@@ -2351,6 +2351,11 @@ public final class Settings {
 
     /**
      * Activity Action: Show the permission screen for allowing apps to post promoted notifications.
+     * Properly formatted priority notifications are elevated in appearance. For example they may be
+     * able to use colors, have richer progress bars, show as chips in the status bar, and/or
+     * permanently appear on always-on-displays. This functionality is intended to be reserved for
+     * user initiated ongoing activities like navigation, phone calls, and ride sharing.
+     *
      * <p>
      *     Input: {@link #EXTRA_APP_PACKAGE}, the package to display.
      * <p>
@@ -6205,6 +6210,25 @@ public final class Settings {
         public static final String TOUCHPAD_RIGHT_CLICK_ZONE = "touchpad_right_click_zone";
 
         /**
+         * Whether to enable reversed vertical scrolling for connected mice.
+         *
+         * When enabled, scrolling down on the mouse wheel will move the screen up and vice versa.
+         * @hide
+         */
+        public static final String MOUSE_REVERSE_VERTICAL_SCROLLING =
+                "mouse_reverse_vertical_scrolling";
+
+        /**
+         * Whether to enable swapping the primary button for connected mice.
+         *
+         * When enabled, right clicking will be the primary button and left clicking will be the
+         * secondary button (e.g. show menu).
+         * @hide
+         */
+        public static final String MOUSE_SWAP_PRIMARY_BUTTON =
+                "mouse_swap_primary_button";
+
+        /**
          * Pointer fill style, specified by
          * {@link android.view.PointerIcon.PointerIconVectorStyleFill} constants.
          *
@@ -6442,6 +6466,8 @@ public final class Settings {
             PRIVATE_SETTINGS.add(SCREEN_FLASH_NOTIFICATION);
             PRIVATE_SETTINGS.add(SCREEN_FLASH_NOTIFICATION_COLOR);
             PRIVATE_SETTINGS.add(DEFAULT_DEVICE_FONT_SCALE);
+            PRIVATE_SETTINGS.add(MOUSE_REVERSE_VERTICAL_SCROLLING);
+            PRIVATE_SETTINGS.add(MOUSE_SWAP_PRIMARY_BUTTON);
         }
 
         /**

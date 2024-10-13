@@ -673,6 +673,10 @@
     <string name="stream_notification_unavailable" msgid="4313854556205836435">"Inaccessible : sonnerie en sourdine"</string>
     <string name="stream_alarm_unavailable" msgid="4059817189292197839">"Inaccessible parce que Ne pas déranger est activée"</string>
     <string name="stream_media_unavailable" msgid="6823020894438959853">"Inaccessible parce que Ne pas déranger est activée"</string>
+    <!-- no translation found for stream_unavailable_by_modes (3674139029490353683) -->
+    <skip />
+    <!-- no translation found for stream_unavailable_by_unknown (6908434629318171588) -->
+    <skip />
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. Touchez pour réactiver le son."</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. Touchez pour activer les vibrations. Il est possible de couper le son des services d\'accessibilité."</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. Touchez pour couper le son. Il est possible de couper le son des services d\'accessibilité."</string>
@@ -706,8 +710,7 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"Afficher le mode Démo"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Alarme"</string>
-    <!-- no translation found for active_mode_content_description (1627555562186515927) -->
-    <skip />
+    <string name="active_mode_content_description" msgid="1627555562186515927">"Le mode <xliff:g id="MODENAME">%1$s</xliff:g> est activé"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Préparez-vous à faire des achats plus rapidement et de façon plus sûre avec votre téléphone"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Tout afficher"</string>

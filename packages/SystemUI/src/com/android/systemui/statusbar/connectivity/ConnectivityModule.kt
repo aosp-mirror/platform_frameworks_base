@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.connectivity
 
 import android.os.UserManager
+import com.android.systemui.bluetooth.qsdialog.dagger.AudioSharingModule
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags.SIGNAL_CALLBACK_DEPRECATION
 import com.android.systemui.qs.QsEventLogger
@@ -56,7 +57,7 @@ import dagger.Provides
 import dagger.multibindings.IntoMap
 import dagger.multibindings.StringKey
 
-@Module
+@Module(includes = [AudioSharingModule::class])
 interface ConnectivityModule {
 
     /** Inject BluetoothTile into tileMap in QSModule */

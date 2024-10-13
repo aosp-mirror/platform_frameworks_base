@@ -34,7 +34,7 @@ constructor(private val viewModelFactory: VolumeDialogSettingsButtonViewModel.Fa
 
     fun bind(view: View) {
         with(view) {
-            val button = requireViewById<View>(R.id.settings)
+            val button = requireViewById<View>(R.id.volume_dialog_settings)
             repeatWhenAttached {
                 viewModel(
                     traceName = "VolumeDialogViewBinder",

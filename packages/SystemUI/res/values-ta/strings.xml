@@ -673,6 +673,10 @@
     <string name="stream_notification_unavailable" msgid="4313854556205836435">"\'ரிங்\' மியூட்டில் உள்ளதால் கிடைக்கவில்லை"</string>
     <string name="stream_alarm_unavailable" msgid="4059817189292197839">"\'தொந்தரவு செய்ய வேண்டாம்\' ஆனில் இருப்பதால் இல்லை"</string>
     <string name="stream_media_unavailable" msgid="6823020894438959853">"\'தொந்தரவு செய்ய வேண்டாம்\' ஆனில் இருப்பதால் இல்லை"</string>
+    <!-- no translation found for stream_unavailable_by_modes (3674139029490353683) -->
+    <skip />
+    <!-- no translation found for stream_unavailable_by_unknown (6908434629318171588) -->
+    <skip />
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. ஒலி இயக்க, தட்டவும்."</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. அதிர்விற்கு அமைக்க, தட்டவும். அணுகல்தன்மை சேவைகள் ஒலியடக்கப்படக்கூடும்."</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. ஒலியடக்க, தட்டவும். அணுகல்தன்மை சேவைகள் ஒலியடக்கப்படக்கூடும்."</string>
@@ -972,7 +976,7 @@
     <string name="notification_channel_screenshot" msgid="7665814998932211997">"ஸ்கிரீன் ஷாட்டுகள்"</string>
     <string name="notification_channel_instant" msgid="7556135423486752680">"இன்ஸ்டண்ட் ஆப்ஸ்"</string>
     <string name="notification_channel_setup" msgid="7660580986090760350">"அமைவு"</string>
-    <string name="notification_channel_storage" msgid="2720725707628094977">"சேமிப்பிடம்"</string>
+    <string name="notification_channel_storage" msgid="2720725707628094977">"சேமிப்பகம்"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"குறிப்புகள்"</string>
     <string name="notification_channel_accessibility" msgid="8956203986976245820">"மாற்றுத்திறன் வசதி"</string>
     <string name="instant_apps" msgid="8337185853050247304">"Instant Apps"</string>

@@ -16,10 +16,12 @@
 
 package android.webkit;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledAfter;
 import android.compat.annotation.EnabledSince;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
@@ -149,6 +151,24 @@ public abstract class WebSettings {
     @EnabledSince(targetSdkVersion = android.os.Build.VERSION_CODES.TIRAMISU)
     @SystemApi
     public static final long ENABLE_SIMPLIFIED_DARK_MODE = 214741472L;
+
+    /**
+     * Enable User-Agent Reduction for webview.
+     * The OS, CPU, and Build information in the default User-Agent will be
+     * reduced to the static "Linux; Android 10; K" string.
+     * Minor/build/patch version information in the default User-Agent is
+     * reduced to "0.0.0". The rest of the default User-Agent remains unchanged.
+     *
+     * See https://developers.google.com/privacy-sandbox/protections/user-agent
+     * for details related to User-Agent Reduction.
+     *
+     * @hide
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = android.os.Build.VERSION_CODES.VANILLA_ICE_CREAM)
+    @FlaggedApi(android.webkit.Flags.FLAG_USER_AGENT_REDUCTION)
+    @SystemApi
+    public static final long ENABLE_USER_AGENT_REDUCTION = 371034303L;
 
     /**
      * Default cache usage mode. If the navigation type doesn't impose any

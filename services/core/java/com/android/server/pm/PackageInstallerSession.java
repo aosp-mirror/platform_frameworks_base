@@ -109,6 +109,7 @@ import android.content.pm.PackageInstaller.UserActionReason;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.PackageInfoFlags;
 import android.content.pm.PackageManagerInternal;
+import android.content.pm.SharedLibraryInfo;
 import android.content.pm.SigningDetails;
 import android.content.pm.SigningInfo;
 import android.content.pm.dex.DexMetadataHelper;
@@ -1102,17 +1103,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         final boolean isUpdateOwnershipEnforcementEnabled =
                 mPm.isUpdateOwnershipEnforcementAvailable()
                         && existingUpdateOwnerPackageName != null;
-
-        if (Build.IS_USERDEBUG) {
-            Log.d("updateowner", "PackageInstallerSession computeUserActionRequirement"
-                    + " isUpdateOwnershipEnforcementEnabled= " + isUpdateOwnershipEnforcementEnabled
-                    + ", mPm.isUpdateOwnershipEnforcementAvailable= "
-                    + mPm.isUpdateOwnershipEnforcementAvailable()
-                    + ", existingUpdateOwnerPackageName=" + existingUpdateOwnerPackageName
-                    + ", isUpdateOwner= " + isUpdateOwner + ", getInstallerPackageName()= "
-                    + getInstallerPackageName() + ", isInstallerShell= " + isInstallerShell
-                    + ", mInstallerUid=" + mInstallerUid + ", packageName = " + packageName);
-        }
         // For an installation that un-archives an app, if the installer doesn't have the
         // INSTALL_PACKAGES permission, the user should have already been prompted to confirm the
         // un-archive request. There's no need for another confirmation during the installation.
@@ -1126,10 +1116,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 || isInstallUnarchive;
 
         if (noUserActionNecessary) {
-            if (Build.IS_USERDEBUG) {
-                Log.d("updateowner", "PackageInstallerSession computeUserActionRequirement"
-                                + " noUserActionNecessary userActionNotTypicallyNeededResponse");
-            }
             return userActionNotTypicallyNeededResponse;
         }
 
@@ -1139,27 +1125,15 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 && !isInstallerShell
                 // We don't enforce the update ownership for the managed user and profile.
                 && !isFromManagedUserOrProfile) {
-            if (Build.IS_USERDEBUG) {
-                Log.d("updateowner", "PackageInstallerSession computeUserActionRequirement"
-                        + "USER_ACTION_REQUIRED_UPDATE_OWNER_REMINDER");
-            }
             return USER_ACTION_REQUIRED_UPDATE_OWNER_REMINDER;
         }
 
         if (isPermissionGranted) {
-            if (Build.IS_USERDEBUG) {
-                Log.d("updateowner", "PackageInstallerSession computeUserActionRequirement"
-                        + " permission userActionNotTypicallyNeededResponse");
-            }
             return userActionNotTypicallyNeededResponse;
         }
 
         if (snapshot.isInstallDisabledForPackage(getInstallerPackageName(), mInstallerUid,
                 userId)) {
-            if (Build.IS_USERDEBUG) {
-                Log.d("updateowner", "PackageInstallerSession computeUserActionRequirement"
-                        + " disable USER_ACTION_REQUIRED");
-            }
             // show the installer to account for device policy or unknown sources use cases
             return USER_ACTION_REQUIRED;
         }
@@ -1168,17 +1142,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 && isUpdateWithoutUserActionPermissionGranted
                 && ((isUpdateOwnershipEnforcementEnabled ? isUpdateOwner
                 : isInstallerOfRecord) || isSelfUpdate)) {
-            if (Build.IS_USERDEBUG) {
-                Log.d("updateowner", "PackageInstallerSession computeUserActionRequirement"
-                        + " USER_ACTION_PENDING_APK_PARSING");
-            }
             return USER_ACTION_PENDING_APK_PARSING;
         }
 
-        if (Build.IS_USERDEBUG) {
-            Log.d("updateowner", "PackageInstallerSession computeUserActionRequirement"
-                    + " USER_ACTION_REQUIRED");
-        }
         return USER_ACTION_REQUIRED;
     }
 
@@ -2749,11 +2715,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         @UserActionRequirement int userActionRequirement = USER_ACTION_NOT_NEEDED;
         // TODO(b/159331446): Move this to makeSessionActiveForInstall and update javadoc
         userActionRequirement = session.computeUserActionRequirement();
-        if (Build.IS_USERDEBUG) {
-            Log.d("updateowner", "PackageInstallerSession checkUserActionRequirement"
-                    + " userActionRequirement= " + userActionRequirement
-                    + ", session.packageName= " + session.getPackageName());
-        }
         session.updateUserActionRequirement(userActionRequirement);
         if (userActionRequirement == USER_ACTION_REQUIRED
                 || userActionRequirement == USER_ACTION_REQUIRED_UPDATE_OWNER_REMINDER) {
@@ -2880,19 +2841,38 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             // since installation is in progress.
             activate();
         }
+        try {
+            List<PackageInstallerSession> children = getChildSessions();
+            if (isMultiPackage()) {
+                for (PackageInstallerSession child : children) {
+                    child.prepareInheritedFiles();
+                    child.parseApk();
+                }
+            } else {
+                prepareInheritedFiles();
+                parseApk();
+            }
+        }  catch (PackageManagerException e) {
+            final String completeMsg = ExceptionUtils.getCompleteMessage(e);
+            final String errorMsg = PackageManager.installStatusToString(e.error, completeMsg);
+            setSessionFailed(e.error, errorMsg);
+            onSessionVerificationFailure(e.error, errorMsg);
+        }
         if (Flags.verificationService()) {
             final Supplier<Computer> snapshotSupplier = mPm::snapshotComputer;
             if (mVerifierController.isVerifierInstalled(snapshotSupplier, userId)) {
-                // TODO: extract shared library declarations
                 final SigningInfo signingInfo;
+                final List<SharedLibraryInfo> declaredLibraries;
                 synchronized (mLock) {
                     signingInfo = new SigningInfo(mSigningDetails);
+                    declaredLibraries =
+                            mPackageLite == null ? null : mPackageLite.getDeclaredLibraries();
                 }
                 // Send the request to the verifier and wait for its response before the rest of
                 // the installation can proceed.
                 if (!mVerifierController.startVerificationSession(snapshotSupplier, userId,
-                        sessionId, params.appPackageName, Uri.fromFile(stageDir), signingInfo,
-                        /* declaredLibraries= */null, /* extensionParams= */ null,
+                        sessionId, getPackageName(), Uri.fromFile(stageDir), signingInfo,
+                        declaredLibraries, /* extensionParams= */ null,
                         new VerifierCallback(), /* retry= */ false)) {
                     // A verifier is installed but cannot be connected. Installation disallowed.
                     onSessionVerificationFailure(INSTALL_FAILED_INTERNAL_ERROR,
@@ -2927,12 +2907,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             List<PackageInstallerSession> children = getChildSessions();
             if (isMultiPackage()) {
                 for (PackageInstallerSession child : children) {
-                    child.prepareInheritedFiles();
-                    child.parseApkAndExtractNativeLibraries();
+                    child.extractNativeLibraries();
                 }
             } else {
-                prepareInheritedFiles();
-                parseApkAndExtractNativeLibraries();
+                extractNativeLibraries();
             }
             verifyNonStaged();
         } catch (PackageManagerException e) {
@@ -3109,7 +3087,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         mStageDirInUse = true;
     }
 
-    private void parseApkAndExtractNativeLibraries() throws PackageManagerException {
+    private void parseApk() throws PackageManagerException {
         synchronized (mLock) {
             if (mStageDirInUse) {
                 throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
@@ -3142,12 +3120,16 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 // stage dir here.
                 // Besides, PackageLite may be null for staged sessions that don't complete
                 // pre-reboot verification.
-                result = getOrParsePackageLiteLocked(stageDir, /* flags */ 0);
+                mPackageLite = getOrParsePackageLiteLocked(stageDir, /* flags */ 0);
             } else {
-                result = getOrParsePackageLiteLocked(mResolvedBaseFile, /* flags */ 0);
+                mPackageLite = getOrParsePackageLiteLocked(mResolvedBaseFile, /* flags */ 0);
             }
-            if (result != null) {
-                mPackageLite = result;
+        }
+    }
+
+    private void extractNativeLibraries() throws PackageManagerException {
+        synchronized (mLock) {
+            if (mPackageLite != null) {
                 if (!isApexSession()) {
                     synchronized (mProgressLock) {
                         mInternalProgress = 0.5f;

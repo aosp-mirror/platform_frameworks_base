@@ -425,8 +425,8 @@ filegroup {
         "tests/src/**/systemui/media/controls/domain/pipeline/LegacyMediaDataManagerImplTest.kt",
         "tests/src/**/systemui/shared/system/RemoteTransitionTest.java",
         "tests/src/**/systemui/navigationbar/NavigationBarControllerImplTest.java",
-        "tests/src/**/systemui/bluetooth/qsdialog/AudioSharingInteractorTest.kt",
-        "tests/src/**/systemui/bluetooth/qsdialog/DeviceItemActionInteractorTest.kt",
+        "tests/src/**/systemui/bluetooth/qsdialog/AudioSharingButtonViewModelTest.kt",
+        "tests/src/**/systemui/bluetooth/qsdialog/AudioSharingDeviceItemActionInteractorTest.kt",
         "tests/src/**/systemui/notetask/quickaffordance/NoteTaskQuickAffordanceConfigTest.kt",
         "tests/src/**/systemui/notetask/LaunchNotesRoleSettingsTrampolineActivityTest.kt",
         "tests/src/**/systemui/notetask/shortcut/LaunchNoteTaskActivityTest.kt",
@@ -802,6 +802,7 @@ android_library {
         "SystemUICustomizationTestUtils",
         "androidx.compose.runtime_runtime",
         "kosmos",
+        "testables",
         "androidx.test.rules",
     ],
     libs: [
@@ -1022,6 +1023,7 @@ android_app {
     defaults: [
         "platform_app_defaults",
         "SystemUI_optimized_defaults",
+        "wmshell_defaults",
     ],
     static_libs: [
         "SystemUI-core",

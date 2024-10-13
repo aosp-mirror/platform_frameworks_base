@@ -16,6 +16,7 @@
 
 package com.android.systemui.touchpad.tutorial.ui.composable
 
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import com.airbnb.lottie.compose.rememberLottieDynamicProperties
@@ -23,13 +24,10 @@ import com.android.compose.theme.LocalAndroidColorScheme
 import com.android.systemui.inputdevice.tutorial.ui.composable.TutorialScreenConfig
 import com.android.systemui.inputdevice.tutorial.ui.composable.rememberColorFilterProperty
 import com.android.systemui.res.R
-import com.android.systemui.touchpad.tutorial.ui.gesture.BackGestureMonitor
+import com.android.systemui.touchpad.tutorial.ui.gesture.BackGestureRecognizer
 
 @Composable
-fun BackGestureTutorialScreen(
-    onDoneButtonClicked: () -> Unit,
-    onBack: () -> Unit,
-) {
+fun BackGestureTutorialScreen(onDoneButtonClicked: () -> Unit, onBack: () -> Unit) {
     val screenConfig =
         TutorialScreenConfig(
             colors = rememberScreenColors(),
@@ -38,26 +36,28 @@ fun BackGestureTutorialScreen(
                     titleResId = R.string.touchpad_back_gesture_action_title,
                     bodyResId = R.string.touchpad_back_gesture_guidance,
                     titleSuccessResId = R.string.touchpad_back_gesture_success_title,
-                    bodySuccessResId = R.string.touchpad_back_gesture_success_body
+                    bodySuccessResId = R.string.touchpad_back_gesture_success_body,
                 ),
             animations =
                 TutorialScreenConfig.Animations(
                     educationResId = R.raw.trackpad_back_edu,
-                    successResId = R.raw.trackpad_back_success
-                )
+                    successResId = R.raw.trackpad_back_success,
+                ),
         )
-    val gestureMonitorProvider =
-        DistanceBasedGestureMonitorProvider(
-            monitorFactory = { distanceThresholdPx, gestureStateCallback ->
-                BackGestureMonitor(distanceThresholdPx, gestureStateCallback)
+    val gestureRecognizerProvider =
+        DistanceBasedGestureRecognizerProvider(
+            recognizerFactory = { distanceThresholdPx, gestureStateCallback ->
+                BackGestureRecognizer(distanceThresholdPx).also {
+                    it.addGestureStateCallback(gestureStateCallback)
+                }
             }
         )
-    GestureTutorialScreen(screenConfig, gestureMonitorProvider, onDoneButtonClicked, onBack)
+    GestureTutorialScreen(screenConfig, gestureRecognizerProvider, onDoneButtonClicked, onBack)
 }
 
 @Composable
 private fun rememberScreenColors(): TutorialScreenConfig.Colors {
-    val onTertiary = LocalAndroidColorScheme.current.onTertiary
+    val onTertiary = MaterialTheme.colorScheme.onTertiary
     val onTertiaryFixed = LocalAndroidColorScheme.current.onTertiaryFixed
     val onTertiaryFixedVariant = LocalAndroidColorScheme.current.onTertiaryFixedVariant
     val tertiaryFixedDim = LocalAndroidColorScheme.current.tertiaryFixedDim
@@ -66,7 +66,7 @@ private fun rememberScreenColors(): TutorialScreenConfig.Colors {
             rememberColorFilterProperty(".tertiaryFixedDim", tertiaryFixedDim),
             rememberColorFilterProperty(".onTertiaryFixed", onTertiaryFixed),
             rememberColorFilterProperty(".onTertiary", onTertiary),
-            rememberColorFilterProperty(".onTertiaryFixedVariant", onTertiaryFixedVariant)
+            rememberColorFilterProperty(".onTertiaryFixedVariant", onTertiaryFixedVariant),
         )
     val screenColors =
         remember(dynamicProperties) {

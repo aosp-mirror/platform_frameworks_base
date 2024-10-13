@@ -111,7 +111,7 @@
                 </RadioGroup>
 
                 <Button
-                    android:id="@+id/open_by_default_settings_dialog_dismiss_button"
+                    android:id="@+id/open_by_default_settings_dialog_confirm_button"
                     android:layout_width="wrap_content"
                     android:layout_height="36dp"
                     android:text="@string/open_by_default_dialog_dismiss_button_text"
@@ -122,7 +122,7 @@
                     android:textSize="14sp"
                     android:textFontWeight="500"
                     android:textColor="?androidprv:attr/materialColorOnPrimary"
-                    android:background="@drawable/open_by_default_settings_dialog_dismiss_button_background"/>
+                    android:background="@drawable/open_by_default_settings_dialog_confirm_button_background"/>
             </LinearLayout>
         </ScrollView>
     </FrameLayout>

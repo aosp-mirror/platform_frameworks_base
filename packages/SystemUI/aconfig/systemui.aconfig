@@ -813,16 +813,6 @@ flag {
 }
 
 flag {
-    name: "register_zen_mode_content_observer_background"
-    namespace: "systemui"
-    description: "Decide whether to register zen mode content observers in the background thread."
-    bug: "324515627"
-    metadata {
-        purpose: PURPOSE_BUGFIX
-    }
-}
-
-flag {
     name: "clipboard_noninteractive_on_lockscreen"
     namespace: "systemui"
     description: "Prevents the interactive clipboard UI from appearing when device is locked"
@@ -1483,3 +1473,11 @@ flag {
        purpose: PURPOSE_BUGFIX
    }
 }
+
+flag {
+   name: "magic_portrait_wallpapers"
+   namespace: "systemui"
+   description: "Magic Portrait related changes in systemui"
+   bug: "370863642"
+}
+

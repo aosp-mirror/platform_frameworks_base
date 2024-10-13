@@ -470,6 +470,7 @@ public class ResourcesManagerTest {
 
     @Test
     @SmallTest
+    @DisabledOnRavenwood(blockedBy = ResourcesManager.class)
     public void testResourceConfigurationAppliedWhenOverrideDoesNotExist() {
         final int width = 240;
         final int height = 360;

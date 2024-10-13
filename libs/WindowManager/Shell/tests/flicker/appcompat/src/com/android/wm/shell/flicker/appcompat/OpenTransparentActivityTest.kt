@@ -17,7 +17,6 @@
 package com.android.wm.shell.flicker.appcompat
 
 import android.platform.test.annotations.Postsubmit
-import android.tools.Rotation
 import android.tools.flicker.assertions.FlickerTest
 import android.tools.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.flicker.legacy.FlickerBuilder
@@ -109,9 +108,7 @@ class OpenTransparentActivityTest(flicker: LegacyFlickerTest) : TransparentBaseA
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun getParams(): Collection<FlickerTest> {
-            return LegacyFlickerTestFactory.nonRotationTests(
-                supportedRotations = listOf(Rotation.ROTATION_90)
-            )
+            return LegacyFlickerTestFactory.nonRotationTests()
         }
     }
 }

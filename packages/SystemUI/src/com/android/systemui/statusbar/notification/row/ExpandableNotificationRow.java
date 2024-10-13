@@ -1015,7 +1015,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         }
         mNotificationParent = isChildInGroup ? parent : null;
         mPrivateLayout.setIsChildInGroup(isChildInGroup);
-        if (LockscreenOtpRedaction.isEnabled()) {
+        if (LockscreenOtpRedaction.isSingleLineViewEnabled()) {
             mPublicLayout.setIsChildInGroup(isChildInGroup);
         }
 
@@ -3884,6 +3884,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             }
             showingLayout.dump(pw, args);
             dumpCustomOutline(pw, args);
+            dumpClipping(pw, args);
             if (getViewState() != null) {
                 getViewState().dump(pw, args);
                 pw.println();

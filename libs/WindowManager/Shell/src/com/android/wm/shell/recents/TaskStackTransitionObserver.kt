@@ -21,7 +21,7 @@ import android.os.IBinder
 import android.util.ArrayMap
 import android.view.SurfaceControl
 import android.window.TransitionInfo
-import android.window.flags.DesktopModeFlags
+import android.window.DesktopModeFlags
 import com.android.wm.shell.shared.TransitionUtil
 import com.android.wm.shell.sysui.ShellInit
 import com.android.wm.shell.transition.Transitions
@@ -42,9 +42,7 @@ class TaskStackTransitionObserver(
         ArrayMap<TaskStackTransitionObserverListener, Executor>()
 
     init {
-        if (Transitions.ENABLE_SHELL_TRANSITIONS) {
-            shellInit.addInitCallback(::onInit, this)
-        }
+        shellInit.addInitCallback(::onInit, this)
     }
 
     fun onInit() {

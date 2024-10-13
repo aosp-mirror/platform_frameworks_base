@@ -45,6 +45,7 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.MotionEvent.PointerCoords;
 import android.view.RoundedCorner;
+import android.view.Surface;
 import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
@@ -84,7 +85,7 @@ public class PointerLocationView extends View implements InputDeviceListener,
         private boolean mCurDown;
 
         // Most recent coordinates.
-        private PointerCoords mCoords = new PointerCoords();
+        private final PointerCoords mCoords = new PointerCoords();
         private int mToolType;
 
         // Most recent velocity.
@@ -104,7 +105,7 @@ public class PointerLocationView extends View implements InputDeviceListener,
         public PointerState() {
         }
 
-        public void addTrace(float x, float y, boolean isHistorical) {
+        void addTrace(float x, float y, boolean isHistorical) {
             if (Float.isNaN(mFirstX)) {
                 mFirstX = x;
             }
@@ -148,8 +149,9 @@ public class PointerLocationView extends View implements InputDeviceListener,
 
     // Draw the trace of all pointers in the current gesture in a separate layer
     // that is not cleared on every frame so that we don't have to re-draw the
-    // entire trace on each frame.
-    private final Bitmap mTraceBitmap;
+    // entire trace on each frame. The trace bitmap is in the coordinate space of the unrotated
+    // display.
+    private Bitmap mTraceBitmap;
     private final Canvas mTraceCanvas;
 
     private final Region mSystemGestureExclusion = new Region();
@@ -200,9 +202,8 @@ public class PointerLocationView extends View implements InputDeviceListener,
         mPathPaint.setARGB(255, 0, 96, 255);
         mPathPaint.setStyle(Paint.Style.STROKE);
 
-        mTraceBitmap = Bitmap.createBitmap(getResources().getDisplayMetrics().widthPixels,
-                getResources().getDisplayMetrics().heightPixels, Bitmap.Config.ARGB_8888);
-        mTraceCanvas = new Canvas(mTraceBitmap);
+        mTraceCanvas = new Canvas();
+        configureTraceBitmap();
 
         configureDensityDependentFactors();
 
@@ -275,7 +276,7 @@ public class PointerLocationView extends View implements InputDeviceListener,
 
     // Draw an oval.  When angle is 0 radians, orients the major axis vertically,
     // angles less than or greater than 0 radians rotate the major axis left or right.
-    private RectF mReusableOvalRect = new RectF();
+    private final RectF mReusableOvalRect = new RectF();
 
     private void drawOval(Canvas canvas, float x, float y, float major, float minor,
             float angle, Paint paint) {
@@ -293,7 +294,11 @@ public class PointerLocationView extends View implements InputDeviceListener,
     protected void onDraw(Canvas canvas) {
         final int NP = mPointers.size();
 
+        // Pointer trace.
+        canvas.save();
+        rotateCanvasToUnrotatedDisplay(canvas);
         canvas.drawBitmap(mTraceBitmap, 0, 0, null);
+        canvas.restore();
 
         if (!mSystemGestureExclusion.isEmpty()) {
             mSystemGestureExclusionPath.reset();
@@ -310,7 +315,9 @@ public class PointerLocationView extends View implements InputDeviceListener,
         // Labels
         drawLabels(canvas);
 
-        // Pointer trace.
+        // Current pointer states.
+        canvas.save();
+        rotateCanvasToUnrotatedDisplay(canvas);
         for (int p = 0; p < NP; p++) {
             final PointerState ps = mPointers.valueAt(p);
             float lastX = ps.mCurrentX, lastY = ps.mCurrentY;
@@ -393,6 +400,7 @@ public class PointerLocationView extends View implements InputDeviceListener,
                 }
             }
         }
+        canvas.restore();
     }
 
     private void drawLabels(Canvas canvas) {
@@ -572,6 +580,11 @@ public class PointerLocationView extends View implements InputDeviceListener,
 
     @Override
     public void onPointerEvent(MotionEvent event) {
+        // PointerLocationView stores and draws events in the unrotated display space, so undo the
+        // event's rotation to bring it back to the unrotated display space.
+        event.transform(MotionEvent.createRotateMatrix(inverseRotation(event.getSurfaceRotation()),
+                mTraceBitmap.getWidth(), mTraceBitmap.getHeight()));
+
         final int action = event.getAction();
 
         if (action == MotionEvent.ACTION_DOWN
@@ -633,7 +646,7 @@ public class PointerLocationView extends View implements InputDeviceListener,
                     logCoords("Pointer", action, i, coords, id, event);
                 }
                 if (ps != null) {
-                    ps.addTrace(coords.x, coords.y, true);
+                    ps.addTrace(coords.x, coords.y, /*isHistorical*/ true);
                     updateDrawTrace(ps);
                 }
             }
@@ -647,7 +660,7 @@ public class PointerLocationView extends View implements InputDeviceListener,
                 logCoords("Pointer", action, i, coords, id, event);
             }
             if (ps != null) {
-                ps.addTrace(coords.x, coords.y, false);
+                ps.addTrace(coords.x, coords.y, /*isHistorical*/ false);
                 updateDrawTrace(ps);
                 ps.mXVelocity = mVelocity.getXVelocity(id);
                 ps.mYVelocity = mVelocity.getYVelocity(id);
@@ -704,11 +717,12 @@ public class PointerLocationView extends View implements InputDeviceListener,
         float y = ps.mCurrentY;
         float lastX = ps.mPreviousX;
         float lastY = ps.mPreviousY;
-        if (!Float.isNaN(x) && !Float.isNaN(y) && !Float.isNaN(lastX) && !Float.isNaN(lastY)) {
-            mTraceCanvas.drawLine(lastX, lastY, x, y, mPathPaint);
-            Paint paint = ps.mPreviousPointIsHistorical ? mPaint : mCurrentPointPaint;
-            mTraceCanvas.drawPoint(lastX, lastY, paint);
+        if (Float.isNaN(x) || Float.isNaN(y) || Float.isNaN(lastX) || Float.isNaN(lastY)) {
+            return;
         }
+        mTraceCanvas.drawLine(lastX, lastY, x, y, mPathPaint);
+        Paint paint = ps.mPreviousPointIsHistorical ? mPaint : mCurrentPointPaint;
+        mTraceCanvas.drawPoint(lastX, lastY, paint);
     }
 
     @Override
@@ -973,7 +987,7 @@ public class PointerLocationView extends View implements InputDeviceListener,
         }
     }
 
-    private ISystemGestureExclusionListener mSystemGestureExclusionListener =
+    private final ISystemGestureExclusionListener mSystemGestureExclusionListener =
             new ISystemGestureExclusionListener.Stub() {
                 @Override
                 public void onSystemGestureExclusionChanged(int displayId,
@@ -1000,6 +1014,7 @@ public class PointerLocationView extends View implements InputDeviceListener,
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
+        configureTraceBitmap();
         configureDensityDependentFactors();
     }
 
@@ -1010,5 +1025,59 @@ public class PointerLocationView extends View implements InputDeviceListener,
         mPaint.setStrokeWidth(1 * mDensity);
         mCurrentPointPaint.setStrokeWidth(1 * mDensity);
         mPathPaint.setStrokeWidth(1 * mDensity);
+    }
+
+    private void configureTraceBitmap() {
+        final var display = mContext.getDisplay();
+        final boolean rotated = display.getRotation() == Surface.ROTATION_90
+                || display.getRotation() == Surface.ROTATION_270;
+        int unrotatedWidth = rotated ? display.getHeight() : display.getWidth();
+        int unrotatedHeight = rotated ? display.getWidth() : display.getHeight();
+
+        if (mTraceBitmap != null && mTraceBitmap.getWidth() == unrotatedWidth
+                && mTraceBitmap.getHeight() == unrotatedHeight) {
+            return;
+        }
+        if (unrotatedWidth <= 0 || unrotatedHeight <= 0) {
+            Slog.w(TAG, "Ignoring configuration: invalid display size: " + unrotatedWidth + "x"
+                    + unrotatedHeight);
+            // Initialize the bitmap to an arbitrary size. It should be reconfigured with a valid
+            // size in the future.
+            unrotatedWidth = 100;
+            unrotatedHeight = 100;
+        }
+        mTraceBitmap = Bitmap.createBitmap(unrotatedWidth, unrotatedHeight,
+                Bitmap.Config.ARGB_8888);
+        mTraceCanvas.setBitmap(mTraceBitmap);
+    }
+
+    private static int inverseRotation(@Surface.Rotation int rotation) {
+        return switch(rotation) {
+            case Surface.ROTATION_0 -> Surface.ROTATION_0;
+            case Surface.ROTATION_90 -> Surface.ROTATION_270;
+            case Surface.ROTATION_180 -> Surface.ROTATION_180;
+            case Surface.ROTATION_270 -> Surface.ROTATION_90;
+            default -> {
+                Slog.e(TAG, "Received unexpected surface rotation: " + rotation);
+                yield Surface.ROTATION_0;
+            }
+        };
+    }
+
+    private void rotateCanvasToUnrotatedDisplay(Canvas c) {
+        switch (inverseRotation(mContext.getDisplay().getRotation())) {
+            case Surface.ROTATION_90 -> {
+                c.rotate(90);
+                c.translate(0, -mTraceBitmap.getHeight());
+            }
+            case Surface.ROTATION_180 -> {
+                c.rotate(180);
+                c.translate(-mTraceBitmap.getWidth(), -mTraceBitmap.getHeight());
+            }
+            case Surface.ROTATION_270 -> {
+                c.rotate(270);
+                c.translate(-mTraceBitmap.getWidth(), 0);
+            }
+        }
     }
 }
