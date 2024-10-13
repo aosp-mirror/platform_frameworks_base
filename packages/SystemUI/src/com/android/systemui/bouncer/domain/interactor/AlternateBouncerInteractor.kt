@@ -16,6 +16,7 @@
 
 package com.android.systemui.bouncer.domain.interactor
 
+import android.util.Log
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.biometrics.data.repository.FingerprintPropertyRepository
 import com.android.systemui.bouncer.data.repository.KeyguardBouncerRepository
@@ -46,6 +47,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 
 /** Encapsulates business logic for interacting with the lock-screen alternate bouncer. */
@@ -137,6 +139,8 @@ constructor(
                     flowOf(false)
                 }
             }
+            .distinctUntilChanged()
+            .onEach { Log.d(TAG, "canShowAlternateBouncer changed to $it") }
             .stateIn(
                 scope = scope,
                 started = WhileSubscribed(),
@@ -234,5 +238,7 @@ constructor(
 
     companion object {
         private const val MIN_VISIBILITY_DURATION_UNTIL_TOUCHES_DISMISS_ALTERNATE_BOUNCER_MS = 200L
+
+        private const val TAG = "AlternateBouncerInteractor"
     }
 }

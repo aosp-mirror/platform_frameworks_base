@@ -528,6 +528,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                     this::consumeKeyguardAuthenticatedBiometricsHandled
             );
         } else {
+            // Collector that keeps the AlternateBouncerInteractor#canShowAlternateBouncer flow hot.
             mListenForCanShowAlternateBouncer = mJavaAdapter.alwaysCollectFlow(
                     mAlternateBouncerInteractor.getCanShowAlternateBouncer(),
                     this::consumeCanShowAlternateBouncer
@@ -576,8 +577,17 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     }
 
     private void consumeCanShowAlternateBouncer(boolean canShow) {
-        // do nothing, we only are registering for the flow to ensure that there's at least
-        // one subscriber that will update AlternateBouncerInteractor.canShowAlternateBouncer.value
+        // Hack: this is required to fix issues where
+        // KeyguardBouncerRepository#alternateBouncerVisible state is incorrectly set and then never
+        // reset. This is caused by usages of show()/forceShow() that only read this flow to set the
+        // alternate bouncer visible state, if there is a race condition between when that flow
+        // changes to false and when the read happens, the flow will be set to an incorrect value
+        // and not reset on time.
+        if (!canShow) {
+            Log.d(TAG, "canShowAlternateBouncer turned false, maybe try hiding the alternate "
+                    + "bouncer if it is already visible");
+            mAlternateBouncerInteractor.maybeHide();
+        }
     }
 
     /** Register a callback, to be invoked by the Predictive Back system. */
