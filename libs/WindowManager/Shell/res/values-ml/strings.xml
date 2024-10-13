@@ -136,14 +136,9 @@
     <string name="desktop_mode_maximize_menu_maximize_button_text" msgid="3090199175564175845">"വലുതാക്കുക"</string>
     <string name="desktop_mode_maximize_menu_snap_left_button_text" msgid="8077452201179893424">"ഇടതുവശത്തേക്ക് സ്‌നാപ്പ് ചെയ്യുക"</string>
     <string name="desktop_mode_maximize_menu_snap_right_button_text" msgid="7117751068945657304">"വലതുവശത്തേക്ക് സ്‌നാപ്പ് ചെയ്യുക"</string>
-    <!-- no translation found for open_by_default_settings_text (2526548548598185500) -->
-    <skip />
-    <!-- no translation found for open_by_default_dialog_subheader_text (1729599730664063881) -->
-    <skip />
-    <!-- no translation found for open_by_default_dialog_in_app_text (6978022419634199806) -->
-    <skip />
-    <!-- no translation found for open_by_default_dialog_in_browser_text (8042769465958497081) -->
-    <skip />
-    <!-- no translation found for open_by_default_dialog_dismiss_button_text (3487238795534582291) -->
-    <skip />
+    <string name="open_by_default_settings_text" msgid="2526548548598185500">"ഡിഫോൾട്ട് ക്രമീകരണം ഉപയോഗിച്ച് തുറക്കുക"</string>
+    <string name="open_by_default_dialog_subheader_text" msgid="1729599730664063881">"ഈ ആപ്പിനായി വെബ് ലിങ്കുകൾ എങ്ങനെ തുറക്കണമെന്ന് തിരഞ്ഞെടുക്കൂ"</string>
+    <string name="open_by_default_dialog_in_app_text" msgid="6978022419634199806">"ആപ്പിൽ"</string>
+    <string name="open_by_default_dialog_in_browser_text" msgid="8042769465958497081">"നിങ്ങളുടെ ബ്രൗസറിൽ"</string>
+    <string name="open_by_default_dialog_dismiss_button_text" msgid="3487238795534582291">"ശരി"</string>
 </resources>

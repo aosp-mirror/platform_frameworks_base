@@ -672,6 +672,10 @@
     <string name="stream_notification_unavailable" msgid="4313854556205836435">"Ni na voljo, ker je zvonjenje izklopljeno"</string>
     <string name="stream_alarm_unavailable" msgid="4059817189292197839">"Ni na voljo, ker je vklopljen način »Ne moti«"</string>
     <string name="stream_media_unavailable" msgid="6823020894438959853">"Ni na voljo, ker je vklopljen način »Ne moti«"</string>
+    <!-- no translation found for stream_unavailable_by_modes (3674139029490353683) -->
+    <skip />
+    <!-- no translation found for stream_unavailable_by_unknown (6908434629318171588) -->
+    <skip />
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. Dotaknite se, če želite vklopiti zvok."</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. Dotaknite se, če želite nastaviti vibriranje. V storitvah za dostopnost bo morda izklopljen zvok."</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. Dotaknite se, če želite izklopiti zvok. V storitvah za dostopnost bo morda izklopljen zvok."</string>

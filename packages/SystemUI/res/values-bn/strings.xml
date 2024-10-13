@@ -673,6 +673,10 @@
     <string name="stream_notification_unavailable" msgid="4313854556205836435">"রিং মিউট করা হয়েছে বলে উপলভ্য নেই"</string>
     <string name="stream_alarm_unavailable" msgid="4059817189292197839">"\'বিরক্ত করবে না\' মোড চালু থাকার জন্য উপলভ্য নেই"</string>
     <string name="stream_media_unavailable" msgid="6823020894438959853">"\'বিরক্ত করবে না\' মোড চালু থাকার জন্য উপলভ্য নেই"</string>
+    <!-- no translation found for stream_unavailable_by_modes (3674139029490353683) -->
+    <skip />
+    <!-- no translation found for stream_unavailable_by_unknown (6908434629318171588) -->
+    <skip />
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s। সশব্দ করতে আলতো চাপুন।"</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s। কম্পন এ সেট করতে আলতো চাপুন। অ্যাক্সেসযোগ্যতার পরিষেবাগুলিকে মিউট করা হতে পারে।"</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s। মিউট করতে আলতো চাপুন। অ্যাক্সেসযোগ্যতার পরিষেবাগুলিকে মিউট করা হতে পারে।"</string>
@@ -1464,7 +1468,7 @@
     <string name="accessibility_deprecate_extra_dim_dialog_toast" msgid="165474092660941104">"\'অতিরিক্ত কম ব্রাইটনেস\' ফিচারের শর্টকাট সরানো হয়েছে"</string>
     <string name="qs_edit_mode_category_connectivity" msgid="4559726936546032672">"কানেক্টিভিটি"</string>
     <string name="qs_edit_mode_category_accessibility" msgid="7969091385071475922">"অ্যাক্সেসিবিলিটি"</string>
-    <string name="qs_edit_mode_category_utilities" msgid="8123080090108420095">"উপযোগিতা"</string>
+    <string name="qs_edit_mode_category_utilities" msgid="8123080090108420095">"ইউটিলিটি"</string>
     <string name="qs_edit_mode_category_privacy" msgid="6577774443194551775">"গোপনীয়তা"</string>
     <string name="qs_edit_mode_category_providedByApps" msgid="8346112074897919019">"অ্যাপের তরফ থেকে দেওয়া"</string>
     <string name="qs_edit_mode_category_display" msgid="4749511439121053942">"ডিসপ্লে"</string>
