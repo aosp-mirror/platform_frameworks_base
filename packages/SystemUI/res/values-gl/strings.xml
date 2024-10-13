@@ -440,8 +440,7 @@
     <string name="zen_mode_on" msgid="9085304934016242591">"Activado"</string>
     <string name="zen_mode_on_with_details" msgid="7416143430557895497">"Activo • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"Desactivado"</string>
-    <!-- no translation found for zen_mode_set_up (8231201163894922821) -->
-    <skip />
+    <string name="zen_mode_set_up" msgid="8231201163894922821">"Sen configurar"</string>
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"Xestionar na configuración"</string>
     <string name="zen_mode_active_modes" msgid="1625850411578488856">"{count,plural, =0{Non hai ningún modo activo}=1{{mode} está activo}other{Hai # modos activos}}"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Non te molestará ningún son nin vibración, agás os procedentes de alarmas, recordatorios, eventos e os emisores de chamada especificados. Seguirás escoitando todo aquilo que decidas reproducir, mesmo a música, os vídeos e os xogos."</string>
@@ -673,6 +672,10 @@
     <string name="stream_notification_unavailable" msgid="4313854556205836435">"Non dispoñible: o son está silenciado"</string>
     <string name="stream_alarm_unavailable" msgid="4059817189292197839">"Non dispoñible: Non molestar está activado"</string>
     <string name="stream_media_unavailable" msgid="6823020894438959853">"Non dispoñible: Non molestar está activado"</string>
+    <!-- no translation found for stream_unavailable_by_modes (3674139029490353683) -->
+    <skip />
+    <!-- no translation found for stream_unavailable_by_unknown (6908434629318171588) -->
+    <skip />
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. Toca para activar o son."</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. Toca para establecer a vibración. Pódense silenciar os servizos de accesibilidade."</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. Toca para silenciar. Pódense silenciar os servizos de accesibilidade."</string>
@@ -1406,38 +1409,26 @@
     <string name="launch_touchpad_tutorial_notification_content" msgid="7931085031240753226">"Aprende a usar os xestos do panel táctil"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_title" msgid="1940023776496198762">"Navega co teclado e o panel táctil"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"Aprende a usar os xestos do panel táctil, atallos de teclado e moito máis"</string>
-    <!-- no translation found for touchpad_tutorial_back_gesture_button (3104716365403620315) -->
-    <skip />
-    <!-- no translation found for touchpad_tutorial_home_gesture_button (8023973153559885624) -->
-    <skip />
+    <string name="touchpad_tutorial_back_gesture_button" msgid="3104716365403620315">"Volver"</string>
+    <string name="touchpad_tutorial_home_gesture_button" msgid="8023973153559885624">"Ir ao inicio"</string>
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"Consultar aplicacións recentes"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"Feito"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Volver"</string>
-    <!-- no translation found for touchpad_back_gesture_guidance (5352221087725906542) -->
-    <skip />
-    <!-- no translation found for touchpad_back_gesture_success_title (7370719098633023496) -->
-    <skip />
+    <string name="touchpad_back_gesture_guidance" msgid="5352221087725906542">"Pasa tres dedos cara á esquerda ou cara á dereita no panel táctil"</string>
+    <string name="touchpad_back_gesture_success_title" msgid="7370719098633023496">"Excelente!"</string>
     <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"Completaches o xesto de retroceso."</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"Ir ao inicio"</string>
-    <!-- no translation found for touchpad_home_gesture_guidance (4178219118381915899) -->
-    <skip />
-    <!-- no translation found for touchpad_home_gesture_success_title (3648264553645798470) -->
-    <skip />
-    <!-- no translation found for touchpad_home_gesture_success_body (2590690589194027059) -->
-    <skip />
+    <string name="touchpad_home_gesture_guidance" msgid="4178219118381915899">"Pasa tres dedos cara arriba no panel táctil"</string>
+    <string name="touchpad_home_gesture_success_title" msgid="3648264553645798470">"Excelente traballo."</string>
+    <string name="touchpad_home_gesture_success_body" msgid="2590690589194027059">"Completaches o titorial do xesto de ir ao inicio"</string>
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"Consultar aplicacións recentes"</string>
-    <!-- no translation found for touchpad_recent_apps_gesture_guidance (6304446013842271822) -->
-    <skip />
+    <string name="touchpad_recent_apps_gesture_guidance" msgid="6304446013842271822">"Pasa tres dedos cara arriba e mantenos premidos no panel táctil"</string>
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"Moi ben!"</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"Completaches o titorial do xesto de consultar aplicacións recentes."</string>
-    <!-- no translation found for tutorial_action_key_title (8172535792469008169) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_guidance (5040613427202799294) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_success_title (2371827347071979571) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_success_body (1688986269491357832) -->
-    <skip />
+    <string name="tutorial_action_key_title" msgid="8172535792469008169">"Ver todas as aplicacións"</string>
+    <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"Preme a tecla de acción do teclado"</string>
+    <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"Ben feito!"</string>
+    <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"Completaches o titorial do xesto de ver todas as aplicacións"</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Retroiluminación do teclado"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Nivel %1$d de %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Controis domóticos"</string>

@@ -2301,6 +2301,11 @@ public final class DisplayManagerService extends SystemService {
         updateLogicalDisplayState(display);
 
         mExternalDisplayPolicy.handleLogicalDisplayAddedLocked(display);
+
+        if (mFlags.isApplyDisplayChangedDuringDisplayAddedEnabled()) {
+            applyDisplayChangedLocked(display);
+        }
+
         if (mDisplayTopologyCoordinator != null) {
             mDisplayTopologyCoordinator.onDisplayAdded(display.getDisplayInfoLocked());
         }

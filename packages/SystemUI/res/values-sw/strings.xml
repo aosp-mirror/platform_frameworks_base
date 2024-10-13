@@ -440,8 +440,7 @@
     <string name="zen_mode_on" msgid="9085304934016242591">"Imewashwa"</string>
     <string name="zen_mode_on_with_details" msgid="7416143430557895497">"Imewashwa • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"Imezimwa"</string>
-    <!-- no translation found for zen_mode_set_up (8231201163894922821) -->
-    <skip />
+    <string name="zen_mode_set_up" msgid="8231201163894922821">"Haijawekwa"</string>
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"Dhibiti katika mipangilio"</string>
     <string name="zen_mode_active_modes" msgid="1625850411578488856">"{count,plural, =0{Hakuna hali zinazotumika}=1{Unatumia {mode}}other{Unatumia hali #}}"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Hutasumbuliwa na sauti na mitetemo, isipokuwa kengele, vikumbusho, matukio na simu zinazopigwa na watu uliobainisha. Bado utasikia chochote utakachochagua kucheza, ikiwa ni pamoja na muziki, video na michezo."</string>
@@ -673,6 +672,10 @@
     <string name="stream_notification_unavailable" msgid="4313854556205836435">"Halipatikani kwa sababu sauti imezimwa"</string>
     <string name="stream_alarm_unavailable" msgid="4059817189292197839">"Imeshindwa kwa sababu Usinisumbue imewashwa"</string>
     <string name="stream_media_unavailable" msgid="6823020894438959853">"Imeshindwa kwa sababu Usinisumbue imewashwa"</string>
+    <!-- no translation found for stream_unavailable_by_modes (3674139029490353683) -->
+    <skip />
+    <!-- no translation found for stream_unavailable_by_unknown (6908434629318171588) -->
+    <skip />
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. Gusa ili urejeshe."</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. Gusa ili uweke mtetemo. Huenda ikakomesha huduma za zana za walio na matatizo ya kuona au kusikia."</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. Gusa ili ukomeshe. Huenda ikakomesha huduma za zana za walio na matatizo ya kuona au kusikia."</string>
@@ -1406,38 +1409,26 @@
     <string name="launch_touchpad_tutorial_notification_content" msgid="7931085031240753226">"Jifunze kuhusu miguso ya padi ya kugusa"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_title" msgid="1940023776496198762">"Kusogeza kwa kutumia kibodi na padi yako ya kugusa"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"Jifunze kuhusu miguso ya padi ya kugusa, mikato ya kibodi na mengineyo"</string>
-    <!-- no translation found for touchpad_tutorial_back_gesture_button (3104716365403620315) -->
-    <skip />
-    <!-- no translation found for touchpad_tutorial_home_gesture_button (8023973153559885624) -->
-    <skip />
+    <string name="touchpad_tutorial_back_gesture_button" msgid="3104716365403620315">"Rudi nyuma"</string>
+    <string name="touchpad_tutorial_home_gesture_button" msgid="8023973153559885624">"Nenda kwenye ukurasa wa mwanzo"</string>
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"Angalia programu za hivi majuzi"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"Nimemaliza"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Rudi nyuma"</string>
-    <!-- no translation found for touchpad_back_gesture_guidance (5352221087725906542) -->
-    <skip />
-    <!-- no translation found for touchpad_back_gesture_success_title (7370719098633023496) -->
-    <skip />
+    <string name="touchpad_back_gesture_guidance" msgid="5352221087725906542">"Telezesha vidole vitatu kushoto au kulia kwenye padi yako ya kugusa"</string>
+    <string name="touchpad_back_gesture_success_title" msgid="7370719098633023496">"Safi!"</string>
     <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"Umekamilisha ishara ya kurudi nyuma."</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"Nenda kwenye skrini ya kwanza"</string>
-    <!-- no translation found for touchpad_home_gesture_guidance (4178219118381915899) -->
-    <skip />
-    <!-- no translation found for touchpad_home_gesture_success_title (3648264553645798470) -->
-    <skip />
-    <!-- no translation found for touchpad_home_gesture_success_body (2590690589194027059) -->
-    <skip />
+    <string name="touchpad_home_gesture_guidance" msgid="4178219118381915899">"Telezesha vidole vitatu juu kwenye padi yako ya kugusa"</string>
+    <string name="touchpad_home_gesture_success_title" msgid="3648264553645798470">"Kazi nzuri!"</string>
+    <string name="touchpad_home_gesture_success_body" msgid="2590690589194027059">"Umeweka ishara ya kwenda kwenye skrini ya kwanza"</string>
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"Angalia programu za hivi majuzi"</string>
-    <!-- no translation found for touchpad_recent_apps_gesture_guidance (6304446013842271822) -->
-    <skip />
+    <string name="touchpad_recent_apps_gesture_guidance" msgid="6304446013842271822">"Telezesha vidole vitatu juu kisha ushikilie kwenye padi yako ya kugusa"</string>
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"Kazi nzuri!"</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"Umekamilisha mafunzo ya mguso wa kuangalia programu za hivi majuzi."</string>
-    <!-- no translation found for tutorial_action_key_title (8172535792469008169) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_guidance (5040613427202799294) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_success_title (2371827347071979571) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_success_body (1688986269491357832) -->
-    <skip />
+    <string name="tutorial_action_key_title" msgid="8172535792469008169">"Angalia programu zote"</string>
+    <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"Bonyeza kitufe cha vitendo kwenye kibodi yako"</string>
+    <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"Vizuri sana!"</string>
+    <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"Umekamilisha mafunzo ya mguso wa kuangalia programu zote"</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Mwanga chini ya kibodi"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Kiwango cha %1$d kati ya %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Dhibiti Vifaa Nyumbani"</string>

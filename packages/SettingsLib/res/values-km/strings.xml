@@ -690,8 +690,7 @@
     <string name="media_transfer_usb_audio_name" msgid="1789292056757821355">"ឧបករណ៍បំពងសំឡេង USB"</string>
     <string name="media_transfer_wired_device_mic_name" msgid="7417067197803840965">"ឌុយ​មីក្រូហ្វូន"</string>
     <string name="media_transfer_usb_device_mic_name" msgid="7171789543226269822">"មីក្រូហ្វូន USB"</string>
-    <!-- no translation found for media_transfer_bt_device_mic_name (1870669402238687618) -->
-    <skip />
+    <string name="media_transfer_bt_device_mic_name" msgid="1870669402238687618">"មីក្រូហ្វូន BT"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"បើក"</string>
     <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"បិទ"</string>
     <string name="carrier_network_change_mode" msgid="4257621815706644026">"បណ្តាញ​ក្រុមហ៊ុនសេវាទូរសព្ទ​កំពុងផ្លាស់ប្តូរ"</string>

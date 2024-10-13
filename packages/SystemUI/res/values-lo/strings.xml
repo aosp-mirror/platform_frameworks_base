@@ -672,6 +672,10 @@
     <string name="stream_notification_unavailable" msgid="4313854556205836435">"ບໍ່ມີໃຫ້ໃຊ້ເນື່ອງຈາກມີການປິດສຽງໂທເຂົ້າ"</string>
     <string name="stream_alarm_unavailable" msgid="4059817189292197839">"ບໍ່ມີໃຫ້ຍ້ອນວ່າຫ້າມລົບກວນເປີດຢູ່"</string>
     <string name="stream_media_unavailable" msgid="6823020894438959853">"ບໍ່ມີໃຫ້ຍ້ອນວ່າຫ້າມລົບກວນເປີດຢູ່"</string>
+    <!-- no translation found for stream_unavailable_by_modes (3674139029490353683) -->
+    <skip />
+    <!-- no translation found for stream_unavailable_by_unknown (6908434629318171588) -->
+    <skip />
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. ແຕະເພື່ອເຊົາປິດສຽງ."</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. ແຕະເພື່ອຕັ້ງເປັນສັ່ນ. ບໍລິການຊ່ວຍເຂົ້າເຖິງອາດຖືກປິດສຽງໄວ້."</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. ແຕະເພື່ອປິດສຽງ. ບໍລິການຊ່ວຍເຂົ້າເຖິງອາດຖືກປິດສຽງໄວ້."</string>
