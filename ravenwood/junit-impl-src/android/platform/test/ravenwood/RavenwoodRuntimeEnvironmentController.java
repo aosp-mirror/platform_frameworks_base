@@ -21,9 +21,15 @@ import static com.android.ravenwood.common.RavenwoodCommonUtils.RAVENWOOD_RESOUR
 import static com.android.ravenwood.common.RavenwoodCommonUtils.RAVENWOOD_VERBOSE_LOGGING;
 import static com.android.ravenwood.common.RavenwoodCommonUtils.RAVENWOOD_VERSION_JAVA_SYSPROP;
 
+import static org.junit.Assert.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
+
 import android.app.ActivityManager;
 import android.app.Instrumentation;
 import android.app.ResourcesManager;
+import android.app.UiAutomation;
 import android.content.res.Resources;
 import android.os.Binder;
 import android.os.Build;
@@ -38,6 +44,7 @@ import android.util.Log;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import com.android.hoststubgen.hosthelper.HostTestUtils;
 import com.android.internal.os.RuntimeInit;
 import com.android.ravenwood.RavenwoodRuntimeNative;
 import com.android.ravenwood.common.RavenwoodCommonUtils;
@@ -50,8 +57,10 @@ import org.junit.runner.Description;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -123,6 +132,9 @@ public class RavenwoodRuntimeEnvironmentController {
 
     private static RavenwoodConfig sConfig;
     private static RavenwoodSystemProperties sProps;
+    // TODO: use the real UiAutomation class instead of a mock
+    private static UiAutomation sMockUiAutomation;
+    private static Set<String> sAdoptedPermissions = Collections.emptySet();
     private static boolean sInitialized = false;
 
     /**
@@ -167,6 +179,9 @@ public class RavenwoodRuntimeEnvironmentController {
         // This will let AndroidJUnit4 use the original runner.
         System.setProperty("android.junit.runner",
                 "androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner");
+
+        assertMockitoVersion();
+        sMockUiAutomation = createMockUiAutomation();
     }
 
     /**
@@ -257,7 +272,7 @@ public class RavenwoodRuntimeEnvironmentController {
 
         // Prepare other fields.
         config.mInstrumentation = new Instrumentation();
-        config.mInstrumentation.basicInit(config.mInstContext, config.mTargetContext);
+        config.mInstrumentation.basicInit(instContext, targetContext, sMockUiAutomation);
         InstrumentationRegistry.registerInstance(config.mInstrumentation, Bundle.EMPTY);
 
         RavenwoodSystemServer.init(config);
@@ -296,12 +311,13 @@ public class RavenwoodRuntimeEnvironmentController {
         config.mInstrumentation = null;
         if (config.mInstContext != null) {
             ((RavenwoodContext) config.mInstContext).cleanUp();
+            config.mInstContext = null;
         }
         if (config.mTargetContext != null) {
             ((RavenwoodContext) config.mTargetContext).cleanUp();
+            config.mTargetContext = null;
         }
-        config.mInstContext = null;
-        config.mTargetContext = null;
+        sMockUiAutomation.dropShellPermissionIdentity();
 
         if (config.mProvideMainThread) {
             Looper.getMainLooper().quit();
@@ -379,6 +395,53 @@ public class RavenwoodRuntimeEnvironmentController {
         for (var entry : systemProperties.getValues().entrySet()) {
             RavenwoodRuntimeNative.setSystemProperty(entry.getKey(), entry.getValue());
         }
+    }
+
+    private static final String MOCKITO_ERROR = "FATAL: Unsupported Mockito detected!"
+            + " Your test or its dependencies use one of the \"mockito-target-*\""
+            + " modules as static library, which is unusable on host side."
+            + " Please switch over to use \"mockito-ravenwood-prebuilt\" as shared library, or"
+            + " as a last resort, set `ravenizer: { strip_mockito: true }` in your test module.";
+
+    /**
+     * Assert the Mockito version at runtime to ensure no incorrect Mockito classes are loaded.
+     */
+    private static void assertMockitoVersion() {
+        // DexMaker should not exist
+        assertThrows(
+                MOCKITO_ERROR,
+                ClassNotFoundException.class,
+                () -> Class.forName("com.android.dx.DexMaker"));
+        // Mockito 2 should not exist
+        assertThrows(
+                MOCKITO_ERROR,
+                ClassNotFoundException.class,
+                () -> Class.forName("org.mockito.Matchers"));
+    }
+
+    private static UiAutomation createMockUiAutomation() {
+        var mock = mock(UiAutomation.class, inv -> {
+            HostTestUtils.onThrowMethodCalled();
+            return null;
+        });
+        doAnswer(inv -> {
+            sAdoptedPermissions = UiAutomation.ALL_PERMISSIONS;
+            return null;
+        }).when(mock).adoptShellPermissionIdentity();
+        doAnswer(inv -> {
+            if (inv.getArgument(0) == null) {
+                sAdoptedPermissions = UiAutomation.ALL_PERMISSIONS;
+            } else {
+                sAdoptedPermissions = (Set) Set.of(inv.getArguments());
+            }
+            return null;
+        }).when(mock).adoptShellPermissionIdentity(any());
+        doAnswer(inv -> {
+            sAdoptedPermissions = Collections.emptySet();
+            return null;
+        }).when(mock).dropShellPermissionIdentity();
+        doAnswer(inv -> sAdoptedPermissions).when(mock).getAdoptedShellPermissions();
+        return mock;
     }
 
     @SuppressWarnings("unused")  // Called from native code (ravenwood_sysprop.cpp)

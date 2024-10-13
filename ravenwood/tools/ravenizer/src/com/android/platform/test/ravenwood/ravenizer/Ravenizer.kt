@@ -85,18 +85,17 @@ data class RavenizerStats(
 /**
  * Main class.
  */
-class Ravenizer(val options: RavenizerOptions) {
-    fun run() {
+class Ravenizer {
+    fun run(options: RavenizerOptions) {
         val stats = RavenizerStats()
-
-        val fatalValidation = options.fatalValidation.get
 
         stats.totalTime = log.nTime {
             process(
                 options.inJar.get,
                 options.outJar.get,
                 options.enableValidation.get,
-                fatalValidation,
+                options.fatalValidation.get,
+                options.stripMockito.get,
                 stats,
             )
         }
@@ -108,6 +107,7 @@ class Ravenizer(val options: RavenizerOptions) {
         outJar: String,
         enableValidation: Boolean,
         fatalValidation: Boolean,
+        stripMockito: Boolean,
         stats: RavenizerStats,
     ) {
         var allClasses = ClassNodes.loadClassStructures(inJar) {
@@ -126,6 +126,9 @@ class Ravenizer(val options: RavenizerOptions) {
                 }
             }
         }
+        if (includeUnsupportedMockito(allClasses)) {
+            log.w("Unsupported Mockito detected in $inJar!")
+        }
 
         stats.totalProcessTime = log.vTime("$executableName processing $inJar") {
             ZipFile(inJar).use { inZip ->
@@ -143,6 +146,11 @@ class Ravenizer(val options: RavenizerOptions) {
                             throw GeneralUserErrorException(
                                 "$inJar is not a desktop jar file. It contains a *.dex file."
                             )
+                        }
+
+                        if (stripMockito && entry.name.isMockitoFile()) {
+                            // Skip this entry
+                            continue
                         }
 
                         val className = zipEntryNameToClassName(entry.name)
