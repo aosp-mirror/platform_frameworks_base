@@ -16,7 +16,9 @@
 
 package com.android.systemui.statusbar.core
 
+import com.android.systemui.display.data.repository.displayRepository
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.statusbar.phone.phoneStatusBarTransitions
 import com.android.systemui.statusbar.phone.phoneStatusBarViewController
 
@@ -26,3 +28,20 @@ val Kosmos.fakeStatusBarInitializer by
     }
 
 var Kosmos.statusBarInitializer by Kosmos.Fixture { fakeStatusBarInitializer }
+
+val Kosmos.fakeStatusBarInitializerFactory by
+    Kosmos.Fixture {
+        FakeStatusBarInitializerFactory(phoneStatusBarViewController, phoneStatusBarTransitions)
+    }
+
+var Kosmos.statusBarInitializerFactory: StatusBarInitializer.Factory by
+    Kosmos.Fixture { fakeStatusBarInitializerFactory }
+
+val Kosmos.multiDisplayStatusBarInitializerStore by
+    Kosmos.Fixture {
+        MultiDisplayStatusBarInitializerStore(
+            applicationCoroutineScope,
+            fakeStatusBarInitializerFactory,
+            displayRepository,
+        )
+    }

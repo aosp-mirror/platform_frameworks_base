@@ -14,18 +14,16 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.window
+package com.android.systemui.statusbar.core
 
-import android.view.Display
+import com.android.systemui.statusbar.phone.PhoneStatusBarTransitions
+import com.android.systemui.statusbar.phone.PhoneStatusBarViewController
 
-class FakeStatusBarWindowControllerStore : StatusBarWindowControllerStore {
+class FakeStatusBarInitializerFactory(
+    private val statusBarViewController: PhoneStatusBarViewController,
+    private val statusBarTransitions: PhoneStatusBarTransitions,
+) : StatusBarInitializer.Factory {
 
-    private val perDisplayControllers = mutableMapOf<Int, FakeStatusBarWindowController>()
-
-    override val defaultDisplay: FakeStatusBarWindowController
-        get() = forDisplay(Display.DEFAULT_DISPLAY)
-
-    override fun forDisplay(displayId: Int): FakeStatusBarWindowController {
-        return perDisplayControllers.computeIfAbsent(displayId) { FakeStatusBarWindowController() }
-    }
+    override fun create(displayId: Int): StatusBarInitializer =
+        FakeStatusBarInitializer(statusBarViewController, statusBarTransitions)
 }

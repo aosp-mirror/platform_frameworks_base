@@ -57,7 +57,7 @@ import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
 import com.android.systemui.statusbar.policy.KeyguardStateController
-import com.android.systemui.statusbar.window.StatusBarWindowController
+import com.android.systemui.statusbar.window.StatusBarWindowControllerStore
 import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.systemui.util.kotlin.getOrNull
 import dagger.Lazy
@@ -85,7 +85,7 @@ constructor(
     private val context: Context,
     @DisplayId private val displayId: Int,
     private val lockScreenUserManager: NotificationLockscreenUserManager,
-    private val statusBarWindowController: StatusBarWindowController,
+    private val statusBarWindowControllerStore: StatusBarWindowControllerStore,
     private val wakefulnessLifecycle: WakefulnessLifecycle,
     private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
     private val deviceProvisionedController: DeviceProvisionedController,
@@ -525,7 +525,7 @@ constructor(
         }
         val rootView = animationController.transitionContainer.rootView
         val controllerFromStatusBar: Optional<ActivityTransitionAnimator.Controller> =
-            statusBarWindowController.wrapAnimationControllerIfInStatusBar(
+            statusBarWindowControllerStore.defaultDisplay.wrapAnimationControllerIfInStatusBar(
                 rootView,
                 animationController
             )

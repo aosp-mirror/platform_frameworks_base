@@ -14,18 +14,17 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.window
+package com.android.systemui.dagger.qualifiers;
 
-import android.view.Display
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
-class FakeStatusBarWindowControllerStore : StatusBarWindowControllerStore {
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
 
-    private val perDisplayControllers = mutableMapOf<Int, FakeStatusBarWindowController>()
+import javax.inject.Qualifier;
 
-    override val defaultDisplay: FakeStatusBarWindowController
-        get() = forDisplay(Display.DEFAULT_DISPLAY)
-
-    override fun forDisplay(displayId: Int): FakeStatusBarWindowController {
-        return perDisplayControllers.computeIfAbsent(displayId) { FakeStatusBarWindowController() }
-    }
+@Qualifier
+@Documented
+@Retention(RUNTIME)
+public @interface Default {
 }

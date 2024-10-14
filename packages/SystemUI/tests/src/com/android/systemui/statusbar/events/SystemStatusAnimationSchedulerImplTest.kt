@@ -31,6 +31,7 @@ import com.android.systemui.privacy.OngoingPrivacyChip
 import com.android.systemui.statusbar.BatteryStatusChip
 import com.android.systemui.statusbar.phone.StatusBarContentInsetsProvider
 import com.android.systemui.statusbar.window.StatusBarWindowController
+import com.android.systemui.statusbar.window.StatusBarWindowControllerStore
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.mock
@@ -63,6 +64,7 @@ class SystemStatusAnimationSchedulerImplTest : SysuiTestCase() {
     @Mock private lateinit var systemEventCoordinator: SystemEventCoordinator
 
     @Mock private lateinit var statusBarWindowController: StatusBarWindowController
+    @Mock private lateinit var statusBarWindowControllerStore: StatusBarWindowControllerStore
 
     @Mock private lateinit var statusBarContentInsetProvider: StatusBarContentInsetsProvider
 
@@ -82,12 +84,14 @@ class SystemStatusAnimationSchedulerImplTest : SysuiTestCase() {
     fun setup() {
         MockitoAnnotations.initMocks(this)
 
+        whenever(statusBarWindowControllerStore.defaultDisplay)
+            .thenReturn(statusBarWindowController)
         systemClock = FakeSystemClock()
         chipAnimationController =
             SystemEventChipAnimationController(
                 mContext,
-                statusBarWindowController,
-                statusBarContentInsetProvider
+                statusBarWindowControllerStore,
+                statusBarContentInsetProvider,
             )
 
         // StatusBarContentInsetProvider is mocked. Ensure that it returns some mocked values.
@@ -660,7 +664,7 @@ class SystemStatusAnimationSchedulerImplTest : SysuiTestCase() {
             SystemStatusAnimationSchedulerImpl(
                 systemEventCoordinator,
                 chipAnimationController,
-                statusBarWindowController,
+                statusBarWindowControllerStore,
                 dumpManager,
                 systemClock,
                 CoroutineScope(StandardTestDispatcher(testScope.testScheduler)),

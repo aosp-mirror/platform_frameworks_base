@@ -50,6 +50,7 @@ import com.android.systemui.statusbar.notification.domain.interactor.activeNotif
 import com.android.systemui.statusbar.phone.ongoingcall.data.repository.ongoingCallRepository
 import com.android.systemui.statusbar.phone.ongoingcall.shared.model.OngoingCallModel
 import com.android.systemui.statusbar.window.StatusBarWindowController
+import com.android.systemui.statusbar.window.StatusBarWindowControllerStore
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.time.FakeSystemClock
@@ -74,6 +75,7 @@ import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.whenever
 
 private const val CALL_UID = 900
 
@@ -106,6 +108,7 @@ class OngoingCallControllerViaListenerTest : SysuiTestCase() {
     @Mock private lateinit var mockActivityStarter: ActivityStarter
     @Mock private lateinit var mockIActivityManager: IActivityManager
     @Mock private lateinit var mockStatusBarWindowController: StatusBarWindowController
+    @Mock private lateinit var mockStatusBarWindowControllerStore: StatusBarWindowControllerStore
 
     private lateinit var chipView: View
 
@@ -118,6 +121,8 @@ class OngoingCallControllerViaListenerTest : SysuiTestCase() {
 
         MockitoAnnotations.initMocks(this)
         val notificationCollection = mock(CommonNotifCollection::class.java)
+        whenever(mockStatusBarWindowControllerStore.defaultDisplay)
+            .thenReturn(mockStatusBarWindowController)
 
         controller =
             OngoingCallController(
@@ -131,7 +136,7 @@ class OngoingCallControllerViaListenerTest : SysuiTestCase() {
                 mainExecutor,
                 mockIActivityManager,
                 DumpManager(),
-                mockStatusBarWindowController,
+                mockStatusBarWindowControllerStore,
                 mockSwipeStatusBarAwayGestureHandler,
                 statusBarModeRepository,
                 logcatLogBuffer("OngoingCallControllerViaListenerTest"),
