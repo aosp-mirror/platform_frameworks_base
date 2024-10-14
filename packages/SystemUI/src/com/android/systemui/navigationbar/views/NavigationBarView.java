@@ -16,6 +16,9 @@
 
 package com.android.systemui.navigationbar.views;
 
+import static android.app.StatusBarManager.NAVIGATION_HINT_BACK_ALT;
+import static android.app.StatusBarManager.NAVIGATION_HINT_IME_SHOWN;
+import static android.app.StatusBarManager.NAVIGATION_HINT_IME_SWITCHER_BUTTON_SHOWN;
 import static android.inputmethodservice.InputMethodService.canImeRenderGesturalNavButtons;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL;
 
@@ -31,7 +34,7 @@ import android.animation.PropertyValuesHolder;
 import android.animation.TimeInterpolator;
 import android.animation.ValueAnimator;
 import android.annotation.DrawableRes;
-import android.app.StatusBarManager;
+import android.app.StatusBarManager.NavigationHint;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Canvas;
@@ -113,6 +116,7 @@ public class NavigationBarView extends FrameLayout {
 
     boolean mLongClickableAccessibilityButton;
     int mDisabledFlags = 0;
+    @NavigationHint
     int mNavigationIconHints = 0;
     private int mNavBarMode;
     private boolean mImeDrawsImeNavBar;
@@ -499,8 +503,7 @@ public class NavigationBarView extends FrameLayout {
     }
 
     private void orientBackButton(KeyButtonDrawable drawable) {
-        final boolean useAltBack =
-                (mNavigationIconHints & StatusBarManager.NAVIGATION_HINT_BACK_ALT) != 0;
+        final boolean useAltBack = (mNavigationIconHints & NAVIGATION_HINT_BACK_ALT) != 0;
         final boolean isRtl = mConfiguration.getLayoutDirection() == View.LAYOUT_DIRECTION_RTL;
         float degrees = useAltBack ? (isRtl ? 90 : -90) : 0;
         if (drawable.getRotation() == degrees) {
@@ -555,8 +558,10 @@ public class NavigationBarView extends FrameLayout {
         super.setLayoutDirection(layoutDirection);
     }
 
-    void setNavigationIconHints(int hints) {
-        if (hints == mNavigationIconHints) return;
+    void setNavigationIconHints(@NavigationHint int hints) {
+        if (hints == mNavigationIconHints) {
+            return;
+        }
         mNavigationIconHints = hints;
         updateNavButtonIcons();
     }
@@ -594,8 +599,7 @@ public class NavigationBarView extends FrameLayout {
         // We have to replace or restore the back and home button icons when exiting or entering
         // carmode, respectively. Recents are not available in CarMode in nav bar so change
         // to recent icon is not required.
-        final boolean useAltBack =
-                (mNavigationIconHints & StatusBarManager.NAVIGATION_HINT_BACK_ALT) != 0;
+        final boolean useAltBack = (mNavigationIconHints & NAVIGATION_HINT_BACK_ALT) != 0;
         KeyButtonDrawable backIcon = mBackIcon;
         orientBackButton(backIcon);
         KeyButtonDrawable homeIcon = mHomeDefaultIcon;
@@ -607,11 +611,12 @@ public class NavigationBarView extends FrameLayout {
 
         updateRecentsIcon();
 
-        // Update IME button visibility, a11y and rotate button always overrides the appearance
-        boolean disableImeSwitcher =
-                (mNavigationIconHints & StatusBarManager.NAVIGATION_HINT_IME_SWITCHER_SHOWN) == 0
-                || isImeRenderingNavButtons();
-        mContextualButtonGroup.setButtonVisibility(R.id.ime_switcher, !disableImeSwitcher);
+        // Update IME switcher button visibility, a11y and rotate button always overrides
+        // the appearance
+        boolean isImeSwitcherButtonVisible =
+                (mNavigationIconHints & NAVIGATION_HINT_IME_SWITCHER_BUTTON_SHOWN) != 0
+                        && !isImeRenderingNavButtons();
+        mContextualButtonGroup.setButtonVisibility(R.id.ime_switcher, isImeSwitcherButtonVisible);
 
         mBarTransitions.reapplyDarkIntensity();
 
@@ -665,7 +670,7 @@ public class NavigationBarView extends FrameLayout {
     boolean isImeRenderingNavButtons() {
         return mImeDrawsImeNavBar
                 && mImeCanRenderGesturalNavButtons
-                && (mNavigationIconHints & StatusBarManager.NAVIGATION_HINT_IME_SHOWN) != 0;
+                && (mNavigationIconHints & NAVIGATION_HINT_IME_SHOWN) != 0;
     }
 
     @VisibleForTesting

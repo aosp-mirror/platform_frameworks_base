@@ -61,6 +61,14 @@ interface IStatusBarService
     void setIconVisibility(String slot, boolean visible);
     @UnsupportedAppUsage
     void removeIcon(String slot);
+    /**
+     * Sets the new IME window status.
+     *
+     * @param displayId The id of the display to which the IME is bound.
+     * @param vis The IME window visibility.
+     * @param backDisposition The IME back disposition mode.
+     * @param showImeSwitcher Whether the IME Switcher button should be shown.
+     */
     void setImeWindowStatus(int displayId, int vis, int backDisposition, boolean showImeSwitcher);
     void expandSettingsPanel(String subPanel);
 

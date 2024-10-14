@@ -98,12 +98,12 @@ public class QuickStepContract {
     public static final long SYSUI_STATE_ONE_HANDED_ACTIVE = 1L << 16;
     // Allow system gesture no matter the system bar(s) is visible or not
     public static final long SYSUI_STATE_ALLOW_GESTURE_IGNORING_BAR_VISIBILITY = 1L << 17;
-    // The IME is showing
+    // The IME is visible.
     public static final long SYSUI_STATE_IME_SHOWING = 1L << 18;
     // The window magnification is overlapped with system gesture insets at the bottom.
     public static final long SYSUI_STATE_MAGNIFICATION_OVERLAP = 1L << 19;
-    // ImeSwitcher is showing
-    public static final long SYSUI_STATE_IME_SWITCHER_SHOWING = 1L << 20;
+    // The IME Switcher button is visible.
+    public static final long SYSUI_STATE_IME_SWITCHER_BUTTON_SHOWING = 1L << 20;
     // Device dozing/AOD state
     public static final long SYSUI_STATE_DEVICE_DOZING = 1L << 21;
     // The home feature is disabled (either by SUW/SysUI/device policy)
@@ -170,7 +170,7 @@ public class QuickStepContract {
             SYSUI_STATE_ALLOW_GESTURE_IGNORING_BAR_VISIBILITY,
             SYSUI_STATE_IME_SHOWING,
             SYSUI_STATE_MAGNIFICATION_OVERLAP,
-            SYSUI_STATE_IME_SWITCHER_SHOWING,
+            SYSUI_STATE_IME_SWITCHER_BUTTON_SHOWING,
             SYSUI_STATE_DEVICE_DOZING,
             SYSUI_STATE_BACK_DISABLED,
             SYSUI_STATE_BUBBLES_MANAGE_MENU_EXPANDED,
@@ -250,8 +250,8 @@ public class QuickStepContract {
         if ((flags & SYSUI_STATE_MAGNIFICATION_OVERLAP) != 0) {
             str.add("magnification_overlap");
         }
-        if ((flags & SYSUI_STATE_IME_SWITCHER_SHOWING) != 0) {
-            str.add("ime_switcher_showing");
+        if ((flags & SYSUI_STATE_IME_SWITCHER_BUTTON_SHOWING) != 0) {
+            str.add("ime_switcher_button_visible");
         }
         if ((flags & SYSUI_STATE_DEVICE_DOZING) != 0) {
             str.add("device_dozing");
