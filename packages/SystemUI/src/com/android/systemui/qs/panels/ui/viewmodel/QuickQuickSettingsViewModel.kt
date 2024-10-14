@@ -70,17 +70,20 @@ constructor(
             source = quickQuickSettingsRowInteractor.rows,
         )
 
+    private val largeTilesSpan by
+        hydrator.hydratedStateOf(
+            traceName = "largeTilesSpan",
+            source = iconTilesViewModel.largeTilesSpan,
+        )
+
     private val currentTiles by
         hydrator.hydratedStateOf(traceName = "currentTiles", source = tilesInteractor.currentTiles)
 
     val tileViewModels by derivedStateOf {
         currentTiles
-            .map { SizedTileImpl(TileViewModel(it.tile, it.spec), it.spec.width) }
+            .map { SizedTileImpl(TileViewModel(it.tile, it.spec), it.spec.width()) }
             .let { splitInRowsSequence(it, columns).take(rows).toList().flatten() }
     }
-
-    private val TileSpec.width: Int
-        get() = if (largeTiles.contains(this)) 2 else 1
 
     override suspend fun onActivated(): Nothing {
         coroutineScope {
@@ -95,4 +98,6 @@ constructor(
     interface Factory {
         fun create(): QuickQuickSettingsViewModel
     }
+
+    private fun TileSpec.width(): Int = if (largeTiles.contains(this)) largeTilesSpan else 1
 }
