@@ -37,6 +37,7 @@ import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.View;
 
+import com.android.graphics.hwui.flags.Flags;
 import com.android.internal.R;
 
 import dalvik.annotation.optimization.FastNative;
@@ -525,6 +526,35 @@ public class AnimatedImageDrawable extends Drawable implements Animatable2 {
         }
     }
 
+    @Override
+    public void setFilterBitmap(boolean filterBitmap) {
+        if (!Flags.animatedImageDrawableFilterBitmap()) {
+            super.setFilterBitmap(filterBitmap);
+            return;
+        }
+        if (mState.mNativePtr == 0) {
+            throw new IllegalStateException(
+              "called setFilterBitmap on empty AnimatedImageDrawable"
+            );
+        }
+        if (nSetFilterBitmap(mState.mNativePtr, filterBitmap)) {
+            invalidateSelf();
+        }
+    }
+
+    @Override
+    public boolean isFilterBitmap() {
+        if (!Flags.animatedImageDrawableFilterBitmap()) {
+            return super.isFilterBitmap();
+        }
+        if (mState.mNativePtr == 0) {
+            throw new IllegalStateException(
+                "called isFilterBitmap on empty AnimatedImageDrawable"
+            );
+        }
+        return nGetFilterBitmap(mState.mNativePtr);
+    }
+
     private void postOnAnimationStart() {
         if (mAnimationCallbacks == null) {
             return;
@@ -618,4 +648,8 @@ public class AnimatedImageDrawable extends Drawable implements Animatable2 {
     private static native void nSetMirrored(long nativePtr, boolean mirror);
     @FastNative
     private static native void nSetBounds(long nativePtr, Rect rect);
+    @FastNative
+    private static native boolean nSetFilterBitmap(long nativePtr, boolean filterBitmap);
+    @FastNative
+    private static native boolean nGetFilterBitmap(long nativePtr);
 }
