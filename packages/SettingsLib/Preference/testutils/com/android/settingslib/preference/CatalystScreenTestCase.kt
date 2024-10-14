@@ -49,15 +49,15 @@ abstract class CatalystScreenTestCase {
      * catalyst screen (flag is enabled).
      */
     @Test
-    fun migration() {
+    open fun migration() {
         enableCatalystScreen()
         assertThat(preferenceScreenCreator.isFlagEnabled(context)).isTrue()
-        val catalystScreen = stringifyPreferenceScreen()
+        val catalystScreen = dumpPreferenceScreen()
         Log.i("Catalyst", catalystScreen)
 
         disableCatalystScreen()
         assertThat(preferenceScreenCreator.isFlagEnabled(context)).isFalse()
-        val legacyScreen = stringifyPreferenceScreen()
+        val legacyScreen = dumpPreferenceScreen()
 
         assertThat(catalystScreen).isEqualTo(legacyScreen)
     }
@@ -82,7 +82,7 @@ abstract class CatalystScreenTestCase {
         setFlagsRule.disableFlags(flagName)
     }
 
-    private fun stringifyPreferenceScreen(): String {
+    private fun dumpPreferenceScreen(): String {
         @Suppress("UNCHECKED_CAST")
         val clazz = preferenceScreenCreator.fragmentClass() as Class<PreferenceFragmentCompat>
         val builder = StringBuilder()
