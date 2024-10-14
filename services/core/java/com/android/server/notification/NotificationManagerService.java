@@ -216,6 +216,7 @@ import android.app.StatsManager;
 import android.app.UriGrantsManager;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.app.backup.BackupManager;
+import android.app.backup.BackupRestoreEventLogger;
 import android.app.compat.CompatChanges;
 import android.app.role.OnRoleHoldersChangedListener;
 import android.app.role.RoleManager;
@@ -1102,7 +1103,8 @@ public class NotificationManagerService extends SystemService {
         return false;
     }
 
-    void readPolicyXml(InputStream stream, boolean forRestore, int userId)
+    void readPolicyXml(InputStream stream, boolean forRestore, int userId,
+            BackupRestoreEventLogger logger)
             throws XmlPullParserException, NumberFormatException, IOException {
         final TypedXmlPullParser parser;
         if (forRestore) {
@@ -1189,7 +1191,7 @@ public class NotificationManagerService extends SystemService {
             InputStream infile = null;
             try {
                 infile = mPolicyFile.openRead();
-                readPolicyXml(infile, false /*forRestore*/, USER_ALL);
+                readPolicyXml(infile, false /*forRestore*/, USER_ALL, null);
 
                 // We re-load the default dnd packages to allow the newly added and denined.
                 final boolean isWatch = mPackageManagerClient.hasSystemFeature(
@@ -1239,7 +1241,7 @@ public class NotificationManagerService extends SystemService {
                 }
 
                 try {
-                    writePolicyXml(stream, false /*forBackup*/, USER_ALL);
+                    writePolicyXml(stream, false /*forBackup*/, USER_ALL, null);
                     mPolicyFile.finishWrite(stream);
                 } catch (IOException e) {
                     Slog.w(TAG, "Failed to save policy file, restoring backup", e);
@@ -1250,8 +1252,8 @@ public class NotificationManagerService extends SystemService {
         }
     }
 
-    private void writePolicyXml(OutputStream stream, boolean forBackup, int userId)
-            throws IOException {
+    private void writePolicyXml(OutputStream stream, boolean forBackup, int userId,
+            BackupRestoreEventLogger logger)  throws IOException {
         final TypedXmlSerializer out;
         if (forBackup) {
             out = Xml.newFastSerializer();
@@ -6171,7 +6173,7 @@ public class NotificationManagerService extends SystemService {
             if (DBG) Slog.d(TAG, "getBackupPayload u=" + user);
             final ByteArrayOutputStream baos = new ByteArrayOutputStream();
             try {
-                writePolicyXml(baos, true /*forBackup*/, user);
+                writePolicyXml(baos, true /*forBackup*/, user, null);
                 return baos.toByteArray();
             } catch (IOException e) {
                 Slog.w(TAG, "getBackupPayload: error writing payload for user " + user, e);
@@ -6190,7 +6192,7 @@ public class NotificationManagerService extends SystemService {
             }
             final ByteArrayInputStream bais = new ByteArrayInputStream(payload);
             try {
-                readPolicyXml(bais, true /*forRestore*/, user);
+                readPolicyXml(bais, true /*forRestore*/, user, null);
                 handleSavePolicyFile();
             } catch (NumberFormatException | XmlPullParserException | IOException e) {
                 Slog.w(TAG, "applyRestore: error reading payload", e);
@@ -7391,6 +7393,37 @@ public class NotificationManagerService extends SystemService {
      * The private API only accessible to the system process.
      */
     private final NotificationManagerInternal mInternalService = new NotificationManagerInternal() {
+
+        public byte[] getBackupPayload(int user, BackupRestoreEventLogger logger) {
+            checkCallerIsSystem();
+            if (DBG) Slog.d(TAG, "getBackupPayload u=" + user);
+            final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            try {
+                writePolicyXml(baos, true /*forBackup*/, user, logger);
+                return baos.toByteArray();
+            } catch (IOException e) {
+                Slog.w(TAG, "getBackupPayload: error writing payload for user " + user, e);
+            }
+            return null;
+        }
+
+        @Override
+        public void applyRestore(byte[] payload, int user, BackupRestoreEventLogger logger) {
+            checkCallerIsSystem();
+            if (DBG) Slog.d(TAG, "applyRestore u=" + user + " payload="
+                    + (payload != null ? new String(payload, StandardCharsets.UTF_8) : null));
+            if (payload == null) {
+                Slog.w(TAG, "applyRestore: no payload to restore for user " + user);
+                return;
+            }
+            final ByteArrayInputStream bais = new ByteArrayInputStream(payload);
+            try {
+                readPolicyXml(bais, true /*forRestore*/, user, logger);
+                handleSavePolicyFile();
+            } catch (NumberFormatException | XmlPullParserException | IOException e) {
+                Slog.w(TAG, "applyRestore: error reading payload", e);
+            }
+        }
 
         @Override
         public NotificationChannel getNotificationChannel(String pkg, int uid, String
