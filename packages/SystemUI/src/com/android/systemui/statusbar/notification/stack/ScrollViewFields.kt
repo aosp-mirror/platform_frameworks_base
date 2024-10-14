@@ -64,12 +64,6 @@ class ScrollViewFields {
      */
     var remoteInputRowBottomBoundConsumer: Consumer<Float?>? = null
 
-    /**
-     * Any time the heads up height is recalculated, it should be updated here to be used by the
-     * placeholder
-     */
-    var headsUpHeightConsumer: Consumer<Float>? = null
-
     /** send the [syntheticScroll] to the [syntheticScrollConsumer], if present. */
     fun sendSyntheticScroll(syntheticScroll: Float) =
         syntheticScrollConsumer?.accept(syntheticScroll)
