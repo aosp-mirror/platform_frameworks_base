@@ -16,6 +16,9 @@
 
 package android.inputmethodservice;
 
+import static android.app.StatusBarManager.NAVIGATION_HINT_BACK_ALT;
+import static android.app.StatusBarManager.NAVIGATION_HINT_IME_SHOWN;
+import static android.app.StatusBarManager.NAVIGATION_HINT_IME_SWITCHER_SHOWN;
 import static android.view.WindowInsets.Type.captionBar;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
 
@@ -23,7 +26,6 @@ import android.animation.ValueAnimator;
 import android.annotation.FloatRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.StatusBarManager;
 import android.graphics.Color;
 import android.graphics.Insets;
 import android.graphics.Rect;
@@ -241,10 +243,9 @@ final class NavigationBarController {
                 if (navigationBarView != null) {
                     // TODO(b/213337792): Support InputMethodService#setBackDisposition().
                     // TODO(b/213337792): Set NAVIGATION_HINT_IME_SHOWN only when necessary.
-                    final int hints = StatusBarManager.NAVIGATION_HINT_BACK_ALT
+                    final int hints = NAVIGATION_HINT_BACK_ALT | NAVIGATION_HINT_IME_SHOWN
                             | (mShouldShowImeSwitcherWhenImeIsShown
-                                    ? StatusBarManager.NAVIGATION_HINT_IME_SWITCHER_SHOWN
-                                    : 0);
+                                    ? NAVIGATION_HINT_IME_SWITCHER_SHOWN : 0);
                     navigationBarView.setNavigationIconHints(hints);
                     navigationBarView.prepareNavButtons(this);
                 }
@@ -512,13 +513,14 @@ final class NavigationBarController {
                 }
                 final NavigationBarView navigationBarView = mNavigationBarFrame.findViewByPredicate(
                         NavigationBarView.class::isInstance);
-                if (navigationBarView == null) {
-                    return;
+                if (navigationBarView != null) {
+                    // TODO(b/213337792): Support InputMethodService#setBackDisposition().
+                    // TODO(b/213337792): Set NAVIGATION_HINT_IME_SHOWN only when necessary.
+                    final int hints = NAVIGATION_HINT_BACK_ALT | NAVIGATION_HINT_IME_SHOWN
+                            | (mShouldShowImeSwitcherWhenImeIsShown
+                                    ? NAVIGATION_HINT_IME_SWITCHER_SHOWN : 0);
+                    navigationBarView.setNavigationIconHints(hints);
                 }
-                final int hints = StatusBarManager.NAVIGATION_HINT_BACK_ALT
-                        | (shouldShowImeSwitcherWhenImeIsShown
-                                ? StatusBarManager.NAVIGATION_HINT_IME_SWITCHER_SHOWN : 0);
-                navigationBarView.setNavigationIconHints(hints);
             } else {
                 uninstallNavigationBarFrameIfNecessary();
             }

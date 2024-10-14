@@ -561,8 +561,15 @@ public class NavigationBarView extends FrameLayout {
         updateNavButtonIcons();
     }
 
-    void onImeVisibilityChanged(boolean visible) {
-        if (!visible) {
+    /**
+     * Called when the boolean value of whether to adjust the back button for the IME changed.
+     *
+     * @param useBackAlt whether to adjust the back button for the IME.
+     *
+     * @see android.inputmethodservice.InputMethodService.BackDispositionMode
+     */
+    void onBackAltChanged(boolean useBackAlt) {
+        if (!useBackAlt) {
             mTransitionListener.onBackAltCleared();
         }
     }

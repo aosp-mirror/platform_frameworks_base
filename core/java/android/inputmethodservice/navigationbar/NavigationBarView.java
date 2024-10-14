@@ -290,7 +290,7 @@ public final class NavigationBarView extends FrameLayout {
         final boolean oldBackAlt =
                 (mNavigationIconHints & StatusBarManager.NAVIGATION_HINT_BACK_ALT) != 0;
         if (newBackAlt != oldBackAlt) {
-            //onImeVisibilityChanged(newBackAlt);
+            //onBackAltChanged(newBackAlt);
         }
 
         if (DEBUG) {
