@@ -86,7 +86,6 @@ import static com.android.server.wm.TaskFragment.EMBEDDING_DISALLOWED_MIN_DIMENS
 import static com.android.server.wm.TaskFragment.EMBEDDING_DISALLOWED_NEW_TASK;
 import static com.android.server.wm.TaskFragment.EMBEDDING_DISALLOWED_UNTRUSTED_HOST;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
-import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.window.flags.Flags.balDontBringExistingBackgroundTaskStackToFg;
 
 import android.annotation.IntDef;
@@ -2787,22 +2786,10 @@ class ActivityStarter {
             }
         }
 
-        if ((mLaunchFlags & FLAG_ACTIVITY_LAUNCH_ADJACENT) != 0) {
-            final boolean hasNewTaskFlag = (mLaunchFlags & FLAG_ACTIVITY_NEW_TASK) != 0;
-            if (!hasNewTaskFlag || mSourceRecord == null) {
-                // ignore the flag if there is no the sourceRecord or without new_task flag
-                Slog.w(TAG_WM, !hasNewTaskFlag
-                        ? "Launch adjacent ignored due to missing NEW_TASK"
-                        : "Launch adjacent ignored due to missing source activity");
-                mLaunchFlags &= ~FLAG_ACTIVITY_LAUNCH_ADJACENT;
-            }
-            // Ensure that the source task or its parents has not disabled launch-adjacent
-            if (mSourceRecord != null && mSourceRecord.getTask() != null &&
-                    mSourceRecord.getTask().isLaunchAdjacentDisabled()) {
-                Slog.w(TAG_WM, "Launch adjacent blocked by source task or ancestor");
-                mLaunchFlags &= ~FLAG_ACTIVITY_LAUNCH_ADJACENT;
-            }
-
+        if ((mLaunchFlags & FLAG_ACTIVITY_LAUNCH_ADJACENT) != 0
+                && ((mLaunchFlags & FLAG_ACTIVITY_NEW_TASK) == 0 || mSourceRecord == null)) {
+            // ignore the flag if there is no the sourceRecord or without new_task flag
+            mLaunchFlags &= ~FLAG_ACTIVITY_LAUNCH_ADJACENT;
         }
     }
 
