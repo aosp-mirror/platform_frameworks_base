@@ -395,6 +395,8 @@ KotlinOperator: android.graphics.Matrix44#set(int, int, float):
     Method can be invoked with an indexing operator from Kotlin: `set` (this is usually desirable; just make sure it makes sense for this type of object)
 
 
+MissingGetterMatchingBuilder: android.os.RemoteCallbackList.Builder#setInterfaceDiedCallback(android.os.RemoteCallbackList.Builder.InterfaceDiedCallback<E>):
+    android.os.RemoteCallbackList does not declare a `getInterfaceDiedCallback()` method matching method android.os.RemoteCallbackList.Builder.setInterfaceDiedCallback(android.os.RemoteCallbackList.Builder.InterfaceDiedCallback<E>)
 RequiresPermission: android.accounts.AccountManager#getAccountsByTypeAndFeatures(String, String[], android.accounts.AccountManagerCallback<android.accounts.Account[]>, android.os.Handler):
     Method 'getAccountsByTypeAndFeatures' documentation mentions permissions without declaring @RequiresPermission
 RequiresPermission: android.accounts.AccountManager#hasFeatures(android.accounts.Account, String[], android.accounts.AccountManagerCallback<java.lang.Boolean>, android.os.Handler):
