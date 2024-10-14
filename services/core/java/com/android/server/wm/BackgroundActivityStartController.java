@@ -558,7 +558,7 @@ public class BackgroundActivityStartController {
                     .append(mBalAllowedByPiCreatorWithHardening);
             sb.append("; resultIfPiCreatorAllowsBal: ").append(mResultForCaller);
             sb.append("; callerStartMode: ").append(balStartModeToString(
-                    mCheckedOptions.getPendingIntentBackgroundActivityStartMode()));
+                    mCheckedOptions.getPendingIntentCreatorBackgroundActivityStartMode()));
             sb.append("; hasRealCaller: ").append(hasRealCaller());
             sb.append("; isCallForResult: ").append(mIsCallForResult);
             sb.append("; isPendingIntent: ").append(isPendingIntent());
@@ -585,7 +585,7 @@ public class BackgroundActivityStartController {
                 sb.append("; balAllowedByPiSender: ").append(mBalAllowedByPiSender);
                 sb.append("; resultIfPiSenderAllowsBal: ").append(mResultForRealCaller);
                 sb.append("; realCallerStartMode: ").append(balStartModeToString(
-                        mCheckedOptions.getPendingIntentCreatorBackgroundActivityStartMode()));
+                        mCheckedOptions.getPendingIntentBackgroundActivityStartMode()));
             }
             // features
             sb.append("; balImproveRealCallerVisibilityCheck: ")
@@ -1042,6 +1042,24 @@ public class BackgroundActivityStartController {
             return new BalVerdict(BAL_ALLOW_PERMISSION,
                     /*background*/ false,
                     "realCallingUid has BAL permission.");
+        }
+
+        // don't abort if the realCallingUid has SYSTEM_ALERT_WINDOW permission
+        Slog.i(TAG, "hasSystemAlertWindowPermission(" + state.mRealCallingUid + ", "
+                + state.mRealCallingPid + ", " + state.mRealCallingPackage + ") "
+                + balStartModeToString(
+                state.mCheckedOptions.getPendingIntentBackgroundActivityStartMode()));
+        if (state.mCheckedOptions.getPendingIntentBackgroundActivityStartMode()
+                == MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS
+                && mService.hasSystemAlertWindowPermission(state.mRealCallingUid,
+                state.mRealCallingPid, state.mRealCallingPackage)) {
+            Slog.w(
+                    TAG,
+                    "Background activity start for "
+                            + state.mRealCallingPackage
+                            + " allowed because SYSTEM_ALERT_WINDOW permission is granted.");
+            return new BalVerdict(BAL_ALLOW_SAW_PERMISSION,
+                    /*background*/ true, "SYSTEM_ALERT_WINDOW permission is granted");
         }
 
         // if the realCallingUid is a persistent system process, abort if the IntentSender
