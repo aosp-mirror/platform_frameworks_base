@@ -34,7 +34,7 @@ object PreferenceScreenRegistry : ReadWritePermitProvider {
         ImmutableMap.of()
     }
 
-    val preferenceScreens: PreferenceScreenMap
+    private val preferenceScreens: PreferenceScreenMap
         get() = preferenceScreensSupplier.get()
 
     private var readWritePermitProvider: ReadWritePermitProvider? = null
