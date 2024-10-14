@@ -2221,8 +2221,8 @@ class ElementTest {
                             // In A => B, Foo is not shared and first fades out from A then fades in
                             // B.
                             sharedElement(TestElements.Foo, enabled = false)
-                            fractionRange(end = 0.5f) { fade(TestElements.Foo.inContent(SceneA)) }
-                            fractionRange(start = 0.5f) { fade(TestElements.Foo.inContent(SceneB)) }
+                            fractionRange(end = 0.5f) { fade(TestElements.Foo.inScene(SceneA)) }
+                            fractionRange(start = 0.5f) { fade(TestElements.Foo.inScene(SceneB)) }
                         }
 
                         from(SceneB, to = SceneA) {
