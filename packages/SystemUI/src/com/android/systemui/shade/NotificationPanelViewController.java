@@ -123,7 +123,6 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.DisplayId;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor;
-import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor;
 import com.android.systemui.doze.DozeLog;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.dump.DumpsysTableLogger;
@@ -1859,16 +1858,11 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     /** Returns space between top of lock icon and bottom of NotificationStackScrollLayout. */
     private float getLockIconPadding() {
         float lockIconPadding = 0f;
-        if (DeviceEntryUdfpsRefactor.isEnabled()) {
-            View deviceEntryIconView = mKeyguardViewConfigurator.getKeyguardRootView()
-                    .findViewById(R.id.device_entry_icon_view);
-            if (deviceEntryIconView != null) {
-                lockIconPadding = mNotificationStackScrollLayoutController.getBottom()
-                    - deviceEntryIconView.getTop();
-            }
-        } else if (mLockIconViewController.getTop() != 0f) {
+        View deviceEntryIconView = mKeyguardViewConfigurator.getKeyguardRootView()
+                .findViewById(R.id.device_entry_icon_view);
+        if (deviceEntryIconView != null) {
             lockIconPadding = mNotificationStackScrollLayoutController.getBottom()
-                    - mLockIconViewController.getTop();
+                - deviceEntryIconView.getTop();
         }
         return lockIconPadding;
     }
@@ -5059,8 +5053,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                 return false;
             }
 
-            if (DeviceEntryUdfpsRefactor.isEnabled()
-                    && mAlternateBouncerInteractor.isVisibleState()) {
+            if (mAlternateBouncerInteractor.isVisibleState()) {
                 // never send touches to shade if the alternate bouncer is showing
                 return false;
             }
