@@ -547,13 +547,14 @@ public class AudioSystemAdapter implements AudioSystem.RoutingUpdateCallback,
      * @param device
      * @return
      */
-    public int setStreamVolumeIndexAS(int stream, int index, int device) {
-        return AudioSystem.setStreamVolumeIndexAS(stream, index, device);
+    public int setStreamVolumeIndexAS(int stream, int index, boolean muted, int device) {
+        return AudioSystem.setStreamVolumeIndexAS(stream, index, muted, device);
     }
 
     /** Same as {@link AudioSystem#setVolumeIndexForAttributes(AudioAttributes, int, int)} */
-    public int setVolumeIndexForAttributes(AudioAttributes attributes, int index, int device) {
-        return AudioSystem.setVolumeIndexForAttributes(attributes, index, device);
+    public int setVolumeIndexForAttributes(AudioAttributes attributes, int index, boolean muted,
+            int device) {
+        return AudioSystem.setVolumeIndexForAttributes(attributes, index, muted, device);
     }
 
     /**
