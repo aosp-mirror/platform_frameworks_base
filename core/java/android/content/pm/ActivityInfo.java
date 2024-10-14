@@ -21,10 +21,12 @@ import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.annotation.TestApi;
 import android.app.Activity;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.Disabled;
+import android.compat.annotation.EnabledAfter;
 import android.compat.annotation.EnabledSince;
 import android.compat.annotation.Overridable;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -1202,6 +1204,18 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface SizeChangesSupportMode {}
+
+    /**
+     * This change id makes the restriction of fixed orientation, aspect ratio, and resizability
+     * of the app to be ignored, which means making the app fill the given available area.
+     * @hide
+     */
+    @ChangeId
+    @Overridable
+    @TestApi
+    @SuppressLint("UnflaggedApi") // @TestApi without associated public API.
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.VANILLA_ICE_CREAM)
+    public static final long UNIVERSAL_RESIZABLE_BY_DEFAULT = 357141415L; // buganizer id
 
     /**
      * This change id enables compat policy that ignores app requested orientation in
