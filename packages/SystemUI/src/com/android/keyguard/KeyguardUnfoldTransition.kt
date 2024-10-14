@@ -18,6 +18,7 @@ package com.android.keyguard
 
 import android.content.Context
 import android.view.View
+import com.android.systemui.customization.R as customR
 import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.keyguard.ui.view.KeyguardRootView
 import com.android.systemui.plugins.statusbar.StatusBarStateController
@@ -98,12 +99,12 @@ constructor(
             viewsIdToTranslate =
                 setOf(
                     ViewIdToTranslate(
-                        viewId = R.id.lockscreen_clock_view_large,
+                        viewId = customR.id.lockscreen_clock_view_large,
                         direction = START,
                         shouldBeAnimated = filterKeyguardAndSplitShadeOnly
                     ),
                     ViewIdToTranslate(
-                        viewId = R.id.lockscreen_clock_view,
+                        viewId = customR.id.lockscreen_clock_view,
                         direction = START,
                         shouldBeAnimated = filterKeyguard
                     ),
