@@ -401,6 +401,23 @@ public class MediaProjectionManagerServiceTest {
         }
     }
 
+    @EnableFlags(android.companion.virtualdevice.flags
+            .Flags.FLAG_MEDIA_PROJECTION_KEYGUARD_RESTRICTIONS)
+    @Test
+    public void testCreateProjection_keyguardLocked_noDisplayCreated()
+            throws NameNotFoundException {
+        MediaProjectionManagerService.MediaProjection projection = startProjectionPreconditions();
+        doReturn(true).when(mKeyguardManager).isKeyguardLocked();
+
+        doReturn(PackageManager.PERMISSION_DENIED).when(mPackageManager).checkPermission(
+                RECORD_SENSITIVE_CONTENT, projection.packageName);
+
+        projection.start(mIMediaProjectionCallback);
+
+        // The projection was started because it was allowed to capture the keyguard.
+        assertThat(mService.getActiveProjectionInfo()).isNotNull();
+    }
+
     @Test
     public void testCreateProjection_attemptReuse_noPriorProjectionGrant()
             throws NameNotFoundException {
@@ -514,6 +531,7 @@ public class MediaProjectionManagerServiceTest {
         MediaProjectionManagerService.MediaProjection projection =
                 startProjectionPreconditions(service);
         projection.start(mIMediaProjectionCallback);
+        projection.notifyVirtualDisplayCreated(10);
 
         assertThat(service.getActiveProjectionInfo()).isNotNull();
 
@@ -536,6 +554,7 @@ public class MediaProjectionManagerServiceTest {
         MediaProjectionManagerService.MediaProjection projection =
                 startProjectionPreconditions(service);
         projection.start(mIMediaProjectionCallback);
+        projection.notifyVirtualDisplayCreated(10);
 
         assertThat(service.getActiveProjectionInfo()).isNotNull();
 

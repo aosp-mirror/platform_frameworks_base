@@ -237,7 +237,8 @@ public final class MediaProjectionManagerService extends SystemService
     void onKeyguardLockedStateChanged(boolean isKeyguardLocked) {
         if (!isKeyguardLocked) return;
         synchronized (mLock) {
-            if (mProjectionGrant != null && !canCaptureKeyguard()) {
+            if (mProjectionGrant != null && !canCaptureKeyguard()
+                    && mProjectionGrant.mVirtualDisplayId != INVALID_DISPLAY) {
                 Slog.d(TAG, "Content Recording: Stopped MediaProjection"
                         + " due to keyguard lock");
                 mProjectionGrant.stop();
