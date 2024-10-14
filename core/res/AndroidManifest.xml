@@ -2412,6 +2412,16 @@
                 android:label="@string/permlab_nearby_wifi_devices"
                 android:protectionLevel="dangerous" />
 
+    <!-- Required to be able to range to devices using generic ranging module.
+         @FlaggedApi("android.permission.flags.ranging_permission_enabled")
+         <p>Protection level: dangerous -->
+    <permission android:name="android.permission.RANGING"
+        android:permissionGroup="android.permission-group.UNDEFINED"
+        android:description="@string/permdesc_ranging"
+        android:label="@string/permlab_ranging"
+        android:protectionLevel="dangerous"
+        android:featureFlag="android.permission.flags.ranging_permission_enabled"/>
+
     <!-- @SystemApi @TestApi Allows an application to suspend other apps, which will prevent the
          user from using them until they are unsuspended.
          @hide

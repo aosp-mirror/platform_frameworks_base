@@ -235,6 +235,7 @@ final class DefaultPermissionGrantPolicy {
         NEARBY_DEVICES_PERMISSIONS.add(Manifest.permission.BLUETOOTH_SCAN);
         NEARBY_DEVICES_PERMISSIONS.add(Manifest.permission.UWB_RANGING);
         NEARBY_DEVICES_PERMISSIONS.add(Manifest.permission.NEARBY_WIFI_DEVICES);
+        NEARBY_DEVICES_PERMISSIONS.add(Manifest.permission.RANGING);
     }
 
     private static final Set<String> NOTIFICATION_PERMISSIONS = new ArraySet<>();
