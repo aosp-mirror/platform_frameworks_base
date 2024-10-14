@@ -54,6 +54,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.database.DatabaseUtils;
 import android.health.connect.HealthConnectManager;
+import android.health.connect.HealthPermissions;
 import android.media.AudioAttributes.AttributeUsage;
 import android.media.MediaRouter2;
 import android.os.Binder;
@@ -1608,9 +1609,25 @@ public class AppOpsManager {
     public static final int OP_RECEIVE_SENSITIVE_NOTIFICATIONS =
             AppProtoEnums.APP_OP_RECEIVE_SENSITIVE_NOTIFICATIONS;
 
+    /** @hide Access to read heart rate sensor. */
+    public static final int OP_READ_HEART_RATE = AppProtoEnums.APP_OP_READ_HEART_RATE;
+
+    /** @hide Access to read skin temperature. */
+    public static final int OP_READ_SKIN_TEMPERATURE = AppProtoEnums.APP_OP_READ_SKIN_TEMPERATURE;
+
+    /**
+     * Allows an app to range with nearby devices using any ranging technology available.
+     *
+     * @hide
+     */
+    public static final int OP_RANGING = AppProtoEnums.APP_OP_RANGING;
+
+    /** @hide Access to read oxygen saturation. */
+    public static final int OP_READ_OXYGEN_SATURATION = AppProtoEnums.APP_OP_READ_OXYGEN_SATURATION;
+
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public static final int _NUM_OP = 149;
+    public static final int _NUM_OP = 153;
 
     /**
      * All app ops represented as strings.
@@ -1763,6 +1780,10 @@ public class AppOpsManager {
             OPSTR_UNARCHIVAL_CONFIRMATION,
             OPSTR_EMERGENCY_LOCATION,
             OPSTR_RECEIVE_SENSITIVE_NOTIFICATIONS,
+            OPSTR_READ_HEART_RATE,
+            OPSTR_READ_SKIN_TEMPERATURE,
+            OPSTR_RANGING,
+            OPSTR_READ_OXYGEN_SATURATION,
     })
     public @interface AppOpString {}
 
@@ -2500,6 +2521,26 @@ public class AppOpsManager {
     public static final String OPSTR_RECEIVE_SENSITIVE_NOTIFICATIONS =
             "android:receive_sensitive_notifications";
 
+    /** @hide Access to read heart rate sensor. */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_REPLACE_BODY_SENSOR_PERMISSION_ENABLED)
+    public static final String OPSTR_READ_HEART_RATE = "android:read_heart_rate";
+
+    /** @hide Access to read oxygen saturation. */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_REPLACE_BODY_SENSOR_PERMISSION_ENABLED)
+    public static final String OPSTR_READ_OXYGEN_SATURATION = "android:read_oxygen_saturation";
+
+    /** @hide Access to read skin temperature. */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_REPLACE_BODY_SENSOR_PERMISSION_ENABLED)
+    public static final String OPSTR_READ_SKIN_TEMPERATURE = "android:read_skin_temperature";
+
+    /** @hide Access to ranging */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_RANGING_PERMISSION_ENABLED)
+    public static final String OPSTR_RANGING = "android:ranging";
+
     /** {@link #sAppOpsToNote} not initialized yet for this op */
     private static final byte SHOULD_COLLECT_NOTE_OP_NOT_INITIALIZED = 0;
     /** Should not collect noting of this app-op in {@link #sAppOpsToNote} */
@@ -2571,8 +2612,13 @@ public class AppOpsManager {
             OP_BLUETOOTH_ADVERTISE,
             OP_UWB_RANGING,
             OP_NEARBY_WIFI_DEVICES,
+            Flags.rangingPermissionEnabled() ? OP_RANGING : OP_NONE,
             // Notifications
             OP_POST_NOTIFICATION,
+            // Health
+            Flags.replaceBodySensorPermissionEnabled() ? OP_READ_HEART_RATE : OP_NONE,
+            Flags.replaceBodySensorPermissionEnabled() ? OP_READ_SKIN_TEMPERATURE : OP_NONE,
+            Flags.replaceBodySensorPermissionEnabled() ? OP_READ_OXYGEN_SATURATION : OP_NONE,
     };
 
     /**
@@ -3080,6 +3126,24 @@ public class AppOpsManager {
         new AppOpInfo.Builder(OP_RECEIVE_SENSITIVE_NOTIFICATIONS,
                 OPSTR_RECEIVE_SENSITIVE_NOTIFICATIONS, "RECEIVE_SENSITIVE_NOTIFICATIONS")
                 .setDefaultMode(MODE_IGNORED).build(),
+        new AppOpInfo.Builder(OP_READ_HEART_RATE, OPSTR_READ_HEART_RATE, "READ_HEART_RATE")
+                .setPermission(Flags.replaceBodySensorPermissionEnabled()
+                ? HealthPermissions.READ_HEART_RATE : null)
+                .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_READ_SKIN_TEMPERATURE, OPSTR_READ_SKIN_TEMPERATURE,
+                "READ_SKIN_TEMPERATURE").setPermission(
+                    Flags.replaceBodySensorPermissionEnabled()
+                        ? HealthPermissions.READ_SKIN_TEMPERATURE : null)
+                .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_RANGING, OPSTR_RANGING, "RANGING")
+                .setPermission(Flags.rangingPermissionEnabled()
+                ? Manifest.permission.RANGING : null)
+                .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_READ_OXYGEN_SATURATION, OPSTR_READ_OXYGEN_SATURATION,
+                "READ_OXYGEN_SATURATION").setPermission(
+                    Flags.replaceBodySensorPermissionEnabled()
+                        ? HealthPermissions.READ_OXYGEN_SATURATION : null)
+                .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
     };
 
     // The number of longs needed to form a full bitmask of app ops
@@ -3133,6 +3197,10 @@ public class AppOpsManager {
             }
         }
         for (int op : RUNTIME_PERMISSION_OPS) {
+            if (op == OP_NONE) {
+                // Skip ops with a disabled feature flag.
+                continue;
+            }
             if (sAppOpInfos[op].permission != null) {
                 sPermToOp.put(sAppOpInfos[op].permission, op);
             }
