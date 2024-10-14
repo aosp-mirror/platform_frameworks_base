@@ -1702,9 +1702,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                             mRTLastReportedPosition.top /*positionTop*/,
                             postScaleX, postScaleY);
 
-                    mRTLastSetCrop.set((int) (clipLeft / postScaleX), (int) (clipTop / postScaleY),
-                            (int) Math.ceil(clipRight / postScaleX),
-                            (int) Math.ceil(clipBottom / postScaleY));
+                    mRTLastSetCrop.set(clipLeft, clipTop, clipRight, clipBottom);
                     if (DEBUG_POSITION) {
                         Log.d(TAG, String.format("Setting layer crop = [%d, %d, %d, %d] "
                                         + "from scale %f, %f", mRTLastSetCrop.left,
