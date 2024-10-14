@@ -85,7 +85,7 @@ class TouchpadGestureHandlerTest : SysuiTestCase() {
     }
 
     private fun backGestureEvents(): List<MotionEvent> {
-        return ThreeFingerGesture.createEvents {
+        return ThreeFingerGesture.eventsForFullGesture {
             move(deltaX = SWIPE_DISTANCE / 4)
             move(deltaX = SWIPE_DISTANCE / 2)
             move(deltaX = SWIPE_DISTANCE)

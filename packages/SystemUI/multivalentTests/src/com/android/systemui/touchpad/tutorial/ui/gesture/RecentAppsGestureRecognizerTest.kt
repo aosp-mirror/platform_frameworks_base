@@ -77,8 +77,29 @@ class RecentAppsGestureRecognizerTest : SysuiTestCase() {
     fun triggersGestureProgressForThreeFingerGestureStarted() {
         assertStateAfterEvents(
             events = ThreeFingerGesture.startEvents(x = 0f, y = 0f),
-            expectedState = InProgress(),
+            expectedState = InProgress(progress = 0f),
         )
+    }
+
+    @Test
+    fun triggersProgressRelativeToDistance() {
+        assertProgressWhileMovingFingers(deltaY = -SWIPE_DISTANCE / 2, expectedProgress = 0.5f)
+        assertProgressWhileMovingFingers(deltaY = -SWIPE_DISTANCE, expectedProgress = 1f)
+    }
+
+    private fun assertProgressWhileMovingFingers(deltaY: Float, expectedProgress: Float) {
+        assertStateAfterEvents(
+            events = ThreeFingerGesture.eventsForGestureInProgress { move(deltaY = deltaY) },
+            expectedState = InProgress(progress = expectedProgress),
+        )
+    }
+
+    @Test
+    fun triggeredProgressIsBetweenZeroAndOne() {
+        // going in the wrong direction
+        assertProgressWhileMovingFingers(deltaY = SWIPE_DISTANCE / 2, expectedProgress = 0f)
+        // going further than required distance
+        assertProgressWhileMovingFingers(deltaY = -SWIPE_DISTANCE * 2, expectedProgress = 1f)
     }
 
     @Test

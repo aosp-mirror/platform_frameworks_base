@@ -104,7 +104,8 @@ class EasterEggGestureTest : SysuiTestCase() {
     }
 
     private fun assertStateAfterTwoFingerGesture(gesturePath: List<Point>, wasTriggered: Boolean) {
-        val events = TwoFingerGesture.createEvents { gesturePath.forEach { (x, y) -> move(x, y) } }
+        val events =
+            TwoFingerGesture.eventsForFullGesture { gesturePath.forEach { (x, y) -> move(x, y) } }
         assertStateAfterEvents(events = events, wasTriggered = wasTriggered)
     }
 
