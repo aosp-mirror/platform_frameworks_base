@@ -169,6 +169,10 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
     private static final String TAG = StageCoordinator.class.getSimpleName();
 
+    // The duration in ms to prevent launch-adjacent from working after split screen is first
+    // entered
+    private static final int DISABLE_LAUNCH_ADJACENT_AFTER_ENTER_TIMEOUT_MS = 1000;
+
     private final StageTaskListener mMainStage;
     private final StageListenerImpl mMainStageListener = new StageListenerImpl();
     private final StageTaskListener mSideStage;
@@ -234,6 +238,10 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     /** Used to notify others of when shell is animating into split screen */
     private SplitScreen.SplitInvocationListener mSplitInvocationListener;
     private Executor mSplitInvocationListenerExecutor;
+
+    // Re-enables launch-adjacent handling on the split root task.  This needs to be a member
+    // because we will be posting and removing it from the handler.
+    private final Runnable mReEnableLaunchAdjacentOnRoot = () -> setLaunchAdjacentDisabled(false);
 
     /**
      * Since StageCoordinator only coordinates MainStage and SideStage, it shouldn't support
@@ -2662,6 +2670,16 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         }
     }
 
+    /**
+     * Sets whether launch-adjacent is disabled or enabled.
+     */
+    private void setLaunchAdjacentDisabled(boolean disabled) {
+        ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "setLaunchAdjacentDisabled: disabled=%b", disabled);
+        final WindowContainerTransaction wct = new WindowContainerTransaction();
+        wct.setDisableLaunchAdjacent(mRootTaskInfo.token, disabled);
+        mTaskOrganizer.applyTransaction(wct);
+    }
+
     /** Starts the pending transition animation. */
     public boolean startPendingAnimation(@NonNull IBinder transition,
             @NonNull TransitionInfo info,
@@ -2674,6 +2692,14 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         if (mSplitTransitions.isPendingEnter(transition)) {
             shouldAnimate = startPendingEnterAnimation(transition,
                     mSplitTransitions.mPendingEnter, info, startTransaction, finishTransaction);
+
+            // Disable launch adjacent after an enter animation to prevent cases where apps are
+            // incorrectly trampolining and incorrectly triggering a double launch-adjacent task
+            // launch (ie. main -> split -> main). See b/344216031
+            setLaunchAdjacentDisabled(true);
+            mMainHandler.removeCallbacks(mReEnableLaunchAdjacentOnRoot);
+            mMainHandler.postDelayed(mReEnableLaunchAdjacentOnRoot,
+                    DISABLE_LAUNCH_ADJACENT_AFTER_ENTER_TIMEOUT_MS);
         } else if (mSplitTransitions.isPendingDismiss(transition)) {
             final SplitScreenTransitions.DismissSession dismiss = mSplitTransitions.mPendingDismiss;
             shouldAnimate = startPendingDismissAnimation(
