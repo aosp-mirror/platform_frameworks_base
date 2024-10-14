@@ -6016,6 +6016,38 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
     public static final Key<Integer> EXTENSION_STRENGTH =
             new Key<Integer>("android.extension.strength", int.class);
 
+    /**
+     * <p>Indicates when to activate Night Mode Camera Extension for high-quality
+     * still captures in low-light conditions.</p>
+     * <p>Provides awareness to the application when the current scene can benefit from using a
+     * Night Mode Camera Extension to take a high-quality photo.</p>
+     * <p>Support for this capture result can be queried via
+     * {@link android.hardware.camera2.CameraCharacteristics#getAvailableCaptureResultKeys }.</p>
+     * <p>If the device supports this capability then it will also support
+     * {@link android.hardware.camera2.CameraExtensionCharacteristics#EXTENSION_NIGHT NIGHT}
+     * and will be available in both
+     * {@link android.hardware.camera2.CameraCaptureSession sessions} and
+     * {@link android.hardware.camera2.CameraExtensionSession sessions}.</p>
+     * <p>The value will be {@code UNKNOWN} in the following auto exposure modes: ON_AUTO_FLASH,
+     * ON_ALWAYS_FLASH, ON_AUTO_FLASH_REDEYE, or ON_EXTERNAL_FLASH.</p>
+     * <p><b>Possible values:</b></p>
+     * <ul>
+     *   <li>{@link #EXTENSION_NIGHT_MODE_INDICATOR_UNKNOWN UNKNOWN}</li>
+     *   <li>{@link #EXTENSION_NIGHT_MODE_INDICATOR_OFF OFF}</li>
+     *   <li>{@link #EXTENSION_NIGHT_MODE_INDICATOR_ON ON}</li>
+     * </ul>
+     *
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     * @see #EXTENSION_NIGHT_MODE_INDICATOR_UNKNOWN
+     * @see #EXTENSION_NIGHT_MODE_INDICATOR_OFF
+     * @see #EXTENSION_NIGHT_MODE_INDICATOR_ON
+     */
+    @PublicKey
+    @NonNull
+    @FlaggedApi(Flags.FLAG_NIGHT_MODE_INDICATOR)
+    public static final Key<Integer> EXTENSION_NIGHT_MODE_INDICATOR =
+            new Key<Integer>("android.extension.nightModeIndicator", int.class);
+
     /*~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~
      * End generated code
      *~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~O@*/
