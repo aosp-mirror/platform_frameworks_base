@@ -37,6 +37,13 @@ flag {
 }
 
 flag {
+  name: "move_to_external_display_shortcut"
+  namespace: "large_screen_experiences_app_compat"
+  description: "Whether the move to external display shortcut in overview is available"
+  bug: "372872848"
+}
+
+flag {
   name: "app_compat_properties_api"
   is_exported: true
   namespace: "large_screen_experiences_app_compat"
