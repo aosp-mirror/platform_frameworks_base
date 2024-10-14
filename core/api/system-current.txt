@@ -18331,7 +18331,12 @@ package android.telephony.satellite {
     method @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") @RequiresPermission(android.Manifest.permission.SATELLITE_COMMUNICATION) public void unregisterForModemStateChanged(@NonNull android.telephony.satellite.SatelliteModemStateCallback);
     method @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") @RequiresPermission(android.Manifest.permission.SATELLITE_COMMUNICATION) public void unregisterForNtnSignalStrengthChanged(@NonNull android.telephony.satellite.NtnSignalStrengthCallback);
     method @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") @RequiresPermission(android.Manifest.permission.SATELLITE_COMMUNICATION) public void unregisterForProvisionStateChanged(@NonNull android.telephony.satellite.SatelliteProvisionStateCallback);
+    field @FlaggedApi("com.android.internal.telephony.flags.satellite_system_apis") public static final int DATAGRAM_TYPE_CHECK_PENDING_INCOMING_SMS = 7; // 0x7
+    field @FlaggedApi("com.android.internal.telephony.flags.satellite_system_apis") public static final int DATAGRAM_TYPE_KEEP_ALIVE = 3; // 0x3
+    field @FlaggedApi("com.android.internal.telephony.flags.satellite_system_apis") public static final int DATAGRAM_TYPE_LAST_SOS_MESSAGE_NO_HELP_NEEDED = 5; // 0x5
+    field @FlaggedApi("com.android.internal.telephony.flags.satellite_system_apis") public static final int DATAGRAM_TYPE_LAST_SOS_MESSAGE_STILL_NEED_HELP = 4; // 0x4
     field @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") public static final int DATAGRAM_TYPE_LOCATION_SHARING = 2; // 0x2
+    field @FlaggedApi("com.android.internal.telephony.flags.satellite_system_apis") public static final int DATAGRAM_TYPE_SMS = 6; // 0x6
     field @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") public static final int DATAGRAM_TYPE_SOS_MESSAGE = 1; // 0x1
     field @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") public static final int DATAGRAM_TYPE_UNKNOWN = 0; // 0x0
     field @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") public static final int DEVICE_HOLD_POSITION_LANDSCAPE_LEFT = 2; // 0x2
@@ -18351,6 +18356,7 @@ package android.telephony.satellite {
     field @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") public static final int NT_RADIO_TECHNOLOGY_UNKNOWN = 0; // 0x0
     field @FlaggedApi("com.android.internal.telephony.flags.carrier_enabled_satellite_flag") public static final int SATELLITE_COMMUNICATION_RESTRICTION_REASON_ENTITLEMENT = 2; // 0x2
     field @FlaggedApi("com.android.internal.telephony.flags.carrier_enabled_satellite_flag") public static final int SATELLITE_COMMUNICATION_RESTRICTION_REASON_GEOLOCATION = 1; // 0x1
+    field @FlaggedApi("com.android.internal.telephony.flags.satellite_system_apis") public static final int SATELLITE_COMMUNICATION_RESTRICTION_REASON_USER = 0; // 0x0
     field @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") public static final int SATELLITE_DATAGRAM_TRANSFER_STATE_IDLE = 0; // 0x0
     field @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") public static final int SATELLITE_DATAGRAM_TRANSFER_STATE_RECEIVE_FAILED = 7; // 0x7
     field @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") public static final int SATELLITE_DATAGRAM_TRANSFER_STATE_RECEIVE_NONE = 6; // 0x6
@@ -18364,6 +18370,8 @@ package android.telephony.satellite {
     field @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") public static final int SATELLITE_MODEM_STATE_CONNECTED = 7; // 0x7
     field @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") public static final int SATELLITE_MODEM_STATE_DATAGRAM_RETRYING = 3; // 0x3
     field @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") public static final int SATELLITE_MODEM_STATE_DATAGRAM_TRANSFERRING = 2; // 0x2
+    field @FlaggedApi("com.android.internal.telephony.flags.satellite_system_apis") public static final int SATELLITE_MODEM_STATE_DISABLING_SATELLITE = 9; // 0x9
+    field @FlaggedApi("com.android.internal.telephony.flags.satellite_system_apis") public static final int SATELLITE_MODEM_STATE_ENABLING_SATELLITE = 8; // 0x8
     field @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") public static final int SATELLITE_MODEM_STATE_IDLE = 0; // 0x0
     field @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") public static final int SATELLITE_MODEM_STATE_LISTENING = 1; // 0x1
     field @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") public static final int SATELLITE_MODEM_STATE_NOT_CONNECTED = 6; // 0x6
@@ -18371,11 +18379,16 @@ package android.telephony.satellite {
     field @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") public static final int SATELLITE_MODEM_STATE_UNAVAILABLE = 5; // 0x5
     field @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") public static final int SATELLITE_MODEM_STATE_UNKNOWN = -1; // 0xffffffff
     field @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") public static final int SATELLITE_RESULT_ACCESS_BARRED = 16; // 0x10
+    field @FlaggedApi("com.android.internal.telephony.flags.satellite_system_apis") public static final int SATELLITE_RESULT_DISABLE_IN_PROGRESS = 28; // 0x1c
+    field @FlaggedApi("com.android.internal.telephony.flags.satellite_system_apis") public static final int SATELLITE_RESULT_EMERGENCY_CALL_IN_PROGRESS = 27; // 0x1b
+    field @FlaggedApi("com.android.internal.telephony.flags.satellite_system_apis") public static final int SATELLITE_RESULT_ENABLE_IN_PROGRESS = 29; // 0x1d
     field @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") public static final int SATELLITE_RESULT_ERROR = 1; // 0x1
     field @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") public static final int SATELLITE_RESULT_ILLEGAL_STATE = 23; // 0x17
     field @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") public static final int SATELLITE_RESULT_INVALID_ARGUMENTS = 8; // 0x8
     field @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") public static final int SATELLITE_RESULT_INVALID_MODEM_STATE = 7; // 0x7
     field @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") public static final int SATELLITE_RESULT_INVALID_TELEPHONY_STATE = 6; // 0x6
+    field @FlaggedApi("com.android.internal.telephony.flags.satellite_system_apis") public static final int SATELLITE_RESULT_LOCATION_DISABLED = 25; // 0x19
+    field @FlaggedApi("com.android.internal.telephony.flags.satellite_system_apis") public static final int SATELLITE_RESULT_LOCATION_NOT_AVAILABLE = 26; // 0x1a
     field @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") public static final int SATELLITE_RESULT_MODEM_BUSY = 22; // 0x16
     field @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") public static final int SATELLITE_RESULT_MODEM_ERROR = 4; // 0x4
     field @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") public static final int SATELLITE_RESULT_MODEM_TIMEOUT = 24; // 0x18
