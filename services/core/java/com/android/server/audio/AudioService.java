@@ -6840,9 +6840,13 @@ public class AudioService extends IAudioService.Stub
      * @see AudioManager#setCommunicationDevice(int)
      * @see AudioManager#clearCommunicationDevice()
      */
-    public boolean setCommunicationDevice(IBinder cb, int portId) {
-        final int uid = Binder.getCallingUid();
-        final int pid = Binder.getCallingPid();
+    public boolean setCommunicationDevice(IBinder cb, int portId,
+            @NonNull AttributionSource attributionSource) {
+        if (attributionSource == null) {
+            return false;
+        }
+        final int uid = attributionSource.getUid();
+        final int pid = attributionSource.getPid();
 
         AudioDeviceInfo device = null;
         if (portId != 0) {
@@ -6892,7 +6896,8 @@ public class AudioService extends IAudioService.Stub
                 == PackageManager.PERMISSION_GRANTED;
         final long ident = Binder.clearCallingIdentity();
         try {
-            return mDeviceBroker.setCommunicationDevice(cb, uid, device, isPrivileged, eventSource);
+            return mDeviceBroker.setCommunicationDevice(
+                    cb, attributionSource, device, isPrivileged, eventSource);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
@@ -6934,7 +6939,11 @@ public class AudioService extends IAudioService.Stub
     }
 
     /** @see AudioManager#setSpeakerphoneOn(boolean) */
-    public void setSpeakerphoneOn(IBinder cb, boolean on) {
+    public void setSpeakerphoneOn(IBinder cb, boolean on,
+            @NonNull AttributionSource attributionSource) {
+        if (attributionSource == null) {
+            return;
+        }
         if (!checkAudioSettingsPermission("setSpeakerphoneOn()")) {
             return;
         }
@@ -6942,8 +6951,8 @@ public class AudioService extends IAudioService.Stub
                 == PackageManager.PERMISSION_GRANTED;
 
         // for logging only
-        final int uid = Binder.getCallingUid();
-        final int pid = Binder.getCallingPid();
+        final int uid = attributionSource.getUid();
+        final int pid = attributionSource.getPid();
 
         final String eventSource = new StringBuilder("setSpeakerphoneOn(").append(on)
                 .append(") from u/pid:").append(uid).append("/")
@@ -6958,7 +6967,7 @@ public class AudioService extends IAudioService.Stub
 
         final long ident = Binder.clearCallingIdentity();
         try {
-            mDeviceBroker.setSpeakerphoneOn(cb, uid, on, isPrivileged, eventSource);
+            mDeviceBroker.setSpeakerphoneOn(cb, attributionSource, on, isPrivileged, eventSource);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
@@ -7062,13 +7071,17 @@ public class AudioService extends IAudioService.Stub
     }
 
     /** @see AudioManager#startBluetoothSco() */
-    public void startBluetoothSco(IBinder cb, int targetSdkVersion) {
+    public void startBluetoothSco(IBinder cb, int targetSdkVersion,
+            @NonNull AttributionSource attributionSource) {
+        if (attributionSource == null) {
+            return;
+        }
         if (!checkAudioSettingsPermission("startBluetoothSco()")) {
             return;
         }
 
-        final int uid = Binder.getCallingUid();
-        final int pid = Binder.getCallingPid();
+        final int uid = attributionSource.getUid();
+        final int pid = attributionSource.getPid();
         final int scoAudioMode =
                 (targetSdkVersion < Build.VERSION_CODES.JELLY_BEAN_MR2) ?
                         BtHelper.SCO_MODE_VIRTUAL_CALL : BtHelper.SCO_MODE_UNDEFINED;
@@ -7083,18 +7096,22 @@ public class AudioService extends IAudioService.Stub
                 .set(MediaMetrics.Property.SCO_AUDIO_MODE,
                         BtHelper.scoAudioModeToString(scoAudioMode))
                 .record();
-        startBluetoothScoInt(cb, uid, scoAudioMode, eventSource);
+        startBluetoothScoInt(cb, attributionSource, scoAudioMode, eventSource);
 
     }
 
     /** @see AudioManager#startBluetoothScoVirtualCall() */
-    public void startBluetoothScoVirtualCall(IBinder cb) {
+    public void startBluetoothScoVirtualCall(IBinder cb,
+            @NonNull AttributionSource attributionSource) {
+        if (attributionSource == null) {
+            return;
+        }
         if (!checkAudioSettingsPermission("startBluetoothScoVirtualCall()")) {
             return;
         }
 
-        final int uid = Binder.getCallingUid();
-        final int pid = Binder.getCallingPid();
+        final int uid = attributionSource.getUid();
+        final int pid = attributionSource.getPid();
         final String eventSource = new StringBuilder("startBluetoothScoVirtualCall()")
                 .append(") from u/pid:").append(uid).append("/")
                 .append(pid).toString();
@@ -7106,10 +7123,11 @@ public class AudioService extends IAudioService.Stub
                 .set(MediaMetrics.Property.SCO_AUDIO_MODE,
                         BtHelper.scoAudioModeToString(BtHelper.SCO_MODE_VIRTUAL_CALL))
                 .record();
-        startBluetoothScoInt(cb, uid, BtHelper.SCO_MODE_VIRTUAL_CALL, eventSource);
+        startBluetoothScoInt(cb, attributionSource, BtHelper.SCO_MODE_VIRTUAL_CALL, eventSource);
     }
 
-    void startBluetoothScoInt(IBinder cb, int uid, int scoAudioMode, @NonNull String eventSource) {
+    void startBluetoothScoInt(IBinder cb, AttributionSource attributionSource,
+            int scoAudioMode, @NonNull String eventSource) {
         MediaMetrics.Item mmi = new MediaMetrics.Item(MediaMetrics.Name.AUDIO_BLUETOOTH)
                 .set(MediaMetrics.Property.EVENT, "startBluetoothScoInt")
                 .set(MediaMetrics.Property.SCO_AUDIO_MODE,
@@ -7125,7 +7143,7 @@ public class AudioService extends IAudioService.Stub
         final long ident = Binder.clearCallingIdentity();
         try {
             mDeviceBroker.startBluetoothScoForClient(
-                    cb, uid, scoAudioMode, isPrivileged, eventSource);
+                    cb, attributionSource, scoAudioMode, isPrivileged, eventSource);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
@@ -7133,13 +7151,17 @@ public class AudioService extends IAudioService.Stub
     }
 
     /** @see AudioManager#stopBluetoothSco() */
-    public void stopBluetoothSco(IBinder cb){
+    public void stopBluetoothSco(IBinder cb,
+            @NonNull AttributionSource attributionSource) {
+        if (attributionSource == null) {
+            return;
+        }
         if (!checkAudioSettingsPermission("stopBluetoothSco()") ||
                 !mSystemReady) {
             return;
         }
-        final int uid = Binder.getCallingUid();
-        final int pid = Binder.getCallingPid();
+        final int uid = attributionSource.getUid();
+        final int pid = attributionSource.getPid();
         final String eventSource =  new StringBuilder("stopBluetoothSco()")
                 .append(") from u/pid:").append(uid).append("/")
                 .append(pid).toString();
@@ -7147,7 +7169,8 @@ public class AudioService extends IAudioService.Stub
                 == PackageManager.PERMISSION_GRANTED;
         final long ident = Binder.clearCallingIdentity();
         try {
-            mDeviceBroker.stopBluetoothScoForClient(cb, uid, isPrivileged, eventSource);
+            mDeviceBroker.stopBluetoothScoForClient(
+                    cb, attributionSource, isPrivileged, eventSource);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }

@@ -18,9 +18,12 @@ package com.android.systemui.screenrecord;
 
 import static com.android.systemui.screenrecord.RecordingService.GROUP_KEY_ERROR_SAVING;
 import static com.android.systemui.screenrecord.RecordingService.GROUP_KEY_SAVED;
+import static com.android.systemui.screenrecord.RecordingService.NOTIF_GROUP_ID_ERROR_SAVING;
+import static com.android.systemui.screenrecord.RecordingService.NOTIF_GROUP_ID_SAVED;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -235,7 +238,9 @@ public class RecordingServiceTest extends SysuiTestCase {
 
         // Processing notification
         ArgumentCaptor<Notification> notifCaptor = ArgumentCaptor.forClass(Notification.class);
-        verify(mNotificationManager).notifyAsUser(any(), anyInt(), notifCaptor.capture(), any());
+        ArgumentCaptor<Integer> notifIdCaptor = ArgumentCaptor.forClass(Integer.class);
+        verify(mNotificationManager)
+                .notifyAsUser(any(), notifIdCaptor.capture(), notifCaptor.capture(), any());
         assertEquals(GROUP_KEY_SAVED, notifCaptor.getValue().getGroup());
 
         reset(mNotificationManager);
@@ -243,7 +248,7 @@ public class RecordingServiceTest extends SysuiTestCase {
         mRunnableCaptor.getValue().run();
 
         verify(mNotificationManager, times(2))
-                .notifyAsUser(any(), anyInt(), notifCaptor.capture(), any());
+                .notifyAsUser(any(), notifIdCaptor.capture(), notifCaptor.capture(), any());
         // Saved notification
         Notification saveNotification = notifCaptor.getAllValues().get(0);
         assertFalse(saveNotification.isGroupSummary());
@@ -252,6 +257,10 @@ public class RecordingServiceTest extends SysuiTestCase {
         Notification groupSummaryNotification = notifCaptor.getAllValues().get(1);
         assertTrue(groupSummaryNotification.isGroupSummary());
         assertEquals(GROUP_KEY_SAVED, groupSummaryNotification.getGroup());
+
+        // Verify the group notification ID and the individual notification ID are different
+        assertNotEquals(NOTIF_GROUP_ID_SAVED, (int) notifIdCaptor.getAllValues().get(0));
+        assertEquals(NOTIF_GROUP_ID_SAVED, (int) notifIdCaptor.getAllValues().get(1));
     }
 
     @Test
@@ -264,9 +273,12 @@ public class RecordingServiceTest extends SysuiTestCase {
 
         verify(mRecordingService).createErrorSavingNotification(any());
         ArgumentCaptor<Notification> notifCaptor = ArgumentCaptor.forClass(Notification.class);
-        verify(mNotificationManager).notifyAsUser(any(), anyInt(), notifCaptor.capture(), any());
+        ArgumentCaptor<Integer> notifIdCaptor = ArgumentCaptor.forClass(Integer.class);
+        verify(mNotificationManager)
+                .notifyAsUser(any(), notifIdCaptor.capture(), notifCaptor.capture(), any());
         assertTrue(notifCaptor.getValue().isGroupSummary());
         assertEquals(GROUP_KEY_ERROR_SAVING, notifCaptor.getValue().getGroup());
+        assertEquals(NOTIF_GROUP_ID_ERROR_SAVING, (int) notifIdCaptor.getValue());
     }
 
     @Test

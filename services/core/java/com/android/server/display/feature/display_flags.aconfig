@@ -414,3 +414,11 @@ flag {
       purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "enable_has_arr_support"
+    namespace: "core_graphics"
+    description: "Flag for an API to get whether display supports ARR or not"
+    bug: "361433651"
+    is_fixed_read_only: true
+}
