@@ -148,8 +148,12 @@ class BackupHelper {
             final TaskFragmentInfo info = mTaskFragmentInfos.valueAt(i);
             mPresenter.deleteTaskFragment(wct, info.getFragmentToken());
         }
-        mPresenter.setSavedState(new Bundle());
 
+        removeSavedState();
+    }
+
+    private void removeSavedState() {
+        mPresenter.setSavedState(new Bundle());
         mParcelableTaskContainerDataList.clear();
         mTaskFragmentInfos.clear();
         mTaskFragmentParentInfos.clear();
@@ -167,6 +171,19 @@ class BackupHelper {
             @NonNull Set<EmbeddingRule> rules) {
         if (mParcelableTaskContainerDataList.isEmpty()) {
             return false;
+        }
+
+        if (mTaskFragmentParentInfos.size() == 0) {
+            // No Task left in the WM hierarchy, remove the states and no need to restore.
+            if (DEBUG) Log.d(TAG, "Remove save states due to no task to restore.");
+            removeSavedState();
+            return false;
+        }
+
+        final ArrayList<Integer> taskIdsInSystem = new ArrayList<>();
+        for (int i = mTaskFragmentParentInfos.size() - 1; i >= 0; --i) {
+            final TaskFragmentParentInfo parentInfo = mTaskFragmentParentInfos.valueAt(i);
+            taskIdsInSystem.add(parentInfo.getTaskId());
         }
 
         if (DEBUG) Log.d(TAG, "Rebuilding TaskContainers.");
@@ -190,6 +207,14 @@ class BackupHelper {
             }
 
             mParcelableTaskContainerDataList.remove(parcelableTaskContainerData);
+            if (!taskIdsInSystem.contains(parcelableTaskContainerData.mTaskId)) {
+                if (DEBUG) {
+                    Log.d(TAG, "Rebuilding TaskContainer abort! Not existed. Task#"
+                            + parcelableTaskContainerData.mTaskId);
+                }
+                continue;
+            }
+
             final TaskContainer taskContainer = new TaskContainer(parcelableTaskContainerData,
                     mController, mTaskFragmentInfos);
             if (DEBUG) Log.d(TAG, "Created TaskContainer " + taskContainer);
