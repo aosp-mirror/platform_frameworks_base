@@ -3567,8 +3567,10 @@ public class AudioService extends IAudioService.Stub
      * @see AudioManager#addOnDevicesForAttributesChangedListener(
      *      AudioAttributes, Executor, OnDevicesForAttributesChangedListener)
      */
+    @android.annotation.EnforcePermission(anyOf = { MODIFY_AUDIO_ROUTING, QUERY_AUDIO_STATE })
     public void addOnDevicesForAttributesChangedListener(AudioAttributes attributes,
             IDevicesForAttributesCallback callback) {
+        super.addOnDevicesForAttributesChangedListener_enforcePermission();
         mAudioSystem.addOnDevicesForAttributesChangedListener(
                 attributes, false /* forVolume */, callback);
     }
