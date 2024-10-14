@@ -73,8 +73,8 @@ import java.util.Locale;
 public abstract class Layout {
 
     // These should match the constants in framework/base/libs/hwui/hwui/DrawTextFunctor.h
-    private static final float HIGH_CONTRAST_TEXT_BORDER_WIDTH_MIN_PX = 4f;
-    private static final float HIGH_CONTRAST_TEXT_BORDER_WIDTH_FACTOR = 0.2f;
+    private static final float HIGH_CONTRAST_TEXT_BORDER_WIDTH_MIN_PX = 0f;
+    private static final float HIGH_CONTRAST_TEXT_BORDER_WIDTH_FACTOR = 0f;
     private static final float HIGH_CONTRAST_TEXT_BACKGROUND_CORNER_RADIUS_DP = 5f;
     // since we're not using soft light yet, this needs to be much lower than the spec'd 0.8
     private static final float HIGH_CONTRAST_TEXT_BACKGROUND_ALPHA_PERCENTAGE = 0.5f;
