@@ -27,6 +27,7 @@ object SettingsDimension {
     val paddingExtraSmall6 = 12.dp
     val paddingLarge = 16.dp
     val paddingExtraLarge = 24.dp
+    val paddingExtraLarge1 = 28.dp
 
     val spinnerHorizontalPadding = paddingExtraLarge
     val spinnerVerticalPadding = paddingLarge
@@ -42,6 +43,12 @@ object SettingsDimension {
     val itemPaddingVertical = if (isSpaExpressiveEnabled) paddingExtraSmall6 else paddingLarge
     val itemPadding = PaddingValues(
         start = itemPaddingStart,
+        top = itemPaddingVertical,
+        end = itemPaddingEnd,
+        bottom = itemPaddingVertical,
+    )
+    val footerItemPadding = PaddingValues(
+        start = paddingExtraLarge1,
         top = itemPaddingVertical,
         end = itemPaddingEnd,
         bottom = itemPaddingVertical,
