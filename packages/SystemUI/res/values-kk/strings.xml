@@ -440,8 +440,7 @@
     <string name="zen_mode_on" msgid="9085304934016242591">"Қосулы"</string>
     <string name="zen_mode_on_with_details" msgid="7416143430557895497">"Қосулы • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"Өшірулі"</string>
-    <!-- no translation found for zen_mode_set_up (8231201163894922821) -->
-    <skip />
+    <string name="zen_mode_set_up" msgid="8231201163894922821">"Орнатылмаған"</string>
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"\"Параметрлер\" бөлімінде реттеу"</string>
     <string name="zen_mode_active_modes" msgid="1625850411578488856">"{count,plural, =0{Қосулы режим жоқ}=1{{mode} қосулы}other{# режим қосулы}}"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Оятқыш, еске салғыш, іс-шара мен өзіңіз көрсеткен контактілердің қоңырауларынан басқа дыбыстар мен дірілдер мазаламайтын болады. Музыка, бейне және ойын сияқты медиафайлдарды қоссаңыз, оларды естисіз."</string>
@@ -673,6 +672,10 @@
     <string name="stream_notification_unavailable" msgid="4313854556205836435">"Қолжетімді емес, шылдырлату өшірулі."</string>
     <string name="stream_alarm_unavailable" msgid="4059817189292197839">"Мазаламау режимі қосылғандықтан өзгерту мүмкін емес."</string>
     <string name="stream_media_unavailable" msgid="6823020894438959853">"Мазаламау режимі қосылғандықтан өзгерту мүмкін емес."</string>
+    <!-- no translation found for stream_unavailable_by_modes (3674139029490353683) -->
+    <skip />
+    <!-- no translation found for stream_unavailable_by_unknown (6908434629318171588) -->
+    <skip />
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. Дыбысын қосу үшін түртіңіз."</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. Діріл режимін орнату үшін түртіңіз. Арнайы мүмкіндік қызметтерінің дыбысы өшуі мүмкін."</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. Дыбысын өшіру үшін түртіңіз. Арнайы мүмкіндік қызметтерінің дыбысы өшуі мүмкін."</string>
@@ -1406,38 +1409,26 @@
     <string name="launch_touchpad_tutorial_notification_content" msgid="7931085031240753226">"Сенсорлық тақта қимылдарын үйреніңіз."</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_title" msgid="1940023776496198762">"Пернетақтамен және сенсорлық тақтамен жұмыс істеңіз"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"Сенсорлық тақта қимылдарын, перне тіркесімдерін және т.б. үйреніңіз."</string>
-    <!-- no translation found for touchpad_tutorial_back_gesture_button (3104716365403620315) -->
-    <skip />
-    <!-- no translation found for touchpad_tutorial_home_gesture_button (8023973153559885624) -->
-    <skip />
+    <string name="touchpad_tutorial_back_gesture_button" msgid="3104716365403620315">"Артқа"</string>
+    <string name="touchpad_tutorial_home_gesture_button" msgid="8023973153559885624">"Негізгі бетке өту"</string>
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"Соңғы қолданбаларды көру"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"Дайын"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Артқа"</string>
-    <!-- no translation found for touchpad_back_gesture_guidance (5352221087725906542) -->
-    <skip />
-    <!-- no translation found for touchpad_back_gesture_success_title (7370719098633023496) -->
-    <skip />
+    <string name="touchpad_back_gesture_guidance" msgid="5352221087725906542">"Сенсорлық тақтада үш саусақпен оңға немесе солға сырғытыңыз."</string>
+    <string name="touchpad_back_gesture_success_title" msgid="7370719098633023496">"Керемет!"</string>
     <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"Артқа қайту қимылын аяқтадыңыз."</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"Негізгі экранға өту"</string>
-    <!-- no translation found for touchpad_home_gesture_guidance (4178219118381915899) -->
-    <skip />
-    <!-- no translation found for touchpad_home_gesture_success_title (3648264553645798470) -->
-    <skip />
-    <!-- no translation found for touchpad_home_gesture_success_body (2590690589194027059) -->
-    <skip />
+    <string name="touchpad_home_gesture_guidance" msgid="4178219118381915899">"Сенсорлық тақтада үш саусақпен жоғары сырғытыңыз."</string>
+    <string name="touchpad_home_gesture_success_title" msgid="3648264553645798470">"Жарайсыз!"</string>
+    <string name="touchpad_home_gesture_success_body" msgid="2590690589194027059">"Негізгі экранға қайту қимылын орындадыңыз."</string>
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"Соңғы қолданбаларды көру"</string>
-    <!-- no translation found for touchpad_recent_apps_gesture_guidance (6304446013842271822) -->
-    <skip />
+    <string name="touchpad_recent_apps_gesture_guidance" msgid="6304446013842271822">"Сенсорлық тақтада үш саусақпен жоғары сырғытып, басып тұрыңыз."</string>
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"Жарайсыз!"</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"Соңғы қолданбаларды көру қимылын орындадыңыз."</string>
-    <!-- no translation found for tutorial_action_key_title (8172535792469008169) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_guidance (5040613427202799294) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_success_title (2371827347071979571) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_success_body (1688986269491357832) -->
-    <skip />
+    <string name="tutorial_action_key_title" msgid="8172535792469008169">"Барлық қолданбаны көру"</string>
+    <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"Пернетақтадағы әрекет пернесін басыңыз."</string>
+    <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"Жарайсыз!"</string>
+    <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"Барлық қолданбаны көру қимылын орындадыңыз."</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Пернетақта жарығы"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Деңгей: %1$d/%2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Үй басқару элементтері"</string>

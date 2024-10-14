@@ -440,8 +440,7 @@
     <string name="zen_mode_on" msgid="9085304934016242591">"Aktiv"</string>
     <string name="zen_mode_on_with_details" msgid="7416143430557895497">"Aktiv • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"Deaktiv"</string>
-    <!-- no translation found for zen_mode_set_up (8231201163894922821) -->
-    <skip />
+    <string name="zen_mode_set_up" msgid="8231201163894922821">"Ayarlanmayıb"</string>
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"Ayarlarda idarə edin"</string>
     <string name="zen_mode_active_modes" msgid="1625850411578488856">"{count,plural, =0{Aktiv rejim yoxdur}=1{{mode} aktivdir}other{# rejim aktivdir}}"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Seçdiyiniz siqnal, xatırladıcı, tədbir və zənglər istisna olmaqla səslər və vibrasiyalar Sizi narahat etməyəcək. Musiqi, video və oyunlar da daxil olmaqla oxutmaq istədiyiniz hər şeyi eşidəcəksiniz."</string>
@@ -673,6 +672,10 @@
     <string name="stream_notification_unavailable" msgid="4313854556205836435">"Zəng səssiz edildiyi üçün əlçatan deyil"</string>
     <string name="stream_alarm_unavailable" msgid="4059817189292197839">"Narahat Etməyin aktiv olduğu üçün əlçatan deyil"</string>
     <string name="stream_media_unavailable" msgid="6823020894438959853">"Narahat Etməyin aktiv olduğu üçün əlçatan deyil"</string>
+    <!-- no translation found for stream_unavailable_by_modes (3674139029490353683) -->
+    <skip />
+    <!-- no translation found for stream_unavailable_by_unknown (6908434629318171588) -->
+    <skip />
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. Səsli etmək üçün tıklayın."</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. Vibrasiyanı ayarlamaq üçün tıklayın. Əlçatımlılıq xidmətləri səssiz edilmiş ola bilər."</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. Səssiz etmək üçün tıklayın. Əlçatımlılıq xidmətləri səssiz edilmiş ola bilər."</string>
@@ -706,8 +709,7 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"Demo rejimini göstərin"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Zəngli saat"</string>
-    <!-- no translation found for active_mode_content_description (1627555562186515927) -->
-    <skip />
+    <string name="active_mode_content_description" msgid="1627555562186515927">"<xliff:g id="MODENAME">%1$s</xliff:g> aktivdir"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Pulqabı"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Telefonunuzla daha sürətli və təhlükəsiz satınalmalar etmək üçün ayarlayın"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Hamısını göstər"</string>
@@ -1407,38 +1409,26 @@
     <string name="launch_touchpad_tutorial_notification_content" msgid="7931085031240753226">"Taçped jestlərini öyrənin"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_title" msgid="1940023776496198762">"Klaviatura və taçpeddən istifadə edərək hərəkət edin"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"Taçped jestləri, klaviatura qısayolları və s. haqqında öyrənin"</string>
-    <!-- no translation found for touchpad_tutorial_back_gesture_button (3104716365403620315) -->
-    <skip />
-    <!-- no translation found for touchpad_tutorial_home_gesture_button (8023973153559885624) -->
-    <skip />
+    <string name="touchpad_tutorial_back_gesture_button" msgid="3104716365403620315">"Geri qayıdın"</string>
+    <string name="touchpad_tutorial_home_gesture_button" msgid="8023973153559885624">"Əsas səhifəyə qayıdın"</string>
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"Son tətbiqlərə baxın"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"Hazırdır"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Geri qayıdın"</string>
-    <!-- no translation found for touchpad_back_gesture_guidance (5352221087725906542) -->
-    <skip />
-    <!-- no translation found for touchpad_back_gesture_success_title (7370719098633023496) -->
-    <skip />
+    <string name="touchpad_back_gesture_guidance" msgid="5352221087725906542">"Taçpeddə üç barmaqla sola və ya sağa sürüşdürün"</string>
+    <string name="touchpad_back_gesture_success_title" msgid="7370719098633023496">"Əla!"</string>
     <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"Geri getmə jestini tamamladınız."</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"Ana ekrana qayıdın"</string>
-    <!-- no translation found for touchpad_home_gesture_guidance (4178219118381915899) -->
-    <skip />
-    <!-- no translation found for touchpad_home_gesture_success_title (3648264553645798470) -->
-    <skip />
-    <!-- no translation found for touchpad_home_gesture_success_body (2590690589194027059) -->
-    <skip />
+    <string name="touchpad_home_gesture_guidance" msgid="4178219118381915899">"Taçpeddə üç barmaqla yuxarı sürüşdürün"</string>
+    <string name="touchpad_home_gesture_success_title" msgid="3648264553645798470">"Əla!"</string>
+    <string name="touchpad_home_gesture_success_body" msgid="2590690589194027059">"Əsas səhifəyə keçid jestini tamamladınız"</string>
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"Son tətbiqlərə baxın"</string>
-    <!-- no translation found for touchpad_recent_apps_gesture_guidance (6304446013842271822) -->
-    <skip />
+    <string name="touchpad_recent_apps_gesture_guidance" msgid="6304446013842271822">"Taçpeddə üç barmaqla yuxarı çəkib saxlayın"</string>
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"Əla!"</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"Son tətbiqlərə baxmaq jestini tamamladınız."</string>
-    <!-- no translation found for tutorial_action_key_title (8172535792469008169) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_guidance (5040613427202799294) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_success_title (2371827347071979571) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_success_body (1688986269491357832) -->
-    <skip />
+    <string name="tutorial_action_key_title" msgid="8172535792469008169">"Bütün tətbiqlərə baxın"</string>
+    <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"Klaviaturada fəaliyyət açarına basın"</string>
+    <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"Əla!"</string>
+    <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"\"Bütün tətbiqlərə baxın\" jestini tamamladınız"</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Klaviatura işığı"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Səviyyə %1$d/%2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Ev nizamlayıcıları"</string>

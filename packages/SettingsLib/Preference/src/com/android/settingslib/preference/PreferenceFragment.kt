@@ -41,6 +41,9 @@ open class PreferenceFragment :
         createPreferenceScreen(PreferenceScreenFactory(this))
 
     override fun createPreferenceScreen(factory: PreferenceScreenFactory): PreferenceScreen? {
+        preferenceScreenBindingHelper?.close()
+        preferenceScreenBindingHelper = null
+
         val context = factory.context
         fun createPreferenceScreenFromResource() =
             factory.inflate(getPreferenceScreenResId(context))?.also {
@@ -86,8 +89,12 @@ open class PreferenceFragment :
 
     override fun onDestroy() {
         preferenceScreenBindingHelper?.close()
+        preferenceScreenBindingHelper = null
         super.onDestroy()
     }
+
+    protected fun getPreferenceKeysInHierarchy(): Set<String> =
+        preferenceScreenBindingHelper?.getPreferences()?.map { it.key }?.toSet() ?: setOf()
 
     companion object {
         private const val TAG = "PreferenceFragment"

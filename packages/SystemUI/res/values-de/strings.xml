@@ -673,6 +673,10 @@
     <string name="stream_notification_unavailable" msgid="4313854556205836435">"Nicht verfügbar, da Klingelton stumm"</string>
     <string name="stream_alarm_unavailable" msgid="4059817189292197839">"Nicht verfügbar, weil „Bitte nicht stören“ an ist"</string>
     <string name="stream_media_unavailable" msgid="6823020894438959853">"Nicht verfügbar, weil „Bitte nicht stören“ an"</string>
+    <!-- no translation found for stream_unavailable_by_modes (3674139029490353683) -->
+    <skip />
+    <!-- no translation found for stream_unavailable_by_unknown (6908434629318171588) -->
+    <skip />
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. Zum Aufheben der Stummschaltung tippen."</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. Tippen, um Vibrieren festzulegen. Bedienungshilfen werden unter Umständen stummgeschaltet."</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. Zum Stummschalten tippen. Bedienungshilfen werden unter Umständen stummgeschaltet."</string>
@@ -706,8 +710,7 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"Demomodus anzeigen"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Weckruf"</string>
-    <!-- no translation found for active_mode_content_description (1627555562186515927) -->
-    <skip />
+    <string name="active_mode_content_description" msgid="1627555562186515927">"„<xliff:g id="MODENAME">%1$s</xliff:g>“ ist aktiviert"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Füge eine Zahlungsmethode hinzu, um noch schneller und sicherer mit deinem Smartphone zu bezahlen"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Alle anzeigen"</string>

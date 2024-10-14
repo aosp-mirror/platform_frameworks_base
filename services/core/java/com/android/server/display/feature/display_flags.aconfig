@@ -386,6 +386,17 @@ flag {
 }
 
 flag {
+    name: "enable_apply_display_changed_during_display_added"
+    namespace: "display_manager"
+    description: "Apply display changes after display added"
+    bug: "368131655"
+    is_fixed_read_only: true
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "block_autobrightness_changes_on_stylus_usage"
     namespace: "display_manager"
     description: "Block the usage of ALS to control the display brightness when stylus is being used"

@@ -690,8 +690,7 @@
     <string name="media_transfer_usb_audio_name" msgid="1789292056757821355">"Audio USB"</string>
     <string name="media_transfer_wired_device_mic_name" msgid="7417067197803840965">"Conector para micrófono"</string>
     <string name="media_transfer_usb_device_mic_name" msgid="7171789543226269822">"Micrófono USB"</string>
-    <!-- no translation found for media_transfer_bt_device_mic_name (1870669402238687618) -->
-    <skip />
+    <string name="media_transfer_bt_device_mic_name" msgid="1870669402238687618">"Micrófono Bluetooth"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"Activar"</string>
     <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"Desactivar"</string>
     <string name="carrier_network_change_mode" msgid="4257621815706644026">"Cambio de proveedor de red"</string>
