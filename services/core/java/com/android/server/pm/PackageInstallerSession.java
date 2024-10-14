@@ -1103,17 +1103,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         final boolean isUpdateOwnershipEnforcementEnabled =
                 mPm.isUpdateOwnershipEnforcementAvailable()
                         && existingUpdateOwnerPackageName != null;
-
-        if (Build.IS_USERDEBUG) {
-            Log.d("updateowner", "PackageInstallerSession computeUserActionRequirement"
-                    + " isUpdateOwnershipEnforcementEnabled= " + isUpdateOwnershipEnforcementEnabled
-                    + ", mPm.isUpdateOwnershipEnforcementAvailable= "
-                    + mPm.isUpdateOwnershipEnforcementAvailable()
-                    + ", existingUpdateOwnerPackageName=" + existingUpdateOwnerPackageName
-                    + ", isUpdateOwner= " + isUpdateOwner + ", getInstallerPackageName()= "
-                    + getInstallerPackageName() + ", isInstallerShell= " + isInstallerShell
-                    + ", mInstallerUid=" + mInstallerUid + ", packageName = " + packageName);
-        }
         // For an installation that un-archives an app, if the installer doesn't have the
         // INSTALL_PACKAGES permission, the user should have already been prompted to confirm the
         // un-archive request. There's no need for another confirmation during the installation.
@@ -1127,10 +1116,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 || isInstallUnarchive;
 
         if (noUserActionNecessary) {
-            if (Build.IS_USERDEBUG) {
-                Log.d("updateowner", "PackageInstallerSession computeUserActionRequirement"
-                                + " noUserActionNecessary userActionNotTypicallyNeededResponse");
-            }
             return userActionNotTypicallyNeededResponse;
         }
 
@@ -1140,27 +1125,15 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 && !isInstallerShell
                 // We don't enforce the update ownership for the managed user and profile.
                 && !isFromManagedUserOrProfile) {
-            if (Build.IS_USERDEBUG) {
-                Log.d("updateowner", "PackageInstallerSession computeUserActionRequirement"
-                        + "USER_ACTION_REQUIRED_UPDATE_OWNER_REMINDER");
-            }
             return USER_ACTION_REQUIRED_UPDATE_OWNER_REMINDER;
         }
 
         if (isPermissionGranted) {
-            if (Build.IS_USERDEBUG) {
-                Log.d("updateowner", "PackageInstallerSession computeUserActionRequirement"
-                        + " permission userActionNotTypicallyNeededResponse");
-            }
             return userActionNotTypicallyNeededResponse;
         }
 
         if (snapshot.isInstallDisabledForPackage(getInstallerPackageName(), mInstallerUid,
                 userId)) {
-            if (Build.IS_USERDEBUG) {
-                Log.d("updateowner", "PackageInstallerSession computeUserActionRequirement"
-                        + " disable USER_ACTION_REQUIRED");
-            }
             // show the installer to account for device policy or unknown sources use cases
             return USER_ACTION_REQUIRED;
         }
@@ -1169,17 +1142,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 && isUpdateWithoutUserActionPermissionGranted
                 && ((isUpdateOwnershipEnforcementEnabled ? isUpdateOwner
                 : isInstallerOfRecord) || isSelfUpdate)) {
-            if (Build.IS_USERDEBUG) {
-                Log.d("updateowner", "PackageInstallerSession computeUserActionRequirement"
-                        + " USER_ACTION_PENDING_APK_PARSING");
-            }
             return USER_ACTION_PENDING_APK_PARSING;
         }
 
-        if (Build.IS_USERDEBUG) {
-            Log.d("updateowner", "PackageInstallerSession computeUserActionRequirement"
-                    + " USER_ACTION_REQUIRED");
-        }
         return USER_ACTION_REQUIRED;
     }
 
@@ -2750,11 +2715,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         @UserActionRequirement int userActionRequirement = USER_ACTION_NOT_NEEDED;
         // TODO(b/159331446): Move this to makeSessionActiveForInstall and update javadoc
         userActionRequirement = session.computeUserActionRequirement();
-        if (Build.IS_USERDEBUG) {
-            Log.d("updateowner", "PackageInstallerSession checkUserActionRequirement"
-                    + " userActionRequirement= " + userActionRequirement
-                    + ", session.packageName= " + session.getPackageName());
-        }
         session.updateUserActionRequirement(userActionRequirement);
         if (userActionRequirement == USER_ACTION_REQUIRED
                 || userActionRequirement == USER_ACTION_REQUIRED_UPDATE_OWNER_REMINDER) {

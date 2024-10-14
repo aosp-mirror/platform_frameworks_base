@@ -45,7 +45,7 @@ class PreferenceScreenBindingHelper(
     context: Context,
     private val preferenceBindingFactory: PreferenceBindingFactory,
     private val preferenceScreen: PreferenceScreen,
-    preferenceHierarchy: PreferenceHierarchy,
+    private val preferenceHierarchy: PreferenceHierarchy,
 ) : KeyedDataObservable<String>(), AutoCloseable {
 
     private val handler = Handler(Looper.getMainLooper())
@@ -132,6 +132,8 @@ class PreferenceScreenBindingHelper(
             notifyDependents(dependency, notifiedKeys)
         }
     }
+
+    fun getPreferences() = preferenceHierarchy.getAllPreferences()
 
     override fun close() {
         removeObserver(preferenceObserver)
