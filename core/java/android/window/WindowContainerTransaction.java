@@ -525,6 +525,22 @@ public final class WindowContainerTransaction implements Parcelable {
     }
 
     /**
+     * Disables or enables activities to be started in adjacent tasks (see
+     * {@link FLAG_ACTIVITY_LAUNCH_ADJACENT}) for the specified root of any child tasks.  This
+     * differs from {@link #setLaunchAdjacentFlagRoot(WindowContainerToken)} which controls the
+     * preferred launch-adjacent target and allows for selectively setting which root tasks can
+     * support launch-adjacent.
+     * @hide
+     */
+    @NonNull
+    public WindowContainerTransaction setDisableLaunchAdjacent(
+            @NonNull WindowContainerToken container, boolean disabled) {
+        mHierarchyOps.add(HierarchyOp.createForSetDisableLaunchAdjacent(container.asBinder(),
+                disabled));
+        return this;
+    }
+
+    /**
      * Starts a task by id. The task is expected to already exist (eg. as a recent task).
      * @param taskId Id of task to start.
      * @param options bundle containing ActivityOptions for the task's top activity.
@@ -1488,6 +1504,7 @@ public final class WindowContainerTransaction implements Parcelable {
         public static final int HIERARCHY_OP_TYPE_RESTORE_BACK_NAVIGATION = 20;
         public static final int HIERARCHY_OP_TYPE_SET_EXCLUDE_INSETS_TYPES = 21;
         public static final int HIERARCHY_OP_TYPE_SET_KEYGUARD_STATE = 22;
+        public static final int HIERARCHY_OP_TYPE_SET_DISABLE_LAUNCH_ADJACENT = 23;
 
         // The following key(s) are for use with mLaunchOptions:
         // When launching a task (eg. from recents), this is the taskId to be launched.
@@ -1555,6 +1572,8 @@ public final class WindowContainerTransaction implements Parcelable {
         private boolean mIsTrimmableFromRecents;
 
         private @InsetsType int mExcludeInsetsTypes;
+
+        private boolean mLaunchAdjacentDisabled;
 
         public static HierarchyOp createForReparent(
                 @NonNull IBinder container, @Nullable IBinder reparent, boolean toTop) {
@@ -1644,6 +1663,15 @@ public final class WindowContainerTransaction implements Parcelable {
                     .build();
         }
 
+        /** Create a hierarchy op for disabling launch adjacent. */
+        public static HierarchyOp createForSetDisableLaunchAdjacent(IBinder container,
+                boolean disabled) {
+            return new HierarchyOp.Builder(HIERARCHY_OP_TYPE_SET_DISABLE_LAUNCH_ADJACENT)
+                    .setContainer(container)
+                    .setLaunchAdjacentDisabled(disabled)
+                    .build();
+        }
+
         /** create a hierarchy op for deleting a task **/
         public static HierarchyOp createForRemoveTask(@NonNull IBinder container) {
             return new HierarchyOp.Builder(HIERARCHY_OP_TYPE_REMOVE_TASK)
@@ -1695,6 +1723,7 @@ public final class WindowContainerTransaction implements Parcelable {
             mReparentLeafTaskIfRelaunch = copy.mReparentLeafTaskIfRelaunch;
             mIsTrimmableFromRecents = copy.mIsTrimmableFromRecents;
             mExcludeInsetsTypes = copy.mExcludeInsetsTypes;
+            mLaunchAdjacentDisabled = copy.mLaunchAdjacentDisabled;
         }
 
         protected HierarchyOp(Parcel in) {
@@ -1719,6 +1748,7 @@ public final class WindowContainerTransaction implements Parcelable {
             mReparentLeafTaskIfRelaunch = in.readBoolean();
             mIsTrimmableFromRecents = in.readBoolean();
             mExcludeInsetsTypes = in.readInt();
+            mLaunchAdjacentDisabled = in.readBoolean();
         }
 
         public int getType() {
@@ -1814,19 +1844,22 @@ public final class WindowContainerTransaction implements Parcelable {
         }
 
         /** Denotes whether the parents should also be included in the op. */
-        @NonNull
         public boolean includingParents() {
             return mIncludingParents;
         }
 
-        /** Set the task to be trimmable */
-        @NonNull
+        /** Denotes whether the task can be trimmable from recents */
         public boolean isTrimmableFromRecents() {
             return mIsTrimmableFromRecents;
         }
 
         public @InsetsType int getExcludeInsetsTypes() {
             return mExcludeInsetsTypes;
+        }
+
+        /** Denotes whether launch-adjacent flag is respected from this task or its children */
+        public boolean isLaunchAdjacentDisabled() {
+            return mLaunchAdjacentDisabled;
         }
 
         /** Gets a string representation of a hierarchy-op type. */
@@ -1839,6 +1872,8 @@ public final class WindowContainerTransaction implements Parcelable {
                 case HIERARCHY_OP_TYPE_SET_ADJACENT_ROOTS: return "SetAdjacentRoot";
                 case HIERARCHY_OP_TYPE_LAUNCH_TASK: return "LaunchTask";
                 case HIERARCHY_OP_TYPE_SET_LAUNCH_ADJACENT_FLAG_ROOT: return "SetAdjacentFlagRoot";
+                case HIERARCHY_OP_TYPE_SET_DISABLE_LAUNCH_ADJACENT:
+                    return "SetDisableLaunchAdjacent";
                 case HIERARCHY_OP_TYPE_PENDING_INTENT: return "PendingIntent";
                 case HIERARCHY_OP_TYPE_START_SHORTCUT: return "StartShortcut";
                 case HIERARCHY_OP_TYPE_ADD_INSETS_FRAME_PROVIDER: return "addInsetsFrameProvider";
@@ -1890,6 +1925,10 @@ public final class WindowContainerTransaction implements Parcelable {
                     break;
                 case HIERARCHY_OP_TYPE_SET_LAUNCH_ADJACENT_FLAG_ROOT:
                     sb.append("container=").append(mContainer).append(" clearRoot=").append(mToTop);
+                    break;
+                case HIERARCHY_OP_TYPE_SET_DISABLE_LAUNCH_ADJACENT:
+                    sb.append("container=").append(mContainer).append(" disabled=")
+                            .append(mLaunchAdjacentDisabled);
                     break;
                 case HIERARCHY_OP_TYPE_START_SHORTCUT:
                     sb.append("options=").append(mLaunchOptions)
@@ -1971,6 +2010,7 @@ public final class WindowContainerTransaction implements Parcelable {
             dest.writeBoolean(mReparentLeafTaskIfRelaunch);
             dest.writeBoolean(mIsTrimmableFromRecents);
             dest.writeInt(mExcludeInsetsTypes);
+            dest.writeBoolean(mLaunchAdjacentDisabled);
         }
 
         @Override
@@ -2046,6 +2086,8 @@ public final class WindowContainerTransaction implements Parcelable {
             private boolean mIsTrimmableFromRecents;
 
             private @InsetsType int mExcludeInsetsTypes;
+
+            private boolean mLaunchAdjacentDisabled;
 
             Builder(int type) {
                 mType = type;
@@ -2153,6 +2195,11 @@ public final class WindowContainerTransaction implements Parcelable {
                 return this;
             }
 
+            Builder setLaunchAdjacentDisabled(boolean disabled) {
+                mLaunchAdjacentDisabled = disabled;
+                return this;
+            }
+
             HierarchyOp build() {
                 final HierarchyOp hierarchyOp = new HierarchyOp(mType);
                 hierarchyOp.mContainer = mContainer;
@@ -2179,6 +2226,7 @@ public final class WindowContainerTransaction implements Parcelable {
                 hierarchyOp.mReparentLeafTaskIfRelaunch = mReparentLeafTaskIfRelaunch;
                 hierarchyOp.mIsTrimmableFromRecents = mIsTrimmableFromRecents;
                 hierarchyOp.mExcludeInsetsTypes = mExcludeInsetsTypes;
+                hierarchyOp.mLaunchAdjacentDisabled = mLaunchAdjacentDisabled;
 
                 return hierarchyOp;
             }
