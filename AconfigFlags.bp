@@ -791,6 +791,12 @@ java_aconfig_library {
     ],
 }
 
+cc_aconfig_library {
+    name: "android.permission.flags-aconfig-cc",
+    aconfig_declarations: "android.permission.flags-aconfig",
+    host_supported: true,
+}
+
 // SQLite
 aconfig_declarations {
     name: "android.database.sqlite-aconfig",
