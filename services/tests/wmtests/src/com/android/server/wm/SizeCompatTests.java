@@ -4883,7 +4883,7 @@ public class SizeCompatTests extends WindowTestsBase {
 
 
     @Test
-    @EnableCompatChanges({ActivityRecord.UNIVERSAL_RESIZABLE_BY_DEFAULT})
+    @EnableCompatChanges({ActivityInfo.UNIVERSAL_RESIZABLE_BY_DEFAULT})
     public void testUniversalResizeableByDefault() {
         mSetFlagsRule.enableFlags(Flags.FLAG_UNIVERSAL_RESIZABLE_BY_DEFAULT);
         mDisplayContent.setIgnoreOrientationRequest(false);
