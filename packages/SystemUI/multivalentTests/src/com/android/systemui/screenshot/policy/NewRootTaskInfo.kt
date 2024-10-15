@@ -69,7 +69,7 @@ fun RootTaskInfo.newChildTask(
     taskId: Int,
     name: String,
     bounds: Rect? = null,
-    userId: Int? = null
+    userId: Int? = null,
 ): ChildTaskModel {
     return ChildTaskModel(taskId, name, bounds ?: this.bounds, userId ?: this.userId)
 }
@@ -83,7 +83,7 @@ fun newRootTaskInfo(
     running: Boolean = true,
     activityType: ActivityType = Standard,
     windowingMode: WindowingMode = FullScreen,
-    bounds: Rect? = null,
+    bounds: Rect = Rect(),
     topActivity: ComponentName? = null,
     topActivityType: ActivityType = Standard,
     numActivities: Int? = null,
