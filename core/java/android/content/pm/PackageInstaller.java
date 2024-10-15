@@ -2934,6 +2934,8 @@ public class PackageInstaller {
         public int unarchiveId = -1;
         /** {@hide} */
         public @Nullable String dexoptCompilerFilter = null;
+        /** {@hide} */
+        public boolean forceVerification;
 
         private final ArrayMap<String, Integer> mPermissionStates;
 
@@ -2988,6 +2990,7 @@ public class PackageInstaller {
             developmentInstallFlags = source.readInt();
             unarchiveId = source.readInt();
             dexoptCompilerFilter = source.readString();
+            forceVerification = source.readBoolean();
         }
 
         /** {@hide} */
@@ -3024,6 +3027,7 @@ public class PackageInstaller {
             ret.developmentInstallFlags = developmentInstallFlags;
             ret.unarchiveId = unarchiveId;
             ret.dexoptCompilerFilter = dexoptCompilerFilter;
+            ret.forceVerification = forceVerification;
             return ret;
         }
 
@@ -3732,6 +3736,14 @@ public class PackageInstaller {
             return grantedPermissions.toArray(ArrayUtils.emptyArray(String.class));
         }
 
+        /**
+         * Used by adb installations to force enable the verification for this install.
+         * {@hide}
+         */
+        public void setForceVerification() {
+            this.forceVerification = true;
+        }
+
         /** {@hide} */
         public void dump(IndentingPrintWriter pw) {
             pw.printPair("mode", mode);
@@ -3767,6 +3779,7 @@ public class PackageInstaller {
             pw.printHexPair("developmentInstallFlags", developmentInstallFlags);
             pw.printPair("unarchiveId", unarchiveId);
             pw.printPair("dexoptCompilerFilter", dexoptCompilerFilter);
+            pw.printPair("forceVerification", forceVerification);
             pw.println();
         }
 
@@ -3813,6 +3826,7 @@ public class PackageInstaller {
             dest.writeInt(developmentInstallFlags);
             dest.writeInt(unarchiveId);
             dest.writeString(dexoptCompilerFilter);
+            dest.writeBoolean(forceVerification);
         }
 
         public static final Parcelable.Creator<SessionParams>

@@ -3599,6 +3599,9 @@ class PackageManagerShellCommand extends ShellCommand {
                             .setCompilerFilter(sessionParams.dexoptCompilerFilter)
                             .build();
                     break;
+                case "--force-verification":
+                    sessionParams.setForceVerification();
+                    break;
                 default:
                     throw new IllegalArgumentException("Unknown option " + opt);
             }
@@ -4805,6 +4808,7 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("          https://source.android.com/docs/core/runtime/configure"
                 + "#compiler_filters");
         pw.println("          or 'skip'");
+        pw.println("      --force-verification: if set, enable the verification for this install");
         pw.println("");
         pw.println("  install-existing [--user USER_ID|all|current]");
         pw.println("       [--instant] [--full] [--wait] [--restrict-permissions] PACKAGE");

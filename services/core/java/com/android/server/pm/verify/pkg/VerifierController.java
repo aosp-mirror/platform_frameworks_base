@@ -139,15 +139,16 @@ public class VerifierController {
     }
 
     /**
-     * Used by the installation session to check if a verifier is installed.
+     * Used by the installation session to get the package name of the installed verifier.
      */
-    public boolean isVerifierInstalled(Supplier<Computer> snapshotSupplier, int userId) {
+    @Nullable
+    public String getVerifierPackageName(Supplier<Computer> snapshotSupplier, int userId) {
         if (isVerifierConnected()) {
             // Verifier is connected or is being connected, so it must be installed.
-            return true;
+            return mRemoteServiceComponentName.getPackageName();
         }
         // Verifier has been disconnected, or it hasn't been connected. Check if it's installed.
-        return mInjector.isVerifierInstalled(snapshotSupplier.get(), userId);
+        return mInjector.getVerifierPackageName(snapshotSupplier.get(), userId);
     }
 
     /**
@@ -331,7 +332,7 @@ public class VerifierController {
         final long defaultTimeoutMillis = mInjector.getVerificationRequestTimeoutMillis();
         final long maxExtendedTimeoutMillis = mInjector.getMaxVerificationExtendedTimeoutMillis();
         final VerificationStatusTracker tracker = new VerificationStatusTracker(
-                packageName, defaultTimeoutMillis, maxExtendedTimeoutMillis, mInjector);
+                defaultTimeoutMillis, maxExtendedTimeoutMillis, mInjector);
         synchronized (mVerificationStatus) {
             mVerificationStatus.put(verificationId, tracker);
         }
@@ -542,10 +543,15 @@ public class VerifierController {
         }
 
         /**
-         * Check if a verifier is installed on this device.
+         * Return the package name of the verifier installed on this device.
          */
-        public boolean isVerifierInstalled(Computer snapshot, int userId) {
-            return resolveVerifierComponentName(snapshot, userId) != null;
+        @Nullable
+        public String getVerifierPackageName(Computer snapshot, int userId) {
+            final ComponentName componentName = resolveVerifierComponentName(snapshot, userId);
+            if (componentName == null) {
+                return null;
+            }
+            return componentName.getPackageName();
         }
 
         /**
