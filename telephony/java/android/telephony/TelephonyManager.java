@@ -2127,7 +2127,6 @@ public class TelephonyManager {
      * <p>On some devices, this settings activity may not exist. Callers should ensure that this
      * case is appropriately handled.
      */
-    @FlaggedApi(Flags.FLAG_RESET_MOBILE_NETWORK_SETTINGS)
     @SdkConstant(SdkConstant.SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_RESET_MOBILE_NETWORK_SETTINGS =
             "android.telephony.action.RESET_MOBILE_NETWORK_SETTINGS";
