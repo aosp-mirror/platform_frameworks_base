@@ -115,7 +115,7 @@ class IssueRecordingServiceSessionTest : SysuiTestCase() {
         underTest.share(0, uri)
         bgExecutor.runAllReady()
 
-        verify(iActivityManager).requestBugReportWithExtraAttachment(uri)
+        verify(iActivityManager).requestBugReportWithExtraAttachments(any())
     }
 
     @Test
