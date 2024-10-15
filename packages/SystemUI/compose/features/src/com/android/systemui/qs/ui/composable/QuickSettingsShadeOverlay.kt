@@ -133,7 +133,14 @@ fun SceneScope.QuickSettingsLayout(
     Column(
         verticalArrangement = Arrangement.spacedBy(QuickSettingsShade.Dimensions.Padding),
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = modifier.fillMaxWidth().padding(QuickSettingsShade.Dimensions.Padding),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .padding(
+                    start = QuickSettingsShade.Dimensions.Padding,
+                    end = QuickSettingsShade.Dimensions.Padding,
+                    top = QuickSettingsShade.Dimensions.Padding,
+                ),
     ) {
         BrightnessSliderContainer(
             viewModel = viewModel.brightnessSliderViewModel,
