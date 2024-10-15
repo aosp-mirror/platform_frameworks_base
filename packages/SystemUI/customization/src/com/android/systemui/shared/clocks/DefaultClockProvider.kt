@@ -17,6 +17,8 @@ import android.content.Context
 import android.content.res.Resources
 import android.view.LayoutInflater
 import com.android.systemui.customization.R
+import com.android.systemui.log.core.LogLevel
+import com.android.systemui.log.core.LogcatOnlyMessageBuffer
 import com.android.systemui.plugins.clocks.ClockController
 import com.android.systemui.plugins.clocks.ClockId
 import com.android.systemui.plugins.clocks.ClockMessageBuffers
@@ -53,7 +55,9 @@ class DefaultClockProvider(
         }
 
         return if (clockReactiveVariants) {
-            val assets = AssetLoader(ctx, ctx, "clocks/", messageBuffers!!.infraMessageBuffer)
+            val buffer =
+                messageBuffers?.infraMessageBuffer ?: LogcatOnlyMessageBuffer(LogLevel.INFO)
+            val assets = AssetLoader(ctx, ctx, "clocks/", buffer)
             FlexClockController(ctx, resources, assets, FLEX_DESIGN, messageBuffers)
         } else {
             DefaultClockController(
