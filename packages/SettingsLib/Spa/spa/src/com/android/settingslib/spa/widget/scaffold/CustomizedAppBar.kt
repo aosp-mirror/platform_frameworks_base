@@ -46,6 +46,7 @@ import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.TopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.derivedStateOf
@@ -326,6 +327,9 @@ private fun TwoRowsTopAppBar(
     // Sets the app bar's height offset limit to hide just the bottom title area and keep top title
     // visible when collapsed.
     scrollBehavior?.state?.heightOffsetLimit = pinnedHeightPx - maxHeightPx.floatValue
+    if (isSpaExpressiveEnabled) {
+        LaunchedEffect(scrollBehavior?.state?.heightOffsetLimit) { scrollBehavior?.collapse() }
+    }
 
     // Obtain the container Color from the TopAppBarColors using the `collapsedFraction`, as the
     // bottom part of this TwoRowsTopAppBar changes color at the same rate the app bar expands or
