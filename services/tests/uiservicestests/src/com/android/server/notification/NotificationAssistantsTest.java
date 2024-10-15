@@ -16,6 +16,9 @@
 package com.android.server.notification;
 
 import static android.os.UserHandle.USER_ALL;
+import static android.service.notification.Adjustment.KEY_IMPORTANCE;
+
+import static com.android.server.notification.NotificationManagerService.DEFAULT_ALLOWED_ADJUSTMENTS;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -630,5 +633,51 @@ public class NotificationAssistantsTest extends UiServiceTestCase {
         writeXmlAndReload(USER_ALL);
 
         assertThat(mAssistants.getUnsupportedAdjustments(userId).size()).isEqualTo(0);
+    }
+
+    @Test
+    @EnableFlags(android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION)
+    public void testDisallowAdjustmentType() {
+        mAssistants.disallowAdjustmentType(Adjustment.KEY_RANKING_SCORE);
+        assertThat(mAssistants.getAllowedAssistantAdjustments())
+                .doesNotContain(Adjustment.KEY_RANKING_SCORE);
+        assertThat(mAssistants.getAllowedAssistantAdjustments()).contains(Adjustment.KEY_TYPE);
+    }
+
+    @Test
+    @EnableFlags(android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION)
+    public void testAllowAdjustmentType() {
+        mAssistants.disallowAdjustmentType(Adjustment.KEY_RANKING_SCORE);
+        assertThat(mAssistants.getAllowedAssistantAdjustments())
+                .doesNotContain(Adjustment.KEY_RANKING_SCORE);
+        mAssistants.allowAdjustmentType(Adjustment.KEY_RANKING_SCORE);
+        assertThat(mAssistants.getAllowedAssistantAdjustments())
+                .contains(Adjustment.KEY_RANKING_SCORE);
+    }
+
+    @Test
+    @EnableFlags(android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION)
+    public void testDisallowAdjustmentType_readWriteXml_entries() throws Exception {
+        int userId = ActivityManager.getCurrentUser();
+
+        mAssistants.loadDefaultsFromConfig(true);
+        mAssistants.disallowAdjustmentType(KEY_IMPORTANCE);
+
+        writeXmlAndReload(USER_ALL);
+
+        assertThat(mAssistants.getAllowedAssistantAdjustments()).contains(
+                Adjustment.KEY_NOT_CONVERSATION);
+        assertThat(mAssistants.getAllowedAssistantAdjustments()).doesNotContain(
+                KEY_IMPORTANCE);
+    }
+
+    @Test
+    public void testDefaultAllowedAdjustments_readWriteXml_entries() throws Exception {
+        mAssistants.loadDefaultsFromConfig(true);
+
+        writeXmlAndReload(USER_ALL);
+
+        assertThat(mAssistants.getAllowedAssistantAdjustments())
+                .containsExactlyElementsIn(DEFAULT_ALLOWED_ADJUSTMENTS);
     }
 }

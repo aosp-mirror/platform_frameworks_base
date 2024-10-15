@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <item type="id" name="lockscreen_clock_view_large" />
+    <item type="id" name="lockscreen_clock_view" />
+
     <!-- View ids for elements in large weather clock -->
     <item type="id" name="weather_clock_time" />
     <item type="id" name="weather_clock_date" />

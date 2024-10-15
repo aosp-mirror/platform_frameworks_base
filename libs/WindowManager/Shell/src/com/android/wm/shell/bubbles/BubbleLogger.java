@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.bubbles;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.util.FrameworkStatsLog;
@@ -33,7 +32,6 @@ public class BubbleLogger {
     /**
      * Bubble UI event.
      */
-    @VisibleForTesting
     public enum Event implements UiEventLogger.UiEventEnum {
 
         // region bubble events

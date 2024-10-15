@@ -46,6 +46,7 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doReturn;
@@ -2468,6 +2469,37 @@ public class BubblesTest extends SysuiTestCase {
 
         // Show overflow should never be called if the flag is off
         verify(stackView, never()).showOverflow(anyBoolean());
+    }
+
+    @EnableFlags(FLAG_ENABLE_BUBBLE_BAR)
+    @Test
+    public void testEventLogging_bubbleBar_addBubble() {
+        mBubbleProperties.mIsBubbleBarEnabled = true;
+        mPositioner.setIsLargeScreen(true);
+        FakeBubbleStateListener bubbleStateListener = new FakeBubbleStateListener();
+        mBubbleController.registerBubbleStateListener(bubbleStateListener);
+
+        mEntryListener.onEntryAdded(mRow);
+
+        verify(mBubbleLogger).log(argThat(b -> b.getKey().equals(mRow.getKey())),
+                eq(BubbleLogger.Event.BUBBLE_BAR_BUBBLE_POSTED));
+    }
+
+    @EnableFlags(FLAG_ENABLE_BUBBLE_BAR)
+    @Test
+    public void testEventLogging_bubbleBar_updateBubble() {
+        mBubbleProperties.mIsBubbleBarEnabled = true;
+        mPositioner.setIsLargeScreen(true);
+        FakeBubbleStateListener bubbleStateListener = new FakeBubbleStateListener();
+        mBubbleController.registerBubbleStateListener(bubbleStateListener);
+
+        mEntryListener.onEntryAdded(mRow);
+        // Mark the notification as updated
+        NotificationEntryHelper.modifyRanking(mRow).setTextChanged(true).build();
+        mEntryListener.onEntryUpdated(mRow, /* fromSystem= */ true);
+
+        verify(mBubbleLogger).log(argThat(b -> b.getKey().equals(mRow.getKey())),
+                eq(BubbleLogger.Event.BUBBLE_BAR_BUBBLE_UPDATED));
     }
 
     /** Creates a bubble using the userId and package. */

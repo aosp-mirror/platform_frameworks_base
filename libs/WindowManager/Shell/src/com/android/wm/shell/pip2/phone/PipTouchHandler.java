@@ -582,7 +582,6 @@ public class PipTouchHandler implements PipTransitionState.PipTransitionStateCha
             return true;
         }
 
-        /*
         if ((ev.getAction() == MotionEvent.ACTION_DOWN || mTouchState.isUserInteracting())
                 && mPipDismissTargetHandler.maybeConsumeMotionEvent(ev)) {
             // If the first touch event occurs within the magnetic field, pass the ACTION_DOWN event
@@ -599,6 +598,7 @@ public class PipTouchHandler implements PipTransitionState.PipTransitionStateCha
             return true;
         }
 
+        /*
         // Ignore the motion event When the entry animation is waiting to be started
         if (!mTouchState.isUserInteracting() && mPipTaskOrganizer.isEntryScheduled()) {
             ProtoLog.wtf(WM_SHELL_PICTURE_IN_PICTURE,

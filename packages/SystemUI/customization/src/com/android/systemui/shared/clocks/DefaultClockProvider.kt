@@ -53,11 +53,8 @@ class DefaultClockProvider(
         }
 
         return if (clockReactiveVariants) {
-            // TODO handle the case here where only the smallClock message buffer is added
-            val assetLoader =
-                AssetLoader(ctx, ctx, "clocks/", messageBuffers?.smallClockMessageBuffer!!)
-
-            SimpleClockController(ctx, assetLoader, FLEX_DESIGN, messageBuffers)
+            val assets = AssetLoader(ctx, ctx, "clocks/", messageBuffers!!.infraMessageBuffer)
+            FlexClockController(ctx, resources, assets, FLEX_DESIGN, messageBuffers)
         } else {
             DefaultClockController(
                 ctx,
@@ -82,6 +79,9 @@ class DefaultClockProvider(
             resources.getString(R.string.clock_default_description),
             // TODO(b/352049256): Update placeholder to actual resource
             resources.getDrawable(R.drawable.clock_default_thumbnail, null),
+            isReactiveToTone = true,
+            isReactiveToTouch = clockReactiveVariants,
+            axes = listOf(), // TODO: Ater some picker definition
         )
     }
 
@@ -118,9 +118,9 @@ class DefaultClockProvider(
                                     alignment =
                                         DigitalAlignment(
                                             HorizontalAlignment.CENTER,
-                                            VerticalAlignment.CENTER
+                                            VerticalAlignment.CENTER,
                                         ),
-                                    dateTimeFormat = "hh"
+                                    dateTimeFormat = "hh",
                                 ),
                                 DigitalHandLayer(
                                     layerBounds = LayerBounds.FIT,
@@ -146,9 +146,9 @@ class DefaultClockProvider(
                                     alignment =
                                         DigitalAlignment(
                                             HorizontalAlignment.CENTER,
-                                            VerticalAlignment.CENTER
+                                            VerticalAlignment.CENTER,
                                         ),
-                                    dateTimeFormat = "hh"
+                                    dateTimeFormat = "hh",
                                 ),
                                 DigitalHandLayer(
                                     layerBounds = LayerBounds.FIT,
@@ -174,9 +174,9 @@ class DefaultClockProvider(
                                     alignment =
                                         DigitalAlignment(
                                             HorizontalAlignment.CENTER,
-                                            VerticalAlignment.CENTER
+                                            VerticalAlignment.CENTER,
                                         ),
-                                    dateTimeFormat = "mm"
+                                    dateTimeFormat = "mm",
                                 ),
                                 DigitalHandLayer(
                                     layerBounds = LayerBounds.FIT,
@@ -202,11 +202,11 @@ class DefaultClockProvider(
                                     alignment =
                                         DigitalAlignment(
                                             HorizontalAlignment.CENTER,
-                                            VerticalAlignment.CENTER
+                                            VerticalAlignment.CENTER,
                                         ),
-                                    dateTimeFormat = "mm"
-                                )
-                            )
+                                    dateTimeFormat = "mm",
+                                ),
+                            ),
                     )
                 )
 
@@ -230,7 +230,7 @@ class DefaultClockProvider(
                                 renderType = RenderType.CHANGE_WEIGHT,
                             ),
                         alignment = DigitalAlignment(HorizontalAlignment.LEFT, null),
-                        dateTimeFormat = "h:mm"
+                        dateTimeFormat = "h:mm",
                     )
                 )
 
@@ -239,7 +239,7 @@ class DefaultClockProvider(
                 name = "@string/clock_default_name",
                 description = "@string/clock_default_description",
                 large = ClockFace(layers = largeLayer),
-                small = ClockFace(layers = smallLayer)
+                small = ClockFace(layers = smallLayer),
             )
         }
     }

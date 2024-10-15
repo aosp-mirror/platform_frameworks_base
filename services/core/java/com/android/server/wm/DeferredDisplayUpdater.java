@@ -401,6 +401,7 @@ class DeferredDisplayUpdater {
                 || !Objects.equals(first.deviceProductInfo, second.deviceProductInfo)
                 || first.modeId != second.modeId
                 || first.renderFrameRate != second.renderFrameRate
+                || first.hasArrSupport != second.hasArrSupport
                 || first.defaultModeId != second.defaultModeId
                 || first.userPreferredModeId != second.userPreferredModeId
                 || !Arrays.equals(first.supportedModes, second.supportedModes)

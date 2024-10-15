@@ -41,6 +41,17 @@ interface PreferenceSummaryProvider {
 }
 
 /**
+ * Interface to provide dynamic preference icon.
+ *
+ * Implement this interface implies that the preference icon should not be cached for indexing.
+ */
+interface PreferenceIconProvider {
+
+    /** Provides preference icon. */
+    fun getIcon(context: Context): Int
+}
+
+/**
  * Interface to provide the state of preference availability.
  *
  * UI framework normally does not show the preference widget if it is unavailable.

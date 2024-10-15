@@ -27,6 +27,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.fragments.FragmentHostManager
 import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragment
 import com.android.systemui.statusbar.window.StatusBarWindowController
+import com.android.systemui.statusbar.window.StatusBarWindowControllerStore
 import com.google.common.truth.Truth.assertThat
 import kotlin.test.Test
 import org.junit.Assert.assertThrows
@@ -39,7 +40,8 @@ import org.mockito.kotlin.whenever
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class StatusBarInitializerTest : SysuiTestCase() {
-    val windowController = mock(StatusBarWindowController::class.java)
+    private val windowController = mock(StatusBarWindowController::class.java)
+    private val windowControllerStore = mock(StatusBarWindowControllerStore::class.java)
 
     @Before
     fun setup() {
@@ -52,15 +54,16 @@ class StatusBarInitializerTest : SysuiTestCase() {
         whenever(fragmentHostManager.fragmentManager).thenReturn(fragmentManager)
         whenever(fragmentManager.beginTransaction()).thenReturn(transaction)
         whenever(transaction.replace(any(), any(), any())).thenReturn(transaction)
-
+        whenever(windowControllerStore.defaultDisplay).thenReturn(windowController)
         whenever(windowController.fragmentHostManager).thenReturn(fragmentHostManager)
     }
 
     val underTest =
         StatusBarInitializerImpl(
-            windowController,
-            { mock(CollapsedStatusBarFragment::class.java) },
-            setOf(),
+            displayId = context.displayId,
+            statusBarWindowControllerStore = windowControllerStore,
+            collapsedStatusBarFragmentProvider = { mock(CollapsedStatusBarFragment::class.java) },
+            creationListeners = setOf(),
         )
 
     @Test
