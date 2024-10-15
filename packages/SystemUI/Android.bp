@@ -87,7 +87,6 @@ filegroup {
     srcs: [
         "tests/src/**/systemui/broadcast/BroadcastDispatcherTest.kt",
         "tests/src/**/systemui/broadcast/ActionReceiverTest.kt",
-        "tests/src/**/systemui/doze/DozeMachineTest.java",
         "tests/src/**/systemui/globalactions/GlobalActionsDialogLiteTest.java",
         "tests/src/**/systemui/globalactions/GlobalActionsImeTest.java",
         "tests/src/**/systemui/keyguard/data/repository/KeyguardTransitionRepositoryTest.kt",
@@ -175,7 +174,6 @@ filegroup {
         "tests/src/**/systemui/controls/management/ControlsEditingActivityTest.kt",
         "tests/src/**/systemui/controls/management/ControlsRequestDialogTest.kt",
         "tests/src/**/systemui/controls/ui/DetailDialogTest.kt",
-        "tests/src/**/systemui/doze/DozeMachineTest.kt",
         "tests/src/**/systemui/fontscaling/FontScalingDialogDelegateTest.kt",
         "tests/src/**/systemui/keyguard/CustomizationProviderTest.kt",
         "tests/src/**/systemui/globalactions/GlobalActionsColumnLayoutTest.java",
