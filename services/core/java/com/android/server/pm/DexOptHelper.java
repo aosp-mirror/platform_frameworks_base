@@ -791,16 +791,6 @@ public final class DexOptHelper {
             }
             try {
                 Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dexopt");
-
-                // This mirrors logic from commitReconciledScanResultLocked, where the library
-                // files needed for dexopt are assigned.
-                PackageSetting realPkgSetting = installRequest.getRealPackageSetting();
-                // Unfortunately, the updated system app flag is only tracked on this
-                // PackageSetting
-                boolean isUpdatedSystemApp =
-                        installRequest.getScannedPackageSetting().isUpdatedSystemApp();
-                realPkgSetting.getPkgState().setUpdatedSystemApp(isUpdatedSystemApp);
-
                 DexoptResult dexOptResult = DexOptHelper.dexoptPackageUsingArtService(
                         installRequest, dexoptOptions);
                 installRequest.onDexoptFinished(dexOptResult);
