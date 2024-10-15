@@ -36,7 +36,8 @@ import java.util.List;
  * This component is used as the main switch of the page
  * to enable or disable the prefereces on the page.
  */
-public class MainSwitchPreference extends TwoStatePreference implements OnCheckedChangeListener {
+public class MainSwitchPreference extends TwoStatePreference
+        implements OnCheckedChangeListener, GroupSectionDividerMixin {
 
     private final List<OnCheckedChangeListener> mSwitchChangeListeners = new ArrayList<>();
 
