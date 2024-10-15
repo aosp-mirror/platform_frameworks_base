@@ -37,7 +37,7 @@ import com.android.systemui.Flags
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.screenshot.proxy.SystemUiProxy
+import com.android.systemui.screenshot.proxy.ScreenshotProxy
 import com.android.systemui.settings.DisplayTracker
 import com.android.systemui.shared.system.ActivityManagerWrapper
 import com.android.systemui.statusbar.phone.CentralSurfaces
@@ -55,7 +55,7 @@ constructor(
     private val activityManagerWrapper: ActivityManagerWrapper,
     @Application private val applicationScope: CoroutineScope,
     @Main private val mainDispatcher: CoroutineDispatcher,
-    private val systemUiProxy: SystemUiProxy,
+    private val screenshotProxy: ScreenshotProxy,
     private val displayTracker: DisplayTracker,
 ) {
     /**
@@ -89,7 +89,7 @@ constructor(
                 CentralSurfaces.SYSTEM_DIALOG_REASON_SCREENSHOT
             )
         }
-        systemUiProxy.dismissKeyguard()
+        screenshotProxy.dismissKeyguard()
         var transitionOptions: ActivityOptions? = null
         if (transitionCoordinator?.decor?.isAttachedToWindow == true) {
             transitionCoordinator.startExit()
@@ -127,7 +127,7 @@ constructor(
     private suspend fun launchCrossProfileIntent(
         user: UserHandle,
         intent: Intent,
-        bundle: Bundle?
+        bundle: Bundle?,
     ) {
         val connector = getCrossProfileConnector(user)
         val completion = CompletableDeferred<Unit>()

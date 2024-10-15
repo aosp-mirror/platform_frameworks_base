@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.screenshot;
+package com.android.systemui.screenshot.proxy;
 
 interface IOnDoneCallback {
   void onDone(boolean success);

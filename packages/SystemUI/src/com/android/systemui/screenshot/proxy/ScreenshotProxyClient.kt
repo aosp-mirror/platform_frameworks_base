@@ -22,9 +22,6 @@ import android.content.Intent
 import android.util.Log
 import com.android.internal.infra.ServiceConnector
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.screenshot.IOnDoneCallback
-import com.android.systemui.screenshot.IScreenshotProxy
-import com.android.systemui.screenshot.ScreenshotProxyService
 import javax.inject.Inject
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -32,8 +29,8 @@ import kotlinx.coroutines.CompletableDeferred
 
 private const val TAG = "SystemUiProxy"
 
-/** An implementation of [SystemUiProxy] using [ScreenshotProxyService]. */
-class SystemUiProxyClient @Inject constructor(@Application context: Context) : SystemUiProxy {
+/** An implementation of [ScreenshotProxy] using [ScreenshotProxyService]. */
+class ScreenshotProxyClient @Inject constructor(@Application context: Context) : ScreenshotProxy {
     @SuppressLint("ImplicitSamInstance")
     private val proxyConnector: ServiceConnector<IScreenshotProxy> =
         ServiceConnector.Impl(
@@ -41,7 +38,7 @@ class SystemUiProxyClient @Inject constructor(@Application context: Context) : S
             Intent(context, ScreenshotProxyService::class.java),
             Context.BIND_AUTO_CREATE or Context.BIND_WAIVE_PRIORITY or Context.BIND_NOT_VISIBLE,
             context.userId,
-            IScreenshotProxy.Stub::asInterface
+            IScreenshotProxy.Stub::asInterface,
         )
 
     override suspend fun isNotificationShadeExpanded(): Boolean = suspendCoroutine { k ->
