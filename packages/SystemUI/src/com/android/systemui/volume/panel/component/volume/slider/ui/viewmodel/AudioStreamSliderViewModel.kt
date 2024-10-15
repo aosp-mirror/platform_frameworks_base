@@ -28,6 +28,7 @@ import com.android.settingslib.volume.shared.model.AudioStream
 import com.android.settingslib.volume.shared.model.AudioStreamModel
 import com.android.settingslib.volume.shared.model.RingerMode
 import com.android.systemui.common.shared.model.Icon
+import com.android.systemui.haptics.slider.compose.ui.SliderHapticsViewModel
 import com.android.systemui.modes.shared.ModesUiIcons
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.policy.domain.interactor.ZenModeInteractor
@@ -61,6 +62,7 @@ constructor(
     private val zenModeInteractor: ZenModeInteractor,
     private val uiEventLogger: UiEventLogger,
     private val volumePanelLogger: VolumePanelLogger,
+    override val hapticsViewModelFactory: SliderHapticsViewModel.Factory,
 ) : SliderViewModel {
 
     private val volumeChanges = MutableStateFlow<Int?>(null)
