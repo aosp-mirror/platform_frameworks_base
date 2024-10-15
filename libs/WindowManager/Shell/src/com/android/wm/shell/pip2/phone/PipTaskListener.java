@@ -90,9 +90,10 @@ public class PipTaskListener implements ShellTaskOrganizer.TaskListener,
         if (mPictureInPictureParams.equals(params)) {
             return;
         }
-        if (PipUtils.remoteActionsChanged(params.getActions(), mPictureInPictureParams.getActions())
+        if (params != null && (PipUtils.remoteActionsChanged(params.getActions(),
+                mPictureInPictureParams.getActions())
                 || !PipUtils.remoteActionsMatch(params.getCloseAction(),
-                mPictureInPictureParams.getCloseAction())) {
+                mPictureInPictureParams.getCloseAction()))) {
             for (PipParamsChangedCallback listener : mPipParamsChangedListeners) {
                 listener.onActionsChanged(params.getActions(), params.getCloseAction());
             }

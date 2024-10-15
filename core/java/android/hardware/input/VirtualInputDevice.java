@@ -16,7 +16,6 @@
 
 package android.hardware.input;
 
-import android.annotation.RequiresPermission;
 import android.companion.virtual.IVirtualDevice;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -68,7 +67,6 @@ abstract class VirtualInputDevice implements Closeable {
     }
 
     @Override
-    @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     public void close() {
         Log.d(TAG, "Closing virtual input device " + mConfig.getInputDeviceName());
         try {

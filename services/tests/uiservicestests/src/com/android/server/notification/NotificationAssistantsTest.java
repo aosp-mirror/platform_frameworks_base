@@ -16,6 +16,9 @@
 package com.android.server.notification;
 
 import static android.os.UserHandle.USER_ALL;
+import static android.service.notification.Adjustment.KEY_IMPORTANCE;
+
+import static com.android.server.notification.NotificationManagerService.DEFAULT_ALLOWED_ADJUSTMENTS;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -145,7 +148,8 @@ public class NotificationAssistantsTest extends UiServiceTestCase {
         mContext.setMockPackageManager(mPm);
         mContext.addMockSystemService(Context.USER_SERVICE, mUm);
         mContext.getOrCreateTestableResources().addOverride(
-                com.android.internal.R.string.config_defaultAssistantAccessComponent, "a/a");
+                com.android.internal.R.string.config_defaultAssistantAccessComponent,
+                mCn.flattenToString());
         mAssistants = spy(mNm.new NotificationAssistants(mContext, mLock, mUserProfiles, miPm));
         when(mNm.getBinderService()).thenReturn(mINm);
         mContext.ensureTestableResources();
@@ -207,13 +211,43 @@ public class NotificationAssistantsTest extends UiServiceTestCase {
 
         writeXmlAndReload(USER_ALL);
 
-        ArrayMap<Boolean, ArraySet<String>> approved = mAssistants.mApproved.get(0);
+        ArrayMap<Boolean, ArraySet<String>> approved =
+                mAssistants.mApproved.get(ActivityManager.getCurrentUser());
         // approved should not be null
         assertNotNull(approved);
         assertEquals(new ArraySet<>(), approved.get(true));
 
         // user set is maintained
         assertTrue(mAssistants.mIsUserChanged.get(ActivityManager.getCurrentUser()));
+    }
+
+    @Test
+    public void testWriteXml_userTurnedOffNAS_backup() throws Exception {
+        int userId = 10;
+
+        mAssistants.loadDefaultsFromConfig(true);
+
+        mAssistants.setPackageOrComponentEnabled(mCn.flattenToString(), userId, true,
+                true, true);
+
+        ComponentName current = CollectionUtils.firstOrNull(
+                mAssistants.getAllowedComponents(userId));
+        mAssistants.setUserSet(userId, true);
+        mAssistants.setPackageOrComponentEnabled(current.flattenToString(), userId, true, false,
+                true);
+        assertTrue(mAssistants.mIsUserChanged.get(userId));
+        assertThat(mAssistants.getApproved(userId, true)).isEmpty();
+
+        writeXmlAndReload(userId);
+
+        ArrayMap<Boolean, ArraySet<String>> approved = mAssistants.mApproved.get(userId);
+        // approved should not be null
+        assertNotNull(approved);
+        assertEquals(new ArraySet<>(), approved.get(true));
+
+        // user set is maintained
+        assertTrue(mAssistants.mIsUserChanged.get(userId));
+        assertThat(mAssistants.getApproved(userId, true)).isEmpty();
     }
 
     @Test
@@ -599,5 +633,51 @@ public class NotificationAssistantsTest extends UiServiceTestCase {
         writeXmlAndReload(USER_ALL);
 
         assertThat(mAssistants.getUnsupportedAdjustments(userId).size()).isEqualTo(0);
+    }
+
+    @Test
+    @EnableFlags(android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION)
+    public void testDisallowAdjustmentType() {
+        mAssistants.disallowAdjustmentType(Adjustment.KEY_RANKING_SCORE);
+        assertThat(mAssistants.getAllowedAssistantAdjustments())
+                .doesNotContain(Adjustment.KEY_RANKING_SCORE);
+        assertThat(mAssistants.getAllowedAssistantAdjustments()).contains(Adjustment.KEY_TYPE);
+    }
+
+    @Test
+    @EnableFlags(android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION)
+    public void testAllowAdjustmentType() {
+        mAssistants.disallowAdjustmentType(Adjustment.KEY_RANKING_SCORE);
+        assertThat(mAssistants.getAllowedAssistantAdjustments())
+                .doesNotContain(Adjustment.KEY_RANKING_SCORE);
+        mAssistants.allowAdjustmentType(Adjustment.KEY_RANKING_SCORE);
+        assertThat(mAssistants.getAllowedAssistantAdjustments())
+                .contains(Adjustment.KEY_RANKING_SCORE);
+    }
+
+    @Test
+    @EnableFlags(android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION)
+    public void testDisallowAdjustmentType_readWriteXml_entries() throws Exception {
+        int userId = ActivityManager.getCurrentUser();
+
+        mAssistants.loadDefaultsFromConfig(true);
+        mAssistants.disallowAdjustmentType(KEY_IMPORTANCE);
+
+        writeXmlAndReload(USER_ALL);
+
+        assertThat(mAssistants.getAllowedAssistantAdjustments()).contains(
+                Adjustment.KEY_NOT_CONVERSATION);
+        assertThat(mAssistants.getAllowedAssistantAdjustments()).doesNotContain(
+                KEY_IMPORTANCE);
+    }
+
+    @Test
+    public void testDefaultAllowedAdjustments_readWriteXml_entries() throws Exception {
+        mAssistants.loadDefaultsFromConfig(true);
+
+        writeXmlAndReload(USER_ALL);
+
+        assertThat(mAssistants.getAllowedAssistantAdjustments())
+                .containsExactlyElementsIn(DEFAULT_ALLOWED_ADJUSTMENTS);
     }
 }

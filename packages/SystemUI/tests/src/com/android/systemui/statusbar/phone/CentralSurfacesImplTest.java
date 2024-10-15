@@ -170,6 +170,7 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.StatusBarStateControllerImpl;
 import com.android.systemui.statusbar.core.StatusBarInitializerImpl;
 import com.android.systemui.statusbar.core.StatusBarOrchestrator;
+import com.android.systemui.statusbar.core.StatusBarSimpleFragment;
 import com.android.systemui.statusbar.data.repository.FakeStatusBarModeRepository;
 import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
@@ -194,6 +195,7 @@ import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.UserInfoControllerImpl;
 import com.android.systemui.statusbar.window.StatusBarWindowController;
+import com.android.systemui.statusbar.window.StatusBarWindowControllerStore;
 import com.android.systemui.statusbar.window.StatusBarWindowStateController;
 import com.android.systemui.util.FakeEventLog;
 import com.android.systemui.util.WallpaperController;
@@ -292,6 +294,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Mock private KeyguardBypassController mKeyguardBypassController;
     @Mock private AutoHideController mAutoHideController;
     @Mock private StatusBarWindowController mStatusBarWindowController;
+    @Mock private StatusBarWindowControllerStore mStatusBarWindowControllerStore;
     @Mock private Provider<CollapsedStatusBarFragment> mCollapsedStatusBarFragmentProvider;
     @Mock private StatusBarWindowStateController mStatusBarWindowStateController;
     @Mock private Bubbles mBubbles;
@@ -383,6 +386,9 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
 
         when(mBubbles.canShowBubbleNotification()).thenReturn(true);
 
+        when(mStatusBarWindowControllerStore.getDefaultDisplay())
+                .thenReturn(mStatusBarWindowController);
+
         mVisualInterruptionDecisionProvider =
                 VisualInterruptionDecisionProviderTestUtil.INSTANCE.createProviderByFlag(
                         mAmbientDisplayConfiguration,
@@ -465,7 +471,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                     mKeyguardStateController,
                     mStatusBarStateController,
                     mStatusBarKeyguardViewManager,
-                    mStatusBarWindowController,
+                    mStatusBarWindowControllerStore,
                     mDeviceProvisionedController,
                     mNotificationShadeWindowController,
                     0,
@@ -507,10 +513,11 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 mLightBarController,
                 mAutoHideController,
                 new StatusBarInitializerImpl(
-                        mStatusBarWindowController,
+                        mContext.getDisplayId(),
+                        mStatusBarWindowControllerStore,
                         mCollapsedStatusBarFragmentProvider,
                         emptySet()),
-                mStatusBarWindowController,
+                mStatusBarWindowControllerStore,
                 mStatusBarWindowStateController,
                 new FakeStatusBarModeRepository(),
                 mKeyguardUpdateMonitor,
@@ -1149,6 +1156,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableFlags(StatusBarSimpleFragment.FLAG_NAME)
     public void bubbleBarVisibility() {
         createCentralSurfaces();
         mCentralSurfaces.onStatusBarWindowStateChanged(WINDOW_STATE_HIDDEN);

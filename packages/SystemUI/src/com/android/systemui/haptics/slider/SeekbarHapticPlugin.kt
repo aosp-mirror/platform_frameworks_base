@@ -46,12 +46,24 @@ constructor(
 
     private val velocityTracker = VelocityTracker.obtain()
 
+    private val dragVelocityProvider = SliderDragVelocityProvider {
+        velocityTracker.computeCurrentVelocity(
+            UNITS_SECOND,
+            sliderHapticFeedbackConfig.maxVelocityToScale,
+        )
+        if (velocityTracker.isAxisSupported(sliderHapticFeedbackConfig.velocityAxis)) {
+            velocityTracker.getAxisVelocity(sliderHapticFeedbackConfig.velocityAxis)
+        } else {
+            0f
+        }
+    }
+
     private val sliderEventProducer = SliderStateProducer()
 
     private val sliderHapticFeedbackProvider =
         SliderHapticFeedbackProvider(
             vibratorHelper,
-            velocityTracker,
+            dragVelocityProvider,
             sliderHapticFeedbackConfig,
             systemClock,
         )
@@ -188,5 +200,6 @@ constructor(
 
     companion object {
         const val KEY_UP_TIMEOUT = 60L
+        private const val UNITS_SECOND = 1000
     }
 }

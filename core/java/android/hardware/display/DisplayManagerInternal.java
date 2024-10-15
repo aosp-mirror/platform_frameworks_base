@@ -461,6 +461,16 @@ public abstract class DisplayManagerInternal {
     public abstract void stylusGestureStarted(long eventTime);
 
     /**
+     * Called by {@link com.android.server.wm.ContentRecorder} to verify whether
+     * the display is allowed to mirror primary display's content.
+     * @param displayId the id of the display where we mirror to.
+     * @return true if the mirroring dialog is confirmed (display is enabled), or
+     * {@link com.android.server.display.ExternalDisplayPolicy#ENABLE_ON_CONNECT}
+     * system property is enabled.
+     */
+    public abstract boolean isDisplayReadyForMirroring(int displayId);
+
+    /**
      * Describes the requested power state of the display.
      *
      * This object is intended to describe the general characteristics of the

@@ -265,7 +265,7 @@ public final class DisplayDeviceConfigTest {
                 mDisplayDeviceConfig.getPowerThrottlingConfigData();
         assertNotNull(powerThrottlingConfigData);
         assertEquals(0.1f, powerThrottlingConfigData.brightnessLowestCapAllowed, SMALL_DELTA);
-        assertEquals(15f, powerThrottlingConfigData.customAnimationRateSec, SMALL_DELTA);
+        assertEquals(15f, powerThrottlingConfigData.customAnimationRate, SMALL_DELTA);
         assertEquals(20000, powerThrottlingConfigData.pollingWindowMaxMillis);
         assertEquals(10000, powerThrottlingConfigData.pollingWindowMinMillis);
     }
@@ -1299,7 +1299,7 @@ public final class DisplayDeviceConfigTest {
     private String getPowerThrottlingConfig() {
         return  "<powerThrottlingConfig >\n"
                 +       "<brightnessLowestCapAllowed>0.1</brightnessLowestCapAllowed>\n"
-                +       "<customAnimationRateSec>15</customAnimationRateSec>\n"
+                +       "<customAnimationRate>15</customAnimationRate>\n"
                 +       "<pollingWindowMaxMillis>20000</pollingWindowMaxMillis>\n"
                 +       "<pollingWindowMinMillis>10000</pollingWindowMinMillis>\n"
                 +       "<powerThrottlingMap>\n"

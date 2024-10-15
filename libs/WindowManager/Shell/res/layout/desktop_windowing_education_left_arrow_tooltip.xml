@@ -26,6 +26,7 @@
         android:id="@+id/arrow_icon"
         android:layout_width="10dp"
         android:layout_height="12dp"
+        android:elevation="2dp"
         android:layout_gravity="center_vertical"
         android:src="@drawable/desktop_windowing_education_tooltip_left_arrow" />
 

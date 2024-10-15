@@ -38,10 +38,10 @@ class DistanceTracker(var startX: Float = 0f, var startY: Float = 0f) {
     }
 }
 
-sealed interface DistanceGestureState
+sealed class DistanceGestureState(val deltaX: Float, val deltaY: Float)
 
-class Started(val deltaX: Float, val deltaY: Float) : DistanceGestureState
+class Started(deltaX: Float, deltaY: Float) : DistanceGestureState(deltaX, deltaY)
 
-class Moving(val deltaX: Float, val deltaY: Float) : DistanceGestureState
+class Moving(deltaX: Float, deltaY: Float) : DistanceGestureState(deltaX, deltaY)
 
-class Finished(val deltaX: Float, val deltaY: Float) : DistanceGestureState
+class Finished(deltaX: Float, deltaY: Float) : DistanceGestureState(deltaX, deltaY)

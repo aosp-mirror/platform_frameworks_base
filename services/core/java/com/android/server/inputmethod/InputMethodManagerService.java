@@ -84,6 +84,7 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
+import android.hardware.display.DisplayManagerInternal;
 import android.hardware.input.InputManager;
 import android.inputmethodservice.InputMethodService;
 import android.inputmethodservice.InputMethodService.BackDispositionMode;
@@ -119,6 +120,7 @@ import android.util.Printer;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
+import android.view.Display;
 import android.view.InputChannel;
 import android.view.InputDevice;
 import android.view.MotionEvent;
@@ -185,7 +187,6 @@ import com.android.server.SystemService;
 import com.android.server.companion.virtual.VirtualDeviceManagerInternal;
 import com.android.server.input.InputManagerInternal;
 import com.android.server.inputmethod.InputMethodManagerInternal.InputMethodListListener;
-import com.android.server.inputmethod.InputMethodMenuControllerNew.MenuItem;
 import com.android.server.inputmethod.InputMethodSubtypeSwitchingController.ImeSubtypeListItem;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.statusbar.StatusBarManagerInternal;
@@ -448,6 +449,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     private AudioManagerInternal mAudioManagerInternal = null;
     @Nullable
     private VirtualDeviceManagerInternal mVdmInternal = null;
+    @Nullable
+    private DisplayManagerInternal mDisplayManagerInternal = null;
 
     // Mapping from deviceId to the device-specific imeId for that device.
     @GuardedBy("ImfLock.class")
@@ -2165,7 +2168,18 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         final var bindingController = getInputMethodBindingController(userId);
         final int oldDeviceId = bindingController.getDeviceIdToShowIme();
         final int displayIdToShowIme = bindingController.getDisplayIdToShowIme();
-        final int newDeviceId = mVdmInternal.getDeviceIdForDisplayId(displayIdToShowIme);
+        int newDeviceId = mVdmInternal.getDeviceIdForDisplayId(displayIdToShowIme);
+        if (newDeviceId != DEVICE_ID_DEFAULT) {
+            // Only show custom IME on trusted displays.
+            if (mDisplayManagerInternal == null) {
+                mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
+            }
+            int displayFlags = mDisplayManagerInternal.getDisplayInfo(displayIdToShowIme).flags;
+            if ((displayFlags & Display.FLAG_TRUSTED) != Display.FLAG_TRUSTED) {
+                // If the display is not trusted, fallback to the default device IME.
+                newDeviceId = DEVICE_ID_DEFAULT;
+            }
+        }
         bindingController.setDeviceIdToShowIme(newDeviceId);
         if (newDeviceId == DEVICE_ID_DEFAULT) {
             if (oldDeviceId == DEVICE_ID_DEFAULT) {
@@ -4063,65 +4077,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         }
     }
 
-    /**
-     * Gets the list of Input Method Switcher Menu items and the index of the selected item.
-     *
-     * @param items                the list of input method and subtype items.
-     * @param selectedImeId        the ID of the selected input method.
-     * @param selectedSubtypeIndex the index of the selected subtype in the input method's array of
-     *                             subtypes, or {@link InputMethodUtils#NOT_A_SUBTYPE_INDEX} if no
-     *                             subtype is selected.
-     * @param userId               the ID of the user for which to get the menu items.
-     * @return the list of menu items, and the index of the selected item,
-     * or {@code -1} if no item is selected.
-     */
-    @GuardedBy("ImfLock.class")
-    @NonNull
-    private Pair<List<MenuItem>, Integer> getInputMethodPickerItems(
-            @NonNull List<ImeSubtypeListItem> items, @Nullable String selectedImeId,
-            int selectedSubtypeIndex, @UserIdInt int userId) {
-        final var bindingController = getInputMethodBindingController(userId);
-        final var settings = InputMethodSettingsRepository.get(userId);
-
-        if (selectedSubtypeIndex == NOT_A_SUBTYPE_INDEX) {
-            // TODO(b/351124299): Check if this fallback logic is still necessary.
-            final var curSubtype = bindingController.getCurrentInputMethodSubtype();
-            if (curSubtype != null) {
-                final var curMethodId = bindingController.getSelectedMethodId();
-                final var curImi = settings.getMethodMap().get(curMethodId);
-                selectedSubtypeIndex = SubtypeUtils.getSubtypeIndexFromHashCode(
-                        curImi, curSubtype.hashCode());
-            }
-        }
-
-        // No item is selected by default. When we have a list of explicitly enabled
-        // subtypes, the implicit subtype is no longer listed. If the implicit one
-        // is still selected, no items will be shown as selected.
-        int selectedIndex = -1;
-        String prevImeId = null;
-        final var menuItems = new ArrayList<MenuItem>();
-        for (int i = 0; i < items.size(); i++) {
-            final var item = items.get(i);
-            final var imeId = item.mImi.getId();
-            if (imeId.equals(selectedImeId)) {
-                final int subtypeIndex = item.mSubtypeIndex;
-                // Check if this is the selected IME-subtype pair.
-                if ((subtypeIndex == 0 && selectedSubtypeIndex == NOT_A_SUBTYPE_INDEX)
-                        || subtypeIndex == NOT_A_SUBTYPE_INDEX
-                        || subtypeIndex == selectedSubtypeIndex) {
-                    selectedIndex = i;
-                }
-            }
-            final boolean hasHeader = !imeId.equals(prevImeId);
-            final boolean hasDivider = hasHeader && prevImeId != null;
-            prevImeId = imeId;
-            menuItems.add(new MenuItem(item.mImeName, item.mSubtypeName, item.mImi,
-                    item.mSubtypeIndex, hasHeader, hasDivider));
-        }
-
-        return new Pair<>(menuItems, selectedIndex);
-    }
-
     @IInputMethodManagerImpl.PermissionVerified(allOf = {
             Manifest.permission.INTERACT_ACROSS_USERS_FULL,
             Manifest.permission.WRITE_SECURE_SETTINGS})
@@ -4958,18 +4913,21 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                         + " preferredInputMethodSubtypeIndex=" + lastInputMethodSubtypeIndex);
             }
 
-            final var itemsAndIndex = getInputMethodPickerItems(imList,
-                    lastInputMethodId, lastInputMethodSubtypeIndex, userId);
-            final var menuItems = itemsAndIndex.first;
-            final int selectedIndex = itemsAndIndex.second;
-
-            if (selectedIndex == -1) {
-                Slog.w(TAG, "Switching menu shown with no item selected"
-                        + ", IME id: " + lastInputMethodId
-                        + ", subtype index: " + lastInputMethodSubtypeIndex);
+            int selectedSubtypeIndex = lastInputMethodSubtypeIndex;
+            if (selectedSubtypeIndex == NOT_A_SUBTYPE_INDEX) {
+                // TODO(b/351124299): Check if this fallback logic is still necessary.
+                final var bindingController = getInputMethodBindingController(userId);
+                final var curSubtype = bindingController.getCurrentInputMethodSubtype();
+                if (curSubtype != null) {
+                    final var curMethodId = bindingController.getSelectedMethodId();
+                    final var curImi = settings.getMethodMap().get(curMethodId);
+                    selectedSubtypeIndex = SubtypeUtils.getSubtypeIndexFromHashCode(
+                            curImi, curSubtype.hashCode());
+                }
             }
 
-            mMenuControllerNew.show(menuItems, selectedIndex, displayId, userId);
+            mMenuControllerNew.show(imList, lastInputMethodId, selectedSubtypeIndex, displayId,
+                    userId);
         } else {
             mMenuController.showInputMethodMenuLocked(showAuxSubtypes, displayId,
                     lastInputMethodId, lastInputMethodSubtypeIndex, imList, userId);

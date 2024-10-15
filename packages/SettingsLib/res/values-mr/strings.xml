@@ -690,8 +690,7 @@
     <string name="media_transfer_usb_audio_name" msgid="1789292056757821355">"USB ऑडिओ"</string>
     <string name="media_transfer_wired_device_mic_name" msgid="7417067197803840965">"माइक जॅक"</string>
     <string name="media_transfer_usb_device_mic_name" msgid="7171789543226269822">"USB मायक्रोफोन"</string>
-    <!-- no translation found for media_transfer_bt_device_mic_name (1870669402238687618) -->
-    <skip />
+    <string name="media_transfer_bt_device_mic_name" msgid="1870669402238687618">"BT मायक्रोफोन"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"सुरू करा"</string>
     <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"बंद करा"</string>
     <string name="carrier_network_change_mode" msgid="4257621815706644026">"वाहक नेटवर्क बदलत आहे"</string>

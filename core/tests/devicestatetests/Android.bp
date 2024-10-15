@@ -28,8 +28,10 @@ android_test {
     static_libs: [
         "androidx.test.ext.junit",
         "androidx.test.rules",
+        "flag-junit",
         "frameworks-base-testutils",
         "mockito-target-minus-junit4",
+        "platform-parametric-runner-lib",
         "platform-test-annotations",
         "truth",
     ],

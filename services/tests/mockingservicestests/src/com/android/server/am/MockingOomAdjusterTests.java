@@ -1540,7 +1540,8 @@ public class MockingOomAdjusterTests {
     public void testUpdateOomAdj_DoOne_Provider_Self() {
         ProcessRecord app = spy(makeDefaultProcessRecord(MOCKAPP_PID, MOCKAPP_UID,
                 MOCKAPP_PROCESSNAME, MOCKAPP_PACKAGENAME, false));
-        bindProvider(app, app, null, null, false);
+        final ContentProviderRecord cpr = createContentProviderRecord(app, null, false);
+        bindProvider(app, cpr);
         updateOomAdj(app);
 
         final int expectedAdj = mService.mConstants.USE_TIERED_CACHED_ADJ
@@ -1555,7 +1556,8 @@ public class MockingOomAdjusterTests {
                 MOCKAPP_PROCESSNAME, MOCKAPP_PACKAGENAME, false));
         ProcessRecord client = spy(makeDefaultProcessRecord(MOCKAPP2_PID, MOCKAPP2_UID,
                 MOCKAPP2_PROCESSNAME, MOCKAPP2_PACKAGENAME, false));
-        bindProvider(app, client, null, null, false);
+        final ContentProviderRecord cpr = createContentProviderRecord(app, null, false);
+        bindProvider(client, cpr);
         mProcessStateController.setTreatLikeActivity(client.mServices, true);
         setWakefulness(PowerManagerInternal.WAKEFULNESS_AWAKE);
         updateOomAdj(app, client);
@@ -1572,7 +1574,8 @@ public class MockingOomAdjusterTests {
                 MOCKAPP_PROCESSNAME, MOCKAPP_PACKAGENAME, false));
         ProcessRecord client = spy(makeDefaultProcessRecord(MOCKAPP2_PID, MOCKAPP2_UID,
                 MOCKAPP2_PROCESSNAME, MOCKAPP2_PACKAGENAME, false));
-        bindProvider(app, client, null, null, false);
+        final ContentProviderRecord cpr = createContentProviderRecord(app, null, false);
+        bindProvider(client, cpr);
         doReturn(PROCESS_STATE_TOP).when(mService.mAtmInternal).getTopProcessState();
         doReturn(client).when(mService).getTopApp();
         setWakefulness(PowerManagerInternal.WAKEFULNESS_AWAKE);
@@ -1590,7 +1593,8 @@ public class MockingOomAdjusterTests {
         ProcessRecord client = spy(makeDefaultProcessRecord(MOCKAPP2_PID, MOCKAPP2_UID,
                 MOCKAPP2_PROCESSNAME, MOCKAPP2_PACKAGENAME, false));
         mProcessStateController.setHasForegroundServices(client.mServices, true, 0, true);
-        bindProvider(app, client, null, null, false);
+        final ContentProviderRecord cpr = createContentProviderRecord(app, null, false);
+        bindProvider(client, cpr);
         setWakefulness(PowerManagerInternal.WAKEFULNESS_AWAKE);
         updateOomAdj(client, app);
 
@@ -1620,7 +1624,8 @@ public class MockingOomAdjusterTests {
 
         mProcessStateController.setHasForegroundServices(client.mServices, true,
                 FOREGROUND_SERVICE_TYPE_SHORT_SERVICE, false);
-        bindProvider(app, client, null, null, false);
+        final ContentProviderRecord cpr = createContentProviderRecord(app, null, false);
+        bindProvider(client, cpr);
         setWakefulness(PowerManagerInternal.WAKEFULNESS_AWAKE);
         updateOomAdj(client, app);
 
@@ -1642,7 +1647,8 @@ public class MockingOomAdjusterTests {
                 MOCKAPP_PROCESSNAME, MOCKAPP_PACKAGENAME, false));
         ProcessRecord client = spy(makeDefaultProcessRecord(MOCKAPP2_PID, MOCKAPP2_UID,
                 MOCKAPP2_PROCESSNAME, MOCKAPP2_PACKAGENAME, false));
-        bindProvider(app, client, null, null, true);
+        final ContentProviderRecord cpr = createContentProviderRecord(app, null, true);
+        bindProvider(client, cpr);
         setWakefulness(PowerManagerInternal.WAKEFULNESS_AWAKE);
         updateOomAdj(client, app);
 
@@ -1655,9 +1661,24 @@ public class MockingOomAdjusterTests {
     public void testUpdateOomAdj_DoOne_Provider_Retention() {
         ProcessRecord app = spy(makeDefaultProcessRecord(MOCKAPP_PID, MOCKAPP_UID,
                 MOCKAPP_PROCESSNAME, MOCKAPP_PACKAGENAME, false));
-        app.mProviders.setLastProviderTime(SystemClock.uptimeMillis());
+        ProcessRecord client = spy(makeDefaultProcessRecord(MOCKAPP2_PID, MOCKAPP2_UID,
+                MOCKAPP2_PROCESSNAME, MOCKAPP2_PACKAGENAME, false));
+        final String providerName = "aProvider";
+        // Go through the motions of binding a provider
+        final ContentProviderRecord cpr = createContentProviderRecord(app, providerName, false);
+        final ContentProviderConnection conn = bindProvider(client, cpr);
+        doReturn(PROCESS_STATE_TOP).when(mService.mAtmInternal).getTopProcessState();
+        doReturn(client).when(mService).getTopApp();
         setWakefulness(PowerManagerInternal.WAKEFULNESS_AWAKE);
-        updateOomAdj(app);
+        updateOomAdj(client, app);
+
+        assertProcStates(app, PROCESS_STATE_BOUND_TOP, FOREGROUND_APP_ADJ, SCHED_GROUP_DEFAULT);
+
+        unbindProvider(client, cpr, conn);
+        mProcessStateController.removePublishedProvider(app, providerName);
+        final long lastProviderTime = SystemClock.uptimeMillis();
+        mProcessStateController.setLastProviderTime(app, SystemClock.uptimeMillis());
+        updateOomAdj(client, app);
 
         assertProcStates(app, PROCESS_STATE_LAST_ACTIVITY, PREVIOUS_APP_ADJ,
                 SCHED_GROUP_BACKGROUND, "recent-provider");
@@ -1667,7 +1688,9 @@ public class MockingOomAdjusterTests {
         final ArgumentCaptor<Long> followUpTimeCaptor = ArgumentCaptor.forClass(Long.class);
         verify(mService.mHandler).sendEmptyMessageAtTime(eq(FOLLOW_UP_OOMADJUSTER_UPDATE_MSG),
                 followUpTimeCaptor.capture());
+
         mInjector.jumpUptimeAheadTo(followUpTimeCaptor.getValue());
+        setProcessesToLru(client, app);
         mProcessStateController.runFollowUpUpdate();
 
         final int expectedAdj = mService.mConstants.USE_TIERED_CACHED_ADJ
@@ -2019,7 +2042,8 @@ public class MockingOomAdjusterTests {
         bindService(app, client, null, null, 0, mock(IBinder.class));
         ProcessRecord client2 = spy(makeDefaultProcessRecord(MOCKAPP3_PID, MOCKAPP3_UID,
                 MOCKAPP3_PROCESSNAME, MOCKAPP3_PACKAGENAME, false));
-        bindProvider(client, client2, null, null, false);
+        final ContentProviderRecord cpr = createContentProviderRecord(client, null, false);
+        bindProvider(client2, cpr);
         mProcessStateController.setHasForegroundServices(client2.mServices, true, 0, true);
         setWakefulness(PowerManagerInternal.WAKEFULNESS_AWAKE);
         updateOomAdj(client, client2, app);
@@ -2039,7 +2063,8 @@ public class MockingOomAdjusterTests {
         bindService(app, client, null, null, 0, mock(IBinder.class));
         ProcessRecord client2 = spy(makeDefaultProcessRecord(MOCKAPP3_PID, MOCKAPP3_UID,
                 MOCKAPP3_PROCESSNAME, MOCKAPP3_PACKAGENAME, false));
-        bindProvider(client, client2, null, null, false);
+        final ContentProviderRecord cpr = createContentProviderRecord(client, null, false);
+        bindProvider(client2, cpr);
         mProcessStateController.setHasForegroundServices(client2.mServices, true, 0, true);
         bindService(client2, app, null, null, 0, mock(IBinder.class));
         setWakefulness(PowerManagerInternal.WAKEFULNESS_AWAKE);
@@ -2057,10 +2082,12 @@ public class MockingOomAdjusterTests {
                 MOCKAPP_PROCESSNAME, MOCKAPP_PACKAGENAME, false));
         ProcessRecord client = spy(makeDefaultProcessRecord(MOCKAPP2_PID, MOCKAPP2_UID,
                 MOCKAPP2_PROCESSNAME, MOCKAPP2_PACKAGENAME, false));
-        bindProvider(app, client, null, null, false);
+        final ContentProviderRecord cpr = createContentProviderRecord(app, null, false);
+        bindProvider(client, cpr);
         ProcessRecord client2 = spy(makeDefaultProcessRecord(MOCKAPP3_PID, MOCKAPP3_UID,
                 MOCKAPP3_PROCESSNAME, MOCKAPP3_PACKAGENAME, false));
-        bindProvider(client, client2, null, null, false);
+        final ContentProviderRecord cpr2 = createContentProviderRecord(client, null, false);
+        bindProvider(client2, cpr2);
         mProcessStateController.setHasForegroundServices(client2.mServices, true, 0, true);
         setWakefulness(PowerManagerInternal.WAKEFULNESS_AWAKE);
         updateOomAdj(client, client2, app);
@@ -2077,12 +2104,15 @@ public class MockingOomAdjusterTests {
                 MOCKAPP_PROCESSNAME, MOCKAPP_PACKAGENAME, false));
         ProcessRecord client = spy(makeDefaultProcessRecord(MOCKAPP2_PID, MOCKAPP2_UID,
                 MOCKAPP2_PROCESSNAME, MOCKAPP2_PACKAGENAME, false));
-        bindProvider(app, client, null, null, false);
+        final ContentProviderRecord cpr = createContentProviderRecord(app, null, false);
+        bindProvider(client, cpr);
         ProcessRecord client2 = spy(makeDefaultProcessRecord(MOCKAPP3_PID, MOCKAPP3_UID,
                 MOCKAPP3_PROCESSNAME, MOCKAPP3_PACKAGENAME, false));
-        bindProvider(client, client2, null, null, false);
+        final ContentProviderRecord cpr2 = createContentProviderRecord(client, null, false);
+        bindProvider(client2, cpr2);
         mProcessStateController.setHasForegroundServices(client2.mServices, true, 0, true);
-        bindProvider(client2, app, null, null, false);
+        final ContentProviderRecord cpr3 = createContentProviderRecord(client2, null, false);
+        bindProvider(app, cpr3);
         setWakefulness(PowerManagerInternal.WAKEFULNESS_AWAKE);
         updateOomAdj(app, client, client2);
 
@@ -2629,21 +2659,24 @@ public class MockingOomAdjusterTests {
                 MOCKAPP_PROCESSNAME, MOCKAPP_PACKAGENAME, false));
         ProcessRecord app2 = spy(makeDefaultProcessRecord(MOCKAPP2_PID, MOCKAPP2_UID,
                 MOCKAPP2_PROCESSNAME, MOCKAPP2_PACKAGENAME, false));
-        ContentProviderRecord cr = bindProvider(app, app2, null, null, false);
+        final ContentProviderRecord cpr = createContentProviderRecord(app, null, false);
+        bindProvider(app2, cpr);
         ProcessRecord app3 = spy(makeDefaultProcessRecord(MOCKAPP3_PID, MOCKAPP3_UID,
                 MOCKAPP3_PROCESSNAME, MOCKAPP3_PACKAGENAME, false));
-        bindProvider(app2, app3, null, null, false);
-        bindProvider(app3, app, null, null, false);
+        final ContentProviderRecord cpr2 = createContentProviderRecord(app2, null, false);
+        bindProvider(app3, cpr2);
+        final ContentProviderRecord cpr3 = createContentProviderRecord(app3, null, false);
+        bindProvider(app, cpr3);
         WindowProcessController wpc = app3.getWindowProcessController();
         doReturn(true).when(wpc).isHomeProcess();
         ProcessRecord app4 = spy(makeDefaultProcessRecord(MOCKAPP4_PID, MOCKAPP4_UID,
                 MOCKAPP4_PROCESSNAME, MOCKAPP4_PACKAGENAME, false));
         mProcessStateController.setHasOverlayUi(app4, true);
-        bindProvider(app, app4, cr, null, false);
+        bindProvider(app4, cpr);
         ProcessRecord app5 = spy(makeDefaultProcessRecord(MOCKAPP5_PID, MOCKAPP5_UID,
                 MOCKAPP5_PROCESSNAME, MOCKAPP5_PACKAGENAME, false));
         mProcessStateController.setHasForegroundServices(app5.mServices, true, 0, true);
-        bindProvider(app, app5, cr, null, false);
+        bindProvider(app5, cpr);
         setWakefulness(PowerManagerInternal.WAKEFULNESS_AWAKE);
         updateOomAdj(app, app2, app3, app4, app5);
 
@@ -3248,21 +3281,30 @@ public class MockingOomAdjusterTests {
         }
     }
 
-    private ContentProviderRecord bindProvider(ProcessRecord publisher, ProcessRecord client,
-            ContentProviderRecord record, String name, boolean hasExternalProviders) {
-        if (record == null) {
-            record = mock(ContentProviderRecord.class);
-            mProcessStateController.addPublishedProvider(publisher, name, record);
-            record.proc = publisher;
-            setFieldValue(ContentProviderRecord.class, record, "connections",
-                    new ArrayList<ContentProviderConnection>());
-            doReturn(hasExternalProviders).when(record).hasExternalProcessHandles();
-        }
+    private ContentProviderRecord createContentProviderRecord(ProcessRecord publisher, String name,
+            boolean hasExternalProviders) {
+        ContentProviderRecord record = mock(ContentProviderRecord.class);
+        mProcessStateController.addPublishedProvider(publisher, name, record);
+        record.proc = publisher;
+        setFieldValue(ContentProviderRecord.class, record, "connections",
+                new ArrayList<ContentProviderConnection>());
+        doReturn(hasExternalProviders).when(record).hasExternalProcessHandles();
+        return record;
+    }
+
+    private ContentProviderConnection bindProvider(ProcessRecord client,
+            ContentProviderRecord record) {
         ContentProviderConnection conn = spy(new ContentProviderConnection(record, client,
                 client.info.packageName, UserHandle.getUserId(client.uid)));
         record.connections.add(conn);
         mProcessStateController.addProviderConnection(client, conn);
-        return record;
+        return conn;
+    }
+
+    private void unbindProvider(ProcessRecord client, ContentProviderRecord record,
+            ContentProviderConnection conn) {
+        record.connections.remove(conn);
+        mProcessStateController.removeProviderConnection(client, conn);
     }
 
     @SuppressWarnings("GuardedBy")

@@ -16,16 +16,18 @@
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/tooltip_container"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
     android:background="@drawable/desktop_windowing_education_tooltip_background"
     android:orientation="horizontal"
+    android:elevation="2dp"
     android:padding="@dimen/desktop_windowing_education_tooltip_padding">
 
     <ImageView
         android:id="@+id/tooltip_icon"
         android:layout_width="32dp"
         android:layout_height="32dp"
+        android:layout_margin="8dp"
         android:layout_gravity="center_vertical"
         android:src="@drawable/app_handle_education_tooltip_icon" />
 
@@ -34,9 +36,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
-        android:layout_marginStart="2dp"
+        android:layout_marginHorizontal="8dp"
         android:lineHeight="20dp"
-        android:maxWidth="150dp"
+        android:maxWidth="220dp"
         android:textColor="@android:color/system_on_tertiary_container_light"
         android:textFontWeight="500"
         android:textSize="14sp" />

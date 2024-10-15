@@ -115,3 +115,10 @@ per-file OomKillRecord.java = file:/MEMORY_OWNERS
 # MessageQueue
 per-file MessageQueue.java = mfasheh@google.com, shayba@google.com
 per-file Message.java = mfasheh@google.com, shayba@google.com
+
+# Stats
+per-file IStatsBootstrapAtomService.aidl = file:/services/core/java/com/android/server/stats/OWNERS
+per-file StatsBootstrapAtom.aidl = file:/services/core/java/com/android/server/stats/OWNERS
+per-file StatsBootstrapAtomValue.aidl = file:/services/core/java/com/android/server/stats/OWNERS
+per-file StatsBootstrapAtomService.java = file:/services/core/java/com/android/server/stats/OWNERS
+per-file StatsServiceManager.java = file:/services/core/java/com/android/server/stats/OWNERS

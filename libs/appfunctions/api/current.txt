@@ -15,7 +15,8 @@ package com.google.android.appfunctions.sidecar {
   public abstract class AppFunctionService extends android.app.Service {
     ctor public AppFunctionService();
     method @NonNull public final android.os.IBinder onBind(@Nullable android.content.Intent);
-    method @MainThread public void onExecuteFunction(@NonNull com.google.android.appfunctions.sidecar.ExecuteAppFunctionRequest, @NonNull android.os.CancellationSignal, @NonNull java.util.function.Consumer<com.google.android.appfunctions.sidecar.ExecuteAppFunctionResponse>);
+    method @MainThread public void onExecuteFunction(@NonNull com.google.android.appfunctions.sidecar.ExecuteAppFunctionRequest, @NonNull String, @NonNull android.os.CancellationSignal, @NonNull java.util.function.Consumer<com.google.android.appfunctions.sidecar.ExecuteAppFunctionResponse>);
+    method @Deprecated @MainThread public void onExecuteFunction(@NonNull com.google.android.appfunctions.sidecar.ExecuteAppFunctionRequest, @NonNull android.os.CancellationSignal, @NonNull java.util.function.Consumer<com.google.android.appfunctions.sidecar.ExecuteAppFunctionResponse>);
     method @Deprecated @MainThread public void onExecuteFunction(@NonNull com.google.android.appfunctions.sidecar.ExecuteAppFunctionRequest, @NonNull java.util.function.Consumer<com.google.android.appfunctions.sidecar.ExecuteAppFunctionResponse>);
     field @NonNull public static final String BIND_APP_FUNCTION_SERVICE = "android.permission.BIND_APP_FUNCTION_SERVICE";
     field @NonNull public static final String SERVICE_INTERFACE = "android.app.appfunctions.AppFunctionService";

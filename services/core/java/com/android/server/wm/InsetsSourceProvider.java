@@ -384,16 +384,19 @@ class InsetsSourceProvider {
         }
         final boolean serverVisibleChanged = mServerVisible != isServerVisible;
         setServerVisible(isServerVisible);
-        final boolean positionChanged = updateInsetsControlPosition(windowState);
-        if (mControl != null && !positionChanged
-                // The insets hint would be updated if the position is changed. Here updates it for
-                // the possible change of the bounds or the server visibility.
-                && (updateInsetsHint()
-                        || serverVisibleChanged
-                                && android.view.inputmethod.Flags.refactorInsetsController())) {
-            // Only call notifyControlChanged here when the position is not changed. Otherwise, it
-            // is called or is scheduled to be called during updateInsetsControlPosition.
-            mStateController.notifyControlChanged(mControlTarget, this);
+        if (mControl != null) {
+            final boolean positionChanged = updateInsetsControlPosition(windowState);
+            if (!(positionChanged || mHasPendingPosition)
+                    // The insets hint would be updated while changing the position. Here updates it
+                    // for the possible change of the bounds or the server visibility.
+                    && (updateInsetsHint()
+                            || (android.view.inputmethod.Flags.refactorInsetsController()))
+                                    && serverVisibleChanged) {
+                // Only call notifyControlChanged here when the position hasn't been or won't be
+                // changed. Otherwise, it has been called or scheduled to be called during
+                // updateInsetsControlPosition.
+                mStateController.notifyControlChanged(mControlTarget, this);
+            }
         }
     }
 
@@ -409,6 +412,7 @@ class InsetsSourceProvider {
             mPosition.set(position.x, position.y);
             if (windowState != null && windowState.getWindowFrames().didFrameSizeChange()
                     && windowState.mWinAnimator.getShown() && mWindowContainer.okToDisplay()) {
+                mHasPendingPosition = true;
                 windowState.applyWithNextDraw(mSetControlPositionConsumer);
             } else {
                 Transaction t = mWindowContainer.getSyncTransaction();

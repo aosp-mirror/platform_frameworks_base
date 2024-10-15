@@ -65,8 +65,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.infra.AndroidFuture;
 import com.android.internal.util.DumpUtils;
 import com.android.server.SystemService.TargetUser;
-import com.android.server.appfunctions.RemoteServiceCaller.RunServiceCallCallback;
-import com.android.server.appfunctions.RemoteServiceCaller.ServiceUsageCompleteListener;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -233,6 +231,9 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
                                                 "Caller does not have permission to execute the"
                                                         + " appfunction",
                                                 /* extras= */ null));
+                                throw new SecurityException(
+                                        "Caller does not have permission to execute the"
+                                                + " appfunction");
                             }
                         })
                 .thenCompose(
@@ -380,7 +381,8 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
                                     runtimeMetadataSearchSession));
             AppFunctionRuntimeMetadata newMetadata =
                     new AppFunctionRuntimeMetadata.Builder(existingMetadata)
-                            .setEnabled(enabledState).build();
+                            .setEnabled(enabledState)
+                            .build();
             AppSearchBatchResult<String, Void> putDocumentBatchResult =
                     runtimeMetadataSearchSession
                             .put(
@@ -441,7 +443,7 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
                         targetUser,
                         mServiceConfig.getExecuteAppFunctionCancellationTimeoutMillis(),
                         cancellationSignal,
-                        RunAppFunctionServiceCallback.create(
+                        new RunAppFunctionServiceCallback(
                                 requestInternal,
                                 cancellationCallback,
                                 safeExecuteAppFunctionCallback),

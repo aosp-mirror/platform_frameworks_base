@@ -33,7 +33,6 @@ import static com.android.systemui.Flags.relockWithPowerButtonImmediately;
 import static com.android.systemui.Flags.statusBarSignalPolicyRefactor;
 import static com.android.systemui.charging.WirelessChargingAnimation.UNKNOWN_BATTERY_LEVEL;
 import static com.android.systemui.flags.Flags.SHORTCUT_LIST_SEARCH_LAYOUT;
-import static com.android.systemui.statusbar.NotificationLockscreenUserManager.PERMISSION_SELF;
 import static com.android.systemui.statusbar.StatusBarState.SHADE;
 
 import android.annotation.Nullable;
@@ -41,7 +40,6 @@ import android.app.ActivityOptions;
 import android.app.IWallpaperManager;
 import android.app.KeyguardManager;
 import android.app.Notification;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.StatusBarManager;
 import android.app.TaskInfo;
@@ -228,7 +226,7 @@ import com.android.systemui.statusbar.policy.ExtensionController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.UserInfoControllerImpl;
-import com.android.systemui.statusbar.window.StatusBarWindowController;
+import com.android.systemui.statusbar.window.StatusBarWindowControllerStore;
 import com.android.systemui.statusbar.window.StatusBarWindowStateController;
 import com.android.systemui.surfaceeffects.ripple.RippleShader.RippleShape;
 import com.android.systemui.util.DumpUtilsKt;
@@ -274,11 +272,6 @@ import javax.inject.Provider;
  */
 @SysUISingleton
 public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
-
-    private static final String BANNER_ACTION_CANCEL =
-            "com.android.systemui.statusbar.banner_action_cancel";
-    private static final String BANNER_ACTION_SETUP =
-            "com.android.systemui.statusbar.banner_action_setup";
 
     private static final int MSG_LAUNCH_TRANSITION_TIMEOUT = 1003;
     // 1020-1040 reserved for BaseStatusBar
@@ -379,7 +372,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     @WindowVisibleState private int mStatusBarWindowState = WINDOW_STATE_SHOWING;
     private final NotificationShadeWindowController mNotificationShadeWindowController;
     private final StatusBarInitializer mStatusBarInitializer;
-    private final StatusBarWindowController mStatusBarWindowController;
+    private final StatusBarWindowControllerStore mStatusBarWindowControllerStore;
     private final StatusBarModeRepositoryStore mStatusBarModeRepository;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @VisibleForTesting
@@ -617,7 +610,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             LightBarController lightBarController,
             AutoHideController autoHideController,
             StatusBarInitializer statusBarInitializer,
-            StatusBarWindowController statusBarWindowController,
+            StatusBarWindowControllerStore statusBarWindowControllerStore,
             StatusBarWindowStateController statusBarWindowStateController,
             StatusBarModeRepositoryStore statusBarModeRepository,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
@@ -723,7 +716,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mLightBarController = lightBarController;
         mAutoHideController = autoHideController;
         mStatusBarInitializer = statusBarInitializer;
-        mStatusBarWindowController = statusBarWindowController;
+        mStatusBarWindowControllerStore = statusBarWindowControllerStore;
         mStatusBarModeRepository = statusBarModeRepository;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mPulseExpansionHandler = pulseExpansionHandler;
@@ -962,12 +955,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                                 result.mImeWindowVis));
             }
         }
-
-        IntentFilter internalFilter = new IntentFilter();
-        internalFilter.addAction(BANNER_ACTION_CANCEL);
-        internalFilter.addAction(BANNER_ACTION_SETUP);
-        mContext.registerReceiver(mBannerActionBroadcastReceiver, internalFilter, PERMISSION_SELF,
-                null, Context.RECEIVER_EXPORTED_UNAUDITED);
 
         if (mWallpaperSupported) {
             IWallpaperManager wallpaperManager = IWallpaperManager.Stub.asInterface(
@@ -1907,7 +1894,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         // When the StatusBarSimpleFragment flag is enabled, this logic will be done in
         // StatusBarOrchestrator
         if (!StatusBarSimpleFragment.isEnabled()) {
-            mStatusBarWindowController.attach();
+            mStatusBarWindowControllerStore.getDefaultDisplay().attach();
         }
     }
 
@@ -2947,29 +2934,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     public boolean isDeviceInteractive() {
         return mDeviceInteractive;
     }
-
-    private final BroadcastReceiver mBannerActionBroadcastReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if (BANNER_ACTION_CANCEL.equals(action) || BANNER_ACTION_SETUP.equals(action)) {
-                NotificationManager noMan = (NotificationManager)
-                        mContext.getSystemService(Context.NOTIFICATION_SERVICE);
-                noMan.cancel(com.android.internal.messages.nano.SystemMessageProto.SystemMessage.
-                        NOTE_HIDDEN_NOTIFICATIONS);
-
-                Settings.Secure.putInt(mContext.getContentResolver(),
-                        Settings.Secure.SHOW_NOTE_ABOUT_NOTIFICATION_HIDING, 0);
-                if (BANNER_ACTION_SETUP.equals(action)) {
-                    mShadeController.animateCollapseShadeForced();
-                    mContext.startActivity(new Intent(Settings.ACTION_APP_NOTIFICATION_REDACTION)
-                            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-
-                    );
-                }
-            }
-        }
-    };
 
     @Override
     public void handleExternalShadeWindowTouch(MotionEvent event) {

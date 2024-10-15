@@ -61,9 +61,28 @@ public class SplitScreenConstants {
     @IntDef(prefix = {"SPLIT_POSITION_"}, value = {
             SPLIT_POSITION_UNDEFINED,
             SPLIT_POSITION_TOP_OR_LEFT,
-            SPLIT_POSITION_BOTTOM_OR_RIGHT
+            SPLIT_POSITION_BOTTOM_OR_RIGHT,
     })
     public @interface SplitPosition {
+    }
+
+    // These SPLIT_INDEX constants will be used in the same way as the above SPLIT_POSITION ints,
+    // but scalable to n apps. Eventually, SPLIT_POSITION can be deprecated and only the below
+    // will be used.
+    public static final int SPLIT_INDEX_UNDEFINED = -1;
+    public static final int SPLIT_INDEX_0 = 0;
+    public static final int SPLIT_INDEX_1 = 1;
+    public static final int SPLIT_INDEX_2 = 2;
+    public static final int SPLIT_INDEX_3 = 3;
+
+    @IntDef(prefix = {"SPLIT_INDEX_"}, value = {
+            SPLIT_INDEX_UNDEFINED,
+            SPLIT_INDEX_0,
+            SPLIT_INDEX_1,
+            SPLIT_INDEX_2,
+            SPLIT_INDEX_3
+    })
+    public @interface SplitIndex {
     }
 
     /**
@@ -170,7 +189,7 @@ public class SplitScreenConstants {
             SNAP_TO_NONE,
             SNAP_TO_START_AND_DISMISS,
             SNAP_TO_END_AND_DISMISS,
-            SNAP_TO_MINIMIZE
+            SNAP_TO_MINIMIZE,
     })
     public @interface SnapPosition {}
 

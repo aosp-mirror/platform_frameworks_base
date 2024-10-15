@@ -21,6 +21,7 @@ import static android.media.AudioManager.AUDIO_SESSION_ID_GENERATE;
 
 import static com.android.server.wm.ActivityInterceptorCallback.VIRTUAL_DEVICE_SERVICE_ORDERED_ID;
 
+import android.annotation.EnforcePermission;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -122,7 +123,6 @@ public class VirtualDeviceManagerService extends SystemService {
     private final CompanionDeviceManager.OnAssociationsChangedListener mCdmAssociationListener =
             new CompanionDeviceManager.OnAssociationsChangedListener() {
                 @Override
-                @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
                 public void onAssociationsChanged(@NonNull List<AssociationInfo> associations) {
                     syncVirtualDevicesToCdmAssociations(associations);
                 }
@@ -339,7 +339,6 @@ public class VirtualDeviceManagerService extends SystemService {
         return true;
     }
 
-    @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     private void syncVirtualDevicesToCdmAssociations(List<AssociationInfo> associations) {
         Set<VirtualDeviceImpl> virtualDevicesToRemove = new HashSet<>();
         synchronized (mVirtualDeviceManagerLock) {
@@ -382,7 +381,6 @@ public class VirtualDeviceManagerService extends SystemService {
         cdm.removeOnAssociationsChangedListener(mCdmAssociationListener);
     }
 
-    @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     void onCdmAssociationsChanged(List<AssociationInfo> associations) {
         ArrayMap<String, AssociationInfo> vdmAssociations = new ArrayMap<>();
         for (int i = 0; i < associations.size(); ++i) {
@@ -452,7 +450,7 @@ public class VirtualDeviceManagerService extends SystemService {
                     }
                 };
 
-        @android.annotation.EnforcePermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
+        @EnforcePermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
         @Override // Binder call
         public IVirtualDevice createVirtualDevice(
                 IBinder token,

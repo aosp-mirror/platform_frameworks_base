@@ -34,7 +34,7 @@ import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.phone.StatusBarContentInsetsChangedListener
 import com.android.systemui.statusbar.phone.StatusBarContentInsetsProvider
-import com.android.systemui.statusbar.window.StatusBarWindowController
+import com.android.systemui.statusbar.window.StatusBarWindowControllerStore
 import com.android.systemui.util.animation.AnimationUtil.Companion.frames
 import javax.inject.Inject
 import kotlin.math.roundToInt
@@ -44,8 +44,8 @@ import kotlin.math.roundToInt
  */
 class SystemEventChipAnimationController @Inject constructor(
     private val context: Context,
-    private val statusBarWindowController: StatusBarWindowController,
-    private val contentInsetsProvider: StatusBarContentInsetsProvider
+    private val statusBarWindowControllerStore: StatusBarWindowControllerStore,
+    private val contentInsetsProvider: StatusBarContentInsetsProvider,
 ) : SystemStatusAnimationCallback {
 
     private lateinit var animationWindowView: FrameLayout
@@ -244,7 +244,7 @@ class SystemEventChipAnimationController @Inject constructor(
         val height = themedContext.resources.getDimensionPixelSize(R.dimen.status_bar_height)
         val lp = FrameLayout.LayoutParams(MATCH_PARENT, height)
         lp.gravity = Gravity.END or Gravity.TOP
-        statusBarWindowController.addViewToWindow(animationWindowView, lp)
+        statusBarWindowControllerStore.defaultDisplay.addViewToWindow(animationWindowView, lp)
         animationWindowView.clipToPadding = false
         animationWindowView.clipChildren = false
 

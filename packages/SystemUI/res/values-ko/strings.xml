@@ -440,8 +440,7 @@
     <string name="zen_mode_on" msgid="9085304934016242591">"사용"</string>
     <string name="zen_mode_on_with_details" msgid="7416143430557895497">"켜짐 • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"사용 안함"</string>
-    <!-- no translation found for zen_mode_set_up (8231201163894922821) -->
-    <skip />
+    <string name="zen_mode_set_up" msgid="8231201163894922821">"설정되지 않음"</string>
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"설정에서 관리"</string>
     <string name="zen_mode_active_modes" msgid="1625850411578488856">"{count,plural, =0{활성화된 모드 없음}=1{{mode} 모드가 활성화됨}other{모드 #개가 활성화됨}}"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"알람, 알림, 일정 및 지정한 발신자로부터 받은 전화를 제외한 소리와 진동을 끕니다. 음악, 동영상, 게임 등 재생하도록 선택한 소리는 정상적으로 들립니다."</string>
@@ -673,6 +672,10 @@
     <string name="stream_notification_unavailable" msgid="4313854556205836435">"벨소리가 음소거되어 있으므로 사용할 수 없음"</string>
     <string name="stream_alarm_unavailable" msgid="4059817189292197839">"방해 금지 모드로 설정되어 있어 사용할 수 없음"</string>
     <string name="stream_media_unavailable" msgid="6823020894438959853">"방해 금지 모드로 설정되어 있어 사용할 수 없음"</string>
+    <!-- no translation found for stream_unavailable_by_modes (3674139029490353683) -->
+    <skip />
+    <!-- no translation found for stream_unavailable_by_unknown (6908434629318171588) -->
+    <skip />
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. 탭하여 음소거를 해제하세요."</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. 탭하여 진동으로 설정하세요. 접근성 서비스가 음소거될 수 있습니다."</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. 탭하여 음소거로 설정하세요. 접근성 서비스가 음소거될 수 있습니다."</string>
@@ -1406,38 +1409,26 @@
     <string name="launch_touchpad_tutorial_notification_content" msgid="7931085031240753226">"터치패드 동작 알아보기"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_title" msgid="1940023776496198762">"키보드와 터치패드를 사용하여 이동"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"터치패드 동작, 단축키 등 알아보기"</string>
-    <!-- no translation found for touchpad_tutorial_back_gesture_button (3104716365403620315) -->
-    <skip />
-    <!-- no translation found for touchpad_tutorial_home_gesture_button (8023973153559885624) -->
-    <skip />
+    <string name="touchpad_tutorial_back_gesture_button" msgid="3104716365403620315">"뒤로 이동"</string>
+    <string name="touchpad_tutorial_home_gesture_button" msgid="8023973153559885624">"홈으로 이동"</string>
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"최근 앱 보기"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"완료"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"뒤로"</string>
-    <!-- no translation found for touchpad_back_gesture_guidance (5352221087725906542) -->
-    <skip />
-    <!-- no translation found for touchpad_back_gesture_success_title (7370719098633023496) -->
-    <skip />
+    <string name="touchpad_back_gesture_guidance" msgid="5352221087725906542">"세 손가락을 사용해 터치패드에서 왼쪽 또는 오른쪽으로 스와이프하세요."</string>
+    <string name="touchpad_back_gesture_success_title" msgid="7370719098633023496">"훌륭합니다"</string>
     <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"돌아가기 동작을 완료했습니다."</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"홈으로 이동"</string>
-    <!-- no translation found for touchpad_home_gesture_guidance (4178219118381915899) -->
-    <skip />
-    <!-- no translation found for touchpad_home_gesture_success_title (3648264553645798470) -->
-    <skip />
-    <!-- no translation found for touchpad_home_gesture_success_body (2590690589194027059) -->
-    <skip />
+    <string name="touchpad_home_gesture_guidance" msgid="4178219118381915899">"세 손가락을 사용해 터치패드에서 위로 스와이프하세요."</string>
+    <string name="touchpad_home_gesture_success_title" msgid="3648264553645798470">"아주 좋습니다"</string>
+    <string name="touchpad_home_gesture_success_body" msgid="2590690589194027059">"홈으로 이동 동작을 완료했습니다."</string>
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"최근 앱 보기"</string>
-    <!-- no translation found for touchpad_recent_apps_gesture_guidance (6304446013842271822) -->
-    <skip />
+    <string name="touchpad_recent_apps_gesture_guidance" msgid="6304446013842271822">"세 손가락을 사용해 터치패드에서 위로 스와이프한 후 잠시 기다리세요."</string>
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"아주 좋습니다"</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"최근 앱 보기 동작을 완료했습니다."</string>
-    <!-- no translation found for tutorial_action_key_title (8172535792469008169) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_guidance (5040613427202799294) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_success_title (2371827347071979571) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_success_body (1688986269491357832) -->
-    <skip />
+    <string name="tutorial_action_key_title" msgid="8172535792469008169">"모든 앱 보기"</string>
+    <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"키보드의 작업 키를 누르세요."</string>
+    <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"잘하셨습니다"</string>
+    <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"모든 앱 보기 동작을 완료했습니다."</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"키보드 백라이트"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"%2$d단계 중 %1$d단계"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"홈 컨트롤"</string>

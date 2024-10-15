@@ -2768,7 +2768,8 @@ public class ComputerEngine implements Computer {
             enforceCrossUserPermission(Binder.getCallingUid(), userId, false, false,
                     !isRecentsAccessingChildProfiles(Binder.getCallingUid(), userId),
                     "MATCH_ANY_USER flag requires INTERACT_ACROSS_USERS permission");
-        } else if ((flags & PackageManager.MATCH_UNINSTALLED_PACKAGES) != 0
+        } else if (!Flags.removeCrossUserPermissionHack()
+                && (flags & PackageManager.MATCH_UNINSTALLED_PACKAGES) != 0
                 && isCallerSystemUser
                 && mUserManager.hasProfile(UserHandle.USER_SYSTEM)) {
             // If the caller wants all packages and has a profile associated with it,

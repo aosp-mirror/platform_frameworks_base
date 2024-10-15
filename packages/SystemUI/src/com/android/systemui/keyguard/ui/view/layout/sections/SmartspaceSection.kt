@@ -23,6 +23,7 @@ import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import androidx.constraintlayout.widget.Barrier
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
+import com.android.systemui.customization.R as customR
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController
 import com.android.systemui.keyguard.MigrateClocksToBlueprint
@@ -157,7 +158,7 @@ constructor(
                 connect(
                     sharedR.id.date_smartspace_view,
                     ConstraintSet.TOP,
-                    R.id.lockscreen_clock_view,
+                    customR.id.lockscreen_clock_view,
                     ConstraintSet.BOTTOM
                 )
                 connect(

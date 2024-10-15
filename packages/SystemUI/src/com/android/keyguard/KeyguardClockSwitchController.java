@@ -241,8 +241,10 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         mKeyguardSliceViewController.init();
 
         if (!MigrateClocksToBlueprint.isEnabled()) {
-            mSmallClockFrame = mView.findViewById(R.id.lockscreen_clock_view);
-            mLargeClockFrame = mView.findViewById(R.id.lockscreen_clock_view_large);
+            mSmallClockFrame = mView
+                .findViewById(com.android.systemui.customization.R.id.lockscreen_clock_view);
+            mLargeClockFrame = mView
+                .findViewById(com.android.systemui.customization.R.id.lockscreen_clock_view_large);
         }
 
         if (!mOnlyClock) {

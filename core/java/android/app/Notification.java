@@ -115,6 +115,7 @@ import com.android.internal.graphics.ColorUtils;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.ContrastColorUtil;
 import com.android.internal.util.NotificationBigTextNormalizer;
+import com.android.internal.widget.NotificationProgressModel;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -7318,11 +7319,15 @@ public class Notification implements Parcelable
          */
         @VisibleForTesting
         public static int ensureButtonFillContrast(int color, int bg) {
-            return isColorDark(bg)
-                    ? ContrastColorUtil.findContrastColorAgainstDark(color, bg, true, 1.3)
-                    : ContrastColorUtil.findContrastColor(color, bg, true, 1.3);
+            return ensureColorContrast(color, bg, 1.3);
         }
 
+
+        private static int ensureColorContrast(int color, int bg, double contrastRatio) {
+            return isColorDark(bg)
+                    ? ContrastColorUtil.findContrastColorAgainstDark(color, bg, true, contrastRatio)
+                    : ContrastColorUtil.findContrastColor(color, bg, true, contrastRatio);
+        }
 
         /**
          * @return Whether we are currently building a notification from a legacy (an app that
@@ -11291,7 +11296,11 @@ public class Notification implements Parcelable
          * @see Segment
          */
         public @NonNull ProgressStyle setProgressSegments(@NonNull List<Segment> progressSegments) {
-            mProgressSegments = new ArrayList<>(progressSegments.size());
+            if (mProgressSegments == null) {
+                mProgressSegments = new ArrayList<>();
+            }
+            mProgressSegments.clear();
+            mProgressSegments.addAll(progressSegments);
             return this;
         }
 
@@ -11657,6 +11666,7 @@ public class Notification implements Parcelable
             StandardTemplateParams p = mBuilder.mParams.reset()
                     .viewType(StandardTemplateParams.VIEW_TYPE_BIG)
                     .allowTextWithProgress(true)
+                    .hideProgress(true)
                     .fillTextsFrom(mBuilder);
 
             // Replace the text with the big text, but only if the big text is not empty.
@@ -11678,10 +11688,28 @@ public class Notification implements Parcelable
                 contentView.setViewVisibility(R.id.notification_progress_end_icon, View.GONE);
             }
 
+            contentView.setViewVisibility(R.id.progress, View.VISIBLE);
+
+            final int backgroundColor = mBuilder.getColors(p).getBackgroundColor();
+            final int defaultProgressColor = mBuilder.getPrimaryAccentColor(p);
+            final NotificationProgressModel model = createProgressModel(
+                    defaultProgressColor, backgroundColor);
+            contentView.setBundle(R.id.progress,
+                    "setProgressModel", model.toBundle());
+
+            if (mTrackerIcon != null) {
+                contentView.setIcon(R.id.progress,
+                        "setProgressTrackerIcon",
+                        mTrackerIcon);
+            }
+
             return contentView;
         }
 
-        private static @NonNull ArrayList<Bundle> getProgressSegmentsAsBundleList(
+        /**
+         * @hide
+         */
+        public static @NonNull ArrayList<Bundle> getProgressSegmentsAsBundleList(
                 @Nullable List<Segment> progressSegments) {
             final ArrayList<Bundle> segments = new ArrayList<>();
             if (progressSegments != null && !progressSegments.isEmpty()) {
@@ -11703,7 +11731,10 @@ public class Notification implements Parcelable
             return segments;
         }
 
-        private static @NonNull List<Segment> getProgressSegmentsFromBundleList(
+        /**
+         * @hide
+         */
+        public  static @NonNull List<Segment> getProgressSegmentsFromBundleList(
                 @Nullable List<Bundle> segmentBundleList) {
             final ArrayList<Segment> segments = new ArrayList<>();
             if (segmentBundleList != null && !segmentBundleList.isEmpty()) {
@@ -11726,8 +11757,10 @@ public class Notification implements Parcelable
 
             return segments;
         }
-
-        private static @NonNull ArrayList<Bundle> getProgressPointsAsBundleList(
+        /**
+         * @hide
+         */
+        public static @NonNull ArrayList<Bundle> getProgressPointsAsBundleList(
                 @Nullable List<Point> progressPoints) {
             final ArrayList<Bundle> points = new ArrayList<>();
             if (progressPoints != null && !progressPoints.isEmpty()) {
@@ -11749,7 +11782,10 @@ public class Notification implements Parcelable
             return points;
         }
 
-        private static @NonNull List<Point> getProgressPointsFromBundleList(
+        /**
+         * @hide
+         */
+        public static @NonNull List<Point> getProgressPointsFromBundleList(
                 @Nullable List<Bundle> pointBundleList) {
             final ArrayList<Point> points = new ArrayList<>();
 
@@ -11769,6 +11805,78 @@ public class Notification implements Parcelable
             }
 
             return points;
+        }
+
+        @NonNull
+        private NotificationProgressModel createProgressModel(int defaultProgressColor,
+                int backgroundColor) {
+            final NotificationProgressModel model;
+            if (mIndeterminate) {
+                final int indeterminateColor;
+                if (!mProgressSegments.isEmpty()) {
+                    indeterminateColor = mProgressSegments.get(0).mColor;
+                } else {
+                    indeterminateColor = defaultProgressColor;
+                }
+
+                model = new NotificationProgressModel(
+                        sanitizeProgressColor(indeterminateColor,
+                                backgroundColor, defaultProgressColor));
+            } else {
+
+                // Ensure segment color contrasts.
+                final List<Segment> segments = new ArrayList<>();
+                for (Segment segment : mProgressSegments) {
+                    segments.add(sanitizeSegment(segment, backgroundColor,
+                            defaultProgressColor));
+                }
+
+                // Create default segment when no segments are provided.
+                if (segments.isEmpty()) {
+                    segments.add(sanitizeSegment(new Segment(100), backgroundColor,
+                            defaultProgressColor));
+                }
+
+                // Ensure point color contrasts.
+                final List<Point> points = new ArrayList<>();
+                for (Point point : mProgressPoints) {
+                    points.add(sanitizePoint(point, backgroundColor, defaultProgressColor));
+                }
+
+                model = new NotificationProgressModel(segments, points,
+                        mProgress, mIsStyledByProgress);
+            }
+            return model;
+        }
+
+        private Segment sanitizeSegment(@NonNull Segment segment,
+                @ColorInt int bg,
+                @ColorInt int defaultColor) {
+            return new Segment(segment.getLength())
+                    .setId(segment.getId())
+                    .setColor(sanitizeProgressColor(segment.getColor(), bg, defaultColor));
+        }
+
+        private Point sanitizePoint(@NonNull Point point,
+                @ColorInt int bg,
+                @ColorInt int defaultColor) {
+            return new Point(point.getPosition()).setId(point.getId())
+                    .setColor(sanitizeProgressColor(point.getColor(), bg, defaultColor));
+        }
+
+        /**
+         * Finds steps and points fill color with sufficient contrast over bg (1.3:1) that
+         * has the same hue as the original color, but is lightened or darkened depending on
+         * whether the background is dark or light.
+         *
+         */
+        private int sanitizeProgressColor(@ColorInt int color,
+                @ColorInt int bg,
+                @ColorInt int defaultColor) {
+            return Builder.ensureColorContrast(
+                    Color.alpha(color) == 0 ? defaultColor : color,
+                    bg,
+                    1.3);
         }
 
         /**

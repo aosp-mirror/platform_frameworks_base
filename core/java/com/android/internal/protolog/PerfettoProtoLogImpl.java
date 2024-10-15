@@ -218,6 +218,22 @@ public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProto
         // NOTE: Registering that datasource is an async operation, so there may be no data traced
         // for some messages logged right after the construction of this class.
         mDataSource.register(params);
+
+        if (viewerConfigInputStreamProvider == null && viewerConfigFilePath != null) {
+            viewerConfigInputStreamProvider = new ViewerConfigInputStreamProvider() {
+                @NonNull
+                @Override
+                public ProtoInputStream getInputStream() {
+                    try {
+                        return new ProtoInputStream(new FileInputStream(viewerConfigFilePath));
+                    } catch (FileNotFoundException e) {
+                        throw new RuntimeException(
+                                "Failed to load viewer config file " + viewerConfigFilePath, e);
+                    }
+                }
+            };
+        }
+
         this.mViewerConfigInputStreamProvider = viewerConfigInputStreamProvider;
         this.mViewerConfigReader = viewerConfigReader;
         this.mCacheUpdater = cacheUpdater;

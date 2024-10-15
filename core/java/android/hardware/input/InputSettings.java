@@ -24,6 +24,8 @@ import static com.android.hardware.input.Flags.keyboardA11yBounceKeysFlag;
 import static com.android.hardware.input.Flags.keyboardA11ySlowKeysFlag;
 import static com.android.hardware.input.Flags.keyboardA11yStickyKeysFlag;
 import static com.android.hardware.input.Flags.keyboardA11yMouseKeys;
+import static com.android.hardware.input.Flags.mouseReverseVerticalScrolling;
+import static com.android.hardware.input.Flags.mouseSwapPrimaryButton;
 import static com.android.hardware.input.Flags.touchpadTapDragging;
 import static com.android.hardware.input.Flags.touchpadVisualizer;
 import static com.android.input.flags.Flags.enableInputFilterRustImpl;
@@ -363,6 +365,22 @@ public class InputSettings {
     }
 
     /**
+     * Returns true if the feature flag for mouse reverse vertical scrolling is enabled.
+     * @hide
+     */
+    public static boolean isMouseReverseVerticalScrollingFeatureFlagEnabled() {
+        return mouseReverseVerticalScrolling();
+    }
+
+    /**
+     * Returns true if the feature flag for mouse swap primary button is enabled.
+     * @hide
+     */
+    public static boolean isMouseSwapPrimaryButtonFeatureFlagEnabled() {
+        return mouseSwapPrimaryButton();
+    }
+
+    /**
      * Returns true if the touchpad visualizer is allowed to appear.
      *
      * @param context The application context.
@@ -498,6 +516,86 @@ public class InputSettings {
      */
     public static boolean isStylusPointerIconEnabled(@NonNull Context context) {
         return isStylusPointerIconEnabled(context, false /* forceReloadSetting */);
+    }
+
+    /**
+     * Whether mouse vertical scrolling is enabled, this applies only to connected mice.
+     *
+     * @param context The application context.
+     * @return Whether the mouse will have its vertical scrolling reversed
+     * (scroll down to move up).
+     *
+     * @hide
+     */
+    public static boolean isMouseReverseVerticalScrollingEnabled(@NonNull Context context) {
+        if (!isMouseReverseVerticalScrollingFeatureFlagEnabled()) {
+            return false;
+        }
+
+        return Settings.System.getIntForUser(context.getContentResolver(),
+                Settings.System.MOUSE_REVERSE_VERTICAL_SCROLLING, 0, UserHandle.USER_CURRENT)
+                != 0;
+    }
+
+    /**
+     * Sets whether the connected mouse will have its vertical scrolling reversed.
+     *
+     * @param context The application context.
+     * @param reverseScrolling Whether reverse scrolling is enabled.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.WRITE_SETTINGS)
+    public static void setMouseReverseVerticalScrolling(@NonNull Context context,
+            boolean reverseScrolling) {
+        if (!isMouseReverseVerticalScrollingFeatureFlagEnabled()) {
+            return;
+        }
+
+        Settings.System.putIntForUser(context.getContentResolver(),
+                Settings.System.MOUSE_REVERSE_VERTICAL_SCROLLING, reverseScrolling ? 1 : 0,
+                UserHandle.USER_CURRENT);
+    }
+
+    /**
+     * Whether the primary mouse button is swapped on connected mice.
+     *
+     * @param context The application context.
+     * @return Whether mice will have their primary buttons swapped, so that left clicking will
+     * perform the secondary action (e.g. show menu) and right clicking will perform the primary
+     * action.
+     *
+     * @hide
+     */
+    public static boolean isMouseSwapPrimaryButtonEnabled(@NonNull Context context) {
+        if (!isMouseSwapPrimaryButtonFeatureFlagEnabled()) {
+            return false;
+        }
+
+        return Settings.System.getIntForUser(context.getContentResolver(),
+                Settings.System.MOUSE_SWAP_PRIMARY_BUTTON, 0, UserHandle.USER_CURRENT)
+                != 0;
+    }
+
+    /**
+     * Sets whether mice will have their primary buttons swapped between left and right
+     * clicks.
+     *
+     * @param context The application context.
+     * @param swapPrimaryButton Whether swapping the primary button is enabled.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.WRITE_SETTINGS)
+    public static void setMouseSwapPrimaryButton(@NonNull Context context,
+            boolean swapPrimaryButton) {
+        if (!isMouseSwapPrimaryButtonFeatureFlagEnabled()) {
+            return;
+        }
+
+        Settings.System.putIntForUser(context.getContentResolver(),
+                Settings.System.MOUSE_SWAP_PRIMARY_BUTTON, swapPrimaryButton ? 1 : 0,
+                UserHandle.USER_CURRENT);
     }
 
     /**

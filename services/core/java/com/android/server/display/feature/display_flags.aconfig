@@ -367,11 +367,33 @@ flag {
 }
 
 flag {
+    name: "enable_waiting_confirmation_before_mirroring"
+    namespace: "display_manager"
+    description: "Allow ContentRecorder checking whether user confirmed mirroring after boot"
+    bug: "361698995"
+    is_fixed_read_only: true
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "enable_battery_stats_for_all_displays"
     namespace: "display_manager"
     description: "Flag to enable battery stats for all displays."
     bug: "366112793"
     is_fixed_read_only: true
+}
+
+flag {
+    name: "enable_apply_display_changed_during_display_added"
+    namespace: "display_manager"
+    description: "Apply display changes after display added"
+    bug: "368131655"
+    is_fixed_read_only: true
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
 }
 
 flag {
@@ -391,4 +413,12 @@ flag {
     metadata {
       purpose: PURPOSE_BUGFIX
     }
+}
+
+flag {
+    name: "enable_has_arr_support"
+    namespace: "core_graphics"
+    description: "Flag for an API to get whether display supports ARR or not"
+    bug: "361433651"
+    is_fixed_read_only: true
 }

@@ -335,7 +335,11 @@ public class RavenwoodRuntimeEnvironmentController {
         }
         android.os.Process.reset$ravenwood();
 
-        ResourcesManager.setInstance(null); // Better structure needed.
+        try {
+            ResourcesManager.setInstance(null); // Better structure needed.
+        } catch (Exception e) {
+            // AOSP-CHANGE: AOSP doesn't support resources yet.
+        }
 
         if (ENABLE_UNCAUGHT_EXCEPTION_DETECTION) {
             maybeThrowPendingUncaughtException(true);

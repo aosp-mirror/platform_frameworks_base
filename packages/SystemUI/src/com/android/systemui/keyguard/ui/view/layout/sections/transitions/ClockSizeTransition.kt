@@ -29,6 +29,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver.OnPreDrawListener
 import com.android.app.animation.Interpolators
+import com.android.systemui.customization.R as customR
 import com.android.systemui.keyguard.ui.view.layout.blueprints.transitions.IntraBlueprintTransition
 import com.android.systemui.keyguard.ui.view.layout.blueprints.transitions.IntraBlueprintTransition.Type
 import com.android.systemui.keyguard.ui.view.layout.sections.transitions.ClockSizeTransition.SmartspaceMoveTransition.Companion.STATUS_AREA_MOVE_DOWN_MILLIS
@@ -242,11 +243,11 @@ class ClockSizeTransition(
                 }
                     ?: run {
                         Log.e(TAG, "No large clock set, falling back")
-                        addTarget(R.id.lockscreen_clock_view_large)
+                        addTarget(customR.id.lockscreen_clock_view_large)
                     }
             } else {
                 if (DEBUG) Log.i(TAG, "Adding small clock")
-                addTarget(R.id.lockscreen_clock_view)
+                addTarget(customR.id.lockscreen_clock_view)
             }
         }
 

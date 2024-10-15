@@ -232,6 +232,13 @@ flag {
 }
 
 flag {
+  name: "sync_on_op_noted_api"
+  namespace: "permissions"
+  description: "New setOnOpNotedCallback API to allow subscribing to only sync ops."
+  bug: "372910217"
+}
+
+flag {
     name: "wallet_role_icon_property_enabled"
     is_exported: true
     namespace: "wallet_integration"
@@ -254,4 +261,15 @@ flag {
     namespace: "android_health_services"
     description: "This fixed read-only flag is used to enable replacing permission BODY_SENSORS (and BODY_SENSORS_BACKGROUND) with granular health permission READ_HEART_RATE (and READ_HEALTH_DATA_IN_BACKGROUND)"
     bug: "364638912"
+}
+
+flag {
+    name: "delay_uid_state_changes_from_capability_updates"
+    is_fixed_read_only: true
+    namespace: "permissions"
+    description: "If proc state is decreasing over the restriction threshold and capability is changed, delay if no new capabilities are added"
+    bug: "347891382"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }

@@ -18,7 +18,6 @@ package com.android.systemui.statusbar.core
 import android.app.Fragment
 import androidx.annotation.VisibleForTesting
 import com.android.systemui.CoreStartable
-import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.fragments.FragmentHostManager
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.core.StatusBarInitializer.OnStatusBarViewInitializedListener
@@ -27,9 +26,11 @@ import com.android.systemui.statusbar.phone.PhoneStatusBarTransitions
 import com.android.systemui.statusbar.phone.PhoneStatusBarViewController
 import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragment
 import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentComponent
-import com.android.systemui.statusbar.window.StatusBarWindowController
+import com.android.systemui.statusbar.window.StatusBarWindowControllerStore
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import java.lang.IllegalStateException
-import javax.inject.Inject
 import javax.inject.Provider
 
 /**
@@ -65,13 +66,17 @@ interface StatusBarInitializer {
             statusBarTransitions: PhoneStatusBarTransitions,
         )
     }
+
+    interface Factory {
+        fun create(displayId: Int): StatusBarInitializer
+    }
 }
 
-@SysUISingleton
 class StatusBarInitializerImpl
-@Inject
+@AssistedInject
 constructor(
-    private val windowController: StatusBarWindowController,
+    @Assisted private val displayId: Int,
+    private val statusBarWindowControllerStore: StatusBarWindowControllerStore,
     private val collapsedStatusBarFragmentProvider: Provider<CollapsedStatusBarFragment>,
     private val creationListeners: Set<@JvmSuppressWildcards OnStatusBarViewInitializedListener>,
 ) : CoreStartable, StatusBarInitializer {
@@ -106,7 +111,7 @@ constructor(
 
     private fun doStart() {
         initialized = true
-        windowController.fragmentHostManager
+        statusBarWindowControllerStore.defaultDisplay.fragmentHostManager
             .addTagListener(
                 CollapsedStatusBarFragment.TAG,
                 object : FragmentHostManager.FragmentListener {
@@ -136,5 +141,10 @@ constructor(
                 CollapsedStatusBarFragment.TAG,
             )
             .commit()
+    }
+
+    @AssistedFactory
+    interface Factory : StatusBarInitializer.Factory {
+        override fun create(displayId: Int): StatusBarInitializerImpl
     }
 }

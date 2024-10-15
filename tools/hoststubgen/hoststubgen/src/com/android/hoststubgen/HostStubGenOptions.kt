@@ -100,7 +100,7 @@ class HostStubGenOptions(
         var defaultClassLoadHook: SetOnce<String?> = SetOnce(null),
         var defaultMethodCallHook: SetOnce<String?> = SetOnce(null),
 
-        var policyOverrideFile: SetOnce<String?> = SetOnce(null),
+        var policyOverrideFiles: MutableList<String> = mutableListOf(),
 
         var defaultPolicy: SetOnce<FilterPolicy> = SetOnce(FilterPolicy.Remove),
 
@@ -164,7 +164,7 @@ class HostStubGenOptions(
                         "--out-jar", "--out-impl-jar" -> ret.outJar.set(nextArg())
 
                         "--policy-override-file" ->
-                            ret.policyOverrideFile.set(nextArg())!!.ensureFileExists()
+                            ret.policyOverrideFiles.add(nextArg().ensureFileExists())
 
                         "--clean-up-on-error" -> ret.cleanUpOnError.set(true)
                         "--no-clean-up-on-error" -> ret.cleanUpOnError.set(false)
@@ -291,7 +291,7 @@ class HostStubGenOptions(
               annotationAllowedClassesFile=$annotationAllowedClassesFile,
               defaultClassLoadHook=$defaultClassLoadHook,
               defaultMethodCallHook=$defaultMethodCallHook,
-              policyOverrideFile=$policyOverrideFile,
+              policyOverrideFiles=${policyOverrideFiles.toTypedArray().contentToString()},
               defaultPolicy=$defaultPolicy,
               cleanUpOnError=$cleanUpOnError,
               enableClassChecker=$enableClassChecker,

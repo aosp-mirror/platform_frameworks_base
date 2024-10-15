@@ -34,9 +34,11 @@ import java.lang.annotation.RetentionPolicy;
 public abstract class UsbManagerInternal {
 
   public static final int OS_USB_DISABLE_REASON_AAPM = 0;
+  public static final int OS_USB_DISABLE_REASON_LOCKDOWN_MODE = 1;
 
   @Retention(RetentionPolicy.SOURCE)
-  @IntDef(value = {OS_USB_DISABLE_REASON_AAPM})
+  @IntDef(value = {OS_USB_DISABLE_REASON_AAPM,
+    OS_USB_DISABLE_REASON_LOCKDOWN_MODE})
   public @interface OsUsbDisableReason {
   }
 

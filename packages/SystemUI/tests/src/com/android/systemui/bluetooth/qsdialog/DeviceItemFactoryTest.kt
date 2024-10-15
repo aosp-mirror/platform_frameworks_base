@@ -133,8 +133,8 @@ class DeviceItemFactoryTest : SysuiTestCase() {
 
     @Test
     fun testAvailableAudioSharingMediaDeviceItemFactory_isFilterMatched_flagOff_returnsFalse() {
-         // Flags.FLAG_ENABLE_LE_AUDIO_SHARING off or the device doesn't support broadcast
-         // source or assistant.
+        // Flags.FLAG_ENABLE_LE_AUDIO_SHARING off or the device doesn't support broadcast
+        // source or assistant.
         `when`(BluetoothUtils.isAudioSharingEnabled()).thenReturn(false)
 
         assertThat(
@@ -145,9 +145,9 @@ class DeviceItemFactoryTest : SysuiTestCase() {
     }
 
     @Test
-    fun testAvailableAudioSharingMediaDeviceItemFactory_isFilterMatched_isActiveDevice_returnsFalse() {
-         // Flags.FLAG_ENABLE_LE_AUDIO_SHARING on and the device support broadcast source and
-         // assistant.
+    fun testAvailableAudioSharingMediaDeviceItemFactory_isFilterMatched_isActiveDevice_false() {
+        // Flags.FLAG_ENABLE_LE_AUDIO_SHARING on and the device support broadcast source and
+        // assistant.
         `when`(BluetoothUtils.isAudioSharingEnabled()).thenReturn(true)
         `when`(BluetoothUtils.isActiveMediaDevice(any())).thenReturn(true)
 
@@ -159,9 +159,9 @@ class DeviceItemFactoryTest : SysuiTestCase() {
     }
 
     @Test
-    fun testAvailableAudioSharingMediaDeviceItemFactory_isFilterMatched_isNotAvailable_returnsFalse() {
-         // Flags.FLAG_ENABLE_LE_AUDIO_SHARING on and the device support broadcast source and
-         // assistant.
+    fun testAvailableAudioSharingMediaDeviceItemFactory_isFilterMatched_isNotAvailable_false() {
+        // Flags.FLAG_ENABLE_LE_AUDIO_SHARING on and the device support broadcast source and
+        // assistant.
         `when`(BluetoothUtils.isAudioSharingEnabled()).thenReturn(true)
         `when`(BluetoothUtils.isActiveMediaDevice(any())).thenReturn(false)
         `when`(BluetoothUtils.isAvailableMediaBluetoothDevice(any(), any())).thenReturn(true)
@@ -177,8 +177,8 @@ class DeviceItemFactoryTest : SysuiTestCase() {
 
     @Test
     fun testAvailableAudioSharingMediaDeviceItemFactory_isFilterMatched_returnsTrue() {
-         // Flags.FLAG_ENABLE_LE_AUDIO_SHARING on and the device support broadcast source and
-         // assistant.
+        // Flags.FLAG_ENABLE_LE_AUDIO_SHARING on and the device support broadcast source and
+        // assistant.
         `when`(BluetoothUtils.isAudioSharingEnabled()).thenReturn(true)
         `when`(BluetoothUtils.isActiveMediaDevice(any())).thenReturn(false)
         `when`(BluetoothUtils.isAvailableMediaBluetoothDevice(any(), any())).thenReturn(true)

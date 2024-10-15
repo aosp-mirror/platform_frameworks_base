@@ -264,6 +264,13 @@ public class AppOpsManager {
     private static @Nullable OnOpNotedCallback sOnOpNotedCallback;
 
     /**
+     * Whether OP_NOTED_CALLBACK_FLAG_IGNORE_ASYNC was set when sOnOpNotedCallback was registered
+     * last time.
+     */
+    @GuardedBy("sLock")
+    private static boolean sIgnoreAsyncNotedCallback;
+
+    /**
      * Sync note-ops collected from {@link #readAndLogNotedAppops(Parcel)} that have not been
      * delivered to a callback yet.
      *
@@ -10111,6 +10118,22 @@ public class AppOpsManager {
     private static final int COLLECT_SYNC = 2;
     private static final int COLLECT_ASYNC = 3;
 
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(flag = true, prefix = { "OP_NOTED_CALLBACK_FLAG_" }, value = {
+            OP_NOTED_CALLBACK_FLAG_IGNORE_ASYNC,
+    })
+    private @interface OpNotedCallbackFlags {}
+
+    /**
+     * Ignores async op noted events.
+     *
+     * @see #setOnOpNotedCallback
+     */
+    @FlaggedApi(android.permission.flags.Flags.FLAG_SYNC_ON_OP_NOTED_API)
+    public static final int OP_NOTED_CALLBACK_FLAG_IGNORE_ASYNC = 1;
+    private static final int OP_NOTED_CALLBACK_FLAG_ALL = OP_NOTED_CALLBACK_FLAG_IGNORE_ASYNC;
+
     /**
      * Mark an app-op as noted.
      */
@@ -10256,6 +10279,12 @@ public class AppOpsManager {
      * <p>There can only ever be one collector per process. If there currently is another callback
      * set, this will fail.
      *
+     * <p>Note that if an app has multiple processes registering for this callback, the system would
+     * fan out async op noted callbacks to each of the processes, resulting in the same data being
+     * delivered multiple times to an app, which is usually undesired. To avoid this, consider
+     * listening to async ops only in one process. See
+     * {@link #setOnOpNotedCallback(Executor, OnOpNotedCallback, int)} for how to do this.
+     *
      * @param asyncExecutor executor to execute {@link OnOpNotedCallback#onAsyncNoted} on, {@code
      * null} to unset
      * @param callback listener to set, {@code null} to unset
@@ -10264,18 +10293,62 @@ public class AppOpsManager {
      */
     public void setOnOpNotedCallback(@Nullable @CallbackExecutor Executor asyncExecutor,
             @Nullable OnOpNotedCallback callback) {
+        setOnOpNotedCallback(asyncExecutor, callback, /* flag */ 0);
+    }
+
+    /**
+     * Set a new {@link OnOpNotedCallback}.
+     *
+     * <p>There can only ever be one collector per process. If there currently is another callback
+     * set, this will fail.
+     *
+     * <p>This API allows the caller to listen only to sync and self op noted events, and ignore
+     * async ops. This is useful in the scenario where an app has multiple processes. Consider an
+     * example where an app has two processes, A and B. The op noted events are as follows:
+     * <ul>
+     * <li>op 1: process A, sync
+     * <li>op 2: process A, async
+     * <li>op 3: process B, sync
+     * <li>op 4: process B, async
+     * Any process that listens to async op noted events gets events originating from across ALL
+     * processes (op 2 and op 4 in this example). So if both process A and B register as listeners,
+     * both of them get op 2 and 4 which is not ideal. To avoid duplicates, one of the two processes
+     * should set {@link #OP_NOTED_CALLBACK_FLAG_IGNORE_ASYNC}. For example
+     * process A sets {@link #OP_NOTED_CALLBACK_FLAG_IGNORE_ASYNC} and would then only get its own
+     * sync event (op 1). The other process would then listen to all types of events and get op 2, 3
+     * and 4.
+     *
+     * Note that even with {@link #OP_NOTED_CALLBACK_FLAG_IGNORE_ASYNC},
+     * {@link #OnOpNotedCallback.onAsyncNoted} may still be invoked. This happens for sync events
+     * that were collected before a callback is registered.
+     *
+     * @param asyncExecutor executor to execute {@link OnOpNotedCallback#onAsyncNoted} on, {@code
+     * null} to unset
+     * @param callback listener to set, {@code null} to unset
+     * @param flags additional flags to modify the callback behavior, such as
+     * {@link #OP_NOTED_CALLBACK_FLAG_IGNORE_ASYNC}
+     *
+     * @throws IllegalStateException If another callback is already registered
+     */
+    @FlaggedApi(android.permission.flags.Flags.FLAG_SYNC_ON_OP_NOTED_API)
+    public void setOnOpNotedCallback(@Nullable @CallbackExecutor Executor asyncExecutor,
+            @Nullable OnOpNotedCallback callback, @OpNotedCallbackFlags int flags) {
         Preconditions.checkState((callback == null) == (asyncExecutor == null));
+        Preconditions.checkFlagsArgument(flags, OP_NOTED_CALLBACK_FLAG_ALL);
 
         synchronized (sLock) {
             if (callback == null) {
+                Preconditions.checkFlagsArgument(flags, 0);
                 Preconditions.checkState(sOnOpNotedCallback != null,
                         "No callback is currently registered");
 
-                try {
-                    mService.stopWatchingAsyncNoted(mContext.getPackageName(),
-                            sOnOpNotedCallback.mAsyncCb);
-                } catch (RemoteException e) {
-                    e.rethrowFromSystemServer();
+                if (!sIgnoreAsyncNotedCallback) {
+                    try {
+                        mService.stopWatchingAsyncNoted(mContext.getPackageName(),
+                                sOnOpNotedCallback.mAsyncCb);
+                    } catch (RemoteException e) {
+                        e.rethrowFromSystemServer();
+                    }
                 }
 
                 sOnOpNotedCallback = null;
@@ -10285,14 +10358,17 @@ public class AppOpsManager {
 
                 callback.mAsyncExecutor = asyncExecutor;
                 sOnOpNotedCallback = callback;
+                sIgnoreAsyncNotedCallback = (flags & OP_NOTED_CALLBACK_FLAG_IGNORE_ASYNC) != 0;
 
                 List<AsyncNotedAppOp> missedAsyncOps = null;
-                try {
-                    mService.startWatchingAsyncNoted(mContext.getPackageName(),
-                            sOnOpNotedCallback.mAsyncCb);
-                    missedAsyncOps = mService.extractAsyncOps(mContext.getPackageName());
-                } catch (RemoteException e) {
-                    e.rethrowFromSystemServer();
+                if (!sIgnoreAsyncNotedCallback) {
+                    try {
+                        mService.startWatchingAsyncNoted(mContext.getPackageName(),
+                                sOnOpNotedCallback.mAsyncCb);
+                        missedAsyncOps = mService.extractAsyncOps(mContext.getPackageName());
+                    } catch (RemoteException e) {
+                        e.rethrowFromSystemServer();
+                    }
                 }
 
                 // Copy pointer so callback can be dispatched out of lock
@@ -10305,17 +10381,15 @@ public class AppOpsManager {
                                 () -> onOpNotedCallback.onAsyncNoted(asyncNotedAppOp));
                     }
                 }
-                synchronized (this) {
-                    int numMissedSyncOps = sUnforwardedOps.size();
-                    if (onOpNotedCallback != null) {
-                        for (int i = 0; i < numMissedSyncOps; i++) {
-                            final AsyncNotedAppOp syncNotedAppOp = sUnforwardedOps.get(i);
-                            onOpNotedCallback.getAsyncNotedExecutor().execute(
-                                    () -> onOpNotedCallback.onAsyncNoted(syncNotedAppOp));
-                        }
+                int numMissedSyncOps = sUnforwardedOps.size();
+                if (onOpNotedCallback != null) {
+                    for (int i = 0; i < numMissedSyncOps; i++) {
+                        final AsyncNotedAppOp syncNotedAppOp = sUnforwardedOps.get(i);
+                        onOpNotedCallback.getAsyncNotedExecutor().execute(
+                                () -> onOpNotedCallback.onAsyncNoted(syncNotedAppOp));
                     }
-                    sUnforwardedOps.clear();
                 }
+                sUnforwardedOps.clear();
             }
         }
     }

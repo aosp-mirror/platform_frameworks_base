@@ -16,8 +16,10 @@
 
 package com.android.systemui.statusbar.window
 
+import android.content.Context
 import android.view.View
 import android.view.ViewGroup
+import com.android.app.viewcapture.ViewCaptureAwareWindowManager
 import com.android.systemui.animation.ActivityTransitionAnimator
 import com.android.systemui.fragments.FragmentHostManager
 import java.util.Optional
@@ -73,4 +75,11 @@ interface StatusBarWindowController {
      *   this#setForceStatusBarVisible} together and use some sort of ranking system instead.
      */
     fun setOngoingProcessRequiresStatusBarVisible(visible: Boolean)
+
+    interface Factory {
+        fun create(
+            context: Context,
+            viewCaptureAwareWindowManager: ViewCaptureAwareWindowManager,
+        ): StatusBarWindowController
+    }
 }

@@ -284,6 +284,7 @@ import com.android.internal.view.BaseSurfaceHolder;
 import com.android.internal.view.RootViewSurfaceTaker;
 import com.android.internal.view.SurfaceCallbackHelper;
 import com.android.modules.expresslog.Counter;
+import com.android.os.coregraphics.HwuiStatsLog;
 
 import libcore.io.IoUtils;
 
@@ -1228,6 +1229,8 @@ public final class ViewRootImpl implements ViewParent,
 
     // The latest input event from the gesture that was used to resolve the pointer icon.
     private MotionEvent mPointerIconEvent = null;
+    private @ActivityInfo.ColorMode int mCurrentColorMode = ActivityInfo.COLOR_MODE_DEFAULT;
+    private long mColorModeLastSetMillis = -1;
 
     public ViewRootImpl(Context context, Display display) {
         this(context, display, WindowManagerGlobal.getWindowSession(), new WindowLayout());
@@ -2646,6 +2649,7 @@ public final class ViewRootImpl implements ViewParent,
                 mFirstFramePresentedTimeNs = -1;
             }
         }
+        logColorMode(mCurrentColorMode, true);
     }
 
 
@@ -6341,6 +6345,7 @@ public final class ViewRootImpl implements ViewParent,
         if (mAttachInfo.mThreadedRenderer == null) {
             return;
         }
+
         boolean isHdr = colorMode == ActivityInfo.COLOR_MODE_HDR
                 || colorMode == ActivityInfo.COLOR_MODE_HDR10;
         if (isHdr && !mDisplay.isHdrSdrRatioAvailable()) {
@@ -6353,6 +6358,9 @@ public final class ViewRootImpl implements ViewParent,
                 && !getConfiguration().isScreenWideColorGamut()) {
             colorMode = ActivityInfo.COLOR_MODE_DEFAULT;
         }
+
+        logColorMode(colorMode, false);
+
         float automaticRatio = mAttachInfo.mThreadedRenderer.setColorMode(colorMode);
         if (desiredRatio == 0 || desiredRatio > automaticRatio) {
             desiredRatio = automaticRatio;
@@ -6963,9 +6971,7 @@ public final class ViewRootImpl implements ViewParent,
                     handleScrollCaptureRequest((IScrollCaptureResponseListener) msg.obj);
                     break;
                 case MSG_PAUSED_FOR_SYNC_TIMEOUT:
-                    Log.e(mTag, "Timedout waiting to unpause for sync");
-                    mNumPausedForSync = 0;
-                    scheduleTraversals();
+                    resumeAfterSyncTimeout();
                     break;
                 case MSG_CHECK_INVALIDATION_IDLE: {
                     long delta;
@@ -10005,6 +10011,7 @@ public final class ViewRootImpl implements ViewParent,
 
             mAttachInfo.mThreadedRenderer = null;
             mAttachInfo.mHardwareAccelerated = false;
+            logColorMode(mCurrentColorMode, true);
         }
     }
 
@@ -12768,6 +12775,15 @@ public final class ViewRootImpl implements ViewParent,
         activeSurfaceSyncGroup.addTransaction(t);
     }
 
+    /**
+     * Resume rendering after being paused for sync due to a timeout.
+     */
+    private void resumeAfterSyncTimeout() {
+        Log.e(mTag, "Timedout waiting to unpause for sync mNumPausedForSync=" + mNumPausedForSync);
+        mNumPausedForSync = 0;
+        scheduleTraversals();
+    }
+
     @Override
     public SurfaceSyncGroup getOrCreateSurfaceSyncGroup() {
         boolean newSyncGroup = false;
@@ -12795,6 +12811,16 @@ public final class ViewRootImpl implements ViewParent,
                 }
             });
             newSyncGroup = true;
+
+            // If the sync group is marked ready by a timeout, check if rendering is paused and
+            // if it is, resume rendering and trigger a traversal.
+            mActiveSurfaceSyncGroup.addSyncCompleteCallback(mExecutor, () -> {
+                if (mActiveSurfaceSyncGroup != null
+                        && mActiveSurfaceSyncGroup.isComplete() && mNumPausedForSync > 0) {
+                    mHandler.removeMessages(MSG_PAUSED_FOR_SYNC_TIMEOUT);
+                    resumeAfterSyncTimeout();
+                }
+            });
         }
 
         Trace.instant(Trace.TRACE_TAG_VIEW,
@@ -12809,12 +12835,20 @@ public final class ViewRootImpl implements ViewParent,
             }
         }
 
-        mNumPausedForSync++;
-        mHandler.removeMessages(MSG_PAUSED_FOR_SYNC_TIMEOUT);
-        mHandler.sendEmptyMessageDelayed(MSG_PAUSED_FOR_SYNC_TIMEOUT,
-                1000 * Build.HW_TIMEOUT_MULTIPLIER);
+        // The sync group can be marked ready by a timeout. This makes incrementing
+        // mNumPausedForSync racy. Here we check if the sync group is complete and
+        // if it is then we don't pause for syncing.
+        if (!mActiveSurfaceSyncGroup.isComplete()) {
+            mNumPausedForSync++;
+            mHandler.removeMessages(MSG_PAUSED_FOR_SYNC_TIMEOUT);
+            mHandler.sendEmptyMessageDelayed(MSG_PAUSED_FOR_SYNC_TIMEOUT,
+                    1000 * Build.HW_TIMEOUT_MULTIPLIER);
+        } else {
+            Log.d(mTag, "Active sync group is already completed "
+                    + mActiveSurfaceSyncGroup.getName());
+        }
         return mActiveSurfaceSyncGroup;
-    };
+    }
 
     private final Executor mSimpleExecutor = Runnable::run;
 
@@ -13345,5 +13379,28 @@ public final class ViewRootImpl implements ViewParent,
         } else {
             mInfrequentUpdateCount = 0;
         }
+    }
+
+    private void logColorMode(@ActivityInfo.ColorMode int colorMode, boolean windowStopped) {
+        if (mColorModeLastSetMillis == -1 && windowStopped) {
+            Log.d(TAG, "Skipping stats log for color mode");
+            return;
+        }
+
+        long currentTimeMillis = System.currentTimeMillis();
+
+        if (windowStopped) {
+            HwuiStatsLog.write(HwuiStatsLog.HARDWARE_RENDERER_EVENT, Process.myUid(),
+                    currentTimeMillis - mColorModeLastSetMillis, mCurrentColorMode);
+            mColorModeLastSetMillis = -1;
+        } else {
+            if (mColorModeLastSetMillis > 0) {
+                HwuiStatsLog.write(HwuiStatsLog.HARDWARE_RENDERER_EVENT, Process.myUid(),
+                        currentTimeMillis - mColorModeLastSetMillis, mCurrentColorMode);
+            }
+            mColorModeLastSetMillis = currentTimeMillis;
+        }
+
+        mCurrentColorMode = colorMode;
     }
 }

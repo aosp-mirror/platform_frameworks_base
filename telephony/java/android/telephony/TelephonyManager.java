@@ -6934,7 +6934,6 @@ public class TelephonyManager {
      *
      * @see SubscriptionInfo#getServiceCapabilities()
      */
-    @FlaggedApi(Flags.FLAG_DATA_ONLY_CELLULAR_SERVICE)
     public boolean isDeviceVoiceCapable() {
         return isVoiceCapable();
     }
@@ -6974,7 +6973,6 @@ public class TelephonyManager {
      *
      * @see SubscriptionInfo#getServiceCapabilities()
      */
-    @FlaggedApi(Flags.FLAG_DATA_ONLY_CELLULAR_SERVICE)
     public boolean isDeviceSmsCapable() {
         return isSmsCapable();
     }
@@ -19180,15 +19178,19 @@ public class TelephonyManager {
     public @interface EmergencyCallbackModeType {}
 
     /**
-     * The callback mode is due to emergency call.
+     * The emergency callback mode is due to emergency call.
      * @hide
      */
+    @FlaggedApi(Flags.FLAG_EMERGENCY_CALLBACK_MODE_NOTIFICATION)
+    @SystemApi
     public static final int EMERGENCY_CALLBACK_MODE_CALL = 1;
 
     /**
-     * The callback mode is due to emergency SMS.
+     * The emergency callback mode is due to emergency SMS.
      * @hide
      */
+    @FlaggedApi(Flags.FLAG_EMERGENCY_CALLBACK_MODE_NOTIFICATION)
+    @SystemApi
     public static final int EMERGENCY_CALLBACK_MODE_SMS = 2;
 
     /**
@@ -19209,45 +19211,64 @@ public class TelephonyManager {
     public @interface EmergencyCallbackModeStopReason {}
 
     /**
-     * unknown reason.
+     * Indicates that emergency callback mode has been stopped for an unknown reason.
      * @hide
      */
+    @FlaggedApi(Flags.FLAG_EMERGENCY_CALLBACK_MODE_NOTIFICATION)
+    @SystemApi
     public static final int STOP_REASON_UNKNOWN = 0;
 
     /**
-     * The call back mode is exited due to a new normal call is originated.
+     * Indicates that emergency callback mode has been stopped because a new non-emergency call was
+     * initiated.
      * @hide
      */
+    @FlaggedApi(Flags.FLAG_EMERGENCY_CALLBACK_MODE_NOTIFICATION)
+    @SystemApi
     public static final int STOP_REASON_OUTGOING_NORMAL_CALL_INITIATED = 1;
 
     /**
-     * The call back mode is exited due to a new normal SMS is originated.
+     * Indicates that emergency callback mode has been stopped because a new non-emergency SMS was
+     * sent.
      * @hide
      */
+    @FlaggedApi(Flags.FLAG_EMERGENCY_CALLBACK_MODE_NOTIFICATION)
+    @SystemApi
     public static final int STOP_REASON_NORMAL_SMS_SENT = 2;
 
     /**
-     * The call back mode is exited due to a new emergency call is originated.
+     * Indicates that emergency callback mode has been stopped because a new outgoing emergency
+     * call was initiated.
      * @hide
      */
+    @FlaggedApi(Flags.FLAG_EMERGENCY_CALLBACK_MODE_NOTIFICATION)
+    @SystemApi
     public static final int STOP_REASON_OUTGOING_EMERGENCY_CALL_INITIATED = 3;
 
     /**
-     * The call back mode is exited due to a new emergency SMS is originated.
+     * Indicates that emergency callback mode has been stopped because a new emergency SMS was sent.
      * @hide
      */
+    @FlaggedApi(Flags.FLAG_EMERGENCY_CALLBACK_MODE_NOTIFICATION)
+    @SystemApi
     public static final int STOP_REASON_EMERGENCY_SMS_SENT = 4;
 
     /**
-     * The call back mode is exited due to timer expiry.
+     * Indicates that emergency callback mode has been stopped due to the emergency callback mode
+     * timer expiry.
      * @hide
      */
+    @FlaggedApi(Flags.FLAG_EMERGENCY_CALLBACK_MODE_NOTIFICATION)
+    @SystemApi
     public static final int STOP_REASON_TIMER_EXPIRED = 5;
 
     /**
-     * The call back mode is exited due to user action.
+     * Indicates that emergency callback mode has been stopped due to user ending the emergency
+     * mode by clicking the notification.
      * @hide
      */
+    @FlaggedApi(Flags.FLAG_EMERGENCY_CALLBACK_MODE_NOTIFICATION)
+    @SystemApi
     public static final int STOP_REASON_USER_ACTION = 6;
 
     /**
