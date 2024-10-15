@@ -182,6 +182,15 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     // used to verify which request has successfully been received by the host.
     private static final AtomicLong UPDATE_COUNTER = new AtomicLong();
 
+    // Hard limit of number of hosts an app can create, note that the app that hosts the widgets
+    // can have multiple instances of {@link AppWidgetHost}, typically in respect to different
+    // surfaces in the host app.
+    // @see AppWidgetHost
+    // @see AppWidgetHost#mHostId
+    private static final int MAX_NUMBER_OF_HOSTS_PER_PACKAGE = 20;
+    // Hard limit of number of widgets can be pinned by a host.
+    private static final int MAX_NUMBER_OF_WIDGETS_PER_HOST = 200;
+
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -1818,12 +1827,30 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         if (host != null) {
             return host;
         }
-
+        ensureHostCountBeforeAddLocked(id);
         host = new Host();
         host.id = id;
         mHosts.add(host);
 
         return host;
+    }
+
+    /**
+     * Ensures that the number of hosts for a package is less than the maximum number of hosts per
+     * package. If the number of hosts is greater than the maximum number of hosts per package, then
+     * removes the oldest host.
+     */
+    private void ensureHostCountBeforeAddLocked(HostId hostId) {
+        final List<Host> hosts = new ArrayList<>();
+        for (Host host : mHosts) {
+            if (host.id.uid == hostId.uid
+                    && host.id.packageName.equals(hostId.packageName)) {
+                hosts.add(host);
+            }
+        }
+        while (hosts.size() >= MAX_NUMBER_OF_HOSTS_PER_PACKAGE) {
+            deleteHostLocked(hosts.remove(0));
+        }
     }
 
     private void deleteHostLocked(Host host) {
@@ -3038,9 +3065,30 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
      * Adds the widget to mWidgets and tracks the package name in mWidgetPackages.
      */
     void addWidgetLocked(Widget widget) {
+        ensureWidgetCountBeforeAddLocked(widget);
         mWidgets.add(widget);
 
         onWidgetProviderAddedOrChangedLocked(widget);
+    }
+
+    /**
+     * Ensures that the widget count for the widget's host is not greater than the maximum
+     * number of widgets per host. If the count is greater than the maximum, removes oldest widgets
+     * from the host until the count is less than or equal to the maximum.
+     */
+    private void ensureWidgetCountBeforeAddLocked(Widget widget) {
+        if (widget.host == null || widget.host.id == null) {
+            return;
+        }
+        final List<Widget> widgetsInSameHost = new ArrayList<>();
+        for (Widget w : mWidgets) {
+            if (w.host != null && widget.host.id.equals(w.host.id)) {
+                widgetsInSameHost.add(w);
+            }
+        }
+        while (widgetsInSameHost.size() >= MAX_NUMBER_OF_WIDGETS_PER_HOST) {
+            removeWidgetLocked(widgetsInSameHost.remove(0));
+        }
     }
 
     /**
