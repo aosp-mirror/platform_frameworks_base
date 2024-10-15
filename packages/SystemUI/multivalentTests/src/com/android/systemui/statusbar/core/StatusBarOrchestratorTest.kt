@@ -44,7 +44,7 @@ import com.android.systemui.statusbar.phone.mockPhoneStatusBarViewController
 import com.android.systemui.statusbar.window.data.model.StatusBarWindowState
 import com.android.systemui.statusbar.window.data.repository.fakeStatusBarWindowStateRepositoryStore
 import com.android.systemui.statusbar.window.data.repository.statusBarWindowStateRepositoryStore
-import com.android.systemui.statusbar.window.fakeStatusBarWindowController
+import com.android.systemui.statusbar.window.fakeStatusBarWindowControllerStore
 import com.android.systemui.testKosmos
 import com.android.wm.shell.bubbles.bubbles
 import com.google.common.truth.Truth.assertThat
@@ -67,7 +67,7 @@ class StatusBarOrchestratorTest : SysuiTestCase() {
         }
     private val testScope = kosmos.testScope
     private val statusBarViewController = kosmos.mockPhoneStatusBarViewController
-    private val statusBarWindowController = kosmos.fakeStatusBarWindowController
+    private val statusBarWindowControllerStore = kosmos.fakeStatusBarWindowControllerStore
     private val statusBarModeRepository = kosmos.fakeStatusBarModeRepository
     private val pluginDependencyProvider = kosmos.mockPluginDependencyProvider
     private val notificationShadeWindowViewController =
@@ -94,7 +94,7 @@ class StatusBarOrchestratorTest : SysuiTestCase() {
     fun start_attachesWindow() {
         orchestrator.start()
 
-        assertThat(statusBarWindowController.isAttached).isTrue()
+        assertThat(statusBarWindowControllerStore.defaultDisplay.isAttached).isTrue()
     }
 
     @Test

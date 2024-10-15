@@ -2343,6 +2343,41 @@ public final class DisplayPowerControllerTest {
         }
     }
 
+    @Test
+    public void stylusUsageStarted_disablesAutomaticBrightnessStrategy() {
+        when(mDisplayManagerFlagsMock.isBlockAutobrightnessChangesOnStylusUsage())
+                .thenReturn(true);
+        when(mDisplayManagerFlagsMock.isRefactorDisplayPowerControllerEnabled())
+                .thenReturn(true);
+        mHolder = createDisplayPowerController(DISPLAY_ID, UNIQUE_ID);
+        mHolder.dpc.setDisplayOffloadSession(mDisplayOffloadSession);
+        Settings.System.putInt(mContext.getContentResolver(),
+                Settings.System.SCREEN_BRIGHTNESS_MODE,
+                Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC);
+
+        DisplayPowerRequest dpr = new DisplayPowerRequest();
+        dpr.policy = DisplayPowerRequest.POLICY_BRIGHT;
+        when(mHolder.displayPowerState.getScreenState()).thenReturn(Display.STATE_ON);
+        advanceTime(2);
+        clearInvocations(mHolder.automaticBrightnessController);
+        mHolder.dpc.stylusGestureStarted(2000000);
+
+        mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
+        advanceTime(1); // Run updatePowerState
+        verify(mHolder.automaticBrightnessController, times(0))
+                .getAutomaticScreenBrightness(any());
+
+        // Stylus usage timed out, hence autobrightness is now enabled back again
+        advanceTime(6);
+        verify(mHolder.automaticBrightnessController).getAutomaticScreenBrightness(null);
+
+        // Ideally we should be able to assert against new BrightnessEvent(Display.DEFAULT_DISPLAY),
+        // but because brightnessEvent has the mTime field which refers to the current time,
+        // asserting against that is non-trivial
+        verify(mHolder.automaticBrightnessController).getAutomaticScreenBrightness(
+                any(BrightnessEvent.class));
+    }
+
     /**
      * Creates a mock and registers it to {@link LocalServices}.
      */
@@ -2406,6 +2441,7 @@ public final class DisplayPowerControllerTest {
                 .thenReturn(new int[0]);
         when(displayDeviceConfigMock.getDefaultDozeBrightness())
                 .thenReturn(DEFAULT_DOZE_BRIGHTNESS);
+        when(displayDeviceConfigMock.getIdleStylusTimeoutMillis()).thenReturn(5);
 
         when(displayDeviceConfigMock.getBrightnessRampFastDecrease())
                 .thenReturn(BRIGHTNESS_RAMP_RATE_FAST_DECREASE);

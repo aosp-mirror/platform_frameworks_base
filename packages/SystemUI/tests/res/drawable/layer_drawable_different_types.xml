@@ -1,4 +1,4 @@
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Copyright (C) 2024 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,16 +13,8 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-
-<ripple xmlns:android="http://schemas.android.com/apk/res/android"
-        android:color="?attr/colorControlHighlight">
-    <item>
-        <shape android:shape="rectangle">
-            <solid android:color="@color/btn_material_filled_background_color"/>
-            <corners android:radius="?android:attr/buttonCornerRadius"/>
-            <size
-                android:width="@dimen/btn_material_width"
-                android:height="@dimen/btn_material_height" />
-        </shape>
-    </item>
-</ripple>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android" >
+    <!-- dessert_flan is a PNG while ic_brightness is a level-list. -->
+    <item android:drawable="@drawable/dessert_flan"/>
+    <item android:drawable="@drawable/ic_brightness"/>
+</layer-list>

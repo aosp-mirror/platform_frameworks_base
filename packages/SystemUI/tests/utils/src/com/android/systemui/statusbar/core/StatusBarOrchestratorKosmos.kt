@@ -28,7 +28,7 @@ import com.android.systemui.statusbar.data.repository.fakeStatusBarModeRepositor
 import com.android.systemui.statusbar.mockNotificationRemoteInputManager
 import com.android.systemui.statusbar.phone.mockAutoHideController
 import com.android.systemui.statusbar.window.data.repository.statusBarWindowStateRepositoryStore
-import com.android.systemui.statusbar.window.fakeStatusBarWindowController
+import com.android.systemui.statusbar.window.fakeStatusBarWindowControllerStore
 import com.android.wm.shell.bubbles.bubblesOptional
 
 val Kosmos.statusBarOrchestrator by
@@ -36,8 +36,8 @@ val Kosmos.statusBarOrchestrator by
         StatusBarOrchestrator(
             applicationCoroutineScope,
             fakeStatusBarInitializer,
-            fakeStatusBarWindowController,
             fakeStatusBarModeRepository,
+            fakeStatusBarWindowControllerStore,
             mockDemoModeController,
             mockPluginDependencyProvider,
             mockAutoHideController,

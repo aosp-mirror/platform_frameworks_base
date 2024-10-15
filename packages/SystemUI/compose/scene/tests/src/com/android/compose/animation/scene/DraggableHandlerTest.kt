@@ -39,7 +39,6 @@ import com.android.compose.animation.scene.TestScenes.SceneC
 import com.android.compose.animation.scene.content.state.TransitionState
 import com.android.compose.animation.scene.content.state.TransitionState.Transition
 import com.android.compose.animation.scene.subjects.assertThat
-import com.android.compose.nestedscroll.SuspendedValue
 import com.android.compose.test.MonotonicClockTestScope
 import com.android.compose.test.runMonotonicClockTest
 import com.android.compose.test.transition

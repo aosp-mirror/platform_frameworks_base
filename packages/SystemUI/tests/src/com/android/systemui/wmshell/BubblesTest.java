@@ -198,6 +198,8 @@ import com.android.wm.shell.taskview.TaskView;
 import com.android.wm.shell.taskview.TaskViewTransitions;
 import com.android.wm.shell.transition.Transitions;
 
+import kotlin.Lazy;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -216,7 +218,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Executor;
 
-import kotlin.Lazy;
 import platform.test.runner.parameterized.ParameterizedAndroidJunit4;
 import platform.test.runner.parameterized.Parameters;
 
@@ -2481,7 +2482,7 @@ public class BubblesTest extends SysuiTestCase {
 
         mEntryListener.onEntryAdded(mRow);
 
-        verify(mBubbleLogger).log(argThat(b -> b.getKey().equals(mRow.getKey())),
+        verify(mBubbleLogger).log(eqBubbleWithKey(mRow.getKey()),
                 eq(BubbleLogger.Event.BUBBLE_BAR_BUBBLE_POSTED));
     }
 
@@ -2498,8 +2499,23 @@ public class BubblesTest extends SysuiTestCase {
         NotificationEntryHelper.modifyRanking(mRow).setTextChanged(true).build();
         mEntryListener.onEntryUpdated(mRow, /* fromSystem= */ true);
 
-        verify(mBubbleLogger).log(argThat(b -> b.getKey().equals(mRow.getKey())),
+        verify(mBubbleLogger).log(eqBubbleWithKey(mRow.getKey()),
                 eq(BubbleLogger.Event.BUBBLE_BAR_BUBBLE_UPDATED));
+    }
+
+    @EnableFlags(FLAG_ENABLE_BUBBLE_BAR)
+    @Test
+    public void testEventLogging_bubbleBar_dragBubbleToDismiss() {
+        mBubbleProperties.mIsBubbleBarEnabled = true;
+        mPositioner.setIsLargeScreen(true);
+        FakeBubbleStateListener bubbleStateListener = new FakeBubbleStateListener();
+        mBubbleController.registerBubbleStateListener(bubbleStateListener);
+
+        mEntryListener.onEntryAdded(mRow);
+        mBubbleController.dragBubbleToDismiss(mRow.getKey(), 1L);
+
+        verify(mBubbleLogger).log(eqBubbleWithKey(mRow.getKey()),
+                eq(BubbleLogger.Event.BUBBLE_BAR_BUBBLE_DISMISSED_DRAG_BUBBLE));
     }
 
     /** Creates a bubble using the userId and package. */
@@ -2685,6 +2701,10 @@ public class BubblesTest extends SysuiTestCase {
     private void assertSysuiStates(boolean stackExpanded, boolean manageMenuExpanded) {
         assertThat(mSysUiStateBubblesExpanded).isEqualTo(stackExpanded);
         assertThat(mSysUiStateBubblesManageMenuExpanded).isEqualTo(manageMenuExpanded);
+    }
+
+    private Bubble eqBubbleWithKey(String key) {
+        return argThat(b -> b.getKey().equals(key));
     }
 
     private static class FakeBubbleStateListener implements Bubbles.BubbleStateListener {

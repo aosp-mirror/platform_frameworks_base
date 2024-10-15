@@ -110,6 +110,9 @@ public final class DisplayBrightnessController {
     @VisibleForTesting
     AutomaticBrightnessController mAutomaticBrightnessController;
 
+    // True if the stylus is being used
+    private boolean mIsStylusBeingUsed;
+
     /**
      * The constructor of DisplayBrightnessController.
      */
@@ -460,6 +463,8 @@ public final class DisplayBrightnessController {
         writer.println("  mScreenBrightnessDefault=" + mScreenBrightnessDefault);
         writer.println("  mPersistBrightnessNitsForDefaultDisplay="
                 + mPersistBrightnessNitsForDefaultDisplay);
+        writer.println("  mIsStylusBeingUsed="
+                + mIsStylusBeingUsed);
         synchronized (mLock) {
             writer.println("  mPendingScreenBrightness=" + mPendingScreenBrightness);
             writer.println("  mCurrentScreenBrightness=" + mCurrentScreenBrightness);
@@ -505,7 +510,12 @@ public final class DisplayBrightnessController {
      * Notifies if the stylus is currently being used or not.
      */
     public void setStylusBeingUsed(boolean isEnabled) {
-        // Todo(b/369977976) - Disable the auto-brightness strategy
+        mIsStylusBeingUsed = isEnabled;
+    }
+
+    @VisibleForTesting
+    boolean isStylusBeingUsed() {
+        return mIsStylusBeingUsed;
     }
 
     @VisibleForTesting
@@ -626,13 +636,14 @@ public final class DisplayBrightnessController {
             lastUserSetScreenBrightness = mLastUserSetScreenBrightness;
         }
         return new StrategySelectionRequest(displayPowerRequest, targetDisplayState,
-                lastUserSetScreenBrightness, userSetBrightnessChanged, displayOffloadSession);
+                lastUserSetScreenBrightness, userSetBrightnessChanged, displayOffloadSession,
+                mIsStylusBeingUsed);
     }
 
     private StrategyExecutionRequest constructStrategyExecutionRequest(
             DisplayManagerInternal.DisplayPowerRequest displayPowerRequest) {
         float currentScreenBrightness = getCurrentBrightness();
         return new StrategyExecutionRequest(displayPowerRequest, currentScreenBrightness,
-                mUserSetScreenBrightnessUpdated);
+                mUserSetScreenBrightnessUpdated, mIsStylusBeingUsed);
     }
 }

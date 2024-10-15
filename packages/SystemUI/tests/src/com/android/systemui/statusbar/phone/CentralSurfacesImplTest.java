@@ -21,7 +21,6 @@ import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
 import static android.provider.Settings.Global.HEADS_UP_NOTIFICATIONS_ENABLED;
 import static android.provider.Settings.Global.HEADS_UP_ON;
 
-import static com.android.systemui.Flags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR;
 import static com.android.systemui.Flags.FLAG_KEYBOARD_SHORTCUT_HELPER_REWRITE;
 import static com.android.systemui.Flags.FLAG_LIGHT_REVEAL_MIGRATION;
 import static com.android.systemui.flags.Flags.SHORTCUT_LIST_SEARCH_LAYOUT;
@@ -170,6 +169,7 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.StatusBarStateControllerImpl;
 import com.android.systemui.statusbar.core.StatusBarInitializerImpl;
 import com.android.systemui.statusbar.core.StatusBarOrchestrator;
+import com.android.systemui.statusbar.core.StatusBarSimpleFragment;
 import com.android.systemui.statusbar.data.repository.FakeStatusBarModeRepository;
 import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
@@ -194,6 +194,7 @@ import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.UserInfoControllerImpl;
 import com.android.systemui.statusbar.window.StatusBarWindowController;
+import com.android.systemui.statusbar.window.StatusBarWindowControllerStore;
 import com.android.systemui.statusbar.window.StatusBarWindowStateController;
 import com.android.systemui.util.FakeEventLog;
 import com.android.systemui.util.WallpaperController;
@@ -292,6 +293,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Mock private KeyguardBypassController mKeyguardBypassController;
     @Mock private AutoHideController mAutoHideController;
     @Mock private StatusBarWindowController mStatusBarWindowController;
+    @Mock private StatusBarWindowControllerStore mStatusBarWindowControllerStore;
     @Mock private Provider<CollapsedStatusBarFragment> mCollapsedStatusBarFragmentProvider;
     @Mock private StatusBarWindowStateController mStatusBarWindowStateController;
     @Mock private Bubbles mBubbles;
@@ -383,6 +385,9 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
 
         when(mBubbles.canShowBubbleNotification()).thenReturn(true);
 
+        when(mStatusBarWindowControllerStore.getDefaultDisplay())
+                .thenReturn(mStatusBarWindowController);
+
         mVisualInterruptionDecisionProvider =
                 VisualInterruptionDecisionProviderTestUtil.INSTANCE.createProviderByFlag(
                         mAmbientDisplayConfiguration,
@@ -465,7 +470,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                     mKeyguardStateController,
                     mStatusBarStateController,
                     mStatusBarKeyguardViewManager,
-                    mStatusBarWindowController,
+                    mStatusBarWindowControllerStore,
                     mDeviceProvisionedController,
                     mNotificationShadeWindowController,
                     0,
@@ -507,10 +512,11 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 mLightBarController,
                 mAutoHideController,
                 new StatusBarInitializerImpl(
-                        mStatusBarWindowController,
+                        mContext.getDisplayId(),
+                        mStatusBarWindowControllerStore,
                         mCollapsedStatusBarFragmentProvider,
                         emptySet()),
-                mStatusBarWindowController,
+                mStatusBarWindowControllerStore,
                 mStatusBarWindowStateController,
                 new FakeStatusBarModeRepository(),
                 mKeyguardUpdateMonitor,
@@ -852,34 +858,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     }
 
     @Test
-    @DisableFlags(FLAG_DEVICE_ENTRY_UDFPS_REFACTOR)
-    public void testSetDozingNotUnlocking_transitionToAuthScrimmed_cancelKeyguardFadingAway() {
-        when(mAlternateBouncerInteractor.isVisibleState()).thenReturn(true);
-        when(mKeyguardStateController.isKeyguardFadingAway()).thenReturn(true);
-
-        mCentralSurfaces.updateScrimController();
-
-        verify(mScrimController).legacyTransitionTo(eq(ScrimState.AUTH_SCRIMMED_SHADE));
-        verify(mStatusBarKeyguardViewManager).onKeyguardFadedAway();
-    }
-
-    @Test
-    @DisableFlags(FLAG_DEVICE_ENTRY_UDFPS_REFACTOR)
-    public void testOccludingQSNotExpanded_flagOff_transitionToAuthScrimmed() {
-        when(mAlternateBouncerInteractor.isVisibleState()).thenReturn(true);
-
-        // GIVEN device occluded and panel is NOT expanded
-        mCentralSurfaces.setBarStateForTest(SHADE); // occluding on LS has StatusBarState = SHADE
-        when(mKeyguardStateController.isOccluded()).thenReturn(true);
-        when(mNotificationPanelViewController.isPanelExpanded()).thenReturn(false);
-
-        mCentralSurfaces.updateScrimController();
-
-        verify(mScrimController).legacyTransitionTo(eq(ScrimState.AUTH_SCRIMMED));
-    }
-
-    @Test
-    @EnableFlags(FLAG_DEVICE_ENTRY_UDFPS_REFACTOR)
     public void testNotOccluding_QSNotExpanded_flagOn_doesNotTransitionScrimState() {
         when(mAlternateBouncerInteractor.isVisibleState()).thenReturn(true);
 
@@ -895,7 +873,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     }
 
     @Test
-    @EnableFlags(FLAG_DEVICE_ENTRY_UDFPS_REFACTOR)
     public void testNotOccluding_QSExpanded_flagOn_doesTransitionScrimStateToKeyguard() {
         when(mAlternateBouncerInteractor.isVisibleState()).thenReturn(true);
 
@@ -908,21 +885,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
 
         // Tests the safeguard to reset the scrimstate
         verify(mScrimController, never()).legacyTransitionTo(eq(ScrimState.KEYGUARD));
-    }
-
-    @Test
-    @DisableFlags(FLAG_DEVICE_ENTRY_UDFPS_REFACTOR)
-    public void testOccludingQSExpanded_transitionToAuthScrimmedShade() {
-        when(mAlternateBouncerInteractor.isVisibleState()).thenReturn(true);
-
-        // GIVEN device occluded and qs IS expanded
-        mCentralSurfaces.setBarStateForTest(SHADE); // occluding on LS has StatusBarState = SHADE
-        when(mKeyguardStateController.isOccluded()).thenReturn(true);
-        when(mNotificationPanelViewController.isPanelExpanded()).thenReturn(true);
-
-        mCentralSurfaces.updateScrimController();
-
-        verify(mScrimController).legacyTransitionTo(eq(ScrimState.AUTH_SCRIMMED_SHADE));
     }
 
     @Test
@@ -1149,6 +1111,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableFlags(StatusBarSimpleFragment.FLAG_NAME)
     public void bubbleBarVisibility() {
         createCentralSurfaces();
         mCentralSurfaces.onStatusBarWindowStateChanged(WINDOW_STATE_HIDDEN);

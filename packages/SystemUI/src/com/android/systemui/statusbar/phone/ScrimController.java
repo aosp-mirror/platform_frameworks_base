@@ -1715,26 +1715,6 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
         updateScrims();
     }
 
-    public void setHasBackdrop(boolean hasBackdrop) {
-        for (ScrimState state : ScrimState.values()) {
-            state.setHasBackdrop(hasBackdrop);
-        }
-
-        // Backdrop event may arrive after state was already applied,
-        // in this case, back-scrim needs to be re-evaluated
-        if (mState == ScrimState.AOD || mState == ScrimState.PULSING) {
-            float newBehindAlpha = mState.getBehindAlpha();
-            if (isNaN(newBehindAlpha)) {
-                throw new IllegalStateException("Scrim opacity is NaN for state: " + mState
-                        + ", back: " + mBehindAlpha);
-            }
-            if (mBehindAlpha != newBehindAlpha) {
-                mBehindAlpha = newBehindAlpha;
-                updateScrims();
-            }
-        }
-    }
-
     private void setKeyguardFadingAway(boolean fadingAway, long duration) {
         for (ScrimState state : ScrimState.values()) {
             state.setKeyguardFadingAway(fadingAway, duration);

@@ -61,7 +61,8 @@ public class FallbackBrightnessStrategyTest {
         DisplayBrightnessState updatedDisplayBrightnessState =
                 mFallbackBrightnessStrategy.updateBrightness(
                         new StrategyExecutionRequest(displayPowerRequest, currentBrightness,
-                                /* userSetBrightnessChanged= */ true));
+                                /* userSetBrightnessChanged= */ true,
+                                /* isStylusBeingUsed */ false));
         assertEquals(updatedDisplayBrightnessState, expectedDisplayBrightnessState);
     }
 }

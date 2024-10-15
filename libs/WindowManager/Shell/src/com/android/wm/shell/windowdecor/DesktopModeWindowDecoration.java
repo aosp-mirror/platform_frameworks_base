@@ -514,8 +514,12 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             ));
         } else {
             mWindowDecorViewHolder.bindData(new AppHeaderViewHolder.HeaderData(
-                    mTaskInfo, TaskInfoKt.getRequestingImmersive(mTaskInfo), inFullImmersive,
-                    hasGlobalFocus
+                    mTaskInfo,
+                    TaskInfoKt.getRequestingImmersive(mTaskInfo),
+                    inFullImmersive,
+                    hasGlobalFocus,
+                    /* maximizeHoverEnabled= */ canOpenMaximizeMenu(
+                            /* animatingTaskResizeOrReposition= */ false)
             ));
         }
         Trace.endSection();
@@ -1616,8 +1620,14 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
 
     void setAnimatingTaskResizeOrReposition(boolean animatingTaskResizeOrReposition) {
         if (mRelayoutParams.mLayoutResId == R.layout.desktop_mode_app_handle) return;
-        asAppHeader(mWindowDecorViewHolder)
-                .setAnimatingTaskResizeOrReposition(animatingTaskResizeOrReposition);
+        final boolean inFullImmersive =
+                mDesktopRepository.isTaskInFullImmersiveState(mTaskInfo.taskId);
+        asAppHeader(mWindowDecorViewHolder).bindData(new AppHeaderViewHolder.HeaderData(
+                mTaskInfo,
+                TaskInfoKt.getRequestingImmersive(mTaskInfo),
+                inFullImmersive,
+                isFocused(),
+                /* maximizeHoverEnabled= */ canOpenMaximizeMenu(animatingTaskResizeOrReposition)));
     }
 
     /**
@@ -1632,6 +1642,16 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
      */
     void onMaximizeButtonHoverEnter() {
         asAppHeader(mWindowDecorViewHolder).onMaximizeWindowHoverEnter();
+    }
+
+    private boolean canOpenMaximizeMenu(boolean animatingTaskResizeOrReposition) {
+        if (!Flags.enableFullyImmersiveInDesktop()) {
+            return !animatingTaskResizeOrReposition;
+        }
+        final boolean inImmersiveAndRequesting =
+                mDesktopRepository.isTaskInFullImmersiveState(mTaskInfo.taskId)
+                        && TaskInfoKt.getRequestingImmersive(mTaskInfo);
+        return !animatingTaskResizeOrReposition && !inImmersiveAndRequesting;
     }
 
     @Override

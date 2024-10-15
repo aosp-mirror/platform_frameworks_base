@@ -16815,6 +16815,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
         }
         EnforcingAdmin enforcingAdmin;
+
+        // TODO(b/370472975): enable when we stop policy enforecer callback from blocking the main
+        //  thread
         if (Flags.setPermissionGrantStateCoexistence()) {
             enforcingAdmin = enforcePermissionAndGetEnforcingAdmin(
                     admin,
@@ -16840,54 +16843,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 callback.sendResult(null);
                 return;
             }
-        } else {
-            Preconditions.checkCallAuthorization((caller.hasAdminComponent()
-                    && (isProfileOwner(caller) || isDefaultDeviceOwner(caller)
-                    || isFinancedDeviceOwner(caller)))
-                    || (caller.hasPackage() && isCallerDelegate(caller,
-                    DELEGATION_PERMISSION_GRANT)));
-            if (SENSOR_PERMISSIONS.contains(permission)
-                    && grantState == PERMISSION_GRANT_STATE_GRANTED
-                    && !canAdminGrantSensorsPermissions()) {
-                if (mInjector.isChangeEnabled(THROW_SECURITY_EXCEPTION_FOR_SENSOR_PERMISSIONS,
-                        caller.getPackageName(), caller.getUserId())) {
-                    throw new SecurityException(
-                            "Caller not permitted to grant sensor permissions.");
-                } else {
-                    Slogf.e(LOG_TAG, "Caller attempted to grant sensor permissions but denied");
-                    // This is to match the legacy behaviour.
-                    callback.sendResult(Bundle.EMPTY);
-                    return;
-                }
-            }
-            synchronized (getLockObject()) {
-                long ident = mInjector.binderClearCallingIdentity();
-                try {
-                    boolean isPostQAdmin = getTargetSdk(caller.getPackageName(), caller.getUserId())
-                            >= android.os.Build.VERSION_CODES.Q;
-                    if (!isPostQAdmin) {
-                        // Legacy admins assume that they cannot control pre-M apps
-                        if (getTargetSdk(packageName, caller.getUserId())
-                                < android.os.Build.VERSION_CODES.M) {
-                            callback.sendResult(null);
-                            return;
-                        }
-                    }
-                    if (!isRuntimePermission(permission)) {
-                        callback.sendResult(null);
-                        return;
-                    }
-                } catch (SecurityException e) {
-                    Slogf.e(LOG_TAG, "Could not set permission grant state", e);
-                    callback.sendResult(null);
-                } finally {
-                    mInjector.binderRestoreCallingIdentity(ident);
-                }
-            }
-        }
-        // TODO(b/278710449): enable when we stop policy enforecer callback from blocking the main
-        //  thread
-        if (false) {
+
             // TODO(b/266924257): decide how to handle the internal state if the package doesn't
             //  exist, or the permission isn't requested by the app, because we could end up with
             //  inconsistent state between the policy engine and package manager. Also a package
@@ -16913,11 +16869,43 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 callback.sendResult(null);
             }
         } else {
+            Preconditions.checkCallAuthorization((caller.hasAdminComponent()
+                    && (isProfileOwner(caller) || isDefaultDeviceOwner(caller)
+                    || isFinancedDeviceOwner(caller)))
+                    || (caller.hasPackage() && isCallerDelegate(caller,
+                    DELEGATION_PERMISSION_GRANT)));
+            if (SENSOR_PERMISSIONS.contains(permission)
+                    && grantState == PERMISSION_GRANT_STATE_GRANTED
+                    && !canAdminGrantSensorsPermissions()) {
+                if (mInjector.isChangeEnabled(THROW_SECURITY_EXCEPTION_FOR_SENSOR_PERMISSIONS,
+                        caller.getPackageName(), caller.getUserId())) {
+                    throw new SecurityException(
+                            "Caller not permitted to grant sensor permissions.");
+                } else {
+                    Slogf.e(LOG_TAG, "Caller attempted to grant sensor permissions but denied");
+                    // This is to match the legacy behaviour.
+                    callback.sendResult(Bundle.EMPTY);
+                    return;
+                }
+            }
             synchronized (getLockObject()) {
                 long ident = mInjector.binderClearCallingIdentity();
+                boolean isPostQAdmin = getTargetSdk(caller.getPackageName(), caller.getUserId())
+                        >= android.os.Build.VERSION_CODES.Q;
+
                 try {
-                    boolean isPostQAdmin = getTargetSdk(caller.getPackageName(), caller.getUserId())
-                            >= android.os.Build.VERSION_CODES.Q;
+                    if (!isPostQAdmin) {
+                        // Legacy admins assume that they cannot control pre-M apps
+                        if (getTargetSdk(packageName, caller.getUserId())
+                                < android.os.Build.VERSION_CODES.M) {
+                            callback.sendResult(null);
+                            return;
+                        }
+                    }
+                    if (!isRuntimePermission(permission)) {
+                        callback.sendResult(null);
+                        return;
+                    }
                     if (grantState == PERMISSION_GRANT_STATE_GRANTED
                             || grantState == DevicePolicyManager.PERMISSION_GRANT_STATE_DENIED
                             || grantState == DevicePolicyManager.PERMISSION_GRANT_STATE_DEFAULT) {
@@ -16939,7 +16927,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     }
                 } catch (SecurityException e) {
                     Slogf.e(LOG_TAG, "Could not set permission grant state", e);
-
                     callback.sendResult(null);
                 } finally {
                     mInjector.binderRestoreCallingIdentity(ident);

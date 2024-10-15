@@ -30,6 +30,8 @@ import static com.android.wm.shell.shared.animation.Interpolators.DIM_INTERPOLAT
 import static com.android.wm.shell.shared.animation.Interpolators.EMPHASIZED;
 import static com.android.wm.shell.shared.animation.Interpolators.LINEAR;
 import static com.android.wm.shell.shared.animation.Interpolators.SLOWDOWN_INTERPOLATOR;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.SNAP_TO_2_10_90;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.SNAP_TO_2_90_10;
 import static com.android.wm.shell.shared.split.SplitScreenConstants.SNAP_TO_END_AND_DISMISS;
 import static com.android.wm.shell.shared.split.SplitScreenConstants.SNAP_TO_START_AND_DISMISS;
 import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
@@ -438,12 +440,31 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
             dividerBounds.right = dividerBounds.left + mDividerWindowWidth;
             bounds1.right = position;
             bounds2.left = bounds1.right + mDividerSize;
+
+            // For flexible split, expand app offscreen as well
+            if (mDividerSnapAlgorithm.areOffscreenRatiosSupported()) {
+                if (position <= mDividerSnapAlgorithm.getMiddleTarget().position) {
+                    bounds1.left = bounds1.right - bounds2.width();
+                } else {
+                    bounds2.right = bounds2.left + bounds1.width();
+                }
+            }
+
         } else {
             position += mRootBounds.top;
             dividerBounds.top = position - mDividerInsets;
             dividerBounds.bottom = dividerBounds.top + mDividerWindowWidth;
             bounds1.bottom = position;
             bounds2.top = bounds1.bottom + mDividerSize;
+
+            // For flexible split, expand app offscreen as well
+            if (mDividerSnapAlgorithm.areOffscreenRatiosSupported()) {
+                if (position <= mDividerSnapAlgorithm.getMiddleTarget().position) {
+                    bounds1.top = bounds1.bottom - bounds2.width();
+                } else {
+                    bounds2.bottom = bounds2.top + bounds1.width();
+                }
+            }
         }
         DockedDividerUtils.sanitizeStackBounds(bounds1, true /** topLeft */);
         DockedDividerUtils.sanitizeStackBounds(bounds2, false /** topLeft */);
@@ -644,7 +665,7 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
                 rootBounds.width(),
                 rootBounds.height(),
                 mDividerSize,
-                !mIsLeftRightSplit,
+                mIsLeftRightSplit,
                 insets,
                 mIsLeftRightSplit ? DOCKED_LEFT : DOCKED_TOP /* dockSide */);
     }
@@ -667,6 +688,21 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
                         finishCallback.run();
                     }
                 });
+    }
+
+    /**
+     * Moves the divider to the other side of the screen. Does nothing if the divider is in the
+     * center.
+     * TODO (b/349828130): Currently only supports the two-app case. For n-apps,
+     *  DividerSnapAlgorithm will need to be refactored, and this function will change as well.
+     */
+    public void flingDividerToOtherSide(@PersistentSnapPosition int currentSnapPosition) {
+        switch (currentSnapPosition) {
+            case SNAP_TO_2_10_90 ->
+                    snapToTarget(mDividerPosition, mDividerSnapAlgorithm.getLastSplitTarget());
+            case SNAP_TO_2_90_10 ->
+                    snapToTarget(mDividerPosition, mDividerSnapAlgorithm.getFirstSplitTarget());
+        }
     }
 
     @VisibleForTesting

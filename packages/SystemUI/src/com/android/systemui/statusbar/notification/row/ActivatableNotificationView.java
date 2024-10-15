@@ -830,4 +830,13 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
             });
         }
     }
+
+    protected void dumpAppearAnimationProperties(IndentingPrintWriter pw, String[] args) {
+        pw.print("AppearAnimation: ");
+        pw.print("mDrawingAppearAnimation", mDrawingAppearAnimation);
+        pw.print("mAppearAnimationFraction", mAppearAnimationFraction);
+        pw.print("mIsHeadsUpAnimation", mIsHeadsUpAnimation);
+        pw.print("mTargetPoint", mTargetPoint);
+        pw.println();
+    }
 }
