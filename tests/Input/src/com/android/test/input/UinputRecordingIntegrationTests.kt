@@ -21,6 +21,7 @@ import android.cts.input.EventVerifier
 import android.graphics.PointF
 import android.hardware.input.InputManager
 import android.os.ParcelFileDescriptor
+import android.platform.test.annotations.FlakyTest
 import android.util.Log
 import android.util.Size
 import android.view.InputEvent
@@ -39,7 +40,6 @@ import com.android.cts.input.inputeventmatchers.withSource
 import junit.framework.Assert.fail
 import org.hamcrest.Matchers.allOf
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestName
@@ -108,7 +108,7 @@ class UinputRecordingIntegrationTests {
         parser = InputJsonParser(instrumentation.context)
     }
 
-    @Ignore("b/366602644")
+    @FlakyTest(bugId = 366602644)
     @Test
     fun testEvemuRecording() {
         VirtualDisplayActivityScenario.AutoClose<CaptureEventActivity>(
