@@ -11,7 +11,7 @@ used at runtime.
 
 - HostStubGen itself is design to be agnostic to Android. It doesn't use any Android APIs
 (hidden or not). But it may use Android specific knowledge -- e.g. as of now,
-AndroidHeuristicsFilter has hardcoded heuristics to detect AIDL generated classes. 
+AndroidHeuristicsFilter has hardcoded heuristics to detect AIDL generated classes.
 
 - `test-tiny-framework/` contains basic tests that are agnostic to Android.
 
@@ -20,19 +20,16 @@ AndroidHeuristicsFilter has hardcoded heuristics to detect AIDL generated classe
 
 ## Directories and files
 
-- `hoststubgen/`
-  Contains source code of the "hoststubgen" tool and relevant code
+- `src/`
 
-  - `src/`
+  HostStubGen tool source code.
 
-    HostStubGen tool source code.
+- `annotations-src/` See `Android.bp`.
+- `helper-framework-buildtime-src/` See `Android.bp`.
+- `helper-framework-runtime-src/` See `Android.bp`.
+- `helper-runtime-src/` See `Android.bp`.
 
-  - `annotations-src/` See `Android.bp`.
-  - `helper-framework-buildtime-src/` See `Android.bp`.
-  - `helper-framework-runtime-src/` See `Android.bp`.
-  - `helper-runtime-src/` See `Android.bp`.
-
-  - `test-tiny-framework/` See `README.md` in it.
+- `test-tiny-framework/` See `README.md` in it.
 
 - `scripts`
   - `dump-jar.sh`
