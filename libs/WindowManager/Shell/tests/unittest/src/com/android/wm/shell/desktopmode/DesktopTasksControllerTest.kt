@@ -2902,7 +2902,8 @@ class DesktopTasksControllerTest : ShellTestCase() {
     runOpenNewWindow(task)
     verify(splitScreenController)
       .startIntent(any(), anyInt(), any(), any(),
-        optionsCaptor.capture(), anyOrNull())
+        optionsCaptor.capture(), anyOrNull(), eq(true)
+      )
     assertThat(ActivityOptions.fromBundle(optionsCaptor.value).launchWindowingMode)
       .isEqualTo(WINDOWING_MODE_MULTI_WINDOW)
   }
@@ -2917,7 +2918,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     verify(splitScreenController)
       .startIntent(
         any(), anyInt(), any(), any(),
-        optionsCaptor.capture(), anyOrNull()
+        optionsCaptor.capture(), anyOrNull(), eq(true)
       )
     assertThat(ActivityOptions.fromBundle(optionsCaptor.value).launchWindowingMode)
       .isEqualTo(WINDOWING_MODE_MULTI_WINDOW)
