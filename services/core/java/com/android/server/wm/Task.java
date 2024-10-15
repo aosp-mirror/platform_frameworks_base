@@ -5807,6 +5807,12 @@ class Task extends TaskFragment {
     }
 
     private boolean canMoveTaskToBack(Task task) {
+        // Checks whether a task is a child of this task because it can be reparetned when
+        // transition is deferred.
+        if (task != this && task.getParent() != this) {
+            return false;
+        }
+
         // In LockTask mode, moving a locked task to the back of the root task may expose unlocked
         // ones. Therefore we need to check if this operation is allowed.
         if (!mAtmService.getLockTaskController().canMoveTaskToBack(task)) {
@@ -5876,7 +5882,7 @@ class Task extends TaskFragment {
                     (deferred) -> {
                         // Need to check again if deferred since the system might
                         // be in a different state.
-                        if (!isAttached() || (deferred && !canMoveTaskToBack(tr))) {
+                        if (!tr.isAttached() || (deferred && !canMoveTaskToBack(tr))) {
                             Slog.e(TAG, "Failed to move task to back after saying we could: "
                                     + tr.mTaskId);
                             transition.abort();
