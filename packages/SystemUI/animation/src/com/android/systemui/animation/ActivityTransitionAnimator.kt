@@ -136,20 +136,16 @@ constructor(
             )
 
         /**
-         * The timings when animating a View into an app using a spring animator.
-         *
-         * Important: since springs don't have fixed durations, these timings represent fractions of
-         * the progress between the spring's initial value and its final value.
-         *
-         * TODO(b/372858592): make this a separate class explicitly using percentages.
+         * The timings when animating a View into an app using a spring animator. These timings
+         * represent fractions of the progress between the spring's initial value and its final
+         * value.
          */
         val SPRING_TIMINGS =
-            TransitionAnimator.Timings(
-                totalDuration = 1000L,
-                contentBeforeFadeOutDelay = 0L,
-                contentBeforeFadeOutDuration = 800L,
-                contentAfterFadeInDelay = 850L,
-                contentAfterFadeInDuration = 135L,
+            TransitionAnimator.SpringTimings(
+                contentBeforeFadeOutDelay = 0f,
+                contentBeforeFadeOutDuration = 0.8f,
+                contentAfterFadeInDelay = 0.85f,
+                contentAfterFadeInDuration = 0.135f,
             )
 
         /**
