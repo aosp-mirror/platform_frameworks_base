@@ -55,6 +55,7 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.approachLayout
 import androidx.compose.ui.layout.onPlaced
@@ -218,7 +219,7 @@ constructor(
                 { notificationScrimClippingParams.params.top },
                 // Only allow scrolling when we are fully expanded. That way, we don't intercept
                 // swipes in lockscreen (when somehow QS is receiving touches).
-                { scrollState.canScrollForward && viewModel.expansionState.value.progress >= 1f },
+                { scrollState.canScrollForward && viewModel.isQsFullyExpanded },
             )
         frame.addView(
             composeView,
@@ -231,10 +232,8 @@ constructor(
     @Composable
     private fun Content() {
         PlatformTheme {
-            val visible by viewModel.qsVisible.collectAsStateWithLifecycle()
-
             AnimatedVisibility(
-                visible = visible,
+                visible = viewModel.isQsVisible,
                 modifier =
                     Modifier.windowInsetsPadding(WindowInsets.navigationBars).thenIf(
                         notificationScrimClippingParams.isEnabled
@@ -254,7 +253,7 @@ constructor(
                     label = "EditModeAnimatedContent",
                 ) { editing ->
                     if (editing) {
-                        val qqsPadding by viewModel.qqsHeaderHeight.collectAsStateWithLifecycle()
+                        val qqsPadding = viewModel.qqsHeaderHeight
                         EditMode(
                             viewModel = viewModel.containerViewModel.editModeViewModel,
                             modifier =
@@ -283,7 +282,7 @@ constructor(
     private fun CollapsableQuickSettingsSTL() {
         val sceneState = remember {
             MutableSceneTransitionLayoutState(
-                viewModel.expansionState.value.toIdleSceneKey(),
+                viewModel.expansionState.toIdleSceneKey(),
                 transitions =
                     transitions {
                         from(QuickQuickSettings, QuickSettings) {
@@ -294,7 +293,10 @@ constructor(
         }
 
         LaunchedEffect(Unit) {
-            synchronizeQsState(sceneState, viewModel.expansionState.map { it.progress })
+            synchronizeQsState(
+                sceneState,
+                snapshotFlow { viewModel.expansionState }.map { it.progress },
+            )
         }
 
         SceneTransitionLayout(state = sceneState, modifier = Modifier.fillMaxSize()) {
@@ -329,7 +331,7 @@ constructor(
     }
 
     override fun setHeightOverride(desiredHeight: Int) {
-        viewModel.heightOverrideValue = desiredHeight
+        viewModel.heightOverride = desiredHeight
     }
 
     override fun setHeaderClickable(qsExpansionEnabled: Boolean) {
@@ -349,7 +351,7 @@ constructor(
     }
 
     override fun setExpanded(qsExpanded: Boolean) {
-        viewModel.isQSExpanded = qsExpanded
+        viewModel.isQsExpanded = qsExpanded
     }
 
     override fun setListening(listening: Boolean) {
@@ -357,7 +359,7 @@ constructor(
     }
 
     override fun setQsVisible(qsVisible: Boolean) {
-        viewModel.isQSVisible = qsVisible
+        viewModel.isQsVisible = qsVisible
     }
 
     override fun isShowingDetail(): Boolean {
@@ -378,9 +380,9 @@ constructor(
         headerTranslation: Float,
         squishinessFraction: Float,
     ) {
-        viewModel.qsExpansionValue = qsExpansionFraction
-        viewModel.panelExpansionFractionValue = panelExpansionFraction
-        viewModel.squishinessFractionValue = squishinessFraction
+        viewModel.setQsExpansionValue(qsExpansionFraction)
+        viewModel.panelExpansionFraction = panelExpansionFraction
+        viewModel.squishinessFraction = squishinessFraction
 
         // TODO(b/353254353) Handle header translation
     }
@@ -415,8 +417,8 @@ constructor(
         // TODO (b/353253280)
     }
 
-    override fun setInSplitShade(shouldTranslate: Boolean) {
-        // TODO (b/356435605)
+    override fun setInSplitShade(isInSplitShade: Boolean) {
+        viewModel.isInSplitShade = isInSplitShade
     }
 
     override fun setTransitionToFullShadeProgress(
@@ -425,9 +427,9 @@ constructor(
         qsSquishinessFraction: Float,
     ) {
         viewModel.isTransitioningToFullShade = isTransitioningToFullShade
-        viewModel.lockscreenToShadeProgressValue = qsTransitionFraction
+        viewModel.lockscreenToShadeProgress = qsTransitionFraction
         if (isTransitioningToFullShade) {
-            viewModel.squishinessFractionValue = qsSquishinessFraction
+            viewModel.squishinessFraction = qsSquishinessFraction
         }
     }
 
@@ -452,7 +454,7 @@ constructor(
     }
 
     override fun isFullyCollapsed(): Boolean {
-        return viewModel.qsExpansionValue <= 0f
+        return viewModel.isQsFullyCollapsed
     }
 
     override fun setCollapsedMediaVisibilityChangedListener(listener: Consumer<Boolean>?) {
@@ -468,7 +470,7 @@ constructor(
     }
 
     override fun setIsNotificationPanelFullWidth(isFullWidth: Boolean) {
-        viewModel.isSmallScreenValue = isFullWidth
+        viewModel.isSmallScreen = isFullWidth
     }
 
     override fun getHeaderTop(): Int {
@@ -522,7 +524,7 @@ constructor(
 
     @Composable
     private fun SceneScope.QuickQuickSettingsElement() {
-        val qqsPadding by viewModel.qqsHeaderHeight.collectAsStateWithLifecycle()
+        val qqsPadding = viewModel.qqsHeaderHeight
         val bottomPadding = dimensionResource(id = R.dimen.qqs_layout_padding_bottom)
         DisposableEffect(Unit) {
             qqsVisible.value = true
@@ -559,8 +561,7 @@ constructor(
                         }
                         .padding(top = { qqsPadding }, bottom = { bottomPadding.roundToPx() })
             ) {
-                val qsEnabled by viewModel.qsEnabled.collectAsStateWithLifecycle()
-                if (qsEnabled) {
+                if (viewModel.isQsEnabled) {
                     QuickQuickSettings(
                         viewModel = viewModel.containerViewModel.quickQuickSettingsViewModel,
                         modifier =
@@ -583,7 +584,7 @@ constructor(
 
     @Composable
     private fun SceneScope.QuickSettingsElement() {
-        val qqsPadding by viewModel.qqsHeaderHeight.collectAsStateWithLifecycle()
+        val qqsPadding = viewModel.qqsHeaderHeight
         val qsExtraPadding = dimensionResource(R.dimen.qs_panel_padding_top)
         Column(
             modifier =
@@ -591,8 +592,7 @@ constructor(
                     stringResource(id = R.string.accessibility_quick_settings_collapse)
                 )
         ) {
-            val qsEnabled by viewModel.qsEnabled.collectAsStateWithLifecycle()
-            if (qsEnabled) {
+            if (viewModel.isQsEnabled) {
                 Box(
                     modifier =
                         Modifier.element(ElementKeys.QuickSettingsContent).fillMaxSize().weight(1f)
