@@ -54,6 +54,8 @@ import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.notification.ConversationNotificationProcessor;
 import com.android.systemui.statusbar.notification.InflationException;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.promoted.PromotedNotificationContentExtractor;
+import com.android.systemui.statusbar.notification.promoted.shared.model.PromotedNotificationContentModel;
 import com.android.systemui.statusbar.notification.row.shared.AsyncGroupHeaderViewInflation;
 import com.android.systemui.statusbar.notification.row.shared.AsyncHybridViewInflation;
 import com.android.systemui.statusbar.notification.row.shared.LockscreenOtpRedaction;
@@ -92,6 +94,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
     private final SmartReplyStateInflater mSmartReplyStateInflater;
     private final NotifLayoutInflaterFactory.Provider mNotifLayoutInflaterFactoryProvider;
     private final HeadsUpStyleProvider mHeadsUpStyleProvider;
+    private final PromotedNotificationContentExtractor mPromotedNotificationContentExtractor;
 
     private final NotificationRowContentBinderLogger mLogger;
 
@@ -105,6 +108,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
             SmartReplyStateInflater smartRepliesInflater,
             NotifLayoutInflaterFactory.Provider notifLayoutInflaterFactoryProvider,
             HeadsUpStyleProvider headsUpStyleProvider,
+            PromotedNotificationContentExtractor promotedNotificationContentExtractor,
             NotificationRowContentBinderLogger logger) {
         NotificationRowContentBinderRefactor.assertInLegacyMode();
         mRemoteViewCache = remoteViewCache;
@@ -115,6 +119,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
         mSmartReplyStateInflater = smartRepliesInflater;
         mNotifLayoutInflaterFactoryProvider = notifLayoutInflaterFactoryProvider;
         mHeadsUpStyleProvider = headsUpStyleProvider;
+        mPromotedNotificationContentExtractor = promotedNotificationContentExtractor;
         mLogger = logger;
     }
 
@@ -165,6 +170,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                 mSmartReplyStateInflater,
                 mNotifLayoutInflaterFactoryProvider,
                 mHeadsUpStyleProvider,
+                mPromotedNotificationContentExtractor,
                 mLogger);
         if (mInflateSynchronously) {
             task.onPostExecute(task.doInBackground());
@@ -913,6 +919,11 @@ public class NotificationContentInflater implements NotificationRowContentBinder
         NotificationContentView privateLayout = row.getPrivateLayout();
         NotificationContentView publicLayout = row.getPublicLayout();
         logger.logAsyncTaskProgress(entry, "finishing");
+
+        if (PromotedNotificationContentModel.featureFlagEnabled()) {
+            entry.setPromotedNotificationContentModel(result.mExtractedPromotedNotificationContent);
+        }
+
         boolean setRepliesAndActions = true;
         if ((reInflateFlags & FLAG_CONTENT_VIEW_CONTRACTED) != 0) {
             if (result.inflatedContentView != null) {
@@ -1123,6 +1134,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
         private final SmartReplyStateInflater mSmartRepliesInflater;
         private final NotifLayoutInflaterFactory.Provider mNotifLayoutInflaterFactoryProvider;
         private final HeadsUpStyleProvider mHeadsUpStyleProvider;
+        private final PromotedNotificationContentExtractor mPromotedNotificationContentExtractor;
         private final NotificationRowContentBinderLogger mLogger;
 
         private AsyncInflationTask(
@@ -1142,6 +1154,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                 SmartReplyStateInflater smartRepliesInflater,
                 NotifLayoutInflaterFactory.Provider notifLayoutInflaterFactoryProvider,
                 HeadsUpStyleProvider headsUpStyleProvider,
+                PromotedNotificationContentExtractor promotedNotificationContentExtractor,
                 NotificationRowContentBinderLogger logger) {
             mEntry = entry;
             mRow = row;
@@ -1160,6 +1173,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
             mIsMediaInQS = isMediaFlagEnabled;
             mNotifLayoutInflaterFactoryProvider = notifLayoutInflaterFactoryProvider;
             mHeadsUpStyleProvider = headsUpStyleProvider;
+            mPromotedNotificationContentExtractor = promotedNotificationContentExtractor;
             mLogger = logger;
             entry.setInflationTask(this);
         }
@@ -1276,6 +1290,14 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                         );
             }
 
+            if (PromotedNotificationContentModel.featureFlagEnabled()) {
+                mLogger.logAsyncTaskProgress(mEntry, "extracting promoted notification content");
+                result.mExtractedPromotedNotificationContent = mPromotedNotificationContentExtractor
+                        .extractContent(mEntry, recoveredBuilder);
+                mLogger.logAsyncTaskProgress(mEntry, "extracted promoted notification content: "
+                        + result.mExtractedPromotedNotificationContent);
+            }
+
             mLogger.logAsyncTaskProgress(mEntry,
                     "getting row image resolver (on wrong thread!)");
             final NotificationInlineImageResolver imageResolver = mRow.getImageResolver();
@@ -1377,6 +1399,8 @@ public class NotificationContentInflater implements NotificationRowContentBinder
 
     @VisibleForTesting
     static class InflationProgress {
+        PromotedNotificationContentModel mExtractedPromotedNotificationContent;
+
         private RemoteViews newContentView;
         private RemoteViews newHeadsUpView;
         private RemoteViews newExpandedView;

@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.notification.promoted
 
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.log.logcatLogBuffer
 
-var Kosmos.promotedNotificationsProvider: PromotedNotificationsProvider by
-    Kosmos.Fixture { PromotedNotificationsProviderImpl() }
+val Kosmos.promotedNotificationLogger by
+    Kosmos.Fixture { PromotedNotificationLogger(logcatLogBuffer("PromotedNotifLog")) }

@@ -16,7 +16,14 @@
 
 package com.android.systemui.statusbar.notification.promoted
 
+import android.content.applicationContext
 import com.android.systemui.kosmos.Kosmos
 
-var Kosmos.promotedNotificationsProvider: PromotedNotificationsProvider by
-    Kosmos.Fixture { PromotedNotificationsProviderImpl() }
+var Kosmos.promotedNotificationContentExtractor by
+    Kosmos.Fixture {
+        PromotedNotificationContentExtractor(
+            promotedNotificationsProvider,
+            applicationContext,
+            promotedNotificationLogger,
+        )
+    }
