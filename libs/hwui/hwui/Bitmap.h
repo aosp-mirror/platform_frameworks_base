@@ -37,10 +37,10 @@ class SkWStream;
 namespace android {
 
 enum class PixelStorageType {
-    WrappedPixelRef,
-    Heap,
-    Ashmem,
-    Hardware,
+    WrappedPixelRef = 0,
+    Heap = 1,
+    Ashmem = 2,
+    Hardware = 3,
 };
 
 // TODO: Find a better home for this. It's here because hwui/Bitmap is exported and CanvasTransform
@@ -103,6 +103,10 @@ public:
     void reconfigure(const SkImageInfo& info);
     void setColorSpace(sk_sp<SkColorSpace> colorSpace);
     void setAlphaType(SkAlphaType alphaType);
+
+    uint64_t getId() const {
+        return mId;
+    }
 
     void getSkBitmap(SkBitmap* outBitmap);
 
@@ -228,6 +232,9 @@ private:
     } mPixelStorage;
 
     sk_sp<SkImage> mImage;  // Cache is used only for HW Bitmaps with Skia pipeline.
+
+    uint64_t mId;                // unique ID for this bitmap
+    static uint64_t getId(PixelStorageType type);
 
     // for tracing total number and memory usage of bitmaps
     static std::mutex mLock;

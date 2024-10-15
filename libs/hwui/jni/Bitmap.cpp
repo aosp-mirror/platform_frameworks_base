@@ -196,7 +196,7 @@ jobject createBitmap(JNIEnv* env, Bitmap* bitmap,
         int density) {
     static jmethodID gBitmap_constructorMethodID =
         GetMethodIDOrDie(env, gBitmap_class,
-            "<init>", "(JIIIZ[BLandroid/graphics/NinePatch$InsetStruct;Z)V");
+            "<init>", "(JJIIIZ[BLandroid/graphics/NinePatch$InsetStruct;Z)V");
 
     bool isMutable = bitmapCreateFlags & kBitmapCreateFlag_Mutable;
     bool isPremultiplied = bitmapCreateFlags & kBitmapCreateFlag_Premultiplied;
@@ -209,7 +209,8 @@ jobject createBitmap(JNIEnv* env, Bitmap* bitmap,
         bitmapWrapper->bitmap().setImmutable();
     }
     jobject obj = env->NewObject(gBitmap_class, gBitmap_constructorMethodID,
-            reinterpret_cast<jlong>(bitmapWrapper), bitmap->width(), bitmap->height(), density,
+            static_cast<jlong>(bitmap->getId()), reinterpret_cast<jlong>(bitmapWrapper),
+            bitmap->width(), bitmap->height(), density,
             isPremultiplied, ninePatchChunk, ninePatchInsets, fromMalloc);
 
     if (env->ExceptionCheck() != 0) {
