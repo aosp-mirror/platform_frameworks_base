@@ -82,12 +82,12 @@ package android.database {
 package android.graphics {
 
   @Deprecated public class AvoidXfermode extends android.graphics.Xfermode {
-    ctor public AvoidXfermode(int, int, android.graphics.AvoidXfermode.Mode);
+    ctor @Deprecated public AvoidXfermode(int, int, android.graphics.AvoidXfermode.Mode);
   }
 
-  public enum AvoidXfermode.Mode {
-    enum_constant public static final android.graphics.AvoidXfermode.Mode AVOID;
-    enum_constant public static final android.graphics.AvoidXfermode.Mode TARGET;
+  @Deprecated public enum AvoidXfermode.Mode {
+    enum_constant @Deprecated public static final android.graphics.AvoidXfermode.Mode AVOID;
+    enum_constant @Deprecated public static final android.graphics.AvoidXfermode.Mode TARGET;
   }
 
   public class Canvas {
@@ -102,9 +102,9 @@ package android.graphics {
   }
 
   @Deprecated public class LayerRasterizer extends android.graphics.Rasterizer {
-    ctor public LayerRasterizer();
-    method public void addLayer(android.graphics.Paint, float, float);
-    method public void addLayer(android.graphics.Paint);
+    ctor @Deprecated public LayerRasterizer();
+    method @Deprecated public void addLayer(android.graphics.Paint, float, float);
+    method @Deprecated public void addLayer(android.graphics.Paint);
   }
 
   public class Paint {
@@ -118,7 +118,7 @@ package android.graphics {
   }
 
   @Deprecated public class PixelXorXfermode extends android.graphics.Xfermode {
-    ctor public PixelXorXfermode(int);
+    ctor @Deprecated public PixelXorXfermode(int);
   }
 
   public class Rasterizer {
@@ -170,14 +170,14 @@ package android.media.tv {
 package android.net {
 
   @Deprecated public class NetworkBadging {
-    method @NonNull public static android.graphics.drawable.Drawable getWifiIcon(@IntRange(from=0, to=4) int, int, @Nullable android.content.res.Resources.Theme);
-    field public static final int BADGING_4K = 30; // 0x1e
-    field public static final int BADGING_HD = 20; // 0x14
-    field public static final int BADGING_NONE = 0; // 0x0
-    field public static final int BADGING_SD = 10; // 0xa
+    method @Deprecated @NonNull public static android.graphics.drawable.Drawable getWifiIcon(@IntRange(from=0, to=4) int, int, @Nullable android.content.res.Resources.Theme);
+    field @Deprecated public static final int BADGING_4K = 30; // 0x1e
+    field @Deprecated public static final int BADGING_HD = 20; // 0x14
+    field @Deprecated public static final int BADGING_NONE = 0; // 0x0
+    field @Deprecated public static final int BADGING_SD = 10; // 0xa
   }
 
-  @IntDef({0x0, 0xa, 0x14, 0x1e}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface NetworkBadging.Badging {
+  @Deprecated @IntDef({0x0, 0xa, 0x14, 0x1e}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface NetworkBadging.Badging {
   }
 
   public final class Proxy {
@@ -304,14 +304,14 @@ package android.provider {
 
   @Deprecated public static final class ContactsContract.RawContacts.StreamItems implements android.provider.BaseColumns android.provider.ContactsContract.StreamItemsColumns {
     field @Deprecated public static final String CONTENT_DIRECTORY = "stream_items";
-    field public static final String _COUNT = "_count";
-    field public static final String _ID = "_id";
+    field @Deprecated public static final String _COUNT = "_count";
+    field @Deprecated public static final String _ID = "_id";
   }
 
   @Deprecated public static final class ContactsContract.StreamItemPhotos implements android.provider.BaseColumns android.provider.ContactsContract.StreamItemPhotosColumns {
     field @Deprecated public static final String PHOTO = "photo";
-    field public static final String _COUNT = "_count";
-    field public static final String _ID = "_id";
+    field @Deprecated public static final String _COUNT = "_count";
+    field @Deprecated public static final String _ID = "_id";
   }
 
   @Deprecated protected static interface ContactsContract.StreamItemPhotosColumns {
@@ -332,16 +332,16 @@ package android.provider {
     field @Deprecated public static final String CONTENT_TYPE = "vnd.android.cursor.dir/stream_item";
     field @Deprecated public static final android.net.Uri CONTENT_URI;
     field @Deprecated public static final String MAX_ITEMS = "max_items";
-    field public static final String _COUNT = "_count";
-    field public static final String _ID = "_id";
+    field @Deprecated public static final String _COUNT = "_count";
+    field @Deprecated public static final String _ID = "_id";
   }
 
   @Deprecated public static final class ContactsContract.StreamItems.StreamItemPhotos implements android.provider.BaseColumns android.provider.ContactsContract.StreamItemPhotosColumns {
     field @Deprecated public static final String CONTENT_DIRECTORY = "photo";
     field @Deprecated public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/stream_item_photo";
     field @Deprecated public static final String CONTENT_TYPE = "vnd.android.cursor.dir/stream_item_photo";
-    field public static final String _COUNT = "_count";
-    field public static final String _ID = "_id";
+    field @Deprecated public static final String _COUNT = "_count";
+    field @Deprecated public static final String _ID = "_id";
   }
 
   @Deprecated protected static interface ContactsContract.StreamItemsColumns {
@@ -447,14 +447,14 @@ package android.text.style {
 package android.util {
 
   @Deprecated public class FloatMath {
-    method public static float ceil(float);
-    method public static float cos(float);
-    method public static float exp(float);
-    method public static float floor(float);
-    method public static float hypot(float, float);
-    method public static float pow(float, float);
-    method public static float sin(float);
-    method public static float sqrt(float);
+    method @Deprecated public static float ceil(float);
+    method @Deprecated public static float cos(float);
+    method @Deprecated public static float exp(float);
+    method @Deprecated public static float floor(float);
+    method @Deprecated public static float hypot(float, float);
+    method @Deprecated public static float pow(float, float);
+    method @Deprecated public static float sin(float);
+    method @Deprecated public static float sqrt(float);
   }
 
 }
