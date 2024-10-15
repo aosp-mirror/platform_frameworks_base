@@ -20,7 +20,8 @@ import com.android.systemui.kosmos.Kosmos
 
 val Kosmos.fakeStatusBarWindowController by Kosmos.Fixture { FakeStatusBarWindowController() }
 
-var Kosmos.statusBarWindowController by Kosmos.Fixture { fakeStatusBarWindowController }
+var Kosmos.statusBarWindowController: StatusBarWindowController by
+    Kosmos.Fixture { fakeStatusBarWindowController }
 
 val Kosmos.fakeStatusBarWindowControllerStore by
     Kosmos.Fixture { FakeStatusBarWindowControllerStore() }

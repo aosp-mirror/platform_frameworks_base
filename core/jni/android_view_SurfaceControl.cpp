@@ -115,6 +115,7 @@ static struct {
     jfieldID supportedDisplayModes;
     jfieldID activeDisplayModeId;
     jfieldID renderFrameRate;
+    jfieldID hasArrSupport;
     jfieldID supportedColorModes;
     jfieldID activeColorMode;
     jfieldID hdrCapabilities;
@@ -1453,7 +1454,7 @@ static jobject nativeGetDynamicDisplayInfo(JNIEnv* env, jclass clazz, jlong disp
     env->SetIntField(object, gDynamicDisplayInfoClassInfo.activeDisplayModeId,
                      info.activeDisplayModeId);
     env->SetFloatField(object, gDynamicDisplayInfoClassInfo.renderFrameRate, info.renderFrameRate);
-
+    env->SetBooleanField(object, gDynamicDisplayInfoClassInfo.hasArrSupport, info.hasArrSupport);
     jintArray colorModesArray = env->NewIntArray(info.supportedColorModes.size());
     if (colorModesArray == NULL) {
         jniThrowException(env, "java/lang/OutOfMemoryError", NULL);
@@ -2641,6 +2642,8 @@ int register_android_view_SurfaceControl(JNIEnv* env)
             GetFieldIDOrDie(env, dynamicInfoClazz, "activeDisplayModeId", "I");
     gDynamicDisplayInfoClassInfo.renderFrameRate =
             GetFieldIDOrDie(env, dynamicInfoClazz, "renderFrameRate", "F");
+    gDynamicDisplayInfoClassInfo.hasArrSupport =
+            GetFieldIDOrDie(env, dynamicInfoClazz, "hasArrSupport", "Z");
     gDynamicDisplayInfoClassInfo.supportedColorModes =
             GetFieldIDOrDie(env, dynamicInfoClazz, "supportedColorModes", "[I");
     gDynamicDisplayInfoClassInfo.activeColorMode =

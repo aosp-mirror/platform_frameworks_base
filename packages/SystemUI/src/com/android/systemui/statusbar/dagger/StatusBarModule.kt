@@ -77,16 +77,6 @@ abstract class StatusBarModule {
 
         @Provides
         @SysUISingleton
-        fun defaultStatusBarWindowController(
-            context: Context,
-            viewCaptureAwareWindowManager: ViewCaptureAwareWindowManager,
-            factory: StatusBarWindowControllerImpl.Factory,
-        ): StatusBarWindowController {
-            return factory.create(context, viewCaptureAwareWindowManager)
-        }
-
-        @Provides
-        @SysUISingleton
         fun windowControllerStore(
             multiDisplayImplLazy: Lazy<MultiDisplayStatusBarWindowControllerStore>,
             singleDisplayImplLazy: Lazy<SingleDisplayStatusBarWindowControllerStore>,

@@ -216,6 +216,7 @@ import android.app.StatsManager;
 import android.app.UriGrantsManager;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.app.backup.BackupManager;
+import android.app.backup.BackupRestoreEventLogger;
 import android.app.compat.CompatChanges;
 import android.app.role.OnRoleHoldersChangedListener;
 import android.app.role.RoleManager;
@@ -462,7 +463,7 @@ public class NotificationManagerService extends SystemService {
     static final int INVALID_UID = -1;
     static final String ROOT_PKG = "root";
 
-    static final String[] ALLOWED_ADJUSTMENTS = new String[] {
+    static final String[] DEFAULT_ALLOWED_ADJUSTMENTS = new String[] {
             Adjustment.KEY_PEOPLE,
             Adjustment.KEY_SNOOZE_CRITERIA,
             Adjustment.KEY_USER_SENTIMENT,
@@ -1102,7 +1103,8 @@ public class NotificationManagerService extends SystemService {
         return false;
     }
 
-    void readPolicyXml(InputStream stream, boolean forRestore, int userId)
+    void readPolicyXml(InputStream stream, boolean forRestore, int userId,
+            BackupRestoreEventLogger logger)
             throws XmlPullParserException, NumberFormatException, IOException {
         final TypedXmlPullParser parser;
         if (forRestore) {
@@ -1189,7 +1191,7 @@ public class NotificationManagerService extends SystemService {
             InputStream infile = null;
             try {
                 infile = mPolicyFile.openRead();
-                readPolicyXml(infile, false /*forRestore*/, USER_ALL);
+                readPolicyXml(infile, false /*forRestore*/, USER_ALL, null);
 
                 // We re-load the default dnd packages to allow the newly added and denined.
                 final boolean isWatch = mPackageManagerClient.hasSystemFeature(
@@ -1239,7 +1241,7 @@ public class NotificationManagerService extends SystemService {
                 }
 
                 try {
-                    writePolicyXml(stream, false /*forBackup*/, USER_ALL);
+                    writePolicyXml(stream, false /*forBackup*/, USER_ALL, null);
                     mPolicyFile.finishWrite(stream);
                 } catch (IOException e) {
                     Slog.w(TAG, "Failed to save policy file, restoring backup", e);
@@ -1250,8 +1252,8 @@ public class NotificationManagerService extends SystemService {
         }
     }
 
-    private void writePolicyXml(OutputStream stream, boolean forBackup, int userId)
-            throws IOException {
+    private void writePolicyXml(OutputStream stream, boolean forBackup, int userId,
+            BackupRestoreEventLogger logger)  throws IOException {
         final TypedXmlSerializer out;
         if (forBackup) {
             out = Xml.newFastSerializer();
@@ -4119,6 +4121,24 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         @FlaggedApi(android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION)
+        public void allowAssistantAdjustment(String adjustmentType) {
+            checkCallerIsSystemOrSystemUiOrShell();
+            mAssistants.allowAdjustmentType(adjustmentType);
+
+            handleSavePolicyFile();
+        }
+
+        @Override
+        @FlaggedApi(android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION)
+        public void disallowAssistantAdjustment(String adjustmentType) {
+            checkCallerIsSystemOrSystemUiOrShell();
+            mAssistants.disallowAdjustmentType(adjustmentType);
+
+            handleSavePolicyFile();
+        }
+
+        @Override
+        @FlaggedApi(android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION)
         public void setAdjustmentTypeSupportedState(INotificationListener token,
                 @Adjustment.Keys String key, boolean supported) {
             final long identity = Binder.clearCallingIdentity();
@@ -4133,6 +4153,7 @@ public class NotificationManagerService extends SystemService {
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
+            handleSavePolicyFile();
         }
 
         @Override
@@ -4891,7 +4912,7 @@ public class NotificationManagerService extends SystemService {
                     throw new SecurityException("Not currently an assistant");
             }
 
-            return mAssistants.getAllowedAssistantAdjustments();
+            return new ArrayList<>(mAssistants.getAllowedAssistantAdjustments());
         }
 
         /**
@@ -6171,7 +6192,7 @@ public class NotificationManagerService extends SystemService {
             if (DBG) Slog.d(TAG, "getBackupPayload u=" + user);
             final ByteArrayOutputStream baos = new ByteArrayOutputStream();
             try {
-                writePolicyXml(baos, true /*forBackup*/, user);
+                writePolicyXml(baos, true /*forBackup*/, user, null);
                 return baos.toByteArray();
             } catch (IOException e) {
                 Slog.w(TAG, "getBackupPayload: error writing payload for user " + user, e);
@@ -6190,7 +6211,7 @@ public class NotificationManagerService extends SystemService {
             }
             final ByteArrayInputStream bais = new ByteArrayInputStream(payload);
             try {
-                readPolicyXml(bais, true /*forRestore*/, user);
+                readPolicyXml(bais, true /*forRestore*/, user, null);
                 handleSavePolicyFile();
             } catch (NumberFormatException | XmlPullParserException | IOException e) {
                 Slog.w(TAG, "applyRestore: error reading payload", e);
@@ -7391,6 +7412,37 @@ public class NotificationManagerService extends SystemService {
      * The private API only accessible to the system process.
      */
     private final NotificationManagerInternal mInternalService = new NotificationManagerInternal() {
+
+        public byte[] getBackupPayload(int user, BackupRestoreEventLogger logger) {
+            checkCallerIsSystem();
+            if (DBG) Slog.d(TAG, "getBackupPayload u=" + user);
+            final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            try {
+                writePolicyXml(baos, true /*forBackup*/, user, logger);
+                return baos.toByteArray();
+            } catch (IOException e) {
+                Slog.w(TAG, "getBackupPayload: error writing payload for user " + user, e);
+            }
+            return null;
+        }
+
+        @Override
+        public void applyRestore(byte[] payload, int user, BackupRestoreEventLogger logger) {
+            checkCallerIsSystem();
+            if (DBG) Slog.d(TAG, "applyRestore u=" + user + " payload="
+                    + (payload != null ? new String(payload, StandardCharsets.UTF_8) : null));
+            if (payload == null) {
+                Slog.w(TAG, "applyRestore: no payload to restore for user " + user);
+                return;
+            }
+            final ByteArrayInputStream bais = new ByteArrayInputStream(payload);
+            try {
+                readPolicyXml(bais, true /*forRestore*/, user, logger);
+                handleSavePolicyFile();
+            } catch (NumberFormatException | XmlPullParserException | IOException e) {
+                Slog.w(TAG, "applyRestore: error reading payload", e);
+            }
+        }
 
         @Override
         public NotificationChannel getNotificationChannel(String pkg, int uid, String
@@ -11395,12 +11447,16 @@ public class NotificationManagerService extends SystemService {
         static final String TAG_ENABLED_NOTIFICATION_ASSISTANTS = "enabled_assistants";
 
         private static final String ATT_TYPES = "types";
+        private static final String ATT_DENIED = "denied_adjustments";
         private static final String ATT_NAS_UNSUPPORTED = "unsupported_adjustments";
 
         private final Object mLock = new Object();
 
         @GuardedBy("mLock")
         private Set<String> mAllowedAdjustments = new ArraySet<>();
+
+        @GuardedBy("mLock")
+        private Set<String> mDeniedAdjustments = new ArraySet<>();
 
         @GuardedBy("mLock")
         private Map<Integer, HashSet<String>> mNasUnsupported = new ArrayMap<>();
@@ -11474,9 +11530,11 @@ public class NotificationManagerService extends SystemService {
                 IPackageManager pm) {
             super(context, lock, up, pm);
 
-            // Add all default allowed adjustment types.
-            for (int i = 0; i < ALLOWED_ADJUSTMENTS.length; i++) {
-                mAllowedAdjustments.add(ALLOWED_ADJUSTMENTS[i]);
+            if (!notificationClassification()) {
+                // Add all default allowed adjustment types.
+                for (int i = 0; i < DEFAULT_ALLOWED_ADJUSTMENTS.length; i++) {
+                    mAllowedAdjustments.add(DEFAULT_ALLOWED_ADJUSTMENTS[i]);
+                }
             }
         }
 
@@ -11539,17 +11597,28 @@ public class NotificationManagerService extends SystemService {
             return android.Manifest.permission.REQUEST_NOTIFICATION_ASSISTANT_SERVICE;
         }
 
-        protected List<String> getAllowedAssistantAdjustments() {
+        protected Set<String> getAllowedAssistantAdjustments() {
             synchronized (mLock) {
-                List<String> types = new ArrayList<>();
-                types.addAll(mAllowedAdjustments);
-                return types;
+                if (notificationClassification()) {
+                    Set<String> types = new HashSet<>(Set.of(DEFAULT_ALLOWED_ADJUSTMENTS));
+                    types.removeAll(mDeniedAdjustments);
+                    return types;
+                } else {
+                    Set<String> types = new HashSet<>();
+                    types.addAll(mAllowedAdjustments);
+                    return types;
+                }
             }
         }
 
         protected boolean isAdjustmentAllowed(String type) {
             synchronized (mLock) {
-                return mAllowedAdjustments.contains(type);
+                if (notificationClassification()) {
+                    return List.of(DEFAULT_ALLOWED_ADJUSTMENTS).contains(type)
+                            && !mDeniedAdjustments.contains(type);
+                } else {
+                    return mAllowedAdjustments.contains(type);
+                }
             }
         }
 
@@ -11911,6 +11980,30 @@ public class NotificationManagerService extends SystemService {
 
         @FlaggedApi(android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION)
         @GuardedBy("mNotificationLock")
+        public void allowAdjustmentType(@Adjustment.Keys String key) {
+            if (!android.service.notification.Flags.notificationClassification()) {
+                return;
+            }
+            mDeniedAdjustments.remove(key);
+            for (final ManagedServiceInfo info : NotificationAssistants.this.getServices()) {
+                mHandler.post(() -> notifyCapabilitiesChanged(info));
+            }
+        }
+
+        @FlaggedApi(android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION)
+        @GuardedBy("mNotificationLock")
+        public void disallowAdjustmentType(@Adjustment.Keys String key) {
+            if (!android.service.notification.Flags.notificationClassification()) {
+                return;
+            }
+            mDeniedAdjustments.add(key);
+            for (final ManagedServiceInfo info : NotificationAssistants.this.getServices()) {
+                mHandler.post(() -> notifyCapabilitiesChanged(info));
+            }
+        }
+
+        @FlaggedApi(android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION)
+        @GuardedBy("mNotificationLock")
         public void setAdjustmentTypeSupportedState(ManagedServiceInfo info,
                 @Adjustment.Keys String key, boolean supported) {
             if (!android.service.notification.Flags.notificationClassification()) {
@@ -11963,6 +12056,43 @@ public class NotificationManagerService extends SystemService {
                         mNasUnsupported.put(approvedUserId, new HashSet(List.of(types.split(","))));
                     }
                 }
+            }
+        }
+
+        @Override
+        protected void writeExtraXmlTags(TypedXmlSerializer out) throws IOException {
+            if (!android.service.notification.Flags.notificationClassification()) {
+                return;
+            }
+            synchronized (mLock) {
+                out.startTag(null, ATT_DENIED);
+                out.attribute(null, ATT_TYPES, TextUtils.join(",", mDeniedAdjustments));
+                out.endTag(null, ATT_DENIED);
+            }
+        }
+
+        @Override
+        protected void readExtraTag(String tag, TypedXmlPullParser parser) throws IOException {
+            if (!android.service.notification.Flags.notificationClassification()) {
+                return;
+            }
+            if (ATT_DENIED.equals(tag)) {
+                final String types = XmlUtils.readStringAttribute(parser, ATT_TYPES);
+                synchronized (mLock) {
+                    mDeniedAdjustments.clear();
+                    if (!TextUtils.isEmpty(types)) {
+                        mDeniedAdjustments.addAll(Arrays.asList(types.split(",")));
+                    }
+                }
+            }
+        }
+
+        private void notifyCapabilitiesChanged(final ManagedServiceInfo info) {
+            final INotificationListener assistant = (INotificationListener) info.service;
+            try {
+                assistant.onAllowedAdjustmentsChanged();
+            } catch (RemoteException ex) {
+                Slog.e(TAG, "unable to notify assistant (capabilities): " + info, ex);
             }
         }
     }

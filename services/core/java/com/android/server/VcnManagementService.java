@@ -48,7 +48,6 @@ import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
-import android.net.vcn.Flags;
 import android.net.vcn.IVcnManagementService;
 import android.net.vcn.IVcnStatusCallback;
 import android.net.vcn.IVcnUnderlyingNetworkPolicyListener;
@@ -447,22 +446,16 @@ public class VcnManagementService extends IVcnManagementService.Stub {
         }
 
         final UserHandle userHandle = UserHandle.getUserHandleForUid(uid);
+        final UserManager userManager = mContext.getSystemService(UserManager.class);
 
-        if (Flags.enforceMainUser()) {
-            final UserManager userManager = mContext.getSystemService(UserManager.class);
-
-            Binder.withCleanCallingIdentity(
-                    () -> {
-                        if (!Objects.equals(userManager.getMainUser(), userHandle)) {
-                            throw new SecurityException(
-                                    "VcnManagementService can only be used by callers running as"
-                                            + " the main user");
-                        }
-                    });
-        } else if (!userHandle.isSystem()) {
-            throw new SecurityException(
-                    "VcnManagementService can only be used by callers running as the primary user");
-        }
+        Binder.withCleanCallingIdentity(
+                () -> {
+                    if (!Objects.equals(userManager.getMainUser(), userHandle)) {
+                        throw new SecurityException(
+                                "VcnManagementService can only be used by callers running as"
+                                        + " the main user");
+                    }
+                });
     }
 
     private void enforceCallingUserAndCarrierPrivilege(

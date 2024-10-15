@@ -350,7 +350,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
         }
         cancelPhysicsAnimation();
         mMenuController.hideMenu(ANIM_TYPE_DISMISS, false /* resize */);
-        // mPipTaskOrganizer.removePip();
+        mPipScheduler.removePipAfterAnimation();
     }
 
     /** Sets the movement bounds to use to constrain PIP position animations. */

@@ -42,7 +42,8 @@ private val TAG = SimpleDigitalHandLayerController::class.simpleName!!
 
 open class SimpleDigitalHandLayerController<T>(
     private val ctx: Context,
-    private val assets: AssetLoader,
+    private val resources: Resources,
+    private val assets: AssetLoader, // TODO(b/364680879): Remove and replace w/ resources
     private val layer: DigitalHandLayer,
     override val view: T,
     messageBuffer: MessageBuffer,
@@ -68,7 +69,7 @@ open class SimpleDigitalHandLayerController<T>(
         view.layoutParams =
             RelativeLayout.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
+                ViewGroup.LayoutParams.WRAP_CONTENT,
             )
         if (layer.alignment != null) {
             layer.alignment.verticalAlignment?.let { view.verticalAlignment = it }

@@ -52,6 +52,7 @@ import com.android.systemui.statusbar.notification.shared.CallType
 import com.android.systemui.statusbar.phone.ongoingcall.data.repository.ongoingCallRepository
 import com.android.systemui.statusbar.phone.ongoingcall.shared.model.OngoingCallModel
 import com.android.systemui.statusbar.window.StatusBarWindowController
+import com.android.systemui.statusbar.window.StatusBarWindowControllerStore
 import com.android.systemui.util.time.fakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -93,6 +94,7 @@ class OngoingCallControllerViaRepoTest : SysuiTestCase() {
     private val mockActivityStarter = kosmos.activityStarter
     private val mockIActivityManager = mock<IActivityManager>()
     private val mockStatusBarWindowController = mock<StatusBarWindowController>()
+    private val mockStatusBarWindowControllerStore = mock<StatusBarWindowControllerStore>()
 
     private lateinit var chipView: View
 
@@ -103,6 +105,8 @@ class OngoingCallControllerViaRepoTest : SysuiTestCase() {
             chipView = LayoutInflater.from(mContext).inflate(R.layout.ongoing_activity_chip, null)
         }
 
+        whenever(mockStatusBarWindowControllerStore.defaultDisplay)
+            .thenReturn(mockStatusBarWindowController)
         controller =
             OngoingCallController(
                 testScope.backgroundScope,
@@ -115,7 +119,7 @@ class OngoingCallControllerViaRepoTest : SysuiTestCase() {
                 mainExecutor,
                 mockIActivityManager,
                 DumpManager(),
-                mockStatusBarWindowController,
+                mockStatusBarWindowControllerStore,
                 mockSwipeStatusBarAwayGestureHandler,
                 statusBarModeRepository,
                 logcatLogBuffer("OngoingCallControllerViaRepoTest"),

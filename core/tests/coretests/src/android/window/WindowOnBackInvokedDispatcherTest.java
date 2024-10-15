@@ -21,6 +21,7 @@ import static android.window.OnBackInvokedDispatcher.PRIORITY_OVERLAY;
 import static android.window.OnBackInvokedDispatcher.PRIORITY_SYSTEM_NAVIGATION_OBSERVER;
 
 import static com.android.window.flags.Flags.FLAG_PREDICTIVE_BACK_PRIORITY_SYSTEM_NAVIGATION_OBSERVER;
+import static com.android.window.flags.Flags.FLAG_PREDICTIVE_BACK_TIMESTAMP_API;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -486,6 +487,7 @@ public class WindowOnBackInvokedDispatcherTest {
     }
 
     @Test
+    @RequiresFlagsDisabled(FLAG_PREDICTIVE_BACK_TIMESTAMP_API)
     public void onBackInvoked_notCalledAfterCallbackUnregistration()
             throws RemoteException, InterruptedException {
         // Setup a callback that unregisters itself after the gesture is finished but before the
@@ -684,6 +686,7 @@ public class WindowOnBackInvokedDispatcherTest {
         return new BackMotionEvent(
                 /* touchX = */ 0,
                 /* touchY = */ 0,
+                /* frameTime = */ 0,
                 /* progress = */ progress,
                 /* triggerBack = */ false,
                 /* swipeEdge = */ BackEvent.EDGE_LEFT,

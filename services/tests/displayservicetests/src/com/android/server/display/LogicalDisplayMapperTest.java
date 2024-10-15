@@ -51,6 +51,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
@@ -209,8 +210,8 @@ public class LogicalDisplayMapperTest {
         when(mResourcesMock.getIntArray(
                 com.android.internal.R.array.config_deviceStatesOnWhichToSleep))
                 .thenReturn(new int[]{0});
-        when(mSyntheticModeManagerMock.createAppSupportedModes(any(), any())).thenAnswer(
-                AdditionalAnswers.returnsSecondArg());
+        when(mSyntheticModeManagerMock.createAppSupportedModes(any(), any(), anyBoolean()))
+                .thenAnswer(AdditionalAnswers.returnsSecondArg());
 
         when(mFlagsMock.isConnectedDisplayManagementEnabled()).thenReturn(false);
         mLooper = new TestLooper();
