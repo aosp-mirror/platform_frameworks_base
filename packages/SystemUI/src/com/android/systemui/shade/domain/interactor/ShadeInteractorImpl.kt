@@ -16,6 +16,7 @@
 
 package com.android.systemui.shade.domain.interactor
 
+import com.android.app.tracing.coroutines.flow.flowName
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
@@ -62,17 +63,20 @@ constructor(
     override val isShadeEnabled: StateFlow<Boolean> =
         disableFlagsRepository.disableFlags
             .map { it.isShadeEnabled() }
+            .flowName("isShadeEnabled")
             .stateIn(scope, SharingStarted.Eagerly, initialValue = false)
 
     override val isQsEnabled: StateFlow<Boolean> =
         disableFlagsRepository.disableFlags
             .map { it.isQuickSettingsEnabled() }
+            .flowName("isQsEnabled")
             .stateIn(scope, SharingStarted.Eagerly, initialValue = false)
 
     override val isAnyFullyExpanded: StateFlow<Boolean> =
         anyExpansion
             .map { it >= 1f }
             .distinctUntilChanged()
+            .flowName("isAnyFullyExpanded")
             .stateIn(scope, SharingStarted.Eagerly, initialValue = false)
 
     override val isShadeFullyExpanded: Flow<Boolean> =
@@ -81,6 +85,7 @@ constructor(
     override val isShadeAnyExpanded: StateFlow<Boolean> =
         baseShadeInteractor.shadeExpansion
             .map { it > 0 }
+            .flowName("isShadeAnyExpanded")
             .stateIn(scope, SharingStarted.Eagerly, false)
 
     override val isShadeFullyCollapsed: Flow<Boolean> =
@@ -88,6 +93,7 @@ constructor(
 
     override val isUserInteracting: StateFlow<Boolean> =
         combine(isUserInteractingWithShade, isUserInteractingWithQs) { shade, qs -> shade || qs }
+            .flowName("isUserInteracting")
             .stateIn(scope, SharingStarted.Eagerly, false)
 
     override val isShadeTouchable: Flow<Boolean> =

@@ -22,7 +22,7 @@ import androidx.compose.foundation.interaction.InteractionSource
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.util.VelocityTracker
 import androidx.compose.ui.unit.Velocity
-import com.android.app.tracing.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.haptics.slider.SeekableSliderTrackerConfig
 import com.android.systemui.haptics.slider.SliderDragVelocityProvider
 import com.android.systemui.haptics.slider.SliderEventType

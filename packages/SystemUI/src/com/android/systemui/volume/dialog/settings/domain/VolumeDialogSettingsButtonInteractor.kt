@@ -17,7 +17,7 @@
 package com.android.systemui.volume.dialog.settings.domain
 
 import android.app.ActivityManager
-import com.android.app.tracing.coroutines.flow.map
+import com.android.app.tracing.coroutines.flow.flowName
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
 import com.android.systemui.volume.Events
 import com.android.systemui.volume.dialog.dagger.scope.VolumeDialog
@@ -30,6 +30,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
 @VolumeDialogScope
@@ -49,6 +50,7 @@ constructor(
                 deviceProvisionedController.isCurrentUserSetup() &&
                     model.lockTaskModeState == ActivityManager.LOCK_TASK_MODE_NONE
             }
+            .flowName("VDSBI#isVisible")
             .stateIn(coroutineScope, SharingStarted.Eagerly, false)
 
     fun onButtonClicked() {
