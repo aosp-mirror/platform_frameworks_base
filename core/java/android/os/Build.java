@@ -1278,6 +1278,41 @@ public class Build {
 
     /** @hide */
     @IntDef(value = {
+        VERSION_CODES_FULL.BASE,
+        VERSION_CODES_FULL.BASE_1_1,
+        VERSION_CODES_FULL.CUPCAKE,
+        VERSION_CODES_FULL.DONUT,
+        VERSION_CODES_FULL.ECLAIR,
+        VERSION_CODES_FULL.ECLAIR_0_1,
+        VERSION_CODES_FULL.ECLAIR_MR1,
+        VERSION_CODES_FULL.FROYO,
+        VERSION_CODES_FULL.GINGERBREAD,
+        VERSION_CODES_FULL.GINGERBREAD_MR1,
+        VERSION_CODES_FULL.HONEYCOMB,
+        VERSION_CODES_FULL.HONEYCOMB_MR1,
+        VERSION_CODES_FULL.HONEYCOMB_MR2,
+        VERSION_CODES_FULL.ICE_CREAM_SANDWICH,
+        VERSION_CODES_FULL.ICE_CREAM_SANDWICH_MR1,
+        VERSION_CODES_FULL.JELLY_BEAN,
+        VERSION_CODES_FULL.JELLY_BEAN_MR1,
+        VERSION_CODES_FULL.JELLY_BEAN_MR2,
+        VERSION_CODES_FULL.KITKAT,
+        VERSION_CODES_FULL.KITKAT_WATCH,
+        VERSION_CODES_FULL.LOLLIPOP,
+        VERSION_CODES_FULL.LOLLIPOP_MR1,
+        VERSION_CODES_FULL.M,
+        VERSION_CODES_FULL.N,
+        VERSION_CODES_FULL.N_MR1,
+        VERSION_CODES_FULL.O,
+        VERSION_CODES_FULL.O_MR1,
+        VERSION_CODES_FULL.P,
+        VERSION_CODES_FULL.Q,
+        VERSION_CODES_FULL.R,
+        VERSION_CODES_FULL.S,
+        VERSION_CODES_FULL.S_V2,
+        VERSION_CODES_FULL.TIRAMISU,
+        VERSION_CODES_FULL.UPSIDE_DOWN_CAKE,
+        VERSION_CODES_FULL.VANILLA_ICE_CREAM,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface SdkIntFull {}
@@ -1299,6 +1334,186 @@ public class Build {
         // Use the last 5 digits for the minor version. This allows the
         // minor version to be set to CUR_DEVELOPMENT.
         private static final int SDK_INT_MULTIPLIER = 100000;
+
+        /**
+         * Android 1.0.
+         */
+        public static final int BASE = VERSION_CODES.BASE * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 2.0.
+         */
+        public static final int BASE_1_1 = VERSION_CODES.BASE_1_1 * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 3.0.
+         */
+        public static final int CUPCAKE = VERSION_CODES.CUPCAKE * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 4.0.
+         */
+        public static final int DONUT = VERSION_CODES.DONUT * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 5.0.
+         */
+        public static final int ECLAIR = VERSION_CODES.ECLAIR * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 6.0.
+         */
+        public static final int ECLAIR_0_1 = VERSION_CODES.ECLAIR_0_1 * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 7.0.
+         */
+        public static final int ECLAIR_MR1 = VERSION_CODES.ECLAIR_MR1 * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 8.0.
+         */
+        public static final int FROYO = VERSION_CODES.FROYO * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 9.0.
+         */
+        public static final int GINGERBREAD = VERSION_CODES.GINGERBREAD * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 10.0.
+         */
+        public static final int GINGERBREAD_MR1 =
+                VERSION_CODES.GINGERBREAD_MR1 * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 11.0.
+         */
+        public static final int HONEYCOMB = VERSION_CODES.HONEYCOMB * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 12.0.
+         */
+        public static final int HONEYCOMB_MR1 = VERSION_CODES.HONEYCOMB_MR1 * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 13.0.
+         */
+        public static final int HONEYCOMB_MR2 = VERSION_CODES.HONEYCOMB_MR2 * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 14.0.
+         */
+        public static final int ICE_CREAM_SANDWICH =
+                VERSION_CODES.ICE_CREAM_SANDWICH * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 15.0.
+         */
+        public static final int ICE_CREAM_SANDWICH_MR1 =
+                VERSION_CODES.ICE_CREAM_SANDWICH_MR1 * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 16.0.
+         */
+        public static final int JELLY_BEAN = VERSION_CODES.JELLY_BEAN * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 17.0.
+         */
+        public static final int JELLY_BEAN_MR1 = VERSION_CODES.JELLY_BEAN_MR1 * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 18.0.
+         */
+        public static final int JELLY_BEAN_MR2 = VERSION_CODES.JELLY_BEAN_MR2 * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 19.0.
+         */
+        public static final int KITKAT = VERSION_CODES.KITKAT * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 20.0.
+         */
+        public static final int KITKAT_WATCH = VERSION_CODES.KITKAT_WATCH * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 21.0.
+         */
+        public static final int LOLLIPOP = VERSION_CODES.LOLLIPOP * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 22.0.
+         */
+        public static final int LOLLIPOP_MR1 = VERSION_CODES.LOLLIPOP_MR1 * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 23.0.
+         */
+        public static final int M = VERSION_CODES.M * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 24.0.
+         */
+        public static final int N = VERSION_CODES.N * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 25.0.
+         */
+        public static final int N_MR1 = VERSION_CODES.N_MR1 * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 26.0.
+         */
+        public static final int O = VERSION_CODES.O * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 27.0.
+         */
+        public static final int O_MR1 = VERSION_CODES.O_MR1 * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 28.0.
+         */
+        public static final int P = VERSION_CODES.P * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 29.0.
+         */
+        public static final int Q = VERSION_CODES.Q * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 30.0.
+         */
+        public static final int R = VERSION_CODES.R * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 31.0.
+         */
+        public static final int S = VERSION_CODES.S * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 32.0.
+         */
+        public static final int S_V2 = VERSION_CODES.S_V2 * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 33.0.
+         */
+        public static final int TIRAMISU = VERSION_CODES.TIRAMISU * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 34.0.
+         */
+        public static final int UPSIDE_DOWN_CAKE =
+                VERSION_CODES.UPSIDE_DOWN_CAKE * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 35.0.
+         */
+        public static final int VANILLA_ICE_CREAM =
+                VERSION_CODES.VANILLA_ICE_CREAM * SDK_INT_MULTIPLIER;
     }
 
     /**
