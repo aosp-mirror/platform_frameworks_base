@@ -247,6 +247,7 @@ public class UnfoldTransitionHandlerTest {
         TransitionFinishCallback finishCallback = mock(TransitionFinishCallback.class);
 
         mShellUnfoldProgressProvider.onStateChangeStarted();
+        mShellUnfoldProgressProvider.onStateChangeProgress(0.5f);
         mShellUnfoldProgressProvider.onStateChangeFinished();
         mUnfoldTransitionHandler.startAnimation(
                 mTransition,
@@ -279,6 +280,8 @@ public class UnfoldTransitionHandlerTest {
         clearInvocations(finishCallback);
 
         // Fold
+        mShellUnfoldProgressProvider.onStateChangeProgress(/* progress= */ 0.0f);
+        mShellUnfoldProgressProvider.onStateChangeFinished();
         mShellUnfoldProgressProvider.onFoldStateChanged(/* isFolded= */ true);
 
         // Second unfold

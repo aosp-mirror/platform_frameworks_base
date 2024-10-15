@@ -66,7 +66,10 @@ public class UnfoldTransitionHandler implements TransitionHandler, UnfoldListene
     @Nullable
     private IBinder mTransition;
 
+    // TODO: b/318803244 - remove when we could guarantee finishing the animation
+    //  after startAnimation callback
     private boolean mAnimationFinished = false;
+    private float mLastAnimationProgress = 0.0f;
     private final List<UnfoldTaskAnimator> mAnimators = new ArrayList<>();
 
     public UnfoldTransitionHandler(ShellInit shellInit,
@@ -158,6 +161,8 @@ public class UnfoldTransitionHandler implements TransitionHandler, UnfoldListene
 
     @Override
     public void onStateChangeProgress(float progress) {
+        mLastAnimationProgress = progress;
+
         if (mTransition == null) return;
 
         SurfaceControl.Transaction transaction = null;
@@ -182,8 +187,14 @@ public class UnfoldTransitionHandler implements TransitionHandler, UnfoldListene
 
     @Override
     public void onStateChangeFinished() {
-        mAnimationFinished = true;
         finishTransitionIfNeeded();
+
+        // mLastAnimationProgress is guaranteed to be 0f when folding finishes, see
+        // {@link PhysicsBasedUnfoldTransitionProgressProvider#cancelTransition}.
+        // We can use it as an indication that the next animation progress events will be related
+        // to unfolding, so let's reset mAnimationFinished to 'false' in this case.
+        final boolean isFoldingFinished = mLastAnimationProgress == 0f;
+        mAnimationFinished = !isFoldingFinished;
     }
 
     @Override
@@ -293,10 +304,6 @@ public class UnfoldTransitionHandler implements TransitionHandler, UnfoldListene
     @Override
     public void onFoldStateChanged(boolean isFolded) {
         if (isFolded) {
-            // Reset unfold animation finished flag on folding, so it could be used next time
-            // when we unfold the device as an indication that animation hasn't finished yet
-            mAnimationFinished = false;
-
             // If we are currently animating unfold animation we should finish it because
             // the animation might not start and finish as the device was folded
             finishTransitionIfNeeded();
