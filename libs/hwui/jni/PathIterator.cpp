@@ -43,6 +43,14 @@ public:
         return iterator->peek();
     }
 
+    // A variant of 'next' (below) that is compatible with the host JVM.
+    static jint nextHost(JNIEnv* env, jclass clazz, jlong iteratorHandle, jfloatArray pointsArray) {
+        jfloat* points = env->GetFloatArrayElements(pointsArray, 0);
+        jint result = next(env, clazz, iteratorHandle, reinterpret_cast<jlong>(points));
+        env->ReleaseFloatArrayElements(pointsArray, points, 0);
+        return result;
+    }
+
     static jint next(CRITICAL_JNI_PARAMS_COMMA jlong iteratorHandle, jlong pointsArray) {
         static_assert(SkPath::kMove_Verb == 0, "SkPath::Verb unexpected index");
         static_assert(SkPath::kLine_Verb == 1, "SkPath::Verb unexpected index");
@@ -72,6 +80,7 @@ static const JNINativeMethod methods[] = {
 
         {"nPeek", "(J)I", (void*)SkPathIteratorGlue::peek},
         {"nNext", "(JJ)I", (void*)SkPathIteratorGlue::next},
+        {"nNextHost", "(J[F)I", (void*)SkPathIteratorGlue::nextHost},
 };
 
 int register_android_graphics_PathIterator(JNIEnv* env) {
