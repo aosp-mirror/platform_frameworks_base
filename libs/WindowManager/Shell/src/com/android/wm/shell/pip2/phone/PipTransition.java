@@ -25,6 +25,7 @@ import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 
 import static com.android.wm.shell.transition.Transitions.TRANSIT_EXIT_PIP;
+import static com.android.wm.shell.transition.Transitions.TRANSIT_REMOVE_PIP;
 import static com.android.wm.shell.transition.Transitions.TRANSIT_RESIZE_PIP;
 
 import android.animation.Animator;
@@ -605,8 +606,11 @@ public class PipTransition extends PipTransitionController implements
                 && pipChange.getMode() == TRANSIT_TO_BACK;
         boolean isPipClosed = info.getType() == TRANSIT_CLOSE
                 && pipChange.getMode() == TRANSIT_CLOSE;
-        // PiP is being removed if the pinned task is either moved to back or closed.
-        return isPipMovedToBack || isPipClosed;
+        // If PiP is dismissed by user (i.e. via dismiss button in PiP menu)
+        boolean isPipDismissed = info.getType() == TRANSIT_REMOVE_PIP
+                && pipChange.getMode() == TRANSIT_TO_BACK;
+        // PiP is being removed if the pinned task is either moved to back, closed, or dismissed.
+        return isPipMovedToBack || isPipClosed || isPipDismissed;
     }
 
     //

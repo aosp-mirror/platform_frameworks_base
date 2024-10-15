@@ -3841,6 +3841,18 @@ public final class ActivityThread extends ClientTransactionHandler
         return activityRecord != null ? activityRecord.activity : null;
     }
 
+    /**
+     * Returns the most recent created activity that's still running.
+     */
+    @Nullable
+    public Activity getLastCreatedActivity() {
+        if (mActivities.isEmpty()) {
+            return null;
+        }
+
+        return mActivities.valueAt(mActivities.size() - 1).activity;
+    }
+
     @Override
     public ActivityClientRecord getActivityClient(IBinder token) {
         return mActivities.get(token);

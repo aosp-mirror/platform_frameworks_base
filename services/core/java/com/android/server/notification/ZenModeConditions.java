@@ -102,16 +102,6 @@ public class ZenModeConditions implements ConditionProviders.Callback {
     }
 
     @Override
-    public void onBootComplete() {
-        // noop
-    }
-
-    @Override
-    public void onUserSwitched() {
-        // noop
-    }
-
-    @Override
     public void onServiceAdded(ComponentName component) {
         if (DEBUG) Log.d(TAG, "onServiceAdded " + component);
         final int callingUid = Binder.getCallingUid();

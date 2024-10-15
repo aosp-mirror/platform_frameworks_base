@@ -221,6 +221,7 @@ class CustomCrossActivityBackAnimationTest : ShellTestCase() {
         BackMotionEvent(
             /* touchX = */ touchX,
             /* touchY = */ 0f,
+            /* frameTime = */ 0,
             /* progress = */ progress,
             /* triggerBack = */ false,
             /* swipeEdge = */ BackEvent.EDGE_LEFT,

@@ -53,6 +53,7 @@ public class BackProgressAnimatorTest {
         return new BackMotionEvent(
                 /* touchX = */ touchX,
                 /* touchY = */ 0,
+                /* frameTime = */ 0,
                 /* progress = */ progress,
                 /* triggerBack = */ false,
                 /* swipeEdge = */ BackEvent.EDGE_LEFT,

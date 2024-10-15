@@ -1810,6 +1810,7 @@ public final class SurfaceControl implements Parcelable {
         public DisplayMode[] supportedDisplayModes;
         public int activeDisplayModeId;
         public float renderFrameRate;
+        public boolean hasArrSupport;
 
         public int[] supportedColorModes;
         public int activeColorMode;
@@ -1827,6 +1828,7 @@ public final class SurfaceControl implements Parcelable {
                     + "supportedDisplayModes=" + Arrays.toString(supportedDisplayModes)
                     + ", activeDisplayModeId=" + activeDisplayModeId
                     + ", renderFrameRate=" + renderFrameRate
+                    + ", hasArrSupport=" + hasArrSupport
                     + ", supportedColorModes=" + Arrays.toString(supportedColorModes)
                     + ", activeColorMode=" + activeColorMode
                     + ", hdrCapabilities=" + hdrCapabilities
@@ -1846,13 +1848,14 @@ public final class SurfaceControl implements Parcelable {
                 && Arrays.equals(supportedColorModes, that.supportedColorModes)
                 && activeColorMode == that.activeColorMode
                 && Objects.equals(hdrCapabilities, that.hdrCapabilities)
-                && preferredBootDisplayMode == that.preferredBootDisplayMode;
+                && preferredBootDisplayMode == that.preferredBootDisplayMode
+                && hasArrSupport == that.hasArrSupport;
         }
 
         @Override
         public int hashCode() {
             return Objects.hash(Arrays.hashCode(supportedDisplayModes), activeDisplayModeId,
-                    renderFrameRate, activeColorMode, hdrCapabilities);
+                    renderFrameRate, activeColorMode, hdrCapabilities, hasArrSupport);
         }
     }
 

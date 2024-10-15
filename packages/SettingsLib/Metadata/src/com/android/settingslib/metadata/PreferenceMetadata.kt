@@ -31,6 +31,7 @@ import androidx.annotation.StringRes
  * information:
  * - [PreferenceTitleProvider]: provide dynamic title content
  * - [PreferenceSummaryProvider]: provide dynamic summary content (e.g. based on preference value)
+ * - [PreferenceIconProvider]: provide dynamic icon content (e.g. based on flag)
  * - [PreferenceAvailabilityProvider]: provide preference availability (e.g. based on flag)
  * - [PreferenceLifecycleProvider]: provide the lifecycle callbacks and notify state change
  *
@@ -159,6 +160,19 @@ interface PreferenceMetadata {
             summary != 0 -> context.getText(summary)
             this is PreferenceSummaryProvider -> getSummary(context)
             else -> null
+        }
+
+    /**
+     * Returns the preference icon.
+     *
+     * Implement [PreferenceIconProvider] interface if icon content is provided dynamically
+     * (e.g. icon is provided based on flag value).
+     */
+    fun getPreferenceIcon(context: Context): Int =
+        when {
+            icon != 0 -> icon
+            this is PreferenceIconProvider -> getIcon(context)
+            else -> 0
         }
 }
 

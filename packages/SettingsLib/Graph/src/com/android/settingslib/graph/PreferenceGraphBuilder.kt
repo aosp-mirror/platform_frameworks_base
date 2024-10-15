@@ -78,6 +78,10 @@ private constructor(private val context: Context, private val request: GetPrefer
         for (activityClass in request.activityClasses) {
             add(activityClass)
         }
+        // Temporarily add all screens
+        for (key in PreferenceScreenRegistry.preferenceScreens.keys) {
+            addPreferenceScreenFromRegistry(key, Activity::class.java)
+        }
     }
 
     fun build() = builder.build()
