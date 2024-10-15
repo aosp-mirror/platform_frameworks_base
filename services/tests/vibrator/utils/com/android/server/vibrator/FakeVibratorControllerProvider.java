@@ -26,6 +26,7 @@ import android.os.VibrationEffect;
 import android.os.VibratorInfo;
 import android.os.vibrator.PrebakedSegment;
 import android.os.vibrator.PrimitiveSegment;
+import android.os.vibrator.PwleSegment;
 import android.os.vibrator.RampSegment;
 import android.os.vibrator.StepSegment;
 import android.os.vibrator.VibrationEffectSegment;
@@ -190,6 +191,19 @@ public final class FakeVibratorControllerProvider {
             recordBraking(vibrationId, braking);
             applyLatency(mOnLatency);
             scheduleListener(duration, vibrationId);
+            return duration;
+        }
+
+        @Override
+        public long composePwleV2(PwleSegment[] primitives, long vibrationId) {
+            long duration = 0;
+            for (PwleSegment primitive: primitives) {
+                duration += primitive.getDuration();
+                recordEffectSegment(vibrationId, primitive);
+            }
+            applyLatency(mOnLatency);
+            scheduleListener(duration, vibrationId);
+
             return duration;
         }
 
