@@ -463,7 +463,7 @@ public class PipTransition extends PipTransitionController {
         // so update fixed rotation state to default.
         mFixedRotationState = FIXED_ROTATION_UNDEFINED;
 
-        if (transition != mExitTransition) {
+        if (transition != mExitTransition && transition != mMoveToBackTransition) {
             return;
         }
         // This means an expand happened before enter-pip finished and we are now "merging" a
@@ -477,8 +477,10 @@ public class PipTransition extends PipTransitionController {
             cancelled = true;
         }
 
-        // Unset exitTransition AFTER cancel so that finishResize knows we are merging.
+        // Unset both exitTransition and moveToBackTransition AFTER cancel so that
+        // finishResize knows we are merging.
         mExitTransition = null;
+        mMoveToBackTransition = null;
         if (!cancelled) return;
         final ActivityManager.RunningTaskInfo taskInfo = mPipOrganizer.getTaskInfo();
         if (taskInfo != null) {
@@ -515,7 +517,8 @@ public class PipTransition extends PipTransitionController {
         // means we're expecting the exit transition will be "merged" into another transition
         // (likely a remote like launcher), so don't fire the finish-callback here -- wait until
         // the exit transition is merged.
-        if ((mExitTransition == null || isAnimatingLocally()) && mFinishCallback != null) {
+        if ((mExitTransition == null || mMoveToBackTransition == null || isAnimatingLocally())
+                && mFinishCallback != null) {
             final SurfaceControl leash = mPipOrganizer.getSurfaceControl();
             final boolean hasValidLeash = leash != null && leash.isValid();
             WindowContainerTransaction wct = null;
