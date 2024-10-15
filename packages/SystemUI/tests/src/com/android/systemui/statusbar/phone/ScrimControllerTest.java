@@ -309,8 +309,6 @@ public class ScrimControllerTest extends SysuiTestCase {
         // Attach behind scrim so flows that are collecting on it start running.
         ViewUtils.attachView(mScrimBehind);
 
-        mScrimController.setHasBackdrop(false);
-
         mWallpaperRepository.getWallpaperSupportsAmbientMode().setValue(false);
         mTestScope.getTestScheduler().runCurrent();
 
@@ -480,47 +478,6 @@ public class ScrimControllerTest extends SysuiTestCase {
                 mScrimInFront, TRANSPARENT,
                 mScrimBehind, TRANSPARENT));
         assertEquals(0f, mScrimController.getState().getMaxLightRevealScrimAlpha(), 0f);
-    }
-
-    @Test
-    public void transitionToAod_withAodWallpaperAndLockScreenWallpaper() {
-        mScrimController.setHasBackdrop(true);
-        mWallpaperRepository.getWallpaperSupportsAmbientMode().setValue(true);
-        mTestScope.getTestScheduler().runCurrent();
-
-        mScrimController.legacyTransitionTo(ScrimState.AOD);
-        finishAnimationsImmediately();
-
-        assertScrimAlpha(Map.of(
-                mScrimInFront, TRANSPARENT,
-                mScrimBehind, TRANSPARENT));
-        assertEquals(1f, mScrimController.getState().getMaxLightRevealScrimAlpha(), 0f);
-
-        assertScrimTinted(Map.of(
-                mScrimInFront, true,
-                mScrimBehind, true
-        ));
-    }
-
-    @Test
-    public void setHasBackdrop_withAodWallpaperAndAlbumArt() {
-        mWallpaperRepository.getWallpaperSupportsAmbientMode().setValue(true);
-        mTestScope.getTestScheduler().runCurrent();
-
-        mScrimController.legacyTransitionTo(ScrimState.AOD);
-        finishAnimationsImmediately();
-        mScrimController.setHasBackdrop(true);
-        finishAnimationsImmediately();
-
-        assertScrimAlpha(Map.of(
-                mScrimInFront, TRANSPARENT,
-                mScrimBehind, TRANSPARENT));
-        assertEquals(1f, mScrimController.getState().getMaxLightRevealScrimAlpha(), 0f);
-
-        assertScrimTinted(Map.of(
-                mScrimInFront, true,
-                mScrimBehind, true
-        ));
     }
 
     @Test
@@ -1356,7 +1313,6 @@ public class ScrimControllerTest extends SysuiTestCase {
         mScrimController.setScrimVisibleListener(visible -> mScrimVisibility = visible);
         mScrimController.attachViews(mScrimBehind, mNotificationsScrim, mScrimInFront);
         mScrimController.setAnimatorListener(mAnimatorListener);
-        mScrimController.setHasBackdrop(false);
         mWallpaperRepository.getWallpaperSupportsAmbientMode().setValue(false);
         mTestScope.getTestScheduler().runCurrent();
         mScrimController.legacyTransitionTo(ScrimState.KEYGUARD);
