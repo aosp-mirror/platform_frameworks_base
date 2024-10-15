@@ -18,7 +18,7 @@ package com.android.systemui.shared.clocks
 
 import android.content.Context
 import android.content.res.Resources
-import com.android.systemui.monet.Style as MonetStyle
+import com.android.systemui.customization.R
 import com.android.systemui.plugins.clocks.AlarmData
 import com.android.systemui.plugins.clocks.ClockConfig
 import com.android.systemui.plugins.clocks.ClockController
@@ -27,21 +27,24 @@ import com.android.systemui.plugins.clocks.ClockMessageBuffers
 import com.android.systemui.plugins.clocks.ClockReactiveSetting
 import com.android.systemui.plugins.clocks.WeatherData
 import com.android.systemui.plugins.clocks.ZenData
+import com.android.systemui.shared.clocks.view.FlexClockView
 import java.io.PrintWriter
 import java.util.Locale
 import java.util.TimeZone
 
-/** Controller for a simple json specified clock */
-class SimpleClockController(
+/** Controller for the default flex clock */
+class FlexClockController(
     private val ctx: Context,
-    private val assets: AssetLoader,
-    val design: ClockDesign,
+    private val resources: Resources,
+    private val assets: AssetLoader, // TODO(b/364680879): Remove and replace w/ resources
+    val design: ClockDesign, // TODO(b/364680879): Remove when done inlining
     val messageBuffers: ClockMessageBuffers?,
 ) : ClockController {
     override val smallClock = run {
         val buffer = messageBuffers?.smallClockMessageBuffer ?: LogUtil.DEFAULT_MESSAGE_BUFFER
-        SimpleClockFaceController(
+        FlexClockFaceController(
             ctx,
+            resources,
             assets.copy(messageBuffer = buffer),
             design.small ?: design.large!!,
             false,
@@ -51,8 +54,9 @@ class SimpleClockController(
 
     override val largeClock = run {
         val buffer = messageBuffers?.largeClockMessageBuffer ?: LogUtil.DEFAULT_MESSAGE_BUFFER
-        SimpleClockFaceController(
+        FlexClockFaceController(
             ctx,
+            resources,
             assets.copy(messageBuffer = buffer),
             design.large ?: design.small!!,
             true,
@@ -62,16 +66,10 @@ class SimpleClockController(
 
     override val config: ClockConfig by lazy {
         ClockConfig(
-            design.id,
-            design.name?.let { assets.tryReadString(it) ?: it } ?: "",
-            design.description?.let { assets.tryReadString(it) ?: it } ?: "",
-            isReactiveToTone =
-                design.colorPalette == null || design.colorPalette == MonetStyle.CLOCK,
-            useAlternateSmartspaceAODTransition =
-                smallClock.config.hasCustomWeatherDataDisplay ||
-                    largeClock.config.hasCustomWeatherDataDisplay,
-            useCustomClockScene =
-                smallClock.config.useCustomClockScene || largeClock.config.useCustomClockScene,
+            DEFAULT_CLOCK_ID,
+            resources.getString(R.string.clock_default_name),
+            resources.getString(R.string.clock_default_description),
+            isReactiveToTone = true,
         )
     }
 
@@ -80,8 +78,8 @@ class SimpleClockController(
             override var isReactiveTouchInteractionEnabled = false
                 set(value) {
                     field = value
-                    smallClock.events.isReactiveTouchInteractionEnabled = value
-                    largeClock.events.isReactiveTouchInteractionEnabled = value
+                    val view = largeClock.view as FlexClockView
+                    view.isReactiveTouchInteractionEnabled = value
                 }
 
             override fun onTimeZoneChanged(timeZone: TimeZone) {

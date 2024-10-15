@@ -51,6 +51,7 @@ import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
 import android.compat.annotation.Overridable;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.AttributionSource;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -1918,10 +1919,16 @@ public class AudioManager {
     @Deprecated public void setSpeakerphoneOn(boolean on) {
         final IAudioService service = getService();
         try {
-            service.setSpeakerphoneOn(mICallBack, on);
+            service.setSpeakerphoneOn(mICallBack, on, getAttributionSource());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    private AttributionSource getAttributionSource() {
+        Context context = getContext();
+        return (context != null)
+                     ? context.getAttributionSource() : AttributionSource.myAttributionSource();
     }
 
     /**
@@ -3089,7 +3096,8 @@ public class AudioManager {
         final IAudioService service = getService();
         try {
             service.startBluetoothSco(mICallBack,
-                    getContext().getApplicationInfo().targetSdkVersion);
+                    getContext().getApplicationInfo().targetSdkVersion,
+                    getAttributionSource());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -3114,7 +3122,7 @@ public class AudioManager {
     public void startBluetoothScoVirtualCall() {
         final IAudioService service = getService();
         try {
-            service.startBluetoothScoVirtualCall(mICallBack);
+            service.startBluetoothScoVirtualCall(mICallBack, getAttributionSource());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -3134,7 +3142,7 @@ public class AudioManager {
     @Deprecated public void stopBluetoothSco() {
         final IAudioService service = getService();
         try {
-            service.stopBluetoothSco(mICallBack);
+            service.stopBluetoothSco(mICallBack,  getAttributionSource());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -9023,7 +9031,8 @@ public class AudioManager {
                 Log.w(TAG, "setCommunicationDevice: device not found: " + device);
                 return false;
             }
-            return getService().setCommunicationDevice(mICallBack, device.getId());
+            return getService().setCommunicationDevice(mICallBack, device.getId(),
+                    getAttributionSource());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -9035,7 +9044,7 @@ public class AudioManager {
      */
     public void clearCommunicationDevice() {
         try {
-            getService().setCommunicationDevice(mICallBack, 0);
+            getService().setCommunicationDevice(mICallBack, 0, getAttributionSource());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

@@ -62,12 +62,13 @@ interface PreferenceBinding {
     fun bind(preference: Preference, metadata: PreferenceMetadata) {
         metadata.apply {
             preference.key = key
-            if (icon != 0) {
-                preference.setIcon(icon)
+            val context = preference.context
+            val preferenceIcon = metadata.getPreferenceIcon(context)
+            if (preferenceIcon != 0) {
+                preference.setIcon(preferenceIcon)
             } else {
                 preference.icon = null
             }
-            val context = preference.context
             val isPreferenceScreen = preference is PreferenceScreen
             preference.peekExtras()?.clear()
             extras(context)?.let { preference.extras.putAll(it) }

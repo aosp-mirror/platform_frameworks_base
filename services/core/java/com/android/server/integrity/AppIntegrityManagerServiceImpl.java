@@ -63,7 +63,6 @@ import com.android.internal.pm.parsing.PackageParser2;
 import com.android.internal.pm.pkg.parsing.ParsingPackageUtils;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.LocalServices;
-import com.android.server.integrity.engine.RuleEvaluationEngine;
 import com.android.server.integrity.model.IntegrityCheckResult;
 import com.android.server.integrity.model.RuleMetadata;
 import com.android.server.pm.PackageManagerServiceUtils;
@@ -130,7 +129,6 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
     private final Handler mHandler;
     private final PackageManagerInternal mPackageManagerInternal;
     private final Supplier<PackageParser2> mParserSupplier;
-    private final RuleEvaluationEngine mEvaluationEngine;
     private final IntegrityFileManager mIntegrityFileManager;
 
     /** Create an instance of {@link AppIntegrityManagerServiceImpl}. */
@@ -142,7 +140,6 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
                 context,
                 LocalServices.getService(PackageManagerInternal.class),
                 PackageParserUtils::forParsingFileWithDefaults,
-                RuleEvaluationEngine.getRuleEvaluationEngine(),
                 IntegrityFileManager.getInstance(),
                 handlerThread.getThreadHandler());
     }
@@ -152,13 +149,11 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
             Context context,
             PackageManagerInternal packageManagerInternal,
             Supplier<PackageParser2> parserSupplier,
-            RuleEvaluationEngine evaluationEngine,
             IntegrityFileManager integrityFileManager,
             Handler handler) {
         mContext = context;
         mPackageManagerInternal = packageManagerInternal;
         mParserSupplier = parserSupplier;
-        mEvaluationEngine = evaluationEngine;
         mIntegrityFileManager = integrityFileManager;
         mHandler = handler;
 
@@ -330,7 +325,7 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
                                 + " installers "
                                 + allowedInstallers);
             }
-            IntegrityCheckResult result = mEvaluationEngine.evaluate(appInstallMetadata);
+            IntegrityCheckResult result = IntegrityCheckResult.allow();
             if (!result.getMatchedRules().isEmpty() || DEBUG_INTEGRITY_COMPONENT) {
                 Slog.i(
                         TAG,

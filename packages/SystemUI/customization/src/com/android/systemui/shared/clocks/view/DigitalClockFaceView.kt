@@ -31,6 +31,7 @@ import com.android.systemui.shared.clocks.AssetLoader
 import com.android.systemui.shared.clocks.LogUtil
 import java.util.Locale
 
+// TODO(b/364680879): Merge w/ only subclass FlexClockView
 abstract class DigitalClockFaceView(ctx: Context, messageBuffer: MessageBuffer) : FrameLayout(ctx) {
     protected val logger = Logger(messageBuffer, this::class.simpleName!!)
         get() = field ?: LogUtil.FALLBACK_INIT_LOGGER
@@ -140,7 +141,6 @@ abstract class DigitalClockFaceView(ctx: Context, messageBuffer: MessageBuffer) 
     open val useCustomClockScene
         get() = false
 
-    // TODO: implement ClockEventUnion?
     open fun onLocaleChanged(locale: Locale) {}
 
     open fun onWeatherDataChanged(data: WeatherData) {}

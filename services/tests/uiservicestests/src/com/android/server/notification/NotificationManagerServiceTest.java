@@ -201,6 +201,7 @@ import android.app.RemoteInput;
 import android.app.RemoteInputHistoryItem;
 import android.app.StatsManager;
 import android.app.admin.DevicePolicyManagerInternal;
+import android.app.backup.BackupRestoreEventLogger;
 import android.app.job.JobScheduler;
 import android.app.role.RoleManager;
 import android.app.usage.UsageStatsManagerInternal;
@@ -6340,7 +6341,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mService.readPolicyXml(
                 new BufferedInputStream(new ByteArrayInputStream(upgradeXml.getBytes())),
                 false,
-                UserHandle.USER_ALL);
+                UserHandle.USER_ALL, null);
         verify(mListeners, times(1)).readXml(any(), any(), anyBoolean(), anyInt());
         verify(mConditionProviders, times(1)).readXml(any(), any(), anyBoolean(), anyInt());
         verify(mAssistants, times(1)).readXml(any(), any(), anyBoolean(), anyInt());
@@ -6360,7 +6361,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mService.readPolicyXml(
                 new BufferedInputStream(new ByteArrayInputStream(upgradeXml.getBytes())),
                 false,
-                UserHandle.USER_ALL);
+                UserHandle.USER_ALL, null);
         verify(mSnoozeHelper, times(1)).readXml(any(TypedXmlPullParser.class), anyLong());
     }
 
@@ -6372,7 +6373,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mService.readPolicyXml(
                 new BufferedInputStream(new ByteArrayInputStream(preupgradeXml.getBytes())),
                 false,
-                UserHandle.USER_ALL);
+                UserHandle.USER_ALL, null);
         verify(mListeners, never()).readXml(any(), any(), anyBoolean(), anyInt());
         verify(mConditionProviders, never()).readXml(any(), any(), anyBoolean(), anyInt());
         verify(mAssistants, never()).readXml(any(), any(), anyBoolean(), anyInt());
@@ -6404,7 +6405,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mService.readPolicyXml(
                 new BufferedInputStream(new ByteArrayInputStream(policyXml.getBytes())),
                 true,
-                10);
+                10, null);
         verify(mListeners, never()).readXml(any(), any(), eq(true), eq(10));
         verify(mConditionProviders, never()).readXml(any(), any(), eq(true), eq(10));
         verify(mAssistants, never()).readXml(any(), any(), eq(true), eq(10));
@@ -6430,7 +6431,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mService.readPolicyXml(
                 new BufferedInputStream(new ByteArrayInputStream(policyXml.getBytes())),
                 true,
-                10);
+                10, null);
         verify(mListeners, never()).readXml(any(), any(), eq(true), eq(10));
         verify(mConditionProviders, never()).readXml(any(), any(), eq(true), eq(10));
         verify(mAssistants, never()).readXml(any(), any(), eq(true), eq(10));
@@ -6458,7 +6459,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mService.readPolicyXml(
                 new BufferedInputStream(new ByteArrayInputStream(policyXml.getBytes())),
                 true,
-                10);
+                10, null);
         verify(mListeners, never()).readXml(any(), any(), eq(true), eq(10));
         verify(mConditionProviders, never()).readXml(any(), any(), eq(true), eq(10));
         verify(mAssistants, never()).readXml(any(), any(), eq(true), eq(10));
@@ -6485,7 +6486,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mService.readPolicyXml(
                 new BufferedInputStream(new ByteArrayInputStream(policyXml.getBytes())),
                 true,
-                10);
+                10, null);
         verify(mListeners, times(1)).readXml(any(), any(), eq(true), eq(10));
         verify(mConditionProviders, times(1)).readXml(any(), any(), eq(true), eq(10));
         verify(mAssistants, times(1)).readXml(any(), any(), eq(true), eq(10));

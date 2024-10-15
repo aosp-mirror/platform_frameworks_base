@@ -156,6 +156,8 @@ public class DisplayModeDirector {
     // a map from display id to display device config
     private SparseArray<DisplayDeviceConfig> mDisplayDeviceConfigByDisplay = new SparseArray<>();
 
+    private SparseBooleanArray mHasArrSupport;
+
     private BrightnessObserver mBrightnessObserver;
 
     private DesiredDisplayModeSpecsListener mDesiredDisplayModeSpecsListener;
@@ -194,6 +196,8 @@ public class DisplayModeDirector {
 
     private final boolean mIsBackUpSmoothDisplayAndForcePeakRefreshRateEnabled;
 
+    private final boolean mHasArrSupportFlagEnabled;
+
     private final DisplayManagerFlags mDisplayManagerFlags;
 
     private final DisplayDeviceConfigProvider mDisplayDeviceConfigProvider;
@@ -218,6 +222,7 @@ public class DisplayModeDirector {
             .isDisplaysRefreshRatesSynchronizationEnabled();
         mIsBackUpSmoothDisplayAndForcePeakRefreshRateEnabled = displayManagerFlags
                 .isBackUpSmoothDisplayAndForcePeakRefreshRateEnabled();
+        mHasArrSupportFlagEnabled = displayManagerFlags.hasArrSupportFlag();
         mDisplayManagerFlags = displayManagerFlags;
         mDisplayDeviceConfigProvider = displayDeviceConfigProvider;
         mContext = context;
@@ -228,6 +233,7 @@ public class DisplayModeDirector {
         mSupportedModesByDisplay = new SparseArray<>();
         mAppSupportedModesByDisplay = new SparseArray<>();
         mDefaultModeByDisplay = new SparseArray<>();
+        mHasArrSupport = new SparseBooleanArray();
         mAppRequestObserver = new AppRequestObserver(displayManagerFlags);
         mConfigParameterProvider = new DeviceConfigParameterProvider(injector.getDeviceConfig());
         mDeviceConfigDisplaySettings = new DeviceConfigDisplaySettings();
@@ -452,7 +458,13 @@ public class DisplayModeDirector {
         return mAppRequestObserver;
     }
 
+    // TODO(b/372019752) Rename all the occurrences of the VRR with ARR.
     private boolean isVrrSupportedLocked(int displayId) {
+        if (mHasArrSupportFlagEnabled) {
+            Boolean hasArrSupport = mHasArrSupport.get(displayId);
+            return hasArrSupport != null && hasArrSupport;
+        }
+        // TODO(b/371041638) Remove config.isVrrSupportEnabled once hasArrSupport is rolled out
         DisplayDeviceConfig config = mDisplayDeviceConfigByDisplay.get(displayId);
         return config != null && config.isVrrSupportEnabled();
     }
@@ -1469,6 +1481,7 @@ public class DisplayModeDirector {
             DisplayInfo displayInfo = getDisplayInfo(displayId);
             registerExternalDisplay(displayInfo);
             updateDisplayModes(displayId, displayInfo);
+            updateHasArrSupport(displayId, displayInfo);
             updateLayoutLimitedFrameRate(displayId, displayInfo);
             updateUserSettingDisplayPreferredSize(displayInfo);
             updateDisplaysPeakRefreshRateAndResolution(displayInfo);
@@ -1482,6 +1495,7 @@ public class DisplayModeDirector {
                 mDefaultModeByDisplay.remove(displayId);
                 mDisplayDeviceConfigByDisplay.remove(displayId);
                 mSettingsObserver.removeRefreshRateSetting(displayId);
+                mHasArrSupport.delete(displayId);
             }
             updateLayoutLimitedFrameRate(displayId, null);
             removeUserSettingDisplayPreferredSize(displayId);
@@ -1493,6 +1507,7 @@ public class DisplayModeDirector {
         public void onDisplayChanged(int displayId) {
             updateDisplayDeviceConfig(displayId);
             DisplayInfo displayInfo = getDisplayInfo(displayId);
+            updateHasArrSupport(displayId, displayInfo);
             updateDisplayModes(displayId, displayInfo);
             updateLayoutLimitedFrameRate(displayId, displayInfo);
             updateUserSettingDisplayPreferredSize(displayInfo);
@@ -1691,6 +1706,16 @@ public class DisplayModeDirector {
                 }
             }
         }
+
+        private void updateHasArrSupport(int displayId, @Nullable DisplayInfo info) {
+            if (info == null) {
+                return;
+            }
+            synchronized (mLock) {
+                mHasArrSupport.put(displayId, info.hasArrSupport);
+            }
+        }
+
     }
 
     /**

@@ -16,6 +16,7 @@
 
 package com.android.server.notification;
 
+import android.annotation.Nullable;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
@@ -23,6 +24,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.UserInfo;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -37,6 +39,7 @@ import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.notification.CalendarTracker.CheckEventResult;
 import com.android.server.notification.NotificationManagerService.DumpFilter;
 import com.android.server.pm.PackageManagerService;
@@ -59,12 +62,13 @@ public class EventConditionProvider extends SystemConditionProviderService {
     private static final String EXTRA_TIME = "time";
     private static final long CHANGE_DELAY = 2 * 1000;  // coalesce chatty calendar changes
 
-    private final Context mContext = this;
+    @VisibleForTesting Context mContext = this;
     private final ArraySet<Uri> mSubscriptions = new ArraySet<Uri>();
     private final SparseArray<CalendarTracker> mTrackers = new SparseArray<>();
     private final Handler mWorker;
     private final HandlerThread mThread;
 
+    @Nullable private UserHandle mCurrentUser;
     private boolean mConnected;
     private boolean mRegistered;
     private boolean mBootComplete;  // don't hammer the calendar provider until boot completes.
@@ -114,10 +118,28 @@ public class EventConditionProvider extends SystemConditionProviderService {
         mContext.registerReceiver(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                reloadTrackers();
+                if (android.app.Flags.modesHsum()) {
+                    if (mCurrentUser != null) {
+                        // Possibly the intent signals a profile added on a different user, but it
+                        // doesn't matter (except for a bit of wasted work here). We will reload
+                        // trackers for that user when we switch.
+                        reloadTrackers(mCurrentUser);
+                    }
+                } else {
+                    reloadTrackers();
+                }
             }
         }, filter);
-        reloadTrackers();
+        if (!android.app.Flags.modesHsum()) {
+            reloadTrackers();
+        }
+    }
+
+    @Override
+    public void onUserSwitched(UserHandle user) {
+        if (DEBUG) Slog.d(TAG, "onUserSwitched: " + user);
+        mCurrentUser = user;
+        reloadTrackers(user);
     }
 
     @Override
@@ -157,8 +179,41 @@ public class EventConditionProvider extends SystemConditionProviderService {
         }
     }
 
+    private void reloadTrackers(UserHandle user) {
+        if (DEBUG) Slog.d(TAG, "reloadTrackers user=" + user);
+        for (int i = 0; i < mTrackers.size(); i++) {
+            mTrackers.valueAt(i).setCallback(null);
+        }
+        mTrackers.clear();
+
+        // Ensure that user is the main user and not a profile.
+        UserManager userManager = UserManager.get(mContext);
+        UserHandle possibleParent = userManager.getProfileParent(user);
+        if (possibleParent != null) {
+            Slog.wtf(TAG, "reloadTrackers should not be called with profile " + user
+                    + "; continuing with parent " + possibleParent);
+            user = possibleParent;
+        }
+
+        for (UserInfo profile : userManager.getProfiles(user.getIdentifier())) {
+            final Context profileContext = getContextForUser(mContext, profile.getUserHandle());
+            if (profileContext == null) {
+                Slog.w(TAG, "Unable to create context for profile " + profile.id + " of user "
+                        + user.getIdentifier());
+                continue;
+            }
+            mTrackers.put(profile.id, new CalendarTracker(mContext, profileContext));
+        }
+        evaluateSubscriptions();
+    }
+
+    @Deprecated // Remove when inlining MODES_HSUM
     private void reloadTrackers() {
         if (DEBUG) Slog.d(TAG, "reloadTrackers");
+        if (android.app.Flags.modesHsum()) {
+            Slog.wtf(TAG, "Shouldn't call reloadTrackers() without user in MODES_HSUM",
+                    new Exception());
+        }
         for (int i = 0; i < mTrackers.size(); i++) {
             mTrackers.valueAt(i).setCallback(null);
         }
@@ -325,4 +380,9 @@ public class EventConditionProvider extends SystemConditionProviderService {
             evaluateSubscriptionsW();
         }
     };
+
+    @VisibleForTesting // (otherwise = NONE)
+    public SparseArray<CalendarTracker> getTrackers() {
+        return mTrackers;
+    }
 }

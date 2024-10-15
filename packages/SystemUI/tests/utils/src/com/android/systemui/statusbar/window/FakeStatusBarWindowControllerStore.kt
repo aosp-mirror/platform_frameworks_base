@@ -22,10 +22,10 @@ class FakeStatusBarWindowControllerStore : StatusBarWindowControllerStore {
 
     private val perDisplayControllers = mutableMapOf<Int, FakeStatusBarWindowController>()
 
-    override val defaultDisplay
+    override val defaultDisplay: FakeStatusBarWindowController
         get() = forDisplay(Display.DEFAULT_DISPLAY)
 
-    override fun forDisplay(displayId: Int): StatusBarWindowController {
+    override fun forDisplay(displayId: Int): FakeStatusBarWindowController {
         return perDisplayControllers.computeIfAbsent(displayId) { FakeStatusBarWindowController() }
     }
 }

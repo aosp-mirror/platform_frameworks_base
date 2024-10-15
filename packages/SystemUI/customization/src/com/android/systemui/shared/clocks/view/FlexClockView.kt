@@ -35,7 +35,7 @@ import kotlin.math.min
 
 fun clamp(value: Float, minVal: Float, maxVal: Float): Float = max(min(value, maxVal), minVal)
 
-class FlexClockView(context: Context, val assetLoader: AssetLoader, messageBuffer: MessageBuffer) :
+class FlexClockView(context: Context, val assets: AssetLoader, messageBuffer: MessageBuffer) :
     DigitalClockFaceView(context, messageBuffer) {
     override var digitalClockTextViewMap = mutableMapOf<Int, SimpleDigitalClockTextView>()
     val digitLeftTopMap = mutableMapOf<Int, Point>()
@@ -57,11 +57,9 @@ class FlexClockView(context: Context, val assetLoader: AssetLoader, messageBuffe
     private var prevY = 0f
     private var isDown = false
 
-    // TODO(b/340253296): Genericize; json spec
     private var wght = 603f
     private var wdth = 100f
 
-    // TODO(b/340253296): Json spec
     private val MAX_WGHT = 950f
     private val MIN_WGHT = 50f
     private val WGHT_SCALE = 0.5f
@@ -71,7 +69,6 @@ class FlexClockView(context: Context, val assetLoader: AssetLoader, messageBuffe
     private val WDTH_SCALE = 0.2f
 
     override fun onTouchEvent(evt: MotionEvent): Boolean {
-        // TODO(b/340253296): implement on DigitalClockFaceView?
         if (!isReactiveTouchInteractionEnabled) {
             return super.onTouchEvent(evt)
         }
@@ -94,12 +91,11 @@ class FlexClockView(context: Context, val assetLoader: AssetLoader, messageBuffe
                 prevX = evt.x
                 prevY = evt.y
 
-                // TODO(b/340253296): Genericize; json spec
                 val fvar = "'wght' $wght, 'wdth' $wdth, 'opsz' 144, 'ROND' 100"
                 digitalClockTextViewMap.forEach { (_, view) ->
                     val textStyle = view.textStyle as FontTextStyle
                     textStyle.fontVariation = fvar
-                    view.applyStyles(assetLoader, textStyle, view.aodStyle)
+                    view.applyStyles(assets, textStyle, view.aodStyle)
                 }
 
                 requestLayout()
