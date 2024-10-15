@@ -1738,35 +1738,6 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         mLaunchAdjacentController.setLaunchAdjacentRoot(mSideStage.mRootTaskInfo.token);
     }
 
-    /** Callback when split roots have child task appeared under it, this is a little different from
-     * #onStageHasChildrenChanged because this would be called every time child task appeared.
-     * NOTICE: This only be called on legacy transition. */
-    @Override
-    public void onChildTaskAppeared(StageTaskListener stageListener, int taskId) {
-        ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "onChildTaskAppeared: isMainStage=%b task=%d",
-                stageListener == mMainStage, taskId);
-        // Handle entering split screen while there is a split pair running in the background.
-        if (stageListener == mSideStage && !isSplitScreenVisible() && isSplitActive()
-                && mSplitRequest == null) {
-            final WindowContainerTransaction wct = new WindowContainerTransaction();
-            prepareEnterSplitScreen(wct);
-            mMainStage.evictAllChildren(wct);
-            mSideStage.evictOtherChildren(wct, taskId);
-
-            mSyncQueue.queue(wct);
-            mSyncQueue.runInSync(t -> {
-                if (mIsDropEntering) {
-                    updateSurfaceBounds(mSplitLayout, t, false /* applyResizingOffset */);
-                    mIsDropEntering = false;
-                    mSkipEvictingMainStageChildren = false;
-                } else {
-                    mShowDecorImmediately = true;
-                    mSplitLayout.flingDividerToCenter(/*finishCallback*/ null);
-                }
-            });
-        }
-    }
-
     @Override
     public void onRootTaskVanished() {
         ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "onRootTaskVanished");
