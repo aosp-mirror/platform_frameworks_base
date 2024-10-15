@@ -691,8 +691,8 @@ private fun prepareInterruption(
     val fromState = updateStateInContent(transition.fromContent)
     val toState = updateStateInContent(transition.toContent)
 
-    reconcileStates(element, previousTransition)
-    reconcileStates(element, transition)
+    val previousUniqueState = reconcileStates(element, previousTransition, previousState = null)
+    reconcileStates(element, transition, previousState = previousUniqueState)
 
     // Remove the interruption values to all contents but the content(s) where the element will be
     // placed, to make sure that interruption deltas are computed only right after this interruption
@@ -719,12 +719,32 @@ private fun prepareInterruption(
 /**
  * Reconcile the state of [element] in the formContent and toContent of [transition] so that the
  * values before interruption have their expected values, taking shared transitions into account.
+ *
+ * @return the unique state this element had during [transition], `null` if it had multiple
+ *   different states (i.e. the shared animation was disabled).
  */
-private fun reconcileStates(element: Element, transition: TransitionState.Transition) {
-    val fromContentState = element.stateByContent[transition.fromContent] ?: return
-    val toContentState = element.stateByContent[transition.toContent] ?: return
+private fun reconcileStates(
+    element: Element,
+    transition: TransitionState.Transition,
+    previousState: Element.State?,
+): Element.State? {
+    fun reconcileWithPreviousState(state: Element.State) {
+        if (previousState != null && state.offsetBeforeInterruption == Offset.Unspecified) {
+            state.updateValuesBeforeInterruption(previousState)
+        }
+    }
+
+    val fromContentState = element.stateByContent[transition.fromContent]
+    val toContentState = element.stateByContent[transition.toContent]
+
+    if (fromContentState == null || toContentState == null) {
+        return (fromContentState ?: toContentState)
+            ?.also { reconcileWithPreviousState(it) }
+            ?.takeIf { it.offsetBeforeInterruption != Offset.Unspecified }
+    }
+
     if (!isSharedElementEnabled(element.key, transition)) {
-        return
+        return null
     }
 
     if (
@@ -733,13 +753,19 @@ private fun reconcileStates(element: Element, transition: TransitionState.Transi
     ) {
         // Element is shared and placed in fromContent only.
         toContentState.updateValuesBeforeInterruption(fromContentState)
-    } else if (
+        return fromContentState
+    }
+
+    if (
         toContentState.offsetBeforeInterruption != Offset.Unspecified &&
             fromContentState.offsetBeforeInterruption == Offset.Unspecified
     ) {
         // Element is shared and placed in toContent only.
         fromContentState.updateValuesBeforeInterruption(toContentState)
+        return toContentState
     }
+
+    return null
 }
 
 private fun Element.State.selfUpdateValuesBeforeInterruption() {

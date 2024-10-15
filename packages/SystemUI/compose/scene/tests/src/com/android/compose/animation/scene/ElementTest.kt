@@ -2641,4 +2641,58 @@ class ElementTest {
             assertWithMessage("Frame $i didn't replace Foo").that(numberOfPlacements).isEqualTo(0)
         }
     }
+
+    @Test
+    fun interruption_considerPreviousUniqueState() {
+        @Composable
+        fun SceneScope.Foo(modifier: Modifier = Modifier) {
+            Box(modifier.element(TestElements.Foo).size(50.dp))
+        }
+
+        val state = rule.runOnUiThread { MutableSceneTransitionLayoutState(SceneA) }
+        val scope =
+            rule.setContentAndCreateMainScope {
+                SceneTransitionLayout(state) {
+                    scene(SceneA) { Box(Modifier.fillMaxSize()) { Foo() } }
+                    scene(SceneB) { Box(Modifier.fillMaxSize()) }
+                    scene(SceneC) {
+                        Box(Modifier.fillMaxSize()) { Foo(Modifier.offset(x = 100.dp, y = 100.dp)) }
+                    }
+                }
+            }
+
+        // During A => B, Foo disappears and stays in its original position.
+        scope.launch { state.startTransition(transition(SceneA, SceneB)) }
+        rule
+            .onNode(isElement(TestElements.Foo))
+            .assertSizeIsEqualTo(50.dp)
+            .assertPositionInRootIsEqualTo(0.dp, 0.dp)
+
+        // Interrupt A => B by B => C.
+        var interruptionProgress by mutableFloatStateOf(1f)
+        scope.launch {
+            state.startTransition(
+                transition(SceneB, SceneC, interruptionProgress = { interruptionProgress })
+            )
+        }
+
+        // During B => C, Foo appears again. It is still at (0, 0) when the interruption progress is
+        // 100%, and converges to its position (100, 100) in C.
+        rule
+            .onNode(isElement(TestElements.Foo))
+            .assertSizeIsEqualTo(50.dp)
+            .assertPositionInRootIsEqualTo(0.dp, 0.dp)
+
+        interruptionProgress = 0.5f
+        rule
+            .onNode(isElement(TestElements.Foo))
+            .assertSizeIsEqualTo(50.dp)
+            .assertPositionInRootIsEqualTo(50.dp, 50.dp)
+
+        interruptionProgress = 0f
+        rule
+            .onNode(isElement(TestElements.Foo))
+            .assertSizeIsEqualTo(50.dp)
+            .assertPositionInRootIsEqualTo(100.dp, 100.dp)
+    }
 }
