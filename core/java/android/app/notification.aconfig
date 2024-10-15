@@ -48,6 +48,16 @@ flag {
 }
 
 flag {
+  name: "modes_hsum"
+  namespace: "systemui"
+  description: "Fixes for modes (and DND/Zen in general) with HSUM or secondary users"
+  bug: "366203070"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
   name: "api_tvextender"
   is_exported: true
   namespace: "systemui"
@@ -261,4 +271,11 @@ flag {
   namespace: "systemui"
   description: "[RONs] Guards new promotion logic and UI, including AOD notification and Colorization"
   bug: "367705002"
+}
+
+flag {
+  name: "backup_restore_logging"
+  namespace: "systemui"
+  description: "Adds logging for notification/modes backup and restore events"
+  bug: "289524803"
 }

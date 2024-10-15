@@ -28,12 +28,12 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.customization.R as customR
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController
 import com.android.systemui.keyguard.domain.interactor.KeyguardBlueprintInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardSmartspaceInteractor
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardClockViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardSmartspaceViewModel
-import com.android.systemui.res.R
 import com.android.systemui.shared.R as sharedR
 import com.android.systemui.statusbar.lockscreen.LockscreenSmartspaceController
 import com.android.systemui.util.mockito.any
@@ -135,7 +135,7 @@ class SmartspaceSectionTest : SysuiTestCase() {
         assertThat(smartspaceConstraints.layout.topToBottom).isEqualTo(dateView.id)
 
         val dateConstraints = constraintSet.getConstraint(dateView.id)
-        assertThat(dateConstraints.layout.topToBottom).isEqualTo(R.id.lockscreen_clock_view)
+        assertThat(dateConstraints.layout.topToBottom).isEqualTo(customR.id.lockscreen_clock_view)
     }
 
     @Test

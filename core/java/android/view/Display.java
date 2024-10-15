@@ -21,6 +21,7 @@ import static android.Manifest.permission.CONTROL_DISPLAY_BRIGHTNESS;
 import static android.hardware.flags.Flags.FLAG_OVERLAYPROPERTIES_CLASS_API;
 
 import static com.android.server.display.feature.flags.Flags.FLAG_HIGHEST_HDR_SDR_RATIO_API;
+import static com.android.server.display.feature.flags.Flags.FLAG_ENABLE_HAS_ARR_SUPPORT;
 
 import android.Manifest;
 import android.annotation.FlaggedApi;
@@ -1262,6 +1263,18 @@ public final class Display {
             updateDisplayInfoLocked();
             final Display.Mode[] modes = mDisplayInfo.supportedModes;
             return Arrays.copyOf(modes, modes.length);
+        }
+    }
+
+    /**
+     * Returns whether display supports adaptive refresh rate or not.
+     */
+    // TODO(b/372526856) Add a link to the documentation for ARR.
+    @FlaggedApi(FLAG_ENABLE_HAS_ARR_SUPPORT)
+    public boolean hasArrSupport() {
+        synchronized (mLock) {
+            updateDisplayInfoLocked();
+            return mDisplayInfo.hasArrSupport;
         }
     }
 

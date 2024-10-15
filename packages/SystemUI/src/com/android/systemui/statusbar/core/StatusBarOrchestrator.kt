@@ -36,7 +36,7 @@ import com.android.systemui.statusbar.phone.AutoHideController
 import com.android.systemui.statusbar.phone.CentralSurfaces
 import com.android.systemui.statusbar.phone.PhoneStatusBarTransitions
 import com.android.systemui.statusbar.phone.PhoneStatusBarViewController
-import com.android.systemui.statusbar.window.StatusBarWindowController
+import com.android.systemui.statusbar.window.StatusBarWindowControllerStore
 import com.android.systemui.statusbar.window.data.model.StatusBarWindowState
 import com.android.systemui.statusbar.window.data.repository.StatusBarWindowStateRepositoryStore
 import com.android.wm.shell.bubbles.Bubbles
@@ -63,8 +63,8 @@ class StatusBarOrchestrator
 constructor(
     @Application private val applicationScope: CoroutineScope,
     private val statusBarInitializer: StatusBarInitializer,
-    private val statusBarWindowController: StatusBarWindowController,
     private val statusBarModeRepository: StatusBarModeRepositoryStore,
+    private val statusBarWindowControllerStore: StatusBarWindowControllerStore,
     private val demoModeController: DemoModeController,
     private val pluginDependencyProvider: PluginDependencyProvider,
     private val autoHideController: AutoHideController,
@@ -157,7 +157,7 @@ constructor(
 
     private fun createAndAddWindow() {
         initializeStatusBarFragment()
-        statusBarWindowController.attach()
+        statusBarWindowControllerStore.defaultDisplay.attach()
     }
 
     private fun initializeStatusBarFragment() {

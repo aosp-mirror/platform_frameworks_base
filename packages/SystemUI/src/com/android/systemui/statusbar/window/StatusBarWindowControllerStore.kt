@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.window
 
+import android.content.Context
 import android.view.Display
 import android.view.WindowManager
 import com.android.app.viewcapture.ViewCaptureAwareWindowManager
@@ -105,11 +106,18 @@ constructor(
 @SysUISingleton
 class SingleDisplayStatusBarWindowControllerStore
 @Inject
-constructor(private val controller: StatusBarWindowController) : StatusBarWindowControllerStore {
+constructor(
+    context: Context,
+    viewCaptureAwareWindowManager: ViewCaptureAwareWindowManager,
+    factory: StatusBarWindowControllerImpl.Factory,
+) : StatusBarWindowControllerStore {
 
     init {
         StatusBarConnectedDisplays.assertInLegacyMode()
     }
+
+    private val controller: StatusBarWindowController =
+        factory.create(context, viewCaptureAwareWindowManager)
 
     override val defaultDisplay = controller
 

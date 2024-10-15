@@ -683,6 +683,41 @@ public class BackgroundActivityStartControllerExemptionTests {
     }
 
     @Test
+    @RequiresFlagsEnabled(Flags.FLAG_BAL_ADDITIONAL_START_MODES)
+    public void testRealCaller_sawPermission() {
+        int callingUid = REGULAR_UID_1;
+        int callingPid = REGULAR_PID_1;
+        final String callingPackage = REGULAR_PACKAGE_1;
+        int realCallingUid = REGULAR_UID_2;
+        int realCallingPid = REGULAR_PID_2;
+
+        // setup state
+        when(mService.hasSystemAlertWindowPermission(eq(realCallingUid), eq(realCallingPid),
+                any())).thenReturn(true);
+
+        // prepare call
+        PendingIntentRecord originatingPendingIntent = mPendingIntentRecord;
+        BackgroundStartPrivileges forcedBalByPiSender = BackgroundStartPrivileges.NONE;
+        Intent intent = TEST_INTENT;
+        ActivityOptions checkedOptions =
+                mCheckedOptions.setPendingIntentBackgroundActivityStartMode(
+                        MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS);
+        BackgroundActivityStartController.BalState balState = mController.new BalState(callingUid,
+                callingPid, callingPackage, realCallingUid, realCallingPid, null,
+                originatingPendingIntent, forcedBalByPiSender, mResultRecord, intent,
+                checkedOptions);
+
+        // call
+        BalVerdict callerVerdict = mController.checkBackgroundActivityStartAllowedByRealCaller(
+                balState);
+        balState.setResultForCaller(callerVerdict);
+
+        // assertions
+        assertWithMessage(balState.toString()).that(callerVerdict.getCode()).isEqualTo(
+                BAL_ALLOW_SAW_PERMISSION);
+    }
+
+    @Test
     public void testCaller_isRecents() {
         int callingUid = REGULAR_UID_1;
         int callingPid = REGULAR_PID_1;

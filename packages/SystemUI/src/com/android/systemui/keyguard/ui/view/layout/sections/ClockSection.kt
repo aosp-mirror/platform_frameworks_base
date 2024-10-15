@@ -30,7 +30,7 @@ import androidx.constraintlayout.widget.ConstraintSet.START
 import androidx.constraintlayout.widget.ConstraintSet.TOP
 import androidx.constraintlayout.widget.ConstraintSet.VISIBLE
 import androidx.constraintlayout.widget.ConstraintSet.WRAP_CONTENT
-import com.android.systemui.customization.R as custR
+import com.android.systemui.customization.R as customR
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.keyguard.domain.interactor.KeyguardBlueprintInteractor
@@ -153,7 +153,7 @@ constructor(
                 R.id.weather_clock_bc_smartspace_bottom,
                 Barrier.BOTTOM,
                 getDimen(ENHANCED_SMARTSPACE_HEIGHT),
-                (custR.id.weather_clock_time),
+                (customR.id.weather_clock_time),
             )
             if (
                 rootViewModel.isNotifIconContainerVisible.value.value &&
@@ -184,40 +184,40 @@ constructor(
             if (keyguardClockViewModel.clockShouldBeCentered.value) PARENT_ID
             else R.id.split_shade_guideline
         constraints.apply {
-            connect(R.id.lockscreen_clock_view_large, START, PARENT_ID, START)
-            connect(R.id.lockscreen_clock_view_large, END, guideline, END)
-            connect(R.id.lockscreen_clock_view_large, BOTTOM, R.id.device_entry_icon_view, TOP)
+            connect(customR.id.lockscreen_clock_view_large, START, PARENT_ID, START)
+            connect(customR.id.lockscreen_clock_view_large, END, guideline, END)
+            connect(customR.id.lockscreen_clock_view_large, BOTTOM, R.id.device_entry_icon_view, TOP)
             val largeClockTopMargin =
                 keyguardClockViewModel.getLargeClockTopMargin() +
                     getDimen(DATE_WEATHER_VIEW_HEIGHT) +
                     getDimen(ENHANCED_SMARTSPACE_HEIGHT)
-            connect(R.id.lockscreen_clock_view_large, TOP, PARENT_ID, TOP, largeClockTopMargin)
-            constrainWidth(R.id.lockscreen_clock_view_large, WRAP_CONTENT)
+            connect(customR.id.lockscreen_clock_view_large, TOP, PARENT_ID, TOP, largeClockTopMargin)
+            constrainWidth(customR.id.lockscreen_clock_view_large, WRAP_CONTENT)
 
             // The following two lines make lockscreen_clock_view_large is constrained to available
             // height when it goes beyond constraints; otherwise, it use WRAP_CONTENT
-            constrainHeight(R.id.lockscreen_clock_view_large, WRAP_CONTENT)
-            constrainMaxHeight(R.id.lockscreen_clock_view_large, 0)
-            constrainWidth(R.id.lockscreen_clock_view, WRAP_CONTENT)
+            constrainHeight(customR.id.lockscreen_clock_view_large, WRAP_CONTENT)
+            constrainMaxHeight(customR.id.lockscreen_clock_view_large, 0)
+            constrainWidth(customR.id.lockscreen_clock_view, WRAP_CONTENT)
             constrainHeight(
-                R.id.lockscreen_clock_view,
-                context.resources.getDimensionPixelSize(custR.dimen.small_clock_height),
+                customR.id.lockscreen_clock_view,
+                context.resources.getDimensionPixelSize(customR.dimen.small_clock_height),
             )
             connect(
-                R.id.lockscreen_clock_view,
+                customR.id.lockscreen_clock_view,
                 START,
                 PARENT_ID,
                 START,
-                context.resources.getDimensionPixelSize(custR.dimen.clock_padding_start) +
+                context.resources.getDimensionPixelSize(customR.dimen.clock_padding_start) +
                     context.resources.getDimensionPixelSize(R.dimen.status_view_margin_horizontal),
             )
             val smallClockTopMargin = keyguardClockViewModel.getSmallClockTopMargin()
             create(R.id.small_clock_guideline_top, ConstraintSet.HORIZONTAL_GUIDELINE)
             setGuidelineBegin(R.id.small_clock_guideline_top, smallClockTopMargin)
-            connect(R.id.lockscreen_clock_view, TOP, R.id.small_clock_guideline_top, BOTTOM)
+            connect(customR.id.lockscreen_clock_view, TOP, R.id.small_clock_guideline_top, BOTTOM)
 
             // Explicitly clear pivot to force recalculate pivot instead of using legacy value
-            setTransformPivot(R.id.lockscreen_clock_view_large, Float.NaN, Float.NaN)
+            setTransformPivot(customR.id.lockscreen_clock_view_large, Float.NaN, Float.NaN)
 
             val smallClockBottom =
                 keyguardClockViewModel.getSmallClockTopMargin() +

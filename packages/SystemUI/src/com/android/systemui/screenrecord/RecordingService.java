@@ -61,6 +61,9 @@ public class RecordingService extends Service implements ScreenMediaRecorderList
 
     private static final int USER_ID_NOT_SPECIFIED = -1;
     protected static final int NOTIF_BASE_ID = 4273;
+    protected static final int NOTIF_GROUP_ID_SAVED = NOTIF_BASE_ID + 1;
+    protected static final int NOTIF_GROUP_ID_ERROR_SAVING = NOTIF_BASE_ID + 2;
+    protected static final int NOTIF_GROUP_ID_ERROR_STARTING = NOTIF_BASE_ID + 3;
     private static final String TAG = "RecordingService";
     private static final String CHANNEL_ID = "screen_record";
     @VisibleForTesting static final String GROUP_KEY_SAVED = "screen_record_saved";
@@ -280,7 +283,11 @@ public class RecordingService extends Service implements ScreenMediaRecorderList
      */
     @VisibleForTesting
     protected void createErrorStartingNotification(UserHandle currentUser) {
-        createErrorNotification(currentUser, strings().getStartError(), GROUP_KEY_ERROR_STARTING);
+        createErrorNotification(
+                currentUser,
+                strings().getStartError(),
+                GROUP_KEY_ERROR_STARTING,
+                NOTIF_GROUP_ID_ERROR_STARTING);
     }
 
     /**
@@ -289,13 +296,21 @@ public class RecordingService extends Service implements ScreenMediaRecorderList
      */
     @VisibleForTesting
     protected void createErrorSavingNotification(UserHandle currentUser) {
-        createErrorNotification(currentUser, strings().getSaveError(), GROUP_KEY_ERROR_SAVING);
+        createErrorNotification(
+                currentUser,
+                strings().getSaveError(),
+                GROUP_KEY_ERROR_SAVING,
+                NOTIF_GROUP_ID_ERROR_SAVING);
     }
 
     private void createErrorNotification(
-            UserHandle currentUser, String notificationContentTitle, String groupKey) {
+            UserHandle currentUser,
+            String notificationContentTitle,
+            String groupKey,
+            int notificationIdForGroup) {
         // Make sure error notifications get their own group.
-        postGroupSummaryNotification(currentUser, notificationContentTitle, groupKey);
+        postGroupSummaryNotification(
+                currentUser, notificationContentTitle, groupKey, notificationIdForGroup);
 
         Bundle extras = new Bundle();
         extras.putString(Notification.EXTRA_SUBSTITUTE_APP_NAME, strings().getTitle());
@@ -410,17 +425,20 @@ public class RecordingService extends Service implements ScreenMediaRecorderList
     }
 
     /**
-     * Adds a group summary notification for save notifications so that save notifications from
-     * multiple recordings are grouped together, and the foreground service recording notification
-     * is not.
+     * Posts a group summary notification for the given group.
+     *
+     * Notifications that should be grouped:
+     *  - Save notifications
+     *  - Error saving notifications
+     *  - Error starting notifications
+     *
+     * The foreground service recording notification should never be grouped.
      */
-    private void postGroupSummaryNotificationForSaves(UserHandle currentUser) {
-        postGroupSummaryNotification(currentUser, strings().getSaveTitle(), GROUP_KEY_SAVED);
-    }
-
-    /** Posts a group summary notification for the given group. */
     private void postGroupSummaryNotification(
-            UserHandle currentUser, String notificationContentTitle, String groupKey) {
+            UserHandle currentUser,
+            String notificationContentTitle,
+            String groupKey,
+            int notificationIdForGroup) {
         Bundle extras = new Bundle();
         extras.putString(Notification.EXTRA_SUBSTITUTE_APP_NAME,
                 strings().getTitle());
@@ -431,7 +449,8 @@ public class RecordingService extends Service implements ScreenMediaRecorderList
                 .setGroupSummary(true)
                 .setExtras(extras)
                 .build();
-        mNotificationManager.notifyAsUser(getTag(), mNotificationId, groupNotif, currentUser);
+        mNotificationManager.notifyAsUser(
+                getTag(), notificationIdForGroup, groupNotif, currentUser);
     }
 
     private void stopService() {
@@ -484,7 +503,11 @@ public class RecordingService extends Service implements ScreenMediaRecorderList
                 Log.d(getTag(), "saving recording");
                 Notification notification = createSaveNotification(
                         getRecorder() != null ? getRecorder().save() : null);
-                postGroupSummaryNotificationForSaves(currentUser);
+                postGroupSummaryNotification(
+                        currentUser,
+                        strings().getSaveTitle(),
+                        GROUP_KEY_SAVED,
+                        NOTIF_GROUP_ID_SAVED);
                 mNotificationManager.notifyAsUser(null, mNotificationId,  notification,
                         currentUser);
             } catch (IOException | IllegalStateException e) {
