@@ -478,6 +478,15 @@ public final class CompanionDeviceManager {
         Objects.requireNonNull(callback, "Callback cannot be null");
         handler = Handler.mainIfNull(handler);
 
+        if (Flags.associationDeviceIcon()) {
+            final Icon deviceIcon = request.getDeviceIcon();
+
+            if (deviceIcon != null && !isValidIcon(deviceIcon, mContext)) {
+                throw new IllegalArgumentException("The size of the device icon must be "
+                        + "24dp x 24dp to ensure proper display");
+            }
+        }
+
         try {
             mService.associate(request, new AssociationRequestCallbackProxy(handler, callback),
                     mContext.getOpPackageName(), mContext.getUserId());
@@ -542,11 +551,13 @@ public final class CompanionDeviceManager {
         Objects.requireNonNull(executor, "Executor cannot be null");
         Objects.requireNonNull(callback, "Callback cannot be null");
 
-        final Icon deviceIcon = request.getDeviceIcon();
+        if (Flags.associationDeviceIcon()) {
+            final Icon deviceIcon = request.getDeviceIcon();
 
-        if (deviceIcon != null && !isValidIcon(deviceIcon, mContext)) {
-            throw new IllegalArgumentException("The size of the device icon must be 24dp x 24dp to"
-                    + "ensure proper display");
+            if (deviceIcon != null && !isValidIcon(deviceIcon, mContext)) {
+                throw new IllegalArgumentException("The size of the device icon must be "
+                        + "24dp x 24dp to ensure proper display");
+            }
         }
 
         try {
