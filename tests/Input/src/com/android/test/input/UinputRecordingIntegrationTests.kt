@@ -21,7 +21,6 @@ import android.cts.input.EventVerifier
 import android.graphics.PointF
 import android.hardware.input.InputManager
 import android.os.ParcelFileDescriptor
-import android.platform.test.annotations.FlakyTest
 import android.util.Log
 import android.util.Size
 import android.view.InputEvent
@@ -108,7 +107,6 @@ class UinputRecordingIntegrationTests {
         parser = InputJsonParser(instrumentation.context)
     }
 
-    @FlakyTest(bugId = 366602644)
     @Test
     fun testEvemuRecording() {
         VirtualDisplayActivityScenario.AutoClose<CaptureEventActivity>(
