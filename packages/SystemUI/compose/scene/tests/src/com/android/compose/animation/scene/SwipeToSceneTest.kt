@@ -17,6 +17,8 @@
 package com.android.compose.animation.scene
 
 import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.rememberScrollableState
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -39,12 +41,14 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.test.ScrollWheel
 import androidx.compose.ui.test.assertPositionInRootIsEqualTo
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performMouseInput
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeRight
 import androidx.compose.ui.test.swipeUp
@@ -495,6 +499,89 @@ class SwipeToSceneTest {
             moveBy(Offset(0f, touchSlop), delayMillis = 1_000)
         }
         assertThat(layoutState.currentTransition).isNotNull()
+    }
+
+    @Test
+    fun mouseWheel_pointerInputApi_ignoredByStl() {
+        val layoutState = layoutState()
+        var touchSlop = 0f
+        rule.setContent {
+            touchSlop = LocalViewConfiguration.current.touchSlop
+            TestContent(layoutState)
+        }
+
+        rule.onRoot().performMouseInput {
+            enter(middle)
+            scroll(touchSlop, ScrollWheel.Vertical)
+        }
+
+        // Mouse wheel scroll are ignored
+        assertThat(layoutState.currentTransition).isNull()
+    }
+
+    @Test
+    fun mouseWheel_scrollableCannotScroll_ignoredByStl() {
+        val layoutState = layoutState()
+        var touchSlop = 0f
+        rule.setContent {
+            touchSlop = LocalViewConfiguration.current.touchSlop
+            SceneTransitionLayout(layoutState, Modifier.size(LayoutWidth, LayoutHeight)) {
+                scene(SceneA, userActions = mapOf(Swipe.Down to SceneB)) {
+                    Box(
+                        Modifier.fillMaxSize()
+                            // A scrollable that does not consume the scroll gesture
+                            .scrollable(rememberScrollableState { 0f }, Orientation.Vertical)
+                    )
+                }
+                scene(SceneB) { Box(Modifier.fillMaxSize()) }
+            }
+        }
+
+        rule.onRoot().performMouseInput {
+            enter(middle)
+            scroll(touchSlop, ScrollWheel.Vertical)
+        }
+
+        // Mouse wheel scroll are ignored
+        assertThat(layoutState.currentTransition).isNull()
+    }
+
+    @Test
+    fun mouseWheel_scrollableConsume_ignoredByStl() {
+        val layoutState = layoutState()
+        var touchSlop = 0f
+        var lastScroll = 0f
+        rule.setContent {
+            touchSlop = LocalViewConfiguration.current.touchSlop
+            SceneTransitionLayout(layoutState, Modifier.size(LayoutWidth, LayoutHeight)) {
+                scene(SceneA, userActions = mapOf(Swipe.Down to SceneB)) {
+                    Box(
+                        Modifier.fillMaxSize()
+                            // A scrollable that consumes the scroll gesture
+                            .scrollable(
+                                rememberScrollableState {
+                                    lastScroll = it
+                                    it
+                                },
+                                Orientation.Vertical,
+                            )
+                    )
+                }
+                scene(SceneB) { Box(Modifier.fillMaxSize()) }
+            }
+        }
+
+        rule.onRoot().performMouseInput {
+            enter(middle)
+            scroll(touchSlop * 10, ScrollWheel.Vertical)
+        }
+
+        // Mouse wheel scroll are ignored
+        assertThat(layoutState.currentTransition).isNull()
+
+        // Mouse wheel scroll can still be consumed by the scrollable
+        assertThat(lastScroll).isNotEqualTo(0f)
+        assertThat(touchSlop).isNotEqualTo(0f)
     }
 
     @Test
