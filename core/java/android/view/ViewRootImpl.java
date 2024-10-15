@@ -118,6 +118,7 @@ import static android.view.flags.Flags.disableDrawWakeLock;
 import static android.view.flags.Flags.sensitiveContentAppProtection;
 import static android.view.flags.Flags.sensitiveContentPrematureProtectionRemovedFix;
 import static android.view.flags.Flags.toolkitFrameRateFunctionEnablingReadOnly;
+import static android.view.flags.Flags.toolkitFrameRateTouchBoost25q1;
 import static android.view.flags.Flags.toolkitFrameRateTypingReadOnly;
 import static android.view.flags.Flags.toolkitFrameRateVelocityMappingReadOnly;
 import static android.view.flags.Flags.toolkitFrameRateViewEnablingReadOnly;
@@ -13045,6 +13046,11 @@ public final class ViewRootImpl implements ViewParent,
         boolean desiredAction = motionEventAction != MotionEvent.ACTION_OUTSIDE;
         boolean undesiredType = windowType == TYPE_INPUT_METHOD
                 && sToolkitFrameRateTypingReadOnlyFlagValue;
+
+        // don't suppress touch boost for TYPE_INPUT_METHOD in ViewRootImpl
+        if (toolkitFrameRateTouchBoost25q1()) {
+            return desiredAction && shouldEnableDvrr() && getFrameRateBoostOnTouchEnabled();
+        }
         // use toolkitSetFrameRate flag to gate the change
         return desiredAction && !undesiredType && shouldEnableDvrr()
                 && getFrameRateBoostOnTouchEnabled();

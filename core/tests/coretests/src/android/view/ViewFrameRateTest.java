@@ -24,6 +24,7 @@ import static android.view.Surface.FRAME_RATE_CATEGORY_NO_PREFERENCE;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.flags.Flags.FLAG_TOOLKIT_FRAME_RATE_ANIMATION_BUGFIX_25Q1;
 import static android.view.flags.Flags.FLAG_TOOLKIT_FRAME_RATE_VELOCITY_MAPPING_READ_ONLY;
+import static android.view.flags.Flags.FLAG_TOOLKIT_FRAME_RATE_TOUCH_BOOST_25Q1;
 import static android.view.flags.Flags.FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY;
 import static android.view.flags.Flags.FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY;
 import static android.view.flags.Flags.FLAG_VIEW_VELOCITY_API;
@@ -115,6 +116,67 @@ public class ViewFrameRateTest {
             });
         });
         waitForAfterDraw();
+    }
+
+    @Test
+    @RequiresFlagsEnabled(FLAG_TOOLKIT_FRAME_RATE_TOUCH_BOOST_25Q1)
+    public void shouldNotSuppressTouchBoost() throws Throwable {
+        if (!ViewProperties.vrr_enabled().orElse(true)) {
+            return;
+        }
+
+        mActivityRule.runOnUiThread(() -> {
+            ViewGroup.LayoutParams layoutParams = mMovingView.getLayoutParams();
+            layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT;
+            layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT;
+            mMovingView.setLayoutParams(layoutParams);
+            mMovingView.setOnClickListener((v) -> {});
+        });
+        waitForFrameRateCategoryToSettle();
+
+        int[] position = new int[2];
+        mActivityRule.runOnUiThread(() -> {
+            mMovingView.getLocationOnScreen(position);
+            position[0] += mMovingView.getWidth() / 2;
+            position[1] += mMovingView.getHeight() / 2;
+        });
+        final Instrumentation instrumentation = InstrumentationRegistry.getInstrumentation();
+
+        // update the window type to TYPE_INPUT_METHOD
+        int windowType = mViewRoot.mWindowAttributes.type;
+        final WindowManager.LayoutParams attrs = mViewRoot.mWindowAttributes;
+        attrs.type = TYPE_INPUT_METHOD;
+        instrumentation.runOnMainSync(() -> {
+            mViewRoot.setLayoutParams(attrs, false);
+        });
+        instrumentation.waitForIdleSync();
+
+        final WindowManager.LayoutParams newAttrs = mViewRoot.mWindowAttributes;
+        assertTrue(newAttrs.type == TYPE_INPUT_METHOD);
+
+        long now = SystemClock.uptimeMillis();
+        MotionEvent down = MotionEvent.obtain(
+                now, // downTime
+                now, // eventTime
+                MotionEvent.ACTION_DOWN, // action
+                position[0], // x
+                position[1], // y
+                0 // metaState
+        );
+        down.setSource(InputDevice.SOURCE_TOUCHSCREEN);
+        instrumentation.sendPointerSync(down);
+        down.recycle();
+
+        // should have touch boost
+        assertTrue(mViewRoot.getIsTouchBoosting());
+
+        // Reset the window type back to the original one.
+        newAttrs.type = windowType;
+        instrumentation.runOnMainSync(() -> {
+            mViewRoot.setLayoutParams(newAttrs, false);
+        });
+        instrumentation.waitForIdleSync();
+        assertTrue(mViewRoot.mWindowAttributes.type == windowType);
     }
 
     @Test
