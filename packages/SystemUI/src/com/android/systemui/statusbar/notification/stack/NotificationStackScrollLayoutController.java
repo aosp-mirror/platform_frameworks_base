@@ -2098,13 +2098,8 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     }
 
     class TouchHandler implements Gefingerpoken {
-        private boolean mSwipeWantsIt = false;
-
         @Override
         public boolean onInterceptTouchEvent(MotionEvent ev) {
-            // Reset on each call to intercept, and share swipe state with onTouchEvent()
-            // below when this method returns true.
-            mSwipeWantsIt = false;
             mView.initDownStates(ev);
             mView.handleEmptySpaceClick(ev);
 
@@ -2131,16 +2126,17 @@ public class NotificationStackScrollLayoutController implements Dumpable {
                     mView.startDraggingOnHun();
                 }
             }
+            boolean swipeWantsIt = false;
             if (mLongPressedView == null && !mView.isBeingDragged()
                     && !mView.isExpandingNotification()
                     && !mView.getExpandedInThisMotion()
                     && !mView.getOnlyScrollingInThisMotion()
                     && !mView.getDisallowDismissInThisMotion()) {
-                mSwipeWantsIt = mSwipeHelper.onInterceptTouchEvent(ev);
+                swipeWantsIt = mSwipeHelper.onInterceptTouchEvent(ev);
             }
             // Check if we need to clear any snooze leavebehinds
             boolean isUp = ev.getActionMasked() == MotionEvent.ACTION_UP;
-            if (!NotificationSwipeHelper.isTouchInView(ev, guts) && isUp && !mSwipeWantsIt &&
+            if (!NotificationSwipeHelper.isTouchInView(ev, guts) && isUp && !swipeWantsIt &&
                     !expandWantsIt && !scrollWantsIt) {
                 mView.setCheckForLeaveBehind(false);
                 mNotificationGutsManager.closeAndSaveGuts(true /* removeLeavebehind */,
@@ -2159,8 +2155,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
                     && ev.getActionMasked() != MotionEvent.ACTION_DOWN) {
                 mJankMonitor.begin(mView, CUJ_NOTIFICATION_SHADE_SCROLL_FLING);
             }
-            return mSwipeWantsIt || scrollWantsIt || expandWantsIt || longPressWantsIt ||
-                    hunWantsIt;
+            return swipeWantsIt || scrollWantsIt || expandWantsIt || longPressWantsIt || hunWantsIt;
         }
 
         @Override
@@ -2197,7 +2192,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
                     }
                 }
             }
-            boolean horizontalSwipeWantsIt = mSwipeWantsIt;
+            boolean horizontalSwipeWantsIt = false;
             boolean scrollerWantsIt = false;
             // NOTE: the order of these is important. If reversed, onScrollTouch will reset on an
             // UP event, causing horizontalSwipeWantsIt to be set to true on vertical swipes.
@@ -2206,7 +2201,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
                     && !mView.getExpandedInThisMotion()
                     && !onlyScrollingInThisMotion
                     && !mView.getDisallowDismissInThisMotion()) {
-                mSwipeHelper.onTouchEvent(ev);
+                horizontalSwipeWantsIt = mSwipeHelper.onTouchEvent(ev);
             }
             if (mLongPressedView == null && mView.isExpanded() && !mSwipeHelper.isSwiping()
                     && !expandingNotification && !mView.getDisallowScrollingInThisMotion()) {
