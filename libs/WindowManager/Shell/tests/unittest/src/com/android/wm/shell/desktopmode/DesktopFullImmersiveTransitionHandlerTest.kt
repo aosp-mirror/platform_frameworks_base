@@ -24,6 +24,7 @@ import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
 import android.testing.AndroidTestingRunner
 import android.view.Display.DEFAULT_DISPLAY
+import android.view.Surface
 import android.view.SurfaceControl
 import android.view.WindowManager.TRANSIT_CHANGE
 import android.view.WindowManager.TransitionFlags
@@ -204,6 +205,30 @@ class DesktopFullImmersiveTransitionHandlerTest : ShellTestCase() {
         )
 
         assertThat(desktopRepository.removeBoundsBeforeMaximize(task.taskId)).isNull()
+    }
+
+    @Test
+    fun onTransitionReady_displayRotation_exitsImmersive() {
+        val task = createFreeformTask()
+        desktopRepository.setTaskInFullImmersiveState(
+            displayId = task.displayId,
+            taskId = task.taskId,
+            immersive = true
+        )
+
+        immersiveHandler.onTransitionReady(
+            transition = mock(IBinder::class.java),
+            info = createTransitionInfo(
+                changes = listOf(
+                    TransitionInfo.Change(task.token, SurfaceControl()).apply {
+                        taskInfo = task
+                        setRotation(/* start= */ Surface.ROTATION_0, /* end= */ Surface.ROTATION_90)
+                    }
+                )
+            )
+        )
+
+        assertThat(desktopRepository.isTaskInFullImmersiveState(task.taskId)).isFalse()
     }
 
     @Test

@@ -307,8 +307,8 @@ class DesktopFullImmersiveTransitionHandler(
         }
 
         // Check if this is a direct immersive enter/exit transition.
-        val state = this.state ?: return
-        if (transition == state.transition) {
+        if (transition == state?.transition) {
+            val state = requireState()
             val startBounds = info.changes.first { c -> c.taskInfo?.taskId == state.taskId }
                 .startAbsBounds
             logV("Direct move for task ${state.taskId} in ${state.direction} direction verified")
@@ -334,7 +334,22 @@ class DesktopFullImmersiveTransitionHandler(
                     }
                 }
             }
+            return
         }
+
+        // Check if this is an untracked exit transition, like display rotation.
+        info.changes
+            .filter { c -> c.taskInfo != null }
+            .filter { c -> desktopRepository.isTaskInFullImmersiveState(c.taskInfo!!.taskId) }
+            .filter { c -> c.startRotation != c.endRotation }
+            .forEach { c ->
+                logV("Detected immersive exit due to rotation for task: ${c.taskInfo!!.taskId}")
+                desktopRepository.setTaskInFullImmersiveState(
+                    displayId = c.taskInfo!!.displayId,
+                    taskId = c.taskInfo!!.taskId,
+                    immersive = false
+                )
+            }
     }
 
     private fun clearState() {
