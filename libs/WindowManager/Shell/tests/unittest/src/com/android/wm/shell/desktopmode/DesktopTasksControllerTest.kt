@@ -2984,6 +2984,58 @@ class DesktopTasksControllerTest : ShellTestCase() {
       .launchWindowingMode).isEqualTo(WINDOWING_MODE_FREEFORM)
   }
 
+  @Test
+  @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MULTI_INSTANCE_FEATURES)
+  fun openInstance_fromFreeform_minimizesIfNeeded() {
+    setUpLandscapeDisplay()
+    val homeTask = setUpHomeTask()
+    val freeformTasks = (1..MAX_TASK_LIMIT + 1).map { _ -> setUpFreeformTask() }
+    val oldestTask = freeformTasks.first()
+    val newestTask = freeformTasks.last()
+
+    runOpenInstance(newestTask, freeformTasks[1].taskId)
+
+    val wct = getLatestWct(type = TRANSIT_OPEN)
+    // Home is moved to front of everything.
+    assertThat(
+      wct.hierarchyOps.any { hop ->
+        hop.container == homeTask.token.asBinder() && hop.toTop
+      }
+    ).isTrue()
+    // And the oldest task isn't moved in front of home, effectively minimizing it.
+    assertThat(
+      wct.hierarchyOps.none { hop ->
+        hop.container == oldestTask.token.asBinder() && hop.toTop
+      }
+    ).isTrue()
+  }
+
+  @Test
+  @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MULTI_INSTANCE_FEATURES)
+  fun openInstance_fromFreeform_exitsImmersiveIfNeeded() {
+    setUpLandscapeDisplay()
+    val homeTask = setUpHomeTask()
+    val freeformTask = setUpFreeformTask()
+    val immersiveTask = setUpFreeformTask()
+    taskRepository.setTaskInFullImmersiveState(
+      displayId = immersiveTask.displayId,
+      taskId = immersiveTask.taskId,
+      immersive = true
+    )
+    val runOnStartTransit = RunOnStartTransitionCallback()
+    val transition = Binder()
+    whenever(transitions.startTransition(eq(TRANSIT_OPEN), any(), anyOrNull()))
+      .thenReturn(transition)
+    whenever(mockDesktopFullImmersiveTransitionHandler
+      .exitImmersiveIfApplicable(any(), eq(immersiveTask.displayId))).thenReturn(runOnStartTransit)
+
+    runOpenInstance(immersiveTask, freeformTask.taskId)
+
+    verify(mockDesktopFullImmersiveTransitionHandler)
+      .exitImmersiveIfApplicable(any(), eq(immersiveTask.displayId))
+    runOnStartTransit.assertOnlyInvocation(transition)
+  }
+
   private fun runOpenInstance(
     callingTask: RunningTaskInfo,
     requestedTaskId: Int
