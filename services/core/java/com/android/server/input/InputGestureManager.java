@@ -215,6 +215,12 @@ final class InputGestureManager {
             systemShortcuts.add(createKeyGesture(KeyEvent.KEYCODE_T,
                     KeyEvent.META_META_ON | KeyEvent.META_ALT_ON,
                     KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_TALKBACK));
+            systemShortcuts.add(createKeyGesture(KeyEvent.KEYCODE_MINUS,
+                    KeyEvent.META_META_ON | KeyEvent.META_ALT_ON,
+                    KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFIER_ZOOM_OUT));
+            systemShortcuts.add(createKeyGesture(KeyEvent.KEYCODE_EQUALS,
+                    KeyEvent.META_META_ON | KeyEvent.META_ALT_ON,
+                    KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFIER_ZOOM_IN));
         }
         if (keyboardA11yShortcutControl()) {
             if (InputSettings.isAccessibilityBounceKeysFeatureEnabled()) {
