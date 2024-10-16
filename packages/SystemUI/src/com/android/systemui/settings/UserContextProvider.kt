@@ -18,14 +18,18 @@ package com.android.systemui.settings
 
 import android.content.Context
 
-/**
- * Implemented by [UserTrackerImpl].
- */
+/** Implemented by [UserTrackerImpl]. */
 interface UserContextProvider {
+    /**
+     * provides system context, not current user context.
+     *
+     * To get current user context use [createCurrentUserContext] passing [userContext] as context
+     */
     val userContext: Context
 
     /**
      * Creates the {@code context} with the current user.
+     *
      * @see Context#createContextAsUser(UserHandle, int)
      */
     fun createCurrentUserContext(context: Context): Context

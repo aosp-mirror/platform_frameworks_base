@@ -16,15 +16,19 @@
 
 package com.android.systemui.keyboard.shortcut.ui.model
 
+import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategory
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType
+import com.android.systemui.keyboard.shortcut.shared.model.ShortcutSubCategory
 
-sealed interface ShortcutsUiState {
-
-    data class Active(
-        val searchQuery: String,
-        val shortcutCategories: List<ShortcutCategoryUi>,
-        val defaultSelectedCategory: ShortcutCategoryType?,
-    ) : ShortcutsUiState
-
-    data object Inactive : ShortcutsUiState
+data class ShortcutCategoryUi(
+    val label: String,
+    val iconSource: IconSource,
+    val type: ShortcutCategoryType,
+    val subCategories: List<ShortcutSubCategory>,
+) {
+    constructor(
+        label: String,
+        iconSource: IconSource,
+        shortcutCategory: ShortcutCategory,
+    ) : this(label, iconSource, shortcutCategory.type, shortcutCategory.subCategories)
 }
