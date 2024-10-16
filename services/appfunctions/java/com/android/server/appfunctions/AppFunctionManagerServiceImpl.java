@@ -225,12 +225,6 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
                 .thenAccept(
                         canExecute -> {
                             if (!canExecute) {
-                                safeExecuteAppFunctionCallback.onResult(
-                                        ExecuteAppFunctionResponse.newFailure(
-                                                ExecuteAppFunctionResponse.RESULT_DENIED,
-                                                "Caller does not have permission to execute the"
-                                                        + " appfunction",
-                                                /* extras= */ null));
                                 throw new SecurityException(
                                         "Caller does not have permission to execute the"
                                                 + " appfunction");
