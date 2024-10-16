@@ -31,6 +31,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.keyguard.data.repository.KeyguardClockRepository
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
+import com.android.systemui.shared.Flags.ambientAod
 import com.android.systemui.user.data.model.SelectedUserModel
 import com.android.systemui.user.data.model.SelectionStatus
 import com.android.systemui.user.data.repository.UserRepository
@@ -144,14 +145,21 @@ constructor(
     override val wallpaperSupportsAmbientMode: StateFlow<Boolean> =
         wallpaperInfo
             .map {
-                // If WallpaperInfo is null, it's ImageWallpaper which never supports ambient mode.
-                it?.supportsAmbientMode() == true
+                if (ambientAod()) {
+                    // Force this mode for now, until ImageWallpaper supports it directly
+                    // TODO(b/371236225)
+                    true
+                } else {
+                    // If WallpaperInfo is null, it's ImageWallpaper which never supports ambient
+                    // mode.
+                    it?.supportsAmbientMode() == true
+                }
             }
             .stateIn(
                 scope,
                 // Always be listening for wallpaper changes.
                 SharingStarted.Eagerly,
-                initialValue = wallpaperInfo.value?.supportsAmbientMode() == true,
+                initialValue = if (ambientAod()) true else false,
             )
 
     override var rootView: View? = null

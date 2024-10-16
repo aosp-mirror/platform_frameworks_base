@@ -14,17 +14,12 @@
  * limitations under the License.
  */
 
-package com.android.systemui.wallpapers.domain.interactor
+package com.android.systemui.wallpapers.ui.viewmodel
 
-import com.android.systemui.wallpapers.data.repository.WallpaperRepository
+import com.android.systemui.wallpapers.domain.interactor.WallpaperInteractor
 import javax.inject.Inject
 import kotlinx.coroutines.flow.StateFlow
 
-class WallpaperInteractor @Inject constructor(val wallpaperRepository: WallpaperRepository) {
-    fun setNotificationStackAbsoluteBottom(bottom: Float) {
-        wallpaperRepository.setNotificationStackAbsoluteBottom(bottom)
-    }
-
-    val wallpaperSupportsAmbientMode: StateFlow<Boolean> =
-        wallpaperRepository.wallpaperSupportsAmbientMode
+class WallpaperViewModel @Inject constructor(interactor: WallpaperInteractor) {
+    val wallpaperSupportsAmbientMode: StateFlow<Boolean> = interactor.wallpaperSupportsAmbientMode
 }
