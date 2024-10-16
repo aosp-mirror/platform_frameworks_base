@@ -191,7 +191,6 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
     boolean mDrawFinished = false;
 
     final Rect mScreenRect = new Rect();
-    private final SurfaceSession mSurfaceSession = new SurfaceSession();
     private final boolean mLimitedHdrEnabled = Flags.limitedHdr();
 
     SurfaceControl mSurfaceControl;
@@ -1517,7 +1516,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
     private void createBlastSurfaceControls(ViewRootImpl viewRoot, String name,
             Transaction surfaceUpdateTransaction) {
         if (mSurfaceControl == null) {
-            mSurfaceControl = new SurfaceControl.Builder(mSurfaceSession)
+            mSurfaceControl = new SurfaceControl.Builder()
                     .setName(name)
                     .setLocalOwnerView(this)
                     .setParent(viewRoot.updateAndGetBoundsLayer(surfaceUpdateTransaction))
@@ -1527,7 +1526,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
         }
 
         if (mBlastSurfaceControl == null) {
-            mBlastSurfaceControl = new SurfaceControl.Builder(mSurfaceSession)
+            mBlastSurfaceControl = new SurfaceControl.Builder()
                     .setName(name + "(BLAST)")
                     .setLocalOwnerView(this)
                     .setParent(mSurfaceControl)
@@ -1545,7 +1544,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
         }
 
         if (mBackgroundControl == null) {
-            mBackgroundControl = new SurfaceControl.Builder(mSurfaceSession)
+            mBackgroundControl = new SurfaceControl.Builder()
                     .setName("Background for " + name)
                     .setLocalOwnerView(this)
                     .setOpaque(true)
