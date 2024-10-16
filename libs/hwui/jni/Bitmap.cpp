@@ -669,14 +669,20 @@ static binder_status_t writeBlobFromFd(AParcel* parcel, int32_t size, int fd) {
     return STATUS_OK;
 }
 
-static binder_status_t writeBlob(AParcel* parcel, const int32_t size, const void* data, bool immutable) {
+static binder_status_t writeBlob(AParcel* parcel, uint64_t bitmapId, const SkBitmap& bitmap) {
+    const size_t size = bitmap.computeByteSize();
+    const void* data = bitmap.getPixels();
+    const bool immutable = bitmap.isImmutable();
+
     if (size <= 0 || data == nullptr) {
         return STATUS_NOT_ENOUGH_DATA;
     }
     binder_status_t error = STATUS_OK;
     if (shouldUseAshmem(parcel, size)) {
         // Create new ashmem region with read/write priv
-        base::unique_fd fd(ashmem_create_region("bitmap", size));
+        auto ashmemId = Bitmap::getAshmemId("writeblob", bitmapId,
+                                            bitmap.width(), bitmap.height(), size);
+        base::unique_fd fd(ashmem_create_region(ashmemId.c_str(), size));
         if (fd.get() < 0) {
             return STATUS_NO_MEMORY;
         }
@@ -884,8 +890,7 @@ static jboolean Bitmap_writeToParcel(JNIEnv* env, jobject,
           p.allowFds() ? "allowed" : "forbidden");
 #endif
 
-    size_t size = bitmap.computeByteSize();
-    status = writeBlob(p.get(), size, bitmap.getPixels(), bitmap.isImmutable());
+    status = writeBlob(p.get(), bitmapWrapper->bitmap().getId(), bitmap);
     if (status) {
         doThrowRE(env, "Could not copy bitmap to parcel blob.");
         return JNI_FALSE;

@@ -15,6 +15,7 @@
  */
 #include "Bitmap.h"
 
+#include <android-base/file.h>
 #include "HardwareBitmapUploader.h"
 #include "Properties.h"
 #ifdef __ANDROID__  // Layoutlib does not support render thread
@@ -56,6 +57,15 @@
 
 #include <atomic>
 #include <limits>
+
+#ifdef __ANDROID__
+#include <com_android_graphics_hwui_flags.h>
+namespace hwui_flags = com::android::graphics::hwui::flags;
+#else
+namespace hwui_flags {
+constexpr bool bitmap_ashmem_long_name() { return false; }
+}
+#endif
 
 namespace android {
 
@@ -140,6 +150,20 @@ static sk_sp<Bitmap> allocateBitmap(SkBitmap* bitmap, AllocPixelRef alloc) {
     return wrapper;
 }
 
+std::string Bitmap::getAshmemId(const char* tag, uint64_t bitmapId,
+                                int width, int height, size_t size) {
+    if (!hwui_flags::bitmap_ashmem_long_name()) {
+        return "bitmap";
+    }
+    static std::string sCmdline = [] {
+        std::string temp;
+        android::base::ReadFileToString("/proc/self/cmdline", &temp);
+        return temp;
+    }();
+    return std::format("bitmap/{}-id_{}-{}x{}-size_{}-{}",
+                       tag, bitmapId, width, height, size, sCmdline);
+}
+
 sk_sp<Bitmap> Bitmap::allocateAshmemBitmap(SkBitmap* bitmap) {
     return allocateBitmap(bitmap, &Bitmap::allocateAshmemBitmap);
 }
@@ -147,7 +171,9 @@ sk_sp<Bitmap> Bitmap::allocateAshmemBitmap(SkBitmap* bitmap) {
 sk_sp<Bitmap> Bitmap::allocateAshmemBitmap(size_t size, const SkImageInfo& info, size_t rowBytes) {
 #ifdef __ANDROID__
     // Create new ashmem region with read/write priv
-    int fd = ashmem_create_region("bitmap", size);
+    uint64_t id = getId(PixelStorageType::Ashmem);
+    auto ashmemId = getAshmemId("allocate", id, info.width(), info.height(), size);
+    int fd = ashmem_create_region(ashmemId.c_str(), size);
     if (fd < 0) {
         return nullptr;
     }
@@ -163,7 +189,7 @@ sk_sp<Bitmap> Bitmap::allocateAshmemBitmap(size_t size, const SkImageInfo& info,
         close(fd);
         return nullptr;
     }
-    return sk_sp<Bitmap>(new Bitmap(addr, fd, size, info, rowBytes));
+    return sk_sp<Bitmap>(new Bitmap(addr, fd, size, info, rowBytes, id));
 #else
     return Bitmap::allocateHeapBitmap(size, info, rowBytes);
 #endif
@@ -301,11 +327,12 @@ Bitmap::Bitmap(SkPixelRef& pixelRef, const SkImageInfo& info)
     traceBitmapCreate();
 }
 
-Bitmap::Bitmap(void* address, int fd, size_t mappedSize, const SkImageInfo& info, size_t rowBytes)
+Bitmap::Bitmap(void* address, int fd, size_t mappedSize, const SkImageInfo& info,
+               size_t rowBytes, uint64_t id)
         : SkPixelRef(info.width(), info.height(), address, rowBytes)
         , mInfo(validateAlpha(info))
         , mPixelStorageType(PixelStorageType::Ashmem)
-        , mId(getId(mPixelStorageType)) {
+        , mId(id != INVALID_BITMAP_ID ? id : getId(mPixelStorageType)) {
     mPixelStorage.ashmem.address = address;
     mPixelStorage.ashmem.fd = fd;
     mPixelStorage.ashmem.size = mappedSize;
