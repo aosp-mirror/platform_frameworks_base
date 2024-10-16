@@ -40,6 +40,8 @@ import com.android.systemui.statusbar.policy.BrightnessMirrorController;
 import com.android.systemui.util.ViewController;
 import com.android.systemui.util.time.SystemClock;
 
+import com.google.android.msdl.domain.MSDLPlayer;
+
 import javax.inject.Inject;
 
 /**
@@ -283,12 +285,14 @@ public class BrightnessSliderController extends ViewController<BrightnessSliderV
         private final VibratorHelper mVibratorHelper;
         private final SystemClock mSystemClock;
         private final ActivityStarter mActivityStarter;
+        private final MSDLPlayer mMSDLPlayer;
 
         @Inject
         public Factory(
                 FalsingManager falsingManager,
                 UiEventLogger uiEventLogger,
                 VibratorHelper vibratorHelper,
+                MSDLPlayer msdlPlayer,
                 SystemClock clock,
                 ActivityStarter activityStarter
         ) {
@@ -297,6 +301,7 @@ public class BrightnessSliderController extends ViewController<BrightnessSliderV
             mVibratorHelper = vibratorHelper;
             mSystemClock = clock;
             mActivityStarter = activityStarter;
+            mMSDLPlayer = msdlPlayer;
         }
 
         /**
@@ -314,6 +319,7 @@ public class BrightnessSliderController extends ViewController<BrightnessSliderV
                     .inflate(layout, viewRoot, false);
             SeekbarHapticPlugin plugin = new SeekbarHapticPlugin(
                     mVibratorHelper,
+                    mMSDLPlayer,
                     mSystemClock);
             HapticSliderViewBinder.bind(viewRoot, plugin);
             return new BrightnessSliderController(

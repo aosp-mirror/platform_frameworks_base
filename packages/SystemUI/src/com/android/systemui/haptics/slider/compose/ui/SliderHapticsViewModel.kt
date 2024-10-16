@@ -33,6 +33,7 @@ import com.android.systemui.haptics.slider.SliderStateTracker
 import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.util.time.SystemClock
+import com.google.android.msdl.domain.MSDLPlayer
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -50,6 +51,7 @@ constructor(
     @Assisted private val sliderHapticFeedbackConfig: SliderHapticFeedbackConfig,
     @Assisted private val sliderTrackerConfig: SeekableSliderTrackerConfig,
     vibratorHelper: VibratorHelper,
+    msdlPlayer: MSDLPlayer,
     systemClock: SystemClock,
 ) : ExclusiveActivatable() {
 
@@ -78,6 +80,7 @@ constructor(
     private val sliderHapticFeedbackProvider =
         SliderHapticFeedbackProvider(
             vibratorHelper,
+            msdlPlayer,
             dragVelocityProvider,
             sliderHapticFeedbackConfig,
             systemClock,
