@@ -179,6 +179,6 @@ public class ProtoLogViewerConfigReader {
             }
         }
 
-        throw new RuntimeException("Group " + group + "not found in viewer config");
+        throw new RuntimeException("Group " + group + " not found in viewer config");
     }
 }
