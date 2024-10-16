@@ -23,6 +23,7 @@ import com.android.systemui.SliceBroadcastRelayHandler
 import com.android.systemui.accessibility.Magnification
 import com.android.systemui.back.domain.interactor.BackActionInteractor
 import com.android.systemui.biometrics.BiometricNotificationService
+import com.android.systemui.bouncer.domain.startable.BouncerStartable
 import com.android.systemui.clipboardoverlay.ClipboardListener
 import com.android.systemui.controls.dagger.StartControlsStartableModule
 import com.android.systemui.dagger.qualifiers.PerUser
@@ -301,6 +302,11 @@ abstract class SystemUICoreStartableModule {
     @IntoMap
     @ClassKey(KeyguardDismissActionBinder::class)
     abstract fun bindKeyguardDismissActionBinder(impl: KeyguardDismissActionBinder): CoreStartable
+
+    @Binds
+    @IntoMap
+    @ClassKey(BouncerStartable::class)
+    abstract fun bindBouncerStartable(impl: BouncerStartable): CoreStartable
 
     @Binds
     @IntoMap
