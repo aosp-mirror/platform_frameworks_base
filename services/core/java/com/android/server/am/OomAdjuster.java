@@ -1162,8 +1162,8 @@ public class OomAdjuster {
                     if (opt != null && opt.isFreezeExempt()) {
                         // BIND_WAIVE_PRIORITY and the like get oom_adj 900
                         targetAdj += 0;
-                    } else if (state.hasShownUi() && uiTargetAdj < 15) {
-                        // The most recent 5 apps that have shown UI get 910-914
+                    } else if (state.hasShownUi() && uiTargetAdj < 20) {
+                        // The most recent 10 apps that have shown UI get 910-919
                         targetAdj += uiTargetAdj++;
                     } else if ((state.getSetAdj() >= CACHED_APP_MIN_ADJ)
                             && (state.getLastStateTime()
