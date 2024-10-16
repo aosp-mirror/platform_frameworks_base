@@ -114,10 +114,13 @@ flag {
 }
 
 flag {
-    name: "enable_magnification_follows_mouse"
+    name: "enable_magnification_follows_mouse_bugfix"
     namespace: "accessibility"
     description: "Whether to enable mouse following for fullscreen magnification"
     bug: "354696546"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
 }
 
 flag {
