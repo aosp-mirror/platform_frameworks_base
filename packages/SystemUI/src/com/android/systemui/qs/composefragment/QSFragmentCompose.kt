@@ -58,6 +58,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.approachLayout
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.layout.onSizeChanged
@@ -236,14 +237,16 @@ constructor(
             AnimatedVisibility(
                 visible = viewModel.isQsVisible,
                 modifier =
-                    Modifier.windowInsetsPadding(WindowInsets.navigationBars)
+                    Modifier.graphicsLayer { alpha = viewModel.viewAlpha }
+                        .windowInsetsPadding(WindowInsets.navigationBars)
+                        // Clipping before translation to match QSContainerImpl.onDraw
+                        .offset {
+                            IntOffset(x = 0, y = viewModel.viewTranslationY.fastRoundToInt())
+                        }
                         .thenIf(notificationScrimClippingParams.isEnabled) {
                             Modifier.notificationScrimClip {
                                 notificationScrimClippingParams.params
                             }
-                        }
-                        .offset {
-                            IntOffset(x = 0, y = viewModel.viewTranslationY.fastRoundToInt())
                         },
             ) {
                 val isEditing by
