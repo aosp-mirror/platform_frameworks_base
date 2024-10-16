@@ -30,8 +30,7 @@ import java.util.Objects;
  *
  * @hide
  */
-public class SatelliteSessionStats implements Parcelable {
-
+public final class SatelliteSessionStats implements Parcelable {
     private int mCountOfSuccessfulUserMessages;
     private int mCountOfUnsuccessfulUserMessages;
     private int mCountOfTimedOutUserMessagesWaitingForConnection;
