@@ -237,6 +237,11 @@ public class DisplayManagerFlags {
             Flags::enableHasArrSupport
     );
 
+    private final FlagState mAutoBrightnessModeBedtimeWearFlagState = new FlagState(
+            Flags.FLAG_AUTO_BRIGHTNESS_MODE_BEDTIME_WEAR,
+            Flags::autoBrightnessModeBedtimeWear
+    );
+
     /**
      * @return {@code true} if 'port' is allowed in display layout configuration file.
      */
@@ -503,6 +508,15 @@ public class DisplayManagerFlags {
     public boolean hasArrSupportFlag() {
         return mHasArrSupport.isEnabled();
     }
+
+    /**
+     * @return {@code true} if bedtime mode specific auto-brightness curve should be loaded and be
+     * applied when bedtime mode is enabled.
+     */
+    public boolean isAutoBrightnessModeBedtimeWearEnabled() {
+        return mAutoBrightnessModeBedtimeWearFlagState.isEnabled();
+    }
+
     /**
      * dumps all flagstates
      * @param pw printWriter
@@ -553,6 +567,7 @@ public class DisplayManagerFlags {
         pw.println(" " + mBlockAutobrightnessChangesOnStylusUsage);
         pw.println(" " + mIsUserRefreshRateForExternalDisplayEnabled);
         pw.println(" " + mHasArrSupport);
+        pw.println(" " + mAutoBrightnessModeBedtimeWearFlagState);
     }
 
     private static class FlagState {
