@@ -1487,3 +1487,13 @@ flag {
   description: "Enables notes role qs tile which opens default notes role app in app bubbles"
   bug: "357863750"
 }
+
+flag {
+   name: "media_projection_request_attribution_fix"
+   namespace: "systemui"
+   description: "Ensure MediaProjection consent requests are properly attributed"
+   bug: "373581993"
+   metadata {
+       purpose: PURPOSE_BUGFIX
+   }
+}
