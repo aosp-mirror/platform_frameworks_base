@@ -12763,6 +12763,8 @@ public class Intent implements Parcelable, Cloneable {
     private boolean isImageCaptureIntent() {
         return (MediaStore.ACTION_IMAGE_CAPTURE.equals(mAction)
                 || MediaStore.ACTION_IMAGE_CAPTURE_SECURE.equals(mAction)
+                || MediaStore.ACTION_MOTION_PHOTO_CAPTURE.equals(mAction)
+                || MediaStore.ACTION_MOTION_PHOTO_CAPTURE_SECURE.equals(mAction)
                 || MediaStore.ACTION_VIDEO_CAPTURE.equals(mAction));
     }
 
