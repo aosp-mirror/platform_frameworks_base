@@ -39,7 +39,6 @@ import static org.mockito.Mockito.when;
 
 import android.app.ActivityOptions;
 import android.app.AppOpsManager;
-import android.app.BackgroundStartPrivileges;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -223,12 +222,12 @@ public class BackgroundActivityStartControllerExemptionTests {
 
         // prepare call
         PendingIntentRecord originatingPendingIntent = mPendingIntentRecord;
-        BackgroundStartPrivileges forcedBalByPiSender = BackgroundStartPrivileges.NONE;
+        boolean allowBalExemptionForSystemProcess = false;
         Intent intent = TEST_INTENT;
         ActivityOptions checkedOptions = mCheckedOptions;
         BackgroundActivityStartController.BalState balState = mController.new BalState(callingUid,
                 callingPid, callingPackage, realCallingUid, realCallingPid, mCallerApp,
-                originatingPendingIntent, forcedBalByPiSender, mResultRecord, intent,
+                originatingPendingIntent, allowBalExemptionForSystemProcess, mResultRecord, intent,
                 checkedOptions);
 
         assertWithMessage(balState.toString()).that(balState.isPendingIntent()).isTrue();
@@ -263,12 +262,12 @@ public class BackgroundActivityStartControllerExemptionTests {
 
         // prepare call
         PendingIntentRecord originatingPendingIntent = mPendingIntentRecord;
-        BackgroundStartPrivileges forcedBalByPiSender = BackgroundStartPrivileges.NONE;
+        boolean allowBalExemptionForSystemProcess = false;
         Intent intent = TEST_INTENT;
         ActivityOptions checkedOptions = mCheckedOptions;
         BackgroundActivityStartController.BalState balState = mController.new BalState(callingUid,
                 callingPid, callingPackage, realCallingUid, realCallingPid, mCallerApp,
-                originatingPendingIntent, forcedBalByPiSender, mResultRecord, intent,
+                originatingPendingIntent, allowBalExemptionForSystemProcess, mResultRecord, intent,
                 checkedOptions);
 
         // call
@@ -295,12 +294,12 @@ public class BackgroundActivityStartControllerExemptionTests {
 
         // prepare call
         PendingIntentRecord originatingPendingIntent = mPendingIntentRecord;
-        BackgroundStartPrivileges forcedBalByPiSender = BackgroundStartPrivileges.NONE;
+        boolean allowBalExemptionForSystemProcess = false;
         Intent intent = TEST_INTENT;
         ActivityOptions checkedOptions = mCheckedOptions;
         BackgroundActivityStartController.BalState balState = mController.new BalState(callingUid,
                 callingPid, callingPackage, realCallingUid, realCallingPid, mCallerApp,
-                originatingPendingIntent, forcedBalByPiSender, mResultRecord, intent,
+                originatingPendingIntent, allowBalExemptionForSystemProcess, mResultRecord, intent,
                 checkedOptions);
 
         // call
@@ -328,14 +327,14 @@ public class BackgroundActivityStartControllerExemptionTests {
 
         // prepare call
         PendingIntentRecord originatingPendingIntent = mPendingIntentRecord;
-        BackgroundStartPrivileges forcedBalByPiSender = BackgroundStartPrivileges.NONE;
+        boolean allowBalExemptionForSystemProcess = false;
         Intent intent = TEST_INTENT;
         ActivityOptions checkedOptions = mCheckedOptions
                 .setPendingIntentCreatorBackgroundActivityStartMode(
                         MODE_BACKGROUND_ACTIVITY_START_ALLOW_IF_VISIBLE);
         BackgroundActivityStartController.BalState balState = mController.new BalState(callingUid,
                 callingPid, callingPackage, realCallingUid, realCallingPid, mCallerApp,
-                originatingPendingIntent, forcedBalByPiSender, mResultRecord, intent,
+                originatingPendingIntent, allowBalExemptionForSystemProcess, mResultRecord, intent,
                 checkedOptions);
 
         // call
@@ -363,14 +362,14 @@ public class BackgroundActivityStartControllerExemptionTests {
 
         // prepare call
         PendingIntentRecord originatingPendingIntent = mPendingIntentRecord;
-        BackgroundStartPrivileges forcedBalByPiSender = BackgroundStartPrivileges.NONE;
+        boolean allowBalExemptionForSystemProcess = false;
         Intent intent = TEST_INTENT;
         ActivityOptions checkedOptions = mCheckedOptions
                 .setPendingIntentCreatorBackgroundActivityStartMode(
                         MODE_BACKGROUND_ACTIVITY_START_ALLOW_IF_VISIBLE);
         BackgroundActivityStartController.BalState balState = mController.new BalState(callingUid,
                 callingPid, callingPackage, realCallingUid, realCallingPid, mCallerApp,
-                originatingPendingIntent, forcedBalByPiSender, mResultRecord, intent,
+                originatingPendingIntent, allowBalExemptionForSystemProcess, mResultRecord, intent,
                 checkedOptions);
 
         // call
@@ -405,12 +404,12 @@ public class BackgroundActivityStartControllerExemptionTests {
 
         // prepare call
         PendingIntentRecord originatingPendingIntent = mPendingIntentRecord;
-        BackgroundStartPrivileges forcedBalByPiSender = BackgroundStartPrivileges.NONE;
+        boolean allowBalExemptionForSystemProcess = false;
         Intent intent = TEST_INTENT;
         ActivityOptions checkedOptions = mCheckedOptions;
         BackgroundActivityStartController.BalState balState = mController.new BalState(callingUid,
                 callingPid, callingPackage, realCallingUid, realCallingPid, mCallerApp,
-                originatingPendingIntent, forcedBalByPiSender, mResultRecord, intent,
+                originatingPendingIntent, allowBalExemptionForSystemProcess, mResultRecord, intent,
                 checkedOptions);
 
         // call
@@ -441,12 +440,12 @@ public class BackgroundActivityStartControllerExemptionTests {
 
         // prepare call
         PendingIntentRecord originatingPendingIntent = mPendingIntentRecord;
-        BackgroundStartPrivileges forcedBalByPiSender = BackgroundStartPrivileges.NONE;
+        boolean allowBalExemptionForSystemProcess = false;
         Intent intent = TEST_INTENT;
         ActivityOptions checkedOptions = mCheckedOptions;
         BackgroundActivityStartController.BalState balState = mController.new BalState(callingUid,
                 callingPid, callingPackage, realCallingUid, realCallingPid, null,
-                originatingPendingIntent, forcedBalByPiSender, mResultRecord, intent,
+                originatingPendingIntent, allowBalExemptionForSystemProcess, mResultRecord, intent,
                 checkedOptions);
 
         // call
@@ -490,12 +489,12 @@ public class BackgroundActivityStartControllerExemptionTests {
 
         // prepare call
         PendingIntentRecord originatingPendingIntent = mPendingIntentRecord;
-        BackgroundStartPrivileges forcedBalByPiSender = BackgroundStartPrivileges.NONE;
+        boolean allowBalExemptionForSystemProcess = false;
         Intent intent = TEST_INTENT;
         ActivityOptions checkedOptions = mCheckedOptions;
         BackgroundActivityStartController.BalState balState = mController.new BalState(callingUid,
                 callingPid, callingPackage, realCallingUid, realCallingPid, null,
-                originatingPendingIntent, forcedBalByPiSender, mResultRecord, intent,
+                originatingPendingIntent, allowBalExemptionForSystemProcess, mResultRecord, intent,
                 checkedOptions);
 
         // call
@@ -526,12 +525,12 @@ public class BackgroundActivityStartControllerExemptionTests {
 
         // prepare call
         PendingIntentRecord originatingPendingIntent = mPendingIntentRecord;
-        BackgroundStartPrivileges forcedBalByPiSender = BackgroundStartPrivileges.NONE;
+        boolean allowBalExemptionForSystemProcess = false;
         Intent intent = TEST_INTENT;
         ActivityOptions checkedOptions = mCheckedOptions;
         BackgroundActivityStartController.BalState balState = mController.new BalState(callingUid,
                 callingPid, callingPackage, realCallingUid, realCallingPid, null,
-                originatingPendingIntent, forcedBalByPiSender, mResultRecord, intent,
+                originatingPendingIntent, allowBalExemptionForSystemProcess, mResultRecord, intent,
                 checkedOptions);
 
         // call
@@ -563,14 +562,14 @@ public class BackgroundActivityStartControllerExemptionTests {
 
         // prepare call
         PendingIntentRecord originatingPendingIntent = mPendingIntentRecord;
-        BackgroundStartPrivileges forcedBalByPiSender = BackgroundStartPrivileges.NONE;
+        boolean allowBalExemptionForSystemProcess = false;
         Intent intent = TEST_INTENT;
         ActivityOptions checkedOptions = mCheckedOptions
                 .setPendingIntentBackgroundActivityStartMode(
                         MODE_BACKGROUND_ACTIVITY_START_ALLOW_IF_VISIBLE);
         BackgroundActivityStartController.BalState balState = mController.new BalState(callingUid,
                 callingPid, callingPackage, realCallingUid, realCallingPid, null,
-                originatingPendingIntent, forcedBalByPiSender, mResultRecord, intent,
+                originatingPendingIntent, allowBalExemptionForSystemProcess, mResultRecord, intent,
                 checkedOptions);
 
         // call
@@ -597,12 +596,12 @@ public class BackgroundActivityStartControllerExemptionTests {
 
         // prepare call
         PendingIntentRecord originatingPendingIntent = mPendingIntentRecord;
-        BackgroundStartPrivileges forcedBalByPiSender = BackgroundStartPrivileges.NONE;
+        boolean allowBalExemptionForSystemProcess = false;
         Intent intent = TEST_INTENT;
         ActivityOptions checkedOptions = mCheckedOptions;
         BackgroundActivityStartController.BalState balState = mController.new BalState(callingUid,
                 callingPid, callingPackage, realCallingUid, realCallingPid, null,
-                originatingPendingIntent, forcedBalByPiSender, mResultRecord, intent,
+                originatingPendingIntent, allowBalExemptionForSystemProcess, mResultRecord, intent,
                 checkedOptions);
 
         // call
@@ -630,14 +629,14 @@ public class BackgroundActivityStartControllerExemptionTests {
 
         // prepare call
         PendingIntentRecord originatingPendingIntent = mPendingIntentRecord;
-        BackgroundStartPrivileges forcedBalByPiSender = BackgroundStartPrivileges.NONE;
+        boolean allowBalExemptionForSystemProcess = false;
         Intent intent = TEST_INTENT;
         ActivityOptions checkedOptions = mCheckedOptions;
         checkedOptions.setPendingIntentBackgroundActivityStartMode(
                 MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS);
         BackgroundActivityStartController.BalState balState = mController.new BalState(callingUid,
                 callingPid, callingPackage, realCallingUid, realCallingPid, null,
-                originatingPendingIntent, forcedBalByPiSender, mResultRecord, intent,
+                originatingPendingIntent, allowBalExemptionForSystemProcess, mResultRecord, intent,
                 checkedOptions);
 
         // call
@@ -664,12 +663,12 @@ public class BackgroundActivityStartControllerExemptionTests {
 
         // prepare call
         PendingIntentRecord originatingPendingIntent = mPendingIntentRecord;
-        BackgroundStartPrivileges forcedBalByPiSender = BackgroundStartPrivileges.NONE;
+        boolean allowBalExemptionForSystemProcess = false;
         Intent intent = TEST_INTENT;
         ActivityOptions checkedOptions = mCheckedOptions;
         BackgroundActivityStartController.BalState balState = mController.new BalState(callingUid,
                 callingPid, callingPackage, realCallingUid, realCallingPid, null,
-                originatingPendingIntent, forcedBalByPiSender, mResultRecord, intent,
+                originatingPendingIntent, allowBalExemptionForSystemProcess, mResultRecord, intent,
                 checkedOptions);
 
         // call
@@ -697,14 +696,14 @@ public class BackgroundActivityStartControllerExemptionTests {
 
         // prepare call
         PendingIntentRecord originatingPendingIntent = mPendingIntentRecord;
-        BackgroundStartPrivileges forcedBalByPiSender = BackgroundStartPrivileges.NONE;
+        boolean allowBalExemptionForSystemProcess = false;
         Intent intent = TEST_INTENT;
         ActivityOptions checkedOptions =
                 mCheckedOptions.setPendingIntentBackgroundActivityStartMode(
                         MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS);
         BackgroundActivityStartController.BalState balState = mController.new BalState(callingUid,
                 callingPid, callingPackage, realCallingUid, realCallingPid, null,
-                originatingPendingIntent, forcedBalByPiSender, mResultRecord, intent,
+                originatingPendingIntent, allowBalExemptionForSystemProcess, mResultRecord, intent,
                 checkedOptions);
 
         // call
@@ -733,12 +732,12 @@ public class BackgroundActivityStartControllerExemptionTests {
 
         // prepare call
         PendingIntentRecord originatingPendingIntent = mPendingIntentRecord;
-        BackgroundStartPrivileges forcedBalByPiSender = BackgroundStartPrivileges.NONE;
+        boolean allowBalExemptionForSystemProcess = false;
         Intent intent = TEST_INTENT;
         ActivityOptions checkedOptions = mCheckedOptions;
         BackgroundActivityStartController.BalState balState = mController.new BalState(callingUid,
                 callingPid, callingPackage, realCallingUid, realCallingPid, null,
-                originatingPendingIntent, forcedBalByPiSender, mResultRecord, intent,
+                originatingPendingIntent, allowBalExemptionForSystemProcess, mResultRecord, intent,
                 checkedOptions);
 
         // call
@@ -764,12 +763,12 @@ public class BackgroundActivityStartControllerExemptionTests {
 
         // prepare call
         PendingIntentRecord originatingPendingIntent = mPendingIntentRecord;
-        BackgroundStartPrivileges forcedBalByPiSender = BackgroundStartPrivileges.NONE;
+        boolean allowBalExemptionForSystemProcess = false;
         Intent intent = TEST_INTENT;
         ActivityOptions checkedOptions = mCheckedOptions;
         BackgroundActivityStartController.BalState balState = mController.new BalState(callingUid,
                 callingPid, callingPackage, realCallingUid, realCallingPid, null,
-                originatingPendingIntent, forcedBalByPiSender, mResultRecord, intent,
+                originatingPendingIntent, allowBalExemptionForSystemProcess, mResultRecord, intent,
                 checkedOptions);
 
         // call
@@ -795,12 +794,12 @@ public class BackgroundActivityStartControllerExemptionTests {
 
         // prepare call
         PendingIntentRecord originatingPendingIntent = mPendingIntentRecord;
-        BackgroundStartPrivileges forcedBalByPiSender = BackgroundStartPrivileges.NONE;
+        boolean allowBalExemptionForSystemProcess = false;
         Intent intent = TEST_INTENT;
         ActivityOptions checkedOptions = mCheckedOptions;
         BackgroundActivityStartController.BalState balState = mController.new BalState(callingUid,
                 callingPid, callingPackage, realCallingUid, realCallingPid, null,
-                originatingPendingIntent, forcedBalByPiSender, mResultRecord, intent,
+                originatingPendingIntent, allowBalExemptionForSystemProcess, mResultRecord, intent,
                 checkedOptions);
 
         // call
@@ -831,12 +830,12 @@ public class BackgroundActivityStartControllerExemptionTests {
 
         // prepare call
         PendingIntentRecord originatingPendingIntent = mPendingIntentRecord;
-        BackgroundStartPrivileges forcedBalByPiSender = BackgroundStartPrivileges.NONE;
+        boolean allowBalExemptionForSystemProcess = false;
         Intent intent = TEST_INTENT;
         ActivityOptions checkedOptions = mCheckedOptions;
         BackgroundActivityStartController.BalState balState = mController.new BalState(callingUid,
                 callingPid, callingPackage, realCallingUid, realCallingPid, null,
-                originatingPendingIntent, forcedBalByPiSender, mResultRecord, intent,
+                originatingPendingIntent, allowBalExemptionForSystemProcess, mResultRecord, intent,
                 checkedOptions);
 
         // call

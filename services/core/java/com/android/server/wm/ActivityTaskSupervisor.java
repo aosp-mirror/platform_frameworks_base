@@ -96,7 +96,6 @@ import android.app.ActivityManagerInternal;
 import android.app.ActivityOptions;
 import android.app.AppOpsManager;
 import android.app.AppOpsManagerInternal;
-import android.app.BackgroundStartPrivileges;
 import android.app.IActivityClientController;
 import android.app.ProfilerInfo;
 import android.app.ResultInfo;
@@ -2862,7 +2861,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                     callingPid, callingUid, callingPackage, callingFeatureId, intent, null, null,
                     null, 0, 0, options, userId, task, "startActivityFromRecents",
                     false /* validateIncomingUser */, null /* originatingPendingIntent */,
-                    BackgroundStartPrivileges.NONE);
+                    /* allowBalExemptionForSystemProcess */ false);
         } finally {
             SaferIntentUtils.DISABLE_ENFORCE_INTENTS_TO_MATCH_INTENT_FILTERS.set(false);
             synchronized (mService.mGlobalLock) {
