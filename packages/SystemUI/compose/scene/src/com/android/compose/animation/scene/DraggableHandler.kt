@@ -631,7 +631,13 @@ internal class NestedScrollHandlerImpl(
                     return@PriorityNestedScrollConnection false
                 }
 
-                _lastPointersInfo = pointersInfoOwner.pointersInfo()
+                val pointersInfo = pointersInfoOwner.pointersInfo()
+
+                if (pointersInfo.isMouseWheel) {
+                    // Do not support mouse wheel interactions
+                    return@PriorityNestedScrollConnection false
+                }
+                _lastPointersInfo = pointersInfo
 
                 // If the current swipe transition is *not* closed to 0f or 1f, then we want the
                 // scroll events to intercept the current transition to continue the scene
@@ -650,7 +656,12 @@ internal class NestedScrollHandlerImpl(
                 val isZeroOffset =
                     if (isExternalOverscrollGesture()) false else offsetBeforeStart == 0f
 
-                _lastPointersInfo = pointersInfoOwner.pointersInfo()
+                val pointersInfo = pointersInfoOwner.pointersInfo()
+                if (pointersInfo.isMouseWheel) {
+                    // Do not support mouse wheel interactions
+                    return@PriorityNestedScrollConnection false
+                }
+                _lastPointersInfo = pointersInfo
 
                 val canStart =
                     when (behavior) {
@@ -685,7 +696,12 @@ internal class NestedScrollHandlerImpl(
                 // We could start an overscroll animation
                 canChangeScene = false
 
-                _lastPointersInfo = pointersInfoOwner.pointersInfo()
+                val pointersInfo = pointersInfoOwner.pointersInfo()
+                if (pointersInfo.isMouseWheel) {
+                    // Do not support mouse wheel interactions
+                    return@PriorityNestedScrollConnection false
+                }
+                _lastPointersInfo = pointersInfo
 
                 val canStart = behavior.canStartOnPostFling && hasNextScene(velocityAvailable)
                 if (canStart) {
@@ -706,6 +722,12 @@ internal class NestedScrollHandlerImpl(
             },
             onScroll = { offsetAvailable, _ ->
                 val controller = dragController ?: error("Should be called after onStart")
+
+                val pointersInfo = pointersInfoOwner.pointersInfo()
+                if (pointersInfo.isMouseWheel) {
+                    // Do not support mouse wheel interactions
+                    return@PriorityNestedScrollConnection 0f
+                }
 
                 // TODO(b/297842071) We should handle the overscroll or slow drag if the gesture is
                 // initiated in a nested child.

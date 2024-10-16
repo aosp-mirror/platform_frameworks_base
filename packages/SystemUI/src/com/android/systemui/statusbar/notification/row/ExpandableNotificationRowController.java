@@ -209,6 +209,32 @@ public class ExpandableNotificationRowController implements NotifViewController 
                 ) {
                     mLogBufferLogger.logSkipResetAllContentAlphas(entry);
                 }
+
+                @Override
+                public void logStartAppearAnimation(NotificationEntry entry, boolean isAppear) {
+                    mLogBufferLogger.logStartAppearAnimation(entry, isAppear);
+                }
+
+                @Override
+                public void logCancelAppearDrawing(NotificationEntry entry, boolean wasDrawing) {
+                    mLogBufferLogger.logCancelAppearDrawing(entry, wasDrawing);
+                }
+
+                @Override
+                public void logAppearAnimationStarted(NotificationEntry entry, boolean isAppear) {
+                    mLogBufferLogger.logAppearAnimationStarted(entry, isAppear);
+                }
+
+                @Override
+                public void logAppearAnimationSkipped(NotificationEntry entry, boolean isAppear) {
+                    mLogBufferLogger.logAppearAnimationSkipped(entry, isAppear);
+                }
+
+                @Override
+                public void logAppearAnimationFinished(NotificationEntry entry, boolean isAppear,
+                        boolean cancelled) {
+                    mLogBufferLogger.logAppearAnimationFinished(entry, isAppear, cancelled);
+                }
             };
 
 

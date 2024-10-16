@@ -66,6 +66,7 @@ import android.app.BackgroundStartPrivileges;
 import android.app.compat.CompatChanges;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledAfter;
+import android.compat.annotation.Overridable;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
@@ -129,6 +130,7 @@ public class BackgroundActivityStartController {
     /** If enabled the creator will not allow BAL on its behalf by default. */
     @ChangeId
     @EnabledAfter(targetSdkVersion = UPSIDE_DOWN_CAKE)
+    @Overridable
     private static final long DEFAULT_RESCIND_BAL_PRIVILEGES_FROM_PENDING_INTENT_CREATOR =
             296478951;
     public static final ActivityOptions ACTIVITY_OPTIONS_SYSTEM_DEFINED =

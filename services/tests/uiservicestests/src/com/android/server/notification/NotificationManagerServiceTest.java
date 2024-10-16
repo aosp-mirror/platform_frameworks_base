@@ -4838,7 +4838,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 null, mPkg, Process.myUserHandle());
 
         verify(mPreferencesHelper, times(1)).getNotificationChannels(
-                anyString(), anyInt(), anyBoolean());
+                anyString(), anyInt(), anyBoolean(), anyBoolean());
     }
 
     @Test
@@ -4856,7 +4856,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         }
 
         verify(mPreferencesHelper, never()).getNotificationChannels(
-                anyString(), anyInt(), anyBoolean());
+                anyString(), anyInt(), anyBoolean(), anyBoolean());
     }
 
     @Test
@@ -4871,7 +4871,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 null, mPkg, Process.myUserHandle());
 
         verify(mPreferencesHelper, times(1)).getNotificationChannels(
-                anyString(), anyInt(), anyBoolean());
+                anyString(), anyInt(), anyBoolean(), anyBoolean());
     }
 
     @Test
@@ -4891,7 +4891,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         }
 
         verify(mPreferencesHelper, never()).getNotificationChannels(
-                anyString(), anyInt(), anyBoolean());
+                anyString(), anyInt(), anyBoolean(), anyBoolean());
     }
 
     @Test
@@ -4913,7 +4913,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         }
 
         verify(mPreferencesHelper, never()).getNotificationChannels(
-                anyString(), anyInt(), anyBoolean());
+                anyString(), anyInt(), anyBoolean(), anyBoolean());
     }
 
     @Test
@@ -17061,5 +17061,21 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         assertThat(mService.hasFlag(captor.getValue().getNotification().flags,
                 FLAG_PROMOTED_ONGOING)).isFalse();
+    }
+
+    @Test
+    @EnableFlags(FLAG_NOTIFICATION_CLASSIFICATION)
+    public void testAppCannotUseReservedBundleChannels() throws Exception {
+        mBinderService.getBubblePreferenceForPackage(mPkg, mUid);
+        NotificationChannel news = mBinderService.getNotificationChannel(
+                mPkg, mContext.getUserId(), mPkg, NEWS_ID);
+        assertThat(news).isNotNull();
+
+        NotificationRecord nr = generateNotificationRecord(news);
+        mBinderService.enqueueNotificationWithTag(mPkg, mPkg, nr.getSbn().getTag(),
+                nr.getSbn().getId(), nr.getSbn().getNotification(), nr.getSbn().getUserId());
+        waitForIdle();
+
+        assertThat(mService.mNotificationList).isEmpty();
     }
 }

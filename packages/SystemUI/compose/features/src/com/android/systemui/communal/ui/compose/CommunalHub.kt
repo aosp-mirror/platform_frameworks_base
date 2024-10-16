@@ -765,7 +765,7 @@ private fun BoxScope.CommunalHubLazyGrid(
                     alpha = { outlineAlpha },
                     modifier =
                         Modifier.requiredSize(dpSize).thenIf(
-                            dragDropState.draggingItemIndex != index
+                            dragDropState.draggingItemKey != item.key
                         ) {
                             Modifier.animateItem(
                                 placementSpec = spring(stiffness = Spring.StiffnessMediumLow)
@@ -778,7 +778,7 @@ private fun BoxScope.CommunalHubLazyGrid(
                         dragDropState = dragDropState,
                         selected = selected,
                         enabled = item.isWidgetContent(),
-                        index = index,
+                        key = item.key,
                     ) { isDragging ->
                         CommunalContent(
                             modifier = Modifier.fillMaxSize(),

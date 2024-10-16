@@ -87,7 +87,6 @@ filegroup {
     srcs: [
         "tests/src/**/systemui/broadcast/BroadcastDispatcherTest.kt",
         "tests/src/**/systemui/broadcast/ActionReceiverTest.kt",
-        "tests/src/**/systemui/doze/DozeMachineTest.java",
         "tests/src/**/systemui/globalactions/GlobalActionsDialogLiteTest.java",
         "tests/src/**/systemui/globalactions/GlobalActionsImeTest.java",
         "tests/src/**/systemui/keyguard/data/repository/KeyguardTransitionRepositoryTest.kt",
@@ -175,7 +174,6 @@ filegroup {
         "tests/src/**/systemui/controls/management/ControlsEditingActivityTest.kt",
         "tests/src/**/systemui/controls/management/ControlsRequestDialogTest.kt",
         "tests/src/**/systemui/controls/ui/DetailDialogTest.kt",
-        "tests/src/**/systemui/doze/DozeMachineTest.kt",
         "tests/src/**/systemui/fontscaling/FontScalingDialogDelegateTest.kt",
         "tests/src/**/systemui/keyguard/CustomizationProviderTest.kt",
         "tests/src/**/systemui/globalactions/GlobalActionsColumnLayoutTest.java",
@@ -318,9 +316,6 @@ filegroup {
         "tests/src/**/systemui/stylus/StylusUsiPowerStartableTest.kt",
         "tests/src/**/systemui/temporarydisplay/TemporaryViewDisplayControllerTest.kt",
         "tests/src/**/keyguard/ClockEventControllerTest.kt",
-        "tests/src/**/keyguard/LegacyLockIconViewControllerWithCoroutinesTest.kt",
-        "tests/src/**/keyguard/LegacyLockIconViewControllerBaseTest.kt",
-        "tests/src/**/keyguard/LegacyLockIconViewControllerTest.java",
         "tests/src/**/systemui/animation/TransitionAnimatorTest.kt",
         "tests/src/**/systemui/bluetooth/qsdialog/BluetoothAutoOnRepositoryTest.kt",
         "tests/src/**/systemui/bluetooth/qsdialog/BluetoothStateInteractorTest.kt",
@@ -417,7 +412,6 @@ filegroup {
         "tests/src/**/systemui/stylus/StylusUsiPowerUiTest.kt",
         "tests/src/**/systemui/temporarydisplay/chipbar/ChipbarCoordinatorTest.kt",
         "tests/src/**/keyguard/KeyguardUpdateMonitorTest.java",
-        "tests/src/**/keyguard/LegacyLockIconViewControllerBaseTest.java",
         "tests/src/**/keyguard/CarrierTextManagerTest.java",
         "tests/src/**/systemui/ScreenDecorationsTest.java",
         "tests/src/**/systemui/temporarydisplay/chipbar/SwipeChipbarAwayGestureHandlerTest.kt",
@@ -899,9 +893,9 @@ android_robolectric_test {
         "androidx.compose.runtime_runtime",
     ],
     libs: [
-        "android.test.runner.stubs.system",
-        "android.test.base.stubs.system",
-        "android.test.mock.stubs.system",
+        "android.test.runner.impl",
+        "android.test.base.impl",
+        "android.test.mock.impl",
         "truth",
     ],
 
@@ -936,9 +930,9 @@ android_robolectric_test {
         "androidx.compose.runtime_runtime",
     ],
     libs: [
-        "android.test.runner.stubs.system",
-        "android.test.base.stubs.system",
-        "android.test.mock.stubs.system",
+        "android.test.runner.impl",
+        "android.test.base.impl",
+        "android.test.mock.impl",
         "truth",
     ],
 
@@ -974,9 +968,9 @@ android_ravenwood_test {
         "androidx.compose.runtime_runtime",
     ],
     libs: [
-        "android.test.runner.stubs.system",
-        "android.test.base.stubs.system",
-        "android.test.mock.stubs.system",
+        "android.test.runner.impl",
+        "android.test.base.impl",
+        "android.test.mock.impl",
     ],
     auto_gen_config: true,
     plugins: [

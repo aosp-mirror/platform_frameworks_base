@@ -70,6 +70,20 @@
         <item name="android:fontWeight">700</item>
     </style>
 
+    <style name="StatusBar" />
+    <style name="StatusBar.Chip" />
+
+    <style name="StatusBar.Chip.Text">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:gravity">center|start</item>
+        <item name="android:paddingStart">@dimen/ongoing_activity_chip_icon_text_padding</item>
+        <item name="android:textAppearance">@android:style/TextAppearance.Material.Small</item>
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
+        <item name="android:textColor">?android:attr/colorPrimary</item>
+    </style>
+
     <style name="Chipbar" />
 
     <style name="Chipbar.Text" parent="@*android:style/TextAppearance.DeviceDefault.Notification.Title">
@@ -677,10 +691,12 @@
 
     <style name="TunerSettings" parent="@android:style/Theme.DeviceDefault.Settings">
         <item name="android:windowActionBar">false</item>
+        <item name="android:windowOptOutEdgeToEdgeEnforcement">true</item>
         <item name="preferenceTheme">@style/TunerPreferenceTheme</item>
     </style>
 
     <style name="TunerPreferenceTheme" parent="@style/PreferenceThemeOverlay.SettingsBase">
+        <item name="android:windowOptOutEdgeToEdgeEnforcement">true</item>
     </style>
 
     <style name="TextAppearance.NotificationInfo.Confirmation">

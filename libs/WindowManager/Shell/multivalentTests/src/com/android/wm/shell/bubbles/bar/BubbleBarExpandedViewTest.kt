@@ -27,11 +27,13 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
+import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.internal.protolog.ProtoLog
 import com.android.wm.shell.R
 import com.android.wm.shell.bubbles.Bubble
 import com.android.wm.shell.bubbles.BubbleData
 import com.android.wm.shell.bubbles.BubbleExpandedViewManager
+import com.android.wm.shell.bubbles.BubbleLogger
 import com.android.wm.shell.bubbles.BubblePositioner
 import com.android.wm.shell.bubbles.BubbleTaskView
 import com.android.wm.shell.bubbles.BubbleTaskViewFactory
@@ -106,11 +108,12 @@ class BubbleBarExpandedViewTest {
         bubbleExpandedView.initialize(
             expandedViewManager,
             positioner,
+            BubbleLogger(UiEventLoggerFake()),
             false /* isOverflow */,
             bubbleTaskView,
             mainExecutor,
             bgExecutor,
-            regionSamplingProvider
+            regionSamplingProvider,
         )
 
         getInstrumentation().runOnMainSync(Runnable {

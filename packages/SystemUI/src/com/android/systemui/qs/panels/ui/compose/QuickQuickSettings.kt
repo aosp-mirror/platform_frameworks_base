@@ -41,8 +41,7 @@ fun SceneScope.QuickQuickSettings(
     viewModel: QuickQuickSettingsViewModel,
     modifier: Modifier = Modifier,
 ) {
-    val sizedTiles by
-        viewModel.tileViewModels.collectAsStateWithLifecycle(initialValue = emptyList())
+    val sizedTiles by viewModel.tileViewModels.collectAsStateWithLifecycle()
     val tiles = sizedTiles.fastMap { it.tile }
     val bounceables = remember(sizedTiles) { List(sizedTiles.size) { BounceableTileViewModel() } }
     val squishiness by viewModel.squishinessViewModel.squishiness.collectAsStateWithLifecycle()

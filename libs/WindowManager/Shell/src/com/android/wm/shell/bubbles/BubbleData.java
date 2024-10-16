@@ -495,7 +495,7 @@ public class BubbleData {
     /**
      * When this method is called it is expected that all info in the bubble has completed loading.
      * @see Bubble#inflate(BubbleViewInfoTask.Callback, Context, BubbleExpandedViewManager,
-     * BubbleTaskViewFactory, BubblePositioner, BubbleStackView,
+     * BubbleTaskViewFactory, BubblePositioner, BubbleLogger, BubbleStackView,
      * com.android.wm.shell.bubbles.bar.BubbleBarLayerView,
      * com.android.launcher3.icons.BubbleIconFactory, boolean)
      */
