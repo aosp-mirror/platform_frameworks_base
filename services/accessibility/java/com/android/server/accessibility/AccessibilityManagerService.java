@@ -2513,6 +2513,19 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     private boolean readInstalledAccessibilityShortcutLocked(AccessibilityUserState userState,
             List<AccessibilityShortcutInfo> parsedAccessibilityShortcutInfos) {
         if (!parsedAccessibilityShortcutInfos.equals(userState.mInstalledShortcuts)) {
+            if (Flags.clearShortcutsWhenActivityUpdatesToService()) {
+                List<String> componentNames = userState.mInstalledShortcuts.stream()
+                        .filter(a11yActivity ->
+                                !parsedAccessibilityShortcutInfos.contains(a11yActivity))
+                        .map(a11yActivity -> a11yActivity.getComponentName().flattenToString())
+                        .toList();
+                if (!componentNames.isEmpty()) {
+                    enableShortcutsForTargets(
+                            /* enable= */ false, UserShortcutType.ALL,
+                            componentNames, userState.mUserId);
+                }
+            }
+
             userState.mInstalledShortcuts.clear();
             userState.mInstalledShortcuts.addAll(parsedAccessibilityShortcutInfos);
             userState.updateTileServiceMapForAccessibilityActivityLocked();
