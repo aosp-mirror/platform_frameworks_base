@@ -20,12 +20,14 @@ import static com.android.ravenwood.common.RavenwoodCommonUtils.RAVENWOOD_INST_R
 import static com.android.ravenwood.common.RavenwoodCommonUtils.RAVENWOOD_RESOURCE_APK;
 import static com.android.ravenwood.common.RavenwoodCommonUtils.RAVENWOOD_VERBOSE_LOGGING;
 import static com.android.ravenwood.common.RavenwoodCommonUtils.RAVENWOOD_VERSION_JAVA_SYSPROP;
+import static com.android.ravenwood.common.RavenwoodCommonUtils.getRavenwoodRuntimePath;
 
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.Instrumentation;
 import android.app.ResourcesManager;
@@ -81,6 +83,8 @@ public class RavenwoodRuntimeEnvironmentController {
     private static final String MAIN_THREAD_NAME = "RavenwoodMain";
     private static final String RAVENWOOD_NATIVE_SYSPROP_NAME = "ravenwood_sysprop";
     private static final String RAVENWOOD_NATIVE_RUNTIME_NAME = "ravenwood_runtime";
+    private static final String RAVENWOOD_BUILD_PROP =
+            getRavenwoodRuntimePath() + "ravenwood-data/build.prop";
 
     /**
      * When enabled, attempt to dump all thread stacks just before we hit the
@@ -158,7 +162,8 @@ public class RavenwoodRuntimeEnvironmentController {
         System.load(RavenwoodCommonUtils.getJniLibraryPath(RAVENWOOD_NATIVE_RUNTIME_NAME));
 
         // Do the basic set up for the android sysprops.
-        setSystemProperties(RavenwoodSystemProperties.DEFAULT_VALUES);
+        RavenwoodSystemProperties.initialize(RAVENWOOD_BUILD_PROP);
+        setSystemProperties(null);
 
         // Make sure libandroid_runtime is loaded.
         RavenwoodNativeLoader.loadFrameworkNativeCode();
@@ -329,7 +334,7 @@ public class RavenwoodRuntimeEnvironmentController {
         LocalServices.removeAllServicesForTest();
         ServiceManager.reset$ravenwood();
 
-        setSystemProperties(RavenwoodSystemProperties.DEFAULT_VALUES);
+        setSystemProperties(null);
         if (sOriginalIdentityToken != -1) {
             Binder.restoreCallingIdentity(sOriginalIdentityToken);
         }
@@ -388,9 +393,10 @@ public class RavenwoodRuntimeEnvironmentController {
     /**
      * Set the current configuration to the actual SystemProperties.
      */
-    private static void setSystemProperties(RavenwoodSystemProperties systemProperties) {
+    private static void setSystemProperties(@Nullable RavenwoodSystemProperties systemProperties) {
         SystemProperties.clearChangeCallbacksForTest();
         RavenwoodRuntimeNative.clearSystemProperties();
+        if (systemProperties == null) systemProperties = new RavenwoodSystemProperties();
         sProps = new RavenwoodSystemProperties(systemProperties, true);
         for (var entry : systemProperties.getValues().entrySet()) {
             RavenwoodRuntimeNative.setSystemProperty(entry.getKey(), entry.getValue());
