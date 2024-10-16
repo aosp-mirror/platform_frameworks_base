@@ -36,6 +36,7 @@ import static org.mockito.Mockito.mock;
 import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
+import android.app.NotificationChannelGroup;
 import android.app.PendingIntent;
 import android.app.Person;
 import android.content.Intent;
@@ -369,6 +370,29 @@ public class NotificationEntryTest extends SysuiTestCase {
         entry.setHasSentReply();
 
         assertTrue(entry.isLastMessageFromReply());
+    }
+
+    @Test
+    public void notificationDataEntry_testIsLastMessageFromReply_invalidData() {
+        Bundle bundle = new Bundle();
+        bundle.putParcelableArray(Notification.EXTRA_REMOTE_INPUT_HISTORY_ITEMS,
+                new NotificationChannelGroup[]{});
+
+        Notification notification = new Notification.Builder(mContext, "test")
+                .addExtras(bundle)
+                .build();
+
+        NotificationEntry entry = new NotificationEntryBuilder()
+                .setPkg("pkg")
+                .setOpPkg("pkg")
+                .setTag("tag")
+                .setNotification(notification)
+                .setUser(mContext.getUser())
+                .setOverrideGroupKey("")
+                .build();
+        entry.setHasSentReply();
+
+        assertFalse(entry.isLastMessageFromReply());
     }
 
     @Test
