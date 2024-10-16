@@ -19,40 +19,31 @@ package com.android.systemui.qs.panels.data.repository
 import android.content.res.Resources
 import com.android.systemui.common.ui.data.repository.ConfigurationRepository
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.res.R
-import com.android.systemui.shade.shared.flag.DualShade
 import com.android.systemui.util.kotlin.emitOnStart
 import javax.inject.Inject
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.mapLatest
-import kotlinx.coroutines.flow.stateIn
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class QSColumnsRepository
 @Inject
 constructor(
-    @Application scope: CoroutineScope,
     @Main private val resources: Resources,
     configurationRepository: ConfigurationRepository,
 ) {
-    val columns: StateFlow<Int> =
-        if (DualShade.isEnabled) {
-                flowOf(resources.getInteger(R.integer.quick_settings_dual_shade_num_columns))
-            } else {
-                configurationRepository.onConfigurationChange.emitOnStart().mapLatest {
-                    resources.getInteger(R.integer.quick_settings_infinite_grid_num_columns)
-                }
-            }
-            .stateIn(
-                scope,
-                SharingStarted.WhileSubscribed(),
-                resources.getInteger(R.integer.quick_settings_infinite_grid_num_columns),
-            )
+    val splitShadeColumns: Flow<Int> =
+        flowOf(resources.getInteger(R.integer.quick_settings_split_shade_num_columns))
+    val dualShadeColumns: Flow<Int> =
+        flowOf(resources.getInteger(R.integer.quick_settings_dual_shade_num_columns))
+    val columns: Flow<Int> =
+        configurationRepository.onConfigurationChange.emitOnStart().mapLatest {
+            resources.getInteger(R.integer.quick_settings_infinite_grid_num_columns)
+        }
+    val defaultColumns: Int =
+        resources.getInteger(R.integer.quick_settings_infinite_grid_num_columns)
 }
