@@ -453,8 +453,8 @@ class TransitionAnimator(
         endState: State,
         windowBackgroundLayer: GradientDrawable,
         fadeWindowBackgroundLayer: Boolean = true,
-        useSpring: Boolean = false,
         drawHole: Boolean = false,
+        useSpring: Boolean = false,
     ): Animation {
         val transitionContainer = controller.transitionContainer
         val transitionContainerOverlay = transitionContainer.overlay
