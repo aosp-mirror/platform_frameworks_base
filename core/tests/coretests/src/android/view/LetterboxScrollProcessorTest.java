@@ -38,7 +38,6 @@ import androidx.test.platform.app.InstrumentationRegistry;
 import org.junit.Before;
 import org.junit.Test;
 
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -55,7 +54,7 @@ public class LetterboxScrollProcessorTest {
     private LetterboxScrollProcessor mLetterboxScrollProcessor;
     private Context mContext;
 
-    // Constant delta used when comparing coordinates (floats)
+    // Constant delta used when comparing coordinates (floats).
     private static final float EPSILON = 0.1f;
 
     private static final Rect APP_BOUNDS =
@@ -68,19 +67,19 @@ public class LetterboxScrollProcessorTest {
         // Set app bounds as if it was letterboxed.
         mContext.getResources().getConfiguration().windowConfiguration.setBounds(APP_BOUNDS);
 
-        Handler handler = new Handler(Looper.getMainLooper());
-
         // Recreate to reset LetterboxScrollProcessor state.
-        mLetterboxScrollProcessor = new LetterboxScrollProcessor(mContext, handler);
+        mLetterboxScrollProcessor = new LetterboxScrollProcessor(mContext,
+                new Handler(Looper.getMainLooper()));
     }
 
     @Test
     public void testGestureInBoundsHasNoAdjustments() {
         // Tap-like gesture in bounds (non-scroll).
-        List<MotionEvent> tapGestureEvents = createTapGestureEvents(0f, 0f);
+        final List<MotionEvent> tapGestureEvents = createTapGestureEvents(
+                /* startX= */ 0f, /* startY= */ 0f);
 
         // Get processed events from Letterbox Scroll Processor.
-        List<MotionEvent> processedEvents = processMotionEvents(tapGestureEvents);
+        final List<MotionEvent> processedEvents = processMotionEvents(tapGestureEvents);
 
         // Ensure no changes are made to events after processing - event locations should not be
         // adjusted because the gesture started in the app's bounds (for all gestures).
@@ -110,10 +109,11 @@ public class LetterboxScrollProcessorTest {
     @Test
     public void testGestureOutsideBoundsIsIgnored() {
         // Tap-like gesture outside bounds (non-scroll).
-        List<MotionEvent> tapGestureEvents = createTapGestureEvents(-100f, -100f);
+        final List<MotionEvent> tapGestureEvents = createTapGestureEvents(
+                /* startX= */ -100f, /* startY= */ -100f);
 
         // Get processed events from Letterbox Scroll Processor.
-        List<MotionEvent> processedEvents = processMotionEvents(tapGestureEvents);
+        final List<MotionEvent> processedEvents = processMotionEvents(tapGestureEvents);
 
         // All events should be ignored since it was a non-scroll gesture and out of bounds.
         assertEquals(0, processedEvents.size());
@@ -122,10 +122,11 @@ public class LetterboxScrollProcessorTest {
     @Test
     public void testScrollGestureInBoundsHasNoAdjustments() {
         // Scroll gesture in bounds (non-scroll).
-        List<MotionEvent> scrollGestureEvents = createScrollGestureEvents(0f, 0f);
+        final List<MotionEvent> scrollGestureEvents = createScrollGestureEvents(
+                /* startX= */ 0f, /* startY= */ 0f);
 
         // Get processed events from Letterbox Scroll Processor.
-        List<MotionEvent> processedEvents = processMotionEvents(scrollGestureEvents);
+        final List<MotionEvent> processedEvents = processMotionEvents(scrollGestureEvents);
 
         // Ensure no changes are made to events after processing - event locations should not be
         // adjusted because the gesture started in the app's bounds (for all gestures).
@@ -137,10 +138,11 @@ public class LetterboxScrollProcessorTest {
     @Test
     public void testScrollGestureInBoundsThenLeavesBoundsHasNoAdjustments() {
         // Scroll gesture in bounds (non-scroll) that moves out of bounds.
-        List<MotionEvent> scrollGestureEvents = createScrollGestureEvents(390f, 790f);
+        final List<MotionEvent> scrollGestureEvents = createScrollGestureEvents(
+                /* startX= */ 390f, /* startY= */ 790f);
 
         // Get processed events from Letterbox Scroll Processor.
-        List<MotionEvent> processedEvents = processMotionEvents(scrollGestureEvents);
+        final List<MotionEvent> processedEvents = processMotionEvents(scrollGestureEvents);
 
         // Ensure no changes are made to events after processing - event locations should not be
         // adjusted because the gesture started in the app's bounds (for all gestures), even if it
@@ -153,7 +155,8 @@ public class LetterboxScrollProcessorTest {
     @Test
     public void testScrollGestureOutsideBoundsIsStartedInBounds() {
         // Scroll gesture outside bounds.
-        List<MotionEvent> scrollGestureEvents = createScrollGestureEvents(-100f, 0f);
+        List<MotionEvent> scrollGestureEvents = createScrollGestureEvents(
+                /* startX= */ -100f, /* startY= */ 0f);
 
         // Get processed events from Letterbox Scroll Processor.
         List<MotionEvent> processedEvents = processMotionEvents(scrollGestureEvents);
@@ -163,9 +166,9 @@ public class LetterboxScrollProcessorTest {
 
         // Ensure offset ACTION_DOWN is first event received.
         MotionEvent firstProcessedEvent = processedEvents.getFirst();
-        assertEquals(firstProcessedEvent.getAction(), ACTION_DOWN);
-        assertEquals(firstProcessedEvent.getX(), 0, EPSILON);
-        assertEquals(firstProcessedEvent.getY(), 0, EPSILON);
+        assertEquals(ACTION_DOWN, firstProcessedEvent.getAction());
+        assertEquals(0, firstProcessedEvent.getX(), EPSILON);
+        assertEquals(0, firstProcessedEvent.getY(), EPSILON);
         // Ensure this event is not finished (because it was generated by LetterboxScrollProcessor).
         assertNull(mLetterboxScrollProcessor.processMotionEventBeforeFinish(firstProcessedEvent));
     }
@@ -173,16 +176,17 @@ public class LetterboxScrollProcessorTest {
     @Test
     public void testScrollGestureOutsideBoundsIsMovedInBounds() {
         // Scroll gesture outside bounds.
-        List<MotionEvent> scrollGestureEvents = createScrollGestureEvents(-100f, 0f);
+        final List<MotionEvent> scrollGestureEvents = createScrollGestureEvents(
+                /* startX= */ -100f, /* startY= */ 0f);
 
         // Get processed events from Letterbox Scroll Processor.
-        List<MotionEvent> processedEvents = processMotionEvents(scrollGestureEvents);
+        final List<MotionEvent> processedEvents = processMotionEvents(scrollGestureEvents);
 
         // When a scroll occurs outside bounds: once detected as a scroll, an offset ACTION_DOWN is
         // placed and then the rest of the gesture is offset also. Some ACTION_MOVE events may be
         // ignored until the gesture is 'detected as a scroll'.
         // For this test, we expect the first ACTION_MOVE event to be ignored:
-        scrollGestureEvents.remove(1);
+        scrollGestureEvents.remove(/* index= */ 1);
 
         // Ensure all processed events (that are not ignored) are offset over the app.
         assertXCoordinatesAdjustedToZero(scrollGestureEvents, processedEvents);
@@ -191,8 +195,9 @@ public class LetterboxScrollProcessorTest {
         assertMotionEventsShouldBeFinished(processedEvents.subList(1, processedEvents.size()));
     }
 
-    private List<MotionEvent> processMotionEvents(List<MotionEvent> motionEvents) {
-        List<MotionEvent> processedEvents = new ArrayList<>();
+    @NonNull
+    private List<MotionEvent> processMotionEvents(@NonNull List<MotionEvent> motionEvents) {
+        final List<MotionEvent> processedEvents = new ArrayList<>();
         for (MotionEvent motionEvent : motionEvents) {
             MotionEvent clonedEvent = MotionEvent.obtain(motionEvent);
             List<MotionEvent> letterboxScrollCompatEvents =
@@ -212,6 +217,7 @@ public class LetterboxScrollProcessorTest {
      * Creates and returns a tap gesture with X and Y in reference to the app bounds (top left
      * corner is x=0, y=0).
      */
+    @NonNull
     private List<MotionEvent> createTapGestureEvents(float startX, float startY) {
         return createTapGestureEventsWithCoordinateSystem(startX, startY, APP_BOUNDS);
     }
@@ -230,20 +236,21 @@ public class LetterboxScrollProcessorTest {
         return motionEvents;
     }
 
+    @NonNull
     private List<MotionEvent> createScrollGestureEvents(float startX, float startY) {
-        float touchSlop = (float) ViewConfiguration.get(mContext).getScaledTouchSlop();
+        final float touchSlop = (float) ViewConfiguration.get(mContext).getScaledTouchSlop();
 
-        // Events for scroll gesture (starts at (startX, startY) then moves down-right
-        List<MotionEvent> motionEvents = new ArrayList<>();
-        motionEvents.add(createBasicMotionEvent(0, ACTION_DOWN, startX, startY));
-        motionEvents.add(createBasicMotionEvent(10, ACTION_MOVE,
+        // Events for scroll gesture (starts at (startX, startY) then moves down-right.
+        final List<MotionEvent> motionEvents = new ArrayList<>();
+        motionEvents.add(createBasicMotionEvent(/* downTime= */ 0, ACTION_DOWN, startX, startY));
+        motionEvents.add(createBasicMotionEvent(/* downTime= */ 10, ACTION_MOVE,
                 startX + touchSlop / 2, startY + touchSlop / 2));
-        // Below event is first event in the scroll gesture where distance > touchSlop
-        motionEvents.add(createBasicMotionEvent(20, ACTION_MOVE,
+        // Below event is first event in the scroll gesture where distance > touchSlop.
+        motionEvents.add(createBasicMotionEvent(/* downTime= */ 20, ACTION_MOVE,
                 startX + touchSlop * 2, startY + touchSlop * 2));
-        motionEvents.add(createBasicMotionEvent(30, ACTION_MOVE,
+        motionEvents.add(createBasicMotionEvent(/* downTime= */ 30, ACTION_MOVE,
                 startX + touchSlop * 3, startY + touchSlop * 3));
-        motionEvents.add(createBasicMotionEvent(40, ACTION_UP,
+        motionEvents.add(createBasicMotionEvent(/* downTime= */ 40, ACTION_UP,
                 startX + touchSlop * 3, startY + touchSlop * 3));
         return motionEvents;
     }
@@ -274,8 +281,8 @@ public class LetterboxScrollProcessorTest {
     }
 
     private void assertEventLocationsAreNotAdjusted(
-            List<MotionEvent> originalEvents,
-            List<MotionEvent> processedEvents) {
+            @NonNull List<MotionEvent> originalEvents,
+            @NonNull List<MotionEvent> processedEvents) {
         assertEquals("MotionEvent arrays are not the same size",
                 originalEvents.size(), processedEvents.size());
 
@@ -288,8 +295,8 @@ public class LetterboxScrollProcessorTest {
     }
 
     private void assertXCoordinatesAdjustedToZero(
-            List<MotionEvent> originalEvents,
-            List<MotionEvent> processedEvents) {
+            @NonNull List<MotionEvent> originalEvents,
+            @NonNull List<MotionEvent> processedEvents) {
         assertEquals("MotionEvent arrays are not the same size",
                 originalEvents.size(), processedEvents.size());
 
@@ -301,7 +308,7 @@ public class LetterboxScrollProcessorTest {
         }
     }
 
-    private void assertMotionEventsShouldBeFinished(List<MotionEvent> processedEvents) {
+    private void assertMotionEventsShouldBeFinished(@NonNull List<MotionEvent> processedEvents) {
         for (MotionEvent processedEvent : processedEvents) {
             assertNotNull(mLetterboxScrollProcessor.processMotionEventBeforeFinish(processedEvent));
         }
