@@ -14,13 +14,18 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.data.repository
+package com.android.systemui.statusbar.core
 
-import com.android.systemui.kosmos.Kosmos
+import android.view.Display
 
-val Kosmos.fakeStatusBarModePerDisplayRepository by
-    Kosmos.Fixture { FakeStatusBarModePerDisplayRepository() }
+class FakeStatusBarInitializerStore : StatusBarInitializerStore {
 
-val Kosmos.statusBarModeRepository: StatusBarModeRepositoryStore by
-    Kosmos.Fixture { fakeStatusBarModeRepository }
-val Kosmos.fakeStatusBarModeRepository by Kosmos.Fixture { FakeStatusBarModeRepository() }
+    private val initializers = mutableMapOf<Int, FakeStatusBarInitializer>()
+
+    override val defaultDisplay: FakeStatusBarInitializer
+        get() = forDisplay(Display.DEFAULT_DISPLAY)
+
+    override fun forDisplay(displayId: Int): FakeStatusBarInitializer {
+        return initializers.computeIfAbsent(displayId) { FakeStatusBarInitializer() }
+    }
+}
