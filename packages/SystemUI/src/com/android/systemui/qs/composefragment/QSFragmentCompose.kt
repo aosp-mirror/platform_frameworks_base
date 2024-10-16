@@ -45,6 +45,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
@@ -59,6 +60,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.approachLayout
 import androidx.compose.ui.layout.onPlaced
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.dimensionResource
@@ -66,7 +68,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.round
+import androidx.compose.ui.util.fastRoundToInt
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
@@ -144,9 +148,6 @@ constructor(
 
     private lateinit var viewModel: QSFragmentComposeViewModel
 
-    // Starting with a non-zero value makes it so that it has a non-zero height on first expansion
-    // This is important for `QuickSettingsControllerImpl.mMinExpansionHeight` to detect a "change".
-    private val qqsHeight = MutableStateFlow(1)
     private val qsHeight = MutableStateFlow(0)
     private val qqsVisible = MutableStateFlow(false)
     private val qqsPositionOnRoot = Rect()
@@ -235,11 +236,15 @@ constructor(
             AnimatedVisibility(
                 visible = viewModel.isQsVisible,
                 modifier =
-                    Modifier.windowInsetsPadding(WindowInsets.navigationBars).thenIf(
-                        notificationScrimClippingParams.isEnabled
-                    ) {
-                        Modifier.notificationScrimClip { notificationScrimClippingParams.params }
-                    },
+                    Modifier.windowInsetsPadding(WindowInsets.navigationBars)
+                        .thenIf(notificationScrimClippingParams.isEnabled) {
+                            Modifier.notificationScrimClip {
+                                notificationScrimClippingParams.params
+                            }
+                        }
+                        .offset {
+                            IntOffset(x = 0, y = viewModel.viewTranslationY.fastRoundToInt())
+                        },
             ) {
                 val isEditing by
                     viewModel.containerViewModel.editModeViewModel.isEditing
@@ -317,7 +322,7 @@ constructor(
 
     override fun getQsMinExpansionHeight(): Int {
         // TODO (b/353253277) implement split screen
-        return qqsHeight.value
+        return viewModel.qqsHeight
     }
 
     override fun getDesiredHeight(): Int {
@@ -383,8 +388,7 @@ constructor(
         viewModel.setQsExpansionValue(qsExpansionFraction)
         viewModel.panelExpansionFraction = panelExpansionFraction
         viewModel.squishinessFraction = squishinessFraction
-
-        // TODO(b/353254353) Handle header translation
+        viewModel.proposedTranslation = headerTranslation
     }
 
     override fun setHeaderListening(listening: Boolean) {
@@ -404,7 +408,7 @@ constructor(
     }
 
     override fun getHeightDiff(): Int {
-        return 0 // For now TODO(b/353254353)
+        return viewModel.heightDiff
     }
 
     override fun getHeader(): View? {
@@ -466,7 +470,7 @@ constructor(
     }
 
     override fun setOverScrollAmount(overScrollAmount: Int) {
-        super.setOverScrollAmount(overScrollAmount)
+        viewModel.overScrollAmount = overScrollAmount
     }
 
     override fun setIsNotificationPanelFullWidth(isFullWidth: Boolean) {
@@ -525,7 +529,7 @@ constructor(
     @Composable
     private fun SceneScope.QuickQuickSettingsElement() {
         val qqsPadding = viewModel.qqsHeaderHeight
-        val bottomPadding = dimensionResource(id = R.dimen.qqs_layout_padding_bottom)
+        val bottomPadding = viewModel.qqsBottomPadding
         DisposableEffect(Unit) {
             qqsVisible.value = true
 
@@ -555,11 +559,11 @@ constructor(
                         .approachLayout(isMeasurementApproachInProgress = { squishiness < 1f }) {
                             measurable,
                             constraints ->
-                            qqsHeight.value = lookaheadSize.height
+                            viewModel.qqsHeight = lookaheadSize.height
                             val placeable = measurable.measure(constraints)
                             layout(placeable.width, placeable.height) { placeable.place(0, 0) }
                         }
-                        .padding(top = { qqsPadding }, bottom = { bottomPadding.roundToPx() })
+                        .padding(top = { qqsPadding }, bottom = { bottomPadding })
             ) {
                 if (viewModel.isQsEnabled) {
                     QuickQuickSettings(
@@ -602,7 +606,17 @@ constructor(
                         onDispose { lifecycleScope.launch { scrollState.scrollTo(0) } }
                     }
 
-                    Column(modifier = Modifier.verticalScroll(scrollState)) {
+                    Column(
+                        modifier =
+                            Modifier.offset {
+                                    IntOffset(
+                                        x = 0,
+                                        y = viewModel.qsScrollTranslationY.fastRoundToInt(),
+                                    )
+                                }
+                                .onSizeChanged { viewModel.qsScrollHeight = it.height }
+                                .verticalScroll(scrollState)
+                    ) {
                         Spacer(
                             modifier = Modifier.height { qqsPadding + qsExtraPadding.roundToPx() }
                         )

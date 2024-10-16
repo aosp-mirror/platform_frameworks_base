@@ -38,6 +38,7 @@ import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel
 import com.android.systemui.qs.panels.domain.interactor.TileSquishinessInteractor
 import com.android.systemui.qs.panels.ui.viewmodel.PaginatedGridViewModel
 import com.android.systemui.qs.ui.viewmodel.QuickSettingsContainerViewModel
+import com.android.systemui.res.R
 import com.android.systemui.shade.LargeScreenHeaderHelper
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolator
 import com.android.systemui.statusbar.StatusBarState
@@ -123,7 +124,25 @@ constructor(
                 },
         )
 
+    val qqsBottomPadding by
+        hydrator.hydratedStateOf(
+            traceName = "qqsBottomPadding",
+            initialValue = resources.getDimensionPixelSize(R.dimen.qqs_layout_padding_bottom),
+            source = configurationInteractor.dimensionPixelSize(R.dimen.qqs_layout_padding_bottom),
+        )
+
+    // Starting with a non-zero value makes it so that it has a non-zero height on first expansion
+    // This is important for `QuickSettingsControllerImpl.mMinExpansionHeight` to detect a "change".
+    var qqsHeight by mutableStateOf(1)
+
+    var qsScrollHeight by mutableStateOf(0)
+
+    val heightDiff: Int
+        get() = qsScrollHeight - qqsHeight + qqsBottomPadding
+
     var isStackScrollerOverscrolling by mutableStateOf(false)
+
+    var proposedTranslation by mutableStateOf(0f)
 
     /**
      * Whether QS is enabled by policy. This is normally true, except when it's disabled by some
@@ -164,6 +183,25 @@ constructor(
 
     val inFirstPage: Boolean
         get() = paginatedGridViewModel.inFirstPage
+
+    var overScrollAmount by mutableStateOf(0)
+
+    val viewTranslationY by derivedStateOf {
+        if (isOverscrolling) {
+            overScrollAmount.toFloat()
+        } else {
+            if (onKeyguardAndExpanded) {
+                translationScaleY * qqsHeight
+            } else {
+                headerTranslation
+            }
+        }
+    }
+
+    val qsScrollTranslationY by derivedStateOf {
+        val panelTranslationY = translationScaleY * heightDiff
+        if (onKeyguardAndExpanded) panelTranslationY else 0f
+    }
 
     private var qsBounds by mutableStateOf(Rect())
 
@@ -209,8 +247,6 @@ constructor(
 
     private var viewHeight by mutableStateOf(0)
 
-    private var headerTranslation by mutableStateOf(0f)
-
     private val isBypassEnabled by
         hydrator.hydratedStateOf(
             traceName = "isBypassEnabled",
@@ -221,13 +257,24 @@ constructor(
         isBypassEnabled || (isTransitioningToFullShade && !isInSplitShade)
     }
 
-    private var overscrolling = mutableStateOf(false)
+    private val onKeyguardAndExpanded: Boolean
+        get() = isKeyguardState && !showCollapsedOnKeyguard
+
+    private val isOverscrolling: Boolean
+        get() = overScrollAmount != 0
 
     private var shouldUpdateMediaSquishiness by mutableStateOf(false)
 
     private val forceQs by derivedStateOf {
         (isQsExpanded || isStackScrollerOverscrolling) &&
             (isKeyguardState && !showCollapsedOnKeyguard)
+    }
+
+    private val translationScaleY: Float
+        get() = (qsExpansion - 1) * (if (isInSplitShade) 1f else SHORT_PARALLAX_AMOUNT)
+
+    private val headerTranslation by derivedStateOf {
+        if (isTransitioningToFullShade) 0f else proposedTranslation
     }
 
     override suspend fun onActivated(): Nothing {
@@ -255,8 +302,15 @@ constructor(
                 println("qsExpansion", qsExpansion)
                 println("panelExpansionFraction", panelExpansionFraction)
                 println("squishinessFraction", squishinessFraction)
+                println("proposedTranslation", proposedTranslation)
                 println("expansionState", expansionState)
                 println("forceQS", forceQs)
+                printSection("Derived values") {
+                    println("headerTranslation", headerTranslation)
+                    println("translationScaleY", translationScaleY)
+                    println("viewTranslationY", viewTranslationY)
+                    println("qsScrollTranslationY", qsScrollTranslationY)
+                }
             }
             printSection("Shade state") {
                 println("stackOverscrolling", isStackScrollerOverscrolling)
@@ -265,8 +319,11 @@ constructor(
                 println("isSmallScreen", isSmallScreen)
                 println("heightOverride", "${heightOverride}px")
                 println("qqsHeaderHeight", "${qqsHeaderHeight}px")
+                println("qqsBottomPadding", "${qqsBottomPadding}px")
                 println("isSplitShade", isInSplitShade)
                 println("showCollapsedOnKeyguard", showCollapsedOnKeyguard)
+                println("qqsHeight", "${qqsHeight}px")
+                println("qsScrollHeight", "${qsScrollHeight}px")
             }
         }
     }
@@ -283,3 +340,5 @@ constructor(
 private fun Float.constrainSquishiness(): Float {
     return (0.1f + this * 0.9f).coerceIn(0f, 1f)
 }
+
+private val SHORT_PARALLAX_AMOUNT = 0.1f
