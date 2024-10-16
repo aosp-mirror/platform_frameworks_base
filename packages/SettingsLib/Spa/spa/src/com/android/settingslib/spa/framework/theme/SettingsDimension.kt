@@ -37,6 +37,7 @@ object SettingsDimension {
     val actionIconPadding = 4.dp
 
     val itemIconSize = 24.dp
+    val itemIconContainerSizeSmall = 40.dp
     val itemIconContainerSize = 72.dp
     val itemPaddingStart = if (isSpaExpressiveEnabled) paddingLarge else paddingExtraLarge
     val itemPaddingEnd = paddingLarge
