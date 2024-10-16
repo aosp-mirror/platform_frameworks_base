@@ -24,7 +24,6 @@ import com.android.systemui.bouncer.shared.model.BouncerDismissActionModel
 import com.android.systemui.bouncer.shared.model.BouncerShowMessageModel
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor
 import com.android.systemui.log.dagger.BouncerTableLog
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.log.table.logDiffsForTable
@@ -88,7 +87,6 @@ interface KeyguardBouncerRepository {
     val showMessage: StateFlow<BouncerShowMessageModel?>
     val resourceUpdateRequests: StateFlow<Boolean>
     val alternateBouncerVisible: StateFlow<Boolean>
-    val alternateBouncerUIAvailable: StateFlow<Boolean>
 
     /** Last shown security mode of the primary bouncer (ie: pin/pattern/password/SIM) */
     val lastShownSecurityMode: StateFlow<KeyguardSecurityModel.SecurityMode>
@@ -125,8 +123,6 @@ interface KeyguardBouncerRepository {
     fun setIsBackButtonEnabled(isBackButtonEnabled: Boolean)
 
     fun setAlternateVisible(isVisible: Boolean)
-
-    fun setAlternateBouncerUIAvailable(isAvailable: Boolean)
 
     fun setLastShownSecurityMode(securityMode: KeyguardSecurityModel.SecurityMode)
 }
@@ -199,9 +195,6 @@ constructor(
     private val _alternateBouncerVisible = MutableStateFlow(false)
     override val alternateBouncerVisible = _alternateBouncerVisible.asStateFlow()
     override var lastAlternateBouncerVisibleTime: Long = NOT_VISIBLE
-    private val _alternateBouncerUIAvailable = MutableStateFlow(false)
-    override val alternateBouncerUIAvailable: StateFlow<Boolean> =
-        _alternateBouncerUIAvailable.asStateFlow()
 
     init {
         setUpLogging()
@@ -218,11 +211,6 @@ constructor(
             lastAlternateBouncerVisibleTime = NOT_VISIBLE
         }
         _alternateBouncerVisible.value = isVisible
-    }
-
-    override fun setAlternateBouncerUIAvailable(isAvailable: Boolean) {
-        DeviceEntryUdfpsRefactor.assertInLegacyMode()
-        _alternateBouncerUIAvailable.value = isAvailable
     }
 
     override fun setPrimaryShow(isShowing: Boolean) {
@@ -319,9 +307,6 @@ constructor(
             .launchIn(applicationScope)
         resourceUpdateRequests
             .logDiffsForTable(buffer, "", "ResourceUpdateRequests", false)
-            .launchIn(applicationScope)
-        alternateBouncerUIAvailable
-            .logDiffsForTable(buffer, "", "IsAlternateBouncerUIAvailable", false)
             .launchIn(applicationScope)
         alternateBouncerVisible
             .logDiffsForTable(buffer, "", "AlternateBouncerVisible", false)

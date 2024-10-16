@@ -16,21 +16,14 @@
 
 package com.android.systemui.biometrics
 
-import android.graphics.Rect
 import android.hardware.biometrics.BiometricRequestConstants.REASON_AUTH_BP
 import android.hardware.biometrics.BiometricRequestConstants.REASON_AUTH_KEYGUARD
-import android.hardware.biometrics.BiometricRequestConstants.REASON_AUTH_OTHER
-import android.hardware.biometrics.BiometricRequestConstants.REASON_AUTH_SETTINGS
-import android.hardware.biometrics.BiometricRequestConstants.REASON_ENROLL_ENROLLING
 import android.hardware.biometrics.BiometricRequestConstants.RequestReason
 import android.hardware.fingerprint.IUdfpsOverlayControllerCallback
 import android.testing.TestableLooper.RunWithLooper
 import android.view.LayoutInflater
 import android.view.MotionEvent
-import android.view.Surface
-import android.view.Surface.Rotation
 import android.view.View
-import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -38,7 +31,6 @@ import androidx.test.filters.SmallTest
 import com.android.app.viewcapture.ViewCapture
 import com.android.app.viewcapture.ViewCaptureAwareWindowManager
 import com.android.keyguard.KeyguardUpdateMonitor
-import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.ActivityTransitionAnimator
 import com.android.systemui.biometrics.domain.interactor.UdfpsOverlayInteractor
@@ -61,9 +53,7 @@ import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.power.shared.model.WakeSleepReason
 import com.android.systemui.power.shared.model.WakefulnessState
-import com.android.systemui.res.R
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
-import com.android.systemui.statusbar.LockscreenShadeTransitionController
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.android.systemui.statusbar.phone.SystemUIDialogManager
 import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController
@@ -86,7 +76,6 @@ import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.eq
 import org.mockito.Captor
 import org.mockito.Mock
-import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
@@ -118,7 +107,6 @@ class UdfpsControllerOverlayTest : SysuiTestCase() {
     @Mock private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
     @Mock private lateinit var dialogManager: SystemUIDialogManager
     @Mock private lateinit var dumpManager: DumpManager
-    @Mock private lateinit var transitionController: LockscreenShadeTransitionController
     @Mock private lateinit var configurationController: ConfigurationController
     @Mock private lateinit var keyguardStateController: KeyguardStateController
     @Mock
@@ -126,8 +114,6 @@ class UdfpsControllerOverlayTest : SysuiTestCase() {
     @Mock private lateinit var udfpsDisplayMode: UdfpsDisplayModeProvider
     @Mock private lateinit var controllerCallback: IUdfpsOverlayControllerCallback
     @Mock private lateinit var udfpsController: UdfpsController
-    @Mock private lateinit var udfpsView: UdfpsView
-    @Mock private lateinit var mUdfpsKeyguardViewLegacy: UdfpsKeyguardViewLegacy
     @Mock private lateinit var mActivityTransitionAnimator: ActivityTransitionAnimator
     @Mock private lateinit var primaryBouncerInteractor: PrimaryBouncerInteractor
     @Mock private lateinit var alternateBouncerInteractor: AlternateBouncerInteractor
@@ -147,7 +133,7 @@ class UdfpsControllerOverlayTest : SysuiTestCase() {
     private lateinit var powerInteractor: PowerInteractor
     private lateinit var testScope: TestScope
 
-    private val onTouch = { _: View, _: MotionEvent, _: Boolean -> true }
+    private val onTouch = { _: View, _: MotionEvent -> true }
     private var overlayParams: UdfpsOverlayParams = UdfpsOverlayParams()
     private lateinit var controllerOverlay: UdfpsControllerOverlay
 
@@ -158,53 +144,37 @@ class UdfpsControllerOverlayTest : SysuiTestCase() {
         powerInteractor = kosmos.powerInteractor
         keyguardTransitionRepository = kosmos.fakeKeyguardTransitionRepository
         keyguardTransitionInteractor = kosmos.keyguardTransitionInteractor
-        whenever(inflater.inflate(R.layout.udfps_view, null, false)).thenReturn(udfpsView)
-        whenever(inflater.inflate(R.layout.udfps_bp_view, null))
-            .thenReturn(mock(UdfpsBpView::class.java))
-        whenever(inflater.inflate(R.layout.udfps_keyguard_view_legacy, null))
-            .thenReturn(mUdfpsKeyguardViewLegacy)
-        whenever(inflater.inflate(R.layout.udfps_fpm_empty_view, null))
-            .thenReturn(mock(UdfpsFpmEmptyView::class.java))
     }
 
     private suspend fun withReasonSuspend(
         @RequestReason reason: Int,
         isDebuggable: Boolean = false,
-        enableDeviceEntryUdfpsRefactor: Boolean = false,
         block: suspend () -> Unit,
     ) {
-        withReason(
-            reason,
-            isDebuggable,
-            enableDeviceEntryUdfpsRefactor,
-        )
+        withReason(reason, isDebuggable)
         block()
     }
 
     private fun withReason(
         @RequestReason reason: Int,
         isDebuggable: Boolean = false,
-        enableDeviceEntryUdfpsRefactor: Boolean = false,
         block: () -> Unit = {},
     ) {
-        if (enableDeviceEntryUdfpsRefactor) {
-            mSetFlagsRule.enableFlags(Flags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR)
-        } else {
-            mSetFlagsRule.disableFlags(Flags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR)
-        }
         controllerOverlay =
             UdfpsControllerOverlay(
                 context,
                 inflater,
-                ViewCaptureAwareWindowManager(windowManager, lazyViewCapture,
-                        isViewCaptureEnabled = false),
+                ViewCaptureAwareWindowManager(
+                    windowManager,
+                    lazyViewCapture,
+                    isViewCaptureEnabled = false,
+                ),
                 accessibilityManager,
                 statusBarStateController,
                 statusBarKeyguardViewManager,
                 keyguardUpdateMonitor,
                 dialogManager,
                 dumpManager,
-                transitionController,
                 configurationController,
                 keyguardStateController,
                 unlockedScreenOffAnimationController,
@@ -229,117 +199,6 @@ class UdfpsControllerOverlayTest : SysuiTestCase() {
             )
         block()
     }
-
-    @Test fun showUdfpsOverlay_bp() = withReason(REASON_AUTH_BP) { showUdfpsOverlay() }
-
-    @Test
-    fun showUdfpsOverlay_keyguard() =
-        withReason(REASON_AUTH_KEYGUARD) {
-            showUdfpsOverlay()
-            verify(mUdfpsKeyguardViewLegacy).updateSensorLocation(eq(overlayParams.sensorBounds))
-        }
-
-    @Test fun showUdfpsOverlay_other() = withReason(REASON_AUTH_OTHER) { showUdfpsOverlay() }
-
-    private fun withRotation(@Rotation rotation: Int, block: () -> Unit) {
-        // Sensor that's in the top left corner of the display in natural orientation.
-        val sensorBounds = Rect(0, 0, SENSOR_WIDTH, SENSOR_HEIGHT)
-        val overlayBounds = Rect(0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT)
-        overlayParams =
-            UdfpsOverlayParams(
-                sensorBounds,
-                overlayBounds,
-                DISPLAY_WIDTH,
-                DISPLAY_HEIGHT,
-                scaleFactor = 1f,
-                rotation
-            )
-        block()
-    }
-
-    @Test
-    fun showUdfpsOverlay_withRotation0() =
-        withRotation(Surface.ROTATION_0) {
-            withReason(REASON_AUTH_BP) {
-                controllerOverlay.show(udfpsController, overlayParams)
-                verify(windowManager)
-                    .addView(eq(controllerOverlay.getTouchOverlay()), layoutParamsCaptor.capture())
-
-                // ROTATION_0 is the native orientation. Sensor should stay in the top left corner.
-                val lp = layoutParamsCaptor.value
-                assertThat(lp.x).isEqualTo(0)
-                assertThat(lp.y).isEqualTo(0)
-                assertThat(lp.width).isEqualTo(DISPLAY_WIDTH)
-                assertThat(lp.height).isEqualTo(DISPLAY_HEIGHT)
-            }
-        }
-
-    @Test
-    fun showUdfpsOverlay_withRotation180() =
-        withRotation(Surface.ROTATION_180) {
-            withReason(REASON_AUTH_BP) {
-                controllerOverlay.show(udfpsController, overlayParams)
-                verify(windowManager)
-                    .addView(eq(controllerOverlay.getTouchOverlay()), layoutParamsCaptor.capture())
-
-                // ROTATION_180 is not supported. Sensor should stay in the top left corner.
-                val lp = layoutParamsCaptor.value
-                assertThat(lp.x).isEqualTo(0)
-                assertThat(lp.y).isEqualTo(0)
-                assertThat(lp.width).isEqualTo(DISPLAY_WIDTH)
-                assertThat(lp.height).isEqualTo(DISPLAY_HEIGHT)
-            }
-        }
-
-    @Test
-    fun showUdfpsOverlay_withRotation90() =
-        withRotation(Surface.ROTATION_90) {
-            withReason(REASON_AUTH_BP) {
-                controllerOverlay.show(udfpsController, overlayParams)
-                verify(windowManager)
-                    .addView(eq(controllerOverlay.getTouchOverlay()), layoutParamsCaptor.capture())
-
-                // Sensor should be in the bottom left corner in ROTATION_90.
-                val lp = layoutParamsCaptor.value
-                assertThat(lp.x).isEqualTo(0)
-                assertThat(lp.y).isEqualTo(0)
-                assertThat(lp.width).isEqualTo(DISPLAY_HEIGHT)
-                assertThat(lp.height).isEqualTo(DISPLAY_WIDTH)
-            }
-        }
-
-    @Test
-    fun showUdfpsOverlay_withRotation270() =
-        withRotation(Surface.ROTATION_270) {
-            withReason(REASON_AUTH_BP) {
-                controllerOverlay.show(udfpsController, overlayParams)
-                verify(windowManager)
-                    .addView(eq(controllerOverlay.getTouchOverlay()), layoutParamsCaptor.capture())
-
-                // Sensor should be in the top right corner in ROTATION_270.
-                val lp = layoutParamsCaptor.value
-                assertThat(lp.x).isEqualTo(0)
-                assertThat(lp.y).isEqualTo(0)
-                assertThat(lp.width).isEqualTo(DISPLAY_HEIGHT)
-                assertThat(lp.height).isEqualTo(DISPLAY_WIDTH)
-            }
-        }
-
-    @Test
-    fun showUdfpsOverlay_awake() =
-        testScope.runTest {
-            withReason(REASON_AUTH_KEYGUARD) {
-                powerRepository.updateWakefulness(
-                    rawState = WakefulnessState.AWAKE,
-                    lastWakeReason = WakeSleepReason.POWER_BUTTON,
-                    lastSleepReason = WakeSleepReason.OTHER,
-                )
-                runCurrent()
-                controllerOverlay.show(udfpsController, overlayParams)
-                runCurrent()
-                verify(windowManager).addView(any(), any())
-            }
-        }
 
     @Test
     fun showUdfpsOverlay_whileGoingToSleep() =
@@ -412,105 +271,13 @@ class UdfpsControllerOverlayTest : SysuiTestCase() {
         }
 
     @Test
-    fun showUdfpsOverlay_afterFinishedTransitioningToAOD() =
-        testScope.runTest {
-            withReasonSuspend(REASON_AUTH_KEYGUARD) {
-                keyguardTransitionRepository.sendTransitionSteps(
-                    from = KeyguardState.OFF,
-                    to = KeyguardState.GONE,
-                    testScope = this,
-                )
-                powerRepository.updateWakefulness(
-                    rawState = WakefulnessState.STARTING_TO_SLEEP,
-                    lastWakeReason = WakeSleepReason.POWER_BUTTON,
-                    lastSleepReason = WakeSleepReason.OTHER,
-                )
-                runCurrent()
-
-                // WHEN a request comes to show the view
-                controllerOverlay.show(udfpsController, overlayParams)
-                runCurrent()
-
-                // THEN the view does not get added immediately
-                verify(windowManager, never()).addView(any(), any())
-
-                // WHEN the device finishes transitioning to AOD
-                keyguardTransitionRepository.sendTransitionSteps(
-                    from = KeyguardState.GONE,
-                    to = KeyguardState.AOD,
-                    testScope = this,
-                )
-                runCurrent()
-
-                // THEN the view gets added
-                verify(windowManager)
-                    .addView(eq(controllerOverlay.getTouchOverlay()), layoutParamsCaptor.capture())
-            }
-        }
-
-    private fun showUdfpsOverlay() {
-        val didShow = controllerOverlay.show(udfpsController, overlayParams)
-
-        verify(windowManager).addView(eq(controllerOverlay.getTouchOverlay()), any())
-        verify(udfpsView).setUdfpsDisplayModeProvider(eq(udfpsDisplayMode))
-        verify(udfpsView).animationViewController = any()
-        verify(udfpsView).addView(any())
-
-        assertThat(didShow).isTrue()
-        assertThat(controllerOverlay.isShowing).isTrue()
-        assertThat(controllerOverlay.isHiding).isFalse()
-        assertThat(controllerOverlay.getTouchOverlay()).isNotNull()
-    }
-
-    @Test fun hideUdfpsOverlay_bp() = withReason(REASON_AUTH_BP) { hideUdfpsOverlay() }
-
-    @Test fun hideUdfpsOverlay_keyguard() = withReason(REASON_AUTH_KEYGUARD) { hideUdfpsOverlay() }
-
-    @Test fun hideUdfpsOverlay_settings() = withReason(REASON_AUTH_SETTINGS) { hideUdfpsOverlay() }
-
-    @Test fun hideUdfpsOverlay_other() = withReason(REASON_AUTH_OTHER) { hideUdfpsOverlay() }
-
-    private fun hideUdfpsOverlay() {
-        val didShow = controllerOverlay.show(udfpsController, overlayParams)
-        val view = controllerOverlay.getTouchOverlay()
-        view?.let { whenever(view.parent).thenReturn(mock(ViewGroup::class.java)) }
-        val didHide = controllerOverlay.hide()
-
-        verify(windowManager).removeView(eq(view))
-
-        assertThat(didShow).isTrue()
-        assertThat(didHide).isTrue()
-        assertThat(controllerOverlay.getTouchOverlay()).isNull()
-        assertThat(controllerOverlay.animationViewController).isNull()
-        assertThat(controllerOverlay.isShowing).isFalse()
-        assertThat(controllerOverlay.isHiding).isTrue()
-    }
-
-    @Test
     fun canNotHide() = withReason(REASON_AUTH_BP) { assertThat(controllerOverlay.hide()).isFalse() }
-
-    @Test
-    fun canNotReshow() =
-        withReason(REASON_AUTH_BP) {
-            assertThat(controllerOverlay.show(udfpsController, overlayParams)).isTrue()
-            assertThat(controllerOverlay.show(udfpsController, overlayParams)).isFalse()
-        }
 
     @Test
     fun cancels() =
         withReason(REASON_AUTH_BP) {
             controllerOverlay.cancel()
             verify(controllerCallback).onUserCanceled()
-        }
-
-    @Test
-    fun unconfigureDisplayOnHide() =
-        withReason(REASON_AUTH_BP) {
-            whenever(udfpsView.isDisplayConfigured).thenReturn(true)
-
-            controllerOverlay.show(udfpsController, overlayParams)
-            controllerOverlay.hide()
-            verify(udfpsView).unconfigureDisplay()
         }
 
     @Test
@@ -521,29 +288,9 @@ class UdfpsControllerOverlayTest : SysuiTestCase() {
         }
 
     @Test
-    fun smallOverlayOnEnrollmentWithA11y() =
-        withRotation(Surface.ROTATION_0) {
-            withReason(REASON_ENROLL_ENROLLING) {
-                // When a11y enabled during enrollment
-                whenever(accessibilityManager.isTouchExplorationEnabled).thenReturn(true)
-
-                controllerOverlay.show(udfpsController, overlayParams)
-                verify(windowManager)
-                    .addView(eq(controllerOverlay.getTouchOverlay()), layoutParamsCaptor.capture())
-
-                // Layout params should use sensor bounds
-                val lp = layoutParamsCaptor.value
-                assertThat(lp.width).isEqualTo(overlayParams.sensorBounds.width())
-                assertThat(lp.height).isEqualTo(overlayParams.sensorBounds.height())
-            }
-        }
-
-    @Test
     fun addViewPending_layoutIsNotUpdated() =
         testScope.runTest {
             withReasonSuspend(REASON_AUTH_KEYGUARD) {
-                mSetFlagsRule.enableFlags(Flags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR)
-
                 // GIVEN going to sleep
                 keyguardTransitionRepository.sendTransitionSteps(
                     from = KeyguardState.OFF,
@@ -572,28 +319,6 @@ class UdfpsControllerOverlayTest : SysuiTestCase() {
 
                 // CLEANUP we hide to end the job that listens for the finishedGoingToSleep signal
                 controllerOverlay.hide()
-            }
-        }
-
-    @Test
-    fun updateOverlayParams_viewLayoutUpdated() =
-        testScope.runTest {
-            withReasonSuspend(REASON_AUTH_KEYGUARD) {
-                powerRepository.updateWakefulness(
-                    rawState = WakefulnessState.AWAKE,
-                    lastWakeReason = WakeSleepReason.POWER_BUTTON,
-                    lastSleepReason = WakeSleepReason.OTHER,
-                )
-                runCurrent()
-                controllerOverlay.show(udfpsController, overlayParams)
-                runCurrent()
-                verify(windowManager).addView(any(), any())
-
-                // WHEN updateOverlayParams gets called
-                controllerOverlay.updateOverlayParams(overlayParams)
-
-                // THEN the view layout is updated
-                verify(windowManager).updateViewLayout(any(), any())
             }
         }
 }

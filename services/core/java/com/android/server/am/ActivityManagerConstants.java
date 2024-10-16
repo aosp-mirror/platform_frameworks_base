@@ -246,7 +246,7 @@ final class ActivityManagerConstants extends ContentObserver {
 
     static final int DEFAULT_MAX_SERVICE_CONNECTIONS_PER_PROCESS = 3000;
 
-    private static final boolean DEFAULT_USE_TIERED_CACHED_ADJ = false;
+    private static final boolean DEFAULT_USE_TIERED_CACHED_ADJ = Flags.oomadjusterCachedAppTiers();
     private static final long DEFAULT_TIERED_CACHED_ADJ_DECAY_TIME = 60 * 1000;
 
     /**

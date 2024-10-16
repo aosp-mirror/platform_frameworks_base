@@ -128,7 +128,6 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.demomode.DemoMode;
 import com.android.systemui.demomode.DemoModeController;
-import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor;
 import com.android.systemui.emergency.EmergencyGesture;
 import com.android.systemui.emergency.EmergencyGestureModule.EmergencyGestureIntentFactory;
 import com.android.systemui.flags.FeatureFlags;
@@ -2825,23 +2824,13 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mScrimController.setExpansionAffectsAlpha(!unlocking);
 
         if (mAlternateBouncerInteractor.isVisibleState()) {
-            if (DeviceEntryUdfpsRefactor.isEnabled()) {
-                if ((!mKeyguardStateController.isOccluded() || mShadeSurface.isPanelExpanded())
-                        && (mState == StatusBarState.SHADE || mState == StatusBarState.SHADE_LOCKED
-                        || mTransitionToFullShadeProgress > 0f)) {
-                    // Assume scrim state for shade is already correct and do nothing
-                } else {
-                    // Safeguard which prevents the scrim from being stuck in the wrong state
-                    mScrimController.legacyTransitionTo(ScrimState.KEYGUARD);
-                }
+            if ((!mKeyguardStateController.isOccluded() || mShadeSurface.isPanelExpanded())
+                    && (mState == StatusBarState.SHADE || mState == StatusBarState.SHADE_LOCKED
+                    || mTransitionToFullShadeProgress > 0f)) {
+                // Assume scrim state for shade is already correct and do nothing
             } else {
-                if ((!mKeyguardStateController.isOccluded() || mShadeSurface.isPanelExpanded())
-                        && (mState == StatusBarState.SHADE || mState == StatusBarState.SHADE_LOCKED
-                        || mTransitionToFullShadeProgress > 0f)) {
-                    mScrimController.legacyTransitionTo(ScrimState.AUTH_SCRIMMED_SHADE);
-                } else {
-                    mScrimController.legacyTransitionTo(ScrimState.AUTH_SCRIMMED);
-                }
+                // Safeguard which prevents the scrim from being stuck in the wrong state
+                mScrimController.legacyTransitionTo(ScrimState.KEYGUARD);
             }
             // This will cancel the keyguardFadingAway animation if it is running. We need to do
             // this as otherwise it can remain pending and leave keyguard in a weird state.
@@ -3168,12 +3157,8 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 public void onDozeAmountChanged(float linear, float eased) {
                     if (!lightRevealMigration()
                             && !(mLightRevealScrim.getRevealEffect() instanceof CircleReveal)) {
-                        if (DeviceEntryUdfpsRefactor.isEnabled()) {
-                            // If wakeAndUnlocking, this is handled in AuthRippleInteractor
-                            if (!mBiometricUnlockController.isWakeAndUnlock()) {
-                                mLightRevealScrim.setRevealAmount(1f - linear);
-                            }
-                        } else {
+                        // If wakeAndUnlocking, this is handled in AuthRippleInteractor
+                        if (!mBiometricUnlockController.isWakeAndUnlock()) {
                             mLightRevealScrim.setRevealAmount(1f - linear);
                         }
                     }

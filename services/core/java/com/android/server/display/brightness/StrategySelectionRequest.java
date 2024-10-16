@@ -40,15 +40,19 @@ public final class StrategySelectionRequest {
 
     private DisplayManagerInternal.DisplayOffloadSession mDisplayOffloadSession;
 
+    private boolean mIsStylusBeingUsed;
+
     public StrategySelectionRequest(DisplayManagerInternal.DisplayPowerRequest displayPowerRequest,
             int targetDisplayState, float lastUserSetScreenBrightness,
             boolean userSetBrightnessChanged,
-            DisplayManagerInternal.DisplayOffloadSession displayOffloadSession) {
+            DisplayManagerInternal.DisplayOffloadSession displayOffloadSession,
+            boolean isStylusBeingUsed) {
         mDisplayPowerRequest = displayPowerRequest;
         mTargetDisplayState = targetDisplayState;
         mLastUserSetScreenBrightness = lastUserSetScreenBrightness;
         mUserSetBrightnessChanged = userSetBrightnessChanged;
         mDisplayOffloadSession = displayOffloadSession;
+        mIsStylusBeingUsed = isStylusBeingUsed;
     }
 
     public DisplayManagerInternal.DisplayPowerRequest getDisplayPowerRequest() {
@@ -72,6 +76,10 @@ public final class StrategySelectionRequest {
         return mDisplayOffloadSession;
     }
 
+    public boolean isStylusBeingUsed() {
+        return mIsStylusBeingUsed;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (!(obj instanceof StrategySelectionRequest)) {
@@ -82,12 +90,14 @@ public final class StrategySelectionRequest {
                 && mTargetDisplayState == other.getTargetDisplayState()
                 && mLastUserSetScreenBrightness == other.getLastUserSetScreenBrightness()
                 && mUserSetBrightnessChanged == other.isUserSetBrightnessChanged()
-                && mDisplayOffloadSession.equals(other.getDisplayOffloadSession());
+                && mDisplayOffloadSession.equals(other.getDisplayOffloadSession())
+                && mIsStylusBeingUsed == other.isStylusBeingUsed();
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(mDisplayPowerRequest, mTargetDisplayState,
-                mLastUserSetScreenBrightness, mUserSetBrightnessChanged, mDisplayOffloadSession);
+                mLastUserSetScreenBrightness, mUserSetBrightnessChanged, mDisplayOffloadSession,
+                mIsStylusBeingUsed);
     }
 }

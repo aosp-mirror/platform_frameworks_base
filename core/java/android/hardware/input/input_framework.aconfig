@@ -142,3 +142,10 @@ flag {
   description: "Controls whether the connected mice's primary buttons, left and right, can be swapped."
   bug: "352598211"
 }
+
+flag {
+  name: "keyboard_a11y_shortcut_control"
+  namespace: "input"
+  description: "Adds shortcuts to toggle and control a11y features"
+  bug: "373458181"
+}

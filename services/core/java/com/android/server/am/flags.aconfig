@@ -225,3 +225,11 @@ flag {
     description: "Migrate OomAdjuster pulled device state to a push model"
     bug: "302575389"
 }
+
+flag {
+    name: "oomadjuster_cached_app_tiers"
+    namespace: "system_performance"
+    is_fixed_read_only: true
+    description: "Assign cached oom_score_adj in tiers."
+    bug: "369893532"
+}

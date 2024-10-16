@@ -23,7 +23,6 @@ import android.widget.FrameLayout
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardSecurityContainerController
-import com.android.keyguard.LegacyLockIconViewController
 import com.android.keyguard.dagger.KeyguardBouncerComponent
 import com.android.systemui.Flags as AConfigFlags
 import com.android.systemui.SysuiTestCase
@@ -57,7 +56,6 @@ import com.android.systemui.statusbar.notification.stack.NotificationStackScroll
 import com.android.systemui.statusbar.phone.CentralSurfaces
 import com.android.systemui.statusbar.phone.DozeScrimController
 import com.android.systemui.statusbar.phone.DozeServiceHost
-import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.android.systemui.statusbar.window.StatusBarWindowStateController
 import com.android.systemui.unfold.SysUIUnfoldComponent
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider
@@ -104,11 +102,9 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
     @Mock
     private lateinit var notificationStackScrollLayoutController:
         NotificationStackScrollLayoutController
-    @Mock private lateinit var statusBarKeyguardViewManager: StatusBarKeyguardViewManager
     @Mock private lateinit var statusBarWindowStateController: StatusBarWindowStateController
     @Mock
     private lateinit var lockscreenShadeTransitionController: LockscreenShadeTransitionController
-    @Mock private lateinit var lockIconViewController: LegacyLockIconViewController
     @Mock private lateinit var keyguardUnlockAnimationController: KeyguardUnlockAnimationController
     @Mock private lateinit var ambientState: AmbientState
     @Mock private lateinit var shadeLogger: ShadeLogger
@@ -161,7 +157,6 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
         val featureFlags = FakeFeatureFlags()
         featureFlags.set(Flags.SPLIT_SHADE_SUBPIXEL_OPTIMIZATION, true)
         featureFlags.set(Flags.LOCKSCREEN_WALLPAPER_DREAM_ENABLED, false)
-        mSetFlagsRule.disableFlags(AConfigFlags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR)
         mSetFlagsRule.enableFlags(AConfigFlags.FLAG_REVAMPED_BOUNCER_MESSAGES)
         testScope = TestScope()
         controller =
@@ -176,9 +171,7 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
                 panelExpansionInteractor,
                 ShadeExpansionStateManager(),
                 notificationStackScrollLayoutController,
-                statusBarKeyguardViewManager,
                 statusBarWindowStateController,
-                lockIconViewController,
                 centralSurfaces,
                 dozeServiceHost,
                 dozeScrimController,
@@ -221,46 +214,16 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
         }
 
     @Test
-    fun testInterceptTouchWhenShowingAltAuth() =
-        testScope.runTest {
-            captureInteractionEventHandler()
-
-            // WHEN showing alt auth, not dozing, drag down helper doesn't want to intercept
-            whenever(statusBarStateController.isDozing).thenReturn(false)
-            whenever(statusBarKeyguardViewManager.shouldInterceptTouchEvent(any())).thenReturn(true)
-            whenever(dragDownHelper.onInterceptTouchEvent(any())).thenReturn(false)
-
-            // THEN we should intercept touch
-            assertThat(interactionEventHandler.shouldInterceptTouchEvent(mock())).isTrue()
-        }
-
-    @Test
     fun testNoInterceptTouch() =
         testScope.runTest {
             captureInteractionEventHandler()
 
-            // WHEN not showing alt auth, not dozing, drag down helper doesn't want to intercept
+            // WHEN not dozing, drag down helper doesn't want to intercept
             whenever(statusBarStateController.isDozing).thenReturn(false)
-            whenever(statusBarKeyguardViewManager.shouldInterceptTouchEvent(any()))
-                .thenReturn(false)
             whenever(dragDownHelper.onInterceptTouchEvent(any())).thenReturn(false)
 
             // THEN we shouldn't intercept touch
             assertThat(interactionEventHandler.shouldInterceptTouchEvent(mock())).isFalse()
-        }
-
-    @Test
-    fun testHandleTouchEventWhenShowingAltAuth() =
-        testScope.runTest {
-            captureInteractionEventHandler()
-
-            // WHEN showing alt auth, not dozing, drag down helper doesn't want to intercept
-            whenever(statusBarStateController.isDozing).thenReturn(false)
-            whenever(statusBarKeyguardViewManager.onTouch(any())).thenReturn(true)
-            whenever(dragDownHelper.onInterceptTouchEvent(any())).thenReturn(false)
-
-            // THEN we should handle the touch
-            assertThat(interactionEventHandler.handleTouchEvent(mock())).isTrue()
         }
 
     private fun captureInteractionEventHandler() {

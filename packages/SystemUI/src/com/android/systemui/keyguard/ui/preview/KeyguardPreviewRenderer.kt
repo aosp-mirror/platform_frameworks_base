@@ -17,7 +17,6 @@
 
 package com.android.systemui.keyguard.ui.preview
 
-import com.android.app.tracing.coroutines.createCoroutineTracingContext
 import android.app.WallpaperColors
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -57,6 +56,7 @@ import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.common.ui.ConfigurationState
 import com.android.systemui.communal.ui.binder.CommunalTutorialIndicatorViewBinder
 import com.android.systemui.communal.ui.viewmodel.CommunalTutorialIndicatorViewModel
+import com.android.systemui.coroutines.newTracingContext
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
@@ -151,10 +151,7 @@ constructor(
     private val width: Int = bundle.getInt(KEY_VIEW_WIDTH)
     private val height: Int = bundle.getInt(KEY_VIEW_HEIGHT)
     private val shouldHighlightSelectedAffordance: Boolean =
-        bundle.getBoolean(
-            KeyguardPreviewConstants.KEY_HIGHLIGHT_QUICK_AFFORDANCES,
-            false,
-        )
+        bundle.getBoolean(KeyguardPreviewConstants.KEY_HIGHLIGHT_QUICK_AFFORDANCES, false)
 
     private val displayId = bundle.getInt(KEY_DISPLAY_ID, DEFAULT_DISPLAY)
     private val display: Display? = displayManager.getDisplay(displayId)
@@ -188,24 +185,26 @@ constructor(
     private var themeStyle: Style? = null
 
     init {
-        coroutineScope = CoroutineScope(applicationScope.coroutineContext + Job() + createCoroutineTracingContext("KeyguardPreviewRenderer"))
+        coroutineScope =
+            CoroutineScope(
+                applicationScope.coroutineContext +
+                    Job() +
+                    newTracingContext("KeyguardPreviewRenderer")
+            )
         disposables += DisposableHandle { coroutineScope.cancel() }
         clockController.setFallbackWeatherData(WeatherData.getPlaceholderWeatherData())
 
         if (KeyguardBottomAreaRefactor.isEnabled) {
             quickAffordancesCombinedViewModel.enablePreviewMode(
                 initiallySelectedSlotId =
-                    bundle.getString(
-                        KeyguardPreviewConstants.KEY_INITIALLY_SELECTED_SLOT_ID,
-                    ) ?: KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START,
+                    bundle.getString(KeyguardPreviewConstants.KEY_INITIALLY_SELECTED_SLOT_ID)
+                        ?: KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START,
                 shouldHighlightSelectedAffordance = shouldHighlightSelectedAffordance,
             )
         } else {
             bottomAreaViewModel.enablePreviewMode(
                 initiallySelectedSlotId =
-                    bundle.getString(
-                        KeyguardPreviewConstants.KEY_INITIALLY_SELECTED_SLOT_ID,
-                    ),
+                    bundle.getString(KeyguardPreviewConstants.KEY_INITIALLY_SELECTED_SLOT_ID),
                 shouldHighlightSelectedAffordance = shouldHighlightSelectedAffordance,
             )
         }
@@ -218,7 +217,7 @@ constructor(
                     context,
                     displayManager.getDisplay(DEFAULT_DISPLAY),
                     if (hostToken == null) null else InputTransferToken(hostToken),
-                    "KeyguardPreviewRenderer"
+                    "KeyguardPreviewRenderer",
                 )
             disposables += DisposableHandle { host.release() }
         }
@@ -247,12 +246,12 @@ constructor(
             rootView.measure(
                 View.MeasureSpec.makeMeasureSpec(
                     displayInfo?.logicalWidth ?: windowManager.currentWindowMetrics.bounds.width(),
-                    View.MeasureSpec.EXACTLY
+                    View.MeasureSpec.EXACTLY,
                 ),
                 View.MeasureSpec.makeMeasureSpec(
                     displayInfo?.logicalHeight
                         ?: windowManager.currentWindowMetrics.bounds.height(),
-                    View.MeasureSpec.EXACTLY
+                    View.MeasureSpec.EXACTLY,
                 ),
             )
             rootView.layout(0, 0, rootView.measuredWidth, rootView.measuredHeight)
@@ -278,9 +277,7 @@ constructor(
         }
     }
 
-    fun onStartCustomizingQuickAffordances(
-        initiallySelectedSlotId: String?,
-    ) {
+    fun onStartCustomizingQuickAffordances(initiallySelectedSlotId: String?) {
         quickAffordancesCombinedViewModel.enablePreviewMode(
             initiallySelectedSlotId = initiallySelectedSlotId,
             shouldHighlightSelectedAffordance = true,
@@ -379,15 +376,9 @@ constructor(
     @Deprecated("Deprecated as part of b/278057014")
     private fun setUpBottomArea(parentView: ViewGroup) {
         val bottomAreaView =
-            LayoutInflater.from(context)
-                .inflate(
-                    R.layout.keyguard_bottom_area,
-                    parentView,
-                    false,
-                ) as KeyguardBottomAreaView
-        bottomAreaView.init(
-            viewModel = bottomAreaViewModel,
-        )
+            LayoutInflater.from(context).inflate(R.layout.keyguard_bottom_area, parentView, false)
+                as KeyguardBottomAreaView
+        bottomAreaView.init(viewModel = bottomAreaViewModel)
         parentView.addView(
             bottomAreaView,
             FrameLayout.LayoutParams(
@@ -433,7 +424,7 @@ constructor(
 
         setUpUdfps(
             previewContext,
-            if (MigrateClocksToBlueprint.isEnabled) keyguardRootView else rootView
+            if (MigrateClocksToBlueprint.isEnabled) keyguardRootView else rootView,
         )
 
         if (KeyguardBottomAreaRefactor.isEnabled) {
@@ -466,7 +457,7 @@ constructor(
                 previewContext,
                 it,
                 previewInSplitShade(),
-                smartspaceViewModel
+                smartspaceViewModel,
             )
         }
         setupCommunalTutorialIndicator(keyguardRootView)
@@ -515,23 +506,20 @@ constructor(
 
         val finger =
             LayoutInflater.from(previewContext)
-                .inflate(
-                    R.layout.udfps_keyguard_preview,
-                    parentView,
-                    false,
-                ) as View
+                .inflate(R.layout.udfps_keyguard_preview, parentView, false) as View
 
         // Place the UDFPS view in the proper sensor location
         if (MigrateClocksToBlueprint.isEnabled) {
-            finger.id = R.id.lock_icon_view
+            val lockId = KeyguardPreviewClockViewBinder.lockId
+            finger.id = lockId
             parentView.addView(finger)
             val cs = ConstraintSet()
             cs.clone(parentView as ConstraintLayout)
             cs.apply {
-                constrainWidth(R.id.lock_icon_view, sensorBounds.width())
-                constrainHeight(R.id.lock_icon_view, sensorBounds.height())
-                connect(R.id.lock_icon_view, TOP, PARENT_ID, TOP, sensorBounds.top)
-                connect(R.id.lock_icon_view, START, PARENT_ID, START, sensorBounds.left)
+                constrainWidth(lockId, sensorBounds.width())
+                constrainHeight(lockId, sensorBounds.height())
+                connect(lockId, TOP, PARENT_ID, TOP, sensorBounds.top)
+                connect(lockId, START, PARENT_ID, START, sensorBounds.left)
             }
             cs.applyTo(parentView)
         } else {
@@ -541,7 +529,7 @@ constructor(
                 sensorBounds.left,
                 sensorBounds.top,
                 sensorBounds.right,
-                sensorBounds.bottom
+                sensorBounds.bottom,
             )
             parentView.addView(finger, fingerprintLayoutParams)
         }
@@ -565,7 +553,7 @@ constructor(
                     FrameLayout.LayoutParams.WRAP_CONTENT,
                     resources.getDimensionPixelSize(
                         com.android.systemui.customization.R.dimen.small_clock_height
-                    )
+                    ),
                 )
             layoutParams.topMargin =
                 SystemBarUtils.getStatusBarHeight(previewContext) +
@@ -579,7 +567,7 @@ constructor(
                 ),
                 /* top = */ 0,
                 /* end = */ 0,
-                /* bottom = */ 0
+                /* bottom = */ 0,
             )
             smallClockHostView.clipChildren = false
             parentView.addView(smallClockHostView)
@@ -703,9 +691,7 @@ constructor(
     private suspend fun fetchThemeStyleFromSetting(): Style {
         val overlayPackageJson =
             withContext(backgroundDispatcher) {
-                secureSettings.getString(
-                    Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES,
-                )
+                secureSettings.getString(Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES)
             }
         return if (!overlayPackageJson.isNullOrEmpty()) {
             try {

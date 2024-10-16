@@ -39,7 +39,7 @@ public class ProtoLogViewerConfigReader {
      * or the viewer config is not loaded into memory.
      */
     @Nullable
-    public synchronized String getViewerString(long messageHash) {
+    public String getViewerString(long messageHash) {
         return mLogMessageMap.get(messageHash);
     }
 

@@ -23,7 +23,9 @@ import android.graphics.Rect
 import android.os.Bundle
 import android.util.IndentingPrintWriter
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
+import android.view.ViewConfiguration
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.activity.OnBackPressedDispatcher
@@ -35,6 +37,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -43,6 +46,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -83,6 +87,7 @@ import com.android.systemui.Dumpable
 import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.lifecycle.repeatWhenAttached
+import com.android.systemui.lifecycle.setSnapshotBinding
 import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager
 import com.android.systemui.media.controls.ui.view.MediaHost
 import com.android.systemui.media.dagger.MediaModule.QS_PANEL
@@ -145,6 +150,7 @@ constructor(
     private val qqsVisible = MutableStateFlow(false)
     private val qqsPositionOnRoot = Rect()
     private val composeViewPositionOnScreen = Rect()
+    private val scrollState = ScrollState(0)
 
     // Inside object for namespacing
     private val notificationScrimClippingParams =
@@ -210,6 +216,9 @@ constructor(
                 context,
                 { notificationScrimClippingParams.isEnabled },
                 { notificationScrimClippingParams.params.top },
+                // Only allow scrolling when we are fully expanded. That way, we don't intercept
+                // swipes in lockscreen (when somehow QS is receiving touches).
+                { scrollState.canScrollForward && viewModel.expansionState.value.progress >= 1f },
             )
         frame.addView(
             composeView,
@@ -488,12 +497,8 @@ constructor(
     private fun setListenerCollections() {
         lifecycleScope.launch {
             lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                launch {
-                    //                    TODO
-                    //                    setListenerJob(
-                    //                            scrollListener,
-                    //
-                    //                    )
+                this@QSFragmentCompose.view?.setSnapshotBinding {
+                    scrollListener.value?.onQsPanelScrollChanged(scrollState.value)
                 }
                 launch {
                     setListenerJob(
@@ -528,6 +533,7 @@ constructor(
             viewModel.containerViewModel.quickQuickSettingsViewModel.squishinessViewModel
                 .squishiness
                 .collectAsStateWithLifecycle()
+
         Column(modifier = Modifier.sysuiResTag("quick_qs_panel")) {
             Box(
                 modifier =
@@ -591,7 +597,12 @@ constructor(
                     modifier =
                         Modifier.element(ElementKeys.QuickSettingsContent).fillMaxSize().weight(1f)
                 ) {
-                    Column {
+                    DisposableEffect(Unit) {
+                        lifecycleScope.launch { scrollState.scrollTo(0) }
+                        onDispose { lifecycleScope.launch { scrollState.scrollTo(0) } }
+                    }
+
+                    Column(modifier = Modifier.verticalScroll(scrollState)) {
                         Spacer(
                             modifier = Modifier.height { qqsPadding + qsExtraPadding.roundToPx() }
                         )
@@ -601,15 +612,14 @@ constructor(
                         )
                     }
                 }
-                QuickSettingsTheme {
-                    FooterActions(
-                        viewModel = viewModel.footerActionsViewModel,
-                        qsVisibilityLifecycleOwner = this@QSFragmentCompose,
-                        modifier =
-                            Modifier.sysuiResTag("qs_footer_actions")
-                                .element(ElementKeys.FooterActions),
-                    )
-                }
+            }
+            QuickSettingsTheme {
+                FooterActions(
+                    viewModel = viewModel.footerActionsViewModel,
+                    qsVisibilityLifecycleOwner = this@QSFragmentCompose,
+                    modifier =
+                        Modifier.sysuiResTag("qs_footer_actions").element(ElementKeys.FooterActions),
+                )
             }
         }
     }
@@ -791,13 +801,17 @@ private class ExpansionTransition(currentProgress: Float) :
 private const val EDIT_MODE_TIME_MILLIS = 500
 
 /**
- * Ignore touches below the value returned by [clippingTopProvider], when clipping is enabled, as
- * per [clippingEnabledProvider].
+ * Performs different touch handling based on the state of the ComposeView:
+ * * Ignore touches below the value returned by [clippingTopProvider], when clipping is enabled, as
+ *   per [clippingEnabledProvider].
+ * * Intercept touches that would overscroll QS forward and instead allow them to be used to close
+ *   the shade.
  */
 private class FrameLayoutTouchPassthrough(
     context: Context,
     private val clippingEnabledProvider: () -> Boolean,
     private val clippingTopProvider: () -> Int,
+    private val canScrollForwardQs: () -> Boolean,
 ) : FrameLayout(context) {
     override fun isTransformedTouchPointInView(
         x: Float,
@@ -810,5 +824,33 @@ private class FrameLayoutTouchPassthrough(
         } else {
             super.isTransformedTouchPointInView(x, y, child, outLocalPoint)
         }
+    }
+
+    val touchSlop = ViewConfiguration.get(context).scaledTouchSlop
+    var downY = 0f
+
+    override fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
+        // If there's a touch on this view and we can scroll down, we don't want to be intercepted
+        val action = ev.actionMasked
+
+        when (action) {
+            MotionEvent.ACTION_DOWN -> {
+                // If we can scroll down, make sure none of our parents intercepts us.
+                if (canScrollForwardQs()) {
+                    parent?.requestDisallowInterceptTouchEvent(true)
+                }
+                downY = ev.y
+            }
+
+            MotionEvent.ACTION_MOVE -> {
+                val y = ev.y.toInt()
+                val yDiff: Float = y - downY
+                if (yDiff < -touchSlop && !canScrollForwardQs()) {
+                    // Intercept touches that are overscrolling.
+                    return true
+                }
+            }
+        }
+        return super.onInterceptTouchEvent(ev)
     }
 }

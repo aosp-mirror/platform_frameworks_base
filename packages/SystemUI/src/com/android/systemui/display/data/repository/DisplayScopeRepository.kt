@@ -17,8 +17,8 @@
 package com.android.systemui.display.data.repository
 
 import android.view.Display
-import com.android.app.tracing.coroutines.createCoroutineTracingContext
 import com.android.systemui.CoreStartable
+import com.android.systemui.coroutines.newTracingContext
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.statusbar.core.StatusBarConnectedDisplays
@@ -69,7 +69,7 @@ constructor(
             backgroundApplicationScope
         } else {
             CoroutineScope(
-                backgroundDispatcher + createCoroutineTracingContext("DisplayScope$displayId")
+                backgroundDispatcher + newTracingContext("DisplayScope$displayId")
             )
         }
     }
