@@ -337,10 +337,8 @@ constructor(
      * @return `true` when the [KeyEvent] was consumed as user input on bouncer; `false` otherwise.
      */
     fun onKeyEvent(keyEvent: KeyEvent): Boolean {
-        return (authMethodViewModel.value as? PinBouncerViewModel)?.onKeyEvent(
-            keyEvent.type,
-            keyEvent.nativeKeyEvent.keyCode,
-        ) ?: false
+        return authMethodViewModel.value?.onKeyEvent(keyEvent.type, keyEvent.nativeKeyEvent.keyCode)
+            ?: false
     }
 
     data class DialogViewModel(
