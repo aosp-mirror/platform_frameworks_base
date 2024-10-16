@@ -18,13 +18,13 @@ package com.android.wm.shell.unfold;
 
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY;
-import static android.view.WindowManager.TRANSIT_FLAG_PHYSICAL_DISPLAY_SWITCH;
 import static android.view.WindowManager.TRANSIT_NONE;
 
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -50,6 +50,7 @@ import com.android.wm.shell.unfold.animation.SplitTaskUnfoldAnimator;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.InOrder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -140,6 +141,32 @@ public class UnfoldTransitionHandlerTest {
     }
 
     @Test
+    public void handleFoldMergeRequest_finishesTheTransition() {
+        TransitionRequestInfo requestInfo = createUnfoldTransitionRequestInfo();
+        mUnfoldTransitionHandler.handleRequest(mTransition, requestInfo);
+        TransitionFinishCallback finishCallback = mock(TransitionFinishCallback.class);
+        // Starts the animation, the handler should wait for mShellUnfoldProgressProvider to
+        // notify about the end of the animation
+        mUnfoldTransitionHandler.startAnimation(
+                mTransition,
+                mock(TransitionInfo.class),
+                mock(SurfaceControl.Transaction.class),
+                mock(SurfaceControl.Transaction.class),
+                finishCallback
+        );
+
+        // Send fold transition request
+        TransitionFinishCallback mergeFinishCallback = mock(TransitionFinishCallback.class);
+        mUnfoldTransitionHandler.mergeAnimation(new Binder(), createFoldTransitionInfo(),
+                mock(SurfaceControl.Transaction.class), mTransition, mergeFinishCallback);
+
+        // Verify that fold transition is merged into unfold and that unfold is finished
+        final InOrder inOrder = inOrder(mergeFinishCallback, finishCallback);
+        inOrder.verify(mergeFinishCallback).onTransitionFinished(any());
+        inOrder.verify(finishCallback).onTransitionFinished(any());
+    }
+
+    @Test
     public void startAnimation_animationHasNotFinishedYet_doesNotFinishTheTransition() {
         TransitionRequestInfo requestInfo = createUnfoldTransitionRequestInfo();
         mUnfoldTransitionHandler.handleRequest(mTransition, requestInfo);
@@ -174,29 +201,13 @@ public class UnfoldTransitionHandlerTest {
     }
 
     @Test
-    public void startAnimation_differentTransitionFromRequestWithUnfold_startsAnimation() {
-        mUnfoldTransitionHandler.handleRequest(new Binder(), createNoneTransitionInfo());
-        TransitionFinishCallback finishCallback = mock(TransitionFinishCallback.class);
-
-        boolean animationStarted = mUnfoldTransitionHandler.startAnimation(
-                mTransition,
-                createUnfoldTransitionInfo(),
-                mock(SurfaceControl.Transaction.class),
-                mock(SurfaceControl.Transaction.class),
-                finishCallback
-        );
-
-        assertThat(animationStarted).isTrue();
-    }
-
-    @Test
     public void startAnimation_differentTransitionFromRequestWithResize_doesNotStartAnimation() {
         mUnfoldTransitionHandler.handleRequest(new Binder(), createNoneTransitionInfo());
         TransitionFinishCallback finishCallback = mock(TransitionFinishCallback.class);
 
         boolean animationStarted = mUnfoldTransitionHandler.startAnimation(
                 mTransition,
-                createDisplayResizeTransitionInfo(),
+                createUnfoldTransitionInfo(),
                 mock(SurfaceControl.Transaction.class),
                 mock(SurfaceControl.Transaction.class),
                 finishCallback
@@ -247,6 +258,7 @@ public class UnfoldTransitionHandlerTest {
         TransitionFinishCallback finishCallback = mock(TransitionFinishCallback.class);
 
         mShellUnfoldProgressProvider.onStateChangeStarted();
+        mShellUnfoldProgressProvider.onStateChangeProgress(0.5f);
         mShellUnfoldProgressProvider.onStateChangeFinished();
         mUnfoldTransitionHandler.startAnimation(
                 mTransition,
@@ -279,6 +291,8 @@ public class UnfoldTransitionHandlerTest {
         clearInvocations(finishCallback);
 
         // Fold
+        mShellUnfoldProgressProvider.onStateChangeProgress(/* progress= */ 0.0f);
+        mShellUnfoldProgressProvider.onStateChangeFinished();
         mShellUnfoldProgressProvider.onFoldStateChanged(/* isFolded= */ true);
 
         // Second unfold
@@ -370,6 +384,19 @@ public class UnfoldTransitionHandlerTest {
                 triggerTaskInfo, /* remoteTransition= */ null, displayChange, 0 /* flags */);
     }
 
+    private TransitionInfo createFoldTransitionInfo() {
+        final TransitionInfo transitionInfo = new TransitionInfo(TRANSIT_CHANGE, /* flags= */ 0);
+
+        final TransitionInfo.Change change = new TransitionInfo.Change(/* container= */ null,
+                /* leash= */ null);
+        change.setFlags(TransitionInfo.FLAG_IS_DISPLAY);
+        change.setStartAbsBounds(new Rect(0, 0, 200, 200));
+        change.setEndAbsBounds(new Rect(0, 0, 100, 100));
+        transitionInfo.addChange(change);
+
+        return transitionInfo;
+    }
+
     private TransitionRequestInfo createNoneTransitionInfo() {
         return new TransitionRequestInfo(TRANSIT_NONE,
                 /* triggerTask= */ null, /* remoteTransition= */ null,
@@ -440,17 +467,6 @@ public class UnfoldTransitionHandlerTest {
     }
 
     private TransitionInfo createUnfoldTransitionInfo() {
-        TransitionInfo transitionInfo = new TransitionInfo(TRANSIT_CHANGE, /* flags= */ 0);
-        TransitionInfo.Change change = new TransitionInfo.Change(null, mock(SurfaceControl.class));
-        change.setStartAbsBounds(new Rect(0, 0, 10, 10));
-        change.setEndAbsBounds(new Rect(0, 0, 100, 100));
-        change.setFlags(TransitionInfo.FLAG_IS_DISPLAY);
-        transitionInfo.addChange(change);
-        transitionInfo.setFlags(TRANSIT_FLAG_PHYSICAL_DISPLAY_SWITCH);
-        return transitionInfo;
-    }
-
-    private TransitionInfo createDisplayResizeTransitionInfo() {
         TransitionInfo transitionInfo = new TransitionInfo(TRANSIT_CHANGE, /* flags= */ 0);
         TransitionInfo.Change change = new TransitionInfo.Change(null, mock(SurfaceControl.class));
         change.setStartAbsBounds(new Rect(0, 0, 10, 10));
