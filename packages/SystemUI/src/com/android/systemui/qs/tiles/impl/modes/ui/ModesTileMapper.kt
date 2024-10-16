@@ -39,7 +39,7 @@ constructor(@Main private val resources: Resources, val theme: Resources.Theme) 
             val loadedIcon: Icon.Loaded =
                 when (val dataIcon = data.icon) {
                     is Icon.Resource -> {
-                        if (iconRes != dataIcon.res) {
+                        if (data.iconResId != dataIcon.res) {
                             Log.wtf(
                                 "ModesTileMapper",
                                 "Icon.Resource.res & iconResId are not identical",
