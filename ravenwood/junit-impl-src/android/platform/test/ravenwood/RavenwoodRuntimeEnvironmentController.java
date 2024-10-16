@@ -225,14 +225,9 @@ public class RavenwoodRuntimeEnvironmentController {
 
         ActivityManager.init$ravenwood(config.mCurrentUser);
 
-        final HandlerThread main;
-        if (config.mProvideMainThread) {
-            main = new HandlerThread(MAIN_THREAD_NAME);
-            main.start();
-            Looper.setMainLooperForTest(main.getLooper());
-        } else {
-            main = null;
-        }
+        final var main = new HandlerThread(MAIN_THREAD_NAME);
+        main.start();
+        Looper.setMainLooperForTest(main.getLooper());
 
         final boolean isSelfInstrumenting =
                 Objects.equals(config.mTestPackageName, config.mTargetPackageName);
@@ -324,10 +319,8 @@ public class RavenwoodRuntimeEnvironmentController {
         }
         sMockUiAutomation.dropShellPermissionIdentity();
 
-        if (config.mProvideMainThread) {
-            Looper.getMainLooper().quit();
-            Looper.clearMainLooperForTest();
-        }
+        Looper.getMainLooper().quit();
+        Looper.clearMainLooperForTest();
 
         ActivityManager.reset$ravenwood();
 
