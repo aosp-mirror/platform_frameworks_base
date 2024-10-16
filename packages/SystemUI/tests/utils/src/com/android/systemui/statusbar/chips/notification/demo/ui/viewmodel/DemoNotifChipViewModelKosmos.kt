@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.chips.ron.demo.ui.viewmodel
+package com.android.systemui.statusbar.chips.notification.demo.ui.viewmodel
 
 import android.content.packageManager
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.statusbar.commandline.commandRegistry
 import com.android.systemui.util.time.fakeSystemClock
 
-val Kosmos.demoRonChipViewModel: DemoRonChipViewModel by
+val Kosmos.demoNotifChipViewModel: DemoNotifChipViewModel by
     Kosmos.Fixture {
-        DemoRonChipViewModel(
+        DemoNotifChipViewModel(
             commandRegistry = commandRegistry,
             packageManager = packageManager,
             systemClock = fakeSystemClock,
