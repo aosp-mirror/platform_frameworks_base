@@ -76,6 +76,7 @@ android_test {
         "truth",
         "Nene",
         "Harrier",
+        "bedstead-enterprise",
     ],
     libs: [
         "android.test.base.stubs.system",
