@@ -114,9 +114,6 @@ class KeyguardQuickAffordancesCombinedViewModelTest : SysuiTestCase() {
     private lateinit var dozingToLockscreenTransitionViewModel:
         DozingToLockscreenTransitionViewModel
     @Mock
-    private lateinit var dreamingHostedToLockscreenTransitionViewModel:
-        DreamingHostedToLockscreenTransitionViewModel
-    @Mock
     private lateinit var dreamingToLockscreenTransitionViewModel:
         DreamingToLockscreenTransitionViewModel
     @Mock
@@ -134,9 +131,6 @@ class KeyguardQuickAffordancesCombinedViewModelTest : SysuiTestCase() {
     @Mock
     private lateinit var lockscreenToDozingTransitionViewModel:
         LockscreenToDozingTransitionViewModel
-    @Mock
-    private lateinit var lockscreenToDreamingHostedTransitionViewModel:
-        LockscreenToDreamingHostedTransitionViewModel
     @Mock
     private lateinit var lockscreenToDreamingTransitionViewModel:
         LockscreenToDreamingTransitionViewModel
@@ -263,8 +257,6 @@ class KeyguardQuickAffordancesCombinedViewModelTest : SysuiTestCase() {
         whenever(aodToLockscreenTransitionViewModel.shortcutsAlpha)
             .thenReturn(intendedAlphaMutableStateFlow)
         whenever(dozingToLockscreenTransitionViewModel.shortcutsAlpha).thenReturn(emptyFlow())
-        whenever(dreamingHostedToLockscreenTransitionViewModel.shortcutsAlpha)
-            .thenReturn(emptyFlow())
         whenever(dreamingToLockscreenTransitionViewModel.shortcutsAlpha).thenReturn(emptyFlow())
         whenever(goneToLockscreenTransitionViewModel.shortcutsAlpha).thenReturn(emptyFlow())
         whenever(occludedToLockscreenTransitionViewModel.shortcutsAlpha).thenReturn(emptyFlow())
@@ -274,8 +266,6 @@ class KeyguardQuickAffordancesCombinedViewModelTest : SysuiTestCase() {
         whenever(lockscreenToAodTransitionViewModel.shortcutsAlpha)
             .thenReturn(intendedAlphaMutableStateFlow)
         whenever(lockscreenToDozingTransitionViewModel.shortcutsAlpha).thenReturn(emptyFlow())
-        whenever(lockscreenToDreamingHostedTransitionViewModel.shortcutsAlpha)
-            .thenReturn(emptyFlow())
         whenever(lockscreenToDreamingTransitionViewModel.shortcutsAlpha).thenReturn(emptyFlow())
         whenever(lockscreenToGoneTransitionViewModel.shortcutsAlpha).thenReturn(emptyFlow())
         whenever(lockscreenToOccludedTransitionViewModel.shortcutsAlpha).thenReturn(emptyFlow())
@@ -314,8 +304,6 @@ class KeyguardQuickAffordancesCombinedViewModelTest : SysuiTestCase() {
                 shadeInteractor = shadeInteractor,
                 aodToLockscreenTransitionViewModel = aodToLockscreenTransitionViewModel,
                 dozingToLockscreenTransitionViewModel = dozingToLockscreenTransitionViewModel,
-                dreamingHostedToLockscreenTransitionViewModel =
-                    dreamingHostedToLockscreenTransitionViewModel,
                 dreamingToLockscreenTransitionViewModel = dreamingToLockscreenTransitionViewModel,
                 goneToLockscreenTransitionViewModel = goneToLockscreenTransitionViewModel,
                 occludedToLockscreenTransitionViewModel = occludedToLockscreenTransitionViewModel,
@@ -326,8 +314,6 @@ class KeyguardQuickAffordancesCombinedViewModelTest : SysuiTestCase() {
                     glanceableHubToLockscreenTransitionViewModel,
                 lockscreenToAodTransitionViewModel = lockscreenToAodTransitionViewModel,
                 lockscreenToDozingTransitionViewModel = lockscreenToDozingTransitionViewModel,
-                lockscreenToDreamingHostedTransitionViewModel =
-                    lockscreenToDreamingHostedTransitionViewModel,
                 lockscreenToDreamingTransitionViewModel = lockscreenToDreamingTransitionViewModel,
                 lockscreenToGoneTransitionViewModel = lockscreenToGoneTransitionViewModel,
                 lockscreenToOccludedTransitionViewModel = lockscreenToOccludedTransitionViewModel,
