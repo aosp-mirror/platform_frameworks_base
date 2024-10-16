@@ -16,10 +16,17 @@
 
 package com.android.systemui.statusbar.notification.collection
 
+import android.annotation.SuppressLint
 import com.android.internal.annotations.VisibleForTesting
+import com.android.systemui.Dumpable
+import com.android.systemui.util.asIndenting
+import com.android.systemui.util.printCollection
 import com.android.systemui.util.time.SystemClock
 import com.android.systemui.util.time.SystemClockImpl
+import com.android.systemui.util.withIncreasedIndent
+import java.io.PrintWriter
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * A cache in which entries can "survive" getting purged [retainCount] times, given consecutive
@@ -29,12 +36,17 @@ import java.util.concurrent.ConcurrentHashMap
  * resolve (such as drawables, or things that require binder calls). As such, [getOrFetch] is
  * recommended to be run on a background thread, while [purge] can be done from any thread.
  */
+@SuppressLint("DumpableNotRegistered") // this will be dumped by container classes
 class NotifCollectionCache<V>(
     private val retainCount: Int = 1,
     private val purgeTimeoutMillis: Long = 1000L,
     private val systemClock: SystemClock = SystemClockImpl(),
-) {
+) : Dumpable {
     @get:VisibleForTesting val cache = ConcurrentHashMap<String, CacheEntry>()
+
+    // Counters for cache hits and misses to be used to calculate and dump the hit ratio
+    @get:VisibleForTesting val misses = AtomicInteger(0)
+    @get:VisibleForTesting val hits = AtomicInteger(0)
 
     init {
         if (retainCount < 0) {
@@ -102,11 +114,13 @@ class NotifCollectionCache<V>(
     fun getOrFetch(key: String, fetch: (String) -> V): V {
         val entry = cache[key]
         if (entry != null) {
+            hits.incrementAndGet()
             // Refresh lives on access
             entry.resetLives()
             return entry.value
         }
 
+        misses.incrementAndGet()
         val value = fetch(key)
         cache[key] = CacheEntry(key, value)
         return value
@@ -150,5 +164,25 @@ class NotifCollectionCache<V>(
     /** Clear all entries from the cache. */
     fun clear() {
         cache.clear()
+    }
+
+    override fun dump(pwOrig: PrintWriter, args: Array<out String>) {
+        val pw = pwOrig.asIndenting()
+
+        pw.println("$TAG(retainCount = $retainCount, purgeTimeoutMillis = $purgeTimeoutMillis)")
+        pw.withIncreasedIndent {
+            pw.printCollection("keys present in cache", cache.keys.stream().sorted().toList())
+
+            val misses = misses.get()
+            val hits = hits.get()
+            pw.println(
+                "cache hit ratio = ${(hits.toFloat() / (hits + misses)) * 100}% " +
+                    "($hits hits, $misses misses)"
+            )
+        }
+    }
+
+    companion object {
+        const val TAG = "NotifCollectionCache"
     }
 }

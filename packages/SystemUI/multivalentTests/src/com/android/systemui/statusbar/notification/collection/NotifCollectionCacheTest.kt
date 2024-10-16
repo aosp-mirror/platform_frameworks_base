@@ -202,5 +202,31 @@ class NotifCollectionCacheTest : SysuiTestCase() {
         assertNotNull(noLivesCache.cache[C])
     }
 
+    @Test
+    fun hitsAndMisses_areAccurate() {
+        val fetch = { key: String -> key }
+
+        // Construct the cache
+        assertThat(underTest.getOrFetch(A, fetch)).isEqualTo(A)
+        assertThat(underTest.getOrFetch(B, fetch)).isEqualTo(B)
+        assertThat(underTest.getOrFetch(C, fetch)).isEqualTo(C)
+        assertThat(underTest.hits.get()).isEqualTo(0)
+        assertThat(underTest.misses.get()).isEqualTo(3)
+
+        // Verify that further calls count as hits
+        underTest.getOrFetch(A, fetch)
+        underTest.getOrFetch(A, fetch)
+        underTest.getOrFetch(B, fetch)
+        underTest.getOrFetch(C, fetch)
+        assertThat(underTest.hits.get()).isEqualTo(4)
+        assertThat(underTest.misses.get()).isEqualTo(3)
+
+        // Verify that a miss is counted again if the entries are cleared
+        underTest.clear()
+        underTest.getOrFetch(A, fetch)
+        assertThat(underTest.hits.get()).isEqualTo(4)
+        assertThat(underTest.misses.get()).isEqualTo(4)
+    }
+
     private fun <V> NotifCollectionCache<V>.getLives(key: String) = this.cache[key]?.lives
 }
