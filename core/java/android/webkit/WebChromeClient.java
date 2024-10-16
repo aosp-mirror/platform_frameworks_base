@@ -552,6 +552,16 @@ public class WebChromeClient {
      * Parameters used in the {@link #onShowFileChooser} method.
      */
     public static abstract class FileChooserParams {
+        /** @hide */
+        @IntDef(prefix = { "MODE_" }, value = {
+            MODE_OPEN,
+            MODE_OPEN_MULTIPLE,
+            MODE_OPEN_FOLDER,
+            MODE_SAVE,
+        })
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface Mode {}
+
         /** Open single file. Requires that the file exists before allowing the user to pick it. */
         public static final int MODE_OPEN = 0;
         /** Like Open but allows multiple files to be selected. */
@@ -603,6 +613,7 @@ public class WebChromeClient {
         /**
          * Returns file chooser mode.
          */
+        @Mode
         public abstract int getMode();
 
         /**
