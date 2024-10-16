@@ -16,14 +16,11 @@
 
 package com.android.systemui.statusbar.core
 
-import com.android.systemui.statusbar.phone.PhoneStatusBarTransitions
-import com.android.systemui.statusbar.phone.PhoneStatusBarViewController
+import com.android.systemui.statusbar.window.StatusBarWindowController
 
-class FakeStatusBarInitializerFactory(
-    private val statusBarViewController: PhoneStatusBarViewController,
-    private val statusBarTransitions: PhoneStatusBarTransitions,
-) : StatusBarInitializer.Factory {
+class FakeStatusBarInitializerFactory() : StatusBarInitializer.Factory {
 
-    override fun create(displayId: Int): StatusBarInitializer =
-        FakeStatusBarInitializer(statusBarViewController, statusBarTransitions)
+    override fun create(
+        statusBarWindowController: StatusBarWindowController
+    ): StatusBarInitializer = FakeStatusBarInitializer()
 }
