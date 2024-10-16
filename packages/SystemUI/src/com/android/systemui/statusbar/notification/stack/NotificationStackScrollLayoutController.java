@@ -2122,9 +2122,6 @@ public class NotificationStackScrollLayoutController implements Dumpable {
             boolean hunWantsIt = false;
             if (shouldHeadsUpHandleTouch()) {
                 hunWantsIt = mHeadsUpTouchHelper.onInterceptTouchEvent(ev);
-                if (hunWantsIt) {
-                    mView.startDraggingOnHun();
-                }
             }
             boolean swipeWantsIt = false;
             if (mLongPressedView == null && !mView.isBeingDragged()
@@ -2210,6 +2207,9 @@ public class NotificationStackScrollLayoutController implements Dumpable {
             boolean hunWantsIt = false;
             if (shouldHeadsUpHandleTouch()) {
                 hunWantsIt = mHeadsUpTouchHelper.onTouchEvent(ev);
+                if (hunWantsIt) {
+                    mView.startDraggingOnHun();
+                }
             }
 
             // Check if we need to clear any snooze leavebehinds
