@@ -60,7 +60,7 @@ abstract class FlingOnBackAnimationCallback(
                         it.touchY,
                         progress / SCALE_FACTOR,
                         it.swipeEdge,
-                        it.frameTime,
+                        it.frameTimeMillis,
                     )
                 onBackProgressedCompat(backEvent)
             }
@@ -87,7 +87,7 @@ abstract class FlingOnBackAnimationCallback(
         }
         reset()
         if (predictiveBackTimestampApi()) {
-            downTime = backEvent.frameTime
+            downTime = backEvent.frameTimeMillis
         }
         onBackStartedCompat(backEvent)
     }
@@ -98,7 +98,7 @@ abstract class FlingOnBackAnimationCallback(
             velocityTracker.addMovement(
                 MotionEvent.obtain(
                     /* downTime */ downTime!!,
-                    /* eventTime */ backEvent.frameTime,
+                    /* eventTime */ backEvent.frameTimeMillis,
                     /* action */ ACTION_MOVE,
                     /* x */ interpolatedProgress * SCALE_FACTOR,
                     /* y */ 0f,
@@ -111,7 +111,7 @@ abstract class FlingOnBackAnimationCallback(
                     backEvent.touchY,
                     interpolatedProgress,
                     backEvent.swipeEdge,
-                    backEvent.frameTime,
+                    backEvent.frameTimeMillis,
                 )
         } else {
             lastBackEvent =
