@@ -308,6 +308,13 @@ flag {
 }
 
 flag {
+    name: "enable_restore_to_previous_size_from_desktop_immersive"
+    namespace: "lse_desktop_experience"
+    description: "Restores the window bounds to their previous size when exiting desktop immersive"
+    bug: "372318163"
+}
+
+flag {
     name: "enable_display_focus_in_shell_transitions"
     namespace: "lse_desktop_experience"
     description: "Creates a shell transition when display focus switches."
