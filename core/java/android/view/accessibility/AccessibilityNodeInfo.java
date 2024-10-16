@@ -2288,10 +2288,7 @@ public class AccessibilityNodeInfo implements Parcelable {
     /**
      * Gets the node bounds in window coordinates.
      * <p>
-     * When magnification is enabled, the bounds in window are scaled up by magnification scale
-     * and the positions are also adjusted according to the offset of magnification viewport.
-     * For example, it returns Rect(-180, -180, 0, 0) for original bounds Rect(10, 10, 100, 100),
-     * when the magnification scale is 2 and offsets for X and Y are both 200.
+     *   The node bounds returned are not scaled by magnification.
      * <p/>
      *
      * @param outBounds The output node bounds.
