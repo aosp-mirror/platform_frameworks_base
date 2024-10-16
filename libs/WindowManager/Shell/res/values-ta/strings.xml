@@ -97,9 +97,9 @@
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"கேமரா தொடர்பான சிக்கல்களா?\nமீண்டும் பொருத்த தட்டவும்"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"சிக்கல்கள் சரிசெய்யப்படவில்லையா?\nமாற்றியமைக்க தட்டவும்"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"கேமரா தொடர்பான சிக்கல்கள் எதுவும் இல்லையா? நிராகரிக்க தட்டவும்."</string>
-    <string name="windowing_app_handle_education_tooltip" msgid="6398482412956375783">"ஆப்ஸ் மெனுவைத் திறக்க தட்டவும்"</string>
-    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="6285279585554484957">"பல ஆப்ஸை ஒன்றாகக் காட்ட தட்டவும்"</string>
-    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="6685429075790085337">"ஆப்ஸ் மெனுவில் இருந்து முழுத்திரைக்குச் செல்லும்"</string>
+    <string name="windowing_app_handle_education_tooltip" msgid="2929643449849791854">"ஆப்ஸ் மெனுவை இங்கே பார்க்கலாம்"</string>
+    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="2523468503353474095">"பல ஆப்ஸை ஒன்றாகத் திறக்க டெஸ்க்டாப் காட்சிக்குச் செல்லலாம்"</string>
+    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="5225660258192054132">"ஆப்ஸ் மெனுவிலிருந்து எப்போது வேண்டுமானாலும் முழுத்திரைக்குத் திரும்பலாம்"</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"பலவற்றைப் பார்த்தல் மற்றும் செய்தல்"</string>
     <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"திரைப் பிரிப்புக்கு மற்றொரு ஆப்ஸை இழுக்கலாம்"</string>
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"ஆப்ஸை இடம் மாற்ற அதன் வெளியில் இருமுறை தட்டலாம்"</string>

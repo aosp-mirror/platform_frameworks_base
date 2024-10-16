@@ -97,9 +97,9 @@
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Камерада маселелер келип чыктыбы?\nОңдоо үчүн таптаңыз"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Оңдолгон жокпу?\nАртка кайтаруу үчүн таптаңыз"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Камерада маселе жокпу? Этибарга албоо үчүн таптаңыз."</string>
-    <string name="windowing_app_handle_education_tooltip" msgid="6398482412956375783">"Колдонмонун менюсун ачуу үчүн таптап коюңуз"</string>
-    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="6285279585554484957">"Бир нече колдонмону чогуу көрүү үчүн таптап коюңуз"</string>
-    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="6685429075790085337">"Колдонмонун менюсунан толук экранга кайтыңыз"</string>
+    <string name="windowing_app_handle_education_tooltip" msgid="2929643449849791854">"Колдонмонун менюсун ушул жерден таба аласыз"</string>
+    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="2523468503353474095">"Бир убакта бир нече колдонмону ачуу үчүн компьютердик версияга өтүңүз"</string>
+    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="5225660258192054132">"Каалаган убакта колдонмонун менюсунан толук экранга кайта аласыз"</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"Көрүп, көбүрөөк нерселерди жасаңыз"</string>
     <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"Экранды бөлүү үчүн башка колдонмону сүйрөңүз"</string>
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Колдонмону жылдыруу үчүн сырт жагын эки жолу таптаңыз"</string>
