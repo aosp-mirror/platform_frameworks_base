@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.pipeline.shared.ui.viewmodel
 
+import android.app.StatusBarManager.CAMERA_LAUNCH_SOURCE_POWER_DOUBLE_TAP
 import android.app.StatusBarManager.DISABLE2_NONE
 import android.app.StatusBarManager.DISABLE_CLOCK
 import android.app.StatusBarManager.DISABLE_NONE
@@ -33,6 +34,7 @@ import com.android.systemui.flags.DisableSceneContainer
 import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.data.repository.keyguardOcclusionRepository
+import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
@@ -740,6 +742,45 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
             transitionKeyguardToGone()
 
             kosmos.sceneContainerRepository.snapToScene(Scenes.Shade)
+
+            assertThat(clockVisible!!.visibility).isEqualTo(View.GONE)
+            assertThat(notifIconsVisible!!.visibility).isEqualTo(View.GONE)
+            assertThat(systemInfoVisible!!.visibility).isEqualTo(View.GONE)
+        }
+
+    @Test
+    @DisableSceneContainer
+    fun secureCameraActive_sceneFlagOff_noStatusBarViewsShown() =
+        testScope.runTest {
+            val clockVisible by collectLastValue(underTest.isClockVisible)
+            val notifIconsVisible by collectLastValue(underTest.isNotificationIconContainerVisible)
+            val systemInfoVisible by collectLastValue(underTest.isSystemInfoVisible)
+
+            // Secure camera is an occluding activity
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.LOCKSCREEN,
+                to = KeyguardState.OCCLUDED,
+                testScope = this,
+            )
+            kosmos.keyguardInteractor.onCameraLaunchDetected(CAMERA_LAUNCH_SOURCE_POWER_DOUBLE_TAP)
+
+            assertThat(clockVisible!!.visibility).isEqualTo(View.GONE)
+            assertThat(notifIconsVisible!!.visibility).isEqualTo(View.GONE)
+            assertThat(systemInfoVisible!!.visibility).isEqualTo(View.GONE)
+        }
+
+    @Test
+    @EnableSceneContainer
+    fun secureCameraActive_sceneFlagOn_noStatusBarViewsShown() =
+        testScope.runTest {
+            val clockVisible by collectLastValue(underTest.isClockVisible)
+            val notifIconsVisible by collectLastValue(underTest.isNotificationIconContainerVisible)
+            val systemInfoVisible by collectLastValue(underTest.isSystemInfoVisible)
+
+            kosmos.sceneContainerRepository.snapToScene(Scenes.Lockscreen)
+            // Secure camera is an occluding activity
+            kosmos.keyguardOcclusionRepository.setShowWhenLockedActivityInfo(true, taskInfo = null)
+            kosmos.keyguardInteractor.onCameraLaunchDetected(CAMERA_LAUNCH_SOURCE_POWER_DOUBLE_TAP)
 
             assertThat(clockVisible!!.visibility).isEqualTo(View.GONE)
             assertThat(notifIconsVisible!!.visibility).isEqualTo(View.GONE)

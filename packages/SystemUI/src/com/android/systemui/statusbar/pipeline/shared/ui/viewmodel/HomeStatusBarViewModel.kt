@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.pipeline.shared.ui.viewmodel
 import android.view.View
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState.DREAMING
@@ -123,6 +124,7 @@ constructor(
     private val lightsOutInteractor: LightsOutInteractor,
     private val notificationsInteractor: ActiveNotificationsInteractor,
     keyguardTransitionInteractor: KeyguardTransitionInteractor,
+    keyguardInteractor: KeyguardInteractor,
     sceneInteractor: SceneInteractor,
     sceneContainerOcclusionInteractor: SceneContainerOcclusionInteractor,
     shadeInteractor: ShadeInteractor,
@@ -184,29 +186,43 @@ constructor(
             // TODO(b/364360986): Add edge cases, like secure camera launch.
         }
 
-    private val isHomeScreenStatusBarAllowed: Flow<Boolean> =
+    private val isHomeStatusBarAllowed: Flow<Boolean> =
         if (SceneContainerFlag.isEnabled) {
             isHomeStatusBarAllowedByScene
         } else {
             isHomeScreenStatusBarAllowedLegacy
         }
 
+    private val shouldHomeStatusBarBeVisible =
+        combine(isHomeStatusBarAllowed, keyguardInteractor.isSecureCameraActive) {
+            isHomeStatusBarAllowed,
+            isSecureCameraActive ->
+            // When launching the camera over the lockscreen, the status icons would typically
+            // become visible momentarily before animating out, since we're not yet aware that the
+            // launching camera activity is fullscreen. Even once the activity finishes launching,
+            // it takes a short time before WM decides that the top app wants to hide the icons and
+            // tells us to hide them.
+            // To ensure that this high-visibility animation is smooth, keep the icons hidden during
+            // a camera launch. See b/257292822.
+            isHomeStatusBarAllowed && !isSecureCameraActive
+        }
+
     override val isClockVisible: Flow<VisibilityModel> =
         combine(
-            isHomeScreenStatusBarAllowed,
+            shouldHomeStatusBarBeVisible,
             collapsedStatusBarInteractor.visibilityViaDisableFlags,
-        ) { isStatusBarAllowed, visibilityViaDisableFlags ->
-            val showClock = isStatusBarAllowed && visibilityViaDisableFlags.isClockAllowed
+        ) { shouldStatusBarBeVisible, visibilityViaDisableFlags ->
+            val showClock = shouldStatusBarBeVisible && visibilityViaDisableFlags.isClockAllowed
             // TODO(b/364360986): Take CollapsedStatusBarFragment.clockHiddenMode into account.
             VisibilityModel(showClock.toVisibilityInt(), visibilityViaDisableFlags.animate)
         }
     override val isNotificationIconContainerVisible: Flow<VisibilityModel> =
         combine(
-            isHomeScreenStatusBarAllowed,
+            shouldHomeStatusBarBeVisible,
             collapsedStatusBarInteractor.visibilityViaDisableFlags,
-        ) { isStatusBarAllowed, visibilityViaDisableFlags ->
+        ) { shouldStatusBarBeVisible, visibilityViaDisableFlags ->
             val showNotificationIconContainer =
-                isStatusBarAllowed && visibilityViaDisableFlags.areNotificationIconsAllowed
+                shouldStatusBarBeVisible && visibilityViaDisableFlags.areNotificationIconsAllowed
             VisibilityModel(
                 showNotificationIconContainer.toVisibilityInt(),
                 visibilityViaDisableFlags.animate,
@@ -214,10 +230,11 @@ constructor(
         }
     override val isSystemInfoVisible: Flow<VisibilityModel> =
         combine(
-            isHomeScreenStatusBarAllowed,
+            shouldHomeStatusBarBeVisible,
             collapsedStatusBarInteractor.visibilityViaDisableFlags,
-        ) { isStatusBarAllowed, visibilityViaDisableFlags ->
-            val showSystemInfo = isStatusBarAllowed && visibilityViaDisableFlags.isSystemInfoAllowed
+        ) { shouldStatusBarBeVisible, visibilityViaDisableFlags ->
+            val showSystemInfo =
+                shouldStatusBarBeVisible && visibilityViaDisableFlags.isSystemInfoAllowed
             VisibilityModel(showSystemInfo.toVisibilityInt(), visibilityViaDisableFlags.animate)
         }
 
