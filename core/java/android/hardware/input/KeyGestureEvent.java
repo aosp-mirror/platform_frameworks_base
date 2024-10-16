@@ -100,6 +100,7 @@ public final class KeyGestureEvent {
     public static final int KEY_GESTURE_TYPE_ACCESSIBILITY_SHORTCUT = 60;
     public static final int KEY_GESTURE_TYPE_CLOSE_ALL_DIALOGS = 61;
     public static final int KEY_GESTURE_TYPE_MOVE_TO_NEXT_DISPLAY = 62;
+    public static final int KEY_GESTURE_TYPE_TOGGLE_TALKBACK = 63;
 
     public static final int FLAG_CANCELLED = 1;
 
@@ -177,6 +178,7 @@ public final class KeyGestureEvent {
             KEY_GESTURE_TYPE_ACCESSIBILITY_SHORTCUT,
             KEY_GESTURE_TYPE_CLOSE_ALL_DIALOGS,
             KEY_GESTURE_TYPE_MOVE_TO_NEXT_DISPLAY,
+            KEY_GESTURE_TYPE_TOGGLE_TALKBACK,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface KeyGestureType {
@@ -597,6 +599,8 @@ public final class KeyGestureEvent {
                 return "KEY_GESTURE_TYPE_ACCESSIBILITY_SHORTCUT";
             case KEY_GESTURE_TYPE_CLOSE_ALL_DIALOGS:
                 return "KEY_GESTURE_TYPE_CLOSE_ALL_DIALOGS";
+            case KEY_GESTURE_TYPE_TOGGLE_TALKBACK:
+                return "KEY_GESTURE_TYPE_TOGGLE_TALKBACK";
             default:
                 return Integer.toHexString(value);
         }

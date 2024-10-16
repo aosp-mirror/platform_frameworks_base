@@ -35,6 +35,7 @@ import android.view.KeyEvent;
 
 import androidx.test.filters.MediumTest;
 
+import com.android.hardware.input.Flags;
 import com.android.internal.annotations.Keep;
 
 import junit.framework.Assert;
@@ -393,6 +394,17 @@ public class KeyGestureEventTests extends ShortcutKeyTestBase {
                 META_ON | CTRL_ON);
     }
 
+    @Test
+    @EnableFlags(Flags.FLAG_KEYBOARD_A11Y_SHORTCUT_CONTROL)
+    @DisableFlags(com.android.hardware.input.Flags.FLAG_USE_KEY_GESTURE_EVENT_HANDLER)
+    public void testToggleTalkbackPress() {
+        testShortcutInternal("Meta + Alt + T -> Toggle talkback",
+                new int[]{META_KEY, ALT_KEY, KeyEvent.KEYCODE_T},
+                KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_TALKBACK,
+                KeyEvent.KEYCODE_T,
+                META_ON | ALT_ON);
+    }
+
     private void testShortcutInternal(String testName, int[] testKeys,
             @KeyGestureEvent.KeyGestureType int expectedKeyGestureType, int expectedKey,
             int expectedModifierState) {
@@ -698,5 +710,17 @@ public class KeyGestureEventTests extends ShortcutKeyTestBase {
         Assert.assertTrue(
                 sendKeyGestureEventComplete(KeyGestureEvent.KEY_GESTURE_TYPE_CLOSE_ALL_DIALOGS));
         mPhoneWindowManager.assertCloseAllDialogs();
+    }
+
+    @Test
+    @EnableFlags(com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_SHORTCUT_CONTROL)
+    public void testKeyGestureToggleTalkback() {
+        Assert.assertTrue(
+                sendKeyGestureEventComplete(KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_TALKBACK));
+        mPhoneWindowManager.assertTalkBack(true);
+
+        Assert.assertTrue(
+                sendKeyGestureEventComplete(KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_TALKBACK));
+        mPhoneWindowManager.assertTalkBack(false);
     }
 }
