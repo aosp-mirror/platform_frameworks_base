@@ -16,13 +16,14 @@
 
 package com.android.systemui.touchpad.tutorial.ui.gesture
 
+import android.util.MathUtils
 import android.view.MotionEvent
 import kotlin.math.abs
 
 /**
- * Recognizes apps gesture completion. That is - using three fingers on touchpad - swipe up over
- * some distance threshold and then slow down gesture before fingers are lifted. Implementation is
- * based on [com.android.quickstep.util.TriggerSwipeUpTouchTracker]
+ * Recognizes recent apps gesture, that is - using three fingers on touchpad - swipe up over some
+ * distance threshold and then slow down gesture before fingers are lifted. Implementation is based
+ * on [com.android.quickstep.util.TriggerSwipeUpTouchTracker]
  */
 class RecentAppsGestureRecognizer(
     private val gestureDistanceThresholdPx: Int,
@@ -49,7 +50,7 @@ class RecentAppsGestureRecognizer(
                 -state.deltaY >= gestureDistanceThresholdPx &&
                     abs(velocityTracker.calculateVelocity().value) <= velocityThresholdPxPerMs
             },
-            progress = { 0f },
+            progress = { MathUtils.saturate(-it.deltaY / gestureDistanceThresholdPx) },
         )
     }
 }
