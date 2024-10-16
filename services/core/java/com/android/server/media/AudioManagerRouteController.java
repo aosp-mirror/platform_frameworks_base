@@ -420,7 +420,7 @@ import java.util.Objects;
         // to derive a name ourselves from the type instead.
         String deviceName = audioDeviceInfo.getPort().name();
 
-        if (!TextUtils.isEmpty(address)) {
+        if (mBluetoothRouteController.containsBondedDeviceWithAddress(address)) {
             routeId = mBluetoothRouteController.getRouteIdForBluetoothAddress(address);
             deviceName = mBluetoothRouteController.getNameForBluetoothAddress(address);
         }

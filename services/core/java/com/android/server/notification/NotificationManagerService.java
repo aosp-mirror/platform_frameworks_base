@@ -4392,8 +4392,9 @@ public class NotificationManagerService extends SystemService {
             List<NotificationChannel> channels = channelsList.getList();
             final int channelsSize = channels.size();
             ParceledListSlice<NotificationChannel> oldChannels =
-                    mPreferencesHelper.getNotificationChannels(pkg, uid, true);
-            final boolean hadChannel = oldChannels != null && !oldChannels.getList().isEmpty();
+                    mPreferencesHelper.getNotificationChannels(pkg, uid, true, false);
+            final boolean hadNonBundleChannel =
+                    oldChannels != null && !oldChannels.getList().isEmpty();
             boolean needsPolicyFileChange = false;
             boolean hasRequestedNotificationPermission = false;
             for (int i = 0; i < channelsSize; i++) {
@@ -4410,13 +4411,18 @@ public class NotificationManagerService extends SystemService {
                             mPreferencesHelper.getNotificationChannel(pkg, uid, channel.getId(),
                                     false),
                             NOTIFICATION_CHANNEL_OR_GROUP_ADDED);
-                    boolean hasChannel = hadChannel || hasRequestedNotificationPermission;
-                    if (!hasChannel) {
+                    boolean hasNonBundleChannel =
+                            hadNonBundleChannel || hasRequestedNotificationPermission;
+                    if (!hasNonBundleChannel) {
                         ParceledListSlice<NotificationChannel> currChannels =
-                                mPreferencesHelper.getNotificationChannels(pkg, uid, true);
-                        hasChannel = currChannels != null && !currChannels.getList().isEmpty();
+                                mPreferencesHelper.getNotificationChannels(pkg, uid, true, false);
+                        hasNonBundleChannel =
+                                currChannels != null && !currChannels.getList().isEmpty();
                     }
-                    if (!hadChannel && hasChannel && !hasRequestedNotificationPermission
+                    // show perm prompt if new non-bundle channel added and the user has not
+                    // seen the prompt
+                    if (!hadNonBundleChannel && hasNonBundleChannel
+                            && !hasRequestedNotificationPermission
                             && startingTaskId != ActivityTaskManager.INVALID_TASK_ID) {
                         hasRequestedNotificationPermission = true;
                         if (mPermissionPolicyInternal == null) {
@@ -4651,7 +4657,7 @@ public class NotificationManagerService extends SystemService {
         public ParceledListSlice<NotificationChannel> getNotificationChannelsForPackage(String pkg,
                 int uid, boolean includeDeleted) {
             enforceSystemOrSystemUI("getNotificationChannelsForPackage");
-            return mPreferencesHelper.getNotificationChannels(pkg, uid, includeDeleted);
+            return mPreferencesHelper.getNotificationChannels(pkg, uid, includeDeleted, true);
         }
 
         @Override
@@ -4783,7 +4789,7 @@ public class NotificationManagerService extends SystemService {
                     /* ignore */
                 }
                 return mPreferencesHelper.getNotificationChannels(
-                        targetPkg, targetUid, false /* includeDeleted */);
+                        targetPkg, targetUid, false /* includeDeleted */, true);
             }
             throw new SecurityException("Pkg " + callingPkg
                     + " cannot read channels for " + targetPkg + " in " + userId);
@@ -6652,7 +6658,7 @@ public class NotificationManagerService extends SystemService {
             verifyPrivilegedListener(token, user, true);
 
             return mPreferencesHelper.getNotificationChannels(pkg,
-                    getUidForPackageAndUser(pkg, user), false /* includeDeleted */);
+                    getUidForPackageAndUser(pkg, user), false /* includeDeleted */, true);
         }
 
         @Override
@@ -7693,8 +7699,9 @@ public class NotificationManagerService extends SystemService {
     }
 
     int getNumNotificationChannelsForPackage(String pkg, int uid, boolean includeDeleted) {
-        return mPreferencesHelper.getNotificationChannels(pkg, uid, includeDeleted).getList()
-                .size();
+        // don't show perm prompt if the only channels are bundle channels
+        return mPreferencesHelper.getNotificationChannels(
+                pkg, uid, includeDeleted, false).getList().size();
     }
 
     void cancelNotificationInternal(String pkg, String opPkg, int callingUid, int callingPid,
@@ -8005,11 +8012,16 @@ public class NotificationManagerService extends SystemService {
     }
 
     /**
-     * Returns a channel, if exists, and restores deleted conversation channels.
+     * Returns a channel, if exists and is not a bundle channel, and restores deleted
+     * conversation channels.
      */
     @Nullable
     private NotificationChannel getNotificationChannelRestoreDeleted(String pkg,
             int callingUid, int notificationUid, String channelId, String conversationId) {
+        if (SYSTEM_RESERVED_IDS.contains(channelId)) {
+            // apps cannot post to these channels directly, in case they post incorrect content
+            return null;
+        }
         // Restore a deleted conversation channel, if exists. Otherwise use the parent channel.
         NotificationChannel channel = mPreferencesHelper.getConversationNotificationChannel(
                 pkg, notificationUid, channelId, conversationId,

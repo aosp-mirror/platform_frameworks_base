@@ -38,8 +38,9 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.round
 import androidx.compose.ui.unit.toOffset
 import androidx.compose.ui.unit.toSize
 import com.android.systemui.Flags.communalWidgetResizing
@@ -93,7 +94,7 @@ internal constructor(
     private val scope: CoroutineScope,
     private val updateDragPositionForRemove: (offset: Offset) -> Boolean,
 ) {
-    var draggingItemIndex by mutableStateOf<Int?>(null)
+    var draggingItemKey by mutableStateOf<Any?>(null)
         private set
 
     var isDraggingToRemove by mutableStateOf(false)
@@ -105,6 +106,8 @@ internal constructor(
     private var draggingItemInitialOffset by mutableStateOf(Offset.Zero)
     private var dragStartPointerOffset by mutableStateOf(Offset.Zero)
 
+    private var previousTargetItemKey: Any? = null
+
     internal val draggingItemOffset: Offset
         get() =
             draggingItemLayoutInfo?.let { item ->
@@ -112,7 +115,7 @@ internal constructor(
             } ?: Offset.Zero
 
     private val draggingItemLayoutInfo: LazyGridItemInfo?
-        get() = state.layoutInfo.visibleItemsInfo.firstOrNull { it.index == draggingItemIndex }
+        get() = state.layoutInfo.visibleItemsInfo.firstOrNull { it.key == draggingItemKey }
 
     /**
      * Called when dragging is initiated.
@@ -137,7 +140,7 @@ internal constructor(
             .firstItemAtOffset(normalizedOffset - contentOffset)
             ?.apply {
                 dragStartPointerOffset = normalizedOffset - this.offset.toOffset()
-                draggingItemIndex = index
+                draggingItemKey = key
                 draggingItemInitialOffset = this.offset.toOffset()
                 return true
             }
@@ -146,16 +149,19 @@ internal constructor(
     }
 
     internal fun onDragInterrupted() {
-        draggingItemIndex?.let {
+        draggingItemKey?.let {
             if (isDraggingToRemove) {
-                contentListState.onRemove(it)
+                contentListState.onRemove(
+                    contentListState.list.indexOfFirst { it.key == draggingItemKey }
+                )
                 isDraggingToRemove = false
                 updateDragPositionForRemove(Offset.Zero)
             }
             // persist list editing changes on dragging ends
             contentListState.onSaveList()
-            draggingItemIndex = null
+            draggingItemKey = null
         }
+        previousTargetItemKey = null
         draggingItemDraggedDelta = Offset.Zero
         draggingItemInitialOffset = Offset.Zero
         dragStartPointerOffset = Offset.Zero
@@ -170,15 +176,29 @@ internal constructor(
         val startOffset = draggingItem.offset.toOffset() + draggingItemOffset
         val endOffset = startOffset + draggingItem.size.toSize()
         val middleOffset = startOffset + (endOffset - startOffset) / 2f
+        val draggingBoundingBox =
+            IntRect(draggingItem.offset + draggingItemOffset.round(), draggingItem.size)
 
         val targetItem =
-            state.layoutInfo.visibleItemsInfo
-                .asSequence()
-                .filter { item -> contentListState.isItemEditable(item.index) }
-                .filter { item -> draggingItem.index != item.index }
-                .firstItemAtOffset(middleOffset)
+            if (communalWidgetResizing()) {
+                state.layoutInfo.visibleItemsInfo.findLast { item ->
+                    val itemBoundingBox = IntRect(item.offset, item.size)
+                    draggingItemKey != item.key &&
+                        contentListState.isItemEditable(item.index) &&
+                        draggingBoundingBox.contains(itemBoundingBox.center)
+                }
+            } else {
+                state.layoutInfo.visibleItemsInfo
+                    .asSequence()
+                    .filter { item -> contentListState.isItemEditable(item.index) }
+                    .filter { item -> draggingItem.index != item.index }
+                    .firstItemAtOffset(middleOffset)
+            }
 
-        if (targetItem != null) {
+        if (
+            targetItem != null &&
+                (!communalWidgetResizing() || targetItem.key != previousTargetItemKey)
+        ) {
             val scrollToIndex =
                 if (targetItem.index == state.firstVisibleItemIndex) {
                     draggingItem.index
@@ -187,6 +207,14 @@ internal constructor(
                 } else {
                     null
                 }
+            if (communalWidgetResizing()) {
+                // Keep track of the previous target item, to avoid rapidly oscillating between
+                // items if the target item doesn't visually move as a result of the index change.
+                // In this case, even after the index changes, we'd still be colliding with the
+                // element, so it would be selected as the target item the next time this function
+                // runs again, which would trigger us to revert the index change we recently made.
+                previousTargetItemKey = targetItem.key
+            }
             if (scrollToIndex != null) {
                 scope.launch {
                     // this is needed to neutralize automatic keeping the first item first.
@@ -196,19 +224,16 @@ internal constructor(
             } else {
                 contentListState.onMove(draggingItem.index, targetItem.index)
             }
-            draggingItemIndex = targetItem.index
             isDraggingToRemove = false
-        } else {
+        } else if (targetItem == null) {
             val overscroll = checkForOverscroll(startOffset, endOffset)
             if (overscroll != 0f) {
                 scrollChannel.trySend(overscroll)
             }
             isDraggingToRemove = checkForRemove(startOffset)
+            previousTargetItemKey = null
         }
     }
-
-    private val LazyGridItemInfo.offsetEnd: IntOffset
-        get() = this.offset + this.size
 
     /** Calculate the amount dragged out of bound on both sides. Returns 0f if not overscrolled */
     private fun checkForOverscroll(startOffset: Offset, endOffset: Offset): Float {
@@ -237,7 +262,7 @@ fun Modifier.dragContainer(
     viewModel: BaseCommunalViewModel,
 ): Modifier {
     return this.then(
-        pointerInput(dragDropState, contentOffset) {
+        Modifier.pointerInput(dragDropState, contentOffset) {
             detectDragGesturesAfterLongPress(
                 onDrag = { change, offset ->
                     change.consume()
@@ -273,7 +298,7 @@ fun Modifier.dragContainer(
 @Composable
 fun LazyGridItemScope.DraggableItem(
     dragDropState: GridDragDropState,
-    index: Int,
+    key: Any,
     enabled: Boolean,
     selected: Boolean,
     modifier: Modifier = Modifier,
@@ -283,7 +308,7 @@ fun LazyGridItemScope.DraggableItem(
         return content(false)
     }
 
-    val dragging = index == dragDropState.draggingItemIndex
+    val dragging = key == dragDropState.draggingItemKey
     val itemAlpha: Float by
         animateFloatAsState(
             targetValue = if (dragDropState.isDraggingToRemove) 0.5f else 1f,

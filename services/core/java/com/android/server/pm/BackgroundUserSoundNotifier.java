@@ -55,6 +55,8 @@ public class BackgroundUserSoundNotifier {
     private static final String ACTION_SWITCH_USER = "com.android.server.ACTION_SWITCH_TO_USER";
     private static final String ACTION_DISMISS_NOTIFICATION =
             "com.android.server.ACTION_DISMISS_NOTIFICATION";
+    private static final String EXTRA_NOTIFICATION_CLIENT_UID =
+            "com.android.server.EXTRA_CLIENT_UID";
     /**
      * The clientUid from the AudioFocusInfo of the background user,
      * for which an active notification is currently displayed.
@@ -101,7 +103,7 @@ public class BackgroundUserSoundNotifier {
         ActivityManager am = mSystemUserContext.getSystemService(ActivityManager.class);
 
         registerReceiver(am);
-        mBgUserListener = new BackgroundUserListener(mSystemUserContext);
+        mBgUserListener = new BackgroundUserListener();
         AudioPolicy.Builder focusControlPolicyBuilder = new AudioPolicy.Builder(mSystemUserContext);
         focusControlPolicyBuilder.setLooper(Looper.getMainLooper());
 
@@ -119,26 +121,16 @@ public class BackgroundUserSoundNotifier {
 
     final class BackgroundUserListener extends AudioPolicy.AudioPolicyFocusListener {
 
-        Context mSystemContext;
-
-        BackgroundUserListener(Context systemContext) {
-            mSystemContext = systemContext;
-        }
-
-        @SuppressLint("MissingPermission")
         public void onAudioFocusGrant(AudioFocusInfo afi, int requestResult) {
             try {
-                BackgroundUserSoundNotifier.this.notifyForegroundUserAboutSoundIfNecessary(afi,
-                        mSystemContext.createContextAsUser(
-                                UserHandle.of(ActivityManager.getCurrentUser()), 0));
+                BackgroundUserSoundNotifier.this.notifyForegroundUserAboutSoundIfNecessary(afi);
             } catch (RemoteException e) {
                 throw new RuntimeException(e);
             }
         }
 
-        @SuppressLint("MissingPermission")
         public void onAudioFocusLoss(AudioFocusInfo afi, boolean wasNotified) {
-            BackgroundUserSoundNotifier.this.dismissNotificationIfNecessary();
+            BackgroundUserSoundNotifier.this.dismissNotificationIfNecessary(afi.getClientUid());
         }
     }
 
@@ -160,7 +152,7 @@ public class BackgroundUserSoundNotifier {
                 if (mNotificationClientUid == -1) {
                     return;
                 }
-                dismissNotification();
+                dismissNotification(mNotificationClientUid);
 
                 if (DEBUG) {
                     final int actionIndex = intent.getAction().lastIndexOf(".") + 1;
@@ -171,7 +163,7 @@ public class BackgroundUserSoundNotifier {
                 }
 
                 if (ACTION_MUTE_SOUND.equals(intent.getAction())) {
-                    muteAlarmSounds(mSystemUserContext);
+                    muteAlarmSounds(mNotificationClientUid);
                 } else if (ACTION_SWITCH_USER.equals(intent.getAction())) {
                     activityManager.switchUser(UserHandle.getUserId(mNotificationClientUid));
                 }
@@ -193,17 +185,17 @@ public class BackgroundUserSoundNotifier {
      */
     @SuppressLint("MissingPermission")
     @VisibleForTesting
-    void muteAlarmSounds(Context context) {
-        AudioManager audioManager = context.getSystemService(AudioManager.class);
+    void muteAlarmSounds(int notificationClientUid) {
+        AudioManager audioManager = mSystemUserContext.getSystemService(AudioManager.class);
         if (audioManager != null) {
             for (AudioPlaybackConfiguration apc : audioManager.getActivePlaybackConfigurations()) {
-                if (apc.getClientUid() == mNotificationClientUid && apc.getPlayerProxy() != null) {
+                if (apc.getClientUid() == notificationClientUid && apc.getPlayerProxy() != null) {
                     apc.getPlayerProxy().stop();
                 }
             }
         }
 
-        AudioFocusInfo currentAfi = getAudioFocusInfoForNotification();
+        AudioFocusInfo currentAfi = getAudioFocusInfoForNotification(notificationClientUid);
         if (currentAfi != null) {
             mFocusControlAudioPolicy.sendFocusLossAndUpdate(currentAfi);
         }
@@ -212,9 +204,14 @@ public class BackgroundUserSoundNotifier {
     /**
      * Check if sound is coming from background user and show notification is required.
      */
+    @SuppressLint("MissingPermission")
     @VisibleForTesting
-    void notifyForegroundUserAboutSoundIfNecessary(AudioFocusInfo afi, Context foregroundContext)
-            throws RemoteException {
+    void notifyForegroundUserAboutSoundIfNecessary(AudioFocusInfo afi) throws RemoteException {
+        if (afi == null) {
+            return;
+        }
+        Context foregroundContext = mSystemUserContext.createContextAsUser(
+                UserHandle.of(ActivityManager.getCurrentUser()), 0);
         final int userId = UserHandle.getUserId(afi.getClientUid());
         final int usage = afi.getAttributes().getUsage();
         UserInfo userInfo = mUserManager.getUserInfo(userId);
@@ -232,8 +229,8 @@ public class BackgroundUserSoundNotifier {
 
                 mNotificationClientUid = afi.getClientUid();
 
-                mNotificationManager.notifyAsUser(LOG_TAG, mNotificationClientUid,
-                        createNotification(userInfo.name, foregroundContext),
+                mNotificationManager.notifyAsUser(LOG_TAG, afi.getClientUid(),
+                        createNotification(userInfo.name, foregroundContext, afi.getClientUid()),
                         foregroundContext.getUser());
             }
         }
@@ -245,14 +242,15 @@ public class BackgroundUserSoundNotifier {
      * focus ownership.
      */
     @VisibleForTesting
-    void dismissNotificationIfNecessary() {
-        if (getAudioFocusInfoForNotification() == null && mNotificationClientUid >= 0) {
+    void dismissNotificationIfNecessary(int notificationClientUid) {
+        if (getAudioFocusInfoForNotification(notificationClientUid) == null
+                && mNotificationClientUid >= 0) {
             if (DEBUG) {
                 Log.d(LOG_TAG, "Alarm ringing on background user "
-                        + UserHandle.getUserHandleForUid(mNotificationClientUid).getIdentifier()
+                        + UserHandle.getUserHandleForUid(notificationClientUid).getIdentifier()
                         + " left focus stack, dismissing notification");
             }
-            dismissNotification();
+            dismissNotification(notificationClientUid);
             mNotificationClientUid = -1;
         }
     }
@@ -262,8 +260,8 @@ public class BackgroundUserSoundNotifier {
      * shown.
      */
     @SuppressLint("MissingPermission")
-    private void dismissNotification() {
-        mNotificationManager.cancelAsUser(LOG_TAG, mNotificationClientUid, UserHandle.ALL);
+    private void dismissNotification(int notificationClientUid) {
+        mNotificationManager.cancelAsUser(LOG_TAG, notificationClientUid, UserHandle.ALL);
     }
 
     /**
@@ -272,11 +270,11 @@ public class BackgroundUserSoundNotifier {
     @SuppressLint("MissingPermission")
     @VisibleForTesting
     @Nullable
-    AudioFocusInfo getAudioFocusInfoForNotification() {
-        if (mNotificationClientUid >= 0) {
+    AudioFocusInfo getAudioFocusInfoForNotification(int notificationClientUid) {
+        if (notificationClientUid >= 0) {
             List<AudioFocusInfo> stack = mFocusControlAudioPolicy.getFocusStack();
             for (int i = stack.size() - 1; i >= 0; i--) {
-                if (stack.get(i).getClientUid() == mNotificationClientUid) {
+                if (stack.get(i).getClientUid() == notificationClientUid) {
                     return stack.get(i);
                 }
             }
@@ -284,22 +282,24 @@ public class BackgroundUserSoundNotifier {
         return null;
     }
 
-    private PendingIntent createPendingIntent(String intentAction) {
+    private PendingIntent createPendingIntent(String intentAction, int notificationClientUid) {
         final Intent intent = new Intent(intentAction);
-        PendingIntent resultPI =  PendingIntent.getBroadcast(mSystemUserContext, 0, intent,
-                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-        return resultPI;
+        intent.putExtra(EXTRA_NOTIFICATION_CLIENT_UID, notificationClientUid);
+        return PendingIntent.getBroadcast(mSystemUserContext, notificationClientUid, intent,
+                PendingIntent.FLAG_IMMUTABLE);
     }
 
+    @SuppressLint("MissingPermission")
     @VisibleForTesting
-    Notification createNotification(String userName, Context fgContext) {
+    Notification createNotification(String userName, Context fgContext, int notificationClientUid) {
         final String title = fgContext.getString(R.string.bg_user_sound_notification_title_alarm,
                 userName);
         final int icon = R.drawable.ic_audio_alarm;
 
-        PendingIntent mutePI = createPendingIntent(ACTION_MUTE_SOUND);
-        PendingIntent switchPI = createPendingIntent(ACTION_SWITCH_USER);
-        PendingIntent dismissNotificationPI = createPendingIntent(ACTION_DISMISS_NOTIFICATION);
+        PendingIntent mutePI = createPendingIntent(ACTION_MUTE_SOUND, notificationClientUid);
+        PendingIntent switchPI = createPendingIntent(ACTION_SWITCH_USER, notificationClientUid);
+        PendingIntent dismissNotificationPI = createPendingIntent(ACTION_DISMISS_NOTIFICATION,
+                notificationClientUid);
 
         final Notification.Action mute = new Notification.Action.Builder(null,
                 fgContext.getString(R.string.bg_user_sound_notification_button_mute),

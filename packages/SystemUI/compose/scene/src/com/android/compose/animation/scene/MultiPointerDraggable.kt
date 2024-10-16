@@ -29,6 +29,7 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.pointer.AwaitPointerEventScope
 import androidx.compose.ui.input.pointer.PointerEvent
 import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.PointerId
 import androidx.compose.ui.input.pointer.PointerInputChange
 import androidx.compose.ui.input.pointer.PointerInputScope
@@ -184,6 +185,7 @@ internal class MultiPointerDraggableNode(
 
     private var startedPosition: Offset? = null
     private var pointersDown: Int = 0
+    private var isMouseWheel: Boolean = false
 
     internal fun pointersInfo(): PointersInfo {
         return PointersInfo(
@@ -191,6 +193,7 @@ internal class MultiPointerDraggableNode(
             startedPosition = startedPosition,
             // We could have 0 pointers during fling or for other reasons.
             pointersDown = pointersDown.coerceAtLeast(1),
+            isMouseWheel = isMouseWheel,
         )
     }
 
@@ -202,8 +205,15 @@ internal class MultiPointerDraggableNode(
             // [requireAncestorPointersInfoOwner], to our descendants.
             while (currentContext.isActive) {
                 // During the Initial pass, we receive the event after our ancestors.
-                val changes = awaitPointerEvent(PointerEventPass.Initial).changes
+                val pointerEvent = awaitPointerEvent(PointerEventPass.Initial)
+
+                // Ignore cursor has entered the input region.
+                // This will only be sent after the cursor is hovering when in the input region.
+                if (pointerEvent.type == PointerEventType.Enter) continue
+
+                val changes = pointerEvent.changes
                 pointersDown = changes.countDown()
+                isMouseWheel = pointerEvent.type == PointerEventType.Scroll
 
                 when {
                     // There are no more pointers down.
@@ -223,7 +233,8 @@ internal class MultiPointerDraggableNode(
 
                     // The first pointer down, startedPosition was not set.
                     startedPosition == null -> {
-                        val firstPointerDown = changes.single()
+                        // Mouse wheel could start with multiple pointer down
+                        val firstPointerDown = changes.first()
                         velocityPointerId = firstPointerDown.id
                         velocityTracker.resetTracking()
                         velocityTracker.addPointerInputChange(firstPointerDown)
@@ -647,4 +658,8 @@ internal fun interface PointersInfoOwner {
     fun pointersInfo(): PointersInfo
 }
 
-internal data class PointersInfo(val startedPosition: Offset?, val pointersDown: Int)
+internal data class PointersInfo(
+    val startedPosition: Offset?,
+    val pointersDown: Int,
+    val isMouseWheel: Boolean,
+)
