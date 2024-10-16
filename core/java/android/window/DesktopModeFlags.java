@@ -64,7 +64,9 @@ public enum DesktopModeFlags {
     ENABLE_WINDOWING_EDGE_DRAG_RESIZE(Flags::enableWindowingEdgeDragResize, true),
     ENABLE_DESKTOP_WINDOWING_TASKBAR_RUNNING_APPS(
             Flags::enableDesktopWindowingTaskbarRunningApps, true),
+    // TODO: b/369763947 - remove this once ENABLE_DESKTOP_WINDOWING_ENTER_TRANSITIONS is ramped up
     ENABLE_DESKTOP_WINDOWING_TRANSITIONS(Flags::enableDesktopWindowingTransitions, false),
+    ENABLE_DESKTOP_WINDOWING_ENTER_TRANSITIONS(Flags::enableDesktopWindowingTransitions, false),
     ENABLE_DESKTOP_WINDOWING_EXIT_TRANSITIONS(Flags::enableDesktopWindowingExitTransitions, false),
     ENABLE_WINDOWING_TRANSITION_HANDLERS_OBSERVERS(
             Flags::enableWindowingTransitionHandlersObservers, false);
