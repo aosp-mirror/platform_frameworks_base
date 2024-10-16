@@ -39,7 +39,9 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 
@@ -59,9 +61,12 @@ public class CompanionTransportManager {
     @GuardedBy("mTransportsListeners")
     private final RemoteCallbackList<IOnTransportsChangedListener> mTransportsListeners =
             new RemoteCallbackList<>();
+
     /** Message type -> IOnMessageReceivedListener */
+    @GuardedBy("mMessageListeners")
     @NonNull
-    private final SparseArray<IOnMessageReceivedListener> mMessageListeners = new SparseArray<>();
+    private final SparseArray<Set<IOnMessageReceivedListener>> mMessageListeners =
+            new SparseArray<>();
 
     public CompanionTransportManager(Context context, AssociationStore associationStore) {
         mContext = context;
@@ -72,7 +77,12 @@ public class CompanionTransportManager {
      * Add a listener to receive callbacks when a message is received for the message type
      */
     public void addListener(int message, @NonNull IOnMessageReceivedListener listener) {
-        mMessageListeners.put(message, listener);
+        synchronized (mMessageListeners) {
+            if (!mMessageListeners.contains(message)) {
+                mMessageListeners.put(message, new HashSet<IOnMessageReceivedListener>());
+            }
+            mMessageListeners.get(message).add(listener);
+        }
         synchronized (mTransports) {
             for (int i = 0; i < mTransports.size(); i++) {
                 mTransports.valueAt(i).addListener(message, listener);
@@ -113,7 +123,12 @@ public class CompanionTransportManager {
      * Remove the listener to stop receiving calbacks when a message is received for the given type
      */
     public void removeListener(int messageType, IOnMessageReceivedListener listener) {
-        mMessageListeners.remove(messageType);
+        synchronized (mMessageListeners) {
+            if (!mMessageListeners.contains(messageType)) {
+                return;
+            }
+            mMessageListeners.get(messageType).remove(listener);
+        }
     }
 
     /**
@@ -315,8 +330,12 @@ public class CompanionTransportManager {
     }
 
     private void addMessageListenersToTransport(Transport transport) {
-        for (int i = 0; i < mMessageListeners.size(); i++) {
-            transport.addListener(mMessageListeners.keyAt(i), mMessageListeners.valueAt(i));
+        synchronized (mMessageListeners) {
+            for (int i = 0; i < mMessageListeners.size(); i++) {
+                for (IOnMessageReceivedListener listener : mMessageListeners.valueAt(i)) {
+                    transport.addListener(mMessageListeners.keyAt(i), listener);
+                }
+            }
         }
     }
 
