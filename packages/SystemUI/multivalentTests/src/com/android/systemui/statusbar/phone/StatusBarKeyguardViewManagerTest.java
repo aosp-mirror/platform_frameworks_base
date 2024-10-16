@@ -34,7 +34,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -43,9 +42,7 @@ import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
-import android.service.trust.TrustAgentService;
 import android.testing.TestableLooper;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewRootImpl;
@@ -67,7 +64,6 @@ import com.android.keyguard.KeyguardMessageAreaController;
 import com.android.keyguard.KeyguardSecurityModel;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
-import com.android.keyguard.TrustGrantFlags;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.Flags;
 import com.android.systemui.SysuiTestCase;
@@ -580,22 +576,6 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     }
 
     @Test
-    @DisableSceneContainer
-    @DisableFlags(com.android.systemui.Flags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR)
-    public void testShowAlternateBouncer_unlockingWithBiometricAllowed() {
-        // GIVEN will show alternate bouncer
-        when(mPrimaryBouncerInteractor.isFullyShowing()).thenReturn(false);
-        when(mAlternateBouncerInteractor.show()).thenReturn(true);
-
-        // WHEN showGenericBouncer is called
-        mStatusBarKeyguardViewManager.showBouncer(true);
-
-        // THEN alt auth bouncer is shown
-        verify(mAlternateBouncerInteractor).show();
-        verify(mPrimaryBouncerInteractor, never()).show(anyBoolean());
-    }
-
-    @Test
     public void testUpdateResources_delegatesToBouncer() {
         mStatusBarKeyguardViewManager.updateResources();
 
@@ -841,145 +821,6 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     }
 
     @Test
-    @EnableFlags(com.android.systemui.Flags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR)
-    public void handleDispatchTouchEvent_alternateBouncerViewFlagEnabled() {
-        mStatusBarKeyguardViewManager.addCallback(mCallback);
-
-        // GIVEN alternate bouncer view flag enabled & the alternate bouncer is visible
-        when(mAlternateBouncerInteractor.isVisibleState()).thenReturn(true);
-
-        // THEN the touch is not acted upon
-        verify(mCallback, never()).onTouch(any());
-    }
-
-    @Test
-    @EnableFlags(com.android.systemui.Flags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR)
-    public void onInterceptTouch_alternateBouncerViewFlagEnabled() {
-        // GIVEN alternate bouncer view flag enabled & the alternate bouncer is visible
-        when(mAlternateBouncerInteractor.isVisibleState()).thenReturn(true);
-
-        // THEN the touch is not intercepted
-        assertFalse(mStatusBarKeyguardViewManager.shouldInterceptTouchEvent(
-                MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 0f, 0)
-        ));
-    }
-
-    @Test
-    public void handleDispatchTouchEvent_alternateBouncerNotVisible() {
-        mStatusBarKeyguardViewManager.addCallback(mCallback);
-
-        // GIVEN the alternate bouncer is visible
-        when(mAlternateBouncerInteractor.isVisibleState()).thenReturn(false);
-
-        // THEN handleDispatchTouchEvent doesn't use the touches
-        assertFalse(mStatusBarKeyguardViewManager.dispatchTouchEvent(
-                MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 0f, 0)
-        ));
-        assertFalse(mStatusBarKeyguardViewManager.dispatchTouchEvent(
-                MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_UP, 0f, 0f, 0)
-        ));
-        assertFalse(mStatusBarKeyguardViewManager.dispatchTouchEvent(
-                MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_MOVE, 0f, 0f, 0)
-        ));
-
-        // THEN the touch is not acted upon
-        verify(mCallback, never()).onTouch(any());
-    }
-
-    @Test
-    @DisableSceneContainer
-    @DisableFlags(Flags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR)
-    public void handleDispatchTouchEvent_shouldInterceptTouchAndHandleTouch() {
-        mStatusBarKeyguardViewManager.addCallback(mCallback);
-
-        // GIVEN the alternate bouncer is visible
-        when(mAlternateBouncerInteractor.isVisibleState()).thenReturn(true);
-
-        // GIVEN all touches are NOT the udfps overlay
-        when(mUdfpsOverlayInteractor.isTouchWithinUdfpsArea(any())).thenReturn(false);
-
-        // THEN handleDispatchTouchEvent eats/intercepts the touches so motion events aren't sent
-        // to its child views (handleDispatchTouchEvent returns true)
-        assertTrue(mStatusBarKeyguardViewManager.dispatchTouchEvent(
-                MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 0f, 0)
-        ));
-        assertTrue(mStatusBarKeyguardViewManager.dispatchTouchEvent(
-                MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_UP, 0f, 0f, 0)
-        ));
-        assertTrue(mStatusBarKeyguardViewManager.dispatchTouchEvent(
-                MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_MOVE, 0f, 0f, 0)
-        ));
-
-        // THEN the touch is acted upon once for each dispatchTOuchEvent call
-        verify(mCallback, times(3)).onTouch(any());
-    }
-
-    @Test
-    @DisableSceneContainer
-    @DisableFlags(Flags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR)
-    public void handleDispatchTouchEvent_shouldInterceptTouchButNotHandleTouch() {
-        mStatusBarKeyguardViewManager.addCallback(mCallback);
-
-        // GIVEN the alternate bouncer is visible
-        when(mAlternateBouncerInteractor.isVisibleState()).thenReturn(true);
-
-        // GIVEN all touches are within the udfps overlay
-        when(mUdfpsOverlayInteractor.isTouchWithinUdfpsArea(any())).thenReturn(true);
-
-        // THEN handleDispatchTouchEvent eats/intercepts the touches so motion events aren't sent
-        // to its child views (handleDispatchTouchEvent returns true)
-        assertTrue(mStatusBarKeyguardViewManager.dispatchTouchEvent(
-                MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 0f, 0)
-        ));
-        assertTrue(mStatusBarKeyguardViewManager.dispatchTouchEvent(
-                MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_UP, 0f, 0f, 0)
-        ));
-        assertTrue(mStatusBarKeyguardViewManager.dispatchTouchEvent(
-                MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_MOVE, 0f, 0f, 0)
-        ));
-
-        // THEN the touch is NOT acted upon at the moment
-        verify(mCallback, never()).onTouch(any());
-    }
-
-    @Test
-    @DisableSceneContainer
-    public void shouldInterceptTouch_alternateBouncerNotVisible() {
-        // GIVEN the alternate bouncer is not visible
-        when(mAlternateBouncerInteractor.isVisibleState()).thenReturn(false);
-
-        // THEN no motion events are intercepted
-        assertFalse(mStatusBarKeyguardViewManager.shouldInterceptTouchEvent(
-                MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 0f, 0)
-        ));
-        assertFalse(mStatusBarKeyguardViewManager.shouldInterceptTouchEvent(
-                MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_UP, 0f, 0f, 0)
-        ));
-        assertFalse(mStatusBarKeyguardViewManager.shouldInterceptTouchEvent(
-                MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_MOVE, 0f, 0f, 0)
-        ));
-    }
-
-    @Test
-    @DisableSceneContainer
-    @DisableFlags(Flags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR)
-    public void shouldInterceptTouch_alternateBouncerVisible() {
-        // GIVEN the alternate bouncer is visible
-        when(mAlternateBouncerInteractor.isVisibleState()).thenReturn(true);
-
-        // THEN all motion events are intercepted
-        assertTrue(mStatusBarKeyguardViewManager.shouldInterceptTouchEvent(
-                MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 0f, 0)
-        ));
-        assertTrue(mStatusBarKeyguardViewManager.shouldInterceptTouchEvent(
-                MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_UP, 0f, 0f, 0)
-        ));
-        assertTrue(mStatusBarKeyguardViewManager.shouldInterceptTouchEvent(
-                MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_MOVE, 0f, 0f, 0)
-        ));
-    }
-
-    @Test
     public void alternateBouncerToShowPrimaryBouncer_updatesScrimControllerOnce() {
         // GIVEN the alternate bouncer has shown and calls to hide()  will result in successfully
         // hiding it
@@ -993,106 +834,6 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
 
         // THEN the scrim isn't updated from StatusBarKeyguardViewManager
         verify(mCentralSurfaces, never()).updateScrimController();
-    }
-
-    @Test
-    @DisableSceneContainer
-    @DisableFlags(Flags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR)
-    public void alternateBouncerOnTouch_actionDownThenUp_noMinTimeShown_noHideAltBouncer() {
-        reset(mAlternateBouncerInteractor);
-
-        // GIVEN the alternate bouncer has shown for a minimum amount of time
-        when(mAlternateBouncerInteractor.hasAlternateBouncerShownWithMinTime()).thenReturn(false);
-        when(mAlternateBouncerInteractor.isVisibleState()).thenReturn(true);
-        when(mUdfpsOverlayInteractor.isTouchWithinUdfpsArea(any())).thenReturn(false);
-
-        // WHEN ACTION_DOWN and ACTION_UP touch event comes
-        boolean touchHandledDown = mStatusBarKeyguardViewManager.onTouch(
-                MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 0f, 0));
-        when(mAlternateBouncerInteractor.getReceivedDownTouch()).thenReturn(true);
-        boolean touchHandledUp = mStatusBarKeyguardViewManager.onTouch(
-                MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_UP, 0f, 0f, 0));
-
-        // THEN the touches are handled (doesn't let touches through to underlying views)
-        assertTrue(touchHandledDown);
-        assertTrue(touchHandledUp);
-
-        // THEN alternate bouncer does NOT attempt to hide since min showing time wasn't met
-        verify(mAlternateBouncerInteractor, never()).hide();
-    }
-
-    @Test
-    @DisableSceneContainer
-    @DisableFlags(Flags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR)
-    public void alternateBouncerOnTouch_actionDownThenUp_handlesTouch_hidesAltBouncer() {
-        reset(mAlternateBouncerInteractor);
-
-        // GIVEN the alternate bouncer has shown for a minimum amount of time
-        when(mAlternateBouncerInteractor.hasAlternateBouncerShownWithMinTime()).thenReturn(true);
-        when(mAlternateBouncerInteractor.isVisibleState()).thenReturn(true);
-        when(mUdfpsOverlayInteractor.isTouchWithinUdfpsArea(any())).thenReturn(false);
-
-        // WHEN ACTION_DOWN and ACTION_UP touch event comes
-        boolean touchHandledDown = mStatusBarKeyguardViewManager.onTouch(
-                MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 0f, 0));
-        when(mAlternateBouncerInteractor.getReceivedDownTouch()).thenReturn(true);
-        boolean touchHandledUp = mStatusBarKeyguardViewManager.onTouch(
-                MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_UP, 0f, 0f, 0));
-
-        // THEN the touches are handled
-        assertTrue(touchHandledDown);
-        assertTrue(touchHandledUp);
-
-        // THEN alternate bouncer attempts to hide
-        verify(mAlternateBouncerInteractor).hide();
-    }
-
-    @Test
-    @DisableSceneContainer
-    public void alternateBouncerOnTouch_actionUp_doesNotHideAlternateBouncer() {
-        reset(mAlternateBouncerInteractor);
-
-        // GIVEN the alternate bouncer has shown for a minimum amount of time
-        when(mAlternateBouncerInteractor.hasAlternateBouncerShownWithMinTime()).thenReturn(true);
-        when(mAlternateBouncerInteractor.isVisibleState()).thenReturn(true);
-        when(mUdfpsOverlayInteractor.isTouchWithinUdfpsArea(any())).thenReturn(false);
-
-        // WHEN only ACTION_UP touch event comes
-        mStatusBarKeyguardViewManager.onTouch(
-                MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_UP, 0f, 0f, 0));
-
-        // THEN the alternateBouncer doesn't hide
-        verify(mAlternateBouncerInteractor, never()).hide();
-    }
-
-    @Test
-    @DisableSceneContainer
-    @DisableFlags(Flags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR)
-    public void onTrustChanged_hideAlternateBouncerAndClearMessageArea() {
-        // GIVEN keyguard update monitor callback is registered
-        verify(mKeyguardUpdateMonitor).registerCallback(mKeyguardUpdateMonitorCallback.capture());
-
-        reset(mKeyguardUpdateMonitor);
-        reset(mKeyguardMessageAreaController);
-
-        // GIVEN alternate bouncer state = not visible
-        when(mAlternateBouncerInteractor.isVisibleState()).thenReturn(false);
-
-        // WHEN the device is trusted by active unlock
-        mKeyguardUpdateMonitorCallback.getValue().onTrustGrantedForCurrentUser(
-                true,
-                true,
-                new TrustGrantFlags(TrustAgentService.FLAG_GRANT_TRUST_DISMISS_KEYGUARD
-                        | TrustAgentService.FLAG_GRANT_TRUST_TEMPORARY_AND_RENEWABLE),
-                null
-        );
-
-        // THEN the false visibility state is propagated to the keyguardUpdateMonitor
-        verify(mKeyguardUpdateMonitor).setAlternateBouncerShowing(eq(false));
-
-        // THEN message area visibility updated to FALSE with empty message
-        verify(mKeyguardMessageAreaController).setIsVisible(eq(false));
-        verify(mKeyguardMessageAreaController).setMessage(eq(""));
     }
 
     @Test

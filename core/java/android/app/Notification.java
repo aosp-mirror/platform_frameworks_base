@@ -11296,7 +11296,11 @@ public class Notification implements Parcelable
          * @see Segment
          */
         public @NonNull ProgressStyle setProgressSegments(@NonNull List<Segment> progressSegments) {
-            mProgressSegments = new ArrayList<>(progressSegments.size());
+            if (mProgressSegments == null) {
+                mProgressSegments = new ArrayList<>();
+            }
+            mProgressSegments.clear();
+            mProgressSegments.addAll(progressSegments);
             return this;
         }
 

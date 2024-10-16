@@ -31,7 +31,7 @@ import android.view.RemoteAnimationAdapter
 import android.view.RemoteAnimationTarget
 import android.view.WindowManager
 import android.view.WindowManagerGlobal
-import com.android.app.tracing.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.internal.infra.ServiceConnector
 import com.android.systemui.Flags
 import com.android.systemui.dagger.SysUISingleton

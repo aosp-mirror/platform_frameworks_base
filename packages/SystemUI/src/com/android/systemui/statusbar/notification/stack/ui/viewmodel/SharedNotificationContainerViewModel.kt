@@ -20,6 +20,7 @@
 package com.android.systemui.statusbar.notification.stack.ui.viewmodel
 
 import androidx.annotation.VisibleForTesting
+import com.android.app.tracing.coroutines.flow.flowName
 import com.android.systemui.common.shared.model.NotificationContainerBounds
 import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
 import com.android.systemui.dagger.SysUISingleton
@@ -158,6 +159,7 @@ constructor(
             ) { shadeExpansion, qsExpansion ->
                 shadeExpansion || qsExpansion
             }
+            .flowName("isAnyExpanded")
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.Eagerly,
@@ -175,6 +177,7 @@ constructor(
                 isAnyExpanded ->
                 isShadeLocked && isAnyExpanded
             }
+            .flowName("isShadeLocked")
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.Eagerly,
@@ -227,6 +230,7 @@ constructor(
                 ),
                 keyguardTransitionInteractor.transitionValue(LOCKSCREEN).map { it > 0f },
             )
+            .flowName("isOnLockscreen")
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.Eagerly,
@@ -239,6 +243,7 @@ constructor(
         combine(isOnLockscreen, isAnyExpanded) { isKeyguard, isAnyExpanded ->
                 isKeyguard && !isAnyExpanded
             }
+            .flowName("isOnLockscreenWithoutShade")
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.Eagerly,
@@ -274,6 +279,7 @@ constructor(
         combine(isOnGlanceableHub, isAnyExpanded) { isGlanceableHub, isAnyExpanded ->
                 isGlanceableHub && !isAnyExpanded
             }
+            .flowName("isOnGlanceableHubWithoutShade")
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.Eagerly,
@@ -288,6 +294,7 @@ constructor(
                 isAnyExpanded ->
                 isDreaming && !isAnyExpanded
             }
+            .flowName("isDreamingWithoutShade")
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.Eagerly,
@@ -345,6 +352,7 @@ constructor(
                     }
                 }
             }
+            .flowName("shadeCollapseFadeIn")
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.WhileSubscribed(),
@@ -382,6 +390,7 @@ constructor(
                     bounds.copy(top = top, isAnimated = animate)
                 }
             }
+            .flowName("bounds")
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.Lazily,
@@ -495,6 +504,7 @@ constructor(
         // flatMapLatest below, the last value gets emitted, to avoid the randomness of `merge`.
         val alphaForTransitionsAndShade =
             merge(alphaForTransitions(viewState), alphaForShadeAndQsExpansion)
+                .flowName("alphaForTransitionsAndShade")
                 .stateIn(
                     // Use view-level scope instead of ApplicationScope, to prevent collection that
                     // never stops

@@ -1481,3 +1481,9 @@ flag {
    bug: "370863642"
 }
 
+flag {
+  name: "notes_role_qs_tile"
+  namespace: "systemui"
+  description: "Enables notes role qs tile which opens default notes role app in app bubbles"
+  bug: "357863750"
+}

@@ -19,7 +19,7 @@ package com.android.systemui.communal.util
 import android.content.Context
 import android.os.Bundle
 import android.util.SizeF
-import com.android.app.tracing.coroutines.withContext
+import com.android.app.tracing.coroutines.withContextTraced as withContext
 import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.communal.widgets.AppWidgetHostListenerDelegate
 import com.android.systemui.communal.widgets.CommunalAppWidgetHost

@@ -17,7 +17,6 @@
 package com.android.systemui.bouncer.ui.viewmodel
 
 import android.annotation.StringRes
-import com.android.app.tracing.coroutines.flow.collectLatest
 import com.android.systemui.authentication.domain.interactor.AuthenticationResult
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
@@ -28,6 +27,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.receiveAsFlow
 
 sealed class AuthMethodBouncerViewModel(

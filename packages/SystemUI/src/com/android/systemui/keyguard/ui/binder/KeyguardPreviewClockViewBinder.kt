@@ -33,7 +33,7 @@ import androidx.constraintlayout.widget.ConstraintSet.TOP
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
-import com.android.app.tracing.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.internal.policy.SystemBarUtils
 import com.android.systemui.customization.R as customR
 import com.android.systemui.keyguard.shared.model.ClockSizeSetting
@@ -50,6 +50,8 @@ import kotlin.reflect.KSuspendFunction1
 
 /** Binder for the small clock view, large clock view. */
 object KeyguardPreviewClockViewBinder {
+    val lockId = View.generateViewId()
+
     @JvmStatic
     fun bind(
         largeClockHostView: View,
@@ -144,12 +146,12 @@ object KeyguardPreviewClockViewBinder {
                 ConstraintSet.END,
             )
 
-            // In preview, we'll show UDFPS icon for UDFPS devices
-            // and nothing for non-UDFPS devices,
-            // but we need position of device entry icon to constrain clock
-            if (getConstraint(R.id.lock_icon_view) != null) {
-                connect(customR.id.lockscreen_clock_view_large, BOTTOM, R.id.lock_icon_view, TOP)
-            } else {
+
+            // In preview, we'll show UDFPS icon for UDFPS devices and nothing for non-UDFPS
+            // devices, but we need position of device entry icon to constrain clock
+            if (getConstraint(lockId) != null) {
+                connect(customR.id.lockscreen_clock_view_large, BOTTOM, lockId, TOP)
+           } else {
                 // Copied calculation codes from applyConstraints in DefaultDeviceEntrySection
                 val bottomPaddingPx =
                     context.resources.getDimensionPixelSize(R.dimen.lock_icon_margin_bottom)

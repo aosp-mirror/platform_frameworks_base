@@ -34,30 +34,31 @@ class PriorityNestedScrollConnectionTest {
     private var canStartPreScroll = false
     private var canStartPostScroll = false
     private var canStartPostFling = false
-    private var canContinueScroll = false
+    private var canStopOnPreFling = true
     private var isStarted = false
     private var lastScroll: Float? = null
-    private var returnOnScroll = 0f
+    private var consumeScroll = true
     private var lastStop: Float? = null
-    private var returnOnStop = 0f
+    private var isCancelled: Boolean = false
+    private var consumeStop = true
 
     private val scrollConnection =
         PriorityNestedScrollConnection(
             orientation = Orientation.Vertical,
-            canStartPreScroll = { _, _ -> canStartPreScroll },
-            canStartPostScroll = { _, _ -> canStartPostScroll },
+            canStartPreScroll = { _, _, _ -> canStartPreScroll },
+            canStartPostScroll = { _, _, _ -> canStartPostScroll },
             canStartPostFling = { canStartPostFling },
-            canContinueScroll = { canContinueScroll },
-            canScrollOnFling = false,
+            canStopOnPreFling = { canStopOnPreFling },
             onStart = { isStarted = true },
-            onScroll = {
-                lastScroll = it
-                returnOnScroll
+            onScroll = { offsetAvailable, _ ->
+                lastScroll = offsetAvailable
+                if (consumeScroll) offsetAvailable else 0f
             },
             onStop = {
                 lastStop = it
-                { returnOnStop }
+                if (consumeStop) it else 0f
             },
+            onCancel = { isCancelled = true },
         )
 
     @Test
@@ -85,7 +86,7 @@ class PriorityNestedScrollConnectionTest {
         canStartPostScroll = true
         scrollConnection.onPostScroll(
             consumed = Offset.Zero,
-            available = Offset.Zero,
+            available = Offset(1f, 1f),
             source = UserInput,
         )
     }
@@ -136,45 +137,55 @@ class PriorityNestedScrollConnectionTest {
     @Test
     fun step2_onPriorityMode_shouldContinueIfAllowed() {
         startPriorityModePostScroll()
-        canContinueScroll = true
 
-        scrollConnection.onPreScroll(available = Offset(1f, 1f), source = UserInput)
+        val scroll1 = scrollConnection.onPreScroll(available = Offset(0f, 1f), source = UserInput)
         assertThat(lastScroll).isEqualTo(1f)
+        assertThat(scroll1.y).isEqualTo(1f)
 
-        canContinueScroll = false
-        scrollConnection.onPreScroll(available = Offset(2f, 2f), source = UserInput)
-        assertThat(lastScroll).isNotEqualTo(2f)
-        assertThat(lastScroll).isEqualTo(1f)
+        consumeScroll = false
+        val scroll2 = scrollConnection.onPreScroll(available = Offset(0f, 2f), source = UserInput)
+        assertThat(lastScroll).isEqualTo(2f)
+        assertThat(scroll2.y).isEqualTo(0f)
     }
 
     @Test
-    fun step3a_onPriorityMode_shouldStopIfCannotContinue() {
+    fun step3a_onPriorityMode_shouldCancelIfCannotContinue() {
         startPriorityModePostScroll()
-        canContinueScroll = false
+        consumeScroll = false
 
-        scrollConnection.onPreScroll(available = Offset.Zero, source = UserInput)
+        scrollConnection.onPreScroll(available = Offset(0f, 1f), source = UserInput)
 
-        assertThat(lastStop).isNotNull()
+        assertThat(isCancelled).isTrue()
     }
 
     @Test
     fun step3b_onPriorityMode_shouldStopOnFling() = runTest {
         startPriorityModePostScroll()
-        canContinueScroll = true
 
         scrollConnection.onPreFling(available = Velocity.Zero)
 
-        assertThat(lastStop).isNotNull()
+        assertThat(lastStop).isEqualTo(0f)
     }
 
     @Test
-    fun step3c_onPriorityMode_shouldStopOnReset() {
+    fun ifCannotStopOnPreFling_shouldStopOnPostFling() = runTest {
         startPriorityModePostScroll()
-        canContinueScroll = true
+        canStopOnPreFling = false
+
+        scrollConnection.onPreFling(available = Velocity.Zero)
+        assertThat(lastStop).isNull()
+
+        scrollConnection.onPostFling(consumed = Velocity.Zero, available = Velocity.Zero)
+        assertThat(lastStop).isEqualTo(0f)
+    }
+
+    @Test
+    fun step3c_onPriorityMode_shouldCancelOnReset() {
+        startPriorityModePostScroll()
 
         scrollConnection.reset()
 
-        assertThat(lastStop).isNotNull()
+        assertThat(isCancelled).isTrue()
     }
 
     @Test

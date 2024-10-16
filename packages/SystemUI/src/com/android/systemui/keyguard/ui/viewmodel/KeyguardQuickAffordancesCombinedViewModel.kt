@@ -19,6 +19,7 @@ package com.android.systemui.keyguard.ui.viewmodel
 
 import androidx.annotation.VisibleForTesting
 import com.android.app.tracing.FlowTracing.traceEmissionCount
+import com.android.app.tracing.coroutines.flow.flowName
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardQuickAffordanceInteractor
@@ -141,6 +142,7 @@ constructor(
                 fadeInAlpha,
                 fadeOutAlpha,
             )
+            .flowName("transitionAlpha")
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.WhileSubscribed(),

@@ -23,8 +23,8 @@ import android.service.quicksettings.Tile.STATE_ACTIVE
 import android.service.quicksettings.Tile.STATE_INACTIVE
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Arrangement.spacedBy
 import androidx.compose.foundation.layout.Box
@@ -44,6 +44,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -61,11 +62,13 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.Expandable
+import com.android.compose.animation.bounceable
 import com.android.compose.modifiers.thenIf
 import com.android.systemui.animation.Expandable
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.plugins.qs.QSTile
+import com.android.systemui.qs.panels.ui.compose.BounceableInfo
 import com.android.systemui.qs.panels.ui.compose.infinitegrid.CommonTileDefaults.InactiveCornerRadius
 import com.android.systemui.qs.panels.ui.compose.infinitegrid.CommonTileDefaults.longPressLabel
 import com.android.systemui.qs.panels.ui.viewmodel.TileUiState
@@ -74,6 +77,8 @@ import com.android.systemui.qs.panels.ui.viewmodel.toUiState
 import com.android.systemui.qs.tileimpl.QSTileImpl
 import com.android.systemui.res.R
 import java.util.function.Supplier
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 private const val TEST_TAG_SMALL = "qs_tile_small"
 private const val TEST_TAG_LARGE = "qs_tile_large"
@@ -102,9 +107,12 @@ fun Tile(
     tile: TileViewModel,
     iconOnly: Boolean,
     squishiness: () -> Float,
+    coroutineScope: CoroutineScope,
+    bounceableInfo: BounceableInfo,
     modifier: Modifier = Modifier,
 ) {
     val state by tile.state.collectAsStateWithLifecycle(tile.currentState)
+    val currentBounceableInfo by rememberUpdatedState(bounceableInfo)
     val resources = resources()
     val uiState = remember(state, resources) { state.toUiState(resources) }
     val colors = TileDefaults.getColorForState(uiState)
@@ -112,7 +120,7 @@ fun Tile(
     // TODO(b/361789146): Draw the shapes instead of clipping
     val tileShape = TileDefaults.animateTileShape(uiState.state)
 
-    TileContainer(
+    TileExpandable(
         color =
             if (iconOnly || !uiState.handlesSecondaryClick) {
                 colors.iconBackground
@@ -120,90 +128,98 @@ fun Tile(
                 colors.background
             },
         shape = tileShape,
-        iconOnly = iconOnly,
-        onClick = tile::onClick,
-        onLongClick = tile::onLongClick,
-        uiState = uiState,
         squishiness = squishiness,
-        modifier = modifier,
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .bounceable(
+                    bounceable = currentBounceableInfo.bounceable,
+                    previousBounceable = currentBounceableInfo.previousTile,
+                    nextBounceable = currentBounceableInfo.nextTile,
+                    orientation = Orientation.Horizontal,
+                    bounceEnd = currentBounceableInfo.bounceEnd,
+                ),
     ) { expandable ->
-        val icon = getTileIcon(icon = uiState.icon)
-        if (iconOnly) {
-            SmallTileContent(
-                icon = icon,
-                color = colors.icon,
-                modifier = Modifier.align(Alignment.Center),
-            )
-        } else {
-            val iconShape = TileDefaults.animateIconShape(uiState.state)
-            LargeTileContent(
-                label = uiState.label,
-                secondaryLabel = uiState.secondaryLabel,
-                icon = icon,
-                colors = colors,
-                iconShape = iconShape,
-                toggleClickSupported = state.handlesSecondaryClick,
-                onClick = {
-                    if (state.handlesSecondaryClick) {
-                        tile.onSecondaryClick()
-                    }
-                },
-                onLongClick = { tile.onLongClick(expandable) },
-                accessibilityUiState = uiState.accessibilityUiState,
-                squishiness = squishiness,
-            )
+        TileContainer(
+            onClick = {
+                tile.onClick(expandable)
+                if (uiState.accessibilityUiState.toggleableState != null) {
+                    coroutineScope.launch { currentBounceableInfo.bounceable.animateBounce() }
+                }
+            },
+            onLongClick = { tile.onLongClick(expandable) },
+            uiState = uiState,
+            iconOnly = iconOnly,
+        ) {
+            val icon = getTileIcon(icon = uiState.icon)
+            if (iconOnly) {
+                SmallTileContent(
+                    icon = icon,
+                    color = colors.icon,
+                    modifier = Modifier.align(Alignment.Center),
+                )
+            } else {
+                val iconShape = TileDefaults.animateIconShape(uiState.state)
+                LargeTileContent(
+                    label = uiState.label,
+                    secondaryLabel = uiState.secondaryLabel,
+                    icon = icon,
+                    colors = colors,
+                    iconShape = iconShape,
+                    toggleClickSupported = state.handlesSecondaryClick,
+                    onClick = {
+                        if (state.handlesSecondaryClick) {
+                            tile.onSecondaryClick()
+                        }
+                    },
+                    onLongClick = { tile.onLongClick(expandable) },
+                    accessibilityUiState = uiState.accessibilityUiState,
+                    squishiness = squishiness,
+                )
+            }
         }
     }
 }
 
 @Composable
-private fun TileContainer(
+private fun TileExpandable(
     color: Color,
     shape: Shape,
-    iconOnly: Boolean,
-    uiState: TileUiState,
     squishiness: () -> Float,
     modifier: Modifier = Modifier,
-    onClick: (Expandable) -> Unit = {},
-    onLongClick: (Expandable) -> Unit = {},
-    content: @Composable BoxScope.(Expandable) -> Unit,
+    content: @Composable (Expandable) -> Unit,
 ) {
     Expandable(
         color = color,
         shape = shape,
         modifier = modifier.clip(shape).verticalSquish(squishiness),
     ) {
-        val longPressLabel = longPressLabel()
-        Box(
-            modifier =
-                Modifier.height(CommonTileDefaults.TileHeight)
-                    .fillMaxWidth()
-                    .combinedClickable(
-                        onClick = { onClick(it) },
-                        onLongClick = { onLongClick(it) },
-                        onClickLabel = uiState.accessibilityUiState.clickLabel,
-                        onLongClickLabel = longPressLabel,
-                    )
-                    .semantics {
-                        role = uiState.accessibilityUiState.accessibilityRole
-                        if (uiState.accessibilityUiState.accessibilityRole == Role.Switch) {
-                            uiState.accessibilityUiState.toggleableState?.let {
-                                toggleableState = it
-                            }
-                        }
-                        stateDescription = uiState.accessibilityUiState.stateDescription
-                    }
-                    .sysuiResTag(if (iconOnly) TEST_TAG_SMALL else TEST_TAG_LARGE)
-                    .thenIf(iconOnly) {
-                        Modifier.semantics {
-                            contentDescription = uiState.accessibilityUiState.contentDescription
-                        }
-                    }
-                    .tilePadding()
-        ) {
-            content(it)
-        }
+        content(it)
     }
+}
+
+@Composable
+fun TileContainer(
+    onClick: () -> Unit,
+    onLongClick: () -> Unit,
+    uiState: TileUiState,
+    iconOnly: Boolean,
+    content: @Composable BoxScope.() -> Unit,
+) {
+    Box(
+        modifier =
+            Modifier.height(CommonTileDefaults.TileHeight)
+                .fillMaxWidth()
+                .tileCombinedClickable(
+                    onClick = onClick,
+                    onLongClick = onLongClick,
+                    uiState = uiState,
+                    iconOnly = iconOnly,
+                )
+                .sysuiResTag(if (iconOnly) TEST_TAG_SMALL else TEST_TAG_LARGE)
+                .tilePadding(),
+        content = content,
+    )
 }
 
 @Composable
@@ -222,12 +238,36 @@ fun tileHorizontalArrangement(): Arrangement.Horizontal {
     return spacedBy(space = CommonTileDefaults.TileArrangementPadding, alignment = Alignment.Start)
 }
 
-fun Modifier.tileMarquee(): Modifier {
-    return basicMarquee(iterations = 1, initialDelayMillis = 200)
-}
-
 fun Modifier.tilePadding(): Modifier {
     return padding(CommonTileDefaults.TilePadding)
+}
+
+@Composable
+fun Modifier.tileCombinedClickable(
+    onClick: () -> Unit,
+    onLongClick: () -> Unit,
+    uiState: TileUiState,
+    iconOnly: Boolean,
+): Modifier {
+    val longPressLabel = longPressLabel()
+    return combinedClickable(
+            onClick = onClick,
+            onLongClick = onLongClick,
+            onClickLabel = uiState.accessibilityUiState.clickLabel,
+            onLongClickLabel = longPressLabel,
+        )
+        .semantics {
+            role = uiState.accessibilityUiState.accessibilityRole
+            if (uiState.accessibilityUiState.accessibilityRole == Role.Switch) {
+                uiState.accessibilityUiState.toggleableState?.let { toggleableState = it }
+            }
+            stateDescription = uiState.accessibilityUiState.stateDescription
+        }
+        .thenIf(iconOnly) {
+            Modifier.semantics {
+                contentDescription = uiState.accessibilityUiState.contentDescription
+            }
+        }
 }
 
 data class TileColors(

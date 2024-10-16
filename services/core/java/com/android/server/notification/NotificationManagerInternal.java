@@ -44,7 +44,7 @@ public interface NotificationManagerInternal {
 
     void onConversationRemoved(String pkg, int uid, Set<String> shortcuts);
 
-    /** Get the number of notification channels for a given package */
+    /** Get the number of app created notification channels for a given package */
     int getNumNotificationChannelsForPackage(String pkg, int uid, boolean includeDeleted);
 
     /** Does the specified package/uid have permission to post notifications? */
