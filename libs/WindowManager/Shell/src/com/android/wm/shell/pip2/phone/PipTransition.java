@@ -36,7 +36,6 @@ import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.PictureInPictureParams;
 import android.content.Context;
-import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Bundle;
@@ -315,6 +314,14 @@ public class PipTransition extends PipTransitionController implements
         if (pipChange == null) {
             return false;
         }
+
+        // We expect the PiP activity as a separate change in a config-at-end transition.
+        TransitionInfo.Change pipActivityChange = getDeferConfigActivityChange(info,
+                pipChange.getTaskInfo().getToken());
+        if (pipActivityChange == null) {
+            return false;
+        }
+
         SurfaceControl pipLeash = pipChange.getLeash();
         Preconditions.checkNotNull(pipLeash, "Leash is null for swipe-up transition.");
 
@@ -332,27 +339,27 @@ public class PipTransition extends PipTransitionController implements
                             (destinationBounds.width() - overlaySize) / 2f,
                             (destinationBounds.height() - overlaySize) / 2f);
         }
-        startTransaction.merge(finishTransaction);
 
         final int startRotation = pipChange.getStartRotation();
         final int endRotation = mPipDisplayLayoutState.getRotation();
-        if (endRotation != startRotation) {
-            boolean isClockwise = (endRotation - startRotation) == -ROTATION_270;
-
-            // Display bounds were already updated to represent the final orientation,
-            // so we just need to readjust the origin, and perform rotation about (0, 0).
-            Rect displayBounds = mPipDisplayLayoutState.getDisplayBounds();
-            int originTranslateX = isClockwise ? 0 : -displayBounds.width();
-            int originTranslateY = isClockwise ? -displayBounds.height() : 0;
-
-            Matrix transformTensor = new Matrix();
-            final float[] matrixTmp = new float[9];
-            transformTensor.setTranslate(originTranslateX + destinationBounds.left,
-                    originTranslateY + destinationBounds.top);
-            final float degrees = (endRotation - startRotation) * 90f;
-            transformTensor.postRotate(degrees);
-            startTransaction.setMatrix(pipLeash, transformTensor, matrixTmp);
+        final int delta = endRotation == ROTATION_UNDEFINED ? ROTATION_0
+                : startRotation - endRotation;
+        if (delta != ROTATION_0) {
+            mPipTransitionState.setInFixedRotation(true);
+            handleBoundsTypeFixedRotation(pipChange, pipActivityChange, endRotation);
         }
+
+        Rect sourceRectHint = null;
+        if (pipChange.getTaskInfo() != null
+                && pipChange.getTaskInfo().pictureInPictureParams != null) {
+            sourceRectHint = pipChange.getTaskInfo().pictureInPictureParams.getSourceRectHint();
+        }
+
+        startTransaction.merge(finishTransaction);
+        PipEnterAnimator animator = new PipEnterAnimator(mContext, pipLeash,
+                startTransaction, finishTransaction, destinationBounds, sourceRectHint, delta);
+        animator.setEnterStartState(pipChange, pipActivityChange);
+        animator.onEnterAnimationUpdate(1.0f /* fraction */, startTransaction);
         startTransaction.apply();
         finishInner();
         return true;
@@ -398,7 +405,6 @@ public class PipTransition extends PipTransitionController implements
         }
 
         Rect endBounds = pipChange.getEndAbsBounds();
-        Rect activityEndBounds = pipActivityChange.getEndAbsBounds();
         SurfaceControl pipLeash = mPipTransitionState.mPinnedTaskLeash;
         Preconditions.checkNotNull(pipLeash, "Leash is null for bounds transition.");
 
@@ -429,7 +435,8 @@ public class PipTransition extends PipTransitionController implements
 
         if (delta != ROTATION_0) {
             mPipTransitionState.setInFixedRotation(true);
-            handleBoundsTypeFixedRotation(pipChange, pipActivityChange, fixedRotationChange);
+            handleBoundsTypeFixedRotation(pipChange, pipActivityChange,
+                    fixedRotationChange.getEndFixedRotation());
         }
 
         PipEnterAnimator animator = new PipEnterAnimator(mContext, pipLeash,
@@ -442,12 +449,10 @@ public class PipTransition extends PipTransitionController implements
     }
 
     private void handleBoundsTypeFixedRotation(TransitionInfo.Change pipTaskChange,
-            TransitionInfo.Change pipActivityChange,
-            TransitionInfo.Change fixedRotationChange) {
+            TransitionInfo.Change pipActivityChange, int endRotation) {
         final Rect endBounds = pipTaskChange.getEndAbsBounds();
         final Rect endActivityBounds = pipActivityChange.getEndAbsBounds();
         int startRotation = pipTaskChange.getStartRotation();
-        int endRotation = fixedRotationChange.getEndFixedRotation();
 
         // Cache the task to activity offset to potentially restore later.
         Point activityEndOffset = new Point(endActivityBounds.left - endBounds.left,
