@@ -8,7 +8,7 @@ package {
 
     // OWNER: g/ravenwood
     // Bug component: 25698
-    default_team: "trendy_team_framework_backstage_power",
+    default_team: "trendy_team_ravenwood",
 }
 
 filegroup {
@@ -372,6 +372,7 @@ java_library {
 android_ravenwood_libgroup {
     name: "ravenwood-runtime",
     data: [
+        ":system-build.prop",
         ":framework-res",
         ":ravenwood-empty-res",
         ":framework-platform-compat-config",

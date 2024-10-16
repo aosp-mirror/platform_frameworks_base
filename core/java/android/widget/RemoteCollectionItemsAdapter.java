@@ -40,13 +40,15 @@ class RemoteCollectionItemsAdapter extends BaseAdapter {
     private RemoteCollectionItems mItems;
     private InteractionHandler mInteractionHandler;
     private ColorResources mColorResources;
+    private boolean mOnLightBackground;
 
     private SparseIntArray mLayoutIdToViewType;
 
     RemoteCollectionItemsAdapter(
             @NonNull RemoteCollectionItems items,
             @NonNull InteractionHandler interactionHandler,
-            @NonNull ColorResources colorResources) {
+            @NonNull ColorResources colorResources,
+            boolean onLightBackground) {
         // View type count can never increase after an adapter has been set on a ListView.
         // Additionally, decreasing it could inhibit view recycling if the count were to back and
         // forth between 3-2-3-2 for example. Therefore, the view type count, should be fixed for
@@ -56,6 +58,7 @@ class RemoteCollectionItemsAdapter extends BaseAdapter {
         mItems = items;
         mInteractionHandler = interactionHandler;
         mColorResources = colorResources;
+        mOnLightBackground = onLightBackground;
 
         initLayoutIdToViewType();
     }
@@ -68,7 +71,8 @@ class RemoteCollectionItemsAdapter extends BaseAdapter {
     void setData(
             @NonNull RemoteCollectionItems items,
             @NonNull InteractionHandler interactionHandler,
-            @NonNull ColorResources colorResources) {
+            @NonNull ColorResources colorResources,
+            boolean onLightBackground) {
         if (mViewTypeCount < items.getViewTypeCount()) {
             throw new IllegalArgumentException(
                     "RemoteCollectionItemsAdapter cannot increase view type count after creation");
@@ -77,6 +81,7 @@ class RemoteCollectionItemsAdapter extends BaseAdapter {
         mItems = items;
         mInteractionHandler = interactionHandler;
         mColorResources = colorResources;
+        mOnLightBackground = onLightBackground;
 
         initLayoutIdToViewType();
 
@@ -184,6 +189,7 @@ class RemoteCollectionItemsAdapter extends BaseAdapter {
                 : new AppWidgetHostView.AdapterChildHostView(parent.getContext());
         newView.setInteractionHandler(mInteractionHandler);
         newView.setColorResourcesNoReapply(mColorResources);
+        newView.setOnLightBackground(mOnLightBackground);
         newView.updateAppWidget(item);
         return newView;
     }

@@ -30,6 +30,7 @@ import com.android.systemui.animation.AnimatorTestRule
 import com.android.systemui.statusbar.phone.StatusBarContentInsetsChangedListener
 import com.android.systemui.statusbar.phone.StatusBarContentInsetsProvider
 import com.android.systemui.statusbar.window.StatusBarWindowController
+import com.android.systemui.statusbar.window.StatusBarWindowControllerStore
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.capture
@@ -53,6 +54,7 @@ class SystemEventChipAnimationControllerTest : SysuiTestCase() {
 
     @get:Rule val animatorTestRule = AnimatorTestRule(this)
     @Mock private lateinit var sbWindowController: StatusBarWindowController
+    @Mock private lateinit var sbWindowControllerStore: StatusBarWindowControllerStore
     @Mock private lateinit var insetsProvider: StatusBarContentInsetsProvider
 
     private var testView = TestView(mContext)
@@ -61,7 +63,7 @@ class SystemEventChipAnimationControllerTest : SysuiTestCase() {
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
-
+        whenever(sbWindowControllerStore.defaultDisplay).thenReturn(sbWindowController)
         // StatusBarWindowController is mocked. The addViewToWindow function needs to be mocked to
         // ensure that the chip view is added to a parent view
         whenever(sbWindowController.addViewToWindow(any(), any())).then {
@@ -93,8 +95,8 @@ class SystemEventChipAnimationControllerTest : SysuiTestCase() {
         controller =
             SystemEventChipAnimationController(
                 context = mContext,
-                statusBarWindowController = sbWindowController,
-                contentInsetsProvider = insetsProvider
+                statusBarWindowControllerStore = sbWindowControllerStore,
+                contentInsetsProvider = insetsProvider,
             )
     }
 

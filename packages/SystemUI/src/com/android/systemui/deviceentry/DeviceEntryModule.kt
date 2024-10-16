@@ -17,25 +17,17 @@
 package com.android.systemui.deviceentry
 
 import com.android.keyguard.EmptyLockIconViewController
-import com.android.keyguard.LegacyLockIconViewController
 import com.android.keyguard.LockIconViewController
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.deviceentry.data.repository.DeviceEntryRepositoryModule
 import com.android.systemui.deviceentry.data.repository.FaceWakeUpTriggersConfigModule
-import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
 import dagger.Lazy
 import dagger.Module
 import dagger.Provides
 import dagger.multibindings.Multibinds
 
-@Module(
-    includes =
-        [
-            DeviceEntryRepositoryModule::class,
-            FaceWakeUpTriggersConfigModule::class,
-        ],
-)
+@Module(includes = [DeviceEntryRepositoryModule::class, FaceWakeUpTriggersConfigModule::class])
 abstract class DeviceEntryModule {
     /**
      * A set of DeviceEntryIconTransitions. Ensures that this can be injected even if it's empty.
@@ -46,14 +38,9 @@ abstract class DeviceEntryModule {
         @Provides
         @SysUISingleton
         fun provideLockIconViewController(
-            legacyLockIconViewController: Lazy<LegacyLockIconViewController>,
-            emptyLockIconViewController: Lazy<EmptyLockIconViewController>,
+            emptyLockIconViewController: Lazy<EmptyLockIconViewController>
         ): LockIconViewController {
-            return if (DeviceEntryUdfpsRefactor.isEnabled) {
-                emptyLockIconViewController.get()
-            } else {
-                legacyLockIconViewController.get()
-            }
+            return emptyLockIconViewController.get()
         }
     }
 }

@@ -89,6 +89,7 @@ import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -893,7 +894,8 @@ public final class DexOptHelper {
 
         @Override
         public void onApexStaged(@NonNull ApexStagedEvent event) {
-            mArtManager.onApexStaged(event.stagedApexModuleNames);
+            mArtManager.onApexStaged(Arrays.stream(event.stagedApexInfos)
+                    .map(info -> info.moduleName).toArray(String[]::new));
         }
     }
 }

@@ -378,11 +378,12 @@ public class DesktopModeVisualIndicator {
 
         private static VisualIndicatorAnimator fadeBoundsIn(
                 @NonNull View view, IndicatorType type, @NonNull DisplayLayout displayLayout) {
-            final Rect startBounds = getIndicatorBounds(displayLayout, type);
+            final Rect endBounds = getIndicatorBounds(displayLayout, type);
+            final Rect startBounds = getMinBounds(endBounds);
             view.getBackground().setBounds(startBounds);
 
             final VisualIndicatorAnimator animator = new VisualIndicatorAnimator(
-                    view, startBounds, getMaxBounds(startBounds));
+                    view, startBounds, endBounds);
             animator.setInterpolator(new DecelerateInterpolator());
             setupIndicatorAnimation(animator, AlphaAnimType.ALPHA_FADE_IN_ANIM);
             return animator;
@@ -390,8 +391,8 @@ public class DesktopModeVisualIndicator {
 
         private static VisualIndicatorAnimator fadeBoundsOut(
                 @NonNull View view, IndicatorType type, @NonNull DisplayLayout displayLayout) {
-            final Rect endBounds = getIndicatorBounds(displayLayout, type);
-            final Rect startBounds = getMaxBounds(endBounds);
+            final Rect startBounds = getIndicatorBounds(displayLayout, type);
+            final Rect endBounds = getMinBounds(startBounds);
             view.getBackground().setBounds(startBounds);
 
             final VisualIndicatorAnimator animator = new VisualIndicatorAnimator(
@@ -422,28 +423,35 @@ public class DesktopModeVisualIndicator {
             return animator;
         }
 
+        /** Calculates the bounds the indicator should have when fully faded in. */
         private static Rect getIndicatorBounds(DisplayLayout layout, IndicatorType type) {
-            final int padding = layout.stableInsets().top;
+            final Rect desktopStableBounds = new Rect();
+            layout.getStableBounds(desktopStableBounds);
+            final int padding = desktopStableBounds.top;
             switch (type) {
                 case TO_FULLSCREEN_INDICATOR:
-                    return new Rect(padding, padding,
-                            layout.width() - padding,
-                            layout.height() - padding);
+                    desktopStableBounds.top += padding;
+                    desktopStableBounds.bottom -= padding;
+                    desktopStableBounds.left += padding;
+                    desktopStableBounds.right -= padding;
+                    return desktopStableBounds;
                 case TO_DESKTOP_INDICATOR:
                     final float adjustmentPercentage = 1f
                             - DesktopTasksController.DESKTOP_MODE_INITIAL_BOUNDS_SCALE;
-                    return new Rect((int) (adjustmentPercentage * layout.width() / 2),
-                            (int) (adjustmentPercentage * layout.height() / 2),
-                            (int) (layout.width() - (adjustmentPercentage * layout.width() / 2)),
-                            (int) (layout.height() - (adjustmentPercentage * layout.height() / 2)));
+                    return new Rect((int) (adjustmentPercentage * desktopStableBounds.width() / 2),
+                            (int) (adjustmentPercentage * desktopStableBounds.height() / 2),
+                            (int) (desktopStableBounds.width()
+                                    - (adjustmentPercentage * desktopStableBounds.width() / 2)),
+                            (int) (desktopStableBounds.height()
+                                    - (adjustmentPercentage * desktopStableBounds.height() / 2)));
                 case TO_SPLIT_LEFT_INDICATOR:
                     return new Rect(padding, padding,
-                            layout.width() / 2 - padding,
-                            layout.height() - padding);
+                            desktopStableBounds.width() / 2 - padding,
+                            desktopStableBounds.height());
                 case TO_SPLIT_RIGHT_INDICATOR:
-                    return new Rect(layout.width() / 2 + padding, padding,
-                            layout.width() - padding,
-                            layout.height() - padding);
+                    return new Rect(desktopStableBounds.width() / 2 + padding, padding,
+                            desktopStableBounds.width() - padding,
+                            desktopStableBounds.height());
                 default:
                     throw new IllegalArgumentException("Invalid indicator type provided.");
             }
@@ -505,17 +513,18 @@ public class DesktopModeVisualIndicator {
         }
 
         /**
-         * Return the max bounds of a visual indicator
+         * Return the minimum bounds of a visual indicator, to be used at the end of fading out
+         * and the start of fading in.
          */
-        private static Rect getMaxBounds(Rect startBounds) {
-            return new Rect((int) (startBounds.left
-                    - (FULLSCREEN_SCALE_ADJUSTMENT_PERCENT * startBounds.width())),
-                    (int) (startBounds.top
-                            - (FULLSCREEN_SCALE_ADJUSTMENT_PERCENT * startBounds.height())),
-                    (int) (startBounds.right
-                            + (FULLSCREEN_SCALE_ADJUSTMENT_PERCENT * startBounds.width())),
-                    (int) (startBounds.bottom
-                            + (FULLSCREEN_SCALE_ADJUSTMENT_PERCENT * startBounds.height())));
+        private static Rect getMinBounds(Rect maxBounds) {
+            return new Rect((int) (maxBounds.left
+                    + (FULLSCREEN_SCALE_ADJUSTMENT_PERCENT * maxBounds.width())),
+                    (int) (maxBounds.top
+                            + (FULLSCREEN_SCALE_ADJUSTMENT_PERCENT * maxBounds.height())),
+                    (int) (maxBounds.right
+                            - (FULLSCREEN_SCALE_ADJUSTMENT_PERCENT * maxBounds.width())),
+                    (int) (maxBounds.bottom
+                            - (FULLSCREEN_SCALE_ADJUSTMENT_PERCENT * maxBounds.height())));
         }
     }
 }

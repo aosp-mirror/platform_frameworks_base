@@ -29,11 +29,10 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
-import com.android.app.tracing.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor
 import com.android.systemui.deviceentry.ui.binder.UdfpsAccessibilityOverlayBinder
 import com.android.systemui.deviceentry.ui.view.UdfpsAccessibilityOverlay
 import com.android.systemui.deviceentry.ui.viewmodel.AlternateBouncerUdfpsAccessibilityOverlayViewModel
@@ -95,7 +94,7 @@ constructor(
     private var alternateBouncerView: ConstraintLayout? = null
 
     override fun start() {
-        if (!DeviceEntryUdfpsRefactor.isEnabled || SceneContainerFlag.isEnabled) {
+        if (SceneContainerFlag.isEnabled) {
             return
         }
 
@@ -182,14 +181,7 @@ constructor(
     }
 
     /** Binds the view to the view-model, continuing to update the former based on the latter. */
-    fun bind(
-        view: ConstraintLayout,
-        alternateBouncerDependencies: AlternateBouncerDependencies,
-    ) {
-        if (DeviceEntryUdfpsRefactor.isUnexpectedlyInLegacyMode()) {
-            return
-        }
-
+    fun bind(view: ConstraintLayout, alternateBouncerDependencies: AlternateBouncerDependencies) {
         optionallyAddUdfpsViews(
             view = view,
             logger = alternateBouncerDependencies.logger,
@@ -287,10 +279,7 @@ constructor(
                                         )
                                 }
                             view.addView(udfpsView)
-                            AlternateBouncerUdfpsViewBinder.bind(
-                                udfpsView,
-                                udfpsIconViewModel,
-                            )
+                            AlternateBouncerUdfpsViewBinder.bind(udfpsView, udfpsIconViewModel)
                         }
 
                         val constraintSet = ConstraintSet().apply { clone(view) }
@@ -310,17 +299,17 @@ constructor(
                                 ConstraintSet.START,
                                 ConstraintSet.PARENT_ID,
                                 ConstraintSet.START,
-                                iconLocation.left
+                                iconLocation.left,
                             )
 
                             // udfpsA11yOverlayView:
                             constrainWidth(
                                 udfpsA11yOverlayViewId,
-                                ViewGroup.LayoutParams.MATCH_PARENT
+                                ViewGroup.LayoutParams.MATCH_PARENT,
                             )
                             constrainHeight(
                                 udfpsA11yOverlayViewId,
-                                ViewGroup.LayoutParams.MATCH_PARENT
+                                ViewGroup.LayoutParams.MATCH_PARENT,
                             )
                         }
                         constraintSet.applyTo(view)

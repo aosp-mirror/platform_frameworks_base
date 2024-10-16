@@ -318,9 +318,6 @@ filegroup {
         "tests/src/**/systemui/stylus/StylusUsiPowerStartableTest.kt",
         "tests/src/**/systemui/temporarydisplay/TemporaryViewDisplayControllerTest.kt",
         "tests/src/**/keyguard/ClockEventControllerTest.kt",
-        "tests/src/**/keyguard/LegacyLockIconViewControllerWithCoroutinesTest.kt",
-        "tests/src/**/keyguard/LegacyLockIconViewControllerBaseTest.kt",
-        "tests/src/**/keyguard/LegacyLockIconViewControllerTest.java",
         "tests/src/**/systemui/animation/TransitionAnimatorTest.kt",
         "tests/src/**/systemui/bluetooth/qsdialog/BluetoothAutoOnRepositoryTest.kt",
         "tests/src/**/systemui/bluetooth/qsdialog/BluetoothStateInteractorTest.kt",
@@ -417,7 +414,6 @@ filegroup {
         "tests/src/**/systemui/stylus/StylusUsiPowerUiTest.kt",
         "tests/src/**/systemui/temporarydisplay/chipbar/ChipbarCoordinatorTest.kt",
         "tests/src/**/keyguard/KeyguardUpdateMonitorTest.java",
-        "tests/src/**/keyguard/LegacyLockIconViewControllerBaseTest.java",
         "tests/src/**/keyguard/CarrierTextManagerTest.java",
         "tests/src/**/systemui/ScreenDecorationsTest.java",
         "tests/src/**/systemui/temporarydisplay/chipbar/SwipeChipbarAwayGestureHandlerTest.kt",
@@ -899,9 +895,9 @@ android_robolectric_test {
         "androidx.compose.runtime_runtime",
     ],
     libs: [
-        "android.test.runner.stubs.system",
-        "android.test.base.stubs.system",
-        "android.test.mock.stubs.system",
+        "android.test.runner.impl",
+        "android.test.base.impl",
+        "android.test.mock.impl",
         "truth",
     ],
 
@@ -936,9 +932,9 @@ android_robolectric_test {
         "androidx.compose.runtime_runtime",
     ],
     libs: [
-        "android.test.runner.stubs.system",
-        "android.test.base.stubs.system",
-        "android.test.mock.stubs.system",
+        "android.test.runner.impl",
+        "android.test.base.impl",
+        "android.test.mock.impl",
         "truth",
     ],
 
@@ -974,9 +970,9 @@ android_ravenwood_test {
         "androidx.compose.runtime_runtime",
     ],
     libs: [
-        "android.test.runner.stubs.system",
-        "android.test.base.stubs.system",
-        "android.test.mock.stubs.system",
+        "android.test.runner.impl",
+        "android.test.base.impl",
+        "android.test.mock.impl",
     ],
     auto_gen_config: true,
     plugins: [

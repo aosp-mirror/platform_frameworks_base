@@ -70,7 +70,7 @@ class AppHeaderViewHolder(
         rootView: View,
         onCaptionTouchListener: View.OnTouchListener,
         onCaptionButtonClickListener: View.OnClickListener,
-        onLongClickListener: OnLongClickListener,
+        private val onLongClickListener: OnLongClickListener,
         onCaptionGenericMotionListener: View.OnGenericMotionListener,
         appName: CharSequence,
         appIconBitmap: Bitmap,
@@ -81,7 +81,8 @@ class AppHeaderViewHolder(
         val taskInfo: RunningTaskInfo,
         val isRequestingImmersive: Boolean,
         val inFullImmersiveState: Boolean,
-        val hasGlobalFocus: Boolean
+        val hasGlobalFocus: Boolean,
+        val enableMaximizeLongClick: Boolean,
     ) : Data()
 
     private val decorThemeUtil = DecorThemeUtil(context)
@@ -160,19 +161,30 @@ class AppHeaderViewHolder(
     }
 
     override fun bindData(data: HeaderData) {
-        bindData(data.taskInfo, data.isRequestingImmersive, data.inFullImmersiveState,
-            data.hasGlobalFocus)
+        bindData(
+            data.taskInfo,
+            data.isRequestingImmersive,
+            data.inFullImmersiveState,
+            data.hasGlobalFocus,
+            data.enableMaximizeLongClick
+        )
     }
 
     private fun bindData(
         taskInfo: RunningTaskInfo,
         isRequestingImmersive: Boolean,
         inFullImmersiveState: Boolean,
-        hasGlobalFocus: Boolean
+        hasGlobalFocus: Boolean,
+        enableMaximizeLongClick: Boolean,
     ) {
         if (DesktopModeFlags.ENABLE_THEMED_APP_HEADERS.isTrue()) {
-            bindDataWithThemedHeaders(taskInfo, isRequestingImmersive, inFullImmersiveState,
-                hasGlobalFocus)
+            bindDataWithThemedHeaders(
+                taskInfo,
+                isRequestingImmersive,
+                inFullImmersiveState,
+                hasGlobalFocus,
+                enableMaximizeLongClick,
+            )
         } else {
             bindDataLegacy(taskInfo, hasGlobalFocus)
         }
@@ -215,7 +227,8 @@ class AppHeaderViewHolder(
         taskInfo: RunningTaskInfo,
         requestingImmersive: Boolean,
         inFullImmersiveState: Boolean,
-        hasGlobalFocus: Boolean
+        hasGlobalFocus: Boolean,
+        enableMaximizeLongClick: Boolean,
     ) {
         val header = fillHeaderInfo(taskInfo, hasGlobalFocus)
         val headerStyle = getHeaderStyle(header)
@@ -281,6 +294,16 @@ class AppHeaderViewHolder(
                 drawableInsets = closeDrawableInsets
             )
         }
+        if (!enableMaximizeLongClick) {
+            maximizeButtonView.cancelHoverAnimation()
+        }
+        maximizeButtonView.hoverDisabled = !enableMaximizeLongClick
+        maximizeWindowButton.onLongClickListener = if (enableMaximizeLongClick) {
+            onLongClickListener
+        } else {
+            // Disable long-click to open maximize menu when in immersive.
+            null
+        }
     }
 
     override fun onHandleMenuOpened() {}
@@ -289,14 +312,6 @@ class AppHeaderViewHolder(
         openMenuButton.post {
             openMenuButton.sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_FOCUSED)
         }
-    }
-
-    fun setAnimatingTaskResizeOrReposition(animatingTaskResizeOrReposition: Boolean) {
-        // If animating a task resize or reposition, cancel any running hover animations
-        if (animatingTaskResizeOrReposition) {
-            maximizeButtonView.cancelHoverAnimation()
-        }
-        maximizeButtonView.hoverDisabled = animatingTaskResizeOrReposition
     }
 
     fun onMaximizeWindowHoverExit() {
@@ -362,6 +377,11 @@ class AppHeaderViewHolder(
             && requestingImmersive && !inFullImmersiveState
 
     private fun shouldShowExitFullImmersiveIcon(
+        requestingImmersive: Boolean,
+        inFullImmersiveState: Boolean
+    ): Boolean = isInFullImmersiveStateAndRequesting(requestingImmersive, inFullImmersiveState)
+
+    private fun isInFullImmersiveStateAndRequesting(
         requestingImmersive: Boolean,
         inFullImmersiveState: Boolean
     ): Boolean = Flags.enableFullyImmersiveInDesktop()

@@ -355,11 +355,8 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
                 int keyAction,
                 @BackEvent.SwipeEdge int swipeEdge
         ) {
-            mShellExecutor.execute(() -> onMotionEvent(
-                    /* touchX = */ touchX,
-                    /* touchY = */ touchY,
-                    /* keyAction = */ keyAction,
-                    /* swipeEdge = */ swipeEdge));
+            mShellExecutor.execute(
+                    () -> onMotionEvent(touchX, touchY, keyAction, swipeEdge));
         }
 
         @Override

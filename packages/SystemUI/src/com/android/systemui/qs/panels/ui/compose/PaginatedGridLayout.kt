@@ -19,7 +19,7 @@ package com.android.systemui.qs.panels.ui.compose
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
@@ -97,7 +97,9 @@ constructor(
                     TileGrid(tiles = page, modifier = Modifier, editModeStart = {})
                 }
             }
-            Box(modifier = Modifier.height(FooterHeight).fillMaxWidth()) {
+            // Use requiredHeight so it won't be squished if the view doesn't quite fit. As this is
+            // expected to be inside a scrollable container, this should not be an issue.
+            Box(modifier = Modifier.requiredHeight(FooterHeight).fillMaxWidth()) {
                 PagerDots(
                     pagerState = pagerState,
                     activeColor = MaterialTheme.colorScheme.primary,

@@ -306,7 +306,8 @@ public class DisplayBrightnessStrategySelector {
                 strategySelectionRequest.getDisplayPowerRequest().useNormalBrightnessForDoze,
                 strategySelectionRequest.getLastUserSetScreenBrightness(),
                 strategySelectionRequest.isUserSetBrightnessChanged());
-        return mAutomaticBrightnessStrategy1.isAutoBrightnessValid();
+        return !strategySelectionRequest.isStylusBeingUsed()
+                && mAutomaticBrightnessStrategy1.isAutoBrightnessValid();
     }
 
     private StrategySelectionNotifyRequest constructStrategySelectionNotifyRequest(

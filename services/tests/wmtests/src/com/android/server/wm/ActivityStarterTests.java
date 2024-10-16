@@ -1261,6 +1261,33 @@ public class ActivityStarterTests extends WindowTestsBase {
     }
 
     @Test
+    public void testLaunchAdjacentDisabled() {
+        final ActivityStarter starter =
+                prepareStarter(FLAG_ACTIVITY_LAUNCH_ADJACENT, false /* mockGetRootTask */);
+        final ActivityRecord top = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        final ActivityOptions options = ActivityOptions.makeBasic();
+        final ActivityRecord[] outActivity = new ActivityRecord[1];
+
+        // Activity must not land on split-screen task if currently not in split-screen mode.
+        starter.setActivityOptions(options.toBundle())
+                .setReason("testLaunchAdjacentDisabled")
+                .setOutActivity(outActivity).execute();
+        assertThat(outActivity[0].inMultiWindowMode()).isFalse();
+
+        // Move activity to split-screen-primary task and make sure it has the focus.
+        TestSplitOrganizer splitOrg = new TestSplitOrganizer(mAtm, top.getDisplayContent());
+        top.getRootTask().reparent(splitOrg.mPrimary, POSITION_BOTTOM);
+        top.getRootTask().moveToFront("testLaunchAdjacentDisabled");
+        top.getRootTask().setLaunchAdjacentDisabled(true);
+
+        // Ensure activity does not launch into split-screen-secondary when launch adjacent is
+        // disabled
+        startActivityInner(starter, outActivity[0], top, options, null /* inTask */,
+                null /* taskFragment*/);
+        assertThat(outActivity[0].isDescendantOf(splitOrg.mSecondary)).isFalse();
+    }
+
+    @Test
     public void testTransientLaunchWithKeyguard() {
         final ActivityStarter starter = prepareStarter(0 /* flags */);
         final ActivityRecord target = new ActivityBuilder(mAtm).setCreateTask(true).build();

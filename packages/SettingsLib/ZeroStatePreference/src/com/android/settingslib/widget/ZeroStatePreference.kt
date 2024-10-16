@@ -32,7 +32,7 @@ class ZeroStatePreference @JvmOverloads constructor(
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0,
     defStyleRes: Int = 0
-) : Preference(context, attrs, defStyleAttr, defStyleRes) {
+) : Preference(context, attrs, defStyleAttr, defStyleRes), GroupSectionDividerMixin {
 
     private val iconTint: Int = context.getColor(
         com.android.settingslib.widget.theme.R.color.settingslib_materialColorOnSecondaryContainer

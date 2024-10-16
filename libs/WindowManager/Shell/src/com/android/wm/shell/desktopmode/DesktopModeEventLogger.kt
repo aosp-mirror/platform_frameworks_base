@@ -21,17 +21,39 @@ import com.android.internal.protolog.ProtoLog
 import com.android.internal.util.FrameworkStatsLog
 import com.android.window.flags.Flags
 import com.android.wm.shell.EventLogTags
-import com.android.wm.shell.protolog.ShellProtoLogGroup
+import com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE
+import java.security.SecureRandom
+import java.util.Random
+import java.util.concurrent.atomic.AtomicInteger
+
 
 /** Event logger for logging desktop mode session events */
 class DesktopModeEventLogger {
+    private val random: Random = SecureRandom()
+
+    /** The session id for the current desktop mode session */
+    @VisibleForTesting
+    val currentSessionId: AtomicInteger = AtomicInteger(NO_SESSION_ID)
+
+    private fun generateSessionId() = 1 + random.nextInt(1 shl 20)
+
     /**
-     * Logs the enter of desktop mode having session id [sessionId] and the reason [enterReason] for
-     * entering desktop mode
+     * Logs enter into desktop mode with [enterReason]
      */
-    fun logSessionEnter(sessionId: Int, enterReason: EnterReason) {
+    fun logSessionEnter(enterReason: EnterReason) {
+        val sessionId = generateSessionId()
+        val previousSessionId = currentSessionId.getAndSet(sessionId)
+        if (previousSessionId != NO_SESSION_ID) {
+            ProtoLog.w(
+                WM_SHELL_DESKTOP_MODE,
+                "DesktopModeLogger: Existing desktop mode session id: %s found on desktop "
+                    + "mode enter",
+                previousSessionId
+            )
+        }
+
         ProtoLog.v(
-            ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
+            WM_SHELL_DESKTOP_MODE,
             "DesktopModeLogger: Logging session enter, session: %s reason: %s",
             sessionId,
             enterReason.name
@@ -47,12 +69,20 @@ class DesktopModeEventLogger {
     }
 
     /**
-     * Logs the exit of desktop mode having session id [sessionId] and the reason [exitReason] for
-     * exiting desktop mode
+     * Logs exit from desktop mode session with [exitReason]
      */
-    fun logSessionExit(sessionId: Int, exitReason: ExitReason) {
+    fun logSessionExit(exitReason: ExitReason) {
+        val sessionId = currentSessionId.getAndSet(NO_SESSION_ID)
+        if (sessionId == NO_SESSION_ID) {
+            ProtoLog.w(
+                WM_SHELL_DESKTOP_MODE,
+                "DesktopModeLogger: No session id found for logging exit from desktop mode"
+            )
+            return
+        }
+
         ProtoLog.v(
-            ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
+            WM_SHELL_DESKTOP_MODE,
             "DesktopModeLogger: Logging session exit, session: %s reason: %s",
             sessionId,
             exitReason.name
@@ -68,12 +98,20 @@ class DesktopModeEventLogger {
     }
 
     /**
-     * Logs that the task with update [taskUpdate] was added in the desktop mode session having
-     * session id [sessionId]
+     * Logs that a task with [taskUpdate] was added in a desktop mode session
      */
-    fun logTaskAdded(sessionId: Int, taskUpdate: TaskUpdate) {
+    fun logTaskAdded(taskUpdate: TaskUpdate) {
+        val sessionId = currentSessionId.get()
+        if (sessionId == NO_SESSION_ID) {
+            ProtoLog.w(
+                WM_SHELL_DESKTOP_MODE,
+                "DesktopModeLogger: No session id found for logging task added"
+            )
+            return
+        }
+
         ProtoLog.v(
-            ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
+            WM_SHELL_DESKTOP_MODE,
             "DesktopModeLogger: Logging task added, session: %s taskId: %s",
             sessionId,
             taskUpdate.instanceId
@@ -85,12 +123,20 @@ class DesktopModeEventLogger {
     }
 
     /**
-     * Logs that the task with update [taskUpdate] was removed in the desktop mode session having
-     * session id [sessionId]
+     * Logs that a task with [taskUpdate] was removed from a desktop mode session
      */
-    fun logTaskRemoved(sessionId: Int, taskUpdate: TaskUpdate) {
+    fun logTaskRemoved(taskUpdate: TaskUpdate) {
+        val sessionId = currentSessionId.get()
+        if (sessionId == NO_SESSION_ID) {
+            ProtoLog.w(
+                WM_SHELL_DESKTOP_MODE,
+                "DesktopModeLogger: No session id found for logging task removed"
+            )
+            return
+        }
+
         ProtoLog.v(
-            ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
+            WM_SHELL_DESKTOP_MODE,
             "DesktopModeLogger: Logging task remove, session: %s taskId: %s",
             sessionId,
             taskUpdate.instanceId
@@ -102,12 +148,20 @@ class DesktopModeEventLogger {
     }
 
     /**
-     * Logs that the task with update [taskUpdate] had it's info changed in the desktop mode session
-     * having session id [sessionId]
+     * Logs that a task with [taskUpdate] had it's info changed in a desktop mode session
      */
-    fun logTaskInfoChanged(sessionId: Int, taskUpdate: TaskUpdate) {
+    fun logTaskInfoChanged(taskUpdate: TaskUpdate) {
+        val sessionId = currentSessionId.get()
+        if (sessionId == NO_SESSION_ID) {
+            ProtoLog.w(
+                WM_SHELL_DESKTOP_MODE,
+                "DesktopModeLogger: No session id found for logging task info changed"
+            )
+            return
+        }
+
         ProtoLog.v(
-            ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
+            WM_SHELL_DESKTOP_MODE,
             "DesktopModeLogger: Logging task info changed, session: %s taskId: %s",
             sessionId,
             taskUpdate.instanceId
@@ -119,14 +173,23 @@ class DesktopModeEventLogger {
     }
 
     /**
-     * Logs that a task resize event is starting with [taskSizeUpdate] within a
-     * Desktop mode [sessionId].
+     * Logs that a task resize event is starting with [taskSizeUpdate] within a Desktop mode
+     * session.
      */
-    fun logTaskResizingStarted(sessionId: Int, taskSizeUpdate: TaskSizeUpdate) {
+    fun logTaskResizingStarted(taskSizeUpdate: TaskSizeUpdate) {
         if (!Flags.enableResizingMetrics()) return
 
+        val sessionId = currentSessionId.get()
+        if (sessionId == NO_SESSION_ID) {
+            ProtoLog.w(
+                WM_SHELL_DESKTOP_MODE,
+                "DesktopModeLogger: No session id found for logging start of task resizing"
+            )
+            return
+        }
+
         ProtoLog.v(
-            ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
+            WM_SHELL_DESKTOP_MODE,
             "DesktopModeLogger: Logging task resize is starting, session: %s taskId: %s",
             sessionId,
             taskSizeUpdate.instanceId
@@ -138,14 +201,22 @@ class DesktopModeEventLogger {
     }
 
     /**
-     * Logs that a task resize event is ending with [taskSizeUpdate] within a
-     * Desktop mode [sessionId].
+     * Logs that a task resize event is ending with [taskSizeUpdate] within a Desktop mode session.
      */
-    fun logTaskResizingEnded(sessionId: Int, taskSizeUpdate: TaskSizeUpdate) {
+    fun logTaskResizingEnded(taskSizeUpdate: TaskSizeUpdate) {
         if (!Flags.enableResizingMetrics()) return
 
+        val sessionId = currentSessionId.get()
+        if (sessionId == NO_SESSION_ID) {
+            ProtoLog.w(
+                WM_SHELL_DESKTOP_MODE,
+                "DesktopModeLogger: No session id found for logging end of task resizing"
+            )
+            return
+        }
+
         ProtoLog.v(
-            ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
+            WM_SHELL_DESKTOP_MODE,
             "DesktopModeLogger: Logging task resize is ending, session: %s taskId: %s",
             sessionId,
             taskSizeUpdate.instanceId
@@ -248,6 +319,7 @@ class DesktopModeEventLogger {
     }
 
     companion object {
+
         /**
          * Describes a task position and dimensions.
          *
@@ -465,5 +537,6 @@ class DesktopModeEventLogger {
             FrameworkStatsLog.DESKTOP_MODE_SESSION_TASK_UPDATE
         private const val DESKTOP_MODE_TASK_SIZE_UPDATED_ATOM_ID =
             FrameworkStatsLog.DESKTOP_MODE_TASK_SIZE_UPDATED
+        @VisibleForTesting const val NO_SESSION_ID = 0
     }
 }

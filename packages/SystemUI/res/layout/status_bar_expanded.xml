@@ -128,12 +128,6 @@
 
     <include layout="@layout/dock_info_bottom_area_overlay" />
 
-    <com.android.keyguard.LockIconView
-        android:id="@+id/lock_icon_view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
-    </com.android.keyguard.LockIconView>
-
     <include
         layout="@layout/keyguard_bottom_area"
         android:visibility="gone" />

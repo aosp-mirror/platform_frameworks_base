@@ -1790,6 +1790,34 @@ public class NotificationManager {
         }
     }
 
+    /**
+     * @hide
+     */
+    @TestApi
+    @FlaggedApi(android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION)
+    public void allowAssistantAdjustment(@NonNull String capability) {
+        INotificationManager service = getService();
+        try {
+            service.allowAssistantAdjustment(capability);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     */
+    @TestApi
+    @FlaggedApi(android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION)
+    public void disallowAssistantAdjustment(@NonNull String capability) {
+        INotificationManager service = getService();
+        try {
+            service.disallowAssistantAdjustment(capability);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     /** @hide */
     @TestApi
     public boolean isNotificationPolicyAccessGrantedForPackage(@NonNull String pkg) {
