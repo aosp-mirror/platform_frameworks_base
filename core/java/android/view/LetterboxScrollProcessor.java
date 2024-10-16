@@ -145,9 +145,19 @@ public class LetterboxScrollProcessor {
         return mContext.getResources().getConfiguration().windowConfiguration.getBounds();
     }
 
-    private boolean isOutsideAppBounds(MotionEvent motionEvent, Rect appBounds) {
-        return motionEvent.getX() < 0 || motionEvent.getX() >= appBounds.width()
-                || motionEvent.getY() < 0 || motionEvent.getY() >= appBounds.height();
+    /** Checks whether the gesture is located on the letterbox area. */
+    private boolean isOutsideAppBounds(@NonNull MotionEvent motionEvent, @NonNull Rect appBounds) {
+        // The events are in the coordinate system of the ViewRootImpl (window). The window might
+        // not have the same dimensions as the app bounds - for example in case of Dialogs - thus
+        // `getRawX()` and `getRawY()` are used, with the absolute bounds (left, top, etc) instead
+        // of width and height.
+        // The event should be passed to the app if it has happened anywhere in the app area,
+        // irrespective of the current window size, therefore the app bounds are used instead of the
+        // current window.
+        return motionEvent.getRawX() < appBounds.left
+                || motionEvent.getRawX() >= appBounds.right
+                || motionEvent.getRawY() < appBounds.top
+                || motionEvent.getRawY() >= appBounds.bottom;
     }
 
     private void applyOffset(MotionEvent event, Rect appBounds) {
