@@ -659,6 +659,7 @@ class DesktopTasksController(
         }
 
         val wct = WindowContainerTransaction()
+        if (!task.isFreeform) addMoveToDesktopChanges(wct, task, displayId)
         wct.reparent(task.token, displayAreaInfo.token, true /* onTop */)
 
         transitions.startTransition(TRANSIT_CHANGE, wct, null /* handler */)
@@ -1245,7 +1246,7 @@ class DesktopTasksController(
         val bounds = when (newTaskWindowingMode) {
             WINDOWING_MODE_FREEFORM -> {
                 displayController.getDisplayLayout(callingTask.displayId)
-                    ?.let { getInitialBounds(it, callingTask) }
+                    ?.let { getInitialBounds(it, callingTask, callingTask.displayId) }
             }
             WINDOWING_MODE_MULTI_WINDOW -> {
                 Rect()
@@ -1311,7 +1312,7 @@ class DesktopTasksController(
             val displayLayout = displayController.getDisplayLayout(task.displayId)
             if (displayLayout != null) {
                 val initialBounds = Rect(task.configuration.windowConfiguration.bounds)
-                cascadeWindow(task, initialBounds, displayLayout)
+                cascadeWindow(initialBounds, displayLayout, task.displayId)
                 wct.setBounds(task.token, initialBounds)
             }
         }
@@ -1399,13 +1400,19 @@ class DesktopTasksController(
         return if (wct.isEmpty) null else wct
     }
 
+    /**
+     * Apply all changes required when task is first added to desktop. Uses the task's current
+     * display by default to apply initial bounds and placement relative to the display.
+     * Use a different [displayId] if the task should be moved to a different display.
+     */
     @VisibleForTesting
     fun addMoveToDesktopChanges(
         wct: WindowContainerTransaction,
-        taskInfo: RunningTaskInfo
+        taskInfo: RunningTaskInfo,
+        displayId: Int = taskInfo.displayId,
     ) {
-        val displayLayout = displayController.getDisplayLayout(taskInfo.displayId) ?: return
-        val tdaInfo = rootTaskDisplayAreaOrganizer.getDisplayAreaInfo(taskInfo.displayId)!!
+        val displayLayout = displayController.getDisplayLayout(displayId) ?: return
+        val tdaInfo = rootTaskDisplayAreaOrganizer.getDisplayAreaInfo(displayId)!!
         val tdaWindowingMode = tdaInfo.configuration.windowConfiguration.windowingMode
         val targetWindowingMode =
             if (tdaWindowingMode == WINDOWING_MODE_FREEFORM) {
@@ -1414,7 +1421,7 @@ class DesktopTasksController(
             } else {
                 WINDOWING_MODE_FREEFORM
             }
-        val initialBounds = getInitialBounds(displayLayout, taskInfo)
+        val initialBounds = getInitialBounds(displayLayout, taskInfo, displayId)
 
         if (canChangeTaskPosition(taskInfo)) {
             wct.setBounds(taskInfo.token, initialBounds)
@@ -1428,7 +1435,8 @@ class DesktopTasksController(
 
     private fun getInitialBounds(
         displayLayout: DisplayLayout,
-        taskInfo: RunningTaskInfo
+        taskInfo: RunningTaskInfo,
+        displayId: Int,
     ): Rect {
         val bounds = if (ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS.isTrue) {
             calculateInitialBounds(displayLayout, taskInfo)
@@ -1437,7 +1445,7 @@ class DesktopTasksController(
         }
 
         if (DesktopModeFlags.ENABLE_CASCADING_WINDOWS.isTrue) {
-            cascadeWindow(taskInfo, bounds, displayLayout)
+            cascadeWindow(bounds, displayLayout, displayId)
         }
         return bounds
     }
@@ -1466,11 +1474,11 @@ class DesktopTasksController(
         }
     }
 
-    private fun cascadeWindow(task: TaskInfo, bounds: Rect, displayLayout: DisplayLayout) {
+    private fun cascadeWindow(bounds: Rect, displayLayout: DisplayLayout, displayId: Int) {
         val stableBounds = Rect()
         displayLayout.getStableBoundsForDesktopMode(stableBounds)
 
-        val activeTasks = taskRepository.getActiveNonMinimizedOrderedTasks(task.displayId)
+        val activeTasks = taskRepository.getActiveNonMinimizedOrderedTasks(displayId)
         activeTasks.firstOrNull()?.let { activeTask ->
             shellTaskOrganizer.getRunningTaskInfo(activeTask)?.let {
                 cascadeWindow(context.resources, stableBounds,
@@ -2067,6 +2075,12 @@ class DesktopTasksController(
         override fun removeDesktop(displayId: Int) {
             executeRemoteCallWithTaskPermission(controller, "removeDesktop") { c ->
                 c.removeDesktop(displayId)
+            }
+        }
+
+        override fun moveToExternalDisplay(taskId: Int) {
+            executeRemoteCallWithTaskPermission(controller, "moveTaskToExternalDisplay") { c ->
+                c.moveToNextDisplay(taskId)
             }
         }
     }

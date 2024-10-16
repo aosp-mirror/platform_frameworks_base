@@ -665,7 +665,7 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
                 rootBounds.width(),
                 rootBounds.height(),
                 mDividerSize,
-                !mIsLeftRightSplit,
+                mIsLeftRightSplit,
                 insets,
                 mIsLeftRightSplit ? DOCKED_LEFT : DOCKED_TOP /* dockSide */);
     }

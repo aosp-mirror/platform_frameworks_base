@@ -2547,7 +2547,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
 
         // Returns only non-deleted channels
         List<NotificationChannel> channels =
-                mHelper.getNotificationChannels(PKG_N_MR1, UID_N_MR1, false).getList();
+                mHelper.getNotificationChannels(PKG_N_MR1, UID_N_MR1, false, true).getList();
         // Default channel + non-deleted channel + system defaults
         assertEquals(notificationClassification() ? 6 : 2, channels.size());
         for (NotificationChannel nc : channels) {
@@ -2557,7 +2557,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         }
 
         // Returns deleted channels too
-        channels = mHelper.getNotificationChannels(PKG_N_MR1, UID_N_MR1, true).getList();
+        channels = mHelper.getNotificationChannels(PKG_N_MR1, UID_N_MR1, true, true).getList();
         // Includes system channel(s)
         assertEquals(notificationClassification() ? 7 : 3, channels.size());
         for (NotificationChannel nc : channels) {
@@ -3199,7 +3199,8 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         mHelper.permanentlyDeleteNotificationChannels(PKG_N_MR1, UID_N_MR1);
 
         // Only default channel remains
-        assertEquals(1, mHelper.getNotificationChannels(PKG_N_MR1, UID_N_MR1, true).getList().size());
+        assertEquals(1, mHelper.getNotificationChannels(PKG_N_MR1, UID_N_MR1, true, true)
+                .getList().size());
     }
 
     @Test
@@ -3315,12 +3316,12 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         // user 0 records remain
         for (int i = 0; i < user0Uids.length; i++) {
             assertEquals(notificationClassification() ? 5 : 1,
-                    mHelper.getNotificationChannels(PKG_N_MR1, user0Uids[i], false)
+                    mHelper.getNotificationChannels(PKG_N_MR1, user0Uids[i], false, true)
                             .getList().size());
         }
         // user 1 records are gone
         for (int i = 0; i < user1Uids.length; i++) {
-            assertEquals(0, mHelper.getNotificationChannels(PKG_N_MR1, user1Uids[i], false)
+            assertEquals(0, mHelper.getNotificationChannels(PKG_N_MR1, user1Uids[i], false, true)
                     .getList().size());
         }
     }
@@ -3337,7 +3338,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
                 new int[]{UID_N_MR1}));
 
         assertEquals(0, mHelper.getNotificationChannels(
-                PKG_N_MR1, UID_N_MR1, true).getList().size());
+                PKG_N_MR1, UID_N_MR1, true, true).getList().size());
 
         // Not deleted
         mHelper.createNotificationChannel(PKG_N_MR1, UID_N_MR1, channel1, true, false,
@@ -3346,7 +3347,8 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         assertFalse(mHelper.onPackagesChanged(false, USER_SYSTEM,
                 new String[]{PKG_N_MR1}, new int[]{UID_N_MR1}));
         assertEquals(notificationClassification() ? 6 : 2,
-                mHelper.getNotificationChannels(PKG_N_MR1, UID_N_MR1, false).getList().size());
+                mHelper.getNotificationChannels(PKG_N_MR1, UID_N_MR1, false, true)
+                        .getList().size());
     }
 
     @Test
@@ -3405,7 +3407,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         assertTrue(mHelper.canShowBadge(PKG_O, UID_O));
         assertNull(mHelper.getNotificationDelegate(PKG_O, UID_O));
         assertEquals(0, mHelper.getAppLockedFields(PKG_O, UID_O));
-        assertEquals(0, mHelper.getNotificationChannels(PKG_O, UID_O, true).getList().size());
+        assertEquals(0, mHelper.getNotificationChannels(PKG_O, UID_O, true, true).getList().size());
         assertEquals(0, mHelper.getNotificationChannelGroups(PKG_O, UID_O).size());
 
         NotificationChannel channel = getChannel();
@@ -3419,7 +3421,8 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     public void testRecordDefaults() throws Exception {
         assertEquals(true, mHelper.canShowBadge(PKG_N_MR1, UID_N_MR1));
         assertEquals(notificationClassification() ? 5 : 1,
-                mHelper.getNotificationChannels(PKG_N_MR1, UID_N_MR1, false).getList().size());
+                mHelper.getNotificationChannels(PKG_N_MR1, UID_N_MR1, false, true)
+                        .getList().size());
     }
 
     @Test
@@ -6359,6 +6362,15 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         assertEquals(1, actual.getChannels().size());
         assertEquals(1, actual.getChannels().stream().filter(c -> c.getId().equals("id3")).count());
         assertEquals(0, actual.getChannels().stream().filter(c -> c.getId().equals("id2")).count());
+    }
+
+    @Test
+    @EnableFlags(FLAG_NOTIFICATION_CLASSIFICATION)
+    public void testGetNotificationChannels_omitBundleChannels() {
+        // do something that triggers settings creation for an app
+        mHelper.setShowBadge(PKG_O, UID_O, true);
+
+        assertThat(mHelper.getNotificationChannels(PKG_O, UID_O, true, false).getList()).isEmpty();
     }
 
     @Test

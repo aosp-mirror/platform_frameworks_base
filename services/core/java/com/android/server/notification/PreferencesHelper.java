@@ -1870,7 +1870,7 @@ public class PreferencesHelper implements RankingConfig {
 
     @Override
     public ParceledListSlice<NotificationChannel> getNotificationChannels(String pkg, int uid,
-            boolean includeDeleted) {
+            boolean includeDeleted, boolean includeBundles) {
         Objects.requireNonNull(pkg);
         List<NotificationChannel> channels = new ArrayList<>();
         synchronized (mLock) {
@@ -1882,7 +1882,9 @@ public class PreferencesHelper implements RankingConfig {
             for (int i = 0; i < N; i++) {
                 final NotificationChannel nc = r.channels.valueAt(i);
                 if (includeDeleted || !nc.isDeleted()) {
-                    channels.add(nc);
+                    if (includeBundles || !SYSTEM_RESERVED_IDS.contains(nc.getId())) {
+                        channels.add(nc);
+                    }
                 }
             }
             return new ParceledListSlice<>(channels);

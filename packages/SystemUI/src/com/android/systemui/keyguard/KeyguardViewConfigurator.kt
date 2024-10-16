@@ -30,8 +30,6 @@ import com.android.compose.animation.scene.SceneTransitionLayout
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.keyguard.KeyguardStatusView
 import com.android.keyguard.KeyguardStatusViewController
-import com.android.keyguard.LegacyLockIconViewController
-import com.android.keyguard.LockIconView
 import com.android.keyguard.dagger.KeyguardStatusViewComponent
 import com.android.systemui.CoreStartable
 import com.android.systemui.biometrics.ui.binder.DeviceEntryUnlockTrackerViewBinder
@@ -39,7 +37,6 @@ import com.android.systemui.common.ui.ConfigurationState
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryHapticsInteractor
-import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
 import com.android.systemui.keyguard.shared.model.LockscreenSceneBlueprint
 import com.android.systemui.keyguard.ui.binder.KeyguardBlueprintViewBinder
@@ -94,7 +91,6 @@ constructor(
     private val configuration: ConfigurationState,
     private val context: Context,
     private val keyguardIndicationController: KeyguardIndicationController,
-    private val lockIconViewController: Lazy<LegacyLockIconViewController>,
     private val shadeInteractor: ShadeInteractor,
     private val interactionJankMonitor: InteractionJankMonitor,
     private val deviceEntryHapticsInteractor: DeviceEntryHapticsInteractor,
@@ -171,10 +167,6 @@ constructor(
     private fun initializeViews() {
         val indicationArea = KeyguardIndicationArea(context, null)
         keyguardIndicationController.setIndicationArea(indicationArea)
-
-        if (!DeviceEntryUdfpsRefactor.isEnabled) {
-            lockIconViewController.get().setLockIconView(LockIconView(context, null))
-        }
     }
 
     private fun bindKeyguardRootView() {

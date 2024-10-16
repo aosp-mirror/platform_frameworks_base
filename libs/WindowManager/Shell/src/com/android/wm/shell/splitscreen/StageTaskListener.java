@@ -22,20 +22,17 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.res.Configuration.SMALLEST_SCREEN_WIDTH_DP_UNDEFINED;
 import static android.view.RemoteAnimationTarget.MODE_OPENING;
 
+import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN;
 import static com.android.wm.shell.shared.split.SplitScreenConstants.CONTROLLED_ACTIVITY_TYPES;
 import static com.android.wm.shell.shared.split.SplitScreenConstants.CONTROLLED_WINDOWING_MODES;
 import static com.android.wm.shell.shared.split.SplitScreenConstants.CONTROLLED_WINDOWING_MODES_WHEN_ACTIVE;
-import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN;
-import static com.android.wm.shell.transition.Transitions.ENABLE_SHELL_TRANSITIONS;
 
 import android.annotation.CallSuper;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.content.Context;
-import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.IBinder;
-import android.util.Slog;
 import android.util.SparseArray;
 import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
@@ -77,7 +74,6 @@ public class StageTaskListener implements ShellTaskOrganizer.TaskListener {
     /** Callback interface for listening to changes in a split-screen stage. */
     public interface StageListenerCallbacks {
         void onRootTaskAppeared();
-        void onChildTaskAppeared(StageTaskListener stageTaskListener, int taskId);
 
         void onStageHasChildrenChanged(StageTaskListener stageTaskListener);
 
@@ -220,13 +216,6 @@ public class StageTaskListener implements ShellTaskOrganizer.TaskListener {
             mChildrenTaskInfo.put(taskId, taskInfo);
             mCallbacks.onChildTaskStatusChanged(this, taskId, true /* present */,
                     taskInfo.isVisible && taskInfo.isVisibleRequested);
-            if (ENABLE_SHELL_TRANSITIONS) {
-                // Status is managed/synchronized by the transition lifecycle.
-                return;
-            }
-            updateChildTaskSurface(taskInfo, leash, true /* firstAppeared */);
-            mCallbacks.onChildTaskAppeared(this, taskId);
-            sendStatusChanged();
         } else {
             throw new IllegalArgumentException(this + "\n Unknown task: " + taskInfo
                     + "\n mRootTaskInfo: " + mRootTaskInfo);
@@ -240,14 +229,6 @@ public class StageTaskListener implements ShellTaskOrganizer.TaskListener {
                 taskInfo.taskId, taskInfo.baseActivity);
         mWindowDecorViewModel.ifPresent(viewModel -> viewModel.onTaskInfoChanged(taskInfo));
         if (mRootTaskInfo.taskId == taskInfo.taskId) {
-            // Inflates split decor view only when the root task is visible.
-            if (!ENABLE_SHELL_TRANSITIONS && mRootTaskInfo.isVisible != taskInfo.isVisible) {
-                if (taskInfo.isVisible) {
-                    mSplitDecorManager.inflate(mContext, mRootLeash);
-                } else {
-                    mSyncQueue.runInSync(t -> mSplitDecorManager.release(t));
-                }
-            }
             mRootTaskInfo = taskInfo;
         } else if (taskInfo.parentTaskId == mRootTaskInfo.taskId) {
             if (!taskInfo.supportsMultiWindow
@@ -265,19 +246,10 @@ public class StageTaskListener implements ShellTaskOrganizer.TaskListener {
             mChildrenTaskInfo.put(taskInfo.taskId, taskInfo);
             mCallbacks.onChildTaskStatusChanged(this, taskInfo.taskId, true /* present */,
                     taskInfo.isVisible && taskInfo.isVisibleRequested);
-            if (!ENABLE_SHELL_TRANSITIONS) {
-                updateChildTaskSurface(
-                        taskInfo, mChildrenLeashes.get(taskInfo.taskId), false /* firstAppeared */);
-            }
         } else {
             throw new IllegalArgumentException(this + "\n Unknown task: " + taskInfo
                     + "\n mRootTaskInfo: " + mRootTaskInfo);
         }
-        if (ENABLE_SHELL_TRANSITIONS) {
-            // Status is managed/synchronized by the transition lifecycle.
-            return;
-        }
-        sendStatusChanged();
     }
 
     @Override
@@ -302,11 +274,6 @@ public class StageTaskListener implements ShellTaskOrganizer.TaskListener {
             mChildrenLeashes.remove(taskId);
             mCallbacks.onChildTaskStatusChanged(this, taskId, false /* present */,
                     taskInfo.isVisible);
-            if (ENABLE_SHELL_TRANSITIONS) {
-                // Status is managed/synchronized by the transition lifecycle.
-                return;
-            }
-            sendStatusChanged();
         } else {
             throw new IllegalArgumentException(this + "\n Unknown task: " + taskInfo
                     + "\n mRootTaskInfo: " + mRootTaskInfo);
@@ -466,26 +433,6 @@ public class StageTaskListener implements ShellTaskOrganizer.TaskListener {
             listener.onTaskStageChanged(taskId, stage,
                     mChildrenTaskInfo.get(taskId).isVisible);
         }
-    }
-
-    private void updateChildTaskSurface(ActivityManager.RunningTaskInfo taskInfo,
-            SurfaceControl leash, boolean firstAppeared) {
-        final Point taskPositionInParent = taskInfo.positionInParent;
-        mSyncQueue.runInSync(t -> {
-            // The task surface might be released before running in the sync queue for the case like
-            // trampoline launch, so check if the surface is valid before processing it.
-            if (!leash.isValid()) {
-                Slog.w(TAG, "Skip updating invalid child task surface of task#" + taskInfo.taskId);
-                return;
-            }
-            t.setCrop(leash, null);
-            t.setPosition(leash, taskPositionInParent.x, taskPositionInParent.y);
-            if (firstAppeared) {
-                t.setAlpha(leash, 1f);
-                t.setMatrix(leash, 1, 0, 0, 1);
-                t.show(leash);
-            }
-        });
     }
 
     // ---------

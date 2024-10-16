@@ -637,7 +637,7 @@ public class AutomaticBrightnessStrategyTest {
                 .build();
         DisplayBrightnessState actualDisplayBrightnessState = mAutomaticBrightnessStrategy
                 .updateBrightness(new StrategyExecutionRequest(displayPowerRequest, 0.6f,
-                        /* userSetBrightnessChanged= */ true));
+                        /* userSetBrightnessChanged= */ true, /* isStylusBeingUsed */ false));
         assertEquals(expectedDisplayBrightnessState, actualDisplayBrightnessState);
     }
 
@@ -686,7 +686,7 @@ public class AutomaticBrightnessStrategyTest {
                 .build();
         DisplayBrightnessState actualDisplayBrightnessState = mAutomaticBrightnessStrategy
                 .updateBrightness(new StrategyExecutionRequest(displayPowerRequest, 0.6f,
-                        /* userSetBrightnessChanged= */ true));
+                        /* userSetBrightnessChanged= */ true, /* isStylusBeingUsed */ false));
         assertEquals(expectedDisplayBrightnessState, actualDisplayBrightnessState);
     }
 
@@ -725,7 +725,7 @@ public class AutomaticBrightnessStrategyTest {
                 .build();
         DisplayBrightnessState actualDisplayBrightnessState = mAutomaticBrightnessStrategy
                 .updateBrightness(new StrategyExecutionRequest(displayPowerRequest, 0.6f,
-                        /* userSetBrightnessChanged= */ true));
+                        /* userSetBrightnessChanged= */ true, /* isStylusBeingUsed */ false));
         assertEquals(expectedDisplayBrightnessState, actualDisplayBrightnessState);
     }
 
@@ -764,7 +764,7 @@ public class AutomaticBrightnessStrategyTest {
                 .build();
         DisplayBrightnessState actualDisplayBrightnessState = mAutomaticBrightnessStrategy
                 .updateBrightness(new StrategyExecutionRequest(displayPowerRequest, 0.6f,
-                        /* userSetBrightnessChanged= */ true));
+                        /* userSetBrightnessChanged= */ true, /* isStylusBeingUsed */ false));
         assertEquals(expectedDisplayBrightnessState, actualDisplayBrightnessState);
     }
 

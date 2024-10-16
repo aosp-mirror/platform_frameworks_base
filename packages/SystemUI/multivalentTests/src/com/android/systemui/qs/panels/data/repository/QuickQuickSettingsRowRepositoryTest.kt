@@ -54,7 +54,7 @@ class QuickQuickSettingsRowRepositoryTest : SysuiTestCase() {
     private fun setRowsInConfig(rows: Int) =
         with(kosmos) {
             testCase.context.orCreateTestableResources.addOverride(
-                R.integer.quick_qs_panel_max_rows,
+                R.integer.quick_qs_paginated_grid_num_rows,
                 rows,
             )
             fakeConfigurationRepository.onConfigurationChange()

@@ -279,6 +279,7 @@ import com.android.internal.os.IResultReceiver;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.policy.DecorView;
 import com.android.internal.policy.PhoneFallbackEventHandler;
+import com.android.internal.protolog.ProtoLog;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.view.BaseSurfaceHolder;
 import com.android.internal.view.RootViewSurfaceTaker;
@@ -1281,6 +1282,8 @@ public final class ViewRootImpl implements ViewParent,
         mViewBoundsSandboxingEnabled = getViewBoundsSandboxingEnabled();
         mIsStylusPointerIconEnabled =
                 InputSettings.isStylusPointerIconEnabled(mContext);
+
+        initializeProtoLogInProcess();
 
         String processorOverrideName = context.getResources().getString(
                                     R.string.config_inputEventCompatProcessorOverrideClassName);
@@ -13402,5 +13405,14 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         mCurrentColorMode = colorMode;
+    }
+
+    private static boolean sProtoLogInitialized = false;
+
+    private void initializeProtoLogInProcess() {
+        if (!sProtoLogInitialized) {
+            ProtoLog.init(ViewProtoLogGroups.ALL_GROUPS);
+            sProtoLogInitialized = true;
+        }
     }
 }

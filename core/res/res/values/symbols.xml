@@ -3471,6 +3471,8 @@
   <java-symbol type="array" name="config_defaultPinnerServiceFiles" />
   <java-symbol type="bool" name="config_pinnerCameraApp" />
   <java-symbol type="integer" name="config_pinnerHomePinBytes" />
+  <java-symbol type="integer" name="config_pinnerCameraPinBytes" />
+  <java-symbol type="integer" name="config_pinnerAssistantPinBytes" />
   <java-symbol type="bool" name="config_pinnerAssistantApp" />
   <java-symbol type="integer" name="config_pinnerWebviewPinBytes" />
   <java-symbol type="integer" name="config_pinnerMaxPinnedMemoryPercentage" />

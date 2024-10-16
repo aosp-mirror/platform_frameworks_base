@@ -52,4 +52,7 @@ interface IDesktopMode {
 
     /** Remove desktop on the given display */
     oneway void removeDesktop(int displayId);
+
+    /** Move a task with given `taskId` to external display */
+    void moveToExternalDisplay(int taskId);
 }
