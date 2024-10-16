@@ -30,6 +30,7 @@ import com.android.internal.util.EmergencyAffordanceManager
 import com.android.systemui.authentication.domain.interactor.AuthenticationInteractor
 import com.android.systemui.bouncer.data.repository.EmergencyServicesRepository
 import com.android.systemui.bouncer.shared.model.BouncerActionButtonModel
+import com.android.systemui.bouncer.ui.helper.BouncerHapticPlayer
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
@@ -74,6 +75,7 @@ constructor(
     private val metricsLogger: MetricsLogger,
     private val dozeLogger: DozeLogger,
     private val sceneInteractor: Lazy<SceneInteractor>,
+    private val bouncerHapticPlayer: BouncerHapticPlayer,
 ) {
     /** The bouncer action button. If `null`, the button should not be shown. */
     val actionButton: Flow<BouncerActionButtonModel?> =
@@ -111,6 +113,8 @@ constructor(
         BouncerActionButtonModel(
             label = applicationContext.getString(R.string.lockscreen_emergency_call),
             onClick = {
+                // TODO(b/373930432): haptics should be played at the UI layer -> refactor
+                bouncerHapticPlayer.playEmergencyButtonClickFeedback()
                 prepareToPerformAction()
                 dozeLogger.logEmergencyCall()
                 startEmergencyDialerActivity()

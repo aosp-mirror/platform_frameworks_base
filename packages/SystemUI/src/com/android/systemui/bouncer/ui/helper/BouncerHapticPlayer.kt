@@ -81,4 +81,11 @@ class BouncerHapticPlayer @Inject constructor(private val msdlPlayer: dagger.Laz
 
     /** Deliver MSDL feedback when a numpad key is pressed on the pin bouncer */
     fun playNumpadKeyFeedback() = msdlPlayer.get().playToken(MSDLToken.KEYPRESS_STANDARD)
+
+    /** Deliver MSDL feedback when clicking on the emergency button */
+    fun playEmergencyButtonClickFeedback() {
+        if (isEnabled) {
+            msdlPlayer.get().playToken(MSDLToken.KEYPRESS_RETURN)
+        }
+    }
 }
