@@ -16,10 +16,14 @@
 
 package com.android.wm.shell.pip2.animation;
 
+import static android.view.Surface.ROTATION_270;
+import static android.view.Surface.ROTATION_90;
+
 import android.animation.Animator;
 import android.animation.RectEvaluator;
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.graphics.Matrix;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.view.Surface;
@@ -60,6 +64,11 @@ public class PipEnterAnimator extends ValueAnimator
     private final PointF mInitScale = new PointF();
     private final PointF mInitPos = new PointF();
     private final Rect mInitCrop = new Rect();
+    private final PointF mInitActivityScale = new PointF();
+    private final PointF mInitActivityPos = new PointF();
+
+    Matrix mTransformTensor = new Matrix();
+    final float[] mMatrixTmp = new float[9];
 
     public PipEnterAnimator(Context context,
             @NonNull SurfaceControl leash,
@@ -109,6 +118,10 @@ public class PipEnterAnimator extends ValueAnimator
 
     @Override
     public void onAnimationEnd(@NonNull Animator animation) {
+        if (mFinishTransaction != null) {
+            onEnterAnimationUpdate(mInitScale, mInitPos, mInitCrop,
+                    1f /* fraction */, mFinishTransaction);
+        }
         if (mAnimationEndCallback != null) {
             mAnimationEndCallback.run();
         }
@@ -126,16 +139,24 @@ public class PipEnterAnimator extends ValueAnimator
             float fraction, SurfaceControl.Transaction tx) {
         float scaleX = 1 + (initScale.x - 1) * (1 - fraction);
         float scaleY = 1 + (initScale.y - 1) * (1 - fraction);
-        tx.setScale(mLeash, scaleX, scaleY);
-
         float posX = initPos.x + (mEndBounds.left - initPos.x) * fraction;
         float posY = initPos.y + (mEndBounds.top - initPos.y) * fraction;
-        tx.setPosition(mLeash, posX, posY);
+
+        int normalizedRotation = mRotation;
+        if (normalizedRotation == ROTATION_270) {
+            normalizedRotation = -ROTATION_90;
+        }
+        float degrees = -normalizedRotation * 90f * fraction;
 
         Rect endCrop = new Rect(mEndBounds);
         endCrop.offsetTo(0, 0);
         mRectEvaluator.evaluate(fraction, initCrop, endCrop);
         tx.setCrop(mLeash, mAnimatedRect);
+
+        mTransformTensor.setScale(scaleX, scaleY);
+        mTransformTensor.postTranslate(posX, posY);
+        mTransformTensor.postRotate(degrees);
+        tx.setMatrix(mLeash, mTransformTensor, mMatrixTmp);
     }
 
     // no-ops
@@ -153,7 +174,22 @@ public class PipEnterAnimator extends ValueAnimator
      * calculated differently from generic transitions.
      * @param pipChange PiP change received as a transition target.
      */
-    public void setEnterStartState(@NonNull TransitionInfo.Change pipChange) {
+    public void setEnterStartState(@NonNull TransitionInfo.Change pipChange,
+            @NonNull TransitionInfo.Change pipActivityChange) {
+        PipUtils.calcEndTransform(pipActivityChange, pipChange, mInitActivityScale,
+                mInitActivityPos);
+        if (mStartTransaction != null && pipActivityChange.getLeash() != null) {
+            mStartTransaction.setCrop(pipActivityChange.getLeash(), null);
+            mStartTransaction.setScale(pipActivityChange.getLeash(), mInitActivityScale.x,
+                    mInitActivityScale.y);
+            mStartTransaction.setPosition(pipActivityChange.getLeash(), mInitActivityPos.x,
+                    mInitActivityPos.y);
+            mFinishTransaction.setCrop(pipActivityChange.getLeash(), null);
+            mFinishTransaction.setScale(pipActivityChange.getLeash(), mInitActivityScale.x,
+                    mInitActivityScale.y);
+            mFinishTransaction.setPosition(pipActivityChange.getLeash(), mInitActivityPos.x,
+                    mInitActivityPos.y);
+        }
         PipUtils.calcStartTransform(pipChange, mInitScale, mInitPos, mInitCrop);
     }
 }
