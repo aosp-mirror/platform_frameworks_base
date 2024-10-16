@@ -16,6 +16,7 @@
 
 package com.android.systemui.communal
 
+import android.os.UserHandle
 import android.provider.Settings
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.TransitionKey
@@ -147,9 +148,10 @@ constructor(
             .emitOnStart()
             .onEach {
                 screenTimeout =
-                    systemSettings.getInt(
+                    systemSettings.getIntForUser(
                         Settings.System.SCREEN_OFF_TIMEOUT,
                         DEFAULT_SCREEN_TIMEOUT,
+                        UserHandle.USER_CURRENT,
                     )
             }
             .launchIn(bgScope)

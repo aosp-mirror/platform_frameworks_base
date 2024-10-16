@@ -430,6 +430,10 @@ internal class MutableSceneTransitionLayoutStateImpl(
                     // Replace the transition.
                     transitionStates =
                         transitionStates.subList(0, transitionStates.lastIndex) + transition
+
+                    // Make sure it is removed from the finishedTransitions set if it was already
+                    // finished.
+                    finishedTransitions.remove(currentState)
                 } else {
                     // Append the new transition.
                     transitionStates = transitionStates + transition

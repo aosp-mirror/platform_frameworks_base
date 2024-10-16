@@ -19,7 +19,7 @@ package com.android.systemui.scene.ui.viewmodel
 import android.view.MotionEvent
 import android.view.View
 import androidx.compose.runtime.getValue
-import com.android.app.tracing.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.compose.animation.scene.ContentKey
 import com.android.compose.animation.scene.DefaultEdgeDetector
 import com.android.compose.animation.scene.ObservableTransitionState

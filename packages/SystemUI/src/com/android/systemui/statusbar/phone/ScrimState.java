@@ -210,7 +210,7 @@ public enum ScrimState {
 
         @Override
         public float getMaxLightRevealScrimAlpha() {
-            return mWallpaperSupportsAmbientMode && !mHasBackdrop ? 0f : 1f;
+            return mWallpaperSupportsAmbientMode ? 0f : 1f;
         }
 
         @Override
@@ -369,7 +369,6 @@ public enum ScrimState {
     DockManager mDockManager;
     boolean mDisplayRequiresBlanking;
     boolean mWallpaperSupportsAmbientMode;
-    boolean mHasBackdrop;
     boolean mLaunchingAffordanceWithPreview;
     boolean mOccludeAnimationPlaying;
     boolean mWakeLockScreenSensorActive;
@@ -487,10 +486,6 @@ public enum ScrimState {
 
     public boolean isLowPowerState() {
         return false;
-    }
-
-    public void setHasBackdrop(boolean hasBackdrop) {
-        mHasBackdrop = hasBackdrop;
     }
 
     public void setWakeLockScreenSensorActive(boolean active) {

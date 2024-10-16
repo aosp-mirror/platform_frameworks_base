@@ -217,7 +217,6 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
         assertThat(mNotificationPanelViewController.getVerticalSpaceForLockscreenShelf())
                 .isEqualTo(5);
 
-        mSetFlagsRule.enableFlags(com.android.systemui.Flags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR);
         assertThat(mNotificationPanelViewController.getVerticalSpaceForLockscreenShelf())
                 .isEqualTo(5);
     }
@@ -235,7 +234,6 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
         assertThat(mNotificationPanelViewController.getVerticalSpaceForLockscreenShelf())
                 .isEqualTo(0);
 
-        mSetFlagsRule.enableFlags(com.android.systemui.Flags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR);
         assertThat(mNotificationPanelViewController.getVerticalSpaceForLockscreenShelf())
                 .isEqualTo(0);
     }
@@ -253,7 +251,6 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
         assertThat(mNotificationPanelViewController.getVerticalSpaceForLockscreenShelf())
                 .isEqualTo(0);
 
-        mSetFlagsRule.enableFlags(com.android.systemui.Flags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR);
         assertThat(mNotificationPanelViewController.getVerticalSpaceForLockscreenShelf())
                 .isEqualTo(0);
     }
@@ -271,7 +268,6 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
         assertThat(mNotificationPanelViewController.getVerticalSpaceForLockscreenShelf())
                 .isEqualTo(2);
 
-        mSetFlagsRule.enableFlags(com.android.systemui.Flags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR);
         assertThat(mNotificationPanelViewController.getVerticalSpaceForLockscreenShelf())
                 .isEqualTo(2);
     }
@@ -289,7 +285,6 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
         assertThat(mNotificationPanelViewController.getVerticalSpaceForLockscreenShelf())
                 .isEqualTo(0);
 
-        mSetFlagsRule.enableFlags(com.android.systemui.Flags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR);
         assertThat(mNotificationPanelViewController.getVerticalSpaceForLockscreenShelf())
                 .isEqualTo(0);
     }
@@ -389,7 +384,6 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     @Test
     @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void alternateBouncerVisible_onTouchEvent_notHandled() {
-        mSetFlagsRule.enableFlags(com.android.systemui.Flags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR);
         // GIVEN alternate bouncer is visible
         when(mAlternateBouncerInteractor.isVisibleState()).thenReturn(true);
 

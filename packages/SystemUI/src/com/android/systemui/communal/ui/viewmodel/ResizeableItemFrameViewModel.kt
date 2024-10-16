@@ -19,7 +19,7 @@ package com.android.systemui.communal.ui.viewmodel
 import androidx.compose.foundation.gestures.AnchoredDraggableState
 import androidx.compose.foundation.gestures.DraggableAnchors
 import androidx.compose.runtime.snapshotFlow
-import com.android.app.tracing.coroutines.coroutineScope
+import com.android.app.tracing.coroutines.coroutineScopeTraced as coroutineScope
 import com.android.systemui.lifecycle.ExclusiveActivatable
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.Flow

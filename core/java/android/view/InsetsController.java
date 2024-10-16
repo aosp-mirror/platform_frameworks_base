@@ -22,6 +22,7 @@ import static android.view.InsetsControllerProto.CONTROL;
 import static android.view.InsetsControllerProto.STATE;
 import static android.view.InsetsSource.ID_IME;
 import static android.view.InsetsSource.ID_IME_CAPTION_BAR;
+import static android.view.ViewProtoLogGroups.IME_INSETS_CONTROLLER;
 import static android.view.WindowInsets.Type.FIRST;
 import static android.view.WindowInsets.Type.LAST;
 import static android.view.WindowInsets.Type.all;
@@ -69,6 +70,7 @@ import android.view.inputmethod.InputMethodManager;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.inputmethod.ImeTracing;
 import com.android.internal.inputmethod.SoftInputShowHideReason;
+import com.android.internal.protolog.ProtoLog;
 import com.android.internal.util.function.TriFunction;
 
 import java.io.PrintWriter;
@@ -1920,6 +1922,8 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         final @InsetsType int requestedVisibleTypes =
                 (mRequestedVisibleTypes & ~mask) | (visibleTypes & mask);
         if (mRequestedVisibleTypes != requestedVisibleTypes) {
+            ProtoLog.d(IME_INSETS_CONTROLLER, "Setting requestedVisibleTypes to %d (was %d)",
+                    requestedVisibleTypes, mRequestedVisibleTypes);
             mRequestedVisibleTypes = requestedVisibleTypes;
         }
     }

@@ -342,7 +342,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
      * Cancel any pending content view frees from {@link #freeNotificationView} for the provided
      * content views.
      *
-     * @param row top level notification row containing the content views
+     * @param row          top level notification row containing the content views
      * @param contentViews content views to cancel pending frees on
      */
     private void cancelContentViewFrees(
@@ -478,6 +478,13 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                 notifLayoutInflaterFactoryProvider.provide(row, FLAG_CONTENT_VIEW_HEADS_UP));
         setRemoteViewsInflaterFactory(result.newPublicView,
                 notifLayoutInflaterFactoryProvider.provide(row, FLAG_CONTENT_VIEW_PUBLIC));
+        if (android.app.Flags.notificationsRedesignAppIcons()) {
+            setRemoteViewsInflaterFactory(result.mNewGroupHeaderView,
+                    notifLayoutInflaterFactoryProvider.provide(row, FLAG_GROUP_SUMMARY_HEADER));
+            setRemoteViewsInflaterFactory(result.mNewMinimizedGroupHeaderView,
+                    notifLayoutInflaterFactoryProvider.provide(row,
+                            FLAG_LOW_PRIORITY_GROUP_SUMMARY_HEADER));
+        }
     }
 
     private static void setRemoteViewsInflaterFactory(RemoteViews remoteViews,
@@ -516,6 +523,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                     logger.logAsyncTaskProgress(entry, "contracted view applied");
                     result.inflatedContentView = v;
                 }
+
                 @Override
                 public RemoteViews getRemoteView() {
                     return result.newContentView;
@@ -1406,6 +1414,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
     @VisibleForTesting
     abstract static class ApplyCallback {
         public abstract void setResultView(View v);
+
         public abstract RemoteViews getRemoteView();
     }
 

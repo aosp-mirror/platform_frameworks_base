@@ -1246,9 +1246,12 @@ public class BubbleController implements ConfigurationChangeListener,
      */
     public void dragBubbleToDismiss(String bubbleKey, long timestamp) {
         String selectedBubbleKey = mBubbleData.getSelectedBubbleKey();
-        if (mBubbleData.hasAnyBubbleWithKey(bubbleKey)) {
+        Bubble bubbleToDismiss = mBubbleData.getAnyBubbleWithkey(bubbleKey);
+        if (bubbleToDismiss != null) {
             mBubbleData.dismissBubbleWithKey(
                     bubbleKey, Bubbles.DISMISS_USER_GESTURE_FROM_LAUNCHER, timestamp);
+            mLogger.log(bubbleToDismiss,
+                    BubbleLogger.Event.BUBBLE_BAR_BUBBLE_DISMISSED_DRAG_BUBBLE);
         }
         if (mBubbleData.hasBubbles()) {
             // We still have bubbles, if we dragged an individual bubble to dismiss we were expanded

@@ -21,7 +21,7 @@ import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_CROSSFA
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_JUMPCUT;
 import static android.view.WindowManagerPolicyConstants.SCREEN_FREEZE_LAYER_BASE;
 
-import static com.android.wm.shell.transition.DefaultTransitionHandler.buildSurfaceAnimation;
+import static com.android.wm.shell.transition.DefaultSurfaceAnimator.buildSurfaceAnimation;
 import static com.android.wm.shell.transition.Transitions.TAG;
 
 import android.animation.Animator;

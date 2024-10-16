@@ -326,3 +326,11 @@ flag {
     bug: "360129103"
     is_fixed_read_only: true
 }
+
+flag {
+    name: "include_feature_flags_in_package_cacher"
+    namespace: "package_manager_service"
+    description: "Include feature flag status when determining hits or misses in PackageCacher."
+    bug: "364771256"
+    is_fixed_read_only: true
+}

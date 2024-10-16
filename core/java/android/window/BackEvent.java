@@ -156,6 +156,22 @@ public final class BackEvent {
     }
 
     @Override
+    public boolean equals(Object other) {
+        if (this == other) {
+            return true;
+        }
+        if (!(other instanceof BackEvent)) {
+            return false;
+        }
+        final BackEvent that = (BackEvent) other;
+        return mTouchX == that.mTouchX
+                && mTouchY == that.mTouchY
+                && mProgress == that.mProgress
+                && mSwipeEdge == that.mSwipeEdge
+                && mFrameTime == that.mFrameTime;
+    }
+
+    @Override
     public String toString() {
         return "BackEvent{"
                 + "mTouchX=" + mTouchX

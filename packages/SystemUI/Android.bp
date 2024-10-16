@@ -899,9 +899,9 @@ android_robolectric_test {
         "androidx.compose.runtime_runtime",
     ],
     libs: [
-        "android.test.runner.stubs.system",
-        "android.test.base.stubs.system",
-        "android.test.mock.stubs.system",
+        "android.test.runner.impl",
+        "android.test.base.impl",
+        "android.test.mock.impl",
         "truth",
     ],
 
@@ -936,9 +936,9 @@ android_robolectric_test {
         "androidx.compose.runtime_runtime",
     ],
     libs: [
-        "android.test.runner.stubs.system",
-        "android.test.base.stubs.system",
-        "android.test.mock.stubs.system",
+        "android.test.runner.impl",
+        "android.test.base.impl",
+        "android.test.mock.impl",
         "truth",
     ],
 
@@ -974,9 +974,9 @@ android_ravenwood_test {
         "androidx.compose.runtime_runtime",
     ],
     libs: [
-        "android.test.runner.stubs.system",
-        "android.test.base.stubs.system",
-        "android.test.mock.stubs.system",
+        "android.test.runner.impl",
+        "android.test.base.impl",
+        "android.test.mock.impl",
     ],
     auto_gen_config: true,
     plugins: [

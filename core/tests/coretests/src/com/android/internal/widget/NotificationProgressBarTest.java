@@ -254,7 +254,6 @@ public class NotificationProgressBarTest {
 
         // Colors with 50% opacity
         int fadedGreen = 0x7F00FF00;
-        int fadedBlue = 0x7F0000FF;
         int fadedYellow = 0x7FFFFF00;
 
         List<Part> expected = new ArrayList<>(List.of(
