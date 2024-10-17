@@ -150,26 +150,14 @@ public class WakelockStatsFrameworkEvents {
     }
 
     @VisibleForTesting
-    public boolean inOverflow() {
-        synchronized (mLock) {
-            return inOverflowLocked();
-        }
-    }
-
     @GuardedBy("mLock")
-    private boolean inOverflowLocked() {
+    public boolean inOverflow() {
         return mWakeLockStats.size() >= SUMMARY_THRESHOLD;
     }
 
     @VisibleForTesting
-    public boolean inHardCap() {
-        synchronized (mLock) {
-            return inHardCapLocked();
-        }
-    }
-
     @GuardedBy("mLock")
-    private boolean inHardCapLocked() {
+    public boolean inHardCap() {
         return mWakeLockStats.size() >= MAX_WAKELOCK_DIMENSIONS;
     }
 
@@ -189,9 +177,9 @@ public class WakelockStatsFrameworkEvents {
                 long wakeLockDur = eventUptimeMillis - data.acquireUptimeMillis;
 
                 // Rewrite key if in an overflow state.
-                if (inOverflowLocked() && !mWakeLockStats.containsKey(key)) {
+                if (inOverflow() && !mWakeLockStats.containsKey(key)) {
                     key.setOverflow();
-                    if (inHardCapLocked() && !mWakeLockStats.containsKey(key)) {
+                    if (inHardCap() && !mWakeLockStats.containsKey(key)) {
                         key.setHardCap();
                     }
                 }
@@ -207,12 +195,41 @@ public class WakelockStatsFrameworkEvents {
         }
     }
 
-    public List<StatsEvent> pullFrameworkWakelockInfoAtoms() {
-        return pullFrameworkWakelockInfoAtoms(SystemClock.uptimeMillis());
+    // Shim interface for testing.
+    @VisibleForTesting
+    public interface EventLogger {
+        void logResult(
+                int uid, String tag, int wakeLockLevel, long uptimeMillis, long completedCount);
     }
 
-    public List<StatsEvent> pullFrameworkWakelockInfoAtoms(long nowMillis) {
+    public List<StatsEvent> pullFrameworkWakelockInfoAtoms() {
         List<StatsEvent> result = new ArrayList<>();
+        EventLogger logger =
+                new EventLogger() {
+                    public void logResult(
+                            int uid,
+                            String tag,
+                            int wakeLockLevel,
+                            long uptimeMillis,
+                            long completedCount) {
+                        StatsEvent event =
+                                StatsEvent.newBuilder()
+                                        .setAtomId(FrameworkStatsLog.FRAMEWORK_WAKELOCK_INFO)
+                                        .writeInt(uid)
+                                        .writeString(tag)
+                                        .writeInt(wakeLockLevel)
+                                        .writeLong(uptimeMillis)
+                                        .writeLong(completedCount)
+                                        .build();
+                        result.add(event);
+                    }
+                };
+        pullFrameworkWakelockInfoAtoms(SystemClock.uptimeMillis(), logger);
+        return result;
+    }
+
+    @VisibleForTesting
+    public void pullFrameworkWakelockInfoAtoms(long nowMillis, EventLogger logger) {
         HashSet<WakeLockKey> keys = new HashSet<>();
 
         // Used to collect open WakeLocks when in an overflow state.
@@ -223,13 +240,13 @@ public class WakelockStatsFrameworkEvents {
 
             // If we are in an overflow state, an open wakelock may have a new key
             // that needs to be summarized.
-            if (inOverflowLocked()) {
+            if (inOverflow()) {
                 for (WakeLockKey key : mOpenWakeLocks.keySet()) {
                     if (!mWakeLockStats.containsKey(key)) {
                         WakeLockData data = mOpenWakeLocks.get(key);
 
                         key.setOverflow();
-                        if (inHardCapLocked() && !mWakeLockStats.containsKey(key)) {
+                        if (inHardCap() && !mWakeLockStats.containsKey(key)) {
                             key.setHardCap();
                         }
                         keys.add(key);
@@ -257,20 +274,14 @@ public class WakelockStatsFrameworkEvents {
 
                 stats.uptimeMillis += openWakeLockUptime + extraTime.uptimeMillis;
 
-                StatsEvent event =
-                        StatsEvent.newBuilder()
-                                .setAtomId(FrameworkStatsLog.FRAMEWORK_WAKELOCK_INFO)
-                                .writeInt(key.getUid())
-                                .writeString(key.getTag())
-                                .writeInt(key.getPowerManagerWakeLockLevel())
-                                .writeLong(stats.uptimeMillis)
-                                .writeLong(stats.completedCount)
-                                .build();
-                result.add(event);
+                logger.logResult(
+                        key.getUid(),
+                        key.getTag(),
+                        key.getPowerManagerWakeLockLevel(),
+                        stats.uptimeMillis,
+                        stats.completedCount);
             }
         }
-
-        return result;
     }
 
     private static final String TAG = "BatteryStatsPulledMetrics";
