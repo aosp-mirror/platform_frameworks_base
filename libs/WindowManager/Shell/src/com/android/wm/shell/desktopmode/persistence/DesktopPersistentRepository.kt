@@ -73,15 +73,14 @@ class DesktopPersistentRepository(
      */
     private suspend fun getDesktopRepositoryState(
         userId: Int = DEFAULT_USER_ID
-    ): DesktopRepositoryState =
+    ): DesktopRepositoryState? =
         try {
             dataStoreFlow
                 .first()
-                .desktopRepoByUserMap
-                .getOrDefault(userId, DesktopRepositoryState.getDefaultInstance())
+                .desktopRepoByUserMap[userId]
         } catch (e: Exception) {
             Log.e(TAG, "Unable to read from datastore", e)
-            DesktopRepositoryState.getDefaultInstance()
+            null
         }
 
     /**
@@ -91,13 +90,13 @@ class DesktopPersistentRepository(
     suspend fun readDesktop(
         userId: Int = DEFAULT_USER_ID,
         desktopId: Int = DEFAULT_DESKTOP_ID,
-    ): Desktop =
+    ): Desktop? =
         try {
             val repository = getDesktopRepositoryState(userId)
-            repository.getDesktopOrThrow(desktopId)
+            repository?.getDesktopOrThrow(desktopId)
         } catch (e: Exception) {
             Log.e(TAG, "Unable to get desktop info from persistent repository", e)
-            Desktop.getDefaultInstance()
+            null
         }
 
     /** Adds or updates a desktop stored in the datastore */
