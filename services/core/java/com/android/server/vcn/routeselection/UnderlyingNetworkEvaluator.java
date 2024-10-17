@@ -102,17 +102,15 @@ public class UnderlyingNetworkEvaluator {
         updatePriorityClass(
                 underlyingNetworkTemplates, subscriptionGroup, lastSnapshot, carrierConfig);
 
-        if (isIpSecPacketLossDetectorEnabled()) {
-            try {
-                mMetricMonitors.add(
-                        mDependencies.newIpSecPacketLossDetector(
-                                mVcnContext,
-                                mNetworkRecordBuilder.getNetwork(),
-                                carrierConfig,
-                                new MetricMonitorCallbackImpl()));
-            } catch (IllegalAccessException e) {
-                // No action. Do not add anything to mMetricMonitors
-            }
+        try {
+            mMetricMonitors.add(
+                    mDependencies.newIpSecPacketLossDetector(
+                            mVcnContext,
+                            mNetworkRecordBuilder.getNetwork(),
+                            carrierConfig,
+                            new MetricMonitorCallbackImpl()));
+        } catch (IllegalAccessException e) {
+            // No action. Do not add anything to mMetricMonitors
         }
     }
 
@@ -188,22 +186,12 @@ public class UnderlyingNetworkEvaluator {
         }
     }
 
-    private boolean isIpSecPacketLossDetectorEnabled() {
-        return isIpSecPacketLossDetectorEnabled(mVcnContext);
-    }
-
-    private static boolean isIpSecPacketLossDetectorEnabled(VcnContext vcnContext) {
-        return vcnContext.isFlagIpSecTransformStateEnabled();
-    }
-
     /** Get the comparator for UnderlyingNetworkEvaluator */
     public static Comparator<UnderlyingNetworkEvaluator> getComparator(VcnContext vcnContext) {
         return (left, right) -> {
-            if (isIpSecPacketLossDetectorEnabled(vcnContext)) {
-                if (left.mIsPenalized != right.mIsPenalized) {
-                    // A penalized network should have lower priority which means a larger index
-                    return left.mIsPenalized ? 1 : -1;
-                }
+            if (left.mIsPenalized != right.mIsPenalized) {
+                // A penalized network should have lower priority which means a larger index
+                return left.mIsPenalized ? 1 : -1;
             }
 
             final int leftIndex = left.mPriorityClass;

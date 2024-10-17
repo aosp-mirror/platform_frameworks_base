@@ -148,12 +148,6 @@ public class IpSecPacketLossDetector extends NetworkMetricMonitor {
 
         Objects.requireNonNull(deps, "Missing deps");
 
-        if (!vcnContext.isFlagIpSecTransformStateEnabled()) {
-            // Caller error
-            logWtf("ipsecTransformState flag disabled");
-            throw new IllegalAccessException("ipsecTransformState flag disabled");
-        }
-
         mHandler = new Handler(getVcnContext().getLooper());
 
         mPowerManager = getVcnContext().getContext().getSystemService(PowerManager.class);
