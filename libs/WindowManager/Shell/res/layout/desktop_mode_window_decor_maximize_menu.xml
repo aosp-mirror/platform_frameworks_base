@@ -38,7 +38,7 @@
             <Button
                 android:layout_width="94dp"
                 android:layout_height="60dp"
-                android:id="@+id/maximize_menu_maximize_button"
+                android:id="@+id/maximize_menu_size_toggle_button"
                 style="?android:attr/buttonBarButtonStyle"
                 android:stateListAnimator="@null"
                 android:importantForAccessibility="yes"
@@ -48,7 +48,7 @@
                 android:alpha="0"/>
 
             <TextView
-                android:id="@+id/maximize_menu_maximize_window_text"
+                android:id="@+id/maximize_menu_size_toggle_button_text"
                 android:layout_width="94dp"
                 android:layout_height="18dp"
                 android:textSize="11sp"

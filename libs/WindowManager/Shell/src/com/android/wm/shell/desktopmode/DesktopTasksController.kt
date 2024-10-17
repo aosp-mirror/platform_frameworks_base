@@ -1185,7 +1185,13 @@ class DesktopTasksController(
         val options = createNewWindowOptions(callingTask)
         if (options.launchWindowingMode == WINDOWING_MODE_FREEFORM) {
             wct.startTask(requestedTaskId, options.toBundle())
-            transitions.startTransition(TRANSIT_OPEN, wct, null)
+            val taskToMinimize = bringDesktopAppsToFrontBeforeShowingNewTask(
+                callingTask.displayId, wct, requestedTaskId)
+            val runOnTransit = immersiveTransitionHandler
+                .exitImmersiveIfApplicable(wct, callingTask.displayId)
+            val transition = transitions.startTransition(TRANSIT_OPEN, wct, null)
+            addPendingMinimizeTransition(transition, taskToMinimize)
+            runOnTransit?.invoke(transition)
         } else {
             val splitPosition = splitScreenController.determineNewInstancePosition(callingTask)
             splitScreenController.startTask(requestedTaskId, splitPosition,

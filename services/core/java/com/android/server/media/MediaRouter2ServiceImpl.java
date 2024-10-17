@@ -677,24 +677,15 @@ class MediaRouter2ServiceImpl {
             @NonNull IMediaRouter2Manager manager,
             int requestId,
             @NonNull RoutingSessionInfo oldSession,
-            @NonNull MediaRoute2Info route,
-            @NonNull UserHandle transferInitiatorUserHandle,
-            @NonNull String transferInitiatorPackageName) {
+            @NonNull MediaRoute2Info route) {
         Objects.requireNonNull(manager, "manager must not be null");
         Objects.requireNonNull(oldSession, "oldSession must not be null");
         Objects.requireNonNull(route, "route must not be null");
-        Objects.requireNonNull(transferInitiatorUserHandle);
 
         final long token = Binder.clearCallingIdentity();
         try {
             synchronized (mLock) {
-                requestCreateSessionWithManagerLocked(
-                        requestId,
-                        manager,
-                        oldSession,
-                        route,
-                        transferInitiatorUserHandle,
-                        transferInitiatorPackageName);
+                requestCreateSessionWithManagerLocked(requestId, manager, oldSession, route);
             }
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -1738,9 +1729,7 @@ class MediaRouter2ServiceImpl {
             int requestId,
             @NonNull IMediaRouter2Manager manager,
             @NonNull RoutingSessionInfo oldSession,
-            @NonNull MediaRoute2Info route,
-            @NonNull UserHandle transferInitiatorUserHandle,
-            @NonNull String transferInitiatorPackageName) {
+            @NonNull MediaRoute2Info route) {
         ManagerRecord managerRecord = mAllManagerRecords.get(manager.asBinder());
         if (managerRecord == null) {
             return;

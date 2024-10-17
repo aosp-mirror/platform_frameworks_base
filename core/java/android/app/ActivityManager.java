@@ -1031,7 +1031,9 @@ public class ActivityManager {
             | PROCESS_CAPABILITY_FOREGROUND_AUDIO_CONTROL;
 
     /**
-     * All implicit capabilities. There are capabilities that process automatically have.
+     * All implicit capabilities. This capability set is currently only used for processes under
+     * active instrumentation. The intent is to allow CTS tests to always have these capabilities
+     * so that every test doesn't need to launch FGS.
      * @hide
      */
     @TestApi

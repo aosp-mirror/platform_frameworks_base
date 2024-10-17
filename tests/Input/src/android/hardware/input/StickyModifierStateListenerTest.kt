@@ -27,21 +27,20 @@ import android.platform.test.flag.junit.SetFlagsRule
 import android.view.KeyEvent
 import androidx.test.core.app.ApplicationProvider
 import com.android.server.testutils.any
-import org.junit.After
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
-import org.junit.runner.RunWith
-import org.mockito.Mock
-import org.mockito.Mockito
-import org.mockito.Mockito.doAnswer
-import org.mockito.Mockito.`when`
-import org.mockito.junit.MockitoJUnitRunner
+import com.android.test.input.MockInputManagerRule
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlin.test.fail
+import org.junit.Before
+import org.junit.Rule
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.mockito.Mockito
+import org.mockito.Mockito.doAnswer
+import org.mockito.Mockito.`when`
+import org.mockito.junit.MockitoJUnitRunner
 
 /**
  * Tests for [InputManager.StickyModifierStateListener].
@@ -59,21 +58,18 @@ class StickyModifierStateListenerTest {
 
     @get:Rule
     val rule = SetFlagsRule()
+    @get:Rule
+    val inputManagerRule = MockInputManagerRule()
 
     private val testLooper = TestLooper()
     private val executor = HandlerExecutor(Handler(testLooper.looper))
     private var registeredListener: IStickyModifierStateListener? = null
     private lateinit var context: Context
     private lateinit var inputManager: InputManager
-    private lateinit var inputManagerGlobalSession: InputManagerGlobal.TestSession
-
-    @Mock
-    private lateinit var iInputManagerMock: IInputManager
 
     @Before
     fun setUp() {
         context = Mockito.spy(ContextWrapper(ApplicationProvider.getApplicationContext()))
-        inputManagerGlobalSession = InputManagerGlobal.createTestSession(iInputManagerMock)
         inputManager = InputManager(context)
         `when`(context.getSystemService(Mockito.eq(Context.INPUT_SERVICE)))
                 .thenReturn(inputManager)
@@ -88,7 +84,7 @@ class StickyModifierStateListenerTest {
             }
             registeredListener = listener
             null
-        }.`when`(iInputManagerMock).registerStickyModifierStateListener(any())
+        }.`when`(inputManagerRule.mock).registerStickyModifierStateListener(any())
 
         // Handle sticky modifier state listener being unregistered.
         doAnswer {
@@ -99,14 +95,7 @@ class StickyModifierStateListenerTest {
             }
             registeredListener = null
             null
-        }.`when`(iInputManagerMock).unregisterStickyModifierStateListener(any())
-    }
-
-    @After
-    fun tearDown() {
-        if (this::inputManagerGlobalSession.isInitialized) {
-            inputManagerGlobalSession.close()
-        }
+        }.`when`(inputManagerRule.mock).unregisterStickyModifierStateListener(any())
     }
 
     private fun notifyStickyModifierStateChanged(modifierState: Int, lockedModifierState: Int) {

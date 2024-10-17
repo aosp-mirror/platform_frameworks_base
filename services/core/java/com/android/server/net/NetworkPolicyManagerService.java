@@ -3100,11 +3100,16 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
 
         synchronized (mUidRulesFirstLock) {
-            final int oldPolicy = mUidPolicy.get(uid, POLICY_NONE);
-            policy |= oldPolicy;
-            if (oldPolicy != policy) {
-                setUidPolicyUncheckedUL(uid, oldPolicy, policy, true);
-                mLogger.uidPolicyChanged(uid, oldPolicy, policy);
+            final long token = Binder.clearCallingIdentity();
+            try {
+                final int oldPolicy = mUidPolicy.get(uid, POLICY_NONE);
+                policy |= oldPolicy;
+                if (oldPolicy != policy) {
+                    setUidPolicyUncheckedUL(uid, oldPolicy, policy, true);
+                    mLogger.uidPolicyChanged(uid, oldPolicy, policy);
+                }
+            } finally {
+                Binder.restoreCallingIdentity(token);
             }
         }
     }
@@ -3119,11 +3124,16 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
 
         synchronized (mUidRulesFirstLock) {
-            final int oldPolicy = mUidPolicy.get(uid, POLICY_NONE);
-            policy = oldPolicy & ~policy;
-            if (oldPolicy != policy) {
-                setUidPolicyUncheckedUL(uid, oldPolicy, policy, true);
-                mLogger.uidPolicyChanged(uid, oldPolicy, policy);
+            final long token = Binder.clearCallingIdentity();
+            try {
+                final int oldPolicy = mUidPolicy.get(uid, POLICY_NONE);
+                policy = oldPolicy & ~policy;
+                if (oldPolicy != policy) {
+                    setUidPolicyUncheckedUL(uid, oldPolicy, policy, true);
+                    mLogger.uidPolicyChanged(uid, oldPolicy, policy);
+                }
+            } finally {
+                Binder.restoreCallingIdentity(token);
             }
         }
     }
