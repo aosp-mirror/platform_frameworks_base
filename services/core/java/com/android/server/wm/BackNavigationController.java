@@ -34,6 +34,7 @@ import static com.android.server.wm.BackNavigationProto.LAST_BACK_TYPE;
 import static com.android.server.wm.BackNavigationProto.MAIN_OPEN_ACTIVITY;
 import static com.android.server.wm.BackNavigationProto.SHOW_WALLPAPER;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_PREDICT_BACK;
+import static com.android.server.wm.WindowContainer.SYNC_STATE_NONE;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -1237,8 +1238,9 @@ class BackNavigationController {
                 }
                 allWindowDrawn &= next.mAppWindowDrawn;
             }
-            // Do not remove until transition ready.
-            if (!activity.isVisible()) {
+            // Do not remove windowless surfaces if the transaction has not been applied.
+            if (activity.getSyncTransactionCommitCallbackDepth() > 0
+                    || activity.mSyncState != SYNC_STATE_NONE) {
                 return;
             }
             if (allWindowDrawn) {
