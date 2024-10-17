@@ -327,8 +327,6 @@ public final class SystemServer implements Dumpable {
      * Implementation class names for services in the {@code SYSTEMSERVERCLASSPATH}
      * from {@code PRODUCT_SYSTEM_SERVER_JARS} that are *not* in {@code services.jar}.
      */
-    private static final String ARC_NETWORK_SERVICE_CLASS =
-            "com.android.server.arc.net.ArcNetworkService";
     private static final String ARC_PERSISTENT_DATA_BLOCK_SERVICE_CLASS =
             "com.android.server.arc.persistent_data_block.ArcPersistentDataBlockService";
     private static final String ARC_SYSTEM_HEALTH_SERVICE =
@@ -2101,24 +2099,13 @@ public final class SystemServer implements Dumpable {
             if (context.getPackageManager().hasSystemFeature(
                     PackageManager.FEATURE_WIFI)) {
                 // Wifi Service must be started first for wifi-related services.
-                if (!isArc) {
-                    t.traceBegin("StartWifi");
-                    mSystemServiceManager.startServiceFromJar(
-                            WIFI_SERVICE_CLASS, WIFI_APEX_SERVICE_JAR_PATH);
-                    t.traceEnd();
-                    t.traceBegin("StartWifiScanning");
-                    mSystemServiceManager.startServiceFromJar(
-                            WIFI_SCANNING_SERVICE_CLASS, WIFI_APEX_SERVICE_JAR_PATH);
-                    t.traceEnd();
-                }
-            }
-
-            // ARC - ArcNetworkService registers the ARC network stack and replaces the
-            // stock WiFi service in both ARC++ container and ARCVM. Always starts the ARC network
-            // stack regardless of whether FEATURE_WIFI is enabled/disabled (b/254755875).
-            if (isArc) {
-                t.traceBegin("StartArcNetworking");
-                mSystemServiceManager.startService(ARC_NETWORK_SERVICE_CLASS);
+                t.traceBegin("StartWifi");
+                mSystemServiceManager.startServiceFromJar(
+                        WIFI_SERVICE_CLASS, WIFI_APEX_SERVICE_JAR_PATH);
+                t.traceEnd();
+                t.traceBegin("StartWifiScanning");
+                mSystemServiceManager.startServiceFromJar(
+                        WIFI_SCANNING_SERVICE_CLASS, WIFI_APEX_SERVICE_JAR_PATH);
                 t.traceEnd();
             }
 
