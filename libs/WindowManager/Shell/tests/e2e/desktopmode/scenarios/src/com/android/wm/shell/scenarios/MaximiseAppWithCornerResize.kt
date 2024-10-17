@@ -38,10 +38,8 @@ import org.junit.Rule
 import org.junit.Test
 
 @Ignore("Test Base Class")
-abstract class ResizeAppWithCornerResize(
+abstract class MaximiseAppWithCornerResize(
     val rotation: Rotation = Rotation.ROTATION_0,
-    val horizontalChange: Int = 200,
-    val verticalChange: Int = -200,
     val appProperty: AppProperty = AppProperty.STANDARD
 ) {
 
@@ -49,6 +47,7 @@ abstract class ResizeAppWithCornerResize(
     private val tapl = LauncherInstrumentation()
     private val wmHelper = WindowManagerStateHelper(instrumentation)
     private val device = UiDevice.getInstance(instrumentation)
+    private val maxResizeChange = 3000
     private val testApp =
         DesktopModeAppHelper(
             when (appProperty) {
@@ -65,19 +64,26 @@ abstract class ResizeAppWithCornerResize(
     fun setup() {
         Assume.assumeTrue(Flags.enableDesktopWindowingMode() && tapl.isTablet)
         tapl.setEnableRotation(true)
-        ChangeDisplayOrientationRule.setRotation(rotation)
         tapl.setExpectedRotation(rotation.value)
+        ChangeDisplayOrientationRule.setRotation(rotation)
         testApp.enterDesktopWithDrag(wmHelper, device)
-    }
-
-    @Test
-    open fun resizeAppWithCornerResize() {
         testApp.cornerResize(
             wmHelper,
             device,
             DesktopModeAppHelper.Corners.RIGHT_TOP,
-            horizontalChange,
-            verticalChange
+            maxResizeChange,
+            -maxResizeChange
+        )
+    }
+
+    @Test
+    open fun resizeAppWithCornerResizeToMaximumSize() {
+        testApp.cornerResize(
+            wmHelper,
+            device,
+            DesktopModeAppHelper.Corners.LEFT_BOTTOM,
+            -maxResizeChange,
+            maxResizeChange
         )
     }
 
