@@ -28,10 +28,15 @@ import android.graphics.drawable.Drawable
 import android.util.Log
 import com.android.internal.R
 import com.android.launcher3.icons.BaseIconFactory
+import com.android.systemui.Dumpable
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dump.DumpManager
 import com.android.systemui.statusbar.notification.collection.NotifCollectionCache
+import com.android.systemui.util.asIndenting
+import com.android.systemui.util.withIncreasedIndent
 import dagger.Module
 import dagger.Provides
+import java.io.PrintWriter
 import javax.inject.Inject
 import javax.inject.Provider
 
@@ -54,7 +59,14 @@ interface AppIconProvider {
 }
 
 @SysUISingleton
-class AppIconProviderImpl @Inject constructor(private val sysuiContext: Context) : AppIconProvider {
+class AppIconProviderImpl
+@Inject
+constructor(private val sysuiContext: Context, dumpManager: DumpManager) :
+    AppIconProvider, Dumpable {
+    init {
+        dumpManager.registerNormalDumpable(TAG, this)
+    }
+
     private val iconFactory: BaseIconFactory
         get() {
             val isLowRam = ActivityManager.isLowRamDeviceStatic()
@@ -84,6 +96,24 @@ class AppIconProviderImpl @Inject constructor(private val sysuiContext: Context)
 
     override fun purgeCache(wantedPackages: Collection<String>) {
         cache.purge(wantedPackages)
+    }
+
+    override fun dump(pwOrig: PrintWriter, args: Array<out String>) {
+        val pw = pwOrig.asIndenting()
+
+        pw.println("cache information:")
+        pw.withIncreasedIndent { cache.dump(pw, args) }
+
+        val iconFactory = iconFactory
+        pw.println("icon factory information:")
+        pw.withIncreasedIndent {
+            pw.println("fullResIconDpi = ${iconFactory.fullResIconDpi}")
+            pw.println("iconSize = ${iconFactory.iconBitmapSize}")
+        }
+    }
+
+    companion object {
+        const val TAG = "AppIconProviderImpl"
     }
 }
 

@@ -22,10 +22,15 @@ import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.service.notification.StatusBarNotification
 import android.util.Log
+import com.android.systemui.Dumpable
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dump.DumpManager
 import com.android.systemui.statusbar.notification.collection.NotifCollectionCache
+import com.android.systemui.util.asIndenting
+import com.android.systemui.util.withIncreasedIndent
 import dagger.Module
 import dagger.Provides
+import java.io.PrintWriter
 import javax.inject.Inject
 import javax.inject.Provider
 
@@ -50,7 +55,12 @@ interface NotificationIconStyleProvider {
 }
 
 @SysUISingleton
-class NotificationIconStyleProviderImpl @Inject constructor() : NotificationIconStyleProvider {
+class NotificationIconStyleProviderImpl @Inject constructor(dumpManager: DumpManager) :
+    NotificationIconStyleProvider, Dumpable {
+    init {
+        dumpManager.registerNormalDumpable(TAG, this)
+    }
+
     private val cache = NotifCollectionCache<Boolean>()
 
     override fun shouldShowAppIcon(notification: StatusBarNotification, context: Context): Boolean {
@@ -81,6 +91,16 @@ class NotificationIconStyleProviderImpl @Inject constructor() : NotificationIcon
 
     override fun purgeCache(wantedPackages: Collection<String>) {
         cache.purge(wantedPackages)
+    }
+
+    override fun dump(pwOrig: PrintWriter, args: Array<out String>) {
+        val pw = pwOrig.asIndenting()
+        pw.println("cache information:")
+        pw.withIncreasedIndent { cache.dump(pw, args) }
+    }
+
+    companion object {
+        const val TAG = "NotificationIconStyleProviderImpl"
     }
 }
 
