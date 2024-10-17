@@ -96,6 +96,7 @@ public class ProtoLogViewerConfigReader {
                 logger.log("Unloading viewer config hash " + hash);
                 mLogMessageMap.remove(hash);
             }
+            mGroupHashes.remove(group);
         }
     }
 
