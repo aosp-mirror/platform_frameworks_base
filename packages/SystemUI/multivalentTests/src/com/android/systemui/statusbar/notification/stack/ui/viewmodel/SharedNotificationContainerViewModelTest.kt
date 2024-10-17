@@ -64,7 +64,6 @@ import com.android.systemui.scene.data.repository.Idle
 import com.android.systemui.scene.data.repository.Transition
 import com.android.systemui.scene.data.repository.setTransition
 import com.android.systemui.scene.shared.model.Scenes
-import com.android.systemui.shade.data.repository.fakeShadeRepository
 import com.android.systemui.shade.mockLargeScreenHeaderHelper
 import com.android.systemui.shade.shadeTestUtil
 import com.android.systemui.statusbar.notification.stack.domain.interactor.sharedNotificationContainerInteractor
@@ -116,36 +115,18 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
         kosmos.aodBurnInViewModel = aodBurnInViewModel
     }
 
-    val testScope = kosmos.testScope
-    val configurationRepository
-        get() = kosmos.fakeConfigurationRepository
-
-    val keyguardRepository
-        get() = kosmos.fakeKeyguardRepository
-
-    val keyguardInteractor
-        get() = kosmos.keyguardInteractor
-
-    val keyguardRootViewModel
-        get() = kosmos.keyguardRootViewModel
-
-    val keyguardTransitionRepository
-        get() = kosmos.fakeKeyguardTransitionRepository
-
-    val shadeTestUtil
-        get() = kosmos.shadeTestUtil
-
-    val sharedNotificationContainerInteractor
-        get() = kosmos.sharedNotificationContainerInteractor
-
-    val largeScreenHeaderHelper
-        get() = kosmos.mockLargeScreenHeaderHelper
-
-    val communalSceneRepository
-        get() = kosmos.communalSceneRepository
-
-    val shadeRepository
-        get() = kosmos.fakeShadeRepository
+    private val testScope = kosmos.testScope
+    private val configurationRepository by lazy { kosmos.fakeConfigurationRepository }
+    private val keyguardRepository by lazy { kosmos.fakeKeyguardRepository }
+    private val keyguardInteractor by lazy { kosmos.keyguardInteractor }
+    private val keyguardRootViewModel by lazy { kosmos.keyguardRootViewModel }
+    private val keyguardTransitionRepository by lazy { kosmos.fakeKeyguardTransitionRepository }
+    private val shadeTestUtil by lazy { kosmos.shadeTestUtil }
+    private val sharedNotificationContainerInteractor by lazy {
+        kosmos.sharedNotificationContainerInteractor
+    }
+    private val largeScreenHeaderHelper by lazy { kosmos.mockLargeScreenHeaderHelper }
+    private val communalSceneRepository by lazy { kosmos.communalSceneRepository }
 
     lateinit var underTest: SharedNotificationContainerViewModel
 

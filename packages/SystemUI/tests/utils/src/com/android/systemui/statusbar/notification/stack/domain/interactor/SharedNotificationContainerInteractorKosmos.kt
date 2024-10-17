@@ -23,7 +23,6 @@ import com.android.systemui.common.ui.domain.interactor.configurationInteractor
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryUdfpsInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.shade.largeScreenHeaderHelper
 import com.android.systemui.statusbar.policy.splitShadeStateController
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -33,7 +32,6 @@ val Kosmos.sharedNotificationContainerInteractor by
         SharedNotificationContainerInteractor(
             context = applicationContext,
             splitShadeStateController = { splitShadeStateController },
-            shadeInteractor = { shadeInteractor },
             configurationInteractor = configurationInteractor,
             keyguardInteractor = keyguardInteractor,
             deviceEntryUdfpsInteractor = deviceEntryUdfpsInteractor,
