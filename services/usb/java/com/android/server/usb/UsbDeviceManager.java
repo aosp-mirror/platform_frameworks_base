@@ -719,7 +719,7 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
             }
         }
 
-        private void notifyAccessoryModeExit() {
+        protected void notifyAccessoryModeExit() {
             // make sure accessory mode is off
             // and restore default functions
             Slog.d(TAG, "exited USB accessory mode");
@@ -1957,8 +1957,13 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
                      * Dont force to default when the configuration is already set to default.
                      */
                     if (msg.arg1 != 1) {
-                        // Set this since default function may be selected from Developer options
-                        setEnabledFunctions(mScreenUnlockedFunctions, false);
+                        if (mCurrentFunctions == UsbManager.FUNCTION_ACCESSORY) {
+                            notifyAccessoryModeExit();
+                        } else {
+                            // Set this since default function may be selected from Developer
+                            // options
+                            setEnabledFunctions(mScreenUnlockedFunctions, false);
+                        }
                     }
                     break;
                 case MSG_GADGET_HAL_REGISTERED:
