@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.policy
+package com.android.systemui.statusbar.phone
 
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.statusbar.data.repository.StatusBarConfigurationController
+import org.mockito.kotlin.mock
 
-var Kosmos.configurationController: ConfigurationController by
-    Kosmos.Fixture { fakeConfigurationController }
-val Kosmos.fakeConfigurationController: FakeConfigurationController by
-    Kosmos.Fixture { FakeConfigurationController() }
-val Kosmos.statusBarConfigurationController: StatusBarConfigurationController by
-    Kosmos.Fixture { fakeConfigurationController }
+val Kosmos.mockStatusBarContentInsetsProvider by
+    Kosmos.Fixture { mock<StatusBarContentInsetsProvider>() }
+
+var Kosmos.statusBarContentInsetsProvider by Kosmos.Fixture { mockStatusBarContentInsetsProvider }

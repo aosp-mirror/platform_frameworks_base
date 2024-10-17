@@ -20,9 +20,12 @@ import android.view.View;
 import android.view.ViewStub;
 
 import com.android.systemui.battery.BatteryMeterView;
+import com.android.systemui.dagger.qualifiers.DisplaySpecific;
 import com.android.systemui.dagger.qualifiers.RootView;
 import com.android.systemui.res.R;
 import com.android.systemui.statusbar.HeadsUpStatusBarView;
+import com.android.systemui.statusbar.data.repository.StatusBarConfigurationController;
+import com.android.systemui.statusbar.data.repository.StatusBarConfigurationControllerStore;
 import com.android.systemui.statusbar.phone.PhoneStatusBarTransitions;
 import com.android.systemui.statusbar.phone.PhoneStatusBarView;
 import com.android.systemui.statusbar.phone.PhoneStatusBarViewController;
@@ -136,4 +139,21 @@ public interface HomeStatusBarModule {
     static HeadsUpStatusBarView providesHeasdUpStatusBarView(@RootView PhoneStatusBarView view) {
         return view.findViewById(R.id.heads_up_status_bar_view);
     }
+
+    /** */
+    @Provides
+    @HomeStatusBarScope
+    @DisplaySpecific
+    static int displayId(@RootView PhoneStatusBarView view) {
+        return view.getContext().getDisplayId();
+    }
+
+    /** */
+    @Provides
+    @HomeStatusBarScope
+    static StatusBarConfigurationController configurationController(
+            @DisplaySpecific int displayId, StatusBarConfigurationControllerStore store) {
+        return store.forDisplay(displayId);
+    }
+
 }
