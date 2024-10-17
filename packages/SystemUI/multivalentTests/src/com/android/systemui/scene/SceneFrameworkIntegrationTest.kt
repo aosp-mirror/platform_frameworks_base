@@ -332,7 +332,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
             assertWithMessage("Bouncer action button not visible")
                 .that(bouncerActionButton)
                 .isNotNull()
-            bouncerActionButton?.onClick?.invoke()
+            kosmos.bouncerSceneContentViewModel.onActionButtonClicked(bouncerActionButton!!)
             runCurrent()
 
             // TODO(b/369765704): Assert that an activity was started once we use ActivityStarter.
@@ -354,7 +354,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
             assertWithMessage("Bouncer action button not visible during call")
                 .that(bouncerActionButton)
                 .isNotNull()
-            bouncerActionButton?.onClick?.invoke()
+            kosmos.bouncerSceneContentViewModel.onActionButtonClicked(bouncerActionButton!!)
             runCurrent()
 
             verify(kosmos.mockTelecomManager).showInCallScreen(any())

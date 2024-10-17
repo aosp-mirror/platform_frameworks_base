@@ -65,6 +65,7 @@ constructor(
     private val passwordViewModelFactory: PasswordBouncerViewModel.Factory,
     private val bouncerHapticPlayer: BouncerHapticPlayer,
     private val keyguardMediaKeyInteractor: KeyguardMediaKeyInteractor,
+    private val bouncerActionButtonInteractor: BouncerActionButtonInteractor,
 ) : ExclusiveActivatable() {
     private val _selectedUserImage = MutableStateFlow<Bitmap?>(null)
     val selectedUserImage: StateFlow<Bitmap?> = _selectedUserImage.asStateFlow()
@@ -342,6 +343,24 @@ constructor(
         if (keyguardMediaKeyInteractor.processMediaKeyEvent(keyEvent.nativeKeyEvent)) return true
         return authMethodViewModel.value?.onKeyEvent(keyEvent.type, keyEvent.nativeKeyEvent.keyCode)
             ?: false
+    }
+
+    fun onActionButtonClicked(actionButtonModel: BouncerActionButtonModel) {
+        when (actionButtonModel) {
+            is BouncerActionButtonModel.EmergencyButtonModel -> {
+                bouncerHapticPlayer.playEmergencyButtonClickFeedback()
+                bouncerActionButtonInteractor.onEmergencyButtonClicked()
+            }
+            is BouncerActionButtonModel.ReturnToCallButtonModel -> {
+                bouncerActionButtonInteractor.onReturnToCallButtonClicked()
+            }
+        }
+    }
+
+    fun onActionButtonLongClicked(actionButtonModel: BouncerActionButtonModel) {
+        if (actionButtonModel is BouncerActionButtonModel.EmergencyButtonModel) {
+            bouncerActionButtonInteractor.onEmergencyButtonLongClicked()
+        }
     }
 
     data class DialogViewModel(
