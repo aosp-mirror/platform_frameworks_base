@@ -1225,7 +1225,8 @@ class DesktopTasksController(
                     .determineNewInstancePosition(callingTaskInfo)
                 splitScreenController.startIntent(
                     launchIntent, context.userId, fillIn, splitPosition,
-                    options.toBundle(), null /* hideTaskToken */
+                    options.toBundle(), null /* hideTaskToken */,
+                    true /* forceLaunchNewTask */
                 )
             }
             WINDOWING_MODE_FREEFORM -> {
