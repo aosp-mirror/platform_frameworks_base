@@ -301,7 +301,7 @@ public final class ApduServiceInfo implements Parcelable {
                 mOffHostName = sa.getString(
                         com.android.internal.R.styleable.OffHostApduService_secureElementName);
                 mShouldDefaultToObserveMode = sa.getBoolean(
-                        R.styleable.HostApduService_shouldDefaultToObserveMode,
+                        R.styleable.OffHostApduService_shouldDefaultToObserveMode,
                         false);
                 if (mOffHostName != null) {
                     if (mOffHostName.equals("eSE")) {
