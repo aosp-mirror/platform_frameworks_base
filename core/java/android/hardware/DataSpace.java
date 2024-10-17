@@ -15,8 +15,11 @@
  */
 package android.hardware;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.view.SurfaceControl;
+
+import com.android.graphics.flags.Flags;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -639,6 +642,18 @@ public final class DataSpace {
      */
     public static final int DATASPACE_SRGB_LINEAR = 138477568;
 
+    /**
+     * Display BT. 2020 encoding.
+     *
+     * <p>Composed of the following -</p>
+     * <pre>
+     *   Primaries: STANDARD_BT2020
+     *   Transfer: TRANSFER_SRGB
+     *   Range: RANGE_FULL</pre>
+     */
+    @FlaggedApi(Flags.FLAG_DISPLAY_BT2020_COLORSPACE)
+    public static final int DATASPACE_DISPLAY_BT2020 = 142999552;
+
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(flag = true, value = {
@@ -660,7 +675,8 @@ public final class DataSpace {
         DATASPACE_BT2020,
         DATASPACE_BT709,
         DATASPACE_DCI_P3,
-        DATASPACE_SRGB_LINEAR
+        DATASPACE_SRGB_LINEAR,
+        DATASPACE_DISPLAY_BT2020
     })
     public @interface NamedDataSpace {};
 
