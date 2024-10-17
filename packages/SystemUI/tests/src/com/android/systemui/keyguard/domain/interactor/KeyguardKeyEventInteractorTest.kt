@@ -46,6 +46,7 @@ import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnit
+import org.mockito.kotlin.isNull
 
 @ExperimentalCoroutinesApi
 @SmallTest
@@ -96,7 +97,7 @@ class KeyguardKeyEventInteractorTest : SysuiTestCase() {
             .sendVolumeKeyEvent(
                 eq(actionDownVolumeDownKeyEvent),
                 eq(AudioManager.USE_DEFAULT_STREAM_TYPE),
-                eq(true)
+                eq(true),
             )
 
         assertThat(underTest.dispatchKeyEvent(actionDownVolumeUpKeyEvent)).isTrue()
@@ -104,7 +105,7 @@ class KeyguardKeyEventInteractorTest : SysuiTestCase() {
             .sendVolumeKeyEvent(
                 eq(actionDownVolumeUpKeyEvent),
                 eq(AudioManager.USE_DEFAULT_STREAM_TYPE),
-                eq(true)
+                eq(true),
             )
     }
 
@@ -117,7 +118,7 @@ class KeyguardKeyEventInteractorTest : SysuiTestCase() {
             .sendVolumeKeyEvent(
                 eq(actionDownVolumeDownKeyEvent),
                 eq(AudioManager.USE_DEFAULT_STREAM_TYPE),
-                eq(true)
+                eq(true),
             )
 
         assertThat(underTest.dispatchKeyEvent(actionDownVolumeUpKeyEvent)).isFalse()
@@ -125,7 +126,7 @@ class KeyguardKeyEventInteractorTest : SysuiTestCase() {
             .sendVolumeKeyEvent(
                 eq(actionDownVolumeUpKeyEvent),
                 eq(AudioManager.USE_DEFAULT_STREAM_TYPE),
-                eq(true)
+                eq(true),
             )
     }
 
@@ -135,7 +136,9 @@ class KeyguardKeyEventInteractorTest : SysuiTestCase() {
         whenever(statusBarStateController.state).thenReturn(StatusBarState.SHADE_LOCKED)
         whenever(statusBarKeyguardViewManager.shouldDismissOnMenuPressed()).thenReturn(true)
 
-        verifyActionUpCollapsesTheShade(KeyEvent.KEYCODE_MENU)
+        val actionUpMenuKeyEvent = KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_MENU)
+        assertThat(underTest.dispatchKeyEvent(actionUpMenuKeyEvent)).isTrue()
+        verify(statusBarKeyguardViewManager).dismissWithAction(any(), isNull(), eq(false))
     }
 
     @Test
