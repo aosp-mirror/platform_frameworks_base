@@ -74,6 +74,7 @@ import com.android.systemui.statusbar.notification.collection.render.GroupMember
 import com.android.systemui.statusbar.notification.collection.render.NotifViewBarn;
 import com.android.systemui.statusbar.notification.row.NotifInflationErrorManager;
 import com.android.systemui.statusbar.notification.row.icon.AppIconProvider;
+import com.android.systemui.statusbar.notification.row.icon.NotificationIconStyleProvider;
 import com.android.systemui.statusbar.policy.SensitiveNotificationProtectionController;
 import com.android.systemui.util.settings.SecureSettings;
 
@@ -119,13 +120,13 @@ public class PreparationCoordinatorTest extends SysuiTestCase {
     @Mock private IStatusBarService mService;
     @Mock private BindEventManagerImpl mBindEventManagerImpl;
     @Mock private AppIconProvider mAppIconProvider;
+    @Mock private NotificationIconStyleProvider mNotificationIconStyleProvider;
     @Mock private NotificationLockscreenUserManager mLockscreenUserManager;
     @Mock private SensitiveNotificationProtectionController mSensitiveNotifProtectionController;
     @Mock private Handler mHandler;
     @Mock private SecureSettings mSecureSettings;
     @Spy private FakeNotifInflater mNotifInflater = new FakeNotifInflater();
-    @Mock
-    HighPriorityProvider mHighPriorityProvider;
+    @Mock HighPriorityProvider mHighPriorityProvider;
     private SectionStyleProvider mSectionStyleProvider;
     @Mock private UserTracker mUserTracker;
     @Mock private GroupMembershipManager mGroupMembershipManager;
@@ -170,6 +171,7 @@ public class PreparationCoordinatorTest extends SysuiTestCase {
                 mService,
                 mBindEventManagerImpl,
                 mAppIconProvider,
+                mNotificationIconStyleProvider,
                 TEST_CHILD_BIND_CUTOFF,
                 TEST_MAX_GROUP_DELAY);
 
@@ -226,7 +228,7 @@ public class PreparationCoordinatorTest extends SysuiTestCase {
 
     @Test
     @EnableFlags(Flags.FLAG_NOTIFICATIONS_REDESIGN_APP_ICONS)
-    public void testPurgesCache() {
+    public void testPurgesAppIconProviderCache() {
         // GIVEN a notification list
         NotificationEntry entry1 = getNotificationEntryBuilder().setPkg("1").build();
         NotificationEntry entry2 = getNotificationEntryBuilder().setPkg("2").build();
@@ -265,6 +267,53 @@ public class PreparationCoordinatorTest extends SysuiTestCase {
         // THEN purge should be called
         ArgumentCaptor<Collection<String>> argumentCaptor = ArgumentCaptor.forClass(List.class);
         verify(mAppIconProvider).purgeCache(argumentCaptor.capture());
+        List<String> actualList = argumentCaptor.getValue().stream().sorted().toList();
+        List<String> expectedList = Stream.of("1", "2", "3", "group1", "group2")
+                .sorted().toList();
+        assertEquals(expectedList, actualList);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_NOTIFICATIONS_REDESIGN_APP_ICONS)
+    public void testPurgesNotificationIconStyleProviderCache() {
+        // GIVEN a notification list
+        NotificationEntry entry1 = getNotificationEntryBuilder().setPkg("1").build();
+        NotificationEntry entry2 = getNotificationEntryBuilder().setPkg("2").build();
+        NotificationEntry entry2bis = getNotificationEntryBuilder().setPkg("2").build();
+        NotificationEntry entry3 = getNotificationEntryBuilder().setPkg("3").build();
+
+        String groupKey1 = "group1";
+        NotificationEntry summary =
+                getNotificationEntryBuilder()
+                        .setPkg(groupKey1)
+                        .setGroup(mContext, groupKey1)
+                        .setGroupSummary(mContext, true)
+                        .build();
+        NotificationEntry child1 = getNotificationEntryBuilder().setGroup(mContext, groupKey1)
+                .setPkg(groupKey1).build();
+        NotificationEntry child2 = getNotificationEntryBuilder().setGroup(mContext, groupKey1)
+                .setPkg(groupKey1).build();
+        GroupEntry groupWithSummaryAndChildren = getGroupEntryBuilder().setKey(groupKey1)
+                .setSummary(summary).addChild(child1).addChild(child2).build();
+
+        String groupKey2 = "group2";
+        NotificationEntry summary2 =
+                getNotificationEntryBuilder()
+                        .setPkg(groupKey2)
+                        .setGroup(mContext, groupKey2)
+                        .setGroupSummary(mContext, true)
+                        .build();
+        GroupEntry summaryOnlyGroup = getGroupEntryBuilder().setKey(groupKey2)
+                .setSummary(summary2).build();
+
+        // WHEN onBeforeTransformGroup is called
+        mBeforeTransformGroupsListener.onBeforeTransformGroups(
+                List.of(entry1, entry2, entry2bis, entry3,
+                        groupWithSummaryAndChildren, summaryOnlyGroup));
+
+        // THEN purge should be called
+        ArgumentCaptor<Collection<String>> argumentCaptor = ArgumentCaptor.forClass(List.class);
+        verify(mNotificationIconStyleProvider).purgeCache(argumentCaptor.capture());
         List<String> actualList = argumentCaptor.getValue().stream().sorted().toList();
         List<String> expectedList = Stream.of("1", "2", "3", "group1", "group2")
                 .sorted().toList();

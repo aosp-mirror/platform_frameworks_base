@@ -51,6 +51,7 @@ import com.android.systemui.statusbar.notification.collection.render.NotifViewCo
 import com.android.systemui.statusbar.notification.row.NotifInflationErrorManager;
 import com.android.systemui.statusbar.notification.row.NotifInflationErrorManager.NotifInflationErrorListener;
 import com.android.systemui.statusbar.notification.row.icon.AppIconProvider;
+import com.android.systemui.statusbar.notification.row.icon.NotificationIconStyleProvider;
 import com.android.systemui.statusbar.notification.row.shared.AsyncGroupHeaderViewInflation;
 import com.android.systemui.statusbar.notification.row.shared.AsyncHybridViewInflation;
 
@@ -110,6 +111,7 @@ public class PreparationCoordinator implements Coordinator {
     private final long mMaxGroupInflationDelay;
     private final BindEventManagerImpl mBindEventManager;
     private final AppIconProvider mAppIconProvider;
+    private final NotificationIconStyleProvider mNotificationIconStyleProvider;
 
     @Inject
     public PreparationCoordinator(
@@ -120,7 +122,8 @@ public class PreparationCoordinator implements Coordinator {
             NotifUiAdjustmentProvider adjustmentProvider,
             IStatusBarService service,
             BindEventManagerImpl bindEventManager,
-            AppIconProvider appIconProvider) {
+            AppIconProvider appIconProvider,
+            NotificationIconStyleProvider notificationIconStyleProvider) {
         this(
                 logger,
                 notifInflater,
@@ -130,6 +133,7 @@ public class PreparationCoordinator implements Coordinator {
                 service,
                 bindEventManager,
                 appIconProvider,
+                notificationIconStyleProvider,
                 CHILD_BIND_CUTOFF,
                 MAX_GROUP_INFLATION_DELAY);
     }
@@ -144,6 +148,7 @@ public class PreparationCoordinator implements Coordinator {
             IStatusBarService service,
             BindEventManagerImpl bindEventManager,
             AppIconProvider appIconProvider,
+            NotificationIconStyleProvider notificationIconStyleProvider,
             int childBindCutoff,
             long maxGroupInflationDelay) {
         mLogger = logger;
@@ -156,6 +161,7 @@ public class PreparationCoordinator implements Coordinator {
         mMaxGroupInflationDelay = maxGroupInflationDelay;
         mBindEventManager = bindEventManager;
         mAppIconProvider = appIconProvider;
+        mNotificationIconStyleProvider = notificationIconStyleProvider;
     }
 
     @Override
@@ -274,7 +280,9 @@ public class PreparationCoordinator implements Coordinator {
     };
 
     private void purgeCaches(Collection<ListEntry> entries) {
-        mAppIconProvider.purgeCache(/* wantedPackages = */ getPackages(entries));
+        Set<String> wantedPackages = getPackages(entries);
+        mAppIconProvider.purgeCache(wantedPackages);
+        mNotificationIconStyleProvider.purgeCache(wantedPackages);
     }
 
     /**

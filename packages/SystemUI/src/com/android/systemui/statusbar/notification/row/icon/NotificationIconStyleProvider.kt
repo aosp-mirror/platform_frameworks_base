@@ -23,6 +23,7 @@ import android.content.pm.ApplicationInfo
 import android.service.notification.StatusBarNotification
 import android.util.Log
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.statusbar.notification.collection.NotifCollectionCache
 import dagger.Module
 import dagger.Provides
 import javax.inject.Inject
@@ -33,15 +34,30 @@ import javax.inject.Provider
  * notifications.
  */
 interface NotificationIconStyleProvider {
+    /**
+     * Determines whether the [notification] should display the app icon instead of the small icon.
+     * This can result in a binder call, and therefore should only be called from the background.
+     */
     @WorkerThread
     fun shouldShowAppIcon(notification: StatusBarNotification, context: Context): Boolean
+
+    /**
+     * Mark all the entries in the cache that are NOT in [wantedPackages] to be cleared. If they're
+     * still not needed on the next call of this method (made after a timeout of 1s, in case they
+     * happen more frequently than that), they will be purged. This can be done from any thread.
+     */
+    fun purgeCache(wantedPackages: Collection<String>)
 }
 
 @SysUISingleton
 class NotificationIconStyleProviderImpl @Inject constructor() : NotificationIconStyleProvider {
+    private val cache = NotifCollectionCache<Boolean>()
+
     override fun shouldShowAppIcon(notification: StatusBarNotification, context: Context): Boolean {
         val packageContext = notification.getPackageContext(context)
-        return !belongsToHeadlessSystemApp(packageContext)
+        return cache.getOrFetch(notification.packageName) {
+            !belongsToHeadlessSystemApp(packageContext)
+        }
     }
 
     @WorkerThread
@@ -62,6 +78,10 @@ class NotificationIconStyleProviderImpl @Inject constructor() : NotificationIcon
             return false
         }
     }
+
+    override fun purgeCache(wantedPackages: Collection<String>) {
+        cache.purge(wantedPackages)
+    }
 }
 
 class NoOpIconStyleProvider : NotificationIconStyleProvider {
@@ -72,6 +92,10 @@ class NoOpIconStyleProvider : NotificationIconStyleProvider {
     override fun shouldShowAppIcon(notification: StatusBarNotification, context: Context): Boolean {
         Log.wtf(TAG, "NoOpIconStyleProvider should not be used anywhere.")
         return true
+    }
+
+    override fun purgeCache(wantedPackages: Collection<String>) {
+        Log.wtf(TAG, "NoOpIconStyleProvider should not be used anywhere.")
     }
 }
 
