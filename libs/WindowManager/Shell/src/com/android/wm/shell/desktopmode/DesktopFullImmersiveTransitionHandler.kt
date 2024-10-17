@@ -71,7 +71,7 @@ class DesktopFullImmersiveTransitionHandler(
 
     /** Whether there is an immersive transition that hasn't completed yet. */
     private val inProgress: Boolean
-        get() = state != null
+        get() = state != null || pendingExternalExitTransitions.isNotEmpty()
 
     private val rectEvaluator = RectEvaluator()
 
