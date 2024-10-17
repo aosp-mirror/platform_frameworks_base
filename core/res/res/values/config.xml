@@ -287,6 +287,11 @@
          vibration params. -->
     <integer name="config_requestVibrationParamsTimeout">50</integer>
 
+    <!-- The max duration (in milliseconds) that the vibrator service will allow effects to be
+         pipelined (i.e. service will wait for ongoing vibration to finish instead of cancelling it
+         to start the new one). Value should be positive. Zero will disable effect pipelining. -->
+    <integer name="config_vibrationPipelineMaxDuration">25</integer>
+
     <!-- Array containing the usages that should request vibration params before they are played.
          These usages don't have strong latency requirements, e.g. ringtone and notification, and
          can be slightly delayed. -->

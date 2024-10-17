@@ -139,7 +139,10 @@ public final class RavenwoodRule implements TestRule {
         /**
          * Configure a "main" thread to be available for the duration of the test, as defined
          * by {@code Looper.getMainLooper()}. Has no effect on non-Ravenwood environments.
+         *
+         * @deprecated
          */
+        @Deprecated
         public Builder setProvideMainThread(boolean provideMainThread) {
             mBuilder.setProvideMainThread(provideMainThread);
             return this;

@@ -372,6 +372,7 @@ java_library {
 android_ravenwood_libgroup {
     name: "ravenwood-runtime",
     data: [
+        ":system-build.prop",
         ":framework-res",
         ":ravenwood-empty-res",
         ":framework-platform-compat-config",

@@ -21,6 +21,7 @@ import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.display.data.repository.DisplayRepository
+import com.android.systemui.statusbar.window.StatusBarWindowControllerStore
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineName
@@ -53,6 +54,7 @@ constructor(
     @Background private val backgroundApplicationScope: CoroutineScope,
     private val factory: StatusBarInitializer.Factory,
     private val displayRepository: DisplayRepository,
+    private val statusBarWindowControllerStore: StatusBarWindowControllerStore,
 ) : StatusBarInitializerStore, CoreStartable {
 
     init {
@@ -68,7 +70,11 @@ constructor(
         if (displayRepository.getDisplay(displayId) == null) {
             throw IllegalArgumentException("Display with id $displayId doesn't exist.")
         }
-        return perDisplayInitializers.computeIfAbsent(displayId) { factory.create(displayId) }
+        return perDisplayInitializers.computeIfAbsent(displayId) {
+            factory.create(
+                statusBarWindowController = statusBarWindowControllerStore.forDisplay(displayId)
+            )
+        }
     }
 
     override fun start() {
@@ -85,15 +91,13 @@ constructor(
 @SysUISingleton
 class SingleDisplayStatusBarInitializerStore
 @Inject
-constructor(factory: StatusBarInitializerImpl.Factory) : StatusBarInitializerStore {
+constructor(private val defaultInstance: StatusBarInitializer) : StatusBarInitializerStore {
 
     init {
         StatusBarConnectedDisplays.assertInLegacyMode()
     }
 
-    private val defaultInstance = factory.create(Display.DEFAULT_DISPLAY)
-
     override val defaultDisplay: StatusBarInitializer = defaultInstance
 
-    override fun forDisplay(displayId: Int): StatusBarInitializer = defaultDisplay
+    override fun forDisplay(displayId: Int): StatusBarInitializer = defaultInstance
 }

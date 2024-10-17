@@ -14,3 +14,5 @@ per-file KeyguardManagerTest.java = file:/services/core/java/com/android/server/
 # Files related to background activity launches
 per-file Background*Start* = file:/BAL_OWNERS
 
+# Files related to caching
+per-file PropertyInvalidatedCache* = file:/PERFORMANCE_OWNERS

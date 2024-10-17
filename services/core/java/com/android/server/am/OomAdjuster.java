@@ -3283,7 +3283,12 @@ public class OomAdjuster {
                 baseCapabilities = PROCESS_CAPABILITY_ALL; // BFSL allowed
                 break;
             case PROCESS_STATE_BOUND_TOP:
-                baseCapabilities = PROCESS_CAPABILITY_BFSL;
+                if (app.getActiveInstrumentation() != null) {
+                    baseCapabilities = PROCESS_CAPABILITY_BFSL |
+                            PROCESS_CAPABILITY_ALL_IMPLICIT;
+                } else {
+                    baseCapabilities = PROCESS_CAPABILITY_BFSL;
+                }
                 break;
             case PROCESS_STATE_FOREGROUND_SERVICE:
                 if (app.getActiveInstrumentation() != null) {

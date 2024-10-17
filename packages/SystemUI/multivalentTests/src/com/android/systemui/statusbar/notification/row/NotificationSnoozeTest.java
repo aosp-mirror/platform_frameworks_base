@@ -24,9 +24,9 @@ import static org.mockito.Mockito.mock;
 
 import android.provider.Settings;
 import android.testing.TestableResources;
-import android.testing.UiThreadTest;
 import android.util.KeyValueListParser;
 
+import androidx.test.annotation.UiThreadTest;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 

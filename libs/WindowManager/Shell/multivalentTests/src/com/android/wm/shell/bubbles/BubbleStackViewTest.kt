@@ -67,6 +67,7 @@ class BubbleStackViewTest {
 
     private val context = ApplicationProvider.getApplicationContext<Context>()
     private lateinit var positioner: BubblePositioner
+    private lateinit var bubbleLogger: BubbleLogger
     private lateinit var iconFactory: BubbleIconFactory
     private lateinit var expandedViewManager: FakeBubbleExpandedViewManager
     private lateinit var bubbleStackView: BubbleStackView
@@ -96,10 +97,11 @@ class BubbleStackViewTest {
                 )
             )
         positioner = BubblePositioner(context, windowManager)
+        bubbleLogger = BubbleLogger(UiEventLoggerFake())
         bubbleData =
             BubbleData(
                 context,
-                BubbleLogger(UiEventLoggerFake()),
+                bubbleLogger,
                 positioner,
                 BubbleEducationController(context),
                 shellExecutor,
@@ -394,6 +396,7 @@ class BubbleStackViewTest {
             expandedViewManager,
             bubbleTaskViewFactory,
             positioner,
+            bubbleLogger,
             bubbleStackView,
             null,
             iconFactory,

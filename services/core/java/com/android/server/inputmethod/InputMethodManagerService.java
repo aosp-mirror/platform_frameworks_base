@@ -1536,7 +1536,16 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                     Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
         }
         final InputMethodSettings settings = InputMethodSettingsRepository.get(userId);
-        return settings.getMethodMap().get(settings.getSelectedInputMethod());
+        final String selectedImeId;
+        if (Flags.consistentGetCurrentInputMethodInfo()) {
+            final var bindingController = getInputMethodBindingController(userId);
+            synchronized (ImfLock.class) {
+                selectedImeId = bindingController.getSelectedMethodId();
+            }
+        } else {
+            selectedImeId = settings.getSelectedInputMethod();
+        }
+        return settings.getMethodMap().get(selectedImeId);
     }
 
     @BinderThread
