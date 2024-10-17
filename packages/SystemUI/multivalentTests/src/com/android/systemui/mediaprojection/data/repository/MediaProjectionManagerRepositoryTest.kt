@@ -21,10 +21,13 @@ import android.media.projection.MediaProjectionInfo
 import android.os.Binder
 import android.os.Handler
 import android.os.UserHandle
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
 import android.view.ContentRecordingSession
 import android.view.Display
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.systemui.Flags.FLAG_STATUS_BAR_SHOW_AUDIO_ONLY_PROJECTION_CHIP
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.applicationCoroutineScope
@@ -74,13 +77,43 @@ class MediaProjectionManagerRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun mediaProjectionState_onStart_emitsNotProjecting() =
+    @DisableFlags(FLAG_STATUS_BAR_SHOW_AUDIO_ONLY_PROJECTION_CHIP)
+    fun mediaProjectionState_onStart_flagOff_emitsNotProjecting() =
         testScope.runTest {
             val state by collectLastValue(repo.mediaProjectionState)
 
             fakeMediaProjectionManager.dispatchOnStart()
 
             assertThat(state).isEqualTo(MediaProjectionState.NotProjecting)
+        }
+
+    @Test
+    @EnableFlags(FLAG_STATUS_BAR_SHOW_AUDIO_ONLY_PROJECTION_CHIP)
+    fun mediaProjectionState_onStart_flagOn_emitsProjectingNoScreen() =
+        testScope.runTest {
+            val state by collectLastValue(repo.mediaProjectionState)
+
+            fakeMediaProjectionManager.dispatchOnStart()
+
+            assertThat(state).isInstanceOf(MediaProjectionState.Projecting.NoScreen::class.java)
+        }
+
+    @Test
+    @EnableFlags(FLAG_STATUS_BAR_SHOW_AUDIO_ONLY_PROJECTION_CHIP)
+    fun mediaProjectionState_noScreen_hasHostPackage() =
+        testScope.runTest {
+            val state by collectLastValue(repo.mediaProjectionState)
+
+            val info =
+                MediaProjectionInfo(
+                    /* packageName= */ "com.media.projection.repository.test",
+                    /* handle= */ UserHandle.getUserHandleForUid(UserHandle.myUserId()),
+                    /* launchCookie = */ null,
+                )
+            fakeMediaProjectionManager.dispatchOnStart(info)
+
+            assertThat((state as MediaProjectionState.Projecting).hostPackage)
+                .isEqualTo("com.media.projection.repository.test")
         }
 
     @Test
@@ -212,7 +245,7 @@ class MediaProjectionManagerRepositoryTest : SysuiTestCase() {
                 )
             fakeMediaProjectionManager.dispatchOnSessionSet(
                 info = info,
-                session = ContentRecordingSession.createTaskSession(token.asBinder())
+                session = ContentRecordingSession.createTaskSession(token.asBinder()),
             )
 
             assertThat((state as MediaProjectionState.Projecting.SingleTask).hostPackage)
