@@ -17,56 +17,22 @@
 package com.android.systemui.statusbar
 
 import android.testing.TestableLooper
-import android.view.View
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.systemui.flags.Flags.LOCKSCREEN_WALLPAPER_DREAM_ENABLED
 import com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_BIOMETRIC_MESSAGE
 import com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_BIOMETRIC_MESSAGE_FOLLOW_UP
 import com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_TRUST
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.times
-import org.mockito.Mockito.verify
 import org.mockito.kotlin.whenever
 
 @RunWith(AndroidJUnit4::class)
 @SmallTest
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 class KeyguardIndicationControllerWithCoroutinesTest : KeyguardIndicationControllerBaseTest() {
-    @Test
-    fun testIndicationAreaVisibility_onLockscreenHostedDreamStateChanged() =
-        runBlocking(IMMEDIATE) {
-            // GIVEN starting state for keyguard indication and wallpaper dream enabled
-            createController()
-            mFlags.set(LOCKSCREEN_WALLPAPER_DREAM_ENABLED, true)
-            mController.setVisible(true)
-
-            // THEN indication area is visible
-            verify(mIndicationArea, times(2)).visibility = View.VISIBLE
-
-            // WHEN the device is dreaming with lockscreen hosted dream
-            mController.mIsActiveDreamLockscreenHostedCallback.accept(
-                true /* isActiveDreamLockscreenHosted */
-            )
-            mExecutor.runAllReady()
-
-            // THEN the indication area is hidden
-            verify(mIndicationArea).visibility = View.GONE
-
-            // WHEN the device stops dreaming with lockscreen hosted dream
-            mController.mIsActiveDreamLockscreenHostedCallback.accept(
-                false /* isActiveDreamLockscreenHosted */
-            )
-            mExecutor.runAllReady()
-
-            // THEN indication area is set visible
-            verify(mIndicationArea, times(3)).visibility = View.VISIBLE
-        }
-
     @Test
     fun onTrustAgentErrorMessageDelayed_fingerprintEngaged() {
         createController()

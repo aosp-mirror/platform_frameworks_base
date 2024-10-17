@@ -176,8 +176,8 @@ class KeyguardQuickAffordancesCombinedViewModelTest : SysuiTestCase() {
                     BuiltInKeyguardQuickAffordanceKeys.HOME_CONTROLS,
                 KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_END +
                     ":" +
-                    BuiltInKeyguardQuickAffordanceKeys.QUICK_ACCESS_WALLET
-            )
+                    BuiltInKeyguardQuickAffordanceKeys.QUICK_ACCESS_WALLET,
+            ),
         )
 
         homeControlsQuickAffordanceConfig =
@@ -669,8 +669,8 @@ class KeyguardQuickAffordancesCombinedViewModelTest : SysuiTestCase() {
                 min(
                     1f,
                     KeyguardQuickAffordancesCombinedViewModel
-                        .AFFORDANCE_FULLY_OPAQUE_ALPHA_THRESHOLD + 0.1f
-                ),
+                        .AFFORDANCE_FULLY_OPAQUE_ALPHA_THRESHOLD + 0.1f,
+                )
             )
 
             val testConfig =
@@ -765,7 +765,7 @@ class KeyguardQuickAffordancesCombinedViewModelTest : SysuiTestCase() {
         testScope.runTest {
             kosmos.setTransition(
                 sceneTransition = Idle(Scenes.Lockscreen),
-                stateTransition = TransitionStep(from = AOD, to = LOCKSCREEN)
+                stateTransition = TransitionStep(from = AOD, to = LOCKSCREEN),
             )
             intendedShadeAlphaMutableStateFlow.value = 0.25f
             val underTest = collectLastValue(underTest.transitionAlpha)
@@ -780,7 +780,7 @@ class KeyguardQuickAffordancesCombinedViewModelTest : SysuiTestCase() {
         testScope.runTest {
             kosmos.setTransition(
                 sceneTransition = Idle(Scenes.Gone),
-                stateTransition = TransitionStep(from = AOD, to = GONE)
+                stateTransition = TransitionStep(from = AOD, to = GONE),
             )
             intendedShadeAlphaMutableStateFlow.value = 0.5f
             val underTest = collectLastValue(underTest.transitionAlpha)
@@ -815,7 +815,7 @@ class KeyguardQuickAffordancesCombinedViewModelTest : SysuiTestCase() {
                         when (testConfig.isActivated) {
                             true -> ActivationState.Active
                             false -> ActivationState.Inactive
-                        }
+                        },
                 )
             } else {
                 KeyguardQuickAffordanceConfig.LockScreenState.Hidden
@@ -864,7 +864,7 @@ class KeyguardQuickAffordancesCombinedViewModelTest : SysuiTestCase() {
         val intent: Intent? = null,
         val isSelected: Boolean = false,
         val isDimmed: Boolean = false,
-        val slotId: String = ""
+        val slotId: String = "",
     ) {
         init {
             check(!isVisible || icon != null) { "Must supply non-null icon if visible!" }
