@@ -3608,7 +3608,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     if (mEnableBugReportKeyboardShortcut && firstDown
                             && event.isMetaPressed() && event.isCtrlPressed()) {
                         try {
-                            mActivityManagerService.requestInteractiveBugReport();
+                            if (!mActivityManagerService.launchBugReportHandlerApp()) {
+                                mActivityManagerService.requestInteractiveBugReport();
+                            }
                         } catch (RemoteException e) {
                             Slog.d(TAG, "Error taking bugreport", e);
                         }
@@ -4102,7 +4104,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case KeyGestureEvent.KEY_GESTURE_TYPE_TRIGGER_BUG_REPORT:
                 if (complete && mEnableBugReportKeyboardShortcut) {
                     try {
-                        mActivityManagerService.requestInteractiveBugReport();
+                        if (!mActivityManagerService.launchBugReportHandlerApp()) {
+                            mActivityManagerService.requestInteractiveBugReport();
+                        }
                     } catch (RemoteException e) {
                         Slog.d(TAG, "Error taking bugreport", e);
                     }
