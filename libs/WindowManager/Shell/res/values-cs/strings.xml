@@ -97,9 +97,9 @@
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Problémy s fotoaparátem?\nKlepnutím vyřešíte"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Nepomohlo to?\nKlepnutím se vrátíte"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Žádné problémy s fotoaparátem? Klepnutím zavřete."</string>
-    <string name="windowing_app_handle_education_tooltip" msgid="6398482412956375783">"Klepnutím otevřete nabídku aplikace"</string>
-    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="6285279585554484957">"Klepnutím zobrazíte několik aplikací najednou"</string>
-    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="6685429075790085337">"Návrat na celou obrazovku z nabídky aplikace"</string>
+    <string name="windowing_app_handle_education_tooltip" msgid="2929643449849791854">"Najdete tu nabídku aplikace"</string>
+    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="2523468503353474095">"Pokud chcete otevřít několik aplikací současně, přejděte na zobrazení na počítači"</string>
+    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="5225660258192054132">"Na celou obrazovku se můžete kdykoli vrátit z nabídky aplikace"</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"Lepší zobrazení a více možností"</string>
     <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"Přetáhnutím druhé aplikace použijete rozdělenou obrazovku"</string>
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Dvojitým klepnutím mimo aplikaci změníte její umístění"</string>

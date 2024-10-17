@@ -97,9 +97,9 @@
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"May mga isyu sa camera?\nI-tap para i-refit"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Hindi ito naayos?\nI-tap para i-revert"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Walang isyu sa camera? I-tap para i-dismiss."</string>
-    <string name="windowing_app_handle_education_tooltip" msgid="6398482412956375783">"I-tap para buksan ang menu ng app"</string>
-    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="6285279585554484957">"I-tap para ipakita nang magkakasama ang maraming app"</string>
-    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="6685429075790085337">"Bumalik sa fullscreen mula sa menu ng app"</string>
+    <string name="windowing_app_handle_education_tooltip" msgid="2929643449849791854">"Makikita rito ang menu ng app"</string>
+    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="2523468503353474095">"Pumasok sa desktop view para magbukas ng maraming app nang sabay-sabay"</string>
+    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="5225660258192054132">"Bumalik sa full screen anumang oras mula sa menu ng app"</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"Tumingin at gumawa ng higit pa"</string>
     <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"Mag-drag ng isa pang app para sa split screen"</string>
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Mag-double tap sa labas ng app para baguhin ang posisyon nito"</string>
