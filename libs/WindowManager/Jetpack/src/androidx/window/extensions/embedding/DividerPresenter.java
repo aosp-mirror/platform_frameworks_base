@@ -1255,7 +1255,8 @@ class DividerPresenter implements View.OnTouchListener {
 
             // Update divider line surface visibility and color.
             // If a container is fully expanded, the divider line is invisible unless dragging.
-            final boolean isDividerLineVisible = !mProperties.mIsDraggableExpandType || mIsDragging;
+            final boolean isDividerLineVisible = mProperties.mDividerWidthPx > 0
+                    && (!mProperties.mIsDraggableExpandType || mIsDragging);
             t.setVisibility(mDividerLineSurface, isDividerLineVisible);
             t.setColor(mDividerLineSurface, colorToFloatArray(
                     Color.valueOf(mProperties.mDividerAttributes.getDividerColor())));
