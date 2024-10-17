@@ -14,20 +14,15 @@
  * limitations under the License.
  */
 
-package com.android.systemui.volume.panel.component.volume.domain.interactor
+package com.android.systemui.volume.data.repository
 
-import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.applicationCoroutineScope
-import com.android.systemui.volume.data.repository.audioSystemRepository
-import com.android.systemui.volume.domain.interactor.audioModeInteractor
-import com.android.systemui.volume.mediaOutputInteractor
+import com.android.settingslib.volume.data.repository.AudioSystemRepository
 
-val Kosmos.audioSlidersInteractor by
-    Kosmos.Fixture {
-        AudioSlidersInteractor(
-            applicationCoroutineScope,
-            mediaOutputInteractor,
-            audioModeInteractor,
-            audioSystemRepository,
-        )
+class FakeAudioSystemRepository : AudioSystemRepository {
+
+    override var isSingleVolume = false
+
+    fun setIsSingleVolume(singleVolume: Boolean) {
+        isSingleVolume = singleVolume
     }
+}
