@@ -799,6 +799,70 @@ class KeyGestureControllerTests {
     }
 
     @Test
+    @EnableFlags(
+        com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_SHORTCUT_CONTROL,
+        com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_BOUNCE_KEYS_FLAG,
+        com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_SLOW_KEYS_FLAG,
+        com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_STICKY_KEYS_FLAG,
+        com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_MOUSE_KEYS
+    )
+    fun testKeyboardAccessibilityToggleShortcutPress() {
+        val keyGestureController = KeyGestureController(context, testLooper.looper)
+        testKeyGestureInternal(
+            keyGestureController,
+            TestData(
+                "Meta + Alt + 3 -> Toggle Bounce Keys",
+                intArrayOf(
+                    KeyEvent.KEYCODE_META_LEFT,
+                    KeyEvent.KEYCODE_ALT_LEFT,
+                    KeyEvent.KEYCODE_3
+                ),
+                KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_BOUNCE_KEYS,
+                intArrayOf(KeyEvent.KEYCODE_3),
+                KeyEvent.META_META_ON or KeyEvent.META_ALT_ON,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)))
+        testKeyGestureInternal(
+            keyGestureController,
+            TestData(
+                "Meta + Alt + 4 -> Toggle Mouse Keys",
+                intArrayOf(
+                    KeyEvent.KEYCODE_META_LEFT,
+                    KeyEvent.KEYCODE_ALT_LEFT,
+                    KeyEvent.KEYCODE_4
+                ),
+                KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_MOUSE_KEYS,
+                intArrayOf(KeyEvent.KEYCODE_4),
+                KeyEvent.META_META_ON or KeyEvent.META_ALT_ON,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)))
+        testKeyGestureInternal(
+            keyGestureController,
+            TestData(
+                "Meta + Alt + 5 -> Toggle Sticky Keys",
+                intArrayOf(
+                    KeyEvent.KEYCODE_META_LEFT,
+                    KeyEvent.KEYCODE_ALT_LEFT,
+                    KeyEvent.KEYCODE_5
+                ),
+                KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_STICKY_KEYS,
+                intArrayOf(KeyEvent.KEYCODE_5),
+                KeyEvent.META_META_ON or KeyEvent.META_ALT_ON,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)))
+        testKeyGestureInternal(
+            keyGestureController,
+            TestData(
+                "Meta + Alt + 6 -> Toggle Slow Keys",
+                intArrayOf(
+                    KeyEvent.KEYCODE_META_LEFT,
+                    KeyEvent.KEYCODE_ALT_LEFT,
+                    KeyEvent.KEYCODE_6
+                ),
+                KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_SLOW_KEYS,
+                intArrayOf(KeyEvent.KEYCODE_6),
+                KeyEvent.META_META_ON or KeyEvent.META_ALT_ON,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)))
+    }
+
+    @Test
     @EnableFlags(com.android.window.flags.Flags.FLAG_ENABLE_MOVE_TO_NEXT_DISPLAY_SHORTCUT)
     fun testMoveToNextDisplay() {
         val keyGestureController = KeyGestureController(context, testLooper.looper)
