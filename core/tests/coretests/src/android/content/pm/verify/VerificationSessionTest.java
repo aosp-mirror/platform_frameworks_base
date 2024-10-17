@@ -33,7 +33,6 @@ import static org.mockito.Mockito.when;
 import android.content.pm.SharedLibraryInfo;
 import android.content.pm.SigningInfo;
 import android.content.pm.VersionedPackage;
-import android.content.pm.verify.pkg.IVerificationSessionCallback;
 import android.content.pm.verify.pkg.IVerificationSessionInterface;
 import android.content.pm.verify.pkg.VerificationSession;
 import android.content.pm.verify.pkg.VerificationStatus;
@@ -84,8 +83,6 @@ public class VerificationSessionTest {
     private final PersistableBundle mTestExtensionParams = new PersistableBundle();
     @Mock
     private IVerificationSessionInterface mTestSessionInterface;
-    @Mock
-    private IVerificationSessionCallback mTestCallback;
     private VerificationSession mTestSession;
 
     @Before
@@ -96,7 +93,7 @@ public class VerificationSessionTest {
         mTestExtensionParams.putString(TEST_KEY, TEST_VALUE);
         mTestSession = new VerificationSession(TEST_ID, TEST_INSTALL_SESSION_ID,
                 TEST_PACKAGE_NAME, TEST_PACKAGE_URI, TEST_SIGNING_INFO, mTestDeclaredLibraries,
-                mTestExtensionParams, TEST_POLICY, mTestSessionInterface, mTestCallback);
+                mTestExtensionParams, TEST_POLICY, mTestSessionInterface);
     }
 
     @Test
@@ -138,25 +135,22 @@ public class VerificationSessionTest {
         assertThat(mTestSession.extendTimeRemaining(TEST_EXTEND_TIME)).isEqualTo(TEST_EXTEND_TIME);
         verify(mTestSessionInterface, times(1)).extendTimeRemaining(
                 eq(TEST_ID), eq(TEST_EXTEND_TIME));
-    }
 
-    @Test
-    public void testCallback() throws Exception {
         PersistableBundle response = new PersistableBundle();
         response.putString("test key", "test value");
         final VerificationStatus status =
                 new VerificationStatus.Builder().setVerified(true).build();
         mTestSession.reportVerificationComplete(status);
-        verify(mTestCallback, times(1)).reportVerificationComplete(
+        verify(mTestSessionInterface, times(1)).reportVerificationComplete(
                 eq(TEST_ID), eq(status));
         mTestSession.reportVerificationComplete(status, response);
-        verify(mTestCallback, times(1))
+        verify(mTestSessionInterface, times(1))
                 .reportVerificationCompleteWithExtensionResponse(
                         eq(TEST_ID), eq(status), eq(response));
 
         final int reason = VerificationSession.VERIFICATION_INCOMPLETE_UNKNOWN;
         mTestSession.reportVerificationIncomplete(reason);
-        verify(mTestCallback, times(1)).reportVerificationIncomplete(
+        verify(mTestSessionInterface, times(1)).reportVerificationIncomplete(
                 eq(TEST_ID), eq(reason));
     }
 
