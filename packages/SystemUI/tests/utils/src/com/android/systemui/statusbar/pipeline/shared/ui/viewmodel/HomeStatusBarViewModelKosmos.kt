@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.pipeline.shared.ui.viewmodel
 
+import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
@@ -34,6 +35,7 @@ val Kosmos.homeStatusBarViewModel: HomeStatusBarViewModel by
             lightsOutInteractor,
             activeNotificationsInteractor,
             keyguardTransitionInteractor,
+            keyguardInteractor,
             sceneInteractor,
             sceneContainerOcclusionInteractor,
             shadeInteractor,
