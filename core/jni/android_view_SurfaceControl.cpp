@@ -758,54 +758,64 @@ static void nativeSetLuts(JNIEnv* env, jclass clazz, jlong transactionObj, jlong
     auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
     SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl*>(nativeObject);
 
-    ScopedIntArrayRW joffsets(env, joffsetArray);
-    if (joffsets.get() == nullptr) {
-        jniThrowRuntimeException(env, "Failed to get ScopedIntArrayRW from joffsetArray");
-        return;
-    }
-    ScopedIntArrayRW jdimensions(env, jdimensionArray);
-    if (jdimensions.get() == nullptr) {
-        jniThrowRuntimeException(env, "Failed to get ScopedIntArrayRW from jdimensionArray");
-        return;
-    }
-    ScopedIntArrayRW jsizes(env, jsizeArray);
-    if (jsizes.get() == nullptr) {
-        jniThrowRuntimeException(env, "Failed to get ScopedIntArrayRW from jsizeArray");
-        return;
-    }
-    ScopedIntArrayRW jsamplingKeys(env, jsamplingKeyArray);
-    if (jsamplingKeys.get() == nullptr) {
-        jniThrowRuntimeException(env, "Failed to get ScopedIntArrayRW from jsamplingKeyArray");
-        return;
-    }
+    std::vector<int32_t> offsets;
+    std::vector<int32_t> dimensions;
+    std::vector<int32_t> sizes;
+    std::vector<int32_t> samplingKeys;
+    int32_t fd = -1;
 
-    jsize numLuts = env->GetArrayLength(jdimensionArray);
-    std::vector<int32_t> offsets(joffsets.get(), joffsets.get() + numLuts);
-    std::vector<int32_t> dimensions(jdimensions.get(), jdimensions.get() + numLuts);
-    std::vector<int32_t> sizes(jsizes.get(), jsizes.get() + numLuts);
-    std::vector<int32_t> samplingKeys(jsamplingKeys.get(), jsamplingKeys.get() + numLuts);
+    if (jdimensionArray) {
+        jsize numLuts = env->GetArrayLength(jdimensionArray);
+        ScopedIntArrayRW joffsets(env, joffsetArray);
+        if (joffsets.get() == nullptr) {
+            jniThrowRuntimeException(env, "Failed to get ScopedIntArrayRW from joffsetArray");
+            return;
+        }
+        ScopedIntArrayRW jdimensions(env, jdimensionArray);
+        if (jdimensions.get() == nullptr) {
+            jniThrowRuntimeException(env, "Failed to get ScopedIntArrayRW from jdimensionArray");
+            return;
+        }
+        ScopedIntArrayRW jsizes(env, jsizeArray);
+        if (jsizes.get() == nullptr) {
+            jniThrowRuntimeException(env, "Failed to get ScopedIntArrayRW from jsizeArray");
+            return;
+        }
+        ScopedIntArrayRW jsamplingKeys(env, jsamplingKeyArray);
+        if (jsamplingKeys.get() == nullptr) {
+            jniThrowRuntimeException(env, "Failed to get ScopedIntArrayRW from jsamplingKeyArray");
+            return;
+        }
 
-    ScopedFloatArrayRW jbuffers(env, jbufferArray);
-    if (jbuffers.get() == nullptr) {
-        jniThrowRuntimeException(env, "Failed to get ScopedFloatArrayRW from jbufferArray");
-        return;
-    }
+        if (numLuts > 0) {
+            offsets = std::vector<int32_t>(joffsets.get(), joffsets.get() + numLuts);
+            dimensions = std::vector<int32_t>(jdimensions.get(), jdimensions.get() + numLuts);
+            sizes = std::vector<int32_t>(jsizes.get(), jsizes.get() + numLuts);
+            samplingKeys = std::vector<int32_t>(jsamplingKeys.get(), jsamplingKeys.get() + numLuts);
 
-    // create the shared memory and copy jbuffers
-    size_t bufferSize = jbuffers.size() * sizeof(float);
-    int32_t fd = ashmem_create_region("lut_shread_mem", bufferSize);
-    if (fd < 0) {
-        jniThrowRuntimeException(env, "ashmem_create_region() failed");
-        return;
+            ScopedFloatArrayRW jbuffers(env, jbufferArray);
+            if (jbuffers.get() == nullptr) {
+                jniThrowRuntimeException(env, "Failed to get ScopedFloatArrayRW from jbufferArray");
+                return;
+            }
+
+            // create the shared memory and copy jbuffers
+            size_t bufferSize = jbuffers.size() * sizeof(float);
+            fd = ashmem_create_region("lut_shared_mem", bufferSize);
+            if (fd < 0) {
+                jniThrowRuntimeException(env, "ashmem_create_region() failed");
+                return;
+            }
+            void* ptr = mmap(nullptr, bufferSize, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+            if (ptr == MAP_FAILED) {
+                jniThrowRuntimeException(env, "Failed to map the shared memory");
+                return;
+            }
+            memcpy(ptr, jbuffers.get(), bufferSize);
+            // unmap
+            munmap(ptr, bufferSize);
+        }
     }
-    void* ptr = mmap(nullptr, bufferSize, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
-    if (ptr == MAP_FAILED) {
-        jniThrowRuntimeException(env, "Failed to map the shared memory");
-        return;
-    }
-    memcpy(ptr, jbuffers.get(), bufferSize);
-    // unmap
-    munmap(ptr, bufferSize);
 
     transaction->setLuts(ctrl, base::unique_fd(fd), offsets, dimensions, sizes, samplingKeys);
 }
