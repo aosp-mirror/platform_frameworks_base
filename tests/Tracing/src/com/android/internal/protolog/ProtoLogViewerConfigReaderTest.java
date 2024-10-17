@@ -121,4 +121,12 @@ public class ProtoLogViewerConfigReaderTest {
         assertNull(mConfig.getViewerString(4));
         assertNull(mConfig.getViewerString(5));
     }
+
+    @Test
+    public void loadUnloadAndReloadViewerConfig() {
+        loadViewerConfig();
+        unloadViewerConfig();
+        loadViewerConfig();
+        unloadViewerConfig();
+    }
 }
