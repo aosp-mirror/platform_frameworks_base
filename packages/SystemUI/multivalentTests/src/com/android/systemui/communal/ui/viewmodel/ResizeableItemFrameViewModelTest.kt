@@ -420,7 +420,7 @@ class ResizeableItemFrameViewModelTest : SysuiTestCase() {
         val verticalContentPaddingPx: Float,
         val viewportHeightPx: Int,
         val currentRow: Int?,
-        val currentSpan: Int?,
+        val currentSpan: Int,
         val maxHeightPx: Int,
         val minHeightPx: Int,
         val resizeMultiple: Int,

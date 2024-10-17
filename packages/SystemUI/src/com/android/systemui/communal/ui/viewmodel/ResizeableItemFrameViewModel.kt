@@ -109,13 +109,13 @@ class ResizeableItemFrameViewModel : ExclusiveActivatable() {
         currentRow: Int?,
         maxHeightPx: Int,
         minHeightPx: Int,
-        currentSpan: Int?,
+        currentSpan: Int,
         resizeMultiple: Int,
         totalSpans: Int,
         viewportHeightPx: Int,
         verticalContentPaddingPx: Float,
     ) {
-        if (currentRow == null || currentSpan == null) {
+        if (currentRow == null) {
             gridLayoutInfo.value = null
             return
         }

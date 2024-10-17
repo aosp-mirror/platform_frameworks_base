@@ -649,6 +649,7 @@ private fun ObserveNewWidgetAddedEffect(
 @Composable
 private fun ResizableItemFrameWrapper(
     key: String,
+    currentSpan: GridItemSpan,
     gridState: LazyGridState,
     gridContentPadding: PaddingValues,
     verticalArrangement: Arrangement.Vertical,
@@ -665,6 +666,7 @@ private fun ResizableItemFrameWrapper(
     } else {
         ResizableItemFrame(
             key = key,
+            currentSpan = currentSpan,
             gridState = gridState,
             gridContentPadding = gridContentPadding,
             verticalArrangement = verticalArrangement,
@@ -797,6 +799,7 @@ private fun BoxScope.CommunalHubLazyGrid(
                 val widgetSizeInfo = calculateWidgetSize(item, isResizable)
                 ResizableItemFrameWrapper(
                     key = item.key,
+                    currentSpan = GridItemSpan(item.size.span),
                     gridState = gridState,
                     gridContentPadding = contentPadding,
                     verticalArrangement = itemArrangement,

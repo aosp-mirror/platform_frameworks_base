@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -65,6 +66,7 @@ private fun UpdateGridLayoutInfo(
     minHeightPx: Int,
     maxHeightPx: Int,
     resizeMultiple: Int,
+    currentSpan: GridItemSpan,
 ) {
     val density = LocalDensity.current
     LaunchedEffect(
@@ -77,6 +79,7 @@ private fun UpdateGridLayoutInfo(
         minHeightPx,
         maxHeightPx,
         resizeMultiple,
+        currentSpan,
     ) {
         val verticalItemSpacingPx = with(density) { verticalArrangement.spacing.toPx() }
         val verticalContentPaddingPx =
@@ -100,7 +103,7 @@ private fun UpdateGridLayoutInfo(
                     currentRow = itemInfo?.row,
                     maxHeightPx = maxHeightPx,
                     minHeightPx = minHeightPx,
-                    currentSpan = itemInfo?.span,
+                    currentSpan = currentSpan.currentLineSpan,
                     resizeMultiple = resizeMultiple,
                     totalSpans = maxItemSpan,
                     viewportHeightPx = viewportHeightPx,
@@ -168,6 +171,7 @@ private fun BoxScope.DragHandle(
 @Composable
 fun ResizableItemFrame(
     key: String,
+    currentSpan: GridItemSpan,
     gridState: LazyGridState,
     gridContentPadding: PaddingValues,
     verticalArrangement: Arrangement.Vertical,
@@ -187,7 +191,7 @@ fun ResizableItemFrame(
     val brush = SolidColor(outlineColor)
     val onResizeUpdated by rememberUpdatedState(onResize)
     val viewModel =
-        rememberViewModel(traceName = "ResizeableItemFrame.viewModel") {
+        rememberViewModel(key = currentSpan, traceName = "ResizeableItemFrame.viewModel") {
             ResizeableItemFrameViewModel()
         }
 
@@ -241,6 +245,7 @@ fun ResizableItemFrame(
                 viewModel = viewModel,
                 key = key,
                 gridState = gridState,
+                currentSpan = currentSpan,
                 gridContentPadding = gridContentPadding,
                 verticalArrangement = verticalArrangement,
                 minHeightPx = minHeightPx,
