@@ -125,7 +125,9 @@ public class InputMediaDevice extends MediaDevice {
                             ? mProductName
                             : mContext.getString(R.string.media_transfer_usb_device_mic_name);
             case TYPE_BLUETOOTH_SCO ->
-                    mContext.getString(R.string.media_transfer_bt_device_mic_name);
+                    mProductName != null
+                            ? mProductName
+                            : mContext.getString(R.string.media_transfer_bt_device_mic_name);
             default -> mContext.getString(R.string.media_transfer_this_device_name_desktop);
         };
     }

@@ -93,14 +93,12 @@ class InputManagerServiceTests {
         )
     }
 
-    @JvmField
-    @Rule
+    @get:Rule
     val extendedMockitoRule =
         ExtendedMockitoRule.Builder(this).mockStatic(LocalServices::class.java)
             .mockStatic(PermissionChecker::class.java).build()!!
 
-    @JvmField
-    @Rule
+    @get:Rule
     val setFlagsRule = SetFlagsRule()
 
     @get:Rule

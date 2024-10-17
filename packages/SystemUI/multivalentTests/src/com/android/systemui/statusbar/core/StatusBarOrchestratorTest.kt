@@ -38,13 +38,10 @@ import com.android.systemui.statusbar.data.model.StatusBarMode.LIGHTS_OUT
 import com.android.systemui.statusbar.data.model.StatusBarMode.LIGHTS_OUT_TRANSPARENT
 import com.android.systemui.statusbar.data.model.StatusBarMode.OPAQUE
 import com.android.systemui.statusbar.data.model.StatusBarMode.TRANSPARENT
-import com.android.systemui.statusbar.data.repository.fakeStatusBarModeRepository
-import com.android.systemui.statusbar.phone.mockPhoneStatusBarTransitions
-import com.android.systemui.statusbar.phone.mockPhoneStatusBarViewController
+import com.android.systemui.statusbar.data.repository.fakeStatusBarModePerDisplayRepository
 import com.android.systemui.statusbar.window.data.model.StatusBarWindowState
-import com.android.systemui.statusbar.window.data.repository.fakeStatusBarWindowStateRepositoryStore
-import com.android.systemui.statusbar.window.data.repository.statusBarWindowStateRepositoryStore
-import com.android.systemui.statusbar.window.fakeStatusBarWindowControllerStore
+import com.android.systemui.statusbar.window.data.repository.fakeStatusBarWindowStatePerDisplayRepository
+import com.android.systemui.statusbar.window.fakeStatusBarWindowController
 import com.android.systemui.testKosmos
 import com.android.wm.shell.bubbles.bubbles
 import com.google.common.truth.Truth.assertThat
@@ -60,25 +57,20 @@ import org.mockito.kotlin.verify
 @RunWith(AndroidJUnit4::class)
 class StatusBarOrchestratorTest : SysuiTestCase() {
 
-    private val kosmos =
-        testKosmos().also {
-            it.testDispatcher = it.unconfinedTestDispatcher
-            it.statusBarWindowStateRepositoryStore = it.fakeStatusBarWindowStateRepositoryStore
-        }
+    private val kosmos = testKosmos().also { it.testDispatcher = it.unconfinedTestDispatcher }
     private val testScope = kosmos.testScope
-    private val statusBarViewController = kosmos.mockPhoneStatusBarViewController
-    private val statusBarWindowControllerStore = kosmos.fakeStatusBarWindowControllerStore
-    private val statusBarModeRepository = kosmos.fakeStatusBarModeRepository
-    private val pluginDependencyProvider = kosmos.mockPluginDependencyProvider
-    private val notificationShadeWindowViewController =
+    private val fakeStatusBarModePerDisplayRepository = kosmos.fakeStatusBarModePerDisplayRepository
+    private val mockPluginDependencyProvider = kosmos.mockPluginDependencyProvider
+    private val mockNotificationShadeWindowViewController =
         kosmos.mockNotificationShadeWindowViewController
-    private val shadeSurface = kosmos.mockShadeSurface
-    private val bouncerRepository = kosmos.fakeKeyguardBouncerRepository
-    private val fakeStatusBarWindowStateRepositoryStore =
-        kosmos.fakeStatusBarWindowStateRepositoryStore
+    private val mockShadeSurface = kosmos.mockShadeSurface
+    private val fakeBouncerRepository = kosmos.fakeKeyguardBouncerRepository
+    private val fakeStatusBarWindowStatePerDisplayRepository =
+        kosmos.fakeStatusBarWindowStatePerDisplayRepository
     private val fakePowerRepository = kosmos.fakePowerRepository
-    private val mockPhoneStatusBarTransitions = kosmos.mockPhoneStatusBarTransitions
     private val mockBubbles = kosmos.bubbles
+    private val fakeStatusBarWindowController = kosmos.fakeStatusBarWindowController
+    private val fakeStatusBarInitializer = kosmos.fakeStatusBarInitializer
 
     private val orchestrator = kosmos.statusBarOrchestrator
 
@@ -86,30 +78,31 @@ class StatusBarOrchestratorTest : SysuiTestCase() {
     fun start_setsUpPluginDependencies() {
         orchestrator.start()
 
-        verify(pluginDependencyProvider).allowPluginDependency(DarkIconDispatcher::class.java)
-        verify(pluginDependencyProvider).allowPluginDependency(StatusBarStateController::class.java)
+        verify(mockPluginDependencyProvider).allowPluginDependency(DarkIconDispatcher::class.java)
+        verify(mockPluginDependencyProvider)
+            .allowPluginDependency(StatusBarStateController::class.java)
     }
 
     @Test
     fun start_attachesWindow() {
         orchestrator.start()
 
-        assertThat(statusBarWindowControllerStore.defaultDisplay.isAttached).isTrue()
+        assertThat(fakeStatusBarWindowController.isAttached).isTrue()
     }
 
     @Test
     fun start_setsStatusBarControllerOnShade() {
         orchestrator.start()
 
-        verify(notificationShadeWindowViewController)
-            .setStatusBarViewController(statusBarViewController)
+        verify(mockNotificationShadeWindowViewController)
+            .setStatusBarViewController(fakeStatusBarInitializer.statusBarViewController)
     }
 
     @Test
     fun start_updatesShadeExpansion() {
         orchestrator.start()
 
-        verify(shadeSurface).updateExpansionAndVisibility()
+        verify(mockShadeSurface).updateExpansionAndVisibility()
     }
 
     @Test
@@ -117,9 +110,9 @@ class StatusBarOrchestratorTest : SysuiTestCase() {
         testScope.runTest {
             orchestrator.start()
 
-            bouncerRepository.setPrimaryShow(isShowing = true)
+            fakeBouncerRepository.setPrimaryShow(isShowing = true)
 
-            verify(statusBarViewController)
+            verify(fakeStatusBarInitializer.statusBarViewController)
                 .setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS)
         }
 
@@ -128,9 +121,9 @@ class StatusBarOrchestratorTest : SysuiTestCase() {
         testScope.runTest {
             orchestrator.start()
 
-            bouncerRepository.setPrimaryShow(isShowing = false)
+            fakeBouncerRepository.setPrimaryShow(isShowing = false)
 
-            verify(statusBarViewController)
+            verify(fakeStatusBarInitializer.statusBarViewController)
                 .setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_AUTO)
         }
 
@@ -141,7 +134,7 @@ class StatusBarOrchestratorTest : SysuiTestCase() {
 
             orchestrator.start()
 
-            verify(mockPhoneStatusBarTransitions).finishAnimations()
+            verify(fakeStatusBarInitializer.statusBarTransitions).finishAnimations()
         }
 
     @Test
@@ -151,7 +144,7 @@ class StatusBarOrchestratorTest : SysuiTestCase() {
 
             orchestrator.start()
 
-            verify(mockPhoneStatusBarTransitions, never()).finishAnimations()
+            verify(fakeStatusBarInitializer.statusBarTransitions, never()).finishAnimations()
         }
 
     @Test
@@ -208,7 +201,7 @@ class StatusBarOrchestratorTest : SysuiTestCase() {
 
             orchestrator.start()
 
-            verify(mockPhoneStatusBarTransitions)
+            verify(fakeStatusBarInitializer.statusBarTransitions)
                 .transitionTo(TRANSPARENT.toTransitionModeInt(), /* animate= */ true)
         }
 
@@ -222,19 +215,19 @@ class StatusBarOrchestratorTest : SysuiTestCase() {
 
             orchestrator.start()
 
-            verify(mockPhoneStatusBarTransitions)
+            verify(fakeStatusBarInitializer.statusBarTransitions)
                 .transitionTo(TRANSPARENT.toTransitionModeInt(), /* animate= */ true)
 
             setStatusBarMode(OPAQUE)
-            verify(mockPhoneStatusBarTransitions)
+            verify(fakeStatusBarInitializer.statusBarTransitions)
                 .transitionTo(OPAQUE.toTransitionModeInt(), /* animate= */ true)
 
             setStatusBarMode(LIGHTS_OUT)
-            verify(mockPhoneStatusBarTransitions)
+            verify(fakeStatusBarInitializer.statusBarTransitions)
                 .transitionTo(LIGHTS_OUT.toTransitionModeInt(), /* animate= */ true)
 
             setStatusBarMode(LIGHTS_OUT_TRANSPARENT)
-            verify(mockPhoneStatusBarTransitions)
+            verify(fakeStatusBarInitializer.statusBarTransitions)
                 .transitionTo(LIGHTS_OUT_TRANSPARENT.toTransitionModeInt(), /* animate= */ true)
         }
 
@@ -248,7 +241,7 @@ class StatusBarOrchestratorTest : SysuiTestCase() {
 
             orchestrator.start()
 
-            verify(mockPhoneStatusBarTransitions)
+            verify(fakeStatusBarInitializer.statusBarTransitions)
                 .transitionTo(/* mode= */ TRANSPARENT.toTransitionModeInt(), /* animate= */ false)
         }
 
@@ -262,7 +255,7 @@ class StatusBarOrchestratorTest : SysuiTestCase() {
 
             orchestrator.start()
 
-            verify(mockPhoneStatusBarTransitions)
+            verify(fakeStatusBarInitializer.statusBarTransitions)
                 .transitionTo(/* mode= */ TRANSPARENT.toTransitionModeInt(), /* animate= */ false)
         }
 
@@ -276,7 +269,7 @@ class StatusBarOrchestratorTest : SysuiTestCase() {
 
             orchestrator.start()
 
-            verify(mockPhoneStatusBarTransitions)
+            verify(fakeStatusBarInitializer.statusBarTransitions)
                 .transitionTo(/* mode= */ TRANSPARENT.toTransitionModeInt(), /* animate= */ false)
         }
 
@@ -295,7 +288,7 @@ class StatusBarOrchestratorTest : SysuiTestCase() {
             setTransientStatusBar()
             clearTransientStatusBar()
 
-            verify(mockPhoneStatusBarTransitions, times(1))
+            verify(fakeStatusBarInitializer.statusBarTransitions, times(1))
                 .transitionTo(TRANSPARENT.toTransitionModeInt(), /* animate= */ true)
         }
 
@@ -318,18 +311,18 @@ class StatusBarOrchestratorTest : SysuiTestCase() {
     }
 
     private fun setTransientStatusBar() {
-        statusBarModeRepository.defaultDisplay.showTransient()
+        fakeStatusBarModePerDisplayRepository.showTransient()
     }
 
     private fun clearTransientStatusBar() {
-        statusBarModeRepository.defaultDisplay.clearTransient()
+        fakeStatusBarModePerDisplayRepository.clearTransient()
     }
 
     private fun setStatusBarWindowState(state: StatusBarWindowState) {
-        fakeStatusBarWindowStateRepositoryStore.defaultDisplay.setWindowState(state)
+        fakeStatusBarWindowStatePerDisplayRepository.setWindowState(state)
     }
 
     private fun setStatusBarMode(statusBarMode: StatusBarMode) {
-        statusBarModeRepository.defaultDisplay.statusBarMode.value = statusBarMode
+        fakeStatusBarModePerDisplayRepository.statusBarMode.value = statusBarMode
     }
 }

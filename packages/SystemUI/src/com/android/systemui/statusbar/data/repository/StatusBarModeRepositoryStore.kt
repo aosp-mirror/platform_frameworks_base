@@ -31,6 +31,7 @@ import javax.inject.Inject
 
 interface StatusBarModeRepositoryStore {
     val defaultDisplay: StatusBarModePerDisplayRepository
+
     fun forDisplay(displayId: Int): StatusBarModePerDisplayRepository
 }
 
@@ -39,7 +40,7 @@ class StatusBarModeRepositoryImpl
 @Inject
 constructor(
     @DisplayId private val displayId: Int,
-    factory: StatusBarModePerDisplayRepositoryFactory
+    factory: StatusBarModePerDisplayRepositoryFactory,
 ) :
     StatusBarModeRepositoryStore,
     CoreStartable,
@@ -47,11 +48,9 @@ constructor(
     override val defaultDisplay = factory.create(displayId)
 
     override fun forDisplay(displayId: Int) =
-        if (this.displayId == displayId) {
-            defaultDisplay
-        } else {
-            TODO("b/127878649 implement multi-display state management")
-        }
+        // TODO(b/369337087): implement per display status bar modes.
+        //  For now just use default display instance.
+        defaultDisplay
 
     override fun start() {
         defaultDisplay.start()

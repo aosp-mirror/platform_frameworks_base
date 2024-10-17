@@ -2352,6 +2352,13 @@ public final class InputMethodManager {
      * {@link #RESULT_HIDDEN}.
      * @return {@code true} if a request was sent to system_server, {@code false} otherwise. Note:
      * this does not return result of the request. For result use {@param resultReceiver} instead.
+     *
+     * @deprecated The {@link ResultReceiver} is not a reliable way of determining whether the
+     * Input Method is actually shown or hidden. If result is needed, use
+     * {@link android.view.WindowInsetsController#show} instead and set a
+     * {@link View.OnApplyWindowInsetsListener} and verify the provided {@link WindowInsets} for
+     * the visibility of IME. If result is not needed, use {@link #showSoftInput(View, int)}
+     * instead.
      */
     public boolean showSoftInput(View view, @ShowFlags int flags, ResultReceiver resultReceiver) {
         return showSoftInput(view, flags, resultReceiver, SoftInputShowHideReason.SHOW_SOFT_INPUT);
@@ -2399,6 +2406,14 @@ public final class InputMethodManager {
                                 & WindowInsets.Type.ime()) == 0) {
                     ImeTracker.forLogging().onProgress(statsToken,
                             ImeTracker.PHASE_CLIENT_NO_ONGOING_USER_ANIMATION);
+                    if (resultReceiver != null) {
+                        final boolean imeReqVisible =
+                                (viewRootImpl.getInsetsController().getRequestedVisibleTypes()
+                                        & WindowInsets.Type.ime()) != 0;
+                        resultReceiver.send(
+                                imeReqVisible ? InputMethodManager.RESULT_UNCHANGED_SHOWN
+                                        : InputMethodManager.RESULT_SHOWN, null);
+                    }
                     // TODO(b/322992891) handle case of SHOW_IMPLICIT
                     viewRootImpl.getInsetsController().show(WindowInsets.Type.ime(),
                             false /* fromIme */, statsToken);
@@ -2531,6 +2546,13 @@ public final class InputMethodManager {
      * {@link #RESULT_HIDDEN}.
      * @return {@code true} if a request was sent to system_server, {@code false} otherwise. Note:
      * this does not return result of the request. For result use {@param resultReceiver} instead.
+     *
+     * @deprecated The {@link ResultReceiver} is not a reliable way of determining whether the
+     * Input Method is actually shown or hidden. If result is needed, use
+     * {@link android.view.WindowInsetsController#hide} instead and set a
+     * {@link View.OnApplyWindowInsetsListener} and verify the provided {@link WindowInsets} for
+     * the visibility of IME. If result is not needed, use
+     * {@link #hideSoftInputFromView(View, int)} instead.
      */
     public boolean hideSoftInputFromWindow(IBinder windowToken, @HideFlags int flags,
             ResultReceiver resultReceiver) {
@@ -2569,6 +2591,14 @@ public final class InputMethodManager {
                 // TODO(b/322992891) handle case of HIDE_IMPLICIT_ONLY
                 final var viewRootImpl = servedView.getViewRootImpl();
                 if (viewRootImpl != null) {
+                    if (resultReceiver != null) {
+                        final boolean imeReqVisible =
+                                (viewRootImpl.getInsetsController().getRequestedVisibleTypes()
+                                        & WindowInsets.Type.ime()) != 0;
+                        resultReceiver.send(
+                                !imeReqVisible ? InputMethodManager.RESULT_UNCHANGED_HIDDEN
+                                        : InputMethodManager.RESULT_HIDDEN, null);
+                    }
                     viewRootImpl.getInsetsController().hide(WindowInsets.Type.ime());
                 }
                 return true;

@@ -1835,6 +1835,25 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         void logSkipResetAllContentAlphas(
                 NotificationEntry entry
         );
+
+        /** Called when we start an appear animation. */
+        void logStartAppearAnimation(NotificationEntry entry, boolean isAppear);
+
+        /** Called when we cancel the running appear animation. */
+        void logCancelAppearDrawing(NotificationEntry entry, boolean wasDrawing);
+
+        /** Called when the animator of the appear animation is started. */
+        void logAppearAnimationStarted(NotificationEntry entry, boolean isAppear);
+
+        /** Called when we prepared an appear animation, but the animator was never started. */
+        void logAppearAnimationSkipped(NotificationEntry entry, boolean isAppear);
+
+        /** Called when the animator of the appear animation is finished. */
+        void logAppearAnimationFinished(
+                NotificationEntry entry,
+                boolean isAppear,
+                boolean cancelled
+        );
     }
 
     /**
@@ -3165,6 +3184,13 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     @Override
+    public void performAddAnimation(long delay, long duration, boolean isHeadsUpAppear,
+            Runnable onFinishRunnable) {
+        mLogger.logStartAppearAnimation(getEntry(), /* isAppear = */ true);
+        super.performAddAnimation(delay, duration, isHeadsUpAppear, onFinishRunnable);
+    }
+
+    @Override
     public long performRemoveAnimation(
             long duration,
             long delay,
@@ -3173,6 +3199,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             Runnable onStartedRunnable,
             Runnable onFinishedRunnable,
             AnimatorListenerAdapter animationListener, ClipSide clipSide) {
+        mLogger.logStartAppearAnimation(getEntry(), /* isAppear = */ false);
         if (mMenuRow != null && mMenuRow.isMenuVisible()) {
             Animator anim = getTranslateViewAnimator(0f, null /* listener */);
             if (anim != null) {
@@ -3201,8 +3228,25 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     @Override
-    protected void onAppearAnimationFinished(boolean wasAppearing) {
-        super.onAppearAnimationFinished(wasAppearing);
+    protected void onAppearAnimationStarted(boolean isAppear) {
+        mLogger.logAppearAnimationStarted(getEntry(), /* isAppear = */ isAppear);
+        super.onAppearAnimationStarted(isAppear);
+    }
+
+    @Override
+    protected void onAppearAnimationSkipped(boolean isAppear) {
+        mLogger.logAppearAnimationSkipped(getEntry(),  /* isAppear = */ isAppear);
+        super.onAppearAnimationSkipped(isAppear);
+    }
+
+    @Override
+    protected void onAppearAnimationFinished(boolean wasAppearing, boolean cancelled) {
+        mLogger.logAppearAnimationFinished(
+                /* entry = */ getEntry(),
+                /* isAppear = */ wasAppearing,
+                /* cancelled = */ cancelled
+        );
+        super.onAppearAnimationFinished(wasAppearing, cancelled);
         if (wasAppearing) {
             // During the animation the visible view might have changed, so let's make sure all
             // alphas are reset
@@ -3215,6 +3259,12 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         } else {
             setHeadsUpAnimatingAway(false);
         }
+    }
+
+    @Override
+    public void cancelAppearDrawing() {
+        mLogger.logCancelAppearDrawing(getEntry(), isDrawingAppearAnimation());
+        super.cancelAppearDrawing();
     }
 
     @Override
@@ -3883,6 +3933,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 dumpHeights(pw);
             }
             showingLayout.dump(pw, args);
+            dumpAppearAnimationProperties(pw, args);
             dumpCustomOutline(pw, args);
             dumpClipping(pw, args);
             if (getViewState() != null) {

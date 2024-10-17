@@ -126,33 +126,6 @@ public final class AppFunctionManager {
     }
 
     /**
-     * Executes the app function.
-     *
-     * <p>Proxies request and response to the underlying {@link
-     * android.app.appfunctions.AppFunctionManager#executeAppFunction}, converting the request and
-     * response in the appropriate type required by the function.
-     *
-     * @deprecated Use {@link #executeAppFunction(ExecuteAppFunctionRequest, Executor,
-     *     CancellationSignal, Consumer)} instead. This method will be removed once usage references
-     *     are updated.
-     */
-    @Deprecated
-    public void executeAppFunction(
-            @NonNull ExecuteAppFunctionRequest sidecarRequest,
-            @NonNull @CallbackExecutor Executor executor,
-            @NonNull Consumer<ExecuteAppFunctionResponse> callback) {
-        Objects.requireNonNull(sidecarRequest);
-        Objects.requireNonNull(executor);
-        Objects.requireNonNull(callback);
-
-        executeAppFunction(
-                sidecarRequest,
-                executor,
-                new CancellationSignal(),
-                callback);
-    }
-
-    /**
      * Returns a boolean through a callback, indicating whether the app function is enabled.
      *
      * <p>* This method can only check app functions owned by the caller, or those where the caller

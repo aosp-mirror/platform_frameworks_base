@@ -69,6 +69,9 @@ import com.android.systemui.statusbar.notification.row.NotificationRowContentBin
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_EXPANDED
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_HEADS_UP
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag
+import com.android.systemui.statusbar.notification.row.icon.AppIconProviderImpl
+import com.android.systemui.statusbar.notification.row.icon.NotificationIconStyleProviderImpl
+import com.android.systemui.statusbar.notification.row.icon.NotificationRowIconViewInflaterFactory
 import com.android.systemui.statusbar.notification.row.shared.NotificationRowContentBinderRefactor
 import com.android.systemui.statusbar.notification.stack.NotificationChildrenContainerLogger
 import com.android.systemui.statusbar.phone.KeyguardBypassController
@@ -99,7 +102,7 @@ import org.mockito.Mockito
 class ExpandableNotificationRowBuilder(
     private val context: Context,
     dependency: TestableDependency,
-    private val featureFlags: FakeFeatureFlagsClassic = FakeFeatureFlagsClassic()
+    private val featureFlags: FakeFeatureFlagsClassic = FakeFeatureFlagsClassic(),
 ) {
 
     private val mMockLogger: ExpandableNotificationRowLogger
@@ -161,21 +164,21 @@ class ExpandableNotificationRowBuilder(
                         DeviceConfig.NAMESPACE_SYSTEMUI,
                         SystemUiDeviceConfigFlags.SSIN_SHOW_IN_HEADS_UP,
                         "true",
-                        true
+                        true,
                     )
                     setProperty(
                         DeviceConfig.NAMESPACE_SYSTEMUI,
                         SystemUiDeviceConfigFlags.SSIN_ENABLED,
                         "true",
-                        true
+                        true,
                     )
                     setProperty(
                         DeviceConfig.NAMESPACE_SYSTEMUI,
                         SystemUiDeviceConfigFlags.SSIN_REQUIRES_TARGETING_P,
                         "false",
-                        true
+                        true,
                     )
-                }
+                },
             )
         val remoteViewsFactories = getNotifRemoteViewsFactoryContainer(featureFlags)
         val remoteInputManager = Mockito.mock(NotificationRemoteInputManager::class.java, STUB_ONLY)
@@ -192,21 +195,21 @@ class ExpandableNotificationRowBuilder(
                             Mockito.mock(KeyguardDismissUtil::class.java, STUB_ONLY),
                         remoteInputManager = remoteInputManager,
                         smartReplyController = mSmartReplyController,
-                        context = context
+                        context = context,
                     ),
                 smartActionsInflater =
                     SmartActionInflaterImpl(
                         constants = mSmartReplyConstants,
                         activityStarter = Mockito.mock(ActivityStarter::class.java, STUB_ONLY),
                         smartReplyController = mSmartReplyController,
-                        headsUpManager = mHeadsUpManager
-                    )
+                        headsUpManager = mHeadsUpManager,
+                    ),
             )
         val notifLayoutInflaterFactoryProvider =
             object : NotifLayoutInflaterFactory.Provider {
                 override fun provide(
                     row: ExpandableNotificationRow,
-                    layoutType: Int
+                    layoutType: Int,
                 ): NotifLayoutInflaterFactory =
                     NotifLayoutInflaterFactory(row, layoutType, remoteViewsFactories)
             }
@@ -270,14 +273,14 @@ class ExpandableNotificationRowBuilder(
         whenever(
                 mOnUserInteractionCallback.registerFutureDismissal(
                     ArgumentMatchers.any(),
-                    ArgumentMatchers.anyInt()
+                    ArgumentMatchers.anyInt(),
                 )
             )
             .thenReturn(mFutureDismissalRunnable)
     }
 
     private fun getNotifRemoteViewsFactoryContainer(
-        featureFlags: FeatureFlags,
+        featureFlags: FeatureFlags
     ): NotifRemoteViewsFactoryContainer {
         return NotifRemoteViewsFactoryContainerImpl(
             featureFlags,
@@ -285,6 +288,10 @@ class ExpandableNotificationRowBuilder(
             BigPictureLayoutInflaterFactory(),
             NotificationOptimizedLinearLayoutFactory(),
             { Mockito.mock(NotificationViewFlipperFactory::class.java) },
+            NotificationRowIconViewInflaterFactory(
+                AppIconProviderImpl(context),
+                NotificationIconStyleProviderImpl(),
+            ),
         )
     }
 
@@ -293,7 +300,7 @@ class ExpandableNotificationRowBuilder(
             NotificationChannel(
                 notification.channelId,
                 notification.channelId,
-                NotificationManager.IMPORTANCE_DEFAULT
+                NotificationManager.IMPORTANCE_DEFAULT,
             )
         channel.isBlockable = true
         val entry =
@@ -321,7 +328,7 @@ class ExpandableNotificationRowBuilder(
 
     private fun generateRow(
         entry: NotificationEntry,
-        @InflationFlag extraInflationFlags: Int
+        @InflationFlag extraInflationFlags: Int,
     ): ExpandableNotificationRow {
         // NOTE: This flag is read when the ExpandableNotificationRow is inflated, so it needs to be
         //  set, but we do not want to override an existing value that is needed by a specific test.
@@ -329,7 +336,7 @@ class ExpandableNotificationRowBuilder(
         val rowInflaterTask =
             RowInflaterTask(
                 mFakeSystemClock,
-                Mockito.mock(RowInflaterTaskLogger::class.java, STUB_ONLY)
+                Mockito.mock(RowInflaterTaskLogger::class.java, STUB_ONLY),
             )
         val row = rowInflaterTask.inflateSynchronously(context, null, entry)
 
@@ -364,7 +371,7 @@ class ExpandableNotificationRowBuilder(
             mSmartReplyController,
             featureFlags,
             Mockito.mock(IStatusBarService::class.java, STUB_ONLY),
-            Mockito.mock(UiEventLogger::class.java, STUB_ONLY)
+            Mockito.mock(UiEventLogger::class.java, STUB_ONLY),
         )
         row.setAboveShelfChangedListener { aboveShelf: Boolean -> }
         mBindStage.getStageParams(entry).requireContentViews(extraInflationFlags)

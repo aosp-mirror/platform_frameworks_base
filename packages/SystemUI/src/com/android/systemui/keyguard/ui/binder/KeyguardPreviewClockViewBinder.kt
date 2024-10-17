@@ -33,7 +33,7 @@ import androidx.constraintlayout.widget.ConstraintSet.TOP
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
-import com.android.app.tracing.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.internal.policy.SystemBarUtils
 import com.android.systemui.customization.R as customR
 import com.android.systemui.keyguard.shared.model.ClockSizeSetting
@@ -129,15 +129,19 @@ object KeyguardPreviewClockViewBinder {
             constrainMaxHeight(customR.id.lockscreen_clock_view_large, 0)
             val largeClockTopMargin =
                 SystemBarUtils.getStatusBarHeight(context) +
-                    context.resources.getDimensionPixelSize(
-                        customR.dimen.small_clock_padding_top
-                    ) +
+                    context.resources.getDimensionPixelSize(customR.dimen.small_clock_padding_top) +
                     context.resources.getDimensionPixelSize(
                         R.dimen.keyguard_smartspace_top_offset
                     ) +
                     getDimen(context, DATE_WEATHER_VIEW_HEIGHT) +
                     getDimen(context, ENHANCED_SMARTSPACE_HEIGHT)
-            connect(customR.id.lockscreen_clock_view_large, TOP, PARENT_ID, TOP, largeClockTopMargin)
+            connect(
+                customR.id.lockscreen_clock_view_large,
+                TOP,
+                PARENT_ID,
+                TOP,
+                largeClockTopMargin,
+            )
             connect(customR.id.lockscreen_clock_view_large, START, PARENT_ID, START)
             connect(
                 customR.id.lockscreen_clock_view_large,
@@ -146,12 +150,11 @@ object KeyguardPreviewClockViewBinder {
                 ConstraintSet.END,
             )
 
-
             // In preview, we'll show UDFPS icon for UDFPS devices and nothing for non-UDFPS
             // devices, but we need position of device entry icon to constrain clock
             if (getConstraint(lockId) != null) {
                 connect(customR.id.lockscreen_clock_view_large, BOTTOM, lockId, TOP)
-           } else {
+            } else {
                 // Copied calculation codes from applyConstraints in DefaultDeviceEntrySection
                 val bottomPaddingPx =
                     context.resources.getDimensionPixelSize(R.dimen.lock_icon_margin_bottom)

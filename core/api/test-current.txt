@@ -1101,6 +1101,7 @@ package android.content.pm {
     field public static final long OVERRIDE_UNDEFINED_ORIENTATION_TO_PORTRAIT = 265452344L; // 0xfd27b38L
     field public static final long OVERRIDE_USE_DISPLAY_LANDSCAPE_NATURAL_ORIENTATION = 255940284L; // 0xf4156bcL
     field public static final int RESIZE_MODE_RESIZEABLE = 2; // 0x2
+    field public static final long UNIVERSAL_RESIZABLE_BY_DEFAULT = 357141415L; // 0x15498ba7L
   }
 
   public class ApplicationInfo extends android.content.pm.PackageItemInfo implements android.os.Parcelable {

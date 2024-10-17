@@ -47,7 +47,6 @@ import androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
 import androidx.constraintlayout.widget.ConstraintSet.START
 import androidx.constraintlayout.widget.ConstraintSet.TOP
 import androidx.core.view.isInvisible
-import com.android.app.tracing.coroutines.createCoroutineTracingContext
 import com.android.internal.policy.SystemBarUtils
 import com.android.keyguard.ClockEventController
 import com.android.keyguard.KeyguardClockSwitch
@@ -57,6 +56,7 @@ import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.common.ui.ConfigurationState
 import com.android.systemui.communal.ui.binder.CommunalTutorialIndicatorViewBinder
 import com.android.systemui.communal.ui.viewmodel.CommunalTutorialIndicatorViewModel
+import com.android.systemui.coroutines.newTracingContext
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
@@ -189,7 +189,7 @@ constructor(
             CoroutineScope(
                 applicationScope.coroutineContext +
                     Job() +
-                    createCoroutineTracingContext("KeyguardPreviewRenderer")
+                    newTracingContext("KeyguardPreviewRenderer")
             )
         disposables += DisposableHandle { coroutineScope.cancel() }
         clockController.setFallbackWeatherData(WeatherData.getPlaceholderWeatherData())

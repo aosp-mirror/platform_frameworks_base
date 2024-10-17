@@ -727,4 +727,45 @@ class SceneTransitionLayoutStateTest {
         // The previous job is cancelled and does not infinitely collect the progress.
         job.join()
     }
+
+    @Test
+    fun replacedTransitionIsRemovedFromFinishedTransitions() = runTest {
+        val state = MutableSceneTransitionLayoutState(SceneA)
+
+        val aToB =
+            transition(
+                SceneA,
+                SceneB,
+                onFreezeAndAnimate = {
+                    // Do nothing, so that this transition stays in the transitionStates list and we
+                    // can finish() it manually later.
+                },
+            )
+        val replacingAToB = transition(SceneB, SceneC)
+        val replacingBToC = transition(SceneB, SceneC, replacedTransition = replacingAToB)
+
+        // Start A => B.
+        val aToBJob = state.startTransitionImmediately(animationScope = this, aToB)
+
+        // Start B => C and immediately finish it. It will be flagged as finished in
+        // STLState.finishedTransitions given that A => B is not finished yet.
+        val bToCJob = state.startTransitionImmediately(animationScope = this, replacingAToB)
+        replacingAToB.finish()
+        bToCJob.join()
+
+        // Start a new B => C that replaces the previously finished B => C.
+        val replacingBToCJob =
+            state.startTransitionImmediately(animationScope = this, replacingBToC)
+
+        // Finish A => B.
+        aToB.finish()
+        aToBJob.join()
+
+        // Finish the new B => C.
+        replacingBToC.finish()
+        replacingBToCJob.join()
+
+        assertThat(state.transitionState).isIdle()
+        assertThat(state.transitionState).hasCurrentScene(SceneC)
+    }
 }

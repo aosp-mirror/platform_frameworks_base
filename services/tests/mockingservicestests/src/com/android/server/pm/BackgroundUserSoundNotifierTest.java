@@ -18,6 +18,7 @@ package com.android.server.pm;
 
 import static android.media.AudioAttributes.USAGE_ALARM;
 
+import static org.junit.Assume.assumeTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
@@ -91,6 +92,7 @@ public class BackgroundUserSoundNotifierTest {
     }
     @Test
     public void testAlarmOnBackgroundUser_foregroundUserNotified() throws RemoteException {
+        assumeTrue(UserManager.supportsMultipleUsers());
         AudioAttributes aa = new AudioAttributes.Builder().setUsage(USAGE_ALARM).build();
         UserInfo user = createUser("User", UserManager.USER_TYPE_FULL_SECONDARY, 0);
         final int fgUserId = mSpiedContext.getUserId();
@@ -100,7 +102,7 @@ public class BackgroundUserSoundNotifierTest {
                 /* packageName= */ "com.android.car.audio", AudioManager.AUDIOFOCUS_GAIN,
                 AudioManager.AUDIOFOCUS_NONE, /* flags= */ 0, Build.VERSION.SDK_INT);
         clearInvocations(mNotificationManager);
-        mBackgroundUserSoundNotifier.notifyForegroundUserAboutSoundIfNecessary(afi, mSpiedContext);
+        mBackgroundUserSoundNotifier.notifyForegroundUserAboutSoundIfNecessary(afi);
         verify(mNotificationManager)
                 .notifyAsUser(eq(BackgroundUserSoundNotifier.class.getSimpleName()),
                         eq(afi.getClientUid()), any(Notification.class),
@@ -116,7 +118,7 @@ public class BackgroundUserSoundNotifierTest {
                 /* packageName= */ "com.android.car.audio", AudioManager.AUDIOFOCUS_GAIN,
                 AudioManager.AUDIOFOCUS_NONE, /* flags= */ 0, Build.VERSION.SDK_INT);
         clearInvocations(mNotificationManager);
-        mBackgroundUserSoundNotifier.notifyForegroundUserAboutSoundIfNecessary(afi, mSpiedContext);
+        mBackgroundUserSoundNotifier.notifyForegroundUserAboutSoundIfNecessary(afi);
         verifyZeroInteractions(mNotificationManager);
     }
 
@@ -131,7 +133,7 @@ public class BackgroundUserSoundNotifierTest {
                 AudioManager.AUDIOFOCUS_GAIN, AudioManager.AUDIOFOCUS_NONE, /* flags= */ 0,
                 Build.VERSION.SDK_INT);
         clearInvocations(mNotificationManager);
-        mBackgroundUserSoundNotifier.notifyForegroundUserAboutSoundIfNecessary(afi, mSpiedContext);
+        mBackgroundUserSoundNotifier.notifyForegroundUserAboutSoundIfNecessary(afi);
         verifyZeroInteractions(mNotificationManager);
     }
 
@@ -169,7 +171,7 @@ public class BackgroundUserSoundNotifierTest {
         doReturn(focusStack).when(mockAudioPolicy).getFocusStack();
         mBackgroundUserSoundNotifier.mFocusControlAudioPolicy = mockAudioPolicy;
 
-        mBackgroundUserSoundNotifier.muteAlarmSounds(mSpiedContext);
+        mBackgroundUserSoundNotifier.muteAlarmSounds(bgUserUid);
 
         verify(apc1.getPlayerProxy()).stop();
         verify(mockAudioPolicy).sendFocusLossAndUpdate(afi);
@@ -178,6 +180,7 @@ public class BackgroundUserSoundNotifierTest {
 
     @Test
     public void testOnAudioFocusGrant_alarmOnBackgroundUser_notifiesForegroundUser() {
+        assumeTrue(UserManager.supportsMultipleUsers());
         final int fgUserId = mSpiedContext.getUserId();
         UserInfo bgUser = createUser("Background User",  UserManager.USER_TYPE_FULL_SECONDARY, 0);
         int bgUserUid = bgUser.id * 100000;
@@ -205,7 +208,7 @@ public class BackgroundUserSoundNotifierTest {
                 .when(mUserManager).getUserSwitchability(any());
 
         Notification notification = mBackgroundUserSoundNotifier.createNotification(userName,
-                mSpiedContext);
+                mSpiedContext, 101000);
 
         assertEquals("Alarm for BgUser", notification.extras.getString(
                 Notification.EXTRA_TITLE));
@@ -232,7 +235,7 @@ public class BackgroundUserSoundNotifierTest {
                 .when(mUserManager).getUserSwitchability(any());
 
         Notification notification = mBackgroundUserSoundNotifier.createNotification(userName,
-                mSpiedContext);
+                mSpiedContext, 101000);
 
         assertEquals(1, notification.actions.length);
         assertEquals(mSpiedContext.getString(

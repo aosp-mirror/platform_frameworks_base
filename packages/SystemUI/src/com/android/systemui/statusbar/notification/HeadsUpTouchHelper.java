@@ -115,23 +115,23 @@ public class HeadsUpTouchHelper implements Gefingerpoken {
                 final float h = y - mInitialTouchY;
                 if (mTouchingHeadsUpView && Math.abs(h) > mTouchSlop
                         && Math.abs(h) > Math.abs(x - mInitialTouchX)) {
-                    setTrackingHeadsUp(true);
-                    mCollapseSnoozes = h < 0;
-                    mInitialTouchX = x;
-                    mInitialTouchY = y;
-                    int startHeight = (int) (mPickedChild.getActualHeight()
-                                                + mPickedChild.getTranslationY());
-                    mPanel.setHeadsUpDraggingStartingHeight(startHeight);
-                    mPanel.startExpand(x, y, true /* startTracking */, startHeight);
-
                     if (!SceneContainerFlag.isEnabled()) {
+                        setTrackingHeadsUp(true);
+                        mCollapseSnoozes = h < 0;
+                        mInitialTouchX = x;
+                        mInitialTouchY = y;
+                        int startHeight = (int) (mPickedChild.getActualHeight()
+                                + mPickedChild.getTranslationY());
+                        mPanel.setHeadsUpDraggingStartingHeight(startHeight);
+                        mPanel.startExpand(x, y, true /* startTracking */, startHeight);
+
                         // This call needs to be after the expansion start otherwise we will get a
                         // flicker of one frame as it's not expanded yet.
                         mHeadsUpManager.unpinAll(true);
-                    }
 
-                    clearNotificationEffects();
-                    endMotion();
+                        clearNotificationEffects();
+                        endMotion();
+                    }
                     return true;
                 }
                 break;
@@ -167,17 +167,70 @@ public class HeadsUpTouchHelper implements Gefingerpoken {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if (!mTrackingHeadsUp) {
+        if (SceneContainerFlag.isEnabled()) {
+            int pointerIndex = event.findPointerIndex(mTrackingPointer);
+            if (pointerIndex < 0) {
+                pointerIndex = 0;
+                mTrackingPointer = event.getPointerId(pointerIndex);
+            }
+            final float x = event.getX(pointerIndex);
+            final float y = event.getY(pointerIndex);
+            switch (event.getActionMasked()) {
+                case MotionEvent.ACTION_POINTER_UP:
+                    final int upPointer = event.getPointerId(event.getActionIndex());
+                    if (mTrackingPointer == upPointer) {
+                        // gesture is ongoing, find a new pointer to track
+                        final int newIndex = event.getPointerId(0) != upPointer ? 0 : 1;
+                        mTrackingPointer = event.getPointerId(newIndex);
+                        mInitialTouchX = event.getX(newIndex);
+                        mInitialTouchY = event.getY(newIndex);
+                    }
+                    break;
+                case MotionEvent.ACTION_MOVE:
+                    final float h = y - mInitialTouchY;
+                    if (mTouchingHeadsUpView && Math.abs(h) > mTouchSlop
+                            && Math.abs(h) > Math.abs(x - mInitialTouchX)) {
+                        setTrackingHeadsUp(true);
+                        mCollapseSnoozes = h < 0;
+                        mInitialTouchX = x;
+                        mInitialTouchY = y;
+                        int startHeight = (int) (mPickedChild.getActualHeight()
+                                + mPickedChild.getTranslationY());
+                        mPanel.setHeadsUpDraggingStartingHeight(startHeight);
+                        mPanel.startExpand(x, y, true /* startTracking */, startHeight);
+
+                        clearNotificationEffects();
+                        endMotion();
+                        return true;
+                    }
+                    break;
+                case MotionEvent.ACTION_CANCEL:
+                case MotionEvent.ACTION_UP:
+                    if (mPickedChild != null && mTouchingHeadsUpView) {
+                        // We may swallow this click if the heads up just came in.
+                        if (mHeadsUpManager.shouldSwallowClick(
+                                mPickedChild.getEntry().getSbn().getKey())) {
+                            endMotion();
+                            return true;
+                        }
+                    }
+                    endMotion();
+                    return false;
+            }
             return false;
+        } else {
+            if (!mTrackingHeadsUp) {
+                return false;
+            }
+            switch (event.getActionMasked()) {
+                case MotionEvent.ACTION_UP:
+                case MotionEvent.ACTION_CANCEL:
+                    endMotion();
+                    setTrackingHeadsUp(false);
+                    break;
+            }
+            return true;
         }
-        switch (event.getActionMasked()) {
-            case MotionEvent.ACTION_UP:
-            case MotionEvent.ACTION_CANCEL:
-                endMotion();
-                setTrackingHeadsUp(false);
-                break;
-        }
-        return true;
     }
 
     private void endMotion() {

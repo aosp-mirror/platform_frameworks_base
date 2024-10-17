@@ -239,6 +239,13 @@ flag {
 }
 
 flag {
+    name: "enable_desktop_windowing_enter_transitions"
+    namespace: "lse_desktop_experience"
+    description: "Enables enter desktop windowing transition & motion polish changes"
+    bug: "369763947"
+}
+
+flag {
     name: "enable_desktop_windowing_exit_transitions"
     namespace: "lse_desktop_experience"
     description: "Enables exit desktop windowing transition & motion polish changes"
@@ -298,6 +305,13 @@ flag {
     namespace: "lse_desktop_experience"
     description: "Enabled the fully immersive experience from desktop"
     bug: "359523924"
+}
+
+flag {
+    name: "enable_restore_to_previous_size_from_desktop_immersive"
+    namespace: "lse_desktop_experience"
+    description: "Restores the window bounds to their previous size when exiting desktop immersive"
+    bug: "372318163"
 }
 
 flag {

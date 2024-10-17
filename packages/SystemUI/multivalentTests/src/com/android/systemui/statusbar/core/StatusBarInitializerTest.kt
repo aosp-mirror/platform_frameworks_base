@@ -60,10 +60,9 @@ class StatusBarInitializerTest : SysuiTestCase() {
 
     val underTest =
         StatusBarInitializerImpl(
-            displayId = context.displayId,
-            statusBarWindowControllerStore = windowControllerStore,
             collapsedStatusBarFragmentProvider = { mock(CollapsedStatusBarFragment::class.java) },
             creationListeners = setOf(),
+            statusBarWindowController = windowController,
         )
 
     @Test

@@ -27,6 +27,7 @@ import androidx.preference.PreferenceScreen
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
+import java.util.concurrent.atomic.AtomicBoolean
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -36,7 +37,7 @@ import org.junit.runner.RunWith
 abstract class CatalystScreenTestCase {
     @get:Rule val setFlagsRule = SetFlagsRule()
 
-    protected val context: Context = ApplicationProvider.getApplicationContext()
+    protected val appContext: Context = ApplicationProvider.getApplicationContext()
 
     /** Catalyst screen. */
     protected abstract val preferenceScreenCreator: PreferenceScreenCreator
@@ -51,12 +52,12 @@ abstract class CatalystScreenTestCase {
     @Test
     open fun migration() {
         enableCatalystScreen()
-        assertThat(preferenceScreenCreator.isFlagEnabled(context)).isTrue()
+        assertThat(preferenceScreenCreator.isFlagEnabled(appContext)).isTrue()
         val catalystScreen = dumpPreferenceScreen()
-        Log.i("Catalyst", catalystScreen)
+        Log.i(TAG, catalystScreen)
 
         disableCatalystScreen()
-        assertThat(preferenceScreenCreator.isFlagEnabled(context)).isFalse()
+        assertThat(preferenceScreenCreator.isFlagEnabled(appContext)).isFalse()
         val legacyScreen = dumpPreferenceScreen()
 
         assertThat(catalystScreen).isEqualTo(legacyScreen)
@@ -83,11 +84,26 @@ abstract class CatalystScreenTestCase {
     }
 
     private fun dumpPreferenceScreen(): String {
+        // Dump threads for troubleshooting when the test thread is stuck.
+        // Latest junit Timeout rule supports similar feature but it is not yet available on AOSP.
+        val taskFinished = AtomicBoolean()
+        Thread {
+                Thread.sleep(20000)
+                if (!taskFinished.get()) dumpThreads()
+            }
+            .apply {
+                isDaemon = true
+                start()
+            }
+
         @Suppress("UNCHECKED_CAST")
         val clazz = preferenceScreenCreator.fragmentClass() as Class<PreferenceFragmentCompat>
         val builder = StringBuilder()
         FragmentScenario.launch(clazz).use {
-            it.onFragment { fragment -> fragment.preferenceScreen.toString(builder) }
+            it.onFragment { fragment ->
+                taskFinished.set(true)
+                fragment.preferenceScreen.toString(builder)
+            }
         }
         return builder.toString()
     }
@@ -119,5 +135,17 @@ abstract class CatalystScreenTestCase {
             }
         }
         builder.append(indent).append("}\n")
+    }
+
+    companion object {
+        const val TAG = "CatalystScreenTestCase"
+
+        fun dumpThreads() {
+            for ((thread, stack) in Thread.getAllStackTraces()) {
+                Log.i(TAG, "$thread")
+                for (frame in stack) Log.i(TAG, "  $frame")
+                Log.i(TAG, "")
+            }
+        }
     }
 }

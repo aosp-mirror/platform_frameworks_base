@@ -395,9 +395,9 @@ flag {
 }
 
 flag {
-    name: "status_bar_ron_chips"
+    name: "status_bar_notification_chips"
     namespace: "systemui"
-    description: "Show rich ongoing notifications as chips in the status bar"
+    description: "Show promoted ongoing notifications as chips in the status bar"
     bug: "361346412"
 }
 
@@ -1481,3 +1481,29 @@ flag {
    bug: "370863642"
 }
 
+flag {
+  name: "notes_role_qs_tile"
+  namespace: "systemui"
+  description: "Enables notes role qs tile which opens default notes role app in app bubbles"
+  bug: "357863750"
+}
+
+flag {
+   name: "media_projection_request_attribution_fix"
+   namespace: "systemui"
+   description: "Ensure MediaProjection consent requests are properly attributed"
+   bug: "373581993"
+   metadata {
+       purpose: PURPOSE_BUGFIX
+   }
+}
+
+flag {
+  name: "secondary_user_widget_host"
+  namespace: "systemui"
+  description: "Host communal widgets in the current secondary user on HSUM."
+  bug: "373874416"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}

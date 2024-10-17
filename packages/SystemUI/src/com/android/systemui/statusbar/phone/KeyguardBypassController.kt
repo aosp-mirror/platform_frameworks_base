@@ -22,7 +22,7 @@ import android.content.res.Resources
 import android.hardware.biometrics.BiometricSourceType
 import android.provider.Settings
 import com.android.app.tracing.ListenersTracing.forEachTraced
-import com.android.app.tracing.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.Dumpable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
