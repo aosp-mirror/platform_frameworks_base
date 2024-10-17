@@ -97,6 +97,7 @@ per-file InstantAppResolveInfo.aidl = file:/services/core/java/com/android/serve
 
 # Performance
 per-file PropertyInvalidatedCache.java = file:/PERFORMANCE_OWNERS
+per-file performance.aconfig = file:/PERFORMANCE_OWNERS
 
 # Pinner
 per-file pinner-client.aconfig = file:/core/java/android/app/pinner/OWNERS

@@ -152,7 +152,10 @@ public final class RavenwoodConfig {
         /**
          * Configure a "main" thread to be available for the duration of the test, as defined
          * by {@code Looper.getMainLooper()}. Has no effect on non-Ravenwood environments.
+         *
+         * @deprecated
          */
+        @Deprecated
         public Builder setProvideMainThread(boolean provideMainThread) {
             mConfig.mProvideMainThread = provideMainThread;
             return this;
