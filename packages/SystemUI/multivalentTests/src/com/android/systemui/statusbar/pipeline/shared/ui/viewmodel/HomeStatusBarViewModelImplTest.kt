@@ -75,7 +75,7 @@ import org.junit.runner.RunWith
 @SmallTest
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
-class CollapsedStatusBarViewModelImplTest : SysuiTestCase() {
+class HomeStatusBarViewModelImplTest : SysuiTestCase() {
     private val kosmos =
         Kosmos().also {
             it.testCase = this
@@ -89,13 +89,13 @@ class CollapsedStatusBarViewModelImplTest : SysuiTestCase() {
     private val keyguardTransitionRepository = kosmos.fakeKeyguardTransitionRepository
     private val disableFlagsRepository = kosmos.fakeDisableFlagsRepository
 
-    private lateinit var underTest: CollapsedStatusBarViewModel
+    private lateinit var underTest: HomeStatusBarViewModel
 
     @Before
     fun setUp() {
         setUpPackageManagerForMediaProjection(kosmos)
         // Initialize here because some flags are checked when this class is constructed
-        underTest = kosmos.collapsedStatusBarViewModel
+        underTest = kosmos.homeStatusBarViewModel
     }
 
     @Test

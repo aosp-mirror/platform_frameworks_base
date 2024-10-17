@@ -33,31 +33,32 @@ import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 import com.android.systemui.statusbar.core.StatusBarSimpleFragment
 import com.android.systemui.statusbar.notification.shared.NotificationsLiveDataStoreRefactor
 import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragment
-import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.CollapsedStatusBarViewModel
+import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.HomeStatusBarViewModel
+import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.HomeStatusBarViewModel.VisibilityModel
 import javax.inject.Inject
 import kotlinx.coroutines.launch
 
 /**
- * Interface to assist with binding the [CollapsedStatusBarFragment] to
- * [CollapsedStatusBarViewModel]. Used only to enable easy testing of [CollapsedStatusBarFragment].
+ * Interface to assist with binding the [CollapsedStatusBarFragment] to [HomeStatusBarViewModel].
+ * Used only to enable easy testing of [CollapsedStatusBarFragment].
  */
-interface CollapsedStatusBarViewBinder {
+interface HomeStatusBarViewBinder {
     /**
      * Binds the view to the view-model. [listener] will be notified whenever an event that may
      * change the status bar visibility occurs.
      */
     fun bind(
         view: View,
-        viewModel: CollapsedStatusBarViewModel,
+        viewModel: HomeStatusBarViewModel,
         listener: StatusBarVisibilityChangeListener,
     )
 }
 
 @SysUISingleton
-class CollapsedStatusBarViewBinderImpl @Inject constructor() : CollapsedStatusBarViewBinder {
+class HomeStatusBarViewBinderImpl @Inject constructor() : HomeStatusBarViewBinder {
     override fun bind(
         view: View,
-        viewModel: CollapsedStatusBarViewModel,
+        viewModel: HomeStatusBarViewModel,
         listener: StatusBarVisibilityChangeListener,
     ) {
         view.repeatWhenAttached {
@@ -185,9 +186,8 @@ class CollapsedStatusBarViewBinderImpl @Inject constructor() : CollapsedStatusBa
         }
     }
 
-    private fun OngoingActivityChipModel.toVisibilityModel():
-        CollapsedStatusBarViewModel.VisibilityModel {
-        return CollapsedStatusBarViewModel.VisibilityModel(
+    private fun OngoingActivityChipModel.toVisibilityModel(): VisibilityModel {
+        return VisibilityModel(
             visibility = if (this is OngoingActivityChipModel.Shown) View.VISIBLE else View.GONE,
             // TODO(b/364653005): Figure out the animation story here.
             shouldAnimateChange = true,
@@ -224,7 +224,7 @@ class CollapsedStatusBarViewBinderImpl @Inject constructor() : CollapsedStatusBa
             .start()
     }
 
-    private fun View.adjustVisibility(model: CollapsedStatusBarViewModel.VisibilityModel) {
+    private fun View.adjustVisibility(model: VisibilityModel) {
         if (model.visibility == View.VISIBLE) {
             this.show(model.shouldAnimateChange)
         } else {
@@ -298,7 +298,7 @@ interface StatusBarVisibilityChangeListener {
 
     /**
      * Called when the scene state has changed such that the home status bar is newly allowed or no
-     * longer allowed. See [CollapsedStatusBarViewModel.isHomeStatusBarAllowedByScene].
+     * longer allowed. See [HomeStatusBarViewModel.isHomeStatusBarAllowedByScene].
      */
     fun onIsHomeStatusBarAllowedBySceneChanged(isHomeStatusBarAllowedByScene: Boolean)
 }

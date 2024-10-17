@@ -30,8 +30,12 @@ import android.view.View;
 import android.view.WindowInsets;
 import android.widget.FrameLayout;
 
+import com.android.systemui.compose.ComposeInitializer;
+import com.android.systemui.statusbar.core.StatusBarSimpleFragment;
+
 /**
  * Status bar view.
+ * We now extend WindowRootView so that we can host Compose views
  */
 public class StatusBarWindowView extends FrameLayout {
 
@@ -47,6 +51,24 @@ public class StatusBarWindowView extends FrameLayout {
     public StatusBarWindowView(Context context, AttributeSet attrs) {
         super(context, attrs);
         setClipChildren(false);
+    }
+
+    @Override
+    public void onAttachedToWindow() {
+        super.onAttachedToWindow();
+
+        if (StatusBarSimpleFragment.isEnabled()) {
+            ComposeInitializer.INSTANCE.onAttachedToWindow(this);
+        }
+    }
+
+    @Override
+    public void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+
+        if (StatusBarSimpleFragment.isEnabled()) {
+            ComposeInitializer.INSTANCE.onDetachedFromWindow(this);
+        }
     }
 
     @Override
@@ -89,8 +111,8 @@ public class StatusBarWindowView extends FrameLayout {
         final int count = getChildCount();
         for (int i = 0; i < count; i++) {
             View child = getChildAt(i);
-            if (child.getLayoutParams() instanceof LayoutParams) {
-                LayoutParams lp = (LayoutParams) child.getLayoutParams();
+            if (child.getLayoutParams() instanceof FrameLayout.LayoutParams) {
+                FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) child.getLayoutParams();
                 if (lp.rightMargin != mRightInset || lp.leftMargin != mLeftInset
                         || lp.topMargin != mTopInset) {
                     lp.rightMargin = mRightInset;

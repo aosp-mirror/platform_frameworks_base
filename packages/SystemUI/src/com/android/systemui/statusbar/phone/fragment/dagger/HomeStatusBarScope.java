@@ -24,9 +24,9 @@ import java.lang.annotation.Retention;
 import javax.inject.Scope;
 
 /**
- * Scope annotation for singleton items within the {@link StatusBarFragmentComponent}.
+ * Scope annotation for singleton items within the {@link HomeStatusBarComponent}.
  */
 @Documented
 @Retention(RUNTIME)
 @Scope
-public @interface StatusBarFragmentScope {}
+public @interface HomeStatusBarScope {}

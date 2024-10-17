@@ -27,9 +27,9 @@ import com.android.systemui.statusbar.notification.domain.interactor.activeNotif
 import com.android.systemui.statusbar.phone.domain.interactor.lightsOutInteractor
 import com.android.systemui.statusbar.pipeline.shared.domain.interactor.collapsedStatusBarInteractor
 
-val Kosmos.collapsedStatusBarViewModel: CollapsedStatusBarViewModel by
+val Kosmos.homeStatusBarViewModel: HomeStatusBarViewModel by
     Kosmos.Fixture {
-        CollapsedStatusBarViewModelImpl(
+        HomeStatusBarViewModelImpl(
             collapsedStatusBarInteractor,
             lightsOutInteractor,
             activeNotificationsInteractor,
