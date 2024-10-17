@@ -234,7 +234,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 
 public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private static final String TAG = "PackageInstallerSession";
@@ -1279,9 +1278,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
         }
 
-        if (Flags.verificationService()) {
+        if (shouldUseVerificationService()) {
             // Start binding to the verification service, if not bound already.
-            mVerifierController.bindToVerifierServiceIfNeeded(() -> pm.snapshotComputer(), userId);
+            mVerifierController.bindToVerifierServiceIfNeeded(mPm::snapshotComputer, userId);
             if (!TextUtils.isEmpty(params.appPackageName)) {
                 mVerifierController.notifyPackageNameAvailable(params.appPackageName);
             }
@@ -2875,35 +2874,56 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             setSessionFailed(e.error, errorMsg);
             onSessionVerificationFailure(e.error, errorMsg, /* extras= */ null);
         }
-        if (Flags.verificationService()) {
-            final Supplier<Computer> snapshotSupplier = mPm::snapshotComputer;
-            if (mVerifierController.isVerifierInstalled(snapshotSupplier, userId)) {
-                final SigningInfo signingInfo;
-                final List<SharedLibraryInfo> declaredLibraries;
-                synchronized (mLock) {
-                    signingInfo = new SigningInfo(mSigningDetails);
-                    declaredLibraries =
-                            mPackageLite == null ? null : mPackageLite.getDeclaredLibraries();
-                }
-                // Send the request to the verifier and wait for its response before the rest of
-                // the installation can proceed.
-                if (!mVerifierController.startVerificationSession(snapshotSupplier, userId,
-                        sessionId, getPackageName(), Uri.fromFile(stageDir), signingInfo,
-                        declaredLibraries, mVerificationPolicy.get(), /* extensionParams= */ null,
-                        new VerifierCallback(), /* retry= */ false)) {
-                    // A verifier is installed but cannot be connected. Installation disallowed.
-                    onSessionVerificationFailure(INSTALL_FAILED_INTERNAL_ERROR,
-                            "A verifier agent is available on device but cannot be connected.",
-                            /* extras= */ null);
-                }
-            } else {
-                // Verifier is not installed. Let the installation pass for now.
-                resumeVerify();
+        if (shouldUseVerificationService()) {
+            final SigningInfo signingInfo;
+            final List<SharedLibraryInfo> declaredLibraries;
+            synchronized (mLock) {
+                signingInfo = new SigningInfo(mSigningDetails);
+                declaredLibraries =
+                        mPackageLite == null ? null : mPackageLite.getDeclaredLibraries();
+            }
+            // Send the request to the verifier and wait for its response before the rest of
+            // the installation can proceed.
+            if (!mVerifierController.startVerificationSession(mPm::snapshotComputer, userId,
+                    sessionId, getPackageName(), Uri.fromFile(stageDir), signingInfo,
+                    declaredLibraries, mVerificationPolicy.get(), /* extensionParams= */ null,
+                    new VerifierCallback(), /* retry= */ false)) {
+                // A verifier is installed but cannot be connected. Installation disallowed.
+                onSessionVerificationFailure(INSTALL_FAILED_INTERNAL_ERROR,
+                        "A verifier agent is available on device but cannot be connected.",
+                        /* extras= */ null);
             }
         } else {
-            // New verification feature is not enabled. Proceed to the rest of the verification.
+            // No need to check with verifier. Proceed with the rest of the verification.
             resumeVerify();
         }
+    }
+
+    private boolean shouldUseVerificationService() {
+        if (!Flags.verificationService()) {
+            // Feature is not enabled.
+            return false;
+        }
+        if ((params.installFlags & PackageManager.INSTALL_FROM_ADB) != 0) {
+            // adb installs are exempted from verification unless explicitly requested
+            if (!params.forceVerification) {
+                return false;
+            }
+        }
+        final String verifierPackageName = mVerifierController.getVerifierPackageName(
+                mPm::snapshotComputer, userId);
+        if (verifierPackageName == null) {
+            // Feature is enabled but no verifier installed.
+            return false;
+        }
+        synchronized (mLock) {
+            if (verifierPackageName.equals(mPackageName)) {
+                // The verifier itself is being updated. Skip.
+                Slog.w(TAG, "Skipping verification service because the verifier is being updated");
+                return false;
+            }
+        }
+        return true;
     }
 
     private void resumeVerify() {
@@ -5597,7 +5617,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
         } catch (InstallerException ignored) {
         }
-        if (Flags.verificationService()
+        if (shouldUseVerificationService()
                 && !TextUtils.isEmpty(params.appPackageName)
                 && !isCommitted()) {
             // Only notify for the cancellation if the verification request has not
