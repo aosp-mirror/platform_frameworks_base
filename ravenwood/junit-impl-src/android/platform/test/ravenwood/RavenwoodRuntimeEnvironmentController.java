@@ -40,6 +40,7 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
+import android.provider.DeviceConfig_host;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.util.Log;
@@ -332,6 +333,8 @@ public class RavenwoodRuntimeEnvironmentController {
             Binder.restoreCallingIdentity(sOriginalIdentityToken);
         }
         android.os.Process.reset$ravenwood();
+
+        DeviceConfig_host.reset();
 
         try {
             ResourcesManager.setInstance(null); // Better structure needed.
