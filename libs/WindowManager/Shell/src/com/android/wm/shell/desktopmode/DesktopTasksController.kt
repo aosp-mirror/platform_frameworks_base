@@ -751,7 +751,7 @@ class DesktopTasksController(
                 if (ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS.isTrue()) {
                     destinationBounds.set(calculateInitialBounds(displayLayout, taskInfo))
                 } else {
-                    destinationBounds.set(getDefaultDesktopTaskBounds(displayLayout))
+                    destinationBounds.set(calculateDefaultDesktopTaskBounds(displayLayout))
                 }
             }
         } else {
@@ -918,20 +918,6 @@ class DesktopTasksController(
             )
             snapToHalfScreen(taskInfo, taskSurface, currentDragBounds, position)
         }
-    }
-
-    private fun getDefaultDesktopTaskBounds(displayLayout: DisplayLayout): Rect {
-        // TODO(b/319819547): Account for app constraints so apps do not become letterboxed
-        val desiredWidth = (displayLayout.width() * DESKTOP_MODE_INITIAL_BOUNDS_SCALE).toInt()
-        val desiredHeight = (displayLayout.height() * DESKTOP_MODE_INITIAL_BOUNDS_SCALE).toInt()
-        val heightOffset = (displayLayout.height() - desiredHeight) / 2
-        val widthOffset = (displayLayout.width() - desiredWidth) / 2
-        return Rect(
-            widthOffset,
-            heightOffset,
-            desiredWidth + widthOffset,
-            desiredHeight + heightOffset
-        )
     }
 
     private fun getSnapBounds(taskInfo: RunningTaskInfo, position: SnapPosition): Rect {
@@ -1487,7 +1473,7 @@ class DesktopTasksController(
         val bounds = if (ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS.isTrue) {
             calculateInitialBounds(displayLayout, taskInfo)
         } else {
-            getDefaultDesktopTaskBounds(displayLayout)
+            calculateDefaultDesktopTaskBounds(displayLayout)
         }
 
         if (DesktopModeFlags.ENABLE_CASCADING_WINDOWS.isTrue) {
@@ -1883,7 +1869,7 @@ class DesktopTasksController(
         when (indicatorType) {
             IndicatorType.TO_DESKTOP_INDICATOR -> {
                 // Use default bounds, but with the top-center at the drop point.
-                newWindowBounds.set(getDefaultDesktopTaskBounds(displayLayout))
+                newWindowBounds.set(calculateDefaultDesktopTaskBounds(displayLayout))
                 newWindowBounds.offsetTo(
                     dragEvent.x.toInt() - (newWindowBounds.width() / 2),
                     dragEvent.y.toInt()
