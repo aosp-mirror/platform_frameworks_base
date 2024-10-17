@@ -114,6 +114,7 @@ public final class Debug
         "opengl-tracing",
         "view-hierarchy",
         "support_boot_stages",
+        "app_info",
     };
 
     /**
@@ -1016,14 +1017,14 @@ public final class Debug
         // send VM_START.
         System.out.println("Waiting for debugger first packet");
 
-        mWaiting = true;
+        setWaitingForDebugger(true);
         while (!isDebuggerConnected()) {
             try {
                 Thread.sleep(100);
             } catch (InterruptedException ie) {
             }
         }
-        mWaiting = false;
+        setWaitingForDebugger(false);
 
         System.out.println("Debug.suspendAllAndSentVmStart");
         VMDebug.suspendAllAndSendVmStart();
@@ -1049,12 +1050,12 @@ public final class Debug
         Chunk waitChunk = new Chunk(ChunkHandler.type("WAIT"), data, 0, 1);
         DdmServer.sendChunk(waitChunk);
 
-        mWaiting = true;
+        setWaitingForDebugger(true);
         while (!isDebuggerConnected()) {
             try { Thread.sleep(SPIN_DELAY); }
             catch (InterruptedException ie) {}
         }
-        mWaiting = false;
+        setWaitingForDebugger(false);
 
         System.out.println("Debugger has connected");
 
@@ -1109,6 +1110,16 @@ public final class Debug
      */
     public static String[] getVmFeatureList() {
         return VMDebug.getVmFeatureList();
+    }
+
+    /**
+     * Set whether the app is waiting for a debugger to connect
+     *
+     * @hide
+     */
+    private static void setWaitingForDebugger(boolean waiting) {
+        mWaiting = waiting;
+        VMDebug.setWaitingForDebugger(waiting);
     }
 
     /**
