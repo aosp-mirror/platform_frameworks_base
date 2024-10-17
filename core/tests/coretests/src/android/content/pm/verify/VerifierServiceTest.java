@@ -16,6 +16,8 @@
 
 package android.content.pm.verify;
 
+import static android.content.pm.PackageInstaller.VERIFICATION_POLICY_BLOCK_FAIL_CLOSED;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.eq;
@@ -52,6 +54,7 @@ public class VerifierServiceTest {
     private static final String TEST_PACKAGE_NAME = "com.foo";
     private static final Uri TEST_PACKAGE_URI = Uri.parse("test://test");
     private static final SigningInfo TEST_SIGNING_INFO = new SigningInfo();
+    private static final int TEST_POLICY = VERIFICATION_POLICY_BLOCK_FAIL_CLOSED;
     private VerifierService mService;
     private VerificationSession mSession;
 
@@ -60,8 +63,7 @@ public class VerifierServiceTest {
         mService = Mockito.mock(VerifierService.class, Answers.CALLS_REAL_METHODS);
         mSession = new VerificationSession(TEST_ID, TEST_INSTALL_SESSION_ID,
                 TEST_PACKAGE_NAME, TEST_PACKAGE_URI, TEST_SIGNING_INFO,
-                new ArrayList<>(),
-                new PersistableBundle(), null, null);
+                new ArrayList<>(), new PersistableBundle(), TEST_POLICY, null, null);
     }
 
     @Test
