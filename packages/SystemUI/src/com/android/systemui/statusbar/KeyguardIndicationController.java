@@ -32,7 +32,6 @@ import static com.android.keyguard.KeyguardUpdateMonitor.BIOMETRIC_HELP_FACE_NOT
 import static com.android.keyguard.KeyguardUpdateMonitor.BIOMETRIC_HELP_FACE_NOT_RECOGNIZED;
 import static com.android.keyguard.KeyguardUpdateMonitor.BIOMETRIC_HELP_FINGERPRINT_NOT_RECOGNIZED;
 import static com.android.systemui.DejankUtils.whitelistIpcs;
-import static com.android.systemui.flags.Flags.LOCKSCREEN_WALLPAPER_DREAM_ENABLED;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.IMPORTANT_MSG_MIN_DURATION;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_IS_DISMISSIBLE;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_ADAPTIVE_AUTH;
@@ -226,17 +225,7 @@ public class KeyguardIndicationController {
     private KeyguardUpdateMonitorCallback mUpdateMonitorCallback;
 
     private boolean mDozing;
-    private boolean mIsActiveDreamLockscreenHosted;
     private final ScreenLifecycle mScreenLifecycle;
-    @VisibleForTesting
-    final Consumer<Boolean> mIsActiveDreamLockscreenHostedCallback =
-            (Boolean isLockscreenHosted) -> {
-                if (mIsActiveDreamLockscreenHosted == isLockscreenHosted) {
-                    return;
-                }
-                mIsActiveDreamLockscreenHosted = isLockscreenHosted;
-                updateDeviceEntryIndication(false);
-            };
     @VisibleForTesting
     final Consumer<Set<Integer>> mCoExAcquisitionMsgIdsToShowCallback =
             (Set<Integer> coExFaceAcquisitionMsgIdsToShow) -> mCoExFaceAcquisitionMsgIdsToShow =
@@ -422,10 +411,6 @@ public class KeyguardIndicationController {
             intentFilter.addAction(DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED);
             intentFilter.addAction(Intent.ACTION_USER_REMOVED);
             mBroadcastDispatcher.registerReceiver(mBroadcastReceiver, intentFilter);
-        }
-        if (mFeatureFlags.isEnabled(LOCKSCREEN_WALLPAPER_DREAM_ENABLED)) {
-            collectFlow(mIndicationArea, mKeyguardInteractor.isActiveDreamLockscreenHosted(),
-                    mIsActiveDreamLockscreenHostedCallback);
         }
 
         collectFlow(mIndicationArea,
@@ -1032,12 +1017,6 @@ public class KeyguardIndicationController {
             return;
         }
 
-        // Device is dreaming and the dream is hosted in lockscreen
-        if (mIsActiveDreamLockscreenHosted) {
-            mIndicationArea.setVisibility(GONE);
-            return;
-        }
-
         // A few places might need to hide the indication, so always start by making it visible
         mIndicationArea.setVisibility(VISIBLE);
 
@@ -1247,7 +1226,6 @@ public class KeyguardIndicationController {
         pw.println("  mBiometricMessageFollowUp: " + mBiometricMessageFollowUp);
         pw.println("  mBatteryLevel: " + mBatteryLevel);
         pw.println("  mBatteryPresent: " + mBatteryPresent);
-        pw.println("  mIsActiveDreamLockscreenHosted: " + mIsActiveDreamLockscreenHosted);
         pw.println("  AOD text: " + (
                 mTopIndicationView == null ? null : mTopIndicationView.getText()));
         pw.println("  computePowerIndication(): " + computePowerIndication());
