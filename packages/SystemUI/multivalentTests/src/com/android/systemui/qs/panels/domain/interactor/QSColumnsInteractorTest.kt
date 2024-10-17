@@ -14,17 +14,23 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.panels.data.repository
+package com.android.systemui.qs.panels.domain.interactor
 
+import android.content.res.mainResources
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.common.ui.data.repository.fakeConfigurationRepository
+import com.android.systemui.common.ui.data.repository.configurationRepository
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.testCase
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.qs.panels.data.repository.QSColumnsRepository
+import com.android.systemui.qs.panels.data.repository.qsColumnsRepository
 import com.android.systemui.res.R
 import com.android.systemui.shade.data.repository.fakeShadeRepository
+import com.android.systemui.shade.shared.flag.DualShade
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
@@ -34,56 +40,62 @@ import org.junit.runner.RunWith
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-class QSColumnsRepositoryTest : SysuiTestCase() {
-    private val kosmos = testKosmos()
-    private lateinit var underTest: QSColumnsRepository
+class QSColumnsInteractorTest : SysuiTestCase() {
+    private val kosmos =
+        testKosmos().apply {
+            testCase.context.orCreateTestableResources.addOverride(
+                R.integer.quick_settings_infinite_grid_num_columns,
+                1,
+            )
+            testCase.context.orCreateTestableResources.addOverride(
+                R.integer.quick_settings_dual_shade_num_columns,
+                2,
+            )
+            testCase.context.orCreateTestableResources.addOverride(
+                R.integer.quick_settings_split_shade_num_columns,
+                3,
+            )
+            qsColumnsRepository = QSColumnsRepository(mainResources, configurationRepository)
+        }
+    private lateinit var underTest: QSColumnsInteractor
 
     @Before
     fun setUp() {
-        underTest = with(kosmos) { qsColumnsRepository }
+        underTest = with(kosmos) { qsColumnsInteractor }
     }
 
     @Test
-    fun configChanges_triggerColumnsUpdate() =
+    @DisableFlags(DualShade.FLAG_NAME)
+    fun withSingleShade_returnsCorrectValue() =
         with(kosmos) {
             testScope.runTest {
                 val latest by collectLastValue(underTest.columns)
 
-                setColumnsInConfig(4)
-                assertThat(latest).isEqualTo(4)
-
-                setColumnsInConfig(8)
-                assertThat(latest).isEqualTo(8)
+                assertThat(latest).isEqualTo(1)
             }
         }
 
     @Test
+    @EnableFlags(DualShade.FLAG_NAME)
     fun withDualShade_returnsCorrectValue() =
         with(kosmos) {
             testScope.runTest {
-                val latest by collectLastValue(underTest.dualShadeColumns)
+                val latest by collectLastValue(underTest.columns)
 
-                assertThat(latest).isEqualTo(4)
+                assertThat(latest).isEqualTo(2)
             }
         }
 
     @Test
+    @DisableFlags(DualShade.FLAG_NAME)
     fun withSplitShade_returnsCorrectValue() =
         with(kosmos) {
             testScope.runTest {
-                val latest by collectLastValue(underTest.splitShadeColumns)
+                val latest by collectLastValue(underTest.columns)
+
                 fakeShadeRepository.setShadeLayoutWide(true)
 
-                assertThat(latest).isEqualTo(4)
+                assertThat(latest).isEqualTo(3)
             }
-        }
-
-    private fun setColumnsInConfig(
-        columns: Int,
-        id: Int = R.integer.quick_settings_infinite_grid_num_columns,
-    ) =
-        with(kosmos) {
-            testCase.context.orCreateTestableResources.addOverride(id, columns)
-            fakeConfigurationRepository.onConfigurationChange()
         }
 }
