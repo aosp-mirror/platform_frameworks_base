@@ -382,13 +382,11 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
 
     @Test
     public void testResumeNextActivityOnCrashedAppDied() {
-        mSupervisor.beginDeferResume();
         final ActivityRecord homeActivity = new ActivityBuilder(mAtm)
                 .setTask(mRootWindowContainer.getDefaultTaskDisplayArea().getOrCreateRootHomeTask())
                 .build();
         final ActivityRecord activity = new ActivityBuilder(mAtm).setCreateTask(true).build();
         activity.setState(RESUMED, "test");
-        mSupervisor.endDeferResume();
 
         assertEquals(activity.app, mAtm.mInternal.getTopApp());
 
