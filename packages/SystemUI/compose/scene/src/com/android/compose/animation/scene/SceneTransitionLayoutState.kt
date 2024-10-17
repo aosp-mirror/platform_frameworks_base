@@ -387,11 +387,11 @@ internal class MutableSceneTransitionLayoutStateImpl(
         transition.transformationSpec =
             transitions
                 .transitionSpec(fromContent, toContent, key = transition.key)
-                .transformationSpec()
+                .transformationSpec(transition)
         transition.previewTransformationSpec =
             transitions
                 .transitionSpec(fromContent, toContent, key = transition.key)
-                .previewTransformationSpec()
+                .previewTransformationSpec(transition)
         if (orientation != null) {
             transition.updateOverscrollSpecs(
                 fromSpec = transitions.overscrollSpec(fromContent, orientation),
