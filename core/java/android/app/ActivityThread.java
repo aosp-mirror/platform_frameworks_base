@@ -7236,6 +7236,8 @@ public final class ActivityThread extends ClientTransactionHandler
             }
         }
 
+        VMDebug.setUserId(UserHandle.myUserId());
+        VMDebug.addApplication(data.appInfo.packageName);
         // send up app name; do this *before* waiting for debugger
         Process.setArgV0(data.processName);
         android.ddm.DdmHandleAppName.setAppName(data.processName,
@@ -7758,9 +7760,20 @@ public final class ActivityThread extends ClientTransactionHandler
             file.getParentFile().mkdirs();
             Debug.startMethodTracing(file.toString(), 8 * 1024 * 1024);
         }
+
+        if (ii.packageName != null) {
+            VMDebug.addApplication(ii.packageName);
+        }
     }
 
     private void handleFinishInstrumentationWithoutRestart() {
+        LoadedApk loadedApk = getApplication().mLoadedApk;
+        // Only remove instrumentation app if this was not a self-testing app.
+        if (mInstrumentationPackageName != null && loadedApk != null && !mInstrumentationPackageName
+                .equals(loadedApk.mPackageName)) {
+            VMDebug.removeApplication(mInstrumentationPackageName);
+        }
+
         mInstrumentation.onDestroy();
         mInstrumentationPackageName = null;
         mInstrumentationAppDir = null;
@@ -8792,6 +8805,11 @@ public final class ActivityThread extends ClientTransactionHandler
         } catch (RemoteException ignored) {
         }
         return false;
+    }
+
+    void addApplication(@NonNull Application app) {
+        mAllApplications.add(app);
+        VMDebug.addApplication(app.mLoadedApk.mPackageName);
     }
 
     @Override
