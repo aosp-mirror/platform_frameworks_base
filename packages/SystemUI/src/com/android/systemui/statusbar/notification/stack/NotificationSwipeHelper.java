@@ -18,6 +18,7 @@
 package com.android.systemui.statusbar.notification.stack;
 
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_NOTIFICATION_SHADE_ROW_SWIPE;
+import static com.android.systemui.Flags.ignoreTouchesNextToNotificationShelf;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -39,6 +40,7 @@ import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
+import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.notification.SourceType;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
@@ -503,13 +505,21 @@ class NotificationSwipeHelper extends SwipeHelper implements NotificationSwipeAc
         final int height = (view instanceof ExpandableView)
                 ? ((ExpandableView) view).getActualHeight()
                 : view.getHeight();
+        final int width;
+        if (ignoreTouchesNextToNotificationShelf()) {
+            width = (view instanceof NotificationShelf)
+                ? ((NotificationShelf) view).getActualWidth()
+                : view.getWidth();
+        } else {
+            width = view.getWidth();
+        }
         final int rx = (int) ev.getRawX();
         final int ry = (int) ev.getRawY();
         int[] temp = new int[2];
         view.getLocationOnScreen(temp);
         final int x = temp[0];
         final int y = temp[1];
-        Rect rect = new Rect(x, y, x + view.getWidth(), y + height);
+        Rect rect = new Rect(x, y, x + width, y + height);
         boolean ret = rect.contains(rx, ry);
         return ret;
     }
