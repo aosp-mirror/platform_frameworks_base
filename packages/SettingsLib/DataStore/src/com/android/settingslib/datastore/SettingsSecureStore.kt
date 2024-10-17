@@ -18,6 +18,7 @@ package com.android.settingslib.datastore
 
 import android.content.ContentResolver
 import android.content.Context
+import android.net.Uri
 import android.provider.Settings.Secure
 import android.provider.Settings.SettingNotFoundException
 
@@ -28,6 +29,9 @@ import android.provider.Settings.SettingNotFoundException
  */
 class SettingsSecureStore private constructor(contentResolver: ContentResolver) :
     SettingsStore(contentResolver) {
+
+    override val uri: Uri
+        get() = Secure.getUriFor("")
 
     override val tag: String
         get() = "SettingsSecureStore"
