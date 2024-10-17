@@ -30,7 +30,7 @@ class NotificationRowLogger
 @Inject
 constructor(
     @NotificationLog private val buffer: LogBuffer,
-    @NotificationRenderLog private val notificationRenderBuffer: LogBuffer
+    @NotificationRenderLog private val notificationRenderBuffer: LogBuffer,
 ) {
     fun logKeepInParentChildDetached(child: NotificationEntry, oldParent: NotificationEntry?) {
         buffer.log(
@@ -40,7 +40,7 @@ constructor(
                 str1 = child.logKey
                 str2 = oldParent.logKey
             },
-            { "Detach child $str1 kept in parent $str2" }
+            { "Detach child $str1 kept in parent $str2" },
         )
     }
 
@@ -52,13 +52,13 @@ constructor(
                 str1 = child.logKey
                 str2 = newParent.logKey
             },
-            { "Skipping to attach $str1 to $str2, because it still flagged to keep in parent" }
+            { "Skipping to attach $str1 to $str2, because it still flagged to keep in parent" },
         )
     }
 
     fun logRemoveTransientFromContainer(
         childEntry: NotificationEntry,
-        containerEntry: NotificationEntry
+        containerEntry: NotificationEntry,
     ) {
         notificationRenderBuffer.log(
             TAG,
@@ -67,25 +67,20 @@ constructor(
                 str1 = childEntry.logKey
                 str2 = containerEntry.logKey
             },
-            { "RemoveTransientRow from ChildrenContainer: childKey: $str1 -- containerKey: $str2" }
+            { "RemoveTransientRow from ChildrenContainer: childKey: $str1 -- containerKey: $str2" },
         )
     }
 
-    fun logRemoveTransientFromNssl(
-        childEntry: NotificationEntry,
-    ) {
+    fun logRemoveTransientFromNssl(childEntry: NotificationEntry) {
         notificationRenderBuffer.log(
             TAG,
             LogLevel.INFO,
             { str1 = childEntry.logKey },
-            { "RemoveTransientRow from Nssl: childKey: $str1" }
+            { "RemoveTransientRow from Nssl: childKey: $str1" },
         )
     }
 
-    fun logRemoveTransientFromViewGroup(
-        childEntry: NotificationEntry,
-        containerView: ViewGroup,
-    ) {
+    fun logRemoveTransientFromViewGroup(childEntry: NotificationEntry, containerView: ViewGroup) {
         notificationRenderBuffer.log(
             TAG,
             LogLevel.WARNING,
@@ -93,14 +88,14 @@ constructor(
                 str1 = childEntry.logKey
                 str2 = containerView.toString()
             },
-            { "RemoveTransientRow from other ViewGroup: childKey: $str1 -- ViewGroup: $str2" }
+            { "RemoveTransientRow from other ViewGroup: childKey: $str1 -- ViewGroup: $str2" },
         )
     }
 
     fun logAddTransientRow(
         childEntry: NotificationEntry,
         containerEntry: NotificationEntry,
-        index: Int
+        index: Int,
     ) {
         notificationRenderBuffer.log(
             TAG,
@@ -110,14 +105,11 @@ constructor(
                 str2 = containerEntry.logKey
                 int1 = index
             },
-            { "addTransientRow to row: childKey: $str1 -- containerKey: $str2 -- index: $int1" }
+            { "addTransientRow to row: childKey: $str1 -- containerKey: $str2 -- index: $int1" },
         )
     }
 
-    fun logRemoveTransientRow(
-        childEntry: NotificationEntry,
-        containerEntry: NotificationEntry,
-    ) {
+    fun logRemoveTransientRow(childEntry: NotificationEntry, containerEntry: NotificationEntry) {
         notificationRenderBuffer.log(
             TAG,
             LogLevel.ERROR,
@@ -125,7 +117,7 @@ constructor(
                 str1 = childEntry.logKey
                 str2 = containerEntry.logKey
             },
-            { "removeTransientRow from row: childKey: $str1 -- containerKey: $str2" }
+            { "removeTransientRow from row: childKey: $str1 -- containerKey: $str2" },
         )
     }
 
@@ -134,7 +126,7 @@ constructor(
             TAG,
             LogLevel.INFO,
             { str1 = entry.logKey },
-            { "resetAllContentAlphas: $str1" }
+            { "resetAllContentAlphas: $str1" },
         )
     }
 
@@ -143,7 +135,72 @@ constructor(
             TAG,
             LogLevel.INFO,
             { str1 = entry.logKey },
-            { "Skip resetAllContentAlphas: $str1" }
+            { "Skip resetAllContentAlphas: $str1" },
+        )
+    }
+
+    fun logStartAppearAnimation(entry: NotificationEntry, isAppear: Boolean) {
+        notificationRenderBuffer.log(
+            TAG,
+            LogLevel.DEBUG,
+            {
+                str1 = entry.logKey
+                bool1 = isAppear
+            },
+            { "startAppearAnimation childKey: $str1 isAppear:$bool1" },
+        )
+    }
+
+    fun logCancelAppearDrawing(entry: NotificationEntry, wasDrawing: Boolean) {
+        notificationRenderBuffer.log(
+            TAG,
+            LogLevel.WARNING,
+            {
+                str1 = entry.logKey
+                bool1 = wasDrawing
+            },
+            { "cancelAppearDrawing childKey: $str1 wasDrawing:$bool1" },
+        )
+    }
+
+    fun logAppearAnimationStarted(entry: NotificationEntry, isAppear: Boolean) {
+        notificationRenderBuffer.log(
+            TAG,
+            LogLevel.DEBUG,
+            {
+                str1 = entry.logKey
+                bool1 = isAppear
+            },
+            { "onAppearAnimationStarted childKey: $str1 isAppear:$bool1" },
+        )
+    }
+
+    fun logAppearAnimationSkipped(entry: NotificationEntry, isAppear: Boolean) {
+        notificationRenderBuffer.log(
+            TAG,
+            LogLevel.WARNING,
+            {
+                str1 = entry.logKey
+                bool1 = isAppear
+            },
+            { "Skipped an appear animation childKey: $str1 isAppear:$bool1" },
+        )
+    }
+
+    fun logAppearAnimationFinished(
+        entry: NotificationEntry,
+        isAppear: Boolean,
+        cancelled: Boolean,
+    ) {
+        notificationRenderBuffer.log(
+            TAG,
+            LogLevel.DEBUG,
+            {
+                str1 = entry.logKey
+                bool1 = isAppear
+                bool2 = cancelled
+            },
+            { "onAppearAnimationFinished childKey: $str1 isAppear:$bool1 cancelled:$bool2" },
         )
     }
 }

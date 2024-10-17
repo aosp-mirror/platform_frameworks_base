@@ -274,34 +274,7 @@ final class ImeInsetsSourceProvider extends InsetsSourceProvider {
         if (caller != controlTarget) {
             if (Flags.refactorInsetsController()) {
                 if (isImeInputTarget(caller)) {
-                    // In case of the multi window mode, update the requestedVisibleTypes from
-                    // the controlTarget (=RemoteInsetsControlTarget) via DisplayImeController.
-                    // Then, trigger onRequestedVisibleTypesChanged for the controlTarget with
-                    // its new requested visibility for the IME
-                    boolean imeVisible = caller.isRequestedVisible(WindowInsets.Type.ime());
-                    if (controlTarget != null) {
-                        ImeTracker.forLogging().onProgress(statsToken,
-                                ImeTracker.PHASE_WM_SET_REMOTE_TARGET_IME_VISIBILITY);
-                        controlTarget.setImeInputTargetRequestedVisibility(imeVisible);
-                    } else if (caller instanceof InsetsControlTarget) {
-                        // In case of a virtual display that cannot show the IME, the
-                        // controlTarget will be null here, as no controlTarget was set yet. In
-                        // that case, proceed similar to the multi window mode (fallback =
-                        // RemoteInsetsControlTarget of the default display)
-                        controlTarget = mDisplayContent.getImeHostOrFallback(
-                                ((InsetsControlTarget) caller).getWindow());
-
-                        if (controlTarget != caller) {
-                            ImeTracker.forLogging().onProgress(statsToken,
-                                    ImeTracker.PHASE_WM_SET_REMOTE_TARGET_IME_VISIBILITY);
-                            controlTarget.setImeInputTargetRequestedVisibility(imeVisible);
-                        } else {
-                            ImeTracker.forLogging().onFailed(statsToken,
-                                    ImeTracker.PHASE_WM_SET_REMOTE_TARGET_IME_VISIBILITY);
-                        }
-                    }
-
-                    invokeOnImeRequestedChangedListener(caller, statsToken);
+                    reportImeInputTargetStateToControlTarget(caller, controlTarget, statsToken);
                 } else {
                     // TODO(b/353463205) add ImeTracker?
                 }
@@ -332,14 +305,42 @@ final class ImeInsetsSourceProvider extends InsetsSourceProvider {
         if (Flags.refactorInsetsController() && target != null) {
             InsetsControlTarget imeControlTarget = getControlTarget();
             if (target != imeControlTarget) {
-                // If the targetWin is not the imeControlTarget (=RemoteInsetsControlTarget) let it
-                // know about the new requestedVisibleTypes for the IME.
-                if (imeControlTarget != null) {
-                    imeControlTarget.setImeInputTargetRequestedVisibility(
-                            (target.getRequestedVisibleTypes() & WindowInsets.Type.ime()) != 0);
-                }
+                // TODO(b/353463205): start new request here?
+                reportImeInputTargetStateToControlTarget(target, imeControlTarget,
+                        null /* statsToken */);
             }
         }
+    }
+
+    private void reportImeInputTargetStateToControlTarget(@NonNull InsetsTarget imeInsetsTarget,
+            InsetsControlTarget controlTarget, @Nullable ImeTracker.Token statsToken) {
+        // In case of the multi window mode, update the requestedVisibleTypes from
+        // the controlTarget (=RemoteInsetsControlTarget) via DisplayImeController.
+        // Then, trigger onRequestedVisibleTypesChanged for the controlTarget with
+        // its new requested visibility for the IME
+        boolean imeVisible = imeInsetsTarget.isRequestedVisible(WindowInsets.Type.ime());
+        if (controlTarget != null) {
+            ImeTracker.forLogging().onProgress(statsToken,
+                    ImeTracker.PHASE_WM_SET_REMOTE_TARGET_IME_VISIBILITY);
+            controlTarget.setImeInputTargetRequestedVisibility(imeVisible);
+        } else if (imeInsetsTarget instanceof InsetsControlTarget) {
+            // In case of a virtual display that cannot show the IME, the
+            // controlTarget will be null here, as no controlTarget was set yet. In
+            // that case, proceed similar to the multi window mode (fallback =
+            // RemoteInsetsControlTarget of the default display)
+            controlTarget = mDisplayContent.getImeHostOrFallback(
+                    ((InsetsControlTarget) imeInsetsTarget).getWindow());
+
+            if (controlTarget != imeInsetsTarget) {
+                ImeTracker.forLogging().onProgress(statsToken,
+                        ImeTracker.PHASE_WM_SET_REMOTE_TARGET_IME_VISIBILITY);
+                controlTarget.setImeInputTargetRequestedVisibility(imeVisible);
+            } else {
+                ImeTracker.forLogging().onFailed(statsToken,
+                        ImeTracker.PHASE_WM_SET_REMOTE_TARGET_IME_VISIBILITY);
+            }
+        }
+        invokeOnImeRequestedChangedListener(imeInsetsTarget, statsToken);
     }
 
     // TODO(b/353463205) check callers to see if we can make statsToken @NonNull

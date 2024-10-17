@@ -432,6 +432,14 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
         }
     }
 
+    /**
+     * get package name of the PendingIntent sender.
+     * @return package name of the PendingIntent sender.
+     */
+    public String getPackageName() {
+        return key.packageName;
+    }
+
     @Deprecated
     public int sendInner(int code, Intent intent, String resolvedType, IBinder allowlistToken,
             IIntentReceiver finishedReceiver, String requiredPermission, IBinder resultTo,

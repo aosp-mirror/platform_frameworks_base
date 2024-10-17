@@ -70,6 +70,7 @@ import com.android.systemui.statusbar.notification.row.NotificationRowContentBin
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_HEADS_UP
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag
 import com.android.systemui.statusbar.notification.row.icon.AppIconProviderImpl
+import com.android.systemui.statusbar.notification.row.icon.NotificationIconStyleProviderImpl
 import com.android.systemui.statusbar.notification.row.icon.NotificationRowIconViewInflaterFactory
 import com.android.systemui.statusbar.notification.row.shared.NotificationRowContentBinderRefactor
 import com.android.systemui.statusbar.notification.stack.NotificationChildrenContainerLogger
@@ -287,7 +288,10 @@ class ExpandableNotificationRowBuilder(
             BigPictureLayoutInflaterFactory(),
             NotificationOptimizedLinearLayoutFactory(),
             { Mockito.mock(NotificationViewFlipperFactory::class.java) },
-            NotificationRowIconViewInflaterFactory(AppIconProviderImpl(context)),
+            NotificationRowIconViewInflaterFactory(
+                AppIconProviderImpl(context),
+                NotificationIconStyleProviderImpl(),
+            ),
         )
     }
 

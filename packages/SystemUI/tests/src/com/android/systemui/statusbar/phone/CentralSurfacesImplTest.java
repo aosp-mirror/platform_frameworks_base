@@ -512,10 +512,10 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 mLightBarController,
                 mAutoHideController,
                 new StatusBarInitializerImpl(
-                        mContext.getDisplayId(),
-                        mStatusBarWindowControllerStore,
+                        mStatusBarWindowController,
                         mCollapsedStatusBarFragmentProvider,
-                        emptySet()),
+                        emptySet()
+                ),
                 mStatusBarWindowControllerStore,
                 mStatusBarWindowStateController,
                 new FakeStatusBarModeRepository(),

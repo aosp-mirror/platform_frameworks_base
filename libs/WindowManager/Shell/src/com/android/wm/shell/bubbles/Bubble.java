@@ -572,6 +572,7 @@ public class Bubble implements BubbleViewProvider {
      * @param expandedViewManager the bubble expanded view manager.
      * @param taskViewFactory the task view factory used to create the task view for the bubble.
      * @param positioner the bubble positioner.
+     * @param bubbleLogger log bubble metrics.
      * @param stackView the view the bubble is added to, iff showing as floating.
      * @param layerView the layer the bubble is added to, iff showing in the bubble bar.
      * @param iconFactory the icon factory used to create images for the bubble.
@@ -581,6 +582,7 @@ public class Bubble implements BubbleViewProvider {
             BubbleExpandedViewManager expandedViewManager,
             BubbleTaskViewFactory taskViewFactory,
             BubblePositioner positioner,
+            BubbleLogger bubbleLogger,
             @Nullable BubbleStackView stackView,
             @Nullable BubbleBarLayerView layerView,
             BubbleIconFactory iconFactory,
@@ -595,6 +597,7 @@ public class Bubble implements BubbleViewProvider {
                     expandedViewManager,
                     taskViewFactory,
                     positioner,
+                    bubbleLogger,
                     stackView,
                     layerView,
                     iconFactory,
@@ -616,6 +619,7 @@ public class Bubble implements BubbleViewProvider {
                     expandedViewManager,
                     taskViewFactory,
                     positioner,
+                    bubbleLogger,
                     stackView,
                     layerView,
                     iconFactory,

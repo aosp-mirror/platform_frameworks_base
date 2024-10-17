@@ -319,6 +319,8 @@
     <string name="desktop_mode_non_resizable_snap_text">App can\'t be moved here</string>
     <!-- Accessibility text for the Maximize Menu's maximize button [CHAR LIMIT=NONE] -->
     <string name="desktop_mode_maximize_menu_maximize_button_text">Maximize</string>
+    <!-- Accessibility text for the Maximize Menu's restore button [CHAR LIMIT=NONE] -->
+    <string name="desktop_mode_maximize_menu_restore_button_text">Restore</string>
     <!-- Accessibility text for the Maximize Menu's snap left button [CHAR LIMIT=NONE] -->
     <string name="desktop_mode_maximize_menu_snap_left_button_text">Snap left</string>
     <!-- Accessibility text for the Maximize Menu's snap right button [CHAR LIMIT=NONE] -->

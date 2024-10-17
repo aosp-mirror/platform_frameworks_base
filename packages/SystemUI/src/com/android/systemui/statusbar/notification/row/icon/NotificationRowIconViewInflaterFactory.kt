@@ -32,7 +32,10 @@ import javax.inject.Inject
  */
 class NotificationRowIconViewInflaterFactory
 @Inject
-constructor(private val appIconProvider: AppIconProvider) : NotifRemoteViewsFactory {
+constructor(
+    private val appIconProvider: AppIconProvider,
+    private val iconStyleProvider: NotificationIconStyleProvider,
+) : NotifRemoteViewsFactory {
     override fun instantiate(
         row: ExpandableNotificationRow,
         @NotificationRowContentBinder.InflationFlag layoutType: Int,
@@ -48,8 +51,7 @@ constructor(private val appIconProvider: AppIconProvider) : NotifRemoteViewsFact
                     view.setIconProvider(
                         object : NotificationRowIconView.NotificationIconProvider {
                             override fun shouldShowAppIcon(): Boolean {
-                                // TODO(b/371174789): implement me
-                                return true
+                                return iconStyleProvider.shouldShowAppIcon(row.entry.sbn, context)
                             }
 
                             override fun getAppIcon(): Drawable {

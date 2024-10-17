@@ -67,7 +67,7 @@ class DistanceBasedGestureRecognizerProvider(
         val distanceThresholdPx =
             resources.getDimensionPixelSize(
                 com.android.internal.R.dimen.system_gestures_distance_threshold
-            )
+            ) * 5
         return remember(distanceThresholdPx) {
             recognizerFactory(distanceThresholdPx, gestureStateChangedCallback)
         }
@@ -77,7 +77,8 @@ class DistanceBasedGestureRecognizerProvider(
 fun GestureState.toTutorialActionState(): TutorialActionState {
     return when (this) {
         NotStarted -> TutorialActionState.NotStarted
-        is InProgress -> TutorialActionState.InProgress(progress)
+        // progress is disabled for now as views are not ready to handle varying progress
+        is InProgress -> TutorialActionState.InProgress(0f)
         Finished -> TutorialActionState.Finished
     }
 }
