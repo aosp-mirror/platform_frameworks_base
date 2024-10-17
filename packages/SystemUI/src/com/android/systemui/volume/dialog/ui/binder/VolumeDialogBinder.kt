@@ -27,6 +27,7 @@ import android.view.WindowManager
 import com.android.systemui.res.R
 import com.android.systemui.volume.dialog.dagger.scope.VolumeDialog
 import com.android.systemui.volume.dialog.dagger.scope.VolumeDialogScope
+import com.android.systemui.volume.dialog.ringer.ui.binder.VolumeDialogRingerViewBinder
 import com.android.systemui.volume.dialog.settings.ui.binder.VolumeDialogSettingsButtonViewBinder
 import com.android.systemui.volume.dialog.sliders.ui.VolumeDialogSlidersViewBinder
 import com.android.systemui.volume.dialog.ui.viewmodel.VolumeDialogGravityViewModel
@@ -43,6 +44,7 @@ constructor(
     @VolumeDialog private val coroutineScope: CoroutineScope,
     private val volumeDialogViewBinder: VolumeDialogViewBinder,
     private val slidersViewBinder: VolumeDialogSlidersViewBinder,
+    private val volumeDialogRingerViewBinder: VolumeDialogRingerViewBinder,
     private val settingsButtonViewBinder: VolumeDialogSettingsButtonViewBinder,
     private val gravityViewModel: VolumeDialogGravityViewModel,
 ) {
@@ -54,6 +56,7 @@ constructor(
             dialog.setCanceledOnTouchOutside(true)
 
             with(dialog.requireViewById<View>(R.id.volume_dialog_container)) {
+                volumeDialogRingerViewBinder.bind(this)
                 slidersViewBinder.bind(this)
                 settingsButtonViewBinder.bind(this)
                 volumeDialogViewBinder.bind(dialog, this)
