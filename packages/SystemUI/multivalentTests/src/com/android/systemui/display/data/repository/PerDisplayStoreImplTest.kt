@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.core
+package com.android.systemui.display.data.repository
 
-import android.platform.test.annotations.EnableFlags
 import android.view.Display
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.display.data.repository.displayRepository
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.kosmos.unconfinedTestDispatcher
@@ -32,20 +30,18 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.mock
 
 @RunWith(AndroidJUnit4::class)
 @SmallTest
-@EnableFlags(StatusBarConnectedDisplays.FLAG_NAME)
-class MultiDisplayStatusBarInitializerStoreTest : SysuiTestCase() {
+class PerDisplayStoreImplTest : SysuiTestCase() {
 
-    private val kosmos =
-        testKosmos().also {
-            // Using unconfinedTestDispatcher to avoid having to call `runCurrent` in the tests.
-            it.testDispatcher = it.unconfinedTestDispatcher
-        }
+    private val kosmos = testKosmos().also { it.testDispatcher = it.unconfinedTestDispatcher }
     private val testScope = kosmos.testScope
     private val fakeDisplayRepository = kosmos.displayRepository
-    private val store = kosmos.multiDisplayStatusBarInitializerStore
+
+    private val store = kosmos.fakePerDisplayStore
 
     @Before
     fun start() {
@@ -54,44 +50,66 @@ class MultiDisplayStatusBarInitializerStoreTest : SysuiTestCase() {
 
     @Before
     fun addDisplays() = runBlocking {
-        fakeDisplayRepository.addDisplay(DEFAULT_DISPLAY_ID)
-        fakeDisplayRepository.addDisplay(NON_DEFAULT_DISPLAY_ID)
+        fakeDisplayRepository.addDisplay(createDisplay(DEFAULT_DISPLAY_ID))
+        fakeDisplayRepository.addDisplay(createDisplay(NON_DEFAULT_DISPLAY_ID))
     }
 
     @Test
     fun forDisplay_defaultDisplay_multipleCalls_returnsSameInstance() =
         testScope.runTest {
-            val controller = store.defaultDisplay
+            val instance = store.defaultDisplay
 
-            assertThat(store.defaultDisplay).isSameInstanceAs(controller)
+            assertThat(store.defaultDisplay).isSameInstanceAs(instance)
         }
 
     @Test
     fun forDisplay_nonDefaultDisplay_multipleCalls_returnsSameInstance() =
         testScope.runTest {
-            val controller = store.forDisplay(NON_DEFAULT_DISPLAY_ID)
+            val instance = store.forDisplay(NON_DEFAULT_DISPLAY_ID)
 
-            assertThat(store.forDisplay(NON_DEFAULT_DISPLAY_ID)).isSameInstanceAs(controller)
+            assertThat(store.forDisplay(NON_DEFAULT_DISPLAY_ID)).isSameInstanceAs(instance)
         }
 
     @Test
     fun forDisplay_nonDefaultDisplay_afterDisplayRemoved_returnsNewInstance() =
         testScope.runTest {
-            val controller = store.forDisplay(NON_DEFAULT_DISPLAY_ID)
+            val instance = store.forDisplay(NON_DEFAULT_DISPLAY_ID)
 
             fakeDisplayRepository.removeDisplay(NON_DEFAULT_DISPLAY_ID)
-            fakeDisplayRepository.addDisplay(NON_DEFAULT_DISPLAY_ID)
+            fakeDisplayRepository.addDisplay(createDisplay(NON_DEFAULT_DISPLAY_ID))
 
-            assertThat(store.forDisplay(NON_DEFAULT_DISPLAY_ID)).isNotSameInstanceAs(controller)
+            assertThat(store.forDisplay(NON_DEFAULT_DISPLAY_ID)).isNotSameInstanceAs(instance)
         }
 
     @Test(expected = IllegalArgumentException::class)
     fun forDisplay_nonExistingDisplayId_throws() =
         testScope.runTest { store.forDisplay(NON_EXISTING_DISPLAY_ID) }
 
+    @Test
+    fun forDisplay_afterDisplayRemoved_onDisplayRemovalActionInvoked() =
+        testScope.runTest {
+            val instance = store.forDisplay(NON_DEFAULT_DISPLAY_ID)
+
+            fakeDisplayRepository.removeDisplay(NON_DEFAULT_DISPLAY_ID)
+
+            assertThat(store.removalActions).containsExactly(instance)
+        }
+
+    @Test
+    fun forDisplay_withoutDisplayRemoval_onDisplayRemovalActionIsNotInvoked() =
+        testScope.runTest {
+            store.forDisplay(NON_DEFAULT_DISPLAY_ID)
+
+            assertThat(store.removalActions).isEmpty()
+        }
+
+    private fun createDisplay(displayId: Int): Display = mock {
+        on { getDisplayId() } doReturn displayId
+    }
+
     companion object {
         private const val DEFAULT_DISPLAY_ID = Display.DEFAULT_DISPLAY
-        private const val NON_DEFAULT_DISPLAY_ID = Display.DEFAULT_DISPLAY + 1
-        private const val NON_EXISTING_DISPLAY_ID = Display.DEFAULT_DISPLAY + 2
+        private const val NON_DEFAULT_DISPLAY_ID = DEFAULT_DISPLAY_ID + 1
+        private const val NON_EXISTING_DISPLAY_ID = DEFAULT_DISPLAY_ID + 2
     }
 }
