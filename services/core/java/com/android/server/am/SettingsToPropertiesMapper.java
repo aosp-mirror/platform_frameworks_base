@@ -150,6 +150,7 @@ public class SettingsToPropertiesMapper {
         "art_mainline",
         "art_performance",
         "attack_tools",
+        "automotive_cast",
         "avic",
         "desktop_firmware",
         "biometrics",
