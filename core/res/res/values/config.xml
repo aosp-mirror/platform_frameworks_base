@@ -1849,6 +1849,10 @@
         <item>-1</item>
     </integer-array>
 
+     <!-- Specifies the delay in milliseconds after the last user input before turning off the
+          keyboard backlight.
+    -->
+    <integer name="config_keyboardBacklightTimeoutMs">30000</integer>
     <!-- An array describing the screen's backlight values corresponding to the brightness
          values in the config_screenBrightnessNits array.
 
