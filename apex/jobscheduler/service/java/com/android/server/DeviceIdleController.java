@@ -3568,7 +3568,7 @@ public class DeviceIdleController extends SystemService
             Slog.i(TAG, "becomeActiveLocked, reason=" + activeReason
                     + ", changeLightIdle=" + changeLightIdle);
         }
-        if (mState != STATE_ACTIVE || mLightState != STATE_ACTIVE) {
+        if (mState != STATE_ACTIVE || mLightState != LIGHT_STATE_ACTIVE) {
             moveToStateLocked(STATE_ACTIVE, activeReason);
             mInactiveTimeout = newInactiveTimeout;
             resetIdleManagementLocked();
