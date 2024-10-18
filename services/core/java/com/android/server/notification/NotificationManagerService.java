@@ -2984,6 +2984,11 @@ public class NotificationManagerService extends SystemService {
         });
     }
 
+    //Enables tests running in TH mode to be exempted from forced grouping of notifications
+    void setTestHarnessExempted(boolean isExempted) {
+        mGroupHelper.setTestHarnessExempted(isExempted);
+    }
+
     private void sendRegisteredOnlyBroadcast(String action) {
         sendRegisteredOnlyBroadcast(new Intent(action));
     }
