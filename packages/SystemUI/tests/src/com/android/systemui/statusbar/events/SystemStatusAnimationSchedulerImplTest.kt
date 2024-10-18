@@ -88,30 +88,26 @@ class SystemStatusAnimationSchedulerImplTest : SysuiTestCase() {
             .thenReturn(statusBarWindowController)
         systemClock = FakeSystemClock()
         chipAnimationController =
-            SystemEventChipAnimationController(
+            SystemEventChipAnimationControllerImpl(
                 mContext,
-                statusBarWindowControllerStore,
+                statusBarWindowController,
                 statusBarContentInsetProvider,
             )
 
         // StatusBarContentInsetProvider is mocked. Ensure that it returns some mocked values.
         whenever(statusBarContentInsetProvider.getStatusBarContentInsetsForCurrentRotation())
-            .thenReturn(
-                Insets.of(/* left = */ 10, /* top = */ 10, /* right = */ 10, /* bottom = */ 0)
-            )
+            .thenReturn(Insets.of(/* left= */ 10, /* top= */ 10, /* right= */ 10, /* bottom= */ 0))
         whenever(statusBarContentInsetProvider.getStatusBarContentAreaForCurrentRotation())
-            .thenReturn(
-                Rect(/* left = */ 10, /* top = */ 10, /* right = */ 990, /* bottom = */ 100)
-            )
+            .thenReturn(Rect(/* left= */ 10, /* top= */ 10, /* right= */ 990, /* bottom= */ 100))
 
         // StatusBarWindowController is mocked. The addViewToWindow function needs to be mocked to
         // ensure that the chip view is added to a parent view
         whenever(statusBarWindowController.addViewToWindow(any(), any())).then {
             val statusbarFake = FrameLayout(mContext)
-            statusbarFake.layout(/* l = */ 0, /* t = */ 0, /* r = */ 1000, /* b = */ 100)
+            statusbarFake.layout(/* l= */ 0, /* t= */ 0, /* r= */ 1000, /* b= */ 100)
             statusbarFake.addView(
                 it.arguments[0] as View,
-                it.arguments[1] as FrameLayout.LayoutParams
+                it.arguments[1] as FrameLayout.LayoutParams,
             )
         }
     }
@@ -386,7 +382,7 @@ class SystemStatusAnimationSchedulerImplTest : SysuiTestCase() {
         scheduleFakeEventWithView(
             accessibilityDesc,
             mockAnimatableView,
-            shouldAnnounceAccessibilityEvent = true
+            shouldAnnounceAccessibilityEvent = true,
         )
         fastForwardAnimationToState(ANIMATING_OUT)
 
@@ -405,7 +401,7 @@ class SystemStatusAnimationSchedulerImplTest : SysuiTestCase() {
         scheduleFakeEventWithView(
             accessibilityDesc,
             mockAnimatableView,
-            shouldAnnounceAccessibilityEvent = true
+            shouldAnnounceAccessibilityEvent = true,
         )
         fastForwardAnimationToState(ANIMATING_OUT)
 
@@ -424,7 +420,7 @@ class SystemStatusAnimationSchedulerImplTest : SysuiTestCase() {
         scheduleFakeEventWithView(
             accessibilityDesc,
             mockAnimatableView,
-            shouldAnnounceAccessibilityEvent = false
+            shouldAnnounceAccessibilityEvent = false,
         )
         fastForwardAnimationToState(ANIMATING_OUT)
 
@@ -637,13 +633,13 @@ class SystemStatusAnimationSchedulerImplTest : SysuiTestCase() {
     private fun scheduleFakeEventWithView(
         desc: String?,
         view: BackgroundAnimatableView,
-        shouldAnnounceAccessibilityEvent: Boolean
+        shouldAnnounceAccessibilityEvent: Boolean,
     ) {
         val fakeEvent =
             FakeStatusEvent(
                 viewCreator = { view },
                 contentDescription = desc,
-                shouldAnnounceAccessibilityEvent = shouldAnnounceAccessibilityEvent
+                shouldAnnounceAccessibilityEvent = shouldAnnounceAccessibilityEvent,
             )
         systemStatusAnimationScheduler.onStatusEvent(fakeEvent)
     }
@@ -668,7 +664,7 @@ class SystemStatusAnimationSchedulerImplTest : SysuiTestCase() {
                 dumpManager,
                 systemClock,
                 CoroutineScope(StandardTestDispatcher(testScope.testScheduler)),
-                logger
+                logger,
             )
         // add a mock listener
         systemStatusAnimationScheduler.addCallback(listener)

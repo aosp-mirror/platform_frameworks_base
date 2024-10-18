@@ -31,22 +31,46 @@ import androidx.core.animation.AnimatorListenerAdapter
 import androidx.core.animation.AnimatorSet
 import androidx.core.animation.ValueAnimator
 import com.android.internal.annotations.VisibleForTesting
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.phone.StatusBarContentInsetsChangedListener
 import com.android.systemui.statusbar.phone.StatusBarContentInsetsProvider
+import com.android.systemui.statusbar.window.StatusBarWindowController
 import com.android.systemui.statusbar.window.StatusBarWindowControllerStore
 import com.android.systemui.util.animation.AnimationUtil.Companion.frames
-import javax.inject.Inject
+import dagger.Module
+import dagger.Provides
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlin.math.roundToInt
 
 /** Controls the view for system event animations. */
-class SystemEventChipAnimationController
-@Inject
+interface SystemEventChipAnimationController : SystemStatusAnimationCallback {
+
+    /**
+     * Give the chip controller a chance to inflate and configure the chip view before we start
+     * animating
+     */
+    fun prepareChipAnimation(viewCreator: ViewCreator)
+
+    fun init()
+
+    /** Announces [contentDescriptions] for accessibility. */
+    fun announceForAccessibility(contentDescriptions: String)
+
+    override fun onSystemEventAnimationBegin(): Animator
+
+    override fun onSystemEventAnimationFinish(hasPersistentDot: Boolean): Animator
+}
+
+class SystemEventChipAnimationControllerImpl
+@AssistedInject
 constructor(
-    private val context: Context,
-    private val statusBarWindowControllerStore: StatusBarWindowControllerStore,
-    private val contentInsetsProvider: StatusBarContentInsetsProvider,
-) : SystemStatusAnimationCallback {
+    @Assisted private val context: Context,
+    @Assisted private val statusBarWindowController: StatusBarWindowController,
+    @Assisted private val contentInsetsProvider: StatusBarContentInsetsProvider,
+) : SystemEventChipAnimationController {
 
     private lateinit var animationWindowView: FrameLayout
     private lateinit var themedContext: ContextThemeWrapper
@@ -77,11 +101,7 @@ constructor(
     // TODO: move to dagger
     @VisibleForTesting var initialized = false
 
-    /**
-     * Give the chip controller a chance to inflate and configure the chip view before we start
-     * animating
-     */
-    fun prepareChipAnimation(viewCreator: ViewCreator) {
+    override fun prepareChipAnimation(viewCreator: ViewCreator) {
         if (!initialized) {
             init()
         }
@@ -266,7 +286,7 @@ constructor(
         return animSet
     }
 
-    fun init() {
+    override fun init() {
         initialized = true
         themedContext = ContextThemeWrapper(context, R.style.Theme_SystemUI_QuickSettings)
         animationWindowView =
@@ -276,7 +296,7 @@ constructor(
         val height = themedContext.resources.getDimensionPixelSize(R.dimen.status_bar_height)
         val lp = FrameLayout.LayoutParams(MATCH_PARENT, height)
         lp.gravity = Gravity.END or Gravity.TOP
-        statusBarWindowControllerStore.defaultDisplay.addViewToWindow(animationWindowView, lp)
+        statusBarWindowController.addViewToWindow(animationWindowView, lp)
         animationWindowView.clipToPadding = false
         animationWindowView.clipChildren = false
 
@@ -306,8 +326,7 @@ constructor(
         )
     }
 
-    /** Announces [contentDescriptions] for accessibility. */
-    fun announceForAccessibility(contentDescriptions: String) {
+    override fun announceForAccessibility(contentDescriptions: String) {
         currentAnimatedView?.view?.announceForAccessibility(contentDescriptions)
     }
 
@@ -396,6 +415,15 @@ constructor(
             animRect.bottom,
         )
     }
+
+    @AssistedFactory
+    interface Factory {
+        fun create(
+            context: Context,
+            statusBarWindowController: StatusBarWindowController,
+            contentInsetsProvider: StatusBarContentInsetsProvider,
+        ): SystemEventChipAnimationControllerImpl
+    }
 }
 
 /** Chips should provide a view that can be animated with something better than a fade-in */
@@ -415,3 +443,22 @@ interface BackgroundAnimatableView {
 // Animation directions
 private const val LEFT = 1
 private const val RIGHT = 2
+
+@Module
+object SystemEventChipAnimationControllerModule {
+
+    @Provides
+    @SysUISingleton
+    fun controller(
+        factory: SystemEventChipAnimationControllerImpl.Factory,
+        context: Context,
+        statusBarWindowControllerStore: StatusBarWindowControllerStore,
+        contentInsetsProvider: StatusBarContentInsetsProvider,
+    ): SystemEventChipAnimationController {
+        return factory.create(
+            context,
+            statusBarWindowControllerStore.defaultDisplay,
+            contentInsetsProvider,
+        )
+    }
+}
