@@ -1013,21 +1013,6 @@ public class PipTouchHandler implements PipTransitionState.PipTransitionStateCha
             return true;
         }
 
-        private void stashEndAction() {
-            if (mPipBoundsState.getBounds().left < 0
-                    && mPipBoundsState.getStashedState() != STASH_TYPE_LEFT) {
-                mPipUiEventLogger.log(
-                        PipUiEventLogger.PipUiEventEnum.PICTURE_IN_PICTURE_STASH_LEFT);
-                mPipBoundsState.setStashed(STASH_TYPE_LEFT);
-            } else if (mPipBoundsState.getBounds().left >= 0
-                    && mPipBoundsState.getStashedState() != STASH_TYPE_RIGHT) {
-                mPipUiEventLogger.log(
-                        PipUiEventLogger.PipUiEventEnum.PICTURE_IN_PICTURE_STASH_RIGHT);
-                mPipBoundsState.setStashed(STASH_TYPE_RIGHT);
-            }
-            mMenuController.hideMenu();
-        }
-
         private void flingEndAction() {
             if (mShouldHideMenuAfterFling) {
                 // If the menu is not visible, then we can still be showing the activity for the
