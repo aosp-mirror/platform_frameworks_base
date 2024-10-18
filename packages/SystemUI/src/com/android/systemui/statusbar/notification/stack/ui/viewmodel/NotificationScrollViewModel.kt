@@ -104,7 +104,7 @@ constructor(
             1f
         } else if (
             change.isTransitioningBetween(Scenes.Gone, Scenes.Shade) ||
-                change.isTransitioning(from = Scenes.Gone, to = Scenes.Lockscreen)
+                change.isTransitioning(from = Scenes.Shade, to = Scenes.Lockscreen)
         ) {
             shadeExpansion
         } else if (change.isTransitioningBetween(Scenes.Gone, Scenes.QuickSettings)) {
