@@ -16,6 +16,7 @@
 
 package com.android.systemui.communal.ui.compose
 
+import android.appwidget.AppWidgetProviderInfo
 import android.content.Context
 import android.content.res.Configuration
 import android.graphics.drawable.Icon
@@ -183,6 +184,9 @@ import com.android.systemui.communal.widgets.SmartspaceAppWidgetHostView
 import com.android.systemui.communal.widgets.WidgetConfigurator
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.phone.SystemUIDialogFactory
+import kotlin.math.max
+import kotlin.math.min
+import kotlin.math.roundToInt
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -644,11 +648,13 @@ private fun ObserveNewWidgetAddedEffect(
 @Composable
 private fun ResizableItemFrameWrapper(
     key: String,
+    currentSpan: GridItemSpan,
     gridState: LazyGridState,
-    minItemSpan: Int,
     gridContentPadding: PaddingValues,
     verticalArrangement: Arrangement.Vertical,
     enabled: Boolean,
+    minHeightPx: Int,
+    maxHeightPx: Int,
     modifier: Modifier = Modifier,
     alpha: () -> Float = { 1f },
     onResize: (info: ResizeInfo) -> Unit = {},
@@ -659,17 +665,45 @@ private fun ResizableItemFrameWrapper(
     } else {
         ResizableItemFrame(
             key = key,
+            currentSpan = currentSpan,
             gridState = gridState,
-            minItemSpan = minItemSpan,
             gridContentPadding = gridContentPadding,
             verticalArrangement = verticalArrangement,
             enabled = enabled,
             alpha = alpha,
             modifier = modifier,
             onResize = onResize,
+            minHeightPx = minHeightPx,
+            maxHeightPx = maxHeightPx,
+            resizeMultiple = CommunalContentSize.HALF.span,
         ) {
             content(Modifier)
         }
+    }
+}
+
+@Composable
+fun calculateWidgetSize(item: CommunalContentModel, isResizable: Boolean): WidgetSizeInfo {
+    val density = LocalDensity.current
+
+    return if (isResizable && item is CommunalContentModel.WidgetContent.Widget) {
+        with(density) {
+            val minHeightPx =
+                (min(item.providerInfo.minResizeHeight, item.providerInfo.minHeight)
+                    .coerceAtLeast(CommunalContentSize.HALF.dp().toPx().roundToInt()))
+
+            val maxHeightPx =
+                (if (item.providerInfo.maxResizeHeight > 0) {
+                        max(item.providerInfo.maxResizeHeight, item.providerInfo.minHeight)
+                    } else {
+                        Int.MAX_VALUE
+                    })
+                    .coerceIn(minHeightPx, CommunalContentSize.FULL.dp().toPx().roundToInt())
+
+            WidgetSizeInfo(minHeightPx, maxHeightPx)
+        }
+    } else {
+        WidgetSizeInfo(0, Int.MAX_VALUE)
     }
 }
 
@@ -747,6 +781,12 @@ private fun BoxScope.CommunalHubLazyGrid(
             val size = SizeF(Dimensions.CardWidth.value, item.size.dp().value)
             val selected = item.key == selectedKey.value
             val dpSize = DpSize(size.width.dp, size.height.dp)
+            val isResizable =
+                if (item is CommunalContentModel.WidgetContent.Widget) {
+                    item.providerInfo.resizeMode and AppWidgetProviderInfo.RESIZE_VERTICAL != 0
+                } else {
+                    false
+                }
 
             if (viewModel.isEditMode && dragDropState != null) {
                 val outlineAlpha by
@@ -755,10 +795,11 @@ private fun BoxScope.CommunalHubLazyGrid(
                         animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
                         label = "Widget resizing outline alpha",
                     )
+                val widgetSizeInfo = calculateWidgetSize(item, isResizable)
                 ResizableItemFrameWrapper(
                     key = item.key,
+                    currentSpan = GridItemSpan(item.size.span),
                     gridState = gridState,
-                    minItemSpan = CommunalContentSize.HALF.span,
                     gridContentPadding = contentPadding,
                     verticalArrangement = itemArrangement,
                     enabled = selected,
@@ -772,6 +813,8 @@ private fun BoxScope.CommunalHubLazyGrid(
                             )
                         },
                     onResize = { resizeInfo -> contentListState.resize(index, resizeInfo) },
+                    minHeightPx = widgetSizeInfo.minHeightPx,
+                    maxHeightPx = widgetSizeInfo.maxHeightPx,
                 ) { modifier ->
                     DraggableItem(
                         modifier = modifier,
@@ -1655,6 +1698,8 @@ class Dimensions(val context: Context, val config: Configuration) {
         val SlideOffsetY = 30.adjustedDp
     }
 }
+
+data class WidgetSizeInfo(val minHeightPx: Int, val maxHeightPx: Int)
 
 private object Colors {
     val DisabledColorFilter by lazy { disabledColorMatrix() }
