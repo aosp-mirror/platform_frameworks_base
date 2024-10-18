@@ -781,7 +781,7 @@ private fun BoxScope.CommunalHubLazyGrid(
                         key = item.key,
                     ) { isDragging ->
                         CommunalContent(
-                            modifier = Modifier.fillMaxSize(),
+                            modifier = Modifier.requiredSize(dpSize),
                             model = item,
                             viewModel = viewModel,
                             size = size,
