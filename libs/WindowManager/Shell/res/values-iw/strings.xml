@@ -97,9 +97,9 @@
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"בעיות במצלמה?\nאפשר להקיש כדי לבצע התאמה מחדש"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"הבעיה לא נפתרה?\nאפשר להקיש כדי לחזור לגרסה הקודמת"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"אין בעיות במצלמה? אפשר להקיש כדי לסגור."</string>
-    <string name="windowing_app_handle_education_tooltip" msgid="6398482412956375783">"צריך להקיש כדי לפתוח את תפריט האפליקציה"</string>
-    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="6285279585554484957">"אפשר להקיש כדי להציג כמה אפליקציות יחד"</string>
-    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="6685429075790085337">"חזרה למסך מלא מתפריט האפליקציה"</string>
+    <string name="windowing_app_handle_education_tooltip" msgid="2929643449849791854">"תפריט האפליקציה נמצא כאן"</string>
+    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="2523468503353474095">"כדי לפתוח כמה אפליקציות יחד, צריך לעבור למצב תצוגה למחשב"</string>
+    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="5225660258192054132">"אפשר לחזור למסך מלא בכל שלב מתפריט האפליקציה"</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"רוצה לראות ולעשות יותר?"</string>
     <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"צריך לגרור אפליקציה אחרת כדי להשתמש במסך המפוצל"</string>
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"צריך להקיש הקשה כפולה מחוץ לאפליקציה כדי למקם אותה מחדש"</string>

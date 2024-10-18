@@ -97,9 +97,9 @@
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Проблемы с камерой?\nНажмите, чтобы исправить."</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Не помогло?\nНажмите, чтобы отменить изменения."</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Нет проблем с камерой? Нажмите, чтобы закрыть."</string>
-    <string name="windowing_app_handle_education_tooltip" msgid="6398482412956375783">"Нажмите, чтобы открыть меню приложения"</string>
-    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="6285279585554484957">"Нажмите, чтобы на экране размещались сразу несколько приложений"</string>
-    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="6685429075790085337">"Вернуться из меню приложения в режим полного экрана"</string>
+    <string name="windowing_app_handle_education_tooltip" msgid="2929643449849791854">"Здесь вы найдете меню приложения"</string>
+    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="2523468503353474095">"Чтобы открыть сразу несколько приложений, перейдите в режим компьютера"</string>
+    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="5225660258192054132">"Вернуться в полноэкранный режим можно из меню приложения"</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"Выполняйте несколько задач одновременно"</string>
     <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"Перетащите сюда другое приложение, чтобы использовать разделение экрана."</string>
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Чтобы переместить приложение, дважды нажмите рядом с ним."</string>

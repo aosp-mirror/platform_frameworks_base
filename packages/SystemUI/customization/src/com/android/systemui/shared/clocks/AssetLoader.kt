@@ -68,7 +68,10 @@ private constructor(
         seedColor = null,
         overrideChroma = null,
         typefaceCache =
-            TypefaceCache(messageBuffer) { Typeface.createFromAsset(pluginCtx.assets, it) },
+            TypefaceCache(messageBuffer) {
+                // TODO(b/364680873): Move constant to config_clockFontFamily when shipping
+                return@TypefaceCache Typeface.create("google-sans-flex-clock", Typeface.NORMAL)
+            },
         getThemeSeedColor = getThemeSeedColor ?: Companion::getThemeSeedColor,
         messageBuffer = messageBuffer,
     )

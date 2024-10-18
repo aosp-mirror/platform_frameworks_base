@@ -19,7 +19,6 @@ package android.app;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
-import static org.junit.Assert.fail;
 
 import android.platform.test.annotations.IgnoreUnderRavenwood;
 import android.platform.test.ravenwood.RavenwoodRule;
@@ -27,7 +26,6 @@ import android.platform.test.ravenwood.RavenwoodRule;
 import androidx.test.filters.SmallTest;
 
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -92,10 +90,11 @@ public class PropertyInvalidatedCacheTests {
         }
     }
 
-    // Ensure all test nonces are cleared after the test ends.
+    // Clear the test mode after every test, in case this process is used for other
+    // tests. This also resets the test property map.
     @After
     public void tearDown() throws Exception {
-        PropertyInvalidatedCache.resetAfterTest();
+        PropertyInvalidatedCache.setTestMode(false);
     }
 
     // This test is disabled pending an sepolicy change that allows any app to set the
@@ -111,6 +110,9 @@ public class PropertyInvalidatedCacheTests {
         PropertyInvalidatedCache<Integer, Boolean> testCache =
                 new PropertyInvalidatedCache<>(4, MODULE, API, "cache1",
                         new ServerQuery(tester));
+
+        PropertyInvalidatedCache.setTestMode(true);
+        testCache.testPropertyName();
 
         tester.verify(0);
         assertEquals(tester.value(3), testCache.query(3));
@@ -221,16 +223,22 @@ public class PropertyInvalidatedCacheTests {
 
         TestCache(String module, String api) {
             this(module, api, new TestQuery());
+            setTestMode(true);
+            testPropertyName();
         }
 
         TestCache(String module, String api, TestQuery query) {
             super(4, module, api, api, query);
             mQuery = query;
+            setTestMode(true);
+            testPropertyName();
         }
 
         public int getRecomputeCount() {
             return mQuery.getRecomputeCount();
         }
+
+
     }
 
     @Test
@@ -366,19 +374,5 @@ public class PropertyInvalidatedCacheTests {
         n1 = PropertyInvalidatedCache.createPropertyName(
             PropertyInvalidatedCache.MODULE_BLUETOOTH, "getState");
         assertEquals(n1, "cache_key.bluetooth.get_state");
-    }
-
-    // It is illegal to continue to use a cache with a test key after calling setTestMode(false).
-    // This test verifies the code detects errors in calling setTestMode().
-    @Test
-    public void testTestMode() {
-        TestCache cache = new TestCache();
-        cache.invalidateCache();
-        PropertyInvalidatedCache.resetAfterTest();
-        try {
-            cache.invalidateCache();
-            fail("expected an IllegalStateException");
-        } catch (IllegalStateException expected) {
-        }
     }
 }

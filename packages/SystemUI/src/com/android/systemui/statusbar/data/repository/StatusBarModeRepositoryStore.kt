@@ -20,7 +20,7 @@ import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.DisplayId
 import com.android.systemui.statusbar.core.StatusBarInitializer
-import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentComponent
+import com.android.systemui.statusbar.phone.fragment.dagger.HomeStatusBarComponent
 import dagger.Binds
 import dagger.Module
 import dagger.multibindings.ClassKey
@@ -56,7 +56,7 @@ constructor(
         defaultDisplay.start()
     }
 
-    override fun onStatusBarViewInitialized(component: StatusBarFragmentComponent) {
+    override fun onStatusBarViewInitialized(component: HomeStatusBarComponent) {
         defaultDisplay.onStatusBarViewInitialized(component)
     }
 

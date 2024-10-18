@@ -34,10 +34,10 @@ import com.android.systemui.Dumpable
 import com.android.systemui.StatusBarInsetsCommand
 import com.android.systemui.SysUICutoutInformation
 import com.android.systemui.SysUICutoutProvider
-import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.commandline.CommandRegistry
+import com.android.systemui.statusbar.phone.StatusBarContentInsetsProviderImpl.CacheKey
 import com.android.systemui.statusbar.policy.CallbackController
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.leak.RotationUtils.ROTATION_LANDSCAPE
@@ -47,9 +47,11 @@ import com.android.systemui.util.leak.RotationUtils.ROTATION_UPSIDE_DOWN
 import com.android.systemui.util.leak.RotationUtils.Rotation
 import com.android.systemui.util.leak.RotationUtils.getExactRotation
 import com.android.systemui.util.leak.RotationUtils.getResourcesForRotation
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import java.io.PrintWriter
 import java.lang.Math.max
-import javax.inject.Inject
 
 /**
  * Encapsulates logic that can solve for the left/right insets required for the status bar contents.
@@ -64,19 +66,87 @@ import javax.inject.Inject
  *
  * NOTE: This class is not threadsafe
  */
-@SysUISingleton
-class StatusBarContentInsetsProvider
-@Inject
+interface StatusBarContentInsetsProvider :
+    CallbackController<StatusBarContentInsetsChangedListener> {
+
+    /**
+     * Some views may need to care about whether or not the current top display cutout is located in
+     * the corner rather than somewhere in the center. In the case of a corner cutout, the status
+     * bar area is contiguous.
+     */
+    fun currentRotationHasCornerCutout(): Boolean
+
+    /**
+     * Calculates the maximum bounding rectangle for the privacy chip animation + ongoing privacy
+     * dot in the coordinates relative to the given rotation.
+     *
+     * @param rotation the rotation for which the bounds are required. This is an absolute value
+     *   (i.e., ROTATION_NONE will always return the same bounds regardless of the context from
+     *   which this method is called)
+     */
+    fun getBoundingRectForPrivacyChipForRotation(
+        @Rotation rotation: Int,
+        displayCutout: DisplayCutout?,
+    ): Rect
+
+    /**
+     * Calculate the distance from the left, right and top edges of the screen to the status bar
+     * content area. This differs from the content area rects in that these values can be used
+     * directly as padding.
+     *
+     * @param rotation the target rotation for which to calculate insets
+     */
+    fun getStatusBarContentInsetsForRotation(@Rotation rotation: Int): Insets
+
+    /**
+     * Calculate the insets for the status bar content in the device's current rotation
+     *
+     * @see getStatusBarContentAreaForRotation
+     */
+    fun getStatusBarContentInsetsForCurrentRotation(): Insets
+
+    /**
+     * Calculates the area of the status bar contents invariant of the current device rotation, in
+     * the target rotation's coordinates
+     *
+     * @param rotation the rotation for which the bounds are required. This is an absolute value
+     *   (i.e., ROTATION_NONE will always return the same bounds regardless of the context from
+     *   which this method is called)
+     */
+    fun getStatusBarContentAreaForRotation(@Rotation rotation: Int): Rect
+
+    /** Get the status bar content area for the given rotation, in absolute bounds */
+    fun getStatusBarContentAreaForCurrentRotation(): Rect
+
+    fun getStatusBarPaddingTop(@Rotation rotation: Int? = null): Int
+
+    interface Factory {
+        fun create(
+            context: Context,
+            configurationController: ConfigurationController,
+            sysUICutoutProvider: SysUICutoutProvider,
+        ): StatusBarContentInsetsProvider
+    }
+}
+
+class StatusBarContentInsetsProviderImpl
+@AssistedInject
 constructor(
-    val context: Context,
-    val configurationController: ConfigurationController,
+    @Assisted val context: Context,
+    @Assisted val configurationController: ConfigurationController,
     val dumpManager: DumpManager,
     val commandRegistry: CommandRegistry,
-    val sysUICutoutProvider: SysUICutoutProvider,
-) :
-    CallbackController<StatusBarContentInsetsChangedListener>,
-    ConfigurationController.ConfigurationListener,
-    Dumpable {
+    @Assisted val sysUICutoutProvider: SysUICutoutProvider,
+) : StatusBarContentInsetsProvider, ConfigurationController.ConfigurationListener, Dumpable {
+
+    @AssistedFactory
+    interface Factory : StatusBarContentInsetsProvider.Factory {
+        override fun create(
+            context: Context,
+            configurationController: ConfigurationController,
+            sysUICutoutProvider: SysUICutoutProvider,
+        ): StatusBarContentInsetsProviderImpl
+    }
 
     // Limit cache size as potentially we may connect large number of displays
     // (e.g. network displays)
@@ -95,7 +165,7 @@ constructor(
                 object : StatusBarInsetsCommand.Callback {
                     override fun onExecute(
                         command: StatusBarInsetsCommand,
-                        printWriter: PrintWriter
+                        printWriter: PrintWriter,
                     ) {
                         executeCommand(command, printWriter)
                     }
@@ -133,12 +203,7 @@ constructor(
         listeners.forEach { it.onStatusBarContentInsetsChanged() }
     }
 
-    /**
-     * Some views may need to care about whether or not the current top display cutout is located in
-     * the corner rather than somewhere in the center. In the case of a corner cutout, the status
-     * bar area is contiguous.
-     */
-    fun currentRotationHasCornerCutout(): Boolean {
+    override fun currentRotationHasCornerCutout(): Boolean {
         val cutout = checkNotNull(context.display).cutout ?: return false
         val topBounds = cutout.boundingRectTop
 
@@ -148,17 +213,9 @@ constructor(
         return topBounds.left <= 0 || topBounds.right >= point.x
     }
 
-    /**
-     * Calculates the maximum bounding rectangle for the privacy chip animation + ongoing privacy
-     * dot in the coordinates relative to the given rotation.
-     *
-     * @param rotation the rotation for which the bounds are required. This is an absolute value
-     *   (i.e., ROTATION_NONE will always return the same bounds regardless of the context from
-     *   which this method is called)
-     */
-    fun getBoundingRectForPrivacyChipForRotation(
+    override fun getBoundingRectForPrivacyChipForRotation(
         @Rotation rotation: Int,
-        displayCutout: DisplayCutout?
+        displayCutout: DisplayCutout?,
     ): Rect {
         val key = getCacheKey(rotation, displayCutout)
         var insets = insetsCache[key]
@@ -176,14 +233,7 @@ constructor(
         return getPrivacyChipBoundingRectForInsets(insets, dotWidth, chipWidth, isRtl)
     }
 
-    /**
-     * Calculate the distance from the left, right and top edges of the screen to the status bar
-     * content area. This differs from the content area rects in that these values can be used
-     * directly as padding.
-     *
-     * @param rotation the target rotation for which to calculate insets
-     */
-    fun getStatusBarContentInsetsForRotation(@Rotation rotation: Int): Insets =
+    override fun getStatusBarContentInsetsForRotation(@Rotation rotation: Int): Insets =
         traceSection(tag = "StatusBarContentInsetsProvider.getStatusBarContentInsetsForRotation") {
             val sysUICutout = sysUICutoutProvider.cutoutInfoForCurrentDisplayAndRotation()
             val displayCutout = sysUICutout?.cutout
@@ -202,31 +252,17 @@ constructor(
                         rotation,
                         sysUICutout,
                         getResourcesForRotation(rotation, context),
-                        key
+                        key,
                     )
 
             Insets.of(area.left, area.top, /* right= */ width - area.right, /* bottom= */ 0)
         }
 
-    /**
-     * Calculate the insets for the status bar content in the device's current rotation
-     *
-     * @see getStatusBarContentAreaForRotation
-     */
-    fun getStatusBarContentInsetsForCurrentRotation(): Insets {
+    override fun getStatusBarContentInsetsForCurrentRotation(): Insets {
         return getStatusBarContentInsetsForRotation(getExactRotation(context))
     }
 
-    /**
-     * Calculates the area of the status bar contents invariant of the current device rotation, in
-     * the target rotation's coordinates
-     *
-     * @param rotation the rotation for which the bounds are required. This is an absolute value
-     *   (i.e., ROTATION_NONE will always return the same bounds regardless of the context from
-     *   which this method is called)
-     */
-    @JvmOverloads
-    fun getStatusBarContentAreaForRotation(@Rotation rotation: Int): Rect {
+    override fun getStatusBarContentAreaForRotation(@Rotation rotation: Int): Rect {
         val sysUICutout = sysUICutoutProvider.cutoutInfoForCurrentDisplayAndRotation()
         val displayCutout = sysUICutout?.cutout
         val key = getCacheKey(rotation, displayCutout)
@@ -235,12 +271,11 @@ constructor(
                 rotation,
                 sysUICutout,
                 getResourcesForRotation(rotation, context),
-                key
+                key,
             )
     }
 
-    /** Get the status bar content area for the given rotation, in absolute bounds */
-    fun getStatusBarContentAreaForCurrentRotation(): Rect {
+    override fun getStatusBarContentAreaForCurrentRotation(): Rect {
         val rotation = getExactRotation(context)
         return getStatusBarContentAreaForRotation(rotation)
     }
@@ -249,7 +284,7 @@ constructor(
         @Rotation targetRotation: Int,
         sysUICutout: SysUICutoutInformation?,
         rotatedResources: Resources,
-        key: CacheKey
+        key: CacheKey,
     ): Rect {
         return getCalculatedAreaForRotation(sysUICutout, targetRotation, rotatedResources).also {
             insetsCache.put(key, it)
@@ -259,7 +294,7 @@ constructor(
     private fun getCalculatedAreaForRotation(
         sysUICutout: SysUICutoutInformation?,
         @Rotation targetRotation: Int,
-        rotatedResources: Resources
+        rotatedResources: Resources,
     ): Rect {
         val currentRotation = getExactRotation(context)
 
@@ -299,7 +334,7 @@ constructor(
             configurationController.isLayoutRtl,
             dotWidth,
             bottomAlignedMargin,
-            statusBarContentHeight
+            statusBarContentHeight,
         )
     }
 
@@ -349,7 +384,7 @@ constructor(
         return resources.getDimensionPixelSize(dimenRes)
     }
 
-    fun getStatusBarPaddingTop(@Rotation rotation: Int? = null): Int {
+    override fun getStatusBarPaddingTop(@Rotation rotation: Int?): Int {
         val res = rotation?.let { it -> getResourcesForRotation(it, context) } ?: context.resources
         return res.getDimensionPixelSize(R.dimen.status_bar_padding_top)
     }
@@ -364,13 +399,13 @@ constructor(
         CacheKey(
             rotation = rotation,
             displaySize = Rect(context.resources.configuration.windowConfiguration.maxBounds),
-            displayCutout = displayCutout
+            displayCutout = displayCutout,
         )
 
     private data class CacheKey(
         @Rotation val rotation: Int,
         val displaySize: Rect,
-        val displayCutout: DisplayCutout?
+        val displayCutout: DisplayCutout?,
     )
 }
 
@@ -395,21 +430,21 @@ fun getPrivacyChipBoundingRectForInsets(
     contentRect: Rect,
     dotWidth: Int,
     chipWidth: Int,
-    isRtl: Boolean
+    isRtl: Boolean,
 ): Rect {
     return if (isRtl) {
         Rect(
             contentRect.left - dotWidth,
             contentRect.top,
             contentRect.left + chipWidth,
-            contentRect.bottom
+            contentRect.bottom,
         )
     } else {
         Rect(
             contentRect.right - chipWidth,
             contentRect.top,
             contentRect.right + dotWidth,
-            contentRect.bottom
+            contentRect.bottom,
         )
     }
 }
@@ -443,7 +478,7 @@ fun calculateInsetsForRotationWithRotatedResources(
     isRtl: Boolean,
     dotWidth: Int,
     bottomAlignedMargin: Int,
-    statusBarContentHeight: Int
+    statusBarContentHeight: Int,
 ): Rect {
     /*
     TODO: Check if this is ever used for devices with no rounded corners
@@ -467,7 +502,7 @@ fun calculateInsetsForRotationWithRotatedResources(
         targetRotation,
         currentRotation,
         bottomAlignedMargin,
-        statusBarContentHeight
+        statusBarContentHeight,
     )
 }
 
@@ -503,7 +538,7 @@ private fun getStatusBarContentBounds(
     @Rotation targetRotation: Int,
     @Rotation currentRotation: Int,
     bottomAlignedMargin: Int,
-    statusBarContentHeight: Int
+    statusBarContentHeight: Int,
 ): Rect {
     val insetTop = getInsetTop(bottomAlignedMargin, statusBarContentHeight, sbHeight)
 
@@ -597,7 +632,7 @@ private val DisplayCutout.boundingRectsLeftRightTop
 private fun getInsetTop(
     bottomAlignedMargin: Int,
     statusBarContentHeight: Int,
-    statusBarHeight: Int
+    statusBarHeight: Int,
 ): Int {
     val bottomAlignmentEnabled = bottomAlignedMargin >= 0
     if (!bottomAlignmentEnabled) {
@@ -610,7 +645,7 @@ private fun getInsetTop(
 private fun sbRect(
     @Rotation relativeRotation: Int,
     sbHeight: Int,
-    displaySize: Pair<Int, Int>
+    displaySize: Pair<Int, Int>,
 ): Rect {
     val w = displaySize.first
     val h = displaySize.second
@@ -626,7 +661,7 @@ private fun shareShortEdge(
     sbRect: Rect,
     cutoutRect: Rect,
     currentWidth: Int,
-    currentHeight: Int
+    currentHeight: Int,
 ): Boolean {
     if (currentWidth < currentHeight) {
         // Check top/bottom edges by extending the width of the display cutout rect and checking

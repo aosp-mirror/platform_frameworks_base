@@ -312,6 +312,10 @@
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"Comparteix l\'àudio"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"S\'està compartint l\'àudio"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_accessibility" msgid="7604615019302091708">"introduir la configuració de compartició d\'àudio"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_dialog_message" msgid="4251807313264307426">"La música i els vídeos d\'aquest dispositiu es reproduiran en tots dos parells d\'auriculars"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_dialog_title" msgid="4406818346036286793">"Comparteix l\'àudio"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_dialog_subtitle" msgid="3014906864710059236">"<xliff:g id="AVAILABLE_DEVICE_NAME">%1$s</xliff:g> i <xliff:g id="ACTIVE_DEVICE_NAME">%2$s</xliff:g>"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_dialog_switch_to_button" msgid="7546825655978203773">"Canvia a <xliff:g id="AVAILABLE_DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> de bateria"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Àudio"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Auriculars"</string>
@@ -578,7 +582,7 @@
     <string name="empty_shade_text" msgid="8935967157319717412">"No hi ha cap notificació"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"No hi ha cap notificació nova"</string>
     <string name="adaptive_notification_edu_hun_title" msgid="7790738150177329960">"La moderació de notificacions està activada"</string>
-    <string name="adaptive_notification_edu_hun_text" msgid="7743367744129536610">"El volum i les alertes del dispositiu es redueixen automàticament durant 2 minuts quan reps massa notificacions alhora."</string>
+    <string name="adaptive_notification_edu_hun_text" msgid="7743367744129536610">"El volum i les alertes del dispositiu es redueixen automàticament durant 2 minuts com a màxim quan reps massa notificacions alhora."</string>
     <string name="go_to_adaptive_notification_settings" msgid="2423690125178298479">"Desactiva"</string>
     <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"Desbloqueja per veure notif. anteriors"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Els teus pares gestionen aquest dispositiu"</string>
@@ -672,10 +676,8 @@
     <string name="stream_notification_unavailable" msgid="4313854556205836435">"No disponible perquè el so està silenciat"</string>
     <string name="stream_alarm_unavailable" msgid="4059817189292197839">"No disponible perquè No molestis està activat"</string>
     <string name="stream_media_unavailable" msgid="6823020894438959853">"No disponible perquè No molestis està activat"</string>
-    <!-- no translation found for stream_unavailable_by_modes (3674139029490353683) -->
-    <skip />
-    <!-- no translation found for stream_unavailable_by_unknown (6908434629318171588) -->
-    <skip />
+    <string name="stream_unavailable_by_modes" msgid="3674139029490353683">"No està disponible perquè <xliff:g id="MODE">%s</xliff:g> està activat"</string>
+    <string name="stream_unavailable_by_unknown" msgid="6908434629318171588">"No disponible"</string>
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. Toca per activar el so."</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. Toca per activar la vibració. Pot ser que els serveis d\'accessibilitat se silenciïn."</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. Toca per silenciar el so. Pot ser que els serveis d\'accessibilitat se silenciïn."</string>

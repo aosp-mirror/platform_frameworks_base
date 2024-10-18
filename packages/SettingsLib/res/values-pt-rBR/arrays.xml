@@ -206,19 +206,19 @@
   </string-array>
   <string-array name="window_animation_scale_entries">
     <item msgid="2675263395797191850">"Animação desligada"</item>
-    <item msgid="5790132543372767872">"Escala da animação 0,5 x"</item>
-    <item msgid="2529692189302148746">"Escala da animação 1x"</item>
+    <item msgid="5790132543372767872">"Escala de animação 0,5 x"</item>
+    <item msgid="2529692189302148746">"Escala de animação 1x"</item>
     <item msgid="8072785072237082286">"Escala de animação 1,5 x"</item>
-    <item msgid="3531560925718232560">"Escala da animação 2x"</item>
+    <item msgid="3531560925718232560">"Escala de animação 2x"</item>
     <item msgid="4542853094898215187">"Escala de animação 5 x"</item>
     <item msgid="5643881346223901195">"Escala de animação 10 x"</item>
   </string-array>
   <string-array name="transition_animation_scale_entries">
     <item msgid="3376676813923486384">"Animação desligada"</item>
-    <item msgid="753422683600269114">"Escala da animação 0,5 x"</item>
-    <item msgid="3695427132155563489">"Escala da animação 1x"</item>
+    <item msgid="753422683600269114">"Escala de animação 0,5 x"</item>
+    <item msgid="3695427132155563489">"Escala de animação 1x"</item>
     <item msgid="9032615844198098981">"Escala de animação 1,5 x"</item>
-    <item msgid="8473868962499332073">"Escala da animação 2x"</item>
+    <item msgid="8473868962499332073">"Escala de animação 2x"</item>
     <item msgid="4403482320438668316">"Escala de animação 5 x"</item>
     <item msgid="169579387974966641">"Escala de animação 10 x"</item>
   </string-array>

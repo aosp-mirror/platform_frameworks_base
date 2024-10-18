@@ -123,8 +123,6 @@ constructor(
             onLongClick = {
                 if (emergencyAffordanceManager.needsEmergencyAffordance()) {
                     prepareToPerformAction()
-
-                    // TODO(b/369767936): Check that !longPressWasDragged before invoking.
                     emergencyAffordanceManager.performEmergencyCall()
                 }
             },

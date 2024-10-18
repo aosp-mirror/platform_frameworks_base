@@ -97,9 +97,9 @@
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Myndavélavesen?\nÝttu til að breyta stærð"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Ennþá vesen?\nÝttu til að afturkalla"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Ekkert myndavélavesen? Ýttu til að hunsa."</string>
-    <string name="windowing_app_handle_education_tooltip" msgid="6398482412956375783">"Ýttu til að opna forritavalmyndina"</string>
-    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="6285279585554484957">"Ýttu til að sjá mörg forrit saman"</string>
-    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="6685429075790085337">"Opnaðu allan skjáinn aftur á forritavalmyndinni"</string>
+    <string name="windowing_app_handle_education_tooltip" msgid="2929643449849791854">"Hér finnurðu forritavalmyndina"</string>
+    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="2523468503353474095">"Veldu tölvuútgáfu til að opna mörg forrit samtímis"</string>
+    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="5225660258192054132">"Þú getur skipt aftur í allan skjáinn hvenær sem er af forritavalmyndinni"</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"Sjáðu og gerðu meira"</string>
     <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"Dragðu annað forrit inn til að nota skjáskiptingu"</string>
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Ýttu tvisvar utan við forrit til að færa það"</string>
