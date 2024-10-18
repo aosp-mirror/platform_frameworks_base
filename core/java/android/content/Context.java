@@ -4325,6 +4325,7 @@ public abstract class Context {
            //@hide: ECM_ENHANCED_CONFIRMATION_SERVICE,
             CONTACT_KEYS_SERVICE,
             RANGING_SERVICE,
+            ADVANCED_PROTECTION_SERVICE,
 
     })
     @Retention(RetentionPolicy.SOURCE)
@@ -5658,6 +5659,14 @@ public abstract class Context {
     public static final String BINARY_TRANSPARENCY_SERVICE = "transparency";
 
     /**
+     * System service name for ForensicService.
+     * The service manages the forensic info on device.
+     * @hide
+     */
+    @FlaggedApi(android.security.Flags.FLAG_AFL_API)
+    public static final String FORENSIC_SERVICE = "forensic";
+
+    /**
      * System service name for the DeviceIdleManager.
      * @see #getSystemService(String)
      * @hide
@@ -6365,6 +6374,15 @@ public abstract class Context {
      * @hide
      */
     public static final String ATTESTATION_VERIFICATION_SERVICE = "attestation_verification";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve an
+     * {@link android.security.advancedprotection.AdvancedProtectionManager}
+     * @see #getSystemService(String)
+     * @see android.security.advancedprotection.AdvancedProtectionManager
+     */
+    @FlaggedApi(android.security.Flags.FLAG_AAPM_API)
+    public static final String ADVANCED_PROTECTION_SERVICE = "advanced_protection";
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve an

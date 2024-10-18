@@ -772,15 +772,25 @@ public class SplitScreenController implements SplitDragPolicy.Starter,
                 instanceId);
     }
 
-    /**
-     * Starts the given intent into split.
-     * @param hideTaskToken If non-null, a task matching this token will be moved to back in the
-     *                      same window container transaction as the starting of the intent.
-     */
     @Override
     public void startIntent(PendingIntent intent, int userId1, @Nullable Intent fillInIntent,
             @SplitPosition int position, @Nullable Bundle options,
             @Nullable WindowContainerToken hideTaskToken) {
+        startIntent(intent, userId1, fillInIntent, position, options, hideTaskToken,
+                false /* forceLaunchNewTask */);
+    }
+
+    /**
+     * Starts the given intent into split.
+     *
+     * @param hideTaskToken If non-null, a task matching this token will be moved to back in the
+     *                      same window container transaction as the starting of the intent.
+     * @param forceLaunchNewTask If true, this method will skip the check for a background task
+     *                           matching the intent and launch a new task.
+     */
+    public void startIntent(PendingIntent intent, int userId1, @Nullable Intent fillInIntent,
+            @SplitPosition int position, @Nullable Bundle options,
+            @Nullable WindowContainerToken hideTaskToken, boolean forceLaunchNewTask) {
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN,
                 "startIntent(): intent=%s user=%d fillInIntent=%s position=%d", intent, userId1,
                 fillInIntent, position);
@@ -798,8 +808,9 @@ public class SplitScreenController implements SplitDragPolicy.Starter,
         // To prevent accumulating large number of instances in the background, reuse task
         // in the background. If we don't explicitly reuse, new may be created even if the app
         // isn't multi-instance because WM won't automatically remove/reuse the previous instance
-        final ActivityManager.RecentTaskInfo taskInfo = mRecentTasksOptional
-                .map(recentTasks -> recentTasks.findTaskInBackground(component, userId1,
+        final ActivityManager.RecentTaskInfo taskInfo = forceLaunchNewTask ? null :
+                mRecentTasksOptional
+                        .map(recentTasks -> recentTasks.findTaskInBackground(component, userId1,
                         hideTaskToken))
                 .orElse(null);
         if (taskInfo != null) {

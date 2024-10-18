@@ -26,3 +26,11 @@ flag {
     description: "New feature reduce user-agent for webview"
     bug: "371034303"
 }
+
+flag {
+    name: "file_system_access"
+    is_exported: true
+    namespace: "webview"
+    description: "New APIs required by File System Access"
+    bug: "40101963"
+}

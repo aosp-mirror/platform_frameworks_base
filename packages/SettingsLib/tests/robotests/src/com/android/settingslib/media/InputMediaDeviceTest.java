@@ -44,6 +44,7 @@ public class InputMediaDeviceTest {
     private static final String PRODUCT_NAME_BUILTIN_MIC = "Built-in Mic";
     private static final String PRODUCT_NAME_WIRED_HEADSET = "My Wired Headset";
     private static final String PRODUCT_NAME_USB_HEADSET = "My USB Headset";
+    private static final String PRODUCT_NAME_BT_HEADSET = "My Bluetooth Headset";
 
     @Rule public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
@@ -134,6 +135,21 @@ public class InputMediaDeviceTest {
 
     @Test
     public void getName_returnCorrectName_btHeadset() {
+        InputMediaDevice btMediaDevice =
+                InputMediaDevice.create(
+                        mContext,
+                        String.valueOf(BT_HEADSET_ID),
+                        AudioDeviceInfo.TYPE_BLUETOOTH_SCO,
+                        MAX_VOLUME,
+                        CURRENT_VOLUME,
+                        IS_VOLUME_FIXED,
+                        PRODUCT_NAME_BT_HEADSET);
+        assertThat(btMediaDevice).isNotNull();
+        assertThat(btMediaDevice.getName()).isEqualTo(PRODUCT_NAME_BT_HEADSET);
+    }
+
+    @Test
+    public void getName_returnCorrectName_btHeadset_nullProductName() {
         InputMediaDevice btMediaDevice =
                 InputMediaDevice.create(
                         mContext,

@@ -288,7 +288,7 @@
     <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"OEM अनलॉक करने की अनुमति दें?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"चेतावनी: इस सेटिंग के चालू रहने पर डिवाइस सुरक्षा सुविधाएं इस डिवाइस पर काम नहीं करेंगी."</string>
     <string name="mock_location_app" msgid="6269380172542248304">"मॉक लोकेशन के लिए ऐप्लिकेशन चुनें"</string>
-    <string name="mock_location_app_not_set" msgid="6972032787262831155">"मॉक लोकेशन के लिए ऐप्लिकेशन सेट नहीं है"</string>
+    <string name="mock_location_app_not_set" msgid="6972032787262831155">"मॉक लोकेशन के लिए कोई ऐप्लिकेशन सेट नहीं है"</string>
     <string name="mock_location_app_set" msgid="4706722469342913843">"मॉक लोकेशन के लिए ऐप्लिकेशन: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"नेटवर्किंग"</string>
     <string name="wifi_display_certification" msgid="1805579519992520381">"वायरलेस डिसप्ले सर्टिफ़िकेशन"</string>
@@ -686,9 +686,11 @@
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"चालू है"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"बदली गई सेटिंग को लागू करने के लिए, डिवाइस को रीस्टार्ट करना होगा. अपने डिवाइस को रीस्टार्ट करें या रद्द करें."</string>
     <string name="media_transfer_wired_headphone_name" msgid="8698668536022665254">"तार वाला हेडफ़ोन"</string>
-    <string name="media_transfer_headphone_name" msgid="1131962659136578852">"हेडफ़ोन"</string>
+    <!-- no translation found for media_transfer_headphone_name (1157798825650178478) -->
+    <skip />
     <string name="media_transfer_usb_audio_name" msgid="1789292056757821355">"यूएसबी ऑडियो"</string>
-    <string name="media_transfer_wired_device_mic_name" msgid="7417067197803840965">"माइक्रोफ़ोन जैक"</string>
+    <!-- no translation found for media_transfer_wired_device_mic_name (7115192790725088698) -->
+    <skip />
     <string name="media_transfer_usb_device_mic_name" msgid="7171789543226269822">"यूएसबी माइक्रोफ़ोन"</string>
     <string name="media_transfer_bt_device_mic_name" msgid="1870669402238687618">"ब्लूटूथ माइक्रोफ़ोन"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"चालू है"</string>

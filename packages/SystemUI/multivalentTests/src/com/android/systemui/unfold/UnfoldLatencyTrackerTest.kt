@@ -23,9 +23,13 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.util.LatencyTracker
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.foldedDeviceStateList
+import com.android.systemui.halfFoldedDeviceState
 import com.android.systemui.keyguard.ScreenLifecycle
+import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.unfold.util.FoldableDeviceStates
 import com.android.systemui.unfold.util.FoldableTestUtils
+import com.android.systemui.unfoldedDeviceState
 import com.android.systemui.util.mockito.any
 import java.util.Optional
 import org.junit.Before
@@ -38,6 +42,7 @@ import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.whenever
 
 @RunWith(AndroidJUnit4::class)
 @SmallTest
@@ -62,6 +67,13 @@ class UnfoldLatencyTrackerTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
+        whenever(deviceStateManager.supportedDeviceStates).thenReturn(
+            listOf(
+                Kosmos().foldedDeviceStateList[0],
+                Kosmos().unfoldedDeviceState
+            )
+        )
+
         unfoldLatencyTracker =
             UnfoldLatencyTracker(
                     latencyTracker,
@@ -73,6 +85,7 @@ class UnfoldLatencyTrackerTest : SysuiTestCase() {
                     screenLifecycle
                 )
                 .apply { init() }
+
         deviceStates = FoldableTestUtils.findDeviceStates(context)
 
         verify(deviceStateManager).registerCallback(any(), foldStateListenerCaptor.capture())

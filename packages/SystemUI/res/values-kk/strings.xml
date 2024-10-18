@@ -312,6 +312,10 @@
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"Аудионы бөлісу"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"Аудио беріліп жатыр"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_accessibility" msgid="7604615019302091708">"аудио бөлісу параметрлерін енгізу"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_dialog_message" msgid="4251807313264307426">"Бұл құрылғыдағы музыка мен бейнелер қос құлақаспапта ойнатылады."</string>
+    <string name="quick_settings_bluetooth_audio_sharing_dialog_title" msgid="4406818346036286793">"Аудиоңызды бөлісіңіз"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_dialog_subtitle" msgid="3014906864710059236">"<xliff:g id="AVAILABLE_DEVICE_NAME">%1$s</xliff:g> және <xliff:g id="ACTIVE_DEVICE_NAME">%2$s</xliff:g>"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_dialog_switch_to_button" msgid="7546825655978203773">"<xliff:g id="AVAILABLE_DEVICE_NAME">%1$s</xliff:g> құрылғысына ауысу"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"Батарея деңгейі: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Aудио"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Гарнитура"</string>
@@ -672,10 +676,8 @@
     <string name="stream_notification_unavailable" msgid="4313854556205836435">"Қолжетімді емес, шылдырлату өшірулі."</string>
     <string name="stream_alarm_unavailable" msgid="4059817189292197839">"Мазаламау режимі қосылғандықтан өзгерту мүмкін емес."</string>
     <string name="stream_media_unavailable" msgid="6823020894438959853">"Мазаламау режимі қосылғандықтан өзгерту мүмкін емес."</string>
-    <!-- no translation found for stream_unavailable_by_modes (3674139029490353683) -->
-    <skip />
-    <!-- no translation found for stream_unavailable_by_unknown (6908434629318171588) -->
-    <skip />
+    <string name="stream_unavailable_by_modes" msgid="3674139029490353683">"Қолжетімді емес, себебі <xliff:g id="MODE">%s</xliff:g> режимі қосулы."</string>
+    <string name="stream_unavailable_by_unknown" msgid="6908434629318171588">"Қолжетімді емес"</string>
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. Дыбысын қосу үшін түртіңіз."</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. Діріл режимін орнату үшін түртіңіз. Арнайы мүмкіндік қызметтерінің дыбысы өшуі мүмкін."</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. Дыбысын өшіру үшін түртіңіз. Арнайы мүмкіндік қызметтерінің дыбысы өшуі мүмкін."</string>

@@ -42,7 +42,6 @@ import com.android.systemui.dock.DockManager
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.DisableSceneContainer
 import com.android.systemui.flags.FakeFeatureFlagsClassic
-import com.android.systemui.flags.Flags.LOCKSCREEN_WALLPAPER_DREAM_ENABLED
 import com.android.systemui.flags.Flags.SPLIT_SHADE_SUBPIXEL_OPTIMIZATION
 import com.android.systemui.flags.andSceneContainer
 import com.android.systemui.keyevent.domain.interactor.SysUIKeyEventHandler
@@ -128,8 +127,6 @@ class NotificationShadeWindowViewControllerTest(flags: FlagsParameterization) : 
     private lateinit var lockscreenShadeTransitionController: LockscreenShadeTransitionController
     @Mock private lateinit var phoneStatusBarViewController: PhoneStatusBarViewController
     @Mock private lateinit var pulsingGestureListener: PulsingGestureListener
-    @Mock
-    private lateinit var mLockscreenHostedDreamGestureListener: LockscreenHostedDreamGestureListener
     @Mock private lateinit var notificationInsetsController: NotificationInsetsController
     @Mock private lateinit var mGlanceableHubContainerController: GlanceableHubContainerController
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
@@ -181,7 +178,6 @@ class NotificationShadeWindowViewControllerTest(flags: FlagsParameterization) : 
 
         featureFlagsClassic = FakeFeatureFlagsClassic()
         featureFlagsClassic.set(SPLIT_SHADE_SUBPIXEL_OPTIMIZATION, true)
-        featureFlagsClassic.set(LOCKSCREEN_WALLPAPER_DREAM_ENABLED, false)
         mSetFlagsRule.enableFlags(Flags.FLAG_REVAMPED_BOUNCER_MESSAGES)
 
         testScope = TestScope()
@@ -213,7 +209,6 @@ class NotificationShadeWindowViewControllerTest(flags: FlagsParameterization) : 
                 shadeLogger,
                 dumpManager,
                 pulsingGestureListener,
-                mLockscreenHostedDreamGestureListener,
                 keyguardTransitionInteractor,
                 mGlanceableHubContainerController,
                 notificationLaunchAnimationInteractor,

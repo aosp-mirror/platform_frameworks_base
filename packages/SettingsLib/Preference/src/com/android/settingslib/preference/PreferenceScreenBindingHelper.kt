@@ -20,8 +20,10 @@ import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import androidx.preference.Preference
+import androidx.preference.PreferenceDataStore
 import androidx.preference.PreferenceGroup
 import androidx.preference.PreferenceScreen
+import com.android.settingslib.datastore.KeyValueStore
 import com.android.settingslib.datastore.KeyedDataObservable
 import com.android.settingslib.datastore.KeyedObservable
 import com.android.settingslib.datastore.KeyedObserver
@@ -181,15 +183,22 @@ class PreferenceScreenBindingHelper(
         private fun PreferenceGroup.bindRecursively(
             preferenceBindingFactory: PreferenceBindingFactory,
             preferences: Map<String, PreferenceMetadata>,
+            storages: MutableMap<KeyValueStore, PreferenceDataStore> = mutableMapOf(),
         ) {
             preferenceBindingFactory.bind(this, preferences[key])
             val count = preferenceCount
             for (index in 0 until count) {
                 val preference = getPreference(index)
                 if (preference is PreferenceGroup) {
-                    preference.bindRecursively(preferenceBindingFactory, preferences)
+                    preference.bindRecursively(preferenceBindingFactory, preferences, storages)
                 } else {
-                    preferenceBindingFactory.bind(preference, preferences[preference.key])
+                    preferences[preference.key]?.let {
+                        preferenceBindingFactory.getPreferenceBinding(it)?.bind(preference, it)
+                        (it as? PersistentPreference<*>)?.storage(context)?.let { storage ->
+                            preference.preferenceDataStore =
+                                storages.getOrPut(storage) { PreferenceDataStoreAdapter(storage) }
+                        }
+                    }
                 }
             }
         }

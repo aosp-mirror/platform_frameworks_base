@@ -1489,10 +1489,40 @@ flag {
 }
 
 flag {
+  name: "ignore_touches_next_to_notification_shelf"
+  namespace: "systemui"
+  description: "The shelf can vertically overlap the unlock icon. Ignore touches if so."
+  bug: "358424256"
+   metadata {
+       purpose: PURPOSE_BUGFIX
+   }
+}
+
+flag {
    name: "media_projection_request_attribution_fix"
    namespace: "systemui"
    description: "Ensure MediaProjection consent requests are properly attributed"
    bug: "373581993"
+   metadata {
+       purpose: PURPOSE_BUGFIX
+   }
+}
+
+flag {
+  name: "secondary_user_widget_host"
+  namespace: "systemui"
+  description: "Host communal widgets in the current secondary user on HSUM."
+  bug: "373874416"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+   name: "only_show_media_stream_slider_in_single_volume_mode"
+   namespace: "systemui"
+   description: "When the device is in single volume mode, only show media stream slider and hide all other stream (e.g. call, notification, alarm, etc) sliders in volume panel"
+   bug: "373729625"
    metadata {
        purpose: PURPOSE_BUGFIX
    }

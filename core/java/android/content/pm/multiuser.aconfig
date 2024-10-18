@@ -211,6 +211,18 @@ flag {
 }
 
 flag {
+    name: "property_invalidated_cache_bypass_mismatched_uids"
+    namespace: "multiuser"
+    description: "Bypass the cache when the process UID does not match the binder UID."
+    bug: "373752556"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+  }
+  is_fixed_read_only: true
+}
+
+
+flag {
     name: "cache_profile_parent_read_only"
     namespace: "multiuser"
     description: "Cache getProfileParent to avoid unnecessary binder calls"

@@ -34,8 +34,8 @@ val Kosmos.multiDisplayStatusBarInitializerStore by
     Kosmos.Fixture {
         MultiDisplayStatusBarInitializerStore(
             applicationCoroutineScope,
-            fakeStatusBarInitializerFactory,
             displayRepository,
+            fakeStatusBarInitializerFactory,
             fakeStatusBarWindowControllerStore,
         )
     }

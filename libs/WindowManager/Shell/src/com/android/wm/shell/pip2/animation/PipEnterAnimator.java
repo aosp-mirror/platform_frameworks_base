@@ -110,8 +110,7 @@ public class PipEnterAnimator extends ValueAnimator
             mAnimationStartCallback.run();
         }
         if (mStartTransaction != null) {
-            onEnterAnimationUpdate(mInitScale, mInitPos, mInitCrop,
-                    0f /* fraction */, mStartTransaction);
+            onEnterAnimationUpdate(0f /* fraction */, mStartTransaction);
             mStartTransaction.apply();
         }
     }
@@ -119,8 +118,7 @@ public class PipEnterAnimator extends ValueAnimator
     @Override
     public void onAnimationEnd(@NonNull Animator animation) {
         if (mFinishTransaction != null) {
-            onEnterAnimationUpdate(mInitScale, mInitPos, mInitCrop,
-                    1f /* fraction */, mFinishTransaction);
+            onEnterAnimationUpdate(1f /* fraction */, mFinishTransaction);
         }
         if (mAnimationEndCallback != null) {
             mAnimationEndCallback.run();
@@ -131,8 +129,18 @@ public class PipEnterAnimator extends ValueAnimator
     public void onAnimationUpdate(@NonNull ValueAnimator animation) {
         final SurfaceControl.Transaction tx = mSurfaceControlTransactionFactory.getTransaction();
         final float fraction = getAnimatedFraction();
-        onEnterAnimationUpdate(mInitScale, mInitPos, mInitCrop, fraction, tx);
+        onEnterAnimationUpdate(fraction, tx);
         tx.apply();
+    }
+
+    /**
+     * Updates the transaction to reflect the state of PiP leash at a certain fraction during enter.
+     *
+     * @param fraction the fraction of the animator going from 0f to 1f.
+     * @param tx the transaction to modify the transform of.
+     */
+    public void onEnterAnimationUpdate(float fraction, SurfaceControl.Transaction tx) {
+        onEnterAnimationUpdate(mInitScale, mInitPos, mInitCrop, fraction, tx);
     }
 
     private void onEnterAnimationUpdate(PointF initScale, PointF initPos, Rect initCrop,
