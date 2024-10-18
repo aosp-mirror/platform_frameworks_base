@@ -17,6 +17,7 @@
 #include "Color.h"
 
 #include <Properties.h>
+#include <aidl/android/hardware/graphics/common/Dataspace.h>
 #include <android/hardware_buffer.h>
 #include <android/native_window.h>
 #include <ui/ColorSpace.h>
@@ -24,6 +25,8 @@
 
 #include <algorithm>
 #include <cmath>
+
+#include "SkColorSpace.h"
 
 namespace android {
 namespace uirenderer {
@@ -215,9 +218,13 @@ android_dataspace ColorSpaceToADataSpace(SkColorSpace* colorSpace, SkColorType c
         return HAL_DATASPACE_ADOBE_RGB;
     }
 
-    if (nearlyEqual(fn, SkNamedTransferFn::kRec2020) &&
-        nearlyEqual(gamut, SkNamedGamut::kRec2020)) {
-        return HAL_DATASPACE_BT2020;
+    if (nearlyEqual(gamut, SkNamedGamut::kRec2020)) {
+        if (nearlyEqual(fn, SkNamedTransferFn::kRec2020)) {
+            return HAL_DATASPACE_BT2020;
+        } else if (nearlyEqual(fn, SkNamedTransferFn::kSRGB)) {
+            return static_cast<android_dataspace>(
+                    ::aidl::android::hardware::graphics::common::Dataspace::DISPLAY_BT2020);
+        }
     }
 
     if (nearlyEqual(fn, k2Dot6) && nearlyEqual(gamut, kDCIP3)) {
