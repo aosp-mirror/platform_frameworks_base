@@ -27,14 +27,6 @@ flag {
 
 flag {
     namespace: "input_native"
-    name: "pointer_coords_is_resampled_api"
-    is_exported: true
-    description: "Makes MotionEvent.PointerCoords#isResampled() a public API"
-    bug: "298197511"
-}
-
-flag {
-    namespace: "input_native"
     name: "emoji_and_screenshot_keycodes_available"
     is_exported: true
     description: "Add new KeyEvent keycodes for opening Emoji Picker and Taking Screenshots"
