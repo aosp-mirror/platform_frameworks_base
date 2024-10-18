@@ -597,9 +597,10 @@ public abstract class WMShellModule {
             TransactionPool transactionPool,
             Transitions transitions,
             @ShellMainThread ShellExecutor executor,
+            @ShellMainThread Handler handler,
             ShellInit shellInit) {
         return new UnfoldTransitionHandler(shellInit, progressProvider.get(), animator,
-                unfoldAnimator, transactionPool, executor, transitions);
+                unfoldAnimator, transactionPool, executor, handler, transitions);
     }
 
     @WMSingleton
