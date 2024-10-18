@@ -29,6 +29,8 @@ import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
 
+import dalvik.annotation.optimization.NeverCompile;
+
 import java.io.FileDescriptor;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -1331,6 +1333,7 @@ public final class MessageQueue {
                 mMatchAllFutureMessages, true);
     }
 
+    @NeverCompile
     private void printPriorityQueueNodes() {
         Iterator<MessageNode> iterator = mPriorityQueue.iterator();
 
@@ -1342,6 +1345,7 @@ public final class MessageQueue {
         }
     }
 
+    @NeverCompile
     private int dumpPriorityQueue(ConcurrentSkipListSet<MessageNode> queue, Printer pw,
             String prefix, Handler h, int n) {
         int count = 0;
@@ -1357,6 +1361,7 @@ public final class MessageQueue {
         return count;
     }
 
+    @NeverCompile
     void dump(Printer pw, String prefix, Handler h) {
         long now = SystemClock.uptimeMillis();
         int n = 0;
@@ -1387,6 +1392,7 @@ public final class MessageQueue {
                 + ", quitting=" + (boolean) sQuitting.getVolatile(this) + ")");
     }
 
+    @NeverCompile
     private int dumpPriorityQueue(ConcurrentSkipListSet<MessageNode> queue,
             ProtoOutputStream proto) {
         int count = 0;
@@ -1399,6 +1405,7 @@ public final class MessageQueue {
         return count;
     }
 
+    @NeverCompile
     void dumpDebug(ProtoOutputStream proto, long fieldId) {
         final long messageQueueToken = proto.start(fieldId);
 
