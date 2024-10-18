@@ -244,7 +244,7 @@ constructor(
 
     /** Whether the keyguard is going away. */
     @Deprecated("Use KeyguardTransitionInteractor + KeyguardState.GONE")
-    val isKeyguardGoingAway: Flow<Boolean> = repository.isKeyguardGoingAway
+    val isKeyguardGoingAway: StateFlow<Boolean> = repository.isKeyguardGoingAway.asStateFlow()
 
     /** Keyguard can be clipped at the top as the shade is dragged */
     val topClippingBounds: Flow<Int?> by lazy {
@@ -547,6 +547,10 @@ constructor(
 
     fun setShortcutAbsoluteTop(top: Float) {
         repository.setShortcutAbsoluteTop(top)
+    }
+
+    fun setIsKeyguardGoingAway(isGoingAway: Boolean) {
+        repository.isKeyguardGoingAway.value = isGoingAway
     }
 
     companion object {

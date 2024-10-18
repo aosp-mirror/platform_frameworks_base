@@ -114,7 +114,7 @@ interface KeyguardRepository {
             "away' is isInTransitionToState(GONE), but consider using more specific flows " +
             "whenever possible."
     )
-    val isKeyguardGoingAway: Flow<Boolean>
+    val isKeyguardGoingAway: MutableStateFlow<Boolean>
 
     /**
      * Whether the keyguard is enabled, per [KeyguardService]. If the keyguard is not enabled, the
@@ -654,10 +654,6 @@ constructor(
 
                 override fun onUnlockedChanged() {
                     isKeyguardDismissible.value = keyguardStateController.isUnlocked
-                }
-
-                override fun onKeyguardGoingAwayChanged() {
-                    isKeyguardGoingAway.value = keyguardStateController.isKeyguardGoingAway
                 }
             }
 

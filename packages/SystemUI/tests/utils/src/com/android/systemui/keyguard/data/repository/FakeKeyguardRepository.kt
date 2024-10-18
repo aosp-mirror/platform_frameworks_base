@@ -102,8 +102,7 @@ class FakeKeyguardRepository @Inject constructor() : KeyguardRepository {
 
     private val _isUdfpsSupported = MutableStateFlow(false)
 
-    private val _isKeyguardGoingAway = MutableStateFlow(false)
-    override val isKeyguardGoingAway: Flow<Boolean> = _isKeyguardGoingAway
+    override val isKeyguardGoingAway = MutableStateFlow(false)
 
     private val _biometricUnlockState =
         MutableStateFlow(BiometricUnlockModel(BiometricUnlockMode.NONE, null))
@@ -169,7 +168,7 @@ class FakeKeyguardRepository @Inject constructor() : KeyguardRepository {
     }
 
     fun setKeyguardGoingAway(isGoingAway: Boolean) {
-        _isKeyguardGoingAway.value = isGoingAway
+        isKeyguardGoingAway.value = isGoingAway
     }
 
     fun setKeyguardOccluded(isOccluded: Boolean) {
