@@ -43,11 +43,7 @@ fun HomeGestureTutorialScreen(onDoneButtonClicked: () -> Unit, onBack: () -> Uni
                     titleSuccessResId = R.string.touchpad_home_gesture_success_title,
                     bodySuccessResId = R.string.touchpad_home_gesture_success_body,
                 ),
-            animations =
-                TutorialScreenConfig.Animations(
-                    educationResId = R.raw.trackpad_home_edu,
-                    successResId = R.raw.trackpad_home_success,
-                ),
+            animations = TutorialScreenConfig.Animations(educationResId = R.raw.trackpad_home_edu),
         )
     val recognizer = rememberHomeGestureRecognizer(LocalContext.current.resources)
     val gestureUiState: Flow<GestureUiState> =

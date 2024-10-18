@@ -77,7 +77,9 @@ fun TutorialAnimation(
                         config.colors.animationColors,
                     )
                 Finished::class ->
-                    SuccessAnimation(config.animations.successResId, config.colors.animationColors)
+                    // Below cast is safe as Finished state is the last state and afterwards we can
+                    // only leave the screen so this composable would be no longer displayed
+                    SuccessAnimation(actionState as Finished, config.colors.animationColors)
             }
         }
     }
@@ -100,10 +102,11 @@ private fun EducationAnimation(
 
 @Composable
 private fun SuccessAnimation(
-    @RawRes successAnimationId: Int,
+    finishedState: Finished,
     animationProperties: LottieDynamicProperties,
 ) {
-    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(successAnimationId))
+    val composition by
+        rememberLottieComposition(LottieCompositionSpec.RawRes(finishedState.successAnimation))
     val progress by animateLottieCompositionAsState(composition, iterations = 1)
     LottieAnimation(
         composition = composition,
