@@ -122,3 +122,6 @@ per-file StatsBootstrapAtom.aidl = file:/services/core/java/com/android/server/s
 per-file StatsBootstrapAtomValue.aidl = file:/services/core/java/com/android/server/stats/OWNERS
 per-file StatsBootstrapAtomService.java = file:/services/core/java/com/android/server/stats/OWNERS
 per-file StatsServiceManager.java = file:/services/core/java/com/android/server/stats/OWNERS
+
+# Dropbox
+per-file DropBoxManager* = mwachens@google.com
