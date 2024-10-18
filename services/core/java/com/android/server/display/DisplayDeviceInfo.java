@@ -26,6 +26,7 @@ import android.view.DisplayAddress;
 import android.view.DisplayCutout;
 import android.view.DisplayEventReceiver;
 import android.view.DisplayShape;
+import android.view.FrameRateCategoryRate;
 import android.view.RoundedCorners;
 import android.view.Surface;
 
@@ -300,6 +301,11 @@ final class DisplayDeviceInfo {
     public boolean hasArrSupport;
 
     /**
+     * Represents frame rate for the FrameRateCategory Normal and High.
+     * @see android.view.Display#getSuggestedFrameRate(int) for more details.
+     */
+    public FrameRateCategoryRate frameRateCategoryRate;
+    /**
      * The default mode of the display.
      */
     public int defaultModeId;
@@ -548,7 +554,8 @@ final class DisplayDeviceInfo {
                 || !Objects.equals(roundedCorners, other.roundedCorners)
                 || installOrientation != other.installOrientation
                 || !Objects.equals(displayShape, other.displayShape)
-                || hasArrSupport != other.hasArrSupport) {
+                || hasArrSupport != other.hasArrSupport
+                || !Objects.equals(frameRateCategoryRate, other.frameRateCategoryRate)) {
             diff |= DIFF_OTHER;
         }
         return diff;
@@ -567,6 +574,7 @@ final class DisplayDeviceInfo {
         modeId = other.modeId;
         renderFrameRate = other.renderFrameRate;
         hasArrSupport = other.hasArrSupport;
+        frameRateCategoryRate = other.frameRateCategoryRate;
         defaultModeId = other.defaultModeId;
         userPreferredModeId = other.userPreferredModeId;
         supportedModes = other.supportedModes;
@@ -612,6 +620,7 @@ final class DisplayDeviceInfo {
         sb.append(", modeId ").append(modeId);
         sb.append(", renderFrameRate ").append(renderFrameRate);
         sb.append(", hasArrSupport ").append(hasArrSupport);
+        sb.append(", frameRateCategoryRate ").append(frameRateCategoryRate);
         sb.append(", defaultModeId ").append(defaultModeId);
         sb.append(", userPreferredModeId ").append(userPreferredModeId);
         sb.append(", supportedModes ").append(Arrays.toString(supportedModes));
