@@ -116,6 +116,7 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
@@ -901,7 +902,19 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     private void registerBroadcastReceivers() {
         // package changes
         mPackageMonitor = new ManagerPackageMonitor(this);
-        mPackageMonitor.register(mContext, null,  UserHandle.ALL, true);
+        final Looper packageMonitorLooper;
+        if (Flags.packageMonitorDedicatedThread()) {
+            // Use a dedicated thread because the default BackgroundThread used by PackageMonitor
+            // is shared by other components and can get busy, causing a delay and eventual ANR when
+            // responding to broadcasts sent to this PackageMonitor.
+            HandlerThread packageMonitorThread = new HandlerThread(LOG_TAG + " PackageMonitor",
+                    Process.THREAD_PRIORITY_BACKGROUND);
+            packageMonitorThread.start();
+            packageMonitorLooper = packageMonitorThread.getLooper();
+        } else {
+            packageMonitorLooper = null;
+        }
+        mPackageMonitor.register(mContext, packageMonitorLooper,  UserHandle.ALL, true);
 
         // user change and unlock
         IntentFilter intentFilter = new IntentFilter();
