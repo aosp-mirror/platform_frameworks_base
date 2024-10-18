@@ -312,6 +312,10 @@
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"Споделувај аудио"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"Се споделува аудио"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_accessibility" msgid="7604615019302091708">"внесете ги поставките за „Споделување аудио“"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_dialog_message" msgid="4251807313264307426">"Музиката и видеата на уредов ќе се пуштаaт на двата пара слушалки"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_dialog_title" msgid="4406818346036286793">"Споделете го аудиото"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_dialog_subtitle" msgid="3014906864710059236">"<xliff:g id="AVAILABLE_DEVICE_NAME">%1$s</xliff:g> и <xliff:g id="ACTIVE_DEVICE_NAME">%2$s</xliff:g>"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_dialog_switch_to_button" msgid="7546825655978203773">"Префрли на <xliff:g id="AVAILABLE_DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"Батерија: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Аудио"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Слушалки"</string>
@@ -440,8 +444,7 @@
     <string name="zen_mode_on" msgid="9085304934016242591">"Вклучено"</string>
     <string name="zen_mode_on_with_details" msgid="7416143430557895497">"Вклучено: <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"Исклучено"</string>
-    <!-- no translation found for zen_mode_set_up (8231201163894922821) -->
-    <skip />
+    <string name="zen_mode_set_up" msgid="8231201163894922821">"Не е поставено"</string>
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"Управувајте во поставките"</string>
     <string name="zen_mode_active_modes" msgid="1625850411578488856">"{count,plural, =0{Нема активни режими}=1{Активен е {mode}}one{Активни се # режим}other{Активни се # режими}}"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Нема да ве вознемируваат звуци и вибрации, освен од аларми, потсетници, настани и повикувачи што ќе ги наведете. Сѐ уште ќе слушате сѐ што ќе изберете да пуштите, како музика, видеа и игри."</string>
@@ -673,10 +676,8 @@
     <string name="stream_notification_unavailable" msgid="4313854556205836435">"Недостапно бидејќи звукот е исклучен"</string>
     <string name="stream_alarm_unavailable" msgid="4059817189292197839">"Недостапно бидејќи е вклучено „Не вознемирувај“"</string>
     <string name="stream_media_unavailable" msgid="6823020894438959853">"Недостапно бидејќи е вклучено „Не вознемирувај“"</string>
-    <!-- no translation found for stream_unavailable_by_modes (3674139029490353683) -->
-    <skip />
-    <!-- no translation found for stream_unavailable_by_unknown (6908434629318171588) -->
-    <skip />
+    <string name="stream_unavailable_by_modes" msgid="3674139029490353683">"Недостапно бидејќи има вклучено <xliff:g id="MODE">%s</xliff:g>"</string>
+    <string name="stream_unavailable_by_unknown" msgid="6908434629318171588">"Недостапно"</string>
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. Допрете за да вклучите звук."</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. Допрете за да поставите на вибрации. Можеби ќе се исклучи звукот на услугите за достапност."</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. Допрете за да исклучите звук. Можеби ќе се исклучи звукот на услугите за достапност."</string>
@@ -1410,38 +1411,26 @@
     <string name="launch_touchpad_tutorial_notification_content" msgid="7931085031240753226">"Научете движења за допирната подлога"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_title" msgid="1940023776496198762">"Движете се со користење на тастатурата и допирната подлога"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"Научете движења за допирната подлога, кратенки од тастатурата и друго"</string>
-    <!-- no translation found for touchpad_tutorial_back_gesture_button (3104716365403620315) -->
-    <skip />
-    <!-- no translation found for touchpad_tutorial_home_gesture_button (8023973153559885624) -->
-    <skip />
+    <string name="touchpad_tutorial_back_gesture_button" msgid="3104716365403620315">"Врати се назад"</string>
+    <string name="touchpad_tutorial_home_gesture_button" msgid="8023973153559885624">"Оди на почетниот екран"</string>
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"Прегледајте ги неодамнешните апликации"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"Готово"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Назад"</string>
-    <!-- no translation found for touchpad_back_gesture_guidance (5352221087725906542) -->
-    <skip />
-    <!-- no translation found for touchpad_back_gesture_success_title (7370719098633023496) -->
-    <skip />
+    <string name="touchpad_back_gesture_guidance" msgid="5352221087725906542">"Повлечете налево или надесно со три прста на допирната подлога"</string>
+    <string name="touchpad_back_gesture_success_title" msgid="7370719098633023496">"Одлично!"</string>
     <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"Го научивте движењето за враќање назад."</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"Одете на почетниот екран"</string>
-    <!-- no translation found for touchpad_home_gesture_guidance (4178219118381915899) -->
-    <skip />
-    <!-- no translation found for touchpad_home_gesture_success_title (3648264553645798470) -->
-    <skip />
-    <!-- no translation found for touchpad_home_gesture_success_body (2590690589194027059) -->
-    <skip />
+    <string name="touchpad_home_gesture_guidance" msgid="4178219118381915899">"Повлечете нагоре со три прсти на допирната подлога"</string>
+    <string name="touchpad_home_gesture_success_title" msgid="3648264553645798470">"Одлично!"</string>
+    <string name="touchpad_home_gesture_success_body" msgid="2590690589194027059">"Го завршивте движењето за враќање на почетниот екран"</string>
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"Прегледајте ги неодамнешните апликации"</string>
-    <!-- no translation found for touchpad_recent_apps_gesture_guidance (6304446013842271822) -->
-    <skip />
+    <string name="touchpad_recent_apps_gesture_guidance" msgid="6304446013842271822">"Повлечете нагоре и задржете со три прста на допирната подлога"</string>
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"Одлично!"</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"Го завршивте движењето за прегледување на неодамнешните апликации."</string>
-    <!-- no translation found for tutorial_action_key_title (8172535792469008169) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_guidance (5040613427202799294) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_success_title (2371827347071979571) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_success_body (1688986269491357832) -->
-    <skip />
+    <string name="tutorial_action_key_title" msgid="8172535792469008169">"Прегледајте ги сите апликации"</string>
+    <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"Притиснете го копчето за дејство на тастатурата"</string>
+    <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"Браво!"</string>
+    <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"Го завршивте движењето за прегледување на сите апликации"</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Осветлување на тастатура"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Ниво %1$d од %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Контроли за домот"</string>

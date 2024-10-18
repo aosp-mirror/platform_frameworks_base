@@ -59,6 +59,11 @@ open class DesktopModeAppHelper(private val innerHelper: IStandardAppHelper) :
         BOTTOM
     }
 
+    enum class AppProperty {
+        STANDARD,
+        NON_RESIZABLE
+    }
+
     /** Wait for an app moved to desktop to finish its transition. */
     private fun waitForAppToMoveToDesktop(wmHelper: WindowManagerStateHelper) {
         wmHelper

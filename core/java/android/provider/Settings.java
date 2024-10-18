@@ -12845,6 +12845,12 @@ public final class Settings {
          */
         @Readable
         public static final String CONTEXTUAL_SEARCH_PACKAGE = "contextual_search_package";
+
+        /**
+         * Inetger property which determines whether advanced protection is on or not.
+         * @hide
+         */
+        public static final String ADVANCED_PROTECTION_MODE = "advanced_protection_mode";
     }
 
     /**

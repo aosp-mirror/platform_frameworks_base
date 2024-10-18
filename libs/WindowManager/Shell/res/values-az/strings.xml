@@ -97,9 +97,9 @@
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Kamera problemi var?\nBərpa etmək üçün toxunun"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Düzəltməmisiniz?\nGeri qaytarmaq üçün toxunun"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Kamera problemi yoxdur? Qapatmaq üçün toxunun."</string>
-    <string name="windowing_app_handle_education_tooltip" msgid="6398482412956375783">"Tətbiq menyusunu açmaq üçün toxunun"</string>
-    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="6285279585554484957">"Bir neçə tətbiqi birlikdə göstərmək üçün toxunun"</string>
-    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="6685429075790085337">"Tətbiq menyusundan tam ekrana qayıdın"</string>
+    <string name="windowing_app_handle_education_tooltip" msgid="2929643449849791854">"Tətbiq menyusunu burada tapa bilərsiniz"</string>
+    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="2523468503353474095">"Bir neçə tətbiqi birlikdə açmaq üçün masaüstü görünüşə daxil olun"</string>
+    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="5225660258192054132">"İstənilən vaxt tətbiq menyusundan tam ekrana qayıdın"</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"Ardını görün və edin"</string>
     <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"Bölünmüş ekran üçün başqa tətbiq sürüşdürün"</string>
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Tətbiqin yerini dəyişmək üçün kənarına iki dəfə toxunun"</string>

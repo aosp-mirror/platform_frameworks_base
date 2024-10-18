@@ -25,7 +25,6 @@ import static org.mockito.Mockito.mock;
 import android.content.Context;
 import android.os.Process;
 import android.platform.test.annotations.DisableFlags;
-import android.platform.test.annotations.DisabledOnRavenwood;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.platform.test.ravenwood.RavenwoodConfig;
 import android.platform.test.ravenwood.RavenwoodConfig.Config;
@@ -76,7 +75,6 @@ public class WakelockPowerStatsCollectorTest {
 
     @Test
     @DisableFlags(Flags.FLAG_FRAMEWORK_WAKELOCK_INFO)
-    @DisabledOnRavenwood(reason = "b/372292543 temporary disable")
     public void collectStats() {
         PowerStatsCollector powerStatsCollector = mBatteryStats.getPowerStatsCollector(
                 POWER_COMPONENT_WAKELOCK);

@@ -81,16 +81,16 @@ private class SwipeToSceneRootNode(
     draggableHandler: DraggableHandlerImpl,
     swipeDetector: SwipeDetector,
 ) : DelegatingNode() {
-    private var delegate = delegate(SwipeToSceneNode(draggableHandler, swipeDetector))
+    private var delegateNode = delegate(SwipeToSceneNode(draggableHandler, swipeDetector))
 
     fun update(draggableHandler: DraggableHandlerImpl, swipeDetector: SwipeDetector) {
-        if (draggableHandler == delegate.draggableHandler) {
+        if (draggableHandler == delegateNode.draggableHandler) {
             // Simple update, just update the swipe detector directly and keep the node.
-            delegate.swipeDetector = swipeDetector
+            delegateNode.swipeDetector = swipeDetector
         } else {
             // The draggableHandler changed, force recreate the underlying SwipeToSceneNode.
-            undelegate(delegate)
-            delegate = delegate(SwipeToSceneNode(draggableHandler, swipeDetector))
+            undelegate(delegateNode)
+            delegateNode = delegate(SwipeToSceneNode(draggableHandler, swipeDetector))
         }
     }
 }

@@ -97,9 +97,9 @@
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"කැමරා ගැටලුද?\nයළි සවි කිරීමට තට්ටු කරන්න"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"එය විසඳුවේ නැතිද?\nප්‍රතිවර්තනය කිරීමට තට්ටු කරන්න"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"කැමරා ගැටලු නොමැතිද? ඉවත දැමීමට තට්ටු කරන්න"</string>
-    <string name="windowing_app_handle_education_tooltip" msgid="6398482412956375783">"යෙදුම් මෙනුව විවෘත කිරීමට තට්ටු කරන්න"</string>
-    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="6285279585554484957">"යෙදුම් කිහිපයක් එකට පෙන්වීමට තට්ටු කරන්න"</string>
-    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="6685429075790085337">"යෙදුම් මෙනුවෙන් පූර්ණ තිරය වෙත ආපසු යන්න"</string>
+    <string name="windowing_app_handle_education_tooltip" msgid="2929643449849791854">"යෙදුම් මෙනුව මෙතැනින් සොයා ගත හැක"</string>
+    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="2523468503353474095">"යෙදුම් කිහිපයක් එකට විවෘත කිරීමට ඩෙස්ක්ටොප් දසුනට ඇතුළු වන්න"</string>
+    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="5225660258192054132">"යෙදුම් මෙනුවෙන් ඕනෑම වේලාවක පූර්ණ තිරය වෙත ආපසු යන්න"</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"බලන්න සහ තවත් දේ කරන්න"</string>
     <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"බෙදුම් තිරය සඳහා වෙනත් යෙදුමකට අදින්න"</string>
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"යෙදුමක් නැවත ස්ථානගත කිරීමට පිටතින් දෙවරක් තට්ටු කරන්න"</string>

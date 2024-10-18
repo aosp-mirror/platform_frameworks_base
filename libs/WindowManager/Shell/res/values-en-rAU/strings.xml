@@ -97,9 +97,9 @@
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Camera issues?\nTap to refit"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Didn’t fix it?\nTap to revert"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"No camera issues? Tap to dismiss."</string>
-    <string name="windowing_app_handle_education_tooltip" msgid="6398482412956375783">"Tap to open the app menu"</string>
-    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="6285279585554484957">"Tap to show multiple apps together"</string>
-    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="6685429075790085337">"Return to fullscreen from the app menu"</string>
+    <string name="windowing_app_handle_education_tooltip" msgid="2929643449849791854">"The app menu can be found here"</string>
+    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="2523468503353474095">"Enter desktop view to open multiple apps together"</string>
+    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="5225660258192054132">"Return to full screen at any time from the app menu"</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"See and do more"</string>
     <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"Drag in another app for split screen"</string>
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Double-tap outside an app to reposition it"</string>

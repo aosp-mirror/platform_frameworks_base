@@ -23,6 +23,7 @@ import android.os.IBinder
 import android.view.SurfaceControl
 import android.view.WindowManager.TRANSIT_CHANGE
 import android.view.animation.DecelerateInterpolator
+import android.window.DesktopModeFlags.ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS
 import android.window.TransitionInfo
 import android.window.TransitionRequestInfo
 import android.window.WindowContainerTransaction
@@ -102,10 +103,8 @@ class DesktopFullImmersiveTransitionHandler(
             return
         }
 
-        val displayLayout = displayController.getDisplayLayout(taskInfo.displayId) ?: return
-        val destinationBounds = calculateMaximizeBounds(displayLayout, taskInfo)
         val wct = WindowContainerTransaction().apply {
-            setBounds(taskInfo.token, destinationBounds)
+            setBounds(taskInfo.token, getExitDestinationBounds(taskInfo))
         }
         logV("Moving task ${taskInfo.taskId} out of immersive mode")
         val transition = transitions.startTransition(TRANSIT_CHANGE, wct, /* handler= */ this)
@@ -145,11 +144,10 @@ class DesktopFullImmersiveTransitionHandler(
         displayId: Int
     ): ((IBinder) -> Unit)? {
         if (!Flags.enableFullyImmersiveInDesktop()) return null
-        val displayLayout = displayController.getDisplayLayout(displayId) ?: return null
         val immersiveTask = desktopRepository.getTaskInFullImmersiveState(displayId) ?: return null
         val taskInfo = shellTaskOrganizer.getRunningTaskInfo(immersiveTask) ?: return null
         logV("Appending immersive exit for task: $immersiveTask in display: $displayId")
-        wct.setBounds(taskInfo.token, calculateMaximizeBounds(displayLayout, taskInfo))
+        wct.setBounds(taskInfo.token, getExitDestinationBounds(taskInfo))
         return { transition -> addPendingImmersiveExit(immersiveTask, displayId, transition) }
     }
 
@@ -168,16 +166,14 @@ class DesktopFullImmersiveTransitionHandler(
         if (desktopRepository.isTaskInFullImmersiveState(taskInfo.taskId)) {
             // A full immersive task is being minimized, make sure the immersive state is broken
             // (i.e. resize back to max bounds).
-            displayController.getDisplayLayout(taskInfo.displayId)?.let { displayLayout ->
-                wct.setBounds(taskInfo.token, calculateMaximizeBounds(displayLayout, taskInfo))
-                logV("Appending immersive exit for task: ${taskInfo.taskId}")
-                return { transition ->
-                    addPendingImmersiveExit(
-                        taskId = taskInfo.taskId,
-                        displayId = taskInfo.displayId,
-                        transition = transition
-                    )
-                }
+            wct.setBounds(taskInfo.token, getExitDestinationBounds(taskInfo))
+            logV("Appending immersive exit for task: ${taskInfo.taskId}")
+            return { transition ->
+                addPendingImmersiveExit(
+                    taskId = taskInfo.taskId,
+                    displayId = taskInfo.displayId,
+                    transition = transition
+                )
             }
         }
         return null
@@ -302,14 +298,19 @@ class DesktopFullImmersiveTransitionHandler(
                         taskId = pendingExit.taskId,
                         immersive = false
                     )
+                    if (Flags.enableRestoreToPreviousSizeFromDesktopImmersive()) {
+                        desktopRepository.removeBoundsBeforeFullImmersive(pendingExit.taskId)
+                    }
                 }
             }
             return
         }
 
         // Check if this is a direct immersive enter/exit transition.
-        val state = this.state ?: return
-        if (transition == state.transition) {
+        if (transition == state?.transition) {
+            val state = requireState()
+            val startBounds = info.changes.first { c -> c.taskInfo?.taskId == state.taskId }
+                .startAbsBounds
             logV("Direct move for task ${state.taskId} in ${state.direction} direction verified")
             when (state.direction) {
                 Direction.ENTER -> {
@@ -318,6 +319,9 @@ class DesktopFullImmersiveTransitionHandler(
                         taskId = state.taskId,
                         immersive = true
                     )
+                    if (Flags.enableRestoreToPreviousSizeFromDesktopImmersive()) {
+                        desktopRepository.saveBoundsBeforeFullImmersive(state.taskId, startBounds)
+                    }
                 }
                 Direction.EXIT -> {
                     desktopRepository.setTaskInFullImmersiveState(
@@ -325,13 +329,46 @@ class DesktopFullImmersiveTransitionHandler(
                         taskId = state.taskId,
                         immersive = false
                     )
+                    if (Flags.enableRestoreToPreviousSizeFromDesktopImmersive()) {
+                        desktopRepository.removeBoundsBeforeFullImmersive(state.taskId)
+                    }
                 }
             }
+            return
         }
+
+        // Check if this is an untracked exit transition, like display rotation.
+        info.changes
+            .filter { c -> c.taskInfo != null }
+            .filter { c -> desktopRepository.isTaskInFullImmersiveState(c.taskInfo!!.taskId) }
+            .filter { c -> c.startRotation != c.endRotation }
+            .forEach { c ->
+                logV("Detected immersive exit due to rotation for task: ${c.taskInfo!!.taskId}")
+                desktopRepository.setTaskInFullImmersiveState(
+                    displayId = c.taskInfo!!.displayId,
+                    taskId = c.taskInfo!!.taskId,
+                    immersive = false
+                )
+            }
     }
 
     private fun clearState() {
         state = null
+    }
+
+    private fun getExitDestinationBounds(taskInfo: RunningTaskInfo): Rect {
+        val displayLayout = displayController.getDisplayLayout(taskInfo.displayId)
+            ?: error("Expected non-null display layout for displayId: ${taskInfo.displayId}")
+        return if (Flags.enableRestoreToPreviousSizeFromDesktopImmersive()) {
+            desktopRepository.removeBoundsBeforeFullImmersive(taskInfo.taskId)
+                ?: if (ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS.isTrue()) {
+                    calculateInitialBounds(displayLayout, taskInfo)
+                } else {
+                    calculateDefaultDesktopTaskBounds(displayLayout)
+                }
+        } else {
+            return calculateMaximizeBounds(displayLayout, taskInfo)
+        }
     }
 
     private fun requireState(): TransitionState =

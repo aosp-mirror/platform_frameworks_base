@@ -97,9 +97,9 @@
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"კამერად პრობლემები აქვს?\nშეეხეთ გამოსასწორებლად"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"არ გამოსწორდა?\nშეეხეთ წინა ვერსიის დასაბრუნებლად"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"კამერას პრობლემები არ აქვს? შეეხეთ უარყოფისთვის."</string>
-    <string name="windowing_app_handle_education_tooltip" msgid="6398482412956375783">"შეეხეთ აპის მენიუს გასახსნელად"</string>
-    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="6285279585554484957">"შეეხეთ რამდენიმე აპის ერთად საჩვენებლად"</string>
-    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="6685429075790085337">"სრულეკრანიან რეჟიმზე დაბრუნდით აპის მენიუდან"</string>
+    <string name="windowing_app_handle_education_tooltip" msgid="2929643449849791854">"აპის მენიუ შეგიძლიათ იხილოთ აქ"</string>
+    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="2523468503353474095">"რამდენიმე აპის ერთდროულად გასახსნელად შედით დესკტოპის ხედში"</string>
+    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="5225660258192054132">"სრულ ეკრანზე ნებისმიერ დროს შეგიძლიათ დაბრუნდეთ აპის მენიუდან"</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"მეტის ნახვა და გაკეთება"</string>
     <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"ეკრანის გასაყოფად ჩავლებით გადაიტანეთ სხვა აპში"</string>
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"ორმაგად შეეხეთ აპის გარშემო სივრცეს, რათა ის სხვაგან გადაიტანოთ"</string>

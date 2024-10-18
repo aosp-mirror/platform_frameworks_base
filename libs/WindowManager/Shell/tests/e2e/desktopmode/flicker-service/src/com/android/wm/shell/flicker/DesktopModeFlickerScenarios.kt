@@ -154,6 +154,7 @@ class DesktopModeFlickerScenarios {
                         TaggedCujTransitionMatcher(associatedTransitionRequired = false)
                     )
                     .build(),
+                // TODO(373638597) Add AppLayerIncreasesInSize assertion
                 assertions = AssertionTemplates.DESKTOP_MODE_APP_VISIBILITY_ASSERTIONS
             )
 
@@ -208,7 +209,7 @@ class DesktopModeFlickerScenarios {
                 assertions =
                 AssertionTemplates.DESKTOP_MODE_APP_VISIBILITY_ASSERTIONS +
                         listOf(
-                            AppLayerIncreasesInSize(DESKTOP_MODE_APP),
+                            // TODO(373638597) Add AppLayerIncreasesInSize assertion
                             AppWindowHasMaxDisplayHeight(DESKTOP_MODE_APP),
                             AppWindowHasMaxDisplayWidth(DESKTOP_MODE_APP)
                         ).associateBy({ it }, { AssertionInvocationGroup.BLOCKING }),

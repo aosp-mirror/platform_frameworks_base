@@ -17,16 +17,19 @@
 package com.android.systemui.volume.panel.component.volume.domain.interactor
 
 import android.media.AudioManager
+import android.platform.test.annotations.EnableFlags
 import android.testing.TestableLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.settingslib.volume.shared.model.AudioStream
+import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.testKosmos
 import com.android.systemui.volume.data.repository.audioRepository
+import com.android.systemui.volume.data.repository.audioSystemRepository
 import com.android.systemui.volume.panel.component.volume.domain.model.SliderType
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -89,6 +92,22 @@ class AudioSlidersInteractorTest : SysuiTestCase() {
                         AudioManager.STREAM_NOTIFICATION,
                         AudioManager.STREAM_ALARM
                     ).map { SliderType.Stream(AudioStream(it)) })
+            }
+        }
+
+
+    @Test
+    @EnableFlags(Flags.FLAG_ONLY_SHOW_MEDIA_STREAM_SLIDER_IN_SINGLE_VOLUME_MODE)
+    fun shouldAddMusicStreamOnly_singleVolumeMode() =
+        with(kosmos) {
+            testScope.runTest {
+                audioSystemRepository.setIsSingleVolume(true)
+
+                val sliders by collectLastValue(underTest.volumePanelSliders)
+                runCurrent()
+
+                assertThat(sliders).isEqualTo(
+                    mutableListOf(SliderType.Stream(AudioStream(AudioManager.STREAM_MUSIC))))
             }
         }
 }

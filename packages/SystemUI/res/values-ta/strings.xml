@@ -312,6 +312,10 @@
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"ஆடியோவைப் பகிர்"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"ஆடியோ பகிரப்படுகிறது"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_accessibility" msgid="7604615019302091708">"ஆடியோ பகிர்வு அமைப்புகளுக்குச் செல்லும்"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_dialog_message" msgid="4251807313264307426">"இந்தச் சாதனத்தின் இசையும் வீடியோக்களும் இரண்டு ஜோடி ஹெட்ஃபோன்களிலும் பிளே ஆகும்"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_dialog_title" msgid="4406818346036286793">"ஆடியோவைப் பகிர்தல்"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_dialog_subtitle" msgid="3014906864710059236">"<xliff:g id="AVAILABLE_DEVICE_NAME">%1$s</xliff:g>, <xliff:g id="ACTIVE_DEVICE_NAME">%2$s</xliff:g>"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_dialog_switch_to_button" msgid="7546825655978203773">"<xliff:g id="AVAILABLE_DEVICE_NAME">%1$s</xliff:g>க்கு மாற்று"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> பேட்டரி"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"ஆடியோ"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"ஹெட்செட்"</string>
@@ -440,8 +444,7 @@
     <string name="zen_mode_on" msgid="9085304934016242591">"இயக்கப்பட்டுள்ளது"</string>
     <string name="zen_mode_on_with_details" msgid="7416143430557895497">"ஆன் • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"முடக்கப்பட்டுள்ளது"</string>
-    <!-- no translation found for zen_mode_set_up (8231201163894922821) -->
-    <skip />
+    <string name="zen_mode_set_up" msgid="8231201163894922821">"அமைக்கப்படவில்லை"</string>
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"அமைப்புகளில் நிர்வகியுங்கள்"</string>
     <string name="zen_mode_active_modes" msgid="1625850411578488856">"{count,plural, =0{செயலிலுள்ள பயன்முறைகள் எதுவுமில்லை}=1{{mode} செயலில் உள்ளது}other{# பயன்முறைகள் செயலில் உள்ளன}}"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"அலாரங்கள், நினைவூட்டல்கள், நிகழ்வுகள் மற்றும் குறிப்பிட்ட அழைப்பாளர்களைத் தவிர்த்து, பிற ஒலிகள் மற்றும் அதிர்வுகளின் தொந்தரவு இருக்காது. எனினும், நீங்கள் எதையேனும் (இசை, வீடியோக்கள், கேம்ஸ் போன்றவை) ஒலிக்கும்படி தேர்ந்தெடுத்திருந்தால், அவை வழக்கம் போல் ஒலிக்கும்."</string>
@@ -673,10 +676,8 @@
     <string name="stream_notification_unavailable" msgid="4313854556205836435">"\'ரிங்\' மியூட்டில் உள்ளதால் கிடைக்கவில்லை"</string>
     <string name="stream_alarm_unavailable" msgid="4059817189292197839">"\'தொந்தரவு செய்ய வேண்டாம்\' ஆனில் இருப்பதால் இல்லை"</string>
     <string name="stream_media_unavailable" msgid="6823020894438959853">"\'தொந்தரவு செய்ய வேண்டாம்\' ஆனில் இருப்பதால் இல்லை"</string>
-    <!-- no translation found for stream_unavailable_by_modes (3674139029490353683) -->
-    <skip />
-    <!-- no translation found for stream_unavailable_by_unknown (6908434629318171588) -->
-    <skip />
+    <string name="stream_unavailable_by_modes" msgid="3674139029490353683">"<xliff:g id="MODE">%s</xliff:g> பயன்முறை இயக்கத்தில் இருப்பதால் கிடைக்கவில்லை"</string>
+    <string name="stream_unavailable_by_unknown" msgid="6908434629318171588">"கிடைக்கவில்லை"</string>
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. ஒலி இயக்க, தட்டவும்."</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. அதிர்விற்கு அமைக்க, தட்டவும். அணுகல்தன்மை சேவைகள் ஒலியடக்கப்படக்கூடும்."</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. ஒலியடக்க, தட்டவும். அணுகல்தன்மை சேவைகள் ஒலியடக்கப்படக்கூடும்."</string>
@@ -1410,38 +1411,26 @@
     <string name="launch_touchpad_tutorial_notification_content" msgid="7931085031240753226">"டச்பேட் சைகைள் குறித்துத் தெரிந்துகொள்ளுங்கள்"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_title" msgid="1940023776496198762">"உங்கள் டச்பேட் மற்றும் கீபோர்டைப் பயன்படுத்திச் செல்லுதல்"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"டச்பேட் சைகைகள், கீபோர்டு ஷார்ட்கட்கள் மற்றும் பலவற்றைத் தெரிந்துகொள்ளுங்கள்"</string>
-    <!-- no translation found for touchpad_tutorial_back_gesture_button (3104716365403620315) -->
-    <skip />
-    <!-- no translation found for touchpad_tutorial_home_gesture_button (8023973153559885624) -->
-    <skip />
+    <string name="touchpad_tutorial_back_gesture_button" msgid="3104716365403620315">"பின்செல்"</string>
+    <string name="touchpad_tutorial_home_gesture_button" msgid="8023973153559885624">"முகப்பிற்குச் செல்"</string>
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"சமீபத்திய ஆப்ஸைக் காட்டுதல்"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"முடிந்தது"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"பின்செல்"</string>
-    <!-- no translation found for touchpad_back_gesture_guidance (5352221087725906542) -->
-    <skip />
-    <!-- no translation found for touchpad_back_gesture_success_title (7370719098633023496) -->
-    <skip />
+    <string name="touchpad_back_gesture_guidance" msgid="5352221087725906542">"உங்கள் டச்பேடில் மூன்று விரல்களால் இடது அல்லது வலதுபுறம் ஸ்வைப் செய்யவும்"</string>
+    <string name="touchpad_back_gesture_success_title" msgid="7370719098633023496">"அருமை!"</string>
     <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"பின்செல்வதற்கான சைகையை நிறைவுசெய்துவிட்டீர்கள்."</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"முகப்பிற்குச் செல்"</string>
-    <!-- no translation found for touchpad_home_gesture_guidance (4178219118381915899) -->
-    <skip />
-    <!-- no translation found for touchpad_home_gesture_success_title (3648264553645798470) -->
-    <skip />
-    <!-- no translation found for touchpad_home_gesture_success_body (2590690589194027059) -->
-    <skip />
+    <string name="touchpad_home_gesture_guidance" msgid="4178219118381915899">"டச்பேடில் மூன்று விரல்களால் மேல்நோக்கி ஸ்வைப் செய்யவும்"</string>
+    <string name="touchpad_home_gesture_success_title" msgid="3648264553645798470">"அருமை!"</string>
+    <string name="touchpad_home_gesture_success_body" msgid="2590690589194027059">"முகப்புக்குச் செல்வதற்கான சைகைப் பயிற்சியை நிறைவுசெய்துவிட்டீர்கள்"</string>
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"சமீபத்திய ஆப்ஸைக் காட்டுதல்"</string>
-    <!-- no translation found for touchpad_recent_apps_gesture_guidance (6304446013842271822) -->
-    <skip />
+    <string name="touchpad_recent_apps_gesture_guidance" msgid="6304446013842271822">"உங்கள் டச்பேடில் மூன்று விரல்களால் மேல்நோக்கி ஸ்வைப் செய்து பிடிக்கவும்"</string>
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"அருமை!"</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"சமீபத்தில் பயன்படுத்திய ஆப்ஸுக்கான சைகை பயிற்சியை நிறைவுசெய்துவிட்டீர்கள்."</string>
-    <!-- no translation found for tutorial_action_key_title (8172535792469008169) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_guidance (5040613427202799294) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_success_title (2371827347071979571) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_success_body (1688986269491357832) -->
-    <skip />
+    <string name="tutorial_action_key_title" msgid="8172535792469008169">"அனைத்து ஆப்ஸையும் காட்டு"</string>
+    <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"உங்கள் கீபோர்டில் ஆக்‌ஷன் பட்டனை அழுத்தவும்"</string>
+    <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"அருமை!"</string>
+    <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"அனைத்து ஆப்ஸுக்கான சைகை பயிற்சியையும் நிறைவுசெய்துவிட்டீர்கள்"</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"கீபோர்டு பேக்லைட்"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"நிலை, %2$d இல் %1$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"ஹோம் கன்ட்ரோல்கள்"</string>

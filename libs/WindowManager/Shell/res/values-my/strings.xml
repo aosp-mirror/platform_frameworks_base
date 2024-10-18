@@ -97,9 +97,9 @@
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"ကင်မရာပြဿနာလား။\nပြင်ဆင်ရန် တို့ပါ"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"ကောင်းမသွားဘူးလား။\nပြန်ပြောင်းရန် တို့ပါ"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"ကင်မရာပြဿနာ မရှိဘူးလား။ ပယ်ရန် တို့ပါ။"</string>
-    <string name="windowing_app_handle_education_tooltip" msgid="6398482412956375783">"အက်ပ်မီနူးကိုဖွင့်ရန် တို့ပါ"</string>
-    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="6285279585554484957">"အက်ပ်များစွာကို အတူတကွပြရန် တို့ပါ"</string>
-    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="6685429075790085337">"အက်ပ်မီနူးမှ ဖန်သားပြင်အပြည့်သို့ ပြန်သွားပါ"</string>
+    <string name="windowing_app_handle_education_tooltip" msgid="2929643449849791854">"အက်ပ်မီနူးကို ဤနေရာတွင် တွေ့နိုင်သည်"</string>
+    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="2523468503353474095">"အက်ပ်များစွာကို အတူတကွဖွင့်ရန်အတွက် ဒက်စ်တော့မြင်ကွင်းသို့ ဝင်ရောက်နိုင်သည်"</string>
+    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="5225660258192054132">"အက်ပ်မီနူးမှ ဖန်သားပြင်အပြည့်သို့ အချိန်မရွေး ပြန်သွားနိုင်သည်"</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"ကြည့်ပြီး ပိုမိုလုပ်ဆောင်ပါ"</string>
     <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"မျက်နှာပြင် ခွဲ၍ပြသခြင်းအတွက် အက်ပ်နောက်တစ်ခုကို ဖိဆွဲပါ"</string>
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"နေရာပြန်ချရန် အက်ပ်အပြင်ဘက်ကို နှစ်ချက်တို့ပါ"</string>

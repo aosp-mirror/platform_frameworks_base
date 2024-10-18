@@ -312,6 +312,10 @@
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"Отправить аудио"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"Отправка аудио"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_accessibility" msgid="7604615019302091708">"перейти в настройки передачи аудио"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_dialog_message" msgid="4251807313264307426">"Музыка и звук видео на этом устройстве будут воспроизводиться через обе пары наушников."</string>
+    <string name="quick_settings_bluetooth_audio_sharing_dialog_title" msgid="4406818346036286793">"Передача аудио"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_dialog_subtitle" msgid="3014906864710059236">"<xliff:g id="AVAILABLE_DEVICE_NAME">%1$s</xliff:g> и <xliff:g id="ACTIVE_DEVICE_NAME">%2$s</xliff:g>"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_dialog_switch_to_button" msgid="7546825655978203773">"Переключиться на <xliff:g id="AVAILABLE_DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"Заряд: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Аудиоустройство"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Гарнитура"</string>
@@ -672,10 +676,8 @@
     <string name="stream_notification_unavailable" msgid="4313854556205836435">"Недоступно в беззвучном режиме"</string>
     <string name="stream_alarm_unavailable" msgid="4059817189292197839">"Недоступно при включенном режиме \"Не беспокоить\"."</string>
     <string name="stream_media_unavailable" msgid="6823020894438959853">"Недоступно при включенном режиме \"Не беспокоить\"."</string>
-    <!-- no translation found for stream_unavailable_by_modes (3674139029490353683) -->
-    <skip />
-    <!-- no translation found for stream_unavailable_by_unknown (6908434629318171588) -->
-    <skip />
+    <string name="stream_unavailable_by_modes" msgid="3674139029490353683">"Недоступно, так как включен режим \"<xliff:g id="MODE">%s</xliff:g>\""</string>
+    <string name="stream_unavailable_by_unknown" msgid="6908434629318171588">"Недоступно"</string>
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. Нажмите, чтобы включить звук."</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. Нажмите, чтобы включить вибрацию. Специальные возможности могут прекратить работу."</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. Нажмите, чтобы выключить звук. Специальные возможности могут прекратить работу."</string>

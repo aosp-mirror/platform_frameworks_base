@@ -17,7 +17,6 @@
 package android.os;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 
 import android.multiuser.Flags;
 import android.platform.test.annotations.IgnoreUnderRavenwood;
@@ -27,7 +26,6 @@ import android.platform.test.ravenwood.RavenwoodRule;
 import androidx.test.filters.SmallTest;
 
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -94,17 +92,17 @@ public class IpcDataCacheTest {
         public Boolean apply(Integer x) {
             return mServer.query(x);
         }
-
         @Override
         public boolean shouldBypassCache(Integer x) {
             return x % 13 == 0;
         }
     }
 
-    // Ensure all test nonces are cleared after the test ends.
+    // Clear the test mode after every test, in case this process is used for other
+    // tests. This also resets the test property map.
     @After
     public void tearDown() throws Exception {
-        IpcDataCache.resetAfterTest();
+        IpcDataCache.setTestMode(false);
     }
 
     // This test is disabled pending an sepolicy change that allows any app to set the
@@ -120,6 +118,9 @@ public class IpcDataCacheTest {
         IpcDataCache<Integer, Boolean> testCache =
                 new IpcDataCache<>(4, MODULE, API, "testCache1",
                         new ServerQuery(tester));
+
+        IpcDataCache.setTestMode(true);
+        testCache.testPropertyName();
 
         tester.verify(0);
         assertEquals(tester.value(3), testCache.query(3));
@@ -164,6 +165,9 @@ public class IpcDataCacheTest {
         IpcDataCache<Integer, Boolean> testCache =
                 new IpcDataCache<>(config, (x) -> tester.query(x, x % 10 == 9));
 
+        IpcDataCache.setTestMode(true);
+        testCache.testPropertyName();
+
         tester.verify(0);
         assertEquals(tester.value(3), testCache.query(3));
         tester.verify(1);
@@ -200,6 +204,9 @@ public class IpcDataCacheTest {
         IpcDataCache.Config config = new IpcDataCache.Config(4, MODULE, API, "testCache3");
         IpcDataCache<Integer, Boolean> testCache =
                 new IpcDataCache<>(config, (x) -> tester.query(x), (x) -> x % 9 == 0);
+
+        IpcDataCache.setTestMode(true);
+        testCache.testPropertyName();
 
         tester.verify(0);
         assertEquals(tester.value(3), testCache.query(3));
@@ -306,6 +313,8 @@ public class IpcDataCacheTest {
         TestCache(String module, String api, TestQuery query) {
             super(4, module, api, "testCache7", query);
             mQuery = query;
+            setTestMode(true);
+            testPropertyName();
         }
 
         TestCache(IpcDataCache.Config c) {
@@ -315,6 +324,8 @@ public class IpcDataCacheTest {
         TestCache(IpcDataCache.Config c, TestQuery query) {
             super(c, query);
             mQuery = query;
+            setTestMode(true);
+            testPropertyName();
         }
 
         int getRecomputeCount() {
@@ -444,19 +455,5 @@ public class IpcDataCacheTest {
         IpcDataCache.Config e = a.child("nameE");
         TestCache ec = new TestCache(e);
         assertEquals(ec.isDisabled(), true);
-    }
-
-    // It is illegal to continue to use a cache with a test key after calling setTestMode(false).
-    // This test verifies the code detects errors in calling setTestMode().
-    @Test
-    public void testTestMode() {
-        TestCache cache = new TestCache();
-        cache.invalidateCache();
-        IpcDataCache.resetAfterTest();
-        try {
-            cache.invalidateCache();
-            fail("expected an IllegalStateException");
-        } catch (IllegalStateException expected) {
-        }
     }
 }

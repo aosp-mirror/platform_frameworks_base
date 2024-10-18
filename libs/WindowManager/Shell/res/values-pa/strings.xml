@@ -97,9 +97,9 @@
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"ਕੀ ਕੈਮਰੇ ਸੰਬੰਧੀ ਸਮੱਸਿਆਵਾਂ ਹਨ?\nਮੁੜ-ਫਿੱਟ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"ਕੀ ਇਹ ਠੀਕ ਨਹੀਂ ਹੋਈ?\nਵਾਪਸ ਉਹੀ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"ਕੀ ਕੈਮਰੇ ਸੰਬੰਧੀ ਕੋਈ ਸਮੱਸਿਆ ਨਹੀਂ ਹੈ? ਖਾਰਜ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ।"</string>
-    <string name="windowing_app_handle_education_tooltip" msgid="6398482412956375783">"ਐਪ ਮੀਨੂ ਨੂੰ ਖੋਲ੍ਹਣ ਲਈ ਟੈਪ ਕਰੋ"</string>
-    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="6285279585554484957">"ਕਈ ਐਪਾਂ ਇਕੱਠੀਆਂ ਦਿਖਾਉਣ ਲਈ ਟੈਪ ਕਰੋ"</string>
-    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="6685429075790085337">"ਐਪ ਮੀਨੂ ਤੋਂ ਪੂਰੀ-ਸਕ੍ਰੀਨ ਮੋਡ \'ਤੇ ਵਾਪਸ ਜਾਓ"</string>
+    <string name="windowing_app_handle_education_tooltip" msgid="2929643449849791854">"ਐਪ ਮੀਨੂ ਇੱਥੇ ਮਿਲ ਸਕਦਾ ਹੈ"</string>
+    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="2523468503353474095">"ਕਈ ਐਪਾਂ ਨੂੰ ਇਕੱਠੇ ਖੋਲ੍ਹਣ ਲਈ ਡੈਸਕਟਾਪ ਦ੍ਰਿਸ਼ ਵਿੱਚ ਦਾਖਲ ਹੋਵੋ"</string>
+    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="5225660258192054132">"ਐਪ ਮੀਨੂ ਤੋਂ ਕਿਸੇ ਵੀ ਸਮੇਂ ਪੂਰੀ ਸਕ੍ਰੀਨ \'ਤੇ ਵਾਪਸ ਜਾਓ"</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"ਦੇਖੋ ਅਤੇ ਹੋਰ ਬਹੁਤ ਕੁਝ ਕਰੋ"</string>
     <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"ਸਪਲਿਟ ਸਕ੍ਰੀਨ ਦੇ ਲਈ ਕਿਸੇ ਹੋਰ ਐਪ ਵਿੱਚ ਘਸੀਟੋ"</string>
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"ਕਿਸੇ ਐਪ ਦੀ ਜਗ੍ਹਾ ਬਦਲਣ ਲਈ ਉਸ ਦੇ ਬਾਹਰ ਡਬਲ ਟੈਪ ਕਰੋ"</string>

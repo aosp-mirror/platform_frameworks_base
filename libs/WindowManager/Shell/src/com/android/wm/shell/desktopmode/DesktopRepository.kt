@@ -102,6 +102,9 @@ class DesktopRepository (
     /* Tracks last bounds of task before toggled to stable bounds. */
     private val boundsBeforeMaximizeByTaskId = SparseArray<Rect>()
 
+    /* Tracks last bounds of task before toggled to immersive state. */
+    private val boundsBeforeFullImmersiveByTaskId = SparseArray<Rect>()
+
     private var desktopGestureExclusionListener: Consumer<Region>? = null
     private var desktopGestureExclusionExecutor: Executor? = null
 
@@ -414,6 +417,7 @@ class DesktopRepository (
         logD("Removes freeform task: taskId=%d, displayId=%d", taskId, displayId)
         desktopTaskDataByDisplayId[displayId]?.freeformTasksInZOrder?.remove(taskId)
         boundsBeforeMaximizeByTaskId.remove(taskId)
+        boundsBeforeFullImmersiveByTaskId.remove(taskId)
         logD("Remaining freeform tasks: %s",
             desktopTaskDataByDisplayId[displayId]?.freeformTasksInZOrder?.toDumpString())
         // Remove task from unminimized task if it is minimized.
@@ -471,6 +475,14 @@ class DesktopRepository (
     /** Saves the bounds of the given task before maximizing. */
     fun saveBoundsBeforeMaximize(taskId: Int, bounds: Rect) =
         boundsBeforeMaximizeByTaskId.set(taskId, Rect(bounds))
+
+    /** Removes and returns the bounds saved before entering immersive with the given task. */
+    fun removeBoundsBeforeFullImmersive(taskId: Int): Rect? =
+        boundsBeforeFullImmersiveByTaskId.removeReturnOld(taskId)
+
+    /** Saves the bounds of the given task before entering immersive. */
+    fun saveBoundsBeforeFullImmersive(taskId: Int, bounds: Rect) =
+        boundsBeforeFullImmersiveByTaskId.set(taskId, Rect(bounds))
 
     private fun updatePersistentRepository(displayId: Int) {
         // Create a deep copy of the data

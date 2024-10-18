@@ -39,11 +39,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import com.android.systemui.inputdevice.tutorial.ui.composable.DoneButton
 import com.android.systemui.res.R
+import com.android.systemui.touchpad.tutorial.ui.gesture.isFourFingerTouchpadSwipe
+import com.android.systemui.touchpad.tutorial.ui.gesture.isThreeFingerTouchpadSwipe
 
 @Composable
 fun TutorialSelectionScreen(
@@ -55,7 +58,16 @@ fun TutorialSelectionScreen(
     Column(
         verticalArrangement = Arrangement.Center,
         modifier =
-            Modifier.background(color = MaterialTheme.colorScheme.surfaceContainer).fillMaxSize(),
+            Modifier.background(color = MaterialTheme.colorScheme.surfaceContainer)
+                .fillMaxSize()
+                .pointerInteropFilter(
+                    onTouchEvent = { event ->
+                        // Because of window flag we're intercepting 3 and 4-finger swipes.
+                        // Although we don't handle them in this screen, we want to disable them so
+                        // that user is not clicking button by mistake by performing these swipes.
+                        isThreeFingerTouchpadSwipe(event) || isFourFingerTouchpadSwipe(event)
+                    }
+                ),
     ) {
         TutorialSelectionButtons(
             onBackTutorialClicked = onBackTutorialClicked,
