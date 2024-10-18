@@ -38,6 +38,7 @@ import android.provider.Settings;
 import android.service.notification.NotificationListenerService;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.util.Preconditions;
@@ -1369,12 +1370,17 @@ public final class NotificationChannel implements Parcelable {
         if (sound == null || Uri.EMPTY.equals(sound)) {
             return null;
         }
-        Uri canonicalSound = getCanonicalizedSoundUri(context.getContentResolver(), sound);
-        if (canonicalSound == null) {
-            // The content provider does not support canonical uris so we backup the default
+        try {
+            Uri canonicalSound = getCanonicalizedSoundUri(context.getContentResolver(), sound);
+            if (canonicalSound == null) {
+                // The content provider does not support canonical uris so we backup the default
+                return Settings.System.DEFAULT_NOTIFICATION_URI;
+            }
+            return canonicalSound;
+        } catch (Exception e) {
+            Slog.e(TAG, "Cannot find file for sound " + sound + " using default");
             return Settings.System.DEFAULT_NOTIFICATION_URI;
         }
-        return canonicalSound;
     }
 
     /**
