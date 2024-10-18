@@ -67,6 +67,7 @@ public final class RavenwoodConfig {
     String mTargetPackageName;
 
     int mMinSdkLevel;
+    int mTargetSdkLevel;
 
     boolean mProvideMainThread = false;
 
@@ -146,6 +147,14 @@ public final class RavenwoodConfig {
          */
         public Builder setMinSdkLevel(int sdkLevel) {
             mConfig.mMinSdkLevel = sdkLevel;
+            return this;
+        }
+
+        /**
+         * Configure the target SDK level of the test.
+         */
+        public Builder setTargetSdkLevel(int sdkLevel) {
+            mConfig.mTargetSdkLevel = sdkLevel;
             return this;
         }
 
