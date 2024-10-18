@@ -1550,3 +1550,10 @@ flag {
        purpose: PURPOSE_BUGFIX
    }
 }
+
+flag {
+    name: "qs_tile_detailed_view"
+    namespace: "systemui"
+    description: "Enables the tile detailed view UI."
+    bug: "374173773"
+}
