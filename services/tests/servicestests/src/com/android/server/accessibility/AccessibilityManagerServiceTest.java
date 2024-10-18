@@ -1615,7 +1615,8 @@ public class AccessibilityManagerServiceTest {
                 List.of(tile)
         );
 
-        assertThat(mA11yms.getCurrentUserState().getA11yQsTargets()).doesNotContain(tile);
+        assertThat(mA11yms.getCurrentUserState()
+                .getShortcutTargetsLocked(QUICK_SETTINGS)).doesNotContain(tile.flattenToString());
     }
 
     @Test
@@ -1636,7 +1637,7 @@ public class AccessibilityManagerServiceTest {
                 List.of(tile)
         );
 
-        assertThat(mA11yms.getCurrentUserState().getA11yQsTargets())
+        assertThat(mA11yms.getCurrentUserState().getShortcutTargetsLocked(QUICK_SETTINGS))
                 .contains(TARGET_ALWAYS_ON_A11Y_SERVICE.flattenToString());
     }
 
@@ -1656,7 +1657,7 @@ public class AccessibilityManagerServiceTest {
         );
 
         assertThat(
-                mA11yms.getCurrentUserState().getA11yQsTargets()
+                mA11yms.getCurrentUserState().getShortcutTargetsLocked(QUICK_SETTINGS)
         ).containsExactlyElementsIn(List.of(
                 AccessibilityShortcutController.DALTONIZER_COMPONENT_NAME.flattenToString(),
                 AccessibilityShortcutController.COLOR_INVERSION_COMPONENT_NAME.flattenToString())
@@ -1676,7 +1677,7 @@ public class AccessibilityManagerServiceTest {
         );
 
         assertThat(
-                mA11yms.getCurrentUserState().getA11yQsTargets()
+                mA11yms.getCurrentUserState().getShortcutTargetsLocked(QUICK_SETTINGS)
         ).doesNotContain(
                 AccessibilityShortcutController.DALTONIZER_COMPONENT_NAME.flattenToString());
     }
