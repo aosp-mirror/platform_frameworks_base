@@ -42,28 +42,27 @@ public class StatsBootstrapAtomService extends IStatsBootstrapAtomService.Stub {
             return;
         }
         StatsEvent.Builder builder = StatsEvent.newBuilder().setAtomId(atom.atomId);
-        for (StatsBootstrapAtomValue atomValue : atom.values) {
-            StatsBootstrapAtomValue.Primitive value = atomValue.value;
+        for (StatsBootstrapAtomValue value : atom.values) {
             switch (value.getTag()) {
-                case StatsBootstrapAtomValue.Primitive.boolValue:
+                case StatsBootstrapAtomValue.boolValue:
                     builder.writeBoolean(value.getBoolValue());
                     break;
-                case StatsBootstrapAtomValue.Primitive.intValue:
+                case StatsBootstrapAtomValue.intValue:
                     builder.writeInt(value.getIntValue());
                     break;
-                case StatsBootstrapAtomValue.Primitive.longValue:
+                case StatsBootstrapAtomValue.longValue:
                     builder.writeLong(value.getLongValue());
                     break;
-                case StatsBootstrapAtomValue.Primitive.floatValue:
+                case StatsBootstrapAtomValue.floatValue:
                     builder.writeFloat(value.getFloatValue());
                     break;
-                case StatsBootstrapAtomValue.Primitive.stringValue:
+                case StatsBootstrapAtomValue.stringValue:
                     builder.writeString(value.getStringValue());
                     break;
-                case StatsBootstrapAtomValue.Primitive.bytesValue:
+                case StatsBootstrapAtomValue.bytesValue:
                     builder.writeByteArray(value.getBytesValue());
                     break;
-                case StatsBootstrapAtomValue.Primitive.stringArrayValue:
+                case StatsBootstrapAtomValue.stringArrayValue:
                     builder.writeStringArray(value.getStringArrayValue());
                     break;
                 default:
@@ -71,25 +70,6 @@ public class StatsBootstrapAtomService extends IStatsBootstrapAtomService.Stub {
                             + " when logging atom " + atom.atomId);
                     return;
 
-            }
-            StatsBootstrapAtomValue.Annotation[] annotations = atomValue.annotations;
-            for (StatsBootstrapAtomValue.Annotation annotation : atomValue.annotations) {
-                if (annotation.id != StatsBootstrapAtomValue.Annotation.Id.IS_UID) {
-                    Slog.e(TAG, "Unexpected annotation ID: " + annotation.id
-                            + ", for atom " + atom.atomId + ": only UIDs are supported!");
-                    return;
-                }
-
-                switch (annotation.value.getTag()) {
-                    case StatsBootstrapAtomValue.Annotation.Primitive.boolValue:
-                        builder.addBooleanAnnotation(
-                                annotation.id, annotation.value.getBoolValue());
-                        break;
-                    default:
-                        Slog.e(TAG, "Unexpected value type " + annotation.value.getTag()
-                                + " when logging UID for atom " + atom.atomId);
-                        return;
-                }
             }
         }
         StatsLog.write(builder.usePooledBuffer().build());
