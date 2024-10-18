@@ -24,7 +24,6 @@ import android.util.SizeF
 import android.view.MotionEvent
 import android.widget.FrameLayout
 import android.widget.RemoteViews
-import androidx.annotation.VisibleForTesting
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.Spring
@@ -149,9 +148,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.round
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.times
 import androidx.compose.ui.util.fastAll
@@ -386,13 +387,19 @@ fun CommunalHub(
                             contentOffset = contentOffset,
                             screenWidth = screenWidth,
                             setGridCoordinates = { gridCoordinates = it },
-                            updateDragPositionForRemove = { offset ->
-                                isPointerWithinEnabledRemoveButton(
-                                    removeEnabled = removeButtonEnabled,
-                                    offset =
-                                        gridCoordinates?.let { it.positionInWindow() + offset },
-                                    containerToCheck = removeButtonCoordinates,
-                                )
+                            updateDragPositionForRemove = { boundingBox ->
+                                val gridOffset = gridCoordinates?.positionInWindow()
+                                val removeButtonCenter =
+                                    removeButtonCoordinates?.boundsInWindow()?.center
+                                removeButtonEnabled &&
+                                    gridOffset != null &&
+                                    removeButtonCenter != null &&
+                                    boundingBox
+                                        // The bounding box is relative to the grid, so we need to
+                                        // normalize it by adding the grid offset and the content
+                                        // offset.
+                                        .translate((gridOffset + contentOffset).round())
+                                        .contains(removeButtonCenter.round())
                             },
                             gridState = gridState,
                             contentListState = contentListState,
@@ -685,7 +692,7 @@ private fun BoxScope.CommunalHubLazyGrid(
     gridState: LazyGridState,
     contentListState: ContentListState,
     setGridCoordinates: (coordinates: LayoutCoordinates) -> Unit,
-    updateDragPositionForRemove: (offset: Offset) -> Boolean,
+    updateDragPositionForRemove: (boundingBox: IntRect) -> Boolean,
     widgetConfigurator: WidgetConfigurator?,
     interactionHandler: RemoteViews.InteractionHandler?,
     widgetSection: CommunalAppWidgetSection,
@@ -1554,23 +1561,6 @@ private fun beforeContentPadding(paddingValues: PaddingValues): ContentPaddingIn
             top = paddingValues.calculateTopPadding().toPx(),
         )
     }
-}
-
-/**
- * Check whether the pointer position that the item is being dragged at is within the coordinates of
- * the remove button in the toolbar. Returns true if the item is removable.
- */
-@VisibleForTesting
-fun isPointerWithinEnabledRemoveButton(
-    removeEnabled: Boolean,
-    offset: Offset?,
-    containerToCheck: LayoutCoordinates?,
-): Boolean {
-    if (!removeEnabled || offset == null || containerToCheck == null) {
-        return false
-    }
-    val container = containerToCheck.boundsInWindow()
-    return container.contains(offset)
 }
 
 private fun CommunalContentSize.dp(): Dp {
