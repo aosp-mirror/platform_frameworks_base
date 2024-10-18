@@ -26,6 +26,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.LifecycleCoroutineScope
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.keyguard.BouncerPanelExpansionCalculator
 import com.android.systemui.Dumpable
 import com.android.systemui.animation.ShadeInterpolation
@@ -65,13 +66,12 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class QSFragmentComposeViewModel
 @AssistedInject
 constructor(
-    val containerViewModel: QuickSettingsContainerViewModel,
+    containerViewModelFactory: QuickSettingsContainerViewModel.Factory,
     @Main private val resources: Resources,
     footerActionsViewModelFactory: FooterActionsViewModel.Factory,
     private val footerActionsController: FooterActionsController,
@@ -86,6 +86,8 @@ constructor(
     private val paginatedGridViewModel: PaginatedGridViewModel,
     @Assisted private val lifecycleScope: LifecycleCoroutineScope,
 ) : Dumpable, ExclusiveActivatable() {
+
+    val containerViewModel = containerViewModelFactory.create(true)
 
     private val hydrator = Hydrator("QSFragmentComposeViewModel.hydrator")
 
@@ -257,6 +259,9 @@ constructor(
                     .onStart { emit(sysuiStatusBarStateController.state) },
         )
 
+    val showingMirror: Boolean
+        get() = containerViewModel.brightnessSliderViewModel.showMirror
+
     private val isKeyguardState: Boolean
         get() = statusBarState == StatusBarState.KEYGUARD
 
@@ -321,6 +326,7 @@ constructor(
         coroutineScope {
             launch { hydrateSquishinessInteractor() }
             launch { hydrator.activate() }
+            launch { containerViewModel.activate() }
             awaitCancellation()
         }
     }

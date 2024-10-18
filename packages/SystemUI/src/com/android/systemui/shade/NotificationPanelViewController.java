@@ -164,9 +164,11 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.power.domain.interactor.PowerInteractor;
 import com.android.systemui.power.shared.model.WakefulnessModel;
+import com.android.systemui.qs.flags.QSComposeFragment;
 import com.android.systemui.res.R;
 import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.scene.shared.model.Scenes;
+import com.android.systemui.settings.brightness.domain.interactor.BrightnessMirrorShowingInteractor;
 import com.android.systemui.shade.data.repository.FlingInfo;
 import com.android.systemui.shade.data.repository.ShadeRepository;
 import com.android.systemui.shade.domain.interactor.ShadeAnimationInteractor;
@@ -664,6 +666,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             };
 
     private final ActivityStarter mActivityStarter;
+    private final BrightnessMirrorShowingInteractor mBrightnessMirrorShowingInteractor;
 
     @Inject
     public NotificationPanelViewController(NotificationPanelView view,
@@ -757,7 +760,8 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             PowerInteractor powerInteractor,
             KeyguardClockPositionAlgorithm keyguardClockPositionAlgorithm,
             NaturalScrollingSettingObserver naturalScrollingSettingObserver,
-            MSDLPlayer msdlPlayer) {
+            MSDLPlayer msdlPlayer,
+            BrightnessMirrorShowingInteractor brightnessMirrorShowingInteractor) {
         SceneContainerFlag.assertInLegacyMode();
         keyguardStateController.addCallback(new KeyguardStateController.Callback() {
             @Override
@@ -944,6 +948,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                 },
                 mFalsingManager);
         mActivityStarter = activityStarter;
+        mBrightnessMirrorShowingInteractor = brightnessMirrorShowingInteractor;
         onFinishInflate();
         keyguardUnlockAnimationController.addKeyguardUnlockAnimationListener(
                 new KeyguardUnlockAnimationController.KeyguardUnlockAnimationListener() {
@@ -1185,6 +1190,12 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                     }
                 },
                 mMainDispatcher);
+        if (QSComposeFragment.isEnabled()) {
+            collectFlow(mView,
+                    mBrightnessMirrorShowingInteractor.isShowing(),
+                    isShowing -> setAlpha(isShowing ? 0 : 255, true)
+            );
+        }
     }
 
     @VisibleForTesting

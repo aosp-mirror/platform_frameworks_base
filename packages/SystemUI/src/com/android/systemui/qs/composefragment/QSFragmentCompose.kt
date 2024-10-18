@@ -59,6 +59,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.PointerInputChange
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.approachLayout
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.layout.onSizeChanged
@@ -76,6 +79,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.compose.animation.scene.ContentKey
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.ElementMatcher
@@ -131,7 +135,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.map
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 @SuppressLint("ValidFragment")
 class QSFragmentCompose
@@ -247,7 +250,11 @@ constructor(
                             Modifier.notificationScrimClip {
                                 notificationScrimClippingParams.params
                             }
-                        },
+                        }
+                        // Disable touches in the whole composable while the mirror is showing.
+                        // While the mirror is showing, an ancestor of the ComposeView is made
+                        // alpha 0, but touches are still being captured by the composables.
+                        .gesturesDisabled(viewModel.showingMirror),
             ) {
                 val isEditing by
                     viewModel.containerViewModel.editModeViewModel.isEditing
@@ -629,14 +636,15 @@ constructor(
                         )
                     }
                 }
-            }
-            QuickSettingsTheme {
-                FooterActions(
-                    viewModel = viewModel.footerActionsViewModel,
-                    qsVisibilityLifecycleOwner = this@QSFragmentCompose,
-                    modifier =
-                        Modifier.sysuiResTag("qs_footer_actions").element(ElementKeys.FooterActions),
-                )
+                QuickSettingsTheme {
+                    FooterActions(
+                        viewModel = viewModel.footerActionsViewModel,
+                        qsVisibilityLifecycleOwner = this@QSFragmentCompose,
+                        modifier =
+                            Modifier.sysuiResTag("qs_footer_actions")
+                                .element(ElementKeys.FooterActions),
+                    )
+                }
             }
         }
     }
@@ -871,3 +879,19 @@ private class FrameLayoutTouchPassthrough(
         return super.onInterceptTouchEvent(ev)
     }
 }
+
+private fun Modifier.gesturesDisabled(disabled: Boolean) =
+    if (disabled) {
+        pointerInput(Unit) {
+            awaitPointerEventScope {
+                // we should wait for all new pointer events
+                while (true) {
+                    awaitPointerEvent(pass = PointerEventPass.Initial)
+                        .changes
+                        .forEach(PointerInputChange::consume)
+                }
+            }
+        }
+    } else {
+        this
+    }

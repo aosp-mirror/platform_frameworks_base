@@ -51,7 +51,12 @@ import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState.DREAMING
 import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
 import com.android.systemui.keyguard.shared.model.TransitionStep
+import com.android.systemui.kosmos.testDispatcher
+import com.android.systemui.kosmos.testScope
+import com.android.systemui.qs.flags.QSComposeFragment
 import com.android.systemui.res.R
+import com.android.systemui.settings.brightness.data.repository.BrightnessMirrorShowingRepository
+import com.android.systemui.settings.brightness.domain.interactor.BrightnessMirrorShowingInteractor
 import com.android.systemui.shade.NotificationShadeWindowView.InteractionEventHandler
 import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor
 import com.android.systemui.statusbar.DragDownHelper
@@ -70,6 +75,7 @@ import com.android.systemui.statusbar.phone.DozeScrimController
 import com.android.systemui.statusbar.phone.DozeServiceHost
 import com.android.systemui.statusbar.phone.PhoneStatusBarViewController
 import com.android.systemui.statusbar.window.StatusBarWindowStateController
+import com.android.systemui.testKosmos
 import com.android.systemui.unfold.SysUIUnfoldComponent
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
@@ -78,11 +84,15 @@ import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import java.util.Optional
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
@@ -98,6 +108,7 @@ import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.clearInvocations
 import platform.test.runner.parameterized.ParameterizedAndroidJunit4
 import platform.test.runner.parameterized.Parameters
 
@@ -106,6 +117,8 @@ import platform.test.runner.parameterized.Parameters
 @RunWith(ParameterizedAndroidJunit4::class)
 @RunWithLooper(setAsMainLooper = true)
 class NotificationShadeWindowViewControllerTest(flags: FlagsParameterization) : SysuiTestCase() {
+
+    val kosmos = testKosmos()
 
     @Mock private lateinit var view: NotificationShadeWindowView
     @Mock private lateinit var sysuiStatusBarStateController: SysuiStatusBarStateController
@@ -148,6 +161,10 @@ class NotificationShadeWindowViewControllerTest(flags: FlagsParameterization) : 
     private val notificationLaunchAnimationInteractor =
         NotificationLaunchAnimationInteractor(notificationLaunchAnimationRepository)
 
+    private val brightnessMirrorShowingRepository = BrightnessMirrorShowingRepository()
+    private val brightnessMirrorShowingInteractor =
+        BrightnessMirrorShowingInteractor(brightnessMirrorShowingRepository)
+
     private lateinit var falsingCollector: FalsingCollectorFake
     private lateinit var fakeClock: FakeSystemClock
     private lateinit var interactionEventHandlerCaptor: ArgumentCaptor<InteractionEventHandler>
@@ -181,8 +198,9 @@ class NotificationShadeWindowViewControllerTest(flags: FlagsParameterization) : 
         featureFlagsClassic.set(SPLIT_SHADE_SUBPIXEL_OPTIMIZATION, true)
         mSetFlagsRule.enableFlags(Flags.FLAG_REVAMPED_BOUNCER_MESSAGES)
 
-        testScope = TestScope()
+        testScope = kosmos.testScope
         testableLooper = TestableLooper.get(this)
+
         falsingCollector = FalsingCollectorFake()
         fakeClock = FakeSystemClock()
         underTest =
@@ -221,6 +239,7 @@ class NotificationShadeWindowViewControllerTest(flags: FlagsParameterization) : 
                 alternateBouncerInteractor,
                 mock(BouncerViewBinder::class.java),
                 mock(ConfigurationForwarder::class.java),
+                brightnessMirrorShowingInteractor,
             )
         underTest.setupExpandedStatusBar()
         underTest.setDragDownHelper(dragDownHelper)
@@ -596,6 +615,39 @@ class NotificationShadeWindowViewControllerTest(flags: FlagsParameterization) : 
 
         verify(dragDownHelper).stopDragging()
     }
+
+    @Test
+    @EnableFlags(QSComposeFragment.FLAG_NAME)
+    fun mirrorShowing_depthControllerSet() =
+        testScope.runTest {
+            try {
+                Dispatchers.setMain(kosmos.testDispatcher)
+
+                // Simulate attaching the view so flow collection starts.
+                whenever(view.viewTreeObserver).thenReturn(mock(ViewTreeObserver::class.java))
+                val onAttachStateChangeListenerArgumentCaptor =
+                    ArgumentCaptor.forClass(View.OnAttachStateChangeListener::class.java)
+                verify(view, atLeast(1))
+                    .addOnAttachStateChangeListener(
+                        onAttachStateChangeListenerArgumentCaptor.capture()
+                    )
+                for (listener in onAttachStateChangeListenerArgumentCaptor.allValues) {
+                    listener.onViewAttachedToWindow(view)
+                }
+                testableLooper.processAllMessages()
+                clearInvocations(notificationShadeDepthController)
+
+                brightnessMirrorShowingInteractor.setMirrorShowing(true)
+                runCurrent()
+                verify(notificationShadeDepthController).brightnessMirrorVisible = true
+
+                brightnessMirrorShowingInteractor.setMirrorShowing(false)
+                runCurrent()
+                verify(notificationShadeDepthController).brightnessMirrorVisible = false
+            } finally {
+                Dispatchers.resetMain()
+            }
+        }
 
     companion object {
         private val DOWN_EVENT = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 0f, 0)
