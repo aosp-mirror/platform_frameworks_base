@@ -27,6 +27,7 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.AppGlobals;
 import android.app.ambientcontext.AmbientContextEvent;
+import android.app.wearable.Flags;
 import android.app.wearable.IWearableSensingCallback;
 import android.app.wearable.WearableSensingManager;
 import android.companion.CompanionDeviceManager;
@@ -311,11 +312,31 @@ final class WearableSensingManagerPerUserService
                 return WearableSensingManager.CONNECTION_ID_INVALID;
             }
         }
+        boolean isConcurrentConnectionLimitReached = false;
+        synchronized (mSecureChannelMap) {
+            // Do a pre-check on concurrent connection count. We need another check right before we
+            // add the connection into the map to prevent race conditions, but that can only happen
+            // after the WearableSensingSecureChannel is created. This check here allows us to
+            // reject before creating a new secure channel.
+            if (mSecureChannelMap.size() >= mMaxNumberOfConcurrentConnections) {
+                isConcurrentConnectionLimitReached = true;
+            }
+        }
+        if (isConcurrentConnectionLimitReached) {
+            Slog.i(
+                    TAG,
+                    "Rejecting connection because max concurrent connections limit has been"
+                        + " reached.");
+            if (Flags.enableConcurrentWearableConnections()) {
+                notifyStatusCallback(
+                        statusCallback,
+                        WearableSensingManager.STATUS_MAX_CONCURRENT_CONNECTIONS_EXCEEDED);
+            }
+            return WearableSensingManager.CONNECTION_ID_INVALID;
+        }
         int connectionId = mNextConnectionId.getAndIncrement();
         RemoteCallback wrappedStatusCallback =
                 wrapCallbackWithSecureChannelMapCleanUp(statusCallback, connectionId);
-
-        // TODO(b/358133158): enforce mMaxNumberOfConcurrentConnections
         WearableSensingSecureChannel secureChannel;
         try {
             secureChannel =
@@ -353,7 +374,24 @@ final class WearableSensingManagerPerUserService
             return WearableSensingManager.CONNECTION_ID_INVALID;
         }
         synchronized (mSecureChannelMap) {
-            mSecureChannelMap.put(connectionId, secureChannel);
+            if (mSecureChannelMap.size() >= mMaxNumberOfConcurrentConnections) {
+                isConcurrentConnectionLimitReached = true;
+            } else {
+                mSecureChannelMap.put(connectionId, secureChannel);
+            }
+        }
+        if (isConcurrentConnectionLimitReached) {
+            Slog.i(
+                    TAG,
+                    "Rejecting connection because max concurrent connections limit has been"
+                        + " reached.");
+            if (Flags.enableConcurrentWearableConnections()) {
+                notifyStatusCallback(
+                        statusCallback,
+                        WearableSensingManager.STATUS_MAX_CONCURRENT_CONNECTIONS_EXCEEDED);
+            }
+            secureChannel.close();
+            return WearableSensingManager.CONNECTION_ID_INVALID;
         }
         return connectionId;
     }

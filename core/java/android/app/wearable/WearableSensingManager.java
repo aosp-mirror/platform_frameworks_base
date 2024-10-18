@@ -350,9 +350,9 @@ public class WearableSensingManager {
                             statusCallback);
             if (connectionId != CONNECTION_ID_INVALID) {
                 mWearableConnectionIdMap.put(wearableConnection, connectionId);
-            } else {
-                mWearableConnectionIdMap.remove(wearableConnection);
             }
+            // For invalid connection IDs, the status callback will remove the connection from
+            // mWearableConnectionIdMap
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
