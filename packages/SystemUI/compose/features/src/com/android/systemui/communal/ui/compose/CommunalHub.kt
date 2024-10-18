@@ -157,6 +157,7 @@ import androidx.compose.ui.unit.times
 import androidx.compose.ui.util.fastAll
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.viewinterop.NoOpUpdate
+import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.window.layout.WindowMetricsCalculator
 import com.android.compose.animation.Easings.Emphasized
@@ -749,6 +750,7 @@ private fun BoxScope.CommunalHubLazyGrid(
             val dpSize = DpSize(size.width.dp, size.height.dp)
 
             if (viewModel.isEditMode && dragDropState != null) {
+                val isItemDragging = dragDropState.draggingItemKey == item.key
                 val outlineAlpha by
                     animateFloatAsState(
                         targetValue = if (selected) 1f else 0f,
@@ -764,13 +766,13 @@ private fun BoxScope.CommunalHubLazyGrid(
                     enabled = selected,
                     alpha = { outlineAlpha },
                     modifier =
-                        Modifier.requiredSize(dpSize).thenIf(
-                            dragDropState.draggingItemKey != item.key
-                        ) {
-                            Modifier.animateItem(
-                                placementSpec = spring(stiffness = Spring.StiffnessMediumLow)
-                            )
-                        },
+                        Modifier.requiredSize(dpSize)
+                            .thenIf(!isItemDragging) {
+                                Modifier.animateItem(
+                                    placementSpec = spring(stiffness = Spring.StiffnessMediumLow)
+                                )
+                            }
+                            .thenIf(isItemDragging) { Modifier.zIndex(1f) },
                     onResize = { resizeInfo -> contentListState.resize(index, resizeInfo) },
                 ) { modifier ->
                     DraggableItem(
