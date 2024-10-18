@@ -18,15 +18,12 @@ package com.android.systemui.education.dagger
 
 import com.android.systemui.CoreStartable
 import com.android.systemui.Flags
-import com.android.systemui.contextualeducation.GestureType
 import com.android.systemui.coroutines.newTracingContext
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.education.data.repository.ContextualEducationRepository
 import com.android.systemui.education.data.repository.UserContextualEducationRepository
 import com.android.systemui.education.domain.interactor.ContextualEducationInteractor
 import com.android.systemui.education.domain.interactor.KeyboardTouchpadEduInteractor
-import com.android.systemui.education.domain.interactor.KeyboardTouchpadEduStatsInteractor
-import com.android.systemui.education.domain.interactor.KeyboardTouchpadEduStatsInteractorImpl
 import com.android.systemui.education.ui.view.ContextualEduUiCoordinator
 import dagger.Binds
 import dagger.Lazy
@@ -83,18 +80,6 @@ interface ContextualEducationModule {
         }
 
         @Provides
-        fun provideKeyboardTouchpadEduStatsInteractor(
-            implLazy: Lazy<KeyboardTouchpadEduStatsInteractorImpl>
-        ): KeyboardTouchpadEduStatsInteractor {
-            return if (Flags.keyboardTouchpadContextualEducation()) {
-                implLazy.get()
-            } else {
-                // No-op implementation when the flag is disabled.
-                return NoOpKeyboardTouchpadEduStatsInteractor
-            }
-        }
-
-        @Provides
         @IntoMap
         @ClassKey(KeyboardTouchpadEduInteractor::class)
         fun provideKeyboardTouchpadEduInteractor(
@@ -122,12 +107,6 @@ interface ContextualEducationModule {
             }
         }
     }
-}
-
-private object NoOpKeyboardTouchpadEduStatsInteractor : KeyboardTouchpadEduStatsInteractor {
-    override fun incrementSignalCount(gestureType: GestureType) {}
-
-    override fun updateShortcutTriggerTime(gestureType: GestureType) {}
 }
 
 private object NoOpCoreStartable : CoreStartable {

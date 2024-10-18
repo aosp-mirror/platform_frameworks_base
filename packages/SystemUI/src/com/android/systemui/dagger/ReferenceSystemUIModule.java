@@ -34,6 +34,7 @@ import com.android.systemui.display.ui.viewmodel.ConnectingDisplayViewModel;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.dock.DockManagerImpl;
 import com.android.systemui.doze.DozeHost;
+import com.android.systemui.education.dagger.ContextualEducationModule;
 import com.android.systemui.inputdevice.tutorial.KeyboardTouchpadTutorialModule;
 import com.android.systemui.keyboard.shortcut.ShortcutHelperModule;
 import com.android.systemui.keyguard.ui.composable.blueprint.DefaultBlueprintModule;
@@ -153,6 +154,7 @@ import javax.inject.Named;
         VolumeModule.class,
         WallpaperModule.class,
         ShortcutHelperModule.class,
+        ContextualEducationModule.class,
 })
 public abstract class ReferenceSystemUIModule {
 
