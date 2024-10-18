@@ -1061,6 +1061,13 @@ final class KeyGestureController {
         handleKeyGesture(event, null /*focusedToken*/);
     }
 
+    public void handleTouchpadThreeFingerTap() {
+        // TODO(b/365063048): trigger a custom shortcut based on the three-finger tap.
+        if (DEBUG) {
+            Slog.d(TAG, "Three-finger touchpad tap occurred");
+        }
+    }
+
     @MainThread
     private void notifyKeyGestureEvent(AidlKeyGestureEvent event) {
         InputDevice device = getInputDevice(event.deviceId);
