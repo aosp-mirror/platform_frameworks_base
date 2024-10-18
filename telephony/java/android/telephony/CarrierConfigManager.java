@@ -9856,6 +9856,16 @@ public class CarrierConfigManager {
     public static final String KEY_REMOVE_SATELLITE_PLMN_IN_MANUAL_NETWORK_SCAN_BOOL =
             "remove_satellite_plmn_in_manual_network_scan_bool";
 
+    /**
+     * This value is used to set the max datagram size, if the value is not available then the
+     * default one will be used.
+     * If key is {@code true}, retrieve the max datagram value and use this value always,
+     * {@code false} the default value from the modem will be used.
+     *
+     * @hide
+     */
+    public static final String KEY_SATELLITE_SOS_MAX_DATAGRAM_SIZE =
+            "satellite_sos_max_datagram_size";
 
     /** @hide */
     @IntDef({
