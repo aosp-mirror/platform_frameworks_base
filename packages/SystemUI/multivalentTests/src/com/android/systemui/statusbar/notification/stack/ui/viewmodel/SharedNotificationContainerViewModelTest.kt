@@ -1229,6 +1229,75 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
             assertThat(alpha).isEqualTo(1f)
         }
 
+    @Test
+    @DisableSceneContainer
+    fun notificationAbsoluteBottom() =
+        testScope.runTest {
+            var notificationCount = 2
+            val calculateSpace = { _: Float, _: Boolean -> notificationCount }
+            val shelfHeight = 10F
+            val heightForNotification = 20F
+            val calculateHeight = { count: Int -> count * heightForNotification + shelfHeight }
+            val stackAbsoluteBottom by
+                collectLastValue(
+                    underTest.getNotificationStackAbsoluteBottom(
+                        calculateSpace,
+                        calculateHeight,
+                        shelfHeight,
+                    )
+                )
+            advanceTimeBy(50L)
+            showLockscreen()
+
+            shadeTestUtil.setSplitShade(false)
+            keyguardInteractor.setNotificationContainerBounds(
+                NotificationContainerBounds(top = 100F, bottom = 300F)
+            )
+            configurationRepository.onAnyConfigurationChange()
+
+            assertThat(stackAbsoluteBottom).isEqualTo(150F)
+
+            // Also updates when directly requested (as it would from NotificationStackScrollLayout)
+            notificationCount = 3
+            sharedNotificationContainerInteractor.notificationStackChanged()
+            advanceTimeBy(50L)
+            assertThat(stackAbsoluteBottom).isEqualTo(170F)
+        }
+
+    @Test
+    @DisableSceneContainer
+    fun notificationAbsoluteBottom_maxNotificationIsZero_noShelfHeight() =
+        testScope.runTest {
+            var notificationCount = 2
+            val calculateSpace = { _: Float, _: Boolean -> notificationCount }
+            val shelfHeight = 10F
+            val heightForNotification = 20F
+            val calculateHeight = { count: Int -> count * heightForNotification + shelfHeight }
+            val stackAbsoluteBottom by
+                collectLastValue(
+                    underTest.getNotificationStackAbsoluteBottom(
+                        calculateSpace,
+                        calculateHeight,
+                        shelfHeight,
+                    )
+                )
+            advanceTimeBy(50L)
+            showLockscreen()
+
+            shadeTestUtil.setSplitShade(false)
+            keyguardInteractor.setNotificationContainerBounds(
+                NotificationContainerBounds(top = 100F, bottom = 300F)
+            )
+            configurationRepository.onAnyConfigurationChange()
+
+            assertThat(stackAbsoluteBottom).isEqualTo(150F)
+
+            notificationCount = 0
+            sharedNotificationContainerInteractor.notificationStackChanged()
+            advanceTimeBy(50L)
+            assertThat(stackAbsoluteBottom).isEqualTo(100F)
+        }
+
     private suspend fun TestScope.showLockscreen() {
         shadeTestUtil.setQsExpansion(0f)
         shadeTestUtil.setLockscreenShadeExpansion(0f)

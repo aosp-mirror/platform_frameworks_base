@@ -545,6 +545,10 @@ constructor(
         repository.isKeyguardGoingAway.value = isGoingAway
     }
 
+    fun setNotificationStackAbsoluteBottom(bottom: Float) {
+        repository.setNotificationStackAbsoluteBottom(bottom)
+    }
+
     companion object {
         private const val TAG = "KeyguardInteractor"
     }

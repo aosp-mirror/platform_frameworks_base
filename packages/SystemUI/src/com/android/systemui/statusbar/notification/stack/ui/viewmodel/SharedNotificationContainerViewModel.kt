@@ -672,6 +672,36 @@ constructor(
             .dumpWhileCollecting("maxNotifications")
     }
 
+    /**
+     * Wallpaper needs the absolute bottom of notification stack to avoid occlusion
+     *
+     * @param calculateMaxNotifications is required by getMaxNotifications as calculateSpace by
+     *   calling computeMaxKeyguardNotifications in NotificationStackSizeCalculator
+     * @param calculateHeight is calling computeHeight in NotificationStackSizeCalculator The edge
+     *   case is that when maxNotifications is 0, we won't take shelfHeight into account
+     */
+    fun getNotificationStackAbsoluteBottom(
+        calculateMaxNotifications: (Float, Boolean) -> Int,
+        calculateHeight: (Int) -> Float,
+        shelfHeight: Float,
+    ): Flow<Float> {
+        SceneContainerFlag.assertInLegacyMode()
+
+        return combine(
+            getMaxNotifications(calculateMaxNotifications).map {
+                val height = calculateHeight(it)
+                if (it == 0) {
+                    height - shelfHeight
+                } else {
+                    height
+                }
+            },
+            bounds.map { it.top },
+        ) { height, top ->
+            top + height
+        }
+    }
+
     fun notificationStackChanged() {
         interactor.notificationStackChanged()
     }
