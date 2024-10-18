@@ -26,10 +26,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.LifecycleCoroutineScope
+import com.android.keyguard.BouncerPanelExpansionCalculator
 import com.android.systemui.Dumpable
+import com.android.systemui.animation.ShadeInterpolation
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.model.Edge
+import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.lifecycle.Hydrator
 import com.android.systemui.plugins.statusbar.StatusBarStateController
@@ -39,6 +44,7 @@ import com.android.systemui.qs.panels.domain.interactor.TileSquishinessInteracto
 import com.android.systemui.qs.panels.ui.viewmodel.PaginatedGridViewModel
 import com.android.systemui.qs.ui.viewmodel.QuickSettingsContainerViewModel
 import com.android.systemui.res.R
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.LargeScreenHeaderHelper
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolator
 import com.android.systemui.statusbar.StatusBarState
@@ -67,13 +73,14 @@ class QSFragmentComposeViewModel
 constructor(
     val containerViewModel: QuickSettingsContainerViewModel,
     @Main private val resources: Resources,
-    private val footerActionsViewModelFactory: FooterActionsViewModel.Factory,
+    footerActionsViewModelFactory: FooterActionsViewModel.Factory,
     private val footerActionsController: FooterActionsController,
     private val sysuiStatusBarStateController: SysuiStatusBarStateController,
-    private val deviceEntryInteractor: DeviceEntryInteractor,
-    private val disableFlagsRepository: DisableFlagsRepository,
+    deviceEntryInteractor: DeviceEntryInteractor,
+    disableFlagsRepository: DisableFlagsRepository,
+    keyguardTransitionInteractor: KeyguardTransitionInteractor,
     private val largeScreenShadeInterpolator: LargeScreenShadeInterpolator,
-    private val configurationInteractor: ConfigurationInteractor,
+    configurationInteractor: ConfigurationInteractor,
     private val largeScreenHeaderHelper: LargeScreenHeaderHelper,
     private val squishinessInteractor: TileSquishinessInteractor,
     private val paginatedGridViewModel: PaginatedGridViewModel,
@@ -203,14 +210,22 @@ constructor(
         if (onKeyguardAndExpanded) panelTranslationY else 0f
     }
 
+    val viewAlpha by derivedStateOf {
+        when {
+            isInBouncerTransit ->
+                BouncerPanelExpansionCalculator.aboutToShowBouncerProgress(alphaProgress)
+            isKeyguardState -> alphaProgress
+            isSmallScreen -> ShadeInterpolation.getContentAlpha(alphaProgress)
+            else -> largeScreenShadeInterpolator.getQsAlpha(alphaProgress)
+        }
+    }
+
     private var qsBounds by mutableStateOf(Rect())
 
     private val constrainedSquishinessFraction: Float
         get() = squishinessFraction.constrainSquishiness()
 
     private var _headerAnimating by mutableStateOf(false)
-
-    private var keyguardAndExpanded by mutableStateOf(false)
 
     /**
      * Tracks the current [StatusBarState]. It will switch early if the upcoming state is
@@ -271,11 +286,36 @@ constructor(
     }
 
     private val translationScaleY: Float
-        get() = (qsExpansion - 1) * (if (isInSplitShade) 1f else SHORT_PARALLAX_AMOUNT)
+        get() = ((qsExpansion - 1) * (if (isInSplitShade) 1f else SHORT_PARALLAX_AMOUNT))
 
     private val headerTranslation by derivedStateOf {
         if (isTransitioningToFullShade) 0f else proposedTranslation
     }
+
+    private val alphaProgress by derivedStateOf {
+        when {
+            isSmallScreen -> 1f
+            isInSplitShade ->
+                if (isTransitioningToFullShade || isKeyguardState) {
+                    lockscreenToShadeProgress
+                } else {
+                    panelExpansionFraction
+                }
+            isTransitioningToFullShade -> lockscreenToShadeProgress
+            else -> panelExpansionFraction
+        }
+    }
+
+    private val isInBouncerTransit by
+        hydrator.hydratedStateOf(
+            traceName = "isInBouncerTransit",
+            initialValue = false,
+            source =
+                keyguardTransitionInteractor.isInTransition(
+                    Edge.create(to = Scenes.Bouncer),
+                    Edge.create(to = KeyguardState.PRIMARY_BOUNCER),
+                ),
+        )
 
     override suspend fun onActivated(): Nothing {
         coroutineScope {
@@ -310,10 +350,12 @@ constructor(
                     println("translationScaleY", translationScaleY)
                     println("viewTranslationY", viewTranslationY)
                     println("qsScrollTranslationY", qsScrollTranslationY)
+                    println("viewAlpha", viewAlpha)
                 }
             }
             printSection("Shade state") {
                 println("stackOverscrolling", isStackScrollerOverscrolling)
+                println("overscrollAmount", overScrollAmount)
                 println("statusBarState", StatusBarState.toString(statusBarState))
                 println("isKeyguardState", isKeyguardState)
                 println("isSmallScreen", isSmallScreen)
