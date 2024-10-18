@@ -17,13 +17,13 @@
 package com.android.systemui.statusbar.window
 
 import android.content.Context
-import com.android.app.viewcapture.ViewCaptureAwareWindowManager
-import com.android.systemui.statusbar.data.repository.StatusBarConfigurationController
+import org.mockito.kotlin.mock
 
-class FakeStatusBarWindowControllerFactory : StatusBarWindowController.Factory {
-    override fun create(
-        context: Context,
-        viewCaptureAwareWindowManager: ViewCaptureAwareWindowManager,
-        statusBarConfigurationController: StatusBarConfigurationController
-    ) = FakeStatusBarWindowController()
+class FakeStatusBarWindowViewInflater : StatusBarWindowViewInflater {
+
+    val inflatedMockViews = mutableListOf<StatusBarWindowView>()
+
+    override fun inflate(context: Context): StatusBarWindowView {
+        return mock<StatusBarWindowView>().also { inflatedMockViews += it }
+    }
 }

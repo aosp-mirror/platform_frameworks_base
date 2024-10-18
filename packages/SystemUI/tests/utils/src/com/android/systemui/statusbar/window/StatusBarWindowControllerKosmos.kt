@@ -16,9 +16,30 @@
 
 package com.android.systemui.statusbar.window
 
+import android.content.testableContext
+import android.view.windowManagerService
+import com.android.app.viewcapture.viewCaptureAwareWindowManager
+import com.android.systemui.fragments.fragmentService
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.statusbar.phone.statusBarContentInsetsProvider
+import com.android.systemui.statusbar.policy.statusBarConfigurationController
+import java.util.Optional
 
 val Kosmos.fakeStatusBarWindowController by Kosmos.Fixture { FakeStatusBarWindowController() }
+
+val Kosmos.statusBarWindowControllerImpl by
+    Kosmos.Fixture {
+        StatusBarWindowControllerImpl(
+            testableContext,
+            statusBarWindowViewInflater,
+            viewCaptureAwareWindowManager,
+            statusBarConfigurationController,
+            windowManagerService,
+            statusBarContentInsetsProvider,
+            fragmentService,
+            Optional.empty(),
+        )
+    }
 
 var Kosmos.statusBarWindowController: StatusBarWindowController by
     Kosmos.Fixture { fakeStatusBarWindowController }
