@@ -221,13 +221,15 @@ constructor(
     /** If the user is visually on one of the unoccluded lockscreen states. */
     val isOnLockscreen: Flow<Boolean> =
         anyOf(
-                keyguardTransitionInteractor.isFinishedIn(AOD),
-                keyguardTransitionInteractor.isFinishedIn(DOZING),
-                keyguardTransitionInteractor.isFinishedIn(ALTERNATE_BOUNCER),
-                keyguardTransitionInteractor.isFinishedIn(
-                    scene = Scenes.Bouncer,
-                    stateWithoutSceneContainer = PRIMARY_BOUNCER,
-                ),
+                keyguardTransitionInteractor.transitionValue(AOD).map { it > 0f },
+                keyguardTransitionInteractor.transitionValue(DOZING).map { it > 0f },
+                keyguardTransitionInteractor.transitionValue(ALTERNATE_BOUNCER).map { it > 0f },
+                keyguardTransitionInteractor
+                    .transitionValue(
+                        scene = Scenes.Bouncer,
+                        stateWithoutSceneContainer = PRIMARY_BOUNCER,
+                    )
+                    .map { it > 0f },
                 keyguardTransitionInteractor.transitionValue(LOCKSCREEN).map { it > 0f },
             )
             .flowName("isOnLockscreen")
