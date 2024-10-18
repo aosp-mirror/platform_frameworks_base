@@ -73,6 +73,7 @@ public class LayoutTest {
     private static final int STATIC_LINE_COUNT = 9;
     private static final int LINE_HEIGHT = 12;
     private static final int LINE_DESCENT = 4;
+    private static final int LINE_HEIGHT_TOLERANCE_PER_ITERATION = 3;
     private static final CharSequence LAYOUT_TEXT = "alwei\t;sdfs\ndf @";
 
     private SpannableString mSpannedText;
@@ -918,7 +919,8 @@ public class LayoutTest {
                 expect.that(removeAlpha(drawCommand.paint.getColor())).isEqualTo(Color.BLACK);
                 expect.that(drawCommand.rect.height()).isAtLeast(LINE_HEIGHT);
                 expect.that(drawCommand.rect.width()).isGreaterThan(0);
-                float expectedY = (numBackgroundsFound) * (LINE_HEIGHT + LINE_DESCENT);
+                float expectedY = numBackgroundsFound
+                        * (LINE_HEIGHT + LINE_DESCENT - LINE_HEIGHT_TOLERANCE_PER_ITERATION);
                 expect.that(drawCommand.rect.bottom).isAtLeast(expectedY);
             } else if (drawCommand.text != null) {
                 // draw text

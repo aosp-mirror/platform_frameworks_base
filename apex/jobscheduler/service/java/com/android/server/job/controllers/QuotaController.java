@@ -394,13 +394,13 @@ public final class QuotaController extends StateController {
      * minutes to run its jobs.
      */
     private final long[] mBucketPeriodsMs = new long[]{
-            QcConstants.DEFAULT_WINDOW_SIZE_ACTIVE_MS,
-            QcConstants.DEFAULT_WINDOW_SIZE_WORKING_MS,
-            QcConstants.DEFAULT_WINDOW_SIZE_FREQUENT_MS,
+            QcConstants.DEFAULT_LEGACY_WINDOW_SIZE_ACTIVE_MS,
+            QcConstants.DEFAULT_LEGACY_WINDOW_SIZE_WORKING_MS,
+            QcConstants.DEFAULT_LEGACY_WINDOW_SIZE_FREQUENT_MS,
             QcConstants.DEFAULT_WINDOW_SIZE_RARE_MS,
             0, // NEVER
             QcConstants.DEFAULT_WINDOW_SIZE_RESTRICTED_MS,
-            QcConstants.DEFAULT_WINDOW_SIZE_EXEMPTED_MS
+            QcConstants.DEFAULT_LEGACY_WINDOW_SIZE_EXEMPTED_MS
     };
 
     /** The maximum period any bucket can have. */
@@ -454,7 +454,7 @@ public final class QuotaController extends StateController {
      */
     private final long[] mEJLimitsMs = new long[]{
             QcConstants.DEFAULT_EJ_LIMIT_ACTIVE_MS,
-            QcConstants.DEFAULT_EJ_LIMIT_WORKING_MS,
+            QcConstants.DEFAULT_LEGACY_EJ_LIMIT_WORKING_MS,
             QcConstants.DEFAULT_EJ_LIMIT_FREQUENT_MS,
             QcConstants.DEFAULT_EJ_LIMIT_RARE_MS,
             0, // NEVER
@@ -476,7 +476,8 @@ public final class QuotaController extends StateController {
     /**
      * Length of time used to split an app's top time into chunks.
      */
-    private long mEJTopAppTimeChunkSizeMs = QcConstants.DEFAULT_EJ_TOP_APP_TIME_CHUNK_SIZE_MS;
+    private long mEJTopAppTimeChunkSizeMs =
+            QcConstants.DEFAULT_LEGACY_EJ_TOP_APP_TIME_CHUNK_SIZE_MS;
 
     /**
      * How much EJ quota to give back to an app based on the number of top app time chunks it had.
@@ -486,7 +487,7 @@ public final class QuotaController extends StateController {
     /**
      * How much EJ quota to give back to an app based on each non-top user interaction.
      */
-    private long mEJRewardInteractionMs = QcConstants.DEFAULT_EJ_REWARD_INTERACTION_MS;
+    private long mEJRewardInteractionMs = QcConstants.DEFAULT_LEGACY_EJ_REWARD_INTERACTION_MS;
 
     /**
      * How much EJ quota to give back to an app based on each notification seen event.
@@ -570,6 +571,8 @@ public final class QuotaController extends StateController {
         } catch (RemoteException e) {
             // ignored; both services live in system_server
         }
+
+        processQuotaConstantsAdjustment();
     }
 
     @Override
@@ -1408,6 +1411,13 @@ public final class QuotaController extends StateController {
                     stats.expirationTimeElapsed = nowElapsed;
                 }
             }
+        }
+    }
+
+    void processQuotaConstantsAdjustment() {
+        if (Flags.adjustQuotaDefaultConstants()) {
+            mQcConstants.adjustDefaultBucketWindowSizes();
+            mQcConstants.adjustDefaultEjLimits();
         }
     }
 
@@ -3112,14 +3122,28 @@ public final class QuotaController extends StateController {
                 10 * 60 * 1000L; // 10 minutes
         private static final long DEFAULT_IN_QUOTA_BUFFER_MS =
                 30 * 1000L; // 30 seconds
-        private static final long DEFAULT_WINDOW_SIZE_EXEMPTED_MS =
+        // Legacy default window size for EXEMPTED bucket
+        private static final long DEFAULT_LEGACY_WINDOW_SIZE_EXEMPTED_MS =
                 DEFAULT_ALLOWED_TIME_PER_PERIOD_EXEMPTED_MS; // EXEMPT apps can run jobs at any time
-        private static final long DEFAULT_WINDOW_SIZE_ACTIVE_MS =
+        // Legacy default window size for ACTIVE bucket
+        private static final long DEFAULT_LEGACY_WINDOW_SIZE_ACTIVE_MS =
                 DEFAULT_ALLOWED_TIME_PER_PERIOD_ACTIVE_MS; // ACTIVE apps can run jobs at any time
-        private static final long DEFAULT_WINDOW_SIZE_WORKING_MS =
+        // Legacy default window size for WORKING bucket
+        private static final long DEFAULT_LEGACY_WINDOW_SIZE_WORKING_MS =
                 2 * 60 * 60 * 1000L; // 2 hours
-        private static final long DEFAULT_WINDOW_SIZE_FREQUENT_MS =
+        // Legacy default window size for FREQUENT bucket
+        private static final long DEFAULT_LEGACY_WINDOW_SIZE_FREQUENT_MS =
                 8 * 60 * 60 * 1000L; // 8 hours
+
+        private static final long DEFAULT_CURRENT_WINDOW_SIZE_EXEMPTED_MS =
+                20 * 60 * 1000L; // 20 minutes.
+        private static final long DEFAULT_CURRENT_WINDOW_SIZE_ACTIVE_MS =
+                30 * 60 * 1000L; // 30 minutes.
+        private static final long DEFAULT_CURRENT_WINDOW_SIZE_WORKING_MS =
+                4 * 60 * 60 * 1000L; // 4 hours
+        private static final long DEFAULT_CURRENT_WINDOW_SIZE_FREQUENT_MS =
+                12 * 60 * 60 * 1000L; // 12 hours
+
         private static final long DEFAULT_WINDOW_SIZE_RARE_MS =
                 24 * 60 * 60 * 1000L; // 24 hours
         private static final long DEFAULT_WINDOW_SIZE_RESTRICTED_MS =
@@ -3133,9 +3157,9 @@ public final class QuotaController extends StateController {
                 75; // 75/window = 450/hr = 1/session
         private static final int DEFAULT_MAX_JOB_COUNT_ACTIVE = DEFAULT_MAX_JOB_COUNT_EXEMPTED;
         private static final int DEFAULT_MAX_JOB_COUNT_WORKING = // 120/window = 60/hr = 12/session
-                (int) (60.0 * DEFAULT_WINDOW_SIZE_WORKING_MS / HOUR_IN_MILLIS);
+                (int) (60.0 * DEFAULT_LEGACY_WINDOW_SIZE_WORKING_MS / HOUR_IN_MILLIS);
         private static final int DEFAULT_MAX_JOB_COUNT_FREQUENT = // 200/window = 25/hr = 25/session
-                (int) (25.0 * DEFAULT_WINDOW_SIZE_FREQUENT_MS / HOUR_IN_MILLIS);
+                (int) (25.0 * DEFAULT_LEGACY_WINDOW_SIZE_FREQUENT_MS / HOUR_IN_MILLIS);
         private static final int DEFAULT_MAX_JOB_COUNT_RARE = // 48/window = 2/hr = 16/session
                 (int) (2.0 * DEFAULT_WINDOW_SIZE_RARE_MS / HOUR_IN_MILLIS);
         private static final int DEFAULT_MAX_JOB_COUNT_RESTRICTED = 10;
@@ -3156,16 +3180,21 @@ public final class QuotaController extends StateController {
         // TODO(267949143): set a different limit for headless system apps
         private static final long DEFAULT_EJ_LIMIT_EXEMPTED_MS = 60 * MINUTE_IN_MILLIS;
         private static final long DEFAULT_EJ_LIMIT_ACTIVE_MS = 30 * MINUTE_IN_MILLIS;
-        private static final long DEFAULT_EJ_LIMIT_WORKING_MS = DEFAULT_EJ_LIMIT_ACTIVE_MS;
+        private static final long DEFAULT_LEGACY_EJ_LIMIT_WORKING_MS = DEFAULT_EJ_LIMIT_ACTIVE_MS;
+        private static final long DEFAULT_CURRENT_EJ_LIMIT_WORKING_MS = 15 * MINUTE_IN_MILLIS;
         private static final long DEFAULT_EJ_LIMIT_FREQUENT_MS = 10 * MINUTE_IN_MILLIS;
         private static final long DEFAULT_EJ_LIMIT_RARE_MS = DEFAULT_EJ_LIMIT_FREQUENT_MS;
         private static final long DEFAULT_EJ_LIMIT_RESTRICTED_MS = 5 * MINUTE_IN_MILLIS;
         private static final long DEFAULT_EJ_LIMIT_ADDITION_SPECIAL_MS = 15 * MINUTE_IN_MILLIS;
         private static final long DEFAULT_EJ_LIMIT_ADDITION_INSTALLER_MS = 30 * MINUTE_IN_MILLIS;
         private static final long DEFAULT_EJ_WINDOW_SIZE_MS = 24 * HOUR_IN_MILLIS;
-        private static final long DEFAULT_EJ_TOP_APP_TIME_CHUNK_SIZE_MS = 30 * SECOND_IN_MILLIS;
+        private static final long DEFAULT_LEGACY_EJ_TOP_APP_TIME_CHUNK_SIZE_MS =
+                30 * SECOND_IN_MILLIS;
+        private static final long DEFAULT_CURRENT_EJ_TOP_APP_TIME_CHUNK_SIZE_MS =
+                5 * MINUTE_IN_MILLIS;
         private static final long DEFAULT_EJ_REWARD_TOP_APP_MS = 10 * SECOND_IN_MILLIS;
-        private static final long DEFAULT_EJ_REWARD_INTERACTION_MS = 15 * SECOND_IN_MILLIS;
+        private static final long DEFAULT_LEGACY_EJ_REWARD_INTERACTION_MS = 15 * SECOND_IN_MILLIS;
+        private static final long DEFAULT_CURRENT_EJ_REWARD_INTERACTION_MS = 5 * SECOND_IN_MILLIS;
         private static final long DEFAULT_EJ_REWARD_NOTIFICATION_SEEN_MS = 0;
         private static final long DEFAULT_EJ_GRACE_PERIOD_TEMP_ALLOWLIST_MS = 3 * MINUTE_IN_MILLIS;
         private static final long DEFAULT_EJ_GRACE_PERIOD_TOP_APP_MS = 1 * MINUTE_IN_MILLIS;
@@ -3215,28 +3244,28 @@ public final class QuotaController extends StateController {
          * expected to run only {@link #ALLOWED_TIME_PER_PERIOD_EXEMPTED_MS} within the past
          * WINDOW_SIZE_MS.
          */
-        public long WINDOW_SIZE_EXEMPTED_MS = DEFAULT_WINDOW_SIZE_EXEMPTED_MS;
+        public long WINDOW_SIZE_EXEMPTED_MS = DEFAULT_LEGACY_WINDOW_SIZE_EXEMPTED_MS;
 
         /**
          * The quota window size of the particular standby bucket. Apps in this standby bucket are
          * expected to run only {@link #ALLOWED_TIME_PER_PERIOD_ACTIVE_MS} within the past
          * WINDOW_SIZE_MS.
          */
-        public long WINDOW_SIZE_ACTIVE_MS = DEFAULT_WINDOW_SIZE_ACTIVE_MS;
+        public long WINDOW_SIZE_ACTIVE_MS = DEFAULT_LEGACY_WINDOW_SIZE_ACTIVE_MS;
 
         /**
          * The quota window size of the particular standby bucket. Apps in this standby bucket are
          * expected to run only {@link #ALLOWED_TIME_PER_PERIOD_WORKING_MS} within the past
          * WINDOW_SIZE_MS.
          */
-        public long WINDOW_SIZE_WORKING_MS = DEFAULT_WINDOW_SIZE_WORKING_MS;
+        public long WINDOW_SIZE_WORKING_MS = DEFAULT_LEGACY_WINDOW_SIZE_WORKING_MS;
 
         /**
          * The quota window size of the particular standby bucket. Apps in this standby bucket are
          * expected to run only {@link #ALLOWED_TIME_PER_PERIOD_FREQUENT_MS} within the past
          * WINDOW_SIZE_MS.
          */
-        public long WINDOW_SIZE_FREQUENT_MS = DEFAULT_WINDOW_SIZE_FREQUENT_MS;
+        public long WINDOW_SIZE_FREQUENT_MS = DEFAULT_LEGACY_WINDOW_SIZE_FREQUENT_MS;
 
         /**
          * The quota window size of the particular standby bucket. Apps in this standby bucket are
@@ -3397,7 +3426,7 @@ public final class QuotaController extends StateController {
          * standby bucket can only have expedited job sessions totalling EJ_LIMIT (without factoring
          * in any rewards or free EJs).
          */
-        public long EJ_LIMIT_WORKING_MS = DEFAULT_EJ_LIMIT_WORKING_MS;
+        public long EJ_LIMIT_WORKING_MS = DEFAULT_LEGACY_EJ_LIMIT_WORKING_MS;
 
         /**
          * The total expedited job session limit of the particular standby bucket. Apps in this
@@ -3441,7 +3470,7 @@ public final class QuotaController extends StateController {
         /**
          * Length of time used to split an app's top time into chunks.
          */
-        public long EJ_TOP_APP_TIME_CHUNK_SIZE_MS = DEFAULT_EJ_TOP_APP_TIME_CHUNK_SIZE_MS;
+        public long EJ_TOP_APP_TIME_CHUNK_SIZE_MS = DEFAULT_LEGACY_EJ_TOP_APP_TIME_CHUNK_SIZE_MS;
 
         /**
          * How much EJ quota to give back to an app based on the number of top app time chunks it
@@ -3452,7 +3481,7 @@ public final class QuotaController extends StateController {
         /**
          * How much EJ quota to give back to an app based on each non-top user interaction.
          */
-        public long EJ_REWARD_INTERACTION_MS = DEFAULT_EJ_REWARD_INTERACTION_MS;
+        public long EJ_REWARD_INTERACTION_MS = DEFAULT_LEGACY_EJ_REWARD_INTERACTION_MS;
 
         /**
          * How much EJ quota to give back to an app based on each notification seen event.
@@ -3469,6 +3498,52 @@ public final class QuotaController extends StateController {
          * How much additional grace period to give an app when it leaves the TOP state.
          */
         public long EJ_GRACE_PERIOD_TOP_APP_MS = DEFAULT_EJ_GRACE_PERIOD_TOP_APP_MS;
+
+        void adjustDefaultBucketWindowSizes() {
+            WINDOW_SIZE_EXEMPTED_MS = DEFAULT_CURRENT_WINDOW_SIZE_EXEMPTED_MS;
+            WINDOW_SIZE_ACTIVE_MS = DEFAULT_CURRENT_WINDOW_SIZE_ACTIVE_MS;
+            WINDOW_SIZE_WORKING_MS = DEFAULT_CURRENT_WINDOW_SIZE_WORKING_MS;
+            WINDOW_SIZE_FREQUENT_MS = DEFAULT_CURRENT_WINDOW_SIZE_FREQUENT_MS;
+
+            mBucketPeriodsMs[EXEMPTED_INDEX] = Math.max(
+                    mAllowedTimePerPeriodMs[EXEMPTED_INDEX],
+                    Math.min(MAX_PERIOD_MS, WINDOW_SIZE_EXEMPTED_MS));
+            mBucketPeriodsMs[ACTIVE_INDEX] = Math.max(
+                    mAllowedTimePerPeriodMs[ACTIVE_INDEX],
+                    Math.min(MAX_PERIOD_MS, WINDOW_SIZE_ACTIVE_MS));
+            mBucketPeriodsMs[WORKING_INDEX] = Math.max(
+                    mAllowedTimePerPeriodMs[WORKING_INDEX],
+                    Math.min(MAX_PERIOD_MS, WINDOW_SIZE_WORKING_MS));
+            mBucketPeriodsMs[FREQUENT_INDEX] = Math.max(
+                    mAllowedTimePerPeriodMs[FREQUENT_INDEX],
+                    Math.min(MAX_PERIOD_MS, WINDOW_SIZE_FREQUENT_MS));
+        }
+
+        void adjustDefaultEjLimits() {
+            EJ_LIMIT_WORKING_MS = DEFAULT_CURRENT_EJ_LIMIT_WORKING_MS;
+            EJ_TOP_APP_TIME_CHUNK_SIZE_MS = DEFAULT_CURRENT_EJ_TOP_APP_TIME_CHUNK_SIZE_MS;
+            EJ_REWARD_INTERACTION_MS = DEFAULT_CURRENT_EJ_REWARD_INTERACTION_MS;
+
+            // The limit must be in the range [15 minutes, active limit].
+            mEJLimitsMs[WORKING_INDEX] = Math.max(15 * MINUTE_IN_MILLIS,
+                        Math.min(mEJLimitsMs[ACTIVE_INDEX], EJ_LIMIT_WORKING_MS));
+
+            // Limit interaction reward to be in the range [5 seconds, 15 minutes] per event.
+            mEJRewardInteractionMs = Math.min(15 * MINUTE_IN_MILLIS,
+                        Math.max(5 * SECOND_IN_MILLIS, EJ_REWARD_INTERACTION_MS));
+
+            // Limit chunking to be in the range [1 millisecond, 15 minutes] per event.
+            long newChunkSizeMs = Math.min(15 * MINUTE_IN_MILLIS,
+                    Math.max(1, EJ_TOP_APP_TIME_CHUNK_SIZE_MS));
+            mEJTopAppTimeChunkSizeMs = newChunkSizeMs;
+            if (mEJTopAppTimeChunkSizeMs < mEJRewardTopAppMs) {
+                // Not making chunk sizes and top rewards to be the upper/lower
+                // limits of the other to allow trying different policies. Just log
+                // the discrepancy.
+                Slog.w(TAG, "EJ top app time chunk less than reward: "
+                        + mEJTopAppTimeChunkSizeMs + " vs " + mEJRewardTopAppMs);
+            }
+        }
 
         public void processConstantLocked(@NonNull DeviceConfig.Properties properties,
                 @NonNull String key) {
@@ -3638,7 +3713,9 @@ public final class QuotaController extends StateController {
                 case KEY_EJ_TOP_APP_TIME_CHUNK_SIZE_MS:
                     // We don't need to re-evaluate execution stats or constraint status for this.
                     EJ_TOP_APP_TIME_CHUNK_SIZE_MS =
-                            properties.getLong(key, DEFAULT_EJ_TOP_APP_TIME_CHUNK_SIZE_MS);
+                            properties.getLong(key, Flags.adjustQuotaDefaultConstants()
+                                    ? DEFAULT_CURRENT_EJ_TOP_APP_TIME_CHUNK_SIZE_MS :
+                                    DEFAULT_LEGACY_EJ_TOP_APP_TIME_CHUNK_SIZE_MS);
                     // Limit chunking to be in the range [1 millisecond, 15 minutes] per event.
                     long newChunkSizeMs = Math.min(15 * MINUTE_IN_MILLIS,
                             Math.max(1, EJ_TOP_APP_TIME_CHUNK_SIZE_MS));
@@ -3674,7 +3751,9 @@ public final class QuotaController extends StateController {
                 case KEY_EJ_REWARD_INTERACTION_MS:
                     // We don't need to re-evaluate execution stats or constraint status for this.
                     EJ_REWARD_INTERACTION_MS =
-                            properties.getLong(key, DEFAULT_EJ_REWARD_INTERACTION_MS);
+                            properties.getLong(key, Flags.adjustQuotaDefaultConstants()
+                                    ? DEFAULT_CURRENT_EJ_REWARD_INTERACTION_MS :
+                                    DEFAULT_LEGACY_EJ_REWARD_INTERACTION_MS);
                     // Limit interaction reward to be in the range [5 seconds, 15 minutes] per
                     // event.
                     mEJRewardInteractionMs = Math.min(15 * MINUTE_IN_MILLIS,
@@ -3748,14 +3827,23 @@ public final class QuotaController extends StateController {
             MAX_EXECUTION_TIME_MS = properties.getLong(KEY_MAX_EXECUTION_TIME_MS,
                     DEFAULT_MAX_EXECUTION_TIME_MS);
             WINDOW_SIZE_EXEMPTED_MS = properties.getLong(KEY_WINDOW_SIZE_EXEMPTED_MS,
-                    DEFAULT_WINDOW_SIZE_EXEMPTED_MS);
+                    Flags.adjustQuotaDefaultConstants()
+                            ? DEFAULT_CURRENT_WINDOW_SIZE_EXEMPTED_MS :
+                            DEFAULT_LEGACY_WINDOW_SIZE_EXEMPTED_MS);
             WINDOW_SIZE_ACTIVE_MS = properties.getLong(KEY_WINDOW_SIZE_ACTIVE_MS,
-                    DEFAULT_WINDOW_SIZE_ACTIVE_MS);
+                    Flags.adjustQuotaDefaultConstants()
+                            ? DEFAULT_CURRENT_WINDOW_SIZE_ACTIVE_MS :
+                            DEFAULT_LEGACY_WINDOW_SIZE_ACTIVE_MS);
             WINDOW_SIZE_WORKING_MS =
-                    properties.getLong(KEY_WINDOW_SIZE_WORKING_MS, DEFAULT_WINDOW_SIZE_WORKING_MS);
+                    properties.getLong(KEY_WINDOW_SIZE_WORKING_MS,
+                            Flags.adjustQuotaDefaultConstants()
+                                    ? DEFAULT_CURRENT_WINDOW_SIZE_WORKING_MS :
+                                    DEFAULT_LEGACY_WINDOW_SIZE_WORKING_MS);
             WINDOW_SIZE_FREQUENT_MS =
                     properties.getLong(KEY_WINDOW_SIZE_FREQUENT_MS,
-                            DEFAULT_WINDOW_SIZE_FREQUENT_MS);
+                            Flags.adjustQuotaDefaultConstants()
+                                    ? DEFAULT_CURRENT_WINDOW_SIZE_FREQUENT_MS :
+                                    DEFAULT_LEGACY_WINDOW_SIZE_FREQUENT_MS);
             WINDOW_SIZE_RARE_MS = properties.getLong(KEY_WINDOW_SIZE_RARE_MS,
                     DEFAULT_WINDOW_SIZE_RARE_MS);
             WINDOW_SIZE_RESTRICTED_MS =
@@ -3926,7 +4014,9 @@ public final class QuotaController extends StateController {
             EJ_LIMIT_ACTIVE_MS = properties.getLong(
                     KEY_EJ_LIMIT_ACTIVE_MS, DEFAULT_EJ_LIMIT_ACTIVE_MS);
             EJ_LIMIT_WORKING_MS = properties.getLong(
-                    KEY_EJ_LIMIT_WORKING_MS, DEFAULT_EJ_LIMIT_WORKING_MS);
+                    KEY_EJ_LIMIT_WORKING_MS, Flags.adjustQuotaDefaultConstants()
+                            ? DEFAULT_CURRENT_EJ_LIMIT_WORKING_MS :
+                            DEFAULT_LEGACY_EJ_LIMIT_WORKING_MS);
             EJ_LIMIT_FREQUENT_MS = properties.getLong(
                     KEY_EJ_LIMIT_FREQUENT_MS, DEFAULT_EJ_LIMIT_FREQUENT_MS);
             EJ_LIMIT_RARE_MS = properties.getLong(
@@ -4289,6 +4379,13 @@ public final class QuotaController extends StateController {
     @Override
     public void dumpControllerStateLocked(final IndentingPrintWriter pw,
             final Predicate<JobStatus> predicate) {
+        pw.println("Flags: ");
+        pw.println("    " + Flags.FLAG_ADJUST_QUOTA_DEFAULT_CONSTANTS
+                + ": " + Flags.adjustQuotaDefaultConstants());
+        pw.println("    " + Flags.FLAG_ENFORCE_QUOTA_POLICY_TO_FGS_JOBS
+                + ": " + Flags.enforceQuotaPolicyToFgsJobs());
+        pw.println();
+
         pw.println("Current elapsed time: " + sElapsedRealtimeClock.millis());
         pw.println();
 

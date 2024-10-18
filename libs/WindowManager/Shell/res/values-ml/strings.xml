@@ -97,9 +97,9 @@
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"ക്യാമറ പ്രശ്നങ്ങളുണ്ടോ?\nശരിയാക്കാൻ ടാപ്പ് ചെയ്യുക"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"അത് പരിഹരിച്ചില്ലേ?\nപുനഃസ്ഥാപിക്കാൻ ടാപ്പ് ചെയ്യുക"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"ക്യാമറാ പ്രശ്നങ്ങളൊന്നുമില്ലേ? നിരസിക്കാൻ ടാപ്പ് ചെയ്യുക."</string>
-    <string name="windowing_app_handle_education_tooltip" msgid="6398482412956375783">"ആപ്പ് മെനു തുറക്കാൻ ടാപ്പ് ചെയ്യുക"</string>
-    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="6285279585554484957">"ഒന്നിലധികം ആപ്പുകൾ ഒരുമിച്ച് കാണിക്കാൻ ടാപ്പ് ചെയ്യുക"</string>
-    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="6685429075790085337">"ആപ്പ് മെനുവിൽ നിന്ന് പൂർണ്ണസ്‌ക്രീനിലേക്ക് മടങ്ങുക"</string>
+    <string name="windowing_app_handle_education_tooltip" msgid="2929643449849791854">"ആപ്പ് മെനു ഇവിടെ കണ്ടെത്താനാകും"</string>
+    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="2523468503353474095">"ഒന്നിലധികം ആപ്പുകൾ ഒരുമിച്ച് തുറക്കാൻ ഡെസ്‌ക്‌‌ടോപ്പ് വ്യൂവിൽ പ്രവേശിക്കുക"</string>
+    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="5225660258192054132">"ആപ്പ് മെനുവിൽ നിന്ന് ഏതുസമയത്തും പൂർണ്ണ സ്‌ക്രീനിലേക്ക് മടങ്ങുക"</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"കൂടുതൽ കാണുക, ചെയ്യുക"</string>
     <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"സ്‌ക്രീൻ വിഭജന മോഡിന്, മറ്റൊരു ആപ്പ് വലിച്ചിടുക"</string>
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"ആപ്പിന്റെ സ്ഥാനം മാറ്റാൻ അതിന് പുറത്ത് ഡബിൾ ടാപ്പ് ചെയ്യുക"</string>

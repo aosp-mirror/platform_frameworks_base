@@ -84,7 +84,9 @@ public class MetadataSyncAdapter {
             @NonNull PackageManager packageManager, @NonNull AppSearchManager appSearchManager) {
         mPackageManager = Objects.requireNonNull(packageManager);
         mAppSearchManager = Objects.requireNonNull(appSearchManager);
-        mExecutor = Executors.newSingleThreadExecutor();
+        mExecutor =
+                Executors.newSingleThreadExecutor(
+                        new NamedThreadFactory("AppFunctionSyncExecutors"));
     }
 
     /**

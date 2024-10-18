@@ -20,12 +20,15 @@ import android.app.FragmentManager
 import android.app.FragmentTransaction
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
+import android.view.ViewGroup
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.fragments.FragmentHostManager
 import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragment
+import com.android.systemui.statusbar.phone.fragment.dagger.HomeStatusBarComponent
+import com.android.systemui.statusbar.pipeline.shared.ui.composable.StatusBarRootFactory
 import com.android.systemui.statusbar.window.StatusBarWindowController
 import com.android.systemui.statusbar.window.StatusBarWindowControllerStore
 import com.google.common.truth.Truth.assertThat
@@ -35,6 +38,8 @@ import org.junit.Before
 import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.any
+import org.mockito.kotlin.never
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
 @SmallTest
@@ -42,27 +47,31 @@ import org.mockito.kotlin.whenever
 class StatusBarInitializerTest : SysuiTestCase() {
     private val windowController = mock(StatusBarWindowController::class.java)
     private val windowControllerStore = mock(StatusBarWindowControllerStore::class.java)
+    private val transaction = mock(FragmentTransaction::class.java)
+    private val fragmentManager = mock(FragmentManager::class.java)
+    private val fragmentHostManager = mock(FragmentHostManager::class.java)
+    private val backgroundView = mock(ViewGroup::class.java)
 
     @Before
     fun setup() {
         // TODO(b/364360986) this will go away once the fragment is deprecated. Hence, there is no
         // need right now for moving this to kosmos
-        val transaction = mock(FragmentTransaction::class.java)
-        val fragmentManager = mock(FragmentManager::class.java)
-        val fragmentHostManager = mock(FragmentHostManager::class.java)
         whenever(fragmentHostManager.addTagListener(any(), any())).thenReturn(fragmentHostManager)
         whenever(fragmentHostManager.fragmentManager).thenReturn(fragmentManager)
         whenever(fragmentManager.beginTransaction()).thenReturn(transaction)
         whenever(transaction.replace(any(), any(), any())).thenReturn(transaction)
         whenever(windowControllerStore.defaultDisplay).thenReturn(windowController)
         whenever(windowController.fragmentHostManager).thenReturn(fragmentHostManager)
+        whenever(windowController.backgroundView).thenReturn(backgroundView)
     }
 
     val underTest =
         StatusBarInitializerImpl(
-            collapsedStatusBarFragmentProvider = { mock(CollapsedStatusBarFragment::class.java) },
-            creationListeners = setOf(),
             statusBarWindowController = windowController,
+            collapsedStatusBarFragmentProvider = { mock(CollapsedStatusBarFragment::class.java) },
+            statusBarRootFactory = mock(StatusBarRootFactory::class.java),
+            componentFactory = mock(HomeStatusBarComponent.Factory::class.java),
+            creationListeners = setOf(),
         )
 
     @Test
@@ -76,6 +85,15 @@ class StatusBarInitializerTest : SysuiTestCase() {
     @EnableFlags(Flags.FLAG_STATUS_BAR_SIMPLE_FRAGMENT)
     fun simpleFragment_throwsIfInitializeIsCalled() {
         assertThrows(IllegalStateException::class.java) { underTest.initializeStatusBar() }
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_STATUS_BAR_SIMPLE_FRAGMENT)
+    fun simpleFragment_flagEnabled_doesNotCreateFragment() {
+        underTest.start()
+
+        verify(fragmentManager, never()).beginTransaction()
+        verify(transaction, never()).replace(any(), any(), any())
     }
 
     @Test

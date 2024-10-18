@@ -96,6 +96,16 @@ flag {
 
 flag {
     namespace: "accessibility"
+    name: "focus_rect_min_size"
+    description: "Ensures the a11y focus rect is big enough to be drawn as visible"
+    bug: "368667566"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    namespace: "accessibility"
     name: "force_invert_color"
     description: "Enable force force-dark for smart inversion and dark theme everywhere"
     bug: "282821643"

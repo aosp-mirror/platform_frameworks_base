@@ -97,9 +97,9 @@
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Problemas com a câmara?\nToque aqui para reajustar"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Não foi corrigido?\nToque para reverter"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Nenhum problema com a câmara? Toque para ignorar."</string>
-    <string name="windowing_app_handle_education_tooltip" msgid="6398482412956375783">"Toque para abrir o menu de apps"</string>
-    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="6285279585554484957">"Toque para mostrar várias apps em conjunto"</string>
-    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="6685429075790085337">"Regresse ao ecrã inteiro a partir do menu de apps"</string>
+    <string name="windowing_app_handle_education_tooltip" msgid="2929643449849791854">"O menu da app pode ser encontrado aqui"</string>
+    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="2523468503353474095">"Entre na vista de computador para abrir várias apps em conjunto"</string>
+    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="5225660258192054132">"Regresse ao ecrã inteiro em qualquer altura a partir do menu da app"</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"Veja e faça mais"</string>
     <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"Arraste outra app para usar o ecrã dividido"</string>
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Toque duas vezes fora de uma app para a reposicionar"</string>

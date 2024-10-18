@@ -30,11 +30,11 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.SharedLibraryInfo;
 import android.content.pm.SigningInfo;
-import android.content.pm.verify.pkg.IVerificationSessionCallback;
 import android.content.pm.verify.pkg.IVerificationSessionInterface;
 import android.content.pm.verify.pkg.IVerifierService;
 import android.content.pm.verify.pkg.VerificationSession;
@@ -44,7 +44,6 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.PersistableBundle;
 import android.os.Process;
-import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.DeviceConfig;
 import android.util.Pair;
@@ -94,9 +93,22 @@ public class VerifierController {
     // Max duration allowed to wait for a verifier to respond to a verification request.
     private static final long DEFAULT_MAX_VERIFICATION_REQUEST_EXTENDED_TIMEOUT_MILLIS =
             TimeUnit.MINUTES.toMillis(10);
+    /**
+     * Configurable maximum amount of time in milliseconds for the system to wait from the moment
+     * when the installation session requires a verification, till when the request is delivered to
+     * the verifier, pending the connection to be established. If the request has not been delivered
+     * to the verifier within this amount of time, e.g., because the verifier has crashed or ANR'd,
+     * the controller then sends a failure status back to the installation session.
+     * Flag type: {@code long}
+     * Namespace: NAMESPACE_PACKAGE_MANAGER_SERVICE
+     */
+    private static final String PROPERTY_VERIFIER_CONNECTION_TIMEOUT_MILLIS =
+            "verifier_connection_timeout_millis";
     // The maximum amount of time to wait from the moment when the session requires a verification,
     // till when the request is delivered to the verifier, pending the connection to be established.
-    private static final long CONNECTION_TIMEOUT_SECONDS = 10;
+    private static final long DEFAULT_VERIFIER_CONNECTION_TIMEOUT_MILLIS =
+            TimeUnit.SECONDS.toMillis(10);
+
     // The maximum amount of time to wait before the system unbinds from the verifier.
     private static final long UNBIND_TIMEOUT_MILLIS = TimeUnit.HOURS.toMillis(6);
 
@@ -271,6 +283,7 @@ public class VerifierController {
             int installationSessionId, String packageName,
             Uri stagedPackageUri, SigningInfo signingInfo,
             List<SharedLibraryInfo> declaredLibraries,
+            @PackageInstaller.VerificationPolicy int verificationPolicy,
             PersistableBundle extensionParams, PackageInstallerSession.VerifierCallback callback,
             boolean retry) {
         // Try connecting to the verifier if not already connected
@@ -292,8 +305,7 @@ public class VerifierController {
                 /* id= */ verificationId,
                 /* installSessionId= */ installationSessionId,
                 packageName, stagedPackageUri, signingInfo, declaredLibraries, extensionParams,
-                new VerificationSessionInterface(),
-                new VerificationSessionCallback(callback));
+                verificationPolicy, new VerificationSessionInterface(callback));
         AndroidFuture<Void> unusedFuture = mRemoteService.post(service -> {
             if (!retry) {
                 if (DEBUG) {
@@ -306,7 +318,8 @@ public class VerifierController {
                 }
                 service.onVerificationRetry(session);
             }
-        }).orTimeout(CONNECTION_TIMEOUT_SECONDS, TimeUnit.SECONDS).whenComplete((res, err) -> {
+        }).orTimeout(mInjector.getVerifierConnectionTimeoutMillis(), TimeUnit.MILLISECONDS)
+                .whenComplete((res, err) -> {
             if (err != null) {
                 Slog.e(TAG, "Error notifying verification request for session " + verificationId,
                         err);
@@ -407,6 +420,12 @@ public class VerifierController {
 
     // This class handles requests from the remote verifier
     private class VerificationSessionInterface extends IVerificationSessionInterface.Stub {
+        private final PackageInstallerSession.VerifierCallback mCallback;
+
+        VerificationSessionInterface(PackageInstallerSession.VerifierCallback callback) {
+            mCallback = callback;
+        }
+
         @Override
         public long getTimeoutTime(int verificationId) {
             checkCallerPermission();
@@ -432,17 +451,23 @@ public class VerifierController {
                 return tracker.extendTimeRemaining(additionalMs);
             }
         }
-    }
 
-    private class VerificationSessionCallback extends IVerificationSessionCallback.Stub {
-        private final PackageInstallerSession.VerifierCallback mCallback;
-
-        VerificationSessionCallback(PackageInstallerSession.VerifierCallback callback) {
-            mCallback = callback;
+        @Override
+        public boolean setVerificationPolicy(int verificationId,
+                @PackageInstaller.VerificationPolicy int policy) {
+            checkCallerPermission();
+            synchronized (mVerificationStatus) {
+                final VerificationStatusTracker tracker = mVerificationStatus.get(verificationId);
+                if (tracker == null) {
+                    throw new IllegalStateException("Verification session " + verificationId
+                            + " doesn't exist or has finished");
+                }
+            }
+            return mCallback.setVerificationPolicy(policy);
         }
 
         @Override
-        public void reportVerificationIncomplete(int id, int reason) throws RemoteException {
+        public void reportVerificationIncomplete(int id, int reason) {
             checkCallerPermission();
             final VerificationStatusTracker tracker;
             synchronized (mVerificationStatus) {
@@ -451,23 +476,21 @@ public class VerifierController {
                     throw new IllegalStateException("Verification session " + id
                             + " doesn't exist or has finished");
                 }
-                mCallback.onVerificationIncompleteReceived(reason);
             }
+            mCallback.onVerificationIncompleteReceived(reason);
             // Remove status tracking and stop the timeout countdown
             removeStatusTracker(id);
         }
 
         @Override
-        public void reportVerificationComplete(int id, VerificationStatus verificationStatus)
-                throws RemoteException {
+        public void reportVerificationComplete(int id, VerificationStatus verificationStatus) {
             reportVerificationCompleteWithExtensionResponse(id, verificationStatus,
                     /* extensionResponse= */ null);
         }
 
         @Override
         public void reportVerificationCompleteWithExtensionResponse(int id,
-                VerificationStatus verificationStatus, PersistableBundle extensionResponse)
-                throws RemoteException {
+                VerificationStatus verificationStatus, PersistableBundle extensionResponse) {
             checkCallerPermission();
             final VerificationStatusTracker tracker;
             synchronized (mVerificationStatus) {
@@ -630,6 +653,14 @@ public class VerifierController {
             return getMaxVerificationExtendedTimeoutMillisFromDeviceConfig();
         }
 
+        /**
+         * This is added so that we can mock the maximum connection timeout duration without
+         * calling into DeviceConfig.
+         */
+        public long getVerifierConnectionTimeoutMillis() {
+            return getVerifierConnectionTimeoutMillisFromDeviceConfig();
+        }
+
         private static long getVerificationRequestTimeoutMillisFromDeviceConfig() {
             return DeviceConfig.getLong(NAMESPACE_PACKAGE_MANAGER_SERVICE,
                     PROPERTY_VERIFICATION_REQUEST_TIMEOUT_MILLIS,
@@ -640,6 +671,12 @@ public class VerifierController {
             return DeviceConfig.getLong(NAMESPACE_PACKAGE_MANAGER_SERVICE,
                     PROPERTY_MAX_VERIFICATION_REQUEST_EXTENDED_TIMEOUT_MILLIS,
                     DEFAULT_MAX_VERIFICATION_REQUEST_EXTENDED_TIMEOUT_MILLIS);
+        }
+
+        private static long getVerifierConnectionTimeoutMillisFromDeviceConfig() {
+            return DeviceConfig.getLong(NAMESPACE_PACKAGE_MANAGER_SERVICE,
+                    PROPERTY_VERIFIER_CONNECTION_TIMEOUT_MILLIS,
+                    DEFAULT_VERIFIER_CONNECTION_TIMEOUT_MILLIS);
         }
     }
 }

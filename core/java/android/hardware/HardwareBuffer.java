@@ -283,7 +283,7 @@ public final class HardwareBuffer implements Parcelable, AutoCloseable {
     private static NativeAllocationRegistry getRegistry(long size) {
         final long func = nGetNativeFinalizer();
         final Class cls = HardwareBuffer.class;
-        return com.android.libcore.Flags.nativeMetrics()
+        return com.android.libcore.readonly.Flags.nativeMetrics()
             ? NativeAllocationRegistry.createNonmalloced(cls, func, size)
             : NativeAllocationRegistry.createNonmalloced(cls.getClassLoader(), func, size);
     }

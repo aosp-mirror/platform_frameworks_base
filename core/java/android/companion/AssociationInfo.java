@@ -287,7 +287,7 @@ public final class AssociationInfo implements Parcelable {
     /**
      * Get the device icon of the associated device. The device icon represents the device type.
      *
-     * @return the device icon, or {@code null} if no device icon is has been set for the
+     * @return the device icon, or {@code null} if no device icon has been set for the
      * associated device.
      *
      * @see AssociationRequest.Builder#setDeviceIcon(Icon)

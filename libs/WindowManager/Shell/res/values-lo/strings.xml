@@ -97,9 +97,9 @@
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"ມີບັນຫາກ້ອງຖ່າຍຮູບບໍ?\nແຕະເພື່ອປັບໃໝ່"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"ບໍ່ໄດ້ແກ້ໄຂມັນບໍ?\nແຕະເພື່ອແປງກັບຄືນ"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"ບໍ່ມີບັນຫາກ້ອງຖ່າຍຮູບບໍ? ແຕະເພື່ອ​ປິດ​ໄວ້."</string>
-    <string name="windowing_app_handle_education_tooltip" msgid="6398482412956375783">"ແຕະເພື່ອເປີດເມນູແອັບ"</string>
-    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="6285279585554484957">"ແຕະເພື່ອສະແດງແອັບຫຼາຍລາຍການພ້ອມກັນ"</string>
-    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="6685429075790085337">"ກັບຄືນໄປຫາໂໝດເຕັມຈໍຈາກເມນູແອັບ"</string>
+    <string name="windowing_app_handle_education_tooltip" msgid="2929643449849791854">"ສາມາດເບິ່ງເມນູແອັບໄດ້ບ່ອນນີ້"</string>
+    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="2523468503353474095">"ເຂົ້າສູ່ມຸມມອງເດັສທັອບເພື່ອເປີດຫຼາຍແອັບພ້ອມກັນ"</string>
+    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="5225660258192054132">"ກັບຄືນໄປຫາໂໝດເຕັມຈໍໄດ້ທຸກເວລາຈາກເມນູແອັບ"</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"ເບິ່ງ ແລະ ເຮັດຫຼາຍຂຶ້ນ"</string>
     <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"ລາກໄປໄວ້ໃນແອັບອື່ນເພື່ອແບ່ງໜ້າຈໍ"</string>
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"ແຕະສອງເທື່ອໃສ່ນອກແອັບໃດໜຶ່ງເພື່ອຈັດຕຳແໜ່ງຂອງມັນຄືນໃໝ່"</string>

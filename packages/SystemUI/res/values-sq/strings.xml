@@ -312,6 +312,10 @@
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"Ndaj audion"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"Audioja po ndahet"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_accessibility" msgid="7604615019302091708">"për të hyrë te cilësimet e ndarjes së audios"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_dialog_message" msgid="4251807313264307426">"Muzika dhe videot e kësaj pajisjeje do të luhen në të dyja palët e kufjeve"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_dialog_title" msgid="4406818346036286793">"Ndaj audion tënde"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_dialog_subtitle" msgid="3014906864710059236">"<xliff:g id="AVAILABLE_DEVICE_NAME">%1$s</xliff:g> dhe <xliff:g id="ACTIVE_DEVICE_NAME">%2$s</xliff:g>"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_dialog_switch_to_button" msgid="7546825655978203773">"Kalo te profili \"<xliff:g id="AVAILABLE_DEVICE_NAME">%1$s</xliff:g>\""</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> bateri"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Audio"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Kufje me mikrofon"</string>
@@ -440,8 +444,7 @@
     <string name="zen_mode_on" msgid="9085304934016242591">"Aktiv"</string>
     <string name="zen_mode_on_with_details" msgid="7416143430557895497">"Aktiv • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"Joaktiv"</string>
-    <!-- no translation found for zen_mode_set_up (8231201163894922821) -->
-    <skip />
+    <string name="zen_mode_set_up" msgid="8231201163894922821">"Nuk është caktuar"</string>
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"Menaxho te cilësimet"</string>
     <string name="zen_mode_active_modes" msgid="1625850411578488856">"{count,plural, =0{Nuk ka modalitete aktive}=1{\"{mode}\" është aktiv}other{# modalitete janë aktive}}"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Nuk do të shqetësohesh nga tingujt dhe dridhjet, përveç alarmeve, alarmeve rikujtuese, ngjarjeve dhe telefonuesve që specifikon. Do të vazhdosh të dëgjosh çdo gjë që zgjedh të luash duke përfshirë muzikën, videot dhe lojërat."</string>
@@ -673,10 +676,8 @@
     <string name="stream_notification_unavailable" msgid="4313854556205836435">"Nuk ofrohet; ziles i është hequr zëri"</string>
     <string name="stream_alarm_unavailable" msgid="4059817189292197839">"Nuk ofrohet; \"Mos shqetëso\" është aktiv"</string>
     <string name="stream_media_unavailable" msgid="6823020894438959853">"Nuk ofrohet; \"Mos shqetëso\" është aktiv"</string>
-    <!-- no translation found for stream_unavailable_by_modes (3674139029490353683) -->
-    <skip />
-    <!-- no translation found for stream_unavailable_by_unknown (6908434629318171588) -->
-    <skip />
+    <string name="stream_unavailable_by_modes" msgid="3674139029490353683">"Nuk ofrohet sepse \"<xliff:g id="MODE">%s</xliff:g>\" është aktiv"</string>
+    <string name="stream_unavailable_by_unknown" msgid="6908434629318171588">"Nuk ofrohet"</string>
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. Trokit për të aktivizuar."</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. Trokit për ta caktuar te dridhja. Shërbimet e qasshmërisë mund të çaktivizohen."</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. Trokit për të çaktivizuar. Shërbimet e qasshmërisë mund të çaktivizohen."</string>
@@ -1410,38 +1411,26 @@
     <string name="launch_touchpad_tutorial_notification_content" msgid="7931085031240753226">"Mëso gjestet e bllokut me prekje"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_title" msgid="1940023776496198762">"Navigo duke përdorur tastierën dhe bllokun me prekje"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"Mëso gjestet e bllokut me prekje, shkurtoret e tastierës etj."</string>
-    <!-- no translation found for touchpad_tutorial_back_gesture_button (3104716365403620315) -->
-    <skip />
-    <!-- no translation found for touchpad_tutorial_home_gesture_button (8023973153559885624) -->
-    <skip />
+    <string name="touchpad_tutorial_back_gesture_button" msgid="3104716365403620315">"Kthehu prapa"</string>
+    <string name="touchpad_tutorial_home_gesture_button" msgid="8023973153559885624">"Shko tek ekrani bazë"</string>
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"Shiko aplikacionet e fundit"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"U krye"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Kthehu prapa"</string>
-    <!-- no translation found for touchpad_back_gesture_guidance (5352221087725906542) -->
-    <skip />
-    <!-- no translation found for touchpad_back_gesture_success_title (7370719098633023496) -->
-    <skip />
+    <string name="touchpad_back_gesture_guidance" msgid="5352221087725906542">"Rrëshqit shpejt majtas ose djathtas duke përdorur tre gishta në bllokun me prekje."</string>
+    <string name="touchpad_back_gesture_success_title" msgid="7370719098633023496">"Bukur!"</string>
     <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"E ke përfunduar gjestin e kthimit prapa."</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"Shko tek ekrani bazë"</string>
-    <!-- no translation found for touchpad_home_gesture_guidance (4178219118381915899) -->
-    <skip />
-    <!-- no translation found for touchpad_home_gesture_success_title (3648264553645798470) -->
-    <skip />
-    <!-- no translation found for touchpad_home_gesture_success_body (2590690589194027059) -->
-    <skip />
+    <string name="touchpad_home_gesture_guidance" msgid="4178219118381915899">"Rrëshqit shpejt lart me tre gishta në bllokun me prekje"</string>
+    <string name="touchpad_home_gesture_success_title" msgid="3648264553645798470">"Punë e shkëlqyer!"</string>
+    <string name="touchpad_home_gesture_success_body" msgid="2590690589194027059">"E ke përfunduar gjestin e kalimit tek ekrani bazë"</string>
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"Shiko aplikacionet e fundit"</string>
-    <!-- no translation found for touchpad_recent_apps_gesture_guidance (6304446013842271822) -->
-    <skip />
+    <string name="touchpad_recent_apps_gesture_guidance" msgid="6304446013842271822">"Rrëshqit shpejt lart dhe mbaj shtypur me tre gishta në bllokun me prekje"</string>
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"Punë e shkëlqyer!"</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"Përfundove gjestin për shikimin e aplikacioneve të fundit."</string>
-    <!-- no translation found for tutorial_action_key_title (8172535792469008169) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_guidance (5040613427202799294) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_success_title (2371827347071979571) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_success_body (1688986269491357832) -->
-    <skip />
+    <string name="tutorial_action_key_title" msgid="8172535792469008169">"Shiko të gjitha aplikacionet"</string>
+    <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"Shtyp tastin e veprimit në tastierë"</string>
+    <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"Shumë mirë!"</string>
+    <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"Përfundove gjestin për shikimin e të gjitha aplikacioneve"</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Drita e sfondit e tastierës"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Niveli: %1$d nga %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Kontrollet e shtëpisë"</string>

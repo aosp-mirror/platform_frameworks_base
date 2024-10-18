@@ -131,7 +131,9 @@ final class InputManagerCallback implements InputManagerService.WindowManagerCal
         final boolean changed = !com.android.window.flags.Flags.filterIrrelevantInputDeviceChange()
                 || updateLastInputConfigurationSources();
 
-        if (changed) {
+        // Even if the input devices are not changed, there could be other pending changes
+        // during booting. It's fine to apply earlier.
+        if (changed || !mService.mDisplayEnabled) {
             synchronized (mService.mGlobalLock) {
                 Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "inputDeviceConfigChanged");
                 mService.mRoot.forAllDisplays(DisplayContent::sendNewConfiguration);
