@@ -35,7 +35,6 @@ import static android.view.accessibility.AccessibilityNodeInfo.ACTION_CLICK;
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_LONG_CLICK;
 
 import static com.android.server.pm.UserManagerService.enforceCurrentUserIfVisibleBackgroundEnabled;
-import static com.android.window.flags.Flags.deleteCaptureDisplay;
 
 import android.accessibilityservice.AccessibilityGestureEvent;
 import android.accessibilityservice.AccessibilityService;
@@ -62,7 +61,6 @@ import android.graphics.ParcelableColorSpace;
 import android.graphics.Region;
 import android.hardware.HardwareBuffer;
 import android.hardware.display.DisplayManager;
-import android.hardware.display.DisplayManagerInternal;
 import android.hardware.usb.UsbDevice;
 import android.os.Binder;
 import android.os.Build;
@@ -104,7 +102,6 @@ import com.android.internal.inputmethod.IRemoteAccessibilityInputConnection;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.function.pooled.PooledLambda;
-import com.android.server.LocalServices;
 import com.android.server.accessibility.AccessibilityWindowManager.RemoteAccessibilityConnection;
 import com.android.server.accessibility.magnification.MagnificationProcessor;
 import com.android.server.wm.WindowManagerInternal;
@@ -1513,68 +1510,31 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
             return;
         }
         final long identity = Binder.clearCallingIdentity();
-        if (deleteCaptureDisplay()) {
-            try {
-                ScreenCapture.ScreenCaptureListener screenCaptureListener = new
-                        ScreenCapture.ScreenCaptureListener(
-                        (screenshotBuffer, result) -> {
-                            if (screenshotBuffer != null && result == 0) {
-                                sendScreenshotSuccess(screenshotBuffer, callback);
-                            } else {
-                                sendScreenshotFailure(
-                                        AccessibilityService.ERROR_TAKE_SCREENSHOT_INVALID_DISPLAY,
-                                        callback);
-                            }
+        try {
+            ScreenCapture.ScreenCaptureListener screenCaptureListener = new
+                    ScreenCapture.ScreenCaptureListener(
+                    (screenshotBuffer, result) -> {
+                        if (screenshotBuffer != null && result == 0) {
+                            sendScreenshotSuccess(screenshotBuffer, callback);
+                        } else {
+                            sendScreenshotFailure(
+                                    AccessibilityService.ERROR_TAKE_SCREENSHOT_INVALID_DISPLAY,
+                                    callback);
                         }
-                );
-                mWindowManagerService.captureDisplay(displayId, null, screenCaptureListener);
-            } catch (Exception e) {
-                sendScreenshotFailure(AccessibilityService.ERROR_TAKE_SCREENSHOT_INVALID_DISPLAY,
-                        callback);
-            } finally {
-                Binder.restoreCallingIdentity(identity);
-            }
-        } else {
-            try {
-                mMainHandler.post(PooledLambda.obtainRunnable((nonArg) -> {
-                    final ScreenshotHardwareBuffer screenshotBuffer = LocalServices
-                            .getService(DisplayManagerInternal.class).userScreenshot(displayId);
-                    if (screenshotBuffer != null) {
-                        sendScreenshotSuccess(screenshotBuffer, callback);
-                    } else {
-                        sendScreenshotFailure(
-                                AccessibilityService.ERROR_TAKE_SCREENSHOT_INVALID_DISPLAY,
-                                callback);
                     }
-                }, null).recycleOnUse());
-            } finally {
-                Binder.restoreCallingIdentity(identity);
-            }
+            );
+            mWindowManagerService.captureDisplay(displayId, null, screenCaptureListener);
+        } catch (Exception e) {
+            sendScreenshotFailure(AccessibilityService.ERROR_TAKE_SCREENSHOT_INVALID_DISPLAY,
+                    callback);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
         }
     }
 
     private void sendScreenshotSuccess(ScreenshotHardwareBuffer screenshotBuffer,
             RemoteCallback callback) {
-        if (deleteCaptureDisplay()) {
-            mMainHandler.post(PooledLambda.obtainRunnable((nonArg) -> {
-                final HardwareBuffer hardwareBuffer = screenshotBuffer.getHardwareBuffer();
-                final ParcelableColorSpace colorSpace =
-                        new ParcelableColorSpace(screenshotBuffer.getColorSpace());
-
-                final Bundle payload = new Bundle();
-                payload.putInt(KEY_ACCESSIBILITY_SCREENSHOT_STATUS,
-                        AccessibilityService.TAKE_SCREENSHOT_SUCCESS);
-                payload.putParcelable(KEY_ACCESSIBILITY_SCREENSHOT_HARDWAREBUFFER,
-                        hardwareBuffer);
-                payload.putParcelable(KEY_ACCESSIBILITY_SCREENSHOT_COLORSPACE, colorSpace);
-                payload.putLong(KEY_ACCESSIBILITY_SCREENSHOT_TIMESTAMP,
-                        SystemClock.uptimeMillis());
-
-                // Send back the result.
-                callback.sendResult(payload);
-                hardwareBuffer.close();
-            }, null).recycleOnUse());
-        } else {
+        mMainHandler.post(PooledLambda.obtainRunnable((nonArg) -> {
             final HardwareBuffer hardwareBuffer = screenshotBuffer.getHardwareBuffer();
             final ParcelableColorSpace colorSpace =
                     new ParcelableColorSpace(screenshotBuffer.getColorSpace());
@@ -1591,7 +1551,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
             // Send back the result.
             callback.sendResult(payload);
             hardwareBuffer.close();
-        }
+        }, null).recycleOnUse());
     }
 
     private void sendScreenshotFailure(@AccessibilityService.ScreenshotErrorCode int errorCode,

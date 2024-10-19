@@ -18,12 +18,13 @@ package com.android.systemui.qs.composefragment.viewmodel
 
 import android.testing.TestableLooper.RunWithLooper
 import androidx.test.filters.SmallTest
-import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.deviceentry.data.repository.fakeDeviceEntryRepository
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.sysuiStatusBarStateController
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runCurrent
 import org.junit.Test
 import org.junit.runner.RunWith
 import platform.test.runner.parameterized.ParameterizedAndroidJunit4
@@ -32,6 +33,7 @@ import platform.test.runner.parameterized.Parameters
 @SmallTest
 @RunWith(ParameterizedAndroidJunit4::class)
 @RunWithLooper
+@OptIn(ExperimentalCoroutinesApi::class)
 class QSFragmentComposeViewModelForceQSTest(private val testData: TestData) :
     AbstractQSFragmentComposeViewModelTest() {
 
@@ -39,18 +41,18 @@ class QSFragmentComposeViewModelForceQSTest(private val testData: TestData) :
     fun forceQs_orRealExpansion() =
         with(kosmos) {
             testScope.testWithinLifecycle {
-                val expansionState by collectLastValue(underTest.expansionState)
-
                 with(testData) {
                     sysuiStatusBarStateController.setState(statusBarState)
-                    underTest.isQSExpanded = expanded
+                    underTest.isQsExpanded = expanded
                     underTest.isStackScrollerOverscrolling = stackScrollerOverScrolling
                     fakeDeviceEntryRepository.setBypassEnabled(bypassEnabled)
                     underTest.isTransitioningToFullShade = transitioningToFullShade
                     underTest.isInSplitShade = inSplitShade
 
-                    underTest.qsExpansionValue = EXPANSION
-                    assertThat(expansionState!!.progress)
+                    underTest.setQsExpansionValue(EXPANSION)
+
+                    runCurrent()
+                    assertThat(underTest.expansionState.progress)
                         .isEqualTo(if (expectedForceQS) 1f else EXPANSION)
                 }
             }

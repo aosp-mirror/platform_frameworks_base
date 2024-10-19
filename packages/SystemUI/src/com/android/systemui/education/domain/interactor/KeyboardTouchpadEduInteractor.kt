@@ -18,6 +18,9 @@ package com.android.systemui.education.domain.interactor
 
 import android.os.SystemProperties
 import com.android.systemui.CoreStartable
+import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
+import com.android.systemui.contextualeducation.GestureType
+import com.android.systemui.contextualeducation.GestureType.ALL_APPS
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.education.dagger.ContextualEducationModule.EduClock
@@ -25,6 +28,13 @@ import com.android.systemui.education.data.model.GestureEduModel
 import com.android.systemui.education.shared.model.EducationInfo
 import com.android.systemui.education.shared.model.EducationUiType
 import com.android.systemui.inputdevice.data.repository.UserInputDeviceRepository
+import com.android.systemui.inputdevice.tutorial.data.repository.DeviceType
+import com.android.systemui.inputdevice.tutorial.data.repository.DeviceType.KEYBOARD
+import com.android.systemui.inputdevice.tutorial.data.repository.DeviceType.TOUCHPAD
+import com.android.systemui.inputdevice.tutorial.data.repository.TutorialSchedulerRepository
+import com.android.systemui.recents.OverviewProxyService
+import com.android.systemui.recents.OverviewProxyService.OverviewProxyListener
+import com.android.systemui.utils.coroutines.flow.conflatedCallbackFlow
 import java.time.Clock
 import javax.inject.Inject
 import kotlin.time.Duration
@@ -33,9 +43,11 @@ import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.launch
@@ -48,6 +60,8 @@ constructor(
     @Background private val backgroundScope: CoroutineScope,
     private val contextualEducationInteractor: ContextualEducationInteractor,
     private val userInputDeviceRepository: UserInputDeviceRepository,
+    private val tutorialRepository: TutorialSchedulerRepository,
+    private val overviewProxyService: OverviewProxyService,
     @EduClock private val clock: Clock,
 ) : CoreStartable {
 
@@ -59,20 +73,40 @@ constructor(
             getDurationForConfig("persist.contextual_edu.usage_session_sec", 3.days)
         val minIntervalBetweenEdu =
             getDurationForConfig("persist.contextual_edu.edu_interval_sec", 7.days)
+        val initialDelayDuration =
+            getDurationForConfig("persist.contextual_edu.initial_delay_sec", 7.days)
 
         private fun getDurationForConfig(
             systemPropertyKey: String,
-            defaultDuration: Duration
+            defaultDuration: Duration,
         ): Duration =
             SystemProperties.getLong(
                     systemPropertyKey,
-                    /* defaultValue= */ defaultDuration.inWholeSeconds
+                    /* defaultValue= */ defaultDuration.inWholeSeconds,
                 )
                 .toDuration(DurationUnit.SECONDS)
     }
 
     private val _educationTriggered = MutableStateFlow<EducationInfo?>(null)
     val educationTriggered = _educationTriggered.asStateFlow()
+
+    private val statsUpdateRequests: Flow<StatsUpdateRequest> = conflatedCallbackFlow {
+        val listener: OverviewProxyListener =
+            object : OverviewProxyListener {
+                override fun updateContextualEduStats(
+                    isTrackpadGesture: Boolean,
+                    gestureType: GestureType,
+                ) {
+                    trySendWithFailureLogging(
+                        StatsUpdateRequest(isTrackpadGesture, gestureType),
+                        TAG,
+                    )
+                }
+            }
+
+        overviewProxyService.addCallback(listener)
+        awaitClose { overviewProxyService.removeCallback(listener) }
+    }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override fun start() {
@@ -133,6 +167,16 @@ constructor(
                 contextualEducationInteractor.updateShortcutTriggerTime(it)
             }
         }
+
+        backgroundScope.launch {
+            statsUpdateRequests.collect {
+                if (it.isTrackpadGesture) {
+                    contextualEducationInteractor.updateShortcutTriggerTime(it.gestureType)
+                } else {
+                    incrementSignalCount(it.gestureType)
+                }
+            }
+        }
     }
 
     private fun isEducationNeeded(model: GestureEduModel): Boolean {
@@ -160,4 +204,41 @@ constructor(
 
     private fun getEduType(model: GestureEduModel) =
         if (model.educationShownCount > 0) EducationUiType.Notification else EducationUiType.Toast
+
+    private suspend fun incrementSignalCount(gestureType: GestureType) {
+        val targetDevice = getTargetDevice(gestureType)
+        if (isTargetDeviceConnected(targetDevice) && hasInitialDelayElapsed(targetDevice)) {
+            contextualEducationInteractor.incrementSignalCount(gestureType)
+        }
+    }
+
+    private suspend fun isTargetDeviceConnected(deviceType: DeviceType): Boolean {
+        return when (deviceType) {
+            KEYBOARD -> userInputDeviceRepository.isAnyKeyboardConnectedForUser.first().isConnected
+            TOUCHPAD -> userInputDeviceRepository.isAnyTouchpadConnectedForUser.first().isConnected
+        }
+    }
+
+    /**
+     * Keyboard shortcut education would be provided for All Apps. Touchpad gesture education would
+     * be provided for the rest of the gesture types (i.e. Home, Overview, Back). This method maps
+     * gesture to its target education device.
+     */
+    private fun getTargetDevice(gestureType: GestureType) =
+        when (gestureType) {
+            ALL_APPS -> KEYBOARD
+            else -> TOUCHPAD
+        }
+
+    private suspend fun hasInitialDelayElapsed(deviceType: DeviceType): Boolean {
+        val oobeLaunchTime = tutorialRepository.launchTime(deviceType) ?: return false
+        return clock
+            .instant()
+            .isAfter(oobeLaunchTime.plusSeconds(initialDelayDuration.inWholeSeconds))
+    }
+
+    private data class StatsUpdateRequest(
+        val isTrackpadGesture: Boolean,
+        val gestureType: GestureType,
+    )
 }

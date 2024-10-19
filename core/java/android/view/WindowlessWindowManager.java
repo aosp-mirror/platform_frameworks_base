@@ -86,7 +86,6 @@ public class WindowlessWindowManager implements IWindowSession {
     final HashMap<IBinder, ResizeCompleteCallback> mResizeCompletionForWindow =
         new HashMap<IBinder, ResizeCompleteCallback>();
 
-    private final SurfaceSession mSurfaceSession = new SurfaceSession();
     protected final SurfaceControl mRootSurface;
     private final Configuration mConfiguration;
     private final IWindowSession mRealWm;
@@ -184,13 +183,13 @@ public class WindowlessWindowManager implements IWindowSession {
             InputChannel outInputChannel, InsetsState outInsetsState,
             InsetsSourceControl.Array outActiveControls, Rect outAttachedFrame,
             float[] outSizeCompatScale) {
-        final SurfaceControl leash = new SurfaceControl.Builder(mSurfaceSession)
+        final SurfaceControl leash = new SurfaceControl.Builder()
                 .setName(attrs.getTitle().toString() + "Leash")
                 .setCallsite("WindowlessWindowManager.addToDisplay")
                 .setParent(getParentSurface(window, attrs))
                 .build();
 
-        final SurfaceControl sc = new SurfaceControl.Builder(mSurfaceSession)
+        final SurfaceControl sc = new SurfaceControl.Builder()
                 .setFormat(attrs.format)
                 .setBLASTLayer()
                 .setName(attrs.getTitle().toString())

@@ -204,8 +204,7 @@ public class UnderlyingNetworkController {
         List<NetworkCallback> oldCellCallbacks = new ArrayList<>(mCellBringupCallbacks);
         mCellBringupCallbacks.clear();
 
-        if (mVcnContext.isFlagNetworkMetricMonitorEnabled()
-                && mVcnContext.isFlagIpSecTransformStateEnabled()) {
+        if (mVcnContext.isFlagIpSecTransformStateEnabled()) {
             for (UnderlyingNetworkEvaluator evaluator : mUnderlyingNetworkRecords.values()) {
                 evaluator.close();
             }
@@ -431,8 +430,7 @@ public class UnderlyingNetworkController {
                 .getAllSubIdsInGroup(mSubscriptionGroup)
                 .equals(newSnapshot.getAllSubIdsInGroup(mSubscriptionGroup))) {
 
-            if (mVcnContext.isFlagNetworkMetricMonitorEnabled()
-                    && mVcnContext.isFlagIpSecTransformStateEnabled()) {
+            if (mVcnContext.isFlagIpSecTransformStateEnabled()) {
                 reevaluateNetworks();
             }
             return;
@@ -447,8 +445,7 @@ public class UnderlyingNetworkController {
      */
     public void updateInboundTransform(
             @NonNull UnderlyingNetworkRecord currentNetwork, @NonNull IpSecTransform transform) {
-        if (!mVcnContext.isFlagNetworkMetricMonitorEnabled()
-                || !mVcnContext.isFlagIpSecTransformStateEnabled()) {
+        if (!mVcnContext.isFlagIpSecTransformStateEnabled()) {
             logWtf("#updateInboundTransform: unexpected call; flags missing");
             return;
         }
@@ -575,8 +572,7 @@ public class UnderlyingNetworkController {
 
         @Override
         public void onLost(@NonNull Network network) {
-            if (mVcnContext.isFlagNetworkMetricMonitorEnabled()
-                    && mVcnContext.isFlagIpSecTransformStateEnabled()) {
+            if (mVcnContext.isFlagIpSecTransformStateEnabled()) {
                 mUnderlyingNetworkRecords.get(network).close();
             }
 
@@ -652,8 +648,7 @@ public class UnderlyingNetworkController {
     class NetworkEvaluatorCallbackImpl implements NetworkEvaluatorCallback {
         @Override
         public void onEvaluationResultChanged() {
-            if (!mVcnContext.isFlagNetworkMetricMonitorEnabled()
-                    || !mVcnContext.isFlagIpSecTransformStateEnabled()) {
+            if (!mVcnContext.isFlagIpSecTransformStateEnabled()) {
                 logWtf("#onEvaluationResultChanged: unexpected call; flags missing");
                 return;
             }

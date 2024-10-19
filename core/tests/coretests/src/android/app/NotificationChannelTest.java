@@ -27,6 +27,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -51,6 +52,7 @@ import android.platform.test.annotations.UsesFlags;
 import android.platform.test.flag.junit.FlagsParameterization;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.provider.MediaStore.Audio.AudioColumns;
+import android.provider.Settings;
 import android.test.mock.MockContentResolver;
 import android.util.Xml;
 
@@ -396,6 +398,29 @@ public class NotificationChannelTest {
 
         NotificationChannel restoredChannel = backUpAndRestore(channel);
         assertThat(restoredChannel.getSound()).isEqualTo(uriAfterRestoredCanonicalized);
+    }
+
+    @Test
+    public void testWriteXmlForBackup_noAccessToFile() throws Exception {
+        Uri uri = Uri.parse("content://media/1");
+
+        AudioAttributes mAudioAttributes =
+                new AudioAttributes.Builder()
+                        .setContentType(AudioAttributes.CONTENT_TYPE_UNKNOWN)
+                        .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+                        .setFlags(AudioAttributes.FLAG_AUDIBILITY_ENFORCED)
+                        .build();
+
+        NotificationChannel channel = new NotificationChannel("id", "name", 3);
+        channel.setSound(uri, mAudioAttributes);
+
+        when(mIContentProvider.canonicalize(any(), any())).thenThrow(new SecurityException(""));
+        doThrow(new SecurityException("")).when(mIContentProvider)
+                .canonicalizeAsync(any(), any(), any());
+
+        NotificationChannel restoredChannel = backUpAndRestore(channel);
+        assertThat(restoredChannel.getSound())
+                .isEqualTo(Settings.System.DEFAULT_NOTIFICATION_URI);
     }
 
     @Test

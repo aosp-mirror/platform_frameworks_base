@@ -24,7 +24,9 @@ import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_TRANSITI
 
 import android.animation.ValueAnimator;
 import android.app.ActivityManager;
+import android.os.Handler;
 import android.os.IBinder;
+import android.util.Slog;
 import android.view.SurfaceControl;
 import android.window.TransitionInfo;
 import android.window.TransitionRequestInfo;
@@ -33,6 +35,7 @@ import android.window.WindowContainerTransaction;
 import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.protolog.ProtoLog;
 import com.android.wm.shell.shared.TransactionPool;
@@ -59,6 +62,10 @@ import java.util.concurrent.Executor;
  */
 public class UnfoldTransitionHandler implements TransitionHandler, UnfoldListener {
 
+    private static final String TAG = "UnfoldTransitionHandler";
+    @VisibleForTesting
+    static final int FINISH_ANIMATION_TIMEOUT_MILLIS = 5_000;
+
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({
             DefaultDisplayChange.DEFAULT_DISPLAY_NO_CHANGE,
@@ -75,6 +82,7 @@ public class UnfoldTransitionHandler implements TransitionHandler, UnfoldListene
     private final Transitions mTransitions;
     private final Executor mExecutor;
     private final TransactionPool mTransactionPool;
+    private final Handler mHandler;
 
     @Nullable
     private TransitionFinishCallback mFinishCallback;
@@ -87,17 +95,25 @@ public class UnfoldTransitionHandler implements TransitionHandler, UnfoldListene
     private float mLastAnimationProgress = 0.0f;
     private final List<UnfoldTaskAnimator> mAnimators = new ArrayList<>();
 
+    private final Runnable mAnimationPlayingTimeoutRunnable = () -> {
+        Slog.wtf(TAG, "Timeout occurred when playing the unfold animation, "
+                + "force finishing the transition");
+        finishTransitionIfNeeded();
+    };
+
     public UnfoldTransitionHandler(ShellInit shellInit,
             ShellUnfoldProgressProvider unfoldProgressProvider,
             FullscreenUnfoldTaskAnimator fullscreenUnfoldAnimator,
             SplitTaskUnfoldAnimator splitUnfoldTaskAnimator,
             TransactionPool transactionPool,
             Executor executor,
+            Handler handler,
             Transitions transitions) {
         mUnfoldProgressProvider = unfoldProgressProvider;
         mTransitions = transitions;
         mTransactionPool = transactionPool;
         mExecutor = executor;
+        mHandler = handler;
 
         mAnimators.add(splitUnfoldTaskAnimator);
         mAnimators.add(fullscreenUnfoldAnimator);
@@ -159,6 +175,11 @@ public class UnfoldTransitionHandler implements TransitionHandler, UnfoldListene
         // finish shell transition immediately
         if (mAnimationFinished) {
             finishTransitionIfNeeded();
+        } else {
+            // TODO: b/318803244 - remove timeout handling when we could guarantee that
+            //  the animation will be always finished after receiving startAnimation
+            mHandler.removeCallbacks(mAnimationPlayingTimeoutRunnable);
+            mHandler.postDelayed(mAnimationPlayingTimeoutRunnable, FINISH_ANIMATION_TIMEOUT_MILLIS);
         }
 
         return true;
@@ -333,6 +354,7 @@ public class UnfoldTransitionHandler implements TransitionHandler, UnfoldListene
             animator.stop();
         }
 
+        mHandler.removeCallbacks(mAnimationPlayingTimeoutRunnable);
         mFinishCallback.onTransitionFinished(null);
         mFinishCallback = null;
         mTransition = null;

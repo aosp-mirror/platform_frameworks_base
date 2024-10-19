@@ -19,6 +19,7 @@ package com.android.systemui.qs.composefragment.viewmodel
 import android.app.StatusBarManager
 import android.content.testableContext
 import android.testing.TestableLooper.RunWithLooper
+import androidx.compose.runtime.snapshots.Snapshot
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.common.ui.data.repository.fakeConfigurationRepository
@@ -33,6 +34,7 @@ import com.android.systemui.statusbar.disableflags.data.model.DisableFlagsModel
 import com.android.systemui.statusbar.disableflags.data.repository.fakeDisableFlagsRepository
 import com.android.systemui.statusbar.sysuiStatusBarStateController
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -40,22 +42,21 @@ import org.junit.runner.RunWith
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 @RunWithLooper
+@OptIn(ExperimentalCoroutinesApi::class)
 class QSFragmentComposeViewModelTest : AbstractQSFragmentComposeViewModelTest() {
 
     @Test
     fun qsExpansionValueChanges_correctExpansionState() =
         with(kosmos) {
             testScope.testWithinLifecycle {
-                val expansionState by collectLastValue(underTest.expansionState)
+                underTest.setQsExpansionValue(0f)
+                assertThat(underTest.expansionState.progress).isEqualTo(0f)
 
-                underTest.qsExpansionValue = 0f
-                assertThat(expansionState!!.progress).isEqualTo(0f)
+                underTest.setQsExpansionValue(0.3f)
+                assertThat(underTest.expansionState.progress).isEqualTo(0.3f)
 
-                underTest.qsExpansionValue = 0.3f
-                assertThat(expansionState!!.progress).isEqualTo(0.3f)
-
-                underTest.qsExpansionValue = 1f
-                assertThat(expansionState!!.progress).isEqualTo(1f)
+                underTest.setQsExpansionValue(1f)
+                assertThat(underTest.expansionState.progress).isEqualTo(1f)
             }
         }
 
@@ -63,13 +64,11 @@ class QSFragmentComposeViewModelTest : AbstractQSFragmentComposeViewModelTest() 
     fun qsExpansionValueChanges_clamped() =
         with(kosmos) {
             testScope.testWithinLifecycle {
-                val expansionState by collectLastValue(underTest.expansionState)
+                underTest.setQsExpansionValue(-1f)
+                assertThat(underTest.expansionState.progress).isEqualTo(0f)
 
-                underTest.qsExpansionValue = -1f
-                assertThat(expansionState!!.progress).isEqualTo(0f)
-
-                underTest.qsExpansionValue = 2f
-                assertThat(expansionState!!.progress).isEqualTo(1f)
+                underTest.setQsExpansionValue(2f)
+                assertThat(underTest.expansionState.progress).isEqualTo(1f)
             }
         }
 
@@ -77,15 +76,13 @@ class QSFragmentComposeViewModelTest : AbstractQSFragmentComposeViewModelTest() 
     fun qqsHeaderHeight_largeScreenHeader_0() =
         with(kosmos) {
             testScope.testWithinLifecycle {
-                val qqsHeaderHeight by collectLastValue(underTest.qqsHeaderHeight)
-
                 testableContext.orCreateTestableResources.addOverride(
                     R.bool.config_use_large_screen_shade_header,
                     true,
                 )
                 fakeConfigurationRepository.onConfigurationChange()
 
-                assertThat(qqsHeaderHeight).isEqualTo(0)
+                assertThat(underTest.qqsHeaderHeight).isEqualTo(0)
             }
         }
 
@@ -93,15 +90,13 @@ class QSFragmentComposeViewModelTest : AbstractQSFragmentComposeViewModelTest() 
     fun qqsHeaderHeight_noLargeScreenHeader_providedByHelper() =
         with(kosmos) {
             testScope.testWithinLifecycle {
-                val qqsHeaderHeight by collectLastValue(underTest.qqsHeaderHeight)
-
                 testableContext.orCreateTestableResources.addOverride(
                     R.bool.config_use_large_screen_shade_header,
                     false,
                 )
                 fakeConfigurationRepository.onConfigurationChange()
 
-                assertThat(qqsHeaderHeight)
+                assertThat(underTest.qqsHeaderHeight)
                     .isEqualTo(largeScreenHeaderHelper.getLargeScreenHeaderHeight())
             }
         }
@@ -120,17 +115,17 @@ class QSFragmentComposeViewModelTest : AbstractQSFragmentComposeViewModelTest() 
     fun statusBarState_followsController() =
         with(kosmos) {
             testScope.testWithinLifecycle {
-                val statusBarState by collectLastValue(underTest.statusBarState)
-                runCurrent()
-
                 sysuiStatusBarStateController.setState(StatusBarState.SHADE)
-                assertThat(statusBarState).isEqualTo(StatusBarState.SHADE)
+                runCurrent()
+                assertThat(underTest.statusBarState).isEqualTo(StatusBarState.SHADE)
 
                 sysuiStatusBarStateController.setState(StatusBarState.KEYGUARD)
-                assertThat(statusBarState).isEqualTo(StatusBarState.KEYGUARD)
+                runCurrent()
+                assertThat(underTest.statusBarState).isEqualTo(StatusBarState.KEYGUARD)
 
                 sysuiStatusBarStateController.setState(StatusBarState.SHADE_LOCKED)
-                assertThat(statusBarState).isEqualTo(StatusBarState.SHADE_LOCKED)
+                runCurrent()
+                assertThat(underTest.statusBarState).isEqualTo(StatusBarState.SHADE_LOCKED)
             }
         }
 
@@ -138,17 +133,18 @@ class QSFragmentComposeViewModelTest : AbstractQSFragmentComposeViewModelTest() 
     fun statusBarState_changesEarlyIfUpcomingStateIsKeyguard() =
         with(kosmos) {
             testScope.testWithinLifecycle {
-                val statusBarState by collectLastValue(underTest.statusBarState)
-
                 sysuiStatusBarStateController.setState(StatusBarState.SHADE)
                 sysuiStatusBarStateController.setUpcomingState(StatusBarState.SHADE_LOCKED)
-                assertThat(statusBarState).isEqualTo(StatusBarState.SHADE)
+                runCurrent()
+                assertThat(underTest.statusBarState).isEqualTo(StatusBarState.SHADE)
 
                 sysuiStatusBarStateController.setUpcomingState(StatusBarState.KEYGUARD)
-                assertThat(statusBarState).isEqualTo(StatusBarState.KEYGUARD)
+                runCurrent()
+                assertThat(underTest.statusBarState).isEqualTo(StatusBarState.KEYGUARD)
 
                 sysuiStatusBarStateController.setUpcomingState(StatusBarState.SHADE)
-                assertThat(statusBarState).isEqualTo(StatusBarState.KEYGUARD)
+                runCurrent()
+                assertThat(underTest.statusBarState).isEqualTo(StatusBarState.KEYGUARD)
             }
         }
 
@@ -156,16 +152,16 @@ class QSFragmentComposeViewModelTest : AbstractQSFragmentComposeViewModelTest() 
     fun qsEnabled_followsRepository() =
         with(kosmos) {
             testScope.testWithinLifecycle {
-                val qsEnabled by collectLastValue(underTest.qsEnabled)
-
                 fakeDisableFlagsRepository.disableFlags.value =
                     DisableFlagsModel(disable2 = QS_DISABLE_FLAG)
+                runCurrent()
 
-                assertThat(qsEnabled).isFalse()
+                assertThat(underTest.isQsEnabled).isFalse()
 
                 fakeDisableFlagsRepository.disableFlags.value = DisableFlagsModel()
+                runCurrent()
 
-                assertThat(qsEnabled).isTrue()
+                assertThat(underTest.isQsEnabled).isTrue()
             }
         }
 
@@ -175,13 +171,16 @@ class QSFragmentComposeViewModelTest : AbstractQSFragmentComposeViewModelTest() 
             testScope.testWithinLifecycle {
                 val squishiness by collectLastValue(tileSquishinessInteractor.squishiness)
 
-                underTest.squishinessFractionValue = 0.3f
+                underTest.squishinessFraction = 0.3f
+                Snapshot.sendApplyNotifications()
                 assertThat(squishiness).isWithin(epsilon).of(0.3f.constrainSquishiness())
 
-                underTest.squishinessFractionValue = 0f
+                underTest.squishinessFraction = 0f
+                Snapshot.sendApplyNotifications()
                 assertThat(squishiness).isWithin(epsilon).of(0f.constrainSquishiness())
 
-                underTest.squishinessFractionValue = 1f
+                underTest.squishinessFraction = 1f
+                Snapshot.sendApplyNotifications()
                 assertThat(squishiness).isWithin(epsilon).of(1f.constrainSquishiness())
             }
         }
