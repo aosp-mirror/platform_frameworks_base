@@ -37,14 +37,14 @@ class CameraProtectionLoaderImplTest : SysuiTestCase() {
         overrideResource(R.string.config_protectedPhysicalCameraId, OUTER_CAMERA_PHYSICAL_ID)
         overrideResource(
             R.string.config_frontBuiltInDisplayCutoutProtection,
-            OUTER_CAMERA_PROTECTION_PATH
+            OUTER_CAMERA_PROTECTION_PATH,
         )
         overrideResource(R.string.config_protectedScreenUniqueId, OUTER_SCREEN_UNIQUE_ID)
         overrideResource(R.string.config_protectedInnerCameraId, INNER_CAMERA_LOGICAL_ID)
         overrideResource(R.string.config_protectedInnerPhysicalCameraId, INNER_CAMERA_PHYSICAL_ID)
         overrideResource(
             R.string.config_innerBuiltInDisplayCutoutProtection,
-            INNER_CAMERA_PROTECTION_PATH
+            INNER_CAMERA_PROTECTION_PATH,
         )
         overrideResource(R.string.config_protectedInnerScreenUniqueId, INNER_SCREEN_UNIQUE_ID)
     }
@@ -107,7 +107,7 @@ class CameraProtectionLoaderImplTest : SysuiTestCase() {
         private const val OUTER_CAMERA_PHYSICAL_ID = "11"
         private const val OUTER_CAMERA_PROTECTION_PATH = "M 0,0 H 10,10 V 10,10 H 0,10 Z"
         private val OUTER_CAMERA_PROTECTION_BOUNDS =
-            Rect(/* left = */ 0, /* top = */ 0, /* right = */ 10, /* bottom = */ 10)
+            Rect(/* left= */ 0, /* top= */ 0, /* right= */ 10, /* bottom= */ 10)
         private const val OUTER_SCREEN_UNIQUE_ID = "111"
         private val OUTER_CAMERA_PROTECTION_INFO =
             TestableProtectionInfo(
@@ -121,7 +121,7 @@ class CameraProtectionLoaderImplTest : SysuiTestCase() {
         private const val INNER_CAMERA_PHYSICAL_ID = "22"
         private const val INNER_CAMERA_PROTECTION_PATH = "M 0,0 H 20,20 V 20,20 H 0,20 Z"
         private val INNER_CAMERA_PROTECTION_BOUNDS =
-            Rect(/* left = */ 0, /* top = */ 0, /* right = */ 20, /* bottom = */ 20)
+            Rect(/* left= */ 0, /* top= */ 0, /* right= */ 20, /* bottom= */ 20)
         private const val INNER_SCREEN_UNIQUE_ID = "222"
         private val INNER_CAMERA_PROTECTION_INFO =
             TestableProtectionInfo(
