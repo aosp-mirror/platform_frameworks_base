@@ -35,6 +35,8 @@ import static org.mockito.Mockito.when;
 import android.app.WallpaperColors;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Icon;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
 import android.testing.TestableLooper;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -44,6 +46,7 @@ import androidx.core.graphics.drawable.IconCompat;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
+import com.android.media.flags.Flags;
 import com.android.settingslib.media.LocalMediaManager;
 import com.android.settingslib.media.MediaDevice;
 import com.android.systemui.SysuiTestCase;
@@ -737,5 +740,69 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
         mMediaOutputAdapter.updateItems();
 
         assertThat(mMediaOutputAdapter.getItemCount()).isEqualTo(updatedList.size());
+    }
+
+    @DisableFlags(Flags.FLAG_ENABLE_AUDIO_INPUT_DEVICE_ROUTING_AND_VOLUME_CONTROL)
+    @Test
+    public void getDrawableId_FlagDisabled_InputDeviceMutedIcon() {
+        assertThat(
+                mViewHolder.getDrawableId(true /* isInputDevice */, true /* isMutedVolumeIcon */))
+                .isEqualTo(R.drawable.media_output_icon_volume_off);
+    }
+
+    @DisableFlags(Flags.FLAG_ENABLE_AUDIO_INPUT_DEVICE_ROUTING_AND_VOLUME_CONTROL)
+    @Test
+    public void getDrawableId_FlagDisabled_OutputDeviceMutedIcon() {
+        assertThat(
+                mViewHolder.getDrawableId(false /* isInputDevice */, true /* isMutedVolumeIcon */))
+                .isEqualTo(R.drawable.media_output_icon_volume_off);
+    }
+
+    @DisableFlags(Flags.FLAG_ENABLE_AUDIO_INPUT_DEVICE_ROUTING_AND_VOLUME_CONTROL)
+    @Test
+    public void getDrawableId_FlagDisabled_InputDeviceUnmutedIcon() {
+        assertThat(
+                mViewHolder.getDrawableId(true /* isInputDevice */, false /* isMutedVolumeIcon */))
+                .isEqualTo(R.drawable.media_output_icon_volume);
+    }
+
+    @DisableFlags(Flags.FLAG_ENABLE_AUDIO_INPUT_DEVICE_ROUTING_AND_VOLUME_CONTROL)
+    @Test
+    public void getDrawableId_FlagDisabled_OutputDeviceUnmutedIcon() {
+        assertThat(
+                mViewHolder.getDrawableId(false /* isInputDevice */, false /* isMutedVolumeIcon */))
+                .isEqualTo(R.drawable.media_output_icon_volume);
+    }
+
+    @EnableFlags(Flags.FLAG_ENABLE_AUDIO_INPUT_DEVICE_ROUTING_AND_VOLUME_CONTROL)
+    @Test
+    public void getDrawableId_FlagEnabled_InputDeviceMutedIcon() {
+        assertThat(
+                mViewHolder.getDrawableId(true /* isInputDevice */, true /* isMutedVolumeIcon */))
+                .isEqualTo(R.drawable.ic_mic_off);
+    }
+
+    @EnableFlags(Flags.FLAG_ENABLE_AUDIO_INPUT_DEVICE_ROUTING_AND_VOLUME_CONTROL)
+    @Test
+    public void getDrawableId_FlagEnabled_OutputDeviceMutedIcon() {
+        assertThat(
+                mViewHolder.getDrawableId(false /* isInputDevice */, true /* isMutedVolumeIcon */))
+                .isEqualTo(R.drawable.media_output_icon_volume_off);
+    }
+
+    @EnableFlags(Flags.FLAG_ENABLE_AUDIO_INPUT_DEVICE_ROUTING_AND_VOLUME_CONTROL)
+    @Test
+    public void getDrawableId_FlagEnabled_InputDeviceUnmutedIcon() {
+        assertThat(
+                mViewHolder.getDrawableId(true /* isInputDevice */, false /* isMutedVolumeIcon */))
+                .isEqualTo(R.drawable.ic_mic_26dp);
+    }
+
+    @EnableFlags(Flags.FLAG_ENABLE_AUDIO_INPUT_DEVICE_ROUTING_AND_VOLUME_CONTROL)
+    @Test
+    public void getDrawableId_FlagEnabled_OutputDeviceUnmutedIcon() {
+        assertThat(
+                mViewHolder.getDrawableId(false /* isInputDevice */, false /* isMutedVolumeIcon */))
+                .isEqualTo(R.drawable.media_output_icon_volume);
     }
 }

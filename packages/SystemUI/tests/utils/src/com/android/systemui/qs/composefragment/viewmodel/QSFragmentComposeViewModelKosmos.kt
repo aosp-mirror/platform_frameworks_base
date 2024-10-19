@@ -20,6 +20,7 @@ import android.content.res.mainResources
 import androidx.lifecycle.LifecycleCoroutineScope
 import com.android.systemui.common.ui.domain.interactor.configurationInteractor
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
+import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.qs.footerActionsController
 import com.android.systemui.qs.footerActionsViewModelFactory
@@ -30,7 +31,9 @@ import com.android.systemui.shade.largeScreenHeaderHelper
 import com.android.systemui.shade.transition.largeScreenShadeInterpolator
 import com.android.systemui.statusbar.disableflags.data.repository.disableFlagsRepository
 import com.android.systemui.statusbar.sysuiStatusBarStateController
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
+@OptIn(ExperimentalCoroutinesApi::class)
 val Kosmos.qsFragmentComposeViewModelFactory by
     Kosmos.Fixture {
         object : QSFragmentComposeViewModel.Factory {
@@ -45,6 +48,7 @@ val Kosmos.qsFragmentComposeViewModelFactory by
                     sysuiStatusBarStateController,
                     deviceEntryInteractor,
                     disableFlagsRepository,
+                    keyguardTransitionInteractor,
                     largeScreenShadeInterpolator,
                     configurationInteractor,
                     largeScreenHeaderHelper,

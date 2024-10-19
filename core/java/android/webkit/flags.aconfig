@@ -11,6 +11,14 @@ flag {
 }
 
 flag {
+    name: "deprecate_start_safe_browsing"
+    is_exported: true
+    namespace: "webview"
+    description: "Deprecating startSafeBrowsing API because it is a NOOP"
+    bug: "372193372"
+}
+
+flag {
     name: "mainline_apis"
     is_exported: true
     namespace: "webview"

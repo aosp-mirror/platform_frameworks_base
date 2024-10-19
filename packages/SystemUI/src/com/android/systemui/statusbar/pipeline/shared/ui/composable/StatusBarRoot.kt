@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.pipeline.shared.ui.composable
 
-import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -50,7 +49,6 @@ import kotlinx.coroutines.launch
 class StatusBarRootFactory
 @Inject
 constructor(
-    private val context: Context,
     private val homeStatusBarViewModel: HomeStatusBarViewModel,
     private val homeStatusBarViewBinder: HomeStatusBarViewBinder,
     private val notificationIconsBinder: NotificationIconContainerStatusBarViewBinder,
@@ -59,7 +57,7 @@ constructor(
     private val ongoingCallController: OngoingCallController,
 ) {
     fun create(root: ViewGroup, andThen: (ViewGroup) -> Unit): ComposeView {
-        val composeView = ComposeView(context)
+        val composeView = ComposeView(root.context)
         composeView.apply {
             setContent {
                 StatusBarRoot(

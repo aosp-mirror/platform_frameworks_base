@@ -6752,6 +6752,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                         break;
                     }
                 }
+                ProtoLog.v(WM_DEBUG_CONFIGURATION, "Binding proc %s with config %s",
+                        wpc.mName, wpc.getConfiguration());
                 // The "info" can be the target of instrumentation.
                 return new PreBindInfo(compatibilityInfoForPackageLocked(info),
                         new Configuration(wpc.getConfiguration()));
