@@ -17,8 +17,17 @@
 package com.android.statementservice.utils
 
 import android.content.Context
+import android.content.UriRelativeFilter
+import android.content.UriRelativeFilter.FRAGMENT
+import android.content.UriRelativeFilter.PATH
+import android.content.UriRelativeFilter.QUERY
+import android.content.UriRelativeFilterGroup
+import android.content.UriRelativeFilterGroup.ACTION_ALLOW
+import android.content.UriRelativeFilterGroup.ACTION_BLOCK
 import android.content.pm.PackageManager
 import android.util.Patterns
+import com.android.statementservice.parser.parseMatchingExpression
+import com.android.statementservice.retriever.DynamicAppLinkComponent
 import com.android.statementservice.retriever.Relation
 import java.net.URL
 import java.security.MessageDigest
@@ -52,7 +61,9 @@ internal object StatementUtils {
      */
     const val ASSET_DESCRIPTOR_FIELD_RELATION = "relation"
     const val ASSET_DESCRIPTOR_FIELD_TARGET = "target"
+    const val ASSET_DESCRIPTOR_FIELD_RELATION_EXTENSIONS = "relation_extensions"
     const val DELEGATE_FIELD_DELEGATE = "include"
+    const val RELATION_EXTENSION_FIELD_DAL_COMPONENTS = "dynamic_app_link_components"
 
     val HEX_DIGITS =
         charArrayOf('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F')
@@ -160,4 +171,23 @@ internal object StatementUtils {
     // Hosts with *. for wildcard subdomain support are verified against their root domain
     fun createWebAssetString(host: String) =
         WEB_ASSET_FORMAT.format(URL("https", host.removePrefix("*."), "").toString())
+
+    fun createUriRelativeFilterGroup(component: DynamicAppLinkComponent): UriRelativeFilterGroup {
+        val group = UriRelativeFilterGroup(if (component.exclude) ACTION_BLOCK else ACTION_ALLOW)
+        component.fragment?.let {
+            val (type, filter) = parseMatchingExpression(it)
+            group.addUriRelativeFilter(UriRelativeFilter(FRAGMENT, type, filter))
+        }
+        component.path?.let {
+            val (type, filter) = parseMatchingExpression(it)
+            group.addUriRelativeFilter(UriRelativeFilter(PATH, type, filter))
+        }
+        component.query?.let {
+            for ((k, v) in it) {
+                val (type, filter) = parseMatchingExpression(k + "=" + v)
+                group.addUriRelativeFilter(UriRelativeFilter(QUERY, type, filter))
+            }
+        }
+        return group
+    }
 }

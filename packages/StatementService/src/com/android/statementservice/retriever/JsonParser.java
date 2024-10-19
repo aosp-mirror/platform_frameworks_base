@@ -46,12 +46,6 @@ public final class JsonParser {
         while (reader.hasNext()) {
             String fieldName = reader.nextName();
 
-            if (output.has(fieldName)) {
-                errorMsg = "Duplicate field name.";
-                reader.skipValue();
-                continue;
-            }
-
             JsonToken token = reader.peek();
             if (token.equals(JsonToken.BEGIN_ARRAY)) {
                 output.put(fieldName, new JSONArray(parseArray(reader)));

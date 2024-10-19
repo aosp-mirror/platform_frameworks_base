@@ -35,6 +35,7 @@ android_app {
     privileged: true,
     certificate: "platform",
     static_libs: [
+        "StatementServiceParser",
         "androidx.appcompat_appcompat",
         "androidx.collection_collection-ktx",
         "androidx.work_work-runtime",
