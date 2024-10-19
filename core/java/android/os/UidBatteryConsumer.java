@@ -109,9 +109,11 @@ public final class UidBatteryConsumer extends BatteryConsumer {
      * Returns the amount of time in milliseconds this UID spent in the specified process state.
      */
     public long getTimeInProcessStateMs(@ProcessState int state) {
-        Key key = getKey(POWER_COMPONENT_BASE, state);
-        if (key != null) {
-            return getUsageDurationMillis(key);
+        if (state != BatteryConsumer.PROCESS_STATE_UNSPECIFIED) {
+            Key key = getKey(POWER_COMPONENT_BASE, state);
+            if (key != null) {
+                return getUsageDurationMillis(key);
+            }
         }
         return 0;
     }
