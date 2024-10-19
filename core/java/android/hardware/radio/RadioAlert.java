@@ -332,6 +332,7 @@ public final class RadioAlert implements Parcelable {
         private final int mCertainty;
         private final String mTextualMessage;
         private final List<AlertArea> mAreaList;
+        @Nullable private final String mLanguage;
 
         /**
          * Constructor for alert info.
@@ -343,17 +344,19 @@ public final class RadioAlert implements Parcelable {
          * @param textualMessage Textual descriptions of the subject event
          * @param areaList The array of geographic areas to which the alert info segment in which
          *                 it appears applies
+         * @param language The optional language field of the alert info
          * @hide
          */
         public AlertInfo(@NonNull List<Integer> categoryList, int urgency,
-                int severity, int certainty,
-                String textualMessage, @NonNull List<AlertArea> areaList) {
+                int severity, int certainty, String textualMessage,
+                @NonNull List<AlertArea> areaList, @Nullable String language) {
             mCategoryList = Objects.requireNonNull(categoryList, "Category list can not be null");
             mUrgency = urgency;
             mSeverity = severity;
             mCertainty = certainty;
             mTextualMessage = textualMessage;
             mAreaList = Objects.requireNonNull(areaList, "Area list can not be null");
+            mLanguage = language;
         }
 
         private AlertInfo(Parcel in) {
@@ -364,6 +367,12 @@ public final class RadioAlert implements Parcelable {
             mTextualMessage = in.readString8();
             mAreaList = new ArrayList<>();
             in.readTypedList(mAreaList, AlertArea.CREATOR);
+            boolean hasLanguage = in.readBoolean();
+            if (hasLanguage) {
+                mLanguage = in.readString8();
+            } else {
+                mLanguage = null;
+            }
         }
 
         public static final @NonNull Creator<AlertInfo> CREATOR = new Creator<AlertInfo>() {
@@ -391,6 +400,12 @@ public final class RadioAlert implements Parcelable {
             dest.writeInt(mCertainty);
             dest.writeString8(mTextualMessage);
             dest.writeTypedList(mAreaList);
+            if (mLanguage == null) {
+                dest.writeBoolean(false);
+            } else {
+                dest.writeBoolean(true);
+                dest.writeString8(mLanguage);
+            }
         }
 
         @NonNull
@@ -398,13 +413,14 @@ public final class RadioAlert implements Parcelable {
         public String toString() {
             return "AlertInfo [categoryList=" + mCategoryList + ", urgency=" + mUrgency
                     + ", severity=" + mSeverity + ", certainty=" + mCertainty
-                    + ", textualMessage=" + mTextualMessage + ", areaList=" + mAreaList + "]";
+                    + ", textualMessage=" + mTextualMessage + ", areaList=" + mAreaList
+                    + ", language=" + mLanguage + "]";
         }
 
         @Override
         public int hashCode() {
             return Objects.hash(mCategoryList, mUrgency, mSeverity, mCertainty, mTextualMessage,
-                    mAreaList);
+                    mAreaList, mLanguage);
         }
 
         @Override
@@ -419,14 +435,14 @@ public final class RadioAlert implements Parcelable {
             return mCategoryList.equals(other.mCategoryList) && mUrgency == other.mUrgency
                     && mSeverity == other.mSeverity && mCertainty == other.mCertainty
                     && mTextualMessage.equals(other.mTextualMessage)
-                    && mAreaList.equals(other.mAreaList);
+                    && mAreaList.equals(other.mAreaList)
+                    && Objects.equals(mLanguage, other.mLanguage);
         }
     }
 
     private final int mStatus;
     private final int mMessageType;
     private final List<AlertInfo> mInfoList;
-    private final int mScope;
 
     /**
      * Constructor of radio alert message.
@@ -434,15 +450,13 @@ public final class RadioAlert implements Parcelable {
      * @param status Status of alert message
      * @param messageType Message type of alert message
      * @param infoList List of alert info
-     * @param scope Scope of alert message
      * @hide
      */
     public RadioAlert(int status, int messageType,
-            @NonNull List<AlertInfo> infoList, int scope) {
+            @NonNull List<AlertInfo> infoList) {
         mStatus = status;
         mMessageType = messageType;
         mInfoList = Objects.requireNonNull(infoList, "Alert info list can not be null");
-        mScope = scope;
     }
 
     private RadioAlert(Parcel in) {
@@ -450,7 +464,6 @@ public final class RadioAlert implements Parcelable {
         mMessageType = in.readInt();
         mInfoList = in.readParcelableList(new ArrayList<>(), AlertInfo.class.getClassLoader(),
                 AlertInfo.class);
-        mScope = in.readInt();
     }
 
     @Override
@@ -458,7 +471,6 @@ public final class RadioAlert implements Parcelable {
         dest.writeInt(mStatus);
         dest.writeInt(mMessageType);
         dest.writeParcelableList(mInfoList, /* flags= */ 0);
-        dest.writeInt(mScope);
     }
 
     @Override
@@ -470,12 +482,12 @@ public final class RadioAlert implements Parcelable {
     @Override
     public String toString() {
         return "RadioAlert [status=" + mStatus + ", messageType=" + mMessageType
-                + ", infoList= " + mInfoList + ", scope=" + mScope + "]";
+                + ", infoList= " + mInfoList + "]";
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mStatus, mMessageType, mInfoList, mScope);
+        return Objects.hash(mStatus, mMessageType, mInfoList);
     }
 
     @Override
@@ -488,7 +500,7 @@ public final class RadioAlert implements Parcelable {
         }
 
         return mStatus == other.mStatus && mMessageType == other.mMessageType
-                && mInfoList.equals(other.mInfoList) && mScope == other.mScope;
+                && mInfoList.equals(other.mInfoList);
     }
 
     public static final @NonNull Creator<RadioAlert> CREATOR = new Creator<RadioAlert>() {

@@ -475,8 +475,8 @@ public final class AssociationRequest implements Parcelable {
         }
 
         /**
-         * Set the device icon for the self-managed device and this icon will be
-         * displayed in the self-managed association dialog.
+         * Set the device icon for the self-managed device and to display the icon in the
+         * self-managed association dialog.
          *
          * @throws IllegalArgumentException if the icon is not exactly 24dp by 24dp
          * or if it is {@link Icon#TYPE_URI} or {@link Icon#TYPE_URI_ADAPTIVE_BITMAP}.

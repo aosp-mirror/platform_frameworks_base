@@ -29,6 +29,7 @@ import android.window.DesktopModeFlags
 import android.window.DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY
 import com.android.internal.protolog.ProtoLog
 import com.android.wm.shell.ShellTaskOrganizer
+import com.android.wm.shell.desktopmode.DesktopModeTransitionTypes.isExitDesktopModeTransition
 import com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE
 import com.android.wm.shell.shared.TransitionUtil
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
@@ -79,7 +80,9 @@ class DesktopTasksTransitionObserver(
     private fun removeTaskIfNeeded(info: TransitionInfo) {
         // Since we are no longer removing all the tasks [onTaskVanished], we need to remove them by
         // checking the transitions.
-        if (!TransitionUtil.isOpeningType(info.type)) return
+        if (!(TransitionUtil.isOpeningType(info.type) || info.type.isExitDesktopModeTransition())) {
+            return
+        }
         // Remove a task from the repository if the app is launched outside of desktop.
         for (change in info.changes) {
             val taskInfo = change.taskInfo

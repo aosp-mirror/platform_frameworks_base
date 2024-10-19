@@ -409,7 +409,7 @@ class InsetsSourceProvider {
         }
         final Point position = getWindowFrameSurfacePosition();
         if (!mPosition.equals(position)) {
-            mPosition.set(position.x, position.y);
+            mPosition.set(position);
             if (windowState != null && windowState.getWindowFrames().didFrameSizeChange()
                     && windowState.mWinAnimator.getShown() && mWindowContainer.okToDisplay()) {
                 mHasPendingPosition = true;
@@ -553,6 +553,7 @@ class InsetsSourceProvider {
         }
         boolean initiallyVisible = mClientVisible;
         final Point surfacePosition = getWindowFrameSurfacePosition();
+        mPosition.set(surfacePosition);
         mAdapter = new ControlAdapter(surfacePosition);
         if (mSource.getType() == WindowInsets.Type.ime()) {
             if (android.view.inputmethod.Flags.refactorInsetsController()) {

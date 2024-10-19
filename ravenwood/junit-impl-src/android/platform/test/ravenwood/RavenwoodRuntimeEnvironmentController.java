@@ -20,12 +20,14 @@ import static com.android.ravenwood.common.RavenwoodCommonUtils.RAVENWOOD_INST_R
 import static com.android.ravenwood.common.RavenwoodCommonUtils.RAVENWOOD_RESOURCE_APK;
 import static com.android.ravenwood.common.RavenwoodCommonUtils.RAVENWOOD_VERBOSE_LOGGING;
 import static com.android.ravenwood.common.RavenwoodCommonUtils.RAVENWOOD_VERSION_JAVA_SYSPROP;
+import static com.android.ravenwood.common.RavenwoodCommonUtils.getRavenwoodRuntimePath;
 
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.Instrumentation;
 import android.app.ResourcesManager;
@@ -38,6 +40,7 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
+import android.provider.DeviceConfig_host;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.util.Log;
@@ -81,6 +84,8 @@ public class RavenwoodRuntimeEnvironmentController {
     private static final String MAIN_THREAD_NAME = "RavenwoodMain";
     private static final String RAVENWOOD_NATIVE_SYSPROP_NAME = "ravenwood_sysprop";
     private static final String RAVENWOOD_NATIVE_RUNTIME_NAME = "ravenwood_runtime";
+    private static final String RAVENWOOD_BUILD_PROP =
+            getRavenwoodRuntimePath() + "ravenwood-data/build.prop";
 
     /**
      * When enabled, attempt to dump all thread stacks just before we hit the
@@ -132,9 +137,6 @@ public class RavenwoodRuntimeEnvironmentController {
 
     private static RavenwoodConfig sConfig;
     private static RavenwoodSystemProperties sProps;
-    // TODO: use the real UiAutomation class instead of a mock
-    private static UiAutomation sMockUiAutomation;
-    private static Set<String> sAdoptedPermissions = Collections.emptySet();
     private static boolean sInitialized = false;
 
     /**
@@ -158,7 +160,8 @@ public class RavenwoodRuntimeEnvironmentController {
         System.load(RavenwoodCommonUtils.getJniLibraryPath(RAVENWOOD_NATIVE_RUNTIME_NAME));
 
         // Do the basic set up for the android sysprops.
-        setSystemProperties(RavenwoodSystemProperties.DEFAULT_VALUES);
+        RavenwoodSystemProperties.initialize(RAVENWOOD_BUILD_PROP);
+        setSystemProperties(null);
 
         // Make sure libandroid_runtime is loaded.
         RavenwoodNativeLoader.loadFrameworkNativeCode();
@@ -181,7 +184,6 @@ public class RavenwoodRuntimeEnvironmentController {
                 "androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner");
 
         assertMockitoVersion();
-        sMockUiAutomation = createMockUiAutomation();
     }
 
     /**
@@ -220,14 +222,9 @@ public class RavenwoodRuntimeEnvironmentController {
 
         ActivityManager.init$ravenwood(config.mCurrentUser);
 
-        final HandlerThread main;
-        if (config.mProvideMainThread) {
-            main = new HandlerThread(MAIN_THREAD_NAME);
-            main.start();
-            Looper.setMainLooperForTest(main.getLooper());
-        } else {
-            main = null;
-        }
+        final var main = new HandlerThread(MAIN_THREAD_NAME);
+        main.start();
+        Looper.setMainLooperForTest(main.getLooper());
 
         final boolean isSelfInstrumenting =
                 Objects.equals(config.mTestPackageName, config.mTargetPackageName);
@@ -272,7 +269,7 @@ public class RavenwoodRuntimeEnvironmentController {
 
         // Prepare other fields.
         config.mInstrumentation = new Instrumentation();
-        config.mInstrumentation.basicInit(instContext, targetContext, sMockUiAutomation);
+        config.mInstrumentation.basicInit(instContext, targetContext, createMockUiAutomation());
         InstrumentationRegistry.registerInstance(config.mInstrumentation, Bundle.EMPTY);
 
         RavenwoodSystemServer.init(config);
@@ -317,23 +314,22 @@ public class RavenwoodRuntimeEnvironmentController {
             ((RavenwoodContext) config.mTargetContext).cleanUp();
             config.mTargetContext = null;
         }
-        sMockUiAutomation.dropShellPermissionIdentity();
 
-        if (config.mProvideMainThread) {
-            Looper.getMainLooper().quit();
-            Looper.clearMainLooperForTest();
-        }
+        Looper.getMainLooper().quit();
+        Looper.clearMainLooperForTest();
 
         ActivityManager.reset$ravenwood();
 
         LocalServices.removeAllServicesForTest();
         ServiceManager.reset$ravenwood();
 
-        setSystemProperties(RavenwoodSystemProperties.DEFAULT_VALUES);
+        setSystemProperties(null);
         if (sOriginalIdentityToken != -1) {
             Binder.restoreCallingIdentity(sOriginalIdentityToken);
         }
         android.os.Process.reset$ravenwood();
+
+        DeviceConfig_host.reset();
 
         try {
             ResourcesManager.setInstance(null); // Better structure needed.
@@ -388,9 +384,10 @@ public class RavenwoodRuntimeEnvironmentController {
     /**
      * Set the current configuration to the actual SystemProperties.
      */
-    private static void setSystemProperties(RavenwoodSystemProperties systemProperties) {
+    private static void setSystemProperties(@Nullable RavenwoodSystemProperties systemProperties) {
         SystemProperties.clearChangeCallbacksForTest();
         RavenwoodRuntimeNative.clearSystemProperties();
+        if (systemProperties == null) systemProperties = new RavenwoodSystemProperties();
         sProps = new RavenwoodSystemProperties(systemProperties, true);
         for (var entry : systemProperties.getValues().entrySet()) {
             RavenwoodRuntimeNative.setSystemProperty(entry.getKey(), entry.getValue());
@@ -419,28 +416,30 @@ public class RavenwoodRuntimeEnvironmentController {
                 () -> Class.forName("org.mockito.Matchers"));
     }
 
+    // TODO: use the real UiAutomation class instead of a mock
     private static UiAutomation createMockUiAutomation() {
+        final Set[] adoptedPermission = { Collections.emptySet() };
         var mock = mock(UiAutomation.class, inv -> {
             HostTestUtils.onThrowMethodCalled();
             return null;
         });
         doAnswer(inv -> {
-            sAdoptedPermissions = UiAutomation.ALL_PERMISSIONS;
+            adoptedPermission[0] = UiAutomation.ALL_PERMISSIONS;
             return null;
         }).when(mock).adoptShellPermissionIdentity();
         doAnswer(inv -> {
             if (inv.getArgument(0) == null) {
-                sAdoptedPermissions = UiAutomation.ALL_PERMISSIONS;
+                adoptedPermission[0] = UiAutomation.ALL_PERMISSIONS;
             } else {
-                sAdoptedPermissions = (Set) Set.of(inv.getArguments());
+                adoptedPermission[0] = Set.of(inv.getArguments());
             }
             return null;
         }).when(mock).adoptShellPermissionIdentity(any());
         doAnswer(inv -> {
-            sAdoptedPermissions = Collections.emptySet();
+            adoptedPermission[0] = Collections.emptySet();
             return null;
         }).when(mock).dropShellPermissionIdentity();
-        doAnswer(inv -> sAdoptedPermissions).when(mock).getAdoptedShellPermissions();
+        doAnswer(inv -> adoptedPermission[0]).when(mock).getAdoptedShellPermissions();
         return mock;
     }
 

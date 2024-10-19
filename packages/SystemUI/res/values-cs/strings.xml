@@ -312,6 +312,10 @@
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"Sdílet zvuk"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"Zvuk se sdílí"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_accessibility" msgid="7604615019302091708">"přejdete do nastavení sdílení zvuku"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_dialog_message" msgid="4251807313264307426">"Hudba a videa z tohoto zařízení se budou přehrávat na obou párech sluchátek"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_dialog_title" msgid="4406818346036286793">"Sdílet zvuk"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_dialog_subtitle" msgid="3014906864710059236">"<xliff:g id="AVAILABLE_DEVICE_NAME">%1$s</xliff:g> a <xliff:g id="ACTIVE_DEVICE_NAME">%2$s</xliff:g>"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_dialog_switch_to_button" msgid="7546825655978203773">"Přepnout na <xliff:g id="AVAILABLE_DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"Baterie: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Zvuk"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Sluchátka"</string>
@@ -672,10 +676,8 @@
     <string name="stream_notification_unavailable" msgid="4313854556205836435">"Nedostupné, protože vyzvánění je ztlumené"</string>
     <string name="stream_alarm_unavailable" msgid="4059817189292197839">"Nedostupné, protože je zapnutý režim Nerušit"</string>
     <string name="stream_media_unavailable" msgid="6823020894438959853">"Nedostupné – je zapnutý režim Nerušit"</string>
-    <!-- no translation found for stream_unavailable_by_modes (3674139029490353683) -->
-    <skip />
-    <!-- no translation found for stream_unavailable_by_unknown (6908434629318171588) -->
-    <skip />
+    <string name="stream_unavailable_by_modes" msgid="3674139029490353683">"Nedostupné, protože je zapnutý režim <xliff:g id="MODE">%s</xliff:g>"</string>
+    <string name="stream_unavailable_by_unknown" msgid="6908434629318171588">"Nedostupné"</string>
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. Klepnutím zapnete zvuk."</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. Klepnutím aktivujete režim vibrací. Služby přístupnosti mohou být ztlumeny."</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. Klepnutím vypnete zvuk. Služby přístupnosti mohou být ztlumeny."</string>
@@ -934,8 +936,8 @@
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"Přidat dlaždici na pozici <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibilit_qs_edit_tile_add_move_invalid_position" msgid="2858467994472624487">"Pozice není platná."</string>
     <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"Pozice <xliff:g id="POSITION">%1$d</xliff:g>"</string>
-    <string name="accessibility_qs_edit_tile_added" msgid="9067146040380836334">"Karta byla přidána"</string>
-    <string name="accessibility_qs_edit_tile_removed" msgid="1175925632436612036">"Karta byla odstraněna"</string>
+    <string name="accessibility_qs_edit_tile_added" msgid="9067146040380836334">"Dlaždice byla přidána"</string>
+    <string name="accessibility_qs_edit_tile_removed" msgid="1175925632436612036">"Dlaždice byla odstraněna"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"Editor rychlého nastavení"</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"Oznámení aplikace <xliff:g id="ID_1">%1$s</xliff:g>: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_settings" msgid="7098489591715844713">"Otevřít nastavení."</string>

@@ -31,13 +31,13 @@ import com.android.systemui.screenshot.data.model.DisplayContentScenarios.Activi
 import com.android.systemui.screenshot.data.model.DisplayContentScenarios.ActivityNames.YOUTUBE
 import com.android.systemui.screenshot.data.model.DisplayContentScenarios.Bounds.FREE_FORM
 import com.android.systemui.screenshot.data.model.DisplayContentScenarios.Bounds.FULL_SCREEN
-import com.android.systemui.screenshot.data.model.DisplayContentScenarios.Bounds.SPLIT_TOP
 import com.android.systemui.screenshot.data.model.DisplayContentScenarios.RootTasks
 import com.android.systemui.screenshot.data.model.DisplayContentScenarios.TaskSpec
 import com.android.systemui.screenshot.data.model.DisplayContentScenarios.freeFormApps
 import com.android.systemui.screenshot.data.model.DisplayContentScenarios.pictureInPictureApp
 import com.android.systemui.screenshot.data.model.DisplayContentScenarios.singleFullScreen
 import com.android.systemui.screenshot.data.model.DisplayContentScenarios.splitScreenApps
+import com.android.systemui.screenshot.data.model.DisplayContentScenarios.splitTop
 import com.android.systemui.screenshot.data.model.SystemUiState
 import com.android.systemui.screenshot.data.repository.profileTypeRepository
 import com.android.systemui.screenshot.policy.CapturePolicy.PolicyResult
@@ -69,6 +69,7 @@ class WorkProfilePolicyTest {
     @JvmField @Rule(order = 2) val mockitoRule: MockitoRule = MockitoJUnit.rule()
 
     @Mock lateinit var mContext: Context
+
     @Mock lateinit var mResources: Resources
 
     private val kosmos = Kosmos()
@@ -94,17 +95,11 @@ class WorkProfilePolicyTest {
                 DisplayContentModel(
                     displayId = 0,
                     systemUiState = SystemUiState(shadeExpanded = false),
-                    rootTasks = listOf(RootTasks.emptyWithNoChildTasks)
+                    rootTasks = listOf(RootTasks.emptyWithNoChildTasks),
                 )
             )
 
-        assertThat(result)
-            .isEqualTo(
-                NotMatched(
-                    WorkProfilePolicy.NAME,
-                    WORK_TASK_NOT_TOP,
-                )
-            )
+        assertThat(result).isEqualTo(NotMatched(WorkProfilePolicy.NAME, WORK_TASK_NOT_TOP))
     }
 
     @Test
@@ -114,13 +109,7 @@ class WorkProfilePolicyTest {
                 singleFullScreen(TaskSpec(taskId = 1002, name = YOUTUBE, userId = PERSONAL))
             )
 
-        assertThat(result)
-            .isEqualTo(
-                NotMatched(
-                    WorkProfilePolicy.NAME,
-                    WORK_TASK_NOT_TOP,
-                )
-            )
+        assertThat(result).isEqualTo(NotMatched(WorkProfilePolicy.NAME, WORK_TASK_NOT_TOP))
     }
 
     @Test
@@ -129,17 +118,11 @@ class WorkProfilePolicyTest {
             policy.check(
                 singleFullScreen(
                     TaskSpec(taskId = 1002, name = FILES, userId = WORK),
-                    shadeExpanded = true
+                    shadeExpanded = true,
                 )
             )
 
-        assertThat(result)
-            .isEqualTo(
-                NotMatched(
-                    WorkProfilePolicy.NAME,
-                    SHADE_EXPANDED,
-                )
-            )
+        assertThat(result).isEqualTo(NotMatched(WorkProfilePolicy.NAME, SHADE_EXPANDED))
     }
 
     @Test
@@ -156,7 +139,7 @@ class WorkProfilePolicyTest {
                         type = IsolatedTask(taskId = 1002, taskBounds = FULL_SCREEN),
                         component = ComponentName.unflattenFromString(FILES),
                         owner = UserHandle.of(WORK),
-                    )
+                    ),
                 )
             )
     }
@@ -166,9 +149,11 @@ class WorkProfilePolicyTest {
         val result =
             policy.check(
                 splitScreenApps(
-                    top = TaskSpec(taskId = 1002, name = FILES, userId = WORK),
-                    bottom = TaskSpec(taskId = 1003, name = YOUTUBE, userId = PERSONAL),
-                    focusedTaskId = 1002
+                    parentBounds = FULL_SCREEN,
+                    taskMargin = 20,
+                    first = TaskSpec(taskId = 1002, name = FILES, userId = WORK),
+                    second = TaskSpec(taskId = 1003, name = YOUTUBE, userId = PERSONAL),
+                    focusedTaskId = 1002,
                 )
             )
 
@@ -178,10 +163,10 @@ class WorkProfilePolicyTest {
                     policy = WorkProfilePolicy.NAME,
                     reason = WORK_TASK_IS_TOP,
                     CaptureParameters(
-                        type = IsolatedTask(taskId = 1002, taskBounds = SPLIT_TOP),
+                        type = IsolatedTask(taskId = 1002, taskBounds = FULL_SCREEN.splitTop(20)),
                         component = ComponentName.unflattenFromString(FILES),
                         owner = UserHandle.of(WORK),
-                    )
+                    ),
                 )
             )
     }
@@ -191,19 +176,13 @@ class WorkProfilePolicyTest {
         val result =
             policy.check(
                 splitScreenApps(
-                    top = TaskSpec(taskId = 1002, name = FILES, userId = WORK),
-                    bottom = TaskSpec(taskId = 1003, name = YOUTUBE, userId = PERSONAL),
-                    focusedTaskId = 1003
+                    first = TaskSpec(taskId = 1002, name = FILES, userId = WORK),
+                    second = TaskSpec(taskId = 1003, name = YOUTUBE, userId = PERSONAL),
+                    focusedTaskId = 1003,
                 )
             )
 
-        assertThat(result)
-            .isEqualTo(
-                NotMatched(
-                    WorkProfilePolicy.NAME,
-                    WORK_TASK_NOT_TOP,
-                )
-            )
+        assertThat(result).isEqualTo(NotMatched(WorkProfilePolicy.NAME, WORK_TASK_NOT_TOP))
     }
 
     @Test
@@ -225,7 +204,7 @@ class WorkProfilePolicyTest {
                         type = IsolatedTask(taskId = 1003, taskBounds = FULL_SCREEN),
                         component = ComponentName.unflattenFromString(FILES),
                         owner = UserHandle.of(WORK),
-                    )
+                    ),
                 )
             )
     }
@@ -238,7 +217,7 @@ class WorkProfilePolicyTest {
                 freeFormApps(
                     TaskSpec(taskId = 1002, name = YOUTUBE, userId = PERSONAL),
                     TaskSpec(taskId = 1003, name = FILES, userId = WORK),
-                    focusedTaskId = 1003
+                    focusedTaskId = 1003,
                 )
             )
 
@@ -251,7 +230,7 @@ class WorkProfilePolicyTest {
                         type = IsolatedTask(taskId = 1003, taskBounds = FREE_FORM),
                         component = ComponentName.unflattenFromString(FILES),
                         owner = UserHandle.of(WORK),
-                    )
+                    ),
                 )
             )
     }
@@ -264,16 +243,10 @@ class WorkProfilePolicyTest {
                 freeFormApps(
                     TaskSpec(taskId = 1002, name = YOUTUBE, userId = PERSONAL),
                     TaskSpec(taskId = 1003, name = FILES, userId = WORK),
-                    focusedTaskId = 1003
+                    focusedTaskId = 1003,
                 )
             )
 
-        assertThat(result)
-            .isEqualTo(
-                NotMatched(
-                    WorkProfilePolicy.NAME,
-                    DESKTOP_MODE_ENABLED,
-                )
-            )
+        assertThat(result).isEqualTo(NotMatched(WorkProfilePolicy.NAME, DESKTOP_MODE_ENABLED))
     }
 }

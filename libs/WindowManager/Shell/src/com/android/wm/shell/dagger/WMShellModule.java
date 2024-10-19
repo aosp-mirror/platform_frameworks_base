@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.dagger;
 
+import static android.window.DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_ENTER_TRANSITIONS;
 import static android.window.DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_EXIT_TRANSITIONS;
 import static android.window.DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_TASK_LIMIT;
 
@@ -596,9 +597,10 @@ public abstract class WMShellModule {
             TransactionPool transactionPool,
             Transitions transitions,
             @ShellMainThread ShellExecutor executor,
+            @ShellMainThread Handler handler,
             ShellInit shellInit) {
         return new UnfoldTransitionHandler(shellInit, progressProvider.get(), animator,
-                unfoldAnimator, transactionPool, executor, transitions);
+                unfoldAnimator, transactionPool, executor, handler, transitions);
     }
 
     @WMSingleton
@@ -727,7 +729,8 @@ public abstract class WMShellModule {
             Transitions transitions,
             RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
             InteractionJankMonitor interactionJankMonitor) {
-        return Flags.enableDesktopWindowingTransitions()
+        return (Flags.enableDesktopWindowingTransitions() ||
+            ENABLE_DESKTOP_WINDOWING_ENTER_TRANSITIONS.isTrue())
                 ? new SpringDragToDesktopTransitionHandler(context, transitions,
                         rootTaskDisplayAreaOrganizer, interactionJankMonitor)
                 : new DefaultDragToDesktopTransitionHandler(context, transitions,

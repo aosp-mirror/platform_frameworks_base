@@ -110,40 +110,6 @@ public final class AppFunctionManager {
      *
      * @param request the request to execute the app function
      * @param executor the executor to run the callback
-     * @param callback the callback to receive the function execution result. if the calling app
-     *     does not own the app function or does not have {@code
-     *     android.permission.EXECUTE_APP_FUNCTIONS_TRUSTED} or {@code
-     *     android.permission.EXECUTE_APP_FUNCTIONS}, the execution result will contain {@code
-     *     ExecuteAppFunctionResponse.RESULT_DENIED}.
-     * @deprecated Use {@link #executeAppFunction(ExecuteAppFunctionRequest, Executor,
-     *     CancellationSignal, Consumer)} instead. This method will be removed once usage references
-     *     are updated.
-     */
-    @RequiresPermission(
-            anyOf = {
-                Manifest.permission.EXECUTE_APP_FUNCTIONS_TRUSTED,
-                Manifest.permission.EXECUTE_APP_FUNCTIONS
-            },
-            conditional = true)
-    @UserHandleAware
-    @Deprecated
-    public void executeAppFunction(
-            @NonNull ExecuteAppFunctionRequest request,
-            @NonNull @CallbackExecutor Executor executor,
-            @NonNull Consumer<ExecuteAppFunctionResponse> callback) {
-        executeAppFunction(request, executor, new CancellationSignal(), callback);
-    }
-
-    /**
-     * Executes the app function.
-     *
-     * <p>Note: Applications can execute functions they define. To execute functions defined in
-     * another component, apps would need to have {@code
-     * android.permission.EXECUTE_APP_FUNCTIONS_TRUSTED} or {@code
-     * android.permission.EXECUTE_APP_FUNCTIONS}.
-     *
-     * @param request the request to execute the app function
-     * @param executor the executor to run the callback
      * @param cancellationSignal the cancellation signal to cancel the execution.
      * @param callback the callback to receive the function execution result. if the calling app
      *     does not own the app function or does not have {@code

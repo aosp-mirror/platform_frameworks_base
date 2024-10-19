@@ -25,7 +25,6 @@ import static org.mockito.Mockito.mock;
 import android.content.Context;
 import android.os.Process;
 import android.platform.test.annotations.DisableFlags;
-import android.platform.test.annotations.DisabledOnRavenwood;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.platform.test.ravenwood.RavenwoodConfig;
 import android.platform.test.ravenwood.RavenwoodConfig.Config;
@@ -66,23 +65,21 @@ public class WakelockPowerStatsCollectorTest {
     private WakelockPowerStatsLayout mStatsLayout = new WakelockPowerStatsLayout();
 
     @Before
-    public void setup() {
-        mBatteryStats = new MockBatteryStatsImpl(mClock);
+    public void setup() throws Throwable {
+        mBatteryStats = mStatsRule.getBatteryStats();
         mBatteryStats.setPowerStatsCollectorEnabled(POWER_COMPONENT_WAKELOCK, true);
         mBatteryStats.getPowerStatsCollector(POWER_COMPONENT_WAKELOCK)
                 .addConsumer(ps -> mPowerStats = ps);
         mBatteryStats.onSystemReady(mock(Context.class));
+        // onSystemReady schedules the initial power stats collection. Wait for it to finish
+        mStatsRule.waitForBackgroundThread();
     }
 
     @Test
     @DisableFlags(Flags.FLAG_FRAMEWORK_WAKELOCK_INFO)
-    @DisabledOnRavenwood(reason = "b/372292543 temporary disable")
     public void collectStats() {
         PowerStatsCollector powerStatsCollector = mBatteryStats.getPowerStatsCollector(
                 POWER_COMPONENT_WAKELOCK);
-
-        // Establish a baseline
-        powerStatsCollector.collectAndDeliverStats();
 
         mBatteryStats.forceRecordAllHistory();
 

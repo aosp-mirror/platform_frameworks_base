@@ -97,9 +97,9 @@
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"کیمرے کے مسائل؟\nدوبارہ فٹ کرنے کیلئے تھپتھپائیں"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"یہ حل نہیں ہوا؟\nلوٹانے کیلئے تھپتھپائیں"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"کوئی کیمرے کا مسئلہ نہیں ہے؟ برخاست کرنے کیلئے تھپتھپائیں۔"</string>
-    <string name="windowing_app_handle_education_tooltip" msgid="6398482412956375783">"ایپ مینو کھولنے کیلئے تھپتھپائیں"</string>
-    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="6285279585554484957">"متعدد ایپس ایک ساتھ دکھانے کیلئے تھپتھپائیں"</string>
-    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="6685429075790085337">"ایپ مینو سے مکمل اسکرین پر واپس جائیں"</string>
+    <string name="windowing_app_handle_education_tooltip" msgid="2929643449849791854">"ایپ کا مینو یہاں پایا جا سکتا ہے"</string>
+    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="2523468503353474095">"متعدد ایپس کو ایک ساتھ کھولنے کے لیے ڈیسک ٹاپ منظر میں داخل ہوں"</string>
+    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="5225660258192054132">"ایپ مینو سے کسی بھی وقت فُل اسکرین پر واپس جائیں"</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"دیکھیں اور بہت کچھ کریں"</string>
     <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"اسپلٹ اسکرین کے ليے دوسری ایپ میں گھسیٹیں"</string>
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"کسی ایپ کی پوزیشن تبدیل کرنے کے لیے اس ایپ کے باہر دو بار تھپتھپائیں"</string>

@@ -97,9 +97,9 @@
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Kamerakwessies?\nTik om aan te pas"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Nie opgelos nie?\nTik om terug te stel"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Geen kamerakwessies nie? Tik om toe te maak."</string>
-    <string name="windowing_app_handle_education_tooltip" msgid="6398482412956375783">"Tik om die appkieslys oop te maak"</string>
-    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="6285279585554484957">"Tik om verskeie apps saam te wys"</string>
-    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="6685429075790085337">"Keer terug na volskerm van die appkieslys af"</string>
+    <string name="windowing_app_handle_education_tooltip" msgid="2929643449849791854">"Die appkieslys kan hier gevind word"</string>
+    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="2523468503353474095">"Maak rekenaaraansig oop om veelvuldige apps saam oop te maak"</string>
+    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="5225660258192054132">"Keer enige tyd terug na volskerm vanaf die appkieslys"</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"Sien en doen meer"</string>
     <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"Sleep ’n ander app in vir verdeelde skerm"</string>
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Dubbeltik buite ’n program om dit te herposisioneer"</string>

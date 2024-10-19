@@ -11,6 +11,14 @@ flag {
 }
 
 flag {
+    name: "deprecate_start_safe_browsing"
+    is_exported: true
+    namespace: "webview"
+    description: "Deprecating startSafeBrowsing API because it is a NOOP"
+    bug: "372193372"
+}
+
+flag {
     name: "mainline_apis"
     is_exported: true
     namespace: "webview"
@@ -25,4 +33,12 @@ flag {
     namespace: "webview"
     description: "New feature reduce user-agent for webview"
     bug: "371034303"
+}
+
+flag {
+    name: "file_system_access"
+    is_exported: true
+    namespace: "webview"
+    description: "New APIs required by File System Access"
+    bug: "40101963"
 }

@@ -273,3 +273,12 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "platform_skin_temperature_enabled"
+    is_fixed_read_only: true
+    is_exported: true
+    namespace: "android_health_services"
+    description: "This fixed read-only flag is used to enable platform support for Skin Temperature."
+    bug: "369872443"
+}

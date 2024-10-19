@@ -168,11 +168,14 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
 
     @VisibleForTesting
     final VibrationSettings mVibrationSettings;
+    private final VibrationConfig mVibrationConfig;
     private final VibrationScaler mVibrationScaler;
     private final VibratorControlService mVibratorControlService;
     private final InputDeviceDelegate mInputDeviceDelegate;
     private final DeviceAdapter mDeviceAdapter;
 
+    @GuardedBy("mLock")
+    @Nullable private SparseArray<VibratorInfo> mVibratorInfos;
     @GuardedBy("mLock")
     @Nullable private VibratorInfo mCombinedVibratorInfo;
     @GuardedBy("mLock")
@@ -247,9 +250,9 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
         mHandler = injector.createHandler(Looper.myLooper());
         mFrameworkStatsLogger = injector.getFrameworkStatsLogger(mHandler);
 
-        VibrationConfig vibrationConfig = new VibrationConfig(context.getResources());
-        mVibrationSettings = new VibrationSettings(mContext, mHandler, vibrationConfig);
-        mVibrationScaler = new VibrationScaler(vibrationConfig, mVibrationSettings);
+        mVibrationConfig = new VibrationConfig(context.getResources());
+        mVibrationSettings = new VibrationSettings(mContext, mHandler, mVibrationConfig);
+        mVibrationScaler = new VibrationScaler(mVibrationConfig, mVibrationSettings);
         mVibratorControlService = new VibratorControlService(mContext,
                 injector.createVibratorControllerHolder(), mVibrationScaler, mVibrationSettings,
                 mFrameworkStatsLogger, mLock);
@@ -295,7 +298,9 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
             mVibratorIds = vibratorIds;
             mVibrators = new SparseArray<>(mVibratorIds.length);
             for (int vibratorId : vibratorIds) {
-                mVibrators.put(vibratorId, injector.createVibratorController(vibratorId, listener));
+                VibratorController vibratorController =
+                        injector.createVibratorController(vibratorId, listener);
+                mVibrators.put(vibratorId, vibratorController);
             }
         }
 
@@ -332,6 +337,15 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
             // Will retry to load each vibrator's info, if any request have failed.
             for (int i = 0; i < mVibrators.size(); i++) {
                 mVibrators.valueAt(i).reloadVibratorInfoIfNeeded();
+            }
+
+            synchronized (mLock) {
+                mVibratorInfos = transformAllVibratorsLocked(VibratorController::getVibratorInfo);
+                VibratorInfo[] infos = new VibratorInfo[mVibratorInfos.size()];
+                for (int i = 0; i < mVibratorInfos.size(); i++) {
+                    infos[i] = mVibratorInfos.valueAt(i);
+                }
+                mCombinedVibratorInfo = VibratorInfoFactory.create(/* id= */ -1, infos);
             }
 
             mVibrationSettings.onSystemReady();
@@ -633,7 +647,8 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                         endExternalVibrateLocked(Status.CANCELLED_SUPERSEDED, callerInfo,
                                 /* continueExternalControl= */ false);
                     } else if (mCurrentVibration != null) {
-                        if (mCurrentVibration.getVibration().canPipelineWith(vib)) {
+                        if (mCurrentVibration.getVibration().canPipelineWith(vib, mVibratorInfos,
+                                mVibrationConfig.getVibrationPipelineMaxDurationMs())) {
                             // Don't cancel the current vibration if it's pipeline-able.
                             // Note that if there is a pending next vibration that can't be
                             // pipelined, it will have already cancelled the current one, so we
@@ -1871,33 +1886,11 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
         }
     }
 
+    @Nullable
     private VibratorInfo getCombinedVibratorInfo() {
         synchronized (mLock) {
-            // Used a cached resolving vibrator if one exists.
-            if (mCombinedVibratorInfo != null) {
-                return mCombinedVibratorInfo;
-            }
-
-            // Return an empty resolving vibrator if the service has no vibrator.
-            if (mVibratorIds.length == 0) {
-                return mCombinedVibratorInfo = VibratorInfo.EMPTY_VIBRATOR_INFO;
-            }
-
-            // Combine the vibrator infos of all the service's vibrator to create a single resolving
-            // vibrator that is based on the combined info.
-            VibratorInfo[] infos = new VibratorInfo[mVibratorIds.length];
-            for (int i = 0; i < mVibratorIds.length; i++) {
-                VibratorInfo info = getVibratorInfo(mVibratorIds[i]);
-                // If any one of the service's vibrator does not have a valid vibrator info, stop
-                // trying to create and cache a combined resolving vibrator. Combine the infos only
-                // when infos for all vibrators are available.
-                if (info == null) {
-                    return null;
-                }
-                infos[i] = info;
-            }
-
-            return mCombinedVibratorInfo = VibratorInfoFactory.create(/* id= */ -1, infos);
+            // This is only initialized at system ready, when all vibrator infos are fully loaded.
+            return mCombinedVibratorInfo;
         }
     }
 

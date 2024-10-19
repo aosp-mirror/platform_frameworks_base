@@ -1417,7 +1417,7 @@ public class FullScreenMagnificationGestureHandlerTest {
     }
 
     @Test
-    @RequiresFlagsDisabled(Flags.FLAG_ENABLE_MAGNIFICATION_FOLLOWS_MOUSE)
+    @RequiresFlagsDisabled(Flags.FLAG_ENABLE_MAGNIFICATION_FOLLOWS_MOUSE_BUGFIX)
     public void testMouseMoveEventsDoNotMoveMagnifierViewport() {
         runMoveEventsDoNotMoveMagnifierViewport(InputDevice.SOURCE_MOUSE);
     }
@@ -1471,55 +1471,55 @@ public class FullScreenMagnificationGestureHandlerTest {
     }
 
     @Test
-    @RequiresFlagsDisabled(Flags.FLAG_ENABLE_MAGNIFICATION_FOLLOWS_MOUSE)
+    @RequiresFlagsDisabled(Flags.FLAG_ENABLE_MAGNIFICATION_FOLLOWS_MOUSE_BUGFIX)
     public void testMouseHoverMoveEventsDoNotMoveMagnifierViewport() {
         runHoverMoveEventsDoNotMoveMagnifierViewport(InputDevice.SOURCE_MOUSE);
     }
 
     @Test
-    @RequiresFlagsDisabled(Flags.FLAG_ENABLE_MAGNIFICATION_FOLLOWS_MOUSE)
+    @RequiresFlagsDisabled(Flags.FLAG_ENABLE_MAGNIFICATION_FOLLOWS_MOUSE_BUGFIX)
     public void testStylusHoverMoveEventsDoNotMoveMagnifierViewport() {
         runHoverMoveEventsDoNotMoveMagnifierViewport(InputDevice.SOURCE_STYLUS);
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_ENABLE_MAGNIFICATION_FOLLOWS_MOUSE)
+    @RequiresFlagsEnabled(Flags.FLAG_ENABLE_MAGNIFICATION_FOLLOWS_MOUSE_BUGFIX)
     public void testMouseHoverMoveEventsMoveMagnifierViewport() {
         runHoverMovesViewportTest(InputDevice.SOURCE_MOUSE);
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_ENABLE_MAGNIFICATION_FOLLOWS_MOUSE)
+    @RequiresFlagsEnabled(Flags.FLAG_ENABLE_MAGNIFICATION_FOLLOWS_MOUSE_BUGFIX)
     public void testStylusHoverMoveEventsMoveMagnifierViewport() {
         runHoverMovesViewportTest(InputDevice.SOURCE_STYLUS);
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_ENABLE_MAGNIFICATION_FOLLOWS_MOUSE)
+    @RequiresFlagsEnabled(Flags.FLAG_ENABLE_MAGNIFICATION_FOLLOWS_MOUSE_BUGFIX)
     public void testMouseDownEventsDoNotMoveMagnifierViewport() {
         runDownDoesNotMoveViewportTest(InputDevice.SOURCE_MOUSE);
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_ENABLE_MAGNIFICATION_FOLLOWS_MOUSE)
+    @RequiresFlagsEnabled(Flags.FLAG_ENABLE_MAGNIFICATION_FOLLOWS_MOUSE_BUGFIX)
     public void testStylusDownEventsDoNotMoveMagnifierViewport() {
         runDownDoesNotMoveViewportTest(InputDevice.SOURCE_STYLUS);
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_ENABLE_MAGNIFICATION_FOLLOWS_MOUSE)
+    @RequiresFlagsEnabled(Flags.FLAG_ENABLE_MAGNIFICATION_FOLLOWS_MOUSE_BUGFIX)
     public void testMouseUpEventsDoNotMoveMagnifierViewport() {
         runUpDoesNotMoveViewportTest(InputDevice.SOURCE_MOUSE);
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_ENABLE_MAGNIFICATION_FOLLOWS_MOUSE)
+    @RequiresFlagsEnabled(Flags.FLAG_ENABLE_MAGNIFICATION_FOLLOWS_MOUSE_BUGFIX)
     public void testStylusUpEventsDoNotMoveMagnifierViewport() {
         runUpDoesNotMoveViewportTest(InputDevice.SOURCE_STYLUS);
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_ENABLE_MAGNIFICATION_FOLLOWS_MOUSE)
+    @RequiresFlagsEnabled(Flags.FLAG_ENABLE_MAGNIFICATION_FOLLOWS_MOUSE_BUGFIX)
     public void testMouseMoveEventsMoveMagnifierViewport() {
         final EventCaptor eventCaptor = new EventCaptor();
         mMgh.setNext(eventCaptor);

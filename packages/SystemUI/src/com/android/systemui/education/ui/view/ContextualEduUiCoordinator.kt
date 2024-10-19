@@ -25,6 +25,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.os.UserHandle
+import android.view.accessibility.AccessibilityManager
 import androidx.core.app.NotificationCompat
 import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
@@ -64,12 +65,13 @@ constructor(
         context: Context,
         viewModel: ContextualEduViewModel,
         notificationManager: NotificationManager,
+        accessibilityManager: AccessibilityManager,
     ) : this(
         applicationScope,
         viewModel,
         context,
         notificationManager,
-        createDialog = { model -> ContextualEduDialog(context, model) },
+        createDialog = { model -> ContextualEduDialog(context, model, accessibilityManager) },
     )
 
     var dialog: Dialog? = null

@@ -55,7 +55,6 @@ constructor(
     shadeInteractor: ShadeInteractor,
     aodToLockscreenTransitionViewModel: AodToLockscreenTransitionViewModel,
     dozingToLockscreenTransitionViewModel: DozingToLockscreenTransitionViewModel,
-    dreamingHostedToLockscreenTransitionViewModel: DreamingHostedToLockscreenTransitionViewModel,
     dreamingToLockscreenTransitionViewModel: DreamingToLockscreenTransitionViewModel,
     goneToLockscreenTransitionViewModel: GoneToLockscreenTransitionViewModel,
     occludedToLockscreenTransitionViewModel: OccludedToLockscreenTransitionViewModel,
@@ -64,7 +63,6 @@ constructor(
     glanceableHubToLockscreenTransitionViewModel: GlanceableHubToLockscreenTransitionViewModel,
     lockscreenToAodTransitionViewModel: LockscreenToAodTransitionViewModel,
     lockscreenToDozingTransitionViewModel: LockscreenToDozingTransitionViewModel,
-    lockscreenToDreamingHostedTransitionViewModel: LockscreenToDreamingHostedTransitionViewModel,
     lockscreenToDreamingTransitionViewModel: LockscreenToDreamingTransitionViewModel,
     lockscreenToGoneTransitionViewModel: LockscreenToGoneTransitionViewModel,
     lockscreenToOccludedTransitionViewModel: LockscreenToOccludedTransitionViewModel,
@@ -90,10 +88,7 @@ constructor(
 
     /** The only time the expansion is important is while lockscreen is actively displayed */
     private val shadeExpansionAlpha =
-        combine(
-            showingLockscreen,
-            shadeInteractor.anyExpansion,
-        ) { showingLockscreen, expansion ->
+        combine(showingLockscreen, shadeInteractor.anyExpansion) { showingLockscreen, expansion ->
             if (showingLockscreen) {
                 1 - expansion
             } else {
@@ -113,7 +108,6 @@ constructor(
         merge(
             aodToLockscreenTransitionViewModel.shortcutsAlpha,
             dozingToLockscreenTransitionViewModel.shortcutsAlpha,
-            dreamingHostedToLockscreenTransitionViewModel.shortcutsAlpha,
             dreamingToLockscreenTransitionViewModel.shortcutsAlpha,
             goneToLockscreenTransitionViewModel.shortcutsAlpha,
             occludedToLockscreenTransitionViewModel.shortcutsAlpha,
@@ -127,7 +121,6 @@ constructor(
         merge(
             lockscreenToAodTransitionViewModel.shortcutsAlpha,
             lockscreenToDozingTransitionViewModel.shortcutsAlpha,
-            lockscreenToDreamingHostedTransitionViewModel.shortcutsAlpha,
             lockscreenToDreamingTransitionViewModel.shortcutsAlpha,
             lockscreenToGoneTransitionViewModel.shortcutsAlpha,
             lockscreenToOccludedTransitionViewModel.shortcutsAlpha,
@@ -138,10 +131,7 @@ constructor(
 
     /** The source of truth of alpha for all of the quick affordances on lockscreen */
     val transitionAlpha: Flow<Float> =
-        merge(
-                fadeInAlpha,
-                fadeOutAlpha,
-            )
+        merge(fadeInAlpha, fadeOutAlpha)
             .flowName("transitionAlpha")
             .stateIn(
                 scope = applicationScope,
@@ -325,9 +315,7 @@ constructor(
                     slotId = slotId,
                 )
             is KeyguardQuickAffordanceModel.Hidden ->
-                KeyguardQuickAffordanceViewModel(
-                    slotId = slotId,
-                )
+                KeyguardQuickAffordanceViewModel(slotId = slotId)
         }
     }
 

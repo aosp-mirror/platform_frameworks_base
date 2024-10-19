@@ -97,9 +97,9 @@
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Ai probleme cu camera foto?\nAtinge pentru a reîncadra"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Nu ai remediat problema?\nAtinge pentru a reveni"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Nu ai probleme cu camera foto? Atinge pentru a închide."</string>
-    <string name="windowing_app_handle_education_tooltip" msgid="6398482412956375783">"Atinge pentru a deschide meniul aplicației"</string>
-    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="6285279585554484957">"Atinge pentru a afișa mai multe aplicații împreună"</string>
-    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="6685429075790085337">"Revino la ecranul complet din meniul aplicației"</string>
+    <string name="windowing_app_handle_education_tooltip" msgid="2929643449849791854">"Meniul aplicației poate fi găsit aici"</string>
+    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="2523468503353474095">"Accesează afișarea pe desktop pentru a deschide mai multe aplicații simultan"</string>
+    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="5225660258192054132">"Revino oricând la ecranul complet din meniul aplicației"</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"Vezi și fă mai multe"</string>
     <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"Trage în altă aplicație pentru a folosi ecranul împărțit"</string>
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Atinge de două ori lângă o aplicație pentru a o repoziționa"</string>

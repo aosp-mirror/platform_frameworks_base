@@ -101,8 +101,8 @@ fun Spinner(options: List<SpinnerOption>, selectedId: Int?, setId: (id: Int) -> 
                     Modifier.background(MaterialTheme.colorScheme.surfaceContainerLow)
                         .padding(horizontal = SettingsDimension.paddingSmall),
             ) {
-                for ((index, option) in options.withIndex()) {
-                    val selected = index + 1 == selectedId
+                for (option in options) {
+                    val selected = option.id == selectedId
                     DropdownMenuItem(
                         text = { SpinnerOptionText(option = option, selected) },
                         onClick = {

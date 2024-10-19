@@ -25,6 +25,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.os.FactoryTest.FACTORY_TEST_LOW_LEVEL;
 
+import static com.android.server.wm.ActivityStarter.Request.DEFAULT_INTENT_CREATOR_UID;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.ActivityTaskSupervisor.ON_TOP;
@@ -441,6 +442,17 @@ public class ActivityStartController {
                         0 /* startFlags */, null /* profilerInfo */, userId, filterCallingUid,
                         callingPid);
                 aInfo = mService.mAmInternal.getActivityInfoForUser(aInfo, userId);
+                int creatorUid = DEFAULT_INTENT_CREATOR_UID;
+                String creatorPackage = null;
+                if (ActivityManagerService.IntentCreatorToken.isValid(intent)) {
+                    ActivityManagerService.IntentCreatorToken creatorToken =
+                            (ActivityManagerService.IntentCreatorToken) intent.getCreatorToken();
+                    if (creatorToken.getCreatorUid() != filterCallingUid) {
+                        creatorUid = creatorToken.getCreatorUid();
+                        creatorPackage = creatorToken.getCreatorPackage();
+                    }
+                    // leave creatorUid as -1 if the intent creator is the same as the launcher
+                }
 
                 if (aInfo != null) {
                     try {
@@ -454,6 +466,24 @@ public class ActivityStartController {
                         return START_CANCELED;
                     }
 
+                    if (creatorUid != DEFAULT_INTENT_CREATOR_UID) {
+                        try {
+                            NeededUriGrants creatorIntentGrants = mSupervisor.mService.mUgmInternal
+                                    .checkGrantUriPermissionFromIntent(intent, creatorUid,
+                                            aInfo.applicationInfo.packageName,
+                                            UserHandle.getUserId(aInfo.applicationInfo.uid));
+                            if (intentGrants == null) {
+                                intentGrants = creatorIntentGrants;
+                            } else {
+                                intentGrants.merge(creatorIntentGrants);
+                            }
+                        } catch (SecurityException securityException) {
+                            ActivityStarter.logForIntentRedirect(
+                                    "Creator URI Grant Caused Exception.", intent, creatorUid,
+                                    creatorPackage, filterCallingUid, callingPackage);
+                            // TODO b/368559093 - rethrow the securityException.
+                        }
+                    }
                     if ((aInfo.applicationInfo.privateFlags
                             & ApplicationInfo.PRIVATE_FLAG_CANT_SAVE_STATE) != 0) {
                         throw new IllegalArgumentException(
@@ -477,6 +507,8 @@ public class ActivityStartController {
                         .setCallingUid(callingUid)
                         .setCallingPackage(callingPackage)
                         .setCallingFeatureId(callingFeatureId)
+                        .setIntentCreatorUid(creatorUid)
+                        .setIntentCreatorPackage(creatorPackage)
                         .setRealCallingPid(realCallingPid)
                         .setRealCallingUid(realCallingUid)
                         .setActivityOptions(checkedOptions)

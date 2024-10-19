@@ -118,6 +118,7 @@ import static android.view.flags.Flags.disableDrawWakeLock;
 import static android.view.flags.Flags.sensitiveContentAppProtection;
 import static android.view.flags.Flags.sensitiveContentPrematureProtectionRemovedFix;
 import static android.view.flags.Flags.toolkitFrameRateFunctionEnablingReadOnly;
+import static android.view.flags.Flags.toolkitFrameRateTouchBoost25q1;
 import static android.view.flags.Flags.toolkitFrameRateTypingReadOnly;
 import static android.view.flags.Flags.toolkitFrameRateVelocityMappingReadOnly;
 import static android.view.flags.Flags.toolkitFrameRateViewEnablingReadOnly;
@@ -840,7 +841,6 @@ public final class ViewRootImpl implements ViewParent,
      * surfaces can ensure they do not draw into the surface inset region set by the parent window.
      */
     private SurfaceControl mBoundsLayer;
-    private final SurfaceSession mSurfaceSession = new SurfaceSession();
     private final Transaction mTransaction = new Transaction();
     private final Transaction mFrameRateTransaction = new Transaction();
 
@@ -2711,7 +2711,7 @@ public final class ViewRootImpl implements ViewParent,
      */
     public SurfaceControl updateAndGetBoundsLayer(Transaction t) {
         if (mBoundsLayer == null) {
-            mBoundsLayer = new SurfaceControl.Builder(mSurfaceSession)
+            mBoundsLayer = new SurfaceControl.Builder()
                     .setContainerLayer()
                     .setName("Bounds for - " + getTitle().toString())
                     .setParent(getSurfaceControl())
@@ -5952,7 +5952,34 @@ public final class ViewRootImpl implements ViewParent,
             // If no intersection, set bounds to empty.
             bounds.setEmpty();
         }
-        return !bounds.isEmpty();
+
+        if (bounds.isEmpty()) {
+            return false;
+        }
+
+        if (android.view.accessibility.Flags.focusRectMinSize()) {
+            adjustAccessibilityFocusedRectBoundsIfNeeded(bounds);
+        }
+
+        return true;
+    }
+
+    /**
+     * Adjusts accessibility focused rect bounds so that they are not invisible.
+     *
+     * <p>Focus bounds smaller than double the stroke width are very hard to see (or invisible).
+     * Expand the focus bounds if necessary to at least double the stroke width.
+     * @param bounds The bounds to adjust
+     */
+    @VisibleForTesting
+    public void adjustAccessibilityFocusedRectBoundsIfNeeded(Rect bounds) {
+        final int minRectLength = mAccessibilityManager.getAccessibilityFocusStrokeWidth() * 2;
+        if (bounds.width() < minRectLength || bounds.height() < minRectLength) {
+            final float missingWidth = Math.max(0, minRectLength - bounds.width());
+            final float missingHeight = Math.max(0, minRectLength - bounds.height());
+            bounds.inset(-1 * (int) Math.ceil(missingWidth / 2),
+                    -1 * (int) Math.ceil(missingHeight / 2));
+        }
     }
 
     private Drawable getAccessibilityFocusedDrawable() {
@@ -13082,6 +13109,11 @@ public final class ViewRootImpl implements ViewParent,
         boolean desiredAction = motionEventAction != MotionEvent.ACTION_OUTSIDE;
         boolean undesiredType = windowType == TYPE_INPUT_METHOD
                 && sToolkitFrameRateTypingReadOnlyFlagValue;
+
+        // don't suppress touch boost for TYPE_INPUT_METHOD in ViewRootImpl
+        if (toolkitFrameRateTouchBoost25q1()) {
+            return desiredAction && shouldEnableDvrr() && getFrameRateBoostOnTouchEnabled();
+        }
         // use toolkitSetFrameRate flag to gate the change
         return desiredAction && !undesiredType && shouldEnableDvrr()
                 && getFrameRateBoostOnTouchEnabled();

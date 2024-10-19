@@ -287,7 +287,7 @@
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"Izinkan bootloader dibuka kuncinya"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"Izinkan buka kunci OEM?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"PERINGATAN: Fitur perlindungan perangkat tidak akan berfungsi di perangkat ini saat setelan diaktifkan."</string>
-    <string name="mock_location_app" msgid="6269380172542248304">"Pilih aplikasi lokasi palsu"</string>
+    <string name="mock_location_app" msgid="6269380172542248304">"Pilih aplikasi lokasi simulasi"</string>
     <string name="mock_location_app_not_set" msgid="6972032787262831155">"Tidak ada aplikasi lokasi simulasi yang disetel"</string>
     <string name="mock_location_app_set" msgid="4706722469342913843">"Aplikasi lokasi palsu: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"Jaringan"</string>
@@ -686,9 +686,11 @@
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Aktif"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Perangkat Anda harus di-reboot agar perubahan ini diterapkan. Reboot sekarang atau batalkan."</string>
     <string name="media_transfer_wired_headphone_name" msgid="8698668536022665254">"Headphone berkabel"</string>
-    <string name="media_transfer_headphone_name" msgid="1131962659136578852">"Headphone"</string>
+    <!-- no translation found for media_transfer_headphone_name (1157798825650178478) -->
+    <skip />
     <string name="media_transfer_usb_audio_name" msgid="1789292056757821355">"Audio USB"</string>
-    <string name="media_transfer_wired_device_mic_name" msgid="7417067197803840965">"Colokan mikrofon"</string>
+    <!-- no translation found for media_transfer_wired_device_mic_name (7115192790725088698) -->
+    <skip />
     <string name="media_transfer_usb_device_mic_name" msgid="7171789543226269822">"Mikrofon USB"</string>
     <string name="media_transfer_bt_device_mic_name" msgid="1870669402238687618">"Mikrofon BT"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"Aktif"</string>

@@ -515,6 +515,23 @@ public class WindowDecorationTests extends ShellTestCase {
     }
 
     @Test
+    public void testRelayout_withPadding_setsOnResult() {
+        final ActivityManager.RunningTaskInfo taskInfo = new TestRunningTaskInfoBuilder()
+                .setDisplayId(Display.DEFAULT_DISPLAY)
+                .setBounds(TASK_BOUNDS)
+                .setPositionInParent(TASK_POSITION_IN_PARENT.x, TASK_POSITION_IN_PARENT.y)
+                .setVisible(true)
+                .build();
+        final TestWindowDecoration windowDecor = createWindowDecoration(taskInfo);
+        mRelayoutParams.mCaptionTopPadding = 50;
+
+        windowDecor.relayout(taskInfo, false /* applyStartTransactionOnDraw */,
+                true /* hasGlobalFocus */);
+
+        assertEquals(50, mRelayoutResult.mCaptionTopPadding);
+    }
+
+    @Test
     public void testRelayout_fluidResizeEnabled_freeformTask_setTaskSurfaceColor() {
         StaticMockitoSession mockitoSession = mockitoSession().mockStatic(
                 DesktopModeStatus.class).strictness(

@@ -83,9 +83,11 @@ constructor(
             }
 
             launch { viewModel.maxAlpha.collectTraced { view.setMaxAlpha(it) } }
-            launch { viewModel.scrolledToTop.collectTraced { view.setScrolledToTop(it) } }
+            launch { viewModel.shadeScrollState.collect { view.setScrollState(it) } }
             launch {
-                viewModel.expandFraction.collectTraced { view.setExpandFraction(it.coerceIn(0f, 1f)) }
+                viewModel.expandFraction.collectTraced {
+                    view.setExpandFraction(it.coerceIn(0f, 1f))
+                }
             }
             launch { viewModel.qsExpandFraction.collectTraced { view.setQsExpandFraction(it) } }
             launch {
@@ -94,7 +96,9 @@ constructor(
                 }
             }
             launch {
-                viewModel.alphaForLockscreenFadeIn.collectTraced { view.setAlphaForLockscreenFadeIn(it) }
+                viewModel.alphaForLockscreenFadeIn.collectTraced {
+                    view.setAlphaForLockscreenFadeIn(it)
+                }
             }
             launch { viewModel.isScrollable.collectTraced { view.setScrollingEnabled(it) } }
             launch { viewModel.isDozing.collectTraced { isDozing -> view.setDozing(isDozing) } }
@@ -109,9 +113,13 @@ constructor(
                     .collectTraced { view.setStackTop(-(view.getHeadsUpInset().toFloat())) }
             }
             launch {
-                viewModel.shouldCloseGuts.filter { it }.collectTraced { view.closeGutsOnSceneTouch() }
+                viewModel.shouldCloseGuts
+                    .filter { it }
+                    .collectTraced { view.closeGutsOnSceneTouch() }
             }
-            launch { viewModel.suppressHeightUpdates.collectTraced { view.suppressHeightUpdates(it) } }
+            launch {
+                viewModel.suppressHeightUpdates.collectTraced { view.suppressHeightUpdates(it) }
+            }
 
             launchAndDispose {
                 view.setSyntheticScrollConsumer(viewModel.syntheticScrollConsumer)
@@ -120,11 +128,13 @@ constructor(
                 view.setRemoteInputRowBottomBoundConsumer(
                     viewModel.remoteInputRowBottomBoundConsumer
                 )
+                view.setAccessibilityScrollEventConsumer(viewModel.accessibilityScrollEventConsumer)
                 DisposableHandle {
                     view.setSyntheticScrollConsumer(null)
                     view.setCurrentGestureOverscrollConsumer(null)
                     view.setCurrentGestureInGutsConsumer(null)
                     view.setRemoteInputRowBottomBoundConsumer(null)
+                    view.setAccessibilityScrollEventConsumer(null)
                 }
             }
         }

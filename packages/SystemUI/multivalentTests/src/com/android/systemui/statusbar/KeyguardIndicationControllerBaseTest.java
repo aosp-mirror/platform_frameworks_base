@@ -19,7 +19,6 @@ package com.android.systemui.statusbar;
 import static android.app.admin.DevicePolicyManager.DEVICE_OWNER_TYPE_DEFAULT;
 
 import static com.android.systemui.flags.Flags.KEYGUARD_TALKBACK_FIX;
-import static com.android.systemui.flags.Flags.LOCKSCREEN_WALLPAPER_DREAM_ENABLED;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_TRANSIENT;
 import static com.android.systemui.keyguard.ScreenLifecycle.SCREEN_ON;
 
@@ -273,7 +272,6 @@ public class KeyguardIndicationControllerBaseTest extends SysuiTestCase {
 
         mFlags = new FakeFeatureFlags();
         mFlags.set(KEYGUARD_TALKBACK_FIX, true);
-        mFlags.set(LOCKSCREEN_WALLPAPER_DREAM_ENABLED, false);
         mController = new KeyguardIndicationController(
                 mContext,
                 mTestableLooper.getLooper(),

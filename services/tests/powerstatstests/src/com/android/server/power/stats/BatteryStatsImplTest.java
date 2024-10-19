@@ -159,7 +159,7 @@ public class BatteryStatsImplTest {
         }
         mPowerStatsStore = new PowerStatsStore(systemDir, mHandler);
         mBatteryUsageStatsProvider = new BatteryUsageStatsProvider(context, mPowerAttributor,
-                mPowerProfile, mBatteryStatsImpl.getCpuScalingPolicies(), mPowerStatsStore,
+                mPowerProfile, mBatteryStatsImpl.getCpuScalingPolicies(), mPowerStatsStore, 0,
                 mMockClock);
     }
 

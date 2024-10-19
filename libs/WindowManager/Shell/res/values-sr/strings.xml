@@ -97,9 +97,9 @@
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Имате проблема са камером?\nДодирните да бисте поново уклопили"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Проблем није решен?\nДодирните да бисте вратили"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Немате проблема са камером? Додирните да бисте одбацили."</string>
-    <string name="windowing_app_handle_education_tooltip" msgid="6398482412956375783">"Додирните да бисте отворили мени апликације"</string>
-    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="6285279585554484957">"Додирните да бисте приказали више апликација заједно"</string>
-    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="6685429075790085337">"Вратите се из менија апликације на приказ преко целог екрана"</string>
+    <string name="windowing_app_handle_education_tooltip" msgid="2929643449849791854">"Мени апликације можете да пронађете овде"</string>
+    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="2523468503353474095">"Уђите у приказ за рачунаре да бисте истовремено отворили више апликација"</string>
+    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="5225660258192054132">"Вратите се на цео екран било када из менија апликације"</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"Видите и урадите више"</string>
     <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"Превуците другу апликацију да бисте користили подељени екран"</string>
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Двапут додирните изван апликације да бисте променили њену позицију"</string>

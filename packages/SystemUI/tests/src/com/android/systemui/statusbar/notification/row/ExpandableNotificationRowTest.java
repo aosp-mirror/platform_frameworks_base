@@ -612,6 +612,8 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
         Assert.assertNull(child.getParent());
         Assert.assertNull(child.getNotificationParent());
         Assert.assertFalse(child.keepInParentForDismissAnimation());
+        verify(mNotificationTestHelper.getMockLogger())
+                .logCancelAppearDrawing(child.getEntry(), false);
         verifyNoMoreInteractions(mNotificationTestHelper.getMockLogger());
     }
 
@@ -1013,7 +1015,7 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
         assertThat(row.isHeadsUpAnimatingAway()).isTrue();
 
         // on disappear animation ends
-        row.onAppearAnimationFinished(/* wasAppearing = */ false);
+        row.onAppearAnimationFinished(/* wasAppearing = */ false, /* cancelled = */ false);
         assertThat(row.isHeadsUpAnimatingAway()).isFalse();
     }
 
