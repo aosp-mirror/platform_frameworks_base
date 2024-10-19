@@ -533,3 +533,13 @@ flag {
     purpose: PURPOSE_BUGFIX
   }
 }
+
+flag {
+  name: "ignore_restrictions_when_deleting_private_profile"
+  namespace: "multiuser"
+  description: "Ignore any user restrictions when deleting private profiles."
+  bug: "350953833"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}

@@ -23,8 +23,11 @@ import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.statusbar.notification.stack.data.repository.NotificationPlaceholderRepository
 import com.android.systemui.statusbar.notification.stack.data.repository.NotificationViewHeightRepository
+import com.android.systemui.statusbar.notification.stack.shared.model.AccessibilityScrollEvent
 import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimBounds
 import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimRounding
+import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrollState
+import java.util.function.Consumer
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
@@ -78,11 +81,9 @@ constructor(
     val constrainedAvailableSpace: StateFlow<Int> =
         placeholderRepository.constrainedAvailableSpace.asStateFlow()
 
-    /**
-     * Whether the notification stack is scrolled to the top; i.e., it cannot be scrolled down any
-     * further.
-     */
-    val scrolledToTop: StateFlow<Boolean> = placeholderRepository.scrolledToTop.asStateFlow()
+    /** Scroll state of the notification shade. */
+    val shadeScrollState: StateFlow<ShadeScrollState> =
+        placeholderRepository.shadeScrollState.asStateFlow()
 
     /**
      * The amount in px that the notification stack should scroll due to internal expansion. This
@@ -123,14 +124,24 @@ constructor(
         placeholderRepository.shadeScrimBounds.value = bounds
     }
 
-    /** Sets whether the notification stack is scrolled to the top. */
-    fun setScrolledToTop(scrolledToTop: Boolean) {
-        placeholderRepository.scrolledToTop.value = scrolledToTop
+    /** Updates the current scroll state of the notification shade. */
+    fun setScrollState(shadeScrollState: ShadeScrollState) {
+        placeholderRepository.shadeScrollState.value = shadeScrollState
     }
 
     /** Sets the amount (px) that the notification stack should scroll due to internal expansion. */
     fun setSyntheticScroll(delta: Float) {
         viewHeightRepository.syntheticScroll.value = delta
+    }
+
+    /** Sends an [AccessibilityScrollEvent] to scroll the stack up or down. */
+    fun sendAccessibilityScrollEvent(accessibilityScrollEvent: AccessibilityScrollEvent) {
+        placeholderRepository.accessibilityScrollEventConsumer?.accept(accessibilityScrollEvent)
+    }
+
+    /** Set a consumer for the [AccessibilityScrollEvent]s to be handled by the placeholder. */
+    fun setAccessibilityScrollEventConsumer(consumer: Consumer<AccessibilityScrollEvent>?) {
+        placeholderRepository.accessibilityScrollEventConsumer = consumer
     }
 
     /** Sets whether the current touch gesture is overscroll. */

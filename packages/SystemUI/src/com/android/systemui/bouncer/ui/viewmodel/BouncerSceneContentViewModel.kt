@@ -175,8 +175,10 @@ constructor(
                             actions.map { action ->
                                 UserSwitcherDropdownItemViewModel(
                                     icon =
-                                        Icon.Resource(
-                                            action.iconResourceId,
+                                        Icon.Loaded(
+                                            applicationContext.resources.getDrawable(
+                                                action.iconResourceId
+                                            ),
                                             contentDescription = null,
                                         ),
                                     text = Text.Resource(action.textResourceId),

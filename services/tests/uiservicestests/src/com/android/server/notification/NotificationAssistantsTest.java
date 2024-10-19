@@ -28,6 +28,7 @@ import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
 
 import static org.junit.Assert.assertNull;
+
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Matchers.any;
@@ -196,6 +197,8 @@ public class NotificationAssistantsTest extends UiServiceTestCase {
     @Test
     public void testWriteXml_userTurnedOffNAS() throws Exception {
         int userId = ActivityManager.getCurrentUser();
+
+        doReturn(true).when(mAssistants).isValidService(eq(mCn), eq(userId));
 
         mAssistants.loadDefaultsFromConfig(true);
 
@@ -432,6 +435,10 @@ public class NotificationAssistantsTest extends UiServiceTestCase {
     public void testSetPackageOrComponentEnabled_onlyOnePackage() throws Exception {
         ComponentName component1 = ComponentName.unflattenFromString("package/Component1");
         ComponentName component2 = ComponentName.unflattenFromString("package/Component2");
+
+        doReturn(true).when(mAssistants).isValidService(eq(component1), eq(mZero.id));
+        doReturn(true).when(mAssistants).isValidService(eq(component2), eq(mZero.id));
+
         mAssistants.setPackageOrComponentEnabled(component1.flattenToString(), mZero.id, true,
                 true, true);
         verify(mNm, never()).setNotificationAssistantAccessGrantedForUserInternal(
@@ -577,6 +584,7 @@ public class NotificationAssistantsTest extends UiServiceTestCase {
     public void testSetAdjustmentTypeSupportedState() throws Exception {
         int userId = ActivityManager.getCurrentUser();
 
+        doReturn(true).when(mAssistants).isValidService(eq(mCn), eq(userId));
         mAssistants.loadDefaultsFromConfig(true);
         mAssistants.setPackageOrComponentEnabled(mCn.flattenToString(), userId, true,
                 true, true);
@@ -600,6 +608,7 @@ public class NotificationAssistantsTest extends UiServiceTestCase {
     public void testSetAdjustmentTypeSupportedState_readWriteXml_entries() throws Exception {
         int userId = ActivityManager.getCurrentUser();
 
+        doReturn(true).when(mAssistants).isValidService(eq(mCn), eq(userId));
         mAssistants.loadDefaultsFromConfig(true);
         mAssistants.setPackageOrComponentEnabled(mCn.flattenToString(), userId, true,
                 true, true);
@@ -623,6 +632,7 @@ public class NotificationAssistantsTest extends UiServiceTestCase {
     public void testSetAdjustmentTypeSupportedState_readWriteXml_empty() throws Exception {
         int userId = ActivityManager.getCurrentUser();
 
+        doReturn(true).when(mAssistants).isValidService(eq(mCn), eq(userId));
         mAssistants.loadDefaultsFromConfig(true);
         mAssistants.setPackageOrComponentEnabled(mCn.flattenToString(), userId, true,
                 true, true);

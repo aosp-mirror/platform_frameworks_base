@@ -134,7 +134,6 @@ import static android.security.Flags.preventIntentRedirect;
 import static android.util.FeatureFlagUtils.SETTINGS_ENABLE_MONITOR_PHANTOM_PROCS;
 import static android.view.Display.INVALID_DISPLAY;
 
-import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_CONFIGURATION;
 import static com.android.internal.util.FrameworkStatsLog.UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__NEW_MUTABLE_IMPLICIT_PENDING_INTENT_RETRIEVED;
 import static com.android.sdksandbox.flags.Flags.sdkSandboxInstrumentationInfo;
 import static com.android.server.am.ActiveServices.FGS_SAW_RESTRICTIONS;
@@ -415,7 +414,6 @@ import com.android.internal.os.TransferPipe;
 import com.android.internal.os.Zygote;
 import com.android.internal.pm.pkg.parsing.ParsingPackageUtils;
 import com.android.internal.policy.AttributeCache;
-import com.android.internal.protolog.ProtoLog;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.FrameworkStatsLog;
@@ -4654,8 +4652,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 notifyPackageUse(instr.mClass.getPackageName(),
                                  PackageManager.NOTIFY_PACKAGE_USE_INSTRUMENTATION);
             }
-            ProtoLog.v(WM_DEBUG_CONFIGURATION, "Binding proc %s with config %s",
-                    processName, app.getWindowProcessController().getConfiguration());
             ApplicationInfo appInfo = instr != null ? instr.mTargetInfo : app.info;
 
             ProfilerInfo profilerInfo = mAppProfiler.setupProfilerInfoLocked(thread, app, instr);

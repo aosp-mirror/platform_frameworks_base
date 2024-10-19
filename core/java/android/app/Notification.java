@@ -11176,7 +11176,7 @@ public class Notification implements Parcelable
     }
 
     /**
-     * A Notification Style used to to define a notification whose expanded state includes
+     * A Notification Style used to define a notification whose expanded state includes
      * a highly customizable progress bar with segments, points, a custom tracker icon,
      * and custom icons at the start and end of the progress bar.
      *

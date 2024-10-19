@@ -127,7 +127,6 @@ public abstract class NetworkEvaluationTestBase {
                                 false /* isInTestMode */));
         doNothing().when(mVcnContext).ensureRunningOnLooperThread();
 
-        doReturn(true).when(mVcnContext).isFlagNetworkMetricMonitorEnabled();
         doReturn(true).when(mVcnContext).isFlagIpSecTransformStateEnabled();
 
         setupSystemService(

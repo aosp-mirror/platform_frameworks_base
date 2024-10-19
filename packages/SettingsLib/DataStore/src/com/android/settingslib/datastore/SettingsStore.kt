@@ -21,7 +21,6 @@ import android.database.ContentObserver
 import android.net.Uri
 import android.os.Handler
 import android.os.Looper
-import android.provider.Settings
 import android.util.Log
 import java.util.concurrent.Executor
 import java.util.concurrent.atomic.AtomicInteger
@@ -70,12 +69,11 @@ abstract class SettingsStore(protected val contentResolver: ContentResolver) :
     private fun onObserverAdded() {
         if (counter.getAndIncrement() != 0) return
         Log.i(tag, "registerContentObserver")
-        contentResolver.registerContentObserver(
-            Settings.Global.getUriFor(""),
-            true,
-            contentObserver,
-        )
+        contentResolver.registerContentObserver(uri, true, contentObserver)
     }
+
+    /** The URI to watch for any key change. */
+    protected abstract val uri: Uri
 
     override fun removeObserver(observer: KeyedObserver<String?>) =
         if (super.removeObserver(observer)) {
