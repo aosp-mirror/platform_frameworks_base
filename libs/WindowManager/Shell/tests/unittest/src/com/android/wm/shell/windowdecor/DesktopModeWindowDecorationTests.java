@@ -259,7 +259,8 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
         doReturn(defaultDisplay).when(mMockDisplayController).getDisplay(Display.DEFAULT_DISPLAY);
         doReturn(mInsetsState).when(mMockDisplayController).getInsetsState(anyInt());
         when(mMockHandleMenuFactory.create(any(), any(), anyInt(), any(), any(), any(),
-                anyBoolean(), anyBoolean(), anyBoolean(), any(), anyInt(), anyInt(), anyInt()))
+                anyBoolean(), anyBoolean(), anyBoolean(), any(), anyInt(), anyInt(), anyInt(),
+                anyInt()))
                 .thenReturn(mMockHandleMenu);
         when(mMockMultiInstanceHelper.supportsMultiInstanceSplit(any())).thenReturn(false);
         when(mMockAppHeaderViewHolderFactory.create(any(), any(), any(), any(), any(), any(), any(),
@@ -1070,7 +1071,8 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 openInBrowserCaptor.capture(),
                 any(),
                 any(),
-                any()
+                any(),
+                anyBoolean()
         );
         openInBrowserCaptor.getValue().invoke(new Intent(Intent.ACTION_MAIN, TEST_URI1));
 
@@ -1099,7 +1101,8 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 openInBrowserCaptor.capture(),
                 any(),
                 any(),
-                any()
+                any(),
+                anyBoolean()
         );
 
         openInBrowserCaptor.getValue().invoke(new Intent(Intent.ACTION_MAIN, TEST_URI1));
@@ -1151,13 +1154,38 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 any(),
                 any(),
                 closeClickListener.capture(),
-                any()
+                any(),
+                anyBoolean()
         );
 
         closeClickListener.getValue().invoke();
 
         verify(mMockHandleMenu).close();
         assertFalse(decoration.isHandleMenuActive());
+    }
+
+    @Test
+    public void createHandleMenu_immersiveWindow_forceShowsSystemBars() {
+        final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(/* visible= */ true);
+        final DesktopModeWindowDecoration decoration = createWindowDecoration(taskInfo,
+                true /* relayout */);
+        when(mMockDesktopRepository.isTaskInFullImmersiveState(taskInfo.taskId))
+                .thenReturn(true);
+
+        createHandleMenu(decoration);
+
+        verify(mMockHandleMenu).show(
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                /* forceShowSystemBars= */ eq(true)
+        );
     }
 
     @Test
@@ -1301,7 +1329,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
         verify(mMockHandleMenuFactory).create(any(), any(), anyInt(), any(), any(),
                 any(), anyBoolean(), anyBoolean(), anyBoolean(),
                 argThat(intent -> (uri == null && intent == null) || intent.getData().equals(uri)),
-                anyInt(), anyInt(), anyInt());
+                anyInt(), anyInt(), anyInt(), anyInt());
     }
 
     private void createMaximizeMenu(DesktopModeWindowDecoration decoration, MaximizeMenu menu) {

@@ -256,6 +256,8 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         outResult.mCaptionWidth = params.mCaptionWidthId != Resources.ID_NULL
                 ? loadDimensionPixelSize(resources, params.mCaptionWidthId) : taskBounds.width();
         outResult.mCaptionX = (outResult.mWidth - outResult.mCaptionWidth) / 2;
+        outResult.mCaptionY = 0;
+        outResult.mCaptionTopPadding = params.mCaptionTopPadding;
 
         updateDecorationContainerSurface(startT, outResult);
         updateCaptionContainerSurface(startT, outResult);
@@ -786,6 +788,8 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         int mCaptionHeight;
         int mCaptionWidth;
         int mCaptionX;
+        int mCaptionY;
+        int mCaptionTopPadding;
         final Region mCustomizableCaptionRegion = Region.obtain();
         int mWidth;
         int mHeight;
@@ -797,6 +801,8 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
             mCaptionHeight = 0;
             mCaptionWidth = 0;
             mCaptionX = 0;
+            mCaptionY = 0;
+            mCaptionTopPadding = 0;
             mCustomizableCaptionRegion.setEmpty();
             mRootView = null;
         }
