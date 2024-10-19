@@ -168,7 +168,7 @@ public class MockingOomAdjusterTests {
             + ProcessList.CACHED_APP_IMPORTANCE_LEVELS;
     private static int sFirstUiCachedAdj = ProcessList.CACHED_APP_MIN_ADJ + 10;
     private static int sFirstNonUiCachedAdj = ProcessList.CACHED_APP_MIN_ADJ + 20;
-    private static int sUiTierSize = 5;
+    private static int sUiTierSize = 10;
 
     private Context mContext;
     private ProcessStateController mProcessStateController;

@@ -754,7 +754,7 @@ public final class MessageQueue {
                 // Idle handles only run if the queue is empty or if the first message
                 // in the queue (possibly a barrier) is due to be handled in the future.
                 if (pendingIdleHandlerCount < 0
-                        && mNextPollTimeoutMillis != 0) {
+                        && isIdle()) {
                     pendingIdleHandlerCount = mIdleHandlers.size();
                 }
                 if (pendingIdleHandlerCount <= 0) {

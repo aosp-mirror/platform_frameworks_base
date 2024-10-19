@@ -21,10 +21,11 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.testing.TestLifecycleOwner
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.kosmos.testDispatcher
+import com.android.systemui.kosmos.testScope
+import com.android.systemui.lifecycle.activateIn
 import com.android.systemui.testKosmos
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestResult
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.resetMain
@@ -62,7 +63,7 @@ abstract class AbstractQSFragmentComposeViewModelTest : SysuiTestCase() {
     ): TestResult {
         return runTest {
             lifecycleOwner.setCurrentState(Lifecycle.State.RESUMED)
-            lifecycleOwner.lifecycleScope.launch { underTest.activate() }
+            underTest.activateIn(kosmos.testScope)
             block().also { lifecycleOwner.setCurrentState(Lifecycle.State.DESTROYED) }
         }
     }

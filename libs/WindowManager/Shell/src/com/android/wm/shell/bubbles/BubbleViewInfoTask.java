@@ -73,6 +73,7 @@ public class BubbleViewInfoTask {
     private final WeakReference<BubbleExpandedViewManager> mExpandedViewManager;
     private final WeakReference<BubbleTaskViewFactory> mTaskViewFactory;
     private final WeakReference<BubblePositioner> mPositioner;
+    private final WeakReference<BubbleLogger> mBubbleLogger;
     private final WeakReference<BubbleStackView> mStackView;
     private final WeakReference<BubbleBarLayerView> mLayerView;
     private final BubbleIconFactory mIconFactory;
@@ -94,6 +95,7 @@ public class BubbleViewInfoTask {
             BubbleExpandedViewManager expandedViewManager,
             BubbleTaskViewFactory taskViewFactory,
             BubblePositioner positioner,
+            BubbleLogger bubbleLogger,
             @Nullable BubbleStackView stackView,
             @Nullable BubbleBarLayerView layerView,
             BubbleIconFactory factory,
@@ -106,6 +108,7 @@ public class BubbleViewInfoTask {
         mExpandedViewManager = new WeakReference<>(expandedViewManager);
         mTaskViewFactory = new WeakReference<>(taskViewFactory);
         mPositioner = new WeakReference<>(positioner);
+        mBubbleLogger = new WeakReference<>(bubbleLogger);
         mStackView = new WeakReference<>(stackView);
         mLayerView = new WeakReference<>(layerView);
         mIconFactory = factory;
@@ -221,8 +224,9 @@ public class BubbleViewInfoTask {
                 ProtoLog.v(WM_SHELL_BUBBLES, "Task initializing bubble bar expanded view key=%s",
                         mBubble.getKey());
                 viewInfo.bubbleBarExpandedView.initialize(mExpandedViewManager.get(),
-                        mPositioner.get(), false /* isOverflow */, viewInfo.taskView,
-                        mMainExecutor, mBgExecutor, new RegionSamplingProvider() {
+                        mPositioner.get(), mBubbleLogger.get(), false /* isOverflow */,
+                        viewInfo.taskView, mMainExecutor, mBgExecutor,
+                        new RegionSamplingProvider() {
                             @Override
                             public RegionSamplingHelper createHelper(View sampledView,
                                     RegionSamplingHelper.SamplingCallback callback,

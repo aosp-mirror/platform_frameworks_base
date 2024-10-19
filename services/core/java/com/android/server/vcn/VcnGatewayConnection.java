@@ -1913,7 +1913,6 @@ public class VcnGatewayConnection extends StateMachine {
                 mIpSecManager.applyTunnelModeTransform(tunnelIface, direction, transform);
 
                 if (direction == IpSecManager.DIRECTION_IN
-                        && mVcnContext.isFlagNetworkMetricMonitorEnabled()
                         && mVcnContext.isFlagIpSecTransformStateEnabled()) {
                     mUnderlyingNetworkController.updateInboundTransform(mUnderlying, transform);
                 }

@@ -97,9 +97,9 @@
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"কেমেৰাৰ কোনো সমস্যা হৈছে নেকি?\nপুনৰ খাপ খোৱাবলৈ টিপক"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"এইটো সমাধান কৰা নাই নেকি?\nপূৰ্বাৱস্থালৈ নিবলৈ টিপক"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"কেমেৰাৰ কোনো সমস্যা নাই নেকি? অগ্ৰাহ্য কৰিবলৈ টিপক।"</string>
-    <string name="windowing_app_handle_education_tooltip" msgid="6398482412956375783">"এপৰ মেনুখন খুলিবলৈ টিপক"</string>
-    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="6285279585554484957">"একাধিক এপ্ একেলগে দেখুৱাবলৈ টিপক"</string>
-    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="6685429075790085337">"এপৰ মেনুখনৰ পৰা পূৰ্ণ স্ক্ৰীনলৈ উভতি যাওক"</string>
+    <string name="windowing_app_handle_education_tooltip" msgid="2929643449849791854">"এপৰ মেনু ইয়াত বিচাৰি পোৱা যাব"</string>
+    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="2523468503353474095">"একেলগে একাধিক এপ্‌ খুলিবলৈ ডেস্কটপ ভিউলৈ যাওক"</string>
+    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="5225660258192054132">"এপৰ মেনুৰ পৰা যিকোনো সময়তে পূৰ্ণ স্ক্ৰীনলৈ উভতি যাওক"</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"চাওক আৰু অধিক কৰক"</string>
     <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"বিভাজিত স্ক্ৰীনৰ বাবে অন্য এটা এপ্‌ টানি আনি এৰক"</string>
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"এপ্‌টোৰ স্থান সলনি কৰিবলৈ ইয়াৰ বাহিৰত দুবাৰ টিপক"</string>

@@ -30,6 +30,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import android.graphics.Insets;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
 import android.view.InsetsSource;
@@ -257,6 +258,27 @@ public class InsetsSourceProviderTest extends WindowTestsBase {
         insets = mImeSource.calculateInsets(new Rect(0, 0, 500, 500),
                 false /* ignoreVisibility */);
         assertEquals(Insets.of(0, 0, 0, 100), insets);
+    }
+
+    @Test
+    public void testUpdateInsetsControlPosition() {
+        final WindowState target = createWindow(null, TYPE_APPLICATION, "target");
+
+        final WindowState ime1 = createWindow(null, TYPE_INPUT_METHOD, "ime1");
+        ime1.getFrame().set(new Rect(0, 0, 0, 0));
+        mImeProvider.setWindowContainer(ime1, null, null);
+        mImeProvider.updateControlForTarget(target, false /* force */, null /* statsToken */);
+        ime1.getFrame().set(new Rect(0, 400, 500, 500));
+        mImeProvider.updateInsetsControlPosition(ime1);
+        assertEquals(new Point(0, 400), mImeProvider.getControl(target).getSurfacePosition());
+
+        final WindowState ime2 = createWindow(null, TYPE_INPUT_METHOD, "ime2");
+        ime2.getFrame().set(new Rect(0, 0, 0, 0));
+        mImeProvider.setWindowContainer(ime2, null, null);
+        mImeProvider.updateControlForTarget(target, false /* force */, null /* statsToken */);
+        ime2.getFrame().set(new Rect(0, 400, 500, 500));
+        mImeProvider.updateInsetsControlPosition(ime2);
+        assertEquals(new Point(0, 400), mImeProvider.getControl(target).getSurfacePosition());
     }
 
     @Test

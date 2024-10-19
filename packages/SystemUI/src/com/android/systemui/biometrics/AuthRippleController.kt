@@ -37,11 +37,9 @@ import com.android.systemui.biometrics.data.repository.FacePropertyRepository
 import com.android.systemui.biometrics.shared.model.UdfpsOverlayParams
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.deviceentry.domain.interactor.AuthRippleInteractor
-import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.keyguard.shared.model.BiometricUnlockSource
 import com.android.systemui.lifecycle.repeatWhenAttached
-import com.android.systemui.log.core.LogLevel
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.CircleReveal
@@ -87,7 +85,7 @@ constructor(
     private val lightRevealScrim: LightRevealScrim,
     private val authRippleInteractor: AuthRippleInteractor,
     private val facePropertyRepository: FacePropertyRepository,
-    rippleView: AuthRippleView?
+    rippleView: AuthRippleView?,
 ) :
     ViewController<AuthRippleView>(rippleView),
     CoreStartable,
@@ -108,15 +106,13 @@ constructor(
     }
 
     init {
-        if (DeviceEntryUdfpsRefactor.isEnabled) {
-            rippleView?.repeatWhenAttached {
-                repeatOnLifecycle(androidx.lifecycle.Lifecycle.State.CREATED) {
-                    authRippleInteractor.showUnlockRipple.collect { biometricUnlockSource ->
-                        if (biometricUnlockSource == BiometricUnlockSource.FINGERPRINT_SENSOR) {
-                            showUnlockRippleInternal(BiometricSourceType.FINGERPRINT)
-                        } else {
-                            showUnlockRippleInternal(BiometricSourceType.FACE)
-                        }
+        rippleView?.repeatWhenAttached {
+            repeatOnLifecycle(androidx.lifecycle.Lifecycle.State.CREATED) {
+                authRippleInteractor.showUnlockRipple.collect { biometricUnlockSource ->
+                    if (biometricUnlockSource == BiometricUnlockSource.FINGERPRINT_SENSOR) {
+                        showUnlockRippleInternal(BiometricSourceType.FINGERPRINT)
+                    } else {
+                        showUnlockRippleInternal(BiometricSourceType.FACE)
                     }
                 }
             }
@@ -134,28 +130,7 @@ constructor(
         keyguardStateController.addCallback(this)
         wakefulnessLifecycle.addObserver(this)
         commandRegistry.registerCommand("auth-ripple") { AuthRippleCommand() }
-        if (!DeviceEntryUdfpsRefactor.isEnabled) {
-            biometricUnlockController.addListener(biometricModeListener)
-        }
     }
-
-    private val biometricModeListener =
-        object : BiometricUnlockController.BiometricUnlockEventsListener {
-            override fun onBiometricUnlockedWithKeyguardDismissal(
-                biometricSourceType: BiometricSourceType?
-            ) {
-                DeviceEntryUdfpsRefactor.assertInLegacyMode()
-                if (biometricSourceType != null) {
-                    showUnlockRippleInternal(biometricSourceType)
-                } else {
-                    logger.log(
-                        TAG,
-                        LogLevel.ERROR,
-                        "Unexpected scenario where biometricSourceType is null"
-                    )
-                }
-            }
-        }
 
     @VisibleForTesting
     public override fun onViewDetached() {
@@ -166,15 +141,8 @@ constructor(
         keyguardStateController.removeCallback(this)
         wakefulnessLifecycle.removeObserver(this)
         commandRegistry.unregisterCommand("auth-ripple")
-        biometricUnlockController.removeListener(biometricModeListener)
 
         notificationShadeWindowController.setForcePluginOpen(false, this)
-    }
-
-    @Deprecated("Update authRippleInteractor.showUnlockRipple instead of calling this.")
-    fun showUnlockRipple(biometricSourceType: BiometricSourceType) {
-        DeviceEntryUdfpsRefactor.assertInLegacyMode()
-        showUnlockRippleInternal(biometricSourceType)
     }
 
     private fun showUnlockRippleInternal(biometricSourceType: BiometricSourceType) {
@@ -197,8 +165,8 @@ constructor(
                         0,
                         Math.max(
                             Math.max(it.x, displayMetrics.widthPixels - it.x),
-                            Math.max(it.y, displayMetrics.heightPixels - it.y)
-                        )
+                            Math.max(it.y, displayMetrics.heightPixels - it.y),
+                        ),
                     )
                 logger.showingUnlockRippleAt(it.x, it.y, "FP sensor radius: $udfpsRadius")
                 showUnlockedRipple()
@@ -213,8 +181,8 @@ constructor(
                         0,
                         Math.max(
                             Math.max(it.x, displayMetrics.widthPixels - it.x),
-                            Math.max(it.y, displayMetrics.heightPixels - it.y)
-                        )
+                            Math.max(it.y, displayMetrics.heightPixels - it.y),
+                        ),
                     )
                 logger.showingUnlockRippleAt(it.x, it.y, "Face unlock ripple")
                 showUnlockedRipple()
@@ -322,7 +290,7 @@ constructor(
             override fun onBiometricAuthenticated(
                 userId: Int,
                 biometricSourceType: BiometricSourceType,
-                isStrongBiometric: Boolean
+                isStrongBiometric: Boolean,
             ) {
                 if (biometricSourceType == BiometricSourceType.FINGERPRINT) {
                     mView.fadeDwellRipple()
@@ -337,7 +305,7 @@ constructor(
 
             override fun onBiometricAcquired(
                 biometricSourceType: BiometricSourceType,
-                acquireInfo: Int
+                acquireInfo: Int,
             ) {
                 if (
                     biometricSourceType == BiometricSourceType.FINGERPRINT &&

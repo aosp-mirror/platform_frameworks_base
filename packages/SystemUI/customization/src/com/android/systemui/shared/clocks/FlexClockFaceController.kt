@@ -71,7 +71,7 @@ class FlexClockFaceController(
         val layer = face.layers[0]
 
         layerController =
-            if (isLargeClock)
+            if (isLargeClock) {
                 ComposedDigitalLayerController(
                     ctx,
                     resources,
@@ -79,7 +79,7 @@ class FlexClockFaceController(
                     layer as ComposedDigitalHandLayer,
                     messageBuffer,
                 )
-            else {
+            } else {
                 val childView = SimpleDigitalClockTextView(ctx, messageBuffer)
                 SimpleDigitalHandLayerController(
                     ctx,

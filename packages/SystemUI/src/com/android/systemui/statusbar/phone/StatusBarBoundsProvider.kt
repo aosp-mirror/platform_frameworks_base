@@ -18,10 +18,10 @@ package com.android.systemui.statusbar.phone
 
 import android.graphics.Rect
 import android.view.View
-import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentComponent
-import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentModule.END_SIDE_CONTENT
-import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentModule.START_SIDE_CONTENT
-import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentScope
+import com.android.systemui.statusbar.phone.fragment.dagger.HomeStatusBarComponent
+import com.android.systemui.statusbar.phone.fragment.dagger.HomeStatusBarModule.END_SIDE_CONTENT
+import com.android.systemui.statusbar.phone.fragment.dagger.HomeStatusBarModule.START_SIDE_CONTENT
+import com.android.systemui.statusbar.phone.fragment.dagger.HomeStatusBarScope
 import com.android.systemui.util.ListenerSet
 import com.android.systemui.util.boundsOnScreen
 import javax.inject.Inject
@@ -33,13 +33,13 @@ import javax.inject.Named
  * This is distinct from [StatusBarContentInsetsProvider], which provides the bounds of full status
  * bar after accounting for system insets.
  */
-@StatusBarFragmentScope
+@HomeStatusBarScope
 class StatusBarBoundsProvider
 @Inject
 constructor(
     @Named(START_SIDE_CONTENT) private val startSideContent: View,
     @Named(END_SIDE_CONTENT) private val endSideContent: View,
-) : StatusBarFragmentComponent.Startable {
+) : HomeStatusBarComponent.Startable {
 
     interface BoundsChangeListener {
         fun onStatusBarBoundsChanged(bounds: BoundsPair)

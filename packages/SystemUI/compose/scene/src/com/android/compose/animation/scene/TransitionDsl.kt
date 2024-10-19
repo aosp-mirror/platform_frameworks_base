@@ -156,6 +156,9 @@ interface BaseTransitionBuilder : PropertyTransformationBuilder {
 
 @TransitionDsl
 interface TransitionBuilder : BaseTransitionBuilder {
+    /** The [TransitionState.Transition] for which we currently compute the transformations. */
+    val transition: TransitionState.Transition
+
     /**
      * The [AnimationSpec] used to animate the associated transition progress from `0` to `1` when
      * the transition is triggered (i.e. it is not gesture-based).

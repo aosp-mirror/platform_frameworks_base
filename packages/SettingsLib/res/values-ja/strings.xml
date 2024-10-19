@@ -686,9 +686,11 @@
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"有効"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"この変更を適用するには、デバイスの再起動が必要です。今すぐ再起動するか、キャンセルしてください。"</string>
     <string name="media_transfer_wired_headphone_name" msgid="8698668536022665254">"有線ヘッドフォン"</string>
-    <string name="media_transfer_headphone_name" msgid="1131962659136578852">"ヘッドフォン"</string>
+    <!-- no translation found for media_transfer_headphone_name (1157798825650178478) -->
+    <skip />
     <string name="media_transfer_usb_audio_name" msgid="1789292056757821355">"USB オーディオ"</string>
-    <string name="media_transfer_wired_device_mic_name" msgid="7417067197803840965">"マイク差込口"</string>
+    <!-- no translation found for media_transfer_wired_device_mic_name (7115192790725088698) -->
+    <skip />
     <string name="media_transfer_usb_device_mic_name" msgid="7171789543226269822">"USB マイク"</string>
     <string name="media_transfer_bt_device_mic_name" msgid="1870669402238687618">"BT マイク"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"ON"</string>

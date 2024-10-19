@@ -22,9 +22,7 @@ import android.platform.test.annotations.EnableFlags
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.shared.model.asIcon
-import com.android.systemui.qs.tiles.ModesTile
 import com.android.systemui.qs.tiles.impl.modes.domain.model.ModesTileModel
 import com.android.systemui.qs.tiles.viewmodel.QSTileConfigTestBuilder
 import com.android.systemui.qs.tiles.viewmodel.QSTileState
@@ -53,11 +51,6 @@ class ModesTileMapperTest : SysuiTestCase() {
                 .apply {
                     addOverride(R.drawable.qs_dnd_icon_on, TestStubDrawable())
                     addOverride(R.drawable.qs_dnd_icon_off, TestStubDrawable())
-                    addOverride(
-                        ModesTile.ICON_RES_ID,
-                        TestStubDrawable(ModesTile.ICON_RES_ID.toString()),
-                    )
-                    addOverride(123, TestStubDrawable("123"))
                 }
                 .resources,
             context.theme,
@@ -66,7 +59,12 @@ class ModesTileMapperTest : SysuiTestCase() {
     @Test
     fun inactiveState() {
         val icon = TestStubDrawable("res123").asIcon()
-        val model = ModesTileModel(isActivated = false, activeModes = emptyList(), icon = icon)
+        val model =
+            ModesTileModel(
+                isActivated = false,
+                activeModes = emptyList(),
+                icon = icon,
+            )
 
         val state = underTest.map(config, model)
 
@@ -78,7 +76,12 @@ class ModesTileMapperTest : SysuiTestCase() {
     @Test
     fun activeState_oneMode() {
         val icon = TestStubDrawable("res123").asIcon()
-        val model = ModesTileModel(isActivated = true, activeModes = listOf("DND"), icon = icon)
+        val model =
+            ModesTileModel(
+                isActivated = true,
+                activeModes = listOf("DND"),
+                icon = icon,
+            )
 
         val state = underTest.map(config, model)
 
@@ -105,36 +108,19 @@ class ModesTileMapperTest : SysuiTestCase() {
     }
 
     @Test
-    fun resourceIconModel_whenResIdsIdentical_mapsToLoadedIconWithInputResId() {
-        val icon = Icon.Resource(123, null)
+    fun state_modelHasIconResId_includesIconResId() {
+        val icon = TestStubDrawable("res123").asIcon()
         val model =
             ModesTileModel(
                 isActivated = false,
                 activeModes = emptyList(),
                 icon = icon,
-                iconResId = 123,
+                iconResId = 123
             )
 
         val state = underTest.map(config, model)
 
-        assertThat(state.icon()).isEqualTo(TestStubDrawable("123").asIcon())
-        assertThat(state.iconRes).isEqualTo(123)
-    }
-
-    @Test
-    fun resourceIconModel_whenResIdsNonIdentical_mapsToLoadedIconWithIconResourceId() {
-        val icon = Icon.Resource(123, null)
-        val model =
-            ModesTileModel(
-                isActivated = false,
-                activeModes = emptyList(),
-                icon = icon,
-                iconResId = 321, // Note: NOT 123. This will be ignored.
-            )
-
-        val state = underTest.map(config, model)
-
-        assertThat(state.icon()).isEqualTo(TestStubDrawable("123").asIcon())
+        assertThat(state.icon()).isEqualTo(icon)
         assertThat(state.iconRes).isEqualTo(123)
     }
 }

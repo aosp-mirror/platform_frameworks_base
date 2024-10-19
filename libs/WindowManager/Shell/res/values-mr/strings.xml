@@ -97,9 +97,9 @@
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"कॅमेराशी संबंधित काही समस्या आहेत का?\nपुन्हा फिट करण्यासाठी टॅप करा"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"निराकरण झाले नाही?\nरिव्हर्ट करण्यासाठी कृपया टॅप करा"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"कॅमेराशी संबंधित कोणत्याही समस्या नाहीत का? डिसमिस करण्‍यासाठी टॅप करा."</string>
-    <string name="windowing_app_handle_education_tooltip" msgid="6398482412956375783">"अ‍ॅप मेनू उघडण्यासाठी टॅप करा"</string>
-    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="6285279585554484957">"एकाहून अधिक ॲप्स एकत्र दाखवण्यासाठी टॅप करा"</string>
-    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="6685429075790085337">"ॲप मेनूमधून फुलस्क्रीनवर परत या"</string>
+    <string name="windowing_app_handle_education_tooltip" msgid="2929643449849791854">"ॲप मेनू इथे आढळू शकतो"</string>
+    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="2523468503353474095">"एकाहून अधिक ॲप्स एकत्र उघडण्यासाठी डेस्कटॉप दृश्यात एंटर करा"</string>
+    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="5225660258192054132">"ॲप मेनूमधून कधीही फुल स्क्रीनवर परत या"</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"पहा आणि आणखी बरेच काही करा"</string>
     <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"स्प्लिट स्क्रीन वापरण्यासाठी दुसरे ॲप ड्रॅग करा"</string>
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"ॲपची स्थिती पुन्हा बदलण्यासाठी, त्याच्या बाहेर दोनदा टॅप करा"</string>

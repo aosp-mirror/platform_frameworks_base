@@ -96,6 +96,7 @@ public class ProtoLogViewerConfigReader {
                 logger.log("Unloading viewer config hash " + hash);
                 mLogMessageMap.remove(hash);
             }
+            mGroupHashes.remove(group);
         }
     }
 
@@ -179,6 +180,6 @@ public class ProtoLogViewerConfigReader {
             }
         }
 
-        throw new RuntimeException("Group " + group + "not found in viewer config");
+        throw new RuntimeException("Group " + group + " not found in viewer config");
     }
 }
