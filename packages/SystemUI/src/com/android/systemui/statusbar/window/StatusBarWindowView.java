@@ -22,6 +22,7 @@ import static android.view.MotionEvent.ACTION_UP;
 import static android.view.WindowInsets.Type.systemBars;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.Insets;
 import android.util.AttributeSet;
 import android.view.DisplayCutout;
@@ -30,8 +31,12 @@ import android.view.View;
 import android.view.WindowInsets;
 import android.widget.FrameLayout;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import com.android.systemui.compose.ComposeInitializer;
 import com.android.systemui.statusbar.core.StatusBarSimpleFragment;
+import com.android.systemui.statusbar.data.repository.StatusBarConfigurationController;
 
 /**
  * Status bar view.
@@ -47,6 +52,8 @@ public class StatusBarWindowView extends FrameLayout {
     private int mTopInset = 0;
 
     private float mTouchDownY = 0;
+
+    @Nullable private StatusBarConfigurationController mConfigurationController;
 
     public StatusBarWindowView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -68,6 +75,23 @@ public class StatusBarWindowView extends FrameLayout {
 
         if (StatusBarSimpleFragment.isEnabled()) {
             ComposeInitializer.INSTANCE.onDetachedFromWindow(this);
+        }
+    }
+
+    /**
+     * Sets the {@link StatusBarConfigurationController} that is associated with the display that
+     * this view is attached to.
+     */
+    public void setStatusBarConfigurationController(
+            @NonNull StatusBarConfigurationController configurationController) {
+        mConfigurationController = configurationController;
+    }
+
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        StatusBarConfigurationController configurationController = mConfigurationController;
+        if (configurationController != null) {
+            configurationController.onConfigurationChanged(newConfig);
         }
     }
 

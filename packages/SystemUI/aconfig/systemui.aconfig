@@ -298,6 +298,22 @@ flag {
 }
 
 flag {
+    name: "status_bar_ui_thread"
+    namespace: "systemui"
+    description: "Move the StatusBar window to a new UI thread, which is separate from the main "
+        "thread."
+    bug: "374159193"
+}
+
+flag {
+    name: "notification_shade_ui_thread"
+    namespace: "systemui"
+    description: "Move the NotificationShade window to a new UI thread, which is separate from "
+        "the main thread."
+    bug: "374159657"
+}
+
+flag {
     name: "new_aod_transition"
     namespace: "systemui"
     description: "New LOCKSCREEN <=> AOD transition"
@@ -641,6 +657,13 @@ flag {
     namespace: "systemui"
     description: "Improves screenshot policy handling for split screen and desktop mode."
     bug: "365597999"
+}
+
+flag {
+    name: "screenshot_context_url"
+    namespace: "systemui"
+    description: "Include optional app-provided context URL when sharing a screenshot."
+    bug: "242791070"
 }
 
 flag {
@@ -1526,4 +1549,11 @@ flag {
    metadata {
        purpose: PURPOSE_BUGFIX
    }
+}
+
+flag {
+    name: "qs_tile_detailed_view"
+    namespace: "systemui"
+    description: "Enables the tile detailed view UI."
+    bug: "374173773"
 }

@@ -40,6 +40,7 @@ import com.android.window.flags.Flags
 import com.android.wm.shell.MockToken
 import com.android.wm.shell.ShellTaskOrganizer
 import com.android.wm.shell.common.ShellExecutor
+import com.android.wm.shell.desktopmode.DesktopModeTransitionTypes.TRANSIT_EXIT_DESKTOP_MODE_TASK_DRAG
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
 import com.android.wm.shell.sysui.ShellInit
 import com.android.wm.shell.transition.Transitions
@@ -126,14 +127,32 @@ class DesktopTasksTransitionObserverTest {
 
     @Test
     @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION)
-    fun removeTasks_onTaskFullscreenLaunch_taskRemovedFromRepo() {
+    fun removeTasks_onTaskFullscreenLaunchWithOpenTransition_taskRemovedFromRepo() {
         val task = createTaskInfo(1, WINDOWING_MODE_FULLSCREEN)
         whenever(taskRepository.getVisibleTaskCount(any())).thenReturn(1)
         whenever(taskRepository.isActiveTask(task.taskId)).thenReturn(true)
 
         transitionObserver.onTransitionReady(
             transition = mock(),
-            info = createOpenTransition(task),
+            info = createOpenChangeTransition(task),
+            startTransaction = mock(),
+            finishTransaction = mock(),
+        )
+
+        verify(taskRepository, never()).minimizeTask(task.displayId, task.taskId)
+        verify(taskRepository).removeFreeformTask(task.displayId, task.taskId)
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION)
+    fun removeTasks_onTaskFullscreenLaunchExitDesktopTransition_taskRemovedFromRepo() {
+        val task = createTaskInfo(1, WINDOWING_MODE_FULLSCREEN)
+        whenever(taskRepository.getVisibleTaskCount(any())).thenReturn(1)
+        whenever(taskRepository.isActiveTask(task.taskId)).thenReturn(true)
+
+        transitionObserver.onTransitionReady(
+            transition = mock(),
+            info = createOpenChangeTransition(task, TRANSIT_EXIT_DESKTOP_MODE_TASK_DRAG),
             startTransaction = mock(),
             finishTransaction = mock(),
         )
@@ -178,8 +197,9 @@ class DesktopTasksTransitionObserverTest {
         }
     }
 
-    private fun createOpenTransition(
-        task: RunningTaskInfo?
+    private fun createOpenChangeTransition(
+        task: RunningTaskInfo?,
+        type: Int = TRANSIT_OPEN
     ): TransitionInfo {
         return TransitionInfo(TRANSIT_OPEN, 0 /* flags */).apply {
             addChange(

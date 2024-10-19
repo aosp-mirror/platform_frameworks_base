@@ -841,7 +841,6 @@ public final class ViewRootImpl implements ViewParent,
      * surfaces can ensure they do not draw into the surface inset region set by the parent window.
      */
     private SurfaceControl mBoundsLayer;
-    private final SurfaceSession mSurfaceSession = new SurfaceSession();
     private final Transaction mTransaction = new Transaction();
     private final Transaction mFrameRateTransaction = new Transaction();
 
@@ -2712,7 +2711,7 @@ public final class ViewRootImpl implements ViewParent,
      */
     public SurfaceControl updateAndGetBoundsLayer(Transaction t) {
         if (mBoundsLayer == null) {
-            mBoundsLayer = new SurfaceControl.Builder(mSurfaceSession)
+            mBoundsLayer = new SurfaceControl.Builder()
                     .setContainerLayer()
                     .setName("Bounds for - " + getTitle().toString())
                     .setParent(getSurfaceControl())
