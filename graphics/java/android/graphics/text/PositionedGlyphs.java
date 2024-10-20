@@ -24,6 +24,7 @@ import android.annotation.NonNull;
 import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.graphics.fonts.Font;
+import android.os.Build;
 
 import com.android.internal.util.Preconditions;
 import com.android.text.flags.Flags;
@@ -52,6 +53,8 @@ public final class PositionedGlyphs {
                 NativeAllocationRegistry.createMalloced(
                         Typeface.class.getClassLoader(), nReleaseFunc());
     }
+
+    private static boolean sIsRobolectric = Build.FINGERPRINT.equals("robolectric");
 
     private final long mLayoutPtr;
     private final float mXOffset;
@@ -252,7 +255,7 @@ public final class PositionedGlyphs {
         mXOffset = xOffset;
         mYOffset = yOffset;
 
-        if (Flags.typefaceRedesign()) {
+        if (!sIsRobolectric && Flags.typefaceRedesign()) {
             int fontCount = nGetFontCount(layoutPtr);
             mFonts = new ArrayList<>(fontCount);
             for (int i = 0; i < fontCount; ++i) {
