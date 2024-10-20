@@ -7,8 +7,8 @@ package android.app {
   }
 
   @Deprecated public abstract static class AppOpsManager.AppOpsCollector extends android.app.AppOpsManager.OnOpNotedCallback {
-    ctor public AppOpsManager.AppOpsCollector();
-    method @NonNull public java.util.concurrent.Executor getAsyncNotedExecutor();
+    ctor @Deprecated public AppOpsManager.AppOpsCollector();
+    method @Deprecated @NonNull public java.util.concurrent.Executor getAsyncNotedExecutor();
   }
 
   public class Notification implements android.os.Parcelable {
@@ -207,7 +207,7 @@ package android.service.translation {
 
   @Deprecated public static interface TranslationService.OnTranslationResultCallback {
     method @Deprecated public void onError();
-    method public void onTranslationSuccess(@NonNull android.view.translation.TranslationResponse);
+    method @Deprecated public void onTranslationSuccess(@NonNull android.view.translation.TranslationResponse);
   }
 
 }
@@ -261,64 +261,64 @@ package android.telephony.ims {
   }
 
   @Deprecated public final class SipDelegateImsConfiguration implements android.os.Parcelable {
-    method public boolean containsKey(@NonNull String);
-    method @NonNull public android.os.PersistableBundle copyBundle();
-    method public int describeContents();
-    method public boolean getBoolean(@NonNull String, boolean);
-    method public int getInt(@NonNull String, int);
-    method @Nullable public String getString(@NonNull String);
-    method public long getVersion();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.ims.SipDelegateImsConfiguration> CREATOR;
-    field public static final String IPTYPE_IPV4 = "IPV4";
-    field public static final String IPTYPE_IPV6 = "IPV6";
-    field public static final String KEY_SIP_CONFIG_AUTHENTICATION_HEADER_STRING = "sip_config_auhentication_header_string";
-    field public static final String KEY_SIP_CONFIG_AUTHENTICATION_NONCE_STRING = "sip_config_authentication_nonce_string";
-    field public static final String KEY_SIP_CONFIG_CELLULAR_NETWORK_INFO_HEADER_STRING = "sip_config_cellular_network_info_header_string";
-    field public static final String KEY_SIP_CONFIG_HOME_DOMAIN_STRING = "sip_config_home_domain_string";
-    field public static final String KEY_SIP_CONFIG_IMEI_STRING = "sip_config_imei_string";
-    field public static final String KEY_SIP_CONFIG_IPTYPE_STRING = "sip_config_iptype_string";
-    field public static final String KEY_SIP_CONFIG_IS_COMPACT_FORM_ENABLED_BOOL = "sip_config_is_compact_form_enabled_bool";
-    field public static final String KEY_SIP_CONFIG_IS_GRUU_ENABLED_BOOL = "sip_config_is_gruu_enabled_bool";
-    field public static final String KEY_SIP_CONFIG_IS_IPSEC_ENABLED_BOOL = "sip_config_is_ipsec_enabled_bool";
-    field public static final String KEY_SIP_CONFIG_IS_KEEPALIVE_ENABLED_BOOL = "sip_config_is_keepalive_enabled_bool";
-    field public static final String KEY_SIP_CONFIG_IS_NAT_ENABLED_BOOL = "sip_config_is_nat_enabled_bool";
-    field public static final String KEY_SIP_CONFIG_MAX_PAYLOAD_SIZE_ON_UDP_INT = "sip_config_udp_max_payload_size_int";
-    field public static final String KEY_SIP_CONFIG_PATH_HEADER_STRING = "sip_config_path_header_string";
-    field public static final String KEY_SIP_CONFIG_P_ACCESS_NETWORK_INFO_HEADER_STRING = "sip_config_p_access_network_info_header_string";
-    field public static final String KEY_SIP_CONFIG_P_ASSOCIATED_URI_HEADER_STRING = "sip_config_p_associated_uri_header_string";
-    field public static final String KEY_SIP_CONFIG_P_LAST_ACCESS_NETWORK_INFO_HEADER_STRING = "sip_config_p_last_access_network_info_header_string";
-    field public static final String KEY_SIP_CONFIG_SECURITY_VERIFY_HEADER_STRING = "sip_config_security_verify_header_string";
-    field public static final String KEY_SIP_CONFIG_SERVER_DEFAULT_IPADDRESS_STRING = "sip_config_server_default_ipaddress_string";
-    field public static final String KEY_SIP_CONFIG_SERVER_DEFAULT_PORT_INT = "sip_config_server_default_port_int";
-    field public static final String KEY_SIP_CONFIG_SERVER_IPSEC_CLIENT_PORT_INT = "sip_config_server_ipsec_client_port_int";
-    field public static final String KEY_SIP_CONFIG_SERVER_IPSEC_OLD_CLIENT_PORT_INT = "sip_config_server_ipsec_old_client_port_int";
-    field public static final String KEY_SIP_CONFIG_SERVER_IPSEC_SERVER_PORT_INT = "sip_config_server_ipsec_server_port_int";
-    field public static final String KEY_SIP_CONFIG_SERVICE_ROUTE_HEADER_STRING = "sip_config_service_route_header_string";
-    field public static final String KEY_SIP_CONFIG_TRANSPORT_TYPE_STRING = "sip_config_protocol_type_string";
-    field public static final String KEY_SIP_CONFIG_UE_DEFAULT_IPADDRESS_STRING = "sip_config_ue_default_ipaddress_string";
-    field public static final String KEY_SIP_CONFIG_UE_DEFAULT_PORT_INT = "sip_config_ue_default_port_int";
-    field public static final String KEY_SIP_CONFIG_UE_IPSEC_CLIENT_PORT_INT = "sip_config_ue_ipsec_client_port_int";
-    field public static final String KEY_SIP_CONFIG_UE_IPSEC_OLD_CLIENT_PORT_INT = "sip_config_ue_ipsec_old_client_port_int";
-    field public static final String KEY_SIP_CONFIG_UE_IPSEC_SERVER_PORT_INT = "sip_config_ue_ipsec_server_port_int";
-    field public static final String KEY_SIP_CONFIG_UE_PRIVATE_USER_ID_STRING = "sip_config_ue_private_user_id_string";
-    field public static final String KEY_SIP_CONFIG_UE_PUBLIC_GRUU_STRING = "sip_config_ue_public_gruu_string";
-    field public static final String KEY_SIP_CONFIG_UE_PUBLIC_IPADDRESS_WITH_NAT_STRING = "sip_config_ue_public_ipaddress_with_nat_string";
-    field public static final String KEY_SIP_CONFIG_UE_PUBLIC_PORT_WITH_NAT_INT = "sip_config_ue_public_port_with_nat_int";
-    field public static final String KEY_SIP_CONFIG_UE_PUBLIC_USER_ID_STRING = "sip_config_ue_public_user_id_string";
-    field public static final String KEY_SIP_CONFIG_URI_USER_PART_STRING = "sip_config_uri_user_part_string";
-    field public static final String KEY_SIP_CONFIG_USER_AGENT_HEADER_STRING = "sip_config_sip_user_agent_header_string";
-    field public static final String SIP_TRANSPORT_TCP = "TCP";
-    field public static final String SIP_TRANSPORT_UDP = "UDP";
+    method @Deprecated public boolean containsKey(@NonNull String);
+    method @Deprecated @NonNull public android.os.PersistableBundle copyBundle();
+    method @Deprecated public int describeContents();
+    method @Deprecated public boolean getBoolean(@NonNull String, boolean);
+    method @Deprecated public int getInt(@NonNull String, int);
+    method @Deprecated @Nullable public String getString(@NonNull String);
+    method @Deprecated public long getVersion();
+    method @Deprecated public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @Deprecated @NonNull public static final android.os.Parcelable.Creator<android.telephony.ims.SipDelegateImsConfiguration> CREATOR;
+    field @Deprecated public static final String IPTYPE_IPV4 = "IPV4";
+    field @Deprecated public static final String IPTYPE_IPV6 = "IPV6";
+    field @Deprecated public static final String KEY_SIP_CONFIG_AUTHENTICATION_HEADER_STRING = "sip_config_auhentication_header_string";
+    field @Deprecated public static final String KEY_SIP_CONFIG_AUTHENTICATION_NONCE_STRING = "sip_config_authentication_nonce_string";
+    field @Deprecated public static final String KEY_SIP_CONFIG_CELLULAR_NETWORK_INFO_HEADER_STRING = "sip_config_cellular_network_info_header_string";
+    field @Deprecated public static final String KEY_SIP_CONFIG_HOME_DOMAIN_STRING = "sip_config_home_domain_string";
+    field @Deprecated public static final String KEY_SIP_CONFIG_IMEI_STRING = "sip_config_imei_string";
+    field @Deprecated public static final String KEY_SIP_CONFIG_IPTYPE_STRING = "sip_config_iptype_string";
+    field @Deprecated public static final String KEY_SIP_CONFIG_IS_COMPACT_FORM_ENABLED_BOOL = "sip_config_is_compact_form_enabled_bool";
+    field @Deprecated public static final String KEY_SIP_CONFIG_IS_GRUU_ENABLED_BOOL = "sip_config_is_gruu_enabled_bool";
+    field @Deprecated public static final String KEY_SIP_CONFIG_IS_IPSEC_ENABLED_BOOL = "sip_config_is_ipsec_enabled_bool";
+    field @Deprecated public static final String KEY_SIP_CONFIG_IS_KEEPALIVE_ENABLED_BOOL = "sip_config_is_keepalive_enabled_bool";
+    field @Deprecated public static final String KEY_SIP_CONFIG_IS_NAT_ENABLED_BOOL = "sip_config_is_nat_enabled_bool";
+    field @Deprecated public static final String KEY_SIP_CONFIG_MAX_PAYLOAD_SIZE_ON_UDP_INT = "sip_config_udp_max_payload_size_int";
+    field @Deprecated public static final String KEY_SIP_CONFIG_PATH_HEADER_STRING = "sip_config_path_header_string";
+    field @Deprecated public static final String KEY_SIP_CONFIG_P_ACCESS_NETWORK_INFO_HEADER_STRING = "sip_config_p_access_network_info_header_string";
+    field @Deprecated public static final String KEY_SIP_CONFIG_P_ASSOCIATED_URI_HEADER_STRING = "sip_config_p_associated_uri_header_string";
+    field @Deprecated public static final String KEY_SIP_CONFIG_P_LAST_ACCESS_NETWORK_INFO_HEADER_STRING = "sip_config_p_last_access_network_info_header_string";
+    field @Deprecated public static final String KEY_SIP_CONFIG_SECURITY_VERIFY_HEADER_STRING = "sip_config_security_verify_header_string";
+    field @Deprecated public static final String KEY_SIP_CONFIG_SERVER_DEFAULT_IPADDRESS_STRING = "sip_config_server_default_ipaddress_string";
+    field @Deprecated public static final String KEY_SIP_CONFIG_SERVER_DEFAULT_PORT_INT = "sip_config_server_default_port_int";
+    field @Deprecated public static final String KEY_SIP_CONFIG_SERVER_IPSEC_CLIENT_PORT_INT = "sip_config_server_ipsec_client_port_int";
+    field @Deprecated public static final String KEY_SIP_CONFIG_SERVER_IPSEC_OLD_CLIENT_PORT_INT = "sip_config_server_ipsec_old_client_port_int";
+    field @Deprecated public static final String KEY_SIP_CONFIG_SERVER_IPSEC_SERVER_PORT_INT = "sip_config_server_ipsec_server_port_int";
+    field @Deprecated public static final String KEY_SIP_CONFIG_SERVICE_ROUTE_HEADER_STRING = "sip_config_service_route_header_string";
+    field @Deprecated public static final String KEY_SIP_CONFIG_TRANSPORT_TYPE_STRING = "sip_config_protocol_type_string";
+    field @Deprecated public static final String KEY_SIP_CONFIG_UE_DEFAULT_IPADDRESS_STRING = "sip_config_ue_default_ipaddress_string";
+    field @Deprecated public static final String KEY_SIP_CONFIG_UE_DEFAULT_PORT_INT = "sip_config_ue_default_port_int";
+    field @Deprecated public static final String KEY_SIP_CONFIG_UE_IPSEC_CLIENT_PORT_INT = "sip_config_ue_ipsec_client_port_int";
+    field @Deprecated public static final String KEY_SIP_CONFIG_UE_IPSEC_OLD_CLIENT_PORT_INT = "sip_config_ue_ipsec_old_client_port_int";
+    field @Deprecated public static final String KEY_SIP_CONFIG_UE_IPSEC_SERVER_PORT_INT = "sip_config_ue_ipsec_server_port_int";
+    field @Deprecated public static final String KEY_SIP_CONFIG_UE_PRIVATE_USER_ID_STRING = "sip_config_ue_private_user_id_string";
+    field @Deprecated public static final String KEY_SIP_CONFIG_UE_PUBLIC_GRUU_STRING = "sip_config_ue_public_gruu_string";
+    field @Deprecated public static final String KEY_SIP_CONFIG_UE_PUBLIC_IPADDRESS_WITH_NAT_STRING = "sip_config_ue_public_ipaddress_with_nat_string";
+    field @Deprecated public static final String KEY_SIP_CONFIG_UE_PUBLIC_PORT_WITH_NAT_INT = "sip_config_ue_public_port_with_nat_int";
+    field @Deprecated public static final String KEY_SIP_CONFIG_UE_PUBLIC_USER_ID_STRING = "sip_config_ue_public_user_id_string";
+    field @Deprecated public static final String KEY_SIP_CONFIG_URI_USER_PART_STRING = "sip_config_uri_user_part_string";
+    field @Deprecated public static final String KEY_SIP_CONFIG_USER_AGENT_HEADER_STRING = "sip_config_sip_user_agent_header_string";
+    field @Deprecated public static final String SIP_TRANSPORT_TCP = "TCP";
+    field @Deprecated public static final String SIP_TRANSPORT_UDP = "UDP";
   }
 
-  public static final class SipDelegateImsConfiguration.Builder {
-    ctor public SipDelegateImsConfiguration.Builder(int);
-    ctor public SipDelegateImsConfiguration.Builder(@NonNull android.telephony.ims.SipDelegateImsConfiguration);
-    method @NonNull public android.telephony.ims.SipDelegateImsConfiguration.Builder addBoolean(@NonNull String, boolean);
-    method @NonNull public android.telephony.ims.SipDelegateImsConfiguration.Builder addInt(@NonNull String, int);
-    method @NonNull public android.telephony.ims.SipDelegateImsConfiguration.Builder addString(@NonNull String, @NonNull String);
-    method @NonNull public android.telephony.ims.SipDelegateImsConfiguration build();
+  @Deprecated public static final class SipDelegateImsConfiguration.Builder {
+    ctor @Deprecated public SipDelegateImsConfiguration.Builder(int);
+    ctor @Deprecated public SipDelegateImsConfiguration.Builder(@NonNull android.telephony.ims.SipDelegateImsConfiguration);
+    method @Deprecated @NonNull public android.telephony.ims.SipDelegateImsConfiguration.Builder addBoolean(@NonNull String, boolean);
+    method @Deprecated @NonNull public android.telephony.ims.SipDelegateImsConfiguration.Builder addInt(@NonNull String, int);
+    method @Deprecated @NonNull public android.telephony.ims.SipDelegateImsConfiguration.Builder addString(@NonNull String, @NonNull String);
+    method @Deprecated @NonNull public android.telephony.ims.SipDelegateImsConfiguration build();
   }
 
 }

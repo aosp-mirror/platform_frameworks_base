@@ -1228,7 +1228,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             String callingFeatureId, Intent intent, String resolvedType, IBinder resultTo,
             String resultWho, int requestCode, int startFlags, ProfilerInfo profilerInfo,
             Bundle bOptions) {
-        mAmInternal.addCreatorToken(intent);
+        mAmInternal.addCreatorToken(intent, callingPackage);
         return startActivityAsUser(caller, callingPackage, callingFeatureId, intent, resolvedType,
                 resultTo, resultWho, requestCode, startFlags, profilerInfo, bOptions,
                 UserHandle.getCallingUserId());
@@ -1243,7 +1243,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         enforceNotIsolatedCaller(reason);
         if (intents != null) {
             for (Intent intent : intents) {
-                mAmInternal.addCreatorToken(intent);
+                mAmInternal.addCreatorToken(intent, callingPackage);
             }
         }
         userId = handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(), userId, reason);
@@ -1275,7 +1275,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             @Nullable String callingFeatureId, Intent intent, String resolvedType,
             IBinder resultTo, String resultWho, int requestCode, int startFlags,
             ProfilerInfo profilerInfo, Bundle bOptions, int userId, boolean validateIncomingUser) {
-        mAmInternal.addCreatorToken(intent);
+        mAmInternal.addCreatorToken(intent, callingPackage);
         final SafeActivityOptions opts = SafeActivityOptions.fromBundle(bOptions);
 
         assertPackageMatchesCallingUid(callingPackage);
@@ -1330,7 +1330,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             }
             // Remove existing mismatch flag so it can be properly updated later
             fillInIntent.removeExtendedFlags(Intent.EXTENDED_FLAG_FILTER_MISMATCH);
-            mAmInternal.addCreatorToken(fillInIntent);
         }
 
         if (!(target instanceof PendingIntentRecord)) {
@@ -1338,6 +1337,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
 
         PendingIntentRecord pir = (PendingIntentRecord) target;
+
+        if (fillInIntent != null) {
+            mAmInternal.addCreatorToken(fillInIntent, pir.getPackageName());
+        }
 
         synchronized (mGlobalLock) {
             // If this is coming from the currently resumed activity, it is
@@ -1349,6 +1352,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 mAppSwitchesState = APP_SWITCH_ALLOW;
             }
         }
+
         return pir.sendInner(caller, 0, fillInIntent, resolvedType, allowlistToken, null, null,
                 resultTo, resultWho, requestCode, flagsMask, flagsValues, bOptions);
     }
@@ -1360,8 +1364,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         if (intent != null && intent.hasFileDescriptors()) {
             throw new IllegalArgumentException("File descriptors passed in Intent");
         }
-
-        mAmInternal.addCreatorToken(intent);
 
         SafeActivityOptions options = SafeActivityOptions.fromBundle(bOptions);
 
@@ -1376,6 +1378,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 SafeActivityOptions.abort(options);
                 return false;
             }
+
+            mAmInternal.addCreatorToken(intent, r.packageName);
+
             intent = new Intent(intent);
             // Remove existing mismatch flag so it can be properly updated later
             intent.removeExtendedFlags(Intent.EXTENDED_FLAG_FILTER_MISMATCH);
@@ -3944,6 +3949,28 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
+    }
+
+    private TaskSnapshot getTaskSnapshotInner(int taskId, boolean isLowResolution,
+            @TaskSnapshot.ReferenceFlags int usage) {
+        final Task task;
+        synchronized (mGlobalLock) {
+            task = mRootWindowContainer.anyTaskForId(taskId, MATCH_ATTACHED_TASK_OR_RECENT_TASKS);
+            if (task == null) {
+                Slog.w(TAG, "getTaskSnapshot: taskId=" + taskId + " not found");
+                return null;
+            }
+            // Try to load snapshot from cache first, and add reference if the snapshot is in cache.
+            final TaskSnapshot snapshot = mWindowManager.mTaskSnapshotController.getSnapshot(taskId,
+                    task.mUserId, false /* restoreFromDisk */, isLowResolution);
+            if (snapshot != null) {
+                snapshot.addReference(usage);
+                return snapshot;
+            }
+        }
+        // Don't call this while holding the lock as this operation might hit the disk.
+        return mWindowManager.mTaskSnapshotController.getSnapshot(taskId,
+                task.mUserId, true /* restoreFromDisk */, isLowResolution);
     }
 
     @Override
@@ -6725,6 +6752,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                         break;
                     }
                 }
+                ProtoLog.v(WM_DEBUG_CONFIGURATION, "Binding proc %s with config %s",
+                        wpc.mName, wpc.getConfiguration());
                 // The "info" can be the target of instrumentation.
                 return new PreBindInfo(compatibilityInfoForPackageLocked(info),
                         new Configuration(wpc.getConfiguration()));
@@ -7274,8 +7303,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
         @Override
         public TaskSnapshot getTaskSnapshotBlocking(
-                int taskId, boolean isLowResolution) {
-            return ActivityTaskManagerService.this.getTaskSnapshot(taskId, isLowResolution);
+                int taskId, boolean isLowResolution, @TaskSnapshot.ReferenceFlags int usage) {
+            return ActivityTaskManagerService.this.getTaskSnapshotInner(
+                    taskId, isLowResolution, usage);
         }
 
         @Override

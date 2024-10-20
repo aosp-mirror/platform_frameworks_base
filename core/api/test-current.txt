@@ -393,7 +393,9 @@ package android.app {
 
   public class NotificationManager {
     method @FlaggedApi("android.app.modes_api") @NonNull public String addAutomaticZenRule(@NonNull android.app.AutomaticZenRule, boolean);
+    method @FlaggedApi("android.service.notification.notification_classification") public void allowAssistantAdjustment(@NonNull String);
     method public void cleanUpCallersAfter(long);
+    method @FlaggedApi("android.service.notification.notification_classification") public void disallowAssistantAdjustment(@NonNull String);
     method @FlaggedApi("android.app.modes_api") @NonNull public android.service.notification.ZenPolicy getDefaultZenPolicy();
     method public android.content.ComponentName getEffectsSuppressor();
     method @FlaggedApi("android.service.notification.notification_classification") @NonNull public java.util.Set<java.lang.String> getUnsupportedAdjustmentTypes();
@@ -1099,6 +1101,7 @@ package android.content.pm {
     field public static final long OVERRIDE_UNDEFINED_ORIENTATION_TO_PORTRAIT = 265452344L; // 0xfd27b38L
     field public static final long OVERRIDE_USE_DISPLAY_LANDSCAPE_NATURAL_ORIENTATION = 255940284L; // 0xf4156bcL
     field public static final int RESIZE_MODE_RESIZEABLE = 2; // 0x2
+    field public static final long UNIVERSAL_RESIZABLE_BY_DEFAULT = 357141415L; // 0x15498ba7L
   }
 
   public class ApplicationInfo extends android.content.pm.PackageItemInfo implements android.os.Parcelable {

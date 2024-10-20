@@ -25,7 +25,7 @@ import android.os.Messenger
 import android.util.ArrayMap
 import android.util.Log
 import androidx.annotation.VisibleForTesting
-import com.android.app.tracing.coroutines.runBlocking
+import com.android.app.tracing.coroutines.runBlockingTraced as runBlocking
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background

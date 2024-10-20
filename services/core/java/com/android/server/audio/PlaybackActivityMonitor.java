@@ -72,6 +72,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * Class to receive and dispatch updates from AudioSystem about recording configurations.
@@ -160,18 +161,22 @@ public final class PlaybackActivityMonitor
 
     private final Context mContext;
     private int mSavedAlarmVolume = -1;
+    private boolean mSavedAlarmMuted = false;
+    private final Function<Integer, Boolean> mIsStreamMutedCb;
     private final int mMaxAlarmVolume;
     private int mPrivilegedAlarmActiveCount = 0;
     private final Consumer<AudioDeviceAttributes> mMuteAwaitConnectionTimeoutCb;
     private final FadeOutManager mFadeOutManager = new FadeOutManager();
 
     PlaybackActivityMonitor(Context context, int maxAlarmVolume,
-            Consumer<AudioDeviceAttributes> muteTimeoutCallback) {
+            Consumer<AudioDeviceAttributes> muteTimeoutCallback,
+            Function<Integer, Boolean> isStreamMutedCb) {
         mContext = context;
         mMaxAlarmVolume = maxAlarmVolume;
         PlayMonitorClient.sListenerDeathMonitor = this;
         AudioPlaybackConfiguration.sPlayerDeathMonitor = this;
         mMuteAwaitConnectionTimeoutCb = muteTimeoutCallback;
+        mIsStreamMutedCb = isStreamMutedCb;
         initEventHandler();
     }
 
@@ -332,8 +337,9 @@ public final class PlaybackActivityMonitor
                     if (mPrivilegedAlarmActiveCount++ == 0) {
                         mSavedAlarmVolume = AudioSystem.getStreamVolumeIndex(
                                 AudioSystem.STREAM_ALARM, AudioSystem.DEVICE_OUT_SPEAKER);
+                        mSavedAlarmMuted = mIsStreamMutedCb.apply(AudioSystem.STREAM_ALARM);
                         AudioSystem.setStreamVolumeIndexAS(AudioSystem.STREAM_ALARM,
-                                mMaxAlarmVolume, AudioSystem.DEVICE_OUT_SPEAKER);
+                                mMaxAlarmVolume, /*muted=*/false, AudioSystem.DEVICE_OUT_SPEAKER);
                     }
                 } else if (event != AudioPlaybackConfiguration.PLAYER_STATE_STARTED &&
                         apc.getPlayerState() == AudioPlaybackConfiguration.PLAYER_STATE_STARTED) {
@@ -342,7 +348,8 @@ public final class PlaybackActivityMonitor
                                 AudioSystem.STREAM_ALARM, AudioSystem.DEVICE_OUT_SPEAKER) ==
                                 mMaxAlarmVolume) {
                             AudioSystem.setStreamVolumeIndexAS(AudioSystem.STREAM_ALARM,
-                                    mSavedAlarmVolume, AudioSystem.DEVICE_OUT_SPEAKER);
+                                    mSavedAlarmVolume, mSavedAlarmMuted,
+                                    AudioSystem.DEVICE_OUT_SPEAKER);
                         }
                     }
                 }

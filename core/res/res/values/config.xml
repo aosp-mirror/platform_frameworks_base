@@ -287,6 +287,11 @@
          vibration params. -->
     <integer name="config_requestVibrationParamsTimeout">50</integer>
 
+    <!-- The max duration (in milliseconds) that the vibrator service will allow effects to be
+         pipelined (i.e. service will wait for ongoing vibration to finish instead of cancelling it
+         to start the new one). Value should be positive. Zero will disable effect pipelining. -->
+    <integer name="config_vibrationPipelineMaxDuration">25</integer>
+
     <!-- Array containing the usages that should request vibration params before they are played.
          These usages don't have strong latency requirements, e.g. ringtone and notification, and
          can be slightly delayed. -->
@@ -4447,17 +4452,25 @@
     <string-array translatable="false" name="config_defaultPinnerServiceFiles">
     </string-array>
 
-    <!-- True if camera app should be pinned via Pinner Service -->
+    <!-- Note: This config is deprecated, use config_pinnerCameraPinBytes instead.
+         True if camera app should be pinned via Pinner Service -->
     <bool name="config_pinnerCameraApp">false</bool>
 
-    <!-- Bytes that the PinnerService will pin for Home app -->
-    <integer name="config_pinnerHomePinBytes">0</integer>
+    <!-- Default: 60 MB. Bytes that the PinnerService will pin for Home app -->
+    <integer name="config_pinnerHomePinBytes">62914560</integer>
 
-    <!-- True if assistant app should be pinned via Pinner Service -->
+    <!-- Default: 80 MB. Bytes that the PinnerService will pin for Camera app -->
+    <integer name="config_pinnerCameraPinBytes">83886080</integer>
+
+    <!-- Note: This config is deprecated, use config_pinnerAssistantPinBytes instead.
+         True if assistant app should be pinned via Pinner Service -->
     <bool name="config_pinnerAssistantApp">false</bool>
 
-    <!-- Bytes that the PinnerService will pin for WebView -->
-    <integer name="config_pinnerWebviewPinBytes">0</integer>
+     <!-- Default: 60 MB. Bytes that the PinnerService will pin for Assistant -->
+    <integer name="config_pinnerAssistantPinBytes">62914560</integer>
+
+    <!-- Default: 20 MB. Bytes that the PinnerService will pin for WebView -->
+    <integer name="config_pinnerWebviewPinBytes">20971520</integer>
 
     <!-- Maximum memory that PinnerService will pin for apps expressed
          as a percentage of total device memory [0,100].
@@ -4857,7 +4870,7 @@
      See android.credentials.CredentialManager
     -->
     <string name="config_defaultCredentialManagerHybridService" translatable="false"></string>
-    
+
     <!-- The component name, flattened to a string, for the system's credential manager
       autofill service. This service allows interceding autofill requests and routing
       them to credential manager.
@@ -5769,6 +5782,9 @@
     <!-- The list of packages to automatically opt out of refresh rates higher than 60hz because
          of known compatibility issues. -->
     <string-array name="config_highRefreshRateBlacklist"></string-array>
+
+    <!-- The list of packages that will use ANGLE as the GLES driver -->
+    <string-array name="config_angleAllowList"></string-array>
 
     <!-- The list of packages to automatically opt in to refresh rate suppressing by small area
     detection. Format of this array should be packageName:threshold and threshold value should

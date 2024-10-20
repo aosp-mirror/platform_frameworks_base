@@ -36,7 +36,7 @@ import com.android.systemui.statusbar.phone.BoundsPair
 import com.android.systemui.statusbar.phone.LetterboxAppearance
 import com.android.systemui.statusbar.phone.LetterboxAppearanceCalculator
 import com.android.systemui.statusbar.phone.StatusBarBoundsProvider
-import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentComponent
+import com.android.systemui.statusbar.phone.fragment.dagger.HomeStatusBarComponent
 import com.android.systemui.statusbar.phone.ongoingcall.data.repository.ongoingCallRepository
 import com.android.systemui.statusbar.phone.ongoingcall.shared.model.OngoingCallModel
 import com.android.systemui.statusbar.phone.ongoingcall.shared.model.inCallModel
@@ -62,8 +62,8 @@ class StatusBarModeRepositoryImplTest : SysuiTestCase() {
     private val commandQueue = mock<CommandQueue>()
     private val letterboxAppearanceCalculator = mock<LetterboxAppearanceCalculator>()
     private val statusBarBoundsProvider = mock<StatusBarBoundsProvider>()
-    private val statusBarFragmentComponent =
-        mock<StatusBarFragmentComponent>().also {
+    private val homeStatusBarComponent =
+        mock<HomeStatusBarComponent>().also {
             whenever(it.boundsProvider).thenReturn(statusBarBoundsProvider)
         }
     private val ongoingCallRepository = kosmos.ongoingCallRepository
@@ -78,7 +78,7 @@ class StatusBarModeRepositoryImplTest : SysuiTestCase() {
             )
             .apply {
                 this.start()
-                this.onStatusBarViewInitialized(statusBarFragmentComponent)
+                this.onStatusBarViewInitialized(homeStatusBarComponent)
             }
 
     private val commandQueueCallback: CommandQueue.Callbacks
@@ -235,9 +235,7 @@ class StatusBarModeRepositoryImplTest : SysuiTestCase() {
         testScope.runTest {
             val latest by collectLastValue(underTest.isInFullscreenMode)
 
-            onSystemBarAttributesChanged(
-                requestedVisibleTypes = WindowInsets.Type.statusBars(),
-            )
+            onSystemBarAttributesChanged(requestedVisibleTypes = WindowInsets.Type.statusBars())
 
             assertThat(latest).isFalse()
         }
@@ -247,9 +245,7 @@ class StatusBarModeRepositoryImplTest : SysuiTestCase() {
         testScope.runTest {
             val latest by collectLastValue(underTest.isInFullscreenMode)
 
-            onSystemBarAttributesChanged(
-                requestedVisibleTypes = WindowInsets.Type.navigationBars(),
-            )
+            onSystemBarAttributesChanged(requestedVisibleTypes = WindowInsets.Type.navigationBars())
 
             assertThat(latest).isTrue()
         }
@@ -259,9 +255,7 @@ class StatusBarModeRepositoryImplTest : SysuiTestCase() {
         testScope.runTest {
             val latest by collectLastValue(underTest.isInFullscreenMode)
 
-            onSystemBarAttributesChanged(
-                requestedVisibleTypes = WindowInsets.Type.navigationBars(),
-            )
+            onSystemBarAttributesChanged(requestedVisibleTypes = WindowInsets.Type.navigationBars())
             assertThat(latest).isTrue()
 
             onSystemBarAttributesChanged(
@@ -347,7 +341,7 @@ class StatusBarModeRepositoryImplTest : SysuiTestCase() {
             val startingLetterboxAppearance =
                 LetterboxAppearance(
                     APPEARANCE_LIGHT_STATUS_BARS,
-                    listOf(AppearanceRegion(APPEARANCE_LIGHT_STATUS_BARS, Rect(0, 0, 1, 1)))
+                    listOf(AppearanceRegion(APPEARANCE_LIGHT_STATUS_BARS, Rect(0, 0, 1, 1))),
                 )
             whenever(
                     letterboxAppearanceCalculator.getLetterboxAppearance(
@@ -371,7 +365,7 @@ class StatusBarModeRepositoryImplTest : SysuiTestCase() {
             val newLetterboxAppearance =
                 LetterboxAppearance(
                     APPEARANCE_LOW_PROFILE_BARS,
-                    listOf(AppearanceRegion(APPEARANCE_LOW_PROFILE_BARS, Rect(10, 20, 30, 40)))
+                    listOf(AppearanceRegion(APPEARANCE_LOW_PROFILE_BARS, Rect(10, 20, 30, 40))),
                 )
             whenever(
                     letterboxAppearanceCalculator.getLetterboxAppearance(
@@ -398,9 +392,7 @@ class StatusBarModeRepositoryImplTest : SysuiTestCase() {
             val latest by collectLastValue(underTest.statusBarAppearance)
 
             ongoingCallRepository.setOngoingCallState(inCallModel(startTimeMs = 34))
-            onSystemBarAttributesChanged(
-                requestedVisibleTypes = WindowInsets.Type.navigationBars(),
-            )
+            onSystemBarAttributesChanged(requestedVisibleTypes = WindowInsets.Type.navigationBars())
 
             assertThat(latest!!.mode).isEqualTo(StatusBarMode.SEMI_TRANSPARENT)
         }
@@ -438,9 +430,7 @@ class StatusBarModeRepositoryImplTest : SysuiTestCase() {
     fun statusBarMode_transientShown_semiTransparent() =
         testScope.runTest {
             val latest by collectLastValue(underTest.statusBarAppearance)
-            onSystemBarAttributesChanged(
-                appearance = APPEARANCE_OPAQUE_STATUS_BARS,
-            )
+            onSystemBarAttributesChanged(appearance = APPEARANCE_OPAQUE_STATUS_BARS)
 
             underTest.showTransient()
 
@@ -453,7 +443,7 @@ class StatusBarModeRepositoryImplTest : SysuiTestCase() {
             val latest by collectLastValue(underTest.statusBarAppearance)
 
             onSystemBarAttributesChanged(
-                appearance = APPEARANCE_LOW_PROFILE_BARS or APPEARANCE_OPAQUE_STATUS_BARS,
+                appearance = APPEARANCE_LOW_PROFILE_BARS or APPEARANCE_OPAQUE_STATUS_BARS
             )
 
             assertThat(latest!!.mode).isEqualTo(StatusBarMode.LIGHTS_OUT)
@@ -464,9 +454,7 @@ class StatusBarModeRepositoryImplTest : SysuiTestCase() {
         testScope.runTest {
             val latest by collectLastValue(underTest.statusBarAppearance)
 
-            onSystemBarAttributesChanged(
-                appearance = APPEARANCE_LOW_PROFILE_BARS,
-            )
+            onSystemBarAttributesChanged(appearance = APPEARANCE_LOW_PROFILE_BARS)
 
             assertThat(latest!!.mode).isEqualTo(StatusBarMode.LIGHTS_OUT_TRANSPARENT)
         }
@@ -476,9 +464,7 @@ class StatusBarModeRepositoryImplTest : SysuiTestCase() {
         testScope.runTest {
             val latest by collectLastValue(underTest.statusBarAppearance)
 
-            onSystemBarAttributesChanged(
-                appearance = APPEARANCE_OPAQUE_STATUS_BARS,
-            )
+            onSystemBarAttributesChanged(appearance = APPEARANCE_OPAQUE_STATUS_BARS)
 
             assertThat(latest!!.mode).isEqualTo(StatusBarMode.OPAQUE)
         }
@@ -488,9 +474,7 @@ class StatusBarModeRepositoryImplTest : SysuiTestCase() {
         testScope.runTest {
             val latest by collectLastValue(underTest.statusBarAppearance)
 
-            onSystemBarAttributesChanged(
-                appearance = APPEARANCE_SEMI_TRANSPARENT_STATUS_BARS,
-            )
+            onSystemBarAttributesChanged(appearance = APPEARANCE_SEMI_TRANSPARENT_STATUS_BARS)
 
             assertThat(latest!!.mode).isEqualTo(StatusBarMode.SEMI_TRANSPARENT)
         }
@@ -500,9 +484,7 @@ class StatusBarModeRepositoryImplTest : SysuiTestCase() {
         testScope.runTest {
             val latest by collectLastValue(underTest.statusBarAppearance)
 
-            onSystemBarAttributesChanged(
-                appearance = 0,
-            )
+            onSystemBarAttributesChanged(appearance = 0)
 
             assertThat(latest!!.mode).isEqualTo(StatusBarMode.TRANSPARENT)
         }
@@ -540,7 +522,7 @@ class StatusBarModeRepositoryImplTest : SysuiTestCase() {
                 LetterboxDetails(
                     /* letterboxInnerBounds= */ Rect(0, 0, 10, 10),
                     /* letterboxFullBounds= */ Rect(0, 0, 20, 20),
-                    /* appAppearance= */ 0
+                    /* appAppearance= */ 0,
                 )
             )
         private val REGIONS_FROM_LETTERBOX_CALCULATOR =

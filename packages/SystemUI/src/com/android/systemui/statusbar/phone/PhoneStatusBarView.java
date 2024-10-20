@@ -40,7 +40,7 @@ import com.android.systemui.Flags;
 import com.android.systemui.Gefingerpoken;
 import com.android.systemui.res.R;
 import com.android.systemui.statusbar.phone.userswitcher.StatusBarUserSwitcherContainer;
-import com.android.systemui.statusbar.window.StatusBarWindowController;
+import com.android.systemui.statusbar.window.StatusBarWindowControllerStore;
 import com.android.systemui.user.ui.binder.StatusBarUserChipViewBinder;
 import com.android.systemui.user.ui.viewmodel.StatusBarUserChipViewModel;
 import com.android.systemui.util.leak.RotationUtils;
@@ -49,7 +49,7 @@ import java.util.Objects;
 
 public class PhoneStatusBarView extends FrameLayout {
     private static final String TAG = "PhoneStatusBarView";
-    private final StatusBarWindowController mStatusBarWindowController;
+    private final StatusBarWindowControllerStore mStatusBarWindowControllerStore;
 
     private int mRotationOrientation = -1;
     @Nullable
@@ -75,7 +75,7 @@ public class PhoneStatusBarView extends FrameLayout {
 
     public PhoneStatusBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        mStatusBarWindowController = Dependency.get(StatusBarWindowController.class);
+        mStatusBarWindowControllerStore = Dependency.get(StatusBarWindowControllerStore.class);
     }
 
     void setTouchEventHandler(Gefingerpoken handler) {
@@ -326,7 +326,7 @@ public class PhoneStatusBarView extends FrameLayout {
         if (Flags.statusBarStopUpdatingWindowHeight()) {
             return;
         }
-        mStatusBarWindowController.refreshStatusBarHeight();
+        mStatusBarWindowControllerStore.getDefaultDisplay().refreshStatusBarHeight();
     }
 
     interface HasCornerCutoutFetcher {

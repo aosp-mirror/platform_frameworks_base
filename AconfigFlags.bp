@@ -81,6 +81,7 @@ aconfig_declarations_group {
         "android.view.inputmethod.flags-aconfig-java",
         "android.webkit.flags-aconfig-java",
         "android.widget.flags-aconfig-java",
+        "android.xr.flags-aconfig-java",
         "art_exported_aconfig_flags_lib",
         "backstage_power_flags_lib",
         "backup_flags_lib",
@@ -109,6 +110,7 @@ aconfig_declarations_group {
         "hwui_flags_java_lib",
         "interaction_jank_monitor_flags_lib",
         "libcore_exported_aconfig_flags_lib",
+        "libcore_readonly_aconfig_flags_lib",
         "libgui_flags_java_lib",
         "power_flags_lib",
         "sdk_sandbox_flags_lib",
@@ -165,6 +167,26 @@ java_aconfig_library {
     name: "libcore_exported_aconfig_flags_lib",
     aconfig_declarations: "libcore-aconfig-flags",
     mode: "exported",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// See b/368409430 - This is for libcore flags to be generated with
+// force-read-only mode, so access to the flags does not involve I/O,
+// which could break Isolated Processes with I/O permission disabled.
+// The issue will be addressed once new Aconfig storage API is landed
+// and the readonly version will be removed.
+aconfig_declarations {
+    name: "libcore-readonly-aconfig-flags",
+    package: "com.android.libcore.readonly",
+    container: "system",
+    srcs: ["libcore-readonly.aconfig"],
+}
+
+// Core Libraries / libcore
+java_aconfig_library {
+    name: "libcore_readonly_aconfig_flags_lib",
+    aconfig_declarations: "libcore-readonly-aconfig-flags",
+    mode: "force-read-only",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 
@@ -791,6 +813,12 @@ java_aconfig_library {
     ],
 }
 
+cc_aconfig_library {
+    name: "android.permission.flags-aconfig-cc",
+    aconfig_declarations: "android.permission.flags-aconfig",
+    host_supported: true,
+}
+
 // SQLite
 aconfig_declarations {
     name: "android.database.sqlite-aconfig",
@@ -890,6 +918,20 @@ aconfig_declarations {
 java_aconfig_library {
     name: "android.multiuser.flags-aconfig-java",
     aconfig_declarations: "android.multiuser.flags-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// XR
+aconfig_declarations {
+    name: "android.xr.flags-aconfig",
+    package: "android.xr",
+    container: "system",
+    srcs: ["core/java/android/content/pm/xr.aconfig"],
+}
+
+java_aconfig_library {
+    name: "android.xr.flags-aconfig-java",
+    aconfig_declarations: "android.xr.flags-aconfig",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 

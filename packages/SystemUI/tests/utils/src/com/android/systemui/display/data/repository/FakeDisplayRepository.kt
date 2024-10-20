@@ -53,6 +53,10 @@ class FakeDisplayRepository @Inject constructor() : DisplayRepository {
     private val displayAdditionEventFlow = MutableSharedFlow<Display?>(replay = 0)
     private val displayRemovalEventFlow = MutableSharedFlow<Int>(replay = 0)
 
+    suspend fun addDisplay(displayId: Int, type: Int = Display.TYPE_EXTERNAL) {
+        addDisplay(display(type, id = displayId))
+    }
+
     suspend fun addDisplay(display: Display) {
         flow.value += display
         displayAdditionEventFlow.emit(display)

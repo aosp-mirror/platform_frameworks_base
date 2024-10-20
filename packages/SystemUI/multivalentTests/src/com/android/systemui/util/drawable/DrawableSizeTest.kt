@@ -35,7 +35,7 @@ class DrawableSizeTest : SysuiTestCase() {
         val drawable =
             BitmapDrawable(
                 resources,
-                Bitmap.createBitmap(resources.displayMetrics, 150, 150, Bitmap.Config.ARGB_8888)
+                Bitmap.createBitmap(resources.displayMetrics, 150, 150, Bitmap.Config.ARGB_8888),
             )
         val result = DrawableSize.downscaleToSize(resources, drawable, 300, 300)
         assertThat(result).isSameInstanceAs(drawable)
@@ -48,7 +48,7 @@ class DrawableSizeTest : SysuiTestCase() {
         val drawable =
             BitmapDrawable(
                 resources,
-                Bitmap.createBitmap(resources.displayMetrics, 150, 75, Bitmap.Config.ARGB_8888)
+                Bitmap.createBitmap(resources.displayMetrics, 150, 75, Bitmap.Config.ARGB_8888),
             )
 
         val result = DrawableSize.downscaleToSize(resources, drawable, 75, 75)
@@ -62,6 +62,33 @@ class DrawableSizeTest : SysuiTestCase() {
         val drawable =
             resources.getDrawable(android.R.drawable.stat_sys_download, resources.newTheme())
         val result = DrawableSize.downscaleToSize(resources, drawable, 1, 1)
+        assertThat(result).isSameInstanceAs(drawable)
+    }
+
+    @Test
+    fun testDownscaleToSize_layerDrawable_allLayersSameType_resized() {
+        val drawable =
+            resources.getDrawable(
+                com.android.systemui.tests.R.drawable.layer_drawable_all_same_type,
+                resources.newTheme(),
+            )
+
+        val result = DrawableSize.downscaleToSize(resources, drawable, 1, 1)
+
+        assertThat(result).isNotSameInstanceAs(drawable)
+    }
+
+    /** Regression test for b/244282477. */
+    @Test
+    fun testDownscaleToSize_layerDrawable_layersAreDifferentTypes_unchanged() {
+        val drawable =
+            resources.getDrawable(
+                com.android.systemui.tests.R.drawable.layer_drawable_different_types,
+                resources.newTheme(),
+            )
+
+        val result = DrawableSize.downscaleToSize(resources, drawable, 1, 1)
+
         assertThat(result).isSameInstanceAs(drawable)
     }
 }

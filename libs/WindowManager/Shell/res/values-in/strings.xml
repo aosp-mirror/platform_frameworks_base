@@ -97,9 +97,9 @@
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Masalah kamera?\nKetuk untuk memperbaiki"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Tidak dapat diperbaiki?\nKetuk untuk mengembalikan"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Tidak ada masalah kamera? Ketuk untuk menutup."</string>
-    <string name="windowing_app_handle_education_tooltip" msgid="6398482412956375783">"Ketuk untuk membuka menu aplikasi"</string>
-    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="6285279585554484957">"Ketuk untuk menampilkan beberapa aplikasi secara bersamaan"</string>
-    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="6685429075790085337">"Kembali ke layar penuh dari menu aplikasi"</string>
+    <string name="windowing_app_handle_education_tooltip" msgid="2929643449849791854">"Menu aplikasi dapat ditemukan di sini"</string>
+    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="2523468503353474095">"Buka tampilan desktop untuk membuka beberapa aplikasi secara bersamaan"</string>
+    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="5225660258192054132">"Kembali ke layar penuh kapan saja dari menu aplikasi"</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"Lihat dan lakukan lebih banyak hal"</string>
     <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"Tarik aplikasi lain untuk menggunakan layar terpisah"</string>
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Ketuk dua kali di luar aplikasi untuk mengubah posisinya"</string>

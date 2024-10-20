@@ -16,12 +16,16 @@
 
 package android.view;
 
+import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
+
 import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.Rect;
 import android.os.Handler;
 
 import androidx.annotation.NonNull;
+
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -35,6 +39,7 @@ import java.util.Set;
  *
  * @hide
  */
+@VisibleForTesting(visibility = PACKAGE)
 public class LetterboxScrollProcessor {
 
     private enum LetterboxScrollState {
@@ -53,6 +58,7 @@ public class LetterboxScrollProcessor {
     /** IDs of events generated from this class */
     private final Set<Integer> mGeneratedEventIds = new HashSet<>();
 
+    @VisibleForTesting(visibility = PACKAGE)
     public LetterboxScrollProcessor(@NonNull Context context, @Nullable Handler handler) {
         mContext = context;
         mScrollDetector = new GestureDetector(context, new ScrollListener(), handler);
@@ -69,7 +75,9 @@ public class LetterboxScrollProcessor {
      * @return The list of adjusted events, or null if no adjustments are needed. The list is empty
      * if the event should be ignored. Do not keep a reference to the output as the list is reused.
      */
-    public List<MotionEvent> processMotionEvent(MotionEvent motionEvent) {
+    @Nullable
+    @VisibleForTesting(visibility = PACKAGE)
+    public List<MotionEvent> processMotionEvent(@NonNull MotionEvent motionEvent) {
         mProcessedEvents.clear();
         final Rect appBounds = getAppBounds();
 
@@ -124,10 +132,8 @@ public class LetterboxScrollProcessor {
             mState = LetterboxScrollState.AWAITING_GESTURE_START;
         }
 
-        if (makeNoAdjustments) return null;
-        return mProcessedEvents;
+        return makeNoAdjustments ? null : mProcessedEvents;
     }
-
 
     /**
      * Processes the InputEvent for compatibility before it is finished by calling
@@ -136,21 +142,33 @@ public class LetterboxScrollProcessor {
      * @param motionEvent The MotionEvent to process.
      * @return The motionEvent to finish, or null if it should not be finished.
      */
-    public InputEvent processMotionEventBeforeFinish(MotionEvent motionEvent) {
-        if (mGeneratedEventIds.remove(motionEvent.getId())) return null;
-        return motionEvent;
+    @Nullable
+    @VisibleForTesting(visibility = PACKAGE)
+    public InputEvent processMotionEventBeforeFinish(@NonNull MotionEvent motionEvent) {
+        return mGeneratedEventIds.remove(motionEvent.getId()) ? null : motionEvent;
     }
 
+    @NonNull
     private Rect getAppBounds() {
         return mContext.getResources().getConfiguration().windowConfiguration.getBounds();
     }
 
-    private boolean isOutsideAppBounds(MotionEvent motionEvent, Rect appBounds) {
-        return motionEvent.getX() < 0 || motionEvent.getX() >= appBounds.width()
-                || motionEvent.getY() < 0 || motionEvent.getY() >= appBounds.height();
+    /** Checks whether the gesture is located on the letterbox area. */
+    private boolean isOutsideAppBounds(@NonNull MotionEvent motionEvent, @NonNull Rect appBounds) {
+        // The events are in the coordinate system of the ViewRootImpl (window). The window might
+        // not have the same dimensions as the app bounds - for example in case of Dialogs - thus
+        // `getRawX()` and `getRawY()` are used, with the absolute bounds (left, top, etc) instead
+        // of width and height.
+        // The event should be passed to the app if it has happened anywhere in the app area,
+        // irrespective of the current window size, therefore the app bounds are used instead of the
+        // current window.
+        return motionEvent.getRawX() < appBounds.left
+                || motionEvent.getRawX() >= appBounds.right
+                || motionEvent.getRawY() < appBounds.top
+                || motionEvent.getRawY() >= appBounds.bottom;
     }
 
-    private void applyOffset(MotionEvent event, Rect appBounds) {
+    private void applyOffset(@NonNull MotionEvent event, @NonNull Rect appBounds) {
         float horizontalOffset = calculateOffset(event.getX(), appBounds.width());
         float verticalOffset = calculateOffset(event.getY(), appBounds.height());
         // Apply the offset to the motion event so it is over the app's view.

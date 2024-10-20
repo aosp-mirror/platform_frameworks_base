@@ -16,7 +16,7 @@
 
 package com.android.systemui.decor
 
-abstract class DecorProviderFactory {
-    abstract val providers: List<DecorProvider>
-    abstract val hasProviders: Boolean
+interface DecorProviderFactory {
+    val providers: List<DecorProvider>
+    val hasProviders: Boolean
 }

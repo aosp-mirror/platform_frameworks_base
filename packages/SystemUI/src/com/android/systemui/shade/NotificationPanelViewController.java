@@ -32,7 +32,6 @@ import static com.android.systemui.classifier.Classifier.QUICK_SETTINGS;
 import static com.android.systemui.classifier.Classifier.UNLOCK;
 import static com.android.systemui.keyguard.shared.model.KeyguardState.AOD;
 import static com.android.systemui.keyguard.shared.model.KeyguardState.DREAMING;
-import static com.android.systemui.keyguard.shared.model.KeyguardState.DREAMING_LOCKSCREEN_HOSTED;
 import static com.android.systemui.keyguard.shared.model.KeyguardState.GONE;
 import static com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN;
 import static com.android.systemui.keyguard.shared.model.KeyguardState.OCCLUDED;
@@ -123,7 +122,6 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.DisplayId;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor;
-import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor;
 import com.android.systemui.doze.DozeLog;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.dump.DumpsysTableLogger;
@@ -144,7 +142,6 @@ import com.android.systemui.keyguard.shared.model.TransitionState;
 import com.android.systemui.keyguard.shared.model.TransitionStep;
 import com.android.systemui.keyguard.ui.binder.KeyguardLongPressViewBinder;
 import com.android.systemui.keyguard.ui.viewmodel.DreamingToLockscreenTransitionViewModel;
-import com.android.systemui.keyguard.ui.viewmodel.GoneToDreamingLockscreenHostedTransitionViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.GoneToDreamingTransitionViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardBottomAreaViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardTouchHandlingViewModel;
@@ -605,9 +602,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     private final OccludedToLockscreenTransitionViewModel mOccludedToLockscreenTransitionViewModel;
     private final LockscreenToDreamingTransitionViewModel mLockscreenToDreamingTransitionViewModel;
     private final GoneToDreamingTransitionViewModel mGoneToDreamingTransitionViewModel;
-    private final GoneToDreamingLockscreenHostedTransitionViewModel
-            mGoneToDreamingLockscreenHostedTransitionViewModel;
-
     private final LockscreenToOccludedTransitionViewModel mLockscreenToOccludedTransitionViewModel;
     private final PrimaryBouncerToGoneTransitionViewModel mPrimaryBouncerToGoneTransitionViewModel;
     private final SharedNotificationContainerInteractor mSharedNotificationContainerInteractor;
@@ -619,7 +613,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     private final CoroutineDispatcher mMainDispatcher;
     private boolean mIsAnyMultiShadeExpanded;
     private boolean mIsOcclusionTransitionRunning = false;
-    private boolean mIsGoneToDreamingLockscreenHostedTransitionRunning;
     private int mDreamingToLockscreenTransitionTranslationY;
     private int mLockscreenToDreamingTransitionTranslationY;
     private int mGoneToDreamingTransitionTranslationY;
@@ -663,24 +656,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                     step.getTransitionState() == TransitionState.RUNNING;
             };
 
-    private final Consumer<TransitionStep> mGoneToDreamingLockscreenHostedTransition =
-            (TransitionStep step) -> {
-                mIsOcclusionTransitionRunning =
-                        step.getTransitionState() == TransitionState.RUNNING;
-                mIsGoneToDreamingLockscreenHostedTransitionRunning = mIsOcclusionTransitionRunning;
-            };
-
-    private final Consumer<TransitionStep> mLockscreenToDreamingLockscreenHostedTransition =
-            (TransitionStep step) -> {
-                mIsOcclusionTransitionRunning =
-                        step.getTransitionState() == TransitionState.RUNNING;
-            };
-
-    private final Consumer<TransitionStep> mDreamingLockscreenHostedToLockscreenTransition =
-            (TransitionStep step) -> {
-                mIsOcclusionTransitionRunning =
-                        step.getTransitionState() == TransitionState.RUNNING;
-            };
 
     private final Consumer<TransitionStep> mLockscreenToOccludedTransition =
             (TransitionStep step) -> {
@@ -765,8 +740,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             OccludedToLockscreenTransitionViewModel occludedToLockscreenTransitionViewModel,
             LockscreenToDreamingTransitionViewModel lockscreenToDreamingTransitionViewModel,
             GoneToDreamingTransitionViewModel goneToDreamingTransitionViewModel,
-            GoneToDreamingLockscreenHostedTransitionViewModel
-                    goneToDreamingLockscreenHostedTransitionViewModel,
             LockscreenToOccludedTransitionViewModel lockscreenToOccludedTransitionViewModel,
             PrimaryBouncerToGoneTransitionViewModel primaryBouncerToGoneTransitionViewModel,
             @Main CoroutineDispatcher mainDispatcher,
@@ -805,8 +778,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         mOccludedToLockscreenTransitionViewModel = occludedToLockscreenTransitionViewModel;
         mLockscreenToDreamingTransitionViewModel = lockscreenToDreamingTransitionViewModel;
         mGoneToDreamingTransitionViewModel = goneToDreamingTransitionViewModel;
-        mGoneToDreamingLockscreenHostedTransitionViewModel =
-                goneToDreamingLockscreenHostedTransitionViewModel;
         mLockscreenToOccludedTransitionViewModel = lockscreenToOccludedTransitionViewModel;
         mPrimaryBouncerToGoneTransitionViewModel = primaryBouncerToGoneTransitionViewModel;
         mKeyguardTransitionInteractor = keyguardTransitionInteractor;
@@ -1133,25 +1104,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         collectFlow(mView, mDreamingToLockscreenTransitionViewModel.lockscreenTranslationY(
                 mDreamingToLockscreenTransitionTranslationY),
                 setTransitionY(mNotificationStackScrollLayoutController), mMainDispatcher);
-
-        // Gone -> Dreaming hosted in lockscreen
-        collectFlow(mView, mKeyguardTransitionInteractor
-                        .transition(Edge.Companion.create(Scenes.Gone, DREAMING_LOCKSCREEN_HOSTED),
-                                Edge.Companion.create(GONE, DREAMING_LOCKSCREEN_HOSTED)),
-                mGoneToDreamingLockscreenHostedTransition, mMainDispatcher);
-        collectFlow(mView, mGoneToDreamingLockscreenHostedTransitionViewModel.getLockscreenAlpha(),
-                setTransitionAlpha(mNotificationStackScrollLayoutController),
-                mMainDispatcher);
-
-        // Lockscreen -> Dreaming hosted in lockscreen
-        collectFlow(mView, mKeyguardTransitionInteractor
-                        .transition(Edge.Companion.create(LOCKSCREEN, DREAMING_LOCKSCREEN_HOSTED)),
-                mLockscreenToDreamingLockscreenHostedTransition, mMainDispatcher);
-
-        // Dreaming hosted in lockscreen -> Lockscreen
-        collectFlow(mView, mKeyguardTransitionInteractor
-                        .transition(Edge.Companion.create(DREAMING_LOCKSCREEN_HOSTED, LOCKSCREEN)),
-                mDreamingLockscreenHostedToLockscreenTransition, mMainDispatcher);
 
         // Occluded->Lockscreen
         collectFlow(mView, mKeyguardTransitionInteractor.transition(
@@ -1646,11 +1598,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         mAnimateNextPositionUpdate = false;
     }
 
-    private boolean shouldAnimateKeyguardStatusViewAlignment() {
-        // Do not animate when transitioning from Gone->DreamingLockscreenHosted
-        return !mIsGoneToDreamingLockscreenHostedTransitionRunning;
-    }
-
     private void updateClockAppearance() {
         int userSwitcherPreferredY = mStatusBarHeaderHeightKeyguard;
         boolean bypassEnabled = mKeyguardBypassController.getBypassEnabled();
@@ -1661,7 +1608,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             mKeyguardStatusViewController.displayClock(computeDesiredClockSize(),
                     shouldAnimateClockChange);
         }
-        updateKeyguardStatusViewAlignment(/* animate= */shouldAnimateKeyguardStatusViewAlignment());
+        updateKeyguardStatusViewAlignment(/* animate= */true);
         int userSwitcherHeight = mKeyguardQsUserSwitchController != null
                 ? mKeyguardQsUserSwitchController.getUserIconHeight() : 0;
         if (mKeyguardUserSwitcherController != null) {
@@ -1808,10 +1755,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             // overlap.
             return true;
         }
-        if (isActiveDreamLockscreenHosted()) {
-            // Dreaming hosted in lockscreen, no "visible" notifications. Safe to center the clock.
-            return true;
-        }
         if (mNotificationListContainer.hasPulsingNotifications()) {
             // Pulsing notification appears on the right. Move clock left to avoid overlap.
             return false;
@@ -1841,10 +1784,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     }
 
 
-    private boolean isActiveDreamLockscreenHosted() {
-        return mKeyguardInteractor.isActiveDreamLockscreenHosted().getValue();
-    }
-
     private boolean hasVisibleNotifications() {
         if (FooterViewRefactor.isEnabled()) {
             return mActiveNotificationsInteractor.getAreAnyNotificationsPresentValue()
@@ -1859,16 +1798,11 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     /** Returns space between top of lock icon and bottom of NotificationStackScrollLayout. */
     private float getLockIconPadding() {
         float lockIconPadding = 0f;
-        if (DeviceEntryUdfpsRefactor.isEnabled()) {
-            View deviceEntryIconView = mKeyguardViewConfigurator.getKeyguardRootView()
-                    .findViewById(R.id.device_entry_icon_view);
-            if (deviceEntryIconView != null) {
-                lockIconPadding = mNotificationStackScrollLayoutController.getBottom()
-                    - deviceEntryIconView.getTop();
-            }
-        } else if (mLockIconViewController.getTop() != 0f) {
+        View deviceEntryIconView = mKeyguardViewConfigurator.getKeyguardRootView()
+                .findViewById(R.id.device_entry_icon_view);
+        if (deviceEntryIconView != null) {
             lockIconPadding = mNotificationStackScrollLayoutController.getBottom()
-                    - mLockIconViewController.getTop();
+                - deviceEntryIconView.getTop();
         }
         return lockIconPadding;
     }
@@ -5059,8 +4993,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                 return false;
             }
 
-            if (DeviceEntryUdfpsRefactor.isEnabled()
-                    && mAlternateBouncerInteractor.isVisibleState()) {
+            if (mAlternateBouncerInteractor.isVisibleState()) {
                 // never send touches to shade if the alternate bouncer is showing
                 return false;
             }

@@ -97,9 +97,9 @@
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"የካሜራ ችግሮች አሉ?\nዳግም ለማበጀት መታ ያድርጉ"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"አልተስተካከለም?\nለማህደር መታ ያድርጉ"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"ምንም የካሜራ ችግሮች የሉም? ለማሰናበት መታ ያድርጉ።"</string>
-    <string name="windowing_app_handle_education_tooltip" msgid="6398482412956375783">"የመተግበሪያ ምናሌውን ለመክፈት መታ ያድርጉ"</string>
-    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="6285279585554484957">"በርካታ መተግበሪያዎችን በአንድ ላይ ለማየት መታ ያድርጉ"</string>
-    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="6685429075790085337">"ከመተግበሪያ ምናሌው ወደ ሙሉ ማያ ገፅ ይመለሱ"</string>
+    <string name="windowing_app_handle_education_tooltip" msgid="2929643449849791854">"የመተግበሪያ ምናሌው እዚህ መገኘት ይችላል"</string>
+    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="2523468503353474095">"በርካታ መተግበሪያዎችን በአንድ ላይ ለመክፈት ወደ የዴስክቶፕ እይታ ይግቡ"</string>
+    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="5225660258192054132">"በማንኛውም ጊዜ ከመተግበሪያ ምናሌው ላይ ወደ ሙሉ ገጽ እይታ ይመለሱ"</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"ተጨማሪ ይመልከቱ እና ያድርጉ"</string>
     <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"ለተከፈለ ማያ ገፅ ሌላ መተግበሪያ ይጎትቱ"</string>
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"ቦታውን ለመቀየር ከመተግበሪያው ውጭ ሁለቴ መታ ያድርጉ"</string>

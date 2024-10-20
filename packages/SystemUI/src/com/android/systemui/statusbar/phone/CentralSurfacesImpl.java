@@ -128,7 +128,6 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.demomode.DemoMode;
 import com.android.systemui.demomode.DemoModeController;
-import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor;
 import com.android.systemui.emergency.EmergencyGesture;
 import com.android.systemui.emergency.EmergencyGestureModule.EmergencyGestureIntentFactory;
 import com.android.systemui.flags.FeatureFlags;
@@ -141,8 +140,6 @@ import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.MigrateClocksToBlueprint;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
-import com.android.systemui.keyguard.ui.binder.LightRevealScrimViewBinder;
-import com.android.systemui.keyguard.ui.viewmodel.LightRevealScrimViewModel;
 import com.android.systemui.navigationbar.NavigationBarController;
 import com.android.systemui.navigationbar.views.NavigationBarView;
 import com.android.systemui.notetask.NoteTaskController;
@@ -226,7 +223,7 @@ import com.android.systemui.statusbar.policy.ExtensionController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.UserInfoControllerImpl;
-import com.android.systemui.statusbar.window.StatusBarWindowController;
+import com.android.systemui.statusbar.window.StatusBarWindowControllerStore;
 import com.android.systemui.statusbar.window.StatusBarWindowStateController;
 import com.android.systemui.surfaceeffects.ripple.RippleShader.RippleShape;
 import com.android.systemui.util.DumpUtilsKt;
@@ -372,7 +369,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     @WindowVisibleState private int mStatusBarWindowState = WINDOW_STATE_SHOWING;
     private final NotificationShadeWindowController mNotificationShadeWindowController;
     private final StatusBarInitializer mStatusBarInitializer;
-    private final StatusBarWindowController mStatusBarWindowController;
+    private final StatusBarWindowControllerStore mStatusBarWindowControllerStore;
     private final StatusBarModeRepositoryStore mStatusBarModeRepository;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @VisibleForTesting
@@ -426,7 +423,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     private final NotificationsController mNotificationsController;
     private final StatusBarSignalPolicy mStatusBarSignalPolicy;
     private final StatusBarHideIconsForBouncerManager mStatusBarHideIconsForBouncerManager;
-    private final Lazy<LightRevealScrimViewModel> mLightRevealScrimViewModelLazy;
 
     /** Controller for the Shade. */
     private final ShadeSurface mShadeSurface;
@@ -610,7 +606,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             LightBarController lightBarController,
             AutoHideController autoHideController,
             StatusBarInitializer statusBarInitializer,
-            StatusBarWindowController statusBarWindowController,
+            StatusBarWindowControllerStore statusBarWindowControllerStore,
             StatusBarWindowStateController statusBarWindowStateController,
             StatusBarModeRepositoryStore statusBarModeRepository,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
@@ -699,7 +695,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             WiredChargingRippleController wiredChargingRippleController,
             IDreamManager dreamManager,
             Lazy<CameraLauncher> cameraLauncherLazy,
-            Lazy<LightRevealScrimViewModel> lightRevealScrimViewModelLazy,
             LightRevealScrim lightRevealScrim,
             AlternateBouncerInteractor alternateBouncerInteractor,
             UserTracker userTracker,
@@ -716,7 +711,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mLightBarController = lightBarController;
         mAutoHideController = autoHideController;
         mStatusBarInitializer = statusBarInitializer;
-        mStatusBarWindowController = statusBarWindowController;
+        mStatusBarWindowControllerStore = statusBarWindowControllerStore;
         mStatusBarModeRepository = statusBarModeRepository;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mPulseExpansionHandler = pulseExpansionHandler;
@@ -844,7 +839,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mDeviceStateManager = deviceStateManager;
         wiredChargingRippleController.registerCallbacks();
 
-        mLightRevealScrimViewModelLazy = lightRevealScrimViewModelLazy;
         mLightRevealScrim = lightRevealScrim;
 
         mViewCaptureAwareWindowManager = viewCaptureAwareWindowManager;
@@ -1008,7 +1002,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 mStatusBarKeyguardViewManager,
                 getNotificationShadeWindowViewController(),
                 mAmbientIndicationContainer);
-        updateLightRevealScrimVisibility();
 
         mConfigurationController.addCallback(mConfigurationListener);
 
@@ -1280,11 +1273,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         });
         mScrimController.attachViews(scrimBehind, notificationsScrim, scrimInFront);
 
-        if (lightRevealMigration()) {
-            LightRevealScrimViewBinder.bind(
-                    mLightRevealScrim, mLightRevealScrimViewModelLazy.get());
-        }
-
         mLightRevealScrim.setScrimOpaqueChangedListener((opaque) -> {
             Runnable updateOpaqueness = () -> {
                 mNotificationShadeWindowController.setLightRevealScrimOpaque(
@@ -1302,7 +1290,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         });
 
         mScreenOffAnimationController.initialize(this, mShadeSurface, mLightRevealScrim);
-        updateLightRevealScrimVisibility();
 
         if (!SceneContainerFlag.isEnabled()) {
             mShadeSurface.initDependencies(
@@ -1894,7 +1881,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         // When the StatusBarSimpleFragment flag is enabled, this logic will be done in
         // StatusBarOrchestrator
         if (!StatusBarSimpleFragment.isEnabled()) {
-            mStatusBarWindowController.attach();
+            mStatusBarWindowControllerStore.getDefaultDisplay().attach();
         }
     }
 
@@ -2825,23 +2812,13 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mScrimController.setExpansionAffectsAlpha(!unlocking);
 
         if (mAlternateBouncerInteractor.isVisibleState()) {
-            if (DeviceEntryUdfpsRefactor.isEnabled()) {
-                if ((!mKeyguardStateController.isOccluded() || mShadeSurface.isPanelExpanded())
-                        && (mState == StatusBarState.SHADE || mState == StatusBarState.SHADE_LOCKED
-                        || mTransitionToFullShadeProgress > 0f)) {
-                    // Assume scrim state for shade is already correct and do nothing
-                } else {
-                    // Safeguard which prevents the scrim from being stuck in the wrong state
-                    mScrimController.legacyTransitionTo(ScrimState.KEYGUARD);
-                }
+            if ((!mKeyguardStateController.isOccluded() || mShadeSurface.isPanelExpanded())
+                    && (mState == StatusBarState.SHADE || mState == StatusBarState.SHADE_LOCKED
+                    || mTransitionToFullShadeProgress > 0f)) {
+                // Assume scrim state for shade is already correct and do nothing
             } else {
-                if ((!mKeyguardStateController.isOccluded() || mShadeSurface.isPanelExpanded())
-                        && (mState == StatusBarState.SHADE || mState == StatusBarState.SHADE_LOCKED
-                        || mTransitionToFullShadeProgress > 0f)) {
-                    mScrimController.legacyTransitionTo(ScrimState.AUTH_SCRIMMED_SHADE);
-                } else {
-                    mScrimController.legacyTransitionTo(ScrimState.AUTH_SCRIMMED);
-                }
+                // Safeguard which prevents the scrim from being stuck in the wrong state
+                mScrimController.legacyTransitionTo(ScrimState.KEYGUARD);
             }
             // This will cancel the keyguardFadingAway animation if it is running. We need to do
             // this as otherwise it can remain pending and leave keyguard in a weird state.
@@ -2887,7 +2864,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         } else {
             mScrimController.legacyTransitionTo(ScrimState.UNLOCKED, mUnlockScrimCallback);
         }
-        updateLightRevealScrimVisibility();
 
         Trace.endSection();
     }
@@ -3007,17 +2983,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
 
     boolean isTransientShown() {
         return mStatusBarModeRepository.getDefaultDisplay().isTransientShown().getValue();
-    }
-
-    private void updateLightRevealScrimVisibility() {
-        if (mLightRevealScrim == null) {
-            // status bar may not be inflated yet
-            return;
-        }
-
-        if (!lightRevealMigration()) {
-            mLightRevealScrim.setAlpha(mScrimController.getState().getMaxLightRevealScrimAlpha());
-        }
     }
 
     private final KeyguardUpdateMonitorCallback mUpdateCallback =
@@ -3168,12 +3133,8 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 public void onDozeAmountChanged(float linear, float eased) {
                     if (!lightRevealMigration()
                             && !(mLightRevealScrim.getRevealEffect() instanceof CircleReveal)) {
-                        if (DeviceEntryUdfpsRefactor.isEnabled()) {
-                            // If wakeAndUnlocking, this is handled in AuthRippleInteractor
-                            if (!mBiometricUnlockController.isWakeAndUnlock()) {
-                                mLightRevealScrim.setRevealAmount(1f - linear);
-                            }
-                        } else {
+                        // If wakeAndUnlocking, this is handled in AuthRippleInteractor
+                        if (!mBiometricUnlockController.isWakeAndUnlock()) {
                             mLightRevealScrim.setRevealAmount(1f - linear);
                         }
                     }

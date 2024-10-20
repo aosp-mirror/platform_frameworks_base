@@ -39,7 +39,6 @@ import com.android.cts.input.inputeventmatchers.withSource
 import junit.framework.Assert.fail
 import org.hamcrest.Matchers.allOf
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestName
@@ -108,7 +107,6 @@ class UinputRecordingIntegrationTests {
         parser = InputJsonParser(instrumentation.context)
     }
 
-    @Ignore("b/366602644")
     @Test
     fun testEvemuRecording() {
         VirtualDisplayActivityScenario.AutoClose<CaptureEventActivity>(

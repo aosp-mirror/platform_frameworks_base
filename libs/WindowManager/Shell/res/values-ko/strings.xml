@@ -97,9 +97,9 @@
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"카메라 문제가 있나요?\n해결하려면 탭하세요."</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"해결되지 않았나요?\n되돌리려면 탭하세요."</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"카메라에 문제가 없나요? 닫으려면 탭하세요."</string>
-    <string name="windowing_app_handle_education_tooltip" msgid="6398482412956375783">"탭하여 앱 메뉴 열기"</string>
-    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="6285279585554484957">"탭하여 여러 앱을 함께 표시하기"</string>
-    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="6685429075790085337">"앱 메뉴에서 전체 화면으로 돌아가기"</string>
+    <string name="windowing_app_handle_education_tooltip" msgid="2929643449849791854">"앱 메뉴는 여기에서 찾을 수 있습니다."</string>
+    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="2523468503353474095">"데스크톱 뷰를 실행하여 여러 앱을 함께 열 수 있습니다."</string>
+    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="5225660258192054132">"언제든지 앱 메뉴에서 전체 화면으로 돌아갈 수 있습니다."</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"더 많은 정보를 보고 더 많은 작업을 처리하세요"</string>
     <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"화면 분할을 사용하려면 다른 앱을 드래그해 가져옵니다."</string>
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"앱 위치를 조정하려면 앱 외부를 두 번 탭합니다."</string>

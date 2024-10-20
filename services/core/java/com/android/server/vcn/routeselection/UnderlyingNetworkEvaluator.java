@@ -25,7 +25,6 @@ import android.net.IpSecTransform;
 import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkCapabilities;
-import android.net.vcn.Flags;
 import android.net.vcn.VcnManager;
 import android.net.vcn.VcnUnderlyingNetworkTemplate;
 import android.os.Handler;
@@ -194,8 +193,7 @@ public class UnderlyingNetworkEvaluator {
     }
 
     private static boolean isIpSecPacketLossDetectorEnabled(VcnContext vcnContext) {
-        return vcnContext.isFlagIpSecTransformStateEnabled()
-                && vcnContext.isFlagNetworkMetricMonitorEnabled();
+        return vcnContext.isFlagIpSecTransformStateEnabled();
     }
 
     /** Get the comparator for UnderlyingNetworkEvaluator */
@@ -297,10 +295,8 @@ public class UnderlyingNetworkEvaluator {
         updatePriorityClass(
                 underlyingNetworkTemplates, subscriptionGroup, lastSnapshot, carrierConfig);
 
-        if (Flags.evaluateIpsecLossOnLpNcChange()) {
-            for (NetworkMetricMonitor monitor : mMetricMonitors) {
-                monitor.onLinkPropertiesOrCapabilitiesChanged();
-            }
+        for (NetworkMetricMonitor monitor : mMetricMonitors) {
+            monitor.onLinkPropertiesOrCapabilitiesChanged();
         }
     }
 
@@ -316,10 +312,8 @@ public class UnderlyingNetworkEvaluator {
         updatePriorityClass(
                 underlyingNetworkTemplates, subscriptionGroup, lastSnapshot, carrierConfig);
 
-        if (Flags.evaluateIpsecLossOnLpNcChange()) {
-            for (NetworkMetricMonitor monitor : mMetricMonitors) {
-                monitor.onLinkPropertiesOrCapabilitiesChanged();
-            }
+        for (NetworkMetricMonitor monitor : mMetricMonitors) {
+            monitor.onLinkPropertiesOrCapabilitiesChanged();
         }
     }
 

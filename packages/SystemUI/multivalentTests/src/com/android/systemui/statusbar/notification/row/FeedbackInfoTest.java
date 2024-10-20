@@ -45,12 +45,12 @@ import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
-import android.testing.UiThreadTest;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.test.annotation.UiThreadTest;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 

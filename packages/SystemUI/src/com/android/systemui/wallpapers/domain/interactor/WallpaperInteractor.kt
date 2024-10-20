@@ -18,9 +18,13 @@ package com.android.systemui.wallpapers.domain.interactor
 
 import com.android.systemui.wallpapers.data.repository.WallpaperRepository
 import javax.inject.Inject
+import kotlinx.coroutines.flow.StateFlow
 
 class WallpaperInteractor @Inject constructor(val wallpaperRepository: WallpaperRepository) {
     fun setNotificationStackAbsoluteBottom(bottom: Float) {
         wallpaperRepository.setNotificationStackAbsoluteBottom(bottom)
     }
+
+    val wallpaperSupportsAmbientMode: StateFlow<Boolean> =
+        wallpaperRepository.wallpaperSupportsAmbientMode
 }

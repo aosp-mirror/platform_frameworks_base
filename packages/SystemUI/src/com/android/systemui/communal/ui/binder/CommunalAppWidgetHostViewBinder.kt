@@ -24,8 +24,7 @@ import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.compose.ui.unit.IntSize
 import androidx.core.view.doOnLayout
-import com.android.app.tracing.coroutines.flow.flowOn
-import com.android.app.tracing.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.Flags.communalWidgetResizing
 import com.android.systemui.common.ui.view.onLayoutChanged
 import com.android.systemui.communal.domain.model.CommunalContentModel
@@ -41,6 +40,7 @@ import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flowOn
 
 object CommunalAppWidgetHostViewBinder {
     private const val TAG = "CommunalAppWidgetHostViewBinder"

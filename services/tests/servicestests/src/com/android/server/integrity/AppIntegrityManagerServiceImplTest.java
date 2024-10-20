@@ -67,11 +67,8 @@ import android.provider.Settings;
 import androidx.test.InstrumentationRegistry;
 
 import com.android.internal.R;
-import com.android.internal.pm.parsing.PackageParser2;
 import com.android.server.compat.PlatformCompat;
-import com.android.server.integrity.engine.RuleEvaluationEngine;
 import com.android.server.integrity.model.IntegrityCheckResult;
-import com.android.server.pm.parsing.TestPackageParser2;
 import com.android.server.testutils.TestUtils;
 
 import org.junit.After;
@@ -138,11 +135,8 @@ public class AppIntegrityManagerServiceImplTest {
     @Mock PlatformCompat mPlatformCompat;
     @Mock Context mMockContext;
     @Mock Resources mMockResources;
-    @Mock RuleEvaluationEngine mRuleEvaluationEngine;
     @Mock IntegrityFileManager mIntegrityFileManager;
     @Mock Handler mHandler;
-
-    private Supplier<PackageParser2> mParserSupplier = TestPackageParser2::new;
 
     private final Context mRealContext = InstrumentationRegistry.getTargetContext();
 
@@ -175,8 +169,6 @@ public class AppIntegrityManagerServiceImplTest {
                 new AppIntegrityManagerServiceImpl(
                         mMockContext,
                         mPackageManagerInternal,
-                        mParserSupplier,
-                        mRuleEvaluationEngine,
                         mIntegrityFileManager,
                         mHandler);
 
@@ -307,91 +299,6 @@ public class AppIntegrityManagerServiceImplTest {
     }
 
     @Test
-    public void handleBroadcast_correctArgs() throws Exception {
-        allowlistUsAsRuleProvider();
-        makeUsSystemApp();
-        ArgumentCaptor<BroadcastReceiver> broadcastReceiverCaptor =
-                ArgumentCaptor.forClass(BroadcastReceiver.class);
-        verify(mMockContext)
-                .registerReceiver(broadcastReceiverCaptor.capture(), any(), any(), any());
-        Intent intent = makeVerificationIntent();
-        when(mRuleEvaluationEngine.evaluate(any())).thenReturn(IntegrityCheckResult.allow());
-
-        broadcastReceiverCaptor.getValue().onReceive(mMockContext, intent);
-        runJobInHandler();
-
-        ArgumentCaptor<AppInstallMetadata> metadataCaptor =
-                ArgumentCaptor.forClass(AppInstallMetadata.class);
-        verify(mRuleEvaluationEngine).evaluate(metadataCaptor.capture());
-        AppInstallMetadata appInstallMetadata = metadataCaptor.getValue();
-        assertEquals(PACKAGE_NAME, appInstallMetadata.getPackageName());
-        assertThat(appInstallMetadata.getAppCertificates()).containsExactly(APP_CERT);
-        assertEquals(INSTALLER_SHA256, appInstallMetadata.getInstallerName());
-        // we cannot check installer cert because it seems to be device specific.
-        assertEquals(VERSION_CODE, appInstallMetadata.getVersionCode());
-        assertFalse(appInstallMetadata.isPreInstalled());
-        // Asserting source stamp not present.
-        assertFalse(appInstallMetadata.isStampPresent());
-        assertFalse(appInstallMetadata.isStampVerified());
-        assertFalse(appInstallMetadata.isStampTrusted());
-        assertNull(appInstallMetadata.getStampCertificateHash());
-        // These are hardcoded in the test apk android manifest
-        Map<String, String> allowedInstallers =
-                appInstallMetadata.getAllowedInstallersAndCertificates();
-        assertEquals(2, allowedInstallers.size());
-        assertEquals(PLAY_STORE_CERT, allowedInstallers.get(PLAY_STORE_PKG));
-        assertEquals(INSTALLER_CERTIFICATE_NOT_EVALUATED, allowedInstallers.get(ADB_INSTALLER));
-    }
-
-    @Test
-    public void handleBroadcast_correctArgs_multipleCerts() throws Exception {
-        allowlistUsAsRuleProvider();
-        makeUsSystemApp();
-        ArgumentCaptor<BroadcastReceiver> broadcastReceiverCaptor =
-                ArgumentCaptor.forClass(BroadcastReceiver.class);
-        verify(mMockContext)
-                .registerReceiver(broadcastReceiverCaptor.capture(), any(), any(), any());
-        Intent intent = makeVerificationIntent();
-        intent.setDataAndType(Uri.fromFile(mTestApkTwoCerts), PACKAGE_MIME_TYPE);
-        when(mRuleEvaluationEngine.evaluate(any())).thenReturn(IntegrityCheckResult.allow());
-
-        broadcastReceiverCaptor.getValue().onReceive(mMockContext, intent);
-        runJobInHandler();
-
-        ArgumentCaptor<AppInstallMetadata> metadataCaptor =
-                ArgumentCaptor.forClass(AppInstallMetadata.class);
-        verify(mRuleEvaluationEngine).evaluate(metadataCaptor.capture());
-        AppInstallMetadata appInstallMetadata = metadataCaptor.getValue();
-        assertThat(appInstallMetadata.getAppCertificates())
-                .containsExactly(DUMMY_APP_TWO_CERTS_CERT_1, DUMMY_APP_TWO_CERTS_CERT_2);
-    }
-
-    @Test
-    public void handleBroadcast_correctArgs_sourceStamp() throws Exception {
-        allowlistUsAsRuleProvider();
-        makeUsSystemApp();
-        ArgumentCaptor<BroadcastReceiver> broadcastReceiverCaptor =
-                ArgumentCaptor.forClass(BroadcastReceiver.class);
-        verify(mMockContext)
-                .registerReceiver(broadcastReceiverCaptor.capture(), any(), any(), any());
-        Intent intent = makeVerificationIntent();
-        intent.setDataAndType(Uri.fromFile(mTestApkSourceStamp), PACKAGE_MIME_TYPE);
-        when(mRuleEvaluationEngine.evaluate(any())).thenReturn(IntegrityCheckResult.allow());
-
-        broadcastReceiverCaptor.getValue().onReceive(mMockContext, intent);
-        runJobInHandler();
-
-        ArgumentCaptor<AppInstallMetadata> metadataCaptor =
-                ArgumentCaptor.forClass(AppInstallMetadata.class);
-        verify(mRuleEvaluationEngine).evaluate(metadataCaptor.capture());
-        AppInstallMetadata appInstallMetadata = metadataCaptor.getValue();
-        assertTrue(appInstallMetadata.isStampPresent());
-        assertTrue(appInstallMetadata.isStampVerified());
-        assertTrue(appInstallMetadata.isStampTrusted());
-        assertEquals(SOURCE_STAMP_CERTIFICATE_HASH, appInstallMetadata.getStampCertificateHash());
-    }
-
-    @Test
     public void handleBroadcast_allow() throws Exception {
         allowlistUsAsRuleProvider();
         makeUsSystemApp();
@@ -400,7 +307,6 @@ public class AppIntegrityManagerServiceImplTest {
         verify(mMockContext)
                 .registerReceiver(broadcastReceiverCaptor.capture(), any(), any(), any());
         Intent intent = makeVerificationIntent();
-        when(mRuleEvaluationEngine.evaluate(any())).thenReturn(IntegrityCheckResult.allow());
 
         broadcastReceiverCaptor.getValue().onReceive(mMockContext, intent);
         runJobInHandler();
@@ -408,32 +314,6 @@ public class AppIntegrityManagerServiceImplTest {
         verify(mPackageManagerInternal)
                 .setIntegrityVerificationResult(
                         1, PackageManagerInternal.INTEGRITY_VERIFICATION_ALLOW);
-    }
-
-    @Test
-    public void handleBroadcast_reject() throws Exception {
-        allowlistUsAsRuleProvider();
-        makeUsSystemApp();
-        ArgumentCaptor<BroadcastReceiver> broadcastReceiverCaptor =
-                ArgumentCaptor.forClass(BroadcastReceiver.class);
-        verify(mMockContext)
-                .registerReceiver(broadcastReceiverCaptor.capture(), any(), any(), any());
-        when(mRuleEvaluationEngine.evaluate(any()))
-                .thenReturn(
-                        IntegrityCheckResult.deny(
-                                Arrays.asList(
-                                        new Rule(
-                                                new AtomicFormula.BooleanAtomicFormula(
-                                                        AtomicFormula.PRE_INSTALLED, false),
-                                                Rule.DENY))));
-        Intent intent = makeVerificationIntent();
-
-        broadcastReceiverCaptor.getValue().onReceive(mMockContext, intent);
-        runJobInHandler();
-
-        verify(mPackageManagerInternal)
-                .setIntegrityVerificationResult(
-                        1, PackageManagerInternal.INTEGRITY_VERIFICATION_REJECT);
     }
 
     @Test
@@ -446,7 +326,6 @@ public class AppIntegrityManagerServiceImplTest {
         verify(mMockContext)
                 .registerReceiver(broadcastReceiverCaptor.capture(), any(), any(), any());
         Intent intent = makeVerificationIntent();
-        when(mRuleEvaluationEngine.evaluate(any())).thenReturn(IntegrityCheckResult.allow());
 
         broadcastReceiverCaptor.getValue().onReceive(mMockContext, intent);
         runJobInHandler();
@@ -467,8 +346,6 @@ public class AppIntegrityManagerServiceImplTest {
         verify(mMockContext, atLeastOnce())
                 .registerReceiver(broadcastReceiverCaptor.capture(), any(), any(), any());
         Intent intent = makeVerificationIntent(TEST_FRAMEWORK_PACKAGE);
-        when(mRuleEvaluationEngine.evaluate(any()))
-                .thenReturn(IntegrityCheckResult.deny(/* rule= */ null));
 
         broadcastReceiverCaptor.getValue().onReceive(mMockContext, intent);
         runJobInHandler();

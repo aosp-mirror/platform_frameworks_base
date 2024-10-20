@@ -813,10 +813,8 @@ public final class ProcessList {
     private final Object mProcessChangeLock = new Object();
 
     /**
-     * All of the applications we currently have running organized by name.
-     * The keys are strings of the application package name (as
-     * returned by the package manager), and the keys are ApplicationRecord
-     * objects.
+     * All of the processes that are running organized by name.
+     * The keys are process names and the values are the associated ProcessRecord objects.
      */
     @CompositeRWLock({"mService", "mProcLock"})
     private final MyProcessMap mProcessNames = new MyProcessMap();
@@ -5189,6 +5187,7 @@ public final class ProcessList {
                         if (ai != null) {
                             if (ai.packageName.equals(app.info.packageName)) {
                                 app.info = ai;
+                                app.getWindowProcessController().updateApplicationInfo(ai);
                                 PlatformCompatCache.getInstance()
                                         .onApplicationInfoChanged(ai);
                             }

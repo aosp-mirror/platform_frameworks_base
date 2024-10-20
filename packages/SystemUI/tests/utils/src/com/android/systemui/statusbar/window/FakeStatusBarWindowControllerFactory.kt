@@ -18,10 +18,12 @@ package com.android.systemui.statusbar.window
 
 import android.content.Context
 import com.android.app.viewcapture.ViewCaptureAwareWindowManager
+import com.android.systemui.statusbar.data.repository.StatusBarConfigurationController
 
 class FakeStatusBarWindowControllerFactory : StatusBarWindowController.Factory {
     override fun create(
         context: Context,
         viewCaptureAwareWindowManager: ViewCaptureAwareWindowManager,
+        statusBarConfigurationController: StatusBarConfigurationController
     ) = FakeStatusBarWindowController()
 }

@@ -52,7 +52,7 @@ class TransitionAnimator(
     private val interpolators: Interpolators,
 
     /** [springTimings] and [springInterpolators] must either both be null or both not null. */
-    private val springTimings: Timings? = null,
+    private val springTimings: SpringTimings? = null,
     private val springInterpolators: Interpolators? = null,
     private val springParams: SpringParams = DEFAULT_SPRING_PARAMS,
 ) {
@@ -83,8 +83,22 @@ class TransitionAnimator(
             delay: Long,
             duration: Long,
         ): Float {
+            return getProgressInternal(
+                timings.totalDuration.toFloat(),
+                linearProgress,
+                delay.toFloat(),
+                duration.toFloat(),
+            )
+        }
+
+        private fun getProgressInternal(
+            totalDuration: Float,
+            linearProgress: Float,
+            delay: Float,
+            duration: Float,
+        ): Float {
             return MathUtils.constrain(
-                (linearProgress * timings.totalDuration - delay) / duration,
+                (linearProgress * totalDuration - delay) / duration,
                 0.0f,
                 1.0f,
             )
@@ -367,6 +381,25 @@ class TransitionAnimator(
         val contentAfterFadeInDuration: Long,
     )
 
+    /**
+     * The timings (durations and delays) used by the multi-spring animator. These are expressed as
+     * fractions of 1, similar to how the progress of an animator can be expressed as a float value
+     * between 0 and 1.
+     */
+    class SpringTimings(
+        /** The portion of animation to wait before fading out the expanding content. */
+        val contentBeforeFadeOutDelay: Float,
+
+        /** The portion of animation during which the expanding content fades out. */
+        val contentBeforeFadeOutDuration: Float,
+
+        /** The portion of animation to wait before fading in the expanded content. */
+        val contentAfterFadeInDelay: Float,
+
+        /** The portion of animation during which the expanded content fades in. */
+        val contentAfterFadeInDuration: Float,
+    )
+
     /** The interpolators used by this animator. */
     data class Interpolators(
         /** The interpolator used for the Y position, width, height and corner radius. */
@@ -453,8 +486,8 @@ class TransitionAnimator(
         endState: State,
         windowBackgroundLayer: GradientDrawable,
         fadeWindowBackgroundLayer: Boolean = true,
-        useSpring: Boolean = false,
         drawHole: Boolean = false,
+        useSpring: Boolean = false,
     ): Animation {
         val transitionContainer = controller.transitionContainer
         val transitionContainerOverlay = transitionContainer.overlay
@@ -576,18 +609,14 @@ class TransitionAnimator(
                 }
 
                 override fun onAnimationEnd(animation: Animator) {
-                    if (DEBUG) {
-                        Log.d(TAG, "Animation ended")
-                    }
-
-                    // TODO(b/330672236): Post this to the main thread instead so that it does not
-                    // flicker with Flexiglass enabled.
-                    controller.onTransitionAnimationEnd(isExpandingFullyAbove)
-                    transitionContainerOverlay.remove(windowBackgroundLayer)
-
-                    if (moveBackgroundLayerWhenAppVisibilityChanges && controller.isLaunching) {
-                        openingWindowSyncViewOverlay?.remove(windowBackgroundLayer)
-                    }
+                    onAnimationEnd(
+                        controller,
+                        isExpandingFullyAbove,
+                        windowBackgroundLayer,
+                        transitionContainerOverlay,
+                        openingWindowSyncViewOverlay,
+                        moveBackgroundLayerWhenAppVisibilityChanges,
+                    )
                 }
             }
         )
@@ -1021,34 +1050,47 @@ class TransitionAnimator(
         cornerRadii[7] = state.bottomCornerRadius
         drawable.cornerRadii = cornerRadii
 
-        val timings: Timings
         val interpolators: Interpolators
+        val fadeInProgress: Float
+        val fadeOutProgress: Float
         if (useSpring) {
-            timings = springTimings!!
             interpolators = springInterpolators!!
+            val timings = springTimings!!
+            fadeInProgress =
+                getProgressInternal(
+                    totalDuration = 1f,
+                    linearProgress,
+                    timings.contentBeforeFadeOutDelay,
+                    timings.contentBeforeFadeOutDuration,
+                )
+            fadeOutProgress =
+                getProgressInternal(
+                    totalDuration = 1f,
+                    linearProgress,
+                    timings.contentAfterFadeInDelay,
+                    timings.contentAfterFadeInDuration,
+                )
         } else {
-            timings = this.timings
             interpolators = this.interpolators
+            fadeInProgress =
+                getProgress(
+                    timings,
+                    linearProgress,
+                    timings.contentBeforeFadeOutDelay,
+                    timings.contentBeforeFadeOutDuration,
+                )
+            fadeOutProgress =
+                getProgress(
+                    timings,
+                    linearProgress,
+                    timings.contentAfterFadeInDelay,
+                    timings.contentAfterFadeInDuration,
+                )
         }
 
         // We first fade in the background layer to hide the expanding view, then fade it out with
         // SRC mode to draw a hole punch in the status bar and reveal the opening window (if
         // needed). If !isLaunching, the reverse happens.
-        val fadeInProgress =
-            getProgress(
-                timings,
-                linearProgress,
-                timings.contentBeforeFadeOutDelay,
-                timings.contentBeforeFadeOutDuration,
-            )
-        val fadeOutProgress =
-            getProgress(
-                timings,
-                linearProgress,
-                timings.contentAfterFadeInDelay,
-                timings.contentAfterFadeInDuration,
-            )
-
         if (isLaunching) {
             if (fadeInProgress < 1) {
                 val alpha =

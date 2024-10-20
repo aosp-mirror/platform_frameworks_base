@@ -27,11 +27,14 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -48,6 +51,8 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastIsFinite
+import androidx.compose.ui.zIndex
+import com.android.compose.modifiers.thenIf
 import com.android.systemui.communal.ui.viewmodel.DragHandle
 import com.android.systemui.communal.ui.viewmodel.ResizeInfo
 import com.android.systemui.communal.ui.viewmodel.ResizeableItemFrameViewModel
@@ -60,9 +65,12 @@ private fun UpdateGridLayoutInfo(
     viewModel: ResizeableItemFrameViewModel,
     key: String,
     gridState: LazyGridState,
-    minItemSpan: Int,
     gridContentPadding: PaddingValues,
     verticalArrangement: Arrangement.Vertical,
+    minHeightPx: Int,
+    maxHeightPx: Int,
+    resizeMultiple: Int,
+    currentSpan: GridItemSpan,
 ) {
     val density = LocalDensity.current
     LaunchedEffect(
@@ -70,9 +78,12 @@ private fun UpdateGridLayoutInfo(
         viewModel,
         key,
         gridState,
-        minItemSpan,
         gridContentPadding,
         verticalArrangement,
+        minHeightPx,
+        maxHeightPx,
+        resizeMultiple,
+        currentSpan,
     ) {
         val verticalItemSpacingPx = with(density) { verticalArrangement.spacing.toPx() }
         val verticalContentPaddingPx =
@@ -92,13 +103,15 @@ private fun UpdateGridLayoutInfo(
             )
             .collectLatest { (maxItemSpan, viewportHeightPx, itemInfo) ->
                 viewModel.setGridLayoutInfo(
-                    verticalItemSpacingPx,
-                    verticalContentPaddingPx,
-                    viewportHeightPx,
-                    maxItemSpan,
-                    minItemSpan,
-                    itemInfo?.row,
-                    itemInfo?.span,
+                    verticalItemSpacingPx = verticalItemSpacingPx,
+                    currentRow = itemInfo?.row,
+                    maxHeightPx = maxHeightPx,
+                    minHeightPx = minHeightPx,
+                    currentSpan = currentSpan.currentLineSpan,
+                    resizeMultiple = resizeMultiple,
+                    totalSpans = maxItemSpan,
+                    viewportHeightPx = viewportHeightPx,
+                    verticalContentPaddingPx = verticalContentPaddingPx,
                 )
             }
     }
@@ -141,10 +154,9 @@ private fun BoxScope.DragHandle(
 /**
  * Draws a frame around the content with drag handles on the top and bottom of the content.
  *
- * @param index The index of this item in the [LazyGridState].
+ * @param key The unique key of this element, must be the same key used in the [LazyGridState].
+ * @param currentSpan The current span size of this item in the grid.
  * @param gridState The [LazyGridState] for the grid containing this item.
- * @param minItemSpan The minimum span that an item may occupy. Items are resized in multiples of
- *   this span.
  * @param gridContentPadding The content padding used for the grid, needed for determining offsets.
  * @param verticalArrangement The vertical arrangement of the grid items.
  * @param modifier Optional modifier to apply to the frame.
@@ -153,6 +165,10 @@ private fun BoxScope.DragHandle(
  * @param outlineColor Optional color to make the outline around the content.
  * @param cornerRadius Optional radius to give to the outline around the content.
  * @param strokeWidth Optional stroke width to draw the outline with.
+ * @param minHeightPx Optional minimum height in pixels that this widget can be resized to.
+ * @param maxHeightPx Optional maximum height in pixels that this widget can be resized to.
+ * @param resizeMultiple Optional number of spans that we allow resizing by. For example, if set to
+ *   3, then we only allow resizing in multiples of 3 spans.
  * @param alpha Optional function to provide an alpha value for the outline. Can be used to fade the
  *   outline in and out. This is wrapped in a function for performance, as the value is only
  *   accessed during the draw phase.
@@ -162,8 +178,8 @@ private fun BoxScope.DragHandle(
 @Composable
 fun ResizableItemFrame(
     key: String,
+    currentSpan: GridItemSpan,
     gridState: LazyGridState,
-    minItemSpan: Int,
     gridContentPadding: PaddingValues,
     verticalArrangement: Arrangement.Vertical,
     modifier: Modifier = Modifier,
@@ -172,6 +188,9 @@ fun ResizableItemFrame(
     outlineColor: Color = MaterialTheme.colorScheme.primary,
     cornerRadius: Dp = 37.dp,
     strokeWidth: Dp = 3.dp,
+    minHeightPx: Int = 0,
+    maxHeightPx: Int = Int.MAX_VALUE,
+    resizeMultiple: Int = 1,
     alpha: () -> Float = { 1f },
     onResize: (info: ResizeInfo) -> Unit = {},
     content: @Composable () -> Unit,
@@ -179,15 +198,24 @@ fun ResizableItemFrame(
     val brush = SolidColor(outlineColor)
     val onResizeUpdated by rememberUpdatedState(onResize)
     val viewModel =
-        rememberViewModel(traceName = "ResizeableItemFrame.viewModel") {
+        rememberViewModel(key = currentSpan, traceName = "ResizeableItemFrame.viewModel") {
             ResizeableItemFrameViewModel()
         }
 
     val dragHandleHeight = verticalArrangement.spacing - outlinePadding * 2
+    val isDragging by
+        remember(viewModel) {
+            derivedStateOf {
+                val topOffset = viewModel.topDragState.offset.takeIf { it.fastIsFinite() } ?: 0f
+                val bottomOffset =
+                    viewModel.bottomDragState.offset.takeIf { it.fastIsFinite() } ?: 0f
+                topOffset > 0 || bottomOffset > 0
+            }
+        }
 
     // Draw content surrounded by drag handles at top and bottom. Allow drag handles
     // to overlap content.
-    Box(modifier) {
+    Box(modifier.thenIf(isDragging) { Modifier.zIndex(1f) }) {
         content()
 
         if (enabled) {
@@ -230,12 +258,15 @@ fun ResizableItemFrame(
             }
 
             UpdateGridLayoutInfo(
-                viewModel,
-                key,
-                gridState,
-                minItemSpan,
-                gridContentPadding,
-                verticalArrangement,
+                viewModel = viewModel,
+                key = key,
+                gridState = gridState,
+                currentSpan = currentSpan,
+                gridContentPadding = gridContentPadding,
+                verticalArrangement = verticalArrangement,
+                minHeightPx = minHeightPx,
+                maxHeightPx = maxHeightPx,
+                resizeMultiple = resizeMultiple,
             )
             LaunchedEffect(viewModel) {
                 viewModel.resizeInfo.collectLatest { info -> onResizeUpdated(info) }

@@ -80,6 +80,7 @@ public final class FakeVibratorControllerProvider {
     private float[] mFrequenciesHz;
     private float[] mOutputAccelerationsGs;
     private long mVendorEffectDuration = EFFECT_DURATION;
+    private long mPrimitiveDuration = EFFECT_DURATION;
 
     void recordEffectSegment(long vibrationId, VibrationEffectSegment segment) {
         mEffectSegments.computeIfAbsent(vibrationId, k -> new ArrayList<>()).add(segment);
@@ -171,7 +172,7 @@ public final class FakeVibratorControllerProvider {
             }
             long duration = 0;
             for (PrimitiveSegment primitive : primitives) {
-                duration += EFFECT_DURATION + primitive.getDelay();
+                duration += mPrimitiveDuration + primitive.getDelay();
                 recordEffectSegment(vibrationId, primitive);
             }
             applyLatency(mOnLatency);
@@ -379,6 +380,11 @@ public final class FakeVibratorControllerProvider {
     /** Set the duration of vendor effects in fake vibrator hardware. */
     public void setVendorEffectDuration(long durationMs) {
         mVendorEffectDuration = durationMs;
+    }
+
+    /** Set the duration of primitives in fake vibrator hardware. */
+    public void setPrimitiveDuration(long primitiveDuration) {
+        mPrimitiveDuration = primitiveDuration;
     }
 
     /**

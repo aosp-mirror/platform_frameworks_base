@@ -312,6 +312,10 @@
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"Partager l\'audio"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"Partage de l\'audio en cours"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_accessibility" msgid="7604615019302091708">"entrer les paramètres de partage audio"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_dialog_message" msgid="4251807313264307426">"La musique et les vidéos de cet appareil peuvent être lues sur les deux paires d\'écouteurs"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_dialog_title" msgid="4406818346036286793">"Partager votre audio"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_dialog_subtitle" msgid="3014906864710059236">"<xliff:g id="AVAILABLE_DEVICE_NAME">%1$s</xliff:g> et <xliff:g id="ACTIVE_DEVICE_NAME">%2$s</xliff:g>"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_dialog_switch_to_button" msgid="7546825655978203773">"Passer à <xliff:g id="AVAILABLE_DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"Pile : <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Audio"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Écouteurs"</string>
@@ -440,8 +444,7 @@
     <string name="zen_mode_on" msgid="9085304934016242591">"Activé"</string>
     <string name="zen_mode_on_with_details" msgid="7416143430557895497">"Activé • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"Désactivé"</string>
-    <!-- no translation found for zen_mode_set_up (8231201163894922821) -->
-    <skip />
+    <string name="zen_mode_set_up" msgid="8231201163894922821">"Non défini"</string>
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"Gérer dans les paramètres"</string>
     <string name="zen_mode_active_modes" msgid="1625850411578488856">"{count,plural, =0{Aucun mode actif}=1{Le mode {mode} est actif}one{# mode est actif}many{# de modes sont actifs}other{# modes sont actifs}}"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Vous ne serez pas dérangé par les sons et les vibrations, sauf pour les alarmes, les rappels, les événements et les appelants que vous sélectionnez. Vous entendrez tout ce que vous choisissez d\'écouter, y compris la musique, les vidéos et les jeux."</string>
@@ -673,10 +676,8 @@
     <string name="stream_notification_unavailable" msgid="4313854556205836435">"Inaccessible : sonnerie en sourdine"</string>
     <string name="stream_alarm_unavailable" msgid="4059817189292197839">"Inaccessible parce que Ne pas déranger est activée"</string>
     <string name="stream_media_unavailable" msgid="6823020894438959853">"Inaccessible parce que Ne pas déranger est activée"</string>
-    <!-- no translation found for stream_unavailable_by_modes (3674139029490353683) -->
-    <skip />
-    <!-- no translation found for stream_unavailable_by_unknown (6908434629318171588) -->
-    <skip />
+    <string name="stream_unavailable_by_modes" msgid="3674139029490353683">"Non accessible, car le mode <xliff:g id="MODE">%s</xliff:g> est activé"</string>
+    <string name="stream_unavailable_by_unknown" msgid="6908434629318171588">"Non accessible"</string>
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. Touchez pour réactiver le son."</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. Touchez pour activer les vibrations. Il est possible de couper le son des services d\'accessibilité."</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. Touchez pour couper le son. Il est possible de couper le son des services d\'accessibilité."</string>
@@ -1410,38 +1411,26 @@
     <string name="launch_touchpad_tutorial_notification_content" msgid="7931085031240753226">"Apprenez à utiliser les gestes du pavé tactile"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_title" msgid="1940023776496198762">"Naviguer à l\'aide de votre clavier et de votre pavé tactile"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"Apprenez les gestes du pavé tactile, les raccourcis-clavier et bien plus encore"</string>
-    <!-- no translation found for touchpad_tutorial_back_gesture_button (3104716365403620315) -->
-    <skip />
-    <!-- no translation found for touchpad_tutorial_home_gesture_button (8023973153559885624) -->
-    <skip />
+    <string name="touchpad_tutorial_back_gesture_button" msgid="3104716365403620315">"Retour"</string>
+    <string name="touchpad_tutorial_home_gesture_button" msgid="8023973153559885624">"Retour à la page d\'accueil"</string>
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"Afficher les applis récentes"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"OK"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Retour"</string>
-    <!-- no translation found for touchpad_back_gesture_guidance (5352221087725906542) -->
-    <skip />
-    <!-- no translation found for touchpad_back_gesture_success_title (7370719098633023496) -->
-    <skip />
+    <string name="touchpad_back_gesture_guidance" msgid="5352221087725906542">"Balayez votre pavé tactile vers la gauche ou vers la droite avec trois doigts"</string>
+    <string name="touchpad_back_gesture_success_title" msgid="7370719098633023496">"Bien!"</string>
     <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"Vous avez appris le geste de retour en arrière."</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"Retour à la page d\'accueil"</string>
-    <!-- no translation found for touchpad_home_gesture_guidance (4178219118381915899) -->
-    <skip />
-    <!-- no translation found for touchpad_home_gesture_success_title (3648264553645798470) -->
-    <skip />
-    <!-- no translation found for touchpad_home_gesture_success_body (2590690589194027059) -->
-    <skip />
+    <string name="touchpad_home_gesture_guidance" msgid="4178219118381915899">"Balayez votre pavé tactile vers le haut avec trois doigts"</string>
+    <string name="touchpad_home_gesture_success_title" msgid="3648264553645798470">"Bon travail!"</string>
+    <string name="touchpad_home_gesture_success_body" msgid="2590690589194027059">"Vous avez appris le geste pour revenir à l\'écran d\'accueil"</string>
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"Afficher les applis récentes"</string>
-    <!-- no translation found for touchpad_recent_apps_gesture_guidance (6304446013842271822) -->
-    <skip />
+    <string name="touchpad_recent_apps_gesture_guidance" msgid="6304446013842271822">"Balayez votre pavé tactile vers le haut avec trois doigts, puis maintenez-les en place"</string>
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"Bon travail!"</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"Vous avez effectué le geste pour afficher les applis récentes."</string>
-    <!-- no translation found for tutorial_action_key_title (8172535792469008169) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_guidance (5040613427202799294) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_success_title (2371827347071979571) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_success_body (1688986269491357832) -->
-    <skip />
+    <string name="tutorial_action_key_title" msgid="8172535792469008169">"Afficher toutes les applis"</string>
+    <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"Appuyez sur la touche d\'action de votre clavier"</string>
+    <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"Félicitations!"</string>
+    <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"Vous avez appris le geste pour afficher toutes les applis"</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Rétroéclairage du clavier"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Niveau %1$d de %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Domotique"</string>

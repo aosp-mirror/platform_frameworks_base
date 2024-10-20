@@ -97,9 +97,9 @@
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Праблемы з камерай?\nНацісніце, каб пераабсталяваць"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Не ўдалося выправіць?\nНацісніце, каб аднавіць"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Ніякіх праблем з камерай? Націсніце, каб адхіліць."</string>
-    <string name="windowing_app_handle_education_tooltip" msgid="6398482412956375783">"Адкрыць меню праграмы"</string>
-    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="6285279585554484957">"Паказаць некалькі праграм разам"</string>
-    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="6685429075790085337">"Вярнуцца ў поўнаэкранны рэжым з меню праграмы"</string>
+    <string name="windowing_app_handle_education_tooltip" msgid="2929643449849791854">"Меню праграмы шукайце тут"</string>
+    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="2523468503353474095">"Каб адкрыць некалькі праграм адначасова, увайдзіце ў версію для камп’ютараў"</string>
+    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="5225660258192054132">"Вы можаце вярнуцца ў поўнаэкранны рэжым у любы час з меню праграмы"</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"Адначасова выконвайце розныя задачы"</string>
     <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"Перацягніце іншую праграму, каб выкарыстоўваць падзелены экран"</string>
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Двойчы націсніце экран па-за праграмай, каб перамясціць яе"</string>

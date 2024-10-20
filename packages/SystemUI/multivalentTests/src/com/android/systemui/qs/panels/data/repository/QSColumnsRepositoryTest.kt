@@ -16,7 +16,6 @@
 
 package com.android.systemui.qs.panels.data.repository
 
-import android.platform.test.annotations.EnableFlags
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -25,7 +24,7 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.testCase
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.res.R
-import com.android.systemui.shade.shared.flag.DualShade
+import com.android.systemui.shade.data.repository.fakeShadeRepository
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
@@ -59,15 +58,22 @@ class QSColumnsRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    @EnableFlags(DualShade.FLAG_NAME)
     fun withDualShade_returnsCorrectValue() =
         with(kosmos) {
             testScope.runTest {
-                val latest by collectLastValue(underTest.columns)
-                assertThat(latest).isEqualTo(4)
+                val latest by collectLastValue(underTest.dualShadeColumns)
 
-                setColumnsInConfig(8, id = R.integer.quick_settings_dual_shade_num_columns)
-                // Asserts config changes are ignored
+                assertThat(latest).isEqualTo(4)
+            }
+        }
+
+    @Test
+    fun withSplitShade_returnsCorrectValue() =
+        with(kosmos) {
+            testScope.runTest {
+                val latest by collectLastValue(underTest.splitShadeColumns)
+                fakeShadeRepository.setShadeLayoutWide(true)
+
                 assertThat(latest).isEqualTo(4)
             }
         }

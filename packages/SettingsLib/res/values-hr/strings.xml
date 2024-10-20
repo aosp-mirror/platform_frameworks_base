@@ -287,7 +287,7 @@
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"Neka kôd za pokretanje sustava bude otključan"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"Želite li dopustiti OEM otključavanje?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"UPOZORENJE: značajke za zaštitu uređaja neće funkcionirati na ovom uređaju dok je ta postavka uključena."</string>
-    <string name="mock_location_app" msgid="6269380172542248304">"Odabir aplikacije za lažnu lokaciju"</string>
+    <string name="mock_location_app" msgid="6269380172542248304">"Odaberi aplikaciju za lažnu lokaciju"</string>
     <string name="mock_location_app_not_set" msgid="6972032787262831155">"Aplikacija za lažnu lokaciju nije postavljena"</string>
     <string name="mock_location_app_set" msgid="4706722469342913843">"Aplikacija za lažnu lokaciju: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"Umrežavanje"</string>
@@ -686,9 +686,11 @@
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Omogućeno"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Uređaj se mora ponovno pokrenuti da bi se ta promjena primijenila. Ponovo pokrenite uređaj odmah ili odustanite."</string>
     <string name="media_transfer_wired_headphone_name" msgid="8698668536022665254">"Žičane slušalice"</string>
-    <string name="media_transfer_headphone_name" msgid="1131962659136578852">"Slušalice"</string>
+    <!-- no translation found for media_transfer_headphone_name (1157798825650178478) -->
+    <skip />
     <string name="media_transfer_usb_audio_name" msgid="1789292056757821355">"USB zvučnik"</string>
-    <string name="media_transfer_wired_device_mic_name" msgid="7417067197803840965">"Utičnica za mikrofon"</string>
+    <!-- no translation found for media_transfer_wired_device_mic_name (7115192790725088698) -->
+    <skip />
     <string name="media_transfer_usb_device_mic_name" msgid="7171789543226269822">"USB mikrofon"</string>
     <string name="media_transfer_bt_device_mic_name" msgid="1870669402238687618">"BT mikrofon"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"Uključeno"</string>

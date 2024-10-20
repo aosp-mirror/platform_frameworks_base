@@ -442,8 +442,6 @@ class ActivityClientController extends IActivityClientController.Stub {
             throw new IllegalArgumentException("File descriptors passed in Intent");
         }
 
-        mService.mAmInternal.addCreatorToken(resultData);
-
         final ActivityRecord r;
         synchronized (mGlobalLock) {
             r = ActivityRecord.isInRootTaskLocked(token);
@@ -501,6 +499,8 @@ class ActivityClientController extends IActivityClientController.Stub {
             if (r.app != null) {
                 r.app.setLastActivityFinishTimeIfNeeded(SystemClock.uptimeMillis());
             }
+
+            mService.mAmInternal.addCreatorToken(resultData, r.packageName);
 
             final long origId = Binder.clearCallingIdentity();
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "finishActivity");

@@ -155,6 +155,8 @@ public class PipTransitionState {
     @Nullable
     private Runnable mOnIdlePipTransitionStateRunnable;
 
+    private boolean mInFixedRotation = false;
+
     /**
      * An interface to track state updates as we progress through PiP transitions.
      */
@@ -256,7 +258,7 @@ public class PipTransitionState {
 
     private void maybeRunOnIdlePipTransitionStateCallback() {
         if (mOnIdlePipTransitionStateRunnable != null && isPipStateIdle()) {
-            mOnIdlePipTransitionStateRunnable.run();
+            mMainHandler.post(mOnIdlePipTransitionStateRunnable);
             mOnIdlePipTransitionStateRunnable = null;
         }
     }
@@ -300,6 +302,23 @@ public class PipTransitionState {
         mInSwipePipToHomeTransition = false;
         mSwipePipToHomeOverlay = null;
         mSwipePipToHomeAppBounds.setEmpty();
+    }
+
+    /**
+     * @return true if either in swipe or button-nav fixed rotation.
+     */
+    public boolean isInFixedRotation() {
+        return mInFixedRotation;
+    }
+
+    /**
+     * Sets the fixed rotation flag.
+     */
+    public void setInFixedRotation(boolean inFixedRotation) {
+        mInFixedRotation = inFixedRotation;
+        if (!inFixedRotation) {
+            maybeRunOnIdlePipTransitionStateCallback();
+        }
     }
 
     /**
@@ -351,7 +370,7 @@ public class PipTransitionState {
 
     public boolean isPipStateIdle() {
         // This needs to be a valid in-PiP state that isn't a transient state.
-        return mState == ENTERED_PIP || mState == CHANGED_PIP_BOUNDS;
+        return (mState == ENTERED_PIP || mState == CHANGED_PIP_BOUNDS) && !isInFixedRotation();
     }
 
     @Override

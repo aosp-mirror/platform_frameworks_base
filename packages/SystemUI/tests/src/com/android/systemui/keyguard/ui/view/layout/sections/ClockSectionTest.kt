@@ -298,7 +298,7 @@ class ClockSectionTest : SysuiTestCase() {
             underTest.applyDefaultConstraints(cs)
             val referencedIds =
                 cs.getReferencedIds(R.id.weather_clock_date_and_icons_barrier_bottom)
-            referencedIds.contentEquals(intArrayOf(R.id.lockscreen_clock_view))
+            referencedIds.contentEquals(intArrayOf(customR.id.lockscreen_clock_view))
         }
 
     @Test
@@ -323,7 +323,7 @@ class ClockSectionTest : SysuiTestCase() {
         }
 
     private fun assertLargeClockTop(cs: ConstraintSet, expectedLargeClockTopMargin: Int) {
-        val largeClockConstraint = cs.getConstraint(R.id.lockscreen_clock_view_large)
+        val largeClockConstraint = cs.getConstraint(customR.id.lockscreen_clock_view_large)
         assertThat(largeClockConstraint.layout.topToTop).isEqualTo(ConstraintSet.PARENT_ID)
         assertThat(largeClockConstraint.layout.topMargin).isEqualTo(expectedLargeClockTopMargin)
     }
@@ -332,7 +332,7 @@ class ClockSectionTest : SysuiTestCase() {
         val smallClockGuidelineConstraint = cs.getConstraint(R.id.small_clock_guideline_top)
         assertThat(smallClockGuidelineConstraint.layout.topToTop).isEqualTo(-1)
 
-        val smallClockConstraint = cs.getConstraint(R.id.lockscreen_clock_view)
+        val smallClockConstraint = cs.getConstraint(customR.id.lockscreen_clock_view)
         assertThat(smallClockConstraint.layout.topToBottom)
             .isEqualTo(R.id.small_clock_guideline_top)
         assertThat(smallClockConstraint.layout.topMargin).isEqualTo(0)
