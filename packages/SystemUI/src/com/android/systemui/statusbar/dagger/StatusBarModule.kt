@@ -17,8 +17,10 @@
 package com.android.systemui.statusbar.dagger
 
 import android.content.Context
+import com.android.systemui.CameraProtectionLoader
 import com.android.systemui.CoreStartable
 import com.android.systemui.SysUICutoutProvider
+import com.android.systemui.SysUICutoutProviderImpl
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.LogBufferFactory
@@ -110,6 +112,16 @@ abstract class StatusBarModule {
         @OngoingCallLog
         fun provideOngoingCallLogBuffer(factory: LogBufferFactory): LogBuffer {
             return factory.create("OngoingCall", 75)
+        }
+
+        @Provides
+        @SysUISingleton
+        fun sysUiCutoutProvider(
+            factory: SysUICutoutProviderImpl.Factory,
+            context: Context,
+            cameraProtectionLoader: CameraProtectionLoader,
+        ): SysUICutoutProvider {
+            return factory.create(context, cameraProtectionLoader)
         }
 
         @Provides
