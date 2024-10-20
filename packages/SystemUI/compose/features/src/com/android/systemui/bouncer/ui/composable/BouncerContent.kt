@@ -371,10 +371,7 @@ private fun BesideUserSwitcherLayout(
                 .motionTestValues { animatedAlpha(animatedOffset) exportAs MotionTestValues.alpha }
         }
 
-        UserSwitcher(
-            viewModel = viewModel,
-            modifier = Modifier.weight(1f).swappable().testTag("UserSwitcher"),
-        )
+        UserSwitcher(viewModel = viewModel, modifier = Modifier.weight(1f).swappable())
 
         FoldAware(
             modifier = Modifier.weight(1f).swappable(inversed = true).testTag("FoldAware"),
@@ -738,7 +735,7 @@ private fun UserSwitcher(viewModel: BouncerSceneContentViewModel, modifier: Modi
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
-        modifier = modifier,
+        modifier = modifier.sysuiResTag("UserSwitcher"),
     ) {
         selectedUserImage?.let {
             Image(
@@ -781,7 +778,7 @@ private fun UserSwitcher(viewModel: BouncerSceneContentViewModel, modifier: Modi
                     Icon(
                         imageVector = Icons.Default.KeyboardArrowDown,
                         contentDescription = null,
-                        modifier = Modifier.size(32.dp),
+                        modifier = Modifier.size(32.dp).sysuiResTag("user_switcher_anchor"),
                     )
                 }
 
@@ -819,11 +816,11 @@ private fun UserSwitcherDropdownMenu(
             expanded = isExpanded,
             onDismissRequest = onDismissed,
             offset = DpOffset(x = 0.dp, y = -UserSwitcherDropdownHeight),
-            modifier =
-                Modifier.width(UserSwitcherDropdownWidth).sysuiResTag("user_switcher_dropdown"),
+            modifier = Modifier.width(UserSwitcherDropdownWidth).sysuiResTag("user_list_dropdown"),
         ) {
             items.forEach { userSwitcherDropdownItem ->
                 DropdownMenuItem(
+                    modifier = Modifier.sysuiResTag("user_switcher_item"),
                     leadingIcon = {
                         Icon(
                             icon = userSwitcherDropdownItem.icon,
