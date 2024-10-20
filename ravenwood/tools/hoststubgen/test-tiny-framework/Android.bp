@@ -16,7 +16,7 @@ java_library {
     static_libs: [
         "hoststubgen-annotations",
     ],
-    visibility: ["//frameworks/base/tools/hoststubgen:__subpackages__"],
+    visibility: ["//frameworks/base/ravenwood/tools/hoststubgen:__subpackages__"],
 }
 
 // Create stub/impl jars from "hoststubgen-test-tiny-framework", using the following 3 rules.

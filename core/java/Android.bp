@@ -19,6 +19,7 @@ filegroup {
     srcs: [
         "**/*.java",
         "**/*.aidl",
+        ":systemfeatures-gen-srcs",
         ":framework-nfc-non-updatable-sources",
         ":ranging_stack_mock_initializer",
     ],
@@ -637,3 +638,29 @@ java_library {
 }
 
 // protolog end
+
+// Whether to enable read-only system feature codegen.
+gen_readonly_feature_apis = select(release_flag("RELEASE_USE_SYSTEM_FEATURE_BUILD_FLAGS"), {
+    true: "true",
+    false: "false",
+    default: "false",
+})
+
+// Generates com.android.internal.pm.RoSystemFeatures, optionally compiling in
+// details about fixed system features defined by build flags. When disabled,
+// the APIs are simply passthrough stubs with no meaningful side effects.
+genrule {
+    name: "systemfeatures-gen-srcs",
+    cmd: "$(location systemfeatures-gen-tool) com.android.internal.pm.RoSystemFeatures " +
+        // --readonly=false (default) makes the codegen an effective no-op passthrough API.
+        " --readonly=" + gen_readonly_feature_apis +
+        // For now, only export "android.hardware.type.*" system features APIs.
+        // TODO(b/203143243): Use an intermediate soong var that aggregates all declared
+        // RELEASE_SYSTEM_FEATURE_* declarations into a single arg.
+        " --feature-apis=AUTOMOTIVE,WATCH,TELEVISION,EMBEDDED,PC" +
+        " > $(out)",
+    out: [
+        "RoSystemFeatures.java",
+    ],
+    tools: ["systemfeatures-gen-tool"],
+}
