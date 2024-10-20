@@ -298,6 +298,22 @@ flag {
 }
 
 flag {
+    name: "status_bar_ui_thread"
+    namespace: "systemui"
+    description: "Move the StatusBar window to a new UI thread, which is separate from the main "
+        "thread."
+    bug: "374159193"
+}
+
+flag {
+    name: "notification_shade_ui_thread"
+    namespace: "systemui"
+    description: "Move the NotificationShade window to a new UI thread, which is separate from "
+        "the main thread."
+    bug: "374159657"
+}
+
+flag {
     name: "new_aod_transition"
     namespace: "systemui"
     description: "New LOCKSCREEN <=> AOD transition"
@@ -395,9 +411,9 @@ flag {
 }
 
 flag {
-    name: "status_bar_ron_chips"
+    name: "status_bar_notification_chips"
     namespace: "systemui"
-    description: "Show rich ongoing notifications as chips in the status bar"
+    description: "Show promoted ongoing notifications as chips in the status bar"
     bug: "361346412"
 }
 
@@ -641,6 +657,13 @@ flag {
     namespace: "systemui"
     description: "Improves screenshot policy handling for split screen and desktop mode."
     bug: "365597999"
+}
+
+flag {
+    name: "screenshot_context_url"
+    namespace: "systemui"
+    description: "Include optional app-provided context URL when sharing a screenshot."
+    bug: "242791070"
 }
 
 flag {
@@ -1481,3 +1504,56 @@ flag {
    bug: "370863642"
 }
 
+flag {
+  name: "notes_role_qs_tile"
+  namespace: "systemui"
+  description: "Enables notes role qs tile which opens default notes role app in app bubbles"
+  bug: "357863750"
+}
+
+flag {
+  name: "ignore_touches_next_to_notification_shelf"
+  namespace: "systemui"
+  description: "The shelf can vertically overlap the unlock icon. Ignore touches if so."
+  bug: "358424256"
+   metadata {
+       purpose: PURPOSE_BUGFIX
+   }
+}
+
+flag {
+   name: "media_projection_request_attribution_fix"
+   namespace: "systemui"
+   description: "Ensure MediaProjection consent requests are properly attributed"
+   bug: "373581993"
+   metadata {
+       purpose: PURPOSE_BUGFIX
+   }
+}
+
+flag {
+  name: "secondary_user_widget_host"
+  namespace: "systemui"
+  description: "Host communal widgets in the current secondary user on HSUM."
+  bug: "373874416"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+   name: "only_show_media_stream_slider_in_single_volume_mode"
+   namespace: "systemui"
+   description: "When the device is in single volume mode, only show media stream slider and hide all other stream (e.g. call, notification, alarm, etc) sliders in volume panel"
+   bug: "373729625"
+   metadata {
+       purpose: PURPOSE_BUGFIX
+   }
+}
+
+flag {
+    name: "qs_tile_detailed_view"
+    namespace: "systemui"
+    description: "Enables the tile detailed view UI."
+    bug: "374173773"
+}

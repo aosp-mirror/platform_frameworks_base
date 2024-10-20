@@ -13,6 +13,8 @@
 
 package com.android.systemui.statusbar.notification.stack;
 
+import static com.android.systemui.Flags.FLAG_IGNORE_TOUCHES_NEXT_TO_NOTIFICATION_SHELF;
+
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
@@ -36,6 +38,7 @@ import static org.mockito.Mockito.when;
 import android.animation.Animator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.os.Handler;
+import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
 import android.service.notification.StatusBarNotification;
 import android.testing.TestableLooper;
@@ -52,6 +55,7 @@ import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper.SnoozeOption;
+import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.shared.NotificationContentAlphaOptimization;
 
@@ -85,6 +89,7 @@ public class NotificationSwipeHelperTest extends SysuiTestCase {
     private NotificationMenuRowPlugin mMenuRow;
     private Handler mHandler;
     private ExpandableNotificationRow mNotificationRow;
+    private NotificationShelf mShelf;
     private Runnable mFalsingCheck;
     private final FeatureFlags mFeatureFlags = new FakeFeatureFlags();
 
@@ -111,6 +116,7 @@ public class NotificationSwipeHelperTest extends SysuiTestCase {
         mEvent = mock(MotionEvent.class);
         mMenuRow = mock(NotificationMenuRowPlugin.class);
         mNotificationRow = mock(ExpandableNotificationRow.class);
+        mShelf = mock(NotificationShelf.class);
         mHandler = mock(Handler.class);
         mFalsingCheck = mock(Runnable.class);
     }
@@ -662,6 +668,54 @@ public class NotificationSwipeHelperTest extends SysuiTestCase {
 
         assertFalse("Touch is not within the view",
                 mSwipeHelper.isTouchInView(mEvent, mNotificationRow));
+    }
+
+    @Test
+    @EnableFlags(FLAG_IGNORE_TOUCHES_NEXT_TO_NOTIFICATION_SHELF)
+    public void testIsTouchInView_notificationShelf_flagEnabled() {
+        doReturn(500).when(mShelf).getWidth();
+        doReturn(FAKE_ROW_WIDTH).when(mShelf).getActualWidth();
+        doReturn(FAKE_ROW_HEIGHT).when(mShelf).getHeight();
+        doReturn(FAKE_ROW_HEIGHT).when(mShelf).getActualHeight();
+
+        Answer answer = (Answer) invocation -> {
+            int[] arr = invocation.getArgument(0);
+            arr[0] = 0;
+            arr[1] = 0;
+            return null;
+        };
+
+        doReturn(5f).when(mEvent).getRawX();
+        doReturn(10f).when(mEvent).getRawY();
+        doAnswer(answer).when(mShelf).getLocationOnScreen(any());
+        assertTrue("Touch is within the view", mSwipeHelper.isTouchInView(mEvent, mShelf));
+
+        doReturn(50f).when(mEvent).getRawX();
+        assertFalse("Touch is not within the view", mSwipeHelper.isTouchInView(mEvent, mShelf));
+    }
+
+    @Test
+    @DisableFlags(FLAG_IGNORE_TOUCHES_NEXT_TO_NOTIFICATION_SHELF)
+    public void testIsTouchInView_notificationShelf_flagDisabled() {
+        doReturn(500).when(mShelf).getWidth();
+        doReturn(FAKE_ROW_WIDTH).when(mShelf).getActualWidth();
+        doReturn(FAKE_ROW_HEIGHT).when(mShelf).getHeight();
+        doReturn(FAKE_ROW_HEIGHT).when(mShelf).getActualHeight();
+
+        Answer answer = (Answer) invocation -> {
+            int[] arr = invocation.getArgument(0);
+            arr[0] = 0;
+            arr[1] = 0;
+            return null;
+        };
+
+        doReturn(5f).when(mEvent).getRawX();
+        doReturn(10f).when(mEvent).getRawY();
+        doAnswer(answer).when(mShelf).getLocationOnScreen(any());
+        assertTrue("Touch is within the view", mSwipeHelper.isTouchInView(mEvent, mShelf));
+
+        doReturn(50f).when(mEvent).getRawX();
+        assertTrue("Touch is within the view", mSwipeHelper.isTouchInView(mEvent, mShelf));
     }
 
     @Test

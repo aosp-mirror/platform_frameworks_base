@@ -17,6 +17,7 @@
 package android.window;
 
 import static com.android.window.flags.Flags.predictiveBackPrioritySystemNavigationObserver;
+import static com.android.window.flags.Flags.predictiveBackTimestampApi;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -563,7 +564,8 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
                 }
                 OnBackAnimationCallback animationCallback = getBackAnimationCallback();
                 if (animationCallback != null
-                        && !(callback instanceof ImeBackAnimationController)) {
+                        && !(callback instanceof ImeBackAnimationController)
+                        && !predictiveBackTimestampApi()) {
                     mProgressAnimator.onBackInvoked(() -> {
                         if (mIsSystemCallback) {
                             mSystemNavigationObserverCallbackRunnable.run();

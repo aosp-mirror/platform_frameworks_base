@@ -49,7 +49,7 @@ import org.mockito.MockitoAnnotations
 @RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper
 class SystemEventChipAnimationControllerTest : SysuiTestCase() {
-    private lateinit var controller: SystemEventChipAnimationController
+    private lateinit var controller: SystemEventChipAnimationControllerImpl
 
     @get:Rule val animatorTestRule = AnimatorTestRule(this)
     @Mock private lateinit var sbWindowController: StatusBarWindowController
@@ -61,7 +61,6 @@ class SystemEventChipAnimationControllerTest : SysuiTestCase() {
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
-
         // StatusBarWindowController is mocked. The addViewToWindow function needs to be mocked to
         // ensure that the chip view is added to a parent view
         whenever(sbWindowController.addViewToWindow(any(), any())).then {
@@ -74,7 +73,7 @@ class SystemEventChipAnimationControllerTest : SysuiTestCase() {
             )
             statusbarFake.addView(
                 it.arguments[0] as View,
-                it.arguments[1] as FrameLayout.LayoutParams
+                it.arguments[1] as FrameLayout.LayoutParams,
             )
         }
 
@@ -84,17 +83,17 @@ class SystemEventChipAnimationControllerTest : SysuiTestCase() {
                     /* left= */ insets,
                     /* top= */ insets,
                     /* right= */ insets,
-                    /* bottom= */ 0
+                    /* bottom= */ 0,
                 )
             )
         whenever(insetsProvider.getStatusBarContentAreaForCurrentRotation())
             .thenReturn(portraitArea)
 
         controller =
-            SystemEventChipAnimationController(
+            SystemEventChipAnimationControllerImpl(
                 context = mContext,
                 statusBarWindowController = sbWindowController,
-                contentInsetsProvider = insetsProvider
+                contentInsetsProvider = insetsProvider,
             )
     }
 
@@ -154,10 +153,7 @@ class SystemEventChipAnimationControllerTest : SysuiTestCase() {
             val lp = it.arguments[1] as FrameLayout.LayoutParams
             assertThat(lp.gravity and Gravity.VERTICAL_GRAVITY_MASK).isEqualTo(Gravity.TOP)
 
-            statusbarFake.addView(
-                it.arguments[0] as View,
-                lp,
-            )
+            statusbarFake.addView(it.arguments[0] as View, lp)
         }
 
         // GIVEN insets provider gives the correct content area

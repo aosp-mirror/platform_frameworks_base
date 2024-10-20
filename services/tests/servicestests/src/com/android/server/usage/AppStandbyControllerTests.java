@@ -93,7 +93,10 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.provider.DeviceConfig;
 import android.util.ArraySet;
 import android.util.Pair;
@@ -111,6 +114,7 @@ import com.android.server.usage.AppStandbyInternal.AppIdleStateChangeListener;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -184,6 +188,9 @@ public class AppStandbyControllerTests {
     private static boolean isPackageInstalled = true;
 
     private static final Random sRandom = new Random();
+
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     private MyInjector mInjector;
     private AppStandbyController mController;
@@ -894,7 +901,8 @@ public class AppStandbyControllerTests {
     }
 
     @Test
-    public void testScreenTimeAndBuckets() throws Exception {
+    @DisableFlags(Flags.FLAG_SCREEN_TIME_BYPASS)
+    public void testScreenTimeAndBuckets_Legacy() throws Exception {
         mInjector.setDisplayOn(false);
 
         assertTimeout(mController, 0, STANDBY_BUCKET_NEVER);
@@ -914,6 +922,31 @@ public class AppStandbyControllerTests {
 
         mInjector.setDisplayOn(true);
         assertTimeout(mController, RARE_THRESHOLD + 2 * HOUR_MS + 1, STANDBY_BUCKET_RARE);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_SCREEN_TIME_BYPASS)
+    public void testScreenTimeAndBuckets_Bypass() throws Exception {
+        mInjector.setDisplayOn(false);
+
+        assertTimeout(mController, 0, STANDBY_BUCKET_NEVER);
+
+        reportEvent(mController, USER_INTERACTION, 0, PACKAGE_1);
+
+        // ACTIVE bucket
+        assertTimeout(mController, WORKING_SET_THRESHOLD - 1, STANDBY_BUCKET_ACTIVE);
+
+        // WORKING_SET bucket
+        assertTimeout(mController, WORKING_SET_THRESHOLD + 1, STANDBY_BUCKET_WORKING_SET);
+
+        // RARE bucket, should failed due to timeout hasn't reached yet.
+        mInjector.mElapsedRealtime = RARE_THRESHOLD - 1;
+        mController.checkIdleStates(USER_ID);
+        waitAndAssertNotBucket(STANDBY_BUCKET_RARE, PACKAGE_1);
+
+        mInjector.setDisplayOn(true);
+        // screen on time doesn't count.
+        assertTimeout(mController, RARE_THRESHOLD + 1, STANDBY_BUCKET_RARE);
     }
 
     @Test

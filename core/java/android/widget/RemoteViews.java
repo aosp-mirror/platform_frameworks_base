@@ -1248,6 +1248,7 @@ public class RemoteViews implements Parcelable, Filter {
 
             AdapterView adapterView = (AdapterView) target;
             Adapter adapter = adapterView.getAdapter();
+            boolean onLightBackground = hasFlags(FLAG_USE_LIGHT_BACKGROUND_LAYOUT);
             // We can reuse the adapter if it's a RemoteCollectionItemsAdapter and the view type
             // count hasn't increased. Note that AbsListView allocates a fixed size array for view
             // recycling in setAdapter, so we must call setAdapter again if the number of view types
@@ -1255,8 +1256,12 @@ public class RemoteViews implements Parcelable, Filter {
             if (adapter instanceof RemoteCollectionItemsAdapter
                     && adapter.getViewTypeCount() >= items.getViewTypeCount()) {
                 try {
-                    ((RemoteCollectionItemsAdapter) adapter).setData(
-                            items, params.handler, params.colorResources);
+                    ((RemoteCollectionItemsAdapter) adapter)
+                            .setData(
+                                    items,
+                                    params.handler,
+                                    params.colorResources,
+                                    onLightBackground);
                 } catch (Throwable throwable) {
                     // setData should never failed with the validation in the items builder, but if
                     // it does, catch and rethrow.
@@ -1266,8 +1271,9 @@ public class RemoteViews implements Parcelable, Filter {
             }
 
             try {
-                adapterView.setAdapter(new RemoteCollectionItemsAdapter(items,
-                        params.handler, params.colorResources));
+                adapterView.setAdapter(
+                        new RemoteCollectionItemsAdapter(
+                                items, params.handler, params.colorResources, onLightBackground));
             } catch (Throwable throwable) {
                 // This could throw if the AdapterView somehow doesn't accept BaseAdapter due to
                 // a type error.

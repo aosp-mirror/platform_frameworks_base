@@ -27,7 +27,14 @@ import kotlinx.coroutines.flow.Flow
  * draw a gradient that reveals/hides the contents of the screen.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
-class LightRevealScrimViewModel @Inject constructor(interactor: LightRevealScrimInteractor) {
+class LightRevealScrimViewModel
+@Inject
+constructor(private val interactor: LightRevealScrimInteractor) {
     val lightRevealEffect: Flow<LightRevealEffect> = interactor.lightRevealEffect
     val revealAmount: Flow<Float> = interactor.revealAmount
+    val maxAlpha: Flow<Float> = interactor.maxAlpha
+
+    fun setWallpaperSupportsAmbientMode(supportsAmbientMode: Boolean) {
+        interactor.setWallpaperSupportsAmbientMode(supportsAmbientMode)
+    }
 }

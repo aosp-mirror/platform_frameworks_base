@@ -648,7 +648,13 @@ sealed class DragToDesktopTransitionHandler(
             state.startAborted = true
             // The start-transition (DRAG_HOLD) is aborted, cancel its jank interaction.
             interactionJankMonitor.cancel(CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_HOLD)
-        } else if (state.cancelTransitionToken != transition) {
+        } else if (state.cancelTransitionToken == transition) {
+            state.draggedTaskChange?.leash?.let {
+                state.startTransitionFinishTransaction?.show(it)
+            }
+            state.startTransitionFinishCb?.onTransitionFinished(null /* wct */)
+            clearState()
+        } else {
             // This transition being aborted is neither the start, nor the cancel transition, so
             // it must be the finish transition (DRAG_RELEASE); cancel its jank interaction.
             interactionJankMonitor.cancel(CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_RELEASE)
@@ -863,7 +869,8 @@ sealed class DragToDesktopTransitionHandler(
 
     companion object {
         /** The duration of the animation to commit or cancel the drag-to-desktop gesture. */
-        internal const val DRAG_TO_DESKTOP_FINISH_ANIM_DURATION_MS = 336L
+        @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+        const val DRAG_TO_DESKTOP_FINISH_ANIM_DURATION_MS = 336L
     }
 }
 

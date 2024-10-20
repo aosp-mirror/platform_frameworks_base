@@ -1698,12 +1698,12 @@ public class AudioSystem
     }
 
     /** @hide Wrapper for native methods called from AudioService */
-    public static int setStreamVolumeIndexAS(int stream, int index, int device) {
+    public static int setStreamVolumeIndexAS(int stream, int index, boolean muted, int device) {
         if (DEBUG_VOLUME) {
             Log.i(TAG, "setStreamVolumeIndex: " + STREAM_NAMES[stream]
-                    + " dev=" + Integer.toHexString(device) + " idx=" + index);
+                    + " dev=" + Integer.toHexString(device) + " idx=" + index + " muted=" + muted);
         }
-        return setStreamVolumeIndex(stream, index, device);
+        return setStreamVolumeIndex(stream, index, muted, device);
     }
 
     // usage for AudioRecord.startRecordingSync(), must match AudioSystem::sync_event_t
@@ -1774,7 +1774,8 @@ public class AudioSystem
     @UnsupportedAppUsage
     public static native int initStreamVolume(int stream, int indexMin, int indexMax);
     @UnsupportedAppUsage
-    private static native int setStreamVolumeIndex(int stream, int index, int device);
+    private static native int setStreamVolumeIndex(int stream, int index, boolean muted,
+            int device);
     /** @hide */
     public static native int getStreamVolumeIndex(int stream, int device);
     /**
@@ -1787,7 +1788,7 @@ public class AudioSystem
      * @return command completion status.
      */
     public static native int setVolumeIndexForAttributes(@NonNull AudioAttributes attributes,
-                                                         int index, int device);
+                                                         int index, boolean muted, int device);
    /**
     * @hide
     * get the volume index for the given {@link AudioAttributes}.

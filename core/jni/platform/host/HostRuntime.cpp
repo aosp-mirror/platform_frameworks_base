@@ -120,6 +120,7 @@ static const std::unordered_map<std::string, RegJNIRec> gRegJNIMap = {
 #endif
         {"android.content.res.StringBlock", REG_JNI(register_android_content_StringBlock)},
         {"android.content.res.XmlBlock", REG_JNI(register_android_content_XmlBlock)},
+#ifdef __linux__
         {"android.database.CursorWindow", REG_JNI(register_android_database_CursorWindow)},
         {"android.database.sqlite.SQLiteConnection",
          REG_JNI(register_android_database_SQLiteConnection)},
@@ -127,7 +128,6 @@ static const std::unordered_map<std::string, RegJNIRec> gRegJNIMap = {
         {"android.database.sqlite.SQLiteDebug", REG_JNI(register_android_database_SQLiteDebug)},
         {"android.database.sqlite.SQLiteRawStatement",
          REG_JNI(register_android_database_SQLiteRawStatement)},
-#ifdef __linux__
         {"android.os.Binder", REG_JNI(register_android_os_Binder)},
         {"android.os.FileObserver", REG_JNI(register_android_os_FileObserver)},
         {"android.os.MessageQueue", REG_JNI(register_android_os_MessageQueue)},
@@ -262,7 +262,8 @@ static void* mmapFile(const char* dataFilePath) {
 }
 
 // returns result from java.lang.System.getProperty
-static string getJavaProperty(JNIEnv* env, const char* property_name) {
+static string getJavaProperty(JNIEnv* env, const char* property_name,
+                              const char* defaultValue = "") {
     jclass system = FindClassOrDie(env, "java/lang/System");
     jmethodID getPropertyMethod =
             GetStaticMethodIDOrDie(env, system, "getProperty",
@@ -270,7 +271,7 @@ static string getJavaProperty(JNIEnv* env, const char* property_name) {
 
     auto jString = (jstring)env->CallStaticObjectMethod(system, getPropertyMethod,
                                                         env->NewStringUTF(property_name),
-                                                        env->NewStringUTF(""));
+                                                        env->NewStringUTF(defaultValue));
     ScopedUtfChars chars(env, jString);
     return string(chars.c_str());
 }
@@ -430,7 +431,6 @@ public:
 
 } // namespace android
 
-#ifndef _WIN32
 using namespace android;
 
 JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void*) {
@@ -439,12 +439,14 @@ JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void*) {
         return JNI_ERR;
     }
 
-    Vector<String8> args;
-    HostRuntime runtime;
+    string useBaseHostRuntime = getJavaProperty(env, "use_base_native_hostruntime", "true");
+    if (useBaseHostRuntime == "true") {
+        Vector<String8> args;
+        HostRuntime runtime;
 
-    runtime.onVmCreated(env);
-    runtime.start("HostRuntime", args, false);
+        runtime.onVmCreated(env);
+        runtime.start("HostRuntime", args, false);
+    }
 
     return JNI_VERSION_1_6;
 }
-#endif

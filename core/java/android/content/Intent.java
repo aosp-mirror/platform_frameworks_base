@@ -888,6 +888,22 @@ public class Intent implements Parcelable, Cloneable {
     public static final String ACTION_ACTIVITY_RECOGNIZER =
             "android.intent.action.ACTIVITY_RECOGNIZER";
 
+    /** @hide */
+    public static void maybeMarkAsMissingCreatorToken(Object object) {
+        if (object instanceof Intent intent) {
+            maybeMarkAsMissingCreatorTokenInternal(intent);
+        }
+    }
+
+    private static void maybeMarkAsMissingCreatorTokenInternal(Intent intent) {
+        boolean isForeign = (intent.mLocalFlags & LOCAL_FLAG_FROM_PARCEL) != 0;
+        boolean isWithoutTrustedCreatorToken =
+                (intent.mLocalFlags & Intent.LOCAL_FLAG_TRUSTED_CREATOR_TOKEN_PRESENT) == 0;
+        if (isForeign && isWithoutTrustedCreatorToken) {
+            intent.addExtendedFlags(EXTENDED_FLAG_MISSING_CREATOR_OR_INVALID_TOKEN);
+        }
+    }
+
     /**
      * Represents a shortcut/live folder icon resource.
      *
@@ -7684,10 +7700,8 @@ public class Intent implements Parcelable, Cloneable {
 
     /**
      * This flag indicates the creator token of this intent has been verified.
-     *
-     * @hide
      */
-    public static final int LOCAL_FLAG_CREATOR_TOKEN_VERIFIED = 1 << 6;
+    private static final int LOCAL_FLAG_TRUSTED_CREATOR_TOKEN_PRESENT = 1 << 6;
 
     /** @hide */
     @IntDef(flag = true, prefix = { "EXTENDED_FLAG_" }, value = {
@@ -12243,6 +12257,30 @@ public class Intent implements Parcelable, Cloneable {
         }
     }
 
+    /** @hide */
+    public void checkCreatorToken() {
+        if (mExtras == null) return;
+        if (mCreatorTokenInfo != null && mCreatorTokenInfo.mExtraIntentKeys != null) {
+            for (String key : mCreatorTokenInfo.mExtraIntentKeys) {
+                try {
+                    Intent extraIntent = mExtras.getParcelable(key, Intent.class);
+                    if (extraIntent == null) {
+                        Log.w(TAG, "The key {" + key
+                                + "} does not correspond to an intent in the bundle.");
+                        continue;
+                    }
+                    extraIntent.mLocalFlags |= LOCAL_FLAG_TRUSTED_CREATOR_TOKEN_PRESENT;
+                } catch (Exception e) {
+                    Log.e(TAG, "Failed to validate creator token. key: " + key + ".", e);
+                }
+            }
+        }
+        // mark the bundle as intent extras after calls to getParcelable.
+        // otherwise, the logic to mark missing token would run before
+        // mark trusted creator token present.
+        mExtras.setIsIntentExtra();
+    }
+
     public void writeToParcel(Parcel out, int flags) {
         out.writeString8(mAction);
         Uri.writeToParcel(out, mData);
@@ -12730,6 +12768,7 @@ public class Intent implements Parcelable, Cloneable {
         }
 
         mLocalFlags |= localFlags;
+        checkCreatorToken();
 
         // Special attribution fix-up logic for any BluetoothDevice extras
         // passed via Bluetooth intents

@@ -97,9 +97,9 @@
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Je, kuna hitilafu za kamera?\nGusa ili urekebishe"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Umeshindwa kurekebisha?\nGusa ili urejeshe nakala ya awali"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Je, hakuna hitilafu za kamera? Gusa ili uondoe."</string>
-    <string name="windowing_app_handle_education_tooltip" msgid="6398482412956375783">"Gusa ili ufungue menyu ya programu"</string>
-    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="6285279585554484957">"Gusa ili uonyeshe programu nyingi kwa pamoja"</string>
-    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="6685429075790085337">"Rudi kwenye skrini nzima katika menyu ya programu"</string>
+    <string name="windowing_app_handle_education_tooltip" msgid="2929643449849791854">"Unaweza kupata menyu ya programu hapa"</string>
+    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="2523468503353474095">"Tumia mwonekano wa kompyuta ili ufungue programu nyingi pamoja"</string>
+    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="5225660258192054132">"Rudi kwenye skrini nzima wakati wowote ukitumia menyu ya programu"</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"Angalia na ufanye zaidi"</string>
     <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"Buruta katika programu nyingine ili utumie skrini iliyogawanywa"</string>
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Gusa mara mbili nje ya programu ili uihamishe"</string>

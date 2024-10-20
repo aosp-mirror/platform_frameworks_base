@@ -4709,10 +4709,11 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 extras.putLong(Intent.EXTRA_TIME, SystemClock.elapsedRealtime());
                 mHandler.post(() -> {
                     mBroadcastHelper.sendPackageBroadcast(Intent.ACTION_PACKAGE_UNSTOPPED,
-                            packageName, extras,
-                            Intent.FLAG_RECEIVER_REGISTERED_ONLY, null, null,
-                            userIds, null, broadcastAllowList, null,
-                            null);
+                            packageName, extras, Intent.FLAG_RECEIVER_REGISTERED_ONLY,
+                            null /* targetPkg */, null /* finishedReceiver */, userIds,
+                            null /* instantUserIds */, broadcastAllowList,
+                            null /* filterExtrasForReceiver */, null /* bOptions */,
+                            null /* requiredPermissions */);
                 });
                 mPackageMonitorCallbackHelper.notifyPackageMonitor(Intent.ACTION_PACKAGE_UNSTOPPED,
                         packageName, extras, userIds, null /* instantUserIds */,
@@ -7169,17 +7170,17 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 // Sent async using the PM handler, to maintain ordering with PACKAGE_UNSTOPPED
                 mHandler.post(() -> {
                     mBroadcastHelper.sendPackageBroadcast(Intent.ACTION_PACKAGE_RESTARTED,
-                            packageName, extras,
-                            flags, null, null,
-                            userIds, null, broadcastAllowList, null,
-                            null);
+                            packageName, extras, flags, null /* targetPkg */,
+                            null /* finishedReceiver */, userIds, null /* instantUserIds */,
+                            broadcastAllowList, null /* filterExtrasForReceiver */,
+                            null /* bOptions */, null /* requiredPermissions */);
                 });
             } else {
                 mBroadcastHelper.sendPackageBroadcast(Intent.ACTION_PACKAGE_RESTARTED,
-                        packageName, extras,
-                        flags, null, null,
-                        userIds, null, broadcastAllowList, null,
-                        null);
+                        packageName, extras, flags, null /* targetPkg */,
+                        null /* finishedReceiver */, userIds, null /* instantUserIds */,
+                        broadcastAllowList, null /* filterExtrasForReceiver */, null /* bOptions */,
+                        null /* requiredPermissions */);
             }
             mPackageMonitorCallbackHelper.notifyPackageMonitor(Intent.ACTION_PACKAGE_RESTARTED,
                     packageName, extras, userIds, null /* instantUserIds */,

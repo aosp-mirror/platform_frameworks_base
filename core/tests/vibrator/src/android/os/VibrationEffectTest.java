@@ -1078,6 +1078,52 @@ public class VibrationEffectTest {
     }
 
     @Test
+    public void testDuration_withVibratorSupportingPrimitives() {
+        VibratorInfo info = new VibratorInfo.Builder(/* id= */ 1)
+                .setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS)
+                .setSupportedPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 10)
+                .setSupportedPrimitive(VibrationEffect.Composition.PRIMITIVE_TICK, 5)
+                .build();
+
+        VibrationEffect composition = VibrationEffect.startComposition()
+                .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK)
+                .addPrimitive(VibrationEffect.Composition.PRIMITIVE_TICK, 1, 100)
+                .compose();
+
+        assertEquals(1, VibrationEffect.createOneShot(1, 1).getDuration());
+        assertEquals(10, VibrationEffect.get(VibrationEffect.EFFECT_CLICK).getDuration(info));
+        assertEquals(115, composition.getDuration(info));
+        assertEquals(Long.MAX_VALUE,
+                VibrationEffect.startComposition()
+                        .repeatEffectIndefinitely(composition)
+                        .compose()
+                        .getDuration(info));
+        if (Flags.vendorVibrationEffects()) {
+            assertEquals(-1,
+                    VibrationEffect.createVendorEffect(createNonEmptyBundle()).getDuration(info));
+        }
+    }
+
+    @Test
+    public void testDuration_withVibratorNotSupportingPrimitives() {
+        VibratorInfo info = new VibratorInfo.Builder(/* id= */ 1)
+                .setCapabilities(IVibrator.CAP_AMPLITUDE_CONTROL)
+                .build();
+
+        VibrationEffect composition = VibrationEffect.startComposition()
+                .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK)
+                .compose();
+
+        assertEquals(-1, VibrationEffect.get(VibrationEffect.EFFECT_CLICK).getDuration(info));
+        assertEquals(-1, composition.getDuration(info));
+        assertEquals(Long.MAX_VALUE,
+                VibrationEffect.startComposition()
+                        .repeatEffectIndefinitely(composition)
+                        .compose()
+                        .getDuration(info));
+    }
+
+    @Test
     public void testAreVibrationFeaturesSupported_allSegmentsSupported() {
         VibratorInfo info = new VibratorInfo.Builder(/* id= */ 1)
                 .setCapabilities(IVibrator.CAP_AMPLITUDE_CONTROL)

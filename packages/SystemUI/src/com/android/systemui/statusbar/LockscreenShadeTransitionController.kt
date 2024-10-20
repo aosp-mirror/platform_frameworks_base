@@ -15,7 +15,6 @@ import androidx.annotation.VisibleForTesting
 import com.android.systemui.Dumpable
 import com.android.systemui.ExpandHelper
 import com.android.systemui.Gefingerpoken
-import com.android.systemui.biometrics.UdfpsKeyguardViewControllerLegacy
 import com.android.systemui.classifier.Classifier
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.dagger.SysUISingleton
@@ -90,6 +89,7 @@ constructor(
     @get:VisibleForTesting
     var fractionToShade: Float = 0f
         private set
+
     private var useSplitShade: Boolean = false
     private lateinit var nsslController: NotificationStackScrollLayoutController
     lateinit var centralSurfaces: CentralSurfaces
@@ -161,9 +161,6 @@ constructor(
     val distanceUntilShowingPulsingNotifications
         get() = fullTransitionDistance
 
-    /** The udfpsKeyguardViewController if it exists. */
-    var mUdfpsKeyguardViewControllerLegacy: UdfpsKeyguardViewControllerLegacy? = null
-
     /** The touch helper responsible for the drag down animation. */
     val touchHelper =
         DragDownHelper(
@@ -171,7 +168,7 @@ constructor(
             this,
             naturalScrollingSettingObserver,
             shadeRepository,
-            context
+            context,
         )
 
     private val splitShadeOverScroller: SplitShadeLockScreenOverScroller by lazy {
@@ -448,7 +445,6 @@ constructor(
 
         val udfpsProgress = MathUtils.saturate(dragDownAmount / udfpsTransitionDistance)
         shadeRepository.setUdfpsTransitionToFullShadeProgress(udfpsProgress)
-        mUdfpsKeyguardViewControllerLegacy?.setTransitionToFullShadeProgress(udfpsProgress)
 
         val statusBarProgress = MathUtils.saturate(dragDownAmount / statusBarTransitionDistance)
         centralSurfaces.setTransitionToFullShadeProgress(statusBarProgress)
@@ -457,7 +453,7 @@ constructor(
     private fun setDragDownAmountAnimated(
         target: Float,
         delay: Long = 0,
-        endlistener: (() -> Unit)? = null
+        endlistener: (() -> Unit)? = null,
     ) {
         logger.logDragDownAnimation(target)
         val dragDownAnimator = ValueAnimator.ofFloat(dragDownAmount, target)
@@ -553,7 +549,7 @@ constructor(
     private fun goToLockedShadeInternal(
         expandView: View?,
         animationHandler: ((Long) -> Unit)? = null,
-        cancelAction: Runnable? = null
+        cancelAction: Runnable? = null,
     ) {
         if (!shadeInteractor.isShadeEnabled.value) {
             cancelAction?.run()
@@ -564,10 +560,7 @@ constructor(
         var entry: NotificationEntry? = null
         if (expandView is ExpandableNotificationRow) {
             entry = expandView.entry
-            entry.setUserExpanded(
-                /* userExpanded= */ true,
-                /* allowChildExpansion= */ true,
-            )
+            entry.setUserExpanded(/* userExpanded= */ true, /* allowChildExpansion= */ true)
             // Indicate that the group expansion is changing at this time -- this way the group
             // and children backgrounds / divider animations will look correct.
             entry.setGroupExpansionChanging(true)
@@ -594,9 +587,7 @@ constructor(
                 statusBarStateController.setLeaveOpenOnKeyguardHide(false)
                 draggedDownEntry?.apply {
                     setUserLocked(false)
-                    notifyHeightChanged(
-                        /* needsAnimation= */ false,
-                    )
+                    notifyHeightChanged(/* needsAnimation= */ false)
                     draggedDownEntry = null
                 }
                 cancelAction?.run()
@@ -614,9 +605,7 @@ constructor(
             // This call needs to be after updating the shade state since otherwise
             // the scrimstate resets too early
             if (animationHandler != null) {
-                animationHandler.invoke(
-                    /* delay= */ 0,
-                )
+                animationHandler.invoke(/* delay= */ 0)
             } else {
                 performDefaultGoToFullShadeAnimation(0)
             }
@@ -757,7 +746,7 @@ class DragDownHelper(
     private val dragDownCallback: LockscreenShadeTransitionController,
     private val naturalScrollingSettingObserver: NaturalScrollingSettingObserver,
     private val shadeRepository: ShadeRepository,
-    context: Context
+    context: Context,
 ) : Gefingerpoken {
 
     private var dragDownAmountOnStart = 0.0f
@@ -932,7 +921,7 @@ class DragDownHelper(
     @VisibleForTesting
     fun cancelChildExpansion(
         child: ExpandableView,
-        animationDuration: Long = SPRING_BACK_ANIMATION_LENGTH_MS
+        animationDuration: Long = SPRING_BACK_ANIMATION_LENGTH_MS,
     ) {
         if (child.actualHeight == child.collapsedHeight) {
             expandCallback.setUserLockedChild(child, false)

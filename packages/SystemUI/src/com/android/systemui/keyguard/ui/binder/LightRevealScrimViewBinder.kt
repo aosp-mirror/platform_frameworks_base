@@ -16,21 +16,49 @@
 
 package com.android.systemui.keyguard.ui.binder
 
+import android.animation.ValueAnimator
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
-import com.android.app.tracing.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.keyguard.ui.viewmodel.LightRevealScrimViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
+import com.android.systemui.shared.Flags.ambientAod
 import com.android.systemui.statusbar.LightRevealScrim
+import com.android.systemui.wallpapers.ui.viewmodel.WallpaperViewModel
 import kotlinx.coroutines.launch
 
 object LightRevealScrimViewBinder {
     @JvmStatic
-    fun bind(revealScrim: LightRevealScrim, viewModel: LightRevealScrimViewModel) {
+    fun bind(
+        revealScrim: LightRevealScrim,
+        viewModel: LightRevealScrimViewModel,
+        wallpaperViewModel: WallpaperViewModel,
+    ) {
         revealScrim.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.CREATED) {
+                if (ambientAod()) {
+                    launch("$TAG#wallpaperViewModel.wallpaperSupportsAmbientMode") {
+                        wallpaperViewModel.wallpaperSupportsAmbientMode.collect {
+                            viewModel.setWallpaperSupportsAmbientMode(it)
+                        }
+                    }
+                    launch("$TAG#viewModel.maxAlpha") {
+                        viewModel.maxAlpha.collect { alpha ->
+                            if (alpha != revealScrim.alpha) {
+                                ValueAnimator.ofFloat(revealScrim.alpha, alpha).apply {
+                                    duration = 400
+                                    addUpdateListener { animation ->
+                                        revealScrim.alpha = animation.getAnimatedValue() as Float
+                                    }
+                                    start()
+                                }
+                            }
+                        }
+                    }
+                }
+
                 launch("$TAG#viewModel.revealAmount") {
-                    viewModel.revealAmount.collect { amount -> revealScrim.revealAmount = amount }
+                    viewModel.revealAmount.collect { revealScrim.revealAmount = it }
                 }
 
                 launch("$TAG#viewModel.lightRevealEffect") {

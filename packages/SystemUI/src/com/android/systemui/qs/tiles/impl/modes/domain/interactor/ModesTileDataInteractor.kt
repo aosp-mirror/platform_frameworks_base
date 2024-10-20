@@ -18,7 +18,7 @@ package com.android.systemui.qs.tiles.impl.modes.domain.interactor
 
 import android.content.Context
 import android.os.UserHandle
-import com.android.app.tracing.coroutines.flow.map
+import com.android.app.tracing.coroutines.flow.flowName
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.shared.model.asIcon
 import com.android.systemui.dagger.qualifiers.Background
@@ -37,6 +37,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 
 class ModesTileDataInteractor
 @Inject
@@ -59,6 +60,7 @@ constructor(
     fun tileData() =
         zenModeInteractor.activeModes
             .map { activeModes -> buildTileData(activeModes) }
+            .flowName("tileData")
             .flowOn(bgDispatcher)
             .distinctUntilChanged()
 
@@ -76,14 +78,14 @@ constructor(
         } else {
             return ModesTileModel(
                 isActivated = activeModes.isAnyActive(),
-                icon = Icon.Resource(ModesTile.ICON_RES_ID, null),
+                icon = context.getDrawable(ModesTile.ICON_RES_ID)!!.asIcon(),
                 iconResId = ModesTile.ICON_RES_ID,
                 activeModes = activeModes.modeNames,
             )
         }
     }
 
-    private data class TileIcon(val icon: Icon, val resId: Int?)
+    private data class TileIcon(val icon: Icon.Loaded, val resId: Int?)
 
     private fun getTileIcon(activeMode: ZenModeInfo?): TileIcon {
         return if (activeMode != null) {
@@ -94,7 +96,7 @@ constructor(
                 TileIcon(activeMode.icon.drawable.asIcon(), null)
             }
         } else {
-            TileIcon(Icon.Resource(ModesTile.ICON_RES_ID, null), ModesTile.ICON_RES_ID)
+            TileIcon(context.getDrawable(ModesTile.ICON_RES_ID)!!.asIcon(), ModesTile.ICON_RES_ID)
         }
     }
 

@@ -46,7 +46,9 @@ import android.platform.test.annotations.EnableFlags;
 import android.provider.Settings;
 import android.testing.TestableLooper;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.Space;
 import android.widget.Spinner;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -226,7 +228,7 @@ public class HearingDevicesDialogDelegateTest extends SysuiTestCase {
         mDialog.show();
 
         LinearLayout relatedToolsView = (LinearLayout) getRelatedToolsView(mDialog);
-        assertThat(relatedToolsView.getChildCount()).isEqualTo(1);
+        assertThat(countChildWithoutSpace(relatedToolsView)).isEqualTo(1);
     }
 
     @Test
@@ -244,12 +246,13 @@ public class HearingDevicesDialogDelegateTest extends SysuiTestCase {
         when(mActivityInfo.loadLabel(mPackageManager)).thenReturn(TEST_LABEL);
         when(mActivityInfo.loadIcon(mPackageManager)).thenReturn(mDrawable);
         when(mActivityInfo.getComponentName()).thenReturn(TEST_COMPONENT);
+        when(mDrawable.mutate()).thenReturn(mDrawable);
 
         setUpPairNewDeviceDialog();
         mDialog.show();
 
         LinearLayout relatedToolsView = (LinearLayout) getRelatedToolsView(mDialog);
-        assertThat(relatedToolsView.getChildCount()).isEqualTo(2);
+        assertThat(countChildWithoutSpace(relatedToolsView)).isEqualTo(2);
     }
 
     @Test
@@ -362,6 +365,16 @@ public class HearingDevicesDialogDelegateTest extends SysuiTestCase {
 
     private View getPresetSpinner(SystemUIDialog dialog) {
         return dialog.requireViewById(R.id.preset_spinner);
+    }
+
+    private int countChildWithoutSpace(ViewGroup viewGroup) {
+        int spaceCount = 0;
+        for (int i = 0; i < viewGroup.getChildCount(); i++) {
+            if (viewGroup.getChildAt(i) instanceof Space) {
+                spaceCount++;
+            }
+        }
+        return viewGroup.getChildCount() - spaceCount;
     }
 
     @After

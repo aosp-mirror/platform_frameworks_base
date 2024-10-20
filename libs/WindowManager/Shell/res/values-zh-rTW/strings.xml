@@ -97,9 +97,9 @@
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"相機有問題嗎？\n輕觸即可修正"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"未修正問題嗎？\n輕觸即可還原"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"相機沒問題嗎？輕觸即可關閉。"</string>
-    <string name="windowing_app_handle_education_tooltip" msgid="6398482412956375783">"輕觸即可開啟應用程式選單"</string>
-    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="6285279585554484957">"輕觸即可一次顯示多個應用程式"</string>
-    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="6685429075790085337">"從應用程式選單返回全螢幕"</string>
+    <string name="windowing_app_handle_education_tooltip" msgid="2929643449849791854">"你可以在這裡查看應用程式選單"</string>
+    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="2523468503353474095">"進入電腦檢視畫面可以同時開啟多個應用程式"</string>
+    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="5225660258192054132">"你隨時可以從應用程式選單返回全螢幕模式"</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"瀏覽更多內容及執行更多操作"</string>
     <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"拖進另一個應用程式即可使用分割畫面模式"</string>
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"在應用程式外輕觸兩下即可調整位置"</string>

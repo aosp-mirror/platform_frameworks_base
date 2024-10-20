@@ -46,6 +46,7 @@ import com.android.internal.util.FrameworkStatsLog
 import com.android.modules.utils.testing.ExtendedMockitoRule
 import junitparams.JUnitParamsRunner
 import junitparams.Parameters
+import org.junit.After
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -126,6 +127,13 @@ class KeyGestureControllerTests {
         setupBehaviors()
         testLooper = TestLooper()
         currentPid = Process.myPid()
+    }
+
+    @After
+    fun teardown() {
+        if (this::inputManagerGlobalSession.isInitialized) {
+            inputManagerGlobalSession.close()
+        }
     }
 
     private fun setupBehaviors() {

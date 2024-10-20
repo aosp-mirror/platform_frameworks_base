@@ -7,8 +7,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.pm.FeatureInfo;
-import java.util.HashMap;
-import java.util.Map;
+import android.util.ArrayMap;
 
 /**
  * @hide
@@ -32,8 +31,8 @@ public final class RwNoFeatures {
      * @hide
      */
     @NonNull
-    public static Map<String, FeatureInfo> getCompileTimeAvailableFeatures() {
-        Map<String, FeatureInfo> features = new HashMap<>(0);
+    public static ArrayMap<String, FeatureInfo> getReadOnlySystemEnabledFeatures() {
+        ArrayMap<String, FeatureInfo> features = new ArrayMap<>(0);
         return features;
     }
 }

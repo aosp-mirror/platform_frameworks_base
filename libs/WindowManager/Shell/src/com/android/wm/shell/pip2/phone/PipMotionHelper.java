@@ -350,7 +350,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
         }
         cancelPhysicsAnimation();
         mMenuController.hideMenu(ANIM_TYPE_DISMISS, false /* resize */);
-        // mPipTaskOrganizer.removePip();
+        mPipScheduler.removePipAfterAnimation();
     }
 
     /** Sets the movement bounds to use to constrain PIP position animations. */
@@ -776,6 +776,10 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
                 cancelPhysicsAnimation();
                 settlePipBoundsAfterPhysicsAnimation(false /* animatingAfter */);
                 break;
+            case PipTransitionState.CHANGED_PIP_BOUNDS:
+                // Check whether changed bounds imply we need to update stash state too.
+                stashEndActionIfNeeded();
+                break;
         }
     }
 
@@ -829,9 +833,6 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
         mPipBoundsState.getMotionBoundsState().onPhysicsAnimationEnded();
         mSpringingToTouch = false;
         mDismissalPending = false;
-
-        // Check whether new bounds after fling imply we need to update stash state too.
-        stashEndActionIfNeeded();
     }
 
     private void stashEndActionIfNeeded() {

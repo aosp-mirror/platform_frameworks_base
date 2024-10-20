@@ -17,6 +17,7 @@
 package android.os.vibrator;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -58,10 +59,23 @@ public abstract class VibrationEffectSegment implements Parcelable {
      */
     public abstract long getDuration();
 
-   /**
-     * Checks if a given {@link Vibrator} can play this segment as intended. See
-     * {@link Vibrator#areVibrationFeaturesSupported(VibrationEffect)} for more information about
-     * what counts as supported by a vibrator, and what counts as not.
+    /**
+     * Gets the estimated duration of the segment for given vibrator, in milliseconds.
+     *
+     * <p>For segments with hardware-dependent constants (e.g. primitives), this returns the
+     * estimated duration based on the given {@link VibratorInfo}. For all other effects this will
+     * return the same as {@link #getDuration()}.
+     *
+     * @hide
+     */
+    public long getDuration(@Nullable VibratorInfo vibratorInfo) {
+        return getDuration();
+    }
+
+    /**
+     * Checks if a given {@link android.os.Vibrator} can play this segment as intended. See
+     * {@link android.os.Vibrator#areVibrationFeaturesSupported(VibrationEffect)} for more
+     * information about what counts as supported by a vibrator, and what counts as not.
      *
      * @hide
      */

@@ -18,7 +18,7 @@ package com.android.systemui.keyguard.domain.interactor
 
 import android.animation.ValueAnimator
 import com.android.app.animation.Interpolators
-import com.android.app.tracing.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
@@ -75,7 +75,6 @@ constructor(
         listenForGoneToDreaming()
         listenForGoneToLockscreenOrHubOrOccluded()
         listenForGoneToOccluded()
-        listenForGoneToDreamingLockscreenHosted()
     }
 
     fun showKeyguard() {
@@ -93,7 +92,7 @@ constructor(
                 if (keyguardInteractor.isKeyguardOccluded.value) {
                     startTransitionTo(
                         KeyguardState.OCCLUDED,
-                        ownerReason = "Dismissible keyguard with occlusion"
+                        ownerReason = "Dismissible keyguard with occlusion",
                     )
                 }
             }
@@ -129,7 +128,7 @@ constructor(
                             KeyguardState.LOCKSCREEN,
                             ownerReason =
                                 "Keyguard was re-enabled, and we weren't GONE when it " +
-                                    "was originally disabled"
+                                    "was originally disabled",
                         )
                     }
             }
@@ -153,23 +152,10 @@ constructor(
         }
     }
 
-    private fun listenForGoneToDreamingLockscreenHosted() {
-        scope.launch("$TAG#listenForGoneToDreamingLockscreenHosted") {
-            keyguardInteractor.isActiveDreamLockscreenHosted
-                .filterRelevantKeyguardStateAnd { isActiveDreamLockscreenHosted ->
-                    isActiveDreamLockscreenHosted
-                }
-                .collect { startTransitionTo(KeyguardState.DREAMING_LOCKSCREEN_HOSTED) }
-        }
-    }
-
     private fun listenForGoneToDreaming() {
         scope.launch("$TAG#listenForGoneToDreaming") {
             keyguardInteractor.isAbleToDream
-                .sample(keyguardInteractor.isActiveDreamLockscreenHosted, ::Pair)
-                .filterRelevantKeyguardStateAnd { (isAbleToDream, isActiveDreamLockscreenHosted) ->
-                    isAbleToDream && !isActiveDreamLockscreenHosted
-                }
+                .filterRelevantKeyguardStateAnd { isAbleToDream -> isAbleToDream }
                 .collect { startTransitionTo(KeyguardState.DREAMING) }
         }
     }
@@ -177,7 +163,7 @@ constructor(
     private fun listenForGoneToAodOrDozing() {
         scope.launch("$TAG#listenForGoneToAodOrDozing") {
             listenForSleepTransition(
-                modeOnCanceledFromStartedStep = { TransitionModeOnCanceled.RESET },
+                modeOnCanceledFromStartedStep = { TransitionModeOnCanceled.RESET }
             )
         }
     }

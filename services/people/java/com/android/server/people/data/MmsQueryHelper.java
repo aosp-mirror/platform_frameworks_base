@@ -100,6 +100,8 @@ class MmsQueryHelper {
                     }
                 }
             }
+        } catch (Exception e) {
+            Slog.e(TAG, "Exception when querying MMS table.", e);
         } finally {
             Binder.defaultBlockingForCurrentThread();
         }
@@ -133,6 +135,8 @@ class MmsQueryHelper {
                     address = cursor.getString(addrIndex);
                 }
             }
+        } catch (Exception e) {
+            Slog.e(TAG, "Exception when querying MMS address table.", e);
         }
         if (!Mms.isPhoneNumber(address)) {
             return null;

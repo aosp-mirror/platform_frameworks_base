@@ -157,6 +157,7 @@ public class PipExpandAnimator extends ValueAnimator
                 .shadow(tx, mLeash, false /* applyCornerRadius */);
         tx.apply();
     }
+
     private Rect getInsets(float fraction) {
         final Rect startInsets = mSourceRectHintInsets;
         final Rect endInsets = mZeroInsets;

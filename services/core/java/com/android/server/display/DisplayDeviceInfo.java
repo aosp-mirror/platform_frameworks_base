@@ -292,6 +292,13 @@ final class DisplayDeviceInfo {
      */
     public float renderFrameRate;
 
+
+    /**
+     * If {@code true}, this Display supports adaptive refresh rates.
+     * @see android.view.DisplayInfo#hasArrSupport for more details.
+     */
+    public boolean hasArrSupport;
+
     /**
      * The default mode of the display.
      */
@@ -540,7 +547,8 @@ final class DisplayDeviceInfo {
                 other.brightnessDefault)
                 || !Objects.equals(roundedCorners, other.roundedCorners)
                 || installOrientation != other.installOrientation
-                || !Objects.equals(displayShape, other.displayShape)) {
+                || !Objects.equals(displayShape, other.displayShape)
+                || hasArrSupport != other.hasArrSupport) {
             diff |= DIFF_OTHER;
         }
         return diff;
@@ -558,6 +566,7 @@ final class DisplayDeviceInfo {
         height = other.height;
         modeId = other.modeId;
         renderFrameRate = other.renderFrameRate;
+        hasArrSupport = other.hasArrSupport;
         defaultModeId = other.defaultModeId;
         userPreferredModeId = other.userPreferredModeId;
         supportedModes = other.supportedModes;
@@ -602,6 +611,7 @@ final class DisplayDeviceInfo {
         sb.append(width).append(" x ").append(height);
         sb.append(", modeId ").append(modeId);
         sb.append(", renderFrameRate ").append(renderFrameRate);
+        sb.append(", hasArrSupport ").append(hasArrSupport);
         sb.append(", defaultModeId ").append(defaultModeId);
         sb.append(", userPreferredModeId ").append(userPreferredModeId);
         sb.append(", supportedModes ").append(Arrays.toString(supportedModes));

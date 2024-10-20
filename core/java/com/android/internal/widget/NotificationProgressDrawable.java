@@ -45,6 +45,7 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -156,11 +157,18 @@ public final class NotificationProgressDrawable extends Drawable {
     }
 
     /**
-     *
+     * Set the segments and points that constitute the drawable.
+     */
+    public void setParts(List<Part> parts) {
+        mParts.clear();
+        mParts.addAll(parts);
+    }
+
+    /**
+     * Set the segments and points that constitute the drawable.
      */
     public void setParts(@NonNull Part... parts) {
-        mParts.clear();
-        mParts.addAll(Arrays.asList(parts));
+        setParts(Arrays.asList(parts));
     }
 
     @Override
@@ -379,7 +387,7 @@ public final class NotificationProgressDrawable extends Drawable {
         if (state.mThemeAttrsPoints != null) {
             final TypedArray a = t.resolveAttributes(
                     state.mThemeAttrsPoints, R.styleable.NotificationProgressDrawablePoints);
-            updateSegmentsFromTypedArray(a);
+            updatePointsFromTypedArray(a);
             a.recycle();
         }
     }
@@ -651,9 +659,11 @@ public final class NotificationProgressDrawable extends Drawable {
 
         State(@NonNull State orig, @Nullable Resources res) {
             mChangingConfigurations = orig.mChangingConfigurations;
+            mSegSegGap = orig.mSegSegGap;
+            mSegPointGap = orig.mSegPointGap;
+            mStrokeWidth = orig.mStrokeWidth;
             mStrokeColor = orig.mStrokeColor;
             mFadedStrokeColor = orig.mFadedStrokeColor;
-            mStrokeWidth = orig.mStrokeWidth;
             mStrokeDashWidth = orig.mStrokeDashWidth;
             mStrokeDashGap = orig.mStrokeDashGap;
             mPointRadius = orig.mPointRadius;
@@ -791,6 +801,7 @@ public final class NotificationProgressDrawable extends Drawable {
         final State state = mState;
 
         mStrokePaint.setStrokeWidth(state.mStrokeWidth);
+        mDashedStrokePaint.setStrokeWidth(state.mStrokeWidth);
 
         if (state.mStrokeDashWidth != 0.0f) {
             final DashPathEffect e = new DashPathEffect(

@@ -17,17 +17,22 @@
 package com.android.systemui.statusbar.dagger
 
 import android.content.Context
-import com.android.app.viewcapture.ViewCaptureAwareWindowManager
+import com.android.systemui.CameraProtectionLoader
 import com.android.systemui.CoreStartable
+import com.android.systemui.SysUICutoutProvider
+import com.android.systemui.SysUICutoutProviderImpl
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.LogBufferFactory
 import com.android.systemui.statusbar.core.StatusBarConnectedDisplays
 import com.android.systemui.statusbar.data.StatusBarDataLayerModule
 import com.android.systemui.statusbar.phone.LightBarController
+import com.android.systemui.statusbar.phone.StatusBarContentInsetsProvider
+import com.android.systemui.statusbar.phone.StatusBarContentInsetsProviderImpl
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallLog
+import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.ui.SystemBarUtilsProxyImpl
 import com.android.systemui.statusbar.window.MultiDisplayStatusBarWindowControllerStore
 import com.android.systemui.statusbar.window.SingleDisplayStatusBarWindowControllerStore
@@ -77,16 +82,6 @@ abstract class StatusBarModule {
 
         @Provides
         @SysUISingleton
-        fun defaultStatusBarWindowController(
-            context: Context,
-            viewCaptureAwareWindowManager: ViewCaptureAwareWindowManager,
-            factory: StatusBarWindowControllerImpl.Factory,
-        ): StatusBarWindowController {
-            return factory.create(context, viewCaptureAwareWindowManager)
-        }
-
-        @Provides
-        @SysUISingleton
         fun windowControllerStore(
             multiDisplayImplLazy: Lazy<MultiDisplayStatusBarWindowControllerStore>,
             singleDisplayImplLazy: Lazy<SingleDisplayStatusBarWindowControllerStore>,
@@ -117,6 +112,27 @@ abstract class StatusBarModule {
         @OngoingCallLog
         fun provideOngoingCallLogBuffer(factory: LogBufferFactory): LogBuffer {
             return factory.create("OngoingCall", 75)
+        }
+
+        @Provides
+        @SysUISingleton
+        fun sysUiCutoutProvider(
+            factory: SysUICutoutProviderImpl.Factory,
+            context: Context,
+            cameraProtectionLoader: CameraProtectionLoader,
+        ): SysUICutoutProvider {
+            return factory.create(context, cameraProtectionLoader)
+        }
+
+        @Provides
+        @SysUISingleton
+        fun contentInsetsProvider(
+            factory: StatusBarContentInsetsProviderImpl.Factory,
+            context: Context,
+            configurationController: ConfigurationController,
+            sysUICutoutProvider: SysUICutoutProvider,
+        ): StatusBarContentInsetsProvider {
+            return factory.create(context, configurationController, sysUICutoutProvider)
         }
     }
 }

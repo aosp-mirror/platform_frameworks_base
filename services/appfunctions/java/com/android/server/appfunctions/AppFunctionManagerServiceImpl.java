@@ -68,7 +68,10 @@ import com.android.server.SystemService.TargetUser;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.Collections;
+import java.util.Map;
 import java.util.Objects;
+import java.util.WeakHashMap;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.Executor;
 
@@ -81,7 +84,8 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
     private final ServiceHelper mInternalServiceHelper;
     private final ServiceConfig mServiceConfig;
     private final Context mContext;
-    private final Object mLock = new Object();
+    private final Map<String, Object> mLocks = new WeakHashMap<>();
+
 
     public AppFunctionManagerServiceImpl(@NonNull Context context) {
         this(
@@ -225,12 +229,6 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
                 .thenAccept(
                         canExecute -> {
                             if (!canExecute) {
-                                safeExecuteAppFunctionCallback.onResult(
-                                        ExecuteAppFunctionResponse.newFailure(
-                                                ExecuteAppFunctionResponse.RESULT_DENIED,
-                                                "Caller does not have permission to execute the"
-                                                        + " appfunction",
-                                                /* extras= */ null));
                                 throw new SecurityException(
                                         "Caller does not have permission to execute the"
                                                 + " appfunction");
@@ -322,9 +320,7 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
         THREAD_POOL_EXECUTOR.execute(
                 () -> {
                     try {
-                        // TODO(357551503): Instead of holding a global lock, hold a per-package
-                        //  lock.
-                        synchronized (mLock) {
+                        synchronized (getLockForPackage(callingPackage)) {
                             setAppFunctionEnabledInternalLocked(
                                     callingPackage, functionIdentifier, userHandle, enabledState);
                         }
@@ -352,7 +348,7 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
      * process.
      */
     @WorkerThread
-    @GuardedBy("mLock")
+    @GuardedBy("getLockForPackage(callingPackage)")
     private void setAppFunctionEnabledInternalLocked(
             @NonNull String callingPackage,
             @NonNull String functionIdentifier,
@@ -545,6 +541,26 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
                                             Slog.e(TAG, "Sync was not successful");
                                         }
                                     });
+        }
+    }
+    /**
+     * Retrieves the lock object associated with the given package name.
+     *
+     * This method returns the lock object from the {@code mLocks} map if it exists.
+     * If no lock is found for the given package name, a new lock object is created,
+     * stored in the map, and returned.
+     */
+    @VisibleForTesting
+    @NonNull
+    Object getLockForPackage(String callingPackage) {
+        // Synchronized the access to mLocks to prevent race condition.
+        synchronized (mLocks) {
+            // By using a WeakHashMap, we allow the garbage collector to reclaim memory by removing
+            // entries associated with unused callingPackage keys. Therefore, we remove the null
+            // values before getting/computing a new value. The goal is to not let the size of this
+            // map grow without an upper bound.
+            mLocks.values().removeAll(Collections.singleton(null)); // Remove null values
+            return mLocks.computeIfAbsent(callingPackage, k -> new Object());
         }
     }
 

@@ -97,9 +97,9 @@
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Tes problemas coa cámara?\nToca para reaxustala"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Non se solucionaron os problemas?\nToca para reverter o seu tratamento"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Non hai problemas coa cámara? Tocar para ignorar."</string>
-    <string name="windowing_app_handle_education_tooltip" msgid="6398482412956375783">"Toca para abrir o menú da aplicación"</string>
-    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="6285279585554484957">"Toca para mostrar varias aplicacións xuntas"</string>
-    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="6685429075790085337">"Volve á pantalla completa desde o menú da aplicación"</string>
+    <string name="windowing_app_handle_education_tooltip" msgid="2929643449849791854">"Aquí podes ver o menú da aplicación"</string>
+    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="2523468503353474095">"Vai á vista para ordenadores se queres abrir varias aplicacións á vez"</string>
+    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="5225660258192054132">"Volve á pantalla completa en calquera momento desde o menú da aplicación"</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"Ver e facer máis"</string>
     <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"Arrastra outra aplicación para usar a pantalla dividida"</string>
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Toca dúas veces fóra da aplicación para cambiala de posición"</string>

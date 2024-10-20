@@ -25,6 +25,8 @@ import static com.android.internal.jank.InteractionJankMonitor.CUJ_SHADE_CLEAR_A
 import static com.android.systemui.Flags.notificationOverExpansionClippingFix;
 import static com.android.systemui.statusbar.notification.stack.NotificationPriorityBucketKt.BUCKET_SILENT;
 import static com.android.systemui.statusbar.notification.stack.StackStateAnimator.ANIMATION_DURATION_SWIPE;
+import static com.android.systemui.statusbar.notification.stack.shared.model.AccessibilityScrollEvent.SCROLL_DOWN;
+import static com.android.systemui.statusbar.notification.stack.shared.model.AccessibilityScrollEvent.SCROLL_UP;
 import static com.android.systemui.util.DumpUtilsKt.println;
 import static com.android.systemui.util.DumpUtilsKt.visibilityString;
 
@@ -118,8 +120,10 @@ import com.android.systemui.statusbar.notification.shared.NotificationHeadsUpCyc
 import com.android.systemui.statusbar.notification.shared.NotificationThrottleHun;
 import com.android.systemui.statusbar.notification.shared.NotificationsImprovedHunAnimation;
 import com.android.systemui.statusbar.notification.shared.NotificationsLiveDataStoreRefactor;
+import com.android.systemui.statusbar.notification.stack.shared.model.AccessibilityScrollEvent;
 import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimBounds;
 import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimShape;
+import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrollState;
 import com.android.systemui.statusbar.notification.stack.ui.view.NotificationScrollView;
 import com.android.systemui.statusbar.phone.HeadsUpAppearanceController;
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
@@ -609,7 +613,7 @@ public class NotificationStackScrollLayout
         @Override
         public boolean isScrolledToTop() {
             if (SceneContainerFlag.isEnabled()) {
-                return mScrollViewFields.isScrolledToTop();
+                return mScrollViewFields.getScrollState().isScrolledToTop();
             } else {
                 return mOwnScrollY == 0;
             }
@@ -1247,9 +1251,25 @@ public class NotificationStackScrollLayout
     }
 
     @Override
-    public void setScrolledToTop(boolean scrolledToTop) {
-        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
-        mScrollViewFields.setScrolledToTop(scrolledToTop);
+    public void setScrollState(@NonNull ShadeScrollState scrollState) {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) {
+            return;
+        }
+
+        boolean forwardScrollable =
+                scrollState.getScrollPosition() < scrollState.getMaxScrollPosition();
+        boolean backwardScrollable = scrollState.getScrollPosition() > 0;
+        mScrollable = forwardScrollable || backwardScrollable;
+        mForwardScrollable = forwardScrollable;
+        mBackwardScrollable = backwardScrollable;
+
+        boolean scrollPositionChanged = mScrollViewFields.getScrollState().getScrollPosition()
+                != scrollState.getScrollPosition();
+        mScrollViewFields.setScrollState(scrollState);
+
+        if (scrollPositionChanged) {
+            sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_SCROLLED);
+        }
     }
 
     @Override
@@ -1292,6 +1312,12 @@ public class NotificationStackScrollLayout
     public void setSyntheticScrollConsumer(@Nullable Consumer<Float> consumer) {
         if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
         mScrollViewFields.setSyntheticScrollConsumer(consumer);
+    }
+
+    @Override
+    public void setAccessibilityScrollEventConsumer(
+            @Nullable Consumer<AccessibilityScrollEvent> consumer) {
+        mScrollViewFields.setAccessibilityScrollEventConsumer(consumer);
     }
 
     @Override
@@ -2643,6 +2669,11 @@ public class NotificationStackScrollLayout
     public int getHeadsUpInset() {
         if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return 0;
         return mHeadsUpInset;
+    }
+
+    @Override
+    public int getStackBottomInset() {
+        return mPaddingBetweenElements + mShelf.getIntrinsicHeight();
     }
 
     /**
@@ -4243,17 +4274,27 @@ public class NotificationStackScrollLayout
      */
     @Override
     public boolean performAccessibilityActionInternal(int action, Bundle arguments) {
-        // Don't handle scroll accessibility events from the NSSL, when SceneContainer enabled.
-        if (SceneContainerFlag.isEnabled()) {
-            return super.performAccessibilityActionInternal(action, arguments);
-        }
-
         if (super.performAccessibilityActionInternal(action, arguments)) {
             return true;
         }
         if (!isEnabled()) {
             return false;
         }
+
+        if (SceneContainerFlag.isEnabled()) {
+            switch (action) {
+                case AccessibilityNodeInfo.ACTION_SCROLL_FORWARD:
+                case android.R.id.accessibilityActionScrollDown:
+                    mScrollViewFields.sendAccessibilityScrollEvent(SCROLL_DOWN);
+                    return true;
+                case AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD:
+                case android.R.id.accessibilityActionScrollUp:
+                    mScrollViewFields.sendAccessibilityScrollEvent(SCROLL_UP);
+                    return true;
+            }
+            return false;
+        }
+
         int direction = -1;
         switch (action) {
             case AccessibilityNodeInfo.ACTION_SCROLL_FORWARD:
@@ -5029,25 +5070,21 @@ public class NotificationStackScrollLayout
     @Override
     public void onInitializeAccessibilityEventInternal(AccessibilityEvent event) {
         super.onInitializeAccessibilityEventInternal(event);
-        // Don't handle scroll accessibility events from the NSSL, when SceneContainer enabled.
-        if (SceneContainerFlag.isEnabled()) {
-            return;
-        }
-
         event.setScrollable(mScrollable);
         event.setMaxScrollX(mScrollX);
-        event.setScrollY(mOwnScrollY);
-        event.setMaxScrollY(getScrollRange());
+
+        if (SceneContainerFlag.isEnabled()) {
+            event.setScrollY(mScrollViewFields.getScrollState().getScrollPosition());
+            event.setMaxScrollY(mScrollViewFields.getScrollState().getMaxScrollPosition());
+        } else {
+            event.setScrollY(mOwnScrollY);
+            event.setMaxScrollY(getScrollRange());
+        }
     }
 
     @Override
     public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfoInternal(info);
-        // Don't handle scroll accessibility events from the NSSL, when SceneContainer enabled.
-        if (SceneContainerFlag.isEnabled()) {
-            return;
-        }
-
         if (mScrollable) {
             info.setScrollable(true);
             if (mBackwardScrollable) {

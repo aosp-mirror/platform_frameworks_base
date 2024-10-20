@@ -97,9 +97,9 @@
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Tens problemes amb la càmera?\nToca per resoldre\'ls"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"El problema no s\'ha resolt?\nToca per desfer els canvis"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"No tens cap problema amb la càmera? Toca per ignorar."</string>
-    <string name="windowing_app_handle_education_tooltip" msgid="6398482412956375783">"Toca per obrir el menú de l\'aplicació"</string>
-    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="6285279585554484957">"Toca per mostrar diverses aplicacions alhora"</string>
-    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="6685429075790085337">"Torna a la pantalla completa des del menú de l\'aplicació"</string>
+    <string name="windowing_app_handle_education_tooltip" msgid="2929643449849791854">"Pots trobar el menú de l\'aplicació aquí"</string>
+    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="2523468503353474095">"Accedeix a la visualització per a ordinadors per obrir diverses aplicacions alhora"</string>
+    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="5225660258192054132">"Torna a la pantalla completa en qualsevol moment des del menú de l\'aplicació"</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"Consulta i fes més coses"</string>
     <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"Arrossega una altra aplicació per utilitzar la pantalla dividida"</string>
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Fes doble toc fora d\'una aplicació per canviar-ne la posició"</string>

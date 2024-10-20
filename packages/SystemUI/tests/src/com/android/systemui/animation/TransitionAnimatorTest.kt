@@ -156,7 +156,7 @@ class TransitionAnimatorTest(val useSpring: Boolean) : SysuiTestCase() {
             createEndState(transitionContainer),
             backgroundLayer,
             fadeWindowBackgroundLayer,
-            useSpring,
+            useSpring = useSpring,
         )
     }
 

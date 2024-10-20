@@ -23,7 +23,7 @@ import androidx.core.animation.AnimatorListenerAdapter
 import androidx.core.animation.AnimatorSet
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.statusbar.window.StatusBarWindowController
+import com.android.systemui.statusbar.window.StatusBarWindowControllerStore
 import com.android.systemui.util.Assert
 import com.android.systemui.util.time.SystemClock
 import java.io.PrintWriter
@@ -65,7 +65,7 @@ open class SystemStatusAnimationSchedulerImpl
 constructor(
     private val coordinator: SystemEventCoordinator,
     private val chipAnimationController: SystemEventChipAnimationController,
-    private val statusBarWindowController: StatusBarWindowController,
+    private val statusBarWindowControllerStore: StatusBarWindowControllerStore,
     dumpManager: DumpManager,
     private val systemClock: SystemClock,
     @Application private val coroutineScope: CoroutineScope,
@@ -277,7 +277,7 @@ constructor(
     private fun runChipAppearAnimation() {
         Assert.isMainThread()
         if (hasPersistentDot) {
-            statusBarWindowController.setForceStatusBarVisible(true)
+            statusBarWindowControllerStore.defaultDisplay.setForceStatusBarVisible(true)
         }
         animationState.value = ANIMATING_IN
 
@@ -311,7 +311,7 @@ constructor(
                             scheduledEvent.value != null -> ANIMATION_QUEUED
                             else -> IDLE
                         }
-                    statusBarWindowController.setForceStatusBarVisible(false)
+                    statusBarWindowControllerStore.defaultDisplay.setForceStatusBarVisible(false)
                 }
             }
         )

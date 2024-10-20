@@ -454,7 +454,13 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         }
 
         if (isHandleMenuActive()) {
-            mHandleMenu.relayout(startT, mResult.mCaptionX);
+            mHandleMenu.relayout(
+                    startT,
+                    mResult.mCaptionX,
+                    // Add top padding to the caption Y so that the menu is shown over what is the
+                    // actual contents of the caption, ignoring padding. This is currently relevant
+                    // to the Header in desktop immersive.
+                    mResult.mCaptionY + mResult.mCaptionTopPadding);
         }
 
         if (isOpenByDefaultDialogActive()) {
@@ -514,8 +520,12 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             ));
         } else {
             mWindowDecorViewHolder.bindData(new AppHeaderViewHolder.HeaderData(
-                    mTaskInfo, TaskInfoKt.getRequestingImmersive(mTaskInfo), inFullImmersive,
-                    hasGlobalFocus
+                    mTaskInfo,
+                    TaskInfoKt.getRequestingImmersive(mTaskInfo),
+                    inFullImmersive,
+                    hasGlobalFocus,
+                    /* maximizeHoverEnabled= */ canOpenMaximizeMenu(
+                            /* animatingTaskResizeOrReposition= */ false)
             ));
         }
         Trace.endSection();
@@ -1254,6 +1264,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 && Flags.enableDesktopWindowingMultiInstanceFeatures();
         final boolean shouldShowManageWindowsButton = supportsMultiInstance
                 && mMinimumInstancesFound;
+        final boolean inDesktopImmersive = mDesktopRepository
+                .isTaskInFullImmersiveState(mTaskInfo.taskId);
         mHandleMenu = mHandleMenuFactory.create(
                 this,
                 mWindowManagerWrapper,
@@ -1267,7 +1279,11 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 getBrowserLink(),
                 mResult.mCaptionWidth,
                 mResult.mCaptionHeight,
-                mResult.mCaptionX
+                mResult.mCaptionX,
+                // Add top padding to the caption Y so that the menu is shown over what is the
+                // actual contents of the caption, ignoring padding. This is currently relevant
+                // to the Header in desktop immersive.
+                mResult.mCaptionY + mResult.mCaptionTopPadding
         );
         mWindowDecorViewHolder.onHandleMenuOpened();
         mHandleMenu.show(
@@ -1298,7 +1314,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 /* onOutsideTouchListener= */ () -> {
                     closeHandleMenu();
                     return Unit.INSTANCE;
-                }
+                },
+                /* forceShowSystemBars= */ inDesktopImmersive
         );
         if (canEnterDesktopMode(mContext) && Flags.enableDesktopWindowingAppHandleEducation()) {
             notifyCaptionStateChanged();
@@ -1312,9 +1329,12 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         if (mTaskInfo.isFreeform()) {
             mManageWindowsMenu = new DesktopHeaderManageWindowsMenu(
                     mTaskInfo,
+                    /* x= */ mResult.mCaptionX,
+                    /* y= */ mResult.mCaptionY + mResult.mCaptionTopPadding,
                     mDisplayController,
                     mRootTaskDisplayAreaOrganizer,
                     mContext,
+                    mDesktopRepository,
                     mSurfaceControlBuilderSupplier,
                     mSurfaceControlTransactionSupplier,
                     snapshotList,
@@ -1616,8 +1636,14 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
 
     void setAnimatingTaskResizeOrReposition(boolean animatingTaskResizeOrReposition) {
         if (mRelayoutParams.mLayoutResId == R.layout.desktop_mode_app_handle) return;
-        asAppHeader(mWindowDecorViewHolder)
-                .setAnimatingTaskResizeOrReposition(animatingTaskResizeOrReposition);
+        final boolean inFullImmersive =
+                mDesktopRepository.isTaskInFullImmersiveState(mTaskInfo.taskId);
+        asAppHeader(mWindowDecorViewHolder).bindData(new AppHeaderViewHolder.HeaderData(
+                mTaskInfo,
+                TaskInfoKt.getRequestingImmersive(mTaskInfo),
+                inFullImmersive,
+                isFocused(),
+                /* maximizeHoverEnabled= */ canOpenMaximizeMenu(animatingTaskResizeOrReposition)));
     }
 
     /**
@@ -1632,6 +1658,16 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
      */
     void onMaximizeButtonHoverEnter() {
         asAppHeader(mWindowDecorViewHolder).onMaximizeWindowHoverEnter();
+    }
+
+    private boolean canOpenMaximizeMenu(boolean animatingTaskResizeOrReposition) {
+        if (!Flags.enableFullyImmersiveInDesktop()) {
+            return !animatingTaskResizeOrReposition;
+        }
+        final boolean inImmersiveAndRequesting =
+                mDesktopRepository.isTaskInFullImmersiveState(mTaskInfo.taskId)
+                        && TaskInfoKt.getRequestingImmersive(mTaskInfo);
+        return !animatingTaskResizeOrReposition && !inImmersiveAndRequesting;
     }
 
     @Override

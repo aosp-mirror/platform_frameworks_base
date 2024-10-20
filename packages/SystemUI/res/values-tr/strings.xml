@@ -312,6 +312,10 @@
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"Sesi paylaş"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"Ses paylaşılıyor"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_accessibility" msgid="7604615019302091708">"Ses paylaşımı ayarlarına gitmek için"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_dialog_message" msgid="4251807313264307426">"Bu cihazdaki müzikler ve videolar iki kulaklıkta da oynatılacak"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_dialog_title" msgid="4406818346036286793">"Sesi paylaşın"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_dialog_subtitle" msgid="3014906864710059236">"<xliff:g id="AVAILABLE_DEVICE_NAME">%1$s</xliff:g> ve <xliff:g id="ACTIVE_DEVICE_NAME">%2$s</xliff:g>"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_dialog_switch_to_button" msgid="7546825655978203773">"<xliff:g id="AVAILABLE_DEVICE_NAME">%1$s</xliff:g> cihazına geç"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"Pil düzeyi <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Ses"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Mikrofonlu kulaklık"</string>
@@ -440,8 +444,7 @@
     <string name="zen_mode_on" msgid="9085304934016242591">"Açık"</string>
     <string name="zen_mode_on_with_details" msgid="7416143430557895497">"Açık • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"Kapalı"</string>
-    <!-- no translation found for zen_mode_set_up (8231201163894922821) -->
-    <skip />
+    <string name="zen_mode_set_up" msgid="8231201163894922821">"Ayarlanmadı"</string>
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"Ayarlarda yönet"</string>
     <string name="zen_mode_active_modes" msgid="1625850411578488856">"{count,plural, =0{Etkin mod yok}=1{{mode} etkin}other{# mod etkin}}"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Alarmlar, hatırlatıcılar, etkinlikler ve sizin seçtiğiniz kişilerden gelen çağrılar dışında hiçbir ses ve titreşimle rahatsız edilmeyeceksiniz. O sırada çaldığınız müzik, seyrettiğiniz video ya da oynadığınız oyunların sesini duymaya devam edeceksiniz."</string>
@@ -673,10 +676,8 @@
     <string name="stream_notification_unavailable" msgid="4313854556205836435">"Zil sesi kapatıldığı için kullanılamıyor"</string>
     <string name="stream_alarm_unavailable" msgid="4059817189292197839">"Rahatsız Etmeyin açık olduğu için kullanılamıyor"</string>
     <string name="stream_media_unavailable" msgid="6823020894438959853">"Rahatsız Etmeyin açık olduğu için kullanılamıyor"</string>
-    <!-- no translation found for stream_unavailable_by_modes (3674139029490353683) -->
-    <skip />
-    <!-- no translation found for stream_unavailable_by_unknown (6908434629318171588) -->
-    <skip />
+    <string name="stream_unavailable_by_modes" msgid="3674139029490353683">"<xliff:g id="MODE">%s</xliff:g> açık olduğu için kullanılamıyor"</string>
+    <string name="stream_unavailable_by_unknown" msgid="6908434629318171588">"Yok"</string>
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. Sesi açmak için dokunun."</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. Titreşime ayarlamak için dokunun. Erişilebilirlik hizmetlerinin sesi kapatılabilir."</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. Sesi kapatmak için dokunun. Erişilebilirlik hizmetlerinin sesi kapatılabilir."</string>
@@ -1410,38 +1411,26 @@
     <string name="launch_touchpad_tutorial_notification_content" msgid="7931085031240753226">"Dokunmatik alan hareketlerini öğrenin"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_title" msgid="1940023776496198762">"Klavyenizi ve dokunmatik alanınızı kullanarak gezinin"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"Dokunmatik alan hareketlerini, klavye kısayollarını ve daha fazlasını öğrenin"</string>
-    <!-- no translation found for touchpad_tutorial_back_gesture_button (3104716365403620315) -->
-    <skip />
-    <!-- no translation found for touchpad_tutorial_home_gesture_button (8023973153559885624) -->
-    <skip />
+    <string name="touchpad_tutorial_back_gesture_button" msgid="3104716365403620315">"Geri dön"</string>
+    <string name="touchpad_tutorial_home_gesture_button" msgid="8023973153559885624">"Ana sayfaya git"</string>
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"Son uygulamaları görüntüle"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"Bitti"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Geri dön"</string>
-    <!-- no translation found for touchpad_back_gesture_guidance (5352221087725906542) -->
-    <skip />
-    <!-- no translation found for touchpad_back_gesture_success_title (7370719098633023496) -->
-    <skip />
+    <string name="touchpad_back_gesture_guidance" msgid="5352221087725906542">"Dokunmatik alanda üç parmağınızla sola veya sağa kaydırın"</string>
+    <string name="touchpad_back_gesture_success_title" msgid="7370719098633023496">"Güzel!"</string>
     <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"Geri dön hareketini tamamladınız."</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"Ana sayfaya gidin"</string>
-    <!-- no translation found for touchpad_home_gesture_guidance (4178219118381915899) -->
-    <skip />
-    <!-- no translation found for touchpad_home_gesture_success_title (3648264553645798470) -->
-    <skip />
-    <!-- no translation found for touchpad_home_gesture_success_body (2590690589194027059) -->
-    <skip />
+    <string name="touchpad_home_gesture_guidance" msgid="4178219118381915899">"Dokunmatik alanda üç parmağınızla yukarı kaydırın"</string>
+    <string name="touchpad_home_gesture_success_title" msgid="3648264553645798470">"Tebrikler!"</string>
+    <string name="touchpad_home_gesture_success_body" msgid="2590690589194027059">"Ana ekrana git hareketini tamamladınız"</string>
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"Son uygulamaları görüntüle"</string>
-    <!-- no translation found for touchpad_recent_apps_gesture_guidance (6304446013842271822) -->
-    <skip />
+    <string name="touchpad_recent_apps_gesture_guidance" msgid="6304446013842271822">"Dokunmatik alanda üç parmağınızla yukarı doğru kaydırıp basılı tutun"</string>
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"Tebrikler!"</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"Son uygulamaları görüntüleme hareketini tamamladınız."</string>
-    <!-- no translation found for tutorial_action_key_title (8172535792469008169) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_guidance (5040613427202799294) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_success_title (2371827347071979571) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_success_body (1688986269491357832) -->
-    <skip />
+    <string name="tutorial_action_key_title" msgid="8172535792469008169">"Tüm uygulamaları göster"</string>
+    <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"Klavyenizde eylem tuşuna basın"</string>
+    <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"Tebrikler!"</string>
+    <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"Tüm uygulamaları görüntüleme hareketini tamamladınız"</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Klavye aydınlatması"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Seviye %1$d / %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Ev Kontrolleri"</string>

@@ -3,50 +3,54 @@
 per-file ContextImpl.java = *
 
 # ActivityManager
-per-file ActivityManager* = file:/services/core/java/com/android/server/am/OWNERS
-per-file *ApplicationStartInfo* = file:/services/core/java/com/android/server/am/OWNERS
-per-file ApplicationErrorReport* = file:/services/core/java/com/android/server/am/OWNERS
-per-file ApplicationExitInfo* = file:/services/core/java/com/android/server/am/OWNERS
-per-file Application.java = file:/services/core/java/com/android/server/am/OWNERS
-per-file ApplicationLoaders.java = file:/services/core/java/com/android/server/am/OWNERS
-per-file ApplicationThreadConstants.java = file:/services/core/java/com/android/server/am/OWNERS
-per-file ContentProviderHolder* = file:/services/core/java/com/android/server/am/OWNERS
-per-file *ForegroundService* = file:/services/core/java/com/android/server/am/OWNERS
-per-file IActivityController.aidl = file:/services/core/java/com/android/server/am/OWNERS
-per-file IActivityManager.aidl = file:/services/core/java/com/android/server/am/OWNERS
-per-file IApplicationThread.aidl = file:/services/core/java/com/android/server/am/OWNERS
-per-file IAppTraceRetriever.aidl = file:/services/core/java/com/android/server/am/OWNERS
-per-file IForegroundServiceObserver.aidl = file:/services/core/java/com/android/server/am/OWNERS
-per-file IInstrumentationWatcher.aidl = file:/services/core/java/com/android/server/am/OWNERS
-per-file IntentService.aidl = file:/services/core/java/com/android/server/am/OWNERS
-per-file IServiceConnection.aidl = file:/services/core/java/com/android/server/am/OWNERS
-per-file IStopUserCallback.aidl = file:/services/core/java/com/android/server/am/OWNERS
-per-file IUidObserver.aidl = file:/services/core/java/com/android/server/am/OWNERS
-per-file LoadedApk.java = file:/services/core/java/com/android/server/am/OWNERS
-per-file LocalActivityManager.java = file:/services/core/java/com/android/server/am/OWNERS
-per-file PendingIntent* = file:/services/core/java/com/android/server/am/OWNERS
-per-file *Process* = file:/services/core/java/com/android/server/am/OWNERS
-per-file ProfilerInfo* = file:/services/core/java/com/android/server/am/OWNERS
-per-file Service* = file:/services/core/java/com/android/server/am/OWNERS
-per-file SystemServiceRegistry.java = file:/services/core/java/com/android/server/am/OWNERS
-per-file *UserSwitchObserver* = file:/services/core/java/com/android/server/am/OWNERS
+per-file ActivityManager* = file:/ACTIVITY_MANAGER_OWNERS
+per-file Application.java = file:/ACTIVITY_MANAGER_OWNERS
+per-file ApplicationErrorReport* = file:/ACTIVITY_MANAGER_OWNERS
+per-file ApplicationLoaders.java = file:/ACTIVITY_MANAGER_OWNERS
+per-file ApplicationThreadConstants.java = file:/ACTIVITY_MANAGER_OWNERS
+per-file ContentProviderHolder* = file:/ACTIVITY_MANAGER_OWNERS
+per-file *ForegroundService* = file:/ACTIVITY_MANAGER_OWNERS
+per-file IActivityController.aidl = file:/ACTIVITY_MANAGER_OWNERS
+per-file IActivityManager.aidl = file:/ACTIVITY_MANAGER_OWNERS
+per-file IApplicationThread.aidl = file:/ACTIVITY_MANAGER_OWNERS
+per-file IAppTraceRetriever.aidl = file:/ACTIVITY_MANAGER_OWNERS
+per-file IForegroundServiceObserver.aidl = file:/ACTIVITY_MANAGER_OWNERS
+per-file IInstrumentationWatcher.aidl = file:/ACTIVITY_MANAGER_OWNERS
+per-file IntentService.aidl = file:/ACTIVITY_MANAGER_OWNERS
+per-file IServiceConnection.aidl = file:/ACTIVITY_MANAGER_OWNERS
+per-file IStopUserCallback.aidl = file:/ACTIVITY_MANAGER_OWNERS
+per-file IUidObserver.aidl = file:/ACTIVITY_MANAGER_OWNERS
+per-file LoadedApk.java = file:/ACTIVITY_MANAGER_OWNERS
+per-file LocalActivityManager.java = file:/ACTIVITY_MANAGER_OWNERS
+per-file PendingIntent* = file:/ACTIVITY_MANAGER_OWNERS
+per-file *Process* = file:/ACTIVITY_MANAGER_OWNERS
+per-file ProfilerInfo* = file:/ACTIVITY_MANAGER_OWNERS
+per-file Service* = file:/ACTIVITY_MANAGER_OWNERS
+per-file SystemServiceRegistry.java = file:/ACTIVITY_MANAGER_OWNERS
+per-file *UserSwitchObserver* = file:/ACTIVITY_MANAGER_OWNERS
+
+# UI Automation
 per-file *UiAutomation* = file:/services/accessibility/OWNERS
 per-file *UiAutomation* = file:/core/java/android/permission/OWNERS
+
+# Game Manager
 per-file GameManager* = file:/GAME_MANAGER_OWNERS
 per-file GameMode* = file:/GAME_MANAGER_OWNERS
 per-file GameState* = file:/GAME_MANAGER_OWNERS
 per-file IGameManager* = file:/GAME_MANAGER_OWNERS
 per-file IGameMode* = file:/GAME_MANAGER_OWNERS
+
+# Background Starts
 per-file BackgroundStartPrivileges.java = file:/BAL_OWNERS
 per-file activity_manager.aconfig = file:/ACTIVITY_MANAGER_OWNERS
 
 # ActivityThread
-per-file ActivityThread.java = file:/services/core/java/com/android/server/am/OWNERS
+per-file ActivityThread.java = file:/ACTIVITY_MANAGER_OWNERS
 per-file ActivityThread.java = file:/services/core/java/com/android/server/wm/OWNERS
 per-file ActivityThread.java = file:RESOURCES_OWNERS
 
 # Alarm
-per-file *Alarm* = file:/apex/jobscheduler/OWNERS
+per-file *Alarm* = file:/apex/jobscheduler/ALARM_OWNERS
 
 # AppOps
 per-file *AppOp* = file:/core/java/android/permission/OWNERS
@@ -97,6 +101,9 @@ per-file InstantAppResolveInfo.aidl = file:/services/core/java/com/android/serve
 
 # Performance
 per-file PropertyInvalidatedCache.java = file:/PERFORMANCE_OWNERS
+per-file *ApplicationStartInfo* = file:/PERFORMANCE_OWNERS
+per-file ApplicationExitInfo* = file:/PERFORMANCE_OWNERS
+per-file performance.aconfig = file:/PERFORMANCE_OWNERS
 
 # Pinner
 per-file pinner-client.aconfig = file:/core/java/android/app/pinner/OWNERS

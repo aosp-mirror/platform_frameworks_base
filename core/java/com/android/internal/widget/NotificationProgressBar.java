@@ -20,16 +20,20 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Notification.ProgressStyle;
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
+import android.graphics.drawable.LayerDrawable;
 import android.os.Bundle;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.RemotableViewMethod;
 import android.widget.ProgressBar;
 import android.widget.RemoteViews;
 
 import androidx.annotation.ColorInt;
 
+import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
 import com.android.internal.widget.NotificationProgressDrawable.Part;
@@ -49,7 +53,13 @@ import java.util.TreeSet;
  */
 @RemoteViews.RemoteView
 public class NotificationProgressBar extends ProgressBar {
+    private static final String TAG = "NotificationProgressBar";
+
     private NotificationProgressModel mProgressModel;
+
+    @Nullable
+    private List<Part> mProgressDrawableParts = null;
+
     @Nullable
     private Drawable mProgressTrackerDrawable = null;
 
@@ -58,7 +68,7 @@ public class NotificationProgressBar extends ProgressBar {
     }
 
     public NotificationProgressBar(Context context, AttributeSet attrs) {
-        this(context, attrs, com.android.internal.R.attr.progressBarStyle);
+        this(context, attrs, R.attr.progressBarStyle);
     }
 
     public NotificationProgressBar(Context context, AttributeSet attrs, int defStyleAttr) {
@@ -82,10 +92,42 @@ public class NotificationProgressBar extends ProgressBar {
                 "Bundle shouldn't be null");
 
         mProgressModel = NotificationProgressModel.fromBundle(bundle);
+
+        if (mProgressModel.isIndeterminate()) {
+            final int indeterminateColor = mProgressModel.getIndeterminateColor();
+            setIndeterminateTintList(ColorStateList.valueOf(indeterminateColor));
+        } else {
+            mProgressDrawableParts = processAndConvertToDrawableParts(mProgressModel.getSegments(),
+                    mProgressModel.getPoints(),
+                    mProgressModel.getProgress(), mProgressModel.isStyledByProgress());
+
+            try {
+                final NotificationProgressDrawable drawable = getNotificationProgressDrawable();
+                drawable.setParts(mProgressDrawableParts);
+            } catch (IllegalStateException ex) {
+                Log.e(TAG, "Can't set parts because can't get NotificationProgressDrawable", ex);
+            }
+        }
     }
 
-    private void setProgressModel(@NonNull NotificationProgressModel model) {
-        mProgressModel = model;
+    @NonNull
+    private NotificationProgressDrawable getNotificationProgressDrawable() {
+        final Drawable d = getProgressDrawable();
+        if (d == null) {
+            throw new IllegalStateException("getProgressDrawable() returns null");
+        }
+        if (!(d instanceof LayerDrawable)) {
+            throw new IllegalStateException("getProgressDrawable() doesn't return a LayerDrawable");
+        }
+
+        final Drawable layer = ((LayerDrawable) d).findDrawableByLayerId(R.id.background);
+        if (!(layer instanceof NotificationProgressDrawable)) {
+            throw new IllegalStateException(
+                    "Couldn't get NotificationProgressDrawable, retrieved drawable is: " + (
+                            layer != null ? layer.toString() : null));
+        }
+
+        return (NotificationProgressDrawable) layer;
     }
 
     /**
@@ -96,7 +138,6 @@ public class NotificationProgressBar extends ProgressBar {
     @RemotableViewMethod(asyncImpl = "setProgressTrackerIconAsync")
     public void setProgressTrackerIcon(@Nullable Icon icon) {
     }
-
 
     /**
      * Async version of {@link #setProgressTrackerIcon}

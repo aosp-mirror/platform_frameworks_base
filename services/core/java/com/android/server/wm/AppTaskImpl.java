@@ -160,7 +160,7 @@ class AppTaskImpl extends IAppTask.Stub {
             Intent intent, String resolvedType, Bundle bOptions) {
         checkCallerOrSystemOrRoot();
         mService.assertPackageMatchesCallingUid(callingPackage);
-        mService.mAmInternal.addCreatorToken(intent);
+        mService.mAmInternal.addCreatorToken(intent, callingPackage);
 
         int callingUser = UserHandle.getCallingUserId();
         Task task;

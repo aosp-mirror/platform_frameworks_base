@@ -70,17 +70,6 @@ flag {
 }
 
 flag {
-  name: "common_surface_animator"
-  namespace: "windowing_frontend"
-  description: "A reusable surface animator for default transition"
-  bug: "326331384"
-  is_fixed_read_only: true
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
-}
-
-flag {
   name: "reduce_keyguard_transitions"
   namespace: "windowing_frontend"
   description: "Avoid setting keyguard transitions ready unless there are no other changes"
@@ -322,6 +311,14 @@ flag {
     name: "predictive_back_priority_system_navigation_observer"
     namespace: "systemui"
     description: "PRIORITY_SYSTEM_NAVIGATION_OBSERVER predictive back API extension"
+    is_fixed_read_only: true
+    bug: "362938401"
+}
+
+flag {
+    name: "predictive_back_timestamp_api"
+    namespace: "systemui"
+    description: "expose timestamp in BackEvent (API extension)"
     is_fixed_read_only: true
     bug: "362938401"
 }
