@@ -60,6 +60,7 @@ per-file res/values/config_display.xml = file:/services/core/java/com/android/se
 
 # Wear
 per-file res/*-watch/* = file:/WEAR_OWNERS
+per-file res/*-watch-v*/* = file:/WEAR_OWNERS
 
 # Performance
 per-file res/values/config.xml = file:/PERFORMANCE_OWNERS

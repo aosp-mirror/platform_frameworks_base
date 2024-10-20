@@ -8,7 +8,15 @@ package {
 
     // OWNER: g/ravenwood
     // Bug component: 25698
-    default_team: "trendy_team_framework_backstage_power",
+    default_team: "trendy_team_ravenwood",
+}
+
+filegroup {
+    name: "ravenwood-common-policies",
+    srcs: [
+        "texts/ravenwood-common-policies.txt",
+    ],
+    visibility: ["//visibility:private"],
 }
 
 filegroup {
@@ -16,7 +24,7 @@ filegroup {
     srcs: [
         "texts/ravenwood-services-policies.txt",
     ],
-    visibility: ["//visibility:public"],
+    visibility: ["//visibility:private"],
 }
 
 filegroup {
@@ -24,7 +32,7 @@ filegroup {
     srcs: [
         "texts/ravenwood-framework-policies.txt",
     ],
-    visibility: ["//visibility:public"],
+    visibility: ["//visibility:private"],
 }
 
 filegroup {
@@ -32,7 +40,7 @@ filegroup {
     srcs: [
         "texts/ravenwood-standard-options.txt",
     ],
-    visibility: ["//visibility:public"],
+    visibility: ["//visibility:private"],
 }
 
 filegroup {
@@ -40,7 +48,7 @@ filegroup {
     srcs: [
         "texts/ravenwood-annotation-allowed-classes.txt",
     ],
-    visibility: ["//visibility:public"],
+    visibility: ["//visibility:private"],
 }
 
 // This and the next module contain the same classes with different implementations.
@@ -337,9 +345,34 @@ java_library {
     ],
 }
 
+// JARs in "ravenwood-runtime" are set to the classpath, sorted alphabetically.
+// Rename some of the dependencies to make sure they're included in the intended order.
+
+java_library {
+    name: "100-framework-minus-apex.ravenwood",
+    installable: false,
+    static_libs: ["framework-minus-apex.ravenwood"],
+    visibility: ["//visibility:private"],
+}
+
+java_library {
+    name: "200-kxml2-android",
+    installable: false,
+    static_libs: ["kxml2-android"],
+    visibility: ["//visibility:private"],
+}
+
+java_library {
+    name: "z00-all-updatable-modules-system-stubs",
+    installable: false,
+    static_libs: ["all-updatable-modules-system-stubs-for-host"],
+    visibility: ["//visibility:private"],
+}
+
 android_ravenwood_libgroup {
     name: "ravenwood-runtime",
     data: [
+        ":system-build.prop",
         ":framework-res",
         ":ravenwood-empty-res",
         ":framework-platform-compat-config",
@@ -395,3 +428,7 @@ android_ravenwood_libgroup {
         "inline-mockito-ravenwood-prebuilt",
     ],
 }
+
+build = [
+    "Framework.bp",
+]

@@ -168,12 +168,6 @@ java_library {
         //same purpose.
         "//external/robolectric:__subpackages__",
         "//frameworks/layoutlib:__subpackages__",
-
-        // This is for the same purpose as robolectric -- to build "framework.jar" for host-side
-        // testing.
-        // TODO: Once Ravenwood is stable, move the host side jar targets to this directory,
-        // and remove this line.
-        "//frameworks/base/tools/hoststubgen:__subpackages__",
     ],
 }
 

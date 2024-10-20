@@ -819,6 +819,11 @@
     <!-- Summary of checkbox setting that enables the terminal app. [CHAR LIMIT=64] -->
     <string name="enable_terminal_summary">Enable terminal app that offers local shell access</string>
 
+    <!-- Title of checkbox setting that enables the Linux terminal app. [CHAR LIMIT=32] -->
+    <string name="enable_linux_terminal_title">Linux development environment</string>
+    <!-- Summary of checkbox setting that enables the Linux terminal app. [CHAR LIMIT=64] -->
+    <string name="enable_linux_terminal_summary">Run Linux terminal on Android</string>
+
     <!-- HDCP checking title, used for debug purposes only. [CHAR LIMIT=25] -->
     <string name="hdcp_checking_title">HDCP checking</string>
     <!-- HDCP checking dialog title, used for debug purposes only. [CHAR LIMIT=25] -->

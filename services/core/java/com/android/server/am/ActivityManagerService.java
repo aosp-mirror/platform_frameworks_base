@@ -12689,7 +12689,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         continue;
                     }
                     endTime = SystemClock.currentThreadTimeMillis();
-                    hasSwapPss = mi.hasSwappedOutPss;
+                    hasSwapPss = hasSwapPss || mi.hasSwappedOutPss;
                     memtrackGraphics = mi.getOtherPrivate(Debug.MemoryInfo.OTHER_GRAPHICS);
                     memtrackGl = mi.getOtherPrivate(Debug.MemoryInfo.OTHER_GL);
                 } else {
@@ -13143,6 +13143,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             final long lostRAM = memInfo.getTotalSizeKb()
                     - (ss[INDEX_TOTAL_PSS] - ss[INDEX_TOTAL_SWAP_PSS])
                     - memInfo.getFreeSizeKb() - memInfo.getCachedSizeKb()
+                    // NR_SHMEM is subtracted twice (getCachedSizeKb() and getKernelUsedSizeKb())
+                    + memInfo.getShmemSizeKb()
                     - kernelUsed - memInfo.getZramTotalSizeKb();
             if (!opts.isCompact) {
                 pw.print(" Used RAM: "); pw.print(stringifyKBSize(ss[INDEX_TOTAL_PSS] - cachedPss
@@ -13365,7 +13367,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     continue;
                 }
                 endTime = SystemClock.currentThreadTimeMillis();
-                hasSwapPss = mi.hasSwappedOutPss;
+                hasSwapPss = hasSwapPss || mi.hasSwappedOutPss;
             } else {
                 reportType = ProcessStats.ADD_PSS_EXTERNAL;
                 startTime = SystemClock.currentThreadTimeMillis();
@@ -13656,6 +13658,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             long lostRAM = memInfo.getTotalSizeKb()
                     - (ss[INDEX_TOTAL_PSS] - ss[INDEX_TOTAL_SWAP_PSS])
                     - memInfo.getFreeSizeKb() - memInfo.getCachedSizeKb()
+                    // NR_SHMEM is subtracted twice (getCachedSizeKb() and getKernelUsedSizeKb())
+                    + memInfo.getShmemSizeKb()
                     - memInfo.getKernelUsedSizeKb() - memInfo.getZramTotalSizeKb();
             proto.write(MemInfoDumpProto.USED_PSS_KB, ss[INDEX_TOTAL_PSS] - cachedPss);
             proto.write(MemInfoDumpProto.USED_KERNEL_KB, memInfo.getKernelUsedSizeKb());
