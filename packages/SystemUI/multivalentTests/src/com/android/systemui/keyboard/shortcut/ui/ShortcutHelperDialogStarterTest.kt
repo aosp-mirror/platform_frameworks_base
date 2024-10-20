@@ -16,25 +16,26 @@
 
 package com.android.systemui.keyboard.shortcut.ui
 
-import android.content.Intent
+import androidx.test.annotation.UiThreadTest
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.keyboard.shortcut.data.source.FakeKeyboardShortcutGroupsSource
 import com.android.systemui.keyboard.shortcut.data.source.TestShortcuts
-import com.android.systemui.keyboard.shortcut.fakeShortcutHelperStartActivity
-import com.android.systemui.keyboard.shortcut.shortcutHelperActivityStarter
 import com.android.systemui.keyboard.shortcut.shortcutHelperAppCategoriesShortcutsSource
 import com.android.systemui.keyboard.shortcut.shortcutHelperCurrentAppShortcutsSource
 import com.android.systemui.keyboard.shortcut.shortcutHelperInputShortcutsSource
 import com.android.systemui.keyboard.shortcut.shortcutHelperMultiTaskingShortcutsSource
 import com.android.systemui.keyboard.shortcut.shortcutHelperSystemShortcutsSource
 import com.android.systemui.keyboard.shortcut.shortcutHelperTestHelper
-import com.android.systemui.keyboard.shortcut.ui.view.ShortcutHelperActivity
+import com.android.systemui.keyboard.shortcut.shortcutHelperViewModel
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.kosmos.testCase
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.plugins.activityStarter
+import com.android.systemui.statusbar.phone.systemUIDialogFactory
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -46,7 +47,7 @@ import org.junit.runner.RunWith
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-class ShortcutHelperActivityStarterTest : SysuiTestCase() {
+class ShortcutHelperDialogStarterTest : SysuiTestCase() {
 
     private val fakeSystemSource = FakeKeyboardShortcutGroupsSource()
     private val fakeMultiTaskingSource = FakeKeyboardShortcutGroupsSource()
@@ -64,8 +65,14 @@ class ShortcutHelperActivityStarterTest : SysuiTestCase() {
 
     private val testScope = kosmos.testScope
     private val testHelper = kosmos.shortcutHelperTestHelper
-    private val fakeStartActivity = kosmos.fakeShortcutHelperStartActivity
-    private val starter = kosmos.shortcutHelperActivityStarter
+    private val dialogFactory = kosmos.systemUIDialogFactory
+    private val coroutineScope = kosmos.applicationCoroutineScope
+    private val viewModel = kosmos.shortcutHelperViewModel
+
+    private val starter: ShortcutHelperDialogStarter =
+        with(kosmos) {
+            ShortcutHelperDialogStarter(coroutineScope, viewModel, dialogFactory, activityStarter)
+        }
 
     @Before
     fun setUp() {
@@ -74,21 +81,22 @@ class ShortcutHelperActivityStarterTest : SysuiTestCase() {
     }
 
     @Test
-    fun start_doesNotStartByDefault() =
+    fun start_doesNotShowDialogByDefault() =
         testScope.runTest {
             starter.start()
 
-            assertThat(fakeStartActivity.startIntents).isEmpty()
+            assertThat(starter.dialog).isNull()
         }
 
     @Test
-    fun start_onToggle_startsActivity() =
+    @UiThreadTest
+    fun start_onToggle_showsDialog() =
         testScope.runTest {
             starter.start()
 
             testHelper.toggle(deviceId = 456)
 
-            verifyShortcutHelperActivityStarted()
+            assertThat(starter.dialog?.isShowing).isTrue()
         }
 
     @Test
@@ -101,34 +109,18 @@ class ShortcutHelperActivityStarterTest : SysuiTestCase() {
 
             testHelper.toggle(deviceId = 456)
 
-            assertThat(fakeStartActivity.startIntents).isEmpty()
+            assertThat(starter.dialog).isNull()
         }
 
     @Test
-    fun start_onToggle_multipleTimesStartsActivityOnlyWhenNotStarted() =
-        testScope.runTest {
-            starter.start()
-
-            // Starts
-            testHelper.toggle(deviceId = 456)
-            // Stops
-            testHelper.toggle(deviceId = 456)
-            // Starts again
-            testHelper.toggle(deviceId = 456)
-            // Stops
-            testHelper.toggle(deviceId = 456)
-
-            verifyShortcutHelperActivityStarted(numTimes = 2)
-        }
-
-    @Test
+    @UiThreadTest
     fun start_onRequestShowShortcuts_startsActivity() =
         testScope.runTest {
             starter.start()
 
             testHelper.showFromActivity()
 
-            verifyShortcutHelperActivityStarted()
+            assertThat(starter.dialog?.isShowing).isTrue()
         }
 
     @Test
@@ -140,10 +132,11 @@ class ShortcutHelperActivityStarterTest : SysuiTestCase() {
 
             testHelper.showFromActivity()
 
-            assertThat(fakeStartActivity.startIntents).isEmpty()
+            assertThat(starter.dialog).isNull()
         }
 
     @Test
+    @UiThreadTest
     fun start_onRequestShowShortcuts_multipleTimes_startsActivityOnlyOnce() =
         testScope.runTest {
             starter.start()
@@ -152,40 +145,40 @@ class ShortcutHelperActivityStarterTest : SysuiTestCase() {
             testHelper.showFromActivity()
             testHelper.showFromActivity()
 
-            verifyShortcutHelperActivityStarted(numTimes = 1)
+            assertThat(starter.dialog?.isShowing).isTrue()
         }
 
     @Test
+    @UiThreadTest
     fun start_onRequestShowShortcuts_multipleTimes_startsActivityOnlyWhenNotStarted() =
         testScope.runTest {
             starter.start()
 
+            assertThat(starter.dialog).isNull()
             // No-op. Already hidden.
             testHelper.hideFromActivity()
+            assertThat(starter.dialog).isNull()
             // No-op. Already hidden.
             testHelper.hideForSystem()
+            assertThat(starter.dialog).isNull()
             // Show 1st time.
             testHelper.toggle(deviceId = 987)
+            assertThat(starter.dialog).isNotNull()
+            assertThat(starter.dialog?.isShowing).isTrue()
             // No-op. Already shown.
             testHelper.showFromActivity()
+            assertThat(starter.dialog?.isShowing).isTrue()
             // Hidden.
             testHelper.hideFromActivity()
+            assertThat(starter.dialog?.isShowing).isFalse()
             // No-op. Already hidden.
             testHelper.hideForSystem()
+            assertThat(starter.dialog?.isShowing).isFalse()
             // Show 2nd time.
             testHelper.toggle(deviceId = 456)
+            assertThat(starter.dialog?.isShowing).isTrue()
             // No-op. Already shown.
             testHelper.showFromActivity()
-
-            verifyShortcutHelperActivityStarted(numTimes = 2)
+            assertThat(starter.dialog?.isShowing).isTrue()
         }
-
-    private fun verifyShortcutHelperActivityStarted(numTimes: Int = 1) {
-        assertThat(fakeStartActivity.startIntents).hasSize(numTimes)
-        fakeStartActivity.startIntents.forEach { intent ->
-            assertThat(intent.flags).isEqualTo(Intent.FLAG_ACTIVITY_NEW_TASK)
-            assertThat(intent.filterEquals(Intent(context, ShortcutHelperActivity::class.java)))
-                .isTrue()
-        }
-    }
 }

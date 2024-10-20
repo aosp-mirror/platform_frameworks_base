@@ -1139,11 +1139,5 @@
                 android:name="android.service.dream"
                 android:resource="@xml/home_controls_dream_metadata" />
         </service>
-
-        <activity android:name="com.android.systemui.keyboard.shortcut.ui.view.ShortcutHelperActivity"
-            android:exported="false"
-            android:showForAllUsers="true"
-            android:theme="@style/ShortcutHelperTheme"
-            android:excludeFromRecents="true" />
     </application>
 </manifest>
