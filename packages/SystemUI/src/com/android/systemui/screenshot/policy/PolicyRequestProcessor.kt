@@ -26,6 +26,7 @@ import android.os.UserHandle
 import android.util.Log
 import android.view.WindowManager.TAKE_SCREENSHOT_FULLSCREEN
 import android.view.WindowManager.TAKE_SCREENSHOT_PROVIDED_IMAGE
+import com.android.systemui.Flags.screenshotPolicySplitAndDesktopMode
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.screenshot.ImageCapture
 import com.android.systemui.screenshot.ScreenshotData
@@ -47,20 +48,29 @@ class PolicyRequestProcessor(
     private val capture: ImageCapture,
     /** Provides information about the tasks on a given display */
     private val displayTasks: DisplayContentRepository,
-    /** The list of policies to apply, in order of priority */
+    /** The legacy list of policy implementations to apply, in order of priority */
     private val policies: List<CapturePolicy>,
+    /** Implements the combined policy rules for all profile types. */
+    private val policy: ScreenshotPolicy,
     /** The owner to assign for screenshot when a focused task isn't visible */
     private val defaultOwner: UserHandle = myUserHandle(),
     /** The assigned component when no application has focus, or not visible */
     private val defaultComponent: ComponentName,
 ) : ScreenshotRequestProcessor {
     override suspend fun process(original: ScreenshotData): ScreenshotData {
+
         if (original.type == TAKE_SCREENSHOT_PROVIDED_IMAGE) {
             // The request contains an already captured screenshot, accept it as is.
             Log.i(TAG, "Screenshot bitmap provided. No modifications applied.")
             return original
         }
         val displayContent = displayTasks.getDisplayContent(original.displayId)
+
+        if (screenshotPolicySplitAndDesktopMode()) {
+            Log.i(TAG, "Applying screenshot policy....")
+            val type = policy.apply(displayContent, defaultComponent, defaultOwner)
+            return modify(original, type)
+        }
 
         // If policies yield explicit modifications, apply them and return the result
         Log.i(TAG, "Applying policy checks....")
@@ -79,10 +89,8 @@ class PolicyRequestProcessor(
     }
 
     /** Produce a new [ScreenshotData] using [CaptureParameters] */
-    private suspend fun modify(
-        original: ScreenshotData,
-        updates: CaptureParameters,
-    ): ScreenshotData {
+    suspend fun modify(original: ScreenshotData, updates: CaptureParameters): ScreenshotData {
+        Log.d(TAG, "[modify] CaptureParameters = $updates")
         // Update and apply bitmap capture depending on the parameters.
         val updated =
             when (val type = updates.type) {
@@ -92,6 +100,14 @@ class PolicyRequestProcessor(
                         updates.component,
                         updates.owner,
                         type.taskId,
+                        type.taskBounds,
+                    )
+                is CaptureType.RootTask ->
+                    replaceWithTaskSnapshot(
+                        original,
+                        updates.component,
+                        updates.owner,
+                        type.parentTaskId,
                         type.taskBounds,
                     )
                 is FullScreen ->

@@ -16,9 +16,14 @@
 
 package com.android.systemui
 
+import android.content.Context
+import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.decor.FaceScanningProviderFactory
+import com.android.systemui.decor.FaceScanningProviderFactoryImpl
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener
 import dagger.Binds
 import dagger.Module
+import dagger.Provides
 import dagger.multibindings.ClassKey
 import dagger.multibindings.IntoMap
 import dagger.multibindings.IntoSet
@@ -35,4 +40,15 @@ interface ScreenDecorationsModule {
     @Binds
     @IntoSet
     fun bindScreenDecorationsConfigListener(impl: ScreenDecorations): ConfigurationListener
+
+    companion object {
+        @Provides
+        @SysUISingleton
+        fun faceScanningProviderFactory(
+            creator: FaceScanningProviderFactoryImpl.Creator,
+            context: Context,
+        ): FaceScanningProviderFactory {
+            return creator.create(context)
+        }
+    }
 }

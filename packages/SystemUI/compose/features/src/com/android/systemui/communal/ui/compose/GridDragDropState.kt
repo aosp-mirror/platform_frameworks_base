@@ -58,11 +58,11 @@ private fun Float.directional(origin: LayoutDirection, current: LayoutDirection)
 fun rememberGridDragDropState(
     gridState: LazyGridState,
     contentListState: ContentListState,
-    updateDragPositionForRemove: (offset: Offset) -> Boolean,
+    updateDragPositionForRemove: (boundingBox: IntRect) -> Boolean,
 ): GridDragDropState {
     val scope = rememberCoroutineScope()
     val state =
-        remember(gridState, contentListState) {
+        remember(gridState, contentListState, updateDragPositionForRemove) {
             GridDragDropState(
                 state = gridState,
                 contentListState = contentListState,
@@ -92,7 +92,7 @@ internal constructor(
     private val state: LazyGridState,
     private val contentListState: ContentListState,
     private val scope: CoroutineScope,
-    private val updateDragPositionForRemove: (offset: Offset) -> Boolean,
+    private val updateDragPositionForRemove: (draggingBoundingBox: IntRect) -> Boolean,
 ) {
     var draggingItemKey by mutableStateOf<Any?>(null)
         private set
@@ -104,7 +104,6 @@ internal constructor(
 
     private var draggingItemDraggedDelta by mutableStateOf(Offset.Zero)
     private var draggingItemInitialOffset by mutableStateOf(Offset.Zero)
-    private var dragStartPointerOffset by mutableStateOf(Offset.Zero)
 
     private var previousTargetItemKey: Any? = null
 
@@ -139,7 +138,6 @@ internal constructor(
             // before content padding from the initial pointer position
             .firstItemAtOffset(normalizedOffset - contentOffset)
             ?.apply {
-                dragStartPointerOffset = normalizedOffset - this.offset.toOffset()
                 draggingItemKey = key
                 draggingItemInitialOffset = this.offset.toOffset()
                 return true
@@ -155,7 +153,7 @@ internal constructor(
                     contentListState.list.indexOfFirst { it.key == draggingItemKey }
                 )
                 isDraggingToRemove = false
-                updateDragPositionForRemove(Offset.Zero)
+                updateDragPositionForRemove(IntRect.Zero)
             }
             // persist list editing changes on dragging ends
             contentListState.onSaveList()
@@ -164,7 +162,6 @@ internal constructor(
         previousTargetItemKey = null
         draggingItemDraggedDelta = Offset.Zero
         draggingItemInitialOffset = Offset.Zero
-        dragStartPointerOffset = Offset.Zero
     }
 
     internal fun onDrag(offset: Offset, layoutDirection: LayoutDirection) {
@@ -230,7 +227,7 @@ internal constructor(
             if (overscroll != 0f) {
                 scrollChannel.trySend(overscroll)
             }
-            isDraggingToRemove = checkForRemove(startOffset)
+            isDraggingToRemove = checkForRemove(draggingBoundingBox)
             previousTargetItemKey = null
         }
     }
@@ -247,10 +244,12 @@ internal constructor(
     }
 
     /** Calls the callback with the updated drag position and returns whether to remove the item. */
-    private fun checkForRemove(startOffset: Offset): Boolean {
-        return if (draggingItemDraggedDelta.y < 0)
-            updateDragPositionForRemove(startOffset + dragStartPointerOffset)
-        else false
+    private fun checkForRemove(draggingItemBoundingBox: IntRect): Boolean {
+        return if (draggingItemDraggedDelta.y < 0) {
+            updateDragPositionForRemove(draggingItemBoundingBox)
+        } else {
+            false
+        }
     }
 }
 

@@ -97,9 +97,9 @@
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"కెమెరా సమస్యలు ఉన్నాయా?\nరీఫిట్ చేయడానికి ట్యాప్ చేయండి"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"దాని సమస్యను పరిష్కరించలేదా?\nపూర్వస్థితికి మార్చడానికి ట్యాప్ చేయండి"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"కెమెరా సమస్యలు లేవా? తీసివేయడానికి ట్యాప్ చేయండి."</string>
-    <string name="windowing_app_handle_education_tooltip" msgid="6398482412956375783">"యాప్ మెనూని తెరవడానికి ట్యాప్ చేయండి"</string>
-    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="6285279585554484957">"పలు యాప్‌లను కలిపి చూడటానికి ట్యాప్ చేయండి"</string>
-    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="6685429075790085337">"యాప్ మెనూ నుండి ఫుల్ స్క్రీన్‌కు తిరిగి రండి"</string>
+    <string name="windowing_app_handle_education_tooltip" msgid="2929643449849791854">"యాప్ మెనూను ఇక్కడ పొందవచ్చు"</string>
+    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="2523468503353474095">"పలు యాప్‌లను ఒకేసారి తెరవడానికి డెస్క్‌టాప్ వీక్షణకు ఎంటర్ అవ్వండి"</string>
+    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="5225660258192054132">"యాప్ మెనూ నుండి ఏ సమయంలోనైనా ఫుల్ స్క్రీన్‌కు తిరిగి రండి"</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"చూసి, మరిన్ని చేయండి"</string>
     <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"స్ప్లిట్ స్క్రీన్ కోసం మరొక యాప్‌లోకి లాగండి"</string>
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"యాప్ స్థానాన్ని మార్చడానికి దాని వెలుపల డబుల్-ట్యాప్ చేయండి"</string>

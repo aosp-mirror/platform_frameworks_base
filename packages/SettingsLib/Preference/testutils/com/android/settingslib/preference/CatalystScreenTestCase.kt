@@ -37,7 +37,7 @@ import org.junit.runner.RunWith
 abstract class CatalystScreenTestCase {
     @get:Rule val setFlagsRule = SetFlagsRule()
 
-    protected val context: Context = ApplicationProvider.getApplicationContext()
+    protected val appContext: Context = ApplicationProvider.getApplicationContext()
 
     /** Catalyst screen. */
     protected abstract val preferenceScreenCreator: PreferenceScreenCreator
@@ -52,12 +52,12 @@ abstract class CatalystScreenTestCase {
     @Test
     open fun migration() {
         enableCatalystScreen()
-        assertThat(preferenceScreenCreator.isFlagEnabled(context)).isTrue()
+        assertThat(preferenceScreenCreator.isFlagEnabled(appContext)).isTrue()
         val catalystScreen = dumpPreferenceScreen()
         Log.i(TAG, catalystScreen)
 
         disableCatalystScreen()
-        assertThat(preferenceScreenCreator.isFlagEnabled(context)).isFalse()
+        assertThat(preferenceScreenCreator.isFlagEnabled(appContext)).isFalse()
         val legacyScreen = dumpPreferenceScreen()
 
         assertThat(catalystScreen).isEqualTo(legacyScreen)
@@ -99,7 +99,7 @@ abstract class CatalystScreenTestCase {
         @Suppress("UNCHECKED_CAST")
         val clazz = preferenceScreenCreator.fragmentClass() as Class<PreferenceFragmentCompat>
         val builder = StringBuilder()
-        FragmentScenario.launch(clazz).use {
+        launchFragmentScenario(clazz).use {
             it.onFragment { fragment ->
                 taskFinished.set(true)
                 fragment.preferenceScreen.toString(builder)
@@ -107,6 +107,9 @@ abstract class CatalystScreenTestCase {
         }
         return builder.toString()
     }
+
+    protected open fun launchFragmentScenario(fragmentClass: Class<PreferenceFragmentCompat>) =
+        FragmentScenario.launch(fragmentClass)
 
     private fun Preference.toString(builder: StringBuilder, indent: String = "") {
         val clazz = javaClass

@@ -62,6 +62,7 @@ import com.android.wm.shell.R
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer
 import com.android.wm.shell.common.DisplayController
 import com.android.wm.shell.common.SyncTransactionQueue
+import com.android.wm.shell.desktopmode.calculateMaximizeBounds
 import com.android.wm.shell.shared.animation.Interpolators.EMPHASIZED_DECELERATE
 import com.android.wm.shell.shared.animation.Interpolators.FAST_OUT_LINEAR_IN
 import com.android.wm.shell.windowdecor.additionalviewcontainer.AdditionalViewHostViewContainer
@@ -73,7 +74,8 @@ import java.util.function.Supplier
 
 /**
  *  Menu that appears when user long clicks the maximize button. Gives the user the option to
- *  maximize the task or snap the task to the right or left half of the screen.
+ *  maximize the task or restore previous task bounds from the maximized state and to snap the task
+ *  to the right or left half of the screen.
  */
 class MaximizeMenu(
         private val syncQueue: SyncTransactionQueue,
@@ -176,6 +178,7 @@ class MaximizeMenu(
                 "MaximizeMenu")
         maximizeMenuView = MaximizeMenuView(
             context = decorWindowContext,
+            sizeToggleDirection = getSizeToggleDirection(),
             menuHeight = menuHeight,
             menuPadding = menuPadding,
         ).also { menuView ->
@@ -200,6 +203,18 @@ class MaximizeMenu(
             transaction.merge(t)
             t.close()
         }
+    }
+
+    private fun getSizeToggleDirection(): MaximizeMenuView.SizeToggleDirection {
+        val maximizeBounds = calculateMaximizeBounds(
+            displayController.getDisplayLayout(taskInfo.displayId)!!,
+            taskInfo
+        )
+        val maximized = taskInfo.configuration.windowConfiguration.bounds.equals(maximizeBounds)
+        return if (maximized)
+            MaximizeMenuView.SizeToggleDirection.RESTORE
+        else
+            MaximizeMenuView.SizeToggleDirection.MAXIMIZE
     }
 
     private fun loadDimensionPixelSize(resourceId: Int): Int {
@@ -236,18 +251,19 @@ class MaximizeMenu(
      * resizing a Task.
      */
     class MaximizeMenuView(
-        context: Context,
+        private val context: Context,
+        private val sizeToggleDirection: SizeToggleDirection,
         private val menuHeight: Int,
-        private val menuPadding: Int,
+        private val menuPadding: Int
     ) {
         val rootView = LayoutInflater.from(context)
             .inflate(R.layout.desktop_mode_window_decor_maximize_menu, null /* root */) as ViewGroup
         private val container = requireViewById(R.id.container)
         private val overlay = requireViewById(R.id.maximize_menu_overlay)
-        private val maximizeText =
-            requireViewById(R.id.maximize_menu_maximize_window_text) as TextView
-        private val maximizeButton =
-            requireViewById(R.id.maximize_menu_maximize_button) as Button
+        private val sizeToggleButtonText =
+            requireViewById(R.id.maximize_menu_size_toggle_button_text) as TextView
+        private val sizeToggleButton =
+            requireViewById(R.id.maximize_menu_size_toggle_button) as Button
         private val snapWindowText =
             requireViewById(R.id.maximize_menu_snap_window_text) as TextView
         private val snapRightButton =
@@ -263,8 +279,6 @@ class MaximizeMenu(
             .getDimensionPixelSize(R.dimen.desktop_mode_maximize_menu_buttons_outline_radius)
         private val outlineStroke = context.resources
             .getDimensionPixelSize(R.dimen.desktop_mode_maximize_menu_buttons_outline_stroke)
-        private val fillPadding = context.resources
-            .getDimensionPixelSize(R.dimen.desktop_mode_maximize_menu_buttons_fill_padding)
         private val fillRadius = context.resources
             .getDimensionPixelSize(R.dimen.desktop_mode_maximize_menu_buttons_fill_radius)
 
@@ -324,7 +338,7 @@ class MaximizeMenu(
                 return@setOnHoverListener false
             }
 
-            maximizeButton.setOnClickListener { onMaximizeClickListener?.invoke() }
+            sizeToggleButton.setOnClickListener { onMaximizeClickListener?.invoke() }
             snapRightButton.setOnClickListener { onRightSnapClickListener?.invoke() }
             snapLeftButton.setOnClickListener { onLeftSnapClickListener?.invoke() }
             rootView.setOnTouchListener { _, event ->
@@ -335,9 +349,17 @@ class MaximizeMenu(
                 true
             }
 
+            val btnTextId = if (sizeToggleDirection == SizeToggleDirection.RESTORE)
+                R.string.desktop_mode_maximize_menu_restore_button_text
+            else
+                R.string.desktop_mode_maximize_menu_maximize_button_text
+            val btnText = context.resources.getText(btnTextId)
+            sizeToggleButton.contentDescription = btnText
+            sizeToggleButtonText.text = btnText
+
             // To prevent aliasing.
-            maximizeButton.setLayerType(View.LAYER_TYPE_SOFTWARE, null)
-            maximizeText.setLayerType(View.LAYER_TYPE_SOFTWARE, null)
+            sizeToggleButton.setLayerType(View.LAYER_TYPE_SOFTWARE, null)
+            sizeToggleButtonText.setLayerType(View.LAYER_TYPE_SOFTWARE, null)
         }
 
         /** Bind the menu views to the new [RunningTaskInfo] data. */
@@ -348,8 +370,8 @@ class MaximizeMenu(
             rootView.background.setTint(style.backgroundColor)
 
             // Maximize option.
-            maximizeButton.background = style.maximizeOption.drawable
-            maximizeText.setTextColor(style.textColor)
+            sizeToggleButton.background = style.maximizeOption.drawable
+            sizeToggleButtonText.setTextColor(style.textColor)
 
             // Snap options.
             snapWindowText.setTextColor(style.textColor)
@@ -358,8 +380,8 @@ class MaximizeMenu(
 
         /** Animate the opening of the menu */
         fun animateOpenMenu(onEnd: () -> Unit) {
-            maximizeButton.setLayerType(View.LAYER_TYPE_HARDWARE, null)
-            maximizeText.setLayerType(View.LAYER_TYPE_HARDWARE, null)
+            sizeToggleButton.setLayerType(View.LAYER_TYPE_HARDWARE, null)
+            sizeToggleButtonText.setLayerType(View.LAYER_TYPE_HARDWARE, null)
             menuAnimatorSet = AnimatorSet()
             menuAnimatorSet?.playTogether(
                 ObjectAnimator.ofFloat(rootView, SCALE_Y, STARTING_MENU_HEIGHT_SCALE, 1f)
@@ -388,9 +410,9 @@ class MaximizeMenu(
                         // Scale up the children of the maximize menu so that the menu
                         // scale is cancelled out and only the background is scaled.
                         val value = animatedValue as Float
-                        maximizeButton.scaleY = value
+                        sizeToggleButton.scaleY = value
                         snapButtonsLayout.scaleY = value
-                        maximizeText.scaleY = value
+                        sizeToggleButtonText.scaleY = value
                         snapWindowText.scaleY = value
                     }
                 },
@@ -409,9 +431,9 @@ class MaximizeMenu(
                         startDelay = CONTROLS_ALPHA_OPEN_MENU_ANIMATION_DELAY_MS
                         addUpdateListener {
                             val value = animatedValue as Float
-                            maximizeButton.alpha = value
+                            sizeToggleButton.alpha = value
                             snapButtonsLayout.alpha = value
-                            maximizeText.alpha = value
+                            sizeToggleButtonText.alpha = value
                             snapWindowText.alpha = value
                         }
                     },
@@ -423,8 +445,8 @@ class MaximizeMenu(
             )
             menuAnimatorSet?.addListener(
                 onEnd = {
-                    maximizeButton.setLayerType(View.LAYER_TYPE_SOFTWARE, null)
-                    maximizeText.setLayerType(View.LAYER_TYPE_SOFTWARE, null)
+                    sizeToggleButton.setLayerType(View.LAYER_TYPE_SOFTWARE, null)
+                    sizeToggleButtonText.setLayerType(View.LAYER_TYPE_SOFTWARE, null)
                     onEnd.invoke()
                 }
             )
@@ -433,8 +455,8 @@ class MaximizeMenu(
 
         /** Animate the closing of the menu */
         fun animateCloseMenu(onEnd: (() -> Unit)) {
-            maximizeButton.setLayerType(View.LAYER_TYPE_HARDWARE, null)
-            maximizeText.setLayerType(View.LAYER_TYPE_HARDWARE, null)
+            sizeToggleButton.setLayerType(View.LAYER_TYPE_HARDWARE, null)
+            sizeToggleButtonText.setLayerType(View.LAYER_TYPE_HARDWARE, null)
             cancelAnimation()
             menuAnimatorSet = AnimatorSet()
             menuAnimatorSet?.playTogether(
@@ -464,9 +486,9 @@ class MaximizeMenu(
                             // Scale up the children of the maximize menu so that the menu
                             // scale is cancelled out and only the background is scaled.
                             val value = animatedValue as Float
-                            maximizeButton.scaleY = value
+                            sizeToggleButton.scaleY = value
                             snapButtonsLayout.scaleY = value
-                            maximizeText.scaleY = value
+                            sizeToggleButtonText.scaleY = value
                             snapWindowText.scaleY = value
                         }
                     },
@@ -485,9 +507,9 @@ class MaximizeMenu(
                                 duration = ALPHA_ANIMATION_DURATION_MS
                                 addUpdateListener {
                                     val value = animatedValue as Float
-                                    maximizeButton.alpha = value
+                                    sizeToggleButton.alpha = value
                                     snapButtonsLayout.alpha = value
-                                    maximizeText.alpha = value
+                                    sizeToggleButtonText.alpha = value
                                     snapWindowText.alpha = value
                                 }
                             },
@@ -498,8 +520,8 @@ class MaximizeMenu(
             )
             menuAnimatorSet?.addListener(
                     onEnd = {
-                        maximizeButton.setLayerType(View.LAYER_TYPE_SOFTWARE, null)
-                        maximizeText.setLayerType(View.LAYER_TYPE_SOFTWARE, null)
+                        sizeToggleButton.setLayerType(View.LAYER_TYPE_SOFTWARE, null)
+                        sizeToggleButtonText.setLayerType(View.LAYER_TYPE_SOFTWARE, null)
                         onEnd?.invoke()
                     }
             )
@@ -509,8 +531,8 @@ class MaximizeMenu(
         /** Request that the accessibility service focus on the menu. */
         fun requestAccessibilityFocus() {
             // Focus the first button in the menu by default.
-            maximizeButton.post {
-                maximizeButton.sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_FOCUSED)
+            sizeToggleButton.post {
+                sizeToggleButton.sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_FOCUSED)
             }
         }
 
@@ -685,15 +707,31 @@ class MaximizeMenu(
                 paint.color = strokeAndFillColor
                 paint.style = Paint.Style.FILL
             })
+
+            val (horizontalFillPadding, verticalFillPadding) =
+                if (sizeToggleDirection == SizeToggleDirection.MAXIMIZE) {
+                    context.resources.getDimensionPixelSize(R.dimen
+                        .desktop_mode_maximize_menu_snap_and_maximize_buttons_fill_padding) to
+                            context.resources.getDimensionPixelSize(R.dimen
+                                .desktop_mode_maximize_menu_snap_and_maximize_buttons_fill_padding)
+                } else {
+                    context.resources.getDimensionPixelSize(R.dimen
+                        .desktop_mode_maximize_menu_restore_button_fill_horizontal_padding) to
+                            context.resources.getDimensionPixelSize(R.dimen
+                                .desktop_mode_maximize_menu_restore_button_fill_vertical_padding)
+                }
+
             return LayerDrawable(layers.toTypedArray()).apply {
                 when (numberOfLayers) {
                     3 -> {
                         setLayerInset(1, outlineStroke)
-                        setLayerInset(2, fillPadding)
+                        setLayerInset(2, horizontalFillPadding, verticalFillPadding,
+                            horizontalFillPadding, verticalFillPadding)
                     }
                     4 -> {
                         setLayerInset(intArrayOf(1, 2), outlineStroke)
-                        setLayerInset(3, fillPadding)
+                        setLayerInset(3, horizontalFillPadding, verticalFillPadding,
+                            horizontalFillPadding, verticalFillPadding)
                     }
                     else -> error("Unexpected number of layers: $numberOfLayers")
                 }
@@ -736,6 +774,11 @@ class MaximizeMenu(
         /** The possible selection states of the half-snap menu option. */
         enum class SnapToHalfSelection {
             NONE, LEFT, RIGHT
+        }
+
+        /** The possible selection states of the size toggle button in the maximize menu. */
+        enum class SizeToggleDirection {
+            MAXIMIZE, RESTORE
         }
     }
 

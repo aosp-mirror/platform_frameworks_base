@@ -582,20 +582,22 @@ size_t Bitmap::mTotalBitmapBytes = 0;
 size_t Bitmap::mTotalBitmapCount = 0;
 
 void Bitmap::traceBitmapCreate() {
+    size_t bytes = getAllocationByteCount();
+    std::lock_guard lock{mLock};
+    mTotalBitmapBytes += bytes;
+    mTotalBitmapCount++;
     if (ATRACE_ENABLED()) {
-        std::lock_guard lock{mLock};
-        mTotalBitmapBytes += getAllocationByteCount();
-        mTotalBitmapCount++;
         ATRACE_INT64("Bitmap Memory", mTotalBitmapBytes);
         ATRACE_INT64("Bitmap Count", mTotalBitmapCount);
     }
 }
 
 void Bitmap::traceBitmapDelete() {
+    size_t bytes = getAllocationByteCount();
+    std::lock_guard lock{mLock};
+    mTotalBitmapBytes -= getAllocationByteCount();
+    mTotalBitmapCount--;
     if (ATRACE_ENABLED()) {
-        std::lock_guard lock{mLock};
-        mTotalBitmapBytes -= getAllocationByteCount();
-        mTotalBitmapCount--;
         ATRACE_INT64("Bitmap Memory", mTotalBitmapBytes);
         ATRACE_INT64("Bitmap Count", mTotalBitmapCount);
     }

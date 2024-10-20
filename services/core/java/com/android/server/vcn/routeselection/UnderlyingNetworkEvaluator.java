@@ -193,8 +193,7 @@ public class UnderlyingNetworkEvaluator {
     }
 
     private static boolean isIpSecPacketLossDetectorEnabled(VcnContext vcnContext) {
-        return vcnContext.isFlagIpSecTransformStateEnabled()
-                && vcnContext.isFlagNetworkMetricMonitorEnabled();
+        return vcnContext.isFlagIpSecTransformStateEnabled();
     }
 
     /** Get the comparator for UnderlyingNetworkEvaluator */

@@ -97,9 +97,9 @@
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"ಕ್ಯಾಮರಾ ಸಮಸ್ಯೆಗಳಿವೆಯೇ?\nಮರುಹೊಂದಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"ಅದನ್ನು ಸರಿಪಡಿಸಲಿಲ್ಲವೇ?\nಹಿಂತಿರುಗಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"ಕ್ಯಾಮರಾ ಸಮಸ್ಯೆಗಳಿಲ್ಲವೇ? ವಜಾಗೊಳಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
-    <string name="windowing_app_handle_education_tooltip" msgid="6398482412956375783">"ಆ್ಯಪ್‌ ಮೆನುವನ್ನು ತೆರೆಯಲು ಟ್ಯಾಪ್‌ ಮಾಡಿ"</string>
-    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="6285279585554484957">"ಅನೇಕ ಆ್ಯಪ್‌ಗಳನ್ನು ಒಟ್ಟಿಗೆ ತೋರಿಸಲು ಟ್ಯಾಪ್‌ ಮಾಡಿ"</string>
-    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="6685429075790085337">"ಆ್ಯಪ್‌ ಮೆನುವಿನಿಂದ ಫುಲ್‌ಸ್ಕ್ರೀನ್‌ಗೆ ಹಿಂತಿರುಗಿ"</string>
+    <string name="windowing_app_handle_education_tooltip" msgid="2929643449849791854">"ಆ್ಯಪ್ ಮೆನುವನ್ನು ಇಲ್ಲಿ ಕಾಣಬಹುದು"</string>
+    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="2523468503353474095">"ಹಲವು ಆ್ಯಪ್‌ಗಳನ್ನು ಒಟ್ಟಿಗೆ ತೆರೆಯಲು ಡೆಸ್ಕ್‌ಟಾಪ್ ವೀಕ್ಷಣೆಯನ್ನು ನಮೂದಿಸಿ"</string>
+    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="5225660258192054132">"ಆ್ಯಪ್ ಮೆನುವಿನಿಂದ ಯಾವಾಗ ಬೇಕಾದರೂ ಫುಲ್‌ಸ್ಕ್ರೀನ್‌ಗೆ ಹಿಂತಿರುಗಿ"</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"ನೋಡಿ ಮತ್ತು ಹೆಚ್ಚಿನದನ್ನು ಮಾಡಿ"</string>
     <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"ಸ್ಪ್ಲಿಟ್‌ ಸ್ಕ್ರೀನ್‌ಗಾಗಿ ಮತ್ತೊಂದು ಆ್ಯಪ್‌ನಲ್ಲಿ ಡ್ರ್ಯಾಗ್ ಮಾಡಿ"</string>
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"ಆ್ಯಪ್ ಒಂದರ ಸ್ಥಾನವನ್ನು ಬದಲಾಯಿಸಲು ಅದರ ಹೊರಗೆ ಡಬಲ್-ಟ್ಯಾಪ್ ಮಾಡಿ"</string>

@@ -297,20 +297,39 @@ constructor(
     val isKeyguardVisible: Flow<Boolean> =
         combine(isKeyguardShowing, isKeyguardOccluded) { showing, occluded -> showing && !occluded }
 
+    /**
+     * Event types that affect whether secure camera is active. Only used by [isSecureCameraActive].
+     */
+    private enum class SecureCameraRelatedEventType {
+        KeyguardBecameVisible,
+        PrimaryBouncerBecameVisible,
+        SecureCameraLaunched,
+    }
+
     /** Whether camera is launched over keyguard. */
-    val isSecureCameraActive: Flow<Boolean> by lazy {
-        combine(isKeyguardVisible, primaryBouncerShowing, onCameraLaunchDetected) {
-                isKeyguardVisible,
-                isPrimaryBouncerShowing,
-                cameraLaunchEvent ->
-                when {
-                    isKeyguardVisible -> false
-                    isPrimaryBouncerShowing -> false
-                    else -> cameraLaunchEvent.type == CameraLaunchType.POWER_DOUBLE_TAP
+    val isSecureCameraActive: Flow<Boolean> =
+        merge(
+                onCameraLaunchDetected
+                    .filter { it.type == CameraLaunchType.POWER_DOUBLE_TAP }
+                    .map { SecureCameraRelatedEventType.SecureCameraLaunched },
+                isKeyguardVisible
+                    .filter { it }
+                    .map { SecureCameraRelatedEventType.KeyguardBecameVisible },
+                primaryBouncerShowing
+                    .filter { it }
+                    .map { SecureCameraRelatedEventType.PrimaryBouncerBecameVisible },
+            )
+            .map {
+                when (it) {
+                    SecureCameraRelatedEventType.SecureCameraLaunched -> true
+                    // When secure camera is closed, either the keyguard or the primary bouncer will
+                    // have to show, so those events tell us that secure camera is no longer active.
+                    SecureCameraRelatedEventType.KeyguardBecameVisible -> false
+                    SecureCameraRelatedEventType.PrimaryBouncerBecameVisible -> false
                 }
             }
             .onStart { emit(false) }
-    }
+            .distinctUntilChanged()
 
     /** The approximate location on the screen of the fingerprint sensor, if one is available. */
     val fingerprintSensorLocation: Flow<Point?> = repository.fingerprintSensorLocation

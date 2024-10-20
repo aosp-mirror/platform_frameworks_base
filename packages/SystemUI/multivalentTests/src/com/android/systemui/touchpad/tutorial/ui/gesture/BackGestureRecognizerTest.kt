@@ -61,6 +61,26 @@ class BackGestureRecognizerTest : SysuiTestCase() {
     }
 
     @Test
+    fun triggersProgressRelativeToDistance() {
+        assertProgressWhileMovingFingers(deltaX = -SWIPE_DISTANCE / 2, expectedProgress = 0.5f)
+        assertProgressWhileMovingFingers(deltaX = SWIPE_DISTANCE / 2, expectedProgress = 0.5f)
+        assertProgressWhileMovingFingers(deltaX = -SWIPE_DISTANCE, expectedProgress = 1f)
+        assertProgressWhileMovingFingers(deltaX = SWIPE_DISTANCE, expectedProgress = 1f)
+    }
+
+    private fun assertProgressWhileMovingFingers(deltaX: Float, expectedProgress: Float) {
+        assertStateAfterEvents(
+            events = ThreeFingerGesture.eventsForGestureInProgress { move(deltaX = deltaX) },
+            expectedState = InProgress(progress = expectedProgress),
+        )
+    }
+
+    @Test
+    fun triggeredProgressIsNoBiggerThanOne() {
+        assertProgressWhileMovingFingers(deltaX = SWIPE_DISTANCE * 2, expectedProgress = 1f)
+    }
+
+    @Test
     fun doesntTriggerGestureFinished_onGestureDistanceTooShort() {
         assertStateAfterEvents(
             events = ThreeFingerGesture.swipeLeft(distancePx = SWIPE_DISTANCE / 2),

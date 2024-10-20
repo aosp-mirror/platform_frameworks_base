@@ -78,6 +78,7 @@ public class BubbleViewInfoTaskLegacy extends
     private WeakReference<BubbleExpandedViewManager> mExpandedViewManager;
     private WeakReference<BubbleTaskViewFactory> mTaskViewFactory;
     private WeakReference<BubblePositioner> mPositioner;
+    private WeakReference<BubbleLogger>  mBubbleLogger;
     private WeakReference<BubbleStackView> mStackView;
     private WeakReference<BubbleBarLayerView> mLayerView;
     private BubbleIconFactory mIconFactory;
@@ -95,6 +96,7 @@ public class BubbleViewInfoTaskLegacy extends
             BubbleExpandedViewManager expandedViewManager,
             BubbleTaskViewFactory taskViewFactory,
             BubblePositioner positioner,
+            BubbleLogger bubbleLogger,
             @Nullable BubbleStackView stackView,
             @Nullable BubbleBarLayerView layerView,
             BubbleIconFactory factory,
@@ -107,6 +109,7 @@ public class BubbleViewInfoTaskLegacy extends
         mExpandedViewManager = new WeakReference<>(expandedViewManager);
         mTaskViewFactory = new WeakReference<>(taskViewFactory);
         mPositioner = new WeakReference<>(positioner);
+        mBubbleLogger = new WeakReference<>(bubbleLogger);
         mStackView = new WeakReference<>(stackView);
         mLayerView = new WeakReference<>(layerView);
         mIconFactory = factory;
@@ -124,8 +127,9 @@ public class BubbleViewInfoTaskLegacy extends
         }
         if (mLayerView.get() != null) {
             return BubbleViewInfo.populateForBubbleBar(mContext.get(), mExpandedViewManager.get(),
-                    mTaskViewFactory.get(), mPositioner.get(), mLayerView.get(), mIconFactory,
-                    mBubble, mSkipInflation, mMainExecutor, mBackgroundExecutor);
+                    mTaskViewFactory.get(), mPositioner.get(), mBubbleLogger.get(),
+                    mLayerView.get(), mIconFactory, mBubble, mSkipInflation, mMainExecutor,
+                    mBackgroundExecutor);
         } else {
             return BubbleViewInfo.populate(mContext.get(), mExpandedViewManager.get(),
                     mTaskViewFactory.get(), mPositioner.get(), mStackView.get(), mIconFactory,
@@ -187,6 +191,7 @@ public class BubbleViewInfoTaskLegacy extends
                 BubbleExpandedViewManager expandedViewManager,
                 BubbleTaskViewFactory taskViewFactory,
                 BubblePositioner positioner,
+                BubbleLogger bubbleLogger,
                 BubbleBarLayerView layerView,
                 BubbleIconFactory iconFactory,
                 Bubble b,
@@ -200,9 +205,9 @@ public class BubbleViewInfoTaskLegacy extends
                 LayoutInflater inflater = LayoutInflater.from(c);
                 info.bubbleBarExpandedView = (BubbleBarExpandedView) inflater.inflate(
                         R.layout.bubble_bar_expanded_view, layerView, false /* attachToRoot */);
-                info.bubbleBarExpandedView.initialize(
-                        expandedViewManager, positioner, false /* isOverflow */, bubbleTaskView,
-                        mainExecutor, backgroundExecutor, new RegionSamplingProvider() {
+                info.bubbleBarExpandedView.initialize(expandedViewManager, positioner, bubbleLogger,
+                        false /* isOverflow */, bubbleTaskView, mainExecutor, backgroundExecutor,
+                        new RegionSamplingProvider() {
                             @Override
                             public RegionSamplingHelper createHelper(View sampledView,
                                     RegionSamplingHelper.SamplingCallback callback,

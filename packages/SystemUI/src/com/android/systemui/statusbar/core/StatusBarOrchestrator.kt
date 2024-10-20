@@ -169,11 +169,11 @@ constructor(
     }
 
     private fun createAndAddWindow() {
-        initializeStatusBarFragment()
+        initializeStatusBarRootView()
         statusBarWindowController.attach()
     }
 
-    private fun initializeStatusBarFragment() {
+    private fun initializeStatusBarRootView() {
         statusBarInitializer.statusBarViewUpdatedListener =
             object : StatusBarInitializer.OnStatusBarViewUpdatedListener {
                 override fun onStatusBarViewUpdated(

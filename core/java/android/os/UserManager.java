@@ -772,9 +772,10 @@ public class UserManager {
     public static final String DISALLOW_CONFIG_CREDENTIALS = "no_config_credentials";
 
     /**
-     * When set on the admin user this specifies if the user can remove users.
+     * When set on the admin user this specifies if the user can remove secondary users. Managed
+     * profiles and private profiles can still be removed even if this is set on the admin user.
      * When set on a non-admin secondary user, this specifies if the user can remove itself.
-     * This restriction has no effect on managed profiles.
+     * This restriction has no effect when set on managed profiles.
      * The default value is <code>false</code>.
      *
      * <p>Holders of the permission
@@ -793,7 +794,8 @@ public class UserManager {
      * Specifies if managed profiles of this user can be removed, other than by its profile owner.
      * The default value is <code>false</code>.
      * <p>
-     * This restriction has no effect on managed profiles.
+     * This restriction has no effect on managed profiles, and this restriction does not block the
+     * removal of private profiles of this user.
      *
      * <p>Key for user restrictions.
      * <p>Type: Boolean

@@ -1162,8 +1162,8 @@ public class OomAdjuster {
                     if (opt != null && opt.isFreezeExempt()) {
                         // BIND_WAIVE_PRIORITY and the like get oom_adj 900
                         targetAdj += 0;
-                    } else if (state.hasShownUi() && uiTargetAdj < 15) {
-                        // The most recent 5 apps that have shown UI get 910-914
+                    } else if (state.hasShownUi() && uiTargetAdj < 20) {
+                        // The most recent 10 apps that have shown UI get 910-919
                         targetAdj += uiTargetAdj++;
                     } else if ((state.getSetAdj() >= CACHED_APP_MIN_ADJ)
                             && (state.getLastStateTime()
@@ -3283,7 +3283,12 @@ public class OomAdjuster {
                 baseCapabilities = PROCESS_CAPABILITY_ALL; // BFSL allowed
                 break;
             case PROCESS_STATE_BOUND_TOP:
-                baseCapabilities = PROCESS_CAPABILITY_BFSL;
+                if (app.getActiveInstrumentation() != null) {
+                    baseCapabilities = PROCESS_CAPABILITY_BFSL |
+                            PROCESS_CAPABILITY_ALL_IMPLICIT;
+                } else {
+                    baseCapabilities = PROCESS_CAPABILITY_BFSL;
+                }
                 break;
             case PROCESS_STATE_FOREGROUND_SERVICE:
                 if (app.getActiveInstrumentation() != null) {

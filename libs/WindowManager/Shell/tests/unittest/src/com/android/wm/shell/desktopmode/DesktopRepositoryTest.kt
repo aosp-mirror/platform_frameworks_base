@@ -746,6 +746,18 @@ class DesktopRepositoryTest : ShellTestCase() {
     }
 
     @Test
+    fun removeFreeformTask_removesTaskBoundsBeforeImmersive() {
+        val taskId = 1
+        repo.addActiveTask(THIRD_DISPLAY, taskId)
+        repo.addOrMoveFreeformTaskToTop(THIRD_DISPLAY, taskId)
+        repo.saveBoundsBeforeFullImmersive(taskId, Rect(0, 0, 200, 200))
+
+        repo.removeFreeformTask(THIRD_DISPLAY, taskId)
+
+        assertThat(repo.removeBoundsBeforeFullImmersive(taskId)).isNull()
+    }
+
+    @Test
     fun removeFreeformTask_removesActiveTask() {
         val taskId = 1
         val listener = TestListener()
@@ -802,6 +814,28 @@ class DesktopRepositoryTest : ShellTestCase() {
         val boundsBeforeMaximize = repo.removeBoundsBeforeMaximize(taskId)
 
         assertThat(boundsBeforeMaximize).isNull()
+    }
+
+    @Test
+    fun saveBoundsBeforeImmersive_boundsSavedByTaskId() {
+        val taskId = 1
+        val bounds = Rect(0, 0, 200, 200)
+
+        repo.saveBoundsBeforeFullImmersive(taskId, bounds)
+
+        assertThat(repo.removeBoundsBeforeFullImmersive(taskId)).isEqualTo(bounds)
+    }
+
+    @Test
+    fun removeBoundsBeforeImmersive_returnsNullAfterBoundsRemoved() {
+        val taskId = 1
+        val bounds = Rect(0, 0, 200, 200)
+        repo.saveBoundsBeforeFullImmersive(taskId, bounds)
+        repo.removeBoundsBeforeFullImmersive(taskId)
+
+        val boundsBeforeImmersive = repo.removeBoundsBeforeFullImmersive(taskId)
+
+        assertThat(boundsBeforeImmersive).isNull()
     }
 
     @Test

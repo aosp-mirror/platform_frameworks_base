@@ -537,7 +537,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
      * @return true unless the wallpaper changed during the color computation
      */
     private boolean extractColors(WallpaperData wallpaper) {
-        if (offloadColorExtraction()) return !mImageWallpaper.equals(wallpaper.getComponent());
+        if (offloadColorExtraction()) return true;
         String cropFile = null;
         boolean defaultImageWallpaper = false;
         int wallpaperId;

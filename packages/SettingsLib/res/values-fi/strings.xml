@@ -686,9 +686,11 @@
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Käytössä"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Laitteesi on käynnistettävä uudelleen, jotta muutos tulee voimaan. Käynnistä uudelleen nyt tai peru."</string>
     <string name="media_transfer_wired_headphone_name" msgid="8698668536022665254">"Langalliset kuulokkeet"</string>
-    <string name="media_transfer_headphone_name" msgid="1131962659136578852">"Kuulokkeet"</string>
+    <!-- no translation found for media_transfer_headphone_name (1157798825650178478) -->
+    <skip />
     <string name="media_transfer_usb_audio_name" msgid="1789292056757821355">"USB-audio"</string>
-    <string name="media_transfer_wired_device_mic_name" msgid="7417067197803840965">"Mikrofoniliitäntä"</string>
+    <!-- no translation found for media_transfer_wired_device_mic_name (7115192790725088698) -->
+    <skip />
     <string name="media_transfer_usb_device_mic_name" msgid="7171789543226269822">"USB-mikrofoni"</string>
     <string name="media_transfer_bt_device_mic_name" msgid="1870669402238687618">"BT-mikrofoni"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"Päällä"</string>

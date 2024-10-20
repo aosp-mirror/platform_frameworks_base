@@ -16,13 +16,16 @@
 
 package com.android.systemui.touchpad.tutorial.ui.composable
 
+import android.content.res.Resources
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
 import com.airbnb.lottie.compose.rememberLottieDynamicProperties
 import com.android.compose.theme.LocalAndroidColorScheme
 import com.android.systemui.inputdevice.tutorial.ui.composable.TutorialScreenConfig
 import com.android.systemui.inputdevice.tutorial.ui.composable.rememberColorFilterProperty
 import com.android.systemui.res.R
+import com.android.systemui.touchpad.tutorial.ui.gesture.GestureRecognizer
 import com.android.systemui.touchpad.tutorial.ui.gesture.HomeGestureRecognizer
 
 @Composable
@@ -43,15 +46,17 @@ fun HomeGestureTutorialScreen(onDoneButtonClicked: () -> Unit, onBack: () -> Uni
                     successResId = R.raw.trackpad_home_success,
                 ),
         )
-    val gestureRecognizerProvider =
-        DistanceBasedGestureRecognizerProvider(
-            recognizerFactory = { distanceThresholdPx, gestureStateCallback ->
-                HomeGestureRecognizer(distanceThresholdPx).also {
-                    it.addGestureStateCallback(gestureStateCallback)
-                }
-            }
+    val recognizer = rememberHomeGestureRecognizer(LocalContext.current.resources)
+    GestureTutorialScreen(screenConfig, recognizer, onDoneButtonClicked, onBack)
+}
+
+@Composable
+private fun rememberHomeGestureRecognizer(resources: Resources): GestureRecognizer {
+    val distance =
+        resources.getDimensionPixelSize(
+            com.android.internal.R.dimen.system_gestures_distance_threshold
         )
-    GestureTutorialScreen(screenConfig, gestureRecognizerProvider, onDoneButtonClicked, onBack)
+    return remember(distance) { HomeGestureRecognizer(distance) }
 }
 
 @Composable

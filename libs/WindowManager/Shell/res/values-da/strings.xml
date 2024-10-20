@@ -97,9 +97,9 @@
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Har du problemer med dit kamera?\nTryk for at gendanne det oprindelige format"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Løste det ikke problemet?\nTryk for at fortryde"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Har du ingen problemer med dit kamera? Tryk for at afvise."</string>
-    <string name="windowing_app_handle_education_tooltip" msgid="6398482412956375783">"Tryk for at åbne appmenuen"</string>
-    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="6285279585554484957">"Tryk for at se flere apps på én gang"</string>
-    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="6685429075790085337">"Gå tilbage til fuld skærm via appmenuen"</string>
+    <string name="windowing_app_handle_education_tooltip" msgid="2929643449849791854">"Appmenuen kan findes her"</string>
+    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="2523468503353474095">"Gå til computervenlig visning for at åbne flere apps på én gang"</string>
+    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="5225660258192054132">"Gå tilbage til fuld skærm når som helst via appmenuen"</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"Se og gør mere"</string>
     <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"Træk en anden app hertil for at bruge opdelt skærm"</string>
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Tryk to gange uden for en app for at justere dens placering"</string>

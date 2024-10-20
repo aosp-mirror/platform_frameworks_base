@@ -16,88 +16,52 @@
 
 package com.android.systemui.statusbar.core
 
-import android.view.Display
-import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.display.data.repository.DisplayRepository
+import com.android.systemui.display.data.repository.PerDisplayStore
+import com.android.systemui.display.data.repository.PerDisplayStoreImpl
+import com.android.systemui.display.data.repository.SingleDisplayStore
 import com.android.systemui.statusbar.window.StatusBarWindowControllerStore
-import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
-import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 
 /** Provides per display instances of [StatusBarInitializer]. */
-interface StatusBarInitializerStore {
-    /**
-     * The instance for the default/main display of the device. For example, on a phone or a tablet,
-     * the default display is the internal/built-in display of the device.
-     *
-     * Note that the id of the default display is [Display.DEFAULT_DISPLAY].
-     */
-    val defaultDisplay: StatusBarInitializer
-
-    /**
-     * Returns an instance for a specific display id.
-     *
-     * @throws IllegalArgumentException if [displayId] doesn't match the id of any existing
-     *   displays.
-     */
-    fun forDisplay(displayId: Int): StatusBarInitializer
-}
+interface StatusBarInitializerStore : PerDisplayStore<StatusBarInitializer>
 
 @SysUISingleton
 class MultiDisplayStatusBarInitializerStore
 @Inject
 constructor(
-    @Background private val backgroundApplicationScope: CoroutineScope,
+    @Background backgroundApplicationScope: CoroutineScope,
+    displayRepository: DisplayRepository,
     private val factory: StatusBarInitializer.Factory,
-    private val displayRepository: DisplayRepository,
     private val statusBarWindowControllerStore: StatusBarWindowControllerStore,
-) : StatusBarInitializerStore, CoreStartable {
+) :
+    StatusBarInitializerStore,
+    PerDisplayStoreImpl<StatusBarInitializer>(backgroundApplicationScope, displayRepository) {
 
     init {
         StatusBarConnectedDisplays.assertInNewMode()
     }
 
-    private val perDisplayInitializers = ConcurrentHashMap<Int, StatusBarInitializer>()
-
-    override val defaultDisplay: StatusBarInitializer
-        get() = forDisplay(Display.DEFAULT_DISPLAY)
-
-    override fun forDisplay(displayId: Int): StatusBarInitializer {
-        if (displayRepository.getDisplay(displayId) == null) {
-            throw IllegalArgumentException("Display with id $displayId doesn't exist.")
-        }
-        return perDisplayInitializers.computeIfAbsent(displayId) {
-            factory.create(
-                statusBarWindowController = statusBarWindowControllerStore.forDisplay(displayId)
-            )
-        }
+    override fun createInstanceForDisplay(displayId: Int): StatusBarInitializer {
+        return factory.create(
+            statusBarWindowController = statusBarWindowControllerStore.forDisplay(displayId)
+        )
     }
 
-    override fun start() {
-        backgroundApplicationScope.launch(
-            CoroutineName("MultiDisplayStatusBarInitializerStore#start")
-        ) {
-            displayRepository.displayRemovalEvent.collect { removedDisplayId ->
-                perDisplayInitializers.remove(removedDisplayId)
-            }
-        }
-    }
+    override val instanceClass = StatusBarInitializer::class.java
 }
 
 @SysUISingleton
 class SingleDisplayStatusBarInitializerStore
 @Inject
-constructor(private val defaultInstance: StatusBarInitializer) : StatusBarInitializerStore {
+constructor(defaultInitializer: StatusBarInitializer) :
+    StatusBarInitializerStore,
+    PerDisplayStore<StatusBarInitializer> by SingleDisplayStore(defaultInitializer) {
 
     init {
         StatusBarConnectedDisplays.assertInLegacyMode()
     }
-
-    override val defaultDisplay: StatusBarInitializer = defaultInstance
-
-    override fun forDisplay(displayId: Int): StatusBarInitializer = defaultInstance
 }

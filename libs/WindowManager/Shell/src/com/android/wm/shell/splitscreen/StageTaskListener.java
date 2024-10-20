@@ -244,8 +244,9 @@ public class StageTaskListener implements ShellTaskOrganizer.TaskListener {
                 return;
             }
             mChildrenTaskInfo.put(taskInfo.taskId, taskInfo);
+            mVisible = taskInfo.isVisible && taskInfo.isVisibleRequested;
             mCallbacks.onChildTaskStatusChanged(this, taskInfo.taskId, true /* present */,
-                    taskInfo.isVisible && taskInfo.isVisibleRequested);
+                    mVisible);
         } else {
             throw new IllegalArgumentException(this + "\n Unknown task: " + taskInfo
                     + "\n mRootTaskInfo: " + mRootTaskInfo);

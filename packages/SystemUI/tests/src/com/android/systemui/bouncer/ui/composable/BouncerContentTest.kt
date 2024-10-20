@@ -88,7 +88,7 @@ class BouncerContentTest : SysuiTestCase() {
                     },
                 layout = BouncerSceneLayout.BESIDE_USER_SWITCHER,
                 modifier = Modifier.fillMaxSize().testTag("BouncerContent"),
-                dialogFactory = bouncerDialogFactory
+                dialogFactory = bouncerDialogFactory,
             )
         }
     }
@@ -110,11 +110,19 @@ class BouncerContentTest : SysuiTestCase() {
                             }
                         }
                     ) {
-                        feature(hasTestTag("UserSwitcher"), positionInRoot, "userSwitcher_pos")
-                        feature(hasTestTag("UserSwitcher"), alpha, "userSwitcher_alpha")
+                        feature(
+                            hasTestTag("com.android.systemui:id/UserSwitcher"),
+                            positionInRoot,
+                            "userSwitcher_pos",
+                        )
+                        feature(
+                            hasTestTag("com.android.systemui:id/UserSwitcher"),
+                            alpha,
+                            "userSwitcher_alpha",
+                        )
                         feature(hasTestTag("FoldAware"), positionInRoot, "foldAware_pos")
                         feature(hasTestTag("FoldAware"), alpha, "foldAware_alpha")
-                    }
+                    },
                 )
 
             assertThat(motion).timeSeriesMatchesGolden()

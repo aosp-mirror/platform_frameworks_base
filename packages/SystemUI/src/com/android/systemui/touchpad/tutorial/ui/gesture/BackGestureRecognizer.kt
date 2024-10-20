@@ -16,10 +16,14 @@
 
 package com.android.systemui.touchpad.tutorial.ui.gesture
 
+import android.util.MathUtils
 import android.view.MotionEvent
 import kotlin.math.abs
 
-/** Recognizes touchpad back gesture, that is three fingers swiping left or right */
+/**
+ * Recognizes touchpad back gesture, that is - using three fingers on touchpad - swiping left or
+ * right.
+ */
 class BackGestureRecognizer(private val gestureDistanceThresholdPx: Int) : GestureRecognizer {
 
     private val distanceTracker = DistanceTracker()
@@ -36,7 +40,7 @@ class BackGestureRecognizer(private val gestureDistanceThresholdPx: Int) : Gestu
             gestureStateChangedCallback,
             gestureState,
             isFinished = { abs(it.deltaX) >= gestureDistanceThresholdPx },
-            progress = { 0f },
+            progress = { MathUtils.saturate(abs(it.deltaX / gestureDistanceThresholdPx)) },
         )
     }
 }

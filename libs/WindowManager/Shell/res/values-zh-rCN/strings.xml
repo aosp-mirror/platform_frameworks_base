@@ -97,9 +97,9 @@
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"相机有问题？\n点按即可整修"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"没有解决此问题？\n点按即可恢复"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"相机没有问题？点按即可忽略。"</string>
-    <string name="windowing_app_handle_education_tooltip" msgid="6398482412956375783">"点按可打开应用菜单"</string>
-    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="6285279585554484957">"点按可同时显示多个应用"</string>
-    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="6685429075790085337">"从应用菜单可返回到全屏"</string>
+    <string name="windowing_app_handle_education_tooltip" msgid="2929643449849791854">"您可以在此处找到应用菜单"</string>
+    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="2523468503353474095">"进入桌面版视图可同时打开多个应用"</string>
+    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="5225660258192054132">"随时从应用菜单返回全屏模式"</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"查看和处理更多任务"</string>
     <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"拖入另一个应用，即可使用分屏模式"</string>
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"在某个应用外连续点按两次，即可调整它的位置"</string>

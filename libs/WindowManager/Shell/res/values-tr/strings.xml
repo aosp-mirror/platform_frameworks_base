@@ -97,9 +97,9 @@
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Kameranızda sorun mu var?\nDüzeltmek için dokunun"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Bu işlem sorunu düzeltmedi mi?\nİşlemi geri almak için dokunun"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Kameranızda sorun yok mu? Kapatmak için dokunun."</string>
-    <string name="windowing_app_handle_education_tooltip" msgid="6398482412956375783">"Uygulama menüsünü açmak için dokunun"</string>
-    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="6285279585554484957">"Birden fazla uygulamayı birlikte göstermek için dokunun"</string>
-    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="6685429075790085337">"Uygulama menüsünden tam ekrana dönün"</string>
+    <string name="windowing_app_handle_education_tooltip" msgid="2929643449849791854">"Uygulama menüsünü burada bulabilirsiniz"</string>
+    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="2523468503353474095">"Birden fazla uygulamayı birlikte açmak için masaüstü görünümüne geçin"</string>
+    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="5225660258192054132">"Uygulama menüsünden dilediğiniz zaman tam ekrana dönebilirsiniz"</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"Daha fazlasını görün ve yapın"</string>
     <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"Bölünmüş ekran için başka bir uygulamayı sürükleyin"</string>
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Yeniden konumlandırmak için uygulamanın dışına iki kez dokunun"</string>

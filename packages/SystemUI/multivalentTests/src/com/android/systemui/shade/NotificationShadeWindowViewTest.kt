@@ -111,8 +111,6 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
     @Mock private lateinit var dumpManager: DumpManager
     @Mock private lateinit var pulsingGestureListener: PulsingGestureListener
     @Mock private lateinit var sysUiUnfoldComponent: SysUIUnfoldComponent
-    @Mock
-    private lateinit var mLockscreenHostedDreamGestureListener: LockscreenHostedDreamGestureListener
     @Mock private lateinit var keyguardBouncerComponentFactory: KeyguardBouncerComponent.Factory
     @Mock private lateinit var keyguardBouncerComponent: KeyguardBouncerComponent
     @Mock
@@ -156,7 +154,6 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
 
         val featureFlags = FakeFeatureFlags()
         featureFlags.set(Flags.SPLIT_SHADE_SUBPIXEL_OPTIMIZATION, true)
-        featureFlags.set(Flags.LOCKSCREEN_WALLPAPER_DREAM_ENABLED, false)
         mSetFlagsRule.enableFlags(AConfigFlags.FLAG_REVAMPED_BOUNCER_MESSAGES)
         testScope = TestScope()
         controller =
@@ -184,7 +181,6 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
                 shadeLogger,
                 dumpManager,
                 pulsingGestureListener,
-                mLockscreenHostedDreamGestureListener,
                 keyguardTransitionInteractor,
                 mGlanceableHubContainerController,
                 NotificationLaunchAnimationInteractor(NotificationLaunchAnimationRepository()),

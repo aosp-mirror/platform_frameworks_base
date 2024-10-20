@@ -258,6 +258,7 @@ class BroadcastController {
             final StringBuilder sb = new StringBuilder("registerReceiver: ");
             sb.append(Binder.getCallingUid()); sb.append('/');
             sb.append(receiverId == null ? "null" : receiverId); sb.append('/');
+            sb.append("p:"); sb.append(filter.getPriority()); sb.append('/');
             final int actionsCount = filter.safeCountActions();
             if (actionsCount > 0) {
                 for (int i = 0; i < actionsCount; ++i) {

@@ -60,7 +60,7 @@ public class SystemFeaturesGeneratorTest {
         assertThat(RwNoFeatures.maybeHasFeature(PackageManager.FEATURE_VULKAN, 0)).isNull();
         assertThat(RwNoFeatures.maybeHasFeature(PackageManager.FEATURE_AUTO, 0)).isNull();
         assertThat(RwNoFeatures.maybeHasFeature("com.arbitrary.feature", 0)).isNull();
-        assertThat(RwNoFeatures.getCompileTimeAvailableFeatures()).isEmpty();
+        assertThat(RwNoFeatures.getReadOnlySystemEnabledFeatures()).isEmpty();
     }
 
     @Test
@@ -72,7 +72,7 @@ public class SystemFeaturesGeneratorTest {
         assertThat(RoNoFeatures.maybeHasFeature(PackageManager.FEATURE_VULKAN, 0)).isNull();
         assertThat(RoNoFeatures.maybeHasFeature(PackageManager.FEATURE_AUTO, 0)).isNull();
         assertThat(RoNoFeatures.maybeHasFeature("com.arbitrary.feature", 0)).isNull();
-        assertThat(RoNoFeatures.getCompileTimeAvailableFeatures()).isEmpty();
+        assertThat(RoNoFeatures.getReadOnlySystemEnabledFeatures()).isEmpty();
 
         // Also ensure we fall back to the PackageManager for feature APIs without an accompanying
         // versioned feature definition.
@@ -106,7 +106,7 @@ public class SystemFeaturesGeneratorTest {
         assertThat(RwFeatures.maybeHasFeature(PackageManager.FEATURE_VULKAN, 0)).isNull();
         assertThat(RwFeatures.maybeHasFeature(PackageManager.FEATURE_AUTO, 0)).isNull();
         assertThat(RwFeatures.maybeHasFeature("com.arbitrary.feature", 0)).isNull();
-        assertThat(RwFeatures.getCompileTimeAvailableFeatures()).isEmpty();
+        assertThat(RwFeatures.getReadOnlySystemEnabledFeatures()).isEmpty();
     }
 
     @Test
@@ -163,7 +163,7 @@ public class SystemFeaturesGeneratorTest {
         assertThat(RoFeatures.maybeHasFeature("com.arbitrary.feature", 100)).isNull();
         assertThat(RoFeatures.maybeHasFeature("", 0)).isNull();
 
-        Map<String, FeatureInfo> compiledFeatures = RoFeatures.getCompileTimeAvailableFeatures();
+        Map<String, FeatureInfo> compiledFeatures = RoFeatures.getReadOnlySystemEnabledFeatures();
         assertThat(compiledFeatures.keySet())
                 .containsExactly(PackageManager.FEATURE_WATCH, PackageManager.FEATURE_WIFI);
         assertThat(compiledFeatures.get(PackageManager.FEATURE_WATCH).version).isEqualTo(1);

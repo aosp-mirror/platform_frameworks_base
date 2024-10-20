@@ -4459,6 +4459,7 @@
 
   <java-symbol type="string" name="config_factoryResetPackage" />
   <java-symbol type="array" name="config_highRefreshRateBlacklist" />
+  <java-symbol type="array" name="config_angleAllowList" />
   <java-symbol type="array" name="config_forceSlowJpegModeList" />
   <java-symbol type="array" name="pause_wallpaper_render_when_state_change" />
   <java-symbol type="bool" name="config_pauseWallpaperRenderWhenStateChangeEnabled" />
@@ -5300,6 +5301,7 @@
   <java-symbol type="string" name="config_powerStatsThrottlePeriods" />
   <java-symbol type="integer" name="config_powerStatsAggregationPeriod" />
   <java-symbol type="integer" name="config_aggregatedPowerStatsSpanDuration" />
+  <java-symbol type="integer" name="config_accumulatedBatteryUsageStatsSpanSize" />
 
   <java-symbol name="materialColorOnSecondaryFixedVariant" type="attr"/>
   <java-symbol name="materialColorOnTertiaryFixedVariant" type="attr"/>
