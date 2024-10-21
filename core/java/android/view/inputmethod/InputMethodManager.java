@@ -2591,6 +2591,17 @@ public final class InputMethodManager {
                 // TODO(b/322992891) handle case of HIDE_IMPLICIT_ONLY
                 final var viewRootImpl = servedView.getViewRootImpl();
                 if (viewRootImpl != null) {
+                    Handler vh = servedView.getHandler();
+                    if (vh == null) {
+                        // If the view doesn't have a handler, something has changed out from
+                        // under us. The current input has been closed before (from checkFocus).
+                        ImeTracker.forLogging().onFailed(statsToken,
+                                ImeTracker.PHASE_CLIENT_VIEW_HANDLER_AVAILABLE);
+                        return false;
+                    }
+                    ImeTracker.forLogging().onProgress(statsToken,
+                            ImeTracker.PHASE_CLIENT_VIEW_HANDLER_AVAILABLE);
+
                     if (resultReceiver != null) {
                         final boolean imeReqVisible =
                                 (viewRootImpl.getInsetsController().getRequestedVisibleTypes()
@@ -2599,7 +2610,15 @@ public final class InputMethodManager {
                                 !imeReqVisible ? InputMethodManager.RESULT_UNCHANGED_HIDDEN
                                         : InputMethodManager.RESULT_HIDDEN, null);
                     }
-                    viewRootImpl.getInsetsController().hide(WindowInsets.Type.ime());
+                    if (vh.getLooper() != Looper.myLooper()) {
+                        // The view is running on a different thread than our own, so
+                        // we need to reschedule our work for over there.
+                        if (DEBUG) Log.v(TAG, "Hiding soft input: reschedule to view thread");
+                        vh.post(() -> viewRootImpl.getInsetsController().hide(
+                                WindowInsets.Type.ime()));
+                    } else {
+                        viewRootImpl.getInsetsController().hide(WindowInsets.Type.ime());
+                    }
                 }
                 return true;
             } else {
