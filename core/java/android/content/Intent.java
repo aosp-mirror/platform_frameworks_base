@@ -20,6 +20,7 @@ import static android.app.sdksandbox.SdkSandboxManager.ACTION_START_SANDBOXED_AC
 import static android.content.ContentProvider.maybeAddUserId;
 import static android.os.Flags.FLAG_ALLOW_PRIVATE_PROFILE;
 import static android.security.Flags.FLAG_FRP_ENFORCEMENT;
+import static android.security.Flags.FLAG_PREVENT_INTENT_REDIRECT;
 import static android.security.Flags.preventIntentRedirect;
 
 import android.Manifest;
@@ -12295,6 +12296,20 @@ public class Intent implements Parcelable, Cloneable {
         // otherwise, the logic to mark missing token would run before
         // mark trusted creator token present.
         mExtras.setIsIntentExtra();
+    }
+
+    /**
+     * When an intent comes from another app or component as an embedded extra intent, the system
+     * creates a token to identify the creator of this foreign intent. If this token is missing or
+     * invalid, the system will block the launch of this intent. If it contains a valid token, the
+     * system will perform verification against the creator to block launching target it has no
+     * permission to launch or block it from granting URI access to the tagert it cannot access.
+     * This method provides a way to opt out this feature.
+     */
+    @FlaggedApi(FLAG_PREVENT_INTENT_REDIRECT)
+    public void removeLaunchSecurityProtection() {
+        mExtendedFlags &= ~EXTENDED_FLAG_MISSING_CREATOR_OR_INVALID_TOKEN;
+        removeCreatorTokenInfo();
     }
 
     public void writeToParcel(Parcel out, int flags) {
