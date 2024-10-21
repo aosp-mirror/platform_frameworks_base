@@ -31,7 +31,6 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class NotificationScrimNestedScrollConnectionTest : SysuiTestCase() {
     private var isStarted = false
-    private var wasStarted = false
     private var scrimOffset = 0f
     private var contentHeight = 0f
     private var isCurrentGestureOverscroll = false
@@ -47,10 +46,7 @@ class NotificationScrimNestedScrollConnectionTest : SysuiTestCase() {
             minVisibleScrimHeight = { MIN_VISIBLE_SCRIM_HEIGHT },
             isCurrentGestureOverscroll = { isCurrentGestureOverscroll },
             onStart = { isStarted = true },
-            onStop = {
-                wasStarted = true
-                isStarted = false
-            },
+            onStop = { isStarted = false },
         )
 
     @Test
@@ -169,7 +165,6 @@ class NotificationScrimNestedScrollConnectionTest : SysuiTestCase() {
             )
 
         assertThat(offsetConsumed).isEqualTo(Offset.Zero)
-        assertThat(wasStarted).isEqualTo(false)
         assertThat(isStarted).isEqualTo(false)
     }
 
@@ -186,9 +181,7 @@ class NotificationScrimNestedScrollConnectionTest : SysuiTestCase() {
             )
 
         assertThat(offsetConsumed).isEqualTo(Offset.Zero)
-        // Returning 0 offset will immediately stop the connection
-        assertThat(wasStarted).isEqualTo(true)
-        assertThat(isStarted).isEqualTo(false)
+        assertThat(isStarted).isEqualTo(true)
     }
 
     @Test
