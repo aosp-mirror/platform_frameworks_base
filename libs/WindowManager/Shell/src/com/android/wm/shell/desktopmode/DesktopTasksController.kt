@@ -515,7 +515,6 @@ class DesktopTasksController(
         wct.setWindowingMode(task.token, WINDOWING_MODE_UNDEFINED)
 
         transitions.startTransition(TRANSIT_CHANGE, wct, null /* handler */)
-
     }
 
     private fun exitSplitIfApplicable(wct: WindowContainerTransaction, taskInfo: RunningTaskInfo) {
@@ -657,7 +656,6 @@ class DesktopTasksController(
         wct.reparent(task.token, displayAreaInfo.token, true /* onTop */)
 
         transitions.startTransition(TRANSIT_CHANGE, wct, null /* handler */)
-
     }
 
     /** Moves a task in/out of full immersive state within the desktop. */
@@ -733,7 +731,6 @@ class DesktopTasksController(
         val wct = WindowContainerTransaction().setBounds(taskInfo.token, destinationBounds)
 
         toggleResizeDesktopTaskTransitionHandler.startTransition(wct)
-
     }
 
     private fun getMaximizeBounds(taskInfo: RunningTaskInfo, stableBounds: Rect): Rect {
@@ -845,7 +842,6 @@ class DesktopTasksController(
         val wct = WindowContainerTransaction().setBounds(taskInfo.token, destinationBounds)
 
         toggleResizeDesktopTaskTransitionHandler.startTransition(wct, currentDragBounds)
-
     }
 
     @VisibleForTesting
