@@ -164,8 +164,8 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
      */
     private BackTouchTracker mQueuedTracker = new BackTouchTracker();
 
-    private final FocusTaskTrackerObserver mFocusTaskTrackerObserver =
-            new FocusTaskTrackerObserver();
+    private final BackTransitionObserver mBackTransitionObserver =
+            new BackTransitionObserver();
 
     private final Runnable mAnimationTimeoutRunnable = () -> {
         ProtoLog.w(WM_SHELL_BACK_PREVIEW, "Animation didn't finish in %d ms. Resetting...",
@@ -271,7 +271,8 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         mBackTransitionHandler = new BackTransitionHandler();
         mTransitions.addHandler(mBackTransitionHandler);
         mHandler = handler;
-        mTransitions.registerObserver(mFocusTaskTrackerObserver);
+        mTransitions.registerObserver(mBackTransitionObserver);
+        mBackTransitionObserver.setBackTransitionHandler(mBackTransitionHandler);
         updateTouchableArea();
     }
 
@@ -736,7 +737,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
      * @return Latest task id which back gesture has occurred on it.
      */
     public int getLatestTriggerBackTask() {
-        return mFocusTaskTrackerObserver.mFocusedTaskId;
+        return mBackTransitionObserver.mFocusedTaskId;
     }
 
     /**
@@ -804,7 +805,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         ProtoLog.d(WM_SHELL_BACK_PREVIEW, "onGestureFinished() mTriggerBack == %s", triggerBack);
 
         if (triggerBack) {
-            mFocusTaskTrackerObserver.update(mBackNavigationInfo != null
+            mBackTransitionObserver.update(mBackNavigationInfo != null
                             ? mBackNavigationInfo.getFocusedTaskId()
                             : INVALID_TASK_ID);
         }
@@ -1234,6 +1235,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
             }
 
             if (shouldCancelAnimation(info)) {
+                mPrepareOpenTransition = null;
                 return false;
             }
 
@@ -1663,9 +1665,13 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
     }
 
     // Record the latest back gesture happen on which task.
-    static class FocusTaskTrackerObserver implements Transitions.TransitionObserver {
+    static class BackTransitionObserver implements Transitions.TransitionObserver {
         int mFocusedTaskId = INVALID_TASK_ID;
-        IBinder mMonitorBinder;
+        IBinder mFocusTaskMonitorToken;
+        private BackTransitionHandler mBackTransitionHandler;
+        void setBackTransitionHandler(BackTransitionHandler handler) {
+            mBackTransitionHandler = handler;
+        }
 
         void update(int focusedTaskId) {
             mFocusedTaskId = focusedTaskId;
@@ -1681,27 +1687,33 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
             for (int i = info.getChanges().size() - 1; i >= 0; --i) {
                 final TransitionInfo.Change c = info.getChanges().get(i);
                 if (c.getTaskInfo() != null && c.getTaskInfo().taskId == mFocusedTaskId) {
-                    mMonitorBinder = transition;
+                    mFocusTaskMonitorToken = transition;
                     break;
                 }
             }
             // Transition happen but the task isn't involved, reset.
-            if (mMonitorBinder == null) {
+            if (mFocusTaskMonitorToken == null) {
                 mFocusedTaskId = INVALID_TASK_ID;
             }
         }
 
         @Override
         public void onTransitionMerged(@NonNull IBinder merged, @NonNull IBinder playing) {
-            if (mMonitorBinder == merged) {
-                mMonitorBinder = playing;
+            if (mFocusTaskMonitorToken == merged) {
+                mFocusTaskMonitorToken = playing;
+            }
+            if (mBackTransitionHandler.mClosePrepareTransition == merged) {
+                mBackTransitionHandler.mClosePrepareTransition = null;
             }
         }
 
         @Override
         public void onTransitionFinished(@NonNull IBinder transition, boolean aborted) {
-            if (mMonitorBinder == transition) {
+            if (mFocusTaskMonitorToken == transition) {
                 mFocusedTaskId = INVALID_TASK_ID;
+            }
+            if (mBackTransitionHandler.mClosePrepareTransition == transition) {
+                mBackTransitionHandler.mClosePrepareTransition = null;
             }
         }
     }
