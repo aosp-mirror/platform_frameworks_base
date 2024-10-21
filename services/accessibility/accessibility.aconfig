@@ -192,6 +192,16 @@ flag {
 }
 
 flag {
+    name: "package_monitor_dedicated_thread"
+    namespace: "accessibility"
+    description: "Runs the A11yManagerService PackageMonitor on a dedicated thread"
+    bug: "348138695"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "manager_package_monitor_logic_fix"
     namespace: "accessibility"
     description: "Corrects the return values of the HandleForceStop function"

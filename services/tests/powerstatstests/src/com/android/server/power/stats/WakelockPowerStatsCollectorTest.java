@@ -65,12 +65,14 @@ public class WakelockPowerStatsCollectorTest {
     private WakelockPowerStatsLayout mStatsLayout = new WakelockPowerStatsLayout();
 
     @Before
-    public void setup() {
-        mBatteryStats = new MockBatteryStatsImpl(mClock);
+    public void setup() throws Throwable {
+        mBatteryStats = mStatsRule.getBatteryStats();
         mBatteryStats.setPowerStatsCollectorEnabled(POWER_COMPONENT_WAKELOCK, true);
         mBatteryStats.getPowerStatsCollector(POWER_COMPONENT_WAKELOCK)
                 .addConsumer(ps -> mPowerStats = ps);
         mBatteryStats.onSystemReady(mock(Context.class));
+        // onSystemReady schedules the initial power stats collection. Wait for it to finish
+        mStatsRule.waitForBackgroundThread();
     }
 
     @Test
@@ -78,9 +80,6 @@ public class WakelockPowerStatsCollectorTest {
     public void collectStats() {
         PowerStatsCollector powerStatsCollector = mBatteryStats.getPowerStatsCollector(
                 POWER_COMPONENT_WAKELOCK);
-
-        // Establish a baseline
-        powerStatsCollector.collectAndDeliverStats();
 
         mBatteryStats.forceRecordAllHistory();
 

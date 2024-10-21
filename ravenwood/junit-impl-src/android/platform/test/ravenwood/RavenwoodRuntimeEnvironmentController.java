@@ -137,9 +137,6 @@ public class RavenwoodRuntimeEnvironmentController {
 
     private static RavenwoodConfig sConfig;
     private static RavenwoodSystemProperties sProps;
-    // TODO: use the real UiAutomation class instead of a mock
-    private static UiAutomation sMockUiAutomation;
-    private static Set<String> sAdoptedPermissions = Collections.emptySet();
     private static boolean sInitialized = false;
 
     /**
@@ -187,7 +184,6 @@ public class RavenwoodRuntimeEnvironmentController {
                 "androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner");
 
         assertMockitoVersion();
-        sMockUiAutomation = createMockUiAutomation();
     }
 
     /**
@@ -273,7 +269,7 @@ public class RavenwoodRuntimeEnvironmentController {
 
         // Prepare other fields.
         config.mInstrumentation = new Instrumentation();
-        config.mInstrumentation.basicInit(instContext, targetContext, sMockUiAutomation);
+        config.mInstrumentation.basicInit(instContext, targetContext, createMockUiAutomation());
         InstrumentationRegistry.registerInstance(config.mInstrumentation, Bundle.EMPTY);
 
         RavenwoodSystemServer.init(config);
@@ -318,7 +314,6 @@ public class RavenwoodRuntimeEnvironmentController {
             ((RavenwoodContext) config.mTargetContext).cleanUp();
             config.mTargetContext = null;
         }
-        sMockUiAutomation.dropShellPermissionIdentity();
 
         Looper.getMainLooper().quit();
         Looper.clearMainLooperForTest();
@@ -421,28 +416,30 @@ public class RavenwoodRuntimeEnvironmentController {
                 () -> Class.forName("org.mockito.Matchers"));
     }
 
+    // TODO: use the real UiAutomation class instead of a mock
     private static UiAutomation createMockUiAutomation() {
+        final Set[] adoptedPermission = { Collections.emptySet() };
         var mock = mock(UiAutomation.class, inv -> {
             HostTestUtils.onThrowMethodCalled();
             return null;
         });
         doAnswer(inv -> {
-            sAdoptedPermissions = UiAutomation.ALL_PERMISSIONS;
+            adoptedPermission[0] = UiAutomation.ALL_PERMISSIONS;
             return null;
         }).when(mock).adoptShellPermissionIdentity();
         doAnswer(inv -> {
             if (inv.getArgument(0) == null) {
-                sAdoptedPermissions = UiAutomation.ALL_PERMISSIONS;
+                adoptedPermission[0] = UiAutomation.ALL_PERMISSIONS;
             } else {
-                sAdoptedPermissions = (Set) Set.of(inv.getArguments());
+                adoptedPermission[0] = Set.of(inv.getArguments());
             }
             return null;
         }).when(mock).adoptShellPermissionIdentity(any());
         doAnswer(inv -> {
-            sAdoptedPermissions = Collections.emptySet();
+            adoptedPermission[0] = Collections.emptySet();
             return null;
         }).when(mock).dropShellPermissionIdentity();
-        doAnswer(inv -> sAdoptedPermissions).when(mock).getAdoptedShellPermissions();
+        doAnswer(inv -> adoptedPermission[0]).when(mock).getAdoptedShellPermissions();
         return mock;
     }
 

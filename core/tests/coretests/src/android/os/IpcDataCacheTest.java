@@ -17,6 +17,7 @@
 package android.os;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import android.multiuser.Flags;
 import android.platform.test.annotations.IgnoreUnderRavenwood;
@@ -26,6 +27,7 @@ import android.platform.test.ravenwood.RavenwoodRule;
 import androidx.test.filters.SmallTest;
 
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -92,14 +94,20 @@ public class IpcDataCacheTest {
         public Boolean apply(Integer x) {
             return mServer.query(x);
         }
+
         @Override
         public boolean shouldBypassCache(Integer x) {
             return x % 13 == 0;
         }
     }
 
-    // Clear the test mode after every test, in case this process is used for other
-    // tests. This also resets the test property map.
+    // Prepare for testing.
+    @Before
+    public void setUp() throws Exception {
+        IpcDataCache.setTestMode(true);
+    }
+
+    // Ensure all test configurations are cleared.
     @After
     public void tearDown() throws Exception {
         IpcDataCache.setTestMode(false);
@@ -118,9 +126,6 @@ public class IpcDataCacheTest {
         IpcDataCache<Integer, Boolean> testCache =
                 new IpcDataCache<>(4, MODULE, API, "testCache1",
                         new ServerQuery(tester));
-
-        IpcDataCache.setTestMode(true);
-        testCache.testPropertyName();
 
         tester.verify(0);
         assertEquals(tester.value(3), testCache.query(3));
@@ -165,9 +170,6 @@ public class IpcDataCacheTest {
         IpcDataCache<Integer, Boolean> testCache =
                 new IpcDataCache<>(config, (x) -> tester.query(x, x % 10 == 9));
 
-        IpcDataCache.setTestMode(true);
-        testCache.testPropertyName();
-
         tester.verify(0);
         assertEquals(tester.value(3), testCache.query(3));
         tester.verify(1);
@@ -204,9 +206,6 @@ public class IpcDataCacheTest {
         IpcDataCache.Config config = new IpcDataCache.Config(4, MODULE, API, "testCache3");
         IpcDataCache<Integer, Boolean> testCache =
                 new IpcDataCache<>(config, (x) -> tester.query(x), (x) -> x % 9 == 0);
-
-        IpcDataCache.setTestMode(true);
-        testCache.testPropertyName();
 
         tester.verify(0);
         assertEquals(tester.value(3), testCache.query(3));
@@ -313,8 +312,6 @@ public class IpcDataCacheTest {
         TestCache(String module, String api, TestQuery query) {
             super(4, module, api, "testCache7", query);
             mQuery = query;
-            setTestMode(true);
-            testPropertyName();
         }
 
         TestCache(IpcDataCache.Config c) {
@@ -324,8 +321,6 @@ public class IpcDataCacheTest {
         TestCache(IpcDataCache.Config c, TestQuery query) {
             super(c, query);
             mQuery = query;
-            setTestMode(true);
-            testPropertyName();
         }
 
         int getRecomputeCount() {
@@ -455,5 +450,53 @@ public class IpcDataCacheTest {
         IpcDataCache.Config e = a.child("nameE");
         TestCache ec = new TestCache(e);
         assertEquals(ec.isDisabled(), true);
+    }
+
+    // Verify that test mode works properly.
+    @Test
+    public void testTestMode() {
+        // Create a cache that will write a system nonce.
+        TestCache sysCache = new TestCache(IpcDataCache.MODULE_SYSTEM, "mode1");
+        try {
+            // Invalidate the cache, which writes the system property.  There must be a permission
+            // failure.
+            sysCache.invalidateCache();
+            fail("expected permission failure");
+        } catch (RuntimeException e) {
+            // The expected exception is a bare RuntimeException.  The test does not attempt to
+            // validate the text of the exception message.
+        }
+
+        sysCache.testPropertyName();
+        // Invalidate the cache.  This must succeed because the property has been marked for
+        // testing.
+        sysCache.invalidateCache();
+
+        // Create a cache that uses MODULE_TEST.  Invalidation succeeds whether or not the
+        // property is tagged as being tested.
+        TestCache testCache = new TestCache(IpcDataCache.MODULE_TEST, "mode2");
+        testCache.invalidateCache();
+        testCache.testPropertyName();
+        testCache.invalidateCache();
+
+        // Clear test mode.  This fails if test mode is not enabled.
+        IpcDataCache.setTestMode(false);
+        try {
+            IpcDataCache.setTestMode(false);
+            fail("expected an IllegalStateException");
+        } catch (IllegalStateException e) {
+            // The expected exception.
+        }
+        // Configuring a property for testing must fail if test mode is false.
+        TestCache cache2 = new TestCache(IpcDataCache.MODULE_SYSTEM, "mode3");
+        try {
+            cache2.testPropertyName();
+            fail("expected an IllegalStateException");
+        } catch (IllegalStateException e) {
+            // The expected exception.
+        }
+
+        // Re-enable test mode (so that the cleanup for the test does not throw).
+        IpcDataCache.setTestMode(true);
     }
 }

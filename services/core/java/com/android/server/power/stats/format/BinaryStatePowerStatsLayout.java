@@ -21,7 +21,9 @@ import com.android.internal.os.PowerStats;
 public class BinaryStatePowerStatsLayout extends EnergyConsumerPowerStatsLayout {
     public BinaryStatePowerStatsLayout() {
         addDeviceSectionUsageDuration();
+        addDeviceSectionPowerEstimate();
         addUidSectionUsageDuration();
+        addUidSectionPowerEstimate();
     }
 
     public BinaryStatePowerStatsLayout(PowerStats.Descriptor descriptor) {
