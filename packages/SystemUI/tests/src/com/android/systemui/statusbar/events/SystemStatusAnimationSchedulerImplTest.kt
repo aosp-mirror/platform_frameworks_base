@@ -39,18 +39,14 @@ import com.android.systemui.statusbar.events.shared.model.SystemEventAnimationSt
 import com.android.systemui.statusbar.phone.StatusBarContentInsetsProvider
 import com.android.systemui.statusbar.window.StatusBarWindowController
 import com.android.systemui.statusbar.window.StatusBarWindowControllerStore
-import com.android.systemui.util.mockito.any
-import com.android.systemui.util.mockito.eq
-import com.android.systemui.util.mockito.mock
-import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
-import junit.framework.Assert.assertEquals
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -61,6 +57,10 @@ import org.mockito.Mockito.never
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 
 @RunWith(AndroidJUnit4::class)
 @RunWithLooper(setAsMainLooper = true)
@@ -384,7 +384,7 @@ class SystemStatusAnimationSchedulerImplTest : SysuiTestCase() {
         val accessibilityDesc = "Some desc"
         val mockView = mock<View>()
         val mockAnimatableView =
-            mock<BackgroundAnimatableView> { whenever(view).thenReturn(mockView) }
+            mock<BackgroundAnimatableView> { whenever(it.view).thenReturn(mockView) }
 
         scheduleFakeEventWithView(
             accessibilityDesc,
@@ -403,7 +403,7 @@ class SystemStatusAnimationSchedulerImplTest : SysuiTestCase() {
         val accessibilityDesc = null
         val mockView = mock<View>()
         val mockAnimatableView =
-            mock<BackgroundAnimatableView> { whenever(view).thenReturn(mockView) }
+            mock<BackgroundAnimatableView> { whenever(it.view).thenReturn(mockView) }
 
         scheduleFakeEventWithView(
             accessibilityDesc,
@@ -422,7 +422,7 @@ class SystemStatusAnimationSchedulerImplTest : SysuiTestCase() {
         val accessibilityDesc = "something"
         val mockView = mock<View>()
         val mockAnimatableView =
-            mock<BackgroundAnimatableView> { whenever(view).thenReturn(mockView) }
+            mock<BackgroundAnimatableView> { whenever(it.view).thenReturn(mockView) }
 
         scheduleFakeEventWithView(
             accessibilityDesc,
