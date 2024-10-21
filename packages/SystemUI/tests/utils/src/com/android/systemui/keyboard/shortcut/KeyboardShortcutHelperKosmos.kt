@@ -33,7 +33,6 @@ import com.android.systemui.keyboard.shortcut.data.source.MultitaskingShortcutsS
 import com.android.systemui.keyboard.shortcut.data.source.SystemShortcutsSource
 import com.android.systemui.keyboard.shortcut.domain.interactor.ShortcutHelperCategoriesInteractor
 import com.android.systemui.keyboard.shortcut.domain.interactor.ShortcutHelperStateInteractor
-import com.android.systemui.keyboard.shortcut.ui.ShortcutHelperActivityStarter
 import com.android.systemui.keyboard.shortcut.ui.viewmodel.ShortcutHelperViewModel
 import com.android.systemui.keyguard.data.repository.fakeCommandQueue
 import com.android.systemui.kosmos.Kosmos
@@ -45,12 +44,7 @@ import com.android.systemui.settings.displayTracker
 import com.android.systemui.settings.fakeUserTracker
 
 var Kosmos.shortcutHelperAppCategoriesShortcutsSource: KeyboardShortcutGroupsSource by
-    Kosmos.Fixture {
-        AppCategoriesShortcutsSource(
-            windowManager,
-            testDispatcher,
-        )
-    }
+    Kosmos.Fixture { AppCategoriesShortcutsSource(windowManager, testDispatcher) }
 
 var Kosmos.shortcutHelperSystemShortcutsSource: KeyboardShortcutGroupsSource by
     Kosmos.Fixture { SystemShortcutsSource(mainResources) }
@@ -65,7 +59,7 @@ val Kosmos.shortcutHelperStateRepository by
             broadcastDispatcher,
             fakeInputManager.inputManager,
             testScope,
-            testDispatcher
+            testDispatcher,
         )
     }
 
@@ -109,7 +103,7 @@ val Kosmos.shortcutHelperStateInteractor by
             displayTracker,
             testScope,
             sysUiState,
-            shortcutHelperStateRepository
+            shortcutHelperStateRepository,
         )
     }
 
@@ -124,18 +118,6 @@ val Kosmos.shortcutHelperViewModel by
             applicationCoroutineScope,
             testDispatcher,
             shortcutHelperStateInteractor,
-            shortcutHelperCategoriesInteractor
-        )
-    }
-
-val Kosmos.fakeShortcutHelperStartActivity by Kosmos.Fixture { FakeShortcutHelperStartActivity() }
-
-val Kosmos.shortcutHelperActivityStarter by
-    Kosmos.Fixture {
-        ShortcutHelperActivityStarter(
-            applicationContext,
-            applicationCoroutineScope,
-            shortcutHelperViewModel,
-            fakeShortcutHelperStartActivity,
+            shortcutHelperCategoriesInteractor,
         )
     }

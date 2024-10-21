@@ -20,6 +20,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.surfaceeffects.turbulencenoise.TurbulenceNoiseShader.Companion.Type.SIMPLEX_NOISE
 import com.android.systemui.surfaceeffects.turbulencenoise.TurbulenceNoiseShader.Companion.Type.SIMPLEX_NOISE_FRACTAL
+import com.android.systemui.surfaceeffects.turbulencenoise.TurbulenceNoiseShader.Companion.Type.SIMPLEX_NOISE_SIMPLE
 import com.android.systemui.surfaceeffects.turbulencenoise.TurbulenceNoiseShader.Companion.Type.SIMPLEX_NOISE_SPARKLE
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -28,20 +29,23 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class TurbulenceNoiseShaderTest : SysuiTestCase() {
 
-    private lateinit var turbulenceNoiseShader: TurbulenceNoiseShader
-
     @Test
     fun compilesSimplexNoise() {
-        turbulenceNoiseShader = TurbulenceNoiseShader(baseType = SIMPLEX_NOISE)
+        TurbulenceNoiseShader(baseType = SIMPLEX_NOISE)
+    }
+
+    @Test
+    fun compilesSimplexSimpleNoise() {
+        TurbulenceNoiseShader(baseType = SIMPLEX_NOISE_SIMPLE)
     }
 
     @Test
     fun compilesFractalNoise() {
-        turbulenceNoiseShader = TurbulenceNoiseShader(baseType = SIMPLEX_NOISE_FRACTAL)
+        TurbulenceNoiseShader(baseType = SIMPLEX_NOISE_FRACTAL)
     }
 
     @Test
     fun compilesSparkleNoise() {
-        turbulenceNoiseShader = TurbulenceNoiseShader(baseType = SIMPLEX_NOISE_SPARKLE)
+        TurbulenceNoiseShader(baseType = SIMPLEX_NOISE_SPARKLE)
     }
 }

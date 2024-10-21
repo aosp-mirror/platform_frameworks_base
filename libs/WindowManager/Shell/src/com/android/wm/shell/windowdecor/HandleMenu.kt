@@ -32,6 +32,7 @@ import android.view.MotionEvent
 import android.view.MotionEvent.ACTION_OUTSIDE
 import android.view.SurfaceControl
 import android.view.View
+import android.view.WindowInsets.Type.systemBars
 import android.view.WindowManager
 import android.widget.Button
 import android.widget.ImageButton
@@ -73,7 +74,8 @@ class HandleMenu(
     private val openInBrowserIntent: Intent?,
     private val captionWidth: Int,
     private val captionHeight: Int,
-    captionX: Int
+    captionX: Int,
+    captionY: Int
 ) {
     private val context: Context = parentDecor.mDecorWindowContext
     private val taskInfo: RunningTaskInfo = parentDecor.mTaskInfo
@@ -110,7 +112,7 @@ class HandleMenu(
         get() = openInBrowserIntent != null
 
     init {
-        updateHandleMenuPillPositions(captionX)
+        updateHandleMenuPillPositions(captionX, captionY)
     }
 
     fun show(
@@ -123,6 +125,7 @@ class HandleMenu(
         onOpenByDefaultClickListener: () -> Unit,
         onCloseMenuClickListener: () -> Unit,
         onOutsideTouchListener: () -> Unit,
+        forceShowSystemBars: Boolean = false,
     ) {
         val ssg = SurfaceSyncGroup(TAG)
         val t = SurfaceControl.Transaction()
@@ -139,6 +142,7 @@ class HandleMenu(
             onOpenByDefaultClickListener = onOpenByDefaultClickListener,
             onCloseMenuClickListener = onCloseMenuClickListener,
             onOutsideTouchListener = onOutsideTouchListener,
+            forceShowSystemBars = forceShowSystemBars,
         )
         ssg.addTransaction(t)
         ssg.markSyncReady()
@@ -157,7 +161,8 @@ class HandleMenu(
         openInBrowserClickListener: (Intent) -> Unit,
         onOpenByDefaultClickListener: () -> Unit,
         onCloseMenuClickListener: () -> Unit,
-        onOutsideTouchListener: () -> Unit
+        onOutsideTouchListener: () -> Unit,
+        forceShowSystemBars: Boolean = false,
     ) {
         val handleMenuView = HandleMenuView(
             context = context,
@@ -185,7 +190,7 @@ class HandleMenu(
         val x = handleMenuPosition.x.toInt()
         val y = handleMenuPosition.y.toInt()
         handleMenuViewContainer =
-            if (!taskInfo.isFreeform && Flags.enableHandleInputFix()) {
+            if ((!taskInfo.isFreeform && Flags.enableHandleInputFix()) || forceShowSystemBars) {
                 AdditionalSystemViewContainer(
                     windowManagerWrapper = windowManagerWrapper,
                     taskId = taskInfo.taskId,
@@ -196,7 +201,8 @@ class HandleMenu(
                     flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
                             WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH or
                             WindowManager.LayoutParams.FLAG_SPLIT_TOUCH,
-                    view = handleMenuView.rootView
+                    view = handleMenuView.rootView,
+                    forciblyShownTypes = if (forceShowSystemBars) { systemBars() } else { 0 }
                 )
             } else {
                 parentDecor.addWindow(
@@ -210,15 +216,15 @@ class HandleMenu(
     /**
      * Updates handle menu's position variables to reflect its next position.
      */
-    private fun updateHandleMenuPillPositions(captionX: Int) {
+    private fun updateHandleMenuPillPositions(captionX: Int, captionY: Int) {
         val menuX: Int
         val menuY: Int
         val taskBounds = taskInfo.getConfiguration().windowConfiguration.bounds
-        updateGlobalMenuPosition(taskBounds, captionX)
+        updateGlobalMenuPosition(taskBounds, captionX, captionY)
         if (layoutResId == R.layout.desktop_mode_app_header) {
             // Align the handle menu to the left side of the caption.
             menuX = marginMenuStart
-            menuY = marginMenuTop
+            menuY = captionY + marginMenuTop
         } else {
             if (Flags.enableHandleInputFix()) {
                 // In a focused decor, we use global coordinates for handle menu. Therefore we
@@ -228,26 +234,26 @@ class HandleMenu(
                 menuY = globalMenuPosition.y
             } else {
                 menuX = (taskBounds.width() / 2) - (menuWidth / 2)
-                menuY = marginMenuTop
+                menuY = captionY + marginMenuTop
             }
         }
         // Handle Menu position setup.
         handleMenuPosition.set(menuX.toFloat(), menuY.toFloat())
     }
 
-    private fun updateGlobalMenuPosition(taskBounds: Rect, captionX: Int) {
+    private fun updateGlobalMenuPosition(taskBounds: Rect, captionX: Int, captionY: Int) {
         val nonFreeformX = captionX + (captionWidth / 2) - (menuWidth / 2)
         when {
             taskInfo.isFreeform -> {
                 globalMenuPosition.set(
                     /* x = */ taskBounds.left + marginMenuStart,
-                    /* y = */ taskBounds.top + marginMenuTop
+                    /* y = */ taskBounds.top + captionY + marginMenuTop
                 )
             }
             taskInfo.isFullscreen -> {
                 globalMenuPosition.set(
                     /* x = */ nonFreeformX,
-                    /* y = */ marginMenuTop
+                    /* y = */ marginMenuTop + captionY
                 )
             }
             taskInfo.isMultiWindow -> {
@@ -261,13 +267,13 @@ class HandleMenu(
                     SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT -> {
                         globalMenuPosition.set(
                             /* x = */ leftOrTopStageBounds.width() + nonFreeformX,
-                            /* y = */ marginMenuTop
+                            /* y = */ captionY + marginMenuTop
                         )
                     }
                     SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT -> {
                         globalMenuPosition.set(
                             /* x = */ nonFreeformX,
-                            /* y = */ marginMenuTop
+                            /* y = */ captionY + marginMenuTop
                         )
                     }
                 }
@@ -280,10 +286,11 @@ class HandleMenu(
      */
     fun relayout(
         t: SurfaceControl.Transaction,
-        captionX: Int
+        captionX: Int,
+        captionY: Int,
     ) {
         handleMenuViewContainer?.let { container ->
-            updateHandleMenuPillPositions(captionX)
+            updateHandleMenuPillPositions(captionX, captionY)
             container.setPosition(t, handleMenuPosition.x, handleMenuPosition.y)
         }
     }
@@ -675,7 +682,8 @@ interface HandleMenuFactory {
         openInBrowserIntent: Intent?,
         captionWidth: Int,
         captionHeight: Int,
-        captionX: Int
+        captionX: Int,
+        captionY: Int,
     ): HandleMenu
 }
 
@@ -694,7 +702,8 @@ object DefaultHandleMenuFactory : HandleMenuFactory {
         openInBrowserIntent: Intent?,
         captionWidth: Int,
         captionHeight: Int,
-        captionX: Int
+        captionX: Int,
+        captionY: Int,
     ): HandleMenu {
         return HandleMenu(
             parentDecor,
@@ -709,7 +718,8 @@ object DefaultHandleMenuFactory : HandleMenuFactory {
             openInBrowserIntent,
             captionWidth,
             captionHeight,
-            captionX
+            captionX,
+            captionY,
         )
     }
 }
