@@ -3060,12 +3060,13 @@ class DesktopTasksControllerTest : ShellTestCase() {
     whenever(transitions.startTransition(eq(TRANSIT_OPEN), any(), anyOrNull()))
       .thenReturn(transition)
     whenever(mockDesktopFullImmersiveTransitionHandler
-      .exitImmersiveIfApplicable(any(), eq(immersiveTask.displayId))).thenReturn(runOnStartTransit)
+      .exitImmersiveIfApplicable(any(), eq(immersiveTask.displayId), eq(freeformTask.taskId)))
+      .thenReturn(runOnStartTransit)
 
     runOpenInstance(immersiveTask, freeformTask.taskId)
 
     verify(mockDesktopFullImmersiveTransitionHandler)
-      .exitImmersiveIfApplicable(any(), eq(immersiveTask.displayId))
+      .exitImmersiveIfApplicable(any(), eq(immersiveTask.displayId), eq(freeformTask.taskId))
     runOnStartTransit.assertOnlyInvocation(transition)
   }
 
@@ -3370,12 +3371,13 @@ class DesktopTasksControllerTest : ShellTestCase() {
     val runOnStartTransit = RunOnStartTransitionCallback()
     val transition = Binder()
     whenever(mockDesktopFullImmersiveTransitionHandler
-      .exitImmersiveIfApplicable(wct, task.displayId)).thenReturn(runOnStartTransit)
+      .exitImmersiveIfApplicable(wct, task.displayId, task.taskId)).thenReturn(runOnStartTransit)
     whenever(enterDesktopTransitionHandler.moveToDesktop(wct, UNKNOWN)).thenReturn(transition)
 
     controller.moveTaskToDesktop(taskId = task.taskId, wct = wct, transitionSource = UNKNOWN)
 
-    verify(mockDesktopFullImmersiveTransitionHandler).exitImmersiveIfApplicable(wct, task.displayId)
+    verify(mockDesktopFullImmersiveTransitionHandler)
+      .exitImmersiveIfApplicable(wct, task.displayId, task.taskId)
     runOnStartTransit.assertOnlyInvocation(transition)
   }
 
@@ -3386,12 +3388,13 @@ class DesktopTasksControllerTest : ShellTestCase() {
     val runOnStartTransit = RunOnStartTransitionCallback()
     val transition = Binder()
     whenever(mockDesktopFullImmersiveTransitionHandler
-      .exitImmersiveIfApplicable(wct, task.displayId)).thenReturn(runOnStartTransit)
+      .exitImmersiveIfApplicable(wct, task.displayId, task.taskId)).thenReturn(runOnStartTransit)
     whenever(enterDesktopTransitionHandler.moveToDesktop(wct, UNKNOWN)).thenReturn(transition)
 
     controller.moveTaskToDesktop(taskId = task.taskId, wct = wct, transitionSource = UNKNOWN)
 
-    verify(mockDesktopFullImmersiveTransitionHandler).exitImmersiveIfApplicable(wct, task.displayId)
+    verify(mockDesktopFullImmersiveTransitionHandler)
+      .exitImmersiveIfApplicable(wct, task.displayId, task.taskId)
     runOnStartTransit.assertOnlyInvocation(transition)
   }
 
@@ -3401,13 +3404,14 @@ class DesktopTasksControllerTest : ShellTestCase() {
     val runOnStartTransit = RunOnStartTransitionCallback()
     val transition = Binder()
     whenever(mockDesktopFullImmersiveTransitionHandler
-      .exitImmersiveIfApplicable(any(), eq(task.displayId))).thenReturn(runOnStartTransit)
+      .exitImmersiveIfApplicable(any(), eq(task.displayId), eq(task.taskId)))
+      .thenReturn(runOnStartTransit)
     whenever(transitions.startTransition(any(), any(), anyOrNull())).thenReturn(transition)
 
     controller.moveTaskToFront(task.taskId, remoteTransition = null)
 
     verify(mockDesktopFullImmersiveTransitionHandler)
-      .exitImmersiveIfApplicable(any(), eq(task.displayId))
+      .exitImmersiveIfApplicable(any(), eq(task.displayId), eq(task.taskId))
     runOnStartTransit.assertOnlyInvocation(transition)
   }
 
@@ -3417,13 +3421,14 @@ class DesktopTasksControllerTest : ShellTestCase() {
     val runOnStartTransit = RunOnStartTransitionCallback()
     val transition = Binder()
     whenever(mockDesktopFullImmersiveTransitionHandler
-      .exitImmersiveIfApplicable(any(), eq(task.displayId))).thenReturn(runOnStartTransit)
+      .exitImmersiveIfApplicable(any(), eq(task.displayId), eq(task.taskId)))
+      .thenReturn(runOnStartTransit)
     whenever(transitions.startTransition(any(), any(), anyOrNull())).thenReturn(transition)
 
     controller.moveTaskToFront(task.taskId, remoteTransition = null)
 
     verify(mockDesktopFullImmersiveTransitionHandler)
-      .exitImmersiveIfApplicable(any(), eq(task.displayId))
+      .exitImmersiveIfApplicable(any(), eq(task.displayId), eq(task.taskId))
     runOnStartTransit.assertOnlyInvocation(transition)
   }
 

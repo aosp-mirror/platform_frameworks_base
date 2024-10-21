@@ -357,8 +357,11 @@ class DesktopTasksController(
         // TODO(342378842): Instead of using default display, support multiple displays
         val taskToMinimize = bringDesktopAppsToFrontBeforeShowingNewTask(
             DEFAULT_DISPLAY, wct, taskId)
-        val runOnTransit = immersiveTransitionHandler
-            .exitImmersiveIfApplicable(wct, DEFAULT_DISPLAY)
+        val runOnTransit = immersiveTransitionHandler.exitImmersiveIfApplicable(
+            wct = wct,
+            displayId = DEFAULT_DISPLAY,
+            excludeTaskId = taskId,
+        )
         wct.startTask(
             taskId,
             ActivityOptions.makeBasic().apply {
@@ -385,7 +388,11 @@ class DesktopTasksController(
         }
         logV("moveRunningTaskToDesktop taskId=%d", task.taskId)
         exitSplitIfApplicable(wct, task)
-        val runOnTransit = immersiveTransitionHandler.exitImmersiveIfApplicable(wct, task.displayId)
+        val runOnTransit = immersiveTransitionHandler.exitImmersiveIfApplicable(
+            wct = wct,
+            displayId = task.displayId,
+            excludeTaskId = task.taskId,
+        )
         // Bring other apps to front first
         val taskToMinimize =
             bringDesktopAppsToFrontBeforeShowingNewTask(task.displayId, wct, task.taskId)
@@ -594,8 +601,11 @@ class DesktopTasksController(
         logV("moveBackgroundTaskToFront taskId=%s", taskId)
         val wct = WindowContainerTransaction()
         // TODO: b/342378842 - Instead of using default display, support multiple displays
-        val runOnTransit = immersiveTransitionHandler
-            .exitImmersiveIfApplicable(wct, DEFAULT_DISPLAY)
+        val runOnTransit = immersiveTransitionHandler.exitImmersiveIfApplicable(
+            wct = wct,
+            displayId = DEFAULT_DISPLAY,
+            excludeTaskId = taskId,
+        )
         wct.startTask(
             taskId,
             ActivityOptions.makeBasic().apply {
@@ -618,7 +628,10 @@ class DesktopTasksController(
         val wct = WindowContainerTransaction()
         wct.reorder(taskInfo.token, true /* onTop */, true /* includingParents */)
         val runOnTransit = immersiveTransitionHandler.exitImmersiveIfApplicable(
-            wct, taskInfo.displayId)
+            wct = wct,
+            displayId = taskInfo.displayId,
+            excludeTaskId = taskInfo.taskId,
+        )
         val transition =
             startLaunchTransition(TRANSIT_TO_FRONT, wct, taskInfo.taskId, remoteTransition)
         runOnTransit?.invoke(transition)
@@ -1218,8 +1231,11 @@ class DesktopTasksController(
             wct.startTask(requestedTaskId, options.toBundle())
             val taskToMinimize = bringDesktopAppsToFrontBeforeShowingNewTask(
                 callingTask.displayId, wct, requestedTaskId)
-            val runOnTransit = immersiveTransitionHandler
-                .exitImmersiveIfApplicable(wct, callingTask.displayId)
+            val runOnTransit = immersiveTransitionHandler.exitImmersiveIfApplicable(
+                wct = wct,
+                displayId = callingTask.displayId,
+                excludeTaskId = requestedTaskId,
+            )
             val transition = transitions.startTransition(TRANSIT_OPEN, wct, null)
             addPendingMinimizeTransition(transition, taskToMinimize)
             runOnTransit?.invoke(transition)
