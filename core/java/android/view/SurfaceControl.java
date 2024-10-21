@@ -87,6 +87,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
@@ -463,7 +464,7 @@ public final class SurfaceControl implements Parcelable {
         /**
          * Called when new jank classifications are available.
          */
-        void onJankDataAvailable(JankData[] jankData);
+        void onJankDataAvailable(@NonNull List<JankData> jankData);
 
     }
 
@@ -2686,7 +2687,9 @@ public final class SurfaceControl implements Parcelable {
      * Adds a callback to be informed about SF's jank classification for this surface.
      * @hide
      */
-    public OnJankDataListenerRegistration addJankDataListener(OnJankDataListener listener) {
+    @NonNull
+    public OnJankDataListenerRegistration addOnJankDataListener(
+            @NonNull OnJankDataListener listener) {
         return new OnJankDataListenerRegistration(this, listener);
     }
 
