@@ -14,12 +14,19 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.panels.domain.interactor
+package com.android.systemui.qs.panels.ui.viewmodel
 
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.qs.panels.ui.compose.infinitegrid.InfiniteGridLayout
-import com.android.systemui.qs.panels.ui.viewmodel.iconTilesViewModel
-import com.android.systemui.qs.panels.ui.viewmodel.infiniteGridViewModelFactory
+import com.android.systemui.qs.panels.domain.interactor.dynamicIconTilesInteractorFactory
 
-val Kosmos.infiniteGridLayout by
-    Kosmos.Fixture { InfiniteGridLayout(iconTilesViewModel, infiniteGridViewModelFactory) }
+val Kosmos.dynamicIconTilesViewModelFactory by
+    Kosmos.Fixture {
+        object : DynamicIconTilesViewModel.Factory {
+            override fun create(): DynamicIconTilesViewModel {
+                return DynamicIconTilesViewModel(
+                    dynamicIconTilesInteractorFactory,
+                    iconTilesViewModel,
+                )
+            }
+        }
+    }

@@ -21,6 +21,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.lifecycle.activateIn
 import com.android.systemui.qs.panels.data.repository.DefaultLargeTilesRepository
 import com.android.systemui.qs.panels.data.repository.defaultLargeTilesRepository
 import com.android.systemui.qs.panels.data.repository.qsPreferencesRepository
@@ -31,12 +32,13 @@ import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-class IconTilesInteractorTest : SysuiTestCase() {
+class DynamicIconTilesInteractorTest : SysuiTestCase() {
     private val kosmos =
         testKosmos().apply {
             defaultLargeTilesRepository =
@@ -45,71 +47,30 @@ class IconTilesInteractorTest : SysuiTestCase() {
                 }
             currentTilesInteractor.setTiles(listOf(largeTile, smallTile))
         }
-    private val underTest = with(kosmos) { iconTilesInteractor }
+    private lateinit var underTest: DynamicIconTilesInteractor
 
-    @Test
-    fun isIconTile_returnsCorrectValue() {
-        assertThat(underTest.isIconTile(largeTile)).isFalse()
-        assertThat(underTest.isIconTile(smallTile)).isTrue()
+    @Before
+    fun setUp() {
+        with(kosmos) {
+            underTest = dynamicIconTilesInteractorFactory.create()
+            underTest.activateIn(testScope)
+        }
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     @Test
-    fun isIconTile_updatesFromSharedPreferences() =
-        with(kosmos) {
-            testScope.runTest {
-                val spec = TileSpec.create("newTile")
-
-                // Assert that new tile defaults to icon
-                assertThat(underTest.isIconTile(spec)).isTrue()
-
-                // Add the tile
-                currentTilesInteractor.addTile(spec)
-                runCurrent()
-
-                // Resize it to large
-                qsPreferencesRepository.setLargeTilesSpecs(setOf(spec))
-                runCurrent()
-
-                // Assert that the new tile was added to the large tiles set
-                assertThat(underTest.isIconTile(spec)).isFalse()
-            }
-        }
-
-    @OptIn(ExperimentalCoroutinesApi::class)
-    @Test
-    fun resize_updatesSharedPreferences() =
+    fun removingTile_updatesSharedPreferences() =
         with(kosmos) {
             testScope.runTest {
                 val latest by collectLastValue(qsPreferencesRepository.largeTilesSpecs)
                 runCurrent()
-
-                // Assert that the tile is removed from the large tiles after resizing
-                underTest.resize(largeTile, toIcon = true)
-                runCurrent()
-                assertThat(latest).doesNotContain(largeTile)
-
-                // Assert that the tile is added to the large tiles after resizing
-                underTest.resize(largeTile, toIcon = false)
-                runCurrent()
-                assertThat(latest).contains(largeTile)
-            }
-        }
-
-    @OptIn(ExperimentalCoroutinesApi::class)
-    @Test
-    fun resizingNonCurrentTile_doesNothing() =
-        with(kosmos) {
-            testScope.runTest {
-                val latest by collectLastValue(qsPreferencesRepository.largeTilesSpecs)
-                val newTile = TileSpec.create("newTile")
 
                 // Remove the large tile from the current tiles
-                underTest.resize(newTile, toIcon = false)
+                currentTilesInteractor.removeTiles(listOf(largeTile))
                 runCurrent()
 
-                // Assert that it's still small
-                assertThat(latest).doesNotContain(newTile)
+                // Assert that it resized to small
+                assertThat(latest).doesNotContain(largeTile)
             }
         }
 

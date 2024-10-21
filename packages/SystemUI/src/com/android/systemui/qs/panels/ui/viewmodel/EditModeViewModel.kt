@@ -73,11 +73,7 @@ constructor(
     val gridLayout: StateFlow<GridLayout> =
         gridLayoutTypeInteractor.layout
             .map { gridLayoutMap[it] ?: defaultGridLayout }
-            .stateIn(
-                applicationScope,
-                SharingStarted.WhileSubscribed(),
-                defaultGridLayout,
-            )
+            .stateIn(applicationScope, SharingStarted.WhileSubscribed(), defaultGridLayout)
 
     /**
      * Flow of view models for each tile that should be visible in edit mode (or empty flow when not
@@ -195,10 +191,5 @@ constructor(
 
     fun setTiles(tileSpecs: List<TileSpec>) {
         currentTilesInteractor.setTiles(tileSpecs)
-    }
-
-    /** Immediately resets the current tiles to the default list. */
-    fun resetCurrentTilesToDefault() {
-        throw NotImplementedError("This is not supported yet")
     }
 }

@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.panels.domain.interactor
+package com.android.systemui.qs.panels.ui.dialog
 
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.qs.panels.ui.compose.infinitegrid.InfiniteGridLayout
-import com.android.systemui.qs.panels.ui.viewmodel.iconTilesViewModel
-import com.android.systemui.qs.panels.ui.viewmodel.infiniteGridViewModelFactory
+import com.android.systemui.qs.panels.domain.interactor.sizedTilesResetInteractor
+import com.android.systemui.statusbar.phone.systemUIDialogFactory
 
-val Kosmos.infiniteGridLayout by
-    Kosmos.Fixture { InfiniteGridLayout(iconTilesViewModel, infiniteGridViewModelFactory) }
+val Kosmos.qsResetDialogDelegateKosmos by
+    Kosmos.Fixture { QSResetDialogDelegate(systemUIDialogFactory, sizedTilesResetInteractor) }
