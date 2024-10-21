@@ -230,7 +230,7 @@ public class FrameTracker implements HardwareRendererObserver.OnFrameMetricsAvai
         mRendererWrapper = mSurfaceOnly ? null : renderer;
         mMetricsWrapper = mSurfaceOnly ? null : metrics;
         mViewRoot = mSurfaceOnly ? null : viewRootWrapper;
-        mObserver = mSurfaceOnly
+        mObserver = mSurfaceOnly || (Flags.useSfFrameDuration() && Flags.ignoreHwuiIsFirstFrame())
                 ? null
                 : new HardwareRendererObserver(this, mMetricsWrapper.getTiming(),
                         mHandler, /* waitForPresentTime= */ false);
@@ -568,7 +568,7 @@ public class FrameTracker implements HardwareRendererObserver.OnFrameMetricsAvai
     }
 
     private boolean callbacksReceived(JankInfo info) {
-        return mSurfaceOnly
+        return mObserver == null
                 ? info.surfaceControlCallbackFired
                 : info.hwuiCallbackFired && info.surfaceControlCallbackFired;
     }
@@ -599,7 +599,7 @@ public class FrameTracker implements HardwareRendererObserver.OnFrameMetricsAvai
         for (int i = 0; i < mJankInfos.size(); i++) {
             JankInfo info = mJankInfos.valueAt(i);
             final boolean isFirstDrawn = !mSurfaceOnly && info.isFirstFrame;
-            if (isFirstDrawn) {
+            if (isFirstDrawn && !Flags.ignoreHwuiIsFirstFrame()) {
                 continue;
             }
             if (info.frameVsyncId > mEndVsyncId) {
@@ -636,7 +636,7 @@ public class FrameTracker implements HardwareRendererObserver.OnFrameMetricsAvai
                 }
                 // TODO (b/174755489): Early latch currently gets fired way too often, so we have
                 // to ignore it for now.
-                if (!mSurfaceOnly && !info.hwuiCallbackFired) {
+                if (mObserver != null && !info.hwuiCallbackFired) {
                     markEvent("FT#MissedHWUICallback", info.frameVsyncId);
                     Log.w(TAG, "Missing HWUI jank callback for vsyncId: " + info.frameVsyncId
                             + ", CUJ=" + name);
@@ -762,7 +762,9 @@ public class FrameTracker implements HardwareRendererObserver.OnFrameMetricsAvai
          * @param observer observer
          */
         public void addObserver(HardwareRendererObserver observer) {
-            mRenderer.addObserver(observer);
+            if (observer != null) {
+                mRenderer.addObserver(observer);
+            }
         }
 
         /**
@@ -770,7 +772,9 @@ public class FrameTracker implements HardwareRendererObserver.OnFrameMetricsAvai
          * @param observer observer
          */
         public void removeObserver(HardwareRendererObserver observer) {
-            mRenderer.removeObserver(observer);
+            if (observer != null) {
+                mRenderer.removeObserver(observer);
+            }
         }
     }
 
