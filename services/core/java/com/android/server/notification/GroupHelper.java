@@ -25,8 +25,10 @@ import static android.app.Notification.FLAG_ONGOING_EVENT;
 import static android.app.Notification.VISIBILITY_PRIVATE;
 import static android.app.Notification.VISIBILITY_PUBLIC;
 import static android.service.notification.Flags.notificationForceGrouping;
+import static android.service.notification.Flags.notificationRegroupOnClassification;
 
 import android.annotation.FlaggedApi;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
@@ -49,6 +51,9 @@ import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 
+import java.io.PrintWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -83,10 +88,22 @@ public class GroupHelper {
     //  with less than this value, they will be forced grouped
     private static final int MIN_CHILD_COUNT_TO_AVOID_FORCE_GROUPING = 3;
 
+    // Regrouping needed because the channel was updated, ie. importance changed
+    static final int REGROUP_REASON_CHANNEL_UPDATE = 0;
+    // Regrouping needed because of notification bundling
+    static final int REGROUP_REASON_BUNDLE = 1;
+
+    @IntDef(prefix = { "REGROUP_REASON_" }, value = {
+        REGROUP_REASON_CHANNEL_UPDATE,
+        REGROUP_REASON_BUNDLE,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @interface RegroupingReason {}
 
     private final Callback mCallback;
     private final int mAutoGroupAtCount;
     private final int mAutogroupSparseGroupsAtCount;
+    private final int mAutoGroupRegroupingAtCount;
     private final Context mContext;
     private final PackageManager mPackageManager;
     private boolean mIsTestHarnessExempted;
@@ -173,6 +190,11 @@ public class GroupHelper {
         mContext = context;
         mPackageManager = packageManager;
         mAutogroupSparseGroupsAtCount = autoGroupSparseGroupsAtCount;
+        if (notificationRegroupOnClassification()) {
+            mAutoGroupRegroupingAtCount = 1;
+        } else {
+            mAutoGroupRegroupingAtCount = mAutoGroupAtCount;
+        }
         NOTIFICATION_SHADE_SECTIONS = getNotificationShadeSections();
     }
 
@@ -865,7 +887,8 @@ public class GroupHelper {
                 }
             }
 
-            regroupNotifications(userId, pkgName, notificationsToCheck);
+            regroupNotifications(userId, pkgName, notificationsToCheck,
+                    REGROUP_REASON_CHANNEL_UPDATE);
         }
     }
 
@@ -883,13 +906,14 @@ public class GroupHelper {
             ArrayMap<String, NotificationRecord> notificationsToCheck = new ArrayMap<>();
             notificationsToCheck.put(record.getKey(), record);
             regroupNotifications(record.getUserId(), record.getSbn().getPackageName(),
-                    notificationsToCheck);
+                    notificationsToCheck, REGROUP_REASON_BUNDLE);
         }
     }
 
     @GuardedBy("mAggregatedNotifications")
     private void regroupNotifications(int userId, String pkgName,
-            ArrayMap<String, NotificationRecord> notificationsToCheck) {
+            ArrayMap<String, NotificationRecord> notificationsToCheck,
+            @RegroupingReason int regroupingReason) {
         // The list of notification operations required after the channel update
         final ArrayList<NotificationMoveOp> notificationsToMove = new ArrayList<>();
 
@@ -904,10 +928,40 @@ public class GroupHelper {
         notificationsToMove.addAll(
                 getUngroupedNotificationsMoveOps(userId, pkgName, notificationsToCheck));
 
+        // Handle "grouped correctly" notifications that were re-classified (bundled)
+        if (notificationRegroupOnClassification()) {
+            if (regroupingReason == REGROUP_REASON_BUNDLE) {
+                notificationsToMove.addAll(
+                        getReclassifiedNotificationsMoveOps(userId, pkgName, notificationsToCheck));
+            }
+        }
+
         // Batch move to new section
         if (!notificationsToMove.isEmpty()) {
             moveNotificationsToNewSection(userId, pkgName, notificationsToMove);
         }
+    }
+
+    private List<NotificationMoveOp> getReclassifiedNotificationsMoveOps(int userId,
+                String pkgName, ArrayMap<String, NotificationRecord> notificationsToCheck) {
+        final ArrayList<NotificationMoveOp> notificationsToMove = new ArrayList<>();
+        for (NotificationRecord record : notificationsToCheck.values()) {
+            if (isChildOfValidAppGroup(record)) {
+                // Check if section changes
+                NotificationSectioner sectioner = getSection(record);
+                if (sectioner != null) {
+                    FullyQualifiedGroupKey newFullAggregateGroupKey =
+                            new FullyQualifiedGroupKey(userId, pkgName, sectioner);
+                    if (DEBUG) {
+                        Slog.v(TAG, "Regroup after classification: " + record + " to: "
+                                + newFullAggregateGroupKey);
+                    }
+                    notificationsToMove.add(
+                            new NotificationMoveOp(record, null, newFullAggregateGroupKey));
+                }
+            }
+        }
+        return notificationsToMove;
     }
 
     @GuardedBy("mAggregatedNotifications")
@@ -1010,6 +1064,10 @@ public class GroupHelper {
         // Bundled operations to apply to groups affected by the channel update
         ArrayMap<FullyQualifiedGroupKey, GroupUpdateOp> groupsToUpdate = new ArrayMap<>();
 
+        // App-provided (valid) groups of notifications that were classified (bundled).
+        // Summaries will be canceled if all child notifications have been bundled.
+        ArrayMap<String, String> originalGroupsOfBundledNotifications = new ArrayMap<>();
+
         for (NotificationMoveOp moveOp: notificationsToMove) {
             final NotificationRecord record = moveOp.record;
             final FullyQualifiedGroupKey oldFullAggregateGroupKey = moveOp.oldGroup;
@@ -1034,6 +1092,13 @@ public class GroupHelper {
                 if (!groupsToUpdate.containsKey(oldFullAggregateGroupKey)) {
                     groupsToUpdate.put(oldFullAggregateGroupKey,
                         new GroupUpdateOp(oldFullAggregateGroupKey, record, true));
+                }
+            } else {
+                if (notificationRegroupOnClassification()) {
+                    // Null "old aggregate group" => this notification was re-classified from
+                    // a valid app-provided group => maybe cancel the original summary
+                    // if no children are left
+                    originalGroupsOfBundledNotifications.put(record.getKey(), record.getGroupKey());
                 }
             }
 
@@ -1076,7 +1141,7 @@ public class GroupHelper {
             NotificationRecord triggeringNotification = groupsToUpdate.get(groupKey).record;
             boolean hasSummary = groupsToUpdate.get(groupKey).hasSummary;
             //Group needs to be created/updated
-            if (ungrouped.size() >= mAutoGroupAtCount
+            if (ungrouped.size() >= mAutoGroupRegroupingAtCount
                     || (hasSummary && !aggregatedNotificationsAttrs.isEmpty())) {
                 NotificationSectioner sectioner = getSection(triggeringNotification);
                 if (sectioner == null) {
@@ -1089,6 +1154,18 @@ public class GroupHelper {
                 if (aggregatedNotificationsAttrs.isEmpty() && hasSummary) {
                     mCallback.removeAutoGroupSummary(userId, pkgName, groupKey.toString());
                     mAggregatedNotifications.remove(groupKey);
+                }
+            }
+        }
+
+        if (notificationRegroupOnClassification()) {
+            // Cancel the summary if it's the last notification of the original app-provided group
+            for (String triggeringKey : originalGroupsOfBundledNotifications.keySet()) {
+                NotificationRecord canceledSummary =
+                        mCallback.removeAppProvidedSummaryOnClassification(triggeringKey,
+                        originalGroupsOfBundledNotifications.getOrDefault(triggeringKey, null));
+                if (canceledSummary != null) {
+                    cacheCanceledSummary(canceledSummary);
                 }
             }
         }
@@ -1111,6 +1188,42 @@ public class GroupHelper {
 
     protected static boolean isAggregatedGroup(NotificationRecord record) {
         return (record.mOriginalFlags & Notification.FLAG_AUTOGROUP_SUMMARY) != 0;
+    }
+
+    private boolean isNotificationAggregatedInSection(NotificationRecord record,
+            NotificationSectioner sectioner) {
+        final FullyQualifiedGroupKey fullAggregateGroupKey = new FullyQualifiedGroupKey(
+                record.getUserId(), record.getSbn().getPackageName(), sectioner);
+        return record.getGroupKey().equals(fullAggregateGroupKey.toString());
+    }
+
+    private boolean isChildOfValidAppGroup(NotificationRecord record) {
+        final StatusBarNotification sbn = record.getSbn();
+        if (!sbn.isAppGroup()) {
+            return false;
+        }
+
+        if (!sbn.getNotification().isGroupChild()) {
+            return false;
+        }
+
+        if (record.isCanceled) {
+            return false;
+        }
+
+        final NotificationSectioner sectioner = getSection(record);
+        if (sectioner == null) {
+            if (DEBUG) {
+                Slog.i(TAG, "Skipping autogrouping for " + record + " no valid section found.");
+            }
+            return false;
+        }
+
+        if (isNotificationAggregatedInSection(record, sectioner)) {
+            return false;
+        }
+
+        return true;
     }
 
     private static int getNumChildrenForGroup(@NonNull final String groupKey,
@@ -1438,6 +1551,48 @@ public class GroupHelper {
         }
     }
 
+    protected void dump(PrintWriter pw, String prefix) {
+        synchronized (mAggregatedNotifications) {
+            if (!mUngroupedAbuseNotifications.isEmpty()) {
+                pw.println(prefix + "Ungrouped notifications:");
+                for (FullyQualifiedGroupKey groupKey: mUngroupedAbuseNotifications.keySet()) {
+                    if (!mUngroupedAbuseNotifications.getOrDefault(groupKey, new ArrayMap<>())
+                            .isEmpty()) {
+                        pw.println(prefix + prefix + groupKey.toString());
+                        for (String notifKey : mUngroupedAbuseNotifications.get(groupKey)
+                                .keySet()) {
+                            pw.println(prefix + prefix + prefix + notifKey);
+                        }
+                    }
+                }
+                pw.println("");
+            }
+
+            if (!mAggregatedNotifications.isEmpty()) {
+                pw.println(prefix + "Autogrouped notifications:");
+                for (FullyQualifiedGroupKey groupKey: mAggregatedNotifications.keySet()) {
+                    if (!mAggregatedNotifications.getOrDefault(groupKey, new ArrayMap<>())
+                            .isEmpty()) {
+                        pw.println(prefix + prefix + groupKey.toString());
+                        for (String notifKey : mAggregatedNotifications.get(groupKey).keySet()) {
+                            pw.println(prefix + prefix + prefix + notifKey);
+                        }
+                    }
+                }
+                pw.println("");
+            }
+
+            if (!mCanceledSummaries.isEmpty()) {
+                pw.println(prefix + "Cached canceled summaries:");
+                for (CachedSummary summary: mCanceledSummaries.values()) {
+                    pw.println(prefix + prefix + prefix + summary.key + " -> "
+                            + summary.originalGroupKey);
+                }
+                pw.println("");
+            }
+        }
+    }
+
     protected static class NotificationSectioner {
         final String mName;
         final int mSummaryId;
@@ -1551,5 +1706,16 @@ public class GroupHelper {
 
         void removeNotificationFromCanceledGroup(int userId, String pkg, String groupKey,
                 int cancelReason);
+
+        /**
+         * Cancels the group summary of a notification that was regrouped because of classification
+         *  (bundling). Only cancels if the summary is the last notification of the original group.
+         * @param triggeringKey the triggering child notification key
+         * @param groupKey the original group key
+         * @return the canceled group summary or null if the summary was not canceled
+         */
+        @Nullable
+        NotificationRecord removeAppProvidedSummaryOnClassification(String triggeringKey,
+                @Nullable String groupKey);
     }
 }
