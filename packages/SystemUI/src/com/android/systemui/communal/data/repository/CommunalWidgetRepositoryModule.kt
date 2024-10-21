@@ -23,5 +23,5 @@ import dagger.Module
 @Module
 interface CommunalWidgetRepositoryModule {
     @Binds
-    fun communalWidgetRepository(impl: CommunalWidgetRepositoryImpl): CommunalWidgetRepository
+    fun communalWidgetRepository(impl: CommunalWidgetRepositoryLocalImpl): CommunalWidgetRepository
 }
