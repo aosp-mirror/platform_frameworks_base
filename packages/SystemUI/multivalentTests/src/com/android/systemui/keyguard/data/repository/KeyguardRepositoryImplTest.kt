@@ -326,26 +326,14 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
     @Test
     fun isKeyguardGoingAway() =
         testScope.runTest {
-            whenever(keyguardStateController.isKeyguardGoingAway).thenReturn(false)
-            var latest: Boolean? = null
-            val job = underTest.isKeyguardGoingAway.onEach { latest = it }.launchIn(this)
-            runCurrent()
-            assertThat(latest).isFalse()
+            val isGoingAway by collectLastValue(underTest.isKeyguardGoingAway)
+            assertThat(isGoingAway).isFalse()
 
-            val captor = argumentCaptor<KeyguardStateController.Callback>()
-            verify(keyguardStateController, atLeastOnce()).addCallback(captor.capture())
+            underTest.isKeyguardGoingAway.value = true
+            assertThat(isGoingAway).isTrue()
 
-            whenever(keyguardStateController.isKeyguardGoingAway).thenReturn(true)
-            captor.value.onKeyguardGoingAwayChanged()
-            runCurrent()
-            assertThat(latest).isTrue()
-
-            whenever(keyguardStateController.isKeyguardGoingAway).thenReturn(false)
-            captor.value.onKeyguardGoingAwayChanged()
-            runCurrent()
-            assertThat(latest).isFalse()
-
-            job.cancel()
+            underTest.isKeyguardGoingAway.value = false
+            assertThat(isGoingAway).isFalse()
         }
 
     @Test
