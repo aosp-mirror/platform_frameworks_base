@@ -209,6 +209,8 @@ package android {
     field public static final String MANAGE_FACTORY_RESET_PROTECTION = "android.permission.MANAGE_FACTORY_RESET_PROTECTION";
     field public static final String MANAGE_GAME_ACTIVITY = "android.permission.MANAGE_GAME_ACTIVITY";
     field public static final String MANAGE_GAME_MODE = "android.permission.MANAGE_GAME_MODE";
+    field @FlaggedApi("android.media.tv.flags.media_quality_fw") public static final String MANAGE_GLOBAL_PICTURE_QUALITY_SERVICE = "android.permission.MANAGE_GLOBAL_PICTURE_QUALITY_SERVICE";
+    field @FlaggedApi("android.media.tv.flags.media_quality_fw") public static final String MANAGE_GLOBAL_SOUND_QUALITY_SERVICE = "android.permission.MANAGE_GLOBAL_SOUND_QUALITY_SERVICE";
     field public static final String MANAGE_HOTWORD_DETECTION = "android.permission.MANAGE_HOTWORD_DETECTION";
     field public static final String MANAGE_IPSEC_TUNNELS = "android.permission.MANAGE_IPSEC_TUNNELS";
     field public static final String MANAGE_LOW_POWER_STANDBY = "android.permission.MANAGE_LOW_POWER_STANDBY";
