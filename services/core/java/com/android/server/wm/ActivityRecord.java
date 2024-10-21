@@ -5508,7 +5508,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 clearAllDrawn();
                 // Reset the draw state in order to prevent the starting window to be immediately
                 // dismissed when the app still has the surface.
-                if (!isVisible() && !isClientVisible()) {
+                if (!Flags.resetDrawStateOnClientInvisible()
+                        && !isVisible() && !isClientVisible()) {
                     forAllWindows(w -> {
                         if (w.mWinAnimator.mDrawState == HAS_DRAWN) {
                             w.mWinAnimator.resetDrawState();

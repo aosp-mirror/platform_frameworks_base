@@ -18,6 +18,8 @@ package android.animation;
 
 import static android.test.MoreAsserts.assertNotEqual;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
@@ -889,6 +891,34 @@ public class ValueAnimatorTests {
                 assertTrue(l2.endTime >= l1.startTime);
             }
         });
+    }
+
+    @Test
+    public void testPostNotifyEndListener() throws Throwable {
+        ValueAnimator.setPostNotifyEndListenerEnabled(true);
+        final CountDownLatch latch = new CountDownLatch(1);
+        final long[] lastAnimFrameId = new long[1];
+        final long[] endAnimCallbackId = new long[1];
+        try {
+            a1.addUpdateListener(animator -> {
+                if (animator.getAnimatedFraction() == 1f) {
+                    lastAnimFrameId[0] = Choreographer.getInstance().getVsyncId();
+                }
+            });
+            a1.addListener(new MyListener() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    super.onAnimationEnd(animation);
+                    endAnimCallbackId[0] = Choreographer.getInstance().getVsyncId();
+                    latch.countDown();
+                }
+            });
+            mActivityRule.runOnUiThread(() -> a1.start());
+            assertTrue(latch.await(1, TimeUnit.SECONDS));
+            assertThat(endAnimCallbackId[0]).isGreaterThan(lastAnimFrameId[0]);
+        } finally {
+            ValueAnimator.setPostNotifyEndListenerEnabled(false);
+        }
     }
 
     @Test
