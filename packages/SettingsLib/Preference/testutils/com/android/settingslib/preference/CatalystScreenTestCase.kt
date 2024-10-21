@@ -99,14 +99,17 @@ abstract class CatalystScreenTestCase {
         @Suppress("UNCHECKED_CAST")
         val clazz = preferenceScreenCreator.fragmentClass() as Class<PreferenceFragmentCompat>
         val builder = StringBuilder()
-        launchFragmentScenario(clazz).use {
-            it.onFragment { fragment ->
-                taskFinished.set(true)
-                fragment.preferenceScreen.toString(builder)
-            }
+        launchFragment(clazz) { fragment ->
+            taskFinished.set(true)
+            fragment.preferenceScreen.toString(builder)
         }
         return builder.toString()
     }
+
+    protected open fun launchFragment(
+        fragmentClass: Class<PreferenceFragmentCompat>,
+        action: (PreferenceFragmentCompat) -> Unit,
+    ): Unit = launchFragmentScenario(fragmentClass).use { it.onFragment(action) }
 
     protected open fun launchFragmentScenario(fragmentClass: Class<PreferenceFragmentCompat>) =
         FragmentScenario.launch(fragmentClass)

@@ -23,6 +23,8 @@ import com.android.systemui.qs.panels.data.repository.DefaultLargeTilesRepositor
 import com.android.systemui.qs.panels.data.repository.DefaultLargeTilesRepositoryImpl
 import com.android.systemui.qs.panels.data.repository.GridLayoutTypeRepository
 import com.android.systemui.qs.panels.data.repository.GridLayoutTypeRepositoryImpl
+import com.android.systemui.qs.panels.domain.interactor.EditTilesResetInteractor
+import com.android.systemui.qs.panels.domain.interactor.SizedTilesResetInteractor
 import com.android.systemui.qs.panels.shared.model.GridLayoutType
 import com.android.systemui.qs.panels.shared.model.InfiniteGridLayoutType
 import com.android.systemui.qs.panels.shared.model.PaginatedGridLayoutType
@@ -52,6 +54,9 @@ interface PanelsModule {
 
     @Binds
     fun bindGridLayoutTypeRepository(impl: GridLayoutTypeRepositoryImpl): GridLayoutTypeRepository
+
+    @Binds
+    fun bindEditTilesResetInteractor(impl: SizedTilesResetInteractor): EditTilesResetInteractor
 
     @Binds fun bindIconTilesViewModel(impl: IconTilesViewModelImpl): IconTilesViewModel
 

@@ -55,11 +55,7 @@ interface AudioSharingModule {
             settingsLibAudioSharingRepository: SettingsLibAudioSharingRepository,
             @Background backgroundDispatcher: CoroutineDispatcher,
         ): AudioSharingRepository =
-            if (
-                Flags.enableLeAudioSharing() &&
-                    Flags.audioSharingQsDialogImprovement() &&
-                    localBluetoothManager != null
-            ) {
+            if (Flags.enableLeAudioSharing() && localBluetoothManager != null) {
                 AudioSharingRepositoryImpl(
                     localBluetoothManager,
                     settingsLibAudioSharingRepository,

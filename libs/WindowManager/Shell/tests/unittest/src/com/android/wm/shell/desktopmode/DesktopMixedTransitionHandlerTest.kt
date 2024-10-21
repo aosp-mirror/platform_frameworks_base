@@ -21,6 +21,7 @@ import android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD
 import android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM
 import android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN
 import android.app.WindowConfiguration.WindowingMode
+import android.os.Binder
 import android.os.Handler
 import android.os.IBinder
 import android.testing.AndroidTestingRunner
@@ -107,6 +108,8 @@ class DesktopMixedTransitionHandlerTest : ShellTestCase() {
     @Test
     fun startRemoveTransition_startsCloseTransition() {
         val wct = WindowContainerTransaction()
+        whenever(transitions.startTransition(WindowManager.TRANSIT_CLOSE, wct, mixedHandler))
+            .thenReturn(Binder())
 
         mixedHandler.startRemoveTransition(wct)
 

@@ -262,6 +262,11 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
      */
     private boolean mIsHeadsUp;
 
+    /**
+     * Whether or not the notification is showing the app icon instead of the small icon.
+     */
+    private boolean mIsShowingAppIcon;
+
     private boolean mLastChronometerRunning = true;
     private ViewStub mChildrenContainerStub;
     private GroupMembershipManager mGroupMembershipManager;
@@ -814,6 +819,20 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         } else if (isAboveShelf() != wasAboveShelf) {
             mAboveShelfChangedListener.onAboveShelfStateChanged(!wasAboveShelf);
         }
+    }
+
+    /**
+     * Indicate that the notification is showing the app icon instead of the small icon.
+     */
+    public void setIsShowingAppIcon(boolean isShowingAppIcon) {
+        mIsShowingAppIcon = isShowingAppIcon;
+    }
+
+    /**
+     * Whether or not the notification is showing the app icon instead of the small icon.
+     */
+    public boolean isShowingAppIcon() {
+        return mIsShowingAppIcon;
     }
 
     @Override
@@ -2488,6 +2507,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     private void updateChildrenVisibility() {
+        if (EnsureEnrViewsVisibility.isEnabled()) {
+            mPublicLayout.setVisibility(mShowingPublic ? View.VISIBLE : View.INVISIBLE);
+        }
+
         boolean hideContentWhileLaunching = mExpandAnimationRunning && mGuts != null
                 && mGuts.isExposed();
         mPrivateLayout.setVisibility(!mShowingPublic && !mIsSummaryWithChildren
@@ -3054,7 +3077,13 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             } else {
                 mLogger.logSkipResetAllContentAlphas(getEntry());
             }
-            mPublicLayout.setVisibility(mShowingPublic ? View.VISIBLE : View.INVISIBLE);
+
+            if (!EnsureEnrViewsVisibility.isEnabled()) {
+                // mPublicLayout.setVisibility moved to updateChildrenVisibility when the flag is on
+                // in order to ensure public and private views are not visible
+                // together at the same time.
+                mPublicLayout.setVisibility(mShowingPublic ? View.VISIBLE : View.INVISIBLE);
+            }
             updateChildrenVisibility();
         } else {
             animateShowingPublic(delay, duration, mShowingPublic);

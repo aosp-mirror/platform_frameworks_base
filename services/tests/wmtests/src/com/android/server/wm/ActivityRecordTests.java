@@ -3214,23 +3214,32 @@ public class ActivityRecordTests extends WindowTestsBase {
         assertFalse(activity.mDisplayContent.mClosingApps.contains(activity));
     }
 
+    @SetupWindows(addWindows = W_ACTIVITY)
     @Test
     public void testSetVisibility_visibleToInvisible() {
-        final ActivityRecord activity = new ActivityBuilder(mAtm)
-                .setCreateTask(true).build();
+        final TestTransitionPlayer player = registerTestTransitionPlayer();
+        final ActivityRecord activity = mAppWindow.mActivityRecord;
+        makeWindowVisibleAndDrawn(mAppWindow);
         // By default, activity is visible.
         assertTrue(activity.isVisible());
         assertTrue(activity.isVisibleRequested());
-        assertFalse(activity.mDisplayContent.mClosingApps.contains(activity));
+        assertTrue(mAppWindow.isDrawn());
+        assertFalse(mAppWindow.setReportResizeHints());
 
         // Request the activity to be invisible. Since the visibility changes, app transition
         // animation should be applied on this activity.
-        mDisplayContent.prepareAppTransition(0);
+        activity.mTransitionController.requestCloseTransitionIfNeeded(activity);
         activity.setVisibility(false);
         assertTrue(activity.isVisible());
         assertFalse(activity.isVisibleRequested());
-        assertFalse(activity.mDisplayContent.mOpeningApps.contains(activity));
-        assertTrue(activity.mDisplayContent.mClosingApps.contains(activity));
+
+        player.start();
+        mSetFlagsRule.enableFlags(Flags.FLAG_RESET_DRAW_STATE_ON_CLIENT_INVISIBLE);
+        // ActivityRecord#commitVisibility(false) -> WindowState#sendAppVisibilityToClients().
+        player.finish();
+        assertFalse(activity.isVisible());
+        assertFalse("Reset draw state after committing invisible", mAppWindow.isDrawn());
+        assertTrue("Set pending redraw hint", mAppWindow.setReportResizeHints());
     }
 
     @Test

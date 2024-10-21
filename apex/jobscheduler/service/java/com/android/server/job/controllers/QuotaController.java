@@ -619,7 +619,7 @@ public final class QuotaController extends StateController {
         }
 
         final int uid = jobStatus.getSourceUid();
-        if (mTopAppCache.get(uid)) {
+        if (!Flags.enforceQuotaPolicyToTopStartedJobs() && mTopAppCache.get(uid)) {
             if (DEBUG) {
                 Slog.d(TAG, jobStatus.toShortString() + " is top started job");
             }
@@ -656,7 +656,9 @@ public final class QuotaController extends StateController {
                 timer.stopTrackingJob(jobStatus);
             }
         }
-        mTopStartedJobs.remove(jobStatus);
+        if (!Flags.enforceQuotaPolicyToTopStartedJobs()) {
+            mTopStartedJobs.remove(jobStatus);
+        }
     }
 
     @Override
@@ -767,7 +769,7 @@ public final class QuotaController extends StateController {
 
     /** @return true if the job was started while the app was in the TOP state. */
     private boolean isTopStartedJobLocked(@NonNull final JobStatus jobStatus) {
-        return mTopStartedJobs.contains(jobStatus);
+        return !Flags.enforceQuotaPolicyToTopStartedJobs() && mTopStartedJobs.contains(jobStatus);
     }
 
     /** Returns the maximum amount of time this job could run for. */
@@ -4379,11 +4381,13 @@ public final class QuotaController extends StateController {
     @Override
     public void dumpControllerStateLocked(final IndentingPrintWriter pw,
             final Predicate<JobStatus> predicate) {
-        pw.println("Flags: ");
+        pw.println("Aconfig Flags:");
         pw.println("    " + Flags.FLAG_ADJUST_QUOTA_DEFAULT_CONSTANTS
                 + ": " + Flags.adjustQuotaDefaultConstants());
         pw.println("    " + Flags.FLAG_ENFORCE_QUOTA_POLICY_TO_FGS_JOBS
                 + ": " + Flags.enforceQuotaPolicyToFgsJobs());
+        pw.println("    " + Flags.FLAG_ENFORCE_QUOTA_POLICY_TO_TOP_STARTED_JOBS
+                + ": " + Flags.enforceQuotaPolicyToTopStartedJobs());
         pw.println();
 
         pw.println("Current elapsed time: " + sElapsedRealtimeClock.millis());

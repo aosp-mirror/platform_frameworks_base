@@ -1535,6 +1535,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     }
 
     public boolean interceptMediaKey(KeyEvent event) {
+        ComposeBouncerFlags.assertInLegacyMode();
         return mPrimaryBouncerView.getDelegate() != null
                 && mPrimaryBouncerView.getDelegate().interceptMediaKey(event);
     }

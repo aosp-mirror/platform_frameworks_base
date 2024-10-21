@@ -5508,7 +5508,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 clearAllDrawn();
                 // Reset the draw state in order to prevent the starting window to be immediately
                 // dismissed when the app still has the surface.
-                if (!isVisible() && !isClientVisible()) {
+                if (!Flags.resetDrawStateOnClientInvisible()
+                        && !isVisible() && !isClientVisible()) {
                     forAllWindows(w -> {
                         if (w.mWinAnimator.mDrawState == HAS_DRAWN) {
                             w.mWinAnimator.resetDrawState();
@@ -6852,7 +6853,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         } else if (associatedTask.getActivity(
                 r -> r.isVisibleRequested() && !r.firstWindowDrawn) == null) {
             // The last drawn activity may not be the one that owns the starting window.
-            final ActivityRecord r = associatedTask.topActivityContainsStartingWindow();
+            final ActivityRecord r = associatedTask.getActivity(ar -> ar.mStartingData != null);
             if (r != null) {
                 r.removeStartingWindow();
             }
