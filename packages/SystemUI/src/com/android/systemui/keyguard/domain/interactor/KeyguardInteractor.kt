@@ -189,9 +189,6 @@ constructor(
     /** Whether any dreaming is running, including the doze dream. */
     val isDreamingAny: Flow<Boolean> = repository.isDreaming
 
-    /** Whether the system is dreaming and the active dream is hosted in lockscreen */
-    val isActiveDreamLockscreenHosted: StateFlow<Boolean> = repository.isActiveDreamLockscreenHosted
-
     /** Event for when the camera gesture is detected */
     val onCameraLaunchDetected: Flow<CameraLaunchSourceModel> =
         repository.onCameraLaunchDetected.filter { it.type != CameraLaunchType.IGNORE }
@@ -475,10 +472,6 @@ constructor(
                 CameraLaunchType.QUICK_AFFORDANCE
             else -> throw IllegalArgumentException("Invalid CameraLaunchType value: $value")
         }
-    }
-
-    fun setIsActiveDreamLockscreenHosted(isLockscreenHosted: Boolean) {
-        repository.setIsActiveDreamLockscreenHosted(isLockscreenHosted)
     }
 
     /** Sets whether quick settings or quick-quick settings is visible. */
