@@ -465,7 +465,8 @@ public class KeyguardClockSwitch extends RelativeLayout {
         super.onLayout(changed, l, t, r, b);
         // TODO: b/305022530
         if (mClock != null && mClock.getConfig().getId().equals("DIGITAL_CLOCK_METRO")) {
-            mClock.getEvents().onColorPaletteChanged(mContext.getResources());
+            mClock.getSmallClock().getEvents().onThemeChanged(mClock.getSmallClock().getTheme());
+            mClock.getLargeClock().getEvents().onThemeChanged(mClock.getLargeClock().getTheme());
         }
 
         if (changed) {
