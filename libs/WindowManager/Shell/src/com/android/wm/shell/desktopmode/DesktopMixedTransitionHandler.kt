@@ -23,6 +23,7 @@ import android.os.Handler
 import android.os.IBinder
 import android.view.SurfaceControl
 import android.view.WindowManager
+import android.window.DesktopModeFlags
 import android.window.TransitionInfo
 import android.window.TransitionRequestInfo
 import android.window.WindowContainerTransaction
@@ -59,6 +60,9 @@ class DesktopMixedTransitionHandler(
 
     /** Starts close transition and handles or delegates desktop task close animation. */
     override fun startRemoveTransition(wct: WindowContainerTransaction?): IBinder {
+        if (!DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_EXIT_TRANSITIONS.isTrue) {
+            return freeformTaskTransitionHandler.startRemoveTransition(wct)
+        }
         requireNotNull(wct)
         return transitions.startTransition(WindowManager.TRANSIT_CLOSE, wct, /* handler= */ this)
     }
