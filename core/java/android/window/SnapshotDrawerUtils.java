@@ -152,9 +152,11 @@ public class SnapshotDrawerUtils {
         @VisibleForTesting
         public void setFrames(Rect frame, Rect systemBarInsets) {
             mFrame.set(frame);
-            mSystemBarInsets.set(systemBarInsets);
             mSizeMismatch = (mFrame.width() != mSnapshotW || mFrame.height() != mSnapshotH);
-            mSystemBarBackgroundPainter.setInsets(systemBarInsets);
+            if (!Flags.drawSnapshotAspectRatioMatch() && systemBarInsets != null) {
+                mSystemBarInsets.set(systemBarInsets);
+                mSystemBarBackgroundPainter.setInsets(systemBarInsets);
+            }
         }
 
         private void drawSnapshot(boolean releaseAfterDraw) {
@@ -396,9 +398,12 @@ public class SnapshotDrawerUtils {
         final ActivityManager.RunningTaskInfo runningTaskInfo = info.taskInfo;
         final ActivityManager.TaskDescription taskDescription =
                 getOrCreateTaskDescription(runningTaskInfo);
-        drawSurface.initiateSystemBarPainter(lp.flags, lp.privateFlags,
-                attrs.insetsFlags.appearance, taskDescription, info.requestedVisibleTypes);
-        final Rect systemBarInsets = getSystemBarInsets(windowBounds, topWindowInsetsState);
+        Rect systemBarInsets = null;
+        if (!Flags.drawSnapshotAspectRatioMatch()) {
+            drawSurface.initiateSystemBarPainter(lp.flags, lp.privateFlags,
+                    attrs.insetsFlags.appearance, taskDescription, info.requestedVisibleTypes);
+            systemBarInsets = getSystemBarInsets(windowBounds, topWindowInsetsState);
+        }
         drawSurface.setFrames(windowBounds, systemBarInsets);
         drawSurface.drawSnapshot(releaseAfterDraw);
     }
