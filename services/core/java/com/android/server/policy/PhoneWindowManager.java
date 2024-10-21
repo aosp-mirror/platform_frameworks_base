@@ -6944,6 +6944,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (modifierShortcutManagerMultiuser()) {
             mModifierShortcutManager.setCurrentUser(UserHandle.of(newUserId));
         }
+        mInputManagerInternal.setCurrentUser(newUserId);
     }
 
     @Override
