@@ -14,9 +14,16 @@
  * limitations under the License.
  */
 
-package com.android.systemui.volume.data.repository
+package com.android.systemui.keyguard.domain.interactor
 
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.telephony.domain.interactor.telephonyInteractor
+import com.android.systemui.volume.data.repository.audioRepository
 
-val Kosmos.fakeAudioRepository by Kosmos.Fixture { FakeAudioRepository() }
-val Kosmos.audioRepository by Kosmos.Fixture { fakeAudioRepository }
+val Kosmos.keyguardMediaKeyInteractor: KeyguardMediaKeyInteractor by
+    Kosmos.Fixture {
+        KeyguardMediaKeyInteractor(
+            telephonyInteractor = telephonyInteractor,
+            audioRepository = audioRepository,
+        )
+    }
