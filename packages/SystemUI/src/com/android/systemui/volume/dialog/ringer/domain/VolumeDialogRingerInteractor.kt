@@ -25,15 +25,15 @@ import com.android.settingslib.volume.shared.model.RingerMode
 import com.android.systemui.plugins.VolumeDialogController
 import com.android.systemui.volume.dialog.dagger.scope.VolumeDialog
 import com.android.systemui.volume.dialog.domain.interactor.VolumeDialogStateInteractor
-import com.android.systemui.volume.dialog.ringer.data.VolumeDialogRingerRepository
 import com.android.systemui.volume.dialog.ringer.shared.model.VolumeDialogRingerModel
 import com.android.systemui.volume.dialog.shared.model.VolumeDialogStateModel
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.mapNotNull
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.stateIn
 
 /** Exposes [VolumeDialogRingerModel]. */
 @VolumeDialog
@@ -43,17 +43,13 @@ constructor(
     @VolumeDialog private val coroutineScope: CoroutineScope,
     volumeDialogStateInteractor: VolumeDialogStateInteractor,
     private val controller: VolumeDialogController,
-    private val repository: VolumeDialogRingerRepository,
 ) {
 
-    val ringerModel: Flow<VolumeDialogRingerModel> = repository.ringerModel
-
-    init {
+    val ringerModel: Flow<VolumeDialogRingerModel> =
         volumeDialogStateInteractor.volumeDialogState
-            .mapNotNull { state -> toRingerModel(state) }
-            .onEach { ringerModel -> repository.updateRingerModel { ringerModel } }
-            .launchIn(coroutineScope)
-    }
+            .mapNotNull { toRingerModel(it) }
+            .stateIn(coroutineScope, SharingStarted.Eagerly, null)
+            .filterNotNull()
 
     private fun toRingerModel(state: VolumeDialogStateModel): VolumeDialogRingerModel? {
         return state.streamModels[AudioManager.STREAM_RING]?.let {
