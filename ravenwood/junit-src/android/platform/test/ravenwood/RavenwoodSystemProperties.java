@@ -146,6 +146,9 @@ public class RavenwoodSystemProperties {
         if (root.startsWith("soc.")) return true;
         if (root.startsWith("system.")) return true;
 
+        // For PropertyInvalidatedCache
+        if (root.startsWith("cache_key.")) return true;
+
         switch (key) {
             case "gsm.version.baseband":
             case "no.such.thing":
@@ -169,6 +172,9 @@ public class RavenwoodSystemProperties {
         final String root = getKeyRoot(key);
 
         if (root.startsWith("debug.")) return true;
+
+        // For PropertyInvalidatedCache
+        if (root.startsWith("cache_key.")) return true;
 
         return mKeyWritable.contains(key);
     }
