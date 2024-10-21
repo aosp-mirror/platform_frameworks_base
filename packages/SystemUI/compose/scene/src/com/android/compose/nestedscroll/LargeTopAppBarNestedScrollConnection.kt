@@ -70,6 +70,7 @@ fun LargeTopAppBarNestedScrollConnection(
             amountConsumed
         },
         // Don't consume the velocity on pre/post fling
-        onStop = { { 0f } },
+        onStop = { 0f },
+        onCancel = { /* do nothing */ },
     )
 }

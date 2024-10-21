@@ -73,13 +73,19 @@ fun NotificationScrimNestedScrollConnection(
             snapScrimOffset(currentHeight + amountConsumed)
             amountConsumed
         },
-        // Don't consume the velocity on pre/post fling
         onStop = { velocityAvailable ->
             onStop(velocityAvailable)
             if (scrimOffset() < minScrimOffset()) {
                 animateScrimOffset(minScrimOffset())
             }
-            { 0f }
+            // Don't consume the velocity on pre/post fling
+            0f
+        },
+        onCancel = {
+            onStop(0f)
+            if (scrimOffset() < minScrimOffset()) {
+                animateScrimOffset(minScrimOffset())
+            }
         },
     )
 }

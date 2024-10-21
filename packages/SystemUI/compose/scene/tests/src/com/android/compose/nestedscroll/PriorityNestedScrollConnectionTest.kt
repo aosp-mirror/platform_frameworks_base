@@ -39,6 +39,7 @@ class PriorityNestedScrollConnectionTest {
     private var lastScroll: Float? = null
     private var consumeScroll = true
     private var lastStop: Float? = null
+    private var isCancelled: Boolean = false
     private var consumeStop = true
 
     private val scrollConnection =
@@ -55,8 +56,9 @@ class PriorityNestedScrollConnectionTest {
             },
             onStop = {
                 lastStop = it
-                { if (consumeStop) it else 0f }
+                if (consumeStop) it else 0f
             },
+            onCancel = { isCancelled = true },
         )
 
     @Test
@@ -147,13 +149,13 @@ class PriorityNestedScrollConnectionTest {
     }
 
     @Test
-    fun step3a_onPriorityMode_shouldStopIfCannotContinue() {
+    fun step3a_onPriorityMode_shouldCancelIfCannotContinue() {
         startPriorityModePostScroll()
         consumeScroll = false
 
-        scrollConnection.onPreScroll(available = Offset.Zero, source = UserInput)
+        scrollConnection.onPreScroll(available = Offset(0f, 1f), source = UserInput)
 
-        assertThat(lastStop).isNotNull()
+        assertThat(isCancelled).isTrue()
     }
 
     @Test
@@ -178,12 +180,12 @@ class PriorityNestedScrollConnectionTest {
     }
 
     @Test
-    fun step3c_onPriorityMode_shouldStopOnReset() {
+    fun step3c_onPriorityMode_shouldCancelOnReset() {
         startPriorityModePostScroll()
 
         scrollConnection.reset()
 
-        assertThat(lastStop).isNotNull()
+        assertThat(isCancelled).isTrue()
     }
 
     @Test
