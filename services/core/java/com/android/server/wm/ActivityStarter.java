@@ -3468,8 +3468,8 @@ class ActivityStarter {
         return this;
     }
 
-    ActivityStarter setActivityOptions(Bundle bOptions) {
-        return setActivityOptions(SafeActivityOptions.fromBundle(bOptions));
+    ActivityStarter setActivityOptions(Bundle bOptions, int callingPid, int callingUid) {
+        return setActivityOptions(SafeActivityOptions.fromBundle(bOptions, callingPid, callingUid));
     }
 
     ActivityStarter setIgnoreTargetSecurity(boolean ignoreTargetSecurity) {
