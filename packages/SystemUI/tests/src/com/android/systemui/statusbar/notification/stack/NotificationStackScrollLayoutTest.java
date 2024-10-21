@@ -244,7 +244,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         when(mStackSizeCalculator.computeHeight(eq(mStackScroller), anyInt(), anyFloat()))
                 .thenReturn((float) stackHeight);
 
-        mStackScroller.updateStackHeight();
+        mStackScroller.updateIntrinsicStackHeight();
 
         assertThat(mStackScroller.getIntrinsicStackHeight()).isEqualTo(stackHeight);
     }
