@@ -18,9 +18,12 @@ package android.view;
 
 import static android.view.WindowInsetsAnimation.Callback.DISPATCH_MODE_CONTINUE_ON_SUBTREE;
 import static android.view.WindowInsetsAnimation.Callback.DISPATCH_MODE_STOP;
+import static android.view.flags.Flags.FLAG_TOOLKIT_VIEWGROUP_SET_REQUESTED_FRAME_RATE_API;
+import static android.view.flags.Flags.toolkitViewgroupSetRequestedFrameRateApi;
 
 import android.animation.LayoutTransition;
 import android.annotation.CallSuper;
+import android.annotation.FlaggedApi;
 import android.annotation.IdRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -446,6 +449,14 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * coordinates within the initiating child view.
      */
     private static final int FLAG_SHOW_CONTEXT_MENU_WITH_COORDS = 0x20000000;
+
+    /**
+     * When set, this indicates that the frame rate is passed down from the parent.
+     */
+    private static final int FLAG_PROPAGATED_FRAME_RATE = 0x40000000;
+
+    private static boolean sToolkitViewGroupFrameRateApiFlagValue =
+            toolkitViewgroupSetRequestedFrameRateApi();
 
     /**
      * Indicates which types of drawing caches are to be kept in memory.
@@ -5361,6 +5372,12 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
 
         touchAccessibilityNodeProviderIfNeeded(child);
+
+        // If a propagated value exists, pass it to the child.
+        if (sToolkitViewGroupFrameRateApiFlagValue && !Float.isNaN(getRequestedFrameRate())
+                && (mGroupFlags & FLAG_PROPAGATED_FRAME_RATE) != 0) {
+            child.overrideFrameRate(getRequestedFrameRate(), getForcedOverrideFrameRateFlag());
+        }
     }
 
     /**
@@ -9464,5 +9481,76 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             return parent.findOnBackInvokedDispatcherForChild(this, requester);
         }
         return null;
+    }
+
+    /**
+     * You can set the preferred frame rate for a ViewGroup using a positive number
+     * or by specifying the preferred frame rate category using constants, including
+     * REQUESTED_FRAME_RATE_CATEGORY_NO_PREFERENCE, REQUESTED_FRAME_RATE_CATEGORY_LOW,
+     * REQUESTED_FRAME_RATE_CATEGORY_NORMAL, REQUESTED_FRAME_RATE_CATEGORY_HIGH.
+     * Keep in mind that the preferred frame rate affects the frame rate for the next frame,
+     * so use this method carefully. It's important to note that the preference is valid as
+     * long as the ViewGroup is invalidated. Please also be aware that the requested frame rate
+     * will not propagate to child views.
+     *
+     * @param frameRate the preferred frame rate of the ViewGroup.
+     */
+    @Override
+    @FlaggedApi(FLAG_TOOLKIT_VIEWGROUP_SET_REQUESTED_FRAME_RATE_API)
+    public void setRequestedFrameRate(float frameRate) {
+        if (sToolkitViewGroupFrameRateApiFlagValue) {
+            if (getForcedOverrideFrameRateFlag()) {
+                return;
+            }
+            super.setRequestedFrameRate(frameRate);
+            // If frameRate is Float.NaN, it means it's set to the default value.
+            // We only want to make the flag true, when the value is not Float.nan
+            setSelfRequestedFrameRateFlag(!Float.isNaN(getRequestedFrameRate()));
+            mGroupFlags &= ~FLAG_PROPAGATED_FRAME_RATE;
+        }
+    }
+
+    /**
+     * You can set the preferred frame rate for a ViewGroup and its children using a positive number
+     * or by specifying the preferred frame rate category using constants, including
+     * REQUESTED_FRAME_RATE_CATEGORY_NO_PREFERENCE, REQUESTED_FRAME_RATE_CATEGORY_LOW,
+     * REQUESTED_FRAME_RATE_CATEGORY_NORMAL, REQUESTED_FRAME_RATE_CATEGORY_HIGH.
+     * Keep in mind that the preferred frame rate affects the frame rate for the next frame,
+     * so use this method carefully. It's important to note that the preference is valid as
+     * long as the ViewGroup or any of its children is invalidated.
+     * To undo the frame rate propagation, call the API with REQUESTED_FRAME_RATE_CATEGORY_DEFAULT.
+     *
+     * @param frameRate the preferred frame rate of the ViewGroup.
+     * @param forceOverride indicate whether it should override the frame rate of
+     *        all the children with the given frame rate.
+     */
+    @FlaggedApi(FLAG_TOOLKIT_VIEWGROUP_SET_REQUESTED_FRAME_RATE_API)
+    public void propagateRequestedFrameRate(float frameRate, boolean forceOverride) {
+        if (sToolkitViewGroupFrameRateApiFlagValue) {
+            // Skip setting the frame rate if it's currently in forced override mode.
+            if (getForcedOverrideFrameRateFlag()) {
+                return;
+            }
+
+            // frame rate could be set previously with setRequestedFrameRate
+            // or propagateRequestedFrameRate
+            setSelfRequestedFrameRateFlag(false);
+            overrideFrameRate(frameRate, forceOverride);
+            setSelfRequestedFrameRateFlag(true);
+        }
+    }
+
+    @Override
+    void overrideFrameRate(float frameRate, boolean forceOverride) {
+        // if it's in forceOverrid mode or has no self requested frame rate,
+        // it will override the frame rate.
+        if (forceOverride || !getSelfRequestedFrameRateFlag()) {
+            super.overrideFrameRate(frameRate, forceOverride);
+            mGroupFlags |= FLAG_PROPAGATED_FRAME_RATE;
+
+            for (int i = 0; i < getChildCount(); i++) {
+                getChildAt(i).overrideFrameRate(frameRate, forceOverride);
+            }
+        }
     }
 }
