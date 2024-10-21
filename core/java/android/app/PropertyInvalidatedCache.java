@@ -21,11 +21,13 @@ import static android.text.TextUtils.formatSimple;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
+import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
+import android.os.Process;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.text.TextUtils;
@@ -78,10 +80,15 @@ public class PropertyInvalidatedCache<Query, Result> {
         public abstract @Nullable R apply(@NonNull Q query);
 
         /**
-         * Return true if a query should not use the cache.  The default implementation
-         * always uses the cache.
+         * Return true if a query should not use the cache. The default implementation returns true
+         * if the process UID differs from the calling UID. This is to prevent a binder caller from
+         * reading a cached value created due to a different binder caller, when processes are
+         * caching on behalf of other processes.
          */
         public boolean shouldBypassCache(@NonNull Q query) {
+            if(android.multiuser.Flags.propertyInvalidatedCacheBypassMismatchedUids()) {
+                return Binder.getCallingUid() != Process.myUid();
+            }
             return false;
         }
     };
