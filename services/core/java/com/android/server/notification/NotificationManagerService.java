@@ -2573,9 +2573,9 @@ public class NotificationManagerService extends SystemService {
 
         mToastRateLimiter = toastRateLimiter;
 
-        mAttentionHelper = new NotificationAttentionHelper(getContext(), lightsManager,
-                mAccessibilityManager, mPackageManagerClient, userManager, usageStats,
-                mNotificationManagerPrivate, mZenModeHelper, flagResolver);
+        mAttentionHelper = new NotificationAttentionHelper(getContext(), mNotificationLock,
+                lightsManager, mAccessibilityManager, mPackageManagerClient, userManager,
+                usageStats, mNotificationManagerPrivate, mZenModeHelper, flagResolver);
 
         // register for various Intents.
         // If this is called within a test, make sure to unregister the intent receivers by
@@ -6916,7 +6916,7 @@ public class NotificationManagerService extends SystemService {
                     pw.println("  mMaxPackageEnqueueRate=" + mMaxPackageEnqueueRate);
                     pw.println("  hideSilentStatusBar="
                             + mPreferencesHelper.shouldHideSilentStatusIcons());
-                    mAttentionHelper.dump(pw, "    ", filter);
+                    mAttentionHelper.dumpLocked(pw, "    ", filter);
                 }
                 pw.println("  mArchive=" + mArchive.toString());
                 mArchive.dumpImpl(pw, filter);
