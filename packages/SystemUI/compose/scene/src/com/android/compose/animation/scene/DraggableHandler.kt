@@ -709,6 +709,9 @@ internal class NestedScrollHandlerImpl(
 
                 canStart
             },
+            // We need to maintain scroll priority even if the scene transition can no longer
+            // consume the scroll gesture to allow us to return to the previous scene.
+            canStopOnScroll = { _, _ -> false },
             canStopOnPreFling = { true },
             onStart = { offsetAvailable ->
                 val pointersInfo = pointersInfo()

@@ -40,6 +40,8 @@ internal typealias SuspendedValue<T> = suspend () -> T
  *   events in post-scroll mode.
  * @param canStartPostFling lambda that returns true if the connection can start consuming scroll
  *   events in post-fling mode.
+ * @param canStopOnScroll lambda that returns true if the connection can stop consuming scroll
+ *   events in scroll mode.
  * @param canStopOnPreFling lambda that returns true if the connection can stop consuming scroll
  *   events in pre-fling (i.e. as soon as the user lifts their fingers).
  * @param onStart lambda that is called when the connection starts consuming scroll events.
@@ -57,6 +59,9 @@ class PriorityNestedScrollConnection(
     private val canStartPostScroll:
         (offsetAvailable: Float, offsetBeforeStart: Float, source: NestedScrollSource) -> Boolean,
     private val canStartPostFling: (velocityAvailable: Float) -> Boolean,
+    private val canStopOnScroll: (available: Float, consumed: Float) -> Boolean = { _, consumed ->
+        consumed == 0f
+    },
     private val canStopOnPreFling: () -> Boolean,
     private val onStart: (offsetAvailable: Float) -> Unit,
     private val onScroll: (offsetAvailable: Float, source: NestedScrollSource) -> Float,
@@ -155,10 +160,6 @@ class PriorityNestedScrollConnection(
         }
     }
 
-    private fun shouldStop(consumed: Float): Boolean {
-        return consumed == 0f
-    }
-
     private fun start(
         availableOffset: Float,
         source: NestedScrollSource,
@@ -183,7 +184,7 @@ class PriorityNestedScrollConnection(
         // Step 2: We have the priority and can consume the scroll events.
         val consumedByScroll = onScroll(offsetAvailable, source)
 
-        if (shouldStop(consumedByScroll)) {
+        if (canStopOnScroll(offsetAvailable, consumedByScroll)) {
             // Step 3a: We have lost priority and we no longer need to intercept scroll events.
             cancel()
 
