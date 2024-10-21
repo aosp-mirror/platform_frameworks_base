@@ -27,9 +27,8 @@ import com.android.compose.animation.scene.content.Content
 import com.android.compose.animation.scene.content.state.TransitionState
 import com.android.compose.animation.scene.content.state.TransitionState.HasOverscrollProperties.Companion.DistanceUnspecified
 import com.android.compose.nestedscroll.PriorityNestedScrollConnection
+import com.android.compose.nestedscroll.SuspendedValue
 import kotlin.math.absoluteValue
-
-internal typealias SuspendedValue<T> = suspend () -> T
 
 internal interface DraggableHandler {
     /**
@@ -735,18 +734,10 @@ internal class NestedScrollHandlerImpl(
             },
             onStop = { velocityAvailable ->
                 val controller = dragController ?: error("Should be called after onStart")
-                try {
-                    controller
-                        .onStop(velocity = velocityAvailable, canChangeContent = canChangeScene)
-                        .invoke()
-                } finally {
-                    dragController = null
-                }
-            },
-            onCancel = {
-                val controller = dragController ?: error("Should be called after onStart")
-                controller.onStop(velocity = 0f, canChangeContent = canChangeScene)
-                dragController = null
+
+                controller
+                    .onStop(velocity = velocityAvailable, canChangeContent = canChangeScene)
+                    .also { dragController = null }
             },
         )
     }

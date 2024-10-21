@@ -104,8 +104,7 @@ fun NotificationStackNestedScrollConnection(
         },
         onStop = { velocityAvailable ->
             onStop(velocityAvailable)
-            velocityAvailable
+            suspend { velocityAvailable }
         },
-        onCancel = { onStop(0f) },
     )
 }

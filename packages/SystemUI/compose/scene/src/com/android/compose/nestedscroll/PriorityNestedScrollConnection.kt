@@ -16,21 +16,15 @@
 
 package com.android.compose.nestedscroll
 
-import androidx.compose.animation.core.AnimationState
-import androidx.compose.animation.core.DecayAnimationSpec
-import androidx.compose.animation.core.animateDecay
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.unit.Velocity
 import com.android.compose.ui.util.SpaceVectorConverter
-import kotlin.math.abs
 import kotlin.math.sign
-import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
+
+internal typealias SuspendedValue<T> = suspend () -> T
 
 /**
  * A [NestedScrollConnection] that intercepts scroll events in priority mode.
@@ -53,7 +47,6 @@ import kotlinx.coroutines.coroutineScope
  *   consumed amount.
  * @param onStop lambda that is called when the connection stops consuming scroll events and returns
  *   the consumed velocity.
- * @param onCancel lambda that is called when the connection is cancelled.
  * @sample LargeTopAppBarNestedScrollConnection
  * @sample com.android.compose.animation.scene.NestedScrollHandlerImpl.nestedScrollConnection
  */
@@ -67,17 +60,13 @@ class PriorityNestedScrollConnection(
     private val canStopOnPreFling: () -> Boolean,
     private val onStart: (offsetAvailable: Float) -> Unit,
     private val onScroll: (offsetAvailable: Float, source: NestedScrollSource) -> Float,
-    private val onStop: suspend (velocityAvailable: Float) -> Float,
-    private val onCancel: () -> Unit,
+    private val onStop: (velocityAvailable: Float) -> SuspendedValue<Float>,
 ) : NestedScrollConnection, SpaceVectorConverter by SpaceVectorConverter(orientation) {
 
     /** In priority mode [onPreScroll] events are first consumed by the parent, via [onScroll]. */
     private var isPriorityMode = false
 
     private var offsetScrolledBeforePriorityMode = 0f
-
-    /** This job allows us to interrupt the onStop animation */
-    private var onStopJob: Deferred<Float> = CompletableDeferred(0f)
 
     override fun onPostScroll(
         consumed: Offset,
@@ -159,7 +148,7 @@ class PriorityNestedScrollConnection(
      */
     fun reset() {
         if (isPriorityMode) {
-            // Step 3c: To ensure that an onStop (or onCancel) is always called for every onStart.
+            // Step 3c: To ensure that an onStop is always called for every onStart.
             cancel()
         } else {
             resetOffsetTracker()
@@ -182,8 +171,6 @@ class PriorityNestedScrollConnection(
         // Step 1: It's our turn! We start capturing scroll events when one of our children has an
         // available offset following a scroll event.
         isPriorityMode = true
-
-        onStopJob.cancel()
 
         // Note: onStop will be called if we cannot continue to scroll (step 3a), or the finger is
         // lifted (step 3b), or this object has been destroyed (step 3c).
@@ -217,17 +204,13 @@ class PriorityNestedScrollConnection(
         check(isPriorityMode) { "This should never happen, stop() was called before start()" }
         isPriorityMode = false
         resetOffsetTracker()
-
-        return coroutineScope {
-            onStopJob = async { onStop(velocityAvailable) }
-            onStopJob.await()
-        }
+        return onStop(velocityAvailable).invoke()
     }
 
     private fun cancel() {
         check(isPriorityMode) { "This should never happen, cancel() was called before start()" }
         isPriorityMode = false
         resetOffsetTracker()
-        onCancel()
+        onStop(0f)
     }
 }
