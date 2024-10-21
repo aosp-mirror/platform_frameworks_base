@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.chips.casttootherdevice.ui.view
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import org.junit.runner.RunWith
 import android.content.ComponentName
 import android.content.DialogInterface
 import android.content.Intent
@@ -49,6 +51,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 @OptIn(ExperimentalCoroutinesApi::class)
 class EndCastScreenToOtherDeviceDialogDelegateTest : SysuiTestCase() {
     private val kosmos = Kosmos().also { it.testCase = this }
