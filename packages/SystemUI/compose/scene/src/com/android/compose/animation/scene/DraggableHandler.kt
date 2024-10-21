@@ -612,7 +612,7 @@ internal class NestedScrollHandlerImpl(
 
         return PriorityNestedScrollConnection(
             orientation = orientation,
-            canStartPreScroll = { offsetAvailable, offsetBeforeStart ->
+            canStartPreScroll = { offsetAvailable, offsetBeforeStart, _ ->
                 canChangeScene =
                     if (isExternalOverscrollGesture()) false else offsetBeforeStart == 0f
 
@@ -644,7 +644,7 @@ internal class NestedScrollHandlerImpl(
                 isIntercepting = true
                 true
             },
-            canStartPostScroll = { offsetAvailable, offsetBeforeStart ->
+            canStartPostScroll = { offsetAvailable, offsetBeforeStart, _ ->
                 val behavior: NestedScrollBehavior =
                     when {
                         offsetAvailable > 0f -> topOrLeftBehavior
@@ -709,8 +709,7 @@ internal class NestedScrollHandlerImpl(
 
                 canStart
             },
-            canContinueScroll = { true },
-            canScrollOnFling = false,
+            canStopOnPreFling = { true },
             onStart = { offsetAvailable ->
                 val pointersInfo = pointersInfo()
                 dragController =
@@ -720,7 +719,7 @@ internal class NestedScrollHandlerImpl(
                         overSlop = if (isIntercepting) 0f else offsetAvailable,
                     )
             },
-            onScroll = { offsetAvailable ->
+            onScroll = { offsetAvailable, _ ->
                 val controller = dragController ?: error("Should be called after onStart")
 
                 val pointersInfo = pointersInfoOwner.pointersInfo()
