@@ -24,7 +24,7 @@ import com.android.systemui.Dumpable
 import com.android.systemui.statusbar.policy.CallbackController
 
 interface SystemStatusAnimationScheduler :
-        CallbackController<SystemStatusAnimationCallback>, Dumpable {
+    CallbackController<SystemStatusAnimationCallback>, Dumpable {
 
     @SystemAnimationState fun getAnimationState(): Int
 
@@ -44,30 +44,36 @@ interface SystemStatusAnimationScheduler :
  */
 interface SystemStatusAnimationCallback {
     /** Implement this method to return an [Animator] or [AnimatorSet] that presents the chip */
-    fun onSystemEventAnimationBegin(): Animator? { return null }
+    fun onSystemEventAnimationBegin(): Animator? {
+        return null
+    }
+
     /** Implement this method to return an [Animator] or [AnimatorSet] that hides the chip */
-    fun onSystemEventAnimationFinish(hasPersistentDot: Boolean): Animator? { return null }
+    fun onSystemEventAnimationFinish(hasPersistentDot: Boolean): Animator? {
+        return null
+    }
 
     // Best method name, change my mind
     fun onSystemStatusAnimationTransitionToPersistentDot(contentDescription: String?): Animator? {
         return null
     }
-    fun onHidePersistentDot(): Animator? { return null }
+
+    fun onHidePersistentDot(): Animator? {
+        return null
+    }
 }
 
-
-/**
- * Animation state IntDef
- */
+/** Animation state IntDef */
 @Retention(AnnotationRetention.SOURCE)
 @IntDef(
-        value = [
+    value =
+        [
             IDLE,
             ANIMATION_QUEUED,
             ANIMATING_IN,
             RUNNING_CHIP_ANIM,
             ANIMATING_OUT,
-            SHOWING_PERSISTENT_DOT
+            SHOWING_PERSISTENT_DOT,
         ]
 )
 annotation class SystemAnimationState
