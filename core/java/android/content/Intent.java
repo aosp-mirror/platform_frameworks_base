@@ -40,7 +40,10 @@ import android.app.Activity;
 import android.app.ActivityThread;
 import android.app.AppGlobals;
 import android.app.StatusBarManager;
+import android.app.compat.CompatChanges;
 import android.bluetooth.BluetoothDevice;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.Overridable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
@@ -669,6 +672,11 @@ import java.util.TimeZone;
 @android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class Intent implements Parcelable, Cloneable {
     private static final String TAG = "Intent";
+
+    /** @hide */
+    @ChangeId
+    @Overridable
+    public static final long ENABLE_PREVENT_INTENT_REDIRECT = 29076063L;
 
     private static final String ATTR_ACTION = "action";
     private static final String TAG_CATEGORIES = "categories";
@@ -12240,7 +12248,7 @@ public class Intent implements Parcelable, Cloneable {
      * @hide
      */
     public void collectExtraIntentKeys() {
-        if (!preventIntentRedirect()) return;
+        if (!isPreventIntentRedirectEnabled()) return;
 
         if (mExtras != null && !mExtras.isParcelled() && !mExtras.isEmpty()) {
             for (String key : mExtras.keySet()) {
@@ -12255,6 +12263,14 @@ public class Intent implements Parcelable, Cloneable {
                 }
             }
         }
+    }
+
+    /**
+     * @hide
+     */
+    public static boolean isPreventIntentRedirectEnabled() {
+        return preventIntentRedirect() && CompatChanges.isChangeEnabled(
+                ENABLE_PREVENT_INTENT_REDIRECT);
     }
 
     /** @hide */
@@ -12331,7 +12347,7 @@ public class Intent implements Parcelable, Cloneable {
             out.writeInt(0);
         }
 
-        if (preventIntentRedirect()) {
+        if (isPreventIntentRedirectEnabled()) {
             if (mCreatorTokenInfo == null) {
                 out.writeInt(0);
             } else {
@@ -12398,7 +12414,7 @@ public class Intent implements Parcelable, Cloneable {
             mOriginalIntent = new Intent(in);
         }
 
-        if (preventIntentRedirect()) {
+        if (isPreventIntentRedirectEnabled()) {
             if (in.readInt() != 0) {
                 mCreatorTokenInfo = new CreatorTokenInfo();
                 mCreatorTokenInfo.mCreatorToken = in.readStrongBinder();

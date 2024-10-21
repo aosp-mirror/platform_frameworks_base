@@ -478,10 +478,10 @@ public class ActivityStartController {
                                 intentGrants.merge(creatorIntentGrants);
                             }
                         } catch (SecurityException securityException) {
-                            ActivityStarter.logForIntentRedirect(
+                            ActivityStarter.logAndThrowExceptionForIntentRedirect(
                                     "Creator URI Grant Caused Exception.", intent, creatorUid,
-                                    creatorPackage, filterCallingUid, callingPackage);
-                            // TODO b/368559093 - rethrow the securityException.
+                                    creatorPackage, filterCallingUid, callingPackage,
+                                    securityException);
                         }
                     }
                     if ((aInfo.applicationInfo.privateFlags
