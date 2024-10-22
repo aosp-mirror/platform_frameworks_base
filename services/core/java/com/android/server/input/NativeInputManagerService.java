@@ -287,6 +287,17 @@ interface NativeInputManagerService {
      */
     int getLastUsedInputDeviceId();
 
+    /**
+     * Set whether the given input device can wake up the kernel from sleep
+     * when it generates input events. By default, usually only internal (built-in)
+     * input devices can wake the kernel from sleep. For an external input device
+     * that supports remote wakeup to be able to wake the kernel, this must be called
+     * after each time the device is connected/added.
+     *
+     * Returns true if setting power wakeup was successful.
+     */
+    boolean setKernelWakeEnabled(int deviceId, boolean enabled);
+
     /** The native implementation of InputManagerService methods. */
     class NativeImpl implements NativeInputManagerService {
         /** Pointer to native input manager service object, used by native code. */
@@ -573,5 +584,8 @@ interface NativeInputManagerService {
 
         @Override
         public native int getLastUsedInputDeviceId();
+
+        @Override
+        public native boolean setKernelWakeEnabled(int deviceId, boolean enabled);
     }
 }
