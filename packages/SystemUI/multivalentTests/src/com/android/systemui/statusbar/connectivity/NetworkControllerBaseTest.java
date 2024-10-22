@@ -61,6 +61,7 @@ import android.testing.TestableResources;
 import android.util.Log;
 
 import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.SmallTest;
 
 import com.android.settingslib.R;
 import com.android.settingslib.graph.SignalDrawable;
@@ -98,6 +99,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+@SmallTest
 public class NetworkControllerBaseTest extends SysuiTestCase {
     private static final String TAG = "NetworkControllerBaseTest";
     protected static final int DEFAULT_LEVEL = 2;

@@ -16,7 +16,7 @@
 
 package com.android.systemui.bluetooth.qsdialog
 
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import android.testing.TestableLooper
 import android.widget.Button
 import android.widget.TextView
@@ -43,7 +43,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 @OptIn(ExperimentalCoroutinesApi::class)
 class AudioSharingDialogDelegateTest : SysuiTestCase() {
