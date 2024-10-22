@@ -422,3 +422,11 @@ flag {
     bug: "361433651"
     is_fixed_read_only: true
 }
+
+flag {
+    name: "auto_brightness_mode_bedtime_wear"
+    namespace: "wear_frameworks"
+    description: "Feature flag for loading and applying auto-brightness curve while wear bedtime mode enabled."
+    bug: "350617205"
+    is_fixed_read_only: true
+}

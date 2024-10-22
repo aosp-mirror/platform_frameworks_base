@@ -69,7 +69,7 @@ constructor(
     dumpManager: DumpManager,
     private val systemClock: SystemClock,
     @Application private val coroutineScope: CoroutineScope,
-    private val logger: SystemStatusAnimationSchedulerLogger?
+    private val logger: SystemStatusAnimationSchedulerLogger?,
 ) : SystemStatusAnimationScheduler {
 
     companion object {
@@ -122,9 +122,7 @@ constructor(
                 }
         }
 
-        coroutineScope.launch {
-            animationState.collect { logger?.logAnimationStateUpdate(it) }
-        }
+        coroutineScope.launch { animationState.collect { logger?.logAnimationStateUpdate(it) } }
     }
 
     @SystemAnimationState override fun getAnimationState(): Int = animationState.value
@@ -195,7 +193,7 @@ constructor(
         return DeviceConfig.getBoolean(
             DeviceConfig.NAMESPACE_PRIVACY,
             PROPERTY_ENABLE_IMMERSIVE_INDICATOR,
-            true
+            true,
         )
     }
 
@@ -262,7 +260,7 @@ constructor(
 
     private fun announceForAccessibilityIfNeeded(event: StatusEvent) {
         val description = event.contentDescription ?: return
-        if (!event.shouldAnnounceAccessibilityEvent)  return
+        if (!event.shouldAnnounceAccessibilityEvent) return
         chipAnimationController.announceForAccessibility(description)
     }
 
@@ -356,9 +354,7 @@ constructor(
         logger?.logTransitionToPersistentDotCallbackInvoked()
         val anims: List<Animator> =
             listeners.mapNotNull {
-                it.onSystemStatusAnimationTransitionToPersistentDot(
-                    event?.contentDescription
-                )
+                it.onSystemStatusAnimationTransitionToPersistentDot(event?.contentDescription)
             }
         if (anims.isNotEmpty()) {
             val aSet = AnimatorSet()

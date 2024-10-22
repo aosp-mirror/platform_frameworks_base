@@ -1480,8 +1480,9 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
   @Test
   fun onDesktopWindowClose_noActiveTasks() {
+    val task = setUpFreeformTask(active = false)
     val wct = WindowContainerTransaction()
-    controller.onDesktopWindowClose(wct, displayId = DEFAULT_DISPLAY, taskId = 1)
+    controller.onDesktopWindowClose(wct, displayId = DEFAULT_DISPLAY, task)
     // Doesn't modify transaction
     assertThat(wct.hierarchyOps).isEmpty()
   }
@@ -1490,7 +1491,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
   fun onDesktopWindowClose_singleActiveTask_noWallpaperActivityToken() {
     val task = setUpFreeformTask()
     val wct = WindowContainerTransaction()
-    controller.onDesktopWindowClose(wct, displayId = DEFAULT_DISPLAY, taskId = task.taskId)
+    controller.onDesktopWindowClose(wct, displayId = DEFAULT_DISPLAY, task)
     // Doesn't modify transaction
     assertThat(wct.hierarchyOps).isEmpty()
   }
@@ -1502,7 +1503,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     taskRepository.wallpaperActivityToken = wallpaperToken
 
     val wct = WindowContainerTransaction()
-    controller.onDesktopWindowClose(wct, displayId = DEFAULT_DISPLAY, taskId = task.taskId)
+    controller.onDesktopWindowClose(wct, displayId = DEFAULT_DISPLAY, task)
     // Adds remove wallpaper operation
     wct.assertRemoveAt(index = 0, wallpaperToken)
   }
@@ -1515,7 +1516,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     taskRepository.addClosingTask(DEFAULT_DISPLAY, task.taskId)
 
     val wct = WindowContainerTransaction()
-    controller.onDesktopWindowClose(wct, displayId = DEFAULT_DISPLAY, taskId = task.taskId)
+    controller.onDesktopWindowClose(wct, displayId = DEFAULT_DISPLAY, task)
     // Doesn't modify transaction
     assertThat(wct.hierarchyOps).isEmpty()
   }
@@ -1528,7 +1529,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     taskRepository.minimizeTask(DEFAULT_DISPLAY, task.taskId)
 
     val wct = WindowContainerTransaction()
-    controller.onDesktopWindowClose(wct, displayId = DEFAULT_DISPLAY, taskId = task.taskId)
+    controller.onDesktopWindowClose(wct, displayId = DEFAULT_DISPLAY, task)
     // Doesn't modify transaction
     assertThat(wct.hierarchyOps).isEmpty()
   }
@@ -1541,7 +1542,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     taskRepository.wallpaperActivityToken = wallpaperToken
 
     val wct = WindowContainerTransaction()
-    controller.onDesktopWindowClose(wct, displayId = DEFAULT_DISPLAY, taskId = task1.taskId)
+    controller.onDesktopWindowClose(wct, displayId = DEFAULT_DISPLAY, task1)
     // Doesn't modify transaction
     assertThat(wct.hierarchyOps).isEmpty()
   }
@@ -1555,7 +1556,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     taskRepository.addClosingTask(DEFAULT_DISPLAY, task2.taskId)
 
     val wct = WindowContainerTransaction()
-    controller.onDesktopWindowClose(wct, displayId = DEFAULT_DISPLAY, taskId = task1.taskId)
+    controller.onDesktopWindowClose(wct, displayId = DEFAULT_DISPLAY, task1)
     // Adds remove wallpaper operation
     wct.assertRemoveAt(index = 0, wallpaperToken)
   }
@@ -1569,7 +1570,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     taskRepository.minimizeTask(DEFAULT_DISPLAY, task2.taskId)
 
     val wct = WindowContainerTransaction()
-    controller.onDesktopWindowClose(wct, displayId = DEFAULT_DISPLAY, taskId = task1.taskId)
+    controller.onDesktopWindowClose(wct, displayId = DEFAULT_DISPLAY, task1)
     // Adds remove wallpaper operation
     wct.assertRemoveAt(index = 0, wallpaperToken)
   }

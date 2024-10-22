@@ -311,6 +311,22 @@ sealed interface TransitionState {
             return fromContent == content || toContent == content
         }
 
+        /**
+         * Return [progress] if [content] is equal to [toContent], `1f - progress` if [content] is
+         * equal to [fromContent], and throw otherwise.
+         */
+        fun progressTo(content: ContentKey): Float {
+            return when (content) {
+                toContent -> progress
+                fromContent -> 1f - progress
+                else ->
+                    throw IllegalArgumentException(
+                        "content ($content) should be either toContent ($toContent) or " +
+                            "fromContent ($fromContent)"
+                    )
+            }
+        }
+
         /** Run this transition and return once it is finished. */
         abstract suspend fun run()
 

@@ -29,11 +29,9 @@ import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
-import com.android.systemui.keyguard.shared.model.Edge;
 import com.android.systemui.keyguard.shared.model.KeyguardState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.scene.shared.flag.SceneContainerFlag;
-import com.android.systemui.scene.shared.model.Scenes;
 import com.android.systemui.shade.domain.interactor.ShadeAnimationInteractor;
 import com.android.systemui.shade.domain.interactor.ShadeInteractor;
 import com.android.systemui.statusbar.notification.VisibilityLocationProvider;
@@ -46,6 +44,7 @@ import com.android.systemui.statusbar.notification.collection.provider.VisualSta
 import com.android.systemui.statusbar.notification.domain.interactor.SeenNotificationsInteractor;
 import com.android.systemui.statusbar.notification.shared.NotificationMinimalism;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.kotlin.BooleanFlowOperators;
 import com.android.systemui.util.kotlin.JavaAdapter;
@@ -78,6 +77,7 @@ public class VisualStabilityCoordinator implements Coordinator, Dumpable {
     private final CommunalSceneInteractor mCommunalSceneInteractor;
     private final ShadeInteractor mShadeInteractor;
     private final KeyguardTransitionInteractor mKeyguardTransitionInteractor;
+    private final KeyguardStateController mKeyguardStateController;
     private final VisualStabilityCoordinatorLogger mLogger;
 
     private boolean mSleepy = true;
@@ -120,6 +120,7 @@ public class VisualStabilityCoordinator implements Coordinator, Dumpable {
             CommunalSceneInteractor communalSceneInteractor,
             ShadeInteractor shadeInteractor,
             KeyguardTransitionInteractor keyguardTransitionInteractor,
+            KeyguardStateController keyguardStateController,
             VisualStabilityCoordinatorLogger logger) {
         mHeadsUpManager = headsUpManager;
         mShadeAnimationInteractor = shadeAnimationInteractor;
@@ -133,6 +134,7 @@ public class VisualStabilityCoordinator implements Coordinator, Dumpable {
         mCommunalSceneInteractor = communalSceneInteractor;
         mShadeInteractor = shadeInteractor;
         mKeyguardTransitionInteractor = keyguardTransitionInteractor;
+        mKeyguardStateController = keyguardStateController;
         mLogger = logger;
 
         dumpManager.registerDumpable(this);
@@ -162,16 +164,22 @@ public class VisualStabilityCoordinator implements Coordinator, Dumpable {
                             KeyguardState.LOCKSCREEN),
                     this::onLockscreenKeyguardStateTransitionValueChanged);
         }
-        if (Flags.checkLockscreenGoneTransition()) {
-            mJavaAdapter.alwaysCollectFlow(mKeyguardTransitionInteractor.isInTransition(
-                            Edge.create(KeyguardState.LOCKSCREEN, Scenes.Gone),
-                            Edge.create(KeyguardState.LOCKSCREEN, KeyguardState.GONE)),
-                    this::onLockscreenInGoneTransitionChanged);
-        }
 
+        if (Flags.checkLockscreenGoneTransition()) {
+            mKeyguardStateController.addCallback(mKeyguardFadeAwayAnimationCallback);
+        }
 
         pipeline.setVisualStabilityManager(mNotifStabilityManager);
     }
+
+    final KeyguardStateController.Callback mKeyguardFadeAwayAnimationCallback =
+            new KeyguardStateController.Callback() {
+                @Override
+                public void onKeyguardFadingAwayChanged() {
+                    onLockscreenInGoneTransitionChanged(
+                            mKeyguardStateController.isKeyguardFadingAway());
+                }
+            };
 
     // TODO(b/203826051): Ensure stability manager can allow reordering off-screen
     //  HUNs to the top of the shade

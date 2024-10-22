@@ -57,8 +57,11 @@ public class CompanionTransportManager {
     /** Association id -> Transport */
     @GuardedBy("mTransports")
     private final SparseArray<Transport> mTransports = new SparseArray<>();
+
+    // Use mTransports to synchronize both mTransports and mTransportsListeners to avoid deadlock
+    // between threads that access both
     @NonNull
-    @GuardedBy("mTransportsListeners")
+    @GuardedBy("mTransports")
     private final RemoteCallbackList<IOnTransportsChangedListener> mTransportsListeners =
             new RemoteCallbackList<>();
 
@@ -95,7 +98,7 @@ public class CompanionTransportManager {
      */
     public void addListener(IOnTransportsChangedListener listener) {
         Slog.i(TAG, "Registering OnTransportsChangedListener");
-        synchronized (mTransportsListeners) {
+        synchronized (mTransports) {
             mTransportsListeners.register(listener);
             mTransportsListeners.broadcast(listener1 -> {
                 // callback to the current listener with all the associations of the transports
@@ -114,7 +117,7 @@ public class CompanionTransportManager {
      * Remove the listener for receiving callbacks when any of the transports is changed
      */
     public void removeListener(IOnTransportsChangedListener listener) {
-        synchronized (mTransportsListeners) {
+        synchronized (mTransports) {
             mTransportsListeners.unregister(listener);
         }
     }
@@ -204,7 +207,7 @@ public class CompanionTransportManager {
     }
 
     private void notifyOnTransportsChanged() {
-        synchronized (mTransportsListeners) {
+        synchronized (mTransports) {
             mTransportsListeners.broadcast(listener -> {
                 try {
                     listener.onTransportsChanged(getAssociationsWithTransport());
