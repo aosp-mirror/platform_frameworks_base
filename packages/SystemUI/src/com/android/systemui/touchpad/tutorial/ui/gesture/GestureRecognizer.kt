@@ -22,6 +22,8 @@ import java.util.function.Consumer
 /** Based on passed [MotionEvent]s recognizes different states of gesture and notifies callback. */
 interface GestureRecognizer : Consumer<MotionEvent> {
     fun addGestureStateCallback(callback: (GestureState) -> Unit)
+
+    fun clearGestureStateCallback()
 }
 
 fun isThreeFingerTouchpadSwipe(event: MotionEvent) = isNFingerTouchpadSwipe(event, fingerCount = 3)

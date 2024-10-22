@@ -40,6 +40,7 @@ import android.os.SharedMemory;
 import android.system.ErrnoException;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.UUID;
@@ -170,17 +171,18 @@ public class ConversionUtil {
 
     public static SoundTrigger.RecognitionConfig aidl2apiRecognitionConfig(
             RecognitionConfig aidlConfig) {
-        var keyphrases =
-            new SoundTrigger.KeyphraseRecognitionExtra[aidlConfig.phraseRecognitionExtras.length];
-        int i = 0;
+        var keyphrases = new ArrayList<SoundTrigger.KeyphraseRecognitionExtra>(
+            aidlConfig.phraseRecognitionExtras.length);
         for (var extras : aidlConfig.phraseRecognitionExtras) {
-            keyphrases[i++] = aidl2apiPhraseRecognitionExtra(extras);
+            keyphrases.add(aidl2apiPhraseRecognitionExtra(extras));
         }
-        return new SoundTrigger.RecognitionConfig(aidlConfig.captureRequested,
-                false /** allowMultipleTriggers **/,
-                keyphrases,
-                Arrays.copyOf(aidlConfig.data, aidlConfig.data.length),
-                aidl2apiAudioCapabilities(aidlConfig.audioCapabilities));
+        return new SoundTrigger.RecognitionConfig.Builder()
+            .setCaptureRequested(aidlConfig.captureRequested)
+            .setAllowMultipleTriggers(false)
+            .setKeyphrases(keyphrases)
+            .setData(Arrays.copyOf(aidlConfig.data, aidlConfig.data.length))
+            .setAudioCapabilities(aidl2apiAudioCapabilities(aidlConfig.audioCapabilities))
+            .build();
     }
 
     public static PhraseRecognitionExtra api2aidlPhraseRecognitionExtra(

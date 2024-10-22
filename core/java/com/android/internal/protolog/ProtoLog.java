@@ -70,16 +70,16 @@ public class ProtoLog {
         // directly to the generated tracing implementations.
         if (android.tracing.Flags.perfettoProtologTracing()) {
             synchronized (sInitLock) {
+                final var allGroups = new HashSet<>(Arrays.stream(groups).toList());
                 if (sProtoLogInstance != null) {
                     // The ProtoLog instance has already been initialized in this process
                     final var alreadyRegisteredGroups = sProtoLogInstance.getRegisteredGroups();
-                    final var allGroups = new HashSet<>(alreadyRegisteredGroups);
-                    allGroups.addAll(Arrays.stream(groups).toList());
-                    groups = allGroups.toArray(new IProtoLogGroup[0]);
+                    allGroups.addAll(alreadyRegisteredGroups);
                 }
 
                 try {
-                    sProtoLogInstance = new PerfettoProtoLogImpl(groups);
+                    sProtoLogInstance = new UnprocessedPerfettoProtoLogImpl(
+                            allGroups.toArray(new IProtoLogGroup[0]));
                 } catch (ServiceManager.ServiceNotFoundException e) {
                     throw new RuntimeException(e);
                 }

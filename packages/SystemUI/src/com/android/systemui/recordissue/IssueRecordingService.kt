@@ -38,6 +38,8 @@ import com.android.systemui.screenrecord.RecordingService
 import com.android.systemui.screenrecord.RecordingServiceStrings
 import com.android.systemui.settings.UserContextProvider
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil
+import com.android.traceur.MessageConstants.INTENT_EXTRA_TRACE_TYPE
+import com.android.traceur.TraceConfig
 import java.util.concurrent.Executor
 import javax.inject.Inject
 
@@ -110,7 +112,13 @@ constructor(
         when (intent?.action) {
             ACTION_START -> {
                 session.start()
-                if (!issueRecordingState.recordScreen) {
+                with(session) {
+                    traceConfig =
+                        intent.getParcelableExtra(INTENT_EXTRA_TRACE_TYPE, TraceConfig::class.java)
+                    takeBugReport = intent.getBooleanExtra(EXTRA_BUG_REPORT, false)
+                    start()
+                }
+                if (!intent.getBooleanExtra(EXTRA_SCREEN_RECORD, false)) {
                     // If we don't want to record the screen, the ACTION_SHOW_START_NOTIF action
                     // will circumvent the RecordingService's screen recording start code.
                     return super.onStartCommand(Intent(ACTION_SHOW_START_NOTIF), flags, startId)
@@ -136,6 +144,8 @@ constructor(
     companion object {
         private const val TAG = "IssueRecordingService"
         private const val CHANNEL_ID = "issue_record"
+        const val EXTRA_SCREEN_RECORD = "extra_screenRecord"
+        const val EXTRA_BUG_REPORT = "extra_bugReport"
 
         /**
          * Get an intent to stop the issue recording service.
@@ -153,8 +163,17 @@ constructor(
          *
          * @param context Context from the requesting activity
          */
-        fun getStartIntent(context: Context): Intent =
-            Intent(context, IssueRecordingService::class.java).setAction(ACTION_START)
+        fun getStartIntent(
+            context: Context,
+            traceConfig: TraceConfig,
+            screenRecord: Boolean,
+            bugReport: Boolean,
+        ): Intent =
+            Intent(context, IssueRecordingService::class.java)
+                .setAction(ACTION_START)
+                .putExtra(INTENT_EXTRA_TRACE_TYPE, traceConfig)
+                .putExtra(EXTRA_SCREEN_RECORD, screenRecord)
+                .putExtra(EXTRA_BUG_REPORT, bugReport)
     }
 }
 

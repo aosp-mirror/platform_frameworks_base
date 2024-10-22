@@ -135,7 +135,6 @@ public class AppIntegrityManagerServiceImplTest {
     @Mock PlatformCompat mPlatformCompat;
     @Mock Context mMockContext;
     @Mock Resources mMockResources;
-    @Mock IntegrityFileManager mIntegrityFileManager;
     @Mock Handler mHandler;
 
     private final Context mRealContext = InstrumentationRegistry.getTargetContext();
@@ -169,7 +168,6 @@ public class AppIntegrityManagerServiceImplTest {
                 new AppIntegrityManagerServiceImpl(
                         mMockContext,
                         mPackageManagerInternal,
-                        mIntegrityFileManager,
                         mHandler);
 
         mSpyPackageManager = spy(mRealContext.getPackageManager());
@@ -177,7 +175,6 @@ public class AppIntegrityManagerServiceImplTest {
         when(mMockContext.getPackageManager()).thenReturn(mSpyPackageManager);
         when(mMockContext.getResources()).thenReturn(mMockResources);
         when(mMockResources.getStringArray(anyInt())).thenReturn(new String[] {});
-        when(mIntegrityFileManager.initialized()).thenReturn(true);
         // These are needed to override the Settings.Global.get result.
         when(mMockContext.getContentResolver()).thenReturn(mRealContext.getContentResolver());
         setIntegrityCheckIncludesRuleProvider(true);
@@ -188,98 +185,6 @@ public class AppIntegrityManagerServiceImplTest {
         mTestApk.delete();
         mTestApkTwoCerts.delete();
         mTestApkSourceStamp.delete();
-    }
-
-    @Test
-    public void updateRuleSet_notAuthorized() throws Exception {
-        makeUsSystemApp();
-        Rule rule =
-                new Rule(
-                        new AtomicFormula.BooleanAtomicFormula(AtomicFormula.PRE_INSTALLED, true),
-                        Rule.DENY);
-        TestUtils.assertExpectException(
-                SecurityException.class,
-                "Only system packages specified in config_integrityRuleProviderPackages are"
-                        + " allowed to call this method.",
-                () ->
-                        mService.updateRuleSet(
-                                VERSION,
-                                new ParceledListSlice<>(Arrays.asList(rule)),
-                                /* statusReceiver= */ null));
-    }
-
-    @Test
-    public void updateRuleSet_notSystemApp() throws Exception {
-        allowlistUsAsRuleProvider();
-        makeUsSystemApp(false);
-        Rule rule =
-                new Rule(
-                        new AtomicFormula.BooleanAtomicFormula(AtomicFormula.PRE_INSTALLED, true),
-                        Rule.DENY);
-        TestUtils.assertExpectException(
-                SecurityException.class,
-                "Only system packages specified in config_integrityRuleProviderPackages are"
-                        + " allowed to call this method.",
-                () ->
-                        mService.updateRuleSet(
-                                VERSION,
-                                new ParceledListSlice<>(Arrays.asList(rule)),
-                                /* statusReceiver= */ null));
-    }
-
-    @Test
-    public void updateRuleSet_authorized() throws Exception {
-        allowlistUsAsRuleProvider();
-        makeUsSystemApp();
-        Rule rule =
-                new Rule(
-                        new AtomicFormula.BooleanAtomicFormula(AtomicFormula.PRE_INSTALLED, true),
-                        Rule.DENY);
-
-        // no SecurityException
-        mService.updateRuleSet(
-                VERSION, new ParceledListSlice<>(Arrays.asList(rule)), mock(IntentSender.class));
-    }
-
-    @Test
-    public void updateRuleSet_correctMethodCall() throws Exception {
-        allowlistUsAsRuleProvider();
-        makeUsSystemApp();
-        IntentSender mockReceiver = mock(IntentSender.class);
-        List<Rule> rules =
-                Arrays.asList(
-                        new Rule(
-                                IntegrityFormula.Application.packageNameEquals(PACKAGE_NAME),
-                                Rule.DENY));
-
-        mService.updateRuleSet(VERSION, new ParceledListSlice<>(rules), mockReceiver);
-        runJobInHandler();
-
-        verify(mIntegrityFileManager).writeRules(VERSION, TEST_FRAMEWORK_PACKAGE, rules);
-        ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
-        verify(mockReceiver).sendIntent(any(), anyInt(), intentCaptor.capture(), any(), any());
-        assertEquals(STATUS_SUCCESS, intentCaptor.getValue().getIntExtra(EXTRA_STATUS, -1));
-    }
-
-    @Test
-    public void updateRuleSet_fail() throws Exception {
-        allowlistUsAsRuleProvider();
-        makeUsSystemApp();
-        doThrow(new IOException()).when(mIntegrityFileManager).writeRules(any(), any(), any());
-        IntentSender mockReceiver = mock(IntentSender.class);
-        List<Rule> rules =
-                Arrays.asList(
-                        new Rule(
-                                IntegrityFormula.Application.packageNameEquals(PACKAGE_NAME),
-                                Rule.DENY));
-
-        mService.updateRuleSet(VERSION, new ParceledListSlice<>(rules), mockReceiver);
-        runJobInHandler();
-
-        verify(mIntegrityFileManager).writeRules(VERSION, TEST_FRAMEWORK_PACKAGE, rules);
-        ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
-        verify(mockReceiver).sendIntent(any(), anyInt(), intentCaptor.capture(), any(), any());
-        assertEquals(STATUS_FAILURE, intentCaptor.getValue().getIntExtra(EXTRA_STATUS, -1));
     }
 
     @Test
@@ -314,71 +219,6 @@ public class AppIntegrityManagerServiceImplTest {
         verify(mPackageManagerInternal)
                 .setIntegrityVerificationResult(
                         1, PackageManagerInternal.INTEGRITY_VERIFICATION_ALLOW);
-    }
-
-    @Test
-    public void handleBroadcast_notInitialized() throws Exception {
-        allowlistUsAsRuleProvider();
-        makeUsSystemApp();
-        when(mIntegrityFileManager.initialized()).thenReturn(false);
-        ArgumentCaptor<BroadcastReceiver> broadcastReceiverCaptor =
-                ArgumentCaptor.forClass(BroadcastReceiver.class);
-        verify(mMockContext)
-                .registerReceiver(broadcastReceiverCaptor.capture(), any(), any(), any());
-        Intent intent = makeVerificationIntent();
-
-        broadcastReceiverCaptor.getValue().onReceive(mMockContext, intent);
-        runJobInHandler();
-
-        // The evaluation will still run since we still evaluate manifest based rules.
-        verify(mPackageManagerInternal)
-                .setIntegrityVerificationResult(
-                        1, PackageManagerInternal.INTEGRITY_VERIFICATION_ALLOW);
-    }
-
-    @Test
-    public void verifierAsInstaller_skipIntegrityVerification() throws Exception {
-        allowlistUsAsRuleProvider();
-        makeUsSystemApp();
-        setIntegrityCheckIncludesRuleProvider(false);
-        ArgumentCaptor<BroadcastReceiver> broadcastReceiverCaptor =
-                ArgumentCaptor.forClass(BroadcastReceiver.class);
-        verify(mMockContext, atLeastOnce())
-                .registerReceiver(broadcastReceiverCaptor.capture(), any(), any(), any());
-        Intent intent = makeVerificationIntent(TEST_FRAMEWORK_PACKAGE);
-
-        broadcastReceiverCaptor.getValue().onReceive(mMockContext, intent);
-        runJobInHandler();
-
-        verify(mPackageManagerInternal)
-                .setIntegrityVerificationResult(
-                        1, PackageManagerInternal.INTEGRITY_VERIFICATION_ALLOW);
-    }
-
-    @Test
-    public void getCurrentRules() throws Exception {
-        allowlistUsAsRuleProvider();
-        makeUsSystemApp();
-        Rule rule = new Rule(IntegrityFormula.Application.packageNameEquals("package"), Rule.DENY);
-        when(mIntegrityFileManager.readRules(any())).thenReturn(Arrays.asList(rule));
-
-        assertThat(mService.getCurrentRules().getList()).containsExactly(rule);
-    }
-
-    @Test
-    public void getWhitelistedRuleProviders_returnsEmptyForNonSystemApps() throws Exception {
-        allowlistUsAsRuleProvider();
-        makeUsSystemApp(false);
-
-        assertThat(mService.getWhitelistedRuleProviders()).isEmpty();
-    }
-
-    @Test
-    public void getWhitelistedRuleProviders() throws Exception {
-        allowlistUsAsRuleProvider();
-        makeUsSystemApp();
-
-        assertThat(mService.getWhitelistedRuleProviders()).containsExactly(TEST_FRAMEWORK_PACKAGE);
     }
 
     private void allowlistUsAsRuleProvider() {

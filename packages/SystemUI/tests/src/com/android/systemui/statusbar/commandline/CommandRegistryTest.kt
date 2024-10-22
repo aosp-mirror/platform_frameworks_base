@@ -16,41 +16,39 @@
 
 package com.android.systemui.statusbar.commandline
 
-import androidx.test.filters.SmallTest
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
-
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-
-import org.mockito.ArgumentMatchers.anyList
-import org.mockito.ArgumentMatchers.eq
-import org.mockito.Mockito
-import org.mockito.Mockito.mock
-import org.mockito.Mockito.verify
-import org.junit.Before
-import org.junit.Test
-import org.junit.runner.RunWith
-
 import java.io.PrintWriter
 import java.io.StringWriter
 import java.util.concurrent.Executor
+import org.junit.Before
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers.any
+import org.mockito.ArgumentMatchers.anyList
+import org.mockito.ArgumentMatchers.eq
+import org.mockito.Mockito.mock
+import org.mockito.Mockito.verify
 
 private fun <T> anyObject(): T {
-    return Mockito.anyObject<T>()
+    return any<T>()
 }
 
 private fun <T : Any> safeEq(value: T): T = eq(value) ?: value
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper
 @SmallTest
 class CommandRegistryTest : SysuiTestCase() {
     lateinit var registry: CommandRegistry
-    val inLineExecutor = object : Executor {
-        override fun execute(command: Runnable) {
-            command.run()
+    val inLineExecutor =
+        object : Executor {
+            override fun execute(command: Runnable) {
+                command.run()
+            }
         }
-    }
 
     val writer: PrintWriter = PrintWriter(StringWriter())
 
@@ -83,11 +81,9 @@ class CommandRegistryTest : SysuiTestCase() {
     }
 
     class FakeCommand() : Command {
-        override fun execute(pw: PrintWriter, args: List<String>) {
-        }
+        override fun execute(pw: PrintWriter, args: List<String>) {}
 
-        override fun help(pw: PrintWriter) {
-        }
+        override fun help(pw: PrintWriter) {}
     }
 }
 

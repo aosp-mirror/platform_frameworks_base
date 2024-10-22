@@ -295,7 +295,8 @@ public class BatteryUsageStatsProvider {
                     stats.builder = ((AccumulatedBatteryUsageStatsSection) section)
                             .getBatteryUsageStatsBuilder();
                     stats.startWallClockTime = powerStatsSpan.getMetadata().getStartTime();
-                    stats.startMonotonicTime = powerStatsSpan.getMetadata().getStartMonotonicTime();
+                    stats.startMonotonicTime =
+                            powerStatsSpan.getMetadata().getStartMonotonicTime();
                     stats.endMonotonicTime = powerStatsSpan.getMetadata().getEndMonotonicTime();
                     break;
                 }
@@ -484,29 +485,30 @@ public class BatteryUsageStatsProvider {
                 continue;
             }
 
-            PowerStatsSpan powerStatsSpan = mPowerStatsStore.loadPowerStatsSpan(
-                    spanMetadata.getId(), BatteryUsageStatsSection.TYPE);
-            if (powerStatsSpan == null) {
-                continue;
-            }
-
-            for (PowerStatsSpan.Section section : powerStatsSpan.getSections()) {
-                BatteryUsageStats snapshot =
-                        ((BatteryUsageStatsSection) section).getBatteryUsageStats();
-                if (!Arrays.equals(snapshot.getCustomPowerComponentNames(),
-                        customEnergyConsumerNames)) {
-                    Log.w(TAG, "Ignoring older BatteryUsageStats snapshot, which has different "
-                            + "custom power components: "
-                            + Arrays.toString(snapshot.getCustomPowerComponentNames()));
+            try (PowerStatsSpan powerStatsSpan = mPowerStatsStore.loadPowerStatsSpan(
+                    spanMetadata.getId(), BatteryUsageStatsSection.TYPE)) {
+                if (powerStatsSpan == null) {
                     continue;
                 }
 
-                if (includeProcessStateData && !snapshot.isProcessStateDataIncluded()) {
-                    Log.w(TAG, "Ignoring older BatteryUsageStats snapshot, which "
-                            + " does not include process state data");
-                    continue;
+                for (PowerStatsSpan.Section section : powerStatsSpan.getSections()) {
+                    BatteryUsageStats snapshot =
+                            ((BatteryUsageStatsSection) section).getBatteryUsageStats();
+                    if (!Arrays.equals(snapshot.getCustomPowerComponentNames(),
+                            customEnergyConsumerNames)) {
+                        Log.w(TAG, "Ignoring older BatteryUsageStats snapshot, which has different "
+                                + "custom power components: "
+                                + Arrays.toString(snapshot.getCustomPowerComponentNames()));
+                        continue;
+                    }
+
+                    if (includeProcessStateData && !snapshot.isProcessStateDataIncluded()) {
+                        Log.w(TAG, "Ignoring older BatteryUsageStats snapshot, which "
+                                + " does not include process state data");
+                        continue;
+                    }
+                    builder.add(snapshot);
                 }
-                builder.add(snapshot);
             }
         }
         return builder.build();

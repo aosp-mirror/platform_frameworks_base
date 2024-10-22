@@ -94,6 +94,7 @@ import com.android.wm.shell.common.MultiInstanceHelper;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.desktopmode.CaptionState;
+import com.android.wm.shell.desktopmode.DesktopModeEventLogger;
 import com.android.wm.shell.desktopmode.DesktopRepository;
 import com.android.wm.shell.desktopmode.WindowDecorCaptionHandleRepository;
 import com.android.wm.shell.shared.annotations.ShellBackgroundThread;
@@ -216,7 +217,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             AppToWebGenericLinksParser genericLinksParser,
             AssistContentRequester assistContentRequester,
             MultiInstanceHelper multiInstanceHelper,
-            WindowDecorCaptionHandleRepository windowDecorCaptionHandleRepository) {
+            WindowDecorCaptionHandleRepository windowDecorCaptionHandleRepository,
+            DesktopModeEventLogger desktopModeEventLogger) {
         this (context, userContext, displayController, splitScreenController, desktopRepository,
                 taskOrganizer, taskInfo, taskSurface, handler, bgExecutor, choreographer, syncQueue,
                 appHeaderViewHolderFactory, rootTaskDisplayAreaOrganizer, genericLinksParser,
@@ -227,7 +229,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 new SurfaceControlViewHostFactory() {},
                 DefaultMaximizeMenuFactory.INSTANCE,
                 DefaultHandleMenuFactory.INSTANCE, multiInstanceHelper,
-                windowDecorCaptionHandleRepository);
+                windowDecorCaptionHandleRepository, desktopModeEventLogger);
     }
 
     DesktopModeWindowDecoration(
@@ -256,11 +258,12 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             MaximizeMenuFactory maximizeMenuFactory,
             HandleMenuFactory handleMenuFactory,
             MultiInstanceHelper multiInstanceHelper,
-            WindowDecorCaptionHandleRepository windowDecorCaptionHandleRepository) {
+            WindowDecorCaptionHandleRepository windowDecorCaptionHandleRepository,
+            DesktopModeEventLogger desktopModeEventLogger) {
         super(context, userContext, displayController, taskOrganizer, taskInfo, taskSurface,
                 surfaceControlBuilderSupplier, surfaceControlTransactionSupplier,
                 windowContainerTransactionSupplier, surfaceControlSupplier,
-                surfaceControlViewHostFactory);
+                surfaceControlViewHostFactory, desktopModeEventLogger);
         mSplitScreenController = splitScreenController;
         mHandler = handler;
         mBgExecutor = bgExecutor;
@@ -605,6 +608,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             Trace.beginSection("DesktopModeWindowDecoration#relayout-DragResizeInputListener");
             mDragResizeListener = new DragResizeInputListener(
                     mContext,
+                    mTaskInfo,
                     mHandler,
                     mChoreographer,
                     mDisplay.getDisplayId(),
@@ -612,7 +616,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                     mDragPositioningCallback,
                     mSurfaceControlBuilderSupplier,
                     mSurfaceControlTransactionSupplier,
-                    mDisplayController);
+                    mDisplayController,
+                    mDesktopModeEventLogger);
             Trace.endSection();
         }
 
@@ -1700,7 +1705,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 AppToWebGenericLinksParser genericLinksParser,
                 AssistContentRequester assistContentRequester,
                 MultiInstanceHelper multiInstanceHelper,
-                WindowDecorCaptionHandleRepository windowDecorCaptionHandleRepository) {
+                WindowDecorCaptionHandleRepository windowDecorCaptionHandleRepository,
+                DesktopModeEventLogger desktopModeEventLogger) {
             return new DesktopModeWindowDecoration(
                     context,
                     userContext,
@@ -1719,7 +1725,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                     genericLinksParser,
                     assistContentRequester,
                     multiInstanceHelper,
-                    windowDecorCaptionHandleRepository);
+                    windowDecorCaptionHandleRepository,
+                    desktopModeEventLogger);
         }
     }
 

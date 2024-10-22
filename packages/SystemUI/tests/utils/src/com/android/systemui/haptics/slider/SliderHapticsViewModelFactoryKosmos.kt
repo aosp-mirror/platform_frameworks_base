@@ -18,6 +18,7 @@ package com.android.systemui.haptics.slider
 
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.interaction.InteractionSource
+import com.android.systemui.haptics.msdl.msdlPlayer
 import com.android.systemui.haptics.slider.compose.ui.SliderHapticsViewModel
 import com.android.systemui.haptics.vibratorHelper
 import com.android.systemui.kosmos.Kosmos
@@ -40,6 +41,7 @@ val Kosmos.sliderHapticsViewModelFactory by
                     sliderHapticFeedbackConfig,
                     sliderTrackerConfig,
                     vibratorHelper,
+                    msdlPlayer,
                     fakeSystemClock,
                 )
         }

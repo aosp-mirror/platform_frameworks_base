@@ -342,3 +342,11 @@ flag {
     bug: "292261144"
     is_fixed_read_only: true
 }
+
+flag {
+    name: "change_launcher_badging"
+    namespace: "package_manager_service"
+    description: "Feature flag to introduce a new way to change the launcher badging."
+    bug: "364760703"
+    is_fixed_read_only: true
+}

@@ -24,6 +24,6 @@ class FakeStatusBarWindowControllerFactory : StatusBarWindowController.Factory {
     override fun create(
         context: Context,
         viewCaptureAwareWindowManager: ViewCaptureAwareWindowManager,
-        statusBarConfigurationController: StatusBarConfigurationController
+        statusBarConfigurationController: StatusBarConfigurationController,
     ) = FakeStatusBarWindowController()
 }
