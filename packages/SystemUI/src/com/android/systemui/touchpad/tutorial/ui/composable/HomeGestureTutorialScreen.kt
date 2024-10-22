@@ -62,9 +62,7 @@ fun HomeGestureTutorialScreen(onDoneButtonClicked: () -> Unit, onBack: () -> Uni
 @Composable
 private fun rememberHomeGestureRecognizer(resources: Resources): GestureRecognizer {
     val distance =
-        resources.getDimensionPixelSize(
-            com.android.internal.R.dimen.system_gestures_distance_threshold
-        )
+        resources.getDimensionPixelSize(R.dimen.touchpad_tutorial_gestures_distance_threshold)
     return remember(distance) { HomeGestureRecognizer(distance) }
 }
 
