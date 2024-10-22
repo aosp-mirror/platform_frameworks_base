@@ -51,7 +51,7 @@ import java.util.Set;
 /**
  * Contains power stats of various kinds, aggregated over a time span.
  */
-public class PowerStatsSpan {
+public class PowerStatsSpan implements AutoCloseable {
     private static final String TAG = "PowerStatsStore";
 
     /**
@@ -321,6 +321,13 @@ public class PowerStatsSpan {
         public void dump(IndentingPrintWriter ipw) {
             ipw.println(mType);
         }
+
+        /**
+         * Closes the section, releasing any resources it held. Once closed, the Section
+         * should not be used.
+         */
+        public void close() {
+        }
     }
 
     /**
@@ -482,6 +489,12 @@ public class PowerStatsSpan {
             ipw.println(section.mType);
             section.dump(ipw);
             ipw.decreaseIndent();
+        }
+    }
+    @Override
+    public void close() {
+        for (int i = 0; i < mSections.size(); i++) {
+            mSections.get(i).close();
         }
     }
 }
