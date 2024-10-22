@@ -1908,60 +1908,6 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         }
     }
 
-    /** Callback when split roots have child or haven't under it.
-     * NOTICE: This only be called on legacy transition. */
-    @Override
-    public void onStageHasChildrenChanged(StageTaskListener stageListener) {
-        ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "onStageHasChildrenChanged: isMainStage=%b",
-                stageListener == mMainStage);
-        final boolean hasChildren = stageListener.mHasChildren;
-        final boolean isSideStage = stageListener == mSideStage;
-        if (!hasChildren && !mIsExiting && isSplitActive()) {
-            if (isSideStage && mMainStage.mVisible) {
-                // Exit to main stage if side stage no longer has children.
-                mSplitLayout.flingDividerToDismiss(
-                        mSideStagePosition == SPLIT_POSITION_BOTTOM_OR_RIGHT,
-                        EXIT_REASON_APP_FINISHED);
-            } else if (!isSideStage && mSideStage.mVisible) {
-                // Exit to side stage if main stage no longer has children.
-                mSplitLayout.flingDividerToDismiss(
-                        mSideStagePosition != SPLIT_POSITION_BOTTOM_OR_RIGHT,
-                        EXIT_REASON_APP_FINISHED);
-            } else if (!isSplitScreenVisible() && mSplitRequest == null) {
-                // Dismiss split screen in the background once any sides of the split become empty.
-                exitSplitScreen(null /* childrenToTop */, EXIT_REASON_APP_FINISHED);
-            }
-        } else if (isSideStage && hasChildren && !isSplitActive()) {
-            final WindowContainerTransaction wct = new WindowContainerTransaction();
-            prepareEnterSplitScreen(wct);
-
-            mSyncQueue.queue(wct);
-            mSyncQueue.runInSync(t -> {
-                if (mIsDropEntering) {
-                    updateSurfaceBounds(mSplitLayout, t, false /* applyResizingOffset */);
-                    mIsDropEntering = false;
-                    mSkipEvictingMainStageChildren = false;
-                } else {
-                    mShowDecorImmediately = true;
-                    mSplitLayout.flingDividerToCenter(/*finishCallback*/ null);
-                }
-            });
-        }
-        if (mMainStage.mHasChildren && mSideStage.mHasChildren) {
-            mShouldUpdateRecents = true;
-            clearRequestIfPresented();
-            updateRecentTasksSplitPair();
-
-            if (!mLogger.hasStartedSession() && !mLogger.hasValidEnterSessionId()) {
-                mLogger.enterRequested(null /*enterSessionId*/, ENTER_REASON_MULTI_INSTANCE);
-            }
-            mLogger.logEnter(mSplitLayout.getDividerPositionAsFraction(),
-                    getMainStagePosition(), mMainStage.getTopChildTaskUid(),
-                    getSideStagePosition(), mSideStage.getTopChildTaskUid(),
-                    mSplitLayout.isLeftRightSplit());
-        }
-    }
-
     @Override
     public void onNoLongerSupportMultiWindow(StageTaskListener stageTaskListener,
             ActivityManager.RunningTaskInfo taskInfo) {

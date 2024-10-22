@@ -90,6 +90,7 @@ class FromDozingTransitionInteractorTest(flags: FlagsParameterization?) : SysuiT
 
     private lateinit var powerInteractor: PowerInteractor
     private lateinit var transitionRepository: FakeKeyguardTransitionRepository
+    private lateinit var keyguardInteractor: KeyguardInteractor
 
     companion object {
         @JvmStatic
@@ -106,6 +107,7 @@ class FromDozingTransitionInteractorTest(flags: FlagsParameterization?) : SysuiT
     @Before
     fun setup() {
         powerInteractor = kosmos.powerInteractor
+        keyguardInteractor = kosmos.keyguardInteractor
         transitionRepository = kosmos.fakeKeyguardTransitionRepositorySpy
         underTest = kosmos.fromDozingTransitionInteractor
 
@@ -134,6 +136,20 @@ class FromDozingTransitionInteractorTest(flags: FlagsParameterization?) : SysuiT
             // Under default conditions, we should transition to LOCKSCREEN when waking up.
             assertThat(transitionRepository)
                 .startedTransition(from = KeyguardState.DOZING, to = KeyguardState.LOCKSCREEN)
+        }
+
+    @Test
+    @DisableFlags(FLAG_KEYGUARD_WM_STATE_REFACTOR)
+    fun testTransitionToGone_onWakeup_whenGoingAway() =
+        testScope.runTest {
+            keyguardInteractor.setIsKeyguardGoingAway(true)
+            runCurrent()
+
+            powerInteractor.setAwakeForTest()
+            advanceTimeBy(60L)
+
+            assertThat(transitionRepository)
+                .startedTransition(from = KeyguardState.DOZING, to = KeyguardState.GONE)
         }
 
     @Test

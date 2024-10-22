@@ -24,6 +24,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -65,6 +66,7 @@ import com.android.systemui.statusbar.notification.collection.listbuilder.plugga
 import com.android.systemui.statusbar.notification.collection.provider.VisualStabilityProvider;
 import com.android.systemui.statusbar.notification.domain.interactor.SeenNotificationsInteractor;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.kotlin.JavaAdapter;
 import com.android.systemui.util.time.FakeSystemClock;
@@ -98,6 +100,7 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
     @Mock private VisibilityLocationProvider mVisibilityLocationProvider;
     @Mock private VisualStabilityProvider mVisualStabilityProvider;
     @Mock private VisualStabilityCoordinatorLogger mLogger;
+    @Mock private KeyguardStateController mKeyguardStateController;
 
     @Captor private ArgumentCaptor<WakefulnessLifecycle.Observer> mWakefulnessObserverCaptor;
     @Captor private ArgumentCaptor<StatusBarStateController.StateListener> mSBStateListenerCaptor;
@@ -138,6 +141,7 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
                 mKosmos.getCommunalSceneInteractor(),
                 mKosmos.getShadeInteractor(),
                 mKosmos.getKeyguardTransitionInteractor(),
+                mKeyguardStateController,
                 mLogger);
         mCoordinator.attach(mNotifPipeline);
         mTestScope.getTestScheduler().runCurrent();
@@ -522,23 +526,13 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
     @EnableFlags(Flags.FLAG_CHECK_LOCKSCREEN_GONE_TRANSITION)
     public void testNotLockscreenInGoneTransition_invalidationCalled() {
         // GIVEN visual stability is being maintained b/c animation is playing
-        mKosmos.getKeyguardTransitionRepository().sendTransitionStepJava(
-                mTestScope, new TransitionStep(
-                        KeyguardState.LOCKSCREEN,
-                        KeyguardState.GONE,
-                        1f,
-                        TransitionState.RUNNING),  /* validateStep = */ false);
-        mTestScope.getTestScheduler().runCurrent();
+        doReturn(true).when(mKeyguardStateController).isKeyguardFadingAway();
+        mCoordinator.mKeyguardFadeAwayAnimationCallback.onKeyguardFadingAwayChanged();
         assertFalse(mNotifStabilityManager.isPipelineRunAllowed());
 
         // WHEN the animation has stopped playing
-        mKosmos.getKeyguardTransitionRepository().sendTransitionStepJava(
-                mTestScope, new TransitionStep(
-                        KeyguardState.LOCKSCREEN,
-                        KeyguardState.GONE,
-                        1f,
-                        TransitionState.FINISHED),  /* validateStep = */ false);
-        mTestScope.getTestScheduler().runCurrent();
+        doReturn(false).when(mKeyguardStateController).isKeyguardFadingAway();
+        mCoordinator.mKeyguardFadeAwayAnimationCallback.onKeyguardFadingAwayChanged();
 
         // invalidate is called, b/c we were previously suppressing the pipeline from running
         verifyStabilityManagerWasInvalidated(times(1));

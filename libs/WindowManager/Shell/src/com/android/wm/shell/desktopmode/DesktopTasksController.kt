@@ -461,7 +461,12 @@ class DesktopTasksController(
      * @param displayId display id of the window that's being closed
      * @param taskId task id of the window that's being closed
      */
-    fun onDesktopWindowClose(wct: WindowContainerTransaction, displayId: Int, taskId: Int) {
+    fun onDesktopWindowClose(
+        wct: WindowContainerTransaction,
+        displayId: Int,
+        taskInfo: RunningTaskInfo,
+    ): ((IBinder) -> Unit)? {
+        val taskId = taskInfo.taskId
         if (taskRepository.isOnlyVisibleNonClosingTask(taskId)) {
             removeWallpaperActivity(wct)
         }
@@ -472,6 +477,7 @@ class DesktopTasksController(
                 taskId
             )
         )
+        return immersiveTransitionHandler.exitImmersiveIfApplicable(wct, taskInfo)
     }
 
     fun minimizeTask(taskInfo: RunningTaskInfo) {

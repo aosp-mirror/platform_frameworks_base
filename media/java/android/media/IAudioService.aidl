@@ -471,6 +471,7 @@ interface IAudioService {
 
     List<AudioDeviceAttributes> getDevicesForAttributesUnprotected(in AudioAttributes attributes);
 
+    @EnforcePermission(anyOf = {"MODIFY_AUDIO_ROUTING", "QUERY_AUDIO_STATE"})
     void addOnDevicesForAttributesChangedListener(in AudioAttributes attributes,
             in IDevicesForAttributesCallback callback);
 

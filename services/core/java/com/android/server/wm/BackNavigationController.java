@@ -201,6 +201,9 @@ class BackNavigationController {
             infoBuilder.setTouchableRegion(window.getFrame());
             infoBuilder.setAppProgressAllowed((window.getAttrs().privateFlags
                     & PRIVATE_FLAG_APP_PROGRESS_GENERATION_ALLOWED) != 0);
+            if (currentTask != null) {
+                infoBuilder.setFocusedTaskId(currentTask.mTaskId);
+            }
             mNavigationMonitor.startMonitor(window, navigationObserver);
 
             ProtoLog.d(WM_DEBUG_BACK_PREVIEW, "startBackNavigation currentTask=%s, "
