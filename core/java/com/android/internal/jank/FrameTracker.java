@@ -253,6 +253,7 @@ public class FrameTracker implements HardwareRendererObserver.OnFrameMetricsAvai
             mSurfaceChangedCallback = new ViewRootImpl.SurfaceChangedCallback() {
                 @Override
                 public void surfaceCreated(SurfaceControl.Transaction t) {
+                    Trace.beginSection("FrameTracker#surfaceCreated");
                     mHandler.runWithScissors(() -> {
                         if (mSurfaceControl == null) {
                             mSurfaceControl = mViewRoot.getSurfaceControl();
@@ -262,6 +263,7 @@ public class FrameTracker implements HardwareRendererObserver.OnFrameMetricsAvai
                             }
                         }
                     }, EXECUTOR_TASK_TIMEOUT);
+                    Trace.endSection();
                 }
 
                 @Override
@@ -464,23 +466,28 @@ public class FrameTracker implements HardwareRendererObserver.OnFrameMetricsAvai
     @Override
     public void onJankDataAvailable(SurfaceControl.JankData[] jankData) {
         postCallback(() -> {
-            if (mCancelled || mMetricsFinalized) {
-                return;
-            }
+            try {
+                Trace.beginSection("FrameTracker#onJankDataAvailable");
+                if (mCancelled || mMetricsFinalized) {
+                    return;
+                }
 
-            for (SurfaceControl.JankData jankStat : jankData) {
-                if (!isInRange(jankStat.frameVsyncId)) {
-                    continue;
+                for (SurfaceControl.JankData jankStat : jankData) {
+                    if (!isInRange(jankStat.frameVsyncId)) {
+                        continue;
+                    }
+                    JankInfo info = findJankInfo(jankStat.frameVsyncId);
+                    if (info != null) {
+                        info.update(jankStat);
+                    } else {
+                        mJankInfos.put((int) jankStat.frameVsyncId,
+                                JankInfo.createFromSurfaceControlCallback(jankStat));
+                    }
                 }
-                JankInfo info = findJankInfo(jankStat.frameVsyncId);
-                if (info != null) {
-                    info.update(jankStat);
-                } else {
-                    mJankInfos.put((int) jankStat.frameVsyncId,
-                            JankInfo.createFromSurfaceControlCallback(jankStat));
-                }
+                processJankInfos();
+            } finally {
+                Trace.endSection();
             }
-            processJankInfos();
         });
     }
 
@@ -507,29 +514,35 @@ public class FrameTracker implements HardwareRendererObserver.OnFrameMetricsAvai
     @Override
     public void onFrameMetricsAvailable(int dropCountSinceLastInvocation) {
         postCallback(() -> {
-            if (mCancelled || mMetricsFinalized) {
-                return;
-            }
+            try {
+                Trace.beginSection("FrameTracker#onFrameMetricsAvailable");
+                if (mCancelled || mMetricsFinalized) {
+                    return;
+                }
 
-            // Since this callback might come a little bit late after the end() call.
-            // We should keep tracking the begin / end timestamp that we can compare with
-            // vsync timestamp to check if the frame is in the duration of the CUJ.
-            long totalDurationNanos = mMetricsWrapper.getMetric(FrameMetrics.TOTAL_DURATION);
-            boolean isFirstFrame = mMetricsWrapper.getMetric(FrameMetrics.FIRST_DRAW_FRAME) == 1;
-            long frameVsyncId =
-                    mMetricsWrapper.getTiming()[FrameMetrics.Index.FRAME_TIMELINE_VSYNC_ID];
+                // Since this callback might come a little bit late after the end() call.
+                // We should keep tracking the begin / end timestamp that we can compare with
+                // vsync timestamp to check if the frame is in the duration of the CUJ.
+                long totalDurationNanos = mMetricsWrapper.getMetric(FrameMetrics.TOTAL_DURATION);
+                boolean isFirstFrame =
+                    mMetricsWrapper.getMetric(FrameMetrics.FIRST_DRAW_FRAME) == 1;
+                long frameVsyncId =
+                        mMetricsWrapper.getTiming()[FrameMetrics.Index.FRAME_TIMELINE_VSYNC_ID];
 
-            if (!isInRange(frameVsyncId)) {
-                return;
+                if (!isInRange(frameVsyncId)) {
+                    return;
+                }
+                JankInfo info = findJankInfo(frameVsyncId);
+                if (info != null) {
+                    info.update(totalDurationNanos, isFirstFrame);
+                } else {
+                    mJankInfos.put((int) frameVsyncId, JankInfo.createFromHwuiCallback(
+                            frameVsyncId, totalDurationNanos, isFirstFrame));
+                }
+                processJankInfos();
+            } finally {
+                Trace.endSection();
             }
-            JankInfo info = findJankInfo(frameVsyncId);
-            if (info != null) {
-                info.update(totalDurationNanos, isFirstFrame);
-            } else {
-                mJankInfos.put((int) frameVsyncId, JankInfo.createFromHwuiCallback(
-                        frameVsyncId, totalDurationNanos, isFirstFrame));
-            }
-            processJankInfos();
         });
     }
 
@@ -575,6 +588,13 @@ public class FrameTracker implements HardwareRendererObserver.OnFrameMetricsAvai
 
     @UiThread
     private void finish() {
+        Trace.beginSection("FrameTracker#finish");
+        finishTraced();
+        Trace.endSection();
+    }
+
+    @UiThread
+    private void finishTraced() {
         if (mMetricsFinalized || mCancelled) return;
         mMetricsFinalized = true;
 
