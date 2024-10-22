@@ -20,10 +20,10 @@ import android.content.Context
 import android.content.res.Resources
 import android.view.LayoutInflater
 import android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
-import com.android.systemui.Flags
 import com.android.systemui.common.ui.GlobalConfig
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.res.R
+import com.android.systemui.shade.shared.flag.ShadeWindowGoesAround
 import com.android.systemui.statusbar.phone.ConfigurationControllerImpl
 import com.android.systemui.statusbar.phone.ConfigurationForwarder
 import com.android.systemui.statusbar.policy.ConfigurationController
@@ -50,7 +50,7 @@ object ShadeDisplayAwareModule {
     @ShadeDisplayAware
     @SysUISingleton
     fun provideShadeDisplayAwareContext(context: Context): Context {
-        return if (Flags.shadeWindowGoesAround()) {
+        return if (ShadeWindowGoesAround.isEnabled) {
             context
                 .createWindowContext(context.display, TYPE_APPLICATION_OVERLAY, /* options= */ null)
                 .apply { setTheme(R.style.Theme_SystemUI) }
@@ -81,7 +81,7 @@ object ShadeDisplayAwareModule {
         factory: ConfigurationControllerImpl.Factory,
         @GlobalConfig globalConfigConfigController: ConfigurationController,
     ): ConfigurationController {
-        return if (Flags.shadeWindowGoesAround()) {
+        return if (ShadeWindowGoesAround.isEnabled) {
             factory.create(shadeContext)
         } else {
             globalConfigConfigController
@@ -95,7 +95,7 @@ object ShadeDisplayAwareModule {
         @ShadeDisplayAware shadeConfigurationController: ConfigurationController,
         @GlobalConfig globalConfigController: ConfigurationController,
     ): ConfigurationForwarder {
-        return if (Flags.shadeWindowGoesAround()) {
+        return if (ShadeWindowGoesAround.isEnabled) {
             shadeConfigurationController
         } else {
             globalConfigController
