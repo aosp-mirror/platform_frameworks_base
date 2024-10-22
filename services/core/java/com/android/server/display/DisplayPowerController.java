@@ -19,6 +19,7 @@ package com.android.server.display;
 import static android.hardware.display.DisplayManagerInternal.DisplayPowerRequest.POLICY_DOZE;
 import static android.hardware.display.DisplayManagerInternal.DisplayPowerRequest.POLICY_OFF;
 
+import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_BEDTIME_WEAR;
 import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_DEFAULT;
 import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_DOZE;
 import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_IDLE;
@@ -1084,6 +1085,16 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                         AUTO_BRIGHTNESS_MODE_DOZE, mDisplayWhiteBalanceController);
         if (mFlags.areAutoBrightnessModesEnabled() && dozeModeBrightnessMapper != null) {
             brightnessMappers.put(AUTO_BRIGHTNESS_MODE_DOZE, dozeModeBrightnessMapper);
+        }
+
+        if (mFlags.areAutoBrightnessModesEnabled()
+                && mFlags.isAutoBrightnessModeBedtimeWearEnabled()) {
+            BrightnessMappingStrategy bedtimeBrightnessMapper =
+                    BrightnessMappingStrategy.create(context, mDisplayDeviceConfig,
+                            AUTO_BRIGHTNESS_MODE_BEDTIME_WEAR, mDisplayWhiteBalanceController);
+            if (bedtimeBrightnessMapper != null) {
+                brightnessMappers.put(AUTO_BRIGHTNESS_MODE_BEDTIME_WEAR, bedtimeBrightnessMapper);
+            }
         }
 
         float userLux = BrightnessMappingStrategy.INVALID_LUX;
