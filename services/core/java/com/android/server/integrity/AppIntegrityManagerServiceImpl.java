@@ -127,42 +127,18 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
     @BinderThread
     public void updateRuleSet(
             String version, ParceledListSlice<Rule> rules, IntentSender statusReceiver) {
-        String ruleProvider = getCallerPackageNameOrThrow(Binder.getCallingUid());
-        if (DEBUG_INTEGRITY_COMPONENT) {
-            Slog.i(TAG, String.format("Calling rule provider name is: %s.", ruleProvider));
+        Intent intent = new Intent();
+        intent.putExtra(EXTRA_STATUS, STATUS_SUCCESS);
+        try {
+            statusReceiver.sendIntent(
+                mContext,
+                /* code= */ 0,
+                intent,
+                /* onFinished= */ null,
+                /* handler= */ null);
+        } catch (Exception e) {
+            Slog.e(TAG, "Error sending status feedback.", e);
         }
-
-        mHandler.post(
-                () -> {
-                    boolean success = true;
-                    try {
-                        mIntegrityFileManager.writeRules(version, ruleProvider, rules.getList());
-                    } catch (Exception e) {
-                        Slog.e(TAG, "Error writing rules.", e);
-                        success = false;
-                    }
-
-                    if (DEBUG_INTEGRITY_COMPONENT) {
-                        Slog.i(
-                                TAG,
-                                String.format(
-                                        "Successfully pushed rule set to version '%s' from '%s'",
-                                        version, ruleProvider));
-                    }
-
-                    Intent intent = new Intent();
-                    intent.putExtra(EXTRA_STATUS, success ? STATUS_SUCCESS : STATUS_FAILURE);
-                    try {
-                        statusReceiver.sendIntent(
-                                mContext,
-                                /* code= */ 0,
-                                intent,
-                                /* onFinished= */ null,
-                                /* handler= */ null);
-                    } catch (Exception e) {
-                        Slog.e(TAG, "Error sending status feedback.", e);
-                    }
-                });
     }
 
     @Override
@@ -207,21 +183,6 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
         int verificationId = intent.getIntExtra(EXTRA_VERIFICATION_ID, -1);
         mPackageManagerInternal.setIntegrityVerificationResult(
                 verificationId, PackageManagerInternal.INTEGRITY_VERIFICATION_ALLOW);
-    }
-
-    /** We will use the SHA256 digest of a package name if it is more than 32 bytes long. */
-    private String getPackageNameNormalized(String packageName) {
-        if (packageName.length() <= 32) {
-            return packageName;
-        }
-
-        try {
-            MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
-            byte[] hashBytes = messageDigest.digest(packageName.getBytes(StandardCharsets.UTF_8));
-            return getHexDigest(hashBytes);
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("SHA-256 algorithm not found", e);
-        }
     }
 
     private String getCallerPackageNameOrThrow(int callingUid) {
