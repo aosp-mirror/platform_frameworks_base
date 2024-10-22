@@ -23,6 +23,7 @@ import android.window.BackEvent
 import android.window.OnBackAnimationCallback
 import android.window.OnBackInvokedDispatcher
 import android.window.OnBackInvokedDispatcher.Priority
+import com.android.app.animation.Interpolators
 
 /**
  * Generates an [OnBackAnimationCallback] given a [backAnimationSpec]. [onBackProgressed] will be
@@ -40,16 +41,16 @@ fun onBackAnimationCallbackFrom(
     onBackInvoked: () -> Unit = {},
     onBackCancelled: () -> Unit = {},
 ): OnBackAnimationCallback {
-    return object : OnBackAnimationCallback {
+    return object : FlingOnBackAnimationCallback(progressInterpolator = Interpolators.LINEAR) {
         private var initialY = 0f
         private val lastTransformation = BackTransformation()
 
-        override fun onBackStarted(backEvent: BackEvent) {
+        override fun onBackStartedCompat(backEvent: BackEvent) {
             initialY = backEvent.touchY
             onBackStarted(backEvent)
         }
 
-        override fun onBackProgressed(backEvent: BackEvent) {
+        override fun onBackProgressedCompat(backEvent: BackEvent) {
             val progressY = (backEvent.touchY - initialY) / displayMetrics.heightPixels
 
             backAnimationSpec.getBackTransformation(
@@ -61,11 +62,11 @@ fun onBackAnimationCallbackFrom(
             onBackProgressed(lastTransformation)
         }
 
-        override fun onBackInvoked() {
+        override fun onBackInvokedCompat() {
             onBackInvoked()
         }
 
-        override fun onBackCancelled() {
+        override fun onBackCancelledCompat() {
             onBackCancelled()
         }
     }
@@ -86,7 +87,7 @@ fun View.registerOnBackInvokedCallbackOnViewAttached(
             override fun onViewAttachedToWindow(v: View) {
                 onBackInvokedDispatcher.registerOnBackInvokedCallback(
                     priority,
-                    onBackAnimationCallback
+                    onBackAnimationCallback,
                 )
             }
 
