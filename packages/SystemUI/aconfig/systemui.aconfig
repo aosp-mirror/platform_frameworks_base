@@ -1148,6 +1148,13 @@ flag {
 }
 
 flag {
+  name: "media_controls_button_media3_placement"
+  namespace: "systemui"
+  description: "Use media3 API for action button placement preferences"
+  bug: "360196209"
+}
+
+flag {
   name: "media_controls_drawables_reuse"
   namespace: "systemui"
   description: "Re-use created media drawables for media controls"
