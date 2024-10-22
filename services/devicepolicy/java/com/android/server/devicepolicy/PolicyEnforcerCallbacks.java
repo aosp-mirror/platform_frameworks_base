@@ -212,6 +212,25 @@ final class PolicyEnforcerCallbacks {
         return AndroidFuture.completedFuture(true);
     }
 
+    public static CompletableFuture<Boolean> setAutoTimePolicy(
+            Integer policy, Context context, Integer userId, PolicyKey policyKey) {
+        if (!Flags.setAutoTimeEnabledCoexistence()) {
+            Slogf.w(LOG_TAG, "Trying to enforce setAutoTimePolicy while flag is off.");
+            return AndroidFuture.completedFuture(true);
+        }
+        return Binder.withCleanCallingIdentity(() -> {
+            Objects.requireNonNull(context);
+            if (policy != null
+                    && policy == DevicePolicyManager.AUTO_TIME_NOT_CONTROLLED_BY_POLICY) {
+                return AndroidFuture.completedFuture(false);
+            }
+            int enabled = policy != null && policy == DevicePolicyManager.AUTO_TIME_ENABLED ? 1 : 0;
+            return AndroidFuture.completedFuture(
+                    Settings.Global.putInt(
+                            context.getContentResolver(), Settings.Global.AUTO_TIME,  enabled));
+        });
+    }
+
     private static class BlockingCallback {
         private final CountDownLatch mLatch = new CountDownLatch(1);
         private final AtomicReference<Boolean> mValue = new AtomicReference<>();
