@@ -81,4 +81,15 @@ public class RegionUtils {
         Collections.reverse(rects);
         rects.forEach(rectConsumer);
     }
+
+    /** Returns the area size of the region. */
+    public static int getAreaSize(Region region) {
+        final RegionIterator regionIterator = new RegionIterator(region);
+        int area = 0;
+        final Rect rect = new Rect();
+        while (regionIterator.next(rect)) {
+            area += rect.width() * rect.height();
+        }
+        return area;
+    }
 }
