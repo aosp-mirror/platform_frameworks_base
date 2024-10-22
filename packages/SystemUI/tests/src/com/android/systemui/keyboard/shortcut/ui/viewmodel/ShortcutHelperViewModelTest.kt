@@ -21,6 +21,9 @@ import android.app.role.mockRoleManager
 import android.view.KeyEvent
 import android.view.KeyboardShortcutGroup
 import android.view.KeyboardShortcutInfo
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Tv
+import androidx.compose.material.icons.filled.VerticalSplit
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -41,13 +44,17 @@ import com.android.systemui.keyboard.shortcut.shortcutHelperMultiTaskingShortcut
 import com.android.systemui.keyboard.shortcut.shortcutHelperSystemShortcutsSource
 import com.android.systemui.keyboard.shortcut.shortcutHelperTestHelper
 import com.android.systemui.keyboard.shortcut.shortcutHelperViewModel
+import com.android.systemui.keyboard.shortcut.ui.model.IconSource
+import com.android.systemui.keyboard.shortcut.ui.model.ShortcutCategoryUi
 import com.android.systemui.keyboard.shortcut.ui.model.ShortcutsUiState
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testCase
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.model.sysUiState
+import com.android.systemui.settings.FakeUserTracker
 import com.android.systemui.settings.fakeUserTracker
+import com.android.systemui.settings.userTracker
 import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_SHORTCUT_HELPER_SHOWING
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
@@ -76,6 +83,7 @@ class ShortcutHelperViewModelTest : SysuiTestCase() {
             it.shortcutHelperAppCategoriesShortcutsSource = FakeKeyboardShortcutGroupsSource()
             it.shortcutHelperInputShortcutsSource = FakeKeyboardShortcutGroupsSource()
             it.shortcutHelperCurrentAppShortcutsSource = fakeCurrentAppsSource
+            it.userTracker = FakeUserTracker(onCreateCurrentUserContext = { context })
         }
 
     private val testScope = kosmos.testScope
@@ -253,7 +261,7 @@ class ShortcutHelperViewModelTest : SysuiTestCase() {
             whenever(
                     mockRoleManager.getRoleHoldersAsUser(
                         RoleManager.ROLE_HOME,
-                        fakeUserTracker.userHandle
+                        fakeUserTracker.userHandle,
                     )
                 )
                 .thenReturn(listOf(TestShortcuts.currentAppPackageName))
@@ -283,15 +291,25 @@ class ShortcutHelperViewModelTest : SysuiTestCase() {
             val activeUiState = uiState as ShortcutsUiState.Active
             assertThat(activeUiState.shortcutCategories)
                 .containsExactly(
-                    ShortcutCategory(
-                        System,
-                        subCategoryWithShortcutLabels("first Foo shortcut1"),
-                        subCategoryWithShortcutLabels("second foO shortcut2")
+                    ShortcutCategoryUi(
+                        label = "System",
+                        iconSource = IconSource(imageVector = Icons.Default.Tv),
+                        shortcutCategory =
+                            ShortcutCategory(
+                                System,
+                                subCategoryWithShortcutLabels("first Foo shortcut1"),
+                                subCategoryWithShortcutLabels("second foO shortcut2"),
+                            ),
                     ),
-                    ShortcutCategory(
-                        MultiTasking,
-                        subCategoryWithShortcutLabels("third FoO shortcut1")
-                    )
+                    ShortcutCategoryUi(
+                        label = "Multitasking",
+                        iconSource = IconSource(imageVector = Icons.Default.VerticalSplit),
+                        shortcutCategory =
+                            ShortcutCategory(
+                                MultiTasking,
+                                subCategoryWithShortcutLabels("third FoO shortcut1"),
+                            ),
+                    ),
                 )
         }
 

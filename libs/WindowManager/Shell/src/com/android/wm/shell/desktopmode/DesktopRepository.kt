@@ -522,6 +522,7 @@ class DesktopRepository (
                 "${innerPrefix}freeformTasksInZOrder=${data.freeformTasksInZOrder.toDumpString()}"
             )
             pw.println("${innerPrefix}minimizedTasks=${data.minimizedTasks.toDumpString()}")
+            pw.println("${innerPrefix}fullImmersiveTaskId=${data.fullImmersiveTaskId}")
         }
     }
 

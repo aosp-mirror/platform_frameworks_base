@@ -58,9 +58,9 @@ class DesktopMixedTransitionHandler(
         freeformTaskTransitionHandler.startMinimizedModeTransition(wct)
 
     /** Starts close transition and handles or delegates desktop task close animation. */
-    override fun startRemoveTransition(wct: WindowContainerTransaction?) {
+    override fun startRemoveTransition(wct: WindowContainerTransaction?): IBinder {
         requireNotNull(wct)
-        transitions.startTransition(WindowManager.TRANSIT_CLOSE, wct, /* handler= */ this)
+        return transitions.startTransition(WindowManager.TRANSIT_CLOSE, wct, /* handler= */ this)
     }
 
     /** Returns null, as it only handles transitions started from Shell. */

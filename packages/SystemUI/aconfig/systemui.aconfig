@@ -1557,3 +1557,13 @@ flag {
     description: "Enables the tile detailed view UI."
     bug: "374173773"
 }
+
+flag {
+  name: "ensure_enr_views_visibility"
+  namespace: "systemui"
+  description: "Ensures public and private visibilities"
+  bug: "361552380"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}

@@ -18,8 +18,6 @@ package com.android.systemui.notifications.ui.composable
 
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
-import androidx.compose.ui.util.fastCoerceAtLeast
-import androidx.compose.ui.util.fastCoerceAtMost
 import com.android.compose.nestedscroll.PriorityNestedScrollConnection
 
 /**
@@ -46,7 +44,7 @@ fun NotificationScrimNestedScrollConnection(
         orientation = Orientation.Vertical,
         // scrolling up and inner content is taller than the scrim, so scrim needs to
         // expand; content can scroll once scrim is at the minScrimOffset.
-        canStartPreScroll = { offsetAvailable, offsetBeforeStart, _ ->
+        canStartPreScroll = { offsetAvailable, offsetBeforeStart ->
             offsetAvailable < 0 &&
                 offsetBeforeStart == 0f &&
                 contentHeight() > minVisibleScrimHeight() &&
@@ -54,38 +52,36 @@ fun NotificationScrimNestedScrollConnection(
         },
         // scrolling down and content is done scrolling to top. After that, the scrim
         // needs to collapse; collapse the scrim until it is at the maxScrimOffset.
-        canStartPostScroll = { offsetAvailable, _, _ ->
+        canStartPostScroll = { offsetAvailable, _ ->
             offsetAvailable > 0 && (scrimOffset() < maxScrimOffset || isCurrentGestureOverscroll())
         },
         canStartPostFling = { false },
-        canStopOnPreFling = { false },
+        canContinueScroll = {
+            val currentHeight = scrimOffset()
+            minScrimOffset() < currentHeight && currentHeight < maxScrimOffset
+        },
+        canScrollOnFling = true,
         onStart = { offsetAvailable -> onStart(offsetAvailable) },
-        onScroll = { offsetAvailable, _ ->
+        onScroll = { offsetAvailable ->
             val currentHeight = scrimOffset()
             val amountConsumed =
                 if (offsetAvailable > 0) {
                     val amountLeft = maxScrimOffset - currentHeight
-                    offsetAvailable.fastCoerceAtMost(amountLeft)
+                    offsetAvailable.coerceAtMost(amountLeft)
                 } else {
                     val amountLeft = minScrimOffset() - currentHeight
-                    offsetAvailable.fastCoerceAtLeast(amountLeft)
+                    offsetAvailable.coerceAtLeast(amountLeft)
                 }
             snapScrimOffset(currentHeight + amountConsumed)
             amountConsumed
         },
+        // Don't consume the velocity on pre/post fling
         onStop = { velocityAvailable ->
             onStop(velocityAvailable)
             if (scrimOffset() < minScrimOffset()) {
                 animateScrimOffset(minScrimOffset())
             }
-            // Don't consume the velocity on pre/post fling
-            0f
-        },
-        onCancel = {
-            onStop(0f)
-            if (scrimOffset() < minScrimOffset()) {
-                animateScrimOffset(minScrimOffset())
-            }
+            { 0f }
         },
     )
 }

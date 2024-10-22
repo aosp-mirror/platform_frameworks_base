@@ -189,9 +189,6 @@ constructor(
     /** Whether any dreaming is running, including the doze dream. */
     val isDreamingAny: Flow<Boolean> = repository.isDreaming
 
-    /** Whether the system is dreaming and the active dream is hosted in lockscreen */
-    val isActiveDreamLockscreenHosted: StateFlow<Boolean> = repository.isActiveDreamLockscreenHosted
-
     /** Event for when the camera gesture is detected */
     val onCameraLaunchDetected: Flow<CameraLaunchSourceModel> =
         repository.onCameraLaunchDetected.filter { it.type != CameraLaunchType.IGNORE }
@@ -244,7 +241,7 @@ constructor(
 
     /** Whether the keyguard is going away. */
     @Deprecated("Use KeyguardTransitionInteractor + KeyguardState.GONE")
-    val isKeyguardGoingAway: Flow<Boolean> = repository.isKeyguardGoingAway
+    val isKeyguardGoingAway: StateFlow<Boolean> = repository.isKeyguardGoingAway.asStateFlow()
 
     /** Keyguard can be clipped at the top as the shade is dragged */
     val topClippingBounds: Flow<Int?> by lazy {
@@ -477,10 +474,6 @@ constructor(
         }
     }
 
-    fun setIsActiveDreamLockscreenHosted(isLockscreenHosted: Boolean) {
-        repository.setIsActiveDreamLockscreenHosted(isLockscreenHosted)
-    }
-
     /** Sets whether quick settings or quick-quick settings is visible. */
     fun setQuickSettingsVisible(isVisible: Boolean) {
         repository.setQuickSettingsVisible(isVisible)
@@ -547,6 +540,10 @@ constructor(
 
     fun setShortcutAbsoluteTop(top: Float) {
         repository.setShortcutAbsoluteTop(top)
+    }
+
+    fun setIsKeyguardGoingAway(isGoingAway: Boolean) {
+        repository.isKeyguardGoingAway.value = isGoingAway
     }
 
     companion object {
