@@ -24,6 +24,7 @@ import android.annotation.Nullable;
 import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.pm.LauncherApps;
+import android.hardware.input.InputManager;
 import android.os.Handler;
 import android.os.UserManager;
 import android.view.Choreographer;
@@ -644,7 +645,9 @@ public abstract class WMShellModule {
             @ShellMainThread Handler mainHandler,
             Optional<DesktopTasksLimiter> desktopTasksLimiter,
             Optional<RecentTasksController> recentTasksController,
-            InteractionJankMonitor interactionJankMonitor) {
+            InteractionJankMonitor interactionJankMonitor,
+            InputManager inputManager,
+            FocusTransitionObserver focusTransitionObserver) {
         return new DesktopTasksController(context, shellInit, shellCommandHandler, shellController,
                 displayController, shellTaskOrganizer, syncQueue, rootTaskDisplayAreaOrganizer,
                 dragAndDropController, transitions, keyguardManager,
@@ -655,7 +658,8 @@ public abstract class WMShellModule {
                 desktopRepository,
                 desktopModeLoggerTransitionObserver, launchAdjacentController,
                 recentsTransitionHandler, multiInstanceHelper, mainExecutor, desktopTasksLimiter,
-                recentTasksController.orElse(null), interactionJankMonitor, mainHandler);
+                recentTasksController.orElse(null), interactionJankMonitor, mainHandler,
+                inputManager, focusTransitionObserver);
     }
 
     @WMSingleton

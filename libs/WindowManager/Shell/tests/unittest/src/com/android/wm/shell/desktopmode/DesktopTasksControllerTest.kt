@@ -39,6 +39,9 @@ import android.content.res.Configuration.ORIENTATION_PORTRAIT
 import android.graphics.Point
 import android.graphics.PointF
 import android.graphics.Rect
+import android.hardware.input.InputManager
+import android.hardware.input.InputManager.KeyGestureEventHandler
+import android.hardware.input.KeyGestureEvent
 import android.os.Binder
 import android.os.Bundle
 import android.os.Handler
@@ -50,6 +53,7 @@ import android.testing.AndroidTestingRunner
 import android.view.Display.DEFAULT_DISPLAY
 import android.view.DragEvent
 import android.view.Gravity
+import android.view.KeyEvent
 import android.view.SurfaceControl
 import android.view.WindowInsets
 import android.view.WindowManager
@@ -70,14 +74,18 @@ import android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_R
 import android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REORDER
 import android.window.WindowContainerTransaction.HierarchyOp.LAUNCH_KEY_TASK_ID
 import androidx.test.filters.SmallTest
+import com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer
 import com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn
 import com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession
 import com.android.dx.mockito.inline.extended.ExtendedMockito.never
 import com.android.dx.mockito.inline.extended.StaticMockitoSession
+import com.android.hardware.input.Flags.FLAG_USE_KEY_GESTURE_EVENT_HANDLER
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.window.flags.Flags
 import com.android.window.flags.Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE
+import com.android.window.flags.Flags.FLAG_ENABLE_DISPLAY_FOCUS_IN_SHELL_TRANSITIONS
 import com.android.window.flags.Flags.FLAG_ENABLE_FULLY_IMMERSIVE_IN_DESKTOP
+import com.android.window.flags.Flags.FLAG_ENABLE_MOVE_TO_NEXT_DISPLAY_SHORTCUT
 import com.android.wm.shell.MockToken
 import com.android.wm.shell.R
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer
@@ -112,6 +120,7 @@ import com.android.wm.shell.splitscreen.SplitScreenController
 import com.android.wm.shell.sysui.ShellCommandHandler
 import com.android.wm.shell.sysui.ShellController
 import com.android.wm.shell.sysui.ShellInit
+import com.android.wm.shell.transition.FocusTransitionObserver
 import com.android.wm.shell.transition.OneShotRemoteHandler
 import com.android.wm.shell.transition.TestRemoteTransition
 import com.android.wm.shell.transition.Transitions
@@ -206,6 +215,8 @@ class DesktopTasksControllerTest : ShellTestCase() {
   @Mock private lateinit var freeformTaskTransitionStarter: FreeformTaskTransitionStarter
   @Mock private lateinit var mockHandler: Handler
   @Mock lateinit var persistentRepository: DesktopPersistentRepository
+  @Mock private lateinit var mockInputManager: InputManager
+  @Mock private lateinit var mockFocusTransitionObserver: FocusTransitionObserver
 
   private lateinit var mockitoSession: StaticMockitoSession
   private lateinit var controller: DesktopTasksController
@@ -214,6 +225,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
   private lateinit var desktopTasksLimiter: DesktopTasksLimiter
   private lateinit var recentsTransitionStateListener: RecentsTransitionStateListener
   private lateinit var testScope: CoroutineScope
+  private lateinit var keyGestureEventHandler: KeyGestureEventHandler
 
   private val shellExecutor = TestShellExecutor()
 
@@ -271,6 +283,11 @@ class DesktopTasksControllerTest : ShellTestCase() {
     controller.setSplitScreenController(splitScreenController)
     controller.freeformTaskTransitionStarter = freeformTaskTransitionStarter
 
+    doAnswer {
+      keyGestureEventHandler = (it.arguments[0] as KeyGestureEventHandler)
+      null
+    }.whenever(mockInputManager).registerKeyGestureEventHandler(any())
+
     shellInit.init()
 
     val captor = ArgumentCaptor.forClass(RecentsTransitionStateListener::class.java)
@@ -310,6 +327,8 @@ class DesktopTasksControllerTest : ShellTestCase() {
         recentTasksController,
         mockInteractionJankMonitor,
         mockHandler,
+        mockInputManager,
+        mockFocusTransitionObserver,
       )
   }
 
@@ -1457,6 +1476,44 @@ class DesktopTasksControllerTest : ShellTestCase() {
     val task = setUpFreeformTask(displayId = SECOND_DISPLAY)
     controller.moveToNextDisplay(task.taskId)
 
+    with(getLatestWct(type = TRANSIT_CHANGE)) {
+      assertThat(hierarchyOps).hasSize(1)
+      assertThat(hierarchyOps[0].container).isEqualTo(task.token.asBinder())
+      assertThat(hierarchyOps[0].isReparent).isTrue()
+      assertThat(hierarchyOps[0].newParent).isEqualTo(defaultDisplayArea.token.asBinder())
+      assertThat(hierarchyOps[0].toTop).isTrue()
+    }
+  }
+
+  @Test
+  @EnableFlags(
+    FLAG_ENABLE_DISPLAY_FOCUS_IN_SHELL_TRANSITIONS,
+    FLAG_ENABLE_MOVE_TO_NEXT_DISPLAY_SHORTCUT,
+    FLAG_USE_KEY_GESTURE_EVENT_HANDLER
+  )
+  fun moveToNextDisplay_withKeyGesture() {
+    // Set up two display ids
+    whenever(rootTaskDisplayAreaOrganizer.displayIds)
+      .thenReturn(intArrayOf(DEFAULT_DISPLAY, SECOND_DISPLAY))
+    // Create a mock for the target display area: default display
+    val defaultDisplayArea = DisplayAreaInfo(MockToken().token(), DEFAULT_DISPLAY, 0)
+    whenever(rootTaskDisplayAreaOrganizer.getDisplayAreaInfo(DEFAULT_DISPLAY))
+      .thenReturn(defaultDisplayArea)
+    // Setup a focused task on secondary display, which is expected to move to default display
+    val task = setUpFreeformTask(displayId = SECOND_DISPLAY)
+    task.isFocused = true
+    whenever(shellTaskOrganizer.getRunningTasks()).thenReturn(arrayListOf(task))
+    whenever(mockFocusTransitionObserver.hasGlobalFocus(eq(task))).thenReturn(true)
+
+    val event = KeyGestureEvent.Builder()
+        .setKeyGestureType(KeyGestureEvent.KEY_GESTURE_TYPE_MOVE_TO_NEXT_DISPLAY)
+        .setDisplayId(SECOND_DISPLAY)
+        .setKeycodes(intArrayOf(KeyEvent.KEYCODE_D))
+        .setModifierState(KeyEvent.META_META_ON or KeyEvent.META_CTRL_ON)
+        .build()
+    val result = keyGestureEventHandler.handleKeyGestureEvent(event, null)
+
+    assertThat(result).isTrue()
     with(getLatestWct(type = TRANSIT_CHANGE)) {
       assertThat(hierarchyOps).hasSize(1)
       assertThat(hierarchyOps[0].container).isEqualTo(task.token.asBinder())
