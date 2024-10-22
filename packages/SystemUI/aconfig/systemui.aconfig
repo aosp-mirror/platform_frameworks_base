@@ -1559,6 +1559,16 @@ flag {
 }
 
 flag {
+   name: "hide_ringer_button_in_single_volume_mode"
+   namespace: "systemui"
+   description: "When the device is in single volume mode, hide the ringer button because it doesn't work"
+   bug: "374870615"
+   metadata {
+       purpose: PURPOSE_BUGFIX
+   }
+}
+
+flag {
     name: "qs_tile_detailed_view"
     namespace: "systemui"
     description: "Enables the tile detailed view UI."
