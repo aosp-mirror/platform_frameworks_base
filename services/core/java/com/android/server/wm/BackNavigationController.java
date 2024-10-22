@@ -1328,16 +1328,13 @@ class BackNavigationController {
             if (!allWindowDrawn) {
                 return;
             }
-            final SurfaceControl startingSurface = mOpenAnimAdaptor.mStartingSurface;
-            if (startingSurface != null && startingSurface.isValid()) {
-                startTransaction.addTransactionCommittedListener(Runnable::run, () -> {
-                    synchronized (mWindowManagerService.mGlobalLock) {
-                        if (mOpenAnimAdaptor != null) {
-                            mOpenAnimAdaptor.cleanUpWindowlessSurface(true);
-                        }
+            startTransaction.addTransactionCommittedListener(Runnable::run, () -> {
+                synchronized (mWindowManagerService.mGlobalLock) {
+                    if (mOpenAnimAdaptor != null) {
+                        mOpenAnimAdaptor.cleanUpWindowlessSurface(true);
                     }
-                });
-            }
+                }
+            });
         }
 
         void clearBackAnimateTarget(boolean cancel) {

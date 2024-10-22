@@ -17,6 +17,7 @@
 package com.android.server.power.stats;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import android.annotation.NonNull;
 import android.app.usage.NetworkStatsManager;
@@ -80,7 +81,7 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
             Handler handler, PowerStatsUidResolver powerStatsUidResolver) {
         super(config, clock, new MonotonicClock(0, clock), historyDirectory, handler,
                 mock(PlatformIdleStateCallback.class), mock(EnergyStatsRetriever.class),
-                mock(UserInfoProvider.class), mock(PowerProfile.class),
+                mock(UserInfoProvider.class), mockPowerProfile(),
                 new CpuScalingPolicies(new SparseArray<>(), new SparseArray<>()),
                 powerStatsUidResolver, mock(FrameworkStatsLogger.class),
                 mock(BatteryStatsHistory.TraceDelegate.class),
@@ -94,6 +95,12 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
 
         mCpuUidFreqTimeReader = mock(KernelCpuUidFreqTimeReader.class);
         mKernelWakelockReader = null;
+    }
+
+    private static PowerProfile mockPowerProfile() {
+        PowerProfile powerProfile = mock(PowerProfile.class);
+        when(powerProfile.getNumDisplays()).thenReturn(1);
+        return powerProfile;
     }
 
     public void initMeasuredEnergyStats(String[] customBucketNames) {

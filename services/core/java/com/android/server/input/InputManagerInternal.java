@@ -262,4 +262,12 @@ public abstract class InputManagerInternal {
      */
     public abstract void handleKeyGestureInKeyGestureController(int deviceId, int[] keycodes,
             int modifierState, @KeyGestureEvent.KeyGestureType int event);
+
+    /**
+     * Sets the magnification scale factor for pointer icons.
+     *
+     * @param displayId   the ID of the display where the new scale factor is applied.
+     * @param scaleFactor the new scale factor to be applied for pointer icons.
+     */
+    public abstract void setAccessibilityPointerIconScaleFactor(int displayId, float scaleFactor);
 }

@@ -54,15 +54,8 @@ interface VibrationSession {
     /** Returns debug data for logging and metric reports. */
     DebugInfo getDebugInfo();
 
-    /**
-     * Links this session to the app process death with given callback to handle it.
-     *
-     * <p>This can be used by the service to end the vibration session when the app process dies.
-     *
-     * @param callback The service callback to be triggered when the binder dies
-     * @return true if the link was successful, false otherwise
-     */
-    boolean linkToDeath(@Nullable Runnable callback);
+    /** Links this session to the app process death, returning false if link failed. */
+    boolean linkToDeath();
 
     /** Removes link to the app process death. */
     void unlinkToDeath();

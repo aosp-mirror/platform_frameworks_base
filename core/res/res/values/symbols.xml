@@ -5636,4 +5636,7 @@
   <!-- Identity check strings -->
   <java-symbol type="string" name="identity_check_settings_action" />
   <java-symbol type="string" name="identity_check_settings_package_name" />
+
+  <!-- Forensic backup transport -->
+  <java-symbol type="string" name="config_forensicBackupTransport" />
 </resources>

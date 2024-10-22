@@ -46,6 +46,7 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Velocity
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.compose.modifiers.thenIf
+import com.android.compose.nestedscroll.SuspendedValue
 import com.google.common.truth.Truth.assertThat
 import kotlin.properties.Delegates
 import kotlinx.coroutines.coroutineScope

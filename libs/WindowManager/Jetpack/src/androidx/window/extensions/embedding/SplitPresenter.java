@@ -183,6 +183,10 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         }
     }
 
+    void setAutoSaveEmbeddingState(boolean saveEmbeddingState) {
+        mBackupHelper.setAutoSaveEmbeddingState(saveEmbeddingState);
+    }
+
     void scheduleBackup() {
         mBackupHelper.scheduleBackup();
     }

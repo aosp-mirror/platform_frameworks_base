@@ -88,9 +88,6 @@ class FakeKeyguardRepository @Inject constructor() : KeyguardRepository {
     private val _isDreamingWithOverlay = MutableStateFlow(false)
     override val isDreamingWithOverlay: Flow<Boolean> = _isDreamingWithOverlay
 
-    private val _isActiveDreamLockscreenHosted = MutableStateFlow(false)
-    override val isActiveDreamLockscreenHosted: StateFlow<Boolean> = _isActiveDreamLockscreenHosted
-
     private val _dozeAmount = MutableStateFlow(0f)
     override val linearDozeAmount: Flow<Float> = _dozeAmount
 
@@ -102,8 +99,7 @@ class FakeKeyguardRepository @Inject constructor() : KeyguardRepository {
 
     private val _isUdfpsSupported = MutableStateFlow(false)
 
-    private val _isKeyguardGoingAway = MutableStateFlow(false)
-    override val isKeyguardGoingAway: Flow<Boolean> = _isKeyguardGoingAway
+    override val isKeyguardGoingAway = MutableStateFlow(false)
 
     private val _biometricUnlockState =
         MutableStateFlow(BiometricUnlockModel(BiometricUnlockMode.NONE, null))
@@ -169,7 +165,7 @@ class FakeKeyguardRepository @Inject constructor() : KeyguardRepository {
     }
 
     fun setKeyguardGoingAway(isGoingAway: Boolean) {
-        _isKeyguardGoingAway.value = isGoingAway
+        isKeyguardGoingAway.value = isGoingAway
     }
 
     fun setKeyguardOccluded(isOccluded: Boolean) {
@@ -233,10 +229,6 @@ class FakeKeyguardRepository @Inject constructor() : KeyguardRepository {
 
     fun setDreamingWithOverlay(isDreaming: Boolean) {
         _isDreamingWithOverlay.value = isDreaming
-    }
-
-    override fun setIsActiveDreamLockscreenHosted(isLockscreenHosted: Boolean) {
-        _isActiveDreamLockscreenHosted.value = isLockscreenHosted
     }
 
     fun setDozeAmount(dozeAmount: Float) {

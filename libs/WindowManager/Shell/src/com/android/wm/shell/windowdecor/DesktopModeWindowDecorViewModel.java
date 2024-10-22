@@ -56,6 +56,7 @@ import android.graphics.Rect;
 import android.graphics.Region;
 import android.hardware.input.InputManager;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -133,6 +134,7 @@ import com.android.wm.shell.windowdecor.viewholder.AppHeaderViewHolder;
 
 import kotlin.Pair;
 import kotlin.Unit;
+import kotlin.jvm.functions.Function1;
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi;
 
@@ -767,8 +769,13 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
                             SplitScreenController.EXIT_REASON_DESKTOP_MODE);
                 } else {
                     WindowContainerTransaction wct = new WindowContainerTransaction();
-                    mDesktopTasksController.onDesktopWindowClose(wct, mDisplayId, mTaskId);
-                    mTaskOperations.closeTask(mTaskToken, wct);
+                    final Function1<IBinder, Unit> runOnTransitionStart =
+                            mDesktopTasksController.onDesktopWindowClose(
+                                    wct, mDisplayId, decoration.mTaskInfo);
+                    final IBinder transition = mTaskOperations.closeTask(mTaskToken, wct);
+                    if (transition != null && runOnTransitionStart != null) {
+                        runOnTransitionStart.invoke(transition);
+                    }
                 }
             } else if (id == R.id.back_button) {
                 mTaskOperations.injectBackKey(mDisplayId);

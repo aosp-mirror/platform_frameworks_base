@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.server.stats.pull;
+package com.android.internal.os;
 
-import static android.os.Process.PROC_OUT_STRING;
+import static android.os.Process.*;
 
 import android.annotation.Nullable;
 import android.os.Process;
@@ -23,6 +23,7 @@ import android.util.SparseArray;
 
 public final class ProcfsMemoryUtil {
     private static final int[] CMDLINE_OUT = new int[] { PROC_OUT_STRING };
+    private static final int[] OOM_SCORE_ADJ_OUT = new int[] { PROC_NEWLINE_TERM | PROC_OUT_LONG };
     private static final String[] STATUS_KEYS = new String[] {
             "Uid:",
             "VmHWM:",
@@ -38,17 +39,34 @@ public final class ProcfsMemoryUtil {
     private ProcfsMemoryUtil() {}
 
     /**
-     * Reads memory stats of a process from procfs. Returns values of the VmHWM, VmRss, AnonRSS,
-     * VmSwap, RssShmem fields in /proc/pid/status in kilobytes or null if not available.
+     * Reads memory stats of a process from procfs.
+     *
+     * Returns values of the VmHWM, VmRss, AnonRSS, VmSwap, RssShmem fields in
+     * /proc/pid/status in kilobytes or null if not available.
      */
     @Nullable
     public static MemorySnapshot readMemorySnapshotFromProcfs(int pid) {
+        return readMemorySnapshotFromProcfs("/proc/" + pid + "/status");
+    }
+
+    /**
+     * Reads memory stats of the current process from procfs.
+     *
+     * Returns values of the VmHWM, VmRss, AnonRSS, VmSwap, RssShmem fields in
+     * /proc/self/status in kilobytes or null if not available.
+     */
+    @Nullable
+    public static MemorySnapshot readMemorySnapshotFromProcfs() {
+        return readMemorySnapshotFromProcfs("/proc/self/status");
+    }
+
+    private static MemorySnapshot readMemorySnapshotFromProcfs(String path) {
         long[] output = new long[STATUS_KEYS.length];
         output[0] = -1;
         output[3] = -1;
         output[4] = -1;
         output[5] = -1;
-        Process.readProcLines("/proc/" + pid + "/status", STATUS_KEYS, output);
+        Process.readProcLines(path, STATUS_KEYS, output);
         if (output[0] == -1 || output[3] == -1 || output[4] == -1 || output[5] == -1) {
             // Could not open or parse file.
             return null;
@@ -70,11 +88,51 @@ public final class ProcfsMemoryUtil {
      * if the file is not available.
      */
     public static String readCmdlineFromProcfs(int pid) {
+        return readCmdlineFromProcfs("/proc/" + pid + "/cmdline");
+    }
+
+    /**
+     * Reads cmdline of the current process from procfs.
+     *
+     * Returns content of /proc/pid/cmdline (e.g. /system/bin/statsd) or an empty string
+     * if the file is not available.
+     */
+    public static String readCmdlineFromProcfs() {
+        return readCmdlineFromProcfs("/proc/self/cmdline");
+    }
+
+    private static String readCmdlineFromProcfs(String path) {
         String[] cmdline = new String[1];
-        if (!Process.readProcFile("/proc/" + pid + "/cmdline", CMDLINE_OUT, cmdline, null, null)) {
+        if (!Process.readProcFile(path, CMDLINE_OUT, cmdline, null, null)) {
             return "";
         }
         return cmdline[0];
+    }
+
+    /**
+     * Reads oom_score_adj of a process from procfs
+     *
+     * Returns content of /proc/pid/oom_score_adj. Defaults to 0 if reading fails.
+     */
+    public static int readOomScoreAdjFromProcfs(int pid) {
+        return readOomScoreAdjFromProcfs("/proc/" + pid + "/oom_score_adj");
+    }
+
+    /**
+     * Reads oom_score_adj of the current process from procfs
+     *
+     * Returns content of /proc/pid/oom_score_adj. Defaults to 0 if reading fails.
+     */
+    public static int readOomScoreAdjFromProcfs() {
+        return readOomScoreAdjFromProcfs("/proc/self/oom_score_adj");
+    }
+
+    private static int readOomScoreAdjFromProcfs(String path) {
+        long[] oom_score_adj = new long[1];
+        if (Process.readProcFile(path, OOM_SCORE_ADJ_OUT, null, oom_score_adj, null)) {
+            return (int)oom_score_adj[0];
+        }
+        return 0;
     }
 
     /**
@@ -109,7 +167,7 @@ public final class ProcfsMemoryUtil {
 
     /** Reads and parses selected entries of /proc/vmstat. */
     @Nullable
-    static VmStat readVmStat() {
+    public static VmStat readVmStat() {
         long[] vmstat = new long[VMSTAT_KEYS.length];
         vmstat[0] = -1;
         Process.readProcLines("/proc/vmstat", VMSTAT_KEYS, vmstat);
@@ -121,7 +179,7 @@ public final class ProcfsMemoryUtil {
         return result;
     }
 
-    static final class VmStat {
+    public static final class VmStat {
         public int oomKillCount;
     }
 }

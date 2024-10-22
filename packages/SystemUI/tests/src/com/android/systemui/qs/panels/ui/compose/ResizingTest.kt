@@ -66,6 +66,8 @@ class ResizingTest : SysuiTestCase() {
             onRemoveTile = {},
             onSetTiles = {},
             onResize = onResize,
+            onStopEditing = {},
+            onReset = null,
         )
     }
 

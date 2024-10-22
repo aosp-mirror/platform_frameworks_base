@@ -1148,6 +1148,13 @@ flag {
 }
 
 flag {
+  name: "media_controls_button_media3_placement"
+  namespace: "systemui"
+  description: "Use media3 API for action button placement preferences"
+  bug: "360196209"
+}
+
+flag {
   name: "media_controls_drawables_reuse"
   namespace: "systemui"
   description: "Re-use created media drawables for media controls"
@@ -1556,4 +1563,14 @@ flag {
     namespace: "systemui"
     description: "Enables the tile detailed view UI."
     bug: "374173773"
+}
+
+flag {
+  name: "ensure_enr_views_visibility"
+  namespace: "systemui"
+  description: "Ensures public and private visibilities"
+  bug: "361552380"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
 }

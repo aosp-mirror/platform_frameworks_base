@@ -32,6 +32,7 @@ import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.time.FakeSystemClock
+import com.google.android.msdl.domain.MSDLPlayer
 import com.google.common.truth.Truth.assertThat
 import org.junit.After
 import org.junit.Before
@@ -46,34 +47,26 @@ import org.mockito.Mockito.isNull
 import org.mockito.Mockito.never
 import org.mockito.Mockito.notNull
 import org.mockito.Mockito.verify
-import org.mockito.MockitoAnnotations
 import org.mockito.Mockito.`when` as whenever
+import org.mockito.MockitoAnnotations
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
 class BrightnessSliderControllerTest : SysuiTestCase() {
 
-    @Mock
-    private lateinit var brightnessSliderView: BrightnessSliderView
-    @Mock
-    private lateinit var enforcedAdmin: RestrictedLockUtils.EnforcedAdmin
-    @Mock
-    private lateinit var mirrorController: BrightnessMirrorController
-    @Mock
-    private lateinit var mirror: ToggleSlider
-    @Mock
-    private lateinit var motionEvent: MotionEvent
-    @Mock
-    private lateinit var listener: ToggleSlider.Listener
-    @Mock
-    private lateinit var vibratorHelper: VibratorHelper
-    @Mock
-    private lateinit var activityStarter: ActivityStarter
+    @Mock private lateinit var brightnessSliderView: BrightnessSliderView
+    @Mock private lateinit var enforcedAdmin: RestrictedLockUtils.EnforcedAdmin
+    @Mock private lateinit var mirrorController: BrightnessMirrorController
+    @Mock private lateinit var mirror: ToggleSlider
+    @Mock private lateinit var motionEvent: MotionEvent
+    @Mock private lateinit var listener: ToggleSlider.Listener
+    @Mock private lateinit var vibratorHelper: VibratorHelper
+    @Mock private lateinit var msdlPlayer: MSDLPlayer
+    @Mock private lateinit var activityStarter: ActivityStarter
 
     @Captor
     private lateinit var seekBarChangeCaptor: ArgumentCaptor<SeekBar.OnSeekBarChangeListener>
-    @Mock
-    private lateinit var seekBar: SeekBar
+    @Mock private lateinit var seekBar: SeekBar
     private val uiEventLogger = UiEventLoggerFake()
     private var mFalsingManager: FalsingManagerFake = FalsingManagerFake()
     private val systemClock = FakeSystemClock()
@@ -93,7 +86,7 @@ class BrightnessSliderControllerTest : SysuiTestCase() {
                 brightnessSliderView,
                 mFalsingManager,
                 uiEventLogger,
-                SeekbarHapticPlugin(vibratorHelper, systemClock),
+                SeekbarHapticPlugin(vibratorHelper, msdlPlayer, systemClock),
                 activityStarter,
             )
         mController.init()

@@ -237,6 +237,7 @@ import com.android.internal.os.DebugStore;
 import com.android.internal.os.RuntimeInit;
 import com.android.internal.os.SafeZipPathValidatorCallback;
 import com.android.internal.os.SomeArgs;
+import com.android.internal.os.logging.MetricsLoggerWrapper;
 import com.android.internal.policy.DecorView;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastPrintWriter;
@@ -7675,6 +7676,16 @@ public final class ActivityThread extends ClientTransactionHandler
                 }
             }
         });
+
+        // Register callback to report native memory metrics post GC cleanup
+        if (Flags.reportPostgcMemoryMetrics() &&
+            com.android.libcore.readonly.Flags.postCleanupApis()) {
+            VMRuntime.addPostCleanupCallback(new Runnable() {
+                @Override public void run() {
+                    MetricsLoggerWrapper.logPostGcMemorySnapshot();
+                }
+            });
+        }
     }
 
     @UnsupportedAppUsage

@@ -100,6 +100,9 @@ java_library_host {
     srcs: [
         "runtime-helper-src/libcore-fake/**/*.java",
     ],
+    libs: [
+        "app-compat-annotations",
+    ],
     static_libs: [
         "ravenwood-runtime-common",
     ],
@@ -121,6 +124,7 @@ java_library {
     ],
     static_libs: [
         "ravenwood-runtime-common",
+        "androidx.annotation_annotation",
     ],
     libs: [
         "framework-minus-apex.ravenwood",
