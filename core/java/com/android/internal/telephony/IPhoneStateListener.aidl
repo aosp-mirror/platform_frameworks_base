@@ -84,4 +84,5 @@ oneway interface IPhoneStateListener {
     void onSimultaneousCallingStateChanged(in int[] subIds);
     void onCarrierRoamingNtnModeChanged(in boolean active);
     void onCarrierRoamingNtnEligibleStateChanged(in boolean eligible);
+    void onCarrierRoamingNtnAvailableServicesChanged(in int[] availableServices);
 }
