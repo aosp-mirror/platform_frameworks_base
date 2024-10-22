@@ -32,13 +32,13 @@ import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 interface NotificationActivityStarter {
 
     /** Called when the user clicks on the notification bubble icon. */
-    fun onNotificationBubbleIconClicked(entry: NotificationEntry?)
+    fun onNotificationBubbleIconClicked(entry: NotificationEntry)
 
     /** Called when the user clicks on the surface of a notification. */
-    fun onNotificationClicked(entry: NotificationEntry?, row: ExpandableNotificationRow?)
+    fun onNotificationClicked(entry: NotificationEntry, row: ExpandableNotificationRow)
 
     /** Called when the user clicks on a button in the notification guts which fires an intent. */
-    fun startNotificationGutsIntent(intent: Intent?, appUid: Int, row: ExpandableNotificationRow?)
+    fun startNotificationGutsIntent(intent: Intent, appUid: Int, row: ExpandableNotificationRow)
 
     /**
      * Called when the user clicks "Manage" or "History" in the Shade. Prefer using
@@ -56,7 +56,7 @@ interface NotificationActivityStarter {
     fun startSettingsIntent(view: View, intentInfo: SettingsIntent)
 
     /** Called when the user succeed to drop notification to proper target view. */
-    fun onDragSuccess(entry: NotificationEntry?)
+    fun onDragSuccess(entry: NotificationEntry)
 
     val isCollapsingToShowActivityOverLockscreen: Boolean
         get() = false
