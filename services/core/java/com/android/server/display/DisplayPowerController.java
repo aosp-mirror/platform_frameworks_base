@@ -1503,7 +1503,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 // use the current brightness setting scaled by the doze scale factor
                 rawBrightnessState = getDozeBrightnessForOffload();
                 brightnessState = clampScreenBrightness(rawBrightnessState);
-                updateScreenBrightnessSetting = false;
                 mBrightnessReasonTemp.setReason(BrightnessReason.REASON_DOZE_MANUAL);
                 mTempBrightnessEvent.setFlags(
                         mTempBrightnessEvent.getFlags() | BrightnessEvent.FLAG_DOZE_SCALE);
@@ -1513,6 +1512,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 brightnessState = clampScreenBrightness(rawBrightnessState);
                 mBrightnessReasonTemp.setReason(BrightnessReason.REASON_DOZE_DEFAULT);
             }
+            updateScreenBrightnessSetting = false;
         }
 
         if (!mFlags.isRefactorDisplayPowerControllerEnabled()) {

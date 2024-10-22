@@ -2224,6 +2224,8 @@ public final class DisplayPowerControllerTest {
         verify(mHolder.animator).animateTo(eq(DEFAULT_DOZE_BRIGHTNESS),
                 /* linearSecondTarget= */ anyFloat(), eq(BRIGHTNESS_RAMP_RATE_FAST_INCREASE),
                 eq(false));
+        // This brightness shouldn't be stored in the setting
+        verify(mHolder.brightnessSetting, never()).setBrightness(DEFAULT_DOZE_BRIGHTNESS);
 
         // The display device changes and the default doze brightness changes
         setUpDisplay(DISPLAY_ID, "new_unique_id", mHolder.display, mock(DisplayDevice.class),
