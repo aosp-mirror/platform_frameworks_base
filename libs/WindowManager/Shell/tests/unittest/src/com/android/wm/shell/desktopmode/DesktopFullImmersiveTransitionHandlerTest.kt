@@ -340,6 +340,31 @@ class DesktopFullImmersiveTransitionHandlerTest : ShellTestCase() {
 
     @Test
     @EnableFlags(Flags.FLAG_ENABLE_FULLY_IMMERSIVE_IN_DESKTOP)
+    fun exitImmersiveIfApplicable_byDisplay_withExcludeTask_doesNotExit() {
+        val task = createFreeformTask()
+        whenever(mockShellTaskOrganizer.getRunningTaskInfo(task.taskId)).thenReturn(task)
+        val wct = WindowContainerTransaction()
+        val transition = Binder()
+        desktopRepository.setTaskInFullImmersiveState(
+            displayId = DEFAULT_DISPLAY,
+            taskId = task.taskId,
+            immersive = true
+        )
+
+        immersiveHandler.exitImmersiveIfApplicable(
+            wct = wct,
+            displayId = DEFAULT_DISPLAY,
+            excludeTaskId = task.taskId
+        )?.invoke(transition)
+
+        assertThat(immersiveHandler.pendingExternalExitTransitions.any { exit ->
+            exit.transition == transition && exit.displayId == DEFAULT_DISPLAY
+                    && exit.taskId == task.taskId
+        }).isFalse()
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_FULLY_IMMERSIVE_IN_DESKTOP)
     fun exitImmersiveIfApplicable_byTask_inImmersive_changesTaskBounds() {
         val task = createFreeformTask()
         whenever(mockShellTaskOrganizer.getRunningTaskInfo(task.taskId)).thenReturn(task)
