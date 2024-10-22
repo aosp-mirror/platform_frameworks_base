@@ -19,6 +19,7 @@ package com.android.systemui.dagger;
 import android.app.Service;
 
 import com.android.systemui.SystemUIService;
+import com.android.systemui.communal.widgets.GlanceableHubWidgetManagerService;
 import com.android.systemui.doze.DozeService;
 import com.android.systemui.dreams.DreamOverlayService;
 import com.android.systemui.dump.SystemUIAuxiliaryDumpService;
@@ -93,4 +94,10 @@ public abstract class DefaultServiceBinder {
     @ClassKey(IssueRecordingService.class)
     public abstract Service bindIssueRecordingService(IssueRecordingService service);
 
+    /** Inject into GlanceableHubWidgetManagerService */
+    @Binds
+    @IntoMap
+    @ClassKey(GlanceableHubWidgetManagerService.class)
+    public abstract Service bindGlanceableHubWidgetManagerService(
+            GlanceableHubWidgetManagerService service);
 }

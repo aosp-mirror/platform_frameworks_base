@@ -24,6 +24,7 @@ import com.android.systemui.communal.CommunalOngoingContentStartable
 import com.android.systemui.communal.CommunalSceneStartable
 import com.android.systemui.communal.log.CommunalLoggerStartable
 import com.android.systemui.communal.widgets.CommunalAppWidgetHostStartable
+import com.android.systemui.dagger.qualifiers.PerUser
 import dagger.Binds
 import dagger.Module
 import dagger.multibindings.ClassKey
@@ -48,6 +49,7 @@ interface CommunalStartableModule {
 
     @Binds
     @IntoMap
+    @PerUser
     @ClassKey(CommunalAppWidgetHostStartable::class)
     fun bindCommunalAppWidgetHostStartable(impl: CommunalAppWidgetHostStartable): CoreStartable
 
