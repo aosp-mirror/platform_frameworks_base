@@ -46,6 +46,7 @@ import android.util.Size
 import android.view.Display.DEFAULT_DISPLAY
 import android.view.DragEvent
 import android.view.KeyEvent
+import android.view.MotionEvent
 import android.view.SurfaceControl
 import android.view.WindowManager.TRANSIT_CHANGE
 import android.view.WindowManager.TRANSIT_CLOSE
@@ -125,7 +126,7 @@ import java.io.PrintWriter
 import java.util.Optional
 import java.util.concurrent.Executor
 import java.util.function.Consumer
-
+import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.ResizeTrigger
 /** Handles moving tasks in and out of desktop */
 class DesktopTasksController(
     private val context: Context,
@@ -158,6 +159,7 @@ class DesktopTasksController(
     @ShellMainThread private val handler: Handler,
     private val inputManager: InputManager,
     private val focusTransitionObserver: FocusTransitionObserver,
+    private val desktopModeEventLogger: DesktopModeEventLogger,
 ) :
     RemoteCallable<DesktopTasksController>,
     Transitions.TransitionHandler,
@@ -747,7 +749,11 @@ class DesktopTasksController(
      * bounds) and a free floating state (either the last saved bounds if available or the default
      * bounds otherwise).
      */
-    fun toggleDesktopTaskSize(taskInfo: RunningTaskInfo) {
+    fun toggleDesktopTaskSize(
+        taskInfo: RunningTaskInfo,
+        resizeTrigger: ResizeTrigger,
+        motionEvent: MotionEvent?,
+    ) {
         val displayLayout = displayController.getDisplayLayout(taskInfo.displayId) ?: return
 
         val stableBounds = Rect().apply { displayLayout.getStableBounds(this) }
@@ -794,7 +800,10 @@ class DesktopTasksController(
 
         taskbarDesktopTaskListener?.onTaskbarCornerRoundingUpdate(doesAnyTaskRequireTaskbarRounding)
         val wct = WindowContainerTransaction().setBounds(taskInfo.token, destinationBounds)
-
+        desktopModeEventLogger.logTaskResizingEnded(
+            resizeTrigger, motionEvent, taskInfo, destinationBounds.height(),
+            destinationBounds.width(), displayController
+        )
         toggleResizeDesktopTaskTransitionHandler.startTransition(wct)
     }
 
@@ -884,9 +893,19 @@ class DesktopTasksController(
         taskInfo: RunningTaskInfo,
         taskSurface: SurfaceControl,
         currentDragBounds: Rect,
-        position: SnapPosition
+        position: SnapPosition,
+        resizeTrigger: ResizeTrigger,
+        motionEvent: MotionEvent?,
     ) {
         val destinationBounds = getSnapBounds(taskInfo, position)
+        desktopModeEventLogger.logTaskResizingEnded(
+            resizeTrigger,
+            motionEvent,
+            taskInfo,
+            destinationBounds.height(),
+            destinationBounds.width(),
+            displayController,
+        )
         if (destinationBounds == taskInfo.configuration.windowConfiguration.bounds) {
             // Handle the case where we attempt to snap resize when already snap resized: the task
             // position won't need to change but we want to animate the surface going back to the
@@ -915,7 +934,8 @@ class DesktopTasksController(
         position: SnapPosition,
         taskSurface: SurfaceControl,
         currentDragBounds: Rect,
-        dragStartBounds: Rect
+        dragStartBounds: Rect,
+        motionEvent: MotionEvent,
     ) {
         releaseVisualIndicator()
         if (!taskInfo.isResizeable && DISABLE_NON_RESIZABLE_APP_SNAP_RESIZE.isTrue()) {
@@ -932,10 +952,25 @@ class DesktopTasksController(
                 isResizable = taskInfo.isResizeable,
             )
         } else {
+            val resizeTrigger = if (position == SnapPosition.LEFT) {
+                ResizeTrigger.DRAG_LEFT
+            } else {
+                ResizeTrigger.DRAG_RIGHT
+            }
+            desktopModeEventLogger.logTaskResizingStarted(
+                resizeTrigger, motionEvent, taskInfo, displayController
+            )
             interactionJankMonitor.begin(
                 taskSurface, context, handler, CUJ_DESKTOP_MODE_SNAP_RESIZE, "drag_resizable"
             )
-            snapToHalfScreen(taskInfo, taskSurface, currentDragBounds, position)
+            snapToHalfScreen(
+                taskInfo,
+                taskSurface,
+                currentDragBounds,
+                position,
+                resizeTrigger,
+                motionEvent,
+            )
         }
     }
 
@@ -1735,6 +1770,7 @@ class DesktopTasksController(
         currentDragBounds: Rect,
         validDragArea: Rect,
         dragStartBounds: Rect,
+        motionEvent: MotionEvent,
     ) {
         if (taskInfo.configuration.windowConfiguration.windowingMode != WINDOWING_MODE_FREEFORM) {
             return
@@ -1755,12 +1791,22 @@ class DesktopTasksController(
             }
             IndicatorType.TO_SPLIT_LEFT_INDICATOR -> {
                 handleSnapResizingTask(
-                    taskInfo, SnapPosition.LEFT, taskSurface, currentDragBounds, dragStartBounds
+                    taskInfo,
+                    SnapPosition.LEFT,
+                    taskSurface,
+                    currentDragBounds,
+                    dragStartBounds,
+                    motionEvent,
                 )
             }
             IndicatorType.TO_SPLIT_RIGHT_INDICATOR -> {
                 handleSnapResizingTask(
-                    taskInfo, SnapPosition.RIGHT, taskSurface, currentDragBounds, dragStartBounds
+                    taskInfo,
+                    SnapPosition.RIGHT,
+                    taskSurface,
+                    currentDragBounds,
+                    dragStartBounds,
+                    motionEvent,
                 )
             }
             IndicatorType.NO_INDICATOR -> {

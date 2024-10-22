@@ -267,7 +267,8 @@ public abstract class WMShellModule {
             AppHandleEducationController appHandleEducationController,
             WindowDecorCaptionHandleRepository windowDecorCaptionHandleRepository,
             Optional<DesktopActivityOrientationChangeHandler> desktopActivityOrientationHandler,
-            FocusTransitionObserver focusTransitionObserver) {
+            FocusTransitionObserver focusTransitionObserver,
+            DesktopModeEventLogger desktopModeEventLogger) {
         if (DesktopModeStatus.canEnterDesktopMode(context)) {
             return new DesktopModeWindowDecorViewModel(
                     context,
@@ -295,7 +296,8 @@ public abstract class WMShellModule {
                     appHandleEducationController,
                     windowDecorCaptionHandleRepository,
                     desktopActivityOrientationHandler,
-                    focusTransitionObserver);
+                    focusTransitionObserver,
+                    desktopModeEventLogger);
         }
         return new CaptionWindowDecorViewModel(
                 context,
@@ -647,7 +649,8 @@ public abstract class WMShellModule {
             Optional<RecentTasksController> recentTasksController,
             InteractionJankMonitor interactionJankMonitor,
             InputManager inputManager,
-            FocusTransitionObserver focusTransitionObserver) {
+            FocusTransitionObserver focusTransitionObserver,
+            DesktopModeEventLogger desktopModeEventLogger) {
         return new DesktopTasksController(context, shellInit, shellCommandHandler, shellController,
                 displayController, shellTaskOrganizer, syncQueue, rootTaskDisplayAreaOrganizer,
                 dragAndDropController, transitions, keyguardManager,
@@ -659,7 +662,8 @@ public abstract class WMShellModule {
                 desktopModeLoggerTransitionObserver, launchAdjacentController,
                 recentsTransitionHandler, multiInstanceHelper, mainExecutor, desktopTasksLimiter,
                 recentTasksController.orElse(null), interactionJankMonitor, mainHandler,
-                inputManager, focusTransitionObserver);
+                inputManager, focusTransitionObserver,
+                desktopModeEventLogger);
     }
 
     @WMSingleton
