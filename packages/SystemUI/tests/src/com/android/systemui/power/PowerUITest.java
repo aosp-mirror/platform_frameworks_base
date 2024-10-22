@@ -19,9 +19,8 @@ import static android.provider.Settings.Global.SHOW_USB_TEMPERATURE_ALARM;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.anyObject;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -194,7 +193,7 @@ public class PowerUITest extends SysuiTestCase {
 
         TestableLooper.get(this).processAllMessages();
         verify(mThermalServiceMock, times(1))
-                .registerThermalEventListenerWithType(anyObject(), eq(Temperature.TYPE_SKIN));
+                .registerThermalEventListenerWithType(any(), eq(Temperature.TYPE_SKIN));
     }
 
     @Test
@@ -207,7 +206,7 @@ public class PowerUITest extends SysuiTestCase {
 
         TestableLooper.get(this).processAllMessages();
         verify(mThermalServiceMock, times(1))
-                .registerThermalEventListenerWithType(anyObject(), eq(Temperature.TYPE_USB_PORT));
+                .registerThermalEventListenerWithType(any(), eq(Temperature.TYPE_USB_PORT));
     }
 
     @Test
@@ -220,7 +219,7 @@ public class PowerUITest extends SysuiTestCase {
 
         TestableLooper.get(this).processAllMessages();
         verify(mThermalServiceMock, times(0))
-                .registerThermalEventListenerWithType(anyObject(), eq(Temperature.TYPE_SKIN));
+                .registerThermalEventListenerWithType(any(), eq(Temperature.TYPE_SKIN));
     }
 
     @Test
@@ -233,7 +232,7 @@ public class PowerUITest extends SysuiTestCase {
 
         TestableLooper.get(this).processAllMessages();
         verify(mThermalServiceMock, times(0))
-                .registerThermalEventListenerWithType(anyObject(), eq(Temperature.TYPE_USB_PORT));
+                .registerThermalEventListenerWithType(any(), eq(Temperature.TYPE_USB_PORT));
     }
 
     @Test
@@ -243,14 +242,14 @@ public class PowerUITest extends SysuiTestCase {
 
         // success registering skin thermal event listener
         when(mThermalServiceMock.registerThermalEventListenerWithType(
-                anyObject(), eq(Temperature.TYPE_SKIN))).thenReturn(true);
+                any(), eq(Temperature.TYPE_SKIN))).thenReturn(true);
 
         mPowerUI.doSkinThermalEventListenerRegistration();
 
         // verify registering skin thermal event listener, return true (success)
         TestableLooper.get(this).processAllMessages();
         verify(mThermalServiceMock, times(1))
-                .registerThermalEventListenerWithType(anyObject(), eq(Temperature.TYPE_SKIN));
+                .registerThermalEventListenerWithType(any(), eq(Temperature.TYPE_SKIN));
 
         // Settings SHOW_TEMPERATURE_WARNING is set to 0
         Settings.Global.putInt(mContext.getContentResolver(), SHOW_TEMPERATURE_WARNING, 0);
@@ -259,7 +258,7 @@ public class PowerUITest extends SysuiTestCase {
 
         // verify unregistering skin thermal event listener
         TestableLooper.get(this).processAllMessages();
-        verify(mThermalServiceMock, times(1)).unregisterThermalEventListener(anyObject());
+        verify(mThermalServiceMock, times(1)).unregisterThermalEventListener(any());
     }
 
     @Test
@@ -269,14 +268,14 @@ public class PowerUITest extends SysuiTestCase {
 
         // fail registering skin thermal event listener
         when(mThermalServiceMock.registerThermalEventListenerWithType(
-                anyObject(), eq(Temperature.TYPE_SKIN))).thenReturn(false);
+                any(), eq(Temperature.TYPE_SKIN))).thenReturn(false);
 
         mPowerUI.doSkinThermalEventListenerRegistration();
 
         // verify registering skin thermal event listener, return false (fail)
         TestableLooper.get(this).processAllMessages();
         verify(mThermalServiceMock, times(1))
-                .registerThermalEventListenerWithType(anyObject(), eq(Temperature.TYPE_SKIN));
+                .registerThermalEventListenerWithType(any(), eq(Temperature.TYPE_SKIN));
 
         // Settings SHOW_TEMPERATURE_WARNING is set to 0
         Settings.Global.putInt(mContext.getContentResolver(), SHOW_TEMPERATURE_WARNING, 0);
@@ -285,7 +284,7 @@ public class PowerUITest extends SysuiTestCase {
 
         // verify that cannot unregister listener (current state is unregistered)
         TestableLooper.get(this).processAllMessages();
-        verify(mThermalServiceMock, times(0)).unregisterThermalEventListener(anyObject());
+        verify(mThermalServiceMock, times(0)).unregisterThermalEventListener(any());
 
         // Settings SHOW_TEMPERATURE_WARNING is set to 1
         Settings.Global.putInt(mContext.getContentResolver(), SHOW_TEMPERATURE_WARNING, 1);
@@ -295,7 +294,7 @@ public class PowerUITest extends SysuiTestCase {
         // verify that can register listener (current state is unregistered)
         TestableLooper.get(this).processAllMessages();
         verify(mThermalServiceMock, times(2))
-                .registerThermalEventListenerWithType(anyObject(), eq(Temperature.TYPE_SKIN));
+                .registerThermalEventListenerWithType(any(), eq(Temperature.TYPE_SKIN));
     }
 
     @Test
@@ -305,14 +304,14 @@ public class PowerUITest extends SysuiTestCase {
 
         // success registering usb thermal event listener
         when(mThermalServiceMock.registerThermalEventListenerWithType(
-                anyObject(), eq(Temperature.TYPE_USB_PORT))).thenReturn(true);
+                any(), eq(Temperature.TYPE_USB_PORT))).thenReturn(true);
 
         mPowerUI.doUsbThermalEventListenerRegistration();
 
         // verify registering usb thermal event listener, return true (success)
         TestableLooper.get(this).processAllMessages();
         verify(mThermalServiceMock, times(1))
-                .registerThermalEventListenerWithType(anyObject(), eq(Temperature.TYPE_USB_PORT));
+                .registerThermalEventListenerWithType(any(), eq(Temperature.TYPE_USB_PORT));
 
         // Settings SHOW_USB_TEMPERATURE_ALARM is set to 0
         Settings.Global.putInt(mContext.getContentResolver(), SHOW_USB_TEMPERATURE_ALARM, 0);
@@ -320,7 +319,7 @@ public class PowerUITest extends SysuiTestCase {
         // verify unregistering usb thermal event listener
         mPowerUI.doUsbThermalEventListenerRegistration();
         TestableLooper.get(this).processAllMessages();
-        verify(mThermalServiceMock, times(1)).unregisterThermalEventListener(anyObject());
+        verify(mThermalServiceMock, times(1)).unregisterThermalEventListener(any());
     }
 
     @Test
@@ -330,14 +329,14 @@ public class PowerUITest extends SysuiTestCase {
 
         // fail registering usb thermal event listener
         when(mThermalServiceMock.registerThermalEventListenerWithType(
-                anyObject(), eq(Temperature.TYPE_USB_PORT))).thenReturn(false);
+                any(), eq(Temperature.TYPE_USB_PORT))).thenReturn(false);
 
         mPowerUI.doUsbThermalEventListenerRegistration();
 
         // verify registering usb thermal event listener, return false (fail)
         TestableLooper.get(this).processAllMessages();
         verify(mThermalServiceMock, times(1))
-                .registerThermalEventListenerWithType(anyObject(), eq(Temperature.TYPE_USB_PORT));
+                .registerThermalEventListenerWithType(any(), eq(Temperature.TYPE_USB_PORT));
 
         // Settings SHOW_USB_TEMPERATURE_ALARM is set to 0
         Settings.Global.putInt(mContext.getContentResolver(), SHOW_USB_TEMPERATURE_ALARM, 0);
@@ -346,7 +345,7 @@ public class PowerUITest extends SysuiTestCase {
 
         // verify that cannot unregister listener (current state is unregistered)
         TestableLooper.get(this).processAllMessages();
-        verify(mThermalServiceMock, times(0)).unregisterThermalEventListener(anyObject());
+        verify(mThermalServiceMock, times(0)).unregisterThermalEventListener(any());
 
         // Settings SHOW_USB_TEMPERATURE_ALARM is set to 1
         Settings.Global.putInt(mContext.getContentResolver(), SHOW_USB_TEMPERATURE_ALARM, 1);
@@ -356,7 +355,7 @@ public class PowerUITest extends SysuiTestCase {
         // verify that can register listener (current state is unregistered)
         TestableLooper.get(this).processAllMessages();
         verify(mThermalServiceMock, times(2)).registerThermalEventListenerWithType(
-                anyObject(), eq(Temperature.TYPE_USB_PORT));
+                any(), eq(Temperature.TYPE_USB_PORT));
     }
 
     @Test

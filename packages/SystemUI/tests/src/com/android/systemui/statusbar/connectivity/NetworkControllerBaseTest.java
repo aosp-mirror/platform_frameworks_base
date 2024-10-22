@@ -25,10 +25,10 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
 
+import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.isA;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
@@ -297,7 +297,8 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
         assertNotNull(mDefaultCallbackInWifiTracker);
         assertNotNull(mDefaultCallbackInNetworkController);
         verify(mMockCm, atLeastOnce()).registerNetworkCallback(
-                isA(NetworkRequest.class), callbackArg.capture(), isA(Handler.class));
+                isA(NetworkRequest.class), callbackArg.capture(),
+                isA(Handler.class));
         mNetworkCallback = callbackArg.getValue();
         assertNotNull(mNetworkCallback);
     }
