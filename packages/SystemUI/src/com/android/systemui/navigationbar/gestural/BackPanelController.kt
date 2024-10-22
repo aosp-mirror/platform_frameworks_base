@@ -41,11 +41,11 @@ import com.android.systemui.plugins.NavigationEdgeBackPlugin
 import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.ViewController
-import com.android.systemui.util.concurrency.BackPanelUiThread
-import com.android.systemui.util.concurrency.UiThreadContext
 import com.android.systemui.util.time.SystemClock
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import java.io.PrintWriter
-import javax.inject.Inject
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -82,11 +82,12 @@ private const val POP_ON_INACTIVE_VELOCITY = -1.5f
 private const val DEBUG = false
 
 class BackPanelController
-internal constructor(
-    context: Context,
+@AssistedInject
+constructor(
+    @Assisted context: Context,
     private val windowManager: ViewCaptureAwareWindowManager,
     private val viewConfiguration: ViewConfiguration,
-    private val mainHandler: Handler,
+    @Assisted private val mainHandler: Handler,
     private val systemClock: SystemClock,
     private val vibratorHelper: VibratorHelper,
     private val configurationController: ConfigurationController,
@@ -94,40 +95,9 @@ internal constructor(
     private val interactionJankMonitor: InteractionJankMonitor,
 ) : ViewController<BackPanel>(BackPanel(context, latencyTracker)), NavigationEdgeBackPlugin {
 
-    /**
-     * Injectable instance to create a new BackPanelController.
-     *
-     * Necessary because EdgeBackGestureHandler sometimes needs to create new instances of
-     * BackPanelController, and we need to match EdgeBackGestureHandler's context.
-     */
-    class Factory
-    @Inject
-    constructor(
-        private val windowManager: ViewCaptureAwareWindowManager,
-        private val viewConfiguration: ViewConfiguration,
-        @BackPanelUiThread private val uiThreadContext: UiThreadContext,
-        private val systemClock: SystemClock,
-        private val vibratorHelper: VibratorHelper,
-        private val configurationController: ConfigurationController,
-        private val latencyTracker: LatencyTracker,
-        private val interactionJankMonitor: InteractionJankMonitor,
-    ) {
-        /** Construct a [BackPanelController]. */
-        fun create(context: Context): BackPanelController {
-            uiThreadContext.isCurrentThread()
-            return BackPanelController(
-                    context,
-                    windowManager,
-                    viewConfiguration,
-                    uiThreadContext.handler,
-                    systemClock,
-                    vibratorHelper,
-                    configurationController,
-                    latencyTracker,
-                    interactionJankMonitor,
-                )
-                .also { it.init() }
-        }
+    @AssistedFactory
+    interface Factory {
+        fun create(context: Context, handler: Handler): BackPanelController
     }
 
     @VisibleForTesting internal var params: EdgePanelParams = EdgePanelParams(resources)
