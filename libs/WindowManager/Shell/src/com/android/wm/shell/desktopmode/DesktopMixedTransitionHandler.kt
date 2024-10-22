@@ -138,7 +138,7 @@ class DesktopMixedTransitionHandler(
 
     private fun isLastDesktopTask(change: TransitionInfo.Change): Boolean =
         change.taskInfo?.let {
-            desktopRepository.getActiveNonMinimizedTaskCount(it.displayId) == 1
+            desktopRepository.getExpandedTaskCount(it.displayId) == 1
         } ?: false
 
     private fun findCloseDesktopTaskChange(info: TransitionInfo): TransitionInfo.Change? {

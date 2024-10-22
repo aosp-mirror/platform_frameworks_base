@@ -644,7 +644,7 @@ class DesktopTasksController(
         remoteTransition: RemoteTransition?,
     ): IBinder {
         val taskToMinimize: RunningTaskInfo? =
-            addAndGetMinimizeChangesIfNeeded(DEFAULT_DISPLAY, wct, taskId)
+            addAndGetMinimizeChanges(DEFAULT_DISPLAY, wct, taskId)
         if (remoteTransition == null) {
             val t = transitions.startTransition(transitionType, wct, null /* handler */)
             addPendingMinimizeTransition(t, taskToMinimize)
@@ -847,7 +847,7 @@ class DesktopTasksController(
         excludeTaskId: Int? = null,
     ): Boolean {
         val doesAnyTaskRequireTaskbarRounding =
-            taskRepository.getActiveNonMinimizedOrderedTasks(displayId)
+            taskRepository.getExpandedTasksOrdered(displayId)
                 // exclude current task since maximize/restore transition has not taken place yet.
                 .filterNot { taskId -> taskId == excludeTaskId }
                 .any { taskId ->
@@ -999,23 +999,23 @@ class DesktopTasksController(
             addWallpaperActivity(wct)
         }
 
-        val nonMinimizedTasksOrderedFrontToBack =
-            taskRepository.getActiveNonMinimizedOrderedTasks(displayId)
+        val expandedTasksOrderedFrontToBack =
+            taskRepository.getExpandedTasksOrdered(displayId)
         // If we're adding a new Task we might need to minimize an old one
         // TODO(b/365725441): Handle non running task minimization
         val taskToMinimize: RunningTaskInfo? =
             if (newTaskIdInFront != null && desktopTasksLimiter.isPresent) {
                 desktopTasksLimiter
                     .get()
-                    .getTaskToMinimizeIfNeeded(
-                        nonMinimizedTasksOrderedFrontToBack,
+                    .getTaskToMinimize(
+                        expandedTasksOrderedFrontToBack,
                         newTaskIdInFront
                     )
             } else {
                 null
             }
 
-        nonMinimizedTasksOrderedFrontToBack
+        expandedTasksOrderedFrontToBack
             // If there is a Task to minimize, let it stay behind the Home Task
             .filter { taskId -> taskId != taskToMinimize?.taskId }
             .reversed() // Start from the back so the front task is brought forward last
@@ -1374,7 +1374,7 @@ class DesktopTasksController(
         // 1) Exit immersive if needed.
         immersiveTransitionHandler.exitImmersiveIfApplicable(transition, wct, task.displayId)
         // 2) minimize a Task if needed.
-        val taskToMinimize = addAndGetMinimizeChangesIfNeeded(task.displayId, wct, task.taskId)
+        val taskToMinimize = addAndGetMinimizeChanges(task.displayId, wct, task.taskId)
         if (taskToMinimize != null) {
             addPendingMinimizeTransition(transition, taskToMinimize)
             return wct
@@ -1401,7 +1401,7 @@ class DesktopTasksController(
                 // Desktop Mode is already showing and we're launching a new Task - we might need to
                 // minimize another Task.
                 val taskToMinimize =
-                    addAndGetMinimizeChangesIfNeeded(task.displayId, wct, task.taskId)
+                    addAndGetMinimizeChanges(task.displayId, wct, task.taskId)
                 addPendingMinimizeTransition(transition, taskToMinimize)
                 immersiveTransitionHandler.exitImmersiveIfApplicable(
                     transition, wct, task.displayId
@@ -1529,7 +1529,7 @@ class DesktopTasksController(
         val stableBounds = Rect()
         displayLayout.getStableBoundsForDesktopMode(stableBounds)
 
-        val activeTasks = taskRepository.getActiveNonMinimizedOrderedTasks(displayId)
+        val activeTasks = taskRepository.getExpandedTasksOrdered(displayId)
         activeTasks.firstOrNull()?.let { activeTask ->
             shellTaskOrganizer.getRunningTaskInfo(activeTask)?.let {
                 cascadeWindow(context.resources, stableBounds,
@@ -1558,7 +1558,7 @@ class DesktopTasksController(
     }
 
     /** Returns the ID of the Task that will be minimized, or null if no task will be minimized. */
-    private fun addAndGetMinimizeChangesIfNeeded(
+    private fun addAndGetMinimizeChanges(
         displayId: Int,
         wct: WindowContainerTransaction,
         newTaskId: Int
@@ -1566,7 +1566,7 @@ class DesktopTasksController(
         if (!desktopTasksLimiter.isPresent) return null
         return desktopTasksLimiter
             .get()
-            .addAndGetMinimizeTaskChangesIfNeeded(displayId, wct, newTaskId)
+            .addAndGetMinimizeTaskChanges(displayId, wct, newTaskId)
     }
 
     private fun addPendingMinimizeTransition(
