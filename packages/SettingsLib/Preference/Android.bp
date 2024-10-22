@@ -32,6 +32,7 @@ android_library {
     static_libs: [
         "SettingsLibDataStore",
         "SettingsLibMetadata",
+        "SettingsLibMainSwitchPreference",
         "androidx.annotation_annotation",
         "androidx.preference_preference",
         "guava",
