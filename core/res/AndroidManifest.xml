@@ -1494,8 +1494,8 @@
             android:description="@string/permdesc_readBasicPhoneState"
             android:protectionLevel="normal" />
 
-    <!-- Allows read access to the device's phone number(s). This is a subset of the capabilities
-         granted by {@link #READ_PHONE_STATE} but is exposed to instant applications.
+    <!-- Allows read access to the device's phone number(s),
+         which is exposed to instant applications.
          <p>Protection level: dangerous-->
     <permission android:name="android.permission.READ_PHONE_NUMBERS"
         android:permissionGroup="android.permission-group.UNDEFINED"
