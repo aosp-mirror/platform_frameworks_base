@@ -17,6 +17,8 @@
 package com.android.systemui.statusbar.notification.row.icon
 
 import android.content.applicationContext
+import com.android.systemui.dump.dumpManager
 import com.android.systemui.kosmos.Kosmos
 
-val Kosmos.appIconProvider by Kosmos.Fixture { AppIconProviderImpl(applicationContext) }
+val Kosmos.appIconProvider by
+    Kosmos.Fixture { AppIconProviderImpl(applicationContext, dumpManager) }
