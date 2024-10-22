@@ -1,6 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
-  ~ Copyright (C) 2022 The Android Open Source Project
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright (C) 2024 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -15,13 +14,7 @@
   ~ limitations under the License.
   -->
 
-<!-- These resources are around just to allow their values to be customized
-     for different hardware and product builds. -->
 <resources>
-
-    <!-- Biometric Auth pattern view size, better to align keyguard_security_width -->
-    <dimen name="biometric_auth_pattern_view_size">348dp</dimen>
-
     <!-- The width of the shade overlay panel (both notifications and quick settings). -->
-    <dimen name="shade_panel_width">392dp</dimen>
+    <dimen name="shade_panel_width">474dp</dimen>
 </resources>

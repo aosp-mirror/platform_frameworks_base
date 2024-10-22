@@ -45,11 +45,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.dp
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.LowestZIndexContentPicker
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.windowsizeclass.LocalWindowSizeClass
+import com.android.systemui.res.R
 
 /** Renders a lightweight shade UI container, as an overlay. */
 @Composable
@@ -104,13 +106,11 @@ private fun SceneScope.Panel(modifier: Modifier = Modifier, content: @Composable
 @Composable
 private fun Modifier.panelSize(): Modifier {
     val widthSizeClass = LocalWindowSizeClass.current.widthSizeClass
-
     return this.then(
-        when (widthSizeClass) {
-            WindowWidthSizeClass.Compact -> Modifier.fillMaxWidth()
-            WindowWidthSizeClass.Medium -> Modifier.width(OverlayShade.Dimensions.PanelWidthMedium)
-            WindowWidthSizeClass.Expanded -> Modifier.width(OverlayShade.Dimensions.PanelWidthLarge)
-            else -> error("Unsupported WindowWidthSizeClass \"$widthSizeClass\"")
+        if (widthSizeClass == WindowWidthSizeClass.Compact) {
+            Modifier.fillMaxWidth()
+        } else {
+            Modifier.width(dimensionResource(id = R.dimen.shade_panel_width))
         }
     )
 }
@@ -176,8 +176,6 @@ object OverlayShade {
     object Dimensions {
         val ScrimContentPadding = 16.dp
         val PanelCornerRadius = 46.dp
-        val PanelWidthMedium = 390.dp
-        val PanelWidthLarge = 474.dp
         val OverscrollLimit = 32.dp
     }
 

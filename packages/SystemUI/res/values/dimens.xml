@@ -577,6 +577,13 @@
 
     <dimen name="notification_panel_margin_horizontal">0dp</dimen>
 
+    <!--
+    The width of the shade overlay panel (both notifications and quick settings). On Compact screens
+    in portrait orientation (< w600dp) this is ignored, and the shade layout takes up the full
+    screen width.
+    -->
+    <dimen name="shade_panel_width">412dp</dimen>
+
     <dimen name="brightness_mirror_height">48dp</dimen>
 
     <dimen name="volume_dialog_panel_transparent_padding_right">8dp</dimen>
