@@ -743,7 +743,12 @@ internal class NestedScrollHandlerImpl(
                         .onStop(velocity = velocityAvailable, canChangeContent = canChangeScene)
                         .invoke()
                 } finally {
-                    dragController = null
+                    // onStop might still be running when a new gesture begins.
+                    // To prevent conflicts, we should only remove the drag controller if it's the
+                    // same one that was active initially.
+                    if (dragController == controller) {
+                        dragController = null
+                    }
                 }
             },
             onCancel = {
