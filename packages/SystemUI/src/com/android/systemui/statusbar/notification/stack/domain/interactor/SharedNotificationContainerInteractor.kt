@@ -18,7 +18,7 @@
 package com.android.systemui.statusbar.notification.stack.domain.interactor
 
 import android.content.Context
-import com.android.systemui.common.ui.data.repository.ConfigurationRepository
+import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryUdfpsInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
@@ -29,6 +29,8 @@ import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.policy.SplitShadeStateController
 import dagger.Lazy
 import javax.inject.Inject
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -36,17 +38,17 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onStart
 
 /** Encapsulates business-logic specifically related to the shared notification stack container. */
+@OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
 @SysUISingleton
 class SharedNotificationContainerInteractor
 @Inject
 constructor(
-    configurationRepository: ConfigurationRepository,
     private val context: Context,
     private val splitShadeStateController: Lazy<SplitShadeStateController>,
     private val shadeInteractor: Lazy<ShadeInteractor>,
+    configurationInteractor: ConfigurationInteractor,
     keyguardInteractor: KeyguardInteractor,
     deviceEntryUdfpsInteractor: DeviceEntryUdfpsInteractor,
     largeScreenHeaderHelperLazy: Lazy<LargeScreenHeaderHelper>,
@@ -59,9 +61,6 @@ constructor(
     /** An internal modification was made to notifications */
     val notificationStackChanged = _notificationStackChanged.debounce(20L)
 
-    private val configurationChangeEvents =
-        configurationRepository.onAnyConfigurationChange.onStart { emit(Unit) }
-
     /* Warning: Even though the value it emits only contains the split shade status, this flow must
      * emit a value whenever the configuration *or* the split shade status changes. Adding a
      * distinctUntilChanged() to this would cause configurationBasedDimensions to miss configuration
@@ -69,13 +68,14 @@ constructor(
      */
     private val dimensionsUpdateEventsWithShouldUseSplitShade: Flow<Boolean> =
         if (SceneContainerFlag.isEnabled) {
-            combine(configurationChangeEvents, shadeInteractor.get().isShadeLayoutWide) {
-                _,
-                isShadeLayoutWide ->
+            combine(
+                configurationInteractor.onAnyConfigurationChange,
+                shadeInteractor.get().isShadeLayoutWide,
+            ) { _, isShadeLayoutWide ->
                 isShadeLayoutWide
             }
         } else {
-            configurationChangeEvents.map {
+            configurationInteractor.onAnyConfigurationChange.map {
                 splitShadeStateController.get().shouldUseSplitNotificationShade(context.resources)
             }
         }
@@ -114,11 +114,6 @@ constructor(
         ) { ambientIndicationVisible, isUdfpsSupported ->
             isUdfpsSupported || !ambientIndicationVisible
         }
-
-    val isSplitShadeEnabled: Flow<Boolean> =
-        configurationBasedDimensions
-            .map { dimens: ConfigurationBasedDimensions -> dimens.useSplitShade }
-            .distinctUntilChanged()
 
     /** Top position (without translation) of the shared container. */
     fun setTopPosition(top: Float) {
