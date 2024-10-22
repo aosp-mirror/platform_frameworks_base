@@ -186,6 +186,11 @@ art_profile_java_defaults {
     },
 }
 
+vintf_fragment {
+    name: "manifest_services.xml",
+    src: "manifest_services.xml",
+}
+
 // merge all required services into one jar
 // ============================================================
 java_library {
@@ -250,7 +255,7 @@ java_library {
         "service-sdksandbox.stubs.system_server",
     ],
 
-    vintf_fragments: [
+    vintf_fragment_modules: [
         "manifest_services.xml",
     ],
 

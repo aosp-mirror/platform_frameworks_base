@@ -122,7 +122,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     private int mRapidActivityLaunchCount;
 
     // all about the first app in the process
-    final ApplicationInfo mInfo;
+    volatile ApplicationInfo mInfo;
     final String mName;
     final int mUid;
 
@@ -1789,10 +1789,15 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             Configuration overrideConfig = new Configuration(r.getRequestedOverrideConfiguration());
             overrideConfig.assetsSeq = assetSeq;
             r.onRequestedOverrideConfigurationChanged(overrideConfig);
+            r.updateApplicationInfo(mInfo);
             if (r.isVisibleRequested()) {
                 r.ensureActivityConfiguration();
             }
         }
+    }
+
+    public void updateApplicationInfo(ApplicationInfo aInfo) {
+        mInfo = aInfo;
     }
 
     /**

@@ -100,6 +100,9 @@ java_library_host {
     srcs: [
         "runtime-helper-src/libcore-fake/**/*.java",
     ],
+    libs: [
+        "app-compat-annotations",
+    ],
     static_libs: [
         "ravenwood-runtime-common",
     ],
@@ -121,9 +124,11 @@ java_library {
     ],
     static_libs: [
         "ravenwood-runtime-common",
+        "androidx.annotation_annotation",
     ],
     libs: [
         "framework-minus-apex.ravenwood",
+        "framework-configinfrastructure.ravenwood",
         "ravenwood-helper-libcore-runtime",
     ],
     sdk_version: "core_current",
@@ -394,6 +399,9 @@ android_ravenwood_libgroup {
         "core-icu4j-for-host.ravenwood",
         "icu4j-icudata-jarjar",
         "icu4j-icutzdata-jarjar",
+
+        // DeviceConfig
+        "framework-configinfrastructure.ravenwood",
 
         // Provide runtime versions of utils linked in below
         "junit",
