@@ -410,6 +410,7 @@ cc_library_shared {
                 targets: ["robolectric_native_runtime"],
                 dir: "robolectric/nativeruntime/mac",
             },
+            unexported_symbols_list: "unexp.exp",
         },
         linux_glibc_x86_64: {
             ldflags: ["-static-libgcc"],

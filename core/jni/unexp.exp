@@ -1,0 +1,11 @@
+# Remove symbols coming from harfbuzz Open Type that can conflict with the JVM libfontmanager.dylib
+__ZN2OT*
+# Remove symbols from libc++ to not conflict with the system libc++
+__ZNKSt3*
+__ZNSt3*
+__ZT[A-Z]NSt3*
+# Remove symbols from ANativeWindow
+__ZN7android7*
+# Remove symbols from Minikin
+__ZGVZN7minikin*
+__ZZN7minikin*
