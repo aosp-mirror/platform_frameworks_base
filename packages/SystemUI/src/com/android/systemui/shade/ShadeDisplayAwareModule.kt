@@ -21,8 +21,12 @@ import android.content.res.Resources
 import android.view.LayoutInflater
 import android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
 import com.android.systemui.Flags
+import com.android.systemui.common.ui.GlobalConfig
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.res.R
+import com.android.systemui.statusbar.phone.ConfigurationControllerImpl
+import com.android.systemui.statusbar.phone.ConfigurationForwarder
+import com.android.systemui.statusbar.policy.ConfigurationController
 import dagger.Module
 import dagger.Provides
 
@@ -67,5 +71,34 @@ object ShadeDisplayAwareModule {
     @SysUISingleton
     fun providesDisplayAwareLayoutInflater(@ShadeDisplayAware context: Context): LayoutInflater {
         return LayoutInflater.from(context)
+    }
+
+    @Provides
+    @ShadeDisplayAware
+    @SysUISingleton
+    fun provideShadeWindowConfigurationController(
+        @ShadeDisplayAware shadeContext: Context,
+        factory: ConfigurationControllerImpl.Factory,
+        @GlobalConfig globalConfigConfigController: ConfigurationController,
+    ): ConfigurationController {
+        return if (Flags.shadeWindowGoesAround()) {
+            factory.create(shadeContext)
+        } else {
+            globalConfigConfigController
+        }
+    }
+
+    @Provides
+    @ShadeDisplayAware
+    @SysUISingleton
+    fun provideShadeWindowConfigurationForwarder(
+        @ShadeDisplayAware shadeConfigurationController: ConfigurationController,
+        @GlobalConfig globalConfigController: ConfigurationController,
+    ): ConfigurationForwarder {
+        return if (Flags.shadeWindowGoesAround()) {
+            shadeConfigurationController
+        } else {
+            globalConfigController
+        }
     }
 }
