@@ -27,7 +27,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.unit.IntSize
 import com.android.compose.animation.scene.content.state.TransitionState
 import com.android.compose.animation.scene.content.state.TransitionState.HasOverscrollProperties.Companion.DistanceUnspecified
-import com.android.compose.nestedscroll.SuspendedValue
 import kotlin.math.absoluteValue
 import kotlinx.coroutines.CompletableDeferred
 
