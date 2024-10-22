@@ -8,24 +8,23 @@ import com.android.systemui.shared.rotation.FloatingRotationButtonPositionCalcul
 import com.android.systemui.shared.rotation.FloatingRotationButtonPositionCalculator.Position
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
-import platform.test.runner.parameterized.ParameterizedAndroidJunit4
-import platform.test.runner.parameterized.Parameter
-import platform.test.runner.parameterized.Parameters
 import org.junit.runner.RunWith
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4
+import platform.test.runner.parameterized.Parameters
 
 @RunWith(ParameterizedAndroidJunit4::class)
 @SmallTest
-internal class FloatingRotationButtonPositionCalculatorTest(
-        private val testCase: TestCase,
-) : SysuiTestCase() {
+internal class FloatingRotationButtonPositionCalculatorTest(private val testCase: TestCase) :
+    SysuiTestCase() {
 
     @Test
     fun calculatePosition() {
-        val position = testCase.calculator.calculatePosition(
-            testCase.rotation,
-            testCase.taskbarVisible,
-            testCase.taskbarStashed
-        )
+        val position =
+            testCase.calculator.calculatePosition(
+                testCase.rotation,
+                testCase.taskbarVisible,
+                testCase.taskbarStashed,
+            )
         assertThat(position).isEqualTo(testCase.expectedPosition)
     }
 
@@ -34,21 +33,22 @@ internal class FloatingRotationButtonPositionCalculatorTest(
         val rotation: Int,
         val taskbarVisible: Boolean,
         val taskbarStashed: Boolean,
-        val expectedPosition: Position
+        val expectedPosition: Position,
     ) {
-        override fun toString(): String =
-                buildString {
-                    append("when calculator = ")
-                    append(when (calculator) {
-                        posLeftCalculator -> "LEFT"
-                        posRightCalculator -> "RIGHT"
-                        else -> error("Unknown calculator: $calculator")
-                    })
-                    append(", rotation = $rotation")
-                    append(", taskbarVisible = $taskbarVisible")
-                    append(", taskbarStashed = $taskbarStashed")
-                    append(" - expected $expectedPosition")
+        override fun toString(): String = buildString {
+            append("when calculator = ")
+            append(
+                when (calculator) {
+                    posLeftCalculator -> "LEFT"
+                    posRightCalculator -> "RIGHT"
+                    else -> error("Unknown calculator: $calculator")
                 }
+            )
+            append(", rotation = $rotation")
+            append(", taskbarVisible = $taskbarVisible")
+            append(", taskbarStashed = $taskbarStashed")
+            append(" - expected $expectedPosition")
+        }
     }
 
     companion object {
@@ -56,12 +56,20 @@ internal class FloatingRotationButtonPositionCalculatorTest(
         private const val MARGIN_TASKBAR_LEFT = 20
         private const val MARGIN_TASKBAR_BOTTOM = 30
 
-        private val posLeftCalculator = FloatingRotationButtonPositionCalculator(
-            MARGIN_DEFAULT, MARGIN_TASKBAR_LEFT, MARGIN_TASKBAR_BOTTOM, true
-        )
-        private val posRightCalculator = FloatingRotationButtonPositionCalculator(
-            MARGIN_DEFAULT, MARGIN_TASKBAR_LEFT, MARGIN_TASKBAR_BOTTOM, false
-        )
+        private val posLeftCalculator =
+            FloatingRotationButtonPositionCalculator(
+                MARGIN_DEFAULT,
+                MARGIN_TASKBAR_LEFT,
+                MARGIN_TASKBAR_BOTTOM,
+                true,
+            )
+        private val posRightCalculator =
+            FloatingRotationButtonPositionCalculator(
+                MARGIN_DEFAULT,
+                MARGIN_TASKBAR_LEFT,
+                MARGIN_TASKBAR_BOTTOM,
+                false,
+            )
 
         @Parameters(name = "{0}")
         @JvmStatic
@@ -73,77 +81,84 @@ internal class FloatingRotationButtonPositionCalculatorTest(
                     rotation = Surface.ROTATION_0,
                     taskbarVisible = false,
                     taskbarStashed = false,
-                    expectedPosition = Position(
-                        gravity = Gravity.BOTTOM or Gravity.LEFT,
-                        translationX = MARGIN_DEFAULT,
-                        translationY = -MARGIN_DEFAULT
-                    )
+                    expectedPosition =
+                        Position(
+                            gravity = Gravity.BOTTOM or Gravity.LEFT,
+                            translationX = MARGIN_DEFAULT,
+                            translationY = -MARGIN_DEFAULT,
+                        ),
                 ),
                 TestCase(
                     calculator = posLeftCalculator,
                     rotation = Surface.ROTATION_90,
                     taskbarVisible = false,
                     taskbarStashed = false,
-                    expectedPosition = Position(
-                        gravity = Gravity.BOTTOM or Gravity.RIGHT,
-                        translationX = -MARGIN_DEFAULT,
-                        translationY = -MARGIN_DEFAULT
-                    )
+                    expectedPosition =
+                        Position(
+                            gravity = Gravity.BOTTOM or Gravity.RIGHT,
+                            translationX = -MARGIN_DEFAULT,
+                            translationY = -MARGIN_DEFAULT,
+                        ),
                 ),
                 TestCase(
                     calculator = posLeftCalculator,
                     rotation = Surface.ROTATION_180,
                     taskbarVisible = false,
                     taskbarStashed = false,
-                    expectedPosition = Position(
-                        gravity = Gravity.TOP or Gravity.RIGHT,
-                        translationX = -MARGIN_DEFAULT,
-                        translationY = MARGIN_DEFAULT
-                    )
+                    expectedPosition =
+                        Position(
+                            gravity = Gravity.TOP or Gravity.RIGHT,
+                            translationX = -MARGIN_DEFAULT,
+                            translationY = MARGIN_DEFAULT,
+                        ),
                 ),
                 TestCase(
                     calculator = posLeftCalculator,
                     rotation = Surface.ROTATION_270,
                     taskbarVisible = false,
                     taskbarStashed = false,
-                    expectedPosition = Position(
-                        gravity = Gravity.TOP or Gravity.LEFT,
-                        translationX = MARGIN_DEFAULT,
-                        translationY = MARGIN_DEFAULT
-                    )
+                    expectedPosition =
+                        Position(
+                            gravity = Gravity.TOP or Gravity.LEFT,
+                            translationX = MARGIN_DEFAULT,
+                            translationY = MARGIN_DEFAULT,
+                        ),
                 ),
                 TestCase(
                     calculator = posLeftCalculator,
                     rotation = Surface.ROTATION_0,
                     taskbarVisible = true,
                     taskbarStashed = false,
-                    expectedPosition = Position(
-                        gravity = Gravity.BOTTOM or Gravity.LEFT,
-                        translationX = MARGIN_TASKBAR_LEFT,
-                        translationY = -MARGIN_TASKBAR_BOTTOM
-                    )
+                    expectedPosition =
+                        Position(
+                            gravity = Gravity.BOTTOM or Gravity.LEFT,
+                            translationX = MARGIN_TASKBAR_LEFT,
+                            translationY = -MARGIN_TASKBAR_BOTTOM,
+                        ),
                 ),
                 TestCase(
                     calculator = posLeftCalculator,
                     rotation = Surface.ROTATION_0,
                     taskbarVisible = true,
                     taskbarStashed = true,
-                    expectedPosition = Position(
-                        gravity = Gravity.BOTTOM or Gravity.LEFT,
-                        translationX = MARGIN_DEFAULT,
-                        translationY = -MARGIN_DEFAULT
-                    )
+                    expectedPosition =
+                        Position(
+                            gravity = Gravity.BOTTOM or Gravity.LEFT,
+                            translationX = MARGIN_DEFAULT,
+                            translationY = -MARGIN_DEFAULT,
+                        ),
                 ),
                 TestCase(
                     calculator = posLeftCalculator,
                     rotation = Surface.ROTATION_90,
                     taskbarVisible = true,
                     taskbarStashed = false,
-                    expectedPosition = Position(
-                        gravity = Gravity.BOTTOM or Gravity.RIGHT,
-                        translationX = -MARGIN_TASKBAR_LEFT,
-                        translationY = -MARGIN_TASKBAR_BOTTOM
-                    )
+                    expectedPosition =
+                        Position(
+                            gravity = Gravity.BOTTOM or Gravity.RIGHT,
+                            translationX = -MARGIN_TASKBAR_LEFT,
+                            translationY = -MARGIN_TASKBAR_BOTTOM,
+                        ),
                 ),
 
                 // Position right
@@ -152,78 +167,85 @@ internal class FloatingRotationButtonPositionCalculatorTest(
                     rotation = Surface.ROTATION_0,
                     taskbarVisible = false,
                     taskbarStashed = false,
-                    expectedPosition = Position(
-                        gravity = Gravity.BOTTOM or Gravity.RIGHT,
-                        translationX = -MARGIN_DEFAULT,
-                        translationY = -MARGIN_DEFAULT
-                    )
+                    expectedPosition =
+                        Position(
+                            gravity = Gravity.BOTTOM or Gravity.RIGHT,
+                            translationX = -MARGIN_DEFAULT,
+                            translationY = -MARGIN_DEFAULT,
+                        ),
                 ),
                 TestCase(
                     calculator = posRightCalculator,
                     rotation = Surface.ROTATION_90,
                     taskbarVisible = false,
                     taskbarStashed = false,
-                    expectedPosition = Position(
-                        gravity = Gravity.TOP or Gravity.RIGHT,
-                        translationX = -MARGIN_DEFAULT,
-                        translationY = MARGIN_DEFAULT
-                    )
+                    expectedPosition =
+                        Position(
+                            gravity = Gravity.TOP or Gravity.RIGHT,
+                            translationX = -MARGIN_DEFAULT,
+                            translationY = MARGIN_DEFAULT,
+                        ),
                 ),
                 TestCase(
                     calculator = posRightCalculator,
                     rotation = Surface.ROTATION_180,
                     taskbarVisible = false,
                     taskbarStashed = false,
-                    expectedPosition = Position(
-                        gravity = Gravity.TOP or Gravity.LEFT,
-                        translationX = MARGIN_DEFAULT,
-                        translationY = MARGIN_DEFAULT
-                    )
+                    expectedPosition =
+                        Position(
+                            gravity = Gravity.TOP or Gravity.LEFT,
+                            translationX = MARGIN_DEFAULT,
+                            translationY = MARGIN_DEFAULT,
+                        ),
                 ),
                 TestCase(
                     calculator = posRightCalculator,
                     rotation = Surface.ROTATION_270,
                     taskbarVisible = false,
                     taskbarStashed = false,
-                    expectedPosition = Position(
-                        gravity = Gravity.BOTTOM or Gravity.LEFT,
-                        translationX = MARGIN_DEFAULT,
-                        translationY = -MARGIN_DEFAULT
-                    )
+                    expectedPosition =
+                        Position(
+                            gravity = Gravity.BOTTOM or Gravity.LEFT,
+                            translationX = MARGIN_DEFAULT,
+                            translationY = -MARGIN_DEFAULT,
+                        ),
                 ),
                 TestCase(
                     calculator = posRightCalculator,
                     rotation = Surface.ROTATION_0,
                     taskbarVisible = true,
                     taskbarStashed = false,
-                    expectedPosition = Position(
-                        gravity = Gravity.BOTTOM or Gravity.RIGHT,
-                        translationX = -MARGIN_TASKBAR_LEFT,
-                        translationY = -MARGIN_TASKBAR_BOTTOM
-                    )
+                    expectedPosition =
+                        Position(
+                            gravity = Gravity.BOTTOM or Gravity.RIGHT,
+                            translationX = -MARGIN_TASKBAR_LEFT,
+                            translationY = -MARGIN_TASKBAR_BOTTOM,
+                        ),
                 ),
                 TestCase(
                     calculator = posRightCalculator,
                     rotation = Surface.ROTATION_0,
                     taskbarVisible = true,
                     taskbarStashed = true,
-                    expectedPosition = Position(
-                        gravity = Gravity.BOTTOM or Gravity.RIGHT,
-                        translationX = -MARGIN_DEFAULT,
-                        translationY = -MARGIN_DEFAULT
-                    )
+                    expectedPosition =
+                        Position(
+                            gravity = Gravity.BOTTOM or Gravity.RIGHT,
+                            translationX = -MARGIN_DEFAULT,
+                            translationY = -MARGIN_DEFAULT,
+                        ),
                 ),
                 TestCase(
                     calculator = posRightCalculator,
                     rotation = Surface.ROTATION_90,
                     taskbarVisible = true,
                     taskbarStashed = false,
-                    expectedPosition = Position(
-                        gravity = Gravity.TOP or Gravity.RIGHT,
-                        translationX = -MARGIN_TASKBAR_LEFT,
-                        translationY = MARGIN_TASKBAR_BOTTOM
-                    )
-                )
+                    expectedPosition =
+                        Position(
+                            gravity = Gravity.TOP or Gravity.RIGHT,
+                            translationX = -MARGIN_TASKBAR_LEFT,
+                            translationY = MARGIN_TASKBAR_BOTTOM,
+                        ),
+                ),
             )
     }
 }
