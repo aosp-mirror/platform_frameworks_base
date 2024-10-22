@@ -29,11 +29,11 @@ import android.net.vcn.VcnManager;
 import android.net.vcn.VcnUnderlyingNetworkTemplate;
 import android.os.Handler;
 import android.os.ParcelUuid;
+import android.util.IndentingPrintWriter;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.annotations.VisibleForTesting.Visibility;
-import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.vcn.TelephonySubscriptionTracker.TelephonySubscriptionSnapshot;
 import com.android.server.vcn.VcnContext;
 
@@ -193,8 +193,7 @@ public class UnderlyingNetworkEvaluator {
     }
 
     private static boolean isIpSecPacketLossDetectorEnabled(VcnContext vcnContext) {
-        return vcnContext.isFlagIpSecTransformStateEnabled()
-                && vcnContext.isFlagNetworkMetricMonitorEnabled();
+        return vcnContext.isFlagIpSecTransformStateEnabled();
     }
 
     /** Get the comparator for UnderlyingNetworkEvaluator */

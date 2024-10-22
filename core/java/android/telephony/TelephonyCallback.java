@@ -33,6 +33,7 @@ import android.telephony.ims.MediaThreshold;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.annotations.WeaklyReferencedCallback;
 import com.android.internal.telephony.IPhoneStateListener;
 import com.android.internal.telephony.flags.Flags;
 
@@ -69,6 +70,7 @@ import java.util.stream.Collectors;
  * its manifest file. Where permissions apply, they are noted in the
  * appropriate sub-interfaces.
  */
+@WeaklyReferencedCallback
 public class TelephonyCallback {
     private static final String LOG_TAG = "TelephonyCallback";
     /**
