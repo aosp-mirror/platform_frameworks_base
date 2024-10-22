@@ -484,19 +484,28 @@ constructor(
     }
 
     fun keyguardAlpha(viewState: ViewStateAccessor, scope: CoroutineScope): Flow<Float> {
+        val isKeyguardOccluded =
+            keyguardTransitionInteractor.transitionValue(OCCLUDED).map { it == 1f }
+
+        val isKeyguardNotVisibleInState =
+            if (SceneContainerFlag.isEnabled) {
+                isKeyguardOccluded
+            } else {
+                anyOf(
+                    isKeyguardOccluded,
+                    keyguardTransitionInteractor
+                        .transitionValue(scene = Scenes.Gone, stateWithoutSceneContainer = GONE)
+                        .map { it == 1f },
+                )
+            }
+
         // Transitions are not (yet) authoritative for NSSL; they still rely on StatusBarState to
         // help determine when the device has fully moved to GONE or OCCLUDED state. Once SHADE
         // state has been set, let shade alpha take over
         val isKeyguardNotVisible =
-            combine(
-                anyOf(
-                    keyguardTransitionInteractor.transitionValue(OCCLUDED).map { it == 1f },
-                    keyguardTransitionInteractor
-                        .transitionValue(scene = Scenes.Gone, stateWithoutSceneContainer = GONE)
-                        .map { it == 1f },
-                ),
-                keyguardInteractor.statusBarState,
-            ) { isKeyguardNotVisibleInState, statusBarState ->
+            combine(isKeyguardNotVisibleInState, keyguardInteractor.statusBarState) {
+                isKeyguardNotVisibleInState,
+                statusBarState ->
                 isKeyguardNotVisibleInState && statusBarState == SHADE
             }
 
