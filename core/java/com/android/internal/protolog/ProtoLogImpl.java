@@ -106,7 +106,7 @@ public class ProtoLogImpl {
 
             final var groups = sLogGroups.values().toArray(new IProtoLogGroup[0]);
             if (android.tracing.Flags.perfettoProtologTracing()) {
-                sServiceInstance = createPerfettoProtoLogImpl(groups);
+                sServiceInstance = createProtoLogImpl(groups);
             } else {
                 sServiceInstance = createLegacyProtoLogImpl(groups);
             }
@@ -116,18 +116,18 @@ public class ProtoLogImpl {
         return sServiceInstance;
     }
 
-    private static PerfettoProtoLogImpl createPerfettoProtoLogImpl(IProtoLogGroup[] groups) {
+    private static IProtoLog createProtoLogImpl(IProtoLogGroup[] groups) {
         try {
             File f = new File(sViewerConfigPath);
-            if (!ProtoLog.REQUIRE_PROTOLOGTOOL && !f.exists()) {
+            if (!f.exists()) {
                 // TODO(b/353530422): Remove - temporary fix to unblock b/352290057
-                // In some tests the viewer config file might not exist in which we don't
-                // want to provide config path to the user
-                Log.w(LOG_TAG, "Failed to find viewerConfigFile when setting up "
-                        + ProtoLogImpl.class.getSimpleName() + ". "
-                        + "Setting up without a viewer config instead...");
+                // In robolectric tests the viewer config file isn't current available, so we cannot
+                // use the ProcessedPerfettoProtoLogImpl.
+                Log.e(LOG_TAG, "Failed to find viewer config file " + sViewerConfigPath
+                        + " when setting up " + ProtoLogImpl.class.getSimpleName() + ". "
+                        + "ProtoLog will not work here!");
 
-                return new UnprocessedPerfettoProtoLogImpl(sCacheUpdater, groups);
+                return new NoViewerConfigProtoLogImpl();
             } else {
                 return new ProcessedPerfettoProtoLogImpl(sViewerConfigPath, sCacheUpdater, groups);
             }
