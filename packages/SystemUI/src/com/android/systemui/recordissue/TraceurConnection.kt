@@ -76,8 +76,9 @@ private constructor(userContextProvider: UserContextProvider, private val bgLoop
     @WorkerThread fun stopTracing() = sendMessage(MessageConstants.STOP_WHAT)
 
     @WorkerThread
-    fun shareTraces(screenRecord: Uri?) {
-        val replyHandler = Messenger(ShareFilesHandler(screenRecord, userContextProvider, bgLooper))
+    fun shareTraces(screenRecordingUris: List<Uri>) {
+        val replyHandler =
+            Messenger(ShareFilesHandler(screenRecordingUris, userContextProvider, bgLooper))
         sendMessage(MessageConstants.SHARE_WHAT, replyTo = replyHandler)
     }
 
@@ -101,7 +102,7 @@ private constructor(userContextProvider: UserContextProvider, private val bgLoop
 }
 
 private class ShareFilesHandler(
-    private val screenRecord: Uri?,
+    private val screenRecordingUris: List<Uri>,
     private val userContextProvider: UserContextProvider,
     looper: Looper,
 ) : Handler(looper) {
@@ -122,7 +123,7 @@ private class ShareFilesHandler(
             ArrayList<Uri>().apply {
                 perfetto?.let { add(it) }
                 winscope?.let { add(it) }
-                screenRecord?.let { add(it) }
+                screenRecordingUris.forEach { add(it) }
             }
         val fileSharingIntent =
             FileSender.buildSendIntent(userContextProvider.userContext, uris)
