@@ -74,7 +74,7 @@ fun GestureUiState.toTutorialActionState(): TutorialActionState {
         NotStarted -> TutorialActionState.NotStarted
         // progress is disabled for now as views are not ready to handle varying progress
         is GestureUiState.InProgress -> TutorialActionState.InProgress(progress = 0f)
-        is Finished -> TutorialActionState.Finished
+        is Finished -> TutorialActionState.Finished(successAnimation)
     }
 }
 

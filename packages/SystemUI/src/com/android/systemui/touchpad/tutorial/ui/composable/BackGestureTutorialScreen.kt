@@ -44,11 +44,7 @@ fun BackGestureTutorialScreen(onDoneButtonClicked: () -> Unit, onBack: () -> Uni
                     titleSuccessResId = R.string.touchpad_back_gesture_success_title,
                     bodySuccessResId = R.string.touchpad_back_gesture_success_body,
                 ),
-            animations =
-                TutorialScreenConfig.Animations(
-                    educationResId = R.raw.trackpad_back_edu,
-                    successResId = R.raw.trackpad_back_success,
-                ),
+            animations = TutorialScreenConfig.Animations(educationResId = R.raw.trackpad_back_edu),
         )
     val recognizer = rememberBackGestureRecognizer(LocalContext.current.resources)
     val gestureUiState: Flow<GestureUiState> =

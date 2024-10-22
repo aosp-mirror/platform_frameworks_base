@@ -44,10 +44,7 @@ fun RecentAppsGestureTutorialScreen(onDoneButtonClicked: () -> Unit, onBack: () 
                     bodySuccessResId = R.string.touchpad_recent_apps_gesture_success_body,
                 ),
             animations =
-                TutorialScreenConfig.Animations(
-                    educationResId = R.raw.trackpad_recent_apps_edu,
-                    successResId = R.raw.trackpad_recent_apps_success,
-                ),
+                TutorialScreenConfig.Animations(educationResId = R.raw.trackpad_recent_apps_edu),
         )
     val recognizer = rememberRecentAppsGestureRecognizer(LocalContext.current.resources)
     val gestureUiState: Flow<GestureUiState> =
