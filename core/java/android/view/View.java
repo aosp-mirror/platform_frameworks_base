@@ -33,6 +33,7 @@ import static android.view.accessibility.AccessibilityEvent.CONTENT_CHANGE_TYPE_
 import static android.view.accessibility.Flags.FLAG_SUPPLEMENTAL_DESCRIPTION;
 import static android.view.accessibility.Flags.removeChildHoverCheckForTouchExploration;
 import static android.view.accessibility.Flags.supplementalDescription;
+import static android.view.accessibility.Flags.supportMultipleLabeledby;
 import static android.view.displayhash.DisplayHashResultCallback.DISPLAY_HASH_ERROR_INVALID_BOUNDS;
 import static android.view.displayhash.DisplayHashResultCallback.DISPLAY_HASH_ERROR_MISSING_WINDOW;
 import static android.view.displayhash.DisplayHashResultCallback.DISPLAY_HASH_ERROR_NOT_VISIBLE_ON_SCREEN;
@@ -11363,7 +11364,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
             View label = rootView.findLabelForView(this, mID);
             if (label != null) {
-                info.setLabeledBy(label);
+                if (supportMultipleLabeledby()) {
+                    info.addLabeledBy(label);
+                } else {
+                    info.setLabeledBy(label);
+                }
             }
 
             if ((mAttachInfo.mAccessibilityFetchFlags
