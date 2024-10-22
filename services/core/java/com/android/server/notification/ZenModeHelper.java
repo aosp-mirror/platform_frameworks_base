@@ -43,6 +43,8 @@ import static android.service.notification.ZenModeConfig.implicitRuleId;
 
 import static com.android.internal.util.FrameworkStatsLog.DND_MODE_RULE;
 import static com.android.internal.util.Preconditions.checkArgument;
+import static android.app.backup.NotificationLoggingConstants.DATA_TYPE_ZEN_CONFIG;
+import static android.app.backup.NotificationLoggingConstants.ERROR_XML_PARSING;
 
 import static java.util.Objects.requireNonNull;
 
@@ -56,6 +58,7 @@ import android.app.AutomaticZenRule;
 import android.app.Flags;
 import android.app.NotificationManager;
 import android.app.NotificationManager.Policy;
+import android.app.backup.BackupRestoreEventLogger;
 import android.app.compat.CompatChanges;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
@@ -1759,11 +1762,10 @@ public class ZenModeHelper {
         pw.println(config);
     }
 
-    public void readXml(TypedXmlPullParser parser, boolean forRestore, int userId)
-            throws XmlPullParserException, IOException {
-        ZenModeConfig config = ZenModeConfig.readXml(parser);
+    public boolean readXml(TypedXmlPullParser parser, boolean forRestore, int userId,
+            @Nullable BackupRestoreEventLogger logger) throws XmlPullParserException, IOException {
+        ZenModeConfig config = ZenModeConfig.readXml(parser, logger);
         String reason = "readXml";
-
         if (config != null) {
             if (forRestore) {
                 config.user = userId;
@@ -1855,22 +1857,38 @@ public class ZenModeHelper {
 
             if (DEBUG) Log.d(TAG, reason);
             synchronized (mConfigLock) {
-                setConfigLocked(config, null,
+                return setConfigLocked(config, null,
                         forRestore ? ORIGIN_RESTORE_BACKUP : ORIGIN_INIT, reason,
                         Process.SYSTEM_UID);
             }
         }
+        return false;
     }
 
-    public void writeXml(TypedXmlSerializer out, boolean forBackup, Integer version, int userId)
-            throws IOException {
+    public void writeXml(TypedXmlSerializer out, boolean forBackup, Integer version, int userId,
+            @Nullable BackupRestoreEventLogger logger) throws IOException {
         synchronized (mConfigLock) {
+            int successfulWrites = 0;
+            int unsuccessfulWrites = 0;
             final int n = mConfigs.size();
             for (int i = 0; i < n; i++) {
                 if (forBackup && mConfigs.keyAt(i) != userId) {
                     continue;
                 }
-                mConfigs.valueAt(i).writeXml(out, version, forBackup);
+                try {
+                    mConfigs.valueAt(i).writeXml(out, version, forBackup, logger);
+                    successfulWrites++;
+                } catch (Exception e) {
+                    Slog.e(TAG, "failed to write config", e);
+                    unsuccessfulWrites++;
+                }
+            }
+            if (logger != null) {
+                logger.logItemsBackedUp(DATA_TYPE_ZEN_CONFIG, successfulWrites);
+                if (unsuccessfulWrites > 0) {
+                    logger.logItemsBackupFailed(DATA_TYPE_ZEN_CONFIG,
+                            unsuccessfulWrites, ERROR_XML_PARSING);
+                }
             }
         }
     }
@@ -2501,7 +2519,8 @@ public class ZenModeHelper {
         try {
             parser = resources.getXml(R.xml.default_zen_mode_config);
             while (parser.next() != XmlPullParser.END_DOCUMENT) {
-                final ZenModeConfig config = ZenModeConfig.readXml(XmlUtils.makeTyped(parser));
+                final ZenModeConfig config =
+                        ZenModeConfig.readXml(XmlUtils.makeTyped(parser), null);
                 if (config != null) return config;
             }
         } catch (Exception e) {

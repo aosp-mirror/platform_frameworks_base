@@ -77,6 +77,8 @@ import static android.app.PendingIntent.FLAG_MUTABLE;
 import static android.app.PendingIntent.FLAG_ONE_SHOT;
 import static android.app.StatusBarManager.ACTION_KEYGUARD_PRIVATE_NOTIFICATIONS_CHANGED;
 import static android.app.StatusBarManager.EXTRA_KM_PRIVATE_NOTIFS_ALLOWED;
+import static android.app.backup.NotificationLoggingConstants.DATA_TYPE_ZEN_CONFIG;
+import static android.app.backup.NotificationLoggingConstants.DATA_TYPE_ZEN_RULES;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
 import static android.content.pm.PackageManager.FEATURE_TELECOM;
 import static android.content.pm.PackageManager.FEATURE_WATCH;
@@ -92,6 +94,7 @@ import static android.os.PowerWhitelistManager.REASON_NOTIFICATION_SERVICE;
 import static android.os.PowerWhitelistManager.TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED;
 import static android.os.UserHandle.USER_SYSTEM;
 import static android.os.UserManager.USER_TYPE_FULL_SECONDARY;
+import static android.os.UserManager.USER_TYPE_FULL_SYSTEM;
 import static android.os.UserManager.USER_TYPE_PROFILE_CLONE;
 import static android.os.UserManager.USER_TYPE_PROFILE_MANAGED;
 import static android.os.UserManager.USER_TYPE_PROFILE_PRIVATE;
@@ -361,6 +364,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -6496,6 +6500,35 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         verify(mListeners, times(1)).readXml(any(), any(), eq(true), eq(10));
         verify(mConditionProviders, times(1)).readXml(any(), any(), eq(true), eq(10));
         verify(mAssistants, times(1)).readXml(any(), any(), eq(true), eq(10));
+    }
+
+    @Test
+    @EnableFlags(android.app.Flags.FLAG_BACKUP_RESTORE_LOGGING)
+    public void testReadPolicyXml_backupRestoreLogging() throws Exception {
+        BackupRestoreEventLogger logger = mock(BackupRestoreEventLogger.class);
+
+        UserInfo ui = new UserInfo(ActivityManager.getCurrentUser(), "Clone", UserInfo.FLAG_FULL);
+        ui.userType = USER_TYPE_FULL_SYSTEM;
+        when(mUmInternal.getUserInfo(ActivityManager.getCurrentUser())).thenReturn(ui);
+        when(mPermissionHelper.getNotificationPermissionValues(0)).thenReturn(new ArrayMap<>());
+        TypedXmlSerializer serializer = Xml.newFastSerializer();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        serializer.setOutput(new BufferedOutputStream(baos), "utf-8");
+        serializer.startDocument(null, true);
+        mService.writePolicyXml(baos, true, ActivityManager.getCurrentUser(), logger);
+        serializer.flush();
+
+        mService.readPolicyXml(
+                new BufferedInputStream(new ByteArrayInputStream(baos.toByteArray())),
+                true, ActivityManager.getCurrentUser(), logger);
+
+        verify(logger).logItemsBackedUp(DATA_TYPE_ZEN_CONFIG, 1);
+        verify(logger, never())
+                .logItemsBackupFailed(eq(DATA_TYPE_ZEN_CONFIG), anyInt(), anyString());
+
+        verify(logger).logItemsRestored(DATA_TYPE_ZEN_CONFIG, 1);
+        verify(logger, never())
+                .logItemsRestoreFailed(eq(DATA_TYPE_ZEN_CONFIG), anyInt(), anyString());
     }
 
     @Test
