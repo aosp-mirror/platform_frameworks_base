@@ -51,8 +51,8 @@ fun BackGestureTutorialScreen(onDoneButtonClicked: () -> Unit, onBack: () -> Uni
         remember(recognizer) {
             GestureFlowAdapter(recognizer).gestureStateAsFlow.map {
                 it.toGestureUiState(
-                    progressStartMark = "",
-                    progressEndMark = "",
+                    progressStartMarker = "",
+                    progressEndMarker = "",
                     successAnimation = R.raw.trackpad_back_success,
                 )
             }

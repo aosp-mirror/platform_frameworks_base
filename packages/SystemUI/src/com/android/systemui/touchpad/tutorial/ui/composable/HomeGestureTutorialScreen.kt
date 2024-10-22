@@ -50,8 +50,8 @@ fun HomeGestureTutorialScreen(onDoneButtonClicked: () -> Unit, onBack: () -> Uni
         remember(recognizer) {
             GestureFlowAdapter(recognizer).gestureStateAsFlow.map {
                 it.toGestureUiState(
-                    progressStartMark = "",
-                    progressEndMark = "",
+                    progressStartMarker = "",
+                    progressEndMarker = "",
                     successAnimation = R.raw.trackpad_home_success,
                 )
             }
