@@ -5071,17 +5071,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                     }
 
                     success = true;
-                } catch (IllegalStateException e) {
-                    Slog.w(TAG, "Failed parsing " + e);
-                } catch (NullPointerException e) {
-                    Slog.w(TAG, "Failed parsing " + e);
-                } catch (NumberFormatException e) {
-                    Slog.w(TAG, "Failed parsing " + e);
-                } catch (XmlPullParserException e) {
-                    Slog.w(TAG, "Failed parsing " + e);
-                } catch (IOException e) {
-                    Slog.w(TAG, "Failed parsing " + e);
-                } catch (IndexOutOfBoundsException e) {
+                } catch (Exception e) {
                     Slog.w(TAG, "Failed parsing " + e);
                 } finally {
                     if (!success) {
