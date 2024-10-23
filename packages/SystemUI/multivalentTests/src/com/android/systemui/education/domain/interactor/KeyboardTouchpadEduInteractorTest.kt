@@ -187,7 +187,7 @@ class KeyboardTouchpadEduInteractorTest(private val gestureType: GestureType) : 
                         signalCount = 1,
                         usageSessionStartTime = secondSignalReceivedTime,
                         userId = 0,
-                        gestureType = gestureType
+                        gestureType = gestureType,
                     )
                 )
         }
@@ -401,6 +401,29 @@ class KeyboardTouchpadEduInteractorTest(private val gestureType: GestureType) : 
         tutorialSchedulerRepository.updateLaunchTime(DeviceType.KEYBOARD, eduClock.instant())
         eduClock.offset(initialDelayElapsedDuration)
     }
+
+    fun logMetricsForToastEducation() =
+        testScope.runTest {
+            triggerMaxEducationSignals(gestureType)
+            runCurrent()
+
+            verify(kosmos.mockEduMetricsLogger)
+                .logContextualEducationTriggered(gestureType, EducationUiType.Toast)
+        }
+
+    @Test
+    fun logMetricsForNotificationEducation() =
+        testScope.runTest {
+            triggerMaxEducationSignals(gestureType)
+            runCurrent()
+
+            eduClock.offset(minDurationForNextEdu)
+            triggerMaxEducationSignals(gestureType)
+            runCurrent()
+
+            verify(kosmos.mockEduMetricsLogger)
+                .logContextualEducationTriggered(gestureType, EducationUiType.Notification)
+        }
 
     @After
     fun clear() {
