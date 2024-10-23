@@ -14,25 +14,34 @@
  * limitations under the License.
  */
 
-package com.android.server.display;
+package android.hardware.display;
 
-import static com.android.server.display.DisplayTopology.TreeNode.Position.POSITION_BOTTOM;
-import static com.android.server.display.DisplayTopology.TreeNode.Position.POSITION_LEFT;
-import static com.android.server.display.DisplayTopology.TreeNode.Position.POSITION_TOP;
-import static com.android.server.display.DisplayTopology.TreeNode.Position.POSITION_RIGHT;
+import static android.hardware.display.DisplayTopology.TreeNode.POSITION_BOTTOM;
+import static android.hardware.display.DisplayTopology.TreeNode.POSITION_LEFT;
+import static android.hardware.display.DisplayTopology.TreeNode.POSITION_RIGHT;
+import static android.hardware.display.DisplayTopology.TreeNode.POSITION_TOP;
 
+import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.graphics.RectF;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.util.IndentingPrintWriter;
 import android.util.Pair;
 import android.util.Slog;
 import android.view.Display;
 
+import androidx.annotation.NonNull;
+
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -42,24 +51,59 @@ import java.util.Queue;
 /**
  * Represents the relative placement of extended displays.
  * Does not support concurrent calls, so a lock should be held when calling into this class.
+ *
+ * @hide
  */
-class DisplayTopology {
+public final class DisplayTopology implements Parcelable {
     private static final String TAG = "DisplayTopology";
     private static final float EPSILON = 0.0001f;
+
+    @android.annotation.NonNull
+    public static final Creator<DisplayTopology> CREATOR =
+            new Creator<>() {
+                @Override
+                public DisplayTopology createFromParcel(Parcel source) {
+                    return new DisplayTopology(source);
+                }
+
+                @Override
+                public DisplayTopology[] newArray(int size) {
+                    return new DisplayTopology[size];
+                }
+            };
 
     /**
      * The topology tree
      */
     @Nullable
-    @VisibleForTesting
-    TreeNode mRoot;
+    private TreeNode mRoot;
 
     /**
      * The logical display ID of the primary display that will show certain UI elements.
      * This is not necessarily the same as the default display.
      */
+    private int mPrimaryDisplayId = Display.INVALID_DISPLAY;
+
+    public DisplayTopology() {}
+
     @VisibleForTesting
-    int mPrimaryDisplayId = Display.INVALID_DISPLAY;
+    public DisplayTopology(TreeNode root, int primaryDisplayId) {
+        mRoot = root;
+        mPrimaryDisplayId = primaryDisplayId;
+    }
+
+    public DisplayTopology(Parcel source) {
+        this(source.readTypedObject(TreeNode.CREATOR), source.readInt());
+    }
+
+    @Nullable
+    public TreeNode getRoot() {
+        return mRoot;
+    }
+
+    public int getPrimaryDisplayId() {
+        return mPrimaryDisplayId;
+    }
 
     /**
      * Add a display to the topology.
@@ -69,7 +113,7 @@ class DisplayTopology {
      * @param width The width of the display
      * @param height The height of the display
      */
-    void addDisplay(int displayId, float width, float height) {
+    public void addDisplay(int displayId, float width, float height) {
         addDisplay(displayId, width, height, /* shouldLog= */ true);
     }
 
@@ -79,7 +123,7 @@ class DisplayTopology {
      * one by one.
      * @param displayId The logical display ID
      */
-    void removeDisplay(int displayId) {
+    public void removeDisplay(int displayId) {
         if (findDisplay(displayId, mRoot) == null) {
             return;
         }
@@ -106,11 +150,22 @@ class DisplayTopology {
         }
     }
 
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
+        dest.writeTypedObject(mRoot, flags);
+        dest.writeInt(mPrimaryDisplayId);
+    }
+
     /**
      * Print the object's state and debug information into the given stream.
      * @param pw The stream to dump information to.
      */
-    void dump(PrintWriter pw) {
+    public void dump(PrintWriter pw) {
         pw.println("DisplayTopology:");
         pw.println("--------------------");
         IndentingPrintWriter ipw = new IndentingPrintWriter(pw);
@@ -126,13 +181,21 @@ class DisplayTopology {
         }
     }
 
+    @Override
+    public String toString() {
+        StringWriter out = new StringWriter();
+        PrintWriter writer = new PrintWriter(out);
+        dump(writer);
+        return out.toString();
+    }
+
     private void addDisplay(int displayId, float width, float height, boolean shouldLog) {
         if (findDisplay(displayId, mRoot) != null) {
             throw new IllegalArgumentException(
                     "DisplayTopology: attempting to add a display that already exists");
         }
         if (mRoot == null) {
-            mRoot = new TreeNode(displayId, width, height, /* position= */ null, /* offset= */ 0);
+            mRoot = new TreeNode(displayId, width, height, /* position= */ 0, /* offset= */ 0);
             mPrimaryDisplayId = displayId;
             if (shouldLog) {
                 Slog.i(TAG, "First display added: " + mRoot);
@@ -241,7 +304,7 @@ class DisplayTopology {
      * Update the topology to remove any overlaps between displays.
      */
     @VisibleForTesting
-    void normalize() {
+    public void normalize() {
         if (mRoot == null) {
             return;
         }
@@ -341,6 +404,8 @@ class DisplayTopology {
                 case POSITION_RIGHT -> floatEquals(parentBounds.right, childBounds.left);
                 case POSITION_TOP -> floatEquals(parentBounds.top, childBounds.bottom);
                 case POSITION_BOTTOM -> floatEquals(parentBounds.bottom, childBounds.top);
+                default -> throw new IllegalStateException(
+                        "Unexpected value: " + targetDisplay.mPosition);
             };
             // Check that the offset is within bounds
             areTouching &= switch (targetDisplay.mPosition) {
@@ -350,6 +415,8 @@ class DisplayTopology {
                 case POSITION_TOP, POSITION_BOTTOM ->
                         childBounds.right + EPSILON >= parentBounds.left
                                 && childBounds.left <= parentBounds.right + EPSILON;
+                default -> throw new IllegalStateException(
+                        "Unexpected value: " + targetDisplay.mPosition);
             };
 
             if (!areTouching) {
@@ -379,36 +446,56 @@ class DisplayTopology {
      * @param b second float to compare
      * @return whether the two values are within a small enough tolerance value
      */
-    public static boolean floatEquals(float a, float b) {
-        return a == b || Float.isNaN(a) && Float.isNaN(b) || Math.abs(a - b) < EPSILON;
+    private static boolean floatEquals(float a, float b) {
+        return a == b || (Float.isNaN(a) && Float.isNaN(b)) || Math.abs(a - b) < EPSILON;
     }
 
-    @VisibleForTesting
-    static class TreeNode {
+    public static final class TreeNode implements Parcelable {
+        public static final int POSITION_LEFT = 0;
+        public static final int POSITION_TOP = 1;
+        public static final int POSITION_RIGHT = 2;
+        public static final int POSITION_BOTTOM = 3;
+
+        @IntDef(prefix = { "POSITION_" }, value = {
+                POSITION_LEFT, POSITION_TOP, POSITION_RIGHT, POSITION_BOTTOM
+        })
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface Position{}
+
+        @android.annotation.NonNull
+        public static final Creator<TreeNode> CREATOR =
+                new Creator<>() {
+                    @Override
+                    public TreeNode createFromParcel(Parcel source) {
+                        return new TreeNode(source);
+                    }
+
+                    @Override
+                    public TreeNode[] newArray(int size) {
+                        return new TreeNode[size];
+                    }
+                };
 
         /**
          * The logical display ID
          */
-        @VisibleForTesting
-        final int mDisplayId;
+        private final int mDisplayId;
 
         /**
          * The width of the display in density-independent pixels (dp).
          */
-        @VisibleForTesting
-        float mWidth;
+        private final float mWidth;
 
         /**
          * The height of the display in density-independent pixels (dp).
          */
-        @VisibleForTesting
-        float mHeight;
+        private final float mHeight;
 
         /**
          * The position of this display relative to its parent.
          */
-        @VisibleForTesting
-        Position mPosition;
+        @Position
+        private int mPosition;
 
         /**
          * The distance from the top edge of the parent display to the top edge of this display (in
@@ -416,13 +503,13 @@ class DisplayTopology {
          * to the left edge of this display (in case of POSITION_TOP or POSITION_BOTTOM). The unit
          * used is density-independent pixels (dp).
          */
-        @VisibleForTesting
-        float mOffset;
+        private float mOffset;
+
+        private final List<TreeNode> mChildren = new ArrayList<>();
 
         @VisibleForTesting
-        final List<TreeNode> mChildren = new ArrayList<>();
-
-        TreeNode(int displayId, float width, float height, Position position, float offset) {
+        public TreeNode(int displayId, float width, float height, @Position int position,
+                float offset) {
             mDisplayId = displayId;
             mWidth = width;
             mHeight = height;
@@ -430,11 +517,76 @@ class DisplayTopology {
             mOffset = offset;
         }
 
+        public TreeNode(Parcel source) {
+            this(source.readInt(), source.readFloat(), source.readFloat(), source.readInt(),
+                    source.readFloat());
+            source.readTypedList(mChildren, CREATOR);
+        }
+
+        public int getDisplayId() {
+            return mDisplayId;
+        }
+
+        public float getWidth() {
+            return mWidth;
+        }
+
+        public float getHeight() {
+            return mHeight;
+        }
+
+        public int getPosition() {
+            return mPosition;
+        }
+
+        public float getOffset() {
+            return mOffset;
+        }
+
+        public List<TreeNode> getChildren() {
+            return Collections.unmodifiableList(mChildren);
+        }
+
+        @Override
+        public String toString() {
+            return "Display {id=" + mDisplayId + ", width=" + mWidth + ", height=" + mHeight
+                    + ", position=" + positionToString(mPosition) + ", offset=" + mOffset + "}";
+        }
+
+        /**
+         * @param position The position
+         * @return The string representation
+         */
+        public static String positionToString(@Position int position) {
+            return switch (position) {
+                case POSITION_LEFT -> "left";
+                case POSITION_TOP -> "top";
+                case POSITION_RIGHT -> "right";
+                case POSITION_BOTTOM -> "bottom";
+                default -> throw new IllegalStateException("Unexpected value: " + position);
+            };
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(@NonNull Parcel dest, int flags) {
+            dest.writeInt(mDisplayId);
+            dest.writeFloat(mWidth);
+            dest.writeFloat(mHeight);
+            dest.writeInt(mPosition);
+            dest.writeFloat(mOffset);
+            dest.writeTypedList(mChildren);
+        }
+
         /**
          * Print the object's state and debug information into the given stream.
          * @param ipw The stream to dump information to.
          */
-        void dump(IndentingPrintWriter ipw) {
+        public void dump(IndentingPrintWriter ipw) {
             ipw.println(this);
             ipw.increaseIndent();
             for (TreeNode child : mChildren) {
@@ -443,15 +595,12 @@ class DisplayTopology {
             ipw.decreaseIndent();
         }
 
-        @Override
-        public String toString() {
-            return "Display {id=" + mDisplayId + ", width=" + mWidth + ", height=" + mHeight
-                    + ", position=" + mPosition + ", offset=" + mOffset + "}";
-        }
-
+        /**
+         * @param child The child to add
+         */
         @VisibleForTesting
-        enum Position {
-            POSITION_LEFT, POSITION_TOP, POSITION_RIGHT, POSITION_BOTTOM
+        public void addChild(TreeNode child) {
+            mChildren.add(child);
         }
     }
 }

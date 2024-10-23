@@ -23,6 +23,7 @@ import android.hardware.display.BrightnessConfiguration;
 import android.hardware.display.BrightnessInfo;
 import android.hardware.display.Curve;
 import android.hardware.graphics.common.DisplayDecorationSupport;
+import android.hardware.display.DisplayTopology;
 import android.hardware.display.HdrConversionMode;
 import android.hardware.display.IDisplayManagerCallback;
 import android.hardware.display.IVirtualDisplayCallback;
@@ -254,4 +255,13 @@ interface IDisplayManager {
     // Get the default doze brightness
     @EnforcePermission("CONTROL_DISPLAY_BRIGHTNESS")
     float getDefaultDozeBrightness(int displayId);
+
+    // Get the display topology
+    @EnforcePermission("MANAGE_DISPLAYS")
+    @nullable
+    DisplayTopology getDisplayTopology();
+
+    // Set the display topology
+    @EnforcePermission("MANAGE_DISPLAYS")
+    void setDisplayTopology(in DisplayTopology topology);
 }

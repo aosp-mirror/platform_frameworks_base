@@ -96,6 +96,7 @@ import android.hardware.display.DisplayManagerGlobal;
 import android.hardware.display.DisplayManagerInternal;
 import android.hardware.display.DisplayManagerInternal.DisplayGroupListener;
 import android.hardware.display.DisplayManagerInternal.DisplayTransactionListener;
+import android.hardware.display.DisplayTopology;
 import android.hardware.display.DisplayViewport;
 import android.hardware.display.DisplayedContentSample;
 import android.hardware.display.DisplayedContentSamplingAttributes;
@@ -118,6 +119,7 @@ import android.os.IBinder.DeathRecipient;
 import android.os.IThermalService;
 import android.os.Looper;
 import android.os.Message;
+import android.os.PermissionEnforcer;
 import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
@@ -4314,6 +4316,10 @@ public final class DisplayManagerService extends SystemService {
 
     @VisibleForTesting
     final class BinderService extends IDisplayManager.Stub {
+        BinderService() {
+            super(PermissionEnforcer.fromContext(getContext()));
+        }
+
         /**
          * Returns information about the specified logical display.
          *
@@ -5191,6 +5197,25 @@ public final class DisplayManagerService extends SystemService {
                         "Display ID does not have a config for doze-default: " + displayId);
             }
             return ddc.getDefaultDozeBrightness();
+        }
+
+        @EnforcePermission(MANAGE_DISPLAYS)
+        @Override // Binder call
+        public DisplayTopology getDisplayTopology() {
+            getDisplayTopology_enforcePermission();
+            if (mDisplayTopologyCoordinator == null) {
+                return null;
+            }
+            return mDisplayTopologyCoordinator.getTopology();
+        }
+
+        @EnforcePermission(MANAGE_DISPLAYS)
+        @Override // Binder call
+        public void setDisplayTopology(DisplayTopology topology) {
+            setDisplayTopology_enforcePermission();
+            if (mDisplayTopologyCoordinator != null) {
+                mDisplayTopologyCoordinator.setTopology(topology);
+            }
         }
     }
 

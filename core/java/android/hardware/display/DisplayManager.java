@@ -16,6 +16,7 @@
 
 package android.hardware.display;
 
+import static android.Manifest.permission.MANAGE_DISPLAYS;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.HdrCapabilities.HdrType;
 import static android.view.Display.INVALID_DISPLAY;
@@ -1722,6 +1723,29 @@ public final class DisplayManager {
                     : DEFAULT_DISPLAY;
         }
         return mDisplayIdToMirror;
+    }
+
+    /**
+     * @return The current display topology that represents the relative positions of extended
+     * displays.
+     *
+     * @hide
+     */
+    @RequiresPermission(MANAGE_DISPLAYS)
+    @Nullable
+    public DisplayTopology getDisplayTopology() {
+        return mGlobal.getDisplayTopology();
+    }
+
+    /**
+     * Set the relative positions between extended displays (display topology).
+     * @param topology The display topology to be set
+     *
+     * @hide
+     */
+    @RequiresPermission(MANAGE_DISPLAYS)
+    public void setDisplayTopology(DisplayTopology topology) {
+        mGlobal.setDisplayTopology(topology);
     }
 
     /**
