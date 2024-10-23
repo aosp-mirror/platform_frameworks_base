@@ -51,8 +51,8 @@ fun RecentAppsGestureTutorialScreen(onDoneButtonClicked: () -> Unit, onBack: () 
         remember(recognizer) {
             GestureFlowAdapter(recognizer).gestureStateAsFlow.map {
                 it.toGestureUiState(
-                    progressStartMark = "",
-                    progressEndMark = "",
+                    progressStartMarker = "",
+                    progressEndMarker = "",
                     successAnimation = R.raw.trackpad_recent_apps_success,
                 )
             }
@@ -63,9 +63,7 @@ fun RecentAppsGestureTutorialScreen(onDoneButtonClicked: () -> Unit, onBack: () 
 @Composable
 private fun rememberRecentAppsGestureRecognizer(resources: Resources): GestureRecognizer {
     val distance =
-        resources.getDimensionPixelSize(
-            com.android.internal.R.dimen.system_gestures_distance_threshold
-        )
+        resources.getDimensionPixelSize(R.dimen.touchpad_tutorial_gestures_distance_threshold)
     val velocity = resources.getDimension(R.dimen.touchpad_recent_apps_gesture_velocity_threshold)
     return remember(distance, velocity) { RecentAppsGestureRecognizer(distance, velocity) }
 }

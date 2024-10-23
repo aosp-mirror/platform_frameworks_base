@@ -51,8 +51,8 @@ fun BackGestureTutorialScreen(onDoneButtonClicked: () -> Unit, onBack: () -> Uni
         remember(recognizer) {
             GestureFlowAdapter(recognizer).gestureStateAsFlow.map {
                 it.toGestureUiState(
-                    progressStartMark = "",
-                    progressEndMark = "",
+                    progressStartMarker = "",
+                    progressEndMarker = "",
                     successAnimation = R.raw.trackpad_back_success,
                 )
             }
@@ -63,9 +63,7 @@ fun BackGestureTutorialScreen(onDoneButtonClicked: () -> Unit, onBack: () -> Uni
 @Composable
 private fun rememberBackGestureRecognizer(resources: Resources): GestureRecognizer {
     val distance =
-        resources.getDimensionPixelSize(
-            com.android.internal.R.dimen.system_gestures_distance_threshold
-        )
+        resources.getDimensionPixelSize(R.dimen.touchpad_tutorial_gestures_distance_threshold)
     return remember(distance) { BackGestureRecognizer(distance) }
 }
 
