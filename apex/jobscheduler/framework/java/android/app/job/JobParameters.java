@@ -33,8 +33,8 @@ import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
-import android.os.RemoteException;
 import android.os.Process;
+import android.os.RemoteException;
 import android.system.SystemCleaner;
 import android.util.Log;
 
@@ -770,7 +770,7 @@ public class JobParameters implements Parcelable {
                 return;
             }
             try {
-                mCallback.forceJobFinished(mJobId);
+                mCallback.handleAbandonedJob(mJobId);
             } catch (Exception e) {
                 Log.wtf(TAG, "Could not destroy running job", e);
             }
