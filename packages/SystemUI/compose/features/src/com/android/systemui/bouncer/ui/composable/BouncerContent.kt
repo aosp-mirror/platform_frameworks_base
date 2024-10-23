@@ -30,6 +30,8 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -60,7 +62,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -68,6 +69,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.pointer.PointerInputChange
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -122,8 +124,8 @@ fun BouncerContent(
     dialogFactory: BouncerDialogFactory,
     modifier: Modifier = Modifier,
 ) {
-    val isSideBySideSupported by viewModel.isSideBySideSupported.collectAsStateWithLifecycle()
-    val layout = calculateLayout(isSideBySideSupported = isSideBySideSupported)
+    val isOneHandedModeSupported by viewModel.isOneHandedModeSupported.collectAsStateWithLifecycle()
+    val layout = calculateLayout(isOneHandedModeSupported = isOneHandedModeSupported)
 
     BouncerContent(layout, viewModel, dialogFactory, modifier)
 }
@@ -299,27 +301,53 @@ private fun BesideUserSwitcherLayout(
     viewModel: BouncerSceneContentViewModel,
     modifier: Modifier = Modifier,
 ) {
-    val layoutDirection = LocalLayoutDirection.current
-    val isLeftToRight = layoutDirection == LayoutDirection.Ltr
-    val (isSwapped, setSwapped) = rememberSaveable(isLeftToRight) { mutableStateOf(!isLeftToRight) }
+    val isLeftToRight = LocalLayoutDirection.current == LayoutDirection.Ltr
+    val isInputPreferredOnLeftSide by
+        viewModel.isInputPreferredOnLeftSide.collectAsStateWithLifecycle()
+    // Swaps the order of user switcher and bouncer input area
+    // Default layout is assumed as user switcher followed by bouncer input area in the direction
+    // of layout.
+    val isSwapped = isLeftToRight == isInputPreferredOnLeftSide
     val isHeightExpanded =
         LocalWindowSizeClass.current.heightSizeClass == WindowHeightSizeClass.Expanded
     val authMethod by viewModel.authMethodViewModel.collectAsStateWithLifecycle()
 
     var swapAnimationEnd by remember { mutableStateOf(false) }
 
+    fun wasEventOnNonInputHalfOfScreen(x: Float, totalWidth: Int): Boolean {
+        // Default layout is assumed as user switcher followed by bouncer input area in
+        // the direction of layout. Swapped layout means that bouncer input area is first, followed
+        // by user switcher in the direction of layout.
+        val halfWidth = totalWidth / 2
+        return if (x > halfWidth) {
+            isLeftToRight && isSwapped
+        } else {
+            isLeftToRight && !isSwapped
+        }
+    }
+
     Row(
         modifier =
             modifier
-                .pointerInput(Unit) {
+                .pointerInput(isSwapped, isInputPreferredOnLeftSide) {
                     detectTapGestures(
                         onDoubleTap = { offset ->
                             // Depending on where the user double tapped, switch the elements such
                             // that the non-swapped element is closer to the side that was double
                             // tapped.
-                            setSwapped(offset.x < size.width / 2)
+                            viewModel.onDoubleTap(
+                                wasEventOnNonInputHalfOfScreen(offset.x, size.width)
+                            )
                         }
                     )
+                }
+                .pointerInput(isSwapped, isInputPreferredOnLeftSide) {
+                    awaitEachGesture {
+                        val downEvent: PointerInputChange = awaitFirstDown()
+                        viewModel.onDown(
+                            wasEventOnNonInputHalfOfScreen(downEvent.position.x, size.width)
+                        )
+                    }
                 }
                 .testTag("BesideUserSwitcherLayout")
                 .motionTestValues {
@@ -723,7 +751,8 @@ private fun Dialog(
 /** Renders the UI of the user switcher that's displayed on large screens next to the bouncer UI. */
 @Composable
 private fun UserSwitcher(viewModel: BouncerSceneContentViewModel, modifier: Modifier = Modifier) {
-    if (!viewModel.isUserSwitcherVisible) {
+    val isUserSwitcherVisible by viewModel.isUserSwitcherVisible.collectAsStateWithLifecycle()
+    if (!isUserSwitcherVisible) {
         // Take up the same space as the user switcher normally would, but with nothing inside it.
         Box(modifier = modifier)
         return

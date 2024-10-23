@@ -25,10 +25,12 @@ import com.android.systemui.authentication.shared.model.AuthenticationMethodMode
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel.Pattern
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel.Pin
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel.Sim
+import com.android.systemui.authentication.shared.model.BouncerInputSide
 import com.android.systemui.bouncer.data.repository.BouncerRepository
 import com.android.systemui.bouncer.shared.logging.BouncerUiEvent
 import com.android.systemui.classifier.FalsingClassifier
 import com.android.systemui.classifier.domain.interactor.FalsingInteractor
+import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor
@@ -43,6 +45,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 
@@ -60,6 +63,7 @@ constructor(
     private val uiEventLogger: UiEventLogger,
     private val sessionTracker: SessionTracker,
     sceneBackInteractor: SceneBackInteractor,
+    private val configurationInteractor: ConfigurationInteractor,
 ) {
     private val _onIncorrectBouncerInput = MutableSharedFlow<Unit>()
     val onIncorrectBouncerInput: SharedFlow<Unit> = _onIncorrectBouncerInput
@@ -78,8 +82,47 @@ constructor(
         authenticationInteractor.isPinEnhancedPrivacyEnabled
 
     /** Whether the user switcher should be displayed within the bouncer UI on large screens. */
-    val isUserSwitcherVisible: Boolean
-        get() = repository.isUserSwitcherVisible
+    val isUserSwitcherVisible: Flow<Boolean> =
+        authenticationInteractor.authenticationMethod.map { authMethod ->
+            when (authMethod) {
+                Sim -> false
+                else -> repository.isUserSwitcherEnabledInConfig
+            }
+        }
+
+    /**
+     * Whether one handed bouncer mode is supported on large screen devices. This allows user to
+     * double tap on the half of the screen to bring the bouncer input to that side of the screen.
+     */
+    val isOneHandedModeSupported: Flow<Boolean> =
+        combine(
+            isUserSwitcherVisible,
+            authenticationInteractor.authenticationMethod,
+            configurationInteractor.onAnyConfigurationChange,
+        ) { userSwitcherVisible, authMethod, _ ->
+            userSwitcherVisible ||
+                (repository.isOneHandedBouncerSupportedInConfig && (authMethod !is Password))
+        }
+
+    /**
+     * Preferred side of the screen where the input area on the bouncer should be. This is
+     * applicable for large screen devices (foldables and tablets).
+     */
+    val preferredBouncerInputSide: Flow<BouncerInputSide?> =
+        combine(
+            configurationInteractor.onAnyConfigurationChange,
+            repository.preferredBouncerInputSide,
+        ) { _, _ ->
+            // always read the setting as that can change outside of this
+            // repository (tests/manual testing)
+            val preferredInputSide = repository.getPreferredInputSideSetting()
+            when {
+                preferredInputSide != null -> preferredInputSide
+                repository.isUserSwitcherEnabledInConfig -> BouncerInputSide.RIGHT
+                repository.isOneHandedBouncerSupportedInConfig -> BouncerInputSide.LEFT
+                else -> null
+            }
+        }
 
     private val _onImeHiddenByUser = MutableSharedFlow<Unit>()
     /** Emits a [Unit] each time the IME (keyboard) is hidden by the user. */
@@ -92,6 +135,9 @@ constructor(
                 !successfullyAuthenticated && authenticationInteractor.lockoutEndTimestamp != null
             }
             .map {}
+
+    /** X coordinate of the last recorded touch position on the lockscreen. */
+    val lastRecordedLockscreenTouchPosition = repository.lastRecordedLockscreenTouchPosition
 
     /** The scene to show when bouncer is dismissed. */
     val dismissDestination: Flow<SceneKey> =
@@ -127,6 +173,21 @@ constructor(
                 /* reason= */ "empty pattern input",
             )
         )
+    }
+
+    /** Update the preferred input side for the bouncer. */
+    fun setPreferredBouncerInputSide(inputSide: BouncerInputSide) {
+        repository.setPreferredBouncerInputSide(inputSide)
+    }
+
+    /**
+     * Record the x coordinate of the last touch position on the lockscreen. This will be used to
+     * determine which side of the bouncer the input area should be shown.
+     */
+    fun recordKeyguardTouchPosition(x: Float) {
+        // todo (b/375245685) investigate why this is not working as expected when it is
+        //  wired up with SBKVM
+        repository.recordLockscreenTouchPosition(x)
     }
 
     /**
@@ -180,7 +241,7 @@ constructor(
             } else if (authResult == AuthenticationResult.FAILED) {
                 uiEventLogger.log(
                     BouncerUiEvent.BOUNCER_PASSWORD_FAILURE,
-                    sessionTracker.getSessionId(SESSION_KEYGUARD)
+                    sessionTracker.getSessionId(SESSION_KEYGUARD),
                 )
             }
         }
