@@ -291,3 +291,11 @@ flag {
     description: "This fixed read-only flag is used to enable platform support for Oxygen Saturation (SpO2)."
     bug: "369873227"
 }
+
+flag {
+    name: "allow_host_permission_dialogs_on_virtual_devices"
+    is_exported: true
+    namespace: "permissions"
+    description: "Allow host device permission dialogs (i.e., dialogs for non device-aware permissions) to be shown on virtual devices"
+    bug: "371173672"
+}
