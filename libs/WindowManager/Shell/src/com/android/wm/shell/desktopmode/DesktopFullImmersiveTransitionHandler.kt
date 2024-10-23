@@ -71,7 +71,7 @@ class DesktopFullImmersiveTransitionHandler(
 
     /** Whether there is an immersive transition that hasn't completed yet. */
     private val inProgress: Boolean
-        get() = state != null
+        get() = state != null || pendingExternalExitTransitions.isNotEmpty()
 
     private val rectEvaluator = RectEvaluator()
 
@@ -137,14 +137,19 @@ class DesktopFullImmersiveTransitionHandler(
      *
      * @param wct that will apply these changes
      * @param displayId of the display that should exit immersive mode
+     * @param excludeTaskId of the task to ignore (not exit) if it is the immersive one
      * @return a function to apply once the transition that will apply these changes is started
      */
     fun exitImmersiveIfApplicable(
         wct: WindowContainerTransaction,
-        displayId: Int
+        displayId: Int,
+        excludeTaskId: Int? = null,
     ): ((IBinder) -> Unit)? {
         if (!Flags.enableFullyImmersiveInDesktop()) return null
         val immersiveTask = desktopRepository.getTaskInFullImmersiveState(displayId) ?: return null
+        if (immersiveTask == excludeTaskId) {
+            return null
+        }
         val taskInfo = shellTaskOrganizer.getRunningTaskInfo(immersiveTask) ?: return null
         logV("Appending immersive exit for task: $immersiveTask in display: $displayId")
         wct.setBounds(taskInfo.token, getExitDestinationBounds(taskInfo))

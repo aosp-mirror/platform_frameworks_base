@@ -189,6 +189,21 @@ interface IAudioService {
 
     void setMicrophoneMute(boolean on, String callingPackage, int userId, in String attributionTag);
 
+    @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
+    void setInputGainIndex(in AudioDeviceAttributes ada, int index);
+
+    @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
+    int getInputGainIndex(in AudioDeviceAttributes ada);
+
+    @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
+    int getMaxInputGainIndex();
+
+    @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
+    int getMinInputGainIndex();
+
+    @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
+    boolean isInputGainFixed(in AudioDeviceAttributes ada);
+
     oneway void setMicrophoneMuteFromSwitch(boolean on);
 
     void setRingerModeExternal(int ringerMode, String caller);
@@ -471,6 +486,7 @@ interface IAudioService {
 
     List<AudioDeviceAttributes> getDevicesForAttributesUnprotected(in AudioAttributes attributes);
 
+    @EnforcePermission(anyOf = {"MODIFY_AUDIO_ROUTING", "QUERY_AUDIO_STATE"})
     void addOnDevicesForAttributesChangedListener(in AudioAttributes attributes,
             in IDevicesForAttributesCallback callback);
 

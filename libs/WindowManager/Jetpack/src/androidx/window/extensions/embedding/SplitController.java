@@ -2886,6 +2886,18 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         return getActiveSplitForContainer(container) != null;
     }
 
+
+    @Override
+    public void setAutoSaveEmbeddingState(boolean saveEmbeddingState) {
+        if (!Flags.aeBackStackRestore()) {
+            return;
+        }
+
+        synchronized (mLock) {
+            mPresenter.setAutoSaveEmbeddingState(saveEmbeddingState);
+        }
+    }
+
     void scheduleBackup() {
         synchronized (mLock) {
             mPresenter.scheduleBackup();

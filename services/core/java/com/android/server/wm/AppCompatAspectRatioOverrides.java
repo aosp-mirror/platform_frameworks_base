@@ -39,6 +39,7 @@ import static com.android.server.wm.AppCompatConfiguration.MIN_FIXED_ORIENTATION
 import static com.android.server.wm.AppCompatUtils.isChangeEnabled;
 
 import android.annotation.NonNull;
+import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -126,18 +127,18 @@ class AppCompatAspectRatioOverrides {
             return false;
         }
 
-        mUserAspectRatioState.mUserAspectRatio = getUserMinAspectRatioOverrideCode();
+        final int aspectRatio = getUserMinAspectRatioOverrideCode();
 
-        return mUserAspectRatioState.mUserAspectRatio != USER_MIN_ASPECT_RATIO_UNSET
-                && mUserAspectRatioState.mUserAspectRatio != USER_MIN_ASPECT_RATIO_APP_DEFAULT
-                && mUserAspectRatioState.mUserAspectRatio != USER_MIN_ASPECT_RATIO_FULLSCREEN;
+        return aspectRatio != USER_MIN_ASPECT_RATIO_UNSET
+                && aspectRatio != USER_MIN_ASPECT_RATIO_APP_DEFAULT
+                && aspectRatio != USER_MIN_ASPECT_RATIO_FULLSCREEN;
     }
 
     boolean shouldApplyUserFullscreenOverride() {
         if (isUserFullscreenOverrideEnabled()) {
-            mUserAspectRatioState.mUserAspectRatio = getUserMinAspectRatioOverrideCode();
+            final int aspectRatio = getUserMinAspectRatioOverrideCode();
 
-            return mUserAspectRatioState.mUserAspectRatio == USER_MIN_ASPECT_RATIO_FULLSCREEN;
+            return aspectRatio == USER_MIN_ASPECT_RATIO_FULLSCREEN;
         }
 
         return false;
@@ -153,10 +154,12 @@ class AppCompatAspectRatioOverrides {
     }
 
     boolean isSystemOverrideToFullscreenEnabled() {
+        final int aspectRatio = getUserMinAspectRatioOverrideCode();
+
         return isChangeEnabled(mActivityRecord, OVERRIDE_ANY_ORIENTATION_TO_USER)
                 && !mAllowOrientationOverrideOptProp.isFalse()
-                && (mUserAspectRatioState.mUserAspectRatio == USER_MIN_ASPECT_RATIO_UNSET
-                || mUserAspectRatioState.mUserAspectRatio == USER_MIN_ASPECT_RATIO_FULLSCREEN);
+                && (aspectRatio == USER_MIN_ASPECT_RATIO_UNSET
+                    || aspectRatio == USER_MIN_ASPECT_RATIO_FULLSCREEN);
     }
 
     /**
@@ -173,12 +176,11 @@ class AppCompatAspectRatioOverrides {
     }
 
     boolean hasFullscreenOverride() {
-        // `mUserAspectRatio` is always initialized first in `shouldApplyUserFullscreenOverride()`.
         return shouldApplyUserFullscreenOverride() || isSystemOverrideToFullscreenEnabled();
     }
 
     float getUserMinAspectRatio() {
-        switch (mUserAspectRatioState.mUserAspectRatio) {
+        switch (getUserMinAspectRatioOverrideCode()) {
             case USER_MIN_ASPECT_RATIO_DISPLAY_SIZE:
                 return getDisplaySizeMinAspectRatio();
             case USER_MIN_ASPECT_RATIO_SPLIT_SCREEN:
@@ -269,13 +271,7 @@ class AppCompatAspectRatioOverrides {
     }
 
     int getUserMinAspectRatioOverrideCode() {
-        try {
-            return mActivityRecord.mAtmService.getPackageManager()
-                    .getUserMinAspectRatio(mActivityRecord.packageName, mActivityRecord.mUserId);
-        } catch (RemoteException e) {
-            Slog.w(TAG, "Exception thrown retrieving aspect ratio user override " + this, e);
-        }
-        return mUserAspectRatioState.mUserAspectRatio;
+        return mUserAspectRatioState.getUserAspectRatio(mActivityRecord);
     }
 
     private float getDefaultMinAspectRatioForUnresizableApps() {
@@ -300,10 +296,30 @@ class AppCompatAspectRatioOverrides {
     }
 
     private static class UserAspectRatioState {
-        // TODO(b/315140179): Make mUserAspectRatio final
-        // The min aspect ratio override set by user
+        // The min aspect ratio override set by the user.
         @PackageManager.UserMinAspectRatio
         private int mUserAspectRatio = USER_MIN_ASPECT_RATIO_UNSET;
+        private boolean mHasBeenSet = false;
+
+        @PackageManager.UserMinAspectRatio
+        private int getUserAspectRatio(@NonNull ActivityRecord activityRecord) {
+            // Package manager can be null at construction time, so access should be on demand.
+            if (!mHasBeenSet) {
+                try {
+                    final IPackageManager pm = activityRecord.mAtmService.getPackageManager();
+                    if (pm != null) {
+                        mUserAspectRatio = pm.getUserMinAspectRatio(activityRecord.packageName,
+                                activityRecord.mUserId);
+                        mHasBeenSet = true;
+                    }
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "Exception thrown retrieving aspect ratio user override "
+                            + this, e);
+                }
+            }
+
+            return mUserAspectRatio;
+        }
     }
 
     private Resources getResources() {

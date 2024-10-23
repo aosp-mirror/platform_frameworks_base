@@ -987,5 +987,7 @@ public class BatteryStatsImplTest {
                         BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE)
                 .getUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_FLASHLIGHT))
                 .isEqualTo(60000);
+
+        span.close();
     }
 }

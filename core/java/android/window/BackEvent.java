@@ -16,6 +16,7 @@
 
 package android.window;
 
+import static com.android.window.flags.Flags.FLAG_PREDICTIVE_BACK_SWIPE_EDGE_NONE_API;
 import static com.android.window.flags.Flags.FLAG_PREDICTIVE_BACK_TIMESTAMP_API;
 import static com.android.window.flags.Flags.predictiveBackTimestampApi;
 
@@ -37,11 +38,19 @@ public final class BackEvent {
     public static final int EDGE_LEFT = 0;
     /** Indicates that the edge swipe starts from the right edge of the screen */
     public static final int EDGE_RIGHT = 1;
+    /**
+     * Indicates that the back event was not triggered by an edge swipe back gesture. This applies
+     * to cases like using the back button in 3-button navigation or pressing a hardware back
+     * button.
+     */
+    @FlaggedApi(FLAG_PREDICTIVE_BACK_SWIPE_EDGE_NONE_API)
+    public static final int EDGE_NONE = 2;
 
     /** @hide */
     @IntDef({
             EDGE_LEFT,
             EDGE_RIGHT,
+            EDGE_NONE,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface SwipeEdge{}

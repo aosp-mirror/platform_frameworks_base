@@ -345,6 +345,15 @@ public class TaskInfo {
      */
     public AppCompatTaskInfo appCompatTaskInfo = AppCompatTaskInfo.create();
 
+    /**
+     * The top activity's main window frame if it doesn't match the top activity bounds.
+     * {@code null}, otherwise.
+     *
+     * @hide
+     */
+    @Nullable
+    public Rect topActivityMainWindowFrame;
+
     TaskInfo() {
         // Do nothing
     }
@@ -477,7 +486,8 @@ public class TaskInfo {
                 && Objects.equals(capturedLink, that.capturedLink)
                 && capturedLinkTimestamp == that.capturedLinkTimestamp
                 && requestedVisibleTypes == that.requestedVisibleTypes
-                && appCompatTaskInfo.equalsForTaskOrganizer(that.appCompatTaskInfo);
+                && appCompatTaskInfo.equalsForTaskOrganizer(that.appCompatTaskInfo)
+                && Objects.equals(topActivityMainWindowFrame, that.topActivityMainWindowFrame);
     }
 
     /**
@@ -553,6 +563,7 @@ public class TaskInfo {
         capturedLinkTimestamp = source.readLong();
         requestedVisibleTypes = source.readInt();
         appCompatTaskInfo = source.readTypedObject(AppCompatTaskInfo.CREATOR);
+        topActivityMainWindowFrame = source.readTypedObject(Rect.CREATOR);
     }
 
     /**
@@ -606,6 +617,7 @@ public class TaskInfo {
         dest.writeLong(capturedLinkTimestamp);
         dest.writeInt(requestedVisibleTypes);
         dest.writeTypedObject(appCompatTaskInfo, flags);
+        dest.writeTypedObject(topActivityMainWindowFrame, flags);
     }
 
     @Override
@@ -649,6 +661,7 @@ public class TaskInfo {
                 + " capturedLinkTimestamp=" + capturedLinkTimestamp
                 + " requestedVisibleTypes=" + requestedVisibleTypes
                 + " appCompatTaskInfo=" + appCompatTaskInfo
+                + " topActivityMainWindowFrame=" + topActivityMainWindowFrame
                 + "}";
     }
 }

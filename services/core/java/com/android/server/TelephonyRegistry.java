@@ -68,6 +68,7 @@ import android.telephony.CellSignalStrengthWcdma;
 import android.telephony.DisconnectCause;
 import android.telephony.LinkCapacityEstimate;
 import android.telephony.LocationAccessPolicy;
+import android.telephony.NetworkRegistrationInfo;
 import android.telephony.PhoneCapability;
 import android.telephony.PhoneStateListener;
 import android.telephony.PhysicalChannelConfig;
@@ -90,6 +91,7 @@ import android.telephony.ims.MediaQualityStatus;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.IntArray;
 import android.util.LocalLog;
 import android.util.Pair;
 import android.util.SparseArray;
@@ -429,6 +431,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
     private boolean[] mCarrierRoamingNtnMode = null;
     private boolean[] mCarrierRoamingNtnEligible = null;
 
+    private List<IntArray> mCarrierRoamingNtnAvailableServices;
+
     /**
      * Per-phone map of precise data connection state. The key of the map is the pair of transport
      * type and APN setting. This is the cache to prevent redundant callbacks to the listeners.
@@ -741,6 +745,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 cutListToSize(mCarrierServiceStates, mNumPhones);
                 cutListToSize(mCallStateLists, mNumPhones);
                 cutListToSize(mMediaQualityStatus, mNumPhones);
+                cutListToSize(mCarrierRoamingNtnAvailableServices, mNumPhones);
                 return;
             }
 
@@ -789,6 +794,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 mSCBMDuration[i] = 0;
                 mCarrierRoamingNtnMode[i] = false;
                 mCarrierRoamingNtnEligible[i] = false;
+                mCarrierRoamingNtnAvailableServices.add(i, new IntArray());
             }
         }
     }
@@ -864,6 +870,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         mSCBMDuration = new long[numPhones];
         mCarrierRoamingNtnMode = new boolean[numPhones];
         mCarrierRoamingNtnEligible = new boolean[numPhones];
+        mCarrierRoamingNtnAvailableServices = new ArrayList<>();
 
         for (int i = 0; i < numPhones; i++) {
             mCallState[i] =  TelephonyManager.CALL_STATE_IDLE;
@@ -909,6 +916,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             mSCBMDuration[i] = 0;
             mCarrierRoamingNtnMode[i] = false;
             mCarrierRoamingNtnEligible[i] = false;
+            mCarrierRoamingNtnAvailableServices.add(i, new IntArray());
         }
 
         mAppOps = mContext.getSystemService(AppOpsManager.class);
@@ -1529,6 +1537,15 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     try {
                         r.callback.onCarrierRoamingNtnEligibleStateChanged(
                                 mCarrierRoamingNtnEligible[r.phoneId]);
+                    } catch (RemoteException ex) {
+                        remove(r.binder);
+                    }
+                }
+                if (events.contains(
+                        TelephonyCallback.EVENT_CARRIER_ROAMING_NTN_AVAILABLE_SERVICES_CHANGED)) {
+                    try {
+                        r.callback.onCarrierRoamingNtnAvailableServicesChanged(
+                                mCarrierRoamingNtnAvailableServices.get(r.phoneId).toArray());
                     } catch (RemoteException ex) {
                         remove(r.binder);
                     }
@@ -3642,6 +3659,47 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         }
     }
 
+    /**
+     * Notify external listeners that carrier roaming non-terrestrial available services changed.
+     * @param availableServices The list of the supported services.
+     */
+    public void notifyCarrierRoamingNtnAvailableServicesChanged(
+            int subId, @NetworkRegistrationInfo.ServiceType int[] availableServices) {
+        if (!checkNotifyPermission("notifyCarrierRoamingNtnEligibleStateChanged")) {
+            log("notifyCarrierRoamingNtnAvailableServicesChanged: caller does not have required "
+                    + "permissions.");
+            return;
+        }
+
+        if (VDBG) {
+            log("notifyCarrierRoamingNtnAvailableServicesChanged: "
+                    + "availableServices=" + Arrays.toString(availableServices));
+        }
+
+        synchronized (mRecords) {
+            int phoneId = getPhoneIdFromSubId(subId);
+            if (!validatePhoneId(phoneId)) {
+                loge("Invalid phone ID " + phoneId + " for " + subId);
+                return;
+            }
+            IntArray availableServicesIntArray = new IntArray(availableServices.length);
+            availableServicesIntArray.addAll(availableServices);
+            mCarrierRoamingNtnAvailableServices.set(phoneId, availableServicesIntArray);
+            for (Record r : mRecords) {
+                if (r.matchTelephonyCallbackEvent(
+                        TelephonyCallback.EVENT_CARRIER_ROAMING_NTN_AVAILABLE_SERVICES_CHANGED)
+                        && idMatch(r, subId, phoneId)) {
+                    try {
+                        r.callback.onCarrierRoamingNtnAvailableServicesChanged(availableServices);
+                    } catch (RemoteException ex) {
+                        mRemoveList.add(r.binder);
+                    }
+                }
+            }
+            handleRemoveListLocked();
+        }
+    }
+
     @NeverCompile // Avoid size overhead of debugging code.
     @Override
     public void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
@@ -3706,6 +3764,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 Pair<String, Integer> carrierServiceState = mCarrierServiceStates.get(i);
                 pw.println("mCarrierServiceState=<package=" + pii(carrierServiceState.first)
                         + ", uid=" + carrierServiceState.second + ">");
+                pw.println("mCarrierRoamingNtnAvailableServices="
+                        + mCarrierRoamingNtnAvailableServices.get(i));
                 pw.decreaseIndent();
             }
 

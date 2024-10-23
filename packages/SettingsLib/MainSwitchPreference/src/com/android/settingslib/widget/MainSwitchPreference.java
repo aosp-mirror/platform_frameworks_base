@@ -81,7 +81,11 @@ public class MainSwitchPreference extends TwoStatePreference
     }
 
     private void init(Context context, AttributeSet attrs) {
-        setLayoutResource(R.layout.settingslib_main_switch_layout);
+        boolean isExpressive = SettingsThemeHelper.isExpressiveTheme(context);
+        int resId = isExpressive
+                ? R.layout.settingslib_expressive_main_switch_layout
+                : R.layout.settingslib_main_switch_layout;
+        setLayoutResource(resId);
         mSwitchChangeListeners.add(this);
         if (attrs != null) {
             final TypedArray a = context.obtainStyledAttributes(attrs,

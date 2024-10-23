@@ -799,6 +799,27 @@ class KeyGestureControllerTests {
     }
 
     @Test
+    @EnableFlags(com.android.window.flags.Flags.FLAG_ENABLE_MOVE_TO_NEXT_DISPLAY_SHORTCUT)
+    fun testMoveToNextDisplay() {
+        val keyGestureController = KeyGestureController(context, testLooper.looper)
+        testKeyGestureInternal(
+            keyGestureController,
+            TestData(
+                "META + CTRL + D -> Move a task to next display",
+                intArrayOf(
+                    KeyEvent.KEYCODE_META_LEFT,
+                    KeyEvent.KEYCODE_CTRL_LEFT,
+                    KeyEvent.KEYCODE_D
+                ),
+                KeyGestureEvent.KEY_GESTURE_TYPE_MOVE_TO_NEXT_DISPLAY,
+                intArrayOf(KeyEvent.KEYCODE_D),
+                KeyEvent.META_META_ON or KeyEvent.META_CTRL_ON,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
+            )
+        )
+    }
+
+    @Test
     fun testCapsLockPressNotified() {
         val keyGestureController = KeyGestureController(context, testLooper.looper)
         val listener = KeyGestureEventListener()

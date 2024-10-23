@@ -955,6 +955,7 @@
             <xs:enumeration value="default"/>
             <xs:enumeration value="idle"/>
             <xs:enumeration value="doze"/>
+            <xs:enumeration value="bedtime_wear"/>
         </xs:restriction>
     </xs:simpleType>
 

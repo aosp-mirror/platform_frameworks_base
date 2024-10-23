@@ -161,7 +161,7 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
     fun validateMarginStartInSplitShade() =
         testScope.runTest {
             shadeTestUtil.setSplitShade(true)
-            overrideResource(R.dimen.notification_panel_margin_horizontal, 20)
+            overrideDimensionPixelSize(R.dimen.notification_panel_margin_horizontal, 20)
 
             val dimens by collectLastValue(underTest.configurationBasedDimensions)
 
@@ -174,7 +174,7 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
     fun validateMarginStart() =
         testScope.runTest {
             shadeTestUtil.setSplitShade(false)
-            overrideResource(R.dimen.notification_panel_margin_horizontal, 20)
+            overrideDimensionPixelSize(R.dimen.notification_panel_margin_horizontal, 20)
 
             val dimens by collectLastValue(underTest.configurationBasedDimensions)
 
@@ -189,8 +189,8 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
             whenever(largeScreenHeaderHelper.getLargeScreenHeaderHeight()).thenReturn(5)
             shadeTestUtil.setSplitShade(true)
             overrideResource(R.bool.config_use_large_screen_shade_header, true)
-            overrideResource(R.dimen.large_screen_shade_header_height, 10)
-            overrideResource(R.dimen.keyguard_split_shade_top_margin, 50)
+            overrideDimensionPixelSize(R.dimen.large_screen_shade_header_height, 10)
+            overrideDimensionPixelSize(R.dimen.keyguard_split_shade_top_margin, 50)
 
             val paddingTop by collectLastValue(underTest.paddingTopDimen)
             configurationRepository.onAnyConfigurationChange()
@@ -205,8 +205,8 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
             whenever(largeScreenHeaderHelper.getLargeScreenHeaderHeight()).thenReturn(10)
             shadeTestUtil.setSplitShade(false)
             overrideResource(R.bool.config_use_large_screen_shade_header, true)
-            overrideResource(R.dimen.large_screen_shade_header_height, 10)
-            overrideResource(R.dimen.keyguard_split_shade_top_margin, 50)
+            overrideDimensionPixelSize(R.dimen.large_screen_shade_header_height, 10)
+            overrideDimensionPixelSize(R.dimen.keyguard_split_shade_top_margin, 50)
 
             val paddingTop by collectLastValue(underTest.paddingTopDimen)
 
@@ -221,8 +221,8 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
             whenever(largeScreenHeaderHelper.getLargeScreenHeaderHeight()).thenReturn(10)
             shadeTestUtil.setSplitShade(false)
             overrideResource(R.bool.config_use_large_screen_shade_header, false)
-            overrideResource(R.dimen.large_screen_shade_header_height, 10)
-            overrideResource(R.dimen.keyguard_split_shade_top_margin, 50)
+            overrideDimensionPixelSize(R.dimen.large_screen_shade_header_height, 10)
+            overrideDimensionPixelSize(R.dimen.keyguard_split_shade_top_margin, 50)
 
             val paddingTop by collectLastValue(underTest.paddingTopDimen)
 
@@ -263,8 +263,11 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
             whenever(largeScreenHeaderHelper.getLargeScreenHeaderHeight())
                 .thenReturn(headerHelperHeight)
             overrideResource(R.bool.config_use_large_screen_shade_header, true)
-            overrideResource(R.dimen.large_screen_shade_header_height, headerResourceHeight)
-            overrideResource(R.dimen.notification_panel_margin_top, 0)
+            overrideDimensionPixelSize(
+                R.dimen.large_screen_shade_header_height,
+                headerResourceHeight,
+            )
+            overrideDimensionPixelSize(R.dimen.notification_panel_margin_top, 0)
 
             val dimens by collectLastValue(underTest.configurationBasedDimensions)
 
@@ -282,8 +285,11 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
             whenever(largeScreenHeaderHelper.getLargeScreenHeaderHeight())
                 .thenReturn(headerHelperHeight)
             overrideResource(R.bool.config_use_large_screen_shade_header, true)
-            overrideResource(R.dimen.large_screen_shade_header_height, headerResourceHeight)
-            overrideResource(R.dimen.notification_panel_margin_top, 0)
+            overrideDimensionPixelSize(
+                R.dimen.large_screen_shade_header_height,
+                headerResourceHeight,
+            )
+            overrideDimensionPixelSize(R.dimen.notification_panel_margin_top, 0)
 
             val dimens by collectLastValue(underTest.configurationBasedDimensions)
 
@@ -480,8 +486,8 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
     fun validateMarginTop() =
         testScope.runTest {
             overrideResource(R.bool.config_use_large_screen_shade_header, false)
-            overrideResource(R.dimen.large_screen_shade_header_height, 50)
-            overrideResource(R.dimen.notification_panel_margin_top, 0)
+            overrideDimensionPixelSize(R.dimen.large_screen_shade_header_height, 50)
+            overrideDimensionPixelSize(R.dimen.notification_panel_margin_top, 0)
 
             val dimens by collectLastValue(underTest.configurationBasedDimensions)
 
@@ -676,8 +682,8 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
             whenever(largeScreenHeaderHelper.getLargeScreenHeaderHeight()).thenReturn(5)
             shadeTestUtil.setSplitShade(true)
             overrideResource(R.bool.config_use_large_screen_shade_header, true)
-            overrideResource(R.dimen.large_screen_shade_header_height, 10)
-            overrideResource(R.dimen.keyguard_split_shade_top_margin, 50)
+            overrideDimensionPixelSize(R.dimen.large_screen_shade_header_height, 10)
+            overrideDimensionPixelSize(R.dimen.keyguard_split_shade_top_margin, 50)
 
             configurationRepository.onAnyConfigurationChange()
             runCurrent()
@@ -1309,5 +1315,10 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
             )
         communalSceneRepository.setTransitionState(transitionState)
         runCurrent()
+    }
+
+    private fun overrideDimensionPixelSize(id: Int, pixelSize: Int) {
+        overrideResource(id, pixelSize)
+        configurationRepository.setDimensionPixelSize(id, pixelSize)
     }
 }

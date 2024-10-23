@@ -139,7 +139,6 @@ import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
-import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.provider.DeviceConfig;
 import android.util.MutableBoolean;
 import android.view.DisplayInfo;
@@ -2662,8 +2661,11 @@ public class ActivityRecordTests extends WindowTestsBase {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_UNIVERSAL_RESIZABLE_BY_DEFAULT)
     public void testSetOrientation_restrictedByTargetSdk() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_UNIVERSAL_RESIZABLE_BY_DEFAULT);
+        mDisplayContent.setIgnoreOrientationRequest(true);
+        makeDisplayLargeScreen(mDisplayContent);
+
         assertSetOrientation(Build.VERSION_CODES.CUR_DEVELOPMENT, CATEGORY_SOCIAL, false);
         assertSetOrientation(Build.VERSION_CODES.CUR_DEVELOPMENT, CATEGORY_GAME, true);
 
@@ -2673,11 +2675,12 @@ public class ActivityRecordTests extends WindowTestsBase {
     }
 
     private void assertSetOrientation(int targetSdk, int category, boolean expectRotate) {
-        final ActivityRecord activity = new ActivityBuilder(mAtm).setCreateTask(true).build();
-        activity.mTargetSdk = targetSdk;
+        final String packageName = targetSdk <= Build.VERSION_CODES.VANILLA_ICE_CREAM
+                ? mContext.getPackageName() // WmTests uses legacy sdk.
+                : null; // Simulate CUR_DEVELOPMENT by invalid package (see PlatformCompat).
+        final ActivityRecord activity = new ActivityBuilder(mAtm).setCreateTask(true)
+                .setComponent(getUniqueComponentName(packageName)).build();
         activity.info.applicationInfo.category = category;
-
-        activity.setVisible(true);
 
         // Assert orientation is unspecified to start.
         assertEquals(SCREEN_ORIENTATION_UNSPECIFIED, activity.getOrientation());

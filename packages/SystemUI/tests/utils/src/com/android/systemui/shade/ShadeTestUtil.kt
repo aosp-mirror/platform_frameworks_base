@@ -187,6 +187,7 @@ class ShadeTestUtilLegacyImpl(
         context
             .getOrCreateTestableResources()
             .addOverride(R.bool.config_use_split_notification_shade, splitShade)
+        shadeRepository.setShadeLayoutWide(splitShade)
         testScope.runCurrent()
     }
 }

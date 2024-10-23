@@ -114,7 +114,6 @@ constructor(
                             keyguardTransitionInteractor.currentKeyguardState.replayCache.last()
                         ) {
                             KeyguardState.GLANCEABLE_HUB,
-                            KeyguardState.DREAMING_LOCKSCREEN_HOSTED,
                             KeyguardState.GONE,
                             KeyguardState.OCCLUDED,
                             KeyguardState.OFF,

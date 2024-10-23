@@ -105,7 +105,7 @@ public final class LongArrayMultiStateCounter implements Parcelable {
         public void setValues(long[] array) {
             if (array.length != mLength) {
                 throw new IllegalArgumentException(
-                        "Invalid array length: " + mLength + ", expected: " + mLength);
+                        "Invalid array length: " + array.length + ", expected: " + mLength);
             }
             native_setValues(mNativeObject, array);
         }
@@ -116,7 +116,7 @@ public final class LongArrayMultiStateCounter implements Parcelable {
         public void getValues(long[] array) {
             if (array.length != mLength) {
                 throw new IllegalArgumentException(
-                        "Invalid array length: " + mLength + ", expected: " + mLength);
+                        "Invalid array length: " + array.length + ", expected: " + mLength);
             }
             native_getValues(mNativeObject, array);
         }
@@ -346,6 +346,11 @@ public final class LongArrayMultiStateCounter implements Parcelable {
         if (state < 0 || state >= mStateCount) {
             throw new IllegalArgumentException(
                     "State: " + state + ", outside the range: [0-" + mStateCount + "]");
+        }
+        if (longArrayContainer.mLength != mLength) {
+            throw new IllegalArgumentException(
+                    "Invalid array length: " + longArrayContainer.mLength
+                            + ", expected: " + mLength);
         }
         native_getCounts(mNativeObject, longArrayContainer.mNativeObject, state);
     }

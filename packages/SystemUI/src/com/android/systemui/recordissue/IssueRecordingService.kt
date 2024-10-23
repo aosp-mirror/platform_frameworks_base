@@ -24,11 +24,9 @@ import android.content.res.Resources
 import android.net.Uri
 import android.os.Handler
 import android.os.IBinder
-import android.os.Looper
 import android.util.Log
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.animation.DialogTransitionAnimator
-import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.LongRunning
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.qs.pipeline.domain.interactor.PanelInteractor
@@ -38,6 +36,9 @@ import com.android.systemui.screenrecord.RecordingService
 import com.android.systemui.screenrecord.RecordingServiceStrings
 import com.android.systemui.settings.UserContextProvider
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil
+import com.android.traceur.MessageConstants.INTENT_EXTRA_TRACE_TYPE
+import com.android.traceur.PresetTraceConfigs
+import com.android.traceur.TraceConfig
 import java.util.concurrent.Executor
 import javax.inject.Inject
 
@@ -45,7 +46,6 @@ class IssueRecordingService
 @Inject
 constructor(
     controller: RecordingController,
-    @Background private val bgLooper: Looper,
     @LongRunning private val bgExecutor: Executor,
     @Main handler: Handler,
     uiEventLogger: UiEventLogger,
@@ -57,6 +57,7 @@ constructor(
     private val issueRecordingState: IssueRecordingState,
     traceurConnectionProvider: TraceurConnection.Provider,
     iActivityManager: IActivityManager,
+    screenRecordingStartTimeStore: ScreenRecordingStartTimeStore,
 ) :
     RecordingService(
         controller,
@@ -66,6 +67,7 @@ constructor(
         notificationManager,
         userContextProvider,
         keyguardDismissUtil,
+        screenRecordingStartTimeStore,
     ) {
 
     private val traceurConnection: TraceurConnection = traceurConnectionProvider.create()
@@ -80,6 +82,7 @@ constructor(
             iActivityManager,
             notificationManager,
             userContextProvider,
+            screenRecordingStartTimeStore,
         )
 
     /**
@@ -109,15 +112,23 @@ constructor(
         Log.d(getTag(), "handling action: ${intent?.action}")
         when (intent?.action) {
             ACTION_START -> {
-                session.start()
-                if (!issueRecordingState.recordScreen) {
+                val screenRecord = intent.getBooleanExtra(EXTRA_SCREEN_RECORD, false)
+                with(session) {
+                    traceConfig =
+                        intent.getParcelableExtra(INTENT_EXTRA_TRACE_TYPE, TraceConfig::class.java)
+                            ?: PresetTraceConfigs.getDefaultConfig()
+                    takeBugReport = intent.getBooleanExtra(EXTRA_BUG_REPORT, false)
+                    this.screenRecord = screenRecord
+                    start()
+                }
+                if (!screenRecord) {
                     // If we don't want to record the screen, the ACTION_SHOW_START_NOTIF action
                     // will circumvent the RecordingService's screen recording start code.
                     return super.onStartCommand(Intent(ACTION_SHOW_START_NOTIF), flags, startId)
                 }
             }
             ACTION_STOP,
-            ACTION_STOP_NOTIF -> session.stop(contentResolver)
+            ACTION_STOP_NOTIF -> session.stop()
             ACTION_SHARE -> {
                 session.share(
                     intent.getIntExtra(EXTRA_NOTIFICATION_ID, mNotificationId),
@@ -136,6 +147,8 @@ constructor(
     companion object {
         private const val TAG = "IssueRecordingService"
         private const val CHANNEL_ID = "issue_record"
+        const val EXTRA_SCREEN_RECORD = "extra_screenRecord"
+        const val EXTRA_BUG_REPORT = "extra_bugReport"
 
         /**
          * Get an intent to stop the issue recording service.
@@ -153,8 +166,17 @@ constructor(
          *
          * @param context Context from the requesting activity
          */
-        fun getStartIntent(context: Context): Intent =
-            Intent(context, IssueRecordingService::class.java).setAction(ACTION_START)
+        fun getStartIntent(
+            context: Context,
+            traceConfig: TraceConfig,
+            screenRecord: Boolean,
+            bugReport: Boolean,
+        ): Intent =
+            Intent(context, IssueRecordingService::class.java)
+                .setAction(ACTION_START)
+                .putExtra(INTENT_EXTRA_TRACE_TYPE, traceConfig)
+                .putExtra(EXTRA_SCREEN_RECORD, screenRecord)
+                .putExtra(EXTRA_BUG_REPORT, bugReport)
     }
 }
 

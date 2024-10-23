@@ -710,6 +710,9 @@ internal class NestedScrollHandlerImpl(
 
                 canStart
             },
+            // We need to maintain scroll priority even if the scene transition can no longer
+            // consume the scroll gesture to allow us to return to the previous scene.
+            canStopOnScroll = { _, _ -> false },
             canStopOnPreFling = { true },
             onStart = { offsetAvailable ->
                 val pointersInfo = pointersInfo()
@@ -740,7 +743,12 @@ internal class NestedScrollHandlerImpl(
                         .onStop(velocity = velocityAvailable, canChangeContent = canChangeScene)
                         .invoke()
                 } finally {
-                    dragController = null
+                    // onStop might still be running when a new gesture begins.
+                    // To prevent conflicts, we should only remove the drag controller if it's the
+                    // same one that was active initially.
+                    if (dragController == controller) {
+                        dragController = null
+                    }
                 }
             },
             onCancel = {

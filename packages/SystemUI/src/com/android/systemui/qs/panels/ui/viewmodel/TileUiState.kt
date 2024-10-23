@@ -33,6 +33,7 @@ data class TileUiState(
     val label: String,
     val secondaryLabel: String,
     val state: Int,
+    val handlesLongClick: Boolean,
     val handlesSecondaryClick: Boolean,
     val icon: Supplier<QSTile.Icon?>,
     val accessibilityUiState: AccessibilityUiState,
@@ -86,6 +87,7 @@ fun QSTile.State.toUiState(resources: Resources): TileUiState {
         label = label?.toString() ?: "",
         secondaryLabel = secondaryLabel?.toString() ?: "",
         state = if (disabledByPolicy) Tile.STATE_UNAVAILABLE else state,
+        handlesLongClick = handlesLongClick,
         handlesSecondaryClick = handlesSecondaryClick,
         icon = icon?.let { Supplier { icon } } ?: iconSupplier ?: Supplier { null },
         AccessibilityUiState(

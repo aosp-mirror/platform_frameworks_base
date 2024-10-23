@@ -15,6 +15,8 @@
  */
 package com.android.server.audio;
 
+import static android.media.AudioDeviceInfo.TYPE_BUILTIN_MIC;
+
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -27,15 +29,19 @@ import static org.mockito.Mockito.when;
 
 import android.app.AppOpsManager;
 import android.content.Context;
+import android.media.AudioDeviceAttributes;
 import android.media.AudioSystem;
 import android.os.Looper;
 import android.os.PermissionEnforcer;
 import android.os.UserHandle;
+import android.platform.test.annotations.EnableFlags;
 import android.util.Log;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.MediumTest;
 import androidx.test.runner.AndroidJUnit4;
+
+import com.android.media.flags.Flags;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -53,6 +59,7 @@ public class AudioServiceTest {
     private static final String TAG = "AudioServiceTest";
 
     private static final int MAX_MESSAGE_HANDLING_DELAY_MS = 100;
+    private static final int DEFAULT_INPUT_GAIN_INDEX = 50;
 
     @Rule
     public final MockitoRule mockito = MockitoJUnit.rule();
@@ -201,5 +208,30 @@ public class AudioServiceTest {
                     .broadcastMasterMuteStatus(mute);
             reset(mSpySystemServer);
         }
+    }
+
+    /** Test input gain index setter and getter */
+    @EnableFlags(Flags.FLAG_ENABLE_AUDIO_INPUT_DEVICE_ROUTING_AND_VOLUME_CONTROL)
+    @Test
+    public void testInputGainIndex() throws Exception {
+        Log.i(TAG, "running testInputGainIndex");
+        Assert.assertNotNull(mAudioService);
+        Thread.sleep(MAX_MESSAGE_HANDLING_DELAY_MS); // wait for full AudioService initialization
+
+        AudioDeviceAttributes ada =
+                new AudioDeviceAttributes(
+                        AudioDeviceAttributes.ROLE_INPUT, TYPE_BUILTIN_MIC, /* address= */ "");
+
+        Assert.assertEquals(
+                "default input gain index reporting wrong value",
+                DEFAULT_INPUT_GAIN_INDEX,
+                mAudioService.getInputGainIndex(ada));
+
+        int inputGainIndex = 20;
+        mAudioService.setInputGainIndex(ada, inputGainIndex);
+        Assert.assertEquals(
+                "input gain index reporting wrong value",
+                inputGainIndex,
+                mAudioService.getInputGainIndex(ada));
     }
 }

@@ -18,13 +18,13 @@ package com.android.systemui.recordissue
 
 import android.app.IActivityManager
 import android.app.NotificationManager
-import android.content.ContentResolver
 import android.net.Uri
 import android.os.UserHandle
 import android.provider.Settings
 import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.qs.pipeline.domain.interactor.PanelInteractor
 import com.android.systemui.settings.UserContextProvider
+import com.android.traceur.PresetTraceConfigs
 import java.util.concurrent.Executor
 
 private const val NOTIFY_SESSION_ENDED_SETTING = "should_notify_trace_session_ended"
@@ -46,17 +46,25 @@ class IssueRecordingServiceSession(
     private val iActivityManager: IActivityManager,
     private val notificationManager: NotificationManager,
     private val userContextProvider: UserContextProvider,
+    private val startTimeStore: ScreenRecordingStartTimeStore,
 ) {
+    var takeBugReport = false
+    var traceConfig = PresetTraceConfigs.getDefaultConfig()
+    var screenRecord = false
 
     fun start() {
-        bgExecutor.execute { traceurConnection.startTracing(issueRecordingState.traceConfig) }
+        bgExecutor.execute { traceurConnection.startTracing(traceConfig) }
         issueRecordingState.isRecording = true
     }
 
-    fun stop(contentResolver: ContentResolver) {
+    fun stop() {
         bgExecutor.execute {
-            if (issueRecordingState.traceConfig.longTrace) {
-                Settings.Global.putInt(contentResolver, NOTIFY_SESSION_ENDED_SETTING, DISABLED)
+            if (traceConfig.longTrace) {
+                Settings.Global.putInt(
+                    userContextProvider.userContext.contentResolver,
+                    NOTIFY_SESSION_ENDED_SETTING,
+                    DISABLED,
+                )
             }
             traceurConnection.stopTracing()
         }
@@ -70,11 +78,17 @@ class IssueRecordingServiceSession(
                 notificationId,
                 UserHandle(userContextProvider.userContext.userId),
             )
-
-            if (issueRecordingState.takeBugreport) {
+            val screenRecordingUris: List<Uri> =
+                mutableListOf<Uri>().apply {
+                    screenRecording?.let { add(it) }
+                    if (traceConfig.winscope && screenRecord) {
+                        startTimeStore.getFileUri(userContextProvider.userContext)?.let { add(it) }
+                    }
+                }
+            if (takeBugReport) {
                 iActivityManager.requestBugReportWithExtraAttachment(screenRecording)
             } else {
-                traceurConnection.shareTraces(screenRecording)
+                traceurConnection.shareTraces(screenRecordingUris)
             }
         }
 

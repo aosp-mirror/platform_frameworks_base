@@ -75,8 +75,6 @@ public class StageTaskListener implements ShellTaskOrganizer.TaskListener {
     public interface StageListenerCallbacks {
         void onRootTaskAppeared();
 
-        void onStageHasChildrenChanged(StageTaskListener stageTaskListener);
-
         void onStageVisibilityChanged(StageTaskListener stageTaskListener);
 
         void onChildTaskStatusChanged(StageTaskListener stage, int taskId, boolean present,
@@ -207,7 +205,10 @@ public class StageTaskListener implements ShellTaskOrganizer.TaskListener {
                     mIconProvider);
             mHasRootTask = true;
             mCallbacks.onRootTaskAppeared();
-            sendStatusChanged();
+            if (mVisible != mRootTaskInfo.isVisible) {
+                mVisible = mRootTaskInfo.isVisible;
+                mCallbacks.onStageVisibilityChanged(this);
+            }
             mSyncQueue.runInSync(t -> mDimLayer =
                     SurfaceUtils.makeDimLayer(t, mRootLeash, "Dim layer"));
         } else if (taskInfo.parentTaskId == mRootTaskInfo.taskId) {
@@ -496,22 +497,6 @@ public class StageTaskListener implements ShellTaskOrganizer.TaskListener {
         if (task == null) return false;
         wct.reparent(task.token, newParent, false /* onTop */);
         return true;
-    }
-
-    private void sendStatusChanged() {
-        boolean hasChildren = mChildrenTaskInfo.size() > 0;
-        boolean visible = mRootTaskInfo.isVisible;
-        if (!mHasRootTask) return;
-
-        if (mHasChildren != hasChildren) {
-            mHasChildren = hasChildren;
-            mCallbacks.onStageHasChildrenChanged(this);
-        }
-
-        if (mVisible != visible) {
-            mVisible = visible;
-            mCallbacks.onStageVisibilityChanged(this);
-        }
     }
 
     @Override

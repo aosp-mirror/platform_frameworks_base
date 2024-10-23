@@ -36,16 +36,12 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.keyguard.KeyguardStatusView;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepository;
-import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository;
-import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor;
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor;
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryUdfpsInteractor;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository;
-import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
 import com.android.systemui.kosmos.KosmosJavaAdapter;
 import com.android.systemui.media.controls.domain.pipeline.MediaDataManager;
@@ -55,7 +51,6 @@ import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.power.domain.interactor.PowerInteractor;
 import com.android.systemui.qs.QSFragmentLegacy;
 import com.android.systemui.res.R;
-import com.android.systemui.scene.domain.interactor.SceneInteractor;
 import com.android.systemui.screenrecord.RecordingController;
 import com.android.systemui.shade.data.repository.FakeShadeRepository;
 import com.android.systemui.shade.domain.interactor.ShadeInteractor;
@@ -72,7 +67,6 @@ import com.android.systemui.statusbar.notification.data.repository.ActiveNotific
 import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor;
 import com.android.systemui.statusbar.notification.stack.AmbientState;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
-import com.android.systemui.statusbar.notification.stack.domain.interactor.SharedNotificationContainerInteractor;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.KeyguardBottomAreaView;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
@@ -179,27 +173,11 @@ public class QuickSettingsControllerImplBaseTest extends SysuiTestCase {
         mStatusBarStateController = mKosmos.getStatusBarStateController();
 
         mKosmos.getFakeDeviceProvisioningRepository().setDeviceProvisioned(true);
-        FakeConfigurationRepository configurationRepository = new FakeConfigurationRepository();
 
         PowerInteractor powerInteractor = mKosmos.getPowerInteractor();
 
-        SceneInteractor sceneInteractor = mKosmos.getSceneInteractor();
-
         KeyguardTransitionInteractor keyguardTransitionInteractor =
                 mKosmos.getKeyguardTransitionInteractor();
-        KeyguardInteractor keyguardInteractor = new KeyguardInteractor(
-                mKeyguardRepository,
-                powerInteractor,
-                new FakeKeyguardBouncerRepository(),
-                new ConfigurationInteractor(configurationRepository),
-                mShadeRepository,
-                keyguardTransitionInteractor,
-                () -> sceneInteractor,
-                () -> mKosmos.getFromGoneTransitionInteractor(),
-                () -> mKosmos.getFromLockscreenTransitionInteractor(),
-                () -> mKosmos.getFromOccludedTransitionInteractor(),
-                () -> mKosmos.getSharedNotificationContainerInteractor(),
-                mTestScope);
 
         ResourcesSplitShadeStateController splitShadeStateController =
                 new ResourcesSplitShadeStateController();
@@ -222,14 +200,6 @@ public class QuickSettingsControllerImplBaseTest extends SysuiTestCase {
                 new ShadeInteractorLegacyImpl(
                         mTestScope.getBackgroundScope(),
                         mKeyguardRepository,
-                        new SharedNotificationContainerInteractor(
-                                configurationRepository,
-                                mContext,
-                                () -> splitShadeStateController,
-                                () -> mShadeInteractor,
-                                keyguardInteractor,
-                                deviceEntryUdfpsInteractor,
-                                () -> mLargeScreenHeaderHelper),
                         mShadeRepository
                 ),
                 mKosmos.getShadeModeInteractor());
