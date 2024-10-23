@@ -5550,6 +5550,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (target instanceof PendingIntentRecord) {
             final PendingIntentRecord originalRecord = (PendingIntentRecord) target;
 
+            addCreatorToken(intent, originalRecord.getPackageName());
+
             // In multi-display scenarios, there can be background users who execute the
             // PendingIntent. In these scenarios, we don't want to use the foreground user as the
             // current user.

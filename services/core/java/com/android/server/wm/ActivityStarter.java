@@ -1275,8 +1275,8 @@ class ActivityStarter {
                         "Creator PermissionPolicyService.checkStartActivity Caused abortion.",
                         intent, intentCreatorUid, intentCreatorPackage, callingUid, callingPackage);
             }
-            intent.removeCreatorTokenInfo();
         }
+        intent.removeCreatorToken();
 
         // Merge the two options bundles, while realCallerOptions takes precedence.
         ActivityOptions checkedOptions = options != null
