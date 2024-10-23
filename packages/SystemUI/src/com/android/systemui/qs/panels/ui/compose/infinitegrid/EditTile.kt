@@ -96,7 +96,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.fastMap
 import com.android.compose.animation.bounceable
-import com.android.compose.modifiers.background
 import com.android.compose.modifiers.height
 import com.android.systemui.common.ui.compose.load
 import com.android.systemui.qs.panels.shared.model.SizedTile
@@ -382,8 +381,10 @@ fun LazyGridScope.EditTiles(
                     // If the tile is being moved, replace it with a visible spacer
                     SpacerGridCell(
                         Modifier.background(
-                                color = MaterialTheme.colorScheme.secondary,
-                                alpha = { EditModeTileDefaults.PLACEHOLDER_ALPHA },
+                                color =
+                                    MaterialTheme.colorScheme.secondary.copy(
+                                        alpha = EditModeTileDefaults.PLACEHOLDER_ALPHA
+                                    ),
                                 shape = RoundedCornerShape(InactiveCornerRadius),
                             )
                             .animateItem()
