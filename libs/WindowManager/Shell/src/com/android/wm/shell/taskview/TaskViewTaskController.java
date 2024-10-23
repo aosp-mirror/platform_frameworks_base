@@ -40,6 +40,7 @@ import android.view.WindowInsets;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
+import com.android.wm.shell.Flags;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.SyncTransactionQueue;
 
@@ -525,8 +526,13 @@ public class TaskViewTaskController implements ShellTaskOrganizer.TaskListener {
      */
     void removeTask() {
         if (mTaskToken == null) {
-            // Call to remove task before we have one, do nothing
-            Slog.w(TAG, "Trying to remove a task that was never added? (no taskToken)");
+            if (Flags.enableTaskViewControllerCleanup()) {
+                // We don't have a task yet. Only clean up the controller
+                mTaskViewTransitions.removeTaskView(this);
+            } else {
+                // Call to remove task before we have one, do nothing
+                Slog.w(TAG, "Trying to remove a task that was never added? (no taskToken)");
+            }
             return;
         }
         mShellExecutor.execute(() -> {
