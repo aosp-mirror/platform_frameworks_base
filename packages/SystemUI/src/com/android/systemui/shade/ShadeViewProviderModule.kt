@@ -83,7 +83,7 @@ abstract class ShadeViewProviderModule {
         @Provides
         @SysUISingleton
         fun providesWindowRootView(
-            layoutInflater: LayoutInflater,
+            @ShadeDisplayAware layoutInflater: LayoutInflater,
             viewModelFactory: SceneContainerViewModel.Factory,
             containerConfigProvider: Provider<SceneContainerConfig>,
             scenesProvider: Provider<Set<@JvmSuppressWildcards Scene>>,
@@ -156,7 +156,7 @@ abstract class ShadeViewProviderModule {
         @Provides
         fun providesKeyguardBottomAreaView(
             npv: NotificationPanelView,
-            layoutInflater: LayoutInflater,
+            @ShadeDisplayAware layoutInflater: LayoutInflater,
         ): KeyguardBottomAreaView {
             return layoutInflater.inflate(R.layout.keyguard_bottom_area, npv, false)
                 as KeyguardBottomAreaView
