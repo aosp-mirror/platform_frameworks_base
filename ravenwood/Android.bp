@@ -310,7 +310,7 @@ sh_test_host {
     name: "ravenwood-stats-checker",
     src: "scripts/ravenwood-stats-checker.sh",
     test_suites: ["general-tests"],
-    data: [
+    device_common_data: [
         ":framework-minus-apex.ravenwood-base_all{hoststubgen_framework-minus-apex_stats.csv}",
         ":framework-minus-apex.ravenwood-base_all{hoststubgen_framework-minus-apex_apis.csv}",
         ":framework-minus-apex.ravenwood-base_all{hoststubgen_framework-minus-apex_keep_all.txt}",
