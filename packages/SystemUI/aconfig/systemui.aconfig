@@ -1148,6 +1148,13 @@ flag {
 }
 
 flag {
+  name: "media_controls_button_media3_placement"
+  namespace: "systemui"
+  description: "Use media3 API for action button placement preferences"
+  bug: "360196209"
+}
+
+flag {
   name: "media_controls_drawables_reuse"
   namespace: "systemui"
   description: "Re-use created media drawables for media controls"
@@ -1546,6 +1553,16 @@ flag {
    namespace: "systemui"
    description: "When the device is in single volume mode, only show media stream slider and hide all other stream (e.g. call, notification, alarm, etc) sliders in volume panel"
    bug: "373729625"
+   metadata {
+       purpose: PURPOSE_BUGFIX
+   }
+}
+
+flag {
+   name: "hide_ringer_button_in_single_volume_mode"
+   namespace: "systemui"
+   description: "When the device is in single volume mode, hide the ringer button because it doesn't work"
+   bug: "374870615"
    metadata {
        purpose: PURPOSE_BUGFIX
    }

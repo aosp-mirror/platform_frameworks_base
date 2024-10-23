@@ -48,8 +48,8 @@ public class Utils {
     public static void dumpViewerConfig(@NonNull ProtoLogDataSource dataSource,
             @NonNull ViewerConfigInputStreamProvider viewerConfigInputStreamProvider) {
         dataSource.trace(ctx -> {
-            try {
-                ProtoInputStream pis = viewerConfigInputStreamProvider.getInputStream();
+            try (var pisWrapper = viewerConfigInputStreamProvider.getInputStream()) {
+                final var pis = pisWrapper.get();
 
                 final ProtoOutputStream os = ctx.newTracePacket();
 

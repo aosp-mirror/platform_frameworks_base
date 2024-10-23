@@ -11509,9 +11509,6 @@ public class BatteryStatsImpl extends BatteryStats {
                     mOnBatteryTimeBase);
         }
 
-        mPerDisplayBatteryStats = new DisplayBatteryStats[1];
-        mPerDisplayBatteryStats[0] = new DisplayBatteryStats(mClock, mOnBatteryTimeBase);
-
         mInteractiveTimer = new StopwatchTimer(mClock, null, -10, null, mOnBatteryTimeBase);
         mPowerSaveModeEnabledTimer = new StopwatchTimer(mClock, null, -2, null,
                 mOnBatteryTimeBase);

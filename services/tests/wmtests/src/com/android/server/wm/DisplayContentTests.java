@@ -1081,7 +1081,8 @@ public class DisplayContentTests extends WindowTestsBase {
         final DisplayRotation dr = dc.getDisplayRotation();
         spyOn(dr);
         doReturn(false).when(dr).useDefaultSettingsProvider();
-        final ActivityRecord app = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        final ActivityRecord app = new ActivityBuilder(mAtm).setCreateTask(true)
+                .setComponent(getUniqueComponentName(mContext.getPackageName())).build();
         app.setOrientation(SCREEN_ORIENTATION_LANDSCAPE, app);
 
         assertFalse(dc.getRotationReversionController().isAnyOverrideActive());

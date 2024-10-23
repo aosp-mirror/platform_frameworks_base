@@ -777,7 +777,7 @@ private fun KeyboardSettings(horizontalPadding: Dp, verticalPadding: Dp, onClick
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
-                "Keyboard Settings",
+                stringResource(id = R.string.shortcut_helper_keyboard_settings_buttons_label),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 16.sp,
             )

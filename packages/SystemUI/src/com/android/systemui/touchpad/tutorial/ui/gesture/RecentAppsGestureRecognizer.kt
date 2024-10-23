@@ -38,6 +38,10 @@ class RecentAppsGestureRecognizer(
         gestureStateChangedCallback = callback
     }
 
+    override fun clearGestureStateCallback() {
+        gestureStateChangedCallback = {}
+    }
+
     override fun accept(event: MotionEvent) {
         if (!isThreeFingerTouchpadSwipe(event)) return
         val gestureState = distanceTracker.processEvent(event)

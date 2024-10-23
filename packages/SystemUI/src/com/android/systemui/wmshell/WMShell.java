@@ -281,13 +281,13 @@ public final class WMShell implements
     void initSplitScreen(SplitScreen splitScreen) {
         mWakefulnessLifecycle.addObserver(new WakefulnessLifecycle.Observer() {
             @Override
-            public void onFinishedWakingUp() {
-                splitScreen.onFinishedWakingUp();
+            public void onStartedGoingToSleep() {
+                splitScreen.onStartedGoingToSleep();
             }
 
             @Override
-            public void onStartedGoingToSleep() {
-                splitScreen.onStartedGoingToSleep();
+            public void onStartedWakingUp() {
+                splitScreen.onStartedWakingUp();
             }
         });
         mCommandQueue.addCallback(new CommandQueue.Callbacks() {

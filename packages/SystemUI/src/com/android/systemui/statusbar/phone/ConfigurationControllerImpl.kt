@@ -29,9 +29,8 @@ import dagger.assisted.AssistedInject
 
 class ConfigurationControllerImpl
 @AssistedInject
-constructor(
-    @Assisted private val context: Context,
-) : ConfigurationController, StatusBarConfigurationController {
+constructor(@Assisted private val context: Context) :
+    ConfigurationController, StatusBarConfigurationController {
 
     private val listeners: MutableList<ConfigurationListener> = ArrayList()
     private val lastConfig = Configuration()

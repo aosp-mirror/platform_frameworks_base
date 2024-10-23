@@ -214,7 +214,7 @@ public class KeyguardIndicationController {
     private boolean mEnableBatteryDefender;
     private boolean mIncompatibleCharger;
     private int mChargingWattage;
-    private int mBatteryLevel;
+    private int mBatteryLevel = -1;
     private boolean mBatteryPresent = true;
     protected long mChargingTimeRemaining;
     private Pair<String, BiometricSourceType> mBiometricErrorMessageToShowOnScreenOn;
@@ -1032,12 +1032,16 @@ public class KeyguardIndicationController {
             } else if (!TextUtils.isEmpty(mTransientIndication)) {
                 newIndication = mTransientIndication;
             } else if (!mBatteryPresent) {
-                // If there is no battery detected, hide the indication and bail
+                // If there is no battery detected, hide the indication area and bail
                 mIndicationArea.setVisibility(GONE);
                 return;
             } else if (!TextUtils.isEmpty(mAlignmentIndication)) {
                 useMisalignmentColor = true;
                 newIndication = mAlignmentIndication;
+            } else if (mBatteryLevel == -1) {
+                // If the battery level is not initialized, hide the indication area
+                mIndicationArea.setVisibility(GONE);
+                return;
             } else if (mPowerPluggedIn || mEnableBatteryDefender) {
                 newIndication = computePowerIndication();
             } else {

@@ -4824,12 +4824,7 @@ public class SizeCompatTests extends WindowTestsBase {
         assertFalse(mActivity.isUniversalResizeable());
 
         mDisplayContent.setIgnoreOrientationRequest(true);
-        final int swDp = mDisplayContent.getConfiguration().smallestScreenWidthDp;
-        if (swDp < WindowManager.LARGE_SCREEN_SMALLEST_SCREEN_WIDTH_DP) {
-            final int height = 100 + (int) (mDisplayContent.getDisplayMetrics().density
-                    * WindowManager.LARGE_SCREEN_SMALLEST_SCREEN_WIDTH_DP);
-            resizeDisplay(mDisplayContent, 100 + height, height);
-        }
+        makeDisplayLargeScreen(mDisplayContent);
         assertTrue(mActivity.isUniversalResizeable());
     }
 

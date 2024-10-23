@@ -1701,6 +1701,11 @@ public class PhoneStateListener {
         public final void onCarrierRoamingNtnEligibleStateChanged(boolean eligible) {
             // not supported on the deprecated interface - Use TelephonyCallback instead
         }
+
+        public final void onCarrierRoamingNtnAvailableServicesChanged(
+                @NetworkRegistrationInfo.ServiceType int[] availableServices) {
+            // not supported on the deprecated interface - Use TelephonyCallback instead
+        }
     }
 
     private void log(String s) {

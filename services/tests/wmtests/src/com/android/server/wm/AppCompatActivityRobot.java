@@ -307,6 +307,8 @@ class AppCompatActivityRobot {
     void createNewTaskWithBaseActivity() {
         final Task newTask = new WindowTestsBase.TaskBuilder(mSupervisor)
                 .setCreateActivity(true)
+                // Respect "@ChangeId" according to test package's target sdk.
+                .setPackage(mAtm.mContext.getPackageName())
                 .setDisplay(mDisplayContent).build();
         mTaskStack.push(newTask);
         pushActivity(newTask.getTopNonFinishingActivity());
