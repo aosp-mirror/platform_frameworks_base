@@ -17,6 +17,8 @@
 package com.android.settingslib.preference
 
 import android.content.Context
+import android.content.Intent
+import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import androidx.preference.Preference
@@ -29,6 +31,7 @@ import com.android.settingslib.datastore.KeyedObservable
 import com.android.settingslib.datastore.KeyedObserver
 import com.android.settingslib.metadata.PersistentPreference
 import com.android.settingslib.metadata.PreferenceHierarchy
+import com.android.settingslib.metadata.PreferenceLifecycleContext
 import com.android.settingslib.metadata.PreferenceLifecycleProvider
 import com.android.settingslib.metadata.PreferenceMetadata
 import com.android.settingslib.metadata.PreferenceScreenRegistry
@@ -45,10 +48,11 @@ import java.util.concurrent.Executor
  */
 class PreferenceScreenBindingHelper(
     context: Context,
+    fragment: PreferenceFragment,
     private val preferenceBindingFactory: PreferenceBindingFactory,
     private val preferenceScreen: PreferenceScreen,
     private val preferenceHierarchy: PreferenceHierarchy,
-) : KeyedDataObservable<String>(), AutoCloseable {
+) : KeyedDataObservable<String>() {
 
     private val handler = Handler(Looper.getMainLooper())
     private val executor =
@@ -58,8 +62,22 @@ class PreferenceScreenBindingHelper(
             }
         }
 
+    private val preferenceLifecycleContext =
+        object : PreferenceLifecycleContext(context) {
+            override fun notifyPreferenceChange(preference: PreferenceMetadata) =
+                notifyChange(preference.key, CHANGE_REASON_STATE)
+
+            @Suppress("DEPRECATION")
+            override fun startActivityForResult(
+                intent: Intent,
+                requestCode: Int,
+                options: Bundle?,
+            ) = fragment.startActivityForResult(intent, requestCode, options)
+        }
+
     private val preferences: ImmutableMap<String, PreferenceMetadata>
     private val dependencies: ImmutableMultimap<String, String>
+    private val lifecycleAwarePreferences: Array<PreferenceLifecycleProvider>
     private val storages = mutableSetOf<KeyedObservable<String>>()
 
     private val preferenceObserver: KeyedObserver<String?>
@@ -71,16 +89,10 @@ class PreferenceScreenBindingHelper(
             }
         }
 
-    private val stateObserver =
-        object : PreferenceLifecycleProvider.PreferenceStateObserver {
-            override fun onPreferenceStateChanged(preference: PreferenceMetadata) {
-                notifyChange(preference.key, CHANGE_REASON_STATE)
-            }
-        }
-
     init {
         val preferencesBuilder = ImmutableMap.builder<String, PreferenceMetadata>()
         val dependenciesBuilder = ImmutableMultimap.builder<String, String>()
+        val lifecycleAwarePreferences = mutableListOf<PreferenceLifecycleProvider>()
         fun PreferenceMetadata.addDependency(dependency: PreferenceMetadata) {
             dependenciesBuilder.put(key, dependency.key)
         }
@@ -88,7 +100,7 @@ class PreferenceScreenBindingHelper(
         fun PreferenceMetadata.add() {
             preferencesBuilder.put(key, this)
             dependencyOfEnabledState(context)?.addDependency(this)
-            if (this is PreferenceLifecycleProvider) onAttach(context, stateObserver)
+            if (this is PreferenceLifecycleProvider) lifecycleAwarePreferences.add(this)
             if (this is PersistentPreference<*>) storages.add(storage(context))
         }
 
@@ -106,6 +118,7 @@ class PreferenceScreenBindingHelper(
         preferenceHierarchy.addPreferences()
         this.preferences = preferencesBuilder.buildOrThrow()
         this.dependencies = dependenciesBuilder.build()
+        this.lifecycleAwarePreferences = lifecycleAwarePreferences.toTypedArray()
 
         preferenceObserver = KeyedObserver { key, reason -> onPreferenceChange(key, reason) }
         addObserver(preferenceObserver, executor)
@@ -137,13 +150,48 @@ class PreferenceScreenBindingHelper(
 
     fun getPreferences() = preferenceHierarchy.getAllPreferences()
 
-    override fun close() {
-        removeObserver(preferenceObserver)
-        val context = preferenceScreen.context
-        for (preference in preferences.values) {
-            if (preference is PreferenceLifecycleProvider) preference.onDetach(context)
+    fun onCreate() {
+        for (preference in lifecycleAwarePreferences) {
+            preference.onCreate(preferenceLifecycleContext)
         }
+    }
+
+    fun onStart() {
+        for (preference in lifecycleAwarePreferences) {
+            preference.onStart(preferenceLifecycleContext)
+        }
+    }
+
+    fun onResume() {
+        for (preference in lifecycleAwarePreferences) {
+            preference.onResume(preferenceLifecycleContext)
+        }
+    }
+
+    fun onPause() {
+        for (preference in lifecycleAwarePreferences) {
+            preference.onPause(preferenceLifecycleContext)
+        }
+    }
+
+    fun onStop() {
+        for (preference in lifecycleAwarePreferences) {
+            preference.onStop(preferenceLifecycleContext)
+        }
+    }
+
+    fun onDestroy() {
+        removeObserver(preferenceObserver)
         for (storage in storages) storage.removeObserver(storageObserver)
+        for (preference in lifecycleAwarePreferences) {
+            preference.onDestroy(preferenceLifecycleContext)
+        }
+    }
+
+    fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        for (preference in lifecycleAwarePreferences) {
+            if (preference.onActivityResult(requestCode, resultCode, data)) break
+        }
     }
 
     companion object {
