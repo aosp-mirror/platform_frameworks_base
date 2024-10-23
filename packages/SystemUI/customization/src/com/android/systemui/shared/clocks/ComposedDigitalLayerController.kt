@@ -28,6 +28,7 @@ import com.android.systemui.plugins.clocks.ClockEvents
 import com.android.systemui.plugins.clocks.ClockFaceConfig
 import com.android.systemui.plugins.clocks.ClockFaceEvents
 import com.android.systemui.plugins.clocks.ClockReactiveSetting
+import com.android.systemui.plugins.clocks.ThemeConfig
 import com.android.systemui.plugins.clocks.WeatherData
 import com.android.systemui.plugins.clocks.ZenData
 import com.android.systemui.shared.clocks.view.FlexClockView
@@ -46,7 +47,6 @@ class ComposedDigitalLayerController(
 
     val layerControllers = mutableListOf<SimpleClockLayerController>()
     val dozeState = DefaultClockController.AnimationState(1F)
-    var isRegionDark = true
 
     override val view = FlexClockView(ctx, assets, messageBuffer)
 
@@ -103,10 +103,6 @@ class ComposedDigitalLayerController(
                 view.onZenDataChanged(data)
             }
 
-            override fun onColorPaletteChanged(resources: Resources) {}
-
-            override fun onSeedColorChanged(seedColor: Int?) {}
-
             override fun onReactiveAxesChanged(axes: List<ClockReactiveSetting>) {}
 
             override var isReactiveTouchInteractionEnabled
@@ -115,10 +111,6 @@ class ComposedDigitalLayerController(
                     view.isReactiveTouchInteractionEnabled = value
                 }
         }
-
-    override fun updateColors() {
-        view.updateColors(assets, isRegionDark)
-    }
 
     override val animations =
         object : ClockAnimations {
@@ -158,9 +150,15 @@ class ComposedDigitalLayerController(
                 refreshTime()
             }
 
-            override fun onRegionDarknessChanged(isRegionDark: Boolean) {
-                this@ComposedDigitalLayerController.isRegionDark = isRegionDark
-                updateColors()
+            override fun onThemeChanged(theme: ThemeConfig) {
+                val color =
+                    when {
+                        theme.seedColor != null -> theme.seedColor!!
+                        theme.isDarkTheme -> resources.getColor(android.R.color.system_accent1_100)
+                        else -> resources.getColor(android.R.color.system_accent2_600)
+                    }
+
+                view.updateColor(color)
             }
 
             override fun onFontSettingChanged(fontSizePx: Float) {
