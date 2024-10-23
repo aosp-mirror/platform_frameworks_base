@@ -286,4 +286,6 @@
     <item type="id" name="snapshot_view_binding" />
     <item type="id" name="snapshot_view_binding_root" />
 
+    <item type="id" name="brightness_dialog_slider" />
+
 </resources>
