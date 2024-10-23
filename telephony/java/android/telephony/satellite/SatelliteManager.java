@@ -26,6 +26,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresFeature;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
+import android.annotation.SystemService;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Binder;
@@ -61,13 +62,19 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
- * Manages satellite operations such as provisioning, pointing, messaging, location sharing, etc.
- * To get the object, call {@link Context#getSystemService(String)}.
+ * Manages satellite states such as monitoring enabled state and operations such as provisioning,
+ * pointing, messaging, location sharing, etc.
  *
- * @hide
+ * <p>To get the object, call {@link Context#getSystemService(String)} with
+ * {@link Context#SATELLITE_SERVICE}.
+ *
+ * <p>SatelliteManager is intended for use on devices with feature
+ * {@link PackageManager#FEATURE_TELEPHONY_SATELLITE}. On devices without the feature, the behavior
+ * is not reliable.
  */
+@SystemService(Context.SATELLITE_SERVICE)
+@FlaggedApi(Flags.FLAG_SATELLITE_STATE_CHANGE_LISTENER)
 @RequiresFeature(PackageManager.FEATURE_TELEPHONY_SATELLITE)
-@SystemApi
 public final class SatelliteManager {
     private static final String TAG = "SatelliteManager";
 
