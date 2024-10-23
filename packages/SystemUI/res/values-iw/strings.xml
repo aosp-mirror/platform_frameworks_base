@@ -1405,6 +1405,8 @@
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"סמל ההרחבה"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"או"</string>
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"נקודת האחיזה לגרירה"</string>
+    <!-- no translation found for shortcut_helper_keyboard_settings_buttons_label (6720967595915985259) -->
+    <skip />
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"ניווט באמצעות המקלדת"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"מידע על מקשי קיצור"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"ניווט באמצעות לוח המגע"</string>
@@ -1462,4 +1464,8 @@
     <string name="qs_edit_mode_category_providedByApps" msgid="8346112074897919019">"מסופקים על ידי אפליקציות"</string>
     <string name="qs_edit_mode_category_display" msgid="4749511439121053942">"מסך"</string>
     <string name="qs_edit_mode_category_unknown" msgid="509314252124053550">"לא ידוע"</string>
+    <!-- no translation found for qs_edit_mode_reset_dialog_title (8841270491554460726) -->
+    <skip />
+    <!-- no translation found for qs_edit_mode_reset_dialog_content (8626426097929954027) -->
+    <skip />
 </resources>
