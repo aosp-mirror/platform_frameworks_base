@@ -140,11 +140,15 @@ constructor(
      */
     val isFoldSplitRequired: StateFlow<Boolean> = _isFoldSplitRequired.asStateFlow()
 
+    /** How much the bouncer UI should be scaled. */
+    val scale: StateFlow<Float> = bouncerInteractor.scale
+
     private val _isInputEnabled =
         MutableStateFlow(authenticationInteractor.lockoutEndTimestamp == null)
     private val isInputEnabled: StateFlow<Boolean> = _isInputEnabled.asStateFlow()
 
     override suspend fun onActivated(): Nothing {
+        bouncerInteractor.resetScale()
         coroutineScope {
             launch { message.activate() }
             launch {

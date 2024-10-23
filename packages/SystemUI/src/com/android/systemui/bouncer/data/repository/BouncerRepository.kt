@@ -38,6 +38,8 @@ constructor(
     private val globalSettings: GlobalSettings,
     private val flags: FeatureFlagsClassic,
 ) {
+    val scale: MutableStateFlow<Float> = MutableStateFlow(1.0f)
+
     /** Whether the user switcher should be displayed within the bouncer UI on large screens. */
     val isUserSwitcherEnabledInConfig: Boolean
         get() =

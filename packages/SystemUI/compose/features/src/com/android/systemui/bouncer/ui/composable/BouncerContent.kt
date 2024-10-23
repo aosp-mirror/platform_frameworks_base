@@ -66,6 +66,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.key.onKeyEvent
@@ -138,6 +139,7 @@ fun BouncerContent(
     dialogFactory: BouncerDialogFactory,
     modifier: Modifier,
 ) {
+    val scale by viewModel.scale.collectAsStateWithLifecycle()
     Box(
         // Allows the content within each of the layouts to react to the appearance and
         // disappearance of the IME, which is also known as the software keyboard.
@@ -145,7 +147,7 @@ fun BouncerContent(
         // Despite the keyboard only being part of the password bouncer, adding it at this level is
         // both necessary to properly handle the keyboard in all layouts and harmless in cases when
         // the keyboard isn't used (like the PIN or pattern auth methods).
-        modifier = modifier.imePadding().onKeyEvent(viewModel::onKeyEvent)
+        modifier = modifier.imePadding().onKeyEvent(viewModel::onKeyEvent).scale(scale)
     ) {
         when (layout) {
             BouncerSceneLayout.STANDARD_BOUNCER -> StandardLayout(viewModel = viewModel)
