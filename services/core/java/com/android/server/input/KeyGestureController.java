@@ -20,6 +20,7 @@ import static android.content.pm.PackageManager.FEATURE_LEANBACK;
 import static android.content.pm.PackageManager.FEATURE_WATCH;
 import static android.view.WindowManagerPolicyConstants.FLAG_INTERACTIVE;
 
+import static com.android.hardware.input.Flags.keyboardA11yShortcutControl;
 import static com.android.hardware.input.Flags.useKeyGestureEventHandler;
 import static com.android.hardware.input.Flags.useKeyGestureEventHandlerMultiPressGestures;
 import static com.android.server.flags.Flags.newBugreportKeyboardShortcut;
@@ -575,6 +576,17 @@ final class KeyGestureController {
                             KeyGestureEvent.KEY_GESTURE_TYPE_TAKE_SCREENSHOT,
                             KeyGestureEvent.ACTION_GESTURE_COMPLETE, displayId,
                             focusedToken, /* flags = */0);
+                }
+                break;
+            case KeyEvent.KEYCODE_T:
+                if (keyboardA11yShortcutControl()) {
+                    if (firstDown && event.isMetaPressed() && event.isAltPressed()) {
+                        return handleKeyGesture(deviceId, new int[]{keyCode},
+                                KeyEvent.META_META_ON | KeyEvent.META_ALT_ON,
+                                KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_TALKBACK,
+                                KeyGestureEvent.ACTION_GESTURE_COMPLETE, displayId,
+                                focusedToken, /* flags = */0);
+                    }
                 }
                 break;
             case KeyEvent.KEYCODE_DEL:
