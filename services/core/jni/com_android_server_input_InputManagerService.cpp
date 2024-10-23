@@ -68,6 +68,7 @@
 #include <map>
 #include <vector>
 
+#include "android_hardware_display_DisplayTopology.h"
 #include "android_hardware_display_DisplayViewport.h"
 #include "android_hardware_input_InputApplicationHandle.h"
 #include "android_hardware_input_InputWindowHandle.h"
@@ -320,6 +321,8 @@ public:
     void dump(std::string& dump);
 
     void setDisplayViewports(JNIEnv* env, jobjectArray viewportObjArray);
+
+    void setDisplayTopology(JNIEnv* env, jobject topologyGraph);
 
     base::Result<std::unique_ptr<InputChannel>> createInputChannel(const std::string& name);
     base::Result<std::unique_ptr<InputChannel>> createInputMonitor(ui::LogicalDisplayId displayId,
@@ -638,6 +641,11 @@ void NativeInputManager::setDisplayViewports(JNIEnv* env, jobjectArray viewportO
     mInputManager->getChoreographer().setDisplayViewports(viewports);
     mInputManager->getReader().requestRefreshConfiguration(
             InputReaderConfiguration::Change::DISPLAY_INFO);
+}
+
+void NativeInputManager::setDisplayTopology(JNIEnv* env, jobject topologyGraph) {
+    android_hardware_display_DisplayTopologyGraph_toNative(env, topologyGraph);
+    // TODO(b/367661489): Use the topology
 }
 
 base::Result<std::unique_ptr<InputChannel>> NativeInputManager::createInputChannel(
@@ -2092,6 +2100,12 @@ static void nativeSetDisplayViewports(JNIEnv* env, jobject nativeImplObj,
     im->setDisplayViewports(env, viewportObjArray);
 }
 
+static void nativeSetDisplayTopology(JNIEnv* env, jobject nativeImplObj,
+                                     jobject displayTopologyObj) {
+    NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
+    im->setDisplayTopology(env, displayTopologyObj);
+}
+
 static jint nativeGetScanCodeState(JNIEnv* env, jobject nativeImplObj, jint deviceId,
                                    jint sourceMask, jint scanCode) {
     NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
@@ -3148,6 +3162,8 @@ static const JNINativeMethod gInputManagerMethods[] = {
         {"start", "()V", (void*)nativeStart},
         {"setDisplayViewports", "([Landroid/hardware/display/DisplayViewport;)V",
          (void*)nativeSetDisplayViewports},
+        {"setDisplayTopology", "(Landroid/hardware/display/DisplayTopologyGraph;)V",
+         (void*)nativeSetDisplayTopology},
         {"getScanCodeState", "(III)I", (void*)nativeGetScanCodeState},
         {"getKeyCodeState", "(III)I", (void*)nativeGetKeyCodeState},
         {"getSwitchState", "(III)I", (void*)nativeGetSwitchState},

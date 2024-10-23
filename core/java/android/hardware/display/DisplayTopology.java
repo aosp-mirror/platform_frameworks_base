@@ -582,6 +582,15 @@ public final class DisplayTopology implements Parcelable {
         }
     }
 
+    /** Returns the graph representation of the topology */
+    public DisplayTopologyGraph getGraph() {
+        // TODO(b/364907904): implement
+        return new DisplayTopologyGraph(mPrimaryDisplayId,
+                new DisplayTopologyGraph.DisplayNode[] { new DisplayTopologyGraph.DisplayNode(
+                        mRoot == null ? Display.DEFAULT_DISPLAY : mRoot.mDisplayId,
+                        new DisplayTopologyGraph.AdjacentDisplay[0])});
+    }
+
     /**
      * Tests whether two brightness float values are within a small enough tolerance
      * of each other.
