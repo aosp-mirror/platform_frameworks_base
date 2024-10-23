@@ -140,7 +140,7 @@ constructor(
                                     FromPrimaryBouncerTransitionInteractor
                                         .TO_GONE_SURFACE_BEHIND_VISIBLE_THRESHOLD
                             }
-                        else -> isDeviceEntered
+                        else -> lockscreenVisibilityWithScenes.map { !it }
                     }
                 }
             } else {
