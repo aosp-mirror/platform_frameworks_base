@@ -37,7 +37,7 @@ import com.android.systemui.inputdevice.tutorial.ui.view.KeyboardTouchpadTutoria
 import com.android.systemui.res.R
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /**
  * A class to show contextual education on UI based on the edu produced from

@@ -50,7 +50,7 @@ import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.res.R
 import kotlin.math.abs
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /** Helper for [BiometricViewBinder] to handle resize transitions. */
 object BiometricViewSizeBinder {
