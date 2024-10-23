@@ -1529,6 +1529,13 @@ flag {
 }
 
 flag {
+  name: "shade_window_goes_around"
+  namespace: "systemui"
+  description: "Enables the shade window to move between displays"
+  bug: "362719719"
+}
+
+flag {
    name: "media_projection_request_attribution_fix"
    namespace: "systemui"
    description: "Ensure MediaProjection consent requests are properly attributed"
