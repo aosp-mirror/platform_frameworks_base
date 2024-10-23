@@ -14,18 +14,19 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.phone
+package com.android.systemui.statusbar.data.repository
 
-import com.android.systemui.kosmos.Kosmos
+import android.view.Display
 import org.mockito.kotlin.mock
 
-val Kosmos.mockStatusBarContentInsetsProvider by
-    Kosmos.Fixture { mock<StatusBarContentInsetsProvider>() }
+class FakeStatusBarConfigurationControllerStore : StatusBarConfigurationControllerStore {
 
-var Kosmos.statusBarContentInsetsProvider by Kosmos.Fixture { mockStatusBarContentInsetsProvider }
+    private val perDisplayMockControllers = mutableMapOf<Int, StatusBarConfigurationController>()
 
-val Kosmos.fakeStatusBarContentInsetsProviderFactory by
-    Kosmos.Fixture { FakeStatusBarContentInsetsProviderFactory() }
+    override val defaultDisplay: StatusBarConfigurationController
+        get() = forDisplay(Display.DEFAULT_DISPLAY)
 
-var Kosmos.statusBarContentInsetsProviderFactory: StatusBarContentInsetsProviderImpl.Factory by
-    Kosmos.Fixture { fakeStatusBarContentInsetsProviderFactory }
+    override fun forDisplay(displayId: Int): StatusBarConfigurationController {
+        return perDisplayMockControllers.computeIfAbsent(displayId) { mock() }
+    }
+}
