@@ -1138,14 +1138,10 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 "onKeyguardVisibilityChanged: active=%b occludingTaskRunning=%b",
                 active, occludingTaskRunning);
         setDividerVisibility(!mKeyguardActive, null);
-
-        if (active && occludingTaskRunning) {
-            dismissSplitKeepingLastActiveStage(EXIT_REASON_SCREEN_LOCKED_SHOW_ON_TOP);
-        }
     }
 
-    void onFinishedWakingUp() {
-        ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "onFinishedWakingUp");
+    void onStartedWakingUp() {
+        ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "onStartedWakingUp");
         if (mBreakOnNextWake) {
             dismissSplitKeepingLastActiveStage(EXIT_REASON_DEVICE_FOLDED);
         }
@@ -2431,6 +2427,10 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             final int transitType = info.getType();
             TransitionInfo.Change pipChange = null;
             int closingSplitTaskId = -1;
+            // This array tracks if we are sending stages TO_BACK in this transition.
+            // TODO (b/349828130): Update for n apps
+            boolean[] stagesSentToBack = new boolean[2];
+
             for (int iC = 0; iC < info.getChanges().size(); ++iC) {
                 final TransitionInfo.Change change = info.getChanges().get(iC);
                 if (change.getMode() == TRANSIT_CHANGE
@@ -2498,23 +2498,31 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                     }
                     continue;
                 }
+                final int taskId = taskInfo.taskId;
                 if (isOpeningType(change.getMode())) {
-                    if (!stage.containsTask(taskInfo.taskId)) {
+                    if (!stage.containsTask(taskId)) {
                         Log.w(TAG, "Expected onTaskAppeared on " + stage + " to have been called"
-                                + " with " + taskInfo.taskId + " before startAnimation().");
-                        record.addRecord(stage, true, taskInfo.taskId);
+                                + " with " + taskId + " before startAnimation().");
+                        record.addRecord(stage, true, taskId);
                     }
                 } else if (change.getMode() == TRANSIT_CLOSE) {
-                    if (stage.containsTask(taskInfo.taskId)) {
-                        record.addRecord(stage, false, taskInfo.taskId);
+                    if (stage.containsTask(taskId)) {
+                        record.addRecord(stage, false, taskId);
                         Log.w(TAG, "Expected onTaskVanished on " + stage + " to have been called"
-                                + " with " + taskInfo.taskId + " before startAnimation().");
+                                + " with " + taskId + " before startAnimation().");
                     }
                 }
                 if (isClosingType(change.getMode()) &&
-                        getStageOfTask(change.getTaskInfo().taskId) != STAGE_TYPE_UNDEFINED) {
-                    // If either one of the 2 stages is closing we're assuming we'll break split
-                    closingSplitTaskId = change.getTaskInfo().taskId;
+                        getStageOfTask(taskId) != STAGE_TYPE_UNDEFINED) {
+
+                    // Record which stages are getting sent to back
+                    if (change.getMode() == TRANSIT_TO_BACK) {
+                        stagesSentToBack[getStageOfTask(taskId)] = true;
+                    }
+
+                    // (For PiP transitions) If either one of the 2 stages is closing we're assuming
+                    // we'll break split
+                    closingSplitTaskId = taskId;
                 }
             }
 
@@ -2538,6 +2546,21 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                         startTransaction, finishTransaction, finishCallback, keepSplitWithPip);
                 notifySplitAnimationFinished();
                 return true;
+            }
+
+            // If keyguard is active, check to see if we have our TO_BACK transitions in order.
+            // This array should either be all false (no split stages sent to back) or all true
+            // (all stages sent to back). In any other case (which can happen with SHOW_ABOVE_LOCKED
+            // apps) we should break split.
+            if (mKeyguardActive) {
+                boolean isFirstStageSentToBack = stagesSentToBack[0];
+                for (boolean b : stagesSentToBack) {
+                    // Compare each boolean to the first one. If any are different, break split.
+                    if (b != isFirstStageSentToBack) {
+                        dismissSplitKeepingLastActiveStage(EXIT_REASON_SCREEN_LOCKED_SHOW_ON_TOP);
+                        break;
+                    }
+                }
             }
 
             final ArraySet<StageTaskListener> dismissStages = record.getShouldDismissedStage();

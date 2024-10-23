@@ -19,6 +19,9 @@ package com.android.server.security.forensic;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -50,7 +53,8 @@ public class ForensicServiceTest {
             IForensicServiceCommandCallback.ErrorCode.DATA_SOURCE_UNAVAILABLE;
 
     @Mock
-    private Context mContextSpy;
+    private Context mContext;
+    private BackupTransportConnection mBackupTransportConnection;
 
     private ForensicService mForensicService;
     private TestLooper mTestLooper;
@@ -63,7 +67,7 @@ public class ForensicServiceTest {
 
         mTestLooper = new TestLooper();
         mLooper = mTestLooper.getLooper();
-        mForensicService = new ForensicService(new MockInjector(mContextSpy));
+        mForensicService = new ForensicService(new MockInjector(mContext));
         mForensicService.onStart();
     }
 
@@ -253,12 +257,37 @@ public class ForensicServiceTest {
         assertEquals(STATE_VISIBLE, scb1.mState);
         assertEquals(STATE_VISIBLE, scb2.mState);
 
+        doReturn(true).when(mBackupTransportConnection).initialize();
+
         CommandCallback ccb = new CommandCallback();
         mForensicService.getBinderService().enable(ccb);
         mTestLooper.dispatchAll();
         assertEquals(STATE_ENABLED, scb1.mState);
         assertEquals(STATE_ENABLED, scb2.mState);
         assertNull(ccb.mErrorCode);
+    }
+
+    @Test
+    public void testEnable_FromVisible_TwoMonitors_BackupTransportUnavailable()
+            throws RemoteException {
+        mForensicService.setState(STATE_VISIBLE);
+        StateCallback scb1 = new StateCallback();
+        StateCallback scb2 = new StateCallback();
+        mForensicService.getBinderService().monitorState(scb1);
+        mForensicService.getBinderService().monitorState(scb2);
+        mTestLooper.dispatchAll();
+        assertEquals(STATE_VISIBLE, scb1.mState);
+        assertEquals(STATE_VISIBLE, scb2.mState);
+
+        doReturn(false).when(mBackupTransportConnection).initialize();
+
+        CommandCallback ccb = new CommandCallback();
+        mForensicService.getBinderService().enable(ccb);
+        mTestLooper.dispatchAll();
+        assertEquals(STATE_VISIBLE, scb1.mState);
+        assertEquals(STATE_VISIBLE, scb2.mState);
+        assertNotNull(ccb.mErrorCode);
+        assertEquals(ERROR_BACKUP_TRANSPORT_UNAVAILABLE, ccb.mErrorCode.intValue());
     }
 
     @Test
@@ -330,6 +359,8 @@ public class ForensicServiceTest {
         assertEquals(STATE_ENABLED, scb1.mState);
         assertEquals(STATE_ENABLED, scb2.mState);
 
+        doNothing().when(mBackupTransportConnection).release();
+
         CommandCallback ccb = new CommandCallback();
         mForensicService.getBinderService().disable(ccb);
         mTestLooper.dispatchAll();
@@ -354,6 +385,12 @@ public class ForensicServiceTest {
         @Override
         public Looper getLooper() {
             return mLooper;
+        }
+
+        @Override
+        public BackupTransportConnection getBackupTransportConnection() {
+            mBackupTransportConnection = spy(new BackupTransportConnection(mContext));
+            return mBackupTransportConnection;
         }
 
     }

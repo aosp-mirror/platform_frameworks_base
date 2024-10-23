@@ -320,7 +320,7 @@ public class StageCoordinatorTests extends ShellTestCase {
 
         assertEquals(mStageCoordinator.mLastActiveStage, STAGE_TYPE_MAIN);
 
-        mStageCoordinator.onFinishedWakingUp();
+        mStageCoordinator.onStartedWakingUp();
 
         verify(mTaskOrganizer).startNewTransition(eq(TRANSIT_SPLIT_DISMISS), notNull());
     }

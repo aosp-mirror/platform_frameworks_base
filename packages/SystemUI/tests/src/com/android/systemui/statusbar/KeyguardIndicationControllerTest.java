@@ -21,6 +21,8 @@ import static android.content.pm.UserInfo.FLAG_MANAGED_PROFILE;
 import static android.hardware.biometrics.BiometricFaceConstants.FACE_ACQUIRED_TOO_DARK;
 import static android.hardware.biometrics.BiometricFaceConstants.FACE_ERROR_LOCKOUT_PERMANENT;
 import static android.hardware.biometrics.BiometricFaceConstants.FACE_ERROR_TIMEOUT;
+import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
 
 import static com.android.keyguard.KeyguardUpdateMonitor.BIOMETRIC_HELP_FACE_NOT_AVAILABLE;
 import static com.android.keyguard.KeyguardUpdateMonitor.BIOMETRIC_HELP_FACE_NOT_RECOGNIZED;
@@ -774,6 +776,24 @@ public class KeyguardIndicationControllerTest extends KeyguardIndicationControll
         verifyIndicationMessage(INDICATION_TYPE_BIOMETRIC_MESSAGE, helpString);
         verifyIndicationMessage(INDICATION_TYPE_BIOMETRIC_MESSAGE_FOLLOW_UP,
                 mContext.getString(R.string.keyguard_suggest_fingerprint));
+    }
+
+    @Test
+    public void indicationAreaHidden_untilBatteryInfoArrives() {
+        createController();
+        // level of -1 indicates missing info
+        BatteryStatus status = new BatteryStatus(BatteryManager.BATTERY_STATUS_UNKNOWN,
+                -1 /* level */, BatteryManager.BATTERY_PLUGGED_WIRELESS, 100 /* health */,
+                0 /* maxChargingWattage */, true /* present */);
+
+        mController.setVisible(true);
+        mStatusBarStateListener.onDozingChanged(true);
+        reset(mIndicationArea);
+
+        mController.getKeyguardCallback().onRefreshBatteryInfo(status);
+        // VISIBLE is always called first
+        verify(mIndicationArea).setVisibility(VISIBLE);
+        verify(mIndicationArea).setVisibility(GONE);
     }
 
     @Test

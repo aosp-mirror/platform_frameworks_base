@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.notification.row.icon
 
+import android.annotation.WorkerThread
 import android.app.ActivityManager
 import android.app.Flags
 import android.content.Context
@@ -27,20 +28,45 @@ import android.graphics.drawable.Drawable
 import android.util.Log
 import com.android.internal.R
 import com.android.launcher3.icons.BaseIconFactory
+import com.android.systemui.Dumpable
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dump.DumpManager
+import com.android.systemui.statusbar.notification.collection.NotifCollectionCache
+import com.android.systemui.util.asIndenting
+import com.android.systemui.util.withIncreasedIndent
 import dagger.Module
 import dagger.Provides
+import java.io.PrintWriter
 import javax.inject.Inject
 import javax.inject.Provider
 
 /** A provider used to cache and fetch app icons used by notifications. */
 interface AppIconProvider {
+    /**
+     * Loads the icon corresponding to [packageName] into cache, or fetches it from there if already
+     * present. This should only be called from the background.
+     */
     @Throws(NameNotFoundException::class)
+    @WorkerThread
     fun getOrFetchAppIcon(packageName: String, context: Context): Drawable
+
+    /**
+     * Mark all the entries in the cache that are NOT in [wantedPackages] to be cleared. If they're
+     * still not needed on the next call of this method (made after a timeout of 1s, in case they
+     * happen more frequently than that), they will be purged. This can be done from any thread.
+     */
+    fun purgeCache(wantedPackages: Collection<String>)
 }
 
 @SysUISingleton
-class AppIconProviderImpl @Inject constructor(private val sysuiContext: Context) : AppIconProvider {
+class AppIconProviderImpl
+@Inject
+constructor(private val sysuiContext: Context, dumpManager: DumpManager) :
+    AppIconProvider, Dumpable {
+    init {
+        dumpManager.registerNormalDumpable(TAG, this)
+    }
+
     private val iconFactory: BaseIconFactory
         get() {
             val isLowRam = ActivityManager.isLowRamDeviceStatic()
@@ -53,12 +79,41 @@ class AppIconProviderImpl @Inject constructor(private val sysuiContext: Context)
             return BaseIconFactory(sysuiContext, res.configuration.densityDpi, iconSize)
         }
 
+    private val cache = NotifCollectionCache<Drawable>()
+
     override fun getOrFetchAppIcon(packageName: String, context: Context): Drawable {
+        return cache.getOrFetch(packageName) { fetchAppIcon(packageName, context) }
+    }
+
+    @WorkerThread
+    private fun fetchAppIcon(packageName: String, context: Context): BitmapDrawable {
         val icon = context.packageManager.getApplicationIcon(packageName)
         return BitmapDrawable(
             context.resources,
             iconFactory.createScaledBitmap(icon, BaseIconFactory.MODE_HARDWARE),
         )
+    }
+
+    override fun purgeCache(wantedPackages: Collection<String>) {
+        cache.purge(wantedPackages)
+    }
+
+    override fun dump(pwOrig: PrintWriter, args: Array<out String>) {
+        val pw = pwOrig.asIndenting()
+
+        pw.println("cache information:")
+        pw.withIncreasedIndent { cache.dump(pw, args) }
+
+        val iconFactory = iconFactory
+        pw.println("icon factory information:")
+        pw.withIncreasedIndent {
+            pw.println("fullResIconDpi = ${iconFactory.fullResIconDpi}")
+            pw.println("iconSize = ${iconFactory.iconBitmapSize}")
+        }
+    }
+
+    companion object {
+        const val TAG = "AppIconProviderImpl"
     }
 }
 
@@ -70,6 +125,10 @@ class NoOpIconProvider : AppIconProvider {
     override fun getOrFetchAppIcon(packageName: String, context: Context): Drawable {
         Log.wtf(TAG, "NoOpIconProvider should not be used anywhere.")
         return ColorDrawable(Color.WHITE)
+    }
+
+    override fun purgeCache(wantedPackages: Collection<String>) {
+        Log.wtf(TAG, "NoOpIconProvider should not be used anywhere.")
     }
 }
 

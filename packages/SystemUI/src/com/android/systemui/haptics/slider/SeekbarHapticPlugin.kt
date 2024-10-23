@@ -22,6 +22,7 @@ import android.widget.SeekBar
 import androidx.annotation.VisibleForTesting
 import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.util.time.SystemClock
+import com.google.android.msdl.domain.MSDLPlayer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -39,6 +40,7 @@ class SeekbarHapticPlugin
 @JvmOverloads
 constructor(
     vibratorHelper: VibratorHelper,
+    msdlPlayer: MSDLPlayer,
     systemClock: SystemClock,
     sliderHapticFeedbackConfig: SliderHapticFeedbackConfig = SliderHapticFeedbackConfig(),
     private val sliderTrackerConfig: SeekableSliderTrackerConfig = SeekableSliderTrackerConfig(),
@@ -63,6 +65,7 @@ constructor(
     private val sliderHapticFeedbackProvider =
         SliderHapticFeedbackProvider(
             vibratorHelper,
+            msdlPlayer,
             dragVelocityProvider,
             sliderHapticFeedbackConfig,
             systemClock,

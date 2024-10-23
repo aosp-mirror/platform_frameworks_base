@@ -21,6 +21,7 @@ import static android.provider.Settings.Secure.SHOW_NOTIFICATION_SNOOZE;
 import static com.android.systemui.log.LogBufferHelperKt.logcatLogBuffer;
 import static com.android.systemui.statusbar.notification.collection.GroupEntry.ROOT_ENTRY;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -36,9 +37,11 @@ import static org.mockito.Mockito.when;
 
 import static java.util.Objects.requireNonNull;
 
+import android.app.Flags;
 import android.database.ContentObserver;
 import android.os.Handler;
 import android.os.RemoteException;
+import android.platform.test.annotations.EnableFlags;
 import android.testing.TestableLooper;
 
 import androidx.annotation.NonNull;
@@ -61,6 +64,7 @@ import com.android.systemui.statusbar.notification.collection.inflation.NotifInf
 import com.android.systemui.statusbar.notification.collection.inflation.NotifUiAdjustmentProvider;
 import com.android.systemui.statusbar.notification.collection.listbuilder.NotifSection;
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeFinalizeFilterListener;
+import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeTransformGroupsListener;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSectioner;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
@@ -69,6 +73,8 @@ import com.android.systemui.statusbar.notification.collection.provider.SectionSt
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
 import com.android.systemui.statusbar.notification.collection.render.NotifViewBarn;
 import com.android.systemui.statusbar.notification.row.NotifInflationErrorManager;
+import com.android.systemui.statusbar.notification.row.icon.AppIconProvider;
+import com.android.systemui.statusbar.notification.row.icon.NotificationIconStyleProvider;
 import com.android.systemui.statusbar.policy.SensitiveNotificationProtectionController;
 import com.android.systemui.util.settings.SecureSettings;
 
@@ -82,10 +88,12 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -93,6 +101,7 @@ import java.util.Map;
 public class PreparationCoordinatorTest extends SysuiTestCase {
     private NotifCollectionListener mCollectionListener;
     private OnBeforeFinalizeFilterListener mBeforeFilterListener;
+    private OnBeforeTransformGroupsListener mBeforeTransformGroupsListener;
     private NotifFilter mUninflatedFilter;
     private NotifFilter mInflationErrorFilter;
     private NotifInflationErrorManager mErrorManager;
@@ -101,6 +110,8 @@ public class PreparationCoordinatorTest extends SysuiTestCase {
 
     @Captor private ArgumentCaptor<NotifCollectionListener> mCollectionListenerCaptor;
     @Captor private ArgumentCaptor<OnBeforeFinalizeFilterListener> mBeforeFilterListenerCaptor;
+    @Captor private ArgumentCaptor<OnBeforeTransformGroupsListener>
+            mBeforeTransformGroupsListenerCaptor;
     @Captor private ArgumentCaptor<NotifInflater.Params> mParamsCaptor;
 
     @Mock private NotifSectioner mNotifSectioner;
@@ -108,13 +119,14 @@ public class PreparationCoordinatorTest extends SysuiTestCase {
     @Mock private NotifPipeline mNotifPipeline;
     @Mock private IStatusBarService mService;
     @Mock private BindEventManagerImpl mBindEventManagerImpl;
+    @Mock private AppIconProvider mAppIconProvider;
+    @Mock private NotificationIconStyleProvider mNotificationIconStyleProvider;
     @Mock private NotificationLockscreenUserManager mLockscreenUserManager;
     @Mock private SensitiveNotificationProtectionController mSensitiveNotifProtectionController;
     @Mock private Handler mHandler;
     @Mock private SecureSettings mSecureSettings;
     @Spy private FakeNotifInflater mNotifInflater = new FakeNotifInflater();
-    @Mock
-    HighPriorityProvider mHighPriorityProvider;
+    @Mock HighPriorityProvider mHighPriorityProvider;
     private SectionStyleProvider mSectionStyleProvider;
     @Mock private UserTracker mUserTracker;
     @Mock private GroupMembershipManager mGroupMembershipManager;
@@ -124,6 +136,11 @@ public class PreparationCoordinatorTest extends SysuiTestCase {
     @NonNull
     private NotificationEntryBuilder getNotificationEntryBuilder() {
         return new NotificationEntryBuilder().setSection(mNotifSection);
+    }
+
+    @NonNull
+    private GroupEntryBuilder getGroupEntryBuilder() {
+        return new GroupEntryBuilder().setSection(mNotifSection);
     }
 
     @Before
@@ -138,7 +155,7 @@ public class PreparationCoordinatorTest extends SysuiTestCase {
                 mSectionStyleProvider,
                 mUserTracker,
                 mGroupMembershipManager
-                );
+        );
         mEntry = getNotificationEntryBuilder().setParent(ROOT_ENTRY).build();
         mInflationError = new Exception(TEST_MESSAGE);
         mErrorManager = new NotifInflationErrorManager();
@@ -153,6 +170,8 @@ public class PreparationCoordinatorTest extends SysuiTestCase {
                 mAdjustmentProvider,
                 mService,
                 mBindEventManagerImpl,
+                mAppIconProvider,
+                mNotificationIconStyleProvider,
                 TEST_CHILD_BIND_CUTOFF,
                 TEST_MAX_GROUP_DELAY);
 
@@ -162,6 +181,15 @@ public class PreparationCoordinatorTest extends SysuiTestCase {
         List<NotifFilter> filters = filterCaptor.getAllValues();
         mInflationErrorFilter = filters.get(0);
         mUninflatedFilter = filters.get(1);
+
+        if (android.app.Flags.notificationsRedesignAppIcons()) {
+            verify(mNotifPipeline).addOnBeforeTransformGroupsListener(
+                    mBeforeTransformGroupsListenerCaptor.capture());
+            mBeforeTransformGroupsListener = mBeforeTransformGroupsListenerCaptor.getValue();
+        } else {
+            verify(mNotifPipeline, never()).addOnBeforeTransformGroupsListener(
+                    mBeforeTransformGroupsListenerCaptor.capture());
+        }
 
         verify(mNotifPipeline).addCollectionListener(mCollectionListenerCaptor.capture());
         mCollectionListener = mCollectionListenerCaptor.getValue();
@@ -196,6 +224,100 @@ public class PreparationCoordinatorTest extends SysuiTestCase {
 
         // THEN we filter it from the notification list.
         assertTrue(mInflationErrorFilter.shouldFilterOut(mEntry, 0));
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_NOTIFICATIONS_REDESIGN_APP_ICONS)
+    public void testPurgesAppIconProviderCache() {
+        // GIVEN a notification list
+        NotificationEntry entry1 = getNotificationEntryBuilder().setPkg("1").build();
+        NotificationEntry entry2 = getNotificationEntryBuilder().setPkg("2").build();
+        NotificationEntry entry2bis = getNotificationEntryBuilder().setPkg("2").build();
+        NotificationEntry entry3 = getNotificationEntryBuilder().setPkg("3").build();
+
+        String groupKey1 = "group1";
+        NotificationEntry summary =
+                getNotificationEntryBuilder()
+                        .setPkg(groupKey1)
+                        .setGroup(mContext, groupKey1)
+                        .setGroupSummary(mContext, true)
+                        .build();
+        NotificationEntry child1 = getNotificationEntryBuilder().setGroup(mContext, groupKey1)
+                .setPkg(groupKey1).build();
+        NotificationEntry child2 = getNotificationEntryBuilder().setGroup(mContext, groupKey1)
+                .setPkg(groupKey1).build();
+        GroupEntry groupWithSummaryAndChildren = getGroupEntryBuilder().setKey(groupKey1)
+                .setSummary(summary).addChild(child1).addChild(child2).build();
+
+        String groupKey2 = "group2";
+        NotificationEntry summary2 =
+                getNotificationEntryBuilder()
+                        .setPkg(groupKey2)
+                        .setGroup(mContext, groupKey2)
+                        .setGroupSummary(mContext, true)
+                        .build();
+        GroupEntry summaryOnlyGroup = getGroupEntryBuilder().setKey(groupKey2)
+                .setSummary(summary2).build();
+
+        // WHEN onBeforeTransformGroup is called
+        mBeforeTransformGroupsListener.onBeforeTransformGroups(
+                List.of(entry1, entry2, entry2bis, entry3,
+                        groupWithSummaryAndChildren, summaryOnlyGroup));
+
+        // THEN purge should be called
+        ArgumentCaptor<Collection<String>> argumentCaptor = ArgumentCaptor.forClass(List.class);
+        verify(mAppIconProvider).purgeCache(argumentCaptor.capture());
+        List<String> actualList = argumentCaptor.getValue().stream().sorted().toList();
+        List<String> expectedList = Stream.of("1", "2", "3", "group1", "group2")
+                .sorted().toList();
+        assertEquals(expectedList, actualList);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_NOTIFICATIONS_REDESIGN_APP_ICONS)
+    public void testPurgesNotificationIconStyleProviderCache() {
+        // GIVEN a notification list
+        NotificationEntry entry1 = getNotificationEntryBuilder().setPkg("1").build();
+        NotificationEntry entry2 = getNotificationEntryBuilder().setPkg("2").build();
+        NotificationEntry entry2bis = getNotificationEntryBuilder().setPkg("2").build();
+        NotificationEntry entry3 = getNotificationEntryBuilder().setPkg("3").build();
+
+        String groupKey1 = "group1";
+        NotificationEntry summary =
+                getNotificationEntryBuilder()
+                        .setPkg(groupKey1)
+                        .setGroup(mContext, groupKey1)
+                        .setGroupSummary(mContext, true)
+                        .build();
+        NotificationEntry child1 = getNotificationEntryBuilder().setGroup(mContext, groupKey1)
+                .setPkg(groupKey1).build();
+        NotificationEntry child2 = getNotificationEntryBuilder().setGroup(mContext, groupKey1)
+                .setPkg(groupKey1).build();
+        GroupEntry groupWithSummaryAndChildren = getGroupEntryBuilder().setKey(groupKey1)
+                .setSummary(summary).addChild(child1).addChild(child2).build();
+
+        String groupKey2 = "group2";
+        NotificationEntry summary2 =
+                getNotificationEntryBuilder()
+                        .setPkg(groupKey2)
+                        .setGroup(mContext, groupKey2)
+                        .setGroupSummary(mContext, true)
+                        .build();
+        GroupEntry summaryOnlyGroup = getGroupEntryBuilder().setKey(groupKey2)
+                .setSummary(summary2).build();
+
+        // WHEN onBeforeTransformGroup is called
+        mBeforeTransformGroupsListener.onBeforeTransformGroups(
+                List.of(entry1, entry2, entry2bis, entry3,
+                        groupWithSummaryAndChildren, summaryOnlyGroup));
+
+        // THEN purge should be called
+        ArgumentCaptor<Collection<String>> argumentCaptor = ArgumentCaptor.forClass(List.class);
+        verify(mNotificationIconStyleProvider).purgeCache(argumentCaptor.capture());
+        List<String> actualList = argumentCaptor.getValue().stream().sorted().toList();
+        List<String> expectedList = Stream.of("1", "2", "3", "group1", "group2")
+                .sorted().toList();
+        assertEquals(expectedList, actualList);
     }
 
     @Test

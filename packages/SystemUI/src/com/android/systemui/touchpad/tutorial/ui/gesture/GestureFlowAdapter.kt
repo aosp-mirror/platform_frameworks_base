@@ -14,8 +14,17 @@
  * limitations under the License.
  */
 
-package com.android.systemui.volume.dialog.ringer.data
+package com.android.systemui.touchpad.tutorial.ui.gesture
 
-import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.utils.coroutines.flow.conflatedCallbackFlow
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
 
-val Kosmos.volumeDialogRingerRepository by Kosmos.Fixture { VolumeDialogRingerRepository() }
+class GestureFlowAdapter(gestureRecognizer: GestureRecognizer) {
+
+    val gestureStateAsFlow: Flow<GestureState> = conflatedCallbackFlow {
+        val callback: (GestureState) -> Unit = { trySend(it) }
+        gestureRecognizer.addGestureStateCallback(callback)
+        awaitClose { gestureRecognizer.clearGestureStateCallback() }
+    }
+}

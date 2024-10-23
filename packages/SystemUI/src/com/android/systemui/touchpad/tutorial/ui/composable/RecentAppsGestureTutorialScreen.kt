@@ -25,8 +25,11 @@ import com.android.compose.theme.LocalAndroidColorScheme
 import com.android.systemui.inputdevice.tutorial.ui.composable.TutorialScreenConfig
 import com.android.systemui.inputdevice.tutorial.ui.composable.rememberColorFilterProperty
 import com.android.systemui.res.R
+import com.android.systemui.touchpad.tutorial.ui.gesture.GestureFlowAdapter
 import com.android.systemui.touchpad.tutorial.ui.gesture.GestureRecognizer
 import com.android.systemui.touchpad.tutorial.ui.gesture.RecentAppsGestureRecognizer
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 
 @Composable
 fun RecentAppsGestureTutorialScreen(onDoneButtonClicked: () -> Unit, onBack: () -> Unit) {
@@ -47,7 +50,17 @@ fun RecentAppsGestureTutorialScreen(onDoneButtonClicked: () -> Unit, onBack: () 
                 ),
         )
     val recognizer = rememberRecentAppsGestureRecognizer(LocalContext.current.resources)
-    GestureTutorialScreen(screenConfig, recognizer, onDoneButtonClicked, onBack)
+    val gestureUiState: Flow<GestureUiState> =
+        remember(recognizer) {
+            GestureFlowAdapter(recognizer).gestureStateAsFlow.map {
+                it.toGestureUiState(
+                    progressStartMark = "",
+                    progressEndMark = "",
+                    successAnimation = R.raw.trackpad_recent_apps_success,
+                )
+            }
+        }
+    GestureTutorialScreen(screenConfig, recognizer, gestureUiState, onDoneButtonClicked, onBack)
 }
 
 @Composable

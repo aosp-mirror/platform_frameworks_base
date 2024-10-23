@@ -1770,6 +1770,10 @@ public class BatteryStatsHistory {
 
     @GuardedBy("this")
     private void writeHistoryItem(long elapsedRealtimeMs, long uptimeMs, HistoryItem cur) {
+        if (cur.eventCode != HistoryItem.EVENT_NONE && cur.eventTag.string == null) {
+            Slog.wtfStack(TAG, "Event " + Integer.toHexString(cur.eventCode) + " without a name");
+        }
+
         if (mTracer != null && mTracer.tracingEnabled()) {
             recordTraceEvents(cur.eventCode, cur.eventTag);
             recordTraceCounters(mTraceLastState, cur.states, STATE1_TRACE_MASK,
@@ -2266,6 +2270,7 @@ public class BatteryStatsHistory {
     private int writeHistoryTag(HistoryTag tag) {
         if (tag.string == null) {
             Slog.wtfStack(TAG, "writeHistoryTag called with null name");
+            tag.string = "";
         }
 
         final int stringLength = tag.string.length();
