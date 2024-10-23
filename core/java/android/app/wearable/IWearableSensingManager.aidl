@@ -41,6 +41,8 @@ interface IWearableSensingManager {
      @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE)")
      void removeAllConnections();
      @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE)")
+     void provideReadOnlyParcelFileDescriptor(in ParcelFileDescriptor parcelFileDescriptor, in PersistableBundle metadata, in RemoteCallback statusCallback);
+     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE)")
      void provideDataStream(in ParcelFileDescriptor parcelFileDescriptor, in @nullable IWearableSensingCallback wearableSensingCallback, in RemoteCallback statusCallback);
      @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE)")
      void provideData(in PersistableBundle data, in SharedMemory sharedMemory, in RemoteCallback callback);

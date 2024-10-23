@@ -189,6 +189,28 @@ final class RemoteWearableSensingService extends ServiceConnector.Impl<IWearable
         var unused = post(service -> service.killProcess());
     }
 
+    /** Provides a read-only {@link ParcelFileDescriptor} to the WearableSensingService. */
+    public void provideReadOnlyParcelFileDescriptor(
+            ParcelFileDescriptor parcelFileDescriptor,
+            PersistableBundle metadata,
+            RemoteCallback callback) {
+        if (DEBUG) {
+            Slog.i(TAG, "Providing read-only ParcelFileDescriptor.");
+        }
+        var unused =
+                post(
+                        service -> {
+                            service.provideReadOnlyParcelFileDescriptor(
+                                    parcelFileDescriptor, metadata, callback);
+                            try {
+                                // close the local fd after it has been sent to the WSS process
+                                parcelFileDescriptor.close();
+                            } catch (IOException ex) {
+                                Slog.w(TAG, "Unable to close the local parcelFileDescriptor.", ex);
+                            }
+                        });
+    }
+
     /**
      * Provides the implementation a data stream to the wearable.
      *

@@ -426,6 +426,35 @@ public class WearableSensingManager {
     }
 
     /**
+     * Provides a read-only {@link ParcelFileDescriptor} to the WearableSensingService.
+     *
+     * <p>This is used by the application that will also provide an implementation of the isolated
+     * WearableSensingService. If the {@link ParcelFileDescriptor} was provided successfully, {@link
+     * WearableSensingManager#STATUS_SUCCESS} will be sent to the {@code statusConsumer}.
+     *
+     * @param parcelFileDescriptor The read-only {@link ParcelFileDescriptor} to provide
+     * @param metadata Metadata used to identify the {@code parcelFileDescriptor}
+     * @param executor Executor on which to run the {@code statusConsumer}
+     * @param statusConsumer A consumer that handles the status codes
+     * @throws IllegalArgumentException when the {@code parcelFileDescriptor} is not read-only
+     */
+    @RequiresPermission(Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE)
+    @FlaggedApi(Flags.FLAG_ENABLE_PROVIDE_READ_ONLY_PFD)
+    public void provideReadOnlyParcelFileDescriptor(
+            @NonNull ParcelFileDescriptor parcelFileDescriptor,
+            @NonNull PersistableBundle metadata,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull @StatusCode Consumer<Integer> statusConsumer) {
+        RemoteCallback statusCallback = createStatusCallback(executor, statusConsumer);
+        try {
+            mService.provideReadOnlyParcelFileDescriptor(
+                    parcelFileDescriptor, metadata, statusCallback);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Provides a data stream to the WearableSensingService that's backed by the
      * parcelFileDescriptor, and sends the result to the {@link Consumer} right after the call. This
      * is used by applications that will also provide an implementation of an isolated

@@ -161,6 +161,18 @@ public abstract class WearableSensingService extends Service {
 
                 /** {@inheritDoc} */
                 @Override
+                public void provideReadOnlyParcelFileDescriptor(
+                        ParcelFileDescriptor parcelFileDescriptor,
+                        PersistableBundle metadata,
+                        RemoteCallback callback) {
+                    Objects.requireNonNull(parcelFileDescriptor);
+                    Consumer<Integer> consumer = createWearableStatusConsumer(callback);
+                    WearableSensingService.this.onReadOnlyParcelFileDescriptorProvided(
+                            parcelFileDescriptor, metadata, consumer);
+                }
+
+                /** {@inheritDoc} */
+                @Override
                 public void provideDataStream(
                         ParcelFileDescriptor parcelFileDescriptor,
                         IWearableSensingCallback wearableSensingCallback,
@@ -390,6 +402,29 @@ public abstract class WearableSensingService extends Service {
             @NonNull ParcelFileDescriptor secureWearableConnection,
             @NonNull PersistableBundle metadata,
             @NonNull Consumer<Integer> statusConsumer) {
+        statusConsumer.accept(WearableSensingManager.STATUS_UNSUPPORTED_OPERATION);
+    }
+
+    /**
+     * Called when a read-only {@link ParcelFileDescriptor} is provided.
+     *
+     * <p>It is up to the implementation to close the {@link ParcelFileDescriptor} when it is
+     * finished.
+     *
+     * <p>The implementation should return one of the status code defined in the {@link
+     * WearableSensingManager} via the {@code statusConsumer}.
+     *
+     * @param parcelFileDescriptor The provided read-only {@link ParcelFileDescriptor}
+     * @param metadata The metadata provided along with the {@code parcelFileDescriptor}
+     * @param statusConsumer the consumer for the status code
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_PROVIDE_READ_ONLY_PFD)
+    @BinderThread
+    public void onReadOnlyParcelFileDescriptorProvided(
+            @NonNull ParcelFileDescriptor parcelFileDescriptor,
+            @NonNull PersistableBundle metadata,
+            @NonNull Consumer<Integer> statusConsumer) {
+        // placeholder implementation
         statusConsumer.accept(WearableSensingManager.STATUS_UNSUPPORTED_OPERATION);
     }
 

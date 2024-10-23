@@ -326,7 +326,7 @@ final class WearableSensingManagerPerUserService
             Slog.i(
                     TAG,
                     "Rejecting connection because max concurrent connections limit has been"
-                        + " reached.");
+                            + " reached.");
             if (Flags.enableConcurrentWearableConnections()) {
                 notifyStatusCallback(
                         statusCallback,
@@ -384,7 +384,7 @@ final class WearableSensingManagerPerUserService
             Slog.i(
                     TAG,
                     "Rejecting connection because max concurrent connections limit has been"
-                        + " reached.");
+                            + " reached.");
             if (Flags.enableConcurrentWearableConnections()) {
                 notifyStatusCallback(
                         statusCallback,
@@ -436,6 +436,31 @@ final class WearableSensingManagerPerUserService
         }
         for (WearableSensingSecureChannel channel : allChannels) {
             channel.close();
+        }
+    }
+
+    /**
+     * Handles sending the provided read-only {@link ParcelFileDescriptor} to the wearable sensing
+     * service.
+     */
+    public void onProvideReadOnlyParcelFileDescriptor(
+            ParcelFileDescriptor parcelFileDescriptor,
+            PersistableBundle metadata,
+            RemoteCallback statusCallback) {
+        if (!isReadOnly(parcelFileDescriptor)) {
+            throw new IllegalArgumentException("Provided ParcelFileDescriptor is not read-only.");
+        }
+        synchronized (mLock) {
+            if (!setUpServiceIfNeeded()) {
+                Slog.w(TAG, "Detection service is not available at this moment.");
+                notifyStatusCallback(
+                        statusCallback, WearableSensingManager.STATUS_SERVICE_UNAVAILABLE);
+                return;
+            }
+            Slog.i(TAG, "calling over to remote servvice.");
+            ensureRemoteServiceInitiated();
+            mRemoteService.provideReadOnlyParcelFileDescriptor(
+                    parcelFileDescriptor, metadata, statusCallback);
         }
     }
 

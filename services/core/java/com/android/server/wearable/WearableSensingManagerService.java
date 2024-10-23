@@ -486,6 +486,21 @@ public class WearableSensingManagerService
         }
 
         @Override
+        public void provideReadOnlyParcelFileDescriptor(
+                ParcelFileDescriptor parcelFileDescriptor,
+                PersistableBundle metadata,
+                RemoteCallback statusCallback) {
+            Slog.i(TAG, "WearableSensingManagerInternal provideReadOnlyParcelFileDescriptor.");
+            WearableSensingManagerPerUserService service =
+                    validateAndGetPerUserService(statusCallback);
+            if (service == null) {
+                return;
+            }
+            service.onProvideReadOnlyParcelFileDescriptor(
+                    parcelFileDescriptor, metadata, statusCallback);
+        }
+
+        @Override
         public void provideDataStream(
                 ParcelFileDescriptor parcelFileDescriptor,
                 @Nullable IWearableSensingCallback wearableSensingCallback,
