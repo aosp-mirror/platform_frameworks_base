@@ -152,11 +152,11 @@ constructor(
 
     private lateinit var viewModel: QSFragmentComposeViewModel
 
-    private val qsHeight = MutableStateFlow(0)
     private val qqsVisible = MutableStateFlow(false)
     private val qqsPositionOnRoot = Rect()
     private val composeViewPositionOnScreen = Rect()
     private val scrollState = ScrollState(0)
+    private val locationTemp = IntArray(2)
 
     // Inside object for namespacing
     private val notificationScrimClippingParams =
@@ -331,8 +331,27 @@ constructor(
     }
 
     override fun getQsMinExpansionHeight(): Int {
-        // TODO (b/353253277) implement split screen
-        return viewModel.qqsHeight
+        return if (viewModel.isInSplitShade) {
+            getQsMinExpansionHeightForSplitShade()
+        } else {
+            viewModel.qqsHeight
+        }
+    }
+
+    /**
+     * Returns the min expansion height for split shade.
+     *
+     * On split shade, QS is always expanded and goes from the top of the screen to the bottom of
+     * the QS container.
+     */
+    private fun getQsMinExpansionHeightForSplitShade(): Int {
+        view?.getLocationOnScreen(locationTemp)
+        val top = locationTemp.get(1)
+        // We want to get the original top position, so we subtract any translation currently set.
+        val originalTop = (top - (view?.translationY ?: 0f)).toInt()
+        // On split shade the QS view doesn't start at the top of the screen, so we need to add the
+        // top margin.
+        return originalTop + (view?.height ?: 0)
     }
 
     override fun getDesiredHeight(): Int {
