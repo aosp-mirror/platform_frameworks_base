@@ -49,6 +49,7 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.IndentingPrintWriter;
+import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.DisplayAddress;
@@ -70,12 +71,11 @@ import java.lang.annotation.RetentionPolicy;
 public class WakefulnessSessionObserver {
     private static final String TAG = "WakefulnessSessionObserver";
 
-    private static final int OFF_REASON_UNKNOWN = FrameworkStatsLog
+    static final int OFF_REASON_UNKNOWN = FrameworkStatsLog
             .SCREEN_INTERACTIVE_SESSION_REPORTED__INTERACTIVE_STATE_OFF_REASON__UNKNOWN;
-    private static final int OFF_REASON_TIMEOUT = FrameworkStatsLog
+    static final int OFF_REASON_TIMEOUT = FrameworkStatsLog
             .SCREEN_INTERACTIVE_SESSION_REPORTED__INTERACTIVE_STATE_OFF_REASON__TIMEOUT;
-    @VisibleForTesting
-    protected static final int OFF_REASON_POWER_BUTTON = FrameworkStatsLog
+    static final int OFF_REASON_POWER_BUTTON = FrameworkStatsLog
             .SCREEN_INTERACTIVE_SESSION_REPORTED__INTERACTIVE_STATE_OFF_REASON__POWER_BUTTON;
 
     /**
@@ -90,25 +90,21 @@ public class WakefulnessSessionObserver {
     @Retention(RetentionPolicy.SOURCE)
     private @interface OffReason {}
 
-    private static final int OVERRIDE_OUTCOME_UNKNOWN = FrameworkStatsLog
+    static final int OVERRIDE_OUTCOME_UNKNOWN = FrameworkStatsLog
             .SCREEN_TIMEOUT_OVERRIDE_REPORTED__OVERRIDE_OUTCOME__UNKNOWN;
-    @VisibleForTesting
-    protected static final int OVERRIDE_OUTCOME_TIMEOUT_SUCCESS = FrameworkStatsLog
+    static final int OVERRIDE_OUTCOME_TIMEOUT_SUCCESS = FrameworkStatsLog
             .SCREEN_TIMEOUT_OVERRIDE_REPORTED__OVERRIDE_OUTCOME__TIMEOUT_SUCCESS;
-    @VisibleForTesting
-    protected static final int OVERRIDE_OUTCOME_TIMEOUT_USER_INITIATED_REVERT = FrameworkStatsLog
+    static final int OVERRIDE_OUTCOME_TIMEOUT_USER_INITIATED_REVERT = FrameworkStatsLog
             .SCREEN_TIMEOUT_OVERRIDE_REPORTED__OVERRIDE_OUTCOME__TIMEOUT_USER_INITIATED_REVERT;
-    private static final int OVERRIDE_OUTCOME_CANCEL_CLIENT_API_CALL = FrameworkStatsLog
+    static final int OVERRIDE_OUTCOME_CANCEL_CLIENT_API_CALL = FrameworkStatsLog
             .SCREEN_TIMEOUT_OVERRIDE_REPORTED__OVERRIDE_OUTCOME__CANCEL_CLIENT_API_CALL;
-    @VisibleForTesting
-    protected static final int OVERRIDE_OUTCOME_CANCEL_USER_INTERACTION = FrameworkStatsLog
+    static final int OVERRIDE_OUTCOME_CANCEL_USER_INTERACTION = FrameworkStatsLog
             .SCREEN_TIMEOUT_OVERRIDE_REPORTED__OVERRIDE_OUTCOME__CANCEL_USER_INTERACTION;
-    @VisibleForTesting
-    protected static final int OVERRIDE_OUTCOME_CANCEL_POWER_BUTTON = FrameworkStatsLog
+    static final int OVERRIDE_OUTCOME_CANCEL_POWER_BUTTON = FrameworkStatsLog
             .SCREEN_TIMEOUT_OVERRIDE_REPORTED__OVERRIDE_OUTCOME__CANCEL_POWER_BUTTON;
-    private static final int OVERRIDE_OUTCOME_CANCEL_CLIENT_DISCONNECT = FrameworkStatsLog
+    static final int OVERRIDE_OUTCOME_CANCEL_CLIENT_DISCONNECT = FrameworkStatsLog
             .SCREEN_TIMEOUT_OVERRIDE_REPORTED__OVERRIDE_OUTCOME__CANCEL_CLIENT_DISCONNECTED;
-    private static final int OVERRIDE_OUTCOME_CANCEL_OTHER = FrameworkStatsLog
+    static final int OVERRIDE_OUTCOME_CANCEL_OTHER = FrameworkStatsLog
             .SCREEN_TIMEOUT_OVERRIDE_REPORTED__OVERRIDE_OUTCOME__CANCEL_OTHER;
 
     /**
@@ -128,19 +124,15 @@ public class WakefulnessSessionObserver {
     @Retention(RetentionPolicy.SOURCE)
     private @interface OverrideOutcome {}
 
-    private static final int POLICY_REASON_UNKNOWN = FrameworkStatsLog
+    static final int POLICY_REASON_UNKNOWN = FrameworkStatsLog
             .SCREEN_DIM_REPORTED__POLICY_REASON__UNKNOWN;
-    @VisibleForTesting
-    protected static final int POLICY_REASON_OFF_TIMEOUT = FrameworkStatsLog
+    static final int POLICY_REASON_OFF_TIMEOUT = FrameworkStatsLog
             .SCREEN_DIM_REPORTED__POLICY_REASON__OFF_TIMEOUT;
-    @VisibleForTesting
-    protected static final int POLICY_REASON_OFF_POWER_BUTTON = FrameworkStatsLog
+    static final int POLICY_REASON_OFF_POWER_BUTTON = FrameworkStatsLog
             .SCREEN_DIM_REPORTED__POLICY_REASON__OFF_POWER_BUTTON;
-    @VisibleForTesting
-    protected static final int POLICY_REASON_BRIGHT_UNDIM = FrameworkStatsLog
+    static final int POLICY_REASON_BRIGHT_UNDIM = FrameworkStatsLog
             .SCREEN_DIM_REPORTED__POLICY_REASON__BRIGHT_UNDIM;
-    @VisibleForTesting
-    protected static final int POLICY_REASON_BRIGHT_INITIATED_REVERT = FrameworkStatsLog
+    static final int POLICY_REASON_BRIGHT_INITIATED_REVERT = FrameworkStatsLog
             .SCREEN_DIM_REPORTED__POLICY_REASON__BRIGHT_INITIATED_REVERT;
 
     /**
@@ -157,21 +149,18 @@ public class WakefulnessSessionObserver {
     @Retention(RetentionPolicy.SOURCE)
     private @interface PolicyReason {}
 
-    @VisibleForTesting protected static final int DEFAULT_USER_ACTIVITY = USER_ACTIVITY_EVENT_OTHER;
-    private static final long USER_INITIATED_REVERT_THRESHOLD_MILLIS = 5000L;
-    private static final long SEND_OVERRIDE_TIMEOUT_LOG_THRESHOLD_MILLIS = 1000L;
-    @VisibleForTesting
-    protected static final long SCREEN_POLICY_DIM_POWER_OFF_BRIGHT_THRESHOLD_MILLIS = 500L;
+    static final int DEFAULT_USER_ACTIVITY = USER_ACTIVITY_EVENT_OTHER;
+    static final long USER_INITIATED_REVERT_THRESHOLD_MILLIS = 5000L;
+    static final long SEND_OVERRIDE_TIMEOUT_LOG_THRESHOLD_MILLIS = 1000L;
+    static final long SCREEN_POLICY_DIM_POWER_OFF_BRIGHT_THRESHOLD_MILLIS = 500L;
 
-    @VisibleForTesting protected static final Object HANDLER_TOKEN = new Object();
+    static final Object HANDLER_TOKEN = new Object();
 
     private Context mContext;
     private int mScreenOffTimeoutMs;
     private int mOverrideTimeoutMs = 0;
-    @VisibleForTesting
-    protected final SparseArray<WakefulnessSessionPowerGroup> mPowerGroups = new SparseArray<>();
-    @VisibleForTesting
-    protected WakefulnessSessionFrameworkStatsLogger mWakefulnessSessionFrameworkStatsLogger;
+    final SparseArray<WakefulnessSessionPowerGroup> mPowerGroups = new SparseArray<>();
+    WakefulnessSessionFrameworkStatsLogger mWakefulnessSessionFrameworkStatsLogger;
     private final Clock mClock;
     private final Object mLock = new Object();
     private final Handler mHandler;
@@ -347,7 +336,8 @@ public class WakefulnessSessionObserver {
         writer.println();
     }
 
-    private void updateSettingScreenOffTimeout(Context context) {
+    @VisibleForTesting
+    void updateSettingScreenOffTimeout(Context context) {
         synchronized (mLock) {
             mScreenOffTimeoutMs = Settings.System.getIntForUser(
                     context.getContentResolver(),
@@ -453,6 +443,7 @@ public class WakefulnessSessionObserver {
                 return;
             }
 
+            final int screenOffTimeoutMs = getScreenOffTimeout();
             mIsInteractive = isInteractive(wakefulness);
             if (mIsInteractive) {
                 mInteractiveStateOnStartTimestamp = eventTime;
@@ -466,7 +457,7 @@ public class WakefulnessSessionObserver {
                                 mPowerGroupId,
                                 OVERRIDE_OUTCOME_TIMEOUT_USER_INITIATED_REVERT,
                                 mOverrideTimeoutMs,
-                                getScreenOffTimeout());
+                                screenOffTimeoutMs);
                         mSendOverrideTimeoutLogTimestamp = eventTime;
                     }
                     mTimeoutOffTimestamp = TIMEOUT_OFF_RESET_TIMESTAMP;
@@ -496,7 +487,7 @@ public class WakefulnessSessionObserver {
                                 mPowerGroupId,
                                 OVERRIDE_OUTCOME_CANCEL_POWER_BUTTON,
                                 mOverrideTimeoutMs,
-                                getScreenOffTimeout());
+                                screenOffTimeoutMs);
                         mSendOverrideTimeoutLogTimestamp = eventTime;
                         mTimeoutOverrideReleaseReason = RELEASE_REASON_UNKNOWN; // reset the reason
                     }
@@ -514,13 +505,12 @@ public class WakefulnessSessionObserver {
                     // timeout has been done successfully.
                     if (isInOverrideTimeout()) {
                         reducedInteractiveStateOnDurationMs =
-                                getScreenOffTimeout() - mOverrideTimeoutMs;
-
+                                screenOffTimeoutMs - mOverrideTimeoutMs;
                         mWakefulnessSessionFrameworkStatsLogger.logTimeoutOverrideEvent(
                                 mPowerGroupId,
                                 OVERRIDE_OUTCOME_TIMEOUT_SUCCESS,
                                 mOverrideTimeoutMs,
-                                getScreenOffTimeout());
+                                screenOffTimeoutMs);
                         mSendOverrideTimeoutLogTimestamp = eventTime;
 
                         // Record a timestamp to track if the user initiates to revert from off
@@ -533,13 +523,21 @@ public class WakefulnessSessionObserver {
 
                 long interactiveStateOnDurationMs =
                         eventTime - mInteractiveStateOnStartTimestamp;
-                mWakefulnessSessionFrameworkStatsLogger.logSessionEvent(
-                        mPowerGroupId,
-                        interactiveStateOffReason,
-                        interactiveStateOnDurationMs,
-                        lastUserActivity,
-                        lastUserActivityDurationMs,
-                        reducedInteractiveStateOnDurationMs);
+
+                if (reducedInteractiveStateOnDurationMs < screenOffTimeoutMs
+                        && reducedInteractiveStateOnDurationMs >= 0) {
+                    mWakefulnessSessionFrameworkStatsLogger.logSessionEvent(
+                            mPowerGroupId,
+                            interactiveStateOffReason,
+                            interactiveStateOnDurationMs,
+                            lastUserActivity,
+                            lastUserActivityDurationMs,
+                            reducedInteractiveStateOnDurationMs);
+                } else {
+                    Slog.w(TAG, "invalid reducedInteractiveStateOnDurationMs: "
+                            + reducedInteractiveStateOnDurationMs);
+                }
+
             }
         }
 
@@ -608,6 +606,7 @@ public class WakefulnessSessionObserver {
                 return;
             }
 
+            final int screenOffTimeoutMs = getScreenOffTimeout();
             int dimDurationMs = 0;
             int lastUserActivity = mCurrentUserActivityEvent;
             int lastUserActivityDurationMs = (int) (eventTime - mCurrentUserActivityTimestamp);
@@ -625,7 +624,7 @@ public class WakefulnessSessionObserver {
                             lastUserActivity,
                             lastUserActivityDurationMs,
                             dimDurationMs,
-                            mScreenOffTimeoutMs);
+                            screenOffTimeoutMs);
                     mPastDimDurationMs = dimDurationMs;
                     return;
                 }
@@ -645,7 +644,7 @@ public class WakefulnessSessionObserver {
                                 lastUserActivity,
                                 lastUserActivityDurationMs,
                                 dimDurationMs,
-                                mScreenOffTimeoutMs);
+                                screenOffTimeoutMs);
                         mHandler.removeCallbacksAndMessages(HANDLER_TOKEN);
                     }
 
@@ -674,7 +673,7 @@ public class WakefulnessSessionObserver {
                                     savedLastUserActivity,
                                     savedLastUserActivityDurationMs,
                                     savedDimDurationMs,
-                                    mScreenOffTimeoutMs);
+                                    screenOffTimeoutMs);
                             mPastDimDurationMs = savedDimDurationMs;
                         }, HANDLER_TOKEN, SCREEN_POLICY_DIM_POWER_OFF_BRIGHT_THRESHOLD_MILLIS);
                     }
@@ -692,7 +691,7 @@ public class WakefulnessSessionObserver {
                                 lastUserActivity,
                                 lastUserActivityDurationMs,
                                 mPastDimDurationMs,
-                                mScreenOffTimeoutMs);
+                                screenOffTimeoutMs);
                     }
                     return;
                 }
