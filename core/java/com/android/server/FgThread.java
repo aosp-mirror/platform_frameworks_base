@@ -30,6 +30,8 @@ import java.util.concurrent.Executor;
  * relatively long-running operations like saving state to disk (in addition to
  * simply being a background priority), which can cause operations scheduled on it
  * to be delayed for a user-noticeable amount of time.
+ *
+ * @hide
  */
 public final class FgThread extends ServiceThread {
     private static final long SLOW_DISPATCH_THRESHOLD_MS = 100;

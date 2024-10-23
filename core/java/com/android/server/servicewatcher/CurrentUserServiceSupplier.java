@@ -63,6 +63,8 @@ import java.util.Objects;
  * <p>Optionally, two permissions may be specified: (1) a caller permission - any service that does
  * not require callers to hold this permission is rejected (2) a service permission - any service
  * whose package does not hold this permission is rejected.
+ *
+ * @hide
  */
 public final class CurrentUserServiceSupplier extends BroadcastReceiver implements
         ServiceSupplier<CurrentUserServiceSupplier.BoundServiceInfo> {

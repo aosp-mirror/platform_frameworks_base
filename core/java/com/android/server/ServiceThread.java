@@ -24,6 +24,8 @@ import android.os.StrictMode;
 
 /**
  * Special handler thread that we create for system services that require their own loopers.
+ *
+ * @hide
  */
 public class ServiceThread extends HandlerThread {
     private static final String TAG = "ServiceThread";
