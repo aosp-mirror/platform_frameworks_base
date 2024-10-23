@@ -221,7 +221,7 @@ constructor(
                 { notificationScrimClippingParams.params.top },
                 // Only allow scrolling when we are fully expanded. That way, we don't intercept
                 // swipes in lockscreen (when somehow QS is receiving touches).
-                { scrollState.canScrollForward && viewModel.isQsFullyExpanded },
+                { (scrollState.canScrollForward && viewModel.isQsFullyExpanded) || isCustomizing },
             )
         frame.addView(
             composeView,

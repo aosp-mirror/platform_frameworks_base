@@ -274,6 +274,7 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
             closeDragResizeListener();
             mDragResizeListener = new DragResizeInputListener(
                     mContext,
+                    mTaskInfo,
                     mHandler,
                     mChoreographer,
                     mDisplay.getDisplayId(),

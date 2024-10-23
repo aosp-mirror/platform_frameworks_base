@@ -40,6 +40,5 @@
         android:fontFamily="google-sans-medium"
         android:maxWidth="280dp"
         android:textColor="?androidprv:attr/materialColorOnTertiaryFixed"
-        android:textSize="14sp"
-        android:textStyle="bold" />
+        android:textSize="14sp" />
 </LinearLayout>

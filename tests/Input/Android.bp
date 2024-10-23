@@ -41,6 +41,7 @@ android_test {
         "hamcrest-library",
         "junit-params",
         "kotlin-test",
+        "mockito-kotlin-nodeps",
         "mockito-target-extended-minus-junit4",
         "platform-test-annotations",
         "platform-screenshot-diff-core",

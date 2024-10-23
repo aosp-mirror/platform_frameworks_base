@@ -40,6 +40,7 @@ import com.android.wm.shell.bubbles.BubbleTaskView
 import com.android.wm.shell.bubbles.BubbleTaskViewFactory
 import com.android.wm.shell.bubbles.DeviceConfig
 import com.android.wm.shell.bubbles.RegionSamplingProvider
+import com.android.wm.shell.bubbles.UiEventSubject.Companion.assertThat
 import com.android.wm.shell.common.ShellExecutor
 import com.android.wm.shell.shared.bubbles.BubbleBarLocation
 import com.android.wm.shell.shared.handles.RegionSamplingHelper
@@ -47,16 +48,14 @@ import com.android.wm.shell.taskview.TaskView
 import com.android.wm.shell.taskview.TaskViewTaskController
 import com.google.common.truth.Truth.assertThat
 import com.google.common.util.concurrent.MoreExecutors.directExecutor
+import java.util.Collections
+import java.util.concurrent.Executor
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.spy
-import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import java.util.Collections
-import java.util.concurrent.Executor
 
 /** Tests for [BubbleBarExpandedViewTest] */
 @SmallTest
@@ -82,7 +81,7 @@ class BubbleBarExpandedViewTest {
     private var testableRegionSamplingHelper: TestableRegionSamplingHelper? = null
     private var regionSamplingProvider: TestRegionSamplingProvider? = null
 
-    private val bubbleLogger = spy(BubbleLogger(UiEventLoggerFake()))
+    private val uiEventLoggerFake = UiEventLoggerFake()
 
     @Before
     fun setUp() {
@@ -116,7 +115,7 @@ class BubbleBarExpandedViewTest {
         bubbleExpandedView.initialize(
             expandedViewManager,
             positioner,
-            bubbleLogger,
+            BubbleLogger(uiEventLoggerFake),
             false /* isOverflow */,
             bubbleTaskView,
             mainExecutor,
@@ -223,7 +222,10 @@ class BubbleBarExpandedViewTest {
             bubbleExpandedView.findViewWithTag<View>(BubbleBarMenuView.DISMISS_ACTION_TAG)
         assertThat(dismissMenuItem).isNotNull()
         getInstrumentation().runOnMainSync { dismissMenuItem.performClick() }
-        verify(bubbleLogger).log(bubble, BubbleLogger.Event.BUBBLE_BAR_BUBBLE_DISMISSED_APP_MENU)
+        assertThat(uiEventLoggerFake.numLogs()).isEqualTo(1)
+        assertThat(uiEventLoggerFake.logs[0].eventId)
+            .isEqualTo(BubbleLogger.Event.BUBBLE_BAR_BUBBLE_DISMISSED_APP_MENU.id)
+        assertThat(uiEventLoggerFake.logs[0]).hasBubbleInfo(bubble)
     }
 
     private inner class FakeBubbleTaskViewFactory : BubbleTaskViewFactory {

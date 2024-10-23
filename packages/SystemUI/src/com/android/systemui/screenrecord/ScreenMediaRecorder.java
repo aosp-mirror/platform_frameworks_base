@@ -55,6 +55,7 @@ import android.view.WindowManager;
 
 import com.android.internal.R;
 import com.android.systemui.mediaprojection.MediaProjectionCaptureTarget;
+import com.android.systemui.recordissue.ScreenRecordingStartTimeStore;
 
 import java.io.Closeable;
 import java.io.File;
@@ -91,6 +92,7 @@ public class ScreenMediaRecorder extends MediaProjection.Callback {
     private ScreenInternalAudioRecorder mAudio;
     private ScreenRecordingAudioSource mAudioSource;
     private final MediaProjectionCaptureTarget mCaptureRegion;
+    private final ScreenRecordingStartTimeStore mScreenRecordingStartTimeStore;
     private final Handler mHandler;
 
     private Context mContext;
@@ -99,13 +101,15 @@ public class ScreenMediaRecorder extends MediaProjection.Callback {
     public ScreenMediaRecorder(Context context, Handler handler,
             int uid, ScreenRecordingAudioSource audioSource,
             MediaProjectionCaptureTarget captureRegion,
-            ScreenMediaRecorderListener listener) {
+            ScreenMediaRecorderListener listener,
+            ScreenRecordingStartTimeStore screenRecordingStartTimeStore) {
         mContext = context;
         mHandler = handler;
         mUid = uid;
         mCaptureRegion = captureRegion;
         mListener = listener;
         mAudioSource = audioSource;
+        mScreenRecordingStartTimeStore = screenRecordingStartTimeStore;
     }
 
     private void prepare() throws IOException, RemoteException, RuntimeException {
@@ -278,6 +282,7 @@ public class ScreenMediaRecorder extends MediaProjection.Callback {
         Log.d(TAG, "start recording");
         prepare();
         mMediaRecorder.start();
+        mScreenRecordingStartTimeStore.markStartTime();
         recordInternalAudio();
     }
 

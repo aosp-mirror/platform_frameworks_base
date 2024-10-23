@@ -38,11 +38,11 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
+import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Captor
 import org.mockito.Mock
-import org.mockito.Mockito
 import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
@@ -61,7 +61,7 @@ private const val SESSION_TITLE = "SESSION_TITLE"
 private const val SMARTSPACE_KEY = "SMARTSPACE_KEY"
 
 private fun <T> anyObject(): T {
-    return Mockito.anyObject<T>()
+    return ArgumentMatchers.any<T>()
 }
 
 @SmallTest

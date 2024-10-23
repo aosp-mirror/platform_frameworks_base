@@ -16,6 +16,7 @@
 
 package com.android.systemui.inputdevice.tutorial.ui.composable
 
+import androidx.annotation.RawRes
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -48,7 +49,7 @@ sealed interface TutorialActionState {
         val endMarker: String? = null,
     ) : TutorialActionState
 
-    data object Finished : TutorialActionState
+    data class Finished(@RawRes val successAnimation: Int) : TutorialActionState
 }
 
 @Composable
@@ -68,11 +69,11 @@ fun ActionTutorialContent(
         Row(modifier = Modifier.fillMaxWidth().weight(1f)) {
             TutorialDescription(
                 titleTextId =
-                    if (actionState == Finished) config.strings.titleSuccessResId
+                    if (actionState is Finished) config.strings.titleSuccessResId
                     else config.strings.titleResId,
                 titleColor = config.colors.title,
                 bodyTextId =
-                    if (actionState == Finished) config.strings.bodySuccessResId
+                    if (actionState is Finished) config.strings.bodySuccessResId
                     else config.strings.bodyResId,
                 modifier = Modifier.weight(1f),
             )
@@ -83,7 +84,7 @@ fun ActionTutorialContent(
                 modifier = Modifier.weight(1f).padding(top = 8.dp),
             )
         }
-        AnimatedVisibility(visible = actionState == Finished, enter = fadeIn()) {
+        AnimatedVisibility(visible = actionState is Finished, enter = fadeIn()) {
             DoneButton(onDoneButtonClicked = onDoneButtonClicked)
         }
     }

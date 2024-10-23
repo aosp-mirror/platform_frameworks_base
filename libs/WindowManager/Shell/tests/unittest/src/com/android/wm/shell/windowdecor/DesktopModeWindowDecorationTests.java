@@ -106,6 +106,7 @@ import com.android.wm.shell.common.MultiInstanceHelper;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.desktopmode.CaptionState;
+import com.android.wm.shell.desktopmode.DesktopModeEventLogger;
 import com.android.wm.shell.desktopmode.DesktopRepository;
 import com.android.wm.shell.desktopmode.WindowDecorCaptionHandleRepository;
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
@@ -210,6 +211,8 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
     private MultiInstanceHelper mMockMultiInstanceHelper;
     @Mock
     private WindowDecorCaptionHandleRepository mMockCaptionHandleRepository;
+    @Mock
+    private DesktopModeEventLogger mDesktopModeEventLogger;
     @Captor
     private ArgumentCaptor<Function1<Boolean, Unit>> mOnMaxMenuHoverChangeListener;
     @Captor
@@ -1400,7 +1403,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 mMockTransactionSupplier, WindowContainerTransaction::new, SurfaceControl::new,
                 new WindowManagerWrapper(mMockWindowManager), mMockSurfaceControlViewHostFactory,
                 maximizeMenuFactory, mMockHandleMenuFactory,
-                mMockMultiInstanceHelper, mMockCaptionHandleRepository);
+                mMockMultiInstanceHelper, mMockCaptionHandleRepository, mDesktopModeEventLogger);
         windowDecor.setCaptionListeners(mMockTouchEventListener, mMockTouchEventListener,
                 mMockTouchEventListener, mMockTouchEventListener);
         windowDecor.setExclusionRegionListener(mMockExclusionRegionListener);

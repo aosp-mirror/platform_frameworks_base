@@ -903,8 +903,8 @@ public class SettingsBackupTest {
                         Settings.System.EGG_MODE, // I am the lolrus
                         Settings.System.END_BUTTON_BEHAVIOR, // bug?
                         Settings.System.DEFAULT_DEVICE_FONT_SCALE, // Non configurable
-                        Settings.System
-                                .HIDE_ROTATION_LOCK_TOGGLE_FOR_ACCESSIBILITY,
+                        Settings.System.HIDE_ROTATION_LOCK_TOGGLE_FOR_ACCESSIBILITY,
+                        Settings.System.INPUT_GAIN_INDEX_SETTINGS,
                         // candidate for backup?
                         Settings.System.LOCKSCREEN_DISABLED, // ?
                         Settings.System.MEDIA_BUTTON_RECEIVER, // candidate for backup?

@@ -3178,12 +3178,15 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             mStats.collectPowerStatsSamples();
         }
 
-        BatteryUsageStats batteryUsageStats =
-                mBatteryUsageStatsProvider.getBatteryUsageStats(mStats, query);
-        if (proto) {
-            batteryUsageStats.dumpToProto(fd);
-        } else {
-            batteryUsageStats.dump(pw, "  ");
+        try (BatteryUsageStats batteryUsageStats =
+                     mBatteryUsageStatsProvider.getBatteryUsageStats(mStats, query)) {
+            if (proto) {
+                batteryUsageStats.dumpToProto(fd);
+            } else {
+                batteryUsageStats.dump(pw, "  ");
+            }
+        } catch (IOException e) {
+            Slog.e(TAG, "Cannot close BatteryUsageStats", e);
         }
     }
 

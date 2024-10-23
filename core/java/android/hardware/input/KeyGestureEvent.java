@@ -99,6 +99,7 @@ public final class KeyGestureEvent {
     public static final int KEY_GESTURE_TYPE_TV_TRIGGER_BUG_REPORT = 59;
     public static final int KEY_GESTURE_TYPE_ACCESSIBILITY_SHORTCUT = 60;
     public static final int KEY_GESTURE_TYPE_CLOSE_ALL_DIALOGS = 61;
+    public static final int KEY_GESTURE_TYPE_MOVE_TO_NEXT_DISPLAY = 62;
 
     public static final int FLAG_CANCELLED = 1;
 
@@ -175,7 +176,7 @@ public final class KeyGestureEvent {
             KEY_GESTURE_TYPE_TV_TRIGGER_BUG_REPORT,
             KEY_GESTURE_TYPE_ACCESSIBILITY_SHORTCUT,
             KEY_GESTURE_TYPE_CLOSE_ALL_DIALOGS,
-
+            KEY_GESTURE_TYPE_MOVE_TO_NEXT_DISPLAY,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface KeyGestureType {
@@ -415,6 +416,8 @@ public final class KeyGestureEvent {
             case KEY_GESTURE_TYPE_CHANGE_SPLITSCREEN_FOCUS_LEFT:
             case KEY_GESTURE_TYPE_CHANGE_SPLITSCREEN_FOCUS_RIGHT:
                 return FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__CHANGE_SPLITSCREEN_FOCUS;
+            case KEY_GESTURE_TYPE_MOVE_TO_NEXT_DISPLAY:
+                return FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__MOVE_TO_NEXT_DISPLAY;
             case KEY_GESTURE_TYPE_TRIGGER_BUG_REPORT:
                 return FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__TRIGGER_BUG_REPORT;
             case KEY_GESTURE_TYPE_LOCK_SCREEN:
@@ -530,6 +533,8 @@ public final class KeyGestureEvent {
                 return "KEY_GESTURE_TYPE_CHANGE_SPLITSCREEN_FOCUS_LEFT";
             case KEY_GESTURE_TYPE_CHANGE_SPLITSCREEN_FOCUS_RIGHT:
                 return "KEY_GESTURE_TYPE_CHANGE_SPLITSCREEN_FOCUS_RIGHT";
+            case KEY_GESTURE_TYPE_MOVE_TO_NEXT_DISPLAY:
+                return "KEY_GESTURE_TYPE_MOVE_TO_NEXT_DISPLAY";
             case KEY_GESTURE_TYPE_TRIGGER_BUG_REPORT:
                 return "KEY_GESTURE_TYPE_TRIGGER_BUG_REPORT";
             case KEY_GESTURE_TYPE_LOCK_SCREEN:

@@ -3056,6 +3056,12 @@ static void nativeSetMouseSwapPrimaryButtonEnabled(JNIEnv* env, jobject nativeIm
     im->setMouseSwapPrimaryButtonEnabled(enabled);
 }
 
+static jboolean nativeSetKernelWakeEnabled(JNIEnv* env, jobject nativeImplObj, jint deviceId,
+                                      jboolean enabled) {
+    NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
+    return im->getInputManager()->getReader().setKernelWakeEnabled(deviceId, enabled);
+}
+
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod gInputManagerMethods[] = {
@@ -3172,6 +3178,7 @@ static const JNINativeMethod gInputManagerMethods[] = {
          (void*)nativeSetAccessibilityStickyKeysEnabled},
         {"setInputMethodConnectionIsActive", "(Z)V", (void*)nativeSetInputMethodConnectionIsActive},
         {"getLastUsedInputDeviceId", "()I", (void*)nativeGetLastUsedInputDeviceId},
+        {"setKernelWakeEnabled", "(IZ)Z", (void*)nativeSetKernelWakeEnabled},
 };
 
 #define FIND_CLASS(var, className) \

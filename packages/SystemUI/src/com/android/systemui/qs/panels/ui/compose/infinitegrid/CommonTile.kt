@@ -77,25 +77,24 @@ fun LargeTileContent(
     colors: TileColors,
     squishiness: () -> Float,
     accessibilityUiState: AccessibilityUiState? = null,
-    toggleClickSupported: Boolean = false,
     iconShape: Shape = RoundedCornerShape(CommonTileDefaults.InactiveCornerRadius),
-    onClick: () -> Unit = {},
-    onLongClick: () -> Unit = {},
+    toggleClick: (() -> Unit)? = null,
+    onLongClick: (() -> Unit)? = null,
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = tileHorizontalArrangement(),
     ) {
         // Icon
-        val longPressLabel = longPressLabel()
+        val longPressLabel = longPressLabel().takeIf { onLongClick != null }
         Box(
             modifier =
-                Modifier.size(CommonTileDefaults.ToggleTargetSize).thenIf(toggleClickSupported) {
+                Modifier.size(CommonTileDefaults.ToggleTargetSize).thenIf(toggleClick != null) {
                     Modifier.clip(iconShape)
                         .verticalSquish(squishiness)
                         .background(colors.iconBackground, { 1f })
                         .combinedClickable(
-                            onClick = onClick,
+                            onClick = toggleClick!!,
                             onLongClick = onLongClick,
                             onLongClickLabel = longPressLabel,
                         )

@@ -3745,6 +3745,10 @@
          use. The helper shows shortcuts in categories, which can be collapsed or expanded.
          [CHAR LIMIT=NONE] -->
     <string name="shortcut_helper_content_description_drag_handle">Drag handle</string>
+    <!-- Label on the keyboard settings button in keyboard shortcut helper, that allows user to
+         open keyboard settings while in shortcut helper. The helper is a  component that shows the
+         user which keyboard shortcuts they can use. [CHAR LIMIT=NONE] -->
+    <string name="shortcut_helper_keyboard_settings_buttons_label">Keyboard Settings</string>
 
 
     <!-- Keyboard touchpad tutorial scheduler-->
@@ -3894,5 +3898,13 @@
     <!-- Label for category in QS Edit mode list of tiles, for tiles with an unknown category. [CHAR LIMIT=NONE] -->
     <string name="qs_edit_mode_category_unknown">
         Unknown
+    </string>
+    <!-- Title for the Reset Tiles dialog in QS Edit mode. [CHAR LIMIT=NONE] -->
+    <string name="qs_edit_mode_reset_dialog_title">
+        Reset tiles
+    </string>
+    <!-- Content of the Reset Tiles dialog in QS Edit mode. [CHAR LIMIT=NONE] -->
+    <string name="qs_edit_mode_reset_dialog_content">
+        Reset tiles to their original order and sizes?
     </string>
 </resources>

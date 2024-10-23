@@ -18,6 +18,7 @@ package com.android.systemui.volume.data.repository
 
 import android.media.AudioDeviceInfo
 import android.media.AudioManager
+import android.view.KeyEvent
 import com.android.settingslib.volume.data.model.VolumeControllerEvent
 import com.android.settingslib.volume.data.repository.AudioRepository
 import com.android.settingslib.volume.shared.model.AudioStream
@@ -60,6 +61,15 @@ class FakeAudioRepository : AudioRepository {
     private var mutableIsInitialized: Boolean = false
     val isInitialized: Boolean
         get() = mutableIsInitialized
+
+    private val _dispatchedKeyEvents = mutableListOf<KeyEvent>()
+
+    val dispatchedKeyEvents: List<KeyEvent>
+        get() {
+            val currentValue = _dispatchedKeyEvents.toList()
+            _dispatchedKeyEvents.clear()
+            return currentValue
+        }
 
     override fun init() {
         mutableIsInitialized = true
@@ -144,5 +154,9 @@ class FakeAudioRepository : AudioRepository {
         if (isInitialized) {
             mutableIsVolumeControllerVisible.value = isVisible
         }
+    }
+
+    override fun dispatchMediaKeyEvent(event: KeyEvent) {
+        _dispatchedKeyEvents.add(event)
     }
 }

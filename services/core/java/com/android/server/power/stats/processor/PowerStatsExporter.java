@@ -105,19 +105,19 @@ class PowerStatsExporter {
                     maxEndTime = spanMaxTime;
                 }
 
-                PowerStatsSpan span = mPowerStatsStore.loadPowerStatsSpan(metadata.getId(),
-                        AggregatedPowerStatsSection.TYPE);
-                if (span == null) {
-                    Slog.e(TAG, "Could not read PowerStatsStore section " + metadata);
-                    continue;
-                }
-                List<PowerStatsSpan.Section> sections = span.getSections();
-                for (int k = 0; k < sections.size(); k++) {
-                    hasStoredSpans = true;
-                    PowerStatsSpan.Section section = sections.get(k);
-                    populateBatteryUsageStatsBuilder(batteryUsageStatsBuilder,
-                            ((AggregatedPowerStatsSection) section).getAggregatedPowerStats());
-                    // TODO(b/371614748): close the builder
+                try (PowerStatsSpan span = mPowerStatsStore.loadPowerStatsSpan(metadata.getId(),
+                        AggregatedPowerStatsSection.TYPE)) {
+                    if (span == null) {
+                        Slog.e(TAG, "Could not read PowerStatsStore section " + metadata);
+                        continue;
+                    }
+                    List<PowerStatsSpan.Section> sections = span.getSections();
+                    for (int k = 0; k < sections.size(); k++) {
+                        hasStoredSpans = true;
+                        PowerStatsSpan.Section section = sections.get(k);
+                        populateBatteryUsageStatsBuilder(batteryUsageStatsBuilder,
+                                ((AggregatedPowerStatsSection) section).getAggregatedPowerStats());
+                    }
                 }
             }
 

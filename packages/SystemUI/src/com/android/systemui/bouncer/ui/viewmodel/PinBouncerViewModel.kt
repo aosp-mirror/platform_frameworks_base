@@ -251,7 +251,7 @@ constructor(
      *
      * @return `true` when the [KeyEvent] was consumed as user input on bouncer; `false` otherwise.
      */
-    fun onKeyEvent(type: KeyEventType, keyCode: Int): Boolean {
+    override fun onKeyEvent(type: KeyEventType, keyCode: Int): Boolean {
         return when (type) {
             KeyEventType.KeyUp -> {
                 if (isConfirmKey(keyCode)) {

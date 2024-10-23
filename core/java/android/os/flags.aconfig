@@ -91,6 +91,14 @@ flag {
 }
 
 flag {
+    name: "allow_thermal_thresholds_callback"
+    is_exported: true
+    namespace: "game"
+    description: "Enable thermal threshold callback"
+    bug: "360486877"
+}
+
+flag {
     name: "android_os_build_vanilla_ice_cream"
     is_exported: true
     namespace: "build"

@@ -26,6 +26,7 @@ import com.android.internal.widget.ConversationLayout
 import com.android.internal.widget.MessagingGroup
 import com.android.internal.widget.MessagingImageMessage
 import com.android.internal.widget.MessagingLinearLayout
+import com.android.internal.widget.NotificationRowIconView
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.NotificationTestHelper
@@ -90,7 +91,7 @@ class NotificationConversationTemplateViewWrapperTest : SysuiTestCase() {
 
     private fun fakeConversationLayout(
         mockDrawableGroupMessage: AnimatedImageDrawable,
-        mockDrawableImageMessage: AnimatedImageDrawable
+        mockDrawableImageMessage: AnimatedImageDrawable,
     ): View {
         val mockMessagingImageMessage: MessagingImageMessage =
             mock<MessagingImageMessage>().apply {
@@ -126,6 +127,7 @@ class NotificationConversationTemplateViewWrapperTest : SysuiTestCase() {
                 whenever(requireViewById<CachingIconView>(R.id.conversation_icon))
                     .thenReturn(mock())
                 whenever(findViewById<CachingIconView>(R.id.icon)).thenReturn(mock())
+                whenever(requireViewById<NotificationRowIconView>(R.id.icon)).thenReturn(mock())
                 whenever(requireViewById<View>(R.id.conversation_icon_badge_bg)).thenReturn(mock())
                 whenever(requireViewById<View>(R.id.expand_button)).thenReturn(mock())
                 whenever(requireViewById<View>(R.id.expand_button_container)).thenReturn(mock())

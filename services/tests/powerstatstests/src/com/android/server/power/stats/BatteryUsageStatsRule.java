@@ -323,6 +323,7 @@ public class BatteryUsageStatsRule implements TestRule {
     }
 
     private void before() {
+        BatteryUsageStats.DEBUG_INSTANCE_COUNT = true;
         HandlerThread bgThread = new HandlerThread("bg thread");
         bgThread.setUncaughtExceptionHandler((thread, throwable)-> {
             mThrowable = throwable;
@@ -338,6 +339,10 @@ public class BatteryUsageStatsRule implements TestRule {
 
     private void after() throws Throwable {
         waitForBackgroundThread();
+        if (mBatteryUsageStats != null) {
+            mBatteryUsageStats.close();
+        }
+        BatteryUsageStats.assertAllInstancesClosed();
     }
 
     public void waitForBackgroundThread() throws Throwable {
@@ -409,6 +414,14 @@ public class BatteryUsageStatsRule implements TestRule {
     }
 
     BatteryUsageStats apply(BatteryUsageStatsQuery query, PowerCalculator... calculators) {
+        if (mBatteryUsageStats != null) {
+            try {
+                mBatteryUsageStats.close();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            mBatteryUsageStats = null;
+        }
         final String[] customPowerComponentNames = mBatteryStats.getCustomEnergyConsumerNames();
         final boolean includePowerModels = (query.getFlags()
                 & BatteryUsageStatsQuery.FLAG_BATTERY_USAGE_STATS_INCLUDE_POWER_MODELS) != 0;

@@ -41,14 +41,19 @@ import android.media.AudioManager;
 import android.media.AudioPlaybackConfiguration;
 import android.media.PlayerProxy;
 import android.media.audiopolicy.AudioPolicy;
+import android.multiuser.Flags;
 import android.os.Build;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.util.ArraySet;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -60,7 +65,6 @@ import java.util.List;
 import java.util.Stack;
 
 @RunWith(JUnit4.class)
-
 public class BackgroundUserSoundNotifierTest {
     private final Context mRealContext = androidx.test.InstrumentationRegistry.getInstrumentation()
             .getTargetContext();
@@ -72,6 +76,10 @@ public class BackgroundUserSoundNotifierTest {
 
     @Mock
     private NotificationManager mNotificationManager;
+
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
+
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
@@ -142,8 +150,11 @@ public class BackgroundUserSoundNotifierTest {
         final int fgUserId = mSpiedContext.getUserId();
         int bgUserId = fgUserId + 1;
         int bgUserUid = bgUserId * 100000;
-        mBackgroundUserSoundNotifier.mNotificationClientUid = bgUserUid;
-
+        if (Flags.multipleAlarmNotificationsSupport()) {
+            mBackgroundUserSoundNotifier.mNotificationClientUids.add(bgUserUid);
+        } else {
+            mBackgroundUserSoundNotifier.mNotificationClientUid = bgUserUid;
+        }
         AudioManager mockAudioManager = mock(AudioManager.class);
         when(mSpiedContext.getSystemService(AudioManager.class)).thenReturn(mockAudioManager);
 
@@ -242,6 +253,72 @@ public class BackgroundUserSoundNotifierTest {
                 com.android.internal.R.string.bg_user_sound_notification_button_mute),
                 notification.actions[0].title);
     }
+
+    @RequiresFlagsEnabled({Flags.FLAG_MULTIPLE_ALARM_NOTIFICATIONS_SUPPORT})
+    @Test
+    public void testMultipleAlarmsSameUid_OneNotificationCreated() throws RemoteException {
+        assumeTrue(UserManager.supportsMultipleUsers());
+        UserInfo user = createUser("User", UserManager.USER_TYPE_FULL_SECONDARY, 0);
+        final int fgUserId = mSpiedContext.getUserId();
+        final int bgUserUid = user.id * 100000;
+        doReturn(UserHandle.of(fgUserId)).when(mSpiedContext).getUser();
+
+        AudioAttributes aa = new AudioAttributes.Builder().setUsage(USAGE_ALARM).build();
+        AudioFocusInfo afi1 = new AudioFocusInfo(aa, bgUserUid, "",
+                /* packageName= */ "com.android.car.audio", AudioManager.AUDIOFOCUS_GAIN,
+                AudioManager.AUDIOFOCUS_NONE, /* flags= */ 0, Build.VERSION.SDK_INT);
+
+        mBackgroundUserSoundNotifier.notifyForegroundUserAboutSoundIfNecessary(afi1);
+        verify(mNotificationManager)
+                .notifyAsUser(eq(BackgroundUserSoundNotifier.class.getSimpleName()),
+                        eq(afi1.getClientUid()), any(Notification.class),
+                        eq(UserHandle.of(fgUserId)));
+
+        AudioFocusInfo afi2 = new AudioFocusInfo(aa, bgUserUid, "",
+                /* packageName= */ "com.android.car.audio", AudioManager.AUDIOFOCUS_GAIN,
+                AudioManager.AUDIOFOCUS_NONE, /* flags= */ 0, Build.VERSION.SDK_INT);
+        clearInvocations(mNotificationManager);
+        mBackgroundUserSoundNotifier.notifyForegroundUserAboutSoundIfNecessary(afi2);
+        verify(mNotificationManager, never())
+                .notifyAsUser(eq(BackgroundUserSoundNotifier.class.getSimpleName()),
+                        eq(afi2.getClientUid()), any(Notification.class),
+                        eq(UserHandle.of(fgUserId)));
+    }
+
+    @RequiresFlagsEnabled({Flags.FLAG_MULTIPLE_ALARM_NOTIFICATIONS_SUPPORT})
+    @Test
+    public void testMultipleAlarmsDifferentUsers_multipleNotificationsCreated()
+            throws RemoteException {
+        assumeTrue(UserManager.supportsMultipleUsers());
+        UserInfo user1 = createUser("User1", UserManager.USER_TYPE_FULL_SECONDARY, 0);
+        UserInfo user2 = createUser("User2", UserManager.USER_TYPE_FULL_SECONDARY, 0);
+        final int fgUserId = mSpiedContext.getUserId();
+        final int bgUserUid1 = user1.id * 100000;
+        final int bgUserUid2 = user2.id * 100000;
+        doReturn(UserHandle.of(fgUserId)).when(mSpiedContext).getUser();
+
+        AudioAttributes aa = new AudioAttributes.Builder().setUsage(USAGE_ALARM).build();
+        AudioFocusInfo afi1 = new AudioFocusInfo(aa, bgUserUid1, "",
+                /* packageName= */ "com.android.car.audio", AudioManager.AUDIOFOCUS_GAIN,
+                AudioManager.AUDIOFOCUS_NONE, /* flags= */ 0, Build.VERSION.SDK_INT);
+
+        mBackgroundUserSoundNotifier.notifyForegroundUserAboutSoundIfNecessary(afi1);
+        verify(mNotificationManager)
+                .notifyAsUser(eq(BackgroundUserSoundNotifier.class.getSimpleName()),
+                        eq(afi1.getClientUid()), any(Notification.class),
+                        eq(UserHandle.of(fgUserId)));
+
+        AudioFocusInfo afi2 = new AudioFocusInfo(aa, bgUserUid2, "",
+                /* packageName= */ "com.android.car.audio", AudioManager.AUDIOFOCUS_GAIN,
+                AudioManager.AUDIOFOCUS_NONE, /* flags= */ 0, Build.VERSION.SDK_INT);
+        clearInvocations(mNotificationManager);
+        mBackgroundUserSoundNotifier.notifyForegroundUserAboutSoundIfNecessary(afi2);
+        verify(mNotificationManager)
+                .notifyAsUser(eq(BackgroundUserSoundNotifier.class.getSimpleName()),
+                        eq(afi2.getClientUid()), any(Notification.class),
+                        eq(UserHandle.of(fgUserId)));
+    }
+
 
     private UserInfo createUser(String name, String userType, int flags) {
         UserInfo user = mUserManager.createUser(name, userType, flags);

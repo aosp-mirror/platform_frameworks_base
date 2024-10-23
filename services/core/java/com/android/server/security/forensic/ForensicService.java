@@ -63,6 +63,7 @@ public class ForensicService extends SystemService {
 
     private final Context mContext;
     private final Handler mHandler;
+    private final BackupTransportConnection mBackupTransportConnection;
     private final BinderService mBinderService;
 
     private final ArrayList<IForensicServiceStateCallback> mStateMonitors = new ArrayList<>();
@@ -77,6 +78,7 @@ public class ForensicService extends SystemService {
         super(injector.getContext());
         mContext = injector.getContext();
         mHandler = new EventHandler(injector.getLooper(), this);
+        mBackupTransportConnection = injector.getBackupTransportConnection();
         mBinderService = new BinderService(this);
     }
 
@@ -221,6 +223,10 @@ public class ForensicService extends SystemService {
     private void enable(IForensicServiceCommandCallback callback) throws RemoteException {
         switch (mState) {
             case STATE_VISIBLE:
+                if (!mBackupTransportConnection.initialize()) {
+                    callback.onFailure(ERROR_BACKUP_TRANSPORT_UNAVAILABLE);
+                    break;
+                }
                 mState = STATE_ENABLED;
                 notifyStateMonitors();
                 callback.onSuccess();
@@ -236,6 +242,7 @@ public class ForensicService extends SystemService {
     private void disable(IForensicServiceCommandCallback callback) throws RemoteException {
         switch (mState) {
             case STATE_ENABLED:
+                mBackupTransportConnection.release();
                 mState = STATE_VISIBLE;
                 notifyStateMonitors();
                 callback.onSuccess();
@@ -266,6 +273,8 @@ public class ForensicService extends SystemService {
         Context getContext();
 
         Looper getLooper();
+
+        BackupTransportConnection getBackupTransportConnection();
     }
 
     private static final class InjectorImpl implements Injector {
@@ -288,6 +297,11 @@ public class ForensicService extends SystemService {
                             TAG, android.os.Process.THREAD_PRIORITY_FOREGROUND, true /* allowIo */);
             serviceThread.start();
             return serviceThread.getLooper();
+        }
+
+        @Override
+        public BackupTransportConnection getBackupTransportConnection() {
+            return new BackupTransportConnection(mContext);
         }
     }
 }

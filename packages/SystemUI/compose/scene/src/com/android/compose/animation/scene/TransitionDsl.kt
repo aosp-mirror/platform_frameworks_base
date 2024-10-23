@@ -204,8 +204,17 @@ interface TransitionBuilder : BaseTransitionBuilder {
      *
      * @param enabled whether the matched element(s) should actually be shared in this transition.
      *   Defaults to true.
+     * @param elevateInContent the content in which we should elevate the element when it is shared,
+     *   drawing above all other composables of that content. If `null` (the default), we will
+     *   simply draw this element in its original location. If not `null`, it has to be either the
+     *   [fromContent][TransitionState.Transition.fromContent] or
+     *   [toContent][TransitionState.Transition.toContent] of the transition.
      */
-    fun sharedElement(matcher: ElementMatcher, enabled: Boolean = true)
+    fun sharedElement(
+        matcher: ElementMatcher,
+        enabled: Boolean = true,
+        elevateInContent: ContentKey? = null,
+    )
 
     /**
      * Adds the transformations in [builder] but in reversed order. This allows you to partially

@@ -114,7 +114,7 @@ interface KeyguardRepository {
             "away' is isInTransitionToState(GONE), but consider using more specific flows " +
             "whenever possible."
     )
-    val isKeyguardGoingAway: Flow<Boolean>
+    val isKeyguardGoingAway: MutableStateFlow<Boolean>
 
     /**
      * Whether the keyguard is enabled, per [KeyguardService]. If the keyguard is not enabled, the
@@ -183,9 +183,6 @@ interface KeyguardRepository {
 
     /** Observable for whether the device is dreaming with an overlay, see [DreamOverlayService] */
     val isDreamingWithOverlay: Flow<Boolean>
-
-    /** Observable for device dreaming state and the active dream is hosted in lockscreen */
-    val isActiveDreamLockscreenHosted: StateFlow<Boolean>
 
     /**
      * Observable for the amount of doze we are currently in.
@@ -307,8 +304,6 @@ interface KeyguardRepository {
     fun setLastDozeTapToWakePosition(position: Point)
 
     fun setIsDozing(isDozing: Boolean)
-
-    fun setIsActiveDreamLockscreenHosted(isLockscreenHosted: Boolean)
 
     fun dozeTimeTick()
 
@@ -637,9 +632,6 @@ constructor(
     private val _isQuickSettingsVisible = MutableStateFlow(false)
     override val isQuickSettingsVisible: Flow<Boolean> = _isQuickSettingsVisible.asStateFlow()
 
-    private val _isActiveDreamLockscreenHosted = MutableStateFlow(false)
-    override val isActiveDreamLockscreenHosted = _isActiveDreamLockscreenHosted.asStateFlow()
-
     private val _shortcutAbsoluteTop = MutableStateFlow(0F)
     override val shortcutAbsoluteTop = _shortcutAbsoluteTop.asStateFlow()
 
@@ -654,10 +646,6 @@ constructor(
 
                 override fun onUnlockedChanged() {
                     isKeyguardDismissible.value = keyguardStateController.isUnlocked
-                }
-
-                override fun onKeyguardGoingAwayChanged() {
-                    isKeyguardGoingAway.value = keyguardStateController.isKeyguardGoingAway
                 }
             }
 
@@ -696,10 +684,6 @@ constructor(
 
     override fun setQuickSettingsVisible(isVisible: Boolean) {
         _isQuickSettingsVisible.value = isVisible
-    }
-
-    override fun setIsActiveDreamLockscreenHosted(isLockscreenHosted: Boolean) {
-        _isActiveDreamLockscreenHosted.value = isLockscreenHosted
     }
 
     override fun setClockShouldBeCentered(shouldBeCentered: Boolean) {
