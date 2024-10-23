@@ -16,14 +16,25 @@
 
 package com.android.systemui.communal.widgets
 
+import android.appwidget.AppWidgetHost.AppWidgetHostListener
+import android.appwidget.AppWidgetProviderInfo
+import android.content.ComponentName
 import android.os.IBinder
+import android.os.UserHandle
+import android.widget.RemoteViews
+import com.android.server.servicewatcher.ServiceWatcher
 import com.android.server.servicewatcher.ServiceWatcher.ServiceListener
+import com.android.systemui.communal.shared.model.CommunalWidgetContentModel
 import com.android.systemui.communal.shared.model.GlanceableHubMultiUserHelper
+import com.android.systemui.communal.widgets.IGlanceableHubWidgetManagerService.IAppWidgetHostListener
+import com.android.systemui.communal.widgets.IGlanceableHubWidgetManagerService.IGlanceableHubWidgetsListener
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.Logger
 import com.android.systemui.log.dagger.CommunalLog
+import com.android.systemui.utils.coroutines.flow.conflatedCallbackFlow
 import javax.inject.Inject
+import kotlinx.coroutines.channels.awaitClose
 
 /**
  * Manages updates to Glanceable Hub widgets and requests to edit them from the headless system
@@ -50,6 +61,17 @@ constructor(
 
     private val serviceWatcher by lazy { serviceWatcherFactory.create(this) }
 
+    val widgets = conflatedCallbackFlow {
+        val callback =
+            object : IGlanceableHubWidgetsListener.Stub() {
+                override fun onWidgetsUpdated(widgets: List<CommunalWidgetContentModel>?) {
+                    trySend(widgets ?: emptyList())
+                }
+            }
+        runOnService { service -> service.addWidgetsListener(callback) }
+        awaitClose { runOnService { service -> service.removeWidgetsListener(callback) } }
+    }
+
     fun register() {
         serviceWatcher.register()
     }
@@ -64,6 +86,83 @@ constructor(
 
     override fun onUnbind() {
         logger.i("Service unbound")
+    }
+
+    /** Requests the foreground user to set a [AppWidgetHostListener] for the given app widget. */
+    fun setAppWidgetHostListener(appWidgetId: Int, listener: AppWidgetHostListener) =
+        runOnService { service ->
+            service.setAppWidgetHostListener(appWidgetId, createIAppWidgetHostListener(listener))
+        }
+
+    /** Requests the foreground user to add a widget. */
+    fun addWidget(
+        provider: ComponentName,
+        user: UserHandle,
+        rank: Int?,
+        configurator: WidgetConfigurator?,
+    ) = runOnService { service ->
+        // TODO(b/375036327): Add support for widget configuration
+        service.addWidget(provider, user, rank ?: -1)
+    }
+
+    /** Requests the foreground user to delete a widget. */
+    fun deleteWidget(appWidgetId: Int) = runOnService { service ->
+        service.deleteWidget(appWidgetId)
+    }
+
+    /** Requests the foreground user to update widget order. */
+    fun updateWidgetOrder(widgetIdToRankMap: Map<Int, Int>) = runOnService { service ->
+        service.updateWidgetOrder(
+            widgetIdToRankMap.keys.toIntArray(),
+            widgetIdToRankMap.values.toIntArray(),
+        )
+    }
+
+    /** Requests the foreground user to resize a widget. */
+    fun resizeWidget(appWidgetId: Int, spanY: Int, widgetIdToRankMap: Map<Int, Int>) =
+        runOnService { service ->
+            service.resizeWidget(
+                appWidgetId,
+                spanY,
+                widgetIdToRankMap.keys.toIntArray(),
+                widgetIdToRankMap.values.toIntArray(),
+            )
+        }
+
+    private fun runOnService(block: (IGlanceableHubWidgetManagerService) -> Unit) {
+        serviceWatcher.runOnBinder(
+            object : ServiceWatcher.BinderOperation {
+                override fun run(binder: IBinder?) {
+                    block(IGlanceableHubWidgetManagerService.Stub.asInterface(binder))
+                }
+
+                override fun onError(t: Throwable?) {
+                    // TODO(b/375236794): handle failure in case service is unbound
+                }
+            }
+        )
+    }
+
+    private fun createIAppWidgetHostListener(
+        listener: AppWidgetHostListener
+    ): IAppWidgetHostListener {
+        return object : IAppWidgetHostListener.Stub() {
+            override fun onUpdateProviderInfo(appWidget: AppWidgetProviderInfo?) {
+                listener.onUpdateProviderInfo(appWidget)
+            }
+
+            override fun updateAppWidget(views: RemoteViews?) {
+                listener.updateAppWidget(views)
+            }
+
+            override fun updateAppWidgetDeferred(packageName: String?, appWidgetId: Int) {
+                listener.updateAppWidgetDeferred(packageName, appWidgetId)
+            }
+
+            override fun onViewDataChanged(viewId: Int) {
+                listener.onViewDataChanged(viewId)
+            }
+        }
     }
 
     companion object {

@@ -80,20 +80,30 @@ constructor(
     }
 
     private fun onStartInForegroundUser() {
-        anyOf(communalInteractor.isCommunalAvailable, communalInteractor.editModeOpen)
-            // Only trigger updates on state changes, ignoring the initial false value.
-            .pairwise(false)
-            .filter { (previous, new) -> previous != new }
-            .onEach { (_, shouldListen) -> updateAppWidgetHostActive(shouldListen) }
-            .sample(communalInteractor.communalWidgets, ::Pair)
-            .onEach { (withPrev, widgets) ->
-                val (_, isActive) = withPrev
-                // The validation is performed once the hub becomes active.
-                if (isActive) {
-                    validateWidgetsAndDeleteOrphaned(widgets)
+        // Make the host active when communal becomes available, and delete widgets whose user has
+        // been removed from the system.
+        // Skipped in HSUM, because lifecycle of the host is controlled by the
+        // [GlanceableHubWidgetManagerService], and widgets are stored per user so no more orphaned
+        // widgets.
+        if (
+            !glanceableHubMultiUserHelper.glanceableHubHsumFlagEnabled ||
+                !glanceableHubMultiUserHelper.isHeadlessSystemUserMode()
+        ) {
+            anyOf(communalInteractor.isCommunalAvailable, communalInteractor.editModeOpen)
+                // Only trigger updates on state changes, ignoring the initial false value.
+                .pairwise(false)
+                .filter { (previous, new) -> previous != new }
+                .onEach { (_, shouldListen) -> updateAppWidgetHostActive(shouldListen) }
+                .sample(communalInteractor.communalWidgets, ::Pair)
+                .onEach { (withPrev, widgets) ->
+                    val (_, isActive) = withPrev
+                    // The validation is performed once the hub becomes active.
+                    if (isActive) {
+                        validateWidgetsAndDeleteOrphaned(widgets)
+                    }
                 }
-            }
-            .launchIn(bgScope)
+                .launchIn(bgScope)
+        }
 
         appWidgetHost.appWidgetIdToRemove
             .onEach { appWidgetId -> communalInteractor.deleteWidget(id = appWidgetId) }

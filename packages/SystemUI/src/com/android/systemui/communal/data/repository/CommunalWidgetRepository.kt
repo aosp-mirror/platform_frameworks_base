@@ -55,7 +55,7 @@ import kotlinx.coroutines.flow.map
 
 /** Encapsulates the state of widgets for communal mode. */
 interface CommunalWidgetRepository {
-    /** A flow of information about active communal widgets stored in database. */
+    /** A flow of the list of Glanceable Hub widgets ordered by rank. */
     val communalWidgets: Flow<List<CommunalWidgetContentModel>>
 
     /**

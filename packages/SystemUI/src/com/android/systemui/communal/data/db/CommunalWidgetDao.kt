@@ -25,6 +25,7 @@ import androidx.room.RoomDatabase
 import androidx.room.Transaction
 import androidx.room.Update
 import androidx.sqlite.db.SupportSQLiteDatabase
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.communal.nano.CommunalHubState
 import com.android.systemui.communal.shared.model.CommunalContentSize
 import com.android.systemui.communal.widgets.CommunalWidgetHost
@@ -39,7 +40,6 @@ import javax.inject.Named
 import javax.inject.Provider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 /**
  * Callback that will be invoked when the Room database is created. Then the database will be
@@ -224,9 +224,9 @@ interface CommunalWidgetDao {
     ): Long {
         val widgets = getWidgetsNow()
 
-        // If rank is not specified, rank it last by finding the current maximum rank and increment
-        // by 1. If the new widget is the first widget, set the rank to 0.
-        val newRank = rank ?: widgets.keys.maxOfOrNull { it.rank + 1 } ?: 0
+        // If rank is not specified (null or less than 0), rank it last by finding the current
+        // maximum rank and increment by 1. If the new widget is the first widget, set rank to 0.
+        val newRank = rank?.takeIf { it >= 0 } ?: widgets.keys.maxOfOrNull { it.rank + 1 } ?: 0
 
         // Shift widgets after [rank], unless widget is added at the end.
         if (rank != null) {

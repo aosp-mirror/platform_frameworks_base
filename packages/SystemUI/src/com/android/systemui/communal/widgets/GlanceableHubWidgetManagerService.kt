@@ -16,15 +16,27 @@
 
 package com.android.systemui.communal.widgets
 
+import android.appwidget.AppWidgetHost.AppWidgetHostListener
+import android.appwidget.AppWidgetProviderInfo
 import android.content.ComponentName
 import android.content.Intent
 import android.os.IBinder
+import android.os.RemoteCallbackList
 import android.os.UserHandle
+import android.widget.RemoteViews
 import androidx.lifecycle.LifecycleService
+import androidx.lifecycle.lifecycleScope
+import com.android.systemui.communal.data.repository.CommunalWidgetRepository
 import com.android.systemui.communal.shared.model.GlanceableHubMultiUserHelper
 import com.android.systemui.communal.widgets.IGlanceableHubWidgetManagerService.IAppWidgetHostListener
 import com.android.systemui.communal.widgets.IGlanceableHubWidgetManagerService.IGlanceableHubWidgetsListener
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.core.Logger
+import com.android.systemui.log.dagger.CommunalLog
 import javax.inject.Inject
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 
 /**
  * Service for the [GlanceableHubWidgetManager], which runs in a foreground user in Headless System
@@ -33,11 +45,41 @@ import javax.inject.Inject
  */
 class GlanceableHubWidgetManagerService
 @Inject
-constructor(glanceableHubMultiUserHelper: GlanceableHubMultiUserHelper) : LifecycleService() {
+constructor(
+    private val widgetRepository: CommunalWidgetRepository,
+    private val appWidgetHost: CommunalAppWidgetHost,
+    private val communalWidgetHost: CommunalWidgetHost,
+    glanceableHubMultiUserHelper: GlanceableHubMultiUserHelper,
+    @CommunalLog logBuffer: LogBuffer,
+) : LifecycleService() {
 
     init {
         // The service should only run in a foreground user.
         glanceableHubMultiUserHelper.assertNotInHeadlessSystemUser()
+    }
+
+    private val logger = Logger(logBuffer, TAG)
+    private val widgetListenersRegistry = WidgetListenerRegistry()
+
+    override fun onCreate() {
+        super.onCreate()
+
+        logger.i("Service created")
+
+        communalWidgetHost.startObservingHost()
+        appWidgetHost.startListening()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        logger.i("Service destroyed")
+
+        appWidgetHost.stopListening()
+        communalWidgetHost.stopObservingHost()
+
+        // Cancel all widget listener jobs and unregister listeners
+        widgetListenersRegistry.kill()
     }
 
     override fun onBind(intent: Intent): IBinder? {
@@ -46,30 +88,67 @@ constructor(glanceableHubMultiUserHelper: GlanceableHubMultiUserHelper) : Lifecy
     }
 
     private fun addWidgetsListenerInternal(listener: IGlanceableHubWidgetsListener?) {
-        TODO("Not yet implemented")
+        if (listener == null) {
+            throw IllegalStateException("Listener cannot be null")
+        }
+
+        if (!listener.asBinder().isBinderAlive) {
+            throw IllegalStateException("Listener binder is dead")
+        }
+
+        val job =
+            widgetRepository.communalWidgets
+                .onEach { widgets -> listener.onWidgetsUpdated(widgets) }
+                .launchIn(lifecycleScope)
+        widgetListenersRegistry.register(listener, job)
     }
 
     private fun removeWidgetsListenerInternal(listener: IGlanceableHubWidgetsListener?) {
-        TODO("Not yet implemented")
+        if (listener == null) {
+            throw IllegalStateException("Listener cannot be null")
+        }
+
+        widgetListenersRegistry.unregister(listener)
     }
 
     private fun setAppWidgetHostListenerInternal(
         appWidgetId: Int,
         listener: IAppWidgetHostListener?,
     ) {
-        TODO("Not yet implemented")
+        if (listener == null) {
+            throw IllegalStateException("Listener cannot be null")
+        }
+
+        appWidgetHost.setListener(appWidgetId, createListener(listener))
     }
 
     private fun addWidgetInternal(provider: ComponentName?, user: UserHandle?, rank: Int) {
-        TODO("Not yet implemented")
+        if (provider == null) {
+            throw IllegalStateException("Provider cannot be null")
+        }
+
+        if (user == null) {
+            throw IllegalStateException("User cannot be null")
+        }
+
+        // TODO(b/375036327): Add support for widget configuration
+        widgetRepository.addWidget(provider, user, rank, configurator = null)
     }
 
     private fun deleteWidgetInternal(appWidgetId: Int) {
-        TODO("Not yet implemented")
+        widgetRepository.deleteWidget(appWidgetId)
     }
 
     private fun updateWidgetOrderInternal(appWidgetIds: IntArray?, ranks: IntArray?) {
-        TODO("Not yet implemented")
+        if (appWidgetIds == null || ranks == null) {
+            throw IllegalStateException("appWidgetIds and ranks cannot be null")
+        }
+
+        if (appWidgetIds.size != ranks.size) {
+            throw IllegalStateException("appWidgetIds and ranks must be the same size")
+        }
+
+        widgetRepository.updateWidgetOrder(appWidgetIds.zip(ranks).toMap())
     }
 
     private fun resizeWidgetInternal(
@@ -78,7 +157,35 @@ constructor(glanceableHubMultiUserHelper: GlanceableHubMultiUserHelper) : Lifecy
         appWidgetIds: IntArray?,
         ranks: IntArray?,
     ) {
-        TODO("Not yet implemented")
+        if (appWidgetIds == null || ranks == null) {
+            throw IllegalStateException("appWidgetIds and ranks cannot be null")
+        }
+
+        if (appWidgetIds.size != ranks.size) {
+            throw IllegalStateException("appWidgetIds and ranks must be the same size")
+        }
+
+        widgetRepository.resizeWidget(appWidgetId, spanY, appWidgetIds.zip(ranks).toMap())
+    }
+
+    private fun createListener(listener: IAppWidgetHostListener): AppWidgetHostListener {
+        return object : AppWidgetHostListener {
+            override fun onUpdateProviderInfo(appWidget: AppWidgetProviderInfo?) {
+                listener.onUpdateProviderInfo(appWidget)
+            }
+
+            override fun updateAppWidget(views: RemoteViews?) {
+                listener.updateAppWidget(views)
+            }
+
+            override fun updateAppWidgetDeferred(packageName: String?, appWidgetId: Int) {
+                listener.updateAppWidgetDeferred(packageName, appWidgetId)
+            }
+
+            override fun onViewDataChanged(viewId: Int) {
+                listener.onViewDataChanged(viewId)
+            }
+        }
     }
 
     private inner class WidgetManagerServiceBinder : IGlanceableHubWidgetManagerService.Stub() {
@@ -156,5 +263,43 @@ constructor(glanceableHubMultiUserHelper: GlanceableHubMultiUserHelper) : Lifecy
                 restoreCallingIdentity(iden)
             }
         }
+    }
+
+    /**
+     * Registry of widget listener binders, which handles canceling the job associated with a
+     * listener when it is unregistered, or when the binder is dead.
+     */
+    private class WidgetListenerRegistry : RemoteCallbackList<IGlanceableHubWidgetsListener>() {
+        private val jobs = mutableMapOf<IGlanceableHubWidgetsListener, Job>()
+
+        fun register(listener: IGlanceableHubWidgetsListener, job: Job) {
+            if (register(listener)) {
+                synchronized(jobs) { jobs[listener] = job }
+            } else {
+                job.cancel()
+            }
+        }
+
+        override fun unregister(listener: IGlanceableHubWidgetsListener?): Boolean {
+            synchronized(jobs) { jobs.remove(listener)?.cancel() }
+            return super.unregister(listener)
+        }
+
+        override fun onCallbackDied(listener: IGlanceableHubWidgetsListener?) {
+            synchronized(jobs) { jobs.remove(listener)?.cancel() }
+            super.onCallbackDied(listener)
+        }
+
+        override fun kill() {
+            synchronized(jobs) {
+                jobs.values.forEach { it.cancel() }
+                jobs.clear()
+            }
+            super.kill()
+        }
+    }
+
+    companion object {
+        private const val TAG = "GlanceableHubWidgetManagerService"
     }
 }
