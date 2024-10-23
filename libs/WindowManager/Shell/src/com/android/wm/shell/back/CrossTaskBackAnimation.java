@@ -333,7 +333,7 @@ public class CrossTaskBackAnimation extends ShellBackAnimation {
     private void onGestureProgress(@NonNull BackEvent backEvent) {
         if (!mBackInProgress) {
             mBackInProgress = true;
-            mDownTime = backEvent.getFrameTime();
+            mDownTime = backEvent.getFrameTimeMillis();
         }
         float progress = backEvent.getProgress();
         mTouchPos.set(backEvent.getTouchX(), backEvent.getTouchY());
@@ -342,7 +342,7 @@ public class CrossTaskBackAnimation extends ShellBackAnimation {
             mVelocityTracker.addMovement(
                     MotionEvent.obtain(
                             /* downTime */ mDownTime,
-                            /* eventTime */ backEvent.getFrameTime(),
+                            /* eventTime */ backEvent.getFrameTimeMillis(),
                             /* action */ ACTION_MOVE,
                             /* x */ interpolatedProgress * SPRING_SCALE,
                             /* y */ 0f,
