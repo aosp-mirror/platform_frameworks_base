@@ -33,6 +33,7 @@ import static com.android.internal.accessibility.AccessibilityShortcutController
 import static com.android.internal.accessibility.AccessibilityShortcutController.MAGNIFICATION_CONTROLLER_NAME;
 import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.GESTURE;
 import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.HARDWARE;
+import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.KEY_GESTURE;
 import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.QUICK_SETTINGS;
 import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.SOFTWARE;
 import static com.android.internal.accessibility.dialog.AccessibilityButtonChooserActivity.EXTRA_TYPE_TO_CHOOSE;
@@ -80,6 +81,7 @@ import android.content.pm.ServiceInfo;
 import android.content.res.XmlResourceParser;
 import android.graphics.drawable.Icon;
 import android.hardware.display.DisplayManagerGlobal;
+import android.hardware.input.KeyGestureEvent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -2183,6 +2185,28 @@ public class AccessibilityManagerServiceTest {
         verify(mockUserContext).getSystemService(EnhancedConfirmationManager.class);
     }
 
+    @Test
+    @EnableFlags(com.android.hardware.input.Flags.FLAG_ENABLE_TALKBACK_AND_MAGNIFIER_KEY_GESTURES)
+    public void handleKeyGestureEvent_toggleMagnifier() {
+        mFakePermissionEnforcer.grant(Manifest.permission.MANAGE_ACCESSIBILITY);
+        assertThat(ShortcutUtils.getShortcutTargetsFromSettings(mTestableContext, KEY_GESTURE,
+                mA11yms.getCurrentUserIdLocked())).isEmpty();
+
+        mA11yms.handleKeyGestureEvent(new KeyGestureEvent.Builder().setKeyGestureType(
+                KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_MAGNIFICATION).setAction(
+                        KeyGestureEvent.ACTION_GESTURE_COMPLETE).build());
+
+        assertThat(ShortcutUtils.getShortcutTargetsFromSettings(mTestableContext, KEY_GESTURE,
+                mA11yms.getCurrentUserIdLocked())).containsExactly(MAGNIFICATION_CONTROLLER_NAME);
+
+        // The magnifier will only be toggled on the second event received since the first is
+        // used to toggle the feature on.
+        mA11yms.handleKeyGestureEvent(new KeyGestureEvent.Builder().setKeyGestureType(
+                KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_MAGNIFICATION).setAction(
+                KeyGestureEvent.ACTION_GESTURE_COMPLETE).build());
+
+        verify(mInputFilter).notifyMagnificationShortcutTriggered(anyInt());
+    }
 
     private Set<String> readStringsFromSetting(String setting) {
         final Set<String> result = new ArraySet<>();
@@ -2297,6 +2321,10 @@ public class AccessibilityManagerServiceTest {
         FakeInputFilter(Context context,
                 AccessibilityManagerService service) {
             super(context, service);
+        }
+
+        @Override
+        void notifyMagnificationShortcutTriggered(int displayId) {
         }
     }
 
