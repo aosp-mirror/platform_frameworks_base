@@ -8968,12 +8968,9 @@ public class DevicePolicyManager {
     /**
      * Called by a device owner, a profile owner for the primary user or a profile
      * owner of an organization-owned managed profile to turn auto time zone on and off.
-     * Callers are recommended to use {@link UserManager#DISALLOW_CONFIG_DATE_TIME}
-     * to prevent the user from changing this setting.
      * <p>
-     * If user restriction {@link UserManager#DISALLOW_CONFIG_DATE_TIME} is used,
-     * no user will be able set the date and time zone. Instead, the network date
-     * and time zone will be used.
+     * Callers are recommended to use {@link UserManager#DISALLOW_CONFIG_DATE_TIME} to prevent the
+     * user from changing this setting, that way no user will be able set the date and time zone.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with or Null if the
      *              caller is not a device admin.
@@ -8981,13 +8978,17 @@ public class DevicePolicyManager {
      * @throws SecurityException if caller is not a device owner, a profile owner for the
      * primary user, or a profile owner of an organization-owned managed profile.
      */
-    @SupportsCoexistence
     @RequiresPermission(value = SET_TIME_ZONE, conditional = true)
     public void setAutoTimeZoneEnabled(@Nullable ComponentName admin, boolean enabled) {
         throwIfParentInstance("setAutoTimeZone");
         if (mService != null) {
             try {
-                mService.setAutoTimeZoneEnabled(admin, mContext.getPackageName(), enabled);
+                if (Flags.setAutoTimeZoneEnabledCoexistence()) {
+                    mService.setAutoTimeZonePolicy(mContext.getPackageName(),
+                            enabled ? AUTO_TIME_ZONE_ENABLED : AUTO_TIME_ZONE_DISABLED );
+                } else {
+                    mService.setAutoTimeZoneEnabled(admin, mContext.getPackageName(), enabled);
+                }
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -9014,6 +9015,96 @@ public class DevicePolicyManager {
             }
         }
         return false;
+    }
+
+    /**
+     * Specifies that the auto time zone state is not controlled by device policy.
+     *
+     * @see #setAutoTimeZonePolicy(int)
+     */
+    @FlaggedApi(Flags.FLAG_SET_AUTO_TIME_ZONE_ENABLED_COEXISTENCE)
+    public static final int AUTO_TIME_ZONE_NOT_CONTROLLED_BY_POLICY = 0;
+
+    /**
+     * Specifies the "disabled" auto time zone state.
+     *
+     * @see #setAutoTimeZonePolicy(int)
+     */
+    @FlaggedApi(Flags.FLAG_SET_AUTO_TIME_ZONE_ENABLED_COEXISTENCE)
+    public static final int AUTO_TIME_ZONE_DISABLED = 1;
+
+    /**
+     * Specifies the "enabled" auto time zone state.
+     *
+     * @see #setAutoTimeZonePolicy(int)
+     */
+    @FlaggedApi(Flags.FLAG_SET_AUTO_TIME_ZONE_ENABLED_COEXISTENCE)
+    public static final int AUTO_TIME_ZONE_ENABLED = 2;
+
+    /**
+     * Flags supplied to {@link #setAutoTimeZonePolicy}(int)}.
+     *
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = { "AUTO_TIME_ZONE_" }, value = {
+            AUTO_TIME_ZONE_NOT_CONTROLLED_BY_POLICY,
+            AUTO_TIME_ZONE_DISABLED,
+            AUTO_TIME_ZONE_ENABLED
+    })
+    public @interface AutoTimeZonePolicy {}
+
+    /**
+     * Called by a device owner, a profile owner for the primary user or a profile owner of an
+     * organization-owned managed profile to turn auto time zone on and off.
+     * <p>
+     * Callers are recommended to use {@link UserManager#DISALLOW_CONFIG_DATE_TIME} to prevent the
+     * user from changing this setting, that way no user will be able set the date and time zone.
+     *
+     * @param policy The desired state among {@link #AUTO_TIME_ZONE_ENABLED} to enable it,
+     * {@link #AUTO_TIME_ZONE_DISABLED} to disable it or
+     * {@link #AUTO_TIME_ZONE_NOT_CONTROLLED_BY_POLICY} to unset the policy.
+     * @throws SecurityException if caller is not a device owner, a profile owner for the primary
+     * user, or a profile owner of an organization-owned managed profile, or if the caller does not
+     * hold the required permission.
+     */
+    @SupportsCoexistence
+    @RequiresPermission(value = SET_TIME_ZONE, conditional = true)
+    @FlaggedApi(Flags.FLAG_SET_AUTO_TIME_ZONE_ENABLED_COEXISTENCE)
+    public void setAutoTimeZonePolicy(@AutoTimeZonePolicy int policy) {
+        throwIfParentInstance("setAutoTimeZonePolicy");
+        if (mService != null) {
+            try {
+                mService.setAutoTimeZonePolicy(mContext.getPackageName(), policy);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Returns auto time zone policy's current state.
+     *
+     * @return One of {@link #AUTO_TIME_ZONE_ENABLED} if enabled, {@link #AUTO_TIME_ZONE_DISABLED}
+     *         if disabled and {@link #AUTO_TIME_ZONE_NOT_CONTROLLED_BY_POLICY} if the state is not
+     *         controlled by policy.
+     * @throws SecurityException if caller is not a device owner, a profile owner for the
+     * primary user, or a profile owner of an organization-owned managed profile, or if the caller
+     * does not hold the required permission.
+     */
+    @SupportsCoexistence
+    @RequiresPermission(anyOf = {SET_TIME_ZONE, QUERY_ADMIN_POLICY}, conditional = true)
+    @FlaggedApi(Flags.FLAG_SET_AUTO_TIME_ZONE_ENABLED_COEXISTENCE)
+    public @AutoTimeZonePolicy int getAutoTimeZonePolicy() {
+        throwIfParentInstance("getAutoTimeZonePolicy");
+        if (mService != null) {
+            try {
+                return mService.getAutoTimeZonePolicy(mContext.getPackageName());
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return DevicePolicyManager.AUTO_TIME_ZONE_NOT_CONTROLLED_BY_POLICY;
     }
 
     /**
