@@ -1757,6 +1757,13 @@ class ActivityStarter {
             startedActivityRootTask.setAlwaysOnTop(true);
         }
 
+        if (isIndependentLaunch && !mDoResume && avoidMoveToFront() && !mTransientLaunch
+                && !started.shouldBeVisible(true /* ignoringKeyguard */)) {
+            Slog.i(TAG, "Abort " + transition + " of invisible launch " + started);
+            transition.abort();
+            return startedActivityRootTask;
+        }
+
         // If there is no state change (e.g. a resumed activity is reparented to top of
         // another display) to trigger a visibility/configuration checking, we have to
         // update the configuration for changing to different display.
