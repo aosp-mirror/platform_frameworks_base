@@ -83,6 +83,7 @@ import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestRunningTaskInfoBuilder;
 import com.android.wm.shell.common.DisplayController;
+import com.android.wm.shell.desktopmode.DesktopModeEventLogger;
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.tests.R;
 import com.android.wm.shell.windowdecor.additionalviewcontainer.AdditionalViewContainer;
@@ -138,6 +139,8 @@ public class WindowDecorationTests extends ShellTestCase {
     private SurfaceSyncGroup mMockSurfaceSyncGroup;
     @Mock
     private SurfaceControl mMockTaskSurface;
+    @Mock
+    private DesktopModeEventLogger mDesktopModeEventLogger;
 
     private final List<SurfaceControl.Transaction> mMockSurfaceControlTransactions =
             new ArrayList<>();
@@ -1014,7 +1017,7 @@ public class WindowDecorationTests extends ShellTestCase {
                 new MockObjectSupplier<>(mMockSurfaceControlTransactions,
                         () -> mock(SurfaceControl.Transaction.class)),
                 () -> mMockWindowContainerTransaction, () -> mMockTaskSurface,
-                mMockSurfaceControlViewHostFactory);
+                mMockSurfaceControlViewHostFactory, mDesktopModeEventLogger);
     }
 
     private class MockObjectSupplier<T> implements Supplier<T> {
@@ -1054,11 +1057,12 @@ public class WindowDecorationTests extends ShellTestCase {
                 Supplier<SurfaceControl.Transaction> surfaceControlTransactionSupplier,
                 Supplier<WindowContainerTransaction> windowContainerTransactionSupplier,
                 Supplier<SurfaceControl> surfaceControlSupplier,
-                SurfaceControlViewHostFactory surfaceControlViewHostFactory) {
+                SurfaceControlViewHostFactory surfaceControlViewHostFactory,
+                DesktopModeEventLogger desktopModeEventLogger) {
             super(context, userContext, displayController, taskOrganizer, taskInfo, taskSurface,
                     surfaceControlBuilderSupplier, surfaceControlTransactionSupplier,
                     windowContainerTransactionSupplier, surfaceControlSupplier,
-                    surfaceControlViewHostFactory);
+                    surfaceControlViewHostFactory, desktopModeEventLogger);
         }
 
         @Override

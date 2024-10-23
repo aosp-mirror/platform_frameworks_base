@@ -18,10 +18,6 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_height="wrap_content"
     android:layout_width="match_parent"
-    android:paddingLeft="?android:attr/listPreferredItemPaddingLeft"
-    android:paddingStart="?android:attr/listPreferredItemPaddingStart"
-    android:paddingRight="?android:attr/listPreferredItemPaddingRight"
-    android:paddingEnd="?android:attr/listPreferredItemPaddingEnd"
     android:importantForAccessibility="no">
 
     <com.android.settingslib.widget.MainSwitchBar

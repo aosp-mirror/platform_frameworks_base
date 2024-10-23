@@ -2572,14 +2572,21 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
         wpc.computeProcessActivityState();
     }
 
-    void computeProcessActivityStateBatch() {
+    boolean computeProcessActivityStateBatch() {
         if (mActivityStateChangedProcs.isEmpty()) {
-            return;
+            return false;
         }
+        boolean changed = false;
         for (int i = mActivityStateChangedProcs.size() - 1; i >= 0; i--) {
-            mActivityStateChangedProcs.get(i).computeProcessActivityState();
+            final WindowProcessController wpc = mActivityStateChangedProcs.get(i);
+            final int prevState = wpc.getActivityStateFlags();
+            wpc.computeProcessActivityState();
+            if (!changed && prevState != wpc.getActivityStateFlags()) {
+                changed = true;
+            }
         }
         mActivityStateChangedProcs.clear();
+        return changed;
     }
 
     /**

@@ -25,6 +25,7 @@ import android.provider.Settings
 import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.qs.pipeline.domain.interactor.PanelInteractor
 import com.android.systemui.settings.UserContextProvider
+import com.android.traceur.PresetTraceConfigs
 import java.util.concurrent.Executor
 
 private const val NOTIFY_SESSION_ENDED_SETTING = "should_notify_trace_session_ended"
@@ -47,15 +48,17 @@ class IssueRecordingServiceSession(
     private val notificationManager: NotificationManager,
     private val userContextProvider: UserContextProvider,
 ) {
+    var takeBugReport = false
+    var traceConfig = PresetTraceConfigs.getDefaultConfig()
 
     fun start() {
-        bgExecutor.execute { traceurConnection.startTracing(issueRecordingState.traceConfig) }
+        bgExecutor.execute { traceurConnection.startTracing(traceConfig) }
         issueRecordingState.isRecording = true
     }
 
     fun stop(contentResolver: ContentResolver) {
         bgExecutor.execute {
-            if (issueRecordingState.traceConfig.longTrace) {
+            if (traceConfig.longTrace) {
                 Settings.Global.putInt(contentResolver, NOTIFY_SESSION_ENDED_SETTING, DISABLED)
             }
             traceurConnection.stopTracing()
@@ -71,7 +74,7 @@ class IssueRecordingServiceSession(
                 UserHandle(userContextProvider.userContext.userId),
             )
 
-            if (issueRecordingState.takeBugreport) {
+            if (takeBugReport) {
                 iActivityManager.requestBugReportWithExtraAttachment(screenRecording)
             } else {
                 traceurConnection.shareTraces(screenRecording)

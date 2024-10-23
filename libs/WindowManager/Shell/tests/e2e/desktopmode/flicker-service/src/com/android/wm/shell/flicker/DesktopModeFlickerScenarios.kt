@@ -298,12 +298,18 @@ class DesktopModeFlickerScenarios {
             FlickerConfigEntry(
                 scenarioId = ScenarioId("MAXIMIZE_APP"),
                 extractor =
-                TaggedScenarioExtractorBuilder()
-                    .setTargetTag(CujType.CUJ_DESKTOP_MODE_MAXIMIZE_WINDOW)
-                    .setTransitionMatcher(
-                        TaggedCujTransitionMatcher(associatedTransitionRequired = false)
-                    )
-                    .build(),
+                ShellTransitionScenarioExtractor(
+                    transitionMatcher =
+                    object : ITransitionMatcher {
+                        override fun findAll(
+                            transitions: Collection<Transition>
+                        ): Collection<Transition> {
+                            return transitions.filter {
+                                it.type == TransitionType.DESKTOP_MODE_TOGGLE_RESIZE
+                            }
+                        }
+                    }
+                ),
                 assertions = AssertionTemplates.DESKTOP_MODE_APP_VISIBILITY_ASSERTIONS +
                         listOf(
                             AppLayerIncreasesInSize(DESKTOP_MODE_APP),
@@ -316,12 +322,18 @@ class DesktopModeFlickerScenarios {
             FlickerConfigEntry(
                 scenarioId = ScenarioId("MAXIMIZE_APP_NON_RESIZABLE"),
                 extractor =
-                TaggedScenarioExtractorBuilder()
-                    .setTargetTag(CujType.CUJ_DESKTOP_MODE_MAXIMIZE_WINDOW)
-                    .setTransitionMatcher(
-                        TaggedCujTransitionMatcher(associatedTransitionRequired = false)
-                    )
-                    .build(),
+                ShellTransitionScenarioExtractor(
+                    transitionMatcher =
+                    object : ITransitionMatcher {
+                        override fun findAll(
+                            transitions: Collection<Transition>
+                        ): Collection<Transition> {
+                            return transitions.filter {
+                                it.type == TransitionType.DESKTOP_MODE_TOGGLE_RESIZE
+                            }
+                        }
+                    }
+                ),
                 assertions =
                 AssertionTemplates.DESKTOP_MODE_APP_VISIBILITY_ASSERTIONS +
                         listOf(

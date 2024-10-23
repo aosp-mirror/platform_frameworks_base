@@ -107,7 +107,7 @@ class IssueRecordingServiceSessionTest : SysuiTestCase() {
 
     @Test
     fun requestBugreport_afterReceivingShareCommand_withTakeBugreportTrue() {
-        issueRecordingState.takeBugreport = true
+        underTest.takeBugReport = true
         val uri = mock<Uri>()
 
         underTest.share(0, uri)
@@ -118,7 +118,7 @@ class IssueRecordingServiceSessionTest : SysuiTestCase() {
 
     @Test
     fun sharesTracesDirectly_afterReceivingShareCommand_withTakeBugreportFalse() {
-        issueRecordingState.takeBugreport = false
+        underTest.takeBugReport = false
         val uri = mock<Uri>()
 
         underTest.share(0, uri)

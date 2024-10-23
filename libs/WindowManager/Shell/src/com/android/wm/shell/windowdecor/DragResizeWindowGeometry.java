@@ -181,7 +181,7 @@ final class DragResizeWindowGeometry {
     }
 
     private boolean isInEdgeResizeBounds(float x, float y) {
-        return calculateEdgeResizeCtrlType(x, y) != 0;
+        return calculateEdgeResizeCtrlType(x, y) != CTRL_TYPE_UNDEFINED;
     }
 
     /**

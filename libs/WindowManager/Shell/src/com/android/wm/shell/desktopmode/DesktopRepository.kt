@@ -30,7 +30,6 @@ import androidx.core.util.valueIterator
 import com.android.internal.protolog.ProtoLog
 import com.android.window.flags.Flags
 import com.android.wm.shell.desktopmode.persistence.DesktopPersistentRepository
-import com.android.wm.shell.desktopmode.persistence.DesktopTask
 import com.android.wm.shell.desktopmode.persistence.DesktopTaskState
 import com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE
 import com.android.wm.shell.shared.annotations.ShellMainThread
@@ -124,7 +123,8 @@ class DesktopRepository (
         if (!Flags.enableDesktopWindowingPersistence()) return
         //  TODO: b/365962554 - Handle the case that user moves to desktop before it's initialized
         mainCoroutineScope.launch {
-            val desktop = persistentRepository.readDesktop()
+            val desktop = persistentRepository.readDesktop() ?: return@launch
+
             val maxTasks =
                 DesktopModeStatus.getMaxTaskLimit(context).takeIf { it > 0 }
                     ?: desktop.zOrderedTasksCount
@@ -132,13 +132,11 @@ class DesktopRepository (
             desktop.zOrderedTasksList
                 // Reverse it so we initialize the repo from bottom to top.
                 .reversed()
-                .map { taskId ->
-                    desktop.tasksByTaskIdMap.getOrDefault(
-                        taskId,
-                        DesktopTask.getDefaultInstance()
-                    )
+                .mapNotNull { taskId ->
+                    desktop.tasksByTaskIdMap[taskId]?.takeIf {
+                        it.desktopTaskState == DesktopTaskState.VISIBLE
+                    }
                 }
-                .filter { task -> task.desktopTaskState == DesktopTaskState.VISIBLE }
                 .take(maxTasks)
                 .forEach { task ->
                     addOrMoveFreeformTaskToTop(desktop.displayId, task.taskId)

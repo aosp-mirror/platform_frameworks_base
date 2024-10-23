@@ -1118,6 +1118,21 @@ public class TelephonyRegistryManager {
     }
 
     /**
+     * Notify external listeners that carrier roaming non-terrestrial available services changed.
+     * @param availableServices The list of the supported services.
+     * @hide
+     */
+    public void notifyCarrierRoamingNtnAvailableServicesChanged(
+            int subId, @NetworkRegistrationInfo.ServiceType int[] availableServices) {
+        try {
+            sRegistry.notifyCarrierRoamingNtnAvailableServicesChanged(subId, availableServices);
+        } catch (RemoteException ex) {
+            // system server crash
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Processes potential event changes from the provided {@link TelephonyCallback}.
      *
      * @param telephonyCallback callback for monitoring callback changes to the telephony state.
@@ -1272,12 +1287,9 @@ public class TelephonyRegistryManager {
 
         if (telephonyCallback instanceof TelephonyCallback.CarrierRoamingNtnModeListener) {
             eventList.add(TelephonyCallback.EVENT_CARRIER_ROAMING_NTN_MODE_CHANGED);
-        }
-
-        if (telephonyCallback instanceof TelephonyCallback.CarrierRoamingNtnModeListener) {
             eventList.add(TelephonyCallback.EVENT_CARRIER_ROAMING_NTN_ELIGIBLE_STATE_CHANGED);
+            eventList.add(TelephonyCallback.EVENT_CARRIER_ROAMING_NTN_AVAILABLE_SERVICES_CHANGED);
         }
-
         return eventList;
     }
 

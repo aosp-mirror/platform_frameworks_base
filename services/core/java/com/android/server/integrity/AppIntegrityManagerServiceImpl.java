@@ -74,7 +74,6 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
     private final Context mContext;
     private final Handler mHandler;
     private final PackageManagerInternal mPackageManagerInternal;
-    private final IntegrityFileManager mIntegrityFileManager;
 
     /** Create an instance of {@link AppIntegrityManagerServiceImpl}. */
     public static AppIntegrityManagerServiceImpl create(Context context) {
@@ -84,7 +83,6 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
         return new AppIntegrityManagerServiceImpl(
                 context,
                 LocalServices.getService(PackageManagerInternal.class),
-                IntegrityFileManager.getInstance(),
                 handlerThread.getThreadHandler());
     }
 
@@ -92,11 +90,9 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
     AppIntegrityManagerServiceImpl(
             Context context,
             PackageManagerInternal packageManagerInternal,
-            IntegrityFileManager integrityFileManager,
             Handler handler) {
         mContext = context;
         mPackageManagerInternal = packageManagerInternal;
-        mIntegrityFileManager = integrityFileManager;
         mHandler = handler;
 
         IntentFilter integrityVerificationFilter = new IntentFilter();
@@ -127,171 +123,45 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
     @BinderThread
     public void updateRuleSet(
             String version, ParceledListSlice<Rule> rules, IntentSender statusReceiver) {
-        String ruleProvider = getCallerPackageNameOrThrow(Binder.getCallingUid());
-        if (DEBUG_INTEGRITY_COMPONENT) {
-            Slog.i(TAG, String.format("Calling rule provider name is: %s.", ruleProvider));
+        Intent intent = new Intent();
+        intent.putExtra(EXTRA_STATUS, STATUS_SUCCESS);
+        try {
+            statusReceiver.sendIntent(
+                mContext,
+                /* code= */ 0,
+                intent,
+                /* onFinished= */ null,
+                /* handler= */ null);
+        } catch (Exception e) {
+            Slog.e(TAG, "Error sending status feedback.", e);
         }
-
-        mHandler.post(
-                () -> {
-                    boolean success = true;
-                    try {
-                        mIntegrityFileManager.writeRules(version, ruleProvider, rules.getList());
-                    } catch (Exception e) {
-                        Slog.e(TAG, "Error writing rules.", e);
-                        success = false;
-                    }
-
-                    if (DEBUG_INTEGRITY_COMPONENT) {
-                        Slog.i(
-                                TAG,
-                                String.format(
-                                        "Successfully pushed rule set to version '%s' from '%s'",
-                                        version, ruleProvider));
-                    }
-
-                    Intent intent = new Intent();
-                    intent.putExtra(EXTRA_STATUS, success ? STATUS_SUCCESS : STATUS_FAILURE);
-                    try {
-                        statusReceiver.sendIntent(
-                                mContext,
-                                /* code= */ 0,
-                                intent,
-                                /* onFinished= */ null,
-                                /* handler= */ null);
-                    } catch (Exception e) {
-                        Slog.e(TAG, "Error sending status feedback.", e);
-                    }
-                });
     }
 
     @Override
     @BinderThread
     public String getCurrentRuleSetVersion() {
-        getCallerPackageNameOrThrow(Binder.getCallingUid());
-
-        RuleMetadata ruleMetadata = mIntegrityFileManager.readMetadata();
-        return (ruleMetadata != null && ruleMetadata.getVersion() != null)
-                ? ruleMetadata.getVersion()
-                : "";
+        return "";
     }
 
     @Override
     @BinderThread
     public String getCurrentRuleSetProvider() {
-        getCallerPackageNameOrThrow(Binder.getCallingUid());
-
-        RuleMetadata ruleMetadata = mIntegrityFileManager.readMetadata();
-        return (ruleMetadata != null && ruleMetadata.getRuleProvider() != null)
-                ? ruleMetadata.getRuleProvider()
-                : "";
+        return "";
     }
 
     @Override
     public ParceledListSlice<Rule> getCurrentRules() {
-        List<Rule> rules = Collections.emptyList();
-        try {
-            rules = mIntegrityFileManager.readRules(/* appInstallMetadata= */ null);
-        } catch (Exception e) {
-            Slog.e(TAG, "Error getting current rules", e);
-        }
-        return new ParceledListSlice<>(rules);
+        return new ParceledListSlice<>(Collections.emptyList());
     }
 
     @Override
     public List<String> getWhitelistedRuleProviders() {
-        return getAllowedRuleProviderSystemApps();
+        return Collections.emptyList();
     }
 
     private void handleIntegrityVerification(Intent intent) {
         int verificationId = intent.getIntExtra(EXTRA_VERIFICATION_ID, -1);
         mPackageManagerInternal.setIntegrityVerificationResult(
                 verificationId, PackageManagerInternal.INTEGRITY_VERIFICATION_ALLOW);
-    }
-
-    /** We will use the SHA256 digest of a package name if it is more than 32 bytes long. */
-    private String getPackageNameNormalized(String packageName) {
-        if (packageName.length() <= 32) {
-            return packageName;
-        }
-
-        try {
-            MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
-            byte[] hashBytes = messageDigest.digest(packageName.getBytes(StandardCharsets.UTF_8));
-            return getHexDigest(hashBytes);
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("SHA-256 algorithm not found", e);
-        }
-    }
-
-    private String getCallerPackageNameOrThrow(int callingUid) {
-        String callerPackageName = getCallingRulePusherPackageName(callingUid);
-        if (callerPackageName == null) {
-            throw new SecurityException(
-                    "Only system packages specified in config_integrityRuleProviderPackages are "
-                            + "allowed to call this method.");
-        }
-        return callerPackageName;
-    }
-
-    private String getCallingRulePusherPackageName(int callingUid) {
-        // Obtain the system apps that are allowlisted in config_integrityRuleProviderPackages.
-        List<String> allowedRuleProviders = getAllowedRuleProviderSystemApps();
-        if (DEBUG_INTEGRITY_COMPONENT) {
-            Slog.i(
-                    TAG,
-                    String.format(
-                            "Rule provider system app list contains: %s", allowedRuleProviders));
-        }
-
-        // Identify the package names in the caller list.
-        List<String> callingPackageNames = getPackageListForUid(callingUid);
-
-        // Find the intersection between the allowed and calling packages. Ideally, we will have
-        // at most one package name here. But if we have more, it is fine.
-        List<String> allowedCallingPackages = new ArrayList<>();
-        for (String packageName : callingPackageNames) {
-            if (allowedRuleProviders.contains(packageName)) {
-                allowedCallingPackages.add(packageName);
-            }
-        }
-
-        return allowedCallingPackages.isEmpty() ? null : allowedCallingPackages.get(0);
-    }
-
-    private List<String> getAllowedRuleProviderSystemApps() {
-        List<String> integrityRuleProviders =
-                Arrays.asList(
-                        mContext.getResources()
-                                .getStringArray(R.array.config_integrityRuleProviderPackages));
-
-        // Filter out the rule provider packages that are not system apps.
-        List<String> systemAppRuleProviders = new ArrayList<>();
-        for (String ruleProvider : integrityRuleProviders) {
-            if (isSystemApp(ruleProvider)) {
-                systemAppRuleProviders.add(ruleProvider);
-            }
-        }
-        return systemAppRuleProviders;
-    }
-
-    private boolean isSystemApp(String packageName) {
-        try {
-            PackageInfo existingPackageInfo =
-                    mContext.getPackageManager().getPackageInfo(packageName, /* flags= */ 0);
-            return existingPackageInfo.applicationInfo != null
-                    && existingPackageInfo.applicationInfo.isSystemApp();
-        } catch (PackageManager.NameNotFoundException e) {
-            return false;
-        }
-    }
-
-    private List<String> getPackageListForUid(int uid) {
-        try {
-            return Arrays.asList(mContext.getPackageManager().getPackagesForUid(uid));
-        } catch (NullPointerException e) {
-            Slog.w(TAG, String.format("No packages were found for uid: %d", uid));
-            return List.of();
-        }
     }
 }

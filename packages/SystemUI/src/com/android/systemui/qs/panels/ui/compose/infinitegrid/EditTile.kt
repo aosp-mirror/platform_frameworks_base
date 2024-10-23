@@ -202,14 +202,17 @@ fun DefaultEditTileGrid(
         topBar = { EditModeTopBar(onStopEditing = onStopEditing, onReset = reset) },
     ) { innerPadding ->
         CompositionLocalProvider(LocalOverscrollConfiguration provides null) {
+            val scrollState = rememberScrollState()
+            LaunchedEffect(listState.dragInProgress) {
+                if (listState.dragInProgress) {
+                    scrollState.animateScrollTo(0)
+                }
+            }
+
             Column(
                 verticalArrangement =
                     spacedBy(dimensionResource(id = R.dimen.qs_label_container_margin)),
-                modifier =
-                    modifier
-                        .fillMaxSize()
-                        .verticalScroll(rememberScrollState())
-                        .padding(innerPadding),
+                modifier = modifier.fillMaxSize().verticalScroll(scrollState).padding(innerPadding),
             ) {
                 AnimatedContent(
                     targetState = listState.dragInProgress,

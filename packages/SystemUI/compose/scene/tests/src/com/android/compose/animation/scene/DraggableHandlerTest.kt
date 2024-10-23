@@ -39,7 +39,6 @@ import com.android.compose.animation.scene.TestScenes.SceneC
 import com.android.compose.animation.scene.content.state.TransitionState
 import com.android.compose.animation.scene.content.state.TransitionState.Transition
 import com.android.compose.animation.scene.subjects.assertThat
-import com.android.compose.nestedscroll.SuspendedValue
 import com.android.compose.test.MonotonicClockTestScope
 import com.android.compose.test.runMonotonicClockTest
 import com.android.compose.test.transition
@@ -850,6 +849,34 @@ class DraggableHandlerTest {
     }
 
     @Test
+    fun duringATransition_aNewScrollGesture_shouldTakeControl() = runGestureTest {
+        val nestedScroll = nestedScrollConnection(nestedScrollBehavior = EdgeWithPreview)
+        // First gesture
+        nestedScroll.scroll(available = downOffset(fractionOfScreen = 0.1f))
+        assertTransition(currentScene = SceneA)
+        nestedScroll.preFling(available = Velocity.Zero)
+        assertTransition(currentScene = SceneA)
+
+        // Second gesture, it starts during onStop() animation
+        nestedScroll.scroll(downOffset(0.1f))
+        assertTransition(currentScene = SceneA)
+
+        // Allows onStop() to complete or cancel
+        advanceUntilIdle()
+
+        // Second gesture continues
+        nestedScroll.scroll(downOffset(0.1f))
+        assertTransition(currentScene = SceneA)
+
+        // Second gesture ends
+        nestedScroll.preFling(available = Velocity.Zero)
+        assertTransition(currentScene = SceneA)
+
+        advanceUntilIdle()
+        assertIdle(currentScene = SceneA)
+    }
+
+    @Test
     fun onPreFling_velocityLowerThanThreshold_remainSameScene() = runGestureTest {
         val nestedScroll = nestedScrollConnection(nestedScrollBehavior = EdgeWithPreview)
         nestedScroll.scroll(available = downOffset(fractionOfScreen = 0.1f))
@@ -1293,6 +1320,26 @@ class DraggableHandlerTest {
                 assertThat(consumedVelocity).isGreaterThan(-velocityThreshold)
             },
         )
+    }
+
+    @Test
+    fun scrollKeepPriorityEvenIfWeCanNoLongerScrollOnThatDirection() = runGestureTest {
+        // Overscrolling on scene B does nothing.
+        layoutState.transitions = transitions { overscrollDisabled(SceneB, Orientation.Vertical) }
+        val nestedScroll = nestedScrollConnection(nestedScrollBehavior = EdgeAlways)
+
+        // Overscroll is disabled, it will scroll up to 100%
+        nestedScroll.scroll(available = upOffset(fractionOfScreen = 2f))
+        assertTransition(fromScene = SceneA, toScene = SceneB, progress = 1f)
+
+        // We need to maintain scroll priority even if the scene transition can no longer consume
+        // the scroll gesture.
+        nestedScroll.scroll(available = upOffset(fractionOfScreen = 0.1f))
+        assertTransition(fromScene = SceneA, toScene = SceneB, progress = 1f)
+
+        // A scroll gesture in the opposite direction allows us to return to the previous scene.
+        nestedScroll.scroll(available = downOffset(fractionOfScreen = 0.5f))
+        assertTransition(fromScene = SceneA, toScene = SceneB, progress = 0.5f)
     }
 
     @Test
