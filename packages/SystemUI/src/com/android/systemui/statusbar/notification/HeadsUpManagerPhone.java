@@ -426,7 +426,7 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
         }
         mAnimationStateHandler.setHeadsUpGoingAwayAnimationsAllowed(false);
         for (NotificationEntry entry : mEntriesToRemoveWhenReorderingAllowed) {
-            if (isHeadsUpEntry(entry.getKey())) {
+            if (entry != null && isHeadsUpEntry(entry.getKey())) {
                 // Maybe the heads-up was removed already
                 removeEntry(entry.getKey(), "mOnReorderingAllowedListener");
             }
@@ -488,6 +488,13 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
         }
         updateTopHeadsUpFlow();
         updateHeadsUpFlow();
+        if (NotificationThrottleHun.isEnabled()) {
+            if (headsUpEntry.mEntry != null) {
+                if (mEntriesToRemoveWhenReorderingAllowed.contains(headsUpEntry.mEntry)) {
+                    mEntriesToRemoveWhenReorderingAllowed.remove(headsUpEntry.mEntry);
+                }
+            }
+        }
     }
 
     private void updateTopHeadsUpFlow() {
