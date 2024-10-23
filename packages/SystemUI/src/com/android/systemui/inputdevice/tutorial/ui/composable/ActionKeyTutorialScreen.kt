@@ -52,7 +52,7 @@ fun ActionKeyTutorialScreen(onDoneButtonClicked: () -> Unit, onBack: () -> Unit)
             Modifier.fillMaxSize()
                 .onKeyEvent { keyEvent: KeyEvent ->
                     if (keyEvent.key == Key.MetaLeft && keyEvent.type == KeyEventType.KeyUp) {
-                        actionState = Finished
+                        actionState = Finished(R.raw.action_key_success)
                     }
                     true
                 }
@@ -80,11 +80,7 @@ private fun buildScreenConfig() =
                 titleSuccessResId = R.string.tutorial_action_key_success_title,
                 bodySuccessResId = R.string.tutorial_action_key_success_body,
             ),
-        animations =
-            TutorialScreenConfig.Animations(
-                educationResId = R.raw.action_key_edu,
-                successResId = R.raw.action_key_success,
-            ),
+        animations = TutorialScreenConfig.Animations(educationResId = R.raw.action_key_edu),
     )
 
 @Composable

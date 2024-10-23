@@ -14,17 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.panels.domain.interactor
+package com.android.systemui.statusbar.data.repository
 
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.applicationCoroutineScope
-import com.android.systemui.log.core.FakeLogBuffer
 
-val Kosmos.iconLabelVisibilityInteractor by
-    Kosmos.Fixture {
-        IconLabelVisibilityInteractor(
-            qsPreferencesInteractor,
-            FakeLogBuffer.Factory.create(),
-            applicationCoroutineScope
-        )
-    }
+val Kosmos.fakeStatusBarConfigurationControllerStore by Kosmos.Fixture {
+    FakeStatusBarConfigurationControllerStore()
+}
+
+var Kosmos.statusBarConfigurationControllerStore: StatusBarConfigurationControllerStore by
+    Kosmos.Fixture { fakeStatusBarConfigurationControllerStore }

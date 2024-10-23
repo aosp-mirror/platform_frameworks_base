@@ -357,6 +357,8 @@
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"បើក​មុខងារ​ការតភ្ជាប់​ដែលបានធ្វើឱ្យប្រសើរឡើង។"</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"ស្ថានីយ​មូលដ្ឋាន"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"បើក​កម្មវិធី​ស្ថានីយ​ដែល​ផ្ដល់​ការ​ចូល​សែល​មូលដ្ឋាន"</string>
+    <string name="enable_linux_terminal_title" msgid="5076044866895670637">"មជ្ឈដ្ឋាន​អភិវឌ្ឍន៍ Linux"</string>
+    <string name="enable_linux_terminal_summary" msgid="5893216510985145320">"ដំណើរការទែមីណាល់ Linux នៅលើ Android"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"ពិនិត្យ HDCP"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"កំណត់​ឥរិយាបថ​ពិនិត្យ HDCP"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"ការជួសជុល"</string>
@@ -686,11 +688,9 @@
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"បានបើក"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"ត្រូវតែ​ចាប់ផ្ដើម​ឧបករណ៍​របស់អ្នក​ឡើងវិញ ដើម្បីឱ្យ​ការផ្លាស់ប្ដូរ​នេះ​មានប្រសិទ្ធភាព។ ចាប់ផ្ដើមឡើងវិញ​ឥឡូវនេះ ឬ​បោះបង់​។"</string>
     <string name="media_transfer_wired_headphone_name" msgid="8698668536022665254">"កាស​មានខ្សែ"</string>
-    <!-- no translation found for media_transfer_headphone_name (1157798825650178478) -->
-    <skip />
+    <string name="media_transfer_headphone_name" msgid="1157798825650178478">"សំឡេងប្រើខ្សែ"</string>
     <string name="media_transfer_usb_audio_name" msgid="1789292056757821355">"ឧបករណ៍បំពងសំឡេង USB"</string>
-    <!-- no translation found for media_transfer_wired_device_mic_name (7115192790725088698) -->
-    <skip />
+    <string name="media_transfer_wired_device_mic_name" msgid="7115192790725088698">"មីក្រូហ្វូនប្រើខ្សែ"</string>
     <string name="media_transfer_usb_device_mic_name" msgid="7171789543226269822">"មីក្រូហ្វូន USB"</string>
     <string name="media_transfer_bt_device_mic_name" msgid="1870669402238687618">"មីក្រូហ្វូន BT"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"បើក"</string>

@@ -54,7 +54,9 @@ class RecentAppsGestureRecognizer(
                 -state.deltaY >= gestureDistanceThresholdPx &&
                     abs(velocityTracker.calculateVelocity().value) <= velocityThresholdPxPerMs
             },
-            progress = { MathUtils.saturate(-it.deltaY / gestureDistanceThresholdPx) },
+            progress = {
+                GestureState.InProgress(MathUtils.saturate(-it.deltaY / gestureDistanceThresholdPx))
+            },
         )
     }
 }

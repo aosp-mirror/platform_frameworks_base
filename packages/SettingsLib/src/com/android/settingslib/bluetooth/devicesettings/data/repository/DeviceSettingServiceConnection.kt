@@ -279,7 +279,7 @@ class DeviceSettingServiceConnection(
                             getService(intent, IDeviceSettingsProviderService.Stub::asInterface)
                                 .stateIn(
                                     coroutineScope.plus(backgroundCoroutineContext),
-                                    SharingStarted.WhileSubscribed(),
+                                    SharingStarted.WhileSubscribed(stopTimeoutMillis = SERVICE_CONNECTION_STOP_MILLIS),
                                     ServiceConnectionStatus.Connecting,
                                 )
                         },
@@ -370,5 +370,6 @@ class DeviceSettingServiceConnection(
         const val CONFIG_SERVICE_PACKAGE_NAME = "DEVICE_SETTINGS_CONFIG_PACKAGE_NAME"
         const val CONFIG_SERVICE_CLASS_NAME = "DEVICE_SETTINGS_CONFIG_CLASS"
         const val CONFIG_SERVICE_INTENT_ACTION = "DEVICE_SETTINGS_CONFIG_ACTION"
+        const val SERVICE_CONNECTION_STOP_MILLIS = 1000L
     }
 }

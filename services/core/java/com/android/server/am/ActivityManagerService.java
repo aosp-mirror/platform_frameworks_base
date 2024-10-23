@@ -632,8 +632,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     static final String EXTRA_DESCRIPTION = "android.intent.extra.DESCRIPTION";
     static final String EXTRA_BUGREPORT_TYPE = "android.intent.extra.BUGREPORT_TYPE";
     static final String EXTRA_BUGREPORT_NONCE = "android.intent.extra.BUGREPORT_NONCE";
-    static final String EXTRA_EXTRA_ATTACHMENT_URI =
-            "android.intent.extra.EXTRA_ATTACHMENT_URI";
+    static final String EXTRA_EXTRA_ATTACHMENT_URIS =
+            "android.intent.extra.EXTRA_ATTACHMENT_URIS";
 
     /**
      * The maximum number of bytes that {@link #setProcessStateSummary} accepts.
@@ -7660,7 +7660,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     public void requestBugReportWithDescription(@Nullable String shareTitle,
             @Nullable String shareDescription, int bugreportType, long nonce,
-            @Nullable Uri extraAttachment) {
+            @Nullable List<Uri> extraAttachments) {
         String type = null;
         switch (bugreportType) {
             case BugreportParams.BUGREPORT_MODE_FULL:
@@ -7715,8 +7715,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         triggerShellBugreport.setPackage(SHELL_APP_PACKAGE);
         triggerShellBugreport.putExtra(EXTRA_BUGREPORT_TYPE, bugreportType);
         triggerShellBugreport.putExtra(EXTRA_BUGREPORT_NONCE, nonce);
-        if (extraAttachment != null) {
-            triggerShellBugreport.putExtra(EXTRA_EXTRA_ATTACHMENT_URI, extraAttachment);
+        if (extraAttachments != null && !extraAttachments.isEmpty()) {
+            triggerShellBugreport.putParcelableArrayListExtra(EXTRA_EXTRA_ATTACHMENT_URIS,
+                    new ArrayList(extraAttachments));
             triggerShellBugreport.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         }
         triggerShellBugreport.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
@@ -7775,9 +7776,9 @@ public class ActivityManagerService extends IActivityManager.Stub
      * Takes an interactive bugreport with a progress notification. Also attaches given file uri.
      */
     @Override
-    public void requestBugReportWithExtraAttachment(@NonNull Uri extraAttachment) {
+    public void requestBugReportWithExtraAttachments(@NonNull List<Uri> extraAttachments) {
         requestBugReportWithDescription(null, null, BugreportParams.BUGREPORT_MODE_INTERACTIVE, 0L,
-                extraAttachment);
+                extraAttachments);
     }
 
     /**

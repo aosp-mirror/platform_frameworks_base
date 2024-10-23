@@ -67,7 +67,7 @@ import com.android.wm.shell.dagger.pip.PipModule;
 import com.android.wm.shell.desktopmode.CloseDesktopTaskTransitionHandler;
 import com.android.wm.shell.desktopmode.DefaultDragToDesktopTransitionHandler;
 import com.android.wm.shell.desktopmode.DesktopActivityOrientationChangeHandler;
-import com.android.wm.shell.desktopmode.DesktopFullImmersiveTransitionHandler;
+import com.android.wm.shell.desktopmode.DesktopImmersiveController;
 import com.android.wm.shell.desktopmode.DesktopMixedTransitionHandler;
 import com.android.wm.shell.desktopmode.DesktopModeDragAndDropTransitionHandler;
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger;
@@ -397,12 +397,12 @@ public abstract class WMShellModule {
             Context context,
             ShellInit shellInit,
             Transitions transitions,
-            Optional<DesktopFullImmersiveTransitionHandler> desktopImmersiveTransitionHandler,
+            Optional<DesktopImmersiveController> desktopImmersiveController,
             WindowDecorViewModel windowDecorViewModel,
             Optional<TaskChangeListener> taskChangeListener,
             FocusTransitionObserver focusTransitionObserver) {
         return new FreeformTaskTransitionObserver(
-                context, shellInit, transitions, desktopImmersiveTransitionHandler,
+                context, shellInit, transitions, desktopImmersiveController,
                 windowDecorViewModel, taskChangeListener, focusTransitionObserver);
     }
 
@@ -638,7 +638,7 @@ public abstract class WMShellModule {
             ToggleResizeDesktopTaskTransitionHandler toggleResizeDesktopTaskTransitionHandler,
             DragToDesktopTransitionHandler dragToDesktopTransitionHandler,
             @DynamicOverride DesktopRepository desktopRepository,
-            Optional<DesktopFullImmersiveTransitionHandler> desktopFullImmersiveTransitionHandler,
+            Optional<DesktopImmersiveController> desktopImmersiveController,
             DesktopModeLoggerTransitionObserver desktopModeLoggerTransitionObserver,
             LaunchAdjacentController launchAdjacentController,
             RecentsTransitionHandler recentsTransitionHandler,
@@ -657,7 +657,7 @@ public abstract class WMShellModule {
                 returnToDragStartAnimator, enterDesktopTransitionHandler,
                 exitDesktopTransitionHandler, desktopModeDragAndDropTransitionHandler,
                 toggleResizeDesktopTaskTransitionHandler,
-                dragToDesktopTransitionHandler, desktopFullImmersiveTransitionHandler.get(),
+                dragToDesktopTransitionHandler, desktopImmersiveController.get(),
                 desktopRepository,
                 desktopModeLoggerTransitionObserver, launchAdjacentController,
                 recentsTransitionHandler, multiInstanceHelper, mainExecutor, desktopTasksLimiter,
@@ -705,7 +705,7 @@ public abstract class WMShellModule {
 
     @WMSingleton
     @Provides
-    static Optional<DesktopFullImmersiveTransitionHandler> provideDesktopImmersiveHandler(
+    static Optional<DesktopImmersiveController> provideDesktopImmersiveController(
             Context context,
             Transitions transitions,
             @DynamicOverride DesktopRepository desktopRepository,
@@ -713,7 +713,7 @@ public abstract class WMShellModule {
             ShellTaskOrganizer shellTaskOrganizer) {
         if (DesktopModeStatus.canEnterDesktopMode(context)) {
             return Optional.of(
-                    new DesktopFullImmersiveTransitionHandler(
+                    new DesktopImmersiveController(
                             transitions,
                             desktopRepository,
                             displayController,

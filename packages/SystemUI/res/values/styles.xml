@@ -1354,7 +1354,7 @@
 
     <style name="InternetDialog.Network">
         <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">88dp</item>
+        <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_marginStart">@dimen/internet_dialog_network_layout_margin</item>
         <item name="android:layout_marginEnd">@dimen/internet_dialog_network_layout_margin</item>
         <item name="android:layout_gravity">center_vertical|start</item>

@@ -99,7 +99,7 @@ public class StatusBarWindowControllerImpl implements StatusBarWindowController 
             @Assisted ViewCaptureAwareWindowManager viewCaptureAwareWindowManager,
             @Assisted StatusBarConfigurationController statusBarConfigurationController,
             IWindowManager iWindowManager,
-            StatusBarContentInsetsProvider contentInsetsProvider,
+            @Assisted StatusBarContentInsetsProvider contentInsetsProvider,
             FragmentService fragmentService,
             Optional<UnfoldTransitionProgressProvider> unfoldTransitionProgressProvider) {
         mContext = context;
@@ -370,7 +370,8 @@ public class StatusBarWindowControllerImpl implements StatusBarWindowController 
         StatusBarWindowControllerImpl create(
                 @NonNull Context context,
                 @NonNull ViewCaptureAwareWindowManager viewCaptureAwareWindowManager,
-                @NonNull StatusBarConfigurationController statusBarConfigurationController);
+                @NonNull StatusBarConfigurationController statusBarConfigurationController,
+                @NonNull StatusBarContentInsetsProvider contentInsetsProvider);
     }
 
 }

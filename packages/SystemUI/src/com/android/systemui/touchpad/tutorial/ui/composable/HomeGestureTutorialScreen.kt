@@ -43,19 +43,15 @@ fun HomeGestureTutorialScreen(onDoneButtonClicked: () -> Unit, onBack: () -> Uni
                     titleSuccessResId = R.string.touchpad_home_gesture_success_title,
                     bodySuccessResId = R.string.touchpad_home_gesture_success_body,
                 ),
-            animations =
-                TutorialScreenConfig.Animations(
-                    educationResId = R.raw.trackpad_home_edu,
-                    successResId = R.raw.trackpad_home_success,
-                ),
+            animations = TutorialScreenConfig.Animations(educationResId = R.raw.trackpad_home_edu),
         )
     val recognizer = rememberHomeGestureRecognizer(LocalContext.current.resources)
     val gestureUiState: Flow<GestureUiState> =
         remember(recognizer) {
             GestureFlowAdapter(recognizer).gestureStateAsFlow.map {
                 it.toGestureUiState(
-                    progressStartMark = "",
-                    progressEndMark = "",
+                    progressStartMarker = "",
+                    progressEndMarker = "",
                     successAnimation = R.raw.trackpad_home_success,
                 )
             }
@@ -66,9 +62,7 @@ fun HomeGestureTutorialScreen(onDoneButtonClicked: () -> Unit, onBack: () -> Uni
 @Composable
 private fun rememberHomeGestureRecognizer(resources: Resources): GestureRecognizer {
     val distance =
-        resources.getDimensionPixelSize(
-            com.android.internal.R.dimen.system_gestures_distance_threshold
-        )
+        resources.getDimensionPixelSize(R.dimen.touchpad_tutorial_gestures_distance_threshold)
     return remember(distance) { HomeGestureRecognizer(distance) }
 }
 

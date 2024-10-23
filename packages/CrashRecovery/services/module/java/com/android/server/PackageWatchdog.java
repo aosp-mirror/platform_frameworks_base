@@ -24,9 +24,12 @@ import static com.android.server.crashrecovery.CrashRecoveryUtils.dumpCrashRecov
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
+import android.annotation.SystemApi;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -94,6 +97,8 @@ import java.util.concurrent.TimeUnit;
  * be notified.
  * @hide
  */
+@FlaggedApi(Flags.FLAG_ENABLE_CRASHRECOVERY)
+@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
 public class PackageWatchdog {
     private static final String TAG = "PackageWatchdog";
 
@@ -351,7 +356,7 @@ public class PackageWatchdog {
      *
      * <p>If monitoring a package supporting explicit health check, at the end of the monitoring
      * duration if {@link #onHealthCheckPassed} was never called,
-     * {@link PackageHealthObserver#execute} will be called as if the package failed.
+     * {@link PackageHealthObserver#onExecuteHealthCheckMitigation} will be called as if the package failed.
      *
      * <p>If {@code observer} is already monitoring a package in {@code packageNames},
      * the monitoring window of that package will be reset to {@code durationMs} and the health
@@ -514,8 +519,8 @@ public class PackageWatchdog {
                                 maybeExecute(currentObserverToNotify, versionedPackage,
                                         failureReason, currentObserverImpact, mitigationCount);
                             } else {
-                                currentObserverToNotify.execute(versionedPackage,
-                                        failureReason, mitigationCount);
+                                currentObserverToNotify.onExecuteHealthCheckMitigation(
+                                        versionedPackage, failureReason, mitigationCount);
                             }
                         }
                     }
@@ -550,7 +555,8 @@ public class PackageWatchdog {
                 maybeExecute(currentObserverToNotify, failingPackage, failureReason,
                         currentObserverImpact, /*mitigationCount=*/ 1);
             } else {
-                currentObserverToNotify.execute(failingPackage,  failureReason, 1);
+                currentObserverToNotify.onExecuteHealthCheckMitigation(failingPackage,
+                        failureReason, 1);
             }
         }
     }
@@ -564,7 +570,8 @@ public class PackageWatchdog {
             synchronized (mLock) {
                 mLastMitigation = mSystemClock.uptimeMillis();
             }
-            currentObserverToNotify.execute(versionedPackage, failureReason, mitigationCount);
+            currentObserverToNotify.onExecuteHealthCheckMitigation(versionedPackage, failureReason,
+                    mitigationCount);
         }
     }
 
@@ -626,12 +633,12 @@ public class PackageWatchdog {
                         currentObserverInternal.setBootMitigationCount(
                                 currentObserverMitigationCount);
                         saveAllObserversBootMitigationCountToMetadata(METADATA_FILE);
-                        currentObserverToNotify.executeBootLoopMitigation(
+                        currentObserverToNotify.onExecuteBootLoopMitigation(
                                 currentObserverMitigationCount);
                     } else {
                         mBootThreshold.setMitigationCount(mitigationCount);
                         mBootThreshold.saveMitigationCountToMetadata();
-                        currentObserverToNotify.executeBootLoopMitigation(mitigationCount);
+                        currentObserverToNotify.onExecuteBootLoopMitigation(mitigationCount);
                     }
                 }
             }
@@ -717,7 +724,9 @@ public class PackageWatchdog {
         return mPackagesExemptFromImpactLevelThreshold;
     }
 
-    /** Possible severity values of the user impact of a {@link PackageHealthObserver#execute}.
+    /**
+     * Possible severity values of the user impact of a
+     * {@link PackageHealthObserver#onExecuteHealthCheckMitigation}.
      * @hide
      */
     @Retention(SOURCE)
@@ -753,6 +762,7 @@ public class PackageWatchdog {
     }
 
     /** Register instances of this interface to receive notifications on package failure. */
+    @SuppressLint({"CallbackName"})
     public interface PackageHealthObserver {
         /**
          * Called when health check fails for the {@code versionedPackage}.
@@ -765,7 +775,7 @@ public class PackageWatchdog {
          *
          *
          * @return any one of {@link PackageHealthObserverImpact} to express the impact
-         * to the user on {@link #execute}
+         * to the user on {@link #onExecuteHealthCheckMitigation}
          */
         @PackageHealthObserverImpact int onHealthCheckFailed(
                 @Nullable VersionedPackage versionedPackage,
@@ -773,7 +783,10 @@ public class PackageWatchdog {
                 int mitigationCount);
 
         /**
-         * Executes mitigation for {@link #onHealthCheckFailed}.
+         * This would be called after {@link #onHealthCheckFailed}.
+         * This is called only if current observer returned least
+         * {@link PackageHealthObserverImpact} mitigation for failed health
+         * check.
          *
          * @param versionedPackage the package that is failing. This may be null if a native
          *                          service is crashing.
@@ -782,7 +795,7 @@ public class PackageWatchdog {
          *                        (including this time).
          * @return {@code true} if action was executed successfully, {@code false} otherwise
          */
-        boolean execute(@Nullable VersionedPackage versionedPackage,
+        boolean onExecuteHealthCheckMitigation(@Nullable VersionedPackage versionedPackage,
                 @FailureReasons int failureReason, int mitigationCount);
 
 
@@ -798,11 +811,14 @@ public class PackageWatchdog {
         }
 
         /**
-         * Executes mitigation for {@link #onBootLoop}
+         * This would be called after {@link #onBootLoop}.
+         * This is called only if current observer returned least
+         * {@link PackageHealthObserverImpact} mitigation for fixing boot loop
+         *
          * @param mitigationCount the number of times mitigation has been attempted for this
          *                        boot loop (including this time).
          */
-        default boolean executeBootLoopMitigation(int mitigationCount) {
+        default boolean onExecuteBootLoopMitigation(int mitigationCount) {
             return false;
         }
 
@@ -1083,7 +1099,7 @@ public class PackageWatchdog {
                         if (versionedPkg != null) {
                             Slog.i(TAG,
                                     "Explicit health check failed for package " + versionedPkg);
-                            registeredObserver.execute(versionedPkg,
+                            registeredObserver.onExecuteHealthCheckMitigation(versionedPkg,
                                     PackageWatchdog.FAILURE_REASON_EXPLICIT_HEALTH_CHECK, 1);
                         }
                     }

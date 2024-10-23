@@ -440,6 +440,10 @@ public class PreferencesHelper implements RankingConfig {
             PackagePreferences r) {
         try {
             String id = parser.getAttributeValue(null, ATT_ID);
+            if (!notificationClassification() && SYSTEM_RESERVED_IDS.contains(id)) {
+                // delete bundle channels if flag is rolled back
+                return;
+            }
             String channelName = parser.getAttributeValue(null, ATT_NAME);
             int channelImportance = parser.getAttributeInt(
                     null, ATT_IMPORTANCE, DEFAULT_IMPORTANCE);

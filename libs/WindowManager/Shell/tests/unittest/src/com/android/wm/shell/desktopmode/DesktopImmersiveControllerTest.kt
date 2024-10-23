@@ -15,6 +15,7 @@
  */
 package com.android.wm.shell.desktopmode
 
+import android.app.ActivityManager.RunningTaskInfo
 import android.app.WindowConfiguration.WINDOW_CONFIG_BOUNDS
 import android.graphics.Rect
 import android.os.Binder
@@ -58,13 +59,13 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
 /**
- * Tests for [DesktopFullImmersiveTransitionHandler].
+ * Tests for [DesktopImmersiveController].
  *
- * Usage: atest WMShellUnitTests:DesktopFullImmersiveTransitionHandlerTest
+ * Usage: atest WMShellUnitTests:DesktopImmersiveControllerTest
  */
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
-class DesktopFullImmersiveTransitionHandlerTest : ShellTestCase() {
+class DesktopImmersiveControllerTest : ShellTestCase() {
 
     @JvmField @Rule val setFlagsRule = SetFlagsRule()
 
@@ -75,7 +76,7 @@ class DesktopFullImmersiveTransitionHandlerTest : ShellTestCase() {
     @Mock private lateinit var mockDisplayLayout: DisplayLayout
     private val transactionSupplier = { SurfaceControl.Transaction() }
 
-    private lateinit var immersiveHandler: DesktopFullImmersiveTransitionHandler
+    private lateinit var controller: DesktopImmersiveController
 
     @Before
     fun setUp() {
@@ -87,7 +88,7 @@ class DesktopFullImmersiveTransitionHandlerTest : ShellTestCase() {
         whenever(mockDisplayLayout.getStableBounds(any())).thenAnswer { invocation ->
             (invocation.getArgument(0) as Rect).set(STABLE_BOUNDS)
         }
-        immersiveHandler = DesktopFullImmersiveTransitionHandler(
+        controller = DesktopImmersiveController(
             transitions = mockTransitions,
             desktopRepository = desktopRepository,
             displayController = mockDisplayController,
@@ -100,7 +101,7 @@ class DesktopFullImmersiveTransitionHandlerTest : ShellTestCase() {
     fun enterImmersive_transitionReady_updatesRepository() {
         val task = createFreeformTask()
         val mockBinder = mock(IBinder::class.java)
-        whenever(mockTransitions.startTransition(eq(TRANSIT_CHANGE), any(), eq(immersiveHandler)))
+        whenever(mockTransitions.startTransition(eq(TRANSIT_CHANGE), any(), eq(controller)))
             .thenReturn(mockBinder)
         desktopRepository.setTaskInFullImmersiveState(
             displayId = task.displayId,
@@ -108,16 +109,14 @@ class DesktopFullImmersiveTransitionHandlerTest : ShellTestCase() {
             immersive = false
         )
 
-        immersiveHandler.moveTaskToImmersive(task)
-        immersiveHandler.onTransitionReady(
+        controller.moveTaskToImmersive(task)
+        controller.onTransitionReady(
             transition = mockBinder,
             info = createTransitionInfo(
-                changes = listOf(
-                    TransitionInfo.Change(task.token, SurfaceControl()).apply {
-                        taskInfo = task
-                    }
-                )
-            )
+                changes = listOf(createChange(task))
+            ),
+            startTransaction = SurfaceControl.Transaction(),
+            finishTransaction = SurfaceControl.Transaction(),
         )
 
         assertThat(desktopRepository.isTaskInFullImmersiveState(task.taskId)).isTrue()
@@ -128,7 +127,7 @@ class DesktopFullImmersiveTransitionHandlerTest : ShellTestCase() {
     fun enterImmersive_savesPreImmersiveBounds() {
         val task = createFreeformTask()
         val mockBinder = mock(IBinder::class.java)
-        whenever(mockTransitions.startTransition(eq(TRANSIT_CHANGE), any(), eq(immersiveHandler)))
+        whenever(mockTransitions.startTransition(eq(TRANSIT_CHANGE), any(), eq(controller)))
             .thenReturn(mockBinder)
         desktopRepository.setTaskInFullImmersiveState(
             displayId = task.displayId,
@@ -137,16 +136,14 @@ class DesktopFullImmersiveTransitionHandlerTest : ShellTestCase() {
         )
         assertThat(desktopRepository.removeBoundsBeforeFullImmersive(task.taskId)).isNull()
 
-        immersiveHandler.moveTaskToImmersive(task)
-        immersiveHandler.onTransitionReady(
+        controller.moveTaskToImmersive(task)
+        controller.onTransitionReady(
             transition = mockBinder,
             info = createTransitionInfo(
-                changes = listOf(
-                    TransitionInfo.Change(task.token, SurfaceControl()).apply {
-                        taskInfo = task
-                    }
-                )
-            )
+                changes = listOf(createChange(task))
+            ),
+            startTransaction = SurfaceControl.Transaction(),
+            finishTransaction = SurfaceControl.Transaction(),
         )
 
         assertThat(desktopRepository.removeBoundsBeforeFullImmersive(task.taskId)).isNotNull()
@@ -156,7 +153,7 @@ class DesktopFullImmersiveTransitionHandlerTest : ShellTestCase() {
     fun exitImmersive_transitionReady_updatesRepository() {
         val task = createFreeformTask()
         val mockBinder = mock(IBinder::class.java)
-        whenever(mockTransitions.startTransition(eq(TRANSIT_CHANGE), any(), eq(immersiveHandler)))
+        whenever(mockTransitions.startTransition(eq(TRANSIT_CHANGE), any(), eq(controller)))
             .thenReturn(mockBinder)
         desktopRepository.setTaskInFullImmersiveState(
             displayId = task.displayId,
@@ -164,16 +161,14 @@ class DesktopFullImmersiveTransitionHandlerTest : ShellTestCase() {
             immersive = true
         )
 
-        immersiveHandler.moveTaskToNonImmersive(task)
-        immersiveHandler.onTransitionReady(
+        controller.moveTaskToNonImmersive(task)
+        controller.onTransitionReady(
             transition = mockBinder,
             info = createTransitionInfo(
-                changes = listOf(
-                    TransitionInfo.Change(task.token, SurfaceControl()).apply {
-                        taskInfo = task
-                    }
-                )
-            )
+                changes = listOf(createChange(task))
+            ),
+            startTransaction = SurfaceControl.Transaction(),
+            finishTransaction = SurfaceControl.Transaction(),
         )
 
         assertThat(desktopRepository.isTaskInFullImmersiveState(task.taskId)).isFalse()
@@ -184,7 +179,7 @@ class DesktopFullImmersiveTransitionHandlerTest : ShellTestCase() {
     fun exitImmersive_onTransitionReady_removesBoundsBeforeImmersive() {
         val task = createFreeformTask()
         val mockBinder = mock(IBinder::class.java)
-        whenever(mockTransitions.startTransition(eq(TRANSIT_CHANGE), any(), eq(immersiveHandler)))
+        whenever(mockTransitions.startTransition(eq(TRANSIT_CHANGE), any(), eq(controller)))
             .thenReturn(mockBinder)
         desktopRepository.setTaskInFullImmersiveState(
             displayId = task.displayId,
@@ -193,16 +188,14 @@ class DesktopFullImmersiveTransitionHandlerTest : ShellTestCase() {
         )
         desktopRepository.saveBoundsBeforeFullImmersive(task.taskId, Rect(100, 100, 600, 600))
 
-        immersiveHandler.moveTaskToNonImmersive(task)
-        immersiveHandler.onTransitionReady(
+        controller.moveTaskToNonImmersive(task)
+        controller.onTransitionReady(
             transition = mockBinder,
             info = createTransitionInfo(
-                changes = listOf(
-                    TransitionInfo.Change(task.token, SurfaceControl()).apply {
-                        taskInfo = task
-                    }
-                )
-            )
+                changes = listOf(createChange(task))
+            ),
+            startTransaction = SurfaceControl.Transaction(),
+            finishTransaction = SurfaceControl.Transaction(),
         )
 
         assertThat(desktopRepository.removeBoundsBeforeMaximize(task.taskId)).isNull()
@@ -217,16 +210,15 @@ class DesktopFullImmersiveTransitionHandlerTest : ShellTestCase() {
             immersive = true
         )
 
-        immersiveHandler.onTransitionReady(
+        controller.onTransitionReady(
             transition = mock(IBinder::class.java),
             info = createTransitionInfo(
-                changes = listOf(
-                    TransitionInfo.Change(task.token, SurfaceControl()).apply {
-                        taskInfo = task
-                        setRotation(/* start= */ Surface.ROTATION_0, /* end= */ Surface.ROTATION_90)
-                    }
-                )
-            )
+                changes = listOf(createChange(task).apply {
+                    setRotation(/* start= */ Surface.ROTATION_0, /* end= */ Surface.ROTATION_90)
+                })
+            ),
+            startTransaction = SurfaceControl.Transaction(),
+            finishTransaction = SurfaceControl.Transaction(),
         )
 
         assertThat(desktopRepository.isTaskInFullImmersiveState(task.taskId)).isFalse()
@@ -236,28 +228,28 @@ class DesktopFullImmersiveTransitionHandlerTest : ShellTestCase() {
     fun enterImmersive_inProgress_ignores() {
         val task = createFreeformTask()
         val mockBinder = mock(IBinder::class.java)
-        whenever(mockTransitions.startTransition(eq(TRANSIT_CHANGE), any(), eq(immersiveHandler)))
+        whenever(mockTransitions.startTransition(eq(TRANSIT_CHANGE), any(), eq(controller)))
             .thenReturn(mockBinder)
 
-        immersiveHandler.moveTaskToImmersive(task)
-        immersiveHandler.moveTaskToImmersive(task)
+        controller.moveTaskToImmersive(task)
+        controller.moveTaskToImmersive(task)
 
         verify(mockTransitions, times(1))
-            .startTransition(eq(TRANSIT_CHANGE), any(), eq(immersiveHandler))
+            .startTransition(eq(TRANSIT_CHANGE), any(), eq(controller))
     }
 
     @Test
     fun exitImmersive_inProgress_ignores() {
         val task = createFreeformTask()
         val mockBinder = mock(IBinder::class.java)
-        whenever(mockTransitions.startTransition(eq(TRANSIT_CHANGE), any(), eq(immersiveHandler)))
+        whenever(mockTransitions.startTransition(eq(TRANSIT_CHANGE), any(), eq(controller)))
             .thenReturn(mockBinder)
 
-        immersiveHandler.moveTaskToNonImmersive(task)
-        immersiveHandler.moveTaskToNonImmersive(task)
+        controller.moveTaskToNonImmersive(task)
+        controller.moveTaskToNonImmersive(task)
 
         verify(mockTransitions, times(1))
-            .startTransition(eq(TRANSIT_CHANGE), any(), eq(immersiveHandler))
+            .startTransition(eq(TRANSIT_CHANGE), any(), eq(controller))
     }
 
     @Test
@@ -273,9 +265,9 @@ class DesktopFullImmersiveTransitionHandlerTest : ShellTestCase() {
             immersive = true
         )
 
-        immersiveHandler.exitImmersiveIfApplicable(transition, wct, DEFAULT_DISPLAY)
+        controller.exitImmersiveIfApplicable(transition, wct, DEFAULT_DISPLAY)
 
-        assertThat(immersiveHandler.pendingExternalExitTransitions.any { exit ->
+        assertThat(controller.pendingExternalExitTransitions.any { exit ->
             exit.transition == transition && exit.displayId == DEFAULT_DISPLAY
                     && exit.taskId == task.taskId
         }).isTrue()
@@ -294,9 +286,9 @@ class DesktopFullImmersiveTransitionHandlerTest : ShellTestCase() {
             immersive = false
         )
 
-        immersiveHandler.exitImmersiveIfApplicable(transition, wct, DEFAULT_DISPLAY)
+        controller.exitImmersiveIfApplicable(transition, wct, DEFAULT_DISPLAY)
 
-        assertThat(immersiveHandler.pendingExternalExitTransitions.any { exit ->
+        assertThat(controller.pendingExternalExitTransitions.any { exit ->
             exit.transition == transition && exit.displayId == DEFAULT_DISPLAY
                     && exit.taskId == task.taskId
         }).isFalse()
@@ -315,7 +307,7 @@ class DesktopFullImmersiveTransitionHandlerTest : ShellTestCase() {
             immersive = true
         )
 
-        immersiveHandler.exitImmersiveIfApplicable(transition, wct, DEFAULT_DISPLAY)
+        controller.exitImmersiveIfApplicable(transition, wct, DEFAULT_DISPLAY)
 
         assertThat(wct.hasBoundsChange(task.token)).isTrue()
     }
@@ -333,9 +325,34 @@ class DesktopFullImmersiveTransitionHandlerTest : ShellTestCase() {
             immersive = false
         )
 
-        immersiveHandler.exitImmersiveIfApplicable(transition, wct, DEFAULT_DISPLAY)
+        controller.exitImmersiveIfApplicable(transition, wct, DEFAULT_DISPLAY)
 
         assertThat(wct.hasBoundsChange(task.token)).isFalse()
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_FULLY_IMMERSIVE_IN_DESKTOP)
+    fun exitImmersiveIfApplicable_byDisplay_withExcludeTask_doesNotExit() {
+        val task = createFreeformTask()
+        whenever(mockShellTaskOrganizer.getRunningTaskInfo(task.taskId)).thenReturn(task)
+        val wct = WindowContainerTransaction()
+        val transition = Binder()
+        desktopRepository.setTaskInFullImmersiveState(
+            displayId = DEFAULT_DISPLAY,
+            taskId = task.taskId,
+            immersive = true
+        )
+
+        controller.exitImmersiveIfApplicable(
+            wct = wct,
+            displayId = DEFAULT_DISPLAY,
+            excludeTaskId = task.taskId
+        )?.invoke(transition)
+
+        assertThat(controller.pendingExternalExitTransitions.any { exit ->
+            exit.transition == transition && exit.displayId == DEFAULT_DISPLAY
+                    && exit.taskId == task.taskId
+        }).isFalse()
     }
 
     @Test
@@ -350,7 +367,7 @@ class DesktopFullImmersiveTransitionHandlerTest : ShellTestCase() {
             immersive = true
         )
 
-        immersiveHandler.exitImmersiveIfApplicable(wct = wct, taskInfo = task)
+        controller.exitImmersiveIfApplicable(wct = wct, taskInfo = task)
 
         assertThat(wct.hasBoundsChange(task.token)).isTrue()
     }
@@ -367,7 +384,7 @@ class DesktopFullImmersiveTransitionHandlerTest : ShellTestCase() {
             immersive = false
         )
 
-        immersiveHandler.exitImmersiveIfApplicable(wct, task)
+        controller.exitImmersiveIfApplicable(wct, task)
 
         assertThat(wct.hasBoundsChange(task.token)).isFalse()
     }
@@ -385,9 +402,9 @@ class DesktopFullImmersiveTransitionHandlerTest : ShellTestCase() {
             immersive = true
         )
 
-        immersiveHandler.exitImmersiveIfApplicable(wct, task)?.invoke(transition)
+        controller.exitImmersiveIfApplicable(wct, task)?.invoke(transition)
 
-        assertThat(immersiveHandler.pendingExternalExitTransitions.any { exit ->
+        assertThat(controller.pendingExternalExitTransitions.any { exit ->
             exit.transition == transition && exit.displayId == DEFAULT_DISPLAY
                     && exit.taskId == task.taskId
         }).isTrue()
@@ -406,9 +423,9 @@ class DesktopFullImmersiveTransitionHandlerTest : ShellTestCase() {
             immersive = false
         )
 
-        immersiveHandler.exitImmersiveIfApplicable(wct, task)?.invoke(transition)
+        controller.exitImmersiveIfApplicable(wct, task)?.invoke(transition)
 
-        assertThat(immersiveHandler.pendingExternalExitTransitions.any { exit ->
+        assertThat(controller.pendingExternalExitTransitions.any { exit ->
             exit.transition == transition && exit.displayId == DEFAULT_DISPLAY
                     && exit.taskId == task.taskId
         }).isFalse()
@@ -416,7 +433,7 @@ class DesktopFullImmersiveTransitionHandlerTest : ShellTestCase() {
 
     @Test
     @EnableFlags(Flags.FLAG_ENABLE_FULLY_IMMERSIVE_IN_DESKTOP)
-    fun onTransitionReady_pendingExit_removesPendingExit() {
+    fun onTransitionReady_pendingExit_removesPendingExitOnFinish() {
         val task = createFreeformTask()
         whenever(mockShellTaskOrganizer.getRunningTaskInfo(task.taskId)).thenReturn(task)
         val wct = WindowContainerTransaction()
@@ -426,19 +443,56 @@ class DesktopFullImmersiveTransitionHandlerTest : ShellTestCase() {
             taskId = task.taskId,
             immersive = true
         )
-        immersiveHandler.exitImmersiveIfApplicable(transition, wct, DEFAULT_DISPLAY)
+        controller.exitImmersiveIfApplicable(transition, wct, DEFAULT_DISPLAY)
 
-        immersiveHandler.onTransitionReady(
+        controller.onTransitionReady(
             transition = transition,
             info = createTransitionInfo(
-                changes = listOf(
-                    TransitionInfo.Change(task.token, SurfaceControl()).apply { taskInfo = task }
-                )
-            )
+                changes = listOf(createChange(task))
+            ),
+            startTransaction = SurfaceControl.Transaction(),
+            finishTransaction = SurfaceControl.Transaction(),
         )
+        controller.onTransitionFinished(transition, aborted = false)
 
-        assertThat(immersiveHandler.pendingExternalExitTransitions.any { exit ->
+        assertThat(controller.pendingExternalExitTransitions.any { exit ->
             exit.transition == transition && exit.displayId == DEFAULT_DISPLAY
+                    && exit.taskId == task.taskId
+        }).isFalse()
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_FULLY_IMMERSIVE_IN_DESKTOP)
+    fun onTransitionReady_pendingExit_withMerge_removesPendingExitOnFinish() {
+        val task = createFreeformTask()
+        whenever(mockShellTaskOrganizer.getRunningTaskInfo(task.taskId)).thenReturn(task)
+        val wct = WindowContainerTransaction()
+        val transition = Binder()
+        val mergedToTransition = Binder()
+        desktopRepository.setTaskInFullImmersiveState(
+            displayId = DEFAULT_DISPLAY,
+            taskId = task.taskId,
+            immersive = true
+        )
+        controller.exitImmersiveIfApplicable(transition, wct, DEFAULT_DISPLAY)
+
+        controller.onTransitionReady(
+            transition = transition,
+            info = createTransitionInfo(
+                changes = listOf(createChange(task))
+            ),
+            startTransaction = SurfaceControl.Transaction(),
+            finishTransaction = SurfaceControl.Transaction(),
+        )
+        controller.onTransitionMerged(transition, mergedToTransition)
+        controller.onTransitionFinished(mergedToTransition, aborted = false)
+
+        assertThat(controller.pendingExternalExitTransitions.any { exit ->
+            exit.transition == transition && exit.displayId == DEFAULT_DISPLAY
+                    && exit.taskId == task.taskId
+        }).isFalse()
+        assertThat(controller.pendingExternalExitTransitions.any { exit ->
+            exit.transition == mergedToTransition && exit.displayId == DEFAULT_DISPLAY
                     && exit.taskId == task.taskId
         }).isFalse()
     }
@@ -455,15 +509,15 @@ class DesktopFullImmersiveTransitionHandlerTest : ShellTestCase() {
             taskId = task.taskId,
             immersive = true
         )
-        immersiveHandler.exitImmersiveIfApplicable(transition, wct, DEFAULT_DISPLAY)
+        controller.exitImmersiveIfApplicable(transition, wct, DEFAULT_DISPLAY)
 
-        immersiveHandler.onTransitionReady(
+        controller.onTransitionReady(
             transition = transition,
             info = createTransitionInfo(
-                changes = listOf(
-                    TransitionInfo.Change(task.token, SurfaceControl()).apply { taskInfo = task }
-                )
-            )
+                changes = listOf(createChange(task))
+            ),
+            startTransaction = SurfaceControl.Transaction(),
+            finishTransaction = SurfaceControl.Transaction(),
         )
 
         assertThat(desktopRepository.isTaskInFullImmersiveState(task.taskId)).isFalse()
@@ -485,15 +539,15 @@ class DesktopFullImmersiveTransitionHandlerTest : ShellTestCase() {
             immersive = true
         )
         desktopRepository.saveBoundsBeforeFullImmersive(task.taskId, Rect(100, 100, 600, 600))
-        immersiveHandler.exitImmersiveIfApplicable(transition, wct, DEFAULT_DISPLAY)
+        controller.exitImmersiveIfApplicable(transition, wct, DEFAULT_DISPLAY)
 
-        immersiveHandler.onTransitionReady(
+        controller.onTransitionReady(
             transition = transition,
             info = createTransitionInfo(
-                changes = listOf(
-                    TransitionInfo.Change(task.token, SurfaceControl()).apply { taskInfo = task }
-                )
-            )
+                changes = listOf(createChange(task))
+            ),
+            startTransaction = SurfaceControl.Transaction(),
+            finishTransaction = SurfaceControl.Transaction(),
         )
 
         assertThat(desktopRepository.removeBoundsBeforeMaximize(task.taskId)).isNull()
@@ -512,7 +566,7 @@ class DesktopFullImmersiveTransitionHandlerTest : ShellTestCase() {
             immersive = true
         )
 
-        immersiveHandler.exitImmersiveIfApplicable(wct = wct, taskInfo = task)
+        controller.exitImmersiveIfApplicable(wct = wct, taskInfo = task)
 
         assertThat(
             wct.hasBoundsChange(task.token, calculateMaximizeBounds(mockDisplayLayout, task))
@@ -536,7 +590,7 @@ class DesktopFullImmersiveTransitionHandlerTest : ShellTestCase() {
         val preImmersiveBounds = Rect(100, 100, 500, 500)
         desktopRepository.saveBoundsBeforeFullImmersive(task.taskId, preImmersiveBounds)
 
-        immersiveHandler.exitImmersiveIfApplicable(wct = wct, taskInfo = task)
+        controller.exitImmersiveIfApplicable(wct = wct, taskInfo = task)
 
         assertThat(
             wct.hasBoundsChange(task.token, preImmersiveBounds)
@@ -559,7 +613,7 @@ class DesktopFullImmersiveTransitionHandlerTest : ShellTestCase() {
             immersive = true
         )
 
-        immersiveHandler.exitImmersiveIfApplicable(wct = wct, taskInfo = task)
+        controller.exitImmersiveIfApplicable(wct = wct, taskInfo = task)
 
         assertThat(
             wct.hasBoundsChange(task.token, calculateInitialBounds(mockDisplayLayout, task))
@@ -577,11 +631,30 @@ class DesktopFullImmersiveTransitionHandlerTest : ShellTestCase() {
             taskId = task.taskId,
             immersive = true
         )
-        immersiveHandler.exitImmersiveIfApplicable(wct, task)?.invoke(Binder())
+        controller.exitImmersiveIfApplicable(wct, task)?.invoke(Binder())
 
-        immersiveHandler.moveTaskToNonImmersive(task)
+        controller.moveTaskToNonImmersive(task)
 
         verify(mockTransitions, never()).startTransition(any(), any(), any())
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_FULLY_IMMERSIVE_IN_DESKTOP)
+    fun exitImmersiveIfApplicable_inImmersive_isImmersiveChange() {
+        val task = createFreeformTask()
+        whenever(mockShellTaskOrganizer.getRunningTaskInfo(task.taskId)).thenReturn(task)
+        val wct = WindowContainerTransaction()
+        val transition = Binder()
+        val change = createChange(task)
+        desktopRepository.setTaskInFullImmersiveState(
+            displayId = DEFAULT_DISPLAY,
+            taskId = task.taskId,
+            immersive = true
+        )
+
+        controller.exitImmersiveIfApplicable(transition, wct, DEFAULT_DISPLAY)
+
+        assertThat(controller.isImmersiveChange(transition, change)).isTrue()
     }
 
     private fun createTransitionInfo(
@@ -591,6 +664,11 @@ class DesktopFullImmersiveTransitionHandlerTest : ShellTestCase() {
     ): TransitionInfo = TransitionInfo(type, flags).apply {
         changes.forEach { change -> addChange(change) }
     }
+
+    private fun createChange(task: RunningTaskInfo): TransitionInfo.Change =
+        TransitionInfo.Change(task.token, SurfaceControl()).apply {
+            taskInfo = task
+        }
 
     private fun WindowContainerTransaction.hasBoundsChange(token: WindowContainerToken): Boolean =
         this.changes.any { change ->

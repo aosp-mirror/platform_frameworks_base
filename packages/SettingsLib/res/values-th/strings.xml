@@ -357,6 +357,8 @@
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"เปิดใช้ฟีเจอร์การเชื่อมต่อที่ปรับปรุงแล้ว"</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"เทอร์มินัลในตัวเครื่อง"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"เปิดใช้งานแอปเทอร์มินัลที่ให้การเข้าถึงเชลล์ในตัวเครื่อง"</string>
+    <string name="enable_linux_terminal_title" msgid="5076044866895670637">"สภาพแวดล้อมในการพัฒนาซอฟต์แวร์ Linux"</string>
+    <string name="enable_linux_terminal_summary" msgid="5893216510985145320">"เรียกใช้เทอร์มินัล Linux บน Android"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"การตรวจสอบ HDCP"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"ตั้งค่าการตรวจสอบ HDCP"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"การแก้ไขข้อบกพร่อง"</string>
@@ -686,11 +688,9 @@
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"เปิดใช้"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"คุณต้องรีบูตอุปกรณ์เพื่อให้การเปลี่ยนแปลงนี้มีผล รีบูตเลยหรือยกเลิก"</string>
     <string name="media_transfer_wired_headphone_name" msgid="8698668536022665254">"หูฟังแบบใช้สาย"</string>
-    <!-- no translation found for media_transfer_headphone_name (1157798825650178478) -->
-    <skip />
+    <string name="media_transfer_headphone_name" msgid="1157798825650178478">"หูฟังแบบใช้สาย"</string>
     <string name="media_transfer_usb_audio_name" msgid="1789292056757821355">"เสียง USB"</string>
-    <!-- no translation found for media_transfer_wired_device_mic_name (7115192790725088698) -->
-    <skip />
+    <string name="media_transfer_wired_device_mic_name" msgid="7115192790725088698">"ไมโครโฟนแบบใช้สาย"</string>
     <string name="media_transfer_usb_device_mic_name" msgid="7171789543226269822">"ไมโครโฟน USB"</string>
     <string name="media_transfer_bt_device_mic_name" msgid="1870669402238687618">"ไมโครโฟน BT"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"เปิด"</string>

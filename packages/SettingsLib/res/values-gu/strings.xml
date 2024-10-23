@@ -357,6 +357,10 @@
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"કનેક્ટિવિટીની વિસ્તૃત સુવિધા ચાલુ કરે છે."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"સ્થાનિક ટર્મિનલ"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"સ્થાનિક શેલ અ‍ૅક્સેસની ઑફર કરતી ટર્મિનલ એપ્લિકેશનને સક્ષમ કરો"</string>
+    <!-- no translation found for enable_linux_terminal_title (5076044866895670637) -->
+    <skip />
+    <!-- no translation found for enable_linux_terminal_summary (5893216510985145320) -->
+    <skip />
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP તપાસણી"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"HDCP તપાસણીની વર્તણૂક બદલો"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"ડીબગિંગ"</string>
@@ -686,11 +690,9 @@
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"ચાલુ છે"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"આ ફેરફારને લાગુ કરવા માટે તમારા ડિવાઇસને રીબૂટ કરવાની જરૂર છે. હમણાં જ રીબૂટ કરો કે રદ કરો."</string>
     <string name="media_transfer_wired_headphone_name" msgid="8698668536022665254">"વાયરવાળો હૅડફોન"</string>
-    <!-- no translation found for media_transfer_headphone_name (1157798825650178478) -->
-    <skip />
+    <string name="media_transfer_headphone_name" msgid="1157798825650178478">"વાયર્ડ ઑડિયો"</string>
     <string name="media_transfer_usb_audio_name" msgid="1789292056757821355">"USB ઑડિયો"</string>
-    <!-- no translation found for media_transfer_wired_device_mic_name (7115192790725088698) -->
-    <skip />
+    <string name="media_transfer_wired_device_mic_name" msgid="7115192790725088698">"વાયર્ડ માઇક્રોફોન"</string>
     <string name="media_transfer_usb_device_mic_name" msgid="7171789543226269822">"USB માઇક્રોફોન"</string>
     <string name="media_transfer_bt_device_mic_name" msgid="1870669402238687618">"BT માઇક્રોફોન"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"ચાલુ"</string>

@@ -33,8 +33,6 @@ import com.android.systemui.qs.panels.ui.compose.GridLayout
 import com.android.systemui.qs.panels.ui.compose.PaginatableGridLayout
 import com.android.systemui.qs.panels.ui.compose.PaginatedGridLayout
 import com.android.systemui.qs.panels.ui.compose.infinitegrid.InfiniteGridLayout
-import com.android.systemui.qs.panels.ui.viewmodel.IconLabelVisibilityViewModel
-import com.android.systemui.qs.panels.ui.viewmodel.IconLabelVisibilityViewModelImpl
 import com.android.systemui.qs.panels.ui.viewmodel.IconTilesViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.IconTilesViewModelImpl
 import com.android.systemui.qs.panels.ui.viewmodel.QSColumnsSizeViewModelImpl
@@ -61,11 +59,6 @@ interface PanelsModule {
     @Binds fun bindIconTilesViewModel(impl: IconTilesViewModelImpl): IconTilesViewModel
 
     @Binds fun bindQSColumnsViewModel(impl: QSColumnsSizeViewModelImpl): QSColumnsViewModel
-
-    @Binds
-    fun bindIconLabelVisibilityViewModel(
-        impl: IconLabelVisibilityViewModelImpl
-    ): IconLabelVisibilityViewModel
 
     @Binds
     @PaginatedBaseLayoutType
