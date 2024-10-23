@@ -2697,7 +2697,8 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
                 /* velocityAxis= */ MotionEvent.AXIS_Y,
                 /* upperBookendScale= */ 1f,
                 /* lowerBookendScale= */ 0.05f,
-                /* exponent= */ 1f / 0.89f);
+                /* exponent= */ 1f / 0.89f,
+                /* sliderStepSize = */ 0f);
         private static final SeekableSliderTrackerConfig sSliderTrackerConfig =
                 new SeekableSliderTrackerConfig(
                         /* waitTimeMillis= */100,
