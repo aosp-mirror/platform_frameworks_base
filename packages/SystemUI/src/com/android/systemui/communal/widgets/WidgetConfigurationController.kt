@@ -21,8 +21,10 @@ import android.app.ActivityOptions
 import android.content.ActivityNotFoundException
 import android.window.SplashScreen
 import androidx.activity.ComponentActivity
+import com.android.systemui.communal.shared.model.GlanceableHubMultiUserHelper
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.util.nullableAtomicReference
+import dagger.Lazy
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -38,8 +40,9 @@ class WidgetConfigurationController
 @AssistedInject
 constructor(
     @Assisted private val activity: ComponentActivity,
-    private val appWidgetHost: CommunalAppWidgetHost,
-    @Background private val bgDispatcher: CoroutineDispatcher
+    private val appWidgetHostLazy: Lazy<CommunalAppWidgetHost>,
+    @Background private val bgDispatcher: CoroutineDispatcher,
+    private val glanceableHubMultiUserHelper: GlanceableHubMultiUserHelper,
 ) : WidgetConfigurator {
     @AssistedFactory
     fun interface Factory {
@@ -62,13 +65,21 @@ constructor(
                 }
 
             try {
-                appWidgetHost.startAppWidgetConfigureActivityForResult(
-                    activity,
-                    appWidgetId,
-                    0,
-                    REQUEST_CODE,
-                    options.toBundle()
-                )
+                // TODO(b/375036327): Add support for widget configuration
+                if (
+                    !glanceableHubMultiUserHelper.glanceableHubHsumFlagEnabled ||
+                        !glanceableHubMultiUserHelper.isInHeadlessSystemUser()
+                ) {
+                    with(appWidgetHostLazy.get()) {
+                        startAppWidgetConfigureActivityForResult(
+                            activity,
+                            appWidgetId,
+                            0,
+                            REQUEST_CODE,
+                            options.toBundle(),
+                        )
+                    }
+                }
             } catch (e: ActivityNotFoundException) {
                 setConfigurationResult(Activity.RESULT_CANCELED)
             }

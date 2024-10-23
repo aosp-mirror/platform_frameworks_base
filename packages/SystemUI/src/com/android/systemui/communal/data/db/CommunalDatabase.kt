@@ -17,6 +17,7 @@
 package com.android.systemui.communal.data.db
 
 import android.content.Context
+import android.os.Process
 import android.util.Log
 import androidx.annotation.VisibleForTesting
 import androidx.room.Database
@@ -24,6 +25,7 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
+import com.android.systemui.communal.shared.model.GlanceableHubMultiUserHelperImpl
 import com.android.systemui.res.R
 
 @Database(entities = [CommunalWidgetItem::class, CommunalItemRank::class], version = 4)
@@ -44,6 +46,11 @@ abstract class CommunalDatabase : RoomDatabase() {
          *   new instance is created.
          */
         fun getInstance(context: Context, callback: Callback? = null): CommunalDatabase {
+            with(GlanceableHubMultiUserHelperImpl(Process.myUserHandle())) {
+                // Assert that the database is never accessed from a headless system user.
+                assertNotInHeadlessSystemUser()
+            }
+
             if (instance == null) {
                 instance =
                     Room.databaseBuilder(

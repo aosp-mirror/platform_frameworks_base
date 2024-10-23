@@ -23,7 +23,6 @@ import android.content.pm.ApplicationInfo
 import android.graphics.Bitmap
 import android.widget.RemoteViews
 import com.android.systemui.communal.shared.model.CommunalContentSize
-import com.android.systemui.communal.widgets.CommunalAppWidgetHost
 import java.util.UUID
 
 /** Encapsulates data for a communal content. */
@@ -60,7 +59,6 @@ sealed interface CommunalContentModel {
             override val appWidgetId: Int,
             override val rank: Int,
             val providerInfo: AppWidgetProviderInfo,
-            val appWidgetHost: CommunalAppWidgetHost,
             val inQuietMode: Boolean,
             override val size: CommunalContentSize,
         ) : WidgetContent {
