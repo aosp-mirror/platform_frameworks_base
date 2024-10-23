@@ -14,18 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.phone
+package com.android.systemui
 
 import com.android.systemui.kosmos.Kosmos
-import org.mockito.kotlin.mock
 
-val Kosmos.mockStatusBarContentInsetsProvider by
-    Kosmos.Fixture { mock<StatusBarContentInsetsProvider>() }
+val Kosmos.fakeSysUICutoutProviderFactory by Kosmos.Fixture { FakeSysUICutoutProviderFactory() }
 
-var Kosmos.statusBarContentInsetsProvider by Kosmos.Fixture { mockStatusBarContentInsetsProvider }
-
-val Kosmos.fakeStatusBarContentInsetsProviderFactory by
-    Kosmos.Fixture { FakeStatusBarContentInsetsProviderFactory() }
-
-var Kosmos.statusBarContentInsetsProviderFactory: StatusBarContentInsetsProviderImpl.Factory by
-    Kosmos.Fixture { fakeStatusBarContentInsetsProviderFactory }
+var Kosmos.sysUICutoutProviderFactory: SysUICutoutProviderImpl.Factory by
+    Kosmos.Fixture { fakeSysUICutoutProviderFactory }

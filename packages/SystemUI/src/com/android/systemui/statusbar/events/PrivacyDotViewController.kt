@@ -34,6 +34,7 @@ import com.android.systemui.res.R
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.StatusBarState.SHADE
 import com.android.systemui.statusbar.StatusBarState.SHADE_LOCKED
+import com.android.systemui.statusbar.data.repository.StatusBarContentInsetsProviderStore
 import com.android.systemui.statusbar.phone.StatusBarContentInsetsChangedListener
 import com.android.systemui.statusbar.phone.StatusBarContentInsetsProvider
 import com.android.systemui.statusbar.policy.ConfigurationController
@@ -730,8 +731,12 @@ object PrivacyDotViewControllerModule {
         factory: PrivacyDotViewControllerImpl.Factory,
         @Application scope: CoroutineScope,
         configurationController: ConfigurationController,
-        contentInsetsProvider: StatusBarContentInsetsProvider,
+        contentInsetsProviderStore: StatusBarContentInsetsProviderStore,
     ): PrivacyDotViewController {
-        return factory.create(scope, configurationController, contentInsetsProvider)
+        return factory.create(
+            scope,
+            configurationController,
+            contentInsetsProviderStore.defaultDisplay,
+        )
     }
 }

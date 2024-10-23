@@ -16,16 +16,18 @@
 
 package com.android.systemui.statusbar.phone
 
-import com.android.systemui.kosmos.Kosmos
+import android.content.Context
+import com.android.systemui.SysUICutoutProvider
+import com.android.systemui.statusbar.policy.ConfigurationController
 import org.mockito.kotlin.mock
 
-val Kosmos.mockStatusBarContentInsetsProvider by
-    Kosmos.Fixture { mock<StatusBarContentInsetsProvider>() }
+class FakeStatusBarContentInsetsProviderFactory : StatusBarContentInsetsProviderImpl.Factory {
 
-var Kosmos.statusBarContentInsetsProvider by Kosmos.Fixture { mockStatusBarContentInsetsProvider }
-
-val Kosmos.fakeStatusBarContentInsetsProviderFactory by
-    Kosmos.Fixture { FakeStatusBarContentInsetsProviderFactory() }
-
-var Kosmos.statusBarContentInsetsProviderFactory: StatusBarContentInsetsProviderImpl.Factory by
-    Kosmos.Fixture { fakeStatusBarContentInsetsProviderFactory }
+    override fun create(
+        context: Context,
+        configurationController: ConfigurationController,
+        sysUICutoutProvider: SysUICutoutProvider,
+    ): StatusBarContentInsetsProviderImpl {
+        return mock<StatusBarContentInsetsProviderImpl>()
+    }
+}
