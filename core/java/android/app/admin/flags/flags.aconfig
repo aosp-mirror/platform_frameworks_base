@@ -381,3 +381,11 @@ flag {
   description: "Split up existing create and provision managed profile API."
   bug: "375382324"
 }
+
+flag {
+  name: "secondary_lockscreen_api_enabled"
+  is_exported: true
+  namespace: "enterprise"
+  description: "Add new API for secondary lockscreen"
+  bug: "336297680"
+}
