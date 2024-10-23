@@ -357,6 +357,8 @@
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"بہتر کردہ کنیکٹوٹی کی خصوصیات کو فعال کرتا ہے۔"</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"مقامی ٹرمینل"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"مقامی شیل رسائی پیش کرنے والی ٹرمینل ایپ فعال کریں"</string>
+    <string name="enable_linux_terminal_title" msgid="5076044866895670637">"‏‫Linux ڈیولپمنٹ ماحول"</string>
+    <string name="enable_linux_terminal_summary" msgid="5893216510985145320">"‏‫Android پر Linux ٹرمینل چلائیں"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"‏HDCP چیکنگ"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"‏HDCP چیکنگ برتاؤ سیٹ کریں"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"ڈیبگ کرنا"</string>
@@ -686,11 +688,9 @@
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"فعال"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"اس تبدیلی کو لاگو کرنے کے ليے آپ کے آلہ کو ریبوٹ کرنا ضروری ہے۔ ابھی ریبوٹ کریں یا منسوخ کریں۔"</string>
     <string name="media_transfer_wired_headphone_name" msgid="8698668536022665254">"تار والا ہیڈ فون"</string>
-    <!-- no translation found for media_transfer_headphone_name (1157798825650178478) -->
-    <skip />
+    <string name="media_transfer_headphone_name" msgid="1157798825650178478">"تار والا ہیڈ فون"</string>
     <string name="media_transfer_usb_audio_name" msgid="1789292056757821355">"‏‫USB آڈیو"</string>
-    <!-- no translation found for media_transfer_wired_device_mic_name (7115192790725088698) -->
-    <skip />
+    <string name="media_transfer_wired_device_mic_name" msgid="7115192790725088698">"تار والا مائیکروفون"</string>
     <string name="media_transfer_usb_device_mic_name" msgid="7171789543226269822">"‏‫USB مائیکروفون"</string>
     <string name="media_transfer_bt_device_mic_name" msgid="1870669402238687618">"‏‫BT مائیکروفون"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"آن"</string>
