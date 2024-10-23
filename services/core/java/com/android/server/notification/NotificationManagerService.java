@@ -6726,7 +6726,7 @@ public class NotificationManagerService extends SystemService {
             Objects.requireNonNull(pkg);
             Objects.requireNonNull(user);
 
-            verifyPrivilegedListener(token, user, false);
+            verifyPrivilegedListener(token, user, true);
 
             final NotificationChannel originalChannel = mPreferencesHelper.getNotificationChannel(
                     pkg, getUidForPackageAndUser(pkg, user), channel.getId(), true);

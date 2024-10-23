@@ -551,10 +551,10 @@ public final class NotificationChannel implements Parcelable {
         mDeletedTime = time;
     }
 
-    /**
-     * @hide
-     */
+    /** @hide */
     @TestApi
+    @SystemApi
+    @FlaggedApi(FLAG_NOTIFICATION_CONVERSATION_CHANNEL_MANAGEMENT)
     public void setImportantConversation(boolean importantConvo) {
         mImportantConvo = importantConvo;
     }
