@@ -40,7 +40,6 @@ import android.tools.traces.io.ResultWriter;
 import android.tools.traces.monitors.PerfettoTraceMonitor;
 import android.tools.traces.protolog.ProtoLogTrace;
 import android.tracing.perfetto.DataSource;
-import android.util.proto.ProtoInputStream;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 
@@ -74,7 +73,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @SuppressWarnings("ConstantConditions")
 @Presubmit
 @RunWith(JUnit4.class)
-public class PerfettoProtoLogImplTest {
+public class ProcessedPerfettoProtoLogImplTest {
     private static final String TEST_PROTOLOG_DATASOURCE_NAME = "test.android.protolog";
     private static final String MOCK_VIEWER_CONFIG_FILE = "my/mock/viewer/config/file.pb";
     private final File mTracingDirectory = InstrumentationRegistry.getInstrumentation()
@@ -100,7 +99,7 @@ public class PerfettoProtoLogImplTest {
 
     private static ProtoLogViewerConfigReader sReader;
 
-    public PerfettoProtoLogImplTest() throws IOException {
+    public ProcessedPerfettoProtoLogImplTest() throws IOException {
     }
 
     @BeforeClass
@@ -151,7 +150,8 @@ public class PerfettoProtoLogImplTest {
         ViewerConfigInputStreamProvider viewerConfigInputStreamProvider = Mockito.mock(
                 ViewerConfigInputStreamProvider.class);
         Mockito.when(viewerConfigInputStreamProvider.getInputStream())
-                .thenAnswer(it -> new ProtoInputStream(sViewerConfigBuilder.build().toByteArray()));
+                .thenAnswer(it -> new AutoClosableProtoInputStream(
+                        sViewerConfigBuilder.build().toByteArray()));
 
         sCacheUpdater = () -> {};
         sReader = Mockito.spy(new ProtoLogViewerConfigReader(viewerConfigInputStreamProvider));
@@ -165,21 +165,16 @@ public class PerfettoProtoLogImplTest {
                     throw new RuntimeException(
                             "Unexpected viewer config file path provided");
                 }
-                return new ProtoInputStream(sViewerConfigBuilder.build().toByteArray());
+                return new AutoClosableProtoInputStream(sViewerConfigBuilder.build().toByteArray());
             });
         };
         sProtoLogConfigurationService =
                 new ProtoLogConfigurationServiceImpl(dataSourceBuilder, tracer);
 
-        if (android.tracing.Flags.clientSideProtoLogging()) {
-            sProtoLog = new PerfettoProtoLogImpl(
-                    MOCK_VIEWER_CONFIG_FILE, sReader, () -> sCacheUpdater.run(),
-                    TestProtoLogGroup.values(), dataSourceBuilder, sProtoLogConfigurationService);
-        } else {
-            sProtoLog = new PerfettoProtoLogImpl(
-                    viewerConfigInputStreamProvider, sReader, () -> sCacheUpdater.run(),
-                    TestProtoLogGroup.values(), dataSourceBuilder, sProtoLogConfigurationService);
-        }
+        sProtoLog = new ProcessedPerfettoProtoLogImpl(
+                MOCK_VIEWER_CONFIG_FILE, viewerConfigInputStreamProvider, sReader,
+                () -> sCacheUpdater.run(), TestProtoLogGroup.values(), dataSourceBuilder,
+                sProtoLogConfigurationService);
 
         busyWaitForDataSourceRegistration(TEST_PROTOLOG_DATASOURCE_NAME);
     }
@@ -398,18 +393,17 @@ public class PerfettoProtoLogImplTest {
     }
 
     @Test
-    public void log_logcatEnabledNoMessage() {
+    public void log_logcatEnabledNoMessageThrows() {
         when(sReader.getViewerString(anyLong())).thenReturn(null);
         PerfettoProtoLogImpl implSpy = Mockito.spy(sProtoLog);
         TestProtoLogGroup.TEST_GROUP.setLogToLogcat(true);
         TestProtoLogGroup.TEST_GROUP.setLogToProto(false);
 
-        implSpy.log(LogLevel.INFO, TestProtoLogGroup.TEST_GROUP, 1234, 4321,
-                new Object[]{5});
-
-        verify(implSpy).passToLogcat(eq(TestProtoLogGroup.TEST_GROUP.getTag()), eq(
-                LogLevel.INFO), eq("UNKNOWN MESSAGE args = (5)"));
-        verify(sReader).getViewerString(eq(1234L));
+        var assertion = assertThrows(RuntimeException.class, () ->
+                implSpy.log(LogLevel.INFO, TestProtoLogGroup.TEST_GROUP, 1234, 4321,
+                    new Object[]{5}));
+        Truth.assertThat(assertion).hasMessageThat()
+                .contains("Failed to decode message for logcat");
     }
 
     @Test
@@ -539,16 +533,12 @@ public class PerfettoProtoLogImplTest {
         PerfettoTraceMonitor traceMonitor = PerfettoTraceMonitor.newBuilder()
                 .enableProtoLog(TEST_PROTOLOG_DATASOURCE_NAME)
                 .build();
-        long before;
-        long after;
         try {
             traceMonitor.start();
-            before = SystemClock.elapsedRealtimeNanos();
             sProtoLog.log(
                     LogLevel.INFO, TestProtoLogGroup.TEST_GROUP, messageHash,
                     0b01100100,
                     new Object[]{"test", 1, 0.1, true});
-            after = SystemClock.elapsedRealtimeNanos();
         } finally {
             traceMonitor.stop(mWriter);
         }
@@ -606,7 +596,8 @@ public class PerfettoProtoLogImplTest {
         Truth.assertThat(stacktrace).doesNotContain(DataSource.class.getSimpleName() + ".java");
         Truth.assertThat(stacktrace)
                 .doesNotContain(ProtoLogImpl.class.getSimpleName() + ".java");
-        Truth.assertThat(stacktrace).contains(PerfettoProtoLogImplTest.class.getSimpleName());
+        Truth.assertThat(stacktrace)
+                .contains(ProcessedPerfettoProtoLogImplTest.class.getSimpleName());
         Truth.assertThat(stacktrace).contains("stackTraceTrimmed");
     }
 

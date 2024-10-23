@@ -122,7 +122,8 @@ abstract class ManageWindowsViewContainer(
                     snapshot.hardwareBuffer,
                     snapshot.colorSpace
                 )
-                val scaledSnapshotBitmap = snapshotBitmap?.let {
+                val croppedBitmap = snapshotBitmap?.let { cropBitmap(it) }
+                val scaledSnapshotBitmap = croppedBitmap?.let {
                     Bitmap.createScaledBitmap(
                         it, instanceIconWidth.toInt(), instanceIconHeight.toInt(), true /* filter */
                     )
@@ -158,6 +159,35 @@ abstract class ManageWindowsViewContainer(
             // Add margin again for the right/bottom of the menu.
             menuWidth += iconMargin.toInt()
             menuHeight += iconMargin.toInt()
+        }
+
+        private fun cropBitmap(
+            bitmapToCrop: Bitmap
+        ): Bitmap {
+            val ratioToMatch = ICON_WIDTH_DP / ICON_HEIGHT_DP
+            val bitmapWidth = bitmapToCrop.width
+            val bitmapHeight = bitmapToCrop.height
+            if (bitmapWidth > bitmapHeight * ratioToMatch) {
+                // Crop based on height
+                val newWidth = bitmapHeight * ratioToMatch
+                return Bitmap.createBitmap(
+                    bitmapToCrop,
+                    ((bitmapWidth - newWidth) / 2).toInt(),
+                    0,
+                    newWidth.toInt(),
+                    bitmapHeight
+                )
+            } else {
+                // Crop based on width
+                val newHeight = bitmapWidth / ratioToMatch
+                return Bitmap.createBitmap(
+                    bitmapToCrop,
+                    0,
+                    ((bitmapHeight - newHeight) / 2).toInt(),
+                    bitmapWidth,
+                    newHeight.toInt()
+                )
+            }
         }
 
         companion object {

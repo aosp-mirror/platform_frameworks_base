@@ -23,6 +23,7 @@ import static android.view.WindowManagerPolicyConstants.FLAG_INTERACTIVE;
 import static com.android.hardware.input.Flags.useKeyGestureEventHandler;
 import static com.android.hardware.input.Flags.useKeyGestureEventHandlerMultiPressGestures;
 import static com.android.server.flags.Flags.newBugreportKeyboardShortcut;
+import static com.android.window.flags.Flags.enableMoveToNextDisplayShortcut;
 
 import android.annotation.BinderThread;
 import android.annotation.MainThread;
@@ -650,6 +651,18 @@ final class KeyGestureController {
                                 KeyEvent.META_META_ON | KeyEvent.META_ALT_ON,
                                 KeyGestureEvent.KEY_GESTURE_TYPE_CHANGE_SPLITSCREEN_FOCUS_RIGHT,
                                 KeyGestureEvent.ACTION_GESTURE_COMPLETE, displayId,
+                                focusedToken, /* flags = */0);
+                    }
+                }
+                break;
+            case KeyEvent.KEYCODE_D:
+                if (enableMoveToNextDisplayShortcut()) {
+                    if (firstDown && event.isMetaPressed() && event.isCtrlPressed()) {
+                        return handleKeyGesture(deviceId, new int[]{keyCode},
+                                KeyEvent.META_META_ON | KeyEvent.META_CTRL_ON,
+                                KeyGestureEvent.KEY_GESTURE_TYPE_MOVE_TO_NEXT_DISPLAY,
+                                KeyGestureEvent.ACTION_GESTURE_COMPLETE,
+                                displayId,
                                 focusedToken, /* flags = */0);
                     }
                 }

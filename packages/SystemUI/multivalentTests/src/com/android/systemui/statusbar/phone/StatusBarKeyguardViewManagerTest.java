@@ -34,6 +34,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -56,6 +57,7 @@ import android.window.WindowOnBackInvokedDispatcher;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
+import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.internal.util.LatencyTracker;
 import com.android.internal.widget.LockPatternUtils;
@@ -675,8 +677,8 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
         backCallback.onBackProgressed(event);
         verify(mBouncerViewDelegateBackCallback).onBackProgressed(eq(event));
 
-        backCallback.onBackInvoked();
-        verify(mBouncerViewDelegateBackCallback).onBackInvoked();
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(backCallback::onBackInvoked);
+        verify(mBouncerViewDelegateBackCallback, timeout(1000)).onBackInvoked();
 
         backCallback.onBackCancelled();
         verify(mBouncerViewDelegateBackCallback).onBackCancelled();

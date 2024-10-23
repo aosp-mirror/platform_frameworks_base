@@ -27,7 +27,10 @@ import com.android.systemui.inputdevice.tutorial.ui.composable.TutorialScreenCon
 import com.android.systemui.inputdevice.tutorial.ui.composable.rememberColorFilterProperty
 import com.android.systemui.res.R
 import com.android.systemui.touchpad.tutorial.ui.gesture.BackGestureRecognizer
+import com.android.systemui.touchpad.tutorial.ui.gesture.GestureFlowAdapter
 import com.android.systemui.touchpad.tutorial.ui.gesture.GestureRecognizer
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 
 @Composable
 fun BackGestureTutorialScreen(onDoneButtonClicked: () -> Unit, onBack: () -> Unit) {
@@ -41,14 +44,20 @@ fun BackGestureTutorialScreen(onDoneButtonClicked: () -> Unit, onBack: () -> Uni
                     titleSuccessResId = R.string.touchpad_back_gesture_success_title,
                     bodySuccessResId = R.string.touchpad_back_gesture_success_body,
                 ),
-            animations =
-                TutorialScreenConfig.Animations(
-                    educationResId = R.raw.trackpad_back_edu,
-                    successResId = R.raw.trackpad_back_success,
-                ),
+            animations = TutorialScreenConfig.Animations(educationResId = R.raw.trackpad_back_edu),
         )
     val recognizer = rememberBackGestureRecognizer(LocalContext.current.resources)
-    GestureTutorialScreen(screenConfig, recognizer, onDoneButtonClicked, onBack)
+    val gestureUiState: Flow<GestureUiState> =
+        remember(recognizer) {
+            GestureFlowAdapter(recognizer).gestureStateAsFlow.map {
+                it.toGestureUiState(
+                    progressStartMark = "",
+                    progressEndMark = "",
+                    successAnimation = R.raw.trackpad_back_success,
+                )
+            }
+        }
+    GestureTutorialScreen(screenConfig, recognizer, gestureUiState, onDoneButtonClicked, onBack)
 }
 
 @Composable

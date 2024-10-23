@@ -16,11 +16,20 @@
 
 package com.android.wm.shell.desktopmode
 
+import android.app.ActivityManager.RunningTaskInfo
+import android.util.Size
+import android.view.InputDevice.SOURCE_MOUSE
+import android.view.InputDevice.SOURCE_TOUCHSCREEN
+import android.view.MotionEvent
+import android.view.MotionEvent.TOOL_TYPE_FINGER
+import android.view.MotionEvent.TOOL_TYPE_MOUSE
+import android.view.MotionEvent.TOOL_TYPE_STYLUS
 import com.android.internal.annotations.VisibleForTesting
 import com.android.internal.protolog.ProtoLog
 import com.android.internal.util.FrameworkStatsLog
 import com.android.window.flags.Flags
 import com.android.wm.shell.EventLogTags
+import com.android.wm.shell.common.DisplayController
 import com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE
 import java.security.SecureRandom
 import java.util.Random
@@ -176,7 +185,13 @@ class DesktopModeEventLogger {
      * Logs that a task resize event is starting with [taskSizeUpdate] within a Desktop mode
      * session.
      */
-    fun logTaskResizingStarted(taskSizeUpdate: TaskSizeUpdate) {
+    fun logTaskResizingStarted(
+        resizeTrigger: ResizeTrigger,
+        motionEvent: MotionEvent?,
+        taskInfo: RunningTaskInfo,
+        displayController: DisplayController? = null,
+        displayLayoutSize: Size? = null,
+    ) {
         if (!Flags.enableResizingMetrics()) return
 
         val sessionId = currentSessionId.get()
@@ -188,11 +203,19 @@ class DesktopModeEventLogger {
             return
         }
 
+        val taskSizeUpdate = createTaskSizeUpdate(
+            resizeTrigger,
+            motionEvent,
+            taskInfo,
+            displayController = displayController,
+            displayLayoutSize = displayLayoutSize,
+        )
+
         ProtoLog.v(
             WM_SHELL_DESKTOP_MODE,
-            "DesktopModeLogger: Logging task resize is starting, session: %s taskId: %s",
+            "DesktopModeLogger: Logging task resize is starting, session: %s, taskSizeUpdate: %s",
             sessionId,
-            taskSizeUpdate.instanceId
+            taskSizeUpdate
         )
         logTaskSizeUpdated(
             FrameworkStatsLog.DESKTOP_MODE_TASK_SIZE_UPDATED__RESIZING_STAGE__START_RESIZING_STAGE,
@@ -203,7 +226,15 @@ class DesktopModeEventLogger {
     /**
      * Logs that a task resize event is ending with [taskSizeUpdate] within a Desktop mode session.
      */
-    fun logTaskResizingEnded(taskSizeUpdate: TaskSizeUpdate) {
+    fun logTaskResizingEnded(
+        resizeTrigger: ResizeTrigger,
+        motionEvent: MotionEvent?,
+        taskInfo: RunningTaskInfo,
+        taskHeight: Int? = null,
+        taskWidth: Int? = null,
+        displayController: DisplayController? = null,
+        displayLayoutSize: Size? = null,
+    ) {
         if (!Flags.enableResizingMetrics()) return
 
         val sessionId = currentSessionId.get()
@@ -215,15 +246,58 @@ class DesktopModeEventLogger {
             return
         }
 
+        val taskSizeUpdate = createTaskSizeUpdate(
+            resizeTrigger,
+            motionEvent,
+            taskInfo,
+            taskHeight,
+            taskWidth,
+            displayController,
+            displayLayoutSize,
+        )
+
         ProtoLog.v(
             WM_SHELL_DESKTOP_MODE,
-            "DesktopModeLogger: Logging task resize is ending, session: %s taskId: %s",
+            "DesktopModeLogger: Logging task resize is ending, session: %s, taskSizeUpdate: %s",
             sessionId,
-            taskSizeUpdate.instanceId
+            taskSizeUpdate
         )
+
         logTaskSizeUpdated(
             FrameworkStatsLog.DESKTOP_MODE_TASK_SIZE_UPDATED__RESIZING_STAGE__END_RESIZING_STAGE,
             sessionId, taskSizeUpdate
+        )
+    }
+
+    private fun createTaskSizeUpdate(
+        resizeTrigger: ResizeTrigger,
+        motionEvent: MotionEvent?,
+        taskInfo: RunningTaskInfo,
+        taskHeight: Int? = null,
+        taskWidth: Int? = null,
+        displayController: DisplayController? = null,
+        displayLayoutSize: Size? = null,
+    ): TaskSizeUpdate {
+        val taskBounds = taskInfo.configuration.windowConfiguration.bounds
+
+        val height = taskHeight ?: taskBounds.height()
+        val width = taskWidth ?: taskBounds.width()
+
+        val displaySize = when {
+            displayLayoutSize != null -> displayLayoutSize.height * displayLayoutSize.width
+            displayController != null -> displayController.getDisplayLayout(taskInfo.displayId)
+                ?.let { it.height() * it.width() }
+            else -> null
+        }
+
+        return TaskSizeUpdate(
+            resizeTrigger,
+            getInputMethodFromMotionEvent(motionEvent),
+            taskInfo.taskId,
+            taskInfo.effectiveUid,
+            height,
+            width,
+            displaySize,
         )
     }
 
@@ -238,7 +312,8 @@ class DesktopModeEventLogger {
                 taskHeight = 0,
                 taskWidth = 0,
                 taskX = 0,
-                taskY = 0)
+                taskY = 0
+            )
         )
     }
 
@@ -314,7 +389,7 @@ class DesktopModeEventLogger {
             /* task_width */
             taskSizeUpdate.taskWidth,
             /* display_area */
-            taskSizeUpdate.displayArea
+            taskSizeUpdate.displayArea ?: -1
         )
     }
 
@@ -364,8 +439,23 @@ class DesktopModeEventLogger {
             val uid: Int,
             val taskHeight: Int,
             val taskWidth: Int,
-            val displayArea: Int,
+            val displayArea: Int?,
         )
+
+        private fun getInputMethodFromMotionEvent(e: MotionEvent?): InputMethod {
+            if (e == null) return InputMethod.UNKNOWN_INPUT_METHOD
+
+            val toolType = e.getToolType(
+                e.findPointerIndex(e.getPointerId(0))
+            )
+            return when {
+                toolType == TOOL_TYPE_STYLUS -> InputMethod.STYLUS
+                toolType == TOOL_TYPE_MOUSE -> InputMethod.MOUSE
+                toolType == TOOL_TYPE_FINGER && e.source == SOURCE_MOUSE -> InputMethod.TOUCHPAD
+                toolType == TOOL_TYPE_FINGER && e.source == SOURCE_TOUCHSCREEN -> InputMethod.TOUCH
+                else -> InputMethod.UNKNOWN_INPUT_METHOD
+            }
+        }
 
         // Default value used when the task was not minimized.
         @VisibleForTesting
@@ -498,6 +588,10 @@ class DesktopModeEventLogger {
             SNAP_RIGHT_MENU(
                 FrameworkStatsLog
                     .DESKTOP_MODE_TASK_SIZE_UPDATED__RESIZE_TRIGGER__SNAP_RIGHT_MENU_RESIZE_TRIGGER
+            ),
+            MAXIMIZE_MENU(
+                FrameworkStatsLog
+                    .DESKTOP_MODE_TASK_SIZE_UPDATED__RESIZE_TRIGGER__MAXIMIZE_MENU_RESIZE_TRIGGER
             ),
         }
 

@@ -17,12 +17,12 @@
 package com.android.internal.protolog;
 
 import android.annotation.NonNull;
-import android.util.proto.ProtoInputStream;
 
 public interface ViewerConfigInputStreamProvider {
     /**
      * @return a ProtoInputStream.
      */
     @NonNull
-    ProtoInputStream getInputStream();
+    AutoClosableProtoInputStream getInputStream();
 }
+

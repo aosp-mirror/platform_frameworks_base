@@ -5639,4 +5639,7 @@
 
   <!-- Forensic backup transport -->
   <java-symbol type="string" name="config_forensicBackupTransport" />
+
+  <!-- Fingerprint screen off unlock config -->
+  <java-symbol type="bool" name="config_screen_off_udfps_enabled" />
 </resources>

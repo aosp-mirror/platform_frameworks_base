@@ -1399,6 +1399,10 @@ public final class SystemServer implements Dumpable {
         mSystemServiceManager.startService(BatteryService.class);
         t.traceEnd();
 
+        t.traceBegin("StartTradeInModeService");
+        mSystemServiceManager.startService(TradeInModeService.class);
+        t.traceEnd();
+
         // Tracks application usage stats.
         t.traceBegin("StartUsageService");
         mSystemServiceManager.startService(UsageStatsService.class);
@@ -1503,6 +1507,8 @@ public final class SystemServer implements Dumpable {
 
         boolean isTv = context.getPackageManager().hasSystemFeature(
                 PackageManager.FEATURE_LEANBACK);
+
+        boolean isAutomotive = RoSystemFeatures.hasFeatureAutomotive(context);
 
         boolean enableVrService = context.getPackageManager().hasSystemFeature(
                 PackageManager.FEATURE_VR_MODE_HIGH_PERFORMANCE);
@@ -1760,7 +1766,8 @@ public final class SystemServer implements Dumpable {
                 t.traceEnd();
             }
 
-            if (android.security.Flags.aapmApi()) {
+            if (!isWatch && !isTv && !isAutomotive
+                    && android.security.Flags.aapmApi()) {
                 t.traceBegin("StartAdvancedProtectionService");
                 mSystemServiceManager.startService(AdvancedProtectionService.Lifecycle.class);
                 t.traceEnd();
@@ -3137,7 +3144,7 @@ public final class SystemServer implements Dumpable {
                 }, WEBVIEW_PREPARATION);
             }
 
-            if (RoSystemFeatures.hasFeatureAutomotive(context)) {
+            if (isAutomotive) {
                 t.traceBegin("StartCarServiceHelperService");
                 final SystemService cshs = mSystemServiceManager
                         .startService(CAR_SERVICE_HELPER_SERVICE_CLASS);

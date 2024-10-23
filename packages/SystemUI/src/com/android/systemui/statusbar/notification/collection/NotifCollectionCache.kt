@@ -35,6 +35,9 @@ import java.util.concurrent.atomic.AtomicInteger
  * This cache is safe for multithreaded usage, and is recommended for objects that take a while to
  * resolve (such as drawables, or things that require binder calls). As such, [getOrFetch] is
  * recommended to be run on a background thread, while [purge] can be done from any thread.
+ *
+ * Important: This cache does NOT have a maximum size, cleaning it up (via [purge]) is the
+ * responsibility of the caller, to avoid keeping things in memory unnecessarily.
  */
 @SuppressLint("DumpableNotRegistered") // this will be dumped by container classes
 class NotifCollectionCache<V>(
@@ -151,7 +154,7 @@ class NotifCollectionCache<V>(
      * purge((c));    // deletes a from the cache and marks b for deletion, etc.
      * ```
      */
-    fun purge(wantedKeys: List<String>) {
+    fun purge(wantedKeys: Collection<String>) {
         for ((key, entry) in cache) {
             if (key in wantedKeys) {
                 entry.resetLives()

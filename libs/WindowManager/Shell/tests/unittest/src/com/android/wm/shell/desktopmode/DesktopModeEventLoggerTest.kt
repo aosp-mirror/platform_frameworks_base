@@ -16,9 +16,12 @@
 
 package com.android.wm.shell.desktopmode
 
+import android.app.ActivityManager.RunningTaskInfo
+import android.graphics.Rect
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
 import com.android.dx.mockito.inline.extended.ExtendedMockito.clearInvocations
+import com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn
 import com.android.dx.mockito.inline.extended.ExtendedMockito.staticMockMarker
 import com.android.dx.mockito.inline.extended.ExtendedMockito.verify
 import com.android.dx.mockito.inline.extended.ExtendedMockito.verifyZeroInteractions
@@ -27,6 +30,9 @@ import com.android.modules.utils.testing.ExtendedMockitoRule
 import com.android.window.flags.Flags
 import com.android.wm.shell.EventLogTags
 import com.android.wm.shell.ShellTestCase
+import com.android.wm.shell.TestRunningTaskInfoBuilder
+import com.android.wm.shell.common.DisplayController
+import com.android.wm.shell.common.DisplayLayout
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.EnterReason
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.ExitReason
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.InputMethod
@@ -39,9 +45,13 @@ import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.UNSET_M
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.UNSET_UNMINIMIZE_REASON
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.UnminimizeReason
 import com.google.common.truth.Truth.assertThat
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.kotlin.eq
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 
 /**
  * Tests for [DesktopModeEventLogger].
@@ -49,6 +59,8 @@ import org.mockito.kotlin.eq
 class DesktopModeEventLoggerTest : ShellTestCase() {
 
     private val desktopModeEventLogger = DesktopModeEventLogger()
+    val displayController = mock<DisplayController>()
+    val displayLayout = mock<DisplayLayout>()
 
     @JvmField
     @Rule(order = 0)
@@ -59,6 +71,13 @@ class DesktopModeEventLoggerTest : ShellTestCase() {
     @JvmField
     @Rule(order = 1)
     val setFlagsRule = SetFlagsRule()
+
+    @Before
+    fun setUp() {
+        doReturn(displayLayout).whenever(displayController).getDisplayLayout(anyInt())
+        doReturn(DISPLAY_WIDTH).whenever(displayLayout).width()
+        doReturn(DISPLAY_HEIGHT).whenever(displayLayout).height()
+    }
 
     @Test
     fun logSessionEnter_logsEnterReasonWithNewSessionId() {
@@ -467,7 +486,8 @@ class DesktopModeEventLoggerTest : ShellTestCase() {
 
     @Test
     fun logTaskResizingStarted_noOngoingSession_doesNotLog() {
-        desktopModeEventLogger.logTaskResizingStarted(TASK_SIZE_UPDATE)
+        desktopModeEventLogger.logTaskResizingStarted(ResizeTrigger.CORNER,
+            null, createTaskInfo())
 
         verifyZeroInteractions(staticMockMarker(FrameworkStatsLog::class.java))
         verifyZeroInteractions(staticMockMarker(EventLogTags::class.java))
@@ -478,13 +498,14 @@ class DesktopModeEventLoggerTest : ShellTestCase() {
     fun logTaskResizingStarted_logsTaskSizeUpdatedWithStartResizingStage() {
         val sessionId = startDesktopModeSession()
 
-        desktopModeEventLogger.logTaskResizingStarted(TASK_SIZE_UPDATE)
+        desktopModeEventLogger.logTaskResizingStarted(ResizeTrigger.CORNER,
+            null, createTaskInfo(), displayController)
 
         verify {
             FrameworkStatsLog.write(
                 eq(FrameworkStatsLog.DESKTOP_MODE_TASK_SIZE_UPDATED),
                 /* resize_trigger */
-                eq(FrameworkStatsLog.DESKTOP_MODE_TASK_SIZE_UPDATED__RESIZE_TRIGGER__UNKNOWN_RESIZE_TRIGGER),
+                eq(FrameworkStatsLog.DESKTOP_MODE_TASK_SIZE_UPDATED__RESIZE_TRIGGER__CORNER_RESIZE_TRIGGER),
                 /* resizing_stage */
                 eq(FrameworkStatsLog.DESKTOP_MODE_TASK_SIZE_UPDATED__RESIZING_STAGE__START_RESIZING_STAGE),
                 /* input_method */
@@ -500,7 +521,7 @@ class DesktopModeEventLoggerTest : ShellTestCase() {
                 /* task_width */
                 eq(TASK_SIZE_UPDATE.taskWidth),
                 /* display_area */
-                eq(TASK_SIZE_UPDATE.displayArea),
+                eq(DISPLAY_AREA),
             )
         }
         verifyZeroInteractions(staticMockMarker(FrameworkStatsLog::class.java))
@@ -508,7 +529,8 @@ class DesktopModeEventLoggerTest : ShellTestCase() {
 
     @Test
     fun logTaskResizingEnded_noOngoingSession_doesNotLog() {
-        desktopModeEventLogger.logTaskResizingEnded(TASK_SIZE_UPDATE)
+        desktopModeEventLogger.logTaskResizingEnded(ResizeTrigger.CORNER,
+            null, createTaskInfo())
 
         verifyZeroInteractions(staticMockMarker(FrameworkStatsLog::class.java))
         verifyZeroInteractions(staticMockMarker(EventLogTags::class.java))
@@ -519,13 +541,14 @@ class DesktopModeEventLoggerTest : ShellTestCase() {
     fun logTaskResizingEnded_logsTaskSizeUpdatedWithEndResizingStage() {
         val sessionId = startDesktopModeSession()
 
-        desktopModeEventLogger.logTaskResizingEnded(TASK_SIZE_UPDATE)
+        desktopModeEventLogger.logTaskResizingEnded(ResizeTrigger.CORNER,
+            null, createTaskInfo(), displayController = displayController)
 
         verify {
             FrameworkStatsLog.write(
                 eq(FrameworkStatsLog.DESKTOP_MODE_TASK_SIZE_UPDATED),
                 /* resize_trigger */
-                eq(FrameworkStatsLog.DESKTOP_MODE_TASK_SIZE_UPDATED__RESIZE_TRIGGER__UNKNOWN_RESIZE_TRIGGER),
+                eq(FrameworkStatsLog.DESKTOP_MODE_TASK_SIZE_UPDATED__RESIZE_TRIGGER__CORNER_RESIZE_TRIGGER),
                 /* resizing_stage */
                 eq(FrameworkStatsLog.DESKTOP_MODE_TASK_SIZE_UPDATED__RESIZING_STAGE__END_RESIZING_STAGE),
                 /* input_method */
@@ -541,7 +564,7 @@ class DesktopModeEventLoggerTest : ShellTestCase() {
                 /* task_width */
                 eq(TASK_SIZE_UPDATE.taskWidth),
                 /* display_area */
-                eq(TASK_SIZE_UPDATE.displayArea),
+                eq(DISPLAY_AREA),
             )
         }
         verifyZeroInteractions(staticMockMarker(FrameworkStatsLog::class.java))
@@ -585,8 +608,14 @@ class DesktopModeEventLoggerTest : ShellTestCase() {
         }
     }
 
+    private fun createTaskInfo(): RunningTaskInfo {
+        return TestRunningTaskInfoBuilder().setTaskId(TASK_ID)
+            .setUid(TASK_UID)
+            .setBounds(Rect(TASK_X, TASK_Y, TASK_WIDTH, TASK_HEIGHT))
+            .build()
+    }
+
     private companion object {
-        private const val sessionId = 1
         private const val TASK_ID = 1
         private const val TASK_UID = 1
         private const val TASK_X = 0
@@ -594,7 +623,9 @@ class DesktopModeEventLoggerTest : ShellTestCase() {
         private const val TASK_HEIGHT = 100
         private const val TASK_WIDTH = 100
         private const val TASK_COUNT = 1
-        private const val DISPLAY_AREA = 1000
+        private const val DISPLAY_WIDTH = 500
+        private const val DISPLAY_HEIGHT = 500
+        private const val DISPLAY_AREA = DISPLAY_HEIGHT * DISPLAY_WIDTH
 
         private val TASK_UPDATE = TaskUpdate(
             TASK_ID, TASK_UID, TASK_HEIGHT, TASK_WIDTH, TASK_X, TASK_Y,

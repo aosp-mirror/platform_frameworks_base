@@ -15,6 +15,7 @@
  */
 package com.android.systemui.volume.dialog.shared
 
+import com.android.settingslib.volume.shared.model.RingerMode
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.LogLevel
 import com.android.systemui.log.dagger.VolumeLog
@@ -41,6 +42,15 @@ class VolumeDialogLogger @Inject constructor(@VolumeLog private val logBuffer: L
             LogLevel.DEBUG,
             { int1 = reason },
             { "Dismiss: ${Events.DISMISS_REASONS[int1]}" },
+        )
+    }
+
+    fun onCurrentRingerModeIsUnsupported(ringerMode: RingerMode) {
+        logBuffer.log(
+            TAG,
+            LogLevel.DEBUG,
+            { int1 = ringerMode.value },
+            { "Current ringer mode: $int1, ringer mode is unsupported in ringer drawer options" },
         )
     }
 }

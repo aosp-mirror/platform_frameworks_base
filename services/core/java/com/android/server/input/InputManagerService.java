@@ -3511,6 +3511,11 @@ public class InputManagerService extends IInputManager.Stub
         public void setAccessibilityPointerIconScaleFactor(int displayId, float scaleFactor) {
             InputManagerService.this.setAccessibilityPointerIconScaleFactor(displayId, scaleFactor);
         }
+
+        @Override
+        public boolean setKernelWakeEnabled(int deviceId, boolean enabled) {
+            return mNative.setKernelWakeEnabled(deviceId, enabled);
+        }
     }
 
     @Override

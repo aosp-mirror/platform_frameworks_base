@@ -160,19 +160,18 @@ fun Tile(
                 )
             } else {
                 val iconShape = TileDefaults.animateIconShape(uiState.state)
+                val secondaryClick: (() -> Unit)? =
+                    { tile.onSecondaryClick() }.takeIf { uiState.handlesSecondaryClick }
+                val longClick: (() -> Unit)? =
+                    { tile.onLongClick(expandable) }.takeIf { uiState.handlesLongClick }
                 LargeTileContent(
                     label = uiState.label,
                     secondaryLabel = uiState.secondaryLabel,
                     icon = icon,
                     colors = colors,
                     iconShape = iconShape,
-                    toggleClickSupported = state.handlesSecondaryClick,
-                    onClick = {
-                        if (state.handlesSecondaryClick) {
-                            tile.onSecondaryClick()
-                        }
-                    },
-                    onLongClick = { tile.onLongClick(expandable) },
+                    toggleClick = secondaryClick,
+                    onLongClick = longClick,
                     accessibilityUiState = uiState.accessibilityUiState,
                     squishiness = squishiness,
                 )

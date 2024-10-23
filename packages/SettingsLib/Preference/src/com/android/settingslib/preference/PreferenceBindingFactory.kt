@@ -16,6 +16,7 @@
 
 package com.android.settingslib.preference
 
+import com.android.settingslib.metadata.MainSwitchPreference
 import com.android.settingslib.metadata.PreferenceGroup
 import com.android.settingslib.metadata.PreferenceMetadata
 import com.android.settingslib.metadata.SwitchPreference
@@ -36,6 +37,7 @@ object DefaultPreferenceBindingFactory : PreferenceBindingFactory {
                 is SwitchPreference -> SwitchPreferenceBinding.INSTANCE
                 is PreferenceGroup -> PreferenceGroupBinding.INSTANCE
                 is PreferenceScreenCreator -> PreferenceScreenBinding.INSTANCE
+                is MainSwitchPreference -> MainSwitchPreferenceBinding.INSTANCE
                 else -> DefaultPreferenceBinding
             }
 }

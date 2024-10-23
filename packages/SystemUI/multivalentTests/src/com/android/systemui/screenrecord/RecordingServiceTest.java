@@ -52,6 +52,7 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.mediaprojection.MediaProjectionCaptureTarget;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.recordissue.ScreenRecordingStartTimeStore;
 import com.android.systemui.settings.UserContextProvider;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil;
@@ -95,6 +96,8 @@ public class RecordingServiceTest extends SysuiTestCase {
     private SysuiStatusBarStateController mStatusBarStateController;
     @Mock
     private ActivityStarter mActivityStarter;
+    @Mock
+    private ScreenRecordingStartTimeStore mScreenRecordingStartTimeStore;
 
     private static final String PERMISSION_SELF = "com.android.systemui.permission.SELF";
 
@@ -108,9 +111,10 @@ public class RecordingServiceTest extends SysuiTestCase {
                 RecordingController controller, Executor executor,
                 Handler handler, UiEventLogger uiEventLogger,
                 NotificationManager notificationManager,
-                UserContextProvider userContextTracker, KeyguardDismissUtil keyguardDismissUtil) {
-            super(controller, executor, handler,
-                    uiEventLogger, notificationManager, userContextTracker, keyguardDismissUtil);
+                UserContextProvider userContextTracker, KeyguardDismissUtil keyguardDismissUtil,
+                ScreenRecordingStartTimeStore screenRecordingStartTimeStore) {
+            super(controller, executor, handler, uiEventLogger, notificationManager,
+                    userContextTracker, keyguardDismissUtil, screenRecordingStartTimeStore);
             attachBaseContext(mContext);
         }
     }
@@ -120,7 +124,7 @@ public class RecordingServiceTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         mRecordingService = Mockito.spy(new RecordingServiceTestable(mController, mExecutor,
                 mHandler, mUiEventLogger, mNotificationManager,
-                mUserContextTracker, mKeyguardDismissUtil));
+                mUserContextTracker, mKeyguardDismissUtil, mScreenRecordingStartTimeStore));
 
         // Return actual context info
         doReturn(mContext).when(mRecordingService).getApplicationContext();
