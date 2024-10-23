@@ -18,6 +18,7 @@ package com.android.systemui.recordissue
 
 import android.app.IActivityManager
 import android.app.NotificationManager
+import android.content.Intent
 import android.net.Uri
 import android.os.UserHandle
 import android.provider.Settings
@@ -27,6 +28,7 @@ import com.android.systemui.settings.UserContextProvider
 import com.android.traceur.PresetTraceConfigs
 import java.util.concurrent.Executor
 
+private const val SHELL_PACKAGE = "com.android.shell"
 private const val NOTIFY_SESSION_ENDED_SETTING = "should_notify_trace_session_ended"
 private const val DISABLED = 0
 
@@ -86,7 +88,14 @@ class IssueRecordingServiceSession(
                     }
                 }
             if (takeBugReport) {
-                iActivityManager.requestBugReportWithExtraAttachment(screenRecording)
+                screenRecordingUris.forEach {
+                    userContextProvider.userContext.grantUriPermission(
+                        SHELL_PACKAGE,
+                        it,
+                        Intent.FLAG_GRANT_READ_URI_PERMISSION,
+                    )
+                }
+                iActivityManager.requestBugReportWithExtraAttachments(screenRecordingUris)
             } else {
                 traceurConnection.shareTraces(screenRecordingUris)
             }
