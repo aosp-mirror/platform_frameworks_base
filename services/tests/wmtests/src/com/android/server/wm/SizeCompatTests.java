@@ -2899,7 +2899,7 @@ public class SizeCompatTests extends WindowTestsBase {
         // Launch another portrait fixed app.
         spyOn(mTask);
         setBooted(display.mWmService.mAtmService);
-        final ActivityRecord newActivity = new ActivityBuilder(display.mWmService.mAtmService)
+        final ActivityRecord newActivity = getActivityBuilderWithoutTask()
                 .setResizeMode(RESIZE_MODE_UNRESIZEABLE)
                 .setScreenOrientation(SCREEN_ORIENTATION_PORTRAIT)
                 .setTask(mTask)
@@ -2967,7 +2967,7 @@ public class SizeCompatTests extends WindowTestsBase {
         // Launch another portrait fixed app with max aspect ratio as 1.3.
         spyOn(mTask);
         setBooted(display.mWmService.mAtmService);
-        final ActivityRecord newActivity = new ActivityBuilder(display.mWmService.mAtmService)
+        final ActivityRecord newActivity = getActivityBuilderWithoutTask()
                 .setResizeMode(RESIZE_MODE_UNRESIZEABLE)
                 .setMaxAspectRatio(1.3f)
                 .setScreenOrientation(SCREEN_ORIENTATION_PORTRAIT)
@@ -4791,7 +4791,7 @@ public class SizeCompatTests extends WindowTestsBase {
         final float maxAspect = 1.8f;
         final float minAspect = 1.5f;
         prepareLimitedBounds(mActivity, maxAspect, minAspect,
-                ActivityInfo.SCREEN_ORIENTATION_LOCKED, true /* isUnresizable */);
+                ActivityInfo.SCREEN_ORIENTATION_NOSENSOR, true /* isUnresizable */);
 
         assertTrue(mActivity.isUniversalResizeable());
         assertTrue(mActivity.isResizeable());
