@@ -25,6 +25,7 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.TextView;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
@@ -32,10 +33,12 @@ import com.android.systemui.res.R;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.util.List;
 
 @SmallTest
+@RunWith(AndroidJUnit4.class)
 public class KeyguardClockAccessibilityDelegateTest extends SysuiTestCase {
 
     private TextView mView;
