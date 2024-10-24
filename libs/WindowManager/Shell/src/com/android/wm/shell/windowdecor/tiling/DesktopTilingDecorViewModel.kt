@@ -99,4 +99,10 @@ class DesktopTilingDecorViewModel(
             tilingHandler.onOverviewAnimationStateChange(isRunning)
         }
     }
+
+    fun onUserChange() {
+        for (tilingHandler in tilingTransitionHandlerByDisplayId.valueIterator()) {
+            tilingHandler.onUserChange()
+        }
+    }
 }

@@ -2123,6 +2123,7 @@ class DesktopTasksController(
     // TODO(b/366397912): Support full multi-user mode in Windowing.
     override fun onUserChanged(newUserId: Int, userContext: Context) {
         userId = newUserId
+        desktopTilingDecorViewModel.onUserChange()
     }
 
     /** Called when a task's info changes. */

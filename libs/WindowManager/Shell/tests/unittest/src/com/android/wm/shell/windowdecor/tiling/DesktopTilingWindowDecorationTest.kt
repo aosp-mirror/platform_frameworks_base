@@ -90,6 +90,7 @@ class DesktopTilingWindowDecorationTest : ShellTestCase() {
     private val info: TransitionInfo = mock()
     private val finishCallback: Transitions.TransitionFinishCallback = mock()
     private val desktopRepository: DesktopRepository = mock()
+    private val desktopTilingDividerWindowManager: DesktopTilingDividerWindowManager = mock()
     private lateinit var tilingDecoration: DesktopTilingWindowDecoration
 
     private val split_divider_width = 10
@@ -441,6 +442,43 @@ class DesktopTilingWindowDecorationTest : ShellTestCase() {
         verify(desktopWindowDecoration, never()).removeDragResizeListener(any())
         verify(desktopWindowDecoration, never()).updateDisabledResizingEdge(any(), any())
         verify(tiledTaskHelper, never()).dispose()
+    }
+
+    @Test
+    fun tasksTiled_shouldBeRemoved_whenSessionDestroyed() {
+        val task1 = createFreeformTask()
+        val task2 = createFreeformTask()
+        val stableBounds = STABLE_BOUNDS_MOCK
+        whenever(displayController.getDisplayLayout(any())).thenReturn(displayLayout)
+        whenever(displayLayout.getStableBounds(any())).thenAnswer { i ->
+            (i.arguments.first() as Rect).set(stableBounds)
+        }
+        whenever(context.resources).thenReturn(resources)
+        whenever(resources.getDimensionPixelSize(any())).thenReturn(split_divider_width)
+        whenever(tiledTaskHelper.taskInfo).thenReturn(task1)
+        whenever(tiledTaskHelper.desktopModeWindowDecoration).thenReturn(desktopWindowDecoration)
+        tilingDecoration.onAppTiled(
+            task1,
+            desktopWindowDecoration,
+            DesktopTasksController.SnapPosition.LEFT,
+            BOUNDS,
+        )
+        tilingDecoration.onAppTiled(
+            task2,
+            desktopWindowDecoration,
+            DesktopTasksController.SnapPosition.RIGHT,
+            BOUNDS,
+        )
+        tilingDecoration.leftTaskResizingHelper = tiledTaskHelper
+        tilingDecoration.rightTaskResizingHelper = tiledTaskHelper
+        tilingDecoration.desktopTilingDividerWindowManager = desktopTilingDividerWindowManager
+
+        tilingDecoration.onUserChange()
+
+        assertThat(tilingDecoration.leftTaskResizingHelper).isNull()
+        assertThat(tilingDecoration.rightTaskResizingHelper).isNull()
+        verify(desktopWindowDecoration, times(2)).removeDragResizeListener(any())
+        verify(tiledTaskHelper, times(2)).dispose()
     }
 
     private fun initTiledTaskHelperMock(taskInfo: ActivityManager.RunningTaskInfo) {

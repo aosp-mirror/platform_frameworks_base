@@ -102,7 +102,6 @@ class DesktopTilingDecorViewModelTest : ShellTestCase() {
 
     @Test
     fun removeTile_shouldCreate_newTilingDecoration() {
-
         val task1 = createFreeformTask()
         task1.displayId = 1
         desktopTilingDecorViewModel.tilingTransitionHandlerByDisplayId.put(
@@ -130,8 +129,6 @@ class DesktopTilingDecorViewModelTest : ShellTestCase() {
 
     @Test
     fun overviewAnimation_starting_ShouldNotifyAllDecorations() {
-        val task1 = createFreeformTask()
-        task1.displayId = 1
         desktopTilingDecorViewModel.tilingTransitionHandlerByDisplayId.put(
             1,
             desktopTilingDecoration,
@@ -143,6 +140,22 @@ class DesktopTilingDecorViewModelTest : ShellTestCase() {
         desktopTilingDecorViewModel.onOverviewAnimationStateChange(true)
 
         verify(desktopTilingDecoration, times(2)).onOverviewAnimationStateChange(any())
+    }
+
+    @Test
+    fun userChange_starting_allTilingSessionsShouldBeDestroyed() {
+        desktopTilingDecorViewModel.tilingTransitionHandlerByDisplayId.put(
+            1,
+            desktopTilingDecoration,
+        )
+        desktopTilingDecorViewModel.tilingTransitionHandlerByDisplayId.put(
+            2,
+            desktopTilingDecoration,
+        )
+
+        desktopTilingDecorViewModel.onUserChange()
+
+        verify(desktopTilingDecoration, times(2)).onUserChange()
     }
 
     companion object {

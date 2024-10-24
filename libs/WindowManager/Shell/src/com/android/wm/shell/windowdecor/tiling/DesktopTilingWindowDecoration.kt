@@ -32,6 +32,7 @@ import android.view.WindowManager.TRANSIT_TO_FRONT
 import android.window.TransitionInfo
 import android.window.TransitionRequestInfo
 import android.window.WindowContainerTransaction
+import com.android.internal.annotations.VisibleForTesting
 import com.android.launcher3.icons.BaseIconFactory
 import com.android.launcher3.icons.BaseIconFactory.MODE_DEFAULT
 import com.android.launcher3.icons.IconProvider
@@ -57,7 +58,7 @@ import com.android.wm.shell.windowdecor.extension.isFullscreen
 import java.util.function.Supplier
 
 class DesktopTilingWindowDecoration(
-    private val context: Context,
+    private var context: Context,
     private val syncQueue: SyncTransactionQueue,
     private val displayController: DisplayController,
     private val displayId: Int,
@@ -82,7 +83,8 @@ class DesktopTilingWindowDecoration(
     var leftTaskResizingHelper: AppResizingHelper? = null
     var rightTaskResizingHelper: AppResizingHelper? = null
     private var isTilingManagerInitialised = false
-    private var desktopTilingDividerWindowManager: DesktopTilingDividerWindowManager? = null
+    @VisibleForTesting
+    var desktopTilingDividerWindowManager: DesktopTilingDividerWindowManager? = null
     private lateinit var dividerBounds: Rect
     private var isResizing = false
     private var isTilingFocused = false
@@ -474,6 +476,18 @@ class DesktopTilingWindowDecoration(
                 ?.updateDisabledResizingEdge(NONE, shouldDelayUpdate)
             tearDownTiling()
         }
+    }
+
+    fun onUserChange() {
+        if (leftTaskResizingHelper != null) {
+            removeTask(leftTaskResizingHelper, taskVanished = false, shouldDelayUpdate = true)
+            leftTaskResizingHelper = null
+        }
+        if (rightTaskResizingHelper != null) {
+            removeTask(rightTaskResizingHelper, taskVanished = false, shouldDelayUpdate = true)
+            rightTaskResizingHelper = null
+        }
+        tearDownTiling()
     }
 
     private fun removeTask(
