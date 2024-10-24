@@ -27,10 +27,10 @@ import com.android.systemui.shared.recents.model.ThumbnailData
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.async
+import com.android.app.tracing.coroutines.asyncTraced as async
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 @MediaProjectionAppSelectorScope
 class MediaProjectionAppSelectorController

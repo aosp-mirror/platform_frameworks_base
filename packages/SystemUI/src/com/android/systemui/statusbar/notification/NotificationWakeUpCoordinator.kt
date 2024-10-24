@@ -49,7 +49,7 @@ import javax.inject.Inject
 import kotlin.math.max
 import kotlin.math.min
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 @SysUISingleton
 class NotificationWakeUpCoordinator

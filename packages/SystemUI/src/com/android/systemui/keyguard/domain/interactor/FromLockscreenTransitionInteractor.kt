@@ -51,7 +51,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 @SysUISingleton
 class FromLockscreenTransitionInteractor
@@ -358,7 +358,7 @@ constructor(
         if (!communalSettingsInteractor.isCommunalFlagEnabled()) {
             return
         }
-        scope.launch(mainDispatcher) {
+        scope.launch(context = mainDispatcher) {
             glanceableHubTransitions.listenForGlanceableHubTransition(
                 transitionOwnerName = TAG,
                 fromState = KeyguardState.LOCKSCREEN,

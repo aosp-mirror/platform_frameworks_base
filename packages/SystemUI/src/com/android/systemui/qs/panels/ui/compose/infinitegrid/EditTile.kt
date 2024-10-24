@@ -137,7 +137,7 @@ import com.android.systemui.qs.shared.model.groupAndSort
 import com.android.systemui.res.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 object TileType
 

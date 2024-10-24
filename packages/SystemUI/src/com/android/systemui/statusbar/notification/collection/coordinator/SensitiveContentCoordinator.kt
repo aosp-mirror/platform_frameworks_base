@@ -46,7 +46,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.mapNotNull
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 @Module(includes = [PrivateSensitiveContentCoordinatorModule::class])
 interface SensitiveContentCoordinatorModule

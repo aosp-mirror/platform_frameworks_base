@@ -59,7 +59,7 @@ import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /** Encapsulates business-logic related to the keyguard transitions. */
 @OptIn(ExperimentalCoroutinesApi::class)

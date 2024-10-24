@@ -49,7 +49,7 @@ import dagger.Lazy
 import java.util.function.Consumer
 import javax.inject.Inject
 import kotlin.reflect.KMutableProperty0
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 @VisibleForTesting internal const val INSET_DEBOUNCE_MILLIS = 500L
 

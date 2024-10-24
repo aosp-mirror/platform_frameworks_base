@@ -43,7 +43,7 @@ import com.android.systemui.statusbar.pipeline.shared.ui.binder.HomeStatusBarVie
 import com.android.systemui.statusbar.pipeline.shared.ui.binder.StatusBarVisibilityChangeListener
 import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.HomeStatusBarViewModel
 import javax.inject.Inject
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /** Factory to simplify the dependency management for [StatusBarRoot] */
 class StatusBarRootFactory
