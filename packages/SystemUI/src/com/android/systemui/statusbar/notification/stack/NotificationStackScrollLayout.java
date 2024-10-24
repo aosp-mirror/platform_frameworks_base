@@ -6957,10 +6957,12 @@ public class NotificationStackScrollLayout
 
     /** Use {@link ScrollViewFields#intrinsicStackHeight}, when SceneContainerFlag is enabled. */
     private int getContentHeight() {
+        SceneContainerFlag.assertInLegacyMode();
         return mContentHeight;
     }
 
     private void setContentHeight(int contentHeight) {
+        SceneContainerFlag.assertInLegacyMode();
         mContentHeight = contentHeight;
     }
 
@@ -6969,10 +6971,12 @@ public class NotificationStackScrollLayout
      * @return the height of the content ignoring the footer.
      */
     public float getIntrinsicContentHeight() {
+        SceneContainerFlag.assertInLegacyMode();
         return mIntrinsicContentHeight;
     }
 
     private void setIntrinsicContentHeight(float intrinsicContentHeight) {
+        SceneContainerFlag.assertInLegacyMode();
         mIntrinsicContentHeight = intrinsicContentHeight;
     }
 }
