@@ -30,8 +30,12 @@ import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
+import android.annotation.Nullable;
 import android.content.Context;
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.flag.junit.SetFlagsRule;
+import android.view.flags.Flags;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -39,6 +43,7 @@ import androidx.test.filters.SmallTest;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -48,6 +53,8 @@ import org.mockito.Mock;
 @RunWith(AndroidJUnit4.class)
 @Presubmit
 public final class RotaryScrollHapticsTest {
+    @Rule public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
+
     private static final int TEST_ROTARY_DEVICE_ID = 1;
     private static final int TEST_RANDOM_DEVICE_ID = 2;
 
@@ -167,6 +174,26 @@ public final class RotaryScrollHapticsTest {
     }
 
     @Test
+    @EnableFlags(Flags.FLAG_DYNAMIC_VIEW_ROTARY_HAPTICS_CONFIGURATION)
+    public void testChildViewImplementationUsesScrollFeedbackProvider_doesNoScrollFeedback() {
+        mView.configureGenericMotion(/* result= */ false, /* scroll= */ true);
+        mView.mUsesCustomScrollFeedbackProvider = true;
+
+        // Send multiple generic motion events, to catch bugs where the behavior is WAI only for the
+        // first dispatch, but buggy for future calls.
+        mView.dispatchGenericMotionEvent(createRotaryEvent(20));
+        mView.dispatchGenericMotionEvent(createRotaryEvent(10));
+        mView.dispatchGenericMotionEvent(createRotaryEvent(30));
+
+        // Verify that the base View class's ScrollFeedbackProvider produces no scroll progress
+        // or limit events, because there's a custom ScrollFeedbackProvider used by the child
+        // View class implementation, which should hint the base View class to disable its own
+        // ScrollFeedbackProvider usage.
+        verifyNoScrollProgress();
+        verifyNoScrollLimit();
+    }
+
+    @Test
     public void testScrollProgress_genericMotionEventCallbackReturningTrue_doesScrollProgress() {
         mView.configureGenericMotion(/* result= */ true, /* scroll= */ true);
 
@@ -208,6 +235,9 @@ public final class RotaryScrollHapticsTest {
     private static final class TestGenericMotionEventControllingView extends View {
         private boolean mGenericMotionResult;
         private boolean mScrollOnGenericMotion;
+        private boolean mUsesCustomScrollFeedbackProvider = false;
+
+        @Nullable private ScrollFeedbackProvider mCustomScrollFeedbackProvider;
 
         TestGenericMotionEventControllingView(Context context) {
             super(context);
@@ -222,6 +252,19 @@ public final class RotaryScrollHapticsTest {
         public boolean onGenericMotionEvent(MotionEvent event) {
             if (mScrollOnGenericMotion) {
                 scrollTo(100, 200); // scroll values random (not relevant for tests).
+                if (mUsesCustomScrollFeedbackProvider) {
+                    // Mimic how a real child class of View would instantiate and use the
+                    // ScrollFeedbackProvider API.
+                    if (mCustomScrollFeedbackProvider == null) {
+                        mCustomScrollFeedbackProvider = ScrollFeedbackProvider.createProvider(this);
+                    }
+                    float axisScrollValue = event.getAxisValue(AXIS_SCROLL);
+                    mCustomScrollFeedbackProvider.onScrollProgress(
+                            event.getDeviceId(),
+                            event.getSource(),
+                            MotionEvent.AXIS_SCROLL,
+                            (int) (axisScrollValue * TEST_SCALED_VERTICAL_SCROLL_FACTOR));
+                }
             }
             return mGenericMotionResult;
         }
