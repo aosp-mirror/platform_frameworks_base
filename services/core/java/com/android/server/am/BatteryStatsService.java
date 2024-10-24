@@ -446,8 +446,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
         mPowerStatsStore = new PowerStatsStore(systemDir, mHandler);
         mPowerAttributor = new MultiStatePowerAttributor(mContext, mPowerStatsStore, mPowerProfile,
-                mCpuScalingPolicies, () -> mStats.getBatteryCapacity(),
-                mPowerStatsUidResolver);
+                mCpuScalingPolicies, () -> mStats.getBatteryCapacity());
         mPowerStatsScheduler = createPowerStatsScheduler(mContext);
 
         int accumulatedBatteryUsageStatsSpanSize = mContext.getResources().getInteger(

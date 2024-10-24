@@ -265,7 +265,7 @@ public class BatteryUsageStatsProviderTest {
 
         MultiStatePowerAttributor powerAttributor = new MultiStatePowerAttributor(mContext,
                 mock(PowerStatsStore.class), mStatsRule.getPowerProfile(),
-                mStatsRule.getCpuScalingPolicies(), () -> 3500, new PowerStatsUidResolver());
+                mStatsRule.getCpuScalingPolicies(), () -> 3500);
         powerAttributor.setPowerComponentSupported(BatteryConsumer.POWER_COMPONENT_AUDIO,
                 true);
         powerAttributor.setPowerComponentSupported(BatteryConsumer.POWER_COMPONENT_FLASHLIGHT,
@@ -613,7 +613,7 @@ public class BatteryUsageStatsProviderTest {
 
         MultiStatePowerAttributor powerAttributor = new MultiStatePowerAttributor(mContext,
                 powerStatsStore, mStatsRule.getPowerProfile(), mStatsRule.getCpuScalingPolicies(),
-                () -> 3500, new PowerStatsUidResolver());
+                () -> 3500);
         for (int powerComponentId = 0; powerComponentId < BatteryConsumer.POWER_COMPONENT_COUNT;
                 powerComponentId++) {
             powerAttributor.setPowerComponentSupported(powerComponentId, true);
