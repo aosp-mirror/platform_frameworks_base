@@ -904,7 +904,7 @@ public class NotificationStackScrollLayout
         drawDebugInfo(canvas, y, Color.YELLOW,
                 /* label= */ "mAmbientState.getStackY() + mIntrinsicContentHeight = " + y);
 
-        y = mContentHeight;
+        y = getContentHeight();
         drawDebugInfo(canvas, y, Color.MAGENTA,
                 /* label= */ "mContentHeight = " + y);
 
@@ -1692,7 +1692,8 @@ public class NotificationStackScrollLayout
             if (mShouldShowShelfOnly) {
                 stackHeight = getTopPadding() + mShelf.getIntrinsicHeight();
             } else if (mQsFullScreen) {
-                int stackStartPosition = mContentHeight - getTopPadding() + getIntrinsicPadding();
+                int stackStartPosition =
+                        getContentHeight() - getTopPadding() + getIntrinsicPadding();
                 int stackEndPosition = mMaxTopPadding + mShelf.getIntrinsicHeight();
                 if (stackStartPosition <= stackEndPosition) {
                     stackHeight = stackEndPosition;
@@ -2506,7 +2507,7 @@ public class NotificationStackScrollLayout
         }
         // In current design, it only use the top HUN to treat all of HUNs
         // although there are more than one HUNs
-        int contentHeight = mContentHeight;
+        int contentHeight = getContentHeight();
         if (!isExpanded() && mInHeadsUpPinnedMode) {
             contentHeight = mHeadsUpInset + getTopHeadsUpPinnedHeight();
         }
@@ -2646,13 +2647,12 @@ public class NotificationStackScrollLayout
 
         // The topPadding can be bigger than the regular padding when qs is expanded, in that
         // state the maxPanelHeight and the contentHeight should be bigger
-
-        mContentHeight =
-                (int) (height + Math.max(getIntrinsicPadding(), getTopPadding()) + mBottomPadding);
+        setContentHeight(
+                (int) (height + Math.max(getIntrinsicPadding(), getTopPadding()) + mBottomPadding));
         updateScrollability();
         clampScrollPosition();
         updateStackPosition();
-        mAmbientState.setContentHeight(mContentHeight);
+        mAmbientState.setContentHeight(getContentHeight());
     }
 
     @Override
@@ -4356,9 +4356,9 @@ public class NotificationStackScrollLayout
             // it is based on notifications bottom, which is lower on split shade.
             // Here we prefer to use at least a minimum height defined for split shade.
             // Otherwise the expansion motion is too fast.
-            contentHeight = Math.max(mSplitShadeMinContentHeight, mContentHeight);
+            contentHeight = Math.max(mSplitShadeMinContentHeight, getContentHeight());
         } else {
-            contentHeight = mContentHeight;
+            contentHeight = getContentHeight();
         }
         return Math.max(mMaxLayoutHeight - contentHeight, 0);
     }
@@ -5526,11 +5526,7 @@ public class NotificationStackScrollLayout
             println(pw, "ambientStateSwipingUp", mAmbientState.isSwipingUp());
             println(pw, "maxDisplayedNotifications", mMaxDisplayedNotifications);
             println(pw, "intrinsicContentHeight", mIntrinsicContentHeight);
-            println(pw, "contentHeight", mContentHeight);
             println(pw, "intrinsicPadding", mIntrinsicPadding);
-            if (!SceneContainerFlag.isEnabled()) {
-                println(pw, "topPadding", getTopPadding());
-            }
             println(pw, "bottomPadding", mBottomPadding);
             dumpRoundedRectClipping(pw);
             println(pw, "requestedClipBounds", mRequestedClipBounds);
@@ -5555,6 +5551,11 @@ public class NotificationStackScrollLayout
             println(pw, "isSmallLandscapeLockscreenEnabled", mIsSmallLandscapeLockscreenEnabled);
             mNotificationStackSizeCalculator.dump(pw, args);
             mScrollViewFields.dump(pw);
+            if (!SceneContainerFlag.isEnabled()) {
+                // fields which will be removed with SceneContainer
+                println(pw, "contentHeight", getContentHeight());
+                println(pw, "topPadding", getTopPadding());
+            }
         });
         pw.println();
         pw.println("Contents:");
@@ -6954,5 +6955,18 @@ public class NotificationStackScrollLayout
     interface ClearAllAnimationListener {
         void onAnimationEnd(
                 List<ExpandableNotificationRow> viewsToRemove, @SelectedRows int selectedRows);
+    }
+
+    // -------------------- Getters / Setters for the SceneContainer refactor ----------------------
+
+    /** Use {@link ScrollViewFields#intrinsicStackHeight}, when SceneContainerFlag is enabled. */
+    private int getContentHeight() {
+        SceneContainerFlag.assertInLegacyMode();
+        return mContentHeight;
+    }
+
+    private void setContentHeight(int contentHeight) {
+        SceneContainerFlag.assertInLegacyMode();
+        mContentHeight = contentHeight;
     }
 }
