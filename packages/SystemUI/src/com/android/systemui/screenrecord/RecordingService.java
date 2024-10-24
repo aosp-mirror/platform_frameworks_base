@@ -43,6 +43,7 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.dagger.qualifiers.LongRunning;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.mediaprojection.MediaProjectionCaptureTarget;
+import com.android.systemui.recordissue.ScreenRecordingStartTimeStore;
 import com.android.systemui.res.R;
 import com.android.systemui.screenrecord.ScreenMediaRecorder.ScreenMediaRecorderListener;
 import com.android.systemui.settings.UserContextProvider;
@@ -92,6 +93,7 @@ public class RecordingService extends Service implements ScreenMediaRecorderList
     private boolean mShowTaps;
     private boolean mOriginalShowTaps;
     private ScreenMediaRecorder mRecorder;
+    private final ScreenRecordingStartTimeStore mScreenRecordingStartTimeStore;
     private final Executor mLongExecutor;
     private final UiEventLogger mUiEventLogger;
     protected final NotificationManager mNotificationManager;
@@ -103,7 +105,8 @@ public class RecordingService extends Service implements ScreenMediaRecorderList
     public RecordingService(RecordingController controller, @LongRunning Executor executor,
             @Main Handler handler, UiEventLogger uiEventLogger,
             NotificationManager notificationManager,
-            UserContextProvider userContextTracker, KeyguardDismissUtil keyguardDismissUtil) {
+            UserContextProvider userContextTracker, KeyguardDismissUtil keyguardDismissUtil,
+            ScreenRecordingStartTimeStore screenRecordingStartTimeStore) {
         mController = controller;
         mLongExecutor = executor;
         mMainHandler = handler;
@@ -111,6 +114,7 @@ public class RecordingService extends Service implements ScreenMediaRecorderList
         mNotificationManager = notificationManager;
         mUserContextTracker = userContextTracker;
         mKeyguardDismissUtil = keyguardDismissUtil;
+        mScreenRecordingStartTimeStore = screenRecordingStartTimeStore;
     }
 
     /**
@@ -178,7 +182,8 @@ public class RecordingService extends Service implements ScreenMediaRecorderList
                         currentUid,
                         mAudioSource,
                         captureTarget,
-                        this
+                        this,
+                        mScreenRecordingStartTimeStore
                 );
 
                 if (startRecording()) {

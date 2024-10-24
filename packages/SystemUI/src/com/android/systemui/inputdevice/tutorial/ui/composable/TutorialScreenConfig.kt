@@ -24,13 +24,13 @@ import com.airbnb.lottie.compose.LottieDynamicProperties
 data class TutorialScreenConfig(
     val colors: Colors,
     val strings: Strings,
-    val animations: Animations
+    val animations: Animations,
 ) {
 
     data class Colors(
         val background: Color,
         val title: Color,
-        val animationColors: LottieDynamicProperties
+        val animationColors: LottieDynamicProperties,
     )
 
     data class Strings(
@@ -40,8 +40,5 @@ data class TutorialScreenConfig(
         @StringRes val bodySuccessResId: Int,
     )
 
-    data class Animations(
-        @RawRes val educationResId: Int,
-        @RawRes val successResId: Int,
-    )
+    data class Animations(@RawRes val educationResId: Int)
 }

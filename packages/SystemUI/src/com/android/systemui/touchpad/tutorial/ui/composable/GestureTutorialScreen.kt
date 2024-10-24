@@ -51,20 +51,20 @@ sealed interface GestureUiState {
 
     data class InProgress(
         val progress: Float = 0f,
-        val progressStartMark: String = "",
-        val progressEndMark: String = "",
+        val progressStartMarker: String,
+        val progressEndMarker: String,
     ) : GestureUiState
 }
 
 fun GestureState.toGestureUiState(
-    progressStartMark: String,
-    progressEndMark: String,
+    progressStartMarker: String,
+    progressEndMarker: String,
     successAnimation: Int,
 ): GestureUiState {
     return when (this) {
         GestureState.NotStarted -> NotStarted
         is GestureState.InProgress ->
-            GestureUiState.InProgress(this.progress, progressStartMark, progressEndMark)
+            GestureUiState.InProgress(this.progress, progressStartMarker, progressEndMarker)
         is GestureState.Finished -> GestureUiState.Finished(successAnimation)
     }
 }
@@ -72,9 +72,13 @@ fun GestureState.toGestureUiState(
 fun GestureUiState.toTutorialActionState(): TutorialActionState {
     return when (this) {
         NotStarted -> TutorialActionState.NotStarted
-        // progress is disabled for now as views are not ready to handle varying progress
-        is GestureUiState.InProgress -> TutorialActionState.InProgress(progress = 0f)
-        is Finished -> TutorialActionState.Finished
+        is GestureUiState.InProgress ->
+            TutorialActionState.InProgress(
+                progress = progress,
+                startMarker = progressStartMarker,
+                endMarker = progressEndMarker,
+            )
+        is Finished -> TutorialActionState.Finished(successAnimation)
     }
 }
 

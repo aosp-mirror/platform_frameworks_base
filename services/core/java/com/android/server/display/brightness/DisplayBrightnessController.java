@@ -150,12 +150,13 @@ public final class DisplayBrightnessController {
     public DisplayBrightnessState updateBrightness(
             DisplayManagerInternal.DisplayPowerRequest displayPowerRequest,
             int targetDisplayState,
-            DisplayManagerInternal.DisplayOffloadSession displayOffloadSession) {
+            DisplayManagerInternal.DisplayOffloadSession displayOffloadSession,
+            boolean isBedtimeModeWearEnabled) {
         DisplayBrightnessState state;
         synchronized (mLock) {
             mDisplayBrightnessStrategy = mDisplayBrightnessStrategySelector.selectStrategy(
                     constructStrategySelectionRequest(displayPowerRequest, targetDisplayState,
-                            displayOffloadSession));
+                            displayOffloadSession, isBedtimeModeWearEnabled));
             state = mDisplayBrightnessStrategy
                         .updateBrightness(constructStrategyExecutionRequest(displayPowerRequest));
         }
@@ -629,7 +630,8 @@ public final class DisplayBrightnessController {
     private StrategySelectionRequest constructStrategySelectionRequest(
             DisplayManagerInternal.DisplayPowerRequest displayPowerRequest,
             int targetDisplayState,
-            DisplayManagerInternal.DisplayOffloadSession displayOffloadSession) {
+            DisplayManagerInternal.DisplayOffloadSession displayOffloadSession,
+            boolean isBedtimeModeEnabled) {
         boolean userSetBrightnessChanged = updateUserSetScreenBrightness();
         float lastUserSetScreenBrightness;
         synchronized (mLock) {
@@ -637,7 +639,7 @@ public final class DisplayBrightnessController {
         }
         return new StrategySelectionRequest(displayPowerRequest, targetDisplayState,
                 lastUserSetScreenBrightness, userSetBrightnessChanged, displayOffloadSession,
-                mIsStylusBeingUsed);
+                mIsStylusBeingUsed, isBedtimeModeEnabled);
     }
 
     private StrategyExecutionRequest constructStrategyExecutionRequest(

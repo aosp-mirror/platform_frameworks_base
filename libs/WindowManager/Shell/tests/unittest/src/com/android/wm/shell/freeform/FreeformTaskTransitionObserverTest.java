@@ -43,7 +43,7 @@ import android.window.WindowContainerToken;
 import androidx.test.filters.SmallTest;
 
 import com.android.window.flags.Flags;
-import com.android.wm.shell.desktopmode.DesktopFullImmersiveTransitionHandler;
+import com.android.wm.shell.desktopmode.DesktopImmersiveController;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.FocusTransitionObserver;
 import com.android.wm.shell.transition.TransitionInfoBuilder;
@@ -70,7 +70,7 @@ public class FreeformTaskTransitionObserverTest {
     @Mock
     private Transitions mTransitions;
     @Mock
-    private DesktopFullImmersiveTransitionHandler mDesktopFullImmersiveTransitionHandler;
+    private DesktopImmersiveController mDesktopImmersiveController;
     @Mock
     private WindowDecorViewModel mWindowDecorViewModel;
     @Mock
@@ -92,7 +92,7 @@ public class FreeformTaskTransitionObserverTest {
 
         mTransitionObserver = new FreeformTaskTransitionObserver(
                 context, mShellInit, mTransitions,
-                Optional.of(mDesktopFullImmersiveTransitionHandler),
+                Optional.of(mDesktopImmersiveController),
                 mWindowDecorViewModel, Optional.of(mTaskChangeListener), mFocusTransitionObserver);
 
         final ArgumentCaptor<Runnable> initRunnableCaptor = ArgumentCaptor.forClass(
@@ -321,7 +321,7 @@ public class FreeformTaskTransitionObserverTest {
 
     @Test
     @EnableFlags(Flags.FLAG_ENABLE_FULLY_IMMERSIVE_IN_DESKTOP)
-    public void onTransitionReady_forwardsToDesktopImmersiveHandler() {
+    public void onTransitionReady_forwardsToDesktopImmersiveController() {
         final IBinder transition = mock(IBinder.class);
         final TransitionInfo info = new TransitionInfoBuilder(TRANSIT_CHANGE, 0).build();
         final SurfaceControl.Transaction startT = mock(SurfaceControl.Transaction.class);
@@ -329,7 +329,38 @@ public class FreeformTaskTransitionObserverTest {
 
         mTransitionObserver.onTransitionReady(transition, info, startT, finishT);
 
-        verify(mDesktopFullImmersiveTransitionHandler).onTransitionReady(transition, info);
+        verify(mDesktopImmersiveController).onTransitionReady(transition, info, startT, finishT);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_FULLY_IMMERSIVE_IN_DESKTOP)
+    public void onTransitionMerged_forwardsToDesktopImmersiveController() {
+        final IBinder merged = mock(IBinder.class);
+        final IBinder playing = mock(IBinder.class);
+
+        mTransitionObserver.onTransitionMerged(merged, playing);
+
+        verify(mDesktopImmersiveController).onTransitionMerged(merged, playing);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_FULLY_IMMERSIVE_IN_DESKTOP)
+    public void onTransitionStarting_forwardsToDesktopImmersiveController() {
+        final IBinder transition = mock(IBinder.class);
+
+        mTransitionObserver.onTransitionStarting(transition);
+
+        verify(mDesktopImmersiveController).onTransitionStarting(transition);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_FULLY_IMMERSIVE_IN_DESKTOP)
+    public void onTransitionFinished_forwardsToDesktopImmersiveController() {
+        final IBinder transition = mock(IBinder.class);
+
+        mTransitionObserver.onTransitionFinished(transition, /* aborted= */ false);
+
+        verify(mDesktopImmersiveController).onTransitionFinished(transition, /* aborted= */ false);
     }
 
     private static TransitionInfo.Change createChange(int mode, int taskId, int windowingMode) {

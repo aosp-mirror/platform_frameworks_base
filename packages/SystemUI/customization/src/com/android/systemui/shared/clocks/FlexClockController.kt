@@ -25,6 +25,7 @@ import com.android.systemui.plugins.clocks.ClockController
 import com.android.systemui.plugins.clocks.ClockEvents
 import com.android.systemui.plugins.clocks.ClockMessageBuffers
 import com.android.systemui.plugins.clocks.ClockReactiveSetting
+import com.android.systemui.plugins.clocks.ThemeConfig
 import com.android.systemui.plugins.clocks.WeatherData
 import com.android.systemui.plugins.clocks.ZenData
 import com.android.systemui.shared.clocks.view.FlexClockView
@@ -97,24 +98,6 @@ class FlexClockController(
                 largeClock.events.onLocaleChanged(locale)
             }
 
-            override fun onColorPaletteChanged(resources: Resources) {
-                assets.refreshColorPalette(design.colorPalette)
-                smallClock.assets.refreshColorPalette(design.colorPalette)
-                largeClock.assets.refreshColorPalette(design.colorPalette)
-
-                smallClock.events.onColorPaletteChanged(resources)
-                largeClock.events.onColorPaletteChanged(resources)
-            }
-
-            override fun onSeedColorChanged(seedColor: Int?) {
-                assets.setSeedColor(seedColor, design.colorPalette)
-                smallClock.assets.setSeedColor(seedColor, design.colorPalette)
-                largeClock.assets.setSeedColor(seedColor, design.colorPalette)
-
-                smallClock.events.onSeedColorChanged(seedColor)
-                largeClock.events.onSeedColorChanged(seedColor)
-            }
-
             override fun onWeatherDataChanged(data: WeatherData) {
                 smallClock.events.onWeatherDataChanged(data)
                 largeClock.events.onWeatherDataChanged(data)
@@ -136,14 +119,21 @@ class FlexClockController(
             }
         }
 
-    override fun initialize(resources: Resources, dozeFraction: Float, foldFraction: Float) {
-        events.onColorPaletteChanged(resources)
-        smallClock.animations.doze(dozeFraction)
-        largeClock.animations.doze(dozeFraction)
-        smallClock.animations.fold(foldFraction)
-        largeClock.animations.fold(foldFraction)
-        smallClock.events.onTimeTick()
-        largeClock.events.onTimeTick()
+    override fun initialize(isDarkTheme: Boolean, dozeFraction: Float, foldFraction: Float) {
+        val theme = ThemeConfig(isDarkTheme, assets.seedColor)
+        smallClock.run {
+            events.onThemeChanged(theme)
+            animations.doze(dozeFraction)
+            animations.fold(foldFraction)
+            events.onTimeTick()
+        }
+
+        largeClock.run {
+            events.onThemeChanged(theme)
+            animations.doze(dozeFraction)
+            animations.fold(foldFraction)
+            events.onTimeTick()
+        }
     }
 
     override fun dump(pw: PrintWriter) {}

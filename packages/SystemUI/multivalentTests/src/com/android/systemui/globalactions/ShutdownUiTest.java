@@ -19,20 +19,25 @@ package com.android.systemui.globalactions;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNull;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.content.res.Resources;
 import android.nearby.NearbyManager;
 import android.net.platform.flags.Flags;
 import android.os.PowerManager;
 import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
+import android.testing.TestableLooper;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.R;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.statusbar.BlurUtils;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -46,14 +51,13 @@ public class ShutdownUiTest extends SysuiTestCase {
 
     ShutdownUi mShutdownUi;
     @Mock
-    BlurUtils mBlurUtils;
-    @Mock
     NearbyManager mNearbyManager;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        mShutdownUi = new ShutdownUi(getContext(), mBlurUtils, mNearbyManager);
+        mContext = spy(mContext);
+        mShutdownUi = new ShutdownUi(mContext, mNearbyManager);
     }
 
     @Test
@@ -140,4 +144,24 @@ public class ShutdownUiTest extends SysuiTestCase {
         assertEquals(actualLayout, expectedLayout);
     }
 
+    /**
+     * Main looper required here because showShutdown UI creates a dialog which instantiates a
+     * handler that needs to be on the main thread.
+     */
+    @TestableLooper.RunWithLooper(setAsMainLooper = true)
+    @Test
+    public void showShutdownUi_loadsShutdownTextColorAndAlpha() {
+        this.allowTestableLooperAsMainThread();
+
+        Resources mockResources = spy(mContext.getResources());
+        when(mContext.getResources()).thenReturn(mockResources);
+
+        mShutdownUi.showShutdownUi(false, "test");
+
+        verify(mockResources).getFloat(
+                eq(com.android.systemui.res.R.dimen.shutdown_scrim_behind_alpha));
+        verify(mockResources).getColor(
+                eq(com.android.systemui.res.R.color.global_actions_shutdown_ui_text),
+                any());
+    }
 }

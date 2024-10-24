@@ -659,5 +659,6 @@ applications that come with the platform
    <privapp-permissions package="com.android.devicediagnostics">
         <permission name="android.permission.READ_PRIVILEGED_PHONE_STATE"/>
         <permission name="android.permission.BATTERY_STATS"/>
+        <permission name="android.permission.ENTER_TRADE_IN_MODE"/>
     </privapp-permissions>
 </permissions>

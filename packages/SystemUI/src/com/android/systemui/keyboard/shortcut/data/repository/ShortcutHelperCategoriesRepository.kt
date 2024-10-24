@@ -68,7 +68,7 @@ constructor(
     @InputShortcuts private val inputShortcutsSource: KeyboardShortcutGroupsSource,
     @CurrentAppShortcuts private val currentAppShortcutsSource: KeyboardShortcutGroupsSource,
     private val inputManager: InputManager,
-    stateRepository: ShortcutHelperStateRepository
+    stateRepository: ShortcutHelperStateRepository,
 ) {
 
     private val sources =
@@ -76,27 +76,27 @@ constructor(
             InternalGroupsSource(
                 source = systemShortcutsSource,
                 isTrusted = true,
-                typeProvider = { System }
+                typeProvider = { System },
             ),
             InternalGroupsSource(
                 source = multitaskingShortcutsSource,
                 isTrusted = true,
-                typeProvider = { MultiTasking }
+                typeProvider = { MultiTasking },
             ),
             InternalGroupsSource(
                 source = appCategoriesShortcutsSource,
                 isTrusted = true,
-                typeProvider = { AppCategories }
+                typeProvider = { AppCategories },
             ),
             InternalGroupsSource(
                 source = inputShortcutsSource,
                 isTrusted = false,
-                typeProvider = { InputMethodEditor }
+                typeProvider = { InputMethodEditor },
             ),
             InternalGroupsSource(
                 source = currentAppShortcutsSource,
                 isTrusted = false,
-                typeProvider = { groups -> getCurrentAppShortcutCategoryType(groups) }
+                typeProvider = { groups -> getCurrentAppShortcutCategoryType(groups) },
             ),
         )
 
@@ -179,7 +179,7 @@ constructor(
                             shortcutGroup.items,
                             keepIcons,
                             supportedKeyCodes,
-                        )
+                        ),
                     )
                 }
                 .filter { it.shortcuts.isNotEmpty() }
@@ -214,13 +214,13 @@ constructor(
         return Shortcut(
             label = shortcutInfo.label!!.toString(),
             icon = toShortcutIcon(keepIcon, shortcutInfo),
-            commands = listOf(shortcutCommand)
+            commands = listOf(shortcutCommand),
         )
     }
 
     private fun toShortcutIcon(
         keepIcon: Boolean,
-        shortcutInfo: KeyboardShortcutInfo
+        shortcutInfo: KeyboardShortcutInfo,
     ): ShortcutIcon? {
         if (!keepIcon) {
             return null
@@ -236,13 +236,13 @@ constructor(
 
     private fun toShortcutCommand(
         keyCharacterMap: KeyCharacterMap,
-        info: KeyboardShortcutInfo
+        info: KeyboardShortcutInfo,
     ): ShortcutCommand? {
         val keys = mutableListOf<ShortcutKey>()
         var remainingModifiers = info.modifiers
         SUPPORTED_MODIFIERS.forEach { supportedModifier ->
             if ((supportedModifier and remainingModifiers) != 0) {
-                keys += toShortcutKey(keyCharacterMap, supportedModifier) ?: return null
+                keys += toShortcutModifierKey(supportedModifier) ?: return null
                 // "Remove" the modifier from the remaining modifiers
                 remainingModifiers = remainingModifiers and supportedModifier.inv()
             }
@@ -260,6 +260,20 @@ constructor(
             return null
         }
         return ShortcutCommand(keys)
+    }
+
+    private fun toShortcutModifierKey(modifierMask: Int): ShortcutKey? {
+        val iconResId = ShortcutHelperKeys.keyIcons[modifierMask]
+        if (iconResId != null) {
+            return ShortcutKey.Icon(iconResId)
+        }
+
+        val modifierLabel = ShortcutHelperKeys.modifierLabels[modifierMask]
+        if (modifierLabel != null) {
+            return ShortcutKey.Text(modifierLabel(context))
+        }
+        Log.wtf("TAG", "Couldn't find label or icon for modifier $modifierMask")
+        return null
     }
 
     private fun toShortcutKey(
@@ -289,7 +303,7 @@ constructor(
 
     private suspend fun fetchSupportedKeyCodes(
         deviceId: Int,
-        groupsFromAllSources: List<List<KeyboardShortcutGroup>>
+        groupsFromAllSources: List<List<KeyboardShortcutGroup>>,
     ): Set<Int> =
         withContext(backgroundDispatcher) {
             val allUsedKeyCodes =
@@ -320,7 +334,7 @@ constructor(
                 KeyEvent.META_ALT_ON,
                 KeyEvent.META_SHIFT_ON,
                 KeyEvent.META_SYM_ON,
-                KeyEvent.META_FUNCTION_ON
+                KeyEvent.META_FUNCTION_ON,
             )
     }
 }

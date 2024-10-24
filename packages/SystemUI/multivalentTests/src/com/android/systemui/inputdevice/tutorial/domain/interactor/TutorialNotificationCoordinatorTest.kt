@@ -23,6 +23,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.inputdevice.tutorial.data.repository.TutorialSchedulerRepository
+import com.android.systemui.inputdevice.tutorial.inputDeviceTutorialLogger
 import com.android.systemui.inputdevice.tutorial.ui.TutorialNotificationCoordinator
 import com.android.systemui.keyboard.data.repository.FakeKeyboardRepository
 import com.android.systemui.kosmos.Kosmos
@@ -75,16 +76,21 @@ class TutorialNotificationCoordinatorTest : SysuiTestCase() {
             TutorialSchedulerRepository(
                 context,
                 dataStoreScope,
-                dataStoreName = "TutorialNotificationCoordinatorTest"
+                dataStoreName = "TutorialNotificationCoordinatorTest",
             )
         val interactor =
-            TutorialSchedulerInteractor(keyboardRepository, touchpadRepository, repository)
+            TutorialSchedulerInteractor(
+                keyboardRepository,
+                touchpadRepository,
+                repository,
+                kosmos.inputDeviceTutorialLogger,
+            )
         underTest =
             TutorialNotificationCoordinator(
                 testScope.backgroundScope,
                 context,
                 interactor,
-                notificationManager
+                notificationManager,
             )
         notificationCaptor = ArgumentCaptor.forClass(Notification::class.java)
         underTest.start()
@@ -103,7 +109,7 @@ class TutorialNotificationCoordinatorTest : SysuiTestCase() {
             advanceTimeBy(LAUNCH_DELAY)
             verifyNotification(
                 R.string.launch_keyboard_tutorial_notification_title,
-                R.string.launch_keyboard_tutorial_notification_content
+                R.string.launch_keyboard_tutorial_notification_content,
             )
         }
 
@@ -114,7 +120,7 @@ class TutorialNotificationCoordinatorTest : SysuiTestCase() {
             advanceTimeBy(LAUNCH_DELAY)
             verifyNotification(
                 R.string.launch_touchpad_tutorial_notification_title,
-                R.string.launch_touchpad_tutorial_notification_content
+                R.string.launch_touchpad_tutorial_notification_content,
             )
         }
 
@@ -126,7 +132,7 @@ class TutorialNotificationCoordinatorTest : SysuiTestCase() {
             advanceTimeBy(LAUNCH_DELAY)
             verifyNotification(
                 R.string.launch_keyboard_touchpad_tutorial_notification_title,
-                R.string.launch_keyboard_touchpad_tutorial_notification_content
+                R.string.launch_keyboard_touchpad_tutorial_notification_content,
             )
         }
 

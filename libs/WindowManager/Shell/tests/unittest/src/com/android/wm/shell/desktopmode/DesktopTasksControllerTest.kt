@@ -201,7 +201,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
   lateinit var toggleResizeDesktopTaskTransitionHandler: ToggleResizeDesktopTaskTransitionHandler
   @Mock lateinit var dragToDesktopTransitionHandler: DragToDesktopTransitionHandler
   @Mock
-  lateinit var mockDesktopFullImmersiveTransitionHandler: DesktopFullImmersiveTransitionHandler
+  lateinit var mMockDesktopImmersiveController: DesktopImmersiveController
   @Mock lateinit var launchAdjacentController: LaunchAdjacentController
   @Mock lateinit var splitScreenController: SplitScreenController
   @Mock lateinit var recentsTransitionHandler: RecentsTransitionHandler
@@ -322,7 +322,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
         dragAndDropTransitionHandler,
         toggleResizeDesktopTaskTransitionHandler,
         dragToDesktopTransitionHandler,
-        mockDesktopFullImmersiveTransitionHandler,
+        mMockDesktopImmersiveController,
         taskRepository,
         desktopModeLoggerTransitionObserver,
         launchAdjacentController,
@@ -1773,7 +1773,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
     controller.minimizeTask(task)
 
-    verify(mockDesktopFullImmersiveTransitionHandler).exitImmersiveIfApplicable(any(), eq(task))
+    verify(mMockDesktopImmersiveController).exitImmersiveIfApplicable(any(), eq(task))
   }
 
   @Test
@@ -1783,7 +1783,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     val runOnTransit = RunOnStartTransitionCallback()
     whenever(freeformTaskTransitionStarter.startMinimizedModeTransition(any()))
       .thenReturn(transition)
-    whenever(mockDesktopFullImmersiveTransitionHandler.exitImmersiveIfApplicable(any(), eq(task)))
+    whenever(mMockDesktopImmersiveController.exitImmersiveIfApplicable(any(), eq(task)))
       .thenReturn(runOnTransit)
 
     controller.minimizeTask(task)
@@ -3092,13 +3092,14 @@ class DesktopTasksControllerTest : ShellTestCase() {
     val transition = Binder()
     whenever(transitions.startTransition(eq(TRANSIT_OPEN), any(), anyOrNull()))
       .thenReturn(transition)
-    whenever(mockDesktopFullImmersiveTransitionHandler
-      .exitImmersiveIfApplicable(any(), eq(immersiveTask.displayId))).thenReturn(runOnStartTransit)
+    whenever(mMockDesktopImmersiveController
+      .exitImmersiveIfApplicable(any(), eq(immersiveTask.displayId), eq(freeformTask.taskId)))
+      .thenReturn(runOnStartTransit)
 
     runOpenInstance(immersiveTask, freeformTask.taskId)
 
-    verify(mockDesktopFullImmersiveTransitionHandler)
-      .exitImmersiveIfApplicable(any(), eq(immersiveTask.displayId))
+    verify(mMockDesktopImmersiveController)
+      .exitImmersiveIfApplicable(any(), eq(immersiveTask.displayId), eq(freeformTask.taskId))
     runOnStartTransit.assertOnlyInvocation(transition)
   }
 
@@ -3445,7 +3446,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
     controller.toggleDesktopTaskFullImmersiveState(task)
 
-    verify(mockDesktopFullImmersiveTransitionHandler).moveTaskToImmersive(task)
+    verify(mMockDesktopImmersiveController).moveTaskToImmersive(task)
   }
 
   @Test
@@ -3455,7 +3456,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
     controller.toggleDesktopTaskFullImmersiveState(task)
 
-    verify(mockDesktopFullImmersiveTransitionHandler).moveTaskToNonImmersive(task)
+    verify(mMockDesktopImmersiveController).moveTaskToNonImmersive(task)
   }
 
   @Test
@@ -3467,7 +3468,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     task.requestedVisibleTypes = WindowInsets.Type.statusBars()
     controller.onTaskInfoChanged(task)
 
-    verify(mockDesktopFullImmersiveTransitionHandler).moveTaskToNonImmersive(task)
+    verify(mMockDesktopImmersiveController).moveTaskToNonImmersive(task)
   }
 
   @Test
@@ -3479,7 +3480,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     task.requestedVisibleTypes = WindowInsets.Type.statusBars()
     controller.onTaskInfoChanged(task)
 
-    verify(mockDesktopFullImmersiveTransitionHandler, never()).moveTaskToNonImmersive(task)
+    verify(mMockDesktopImmersiveController, never()).moveTaskToNonImmersive(task)
   }
 
   @Test
@@ -3488,13 +3489,14 @@ class DesktopTasksControllerTest : ShellTestCase() {
     val wct = WindowContainerTransaction()
     val runOnStartTransit = RunOnStartTransitionCallback()
     val transition = Binder()
-    whenever(mockDesktopFullImmersiveTransitionHandler
-      .exitImmersiveIfApplicable(wct, task.displayId)).thenReturn(runOnStartTransit)
+    whenever(mMockDesktopImmersiveController
+      .exitImmersiveIfApplicable(wct, task.displayId, task.taskId)).thenReturn(runOnStartTransit)
     whenever(enterDesktopTransitionHandler.moveToDesktop(wct, UNKNOWN)).thenReturn(transition)
 
     controller.moveTaskToDesktop(taskId = task.taskId, wct = wct, transitionSource = UNKNOWN)
 
-    verify(mockDesktopFullImmersiveTransitionHandler).exitImmersiveIfApplicable(wct, task.displayId)
+    verify(mMockDesktopImmersiveController)
+      .exitImmersiveIfApplicable(wct, task.displayId, task.taskId)
     runOnStartTransit.assertOnlyInvocation(transition)
   }
 
@@ -3504,13 +3506,14 @@ class DesktopTasksControllerTest : ShellTestCase() {
     val wct = WindowContainerTransaction()
     val runOnStartTransit = RunOnStartTransitionCallback()
     val transition = Binder()
-    whenever(mockDesktopFullImmersiveTransitionHandler
-      .exitImmersiveIfApplicable(wct, task.displayId)).thenReturn(runOnStartTransit)
+    whenever(mMockDesktopImmersiveController
+      .exitImmersiveIfApplicable(wct, task.displayId, task.taskId)).thenReturn(runOnStartTransit)
     whenever(enterDesktopTransitionHandler.moveToDesktop(wct, UNKNOWN)).thenReturn(transition)
 
     controller.moveTaskToDesktop(taskId = task.taskId, wct = wct, transitionSource = UNKNOWN)
 
-    verify(mockDesktopFullImmersiveTransitionHandler).exitImmersiveIfApplicable(wct, task.displayId)
+    verify(mMockDesktopImmersiveController)
+      .exitImmersiveIfApplicable(wct, task.displayId, task.taskId)
     runOnStartTransit.assertOnlyInvocation(transition)
   }
 
@@ -3519,14 +3522,15 @@ class DesktopTasksControllerTest : ShellTestCase() {
     val task = setUpFreeformTask(background = true)
     val runOnStartTransit = RunOnStartTransitionCallback()
     val transition = Binder()
-    whenever(mockDesktopFullImmersiveTransitionHandler
-      .exitImmersiveIfApplicable(any(), eq(task.displayId))).thenReturn(runOnStartTransit)
+    whenever(mMockDesktopImmersiveController
+      .exitImmersiveIfApplicable(any(), eq(task.displayId), eq(task.taskId)))
+      .thenReturn(runOnStartTransit)
     whenever(transitions.startTransition(any(), any(), anyOrNull())).thenReturn(transition)
 
     controller.moveTaskToFront(task.taskId, remoteTransition = null)
 
-    verify(mockDesktopFullImmersiveTransitionHandler)
-      .exitImmersiveIfApplicable(any(), eq(task.displayId))
+    verify(mMockDesktopImmersiveController)
+      .exitImmersiveIfApplicable(any(), eq(task.displayId), eq(task.taskId))
     runOnStartTransit.assertOnlyInvocation(transition)
   }
 
@@ -3535,14 +3539,15 @@ class DesktopTasksControllerTest : ShellTestCase() {
     val task = setUpFreeformTask(background = false)
     val runOnStartTransit = RunOnStartTransitionCallback()
     val transition = Binder()
-    whenever(mockDesktopFullImmersiveTransitionHandler
-      .exitImmersiveIfApplicable(any(), eq(task.displayId))).thenReturn(runOnStartTransit)
+    whenever(mMockDesktopImmersiveController
+      .exitImmersiveIfApplicable(any(), eq(task.displayId), eq(task.taskId)))
+      .thenReturn(runOnStartTransit)
     whenever(transitions.startTransition(any(), any(), anyOrNull())).thenReturn(transition)
 
     controller.moveTaskToFront(task.taskId, remoteTransition = null)
 
-    verify(mockDesktopFullImmersiveTransitionHandler)
-      .exitImmersiveIfApplicable(any(), eq(task.displayId))
+    verify(mMockDesktopImmersiveController)
+      .exitImmersiveIfApplicable(any(), eq(task.displayId), eq(task.taskId))
     runOnStartTransit.assertOnlyInvocation(transition)
   }
 
@@ -3555,7 +3560,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
     controller.handleRequest(binder, createTransition(task))
 
-    verify(mockDesktopFullImmersiveTransitionHandler)
+    verify(mMockDesktopImmersiveController)
       .exitImmersiveIfApplicable(eq(binder), any(), eq(task.displayId))
   }
 
@@ -3567,8 +3572,115 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
     controller.handleRequest(binder, createTransition(task))
 
-    verify(mockDesktopFullImmersiveTransitionHandler)
+    verify(mMockDesktopImmersiveController)
       .exitImmersiveIfApplicable(eq(binder), any(), eq(task.displayId))
+  }
+
+  @Test
+  @EnableFlags(Flags.FLAG_ENABLE_FULLY_IMMERSIVE_IN_DESKTOP)
+  fun shouldPlayDesktopAnimation_notShowingDesktop_doesNotPlay() {
+    val triggerTask = setUpFullscreenTask(displayId = 5)
+    taskRepository.setTaskInFullImmersiveState(
+      displayId = triggerTask.displayId,
+      taskId = triggerTask.taskId,
+      immersive = true
+    )
+
+    assertThat(controller.shouldPlayDesktopAnimation(
+      TransitionRequestInfo(TRANSIT_OPEN, triggerTask, /* remoteTransition= */ null)
+    )).isFalse()
+  }
+
+  @Test
+  @EnableFlags(Flags.FLAG_ENABLE_FULLY_IMMERSIVE_IN_DESKTOP)
+  fun shouldPlayDesktopAnimation_notOpening_doesNotPlay() {
+    val triggerTask = setUpFreeformTask(displayId = 5)
+    taskRepository.setTaskInFullImmersiveState(
+      displayId = triggerTask.displayId,
+      taskId = triggerTask.taskId,
+      immersive = true
+    )
+
+    assertThat(controller.shouldPlayDesktopAnimation(
+      TransitionRequestInfo(TRANSIT_CHANGE, triggerTask, /* remoteTransition= */ null)
+    )).isFalse()
+  }
+
+  @Test
+  @EnableFlags(Flags.FLAG_ENABLE_FULLY_IMMERSIVE_IN_DESKTOP)
+  fun shouldPlayDesktopAnimation_notImmersive_doesNotPlay() {
+    val triggerTask = setUpFreeformTask(displayId = 5)
+    taskRepository.setTaskInFullImmersiveState(
+      displayId = triggerTask.displayId,
+      taskId = triggerTask.taskId,
+      immersive = false
+    )
+
+    assertThat(controller.shouldPlayDesktopAnimation(
+      TransitionRequestInfo(TRANSIT_OPEN, triggerTask, /* remoteTransition= */ null)
+    )).isFalse()
+  }
+
+  @Test
+  @EnableFlags(Flags.FLAG_ENABLE_FULLY_IMMERSIVE_IN_DESKTOP)
+  fun shouldPlayDesktopAnimation_fullscreenEntersDesktop_plays() {
+    // At least one freeform task to be in a desktop.
+    val existingTask = setUpFreeformTask(displayId = 5)
+    val triggerTask = setUpFullscreenTask(displayId = 5)
+    assertThat(controller.isDesktopModeShowing(triggerTask.displayId)).isTrue()
+    taskRepository.setTaskInFullImmersiveState(
+      displayId = existingTask.displayId,
+      taskId = existingTask.taskId,
+      immersive = true
+    )
+
+    assertThat(
+      controller.shouldPlayDesktopAnimation(
+        TransitionRequestInfo(TRANSIT_OPEN, triggerTask, /* remoteTransition= */ null)
+      )
+    ).isTrue()
+  }
+
+  @Test
+  @EnableFlags(Flags.FLAG_ENABLE_FULLY_IMMERSIVE_IN_DESKTOP)
+  fun shouldPlayDesktopAnimation_fullscreenStaysFullscreen_doesNotPlay() {
+    val triggerTask = setUpFullscreenTask(displayId = 5)
+    assertThat(controller.isDesktopModeShowing(triggerTask.displayId)).isFalse()
+
+    assertThat(controller.shouldPlayDesktopAnimation(
+      TransitionRequestInfo(TRANSIT_OPEN, triggerTask, /* remoteTransition= */ null)
+    )).isFalse()
+  }
+
+  @Test
+  @EnableFlags(Flags.FLAG_ENABLE_FULLY_IMMERSIVE_IN_DESKTOP)
+  fun shouldPlayDesktopAnimation_freeformStaysInDesktop_plays() {
+    // At least one freeform task to be in a desktop.
+    val existingTask = setUpFreeformTask(displayId = 5)
+    val triggerTask = setUpFreeformTask(displayId = 5, active = false)
+    assertThat(controller.isDesktopModeShowing(triggerTask.displayId)).isTrue()
+    taskRepository.setTaskInFullImmersiveState(
+      displayId = existingTask.displayId,
+      taskId = existingTask.taskId,
+      immersive = true
+    )
+
+    assertThat(
+      controller.shouldPlayDesktopAnimation(
+        TransitionRequestInfo(TRANSIT_OPEN, triggerTask, /* remoteTransition= */ null)
+      )
+    ).isTrue()
+  }
+
+  @Test
+  @EnableFlags(Flags.FLAG_ENABLE_FULLY_IMMERSIVE_IN_DESKTOP)
+  fun shouldPlayDesktopAnimation_freeformExitsDesktop_doesNotPlay() {
+    val triggerTask = setUpFreeformTask(displayId = 5, active = false)
+    assertThat(controller.isDesktopModeShowing(triggerTask.displayId)).isFalse()
+
+    assertThat(controller.shouldPlayDesktopAnimation(
+      TransitionRequestInfo(TRANSIT_OPEN, triggerTask, /* remoteTransition= */ null)
+    )).isFalse()
   }
 
   private class RunOnStartTransitionCallback : ((IBinder) -> Unit) {

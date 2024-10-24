@@ -507,6 +507,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     // The time of inactivity after which the stylus can be assumed to be no longer in use.
     private long mIdleStylusTimeoutMillisConfig = 0;
 
+    // Whether wear bedtime mode is enabled in the settings.
+    private boolean mIsWearBedtimeModeEnabled;
+
     /**
      * Creates the display power controller.
      */
@@ -562,6 +565,12 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         mContext = context;
         mBrightnessTracker = brightnessTracker;
         mOnBrightnessChangeRunnable = onBrightnessChangeRunnable;
+
+        mIsWearBedtimeModeEnabled = Settings.Global.getInt(mContext.getContentResolver(),
+                Settings.Global.Wearable.BEDTIME_MODE, /* def= */ 0) == 1;
+        mContext.getContentResolver().registerContentObserver(
+                Settings.Global.getUriFor(Settings.Global.Wearable.BEDTIME_MODE),
+                false /*notifyForDescendants*/, mSettingsObserver, UserHandle.USER_ALL);
 
         final Resources resources = context.getResources();
 
@@ -1166,8 +1175,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                     screenBrightnessThresholds, ambientBrightnessThresholdsIdle,
                     screenBrightnessThresholdsIdle, mContext, mBrightnessRangeController,
                     mBrightnessThrottler, mDisplayDeviceConfig.getAmbientHorizonShort(),
-                    mDisplayDeviceConfig.getAmbientHorizonLong(), userLux, userNits,
-                    mBrightnessClamperController, mFlags);
+                    mDisplayDeviceConfig.getAmbientHorizonLong(), userLux, userNits, mFlags);
             mDisplayBrightnessController.setUpAutoBrightness(
                     mAutomaticBrightnessController, mSensorManager, mDisplayDeviceConfig, mHandler,
                     defaultModeBrightnessMapper, mIsEnabled, mLeadDisplayId);
@@ -1386,9 +1394,12 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         final boolean useDozeBrightness = mFlags.isNormalBrightnessForDozeParameterEnabled()
                 ? (!mPowerRequest.useNormalBrightnessForDoze && mPowerRequest.policy == POLICY_DOZE)
                         || Display.isDozeState(state) : Display.isDozeState(state);
-
-        DisplayBrightnessState displayBrightnessState = mDisplayBrightnessController
-                .updateBrightness(mPowerRequest, state, mDisplayOffloadSession);
+        DisplayBrightnessState displayBrightnessState =
+                mDisplayBrightnessController.updateBrightness(
+                        mPowerRequest,
+                        state,
+                        mDisplayOffloadSession,
+                        mIsWearBedtimeModeEnabled);
         float brightnessState = displayBrightnessState.getBrightness();
         float rawBrightnessState = displayBrightnessState.getBrightness();
         mBrightnessReasonTemp.set(displayBrightnessState.getBrightnessReason());
@@ -1429,16 +1440,24 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                     && !mAutomaticBrightnessController.isInIdleMode()) {
                 // Set sendUpdate to false, we're already in updatePowerState() so there's no need
                 // to trigger it again
-                mAutomaticBrightnessController.switchMode(useDozeBrightness
-                        ? AUTO_BRIGHTNESS_MODE_DOZE : AUTO_BRIGHTNESS_MODE_DEFAULT,
-                        /* sendUpdate= */ false);
+                if (useDozeBrightness) {
+                    mAutomaticBrightnessController.switchMode(AUTO_BRIGHTNESS_MODE_DOZE,
+                            /* sendUpdate= */ false);
+                } else if (mFlags.isAutoBrightnessModeBedtimeWearEnabled()
+                        && mIsWearBedtimeModeEnabled) {
+                    mAutomaticBrightnessController.switchMode(AUTO_BRIGHTNESS_MODE_BEDTIME_WEAR,
+                            /* sendUpdate= */ false);
+                } else {
+                    mAutomaticBrightnessController.switchMode(AUTO_BRIGHTNESS_MODE_DEFAULT,
+                            /* sendUpdate= */ false);
+                }
             }
 
             mAutomaticBrightnessStrategy.setAutoBrightnessState(state,
                     allowAutoBrightnessWhileDozing, mBrightnessReasonTemp.getReason(),
                     mPowerRequest.policy, mPowerRequest.useNormalBrightnessForDoze,
                     mDisplayBrightnessController.getLastUserSetScreenBrightness(),
-                    userSetBrightnessChanged);
+                    userSetBrightnessChanged, mIsWearBedtimeModeEnabled);
 
             // If the brightness is already set then it's been overridden by something other than
             // the user, or is a temporary adjustment.
@@ -3172,6 +3191,12 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                         + autoBrightnessPresetToString(preset));
                 setUpAutoBrightness(mContext, mHandler);
                 sendUpdatePowerState();
+            } else if (uri.equals(
+                    Settings.Global.getUriFor(Settings.Global.Wearable.BEDTIME_MODE))) {
+                mIsWearBedtimeModeEnabled = Settings.Global.getInt(mContext.getContentResolver(),
+                        Settings.Global.Wearable.BEDTIME_MODE, /* def= */ 0) == 1;
+                Slog.i(mTag, "Update for bedtime mode. Enable: " + mIsWearBedtimeModeEnabled);
+                sendUpdatePowerState();
             } else {
                 handleSettingsChange();
             }
@@ -3275,7 +3300,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 BrightnessRangeController brightnessModeController,
                 BrightnessThrottler brightnessThrottler, int ambientLightHorizonShort,
                 int ambientLightHorizonLong, float userLux, float userNits,
-                BrightnessClamperController brightnessClamperController,
                 DisplayManagerFlags displayManagerFlags) {
 
             return new AutomaticBrightnessController(callbacks, looper, sensorManager, lightSensor,

@@ -728,7 +728,7 @@ public class RescueParty {
         }
 
         @Override
-        public boolean execute(@Nullable VersionedPackage failedPackage,
+        public boolean onExecuteHealthCheckMitigation(@Nullable VersionedPackage failedPackage,
                 @FailureReasons int failureReason, int mitigationCount) {
             if (isDisabled()) {
                 return false;
@@ -796,7 +796,7 @@ public class RescueParty {
         }
 
         @Override
-        public boolean executeBootLoopMitigation(int mitigationCount) {
+        public boolean onExecuteBootLoopMitigation(int mitigationCount) {
             if (isDisabled()) {
                 return false;
             }

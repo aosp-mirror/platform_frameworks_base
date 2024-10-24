@@ -270,4 +270,18 @@ public abstract class InputManagerInternal {
      * @param scaleFactor the new scale factor to be applied for pointer icons.
      */
     public abstract void setAccessibilityPointerIconScaleFactor(int displayId, float scaleFactor);
+
+    /**
+     * Set whether the given input device can wake up the kernel from sleep
+     * when it generates input events. By default, usually only internal (built-in)
+     * input devices can wake the kernel from sleep. For an external input device
+     * that supports remote wakeup to be able to wake the kernel, this must be called
+     * after each time the device is connected/added.
+     *
+     * @param deviceId the device ID of the input device.
+     * @param enabled When true, device will be configured to wake up kernel.
+     *
+     * @return true if setting power wakeup was successful.
+     */
+    public abstract boolean setKernelWakeEnabled(int deviceId, boolean enabled);
 }

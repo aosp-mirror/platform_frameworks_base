@@ -345,6 +345,13 @@ filegroup {
 }
 
 filegroup {
+    name: "service-crashrecovery-shared-srcs",
+    srcs: [
+        "android/util/IndentingPrintWriter.java",
+    ],
+}
+
+filegroup {
     name: "incremental_aidl",
     srcs: [
         "android/os/incremental/IIncrementalServiceConnector.aidl",
