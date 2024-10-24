@@ -27,7 +27,6 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
-import com.android.systemui.statusbar.chips.notification.shared.StatusBarNotifChips
 import com.android.systemui.statusbar.chips.ui.binder.OngoingActivityChipBinder
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 import com.android.systemui.statusbar.core.StatusBarSimpleFragment
@@ -85,7 +84,7 @@ class HomeStatusBarViewBinderImpl @Inject constructor() : HomeStatusBarViewBinde
                     }
                 }
 
-                if (Flags.statusBarScreenSharingChips() && !StatusBarNotifChips.isEnabled) {
+                if (Flags.statusBarScreenSharingChips() && !Flags.statusBarRonChips()) {
                     val primaryChipView: View =
                         view.requireViewById(R.id.ongoing_activity_chip_primary)
                     launch {
@@ -121,7 +120,7 @@ class HomeStatusBarViewBinderImpl @Inject constructor() : HomeStatusBarViewBinde
                     }
                 }
 
-                if (Flags.statusBarScreenSharingChips() && StatusBarNotifChips.isEnabled) {
+                if (Flags.statusBarScreenSharingChips() && Flags.statusBarRonChips()) {
                     val primaryChipView: View =
                         view.requireViewById(R.id.ongoing_activity_chip_primary)
                     val secondaryChipView: View =
