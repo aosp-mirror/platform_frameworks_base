@@ -73,6 +73,7 @@ fun SceneScope.QuickQuickSettings(
                 squishiness = { squishiness },
                 coroutineScope = scope,
                 bounceableInfo = bounceables.bounceableInfo(it, spanIndex, column, columns),
+                tileHapticsViewModelFactoryProvider = viewModel.tileHapticsViewModelFactoryProvider,
             )
         }
     }

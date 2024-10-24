@@ -16,21 +16,10 @@
 
 package com.android.systemui.qs.panels.ui.viewmodel
 
-import com.android.systemui.haptics.msdl.tileHapticsViewModelFactoryProvider
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.applicationCoroutineScope
-import com.android.systemui.qs.panels.domain.interactor.quickQuickSettingsRowInteractor
-import com.android.systemui.qs.pipeline.domain.interactor.currentTilesInteractor
+import com.android.systemui.qs.FakeQSTile
+import com.android.systemui.qs.pipeline.shared.TileSpec
 
-val Kosmos.quickQuickSettingsViewModel by
-    Kosmos.Fixture {
-        QuickQuickSettingsViewModel(
-            currentTilesInteractor,
-            qsColumnsViewModel,
-            quickQuickSettingsRowInteractor,
-            tileSquishinessViewModel,
-            iconTilesViewModel,
-            applicationCoroutineScope,
-            tileHapticsViewModelFactoryProvider,
-        )
-    }
+val Kosmos.fakeQsTile by Kosmos.Fixture { FakeQSTile(user = 0, available = true) }
+val Kosmos.tileViewModel by
+    Kosmos.Fixture { TileViewModel(fakeQsTile, TileSpec.Companion.create("test")) }
