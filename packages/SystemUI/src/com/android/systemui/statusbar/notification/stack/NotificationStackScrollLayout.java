@@ -1200,7 +1200,6 @@ public class NotificationStackScrollLayout
         if (!SceneContainerFlag.isEnabled()) {
             setMaxLayoutHeight(getHeight());
             updateContentHeight();
-            mWallpaperInteractor.setNotificationStackAbsoluteBottom(mContentHeight);
         }
         clampScrollPosition();
         requestChildrenUpdate();
@@ -1278,7 +1277,6 @@ public class NotificationStackScrollLayout
         if (mAmbientState.getStackTop() != stackTop) {
             mAmbientState.setStackTop(stackTop);
             onTopPaddingChanged(/* animate = */ isAddOrRemoveAnimationPending());
-            mWallpaperInteractor.setNotificationStackAbsoluteBottom((int) stackTop);
         }
     }
 
@@ -2648,6 +2646,7 @@ public class NotificationStackScrollLayout
 
         // The topPadding can be bigger than the regular padding when qs is expanded, in that
         // state the maxPanelHeight and the contentHeight should be bigger
+
         mContentHeight =
                 (int) (height + Math.max(getIntrinsicPadding(), getTopPadding()) + mBottomPadding);
         updateScrollability();
