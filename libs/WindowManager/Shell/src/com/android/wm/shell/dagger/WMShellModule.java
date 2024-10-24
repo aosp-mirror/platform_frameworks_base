@@ -67,6 +67,7 @@ import com.android.wm.shell.dagger.pip.PipModule;
 import com.android.wm.shell.desktopmode.CloseDesktopTaskTransitionHandler;
 import com.android.wm.shell.desktopmode.DefaultDragToDesktopTransitionHandler;
 import com.android.wm.shell.desktopmode.DesktopActivityOrientationChangeHandler;
+import com.android.wm.shell.desktopmode.DesktopDisplayEventHandler;
 import com.android.wm.shell.desktopmode.DesktopImmersiveController;
 import com.android.wm.shell.desktopmode.DesktopMixedTransitionHandler;
 import com.android.wm.shell.desktopmode.DesktopModeDragAndDropTransitionHandler;
@@ -1005,6 +1006,30 @@ public abstract class WMShellModule {
 
     @WMSingleton
     @Provides
+    static Optional<DesktopDisplayEventHandler> provideDesktopDisplayEventHandler(
+            Context context,
+            ShellInit shellInit,
+            Transitions transitions,
+            DisplayController displayController,
+            RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
+            IWindowManager windowManager
+    ) {
+        if (!DesktopModeStatus.canEnterDesktopMode(context)
+                || !Flags.enableDisplayWindowingModeSwitching()) {
+            return Optional.empty();
+        }
+        return Optional.of(
+                new DesktopDisplayEventHandler(
+                        context,
+                        shellInit,
+                        transitions,
+                        displayController,
+                        rootTaskDisplayAreaOrganizer,
+                        windowManager));
+    }
+
+    @WMSingleton
+    @Provides
     static AppHandleEducationDatastoreRepository provideAppHandleEducationDatastoreRepository(
             Context context) {
         return new AppHandleEducationDatastoreRepository(context);
@@ -1123,7 +1148,8 @@ public abstract class WMShellModule {
     @Provides
     static Object provideIndependentShellComponentsToCreate(
             DragAndDropController dragAndDropController,
-            Optional<DesktopTasksTransitionObserver> desktopTasksTransitionObserverOptional) {
+            Optional<DesktopTasksTransitionObserver> desktopTasksTransitionObserverOptional,
+            Optional<DesktopDisplayEventHandler> desktopDisplayEventHandler) {
         return new Object();
     }
 }
