@@ -57,6 +57,7 @@ import com.android.systemui.keyguard.shared.model.TransitionStep;
 import com.android.systemui.res.R;
 import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor;
+import com.android.systemui.shade.shared.flag.ShadeWindowGoesAround;
 import com.android.systemui.shared.animation.DisableSubpixelTextTransitionListener;
 import com.android.systemui.statusbar.DragDownHelper;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
@@ -247,7 +248,7 @@ public class NotificationShadeWindowViewController implements Dumpable {
                             mDisableSubpixelTextTransitionListener));
         }
 
-        if (com.android.systemui.Flags.shadeWindowGoesAround()) {
+        if (ShadeWindowGoesAround.isEnabled()) {
             mView.setConfigurationForwarder(configurationForwarder);
         }
         dumpManager.registerDumpable(this);
