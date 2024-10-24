@@ -43,9 +43,12 @@ java_defaults {
 
         // To make sure it won't cause VerifyError (b/324063814)
         "platformprotosnano",
+
+        "com.android.internal.os.flags-aconfig-java",
     ],
     srcs: [
         "test/**/*.java",
+        "test/**/*.kt",
     ],
     jni_libs: [
         "libravenwoodbivalenttest_jni",
@@ -58,10 +61,12 @@ java_defaults {
     // TODO(b/371215487): migrate bivalenttest.ravenizer tests to another architecture
     exclude_srcs: [
         "test/**/ravenizer/*.java",
+        "test/**/ravenizer/*.kt",
     ],
     static_libs: [
         "junit",
         "truth",
+        "flag-junit",
         "ravenwood-junit",
     ],
     test_suites: [
