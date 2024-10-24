@@ -31,7 +31,7 @@ import com.android.systemui.plugins.clocks.ClockAnimations
 import com.android.systemui.plugins.clocks.ClockEvents
 import com.android.systemui.plugins.clocks.ClockFaceConfig
 import com.android.systemui.plugins.clocks.ClockFaceEvents
-import com.android.systemui.plugins.clocks.ClockReactiveSetting
+import com.android.systemui.plugins.clocks.ClockFontAxisSetting
 import com.android.systemui.plugins.clocks.ThemeConfig
 import com.android.systemui.plugins.clocks.WeatherData
 import com.android.systemui.plugins.clocks.ZenData
@@ -246,7 +246,9 @@ open class SimpleDigitalHandLayerController<T>(
 
             override fun onZenDataChanged(data: ZenData) {}
 
-            override fun onReactiveAxesChanged(axes: List<ClockReactiveSetting>) {}
+            override fun onFontAxesChanged(axes: List<ClockFontAxisSetting>) {
+                view.updateAxes(axes)
+            }
         }
 
     override val animations =

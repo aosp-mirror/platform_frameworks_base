@@ -39,8 +39,7 @@ class FlexClockView(context: Context, val assets: AssetLoader, messageBuffer: Me
     DigitalClockFaceView(context, messageBuffer) {
     override var digitalClockTextViewMap = mutableMapOf<Int, SimpleDigitalClockTextView>()
     val digitLeftTopMap = mutableMapOf<Int, Point>()
-    var maxSingleDigitHeight = -1
-    var maxSingleDigitWidth = -1
+    var maxSingleDigitSize = Point(-1, -1)
     val lockscreenTranslate = Point(0, 0)
     val aodTranslate = Point(0, 0)
 
@@ -119,25 +118,26 @@ class FlexClockView(context: Context, val assets: AssetLoader, messageBuffer: Me
     }
 
     protected override fun calculateSize(widthMeasureSpec: Int, heightMeasureSpec: Int): Point {
+        maxSingleDigitSize = Point(-1, -1)
         digitalClockTextViewMap.forEach { (_, textView) ->
             textView.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED)
+            maxSingleDigitSize.x = max(maxSingleDigitSize.x, textView.measuredWidth)
+            maxSingleDigitSize.y = max(maxSingleDigitSize.y, textView.measuredHeight)
         }
         val textView = digitalClockTextViewMap[R.id.HOUR_FIRST_DIGIT]!!
-        maxSingleDigitHeight = textView.measuredHeight
-        maxSingleDigitWidth = textView.measuredWidth
-        aodTranslate.x = -(maxSingleDigitWidth * AOD_HORIZONTAL_TRANSLATE_RATIO).toInt()
-        aodTranslate.y = (maxSingleDigitHeight * AOD_VERTICAL_TRANSLATE_RATIO).toInt()
+        aodTranslate.x = -(maxSingleDigitSize.x * AOD_HORIZONTAL_TRANSLATE_RATIO).toInt()
+        aodTranslate.y = (maxSingleDigitSize.y * AOD_VERTICAL_TRANSLATE_RATIO).toInt()
         return Point(
-            ((maxSingleDigitWidth + abs(aodTranslate.x)) * 2),
-            ((maxSingleDigitHeight + abs(aodTranslate.y)) * 2),
+            ((maxSingleDigitSize.x + abs(aodTranslate.x)) * 2),
+            ((maxSingleDigitSize.y + abs(aodTranslate.y)) * 2),
         )
     }
 
     protected override fun calculateLeftTopPosition() {
         digitLeftTopMap[R.id.HOUR_FIRST_DIGIT] = Point(0, 0)
-        digitLeftTopMap[R.id.HOUR_SECOND_DIGIT] = Point(maxSingleDigitWidth, 0)
-        digitLeftTopMap[R.id.MINUTE_FIRST_DIGIT] = Point(0, maxSingleDigitHeight)
-        digitLeftTopMap[R.id.MINUTE_SECOND_DIGIT] = Point(maxSingleDigitWidth, maxSingleDigitHeight)
+        digitLeftTopMap[R.id.HOUR_SECOND_DIGIT] = Point(maxSingleDigitSize.x, 0)
+        digitLeftTopMap[R.id.MINUTE_FIRST_DIGIT] = Point(0, maxSingleDigitSize.y)
+        digitLeftTopMap[R.id.MINUTE_SECOND_DIGIT] = Point(maxSingleDigitSize)
         digitLeftTopMap.forEach { _, point ->
             point.x += abs(aodTranslate.x)
             point.y += abs(aodTranslate.y)
@@ -162,7 +162,7 @@ class FlexClockView(context: Context, val assets: AssetLoader, messageBuffer: Me
     override fun animateDoze(isDozing: Boolean, isAnimated: Boolean) {
         dozeControlState.animateDoze = {
             super.animateDoze(isDozing, isAnimated)
-            if (maxSingleDigitHeight == -1) {
+            if (maxSingleDigitSize.x < 0 || maxSingleDigitSize.y < 0) {
                 measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED)
             }
             digitalClockTextViewMap.forEach { (id, textView) ->
