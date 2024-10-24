@@ -113,7 +113,8 @@ public class MenuListViewTouchHandlerTest extends SysuiTestCase {
 
         mTouchHandler = new MenuListViewTouchHandler(mMenuAnimationController,
                 mDragToInteractAnimationController);
-        final AccessibilityTargetAdapter stubAdapter = new AccessibilityTargetAdapter(mStubTargets);
+        final AccessibilityTargetAdapter stubAdapter = new AccessibilityTargetAdapter(
+                mStubTargets);
         mStubListView = (RecyclerView) mStubMenuView.getChildAt(0);
         mStubListView.setAdapter(stubAdapter);
     }

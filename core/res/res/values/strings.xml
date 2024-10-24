@@ -4945,6 +4945,18 @@
     <!-- Title of hearing aids feature, shown in the warning dialog about the accessibility shortcut. [CHAR LIMIT=none] -->
     <string name="hearing_aids_feature_name">Hearing devices</string>
 
+    <!-- Text of hearing device disconnected state. [CHAR LIMIT=20] -->
+    <string name="hearing_device_status_disconnected">Disconnected</string>
+
+    <!-- Text of hearing device connected state. [CHAR LIMIT=20] -->
+    <string name="hearing_device_status_connected">Connected</string>
+
+    <!-- Text of hearing device active state. Active means device is currently connected and able to streaming the sound. [CHAR LIMIT=20] -->
+    <string name="hearing_device_status_active">Active</string>
+
+    <!-- Text of hearing device loading state. Loading means device is not available yet, it might be in connecting or disconnecting. [CHAR LIMIT=20] -->
+    <string name="hearing_device_status_loading">Loading</string>
+
     <!-- Text in toast to alert the user that the accessibility shortcut turned on an accessibility service. [CHAR LIMIT=none] -->
     <string name="accessibility_shortcut_enabling_service">Held volume keys. <xliff:g id="service_name" example="TalkBack">%1$s</xliff:g> turned on.</string>
 
