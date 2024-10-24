@@ -2884,23 +2884,24 @@ public class ActivityManagerService extends IActivityManager.Stub
                 addServiceToMap(mAppBindArgs, Context.INPUT_METHOD_SERVICE);
                 addServiceToMap(mAppBindArgs, Context.INPUT_SERVICE);
                 addServiceToMap(mAppBindArgs, "graphicsstats");
-                addServiceToMap(mAppBindArgs, Context.APP_OPS_SERVICE);
                 addServiceToMap(mAppBindArgs, "content");
                 addServiceToMap(mAppBindArgs, Context.JOB_SCHEDULER_SERVICE);
                 addServiceToMap(mAppBindArgs, Context.NOTIFICATION_SERVICE);
                 addServiceToMap(mAppBindArgs, Context.VIBRATOR_SERVICE);
                 addServiceToMap(mAppBindArgs, Context.ACCOUNT_SERVICE);
                 addServiceToMap(mAppBindArgs, Context.POWER_SERVICE);
-                addServiceToMap(mAppBindArgs, Context.USER_SERVICE);
                 addServiceToMap(mAppBindArgs, "mount");
                 addServiceToMap(mAppBindArgs, Context.PLATFORM_COMPAT_SERVICE);
             }
             // See b/79378449
             // Getting the window service and package service binder from servicemanager
             // is blocked for Apps. However they are necessary for apps.
+            // Removing User Service and App Ops Service from cache breaks boot for auto.
             // TODO: remove exception
+            addServiceToMap(mAppBindArgs, Context.APP_OPS_SERVICE);
             addServiceToMap(mAppBindArgs, "package");
             addServiceToMap(mAppBindArgs, Context.WINDOW_SERVICE);
+            addServiceToMap(mAppBindArgs, Context.USER_SERVICE);
         }
         return mAppBindArgs;
     }
