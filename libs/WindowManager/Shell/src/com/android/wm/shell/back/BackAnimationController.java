@@ -985,7 +985,6 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         ProtoLog.d(WM_SHELL_BACK_PREVIEW, "BackAnimationController: finishBackNavigation()");
         mActiveCallback = null;
         mApps = null;
-        mShouldStartOnNextMoveEvent = false;
         mOnBackStartDispatched = false;
         mThresholdCrossed = false;
         mPointersPilfered = false;
