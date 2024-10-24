@@ -897,6 +897,18 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
                     break;
             }
         }
+        // A check to dismiss was made without any authentication. Verify there are no remaining SIM
+        // screens, which may happen on an unlocked lockscreen
+        if (!authenticated) {
+            SecurityMode securityMode = mSecurityModel.getSecurityMode(targetUserId);
+            if (Arrays.asList(SimPin, SimPuk).contains(securityMode)) {
+                Log.v(TAG, "Dismiss called but SIM/PUK unlock screen still required");
+                eventSubtype = -1;
+                showSecurityScreen(securityMode);
+                finish = false;
+            }
+        }
+
         // Check for device admin specified additional security measures.
         if (finish && !bypassSecondaryLockScreen) {
             Intent secondaryLockscreenIntent =
