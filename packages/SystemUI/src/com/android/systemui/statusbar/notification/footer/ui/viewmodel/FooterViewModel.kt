@@ -98,7 +98,6 @@ class FooterViewModel(
     val manageButtonShouldLaunchHistory =
         notificationSettingsInteractor.isNotificationHistoryEnabled
 
-    // TODO(b/366003631): When inlining the flag, consider adding this to FooterButtonViewModel.
     val manageOrHistoryButtonClick: Flow<SettingsIntent> by lazy {
         if (ModesEmptyShadeFix.isUnexpectedlyInLegacyMode()) {
             flowOf(SettingsIntent(Intent(Settings.ACTION_NOTIFICATION_SETTINGS)))
@@ -124,7 +123,11 @@ class FooterViewModel(
             else R.string.manage_notifications_text
         }
 
-    /** The button for managing notification settings or opening notification history. */
+    /**
+     * The button for managing notification settings or opening notification history. This is
+     * replaced by two separate buttons in the redesign. These are currently static, and therefore
+     * not modeled here, but if that changes we can also add them as FooterButtonViewModels.
+     */
     val manageOrHistoryButton: FooterButtonViewModel =
         FooterButtonViewModel(
             labelId = manageOrHistoryButtonText,

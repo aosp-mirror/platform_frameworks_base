@@ -309,7 +309,20 @@ public class FooterView extends StackScrollerDecorView {
         }
     }
 
-    /** Set onClickListener for the manage/history button. */
+    /** Set onClickListener for the notification settings button. */
+    public void setSettingsButtonClickListener(OnClickListener listener) {
+        mSettingsButton.setOnClickListener(listener);
+    }
+
+    /** Set onClickListener for the notification history button. */
+    public void setHistoryButtonClickListener(OnClickListener listener) {
+        mHistoryButton.setOnClickListener(listener);
+    }
+
+    /**
+     * Set onClickListener for the manage/history button. This is replaced by two separate buttons
+     * in the redesign.
+     */
     public void setManageButtonClickListener(OnClickListener listener) {
         mManageOrHistoryButton.setOnClickListener(listener);
     }
