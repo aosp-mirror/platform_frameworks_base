@@ -76,7 +76,7 @@ abstract class PerDisplayStoreImpl<T>(
         }
     }
 
-    abstract fun createInstanceForDisplay(displayId: Int): T
+    protected abstract fun createInstanceForDisplay(displayId: Int): T
 
     override fun start() {
         val instanceType = instanceClass.simpleName

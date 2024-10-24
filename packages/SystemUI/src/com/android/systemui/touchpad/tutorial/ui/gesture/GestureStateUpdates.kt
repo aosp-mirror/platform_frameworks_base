@@ -21,7 +21,7 @@ inline fun updateGestureState(
     gestureStateChangedCallback: (GestureState) -> Unit,
     gestureState: DistanceGestureState?,
     isFinished: (Finished) -> Boolean,
-    progress: (Moving) -> Float,
+    progress: (Moving) -> GestureState.InProgress,
 ) {
     when (gestureState) {
         is Finished -> {
@@ -32,7 +32,7 @@ inline fun updateGestureState(
             }
         }
         is Moving -> {
-            gestureStateChangedCallback(GestureState.InProgress(progress(gestureState)))
+            gestureStateChangedCallback(progress(gestureState))
         }
         is Started -> gestureStateChangedCallback(GestureState.InProgress())
         else -> {}

@@ -20,6 +20,8 @@ import android.view.MotionEvent
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.touchpad.tutorial.ui.gesture.GestureDirection.LEFT
+import com.android.systemui.touchpad.tutorial.ui.gesture.GestureDirection.RIGHT
 import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState.Finished
 import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState.InProgress
 import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState.NotStarted
@@ -61,23 +63,46 @@ class BackGestureRecognizerTest : SysuiTestCase() {
     }
 
     @Test
-    fun triggersProgressRelativeToDistance() {
-        assertProgressWhileMovingFingers(deltaX = -SWIPE_DISTANCE / 2, expectedProgress = 0.5f)
-        assertProgressWhileMovingFingers(deltaX = SWIPE_DISTANCE / 2, expectedProgress = 0.5f)
-        assertProgressWhileMovingFingers(deltaX = -SWIPE_DISTANCE, expectedProgress = 1f)
-        assertProgressWhileMovingFingers(deltaX = SWIPE_DISTANCE, expectedProgress = 1f)
+    fun triggersProgressRelativeToDistanceWhenSwipingLeft() {
+        assertProgressWhileMovingFingers(
+            deltaX = -SWIPE_DISTANCE / 2,
+            expected = InProgress(progress = 0.5f, direction = LEFT),
+        )
+        assertProgressWhileMovingFingers(
+            deltaX = -SWIPE_DISTANCE,
+            expected = InProgress(progress = 1f, direction = LEFT),
+        )
     }
 
-    private fun assertProgressWhileMovingFingers(deltaX: Float, expectedProgress: Float) {
+    @Test
+    fun triggersProgressRelativeToDistanceWhenSwipingRight() {
+        assertProgressWhileMovingFingers(
+            deltaX = SWIPE_DISTANCE / 2,
+            expected = InProgress(progress = 0.5f, direction = RIGHT),
+        )
+        assertProgressWhileMovingFingers(
+            deltaX = SWIPE_DISTANCE,
+            expected = InProgress(progress = 1f, direction = RIGHT),
+        )
+    }
+
+    private fun assertProgressWhileMovingFingers(deltaX: Float, expected: InProgress) {
         assertStateAfterEvents(
             events = ThreeFingerGesture.eventsForGestureInProgress { move(deltaX = deltaX) },
-            expectedState = InProgress(progress = expectedProgress),
+            expectedState = expected,
         )
     }
 
     @Test
     fun triggeredProgressIsNoBiggerThanOne() {
-        assertProgressWhileMovingFingers(deltaX = SWIPE_DISTANCE * 2, expectedProgress = 1f)
+        assertProgressWhileMovingFingers(
+            deltaX = SWIPE_DISTANCE * 2,
+            expected = InProgress(progress = 1f, direction = RIGHT),
+        )
+        assertProgressWhileMovingFingers(
+            deltaX = -SWIPE_DISTANCE * 2,
+            expected = InProgress(progress = 1f, direction = LEFT),
+        )
     }
 
     @Test

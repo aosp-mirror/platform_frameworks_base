@@ -244,7 +244,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         when(mStackSizeCalculator.computeHeight(eq(mStackScroller), anyInt(), anyFloat()))
                 .thenReturn((float) stackHeight);
 
-        mStackScroller.updateStackHeight();
+        mStackScroller.updateIntrinsicStackHeight();
 
         assertThat(mStackScroller.getIntrinsicStackHeight()).isEqualTo(stackHeight);
     }
@@ -1218,7 +1218,38 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     }
 
     @Test
-    @DisableSceneContainer // TODO(b/312473478): address disabled test
+    @EnableSceneContainer
+    public void testSetMaxDisplayedNotifications_updatesStackHeight() {
+        int fullStackHeight = 300;
+        int limitedStackHeight = 100;
+        int maxNotifs = 2; // any non-zero limit
+        float stackTop = 100;
+        float stackCutoff = 1100;
+        float stackViewPortHeight = stackCutoff - stackTop;
+        mStackScroller.setStackTop(stackTop);
+        mStackScroller.setStackCutoff(stackCutoff);
+        when(mStackSizeCalculator.computeHeight(eq(mStackScroller), eq(-1), anyFloat()))
+                .thenReturn((float) fullStackHeight);
+        when(mStackSizeCalculator.computeHeight(eq(mStackScroller), eq(maxNotifs), anyFloat()))
+                .thenReturn((float) limitedStackHeight);
+
+        // When we set a limit on max displayed notifications
+        mStackScroller.setMaxDisplayedNotifications(maxNotifs);
+
+        // Then
+        assertThat(mStackScroller.getIntrinsicStackHeight()).isEqualTo(limitedStackHeight);
+        assertThat(mAmbientState.getStackEndHeight()).isEqualTo(limitedStackHeight);
+
+        // When there is no limit on max displayed notifications
+        mStackScroller.setMaxDisplayedNotifications(-1);
+
+        // Then
+        assertThat(mStackScroller.getIntrinsicStackHeight()).isEqualTo(fullStackHeight);
+        assertThat(mAmbientState.getStackEndHeight()).isEqualTo(stackViewPortHeight);
+    }
+
+    @Test
+    @DisableSceneContainer
     public void testSetMaxDisplayedNotifications_notifiesListeners() {
         ExpandableView.OnHeightChangedListener listener =
                 mock(ExpandableView.OnHeightChangedListener.class);

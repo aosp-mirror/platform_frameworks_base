@@ -31,8 +31,4 @@ interface SimpleClockLayerController {
     val config: ClockFaceConfig
 
     @VisibleForTesting var fakeTimeMills: Long?
-
-    // Called immediately after either onColorPaletteChanged or onSeedColorChanged is called.
-    // Provided for convience to not duplicate color update logic after state updated.
-    fun updateColors() {}
 }

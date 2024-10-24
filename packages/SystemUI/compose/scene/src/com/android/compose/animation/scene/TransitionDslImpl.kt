@@ -249,8 +249,22 @@ internal class TransitionBuilderImpl(override val transition: TransitionState.Tr
         reversed = false
     }
 
-    override fun sharedElement(matcher: ElementMatcher, enabled: Boolean) {
-        transformations.add(SharedElementTransformation(matcher, enabled))
+    override fun sharedElement(
+        matcher: ElementMatcher,
+        enabled: Boolean,
+        elevateInContent: ContentKey?,
+    ) {
+        check(
+            elevateInContent == null ||
+                elevateInContent == transition.fromContent ||
+                elevateInContent == transition.toContent
+        ) {
+            "elevateInContent (${elevateInContent?.debugName}) should be either fromContent " +
+                "(${transition.fromContent.debugName}) or toContent " +
+                "(${transition.toContent.debugName})"
+        }
+
+        transformations.add(SharedElementTransformation(matcher, enabled, elevateInContent))
     }
 
     override fun timestampRange(

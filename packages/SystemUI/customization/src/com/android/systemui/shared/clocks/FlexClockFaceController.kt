@@ -34,6 +34,7 @@ import com.android.systemui.plugins.clocks.ClockFaceEvents
 import com.android.systemui.plugins.clocks.ClockFaceLayout
 import com.android.systemui.plugins.clocks.ClockReactiveSetting
 import com.android.systemui.plugins.clocks.DefaultClockFaceLayout
+import com.android.systemui.plugins.clocks.ThemeConfig
 import com.android.systemui.plugins.clocks.WeatherData
 import com.android.systemui.plugins.clocks.ZenData
 import com.android.systemui.shared.clocks.view.FlexClockView
@@ -58,6 +59,8 @@ class FlexClockFaceController(
         ClockFaceConfig(
             hasCustomPositionUpdatedAnimation = false // TODO(b/364673982)
         )
+
+    override var theme = ThemeConfig(true, assets.seedColor)
 
     private val keyguardLargeClockTopMargin =
         resources.getDimensionPixelSize(R.dimen.keyguard_large_clock_top_margin)
@@ -135,18 +138,8 @@ class FlexClockFaceController(
             layerController.faceEvents.onFontSettingChanged(fontSizePx)
         }
 
-        override fun onColorPaletteChanged(resources: Resources) {
-            layerController.events.onColorPaletteChanged(resources)
-            layerController.updateColors()
-        }
-
-        override fun onSeedColorChanged(seedColor: Int?) {
-            layerController.events.onSeedColorChanged(seedColor)
-            layerController.updateColors()
-        }
-
-        override fun onRegionDarknessChanged(isRegionDark: Boolean) {
-            layerController.faceEvents.onRegionDarknessChanged(isRegionDark)
+        override fun onThemeChanged(theme: ThemeConfig) {
+            layerController.faceEvents.onThemeChanged(theme)
         }
 
         override fun onReactiveAxesChanged(axes: List<ClockReactiveSetting>) {}

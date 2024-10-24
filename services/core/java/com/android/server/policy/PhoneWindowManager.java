@@ -84,6 +84,7 @@ import static android.view.WindowManagerGlobal.ADD_PERMISSION_DENIED;
 import static android.view.contentprotection.flags.Flags.createAccessibilityOverlayAppOpEnabled;
 
 import static com.android.hardware.input.Flags.emojiAndScreenshotKeycodesAvailable;
+import static com.android.hardware.input.Flags.keyboardA11yShortcutControl;
 import static com.android.hardware.input.Flags.modifierShortcutDump;
 import static com.android.hardware.input.Flags.useKeyGestureEventHandler;
 import static com.android.hardware.input.Flags.useKeyGestureEventHandlerMultiPressGestures;
@@ -1615,7 +1616,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case TRIPLE_PRESS_PRIMARY_NOTHING:
                 break;
             case TRIPLE_PRESS_PRIMARY_TOGGLE_ACCESSIBILITY:
-                mTalkbackShortcutController.toggleTalkback(mCurrentUserId);
+                mTalkbackShortcutController.toggleTalkback(mCurrentUserId,
+                        TalkbackShortcutController.ShortcutSource.GESTURE);
                 if (mTalkbackShortcutController.isTalkBackShortcutGestureEnabled()) {
                     performHapticFeedback(HapticFeedbackConstants.CONFIRM,
                             "Stem primary - Triple Press - Toggle Accessibility");
@@ -3603,6 +3605,17 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     return true;
                 }
                 break;
+            case KeyEvent.KEYCODE_T:
+                if (keyboardA11yShortcutControl()) {
+                    if (firstDown && event.isMetaPressed() && event.isAltPressed()) {
+                        mTalkbackShortcutController.toggleTalkback(mCurrentUserId,
+                                TalkbackShortcutController.ShortcutSource.KEYBOARD);
+                        notifyKeyGestureCompleted(event,
+                                KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_TALKBACK);
+                        return true;
+                    }
+                }
+                break;
             case KeyEvent.KEYCODE_DEL:
                 if (newBugreportKeyboardShortcut()) {
                     if (mEnableBugReportKeyboardShortcut && firstDown
@@ -4034,6 +4047,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     case KeyGestureEvent.KEY_GESTURE_TYPE_TV_ACCESSIBILITY_SHORTCUT_CHORD:
                         return mDefaultDisplayPolicy.isAwake() && mAccessibilityShortcutController
                                 .isAccessibilityShortcutAvailable(false);
+                    case KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_TALKBACK:
+                        return keyboardA11yShortcutControl();
                     default:
                         return false;
                 }
@@ -4251,6 +4266,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     mContext.closeSystemDialogs();
                 }
                 return true;
+            case KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_TALKBACK:
+                if (keyboardA11yShortcutControl()) {
+                    if (complete) {
+                        mTalkbackShortcutController.toggleTalkback(mCurrentUserId,
+                                TalkbackShortcutController.ShortcutSource.KEYBOARD);
+                    }
+                    return true;
+                }
+                break;
         }
         return false;
     }

@@ -18,6 +18,7 @@ package com.android.server.display;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
+import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_BEDTIME_WEAR;
 import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_DEFAULT;
 import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_DOZE;
 import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_IDLE;
@@ -1290,7 +1291,6 @@ public final class DisplayPowerControllerTest {
                 /* ambientLightHorizonLong= */ anyInt(),
                 eq(lux),
                 eq(nits),
-                any(BrightnessClamperController.class),
                 any(DisplayManagerFlags.class)
         );
     }
@@ -1925,6 +1925,60 @@ public final class DisplayPowerControllerTest {
         advanceTime(1); // Run updatePowerState
 
         verify(mHolder.automaticBrightnessController, never())
+                .switchMode(eq(AUTO_BRIGHTNESS_MODE_DOZE), /* sendUpdate= */ anyBoolean());
+    }
+
+    @Test
+    public void testSwitchToBedtimeAutoBrightnessMode_wearBedtimeEnabledAndBrightRequest() {
+        when(mDisplayManagerFlagsMock.areAutoBrightnessModesEnabled()).thenReturn(true);
+        when(mDisplayManagerFlagsMock.isAutoBrightnessModeBedtimeWearEnabled()).thenReturn(true);
+        Settings.Global.putInt(mContext.getContentResolver(), Settings.Global.Wearable.BEDTIME_MODE,
+                /* value= */ 1);
+        mHolder = createDisplayPowerController(DISPLAY_ID, UNIQUE_ID);
+        when(mHolder.displayPowerState.getScreenState()).thenReturn(Display.STATE_ON);
+
+        DisplayPowerRequest dpr = new DisplayPowerRequest();
+        dpr.policy = DisplayPowerRequest.POLICY_BRIGHT;
+        mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
+        advanceTime(1); // Run updatePowerState
+
+        verify(mHolder.automaticBrightnessController)
+                .switchMode(eq(AUTO_BRIGHTNESS_MODE_BEDTIME_WEAR), /* sendUpdate= */ anyBoolean());
+    }
+
+    @Test
+    public void testNotSwitchToBedtimeAutoBrightnessMode_wearBedtimeDisabled() {
+        when(mDisplayManagerFlagsMock.areAutoBrightnessModesEnabled()).thenReturn(true);
+        when(mDisplayManagerFlagsMock.isAutoBrightnessModeBedtimeWearEnabled()).thenReturn(true);
+        Settings.Global.putInt(mContext.getContentResolver(), Settings.Global.Wearable.BEDTIME_MODE,
+                /* value= */ 0);
+        mHolder = createDisplayPowerController(DISPLAY_ID, UNIQUE_ID);
+        when(mHolder.displayPowerState.getScreenState()).thenReturn(Display.STATE_ON);
+
+        DisplayPowerRequest dpr = new DisplayPowerRequest();
+        dpr.policy = DisplayPowerRequest.POLICY_BRIGHT;
+        mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
+        advanceTime(1); // Run updatePowerState
+
+        verify(mHolder.automaticBrightnessController)
+                .switchMode(eq(AUTO_BRIGHTNESS_MODE_DEFAULT), /* sendUpdate= */ anyBoolean());
+    }
+
+    @Test
+    public void testSwitchToDozeAutoBrightnessMode_wearBedtimeEnabledAndDozeRequest() {
+        when(mDisplayManagerFlagsMock.areAutoBrightnessModesEnabled()).thenReturn(true);
+        when(mDisplayManagerFlagsMock.isAutoBrightnessModeBedtimeWearEnabled()).thenReturn(true);
+        Settings.Global.putInt(mContext.getContentResolver(), Settings.Global.Wearable.BEDTIME_MODE,
+                /* value= */ 1);
+        mHolder = createDisplayPowerController(DISPLAY_ID, UNIQUE_ID);
+        when(mHolder.displayPowerState.getScreenState()).thenReturn(Display.STATE_DOZE);
+
+        DisplayPowerRequest dpr = new DisplayPowerRequest();
+        dpr.policy = DisplayPowerRequest.POLICY_DOZE;
+        mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
+        advanceTime(1); // Run updatePowerState
+
+        verify(mHolder.automaticBrightnessController)
                 .switchMode(eq(AUTO_BRIGHTNESS_MODE_DOZE), /* sendUpdate= */ anyBoolean());
     }
 
@@ -2710,7 +2764,6 @@ public final class DisplayPowerControllerTest {
                 BrightnessRangeController brightnessRangeController,
                 BrightnessThrottler brightnessThrottler, int ambientLightHorizonShort,
                 int ambientLightHorizonLong, float userLux, float userNits,
-                BrightnessClamperController brightnessClamperController,
                 DisplayManagerFlags displayManagerFlags) {
             return mAutomaticBrightnessController;
         }

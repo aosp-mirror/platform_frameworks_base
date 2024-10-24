@@ -357,6 +357,8 @@
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Ine-enable ang feature na Pinagandang Pagkakonekta."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Lokal na terminal"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Paganahin ang terminal app na nag-aalok ng lokal na shell access"</string>
+    <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Development environment ng Linux"</string>
+    <string name="enable_linux_terminal_summary" msgid="5893216510985145320">"Paganahin ang Linux terminal sa Android"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"Pagsusuring HDCP"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"HDCP checking behavior"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"Pagde-debug"</string>
@@ -686,11 +688,9 @@
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Na-enable"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Dapat i-reboot ang iyong device para mailapat ang pagbabagong ito. Mag-reboot ngayon o kanselahin."</string>
     <string name="media_transfer_wired_headphone_name" msgid="8698668536022665254">"Wired na headphone"</string>
-    <!-- no translation found for media_transfer_headphone_name (1157798825650178478) -->
-    <skip />
+    <string name="media_transfer_headphone_name" msgid="1157798825650178478">"Wired na audio"</string>
     <string name="media_transfer_usb_audio_name" msgid="1789292056757821355">"USB audio"</string>
-    <!-- no translation found for media_transfer_wired_device_mic_name (7115192790725088698) -->
-    <skip />
+    <string name="media_transfer_wired_device_mic_name" msgid="7115192790725088698">"Wired na mikropono"</string>
     <string name="media_transfer_usb_device_mic_name" msgid="7171789543226269822">"USB na mikropono"</string>
     <string name="media_transfer_bt_device_mic_name" msgid="1870669402238687618">"BT na mikropono"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"Naka-on"</string>

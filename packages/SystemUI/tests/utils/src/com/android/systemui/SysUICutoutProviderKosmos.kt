@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.panels.ui.viewmodel
+package com.android.systemui
 
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.qs.panels.domain.interactor.iconLabelVisibilityInteractor
 
-val Kosmos.iconLabelVisibilityViewModel by
-    Kosmos.Fixture { IconLabelVisibilityViewModelImpl(iconLabelVisibilityInteractor) }
+val Kosmos.fakeSysUICutoutProviderFactory by Kosmos.Fixture { FakeSysUICutoutProviderFactory() }
+
+var Kosmos.sysUICutoutProviderFactory: SysUICutoutProviderImpl.Factory by
+    Kosmos.Fixture { fakeSysUICutoutProviderFactory }

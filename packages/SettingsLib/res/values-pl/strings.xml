@@ -357,6 +357,8 @@
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Włącza funkcję lepszej obsługi połączeń."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Terminal lokalny"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Włącz terminal, który umożliwia dostęp do powłoki lokalnej"</string>
+    <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Środowisko programistyczne Linux"</string>
+    <string name="enable_linux_terminal_summary" msgid="5893216510985145320">"Uruchom terminal Linux na Androidzie"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"Sprawdzanie HDCP"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"Ustaw sprawdzanie HDCP"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"Debugowanie"</string>

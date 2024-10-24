@@ -6391,6 +6391,30 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     }
 
     @Test
+    @DisableFlags(FLAG_NOTIFICATION_CLASSIFICATION)
+    public void testNotificationBundles_off_deletesData() throws Exception {
+        String xml = "<ranking version=\"1\">\n"
+                + "<package name=\"" + PKG_P + "\" uid=\"" + UID_P + "\">\n"
+                + "<channel id=\"android.app.social\" name=\"Social\" importance=\"2\"/>\n"
+                + "<channel id=\"android.app.news\" name=\"News\" importance=\"2\"/>\n"
+                + "<channel id=\"android.app.recs\" name=\"Recs\" importance=\"2\"/>\n"
+                + "<channel id=\"android.app.promotions\" name=\"Promos\" importance=\"2\"/>\n"
+                + "<channel id=\"keep.me\" name=\"name\" importance=\"2\" "
+                + "show_badge=\"true\" />\n"
+                + "</package></ranking>\n";
+
+        loadByteArrayXml(xml.getBytes(), false, USER_SYSTEM);
+
+        // verify 4 reserved channels are created
+        assertThat(mXmlHelper.getNotificationChannel(PKG_P, UID_P, NEWS_ID, true)).isNull();
+        assertThat(mXmlHelper.getNotificationChannel(PKG_P, UID_P, PROMOTIONS_ID, true)).isNull();
+        assertThat(mXmlHelper.getNotificationChannel(PKG_P, UID_P, SOCIAL_MEDIA_ID, true)).isNull();
+        assertThat(mXmlHelper.getNotificationChannel(PKG_P, UID_P, RECS_ID, true)).isNull();
+        assertThat(mXmlHelper.getNotificationChannel(PKG_P, UID_P, "keep.me", false)
+                .getImportance()).isEqualTo(IMPORTANCE_LOW);
+    }
+
+    @Test
     @EnableFlags(FLAG_NOTIFICATION_CLASSIFICATION)
     public void testNotificationBundles_appsCannotUpdate() {
         // do something that triggers settings creation for an app

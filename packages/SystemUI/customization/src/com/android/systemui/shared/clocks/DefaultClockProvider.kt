@@ -58,6 +58,7 @@ class DefaultClockProvider(
             val buffer =
                 messageBuffers?.infraMessageBuffer ?: LogcatOnlyMessageBuffer(LogLevel.INFO)
             val assets = AssetLoader(ctx, ctx, "clocks/", buffer)
+            assets.setSeedColor(settings.seedColor, null)
             FlexClockController(ctx, resources, assets, FLEX_DESIGN, messageBuffers)
         } else {
             DefaultClockController(
