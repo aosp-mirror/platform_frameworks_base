@@ -44,9 +44,6 @@ constructor(
                         disconnect()
                         uiEventLogger.log(BluetoothTileDialogUiEvent.ACTIVE_DEVICE_DISCONNECT)
                     }
-                    DeviceItemType.AUDIO_SHARING_MEDIA_BLUETOOTH_DEVICE -> {
-                        uiEventLogger.log(BluetoothTileDialogUiEvent.AUDIO_SHARING_DEVICE_CLICKED)
-                    }
                     DeviceItemType.AVAILABLE_MEDIA_BLUETOOTH_DEVICE -> {
                         setActive()
                         uiEventLogger.log(BluetoothTileDialogUiEvent.CONNECTED_DEVICE_SET_ACTIVE)
@@ -61,6 +58,7 @@ constructor(
                         connect()
                         uiEventLogger.log(BluetoothTileDialogUiEvent.SAVED_DEVICE_CONNECT)
                     }
+                    DeviceItemType.AUDIO_SHARING_MEDIA_BLUETOOTH_DEVICE,
                     DeviceItemType.AVAILABLE_AUDIO_SHARING_MEDIA_BLUETOOTH_DEVICE -> {
                         // Do nothing. Should already be handled in
                         // AudioSharingDeviceItemActionInteractor.
