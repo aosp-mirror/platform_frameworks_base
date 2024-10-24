@@ -170,6 +170,8 @@ public final class KeyGlyphMap implements Parcelable {
             return resources.getDrawable(drawableRes, null);
         } catch (PackageManager.NameNotFoundException ignored) {
             Log.e(TAG, "Package name not found for " + mComponentName);
+        } catch (Resources.NotFoundException ignored) {
+            Log.e(TAG, "Resource not found for " + mComponentName);
         }
         return null;
     }
