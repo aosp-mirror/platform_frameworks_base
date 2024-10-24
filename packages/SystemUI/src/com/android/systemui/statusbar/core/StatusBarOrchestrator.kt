@@ -139,7 +139,7 @@ constructor(
             }
 
     override fun start() {
-        StatusBarSimpleFragment.assertInNewMode()
+        StatusBarConnectedDisplays.assertInNewMode()
         coroutineScope
             .launch {
                 dumpManager.registerCriticalDumpable(dumpableName, this@StatusBarOrchestrator)
