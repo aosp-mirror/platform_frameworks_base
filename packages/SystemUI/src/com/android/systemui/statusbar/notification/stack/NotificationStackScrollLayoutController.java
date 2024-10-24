@@ -1188,7 +1188,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
 
     public int getIntrinsicContentHeight() {
         SceneContainerFlag.assertInLegacyMode();
-        return mView.getIntrinsicContentHeight();
+        return (int) mView.getIntrinsicContentHeight();
     }
 
     /**
