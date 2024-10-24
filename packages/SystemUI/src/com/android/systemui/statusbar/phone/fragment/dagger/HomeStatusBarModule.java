@@ -31,6 +31,7 @@ import com.android.systemui.statusbar.phone.PhoneStatusBarView;
 import com.android.systemui.statusbar.phone.PhoneStatusBarViewController;
 import com.android.systemui.statusbar.phone.StatusBarLocation;
 import com.android.systemui.statusbar.policy.Clock;
+import com.android.systemui.statusbar.window.StatusBarWindowController;
 import com.android.systemui.statusbar.window.StatusBarWindowControllerStore;
 
 import dagger.Module;
@@ -128,9 +129,8 @@ public interface HomeStatusBarModule {
     @HomeStatusBarScope
     static PhoneStatusBarTransitions providePhoneStatusBarTransitions(
             @RootView PhoneStatusBarView view,
-            StatusBarWindowControllerStore statusBarWindowControllerStore) {
-        return new PhoneStatusBarTransitions(
-                view, statusBarWindowControllerStore.getDefaultDisplay().getBackgroundView());
+            StatusBarWindowController statusBarWindowController) {
+        return new PhoneStatusBarTransitions(view, statusBarWindowController.getBackgroundView());
     }
 
     /** */
@@ -153,6 +153,14 @@ public interface HomeStatusBarModule {
     @HomeStatusBarScope
     static StatusBarConfigurationController configurationController(
             @DisplaySpecific int displayId, StatusBarConfigurationControllerStore store) {
+        return store.forDisplay(displayId);
+    }
+
+    /** */
+    @Provides
+    @HomeStatusBarScope
+    static StatusBarWindowController provideWindowController(
+            @DisplaySpecific int displayId, StatusBarWindowControllerStore store) {
         return store.forDisplay(displayId);
     }
 
