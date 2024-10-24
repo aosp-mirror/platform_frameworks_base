@@ -3486,6 +3486,12 @@
              representation this attribute can be used for providing such. -->
         <attr name="contentDescription" format="string" localization="suggested" />
 
+        <!-- Provides brief supplemental information for the view, such as the purpose of
+             the view when that purpose is not conveyed within its textual representation.
+             This property is used primarily for accessibility. -->
+        <!-- @FlaggedApi("android.view.accessibility.supplemental_description") -->
+        <attr name="supplementalDescription" format="string" localization="suggested" />
+
         <!-- Sets the id of a view that screen readers are requested to visit after this view.
              Requests that a screen-reader visits the content of this view before the content of the
              one it precedes. This does nothing if either view is not important for accessibility.

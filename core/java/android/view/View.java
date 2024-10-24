@@ -181,6 +181,7 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 import android.view.accessibility.AccessibilityNodeProvider;
 import android.view.accessibility.AccessibilityWindowInfo;
+import android.view.accessibility.Flags;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Transformation;
@@ -4864,6 +4865,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private CharSequence mContentDescription;
 
     /**
+     * Brief supplemental information for view and is primarily used for accessibility support.
+     */
+    private CharSequence mSupplementalDescription;
+
+    /**
      * If this view represents a distinct part of the window, it can have a title that labels the
      * area.
      */
@@ -6534,6 +6540,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 case R.styleable.View_contentSensitivity:
                     setContentSensitivity(a.getInt(attr, CONTENT_SENSITIVITY_AUTO));
                     break;
+                default: {
+                    if (Flags.supplementalDescription()) {
+                        if (attr == com.android.internal.R.styleable.View_supplementalDescription) {
+                            setSupplementalDescription(a.getString(attr));
+                        }
+                    }
+                }
             }
         }
 
@@ -11806,6 +11819,39 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * Returns the {@link View}'s supplemental description.
+     * <p>
+     * A supplemental description provides
+     * brief supplemental information for this node, such as the purpose of the node when
+     * that purpose is not conveyed within its textual representation. For example, if a
+     * dropdown select has a purpose of setting font family, the supplemental description
+     * could be "font family". If this node has children, its supplemental description serves
+     * as additional information and is not intended to replace any existing information
+     * in the subtree. This is different from the {@link #getContentDescription()} in that
+     * this description is purely supplemental while a content description may be used
+     * to replace a description for a node or its subtree that an assistive technology
+     * would otherwise compute based on other properties of the node and its descendants.
+     *
+     * <p>
+     * <strong>Note:</strong> Do not override this method, as it will have no
+     * effect on the supplemental description presented to accessibility services.
+     * You must call {@link #setSupplementalDescription(CharSequence)} to modify the
+     * supplemental description.
+     *
+     * @return the supplemental description
+     * @see #setSupplementalDescription(CharSequence)
+     * @see #getContentDescription()
+     * @attr ref android.R.styleable#View_supplementalDescription
+     */
+    @FlaggedApi(Flags.FLAG_SUPPLEMENTAL_DESCRIPTION)
+    @ViewDebug.ExportedProperty(category = "accessibility")
+    @InspectableProperty
+    @Nullable
+    public CharSequence getSupplementalDescription() {
+        return mSupplementalDescription;
+    }
+
+    /**
      * Sets the {@link View}'s state description.
      * <p>
      * A state description briefly describes the states of the view and is primarily used
@@ -11888,6 +11934,53 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         } else {
             notifyViewAccessibilityStateChangedIfNeeded(
                     AccessibilityEvent.CONTENT_CHANGE_TYPE_CONTENT_DESCRIPTION);
+        }
+    }
+
+    /**
+     * Sets the {@link View}'s supplemental description.
+     * <p>
+     * A supplemental description provides
+     * brief supplemental information for this node, such as the purpose of the node when
+     * that purpose is not conveyed within its textual representation. For example, if a
+     * dropdown select has a purpose of setting font family, the supplemental description
+     * could be "font family". If this node has children, its supplemental description serves
+     * as additional information and is not intended to replace any existing information
+     * in the subtree. This is different from the {@link #setContentDescription(CharSequence)}
+     * in that this description is purely supplemental while a content description may be used
+     * to replace a description for a node or its subtree that an assistive technology
+     * would otherwise compute based on other properties of the node and its descendants.
+     *
+     * <p>
+     * This should omit role or state. Role refers to the kind of user-interface element the View
+     * is, such as a Button or Checkbox. State refers to a frequently changing property of the View,
+     * such as an On/Off state of a button or the audio level of a volume slider.
+     *
+     * @param supplementalDescription The supplemental description.
+     * @see #getSupplementalDescription()
+     * @see #setContentDescription(CharSequence)
+     * @see #setStateDescription(CharSequence) for state changes.
+     * @attr ref android.R.styleable#View_supplementalDescription
+     */
+    @FlaggedApi(Flags.FLAG_SUPPLEMENTAL_DESCRIPTION)
+    @RemotableViewMethod
+    public void setSupplementalDescription(@Nullable CharSequence supplementalDescription) {
+        if (mSupplementalDescription == null) {
+            if (supplementalDescription == null) {
+                return;
+            }
+        } else if (mSupplementalDescription.equals(supplementalDescription)) {
+            return;
+        }
+        mSupplementalDescription = supplementalDescription;
+        final boolean nonEmptyDesc = supplementalDescription != null
+                && !supplementalDescription.isEmpty();
+        if (nonEmptyDesc && getImportantForAccessibility() == IMPORTANT_FOR_ACCESSIBILITY_AUTO) {
+            setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES);
+            notifySubtreeAccessibilityStateChangedIfNeeded();
+        } else {
+            notifyViewAccessibilityStateChangedIfNeeded(
+                    AccessibilityEvent.CONTENT_CHANGE_TYPE_SUPPLEMENTAL_DESCRIPTION);
         }
     }
 
