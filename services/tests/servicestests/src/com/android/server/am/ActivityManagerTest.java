@@ -20,6 +20,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -35,6 +36,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
+import android.content.pm.UserInfo;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.DropBoxManager;
@@ -48,6 +50,7 @@ import android.os.Parcel;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.platform.test.annotations.Presubmit;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
@@ -68,6 +71,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -147,6 +151,25 @@ public class ActivityManagerTest {
                              taskId / UserHandle.PER_USER_RANGE, userId);
             }
         }
+    }
+
+    @Test
+    public void testRemovedUserShouldNotBeRunning() throws Exception {
+        final UserManager userManager = mContext.getSystemService(UserManager.class);
+        assertNotNull("UserManager should not be null", userManager);
+        final UserInfo user = userManager.createUser(
+                "TestUser", UserManager.USER_TYPE_FULL_SECONDARY, 0);
+
+        mService.startUserInBackground(user.id);
+        assertTrue("User should be running", mService.isUserRunning(user.id, 0));
+        assertTrue("User should be in running users",
+                Arrays.stream(mService.getRunningUserIds()).anyMatch(x -> x == user.id));
+
+        userManager.removeUser(user.id);
+        mService.startUserInBackground(user.id);
+        assertFalse("Removed user should not be running", mService.isUserRunning(user.id, 0));
+        assertFalse("Removed user should not be in running users",
+                Arrays.stream(mService.getRunningUserIds()).anyMatch(x -> x == user.id));
     }
 
     @Test

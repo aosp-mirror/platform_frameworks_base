@@ -454,11 +454,6 @@ class UserController implements Handler.Callback {
         public void onUserCreated(UserInfo user, Object token) {
             onUserAdded(user);
         }
-
-        @Override
-        public void onUserRemoved(UserInfo user) {
-            UserController.this.onUserRemoved(user.id);
-        }
     };
 
     UserController(ActivityManagerService service) {
@@ -3352,10 +3347,12 @@ class UserController implements Handler.Callback {
                 if (mUserProfileGroupIds.keyAt(i) == userId
                         || mUserProfileGroupIds.valueAt(i) == userId) {
                     mUserProfileGroupIds.removeAt(i);
-
                 }
             }
             mCurrentProfileIds = ArrayUtils.removeInt(mCurrentProfileIds, userId);
+            mUserLru.remove((Integer) userId);
+            mStartedUsers.remove(userId);
+            updateStartedUserArrayLU();
         }
     }
 
