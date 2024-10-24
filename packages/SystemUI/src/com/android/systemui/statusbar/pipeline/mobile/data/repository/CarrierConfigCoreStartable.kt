@@ -20,7 +20,7 @@ import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.qualifiers.Application
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /**
  * Core startable which configures the [CarrierConfigRepository] to listen for updates for the

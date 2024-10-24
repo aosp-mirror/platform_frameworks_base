@@ -28,7 +28,7 @@ import com.android.systemui.util.ui.stopAnimating
 import com.android.systemui.util.ui.value
 import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /** Binds a [FooterView] to its [view model][FooterViewModel]. */
 object FooterViewBinder {

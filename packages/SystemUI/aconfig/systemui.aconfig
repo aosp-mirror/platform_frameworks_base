@@ -81,6 +81,16 @@ flag {
 }
 
 flag {
+    name: "notifications_footer_visibility_fix"
+    namespace: "systemui"
+    description: "Fixes a bug where the footer would briefly appear when dismissing a HUN"
+    bug: "356552869"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "notifications_footer_view_refactor"
     namespace: "systemui"
     description: "Enables the refactored version of the footer view in the notification shade "

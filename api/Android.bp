@@ -124,7 +124,7 @@ combined_apis {
     }),
 }
 
-genrule {
+java_genrule {
     name: "frameworks-base-api-current-compat",
     srcs: [
         ":android.api.public.latest",
@@ -140,7 +140,7 @@ genrule {
         "$(location :frameworks-base-api-current.txt)",
 }
 
-genrule {
+java_genrule {
     name: "frameworks-base-api-system-current-compat",
     srcs: [
         ":android.api.public.latest",
@@ -160,7 +160,7 @@ genrule {
         "$(location :frameworks-base-api-system-current.txt)",
 }
 
-genrule {
+java_genrule {
     name: "frameworks-base-api-module-lib-current-compat",
     srcs: [
         ":android.api.public.latest",
@@ -184,7 +184,7 @@ genrule {
         "$(location :frameworks-base-api-module-lib-current.txt)",
 }
 
-genrule {
+java_genrule {
     name: "frameworks-base-api-current.srcjar",
     tools: ["merge_zips"],
     out: ["current.srcjar"],
@@ -209,7 +209,7 @@ genrule_defaults {
         "$(location soong_zip) -o $(out) -C $(genDir)/out -D $(genDir)/out",
 }
 
-genrule {
+java_genrule {
     name: "sdk-annotations.zip",
     defaults: ["sdk-annotations-defaults"],
     srcs: [
@@ -218,7 +218,7 @@ genrule {
     ],
 }
 
-genrule {
+java_genrule {
     name: "sdk-annotations-system.zip",
     defaults: ["sdk-annotations-defaults"],
     srcs: [
@@ -227,7 +227,7 @@ genrule {
     ],
 }
 
-genrule {
+java_genrule {
     name: "sdk-annotations-module-lib.zip",
     defaults: ["sdk-annotations-defaults"],
     srcs: [
@@ -236,7 +236,7 @@ genrule {
     ],
 }
 
-genrule {
+java_genrule {
     name: "sdk-annotations-system-server.zip",
     defaults: ["sdk-annotations-defaults"],
     srcs: [
@@ -245,7 +245,7 @@ genrule {
     ],
 }
 
-genrule {
+java_genrule {
     name: "combined-removed-dex",
     visibility: [
         "//frameworks/base/boot",
@@ -460,7 +460,7 @@ genrule_defaults {
     tools: ["extract-flagged-apis"],
 }
 
-genrule {
+java_genrule {
     name: "flag-api-mapping-PublicApi",
     defaults: ["flag-api-mapping-generation-defaults"],
     srcs: [":frameworks-base-api-current.txt"],
@@ -470,7 +470,7 @@ genrule {
     },
 }
 
-genrule {
+java_genrule {
     name: "flag-api-mapping-SystemApi",
     defaults: ["flag-api-mapping-generation-defaults"],
     srcs: [":frameworks-base-api-system-current.txt"],
@@ -480,7 +480,7 @@ genrule {
     },
 }
 
-genrule {
+java_genrule {
     name: "flag-api-mapping-ModuleLibApi",
     defaults: ["flag-api-mapping-generation-defaults"],
     srcs: [":frameworks-base-api-module-lib-current.txt"],
@@ -490,7 +490,7 @@ genrule {
     },
 }
 
-genrule {
+java_genrule {
     name: "flag-api-mapping-SystemServerApi",
     defaults: ["flag-api-mapping-generation-defaults"],
     srcs: [":frameworks-base-api-system-server-current.txt"],

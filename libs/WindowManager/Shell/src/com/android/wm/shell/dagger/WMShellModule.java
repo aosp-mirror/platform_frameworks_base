@@ -17,7 +17,6 @@
 package com.android.wm.shell.dagger;
 
 import static android.window.DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_ENTER_TRANSITIONS;
-import static android.window.DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_EXIT_TRANSITIONS;
 import static android.window.DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_TASK_LIMIT;
 
 import android.annotation.Nullable;
@@ -848,8 +847,7 @@ public abstract class WMShellModule {
             InteractionJankMonitor interactionJankMonitor,
             @ShellMainThread Handler handler
     ) {
-        if (!DesktopModeStatus.canEnterDesktopMode(context)
-                || !ENABLE_DESKTOP_WINDOWING_EXIT_TRANSITIONS.isTrue()) {
+        if (!DesktopModeStatus.canEnterDesktopMode(context)) {
             return Optional.empty();
         }
         return Optional.of(

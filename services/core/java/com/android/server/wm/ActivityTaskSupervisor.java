@@ -964,11 +964,12 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                     // transaction.
                     mService.getLifecycleManager().dispatchPendingTransaction(proc.getThread());
                 }
-                mService.getLifecycleManager().scheduleTransactionAndLifecycleItems(
-                        proc.getThread(), launchActivityItem, lifecycleItem,
+                mService.getLifecycleManager().scheduleTransactionItems(
+                        proc.getThread(),
                         // Immediately dispatch the transaction, so that if it fails, the server can
                         // restart the process and retry now.
-                        true /* shouldDispatchImmediately */);
+                        true /* shouldDispatchImmediately */,
+                        launchActivityItem, lifecycleItem);
 
                 if (procConfig.seq > mRootWindowContainer.getConfiguration().seq) {
                     // If the seq is increased, there should be something changed (e.g. registered
@@ -2280,6 +2281,9 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
      * sent to the new top resumed activity.
      */
     ActivityRecord updateTopResumedActivityIfNeeded(String reason) {
+        if (!readyToResume()) {
+            return mTopResumedActivity;
+        }
         final ActivityRecord prevTopActivity = mTopResumedActivity;
         final Task topRootTask = mRootWindowContainer.getTopDisplayFocusedRootTask();
         if (topRootTask == null || topRootTask.getTopResumedActivity() == prevTopActivity) {
@@ -2340,8 +2344,8 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                 && mTopResumedActivity.scheduleTopResumedActivityChanged(false /* onTop */)) {
             scheduleTopResumedStateLossTimeout(mTopResumedActivity);
             mTopResumedActivityWaitingForPrev = true;
-            mTopResumedActivity = null;
         }
+        mTopResumedActivity = null;
     }
 
     /** Schedule top resumed state change if previous top activity already reported back. */

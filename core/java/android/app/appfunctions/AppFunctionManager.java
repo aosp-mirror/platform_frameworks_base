@@ -47,7 +47,6 @@ import java.util.function.Consumer;
  * <p>App function is a specific piece of functionality that an app offers to the system. These
  * functionalities can be integrated into various system features.
  */
-// TODO(b/357551503): Implement get and set enabled app function APIs.
 @FlaggedApi(FLAG_ENABLE_APP_FUNCTION_MANAGER)
 @SystemService(Context.APP_FUNCTION_SERVICE)
 public final class AppFunctionManager {
@@ -111,17 +110,19 @@ public final class AppFunctionManager {
      * @param request the request to execute the app function
      * @param executor the executor to run the callback
      * @param cancellationSignal the cancellation signal to cancel the execution.
-     * @param callback the callback to receive the function execution result. if the calling app
-     *     does not own the app function or does not have {@code
+     * @param callback the callback to receive the function execution result.
+     *     <p>If the calling app does not own the app function or does not have {@code
      *     android.permission.EXECUTE_APP_FUNCTIONS_TRUSTED} or {@code
      *     android.permission.EXECUTE_APP_FUNCTIONS}, the execution result will contain {@code
      *     ExecuteAppFunctionResponse.RESULT_DENIED}.
+     *     <p>If the caller only has {@code android.permission.EXECUTE_APP_FUNCTIONS} but the
+     *     function requires {@code android.permission.EXECUTE_APP_FUNCTIONS_TRUSTED}, the execution
+     *     result will contain {@code ExecuteAppFunctionResponse.RESULT_DENIED}
+     *     <p>If the function requested for execution is disabled, then the execution result will
+     *     contain {@code ExecuteAppFunctionResponse.RESULT_DISABLED}
+     *     <p>If the cancellation signal is issued, the operation is cancelled and no response is
+     *     returned to the caller.
      */
-    // TODO(b/357551503): Document the behavior when the cancellation signal is issued.
-    // TODO(b/360864791): Document that apps can opt-out from being executed by callers with
-    //   EXECUTE_APP_FUNCTIONS and how a caller knows whether a function is opted out.
-    // TODO(b/357551503): Update documentation when get / set APIs are implemented that this will
-    //   also return RESULT_DENIED if the app function is disabled.
     @RequiresPermission(
             anyOf = {
                 Manifest.permission.EXECUTE_APP_FUNCTIONS_TRUSTED,

@@ -250,7 +250,7 @@ abstract class ShadeViewProviderModule {
         fun providesBatteryMeterViewController(
             @Named(SHADE_HEADER) batteryMeterView: BatteryMeterView,
             userTracker: UserTracker,
-            configurationController: ConfigurationController,
+            @ShadeDisplayAware configurationController: ConfigurationController,
             tunerService: TunerService,
             @Main mainHandler: Handler,
             contentResolver: ContentResolver,

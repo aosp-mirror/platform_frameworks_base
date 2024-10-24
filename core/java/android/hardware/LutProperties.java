@@ -30,7 +30,7 @@ import java.lang.annotation.RetentionPolicy;
  */
 public final class LutProperties {
     private final @Dimension int mDimension;
-    private final long mSize;
+    private final int mSize;
     private final @SamplingKey int[] mSamplingKeys;
 
     @Retention(RetentionPolicy.SOURCE)
@@ -68,7 +68,7 @@ public final class LutProperties {
     /**
      * @return the size of the Lut.
      */
-    public long getSize() {
+    public int getSize() {
         return mSize;
     }
 
@@ -83,7 +83,7 @@ public final class LutProperties {
     }
 
     /* use in the native code */
-    private LutProperties(@Dimension int dimension, long size, @SamplingKey int[] samplingKeys) {
+    private LutProperties(@Dimension int dimension, int size, @SamplingKey int[] samplingKeys) {
         if (dimension != ONE_DIMENSION || dimension != THREE_DIMENSION) {
             throw new IllegalArgumentException("The dimension is either 1 or 3!");
         }

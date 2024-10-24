@@ -45,7 +45,6 @@ import com.android.internal.os.PowerStats;
 import com.android.server.power.stats.BatteryUsageStatsRule;
 import com.android.server.power.stats.MockClock;
 import com.android.server.power.stats.PowerStatsStore;
-import com.android.server.power.stats.PowerStatsUidResolver;
 import com.android.server.power.stats.format.CpuPowerStatsLayout;
 import com.android.server.power.stats.format.EnergyConsumerPowerStatsLayout;
 
@@ -132,8 +131,8 @@ public class PowerStatsExporterTest {
                 null, 0, mCpuStatsArrayLayout.getUidStatsArrayLength(), extras);
 
         mPowerAttributor = new MultiStatePowerAttributor(mock(Context.class), mPowerStatsStore,
-                mock(PowerProfile.class), mock(CpuScalingPolicies.class), () -> 3500,
-                mock(PowerStatsUidResolver.class));
+                mock(PowerProfile.class), mock(CpuScalingPolicies.class), () -> 3500
+        );
     }
 
     @Test

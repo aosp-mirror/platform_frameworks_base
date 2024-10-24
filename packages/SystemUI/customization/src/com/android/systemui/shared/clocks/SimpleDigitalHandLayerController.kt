@@ -32,6 +32,7 @@ import com.android.systemui.plugins.clocks.ClockEvents
 import com.android.systemui.plugins.clocks.ClockFaceConfig
 import com.android.systemui.plugins.clocks.ClockFaceEvents
 import com.android.systemui.plugins.clocks.ClockReactiveSetting
+import com.android.systemui.plugins.clocks.ThemeConfig
 import com.android.systemui.plugins.clocks.WeatherData
 import com.android.systemui.plugins.clocks.ZenData
 import com.android.systemui.shared.clocks.view.SimpleDigitalClockView
@@ -63,7 +64,6 @@ open class SimpleDigitalHandLayerController<T>(
 
     override val config = ClockFaceConfig()
     var dozeState: DefaultClockController.AnimationState? = null
-    var isRegionDark: Boolean = true
 
     init {
         view.layoutParams =
@@ -240,10 +240,6 @@ open class SimpleDigitalHandLayerController<T>(
                 refreshTime()
             }
 
-            override fun onColorPaletteChanged(resources: Resources) {}
-
-            override fun onSeedColorChanged(seedColor: Int?) {}
-
             override fun onWeatherDataChanged(data: WeatherData) {}
 
             override fun onAlarmDataChanged(data: AlarmData) {}
@@ -252,11 +248,6 @@ open class SimpleDigitalHandLayerController<T>(
 
             override fun onReactiveAxesChanged(axes: List<ClockReactiveSetting>) {}
         }
-
-    override fun updateColors() {
-        view.updateColors(assets, isRegionDark)
-        refreshTime()
-    }
 
     override val animations =
         object : ClockAnimations {
@@ -309,21 +300,20 @@ open class SimpleDigitalHandLayerController<T>(
                 applyMargin()
             }
 
-            override fun onRegionDarknessChanged(isRegionDark: Boolean) {
-                this@SimpleDigitalHandLayerController.isRegionDark = isRegionDark
-                updateColors()
+            override fun onThemeChanged(theme: ThemeConfig) {
+                val color =
+                    when {
+                        theme.seedColor != null -> theme.seedColor!!
+                        theme.isDarkTheme -> resources.getColor(android.R.color.system_accent1_100)
+                        else -> resources.getColor(android.R.color.system_accent2_600)
+                    }
+
+                view.updateColor(color)
+                refreshTime()
             }
 
             override fun onTargetRegionChanged(targetRegion: Rect?) {}
 
             override fun onSecondaryDisplayChanged(onSecondaryDisplay: Boolean) {}
         }
-
-    companion object {
-        private val DEFAULT_LIGHT_COLOR = "@android:color/system_accent1_100+0"
-        private val DEFAULT_DARK_COLOR = "@android:color/system_accent2_600+0"
-
-        fun getDefaultColor(assets: AssetLoader, isRegionDark: Boolean) =
-            assets.readColor(if (isRegionDark) DEFAULT_LIGHT_COLOR else DEFAULT_DARK_COLOR)
-    }
 }

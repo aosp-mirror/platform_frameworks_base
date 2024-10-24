@@ -42,7 +42,15 @@ abstract class DeviceItemFactory {
         context: Context,
         cachedDevice: CachedBluetoothDevice,
         audioManager: AudioManager,
+        audioSharingAvailable: Boolean,
     ): Boolean
+
+    // Overloaded that defaults audioSharingAvailable to false
+    fun isFilterMatched(
+        context: Context,
+        cachedDevice: CachedBluetoothDevice,
+        audioManager: AudioManager,
+    ): Boolean = isFilterMatched(context, cachedDevice, audioManager, false)
 
     abstract fun create(context: Context, cachedDevice: CachedBluetoothDevice): DeviceItem
 
@@ -80,6 +88,7 @@ internal open class ActiveMediaDeviceItemFactory : DeviceItemFactory() {
         context: Context,
         cachedDevice: CachedBluetoothDevice,
         audioManager: AudioManager,
+        audioSharingAvailable: Boolean,
     ): Boolean {
         return BluetoothUtils.isActiveMediaDevice(cachedDevice) &&
             BluetoothUtils.isAvailableMediaBluetoothDevice(cachedDevice, audioManager)
@@ -105,8 +114,9 @@ internal class AudioSharingMediaDeviceItemFactory(
         context: Context,
         cachedDevice: CachedBluetoothDevice,
         audioManager: AudioManager,
+        audioSharingAvailable: Boolean,
     ): Boolean {
-        return BluetoothUtils.isAudioSharingEnabled() &&
+        return audioSharingAvailable &&
             BluetoothUtils.hasConnectedBroadcastSource(cachedDevice, localBluetoothManager)
     }
 
@@ -131,9 +141,10 @@ internal class AvailableAudioSharingMediaDeviceItemFactory(
         context: Context,
         cachedDevice: CachedBluetoothDevice,
         audioManager: AudioManager,
+        audioSharingAvailable: Boolean,
     ): Boolean {
-        return BluetoothUtils.isAudioSharingEnabled() &&
-            super.isFilterMatched(context, cachedDevice, audioManager) &&
+        return audioSharingAvailable &&
+            super.isFilterMatched(context, cachedDevice, audioManager, true) &&
             BluetoothUtils.isAvailableAudioSharingMediaBluetoothDevice(
                 cachedDevice,
                 localBluetoothManager,
@@ -160,6 +171,7 @@ internal class ActiveHearingDeviceItemFactory : ActiveMediaDeviceItemFactory() {
         context: Context,
         cachedDevice: CachedBluetoothDevice,
         audioManager: AudioManager,
+        audioSharingAvailable: Boolean,
     ): Boolean {
         return BluetoothUtils.isActiveMediaDevice(cachedDevice) &&
             BluetoothUtils.isAvailableHearingDevice(cachedDevice)
@@ -171,6 +183,7 @@ open class AvailableMediaDeviceItemFactory : DeviceItemFactory() {
         context: Context,
         cachedDevice: CachedBluetoothDevice,
         audioManager: AudioManager,
+        audioSharingAvailable: Boolean,
     ): Boolean {
         return !BluetoothUtils.isActiveMediaDevice(cachedDevice) &&
             BluetoothUtils.isAvailableMediaBluetoothDevice(cachedDevice, audioManager)
@@ -195,6 +208,7 @@ internal class AvailableHearingDeviceItemFactory : AvailableMediaDeviceItemFacto
         context: Context,
         cachedDevice: CachedBluetoothDevice,
         audioManager: AudioManager,
+        audioSharingAvailable: Boolean,
     ): Boolean {
         return !BluetoothUtils.isActiveMediaDevice(cachedDevice) &&
             BluetoothUtils.isAvailableHearingDevice(cachedDevice)
@@ -206,6 +220,7 @@ internal class ConnectedDeviceItemFactory : DeviceItemFactory() {
         context: Context,
         cachedDevice: CachedBluetoothDevice,
         audioManager: AudioManager,
+        audioSharingAvailable: Boolean,
     ): Boolean {
         return if (Flags.enableHideExclusivelyManagedBluetoothDevice()) {
             !BluetoothUtils.isExclusivelyManagedBluetoothDevice(context, cachedDevice.device) &&
@@ -234,6 +249,7 @@ internal open class SavedDeviceItemFactory : DeviceItemFactory() {
         context: Context,
         cachedDevice: CachedBluetoothDevice,
         audioManager: AudioManager,
+        audioSharingAvailable: Boolean,
     ): Boolean {
         return if (Flags.enableHideExclusivelyManagedBluetoothDevice()) {
             !BluetoothUtils.isExclusivelyManagedBluetoothDevice(context, cachedDevice.device) &&
@@ -263,6 +279,7 @@ internal class SavedHearingDeviceItemFactory : SavedDeviceItemFactory() {
         context: Context,
         cachedDevice: CachedBluetoothDevice,
         audioManager: AudioManager,
+        audioSharingAvailable: Boolean,
     ): Boolean {
         return if (Flags.enableHideExclusivelyManagedBluetoothDevice()) {
             !BluetoothUtils.isExclusivelyManagedBluetoothDevice(

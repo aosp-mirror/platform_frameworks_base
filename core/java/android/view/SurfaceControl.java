@@ -412,41 +412,28 @@ public final class SurfaceControl implements Parcelable {
      */
     public static class JankData {
 
-        /** @hide */
-        @IntDef(flag = true, value = {JANK_NONE,
-                DISPLAY_HAL,
-                JANK_SURFACEFLINGER_DEADLINE_MISSED,
-                JANK_SURFACEFLINGER_GPU_DEADLINE_MISSED,
-                JANK_APP_DEADLINE_MISSED,
-                PREDICTION_ERROR,
-                SURFACE_FLINGER_SCHEDULING})
+        /**
+         * Needs to be kept in sync with android_view_SurfaceControl.cpp's
+         * JankDataListenerWrapper::onJankDataAvailable.
+         * @hide
+         */
+        @IntDef(flag = true, value = {
+            JANK_NONE,
+            JANK_COMPOSER,
+            JANK_APPLICATION,
+            JANK_OTHER,
+        })
         @Retention(RetentionPolicy.SOURCE)
         public @interface JankType {}
 
-        // Needs to be kept in sync with frameworks/native/libs/gui/include/gui/JankInfo.h
-
         // No Jank
-        public static final int JANK_NONE = 0x0;
-
-        // Jank not related to SurfaceFlinger or the App
-        public static final int DISPLAY_HAL = 0x1;
-        // SF took too long on the CPU
-        public static final int JANK_SURFACEFLINGER_DEADLINE_MISSED = 0x2;
-        // SF took too long on the GPU
-        public static final int JANK_SURFACEFLINGER_GPU_DEADLINE_MISSED = 0x4;
-        // Either App or GPU took too long on the frame
-        public static final int JANK_APP_DEADLINE_MISSED = 0x8;
-        // Vsync predictions have drifted beyond the threshold from the actual HWVsync
-        public static final int PREDICTION_ERROR = 0x10;
-        // Latching a buffer early might cause an early present of the frame
-        public static final int SURFACE_FLINGER_SCHEDULING = 0x20;
-        // A buffer is said to be stuffed if it was expected to be presented on a vsync but was
-        // presented later because the previous buffer was presented in its expected vsync. This
-        // usually happens if there is an unexpectedly long frame causing the rest of the buffers
-        // to enter a stuffed state.
-        public static final int BUFFER_STUFFING = 0x40;
-        // Jank due to unknown reasons.
-        public static final int UNKNOWN = 0x80;
+        public static final int JANK_NONE = 0;
+        // Jank caused by the composer missing a deadline
+        public static final int JANK_COMPOSER = 1 << 0;
+        // Jank caused by the application missing the composer's deadline
+        public static final int JANK_APPLICATION = 1 << 1;
+        // Jank due to other unknown reasons
+        public static final int JANK_OTHER = 1 << 2;
 
         public JankData(long frameVsyncId, @JankType int jankType, long frameIntervalNs,
                 long scheduledAppFrameTimeNs, long actualAppFrameTimeNs) {

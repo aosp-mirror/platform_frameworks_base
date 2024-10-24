@@ -29,6 +29,7 @@ import com.android.systemui.keyboard.data.repository.FakeKeyboardRepository
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.res.R
+import com.android.systemui.settings.userTracker
 import com.android.systemui.touchpad.data.repository.FakeTouchpadRepository
 import com.google.common.truth.Truth.assertThat
 import kotlin.time.Duration.Companion.hours
@@ -91,6 +92,7 @@ class TutorialNotificationCoordinatorTest : SysuiTestCase() {
                 context,
                 interactor,
                 notificationManager,
+                kosmos.userTracker,
             )
         notificationCaptor = ArgumentCaptor.forClass(Notification::class.java)
         underTest.start()
@@ -140,12 +142,13 @@ class TutorialNotificationCoordinatorTest : SysuiTestCase() {
     fun doNotShowNotification() =
         testScope.runTest {
             advanceTimeBy(LAUNCH_DELAY)
-            verify(notificationManager, never()).notify(eq(TAG), eq(NOTIFICATION_ID), any())
+            verify(notificationManager, never())
+                .notifyAsUser(eq(TAG), eq(NOTIFICATION_ID), any(), any())
         }
 
     private fun verifyNotification(@StringRes titleResId: Int, @StringRes contentResId: Int) {
         verify(notificationManager)
-            .notify(eq(TAG), eq(NOTIFICATION_ID), notificationCaptor.capture())
+            .notifyAsUser(eq(TAG), eq(NOTIFICATION_ID), notificationCaptor.capture(), any())
         val notification = notificationCaptor.value
         val actualTitle = notification.getString(Notification.EXTRA_TITLE)
         val actualContent = notification.getString(Notification.EXTRA_TEXT)

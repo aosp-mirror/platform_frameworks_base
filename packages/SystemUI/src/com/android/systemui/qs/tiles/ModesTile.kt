@@ -48,7 +48,7 @@ import com.android.systemui.qs.tiles.viewmodel.QSTileConfigProvider
 import com.android.systemui.qs.tiles.viewmodel.QSTileState
 import com.android.systemui.res.R
 import javax.inject.Inject
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 import kotlinx.coroutines.runBlocking
 
 class ModesTile

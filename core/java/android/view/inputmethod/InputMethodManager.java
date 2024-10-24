@@ -2557,21 +2557,24 @@ public final class InputMethodManager {
     public boolean hideSoftInputFromWindow(IBinder windowToken, @HideFlags int flags,
             ResultReceiver resultReceiver) {
         return hideSoftInputFromWindow(windowToken, flags, resultReceiver,
-                SoftInputShowHideReason.HIDE_SOFT_INPUT);
+                SoftInputShowHideReason.HIDE_SOFT_INPUT, null);
     }
 
     private boolean hideSoftInputFromWindow(IBinder windowToken, @HideFlags int flags,
-            ResultReceiver resultReceiver, @SoftInputShowHideReason int reason) {
+            ResultReceiver resultReceiver, @SoftInputShowHideReason int reason,
+            @Nullable ImeTracker.Token statsToken) {
         // Get served view initially for statsToken creation.
         final View initialServedView;
         synchronized (mH) {
             initialServedView = getServedViewLocked();
         }
 
-        final var statsToken = ImeTracker.forLogging().onStart(ImeTracker.TYPE_HIDE,
-                ImeTracker.ORIGIN_CLIENT, reason, ImeTracker.isFromUser(initialServedView));
-        ImeTracker.forLatency().onRequestHide(statsToken,
-                ImeTracker.ORIGIN_CLIENT, reason, ActivityThread::currentApplication);
+        if (statsToken == null) {
+            statsToken = ImeTracker.forLogging().onStart(ImeTracker.TYPE_HIDE,
+                    ImeTracker.ORIGIN_CLIENT, reason, ImeTracker.isFromUser(initialServedView));
+            ImeTracker.forLatency().onRequestHide(statsToken, ImeTracker.ORIGIN_CLIENT, reason,
+                    ActivityThread::currentApplication);
+        }
         ImeTracing.getInstance().triggerClientDump("InputMethodManager#hideSoftInputFromWindow",
                 this, null /* icProto */);
         checkFocus();
@@ -2665,8 +2668,14 @@ public final class InputMethodManager {
 
             ImeTracker.forLogging().onProgress(statsToken, ImeTracker.PHASE_CLIENT_VIEW_SERVED);
 
-            return IInputMethodManagerGlobalInvoker.hideSoftInput(mClient, view.getWindowToken(),
-                    statsToken, flags, null, reason, mAsyncShowHideMethodEnabled);
+            if (Flags.refactorInsetsController()) {
+                return hideSoftInputFromWindow(view.getWindowToken(), flags,
+                        null /* resultReceiver */, reason, statsToken);
+            } else {
+                return IInputMethodManagerGlobalInvoker.hideSoftInput(mClient,
+                        view.getWindowToken(), statsToken, flags, null, reason,
+                        mAsyncShowHideMethodEnabled);
+            }
         }
     }
 
@@ -3162,7 +3171,7 @@ public final class InputMethodManager {
                 if (rootInsets != null && rootInsets.isVisible(WindowInsets.Type.ime())) {
                     hideSoftInputFromWindow(view.getWindowToken(), hideFlags,
                             null /* resultReceiver */,
-                            SoftInputShowHideReason.HIDE_TOGGLE_SOFT_INPUT);
+                            SoftInputShowHideReason.HIDE_TOGGLE_SOFT_INPUT, null);
                 } else {
                     showSoftInput(view, showFlags, null /* resultReceiver */,
                             SoftInputShowHideReason.SHOW_TOGGLE_SOFT_INPUT);
@@ -3740,14 +3749,19 @@ public final class InputMethodManager {
 
             ImeTracker.forLogging().onProgress(statsToken, ImeTracker.PHASE_CLIENT_VIEW_SERVED);
 
-            IInputMethodManagerGlobalInvoker.hideSoftInput(
-                    mClient,
-                    rootView.getWindowToken(),
-                    statsToken,
-                    HIDE_NOT_ALWAYS,
-                    null,
-                    reason,
-                    true /*async */);
+            if (Flags.refactorInsetsController()) {
+                mCurRootView.getInsetsController().hide(WindowInsets.Type.ime(),
+                        false /* fromIme */, statsToken);
+            } else {
+                IInputMethodManagerGlobalInvoker.hideSoftInput(
+                        mClient,
+                        rootView.getWindowToken(),
+                        statsToken,
+                        HIDE_NOT_ALWAYS,
+                        null,
+                        reason,
+                        true /*async */);
+            }
         }
     }
 
