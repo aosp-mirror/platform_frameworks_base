@@ -22,12 +22,14 @@ import android.app.Flags
 import android.content.Context
 import android.content.pm.PackageManager.NameNotFoundException
 import android.graphics.Color
-import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
+import android.os.UserHandle
 import android.util.Log
 import com.android.internal.R
 import com.android.launcher3.icons.BaseIconFactory
+import com.android.launcher3.icons.BaseIconFactory.IconOptions
+import com.android.launcher3.util.UserIconInfo
 import com.android.systemui.Dumpable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dump.DumpManager
@@ -48,7 +50,11 @@ interface AppIconProvider {
      */
     @Throws(NameNotFoundException::class)
     @WorkerThread
-    fun getOrFetchAppIcon(packageName: String, context: Context): Drawable
+    fun getOrFetchAppIcon(
+        packageName: String,
+        context: Context,
+        withWorkProfileBadge: Boolean = false,
+    ): Drawable
 
     /**
      * Mark all the entries in the cache that are NOT in [wantedPackages] to be cleared. If they're
@@ -81,21 +87,52 @@ constructor(private val sysuiContext: Context, dumpManager: DumpManager) :
 
     private val cache = NotifCollectionCache<Drawable>()
 
-    override fun getOrFetchAppIcon(packageName: String, context: Context): Drawable {
-        return cache.getOrFetch(packageName) { fetchAppIcon(packageName, context) }
+    override fun getOrFetchAppIcon(
+        packageName: String,
+        context: Context,
+        withWorkProfileBadge: Boolean,
+    ): Drawable {
+        // Add a suffix to distinguish the app installed on the work profile, since the icon will
+        // be different.
+        val key = packageName + if (withWorkProfileBadge) WORK_SUFFIX else ""
+
+        return cache.getOrFetch(key) { fetchAppIcon(packageName, context, withWorkProfileBadge) }
     }
 
     @WorkerThread
-    private fun fetchAppIcon(packageName: String, context: Context): BitmapDrawable {
-        val icon = context.packageManager.getApplicationIcon(packageName)
-        return BitmapDrawable(
-            context.resources,
-            iconFactory.createScaledBitmap(icon, BaseIconFactory.MODE_HARDWARE),
+    private fun fetchAppIcon(
+        packageName: String,
+        context: Context,
+        withWorkProfileBadge: Boolean,
+    ): Drawable {
+        val pm = context.packageManager
+        val icon = pm.getApplicationInfo(packageName, 0).loadUnbadgedIcon(pm)
+
+        val options =
+            IconOptions().apply {
+                setUser(userIconInfo(context, withWorkProfileBadge))
+                setBitmapGenerationMode(BaseIconFactory.MODE_HARDWARE)
+                // This color is not used since we're not showing the themed icons. We're just
+                // setting it so that the icon factory doesn't try to extract colors from our bitmap
+                // (since it won't work, given it's a hardware bitmap).
+                setExtractedColor(Color.BLUE)
+            }
+        val badgedIcon = iconFactory.createBadgedIconBitmap(icon, options)
+        return badgedIcon.newIcon(sysuiContext)
+    }
+
+    private fun userIconInfo(context: Context, withWorkProfileBadge: Boolean): UserIconInfo {
+        val userId = context.userId
+        return UserIconInfo(
+            UserHandle.of(userId),
+            if (withWorkProfileBadge) UserIconInfo.TYPE_WORK else UserIconInfo.TYPE_MAIN,
         )
     }
 
     override fun purgeCache(wantedPackages: Collection<String>) {
-        cache.purge(wantedPackages)
+        // We don't know from the packages if it's the work profile app or not, so let's just keep
+        // both if they're present in the cache.
+        cache.purge(wantedPackages.flatMap { listOf(it, "$it$WORK_SUFFIX") })
     }
 
     override fun dump(pwOrig: PrintWriter, args: Array<out String>) {
@@ -114,6 +151,7 @@ constructor(private val sysuiContext: Context, dumpManager: DumpManager) :
 
     companion object {
         const val TAG = "AppIconProviderImpl"
+        const val WORK_SUFFIX = "|WORK"
     }
 }
 
@@ -122,7 +160,11 @@ class NoOpIconProvider : AppIconProvider {
         const val TAG = "NoOpIconProvider"
     }
 
-    override fun getOrFetchAppIcon(packageName: String, context: Context): Drawable {
+    override fun getOrFetchAppIcon(
+        packageName: String,
+        context: Context,
+        withWorkProfileBadge: Boolean,
+    ): Drawable {
         Log.wtf(TAG, "NoOpIconProvider should not be used anywhere.")
         return ColorDrawable(Color.WHITE)
     }
