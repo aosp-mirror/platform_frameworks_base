@@ -27,7 +27,7 @@ java_test_host {
     name: "ApexSystemServicesTestCases",
     srcs: ["src/**/*.java"],
     libs: ["tradefed"],
-    java_resources: [
+    device_common_java_resources: [
         ":test_com.android.server",
     ],
     static_libs: [
