@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.chips.notification.demo.ui.viewmodel
+package com.android.systemui.statusbar.chips.ron.demo.ui.viewmodel
 
 import android.content.packageManager
 import android.graphics.drawable.BitmapDrawable
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import androidx.test.filters.SmallTest
+import com.android.systemui.Flags.FLAG_STATUS_BAR_RON_CHIPS
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.statusbar.chips.notification.shared.StatusBarNotifChips
 import com.android.systemui.statusbar.chips.ui.model.ColorsModel
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 import com.android.systemui.statusbar.commandline.CommandRegistry
@@ -40,13 +40,13 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 
 @SmallTest
-class DemoNotifChipViewModelTest : SysuiTestCase() {
+class DemoRonChipViewModelTest : SysuiTestCase() {
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
     private val commandRegistry = kosmos.commandRegistry
     private val pw = PrintWriter(StringWriter())
 
-    private val underTest = kosmos.demoNotifChipViewModel
+    private val underTest = kosmos.demoRonChipViewModel
 
     @Before
     fun setUp() {
@@ -56,61 +56,61 @@ class DemoNotifChipViewModelTest : SysuiTestCase() {
     }
 
     @Test
-    @DisableFlags(StatusBarNotifChips.FLAG_NAME)
+    @DisableFlags(FLAG_STATUS_BAR_RON_CHIPS)
     fun chip_flagOff_hidden() =
         testScope.runTest {
             val latest by collectLastValue(underTest.chip)
 
-            addDemoNotifChip()
+            addDemoRonChip()
 
             assertThat(latest).isInstanceOf(OngoingActivityChipModel.Hidden::class.java)
         }
 
     @Test
-    @EnableFlags(StatusBarNotifChips.FLAG_NAME)
+    @EnableFlags(FLAG_STATUS_BAR_RON_CHIPS)
     fun chip_noPackage_hidden() =
         testScope.runTest {
             val latest by collectLastValue(underTest.chip)
 
-            commandRegistry.onShellCommand(pw, arrayOf("demo-notif"))
+            commandRegistry.onShellCommand(pw, arrayOf("demo-ron"))
 
             assertThat(latest).isInstanceOf(OngoingActivityChipModel.Hidden::class.java)
         }
 
     @Test
-    @EnableFlags(StatusBarNotifChips.FLAG_NAME)
+    @EnableFlags(FLAG_STATUS_BAR_RON_CHIPS)
     fun chip_hasPackage_shown() =
         testScope.runTest {
             val latest by collectLastValue(underTest.chip)
 
-            commandRegistry.onShellCommand(pw, arrayOf("demo-notif", "-p", "com.android.systemui"))
+            commandRegistry.onShellCommand(pw, arrayOf("demo-ron", "-p", "com.android.systemui"))
 
             assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown::class.java)
         }
 
     @Test
-    @EnableFlags(StatusBarNotifChips.FLAG_NAME)
+    @EnableFlags(FLAG_STATUS_BAR_RON_CHIPS)
     fun chip_hasText_shownWithText() =
         testScope.runTest {
             val latest by collectLastValue(underTest.chip)
 
             commandRegistry.onShellCommand(
                 pw,
-                arrayOf("demo-notif", "-p", "com.android.systemui", "-t", "test"),
+                arrayOf("demo-ron", "-p", "com.android.systemui", "-t", "test")
             )
 
             assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown.Text::class.java)
         }
 
     @Test
-    @EnableFlags(StatusBarNotifChips.FLAG_NAME)
+    @EnableFlags(FLAG_STATUS_BAR_RON_CHIPS)
     fun chip_supportsColor() =
         testScope.runTest {
             val latest by collectLastValue(underTest.chip)
 
             commandRegistry.onShellCommand(
                 pw,
-                arrayOf("demo-notif", "-p", "com.android.systemui", "-c", "#434343"),
+                arrayOf("demo-ron", "-p", "com.android.systemui", "-c", "#434343")
             )
 
             assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown::class.java)
@@ -119,28 +119,28 @@ class DemoNotifChipViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    @EnableFlags(StatusBarNotifChips.FLAG_NAME)
+    @EnableFlags(FLAG_STATUS_BAR_RON_CHIPS)
     fun chip_hasHideArg_hidden() =
         testScope.runTest {
             val latest by collectLastValue(underTest.chip)
 
             // First, show a chip
-            addDemoNotifChip()
+            addDemoRonChip()
             assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown::class.java)
 
             // Then, hide the chip
-            commandRegistry.onShellCommand(pw, arrayOf("demo-notif", "--hide"))
+            commandRegistry.onShellCommand(pw, arrayOf("demo-ron", "--hide"))
 
             assertThat(latest).isInstanceOf(OngoingActivityChipModel.Hidden::class.java)
         }
 
-    private fun addDemoNotifChip() {
-        addDemoNotifChip(commandRegistry, pw)
+    private fun addDemoRonChip() {
+        Companion.addDemoRonChip(commandRegistry, pw)
     }
 
     companion object {
-        fun addDemoNotifChip(commandRegistry: CommandRegistry, pw: PrintWriter) {
-            commandRegistry.onShellCommand(pw, arrayOf("demo-notif", "-p", "com.android.systemui"))
+        fun addDemoRonChip(commandRegistry: CommandRegistry, pw: PrintWriter) {
+            commandRegistry.onShellCommand(pw, arrayOf("demo-ron", "-p", "com.android.systemui"))
         }
     }
 }
