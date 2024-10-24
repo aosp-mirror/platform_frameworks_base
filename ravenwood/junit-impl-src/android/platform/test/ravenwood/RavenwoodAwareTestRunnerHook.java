@@ -25,6 +25,7 @@ import android.util.Log;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import org.junit.AssumptionViolatedException;
 import org.junit.runner.Description;
 import org.junit.runners.model.TestClass;
 
@@ -134,8 +135,17 @@ public class RavenwoodAwareTestRunnerHook {
         if (scope == Scope.Instance && order == Order.Outer) {
             // End of a test method.
             runner.mState.exitTestMethod();
-            RavenwoodTestStats.getInstance().onTestFinished(classDescription, description,
-                    th == null ? Result.Passed : Result.Failed);
+
+            final Result result;
+            if (th == null) {
+                result = Result.Passed;
+            } else if (th instanceof AssumptionViolatedException) {
+                result = Result.Skipped;
+            } else {
+                result = Result.Failed;
+            }
+
+            RavenwoodTestStats.getInstance().onTestFinished(classDescription, description, result);
         }
 
         // If RUN_DISABLED_TESTS is set, and the method did _not_ throw, make it an error.
