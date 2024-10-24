@@ -98,9 +98,9 @@ class StatusBarInitializerTest : SysuiTestCase() {
 
     @Test
     @DisableFlags(Flags.FLAG_STATUS_BAR_SIMPLE_FRAGMENT)
-    fun flagOff_doesNotInitializeViaCoreStartable() {
+    fun flagOff_startCalled_stillInitializes() {
         underTest.start()
-        assertThat(underTest.initialized).isFalse()
+        assertThat(underTest.initialized).isTrue()
     }
 
     @Test
