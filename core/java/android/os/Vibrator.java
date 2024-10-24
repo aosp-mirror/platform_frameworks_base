@@ -33,6 +33,7 @@ import android.content.res.Resources;
 import android.hardware.vibrator.IVibrator;
 import android.media.AudioAttributes;
 import android.os.vibrator.Flags;
+import android.os.vibrator.VendorVibrationSession;
 import android.os.vibrator.VibrationConfig;
 import android.os.vibrator.VibratorFrequencyProfile;
 import android.os.vibrator.VibratorFrequencyProfileLegacy;
@@ -244,6 +245,34 @@ public abstract class Vibrator {
      */
     public boolean areVibrationFeaturesSupported(@NonNull VibrationEffect effect) {
         return getInfo().areVibrationFeaturesSupported(effect);
+    }
+
+    /**
+     * Check whether the vibrator has support for vendor-specific effects.
+     *
+     * <p>Vendor vibration effects can be created via {@link VibrationEffect#createVendorEffect}.
+     *
+     * @return True if the hardware can play vendor-specific vibration effects, false otherwise.
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_VENDOR_VIBRATION_EFFECTS)
+    public boolean areVendorEffectsSupported() {
+        return getInfo().hasCapability(IVibrator.CAP_PERFORM_VENDOR_EFFECTS);
+    }
+
+    /**
+     * Check whether the vibrator has support for vendor-specific vibration sessions.
+     *
+     * <p>Vendor vibration sessions can be started via {@link #startVendorSession}.
+     *
+     * @return True if the hardware can play vendor-specific vibration sessions, false otherwise.
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_VENDOR_VIBRATION_EFFECTS)
+    public boolean areVendorSessionsSupported() {
+        return false;
     }
 
     /**
@@ -921,5 +950,45 @@ public abstract class Vibrator {
     @SystemApi
     @RequiresPermission(android.Manifest.permission.ACCESS_VIBRATOR_STATE)
     public void removeVibratorStateListener(@NonNull OnVibratorStateChangedListener listener) {
+    }
+
+    /**
+     * Starts a vibration session in this vibrator.
+     *
+     * <p>The session will start asynchronously once the vibrator control can be acquired. Once it's
+     * started the {@link VendorVibrationSession} will be provided to the callback. This session
+     * should be used to play vibrations until the session is ended or canceled.
+     *
+     * <p>The vendor app will have exclusive control over the vibrator during this session. This
+     * control can be revoked by the vibrator service, which will be notified to the same session
+     * callback with the {@link VendorVibrationSession#STATUS_CANCELED}.
+     *
+     * <p>The {@link VibrationAttributes} will be used to decide the priority of the vendor
+     * vibrations that will be performed in this session. All vibrations within this session will
+     * apply the same attributes.
+     *
+     * @param attrs    The {@link VibrationAttributes} corresponding to the vibrations that will be
+     *                 performed in the session. This will be used to decide the priority of this
+     *                 session against other system vibrations.
+     * @param reason   The description for this session, used for debugging purposes.
+     * @param cancellationSignal A signal to cancel the session before it starts.
+     * @param executor The executor for the session callbacks.
+     * @param callback The {@link VendorVibrationSession.Callback} for the started session.
+     *
+     * @see VendorVibrationSession
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_VENDOR_VIBRATION_EFFECTS)
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.VIBRATE,
+            android.Manifest.permission.VIBRATE_VENDOR_EFFECTS,
+            android.Manifest.permission.START_VIBRATION_SESSIONS,
+    })
+    public void startVendorSession(@NonNull VibrationAttributes attrs, @Nullable String reason,
+            @Nullable CancellationSignal cancellationSignal, @NonNull Executor executor,
+            @NonNull VendorVibrationSession.Callback callback) {
+        Log.w(TAG, "startVendorSession is not supported");
+        executor.execute(() -> callback.onFinished(VendorVibrationSession.STATUS_UNSUPPORTED));
     }
 }

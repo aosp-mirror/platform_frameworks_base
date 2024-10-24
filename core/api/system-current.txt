@@ -388,6 +388,7 @@ package android {
     field public static final String START_CROSS_PROFILE_ACTIVITIES = "android.permission.START_CROSS_PROFILE_ACTIVITIES";
     field public static final String START_REVIEW_PERMISSION_DECISIONS = "android.permission.START_REVIEW_PERMISSION_DECISIONS";
     field public static final String START_TASKS_FROM_RECENTS = "android.permission.START_TASKS_FROM_RECENTS";
+    field @FlaggedApi("android.os.vibrator.vendor_vibration_effects") public static final String START_VIBRATION_SESSIONS = "android.permission.START_VIBRATION_SESSIONS";
     field public static final String STATUS_BAR_SERVICE = "android.permission.STATUS_BAR_SERVICE";
     field public static final String STOP_APP_SWITCHES = "android.permission.STOP_APP_SWITCHES";
     field public static final String SUBSTITUTE_NOTIFICATION_APP_NAME = "android.permission.SUBSTITUTE_NOTIFICATION_APP_NAME";
@@ -11642,8 +11643,11 @@ package android.os {
   public abstract class Vibrator {
     method @RequiresPermission(android.Manifest.permission.ACCESS_VIBRATOR_STATE) public void addVibratorStateListener(@NonNull android.os.Vibrator.OnVibratorStateChangedListener);
     method @RequiresPermission(android.Manifest.permission.ACCESS_VIBRATOR_STATE) public void addVibratorStateListener(@NonNull java.util.concurrent.Executor, @NonNull android.os.Vibrator.OnVibratorStateChangedListener);
+    method @FlaggedApi("android.os.vibrator.vendor_vibration_effects") public boolean areVendorEffectsSupported();
+    method @FlaggedApi("android.os.vibrator.vendor_vibration_effects") public boolean areVendorSessionsSupported();
     method @RequiresPermission(android.Manifest.permission.ACCESS_VIBRATOR_STATE) public boolean isVibrating();
     method @RequiresPermission(android.Manifest.permission.ACCESS_VIBRATOR_STATE) public void removeVibratorStateListener(@NonNull android.os.Vibrator.OnVibratorStateChangedListener);
+    method @FlaggedApi("android.os.vibrator.vendor_vibration_effects") @RequiresPermission(allOf={android.Manifest.permission.VIBRATE, android.Manifest.permission.VIBRATE_VENDOR_EFFECTS, android.Manifest.permission.START_VIBRATION_SESSIONS}) public void startVendorSession(@NonNull android.os.VibrationAttributes, @Nullable String, @Nullable android.os.CancellationSignal, @NonNull java.util.concurrent.Executor, @NonNull android.os.vibrator.VendorVibrationSession.Callback);
   }
 
   public static interface Vibrator.OnVibratorStateChangedListener {
@@ -11791,6 +11795,28 @@ package android.os.storage {
   public final class StorageVolume implements android.os.Parcelable {
     method @NonNull public String getId();
     method public boolean isExternallyManaged();
+  }
+
+}
+
+package android.os.vibrator {
+
+  @FlaggedApi("android.os.vibrator.vendor_vibration_effects") public final class VendorVibrationSession implements java.lang.AutoCloseable {
+    method public void cancel();
+    method public void close();
+    method @RequiresPermission(android.Manifest.permission.VIBRATE) public void vibrate(@NonNull android.os.VibrationEffect, @Nullable String);
+    field public static final int STATUS_CANCELED = 4; // 0x4
+    field public static final int STATUS_IGNORED = 2; // 0x2
+    field public static final int STATUS_SUCCESS = 1; // 0x1
+    field public static final int STATUS_UNKNOWN = 0; // 0x0
+    field public static final int STATUS_UNKNOWN_ERROR = 5; // 0x5
+    field public static final int STATUS_UNSUPPORTED = 3; // 0x3
+  }
+
+  public static interface VendorVibrationSession.Callback {
+    method public void onFinished(int);
+    method public void onFinishing();
+    method public void onStarted(@NonNull android.os.vibrator.VendorVibrationSession);
   }
 
 }
