@@ -1759,6 +1759,9 @@ public class BubbleController implements ConfigurationChangeListener,
     @MainThread
     public void removeAllBubbles(@Bubbles.DismissReason int reason) {
         mBubbleData.dismissAll(reason);
+        if (reason == Bubbles.DISMISS_USER_GESTURE) {
+            mLogger.log(BubbleLogger.Event.BUBBLE_BAR_DISMISSED_DRAG_BAR);
+        }
     }
 
     private void onEntryAdded(BubbleEntry entry) {
