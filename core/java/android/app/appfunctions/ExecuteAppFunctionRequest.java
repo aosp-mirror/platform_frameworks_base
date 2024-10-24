@@ -50,12 +50,12 @@ public final class ExecuteAppFunctionRequest implements Parcelable {
                 }
             };
 
-    /** Returns the package name of the app that hosts the function. */
+    /** Returns the package name of the app that hosts/owns the function. */
     @NonNull private final String mTargetPackageName;
 
     /**
-     * Returns the unique string identifier of the app function to be executed. TODO(b/357551503):
-     * Document how callers can get the available function identifiers.
+     * The unique string identifier of the app function to be executed. This identifier is used to
+     * execute a specific app function.
      */
     @NonNull private final String mFunctionIdentifier;
 
@@ -69,8 +69,6 @@ public final class ExecuteAppFunctionRequest implements Parcelable {
      *
      * <p>The document may have missing parameters. Developers are advised to implement defensive
      * handling measures.
-     *
-     * <p>TODO(b/357551503): Document how function parameters can be obtained for function execution
      */
     @NonNull private final GenericDocumentWrapper mParameters;
 
@@ -91,7 +89,19 @@ public final class ExecuteAppFunctionRequest implements Parcelable {
         return mTargetPackageName;
     }
 
-    /** Returns the unique string identifier of the app function to be executed. */
+    /**
+     * Returns the unique string identifier of the app function to be executed.
+     *
+     * <p>When there is a package change or the device starts up, the metadata of available
+     * functions is indexed by AppSearch. AppSearch stores the indexed information as {@code
+     * AppFunctionStaticMetadata} document.
+     *
+     * <p>The ID can be obtained by querying the {@code AppFunctionStaticMetadata} documents from
+     * AppSearch.
+     *
+     * <p>If the {@code functionId} provided is invalid, the caller will get an invalid argument
+     * response.
+     */
     @NonNull
     public String getFunctionIdentifier() {
         return mFunctionIdentifier;
@@ -103,6 +113,12 @@ public final class ExecuteAppFunctionRequest implements Parcelable {
      *
      * <p>The bundle may have missing parameters. Developers are advised to implement defensive
      * handling measures.
+     *
+     * <p>Similar to {@link #getFunctionIdentifier()} the parameters required by a function can be
+     * obtained by querying AppSearch for the corresponding {@code AppFunctionStaticMetadata}. This
+     * metadata will contain enough information for the caller to resolve the required parameters
+     * either using information from the metadata itself or using the AppFunction SDK for function
+     * callers.
      */
     @NonNull
     public GenericDocument getParameters() {
