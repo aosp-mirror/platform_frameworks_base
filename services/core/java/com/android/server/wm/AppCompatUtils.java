@@ -32,6 +32,8 @@ import android.view.InsetsSource;
 import android.view.InsetsState;
 import android.view.WindowInsets;
 
+import com.android.window.flags.Flags;
+
 import java.util.function.BooleanSupplier;
 
 /**
@@ -86,10 +88,22 @@ final class AppCompatUtils {
     /**
      * @param activityRecord The {@link ActivityRecord} for the app package.
      * @param overrideChangeId The per-app override identifier.
-     * @return {@code true} if the per-app override is enable for the given activity.
+     * @return {@code true} if the per-app override is enable for the given activity and the
+     * display does not ignore fixed orientation, aspect ratio and resizability of activity.
      */
     static boolean isChangeEnabled(@NonNull ActivityRecord activityRecord, long overrideChangeId) {
-        return activityRecord.info.isChangeEnabled(overrideChangeId);
+        return activityRecord.info.isChangeEnabled(overrideChangeId)
+                && !isDisplayIgnoreActivitySizeRestrictions(activityRecord);
+    }
+
+    /**
+     * Whether the display ignores fixed orientation, aspect ratio and resizability of activities.
+     */
+    static boolean isDisplayIgnoreActivitySizeRestrictions(
+            @NonNull ActivityRecord activityRecord) {
+        final DisplayContent dc = activityRecord.mDisplayContent;
+        return Flags.vdmForceAppUniversalResizableApi() && dc != null
+                && dc.isDisplayIgnoreActivitySizeRestrictions();
     }
 
     /**
