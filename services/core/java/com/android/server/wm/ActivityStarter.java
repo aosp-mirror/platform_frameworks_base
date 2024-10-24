@@ -2370,6 +2370,9 @@ class ActivityStarter {
             return START_SUCCESS;
         }
 
+        if (mMovedToTopActivity != null) {
+            targetTaskTop = mMovedToTopActivity;
+        }
         // The reusedActivity could be finishing, for example of starting an activity with
         // FLAG_ACTIVITY_CLEAR_TOP flag. In that case, use the top running activity in the
         // task instead.
@@ -2608,7 +2611,7 @@ class ActivityStarter {
         mInTaskFragment = null;
         mAddingToTaskFragment = null;
         mAddingToTask = false;
-
+        mMovedToTopActivity = null;
         mSourceRootTask = null;
 
         mTargetRootTask = null;
