@@ -615,13 +615,13 @@ public class NotificationStackScrollLayout
             if (SceneContainerFlag.isEnabled()) {
                 return mScrollViewFields.getScrollState().isScrolledToTop();
             } else {
-                return mOwnScrollY == 0;
+                return getOwnScrollY() == 0;
             }
         }
 
         @Override
         public boolean isScrolledToBottom() {
-            return mOwnScrollY >= getScrollRange();
+            return getOwnScrollY() >= getScrollRange();
         }
 
         @Override
@@ -1374,7 +1374,7 @@ public class NotificationStackScrollLayout
 
     /**
      * Updates the children views according to the stack scroll algorithm. Call this whenever
-     * modifications to {@link #mOwnScrollY} are performed to reflect it in the view layout.
+     * modifications to {@link #getOwnScrollY()} are performed to reflect it in the view layout.
      */
     private void updateChildren() {
         Trace.beginSection("NSSL#updateChildren");
@@ -1404,11 +1404,11 @@ public class NotificationStackScrollLayout
             if (mChildrenToAddAnimated.contains(child)) {
                 final int startingPosition = getPositionInLinearLayout(child);
                 final int childHeight = getIntrinsicHeight(child) + mPaddingBetweenElements;
-                if (startingPosition < mOwnScrollY) {
+                if (startingPosition < getOwnScrollY()) {
                     // This child starts off screen, so let's keep it offscreen to keep the
                     // others visible
 
-                    setOwnScrollY(mOwnScrollY + childHeight);
+                    setOwnScrollY(getOwnScrollY() + childHeight);
                 }
             }
         }
@@ -1428,7 +1428,7 @@ public class NotificationStackScrollLayout
             targetScroll = Math.max(0, Math.min(targetScroll, getScrollRange()));
             // Only apply the scroll if we're scrolling the view upwards, or the view is so
             // far up that it is not visible anymore.
-            if (mOwnScrollY < targetScroll || outOfViewScroll < mOwnScrollY) {
+            if (getOwnScrollY() < targetScroll || outOfViewScroll < getOwnScrollY()) {
                 setOwnScrollY(targetScroll);
             }
         }
@@ -1452,7 +1452,7 @@ public class NotificationStackScrollLayout
             return;
         }
         int scrollRange = getScrollRange();
-        if (scrollRange < mOwnScrollY && !mAmbientState.isClearAllInProgress()) {
+        if (scrollRange < getOwnScrollY() && !mAmbientState.isClearAllInProgress()) {
             // if the scroll boundary updates the position of the stack,
             boolean animateStackY = scrollRange < getScrollAmountToScrollBoundary()
                     && mAnimateStackYForContentHeightChange;
@@ -2072,8 +2072,8 @@ public class NotificationStackScrollLayout
 
         // Only apply the scroll if we're scrolling the view upwards, or the view is so far up
         // that it is not visible anymore.
-        if (mOwnScrollY < targetScroll || outOfViewScroll < mOwnScrollY) {
-            mScroller.startScroll(mScrollX, mOwnScrollY, 0, targetScroll - mOwnScrollY);
+        if (getOwnScrollY() < targetScroll || outOfViewScroll < getOwnScrollY()) {
+            mScroller.startScroll(mScrollX, getOwnScrollY(), 0, targetScroll - getOwnScrollY());
             mDontReportNextOverScroll = true;
             animateScroll();
             return true;
@@ -2107,7 +2107,7 @@ public class NotificationStackScrollLayout
         }
 
         int range = getScrollRange();
-        if (mOwnScrollY > range) {
+        if (getOwnScrollY() > range) {
             setOwnScrollY(range);
         }
     }
@@ -2200,7 +2200,7 @@ public class NotificationStackScrollLayout
         // Top overScroll might not grab all scrolling motion,
         // we have to scroll as well.
         float scrollAmount = newTopAmount < 0 ? -newTopAmount : 0.0f;
-        float newScrollY = mOwnScrollY + scrollAmount;
+        float newScrollY = getOwnScrollY() + scrollAmount;
         if (newScrollY > range) {
             if (!mExpandedInThisMotion) {
                 float currentBottomPixels = getCurrentOverScrolledPixels(false);
@@ -2233,7 +2233,7 @@ public class NotificationStackScrollLayout
         // Bottom overScroll might not grab all scrolling motion,
         // we have to scroll as well.
         float scrollAmount = newBottomAmount < 0 ? newBottomAmount : 0.0f;
-        float newScrollY = mOwnScrollY + scrollAmount;
+        float newScrollY = getOwnScrollY() + scrollAmount;
         if (newScrollY < 0) {
             float currentTopPixels = getCurrentOverScrolledPixels(true);
             // We overScroll on the top
@@ -2273,7 +2273,7 @@ public class NotificationStackScrollLayout
 
     private void animateScroll() {
         if (mScroller.computeScrollOffset()) {
-            int oldY = mOwnScrollY;
+            int oldY = getOwnScrollY();
             int y = mScroller.getCurrY();
 
             if (oldY != y) {
@@ -2460,8 +2460,8 @@ public class NotificationStackScrollLayout
                 springBack();
             } else {
                 float overScrollTop = getCurrentOverScrollAmount(true);
-                if (mOwnScrollY < 0) {
-                    notifyOverscrollTopListener(-mOwnScrollY, isRubberbanded(true));
+                if (getOwnScrollY() < 0) {
+                    notifyOverscrollTopListener(-getOwnScrollY(), isRubberbanded(true));
                 } else {
                     notifyOverscrollTopListener(overScrollTop, isRubberbanded(true));
                 }
@@ -2477,19 +2477,19 @@ public class NotificationStackScrollLayout
      */
     private void springBack() {
         int scrollRange = getScrollRange();
-        boolean overScrolledTop = mOwnScrollY <= 0;
-        boolean overScrolledBottom = mOwnScrollY >= scrollRange;
+        boolean overScrolledTop = getOwnScrollY() <= 0;
+        boolean overScrolledBottom = getOwnScrollY() >= scrollRange;
         if (overScrolledTop || overScrolledBottom) {
             boolean onTop;
             float newAmount;
             if (overScrolledTop) {
                 onTop = true;
-                newAmount = -mOwnScrollY;
+                newAmount = -getOwnScrollY();
                 setOwnScrollY(0);
                 mDontReportNextOverScroll = true;
             } else {
                 onTop = false;
-                newAmount = mOwnScrollY - scrollRange;
+                newAmount = getOwnScrollY() - scrollRange;
                 setOwnScrollY(scrollRange);
             }
             setOverScrollAmount(newAmount, onTop, false);
@@ -2794,7 +2794,7 @@ public class NotificationStackScrollLayout
             float topAmount = getCurrentOverScrollAmount(true);
             float bottomAmount = getCurrentOverScrollAmount(false);
             if (velocityY < 0 && topAmount > 0) {
-                setOwnScrollY(mOwnScrollY - (int) topAmount);
+                setOwnScrollY(getOwnScrollY() - (int) topAmount);
                 if (!mShouldUseSplitNotificationShade) {
                     mDontReportNextOverScroll = true;
                     setOverScrollAmount(0, true, false);
@@ -2802,7 +2802,7 @@ public class NotificationStackScrollLayout
                 mMaxOverScroll = Math.abs(velocityY) / 1000f * getRubberBandFactor(true /* onTop */)
                         * mOverflingDistance + topAmount;
             } else if (velocityY > 0 && bottomAmount > 0) {
-                setOwnScrollY((int) (mOwnScrollY + bottomAmount));
+                setOwnScrollY((int) (getOwnScrollY() + bottomAmount));
                 setOverScrollAmount(0, false, false);
                 mMaxOverScroll = Math.abs(velocityY) / 1000f
                         * getRubberBandFactor(false /* onTop */) * mOverflingDistance
@@ -2816,8 +2816,8 @@ public class NotificationStackScrollLayout
             if (mExpandedInThisMotion) {
                 minScrollY = Math.min(minScrollY, mMaxScrollAfterExpand);
             }
-            mScroller.fling(mScrollX, mOwnScrollY, 1, velocityY, 0, 0, 0, minScrollY, 0,
-                    mExpandedInThisMotion && mOwnScrollY >= 0 ? 0 : Integer.MAX_VALUE / 2);
+            mScroller.fling(mScrollX, getOwnScrollY(), 1, velocityY, 0, 0, 0, minScrollY, 0,
+                    mExpandedInThisMotion && getOwnScrollY() >= 0 ? 0 : Integer.MAX_VALUE / 2);
 
             animateScroll();
         }
@@ -3138,11 +3138,11 @@ public class NotificationStackScrollLayout
         final int scrollBoundaryStart = getScrollAmountToScrollBoundary();
         mAnimateStackYForContentHeightChange = true;
         // This is reset onLayout
-        if (endPosition <= mOwnScrollY - scrollBoundaryStart) {
+        if (endPosition <= getOwnScrollY() - scrollBoundaryStart) {
             // This child is fully scrolled of the top, so we have to deduct its height from the
             // scrollPosition
-            setOwnScrollY(mOwnScrollY - childHeight);
-        } else if (startingPosition < mOwnScrollY - scrollBoundaryStart) {
+            setOwnScrollY(getOwnScrollY() - childHeight);
+        } else if (startingPosition < getOwnScrollY() - scrollBoundaryStart) {
             // This child is currently being scrolled into, set the scroll position to the
             // start of this child
             setOwnScrollY(startingPosition + scrollBoundaryStart);
@@ -3764,7 +3764,7 @@ public class NotificationStackScrollLayout
                         if (vscroll != 0) {
                             final int delta = (int) (vscroll * getVerticalScrollFactor());
                             final int range = getScrollRange();
-                            int oldScrollY = mOwnScrollY;
+                            int oldScrollY = getOwnScrollY();
                             int newScrollY = oldScrollY - delta;
                             if (newScrollY < 0) {
                                 newScrollY = 0;
@@ -3881,7 +3881,7 @@ public class NotificationStackScrollLayout
                     if (scrollAmount != 0.0f) {
                         // The scrolling motion could not be compensated with the
                         // existing overScroll, we have to scroll the view
-                        customOverScrollBy((int) scrollAmount, mOwnScrollY,
+                        customOverScrollBy((int) scrollAmount, getOwnScrollY(),
                                 range, getHeight() / 2);
                         // If we're scrolling, leavebehinds should be dismissed
                         mController.checkSnoozeLeavebehind();
@@ -3913,7 +3913,7 @@ public class NotificationStackScrollLayout
                                     onOverScrollFling(false, initialVelocity);
                                 }
                             } else {
-                                if (mScroller.springBack(mScrollX, mOwnScrollY, 0, 0, 0,
+                                if (mScroller.springBack(mScrollX, getOwnScrollY(), 0, 0, 0,
                                         getScrollRange())) {
                                     animateScroll();
                                 }
@@ -3927,7 +3927,7 @@ public class NotificationStackScrollLayout
                 break;
             case ACTION_CANCEL:
                 if (mIsBeingDragged && getChildCount() > 0) {
-                    if (mScroller.springBack(mScrollX, mOwnScrollY, 0, 0, 0,
+                    if (mScroller.springBack(mScrollX, getOwnScrollY(), 0, 0, 0,
                             getScrollRange())) {
                         animateScroll();
                     }
@@ -4213,7 +4213,7 @@ public class NotificationStackScrollLayout
                 setIsBeingDragged(false);
                 mActivePointerId = INVALID_POINTER;
                 recycleVelocityTracker();
-                if (mScroller.springBack(mScrollX, mOwnScrollY, 0, 0, 0, getScrollRange())) {
+                if (mScroller.springBack(mScrollX, getOwnScrollY(), 0, 0, 0, getScrollRange())) {
                     animateScroll();
                 }
                 break;
@@ -4311,10 +4311,10 @@ public class NotificationStackScrollLayout
                         getHeight() - mPaddingBottom - getTopPadding() - mPaddingTop
                                 - mShelf.getIntrinsicHeight();
                 final int targetScrollY = Math.max(0,
-                        Math.min(mOwnScrollY + direction * viewportHeight, getScrollRange()));
-                if (targetScrollY != mOwnScrollY) {
-                    mScroller.startScroll(mScrollX, mOwnScrollY, 0,
-                            targetScrollY - mOwnScrollY);
+                        Math.min(getOwnScrollY() + direction * viewportHeight, getScrollRange()));
+                if (targetScrollY != getOwnScrollY()) {
+                    mScroller.startScroll(mScrollX, getOwnScrollY(), 0,
+                            targetScrollY - getOwnScrollY());
                     animateScroll();
                     return true;
                 }
@@ -4568,7 +4568,7 @@ public class NotificationStackScrollLayout
                         float diff = endPosition - layoutEnd;
                         mScrollViewFields.sendSyntheticScroll(diff);
                     }
-                    setOwnScrollY((int) (mOwnScrollY + endPosition - layoutEnd));
+                    setOwnScrollY((int) (getOwnScrollY() + endPosition - layoutEnd));
                     mDisallowScrollingInThisMotion = true;
                 }
             }
@@ -5079,7 +5079,7 @@ public class NotificationStackScrollLayout
             event.setScrollY(mScrollViewFields.getScrollState().getScrollPosition());
             event.setMaxScrollY(mScrollViewFields.getScrollState().getMaxScrollPosition());
         } else {
-            event.setScrollY(mOwnScrollY);
+            event.setScrollY(getOwnScrollY());
             event.setMaxScrollY(getScrollRange());
         }
     }
@@ -5285,11 +5285,20 @@ public class NotificationStackScrollLayout
 
         // If notifications are scrolled,
         // clear out scrollY by the time we push notifications offscreen
-        if (mOwnScrollY > 0) {
-            setOwnScrollY((int) MathUtils.lerp(mOwnScrollY, 0, mQsExpansionFraction));
+        if (getOwnScrollY() > 0) {
+            setOwnScrollY((int) MathUtils.lerp(getOwnScrollY(), 0, mQsExpansionFraction));
         }
         if (!FooterViewRefactor.isEnabled() && footerAffected) {
             updateFooter();
+        }
+    }
+
+    @VisibleForTesting
+    int getOwnScrollY() {
+        if (SceneContainerFlag.isEnabled()) {
+            return 0;
+        } else {
+            return mOwnScrollY;
         }
     }
 
@@ -5310,11 +5319,11 @@ public class NotificationStackScrollLayout
             return;
         }
 
-        if (ownScrollY != mOwnScrollY) {
+        if (ownScrollY != getOwnScrollY()) {
             // We still want to call the normal scrolled changed for accessibility reasons
-            onScrollChanged(mScrollX, ownScrollY, mScrollX, mOwnScrollY);
+            onScrollChanged(mScrollX, ownScrollY, mScrollX, getOwnScrollY());
             mOwnScrollY = ownScrollY;
-            mAmbientState.setScrollY(mOwnScrollY);
+            mAmbientState.setScrollY(getOwnScrollY());
             updateOnScrollChange();
             updateStackPosition(animateStackYChangeListener);
         }
@@ -5323,7 +5332,7 @@ public class NotificationStackScrollLayout
     private void updateOnScrollChange() {
         SceneContainerFlag.assertInLegacyMode();
         if (mScrollListener != null) {
-            mScrollListener.accept(mOwnScrollY);
+            mScrollListener.accept(getOwnScrollY());
         }
         updateForwardAndBackwardScrollability();
         requestChildrenUpdate();
@@ -6890,7 +6899,7 @@ public class NotificationStackScrollLayout
         public void expansionStateChanged(boolean isExpanding) {
             mExpandingNotification = isExpanding;
             if (!mExpandedInThisMotion) {
-                mMaxScrollAfterExpand = mOwnScrollY;
+                mMaxScrollAfterExpand = getOwnScrollY();
                 mExpandedInThisMotion = true;
             }
         }
