@@ -60,7 +60,7 @@ constructor(
 ) {
 
     @SuppressLint("SharedFlowCreation")
-    private val mutableDismissDialogEvents = MutableSharedFlow<Unit>()
+    private val mutableDismissDialogEvents = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
     val dialogVisibility: Flow<VolumeDialogVisibilityModel> = repository.dialogVisibility
 
     init {
@@ -74,7 +74,7 @@ constructor(
             .mapNotNull { it.toVisibilityModel() }
             .onEach { model ->
                 updateVisibility { model }
-                if (model is VolumeDialogVisibilityModel.Visible) {
+                if (model is Visible) {
                     resetDismissTimeout()
                 }
             }
@@ -87,17 +87,17 @@ constructor(
      */
     fun dismissDialog(reason: Int) {
         updateVisibility { visibilityModel ->
-            if (visibilityModel is VolumeDialogVisibilityModel.Dismissed) {
+            if (visibilityModel is Dismissed) {
                 visibilityModel
             } else {
-                VolumeDialogVisibilityModel.Dismissed(reason)
+                Dismissed(reason)
             }
         }
     }
 
     /** Resets current dialog timeout. */
-    suspend fun resetDismissTimeout() {
-        mutableDismissDialogEvents.emit(Unit)
+    fun resetDismissTimeout() {
+        mutableDismissDialogEvents.tryEmit(Unit)
     }
 
     private fun updateVisibility(
