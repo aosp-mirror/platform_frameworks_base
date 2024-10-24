@@ -775,6 +775,46 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
             new Key<int[]>("android.colorCorrection.availableAberrationModes", int[].class);
 
     /**
+     * <p>The range of supported color temperature values for
+     * {@link CaptureRequest#COLOR_CORRECTION_COLOR_TEMPERATURE android.colorCorrection.colorTemperature}.</p>
+     * <p>This key lists the valid range of color temperature values for
+     * {@link CaptureRequest#COLOR_CORRECTION_COLOR_TEMPERATURE android.colorCorrection.colorTemperature} supported by this camera device.</p>
+     * <p>This key will be null on devices that do not support CCT mode for
+     * {@link CaptureRequest#COLOR_CORRECTION_MODE android.colorCorrection.mode}.</p>
+     * <p><b>Range of valid values:</b><br></p>
+     * <p>The minimum supported range will be [2856K,6500K]. The maximum supported
+     * range will be [1000K,40000K].</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     *
+     * @see CaptureRequest#COLOR_CORRECTION_COLOR_TEMPERATURE
+     * @see CaptureRequest#COLOR_CORRECTION_MODE
+     */
+    @PublicKey
+    @NonNull
+    @FlaggedApi(Flags.FLAG_COLOR_TEMPERATURE)
+    public static final Key<android.util.Range<Integer>> COLOR_CORRECTION_COLOR_TEMPERATURE_RANGE =
+            new Key<android.util.Range<Integer>>("android.colorCorrection.colorTemperatureRange", new TypeReference<android.util.Range<Integer>>() {{ }});
+
+    /**
+     * <p>List of color correction modes for {@link CaptureRequest#COLOR_CORRECTION_MODE android.colorCorrection.mode} that are
+     * supported by this camera device.</p>
+     * <p>This key lists the valid modes for {@link CaptureRequest#COLOR_CORRECTION_MODE android.colorCorrection.mode}. If no
+     * color correction modes are available for a device, this key will be null.</p>
+     * <p>Camera devices that have a FULL hardware level will always include at least
+     * FAST, HIGH_QUALITY, and TRANSFORM_MATRIX modes.</p>
+     * <p><b>Range of valid values:</b><br>
+     * Any value listed in {@link CaptureRequest#COLOR_CORRECTION_MODE android.colorCorrection.mode}</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     *
+     * @see CaptureRequest#COLOR_CORRECTION_MODE
+     */
+    @PublicKey
+    @NonNull
+    @FlaggedApi(Flags.FLAG_COLOR_TEMPERATURE)
+    public static final Key<int[]> COLOR_CORRECTION_AVAILABLE_MODES =
+            new Key<int[]>("android.colorCorrection.availableModes", int[].class);
+
+    /**
      * <p>List of auto-exposure antibanding modes for {@link CaptureRequest#CONTROL_AE_ANTIBANDING_MODE android.control.aeAntibandingMode} that are
      * supported by this camera device.</p>
      * <p>Not all of the auto-exposure anti-banding modes may be
