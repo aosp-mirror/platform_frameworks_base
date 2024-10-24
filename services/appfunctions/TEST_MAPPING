@@ -1,0 +1,10 @@
+{
+  "presubmit": [
+    {
+      "name": "FrameworksAppFunctionsTests"
+    },
+    {
+      "name": "CtsAppFunctionTestCases"
+    }
+  ]
+}

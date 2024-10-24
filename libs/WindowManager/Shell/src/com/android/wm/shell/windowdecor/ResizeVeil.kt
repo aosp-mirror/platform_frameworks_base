@@ -30,7 +30,6 @@ import android.view.Display
 import android.view.LayoutInflater
 import android.view.SurfaceControl
 import android.view.SurfaceControlViewHost
-import android.view.SurfaceSession
 import android.view.WindowManager
 import android.view.WindowManager.LayoutParams.INPUT_FEATURE_NO_INPUT_CHANNEL
 import android.view.WindowlessWindowManager
@@ -66,7 +65,6 @@ class ResizeVeil @JvmOverloads constructor(
     private val lightColors = dynamicLightColorScheme(context)
     private val darkColors = dynamicDarkColorScheme(context)
 
-    private val surfaceSession = SurfaceSession()
     private lateinit var iconView: ImageView
     private var iconSize = 0
 
@@ -126,7 +124,7 @@ class ResizeVeil @JvmOverloads constructor(
                 .setCallsite("ResizeVeil#setupResizeVeil")
                 .build()
         backgroundSurface = surfaceControlBuilderFactory
-                .create("Resize veil background of Task=" + taskInfo.taskId, surfaceSession)
+                .create("Resize veil background of Task=" + taskInfo.taskId)
                 .setColorLayer()
                 .setHidden(true)
                 .setParent(veilSurface)
@@ -398,10 +396,6 @@ class ResizeVeil @JvmOverloads constructor(
     interface SurfaceControlBuilderFactory {
         fun create(name: String): SurfaceControl.Builder {
             return SurfaceControl.Builder().setName(name)
-        }
-
-        fun create(name: String, surfaceSession: SurfaceSession): SurfaceControl.Builder {
-            return SurfaceControl.Builder(surfaceSession).setName(name)
         }
     }
 

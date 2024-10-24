@@ -49,6 +49,7 @@ import android.gui.DropInputMode;
 import android.gui.StalledTransactionInfo;
 import android.gui.TrustedOverlay;
 import android.hardware.DataSpace;
+import android.hardware.DisplayLuts;
 import android.hardware.HardwareBuffer;
 import android.hardware.OverlayProperties;
 import android.hardware.SyncFence;
@@ -152,6 +153,8 @@ public final class SurfaceControl implements Parcelable {
             long nativeObject, int priority);
     private static native void nativeSetWindowCrop(long transactionObj, long nativeObject,
             int l, int t, int r, int b);
+    private static native void nativeSetCrop(long transactionObj, long nativeObject,
+            float l, float t, float r, float b);
     private static native void nativeSetCornerRadius(long transactionObj, long nativeObject,
             float cornerRadius);
     private static native void nativeSetBackgroundBlurRadius(long transactionObj, long nativeObject,
@@ -305,9 +308,9 @@ public final class SurfaceControl implements Parcelable {
     private static native StalledTransactionInfo nativeGetStalledTransactionInfo(int pid);
     private static native void nativeSetDesiredPresentTimeNanos(long transactionObj,
                                                                 long desiredPresentTimeNanos);
-    private static native void nativeSetFrameTimeline(long transactionObj,
-                                                           long vsyncId);
     private static native void nativeNotifyShutdown();
+    private static native void nativeSetLuts(long transactionObj, long nativeObject,
+            float[] buffers, int[] slots, int[] dimensions, int[] sizes, int[] samplingKeys);
 
     /**
      * Transforms that can be applied to buffers as they are displayed to a window.
@@ -445,16 +448,20 @@ public final class SurfaceControl implements Parcelable {
         // Jank due to unknown reasons.
         public static final int UNKNOWN = 0x80;
 
-        public JankData(long frameVsyncId, @JankType int jankType, long frameIntervalNs) {
+        public JankData(long frameVsyncId, @JankType int jankType, long frameIntervalNs,
+                long scheduledAppFrameTimeNs, long actualAppFrameTimeNs) {
             this.frameVsyncId = frameVsyncId;
             this.jankType = jankType;
             this.frameIntervalNs = frameIntervalNs;
-
+            this.scheduledAppFrameTimeNs = scheduledAppFrameTimeNs;
+            this.actualAppFrameTimeNs = actualAppFrameTimeNs;
         }
 
         public final long frameVsyncId;
         public final @JankType int jankType;
         public final long frameIntervalNs;
+        public final long scheduledAppFrameTimeNs;
+        public final long actualAppFrameTimeNs;
     }
 
     /**
@@ -1803,6 +1810,7 @@ public final class SurfaceControl implements Parcelable {
         public DisplayMode[] supportedDisplayModes;
         public int activeDisplayModeId;
         public float renderFrameRate;
+        public boolean hasArrSupport;
 
         public int[] supportedColorModes;
         public int activeColorMode;
@@ -1820,6 +1828,7 @@ public final class SurfaceControl implements Parcelable {
                     + "supportedDisplayModes=" + Arrays.toString(supportedDisplayModes)
                     + ", activeDisplayModeId=" + activeDisplayModeId
                     + ", renderFrameRate=" + renderFrameRate
+                    + ", hasArrSupport=" + hasArrSupport
                     + ", supportedColorModes=" + Arrays.toString(supportedColorModes)
                     + ", activeColorMode=" + activeColorMode
                     + ", hdrCapabilities=" + hdrCapabilities
@@ -1839,13 +1848,14 @@ public final class SurfaceControl implements Parcelable {
                 && Arrays.equals(supportedColorModes, that.supportedColorModes)
                 && activeColorMode == that.activeColorMode
                 && Objects.equals(hdrCapabilities, that.hdrCapabilities)
-                && preferredBootDisplayMode == that.preferredBootDisplayMode;
+                && preferredBootDisplayMode == that.preferredBootDisplayMode
+                && hasArrSupport == that.hasArrSupport;
         }
 
         @Override
         public int hashCode() {
             return Objects.hash(Arrays.hashCode(supportedDisplayModes), activeDisplayModeId,
-                    renderFrameRate, activeColorMode, hdrCapabilities);
+                    renderFrameRate, activeColorMode, hdrCapabilities, hasArrSupport);
         }
     }
 
@@ -3448,6 +3458,29 @@ public final class SurfaceControl implements Parcelable {
         }
 
         /**
+         * Bounds the surface and its children to the bounds specified. Size of the surface will be
+         * ignored and only the crop and buffer size will be used to determine the bounds of the
+         * surface. If no crop is specified and the surface has no buffer, the surface bounds is
+         * only constrained by the size of its parent bounds.
+         *
+         * @param sc   SurfaceControl to set crop of.
+         * @param crop Bounds of the crop to apply.
+         * @return this This transaction for chaining
+         * @hide
+         */
+        public @NonNull Transaction setCrop(@NonNull SurfaceControl sc, float top, float left,
+                float bottom, float right) {
+            checkPreconditions(sc);
+            if (SurfaceControlRegistry.sCallStackDebuggingEnabled) {
+                SurfaceControlRegistry.getProcessInstance().checkCallStackDebugging(
+                        "setCrop", this, sc, "crop={" + top + ", " + left + ", " +
+                        bottom + ", " + right + "}");
+            }
+            nativeSetCrop(mNativeObject, sc.mNativeObject, top, left, bottom, right);
+            return this;
+        }
+
+        /**
          * Sets the corner radius of a {@link SurfaceControl}.
          * @param sc SurfaceControl
          * @param cornerRadius Corner radius in pixels.
@@ -4370,6 +4403,17 @@ public final class SurfaceControl implements Parcelable {
             return this;
         }
 
+        /** @hide */
+        public @NonNull Transaction setLuts(@NonNull SurfaceControl sc,
+                @NonNull DisplayLuts displayLuts) {
+            checkPreconditions(sc);
+
+            nativeSetLuts(mNativeObject, sc.mNativeObject, displayLuts.getLutBuffers(),
+                    displayLuts.getOffsets(), displayLuts.getLutDimensions(),
+                    displayLuts.getLutSizes(), displayLuts.getLutSamplingKeys());
+            return this;
+        }
+
         /**
          * Sets the caching hint for the layer. By default, the caching hint is
          * {@link CACHING_ENABLED}.
@@ -4518,6 +4562,21 @@ public final class SurfaceControl implements Parcelable {
             other.mReparentedSurfaces.clear();
             nativeMergeTransaction(mNativeObject, other.mNativeObject);
             return this;
+        }
+
+        /**
+         * TODO(b/366484871): To be removed once we have some logging in native
+         * This is called when BlastBufferQueue.mergeWithNextTransaction() is called from java, and
+         * for the purposes of logging that path.
+         */
+        void onMergeWithNextTransaction(CharSequence windowName) {
+            if (SurfaceControlRegistry.sCallStackDebuggingEnabled) {
+                SurfaceControlRegistry.getProcessInstance().checkCallStackDebugging(
+                        "merge", this, null, "window=" + windowName);
+                if (mCalls != null) {
+                    mCalls.clear();
+                }
+            }
         }
 
         /**

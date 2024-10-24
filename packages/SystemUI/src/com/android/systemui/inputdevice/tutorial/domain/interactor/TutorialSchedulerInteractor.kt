@@ -17,9 +17,8 @@
 package com.android.systemui.inputdevice.tutorial.domain.interactor
 
 import android.os.SystemProperties
-import android.util.Log
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.inputdevice.tutorial.InputDeviceTutorialLogger
 import com.android.systemui.inputdevice.tutorial.data.repository.DeviceType
 import com.android.systemui.inputdevice.tutorial.data.repository.DeviceType.KEYBOARD
 import com.android.systemui.inputdevice.tutorial.data.repository.DeviceType.TOUCHPAD
@@ -31,43 +30,32 @@ import java.time.Instant
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.toKotlinDuration
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
-import kotlinx.coroutines.launch
 
 /**
- * When the first time a keyboard or touchpad is connected, wait for [LAUNCH_DELAY], then launch the
- * tutorial as soon as there's a connected device
+ * When the first time a keyboard or touchpad is connected, wait for [LAUNCH_DELAY], and as soon as
+ * there's a connected device, show a notification to launch the tutorial.
  */
 @SysUISingleton
 class TutorialSchedulerInteractor
 @Inject
 constructor(
-    @Background private val backgroundScope: CoroutineScope,
     keyboardRepository: KeyboardRepository,
     touchpadRepository: TouchpadRepository,
-    private val repo: TutorialSchedulerRepository
+    private val repo: TutorialSchedulerRepository,
+    private val logger: InputDeviceTutorialLogger,
 ) {
     private val isAnyDeviceConnected =
         mapOf(
             KEYBOARD to keyboardRepository.isAnyKeyboardConnected,
-            TOUCHPAD to touchpadRepository.isAnyTouchpadConnected
+            TOUCHPAD to touchpadRepository.isAnyTouchpadConnected,
         )
-
-    fun start() {
-        backgroundScope.launch {
-            // Merging two flows to ensure that launch tutorial is launched consecutively in order
-            // to avoid race condition
-            merge(touchpadScheduleFlow, keyboardScheduleFlow).collect {
-                val tutorialType = resolveTutorialType(it)
-                launchTutorial(tutorialType)
-            }
-        }
-    }
 
     private val touchpadScheduleFlow = flow {
         if (!repo.isLaunched(TOUCHPAD)) {
@@ -85,24 +73,34 @@ constructor(
 
     private suspend fun schedule(deviceType: DeviceType) {
         if (!repo.wasEverConnected(deviceType)) {
+            logger.d("Waiting for $deviceType to connect")
             waitForDeviceConnection(deviceType)
+            logger.logDeviceFirstConnection(deviceType)
             repo.updateFirstConnectionTime(deviceType, Instant.now())
         }
-        delay(remainingTime(start = repo.firstConnectionTime(deviceType)!!))
+        val remainingTime = remainingTime(start = repo.firstConnectionTime(deviceType)!!)
+        logger.d("Tutorial is scheduled in ${remainingTime.inWholeSeconds} seconds")
+        delay(remainingTime)
         waitForDeviceConnection(deviceType)
     }
 
     private suspend fun waitForDeviceConnection(deviceType: DeviceType) =
         isAnyDeviceConnected[deviceType]!!.filter { it }.first()
 
-    private suspend fun launchTutorial(tutorialType: TutorialType) {
-        if (tutorialType == TutorialType.KEYBOARD || tutorialType == TutorialType.BOTH)
-            repo.updateLaunchTime(KEYBOARD, Instant.now())
-        if (tutorialType == TutorialType.TOUCHPAD || tutorialType == TutorialType.BOTH)
-            repo.updateLaunchTime(TOUCHPAD, Instant.now())
-        // TODO: launch tutorial
-        Log.d(TAG, "Launch tutorial for $tutorialType")
-    }
+    // Merging two flows ensures that tutorial is launched consecutively to avoid race condition
+    val tutorials: Flow<TutorialType> =
+        merge(touchpadScheduleFlow, keyboardScheduleFlow).map {
+            val tutorialType = resolveTutorialType(it)
+
+            // TODO: notifying time is not oobe launching time - move these updates into oobe
+            if (tutorialType == TutorialType.KEYBOARD || tutorialType == TutorialType.BOTH)
+                repo.updateLaunchTime(KEYBOARD, Instant.now())
+            if (tutorialType == TutorialType.TOUCHPAD || tutorialType == TutorialType.BOTH)
+                repo.updateLaunchTime(TOUCHPAD, Instant.now())
+
+            logger.logTutorialLaunched(tutorialType)
+            tutorialType
+        }
 
     private suspend fun resolveTutorialType(deviceType: DeviceType): TutorialType {
         // Resolve the type of tutorial depending on which device are connected when the tutorial is
@@ -128,7 +126,7 @@ constructor(
                 Duration.ofSeconds(
                     SystemProperties.getLong(
                         "persist.peripheral_tutorial_delay_sec",
-                        DEFAULT_LAUNCH_DELAY_SEC
+                        DEFAULT_LAUNCH_DELAY_SEC,
                     )
                 )
     }
@@ -137,6 +135,6 @@ constructor(
         KEYBOARD,
         TOUCHPAD,
         BOTH,
-        NONE
+        NONE,
     }
 }

@@ -55,10 +55,8 @@ import static android.Manifest.permission.SET_TIME;
 import static android.Manifest.permission.SET_TIME_ZONE;
 import static android.app.admin.DeviceAdminInfo.HEADLESS_DEVICE_OWNER_MODE_UNSUPPORTED;
 import static android.app.admin.flags.Flags.FLAG_DEVICE_THEFT_API_ENABLED;
-import static android.app.admin.flags.Flags.FLAG_DEVICE_POLICY_SIZE_TRACKING_ENABLED;
 import static android.app.admin.flags.Flags.onboardingBugreportV2Enabled;
 import static android.app.admin.flags.Flags.onboardingConsentlessBugreports;
-import static android.app.admin.flags.Flags.FLAG_IS_MTE_POLICY_ENFORCED;
 import static android.content.Intent.LOCAL_FLAG_FROM_SYSTEM;
 import static android.net.NetworkCapabilities.NET_ENTERPRISE_ID_1;
 import static android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE;
@@ -215,19 +213,17 @@ import java.util.function.Consumer;
  * <a href="{@docRoot}guide/topics/admin/device-admin.html">Device Administration</a>
  * developer guide.
  *
- * <p id="devicepolicycontroller">Through <a href="#managed_provisioning">Managed Provisioning</a>,
- * Device Administrator apps can also be recognised as <b>
- Device Policy Controllers</b>. Device Policy Controllers can be one of
+ * <p id="devicepolicycontroller">Device Administrator apps can also be recognised as <b>
+ * Device Policy Controllers</b>. Device Policy Controllers can be one of
  * two types:
  * <ul>
  * <li>A <i id="deviceowner">Device Owner</i>, which only ever exists on the
- * {@link UserManager#isSystemUser System User} or {@link UserManager#isMainUser Main User}, is
+ * {@link UserManager#isSystemUser System User} or Main User, is
  * the most powerful type of Device Policy Controller and can affect policy across the device.
  * <li>A <i id="profileowner">Profile Owner<i>, which can exist on any user, can
  * affect policy on the user it is on, and when it is running on
  * {@link UserManager#isProfile a profile} has
- * <a href="#profile-on-parent">limited</a> ability to affect policy on its
- * {@link UserManager#getProfileParent parent}.
+ * <a href="#profile-on-parent">limited</a> ability to affect policy on its parent.
  * </ul>
  *
  * <p>Additional capabilities can be provided to Device Policy Controllers in
@@ -235,7 +231,7 @@ import java.util.function.Consumer;
  * <ul>
  * <li>A Profile Owner on an <a href="#organization-owned">organization owned</a> device has access
  * to additional abilities, both <a href="#profile-on-parent-organization-owned">affecting policy on the profile's</a>
- * {@link UserManager#getProfileParent parent} and also the profile itself.
+ * parent and also the profile itself.
  * <li>A Profile Owner running on the {@link UserManager#isSystemUser System User} has access to
  * additional capabilities which affect the {@link UserManager#isSystemUser System User} and
  * also the whole device.
@@ -247,13 +243,12 @@ import java.util.function.Consumer;
  * Controller</a>.
  *
  * <p><a href="#permissions">Permissions</a> are generally only given to apps
- * fulfilling particular key roles on the device (such as managing {@link DeviceLockManager
-device locks}).
+ * fulfilling particular key roles on the device (such as managing
+ * {@link android.devicelock.DeviceLockManager device locks}).
  *
  * <p id="roleholder"><b>Device Policy Management Role Holder</b>
- * <p>One app on the device fulfills the {@link RoleManager#ROLE_DEVICE_POLICY_MANAGEMENT Device
-Policy Management Role} and is trusted with managing the overall state of
- * Device Policy. This has access to much more powerful methods than
+ * <p>One app on the device fulfills the Device Policy Management Role and is trusted with managing
+ * the overall state of Device Policy. This has access to much more powerful methods than
  * <a href="#managingapps">managing apps</a>.
  *
  * <p id="querying"><b>Querying Device Policy</b>
@@ -275,7 +270,7 @@ Policy Management Role} and is trusted with managing the overall state of
  *
  * <p id="managed_profile">A <b>Managed Profile</b> enables data separation. For example to use
  * a device both for personal and corporate usage. The managed profile and its
- * {@link UserManager#getProfileParent parent} share a launcher.
+ * parent share a launcher.
  *
  * <p id="affiliated"><b>Affiliation</b>
  * <p>Using the {@link #setAffiliationIds} method, a
@@ -475,16 +470,9 @@ public class DevicePolicyManager {
      * that the user backed-out of provisioning or some precondition for provisioning wasn't met.
      *
      * <p>If a <a href="#roleholder">device policy management role holder</a> updater is present on
-     * the device, an internet connection attempt must be made prior to launching this intent. If
-     * an internet connection can not be established, provisioning will fail unless {@link
-     * #EXTRA_PROVISIONING_ALLOW_OFFLINE} is explicitly set to {@code true}, in which case
-     * provisioning will continue without using the
-     * <a href="#roleholder">device policy management role holder</a>. If an internet connection
-     * has been established, the <a href="#roleholder">device policy management role holder</a>
-     * updater will be launched, which may update the
-     * <a href="#roleholder">device policy management role holder</a> before continuing
-     * provisioning.
+     * the device, an internet connection attempt must be made prior to launching this intent.
      */
+    // See b/365955253 for additional behaviours of this API.
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_PROVISION_MANAGED_PROFILE
         = "android.app.action.PROVISION_MANAGED_PROFILE";
@@ -965,23 +953,8 @@ public class DevicePolicyManager {
      * A boolean extra indicating whether offline provisioning should be used.
      *
      * <p>The default value is {@code false}.
-     *
-     * <p>Usually during the <a href="#managedprovisioning">provisioning flow</a>, there will be
-     * an attempt to download and install the latest version of the <a href="#roleholder">device
-     * policy management role holder</a>. The platform will then
-     * delegate provisioning to the <a href="#roleholder">device
-     *      * policy management role holder</a>.
-     *
-     * <p>When this extra is set to {@code true}, the
-     * <a href="#managedprovisioning">provisioning flow</a> will always be handled by the platform
-     * and the <a href="#roleholder">device policy management role holder</a>'s part skipped.
-     *
-     * <p>On Android versions prior to {@link Build.VERSION_CODES#TIRAMISU}, when this extra is
-     * {@code false}, the <a href="#managedprovisioning">provisioning flow</a> will enforce that an
-     * internet connection is established, or otherwise fail. When this extra is {@code true}, a
-     * connection will still be attempted but when it cannot be established provisioning will
-     * continue offline.
      */
+    // See b/365955253 for detailed behaviours of this API.
     public static final String EXTRA_PROVISIONING_ALLOW_OFFLINE =
             "android.app.extra.PROVISIONING_ALLOW_OFFLINE";
 
@@ -4232,7 +4205,6 @@ public class DevicePolicyManager {
      *
      * @return whether MTE is currently enabled on the device.
      */
-    @FlaggedApi(FLAG_IS_MTE_POLICY_ENFORCED)
     public static boolean isMtePolicyEnforced() {
         return Zygote.nativeSupportsMemoryTagging();
     }
@@ -6646,7 +6618,7 @@ public class DevicePolicyManager {
      * @param flags May be 0 or {@link #FLAG_EVICT_CREDENTIAL_ENCRYPTION_KEY}.
      * @throws SecurityException if the calling application does not own an active administrator
      *             that uses {@link DeviceAdminInfo#USES_POLICY_FORCE_LOCK} and the does not hold
-     *             the {@link android.Manifest.permission#LOCK_DEVICE} permission, or
+     *             the LOCK_DEVICE permission, or
      *             the {@link #FLAG_EVICT_CREDENTIAL_ENCRYPTION_KEY} flag is passed by an
      *             application that is not a profile owner of a managed profile.
      * @throws IllegalArgumentException if the {@link #FLAG_EVICT_CREDENTIAL_ENCRYPTION_KEY} flag is
@@ -8664,6 +8636,7 @@ public class DevicePolicyManager {
      *             {@link DeviceAdminInfo#USES_POLICY_DISABLE_CAMERA}.
      */
     @RequiresPermission(value = MANAGE_DEVICE_POLICY_CAMERA, conditional = true)
+    @SupportsCoexistence
     public void setCameraDisabled(@Nullable ComponentName admin, boolean disabled) {
         if (mService != null) {
             try {
@@ -10249,6 +10222,7 @@ public class DevicePolicyManager {
      * permission {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_LOCK_TASK}.
      */
     @RequiresPermission(value = MANAGE_DEVICE_POLICY_LOCK_TASK, conditional = true)
+    @SupportsCoexistence
     public void clearPackagePersistentPreferredActivities(@Nullable ComponentName admin,
             String packageName) {
         throwIfParentInstance("clearPackagePersistentPreferredActivities");
@@ -10476,10 +10450,6 @@ public class DevicePolicyManager {
     @WorkerThread
     public void setApplicationRestrictions(@Nullable ComponentName admin, String packageName,
             Bundle settings) {
-        if (!Flags.dmrhSetAppRestrictions()) {
-            throwIfParentInstance("setApplicationRestrictions");
-        }
-
         if (mService != null) {
             try {
                 mService.setApplicationRestrictions(admin, mContext.getPackageName(), packageName,
@@ -11884,9 +11854,6 @@ public class DevicePolicyManager {
     @WorkerThread
     public @NonNull Bundle getApplicationRestrictions(
             @Nullable ComponentName admin, String packageName) {
-        if (!Flags.dmrhSetAppRestrictions()) {
-            throwIfParentInstance("getApplicationRestrictions");
-        }
 
         if (mService != null) {
             try {
@@ -11947,6 +11914,7 @@ public class DevicePolicyManager {
      * @throws SecurityException if {@code admin} is not a device or profile owner and if the caller
      * has not been granted the permission to set the given user restriction.
      */
+    @SupportsCoexistence
     public void addUserRestriction(@NonNull ComponentName admin,
             @UserManager.UserRestrictionKey String key) {
         if (mService != null) {
@@ -12028,6 +11996,7 @@ public class DevicePolicyManager {
      * @throws IllegalStateException if caller is not targeting Android
      * {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} or above.
      */
+    @SupportsCoexistence
     public void addUserRestrictionGlobally(@NonNull @UserManager.UserRestrictionKey String key) {
         throwIfParentInstance("addUserRestrictionGlobally");
         if (mService != null) {
@@ -12083,6 +12052,7 @@ public class DevicePolicyManager {
      * @throws SecurityException if {@code admin} is not a device or profile owner  and if the
      *  caller has not been granted the permission to set the given user restriction.
      */
+    @SupportsCoexistence
     public void clearUserRestriction(@NonNull ComponentName admin,
             @UserManager.UserRestrictionKey String key) {
         if (mService != null) {
@@ -12319,6 +12289,7 @@ public class DevicePolicyManager {
      * @see #DELEGATION_PACKAGE_ACCESS
      */
     @RequiresPermission(value = MANAGE_DEVICE_POLICY_PACKAGE_STATE, conditional = true)
+    @SupportsCoexistence
     public boolean setApplicationHidden(@Nullable ComponentName admin, String packageName,
             boolean hidden) {
         if (mService != null) {
@@ -12499,6 +12470,7 @@ public class DevicePolicyManager {
      * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
     @RequiresPermission(value = MANAGE_DEVICE_POLICY_ACCOUNT_MANAGEMENT, conditional = true)
+    @SupportsCoexistence
     public void setAccountManagementDisabled(@Nullable ComponentName admin, String accountType,
             boolean disabled) {
         if (mService != null) {
@@ -12582,10 +12554,24 @@ public class DevicePolicyManager {
      **/
     @SystemApi
     public void setSecondaryLockscreenEnabled(@NonNull ComponentName admin, boolean enabled) {
+        setSecondaryLockscreenEnabled(admin, enabled, null);
+    }
+
+    /**
+     * Called by the system supervision app to set whether a secondary lockscreen needs to be shown.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with. Null if the
+     *              caller is not a device admin.
+     * @param enabled Whether or not the lockscreen needs to be shown.
+     * @param options A {@link PersistableBundle} to supply options to the lock screen.
+     * @hide
+     */
+    public void setSecondaryLockscreenEnabled(@Nullable ComponentName admin, boolean enabled,
+            @Nullable PersistableBundle options) {
         throwIfParentInstance("setSecondaryLockscreenEnabled");
         if (mService != null) {
             try {
-                mService.setSecondaryLockscreenEnabled(admin, enabled);
+                mService.setSecondaryLockscreenEnabled(admin, enabled, options);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -14231,21 +14217,11 @@ public class DevicePolicyManager {
      */
     public @NonNull DevicePolicyManager getParentProfileInstance(@NonNull ComponentName admin) {
         throwIfParentInstance("getParentProfileInstance");
-        try {
-            if (Flags.dmrhSetAppRestrictions()) {
-                UserManager um = mContext.getSystemService(UserManager.class);
-                if (!um.isManagedProfile()) {
-                    throw new SecurityException("The current user does not have a parent profile.");
-                }
-            } else {
-                if (!mService.isManagedProfile(admin)) {
-                    throw new SecurityException("The current user does not have a parent profile.");
-                }
-            }
-            return new DevicePolicyManager(mContext, mService, true);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
+        UserManager um = mContext.getSystemService(UserManager.class);
+        if (!um.isManagedProfile()) {
+            throw new SecurityException("The current user does not have a parent profile.");
         }
+        return new DevicePolicyManager(mContext, mService, true);
     }
 
     /**
@@ -14293,6 +14269,7 @@ public class DevicePolicyManager {
      * @see #retrieveSecurityLogs
      */
     @RequiresPermission(value = MANAGE_DEVICE_POLICY_SECURITY_LOGGING, conditional = true)
+    @SupportsCoexistence
     public void setSecurityLoggingEnabled(@Nullable ComponentName admin, boolean enabled) {
         throwIfParentInstance("setSecurityLoggingEnabled");
         try {
@@ -17198,6 +17175,7 @@ public class DevicePolicyManager {
      * if USB data signaling fails to be enabled/disabled.
      */
     @RequiresPermission(value = MANAGE_DEVICE_POLICY_USB_DATA_SIGNALLING, conditional = true)
+    @SupportsCoexistence
     public void setUsbDataSignalingEnabled(boolean enabled) {
         throwIfParentInstance("setUsbDataSignalingEnabled");
         if (mService != null) {
@@ -17763,7 +17741,6 @@ public class DevicePolicyManager {
      */
     @SystemApi
     @RequiresPermission(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS)
-    @FlaggedApi(FLAG_DEVICE_POLICY_SIZE_TRACKING_ENABLED)
     public void setMaxPolicyStorageLimit(int storageLimit) {
         if (mService != null) {
             try {
@@ -17783,7 +17760,6 @@ public class DevicePolicyManager {
      */
     @SystemApi
     @RequiresPermission(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS)
-    @FlaggedApi(FLAG_DEVICE_POLICY_SIZE_TRACKING_ENABLED)
     public int getMaxPolicyStorageLimit() {
         if (mService != null) {
             try {

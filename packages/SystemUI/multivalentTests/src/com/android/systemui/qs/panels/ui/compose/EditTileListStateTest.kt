@@ -16,18 +16,18 @@
 
 package com.android.systemui.qs.panels.ui.compose
 
+import androidx.compose.ui.text.AnnotatedString
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.shared.model.Icon
-import com.android.systemui.common.shared.model.Text
 import com.android.systemui.qs.panels.shared.model.SizedTile
 import com.android.systemui.qs.panels.shared.model.SizedTileImpl
 import com.android.systemui.qs.panels.ui.model.GridCell
-import com.android.systemui.qs.panels.ui.model.SpacerGridCell
 import com.android.systemui.qs.panels.ui.model.TileGridCell
 import com.android.systemui.qs.panels.ui.viewmodel.EditTileViewModel
 import com.android.systemui.qs.pipeline.shared.TileSpec
+import com.android.systemui.qs.shared.model.TileCategory
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -36,13 +36,6 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class EditTileListStateTest : SysuiTestCase() {
     private val underTest = EditTileListState(TestEditTiles, 4)
-
-    @Test
-    fun noDrag_listUnchanged() {
-        underTest.tiles.forEach { assertThat(it).isNotInstanceOf(SpacerGridCell::class.java) }
-        assertThat(underTest.tiles.map { (it as TileGridCell).tile.tileSpec })
-            .containsExactly(*TestEditTiles.map { it.tile.tileSpec }.toTypedArray())
-    }
 
     @Test
     fun startDrag_listHasSpacers() {
@@ -108,16 +101,6 @@ class EditTileListStateTest : SysuiTestCase() {
     }
 
     @Test
-    fun droppedNewTile_spacersDisappear() {
-        underTest.onStarted(TestEditTiles[0])
-        underTest.onDrop()
-
-        assertThat(underTest.tiles.toStrings()).isEqualTo(listOf("a", "b", "c", "d", "e"))
-        assertThat(underTest.isMoving(TestEditTiles[0].tile.tileSpec)).isFalse()
-        assertThat(underTest.dragInProgress).isFalse()
-    }
-
-    @Test
     fun movedTileOutOfBounds_tileDisappears() {
         underTest.onStarted(TestEditTiles[0])
         underTest.movedOutOfBounds()
@@ -141,10 +124,11 @@ class EditTileListStateTest : SysuiTestCase() {
                 EditTileViewModel(
                     tileSpec = TileSpec.create(tileSpec),
                     icon = Icon.Resource(0, null),
-                    label = Text.Loaded("unused"),
+                    label = AnnotatedString("unused"),
                     appName = null,
                     isCurrent = true,
                     availableEditActions = emptySet(),
+                    category = TileCategory.UNKNOWN,
                 ),
                 width,
             )

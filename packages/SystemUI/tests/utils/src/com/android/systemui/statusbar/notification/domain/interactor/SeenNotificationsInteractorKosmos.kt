@@ -45,3 +45,17 @@ var Kosmos.lockScreenShowOnlyUnseenNotificationsSetting: Boolean
             UserHandle.USER_CURRENT,
         )
     }
+
+var Kosmos.lockScreenNotificationMinimalismSetting: Boolean
+    get() =
+        fakeSettings.getIntForUser(
+            Settings.Secure.LOCK_SCREEN_NOTIFICATION_MINIMALISM,
+            UserHandle.USER_CURRENT,
+        ) == 1
+    set(value) {
+        fakeSettings.putIntForUser(
+            Settings.Secure.LOCK_SCREEN_NOTIFICATION_MINIMALISM,
+            if (value) 1 else 0,
+            UserHandle.USER_CURRENT,
+        )
+    }

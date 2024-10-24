@@ -10,3 +10,11 @@ flag {
     bug: "323008518"
     is_fixed_read_only: true
 }
+
+flag {
+    name: "media_projection_connected_display"
+    namespace: "virtual_devices"
+    description: "Enable recording connected display"
+    bug: "362720120"
+    is_exported: true
+}

@@ -29,6 +29,8 @@ import com.android.compose.animation.scene.content.state.TransitionState.HasOver
 import com.android.compose.nestedscroll.PriorityNestedScrollConnection
 import kotlin.math.absoluteValue
 
+internal typealias SuspendedValue<T> = suspend () -> T
+
 internal interface DraggableHandler {
     /**
      * Start a drag in the given [startedPosition], with the given [overSlop] and number of
@@ -54,9 +56,9 @@ internal interface DragController {
     /**
      * Stop the current drag with the given [velocity].
      *
-     * @return the consumed [velocity]
+     * @return the consumed [velocity] when the animation complete
      */
-    fun onStop(velocity: Float, canChangeContent: Boolean): Float
+    fun onStop(velocity: Float, canChangeContent: Boolean): SuspendedValue<Float>
 }
 
 internal class DraggableHandlerImpl(
@@ -109,12 +111,12 @@ internal class DraggableHandlerImpl(
         return (upOrLeft != null &&
             contentTransition.isTransitioningBetween(
                 fromContent.key,
-                upOrLeft.toContent(currentScene)
+                upOrLeft.toContent(currentScene),
             )) ||
             (downOrRight != null &&
                 contentTransition.isTransitioningBetween(
                     fromContent.key,
-                    downOrRight.toContent(currentScene)
+                    downOrRight.toContent(currentScene),
                 ))
     }
 
@@ -163,7 +165,7 @@ internal class DraggableHandlerImpl(
 
     private fun updateDragController(
         swipes: Swipes,
-        swipeAnimation: SwipeAnimation<*>
+        swipeAnimation: SwipeAnimation<*>,
     ): DragControllerImpl {
         val newDragController = DragControllerImpl(this, swipes, swipeAnimation)
         newDragController.updateTransition(swipeAnimation, force = true)
@@ -171,10 +173,7 @@ internal class DraggableHandlerImpl(
         return newDragController
     }
 
-    internal fun createSwipeAnimation(
-        swipes: Swipes,
-        result: UserActionResult,
-    ): SwipeAnimation<*> {
+    internal fun createSwipeAnimation(swipes: Swipes, result: UserActionResult): SwipeAnimation<*> {
         val upOrLeftResult = swipes.upOrLeftResult
         val downOrRightResult = swipes.downOrRightResult
         val isUpOrLeft =
@@ -187,41 +186,47 @@ internal class DraggableHandlerImpl(
         return createSwipeAnimation(layoutImpl, result, isUpOrLeft, orientation)
     }
 
+    internal fun resolveSwipeSource(startedPosition: Offset?): SwipeSource.Resolved? {
+        if (startedPosition == null) return null
+        return layoutImpl.swipeSourceDetector.source(
+            layoutSize = layoutImpl.lastSize,
+            position = startedPosition.round(),
+            density = layoutImpl.density,
+            orientation = orientation,
+        )
+    }
+
+    internal fun resolveSwipe(
+        pointersDown: Int,
+        fromSource: SwipeSource.Resolved?,
+        isUpOrLeft: Boolean,
+    ): Swipe.Resolved {
+        return Swipe.Resolved(
+            direction =
+                when (orientation) {
+                    Orientation.Horizontal ->
+                        if (isUpOrLeft) {
+                            SwipeDirection.Resolved.Left
+                        } else {
+                            SwipeDirection.Resolved.Right
+                        }
+
+                    Orientation.Vertical ->
+                        if (isUpOrLeft) {
+                            SwipeDirection.Resolved.Up
+                        } else {
+                            SwipeDirection.Resolved.Down
+                        }
+                },
+            pointerCount = pointersDown,
+            fromSource = fromSource,
+        )
+    }
+
     private fun computeSwipes(startedPosition: Offset?, pointersDown: Int): Swipes {
-        val fromSource =
-            startedPosition?.let { position ->
-                layoutImpl.swipeSourceDetector
-                    .source(
-                        layoutImpl.lastSize,
-                        position.round(),
-                        layoutImpl.density,
-                        orientation,
-                    )
-                    ?.resolve(layoutImpl.layoutDirection)
-            }
-
-        val upOrLeft =
-            Swipe.Resolved(
-                direction =
-                    when (orientation) {
-                        Orientation.Horizontal -> SwipeDirection.Resolved.Left
-                        Orientation.Vertical -> SwipeDirection.Resolved.Up
-                    },
-                pointerCount = pointersDown,
-                fromSource = fromSource,
-            )
-
-        val downOrRight =
-            Swipe.Resolved(
-                direction =
-                    when (orientation) {
-                        Orientation.Horizontal -> SwipeDirection.Resolved.Right
-                        Orientation.Vertical -> SwipeDirection.Resolved.Down
-                    },
-                pointerCount = pointersDown,
-                fromSource = fromSource,
-            )
-
+        val fromSource = resolveSwipeSource(startedPosition)
+        val upOrLeft = resolveSwipe(pointersDown, fromSource, isUpOrLeft = true)
+        val downOrRight = resolveSwipe(pointersDown, fromSource, isUpOrLeft = false)
         return if (fromSource == null) {
             Swipes(
                 upOrLeft = null,
@@ -268,7 +273,7 @@ private class DragControllerImpl(
             layoutState.startTransitionImmediately(
                 animationScope = draggableHandler.layoutImpl.animationScope,
                 newTransition.contentTransition,
-                true
+                true,
             )
         }
 
@@ -361,10 +366,18 @@ private class DragControllerImpl(
             return 0f
         }
 
+        val currentTransitionIrreversible =
+            if (swipeAnimation.isUpOrLeft) {
+                swipes.upOrLeftResult?.isIrreversible ?: false
+            } else {
+                swipes.downOrRightResult?.isIrreversible ?: false
+            }
+
         val needNewTransition =
-            hasReachedToContent ||
-                result.toContent(layoutState.currentScene) != swipeAnimation.toContent ||
-                result.transitionKey != swipeAnimation.contentTransition.key
+            !currentTransitionIrreversible &&
+                (hasReachedToContent ||
+                    result.toContent(layoutState.currentScene) != swipeAnimation.toContent ||
+                    result.transitionKey != swipeAnimation.contentTransition.key)
 
         if (needNewTransition) {
             // Make sure the current transition will finish to the right current scene.
@@ -378,7 +391,7 @@ private class DragControllerImpl(
         return consumedDelta
     }
 
-    override fun onStop(velocity: Float, canChangeContent: Boolean): Float {
+    override fun onStop(velocity: Float, canChangeContent: Boolean): SuspendedValue<Float> {
         return onStop(velocity, canChangeContent, swipeAnimation)
     }
 
@@ -391,20 +404,14 @@ private class DragControllerImpl(
         // callbacks (like onAnimationCompleted()) might incorrectly finish a new transition that
         // replaced this one.
         swipeAnimation: SwipeAnimation<T>,
-    ): Float {
+    ): SuspendedValue<Float> {
         // The state was changed since the drag started; don't do anything.
         if (!isDrivingTransition || swipeAnimation.isAnimatingOffset()) {
-            return 0f
-        }
-
-        fun animateTo(targetContent: T) {
-            swipeAnimation.animateOffset(
-                initialVelocity = velocity,
-                targetContent = targetContent,
-            )
+            return { 0f }
         }
 
         val fromContent = swipeAnimation.fromContent
+        val consumedVelocity: SuspendedValue<Float>
         if (canChangeContent) {
             // If we are halfway between two contents, we check what the target will be based on the
             // velocity and offset of the transition, then we launch the animation.
@@ -429,18 +436,16 @@ private class DragControllerImpl(
                 } else {
                     fromContent
                 }
-
-            animateTo(targetContent = targetContent)
+            consumedVelocity = swipeAnimation.animateOffset(velocity, targetContent = targetContent)
         } else {
             // We are doing an overscroll preview animation between scenes.
             check(fromContent == swipeAnimation.currentContent) {
                 "canChangeContent is false but currentContent != fromContent"
             }
-            animateTo(targetContent = fromContent)
+            consumedVelocity = swipeAnimation.animateOffset(velocity, targetContent = fromContent)
         }
 
-        // The onStop animation consumes any remaining velocity.
-        return velocity
+        return consumedVelocity
     }
 
     /**
@@ -558,6 +563,14 @@ internal class NestedScrollHandlerImpl(
 
     val connection: PriorityNestedScrollConnection = nestedScrollConnection()
 
+    private fun PointersInfo.resolveSwipe(isUpOrLeft: Boolean): Swipe.Resolved {
+        return draggableHandler.resolveSwipe(
+            pointersDown = pointersDown,
+            fromSource = draggableHandler.resolveSwipeSource(startedPosition),
+            isUpOrLeft = isUpOrLeft,
+        )
+    }
+
     private fun nestedScrollConnection(): PriorityNestedScrollConnection {
         // If we performed a long gesture before entering priority mode, we would have to avoid
         // moving on to the next scene.
@@ -574,35 +587,18 @@ internal class NestedScrollHandlerImpl(
             val transitionState = layoutState.transitionState
             val scene = transitionState.currentScene
             val fromScene = layoutImpl.scene(scene)
-            val nextScene =
+            val resolvedSwipe =
                 when {
-                    amount < 0f -> {
-                        val actionUpOrLeft =
-                            Swipe.Resolved(
-                                direction =
-                                    when (orientation) {
-                                        Orientation.Horizontal -> SwipeDirection.Resolved.Left
-                                        Orientation.Vertical -> SwipeDirection.Resolved.Up
-                                    },
-                                pointerCount = pointersInfo().pointersDown,
-                                fromSource = null,
-                            )
-                        fromScene.userActions[actionUpOrLeft]
-                    }
-                    amount > 0f -> {
-                        val actionDownOrRight =
-                            Swipe.Resolved(
-                                direction =
-                                    when (orientation) {
-                                        Orientation.Horizontal -> SwipeDirection.Resolved.Right
-                                        Orientation.Vertical -> SwipeDirection.Resolved.Down
-                                    },
-                                pointerCount = pointersInfo().pointersDown,
-                                fromSource = null,
-                            )
-                        fromScene.userActions[actionDownOrRight]
-                    }
+                    amount < 0f -> pointersInfo().resolveSwipe(isUpOrLeft = true)
+                    amount > 0f -> pointersInfo().resolveSwipe(isUpOrLeft = false)
                     else -> null
+                }
+            val nextScene =
+                resolvedSwipe?.let {
+                    fromScene.userActions[it]
+                        ?: if (it.fromSource != null) {
+                            fromScene.userActions[it.copy(fromSource = null)]
+                        } else null
                 }
             if (nextScene != null) return true
 
@@ -617,7 +613,7 @@ internal class NestedScrollHandlerImpl(
 
         return PriorityNestedScrollConnection(
             orientation = orientation,
-            canStartPreScroll = { offsetAvailable, offsetBeforeStart ->
+            canStartPreScroll = { offsetAvailable, offsetBeforeStart, _ ->
                 canChangeScene =
                     if (isExternalOverscrollGesture()) false else offsetBeforeStart == 0f
 
@@ -635,7 +631,13 @@ internal class NestedScrollHandlerImpl(
                     return@PriorityNestedScrollConnection false
                 }
 
-                _lastPointersInfo = pointersInfoOwner.pointersInfo()
+                val pointersInfo = pointersInfoOwner.pointersInfo()
+
+                if (pointersInfo.isMouseWheel) {
+                    // Do not support mouse wheel interactions
+                    return@PriorityNestedScrollConnection false
+                }
+                _lastPointersInfo = pointersInfo
 
                 // If the current swipe transition is *not* closed to 0f or 1f, then we want the
                 // scroll events to intercept the current transition to continue the scene
@@ -643,7 +645,7 @@ internal class NestedScrollHandlerImpl(
                 isIntercepting = true
                 true
             },
-            canStartPostScroll = { offsetAvailable, offsetBeforeStart ->
+            canStartPostScroll = { offsetAvailable, offsetBeforeStart, _ ->
                 val behavior: NestedScrollBehavior =
                     when {
                         offsetAvailable > 0f -> topOrLeftBehavior
@@ -654,7 +656,12 @@ internal class NestedScrollHandlerImpl(
                 val isZeroOffset =
                     if (isExternalOverscrollGesture()) false else offsetBeforeStart == 0f
 
-                _lastPointersInfo = pointersInfoOwner.pointersInfo()
+                val pointersInfo = pointersInfoOwner.pointersInfo()
+                if (pointersInfo.isMouseWheel) {
+                    // Do not support mouse wheel interactions
+                    return@PriorityNestedScrollConnection false
+                }
+                _lastPointersInfo = pointersInfo
 
                 val canStart =
                     when (behavior) {
@@ -689,7 +696,12 @@ internal class NestedScrollHandlerImpl(
                 // We could start an overscroll animation
                 canChangeScene = false
 
-                _lastPointersInfo = pointersInfoOwner.pointersInfo()
+                val pointersInfo = pointersInfoOwner.pointersInfo()
+                if (pointersInfo.isMouseWheel) {
+                    // Do not support mouse wheel interactions
+                    return@PriorityNestedScrollConnection false
+                }
+                _lastPointersInfo = pointersInfo
 
                 val canStart = behavior.canStartOnPostFling && hasNextScene(velocityAvailable)
                 if (canStart) {
@@ -698,8 +710,10 @@ internal class NestedScrollHandlerImpl(
 
                 canStart
             },
-            canContinueScroll = { true },
-            canScrollOnFling = false,
+            // We need to maintain scroll priority even if the scene transition can no longer
+            // consume the scroll gesture to allow us to return to the previous scene.
+            canStopOnScroll = { _, _ -> false },
+            canStopOnPreFling = { true },
             onStart = { offsetAvailable ->
                 val pointersInfo = pointersInfo()
                 dragController =
@@ -709,8 +723,14 @@ internal class NestedScrollHandlerImpl(
                         overSlop = if (isIntercepting) 0f else offsetAvailable,
                     )
             },
-            onScroll = { offsetAvailable ->
+            onScroll = { offsetAvailable, _ ->
                 val controller = dragController ?: error("Should be called after onStart")
+
+                val pointersInfo = pointersInfoOwner.pointersInfo()
+                if (pointersInfo.isMouseWheel) {
+                    // Do not support mouse wheel interactions
+                    return@PriorityNestedScrollConnection 0f
+                }
 
                 // TODO(b/297842071) We should handle the overscroll or slow drag if the gesture is
                 // initiated in a nested child.
@@ -718,10 +738,23 @@ internal class NestedScrollHandlerImpl(
             },
             onStop = { velocityAvailable ->
                 val controller = dragController ?: error("Should be called after onStart")
-
-                controller
-                    .onStop(velocity = velocityAvailable, canChangeContent = canChangeScene)
-                    .also { dragController = null }
+                try {
+                    controller
+                        .onStop(velocity = velocityAvailable, canChangeContent = canChangeScene)
+                        .invoke()
+                } finally {
+                    // onStop might still be running when a new gesture begins.
+                    // To prevent conflicts, we should only remove the drag controller if it's the
+                    // same one that was active initially.
+                    if (dragController == controller) {
+                        dragController = null
+                    }
+                }
+            },
+            onCancel = {
+                val controller = dragController ?: error("Should be called after onStart")
+                controller.onStop(velocity = 0f, canChangeContent = canChangeScene)
+                dragController = null
             },
         )
     }
@@ -738,5 +771,5 @@ internal const val OffsetVisibilityThreshold = 0.5f
 private object NoOpDragController : DragController {
     override fun onDrag(delta: Float) = 0f
 
-    override fun onStop(velocity: Float, canChangeContent: Boolean) = 0f
+    override fun onStop(velocity: Float, canChangeContent: Boolean) = suspend { 0f }
 }

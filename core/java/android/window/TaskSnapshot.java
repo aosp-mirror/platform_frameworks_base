@@ -83,13 +83,16 @@ public class TaskSnapshot implements Parcelable {
     public static final int REFERENCE_CACHE = 1 << 1;
     /** This snapshot object is being persistent. */
     public static final int REFERENCE_PERSIST = 1 << 2;
+    /** This snapshot object is being used for content suggestion. */
+    public static final int REFERENCE_CONTENT_SUGGESTION = 1 << 3;
     @IntDef(flag = true, prefix = { "REFERENCE_" }, value = {
             REFERENCE_BROADCAST,
             REFERENCE_CACHE,
-            REFERENCE_PERSIST
+            REFERENCE_PERSIST,
+            REFERENCE_CONTENT_SUGGESTION
     })
     @Retention(RetentionPolicy.SOURCE)
-    @interface ReferenceFlags {}
+    public @interface ReferenceFlags {}
 
     public TaskSnapshot(long id, long captureTime,
             @NonNull ComponentName topActivityComponent, HardwareBuffer snapshot,

@@ -25,12 +25,14 @@ import static android.content.pm.PackageInstaller.UNARCHIVAL_ERROR_NO_CONNECTIVI
 import static android.content.pm.PackageInstaller.UNARCHIVAL_ERROR_USER_ACTION_NEEDED;
 import static android.content.pm.PackageInstaller.UNARCHIVAL_GENERIC_ERROR;
 import static android.content.pm.PackageInstaller.UNARCHIVAL_OK;
+import static android.content.pm.PackageInstaller.VERIFICATION_POLICY_BLOCK_FAIL_WARN;
 import static android.content.pm.PackageManager.DELETE_ARCHIVE;
 import static android.content.pm.PackageManager.INSTALL_UNARCHIVE_DRAFT;
 import static android.os.Process.INVALID_UID;
 import static android.os.Process.SYSTEM_UID;
 
 import static com.android.server.pm.PackageArchiver.isArchivingEnabled;
+import static com.android.server.pm.PackageInstallerSession.isValidVerificationPolicy;
 import static com.android.server.pm.PackageManagerService.SHELL_PACKAGE_NAME;
 
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
@@ -50,6 +52,7 @@ import android.app.PendingIntent;
 import android.app.admin.DevicePolicyEventLogger;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyManagerInternal;
+import android.app.role.RoleManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
@@ -125,6 +128,7 @@ import com.android.server.SystemService;
 import com.android.server.SystemServiceManager;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.utils.RequestThrottle;
+import com.android.server.pm.verify.pkg.VerifierController;
 
 import libcore.io.IoUtils;
 
@@ -148,6 +152,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.IntPredicate;
 import java.util.function.Supplier;
 
@@ -201,6 +206,9 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             Manifest.permission.USE_FULL_SCREEN_INTENT
     );
 
+    private static final String ROLE_SYSTEM_APP_PROTECTION_SERVICE =
+            "android.app.role.SYSTEM_APP_PROTECTION_SERVICE";
+
     final PackageArchiver mPackageArchiver;
 
     private final Context mContext;
@@ -209,6 +217,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
     private final StagingManager mStagingManager;
 
     private AppOpsManager mAppOps;
+    private final VerifierController mVerifierController;
 
     private final HandlerThread mInstallThread;
     private final Handler mInstallHandler;
@@ -269,6 +278,13 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         }
     };
 
+    /**
+     * Default verification policy for incoming installation sessions.
+     * TODO(b/360129657): update the default policy.
+     */
+    private final AtomicInteger mVerificationPolicy = new AtomicInteger(
+            VERIFICATION_POLICY_BLOCK_FAIL_WARN);
+
     private static final class Lifecycle extends SystemService {
         private final PackageInstallerService mPackageInstallerService;
 
@@ -321,6 +337,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         mGentleUpdateHelper = new GentleUpdateHelper(
                 context, mInstallThread.getLooper(), new AppStateHelper(context));
         mPackageArchiver = new PackageArchiver(mContext, mPm);
+        mVerifierController = new VerifierController(mContext, mInstallHandler);
 
         LocalServices.getService(SystemServiceManager.class).startService(
                 new Lifecycle(context, this));
@@ -517,7 +534,8 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                         try {
                             session = PackageInstallerSession.readFromXml(in, mInternalCallback,
                                     mContext, mPm, mInstallThread.getLooper(), mStagingManager,
-                                    mSessionsDir, this, mSilentUpdatePolicy);
+                                    mSessionsDir, this, mSilentUpdatePolicy,
+                                    mVerifierController);
                         } catch (Exception e) {
                             Slog.e(TAG, "Could not read session", e);
                             continue;
@@ -856,8 +874,9 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                     params.appPackageName, SYSTEM_UID);
             if (ps != null
                     && PackageArchiver.isArchived(ps.getUserStateOrDefault(userId))
-                    && PackageArchiver.getResponsibleInstallerPackage(ps)
-                            .equals(requestedInstallerPackageName)) {
+                    && TextUtils.equals(
+                        PackageArchiver.getResponsibleInstallerPackage(ps),
+                        requestedInstallerPackageName)) {
                 params.installFlags |= PackageManager.INSTALL_UNARCHIVE;
             }
         }
@@ -1032,7 +1051,8 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                 mSilentUpdatePolicy, mInstallThread.getLooper(), mStagingManager, sessionId,
                 userId, callingUid, installSource, params, createdMillis, 0L, stageDir, stageCid,
                 null, null, false, false, false, false, null, SessionInfo.INVALID_ID,
-                false, false, false, PackageManager.INSTALL_UNKNOWN, "", null);
+                false, false, false, PackageManager.INSTALL_UNKNOWN, "", null,
+                mVerifierController, mVerificationPolicy.get());
 
         synchronized (mSessions) {
             mSessions.put(sessionId, session);
@@ -1042,6 +1062,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         mCallbacks.notifySessionCreated(session.sessionId, session.userId);
 
         mSettingsWriteRequest.schedule();
+
         if (LOGD) {
             Slog.d(TAG, "Created session id=" + sessionId + " staged=" + params.isStaged);
         }
@@ -1453,6 +1474,12 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                     .createEvent(DevicePolicyEnums.UNINSTALL_PACKAGE)
                     .setAdmin(callerPackageName)
                     .write();
+        } else if (isSystemAppProtectionRoleHolder(snapshot, userId, callingUid)) {
+            // Allow the SYSTEM_APP_PROTECTION_SERVICE role holder to silently uninstall, with a
+            // clean calling identity to get DELETE_PACKAGES permission
+            Binder.withCleanCallingIdentity(() ->
+                    mPm.deletePackageVersioned(versionedPackage, adapter.getBinder(), userId, flags)
+            );
         } else {
             ApplicationInfo appInfo = snapshot.getApplicationInfo(callerPackageName, 0, userId);
             if (appInfo.targetSdkVersion >= Build.VERSION_CODES.P) {
@@ -1472,6 +1499,29 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             }
             adapter.onUserActionRequired(intent);
         }
+    }
+
+    private Boolean isSystemAppProtectionRoleHolder(
+            @NonNull Computer snapshot, int userId, int callingUid) {
+        if (!Flags.deletePackagesSilentlyBackport()) {
+            return false;
+        }
+        String holderPackageName = Binder.withCleanCallingIdentity(() -> {
+            RoleManager roleManager = mPm.mContext.getSystemService(RoleManager.class);
+            if (roleManager == null) {
+                return null;
+            }
+            List<String> holders = roleManager.getRoleHoldersAsUser(
+                    ROLE_SYSTEM_APP_PROTECTION_SERVICE, UserHandle.of(userId));
+            if (holders.isEmpty()) {
+                return null;
+            }
+            return holders.get(0);
+        });
+        if (holderPackageName == null) {
+            return false;
+        }
+        return snapshot.getPackageUid(holderPackageName, /* flags= */ 0, userId) == callingUid;
     }
 
     @Override
@@ -1824,6 +1874,34 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                 UNARCHIVAL_GENERIC_ERROR).contains(status)) {
             throw new IllegalStateException("Invalid status code passed " + status);
         }
+    }
+
+    @Override
+    public @PackageInstaller.VerificationPolicy int getVerificationPolicy() {
+        if (mContext.checkCallingOrSelfPermission(Manifest.permission.VERIFICATION_AGENT)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("You need the "
+                    + "com.android.permission.VERIFICATION_AGENT permission "
+                    + "to get the verification policy");
+        }
+        return mVerificationPolicy.get();
+    }
+
+    @Override
+    public boolean setVerificationPolicy(@PackageInstaller.VerificationPolicy int policy) {
+        if (mContext.checkCallingOrSelfPermission(Manifest.permission.VERIFICATION_AGENT)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("You need the "
+                    + "com.android.permission.VERIFICATION_AGENT permission "
+                    + "to set the verification policy");
+        }
+        if (!isValidVerificationPolicy(policy)) {
+            return false;
+        }
+        if (policy != mVerificationPolicy.get()) {
+            mVerificationPolicy.set(policy);
+        }
+        return true;
     }
 
     private static int getSessionCount(SparseArray<PackageInstallerSession> sessions,

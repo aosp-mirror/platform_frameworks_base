@@ -30,7 +30,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.transformLatest
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /** Restarts the process after all passed in [Condition]s are true. */
 class ConditionalRestarter
@@ -60,7 +60,7 @@ constructor(
     private fun scheduleRestart(reason: String = "") {
         pendingReason = if (reason.isEmpty()) pendingReason else reason
 
-        applicationScope.launch(backgroundDispatcher) {
+        applicationScope.launch(context = backgroundDispatcher) {
             combine(conditions.map { condition -> condition.canRestartNow }) { it.all { it } }
                 // Once all conditions are met, delay.
                 .transformLatest { allConditionsMet ->

@@ -16,14 +16,13 @@
 
 package com.android.server.appfunctions;
 
+import android.annotation.NonNull;
 import android.app.appfunctions.AppFunctionManagerConfiguration;
 import android.content.Context;
 
 import com.android.server.SystemService;
 
-/**
- * Service that manages app functions.
- */
+/** Service that manages app functions. */
 public class AppFunctionManagerService extends SystemService {
     private final AppFunctionManagerServiceImpl mServiceImpl;
 
@@ -37,5 +36,15 @@ public class AppFunctionManagerService extends SystemService {
         if (AppFunctionManagerConfiguration.isSupported(getContext())) {
             publishBinderService(Context.APP_FUNCTION_SERVICE, mServiceImpl);
         }
+    }
+
+    @Override
+    public void onUserUnlocked(@NonNull TargetUser user) {
+        mServiceImpl.onUserUnlocked(user);
+    }
+
+    @Override
+    public void onUserStopping(@NonNull TargetUser user) {
+        mServiceImpl.onUserStopping(user);
     }
 }

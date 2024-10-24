@@ -23,9 +23,11 @@ import com.android.internal.logging.metricsLogger
 import com.android.internal.util.emergencyAffordanceManager
 import com.android.systemui.authentication.domain.interactor.authenticationInteractor
 import com.android.systemui.bouncer.data.repository.emergencyServicesRepository
+import com.android.systemui.haptics.msdl.bouncerHapticPlayer
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.kosmos.testDispatcher
+import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.mobileConnectionsRepository
 import com.android.systemui.telephony.domain.interactor.telephonyInteractor
 import com.android.systemui.user.domain.interactor.selectedUserInteractor
@@ -50,5 +52,7 @@ val Kosmos.bouncerActionButtonInteractor by Fixture {
             },
         metricsLogger = metricsLogger,
         dozeLogger = mock(),
+        sceneInteractor = { sceneInteractor },
+        bouncerHapticPlayer,
     )
 }

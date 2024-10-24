@@ -244,6 +244,19 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
         mWm.clearForcedDisplaySize(mSecondaryDisplay.getDisplayId());
         assertEquals(mSecondaryDisplay.mInitialDisplayWidth, mSecondaryDisplay.mBaseDisplayWidth);
         assertEquals(mSecondaryDisplay.mInitialDisplayHeight, mSecondaryDisplay.mBaseDisplayHeight);
+
+        // Forced size can be cleared even if the initial display size is smaller than max width.
+        final int maxWidth = mSecondaryDisplay.mInitialDisplayWidth - 20;
+        mSecondaryDisplay.setMaxUiWidth(maxWidth);
+        assertEquals(maxWidth, mSecondaryDisplay.mBaseDisplayWidth);
+        mSecondaryDisplay.setForcedSize(maxWidth - 10, maxWidth + 10);
+        assertNotEquals(maxWidth, mSecondaryDisplay.mBaseDisplayHeight);
+        assertTrue(mSecondaryDisplay.mIsSizeForced);
+
+        mWm.clearForcedDisplaySize(mSecondaryDisplay.mDisplayId);
+        assertFalse(mSecondaryDisplay.mIsSizeForced);
+        assertEquals(maxWidth, mSecondaryDisplay.mBaseDisplayWidth);
+        assertEquals(0, mSettingsProvider.getSettings(originalInfo).mForcedWidth);
     }
 
     @Test

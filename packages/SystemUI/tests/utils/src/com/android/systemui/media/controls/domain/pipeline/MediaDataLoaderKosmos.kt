@@ -24,7 +24,6 @@ import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.media.controls.util.fakeMediaControllerFactory
 import com.android.systemui.media.controls.util.mediaFlags
-import com.android.systemui.plugins.activityStarter
 
 val Kosmos.mediaDataLoader by
     Kosmos.Fixture {
@@ -32,7 +31,6 @@ val Kosmos.mediaDataLoader by
             testableContext,
             testDispatcher,
             testScope,
-            activityStarter,
             fakeMediaControllerFactory,
             mediaFlags,
             imageLoader,

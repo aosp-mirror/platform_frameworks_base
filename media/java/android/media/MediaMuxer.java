@@ -34,7 +34,7 @@ import java.util.Map;
 
 /**
  * MediaMuxer facilitates muxing elementary streams. Currently MediaMuxer supports MP4, Webm
- * and 3GP file as the output. It also supports muxing B-frames in MP4 since Android Nougat.
+ * and 3GP file as the output. It also supports muxing B-frames in MP4 since Android Nougat MR1.
  * <p>
  * It is generally used like this:
  *
@@ -191,14 +191,14 @@ import java.util.Map;
     <td>&#9675;</td>
     <td>&#9679;</td>
    </tr>
-    <td align="center">Muxing B-Frames(bi-directional predicted frames)</td>
+    <td align="center">Muxing B-Frames (bi-directional predicted frames)</td>
     <td>&#9675;</td>
     <td>&#9675;</td>
     <td>&#9675;</td>
     <td>&#9675;</td>
     <td>&#9675;</td>
     <td>&#9675;</td>
-    <td>&#8277;</td>
+    <td>&#9675;</td>
     <td>&#8277;</td>
     <td>&#8277;</td>
    </tr>

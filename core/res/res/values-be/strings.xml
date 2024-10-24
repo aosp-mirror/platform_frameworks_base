@@ -1748,7 +1748,7 @@
     <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"Праграма хавае запыт дазволу, таму ваш адказ немагчыма спраўдзіць."</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Каб пачаць выкарыстоўваць функцыю, націсніце на яе:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Выберыце функцыі, якія будзеце выкарыстоўваць з кнопкай спецыяльных магчымасцей"</string>
-    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Выберыце функцыі для выкарыстання з клавішай гучнасці"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2245540598834891500">"Выберыце функцыі для выкарыстання з клавішамі гучнасці"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"Сэрвіс \"<xliff:g id="SERVICE_NAME">%s</xliff:g>\" выключаны"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Змяніць ярлыкі"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Гатова"</string>
@@ -2012,6 +2012,7 @@
     <string name="set_up_screen_lock_title" msgid="8346083801616474030">"Наладзьце блакіроўку экрана"</string>
     <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Наладзіць блакіроўку экрана"</string>
     <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"Каб выкарыстоўваць прыватную прастору, на прыладзе неабходна наладзіць блакіроўку экрана"</string>
+    <string name="private_space_set_up_screen_lock_for_reset" msgid="7817091386408432097">"Каб выдаліць прыватную прастору, на прыладзе неабходна наладзіць блакіроўку экрана"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Праграма недаступная"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"Праграма \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" цяпер недаступная."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"Недаступна: <xliff:g id="ACTIVITY">%1$s</xliff:g>"</string>
@@ -2130,11 +2131,6 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Для выклікаў і апавяшчэнняў уключаны вібрасігнал"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Для выклікаў і апавяшчэнняў гук выключаны"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Сістэмныя змены"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Не турбаваць"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Новае: у рэжыме \"Не турбаваць\" апавяшчэнні не паказваюцца"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Дакраніцеся, каб даведацца больш і змяніць."</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Зменены налады рэжыму \"Не турбаваць\""</string>
-    <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Націсніце, каб паглядзець заблакіраванае."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Праверце налады апавяшчэнняў"</string>
     <string name="review_notification_settings_text" msgid="5916244866751849279">"Пачынаючы з версіі Android 13 усталяваным вамі праграмам неабходна даваць дазвол на адпраўку апавяшчэнняў. Націсніце, каб змяніць дазвол для існуючых праграм."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Нагадаць пазней"</string>

@@ -149,3 +149,19 @@ flag {
     description: "Enable watchdog for the NFC system process"
     bug: "362937338"
 }
+
+flag {
+    name: "enable_card_emulation_euicc"
+    is_exported: true
+    namespace: "nfc"
+    description: "Enable EUICC card emulation"
+    bug: "321314635"
+}
+
+flag {
+    name: "nfc_state_change_security_log_event_enabled"
+    is_exported: true
+    namespace: "nfc"
+    description: "Enabling security log for nfc state change"
+    bug: "319934052"
+}

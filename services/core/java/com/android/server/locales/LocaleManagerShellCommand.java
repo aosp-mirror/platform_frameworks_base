@@ -19,6 +19,8 @@ package com.android.server.locales;
 import android.app.ActivityManager;
 import android.app.ILocaleManager;
 import android.app.LocaleConfig;
+import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.LocaleList;
 import android.os.RemoteException;
 import android.os.ShellCommand;
@@ -31,9 +33,11 @@ import java.io.PrintWriter;
  */
 public class LocaleManagerShellCommand extends ShellCommand {
     private final ILocaleManager mBinderService;
+    private final Context mContext;
 
-    LocaleManagerShellCommand(ILocaleManager localeManager) {
+    LocaleManagerShellCommand(ILocaleManager localeManager, Context context) {
         mBinderService = localeManager;
+        mContext = context;
     }
     @Override
     public int onCommand(String cmd) {
@@ -49,6 +53,8 @@ public class LocaleManagerShellCommand extends ShellCommand {
                 return runSetAppOverrideLocaleConfig();
             case "get-app-localeconfig":
                 return runGetAppOverrideLocaleConfig();
+            case "get-app-localeconfig-ignore-override":
+                return runGetAppLocaleConfigIgnoreOverride();
             default: {
                 return handleDefaultCommands(cmd);
             }
@@ -255,6 +261,55 @@ public class LocaleManagerShellCommand extends ShellCommand {
             }
         } else {
             final PrintWriter err = getErrPrintWriter();
+            err.println("Error: no package specified");
+            return -1;
+        }
+        return 0;
+    }
+
+    private int runGetAppLocaleConfigIgnoreOverride() {
+        String packageName = getNextArg();
+        final PrintWriter err = getErrPrintWriter();
+
+        if (packageName != null) {
+            int userId = ActivityManager.getCurrentUser();
+            do {
+                String option = getNextOption();
+                if (option == null) {
+                    break;
+                }
+                if ("--user".equals(option)) {
+                    userId = UserHandle.parseUserArg(getNextArgRequired());
+                    break;
+                } else {
+                    throw new IllegalArgumentException("Unknown option: " + option);
+                }
+            } while (true);
+            LocaleConfig resLocaleConfig = null;
+            try {
+                resLocaleConfig = LocaleConfig.fromContextIgnoringOverride(
+                    mContext.createPackageContextAsUser(packageName, /* flags= */ 0,
+                        UserHandle.of(userId)));
+            } catch (PackageManager.NameNotFoundException e) {
+                err.println("Unknown package name " + packageName + " for user " + userId);
+                return -1;
+            }
+            if (resLocaleConfig == null) {
+                getOutPrintWriter().println(
+                        "LocaleConfig for " + packageName + " for user " + userId + " is null");
+            } else {
+                LocaleList locales = resLocaleConfig.getSupportedLocales();
+                if (locales == null) {
+                    getOutPrintWriter().println(
+                            "Locales within the LocaleConfig for " + packageName + " for user "
+                                    + userId + " are null");
+                } else {
+                    getOutPrintWriter().println(
+                            "Locales within the LocaleConfig for " + packageName + " for user "
+                                    + userId + " are [" + locales.toLanguageTags() + "]");
+                }
+            }
+        } else {
             err.println("Error: no package specified");
             return -1;
         }

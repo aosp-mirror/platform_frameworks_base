@@ -22,6 +22,7 @@ import android.service.controls.ControlsProviderService
 import android.service.dreams.DreamService
 import android.window.TaskFragmentInfo
 import com.android.systemui.controls.settings.ControlsSettingsRepository
+import com.android.systemui.coroutines.newTracingContext
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dreams.DreamLogger
 import com.android.systemui.dreams.homecontrols.domain.interactor.HomeControlsComponentInteractor
@@ -38,7 +39,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 class HomeControlsDreamService
 @Inject
@@ -53,7 +54,8 @@ constructor(
 ) : DreamService() {
 
     private val serviceJob = SupervisorJob()
-    private val serviceScope = CoroutineScope(bgDispatcher + serviceJob)
+    private val serviceScope =
+        CoroutineScope(bgDispatcher + serviceJob + newTracingContext("HomeControlsDreamService"))
     private val logger = DreamLogger(logBuffer, TAG)
     private lateinit var taskFragmentComponent: TaskFragmentComponent
     private val wakeLock: WakeLock by lazy {

@@ -34,6 +34,7 @@ import android.content.pm.UserProperties;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.IpcDataCache;
 import android.os.PersistableBundle;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -100,6 +101,9 @@ public final class UserManagerTest {
 
     @Before
     public void setUp() throws Exception {
+        // Disable binder caches in this process.
+        IpcDataCache.disableForTestMode();
+
         mOriginalCurrentUserId = ActivityManager.getCurrentUser();
         mUserManager = UserManager.get(mContext);
         mActivityManager = mContext.getSystemService(ActivityManager.class);
@@ -531,6 +535,79 @@ public final class UserManagerTest {
 
         // Now we can remove the user
         removeUser(testUser.id);
+    }
+
+    @MediumTest
+    @Test
+    public void testRemoveUser_shouldRemovePrivateUser() {
+        UserInfo privateProfileUser =
+                createProfileForUser(
+                        "Private profile",
+                        UserManager.USER_TYPE_PROFILE_PRIVATE,
+                        mUserManager.getMainUser().getIdentifier());
+        assertThat(privateProfileUser).isNotNull();
+        assertThat(hasUser(privateProfileUser.id)).isTrue();
+
+        removeUser(privateProfileUser.id);
+
+        assertThat(hasUser(privateProfileUser.id)).isFalse();
+    }
+
+    @MediumTest
+    @Test
+    @RequiresFlagsEnabled(
+            android.multiuser.Flags.FLAG_IGNORE_RESTRICTIONS_WHEN_DELETING_PRIVATE_PROFILE)
+    public void testRemoveUser_shouldRemovePrivateUser_withDisallowRemoveUserRestriction() {
+        UserHandle mainUser = mUserManager.getMainUser();
+        mUserManager.setUserRestriction(
+                UserManager.DISALLOW_REMOVE_USER, /* value= */ true, mainUser);
+        try {
+            UserInfo privateProfileUser =
+                    createProfileForUser(
+                            "Private profile",
+                            UserManager.USER_TYPE_PROFILE_PRIVATE,
+                            mainUser.getIdentifier());
+            assertThat(privateProfileUser).isNotNull();
+            assertThat(hasUser(privateProfileUser.id)).isTrue();
+            removeUser(privateProfileUser.id);
+
+            assertThat(hasUser(privateProfileUser.id)).isFalse();
+        } finally {
+            mUserManager.setUserRestriction(
+                    UserManager.DISALLOW_REMOVE_USER, /* value= */ false, mainUser);
+        }
+    }
+
+    @MediumTest
+    @Test
+    public void testRemoveUser_withDisallowRemoveUserRestrictionAndMultipleUsersPresent() {
+        UserInfo privateProfileUser =
+                createProfileForUser(
+                        "Private profile",
+                        UserManager.USER_TYPE_PROFILE_PRIVATE,
+                        mUserManager.getMainUser().getIdentifier());
+        assertThat(privateProfileUser).isNotNull();
+        assertThat(hasUser(privateProfileUser.id)).isTrue();
+        UserInfo testUser = createUser("TestUser", /* flags= */ 0);
+        assertThat(testUser).isNotNull();
+        assertThat(hasUser(testUser.id)).isTrue();
+        UserHandle mainUser = mUserManager.getMainUser();
+        mUserManager.setUserRestriction(
+                UserManager.DISALLOW_REMOVE_USER, /* value= */ true, mainUser);
+        try {
+            assertThat(
+                    mUserManager.removeUserWhenPossible(
+                            testUser.getUserHandle(), /* overrideDevicePolicy= */ false))
+                    .isEqualTo(UserManager.REMOVE_RESULT_ERROR_USER_RESTRICTION);
+
+            // Non private profile users should be prevented from being removed.
+            assertThat(mUserManager.removeUser(testUser.id)).isEqualTo(false);
+
+            assertThat(hasUser(testUser.id)).isTrue();
+        } finally {
+            mUserManager.setUserRestriction(
+                    UserManager.DISALLOW_REMOVE_USER, /* value= */ false, mainUser);
+        }
     }
 
     @MediumTest

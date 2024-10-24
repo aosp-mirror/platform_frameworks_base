@@ -63,7 +63,6 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.CancellationSignal;
 import android.platform.test.annotations.Presubmit;
-import android.view.SurfaceControl.Transaction;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowInsetsController.OnControllableInsetsChangedListener;
 import android.view.WindowManager.BadTokenException;
@@ -138,8 +137,7 @@ public class InsetsControllerTest {
             mTestHost = spy(new TestHost(mViewRoot));
             mController = new InsetsController(mTestHost, (controller, id, type) -> {
                 if (!Flags.refactorInsetsController() && type == ime()) {
-                    return new InsetsSourceConsumer(id, type, controller.getState(),
-                            Transaction::new, controller) {
+                    return new InsetsSourceConsumer(id, type, controller.getState(), controller) {
 
                         private boolean mImeRequestedShow;
 
@@ -155,8 +153,7 @@ public class InsetsControllerTest {
                         }
                     };
                 } else {
-                    return new InsetsSourceConsumer(id, type, controller.getState(),
-                            Transaction::new, controller);
+                    return new InsetsSourceConsumer(id, type, controller.getState(), controller);
                 }
             }, mTestHandler);
             final Rect rect = new Rect(5, 5, 5, 5);

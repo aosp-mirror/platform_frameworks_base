@@ -16,6 +16,8 @@
 
 package com.android.wm.shell.windowdecor;
 
+import static android.window.DesktopModeFlags.ENABLE_WINDOWING_SCALED_RESIZING;
+
 import static com.android.wm.shell.windowdecor.DragResizeWindowGeometry.getFineResizeCornerSize;
 import static com.android.wm.shell.windowdecor.DragResizeWindowGeometry.getLargeResizeCornerSize;
 import static com.android.wm.shell.windowdecor.DragResizeWindowGeometry.getResizeEdgeHandleSize;
@@ -72,7 +74,6 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
     private View.OnTouchListener mOnCaptionTouchListener;
     private DragPositioningCallback mDragPositioningCallback;
     private DragResizeInputListener mDragResizeListener;
-    private DragDetector mDragDetector;
 
     private RelayoutParams mRelayoutParams = new RelayoutParams();
     private final RelayoutResult<WindowDecorLinearLayout> mResult =
@@ -172,14 +173,8 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
         return stableBounds.bottom - requiredEmptySpace;
     }
 
-
-    void setDragDetector(DragDetector dragDetector) {
-        mDragDetector = dragDetector;
-        mDragDetector.setTouchSlop(ViewConfiguration.get(mContext).getScaledTouchSlop());
-    }
-
     @Override
-    void relayout(RunningTaskInfo taskInfo) {
+    void relayout(RunningTaskInfo taskInfo, boolean hasGlobalFocus) {
         final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
         // The crop and position of the task should only be set when a task is fluid resizing. In
         // all other cases, it is expected that the transition handler positions and crops the task
@@ -190,7 +185,7 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
         // synced with the buffer transaction (that draws the View). Both will be shown on screen
         // at the same, whereas applying them independently causes flickering. See b/270202228.
         relayout(taskInfo, t, t, true /* applyStartTransactionOnDraw */,
-                shouldSetTaskPositionAndCrop);
+                shouldSetTaskPositionAndCrop, hasGlobalFocus);
     }
 
     @VisibleForTesting
@@ -199,16 +194,21 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
             ActivityManager.RunningTaskInfo taskInfo,
             boolean applyStartTransactionOnDraw,
             boolean setTaskCropAndPosition,
-            InsetsState displayInsetsState) {
+            boolean isStatusBarVisible,
+            boolean isKeyguardVisibleAndOccluded,
+            InsetsState displayInsetsState,
+            boolean hasGlobalFocus) {
         relayoutParams.reset();
         relayoutParams.mRunningTaskInfo = taskInfo;
         relayoutParams.mLayoutResId = R.layout.caption_window_decor;
         relayoutParams.mCaptionHeightId = getCaptionHeightIdStatic(taskInfo.getWindowingMode());
-        relayoutParams.mShadowRadiusId = taskInfo.isFocused
+        relayoutParams.mShadowRadiusId = hasGlobalFocus
                 ? R.dimen.freeform_decor_shadow_focused_thickness
                 : R.dimen.freeform_decor_shadow_unfocused_thickness;
         relayoutParams.mApplyStartTransactionOnDraw = applyStartTransactionOnDraw;
         relayoutParams.mSetTaskPositionAndCrop = setTaskCropAndPosition;
+        relayoutParams.mIsCaptionVisible = taskInfo.isFreeform()
+                || (isStatusBarVisible && !isKeyguardVisibleAndOccluded);
 
         if (TaskInfoKt.isTransparentCaptionBarAppearance(taskInfo)) {
             // If the app is requesting to customize the caption bar, allow input to fall
@@ -234,17 +234,20 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
     @SuppressLint("MissingPermission")
     void relayout(RunningTaskInfo taskInfo,
             SurfaceControl.Transaction startT, SurfaceControl.Transaction finishT,
-            boolean applyStartTransactionOnDraw, boolean setTaskCropAndPosition) {
+            boolean applyStartTransactionOnDraw, boolean setTaskCropAndPosition,
+            boolean hasGlobalFocus) {
         final boolean isFreeform =
                 taskInfo.getWindowingMode() == WindowConfiguration.WINDOWING_MODE_FREEFORM;
-        final boolean isDragResizeable = isFreeform && taskInfo.isResizeable;
+        final boolean isDragResizeable = ENABLE_WINDOWING_SCALED_RESIZING.isTrue()
+                ? isFreeform : isFreeform && taskInfo.isResizeable;
 
         final WindowDecorLinearLayout oldRootView = mResult.mRootView;
         final SurfaceControl oldDecorationSurface = mDecorationContainerSurface;
         final WindowContainerTransaction wct = new WindowContainerTransaction();
 
         updateRelayoutParams(mRelayoutParams, taskInfo, applyStartTransactionOnDraw,
-                setTaskCropAndPosition, mDisplayController.getInsetsState(taskInfo.displayId));
+                setTaskCropAndPosition, mIsStatusBarVisible, mIsKeyguardVisibleAndOccluded,
+                mDisplayController.getInsetsState(taskInfo.displayId), hasGlobalFocus);
 
         relayout(mRelayoutParams, startT, finishT, wct, oldRootView, mResult);
         // After this line, mTaskInfo is up-to-date and should be used instead of taskInfo
@@ -271,6 +274,7 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
             closeDragResizeListener();
             mDragResizeListener = new DragResizeInputListener(
                     mContext,
+                    mTaskInfo,
                     mHandler,
                     mChoreographer,
                     mDisplay.getDisplayId(),
@@ -283,11 +287,10 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
 
         final int touchSlop = ViewConfiguration.get(mResult.mRootView.getContext())
                 .getScaledTouchSlop();
-        mDragDetector.setTouchSlop(touchSlop);
 
         final Resources res = mResult.mRootView.getResources();
         mDragResizeListener.setGeometry(new DragResizeWindowGeometry(0 /* taskCornerRadius */,
-                new Size(mResult.mWidth, mResult.mHeight), getResizeEdgeHandleSize(mContext, res),
+                new Size(mResult.mWidth, mResult.mHeight), getResizeEdgeHandleSize(res),
                 getResizeHandleEdgeInset(res), getFineResizeCornerSize(res),
                 getLargeResizeCornerSize(res)), touchSlop);
     }

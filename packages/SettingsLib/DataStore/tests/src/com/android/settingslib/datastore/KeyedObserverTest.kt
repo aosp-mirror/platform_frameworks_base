@@ -45,14 +45,14 @@ class KeyedObserverTest {
 
     @Test
     fun addObserver_sameExecutor() {
-        keyedObservable.addObserver(observer1, executor1)
-        keyedObservable.addObserver(observer1, executor1)
+        assertThat(keyedObservable.addObserver(observer1, executor1)).isTrue()
+        assertThat(keyedObservable.addObserver(observer1, executor1)).isFalse()
     }
 
     @Test
     fun addObserver_keyedObserver_sameExecutor() {
-        keyedObservable.addObserver(key1, keyedObserver1, executor1)
-        keyedObservable.addObserver(key1, keyedObserver1, executor1)
+        assertThat(keyedObservable.addObserver(key1, keyedObserver1, executor1)).isTrue()
+        assertThat(keyedObservable.addObserver(key1, keyedObserver1, executor1)).isFalse()
     }
 
     @Test
@@ -109,15 +109,15 @@ class KeyedObserverTest {
 
     @Test
     fun addObserver_notifyObservers_removeObserver() {
-        keyedObservable.addObserver(observer1, executor1)
-        keyedObservable.addObserver(observer2, executor2)
+        assertThat(keyedObservable.addObserver(observer1, executor1)).isTrue()
+        assertThat(keyedObservable.addObserver(observer2, executor2)).isTrue()
 
         keyedObservable.notifyChange(DataChangeReason.UPDATE)
         verify(observer1).onKeyChanged(null, DataChangeReason.UPDATE)
         verify(observer2).onKeyChanged(null, DataChangeReason.UPDATE)
 
         reset(observer1, observer2)
-        keyedObservable.removeObserver(observer2)
+        assertThat(keyedObservable.removeObserver(observer2)).isTrue()
 
         keyedObservable.notifyChange(DataChangeReason.DELETE)
         verify(observer1).onKeyChanged(null, DataChangeReason.DELETE)
@@ -126,15 +126,15 @@ class KeyedObserverTest {
 
     @Test
     fun addObserver_keyedObserver_notifyObservers_removeObserver() {
-        keyedObservable.addObserver(key1, keyedObserver1, executor1)
-        keyedObservable.addObserver(key2, keyedObserver2, executor2)
+        assertThat(keyedObservable.addObserver(key1, keyedObserver1, executor1)).isTrue()
+        assertThat(keyedObservable.addObserver(key2, keyedObserver2, executor2)).isTrue()
 
         keyedObservable.notifyChange(key1, DataChangeReason.UPDATE)
         verify(keyedObserver1).onKeyChanged(key1, DataChangeReason.UPDATE)
         verify(keyedObserver2, never()).onKeyChanged(key2, DataChangeReason.UPDATE)
 
         reset(keyedObserver1, keyedObserver2)
-        keyedObservable.removeObserver(key1, keyedObserver1)
+        assertThat(keyedObservable.removeObserver(key1, keyedObserver1)).isTrue()
 
         keyedObservable.notifyChange(key1, DataChangeReason.DELETE)
         verify(keyedObserver1, never()).onKeyChanged(key1, DataChangeReason.DELETE)
@@ -143,9 +143,9 @@ class KeyedObserverTest {
 
     @Test
     fun notifyChange_addMoreTypeObservers_checkOnKeyChanged() {
-        keyedObservable.addObserver(observer1, executor1)
-        keyedObservable.addObserver(key1, keyedObserver1, executor1)
-        keyedObservable.addObserver(key2, keyedObserver2, executor1)
+        assertThat(keyedObservable.addObserver(observer1, executor1)).isTrue()
+        assertThat(keyedObservable.addObserver(key1, keyedObserver1, executor1)).isTrue()
+        assertThat(keyedObservable.addObserver(key2, keyedObserver2, executor1)).isTrue()
 
         keyedObservable.notifyChange(DataChangeReason.UPDATE)
         verify(observer1).onKeyChanged(null, DataChangeReason.UPDATE)
@@ -171,25 +171,25 @@ class KeyedObserverTest {
     fun notifyChange_addObserverWithinCallback() {
         // ConcurrentModificationException is raised if it is not implemented correctly
         val observer: KeyedObserver<Any?> = KeyedObserver { _, _ ->
-            keyedObservable.addObserver(observer1, executor1)
+            assertThat(keyedObservable.addObserver(observer1, executor1)).isTrue()
         }
 
-        keyedObservable.addObserver(observer, executor1)
+        assertThat(keyedObservable.addObserver(observer, executor1)).isTrue()
 
         keyedObservable.notifyChange(DataChangeReason.UPDATE)
-        keyedObservable.removeObserver(observer)
+        assertThat(keyedObservable.removeObserver(observer)).isTrue()
     }
 
     @Test
     fun notifyChange_KeyedObserver_addObserverWithinCallback() {
         // ConcurrentModificationException is raised if it is not implemented correctly
         val keyObserver: KeyedObserver<Any?> = KeyedObserver { _, _ ->
-            keyedObservable.addObserver(key1, keyedObserver1, executor1)
+            assertThat(keyedObservable.addObserver(key1, keyedObserver1, executor1)).isTrue()
         }
 
-        keyedObservable.addObserver(key1, keyObserver, executor1)
+        assertThat(keyedObservable.addObserver(key1, keyObserver, executor1)).isTrue()
 
         keyedObservable.notifyChange(key1, DataChangeReason.UPDATE)
-        keyedObservable.removeObserver(key1, keyObserver)
+        assertThat(keyedObservable.removeObserver(key1, keyObserver)).isTrue()
     }
 }

@@ -430,6 +430,86 @@ public class VibrationEffectTest {
     }
 
     @Test
+    public void cropToLength_waveform_underLength() {
+        VibrationEffect effect = VibrationEffect.createWaveform(
+                /* timings= */ new long[]{0, 1, 2},
+                /* repeatIndex= */ -1);
+        VibrationEffect result = effect.cropToLengthOrNull(5);
+
+        assertThat(result).isEqualTo(effect); // unchanged
+    }
+
+    @Test
+    public void cropToLength_waveform_overLength() {
+        VibrationEffect effect = VibrationEffect.createWaveform(
+                /* timings= */ new long[]{0, 1, 2, 3, 4, 5, 6},
+                /* repeatIndex= */ -1);
+        VibrationEffect result = effect.cropToLengthOrNull(4);
+
+        assertThat(result).isEqualTo(VibrationEffect.createWaveform(
+                new long[]{0, 1, 2, 3},
+                -1));
+    }
+
+    @Test
+    public void cropToLength_waveform_repeating() {
+        // repeating waveforms cannot be truncated
+        VibrationEffect effect = VibrationEffect.createWaveform(
+                /* timings= */ new long[]{0, 1, 2, 3, 4, 5, 6},
+                /* repeatIndex= */ 2);
+        VibrationEffect result = effect.cropToLengthOrNull(3);
+
+        assertThat(result).isNull();
+    }
+
+    @Test
+    public void cropToLength_waveform_withAmplitudes() {
+        VibrationEffect effect = VibrationEffect.createWaveform(
+                /* timings= */ new long[]{0, 1, 2, 3, 4, 5, 6},
+                /* amplitudes= */ new int[]{10, 20, 40, 10, 20, 40, 10},
+                /* repeatIndex= */ -1);
+        VibrationEffect result = effect.cropToLengthOrNull(3);
+
+        assertThat(result).isEqualTo(VibrationEffect.createWaveform(
+                new long[]{0, 1, 2},
+                new int[]{10, 20, 40},
+                -1));
+    }
+
+    @Test
+    public void cropToLength_composed() {
+        VibrationEffect effect = VibrationEffect.startComposition()
+                .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK)
+                .addPrimitive(VibrationEffect.Composition.PRIMITIVE_TICK)
+                .compose();
+        VibrationEffect result = effect.cropToLengthOrNull(1);
+
+        assertThat(result).isNotNull();
+        assertThat(result).isEqualTo(VibrationEffect.startComposition()
+                        .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK)
+                        .compose());
+    }
+
+    @Test
+    public void cropToLength_composed_repeating() {
+        VibrationEffect effect = VibrationEffect.startComposition()
+                .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK)
+                .repeatEffectIndefinitely(TEST_ONE_SHOT)
+                .compose();
+        assertThat(effect.cropToLengthOrNull(1)).isNull();
+    }
+
+    @Test
+    @RequiresFlagsEnabled(android.os.vibrator.Flags.FLAG_VENDOR_VIBRATION_EFFECTS)
+    public void cropToLength_vendorEffect() {
+        PersistableBundle vendorData = new PersistableBundle();
+        vendorData.putInt("key", 1);
+        VibrationEffect effect = VibrationEffect.createVendorEffect(vendorData);
+
+        assertThat(effect.cropToLengthOrNull(2)).isNull();
+    }
+
+    @Test
     public void getRingtones_noPrebakedRingtones() {
         Resources r = mockRingtoneResources(new String[0]);
         Context context = mockContext(r);
@@ -995,6 +1075,52 @@ public class VibrationEffectTest {
             assertEquals(-1,
                     VibrationEffect.createVendorEffect(createNonEmptyBundle()).getDuration());
         }
+    }
+
+    @Test
+    public void testDuration_withVibratorSupportingPrimitives() {
+        VibratorInfo info = new VibratorInfo.Builder(/* id= */ 1)
+                .setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS)
+                .setSupportedPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 10)
+                .setSupportedPrimitive(VibrationEffect.Composition.PRIMITIVE_TICK, 5)
+                .build();
+
+        VibrationEffect composition = VibrationEffect.startComposition()
+                .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK)
+                .addPrimitive(VibrationEffect.Composition.PRIMITIVE_TICK, 1, 100)
+                .compose();
+
+        assertEquals(1, VibrationEffect.createOneShot(1, 1).getDuration());
+        assertEquals(10, VibrationEffect.get(VibrationEffect.EFFECT_CLICK).getDuration(info));
+        assertEquals(115, composition.getDuration(info));
+        assertEquals(Long.MAX_VALUE,
+                VibrationEffect.startComposition()
+                        .repeatEffectIndefinitely(composition)
+                        .compose()
+                        .getDuration(info));
+        if (Flags.vendorVibrationEffects()) {
+            assertEquals(-1,
+                    VibrationEffect.createVendorEffect(createNonEmptyBundle()).getDuration(info));
+        }
+    }
+
+    @Test
+    public void testDuration_withVibratorNotSupportingPrimitives() {
+        VibratorInfo info = new VibratorInfo.Builder(/* id= */ 1)
+                .setCapabilities(IVibrator.CAP_AMPLITUDE_CONTROL)
+                .build();
+
+        VibrationEffect composition = VibrationEffect.startComposition()
+                .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK)
+                .compose();
+
+        assertEquals(-1, VibrationEffect.get(VibrationEffect.EFFECT_CLICK).getDuration(info));
+        assertEquals(-1, composition.getDuration(info));
+        assertEquals(Long.MAX_VALUE,
+                VibrationEffect.startComposition()
+                        .repeatEffectIndefinitely(composition)
+                        .compose()
+                        .getDuration(info));
     }
 
     @Test

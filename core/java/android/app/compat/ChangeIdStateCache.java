@@ -16,6 +16,8 @@
 
 package android.app.compat;
 
+import static android.app.PropertyInvalidatedCache.createSystemCacheKey;
+
 import android.annotation.NonNull;
 import android.app.PropertyInvalidatedCache;
 import android.content.Context;
@@ -31,7 +33,7 @@ import com.android.internal.compat.IPlatformCompat;
  */
 public final class ChangeIdStateCache
         extends PropertyInvalidatedCache<ChangeIdStateQuery, Boolean> {
-    private static final String CACHE_KEY = "cache_key.is_compat_change_enabled";
+    private static final String CACHE_KEY = createSystemCacheKey("is_compat_change_enabled");
     private static final int MAX_ENTRIES = 2048;
     private static boolean sDisabled = false;
     private volatile IPlatformCompat mPlatformCompat;

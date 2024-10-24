@@ -61,10 +61,9 @@ license {
 
 filegroup {
     name: "framework-non-updatable-sources",
-    srcs: [
+    device_common_srcs: [
         // Java/AIDL sources under frameworks/base
         ":framework-annotations",
-        ":ravenwood-annotations",
         ":framework-blobstore-sources",
         ":framework-core-sources",
         ":framework-drm-sources",
@@ -98,6 +97,8 @@ filegroup {
         ":android.frameworks.location.altitude-V2-java-source",
         ":android.hardware.biometrics.common-V4-java-source",
         ":android.hardware.biometrics.fingerprint-V5-java-source",
+        ":android.hardware.biometrics.fingerprint.virtualhal-java-source",
+        ":android.hardware.biometrics.face.virtualhal-java-source",
         ":android.hardware.biometrics.face-V4-java-source",
         ":android.hardware.gnss-V2-java-source",
         ":android.hardware.graphics.common-V3-java-source",
@@ -108,7 +109,7 @@ filegroup {
         ":android.hardware.radio.voice-V3-java-source",
         ":android.hardware.security.keymint-V3-java-source",
         ":android.hardware.security.secureclock-V1-java-source",
-        ":android.hardware.thermal-V2-java-source",
+        ":android.hardware.thermal-V3-java-source",
         ":android.hardware.tv.tuner-V3-java-source",
         ":android.security.apc-java-source",
         ":android.security.authorization-java-source",
@@ -149,6 +150,7 @@ filegroup {
         // etc.
         ":framework-javastream-protos",
         ":statslog-framework-java-gen", // FrameworkStatsLog.java
+        ":statslog-hwui-java-gen", // HwuiStatsLog.java
         ":audio_policy_configuration_V7_0",
     ],
 }
@@ -169,12 +171,6 @@ java_library {
         //same purpose.
         "//external/robolectric:__subpackages__",
         "//frameworks/layoutlib:__subpackages__",
-
-        // This is for the same purpose as robolectric -- to build "framework.jar" for host-side
-        // testing.
-        // TODO: Once Ravenwood is stable, move the host side jar targets to this directory,
-        // and remove this line.
-        "//frameworks/base/tools/hoststubgen:__subpackages__",
     ],
 }
 
@@ -294,7 +290,6 @@ java_defaults {
         enforce_permissions_exceptions: [
             // Do not add entries to this list.
             ":framework-annotations",
-            ":ravenwood-annotations",
             ":framework-blobstore-sources",
             ":framework-core-sources",
             ":framework-drm-sources",
@@ -368,6 +363,7 @@ java_defaults {
     jarjar_rules: ":framework-jarjar-rules",
     javac_shard_size: 150,
     plugins: [
+        "cached-property-annotation-processor",
         "view-inspector-annotation-processor",
         "staledataclass-annotation-processor",
         "error_prone_android_framework",
@@ -426,6 +422,7 @@ java_defaults {
         "modules-utils-expresslog",
         "perfetto_trace_javastream_protos_jarjar",
         "libaconfig_java_proto_nano",
+        "aconfig_device_paths_java",
     ],
 }
 
@@ -597,8 +594,6 @@ filegroup {
 filegroup {
     name: "framework-networkstack-shared-srcs",
     srcs: [
-        // TODO: remove these annotations as soon as we can use andoid.support.annotations.*
-        ":framework-annotations",
         ":modules-utils-preconditions-srcs",
         "core/java/android/util/IndentingPrintWriter.java",
         "core/java/android/util/LocalLog.java",

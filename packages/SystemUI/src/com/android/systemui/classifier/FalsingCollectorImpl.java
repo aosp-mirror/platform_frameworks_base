@@ -21,6 +21,7 @@ import static com.android.systemui.dock.DockManager.DockEventListener;
 import android.hardware.SensorManager;
 import android.hardware.biometrics.BiometricSourceType;
 import android.util.Log;
+import android.view.InputDevice;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 
@@ -28,6 +29,7 @@ import androidx.annotation.VisibleForTesting;
 
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
+import com.android.systemui.Flags;
 import com.android.systemui.communal.domain.interactor.CommunalInteractor;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -343,7 +345,9 @@ class FalsingCollectorImpl implements FalsingCollector {
         // will be ignored by the collector until another MotionEvent.ACTION_DOWN is passed in.
         // avoidGesture must be called immediately following the MotionEvent.ACTION_DOWN, before
         // any other events are processed, otherwise the whole gesture will be recorded.
-        if (ev.getActionMasked() == MotionEvent.ACTION_DOWN) {
+        //
+        // We should only delay processing of these events for touchscreen sources
+        if (ev.getActionMasked() == MotionEvent.ACTION_DOWN && isTouchscreenSource(ev)) {
             // Make a copy of ev, since it will be recycled after we exit this method.
             mPendingDownEvent = MotionEvent.obtain(ev);
             mAvoidGesture = false;
@@ -408,6 +412,22 @@ class FalsingCollectorImpl implements FalsingCollector {
             mPendingDownEvent = null;
         }
         mFalsingDataProvider.onA11yAction();
+    }
+
+    /**
+     * returns {@code true} if the device supports Touchscreen, {@code false} otherwise. Defaults to
+     * {@code true} if the device is {@code null}
+     */
+    private boolean isTouchscreenSource(MotionEvent ev) {
+        if (!Flags.nonTouchscreenDevicesBypassFalsing()) {
+            return true;
+        }
+        InputDevice device = ev.getDevice();
+        if (device != null) {
+            return device.supportsSource(InputDevice.SOURCE_TOUCHSCREEN);
+        } else {
+            return true;
+        }
     }
 
     private boolean shouldSessionBeActive() {

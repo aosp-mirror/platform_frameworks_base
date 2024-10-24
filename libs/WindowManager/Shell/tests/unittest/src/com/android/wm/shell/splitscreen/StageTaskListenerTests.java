@@ -23,15 +23,14 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assume.assumeFalse;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.times;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import android.app.ActivityManager;
 import android.os.SystemProperties;
 import android.view.SurfaceControl;
-import android.view.SurfaceSession;
 import android.window.WindowContainerTransaction;
 
 import androidx.test.annotation.UiThreadTest;
@@ -52,6 +51,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
 
 import java.util.Optional;
 
@@ -63,8 +63,6 @@ import java.util.Optional;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public final class StageTaskListenerTests extends ShellTestCase {
-    private static final boolean ENABLE_SHELL_TRANSITIONS =
-            SystemProperties.getBoolean("persist.wm.debug.shell_transit", true);
 
     @Mock
     private ShellTaskOrganizer mTaskOrganizer;
@@ -76,9 +74,10 @@ public final class StageTaskListenerTests extends ShellTestCase {
     private IconProvider mIconProvider;
     @Mock
     private WindowDecorViewModel mWindowDecorViewModel;
+    @Spy
+    private WindowContainerTransaction mWct;
     @Captor
     private ArgumentCaptor<SyncTransactionQueue.TransactionRunnable> mRunnableCaptor;
-    private SurfaceSession mSurfaceSession = new SurfaceSession();
     private SurfaceControl mSurfaceControl;
     private ActivityManager.RunningTaskInfo mRootTask;
     private StageTaskListener mStageTaskListener;
@@ -93,12 +92,11 @@ public final class StageTaskListenerTests extends ShellTestCase {
                 DEFAULT_DISPLAY,
                 mCallbacks,
                 mSyncQueue,
-                mSurfaceSession,
                 mIconProvider,
                 Optional.of(mWindowDecorViewModel));
         mRootTask = new TestRunningTaskInfoBuilder().build();
         mRootTask.parentTaskId = INVALID_TASK_ID;
-        mSurfaceControl = new SurfaceControl.Builder(mSurfaceSession).setName("test").build();
+        mSurfaceControl = new SurfaceControl.Builder().setName("test").build();
         mStageTaskListener.onTaskAppeared(mRootTask, mSurfaceControl);
     }
 
@@ -116,20 +114,19 @@ public final class StageTaskListenerTests extends ShellTestCase {
     public void testRootTaskAppeared() {
         assertThat(mStageTaskListener.mRootTaskInfo.taskId).isEqualTo(mRootTask.taskId);
         verify(mCallbacks).onRootTaskAppeared();
-        verify(mCallbacks).onStatusChanged(eq(mRootTask.isVisible), eq(false));
+        verify(mCallbacks, never()).onStageVisibilityChanged(mStageTaskListener);
     }
 
     @Test
-    public void testChildTaskAppeared() {
-        // With shell transitions, the transition manages status changes, so skip this test.
-        assumeFalse(ENABLE_SHELL_TRANSITIONS);
-        final ActivityManager.RunningTaskInfo childTask =
-                new TestRunningTaskInfoBuilder().setParentTaskId(mRootTask.taskId).build();
+    public void testRootTaskVisible() {
+        mStageTaskListener.onTaskVanished(mRootTask);
+        mRootTask = new TestRunningTaskInfoBuilder().setVisible(true).build();
+        mRootTask.parentTaskId = INVALID_TASK_ID;
+        mSurfaceControl = new SurfaceControl.Builder().setName("test").build();
+        mStageTaskListener.onTaskAppeared(mRootTask, mSurfaceControl);
 
-        mStageTaskListener.onTaskAppeared(childTask, mSurfaceControl);
+        verify(mCallbacks).onStageVisibilityChanged(mStageTaskListener);
 
-        assertThat(mStageTaskListener.mChildrenTaskInfo.contains(childTask.taskId)).isTrue();
-        verify(mCallbacks).onStatusChanged(eq(mRootTask.isVisible), eq(true));
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -139,29 +136,13 @@ public final class StageTaskListenerTests extends ShellTestCase {
     }
 
     @Test
-    public void testTaskVanished() {
-        // With shell transitions, the transition manages status changes, so skip this test.
-        assumeFalse(ENABLE_SHELL_TRANSITIONS);
-        final ActivityManager.RunningTaskInfo childTask =
-                new TestRunningTaskInfoBuilder().setParentTaskId(mRootTask.taskId).build();
-        mStageTaskListener.mRootTaskInfo = mRootTask;
-        mStageTaskListener.mChildrenTaskInfo.put(childTask.taskId, childTask);
-
-        mStageTaskListener.onTaskVanished(childTask);
-        verify(mCallbacks, times(2)).onStatusChanged(eq(mRootTask.isVisible), eq(false));
-
-        mStageTaskListener.onTaskVanished(mRootTask);
-        verify(mCallbacks).onRootTaskVanished();
-    }
-
-    @Test
     public void testTaskInfoChanged_notSupportsMultiWindow() {
         final ActivityManager.RunningTaskInfo childTask =
                 new TestRunningTaskInfoBuilder().setParentTaskId(mRootTask.taskId).build();
         childTask.supportsMultiWindow = false;
 
         mStageTaskListener.onTaskInfoChanged(childTask);
-        verify(mCallbacks).onNoLongerSupportMultiWindow(childTask);
+        verify(mCallbacks).onNoLongerSupportMultiWindow(mStageTaskListener, childTask);
     }
 
     @Test
@@ -176,5 +157,32 @@ public final class StageTaskListenerTests extends ShellTestCase {
 
         mStageTaskListener.evictAllChildren(wct);
         assertFalse(wct.isEmpty());
+    }
+
+    @Test
+    public void testAddTask() {
+        final ActivityManager.RunningTaskInfo task = new TestRunningTaskInfoBuilder().build();
+        mStageTaskListener.addTask(task, mWct);
+
+        verify(mWct).reparent(eq(task.token), eq(mRootTask.token), eq(true));
+    }
+
+    @Test
+    public void testRemoveTask() {
+        final ActivityManager.RunningTaskInfo task = new TestRunningTaskInfoBuilder().build();
+        assertThat(mStageTaskListener.removeTask(task.taskId, null, mWct)).isFalse();
+
+        mStageTaskListener.mChildrenTaskInfo.put(task.taskId, task);
+        assertThat(mStageTaskListener.removeTask(task.taskId, null, mWct)).isTrue();
+        verify(mWct).reparent(eq(task.token), isNull(), eq(false));
+    }
+
+    @Test
+    public void testActiveDeactivate() {
+        mStageTaskListener.activate(mWct, true /* reparent */);
+        assertThat(mStageTaskListener.isActive()).isTrue();
+
+        mStageTaskListener.deactivate(mWct);
+        assertThat(mStageTaskListener.isActive()).isFalse();
     }
 }

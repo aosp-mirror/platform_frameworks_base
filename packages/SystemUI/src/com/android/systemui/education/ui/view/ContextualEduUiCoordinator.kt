@@ -16,6 +16,7 @@
 
 package com.android.systemui.education.ui.view
 
+import android.app.Dialog
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -24,7 +25,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.os.UserHandle
-import android.widget.Toast
+import android.view.accessibility.AccessibilityManager
 import androidx.core.app.NotificationCompat
 import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
@@ -36,7 +37,7 @@ import com.android.systemui.inputdevice.tutorial.ui.view.KeyboardTouchpadTutoria
 import com.android.systemui.res.R
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /**
  * A class to show contextual education on UI based on the edu produced from
@@ -49,7 +50,7 @@ constructor(
     private val viewModel: ContextualEduViewModel,
     private val context: Context,
     private val notificationManager: NotificationManager,
-    private val createToast: (String) -> Toast
+    private val createDialog: (ContextualEduToastViewModel) -> Dialog,
 ) : CoreStartable {
 
     companion object {
@@ -64,21 +65,29 @@ constructor(
         context: Context,
         viewModel: ContextualEduViewModel,
         notificationManager: NotificationManager,
+        accessibilityManager: AccessibilityManager,
     ) : this(
         applicationScope,
         viewModel,
         context,
         notificationManager,
-        createToast = { message -> Toast.makeText(context, message, Toast.LENGTH_LONG) }
+        createDialog = { model -> ContextualEduDialog(context, model, accessibilityManager) },
     )
+
+    var dialog: Dialog? = null
 
     override fun start() {
         createEduNotificationChannel()
         applicationScope.launch {
             viewModel.eduContent.collect { contentModel ->
-                when (contentModel) {
-                    is ContextualEduToastViewModel -> showToast(contentModel)
-                    is ContextualEduNotificationViewModel -> showNotification(contentModel)
+                if (contentModel != null) {
+                    when (contentModel) {
+                        is ContextualEduToastViewModel -> showDialog(contentModel)
+                        is ContextualEduNotificationViewModel -> showNotification(contentModel)
+                    }
+                } else {
+                    dialog?.dismiss()
+                    dialog = null
                 }
             }
         }
@@ -95,9 +104,9 @@ constructor(
         notificationManager.createNotificationChannel(channel)
     }
 
-    private fun showToast(model: ContextualEduToastViewModel) {
-        val toast = createToast(model.message)
-        toast.show()
+    private fun showDialog(model: ContextualEduToastViewModel) {
+        dialog = createDialog(model)
+        dialog?.show()
     }
 
     private fun showNotification(model: ContextualEduNotificationViewModel) {

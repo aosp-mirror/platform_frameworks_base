@@ -99,7 +99,23 @@ public final class DeviceConfigService extends Binder {
 
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        final IContentProvider iprovider = mProvider.getIContentProvider();
+        if (android.provider.flags.Flags.dumpImprovements()) {
+            pw.print("SyncDisabledForTests: ");
+            MyShellCommand.getSyncDisabledForTests(pw, pw);
+
+            pw.print("UpdatableDeviceConfigServiceReadiness.shouldStartUpdatableService(): ");
+            pw.println(UpdatableDeviceConfigServiceReadiness.shouldStartUpdatableService());
+
+            pw.println("DeviceConfig provider: ");
+            try (ParcelFileDescriptor pfd = ParcelFileDescriptor.dup(fd)) {
+                DeviceConfig.dump(pfd, pw, /* prefix= */ "  ", args);
+            } catch (IOException e) {
+                pw.print("IOException creating ParcelFileDescriptor: ");
+                pw.println(e);
+            }
+        }
+
+        IContentProvider iprovider = mProvider.getIContentProvider();
         pw.println("DeviceConfig flags:");
         for (String line : MyShellCommand.listAll(iprovider)) {
             pw.println(line);
@@ -230,6 +246,17 @@ public final class DeviceConfigService extends Binder {
          */
         private boolean isRoot() {
             return Binder.getCallingUid() == Process.ROOT_UID;
+        }
+
+        private static int getSyncDisabledForTests(PrintWriter pOut, PrintWriter pErr) {
+            int syncDisabledModeInt = DeviceConfig.getSyncDisabledMode();
+            String syncDisabledModeString = formatSyncDisabledMode(syncDisabledModeInt);
+            if (syncDisabledModeString == null) {
+                pErr.println("Unknown mode: " + syncDisabledModeInt);
+                return -1;
+            }
+            pOut.println(syncDisabledModeString);
+            return 0;
         }
 
       public static HashMap<String, String> getAllFlags(IContentProvider provider) {
@@ -597,14 +624,7 @@ public final class DeviceConfigService extends Binder {
                     DeviceConfig.setSyncDisabledMode(syncDisabledModeArg);
                     break;
                 case GET_SYNC_DISABLED_FOR_TESTS:
-                    int syncDisabledModeInt = DeviceConfig.getSyncDisabledMode();
-                    String syncDisabledModeString = formatSyncDisabledMode(syncDisabledModeInt);
-                    if (syncDisabledModeString == null) {
-                        perr.println("Unknown mode: " + syncDisabledModeInt);
-                        return -1;
-                    }
-                    pout.println(syncDisabledModeString);
-                    break;
+                    return getSyncDisabledForTests(pout, perr);
                 default:
                     perr.println("Unspecified command");
                     return -1;

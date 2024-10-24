@@ -303,7 +303,7 @@ interface IDevicePolicyManager {
     String[] getAccountTypesWithManagementDisabled(String callerPackageName);
     String[] getAccountTypesWithManagementDisabledAsUser(int userId, String callerPackageName, in boolean parent);
 
-    void setSecondaryLockscreenEnabled(in ComponentName who, boolean enabled);
+    void setSecondaryLockscreenEnabled(in ComponentName who, boolean enabled, in PersistableBundle options);
     boolean isSecondaryLockscreenEnabled(in UserHandle userHandle);
 
     void setPreferentialNetworkServiceConfigs(

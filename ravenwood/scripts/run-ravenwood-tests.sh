@@ -14,15 +14,42 @@
 # limitations under the License.
 
 # Run all the ravenwood tests + hoststubgen unit tests.
+#
+# Options:
+#
+#   -s: "Smoke" test -- skip slow tests (SysUI, ICU)
 
-all_tests="hoststubgentest tiny-framework-dump-test hoststubgen-invoke-test ravenwood-stats-checker"
+smoke=0
+while getopts "s" opt; do
+case "$opt" in
+    s)
+        smoke=1
+        ;;
+    '?')
+        exit 1
+        ;;
+esac
+done
+shift $(($OPTIND - 1))
 
-# "echo" is to remove the newlines
-all_tests="$all_tests $(echo $(${0%/*}/list-ravenwood-tests.sh) )"
+all_tests=(hoststubgentest tiny-framework-dump-test hoststubgen-invoke-test ravenwood-stats-checker)
+all_tests+=( $(${0%/*}/list-ravenwood-tests.sh) )
+
+# Regex to identify slow tests, in PCRE
+slow_tests_re='^(SystemUiRavenTests|CtsIcuTestCasesRavenwood)$'
+
+if (( $smoke )) ; then
+    # Remove the slow tests.
+    all_tests=( $(
+        for t in "${all_tests[@]}"; do
+            echo $t | grep -vP "$slow_tests_re"
+        done
+    ) )
+fi
 
 run() {
     echo "Running: $*"
     "${@}"
 }
 
-run ${ATEST:-atest} $all_tests
+run ${ATEST:-atest} "${all_tests[@]}"

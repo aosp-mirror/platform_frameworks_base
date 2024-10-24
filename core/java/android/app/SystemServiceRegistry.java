@@ -17,6 +17,7 @@
 package android.app;
 
 import static android.app.appfunctions.flags.Flags.enableAppFunctionManager;
+import static android.server.Flags.removeGameManagerServiceFromWear;
 
 import android.accounts.AccountManager;
 import android.accounts.IAccountManager;
@@ -74,7 +75,7 @@ import android.companion.virtual.IVirtualDeviceManager;
 import android.companion.virtual.VirtualDeviceManager;
 import android.compat.Compatibility;
 import android.compat.annotation.ChangeId;
-import android.compat.annotation.EnabledSince;
+import android.compat.annotation.EnabledAfter;
 import android.content.ClipboardManager;
 import android.content.ContentCaptureOptions;
 import android.content.Context;
@@ -104,6 +105,7 @@ import android.debug.IAdbManager;
 import android.devicelock.DeviceLockFrameworkInitializer;
 import android.graphics.fonts.FontManager;
 import android.hardware.ConsumerIrManager;
+import android.hardware.ISensorPrivacyManager;
 import android.hardware.ISerialManager;
 import android.hardware.SensorManager;
 import android.hardware.SensorPrivacyManager;
@@ -169,8 +171,7 @@ import android.net.NetworkWatchlistManager;
 import android.net.PacProxyManager;
 import android.net.TetheringManager;
 import android.net.VpnManager;
-import android.net.vcn.IVcnManagementService;
-import android.net.vcn.VcnManager;
+import android.net.vcn.VcnFrameworkInitializer;
 import android.net.wifi.WifiFrameworkInitializer;
 import android.net.wifi.nl80211.WifiNl80211Manager;
 import android.net.wifi.sharedconnectivity.app.SharedConnectivityManager;
@@ -205,7 +206,6 @@ import android.os.ServiceManager;
 import android.os.ServiceManager.ServiceNotFoundException;
 import android.os.StatsFrameworkInitializer;
 import android.os.SystemConfigManager;
-import android.os.SystemProperties;
 import android.os.SystemUpdateManager;
 import android.os.SystemVibrator;
 import android.os.SystemVibratorManager;
@@ -227,12 +227,16 @@ import android.print.IPrintManager;
 import android.print.PrintManager;
 import android.provider.E2eeContactKeysManager;
 import android.provider.ProviderFrameworkInitializer;
+import android.ranging.RangingFrameworkInitializer;
 import android.safetycenter.SafetyCenterFrameworkInitializer;
 import android.scheduling.SchedulingFrameworkInitializer;
 import android.security.FileIntegrityManager;
 import android.security.IFileIntegrityService;
+import android.security.advancedprotection.AdvancedProtectionManager;
+import android.security.advancedprotection.IAdvancedProtectionService;
 import android.security.attestationverification.AttestationVerificationManager;
 import android.security.attestationverification.IAttestationVerificationManagerService;
+import android.security.keystore.KeyStoreManager;
 import android.service.oemlock.IOemLockService;
 import android.service.oemlock.OemLockManager;
 import android.service.persistentdata.IPersistentDataBlockService;
@@ -296,26 +300,14 @@ public final class SystemServiceRegistry {
     public static boolean sEnableServiceNotFoundWtf = false;
 
     /**
-     * Starting with {@link VANILLA_ICE_CREAM}, Telephony feature flags
-     * (e.g. {@link PackageManager#FEATURE_TELEPHONY_SUBSCRIPTION}) are being checked before
-     * returning managers that depend on them. If the feature is missing,
-     * {@link Context#getSystemService} will return null.
-     *
-     * This change is specific to VcnManager.
+     * After {@link Build.VERSION_CODES.VANILLA_ICE_CREAM}, Wear devices will be allowed to publish
+     * no {@link GameManager} instance. This is because the respective system service is no longer
+     * started for Wear devices given that the applications of the service do not currently apply to
+     * Wear.
      */
     @ChangeId
-    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.VANILLA_ICE_CREAM)
-    static final long ENABLE_CHECKING_TELEPHONY_FEATURES_FOR_VCN = 330902016;
-
-    /**
-     * The corresponding vendor API for Android V
-     *
-     * <p>Starting with Android V, the vendor API format has switched to YYYYMM.
-     *
-     * @see <a href="https://preview.source.android.com/docs/core/architecture/api-flags">Vendor API
-     *     level</a>
-     */
-    private static final int VENDOR_API_FOR_ANDROID_V = 202404;
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.VANILLA_ICE_CREAM)
+    static final long NULL_GAME_MANAGER_IN_WEAR = 340929737;
 
     // Service registry information.
     // This information is never changed once static initialization has completed.
@@ -483,22 +475,6 @@ public final class SystemServiceRegistry {
                 return new VpnManager(ctx, service);
             }});
 
-        registerService(Context.VCN_MANAGEMENT_SERVICE, VcnManager.class,
-                new CachedServiceFetcher<VcnManager>() {
-            @Override
-            public VcnManager createService(ContextImpl ctx) throws ServiceNotFoundException {
-                final String telephonyFeatureToCheck = getVcnFeatureDependency();
-
-                if (telephonyFeatureToCheck != null
-                    && !ctx.getPackageManager().hasSystemFeature(telephonyFeatureToCheck)) {
-                    return null;
-                }
-
-                IBinder b = ServiceManager.getService(Context.VCN_MANAGEMENT_SERVICE);
-                IVcnManagementService service = IVcnManagementService.Stub.asInterface(b);
-                return new VcnManager(ctx, service);
-            }});
-
         registerService(Context.COUNTRY_DETECTOR, CountryDetector.class,
                 new StaticServiceFetcher<CountryDetector>() {
             @Override
@@ -592,6 +568,11 @@ public final class SystemServiceRegistry {
             @Override
             public TextServicesManager createService(ContextImpl ctx)
                     throws ServiceNotFoundException {
+                 if (ctx.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WATCH)
+                        && ServiceManager.getService(Context.TEXT_SERVICES_MANAGER_SERVICE) == null
+                        && android.server.Flags.removeTextService()) {
+                    return null;
+                }
                 return TextServicesManager.createInstance(ctx);
             }});
 
@@ -707,8 +688,12 @@ public final class SystemServiceRegistry {
         registerService(Context.SENSOR_PRIVACY_SERVICE, SensorPrivacyManager.class,
                 new CachedServiceFetcher<SensorPrivacyManager>() {
                     @Override
-                    public SensorPrivacyManager createService(ContextImpl ctx) {
-                        return SensorPrivacyManager.getInstance(ctx);
+                    public SensorPrivacyManager createService(ContextImpl ctx)
+                            throws ServiceNotFoundException {
+                        IBinder b = ServiceManager.getServiceOrThrow(
+                                Context.SENSOR_PRIVACY_SERVICE);
+                        return SensorPrivacyManager.getInstance(
+                                ctx, ISensorPrivacyManager.Stub.asInterface(b));
                     }});
 
         registerService(Context.STATUS_BAR_SERVICE, StatusBarManager.class,
@@ -1614,8 +1599,24 @@ public final class SystemServiceRegistry {
                     @Override
                     public GameManager createService(ContextImpl ctx)
                             throws ServiceNotFoundException {
-                        return new GameManager(ctx.getOuterContext(),
-                                ctx.mMainThread.getHandler());
+                        final PackageManager pm = ctx.getPackageManager();
+                        final boolean isWatch = pm.hasSystemFeature(PackageManager.FEATURE_WATCH);
+                        final IBinder binder =
+                                // Allow a potentially absent GameManagerService only for
+                                // Wear devices. For non-Wear devices, throw a
+                                // ServiceNotFoundException when the service is missing.
+                                (removeGameManagerServiceFromWear() && isWatch)
+                                        ? ServiceManager.getService(Context.GAME_SERVICE)
+                                        : ServiceManager.getServiceOrThrow(Context.GAME_SERVICE);
+
+                        if (binder == null
+                                && Compatibility.isChangeEnabled(NULL_GAME_MANAGER_IN_WEAR)) {
+                            return null;
+                        }
+
+                        return new GameManager(
+                                ctx.getOuterContext(),
+                                IGameManagerService.Stub.asInterface(binder));
                     }
                 });
 
@@ -1657,11 +1658,20 @@ public final class SystemServiceRegistry {
                     @Override
                     public WearableSensingManager createService(ContextImpl ctx)
                             throws ServiceNotFoundException {
-                        IBinder iBinder = ServiceManager.getServiceOrThrow(
+                        IBinder iBinder = ServiceManager.getService(
                                 Context.WEARABLE_SENSING_SERVICE);
-                        IWearableSensingManager manager =
-                                IWearableSensingManager.Stub.asInterface(iBinder);
-                        return new WearableSensingManager(ctx.getOuterContext(), manager);
+                        if (iBinder != null) {
+                            IWearableSensingManager manager =
+                                    IWearableSensingManager.Stub.asInterface(iBinder);
+                            return new WearableSensingManager(ctx.getOuterContext(), manager);
+                        }
+                        // Wear intentionally removes the service, so do not throw a
+                        // ServiceNotFoundException when the service is not absent.
+                        if (ctx.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WATCH)
+                                && android.server.Flags.removeWearableSensingServiceFromWear()) {
+                            return null;
+                        }
+                        throw new ServiceNotFoundException(Context.WEARABLE_SENSING_SERVICE);
                     }});
 
         registerService(Context.ON_DEVICE_INTELLIGENCE_SERVICE, OnDeviceIntelligenceManager.class,
@@ -1696,6 +1706,17 @@ public final class SystemServiceRegistry {
                     }
                 });
 
+        registerService(Context.KEYSTORE_SERVICE, KeyStoreManager.class,
+                new StaticServiceFetcher<KeyStoreManager>() {
+                    @Override
+                    public KeyStoreManager createService()
+                            throws ServiceNotFoundException {
+                        if (!android.security.Flags.keystoreGrantApi()) {
+                            throw new ServiceNotFoundException("KeyStoreManager is not supported");
+                        }
+                        return KeyStoreManager.getInstance();
+                    }});
+
         registerService(Context.CONTACT_KEYS_SERVICE, E2eeContactKeysManager.class,
                 new CachedServiceFetcher<E2eeContactKeysManager>() {
                     @Override
@@ -1723,6 +1744,21 @@ public final class SystemServiceRegistry {
                         return new SupervisionManager(ctx, service);
                     }
                 });
+        if (android.security.Flags.aapmApi()) {
+            registerService(Context.ADVANCED_PROTECTION_SERVICE, AdvancedProtectionManager.class,
+                    new CachedServiceFetcher<>() {
+                        @Override
+                        public AdvancedProtectionManager createService(ContextImpl ctx)
+                                throws ServiceNotFoundException {
+                            IBinder iBinder = ServiceManager.getServiceOrThrow(
+                                    Context.ADVANCED_PROTECTION_SERVICE);
+                            IAdvancedProtectionService service =
+                                    IAdvancedProtectionService.Stub.asInterface(iBinder);
+                            return new AdvancedProtectionManager(service);
+                        }
+                    });
+        }
+
         // DO NOT do a flag check like this unless the flag is read-only.
         // (because this code is executed during preload in zygote.)
         // If the flag is mutable, the check should be inside CachedServiceFetcher.
@@ -1764,6 +1800,8 @@ public final class SystemServiceRegistry {
             OnDevicePersonalizationFrameworkInitializer.registerServiceWrappers();
             DeviceLockFrameworkInitializer.registerServiceWrappers();
             VirtualizationFrameworkInitializer.registerServiceWrappers();
+            VcnFrameworkInitializer.registerServiceWrappers();
+
             if (com.android.server.telecom.flags.Flags.telecomMainlineBlockedNumbersManager()) {
                 ProviderFrameworkInitializer.registerServiceWrappers();
             }
@@ -1778,6 +1816,12 @@ public final class SystemServiceRegistry {
             if (android.webkit.Flags.updateServiceIpcWrapper()) {
                 WebViewBootstrapFrameworkInitializer.registerServiceWrappers();
             }
+            // This is guarded by aconfig flag "com.android.ranging.flags.ranging_stack_enabled"
+            // when the build flag RELEASE_RANGING_STACK is enabled. When disabled, this calls the
+            // mock RangingFrameworkInitializer#registerServiceWrappers which is no-op. As the
+            // aconfig lib for ranging module is built only if  RELEASE_RANGING_STACK is enabled,
+            // flagcannot be added here.
+            RangingFrameworkInitializer.registerServiceWrappers();
         } finally {
             // If any of the above code throws, we're in a pretty bad shape and the process
             // will likely crash, but we'll reset it just in case there's an exception handler...
@@ -1819,30 +1863,6 @@ public final class SystemServiceRegistry {
         return manager.hasSystemFeature(featureName);
     }
 
-    // Suppressing AndroidFrameworkCompatChange because we're querying vendor
-    // partition SDK level, not application's target SDK version (which BTW we
-    // also check through Compatibility framework a few lines below).
-    @SuppressWarnings("AndroidFrameworkCompatChange")
-    @Nullable
-    private static String getVcnFeatureDependency() {
-        // Check SDK version of the client app. Apps targeting pre-V SDK might
-        // have not checked for existence of these features.
-        if (!Compatibility.isChangeEnabled(ENABLE_CHECKING_TELEPHONY_FEATURES_FOR_VCN)) {
-            return null;
-        }
-
-        // Check SDK version of the vendor partition. Pre-V devices might have
-        // incorrectly under-declared telephony features.
-        final int vendorApiLevel = SystemProperties.getInt(
-                "ro.vendor.api_level", Build.VERSION.DEVICE_INITIAL_SDK_INT);
-        if (vendorApiLevel < VENDOR_API_FOR_ANDROID_V) {
-            return PackageManager.FEATURE_TELEPHONY;
-        } else {
-            return PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION;
-        }
-
-    }
-
     /**
      * Gets a system service from a given context.
      * @hide
@@ -1879,6 +1899,12 @@ public final class SystemServiceRegistry {
                     break;
                 case Context.APPWIDGET_SERVICE:
                     if (!hasSystemFeatureOpportunistic(ctx, PackageManager.FEATURE_APP_WIDGETS)) {
+                        return null;
+                    }
+                    break;
+                case Context.TEXT_SERVICES_MANAGER_SERVICE:
+                    if (android.server.Flags.removeTextService()
+                            && hasSystemFeatureOpportunistic(ctx, PackageManager.FEATURE_WATCH)) {
                         return null;
                     }
                     break;

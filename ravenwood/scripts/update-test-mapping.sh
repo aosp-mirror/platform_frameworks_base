@@ -20,6 +20,9 @@
 
 set -e
 
+# Tests that shouldn't be in presubmit.
+EXEMPT='^(SystemUiRavenTests)$'
+
 main() {
     local script_name="${0##*/}"
     local script_dir="${0%/*}"
@@ -30,7 +33,7 @@ main() {
     local footer="$(sed -ne '/AUTO-GENERATED-END/,$p' "$test_mapping")"
 
     echo "Getting all tests"
-    local tests=( $("$script_dir/list-ravenwood-tests.sh") )
+    local tests=( $("$script_dir/list-ravenwood-tests.sh" | grep -vP "$EXEMPT") )
 
     local num_tests="${#tests[@]}"
 

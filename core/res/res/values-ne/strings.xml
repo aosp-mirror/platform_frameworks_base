@@ -1097,7 +1097,7 @@
     <string name="js_dialog_before_unload_positive_button" msgid="4274257182303565509">"यस पृष्ठलाई छोड्नुहोस्"</string>
     <string name="js_dialog_before_unload_negative_button" msgid="3873765747622415310">"यही पृष्ठमा रहनुहोस्"</string>
     <string name="js_dialog_before_unload" msgid="7213364985774778744">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nके तपाईं यो पेजबाट नेभिगेट गर्न चाहनु हुन्छ भन्ने निश्चत छ?"</string>
-    <string name="autofill_window_title" msgid="4379134104008111961">"<xliff:g id="SERVICENAME">%1$s</xliff:g> मार्फत स्वतः भरण गर्नुहोस्‌"</string>
+    <string name="autofill_window_title" msgid="4379134104008111961">"<xliff:g id="SERVICENAME">%1$s</xliff:g> मार्फत अटोफिल गर्नुहोस्‌"</string>
     <string name="permlab_setAlarm" msgid="1158001610254173567">"एउटा आलर्म सेट गर्नुहोस्"</string>
     <string name="permdesc_setAlarm" msgid="2185033720060109640">"स्थापना गरिएको सङ्केत घडी एपमा सङ्केत समय मिलाउन एपलाई अनुमति दिन्छ। केही सङ्केत घडी एपहरूले यो सुविधा कार्यान्वयन नगर्न सक्छन्।"</string>
     <string name="permlab_addVoicemail" msgid="4770245808840814471">"भ्वाइसमेल थप गर्नुहोस्"</string>
@@ -1184,7 +1184,7 @@
     <string name="selectTextMode" msgid="3225108910999318778">"पाठ चयन गर्नुहोस्"</string>
     <string name="undo" msgid="3175318090002654673">"अन्डू गर्नुहोस्"</string>
     <string name="redo" msgid="7231448494008532233">"रिडू गर्नुहोस्"</string>
-    <string name="autofill" msgid="511224882647795296">"स्वतः भरण"</string>
+    <string name="autofill" msgid="511224882647795296">"अटोफिल"</string>
     <string name="textSelectionCABTitle" msgid="5151441579532476940">"पाठ चयनता"</string>
     <string name="addToDictionary" msgid="8041821113480950096">"शब्दकोशमा थप्नुहोस्"</string>
     <string name="deleteText" msgid="4200807474529938112">"मेट्नुहोस्"</string>
@@ -1216,10 +1216,10 @@
     <string name="rating_label" msgid="1837085249662154601">"{rating,plural, =1{{max} मा एक तारा}other{{max} मा # तारा}}"</string>
     <string name="in_progress" msgid="2149208189184319441">"जारी छ"</string>
     <string name="whichApplication" msgid="5432266899591255759">"प्रयोग गरेर कारबाही पुरा गर्नुहोस्"</string>
-    <string name="whichApplicationNamed" msgid="6969946041713975681">"निम्न एपको प्रयोग गरी कारबाही पुरा गर्नुहोस्: %1$s"</string>
+    <string name="whichApplicationNamed" msgid="6969946041713975681">"%1$s प्रयोग गरी यो कार्य पूरा गर्नुहोस्"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"पूर्ण कारबाही"</string>
     <string name="whichViewApplication" msgid="5733194231473132945">"निम्नबाट खोल्नुहोस्"</string>
-    <string name="whichViewApplicationNamed" msgid="415164730629690105">"निम्न एपमा खोल्नुहोस्: %1$s"</string>
+    <string name="whichViewApplicationNamed" msgid="415164730629690105">"%1$s मार्फत खोल्नुहोस्"</string>
     <string name="whichViewApplicationLabel" msgid="7367556735684742409">"खोल्नुहोस्"</string>
     <string name="whichOpenHostLinksWith" msgid="7645631470199397485">"निम्नमार्फत <xliff:g id="HOST">%1$s</xliff:g> का लिंकहरू खोल्नुहोस्"</string>
     <string name="whichOpenLinksWith" msgid="1120936181362907258">"निम्नमार्फत लिंकहरू खोल्नुहोस्"</string>
@@ -1227,7 +1227,7 @@
     <string name="whichOpenHostLinksWithApp" msgid="2401668560768463004">"<xliff:g id="APPLICATION">%2$s</xliff:g> मार्फत <xliff:g id="HOST">%1$s</xliff:g> का लिंकहरू खोल्नुहोस्"</string>
     <string name="whichGiveAccessToApplicationLabel" msgid="7805857277166106236">"पहुँच दिनुहोस्"</string>
     <string name="whichEditApplication" msgid="6191568491456092812">"सँग सम्पादन गर्नुहोस्"</string>
-    <string name="whichEditApplicationNamed" msgid="8096494987978521514">"%1$s सँग सम्पादन गर्नुहोस्"</string>
+    <string name="whichEditApplicationNamed" msgid="8096494987978521514">"%1$s प्रयोग गरी सम्पादन गर्नुहोस्"</string>
     <string name="whichEditApplicationLabel" msgid="1463288652070140285">"सम्पादन गर्नुहोस्"</string>
     <string name="whichSendApplication" msgid="4143847974460792029">"सेयर गर्नुहोस्"</string>
     <string name="whichSendApplicationNamed" msgid="4470386782693183461">"%1$s सँग सेयर गर्नुहोस्"</string>
@@ -1746,7 +1746,7 @@
     <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"कुनै एपका कारण अनुमतिसम्बन्धी अनुरोध बुझ्न कठिनाइ भइरहेकाले तपाईंको जवाफको पुष्टि गर्न सकिएन।"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"कुनै सुविधा प्रयोग गर्न थाल्न उक्त सुविधामा ट्याप गर्नुहोस्:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"पहुँचको बटनमार्फत प्रयोग गर्न चाहेका सुविधाहरू छनौट गर्नुहोस्"</string>
-    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"भोल्युम कुञ्जीको सर्टकटमार्फत प्रयोग गर्न चाहेका सुविधाहरू छनौट गर्नुहोस्"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2245540598834891500">"भोल्युम बटनको सर्टकटमार्फत प्रयोग गर्न चाहेका सुविधाहरू छनौट गर्नुहोस्"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> निष्क्रिय पारिएको छ"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"सर्टकटहरू सम्पादन गर्नुहोस्"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"सम्पन्न भयो"</string>
@@ -1937,7 +1937,7 @@
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"हरेक हप्तादिनको राति"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"शनिवार"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"कार्यक्रम"</string>
-    <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"निदाएका बेला"</string>
+    <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"शयन"</string>
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"<xliff:g id="APP_NAME">%1$s</xliff:g> ले व्यवस्थापन गरेको"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"अन छ"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"अफ छ"</string>
@@ -2010,6 +2010,7 @@
     <string name="set_up_screen_lock_title" msgid="8346083801616474030">"स्क्रिन लक सेटअप गर्नुहोस्"</string>
     <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"स्क्रिन लक सेटअप गर्नुहोस्"</string>
     <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"निजी स्पेस प्रयोग गर्न यो डिभाइसमा स्क्रिन लक सेटअप गर्नुहोस्"</string>
+    <string name="private_space_set_up_screen_lock_for_reset" msgid="7817091386408432097">"निजी स्पेस मेटाउन यो डिभाइसमा स्क्रिन लक सेटअप गर्नुहोस्"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"एप उपलब्ध छैन"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> अहिले उपलब्ध छैन।"</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> उपलब्ध छैन"</string>
@@ -2128,11 +2129,6 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"कल तथा सूचनाहरू आउँदा कम्पन हुने छ"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"कल तथा सूचनाहरूलाई म्युट गरिने छ"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"प्रणालीसम्बन्धी परिवर्तनहरू"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"बाधा नपुऱ्याउनुहोस्"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"नयाँ: बाधा नपुर्‍याउनुहोस् नामक मोडले सूचनाहरू लुकाइरहेको छ"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"थप जान्न र परिवर्तन गर्न ट्याप गर्नुहोस्।"</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"बाधा नपुर्‍याउनुहोस् मोड परिवर्तन भएको छ"</string>
-    <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"रोक लगाइएका कुराहरू जाँच गर्न ट्याप गर्नुहोस्‌।"</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"सूचनाका सेटिङको समीक्षा गर्नुहोस्"</string>
     <string name="review_notification_settings_text" msgid="5916244866751849279">"Android १३ मा तपाईंले अनुमति दिनुभएका खण्डमा मात्र तपाईंले इन्स्टल गर्नुभएका एपले सूचना पठाउन सक्छन्। यसअघि इन्स्टल गरिसकिएका एपका हकमा यो अनुमति परिवर्तन गर्न ट्याप गर्नुहोस्।"</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"मलाई पछि स्मरण गराइयोस्"</string>
@@ -2409,7 +2405,7 @@
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"किबोर्डहरू हेर्न ट्याप गर्नुहोस्"</string>
     <string name="profile_label_private" msgid="6463418670715290696">"निजी"</string>
     <string name="profile_label_clone" msgid="769106052210954285">"क्लोन"</string>
-    <string name="profile_label_work" msgid="3495359133038584618">"कार्य प्रोफाइल"</string>
+    <string name="profile_label_work" msgid="3495359133038584618">"कार्य"</string>
     <string name="profile_label_work_2" msgid="4691533661598632135">"कार्य प्रोफाइल २"</string>
     <string name="profile_label_work_3" msgid="4834572253956798917">"कार्य प्रोफाइल ३"</string>
     <string name="profile_label_test" msgid="9168641926186071947">"परीक्षण"</string>

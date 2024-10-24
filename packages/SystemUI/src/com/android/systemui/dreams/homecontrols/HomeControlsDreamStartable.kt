@@ -25,7 +25,7 @@ import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dreams.homecontrols.domain.interactor.HomeControlsComponentInteractor
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 class HomeControlsDreamStartable
 @Inject

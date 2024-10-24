@@ -70,7 +70,7 @@ class InterruptionHandlerTest {
                         object : InterruptionHandler {
                             override fun onInterruption(
                                 interrupted: TransitionState.Transition.ChangeScene,
-                                newTargetScene: SceneKey
+                                newTargetScene: SceneKey,
                             ): InterruptionResult {
                                 return InterruptionResult(
                                     animateFrom = interrupted.currentScene,
@@ -88,7 +88,7 @@ class InterruptionHandlerTest {
             .comparingElementsUsing(FromToCurrentTriple)
             .containsExactly(
                 // B to C.
-                Triple(SceneB, SceneC, SceneC),
+                Triple(SceneB, SceneC, SceneC)
             )
             .inOrder()
     }
@@ -105,7 +105,7 @@ class InterruptionHandlerTest {
                         object : InterruptionHandler {
                             override fun onInterruption(
                                 interrupted: TransitionState.Transition.ChangeScene,
-                                newTargetScene: SceneKey
+                                newTargetScene: SceneKey,
                             ): InterruptionResult {
                                 return InterruptionResult(
                                     animateFrom =
@@ -217,7 +217,7 @@ class InterruptionHandlerTest {
                 { transition: TransitionState.Transition.ChangeScene? ->
                     Triple(transition?.fromScene, transition?.toScene, transition?.currentScene)
                 },
-                "(from, to, current) triple"
+                "(from, to, current) triple",
             )
     }
 }

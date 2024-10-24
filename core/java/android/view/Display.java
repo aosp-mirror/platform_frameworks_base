@@ -20,6 +20,9 @@ import static android.Manifest.permission.CONFIGURE_DISPLAY_COLOR_MODE;
 import static android.Manifest.permission.CONTROL_DISPLAY_BRIGHTNESS;
 import static android.hardware.flags.Flags.FLAG_OVERLAYPROPERTIES_CLASS_API;
 
+import static com.android.server.display.feature.flags.Flags.FLAG_HIGHEST_HDR_SDR_RATIO_API;
+import static com.android.server.display.feature.flags.Flags.FLAG_ENABLE_HAS_ARR_SUPPORT;
+
 import android.Manifest;
 import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
@@ -445,6 +448,13 @@ public final class Display {
     @UnsupportedAppUsage
     @TestApi
     public static final int TYPE_VIRTUAL = 5;
+
+    /**
+     * The maximum display type value.
+     * Helpful to get all possible display values.
+     * @hide
+     */
+    public static final int TYPE_MAX = TYPE_VIRTUAL;
 
     /**
      * Display state: The display state is unknown.
@@ -1257,6 +1267,18 @@ public final class Display {
     }
 
     /**
+     * Returns whether display supports adaptive refresh rate or not.
+     */
+    // TODO(b/372526856) Add a link to the documentation for ARR.
+    @FlaggedApi(FLAG_ENABLE_HAS_ARR_SUPPORT)
+    public boolean hasArrSupport() {
+        synchronized (mLock) {
+            updateDisplayInfoLocked();
+            return mDisplayInfo.hasArrSupport;
+        }
+    }
+
+    /**
      * <p> Returns true if the connected display can be switched into a mode with minimal
      * post processing. </p>
      *
@@ -1339,7 +1361,7 @@ public final class Display {
     public HdrCapabilities getHdrCapabilities() {
         synchronized (mLock) {
             updateDisplayInfoLocked();
-            if (mDisplayInfo.hdrCapabilities == null) {
+            if (mDisplayInfo.hdrCapabilities == null || mDisplayInfo.isForceSdr) {
                 return null;
             }
             int[] supportedHdrTypes;
@@ -1361,6 +1383,7 @@ public final class Display {
                     supportedHdrTypes[index++] = enabledType;
                 }
             }
+
             return new HdrCapabilities(supportedHdrTypes,
                     mDisplayInfo.hdrCapabilities.mMaxLuminance,
                     mDisplayInfo.hdrCapabilities.mMaxAverageLuminance,
@@ -1496,6 +1519,15 @@ public final class Display {
         if (toRemove != null) {
             mGlobal.unregisterDisplayListener(toRemove);
         }
+    }
+
+    /**
+     * @return The highest possible HDR/SDR ratio. If {@link #isHdrSdrRatioAvailable()} returns
+     * false, this method returns 1.
+     */
+    @FlaggedApi(FLAG_HIGHEST_HDR_SDR_RATIO_API)
+    public float getHighestHdrSdrRatio() {
+        return mGlobal.getHighestHdrSdrRatio(mDisplayId);
     }
 
     /**
@@ -2076,6 +2108,7 @@ public final class Display {
     /**
      * @hide
      */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static String stateToString(int state) {
         switch (state) {
             case STATE_UNKNOWN:
@@ -2098,6 +2131,7 @@ public final class Display {
     }
 
     /** @hide */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static String stateReasonToString(@StateReason int reason) {
         switch (reason) {
             case STATE_REASON_UNKNOWN:

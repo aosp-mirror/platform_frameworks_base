@@ -28,7 +28,7 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
-import com.android.systemui.statusbar.window.StatusBarWindowController;
+import com.android.systemui.statusbar.window.StatusBarWindowControllerStore;
 
 import javax.inject.Inject;
 
@@ -38,7 +38,7 @@ import javax.inject.Inject;
 @SysUISingleton
 public class StatusBarHeadsUpChangeListener implements OnHeadsUpChangedListener, CoreStartable {
     private final NotificationShadeWindowController mNotificationShadeWindowController;
-    private final StatusBarWindowController mStatusBarWindowController;
+    private final StatusBarWindowControllerStore mStatusBarWindowControllerStore;
     private final ShadeViewController mShadeViewController;
     private final PanelExpansionInteractor mPanelExpansionInteractor;
     private final NotificationStackScrollLayoutController mNsslController;
@@ -50,7 +50,7 @@ public class StatusBarHeadsUpChangeListener implements OnHeadsUpChangedListener,
     @Inject
     StatusBarHeadsUpChangeListener(
             NotificationShadeWindowController notificationShadeWindowController,
-            StatusBarWindowController statusBarWindowController,
+            StatusBarWindowControllerStore statusBarWindowControllerStore,
             ShadeViewController shadeViewController,
             PanelExpansionInteractor panelExpansionInteractor,
             NotificationStackScrollLayoutController nsslController,
@@ -59,7 +59,7 @@ public class StatusBarHeadsUpChangeListener implements OnHeadsUpChangedListener,
             StatusBarStateController statusBarStateController,
             NotificationRemoteInputManager notificationRemoteInputManager) {
         mNotificationShadeWindowController = notificationShadeWindowController;
-        mStatusBarWindowController = statusBarWindowController;
+        mStatusBarWindowControllerStore = statusBarWindowControllerStore;
         mShadeViewController = shadeViewController;
         mPanelExpansionInteractor = panelExpansionInteractor;
         mNsslController = nsslController;
@@ -78,7 +78,7 @@ public class StatusBarHeadsUpChangeListener implements OnHeadsUpChangedListener,
     public void onHeadsUpPinnedModeChanged(boolean inPinnedMode) {
         if (inPinnedMode) {
             mNotificationShadeWindowController.setHeadsUpShowing(true);
-            mStatusBarWindowController.setForceStatusBarVisible(true);
+            mStatusBarWindowControllerStore.getDefaultDisplay().setForceStatusBarVisible(true);
             if (mPanelExpansionInteractor.isFullyCollapsed()) {
                 mShadeViewController.updateTouchableRegion();
             }
@@ -93,7 +93,9 @@ public class StatusBarHeadsUpChangeListener implements OnHeadsUpChangedListener,
                 // open artificially.
                 mNotificationShadeWindowController.setHeadsUpShowing(false);
                 if (bypassKeyguard) {
-                    mStatusBarWindowController.setForceStatusBarVisible(false);
+                    mStatusBarWindowControllerStore
+                            .getDefaultDisplay()
+                            .setForceStatusBarVisible(false);
                 }
             } else {
                 // we need to keep the panel open artificially, let's wait until the

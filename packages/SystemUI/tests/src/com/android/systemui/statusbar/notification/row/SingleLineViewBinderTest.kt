@@ -29,12 +29,13 @@ import com.android.systemui.statusbar.notification.row.SingleLineViewInflater.in
 import com.android.systemui.statusbar.notification.row.SingleLineViewInflater.inflatePublicSingleLineView
 import com.android.systemui.statusbar.notification.row.shared.AsyncHybridViewInflation
 import com.android.systemui.statusbar.notification.row.ui.viewbinder.SingleLineViewBinder
-import com.android.systemui.util.mockito.mock
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.mock
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
@@ -69,7 +70,7 @@ class SingleLineViewBinderTest : SysuiTestCase() {
                 reinflateFlags = FLAG_CONTENT_VIEW_SINGLE_LINE,
                 entry = row.entry,
                 context = context,
-                logger = mock()
+                logger = mock(),
             )
 
         val publicView =
@@ -78,7 +79,7 @@ class SingleLineViewBinderTest : SysuiTestCase() {
                 reinflateFlags = FLAG_CONTENT_VIEW_PUBLIC_SINGLE_LINE,
                 entry = row.entry,
                 context = context,
-                logger = mock()
+                logger = mock(),
             )
         assertNotNull(publicView)
 
@@ -114,7 +115,7 @@ class SingleLineViewBinderTest : SysuiTestCase() {
                 .addMessage(
                     "How about lunch?",
                     System.currentTimeMillis(),
-                    Person.Builder().setName("user2").build()
+                    Person.Builder().setName("user2").build(),
                 )
                 .setGroupConversation(true)
         notificationBuilder.setStyle(style).setShortcutId(SHORTCUT_ID)
@@ -127,7 +128,7 @@ class SingleLineViewBinderTest : SysuiTestCase() {
                 reinflateFlags = FLAG_CONTENT_VIEW_SINGLE_LINE,
                 entry = row.entry,
                 context = context,
-                logger = mock()
+                logger = mock(),
             )
                 as HybridConversationNotificationView
 
@@ -137,7 +138,7 @@ class SingleLineViewBinderTest : SysuiTestCase() {
                 reinflateFlags = FLAG_CONTENT_VIEW_PUBLIC_SINGLE_LINE,
                 entry = row.entry,
                 context = context,
-                logger = mock()
+                logger = mock(),
             )
                 as HybridConversationNotificationView
         assertNotNull(publicView)
@@ -150,10 +151,7 @@ class SingleLineViewBinderTest : SysuiTestCase() {
                 systemUiContext = context,
             )
         // WHEN: binds the view
-        SingleLineViewBinder.bind(
-            viewModel,
-            view,
-        )
+        SingleLineViewBinder.bind(viewModel, view)
 
         // THEN: the single-line conversation view should be bound with view model's corresponding
         // fields
@@ -161,8 +159,53 @@ class SingleLineViewBinderTest : SysuiTestCase() {
         assertEquals(viewModel.contentText, view.textView.text)
         assertEquals(
             viewModel.conversationData?.conversationSenderName,
-            view.conversationSenderNameView.text
+            view.conversationSenderNameView.text,
         )
+    }
+
+    @Test
+    @EnableFlags(AsyncHybridViewInflation.FLAG_NAME)
+    fun bindConversationSingleLineView_nonConversationViewModel() {
+        // GIVEN: a ConversationSingleLineView, and a nonConversationViewModel
+        val style = Notification.BigTextStyle().bigText(CONTENT_TEXT)
+        notificationBuilder.setStyle(style)
+        val notification = notificationBuilder.build()
+        val row: ExpandableNotificationRow = helper.createRow(notification)
+
+        val view =
+            inflatePrivateSingleLineView(
+                isConversation = true,
+                reinflateFlags = FLAG_CONTENT_VIEW_SINGLE_LINE,
+                entry = row.entry,
+                context = context,
+                logger = mock(),
+            )
+
+        val publicView =
+            inflatePublicSingleLineView(
+                isConversation = true,
+                reinflateFlags = FLAG_CONTENT_VIEW_PUBLIC_SINGLE_LINE,
+                entry = row.entry,
+                context = context,
+                logger = mock(),
+            )
+        assertNotNull(publicView)
+
+        val viewModel =
+            SingleLineViewInflater.inflateSingleLineViewModel(
+                notification = notification,
+                messagingStyle = null,
+                builder = notificationBuilder,
+                systemUiContext = context,
+            )
+        // WHEN: binds the view with the view model
+        SingleLineViewBinder.bind(viewModel, view)
+
+        // THEN: the single-line view should be bound with view model's corresponding
+        // fields as a normal non-conversation single-line view
+        assertEquals(viewModel.titleText, view?.titleView?.text)
+        assertEquals(viewModel.contentText, view?.textView?.text)
+        assertNull(viewModel.conversationData)
     }
 
     private companion object {

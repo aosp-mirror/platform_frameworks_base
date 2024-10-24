@@ -30,7 +30,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /**
  * Logic around the keyguard being enabled/disabled, per [KeyguardService]. If the keyguard is not
@@ -76,7 +76,7 @@ constructor(
             .filter { enabled -> !enabled }
             .sampleCombine(
                 internalTransitionInteractor.currentTransitionInfoInternal,
-                biometricSettingsRepository.isCurrentUserInLockdown
+                biometricSettingsRepository.isCurrentUserInLockdown,
             )
             .map { (_, transitionInfo, inLockdown) ->
                 // ...we hide the keyguard, if it's showing and we're not in lockdown. In that case,
@@ -91,12 +91,18 @@ constructor(
          */
         scope.launch {
             if (!SceneContainerFlag.isEnabled) {
-                showKeyguardWhenReenabled
-                    .filter { shouldDismiss -> shouldDismiss }
-                    .collect {
-                        keyguardDismissTransitionInteractor.startDismissKeyguardTransition(
-                            "keyguard disabled"
-                        )
+                repository.isKeyguardEnabled
+                    .filter { enabled -> !enabled }
+                    .sampleCombine(
+                        biometricSettingsRepository.isCurrentUserInLockdown,
+                        internalTransitionInteractor.currentTransitionInfoInternal,
+                    )
+                    .collect { (_, inLockdown, currentTransitionInfo) ->
+                        if (currentTransitionInfo.to != KeyguardState.GONE && !inLockdown) {
+                            keyguardDismissTransitionInteractor.startDismissKeyguardTransition(
+                                "keyguard disabled"
+                            )
+                        }
                     }
             }
         }

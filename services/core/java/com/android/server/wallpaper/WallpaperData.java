@@ -78,10 +78,13 @@ class WallpaperData {
     /**
      * The component name of the currently set live wallpaper.
      */
-    ComponentName wallpaperComponent;
+    private ComponentName mWallpaperComponent;
 
+    // TODO(b/347235611) Remove this field
     /**
      * The component name of the wallpaper that should be set next.
+     *
+     * @deprecated
      */
     ComponentName nextWallpaperComponent;
 
@@ -192,7 +195,7 @@ class WallpaperData {
      */
     WallpaperData(WallpaperData source) {
         this.userId = source.userId;
-        this.wallpaperComponent = source.wallpaperComponent;
+        this.mWallpaperComponent = source.mWallpaperComponent;
         this.mWhich = source.mWhich;
         this.wallpaperId = source.wallpaperId;
         this.cropHint.set(source.cropHint);
@@ -225,6 +228,14 @@ class WallpaperData {
             map.put(userId, result);
         }
         return result;
+    }
+
+    ComponentName getComponent() {
+        return mWallpaperComponent;
+    }
+
+    void setComponent(ComponentName componentName) {
+        this.mWallpaperComponent = componentName;
     }
 
     @Override

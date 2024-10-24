@@ -64,13 +64,36 @@ public interface UriGrantsManagerInternal {
             String targetPkg, int targetUserId);
 
     /**
-     * Same as {@link #checkGrantUriPermissionFromIntent(Intent, int, String, int)}, but with an
-     * extra parameter {@code requireContentUriPermissionFromCaller}, which is the value from {@link
-     * android.R.attr#requireContentUriPermissionFromCaller} attribute.
+     * Same as {@link #checkGrantUriPermissionFromIntent(Intent, int, String, int)}, but with:
+     * - {@code requireContentUriPermissionFromCaller}, which is the value from {@link
+     *   android.R.attr#requireContentUriPermissionFromCaller} attribute.
+     * - {@code requestHashCode}, which is required to differentiate activity launches for logging
+     *   ContentOrFileUriEventReported message.
      */
     NeededUriGrants checkGrantUriPermissionFromIntent(Intent intent, int callingUid,
             String targetPkg, int targetUserId,
-            @RequiredContentUriPermission int requireContentUriPermissionFromCaller);
+            @RequiredContentUriPermission int requireContentUriPermissionFromCaller,
+            int requestHashCode);
+
+    /**
+     * Notify that an activity launch request has been completed and perform the following actions:
+     * - If the activity launch was unsuccessful, then clean up all the collected the content URIs
+     *   that were passed during that launch.
+     * - If the activity launch was successful, then log cog content URIs that were passed during
+     *   that launch. Specifically:
+     *   - The caller didn't have read permission to them.
+     *   - The activity's {@link android.R.attr#requireContentUriPermissionFromCaller} was set to
+     *     "none".
+     *
+     * <p>Note that:
+     * - The API has to be called after
+     *   {@link #checkGrantUriPermissionFromIntent(Intent, int, String, int, int, int)} was called.
+     * - The API is not idempotent, i.e. content URIs may be logged only once because the API clears
+     *   the content URIs after logging.
+     */
+    void notifyActivityLaunchRequestCompleted(int requestHashCode, boolean isSuccessfulLaunch,
+            String intentAction, int callingUid, String callingActivityName, int calleeUid,
+            String calleeActivityName, boolean isStartActivityForResult);
 
     /**
      * Extend a previously calculated set of permissions grants to the given

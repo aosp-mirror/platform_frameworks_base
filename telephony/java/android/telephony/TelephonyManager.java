@@ -23,6 +23,7 @@ import static android.provider.Telephony.Carriers.INVALID_APN_ID;
 import static com.android.internal.util.Preconditions.checkNotNull;
 
 import android.Manifest;
+import android.annotation.BoolRes;
 import android.annotation.BytesLong;
 import android.annotation.CallbackExecutor;
 import android.annotation.CurrentTimeMillisLong;
@@ -2126,7 +2127,6 @@ public class TelephonyManager {
      * <p>On some devices, this settings activity may not exist. Callers should ensure that this
      * case is appropriately handled.
      */
-    @FlaggedApi(Flags.FLAG_RESET_MOBILE_NETWORK_SETTINGS)
     @SdkConstant(SdkConstant.SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_RESET_MOBILE_NETWORK_SETTINGS =
             "android.telephony.action.RESET_MOBILE_NETWORK_SETTINGS";
@@ -2297,13 +2297,9 @@ public class TelephonyManager {
      *
      * See {@link #getImei(int)} for details on the required permissions and behavior
      * when the caller does not hold sufficient permissions.
-     *
-     * @throws UnsupportedOperationException If the device does not have
-     *          {@link PackageManager#FEATURE_TELEPHONY_GSM}.
      */
     @SuppressAutoDoc // No support for device / profile owner or carrier privileges (b/72967236).
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
-    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_GSM)
     public String getImei() {
         return getImei(getSlotIndex());
     }
@@ -2342,13 +2338,9 @@ public class TelephonyManager {
      * </ul>
      *
      * @param slotIndex of which IMEI is returned
-     *
-     * @throws UnsupportedOperationException If the device does not have
-     *          {@link PackageManager#FEATURE_TELEPHONY_GSM}.
      */
     @SuppressAutoDoc // No support for device / profile owner or carrier privileges (b/72967236).
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
-    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_GSM)
     public String getImei(int slotIndex) {
         ITelephony telephony = getITelephony();
         if (telephony == null) return null;
@@ -2365,11 +2357,7 @@ public class TelephonyManager {
     /**
      * Returns the Type Allocation Code from the IMEI. Return null if Type Allocation Code is not
      * available.
-     *
-     * @throws UnsupportedOperationException If the device does not have
-     *          {@link PackageManager#FEATURE_TELEPHONY_GSM}.
      */
-    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_GSM)
     @Nullable
     public String getTypeAllocationCode() {
         return getTypeAllocationCode(getSlotIndex());
@@ -2380,11 +2368,7 @@ public class TelephonyManager {
      * available.
      *
      * @param slotIndex of which Type Allocation Code is returned
-     *
-     * @throws UnsupportedOperationException If the device does not have
-     *          {@link PackageManager#FEATURE_TELEPHONY_GSM}.
      */
-    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_GSM)
     @Nullable
     public String getTypeAllocationCode(int slotIndex) {
         ITelephony telephony = getITelephony();
@@ -2756,7 +2740,7 @@ public class TelephonyManager {
 
     /**
      * Returns a constant indicating the device phone type.  This
-     * indicates the type of radio used to transmit voice calls.
+     * indicates the type of radio used to transmit voice/data calls.
      *
      * @see #PHONE_TYPE_NONE
      * @see #PHONE_TYPE_GSM
@@ -2768,7 +2752,7 @@ public class TelephonyManager {
      */
     @RequiresFeature(PackageManager.FEATURE_TELEPHONY)
     public int getPhoneType() {
-        if (!isVoiceCapable()) {
+        if (!isVoiceCapable() && !isDataCapable()) {
             return PHONE_TYPE_NONE;
         }
         return getCurrentPhoneType();
@@ -6886,7 +6870,26 @@ public class TelephonyManager {
         }
     }
 
-    // TODO(b/316183370): replace all @code with @link in javadoc after feature is released
+    // Suppressing AndroidFrameworkCompatChange because we're querying vendor
+    // partition SDK level, not application's target SDK version.
+    @SuppressWarnings("AndroidFrameworkCompatChange")
+    private boolean hasCapability(@NonNull String feature, @BoolRes int legacySetting) {
+        if (mContext == null) return true;
+
+        if (mContext.getPackageManager().hasSystemFeature(feature)) return true;
+
+        // Check SDK version of the vendor partition.
+        final int vendorApiLevel = SystemProperties.getInt(
+                "ro.vendor.api_level", Build.VERSION.DEVICE_INITIAL_SDK_INT);
+        // Devices shipped with 2024Q2 or later are required to declare FEATURE_TELEPHONY_*
+        // for individual sub-features (calling, messaging, data), so there's no need to check
+        // the legacy setting.
+        if (vendorApiLevel < Build.VENDOR_API_2024_Q2) {
+            return mContext.getResources().getBoolean(legacySetting);
+        }
+        return false;
+    }
+
     /**
      * @return true if the current device is "voice capable".
      * <p>
@@ -6900,16 +6903,14 @@ public class TelephonyManager {
      * PackageManager.FEATURE_TELEPHONY system feature, which is available
      * on any device with a telephony radio, even if the device is
      * data-only.
-     * @deprecated Replaced by {@code #isDeviceVoiceCapable()}. Starting from Android 15, voice
+     * @deprecated Replaced by {@link #isDeviceVoiceCapable()}. Starting from Android 15, voice
      * capability may also be overridden by carriers for a given subscription. For voice capable
-     * device (when {@code #isDeviceVoiceCapable} return {@code true}), caller should check for
-     * subscription-level voice capability as well. See {@code #isDeviceVoiceCapable} for details.
+     * device (when {@link #isDeviceVoiceCapable} return {@code true}), caller should check for
+     * subscription-level voice capability as well. See {@link #isDeviceVoiceCapable} for details.
      */
-    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_CALLING)
     @Deprecated
     public boolean isVoiceCapable() {
-        if (mContext == null) return true;
-        return mContext.getResources().getBoolean(
+        return hasCapability(PackageManager.FEATURE_TELEPHONY_CALLING,
                 com.android.internal.R.bool.config_voice_capable);
     }
 
@@ -6927,13 +6928,11 @@ public class TelephonyManager {
      * <p>
      * Starting from Android 15, voice capability may also be overridden by carrier for a given
      * subscription on a voice capable device. To check if a subscription is "voice capable",
-     * call method {@code SubscriptionInfo#getServiceCapabilities()} and check if
-     * {@code SubscriptionManager#SERVICE_CAPABILITY_VOICE} is included.
+     * call method {@link SubscriptionInfo#getServiceCapabilities()} and check if
+     * {@link SubscriptionManager#SERVICE_CAPABILITY_VOICE} is included.
      *
      * @see SubscriptionInfo#getServiceCapabilities()
      */
-    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_CALLING)
-    @FlaggedApi(Flags.FLAG_DATA_ONLY_CELLULAR_SERVICE)
     public boolean isDeviceVoiceCapable() {
         return isVoiceCapable();
     }
@@ -6946,15 +6945,14 @@ public class TelephonyManager {
      * <p>
      * Note: Voicemail waiting sms, cell broadcasting sms, and MMS are
      *       disabled when device doesn't support sms.
-     * @deprecated Replaced by {@code #isDeviceSmsCapable()}. Starting from Android 15, SMS
+     * @deprecated Replaced by {@link #isDeviceSmsCapable()}. Starting from Android 15, SMS
      * capability may also be overridden by carriers for a given subscription. For SMS capable
-     * device (when {@code #isDeviceSmsCapable} return {@code true}), caller should check for
-     * subscription-level SMS capability as well. See {@code #isDeviceSmsCapable} for details.
+     * device (when {@link #isDeviceSmsCapable} return {@code true}), caller should check for
+     * subscription-level SMS capability as well. See {@link #isDeviceSmsCapable} for details.
      */
-    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_MESSAGING)
+    @Deprecated
     public boolean isSmsCapable() {
-        if (mContext == null) return true;
-        return mContext.getResources().getBoolean(
+        return hasCapability(PackageManager.FEATURE_TELEPHONY_MESSAGING,
                 com.android.internal.R.bool.config_sms_capable);
     }
 
@@ -6969,13 +6967,11 @@ public class TelephonyManager {
      * <p>
      * Starting from Android 15, SMS capability may also be overridden by carriers for a given
      * subscription on an SMS capable device. To check if a subscription is "SMS capable",
-     * call method {@code SubscriptionInfo#getServiceCapabilities()} and check if
-     * {@code SubscriptionManager#SERVICE_CAPABILITY_SMS} is included.
+     * call method {@link SubscriptionInfo#getServiceCapabilities()} and check if
+     * {@link SubscriptionManager#SERVICE_CAPABILITY_SMS} is included.
      *
      * @see SubscriptionInfo#getServiceCapabilities()
      */
-    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_MESSAGING)
-    @FlaggedApi(Flags.FLAG_DATA_ONLY_CELLULAR_SERVICE)
     public boolean isDeviceSmsCapable() {
         return isSmsCapable();
     }
@@ -8782,13 +8778,14 @@ public class TelephonyManager {
      *   Authentication error, no memory space available in EFMUK
      *
      * @throws UnsupportedOperationException If the device does not have
-     *          {@link PackageManager#FEATURE_TELEPHONY_SUBSCRIPTION}.
+     *          {@link PackageManager#FEATURE_TELEPHONY_SUBSCRIPTION} or doesn't support given
+     *          authType.
      */
     // TODO(b/73660190): This should probably require MODIFY_PHONE_STATE, not
     // READ_PRIVILEGED_PHONE_STATE. It certainly shouldn't reference the permission in Javadoc since
     // it's not public API.
     @RequiresFeature(PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION)
-    public String getIccAuthentication(int appType,@AuthType int authType, String data) {
+    public String getIccAuthentication(int appType, @AuthType int authType, String data) {
         return getIccAuthentication(getSubId(), appType, authType, data);
     }
 
@@ -8813,10 +8810,14 @@ public class TelephonyManager {
      *   Key freshness failure
      *   Authentication error, no memory space available
      *   Authentication error, no memory space available in EFMUK
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_SUBSCRIPTION} or doesn't support given
+     *          authType.
      * @hide
      */
     @UnsupportedAppUsage
-    public String getIccAuthentication(int subId, int appType,@AuthType int authType, String data) {
+    public String getIccAuthentication(int subId, int appType, @AuthType int authType,
+            String data) {
         try {
             IPhoneSubInfo info = getSubscriberInfoService();
             if (info == null)
@@ -10598,20 +10599,31 @@ public class TelephonyManager {
         return null;
     }
 
-    /** @hide */
+    /**
+     * Get the names of packages with carrier privileges for the current subscription.
+     *
+     * @throws UnsupportedOperationException If the device does not have {@link
+     *     PackageManager#FEATURE_TELEPHONY_SUBSCRIPTION}
+     * @hide
+     */
+    @FlaggedApi(android.os.Flags.FLAG_MAINLINE_VCN_PLATFORM_API)
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
-    public List<String> getPackagesWithCarrierPrivileges() {
+    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION)
+    @NonNull
+    public Set<String> getPackagesWithCarrierPrivileges() {
+        final Set<String> result = new HashSet<>();
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                return telephony.getPackagesWithCarrierPrivileges(getPhoneId());
+                result.addAll(telephony.getPackagesWithCarrierPrivileges(getPhoneId()));
             }
         } catch (RemoteException ex) {
             Rlog.e(TAG, "getPackagesWithCarrierPrivileges RemoteException", ex);
         } catch (NullPointerException ex) {
             Rlog.e(TAG, "getPackagesWithCarrierPrivileges NPE", ex);
         }
-        return Collections.EMPTY_LIST;
+        return result;
     }
 
     /**
@@ -14542,10 +14554,8 @@ public class TelephonyManager {
      * data connections over the telephony network.
      * <p>
      */
-    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_DATA)
     public boolean isDataCapable() {
-        if (mContext == null) return true;
-        return mContext.getResources().getBoolean(
+        return hasCapability(PackageManager.FEATURE_TELEPHONY_DATA,
                 com.android.internal.R.bool.config_mobile_data_capable);
     }
 
@@ -19172,15 +19182,19 @@ public class TelephonyManager {
     public @interface EmergencyCallbackModeType {}
 
     /**
-     * The callback mode is due to emergency call.
+     * The emergency callback mode is due to emergency call.
      * @hide
      */
+    @FlaggedApi(Flags.FLAG_EMERGENCY_CALLBACK_MODE_NOTIFICATION)
+    @SystemApi
     public static final int EMERGENCY_CALLBACK_MODE_CALL = 1;
 
     /**
-     * The callback mode is due to emergency SMS.
+     * The emergency callback mode is due to emergency SMS.
      * @hide
      */
+    @FlaggedApi(Flags.FLAG_EMERGENCY_CALLBACK_MODE_NOTIFICATION)
+    @SystemApi
     public static final int EMERGENCY_CALLBACK_MODE_SMS = 2;
 
     /**
@@ -19201,45 +19215,64 @@ public class TelephonyManager {
     public @interface EmergencyCallbackModeStopReason {}
 
     /**
-     * unknown reason.
+     * Indicates that emergency callback mode has been stopped for an unknown reason.
      * @hide
      */
+    @FlaggedApi(Flags.FLAG_EMERGENCY_CALLBACK_MODE_NOTIFICATION)
+    @SystemApi
     public static final int STOP_REASON_UNKNOWN = 0;
 
     /**
-     * The call back mode is exited due to a new normal call is originated.
+     * Indicates that emergency callback mode has been stopped because a new non-emergency call was
+     * initiated.
      * @hide
      */
+    @FlaggedApi(Flags.FLAG_EMERGENCY_CALLBACK_MODE_NOTIFICATION)
+    @SystemApi
     public static final int STOP_REASON_OUTGOING_NORMAL_CALL_INITIATED = 1;
 
     /**
-     * The call back mode is exited due to a new normal SMS is originated.
+     * Indicates that emergency callback mode has been stopped because a new non-emergency SMS was
+     * sent.
      * @hide
      */
+    @FlaggedApi(Flags.FLAG_EMERGENCY_CALLBACK_MODE_NOTIFICATION)
+    @SystemApi
     public static final int STOP_REASON_NORMAL_SMS_SENT = 2;
 
     /**
-     * The call back mode is exited due to a new emergency call is originated.
+     * Indicates that emergency callback mode has been stopped because a new outgoing emergency
+     * call was initiated.
      * @hide
      */
+    @FlaggedApi(Flags.FLAG_EMERGENCY_CALLBACK_MODE_NOTIFICATION)
+    @SystemApi
     public static final int STOP_REASON_OUTGOING_EMERGENCY_CALL_INITIATED = 3;
 
     /**
-     * The call back mode is exited due to a new emergency SMS is originated.
+     * Indicates that emergency callback mode has been stopped because a new emergency SMS was sent.
      * @hide
      */
+    @FlaggedApi(Flags.FLAG_EMERGENCY_CALLBACK_MODE_NOTIFICATION)
+    @SystemApi
     public static final int STOP_REASON_EMERGENCY_SMS_SENT = 4;
 
     /**
-     * The call back mode is exited due to timer expiry.
+     * Indicates that emergency callback mode has been stopped due to the emergency callback mode
+     * timer expiry.
      * @hide
      */
+    @FlaggedApi(Flags.FLAG_EMERGENCY_CALLBACK_MODE_NOTIFICATION)
+    @SystemApi
     public static final int STOP_REASON_TIMER_EXPIRED = 5;
 
     /**
-     * The call back mode is exited due to user action.
+     * Indicates that emergency callback mode has been stopped due to user ending the emergency
+     * mode by clicking the notification.
      * @hide
      */
+    @FlaggedApi(Flags.FLAG_EMERGENCY_CALLBACK_MODE_NOTIFICATION)
+    @SystemApi
     public static final int STOP_REASON_USER_ACTION = 6;
 
     /**
@@ -19354,12 +19387,9 @@ public class TelephonyManager {
      * </ul>
      *
      * @return Primary IMEI of type string
-     * @throws UnsupportedOperationException If the device does not have
-     *          {@link PackageManager#FEATURE_TELEPHONY_GSM}.
      * @throws SecurityException if the caller does not have the required permission/privileges
      */
     @NonNull
-    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_GSM)
     public String getPrimaryImei() {
         try {
             ITelephony telephony = getITelephony();
@@ -19411,6 +19441,50 @@ public class TelephonyManager {
                 return "PRESENT";
             default:
                 return "UNKNOWN(" + state + ")";
+        }
+    }
+
+    /**
+     * This API can be used by only CTS to override the Euicc UI component.
+     *
+     * @param componentName ui component to be launched for testing. {@code null} to reset.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public void setTestEuiccUiComponent(@Nullable ComponentName componentName) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony == null) {
+                Rlog.e(TAG, "setTestEuiccUiComponent(): ITelephony instance is NULL");
+                throw new IllegalStateException("Telephony service not available.");
+            }
+            telephony.setTestEuiccUiComponent(componentName);
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "setTestEuiccUiComponent() RemoteException : " + ex);
+            throw ex.rethrowAsRuntimeException();
+        }
+    }
+
+    /**
+     * This API can be used by only CTS to retrieve the Euicc UI component.
+     *
+     * @return The Euicc UI component for testing. {@code null} if not available.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @Nullable
+    public ComponentName getTestEuiccUiComponent() {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony == null) {
+                Rlog.e(TAG, "getTestEuiccUiComponent(): ITelephony instance is NULL");
+                throw new IllegalStateException("Telephony service not available.");
+            }
+            return telephony.getTestEuiccUiComponent();
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "getTestEuiccUiComponent() RemoteException : " + ex);
+            throw ex.rethrowAsRuntimeException();
         }
     }
 }

@@ -35,9 +35,7 @@ internal fun PredictiveBackHandler(
     layoutImpl: SceneTransitionLayoutImpl,
     result: UserActionResult?,
 ) {
-    PredictiveBackHandler(
-        enabled = result != null,
-    ) { events: Flow<BackEventCompat> ->
+    PredictiveBackHandler(enabled = result != null) { events: Flow<BackEventCompat> ->
         if (result == null) {
             // Note: We have to collect progress otherwise PredictiveBackHandler will throw.
             events.first()

@@ -25,9 +25,9 @@ android_test {
     name: "LocalizationTest",
     srcs: ["java/**/*.kt"],
     libs: [
-        "android.test.runner",
-        "android.test.base",
-        "android.test.mock",
+        "android.test.runner.stubs.system",
+        "android.test.base.stubs.system",
+        "android.test.mock.stubs.system",
     ],
     static_libs: [
         "androidx.test.core",

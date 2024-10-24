@@ -25,12 +25,14 @@ import android.os.UserHandle
 sealed interface CommunalWidgetContentModel {
     val appWidgetId: Int
     val rank: Int
+    val spanY: Int
 
     /** Widget is ready to display */
     data class Available(
         override val appWidgetId: Int,
         val providerInfo: AppWidgetProviderInfo,
         override val rank: Int,
+        override val spanY: Int,
     ) : CommunalWidgetContentModel
 
     /** Widget is pending installation */
@@ -40,5 +42,6 @@ sealed interface CommunalWidgetContentModel {
         val componentName: ComponentName,
         val icon: Bitmap?,
         val user: UserHandle,
+        override val spanY: Int,
     ) : CommunalWidgetContentModel
 }

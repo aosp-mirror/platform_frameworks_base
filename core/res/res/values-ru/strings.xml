@@ -1748,7 +1748,7 @@
     <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"Невозможно принять ваш ответ, поскольку запрос разрешения скрыт другим приложением."</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Выберите, какую функцию использовать:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Выберите функции, которые будут запускаться с помощью кнопки специальных возможностей"</string>
-    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Выберите функции, которые будут запускаться с помощью кнопки регулировки громкости"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2245540598834891500">"Выберите функции, которые вы хотите запускать кнопками регулировки громкости"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"Сервис \"<xliff:g id="SERVICE_NAME">%s</xliff:g>\" отключен."</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Изменить ярлыки"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Готово"</string>
@@ -2012,6 +2012,7 @@
     <string name="set_up_screen_lock_title" msgid="8346083801616474030">"Настройте блокировку экрана"</string>
     <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Настроить блокировку экрана"</string>
     <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"Чтобы использовать частное пространство, настройте блокировку экрана на этом устройстве."</string>
+    <string name="private_space_set_up_screen_lock_for_reset" msgid="7817091386408432097">"Чтобы удалить частное пространство, настройте блокировку экрана на этом устройстве."</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Приложение недоступно"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"Приложение \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" сейчас недоступно."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"Недоступно: <xliff:g id="ACTIVITY">%1$s</xliff:g>"</string>
@@ -2130,11 +2131,6 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Для звонков и уведомлений включен вибросигнал."</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Для звонков и уведомлений отключен звук."</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Системные изменения"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Не беспокоить"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Теперь в режиме \"Не беспокоить\" уведомления не приходят"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Нажмите, чтобы узнать больше и изменить настройки."</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Настройки режима \"Не беспокоить\" изменены"</string>
-    <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Нажмите, чтобы проверить настройки."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Проверьте настройки уведомлений"</string>
     <string name="review_notification_settings_text" msgid="5916244866751849279">"В Android 13 и более поздних версий приложения могут отправлять вам уведомления только в том случае, если вы предоставили им такое разрешение. Нажмите, чтобы настроить разрешения для установленных приложений."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Напомнить позже"</string>

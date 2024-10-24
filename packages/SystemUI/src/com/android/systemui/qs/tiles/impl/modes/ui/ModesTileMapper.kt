@@ -36,9 +36,7 @@ constructor(
 ) : QSTileDataToStateMapper<ModesTileModel> {
     override fun map(config: QSTileConfig, data: ModesTileModel): QSTileState =
         QSTileState.build(resources, theme, config.uiConfig) {
-            if (!android.app.Flags.modesUiIcons()) {
-                iconRes = data.iconResId
-            }
+            iconRes = data.iconResId
             icon = { data.icon }
             activationState =
                 if (data.isActivated) {

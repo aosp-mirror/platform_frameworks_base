@@ -1,0 +1,10 @@
+package: "android.app"
+container: "system"
+
+flag {
+     namespace: "system_performance"
+     name: "report_postgc_memory_metrics"
+     is_exported: false
+     description: "Controls whether to report memory metrics post GC cleanup"
+     bug: "331243037"
+}

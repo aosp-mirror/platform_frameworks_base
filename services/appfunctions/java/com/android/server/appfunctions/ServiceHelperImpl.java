@@ -38,23 +38,23 @@ class ServiceHelperImpl implements ServiceHelper {
     }
 
     @Override
-    public Intent resolveAppFunctionService(@NonNull String targetPackageName,
-                                            @NonNull UserHandle targetUser) {
+    public Intent resolveAppFunctionService(
+            @NonNull String targetPackageName, @NonNull UserHandle targetUser) {
         Intent serviceIntent = new Intent(AppFunctionService.SERVICE_INTERFACE);
         serviceIntent.setPackage(targetPackageName);
-        ResolveInfo resolveInfo = mContext.createContextAsUser(targetUser, /* flags= */ 0)
-                .getPackageManager().resolveService(serviceIntent, 0);
+        ResolveInfo resolveInfo =
+                mContext.createContextAsUser(targetUser, /* flags= */ 0)
+                        .getPackageManager()
+                        .resolveService(serviceIntent, 0);
         if (resolveInfo == null || resolveInfo.serviceInfo == null) {
             return null;
         }
 
         ServiceInfo serviceInfo = resolveInfo.serviceInfo;
-        if (!Manifest.permission.BIND_APP_FUNCTION_SERVICE.equals(
-                serviceInfo.permission)) {
+        if (!Manifest.permission.BIND_APP_FUNCTION_SERVICE.equals(serviceInfo.permission)) {
             return null;
         }
-        serviceIntent.setComponent(
-                new ComponentName(serviceInfo.packageName, serviceInfo.name));
+        serviceIntent.setComponent(new ComponentName(serviceInfo.packageName, serviceInfo.name));
 
         return serviceIntent;
     }

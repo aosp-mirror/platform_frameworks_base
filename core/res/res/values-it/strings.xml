@@ -969,7 +969,7 @@
     <string name="relationTypeChild" msgid="9076258911292693601">"Figlio"</string>
     <string name="relationTypeDomesticPartner" msgid="7825306887697559238">"Convivente"</string>
     <string name="relationTypeFather" msgid="3856225062864790596">"Padre"</string>
-    <string name="relationTypeFriend" msgid="3192092625893980574">"Persona amica"</string>
+    <string name="relationTypeFriend" msgid="3192092625893980574">"Amico"</string>
     <string name="relationTypeManager" msgid="2272860813153171857">"Dirigente"</string>
     <string name="relationTypeMother" msgid="2331762740982699460">"Madre"</string>
     <string name="relationTypeParent" msgid="4177920938333039882">"Genitore"</string>
@@ -1747,7 +1747,7 @@
     <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"Un\'app nasconde la tua richiesta di autorizzazione, per cui non abbiamo potuto verificare la tua risposta."</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Tocca una funzionalità per iniziare a usarla:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Scegli le funzionalità da usare con il pulsante Accessibilità"</string>
-    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Scegli le funzionalità da usare con la scorciatoia dei tasti del volume"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2245540598834891500">"Scegli le funzionalità da usare con la scorciatoia tasti del volume"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"Il servizio <xliff:g id="SERVICE_NAME">%s</xliff:g> è stato disattivato"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Modifica scorciatoie"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Fine"</string>
@@ -2011,6 +2011,7 @@
     <string name="set_up_screen_lock_title" msgid="8346083801616474030">"Imposta un blocco schermo"</string>
     <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Imposta il blocco schermo"</string>
     <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"Per utilizzare il tuo spazio privato, imposta un blocco schermo sul dispositivo"</string>
+    <string name="private_space_set_up_screen_lock_for_reset" msgid="7817091386408432097">"Per eliminare lo spazio privato, imposta un blocco schermo sul dispositivo"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"L\'app non è disponibile"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"L\'app <xliff:g id="APP_NAME">%1$s</xliff:g> non è al momento disponibile."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> non disponibile"</string>
@@ -2129,11 +2130,6 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"La vibrazione sarà attiva per chiamate e notifiche"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"L\'audio di chiamate e notifiche sarà disattivato"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Modifiche al sistema"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Non disturbare"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Novità: la modalità Non disturbare nasconde le notifiche"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Tocca per avere ulteriori informazioni e modificare."</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"L\'impostazione Non disturbare è cambiata"</string>
-    <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Tocca per controllare le notifiche bloccate."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Controlla le impostazioni di notifica"</string>
     <string name="review_notification_settings_text" msgid="5916244866751849279">"A partire da Android 13, le app che installi devono avere la tua autorizzazione per poter inviare notifiche. Tocca per cambiare questa autorizzazione per le app esistenti."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Ricordamelo dopo"</string>

@@ -16,6 +16,9 @@
 
 package android.window;
 
+import static com.android.window.flags.Flags.predictiveBackPrioritySystemNavigationObserver;
+import static com.android.window.flags.Flags.predictiveBackTimestampApi;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Activity;
@@ -103,6 +106,9 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
     public final TreeMap<Integer, ArrayList<OnBackInvokedCallback>>
             mOnBackInvokedCallbacks = new TreeMap<>();
 
+    @VisibleForTesting
+    public OnBackInvokedCallback mSystemNavigationObserverCallback = null;
+
     private Checker mChecker;
     private final Object mLock = new Object();
     // The threshold for back swipe full progress.
@@ -119,7 +125,7 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
         if (!isBackGestureInProgress() || ev == null || ev.getAction() != MotionEvent.ACTION_MOVE) {
             return;
         }
-        mTouchTracker.update(ev.getX(), ev.getY(), Float.NaN, Float.NaN);
+        mTouchTracker.update(ev.getX(), ev.getY());
         if (mTouchTracker.shouldUpdateStartLocation()) {
             // Reset the start location on the first event after starting back, so that
             // the beginning of the animation feels smooth.
@@ -170,6 +176,20 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
         }
     }
 
+    private void registerSystemNavigationObserverCallback(@NonNull OnBackInvokedCallback callback) {
+        synchronized (mLock) {
+            // If callback has already been added as regular callback, remove it.
+            if (mAllCallbacks.containsKey(callback)) {
+                if (DEBUG) {
+                    Log.i(TAG, "Callback already added. Removing and re-adding it as "
+                            + "system-navigation-observer-callback.");
+                }
+                removeCallbackInternal(callback);
+            }
+            mSystemNavigationObserverCallback = callback;
+        }
+    }
+
     /**
      * Register a callback bypassing platform checks. This is used to register compatibility
      * callbacks.
@@ -180,6 +200,12 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
             if (mImeDispatcher != null) {
                 mImeDispatcher.registerOnBackInvokedCallback(priority, callback);
                 return;
+            }
+            if (predictiveBackPrioritySystemNavigationObserver()) {
+                if (priority == PRIORITY_SYSTEM_NAVIGATION_OBSERVER) {
+                    registerSystemNavigationObserverCallback(callback);
+                    return;
+                }
             }
             if (callback instanceof ImeOnBackInvokedDispatcher.ImeOnBackInvokedCallback) {
                 if (callback instanceof ImeOnBackInvokedDispatcher.DefaultImeOnBackAnimationCallback
@@ -202,6 +228,13 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
                 Integer prevPriority = mAllCallbacks.get(callback);
                 mOnBackInvokedCallbacks.get(prevPriority).remove(callback);
             }
+            if (mSystemNavigationObserverCallback == callback) {
+                mSystemNavigationObserverCallback = null;
+                if (DEBUG) {
+                    Log.i(TAG, "Callback already registered (as system-navigation-observer "
+                            + "callback). Removing and re-adding it.");
+                }
+            }
 
             OnBackInvokedCallback previousTopCallback = getTopCallback();
             callbacks.add(callback);
@@ -221,6 +254,10 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
                 mImeDispatcher.unregisterOnBackInvokedCallback(callback);
                 return;
             }
+            if (mSystemNavigationObserverCallback == callback) {
+                mSystemNavigationObserverCallback = null;
+                return;
+            }
             if (callback instanceof ImeOnBackInvokedDispatcher.DefaultImeOnBackAnimationCallback) {
                 callback = mImeBackAnimationController;
             }
@@ -230,23 +267,29 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
                 }
                 return;
             }
-            OnBackInvokedCallback previousTopCallback = getTopCallback();
-            Integer priority = mAllCallbacks.get(callback);
-            ArrayList<OnBackInvokedCallback> callbacks = mOnBackInvokedCallbacks.get(priority);
-            callbacks.remove(callback);
-            if (callbacks.isEmpty()) {
-                mOnBackInvokedCallbacks.remove(priority);
-            }
-            mAllCallbacks.remove(callback);
-            // Re-populate the top callback to WM if the removed callback was previously the top
-            // one.
-            if (previousTopCallback == callback) {
-                // We should call onBackCancelled() when an active callback is removed from
-                // dispatcher.
-                sendCancelledIfInProgress(callback);
-                mHandler.post(mProgressAnimator::reset);
-                setTopOnBackInvokedCallback(getTopCallback());
-            }
+            removeCallbackInternal(callback);
+        }
+    }
+
+    private void removeCallbackInternal(@NonNull OnBackInvokedCallback callback) {
+        OnBackInvokedCallback previousTopCallback = getTopCallback();
+        Integer priority = mAllCallbacks.get(callback);
+        ArrayList<OnBackInvokedCallback> callbacks = mOnBackInvokedCallbacks.get(priority);
+        callbacks.remove(callback);
+        if (callbacks.isEmpty()) {
+            mOnBackInvokedCallbacks.remove(priority);
+        }
+        mAllCallbacks.remove(callback);
+        // Re-populate the top callback to WM if the removed callback was previously the top
+        // one.
+        if (previousTopCallback == callback) {
+            // We should call onBackCancelled() when an active callback is removed from
+            // dispatcher.
+            mProgressAnimator.removeOnBackCancelledFinishCallback();
+            mProgressAnimator.removeOnBackInvokedFinishCallback();
+            sendCancelledIfInProgress(callback);
+            mHandler.post(mProgressAnimator::reset);
+            setTopOnBackInvokedCallback(getTopCallback());
         }
     }
 
@@ -302,6 +345,7 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
             mHandler.post(mProgressAnimator::reset);
             mAllCallbacks.clear();
             mOnBackInvokedCallbacks.clear();
+            mSystemNavigationObserverCallback = null;
         }
     }
 
@@ -310,6 +354,25 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
             return mViewRoot.injectBackKeyEvents(/*preImeOnly*/ true);
         } else {
             return false;
+        }
+    }
+
+    /**
+     * Tries to call {@link OnBackInvokedCallback#onBackInvoked} on the system navigation observer
+     * callback (if one is set and if the top-most regular callback has
+     * {@link OnBackInvokedDispatcher#PRIORITY_SYSTEM})
+     */
+    public void tryInvokeSystemNavigationObserverCallback() {
+        OnBackInvokedCallback topCallback = getTopCallback();
+        Integer callbackPriority = mAllCallbacks.getOrDefault(topCallback, null);
+        if (callbackPriority != null && callbackPriority == PRIORITY_SYSTEM) {
+            invokeSystemNavigationObserverCallback();
+        }
+    }
+
+    private void invokeSystemNavigationObserverCallback() {
+        if (mSystemNavigationObserverCallback != null) {
+            mSystemNavigationObserverCallback.onBackInvoked();
         }
     }
 
@@ -322,7 +385,9 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
             if (callback != null) {
                 int priority = mAllCallbacks.get(callback);
                 final IOnBackInvokedCallback iCallback = new OnBackInvokedCallbackWrapper(callback,
-                        mTouchTracker, mProgressAnimator, mHandler, this::callOnKeyPreIme);
+                        mTouchTracker, mProgressAnimator, mHandler, this::callOnKeyPreIme,
+                        this::invokeSystemNavigationObserverCallback,
+                        /*isSystemCallback*/ priority == PRIORITY_SYSTEM);
                 callbackInfo = new OnBackInvokedCallbackInfo(
                         iCallback,
                         priority,
@@ -414,18 +479,26 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
         private final Handler mHandler;
         @NonNull
         private final BooleanSupplier mOnKeyPreIme;
+        @NonNull
+        private final Runnable mSystemNavigationObserverCallbackRunnable;
+        private final boolean mIsSystemCallback;
 
         OnBackInvokedCallbackWrapper(
                 @NonNull OnBackInvokedCallback callback,
                 @NonNull BackTouchTracker touchTracker,
                 @NonNull BackProgressAnimator progressAnimator,
                 @NonNull Handler handler,
-                @NonNull BooleanSupplier onKeyPreIme) {
+                @NonNull BooleanSupplier onKeyPreIme,
+                @NonNull Runnable systemNavigationObserverCallbackRunnable,
+                boolean isSystemCallback
+        ) {
             mCallback = new WeakReference<>(callback);
             mTouchTracker = touchTracker;
             mProgressAnimator = progressAnimator;
             mHandler = handler;
             mOnKeyPreIme = onKeyPreIme;
+            mSystemNavigationObserverCallbackRunnable = systemNavigationObserverCallbackRunnable;
+            mIsSystemCallback = isSystemCallback;
         }
 
         @Override
@@ -491,10 +564,19 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
                 }
                 OnBackAnimationCallback animationCallback = getBackAnimationCallback();
                 if (animationCallback != null
-                        && !(callback instanceof ImeBackAnimationController)) {
-                    mProgressAnimator.onBackInvoked(callback::onBackInvoked);
+                        && !(callback instanceof ImeBackAnimationController)
+                        && !predictiveBackTimestampApi()) {
+                    mProgressAnimator.onBackInvoked(() -> {
+                        if (mIsSystemCallback) {
+                            mSystemNavigationObserverCallbackRunnable.run();
+                        }
+                        callback.onBackInvoked();
+                    });
                 } else {
                     mProgressAnimator.reset();
+                    if (mIsSystemCallback) {
+                        mSystemNavigationObserverCallbackRunnable.run();
+                    }
                     callback.onBackInvoked();
                 }
             });
@@ -595,9 +677,18 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
                                 + " application manifest.");
                 return false;
             }
-            if (priority < 0) {
-                throw new IllegalArgumentException("Application registered OnBackInvokedCallback "
-                        + "cannot have negative priority. Priority: " + priority);
+            if (predictiveBackPrioritySystemNavigationObserver()) {
+                if (priority < 0 && priority != PRIORITY_SYSTEM_NAVIGATION_OBSERVER) {
+                    throw new IllegalArgumentException("Application registered "
+                            + "OnBackInvokedCallback cannot have negative priority. Priority: "
+                            + priority);
+                }
+            } else {
+                if (priority < 0) {
+                    throw new IllegalArgumentException("Application registered "
+                            + "OnBackInvokedCallback cannot have negative priority. Priority: "
+                            + priority);
+                }
             }
             Objects.requireNonNull(callback);
             return true;

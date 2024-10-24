@@ -24,6 +24,7 @@ import static junit.framework.Assert.assertTrue;
 import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertThrows;
 
+import android.hardware.vibrator.IVibrator;
 import android.os.Parcel;
 import android.os.VibrationEffect;
 import android.os.VibratorInfo;
@@ -114,39 +115,82 @@ public class PrebakedSegmentTest {
 
     @Test
     public void testDuration() {
-        assertEquals(-1, new PrebakedSegment(
-                VibrationEffect.EFFECT_CLICK, true, VibrationEffect.EFFECT_STRENGTH_MEDIUM)
-                .getDuration());
-        assertEquals(-1, new PrebakedSegment(
-                VibrationEffect.EFFECT_TICK, true, VibrationEffect.EFFECT_STRENGTH_MEDIUM)
-                .getDuration());
-        assertEquals(-1, new PrebakedSegment(
-                VibrationEffect.EFFECT_DOUBLE_CLICK, true, VibrationEffect.EFFECT_STRENGTH_MEDIUM)
-                .getDuration());
-        assertEquals(-1, new PrebakedSegment(
-                VibrationEffect.EFFECT_THUD, true, VibrationEffect.EFFECT_STRENGTH_MEDIUM)
+        assertEquals(-1, createSegmentWithFallback(VibrationEffect.EFFECT_CLICK).getDuration());
+        assertEquals(-1, createSegmentWithFallback(VibrationEffect.EFFECT_TICK).getDuration());
+        assertEquals(-1, createSegmentWithFallback(VibrationEffect.EFFECT_THUD).getDuration());
+        assertEquals(-1, createSegmentWithFallback(VibrationEffect.EFFECT_DOUBLE_CLICK)
                 .getDuration());
     }
 
     @Test
+    public void testDuration_withVibratorSupportingPrimitives_returnsPrimitiveDuration() {
+        int tickDuration = 5;
+        int clickDuration = 10;
+        int thudDuration = 15;
+
+        VibratorInfo vibratorInfo = new VibratorInfo.Builder(/* id= */ 1)
+                .setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS)
+                .setSupportedPrimitive(VibrationEffect.Composition.PRIMITIVE_TICK, tickDuration)
+                .setSupportedPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, clickDuration)
+                .setSupportedPrimitive(VibrationEffect.Composition.PRIMITIVE_THUD, thudDuration)
+                .build();
+
+        assertEquals(5, createSegmentWithFallback(VibrationEffect.EFFECT_TEXTURE_TICK)
+                .getDuration(vibratorInfo));
+        assertEquals(10, createSegmentWithFallback(VibrationEffect.EFFECT_TICK)
+                .getDuration(vibratorInfo));
+        assertEquals(10, createSegmentWithFallback(VibrationEffect.EFFECT_CLICK)
+                .getDuration(vibratorInfo));
+        assertEquals(10, createSegmentWithFallback(VibrationEffect.EFFECT_HEAVY_CLICK)
+                .getDuration(vibratorInfo));
+        assertEquals(20, createSegmentWithFallback(VibrationEffect.EFFECT_DOUBLE_CLICK)
+                .getDuration(vibratorInfo));
+        assertEquals(15, createSegmentWithFallback(VibrationEffect.EFFECT_THUD)
+                .getDuration(vibratorInfo));
+
+        // Unknown effects
+        assertEquals(-1, createSegmentWithFallback(VibrationEffect.EFFECT_POP)
+                .getDuration(vibratorInfo));
+        assertEquals(-1, createSegmentWithFallback(VibrationEffect.RINGTONES[0])
+                .getDuration(vibratorInfo));
+    }
+
+    @Test
+    public void testDuration_withVibratorNotSupportingPrimitives_returnsUnknown() {
+        VibratorInfo vibratorInfo = createVibratorInfoWithSupportedEffects(
+                VibrationEffect.EFFECT_CLICK, VibrationEffect.EFFECT_POP);
+
+        assertEquals(-1, createSegmentWithFallback(VibrationEffect.EFFECT_TEXTURE_TICK)
+                .getDuration(vibratorInfo));
+        assertEquals(-1, createSegmentWithFallback(VibrationEffect.EFFECT_TICK)
+                .getDuration(vibratorInfo));
+        assertEquals(-1, createSegmentWithFallback(VibrationEffect.EFFECT_CLICK)
+                .getDuration(vibratorInfo));
+        assertEquals(-1, createSegmentWithFallback(VibrationEffect.EFFECT_HEAVY_CLICK)
+                .getDuration(vibratorInfo));
+        assertEquals(-1, createSegmentWithFallback(VibrationEffect.EFFECT_DOUBLE_CLICK)
+                .getDuration(vibratorInfo));
+        assertEquals(-1, createSegmentWithFallback(VibrationEffect.EFFECT_THUD)
+                .getDuration(vibratorInfo));
+        assertEquals(-1, createSegmentWithFallback(VibrationEffect.EFFECT_POP)
+                .getDuration(vibratorInfo));
+        assertEquals(-1, createSegmentWithFallback(VibrationEffect.RINGTONES[0])
+                .getDuration(vibratorInfo));
+    }
+
+    @Test
     public void testIsHapticFeedbackCandidate_prebakedConstants_areCandidates() {
-        assertTrue(new PrebakedSegment(
-                VibrationEffect.EFFECT_CLICK, true, VibrationEffect.EFFECT_STRENGTH_MEDIUM)
+        assertTrue(createSegmentWithFallback(VibrationEffect.EFFECT_CLICK)
                 .isHapticFeedbackCandidate());
-        assertTrue(new PrebakedSegment(
-                VibrationEffect.EFFECT_TICK, true, VibrationEffect.EFFECT_STRENGTH_MEDIUM)
+        assertTrue(createSegmentWithFallback(VibrationEffect.EFFECT_TICK)
                 .isHapticFeedbackCandidate());
-        assertTrue(new PrebakedSegment(
-                VibrationEffect.EFFECT_DOUBLE_CLICK, true, VibrationEffect.EFFECT_STRENGTH_MEDIUM)
+        assertTrue(createSegmentWithFallback(VibrationEffect.EFFECT_DOUBLE_CLICK)
                 .isHapticFeedbackCandidate());
-        assertTrue(new PrebakedSegment(
-                VibrationEffect.EFFECT_HEAVY_CLICK, true, VibrationEffect.EFFECT_STRENGTH_MEDIUM)
+        assertTrue(createSegmentWithFallback(VibrationEffect.EFFECT_HEAVY_CLICK)
                 .isHapticFeedbackCandidate());
-        assertTrue(new PrebakedSegment(
-                VibrationEffect.EFFECT_THUD, true, VibrationEffect.EFFECT_STRENGTH_MEDIUM)
+        assertTrue(createSegmentWithFallback(VibrationEffect.EFFECT_THUD)
                 .isHapticFeedbackCandidate());
-        assertTrue(new PrebakedSegment(
-                VibrationEffect.EFFECT_TEXTURE_TICK, true, VibrationEffect.EFFECT_STRENGTH_MEDIUM)
+        assertTrue(createSegmentWithFallback(VibrationEffect.EFFECT_TEXTURE_TICK)
                 .isHapticFeedbackCandidate());
     }
 
@@ -271,8 +315,7 @@ public class PrebakedSegmentTest {
 
     @Test
     public void testIsHapticFeedbackCandidate_prebakedRingtones_notCandidates() {
-        assertFalse(new PrebakedSegment(
-                VibrationEffect.RINGTONES[1], true, VibrationEffect.EFFECT_STRENGTH_MEDIUM)
+        assertFalse(createSegmentWithFallback(VibrationEffect.RINGTONES[1])
                 .isHapticFeedbackCandidate());
     }
 

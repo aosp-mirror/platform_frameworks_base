@@ -19,7 +19,6 @@ package com.android.systemui.screenshot;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.view.WindowManager.LayoutParams.TYPE_SCREENSHOT;
 
-import static com.android.systemui.Flags.screenshotSaveImageExporter;
 import static com.android.systemui.screenshot.LogConfig.DEBUG_ANIM;
 import static com.android.systemui.screenshot.LogConfig.DEBUG_CALLBACK;
 import static com.android.systemui.screenshot.LogConfig.DEBUG_INPUT;
@@ -133,7 +132,6 @@ public class LegacyScreenshotController implements InteractiveScreenshotHandler 
     private final MessageContainerController mMessageContainerController;
     private final AnnouncementResolver mAnnouncementResolver;
     private Bitmap mScreenBitmap;
-    private SaveImageInBackgroundTask mSaveInBgTask;
     private boolean mScreenshotTakenInPortrait;
     private boolean mAttachRequested;
     private boolean mDetachRequested;
@@ -257,12 +255,6 @@ public class LegacyScreenshotController implements InteractiveScreenshotHandler 
         Assert.isMainThread();
 
         mCurrentRequestCallback = requestCallback;
-        if (screenshot.getType() == WindowManager.TAKE_SCREENSHOT_FULLSCREEN
-                && screenshot.getBitmap() == null) {
-            Rect bounds = getFullScreenRect();
-            screenshot.setBitmap(mImageCapture.captureDisplay(mDisplay.getDisplayId(), bounds));
-            screenshot.setScreenBounds(bounds);
-        }
 
         if (screenshot.getBitmap() == null) {
             Log.e(TAG, "handleScreenshot: Screenshot bitmap was null");
@@ -303,7 +295,7 @@ public class LegacyScreenshotController implements InteractiveScreenshotHandler 
         saveScreenshotInBackground(screenshot, requestId, finisher, result -> {
             if (result.uri != null) {
                 ScreenshotSavedResult savedScreenshot = new ScreenshotSavedResult(
-                        result.uri, screenshot.getUserOrDefault(), result.timestamp);
+                        result.uri, screenshot.getUserHandle(), result.timestamp);
                 mActionsController.setCompletedScreenshot(requestId, savedScreenshot);
             }
         });
@@ -321,28 +313,31 @@ public class LegacyScreenshotController implements InteractiveScreenshotHandler 
         setWindowFocusable(true);
         mViewProxy.requestFocus();
 
-        enqueueScrollCaptureRequest(requestId, screenshot.getUserHandle());
+        if (screenshot.getType() != WindowManager.TAKE_SCREENSHOT_PROVIDED_IMAGE) {
+            enqueueScrollCaptureRequest(requestId, screenshot.getUserHandle());
+        }
 
         attachWindow();
 
+        Rect bounds = screenshot.getOriginalScreenBounds();
         boolean showFlash;
         if (screenshot.getType() == WindowManager.TAKE_SCREENSHOT_PROVIDED_IMAGE) {
-            if (screenshot.getScreenBounds() != null
-                    && aspectRatiosMatch(screenshot.getBitmap(), screenshot.getInsets(),
-                    screenshot.getScreenBounds())) {
+            if (bounds != null
+                    && aspectRatiosMatch(screenshot.getBitmap(), screenshot.getOriginalInsets(),
+                    bounds)) {
                 showFlash = false;
             } else {
                 showFlash = true;
-                screenshot.setInsets(Insets.NONE);
-                screenshot.setScreenBounds(new Rect(0, 0, screenshot.getBitmap().getWidth(),
-                        screenshot.getBitmap().getHeight()));
+                bounds = new Rect(0, 0, screenshot.getBitmap().getWidth(),
+                        screenshot.getBitmap().getHeight());
             }
         } else {
             showFlash = true;
         }
 
+        final Rect animationBounds = bounds;
         mViewProxy.prepareEntranceAnimation(
-                () -> startAnimation(screenshot.getScreenBounds(), showFlash,
+                () -> startAnimation(animationBounds, showFlash,
                         () -> mMessageContainerController.onScreenshotTaken(screenshot)));
 
         mViewProxy.setScreenshot(screenshot);
@@ -393,10 +388,6 @@ public class LegacyScreenshotController implements InteractiveScreenshotHandler 
     // Any cleanup needed when the service is being destroyed.
     @Override
     public void onDestroy() {
-        if (mSaveInBgTask != null) {
-            // just log success/failure for the pre-existing screenshot
-            mSaveInBgTask.setActionsReadyListener(this::logSuccessOnActionsReady);
-        }
         removeWindow();
         releaseMediaPlayer();
         releaseContext();
@@ -511,8 +502,8 @@ public class LegacyScreenshotController implements InteractiveScreenshotHandler 
             return;
         }
         // delay starting scroll capture to make sure scrim is up before the app moves
-        mViewProxy.prepareScrollingTransition(response, mScreenBitmap, newScreenshot,
-                mScreenshotTakenInPortrait, () -> executeBatchScrollCapture(response, owner));
+        mViewProxy.prepareScrollingTransition(response, newScreenshot, mScreenshotTakenInPortrait,
+                () -> executeBatchScrollCapture(response, owner));
     }
 
     private void executeBatchScrollCapture(ScrollCaptureResponse response, UserHandle owner) {
@@ -598,36 +589,12 @@ public class LegacyScreenshotController implements InteractiveScreenshotHandler 
         // Play the shutter sound to notify that we've taken a screenshot
         playCameraSoundIfNeeded();
 
-        if (screenshotSaveImageExporter()) {
-            saveScreenshotInBackground(screenshot, UUID.randomUUID(), finisher, result -> {
-                if (result.uri != null) {
-                    mScreenshotHandler.post(() -> Toast.makeText(mContext,
-                            R.string.screenshot_saved_title, Toast.LENGTH_SHORT).show());
-                }
-            });
-        } else {
-            saveScreenshotInWorkerThread(
-                    screenshot.getUserHandle(),
-                    /* onComplete */ finisher,
-                    /* actionsReadyListener */ imageData -> {
-                        if (DEBUG_CALLBACK) {
-                            Log.d(TAG,
-                                    "returning URI to finisher (Consumer<URI>): " + imageData.uri);
-                        }
-                        finisher.accept(imageData.uri);
-                        if (imageData.uri == null) {
-                            mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_NOT_SAVED, 0,
-                                    mPackageName);
-                            mNotificationsController.notifyScreenshotError(
-                                    R.string.screenshot_failed_to_save_text);
-                        } else {
-                            mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_SAVED, 0, mPackageName);
-                            mScreenshotHandler.post(() -> Toast.makeText(mContext,
-                                    R.string.screenshot_saved_title, Toast.LENGTH_SHORT).show());
-                        }
-                    },
-                    null);
-        }
+        saveScreenshotInBackground(screenshot, UUID.randomUUID(), finisher, result -> {
+            if (result.uri != null) {
+                mScreenshotHandler.post(() -> Toast.makeText(mContext,
+                        R.string.screenshot_saved_title, Toast.LENGTH_SHORT).show());
+            }
+        });
     }
 
     /**
@@ -676,7 +643,7 @@ public class LegacyScreenshotController implements InteractiveScreenshotHandler 
     private void saveScreenshotInBackground(ScreenshotData screenshot, UUID requestId,
             Consumer<Uri> finisher, Consumer<ImageExporter.Result> onResult) {
         ListenableFuture<ImageExporter.Result> future = mImageExporter.export(mBgExecutor,
-                requestId, screenshot.getBitmap(), screenshot.getUserOrDefault(),
+                requestId, screenshot.getBitmap(), screenshot.getUserHandle(),
                 mDisplay.getDisplayId());
         future.addListener(() -> {
             try {
@@ -700,35 +667,6 @@ public class LegacyScreenshotController implements InteractiveScreenshotHandler 
     }
 
     /**
-     * Creates a new worker thread and saves the screenshot to the media store.
-     */
-    private void saveScreenshotInWorkerThread(
-            UserHandle owner,
-            @NonNull Consumer<Uri> finisher,
-            @Nullable SaveImageInBackgroundTask.ActionsReadyListener actionsReadyListener,
-            @Nullable SaveImageInBackgroundTask.QuickShareActionReadyListener
-                    quickShareActionsReadyListener) {
-        SaveImageInBackgroundTask.SaveImageInBackgroundData
-                data = new SaveImageInBackgroundTask.SaveImageInBackgroundData();
-        data.image = mScreenBitmap;
-        data.finisher = finisher;
-        data.mActionsReadyListener = actionsReadyListener;
-        data.mQuickShareActionsReadyListener = quickShareActionsReadyListener;
-        data.owner = owner;
-        data.displayId = mDisplay.getDisplayId();
-
-        if (mSaveInBgTask != null) {
-            // just log success/failure for the pre-existing screenshot
-            mSaveInBgTask.setActionsReadyListener(this::logSuccessOnActionsReady);
-        }
-
-        mSaveInBgTask = new SaveImageInBackgroundTask(mContext, mFlags, mImageExporter,
-                mScreenshotSmartActions, data,
-                mScreenshotNotificationSmartActionsProvider);
-        mSaveInBgTask.execute();
-    }
-
-    /**
      * Logs success/failure of the screenshot saving task, and shows an error if it failed.
      */
     private void logScreenshotResultStatus(Uri uri, UserHandle owner) {
@@ -743,13 +681,6 @@ public class LegacyScreenshotController implements InteractiveScreenshotHandler 
                         mPackageName);
             }
         }
-    }
-
-    /**
-     * Logs success/failure of the screenshot saving task, and shows an error if it failed.
-     */
-    private void logSuccessOnActionsReady(SaveImageInBackgroundTask.SavedImageData imageData) {
-        logScreenshotResultStatus(imageData.uri, imageData.owner);
     }
 
     private boolean isUserSetupComplete(UserHandle owner) {

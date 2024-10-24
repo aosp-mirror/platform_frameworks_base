@@ -493,6 +493,11 @@ public final class BinderProxy implements IBinder {
     public native boolean pingBinder();
 
     /**
+     * Check to see if the process that the binder is in is still alive.
+     *
+     * Note, this only reflects the last known death state, if the object
+     * is linked to death or has made a transactions since the death occurs.
+     *
      * @return false if the hosting process is gone
      */
     public native boolean isBinderAlive();
@@ -646,6 +651,37 @@ public final class BinderProxy implements IBinder {
     private native boolean unlinkToDeathNative(DeathRecipient recipient, int flags);
 
     /**
+     * This list is to hold strong reference to the frozen state callbacks. The callbacks are only
+     * weakly referenced by JNI so the strong references here are needed to keep the callbacks
+     * around until the proxy is GC'ed.
+     */
+    private List<FrozenStateChangeCallback> mFrozenStateChangeCallbacks =
+            Collections.synchronizedList(new ArrayList<>());
+
+    /**
+     * See {@link IBinder#addFrozenStateChangeCallback(FrozenStateChangeCallback)}
+     */
+    public void addFrozenStateChangeCallback(FrozenStateChangeCallback callback)
+            throws RemoteException {
+        addFrozenStateChangeCallbackNative(callback);
+        mFrozenStateChangeCallbacks.add(callback);
+    }
+
+    /**
+     * See {@link IBinder#removeFrozenStateChangeCallback}
+     */
+    public boolean removeFrozenStateChangeCallback(FrozenStateChangeCallback callback) {
+        mFrozenStateChangeCallbacks.remove(callback);
+        return removeFrozenStateChangeCallbackNative(callback);
+    }
+
+    private native void addFrozenStateChangeCallbackNative(FrozenStateChangeCallback callback)
+            throws RemoteException;
+
+    private native boolean removeFrozenStateChangeCallbackNative(
+            FrozenStateChangeCallback callback);
+
+    /**
      * Perform a dump on the remote object
      *
      * @param fd The raw file descriptor that the dump is being sent to.
@@ -726,6 +762,16 @@ public final class BinderProxy implements IBinder {
             recipient.binderDied(binderProxy);
         } catch (RuntimeException exc) {
             Log.w("BinderNative", "Uncaught exception from death notification",
+                    exc);
+        }
+    }
+
+    private static void invokeFrozenStateChangeCallback(
+            FrozenStateChangeCallback callback, IBinder binderProxy, int stateIndex) {
+        try {
+            callback.onFrozenStateChanged(binderProxy, stateIndex);
+        } catch (RuntimeException exc) {
+            Log.w("BinderNative", "Uncaught exception from frozen state change callback",
                     exc);
         }
     }

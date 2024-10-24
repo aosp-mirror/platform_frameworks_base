@@ -3,8 +3,7 @@
     android:id="@+id/shortcutItem"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingTop="@dimen/grid_item_padding"
-    android:paddingBottom="@dimen/grid_item_padding"
+    android:padding="@dimen/grid_item_padding"
     android:gravity="center">
 
   <ImageButton
@@ -13,7 +12,8 @@
       android:layout_height="@dimen/image_button_height"
       android:layout_alignParentTop="true"
       android:layout_centerHorizontal="true"
-      android:scaleType="fitCenter"/>
+      android:scaleType="fitCenter"
+      android:background="@drawable/menuitem_background_ripple" />
 
   <TextView
       android:id="@+id/shortcutLabel"

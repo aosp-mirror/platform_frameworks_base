@@ -44,9 +44,9 @@ android_test {
     ],
 
     libs: [
-        "android.test.base",
-        "android.test.mock",
-        "android.test.runner",
+        "android.test.base.stubs.system",
+        "android.test.mock.stubs.system",
+        "android.test.runner.stubs.system",
     ],
 
     // These are not normally accessible from apps so they must be explicitly included.
@@ -62,4 +62,14 @@ android_test {
     ],
 
     certificate: "platform",
+}
+
+test_module_config {
+    name: "FrameworksMockingCoreTests_os_bundlerecyclingtest",
+    base: "FrameworksMockingCoreTests",
+    test_suites: [
+        "automotive-tests",
+        "device-tests",
+    ],
+    include_filters: ["android.os.BundleRecyclingTest"],
 }

@@ -42,6 +42,7 @@ import static android.view.flags.Flags.FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY;
 import static android.view.flags.Flags.FLAG_VIEW_VELOCITY_API;
 import static android.view.flags.Flags.enableUseMeasureCacheDuringForceLayout;
 import static android.view.flags.Flags.sensitiveContentAppProtection;
+import static android.view.flags.Flags.toolkitFrameRateAnimationBugfix25q1;
 import static android.view.flags.Flags.toolkitFrameRateBySizeReadOnly;
 import static android.view.flags.Flags.toolkitFrameRateDefaultNormalReadOnly;
 import static android.view.flags.Flags.toolkitFrameRateSmallUsesPercentReadOnly;
@@ -371,7 +372,7 @@ import java.util.function.Predicate;
  *     </tr>
  *     <tr>
  *         <td><code>{@link #onTouchEvent(MotionEvent)}</code></td>
- *         <td>Called when a touch screen motion event occurs.
+ *         <td>Called when a motion event occurs with pointers down on the view.
  *         </td>
  *     </tr>
  *     <tr>
@@ -2458,13 +2459,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             toolkitFrameRateDefaultNormalReadOnly();
     private static final boolean sToolkitFrameRateBySizeReadOnlyFlagValue =
             toolkitFrameRateBySizeReadOnly();
-
     private static final boolean sToolkitFrameRateSmallUsesPercentReadOnlyFlagValue =
             toolkitFrameRateSmallUsesPercentReadOnly();
     private static final boolean sToolkitFrameRateViewEnablingReadOnlyFlagValue =
             toolkitFrameRateViewEnablingReadOnly();
     private static boolean sToolkitFrameRateVelocityMappingReadOnlyFlagValue =
             toolkitFrameRateVelocityMappingReadOnly();
+    private static boolean sToolkitFrameRateAnimationBugfix25q1FlagValue =
+            toolkitFrameRateAnimationBugfix25q1();
 
     // Used to set frame rate compatibility.
     @Surface.FrameRateCompatibility int mFrameRateCompatibility =
@@ -17873,7 +17875,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Implement this method to handle touch screen motion events.
+     * Implement this method to handle pointer events.
+     * <p>
+     * This method is called to handle motion events where pointers are down on
+     * the view. For example, this could include touchscreen touches, stylus
+     * touches, or click-and-drag events from a mouse. However, it is not called
+     * for motion events that do not involve pointers being down, such as hover
+     * events or mouse scroll wheel movements.
      * <p>
      * If this method is used to detect click actions, it is recommended that
      * the actions be performed by implementing and calling
@@ -24423,6 +24431,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             invalidationTransform = t;
         }
 
+        // Increase the frame rate if there is a transformation that applies a matrix.
+        if (sToolkitFrameRateAnimationBugfix25q1FlagValue
+                && ((t.getTransformationType() & Transformation.TYPE_MATRIX) != 0)) {
+            mPrivateFlags4 |= PFLAG4_HAS_VIEW_PROPERTY_INVALIDATION;
+            mPrivateFlags4 |= PFLAG4_HAS_MOVED;
+        }
+
         if (more) {
             if (!a.willChangeBounds()) {
                 if ((flags & (ViewGroup.FLAG_OPTIMIZE_INVALIDATE | ViewGroup.FLAG_ANIMATION_DONE)) ==
@@ -29202,8 +29217,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     + " shadowX=" + shadowTouchPoint.x + " shadowY=" + shadowTouchPoint.y);
         }
 
-        final SurfaceSession session = new SurfaceSession();
-        final SurfaceControl surfaceControl = new SurfaceControl.Builder(session)
+        final SurfaceControl surfaceControl = new SurfaceControl.Builder()
                 .setName("drag surface")
                 .setParent(root.getSurfaceControl())
                 .setBufferSize(shadowSize.x, shadowSize.y)
@@ -29269,7 +29283,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             if (token == null) {
                 surface.destroy();
             }
-            session.kill();
             surfaceControl.release();
         }
     }

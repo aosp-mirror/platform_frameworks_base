@@ -48,7 +48,7 @@ import kotlinx.coroutines.flow.filterNot
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /** Business logic for handling authentication events when an app is occluding the lockscreen. */
 @ExperimentalCoroutinesApi
@@ -70,7 +70,14 @@ constructor(
 ) {
     private val keyguardOccludedByApp: Flow<Boolean> =
         if (KeyguardWmStateRefactor.isEnabled) {
-            keyguardTransitionInteractor.currentKeyguardState.map { it == KeyguardState.OCCLUDED }
+            combine(
+                    keyguardTransitionInteractor.currentKeyguardState,
+                    communalSceneInteractor.isIdleOnCommunal,
+                    ::Pair,
+                )
+                .map { (currentState, isIdleOnCommunal) ->
+                    currentState == KeyguardState.OCCLUDED && !isIdleOnCommunal
+                }
         } else {
             combine(
                     keyguardInteractor.isKeyguardOccluded,
@@ -120,7 +127,7 @@ constructor(
             // On fingerprint success when the screen is on and not dreaming, go to the home screen
             fingerprintUnlockSuccessEvents
                 .sample(
-                    combine(powerInteractor.isInteractive, keyguardInteractor.isDreaming, ::Pair),
+                    combine(powerInteractor.isInteractive, keyguardInteractor.isDreaming, ::Pair)
                 )
                 .collect { (interactive, dreaming) ->
                     if (interactive && !dreaming) {
@@ -148,7 +155,7 @@ constructor(
                         }
                     },
                     /* cancel= */ null,
-                    /* afterKeyguardGone */ false
+                    /* afterKeyguardGone */ false,
                 )
             }
         }

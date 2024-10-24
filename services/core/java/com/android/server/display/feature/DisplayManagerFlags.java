@@ -69,6 +69,10 @@ public class DisplayManagerFlags {
             Flags.FLAG_ENABLE_MODE_LIMIT_FOR_EXTERNAL_DISPLAY,
             Flags::enableModeLimitForExternalDisplay);
 
+    private final FlagState mDisplayTopology = new FlagState(
+            Flags.FLAG_DISPLAY_TOPOLOGY,
+            Flags::displayTopology);
+
     private final FlagState mConnectedDisplayErrorHandlingFlagState = new FlagState(
             Flags.FLAG_ENABLE_CONNECTED_DISPLAY_ERROR_HANDLING,
             Flags::enableConnectedDisplayErrorHandling);
@@ -195,9 +199,47 @@ public class DisplayManagerFlags {
             Flags.FLAG_IDLE_SCREEN_CONFIG_IN_SUBSCRIBING_LIGHT_SENSOR,
             Flags::idleScreenConfigInSubscribingLightSensor);
 
+    private final FlagState mVirtualDisplayLimit =
+            new FlagState(
+                    Flags.FLAG_VIRTUAL_DISPLAY_LIMIT,
+                    Flags::virtualDisplayLimit);
+
     private final FlagState mNormalBrightnessForDozeParameter = new FlagState(
             Flags.FLAG_NORMAL_BRIGHTNESS_FOR_DOZE_PARAMETER,
             Flags::normalBrightnessForDozeParameter
+    );
+    private final FlagState mBlockAutobrightnessChangesOnStylusUsage = new FlagState(
+            Flags.FLAG_BLOCK_AUTOBRIGHTNESS_CHANGES_ON_STYLUS_USAGE,
+            Flags::blockAutobrightnessChangesOnStylusUsage
+    );
+    private final FlagState mIsUserRefreshRateForExternalDisplayEnabled = new FlagState(
+            Flags.FLAG_ENABLE_USER_REFRESH_RATE_FOR_EXTERNAL_DISPLAY,
+            Flags::enableUserRefreshRateForExternalDisplay
+    );
+
+    private final FlagState mEnableWaitingConfirmationBeforeMirroring = new FlagState(
+            Flags.FLAG_ENABLE_WAITING_CONFIRMATION_BEFORE_MIRRORING,
+            Flags::enableWaitingConfirmationBeforeMirroring
+    );
+
+    private final FlagState mEnableApplyDisplayChangedDuringDisplayAdded = new FlagState(
+            Flags.FLAG_ENABLE_APPLY_DISPLAY_CHANGED_DURING_DISPLAY_ADDED,
+            Flags::enableApplyDisplayChangedDuringDisplayAdded
+    );
+
+    private final FlagState mEnableBatteryStatsForAllDisplays = new FlagState(
+            Flags.FLAG_ENABLE_BATTERY_STATS_FOR_ALL_DISPLAYS,
+            Flags::enableBatteryStatsForAllDisplays
+    );
+
+    private final FlagState mHasArrSupport = new FlagState(
+            Flags.FLAG_ENABLE_HAS_ARR_SUPPORT,
+            Flags::enableHasArrSupport
+    );
+
+    private final FlagState mAutoBrightnessModeBedtimeWearFlagState = new FlagState(
+            Flags.FLAG_AUTO_BRIGHTNESS_MODE_BEDTIME_WEAR,
+            Flags::autoBrightnessModeBedtimeWear
     );
 
     /**
@@ -259,6 +301,10 @@ public class DisplayManagerFlags {
      */
     public boolean isExternalDisplayLimitModeEnabled() {
         return mExternalDisplayLimitModeState.isEnabled();
+    }
+
+    public boolean isDisplayTopologyEnabled() {
+        return mDisplayTopology.isEnabled();
     }
 
     /**
@@ -399,6 +445,10 @@ public class DisplayManagerFlags {
         return mNewHdrBrightnessModifier.isEnabled();
     }
 
+    public boolean isVirtualDisplayLimitEnabled() {
+        return mVirtualDisplayLimit.isEnabled();
+    }
+
     /**
      * @return Whether the useDozeBrightness parameter should be used
      */
@@ -415,6 +465,59 @@ public class DisplayManagerFlags {
     }
 
     /**
+      * @return {@code true} if mirroring won't be enabled until boot completes and the user enables
+      * the display.
+      */
+    public boolean isWaitingConfirmationBeforeMirroringEnabled() {
+        return mEnableWaitingConfirmationBeforeMirroring.isEnabled();
+    }
+
+    /**
+      * @return {@code true} if battery stats is enabled for all displays, not just the primary
+      * display.
+      */
+    public boolean isBatteryStatsEnabledForAllDisplays() {
+        return mEnableBatteryStatsForAllDisplays.isEnabled();
+    }
+
+    /**
+      * @return {@code true} if need to apply display changes during display added event.
+      */
+    public boolean isApplyDisplayChangedDuringDisplayAddedEnabled() {
+        return mEnableApplyDisplayChangedDuringDisplayAdded.isEnabled();
+    }
+
+    /**
+     * @return {@code true} if autobrightness is to be blocked when stylus is being used
+     */
+    public boolean isBlockAutobrightnessChangesOnStylusUsage() {
+        return mBlockAutobrightnessChangesOnStylusUsage.isEnabled();
+    }
+
+    /**
+     * @return {@code true} if need to use user refresh rate settings for
+     * external displays.
+     */
+    public boolean isUserRefreshRateForExternalDisplayEnabled() {
+        return mIsUserRefreshRateForExternalDisplayEnabled.isEnabled();
+    }
+
+    /**
+     * @return {@code true} if hasArrSupport API is enabled.
+     */
+    public boolean hasArrSupportFlag() {
+        return mHasArrSupport.isEnabled();
+    }
+
+    /**
+     * @return {@code true} if bedtime mode specific auto-brightness curve should be loaded and be
+     * applied when bedtime mode is enabled.
+     */
+    public boolean isAutoBrightnessModeBedtimeWearEnabled() {
+        return mAutoBrightnessModeBedtimeWearFlagState.isEnabled();
+    }
+
+    /**
      * dumps all flagstates
      * @param pw printWriter
      */
@@ -428,6 +531,7 @@ public class DisplayManagerFlags {
         pw.println(" " + mConnectedDisplayManagementFlagState);
         pw.println(" " + mDisplayOffloadFlagState);
         pw.println(" " + mExternalDisplayLimitModeState);
+        pw.println(" " + mDisplayTopology);
         pw.println(" " + mHdrClamperFlagState);
         pw.println(" " + mNbmControllerFlagState);
         pw.println(" " + mPowerThrottlingClamperFlagState);
@@ -454,8 +558,16 @@ public class DisplayManagerFlags {
         pw.println(" " + mOffloadDozeOverrideHoldsWakelock);
         pw.println(" " + mOffloadSessionCancelBlockScreenOn);
         pw.println(" " + mNewHdrBrightnessModifier);
+        pw.println(" " + mVirtualDisplayLimit);
         pw.println(" " + mNormalBrightnessForDozeParameter);
         pw.println(" " + mIdleScreenConfigInSubscribingLightSensor);
+        pw.println(" " + mEnableWaitingConfirmationBeforeMirroring);
+        pw.println(" " + mEnableBatteryStatsForAllDisplays);
+        pw.println(" " + mEnableApplyDisplayChangedDuringDisplayAdded);
+        pw.println(" " + mBlockAutobrightnessChangesOnStylusUsage);
+        pw.println(" " + mIsUserRefreshRateForExternalDisplayEnabled);
+        pw.println(" " + mHasArrSupport);
+        pw.println(" " + mAutoBrightnessModeBedtimeWearFlagState);
     }
 
     private static class FlagState {

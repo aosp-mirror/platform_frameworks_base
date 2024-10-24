@@ -121,6 +121,7 @@ class FluidResizeTaskPositionerTest : ShellTestCase() {
             displayId = DISPLAY_ID
             configuration.windowConfiguration.setBounds(STARTING_BOUNDS)
             configuration.windowConfiguration.displayRotation = ROTATION_90
+            isResizeable = true
         }
         `when`(mockWindowDecoration.calculateValidDragArea()).thenReturn(VALID_DRAG_AREA)
         mockWindowDecoration.mDisplay = mockDisplay
@@ -623,7 +624,7 @@ class FluidResizeTaskPositionerTest : ShellTestCase() {
 
     @Test
     fun testDragResize_resize_resizingTaskReorderedToTopWhenNotFocused() {
-        mockWindowDecoration.mTaskInfo.isFocused = false
+        mockWindowDecoration.mHasGlobalFocus = false
         taskPositioner.onDragPositioningStart(
                 CTRL_TYPE_RIGHT, // Resize right
                 STARTING_BOUNDS.left.toFloat(),
@@ -639,7 +640,7 @@ class FluidResizeTaskPositionerTest : ShellTestCase() {
 
     @Test
     fun testDragResize_resize_resizingTaskNotReorderedToTopWhenFocused() {
-        mockWindowDecoration.mTaskInfo.isFocused = true
+        mockWindowDecoration.mHasGlobalFocus = true
         taskPositioner.onDragPositioningStart(
                 CTRL_TYPE_RIGHT, // Resize right
                 STARTING_BOUNDS.left.toFloat(),
@@ -655,7 +656,7 @@ class FluidResizeTaskPositionerTest : ShellTestCase() {
 
     @Test
     fun testDragResize_drag_draggedTaskNotReorderedToTop() {
-        mockWindowDecoration.mTaskInfo.isFocused = false
+        mockWindowDecoration.mHasGlobalFocus = false
         taskPositioner.onDragPositioningStart(
                 CTRL_TYPE_UNDEFINED, // drag
                 STARTING_BOUNDS.left.toFloat(),

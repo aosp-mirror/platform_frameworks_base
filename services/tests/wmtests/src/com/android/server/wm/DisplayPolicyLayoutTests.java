@@ -84,6 +84,7 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         // Disabling this call for most tests since it can override the systemUiFlags when called.
         doNothing().when(mDisplayPolicy).updateSystemBarAttributes();
 
+        makeWindowVisible(mStatusBarWindow, mNavBarWindow);
         updateDisplayFrames();
     }
 
@@ -154,6 +155,7 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         };
         addWindow(win);
         win.getFrame().set(0, 0, 500, 100);
+        makeWindowVisible(win);
         win.updateSourceFrame(win.getFrame());
         mDisplayContent.getInsetsStateController().onPostLayout();
 

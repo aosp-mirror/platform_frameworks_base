@@ -445,15 +445,11 @@ public class CarrierTextManagerTest extends SysuiTestCase {
 
         assertFalse(mWifiRepository.isWifiConnectedWithValidSsid());
         mWifiRepository.setWifiNetwork(
-                new WifiNetworkModel.Active(
-                        /* networkId= */ 0,
+                WifiNetworkModel.Active.Companion.of(
                         /* isValidated= */ false,
                         /* level= */ 0,
                         /* ssid= */ "",
-                        /* hotspotDeviceType= */ WifiNetworkModel.HotspotDeviceType.NONE,
-                        /* isPasspointAccessPoint= */ false,
-                        /* isOnlineSignUpForPasspointAccessPoint= */ false,
-                        /* passpointProviderFriendlyName= */ null));
+                        /* hotspotDeviceType= */ WifiNetworkModel.HotspotDeviceType.NONE));
         assertTrue(mWifiRepository.isWifiConnectedWithValidSsid());
 
         mKeyguardUpdateMonitor.mServiceStates = new HashMap<>();

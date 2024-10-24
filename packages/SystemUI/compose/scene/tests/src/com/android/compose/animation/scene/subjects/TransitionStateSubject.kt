@@ -39,7 +39,7 @@ fun assertThat(transition: TransitionState.Transition.ChangeScene): SceneTransit
 
 /** Assert on a [TransitionState.Transition.ShowOrHideOverlay]. */
 fun assertThat(
-    transition: TransitionState.Transition.ShowOrHideOverlay,
+    transition: TransitionState.Transition.ShowOrHideOverlay
 ): ShowOrHideOverlayTransitionSubject {
     return Truth.assertAbout(ShowOrHideOverlayTransitionSubject.showOrHideOverlayTransitions())
         .that(transition)
@@ -47,17 +47,15 @@ fun assertThat(
 
 /** Assert on a [TransitionState.Transition.ReplaceOverlay]. */
 fun assertThat(
-    transition: TransitionState.Transition.ReplaceOverlay,
+    transition: TransitionState.Transition.ReplaceOverlay
 ): ReplaceOverlayTransitionSubject {
     return Truth.assertAbout(ReplaceOverlayTransitionSubject.replaceOverlayTransitions())
         .that(transition)
 }
 
 class TransitionStateSubject
-private constructor(
-    metadata: FailureMetadata,
-    private val actual: TransitionState,
-) : Subject(metadata, actual) {
+private constructor(metadata: FailureMetadata, private val actual: TransitionState) :
+    Subject(metadata, actual) {
     fun hasCurrentScene(sceneKey: SceneKey) {
         check("currentScene").that(actual.currentScene).isEqualTo(sceneKey)
     }
@@ -181,10 +179,8 @@ abstract class BaseTransitionSubject<T : TransitionState.Transition>(
 }
 
 class SceneTransitionSubject
-private constructor(
-    metadata: FailureMetadata,
-    actual: TransitionState.Transition.ChangeScene,
-) : BaseTransitionSubject<TransitionState.Transition.ChangeScene>(metadata, actual) {
+private constructor(metadata: FailureMetadata, actual: TransitionState.Transition.ChangeScene) :
+    BaseTransitionSubject<TransitionState.Transition.ChangeScene>(metadata, actual) {
     fun hasFromScene(sceneKey: SceneKey) {
         check("fromScene").that(actual.fromScene).isEqualTo(sceneKey)
     }
@@ -223,10 +219,8 @@ private constructor(
 }
 
 class ReplaceOverlayTransitionSubject
-private constructor(
-    metadata: FailureMetadata,
-    actual: TransitionState.Transition.ReplaceOverlay,
-) : BaseTransitionSubject<TransitionState.Transition.ReplaceOverlay>(metadata, actual) {
+private constructor(metadata: FailureMetadata, actual: TransitionState.Transition.ReplaceOverlay) :
+    BaseTransitionSubject<TransitionState.Transition.ReplaceOverlay>(metadata, actual) {
     fun hasFromOverlay(fromOverlay: OverlayKey) {
         check("fromOverlay").that(actual.fromOverlay).isEqualTo(fromOverlay)
     }

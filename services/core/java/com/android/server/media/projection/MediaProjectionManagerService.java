@@ -28,6 +28,7 @@ import static android.media.projection.ReviewGrantedConsentResult.RECORD_CANCEL;
 import static android.media.projection.ReviewGrantedConsentResult.RECORD_CONTENT_DISPLAY;
 import static android.media.projection.ReviewGrantedConsentResult.RECORD_CONTENT_TASK;
 import static android.media.projection.ReviewGrantedConsentResult.UNKNOWN;
+import static android.provider.Settings.Global.DISABLE_SCREEN_SHARE_PROTECTIONS_FOR_APPS_AND_NOTIFICATIONS;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 
@@ -42,6 +43,8 @@ import android.app.AppOpsManager;
 import android.app.IProcessObserver;
 import android.app.KeyguardManager;
 import android.app.compat.CompatChanges;
+import android.app.role.RoleManager;
+import android.companion.AssociationRequest;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
 import android.content.ComponentName;
@@ -71,6 +74,7 @@ import android.os.PermissionEnforcer;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.ArrayMap;
 import android.util.Slog;
 import android.view.ContentRecordingSession;
@@ -94,7 +98,7 @@ import java.util.Objects;
 
 /**
  * Manages MediaProjection sessions.
- *
+ * <p>
  * The {@link MediaProjectionManagerService} manages the creation and lifetime of MediaProjections,
  * as well as the capabilities they grant. Any service using MediaProjection tokens as permission
  * grants <b>must</b> validate the token before use by calling {@link
@@ -137,6 +141,7 @@ public final class MediaProjectionManagerService extends SystemService
     private final PackageManager mPackageManager;
     private final WindowManagerInternal mWmInternal;
     private final KeyguardManager mKeyguardManager;
+    private final RoleManager mRoleManager;
 
     private final MediaRouter mMediaRouter;
     private final MediaRouterCallback mMediaRouterCallback;
@@ -173,14 +178,17 @@ public final class MediaProjectionManagerService extends SystemService
         mKeyguardManager = (KeyguardManager) mContext.getSystemService(Context.KEYGUARD_SERVICE);
         mKeyguardManager.addKeyguardLockedStateListener(
                 mContext.getMainExecutor(), this::onKeyguardLockedStateChanged);
+        mRoleManager = mContext.getSystemService(RoleManager.class);
         Watchdog.getInstance().addMonitor(this);
     }
 
     /**
      * In order to record the keyguard, the MediaProjection package must be either:
      *   - a holder of RECORD_SENSITIVE_CONTENT permission, or
-     *   - be one of the bugreport whitelisted packages
+     *   - be one of the bugreport allowlisted packages, or
+     *   - hold the OP_PROJECT_MEDIA AppOp.
      */
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     private boolean canCaptureKeyguard() {
         if (!android.companion.virtualdevice.flags.Flags.mediaProjectionKeyguardRestrictions()) {
             return true;
@@ -189,9 +197,35 @@ public final class MediaProjectionManagerService extends SystemService
             if (mProjectionGrant == null || mProjectionGrant.packageName == null) {
                 return false;
             }
+            boolean disableScreenShareProtections = Settings.Global.getInt(
+                    getContext().getContentResolver(),
+                    DISABLE_SCREEN_SHARE_PROTECTIONS_FOR_APPS_AND_NOTIFICATIONS, 0) != 0;
+            if (disableScreenShareProtections) {
+                Slog.v(TAG,
+                        "Allowing keyguard capture as screenshare protections are disabled.");
+                return true;
+            }
+
             if (mPackageManager.checkPermission(RECORD_SENSITIVE_CONTENT,
                     mProjectionGrant.packageName)
                     == PackageManager.PERMISSION_GRANTED) {
+                Slog.v(TAG,
+                        "Allowing keyguard capture for package with RECORD_SENSITIVE_CONTENT "
+                                + "permission");
+                return true;
+            }
+            if (AppOpsManager.MODE_ALLOWED == mAppOps.noteOpNoThrow(AppOpsManager.OP_PROJECT_MEDIA,
+                    mProjectionGrant.uid, mProjectionGrant.packageName, /* attributionTag= */ null,
+                    "recording lockscreen")) {
+                // Some tools use media projection by granting the OP_PROJECT_MEDIA app
+                // op via a shell command. Those tools can be granted keyguard capture
+                Slog.v(TAG,
+                        "Allowing keyguard capture for package with OP_PROJECT_MEDIA AppOp ");
+                return true;
+            }
+            if (isProjectionAppHoldingAppStreamingRoleLocked()) {
+                Slog.v(TAG,
+                        "Allowing keyguard capture for package holding app streaming role.");
                 return true;
             }
             return SystemConfig.getInstance().getBugreportWhitelistedPackages()
@@ -203,7 +237,8 @@ public final class MediaProjectionManagerService extends SystemService
     void onKeyguardLockedStateChanged(boolean isKeyguardLocked) {
         if (!isKeyguardLocked) return;
         synchronized (mLock) {
-            if (mProjectionGrant != null && !canCaptureKeyguard()) {
+            if (mProjectionGrant != null && !canCaptureKeyguard()
+                    && mProjectionGrant.mVirtualDisplayId != INVALID_DISPLAY) {
                 Slog.d(TAG, "Content Recording: Stopped MediaProjection"
                         + " due to keyguard lock");
                 mProjectionGrant.stop();
@@ -688,6 +723,20 @@ public final class MediaProjectionManagerService extends SystemService
             }
             return mProjectionGrant.getProjectionInfo();
         }
+    }
+
+    /**
+     * Application holding the app streaming role
+     * ({@value AssociationRequest#DEVICE_PROFILE_APP_STREAMING}) are allowed to record the
+     * lockscreen.
+     *
+     * @return true if the is held by the recording application.
+     */
+    @GuardedBy("mLock")
+    private boolean isProjectionAppHoldingAppStreamingRoleLocked() {
+        return mRoleManager.getRoleHoldersAsUser(AssociationRequest.DEVICE_PROFILE_APP_STREAMING,
+                        mContext.getUser())
+                .contains(mProjectionGrant.packageName);
     }
 
     private void dump(final PrintWriter pw) {

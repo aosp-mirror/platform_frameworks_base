@@ -17,6 +17,7 @@
 package com.android.server.display;
 
 import android.hardware.display.BrightnessInfo;
+import android.os.PowerManager;
 import android.text.TextUtils;
 
 import com.android.server.display.brightness.BrightnessEvent;
@@ -255,7 +256,7 @@ public final class DisplayBrightnessState {
         private String mDisplayBrightnessStrategyName;
         private boolean mShouldUseAutoBrightness;
         private boolean mIsSlowChange;
-        private float mMaxBrightness;
+        private float mMaxBrightness = PowerManager.BRIGHTNESS_MAX;
         private float mMinBrightness;
         private float mCustomAnimationRate = CUSTOM_ANIMATION_RATE_NOT_SET;
         private boolean mShouldUpdateScreenBrightnessSetting;

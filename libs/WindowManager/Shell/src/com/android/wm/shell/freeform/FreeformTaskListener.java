@@ -24,11 +24,13 @@ import android.app.ActivityManager.RunningTaskInfo;
 import android.content.Context;
 import android.util.SparseArray;
 import android.view.SurfaceControl;
+import android.window.DesktopModeFlags;
 
 import com.android.internal.protolog.ProtoLog;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.LaunchAdjacentController;
-import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
+import com.android.wm.shell.desktopmode.DesktopRepository;
+import com.android.wm.shell.desktopmode.DesktopTasksController;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.sysui.ShellInit;
@@ -48,7 +50,8 @@ public class FreeformTaskListener implements ShellTaskOrganizer.TaskListener,
 
     private final Context mContext;
     private final ShellTaskOrganizer mShellTaskOrganizer;
-    private final Optional<DesktopModeTaskRepository> mDesktopModeTaskRepository;
+    private final Optional<DesktopRepository> mDesktopRepository;
+    private final Optional<DesktopTasksController> mDesktopTasksController;
     private final WindowDecorViewModel mWindowDecorationViewModel;
     private final LaunchAdjacentController mLaunchAdjacentController;
 
@@ -63,13 +66,15 @@ public class FreeformTaskListener implements ShellTaskOrganizer.TaskListener,
             Context context,
             ShellInit shellInit,
             ShellTaskOrganizer shellTaskOrganizer,
-            Optional<DesktopModeTaskRepository> desktopModeTaskRepository,
+            Optional<DesktopRepository> desktopRepository,
+            Optional<DesktopTasksController> desktopTasksController,
             LaunchAdjacentController launchAdjacentController,
             WindowDecorViewModel windowDecorationViewModel) {
         mContext = context;
         mShellTaskOrganizer = shellTaskOrganizer;
         mWindowDecorationViewModel = windowDecorationViewModel;
-        mDesktopModeTaskRepository = desktopModeTaskRepository;
+        mDesktopRepository = desktopRepository;
+        mDesktopTasksController = desktopTasksController;
         mLaunchAdjacentController = launchAdjacentController;
         if (shellInit != null) {
             shellInit.addInitCallback(this::onInit, this);
@@ -94,14 +99,9 @@ public class FreeformTaskListener implements ShellTaskOrganizer.TaskListener,
         state.mTaskInfo = taskInfo;
         state.mLeash = leash;
         mTasks.put(taskInfo.taskId, state);
-        if (!Transitions.ENABLE_SHELL_TRANSITIONS) {
-            SurfaceControl.Transaction t = new SurfaceControl.Transaction();
-            mWindowDecorationViewModel.onTaskOpening(taskInfo, leash, t, t);
-            t.apply();
-        }
 
         if (DesktopModeStatus.canEnterDesktopMode(mContext)) {
-            mDesktopModeTaskRepository.ifPresent(repository -> {
+            mDesktopRepository.ifPresent(repository -> {
                 repository.addOrMoveFreeformTaskToTop(taskInfo.displayId, taskInfo.taskId);
                 if (taskInfo.isVisible) {
                     repository.addActiveTask(taskInfo.displayId, taskInfo.taskId);
@@ -120,14 +120,21 @@ public class FreeformTaskListener implements ShellTaskOrganizer.TaskListener,
         mTasks.remove(taskInfo.taskId);
 
         if (DesktopModeStatus.canEnterDesktopMode(mContext)) {
-            mDesktopModeTaskRepository.ifPresent(repository -> {
-                repository.removeFreeformTask(taskInfo.displayId, taskInfo.taskId);
+            mDesktopRepository.ifPresent(repository -> {
+                // TODO: b/370038902 - Handle Activity#finishAndRemoveTask.
+                if (!DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION.isTrue()
+                        || repository.isClosingTask(taskInfo.taskId)) {
+                    // A task that's vanishing should be removed:
+                    // - If it's closed by the X button which means it's marked as a closing task.
+                    repository.removeClosingTask(taskInfo.taskId);
+                    repository.removeFreeformTask(taskInfo.displayId, taskInfo.taskId);
+                } else {
+                    repository.updateTaskVisibility(taskInfo.displayId, taskInfo.taskId, false);
+                    repository.minimizeTask(taskInfo.displayId, taskInfo.taskId);
+                }
             });
         }
         mWindowDecorationViewModel.onTaskVanished(taskInfo);
-        if (!Transitions.ENABLE_SHELL_TRANSITIONS) {
-            mWindowDecorationViewModel.destroyWindowDecoration(taskInfo);
-        }
         updateLaunchAdjacentController();
     }
 
@@ -137,14 +144,13 @@ public class FreeformTaskListener implements ShellTaskOrganizer.TaskListener,
 
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TASK_ORG, "Freeform Task Info Changed: #%d",
                 taskInfo.taskId);
+        mDesktopTasksController.ifPresent(c -> c.onTaskInfoChanged(taskInfo));
         mWindowDecorationViewModel.onTaskInfoChanged(taskInfo);
         state.mTaskInfo = taskInfo;
         if (DesktopModeStatus.canEnterDesktopMode(mContext)) {
-            mDesktopModeTaskRepository.ifPresent(repository -> {
+            mDesktopRepository.ifPresent(repository -> {
                 if (taskInfo.isVisible) {
                     repository.addActiveTask(taskInfo.displayId, taskInfo.taskId);
-                } else if (repository.isClosingTask(taskInfo.taskId)) {
-                    repository.removeClosingTask(taskInfo.taskId);
                 }
                 repository.updateTaskVisibility(taskInfo.displayId, taskInfo.taskId,
                         taskInfo.isVisible);
@@ -172,7 +178,7 @@ public class FreeformTaskListener implements ShellTaskOrganizer.TaskListener,
                 "Freeform Task Focus Changed: #%d focused=%b",
                 taskInfo.taskId, taskInfo.isFocused);
         if (DesktopModeStatus.canEnterDesktopMode(mContext) && taskInfo.isFocused) {
-            mDesktopModeTaskRepository.ifPresent(repository -> {
+            mDesktopRepository.ifPresent(repository -> {
                 repository.addOrMoveFreeformTaskToTop(taskInfo.displayId, taskInfo.taskId);
             });
         }

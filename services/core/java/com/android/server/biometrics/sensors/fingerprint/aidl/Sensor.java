@@ -16,6 +16,8 @@
 
 package com.android.server.biometrics.sensors.fingerprint.aidl;
 
+import static android.hardware.fingerprint.FingerprintSensorConfigurations.remapFqName;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
@@ -356,8 +358,8 @@ public class Sensor {
         if (mTestHalEnabled) {
             return true;
         }
-        return (ServiceManager.checkService(IFingerprint.DESCRIPTOR + "/" + halInstance)
-                != null);
+        return (ServiceManager.checkService(
+                remapFqName(IFingerprint.DESCRIPTOR + "/" + halInstance)) != null);
     }
 
     @NonNull protected BiometricContext getBiometricContext() {

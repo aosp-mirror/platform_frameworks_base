@@ -146,7 +146,10 @@ class SensorPowerStatsProcessor extends PowerStatsProcessor {
             return;
         }
 
-        if (item.eventTag == null || item.eventTag.string == null
+        if (((item.eventCode & BatteryStats.HistoryItem.EVENT_TYPE_MASK)
+                != BatteryStats.HistoryItem.EVENT_STATE_CHANGE)
+                || item.eventTag == null
+                || item.eventTag.string == null
                 || !item.eventTag.string.startsWith(SENSOR_EVENT_TAG_PREFIX)) {
             return;
         }

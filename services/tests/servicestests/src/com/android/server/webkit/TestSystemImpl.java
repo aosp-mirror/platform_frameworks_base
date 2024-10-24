@@ -19,7 +19,7 @@ package com.android.server.webkit;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.content.pm.UserInfo;
+import android.os.UserHandle;
 import android.webkit.UserPackage;
 import android.webkit.WebViewProviderInfo;
 
@@ -137,14 +137,10 @@ public class TestSystemImpl implements SystemInterface {
         List<UserPackage> ret = new ArrayList();
         // Loop over defined users, and find the corresponding package for each user.
         for (int userId : mUsers) {
-            ret.add(new UserPackage(createUserInfo(userId),
+            ret.add(new UserPackage(UserHandle.of(userId),
                     userPackages == null ? null : userPackages.get(userId)));
         }
         return ret;
-    }
-
-    private static UserInfo createUserInfo(int userId) {
-        return new UserInfo(userId, "User nr. " + userId, 0 /* flags */);
     }
 
     /**

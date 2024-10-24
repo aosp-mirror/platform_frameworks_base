@@ -28,6 +28,7 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.content.res.Configuration;
@@ -57,6 +58,7 @@ import com.android.systemui.Flags;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.ambient.touch.dagger.InputSessionComponent;
 import com.android.systemui.kosmos.KosmosJavaAdapter;
+import com.android.systemui.log.LogBufferHelperKt;
 import com.android.systemui.shared.system.InputChannelCompat;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.display.DisplayHelper;
@@ -153,7 +155,8 @@ public class TouchMonitorTest extends SysuiTestCase {
             when(mWindowManager.getMaximumWindowMetrics()).thenReturn(mWindowMetrics);
             mMonitor = new TouchMonitor(mExecutor, mBackgroundExecutor, mLifecycleRegistry,
                     mInputFactory, mDisplayHelper, mKosmos.getConfigurationInteractor(),
-                    handlers, mIWindowManager,  0);
+                    handlers, mIWindowManager, 0, "TouchMonitorTest",
+                    LogBufferHelperKt.logcatLogBuffer("TouchMonitorTest"));
             clearInvocations(mLifecycleRegistry);
             mMonitor.init();
 
@@ -639,6 +642,46 @@ public class TouchMonitorTest extends SysuiTestCase {
 
         // Check to make sure the input session is now disposed.
         environment.verifyInputSessionDispose();
+    }
+
+    @Test
+    public void testSessionPopAfterDestroy() {
+        final TouchHandler touchHandler = createTouchHandler();
+
+        final Environment environment = new Environment(Stream.of(touchHandler)
+                .collect(Collectors.toCollection(HashSet::new)), mKosmos);
+
+        final InputEvent initialEvent = Mockito.mock(InputEvent.class);
+        environment.publishInputEvent(initialEvent);
+
+        // Ensure session started
+        final InputChannelCompat.InputEventListener eventListener =
+                registerInputEventListener(touchHandler);
+
+        // First event will be missed since we register after the execution loop,
+        final InputEvent event = Mockito.mock(InputEvent.class);
+        environment.publishInputEvent(event);
+        verify(eventListener).onInputEvent(eq(event));
+
+        final ArgumentCaptor<TouchHandler.TouchSession> touchSessionArgumentCaptor =
+                ArgumentCaptor.forClass(TouchHandler.TouchSession.class);
+
+        verify(touchHandler).onSessionStart(touchSessionArgumentCaptor.capture());
+
+        environment.updateLifecycle(Lifecycle.State.DESTROYED);
+
+        // Check to make sure the input session is now disposed.
+        environment.verifyInputSessionDispose();
+
+        clearInvocations(environment.mInputFactory);
+
+        // Pop the session
+        touchSessionArgumentCaptor.getValue().pop();
+
+        environment.executeAll();
+
+        // Ensure no input sessions were created due to the session reset.
+        verifyNoMoreInteractions(environment.mInputFactory);
     }
 
 

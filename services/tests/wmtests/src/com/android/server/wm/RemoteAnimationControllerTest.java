@@ -110,6 +110,7 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
         runWithScissors(mWm.mH, () -> mHandler = new TestHandler(null, mClock), 0);
         mController = new RemoteAnimationController(mWm, mDisplayContent, mAdapter,
                 mHandler, false /*isActivityEmbedding*/);
+        mWm.mAnimator.ready();
     }
 
     private WindowState createAppOverlayWindow() {
@@ -133,7 +134,7 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
             adapter.startAnimation(mMockLeash, mMockTransaction, ANIMATION_TYPE_APP_TRANSITION,
                     mFinishedCallback);
             mController.goodToGo(TRANSIT_OLD_ACTIVITY_OPEN);
-            mWm.mAnimator.executeAfterPrepareSurfacesRunnables();
+            waitUntilWindowAnimatorIdle();
             final ArgumentCaptor<RemoteAnimationTarget[]> appsCaptor =
                     ArgumentCaptor.forClass(RemoteAnimationTarget[].class);
             final ArgumentCaptor<RemoteAnimationTarget[]> wallpapersCaptor =
@@ -165,7 +166,7 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
             adapter.startAnimation(mMockLeash, mMockTransaction, ANIMATION_TYPE_APP_TRANSITION,
                     mFinishedCallback);
             mController.goodToGo(TRANSIT_OLD_ACTIVITY_OPEN);
-            mWm.mAnimator.executeAfterPrepareSurfacesRunnables();
+            waitUntilWindowAnimatorIdle();
             final ArgumentCaptor<RemoteAnimationTarget[]> appsCaptor =
                     ArgumentCaptor.forClass(RemoteAnimationTarget[].class);
             final ArgumentCaptor<RemoteAnimationTarget[]> wallpapersCaptor =
@@ -287,7 +288,7 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
         adapter.startAnimation(mMockLeash, mMockTransaction, ANIMATION_TYPE_APP_TRANSITION,
                 mFinishedCallback);
         mController.goodToGo(TRANSIT_OLD_ACTIVITY_OPEN);
-        mWm.mAnimator.executeAfterPrepareSurfacesRunnables();
+        waitUntilWindowAnimatorIdle();
         final ArgumentCaptor<RemoteAnimationTarget[]> appsCaptor =
                 ArgumentCaptor.forClass(RemoteAnimationTarget[].class);
         final ArgumentCaptor<RemoteAnimationTarget[]> wallpapersCaptor =
@@ -333,7 +334,7 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
         task.applyAnimationUnchecked(null /* lp */, true /* enter */, TRANSIT_OLD_TASK_OPEN,
                 false /* isVoiceInteraction */, null /* sources */);
         mController.goodToGo(TRANSIT_OLD_TASK_OPEN);
-        mWm.mAnimator.executeAfterPrepareSurfacesRunnables();
+        waitUntilWindowAnimatorIdle();
         final ArgumentCaptor<RemoteAnimationTarget[]> appsCaptor =
                 ArgumentCaptor.forClass(RemoteAnimationTarget[].class);
         try {
@@ -360,7 +361,7 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
             ((AnimationAdapter) record.mThumbnailAdapter).startAnimation(mMockThumbnailLeash,
                     mMockTransaction, ANIMATION_TYPE_WINDOW_ANIMATION, mThumbnailFinishedCallback);
             mController.goodToGo(TRANSIT_OLD_TASK_CHANGE_WINDOWING_MODE);
-            mWm.mAnimator.executeAfterPrepareSurfacesRunnables();
+            waitUntilWindowAnimatorIdle();
             final ArgumentCaptor<RemoteAnimationTarget[]> appsCaptor =
                     ArgumentCaptor.forClass(RemoteAnimationTarget[].class);
             final ArgumentCaptor<RemoteAnimationTarget[]> wallpapersCaptor =
@@ -414,7 +415,7 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
             ((AnimationAdapter) record.mThumbnailAdapter).startAnimation(mMockThumbnailLeash,
                     mMockTransaction, ANIMATION_TYPE_WINDOW_ANIMATION, mThumbnailFinishedCallback);
             mController.goodToGo(TRANSIT_OLD_TASK_CHANGE_WINDOWING_MODE);
-            mWm.mAnimator.executeAfterPrepareSurfacesRunnables();
+            waitUntilWindowAnimatorIdle();
             final ArgumentCaptor<RemoteAnimationTarget[]> appsCaptor =
                     ArgumentCaptor.forClass(RemoteAnimationTarget[].class);
             final ArgumentCaptor<RemoteAnimationTarget[]> wallpapersCaptor =
@@ -468,7 +469,7 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
             ((AnimationAdapter) record.mThumbnailAdapter).startAnimation(mMockThumbnailLeash,
                     mMockTransaction, ANIMATION_TYPE_WINDOW_ANIMATION, mThumbnailFinishedCallback);
             mController.goodToGo(TRANSIT_OLD_TASK_CHANGE_WINDOWING_MODE);
-            mWm.mAnimator.executeAfterPrepareSurfacesRunnables();
+            waitUntilWindowAnimatorIdle();
             final ArgumentCaptor<RemoteAnimationTarget[]> appsCaptor =
                     ArgumentCaptor.forClass(RemoteAnimationTarget[].class);
             final ArgumentCaptor<RemoteAnimationTarget[]> wallpapersCaptor =
@@ -523,7 +524,7 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
             adapter.startAnimation(mMockLeash, mMockTransaction, ANIMATION_TYPE_APP_TRANSITION,
                     mFinishedCallback);
             mController.goodToGo(TRANSIT_OLD_ACTIVITY_OPEN);
-            mWm.mAnimator.executeAfterPrepareSurfacesRunnables();
+            waitUntilWindowAnimatorIdle();
             final ArgumentCaptor<RemoteAnimationTarget[]> appsCaptor =
                     ArgumentCaptor.forClass(RemoteAnimationTarget[].class);
             final ArgumentCaptor<RemoteAnimationTarget[]> wallpapersCaptor =
@@ -556,7 +557,7 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
             adapter.startAnimation(mMockLeash, mMockTransaction, ANIMATION_TYPE_APP_TRANSITION,
                     mFinishedCallback);
             mController.goodToGo(TRANSIT_OLD_ACTIVITY_OPEN);
-            mWm.mAnimator.executeAfterPrepareSurfacesRunnables();
+            waitUntilWindowAnimatorIdle();
             final ArgumentCaptor<RemoteAnimationTarget[]> appsCaptor =
                     ArgumentCaptor.forClass(RemoteAnimationTarget[].class);
             final ArgumentCaptor<RemoteAnimationTarget[]> wallpapersCaptor =
@@ -592,7 +593,7 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
             adapter.startAnimation(mMockLeash, mMockTransaction, ANIMATION_TYPE_APP_TRANSITION,
                     mFinishedCallback);
             mController.goodToGo(TRANSIT_OLD_KEYGUARD_GOING_AWAY);
-            mWm.mAnimator.executeAfterPrepareSurfacesRunnables();
+            waitUntilWindowAnimatorIdle();
             final ArgumentCaptor<RemoteAnimationTarget[]> appsCaptor =
                     ArgumentCaptor.forClass(RemoteAnimationTarget[].class);
             final ArgumentCaptor<RemoteAnimationTarget[]> wallpapersCaptor =
@@ -642,7 +643,7 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
             adapter.startAnimation(mMockLeash, mMockTransaction, ANIMATION_TYPE_APP_TRANSITION,
                     mFinishedCallback);
             mController.goodToGo(TRANSIT_OLD_KEYGUARD_GOING_AWAY_ON_WALLPAPER);
-            mWm.mAnimator.executeAfterPrepareSurfacesRunnables();
+            waitUntilWindowAnimatorIdle();
             final ArgumentCaptor<RemoteAnimationTarget[]> appsCaptor =
                     ArgumentCaptor.forClass(RemoteAnimationTarget[].class);
             final ArgumentCaptor<RemoteAnimationTarget[]> wallpapersCaptor =
@@ -742,7 +743,7 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
         adapter.startAnimation(mMockLeash, mMockTransaction, ANIMATION_TYPE_APP_TRANSITION,
                 mFinishedCallback);
         mController.goodToGo(transit);
-        mWm.mAnimator.executeAfterPrepareSurfacesRunnables();
+        waitUntilWindowAnimatorIdle();
         return adapter;
     }
 

@@ -18,10 +18,8 @@
 package com.android.keyguard
 
 import android.app.admin.DevicePolicyManager
-import android.app.admin.flags.Flags as DevicePolicyFlags
 import android.content.res.Configuration
 import android.media.AudioManager
-import android.platform.test.annotations.EnableFlags
 import android.telephony.TelephonyManager
 import android.testing.TestableLooper.RunWithLooper
 import android.testing.TestableResources
@@ -78,6 +76,7 @@ import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.statusbar.policy.UserSwitcherController
 import com.android.systemui.testKosmos
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
+import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.kotlin.JavaAdapter
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argThat
@@ -86,6 +85,7 @@ import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.settings.GlobalSettings
+import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth
 import junit.framework.Assert
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -174,6 +174,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
     @Mock private lateinit var primaryBouncerInteractor: PrimaryBouncerInteractor
     private lateinit var sceneTransitionStateFlow: MutableStateFlow<ObservableTransitionState>
     private lateinit var fakeSceneDataSource: FakeSceneDataSource
+    private val executor = FakeExecutor(FakeSystemClock())
 
     private lateinit var underTest: KeyguardSecurityContainerController
 
@@ -212,13 +213,9 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
         featureFlags = FakeFeatureFlags()
         featureFlags.set(Flags.LOCKSCREEN_ENABLE_LANDSCAPE, false)
 
-        mSetFlagsRule.enableFlags(
-            AConfigFlags.FLAG_REVAMPED_BOUNCER_MESSAGES,
-        )
+        mSetFlagsRule.enableFlags(AConfigFlags.FLAG_REVAMPED_BOUNCER_MESSAGES)
         if (!SceneContainerFlag.isEnabled) {
-            mSetFlagsRule.disableFlags(
-                AConfigFlags.FLAG_KEYGUARD_WM_STATE_REFACTOR,
-            )
+            mSetFlagsRule.disableFlags(AConfigFlags.FLAG_KEYGUARD_WM_STATE_REFACTOR)
         }
 
         keyguardPasswordViewController =
@@ -241,7 +238,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
                 mSelectedUserInteractor,
                 keyguardKeyboardInteractor,
                 null,
-                mUserActivityNotifier
+                mUserActivityNotifier,
             )
 
         kosmos = testKosmos()
@@ -285,6 +282,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
                 devicePolicyManager,
                 kosmos.keyguardDismissTransitionInteractor,
                 { primaryBouncerInteractor },
+                executor,
             ) {
                 deviceEntryInteractor
             }
@@ -300,7 +298,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
                 eq(falsingManager),
                 eq(userSwitcherController),
                 any(),
-                eq(falsingA11yDelegate)
+                eq(falsingA11yDelegate),
             )
     }
 
@@ -336,7 +334,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
                 eq(falsingManager),
                 eq(userSwitcherController),
                 any(),
-                eq(falsingA11yDelegate)
+                eq(falsingA11yDelegate),
             )
 
         // Update rotation. Should trigger update
@@ -349,7 +347,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
                 eq(falsingManager),
                 eq(userSwitcherController),
                 any(),
-                eq(falsingA11yDelegate)
+                eq(falsingA11yDelegate),
             )
     }
 
@@ -361,7 +359,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
                 MotionEvent.ACTION_DOWN,
                 /* x= */ 0f,
                 /* y= */ 0f,
-                /* metaState= */ 0
+                /* metaState= */ 0,
             )
         )
     }
@@ -388,7 +386,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
                 eq(falsingManager),
                 eq(userSwitcherController),
                 any(),
-                eq(falsingA11yDelegate)
+                eq(falsingA11yDelegate),
             )
     }
 
@@ -403,7 +401,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
                 eq(falsingManager),
                 eq(userSwitcherController),
                 any(),
-                eq(falsingA11yDelegate)
+                eq(falsingA11yDelegate),
             )
     }
 
@@ -418,7 +416,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
                 eq(falsingManager),
                 eq(userSwitcherController),
                 any(),
-                eq(falsingA11yDelegate)
+                eq(falsingA11yDelegate),
             )
     }
 
@@ -433,7 +431,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
                 eq(falsingManager),
                 eq(userSwitcherController),
                 any(),
-                eq(falsingA11yDelegate)
+                eq(falsingA11yDelegate),
             )
     }
 
@@ -448,7 +446,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
                 eq(falsingManager),
                 eq(userSwitcherController),
                 any(),
-                eq(falsingA11yDelegate)
+                eq(falsingA11yDelegate),
             )
     }
 
@@ -464,7 +462,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
             .showMessage(
                 /* message= */ context.getString(R.string.keyguard_unlock_to_continue),
                 /* colorState= */ null,
-                /* animated= */ true
+                /* animated= */ true,
             )
     }
 
@@ -498,7 +496,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
             /* authenticated= */ true,
             TARGET_USER_ID,
             /* bypassSecondaryLockScreen= */ true,
-            SecurityMode.SimPin
+            SecurityMode.SimPin,
         )
 
         // THEN the next security method of None will dismiss keyguard.
@@ -516,7 +514,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
                 /* authenticated= */ true,
                 TARGET_USER_ID,
                 /* bypassSecondaryLockScreen= */ true,
-                SecurityMode.SimPin
+                SecurityMode.SimPin,
             )
 
         // THEN no action has happened, which will not dismiss the security screens
@@ -541,7 +539,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
             /* authenticated= */ true,
             TARGET_USER_ID,
             /* bypassSecondaryLockScreen= */ true,
-            SecurityMode.SimPin
+            SecurityMode.SimPin,
         )
 
         // THEN the next security method of None will dismiss keyguard.
@@ -566,7 +564,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
             /* authenticated= */ true,
             TARGET_USER_ID,
             /* bypassSecondaryLockScreen= */ true,
-            SecurityMode.SimPin
+            SecurityMode.SimPin,
         )
 
         // THEN the next security method of None will dismiss keyguard.
@@ -591,7 +589,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
             /* authenticated= */ true,
             TARGET_USER_ID,
             /* bypassSecondaryLockScreen= */ true,
-            SecurityMode.SimPin
+            SecurityMode.SimPin,
         )
 
         // THEN we will not show the password screen.
@@ -617,7 +615,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
             /* authenticated= */ true,
             TARGET_USER_ID,
             /* bypassSecondaryLockScreen= */ true,
-            SecurityMode.SimPin
+            SecurityMode.SimPin,
         )
 
         // THEN we will not show the password screen.
@@ -719,7 +717,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
         // Now simulate a config change
         testableResources.addOverride(
             R.integer.keyguard_host_view_gravity,
-            Gravity.CENTER_HORIZONTAL or Gravity.BOTTOM
+            Gravity.CENTER_HORIZONTAL or Gravity.BOTTOM,
         )
         underTest.updateResources()
         verify(view).layoutParams = any()
@@ -730,7 +728,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
         testableResources.addOverride(R.integer.keyguard_host_view_gravity, Gravity.CENTER)
         testableResources.addOverride(
             R.integer.keyguard_host_view_one_handed_gravity,
-            Gravity.CENTER_HORIZONTAL or Gravity.BOTTOM
+            Gravity.CENTER_HORIZONTAL or Gravity.BOTTOM,
         )
 
         // Start disabled.
@@ -942,7 +940,6 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
     }
 
     @Test
-    @EnableFlags(DevicePolicyFlags.FLAG_HEADLESS_SINGLE_USER_FIXES)
     fun showAlmostAtWipeDialog_calledOnMainUser_setsCorrectUserType() {
         val mainUserId = 10
 
@@ -951,7 +948,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
             /* expiringUserId = */ mainUserId,
             /* mainUserId = */ mainUserId,
             /* remainingBeforeWipe = */ 1,
-            /* failedAttempts = */ 1
+            /* failedAttempts = */ 1,
         )
 
         verify(view)
@@ -959,7 +956,6 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
     }
 
     @Test
-    @EnableFlags(DevicePolicyFlags.FLAG_HEADLESS_SINGLE_USER_FIXES)
     fun showAlmostAtWipeDialog_calledOnNonMainUser_setsCorrectUserType() {
         val secondaryUserId = 10
         val mainUserId = 0
@@ -969,14 +965,14 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
             /* expiringUserId = */ secondaryUserId,
             /* mainUserId = */ mainUserId,
             /* remainingBeforeWipe = */ 1,
-            /* failedAttempts = */ 1
+            /* failedAttempts = */ 1,
         )
 
         verify(view)
             .showAlmostAtWipeDialog(
                 any(),
                 any(),
-                eq(KeyguardSecurityContainer.USER_TYPE_SECONDARY_USER)
+                eq(KeyguardSecurityContainer.USER_TYPE_SECONDARY_USER),
             )
     }
 

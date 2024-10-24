@@ -70,7 +70,6 @@ import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
 import android.net.Uri;
-import android.net.vcn.Flags;
 import android.net.vcn.IVcnStatusCallback;
 import android.net.vcn.IVcnUnderlyingNetworkPolicyListener;
 import android.net.vcn.VcnConfig;
@@ -85,7 +84,6 @@ import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.test.TestLooper;
-import android.platform.test.flag.junit.SetFlagsRule;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
@@ -104,7 +102,6 @@ import com.android.server.vcn.util.PersistableBundleUtils;
 import com.android.server.vcn.util.PersistableBundleUtils.PersistableBundleWrapper;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -122,8 +119,6 @@ import java.util.UUID;
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class VcnManagementServiceTest {
-    @Rule public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
-
     private static final String CONTEXT_ATTRIBUTION_TAG = "VCN";
     private static final String TEST_PACKAGE_NAME =
             VcnManagementServiceTest.class.getPackage().getName();
@@ -145,6 +140,8 @@ public class VcnManagementServiceTest {
     private static final String TEST_IFACE_NAME_2 = "TEST_IFACE2";
     private static final LinkProperties TEST_LP_1 = new LinkProperties();
     private static final LinkProperties TEST_LP_2 = new LinkProperties();
+
+    private static final int ACTIVE_MODEM_COUNT = 2;
 
     static {
         TEST_LP_1.setInterfaceName(TEST_IFACE_NAME);
@@ -233,6 +230,7 @@ public class VcnManagementServiceTest {
         setupSystemService(mMockContext, mUserManager, Context.USER_SERVICE, UserManager.class);
 
         doReturn(TEST_USER_HANDLE).when(mUserManager).getMainUser();
+        doReturn(ACTIVE_MODEM_COUNT).when(mTelMgr).getActiveModemCount();
 
         doReturn(TEST_PACKAGE_NAME).when(mMockContext).getOpPackageName();
 
@@ -282,8 +280,6 @@ public class VcnManagementServiceTest {
 
     @Before
     public void setUp() {
-        mSetFlagsRule.enableFlags(Flags.FLAG_ENFORCE_MAIN_USER);
-
         doNothing()
                 .when(mMockContext)
                 .enforceCallingOrSelfPermission(

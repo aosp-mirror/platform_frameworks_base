@@ -16,16 +16,12 @@
 
 package com.android.systemui.statusbar.notification.stack.ui.viewbinder
 
-import android.view.View
-import android.view.WindowInsets
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
-import com.android.systemui.common.ui.view.onApplyWindowInsets
 import com.android.systemui.common.ui.view.onLayoutChanged
 import com.android.systemui.communal.domain.interactor.CommunalSettingsInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.keyguard.ui.viewmodel.BurnInParameters
 import com.android.systemui.keyguard.ui.viewmodel.ViewStateAccessor
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
@@ -39,10 +35,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /** Binds the shared notification container to its view-model. */
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -62,7 +55,6 @@ constructor(
         viewModel: SharedNotificationContainerViewModel,
     ): DisposableHandle {
         val disposables = DisposableHandles()
-
         disposables +=
             view.repeatWhenAttached {
                 repeatOnLifecycle(Lifecycle.State.CREATED) {
@@ -86,11 +78,7 @@ constructor(
                 }
             }
 
-        val burnInParams = MutableStateFlow(BurnInParameters())
-        val viewState =
-            ViewStateAccessor(
-                alpha = { controller.getAlpha() },
-            )
+        val viewState = ViewStateAccessor(alpha = { controller.getAlpha() })
 
         /*
          * For animation sensitive coroutines, immediately run just like applicationScope does
@@ -108,7 +96,7 @@ constructor(
                                         addUpdateListener { animation ->
                                             controller.setMaxAlphaForKeyguard(
                                                 animation.animatedFraction,
-                                                "SharedNotificationContainerVB (collapseFadeIn)"
+                                                "SharedNotificationContainerVB (collapseFadeIn)",
                                             )
                                         }
                                         start()
@@ -144,16 +132,14 @@ constructor(
 
                     if (!SceneContainerFlag.isEnabled) {
                         launch {
-                            burnInParams
-                                .flatMapLatest { params -> viewModel.translationY(params) }
-                                .collect { y -> controller.setTranslationY(y) }
+                            viewModel.translationY.collect { y -> controller.setTranslationY(y) }
                         }
                     }
 
                     launch { viewModel.translationX.collect { x -> controller.translationX = x } }
 
                     launch {
-                        viewModel.keyguardAlpha(viewState).collect {
+                        viewModel.keyguardAlpha(viewState, this).collect {
                             controller.setMaxAlphaForKeyguard(it, "SharedNotificationContainerVB")
                         }
                     }
@@ -182,16 +168,6 @@ constructor(
 
         controller.setOnHeightChangedRunnable { viewModel.notificationStackChanged() }
         disposables += DisposableHandle { controller.setOnHeightChangedRunnable(null) }
-
-        disposables +=
-            view.onApplyWindowInsets { _: View, insets: WindowInsets ->
-                val insetTypes = WindowInsets.Type.systemBars() or WindowInsets.Type.displayCutout()
-                burnInParams.update { current ->
-                    current.copy(topInset = insets.getInsetsIgnoringVisibility(insetTypes).top)
-                }
-                insets
-            }
-
         disposables += view.onLayoutChanged { viewModel.notificationStackChanged() }
 
         return disposables

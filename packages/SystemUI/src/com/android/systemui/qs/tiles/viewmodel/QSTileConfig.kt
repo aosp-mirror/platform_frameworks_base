@@ -21,6 +21,7 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import com.android.internal.logging.InstanceId
 import com.android.systemui.qs.pipeline.shared.TileSpec
+import com.android.systemui.qs.shared.model.TileCategory
 
 data class QSTileConfig
 @JvmOverloads
@@ -28,6 +29,7 @@ constructor(
     val tileSpec: TileSpec,
     val uiConfig: QSTileUIConfig,
     val instanceId: InstanceId,
+    val category: TileCategory,
     val metricsSpec: String = tileSpec.spec,
     val policy: QSTilePolicy = QSTilePolicy.NoRestrictions,
     val autoRemoveOnUnavailable: Boolean = true,

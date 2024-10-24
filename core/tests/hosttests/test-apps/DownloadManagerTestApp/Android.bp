@@ -27,8 +27,8 @@ android_test {
         "junit",
     ],
     libs: [
-        "android.test.runner",
-        "android.test.base",
+        "android.test.runner.stubs.system",
+        "android.test.base.stubs.system",
     ],
 
     platform_apis: true,

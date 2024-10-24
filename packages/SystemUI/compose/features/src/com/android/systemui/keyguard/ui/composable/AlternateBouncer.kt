@@ -16,12 +16,12 @@
 
 package com.android.systemui.keyguard.ui.composable
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -41,7 +41,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.android.compose.modifiers.background
 import com.android.compose.modifiers.height
 import com.android.compose.modifiers.width
 import com.android.systemui.deviceentry.shared.model.BiometricMessage
@@ -53,6 +52,7 @@ import com.android.systemui.keyguard.ui.view.DeviceEntryIconView
 import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerDependencies
 import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerMessageAreaViewModel
 import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerUdfpsIconViewModel
+import com.android.systemui.log.LongPressHandlingViewLogger
 import com.android.systemui.res.R
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
@@ -73,8 +73,6 @@ fun AlternateBouncer(
             initialValue = null
         )
 
-    BackHandler(enabled = isVisible) { alternateBouncerDependencies.viewModel.onBackRequested() }
-
     AnimatedVisibility(
         visible = isVisible,
         enter = fadeIn(),
@@ -84,32 +82,25 @@ fun AlternateBouncer(
         Box(
             contentAlignment = Alignment.TopCenter,
             modifier =
-                Modifier.background(color = Colors.AlternateBouncerBackgroundColor, alpha = { 1f })
-                    .pointerInput(Unit) {
-                        detectTapGestures(
-                            onTap = { alternateBouncerDependencies.viewModel.onTapped() }
-                        )
-                    },
+                Modifier.background(color = Colors.AlternateBouncerBackgroundColor).pointerInput(
+                    Unit
+                ) {
+                    detectTapGestures(onTap = { alternateBouncerDependencies.viewModel.onTapped() })
+                },
         ) {
-            StatusMessage(
-                viewModel = alternateBouncerDependencies.messageAreaViewModel,
-            )
+            StatusMessage(viewModel = alternateBouncerDependencies.messageAreaViewModel)
         }
 
         udfpsIconLocation?.let { udfpsLocation ->
             Box {
                 DeviceEntryIcon(
                     viewModel = alternateBouncerDependencies.udfpsIconViewModel,
+                    logger = alternateBouncerDependencies.logger,
                     modifier =
                         Modifier.width { udfpsLocation.width }
                             .height { udfpsLocation.height }
                             .fillMaxHeight()
-                            .offset {
-                                IntOffset(
-                                    x = udfpsLocation.left,
-                                    y = udfpsLocation.top,
-                                )
-                            },
+                            .offset { IntOffset(x = udfpsLocation.left, y = udfpsLocation.top) },
                 )
             }
 
@@ -154,13 +145,14 @@ private fun StatusMessage(
 @Composable
 private fun DeviceEntryIcon(
     viewModel: AlternateBouncerUdfpsIconViewModel,
+    logger: LongPressHandlingViewLogger,
     modifier: Modifier = Modifier,
 ) {
     AndroidView(
         modifier = modifier,
         factory = { context ->
             val view =
-                DeviceEntryIconView(context, null).apply {
+                DeviceEntryIconView(context, null, logger = logger).apply {
                     id = R.id.alternate_bouncer_udfps_icon_view
                     contentDescription =
                         context.resources.getString(R.string.accessibility_fingerprint_label)

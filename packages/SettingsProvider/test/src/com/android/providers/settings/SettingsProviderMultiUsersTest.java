@@ -20,6 +20,9 @@ import static android.provider.Settings.Secure.ACCESSIBILITY_ENABLED;
 import static android.provider.Settings.Secure.SYNC_PARENT_SOUNDS;
 import static android.provider.Settings.System.RINGTONE;
 
+import static com.android.bedstead.enterprise.EnterpriseDeviceStateExtensionsKt.workProfile;
+import static com.android.bedstead.multiuser.MultiUserDeviceStateExtensionsKt.secondaryUser;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import android.content.pm.PackageManager;
@@ -31,10 +34,10 @@ import com.android.bedstead.enterprise.annotations.EnsureHasNoWorkProfile;
 import com.android.bedstead.enterprise.annotations.EnsureHasWorkProfile;
 import com.android.bedstead.harrier.BedsteadJUnit4;
 import com.android.bedstead.harrier.DeviceState;
-import com.android.bedstead.harrier.annotations.EnsureHasSecondaryUser;
 import com.android.bedstead.harrier.annotations.RequireFeature;
 import com.android.bedstead.harrier.annotations.RequireRunOnInitialUser;
-import com.android.bedstead.harrier.annotations.RequireRunOnPrimaryUser;
+import com.android.bedstead.multiuser.annotations.EnsureHasSecondaryUser;
+import com.android.bedstead.multiuser.annotations.RequireRunOnPrimaryUser;
 import com.android.bedstead.nene.TestApis;
 import com.android.bedstead.nene.users.UserReference;
 import com.android.bedstead.nene.users.UserType;
@@ -82,7 +85,7 @@ public class SettingsProviderMultiUsersTest {
     @RequireFeature(PackageManager.FEATURE_MANAGED_USERS)
     @EnsureHasWorkProfile
     public void testSettings_workProfile() throws Exception {
-        UserReference profile = sDeviceState.workProfile();
+        UserReference profile = workProfile(sDeviceState);
 
         // Settings.Global settings are shared between different users
         assertSettingsShared(SPACE_GLOBAL, mPrimaryUser.id(), profile.id());
@@ -96,7 +99,7 @@ public class SettingsProviderMultiUsersTest {
     @RequireRunOnInitialUser
     @EnsureHasSecondaryUser
     public void testSettings_secondaryUser() throws Exception {
-        UserReference secondaryUser = sDeviceState.secondaryUser();
+        UserReference secondaryUser = secondaryUser(sDeviceState);
 
         // Settings.Global settings are shared between different users
         assertSettingsShared(SPACE_GLOBAL, mPrimaryUser.id(), secondaryUser.id());
@@ -223,7 +226,7 @@ public class SettingsProviderMultiUsersTest {
     @RequireRunOnInitialUser
     @EnsureHasSecondaryUser
     public void testSettings_stopAndRestartSecondaryUser() throws Exception {
-        UserReference secondaryUser = sDeviceState.secondaryUser();
+        UserReference secondaryUser = secondaryUser(sDeviceState);
 
         assertSettingsDifferent(SPACE_SECURE, mPrimaryUser.id(), secondaryUser.id());
 

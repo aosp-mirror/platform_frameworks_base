@@ -17,10 +17,18 @@
 package com.android.internal.protolog.common;
 
 public enum LogLevel {
-    DEBUG("d"), VERBOSE("v"), INFO("i"), WARN("w"), ERROR("e"), WTF("wtf");
+    DEBUG("d", 1),
+    VERBOSE("v", 2),
+    INFO("i", 3),
+    WARN("w", 4),
+    ERROR("e", 5),
+    WTF("wtf", 6);
 
     public final String shortCode;
-    LogLevel(String shortCode) {
+    public final int id;
+
+    LogLevel(String shortCode, int id) {
         this.shortCode = shortCode;
+        this.id = id;
     }
 }

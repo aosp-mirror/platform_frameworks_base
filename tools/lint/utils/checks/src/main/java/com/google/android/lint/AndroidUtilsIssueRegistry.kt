@@ -19,6 +19,7 @@ package com.google.android.lint
 import com.android.tools.lint.client.api.IssueRegistry
 import com.android.tools.lint.client.api.Vendor
 import com.android.tools.lint.detector.api.CURRENT_API
+import com.google.android.lint.aidl.ExemptAidlInterfacesGenerator
 import com.google.android.lint.aidl.AnnotatedAidlCounter
 import com.google.auto.service.AutoService
 
@@ -27,6 +28,7 @@ import com.google.auto.service.AutoService
 class AndroidUtilsIssueRegistry : IssueRegistry() {
     override val issues = listOf(
         AnnotatedAidlCounter.ISSUE_ANNOTATED_AIDL_COUNTER,
+        ExemptAidlInterfacesGenerator.ISSUE_PERMISSION_ANNOTATION_EXEMPT_AIDL_INTERFACES,
     )
 
     override val api: Int
@@ -38,6 +40,6 @@ class AndroidUtilsIssueRegistry : IssueRegistry() {
     override val vendor: Vendor = Vendor(
         vendorName = "Android",
         feedbackUrl = "http://b/issues/new?component=315013",
-        contact = "tweek@google.com"
+        contact = "android-platform-abuse-prevention-withfriends@google.com"
     )
 }

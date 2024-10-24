@@ -500,7 +500,7 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
                 checkNanoappPermsAsync();
             }
 
-            if (!Flags.reliableMessageImplementation() || transactionCallback == null) {
+            if (transactionCallback == null) {
                 try {
                     result = mContextHubProxy.sendMessageToContextHub(mHostEndPointId,
                             mAttachedContextHubInfo.getId(), message);
@@ -671,10 +671,8 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
                         .putExtra(ContextHubManager.EXTRA_MESSAGE, message);
         Consumer<Byte> onFinishedCallback = (Byte error) ->
                 sendMessageDeliveryStatusToContextHub(message.getMessageSequenceNumber(), error);
-        return sendPendingIntent(supplier, nanoAppId,
-                Flags.reliableMessageImplementation() && message.isReliable()
-                        ? onFinishedCallback
-                        : null);
+        return sendPendingIntent(
+                supplier, nanoAppId, message.isReliable() ? onFinishedCallback : null);
     }
 
     /**
@@ -764,6 +762,7 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
     boolean hasPermissions(List<String> permissions) {
         for (String permission : permissions) {
             if (mContext.checkPermission(permission, mPid, mUid) != PERMISSION_GRANTED) {
+                Log.e(TAG, "no permission for " + permission);
                 return false;
             }
         }
@@ -919,6 +918,14 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
             }
         }
         if (curAuthState != newAuthState) {
+            if (newAuthState == AUTHORIZATION_DENIED
+                    || newAuthState == AUTHORIZATION_DENIED_GRACE_PERIOD) {
+                Log.e(TAG, "updateNanoAppAuthState auth error: "
+                        + Long.toHexString(nanoAppId) + ", "
+                        + nanoappPermissions + ", "
+                        + gracePeriodExpired + ", "
+                        + forceDenied);
+            }
             // Don't send the callback in the synchronized block or it could end up in a deadlock.
             sendAuthStateCallback(nanoAppId, newAuthState);
         }
@@ -1275,10 +1282,6 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
     }
 
     private void sendMessageDeliveryStatusToContextHub(int messageSequenceNumber, byte errorCode) {
-        if (!Flags.reliableMessageImplementation()) {
-            return;
-        }
-
         MessageDeliveryStatus status = new MessageDeliveryStatus();
         status.messageSequenceNumber = messageSequenceNumber;
         status.errorCode = errorCode;

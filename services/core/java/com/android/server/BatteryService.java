@@ -160,6 +160,7 @@ public final class BatteryService extends SystemService {
     private int mLastChargeCounter;
     private int mLastBatteryCycleCount;
     private int mLastChargingState;
+    private int mLastBatteryCapacityLevel;
     /**
      * The last seen charging policy. This requires the
      * {@link android.Manifest.permission#BATTERY_STATS} permission and should therefore not be
@@ -238,13 +239,16 @@ public final class BatteryService extends SystemService {
                 final SomeArgs args = (SomeArgs) msg.obj;
                 final Context context;
                 final Intent intent;
+                final boolean forceUpdate;
                 try {
                     context = (Context) args.arg1;
                     intent = (Intent) args.arg2;
+                    forceUpdate = (Boolean) args.arg3;
                 } finally {
                     args.recycle();
                 }
-                broadcastBatteryChangedIntent(context, intent, BATTERY_CHANGED_OPTIONS);
+                broadcastBatteryChangedIntent(context, intent, BATTERY_CHANGED_OPTIONS,
+                        forceUpdate);
                 return true;
             }
             case MSG_BROADCAST_POWER_CONNECTION_CHANGED: {
@@ -606,7 +610,8 @@ public final class BatteryService extends SystemService {
                         || mHealthInfo.batteryChargeCounterUah != mLastChargeCounter
                         || mInvalidCharger != mLastInvalidCharger
                         || mHealthInfo.batteryCycleCount != mLastBatteryCycleCount
-                        || mHealthInfo.chargingState != mLastChargingState)) {
+                        || mHealthInfo.chargingState != mLastChargingState
+                        || mHealthInfo.batteryCapacityLevel != mLastBatteryCapacityLevel)) {
 
             if (mPlugType != mLastPlugType) {
                 if (mLastPlugType == BATTERY_PLUGGED_NONE) {
@@ -798,7 +803,7 @@ public final class BatteryService extends SystemService {
             // We are doing this after sending the above broadcasts, so anything processing
             // them will get the new sequence number at that point.  (See for example how testing
             // of JobScheduler's BatteryController works.)
-            sendBatteryChangedIntentLocked();
+            sendBatteryChangedIntentLocked(force);
             if (mLastBatteryLevel != mHealthInfo.batteryLevel || mLastPlugType != mPlugType) {
                 sendBatteryLevelChangedIntentLocked();
             }
@@ -826,10 +831,11 @@ public final class BatteryService extends SystemService {
             mLastInvalidCharger = mInvalidCharger;
             mLastBatteryCycleCount = mHealthInfo.batteryCycleCount;
             mLastChargingState = mHealthInfo.chargingState;
+            mLastBatteryCapacityLevel = mHealthInfo.batteryCapacityLevel;
         }
     }
 
-    private void sendBatteryChangedIntentLocked() {
+    private void sendBatteryChangedIntentLocked(boolean forceUpdate) {
         //  Pack up the values and broadcast them to everyone
         final Intent intent = new Intent(Intent.ACTION_BATTERY_CHANGED);
         intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY
@@ -859,6 +865,7 @@ public final class BatteryService extends SystemService {
         intent.putExtra(BatteryManager.EXTRA_CHARGE_COUNTER, mHealthInfo.batteryChargeCounterUah);
         intent.putExtra(BatteryManager.EXTRA_CYCLE_COUNT, mHealthInfo.batteryCycleCount);
         intent.putExtra(BatteryManager.EXTRA_CHARGING_STATUS, mHealthInfo.chargingState);
+        intent.putExtra(BatteryManager.EXTRA_CAPACITY_LEVEL, mHealthInfo.batteryCapacityLevel);
         if (DEBUG) {
             Slog.d(TAG, "Sending ACTION_BATTERY_CHANGED. scale:" + BATTERY_SCALE
                     + ", info:" + mHealthInfo.toString());
@@ -869,15 +876,17 @@ public final class BatteryService extends SystemService {
             final SomeArgs args = SomeArgs.obtain();
             args.arg1 = mContext;
             args.arg2 = intent;
+            args.arg3 = forceUpdate;
             mHandler.obtainMessage(MSG_BROADCAST_BATTERY_CHANGED, args).sendToTarget();
         } else {
             mHandler.post(() -> broadcastBatteryChangedIntent(mContext,
-                    intent, BATTERY_CHANGED_OPTIONS));
+                    intent, BATTERY_CHANGED_OPTIONS, forceUpdate));
         }
     }
 
     private static void broadcastBatteryChangedIntent(Context context, Intent intent,
-            Bundle options) {
+            Bundle options, boolean forceUpdate) {
+        traceBatteryChangedBroadcastEvent(intent, forceUpdate);
         // TODO (293959093): It is important that SystemUI receives this broadcast as soon as
         // possible. Ideally, it should be using binder callbacks but until then, dispatch this
         // as a foreground broadcast to SystemUI.
@@ -893,6 +902,53 @@ public final class BatteryService extends SystemService {
 
         ActivityManager.broadcastStickyIntent(intent, new String[] {sSystemUiPackage},
                 AppOpsManager.OP_NONE, options, UserHandle.USER_ALL);
+    }
+
+    private static void traceBatteryChangedBroadcastEvent(Intent intent, boolean forceUpdate) {
+        if (!com.android.server.flags.Flags.traceBatteryChangedBroadcastEvent()) {
+            return;
+        }
+        if (!Trace.isTagEnabled(Trace.TRACE_TAG_SYSTEM_SERVER)) return;
+
+        final StringBuilder builder = new StringBuilder();
+        builder.append("broadcastBatteryChanged; ");
+        builder.append("force="); builder.append(forceUpdate);
+        builder.append(",seq="); builder.append(intent.getIntExtra(
+                BatteryManager.EXTRA_SEQUENCE, -1));
+        builder.append(",s="); builder.append(intent.getIntExtra(
+                BatteryManager.EXTRA_STATUS, -1));
+        builder.append(",h="); builder.append(intent.getIntExtra(
+                BatteryManager.EXTRA_HEALTH, -1));
+        builder.append(",p="); builder.append(intent.getBooleanExtra(
+                BatteryManager.EXTRA_PRESENT, false));
+        builder.append(",l="); builder.append(intent.getIntExtra(
+                BatteryManager.EXTRA_LEVEL, -1));
+        builder.append(",bl="); builder.append(intent.getBooleanExtra(
+                BatteryManager.EXTRA_BATTERY_LOW, false));
+        builder.append(",sc="); builder.append(intent.getIntExtra(
+                BatteryManager.EXTRA_SCALE, -1));
+        builder.append(",pt="); builder.append(intent.getIntExtra(
+                BatteryManager.EXTRA_PLUGGED, -1));
+        builder.append(",v="); builder.append(intent.getIntExtra(
+                BatteryManager.EXTRA_VOLTAGE, -1));
+        builder.append(",t="); builder.append(intent.getIntExtra(
+                BatteryManager.EXTRA_TEMPERATURE, -1));
+        builder.append(",tech="); builder.append(intent.getStringExtra(
+                BatteryManager.EXTRA_TECHNOLOGY));
+        builder.append(",invc="); builder.append(intent.getIntExtra(
+                BatteryManager.EXTRA_INVALID_CHARGER, -1));
+        builder.append(",mcc="); builder.append(intent.getIntExtra(
+                BatteryManager.EXTRA_MAX_CHARGING_CURRENT, -1));
+        builder.append(",mcv="); builder.append(intent.getIntExtra(
+                BatteryManager.EXTRA_MAX_CHARGING_VOLTAGE, -1));
+        builder.append(",chc="); builder.append(intent.getIntExtra(
+                BatteryManager.EXTRA_CHARGE_COUNTER, -1));
+        builder.append(",cc="); builder.append(intent.getIntExtra(
+                BatteryManager.EXTRA_CYCLE_COUNT, -1));
+        builder.append(",chs="); builder.append(intent.getIntExtra(
+                BatteryManager.EXTRA_CHARGING_STATUS, -1));
+
+        Trace.instant(Trace.TRACE_TAG_SYSTEM_SERVER, builder.toString());
     }
 
     private void sendBatteryLevelChangedIntentLocked() {
@@ -912,6 +968,7 @@ public final class BatteryService extends SystemService {
         event.putLong(BatteryManager.EXTRA_EVENT_TIMESTAMP, now);
         event.putInt(BatteryManager.EXTRA_CYCLE_COUNT, mHealthInfo.batteryCycleCount);
         event.putInt(BatteryManager.EXTRA_CHARGING_STATUS, mHealthInfo.chargingState);
+        event.putInt(BatteryManager.EXTRA_CAPACITY_LEVEL, mHealthInfo.batteryCapacityLevel);
 
         boolean queueWasEmpty = mBatteryLevelsEventQueue.isEmpty();
         mBatteryLevelsEventQueue.add(event);
@@ -1349,6 +1406,7 @@ public final class BatteryService extends SystemService {
                 pw.println("  technology: " + mHealthInfo.batteryTechnology);
                 pw.println("  Charging state: " + mHealthInfo.chargingState);
                 pw.println("  Charging policy: " + mHealthInfo.chargingPolicy);
+                pw.println("  Capacity level: " + mHealthInfo.batteryCapacityLevel);
             } else {
                 Shell shell = new Shell();
                 shell.exec(mBinderService, null, fd, null, args, null, new ResultReceiver(null));

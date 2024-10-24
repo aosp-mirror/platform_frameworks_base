@@ -20,6 +20,8 @@ import static android.app.sdksandbox.SdkSandboxManager.ACTION_START_SANDBOXED_AC
 import static android.content.ContentProvider.maybeAddUserId;
 import static android.os.Flags.FLAG_ALLOW_PRIVATE_PROFILE;
 import static android.security.Flags.FLAG_FRP_ENFORCEMENT;
+import static android.security.Flags.FLAG_PREVENT_INTENT_REDIRECT;
+import static android.security.Flags.preventIntentRedirect;
 
 import android.Manifest;
 import android.accessibilityservice.AccessibilityService;
@@ -39,7 +41,10 @@ import android.app.Activity;
 import android.app.ActivityThread;
 import android.app.AppGlobals;
 import android.app.StatusBarManager;
+import android.app.compat.CompatChanges;
 import android.bluetooth.BluetoothDevice;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.Overridable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
@@ -86,6 +91,7 @@ import android.util.Log;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.util.XmlUtils;
+import com.android.modules.expresslog.Counter;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -668,6 +674,11 @@ import java.util.TimeZone;
 public class Intent implements Parcelable, Cloneable {
     private static final String TAG = "Intent";
 
+    /** @hide */
+    @ChangeId
+    @Overridable
+    public static final long ENABLE_PREVENT_INTENT_REDIRECT = 29076063L;
+
     private static final String ATTR_ACTION = "action";
     private static final String TAG_CATEGORIES = "categories";
     private static final String ATTR_CATEGORY = "category";
@@ -886,6 +897,22 @@ public class Intent implements Parcelable, Cloneable {
     public static final String ACTION_ACTIVITY_RECOGNIZER =
             "android.intent.action.ACTIVITY_RECOGNIZER";
 
+    /** @hide */
+    public static void maybeMarkAsMissingCreatorToken(Object object) {
+        if (object instanceof Intent intent) {
+            maybeMarkAsMissingCreatorTokenInternal(intent);
+        }
+    }
+
+    private static void maybeMarkAsMissingCreatorTokenInternal(Intent intent) {
+        boolean isForeign = (intent.mLocalFlags & LOCAL_FLAG_FROM_PARCEL) != 0;
+        boolean isWithoutTrustedCreatorToken =
+                (intent.mLocalFlags & Intent.LOCAL_FLAG_TRUSTED_CREATOR_TOKEN_PRESENT) == 0;
+        if (isForeign && isWithoutTrustedCreatorToken) {
+            intent.addExtendedFlags(EXTENDED_FLAG_MISSING_CREATOR_OR_INVALID_TOKEN);
+        }
+    }
+
     /**
      * Represents a shortcut/live folder icon resource.
      *
@@ -1062,11 +1089,7 @@ public class Intent implements Parcelable, Cloneable {
         }
 
         if (sender != null) {
-            if (android.service.chooser.Flags.enableChooserResult()) {
-                intent.putExtra(EXTRA_CHOOSER_RESULT_INTENT_SENDER, sender);
-            } else {
-                intent.putExtra(EXTRA_CHOSEN_COMPONENT_INTENT_SENDER, sender);
-            }
+            intent.putExtra(EXTRA_CHOOSER_RESULT_INTENT_SENDER, sender);
         }
 
         // Migrate any clip data and flags from target.
@@ -6423,7 +6446,6 @@ public class Intent implements Parcelable, Cloneable {
      * activity. The IntentSender will have the extra {@link #EXTRA_CHOOSER_RESULT} describing
      * the result.
      */
-    @FlaggedApi(android.service.chooser.Flags.FLAG_ENABLE_CHOOSER_RESULT)
     public static final String EXTRA_CHOOSER_RESULT_INTENT_SENDER =
             "android.intent.extra.CHOOSER_RESULT_INTENT_SENDER";
 
@@ -6433,7 +6455,6 @@ public class Intent implements Parcelable, Cloneable {
      * An instance is supplied to the optional IntentSender provided to
      * {@link #createChooser(Intent, CharSequence, IntentSender)} when the session completes.
      */
-    @FlaggedApi(android.service.chooser.Flags.FLAG_ENABLE_CHOOSER_RESULT)
     public static final String EXTRA_CHOOSER_RESULT = "android.intent.extra.CHOOSER_RESULT";
 
     /**
@@ -7686,9 +7707,15 @@ public class Intent implements Parcelable, Cloneable {
     /** @hide */
     public static final int LOCAL_FLAG_FROM_SYSTEM = 1 << 5;
 
+    /**
+     * This flag indicates the creator token of this intent has been verified.
+     */
+    private static final int LOCAL_FLAG_TRUSTED_CREATOR_TOKEN_PRESENT = 1 << 6;
+
     /** @hide */
     @IntDef(flag = true, prefix = { "EXTENDED_FLAG_" }, value = {
             EXTENDED_FLAG_FILTER_MISMATCH,
+            EXTENDED_FLAG_MISSING_CREATOR_OR_INVALID_TOKEN,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ExtendedFlags {}
@@ -7701,6 +7728,13 @@ public class Intent implements Parcelable, Cloneable {
      */
     @TestApi
     public static final int EXTENDED_FLAG_FILTER_MISMATCH = 1 << 0;
+
+    /**
+     * This flag indicates the creator token of this intent is either missing or invalid.
+     *
+     * @hide
+     */
+    public static final int EXTENDED_FLAG_MISSING_CREATOR_OR_INVALID_TOKEN = 1 << 1;
 
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
@@ -7869,6 +7903,7 @@ public class Intent implements Parcelable, Cloneable {
         this.mPackage = o.mPackage;
         this.mComponent = o.mComponent;
         this.mOriginalIntent = o.mOriginalIntent;
+        this.mCreatorTokenInfo = o.mCreatorTokenInfo;
 
         if (o.mCategories != null) {
             this.mCategories = new ArraySet<>(o.mCategories);
@@ -12175,6 +12210,108 @@ public class Intent implements Parcelable, Cloneable {
         return (mExtras != null) ? mExtras.describeContents() : 0;
     }
 
+    private static class CreatorTokenInfo {
+        // Stores a creator token for an intent embedded as an extra intent in a top level intent,
+        private IBinder mCreatorToken;
+        // Stores all extra keys whose values are intents for a top level intent.
+        private ArraySet<String> mExtraIntentKeys;
+    }
+
+    private @Nullable CreatorTokenInfo mCreatorTokenInfo;
+
+    /** @hide */
+    public void removeCreatorTokenInfo() {
+        mCreatorTokenInfo = null;
+    }
+
+    /** @hide */
+    public @Nullable IBinder getCreatorToken() {
+        return mCreatorTokenInfo == null ? null : mCreatorTokenInfo.mCreatorToken;
+    }
+
+    /** @hide */
+    public Set<String> getExtraIntentKeys() {
+        return mCreatorTokenInfo == null ? null : mCreatorTokenInfo.mExtraIntentKeys;
+    }
+
+    /** @hide */
+    public void setCreatorToken(@NonNull IBinder creatorToken) {
+        if (mCreatorTokenInfo == null) {
+            mCreatorTokenInfo = new CreatorTokenInfo();
+        }
+        mCreatorTokenInfo.mCreatorToken = creatorToken;
+    }
+
+    /**
+     * Collects keys in the extra bundle whose value are intents.
+     * With these keys collected on the client side, the system server would only unparcel values
+     * of these keys and create IntentCreatorToken for them.
+     * @hide
+     */
+    public void collectExtraIntentKeys() {
+        if (!isPreventIntentRedirectEnabled()) return;
+
+        if (mExtras != null && !mExtras.isParcelled() && !mExtras.isEmpty()) {
+            for (String key : mExtras.keySet()) {
+                if (mExtras.get(key) instanceof Intent) {
+                    if (mCreatorTokenInfo == null) {
+                        mCreatorTokenInfo = new CreatorTokenInfo();
+                    }
+                    if (mCreatorTokenInfo.mExtraIntentKeys == null) {
+                        mCreatorTokenInfo.mExtraIntentKeys = new ArraySet<>();
+                    }
+                    mCreatorTokenInfo.mExtraIntentKeys.add(key);
+                }
+            }
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public static boolean isPreventIntentRedirectEnabled() {
+        return preventIntentRedirect() && CompatChanges.isChangeEnabled(
+                ENABLE_PREVENT_INTENT_REDIRECT);
+    }
+
+    /** @hide */
+    public void checkCreatorToken() {
+        if (mExtras == null) return;
+        if (mCreatorTokenInfo != null && mCreatorTokenInfo.mExtraIntentKeys != null) {
+            for (String key : mCreatorTokenInfo.mExtraIntentKeys) {
+                try {
+                    Intent extraIntent = mExtras.getParcelable(key, Intent.class);
+                    if (extraIntent == null) {
+                        Log.w(TAG, "The key {" + key
+                                + "} does not correspond to an intent in the bundle.");
+                        continue;
+                    }
+                    extraIntent.mLocalFlags |= LOCAL_FLAG_TRUSTED_CREATOR_TOKEN_PRESENT;
+                } catch (Exception e) {
+                    Log.e(TAG, "Failed to validate creator token. key: " + key + ".", e);
+                }
+            }
+        }
+        // mark the bundle as intent extras after calls to getParcelable.
+        // otherwise, the logic to mark missing token would run before
+        // mark trusted creator token present.
+        mExtras.setIsIntentExtra();
+    }
+
+    /**
+     * When an intent comes from another app or component as an embedded extra intent, the system
+     * creates a token to identify the creator of this foreign intent. If this token is missing or
+     * invalid, the system will block the launch of this intent. If it contains a valid token, the
+     * system will perform verification against the creator to block launching target it has no
+     * permission to launch or block it from granting URI access to the tagert it cannot access.
+     * This method provides a way to opt out this feature.
+     */
+    @FlaggedApi(FLAG_PREVENT_INTENT_REDIRECT)
+    public void removeLaunchSecurityProtection() {
+        mExtendedFlags &= ~EXTENDED_FLAG_MISSING_CREATOR_OR_INVALID_TOKEN;
+        removeCreatorTokenInfo();
+    }
+
     public void writeToParcel(Parcel out, int flags) {
         out.writeString8(mAction);
         Uri.writeToParcel(out, mData);
@@ -12223,6 +12360,16 @@ public class Intent implements Parcelable, Cloneable {
             mOriginalIntent.writeToParcel(out, flags);
         } else {
             out.writeInt(0);
+        }
+
+        if (isPreventIntentRedirectEnabled()) {
+            if (mCreatorTokenInfo == null) {
+                out.writeInt(0);
+            } else {
+                out.writeInt(1);
+                out.writeStrongBinder(mCreatorTokenInfo.mCreatorToken);
+                out.writeArraySet(mCreatorTokenInfo.mExtraIntentKeys);
+            }
         }
     }
 
@@ -12280,6 +12427,14 @@ public class Intent implements Parcelable, Cloneable {
         mExtras = in.readBundle();
         if (in.readInt() != 0) {
             mOriginalIntent = new Intent(in);
+        }
+
+        if (isPreventIntentRedirectEnabled()) {
+            if (in.readInt() != 0) {
+                mCreatorTokenInfo = new CreatorTokenInfo();
+                mCreatorTokenInfo.mCreatorToken = in.readStrongBinder();
+                mCreatorTokenInfo.mExtraIntentKeys = (ArraySet<String>) in.readArraySet(null);
+            }
         }
     }
 
@@ -12499,22 +12654,29 @@ public class Intent implements Parcelable, Cloneable {
      */
     @android.ravenwood.annotation.RavenwoodThrow
     public void prepareToLeaveProcess(boolean leavingPackage) {
+        prepareToLeaveProcess(leavingPackage, true);
+    }
+
+    /**
+     * @hide
+     */
+    void prepareToLeaveProcess(boolean leavingPackage, boolean isTopLevel) {
         setAllowFds(false);
 
         if (mSelector != null) {
-            mSelector.prepareToLeaveProcess(leavingPackage);
+            mSelector.prepareToLeaveProcess(leavingPackage, false);
         }
         if (mClipData != null) {
             mClipData.prepareToLeaveProcess(leavingPackage, getFlags());
         }
         if (mOriginalIntent != null) {
-            mOriginalIntent.prepareToLeaveProcess(leavingPackage);
+            mOriginalIntent.prepareToLeaveProcess(leavingPackage, false);
         }
 
         if (mExtras != null && !mExtras.isParcelled()) {
             final Object intent = mExtras.get(Intent.EXTRA_INTENT);
             if (intent instanceof Intent) {
-                ((Intent) intent).prepareToLeaveProcess(leavingPackage);
+                ((Intent) intent).prepareToLeaveProcess(leavingPackage, false);
             }
         }
 
@@ -12588,6 +12750,10 @@ public class Intent implements Parcelable, Cloneable {
                 StrictMode.onUnsafeIntentLaunch(this);
             }
         }
+
+        if (isTopLevel) {
+            collectExtraIntentKeys();
+        }
     }
 
     /**
@@ -12633,6 +12799,7 @@ public class Intent implements Parcelable, Cloneable {
         }
 
         mLocalFlags |= localFlags;
+        checkCreatorToken();
 
         // Special attribution fix-up logic for any BluetoothDevice extras
         // passed via Bluetooth intents
@@ -12805,6 +12972,8 @@ public class Intent implements Parcelable, Cloneable {
                             new ClipData.Item(text, htmlText, null, stream));
                     setClipData(clipData);
                     if (stream != null) {
+                        logCounterIfFlagsMissing(FLAG_GRANT_READ_URI_PERMISSION,
+                                "intents.value_explicit_uri_grant_for_send_action");
                         addFlags(FLAG_GRANT_READ_URI_PERMISSION);
                     }
                     return true;
@@ -12846,6 +13015,8 @@ public class Intent implements Parcelable, Cloneable {
 
                     setClipData(clipData);
                     if (streams != null) {
+                        logCounterIfFlagsMissing(FLAG_GRANT_READ_URI_PERMISSION,
+                                "intents.value_explicit_uri_grant_for_send_multiple_action");
                         addFlags(FLAG_GRANT_READ_URI_PERMISSION);
                     }
                     return true;
@@ -12865,12 +13036,22 @@ public class Intent implements Parcelable, Cloneable {
                 putExtra(MediaStore.EXTRA_OUTPUT, output);
 
                 setClipData(ClipData.newRawUri("", output));
+
+                logCounterIfFlagsMissing(
+                        FLAG_GRANT_WRITE_URI_PERMISSION | FLAG_GRANT_READ_URI_PERMISSION,
+                        "intents.value_explicit_uri_grant_for_image_capture_action");
                 addFlags(FLAG_GRANT_WRITE_URI_PERMISSION|FLAG_GRANT_READ_URI_PERMISSION);
                 return true;
             }
         }
 
         return false;
+    }
+
+    private void logCounterIfFlagsMissing(int requiredFlags, String metricId) {
+        if ((getFlags() & requiredFlags) != requiredFlags) {
+            Counter.logIncrement(metricId);
+        }
     }
 
     @android.ravenwood.annotation.RavenwoodThrow

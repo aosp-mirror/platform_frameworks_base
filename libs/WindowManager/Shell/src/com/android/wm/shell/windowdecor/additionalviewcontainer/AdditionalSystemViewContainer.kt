@@ -23,25 +23,40 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.SurfaceControl
 import android.view.View
+import android.view.WindowInsets
 import android.view.WindowManager
+import com.android.wm.shell.windowdecor.WindowManagerWrapper
 
 /**
  * An [AdditionalViewContainer] that uses the system [WindowManager] instance. Intended
  * for view containers that should be above the status bar layer.
  */
 class AdditionalSystemViewContainer(
-    context: Context,
+    private val windowManagerWrapper: WindowManagerWrapper,
     taskId: Int,
     x: Int,
     y: Int,
     width: Int,
     height: Int,
     flags: Int,
+    @WindowInsets.Type.InsetsType forciblyShownTypes: Int = 0,
     override val view: View
 ) : AdditionalViewContainer() {
+    val lp: WindowManager.LayoutParams = WindowManager.LayoutParams(
+        width, height, x, y,
+        WindowManager.LayoutParams.TYPE_STATUS_BAR_ADDITIONAL,
+        flags,
+        PixelFormat.TRANSPARENT
+    ).apply {
+        title = "Additional view container of Task=$taskId"
+        gravity = Gravity.LEFT or Gravity.TOP
+        setTrustedOverlay()
+        this.forciblyShownTypes = forciblyShownTypes
+    }
 
     constructor(
         context: Context,
+        windowManagerWrapper: WindowManagerWrapper,
         taskId: Int,
         x: Int,
         y: Int,
@@ -50,7 +65,7 @@ class AdditionalSystemViewContainer(
         flags: Int,
         @LayoutRes layoutId: Int
     ) : this(
-        context = context,
+        windowManagerWrapper = windowManagerWrapper,
         taskId = taskId,
         x = x,
         y = y,
@@ -61,9 +76,16 @@ class AdditionalSystemViewContainer(
     )
 
     constructor(
-        context: Context, taskId: Int, x: Int, y: Int, width: Int, height: Int, flags: Int
+        context: Context,
+        windowManagerWrapper: WindowManagerWrapper,
+        taskId: Int,
+        x: Int,
+        y: Int,
+        width: Int,
+        height: Int,
+        flags: Int
     ) : this(
-        context = context,
+        windowManagerWrapper = windowManagerWrapper,
         taskId = taskId,
         x = x,
         y = y,
@@ -73,24 +95,12 @@ class AdditionalSystemViewContainer(
         view = View(context)
     )
 
-    val windowManager: WindowManager? = context.getSystemService(WindowManager::class.java)
-
     init {
-        val lp = WindowManager.LayoutParams(
-            width, height, x, y,
-            WindowManager.LayoutParams.TYPE_STATUS_BAR_ADDITIONAL,
-            flags,
-            PixelFormat.TRANSPARENT
-        ).apply {
-            title = "Additional view container of Task=$taskId"
-            gravity = Gravity.LEFT or Gravity.TOP
-            setTrustedOverlay()
-        }
-        windowManager?.addView(view, lp)
+        windowManagerWrapper.addView(view, lp)
     }
 
     override fun releaseView() {
-        windowManager?.removeViewImmediate(view)
+        windowManagerWrapper.removeViewImmediate(view)
     }
 
     override fun setPosition(t: SurfaceControl.Transaction, x: Float, y: Float) {
@@ -98,6 +108,29 @@ class AdditionalSystemViewContainer(
             this.x = x.toInt()
             this.y = y.toInt()
         }
-        windowManager?.updateViewLayout(view, lp)
+        windowManagerWrapper.updateViewLayout(view, lp)
+    }
+
+    class Factory {
+        fun create(
+            windowManagerWrapper: WindowManagerWrapper,
+            taskId: Int,
+            x: Int,
+            y: Int,
+            width: Int,
+            height: Int,
+            flags: Int,
+            view: View,
+        ): AdditionalSystemViewContainer =
+            AdditionalSystemViewContainer(
+                windowManagerWrapper = windowManagerWrapper,
+                taskId = taskId,
+                x = x,
+                y = y,
+                width = width,
+                height = height,
+                flags = flags,
+                view = view
+            )
     }
 }

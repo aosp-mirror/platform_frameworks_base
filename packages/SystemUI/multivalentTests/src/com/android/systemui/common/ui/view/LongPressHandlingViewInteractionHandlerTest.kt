@@ -67,7 +67,8 @@ class LongPressHandlingViewInteractionHandlerTest : SysuiTestCase() {
                 isAttachedToWindow = { isAttachedToWindow },
                 onLongPressDetected = onLongPressDetected,
                 onSingleTapDetected = onSingleTapDetected,
-                longPressDuration = { ViewConfiguration.getLongPressTimeout().toLong() }
+                longPressDuration = { ViewConfiguration.getLongPressTimeout().toLong() },
+                allowedTouchSlop = ViewConfiguration.getTouchSlop(),
             )
         underTest.isLongPressHandlingEnabled = true
     }

@@ -38,6 +38,7 @@ import com.android.systemui.shade.ShadeLogger
 import com.android.systemui.shade.ShadeViewController
 import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor
 import com.android.systemui.shared.animation.UnfoldMoveFromCenterAnimator
+import com.android.systemui.statusbar.data.repository.StatusBarContentInsetsProviderStore
 import com.android.systemui.statusbar.policy.Clock
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.window.StatusBarWindowStateController
@@ -78,7 +79,27 @@ private constructor(
 
     private lateinit var battery: BatteryMeterView
     private lateinit var clock: Clock
-    private lateinit var statusContainer: View
+    private lateinit var startSideContainer: View
+    private lateinit var endSideContainer: View
+
+    private val iconsOnTouchListener =
+        object : View.OnTouchListener {
+            override fun onTouch(v: View, event: MotionEvent): Boolean {
+                // We want to handle only mouse events here to avoid stealing finger touches
+                // from status bar which expands shade when swiped down on. See b/326097469.
+                // We're using onTouchListener instead of onClickListener as the later will lead
+                // to isClickable being set to true and hence ALL touches always being
+                // intercepted. See [View.OnTouchEvent]
+                if (event.source == InputDevice.SOURCE_MOUSE) {
+                    if (event.action == MotionEvent.ACTION_UP) {
+                        v.performClick()
+                        shadeController.animateExpandShade()
+                    }
+                    return true
+                }
+                return false
+            }
+        }
 
     private val configurationListener =
         object : ConfigurationController.ConfigurationListener {
@@ -88,34 +109,10 @@ private constructor(
         }
 
     override fun onViewAttached() {
-        statusContainer = mView.requireViewById(R.id.system_icons)
         clock = mView.requireViewById(R.id.clock)
         battery = mView.requireViewById(R.id.battery)
-
         addDarkReceivers()
-
-        statusContainer.setOnHoverListener(
-            statusOverlayHoverListenerFactory.createDarkAwareListener(statusContainer)
-        )
-        statusContainer.setOnTouchListener(
-            object : View.OnTouchListener {
-                override fun onTouch(v: View, event: MotionEvent): Boolean {
-                    // We want to handle only mouse events here to avoid stealing finger touches
-                    // from status bar which expands shade when swiped down on. See b/326097469.
-                    // We're using onTouchListener instead of onClickListener as the later will lead
-                    // to isClickable being set to true and hence ALL touches always being
-                    // intercepted. See [View.OnTouchEvent]
-                    if (event.source == InputDevice.SOURCE_MOUSE) {
-                        if (event.action == MotionEvent.ACTION_UP) {
-                            v.performClick()
-                            shadeController.animateExpandShade()
-                        }
-                        return true
-                    }
-                    return false
-                }
-            }
-        )
+        addCursorSupportToIconContainers()
 
         progressProvider?.setReadyToHandleTransition(true)
         configurationController.addCallback(configurationListener)
@@ -146,10 +143,29 @@ private constructor(
         }
     }
 
+    private fun addCursorSupportToIconContainers() {
+        endSideContainer = mView.requireViewById(R.id.system_icons)
+        endSideContainer.setOnHoverListener(
+            statusOverlayHoverListenerFactory.createDarkAwareListener(endSideContainer)
+        )
+        endSideContainer.setOnTouchListener(iconsOnTouchListener)
+
+        startSideContainer = mView.requireViewById(R.id.status_bar_start_side_content)
+        startSideContainer.setOnHoverListener(
+            statusOverlayHoverListenerFactory.createDarkAwareListener(
+                startSideContainer,
+                topHoverMargin = 6,
+                bottomHoverMargin = 6,
+            )
+        )
+        startSideContainer.setOnTouchListener(iconsOnTouchListener)
+    }
+
     @VisibleForTesting
     public override fun onViewDetached() {
         removeDarkReceivers()
-        statusContainer.setOnHoverListener(null)
+        startSideContainer.setOnHoverListener(null)
+        endSideContainer.setOnHoverListener(null)
         progressProvider?.setReadyToHandleTransition(false)
         moveFromCenterAnimationController?.onViewDetached()
         configurationController.removeCallback(configurationListener)
@@ -199,7 +215,7 @@ private constructor(
                 event.action == MotionEvent.ACTION_UP || event.action == MotionEvent.ACTION_CANCEL
             centralSurfaces.setInteracting(
                 WINDOW_STATUS_BAR,
-                !upOrCancel || shadeController.isExpandedVisible
+                !upOrCancel || shadeController.isExpandedVisible,
             )
         }
     }
@@ -236,7 +252,7 @@ private constructor(
                         String.format(
                             "onTouchForwardedFromStatusBar: panel disabled, " +
                                 "ignoring touch at (${event.x.toInt()},${event.y.toInt()})"
-                        )
+                        ),
                     )
                 }
                 return false
@@ -255,7 +271,7 @@ private constructor(
                 if (!shadeViewController.isViewEnabled) {
                     shadeLogger.logMotionEvent(
                         event,
-                        "onTouchForwardedFromStatusBar: panel view disabled"
+                        "onTouchForwardedFromStatusBar: panel view disabled",
                     )
                     return true
                 }
@@ -318,7 +334,7 @@ private constructor(
         private val configurationController: ConfigurationController,
         private val statusOverlayHoverListenerFactory: StatusOverlayHoverListenerFactory,
         private val darkIconDispatcher: DarkIconDispatcher,
-        private val statusBarContentInsetsProvider: StatusBarContentInsetsProvider,
+        private val statusBarContentInsetsProviderStore: StatusBarContentInsetsProviderStore,
     ) {
         fun create(view: PhoneStatusBarView): PhoneStatusBarViewController {
             val statusBarMoveFromCenterAnimationController =
@@ -344,7 +360,7 @@ private constructor(
                 configurationController,
                 statusOverlayHoverListenerFactory,
                 darkIconDispatcher,
-                statusBarContentInsetsProvider,
+                statusBarContentInsetsProviderStore.defaultDisplay,
             )
         }
     }

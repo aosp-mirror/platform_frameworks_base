@@ -25,10 +25,10 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
 
+import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.isA;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
@@ -95,6 +95,7 @@ import org.mockito.MockitoSession;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class NetworkControllerBaseTest extends SysuiTestCase {
@@ -296,7 +297,8 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
         assertNotNull(mDefaultCallbackInWifiTracker);
         assertNotNull(mDefaultCallbackInNetworkController);
         verify(mMockCm, atLeastOnce()).registerNetworkCallback(
-                isA(NetworkRequest.class), callbackArg.capture(), isA(Handler.class));
+                isA(NetworkRequest.class), callbackArg.capture(),
+                isA(Handler.class));
         mNetworkCallback = callbackArg.getValue();
         assertNotNull(mNetworkCallback);
     }
@@ -332,10 +334,15 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
     }
 
     public void setConnectivityViaCallbackInNetworkControllerForVcn(
-            int networkType, boolean validated, boolean isConnected, VcnTransportInfo info) {
+            int networkType,
+            boolean validated,
+            boolean isConnected,
+            VcnTransportInfo info,
+            Network underlyingNetwork) {
         final NetworkCapabilities.Builder builder =
                 new NetworkCapabilities.Builder(mNetCapabilities);
-        builder.setTransportInfo(info);
+        builder.setTransportInfo(info)
+                .setUnderlyingNetworks(Collections.singletonList(underlyingNetwork));
         setConnectivityCommon(builder, networkType, validated, isConnected);
         mDefaultCallbackInNetworkController.onCapabilitiesChanged(
                 mock(Network.class), builder.build());
@@ -385,10 +392,15 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
     }
 
     public void setConnectivityViaCallbackInWifiTrackerForVcn(
-            int networkType, boolean validated, boolean isConnected, VcnTransportInfo info) {
+            int networkType,
+            boolean validated,
+            boolean isConnected,
+            VcnTransportInfo info,
+            Network underlyingNetwork) {
         final NetworkCapabilities.Builder builder =
                 new NetworkCapabilities.Builder(mNetCapabilities);
-        builder.setTransportInfo(info);
+        builder.setTransportInfo(info)
+                .setUnderlyingNetworks(Collections.singletonList(underlyingNetwork));
         setConnectivityCommon(builder, networkType, validated, isConnected);
         if (networkType == NetworkCapabilities.TRANSPORT_CELLULAR) {
             if (isConnected) {

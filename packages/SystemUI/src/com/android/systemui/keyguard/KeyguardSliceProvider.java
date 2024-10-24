@@ -515,7 +515,13 @@ public class KeyguardSliceProvider extends SliceProvider implements
     }
 
     protected void notifyChange() {
-        mBgHandler.post(() -> mContentResolver.notifyChange(mSliceUri, null /* observer */));
+        mBgHandler.post(() -> {
+            try {
+                mContentResolver.notifyChange(mSliceUri, null /* observer */);
+            } catch (Exception e) {
+                Log.e(TAG, "Error on mContentResolver.notifyChange()", e);
+            }
+        });
     }
 
     @Override

@@ -19,7 +19,7 @@ package com.android.systemui.keyguard.domain.interactor
 import android.animation.ValueAnimator
 import android.util.MathUtils
 import com.android.app.animation.Interpolators
-import com.android.app.tracing.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.Flags.communalSceneKtfRefactor
 import com.android.systemui.communal.domain.interactor.CommunalSettingsInteractor
 import com.android.systemui.dagger.SysUISingleton
@@ -51,7 +51,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 @SysUISingleton
 class FromLockscreenTransitionInteractor
@@ -108,7 +108,7 @@ constructor(
             .transition(
                 edge = Edge.create(from = KeyguardState.LOCKSCREEN, to = Scenes.Gone),
                 edgeWithoutSceneContainer =
-                    Edge.create(from = KeyguardState.LOCKSCREEN, to = KeyguardState.GONE)
+                    Edge.create(from = KeyguardState.LOCKSCREEN, to = KeyguardState.GONE),
             )
             .map<TransitionStep, Boolean?> {
                 true // Make the surface visible during LS -> GONE transitions.
@@ -135,20 +135,13 @@ constructor(
                 .sampleCombine(
                     internalTransitionInteractor.currentTransitionInfoInternal,
                     transitionInteractor.isFinishedIn(KeyguardState.LOCKSCREEN),
-                    keyguardInteractor.isActiveDreamLockscreenHosted,
                 )
-                .collect {
-                    (isAbleToDream, transitionInfo, isOnLockscreen, isActiveDreamLockscreenHosted)
-                    ->
+                .collect { (isAbleToDream, transitionInfo, isOnLockscreen) ->
                     val isTransitionInterruptible =
                         transitionInfo.to == KeyguardState.LOCKSCREEN &&
                             !invalidFromStates.contains(transitionInfo.from)
                     if (isAbleToDream && (isOnLockscreen || isTransitionInterruptible)) {
-                        if (isActiveDreamLockscreenHosted) {
-                            startTransitionTo(KeyguardState.DREAMING_LOCKSCREEN_HOSTED)
-                        } else {
-                            startTransitionTo(KeyguardState.DREAMING)
-                        }
+                        startTransitionTo(KeyguardState.DREAMING)
                     }
                 }
         }
@@ -162,7 +155,7 @@ constructor(
                 .collect {
                     startTransitionTo(
                         KeyguardState.PRIMARY_BOUNCER,
-                        ownerReason = "#listenForLockscreenToPrimaryBouncer"
+                        ownerReason = "#listenForLockscreenToPrimaryBouncer",
                     )
                 }
         }
@@ -189,6 +182,7 @@ constructor(
                     internalTransitionInteractor.currentTransitionInfoInternal,
                     keyguardInteractor.statusBarState,
                     keyguardInteractor.isKeyguardDismissible,
+                    keyguardInteractor.isKeyguardOccluded,
                 )
                 .collect {
                     (
@@ -196,7 +190,8 @@ constructor(
                         startedStep,
                         currentTransitionInfo,
                         statusBarState,
-                        isKeyguardUnlocked) ->
+                        isKeyguardUnlocked,
+                        isKeyguardOccluded) ->
                     val id = transitionId
                     if (id != null) {
                         if (startedStep.to == KeyguardState.PRIMARY_BOUNCER) {
@@ -210,13 +205,18 @@ constructor(
                                 } else {
                                     TransitionState.RUNNING
                                 }
-                            transitionRepository.updateTransition(
-                                id,
-                                // This maps the shadeExpansion to a much faster curve, to match
-                                // the existing logic
-                                1f - MathUtils.constrainedMap(0f, 1f, 0.95f, 1f, shadeExpansion),
-                                nextState,
-                            )
+
+                            // startTransition below will issue the CANCELED directly
+                            if (nextState != TransitionState.CANCELED) {
+                                transitionRepository.updateTransition(
+                                    id,
+                                    // This maps the shadeExpansion to a much faster curve, to match
+                                    // the existing logic
+                                    1f -
+                                        MathUtils.constrainedMap(0f, 1f, 0.95f, 1f, shadeExpansion),
+                                    nextState,
+                                )
+                            }
 
                             if (
                                 nextState == TransitionState.CANCELED ||
@@ -231,14 +231,19 @@ constructor(
                             if (nextState == TransitionState.CANCELED) {
                                 transitionRepository.startTransition(
                                     TransitionInfo(
-                                        ownerName = name,
+                                        ownerName =
+                                            "$name " +
+                                                "(on behalf of FromPrimaryBouncerInteractor)",
                                         from = KeyguardState.PRIMARY_BOUNCER,
-                                        to = KeyguardState.LOCKSCREEN,
+                                        to =
+                                            if (isKeyguardOccluded) KeyguardState.OCCLUDED
+                                            else KeyguardState.LOCKSCREEN,
+                                        modeOnCanceled = TransitionModeOnCanceled.REVERSE,
                                         animator =
                                             getDefaultAnimatorForTransitionsToState(
                                                     KeyguardState.LOCKSCREEN
                                                 )
-                                                .apply { duration = 0 }
+                                                .apply { duration = 100L },
                                     )
                                 )
                             }
@@ -249,6 +254,8 @@ constructor(
                         if (
                             // Use currentTransitionInfo to decide whether to start the transition.
                             currentTransitionInfo.to == KeyguardState.LOCKSCREEN &&
+                                shadeExpansion > 0f &&
+                                shadeExpansion < 1f &&
                                 shadeRepository.legacyShadeTracking.value &&
                                 !isKeyguardUnlocked &&
                                 statusBarState == KEYGUARD
@@ -257,7 +264,7 @@ constructor(
                                 startTransitionTo(
                                     toState = KeyguardState.PRIMARY_BOUNCER,
                                     animator = null, // transition will be manually controlled,
-                                    ownerReason = "#listenForLockscreenToPrimaryBouncerDragging"
+                                    ownerReason = "#listenForLockscreenToPrimaryBouncerDragging",
                                 )
                         }
                     }
@@ -351,7 +358,7 @@ constructor(
         if (!communalSettingsInteractor.isCommunalFlagEnabled()) {
             return
         }
-        scope.launch(mainDispatcher) {
+        scope.launch(context = mainDispatcher) {
             glanceableHubTransitions.listenForGlanceableHubTransition(
                 transitionOwnerName = TAG,
                 fromState = KeyguardState.LOCKSCREEN,
@@ -376,7 +383,6 @@ constructor(
                             TO_AOD_DURATION
                         }
                     KeyguardState.DOZING -> TO_DOZING_DURATION
-                    KeyguardState.DREAMING_LOCKSCREEN_HOSTED -> TO_DREAMING_HOSTED_DURATION
                     KeyguardState.GLANCEABLE_HUB -> TO_GLANCEABLE_HUB_DURATION
                     else -> DEFAULT_DURATION
                 }.inWholeMilliseconds
@@ -388,7 +394,6 @@ constructor(
         private val DEFAULT_DURATION = 400.milliseconds
         val TO_DOZING_DURATION = 500.milliseconds
         val TO_DREAMING_DURATION = 933.milliseconds
-        val TO_DREAMING_HOSTED_DURATION = 933.milliseconds
         val TO_OCCLUDED_DURATION = 550.milliseconds
         val TO_AOD_DURATION = 500.milliseconds
         val TO_AOD_FOLD_DURATION = 1100.milliseconds

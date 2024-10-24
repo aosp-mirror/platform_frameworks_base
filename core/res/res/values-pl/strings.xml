@@ -1748,7 +1748,7 @@
     <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"Aplikacja zasłania prośbę o uprawnienia, więc nie można zweryfikować Twojej odpowiedzi."</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Wybierz funkcję, aby zacząć z niej korzystać:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Wybierz funkcje, których chcesz używać z przyciskiem ułatwień dostępu"</string>
-    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Wybierz funkcje, do których chcesz używać skrótu z klawiszami głośności"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2245540598834891500">"Wybierz funkcje, do których chcesz używać skrótu z przyciskami głośności"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"Usługa <xliff:g id="SERVICE_NAME">%s</xliff:g> została wyłączona"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Edytuj skróty"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"OK"</string>
@@ -2012,6 +2012,7 @@
     <string name="set_up_screen_lock_title" msgid="8346083801616474030">"Ustaw blokadę ekranu"</string>
     <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Ustaw blokadę ekranu"</string>
     <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"Aby korzystać z przestrzeni prywatnej, ustaw na tym urządzeniu blokadę ekranu"</string>
+    <string name="private_space_set_up_screen_lock_for_reset" msgid="7817091386408432097">"Aby usunąć przestrzeń prywatną, ustaw na tym urządzeniu blokadę ekranu"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Aplikacja jest niedostępna"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"Aplikacja <xliff:g id="APP_NAME">%1$s</xliff:g> jest obecnie niedostępna."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> – brak dostępu"</string>
@@ -2130,11 +2131,6 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Wibracje przy połączeniach i powiadomieniach"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Wyciszenie połączeń i powiadomień"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Zmiany w systemie"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Nie przeszkadzać"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Nowość: w trybie Nie przeszkadzać powiadomienia są ukrywane"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Kliknij, by dowiedzieć się więcej i zmienić ustawienia."</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Zmiany w trybie Nie przeszkadzać"</string>
-    <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Kliknij, by sprawdzić, co jest zablokowane."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Sprawdź ustawienia powiadomień"</string>
     <string name="review_notification_settings_text" msgid="5916244866751849279">"W Androidzie 13 i nowszych zainstalowane aplikacje będą potrzebowały zezwolenia na wysyłanie powiadomień. Kliknij, aby zmienić uprawnienia dla istniejących aplikacji."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Przypomnij później"</string>

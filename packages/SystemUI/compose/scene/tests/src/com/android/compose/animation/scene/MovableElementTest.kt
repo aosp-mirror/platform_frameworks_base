@@ -43,12 +43,17 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.android.compose.animation.scene.TestOverlays.OverlayA
+import com.android.compose.animation.scene.TestOverlays.OverlayB
 import com.android.compose.animation.scene.TestScenes.SceneA
 import com.android.compose.animation.scene.TestScenes.SceneB
 import com.android.compose.animation.scene.content.state.TransitionState
 import com.android.compose.animation.scene.subjects.assertThat
 import com.android.compose.test.assertSizeIsEqualTo
+import com.android.compose.test.setContentAndCreateMainScope
+import com.android.compose.test.transition
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.launch
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -161,7 +166,7 @@ class MovableElementTest {
                             element: ElementKey,
                             transition: TransitionState.Transition,
                             fromContentZIndex: Float,
-                            toContentZIndex: Float
+                            toContentZIndex: Float,
                         ): ContentKey {
                             transition as TransitionState.Transition.ChangeScene
                             assertThat(transition).hasFromScene(SceneA)
@@ -177,7 +182,7 @@ class MovableElementTest {
                                 SceneB
                             }
                         }
-                    }
+                    },
             )
 
         rule.testTransition(
@@ -309,8 +314,10 @@ class MovableElementTest {
             TestContentScope {
                 Element(TestElements.Foo, Modifier.size(200.dp)) {
                     content {
-                        Box(Modifier.testTag("bottomEnd").align(Alignment.BottomEnd))
-                        Box(Modifier.testTag("matchParentSize").matchParentSize())
+                        Box {
+                            Box(Modifier.testTag("bottomEnd").align(Alignment.BottomEnd))
+                            Box(Modifier.testTag("matchParentSize").matchParentSize())
+                        }
                     }
                 }
             }
@@ -327,8 +334,10 @@ class MovableElementTest {
             TestContentScope(currentScene = SceneA) {
                 MovableElement(key, Modifier.size(200.dp)) {
                     content {
-                        Box(Modifier.testTag("bottomEnd").align(Alignment.BottomEnd))
-                        Box(Modifier.testTag("matchParentSize").matchParentSize())
+                        Box {
+                            Box(Modifier.testTag("bottomEnd").align(Alignment.BottomEnd))
+                            Box(Modifier.testTag("matchParentSize").matchParentSize())
+                        }
                     }
                 }
             }
@@ -336,5 +345,63 @@ class MovableElementTest {
 
         rule.onNodeWithTag("bottomEnd").assertPositionInRootIsEqualTo(200.dp, 200.dp)
         rule.onNodeWithTag("matchParentSize").assertSizeIsEqualTo(200.dp, 200.dp)
+    }
+
+    @Test
+    fun useCurrentSceneSizeForPlaceholderWhenReplacingOverlay() {
+        val foo =
+            MovableElementKey(
+                "foo",
+
+                // Always compose foo in SceneA.
+                contentPicker =
+                    object : StaticElementContentPicker {
+                        override val contents: Set<ContentKey> = setOf(SceneA, OverlayB)
+
+                        override fun contentDuringTransition(
+                            element: ElementKey,
+                            transition: TransitionState.Transition,
+                            fromContentZIndex: Float,
+                            toContentZIndex: Float,
+                        ): ContentKey {
+                            return SceneA
+                        }
+                    },
+            )
+        val fooSize = 50.dp
+        val fooParentInOverlayTag = "fooParentTagInOverlay"
+
+        @Composable
+        fun SceneScope.Foo(modifier: Modifier = Modifier) {
+            // Foo wraps its content, so there is no way for STL to know its size in advance.
+            MovableElement(foo, modifier) { content { Box(Modifier.size(fooSize)) } }
+        }
+
+        val state =
+            rule.runOnUiThread {
+                MutableSceneTransitionLayoutState(
+                    initialScene = SceneA,
+                    initialOverlays = setOf(OverlayA),
+                )
+            }
+
+        val scope =
+            rule.setContentAndCreateMainScope {
+                SceneTransitionLayout(state) {
+                    scene(SceneA) { Box(Modifier.fillMaxSize()) { Foo() } }
+                    overlay(OverlayA) { /* empty */ }
+                    overlay(OverlayB) { Box(Modifier.testTag(fooParentInOverlayTag)) { Foo() } }
+                }
+            }
+
+        // Start an overlay replace transition.
+        scope.launch {
+            state.startTransition(transition(from = OverlayA, to = OverlayB, progress = { 0.5f }))
+        }
+
+        // The parent of foo should have a correct size in OverlayB even if Foo was never composed
+        // there by using the size information from SceneA.
+        rule.waitForIdle()
+        rule.onNodeWithTag(fooParentInOverlayTag).assertSizeIsEqualTo(fooSize)
     }
 }

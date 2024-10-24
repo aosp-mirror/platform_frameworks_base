@@ -18,24 +18,41 @@ package com.android.systemui.qs.ui.viewmodel
 
 import com.android.compose.animation.scene.Back
 import com.android.compose.animation.scene.Swipe
+import com.android.compose.animation.scene.SwipeDirection
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
+import com.android.compose.animation.scene.UserActionResult.HideOverlay
+import com.android.compose.animation.scene.UserActionResult.ReplaceByOverlay
 import com.android.systemui.scene.shared.model.Overlays
+import com.android.systemui.scene.ui.viewmodel.SceneContainerEdge
 import com.android.systemui.scene.ui.viewmodel.UserActionsViewModel
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.flow.map
 
 /** Models the UI state for the user actions for navigating to other scenes or overlays. */
-class QuickSettingsShadeOverlayActionsViewModel @AssistedInject constructor() :
+class QuickSettingsShadeOverlayActionsViewModel
+@AssistedInject
+constructor(private val containerViewModel: QuickSettingsContainerViewModel) :
     UserActionsViewModel() {
 
     override suspend fun hydrateActions(setActions: (Map<UserAction, UserActionResult>) -> Unit) {
-        setActions(
-            buildMap {
-                put(Swipe.Up, UserActionResult.HideOverlay(Overlays.QuickSettingsShade))
-                put(Back, UserActionResult.HideOverlay(Overlays.QuickSettingsShade))
+        containerViewModel.editModeViewModel.isEditing
+            .map { isEditing ->
+                buildMap {
+                    put(Swipe.Up, HideOverlay(Overlays.QuickSettingsShade))
+                    // When editing, back should go back to QS from edit mode (i.e. remain in the
+                    // same overlay).
+                    if (!isEditing) {
+                        put(Back, HideOverlay(Overlays.QuickSettingsShade))
+                    }
+                    put(
+                        Swipe(SwipeDirection.Down, fromSource = SceneContainerEdge.TopLeft),
+                        ReplaceByOverlay(Overlays.NotificationsShade),
+                    )
+                }
             }
-        )
+            .collect { actions -> setActions(actions) }
     }
 
     @AssistedFactory

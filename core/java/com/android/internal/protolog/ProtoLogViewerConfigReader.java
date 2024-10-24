@@ -24,7 +24,9 @@ import java.util.TreeMap;
 public class ProtoLogViewerConfigReader {
     @NonNull
     private final ViewerConfigInputStreamProvider mViewerConfigInputStreamProvider;
+    @NonNull
     private final Map<String, Set<Long>> mGroupHashes = new TreeMap<>();
+    @NonNull
     private final LongSparseArray<String> mLogMessageMap = new LongSparseArray<>();
 
     public ProtoLogViewerConfigReader(
@@ -37,18 +39,25 @@ public class ProtoLogViewerConfigReader {
      * or the viewer config is not loaded into memory.
      */
     @Nullable
-    public synchronized String getViewerString(long messageHash) {
+    public String getViewerString(long messageHash) {
         return mLogMessageMap.get(messageHash);
     }
 
-    public synchronized void loadViewerConfig(String[] groups) {
+    /**
+     * Load the viewer configs for the target groups into memory.
+     * Only viewer configs loaded into memory can be required. So this must be called for all groups
+     * we want to query before we query their viewer config.
+     *
+     * @param groups Groups to load the viewer configs from file into memory.
+     */
+    public synchronized void loadViewerConfig(@NonNull String[] groups) {
         loadViewerConfig(groups, (message) -> {});
     }
 
     /**
      * Loads the viewer config into memory. No-op if already loaded in memory.
      */
-    public synchronized void loadViewerConfig(String[] groups, @NonNull ILogger logger) {
+    public synchronized void loadViewerConfig(@NonNull String[] groups, @NonNull ILogger logger) {
         for (String group : groups) {
             if (mGroupHashes.containsKey(group)) {
                 continue;
@@ -69,14 +78,14 @@ public class ProtoLogViewerConfigReader {
         }
     }
 
-    public synchronized void unloadViewerConfig(String[] groups) {
+    public synchronized void unloadViewerConfig(@NonNull String[] groups) {
         unloadViewerConfig(groups, (message) -> {});
     }
 
     /**
      * Unload the viewer config from memory.
      */
-    public synchronized void unloadViewerConfig(String[] groups, @NonNull ILogger logger) {
+    public synchronized void unloadViewerConfig(@NonNull String[] groups, @NonNull ILogger logger) {
         for (String group : groups) {
             if (!mGroupHashes.containsKey(group)) {
                 continue;
@@ -87,87 +96,93 @@ public class ProtoLogViewerConfigReader {
                 logger.log("Unloading viewer config hash " + hash);
                 mLogMessageMap.remove(hash);
             }
+            mGroupHashes.remove(group);
         }
     }
 
-    private Map<Long, String> loadViewerConfigMappingForGroup(String group) throws IOException {
-        Long targetGroupId = loadGroupId(group);
+    @NonNull
+    private Map<Long, String> loadViewerConfigMappingForGroup(@NonNull String group)
+            throws IOException {
+        long targetGroupId = loadGroupId(group);
 
         final Map<Long, String> hashesForGroup = new TreeMap<>();
-        final ProtoInputStream pis = mViewerConfigInputStreamProvider.getInputStream();
+        try (var pisWrapper = mViewerConfigInputStreamProvider.getInputStream()) {
+            final var pis = pisWrapper.get();
+            while (pis.nextField() != ProtoInputStream.NO_MORE_FIELDS) {
+                if (pis.getFieldNumber() == (int) MESSAGES) {
+                    final long inMessageToken = pis.start(MESSAGES);
 
-        while (pis.nextField() != ProtoInputStream.NO_MORE_FIELDS) {
-            if (pis.getFieldNumber() == (int) MESSAGES) {
-                final long inMessageToken = pis.start(MESSAGES);
-
-                long messageId = 0;
-                String message = null;
-                int groupId = 0;
-                while (pis.nextField() != ProtoInputStream.NO_MORE_FIELDS) {
-                    switch (pis.getFieldNumber()) {
-                        case (int) MESSAGE_ID:
-                            messageId = pis.readLong(MESSAGE_ID);
-                            break;
-                        case (int) MESSAGE:
-                            message = pis.readString(MESSAGE);
-                            break;
-                        case (int) GROUP_ID:
-                            groupId = pis.readInt(GROUP_ID);
-                            break;
+                    long messageId = 0;
+                    String message = null;
+                    int groupId = 0;
+                    while (pis.nextField() != ProtoInputStream.NO_MORE_FIELDS) {
+                        switch (pis.getFieldNumber()) {
+                            case (int) MESSAGE_ID:
+                                messageId = pis.readLong(MESSAGE_ID);
+                                break;
+                            case (int) MESSAGE:
+                                message = pis.readString(MESSAGE);
+                                break;
+                            case (int) GROUP_ID:
+                                groupId = pis.readInt(GROUP_ID);
+                                break;
+                        }
                     }
-                }
 
-                if (groupId == 0) {
-                    throw new IOException("Failed to get group id");
-                }
+                    if (groupId == 0) {
+                        throw new IOException("Failed to get group id");
+                    }
 
-                if (messageId == 0) {
-                    throw new IOException("Failed to get message id");
-                }
+                    if (messageId == 0) {
+                        throw new IOException("Failed to get message id");
+                    }
 
-                if (message == null) {
-                    throw new IOException("Failed to get message string");
-                }
+                    if (message == null) {
+                        throw new IOException("Failed to get message string");
+                    }
 
-                if (groupId == targetGroupId) {
-                    hashesForGroup.put(messageId, message);
-                }
+                    if (groupId == targetGroupId) {
+                        hashesForGroup.put(messageId, message);
+                    }
 
-                pis.end(inMessageToken);
+                    pis.end(inMessageToken);
+                }
             }
         }
 
         return hashesForGroup;
     }
 
-    private Long loadGroupId(String group) throws IOException {
-        final ProtoInputStream pis = mViewerConfigInputStreamProvider.getInputStream();
+    private long loadGroupId(@NonNull String group) throws IOException {
+        try (var pisWrapper = mViewerConfigInputStreamProvider.getInputStream()) {
+            final var pis = pisWrapper.get();
 
-        while (pis.nextField() != ProtoInputStream.NO_MORE_FIELDS) {
-            if (pis.getFieldNumber() == (int) GROUPS) {
-                final long inMessageToken = pis.start(GROUPS);
+            while (pis.nextField() != ProtoInputStream.NO_MORE_FIELDS) {
+                if (pis.getFieldNumber() == (int) GROUPS) {
+                    final long inMessageToken = pis.start(GROUPS);
 
-                long groupId = 0;
-                String groupName = null;
-                while (pis.nextField() != ProtoInputStream.NO_MORE_FIELDS) {
-                    switch (pis.getFieldNumber()) {
-                        case (int) ID:
-                            groupId = pis.readInt(ID);
-                            break;
-                        case (int) NAME:
-                            groupName = pis.readString(NAME);
-                            break;
+                    long groupId = 0;
+                    String groupName = null;
+                    while (pis.nextField() != ProtoInputStream.NO_MORE_FIELDS) {
+                        switch (pis.getFieldNumber()) {
+                            case (int) ID:
+                                groupId = pis.readInt(ID);
+                                break;
+                            case (int) NAME:
+                                groupName = pis.readString(NAME);
+                                break;
+                        }
                     }
-                }
 
-                if (Objects.equals(groupName, group)) {
-                    return groupId;
-                }
+                    if (Objects.equals(groupName, group)) {
+                        return groupId;
+                    }
 
-                pis.end(inMessageToken);
+                    pis.end(inMessageToken);
+                }
             }
         }
 
-        throw new RuntimeException("Group " + group + "not found in viewer config");
+        throw new RuntimeException("Group " + group + " not found in viewer config");
     }
 }

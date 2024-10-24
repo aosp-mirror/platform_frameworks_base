@@ -33,11 +33,13 @@
 #include <android_runtime/android_view_Surface.h>
 #include <android_runtime/android_view_SurfaceControl.h>
 #include <android_runtime/android_view_SurfaceSession.h>
+#include <cutils/ashmem.h>
 #include <gui/ISurfaceComposer.h>
 #include <gui/Surface.h>
 #include <gui/SurfaceComposerClient.h>
 #include <jni.h>
 #include <nativehelper/JNIHelp.h>
+#include <nativehelper/ScopedPrimitiveArray.h>
 #include <nativehelper/ScopedUtfChars.h>
 #include <private/gui/ComposerService.h>
 #include <stdio.h>
@@ -48,6 +50,7 @@
 #include <ui/DisplayMode.h>
 #include <ui/DisplayedFrameStats.h>
 #include <ui/DynamicDisplayInfo.h>
+#include <ui/FloatRect.h>
 #include <ui/FrameStats.h>
 #include <ui/GraphicTypes.h>
 #include <ui/HdrCapabilities.h>
@@ -112,6 +115,7 @@ static struct {
     jfieldID supportedDisplayModes;
     jfieldID activeDisplayModeId;
     jfieldID renderFrameRate;
+    jfieldID hasArrSupport;
     jfieldID supportedColorModes;
     jfieldID activeColorMode;
     jfieldID hdrCapabilities;
@@ -735,6 +739,65 @@ static void nativeSetDesiredHdrHeadroom(JNIEnv* env, jclass clazz, jlong transac
     transaction->setDesiredHdrHeadroom(ctrl, desiredRatio);
 }
 
+static void nativeSetLuts(JNIEnv* env, jclass clazz, jlong transactionObj, jlong nativeObject,
+                          jfloatArray jbufferArray, jintArray joffsetArray,
+                          jintArray jdimensionArray, jintArray jsizeArray,
+                          jintArray jsamplingKeyArray) {
+    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
+    SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl*>(nativeObject);
+
+    ScopedIntArrayRW joffsets(env, joffsetArray);
+    if (joffsets.get() == nullptr) {
+        jniThrowRuntimeException(env, "Failed to get ScopedIntArrayRW from joffsetArray");
+        return;
+    }
+    ScopedIntArrayRW jdimensions(env, jdimensionArray);
+    if (jdimensions.get() == nullptr) {
+        jniThrowRuntimeException(env, "Failed to get ScopedIntArrayRW from jdimensionArray");
+        return;
+    }
+    ScopedIntArrayRW jsizes(env, jsizeArray);
+    if (jsizes.get() == nullptr) {
+        jniThrowRuntimeException(env, "Failed to get ScopedIntArrayRW from jsizeArray");
+        return;
+    }
+    ScopedIntArrayRW jsamplingKeys(env, jsamplingKeyArray);
+    if (jsamplingKeys.get() == nullptr) {
+        jniThrowRuntimeException(env, "Failed to get ScopedIntArrayRW from jsamplingKeyArray");
+        return;
+    }
+
+    jsize numLuts = env->GetArrayLength(jdimensionArray);
+    std::vector<int32_t> offsets(joffsets.get(), joffsets.get() + numLuts);
+    std::vector<int32_t> dimensions(jdimensions.get(), jdimensions.get() + numLuts);
+    std::vector<int32_t> sizes(jsizes.get(), jsizes.get() + numLuts);
+    std::vector<int32_t> samplingKeys(jsamplingKeys.get(), jsamplingKeys.get() + numLuts);
+
+    ScopedFloatArrayRW jbuffers(env, jbufferArray);
+    if (jbuffers.get() == nullptr) {
+        jniThrowRuntimeException(env, "Failed to get ScopedFloatArrayRW from jbufferArray");
+        return;
+    }
+
+    // create the shared memory and copy jbuffers
+    size_t bufferSize = jbuffers.size() * sizeof(float);
+    int32_t fd = ashmem_create_region("lut_shread_mem", bufferSize);
+    if (fd < 0) {
+        jniThrowRuntimeException(env, "ashmem_create_region() failed");
+        return;
+    }
+    void* ptr = mmap(nullptr, bufferSize, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+    if (ptr == MAP_FAILED) {
+        jniThrowRuntimeException(env, "Failed to map the shared memory");
+        return;
+    }
+    memcpy(ptr, jbuffers.get(), bufferSize);
+    // unmap
+    munmap(ptr, bufferSize);
+
+    transaction->setLuts(ctrl, base::unique_fd(fd), offsets, dimensions, sizes, samplingKeys);
+}
+
 static void nativeSetCachingHint(JNIEnv* env, jclass clazz, jlong transactionObj,
                                  jlong nativeObject, jint cachingHint) {
     auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
@@ -989,6 +1052,15 @@ static void nativeSetWindowCrop(JNIEnv* env, jclass clazz, jlong transactionObj,
 
     SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
     Rect crop(l, t, r, b);
+    transaction->setCrop(ctrl, crop);
+}
+
+static void nativeSetCrop(JNIEnv* env, jclass clazz, jlong transactionObj, jlong nativeObject,
+                          jfloat l, jfloat t, jfloat r, jfloat b) {
+    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
+
+    SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl*>(nativeObject);
+    FloatRect crop(l, t, r, b);
     transaction->setCrop(ctrl, crop);
 }
 
@@ -1382,7 +1454,7 @@ static jobject nativeGetDynamicDisplayInfo(JNIEnv* env, jclass clazz, jlong disp
     env->SetIntField(object, gDynamicDisplayInfoClassInfo.activeDisplayModeId,
                      info.activeDisplayModeId);
     env->SetFloatField(object, gDynamicDisplayInfoClassInfo.renderFrameRate, info.renderFrameRate);
-
+    env->SetBooleanField(object, gDynamicDisplayInfoClassInfo.hasArrSupport, info.hasArrSupport);
     jintArray colorModesArray = env->NewIntArray(info.supportedColorModes.size());
     if (colorModesArray == NULL) {
         jniThrowException(env, "java/lang/OutOfMemoryError", NULL);
@@ -2089,9 +2161,11 @@ public:
         jobjectArray jJankDataArray = env->NewObjectArray(jankData.size(),
                 gJankDataClassInfo.clazz, nullptr);
         for (size_t i = 0; i < jankData.size(); i++) {
-            jobject jJankData = env->NewObject(gJankDataClassInfo.clazz, gJankDataClassInfo.ctor,
-                                               jankData[i].frameVsyncId, jankData[i].jankType,
-                                               jankData[i].frameIntervalNs);
+            jobject jJankData =
+                    env->NewObject(gJankDataClassInfo.clazz, gJankDataClassInfo.ctor,
+                                   jankData[i].frameVsyncId, jankData[i].jankType,
+                                   jankData[i].frameIntervalNs, jankData[i].scheduledAppFrameTimeNs,
+                                   jankData[i].actualAppFrameTimeNs);
             env->SetObjectArrayElement(jJankDataArray, i, jJankData);
             env->DeleteLocalRef(jJankData);
         }
@@ -2345,6 +2419,8 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSetFrameRateSelectionPriority },
     {"nativeSetWindowCrop", "(JJIIII)V",
             (void*)nativeSetWindowCrop },
+    {"nativeSetCrop", "(JJFFFF)V",
+            (void*)nativeSetCrop },
     {"nativeSetCornerRadius", "(JJF)V",
             (void*)nativeSetCornerRadius },
     {"nativeSetBackgroundBlurRadius", "(JJI)V",
@@ -2527,6 +2603,7 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*) nativeSetDesiredPresentTimeNanos },
     {"nativeNotifyShutdown", "()V",
             (void*)nativeNotifyShutdown },
+    {"nativeSetLuts", "(JJ[F[I[I[I[I)V", (void*)nativeSetLuts },
         // clang-format on
 };
 
@@ -2565,6 +2642,8 @@ int register_android_view_SurfaceControl(JNIEnv* env)
             GetFieldIDOrDie(env, dynamicInfoClazz, "activeDisplayModeId", "I");
     gDynamicDisplayInfoClassInfo.renderFrameRate =
             GetFieldIDOrDie(env, dynamicInfoClazz, "renderFrameRate", "F");
+    gDynamicDisplayInfoClassInfo.hasArrSupport =
+            GetFieldIDOrDie(env, dynamicInfoClazz, "hasArrSupport", "Z");
     gDynamicDisplayInfoClassInfo.supportedColorModes =
             GetFieldIDOrDie(env, dynamicInfoClazz, "supportedColorModes", "[I");
     gDynamicDisplayInfoClassInfo.activeColorMode =
@@ -2727,7 +2806,7 @@ int register_android_view_SurfaceControl(JNIEnv* env)
     jclass jankDataClazz =
                 FindClassOrDie(env, "android/view/SurfaceControl$JankData");
     gJankDataClassInfo.clazz = MakeGlobalRefOrDie(env, jankDataClazz);
-    gJankDataClassInfo.ctor = GetMethodIDOrDie(env, gJankDataClassInfo.clazz, "<init>", "(JIJ)V");
+    gJankDataClassInfo.ctor = GetMethodIDOrDie(env, gJankDataClassInfo.clazz, "<init>", "(JIJJJ)V");
     jclass onJankDataListenerClazz =
             FindClassOrDie(env, "android/view/SurfaceControl$OnJankDataListener");
     gJankDataListenerClassInfo.clazz = MakeGlobalRefOrDie(env, onJankDataListenerClazz);

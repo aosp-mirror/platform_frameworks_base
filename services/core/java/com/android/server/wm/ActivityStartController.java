@@ -25,6 +25,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.os.FactoryTest.FACTORY_TEST_LOW_LEVEL;
 
+import static com.android.server.wm.ActivityStarter.Request.DEFAULT_INTENT_CREATOR_UID;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.ActivityTaskSupervisor.ON_TOP;
@@ -43,7 +44,6 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Binder;
-import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Trace;
 import android.os.UserHandle;
@@ -442,6 +442,17 @@ public class ActivityStartController {
                         0 /* startFlags */, null /* profilerInfo */, userId, filterCallingUid,
                         callingPid);
                 aInfo = mService.mAmInternal.getActivityInfoForUser(aInfo, userId);
+                int creatorUid = DEFAULT_INTENT_CREATOR_UID;
+                String creatorPackage = null;
+                if (ActivityManagerService.IntentCreatorToken.isValid(intent)) {
+                    ActivityManagerService.IntentCreatorToken creatorToken =
+                            (ActivityManagerService.IntentCreatorToken) intent.getCreatorToken();
+                    if (creatorToken.getCreatorUid() != filterCallingUid) {
+                        creatorUid = creatorToken.getCreatorUid();
+                        creatorPackage = creatorToken.getCreatorPackage();
+                    }
+                    // leave creatorUid as -1 if the intent creator is the same as the launcher
+                }
 
                 if (aInfo != null) {
                     try {
@@ -455,6 +466,24 @@ public class ActivityStartController {
                         return START_CANCELED;
                     }
 
+                    if (creatorUid != DEFAULT_INTENT_CREATOR_UID) {
+                        try {
+                            NeededUriGrants creatorIntentGrants = mSupervisor.mService.mUgmInternal
+                                    .checkGrantUriPermissionFromIntent(intent, creatorUid,
+                                            aInfo.applicationInfo.packageName,
+                                            UserHandle.getUserId(aInfo.applicationInfo.uid));
+                            if (intentGrants == null) {
+                                intentGrants = creatorIntentGrants;
+                            } else {
+                                intentGrants.merge(creatorIntentGrants);
+                            }
+                        } catch (SecurityException securityException) {
+                            ActivityStarter.logAndThrowExceptionForIntentRedirect(
+                                    "Creator URI Grant Caused Exception.", intent, creatorUid,
+                                    creatorPackage, filterCallingUid, callingPackage,
+                                    securityException);
+                        }
+                    }
                     if ((aInfo.applicationInfo.privateFlags
                             & ApplicationInfo.PRIVATE_FLAG_CANT_SAVE_STATE) != 0) {
                         throw new IllegalArgumentException(
@@ -478,6 +507,8 @@ public class ActivityStartController {
                         .setCallingUid(callingUid)
                         .setCallingPackage(callingPackage)
                         .setCallingFeatureId(callingFeatureId)
+                        .setIntentCreatorUid(creatorUid)
+                        .setIntentCreatorPackage(creatorPackage)
                         .setRealCallingPid(realCallingPid)
                         .setRealCallingUid(realCallingUid)
                         .setActivityOptions(checkedOptions)
@@ -550,14 +581,14 @@ public class ActivityStartController {
      * Starts an activity in the TaskFragment.
      * @param taskFragment TaskFragment {@link TaskFragment} to start the activity in.
      * @param activityIntent intent to start the activity.
-     * @param activityOptions ActivityOptions to start the activity with.
+     * @param activityOptions SafeActivityOptions to start the activity with.
      * @param resultTo the caller activity
      * @param callingUid the caller uid
      * @param callingPid the caller pid
      * @return the start result.
      */
     int startActivityInTaskFragment(@NonNull TaskFragment taskFragment,
-            @NonNull Intent activityIntent, @Nullable Bundle activityOptions,
+            @NonNull Intent activityIntent, @Nullable SafeActivityOptions activityOptions,
             @Nullable IBinder resultTo, int callingUid, int callingPid,
             @Nullable IBinder errorCallbackToken) {
         final ActivityRecord caller =

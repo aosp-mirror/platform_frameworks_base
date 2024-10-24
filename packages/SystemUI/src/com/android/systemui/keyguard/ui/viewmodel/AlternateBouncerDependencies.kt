@@ -18,6 +18,9 @@ package com.android.systemui.keyguard.ui.viewmodel
 
 import com.android.systemui.deviceentry.ui.viewmodel.AlternateBouncerUdfpsAccessibilityOverlayViewModel
 import com.android.systemui.keyguard.ui.SwipeUpAnywhereGestureHandler
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.LongPressHandlingViewLogger
+import com.android.systemui.log.dagger.LongPressTouchLog
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.statusbar.gesture.TapGestureDetector
 import dagger.Lazy
@@ -37,4 +40,11 @@ constructor(
         Lazy<AlternateBouncerUdfpsAccessibilityOverlayViewModel>,
     val messageAreaViewModel: AlternateBouncerMessageAreaViewModel,
     val powerInteractor: PowerInteractor,
-)
+    @LongPressTouchLog private val touchLogBuffer: LogBuffer,
+) {
+    val logger: LongPressHandlingViewLogger =
+        LongPressHandlingViewLogger(logBuffer = touchLogBuffer, TAG)
+    companion object {
+        private const val TAG = "AlternateBouncer"
+    }
+}

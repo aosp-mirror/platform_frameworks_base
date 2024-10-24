@@ -275,7 +275,8 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
             }
         }
 
-        if (LockscreenOtpRedaction.isEnabled()) {
+        if (LockscreenOtpRedaction.isSingleLineViewEnabled()) {
+
             if (inflaterParams.isChildInGroup() && needsRedaction) {
                 params.requireContentViews(FLAG_CONTENT_VIEW_PUBLIC_SINGLE_LINE);
             } else {

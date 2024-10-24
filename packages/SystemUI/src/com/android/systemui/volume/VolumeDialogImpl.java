@@ -35,7 +35,6 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_VOLUME_CONTROL;
 import static com.android.internal.jank.InteractionJankMonitor.Configuration.Builder;
 import static com.android.settingslib.flags.Flags.volumeDialogAudioSharingFix;
-import static com.android.systemui.Flags.hapticVolumeSlider;
 import static com.android.systemui.volume.Events.DISMISS_REASON_POSTURE_CHANGED;
 import static com.android.systemui.volume.Events.DISMISS_REASON_SETTINGS_CLICKED;
 
@@ -65,6 +64,8 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.graphics.drawable.RotateDrawable;
+import android.graphics.drawable.ShapeDrawable;
+import android.graphics.drawable.shapes.RoundRectShape;
 import android.media.AudioManager;
 import android.media.AudioSystem;
 import android.os.Debug;
@@ -116,6 +117,7 @@ import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.view.RotationPolicy;
 import com.android.settingslib.Utils;
 import com.android.systemui.Dumpable;
+import com.android.systemui.Flags;
 import com.android.systemui.Prefs;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.haptics.slider.HapticSliderViewBinder;
@@ -141,6 +143,7 @@ import com.android.systemui.volume.domain.interactor.VolumePanelNavigationIntera
 import com.android.systemui.volume.panel.shared.flag.VolumePanelFlag;
 import com.android.systemui.volume.ui.navigation.VolumeNavigator;
 
+import com.google.android.msdl.domain.MSDLPlayer;
 import com.google.common.collect.ImmutableList;
 
 import dagger.Lazy;
@@ -316,6 +319,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
     private final Lazy<SecureSettings> mSecureSettings;
     private int mDialogTimeoutMillis;
     private final VibratorHelper mVibratorHelper;
+    private final MSDLPlayer mMSDLPlayer;
     private final com.android.systemui.util.time.SystemClock mSystemClock;
     private final VolumePanelFlag mVolumePanelFlag;
     private final VolumeDialogInteractor mInteractor;
@@ -341,12 +345,14 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
             DumpManager dumpManager,
             Lazy<SecureSettings> secureSettings,
             VibratorHelper vibratorHelper,
+            MSDLPlayer msdlPlayer,
             com.android.systemui.util.time.SystemClock systemClock,
             VolumeDialogInteractor interactor) {
         mContext =
                 new ContextThemeWrapper(context, R.style.volume_dialog_theme);
         mHandler = new H(looper);
         mVibratorHelper = vibratorHelper;
+        mMSDLPlayer = msdlPlayer;
         mSystemClock = systemClock;
         mShouldListenForJank = shouldListenForJank;
         mController = volumeDialogController;
@@ -538,7 +544,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
 
         mWindow.setAttributes(lp);
         mWindow.setLayout(WRAP_CONTENT, WRAP_CONTENT);
-        mDialog.setContentView(R.layout.volume_dialog);
+        mDialog.setContentView(R.layout.volume_dialog_legacy);
         mDialogView = mDialog.findViewById(R.id.volume_dialog);
         mDialogView.setAlpha(0);
         mDialogTimeoutMillis = mSecureSettings.get().getInt(
@@ -651,6 +657,11 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
         mRinger = mDialog.findViewById(R.id.ringer);
         if (mRinger != null) {
             mRingerIcon = mRinger.findViewById(R.id.ringer_icon);
+        }
+
+        if (Flags.hideRingerButtonInSingleVolumeMode() && AudioSystem.isSingleVolume(mContext)) {
+            mRingerAndDrawerContainer.setVisibility(INVISIBLE);
+            mRinger.setVisibility(INVISIBLE);
         }
 
         mSelectedRingerIcon = mDialog.findViewById(R.id.volume_new_ringer_active_icon);
@@ -928,10 +939,8 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
     }
 
     private void addSliderHapticsToRow(VolumeRow row) {
-        if (hapticVolumeSlider()) {
-            row.createPlugin(mVibratorHelper, mSystemClock);
-            HapticSliderViewBinder.bind(row.slider, row.mHapticPlugin);
-        }
+        row.createPlugin(mVibratorHelper, mMSDLPlayer, mSystemClock);
+        HapticSliderViewBinder.bind(row.slider, row.mHapticPlugin);
     }
 
     @VisibleForTesting void addSliderHapticsToRows() {
@@ -1991,7 +2000,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
                                             : R.drawable.ic_volume_media_bt;
             }
         } else if (isStreamMuted(ss)) {
-            iconRes = (ss.muted && isTv()) ? R.drawable.ic_volume_media_off : row.iconMuteRes;
+            iconRes = row.iconMuteRes;
         } else {
             iconRes = mShowLowMediaVolumeIcon && ss.level * 2 < (ss.levelMax + ss.levelMin)
                       ? R.drawable.ic_volume_media_low : row.iconRes;
@@ -2340,10 +2349,31 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
             return;
         }
 
-        final ColorDrawable solidDrawable = new ColorDrawable(
+        LayerDrawable background;
+        // mRingerAndDrawerContainer has rounded corner.
+        // But when it's not visible, mTopContainer needs to have rounded corner.
+        if (Flags.hideRingerButtonInSingleVolumeMode()
+                && mRingerAndDrawerContainer.getVisibility() != VISIBLE
+        ) {
+            float[] radius = new float[] {
+                mDialogCornerRadius, mDialogCornerRadius,  // Top-left corner
+                mDialogCornerRadius, mDialogCornerRadius,  // Top-right corner
+                0, 0,  // Bottom-right corner
+                0, 0   // Bottom-left corner
+            };
+
+            ShapeDrawable roundedDrawable = new ShapeDrawable(
+                    new RoundRectShape(radius, null, null));
+            roundedDrawable.getPaint().setColor(Utils.getColorAttrDefaultColor(
+                    mContext, com.android.internal.R.attr.colorSurface));
+
+            background = new LayerDrawable(new Drawable[] { roundedDrawable });
+        } else {
+            final ColorDrawable solidDrawable = new ColorDrawable(
                 Utils.getColorAttrDefaultColor(mContext, com.android.internal.R.attr.colorSurface));
 
-        final LayerDrawable background = new LayerDrawable(new Drawable[] { solidDrawable });
+            background = new LayerDrawable(new Drawable[] { solidDrawable });
+        }
 
         // Size the solid color to match the primary volume row. In landscape, extend it upwards
         // slightly so that it fills in the bottom corners of the ringer icon, whose background is
@@ -2710,11 +2740,13 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
 
         void createPlugin(
                 VibratorHelper vibratorHelper,
+                MSDLPlayer msdlPlayer,
                 com.android.systemui.util.time.SystemClock systemClock) {
             if (mHapticPlugin != null) return;
 
             mHapticPlugin = new SeekbarHapticPlugin(
                 vibratorHelper,
+                msdlPlayer,
                 systemClock,
                 sSliderHapticFeedbackConfig,
                 sSliderTrackerConfig);

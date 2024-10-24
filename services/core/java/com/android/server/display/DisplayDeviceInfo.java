@@ -292,6 +292,13 @@ final class DisplayDeviceInfo {
      */
     public float renderFrameRate;
 
+
+    /**
+     * If {@code true}, this Display supports adaptive refresh rates.
+     * @see android.view.DisplayInfo#hasArrSupport for more details.
+     */
+    public boolean hasArrSupport;
+
     /**
      * The default mode of the display.
      */
@@ -318,13 +325,16 @@ final class DisplayDeviceInfo {
      */
     public Display.HdrCapabilities hdrCapabilities;
 
+    /** When true, all HDR capabilities are hidden from public APIs */
+    public boolean isForceSdr;
+
     /**
      * Indicates whether this display supports Auto Low Latency Mode.
      */
     public boolean allmSupported;
 
     /**
-     * Indicates whether this display suppors Game content type.
+     * Indicates whether this display supports Game content type.
      */
     public boolean gameContentTypeSupported;
 
@@ -516,6 +526,7 @@ final class DisplayDeviceInfo {
                 || !Arrays.equals(supportedModes, other.supportedModes)
                 || !Arrays.equals(supportedColorModes, other.supportedColorModes)
                 || !Objects.equals(hdrCapabilities, other.hdrCapabilities)
+                || isForceSdr != other.isForceSdr
                 || allmSupported != other.allmSupported
                 || gameContentTypeSupported != other.gameContentTypeSupported
                 || densityDpi != other.densityDpi
@@ -536,7 +547,8 @@ final class DisplayDeviceInfo {
                 other.brightnessDefault)
                 || !Objects.equals(roundedCorners, other.roundedCorners)
                 || installOrientation != other.installOrientation
-                || !Objects.equals(displayShape, other.displayShape)) {
+                || !Objects.equals(displayShape, other.displayShape)
+                || hasArrSupport != other.hasArrSupport) {
             diff |= DIFF_OTHER;
         }
         return diff;
@@ -554,12 +566,14 @@ final class DisplayDeviceInfo {
         height = other.height;
         modeId = other.modeId;
         renderFrameRate = other.renderFrameRate;
+        hasArrSupport = other.hasArrSupport;
         defaultModeId = other.defaultModeId;
         userPreferredModeId = other.userPreferredModeId;
         supportedModes = other.supportedModes;
         colorMode = other.colorMode;
         supportedColorModes = other.supportedColorModes;
         hdrCapabilities = other.hdrCapabilities;
+        isForceSdr = other.isForceSdr;
         allmSupported = other.allmSupported;
         gameContentTypeSupported = other.gameContentTypeSupported;
         densityDpi = other.densityDpi;
@@ -597,12 +611,14 @@ final class DisplayDeviceInfo {
         sb.append(width).append(" x ").append(height);
         sb.append(", modeId ").append(modeId);
         sb.append(", renderFrameRate ").append(renderFrameRate);
+        sb.append(", hasArrSupport ").append(hasArrSupport);
         sb.append(", defaultModeId ").append(defaultModeId);
         sb.append(", userPreferredModeId ").append(userPreferredModeId);
         sb.append(", supportedModes ").append(Arrays.toString(supportedModes));
         sb.append(", colorMode ").append(colorMode);
         sb.append(", supportedColorModes ").append(Arrays.toString(supportedColorModes));
         sb.append(", hdrCapabilities ").append(hdrCapabilities);
+        sb.append(", isForceSdr ").append(isForceSdr);
         sb.append(", allmSupported ").append(allmSupported);
         sb.append(", gameContentTypeSupported ").append(gameContentTypeSupported);
         sb.append(", density ").append(densityDpi);

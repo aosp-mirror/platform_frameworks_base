@@ -27,6 +27,7 @@ import android.view.ViewConfiguration
 import android.view.accessibility.AccessibilityNodeInfo
 import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
+import com.android.systemui.log.LongPressHandlingViewLogger
 import com.android.systemui.shade.TouchLogger
 import kotlin.math.pow
 import kotlin.math.sqrt
@@ -42,6 +43,8 @@ class LongPressHandlingView(
     context: Context,
     attrs: AttributeSet?,
     longPressDuration: () -> Long,
+    allowedTouchSlop: Int = ViewConfiguration.getTouchSlop(),
+    logger: LongPressHandlingViewLogger? = null,
 ) :
     View(
         context,
@@ -97,6 +100,8 @@ class LongPressHandlingView(
             },
             onSingleTapDetected = { listener?.onSingleTapDetected(this@LongPressHandlingView) },
             longPressDuration = longPressDuration,
+            allowedTouchSlop = allowedTouchSlop,
+            logger = logger,
         )
     }
 

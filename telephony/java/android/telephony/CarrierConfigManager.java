@@ -253,7 +253,6 @@ public class CarrierConfigManager {
      *
      * The default value is true.
      */
-    @FlaggedApi(Flags.FLAG_SHOW_CALL_ID_AND_CALL_WAITING_IN_ADDITIONAL_SETTINGS_MENU)
     public static final String KEY_ADDITIONAL_SETTINGS_CALLER_ID_VISIBILITY_BOOL =
             "additional_settings_caller_id_visibility_bool";
 
@@ -263,7 +262,6 @@ public class CarrierConfigManager {
      *
      * The default value is true.
      */
-    @FlaggedApi(Flags.FLAG_SHOW_CALL_ID_AND_CALL_WAITING_IN_ADDITIONAL_SETTINGS_MENU)
     public static final String KEY_ADDITIONAL_SETTINGS_CALL_WAITING_VISIBILITY_BOOL =
             "additional_settings_call_waiting_visibility_bool";
 
@@ -5030,6 +5028,18 @@ public class CarrierConfigManager {
         public static final String KEY_ES_SUPL_DATA_PLANE_ONLY_ROAMING_PLMN_STRING_ARRAY =
                 KEY_PREFIX + "es_supl_data_plane_only_roaming_plmn_string_array";
 
+        /**
+         * Determine whether to enable Net Initiated SUPL (NI SUPL) message injection.
+         * If enabled, the GnssLocationProvider will monitor for WAP PUSH or MT SMS NI SUPL intents
+         * and subsequently inject the NI SUPL packet into the GNSS HAL.
+         * {@code false} - Disable NI SUPL message injection. This is default.
+         * {@code true} - Enable NI SUPL message injection.
+         */
+        @FlaggedApi(android.location.flags.Flags
+                .FLAG_ENABLE_NI_SUPL_MESSAGE_INJECTION_BY_CARRIER_CONFIG_BUGFIX)
+        public static final String KEY_ENABLE_NI_SUPL_MESSAGE_INJECTION_BOOL =
+                KEY_PREFIX + "enable_ni_supl_message_injection_bool";
+
         private static PersistableBundle getDefaults() {
             PersistableBundle defaults = new PersistableBundle();
             defaults.putBoolean(KEY_PERSIST_LPP_MODE_BOOL, true);
@@ -5047,6 +5057,9 @@ public class CarrierConfigManager {
             defaults.putInt(KEY_ES_SUPL_CONTROL_PLANE_SUPPORT_INT,
                     SUPL_EMERGENCY_MODE_TYPE_CP_ONLY);
             defaults.putStringArray(KEY_ES_SUPL_DATA_PLANE_ONLY_ROAMING_PLMN_STRING_ARRAY, null);
+            if (android.location.flags.Flags.enableNiSuplMessageInjectionByCarrierConfigBugfix()) {
+                defaults.putBoolean(KEY_ENABLE_NI_SUPL_MESSAGE_INJECTION_BOOL, false);
+            }
             return defaults;
         }
     }
@@ -9748,7 +9761,7 @@ public class CarrierConfigManager {
      * users to switch to using satellite emergency messaging.</li>
      * </ul>
      * <p>
-     * The default value is 300 seconds.
+     * The default value is 180 seconds.
      */
     @FlaggedApi(Flags.FLAG_CARRIER_ENABLED_SATELLITE_FLAG)
     public static final String KEY_SATELLITE_CONNECTION_HYSTERESIS_SEC_INT =
@@ -9843,6 +9856,16 @@ public class CarrierConfigManager {
     public static final String KEY_REMOVE_SATELLITE_PLMN_IN_MANUAL_NETWORK_SCAN_BOOL =
             "remove_satellite_plmn_in_manual_network_scan_bool";
 
+    /**
+     * This value is used to set the max datagram size, if the value is not available then the
+     * default one will be used.
+     * If key is {@code true}, retrieve the max datagram value and use this value always,
+     * {@code false} the default value from the modem will be used.
+     *
+     * @hide
+     */
+    public static final String KEY_SATELLITE_SOS_MAX_DATAGRAM_SIZE =
+            "satellite_sos_max_datagram_size";
 
     /** @hide */
     @IntDef({
@@ -10098,8 +10121,8 @@ public class CarrierConfigManager {
      * The default value is 30 seconds.
      */
     @FlaggedApi(Flags.FLAG_CARRIER_ROAMING_NB_IOT_NTN)
-    public static final String KEY_SATELLITE_SCREEN_OFF_INACTIVITY_TIMEOUT_SEC_INT =
-            "satellite_screen_off_inactivity_timeout_sec_int";
+    public static final String KEY_SATELLITE_ROAMING_SCREEN_OFF_INACTIVITY_TIMEOUT_SEC_INT =
+            "satellite_roaming_screen_off_inactivity_timeout_sec_int";
 
     /**
      * An integer key holds the timeout duration in seconds used to determine whether to exit P2P
@@ -10112,8 +10135,8 @@ public class CarrierConfigManager {
      * The default value is 180 seconds.
      */
     @FlaggedApi(Flags.FLAG_CARRIER_ROAMING_NB_IOT_NTN)
-    public static final String KEY_SATELLITE_P2P_SMS_INACTIVITY_TIMEOUT_SEC_INT =
-            "satellite_p2p_sms_inactivity_timeout_sec_int";
+    public static final String KEY_SATELLITE_ROAMING_P2P_SMS_INACTIVITY_TIMEOUT_SEC_INT =
+            "satellite_roaming_p2p_sms_inactivity_timeout_sec_int";
 
     /**
      * An integer key holds the timeout duration in seconds used to determine whether to exit ESOS
@@ -10126,8 +10149,8 @@ public class CarrierConfigManager {
      * The default value is 600 seconds.
      */
     @FlaggedApi(Flags.FLAG_CARRIER_ROAMING_NB_IOT_NTN)
-    public static final String KEY_SATELLITE_ESOS_INACTIVITY_TIMEOUT_SEC_INT =
-            "satellite_esos_inactivity_timeout_sec_int";
+    public static final String KEY_SATELLITE_ROAMING_ESOS_INACTIVITY_TIMEOUT_SEC_INT =
+            "satellite_roaming_esos_inactivity_timeout_sec_int";
 
     /**
      * Indicating whether DUN APN should be disabled when the device is roaming. In that case,
@@ -10543,7 +10566,6 @@ public class CarrierConfigManager {
      * @see SubscriptionInfo#getServiceCapabilities()
      * @see SubscriptionManager.OnSubscriptionsChangedListener
      */
-    @FlaggedApi(Flags.FLAG_DATA_ONLY_CELLULAR_SERVICE)
     public static final String KEY_CELLULAR_SERVICE_CAPABILITIES_INT_ARRAY =
             "cellular_service_capabilities_int_array";
    /**
@@ -11095,7 +11117,7 @@ public class CarrierConfigManager {
         sDefaults.putString(KEY_5G_ICON_DISPLAY_SECONDARY_GRACE_PERIOD_STRING, "");
         sDefaults.putInt(KEY_NR_ADVANCED_BANDS_SECONDARY_TIMER_SECONDS_INT, 0);
         sDefaults.putBoolean(KEY_NR_TIMERS_RESET_IF_NON_ENDC_AND_RRC_IDLE_BOOL, false);
-        sDefaults.putBoolean(KEY_NR_TIMERS_RESET_ON_VOICE_QOS_BOOL, true);
+        sDefaults.putBoolean(KEY_NR_TIMERS_RESET_ON_VOICE_QOS_BOOL, false);
         sDefaults.putBoolean(KEY_NR_TIMERS_RESET_ON_PLMN_CHANGE_BOOL, false);
         /* Default value is 1 hour. */
         sDefaults.putLong(KEY_5G_WATCHDOG_TIME_MS_LONG, 3600000);
@@ -11242,7 +11264,7 @@ public class CarrierConfigManager {
                 KEY_CARRIER_SUPPORTED_SATELLITE_SERVICES_PER_PROVIDER_BUNDLE,
                 PersistableBundle.EMPTY);
         sDefaults.putBoolean(KEY_SATELLITE_ATTACH_SUPPORTED_BOOL, false);
-        sDefaults.putInt(KEY_SATELLITE_CONNECTION_HYSTERESIS_SEC_INT, 300);
+        sDefaults.putInt(KEY_SATELLITE_CONNECTION_HYSTERESIS_SEC_INT, 180);
         sDefaults.putIntArray(KEY_NTN_LTE_RSRP_THRESHOLDS_INT_ARRAY,
                 // Boundaries: [-140 dBm, -44 dBm]
                 new int[]{
@@ -11294,9 +11316,9 @@ public class CarrierConfigManager {
         sDefaults.putInt(KEY_CARRIER_ROAMING_NTN_EMERGENCY_CALL_TO_SATELLITE_HANDOVER_TYPE_INT,
                 SatelliteManager.EMERGENCY_CALL_TO_SATELLITE_HANDOVER_TYPE_T911);
         sDefaults.putInt(KEY_CARRIER_SUPPORTED_SATELLITE_NOTIFICATION_HYSTERESIS_SEC_INT, 180);
-        sDefaults.putInt(KEY_SATELLITE_SCREEN_OFF_INACTIVITY_TIMEOUT_SEC_INT, 30);
-        sDefaults.putInt(KEY_SATELLITE_P2P_SMS_INACTIVITY_TIMEOUT_SEC_INT, 180);
-        sDefaults.putInt(KEY_SATELLITE_ESOS_INACTIVITY_TIMEOUT_SEC_INT, 600);
+        sDefaults.putInt(KEY_SATELLITE_ROAMING_SCREEN_OFF_INACTIVITY_TIMEOUT_SEC_INT, 30);
+        sDefaults.putInt(KEY_SATELLITE_ROAMING_P2P_SMS_INACTIVITY_TIMEOUT_SEC_INT, 180);
+        sDefaults.putInt(KEY_SATELLITE_ROAMING_ESOS_INACTIVITY_TIMEOUT_SEC_INT, 600);
         sDefaults.putString(KEY_DEFAULT_PREFERRED_APN_NAME_STRING, "");
         sDefaults.putBoolean(KEY_SUPPORTS_CALL_COMPOSER_BOOL, false);
         sDefaults.putBoolean(KEY_SUPPORTS_BUSINESS_CALL_COMPOSER_BOOL, false);

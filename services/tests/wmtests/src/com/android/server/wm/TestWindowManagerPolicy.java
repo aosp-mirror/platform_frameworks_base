@@ -60,7 +60,7 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
 
     @Override
     public int checkAddPermission(int type, boolean isRoundedCornerOverlay, String packageName,
-            int[] outAppOp) {
+            int[] outAppOp, int displayId) {
         return 0;
     }
 
@@ -103,8 +103,8 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
-    public KeyEvent dispatchUnhandledKey(IBinder focusedToken, KeyEvent event, int policyFlags) {
-        return null;
+    public boolean interceptUnhandledKey(KeyEvent event, IBinder focusedToken) {
+        return false;
     }
 
     @Override

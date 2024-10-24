@@ -22,10 +22,11 @@ import android.widget.SeekBar
 import androidx.annotation.VisibleForTesting
 import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.util.time.SystemClock
+import com.google.android.msdl.domain.MSDLPlayer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /**
  * A plugin added to a manager of a [android.widget.SeekBar] that adds dynamic haptic feedback.
@@ -39,6 +40,7 @@ class SeekbarHapticPlugin
 @JvmOverloads
 constructor(
     vibratorHelper: VibratorHelper,
+    msdlPlayer: MSDLPlayer,
     systemClock: SystemClock,
     sliderHapticFeedbackConfig: SliderHapticFeedbackConfig = SliderHapticFeedbackConfig(),
     private val sliderTrackerConfig: SeekableSliderTrackerConfig = SeekableSliderTrackerConfig(),
@@ -46,12 +48,25 @@ constructor(
 
     private val velocityTracker = VelocityTracker.obtain()
 
+    private val dragVelocityProvider = SliderDragVelocityProvider {
+        velocityTracker.computeCurrentVelocity(
+            UNITS_SECOND,
+            sliderHapticFeedbackConfig.maxVelocityToScale,
+        )
+        if (velocityTracker.isAxisSupported(sliderHapticFeedbackConfig.velocityAxis)) {
+            velocityTracker.getAxisVelocity(sliderHapticFeedbackConfig.velocityAxis)
+        } else {
+            0f
+        }
+    }
+
     private val sliderEventProducer = SliderStateProducer()
 
     private val sliderHapticFeedbackProvider =
         SliderHapticFeedbackProvider(
             vibratorHelper,
-            velocityTracker,
+            msdlPlayer,
+            dragVelocityProvider,
             sliderHapticFeedbackConfig,
             systemClock,
         )
@@ -188,5 +203,6 @@ constructor(
 
     companion object {
         const val KEY_UP_TIMEOUT = 60L
+        private const val UNITS_SECOND = 1000
     }
 }

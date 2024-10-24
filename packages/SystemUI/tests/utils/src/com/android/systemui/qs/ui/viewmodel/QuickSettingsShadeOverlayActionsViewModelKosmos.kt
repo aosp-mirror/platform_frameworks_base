@@ -18,8 +18,12 @@ package com.android.systemui.qs.ui.viewmodel
 
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
+import com.android.systemui.qs.ui.adapter.FakeQSSceneAdapter
+import com.android.systemui.util.mockito.mock
+
+val Kosmos.fakeQsSceneAdapter: FakeQSSceneAdapter by Fixture { FakeQSSceneAdapter({ mock() }) }
 
 val Kosmos.quickSettingsShadeOverlayActionsViewModel:
     QuickSettingsShadeOverlayActionsViewModel by Fixture {
-    QuickSettingsShadeOverlayActionsViewModel()
+    QuickSettingsShadeOverlayActionsViewModel(quickSettingsContainerViewModel)
 }

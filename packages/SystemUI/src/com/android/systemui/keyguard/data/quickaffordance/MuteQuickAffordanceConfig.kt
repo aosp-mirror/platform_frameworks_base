@@ -44,7 +44,7 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 import kotlinx.coroutines.withContext
 
 @SysUISingleton
@@ -103,7 +103,7 @@ constructor(
     override fun onTriggered(
         expandable: Expandable?
     ): KeyguardQuickAffordanceConfig.OnTriggeredResult {
-        coroutineScope.launch(backgroundDispatcher) {
+        coroutineScope.launch(context = backgroundDispatcher) {
             val newRingerMode: Int
             val currentRingerMode = audioManager.ringerModeInternal
             if (currentRingerMode == AudioManager.RINGER_MODE_SILENT) {

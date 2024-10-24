@@ -30,9 +30,11 @@ import com.android.systemui.authentication.shared.model.AuthenticationWipeModel
 import com.android.systemui.bouncer.domain.interactor.BouncerActionButtonInteractor
 import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
 import com.android.systemui.bouncer.shared.model.BouncerActionButtonModel
+import com.android.systemui.bouncer.ui.helper.BouncerHapticPlayer
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.shared.model.Text
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.keyguard.domain.interactor.KeyguardMediaKeyInteractor
 import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.user.ui.viewmodel.UserSwitcherViewModel
 import dagger.assisted.AssistedFactory
@@ -45,7 +47,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /** Models UI state for the content of the bouncer scene. */
 class BouncerSceneContentViewModel
@@ -61,6 +63,8 @@ constructor(
     private val pinViewModelFactory: PinBouncerViewModel.Factory,
     private val patternViewModelFactory: PatternBouncerViewModel.Factory,
     private val passwordViewModelFactory: PasswordBouncerViewModel.Factory,
+    private val bouncerHapticPlayer: BouncerHapticPlayer,
+    private val keyguardMediaKeyInteractor: KeyguardMediaKeyInteractor,
 ) : ExclusiveActivatable() {
     private val _selectedUserImage = MutableStateFlow<Bitmap?>(null)
     val selectedUserImage: StateFlow<Bitmap?> = _selectedUserImage.asStateFlow()
@@ -162,10 +166,7 @@ constructor(
             }
 
             launch {
-                combine(
-                        userSwitcher.users,
-                        userSwitcher.menu,
-                    ) { users, actions ->
+                combine(userSwitcher.users, userSwitcher.menu) { users, actions ->
                         users.map { user ->
                             UserSwitcherDropdownItemViewModel(
                                 icon = Icon.Loaded(user.image, contentDescription = null),
@@ -176,9 +177,11 @@ constructor(
                             actions.map { action ->
                                 UserSwitcherDropdownItemViewModel(
                                     icon =
-                                        Icon.Resource(
-                                            action.iconResourceId,
-                                            contentDescription = null
+                                        Icon.Loaded(
+                                            applicationContext.resources.getDrawable(
+                                                action.iconResourceId
+                                            ),
+                                            contentDescription = null,
                                         ),
                                     text = Text.Resource(action.textResourceId),
                                     onClick = action.onClicked,
@@ -226,7 +229,7 @@ constructor(
     }
 
     private fun getChildViewModel(
-        authenticationMethod: AuthenticationMethodModel,
+        authenticationMethod: AuthenticationMethodModel
     ): AuthMethodBouncerViewModel? {
         // If the current child view-model matches the authentication method, reuse it instead of
         // creating a new instance.
@@ -241,12 +244,14 @@ constructor(
                     authenticationMethod = authenticationMethod,
                     onIntentionalUserInput = ::onIntentionalUserInput,
                     isInputEnabled = isInputEnabled,
+                    bouncerHapticPlayer = bouncerHapticPlayer,
                 )
             is AuthenticationMethodModel.Sim ->
                 pinViewModelFactory.create(
                     authenticationMethod = authenticationMethod,
                     onIntentionalUserInput = ::onIntentionalUserInput,
                     isInputEnabled = isInputEnabled,
+                    bouncerHapticPlayer = bouncerHapticPlayer,
                 )
             is AuthenticationMethodModel.Password ->
                 passwordViewModelFactory.create(
@@ -257,6 +262,7 @@ constructor(
                 patternViewModelFactory.create(
                     onIntentionalUserInput = ::onIntentionalUserInput,
                     isInputEnabled = isInputEnabled,
+                    bouncerHapticPlayer = bouncerHapticPlayer,
                 )
             else -> null
         }
@@ -317,10 +323,7 @@ constructor(
         return when {
             // The wipe dialog takes priority over the lockout dialog.
             wipeText != null ->
-                DialogViewModel(
-                    text = wipeText,
-                    onDismiss = { wipeDialogMessage.value = null },
-                )
+                DialogViewModel(text = wipeText, onDismiss = { wipeDialogMessage.value = null })
             lockoutText != null ->
                 DialogViewModel(
                     text = lockoutText,
@@ -336,10 +339,9 @@ constructor(
      * @return `true` when the [KeyEvent] was consumed as user input on bouncer; `false` otherwise.
      */
     fun onKeyEvent(keyEvent: KeyEvent): Boolean {
-        return (authMethodViewModel.value as? PinBouncerViewModel)?.onKeyEvent(
-            keyEvent.type,
-            keyEvent.nativeKeyEvent.keyCode
-        ) ?: false
+        if (keyguardMediaKeyInteractor.processMediaKeyEvent(keyEvent.nativeKeyEvent)) return true
+        return authMethodViewModel.value?.onKeyEvent(keyEvent.type, keyEvent.nativeKeyEvent.keyCode)
+            ?: false
     }
 
     data class DialogViewModel(

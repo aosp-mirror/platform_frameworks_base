@@ -58,6 +58,7 @@ import static com.android.internal.accessibility.common.ShortcutConstants.UserSh
 import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.SOFTWARE;
 import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.TRIPLETAP;
 import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.TWOFINGER_DOUBLETAP;
+import static com.android.internal.accessibility.dialog.AccessibilityButtonChooserActivity.EXTRA_TYPE_TO_CHOOSE;
 import static com.android.internal.accessibility.util.AccessibilityStatsLogUtils.logAccessibilityShortcutActivated;
 import static com.android.internal.accessibility.util.AccessibilityUtils.isUserSetupCompleted;
 import static com.android.internal.util.FunctionalUtils.ignoreRemoteException;
@@ -115,6 +116,7 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
@@ -900,7 +902,19 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     private void registerBroadcastReceivers() {
         // package changes
         mPackageMonitor = new ManagerPackageMonitor(this);
-        mPackageMonitor.register(mContext, null,  UserHandle.ALL, true);
+        final Looper packageMonitorLooper;
+        if (Flags.packageMonitorDedicatedThread()) {
+            // Use a dedicated thread because the default BackgroundThread used by PackageMonitor
+            // is shared by other components and can get busy, causing a delay and eventual ANR when
+            // responding to broadcasts sent to this PackageMonitor.
+            HandlerThread packageMonitorThread = new HandlerThread(LOG_TAG + " PackageMonitor",
+                    Process.THREAD_PRIORITY_BACKGROUND);
+            packageMonitorThread.start();
+            packageMonitorLooper = packageMonitorThread.getLooper();
+        } else {
+            packageMonitorLooper = null;
+        }
+        mPackageMonitor.register(mContext, packageMonitorLooper,  UserHandle.ALL, true);
 
         // user change and unlock
         IntentFilter intentFilter = new IntentFilter();
@@ -1434,8 +1448,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 interfacesToInterrupt = new ArrayList<>(services.size());
                 for (int i = 0; i < services.size(); i++) {
                     AccessibilityServiceConnection service = services.get(i);
-                    IBinder a11yServiceBinder = service.mService;
-                    IAccessibilityServiceClient a11yServiceInterface = service.mServiceInterface;
+                    IBinder a11yServiceBinder = service.mClientBinder;
+                    IAccessibilityServiceClient a11yServiceInterface = service.mClient;
                     if ((a11yServiceBinder != null) && (a11yServiceInterface != null)) {
                         interfacesToInterrupt.add(a11yServiceInterface);
                     }
@@ -1616,7 +1630,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
     /**
      * Invoked remotely over AIDL by SysUi when the accessibility button within the system's
-     * navigation area has been clicked.
+     * navigation area has been clicked, or a gesture shortcut input has been performed.
      *
      * @param displayId The logical display id.
      * @param targetName The flattened {@link ComponentName} string or the class name of a system
@@ -1646,7 +1660,26 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
         mMainHandler.sendMessage(obtainMessage(
                 AccessibilityManagerService::performAccessibilityShortcutInternal, this,
-                displayId, SOFTWARE, targetName));
+                displayId, getShortcutTypeForGenericShortcutCalls(currentUserId), targetName));
+    }
+
+    /**
+     * AIDL-exposed method to show the dialog
+     * for choosing the target for the gesture or button shortcuts.
+     * The shortcut is determined by the current navigation mode.
+     *
+     * @param displayId The id for the display to show the dialog on.
+     */
+    @Override
+    @EnforcePermission(STATUS_BAR_SERVICE)
+    public void notifyAccessibilityButtonLongClicked(int displayId) {
+        notifyAccessibilityButtonLongClicked_enforcePermission();
+        int userId;
+        synchronized (mLock) {
+            userId = mCurrentUserId;
+        }
+        showAccessibilityTargetsSelection(displayId,
+                getShortcutTypeForGenericShortcutCalls(userId), userId);
     }
 
     /**
@@ -2344,16 +2377,18 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
     }
 
-    private void showAccessibilityTargetsSelection(int displayId,
-            @UserShortcutType int shortcutType) {
+    private void showAccessibilityTargetsSelection(int displayId, int shortcutType,
+            int userId) {
         final Intent intent = new Intent(AccessibilityManager.ACTION_CHOOSE_ACCESSIBILITY_BUTTON);
         final String chooserClassName = (shortcutType == HARDWARE)
                 ? AccessibilityShortcutChooserActivity.class.getName()
                 : AccessibilityButtonChooserActivity.class.getName();
         intent.setClassName(CHOOSER_PACKAGE_NAME, chooserClassName);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        intent.putExtra(EXTRA_TYPE_TO_CHOOSE, shortcutType);
         final Bundle bundle = ActivityOptions.makeBasic().setLaunchDisplayId(displayId).toBundle();
-        mContext.startActivityAsUser(intent, bundle, UserHandle.of(mCurrentUserId));
+        mMainHandler.post(() ->
+                mContext.startActivityAsUser(intent, bundle, UserHandle.of(userId)));
     }
 
     private void launchShortcutTargetActivity(int displayId, ComponentName name) {
@@ -2491,6 +2526,19 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     private boolean readInstalledAccessibilityShortcutLocked(AccessibilityUserState userState,
             List<AccessibilityShortcutInfo> parsedAccessibilityShortcutInfos) {
         if (!parsedAccessibilityShortcutInfos.equals(userState.mInstalledShortcuts)) {
+            if (Flags.clearShortcutsWhenActivityUpdatesToService()) {
+                List<String> componentNames = userState.mInstalledShortcuts.stream()
+                        .filter(a11yActivity ->
+                                !parsedAccessibilityShortcutInfos.contains(a11yActivity))
+                        .map(a11yActivity -> a11yActivity.getComponentName().flattenToString())
+                        .toList();
+                if (!componentNames.isEmpty()) {
+                    enableShortcutsForTargets(
+                            /* enable= */ false, UserShortcutType.ALL,
+                            componentNames, userState.mUserId);
+                }
+            }
+
             userState.mInstalledShortcuts.clear();
             userState.mInstalledShortcuts.addAll(parsedAccessibilityShortcutInfos);
             userState.updateTileServiceMapForAccessibilityActivityLocked();
@@ -3631,6 +3679,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             return;
         }
 
+        // Magnification connection should not be requested for visible background users.
+        // (b/332222893)
+        if (mUmi.isVisibleBackgroundFullUser(userState.mUserId)) {
+            return;
+        }
+
         final boolean shortcutEnabled = (userState.isShortcutMagnificationEnabledLocked()
                 || userState.isMagnificationSingleFingerTripleTapEnabledLocked()
                 || (Flags.enableMagnificationMultipleFingerMultipleTapGesture()
@@ -4011,7 +4065,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      * Perform the accessibility shortcut action.
      *
      * @param shortcutType The shortcut type.
-     * @param displayId The display id of the accessibility button.
+     * @param displayId The display id the shortcut is being performed from.
      * @param targetName The flattened {@link ComponentName} string or the class name of a system
      *        class implementing a supported accessibility feature, or {@code null} if there's no
      *        specified target.
@@ -4031,7 +4085,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         if (targetName == null) {
             // In case there are many targets assigned to the given shortcut.
             if (shortcutTargets.size() > 1) {
-                showAccessibilityTargetsSelection(displayId, shortcutType);
+                showAccessibilityTargetsSelection(
+                        displayId, shortcutType, getCurrentUserState().mUserId);
                 return;
             }
             targetName = shortcutTargets.get(0);
@@ -4939,9 +4994,14 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 if (android.permission.flags.Flags.enhancedConfirmationModeApisEnabled()
                         && android.security.Flags.extendEcmToAllSettings()) {
                     try {
-                        return !mContext.getSystemService(EnhancedConfirmationManager.class)
-                                .isRestricted(packageName,
-                                        AppOpsManager.OPSTR_BIND_ACCESSIBILITY_SERVICE);
+                        final EnhancedConfirmationManager userContextEcm =
+                                mContext.createContextAsUser(UserHandle.of(userId), /* flags = */ 0)
+                                        .getSystemService(EnhancedConfirmationManager.class);
+                        if (userContextEcm != null) {
+                            return !userContextEcm.isRestricted(packageName,
+                                    AppOpsManager.OPSTR_BIND_ACCESSIBILITY_SERVICE);
+                        }
+                        return false;
                     } catch (PackageManager.NameNotFoundException e) {
                         Log.e(LOG_TAG, "Exception when retrieving package:" + packageName, e);
                         return false;
@@ -6561,6 +6621,18 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                         displayId,
                         sc,
                         callback));
+    }
+
+    @VisibleForTesting
+    int getShortcutTypeForGenericShortcutCalls(int userId) {
+        int navigationMode = Settings.Secure.getIntForUser(
+                mContext.getContentResolver(),
+                Settings.Secure.NAVIGATION_MODE, -1, userId);
+        if (android.provider.Flags.a11yStandaloneGestureEnabled()) {
+            return (navigationMode == NAV_BAR_MODE_GESTURAL) ? GESTURE : SOFTWARE;
+        } else {
+            return SOFTWARE;
+        }
     }
 
     void attachAccessibilityOverlayToDisplayInternal(

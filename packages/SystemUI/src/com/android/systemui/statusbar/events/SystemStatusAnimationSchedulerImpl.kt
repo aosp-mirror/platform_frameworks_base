@@ -23,7 +23,13 @@ import androidx.core.animation.AnimatorListenerAdapter
 import androidx.core.animation.AnimatorSet
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.statusbar.window.StatusBarWindowController
+import com.android.systemui.statusbar.events.shared.model.SystemEventAnimationState.AnimatingIn
+import com.android.systemui.statusbar.events.shared.model.SystemEventAnimationState.AnimatingOut
+import com.android.systemui.statusbar.events.shared.model.SystemEventAnimationState.AnimationQueued
+import com.android.systemui.statusbar.events.shared.model.SystemEventAnimationState.Idle
+import com.android.systemui.statusbar.events.shared.model.SystemEventAnimationState.RunningChipAnim
+import com.android.systemui.statusbar.events.shared.model.SystemEventAnimationState.ShowingPersistentDot
+import com.android.systemui.statusbar.window.StatusBarWindowControllerStore
 import com.android.systemui.util.Assert
 import com.android.systemui.util.time.SystemClock
 import java.io.PrintWriter
@@ -33,10 +39,11 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 import kotlinx.coroutines.withTimeout
 
 /**
@@ -65,11 +72,11 @@ open class SystemStatusAnimationSchedulerImpl
 constructor(
     private val coordinator: SystemEventCoordinator,
     private val chipAnimationController: SystemEventChipAnimationController,
-    private val statusBarWindowController: StatusBarWindowController,
+    private val statusBarWindowControllerStore: StatusBarWindowControllerStore,
     dumpManager: DumpManager,
     private val systemClock: SystemClock,
     @Application private val coroutineScope: CoroutineScope,
-    private val logger: SystemStatusAnimationSchedulerLogger?
+    private val logger: SystemStatusAnimationSchedulerLogger?,
 ) : SystemStatusAnimationScheduler {
 
     companion object {
@@ -85,8 +92,8 @@ constructor(
      */
     private var currentlyDisplayedEvent: StatusEvent? = null
 
-    /** StateFlow holding the current [SystemAnimationState] at any time. */
-    private var animationState = MutableStateFlow(IDLE)
+    private val _animationState = MutableStateFlow(Idle)
+    override val animationState = _animationState.asStateFlow()
 
     /** True if the persistent privacy dot should be active */
     var hasPersistentDot = false
@@ -109,25 +116,21 @@ constructor(
             // Wait for animationState to become ANIMATION_QUEUED and scheduledEvent to be non null.
             // Once this combination is stable for at least DEBOUNCE_DELAY, then start a chip enter
             // animation
-            animationState
+            _animationState
                 .combine(scheduledEvent) { animationState, scheduledEvent ->
                     Pair(animationState, scheduledEvent)
                 }
                 .debounce(DEBOUNCE_DELAY)
                 .collect { (animationState, event) ->
-                    if (animationState == ANIMATION_QUEUED && event != null) {
+                    if (animationState == AnimationQueued && event != null) {
                         startAnimationLifecycle(event)
                         scheduledEvent.value = null
                     }
                 }
         }
 
-        coroutineScope.launch {
-            animationState.collect { logger?.logAnimationStateUpdate(it) }
-        }
+        coroutineScope.launch { _animationState.collect { logger?.logAnimationStateUpdate(it) } }
     }
-
-    @SystemAnimationState override fun getAnimationState(): Int = animationState.value
 
     override fun onStatusEvent(event: StatusEvent) {
         Assert.isMainThread()
@@ -148,11 +151,11 @@ constructor(
             logger?.logScheduleEvent(event)
             scheduleEvent(event)
         } else if (currentlyDisplayedEvent?.shouldUpdateFromEvent(event) == true) {
-            logger?.logUpdateEvent(event, animationState.value)
+            logger?.logUpdateEvent(event, _animationState.value)
             currentlyDisplayedEvent?.updateFromEvent(event)
             if (event.forceVisible) hasPersistentDot = true
         } else if (scheduledEvent.value?.shouldUpdateFromEvent(event) == true) {
-            logger?.logUpdateEvent(event, animationState.value)
+            logger?.logUpdateEvent(event, _animationState.value)
             scheduledEvent.value?.updateFromEvent(event)
         } else {
             logger?.logIgnoreEvent(event)
@@ -172,15 +175,15 @@ constructor(
         // the disappear animation will not animate into a dot but remove the chip entirely
         hasPersistentDot = false
 
-        if (animationState.value == SHOWING_PERSISTENT_DOT) {
+        if (_animationState.value == ShowingPersistentDot) {
             // if we are currently showing a persistent dot, hide it and update the animationState
             notifyHidePersistentDot()
             if (scheduledEvent.value != null) {
-                animationState.value = ANIMATION_QUEUED
+                _animationState.value = AnimationQueued
             } else {
-                animationState.value = IDLE
+                _animationState.value = Idle
             }
-        } else if (animationState.value == ANIMATING_OUT) {
+        } else if (_animationState.value == AnimatingOut) {
             // if we are currently animating out, hide the dot. The animationState will be updated
             // once the animation has ended in the onAnimationEnd callback
             notifyHidePersistentDot()
@@ -195,7 +198,7 @@ constructor(
         return DeviceConfig.getBoolean(
             DeviceConfig.NAMESPACE_PRIVACY,
             PROPERTY_ENABLE_IMMERSIVE_INDICATOR,
-            true
+            true,
         )
     }
 
@@ -208,9 +211,9 @@ constructor(
             cancelCurrentlyDisplayedEvent()
             return
         }
-        if (animationState.value == IDLE) {
+        if (_animationState.value == Idle) {
             // If we are in IDLE state, set it to ANIMATION_QUEUED now
-            animationState.value = ANIMATION_QUEUED
+            _animationState.value = AnimationQueued
         }
     }
 
@@ -225,7 +228,7 @@ constructor(
                 withTimeout(APPEAR_ANIMATION_DURATION) {
                     // wait for animationState to become RUNNING_CHIP_ANIM, then cancel the running
                     // animation job and run the disappear animation immediately
-                    animationState.first { it == RUNNING_CHIP_ANIM }
+                    _animationState.first { it == RunningChipAnim }
                     currentlyRunningAnimationJob?.cancel()
                     runChipDisappearAnimation()
                 }
@@ -243,7 +246,7 @@ constructor(
 
         if (!event.showAnimation && event.forceVisible) {
             // If animations are turned off, we'll transition directly to the dot
-            animationState.value = SHOWING_PERSISTENT_DOT
+            _animationState.value = ShowingPersistentDot
             notifyTransitionToPersistentDot(event)
             return
         }
@@ -262,7 +265,7 @@ constructor(
 
     private fun announceForAccessibilityIfNeeded(event: StatusEvent) {
         val description = event.contentDescription ?: return
-        if (!event.shouldAnnounceAccessibilityEvent)  return
+        if (!event.shouldAnnounceAccessibilityEvent) return
         chipAnimationController.announceForAccessibility(description)
     }
 
@@ -277,9 +280,9 @@ constructor(
     private fun runChipAppearAnimation() {
         Assert.isMainThread()
         if (hasPersistentDot) {
-            statusBarWindowController.setForceStatusBarVisible(true)
+            statusBarWindowControllerStore.defaultDisplay.setForceStatusBarVisible(true)
         }
-        animationState.value = ANIMATING_IN
+        _animationState.value = AnimatingIn
 
         val animSet = collectStartAnimations()
         if (animSet.totalDuration > 500) {
@@ -291,7 +294,7 @@ constructor(
         animSet.addListener(
             object : AnimatorListenerAdapter() {
                 override fun onAnimationEnd(animation: Animator) {
-                    animationState.value = RUNNING_CHIP_ANIM
+                    _animationState.value = RunningChipAnim
                 }
             }
         )
@@ -301,17 +304,17 @@ constructor(
     private fun runChipDisappearAnimation() {
         Assert.isMainThread()
         val animSet2 = collectFinishAnimations()
-        animationState.value = ANIMATING_OUT
+        _animationState.value = AnimatingOut
         animSet2.addListener(
             object : AnimatorListenerAdapter() {
                 override fun onAnimationEnd(animation: Animator) {
-                    animationState.value =
+                    _animationState.value =
                         when {
-                            hasPersistentDot -> SHOWING_PERSISTENT_DOT
-                            scheduledEvent.value != null -> ANIMATION_QUEUED
-                            else -> IDLE
+                            hasPersistentDot -> ShowingPersistentDot
+                            scheduledEvent.value != null -> AnimationQueued
+                            else -> Idle
                         }
-                    statusBarWindowController.setForceStatusBarVisible(false)
+                    statusBarWindowControllerStore.defaultDisplay.setForceStatusBarVisible(false)
                 }
             }
         )
@@ -356,9 +359,7 @@ constructor(
         logger?.logTransitionToPersistentDotCallbackInvoked()
         val anims: List<Animator> =
             listeners.mapNotNull {
-                it.onSystemStatusAnimationTransitionToPersistentDot(
-                    event?.contentDescription
-                )
+                it.onSystemStatusAnimationTransitionToPersistentDot(event?.contentDescription)
             }
         if (anims.isNotEmpty()) {
             val aSet = AnimatorSet()
@@ -405,7 +406,7 @@ constructor(
         pw.println("Scheduled event: ${scheduledEvent.value}")
         pw.println("Currently displayed event: $currentlyDisplayedEvent")
         pw.println("Has persistent privacy dot: $hasPersistentDot")
-        pw.println("Animation state: ${animationState.value}")
+        pw.println("Animation state: ${_animationState.value}")
         pw.println("Listeners:")
         if (listeners.isEmpty()) {
             pw.println("(none)")

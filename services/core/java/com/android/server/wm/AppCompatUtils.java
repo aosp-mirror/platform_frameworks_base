@@ -185,8 +185,8 @@ final class AppCompatUtils {
                         && aspectRatioOverrides.shouldEnableUserAspectRatioSettings();
         appCompatTaskInfo.setEligibleForUserAspectRatioButton(eligibleForAspectRatioButton);
         appCompatTaskInfo.setTopActivityLetterboxed(top.areBoundsLetterboxed());
-        appCompatTaskInfo.cameraCompatTaskInfo.freeformCameraCompatMode = top.mAppCompatController
-                .getAppCompatCameraOverrides().getFreeformCameraCompatMode();
+        appCompatTaskInfo.cameraCompatTaskInfo.freeformCameraCompatMode =
+                AppCompatCameraPolicy.getCameraCompatFreeformMode(top);
         appCompatTaskInfo.setHasMinAspectRatioOverride(top.mAppCompatController
                 .getDesktopAppCompatAspectRatioPolicy().hasMinAspectRatioOverride(task));
     }

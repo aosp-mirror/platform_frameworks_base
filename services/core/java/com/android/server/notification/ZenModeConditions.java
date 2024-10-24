@@ -102,16 +102,6 @@ public class ZenModeConditions implements ConditionProviders.Callback {
     }
 
     @Override
-    public void onBootComplete() {
-        // noop
-    }
-
-    @Override
-    public void onUserSwitched() {
-        // noop
-    }
-
-    @Override
     public void onServiceAdded(ComponentName component) {
         if (DEBUG) Log.d(TAG, "onServiceAdded " + component);
         final int callingUid = Binder.getCallingUid();
@@ -157,7 +147,7 @@ public class ZenModeConditions implements ConditionProviders.Callback {
         }
         // empty rule? disable and bail early
         if (rule.component == null && rule.enabler == null) {
-            if (!android.app.Flags.modesUi() || (android.app.Flags.modesUi() && !isManual)) {
+            if (!isManual) {
                 Log.w(TAG, "No component found for automatic rule: " + rule.conditionId);
                 rule.enabled = false;
             }

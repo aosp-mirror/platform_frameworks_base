@@ -591,7 +591,7 @@
 
     <dimen name="volume_dialog_panel_width_half">28dp</dimen>
 
-    <dimen name="volume_dialog_slider_width">42dp</dimen>
+    <dimen name="volume_dialog_slider_width_legacy">42dp</dimen>
 
     <dimen name="volume_dialog_slider_corner_radius">21dp</dimen>
 
@@ -621,10 +621,6 @@
     <dimen name="volume_tool_tip_right_margin">76dp</dimen>
 
     <dimen name="volume_tool_tip_arrow_corner_radius">2dp</dimen>
-
-    <!-- Volume panel slices dimensions -->
-    <dimen name="volume_panel_slice_vertical_padding">8dp</dimen>
-    <dimen name="volume_panel_slice_horizontal_padding">24dp</dimen>
 
     <dimen name="bottom_sheet_corner_radius">28dp</dimen>
 
@@ -1751,6 +1747,7 @@
 
     <!-- System UI Dialog -->
     <dimen name="dialog_title_text_size">24sp</dimen>
+    <dimen name="dialog_button_side_margin">8dp</dimen>
 
     <!-- Internet panel related dimensions -->
     <dimen name="internet_dialog_list_max_height">662dp</dimen>
@@ -1801,8 +1798,6 @@
     <dimen name="hearing_devices_preset_spinner_text_padding_vertical">15dp</dimen>
     <dimen name="hearing_devices_preset_spinner_arrow_size">24dp</dimen>
     <dimen name="hearing_devices_preset_spinner_background_radius">28dp</dimen>
-    <dimen name="hearing_devices_tool_icon_frame_width">94dp</dimen>
-    <dimen name="hearing_devices_tool_icon_frame_height">64dp</dimen>
     <dimen name="hearing_devices_tool_icon_size">28dp</dimen>
 
     <!-- Height percentage of the parent container occupied by the communal view -->
@@ -1975,6 +1970,17 @@
     <dimen name="backlight_indicator_step_small_radius">4dp</dimen>
     <dimen name="backlight_indicator_step_large_radius">28dp</dimen>
 
+    <!-- Touchpad gestures tutorial-->
+    <!-- This value is in unit of dp/ms
+        TriggerSwipeUpTouchTracker (which is base for gesture tutorial implementation) uses value
+        of 0.5dp but from manual testing it's too high and doesn't really feel like it's forcing
+        slowing down. Also for tutorial it should be fine to lean to the side of being more strict
+        rather than not strict enough and not teaching user the proper gesture as a result.-->
+    <dimen name="touchpad_recent_apps_gesture_velocity_threshold">0.05dp</dimen>
+    <!-- Normal gesture threshold is system_gestures_distance_threshold but for tutorial we can
+         exaggerate gesture, which also works much better with live tracking -->
+    <dimen name="touchpad_tutorial_gestures_distance_threshold">48dp</dimen>
+
     <!-- Broadcast dialog -->
     <dimen name="broadcast_dialog_title_img_margin_top">18dp</dimen>
     <dimen name="broadcast_dialog_title_text_size">24sp</dimen>
@@ -2001,10 +2007,10 @@
     <!-- Shadow for dream overlay status bar complications -->
     <dimen name="dream_overlay_status_bar_key_text_shadow_dx">0.5dp</dimen>
     <dimen name="dream_overlay_status_bar_key_text_shadow_dy">0.5dp</dimen>
-    <dimen name="dream_overlay_status_bar_key_text_shadow_radius">1dp</dimen>
+    <dimen name="dream_overlay_status_bar_key_text_shadow_radius">3dp</dimen>
     <dimen name="dream_overlay_status_bar_ambient_text_shadow_dx">0.5dp</dimen>
     <dimen name="dream_overlay_status_bar_ambient_text_shadow_dy">0.5dp</dimen>
-    <dimen name="dream_overlay_status_bar_ambient_text_shadow_radius">2dp</dimen>
+    <dimen name="dream_overlay_status_bar_ambient_text_shadow_radius">3dp</dimen>
     <dimen name="dream_overlay_icon_inset_dimen">0dp</dimen>
 
     <!-- Default device corner radius, used for assist UI -->
@@ -2038,4 +2044,25 @@
     <!-- SliceView icon size -->
     <dimen name="abc_slice_big_pic_min_height">64dp</dimen>
     <dimen name="abc_slice_big_pic_max_height">64dp</dimen>
+
+    <dimen name="contextual_edu_dialog_bottom_margin">80dp</dimen>
+    <dimen name="contextual_edu_dialog_elevation">2dp</dimen>
+
+    <!-- Volume start -->
+    <dimen name="volume_dialog_background_corner_radius">30dp</dimen>
+    <dimen name="volume_dialog_width">60dp</dimen>
+    <dimen name="volume_dialog_vertical_padding">6dp</dimen>
+    <dimen name="volume_dialog_components_spacing">8dp</dimen>
+    <dimen name="volume_dialog_floating_sliders_spacing">8dp</dimen>
+    <dimen name="volume_dialog_floating_sliders_vertical_padding">10dp</dimen>
+    <dimen name="volume_dialog_floating_sliders_horizontal_padding">4dp</dimen>
+    <dimen name="volume_dialog_spacing">4dp</dimen>
+    <dimen name="volume_dialog_button_size">48dp</dimen>
+    <dimen name="volume_dialog_floating_sliders_bottom_padding">48dp</dimen>
+    <dimen name="volume_dialog_slider_width">52dp</dimen>
+    <dimen name="volume_dialog_slider_height">254dp</dimen>
+
+    <dimen name="volume_panel_slice_vertical_padding">8dp</dimen>
+    <dimen name="volume_panel_slice_horizontal_padding">24dp</dimen>
+    <!-- Volume end -->
 </resources>

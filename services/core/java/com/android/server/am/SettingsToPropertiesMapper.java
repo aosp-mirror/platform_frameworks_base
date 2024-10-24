@@ -40,6 +40,7 @@ import android.aconfigd.Aconfigd.StorageRequestMessages;
 import android.aconfigd.Aconfigd.StorageReturnMessage;
 import android.aconfigd.Aconfigd.StorageReturnMessages;
 import static com.android.aconfig_new_storage.Flags.enableAconfigStorageDaemon;
+import static com.android.aconfig_new_storage.Flags.supportImmediateLocalOverrides;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -137,8 +138,10 @@ public class SettingsToPropertiesMapper {
     // The list is sorted.
     @VisibleForTesting
     static final String[] sDeviceConfigAconfigScopes = new String[] {
+        "aaos_sdv",
         "accessibility",
         "android_core_networking",
+        "android_health_services",
         "android_sdk",
         "android_stylus",
         "aoc",
@@ -147,7 +150,9 @@ public class SettingsToPropertiesMapper {
         "art_mainline",
         "art_performance",
         "attack_tools",
+        "automotive_cast",
         "avic",
+        "desktop_firmware",
         "biometrics",
         "biometrics_framework",
         "biometrics_integration",
@@ -171,6 +176,7 @@ public class SettingsToPropertiesMapper {
         "core_libraries",
         "crumpet",
         "dck_framework",
+        "desktop_stats",
         "devoptions_settings",
         "game",
         "gpu",
@@ -209,6 +215,7 @@ public class SettingsToPropertiesMapper {
         "preload_safety",
         "printing",
         "privacy_infra_policy",
+        "ravenwood",
         "resource_manager",
         "responsible_apis",
         "rust",
@@ -235,15 +242,16 @@ public class SettingsToPropertiesMapper {
         "wear_connectivity",
         "wear_esim_carriers",
         "wear_frameworks",
-        "wear_health_services",
         "wear_media",
         "wear_offload",
         "wear_security",
         "wear_system_health",
         "wear_systems",
         "wear_sysui",
+        "wear_system_managed_surfaces",
         "window_surfaces",
         "windowing_frontend",
+        "xr",
     };
 
     public static final String NAMESPACE_REBOOT_STAGING = "staged";
@@ -370,6 +378,13 @@ public class SettingsToPropertiesMapper {
                   String propertyName = "next_boot." + makeAconfigFlagPropertyName(
                       actualNamespace, actualFlagName);
 
+                  if (Flags.supportLocalOverridesSysprops()) {
+                    // Don't propagate if there is a local override.
+                    String overrideName = actualNamespace + ":" + actualFlagName;
+                    if (DeviceConfig.getProperty(NAMESPACE_LOCAL_OVERRIDES, overrideName) != null) {
+                      continue;
+                    }
+                  }
                   setProperty(propertyName, flagValue);
               }
 
@@ -387,6 +402,42 @@ public class SettingsToPropertiesMapper {
             (DeviceConfig.Properties properties) -> {
                 if (enableAconfigStorageDaemon()) {
                     setLocalOverridesInNewStorage(properties);
+                }
+
+                if (Flags.supportLocalOverridesSysprops()) {
+                  String overridesNamespace = properties.getNamespace();
+                  for (String key : properties.getKeyset()) {
+                    String realNamespace = key.split(":")[0];
+                    String realFlagName = key.split(":")[1];
+                    String aconfigPropertyName =
+                        makeAconfigFlagPropertyName(realNamespace, realFlagName);
+                    if (aconfigPropertyName == null) {
+                      logErr("unable to construct system property for " + realNamespace + "/"
+                        + key);
+                      return;
+                    }
+
+                    if (properties.getString(key, null) == null) {
+                      String deviceConfigValue =
+                              DeviceConfig.getProperty(realNamespace, realFlagName);
+                      String stagedDeviceConfigValue =
+                              DeviceConfig.getProperty(NAMESPACE_REBOOT_STAGING,
+                                              realNamespace + "*" + realFlagName);
+
+                      setProperty(aconfigPropertyName, deviceConfigValue);
+                      if (stagedDeviceConfigValue == null) {
+                        setProperty("next_boot." + aconfigPropertyName, deviceConfigValue);
+                      } else {
+                        setProperty("next_boot." + aconfigPropertyName, stagedDeviceConfigValue);
+                      }
+                    } else {
+                      // Otherwise, propagate the override to sysprops.
+                      setProperty(aconfigPropertyName, properties.getString(key, null));
+                      // If there's a staged value, make sure it's the override value.
+                      setProperty("next_boot." + aconfigPropertyName,
+                                properties.getString(key, null));
+                    }
+                  }
                 }
         });
     }
@@ -448,12 +499,18 @@ public class SettingsToPropertiesMapper {
     static void writeFlagOverrideRequest(
         ProtoOutputStream proto, String packageName, String flagName, String flagValue,
         boolean isLocal) {
+      int localOverrideTag = supportImmediateLocalOverrides()
+          ? StorageRequestMessage.LOCAL_IMMEDIATE
+          : StorageRequestMessage.LOCAL_ON_REBOOT;
+
       long msgsToken = proto.start(StorageRequestMessages.MSGS);
       long msgToken = proto.start(StorageRequestMessage.FLAG_OVERRIDE_MESSAGE);
       proto.write(StorageRequestMessage.FlagOverrideMessage.PACKAGE_NAME, packageName);
       proto.write(StorageRequestMessage.FlagOverrideMessage.FLAG_NAME, flagName);
       proto.write(StorageRequestMessage.FlagOverrideMessage.FLAG_VALUE, flagValue);
-      proto.write(StorageRequestMessage.FlagOverrideMessage.IS_LOCAL, isLocal);
+      proto.write(StorageRequestMessage.FlagOverrideMessage.OVERRIDE_TYPE, isLocal
+            ? localOverrideTag
+            : StorageRequestMessage.SERVER_ON_REBOOT);
       proto.end(msgToken);
       proto.end(msgsToken);
     }

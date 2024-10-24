@@ -186,6 +186,10 @@ public class BubbleBarLayerView extends FrameLayout
         if (expandedView == null) {
             return;
         }
+        if (mExpandedBubble != null && mIsExpanded && b.getKey().equals(mExpandedBubble.getKey())) {
+            // Already showing this bubble, skip animating
+            return;
+        }
         if (mExpandedBubble != null && !b.getKey().equals(mExpandedBubble.getKey())) {
             removeView(mExpandedView);
             mExpandedView = null;

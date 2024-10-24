@@ -40,6 +40,7 @@ import android.os.vibrator.PrimitiveSegment;
 import android.os.vibrator.RampSegment;
 import android.os.vibrator.StepSegment;
 import android.os.vibrator.VibrationEffectSegment;
+import android.os.vibrator.VibratorFrequencyProfileLegacy;
 import android.util.MathUtils;
 
 import com.android.internal.util.Preconditions;
@@ -54,6 +55,7 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.StringJoiner;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 
 /**
  * A VibrationEffect describes a haptic effect to be performed by a {@link Vibrator}.
@@ -540,6 +542,17 @@ public abstract class VibrationEffect implements Parcelable {
     /** @hide */
     public abstract void validate();
 
+
+    /**
+     * If supported, truncate the length of this vibration effect to the provided length and return
+     * the result. Will always return null for repeating effects.
+     *
+     * @return The desired effect, or {@code null} if truncation is not applicable.
+     * @hide
+     */
+    @Nullable
+    public abstract VibrationEffect cropToLengthOrNull(int length);
+
     /**
      * Gets the estimated duration of the vibration in milliseconds.
      *
@@ -551,6 +564,19 @@ public abstract class VibrationEffect implements Parcelable {
      */
     @TestApi
     public abstract long getDuration();
+
+    /**
+     * Gets the estimated duration of the segment for given vibrator, in milliseconds.
+     *
+     * <p>For effects with hardware-dependent constants (e.g. primitive compositions), this returns
+     * the estimated duration based on the given {@link VibratorInfo}. For all other effects this
+     * will return the same as {@link #getDuration()}.
+     *
+     * @hide
+     */
+    public long getDuration(@Nullable VibratorInfo vibratorInfo) {
+        return getDuration();
+    }
 
     /**
      * Checks if a vibrator with a given {@link VibratorInfo} can play this effect as intended.
@@ -866,15 +892,49 @@ public abstract class VibrationEffect implements Parcelable {
             }
         }
 
+        /** @hide */
+        @Override
+        @Nullable
+        public VibrationEffect cropToLengthOrNull(int length) {
+            // drop repeating effects
+            if (mRepeatIndex >= 0) {
+                return null;
+            }
+
+            int segmentCount = mSegments.size();
+            if (segmentCount <= length) {
+                return this;
+            }
+
+            ArrayList truncated = new ArrayList(mSegments.subList(0, length));
+            Composed updated = new Composed(truncated, mRepeatIndex);
+            try {
+                updated.validate();
+            } catch (IllegalArgumentException e) {
+                return null;
+            }
+            return updated;
+        }
+
         @Override
         public long getDuration() {
+            return getDuration(VibrationEffectSegment::getDuration);
+        }
+
+        /** @hide */
+        @Override
+        public long getDuration(@Nullable VibratorInfo vibratorInfo) {
+            return getDuration(segment -> segment.getDuration(vibratorInfo));
+        }
+
+        private long getDuration(Function<VibrationEffectSegment, Long> durationFn) {
             if (mRepeatIndex >= 0) {
                 return Long.MAX_VALUE;
             }
             int segmentCount = mSegments.size();
             long totalDuration = 0;
             for (int i = 0; i < segmentCount; i++) {
-                long segmentDuration = mSegments.get(i).getDuration();
+                long segmentDuration = durationFn.apply(mSegments.get(i));
                 if (segmentDuration < 0) {
                     return segmentDuration;
                 }
@@ -1148,6 +1208,13 @@ public abstract class VibrationEffect implements Parcelable {
         public void validate() {
             Preconditions.checkArgument(!mVendorData.isEmpty(),
                     "Vendor effect bundle must be non-empty");
+        }
+
+        /** @hide */
+        @Override
+        @Nullable
+        public VibrationEffect cropToLengthOrNull(int length) {
+            return null;
         }
 
         @Override
@@ -1719,7 +1786,7 @@ public abstract class VibrationEffect implements Parcelable {
          * new value as fast as possible.
          *
          * <p>Vibration parameter values will be truncated to conform to the device capabilities
-         * according to the {@link android.os.vibrator.VibratorFrequencyProfile}.
+         * according to the {@link VibratorFrequencyProfileLegacy}.
          *
          * @param duration        The length of time this transition should take. Value must be
          *                        non-negative and will be truncated to milliseconds.
@@ -1750,7 +1817,7 @@ public abstract class VibrationEffect implements Parcelable {
          * new values as fast as possible.
          *
          * <p>Vibration parameters values will be truncated to conform to the device capabilities
-         * according to the {@link android.os.vibrator.VibratorFrequencyProfile}.
+         * according to the {@link VibratorFrequencyProfileLegacy}.
          *
          * @param duration         The length of time this transition should take. Value must be
          *                         non-negative and will be truncated to milliseconds.

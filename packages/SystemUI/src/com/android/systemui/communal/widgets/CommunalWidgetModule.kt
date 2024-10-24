@@ -20,7 +20,6 @@ package com.android.systemui.communal.widgets
 import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.res.Resources
-import android.os.Looper
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
@@ -46,18 +45,9 @@ interface CommunalWidgetModule {
         fun provideCommunalAppWidgetHost(
             @Application context: Context,
             @Background backgroundScope: CoroutineScope,
-            interactionHandler: WidgetInteractionHandler,
-            @Main looper: Looper,
             @CommunalLog logBuffer: LogBuffer,
         ): CommunalAppWidgetHost {
-            return CommunalAppWidgetHost(
-                context,
-                backgroundScope,
-                APP_WIDGET_HOST_ID,
-                interactionHandler,
-                looper,
-                logBuffer,
-            )
+            return CommunalAppWidgetHost(context, backgroundScope, APP_WIDGET_HOST_ID, logBuffer)
         }
 
         @SysUISingleton

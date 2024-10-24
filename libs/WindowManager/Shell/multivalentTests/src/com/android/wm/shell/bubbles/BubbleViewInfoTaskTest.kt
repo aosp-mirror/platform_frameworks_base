@@ -29,6 +29,7 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.R
+import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.internal.protolog.ProtoLog
 import com.android.internal.statusbar.IStatusBarService
 import com.android.launcher3.icons.BubbleIconFactory
@@ -70,6 +71,7 @@ class BubbleViewInfoTaskTest {
     private lateinit var bgExecutor: TestExecutor
     private lateinit var bubbleStackView: BubbleStackView
     private lateinit var bubblePositioner: BubblePositioner
+    private lateinit var bubbleLogger: BubbleLogger
     private lateinit var expandedViewManager: BubbleExpandedViewManager
 
     private val bubbleTaskViewFactory = BubbleTaskViewFactory {
@@ -103,10 +105,11 @@ class BubbleViewInfoTaskTest {
                 mainExecutor
             )
         bubblePositioner = BubblePositioner(context, windowManager)
+        bubbleLogger = BubbleLogger(UiEventLoggerFake())
         val bubbleData =
             BubbleData(
                 context,
-                mock<BubbleLogger>(),
+                bubbleLogger,
                 bubblePositioner,
                 BubbleEducationController(context),
                 mainExecutor,
@@ -138,7 +141,7 @@ class BubbleViewInfoTaskTest {
                 WindowManagerShellWrapper(mainExecutor),
                 mock<UserManager>(),
                 mock<LauncherApps>(),
-                mock<BubbleLogger>(),
+                bubbleLogger,
                 mock<TaskStackListenerImpl>(),
                 mock<ShellTaskOrganizer>(),
                 bubblePositioner,
@@ -314,6 +317,7 @@ class BubbleViewInfoTaskTest {
             expandedViewManager,
             bubbleTaskViewFactory,
             bubblePositioner,
+            bubbleLogger,
             bubbleStackView,
             null /* layerView */,
             iconFactory,

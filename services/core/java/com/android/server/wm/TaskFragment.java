@@ -49,7 +49,7 @@ import static android.view.WindowManager.TRANSIT_FLAG_OPEN_BEHIND;
 import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_STATES;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_STATES;
 import static com.android.server.wm.ActivityRecord.State.PAUSED;
 import static com.android.server.wm.ActivityRecord.State.PAUSING;
 import static com.android.server.wm.ActivityRecord.State.RESUMED;
@@ -3027,7 +3027,11 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         // The task order may be changed by finishIfPossible() for adjusting focus if there are
         // nested tasks, so add all activities into a list to avoid missed removals.
         final ArrayList<ActivityRecord> removingActivities = new ArrayList<>();
-        forAllActivities((Consumer<ActivityRecord>) removingActivities::add);
+        forAllActivities((r) -> {
+            if (!r.finishing) {
+                removingActivities.add(r);
+            }
+        });
         for (int i = removingActivities.size() - 1; i >= 0; --i) {
             final ActivityRecord r = removingActivities.get(i);
             if (withTransition && r.isVisible()) {

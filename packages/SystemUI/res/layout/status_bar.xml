@@ -63,6 +63,8 @@
             <!-- Container that is wrapped around the views on the start half of the status bar.
                  Its width will change with the number of visible children and sub-children.
                  It is useful when we want to know the visible bounds of the content. -->
+            <!-- IMPORTANT: The height of this view *must* be match_parent so that the activity
+                 chips don't get cropped when they appear. See b/302160300 and b/366988057. -->
             <FrameLayout
                 android:id="@+id/status_bar_start_side_content"
                 android:layout_width="wrap_content"
@@ -75,6 +77,8 @@
                 <!-- The alpha of the start side is controlled by PhoneStatusBarTransitions, and the
                      individual views are controlled by StatusBarManager disable flags DISABLE_CLOCK
                      and DISABLE_NOTIFICATION_ICONS, respectively -->
+                <!-- IMPORTANT: The height of this view *must* be match_parent so that the activity
+                 chips don't get cropped when they appear. See b/302160300 and b/366988057. -->
                 <LinearLayout
                     android:id="@+id/status_bar_start_side_except_heads_up"
                     android:layout_height="match_parent"
@@ -99,7 +103,12 @@
                         android:gravity="center_vertical|start"
                     />
 
-                    <include layout="@layout/ongoing_activity_chip" />
+                    <include layout="@layout/ongoing_activity_chip"
+                        android:id="@+id/ongoing_activity_chip_primary"/>
+
+                    <include layout="@layout/ongoing_activity_chip"
+                        android:id="@+id/ongoing_activity_chip_secondary"
+                        android:visibility="gone"/>
 
                     <com.android.systemui.statusbar.AlphaOptimizedFrameLayout
                         android:id="@+id/notification_icon_area"

@@ -70,12 +70,16 @@ oneway interface ISatellite {
             in IIntegerConsumer resultCallback);
 
     /**
-     * Allow cellular modem scanning while satellite mode is on.
+     * Framework will call this API to determine if there are any TN networks available.
+     * This API will be called if framework identifies that user is inactive i.e. no
+     * data transfer or no pointing to satellite.
+     * Modem can send the callback with available for either in service or limited service.
+
      * @param enabled  {@code true} to enable cellular modem while satellite mode is on
      * and {@code false} to disable
      * @param errorCallback The callback to receive the error code result of the operation.
      */
-    void enableCellularModemWhileSatelliteModeIsOn(in boolean enabled,
+    void enableTerrestrialNetworkScanWhileSatelliteModeIsOn(in boolean enabled,
         in IIntegerConsumer errorCallback);
 
     /**
@@ -83,7 +87,16 @@ oneway interface ISatellite {
      * is enabled, this may also disable the cellular modem, and if the satellite modem is disabled,
      * this may also re-enable the cellular modem.
      *
+     * Framework might send an enable request to update the enable attributes of an already-started
+     * satellite session. In such cases, modem needs to apply the new enable attrbitues to the
+     * satellite session. Moreover, modem needs to report its current state and signal strength
+     * level to framework right after receiving this request from framework.
+     *
+     * Framework might send a disable request when an enable request is being processed. In such
+     * cases, modem needs to abort the enable request and process the disable request.
+     *
      * @param enableAttributes The enable parameters that will be applied to the satellite session
+     * @param resultCallback The callback to receive the error code result of the operation.
      *
      * Valid result codes returned:
      *   SatelliteResult:SATELLITE_RESULT_SUCCESS

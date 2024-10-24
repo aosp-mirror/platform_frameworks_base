@@ -117,9 +117,10 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
      */
     private static final long MAX_ANIMATION_DURATION = 2000;
     private final LatencyTracker mLatencyTracker;
+    @ShellMainThread private final Handler mHandler;
 
     /** True when a back gesture is ongoing */
-    private boolean mBackGestureStarted = false;
+    @VisibleForTesting public boolean mBackGestureStarted = false;
 
     /** Tracks if an uninterruptible animation is in progress */
     private boolean mPostCommitAnimationInProgress = false;
@@ -162,6 +163,9 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
      * (and navigation) associated with {@link #mCurrentTracker} have not yet finished.
      */
     private BackTouchTracker mQueuedTracker = new BackTouchTracker();
+
+    private final BackTransitionObserver mBackTransitionObserver =
+            new BackTransitionObserver();
 
     private final Runnable mAnimationTimeoutRunnable = () -> {
         ProtoLog.w(WM_SHELL_BACK_PREVIEW, "Animation didn't finish in %d ms. Resetting...",
@@ -218,7 +222,8 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
             @NonNull BackAnimationBackground backAnimationBackground,
             ShellBackAnimationRegistry shellBackAnimationRegistry,
             ShellCommandHandler shellCommandHandler,
-            Transitions transitions) {
+            Transitions transitions,
+            @ShellMainThread Handler handler) {
         this(
                 shellInit,
                 shellController,
@@ -230,7 +235,8 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
                 backAnimationBackground,
                 shellBackAnimationRegistry,
                 shellCommandHandler,
-                transitions);
+                transitions,
+                handler);
     }
 
     @VisibleForTesting
@@ -245,7 +251,8 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
             @NonNull BackAnimationBackground backAnimationBackground,
             ShellBackAnimationRegistry shellBackAnimationRegistry,
             ShellCommandHandler shellCommandHandler,
-            Transitions transitions) {
+            Transitions transitions,
+            @NonNull @ShellMainThread Handler handler) {
         mShellController = shellController;
         mShellExecutor = shellExecutor;
         mActivityTaskManager = activityTaskManager;
@@ -263,6 +270,9 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         mTransitions = transitions;
         mBackTransitionHandler = new BackTransitionHandler();
         mTransitions.addHandler(mBackTransitionHandler);
+        mHandler = handler;
+        mTransitions.registerObserver(mBackTransitionObserver);
+        mBackTransitionObserver.setBackTransitionHandler(mBackTransitionHandler);
         updateTouchableArea();
     }
 
@@ -347,18 +357,11 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         public void onBackMotion(
                 float touchX,
                 float touchY,
-                float velocityX,
-                float velocityY,
                 int keyAction,
                 @BackEvent.SwipeEdge int swipeEdge
         ) {
-            mShellExecutor.execute(() -> onMotionEvent(
-                    /* touchX = */ touchX,
-                    /* touchY = */ touchY,
-                    /* velocityX = */ velocityX,
-                    /* velocityY = */ velocityY,
-                    /* keyAction = */ keyAction,
-                    /* swipeEdge = */ swipeEdge));
+            mShellExecutor.execute(
+                    () -> onMotionEvent(touchX, touchY, keyAction, swipeEdge));
         }
 
         @Override
@@ -399,7 +402,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         }
     }
 
-    private static class IBackAnimationImpl extends IBackAnimation.Stub
+    private class IBackAnimationImpl extends IBackAnimation.Stub
             implements ExternalInterfaceBinder {
         private BackAnimationController mController;
 
@@ -417,7 +420,8 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
                                     callback,
                                     runner,
                                     controller.mContext,
-                                    CUJ_PREDICTIVE_BACK_HOME)));
+                                    CUJ_PREDICTIVE_BACK_HOME,
+                                    mHandler)));
         }
 
         @Override
@@ -494,14 +498,12 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
     public void onMotionEvent(
             float touchX,
             float touchY,
-            float velocityX,
-            float velocityY,
             int keyAction,
             @BackEvent.SwipeEdge int swipeEdge) {
 
         BackTouchTracker activeTouchTracker = getActiveTracker();
         if (activeTouchTracker != null) {
-            activeTouchTracker.update(touchX, touchY, velocityX, velocityY);
+            activeTouchTracker.update(touchX, touchY);
         }
 
         // two gestures are waiting to be processed at the moment, skip any further user touches
@@ -509,6 +511,11 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
             ProtoLog.d(WM_SHELL_BACK_PREVIEW,
                     "Ignoring MotionEvent because two gestures are already being queued.");
             return;
+        } else if (mBackGestureStarted && mCurrentTracker.isInInitialState()
+                && mQueuedTracker.isInInitialState()) {
+            ProtoLog.e(WM_SHELL_BACK_PREVIEW,
+                    "Both touch trackers in initial state and mBackGestureStarted=true");
+            mBackGestureStarted = false;
         }
 
         if (keyAction == MotionEvent.ACTION_DOWN) {
@@ -573,8 +580,14 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
     private void startBackNavigation(@NonNull BackTouchTracker touchTracker) {
         try {
             startLatencyTracking();
+            final BackAnimationAdapter adapter = mEnableAnimations.get()
+                    ? mBackAnimationAdapter : null;
+            if (adapter != null && mShellBackAnimationRegistry.hasSupportedAnimatorsChanged()) {
+                adapter.updateSupportedAnimators(
+                        mShellBackAnimationRegistry.getSupportedAnimators());
+            }
             mBackNavigationInfo = mActivityTaskManager.startBackNavigation(
-                    mNavigationObserver, mEnableAnimations.get() ? mBackAnimationAdapter : null);
+                    mNavigationObserver, adapter);
             onBackNavigationInfoReceived(mBackNavigationInfo, touchTracker);
         } catch (RemoteException remoteException) {
             Log.e(TAG, "Failed to initAnimation", remoteException);
@@ -726,6 +739,13 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
     }
 
     /**
+     * @return Latest task id which back gesture has occurred on it.
+     */
+    public int getLatestTriggerBackTask() {
+        return mBackTransitionObserver.mFocusedTaskId;
+    }
+
+    /**
      * Sets to true when the back gesture has passed the triggering threshold, false otherwise.
      */
     public void setTriggerBack(boolean triggerBack) {
@@ -789,6 +809,11 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         boolean triggerBack = activeTouchTracker.getTriggerBack();
         ProtoLog.d(WM_SHELL_BACK_PREVIEW, "onGestureFinished() mTriggerBack == %s", triggerBack);
 
+        if (triggerBack) {
+            mBackTransitionObserver.update(mBackNavigationInfo != null
+                            ? mBackNavigationInfo.getFocusedTaskId()
+                            : INVALID_TASK_ID);
+        }
         // Reset gesture states.
         mThresholdCrossed = false;
         mPointersPilfered = false;
@@ -868,10 +893,6 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
             // start post animation
             dispatchOnBackInvoked(mActiveCallback);
         } else {
-            if (migrateBackToTransition
-                    && mBackTransitionHandler.mPrepareOpenTransition != null) {
-                mBackTransitionHandler.createClosePrepareTransition();
-            }
             tryDispatchOnBackCancelled(mActiveCallback);
         }
     }
@@ -976,7 +997,6 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         mShellBackAnimationRegistry.resetDefaultCrossActivity();
         cancelLatencyTracking();
         mReceivedNullNavigationInfo = false;
-        mBackTransitionHandler.mLastTrigger = triggerBack;
         if (mBackNavigationInfo != null) {
             mPreviousNavigationType = mBackNavigationInfo.getType();
             mBackNavigationInfo.onBackNavigationFinished(triggerBack);
@@ -1097,7 +1117,6 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
                                     endLatencyTracking();
                                     if (!validateAnimationTargets(apps)) {
                                         Log.e(TAG, "Invalid animation targets!");
-                                        mBackTransitionHandler.consumeQueuedTransitionIfNeeded();
                                         return;
                                     }
                                     mBackAnimationFinishedCallback = finishedCallback;
@@ -1107,7 +1126,6 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
                                         return;
                                     }
                                     kickStartAnimation();
-                                    mBackTransitionHandler.consumeQueuedTransitionIfNeeded();
                                 });
                     }
 
@@ -1115,7 +1133,6 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
                     public void onAnimationCancelled() {
                         mShellExecutor.execute(
                                 () -> {
-                                    mBackTransitionHandler.consumeQueuedTransitionIfNeeded();
                                     if (!mShellBackAnimationRegistry.cancel(
                                             mBackNavigationInfo != null
                                                     ? mBackNavigationInfo.getType()
@@ -1154,8 +1171,6 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         boolean mCloseTransitionRequested;
         SurfaceControl.Transaction mFinishOpenTransaction;
         Transitions.TransitionFinishCallback mFinishOpenTransitionCallback;
-        QueuedTransition mQueuedTransition = null;
-        boolean mLastTrigger;
         // The Transition to make behindActivity become visible
         IBinder mPrepareOpenTransition;
         // The Transition to make behindActivity become invisible, if prepare open exist and
@@ -1163,8 +1178,8 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         IBinder mClosePrepareTransition;
         TransitionInfo mOpenTransitionInfo;
         void onAnimationFinished() {
-            if (!mCloseTransitionRequested && mClosePrepareTransition == null) {
-                applyFinishOpenTransition();
+            if (!mCloseTransitionRequested && mPrepareOpenTransition != null) {
+                createClosePrepareTransition();
             }
             if (mOnAnimationFinishCallback != null) {
                 mOnAnimationFinishCallback.run();
@@ -1172,24 +1187,19 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
             }
         }
 
-        void consumeQueuedTransitionIfNeeded() {
-            if (mQueuedTransition != null) {
-                mQueuedTransition.consume();
-                mQueuedTransition = null;
-            }
-        }
-
         private void applyFinishOpenTransition() {
-            if (mFinishOpenTransaction != null) {
-                mFinishOpenTransaction.apply();
-                mFinishOpenTransaction = null;
-            }
-            if (mFinishOpenTransitionCallback != null) {
-                mFinishOpenTransitionCallback.onTransitionFinished(null);
-                mFinishOpenTransitionCallback = null;
-            }
             mOpenTransitionInfo = null;
             mPrepareOpenTransition = null;
+            if (mFinishOpenTransaction != null) {
+                final SurfaceControl.Transaction t = mFinishOpenTransaction;
+                mFinishOpenTransaction = null;
+                t.apply();
+            }
+            if (mFinishOpenTransitionCallback != null) {
+                final Transitions.TransitionFinishCallback callback = mFinishOpenTransitionCallback;
+                mFinishOpenTransitionCallback = null;
+                callback.onTransitionFinished(null);
+            }
         }
 
         private void applyAndFinish(@NonNull SurfaceControl.Transaction st,
@@ -1207,7 +1217,9 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
                 @NonNull SurfaceControl.Transaction st,
                 @NonNull SurfaceControl.Transaction ft,
                 @NonNull Transitions.TransitionFinishCallback finishCallback) {
-            if (info.getType() == WindowManager.TRANSIT_PREPARE_BACK_NAVIGATION) {
+            final boolean isPrepareTransition =
+                    info.getType() == WindowManager.TRANSIT_PREPARE_BACK_NAVIGATION;
+            if (isPrepareTransition) {
                 kickStartAnimation();
             }
             // Both mShellExecutor and Transitions#mMainExecutor are ShellMainThread, so we don't
@@ -1228,25 +1240,19 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
             }
 
             if (shouldCancelAnimation(info)) {
+                mPrepareOpenTransition = null;
                 return false;
             }
 
             if (mApps == null || mApps.length == 0) {
-                if (mBackNavigationInfo != null && mShellBackAnimationRegistry
-                        .isWaitingAnimation(mBackNavigationInfo.getType())) {
-                    // Waiting for animation? Queue update to wait for animation start.
-                    consumeQueuedTransitionIfNeeded();
-                    mQueuedTransition = new QueuedTransition(info, st, ft, finishCallback);
-                    return true;
-                } else if (mLastTrigger) {
-                    // animation was done, consume directly
+                if (mCloseTransitionRequested) {
+                    // animation never start, consume directly
                     applyAndFinish(st, ft, finishCallback);
                     return true;
-                } else {
-                    // animation was cancelled but transition haven't happen, we must handle it
-                    if (mClosePrepareTransition == null && mCurrentTracker.isFinished()) {
-                        createClosePrepareTransition();
-                    }
+                } else if (mClosePrepareTransition == null && isPrepareTransition) {
+                    // Gesture animation was cancelled before prepare transition ready, create
+                    // the close prepare transition
+                    createClosePrepareTransition();
                 }
             }
 
@@ -1257,6 +1263,10 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         }
 
         void createClosePrepareTransition() {
+            if (mClosePrepareTransition != null) {
+                Log.e(TAG, "Re-create close prepare transition");
+                return;
+            }
             final WindowContainerTransaction wct = new WindowContainerTransaction();
             wct.restoreBackNavi();
             mClosePrepareTransition = mTransitions.startTransition(
@@ -1334,6 +1344,9 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
                     tmpSize = init.getChanges().size();
                     for (int i = 0; i < tmpSize; ++i) {
                         final TransitionInfo.Change change = init.getChanges().get(i);
+                        if (change.hasFlags(FLAG_IS_WALLPAPER)) {
+                            continue;
+                        }
                         if (moveToTop) {
                             if (isSameChangeTarget(openComponent, openTaskId, openToken, change)) {
                                 change.setFlags(change.getFlags() | FLAG_MOVED_TO_TOP);
@@ -1390,13 +1403,17 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
                 mergePendingTransitions(info);
             }
 
+            if (info.getType() == TRANSIT_CLOSE_PREPARE_BACK_NAVIGATION
+                    && !mCloseTransitionRequested && info.getChanges().isEmpty() && mApps == null) {
+                finishCallback.onTransitionFinished(null);
+                t.apply();
+                applyFinishOpenTransition();
+                return;
+            }
             if (isNotGestureBackTransition(info) || shouldCancelAnimation(info)
                     || !mCloseTransitionRequested) {
                 if (mPrepareOpenTransition != null) {
                     applyFinishOpenTransition();
-                }
-                if (mQueuedTransition != null) {
-                    consumeQueuedTransitionIfNeeded();
                 }
                 return;
             }
@@ -1405,11 +1422,9 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
             t.apply();
             if (mCloseTransitionRequested) {
                 if (mApps == null || mApps.length == 0) {
-                    if (mQueuedTransition == null) {
-                        // animation was done
-                        applyFinishOpenTransition();
-                        mCloseTransitionRequested = false;
-                    } // let queued transition finish.
+                    // animation was done
+                    applyFinishOpenTransition();
+                    mCloseTransitionRequested = false;
                 } else {
                     // we are animating, wait until animation finish
                     mOnAnimationFinishCallback = () -> {
@@ -1497,6 +1512,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
                 }
             }
             if (openingLeash != null) {
+                int rootIdx = -1;
                 for (int i = info.getChanges().size() - 1; i >= 0; --i) {
                     final TransitionInfo.Change c = info.getChanges().get(i);
                     if (TransitionUtil.isOpeningMode(c.getMode())) {
@@ -1504,7 +1520,15 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
                         st.setPosition(c.getLeash(), offset.x, offset.y);
                         st.reparent(c.getLeash(), openingLeash);
                         st.setAlpha(c.getLeash(), 1.0f);
+                        rootIdx = TransitionUtil.rootIndexFor(c, info);
                     }
+                }
+                // The root leash and the leash of opening target should actually in the same level,
+                // but since the root leash is created after opening target, it will have higher
+                // layer in surface flinger. Move the root leash to lower level, so it won't affect
+                // the playing animation.
+                if (rootIdx >= 0 && info.getRootCount() > 0) {
+                    st.setLayer(info.getRoot(rootIdx).getLeash(), -1);
                 }
             }
             st.apply();
@@ -1548,6 +1572,10 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
             if (openingLeash != null && closingLeash != null) {
                 for (int i = info.getChanges().size() - 1; i >= 0; --i) {
                     final TransitionInfo.Change c = info.getChanges().get(i);
+                    if (c.hasFlags(FLAG_IS_WALLPAPER)) {
+                        st.setAlpha(c.getLeash(), 1.0f);
+                        continue;
+                    }
                     if (TransitionUtil.isOpeningMode(c.getMode())) {
                         final Point offset = c.getEndRelOffset();
                         st.setPosition(c.getLeash(), offset.x, offset.y);
@@ -1585,41 +1613,6 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
                 return new WindowContainerTransaction();
             }
             return null;
-        }
-
-        class QueuedTransition {
-            final TransitionInfo mInfo;
-            final SurfaceControl.Transaction mSt;
-            final  SurfaceControl.Transaction mFt;
-            final Transitions.TransitionFinishCallback mFinishCallback;
-            QueuedTransition(@NonNull TransitionInfo info,
-                    @NonNull SurfaceControl.Transaction st,
-                    @NonNull SurfaceControl.Transaction ft,
-                    @NonNull Transitions.TransitionFinishCallback finishCallback) {
-                mInfo = info;
-                mSt = st;
-                mFt = ft;
-                mFinishCallback = finishCallback;
-            }
-
-            void consume() {
-                // not animating, consume transition directly
-                if (mApps == null || mApps.length == 0) {
-                    applyAndFinish(mSt, mFt, mFinishCallback);
-                    return;
-                }
-                // we are animating
-                if (handlePrepareTransition(mInfo, mSt, mFt, mFinishCallback)) {
-                    // handle merge transition if any
-                    if (mCloseTransitionRequested) {
-                        mOnAnimationFinishCallback = () -> {
-                            applyFinishOpenTransition();
-                            mCloseTransitionRequested = false;
-                        };
-                    }
-                }
-                handleCloseTransition(mInfo, mSt, mFt, mFinishCallback);
-            }
         }
     }
 
@@ -1674,5 +1667,59 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
 
     private static boolean canBeTransitionTarget(TransitionInfo.Change change) {
         return findComponentName(change) != null || findTaskId(change) != INVALID_TASK_ID;
+    }
+
+    // Record the latest back gesture happen on which task.
+    static class BackTransitionObserver implements Transitions.TransitionObserver {
+        int mFocusedTaskId = INVALID_TASK_ID;
+        IBinder mFocusTaskMonitorToken;
+        private BackTransitionHandler mBackTransitionHandler;
+        void setBackTransitionHandler(BackTransitionHandler handler) {
+            mBackTransitionHandler = handler;
+        }
+
+        void update(int focusedTaskId) {
+            mFocusedTaskId = focusedTaskId;
+        }
+
+        @Override
+        public void onTransitionReady(@NonNull IBinder transition, @NonNull TransitionInfo info,
+                @NonNull SurfaceControl.Transaction startTransaction,
+                @NonNull SurfaceControl.Transaction finishTransaction) {
+            if (mFocusedTaskId == INVALID_TASK_ID) {
+                return;
+            }
+            for (int i = info.getChanges().size() - 1; i >= 0; --i) {
+                final TransitionInfo.Change c = info.getChanges().get(i);
+                if (c.getTaskInfo() != null && c.getTaskInfo().taskId == mFocusedTaskId) {
+                    mFocusTaskMonitorToken = transition;
+                    break;
+                }
+            }
+            // Transition happen but the task isn't involved, reset.
+            if (mFocusTaskMonitorToken == null) {
+                mFocusedTaskId = INVALID_TASK_ID;
+            }
+        }
+
+        @Override
+        public void onTransitionMerged(@NonNull IBinder merged, @NonNull IBinder playing) {
+            if (mFocusTaskMonitorToken == merged) {
+                mFocusTaskMonitorToken = playing;
+            }
+            if (mBackTransitionHandler.mClosePrepareTransition == merged) {
+                mBackTransitionHandler.mClosePrepareTransition = null;
+            }
+        }
+
+        @Override
+        public void onTransitionFinished(@NonNull IBinder transition, boolean aborted) {
+            if (mFocusTaskMonitorToken == transition) {
+                mFocusedTaskId = INVALID_TASK_ID;
+            }
+            if (mBackTransitionHandler.mClosePrepareTransition == transition) {
+                mBackTransitionHandler.mClosePrepareTransition = null;
+            }
+        }
     }
 }

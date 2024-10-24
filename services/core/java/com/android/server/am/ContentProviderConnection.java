@@ -40,7 +40,7 @@ public final class ContentProviderConnection extends Binder implements
     public final String clientPackage;
     public AssociationState.SourceState association;
     public final long createTime;
-    private Object mProcStatsLock;  // Internal lock for accessing AssociationState
+    private volatile Object mProcStatsLock;  // Internal lock for accessing AssociationState
 
     /**
      * Internal lock that guards access to the two counters.
@@ -118,19 +118,25 @@ public final class ContentProviderConnection extends Binder implements
      * Track the given proc state change.
      */
     public void trackProcState(int procState, int seq) {
-        if (association != null) {
-            synchronized (mProcStatsLock) {
+        if (association == null) {
+            return; // early exit to optimize on oomadj cycles
+        }
+        synchronized (mProcStatsLock) {
+            if (association != null) { // due to race-conditions, association may have become null
                 association.trackProcState(procState, seq, SystemClock.uptimeMillis());
             }
         }
     }
 
     public void stopAssociation() {
-        if (association != null) {
-            synchronized (mProcStatsLock) {
+        if (association == null) {
+            return; // early exit to optimize on oomadj cycles
+        }
+        synchronized (mProcStatsLock) {
+            if (association != null) {  // due to race-conditions, association may have become null
                 association.stop();
+                association = null;
             }
-            association = null;
         }
     }
 

@@ -32,6 +32,7 @@ import static android.service.notification.Condition.STATE_FALSE;
 import static android.service.notification.Condition.STATE_TRUE;
 import static android.service.notification.NotificationListenerService.SUPPRESSED_EFFECT_SCREEN_ON;
 import static android.service.notification.ZenModeConfig.XML_VERSION_MODES_API;
+import static android.service.notification.ZenModeConfig.XML_VERSION_MODES_UI;
 import static android.service.notification.ZenModeConfig.ZEN_TAG;
 import static android.service.notification.ZenModeConfig.ZenRule.OVERRIDE_DEACTIVATE;
 import static android.service.notification.ZenModeConfig.ZenRule.OVERRIDE_NONE;
@@ -756,7 +757,7 @@ public class ZenModeConfigTest extends UiServiceTestCase {
         assertEquals("a", fromXml.getPkg());
 
         fromXml.condition = new Condition(Uri.EMPTY, "", Condition.STATE_TRUE);
-        assertTrue(fromXml.isAutomaticActive());
+        assertTrue(fromXml.isActive());
     }
 
     @Test
@@ -1009,7 +1010,39 @@ public class ZenModeConfigTest extends UiServiceTestCase {
 
     @Test
     @EnableFlags(Flags.FLAG_MODES_UI)
-    public void testConfigXml_manualRule_upgradeWhenExisting() throws Exception {
+    public void testConfigXml_manualRuleWithoutCondition_upgradeWhenExisting() throws Exception {
+        // prior to modes_ui, it's possible to have a non-null manual rule that doesn't have much
+        // data on it because it's meant to indicate that the manual rule is on by merely existing.
+        ZenModeConfig config = new ZenModeConfig();
+        config.manualRule = new ZenModeConfig.ZenRule();
+        config.manualRule.enabled = true;
+        config.manualRule.pkg = "android";
+        config.manualRule.zenMode = ZEN_MODE_IMPORTANT_INTERRUPTIONS;
+        config.manualRule.conditionId = null;
+        config.manualRule.enabler = "test";
+
+        // write out entire config xml
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        writeConfigXml(config, XML_VERSION_MODES_API, /* forBackup= */ false, baos);
+        ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+        ZenModeConfig fromXml = readConfigXml(bais);
+
+
+        // The result should be valid and contain a manual rule; the rule should have a non-null
+        // ZenPolicy and a condition whose state is true. The conditionId should be default.
+        assertThat(fromXml.isValid()).isTrue();
+        assertThat(fromXml.manualRule).isNotNull();
+        assertThat(fromXml.manualRule.zenPolicy).isNotNull();
+        assertThat(fromXml.manualRule.condition).isNotNull();
+        assertThat(fromXml.manualRule.condition.state).isEqualTo(STATE_TRUE);
+        assertThat(fromXml.manualRule.conditionId).isEqualTo(Uri.EMPTY);
+        assertThat(fromXml.manualRule.enabler).isEqualTo("test");
+        assertThat(fromXml.isManualActive()).isTrue();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_MODES_UI)
+    public void testConfigXml_manualRuleWithCondition_upgradeWhenExisting() throws Exception {
         // prior to modes_ui, it's possible to have a non-null manual rule that doesn't have much
         // data on it because it's meant to indicate that the manual rule is on by merely existing.
         ZenModeConfig config = new ZenModeConfig();
@@ -1028,6 +1061,7 @@ public class ZenModeConfigTest extends UiServiceTestCase {
 
         // The result should have a manual rule; it should have a non-null ZenPolicy and a condition
         // whose state is true. The conditionId and enabler data should also be preserved.
+        assertThat(fromXml.isValid()).isTrue();
         assertThat(fromXml.manualRule).isNotNull();
         assertThat(fromXml.manualRule.zenPolicy).isNotNull();
         assertThat(fromXml.manualRule.condition).isNotNull();
@@ -1169,6 +1203,23 @@ public class ZenModeConfigTest extends UiServiceTestCase {
         assertThat(suppressedEffectsOf(result)).isEqualTo(suppressedEffectsOf(policy));
     }
 
+    @Test
+    public void readXml_fixesWronglyDisabledManualRule() throws Exception {
+        ZenModeConfig config = getCustomConfig();
+        if (!Flags.modesUi()) {
+            config.manualRule = new ZenModeConfig.ZenRule();
+            config.manualRule.zenMode = ZEN_MODE_IMPORTANT_INTERRUPTIONS;
+        }
+        config.manualRule.enabled = false;
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        writeConfigXml(config, XML_VERSION_MODES_UI, /* forBackup= */ false, baos);
+        ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+        ZenModeConfig fromXml = readConfigXml(bais);
+
+        assertThat(fromXml.manualRule.enabled).isTrue();
+    }
+
     private static String suppressedEffectsOf(Policy policy) {
         return suppressedEffectsToString(policy.suppressedVisualEffects) + "("
                 + policy.suppressedVisualEffects + ")";
@@ -1274,7 +1325,7 @@ public class ZenModeConfigTest extends UiServiceTestCase {
         out.setOutput(new BufferedOutputStream(os), "utf-8");
         out.startDocument(null, true);
         out.startTag(null, tag);
-        ZenModeConfig.writeRuleXml(rule, out);
+        ZenModeConfig.writeRuleXml(rule, out, /* forBackup= */ false);
         out.endTag(null, tag);
         out.endDocument();
     }

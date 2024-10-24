@@ -32,19 +32,20 @@ import com.android.systemui.keyguard.domain.interactor.keyguardBlueprintInteract
 import com.android.systemui.keyguard.domain.interactor.keyguardClockInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardSmartspaceInteractor
 import com.android.systemui.keyguard.shared.model.ClockSize
+import com.android.systemui.keyguard.ui.viewmodel.aodBurnInViewModel
 import com.android.systemui.keyguard.ui.viewmodel.keyguardClockViewModel
 import com.android.systemui.keyguard.ui.viewmodel.keyguardRootViewModel
 import com.android.systemui.keyguard.ui.viewmodel.keyguardSmartspaceViewModel
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.res.R
+import com.android.systemui.shade.LargeScreenHeaderHelper
 import com.android.systemui.shade.data.repository.shadeRepository
 import com.android.systemui.statusbar.notification.stack.domain.interactor.notificationsKeyguardInteractor
 import com.android.systemui.statusbar.policy.fakeConfigurationController
 import com.android.systemui.statusbar.ui.fakeSystemBarUtilsProxy
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.eq
-import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -56,6 +57,7 @@ import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.mock
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
@@ -120,6 +122,8 @@ class ClockSectionTest : SysuiTestCase() {
                     keyguardSmartspaceViewModel,
                     { keyguardBlueprintInteractor },
                     keyguardRootViewModel,
+                    aodBurnInViewModel,
+                    largeScreenHeaderHelperLazy = { mock<LargeScreenHeaderHelper>() },
                 )
         }
     }
@@ -294,7 +298,7 @@ class ClockSectionTest : SysuiTestCase() {
             underTest.applyDefaultConstraints(cs)
             val referencedIds =
                 cs.getReferencedIds(R.id.weather_clock_date_and_icons_barrier_bottom)
-            referencedIds.contentEquals(intArrayOf(R.id.lockscreen_clock_view))
+            referencedIds.contentEquals(intArrayOf(customR.id.lockscreen_clock_view))
         }
 
     @Test
@@ -313,13 +317,13 @@ class ClockSectionTest : SysuiTestCase() {
             referencedIds.contentEquals(
                 intArrayOf(
                     com.android.systemui.shared.R.id.bc_smartspace_view,
-                    R.id.aod_notification_icon_container
+                    R.id.aod_notification_icon_container,
                 )
             )
         }
 
     private fun assertLargeClockTop(cs: ConstraintSet, expectedLargeClockTopMargin: Int) {
-        val largeClockConstraint = cs.getConstraint(R.id.lockscreen_clock_view_large)
+        val largeClockConstraint = cs.getConstraint(customR.id.lockscreen_clock_view_large)
         assertThat(largeClockConstraint.layout.topToTop).isEqualTo(ConstraintSet.PARENT_ID)
         assertThat(largeClockConstraint.layout.topMargin).isEqualTo(expectedLargeClockTopMargin)
     }
@@ -328,7 +332,7 @@ class ClockSectionTest : SysuiTestCase() {
         val smallClockGuidelineConstraint = cs.getConstraint(R.id.small_clock_guideline_top)
         assertThat(smallClockGuidelineConstraint.layout.topToTop).isEqualTo(-1)
 
-        val smallClockConstraint = cs.getConstraint(R.id.lockscreen_clock_view)
+        val smallClockConstraint = cs.getConstraint(customR.id.lockscreen_clock_view)
         assertThat(smallClockConstraint.layout.topToBottom)
             .isEqualTo(R.id.small_clock_guideline_top)
         assertThat(smallClockConstraint.layout.topMargin).isEqualTo(0)

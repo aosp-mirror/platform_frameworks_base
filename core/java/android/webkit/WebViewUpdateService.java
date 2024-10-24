@@ -16,6 +16,7 @@
 
 package android.webkit;
 
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.RemoteException;
@@ -54,7 +55,11 @@ public final class WebViewUpdateService {
 
     /**
      * Fetch all packages that could potentially implement WebView and are currently valid.
+     *
+     * <p>Note that this will be filtered by the caller's package visibility; callers should
+     * have QUERY_ALL_PACKAGES permission to ensure that the list is complete.
      */
+    @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS)
     public static WebViewProviderInfo[] getValidWebViewPackages() {
         if (Flags.updateServiceIpcWrapper()) {
             if (WebViewFactory.isWebViewSupported()) {

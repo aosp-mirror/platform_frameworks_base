@@ -50,9 +50,7 @@ class StateLink(target: SceneTransitionLayoutState, val transitionLinks: List<Tr
                 error("From and To can't be the same")
         }
 
-        internal fun isMatchingLink(
-            transition: TransitionState.Transition,
-        ): Boolean {
+        internal fun isMatchingLink(transition: TransitionState.Transition): Boolean {
             return (sourceFrom == null || sourceFrom == transition.fromContent) &&
                 (sourceTo == null || sourceTo == transition.toContent)
         }

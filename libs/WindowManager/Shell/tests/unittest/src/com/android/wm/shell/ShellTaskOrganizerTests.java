@@ -39,6 +39,7 @@ import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.never;
 
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.TaskInfo;
@@ -49,7 +50,6 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.SparseArray;
 import android.view.SurfaceControl;
-import android.view.SurfaceSession;
 import android.window.ITaskOrganizer;
 import android.window.ITaskOrganizerController;
 import android.window.TaskAppearedInfo;
@@ -169,7 +169,7 @@ public class ShellTaskOrganizerTests extends ShellTestCase {
     public void testTaskLeashReleasedAfterVanished() throws RemoteException {
         assumeFalse(ENABLE_SHELL_TRANSITIONS);
         RunningTaskInfo taskInfo = createTaskInfo(/* taskId= */ 1, WINDOWING_MODE_MULTI_WINDOW);
-        SurfaceControl taskLeash = new SurfaceControl.Builder(new SurfaceSession())
+        SurfaceControl taskLeash = new SurfaceControl.Builder()
                 .setName("task").build();
         mOrganizer.registerOrganizer();
         mOrganizer.onTaskAppeared(taskInfo, taskLeash);
@@ -597,6 +597,18 @@ public class ShellTaskOrganizerTests extends ShellTestCase {
         mOrganizer.onTaskInfoChanged(task2);
 
         verify(mRecentTasksController).onTaskRunningInfoChanged(task2);
+    }
+
+    @Test
+    public void testRecentTasks_visibilityChanges_notFreeForm_shouldNotNotifyTaskController() {
+        RunningTaskInfo task1_visible = createTaskInfo(/* taskId= */ 1, WINDOWING_MODE_FULLSCREEN);
+        mOrganizer.onTaskAppeared(task1_visible, /* leash= */ null);
+        RunningTaskInfo task1_hidden = createTaskInfo(/* taskId= */ 1, WINDOWING_MODE_FULLSCREEN);
+        task1_hidden.isVisible = false;
+
+        mOrganizer.onTaskInfoChanged(task1_hidden);
+
+        verify(mRecentTasksController, never()).onTaskRunningInfoChanged(task1_hidden);
     }
 
     @Test

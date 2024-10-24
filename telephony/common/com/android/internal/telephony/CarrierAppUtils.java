@@ -186,11 +186,7 @@ public final class CarrierAppUtils {
                 if (hasPrivileges) {
                     // Only update enabled state for the app on /system. Once it has been
                     // updated we shouldn't touch it.
-                    if (!isUpdatedSystemApp(ai) && enabledSetting
-                            == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT
-                            || enabledSetting
-                            == PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED
-                            || (ai.flags & ApplicationInfo.FLAG_INSTALLED) == 0) {
+                    if (shouldUpdateEnabledState(ai, enabledSetting)) {
                         Log.i(TAG, "Update state (" + packageName + "): ENABLED for user "
                                 + userId);
                         context.createContextAsUser(UserHandle.of(userId), 0)
@@ -253,21 +249,17 @@ public final class CarrierAppUtils {
                     // 3. It has not been installed as an update from its system built-in version
                     // 4. It is in default state (not explicitly DISABLED/DISABLED_BY_USER/ENABLED)
                     // 5. It is currently installed for the calling user
-                    // TODO(b/329739019):
-                    // 1. Merge the nested if conditions below during flag cleaning up phase
-                    // 2. Support user case that NEW carrier app is added during OTA, when emerge.
-                    if (!Flags.hidePreinstalledCarrierAppAtMostOnce() || !hasRunEver) {
-                        if (!isUpdatedSystemApp(ai) && enabledSetting
-                                == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT
-                                && (ai.flags & ApplicationInfo.FLAG_INSTALLED) != 0) {
-                            Log.i(TAG, "Update state (" + packageName
-                                    + "): DISABLED_UNTIL_USED for user " + userId);
-                            context.createContextAsUser(UserHandle.of(userId), 0)
-                                    .getPackageManager()
-                                    .setSystemAppState(
-                                            packageName,
-                                            PackageManager.SYSTEM_APP_STATE_UNINSTALLED);
-                        }
+                    // TODO(b/329739019):Support user case that NEW carrier app is added during OTA
+                    if (!hasRunEver && !isUpdatedSystemApp(ai) && enabledSetting
+                            == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT
+                            && (ai.flags & ApplicationInfo.FLAG_INSTALLED) != 0) {
+                        Log.i(TAG, "Update state (" + packageName
+                                + "): DISABLED_UNTIL_USED for user " + userId);
+                        context.createContextAsUser(UserHandle.of(userId), 0)
+                                .getPackageManager()
+                                .setSystemAppState(
+                                        packageName,
+                                        PackageManager.SYSTEM_APP_STATE_UNINSTALLED);
                     }
 
                     // Associated apps are more brittle, because we can't rely on the distinction
@@ -332,6 +324,21 @@ public final class CarrierAppUtils {
             }
         } catch (PackageManager.NameNotFoundException e) {
             Log.w(TAG, "Could not reach PackageManager", e);
+        }
+    }
+
+    private static boolean shouldUpdateEnabledState(ApplicationInfo appInfo, int enabledSetting) {
+        if (Flags.cleanupCarrierAppUpdateEnabledStateLogic()) {
+            return !isUpdatedSystemApp(appInfo)
+                    && (enabledSetting == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT
+                            || enabledSetting
+                                    == PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED
+                            || (appInfo.flags & ApplicationInfo.FLAG_INSTALLED) == 0);
+        } else {
+            return !isUpdatedSystemApp(appInfo)
+                            && enabledSetting == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT
+                    || enabledSetting == PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED
+                    || (appInfo.flags & ApplicationInfo.FLAG_INSTALLED) == 0;
         }
     }
 

@@ -48,7 +48,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 import kotlinx.coroutines.withContext
 
 /** Handles domain layer logic for locked sim cards. */
@@ -125,7 +125,7 @@ constructor(
         // memory. Do it asynchronously with a 5-sec delay to avoid making the keyguard
         // dismiss animation janky.
 
-        applicationScope.launch(backgroundDispatcher) {
+        applicationScope.launch(context = backgroundDispatcher) {
             delay(5000)
             System.gc()
             System.runFinalization()
@@ -151,7 +151,7 @@ constructor(
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE_UNAUDITED,
                 UserHandle.SYSTEM
             )
-        applicationScope.launch(backgroundDispatcher) {
+        applicationScope.launch(context = backgroundDispatcher) {
             if (euiccManager != null) {
                 euiccManager.switchToSubscription(
                     INVALID_SUBSCRIPTION_ID,

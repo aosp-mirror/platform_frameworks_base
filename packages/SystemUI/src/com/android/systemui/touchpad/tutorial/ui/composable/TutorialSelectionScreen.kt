@@ -20,47 +20,64 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import com.android.systemui.inputdevice.tutorial.ui.composable.DoneButton
 import com.android.systemui.res.R
+import com.android.systemui.touchpad.tutorial.ui.gesture.isFourFingerTouchpadSwipe
+import com.android.systemui.touchpad.tutorial.ui.gesture.isThreeFingerTouchpadSwipe
 
 @Composable
 fun TutorialSelectionScreen(
     onBackTutorialClicked: () -> Unit,
     onHomeTutorialClicked: () -> Unit,
-    onActionKeyTutorialClicked: () -> Unit,
+    onRecentAppsTutorialClicked: () -> Unit,
     onDoneButtonClicked: () -> Unit,
 ) {
     Column(
         verticalArrangement = Arrangement.Center,
         modifier =
-            Modifier.background(
-                    color = MaterialTheme.colorScheme.surfaceContainer,
-                )
+            Modifier.background(color = MaterialTheme.colorScheme.surfaceContainer)
                 .fillMaxSize()
+                .pointerInteropFilter(
+                    onTouchEvent = { event ->
+                        // Because of window flag we're intercepting 3 and 4-finger swipes.
+                        // Although we don't handle them in this screen, we want to disable them so
+                        // that user is not clicking button by mistake by performing these swipes.
+                        isThreeFingerTouchpadSwipe(event) || isFourFingerTouchpadSwipe(event)
+                    }
+                ),
     ) {
         TutorialSelectionButtons(
             onBackTutorialClicked = onBackTutorialClicked,
             onHomeTutorialClicked = onHomeTutorialClicked,
-            onActionKeyTutorialClicked = onActionKeyTutorialClicked,
-            modifier = Modifier.padding(60.dp)
+            onRecentAppsTutorialClicked = onRecentAppsTutorialClicked,
+            modifier = Modifier.padding(60.dp),
         )
         DoneButton(
             onDoneButtonClicked = onDoneButtonClicked,
-            modifier = Modifier.padding(horizontal = 60.dp)
+            modifier = Modifier.padding(horizontal = 60.dp),
         )
     }
 }
@@ -69,31 +86,37 @@ fun TutorialSelectionScreen(
 private fun TutorialSelectionButtons(
     onBackTutorialClicked: () -> Unit,
     onHomeTutorialClicked: () -> Unit,
-    onActionKeyTutorialClicked: () -> Unit,
-    modifier: Modifier = Modifier
+    onRecentAppsTutorialClicked: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     Row(
         horizontalArrangement = Arrangement.spacedBy(20.dp),
         verticalAlignment = Alignment.CenterVertically,
-        modifier = modifier
+        modifier = modifier,
     ) {
         TutorialButton(
-            text = stringResource(R.string.touchpad_tutorial_back_gesture_button),
-            onClick = onBackTutorialClicked,
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.weight(1f)
-        )
-        TutorialButton(
             text = stringResource(R.string.touchpad_tutorial_home_gesture_button),
+            icon = ImageVector.vectorResource(id = R.drawable.touchpad_tutorial_home_icon),
+            iconColor = MaterialTheme.colorScheme.onPrimary,
             onClick = onHomeTutorialClicked,
-            color = MaterialTheme.colorScheme.secondary,
-            modifier = Modifier.weight(1f)
+            backgroundColor = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.weight(1f),
         )
         TutorialButton(
-            text = stringResource(R.string.touchpad_tutorial_action_key_button),
-            onClick = onActionKeyTutorialClicked,
-            color = MaterialTheme.colorScheme.tertiary,
-            modifier = Modifier.weight(1f)
+            text = stringResource(R.string.touchpad_tutorial_back_gesture_button),
+            icon = Icons.AutoMirrored.Outlined.ArrowBack,
+            iconColor = MaterialTheme.colorScheme.onTertiary,
+            onClick = onBackTutorialClicked,
+            backgroundColor = MaterialTheme.colorScheme.tertiary,
+            modifier = Modifier.weight(1f),
+        )
+        TutorialButton(
+            text = stringResource(R.string.touchpad_tutorial_recent_apps_gesture_button),
+            icon = ImageVector.vectorResource(id = R.drawable.touchpad_tutorial_recents_icon),
+            iconColor = MaterialTheme.colorScheme.onSecondary,
+            onClick = onRecentAppsTutorialClicked,
+            backgroundColor = MaterialTheme.colorScheme.secondary,
+            modifier = Modifier.weight(1f),
         )
     }
 }
@@ -101,16 +124,30 @@ private fun TutorialSelectionButtons(
 @Composable
 private fun TutorialButton(
     text: String,
+    icon: ImageVector,
+    iconColor: Color,
     onClick: () -> Unit,
-    color: Color,
-    modifier: Modifier = Modifier
+    backgroundColor: Color,
+    modifier: Modifier = Modifier,
 ) {
     Button(
         onClick = onClick,
         shape = RoundedCornerShape(16.dp),
-        colors = ButtonDefaults.buttonColors(containerColor = color),
-        modifier = modifier.aspectRatio(0.66f)
+        colors = ButtonDefaults.buttonColors(containerColor = backgroundColor),
+        modifier = modifier.aspectRatio(0.66f),
     ) {
-        Text(text = text, style = MaterialTheme.typography.headlineLarge)
+        Column(
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = text,
+                modifier = Modifier.width(30.dp).height(30.dp),
+                tint = iconColor,
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(text = text, style = MaterialTheme.typography.headlineLarge)
+        }
     }
 }

@@ -25,6 +25,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
 import android.view.MotionEvent;
 import android.view.accessibility.AccessibilityManager;
 
@@ -33,9 +35,8 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.testing.FakeMetricsLogger;
+import com.android.systemui.Flags;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.flags.FakeFeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
@@ -83,7 +84,6 @@ public class BrightLineFalsingManagerTest extends SysuiTestCase {
     private final FalsingClassifier.Result mPassedResult = FalsingClassifier.Result.passed(1);
     private final FalsingClassifier.Result mFalsedResult =
             FalsingClassifier.Result.falsed(1, getClass().getSimpleName(), "");
-    private final FakeFeatureFlags mFakeFeatureFlags = new FakeFeatureFlags();
 
     @Before
     public void setup() {
@@ -98,11 +98,11 @@ public class BrightLineFalsingManagerTest extends SysuiTestCase {
         when(mFalsingDataProvider.getRecentMotionEvents()).thenReturn(mMotionEventList);
         when(mKeyguardStateController.isShowing()).thenReturn(true);
         when(mFalsingDataProvider.isUnfolded()).thenReturn(false);
+        when(mFalsingDataProvider.isTouchScreenSource()).thenReturn(true);
         mBrightLineFalsingManager = new BrightLineFalsingManager(mFalsingDataProvider,
                 mMetricsLogger, mClassifiers, mSingleTapClassifier, mLongTapClassifier,
                 mDoubleTapClassifier, mHistoryTracker, mKeyguardStateController,
-                mAccessibilityManager, false, mFakeFeatureFlags);
-        mFakeFeatureFlags.set(Flags.FALSING_OFF_FOR_UNFOLDED, true);
+                mAccessibilityManager, false);
     }
 
     @Test
@@ -197,9 +197,25 @@ public class BrightLineFalsingManagerTest extends SysuiTestCase {
     }
 
     @Test
+    public void testSkipNonTouchscreenDevices() {
+        assertThat(mBrightLineFalsingManager.isFalseTouch(Classifier.GENERIC)).isTrue();
+        when(mFalsingDataProvider.isTouchScreenSource()).thenReturn(false);
+        assertThat(mBrightLineFalsingManager.isFalseTouch(Classifier.GENERIC)).isFalse();
+    }
+
+    @Test
+    @DisableFlags(Flags.FLAG_NON_TOUCHSCREEN_DEVICES_BYPASS_FALSING)
     public void testTrackpadGesture() {
         assertThat(mBrightLineFalsingManager.isFalseTouch(Classifier.GENERIC)).isTrue();
         when(mFalsingDataProvider.isFromTrackpad()).thenReturn(true);
+        assertThat(mBrightLineFalsingManager.isFalseTouch(Classifier.GENERIC)).isFalse();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_NON_TOUCHSCREEN_DEVICES_BYPASS_FALSING)
+    public void testTrackpadGesture_touchScreenSource_false() {
+        assertThat(mBrightLineFalsingManager.isFalseTouch(Classifier.GENERIC)).isTrue();
+        when(mFalsingDataProvider.isTouchScreenSource()).thenReturn(false);
         assertThat(mBrightLineFalsingManager.isFalseTouch(Classifier.GENERIC)).isFalse();
     }
 

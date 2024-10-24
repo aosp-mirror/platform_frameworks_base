@@ -83,7 +83,7 @@ import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_TOKEN_TRANSFO
 import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_NORMAL;
-import static com.android.window.flags.Flags.FLAG_CAMERA_COMPAT_FOR_FREEFORM;
+import static com.android.window.flags.Flags.FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING;
 import static com.android.window.flags.Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -369,8 +369,10 @@ public class DisplayContentTests extends WindowTestsBase {
                 "startingWin");
         startingWin.setHasSurface(true);
         assertTrue(startingWin.canBeImeTarget());
+        final WindowContainer imeSurfaceParentWindow = mock(WindowContainer.class);
         final SurfaceControl imeSurfaceParent = mock(SurfaceControl.class);
-        doReturn(imeSurfaceParent).when(mDisplayContent).computeImeParent();
+        doReturn(imeSurfaceParent).when(imeSurfaceParentWindow).getSurfaceControl();
+        doReturn(imeSurfaceParentWindow).when(mDisplayContent).computeImeParent();
         spyOn(imeContainer);
 
         mDisplayContent.setImeInputTarget(startingWin);
@@ -406,8 +408,11 @@ public class DisplayContentTests extends WindowTestsBase {
                 "startingWin");
         startingWin.setHasSurface(true);
         assertTrue(startingWin.canBeImeTarget());
+        final WindowContainer imeSurfaceParentWindow = mock(WindowContainer.class);
         final SurfaceControl imeSurfaceParent = mock(SurfaceControl.class);
-        doReturn(imeSurfaceParent).when(mDisplayContent).computeImeParent();
+        doReturn(imeSurfaceParent).when(imeSurfaceParentWindow).getSurfaceControl();
+        doReturn(imeSurfaceParentWindow).when(mDisplayContent).computeImeParent();
+
 
         // Main precondition for this test: organize the ImeContainer.
         final IDisplayAreaOrganizer mockImeOrganizer = mock(IDisplayAreaOrganizer.class);
@@ -639,10 +644,11 @@ public class DisplayContentTests extends WindowTestsBase {
                 ws.matchesDisplayAreaBounds());
 
         assertTrue("IME shouldn't be attached to app",
-                dc.computeImeParent() != dc.getImeTarget(IME_TARGET_LAYERING).getWindow()
-                        .mActivityRecord.getSurfaceControl());
+                dc.computeImeParent().getSurfaceControl() != dc.getImeTarget(
+                        IME_TARGET_LAYERING).getWindow().mActivityRecord.getSurfaceControl());
         assertEquals("IME should be attached to display",
-                dc.getImeContainer().getParent().getSurfaceControl(), dc.computeImeParent());
+                dc.getImeContainer().getParent().getSurfaceControl(),
+                dc.computeImeParent().getSurfaceControl());
     }
 
     private WindowState[] createNotDrawnWindowsOn(DisplayContent displayContent, int... types) {
@@ -1075,7 +1081,8 @@ public class DisplayContentTests extends WindowTestsBase {
         final DisplayRotation dr = dc.getDisplayRotation();
         spyOn(dr);
         doReturn(false).when(dr).useDefaultSettingsProvider();
-        final ActivityRecord app = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        final ActivityRecord app = new ActivityBuilder(mAtm).setCreateTask(true)
+                .setComponent(getUniqueComponentName(mContext.getPackageName())).build();
         app.setOrientation(SCREEN_ORIENTATION_LANDSCAPE, app);
 
         assertFalse(dc.getRotationReversionController().isAnyOverrideActive());
@@ -1191,8 +1198,9 @@ public class DisplayContentTests extends WindowTestsBase {
         final DisplayContent dc = createNewDisplay();
         dc.setImeLayeringTarget(createWindow(null, TYPE_BASE_APPLICATION, "app"));
         dc.setImeInputTarget(dc.getImeTarget(IME_TARGET_LAYERING).getWindow());
-        assertEquals(dc.getImeTarget(IME_TARGET_LAYERING).getWindow()
-                        .mActivityRecord.getSurfaceControl(), dc.computeImeParent());
+        assertEquals(dc.getImeTarget(
+                        IME_TARGET_LAYERING).getWindow().mActivityRecord.getSurfaceControl(),
+                dc.computeImeParent().getSurfaceControl());
     }
 
     @Test
@@ -1202,7 +1210,8 @@ public class DisplayContentTests extends WindowTestsBase {
         dc.getImeTarget(IME_TARGET_LAYERING).getWindow().setWindowingMode(
                 WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW);
         dc.setImeInputTarget(dc.getImeTarget(IME_TARGET_LAYERING).getWindow());
-        assertEquals(dc.getImeContainer().getParentSurfaceControl(), dc.computeImeParent());
+        assertEquals(dc.getImeContainer().getParentSurfaceControl(),
+                dc.computeImeParent().getSurfaceControl());
     }
 
     @SetupWindows(addWindows = W_ACTIVITY)
@@ -1213,7 +1222,7 @@ public class DisplayContentTests extends WindowTestsBase {
         mDisplayContent.setImeLayeringTarget(mAppWindow);
         // The surface parent of IME should be the display instead of app window.
         assertEquals(mDisplayContent.getImeContainer().getParentSurfaceControl(),
-                mDisplayContent.computeImeParent());
+                mDisplayContent.computeImeParent().getSurfaceControl());
     }
 
     @Test
@@ -1221,7 +1230,8 @@ public class DisplayContentTests extends WindowTestsBase {
         final DisplayContent dc = createNewDisplay();
         dc.setImeLayeringTarget(createWindow(null, TYPE_STATUS_BAR, "statusBar"));
         dc.setImeInputTarget(dc.getImeTarget(IME_TARGET_LAYERING).getWindow());
-        assertEquals(dc.getImeContainer().getParentSurfaceControl(), dc.computeImeParent());
+        assertEquals(dc.getImeContainer().getParentSurfaceControl(),
+                dc.computeImeParent().getSurfaceControl());
     }
 
     @SetupWindows(addWindows = W_ACTIVITY)
@@ -1232,7 +1242,8 @@ public class DisplayContentTests extends WindowTestsBase {
         doReturn(true).when(mDisplayContent).shouldImeAttachedToApp();
         mDisplayContent.setImeLayeringTarget(app1);
         mDisplayContent.setImeInputTarget(app1);
-        assertEquals(app1.mActivityRecord.getSurfaceControl(), mDisplayContent.computeImeParent());
+        assertEquals(app1.mActivityRecord.getSurfaceControl(),
+                mDisplayContent.computeImeParent().getSurfaceControl());
         mDisplayContent.setImeLayeringTarget(app2);
         // Expect null means no change IME parent when the IME layering target not yet
         // request IME to be the input target.
@@ -1250,7 +1261,7 @@ public class DisplayContentTests extends WindowTestsBase {
         mDisplayContent.setImeInputTarget(app);
         assertFalse(mDisplayContent.shouldImeAttachedToApp());
         assertEquals(mDisplayContent.getImeContainer().getParentSurfaceControl(),
-                mDisplayContent.computeImeParent());
+                mDisplayContent.computeImeParent().getSurfaceControl());
     }
 
     @Test
@@ -1275,7 +1286,8 @@ public class DisplayContentTests extends WindowTestsBase {
         assertEquals(dc.getImeTarget(IME_TARGET_LAYERING), dc.getImeInputTarget());
 
         // The ImeParent should be the display.
-        assertEquals(dc.getImeContainer().getParent().getSurfaceControl(), dc.computeImeParent());
+        assertEquals(dc.getImeContainer().getParent().getSurfaceControl(),
+                dc.computeImeParent().getSurfaceControl());
     }
 
     @Test
@@ -2809,7 +2821,7 @@ public class DisplayContentTests extends WindowTestsBase {
         verify(mWm.mUmInternal, never()).isUserVisible(userId2, displayId);
     }
 
-    @EnableFlags(FLAG_CAMERA_COMPAT_FOR_FREEFORM)
+    @EnableFlags(FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
     @Test
     public void cameraCompatFreeformFlagEnabled_cameraCompatFreeformPolicyNotNull() {
         doReturn(true).when(() ->
@@ -2818,7 +2830,7 @@ public class DisplayContentTests extends WindowTestsBase {
         assertTrue(createNewDisplay().mAppCompatCameraPolicy.hasCameraCompatFreeformPolicy());
     }
 
-    @DisableFlags(FLAG_CAMERA_COMPAT_FOR_FREEFORM)
+    @DisableFlags(FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
     @Test
     public void cameraCompatFreeformFlagNotEnabled_cameraCompatFreeformPolicyIsNull() {
         doReturn(true).when(() ->
@@ -2827,7 +2839,7 @@ public class DisplayContentTests extends WindowTestsBase {
         assertFalse(createNewDisplay().mAppCompatCameraPolicy.hasCameraCompatFreeformPolicy());
     }
 
-    @EnableFlags(FLAG_CAMERA_COMPAT_FOR_FREEFORM)
+    @EnableFlags(FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
     @DisableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
     @Test
     public void desktopWindowingFlagNotEnabled_cameraCompatFreeformPolicyIsNull() {

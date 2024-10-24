@@ -49,7 +49,6 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.SurfaceControl;
 import android.view.SurfaceHolder;
-import android.view.SurfaceSession;
 import android.view.ViewTreeObserver;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
@@ -95,7 +94,6 @@ public class TaskViewTest extends ShellTestCase {
     Looper mViewLooper;
     TestHandler mViewHandler;
 
-    SurfaceSession mSession;
     SurfaceControl mLeash;
 
     Context mContext;
@@ -106,7 +104,7 @@ public class TaskViewTest extends ShellTestCase {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mLeash = new SurfaceControl.Builder(mSession)
+        mLeash = new SurfaceControl.Builder()
                 .setName("test")
                 .build();
 

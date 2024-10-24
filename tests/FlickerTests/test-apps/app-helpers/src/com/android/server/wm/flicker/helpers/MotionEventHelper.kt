@@ -21,6 +21,7 @@ import android.os.SystemClock
 import android.view.ContentInfo.Source
 import android.view.InputDevice.SOURCE_MOUSE
 import android.view.InputDevice.SOURCE_STYLUS
+import android.view.InputDevice.SOURCE_TOUCHSCREEN
 import android.view.MotionEvent
 import android.view.MotionEvent.ACTION_DOWN
 import android.view.MotionEvent.ACTION_MOVE
@@ -36,23 +37,24 @@ import android.view.MotionEvent.ToolType
  */
 class MotionEventHelper(
     private val instr: Instrumentation,
-    private val inputMethod: InputMethod
+    val inputMethod: InputMethod
 ) {
     enum class InputMethod(@ToolType val toolType: Int, @Source val source: Int) {
         STYLUS(TOOL_TYPE_STYLUS, SOURCE_STYLUS),
         MOUSE(TOOL_TYPE_MOUSE, SOURCE_MOUSE),
-        TOUCHPAD(TOOL_TYPE_FINGER, SOURCE_MOUSE)
+        TOUCHPAD(TOOL_TYPE_FINGER, SOURCE_MOUSE),
+        TOUCH(TOOL_TYPE_FINGER, SOURCE_TOUCHSCREEN)
     }
 
-    fun actionDown(x: Int, y: Int) {
-        injectMotionEvent(ACTION_DOWN, x, y)
+    fun actionDown(x: Int, y: Int, time: Long = SystemClock.uptimeMillis()) {
+        injectMotionEvent(ACTION_DOWN, x, y, downTime = time, eventTime = time)
     }
 
-    fun actionUp(x: Int, y: Int) {
-        injectMotionEvent(ACTION_UP, x, y)
+    fun actionUp(x: Int, y: Int, downTime: Long) {
+        injectMotionEvent(ACTION_UP, x, y, downTime = downTime)
     }
 
-    fun actionMove(startX: Int, startY: Int, endX: Int, endY: Int, steps: Int) {
+    fun actionMove(startX: Int, startY: Int, endX: Int, endY: Int, steps: Int, downTime: Long) {
         val incrementX = (endX - startX).toFloat() / (steps - 1)
         val incrementY = (endY - startY).toFloat() / (steps - 1)
 
@@ -61,14 +63,19 @@ class MotionEventHelper(
             val x = startX + incrementX * i
             val y = startY + incrementY * i
 
-            val moveEvent = getMotionEvent(time, time, ACTION_MOVE, x, y)
+            val moveEvent = getMotionEvent(downTime, time, ACTION_MOVE, x, y)
             injectMotionEvent(moveEvent)
         }
     }
 
-    private fun injectMotionEvent(action: Int, x: Int, y: Int): MotionEvent {
-        val eventTime = SystemClock.uptimeMillis()
-        val event = getMotionEvent(eventTime, eventTime, action, x.toFloat(), y.toFloat())
+    private fun injectMotionEvent(
+        action: Int,
+        x: Int,
+        y: Int,
+        downTime: Long = SystemClock.uptimeMillis(),
+        eventTime: Long = SystemClock.uptimeMillis()
+    ): MotionEvent {
+        val event = getMotionEvent(downTime, eventTime, action, x.toFloat(), y.toFloat())
         injectMotionEvent(event)
         return event
     }

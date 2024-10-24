@@ -40,7 +40,10 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.animation.AnimationHandler;
+import android.os.ConditionVariable;
 import android.os.Handler;
+import android.view.Choreographer;
 import android.view.FrameMetrics;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.JankData;
@@ -359,7 +362,7 @@ public class FrameTrackerTest {
         tracker.end(FrameTracker.REASON_END_NORMAL);
 
         // Send incomplete callback for 102L
-        sendSfFrame(tracker, 102L, JANK_NONE);
+        sendSfFrame(tracker, 4, 102L, JANK_NONE);
 
         // Send janky but complete callbck fo 103L
         sendFrame(tracker, 50, JANK_APP_DEADLINE_MISSED, 103L);
@@ -576,6 +579,44 @@ public class FrameTrackerTest {
     }
 
     @Test
+    public void testEndAnimationWithLastFrameSyncId() {
+        final long[] expectedLastAnimationFrameVsyncId = { 0 };
+        final long[] lastAnimationFrameVsyncId = { 0 };
+        final long[] endAnimationVsyncId = { 0 };
+        final ConditionVariable condition = new ConditionVariable();
+        final FrameTracker tracker = spyFrameTracker(/* surfaceOnly= */ false);
+        mActivity.runOnUiThread(() -> {
+            final AnimationHandler animationHandler = AnimationHandler.getInstance();
+            final Choreographer realChoreographer = Choreographer.getInstance();
+            // 3 v-sync ids:
+            //  1. Begin mocked vsyncId = 0
+            //  2. Current real vsyncId = last animation frame
+            //  3. Posted real vsyncId = end animation
+            when(mChoreographer.getVsyncId()).thenReturn(0L);
+            tracker.begin();
+            mRunnableArgumentCaptor.getValue().run();
+            when(mChoreographer.getVsyncId()).thenAnswer(a -> realChoreographer.getVsyncId());
+            expectedLastAnimationFrameVsyncId[0] = realChoreographer.getVsyncId();
+            // Simulate ending multiple animators. Their callbacks should run in a batch.
+            animationHandler.postEndAnimationCallback(() -> {
+                endAnimationVsyncId[0] = realChoreographer.getVsyncId();
+                lastAnimationFrameVsyncId[0] =
+                        animationHandler.getLastAnimationFrameVsyncId(endAnimationVsyncId[0]);
+            });
+            animationHandler.postEndAnimationCallback(() -> {
+                tracker.end(FrameTracker.REASON_END_NORMAL);
+                condition.open();
+            });
+        });
+
+        condition.block(1000L /* timeoutMs */);
+        assertThat(lastAnimationFrameVsyncId[0]).isEqualTo(expectedLastAnimationFrameVsyncId[0]);
+        assertThat(endAnimationVsyncId[0]).isGreaterThan(lastAnimationFrameVsyncId[0]);
+        // Verifies that FrameTracker#mEndVsyncId uses the vsyncId from AnimationHandler.
+        verify(mJankStatsRegistration).removeAfter(eq(lastAnimationFrameVsyncId[0]));
+    }
+
+    @Test
     public void testMaxSuccessiveMissedFramesCount() {
         FrameTracker tracker = spyFrameTracker(/* surfaceOnly= */ true);
         when(mChoreographer.getVsyncId()).thenReturn(100L);
@@ -629,7 +670,7 @@ public class FrameTrackerTest {
         if (!tracker.mSurfaceOnly) {
             sendHwuiFrame(tracker, durationMillis, vsyncId, firstWindowFrame);
         }
-        sendSfFrame(tracker, vsyncId, jankType);
+        sendSfFrame(tracker, durationMillis, vsyncId, jankType);
     }
 
     private void sendHwuiFrame(FrameTracker tracker, long durationMillis, long vsyncId,
@@ -645,11 +686,13 @@ public class FrameTrackerTest {
         captor.getValue().run();
     }
 
-    private void sendSfFrame(FrameTracker tracker, long vsyncId, @JankType int jankType) {
+    private void sendSfFrame(
+            FrameTracker tracker, long durationMillis, long vsyncId, @JankType int jankType) {
         final ArgumentCaptor<Runnable> captor = ArgumentCaptor.forClass(Runnable.class);
         doNothing().when(tracker).postCallback(captor.capture());
         mListenerCapture.getValue().onJankDataAvailable(new JankData[] {
-                new JankData(vsyncId, jankType, FRAME_TIME_60Hz)
+                new JankData(vsyncId, jankType, FRAME_TIME_60Hz, FRAME_TIME_60Hz,
+                TimeUnit.MILLISECONDS.toNanos(durationMillis))
         });
         captor.getValue().run();
     }

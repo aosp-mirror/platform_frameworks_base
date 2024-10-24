@@ -94,6 +94,13 @@ public class BiometricManager {
             BiometricConstants.BIOMETRIC_ERROR_MANDATORY_NOT_ACTIVE;
 
     /**
+     * Biometrics is not allowed to verify in apps.
+     * @hide
+     */
+    public static final int BIOMETRIC_ERROR_NOT_ENABLED_FOR_APPS =
+            BiometricConstants.BIOMETRIC_ERROR_NOT_ENABLED_FOR_APPS;
+
+    /**
      * A security vulnerability has been discovered and the sensor is unavailable until a
      * security update has addressed this issue. This error can be received if for example,
      * authentication was requested with {@link Authenticators#BIOMETRIC_STRONG}, but the
