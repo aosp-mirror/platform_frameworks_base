@@ -95,8 +95,8 @@ public class CompanionAppBinder {
     /**
      * On package changed.
      */
-    public void onPackagesChanged(@UserIdInt int userId) {
-        mCompanionServicesRegister.invalidate(userId);
+    public void onPackagesChanged(@UserIdInt int userId, String packageName) {
+        mCompanionServicesRegister.forUser(userId).remove(packageName);
     }
 
     /**
@@ -307,10 +307,6 @@ public class CompanionAppBinder {
         synchronized @NonNull List<ComponentName> forPackage(
                 @UserIdInt int userId, @NonNull String packageName) {
             return forUser(userId).getOrDefault(packageName, Collections.emptyList());
-        }
-
-        synchronized void invalidate(@UserIdInt int userId) {
-            remove(userId);
         }
 
         @Override
