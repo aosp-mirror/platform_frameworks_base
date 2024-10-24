@@ -27,6 +27,7 @@ import static org.mockito.Mockito.when;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.SigningInfo;
+import android.content.pm.verify.pkg.IVerificationSessionInterface;
 import android.content.pm.verify.pkg.IVerifierService;
 import android.content.pm.verify.pkg.VerificationSession;
 import android.content.pm.verify.pkg.VerifierService;
@@ -63,7 +64,8 @@ public class VerifierServiceTest {
         mService = Mockito.mock(VerifierService.class, Answers.CALLS_REAL_METHODS);
         mSession = new VerificationSession(TEST_ID, TEST_INSTALL_SESSION_ID,
                 TEST_PACKAGE_NAME, TEST_PACKAGE_URI, TEST_SIGNING_INFO,
-                new ArrayList<>(), new PersistableBundle(), TEST_POLICY, null, null);
+                new ArrayList<>(), new PersistableBundle(), TEST_POLICY, Mockito.mock(
+                IVerificationSessionInterface.class));
     }
 
     @Test

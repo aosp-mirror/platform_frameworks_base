@@ -59,6 +59,11 @@ open class DesktopModeAppHelper(private val innerHelper: IStandardAppHelper) :
         BOTTOM
     }
 
+    enum class AppProperty {
+        STANDARD,
+        NON_RESIZABLE
+    }
+
     /** Wait for an app moved to desktop to finish its transition. */
     private fun waitForAppToMoveToDesktop(wmHelper: WindowManagerStateHelper) {
         wmHelper
@@ -280,7 +285,11 @@ open class DesktopModeAppHelper(private val innerHelper: IStandardAppHelper) :
 
         val displayRect = getDisplayRect(wmHelper)
 
-        val endX = if (isLeft) displayRect.left else displayRect.right
+        val endX = if (isLeft) {
+            displayRect.left + SNAP_RESIZE_DRAG_INSET
+        } else {
+            displayRect.right - SNAP_RESIZE_DRAG_INSET
+        }
         val endY = displayRect.centerY() / 2
 
         // drag the window to snap resize
@@ -386,6 +395,7 @@ open class DesktopModeAppHelper(private val innerHelper: IStandardAppHelper) :
 
     private companion object {
         val TIMEOUT: Duration = Duration.ofSeconds(3)
+        const val SNAP_RESIZE_DRAG_INSET: Int = 5 // inset to avoid dragging to display edge
         const val CAPTION: String = "desktop_mode_caption"
         const val MAXIMIZE_BUTTON_VIEW: String = "maximize_button_view"
         const val MAXIMIZE_MENU: String = "maximize_menu"

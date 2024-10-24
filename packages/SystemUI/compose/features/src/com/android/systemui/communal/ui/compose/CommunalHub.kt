@@ -16,6 +16,7 @@
 
 package com.android.systemui.communal.ui.compose
 
+import android.appwidget.AppWidgetProviderInfo
 import android.content.Context
 import android.content.res.Configuration
 import android.graphics.drawable.Icon
@@ -24,7 +25,6 @@ import android.util.SizeF
 import android.view.MotionEvent
 import android.widget.FrameLayout
 import android.widget.RemoteViews
-import androidx.annotation.VisibleForTesting
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.Spring
@@ -149,14 +149,17 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.round
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.times
 import androidx.compose.ui.util.fastAll
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.viewinterop.NoOpUpdate
+import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.window.layout.WindowMetricsCalculator
 import com.android.compose.animation.Easings.Emphasized
@@ -183,6 +186,9 @@ import com.android.systemui.communal.widgets.SmartspaceAppWidgetHostView
 import com.android.systemui.communal.widgets.WidgetConfigurator
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.phone.SystemUIDialogFactory
+import kotlin.math.max
+import kotlin.math.min
+import kotlin.math.roundToInt
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -386,13 +392,19 @@ fun CommunalHub(
                             contentOffset = contentOffset,
                             screenWidth = screenWidth,
                             setGridCoordinates = { gridCoordinates = it },
-                            updateDragPositionForRemove = { offset ->
-                                isPointerWithinEnabledRemoveButton(
-                                    removeEnabled = removeButtonEnabled,
-                                    offset =
-                                        gridCoordinates?.let { it.positionInWindow() + offset },
-                                    containerToCheck = removeButtonCoordinates,
-                                )
+                            updateDragPositionForRemove = { boundingBox ->
+                                val gridOffset = gridCoordinates?.positionInWindow()
+                                val removeButtonCenter =
+                                    removeButtonCoordinates?.boundsInWindow()?.center
+                                removeButtonEnabled &&
+                                    gridOffset != null &&
+                                    removeButtonCenter != null &&
+                                    boundingBox
+                                        // The bounding box is relative to the grid, so we need to
+                                        // normalize it by adding the grid offset and the content
+                                        // offset.
+                                        .translate((gridOffset + contentOffset).round())
+                                        .contains(removeButtonCenter.round())
                             },
                             gridState = gridState,
                             contentListState = contentListState,
@@ -644,11 +656,13 @@ private fun ObserveNewWidgetAddedEffect(
 @Composable
 private fun ResizableItemFrameWrapper(
     key: String,
+    currentSpan: GridItemSpan,
     gridState: LazyGridState,
-    minItemSpan: Int,
     gridContentPadding: PaddingValues,
     verticalArrangement: Arrangement.Vertical,
     enabled: Boolean,
+    minHeightPx: Int,
+    maxHeightPx: Int,
     modifier: Modifier = Modifier,
     alpha: () -> Float = { 1f },
     onResize: (info: ResizeInfo) -> Unit = {},
@@ -659,17 +673,45 @@ private fun ResizableItemFrameWrapper(
     } else {
         ResizableItemFrame(
             key = key,
+            currentSpan = currentSpan,
             gridState = gridState,
-            minItemSpan = minItemSpan,
             gridContentPadding = gridContentPadding,
             verticalArrangement = verticalArrangement,
             enabled = enabled,
             alpha = alpha,
             modifier = modifier,
             onResize = onResize,
+            minHeightPx = minHeightPx,
+            maxHeightPx = maxHeightPx,
+            resizeMultiple = CommunalContentSize.HALF.span,
         ) {
             content(Modifier)
         }
+    }
+}
+
+@Composable
+fun calculateWidgetSize(item: CommunalContentModel, isResizable: Boolean): WidgetSizeInfo {
+    val density = LocalDensity.current
+
+    return if (isResizable && item is CommunalContentModel.WidgetContent.Widget) {
+        with(density) {
+            val minHeightPx =
+                (min(item.providerInfo.minResizeHeight, item.providerInfo.minHeight)
+                    .coerceAtLeast(CommunalContentSize.HALF.dp().toPx().roundToInt()))
+
+            val maxHeightPx =
+                (if (item.providerInfo.maxResizeHeight > 0) {
+                        max(item.providerInfo.maxResizeHeight, item.providerInfo.minHeight)
+                    } else {
+                        Int.MAX_VALUE
+                    })
+                    .coerceIn(minHeightPx, CommunalContentSize.FULL.dp().toPx().roundToInt())
+
+            WidgetSizeInfo(minHeightPx, maxHeightPx)
+        }
+    } else {
+        WidgetSizeInfo(0, Int.MAX_VALUE)
     }
 }
 
@@ -685,7 +727,7 @@ private fun BoxScope.CommunalHubLazyGrid(
     gridState: LazyGridState,
     contentListState: ContentListState,
     setGridCoordinates: (coordinates: LayoutCoordinates) -> Unit,
-    updateDragPositionForRemove: (offset: Offset) -> Boolean,
+    updateDragPositionForRemove: (boundingBox: IntRect) -> Boolean,
     widgetConfigurator: WidgetConfigurator?,
     interactionHandler: RemoteViews.InteractionHandler?,
     widgetSection: CommunalAppWidgetSection,
@@ -747,31 +789,41 @@ private fun BoxScope.CommunalHubLazyGrid(
             val size = SizeF(Dimensions.CardWidth.value, item.size.dp().value)
             val selected = item.key == selectedKey.value
             val dpSize = DpSize(size.width.dp, size.height.dp)
+            val isResizable =
+                if (item is CommunalContentModel.WidgetContent.Widget) {
+                    item.providerInfo.resizeMode and AppWidgetProviderInfo.RESIZE_VERTICAL != 0
+                } else {
+                    false
+                }
 
             if (viewModel.isEditMode && dragDropState != null) {
+                val isItemDragging = dragDropState.draggingItemKey == item.key
                 val outlineAlpha by
                     animateFloatAsState(
                         targetValue = if (selected) 1f else 0f,
                         animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
                         label = "Widget resizing outline alpha",
                     )
+                val widgetSizeInfo = calculateWidgetSize(item, isResizable)
                 ResizableItemFrameWrapper(
                     key = item.key,
+                    currentSpan = GridItemSpan(item.size.span),
                     gridState = gridState,
-                    minItemSpan = CommunalContentSize.HALF.span,
                     gridContentPadding = contentPadding,
                     verticalArrangement = itemArrangement,
                     enabled = selected,
                     alpha = { outlineAlpha },
                     modifier =
-                        Modifier.requiredSize(dpSize).thenIf(
-                            dragDropState.draggingItemKey != item.key
-                        ) {
-                            Modifier.animateItem(
-                                placementSpec = spring(stiffness = Spring.StiffnessMediumLow)
-                            )
-                        },
+                        Modifier.requiredSize(dpSize)
+                            .thenIf(!isItemDragging) {
+                                Modifier.animateItem(
+                                    placementSpec = spring(stiffness = Spring.StiffnessMediumLow)
+                                )
+                            }
+                            .thenIf(isItemDragging) { Modifier.zIndex(1f) },
                     onResize = { resizeInfo -> contentListState.resize(index, resizeInfo) },
+                    minHeightPx = widgetSizeInfo.minHeightPx,
+                    maxHeightPx = widgetSizeInfo.maxHeightPx,
                 ) { modifier ->
                     DraggableItem(
                         modifier = modifier,
@@ -781,7 +833,7 @@ private fun BoxScope.CommunalHubLazyGrid(
                         key = item.key,
                     ) { isDragging ->
                         CommunalContent(
-                            modifier = Modifier.fillMaxSize(),
+                            modifier = Modifier.requiredSize(dpSize),
                             model = item,
                             viewModel = viewModel,
                             size = size,
@@ -1556,23 +1608,6 @@ private fun beforeContentPadding(paddingValues: PaddingValues): ContentPaddingIn
     }
 }
 
-/**
- * Check whether the pointer position that the item is being dragged at is within the coordinates of
- * the remove button in the toolbar. Returns true if the item is removable.
- */
-@VisibleForTesting
-fun isPointerWithinEnabledRemoveButton(
-    removeEnabled: Boolean,
-    offset: Offset?,
-    containerToCheck: LayoutCoordinates?,
-): Boolean {
-    if (!removeEnabled || offset == null || containerToCheck == null) {
-        return false
-    }
-    val container = containerToCheck.boundsInWindow()
-    return container.contains(offset)
-}
-
 private fun CommunalContentSize.dp(): Dp {
     return when (this) {
         CommunalContentSize.FULL -> Dimensions.CardHeightFull
@@ -1655,6 +1690,8 @@ class Dimensions(val context: Context, val config: Configuration) {
         val SlideOffsetY = 30.adjustedDp
     }
 }
+
+data class WidgetSizeInfo(val minHeightPx: Int, val maxHeightPx: Int)
 
 private object Colors {
     val DisabledColorFilter by lazy { disabledColorMatrix() }

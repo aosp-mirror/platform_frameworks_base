@@ -64,13 +64,15 @@ public class BatteryUsageStatsAtomTest {
     private static final int UID_3 = 4000;
 
     @Test
-    public void testAtom_BatteryUsageStatsPerUid() {
+    public void testAtom_BatteryUsageStatsPerUid() throws Exception {
         final BatteryUsageStats bus = buildBatteryUsageStats();
         BatteryStatsService.FrameworkStatsLogger statsLogger =
                 mock(BatteryStatsService.FrameworkStatsLogger.class);
 
         List<StatsEvent> actual = new ArrayList<>();
         new BatteryStatsService.StatsPerUidLogger(statsLogger).logStats(bus, actual);
+
+        bus.close();
 
         if (DEBUG) {
             System.out.println(mockingDetails(statsLogger).printInvocations());
@@ -284,7 +286,7 @@ public class BatteryUsageStatsAtomTest {
     }
 
     @Test
-    public void testAtom_BatteryUsageStatsAtomsProto() {
+    public void testAtom_BatteryUsageStatsAtomsProto() throws Exception {
         final BatteryUsageStats bus = buildBatteryUsageStats();
         final byte[] bytes = bus.getStatsProto();
         BatteryUsageStatsAtomsProto proto;
@@ -347,6 +349,7 @@ public class BatteryUsageStatsAtomTest {
 
         // UID_3 - Should be none, since no interesting data (done last for debugging convenience).
         assertEquals(3, proto.uidBatteryConsumers.length);
+        bus.close();
     }
 
     private void assertSameBatteryConsumer(String message, BatteryConsumer consumer,
@@ -582,7 +585,7 @@ public class BatteryUsageStatsAtomTest {
     }
 
     @Test
-    public void testLargeAtomTruncated() {
+    public void testLargeAtomTruncated() throws Exception {
         final BatteryUsageStats.Builder builder =
                 new BatteryUsageStats.Builder(new String[0], true, false, false, false, 0);
         // If not truncated, this BatteryUsageStats object would generate a proto buffer
@@ -617,6 +620,8 @@ public class BatteryUsageStatsAtomTest {
         final byte[] bytes = batteryUsageStats.getStatsProto();
         assertThat(bytes.length).isGreaterThan(20000);
         assertThat(bytes.length).isLessThan(50000);
+
+        batteryUsageStats.close();
 
         BatteryUsageStatsAtomsProto proto;
         try {

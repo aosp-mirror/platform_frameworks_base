@@ -83,6 +83,7 @@ import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestRunningTaskInfoBuilder;
 import com.android.wm.shell.common.DisplayController;
+import com.android.wm.shell.desktopmode.DesktopModeEventLogger;
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.tests.R;
 import com.android.wm.shell.windowdecor.additionalviewcontainer.AdditionalViewContainer;
@@ -138,6 +139,8 @@ public class WindowDecorationTests extends ShellTestCase {
     private SurfaceSyncGroup mMockSurfaceSyncGroup;
     @Mock
     private SurfaceControl mMockTaskSurface;
+    @Mock
+    private DesktopModeEventLogger mDesktopModeEventLogger;
 
     private final List<SurfaceControl.Transaction> mMockSurfaceControlTransactions =
             new ArrayList<>();
@@ -512,6 +515,23 @@ public class WindowDecorationTests extends ShellTestCase {
                 true /* hasGlobalFocus */);
 
         verify(mMockRootSurfaceControl).applyTransactionOnDraw(mMockSurfaceControlStartT);
+    }
+
+    @Test
+    public void testRelayout_withPadding_setsOnResult() {
+        final ActivityManager.RunningTaskInfo taskInfo = new TestRunningTaskInfoBuilder()
+                .setDisplayId(Display.DEFAULT_DISPLAY)
+                .setBounds(TASK_BOUNDS)
+                .setPositionInParent(TASK_POSITION_IN_PARENT.x, TASK_POSITION_IN_PARENT.y)
+                .setVisible(true)
+                .build();
+        final TestWindowDecoration windowDecor = createWindowDecoration(taskInfo);
+        mRelayoutParams.mCaptionTopPadding = 50;
+
+        windowDecor.relayout(taskInfo, false /* applyStartTransactionOnDraw */,
+                true /* hasGlobalFocus */);
+
+        assertEquals(50, mRelayoutResult.mCaptionTopPadding);
     }
 
     @Test
@@ -997,7 +1017,7 @@ public class WindowDecorationTests extends ShellTestCase {
                 new MockObjectSupplier<>(mMockSurfaceControlTransactions,
                         () -> mock(SurfaceControl.Transaction.class)),
                 () -> mMockWindowContainerTransaction, () -> mMockTaskSurface,
-                mMockSurfaceControlViewHostFactory);
+                mMockSurfaceControlViewHostFactory, mDesktopModeEventLogger);
     }
 
     private class MockObjectSupplier<T> implements Supplier<T> {
@@ -1037,11 +1057,12 @@ public class WindowDecorationTests extends ShellTestCase {
                 Supplier<SurfaceControl.Transaction> surfaceControlTransactionSupplier,
                 Supplier<WindowContainerTransaction> windowContainerTransactionSupplier,
                 Supplier<SurfaceControl> surfaceControlSupplier,
-                SurfaceControlViewHostFactory surfaceControlViewHostFactory) {
+                SurfaceControlViewHostFactory surfaceControlViewHostFactory,
+                DesktopModeEventLogger desktopModeEventLogger) {
             super(context, userContext, displayController, taskOrganizer, taskInfo, taskSurface,
                     surfaceControlBuilderSupplier, surfaceControlTransactionSupplier,
                     windowContainerTransactionSupplier, surfaceControlSupplier,
-                    surfaceControlViewHostFactory);
+                    surfaceControlViewHostFactory, desktopModeEventLogger);
         }
 
         @Override

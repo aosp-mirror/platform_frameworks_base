@@ -16,31 +16,32 @@
 
 package com.android.systemui.screenshot
 
+import android.app.assist.AssistContent
 import android.content.Intent
 import android.net.Uri
 import android.os.Process
 import android.os.UserHandle
-import android.testing.AndroidTestingRunner
-import androidx.test.filters.SmallTest
+import android.platform.test.annotations.EnableFlags
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.internal.logging.UiEventLogger
+import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.screenshot.ui.viewmodel.PreviewAction
 import com.google.common.truth.Truth.assertThat
 import java.util.UUID
 import kotlin.test.Test
-import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
 import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 
-@RunWith(AndroidTestingRunner::class)
-@SmallTest
+@RunWith(AndroidJUnit4::class)
 class DefaultScreenshotActionsProviderTest : SysuiTestCase() {
     private val actionExecutor = mock<ActionExecutor>()
     private val uiEventLogger = mock<UiEventLogger>()
@@ -76,7 +77,7 @@ class DefaultScreenshotActionsProviderTest : SysuiTestCase() {
     }
 
     @Test
-    fun actionAccessed_withResult_launchesIntent() = runTest {
+    fun actionAccessed_withResult_launchesIntent() {
         actionsProvider = createActionsProvider()
 
         actionsProvider.setCompletedScreenshot(validResult)
@@ -94,7 +95,32 @@ class DefaultScreenshotActionsProviderTest : SysuiTestCase() {
     }
 
     @Test
-    fun actionAccessed_whilePending_launchesMostRecentAction() = runTest {
+    @EnableFlags(Flags.FLAG_SCREENSHOT_CONTEXT_URL)
+    fun shareAction_includesAssistContentUri() {
+        actionsProvider = createActionsProvider()
+
+        actionsProvider.setCompletedScreenshot(validResult)
+
+        val uri = Uri.parse("http://www.android.com")
+        val assistContent = mock<AssistContent>() { on { webUri } doReturn uri }
+
+        actionsProvider.onAssistContent(assistContent)
+
+        val actionButtonCaptor = argumentCaptor<() -> Unit>()
+        verify(actionsCallback, times(2))
+            .provideActionButton(any(), any(), actionButtonCaptor.capture())
+        actionButtonCaptor.firstValue.invoke()
+
+        val intentCaptor = argumentCaptor<Intent>()
+        verify(actionExecutor)
+            .startSharedTransition(intentCaptor.capture(), eq(Process.myUserHandle()), eq(false))
+        val innerIntent =
+            intentCaptor.lastValue.extras?.getParcelable(Intent.EXTRA_INTENT, Intent::class.java)
+        assertThat(innerIntent?.getStringExtra(Intent.EXTRA_TEXT)).isEqualTo(uri.toString())
+    }
+
+    @Test
+    fun actionAccessed_whilePending_launchesMostRecentAction() {
         actionsProvider = createActionsProvider()
 
         val previewActionCaptor = argumentCaptor<PreviewAction>()
@@ -116,7 +142,7 @@ class DefaultScreenshotActionsProviderTest : SysuiTestCase() {
     }
 
     @Test
-    fun scrollChipClicked_callsOnClick() = runTest {
+    fun scrollChipClicked_callsOnClick() {
         actionsProvider = createActionsProvider()
 
         val onScrollClick = mock<Runnable>()
@@ -131,7 +157,7 @@ class DefaultScreenshotActionsProviderTest : SysuiTestCase() {
     }
 
     @Test
-    fun scrollChipClicked_afterInvalidate_doesNothing() = runTest {
+    fun scrollChipClicked_afterInvalidate_doesNothing() {
         actionsProvider = createActionsProvider()
 
         val onScrollClick = mock<Runnable>()
@@ -147,7 +173,7 @@ class DefaultScreenshotActionsProviderTest : SysuiTestCase() {
     }
 
     @Test
-    fun scrollChipClicked_afterUpdate_runsNewAction() = runTest {
+    fun scrollChipClicked_afterUpdate_runsNewAction() {
         actionsProvider = createActionsProvider()
 
         val onScrollClick = mock<Runnable>()

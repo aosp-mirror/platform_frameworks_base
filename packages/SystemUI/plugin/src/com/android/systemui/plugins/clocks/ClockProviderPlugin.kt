@@ -13,7 +13,6 @@
  */
 package com.android.systemui.plugins.clocks
 
-import android.content.res.Resources
 import android.graphics.Rect
 import android.graphics.drawable.Drawable
 import android.view.View
@@ -85,7 +84,7 @@ interface ClockController {
     val events: ClockEvents
 
     /** Initializes various rendering parameters. If never called, provides reasonable defaults. */
-    fun initialize(resources: Resources, dozeFraction: Float, foldFraction: Float)
+    fun initialize(isDarkTheme: Boolean, dozeFraction: Float, foldFraction: Float)
 
     /** Optional method for dumping debug information */
     fun dump(pw: PrintWriter)
@@ -106,6 +105,10 @@ interface ClockFaceController {
     @get:SimpleProperty
     /** Determines the way the hosting app should behave when rendering this clock face */
     val config: ClockFaceConfig
+
+    @get:SimpleProperty
+    /** Current theme information the clock is using */
+    val theme: ThemeConfig
 
     @get:SimpleProperty
     /** Events specific to this clock face */
@@ -190,12 +193,6 @@ interface ClockEvents {
     /** Call whenever the locale changes */
     fun onLocaleChanged(locale: Locale)
 
-    /** Call whenever the color palette should update */
-    fun onColorPaletteChanged(resources: Resources)
-
-    /** Call if the seed color has changed and should be updated */
-    fun onSeedColorChanged(seedColor: Int?)
-
     /** Call whenever the weather data should update */
     fun onWeatherDataChanged(data: WeatherData)
 
@@ -269,11 +266,13 @@ interface ClockFaceEvents {
     fun onTimeTick()
 
     /**
-     * Region Darkness specific to the clock face.
-     * - isRegionDark = dark theme -> clock should be light
-     * - !isRegionDark = light theme -> clock should be dark
+     * Call whenever the theme or seedColor is updated
+     *
+     * Theme can be specific to the clock face.
+     * - isDarkTheme -> clock should be light
+     * - !isDarkTheme -> clock should be dark
      */
-    fun onRegionDarknessChanged(isRegionDark: Boolean)
+    fun onThemeChanged(theme: ThemeConfig)
 
     /**
      * Call whenever font settings change. Pass in a target font size in pixels. The specific clock
@@ -293,6 +292,8 @@ interface ClockFaceEvents {
     /** Called to notify the clock about its display. */
     fun onSecondaryDisplayChanged(onSecondaryDisplay: Boolean)
 }
+
+data class ThemeConfig(val isDarkTheme: Boolean, val seedColor: Int?)
 
 /** Tick rates for clocks */
 enum class ClockTickRate(val value: Int) {

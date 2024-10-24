@@ -772,9 +772,10 @@ public class UserManager {
     public static final String DISALLOW_CONFIG_CREDENTIALS = "no_config_credentials";
 
     /**
-     * When set on the admin user this specifies if the user can remove users.
+     * When set on the admin user this specifies if the user can remove secondary users. Managed
+     * profiles and private profiles can still be removed even if this is set on the admin user.
      * When set on a non-admin secondary user, this specifies if the user can remove itself.
-     * This restriction has no effect on managed profiles.
+     * This restriction has no effect when set on managed profiles.
      * The default value is <code>false</code>.
      *
      * <p>Holders of the permission
@@ -793,7 +794,8 @@ public class UserManager {
      * Specifies if managed profiles of this user can be removed, other than by its profile owner.
      * The default value is <code>false</code>.
      * <p>
-     * This restriction has no effect on managed profiles.
+     * This restriction has no effect on managed profiles, and this restriction does not block the
+     * removal of private profiles of this user.
      *
      * <p>Key for user restrictions.
      * <p>Type: Boolean
@@ -5600,14 +5602,30 @@ public class UserManager {
             android.Manifest.permission.MANAGE_USERS,
             android.Manifest.permission.INTERACT_ACROSS_USERS
     })
+    @CachedProperty(api = "user_manager_users")
     public @Nullable UserHandle getProfileParent(@NonNull UserHandle user) {
-        UserInfo info = getProfileParent(user.getIdentifier());
-
-        if (info == null) {
-            return null;
+        if (android.multiuser.Flags.cacheProfileParentReadOnly()) {
+            final UserHandle userHandle = UserManagerCache.getProfileParent(
+                    (UserHandle query) -> {
+                        UserInfo info = getProfileParent(query.getIdentifier());
+                        // TODO: Remove when b/372923336 is fixed
+                        if (info == null) {
+                            return UserHandle.of(UserHandle.USER_NULL);
+                        }
+                        return UserHandle.of(info.id);
+                    },
+                    user);
+            if (userHandle.getIdentifier() == UserHandle.USER_NULL) {
+                return null;
+            }
+            return userHandle;
+        } else {
+            UserInfo info = getProfileParent(user.getIdentifier());
+            if (info == null) {
+                return null;
+            }
+            return UserHandle.of(info.id);
         }
-
-        return UserHandle.of(info.id);
     }
 
     /**
@@ -6422,6 +6440,9 @@ public class UserManager {
      */
     public static final void invalidateCacheOnUserListChange() {
         UserManagerCache.invalidateUserSerialNumber();
+        if (android.multiuser.Flags.cacheProfileParentReadOnly()) {
+            UserManagerCache.invalidateProfileParent();
+        }
     }
 
     /**

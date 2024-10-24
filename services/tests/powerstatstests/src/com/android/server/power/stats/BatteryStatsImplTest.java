@@ -159,7 +159,7 @@ public class BatteryStatsImplTest {
         }
         mPowerStatsStore = new PowerStatsStore(systemDir, mHandler);
         mBatteryUsageStatsProvider = new BatteryUsageStatsProvider(context, mPowerAttributor,
-                mPowerProfile, mBatteryStatsImpl.getCpuScalingPolicies(), mPowerStatsStore,
+                mPowerProfile, mBatteryStatsImpl.getCpuScalingPolicies(), mPowerStatsStore, 0,
                 mMockClock);
     }
 
@@ -987,5 +987,7 @@ public class BatteryStatsImplTest {
                         BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE)
                 .getUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_FLASHLIGHT))
                 .isEqualTo(60000);
+
+        span.close();
     }
 }

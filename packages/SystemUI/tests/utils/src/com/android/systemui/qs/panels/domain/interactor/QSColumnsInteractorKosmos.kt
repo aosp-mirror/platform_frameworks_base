@@ -17,6 +17,11 @@
 package com.android.systemui.qs.panels.domain.interactor
 
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.qs.panels.data.repository.qsColumnsRepository
+import com.android.systemui.shade.domain.interactor.shadeInteractor
 
-val Kosmos.qsColumnsInteractor by Kosmos.Fixture { QSColumnsInteractor(qsColumnsRepository) }
+val Kosmos.qsColumnsInteractor by
+    Kosmos.Fixture {
+        QSColumnsInteractor(applicationCoroutineScope, qsColumnsRepository, shadeInteractor)
+    }

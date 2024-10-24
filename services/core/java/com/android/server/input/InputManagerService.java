@@ -3506,6 +3506,16 @@ public class InputManagerService extends IInputManager.Stub
                 int modifierState, @KeyGestureEvent.KeyGestureType int gestureType) {
             mKeyGestureController.handleKeyGesture(deviceId, keycodes, modifierState, gestureType);
         }
+
+        @Override
+        public void setAccessibilityPointerIconScaleFactor(int displayId, float scaleFactor) {
+            InputManagerService.this.setAccessibilityPointerIconScaleFactor(displayId, scaleFactor);
+        }
+
+        @Override
+        public boolean setKernelWakeEnabled(int deviceId, boolean enabled) {
+            return mNative.setKernelWakeEnabled(deviceId, enabled);
+        }
     }
 
     @Override
@@ -3686,6 +3696,10 @@ public class InputManagerService extends IInputManager.Stub
 
     void setPointerScale(float scale) {
         mPointerIconCache.setPointerScale(scale);
+    }
+
+    void setAccessibilityPointerIconScaleFactor(int displayId, float scaleFactor) {
+        mPointerIconCache.setAccessibilityScaleFactor(displayId, scaleFactor);
     }
 
     interface KeyboardBacklightControllerInterface {

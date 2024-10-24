@@ -114,7 +114,18 @@ object KeyguardPreviewClockViewBinder {
                     }
                     .invokeOnCompletion {
                         // recover seed color especially for Transit clock
-                        lastClock?.events?.onSeedColorChanged(clockRegistry.seedColor)
+                        lastClock?.apply {
+                            smallClock.run {
+                                events.onThemeChanged(
+                                    theme.copy(seedColor = clockRegistry.seedColor)
+                                )
+                            }
+                            largeClock.run {
+                                events.onThemeChanged(
+                                    theme.copy(seedColor = clockRegistry.seedColor)
+                                )
+                            }
+                        }
                     }
             }
         }

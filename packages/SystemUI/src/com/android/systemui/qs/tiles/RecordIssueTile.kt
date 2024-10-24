@@ -152,7 +152,14 @@ constructor(
         recordingController.startCountdown(
             DELAY_MS,
             INTERVAL_MS,
-            pendingServiceIntent(getStartIntent(userContextProvider.userContext)),
+            pendingServiceIntent(
+                getStartIntent(
+                    userContextProvider.userContext,
+                    issueRecordingState.traceConfig,
+                    issueRecordingState.recordScreen,
+                    issueRecordingState.takeBugreport,
+                )
+            ),
             pendingServiceIntent(getStopIntent(userContextProvider.userContext)),
         )
 

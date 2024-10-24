@@ -2248,13 +2248,13 @@ public class VibratorManagerServiceTest {
         assertNotEquals(ExternalVibrationScale.ScaleLevel.SCALE_MUTE, secondScale.scaleLevel);
         verify(firstController).mute();
         verify(secondController, never()).mute();
-        // Set external control called only once.
-        assertEquals(Arrays.asList(false, true),
+        // Set external control called for each vibration independently.
+        assertEquals(Arrays.asList(false, true, false, true),
                 mVibratorProviders.get(1).getExternalControlStates());
 
         mExternalVibratorService.onExternalVibrationStop(secondVibration);
         mExternalVibratorService.onExternalVibrationStop(firstVibration);
-        assertEquals(Arrays.asList(false, true, false),
+        assertEquals(Arrays.asList(false, true, false, true, false),
                 mVibratorProviders.get(1).getExternalControlStates());
 
         verify(firstToken).linkToDeath(any(), eq(0));

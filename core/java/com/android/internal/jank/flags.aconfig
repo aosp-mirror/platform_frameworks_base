@@ -8,3 +8,10 @@ flag {
   bug: "354763298"
   is_fixed_read_only: true
 }
+flag {
+  name: "ignore_hwui_is_first_frame"
+  namespace: "window_surfaces"
+  description: "Whether to remove the usage of the HWUI 'is first frame' flag to ignore jank"
+  bug: "354763298"
+  is_fixed_read_only: true
+}

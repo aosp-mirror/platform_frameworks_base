@@ -70,14 +70,14 @@ class PrivacyDotViewControllerTest : SysuiTestCase() {
         }
 
     private fun createController() =
-        PrivacyDotViewController(
+        PrivacyDotViewControllerImpl(
                 executor,
                 testScope.backgroundScope,
                 statusBarStateController,
                 configurationController,
                 contentInsetsProvider,
                 animationScheduler = mock<SystemStatusAnimationScheduler>(),
-                shadeInteractor = null
+                shadeInteractor = null,
             )
             .also { it.setUiExecutor(executor) }
 
@@ -307,7 +307,7 @@ class PrivacyDotViewControllerTest : SysuiTestCase() {
             newTopLeftView,
             newTopRightView,
             newBottomLeftView,
-            newBottomRightView
+            newBottomRightView,
         )
 
         assertThat((newBottomRightView.layoutParams as FrameLayout.LayoutParams).gravity)

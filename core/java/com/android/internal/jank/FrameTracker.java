@@ -30,6 +30,7 @@ import static com.android.internal.jank.InteractionJankMonitor.ACTION_SESSION_CA
 import static com.android.internal.jank.InteractionJankMonitor.ACTION_SESSION_END;
 import static com.android.internal.jank.InteractionJankMonitor.EXECUTOR_TASK_TIMEOUT;
 
+import android.animation.AnimationHandler;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -229,7 +230,7 @@ public class FrameTracker implements HardwareRendererObserver.OnFrameMetricsAvai
         mRendererWrapper = mSurfaceOnly ? null : renderer;
         mMetricsWrapper = mSurfaceOnly ? null : metrics;
         mViewRoot = mSurfaceOnly ? null : viewRootWrapper;
-        mObserver = mSurfaceOnly
+        mObserver = mSurfaceOnly || (Flags.useSfFrameDuration() && Flags.ignoreHwuiIsFirstFrame())
                 ? null
                 : new HardwareRendererObserver(this, mMetricsWrapper.getTiming(),
                         mHandler, /* waitForPresentTime= */ false);
@@ -252,6 +253,7 @@ public class FrameTracker implements HardwareRendererObserver.OnFrameMetricsAvai
             mSurfaceChangedCallback = new ViewRootImpl.SurfaceChangedCallback() {
                 @Override
                 public void surfaceCreated(SurfaceControl.Transaction t) {
+                    Trace.beginSection("FrameTracker#surfaceCreated");
                     mHandler.runWithScissors(() -> {
                         if (mSurfaceControl == null) {
                             mSurfaceControl = mViewRoot.getSurfaceControl();
@@ -261,6 +263,7 @@ public class FrameTracker implements HardwareRendererObserver.OnFrameMetricsAvai
                             }
                         }
                     }, EXECUTOR_TASK_TIMEOUT);
+                    Trace.endSection();
                 }
 
                 @Override
@@ -344,7 +347,8 @@ public class FrameTracker implements HardwareRendererObserver.OnFrameMetricsAvai
     @UiThread
     public boolean end(@Reasons int reason) {
         if (mCancelled || mEndVsyncId != INVALID_ID) return false;
-        mEndVsyncId = mChoreographer.getVsyncId();
+        mEndVsyncId = AnimationHandler.getInstance().getLastAnimationFrameVsyncId(
+                mChoreographer.getVsyncId());
         // Cancel the session if:
         // 1. The session begins and ends at the same vsync id.
         // 2. The session never begun.
@@ -462,23 +466,28 @@ public class FrameTracker implements HardwareRendererObserver.OnFrameMetricsAvai
     @Override
     public void onJankDataAvailable(SurfaceControl.JankData[] jankData) {
         postCallback(() -> {
-            if (mCancelled || mMetricsFinalized) {
-                return;
-            }
+            try {
+                Trace.beginSection("FrameTracker#onJankDataAvailable");
+                if (mCancelled || mMetricsFinalized) {
+                    return;
+                }
 
-            for (SurfaceControl.JankData jankStat : jankData) {
-                if (!isInRange(jankStat.frameVsyncId)) {
-                    continue;
+                for (SurfaceControl.JankData jankStat : jankData) {
+                    if (!isInRange(jankStat.frameVsyncId)) {
+                        continue;
+                    }
+                    JankInfo info = findJankInfo(jankStat.frameVsyncId);
+                    if (info != null) {
+                        info.update(jankStat);
+                    } else {
+                        mJankInfos.put((int) jankStat.frameVsyncId,
+                                JankInfo.createFromSurfaceControlCallback(jankStat));
+                    }
                 }
-                JankInfo info = findJankInfo(jankStat.frameVsyncId);
-                if (info != null) {
-                    info.update(jankStat);
-                } else {
-                    mJankInfos.put((int) jankStat.frameVsyncId,
-                            JankInfo.createFromSurfaceControlCallback(jankStat));
-                }
+                processJankInfos();
+            } finally {
+                Trace.endSection();
             }
-            processJankInfos();
         });
     }
 
@@ -505,29 +514,35 @@ public class FrameTracker implements HardwareRendererObserver.OnFrameMetricsAvai
     @Override
     public void onFrameMetricsAvailable(int dropCountSinceLastInvocation) {
         postCallback(() -> {
-            if (mCancelled || mMetricsFinalized) {
-                return;
-            }
+            try {
+                Trace.beginSection("FrameTracker#onFrameMetricsAvailable");
+                if (mCancelled || mMetricsFinalized) {
+                    return;
+                }
 
-            // Since this callback might come a little bit late after the end() call.
-            // We should keep tracking the begin / end timestamp that we can compare with
-            // vsync timestamp to check if the frame is in the duration of the CUJ.
-            long totalDurationNanos = mMetricsWrapper.getMetric(FrameMetrics.TOTAL_DURATION);
-            boolean isFirstFrame = mMetricsWrapper.getMetric(FrameMetrics.FIRST_DRAW_FRAME) == 1;
-            long frameVsyncId =
-                    mMetricsWrapper.getTiming()[FrameMetrics.Index.FRAME_TIMELINE_VSYNC_ID];
+                // Since this callback might come a little bit late after the end() call.
+                // We should keep tracking the begin / end timestamp that we can compare with
+                // vsync timestamp to check if the frame is in the duration of the CUJ.
+                long totalDurationNanos = mMetricsWrapper.getMetric(FrameMetrics.TOTAL_DURATION);
+                boolean isFirstFrame =
+                    mMetricsWrapper.getMetric(FrameMetrics.FIRST_DRAW_FRAME) == 1;
+                long frameVsyncId =
+                        mMetricsWrapper.getTiming()[FrameMetrics.Index.FRAME_TIMELINE_VSYNC_ID];
 
-            if (!isInRange(frameVsyncId)) {
-                return;
+                if (!isInRange(frameVsyncId)) {
+                    return;
+                }
+                JankInfo info = findJankInfo(frameVsyncId);
+                if (info != null) {
+                    info.update(totalDurationNanos, isFirstFrame);
+                } else {
+                    mJankInfos.put((int) frameVsyncId, JankInfo.createFromHwuiCallback(
+                            frameVsyncId, totalDurationNanos, isFirstFrame));
+                }
+                processJankInfos();
+            } finally {
+                Trace.endSection();
             }
-            JankInfo info = findJankInfo(frameVsyncId);
-            if (info != null) {
-                info.update(totalDurationNanos, isFirstFrame);
-            } else {
-                mJankInfos.put((int) frameVsyncId, JankInfo.createFromHwuiCallback(
-                        frameVsyncId, totalDurationNanos, isFirstFrame));
-            }
-            processJankInfos();
         });
     }
 
@@ -566,13 +581,20 @@ public class FrameTracker implements HardwareRendererObserver.OnFrameMetricsAvai
     }
 
     private boolean callbacksReceived(JankInfo info) {
-        return mSurfaceOnly
+        return mObserver == null
                 ? info.surfaceControlCallbackFired
                 : info.hwuiCallbackFired && info.surfaceControlCallbackFired;
     }
 
     @UiThread
     private void finish() {
+        Trace.beginSection("FrameTracker#finish");
+        finishTraced();
+        Trace.endSection();
+    }
+
+    @UiThread
+    private void finishTraced() {
         if (mMetricsFinalized || mCancelled) return;
         mMetricsFinalized = true;
 
@@ -597,7 +619,7 @@ public class FrameTracker implements HardwareRendererObserver.OnFrameMetricsAvai
         for (int i = 0; i < mJankInfos.size(); i++) {
             JankInfo info = mJankInfos.valueAt(i);
             final boolean isFirstDrawn = !mSurfaceOnly && info.isFirstFrame;
-            if (isFirstDrawn) {
+            if (isFirstDrawn && !Flags.ignoreHwuiIsFirstFrame()) {
                 continue;
             }
             if (info.frameVsyncId > mEndVsyncId) {
@@ -634,7 +656,7 @@ public class FrameTracker implements HardwareRendererObserver.OnFrameMetricsAvai
                 }
                 // TODO (b/174755489): Early latch currently gets fired way too often, so we have
                 // to ignore it for now.
-                if (!mSurfaceOnly && !info.hwuiCallbackFired) {
+                if (mObserver != null && !info.hwuiCallbackFired) {
                     markEvent("FT#MissedHWUICallback", info.frameVsyncId);
                     Log.w(TAG, "Missing HWUI jank callback for vsyncId: " + info.frameVsyncId
                             + ", CUJ=" + name);
@@ -760,7 +782,9 @@ public class FrameTracker implements HardwareRendererObserver.OnFrameMetricsAvai
          * @param observer observer
          */
         public void addObserver(HardwareRendererObserver observer) {
-            mRenderer.addObserver(observer);
+            if (observer != null) {
+                mRenderer.addObserver(observer);
+            }
         }
 
         /**
@@ -768,7 +792,9 @@ public class FrameTracker implements HardwareRendererObserver.OnFrameMetricsAvai
          * @param observer observer
          */
         public void removeObserver(HardwareRendererObserver observer) {
-            mRenderer.removeObserver(observer);
+            if (observer != null) {
+                mRenderer.removeObserver(observer);
+            }
         }
     }
 

@@ -129,8 +129,8 @@
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Comparteix"</string>
     <string name="screenrecord_save_title" msgid="1886652605520893850">"S\'ha desat la gravació de pantalla"</string>
     <string name="screenrecord_save_text" msgid="3008973099800840163">"Toca per veure-la"</string>
-    <string name="screenrecord_save_error" msgid="5862648532560118815">"S\'ha produït un error en desar la gravació de la pantalla"</string>
-    <string name="screenrecord_start_error" msgid="2200660692479682368">"S\'ha produït un error en iniciar la gravació de pantalla"</string>
+    <string name="screenrecord_save_error" msgid="5862648532560118815">"Hi ha hagut un error en desar la gravació de la pantalla"</string>
+    <string name="screenrecord_start_error" msgid="2200660692479682368">"Hi ha hagut un error en iniciar la gravació de pantalla"</string>
     <string name="screenrecord_stop_dialog_title" msgid="8716193661764511095">"Vols aturar la gravació?"</string>
     <string name="screenrecord_stop_dialog_message" msgid="6262768207331626817">"Ara mateix estàs gravant tota la pantalla"</string>
     <string name="screenrecord_stop_dialog_message_specific_app" msgid="5995770227684523244">"Ara mateix estàs gravant <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
@@ -159,8 +159,8 @@
     <string name="issuerecord_share_label" msgid="3992657993619876199">"Comparteix"</string>
     <string name="issuerecord_save_title" msgid="4161043023696751591">"S\'ha desat la gravació del problema"</string>
     <string name="issuerecord_save_text" msgid="1205985304551521495">"Toca per veure"</string>
-    <string name="issuerecord_save_error" msgid="6913040083446722726">"S\'ha produït un error en desar la gravació del problema"</string>
-    <string name="issuerecord_start_error" msgid="3402782952722871190">"S\'ha produït un error en iniciar la gravació del problema"</string>
+    <string name="issuerecord_save_error" msgid="6913040083446722726">"Hi ha hagut un error en desar la gravació del problema"</string>
+    <string name="issuerecord_start_error" msgid="3402782952722871190">"Hi ha hagut un error en iniciar la gravació del problema"</string>
     <string name="immersive_cling_title" msgid="8372056499315585941">"Visualització en pantalla completa"</string>
     <string name="immersive_cling_description" msgid="2717426731830851921">"Per sortir, llisca cap avall des de la part superior de la pantalla"</string>
     <string name="immersive_cling_positive" msgid="3076681691468978568">"Entesos"</string>
@@ -312,6 +312,10 @@
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"Comparteix l\'àudio"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"S\'està compartint l\'àudio"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_accessibility" msgid="7604615019302091708">"introduir la configuració de compartició d\'àudio"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_dialog_message" msgid="4251807313264307426">"La música i els vídeos d\'aquest dispositiu es reproduiran en tots dos parells d\'auriculars"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_dialog_title" msgid="4406818346036286793">"Comparteix l\'àudio"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_dialog_subtitle" msgid="3014906864710059236">"<xliff:g id="AVAILABLE_DEVICE_NAME">%1$s</xliff:g> i <xliff:g id="ACTIVE_DEVICE_NAME">%2$s</xliff:g>"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_dialog_switch_to_button" msgid="7546825655978203773">"Canvia a <xliff:g id="AVAILABLE_DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> de bateria"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Àudio"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Auriculars"</string>
@@ -578,7 +582,7 @@
     <string name="empty_shade_text" msgid="8935967157319717412">"No hi ha cap notificació"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"No hi ha cap notificació nova"</string>
     <string name="adaptive_notification_edu_hun_title" msgid="7790738150177329960">"La moderació de notificacions està activada"</string>
-    <string name="adaptive_notification_edu_hun_text" msgid="7743367744129536610">"El volum i les alertes del dispositiu es redueixen automàticament durant 2 minuts quan reps massa notificacions alhora."</string>
+    <string name="adaptive_notification_edu_hun_text" msgid="7743367744129536610">"El volum i les alertes del dispositiu es redueixen automàticament durant 2 minuts com a màxim quan reps massa notificacions alhora."</string>
     <string name="go_to_adaptive_notification_settings" msgid="2423690125178298479">"Desactiva"</string>
     <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"Desbloqueja per veure notif. anteriors"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Els teus pares gestionen aquest dispositiu"</string>
@@ -672,10 +676,8 @@
     <string name="stream_notification_unavailable" msgid="4313854556205836435">"No disponible perquè el so està silenciat"</string>
     <string name="stream_alarm_unavailable" msgid="4059817189292197839">"No disponible perquè No molestis està activat"</string>
     <string name="stream_media_unavailable" msgid="6823020894438959853">"No disponible perquè No molestis està activat"</string>
-    <!-- no translation found for stream_unavailable_by_modes (3674139029490353683) -->
-    <skip />
-    <!-- no translation found for stream_unavailable_by_unknown (6908434629318171588) -->
-    <skip />
+    <string name="stream_unavailable_by_modes" msgid="3674139029490353683">"No està disponible perquè <xliff:g id="MODE">%s</xliff:g> està activat"</string>
+    <string name="stream_unavailable_by_unknown" msgid="6908434629318171588">"No disponible"</string>
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. Toca per activar el so."</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. Toca per activar la vibració. Pot ser que els serveis d\'accessibilitat se silenciïn."</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. Toca per silenciar el so. Pot ser que els serveis d\'accessibilitat se silenciïn."</string>
@@ -1403,6 +1405,8 @@
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Desplega la icona"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"o"</string>
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"Ansa per arrossegar"</string>
+    <!-- no translation found for shortcut_helper_keyboard_settings_buttons_label (6720967595915985259) -->
+    <skip />
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"Navega amb el teclat"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"Aprèn les tecles de drecera"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"Navega amb el ratolí tàctil"</string>
@@ -1460,4 +1464,8 @@
     <string name="qs_edit_mode_category_providedByApps" msgid="8346112074897919019">"Proporcionat per aplicacions"</string>
     <string name="qs_edit_mode_category_display" msgid="4749511439121053942">"Pantalla"</string>
     <string name="qs_edit_mode_category_unknown" msgid="509314252124053550">"Desconegut"</string>
+    <!-- no translation found for qs_edit_mode_reset_dialog_title (8841270491554460726) -->
+    <skip />
+    <!-- no translation found for qs_edit_mode_reset_dialog_content (8626426097929954027) -->
+    <skip />
 </resources>

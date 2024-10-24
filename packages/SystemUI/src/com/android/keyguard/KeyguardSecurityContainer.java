@@ -32,7 +32,6 @@ import static androidx.constraintlayout.widget.ConstraintSet.START;
 import static androidx.constraintlayout.widget.ConstraintSet.TOP;
 import static androidx.constraintlayout.widget.ConstraintSet.WRAP_CONTENT;
 
-import static com.android.app.animation.InterpolatorsAndroidX.DECELERATE_QUINT;
 import static com.android.systemui.plugins.FalsingManager.LOW_PENALTY;
 
 import static java.lang.Integer.max;
@@ -271,8 +270,7 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
         public void onBackProgressed(BackEvent event) {
             float progress = event.getProgress();
             // TODO(b/263819310): Update the interpolator to match spec.
-            float scale = MIN_BACK_SCALE
-                    +  (1 - MIN_BACK_SCALE) * (1 - DECELERATE_QUINT.getInterpolation(progress));
+            float scale = MIN_BACK_SCALE +  (1 - MIN_BACK_SCALE) * (1 - progress);
             setScale(scale);
         }
     };

@@ -128,6 +128,6 @@ constructor(
     }
 
     companion object {
-        private const val BOUNDS_OFFSET: Int = 100
+        private const val BOUNDS_OFFSET: Int = 50
     }
 }

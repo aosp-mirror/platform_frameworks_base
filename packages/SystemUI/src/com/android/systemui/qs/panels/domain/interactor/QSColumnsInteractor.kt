@@ -17,11 +17,35 @@
 package com.android.systemui.qs.panels.domain.interactor
 
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.qs.panels.data.repository.QSColumnsRepository
+import com.android.systemui.shade.domain.interactor.ShadeInteractor
+import com.android.systemui.shade.shared.model.ShadeMode
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.stateIn
 
 @SysUISingleton
-class QSColumnsInteractor @Inject constructor(repo: QSColumnsRepository) {
-    val columns: StateFlow<Int> = repo.columns
+class QSColumnsInteractor
+@Inject
+constructor(
+    @Application scope: CoroutineScope,
+    repo: QSColumnsRepository,
+    shadeInteractor: ShadeInteractor,
+) {
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val columns: StateFlow<Int> =
+        shadeInteractor.shadeMode
+            .flatMapLatest {
+                when (it) {
+                    ShadeMode.Dual -> repo.dualShadeColumns
+                    ShadeMode.Split -> repo.splitShadeColumns
+                    ShadeMode.Single -> repo.columns
+                }
+            }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), repo.defaultColumns)
 }

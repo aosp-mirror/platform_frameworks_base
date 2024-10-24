@@ -30,7 +30,6 @@ import androidx.core.util.valueIterator
 import com.android.internal.protolog.ProtoLog
 import com.android.window.flags.Flags
 import com.android.wm.shell.desktopmode.persistence.DesktopPersistentRepository
-import com.android.wm.shell.desktopmode.persistence.DesktopTask
 import com.android.wm.shell.desktopmode.persistence.DesktopTaskState
 import com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE
 import com.android.wm.shell.shared.annotations.ShellMainThread
@@ -102,6 +101,9 @@ class DesktopRepository (
     /* Tracks last bounds of task before toggled to stable bounds. */
     private val boundsBeforeMaximizeByTaskId = SparseArray<Rect>()
 
+    /* Tracks last bounds of task before toggled to immersive state. */
+    private val boundsBeforeFullImmersiveByTaskId = SparseArray<Rect>()
+
     private var desktopGestureExclusionListener: Consumer<Region>? = null
     private var desktopGestureExclusionExecutor: Executor? = null
 
@@ -121,7 +123,8 @@ class DesktopRepository (
         if (!Flags.enableDesktopWindowingPersistence()) return
         //  TODO: b/365962554 - Handle the case that user moves to desktop before it's initialized
         mainCoroutineScope.launch {
-            val desktop = persistentRepository.readDesktop()
+            val desktop = persistentRepository.readDesktop() ?: return@launch
+
             val maxTasks =
                 DesktopModeStatus.getMaxTaskLimit(context).takeIf { it > 0 }
                     ?: desktop.zOrderedTasksCount
@@ -129,13 +132,11 @@ class DesktopRepository (
             desktop.zOrderedTasksList
                 // Reverse it so we initialize the repo from bottom to top.
                 .reversed()
-                .map { taskId ->
-                    desktop.tasksByTaskIdMap.getOrDefault(
-                        taskId,
-                        DesktopTask.getDefaultInstance()
-                    )
+                .mapNotNull { taskId ->
+                    desktop.tasksByTaskIdMap[taskId]?.takeIf {
+                        it.desktopTaskState == DesktopTaskState.VISIBLE
+                    }
                 }
-                .filter { task -> task.desktopTaskState == DesktopTaskState.VISIBLE }
                 .take(maxTasks)
                 .forEach { task ->
                     addOrMoveFreeformTaskToTop(desktop.displayId, task.taskId)
@@ -259,11 +260,11 @@ class DesktopRepository (
         ArraySet(desktopTaskDataByDisplayId[displayId]?.minimizedTasks)
 
     /** Returns all active non-minimized tasks for [displayId] ordered from top to bottom. */
-    fun getActiveNonMinimizedOrderedTasks(displayId: Int): List<Int> =
+    fun getExpandedTasksOrdered(displayId: Int): List<Int> =
         getFreeformTasksInZOrder(displayId).filter { !isMinimizedTask(it) }
 
     /** Returns the count of active non-minimized tasks for [displayId]. */
-    fun getActiveNonMinimizedTaskCount(displayId: Int): Int {
+    fun getExpandedTaskCount(displayId: Int): Int {
         return getActiveTasks(displayId).count { !isMinimizedTask(it) }
     }
 
@@ -414,6 +415,7 @@ class DesktopRepository (
         logD("Removes freeform task: taskId=%d, displayId=%d", taskId, displayId)
         desktopTaskDataByDisplayId[displayId]?.freeformTasksInZOrder?.remove(taskId)
         boundsBeforeMaximizeByTaskId.remove(taskId)
+        boundsBeforeFullImmersiveByTaskId.remove(taskId)
         logD("Remaining freeform tasks: %s",
             desktopTaskDataByDisplayId[displayId]?.freeformTasksInZOrder?.toDumpString())
         // Remove task from unminimized task if it is minimized.
@@ -472,6 +474,14 @@ class DesktopRepository (
     fun saveBoundsBeforeMaximize(taskId: Int, bounds: Rect) =
         boundsBeforeMaximizeByTaskId.set(taskId, Rect(bounds))
 
+    /** Removes and returns the bounds saved before entering immersive with the given task. */
+    fun removeBoundsBeforeFullImmersive(taskId: Int): Rect? =
+        boundsBeforeFullImmersiveByTaskId.removeReturnOld(taskId)
+
+    /** Saves the bounds of the given task before entering immersive. */
+    fun saveBoundsBeforeFullImmersive(taskId: Int, bounds: Rect) =
+        boundsBeforeFullImmersiveByTaskId.set(taskId, Rect(bounds))
+
     private fun updatePersistentRepository(displayId: Int) {
         // Create a deep copy of the data
         desktopTaskDataByDisplayId[displayId]?.deepCopy()?.let { desktopTaskDataByDisplayIdCopy ->
@@ -510,6 +520,7 @@ class DesktopRepository (
                 "${innerPrefix}freeformTasksInZOrder=${data.freeformTasksInZOrder.toDumpString()}"
             )
             pw.println("${innerPrefix}minimizedTasks=${data.minimizedTasks.toDumpString()}")
+            pw.println("${innerPrefix}fullImmersiveTaskId=${data.fullImmersiveTaskId}")
         }
     }
 

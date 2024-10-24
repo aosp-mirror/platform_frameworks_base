@@ -5,6 +5,9 @@
 rename com/.*/nano/   devicenano/
 rename android/.*/nano/   devicenano/
 
+# StatsD auto-generated
+class com.android.internal.util.FrameworkStatsLog keepclass
+
 # Exported to Mainline modules; cannot use annotations
 class com.android.internal.util.FastXmlSerializer keepclass
 class com.android.internal.util.FileRotator keepclass

@@ -135,20 +135,13 @@ constructor(
                 .sampleCombine(
                     internalTransitionInteractor.currentTransitionInfoInternal,
                     transitionInteractor.isFinishedIn(KeyguardState.LOCKSCREEN),
-                    keyguardInteractor.isActiveDreamLockscreenHosted,
                 )
-                .collect {
-                    (isAbleToDream, transitionInfo, isOnLockscreen, isActiveDreamLockscreenHosted)
-                    ->
+                .collect { (isAbleToDream, transitionInfo, isOnLockscreen) ->
                     val isTransitionInterruptible =
                         transitionInfo.to == KeyguardState.LOCKSCREEN &&
                             !invalidFromStates.contains(transitionInfo.from)
                     if (isAbleToDream && (isOnLockscreen || isTransitionInterruptible)) {
-                        if (isActiveDreamLockscreenHosted) {
-                            startTransitionTo(KeyguardState.DREAMING_LOCKSCREEN_HOSTED)
-                        } else {
-                            startTransitionTo(KeyguardState.DREAMING)
-                        }
+                        startTransitionTo(KeyguardState.DREAMING)
                     }
                 }
         }
@@ -390,7 +383,6 @@ constructor(
                             TO_AOD_DURATION
                         }
                     KeyguardState.DOZING -> TO_DOZING_DURATION
-                    KeyguardState.DREAMING_LOCKSCREEN_HOSTED -> TO_DREAMING_HOSTED_DURATION
                     KeyguardState.GLANCEABLE_HUB -> TO_GLANCEABLE_HUB_DURATION
                     else -> DEFAULT_DURATION
                 }.inWholeMilliseconds
@@ -402,7 +394,6 @@ constructor(
         private val DEFAULT_DURATION = 400.milliseconds
         val TO_DOZING_DURATION = 500.milliseconds
         val TO_DREAMING_DURATION = 933.milliseconds
-        val TO_DREAMING_HOSTED_DURATION = 933.milliseconds
         val TO_OCCLUDED_DURATION = 550.milliseconds
         val TO_AOD_DURATION = 500.milliseconds
         val TO_AOD_FOLD_DURATION = 1100.milliseconds

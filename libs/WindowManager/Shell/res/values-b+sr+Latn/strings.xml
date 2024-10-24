@@ -97,9 +97,9 @@
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Imate problema sa kamerom?\nDodirnite da biste ponovo uklopili"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Problem nije rešen?\nDodirnite da biste vratili"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Nemate problema sa kamerom? Dodirnite da biste odbacili."</string>
-    <string name="windowing_app_handle_education_tooltip" msgid="6398482412956375783">"Dodirnite da biste otvorili meni aplikacije"</string>
-    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="6285279585554484957">"Dodirnite da biste prikazali više aplikacija zajedno"</string>
-    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="6685429075790085337">"Vratite se iz menija aplikacije na prikaz preko celog ekrana"</string>
+    <string name="windowing_app_handle_education_tooltip" msgid="2929643449849791854">"Meni aplikacije možete da pronađete ovde"</string>
+    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="2523468503353474095">"Uđite u prikaz za računare da biste istovremeno otvorili više aplikacija"</string>
+    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="5225660258192054132">"Vratite se na ceo ekran bilo kada iz menija aplikacije"</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"Vidite i uradite više"</string>
     <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"Prevucite drugu aplikaciju da biste koristili podeljeni ekran"</string>
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Dvaput dodirnite izvan aplikacije da biste promenili njenu poziciju"</string>
@@ -134,6 +134,7 @@
     <string name="desktop_mode_maximize_menu_snap_text" msgid="2065251022783880154">"Uklopi ekran"</string>
     <string name="desktop_mode_non_resizable_snap_text" msgid="3771776422751387878">"Aplikacija ne može da se premesti ovde"</string>
     <string name="desktop_mode_maximize_menu_maximize_button_text" msgid="3090199175564175845">"Uvećajte"</string>
+    <string name="desktop_mode_maximize_menu_restore_button_text" msgid="4234449220944704387">"Vratite"</string>
     <string name="desktop_mode_maximize_menu_snap_left_button_text" msgid="8077452201179893424">"Prikačite levo"</string>
     <string name="desktop_mode_maximize_menu_snap_right_button_text" msgid="7117751068945657304">"Prikačite desno"</string>
     <string name="open_by_default_settings_text" msgid="2526548548598185500">"Podešavanje Podrazumevano otvaraj"</string>

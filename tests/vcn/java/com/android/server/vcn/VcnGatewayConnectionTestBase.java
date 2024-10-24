@@ -224,7 +224,6 @@ public class VcnGatewayConnectionTestBase {
         doReturn(mFeatureFlags).when(mVcnContext).getFeatureFlags();
         doReturn(true).when(mVcnContext).isFlagSafeModeTimeoutConfigEnabled();
         doReturn(true).when(mVcnContext).isFlagIpSecTransformStateEnabled();
-        doReturn(true).when(mVcnContext).isFlagNetworkMetricMonitorEnabled();
 
         doReturn(mUnderlyingNetworkController)
                 .when(mDeps)

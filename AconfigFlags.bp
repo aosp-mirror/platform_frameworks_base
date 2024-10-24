@@ -21,6 +21,7 @@ aconfig_declarations_group {
     java_aconfig_libraries: [
         // !!! KEEP THIS LIST ALPHABETICAL !!!
         "aconfig_mediacodec_flags_java_lib",
+        "aconfig_trade_in_mode_flags_java_lib",
         "android-sdk-flags-java",
         "android.adaptiveauth.flags-aconfig-java",
         "android.app.appfunctions.flags-aconfig-java",
@@ -110,6 +111,7 @@ aconfig_declarations_group {
         "hwui_flags_java_lib",
         "interaction_jank_monitor_flags_lib",
         "libcore_exported_aconfig_flags_lib",
+        "libcore_readonly_aconfig_flags_lib",
         "libgui_flags_java_lib",
         "power_flags_lib",
         "sdk_sandbox_flags_lib",
@@ -166,6 +168,26 @@ java_aconfig_library {
     name: "libcore_exported_aconfig_flags_lib",
     aconfig_declarations: "libcore-aconfig-flags",
     mode: "exported",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// See b/368409430 - This is for libcore flags to be generated with
+// force-read-only mode, so access to the flags does not involve I/O,
+// which could break Isolated Processes with I/O permission disabled.
+// The issue will be addressed once new Aconfig storage API is landed
+// and the readonly version will be removed.
+aconfig_declarations {
+    name: "libcore-readonly-aconfig-flags",
+    package: "com.android.libcore.readonly",
+    container: "system",
+    srcs: ["libcore-readonly.aconfig"],
+}
+
+// Core Libraries / libcore
+java_aconfig_library {
+    name: "libcore_readonly_aconfig_flags_lib",
+    aconfig_declarations: "libcore-readonly-aconfig-flags",
+    mode: "force-read-only",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 
@@ -1538,6 +1560,10 @@ java_aconfig_library {
     name: "android.crashrecovery.flags-aconfig-java",
     aconfig_declarations: "android.crashrecovery.flags-aconfig",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
+    apex_available: [
+        "//apex_available:platform",
+        "com.android.crashrecovery",
+    ],
 }
 
 java_aconfig_library {

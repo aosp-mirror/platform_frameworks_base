@@ -607,7 +607,7 @@ class DragToDesktopTransitionHandlerTest : ShellTestCase() {
                 )
             )
             .thenReturn(token)
-        handler.startDragToDesktopTransition(task, dragAnimator)
+        handler.startDragToDesktopTransition(task.taskId, dragAnimator)
         return token
     }
 

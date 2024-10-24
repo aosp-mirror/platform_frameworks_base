@@ -66,6 +66,7 @@ public final class HardwareBuffer implements Parcelable, AutoCloseable {
             DS_FP32UI8,
             S_UI8,
             YCBCR_P010,
+            YCBCR_P210,
             R_8,
             R_16,
             RG_1616,
@@ -111,6 +112,16 @@ public final class HardwareBuffer implements Parcelable, AutoCloseable {
      * little-endian value, with the lower 6 bits set to zero.
      */
     public static final int YCBCR_P010    = 0x36;
+    /**
+     * <p>Android YUV P210 format.</p>
+     *
+     * P210 is a 4:2:2 YCbCr semiplanar format comprised of a WxH Y plane
+     * followed by a WxH CbCr plane. Each sample is represented by a 16-bit
+     * little-endian value, with the lower 6 bits set to zero.
+     */
+    @FlaggedApi(android.media.codec.Flags.FLAG_P210_FORMAT_SUPPORT)
+    public static final int YCBCR_P210    = 0x3c;
+
     /** Format: 8 bits red */
     @FlaggedApi(com.android.graphics.hwui.flags.Flags.FLAG_REQUESTED_FORMATS_V)
     public static final int R_8           = 0x38;
@@ -283,7 +294,7 @@ public final class HardwareBuffer implements Parcelable, AutoCloseable {
     private static NativeAllocationRegistry getRegistry(long size) {
         final long func = nGetNativeFinalizer();
         final Class cls = HardwareBuffer.class;
-        return com.android.libcore.Flags.nativeMetrics()
+        return com.android.libcore.readonly.Flags.nativeMetrics()
             ? NativeAllocationRegistry.createNonmalloced(cls, func, size)
             : NativeAllocationRegistry.createNonmalloced(cls.getClassLoader(), func, size);
     }

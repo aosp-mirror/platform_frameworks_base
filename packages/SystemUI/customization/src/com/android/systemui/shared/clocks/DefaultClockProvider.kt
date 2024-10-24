@@ -17,6 +17,8 @@ import android.content.Context
 import android.content.res.Resources
 import android.view.LayoutInflater
 import com.android.systemui.customization.R
+import com.android.systemui.log.core.LogLevel
+import com.android.systemui.log.core.LogcatOnlyMessageBuffer
 import com.android.systemui.plugins.clocks.ClockController
 import com.android.systemui.plugins.clocks.ClockId
 import com.android.systemui.plugins.clocks.ClockMessageBuffers
@@ -37,7 +39,7 @@ class DefaultClockProvider(
     val resources: Resources,
     private val hasStepClockAnimation: Boolean = false,
     private val migratedClocks: Boolean = false,
-    private val clockReactiveVariants: Boolean = false,
+    private val isClockReactiveVariantsEnabled: Boolean = false,
 ) : ClockProvider {
     private var messageBuffers: ClockMessageBuffers? = null
 
@@ -52,8 +54,11 @@ class DefaultClockProvider(
             throw IllegalArgumentException("${settings.clockId} is unsupported by $TAG")
         }
 
-        return if (clockReactiveVariants) {
-            val assets = AssetLoader(ctx, ctx, "clocks/", messageBuffers!!.infraMessageBuffer)
+        return if (isClockReactiveVariantsEnabled) {
+            val buffer =
+                messageBuffers?.infraMessageBuffer ?: LogcatOnlyMessageBuffer(LogLevel.INFO)
+            val assets = AssetLoader(ctx, ctx, "clocks/", buffer)
+            assets.setSeedColor(settings.seedColor, null)
             FlexClockController(ctx, resources, assets, FLEX_DESIGN, messageBuffers)
         } else {
             DefaultClockController(
@@ -80,7 +85,7 @@ class DefaultClockProvider(
             // TODO(b/352049256): Update placeholder to actual resource
             resources.getDrawable(R.drawable.clock_default_thumbnail, null),
             isReactiveToTone = true,
-            isReactiveToTouch = clockReactiveVariants,
+            isReactiveToTouch = isClockReactiveVariantsEnabled,
             axes = listOf(), // TODO: Ater some picker definition
         )
     }
@@ -99,7 +104,6 @@ class DefaultClockProvider(
                                     timespec = DigitalTimespec.FIRST_DIGIT,
                                     style =
                                         FontTextStyle(
-                                            fontFamily = "google_sans_flex.ttf",
                                             lineHeight = 147.25f,
                                             fontVariation =
                                                 "'wght' 603, 'wdth' 100, 'opsz' 144, 'ROND' 100",
@@ -108,7 +112,6 @@ class DefaultClockProvider(
                                         FontTextStyle(
                                             fontVariation =
                                                 "'wght' 74, 'wdth' 43, 'opsz' 144, 'ROND' 100",
-                                            fontFamily = "google_sans_flex.ttf",
                                             fillColorLight = "#FFFFFFFF",
                                             outlineColor = "#00000000",
                                             renderType = RenderType.CHANGE_WEIGHT,
@@ -127,7 +130,6 @@ class DefaultClockProvider(
                                     timespec = DigitalTimespec.SECOND_DIGIT,
                                     style =
                                         FontTextStyle(
-                                            fontFamily = "google_sans_flex.ttf",
                                             lineHeight = 147.25f,
                                             fontVariation =
                                                 "'wght' 603, 'wdth' 100, 'opsz' 144, 'ROND' 100",
@@ -136,7 +138,6 @@ class DefaultClockProvider(
                                         FontTextStyle(
                                             fontVariation =
                                                 "'wght' 74, 'wdth' 43, 'opsz' 144, 'ROND' 100",
-                                            fontFamily = "google_sans_flex.ttf",
                                             fillColorLight = "#FFFFFFFF",
                                             outlineColor = "#00000000",
                                             renderType = RenderType.CHANGE_WEIGHT,
@@ -155,7 +156,6 @@ class DefaultClockProvider(
                                     timespec = DigitalTimespec.FIRST_DIGIT,
                                     style =
                                         FontTextStyle(
-                                            fontFamily = "google_sans_flex.ttf",
                                             lineHeight = 147.25f,
                                             fontVariation =
                                                 "'wght' 603, 'wdth' 100, 'opsz' 144, 'ROND' 100",
@@ -164,7 +164,6 @@ class DefaultClockProvider(
                                         FontTextStyle(
                                             fontVariation =
                                                 "'wght' 74, 'wdth' 43, 'opsz' 144, 'ROND' 100",
-                                            fontFamily = "google_sans_flex.ttf",
                                             fillColorLight = "#FFFFFFFF",
                                             outlineColor = "#00000000",
                                             renderType = RenderType.CHANGE_WEIGHT,
@@ -183,7 +182,6 @@ class DefaultClockProvider(
                                     timespec = DigitalTimespec.SECOND_DIGIT,
                                     style =
                                         FontTextStyle(
-                                            fontFamily = "google_sans_flex.ttf",
                                             lineHeight = 147.25f,
                                             fontVariation =
                                                 "'wght' 603, 'wdth' 100, 'opsz' 144, 'ROND' 100",
@@ -192,7 +190,6 @@ class DefaultClockProvider(
                                         FontTextStyle(
                                             fontVariation =
                                                 "'wght' 74, 'wdth' 43, 'opsz' 144, 'ROND' 100",
-                                            fontFamily = "google_sans_flex.ttf",
                                             fillColorLight = "#FFFFFFFF",
                                             outlineColor = "#00000000",
                                             renderType = RenderType.CHANGE_WEIGHT,
@@ -217,13 +214,11 @@ class DefaultClockProvider(
                         timespec = DigitalTimespec.TIME_FULL_FORMAT,
                         style =
                             FontTextStyle(
-                                fontFamily = "google_sans_flex.ttf",
                                 fontVariation = "'wght' 600, 'wdth' 100, 'opsz' 144, 'ROND' 100",
                                 fontSizeScale = 0.98f,
                             ),
                         aodStyle =
                             FontTextStyle(
-                                fontFamily = "google_sans_flex.ttf",
                                 fontVariation = "'wght' 133, 'wdth' 43, 'opsz' 144, 'ROND' 100",
                                 fillColorLight = "#FFFFFFFF",
                                 outlineColor = "#00000000",

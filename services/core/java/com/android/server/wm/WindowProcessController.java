@@ -121,6 +121,11 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
      */
     private static final int MAX_NUM_PERCEPTIBLE_FREEFORM =
             SystemProperties.getInt("persist.wm.max_num_perceptible_freeform", 1);
+    /**
+     * If the visible area percentage of a resumed freeform task is greater than or equal to this
+     * ratio, its process will have a higher priority.
+     */
+    private static final int PERCEPTIBLE_FREEFORM_VISIBLE_RATIO = 90;
 
     private static final int MAX_RAPID_ACTIVITY_LAUNCH_COUNT = 200;
     private static final long RAPID_ACTIVITY_LAUNCH_MS = 500;
@@ -133,7 +138,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     private int mRapidActivityLaunchCount;
 
     // all about the first app in the process
-    final ApplicationInfo mInfo;
+    volatile ApplicationInfo mInfo;
     final String mName;
     final int mUid;
 
@@ -1234,6 +1239,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         boolean hasResumedFreeform = false;
         int minTaskLayer = Integer.MAX_VALUE;
         int stateFlags = 0;
+        int nonOccludedRatio = 0;
         final boolean wasResumed = hasResumedActivity();
         final boolean wasAnyVisible = (mActivityStateFlags
                 & (ACTIVITY_STATE_FLAG_IS_VISIBLE | ACTIVITY_STATE_FLAG_IS_WINDOW_VISIBLE)) != 0;
@@ -1261,6 +1267,8 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
                         stateFlags |= ACTIVITY_STATE_FLAG_RESUMED_SPLIT_SCREEN;
                     } else if (windowingMode == WINDOWING_MODE_FREEFORM) {
                         hasResumedFreeform = true;
+                        nonOccludedRatio =
+                                Math.max(task.mNonOccludedFreeformAreaRatio, nonOccludedRatio);
                     }
                 }
                 if (minTaskLayer > 0) {
@@ -1298,7 +1306,8 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
                 && com.android.window.flags.Flags.processPriorityPolicyForMultiWindowMode()
                 // Exclude task layer 1 because it is already the top most.
                 && minTaskLayer > 1) {
-            if (minTaskLayer <= 1 + MAX_NUM_PERCEPTIBLE_FREEFORM) {
+            if (minTaskLayer <= 1 + MAX_NUM_PERCEPTIBLE_FREEFORM
+                    || nonOccludedRatio >= PERCEPTIBLE_FREEFORM_VISIBLE_RATIO) {
                 stateFlags |= ACTIVITY_STATE_FLAG_PERCEPTIBLE_FREEFORM;
             } else {
                 stateFlags |= ACTIVITY_STATE_FLAG_VISIBLE_MULTI_WINDOW_MODE;
@@ -1805,10 +1814,15 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             Configuration overrideConfig = new Configuration(r.getRequestedOverrideConfiguration());
             overrideConfig.assetsSeq = assetSeq;
             r.onRequestedOverrideConfigurationChanged(overrideConfig);
+            r.updateApplicationInfo(mInfo);
             if (r.isVisibleRequested()) {
                 r.ensureActivityConfiguration();
             }
         }
+    }
+
+    public void updateApplicationInfo(ApplicationInfo aInfo) {
+        mInfo = aInfo;
     }
 
     /**

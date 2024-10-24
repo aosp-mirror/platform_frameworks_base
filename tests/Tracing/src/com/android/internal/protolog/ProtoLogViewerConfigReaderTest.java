@@ -19,15 +19,20 @@ package com.android.internal.protolog;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
+import android.os.Build;
 import android.platform.test.annotations.Presubmit;
-import android.util.proto.ProtoInputStream;
 
+import com.google.common.truth.Truth;
+
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 import perfetto.protos.ProtologCommon;
+
+import java.io.File;
 
 @Presubmit
 @RunWith(JUnit4.class)
@@ -83,7 +88,7 @@ public class ProtoLogViewerConfigReaderTest {
                 ).build().toByteArray();
 
     private final ViewerConfigInputStreamProvider mViewerConfigInputStreamProvider =
-            () -> new ProtoInputStream(TEST_VIEWER_CONFIG);
+            () -> new AutoClosableProtoInputStream(TEST_VIEWER_CONFIG);
 
     private ProtoLogViewerConfigReader mConfig;
 
@@ -120,5 +125,38 @@ public class ProtoLogViewerConfigReaderTest {
         mConfig.unloadViewerConfig(new String[] { OTHER_TEST_GROUP_NAME });
         assertNull(mConfig.getViewerString(4));
         assertNull(mConfig.getViewerString(5));
+    }
+
+    @Test
+    public void viewerConfigIsOnDevice() {
+        Assume.assumeFalse(Build.FINGERPRINT.contains("robolectric"));
+
+        final String[] viewerConfigPaths;
+        if (android.tracing.Flags.perfettoProtologTracing()) {
+            viewerConfigPaths = new String[] {
+                    "/system_ext/etc/wmshell.protolog.pb",
+                    "/system/etc/core.protolog.pb",
+            };
+        } else {
+            viewerConfigPaths = new String[] {
+                    "/system_ext/etc/wmshell.protolog.json.gz",
+                    "/system/etc/protolog.conf.json.gz",
+            };
+        }
+
+        for (final var viewerConfigPath : viewerConfigPaths) {
+            File f = new File(viewerConfigPath);
+
+            Truth.assertWithMessage(f.getAbsolutePath() + " exists").that(f.exists()).isTrue();
+        }
+
+    }
+
+    @Test
+    public void loadUnloadAndReloadViewerConfig() {
+        loadViewerConfig();
+        unloadViewerConfig();
+        loadViewerConfig();
+        unloadViewerConfig();
     }
 }

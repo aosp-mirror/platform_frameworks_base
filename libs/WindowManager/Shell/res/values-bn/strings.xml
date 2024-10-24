@@ -97,9 +97,9 @@
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"ক্যামেরা সংক্রান্ত সমস্যা?\nরিফিট করতে ট্যাপ করুন"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"এখনও সমাধান হয়নি?\nরিভার্ট করার জন্য ট্যাপ করুন"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"ক্যামেরা সংক্রান্ত সমস্যা নেই? বাতিল করতে ট্যাপ করুন।"</string>
-    <string name="windowing_app_handle_education_tooltip" msgid="6398482412956375783">"অ্যাপ মেনু খুলতে ট্যাপ করুন"</string>
-    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="6285279585554484957">"একাধিক অ্যাপ একসাথে দেখতে ট্যাপ করুন"</string>
-    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="6685429075790085337">"অ্যাপ মেনু থেকে ফুল-স্ক্রিন মোডে ফিরে যান"</string>
+    <string name="windowing_app_handle_education_tooltip" msgid="2929643449849791854">"অ্যাপ মেনু এখানে খুঁজে পাওয়া যাবে"</string>
+    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="2523468503353474095">"একসাথে একাধিক অ্যাপ খোলার জন্য ডেস্কটপ ভিউতে যান"</string>
+    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="5225660258192054132">"অ্যাপ মেনু থেকে ফুল-স্ক্রিন মোডে যেকোনও সময়ে ফিরে আসুন"</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"দেখুন ও আরও অনেক কিছু করুন"</string>
     <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"স্প্লিট স্ক্রিনের ক্ষেত্রে অন্য কোনও অ্যাপ টেনে আনুন"</string>
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"কোনও অ্যাপের স্থান পরিবর্তন করতে তার বাইরে ডবল ট্যাপ করুন"</string>
@@ -134,6 +134,8 @@
     <string name="desktop_mode_maximize_menu_snap_text" msgid="2065251022783880154">"স্ক্রিনে অ্যাপ মানানসই হিসেবে ছোট বড় করুন"</string>
     <string name="desktop_mode_non_resizable_snap_text" msgid="3771776422751387878">"অ্যাপটি এখানে সরানো যাবে না"</string>
     <string name="desktop_mode_maximize_menu_maximize_button_text" msgid="3090199175564175845">"বড় করুন"</string>
+    <!-- no translation found for desktop_mode_maximize_menu_restore_button_text (4234449220944704387) -->
+    <skip />
     <string name="desktop_mode_maximize_menu_snap_left_button_text" msgid="8077452201179893424">"বাঁদিকে স্ন্যাপ করুন"</string>
     <string name="desktop_mode_maximize_menu_snap_right_button_text" msgid="7117751068945657304">"ডানদিকে স্ন্যাপ করুন"</string>
     <string name="open_by_default_settings_text" msgid="2526548548598185500">"ডিফল্ট হিসেবে থাকা সেটিংস খুলুন"</string>

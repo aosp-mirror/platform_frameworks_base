@@ -25,6 +25,8 @@
 #include <algorithm>
 #include <cmath>
 
+#include "SkColorSpace.h"
+
 namespace android {
 namespace uirenderer {
 
@@ -215,9 +217,12 @@ android_dataspace ColorSpaceToADataSpace(SkColorSpace* colorSpace, SkColorType c
         return HAL_DATASPACE_ADOBE_RGB;
     }
 
-    if (nearlyEqual(fn, SkNamedTransferFn::kRec2020) &&
-        nearlyEqual(gamut, SkNamedGamut::kRec2020)) {
-        return HAL_DATASPACE_BT2020;
+    if (nearlyEqual(gamut, SkNamedGamut::kRec2020)) {
+        if (nearlyEqual(fn, SkNamedTransferFn::kRec2020)) {
+            return HAL_DATASPACE_BT2020;
+        } else if (nearlyEqual(fn, SkNamedTransferFn::kSRGB)) {
+            return static_cast<android_dataspace>(HAL_DATASPACE_DISPLAY_BT2020);
+        }
     }
 
     if (nearlyEqual(fn, k2Dot6) && nearlyEqual(gamut, kDCIP3)) {

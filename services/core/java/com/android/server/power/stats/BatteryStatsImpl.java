@@ -176,7 +176,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.Executor;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
@@ -949,19 +948,38 @@ public class BatteryStatsImpl extends BatteryStats {
         public @interface ExternalUpdateFlag {
         }
 
-        Future<?> scheduleSync(String reason, int flags);
-        Future<?> scheduleCpuSyncDueToRemovedUid(int uid);
+        /**
+         * Schedules a sync of kernel metrics in accordance with the specified flags.
+         */
+        void scheduleSync(String reason, @ExternalUpdateFlag int flags);
+
+        /**
+         * Schedules a CPU stats sync after a UID removal.
+         */
+        void scheduleCpuSyncDueToRemovedUid(int uid);
 
         /**
          * Schedule a sync because of a screen state change.
          */
-        Future<?> scheduleSyncDueToScreenStateChange(int flags, boolean onBattery,
+        void scheduleSyncDueToScreenStateChange(@ExternalUpdateFlag int flags, boolean onBattery,
                 boolean onBatteryScreenOff, int screenState, int[] perDisplayScreenStates);
-        Future<?> scheduleCpuSyncDueToWakelockChange(long delayMillis);
+
+        /**
+         * Schedules a sync after a wakelock state change
+         */
+        void scheduleCpuSyncDueToWakelockChange(long delayMillis);
+
+        /**
+         * Canceles any pending sync due to a wakelock state change
+         */
         void cancelCpuSyncDueToWakelockChange();
-        Future<?> scheduleSyncDueToBatteryLevelChange(long delayMillis);
+
+        /**
+         * Schedules a sync caused by the battery level change
+         */
+        void scheduleSyncDueToBatteryLevelChange(long delayMillis);
         /** Schedule removal of UIDs corresponding to a removed user */
-        Future<?> scheduleCleanupDueToRemovedUser(int userId);
+        void scheduleCleanupDueToRemovedUser(int userId);
         /** Schedule a sync because of a process state change */
         void scheduleSyncDueToProcessStateChange(int flags, long delayMillis);
     }
@@ -11491,9 +11509,6 @@ public class BatteryStatsImpl extends BatteryStats {
                     mOnBatteryTimeBase);
         }
 
-        mPerDisplayBatteryStats = new DisplayBatteryStats[1];
-        mPerDisplayBatteryStats[0] = new DisplayBatteryStats(mClock, mOnBatteryTimeBase);
-
         mInteractiveTimer = new StopwatchTimer(mClock, null, -10, null, mOnBatteryTimeBase);
         mPowerSaveModeEnabledTimer = new StopwatchTimer(mClock, null, -2, null,
                 mOnBatteryTimeBase);
@@ -12263,14 +12278,8 @@ public class BatteryStatsImpl extends BatteryStats {
             // start time
             long monotonicStartTime =
                     mMonotonicClock.monotonicTime() - batteryUsageStats.getStatsDuration();
-            mHandler.post(() -> {
-                mPowerStatsStore.storeBatteryUsageStats(monotonicStartTime, batteryUsageStats);
-                try {
-                    batteryUsageStats.close();
-                } catch (IOException e) {
-                    Log.e(TAG, "Cannot close BatteryUsageStats", e);
-                }
-            });
+            commitMonotonicClock();
+            mPowerStatsStore.storeBatteryUsageStatsAsync(monotonicStartTime, batteryUsageStats);
         }
     }
 
@@ -15391,6 +15400,10 @@ public class BatteryStatsImpl extends BatteryStats {
         mMaxLearnedBatteryCapacityUah = Math.max(mMaxLearnedBatteryCapacityUah, chargeFullUah);
 
         mBatteryTimeToFullSeconds = chargeTimeToFullSeconds;
+
+        if (mAccumulateBatteryUsageStats) {
+            mBatteryUsageStatsProvider.accumulateBatteryUsageStatsAsync(this, mHandler);
+        }
     }
 
     public static boolean isOnBattery(int plugType, int status) {
@@ -17697,6 +17710,13 @@ public class BatteryStatsImpl extends BatteryStats {
         if (!Flags.disableSystemServicePowerAttr()) {
             LongSamplingCounterArray.writeSummaryToParcelLocked(out, mBinderThreadCpuTimesUs);
         }
+    }
+
+    /**
+     * Persists the monotonic clock associated with battery stats.
+     */
+    public void commitMonotonicClock() {
+        mMonotonicClock.write();
     }
 
     @GuardedBy("this")

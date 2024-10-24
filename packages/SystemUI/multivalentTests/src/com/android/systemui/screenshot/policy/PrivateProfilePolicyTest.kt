@@ -17,8 +17,8 @@
 package com.android.systemui.screenshot.policy
 
 import android.content.ComponentName
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import android.os.UserHandle
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.screenshot.data.model.DisplayContentModel
 import com.android.systemui.screenshot.data.model.DisplayContentScenarios.ActivityNames.FILES
@@ -59,7 +59,7 @@ class PrivateProfilePolicyTest {
             policy.check(
                 singleFullScreen(
                     spec = TaskSpec(taskId = 1002, name = YOUTUBE, userId = PRIVATE),
-                    shadeExpanded = true
+                    shadeExpanded = true,
                 )
             )
 
@@ -93,8 +93,8 @@ class PrivateProfilePolicyTest {
                     CaptureParameters(
                         type = FullScreen(displayId = 0),
                         component = ComponentName.unflattenFromString(YOUTUBE),
-                        owner = UserHandle.of(PRIVATE)
-                    )
+                        owner = UserHandle.of(PRIVATE),
+                    ),
                 )
             )
     }
@@ -110,25 +110,20 @@ class PrivateProfilePolicyTest {
                         listOf(
                             fullScreen(
                                 TaskSpec(taskId = 1002, name = FILES, userId = PERSONAL),
-                                visible = true
+                                visible = true,
                             ),
                             fullScreen(
                                 TaskSpec(taskId = 1003, name = YOUTUBE, userId = PRIVATE),
-                                visible = false
+                                visible = false,
                             ),
                             launcher(visible = false),
                             emptyRootSplit,
-                        )
+                        ),
                 )
             )
 
         assertThat(result)
-            .isEqualTo(
-                NotMatched(
-                    PrivateProfilePolicy.NAME,
-                    PrivateProfilePolicy.NO_VISIBLE_TASKS,
-                )
-            )
+            .isEqualTo(NotMatched(PrivateProfilePolicy.NAME, PrivateProfilePolicy.NO_VISIBLE_TASKS))
     }
 
     @Test
@@ -136,9 +131,9 @@ class PrivateProfilePolicyTest {
         val result =
             policy.check(
                 splitScreenApps(
-                    top = TaskSpec(taskId = 1002, name = FILES, userId = PERSONAL),
-                    bottom = TaskSpec(taskId = 1003, name = YOUTUBE, userId = PRIVATE),
-                    focusedTaskId = 1003
+                    first = TaskSpec(taskId = 1002, name = FILES, userId = PERSONAL),
+                    second = TaskSpec(taskId = 1003, name = YOUTUBE, userId = PRIVATE),
+                    focusedTaskId = 1003,
                 )
             )
 
@@ -150,8 +145,8 @@ class PrivateProfilePolicyTest {
                     CaptureParameters(
                         type = FullScreen(displayId = 0),
                         component = ComponentName.unflattenFromString(YOUTUBE),
-                        owner = UserHandle.of(PRIVATE)
-                    )
+                        owner = UserHandle.of(PRIVATE),
+                    ),
                 )
             )
     }
@@ -161,9 +156,9 @@ class PrivateProfilePolicyTest {
         val result =
             policy.check(
                 splitScreenApps(
-                    top = TaskSpec(taskId = 1002, name = FILES, userId = PERSONAL),
-                    bottom = TaskSpec(taskId = 1003, name = YOUTUBE, userId = PRIVATE),
-                    focusedTaskId = 1002
+                    first = TaskSpec(taskId = 1002, name = FILES, userId = PERSONAL),
+                    second = TaskSpec(taskId = 1003, name = YOUTUBE, userId = PRIVATE),
+                    focusedTaskId = 1002,
                 )
             )
 
@@ -175,8 +170,8 @@ class PrivateProfilePolicyTest {
                     CaptureParameters(
                         type = FullScreen(displayId = 0),
                         component = ComponentName.unflattenFromString(FILES),
-                        owner = UserHandle.of(PRIVATE)
-                    )
+                        owner = UserHandle.of(PRIVATE),
+                    ),
                 )
             )
     }
@@ -196,8 +191,8 @@ class PrivateProfilePolicyTest {
                     CaptureParameters(
                         type = FullScreen(displayId = 0),
                         component = ComponentName.unflattenFromString(YOUTUBE_PIP),
-                        owner = UserHandle.of(PRIVATE)
-                    )
+                        owner = UserHandle.of(PRIVATE),
+                    ),
                 )
             )
     }
@@ -220,8 +215,8 @@ class PrivateProfilePolicyTest {
                     CaptureParameters(
                         type = FullScreen(displayId = 0),
                         component = ComponentName.unflattenFromString(YOUTUBE_PIP),
-                        owner = UserHandle.of(PRIVATE)
-                    )
+                        owner = UserHandle.of(PRIVATE),
+                    ),
                 )
             )
     }

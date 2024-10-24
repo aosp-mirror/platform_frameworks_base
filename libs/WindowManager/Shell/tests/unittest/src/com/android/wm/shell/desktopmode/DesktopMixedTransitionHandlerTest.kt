@@ -21,8 +21,12 @@ import android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD
 import android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM
 import android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN
 import android.app.WindowConfiguration.WindowingMode
+import android.os.Binder
 import android.os.Handler
 import android.os.IBinder
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
+import android.platform.test.flag.junit.SetFlagsRule
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import android.view.SurfaceControl
@@ -32,6 +36,7 @@ import android.window.WindowContainerTransaction
 import androidx.test.filters.SmallTest
 import com.android.internal.jank.Cuj.CUJ_DESKTOP_MODE_EXIT_MODE_ON_LAST_WINDOW_CLOSE
 import com.android.internal.jank.InteractionJankMonitor
+import com.android.window.flags.Flags
 import com.android.wm.shell.ShellTestCase
 import com.android.wm.shell.TestRunningTaskInfoBuilder
 import com.android.wm.shell.freeform.FreeformTaskTransitionHandler
@@ -40,6 +45,7 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
@@ -58,6 +64,8 @@ import org.mockito.kotlin.whenever
 @RunWithLooper
 @RunWith(AndroidTestingRunner::class)
 class DesktopMixedTransitionHandlerTest : ShellTestCase() {
+
+    @JvmField @Rule val setFlagsRule = SetFlagsRule()
 
     @Mock lateinit var transitions: Transitions
     @Mock lateinit var desktopRepository: DesktopRepository
@@ -105,8 +113,23 @@ class DesktopMixedTransitionHandlerTest : ShellTestCase() {
     }
 
     @Test
+    @DisableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_EXIT_TRANSITIONS)
+    fun startRemoveTransition_callsFreeformTaskTransitionHandler() {
+        val wct = WindowContainerTransaction()
+        whenever(freeformTaskTransitionHandler.startRemoveTransition(wct))
+            .thenReturn(mock())
+
+        mixedHandler.startRemoveTransition(wct)
+
+        verify(freeformTaskTransitionHandler).startRemoveTransition(wct)
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_EXIT_TRANSITIONS)
     fun startRemoveTransition_startsCloseTransition() {
         val wct = WindowContainerTransaction()
+        whenever(transitions.startTransition(WindowManager.TRANSIT_CLOSE, wct, mixedHandler))
+            .thenReturn(Binder())
 
         mixedHandler.startRemoveTransition(wct)
 
@@ -144,7 +167,7 @@ class DesktopMixedTransitionHandlerTest : ShellTestCase() {
     fun startAnimation_withClosingDesktopTask_callsCloseTaskHandler() {
         val transition = mock<IBinder>()
         val transitionInfo = createTransitionInfo(task = createTask(WINDOWING_MODE_FREEFORM))
-        whenever(desktopRepository.getActiveNonMinimizedTaskCount(any())).thenReturn(2)
+        whenever(desktopRepository.getExpandedTaskCount(any())).thenReturn(2)
         whenever(
                 closeDesktopTaskTransitionHandler.startAnimation(any(), any(), any(), any(), any())
             )
@@ -167,7 +190,7 @@ class DesktopMixedTransitionHandlerTest : ShellTestCase() {
     fun startAnimation_withClosingLastDesktopTask_dispatchesTransition() {
         val transition = mock<IBinder>()
         val transitionInfo = createTransitionInfo(task = createTask(WINDOWING_MODE_FREEFORM))
-        whenever(desktopRepository.getActiveNonMinimizedTaskCount(any())).thenReturn(1)
+        whenever(desktopRepository.getExpandedTaskCount(any())).thenReturn(1)
         whenever(transitions.dispatchTransition(any(), any(), any(), any(), any(), any()))
             .thenReturn(mock())
 

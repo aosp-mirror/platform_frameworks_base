@@ -29,6 +29,7 @@ import static android.service.notification.Flags.notificationForceGrouping;
 import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -88,6 +89,7 @@ public class GroupHelper {
     private final int mAutogroupSparseGroupsAtCount;
     private final Context mContext;
     private final PackageManager mPackageManager;
+    private boolean mIsTestHarnessExempted;
 
     // Only contains notifications that are not explicitly grouped by the app (aka no group or
     // sort key).
@@ -172,6 +174,11 @@ public class GroupHelper {
         mPackageManager = packageManager;
         mAutogroupSparseGroupsAtCount = autoGroupSparseGroupsAtCount;
         NOTIFICATION_SHADE_SECTIONS = getNotificationShadeSections();
+    }
+
+    void setTestHarnessExempted(boolean isExempted) {
+        // Allow E2E tests to post ungrouped notifications
+        mIsTestHarnessExempted = ActivityManager.isRunningInUserTestHarness() && isExempted;
     }
 
     private String generatePackageKey(int userId, String pkg) {
@@ -693,6 +700,10 @@ public class GroupHelper {
         }
 
         if (record.isCanceled) {
+            return;
+        }
+
+        if (mIsTestHarnessExempted) {
             return;
         }
 

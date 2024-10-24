@@ -20,6 +20,7 @@ import static android.app.sdksandbox.SdkSandboxManager.ACTION_START_SANDBOXED_AC
 import static android.content.ContentProvider.maybeAddUserId;
 import static android.os.Flags.FLAG_ALLOW_PRIVATE_PROFILE;
 import static android.security.Flags.FLAG_FRP_ENFORCEMENT;
+import static android.security.Flags.FLAG_PREVENT_INTENT_REDIRECT;
 import static android.security.Flags.preventIntentRedirect;
 
 import android.Manifest;
@@ -40,7 +41,10 @@ import android.app.Activity;
 import android.app.ActivityThread;
 import android.app.AppGlobals;
 import android.app.StatusBarManager;
+import android.app.compat.CompatChanges;
 import android.bluetooth.BluetoothDevice;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.Overridable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
@@ -669,6 +673,11 @@ import java.util.TimeZone;
 @android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class Intent implements Parcelable, Cloneable {
     private static final String TAG = "Intent";
+
+    /** @hide */
+    @ChangeId
+    @Overridable
+    public static final long ENABLE_PREVENT_INTENT_REDIRECT = 29076063L;
 
     private static final String ATTR_ACTION = "action";
     private static final String TAG_CATEGORIES = "categories";
@@ -12240,7 +12249,7 @@ public class Intent implements Parcelable, Cloneable {
      * @hide
      */
     public void collectExtraIntentKeys() {
-        if (!preventIntentRedirect()) return;
+        if (!isPreventIntentRedirectEnabled()) return;
 
         if (mExtras != null && !mExtras.isParcelled() && !mExtras.isEmpty()) {
             for (String key : mExtras.keySet()) {
@@ -12255,6 +12264,14 @@ public class Intent implements Parcelable, Cloneable {
                 }
             }
         }
+    }
+
+    /**
+     * @hide
+     */
+    public static boolean isPreventIntentRedirectEnabled() {
+        return preventIntentRedirect() && CompatChanges.isChangeEnabled(
+                ENABLE_PREVENT_INTENT_REDIRECT);
     }
 
     /** @hide */
@@ -12279,6 +12296,20 @@ public class Intent implements Parcelable, Cloneable {
         // otherwise, the logic to mark missing token would run before
         // mark trusted creator token present.
         mExtras.setIsIntentExtra();
+    }
+
+    /**
+     * When an intent comes from another app or component as an embedded extra intent, the system
+     * creates a token to identify the creator of this foreign intent. If this token is missing or
+     * invalid, the system will block the launch of this intent. If it contains a valid token, the
+     * system will perform verification against the creator to block launching target it has no
+     * permission to launch or block it from granting URI access to the tagert it cannot access.
+     * This method provides a way to opt out this feature.
+     */
+    @FlaggedApi(FLAG_PREVENT_INTENT_REDIRECT)
+    public void removeLaunchSecurityProtection() {
+        mExtendedFlags &= ~EXTENDED_FLAG_MISSING_CREATOR_OR_INVALID_TOKEN;
+        removeCreatorTokenInfo();
     }
 
     public void writeToParcel(Parcel out, int flags) {
@@ -12331,7 +12362,7 @@ public class Intent implements Parcelable, Cloneable {
             out.writeInt(0);
         }
 
-        if (preventIntentRedirect()) {
+        if (isPreventIntentRedirectEnabled()) {
             if (mCreatorTokenInfo == null) {
                 out.writeInt(0);
             } else {
@@ -12398,7 +12429,7 @@ public class Intent implements Parcelable, Cloneable {
             mOriginalIntent = new Intent(in);
         }
 
-        if (preventIntentRedirect()) {
+        if (isPreventIntentRedirectEnabled()) {
             if (in.readInt() != 0) {
                 mCreatorTokenInfo = new CreatorTokenInfo();
                 mCreatorTokenInfo.mCreatorToken = in.readStrongBinder();

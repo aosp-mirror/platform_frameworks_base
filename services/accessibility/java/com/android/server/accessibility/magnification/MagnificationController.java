@@ -176,7 +176,8 @@ public class MagnificationController implements MagnificationConnectionManager.C
     public void onPerformScaleAction(int displayId, float scale, boolean updatePersistence) {
         if (getFullScreenMagnificationController().isActivated(displayId)) {
             getFullScreenMagnificationController().setScaleAndCenter(displayId, scale,
-                    Float.NaN, Float.NaN, false, MAGNIFICATION_GESTURE_HANDLER_ID);
+                    Float.NaN, Float.NaN, /* isScaleTransient= */ !updatePersistence, false,
+                    MAGNIFICATION_GESTURE_HANDLER_ID);
             if (updatePersistence) {
                 getFullScreenMagnificationController().persistScale(displayId);
             }
@@ -371,7 +372,7 @@ public class MagnificationController implements MagnificationConnectionManager.C
                         }
                         screenMagnificationController.setScaleAndCenter(displayId, targetScale,
                                 magnificationCenter.x, magnificationCenter.y,
-                                magnificationAnimationCallback, id);
+                                /* isScaleTransient= */ false, magnificationAnimationCallback, id);
                     } else {
                         if (screenMagnificationController.isRegistered(displayId)) {
                             screenMagnificationController.reset(displayId, false);

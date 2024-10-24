@@ -85,7 +85,6 @@ import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.classifier.FalsingManagerFake;
-import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository;
 import com.android.systemui.common.ui.view.LongPressHandlingView;
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor;
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryUdfpsInteractor;
@@ -108,7 +107,6 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInterac
 import com.android.systemui.keyguard.domain.interactor.NaturalScrollingSettingObserver;
 import com.android.systemui.keyguard.ui.view.KeyguardRootView;
 import com.android.systemui.keyguard.ui.viewmodel.DreamingToLockscreenTransitionViewModel;
-import com.android.systemui.keyguard.ui.viewmodel.GoneToDreamingLockscreenHostedTransitionViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.GoneToDreamingTransitionViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardBottomAreaViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardTouchHandlingViewModel;
@@ -328,8 +326,6 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
     @Mock protected LockscreenToOccludedTransitionViewModel
             mLockscreenToOccludedTransitionViewModel;
     @Mock protected GoneToDreamingTransitionViewModel mGoneToDreamingTransitionViewModel;
-    @Mock protected GoneToDreamingLockscreenHostedTransitionViewModel
-            mGoneToDreamingLockscreenHostedTransitionViewModel;
     @Mock protected PrimaryBouncerToGoneTransitionViewModel
             mPrimaryBouncerToGoneTransitionViewModel;
     @Mock protected KeyguardTransitionInteractor mKeyguardTransitionInteractor;
@@ -437,15 +433,6 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 new ShadeInteractorLegacyImpl(
                         mTestScope.getBackgroundScope(),
                         mFakeKeyguardRepository,
-                        new SharedNotificationContainerInteractor(
-                                new FakeConfigurationRepository(),
-                                mContext,
-                                () -> splitShadeStateController,
-                                () -> mShadeInteractor,
-                                mKeyguardInteractor,
-                                deviceEntryUdfpsInteractor,
-                                () -> mLargeScreenHeaderHelper
-                        ),
                         mShadeRepository
                 ),
                 mKosmos.getShadeModeInteractor());
@@ -585,10 +572,6 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
         when(mGoneToDreamingTransitionViewModel.getLockscreenAlpha())
                 .thenReturn(emptyFlow());
         when(mGoneToDreamingTransitionViewModel.lockscreenTranslationY(anyInt()))
-                .thenReturn(emptyFlow());
-
-        // Gone->Dreaming lockscreen hosted
-        when(mGoneToDreamingLockscreenHostedTransitionViewModel.getLockscreenAlpha())
                 .thenReturn(emptyFlow());
 
         // Lockscreen->Occluded
@@ -752,7 +735,6 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 mOccludedToLockscreenTransitionViewModel,
                 mLockscreenToDreamingTransitionViewModel,
                 mGoneToDreamingTransitionViewModel,
-                mGoneToDreamingLockscreenHostedTransitionViewModel,
                 mLockscreenToOccludedTransitionViewModel,
                 mPrimaryBouncerToGoneTransitionViewModel,
                 mMainDispatcher,

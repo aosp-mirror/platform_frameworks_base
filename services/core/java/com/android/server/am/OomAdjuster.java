@@ -1149,6 +1149,8 @@ public class OomAdjuster {
         if (mConstants.USE_TIERED_CACHED_ADJ) {
             final long now = mInjector.getUptimeMillis();
             int uiTargetAdj = 10;
+            // mConstants.TIERED_CACHED_ADJ_UI_TIER_SIZE is 10 by default, but is configurable.
+            final int uiTierMaxAdj = 10 + mConstants.TIERED_CACHED_ADJ_UI_TIER_SIZE;
             for (int i = numLru - 1; i >= 0; i--) {
                 ProcessRecord app = lruList.get(i);
                 final ProcessStateRecord state = app.mState;
@@ -1162,17 +1164,17 @@ public class OomAdjuster {
                     if (opt != null && opt.isFreezeExempt()) {
                         // BIND_WAIVE_PRIORITY and the like get oom_adj 900
                         targetAdj += 0;
-                    } else if (state.hasShownUi() && uiTargetAdj < 15) {
-                        // The most recent 5 apps that have shown UI get 910-914
+                    } else if (state.hasShownUi() && uiTargetAdj < uiTierMaxAdj) {
+                        // The most recent UI-showing apps get [910, 910 + ui tier size).
                         targetAdj += uiTargetAdj++;
                     } else if ((state.getSetAdj() >= CACHED_APP_MIN_ADJ)
                             && (state.getLastStateTime()
                                     + mConstants.TIERED_CACHED_ADJ_DECAY_TIME) < now) {
-                        // Older cached apps get 950
-                        targetAdj += 50;
+                        // Older cached apps get 940 + ui tier size (950 by default).
+                        targetAdj += 40 + mConstants.TIERED_CACHED_ADJ_UI_TIER_SIZE;
                     } else {
-                        // Newer cached apps get 920
-                        targetAdj += 20;
+                        // Newer cached apps get 910 + ui tier size (920 by default).
+                        targetAdj += 10 + mConstants.TIERED_CACHED_ADJ_UI_TIER_SIZE;
                     }
                     state.setCurRawAdj(targetAdj);
                     state.setCurAdj(psr.modifyRawOomAdj(targetAdj));

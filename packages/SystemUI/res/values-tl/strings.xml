@@ -312,6 +312,10 @@
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"Ibahagi ang audio"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"Ibinabahagi ang audio"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_accessibility" msgid="7604615019302091708">"pumasok sa mga setting sa pag-share ng audio"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_dialog_message" msgid="4251807313264307426">"Magpe-play ang musika at mga video ng device na ito sa parehong pares ng headphones"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_dialog_title" msgid="4406818346036286793">"Ibahagi ang iyong audio"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_dialog_subtitle" msgid="3014906864710059236">"<xliff:g id="AVAILABLE_DEVICE_NAME">%1$s</xliff:g> at <xliff:g id="ACTIVE_DEVICE_NAME">%2$s</xliff:g>"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_dialog_switch_to_button" msgid="7546825655978203773">"Lumipat sa <xliff:g id="AVAILABLE_DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> na baterya"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Audio"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Headset"</string>
@@ -672,10 +676,8 @@
     <string name="stream_notification_unavailable" msgid="4313854556205836435">"Hindi available dahil naka-mute ang ring"</string>
     <string name="stream_alarm_unavailable" msgid="4059817189292197839">"Hindi available dahil naka-on ang Huwag Istorbohin"</string>
     <string name="stream_media_unavailable" msgid="6823020894438959853">"Hindi available dahil naka-on ang Huwag Istorbohin"</string>
-    <!-- no translation found for stream_unavailable_by_modes (3674139029490353683) -->
-    <skip />
-    <!-- no translation found for stream_unavailable_by_unknown (6908434629318171588) -->
-    <skip />
+    <string name="stream_unavailable_by_modes" msgid="3674139029490353683">"Hindi available dahil naka-on ang <xliff:g id="MODE">%s</xliff:g>"</string>
+    <string name="stream_unavailable_by_unknown" msgid="6908434629318171588">"Hindi available"</string>
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. I-tap upang i-unmute."</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. I-tap upang itakda na mag-vibrate. Maaaring i-mute ang mga serbisyo sa Accessibility."</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. I-tap upang i-mute. Maaaring i-mute ang mga serbisyo sa Accessibility."</string>
@@ -1403,6 +1405,8 @@
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"I-expand ang icon"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"o"</string>
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"Handle sa pag-drag"</string>
+    <!-- no translation found for shortcut_helper_keyboard_settings_buttons_label (6720967595915985259) -->
+    <skip />
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"Mag-navigate gamit ang iyong keyboard"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"Matuto ng mga keyboard shortcut"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"Mag-navigate gamit ang iyong touchpad"</string>
@@ -1460,4 +1464,8 @@
     <string name="qs_edit_mode_category_providedByApps" msgid="8346112074897919019">"Ibinibigay ng mga app"</string>
     <string name="qs_edit_mode_category_display" msgid="4749511439121053942">"Display"</string>
     <string name="qs_edit_mode_category_unknown" msgid="509314252124053550">"Hindi Alam"</string>
+    <!-- no translation found for qs_edit_mode_reset_dialog_title (8841270491554460726) -->
+    <skip />
+    <!-- no translation found for qs_edit_mode_reset_dialog_content (8626426097929954027) -->
+    <skip />
 </resources>

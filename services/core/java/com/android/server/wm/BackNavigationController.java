@@ -34,6 +34,7 @@ import static com.android.server.wm.BackNavigationProto.LAST_BACK_TYPE;
 import static com.android.server.wm.BackNavigationProto.MAIN_OPEN_ACTIVITY;
 import static com.android.server.wm.BackNavigationProto.SHOW_WALLPAPER;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_PREDICT_BACK;
+import static com.android.server.wm.WindowContainer.SYNC_STATE_NONE;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -200,6 +201,9 @@ class BackNavigationController {
             infoBuilder.setTouchableRegion(window.getFrame());
             infoBuilder.setAppProgressAllowed((window.getAttrs().privateFlags
                     & PRIVATE_FLAG_APP_PROGRESS_GENERATION_ALLOWED) != 0);
+            if (currentTask != null) {
+                infoBuilder.setFocusedTaskId(currentTask.mTaskId);
+            }
             mNavigationMonitor.startMonitor(window, navigationObserver);
 
             ProtoLog.d(WM_DEBUG_BACK_PREVIEW, "startBackNavigation currentTask=%s, "
@@ -990,7 +994,9 @@ class BackNavigationController {
         // Ensure the final animation targets which hidden by transition could be visible.
         for (int i = 0; i < targets.size(); i++) {
             final WindowContainer wc = targets.get(i).mContainer;
-            wc.prepareSurfaces();
+            if (wc.mSurfaceControl != null) {
+                wc.prepareSurfaces();
+            }
         }
 
         // The pending builder could be cleared due to prepareSurfaces
@@ -1237,8 +1243,9 @@ class BackNavigationController {
                 }
                 allWindowDrawn &= next.mAppWindowDrawn;
             }
-            // Do not remove until transition ready.
-            if (!activity.isVisible()) {
+            // Do not remove windowless surfaces if the transaction has not been applied.
+            if (activity.getSyncTransactionCommitCallbackDepth() > 0
+                    || activity.mSyncState != SYNC_STATE_NONE) {
                 return;
             }
             if (allWindowDrawn) {
@@ -1323,16 +1330,13 @@ class BackNavigationController {
             if (!allWindowDrawn) {
                 return;
             }
-            final SurfaceControl startingSurface = mOpenAnimAdaptor.mStartingSurface;
-            if (startingSurface != null && startingSurface.isValid()) {
-                startTransaction.addTransactionCommittedListener(Runnable::run, () -> {
-                    synchronized (mWindowManagerService.mGlobalLock) {
-                        if (mOpenAnimAdaptor != null) {
-                            mOpenAnimAdaptor.cleanUpWindowlessSurface(true);
-                        }
+            startTransaction.addTransactionCommittedListener(Runnable::run, () -> {
+                synchronized (mWindowManagerService.mGlobalLock) {
+                    if (mOpenAnimAdaptor != null) {
+                        mOpenAnimAdaptor.cleanUpWindowlessSurface(true);
                     }
-                });
-            }
+                }
+            });
         }
 
         void clearBackAnimateTarget(boolean cancel) {

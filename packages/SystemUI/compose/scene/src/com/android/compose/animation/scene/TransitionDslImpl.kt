@@ -27,6 +27,7 @@ import androidx.compose.animation.core.spring
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.Dp
+import com.android.compose.animation.scene.content.state.TransitionState
 import com.android.compose.animation.scene.transformation.AnchoredSize
 import com.android.compose.animation.scene.transformation.AnchoredTranslate
 import com.android.compose.animation.scene.transformation.DrawScale
@@ -128,8 +129,11 @@ private class SceneTransitionsBuilderImpl : SceneTransitionsBuilder {
         reversePreview: (TransitionBuilder.() -> Unit)?,
         builder: TransitionBuilder.() -> Unit,
     ): TransitionSpec {
-        fun transformationSpec(builder: TransitionBuilder.() -> Unit): TransformationSpecImpl {
-            val impl = TransitionBuilderImpl().apply(builder)
+        fun transformationSpec(
+            transition: TransitionState.Transition,
+            builder: TransitionBuilder.() -> Unit,
+        ): TransformationSpecImpl {
+            val impl = TransitionBuilderImpl(transition).apply(builder)
             return TransformationSpecImpl(
                 progressSpec = impl.spec,
                 swipeSpec = impl.swipeSpec,
@@ -138,17 +142,15 @@ private class SceneTransitionsBuilderImpl : SceneTransitionsBuilder {
             )
         }
 
-        val previewTransformationSpec = preview?.let { { transformationSpec(it) } }
-        val reversePreviewTransformationSpec = reversePreview?.let { { transformationSpec(it) } }
-        val transformationSpec = { transformationSpec(builder) }
         val spec =
             TransitionSpecImpl(
                 key,
                 from,
                 to,
-                previewTransformationSpec,
-                reversePreviewTransformationSpec,
-                transformationSpec,
+                previewTransformationSpec = preview?.let { { t -> transformationSpec(t, it) } },
+                reversePreviewTransformationSpec =
+                    reversePreview?.let { { t -> transformationSpec(t, it) } },
+                transformationSpec = { t -> transformationSpec(t, builder) },
             )
         transitionSpecs.add(spec)
         return spec
@@ -227,7 +229,8 @@ internal abstract class BaseTransitionBuilderImpl : BaseTransitionBuilder {
     }
 }
 
-internal class TransitionBuilderImpl : BaseTransitionBuilderImpl(), TransitionBuilder {
+internal class TransitionBuilderImpl(override val transition: TransitionState.Transition) :
+    BaseTransitionBuilderImpl(), TransitionBuilder {
     override var spec: AnimationSpec<Float> = spring(stiffness = Spring.StiffnessLow)
     override var swipeSpec: SpringSpec<Float>? = null
     override var distance: UserActionDistance? = null
@@ -246,8 +249,22 @@ internal class TransitionBuilderImpl : BaseTransitionBuilderImpl(), TransitionBu
         reversed = false
     }
 
-    override fun sharedElement(matcher: ElementMatcher, enabled: Boolean) {
-        transformations.add(SharedElementTransformation(matcher, enabled))
+    override fun sharedElement(
+        matcher: ElementMatcher,
+        enabled: Boolean,
+        elevateInContent: ContentKey?,
+    ) {
+        check(
+            elevateInContent == null ||
+                elevateInContent == transition.fromContent ||
+                elevateInContent == transition.toContent
+        ) {
+            "elevateInContent (${elevateInContent?.debugName}) should be either fromContent " +
+                "(${transition.fromContent.debugName}) or toContent " +
+                "(${transition.toContent.debugName})"
+        }
+
+        transformations.add(SharedElementTransformation(matcher, enabled, elevateInContent))
     }
 
     override fun timestampRange(

@@ -34,8 +34,10 @@ import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.statusbar.domain.interactor.RemoteInputInteractor
 import com.android.systemui.statusbar.notification.stack.domain.interactor.NotificationStackAppearanceInteractor
+import com.android.systemui.statusbar.notification.stack.shared.model.AccessibilityScrollEvent
 import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimClipping
 import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimShape
+import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrollState
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationTransitionThresholds.EXPANSION_FOR_DELAYED_STACK_FADE_IN
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationTransitionThresholds.EXPANSION_FOR_MAX_SCRIM_ALPHA
 import com.android.systemui.util.kotlin.ActivatableFlowDumper
@@ -102,7 +104,7 @@ constructor(
             1f
         } else if (
             change.isTransitioningBetween(Scenes.Gone, Scenes.Shade) ||
-                change.isTransitioning(from = Scenes.Gone, to = Scenes.Lockscreen)
+                change.isTransitioning(from = Scenes.Shade, to = Scenes.Lockscreen)
         ) {
             shadeExpansion
         } else if (change.isTransitioningBetween(Scenes.Gone, Scenes.QuickSettings)) {
@@ -255,15 +257,15 @@ constructor(
     val maxAlpha: Flow<Float> =
         stackAppearanceInteractor.alphaForBrightnessMirror.dumpValue("maxAlpha")
 
-    /**
-     * Whether the notification stack is scrolled to the top; i.e., it cannot be scrolled down any
-     * further.
-     */
-    val scrolledToTop: Flow<Boolean> =
-        stackAppearanceInteractor.scrolledToTop.dumpValue("scrolledToTop")
+    /** Scroll state of the notification shade. */
+    val shadeScrollState: Flow<ShadeScrollState> = stackAppearanceInteractor.shadeScrollState
 
     /** Receives the amount (px) that the stack should scroll due to internal expansion. */
     val syntheticScrollConsumer: (Float) -> Unit = stackAppearanceInteractor::setSyntheticScroll
+
+    /** Receives an event to scroll the stack up or down. */
+    val accessibilityScrollEventConsumer: (AccessibilityScrollEvent) -> Unit =
+        stackAppearanceInteractor::sendAccessibilityScrollEvent
 
     /**
      * Receives whether the current touch gesture is overscroll as it has already been consumed by
