@@ -5551,6 +5551,30 @@
   <java-symbol type="string" name="satellite_manual_selection_state_popup_cancel" />
   <java-symbol type="drawable" name="ic_satellite_alt_24px" />
   <java-symbol type="drawable" name="ic_android_satellite_24px" />
+  <java-symbol type="string" name="satellite_sos_available_notification_title" />
+  <java-symbol type="string" name="satellite_sos_available_notification_summary" />
+  <java-symbol type="string" name="satellite_sos_not_in_allowed_region_notification_title" />
+  <java-symbol type="string" name="satellite_sos_not_in_allowed_region_notification_summary" />
+  <java-symbol type="string" name="satellite_sos_not_supported_notification_title" />
+  <java-symbol type="string" name="satellite_sos_not_supported_notification_summary" />
+  <java-symbol type="string" name="satellite_sos_not_provisioned_notification_title" />
+  <java-symbol type="string" name="satellite_sos_not_provisioned_notification_summary" />
+  <java-symbol type="string" name="satellite_sos_unsupported_default_sms_app_notification_title" />
+  <java-symbol type="string" name="satellite_sos_unsupported_default_sms_app_notification_summary" />
+  <java-symbol type="string" name="satellite_sos_location_disabled_notification_title" />
+  <java-symbol type="string" name="satellite_sos_location_disabled_notification_summary" />
+  <java-symbol type="string" name="satellite_messaging_available_notification_title" />
+  <java-symbol type="string" name="satellite_messaging_available_notification_summary" />
+  <java-symbol type="string" name="satellite_messaging_not_in_allowed_region_notification_title" />
+  <java-symbol type="string" name="satellite_messaging_not_in_allowed_region_notification_summary" />
+  <java-symbol type="string" name="satellite_messaging_not_supported_notification_title" />
+  <java-symbol type="string" name="satellite_messaging_not_supported_notification_summary" />
+  <java-symbol type="string" name="satellite_messaging_not_provisioned_notification_title" />
+  <java-symbol type="string" name="satellite_messaging_not_provisioned_notification_summary" />
+  <java-symbol type="string" name="satellite_messaging_unsupported_default_sms_app_notification_title" />
+  <java-symbol type="string" name="satellite_messaging_unsupported_default_sms_app_notification_summary" />
+  <java-symbol type="string" name="satellite_messaging_location_disabled_notification_title" />
+  <java-symbol type="string" name="satellite_messaging_location_disabled_notification_summary" />
 
   <!-- DisplayManager configs. -->
   <java-symbol type="bool" name="config_evenDimmerEnabled" />

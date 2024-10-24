@@ -6522,6 +6522,54 @@ ul.</string>
     <string name="satellite_manual_selection_state_popup_cancel">Go back</string>
     <!-- Initial/System provided label shown for an app which gets unarchived. [CHAR LIMIT=64]. -->
     <string name="unarchival_session_app_label">Pending...</string>
+    <!-- Notification title when satellite service is available. -->
+    <string name="satellite_sos_available_notification_title">Satellite SOS is now available</string>
+    <!-- Notification summary when satellite service is available. [CHAR LIMIT=NONE] -->
+    <string name="satellite_sos_available_notification_summary">You can message emergency services if there\'s no mobile or Wi-Fi network. Google Messages must be your default messaging app.</string>
+    <!-- Notification title when satellite service is not supported by device. -->
+    <string name="satellite_sos_not_supported_notification_title">Satellite SOS isn\'t supported</string>
+    <!-- Notification summary when satellite service is not supported by device. [CHAR LIMIT=NONE] -->
+    <string name="satellite_sos_not_supported_notification_summary">Satellite SOS isn\'t supported on this device</string>
+    <!-- Notification title when satellite service is not provisioned. [CHAR LIMIT=NONE] -->
+    <string name="satellite_sos_not_provisioned_notification_title">Satellite SOS isn\'t set up</string>
+    <!-- Notification summary when satellite service is not provisioned. [CHAR LIMIT=NONE] -->
+    <string name="satellite_sos_not_provisioned_notification_summary">Make sure you\'re connected to the internet and try setup again</string>
+    <!-- Notification title when satellite service is not allowed at current location. -->
+    <string name="satellite_sos_not_in_allowed_region_notification_title">Satellite SOS isn\'t available</string>
+    <!-- Notification summary when satellite service is not allowed at current location. [CHAR LIMIT=NONE] -->
+    <string name="satellite_sos_not_in_allowed_region_notification_summary">Satellite SOS isn\'t available in this country or region</string>
+    <!-- Notification title when default messaging app does not support satellite. [CHAR LIMIT=NONE] -->
+    <string name="satellite_sos_unsupported_default_sms_app_notification_title">Satellite SOS not set up</string>
+    <!-- Notification summary when default messaging app does not support satellite. [CHAR LIMIT=NONE] -->
+    <string name="satellite_sos_unsupported_default_sms_app_notification_summary">To message by satellite, set Google Messages as your default messaging app</string>
+    <!-- Notification title when location settings is disabled. -->
+    <string name="satellite_sos_location_disabled_notification_title">Satellite SOS isn\'t available</string>
+    <!-- Notification summary when location settings is disabled. [CHAR LIMIT=NONE] -->
+    <string name="satellite_sos_location_disabled_notification_summary">To check if satellite SOS is available in this country or region, turn on location settings</string>
+    <!-- Notification title when satellite service is available. -->
+    <string name="satellite_messaging_available_notification_title">Satellite messaging available</string>
+    <!-- Notification summary when satellite service is available. [CHAR LIMIT=NONE] -->
+    <string name="satellite_messaging_available_notification_summary">You can message by satellite if there\'s no mobile or Wi-Fi network. Google Messages must be your default messaging app.</string>
+    <!-- Notification title when satellite service is not supported by device. -->
+    <string name="satellite_messaging_not_supported_notification_title">Satellite messaging not supported</string>
+    <!-- Notification summary when satellite service is not supported by device. [CHAR LIMIT=NONE] -->
+    <string name="satellite_messaging_not_supported_notification_summary">Satellite messaging isn\'t supported on this device</string>
+    <!-- Notification title when satellite service is not provisioned. [CHAR LIMIT=NONE] -->
+    <string name="satellite_messaging_not_provisioned_notification_title">Satellite messaging not set up</string>
+    <!-- Notification summary when satellite service is not provisioned. [CHAR LIMIT=NONE] -->
+    <string name="satellite_messaging_not_provisioned_notification_summary">Make sure you\'re connected to the internet and try setup again</string>
+    <!-- Notification title when satellite service is not allowed at current location. -->
+    <string name="satellite_messaging_not_in_allowed_region_notification_title">Satellite messaging not available</string>
+    <!-- Notification summary when satellite service is not allowed at current location. [CHAR LIMIT=NONE] -->
+    <string name="satellite_messaging_not_in_allowed_region_notification_summary">Satellite messaging isn\'t available in this country or region</string>
+    <!-- Notification title when default messaging app does not support satellite. [CHAR LIMIT=NONE] -->
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_title">Satellite messaging not set up</string>
+    <!-- Notification summary when default messaging app does not support satellite. [CHAR LIMIT=NONE] -->
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_summary">To message by satellite, set Google Messages as your default messaging app</string>
+    <!-- Notification title when location settings is disabled. -->
+    <string name="satellite_messaging_location_disabled_notification_title">Satellite messaging not available</string>
+    <!-- Notification summary when location settings is disabled. [CHAR LIMIT=NONE] -->
+    <string name="satellite_messaging_location_disabled_notification_summary">To check if satellite messaging is available in this country or region, turn on location settings</string>
 
     <!-- Fingerprint dangling notification title -->
     <string name="fingerprint_dangling_notification_title">Set up Fingerprint Unlock again</string>
