@@ -101,7 +101,7 @@ public abstract class Conference extends Conferenceable {
     private Set<String> mPreviousExtraKeys;
     private final Object mExtrasLock = new Object();
     private Uri mAddress;
-    private int mAddressPresentation;
+    private int mAddressPresentation = TelecomManager.PRESENTATION_UNKNOWN;
     private String mCallerDisplayName;
     private int mCallerDisplayNamePresentation;
     private int mCallDirection;
