@@ -1574,7 +1574,7 @@ public class NotificationStackScrollLayout
         if (mMaxDisplayedNotifications != -1) {
             // The stack intrinsic height already contains the correct value when there is a limit
             // in the max number of notifications (e.g. as in keyguard).
-            height = mIntrinsicContentHeight;
+            height = mScrollViewFields.getIntrinsicStackHeight();
         } else {
             height = Math.max(0f, mAmbientState.getStackCutoff() - mAmbientState.getStackTop());
         }
@@ -2610,7 +2610,7 @@ public class NotificationStackScrollLayout
     }
 
     @VisibleForTesting
-    void updateStackHeight() {
+    void updateIntrinsicStackHeight() {
         if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
 
         final int shelfIntrinsicHeight = mShelf != null ? mShelf.getIntrinsicHeight() : 0;
@@ -2621,8 +2621,11 @@ public class NotificationStackScrollLayout
                 mMaxDisplayedNotifications,
                 shelfIntrinsicHeight
         );
-        mIntrinsicContentHeight = notificationsHeight;
-        final int fullStackHeight = notificationsHeight + footerIntrinsicHeight + mBottomPadding;
+        // When there is a limit in the max number of notifications, we never display the footer.
+        final int fullStackHeight = mMaxDisplayedNotifications != -1
+                ? notificationsHeight
+                : notificationsHeight + footerIntrinsicHeight + mBottomPadding;
+
         if (mScrollViewFields.getIntrinsicStackHeight() != fullStackHeight) {
             mScrollViewFields.setIntrinsicStackHeight(fullStackHeight);
             notifyStackHeightChangedListeners();
@@ -2631,7 +2634,7 @@ public class NotificationStackScrollLayout
 
     private void updateContentHeight() {
         if (SceneContainerFlag.isEnabled()) {
-            updateStackHeight();
+            updateIntrinsicStackHeight();
             return;
         }
 
@@ -5348,7 +5351,12 @@ public class NotificationStackScrollLayout
     public void setMaxDisplayedNotifications(int maxDisplayedNotifications) {
         if (mMaxDisplayedNotifications != maxDisplayedNotifications) {
             mMaxDisplayedNotifications = maxDisplayedNotifications;
-            updateContentHeight();
+            if (SceneContainerFlag.isEnabled()) {
+                updateIntrinsicStackHeight();
+                updateStackEndHeightAndStackHeight(mAmbientState.getExpansionFraction());
+            } else {
+                updateContentHeight();
+            }
             notifyHeightChangeListener(mShelf);
         }
     }

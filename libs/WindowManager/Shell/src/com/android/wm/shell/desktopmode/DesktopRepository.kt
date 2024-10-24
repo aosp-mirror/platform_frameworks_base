@@ -260,11 +260,11 @@ class DesktopRepository (
         ArraySet(desktopTaskDataByDisplayId[displayId]?.minimizedTasks)
 
     /** Returns all active non-minimized tasks for [displayId] ordered from top to bottom. */
-    fun getActiveNonMinimizedOrderedTasks(displayId: Int): List<Int> =
+    fun getExpandedTasksOrdered(displayId: Int): List<Int> =
         getFreeformTasksInZOrder(displayId).filter { !isMinimizedTask(it) }
 
     /** Returns the count of active non-minimized tasks for [displayId]. */
-    fun getActiveNonMinimizedTaskCount(displayId: Int): Int {
+    fun getExpandedTaskCount(displayId: Int): Int {
         return getActiveTasks(displayId).count { !isMinimizedTask(it) }
     }
 

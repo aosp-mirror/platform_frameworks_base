@@ -63,6 +63,7 @@ import com.android.systemui.res.R;
 import com.android.systemui.shade.ShadeViewStateProvider;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
+import com.android.systemui.statusbar.data.repository.StatusBarContentInsetsProviderStore;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
 import com.android.systemui.statusbar.phone.ui.StatusBarIconController;
 import com.android.systemui.statusbar.phone.ui.TintedIconManager;
@@ -119,6 +120,8 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
     @Mock
     private StatusBarContentInsetsProvider mStatusBarContentInsetsProvider;
     @Mock
+    private StatusBarContentInsetsProviderStore mStatusBarContentInsetsProviderStore;
+    @Mock
     private UserManager mUserManager;
     @Mock
     private StatusBarUserChipViewModel mStatusBarUserChipViewModel;
@@ -143,7 +146,8 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
         mShadeViewStateProvider = new TestShadeViewStateProvider();
 
         MockitoAnnotations.initMocks(this);
-
+        when(mStatusBarContentInsetsProviderStore.getDefaultDisplay())
+                .thenReturn(mStatusBarContentInsetsProvider);
         when(mIconManagerFactory.create(any(), any())).thenReturn(mIconManager);
 
         allowTestableLooperAsMainThread();
@@ -175,7 +179,7 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
                 mKosmos.getKeyguardStatusBarViewModel(),
                 mBiometricUnlockController,
                 mStatusBarStateController,
-                mStatusBarContentInsetsProvider,
+                mStatusBarContentInsetsProviderStore,
                 mUserManager,
                 mStatusBarUserChipViewModel,
                 mSecureSettings,

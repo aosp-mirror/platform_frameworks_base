@@ -313,7 +313,7 @@
     <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"Надсилання аудіо"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_accessibility" msgid="7604615019302091708">"відкрити налаштування надсилання аудіо"</string>
     <string name="quick_settings_bluetooth_audio_sharing_dialog_message" msgid="4251807313264307426">"Музика й відео із цього пристрою відтворюватимуться на обох парах навушників"</string>
-    <string name="quick_settings_bluetooth_audio_sharing_dialog_title" msgid="4406818346036286793">"Поділитися аудіо"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_dialog_title" msgid="4406818346036286793">"Надіслати аудіо"</string>
     <string name="quick_settings_bluetooth_audio_sharing_dialog_subtitle" msgid="3014906864710059236">"Пристрої \"<xliff:g id="AVAILABLE_DEVICE_NAME">%1$s</xliff:g>\" і \"<xliff:g id="ACTIVE_DEVICE_NAME">%2$s</xliff:g>\""</string>
     <string name="quick_settings_bluetooth_audio_sharing_dialog_switch_to_button" msgid="7546825655978203773">"Перемкнути на \"<xliff:g id="AVAILABLE_DEVICE_NAME">%1$s</xliff:g>\""</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> заряду акумулятора"</string>
@@ -1405,6 +1405,8 @@
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Значок розгортання"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"або"</string>
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"Маркер переміщення"</string>
+    <!-- no translation found for shortcut_helper_keyboard_settings_buttons_label (6720967595915985259) -->
+    <skip />
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"Навігація за допомогою клавіатури"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"Комбінації клавіш: докладніше"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"Навігація за допомогою сенсорної панелі"</string>
@@ -1462,4 +1464,8 @@
     <string name="qs_edit_mode_category_providedByApps" msgid="8346112074897919019">"Надано додатками"</string>
     <string name="qs_edit_mode_category_display" msgid="4749511439121053942">"Екран"</string>
     <string name="qs_edit_mode_category_unknown" msgid="509314252124053550">"Невідомо"</string>
+    <!-- no translation found for qs_edit_mode_reset_dialog_title (8841270491554460726) -->
+    <skip />
+    <!-- no translation found for qs_edit_mode_reset_dialog_content (8626426097929954027) -->
+    <skip />
 </resources>

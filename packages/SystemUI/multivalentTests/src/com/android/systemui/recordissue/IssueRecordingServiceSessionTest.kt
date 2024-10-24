@@ -60,6 +60,7 @@ class IssueRecordingServiceSessionTest : SysuiTestCase() {
     private val iActivityManager = mock<IActivityManager>()
     private val notificationManager = mock<NotificationManager>()
     private val panelInteractor = mock<PanelInteractor>()
+    private val screenRecordingStartTimeStore = mock<ScreenRecordingStartTimeStore>()
 
     private lateinit var underTest: IssueRecordingServiceSession
 
@@ -76,6 +77,7 @@ class IssueRecordingServiceSessionTest : SysuiTestCase() {
                 iActivityManager,
                 notificationManager,
                 userContextProvider,
+                screenRecordingStartTimeStore,
             )
     }
 
@@ -90,7 +92,7 @@ class IssueRecordingServiceSessionTest : SysuiTestCase() {
 
     @Test
     fun stopsTracing_afterReceivingStopTracingCommand() {
-        underTest.stop(mContext.contentResolver)
+        underTest.stop()
         bgExecutor.runAllReady()
 
         Truth.assertThat(issueRecordingState.isRecording).isFalse()
@@ -113,7 +115,7 @@ class IssueRecordingServiceSessionTest : SysuiTestCase() {
         underTest.share(0, uri)
         bgExecutor.runAllReady()
 
-        verify(iActivityManager).requestBugReportWithExtraAttachment(uri)
+        verify(iActivityManager).requestBugReportWithExtraAttachments(any())
     }
 
     @Test
@@ -124,7 +126,7 @@ class IssueRecordingServiceSessionTest : SysuiTestCase() {
         underTest.share(0, uri)
         bgExecutor.runAllReady()
 
-        verify(traceurConnection).shareTraces(uri)
+        verify(traceurConnection).shareTraces(any())
     }
 
     @Test

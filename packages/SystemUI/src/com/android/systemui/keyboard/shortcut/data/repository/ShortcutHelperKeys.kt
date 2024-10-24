@@ -124,6 +124,17 @@ object ShortcutHelperKeys {
             KEYCODE_RECENT_APPS to R.drawable.ic_check_box_outline_blank,
         )
 
+    val modifierLabels =
+        mapOf<Int, (Context) -> String>(
+            // Modifiers
+            META_META_ON to { "Meta" },
+            META_CTRL_ON to { "Ctrl" },
+            META_ALT_ON to { "Alt" },
+            META_SHIFT_ON to { "Shift" },
+            META_SYM_ON to { "Sym" },
+            META_FUNCTION_ON to { "Fn" },
+        )
+
     val specialKeyLabels =
         mapOf<Int, (Context) -> String>(
             KEYCODE_HOME to { context -> context.getString(R.string.keyboard_key_home) },
@@ -317,7 +328,7 @@ object ShortcutHelperKeys {
                 { context ->
                     context.getString(
                         R.string.keyboard_key_numpad_template,
-                        context.getString(R.string.keyboard_key_enter)
+                        context.getString(R.string.keyboard_key_enter),
                     )
                 },
             KEYCODE_NUMPAD_EQUALS to
@@ -343,13 +354,5 @@ object ShortcutHelperKeys {
             KEYCODE_CTRL_RIGHT to { "Ctrl" },
             KEYCODE_SHIFT_LEFT to { "Shift" },
             KEYCODE_SHIFT_RIGHT to { "Shift" },
-
-            // Modifiers
-            META_META_ON to { "Meta" },
-            META_CTRL_ON to { "Ctrl" },
-            META_ALT_ON to { "Alt" },
-            META_SHIFT_ON to { "Shift" },
-            META_SYM_ON to { "Sym" },
-            META_FUNCTION_ON to { "Fn" },
         )
 }

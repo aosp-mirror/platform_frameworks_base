@@ -30,20 +30,16 @@ import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.SystemClock;
 import android.os.SystemProperties;
-import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.BackgroundThread;
-import com.android.internal.util.FastPrintWriter;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -1494,6 +1490,7 @@ public class PropertyInvalidatedCache<Query, Result> {
     final static String NAME_LIKE = "-name-like=";
     final static String PROPERTY_CONTAINS = "-property-has=";
     final static String PROPERTY_LIKE = "-property-like=";
+    final static String BRIEF = "-brief";
 
     /**
      * Return true if any argument is a detailed specification switch.
@@ -1539,6 +1536,21 @@ public class PropertyInvalidatedCache<Query, Result> {
         return false;
     }
 
+    /**
+     * helper method to check if dump should be skipped due to zero values
+     * @param args takes command arguments to check if -brief is present
+     * @return True if dump should be skipped
+     */
+    private boolean skipDump(String[] args) {
+        for (String a : args) {
+            if (a.equals(BRIEF)) {
+                return (mSkips[NONCE_CORKED] + mSkips[NONCE_UNSET] + mSkips[NONCE_DISABLED]
+                      + mSkips[NONCE_BYPASS] + mHits + mMisses) == 0;
+            }
+        }
+        return false;
+    }
+
     private void dumpContents(PrintWriter pw, boolean detailed, String[] args) {
         // If the user has requested specific caches and this is not one of them, return
         // immediately.
@@ -1549,25 +1561,28 @@ public class PropertyInvalidatedCache<Query, Result> {
         NonceHandler.Stats stats = mNonce.getStats();
 
         synchronized (mLock) {
-            pw.println(formatSimple("  Cache Name: %s", cacheName()));
-            pw.println(formatSimple("    Property: %s", mPropertyName));
-            final long skips = mSkips[NONCE_CORKED] + mSkips[NONCE_UNSET] + mSkips[NONCE_DISABLED]
-                    + mSkips[NONCE_BYPASS];
-            pw.println(formatSimple(
-                    "    Hits: %d, Misses: %d, Skips: %d, Clears: %d",
-                    mHits, mMisses, skips, mClears));
-            pw.println(formatSimple(
-                    "    Skip-corked: %d, Skip-unset: %d, Skip-bypass: %d, Skip-other: %d",
-                    mSkips[NONCE_CORKED], mSkips[NONCE_UNSET],
-                    mSkips[NONCE_BYPASS], mSkips[NONCE_DISABLED]));
-            pw.println(formatSimple(
-                    "    Nonce: 0x%016x, Invalidates: %d, CorkedInvalidates: %d",
-                    mLastSeenNonce, stats.invalidated, stats.corkedInvalidates));
-            pw.println(formatSimple(
-                    "    Current Size: %d, Max Size: %d, HW Mark: %d, Overflows: %d",
-                    mCache.size(), mMaxEntries, mHighWaterMark, mMissOverflow));
-            pw.println(formatSimple("    Enabled: %s", mDisabled ? "false" : "true"));
-            pw.println("");
+            if (!skipDump(args)) {
+                pw.println(formatSimple("  Cache Name: %s", cacheName()));
+                pw.println(formatSimple("    Property: %s", mPropertyName));
+                final long skips =
+                        mSkips[NONCE_CORKED] + mSkips[NONCE_UNSET] + mSkips[NONCE_DISABLED]
+                                + mSkips[NONCE_BYPASS];
+                pw.println(formatSimple(
+                        "    Hits: %d, Misses: %d, Skips: %d, Clears: %d",
+                        mHits, mMisses, skips, mClears));
+                pw.println(formatSimple(
+                        "    Skip-corked: %d, Skip-unset: %d, Skip-bypass: %d, Skip-other: %d",
+                        mSkips[NONCE_CORKED], mSkips[NONCE_UNSET],
+                        mSkips[NONCE_BYPASS], mSkips[NONCE_DISABLED]));
+                pw.println(formatSimple(
+                        "    Nonce: 0x%016x, Invalidates: %d, CorkedInvalidates: %d",
+                        mLastSeenNonce, stats.invalidated, stats.corkedInvalidates));
+                pw.println(formatSimple(
+                        "    Current Size: %d, Max Size: %d, HW Mark: %d, Overflows: %d",
+                        mCache.size(), mMaxEntries, mHighWaterMark, mMissOverflow));
+                pw.println(formatSimple("    Enabled: %s", mDisabled ? "false" : "true"));
+                pw.println("");
+            }
 
             // No specific cache was requested.  This is the default, and no details
             // should be dumped.
