@@ -170,6 +170,7 @@ android_app {
         "android.os.vibrator.flags-aconfig",
         "android.media.tv.flags-aconfig",
         "android.security.flags-aconfig",
+        "device_policy_aconfig_flags",
         "com.android.hardware.input.input-aconfig",
         "aconfig_trade_in_mode_flags",
         "art-aconfig-flags",

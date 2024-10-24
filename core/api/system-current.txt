@@ -134,6 +134,7 @@ package android {
     field public static final String CONTROL_KEYGUARD_SECURE_NOTIFICATIONS = "android.permission.CONTROL_KEYGUARD_SECURE_NOTIFICATIONS";
     field public static final String CONTROL_OEM_PAID_NETWORK_PREFERENCE = "android.permission.CONTROL_OEM_PAID_NETWORK_PREFERENCE";
     field public static final String CONTROL_VPN = "android.permission.CONTROL_VPN";
+    field @FlaggedApi("android.app.admin.flags.split_create_managed_profile_enabled") public static final String COPY_ACCOUNTS = "android.permission.COPY_ACCOUNTS";
     field public static final String CREATE_USERS = "android.permission.CREATE_USERS";
     field public static final String CREATE_VIRTUAL_DEVICE = "android.permission.CREATE_VIRTUAL_DEVICE";
     field public static final String CRYPT_KEEPER = "android.permission.CRYPT_KEEPER";
@@ -345,6 +346,7 @@ package android {
     field public static final String REGISTER_SIM_SUBSCRIPTION = "android.permission.REGISTER_SIM_SUBSCRIPTION";
     field public static final String REGISTER_STATS_PULL_ATOM = "android.permission.REGISTER_STATS_PULL_ATOM";
     field public static final String REMOTE_DISPLAY_PROVIDER = "android.permission.REMOTE_DISPLAY_PROVIDER";
+    field @FlaggedApi("android.app.admin.flags.split_create_managed_profile_enabled") public static final String REMOVE_ACCOUNTS = "android.permission.REMOVE_ACCOUNTS";
     field public static final String REMOVE_DRM_CERTIFICATES = "android.permission.REMOVE_DRM_CERTIFICATES";
     field public static final String REMOVE_TASKS = "android.permission.REMOVE_TASKS";
     field public static final String RENOUNCE_PERMISSIONS = "android.permission.RENOUNCE_PERMISSIONS";
@@ -570,6 +572,7 @@ package android.accessibilityservice {
 package android.accounts {
 
   public class AccountManager {
+    method @FlaggedApi("android.app.admin.flags.split_create_managed_profile_enabled") @NonNull @RequiresPermission(anyOf={android.Manifest.permission.COPY_ACCOUNTS, android.Manifest.permission.INTERACT_ACROSS_USERS_FULL}) public android.accounts.AccountManagerFuture<java.lang.Boolean> copyAccountToUser(@NonNull android.accounts.Account, @NonNull android.os.UserHandle, @NonNull android.os.UserHandle, @Nullable android.accounts.AccountManagerCallback<java.lang.Boolean>, @Nullable android.os.Handler);
     method @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL) public android.accounts.AccountManagerFuture<android.os.Bundle> finishSessionAsUser(android.os.Bundle, android.app.Activity, android.os.UserHandle, android.accounts.AccountManagerCallback<android.os.Bundle>, android.os.Handler);
   }
 

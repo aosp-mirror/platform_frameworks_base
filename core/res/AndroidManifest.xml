@@ -2649,6 +2649,22 @@
         android:label="@string/permlab_getAccounts" />
     <uses-permission android:name="android.permission.GET_ACCOUNTS"/>
 
+    <!-- @SystemApi Allows access to remove an account.
+         @FlaggedApi(android.app.admin.flags.Flags.FLAG_SPLIT_CREATE_MANAGED_PROFILE_ENABLED)
+         <p>Not for use by third-party applications.
+         @hide -->
+    <permission android:name="android.permission.REMOVE_ACCOUNTS"
+        android:protectionLevel="signature|role"
+        android:featureFlag="android.app.admin.flags.split_create_managed_profile_enabled" />
+
+    <!-- @SystemApi Allows access to copy an account to another user.
+         @FlaggedApi(android.app.admin.flags.Flags.FLAG_SPLIT_CREATE_MANAGED_PROFILE_ENABLED)
+         <p>Not for use by third-party applications.
+         @hide -->
+    <permission android:name="android.permission.COPY_ACCOUNTS"
+        android:protectionLevel="signature|role"
+        android:featureFlag="android.app.admin.flags.split_create_managed_profile_enabled" />
+
     <!-- Allows applications to call into AccountAuthenticators.
     <p>Not for use by third-party applications. -->
     <permission android:name="android.permission.ACCOUNT_MANAGER"
