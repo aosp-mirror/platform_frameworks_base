@@ -15,7 +15,7 @@
  */
 package com.android.internal.widget.remotecompose.core.operations;
 
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.INT;
+import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT;
 
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
@@ -27,10 +27,9 @@ import com.android.internal.widget.remotecompose.core.documentation.Documentatio
 import java.util.List;
 
 /**
- * Set a current theme, applied to the following operations in the document.
- * This can be used to "tag" the subsequent operations to a given theme. On playback,
- * we can then filter operations depending on the chosen theme.
- *
+ * Set a current theme, applied to the following operations in the document. This can be used to
+ * "tag" the subsequent operations to a given theme. On playback, we can then filter operations
+ * depending on the chosen theme.
  */
 public class Theme implements RemoteComposeOperation {
     private static final int OP_CODE = Operations.THEME;
@@ -43,10 +42,7 @@ public class Theme implements RemoteComposeOperation {
     /**
      * we can then filter operations depending on the chosen theme.
      *
-     * @param theme the theme we are interested in:
-     *              - Theme.UNSPECIFIED
-     *              - Theme.DARK
-     *              - Theme.LIGHT
+     * @param theme the theme we are interested in: - Theme.UNSPECIFIED - Theme.DARK - Theme.LIGHT
      */
     public Theme(int theme) {
         this.mTheme = theme;
@@ -76,7 +72,6 @@ public class Theme implements RemoteComposeOperation {
         return CLASS_NAME;
     }
 
-
     public static int id() {
         return OP_CODE;
     }
@@ -85,7 +80,6 @@ public class Theme implements RemoteComposeOperation {
         buffer.start(OP_CODE);
         buffer.writeInt(theme);
     }
-
 
     public static void read(WireBuffer buffer, List<Operation> operations) {
         int theme = buffer.readInt();

@@ -20,9 +20,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.view.View;
 
-/**
- * Implementation for the click handling
- */
+/** Implementation for the click handling */
 class ClickAreaView extends View {
     private int mId;
     private String mMetadata;
@@ -30,8 +28,8 @@ class ClickAreaView extends View {
 
     private boolean mDebug;
 
-    ClickAreaView(Context context, boolean debug, int id,
-                         String contentDescription, String metadata) {
+    ClickAreaView(
+            Context context, boolean debug, int id, String contentDescription, String metadata) {
         super(context);
         this.mId = id;
         this.mMetadata = metadata;

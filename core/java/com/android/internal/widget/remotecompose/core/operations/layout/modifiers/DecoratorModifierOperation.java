@@ -22,15 +22,15 @@ import com.android.internal.widget.remotecompose.core.operations.layout.Componen
 import com.android.internal.widget.remotecompose.core.operations.layout.DecoratorComponent;
 
 /**
- * Represents a decorator modifier (lightweight component), ie a modifier
- * that impacts the visual output (background, border...)
+ * Represents a decorator modifier (lightweight component), ie a modifier that impacts the visual
+ * output (background, border...)
  */
 public abstract class DecoratorModifierOperation extends PaintOperation
         implements ModifierOperation, DecoratorComponent {
 
     @Override
-    public void onClick(RemoteContext context, CoreDocument document,
-                        Component component, float x, float y) {
+    public void onClick(
+            RemoteContext context, CoreDocument document, Component component, float x, float y) {
         // nothing
     }
 }

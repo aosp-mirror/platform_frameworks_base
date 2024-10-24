@@ -15,7 +15,7 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.layout.managers;
 
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.INT;
+import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT;
 
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
@@ -29,8 +29,14 @@ import com.android.internal.widget.remotecompose.core.operations.layout.measure.
 import java.util.List;
 
 public class CanvasLayout extends BoxLayout {
-    public CanvasLayout(Component parent, int componentId, int animationId,
-                        float x, float y, float width, float height) {
+    public CanvasLayout(
+            Component parent,
+            int componentId,
+            int animationId,
+            float x,
+            float y,
+            float width,
+            float height) {
         super(parent, componentId, animationId, x, y, width, height, 0, 0);
     }
 
@@ -40,10 +46,23 @@ public class CanvasLayout extends BoxLayout {
 
     @Override
     public String toString() {
-        return "CANVAS [" + mComponentId + ":" + mAnimationId + "] (" + mX + ", "
-                + mY + " - " + mWidth + " x " + mHeight + ") " + mVisibility;
+        return "CANVAS ["
+                + mComponentId
+                + ":"
+                + mAnimationId
+                + "] ("
+                + mX
+                + ", "
+                + mY
+                + " - "
+                + mWidth
+                + " x "
+                + mHeight
+                + ") "
+                + mVisibility;
     }
 
+    @Override
     protected String getSerializedName() {
         return "CANVAS";
     }
@@ -72,13 +91,14 @@ public class CanvasLayout extends BoxLayout {
         doc.operation("Layout Operations", id(), name())
                 .description("Canvas implementation. Encapsulate draw operations.\n\n")
                 .field(INT, "COMPONENT_ID", "unique id for this component")
-                .field(INT, "ANIMATION_ID", "id used to match components,"
-                        + " for animation purposes");
+                .field(
+                        INT,
+                        "ANIMATION_ID",
+                        "id used to match components," + " for animation purposes");
     }
 
     @Override
-    public void internalLayoutMeasure(PaintContext context,
-                                      MeasurePass measure) {
+    public void internalLayoutMeasure(PaintContext context, MeasurePass measure) {
         ComponentMeasure selfMeasure = measure.get(this);
         float selfWidth = selfMeasure.getW() - mPaddingLeft - mPaddingRight;
         float selfHeight = selfMeasure.getH() - mPaddingTop - mPaddingBottom;

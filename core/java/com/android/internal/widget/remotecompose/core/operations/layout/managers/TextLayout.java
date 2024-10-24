@@ -15,8 +15,8 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.layout.managers;
 
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.FLOAT;
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.INT;
+import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.FLOAT;
+import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT;
 
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
@@ -34,9 +34,7 @@ import com.android.internal.widget.remotecompose.core.operations.utilities.Strin
 
 import java.util.List;
 
-/**
- * Text component, referencing a text id
- */
+/** Text component, referencing a text id */
 public class TextLayout extends LayoutManager implements ComponentStartOperation, VariableSupport {
 
     private static final boolean DEBUG = false;
@@ -86,10 +84,20 @@ public class TextLayout extends LayoutManager implements ComponentStartOperation
         needsRepaint();
     }
 
-    public TextLayout(Component parent, int componentId, int animationId,
-                      float x, float y, float width, float height,
-                      int textId, int color, float fontSize,
-                      int fontStyle, float fontWeight, int fontFamilyId) {
+    public TextLayout(
+            Component parent,
+            int componentId,
+            int animationId,
+            float x,
+            float y,
+            float width,
+            float height,
+            int textId,
+            int color,
+            float fontSize,
+            int fontStyle,
+            float fontWeight,
+            int fontFamilyId) {
         super(parent, componentId, animationId, x, y, width, height);
         mTextId = textId;
         mColor = color;
@@ -99,11 +107,30 @@ public class TextLayout extends LayoutManager implements ComponentStartOperation
         mFontFamilyId = fontFamilyId;
     }
 
-    public TextLayout(Component parent, int componentId, int animationId,
-                      int textId, int color, float fontSize,
-                      int fontStyle, float fontWeight, int fontFamilyId) {
-        this(parent, componentId, animationId, 0, 0, 0, 0,
-                textId, color, fontSize, fontStyle, fontWeight, fontFamilyId);
+    public TextLayout(
+            Component parent,
+            int componentId,
+            int animationId,
+            int textId,
+            int color,
+            float fontSize,
+            int fontStyle,
+            float fontWeight,
+            int fontFamilyId) {
+        this(
+                parent,
+                componentId,
+                animationId,
+                0,
+                0,
+                0,
+                0,
+                textId,
+                color,
+                fontSize,
+                fontStyle,
+                fontWeight,
+                fontFamilyId);
     }
 
     public PaintBundle mPaint = new PaintBundle();
@@ -151,26 +178,57 @@ public class TextLayout extends LayoutManager implements ComponentStartOperation
 
     @Override
     public String toString() {
-        return "TEXT_LAYOUT [" + mComponentId + ":" + mAnimationId + "] (" + mX + ", "
-                + mY + " - " + mWidth + " x " + mHeight + ") " + mVisibility;
+        return "TEXT_LAYOUT ["
+                + mComponentId
+                + ":"
+                + mAnimationId
+                + "] ("
+                + mX
+                + ", "
+                + mY
+                + " - "
+                + mWidth
+                + " x "
+                + mHeight
+                + ") "
+                + mVisibility;
     }
 
+    @Override
     protected String getSerializedName() {
         return "TEXT_LAYOUT";
     }
 
     @Override
     public void serializeToString(int indent, StringSerializer serializer) {
-        serializer.append(indent, getSerializedName() + " [" + mComponentId
-                + ":" + mAnimationId + "] = "
-                + "[" + mX + ", " + mY + ", " + mWidth + ", " + mHeight + "] "
-                + mVisibility + " (" + mTextId + ":\"" + mCachedString + "\")"
-        );
+        serializer.append(
+                indent,
+                getSerializedName()
+                        + " ["
+                        + mComponentId
+                        + ":"
+                        + mAnimationId
+                        + "] = "
+                        + "["
+                        + mX
+                        + ", "
+                        + mY
+                        + ", "
+                        + mWidth
+                        + ", "
+                        + mHeight
+                        + "] "
+                        + mVisibility
+                        + " ("
+                        + mTextId
+                        + ":\""
+                        + mCachedString
+                        + "\")");
     }
 
     @Override
-    public void computeWrapSize(PaintContext context, float maxWidth, float maxHeight,
-                                MeasurePass measure, Size size) {
+    public void computeWrapSize(
+            PaintContext context, float maxWidth, float maxHeight, MeasurePass measure, Size size) {
         context.savePaint();
         mPaint.reset();
         mPaint.setTextSize(mFontSize);
@@ -196,9 +254,16 @@ public class TextLayout extends LayoutManager implements ComponentStartOperation
         return Operations.LAYOUT_TEXT;
     }
 
-    public static void apply(WireBuffer buffer, int componentId, int animationId,
-                             int textId, int color, float fontSize, int fontStyle,
-                             float fontWeight, int fontFamilyId) {
+    public static void apply(
+            WireBuffer buffer,
+            int componentId,
+            int animationId,
+            int textId,
+            int color,
+            float fontSize,
+            int fontStyle,
+            float fontWeight,
+            int fontFamilyId) {
         buffer.start(id());
         buffer.writeInt(componentId);
         buffer.writeInt(animationId);
@@ -219,16 +284,27 @@ public class TextLayout extends LayoutManager implements ComponentStartOperation
         int fontStyle = buffer.readInt();
         float fontWeight = buffer.readFloat();
         int fontFamilyId = buffer.readInt();
-        operations.add(new TextLayout(null, componentId, animationId, textId, color, fontSize,
-                fontStyle, fontWeight, fontFamilyId));
+        operations.add(
+                new TextLayout(
+                        null,
+                        componentId,
+                        animationId,
+                        textId,
+                        color,
+                        fontSize,
+                        fontStyle,
+                        fontWeight,
+                        fontFamilyId));
     }
 
     public static void documentation(DocumentationBuilder doc) {
         doc.operation("Layout Operations", id(), name())
                 .description("Text layout implementation.\n\n")
                 .field(INT, "COMPONENT_ID", "unique id for this component")
-                .field(INT, "ANIMATION_ID", "id used to match components,"
-                        + " for animation purposes")
+                .field(
+                        INT,
+                        "ANIMATION_ID",
+                        "id used to match components," + " for animation purposes")
                 .field(INT, "COLOR", "text color")
                 .field(FLOAT, "FONT_SIZE", "font size")
                 .field(INT, "FONT_STYLE", "font style (0 = normal, 1 = italic)")
@@ -238,8 +314,15 @@ public class TextLayout extends LayoutManager implements ComponentStartOperation
 
     @Override
     public void write(WireBuffer buffer) {
-        apply(buffer, mComponentId, mAnimationId,
-                mTextId, mColor, mFontSize, mFontStyle,
-                mFontWeight, mFontFamilyId);
+        apply(
+                buffer,
+                mComponentId,
+                mAnimationId,
+                mTextId,
+                mColor,
+                mFontSize,
+                mFontStyle,
+                mFontWeight,
+                mFontFamilyId);
     }
 }

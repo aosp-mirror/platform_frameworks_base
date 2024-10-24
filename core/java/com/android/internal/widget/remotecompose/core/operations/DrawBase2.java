@@ -25,11 +25,8 @@ import com.android.internal.widget.remotecompose.core.WireBuffer;
 
 import java.util.List;
 
-/**
- * Base class for commands that take 3 float
- */
-public abstract class DrawBase2 extends PaintOperation
-        implements VariableSupport {
+/** Base class for commands that take 3 float */
+public abstract class DrawBase2 extends PaintOperation implements VariableSupport {
     protected String mName = "DrawRectBase";
     float mV1;
     float mV2;
@@ -45,10 +42,8 @@ public abstract class DrawBase2 extends PaintOperation
 
     @Override
     public void updateVariables(RemoteContext context) {
-        mV1 = (Float.isNaN(mValue1))
-                ? context.getFloat(Utils.idFromNan(mValue1)) : mValue1;
-        mV2 = (Float.isNaN(mValue2))
-                ? context.getFloat(Utils.idFromNan(mValue2)) : mValue2;
+        mV1 = Float.isNaN(mValue1) ? context.getFloat(Utils.idFromNan(mValue1)) : mValue1;
+        mV2 = Float.isNaN(mValue2) ? context.getFloat(Utils.idFromNan(mValue2)) : mValue2;
     }
 
     @Override
@@ -61,7 +56,6 @@ public abstract class DrawBase2 extends PaintOperation
         }
     }
 
-
     @Override
     public void write(WireBuffer buffer) {
         write(buffer, mV1, mV2);
@@ -70,15 +64,13 @@ public abstract class DrawBase2 extends PaintOperation
     protected abstract void write(WireBuffer buffer, float v1, float v2);
 
     protected interface Maker {
-        DrawBase2 create(float v1,
-                         float v2);
+        DrawBase2 create(float v1, float v2);
     }
 
     @Override
     public String toString() {
         return mName + " " + floatToString(mV1) + " " + floatToString(mV2);
     }
-
 
     public static void read(Maker maker, WireBuffer buffer, List<Operation> operations) {
         float v1 = buffer.readFloat();
@@ -99,7 +91,6 @@ public abstract class DrawBase2 extends PaintOperation
         return null;
     }
 
-
     /**
      * Writes out the operation to the buffer
      *
@@ -108,13 +99,9 @@ public abstract class DrawBase2 extends PaintOperation
      * @param x1
      * @param y1
      */
-    protected static void write(WireBuffer buffer,
-                                int opCode,
-                                float x1,
-                                float y1) {
+    protected static void write(WireBuffer buffer, int opCode, float x1, float y1) {
         buffer.start(opCode);
         buffer.writeFloat(x1);
         buffer.writeFloat(y1);
-
     }
 }
