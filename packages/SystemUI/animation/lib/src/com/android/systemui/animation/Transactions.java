@@ -27,6 +27,7 @@ import java.util.concurrent.Executor;
 /**
  * A composite {@link UIComponent.Transaction} that combines multiple other transactions for each ui
  * type.
+ * @hide
  */
 public class Transactions implements UIComponent.Transaction<UIComponent> {
     private final Map<Class, UIComponent.Transaction> mTransactions = new ArrayMap<>();
