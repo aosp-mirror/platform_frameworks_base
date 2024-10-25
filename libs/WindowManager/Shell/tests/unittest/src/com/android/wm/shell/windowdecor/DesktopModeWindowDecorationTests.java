@@ -909,8 +909,10 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 new FakeMaximizeMenuFactory(menu));
         assertFalse(decoration.isMaximizeMenuActive());
 
-        createMaximizeMenu(decoration, menu);
+        createMaximizeMenu(decoration);
 
+        verify(menu).show(anyBoolean(), anyInt(), anyBoolean(), anyBoolean(), any(), any(), any(),
+                any(), mOnMaxMenuHoverChangeListener.capture(), any());
         assertTrue(decoration.isMaximizeMenuActive());
     }
 
@@ -921,7 +923,9 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
         final DesktopModeWindowDecoration decoration = createWindowDecoration(taskInfo,
                 new FakeMaximizeMenuFactory(menu));
         decoration.setAppHeaderMaximizeButtonHovered(false);
-        createMaximizeMenu(decoration, menu);
+        createMaximizeMenu(decoration);
+        verify(menu).show(anyBoolean(), anyInt(), anyBoolean(), anyBoolean(), any(), any(), any(),
+                any(), mOnMaxMenuHoverChangeListener.capture(), any());
 
         mOnMaxMenuHoverChangeListener.getValue().invoke(false);
 
@@ -940,7 +944,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
         final DesktopModeWindowDecoration decoration = createWindowDecoration(taskInfo,
                 new FakeMaximizeMenuFactory(menu));
         decoration.setAppHeaderMaximizeButtonHovered(true);
-        createMaximizeMenu(decoration, menu);
+        createMaximizeMenu(decoration);
 
         decoration.setAppHeaderMaximizeButtonHovered(false);
 
@@ -958,7 +962,9 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
         final MaximizeMenu menu = mock(MaximizeMenu.class);
         final DesktopModeWindowDecoration decoration = createWindowDecoration(taskInfo,
                 new FakeMaximizeMenuFactory(menu));
-        createMaximizeMenu(decoration, menu);
+        createMaximizeMenu(decoration);
+        verify(menu).show(anyBoolean(), anyInt(), anyBoolean(), anyBoolean(), any(), any(), any(),
+                any(), mOnMaxMenuHoverChangeListener.capture(), any());
 
         mOnMaxMenuHoverChangeListener.getValue().invoke(true);
 
@@ -971,13 +977,114 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
         final MaximizeMenu menu = mock(MaximizeMenu.class);
         final DesktopModeWindowDecoration decoration = createWindowDecoration(taskInfo,
                 new FakeMaximizeMenuFactory(menu));
-        createMaximizeMenu(decoration, menu);
+        createMaximizeMenu(decoration);
+        verify(menu).show(anyBoolean(), anyInt(), anyBoolean(), anyBoolean(), any(), any(), any(),
+                any(), mOnMaxMenuHoverChangeListener.capture(), any());
 
         decoration.setAppHeaderMaximizeButtonHovered(true);
 
         verify(mMockHandler).removeCallbacks(any());
     }
 
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_FULLY_IMMERSIVE_IN_DESKTOP)
+    public void createMaximizeMenu_taskRequestsImmersive_showsImmersiveOption() {
+        final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(true /* visible */);
+        taskInfo.requestedVisibleTypes = ~statusBars();
+        final MaximizeMenu menu = mock(MaximizeMenu.class);
+        final DesktopModeWindowDecoration decoration = createWindowDecoration(taskInfo,
+                new FakeMaximizeMenuFactory(menu));
+
+        createMaximizeMenu(decoration);
+
+        verify(menu).show(
+                anyBoolean(),
+                anyInt(),
+                /* showImmersiveOption= */ eq(true),
+                anyBoolean(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any()
+        );
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_FULLY_IMMERSIVE_IN_DESKTOP)
+    public void createMaximizeMenu_taskDoesNotRequestImmersive_hiddenImmersiveOption() {
+        final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(true /* visible */);
+        taskInfo.requestedVisibleTypes = statusBars();
+        final MaximizeMenu menu = mock(MaximizeMenu.class);
+        final DesktopModeWindowDecoration decoration = createWindowDecoration(taskInfo,
+                new FakeMaximizeMenuFactory(menu));
+
+        createMaximizeMenu(decoration);
+
+        verify(menu).show(
+                anyBoolean(),
+                anyInt(),
+                /* showImmersiveOption= */ eq(false),
+                anyBoolean(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any()
+        );
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_FULLY_IMMERSIVE_IN_DESKTOP)
+    public void createMaximizeMenu_taskResizable_showsSnapOptions() {
+        final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(true /* visible */);
+        taskInfo.isResizeable = true;
+        final MaximizeMenu menu = mock(MaximizeMenu.class);
+        final DesktopModeWindowDecoration decoration = createWindowDecoration(taskInfo,
+                new FakeMaximizeMenuFactory(menu));
+
+        createMaximizeMenu(decoration);
+
+        verify(menu).show(
+                anyBoolean(),
+                anyInt(),
+                anyBoolean(),
+                /* showSnapOptions= */ eq(true),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any()
+        );
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_FULLY_IMMERSIVE_IN_DESKTOP)
+    public void createMaximizeMenu_taskUnresizable_hiddenSnapOptions() {
+        final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(true /* visible */);
+        taskInfo.isResizeable = false;
+        final MaximizeMenu menu = mock(MaximizeMenu.class);
+        final DesktopModeWindowDecoration decoration = createWindowDecoration(taskInfo,
+                new FakeMaximizeMenuFactory(menu));
+
+        createMaximizeMenu(decoration);
+
+        verify(menu).show(
+                anyBoolean(),
+                anyInt(),
+                anyBoolean(),
+                /* showSnapOptions= */ eq(false),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any()
+        );
+    }
 
     @Test
     @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_APP_TO_WEB)
@@ -1335,13 +1442,13 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 anyInt(), anyInt(), anyInt(), anyInt());
     }
 
-    private void createMaximizeMenu(DesktopModeWindowDecoration decoration, MaximizeMenu menu) {
+    private void createMaximizeMenu(DesktopModeWindowDecoration decoration) {
         final Function0<Unit> l = () -> Unit.INSTANCE;
         decoration.setOnMaximizeOrRestoreClickListener(l);
+        decoration.setOnImmersiveOrRestoreClickListener(l);
         decoration.setOnLeftSnapClickListener(l);
         decoration.setOnRightSnapClickListener(l);
         decoration.createMaximizeMenu();
-        verify(menu).show(any(), any(), any(), mOnMaxMenuHoverChangeListener.capture(), any());
     }
 
     private void fillRoundedCornersResources(int fillValue) {

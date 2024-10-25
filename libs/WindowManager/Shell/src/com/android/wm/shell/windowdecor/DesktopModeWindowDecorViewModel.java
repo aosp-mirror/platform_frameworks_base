@@ -578,6 +578,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
             return;
         }
         mDesktopTasksController.toggleDesktopTaskFullImmersiveState(decoration.mTaskInfo);
+        decoration.closeMaximizeMenu();
     }
 
     private void onSnapResize(int taskId, boolean left, MotionEvent motionEvent) {
@@ -1527,6 +1528,10 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
         windowDecoration.setOnMaximizeOrRestoreClickListener(() -> {
             onMaximizeOrRestore(taskInfo.taskId, "maximize_menu", ResizeTrigger.MAXIMIZE_MENU,
                     touchEventListener.mMotionEvent);
+            return Unit.INSTANCE;
+        });
+        windowDecoration.setOnImmersiveOrRestoreClickListener(() -> {
+            onEnterOrExitImmersive(taskInfo.taskId);
             return Unit.INSTANCE;
         });
         windowDecoration.setOnLeftSnapClickListener(() -> {
