@@ -900,7 +900,7 @@ public class NotificationStackScrollLayout
         drawDebugInfo(canvas, y, Color.LTGRAY,
                 /* label= */ "mAmbientState.getStackY() + mAmbientState.getStackHeight() = " + y);
 
-        y = (int) (mAmbientState.getStackY() + mIntrinsicContentHeight);
+        y = (int) (mAmbientState.getStackY() + getIntrinsicContentHeight());
         drawDebugInfo(canvas, y, Color.YELLOW,
                 /* label= */ "mAmbientState.getStackY() + mIntrinsicContentHeight = " + y);
 
@@ -1586,7 +1586,7 @@ public class NotificationStackScrollLayout
         if (mMaxDisplayedNotifications != -1) {
             // The stack intrinsic height already contains the correct value when there is a limit
             // in the max number of notifications (e.g. as in keyguard).
-            stackEndHeight = mIntrinsicContentHeight;
+            stackEndHeight = getIntrinsicContentHeight();
         } else {
             stackEndHeight = Math.max(0f, height - bottomMargin - topPadding);
         }
@@ -1760,14 +1760,6 @@ public class NotificationStackScrollLayout
     private void setRequestedClipBounds(Rect clipRect) {
         mRequestedClipBounds = clipRect;
         updateClipping();
-    }
-
-    /**
-     * Return the height of the content ignoring the footer.
-     */
-    public int getIntrinsicContentHeight() {
-        SceneContainerFlag.assertInLegacyMode();
-        return (int) mIntrinsicContentHeight;
     }
 
     public void updateClipping() {
@@ -2643,7 +2635,7 @@ public class NotificationStackScrollLayout
                 (int) scrimTopPadding + (int) mNotificationStackSizeCalculator.computeHeight(
                         /* notificationStackScrollLayout= */ this, mMaxDisplayedNotifications,
                         shelfIntrinsicHeight);
-        mIntrinsicContentHeight = height;
+        setIntrinsicContentHeight(height);
 
         // The topPadding can be bigger than the regular padding when qs is expanded, in that
         // state the maxPanelHeight and the contentHeight should be bigger
@@ -5525,7 +5517,6 @@ public class NotificationStackScrollLayout
             println(pw, "hideAmount", mAmbientState.getHideAmount());
             println(pw, "ambientStateSwipingUp", mAmbientState.isSwipingUp());
             println(pw, "maxDisplayedNotifications", mMaxDisplayedNotifications);
-            println(pw, "intrinsicContentHeight", mIntrinsicContentHeight);
             println(pw, "intrinsicPadding", mIntrinsicPadding);
             println(pw, "bottomPadding", mBottomPadding);
             dumpRoundedRectClipping(pw);
@@ -5553,6 +5544,7 @@ public class NotificationStackScrollLayout
             mScrollViewFields.dump(pw);
             if (!SceneContainerFlag.isEnabled()) {
                 // fields which will be removed with SceneContainer
+                println(pw, "intrinsicContentHeight", getIntrinsicContentHeight());
                 println(pw, "contentHeight", getContentHeight());
                 println(pw, "topPadding", getTopPadding());
             }
@@ -6968,5 +6960,19 @@ public class NotificationStackScrollLayout
     private void setContentHeight(int contentHeight) {
         SceneContainerFlag.assertInLegacyMode();
         mContentHeight = contentHeight;
+    }
+
+    /**
+     * Use {@link ScrollViewFields#intrinsicStackHeight}, when SceneContainerFlag is enabled.
+     * @return the height of the content ignoring the footer.
+     */
+    public float getIntrinsicContentHeight() {
+        SceneContainerFlag.assertInLegacyMode();
+        return mIntrinsicContentHeight;
+    }
+
+    private void setIntrinsicContentHeight(float intrinsicContentHeight) {
+        SceneContainerFlag.assertInLegacyMode();
+        mIntrinsicContentHeight = intrinsicContentHeight;
     }
 }
