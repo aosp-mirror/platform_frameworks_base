@@ -1104,6 +1104,13 @@ flag {
 }
 
 flag {
+  name: "communal_standalone_support"
+  namespace: "systemui"
+  description: "Support communal features without a dock"
+  bug: "352301247"
+}
+
+flag {
     name: "dream_overlay_updated_font"
     namespace: "systemui"
     description: "Flag to enable updated font settings for dream overlay"
