@@ -24,7 +24,6 @@ import android.platform.test.annotations.EnableFlags
 import android.view.View
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.systemui.Flags.FLAG_STATUS_BAR_RON_CHIPS
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.testScope
@@ -37,9 +36,10 @@ import com.android.systemui.screenrecord.data.repository.screenRecordRepository
 import com.android.systemui.statusbar.StatusBarIconView
 import com.android.systemui.statusbar.chips.mediaprojection.domain.interactor.MediaProjectionChipInteractorTest.Companion.NORMAL_PACKAGE
 import com.android.systemui.statusbar.chips.mediaprojection.domain.interactor.MediaProjectionChipInteractorTest.Companion.setUpPackageManagerForMediaProjection
+import com.android.systemui.statusbar.chips.notification.demo.ui.viewmodel.DemoNotifChipViewModelTest.Companion.addDemoNotifChip
+import com.android.systemui.statusbar.chips.notification.demo.ui.viewmodel.demoNotifChipViewModel
+import com.android.systemui.statusbar.chips.notification.shared.StatusBarNotifChips
 import com.android.systemui.statusbar.chips.notification.ui.viewmodel.NotifChipsViewModelTest.Companion.assertIsNotifChip
-import com.android.systemui.statusbar.chips.ron.demo.ui.viewmodel.DemoRonChipViewModelTest.Companion.addDemoRonChip
-import com.android.systemui.statusbar.chips.ron.demo.ui.viewmodel.demoRonChipViewModel
 import com.android.systemui.statusbar.chips.ui.model.MultipleOngoingActivityChipsModel
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 import com.android.systemui.statusbar.chips.ui.view.ChipBackgroundContainer
@@ -73,14 +73,12 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 
-/**
- * Tests for [OngoingActivityChipsViewModel] when the [FLAG_STATUS_BAR_RON_CHIPS] flag is enabled.
- */
+/** Tests for [OngoingActivityChipsViewModel] when the [StatusBarNotifChips] flag is enabled. */
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 @OptIn(ExperimentalCoroutinesApi::class)
-@EnableFlags(FLAG_STATUS_BAR_RON_CHIPS)
-class OngoingActivityChipsWithRonsViewModelTest : SysuiTestCase() {
+@EnableFlags(StatusBarNotifChips.FLAG_NAME)
+class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
     private val systemClock = kosmos.fakeSystemClock
@@ -110,7 +108,7 @@ class OngoingActivityChipsWithRonsViewModelTest : SysuiTestCase() {
     @Before
     fun setUp() {
         setUpPackageManagerForMediaProjection(kosmos)
-        kosmos.demoRonChipViewModel.start()
+        kosmos.demoNotifChipViewModel.start()
         val icon =
             BitmapDrawable(
                 context.resources,
@@ -119,7 +117,7 @@ class OngoingActivityChipsWithRonsViewModelTest : SysuiTestCase() {
         whenever(kosmos.packageManager.getApplicationIcon(any<String>())).thenReturn(icon)
     }
 
-    // Even though the `primaryChip` flow isn't used when the RONs flag is on, still test that the
+    // Even though the `primaryChip` flow isn't used when the notifs flag is on, still test that the
     // flow has the right behavior to verify that we don't break any existing functionality.
 
     @Test
@@ -256,13 +254,13 @@ class OngoingActivityChipsWithRonsViewModelTest : SysuiTestCase() {
         testScope.runTest {
             screenRecordState.value = ScreenRecordModel.Recording
             callRepo.setOngoingCallState(inCallModel(startTimeMs = 34))
-            addDemoRonChip(commandRegistry, pw)
+            addDemoNotifChip(commandRegistry, pw)
 
             val latest by collectLastValue(underTest.chips)
 
             assertIsScreenRecordChip(latest!!.primary)
             assertIsCallChip(latest!!.secondary)
-            // Demo RON chip is dropped
+            // Demo notif chip is dropped
         }
 
     @Test
@@ -389,7 +387,7 @@ class OngoingActivityChipsWithRonsViewModelTest : SysuiTestCase() {
     fun primaryChip_higherPriorityChipAdded_lowerPriorityChipReplaced() =
         testScope.runTest {
             // Start with just the lowest priority chip shown
-            addDemoRonChip(commandRegistry, pw)
+            addDemoNotifChip(commandRegistry, pw)
             // And everything else hidden
             callRepo.setOngoingCallState(OngoingCallModel.NoCall)
             mediaProjectionState.value = MediaProjectionState.NotProjecting
@@ -397,7 +395,7 @@ class OngoingActivityChipsWithRonsViewModelTest : SysuiTestCase() {
 
             val latest by collectLastValue(underTest.primaryChip)
 
-            assertIsDemoRonChip(latest)
+            assertIsDemoNotifChip(latest)
 
             // WHEN the higher priority call chip is added
             callRepo.setOngoingCallState(inCallModel(startTimeMs = 34))
@@ -431,7 +429,7 @@ class OngoingActivityChipsWithRonsViewModelTest : SysuiTestCase() {
             mediaProjectionState.value =
                 MediaProjectionState.Projecting.EntireScreen(NORMAL_PACKAGE)
             callRepo.setOngoingCallState(inCallModel(startTimeMs = 34))
-            addDemoRonChip(commandRegistry, pw)
+            addDemoNotifChip(commandRegistry, pw)
 
             val latest by collectLastValue(underTest.primaryChip)
 
@@ -453,15 +451,15 @@ class OngoingActivityChipsWithRonsViewModelTest : SysuiTestCase() {
             // WHEN the higher priority call is removed
             callRepo.setOngoingCallState(OngoingCallModel.NoCall)
 
-            // THEN the lower priority demo RON is used
-            assertIsDemoRonChip(latest)
+            // THEN the lower priority demo notif is used
+            assertIsDemoNotifChip(latest)
         }
 
     @Test
     fun chips_movesChipsAroundAccordingToPriority() =
         testScope.runTest {
             // Start with just the lowest priority chip shown
-            addDemoRonChip(commandRegistry, pw)
+            addDemoNotifChip(commandRegistry, pw)
             // And everything else hidden
             callRepo.setOngoingCallState(OngoingCallModel.NoCall)
             mediaProjectionState.value = MediaProjectionState.NotProjecting
@@ -469,16 +467,16 @@ class OngoingActivityChipsWithRonsViewModelTest : SysuiTestCase() {
 
             val latest by collectLastValue(underTest.chips)
 
-            assertIsDemoRonChip(latest!!.primary)
+            assertIsDemoNotifChip(latest!!.primary)
             assertThat(latest!!.secondary).isInstanceOf(OngoingActivityChipModel.Hidden::class.java)
 
             // WHEN the higher priority call chip is added
             callRepo.setOngoingCallState(inCallModel(startTimeMs = 34))
 
-            // THEN the higher priority call chip is used as primary and demo ron is demoted to
+            // THEN the higher priority call chip is used as primary and demo notif is demoted to
             // secondary
             assertIsCallChip(latest!!.primary)
-            assertIsDemoRonChip(latest!!.secondary)
+            assertIsDemoNotifChip(latest!!.secondary)
 
             // WHEN the higher priority media projection chip is added
             mediaProjectionState.value =
@@ -489,7 +487,7 @@ class OngoingActivityChipsWithRonsViewModelTest : SysuiTestCase() {
                 )
 
             // THEN the higher priority media projection chip is used as primary and call is demoted
-            // to secondary (and demo RON is dropped altogether)
+            // to secondary (and demo notif is dropped altogether)
             assertIsShareToAppChip(latest!!.primary)
             assertIsCallChip(latest!!.secondary)
 
@@ -503,15 +501,15 @@ class OngoingActivityChipsWithRonsViewModelTest : SysuiTestCase() {
             screenRecordState.value = ScreenRecordModel.DoingNothing
             callRepo.setOngoingCallState(OngoingCallModel.NoCall)
 
-            // THEN media projection and demo RON remain
+            // THEN media projection and demo notif remain
             assertIsShareToAppChip(latest!!.primary)
-            assertIsDemoRonChip(latest!!.secondary)
+            assertIsDemoNotifChip(latest!!.secondary)
 
             // WHEN media projection is dropped
             mediaProjectionState.value = MediaProjectionState.NotProjecting
 
-            // THEN demo RON is promoted to primary
-            assertIsDemoRonChip(latest!!.primary)
+            // THEN demo notif is promoted to primary
+            assertIsDemoNotifChip(latest!!.primary)
             assertThat(latest!!.secondary).isInstanceOf(OngoingActivityChipModel.Hidden::class.java)
         }
 
@@ -624,7 +622,7 @@ class OngoingActivityChipsWithRonsViewModelTest : SysuiTestCase() {
             assertThat(latest).isEqualTo(OngoingActivityChipModel.Hidden(shouldAnimate = false))
         }
 
-    private fun assertIsDemoRonChip(latest: OngoingActivityChipModel?) {
+    private fun assertIsDemoNotifChip(latest: OngoingActivityChipModel?) {
         assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown::class.java)
         assertThat((latest as OngoingActivityChipModel.Shown).icon)
             .isInstanceOf(OngoingActivityChipModel.ChipIcon.FullColorAppIcon::class.java)
