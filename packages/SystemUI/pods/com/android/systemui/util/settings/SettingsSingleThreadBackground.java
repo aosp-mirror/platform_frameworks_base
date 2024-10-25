@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.util.kotlin;
+package com.android.systemui.util.settings;
 
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 

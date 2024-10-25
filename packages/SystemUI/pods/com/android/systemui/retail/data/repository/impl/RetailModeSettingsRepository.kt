@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.retail.data.repository
+package com.android.systemui.retail.data.repository.impl
 
 import android.database.ContentObserver
 import android.provider.Settings
@@ -22,6 +22,7 @@ import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCall
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.retail.data.repository.RetailModeRepository
 import com.android.systemui.util.settings.GlobalSettings
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
@@ -33,16 +34,6 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
-
-/** Repository to track if the device is in Retail mode */
-interface RetailModeRepository {
-    /** Flow of whether the device is currently in retail mode. */
-    val retailMode: StateFlow<Boolean>
-
-    /** Last value of whether the device is in retail mode. */
-    val inRetailMode: Boolean
-        get() = retailMode.value
-}
 
 /**
  * Tracks [Settings.Global.DEVICE_DEMO_MODE].

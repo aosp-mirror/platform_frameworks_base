@@ -23,7 +23,7 @@ import android.content.ContentResolver;
 import android.net.Uri;
 import android.provider.Settings;
 
-import com.android.systemui.util.kotlin.SettingsSingleThreadBackground;
+import com.android.systemui.util.settings.SettingsSingleThreadBackground;
 
 import kotlinx.coroutines.CoroutineDispatcher;
 
