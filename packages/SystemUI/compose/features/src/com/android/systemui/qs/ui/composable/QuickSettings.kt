@@ -128,10 +128,10 @@ private fun SceneScope.stateForQuickSettingsContent(
                         QSSceneAdapter.State.QS
                     }
                     else ->
-                        error(
-                            "Bad transition for QuickSettings: fromContent=$fromContent," +
-                                " toScene=$toContent"
-                        )
+                        // We are not in a transition between states that have QS, so just make
+                        // sure it's closed. This could be an issue if going from SplitShade to
+                        // a folded device.
+                        QSSceneAdapter.State.CLOSED
                 }
             }
         is TransitionState.Transition.OverlayTransition ->
