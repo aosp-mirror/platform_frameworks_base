@@ -17,7 +17,6 @@
 package com.android.systemui.common.ui
 
 import android.content.Context
-import com.android.systemui.common.ui.data.repository.ConfigurationRepositoryModule
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.statusbar.policy.ConfigurationController
