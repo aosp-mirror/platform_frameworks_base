@@ -453,7 +453,7 @@ public final class NotificationProgressBar extends ProgressBar {
         }
         for (ProgressStyle.Point point : points) {
             final int pos = point.getPosition();
-            if (pos <= 0 || pos >= progressMax) {
+            if (pos < 0 || pos > progressMax) {
                 throw new IllegalArgumentException("Invalid Point position : " + pos);
             }
         }
