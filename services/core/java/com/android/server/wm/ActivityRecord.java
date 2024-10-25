@@ -1792,8 +1792,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
         prevDc.onRunningActivityChanged();
 
-        // TODO(b/169035022): move to a more-appropriate place.
-        mTransitionController.collect(this);
         if (prevDc.mOpeningApps.remove(this)) {
             // Transfer opening transition to new display.
             mDisplayContent.mOpeningApps.add(this);
