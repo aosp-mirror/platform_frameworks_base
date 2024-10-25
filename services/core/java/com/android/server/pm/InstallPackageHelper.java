@@ -1101,6 +1101,7 @@ final class InstallPackageHelper {
                 request.setError(e.error, e.getMessage());
                 return;
             }
+            request.setKeepArtProfile(true);
             DexOptHelper.performDexoptIfNeeded(request, mDexManager, mContext, null);
         }
     }
@@ -2406,7 +2407,7 @@ final class InstallPackageHelper {
                         // Settings will be written during the call to updateSettingsLI().
                         mDeletePackageHelper.executeDeletePackage(
                                 reconciledPkg.mDeletePackageAction, packageName,
-                                true, allUsers, false);
+                                true, allUsers, false, installRequest.isKeepArtProfile());
                     } catch (SystemDeleteException e) {
                         if (mPm.mIsEngBuild) {
                             throw new RuntimeException("Unexpected failure", e);

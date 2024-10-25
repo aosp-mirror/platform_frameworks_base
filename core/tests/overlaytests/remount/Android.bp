@@ -32,7 +32,7 @@ java_test_host {
         "frameworks-base-hostutils",
     ],
     test_suites: ["general-tests"],
-    java_resources: [
+    device_common_java_resources: [
         ":com.android.overlaytest.overlaid",
         ":com.android.overlaytest.overlay",
         ":OverlayRemountedTest_SharedLibrary",

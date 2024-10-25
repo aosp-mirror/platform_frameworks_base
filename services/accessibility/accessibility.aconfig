@@ -175,10 +175,13 @@ flag {
 }
 
 flag {
-    name: "magnification_enlarge_pointer"
+    name: "magnification_enlarge_pointer_bugfix"
     namespace: "accessibility"
     description: "When fullscreen magnification is enabled, pointer icon is enlarged"
     bug: "355734856"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }
 
 flag {

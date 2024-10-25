@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.pipeline.shared.ui.composable
 
+import android.view.Display
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -43,7 +44,7 @@ import com.android.systemui.statusbar.pipeline.shared.ui.binder.HomeStatusBarVie
 import com.android.systemui.statusbar.pipeline.shared.ui.binder.StatusBarVisibilityChangeListener
 import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.HomeStatusBarViewModel
 import javax.inject.Inject
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /** Factory to simplify the dependency management for [StatusBarRoot] */
 class StatusBarRootFactory
@@ -152,8 +153,14 @@ fun StatusBarRoot(
                         phoneStatusBarView.requireViewById<NotificationIconContainer>(
                             R.id.notificationIcons
                         )
-                    scope.launch {
-                        notificationIconsBinder.bindWhileAttached(notificationIconContainer)
+
+                    // TODO(b/369337701): implement notification icons for all displays.
+                    //  Currently if we try to bind for all displays, there is a crash, because the
+                    //  same notification icon view can't have multiple parents.
+                    if (context.displayId == Display.DEFAULT_DISPLAY) {
+                        scope.launch {
+                            notificationIconsBinder.bindWhileAttached(notificationIconContainer)
+                        }
                     }
 
                     // This binder handles everything else

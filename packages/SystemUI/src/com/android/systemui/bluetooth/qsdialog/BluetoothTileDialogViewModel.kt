@@ -56,7 +56,7 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 import kotlinx.coroutines.withContext
 
 /** ViewModel for Bluetooth Dialog after clicking on the Bluetooth QS tile. */
@@ -94,7 +94,7 @@ constructor(
         cancelJob()
 
         job =
-            coroutineScope.launch(mainDispatcher) {
+            coroutineScope.launch(context = mainDispatcher) {
                 var updateDeviceItemJob: Job?
                 var updateDialogUiJob: Job? = null
                 val dialogDelegate = createBluetoothTileDialog()

@@ -45,6 +45,9 @@
     <!-- Allow PIP to resize to a slightly bigger state upon touch/showing the menu -->
     <bool name="config_pipEnableResizeForMenu">true</bool>
 
+    <!-- Allow PIP to resize via dragging the corner of PiP. -->
+    <bool name="config_pipEnableDragCornerResize">false</bool>
+
     <!-- Time (duration in milliseconds) that the shell waits for an app to close the PiP by itself
          if a custom action is present before closing it. -->
     <integer name="config_pipForceCloseDelay">1000</integer>

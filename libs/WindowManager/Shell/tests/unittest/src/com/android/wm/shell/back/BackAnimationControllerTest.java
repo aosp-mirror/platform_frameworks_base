@@ -776,6 +776,14 @@ public class BackAnimationControllerTest extends ShellTestCase {
         verify(mergeCallback, never()).onTransitionFinished(any());
     }
 
+    @Test
+    public void testBackAnimationControllersRecoversFromBadState() throws RemoteException {
+        // put controller into bad state (initial state but mBackGestureStarted=true)
+        mController.mBackGestureStarted = true;
+        verifySystemBackBehavior(BackNavigationInfo.TYPE_CROSS_ACTIVITY,
+                mDefaultCrossActivityBackAnimation.getRunner());
+    }
+
     private RemoteAnimationTarget[] createAppAnimationTargets(int openTaskId, int closeTaskId) {
         final RemoteAnimationTarget openT = createSingleAnimationTarget(openTaskId,
                 RemoteAnimationTarget.MODE_OPENING);

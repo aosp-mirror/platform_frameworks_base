@@ -96,7 +96,7 @@ import org.mockito.kotlin.firstValue
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.spy
 import org.mockito.kotlin.times
-import org.mockito.kotlin.verifyZeroInteractions
+import org.mockito.kotlin.verifyNoMoreInteractions
 import org.mockito.kotlin.whenever
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -453,7 +453,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
 
         mMainExecutor.runAllReady()
 
-        verifyZeroInteractions(mTouchMonitor)
+        verifyNoMoreInteractions(mTouchMonitor)
 
         val captor = ArgumentCaptor.forClass(DreamOverlayStateController.Callback::class.java)
         verify(mStateController).addCallback(captor.capture())

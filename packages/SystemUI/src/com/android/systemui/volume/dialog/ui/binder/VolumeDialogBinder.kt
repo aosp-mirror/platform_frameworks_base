@@ -20,6 +20,7 @@ import android.app.Dialog
 import android.graphics.Color
 import android.graphics.PixelFormat
 import android.graphics.drawable.ColorDrawable
+import android.view.View
 import android.view.ViewGroup
 import android.view.Window
 import android.view.WindowManager
@@ -27,6 +28,7 @@ import com.android.systemui.res.R
 import com.android.systemui.volume.dialog.dagger.scope.VolumeDialog
 import com.android.systemui.volume.dialog.dagger.scope.VolumeDialogScope
 import com.android.systemui.volume.dialog.settings.ui.binder.VolumeDialogSettingsButtonViewBinder
+import com.android.systemui.volume.dialog.sliders.ui.VolumeDialogSlidersViewBinder
 import com.android.systemui.volume.dialog.ui.viewmodel.VolumeDialogGravityViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -40,6 +42,7 @@ class VolumeDialogBinder
 constructor(
     @VolumeDialog private val coroutineScope: CoroutineScope,
     private val volumeDialogViewBinder: VolumeDialogViewBinder,
+    private val slidersViewBinder: VolumeDialogSlidersViewBinder,
     private val settingsButtonViewBinder: VolumeDialogSettingsButtonViewBinder,
     private val gravityViewModel: VolumeDialogGravityViewModel,
 ) {
@@ -50,11 +53,11 @@ constructor(
             dialog.setContentView(R.layout.volume_dialog)
             dialog.setCanceledOnTouchOutside(true)
 
-            settingsButtonViewBinder.bind(dialog.requireViewById(R.id.volume_dialog_settings))
-            volumeDialogViewBinder.bind(
-                dialog,
-                dialog.requireViewById(R.id.volume_dialog_container),
-            )
+            with(dialog.requireViewById<View>(R.id.volume_dialog_container)) {
+                slidersViewBinder.bind(this)
+                settingsButtonViewBinder.bind(this)
+                volumeDialogViewBinder.bind(dialog, this)
+            }
         }
     }
 

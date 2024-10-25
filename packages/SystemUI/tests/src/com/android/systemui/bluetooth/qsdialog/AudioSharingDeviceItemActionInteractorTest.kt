@@ -63,6 +63,7 @@ class AudioSharingDeviceItemActionInteractorTest : SysuiTestCase() {
     private lateinit var mockitoSession: StaticMockitoSession
     private lateinit var connectedAudioSharingMediaDeviceItem: DeviceItem
     private lateinit var connectedMediaDeviceItem: DeviceItem
+    private lateinit var inAudioSharingMediaDeviceItem: DeviceItem
     @Mock private lateinit var dialog: SystemUIDialog
     @Mock private lateinit var leAudioProfile: LeAudioProfile
     @Mock private lateinit var bluetoothDevice: BluetoothDevice
@@ -74,6 +75,15 @@ class AudioSharingDeviceItemActionInteractorTest : SysuiTestCase() {
         connectedMediaDeviceItem =
             DeviceItem(
                 type = DeviceItemType.AVAILABLE_MEDIA_BLUETOOTH_DEVICE,
+                cachedBluetoothDevice = kosmos.cachedBluetoothDevice,
+                deviceName = DEVICE_NAME,
+                connectionSummary = DEVICE_CONNECTION_SUMMARY,
+                iconWithDescription = null,
+                background = null,
+            )
+        inAudioSharingMediaDeviceItem =
+            DeviceItem(
+                type = DeviceItemType.AUDIO_SHARING_MEDIA_BLUETOOTH_DEVICE,
                 cachedBluetoothDevice = kosmos.cachedBluetoothDevice,
                 deviceName = DEVICE_NAME,
                 connectionSummary = DEVICE_CONNECTION_SUMMARY,
@@ -124,6 +134,19 @@ class AudioSharingDeviceItemActionInteractorTest : SysuiTestCase() {
                         ArgumentMatchers.anyInt(),
                         ArgumentMatchers.any(),
                     )
+                verify(dialogTransitionAnimator, never())
+                    .showFromDialog(any(), any(), eq(null), anyBoolean())
+            }
+        }
+    }
+
+    @Test
+    fun testOnClick_inAudioSharingMediaDevice_doNothing() {
+        with(kosmos) {
+            testScope.runTest {
+                bluetoothTileDialogAudioSharingRepository.setAudioSharingAvailable(true)
+                actionInteractorImpl.onClick(inAudioSharingMediaDeviceItem, dialog)
+
                 verify(dialogTransitionAnimator, never())
                     .showFromDialog(any(), any(), eq(null), anyBoolean())
             }

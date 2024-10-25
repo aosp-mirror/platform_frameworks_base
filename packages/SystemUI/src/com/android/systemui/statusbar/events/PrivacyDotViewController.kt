@@ -34,6 +34,7 @@ import com.android.systemui.res.R
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.StatusBarState.SHADE
 import com.android.systemui.statusbar.StatusBarState.SHADE_LOCKED
+import com.android.systemui.statusbar.core.StatusBarConnectedDisplays
 import com.android.systemui.statusbar.data.repository.StatusBarContentInsetsProviderStore
 import com.android.systemui.statusbar.phone.StatusBarContentInsetsChangedListener
 import com.android.systemui.statusbar.phone.StatusBarContentInsetsProvider
@@ -52,7 +53,7 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import java.util.concurrent.Executor
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /**
  * Understands how to keep the persistent privacy dot in the corner of the screen in
@@ -69,6 +70,11 @@ import kotlinx.coroutines.launch
  * views are owned by ScreenDecorations and it runs in its own thread
  */
 interface PrivacyDotViewController {
+
+    /**
+     * Called when the [PrivacyDotViewController] should stop doing any work and clean up if needed.
+     */
+    fun stop()
 
     // Only can be modified on @UiThread
     var currentViewState: ViewState
@@ -138,51 +144,58 @@ constructor(
 
     override var showingListener: PrivacyDotViewController.ShowingListener? = null
 
-    init {
-        contentInsetsProvider.addCallback(
-            object : StatusBarContentInsetsChangedListener {
-                override fun onStatusBarContentInsetsChanged() {
-                    dlog("onStatusBarContentInsetsChanged: ")
-                    setNewLayoutRects()
-                }
+    private val insetsChangedListener =
+        object : StatusBarContentInsetsChangedListener {
+            override fun onStatusBarContentInsetsChanged() {
+                dlog("onStatusBarContentInsetsChanged: ")
+                setNewLayoutRects()
             }
-        )
+        }
 
-        configurationController.addCallback(
-            object : ConfigurationController.ConfigurationListener {
-                override fun onLayoutDirectionChanged(isRtl: Boolean) {
-                    uiExecutor?.execute {
-                        // If rtl changed, hide all dotes until the next state resolves
-                        setCornerVisibilities(View.INVISIBLE)
+    private val configurationListener =
+        object : ConfigurationController.ConfigurationListener {
+            override fun onLayoutDirectionChanged(isRtl: Boolean) {
+                uiExecutor?.execute {
+                    // If rtl changed, hide all dots until the next state resolves
+                    setCornerVisibilities(View.INVISIBLE)
 
-                        synchronized(this) {
-                            val corner = selectDesignatedCorner(nextViewState.rotation, isRtl)
-                            nextViewState =
-                                nextViewState.copy(layoutRtl = isRtl, designatedCorner = corner)
-                        }
+                    synchronized(this) {
+                        val corner = selectDesignatedCorner(nextViewState.rotation, isRtl)
+                        nextViewState =
+                            nextViewState.copy(layoutRtl = isRtl, designatedCorner = corner)
                     }
                 }
             }
-        )
+        }
 
-        stateController.addCallback(
-            object : StatusBarStateController.StateListener {
-                override fun onExpandedChanged(isExpanded: Boolean) {
-                    updateStatusBarState()
-                }
-
-                override fun onStateChanged(newState: Int) {
-                    updateStatusBarState()
-                }
+    private val statusBarStateListener =
+        object : StatusBarStateController.StateListener {
+            override fun onExpandedChanged(isExpanded: Boolean) {
+                updateStatusBarState()
             }
-        )
 
+            override fun onStateChanged(newState: Int) {
+                updateStatusBarState()
+            }
+        }
+
+    init {
+        contentInsetsProvider.addCallback(insetsChangedListener)
+        configurationController.addCallback(configurationListener)
+        stateController.addCallback(statusBarStateListener)
         scope.launch {
             shadeInteractor?.isQsExpanded?.collect { isQsExpanded ->
                 dlog("setQsExpanded $isQsExpanded")
                 synchronized(lock) { nextViewState = nextViewState.copy(qsExpanded = isQsExpanded) }
             }
         }
+    }
+
+    override fun stop() {
+        StatusBarConnectedDisplays.assertInNewMode()
+        contentInsetsProvider.removeCallback(insetsChangedListener)
+        configurationController.removeCallback(configurationListener)
+        stateController.removeCallback(statusBarStateListener)
     }
 
     override fun setUiExecutor(e: DelayableExecutor) {

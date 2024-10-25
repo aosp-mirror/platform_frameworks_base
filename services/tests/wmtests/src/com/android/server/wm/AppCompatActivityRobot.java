@@ -243,6 +243,10 @@ class AppCompatActivityRobot {
         doReturn(mTaskStack.top()).when(mActivityStack.top()).getOrganizedTask();
     }
 
+    void setIsInLetterboxAnimation(boolean inAnimation) {
+        doReturn(inAnimation).when(mActivityStack.top()).isInLetterboxAnimation();
+    }
+
     void setTopTaskInMultiWindowMode(boolean inMultiWindowMode) {
         doReturn(inMultiWindowMode).when(mTaskStack.top()).inMultiWindowMode();
     }
@@ -282,6 +286,10 @@ class AppCompatActivityRobot {
         if (freeformWindowingMode) {
             doReturn(WINDOWING_MODE_FREEFORM).when(mActivityStack.top()).getWindowingMode();
         }
+    }
+
+    void setFixedRotationTransformDisplayBounds(@Nullable Rect bounds) {
+        doReturn(bounds).when(mActivityStack.top()).getFixedRotationTransformDisplayBounds();
     }
 
     void destroyTopActivity() {

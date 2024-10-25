@@ -54,7 +54,7 @@ import kotlin.math.hypot
 import kotlin.math.max
 import kotlin.math.min
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /** Monitor for tracking touches on the DreamOverlay to bring up the bouncer. */
 class BouncerSwipeTouchHandler

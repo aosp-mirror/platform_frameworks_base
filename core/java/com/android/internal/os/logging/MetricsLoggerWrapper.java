@@ -57,7 +57,7 @@ public class MetricsLoggerWrapper {
     }
 
     public static void logPostGcMemorySnapshot() {
-        if (!com.android.libcore.Flags.nativeMetrics()) {
+        if (!com.android.libcore.readonly.Flags.nativeMetrics()) {
             return;
         }
         int pid = Process.myPid();

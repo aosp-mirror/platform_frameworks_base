@@ -20,12 +20,10 @@ import android.os.BatteryConsumer;
 import android.os.BatteryStats;
 
 import com.android.internal.os.PowerProfile;
-import com.android.server.power.stats.PowerStatsUidResolver;
 
 class FlashlightPowerStatsProcessor extends BinaryStatePowerStatsProcessor {
-    FlashlightPowerStatsProcessor(PowerProfile powerProfile,
-            PowerStatsUidResolver uidResolver) {
-        super(BatteryConsumer.POWER_COMPONENT_FLASHLIGHT, uidResolver,
+    FlashlightPowerStatsProcessor(PowerProfile powerProfile) {
+        super(BatteryConsumer.POWER_COMPONENT_FLASHLIGHT,
                 powerProfile.getAveragePower(PowerProfile.POWER_FLASHLIGHT));
     }
 

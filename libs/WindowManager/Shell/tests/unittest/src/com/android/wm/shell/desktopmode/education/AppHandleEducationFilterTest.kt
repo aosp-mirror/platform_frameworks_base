@@ -19,10 +19,12 @@ package com.android.wm.shell.desktopmode.education
 import android.app.usage.UsageStats
 import android.app.usage.UsageStatsManager
 import android.content.Context
+import android.os.SystemProperties
 import android.testing.AndroidTestingRunner
 import android.testing.TestableContext
 import android.testing.TestableResources
 import androidx.test.filters.SmallTest
+import com.android.modules.utils.testing.ExtendedMockitoRule
 import com.android.wm.shell.R
 import com.android.wm.shell.ShellTestCase
 import com.android.wm.shell.desktopmode.education.data.AppHandleEducationDatastoreRepository
@@ -35,18 +37,26 @@ import com.google.common.truth.Truth.assertThat
 import kotlin.Int.Companion.MAX_VALUE
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.ArgumentMatchers.anyLong
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.whenever
 
-/** Tests of [AppHandleEducationFilter]
- * Usage: atest AppHandleEducationFilterTest */
+/** Tests of [AppHandleEducationFilter] Usage: atest AppHandleEducationFilterTest */
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
+@kotlinx.coroutines.ExperimentalCoroutinesApi
 class AppHandleEducationFilterTest : ShellTestCase() {
+  @JvmField
+  @Rule
+  val extendedMockitoRule =
+      ExtendedMockitoRule.Builder(this).mockStatic(SystemProperties::class.java).build()!!
   @Mock private lateinit var datastoreRepository: AppHandleEducationDatastoreRepository
   @Mock private lateinit var mockUsageStatsManager: UsageStatsManager
   private lateinit var educationFilter: AppHandleEducationFilter
@@ -208,5 +218,24 @@ class AppHandleEducationFilterTest : ShellTestCase() {
 
     // We should not show app handle education if app menu is expanded
     assertThat(result).isFalse()
+  }
+
+  @Test
+  fun shouldShowAppHandleEducation_overridePrerequisite_returnsTrue() = runTest {
+    // Simulate that gmail app has been launched twice before, minimum app launch count is 3, hence
+    // #shouldShowAppHandleEducation should return false. But as we are overriding prerequisite
+    // conditions, #shouldShowAppHandleEducation should return true.
+    testableResources.addOverride(R.integer.desktop_windowing_education_min_app_launch_count, 3)
+    val systemPropertiesKey = "persist.desktop_windowing_app_handle_education_override_conditions"
+    whenever(SystemProperties.getBoolean(eq(systemPropertiesKey), anyBoolean())).thenReturn(true)
+    val windowingEducationProto =
+        createWindowingEducationProto(
+            appUsageStats = mapOf(GMAIL_PACKAGE_NAME to 2),
+            appUsageStatsLastUpdateTimestampMillis = Long.MAX_VALUE)
+    `when`(datastoreRepository.windowingEducationProto()).thenReturn(windowingEducationProto)
+
+    val result = educationFilter.shouldShowAppHandleEducation(createAppHandleState())
+
+    assertThat(result).isTrue()
   }
 }

@@ -22,6 +22,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
+import android.security.forensic.ForensicEvent;
 import android.security.forensic.IForensicService;
 import android.security.forensic.IForensicServiceCommandCallback;
 import android.security.forensic.IForensicServiceStateCallback;
@@ -32,6 +33,7 @@ import com.android.server.ServiceThread;
 import com.android.server.SystemService;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @hide
@@ -64,6 +66,7 @@ public class ForensicService extends SystemService {
     private final Context mContext;
     private final Handler mHandler;
     private final BackupTransportConnection mBackupTransportConnection;
+    private final DataAggregator mDataAggregator;
     private final BinderService mBinderService;
 
     private final ArrayList<IForensicServiceStateCallback> mStateMonitors = new ArrayList<>();
@@ -79,6 +82,7 @@ public class ForensicService extends SystemService {
         mContext = injector.getContext();
         mHandler = new EventHandler(injector.getLooper(), this);
         mBackupTransportConnection = injector.getBackupTransportConnection();
+        mDataAggregator = injector.getDataAggregator(this);
         mBinderService = new BinderService(this);
     }
 
@@ -167,6 +171,9 @@ public class ForensicService extends SystemService {
                         Slog.e(TAG, "RemoteException", e);
                     }
                     break;
+                case MSG_BACKUP:
+                    mService.backup((List<ForensicEvent>) msg.obj);
+                    break;
                 default:
                     Slog.w(TAG, "Unknown message: " + msg.what);
             }
@@ -192,6 +199,10 @@ public class ForensicService extends SystemService {
     private void makeVisible(IForensicServiceCommandCallback callback) throws RemoteException {
         switch (mState) {
             case STATE_INVISIBLE:
+                if (!mDataAggregator.initialize()) {
+                    callback.onFailure(ERROR_DATA_SOURCE_UNAVAILABLE);
+                    break;
+                }
                 mState = STATE_VISIBLE;
                 notifyStateMonitors();
                 callback.onSuccess();
@@ -227,6 +238,7 @@ public class ForensicService extends SystemService {
                     callback.onFailure(ERROR_BACKUP_TRANSPORT_UNAVAILABLE);
                     break;
                 }
+                mDataAggregator.enable();
                 mState = STATE_ENABLED;
                 notifyStateMonitors();
                 callback.onSuccess();
@@ -243,6 +255,7 @@ public class ForensicService extends SystemService {
         switch (mState) {
             case STATE_ENABLED:
                 mBackupTransportConnection.release();
+                mDataAggregator.disable();
                 mState = STATE_VISIBLE;
                 notifyStateMonitors();
                 callback.onSuccess();
@@ -253,6 +266,17 @@ public class ForensicService extends SystemService {
             default:
                 callback.onFailure(ERROR_INVALID_STATE_TRANSITION);
         }
+    }
+
+    /**
+     * Add a list of ForensicEvent.
+     */
+    public void addNewData(List<ForensicEvent> events) {
+        mHandler.obtainMessage(MSG_BACKUP, events).sendToTarget();
+    }
+
+    private void backup(List<ForensicEvent> events) {
+        mBackupTransportConnection.addData(events);
     }
 
     @Override
@@ -275,6 +299,8 @@ public class ForensicService extends SystemService {
         Looper getLooper();
 
         BackupTransportConnection getBackupTransportConnection();
+
+        DataAggregator getDataAggregator(ForensicService forensicService);
     }
 
     private static final class InjectorImpl implements Injector {
@@ -302,6 +328,11 @@ public class ForensicService extends SystemService {
         @Override
         public BackupTransportConnection getBackupTransportConnection() {
             return new BackupTransportConnection(mContext);
+        }
+
+        @Override
+        public DataAggregator getDataAggregator(ForensicService forensicService) {
+            return new DataAggregator(forensicService);
         }
     }
 }

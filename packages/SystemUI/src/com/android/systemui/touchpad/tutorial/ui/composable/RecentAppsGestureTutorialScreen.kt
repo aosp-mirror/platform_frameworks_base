@@ -51,8 +51,8 @@ fun RecentAppsGestureTutorialScreen(onDoneButtonClicked: () -> Unit, onBack: () 
         remember(recognizer) {
             GestureFlowAdapter(recognizer).gestureStateAsFlow.map {
                 it.toGestureUiState(
-                    progressStartMarker = "",
-                    progressEndMarker = "",
+                    progressStartMarker = "drag with gesture",
+                    progressEndMarker = "onPause",
                     successAnimation = R.raw.trackpad_recent_apps_success,
                 )
             }
