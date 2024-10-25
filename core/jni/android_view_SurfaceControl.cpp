@@ -35,6 +35,7 @@
 #include <android_runtime/android_view_SurfaceSession.h>
 #include <cutils/ashmem.h>
 #include <gui/ISurfaceComposer.h>
+#include <gui/JankInfo.h>
 #include <gui/Surface.h>
 #include <gui/SurfaceComposerClient.h>
 #include <jni.h>
@@ -2161,9 +2162,30 @@ public:
         jobjectArray jJankDataArray = env->NewObjectArray(jankData.size(),
                 gJankDataClassInfo.clazz, nullptr);
         for (size_t i = 0; i < jankData.size(); i++) {
+            // The exposed constants in SurfaceControl are simplified, so we need to translate the
+            // jank type we get from SF to what is exposed in Java.
+            int sfJankType = jankData[i].jankType;
+            int javaJankType = 0x0; // SurfaceControl.JankData.JANK_NONE
+            if (sfJankType &
+                (JankType::DisplayHAL | JankType::SurfaceFlingerCpuDeadlineMissed |
+                 JankType::SurfaceFlingerGpuDeadlineMissed | JankType::PredictionError |
+                 JankType::SurfaceFlingerScheduling)) {
+                javaJankType |= 0x1; // SurfaceControl.JankData.JANK_COMPOSER
+            }
+            if (sfJankType & JankType::AppDeadlineMissed) {
+                javaJankType |= 0x2; // SurfaceControl.JankData.JANK_APPLICATION
+            }
+            if (sfJankType &
+                ~(JankType::DisplayHAL | JankType::SurfaceFlingerCpuDeadlineMissed |
+                  JankType::SurfaceFlingerGpuDeadlineMissed | JankType::AppDeadlineMissed |
+                  JankType::PredictionError | JankType::SurfaceFlingerScheduling |
+                  JankType::BufferStuffing | JankType::SurfaceFlingerStuffing)) {
+                javaJankType |= 0x4; // SurfaceControl.JankData.JANK_OTHER
+            }
+
             jobject jJankData =
                     env->NewObject(gJankDataClassInfo.clazz, gJankDataClassInfo.ctor,
-                                   jankData[i].frameVsyncId, jankData[i].jankType,
+                                   jankData[i].frameVsyncId, javaJankType,
                                    jankData[i].frameIntervalNs, jankData[i].scheduledAppFrameTimeNs,
                                    jankData[i].actualAppFrameTimeNs);
             env->SetObjectArrayElement(jJankDataArray, i, jJankData);

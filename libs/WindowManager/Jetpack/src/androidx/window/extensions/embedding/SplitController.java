@@ -2314,15 +2314,12 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     @GuardedBy("mLock")
     @Nullable
     Bundle getPlaceholderOptions(@NonNull Activity primaryActivity, boolean isOnCreated) {
-        // Setting avoid move to front will also skip the animation. We only want to do that when
-        // the Task is currently in background.
         // Check if the primary is resumed or if this is called when the primary is onCreated
         // (not resumed yet).
         if (isOnCreated || primaryActivity.isResumed()) {
             // Only set trigger type if the launch happens in foreground.
             mTransactionManager.getCurrentTransactionRecord()
                     .setOriginType(TASK_FRAGMENT_TRANSIT_OPEN);
-            return null;
         }
         final ActivityOptions options = ActivityOptions.makeBasic();
         options.setAvoidMoveToFront();

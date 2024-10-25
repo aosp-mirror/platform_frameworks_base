@@ -39,6 +39,7 @@ import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.START_TAG;
 
 import android.Manifest;
+import android.annotation.EnforcePermission;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
@@ -87,6 +88,7 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelableException;
+import android.os.PermissionEnforcer;
 import android.os.Process;
 import android.os.RemoteCallback;
 import android.os.RemoteCallbackList;
@@ -314,6 +316,8 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
 
     public PackageInstallerService(Context context, PackageManagerService pm,
             Supplier<PackageParser2> apexParserSupplier) {
+        super(PermissionEnforcer.fromContext(context));
+
         mContext = context;
         mPm = pm;
 
@@ -1877,23 +1881,20 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
     }
 
     @Override
+    @EnforcePermission(android.Manifest.permission.VERIFICATION_AGENT)
     public @PackageInstaller.VerificationPolicy int getVerificationPolicy() {
-        if (mContext.checkCallingOrSelfPermission(Manifest.permission.VERIFICATION_AGENT)
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("You need the "
-                    + "com.android.permission.VERIFICATION_AGENT permission "
-                    + "to get the verification policy");
-        }
+        getVerificationPolicy_enforcePermission();
         return mVerificationPolicy.get();
     }
 
     @Override
+    @EnforcePermission(android.Manifest.permission.VERIFICATION_AGENT)
     public boolean setVerificationPolicy(@PackageInstaller.VerificationPolicy int policy) {
-        if (mContext.checkCallingOrSelfPermission(Manifest.permission.VERIFICATION_AGENT)
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("You need the "
-                    + "com.android.permission.VERIFICATION_AGENT permission "
-                    + "to set the verification policy");
+        setVerificationPolicy_enforcePermission();
+        final int callingUid = getCallingUid();
+        // Only the verifier currently bound by the system can change the policy, except for Shell
+        if (!PackageManagerServiceUtils.isRootOrShell(callingUid)) {
+            mVerifierController.assertCallerIsCurrentVerifier(callingUid);
         }
         if (!isValidVerificationPolicy(policy)) {
             return false;

@@ -120,7 +120,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
     @ShellMainThread private final Handler mHandler;
 
     /** True when a back gesture is ongoing */
-    private boolean mBackGestureStarted = false;
+    @VisibleForTesting public boolean mBackGestureStarted = false;
 
     /** Tracks if an uninterruptible animation is in progress */
     private boolean mPostCommitAnimationInProgress = false;
@@ -511,6 +511,11 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
             ProtoLog.d(WM_SHELL_BACK_PREVIEW,
                     "Ignoring MotionEvent because two gestures are already being queued.");
             return;
+        } else if (mBackGestureStarted && mCurrentTracker.isInInitialState()
+                && mQueuedTracker.isInInitialState()) {
+            ProtoLog.e(WM_SHELL_BACK_PREVIEW,
+                    "Both touch trackers in initial state and mBackGestureStarted=true");
+            mBackGestureStarted = false;
         }
 
         if (keyAction == MotionEvent.ACTION_DOWN) {
@@ -985,7 +990,6 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         ProtoLog.d(WM_SHELL_BACK_PREVIEW, "BackAnimationController: finishBackNavigation()");
         mActiveCallback = null;
         mApps = null;
-        mShouldStartOnNextMoveEvent = false;
         mOnBackStartDispatched = false;
         mThresholdCrossed = false;
         mPointersPilfered = false;

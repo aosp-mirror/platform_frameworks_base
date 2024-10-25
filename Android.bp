@@ -61,7 +61,7 @@ license {
 
 filegroup {
     name: "framework-non-updatable-sources",
-    srcs: [
+    device_common_srcs: [
         // Java/AIDL sources under frameworks/base
         ":framework-annotations",
         ":framework-blobstore-sources",

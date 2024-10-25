@@ -105,8 +105,8 @@ constructor(
             scope.trySend(VolumeDialogEventModel.ShowSafetyWarning(flags))
         }
 
-        override fun onAccessibilityModeChanged(showA11yStream: Boolean) {
-            scope.trySend(VolumeDialogEventModel.AccessibilityModeChanged(showA11yStream))
+        override fun onAccessibilityModeChanged(showA11yStream: Boolean?) {
+            scope.trySend(VolumeDialogEventModel.AccessibilityModeChanged(showA11yStream == true))
         }
 
         // Captions button is remove from the Volume Dialog

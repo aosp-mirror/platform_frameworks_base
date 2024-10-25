@@ -26,7 +26,7 @@ import com.android.app.tracing.TraceUtils.trace
 import com.android.systemui.coroutines.newTracingContext
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 import kotlinx.coroutines.withContext
 
 /**

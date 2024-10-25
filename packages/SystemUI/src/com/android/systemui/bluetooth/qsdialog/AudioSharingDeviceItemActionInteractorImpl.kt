@@ -63,6 +63,10 @@ constructor(
             logger.logDeviceClickInAudioSharingWhenEnabled(inAudioSharing)
 
             when {
+                deviceItem.type == DeviceItemType.AUDIO_SHARING_MEDIA_BLUETOOTH_DEVICE -> {
+                    // Do nothing if the device is in audio sharing session
+                    uiEventLogger.log(BluetoothTileDialogUiEvent.AUDIO_SHARING_DEVICE_CLICKED)
+                }
                 deviceItem.type ==
                     DeviceItemType.AVAILABLE_AUDIO_SHARING_MEDIA_BLUETOOTH_DEVICE -> {
                     if (audioSharingQsDialogImprovement()) {

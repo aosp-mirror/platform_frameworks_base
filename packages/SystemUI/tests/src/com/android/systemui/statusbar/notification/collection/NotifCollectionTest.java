@@ -45,6 +45,7 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -63,6 +64,7 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.os.Handler;
 import android.os.RemoteException;
+import android.platform.test.annotations.EnableFlags;
 import android.service.notification.NotificationListenerService.Ranking;
 import android.service.notification.NotificationListenerService.RankingMap;
 import android.service.notification.StatusBarNotification;
@@ -77,6 +79,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
+import com.android.systemui.Flags;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.dump.LogBufferEulogizer;
@@ -129,6 +132,7 @@ public class NotifCollectionTest extends SysuiTestCase {
     @Mock private GroupCoalescer mGroupCoalescer;
     @Spy private RecordingCollectionListener mCollectionListener;
     @Mock private CollectionReadyForBuildListener mBuildListener;
+    @Mock private NotificationDismissibilityProvider mDismissibilityProvider;
 
     @Spy private RecordingLifetimeExtender mExtender1 = new RecordingLifetimeExtender("Extender1");
     @Spy private RecordingLifetimeExtender mExtender2 = new RecordingLifetimeExtender("Extender2");
@@ -160,6 +164,7 @@ public class NotifCollectionTest extends SysuiTestCase {
         allowTestableLooperAsMainThread();
 
         when(mEulogizer.record(any(Exception.class))).thenAnswer(i -> i.getArguments()[0]);
+        doReturn(Boolean.TRUE).when(mDismissibilityProvider).isDismissable(any());
 
         mListenerInOrder = inOrder(mCollectionListener);
 
@@ -172,7 +177,7 @@ public class NotifCollectionTest extends SysuiTestCase {
                 mBgExecutor,
                 mEulogizer,
                 mock(DumpManager.class),
-                mock(NotificationDismissibilityProvider.class));
+                mDismissibilityProvider);
         mCollection.attach(mGroupCoalescer);
         mCollection.addCollectionListener(mCollectionListener);
         mCollection.setBuildListener(mBuildListener);
@@ -1376,6 +1381,43 @@ public class NotifCollectionTest extends SysuiTestCase {
 
         assertEquals(List.of(mInterceptor1, mInterceptor2), entry1.mDismissInterceptors);
         assertEquals(List.of(mInterceptor1, mInterceptor2), entry2.mDismissInterceptors);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_NOTIFICATIONS_DISMISS_PRUNED_SUMMARIES)
+    public void testDismissNotificationsIncludesPrunedParents() {
+        // GIVEN a collection with 2 groups; one has a single child, one has two.
+        mCollection.addNotificationDismissInterceptor(mInterceptor1);
+
+        NotifEvent notif1summary = mNoMan.postNotif(
+                buildNotif(TEST_PACKAGE, 1, "notif1summary").setGroup(mContext, "group1")
+                        .setGroupSummary(mContext, true));
+        NotifEvent notif1child = mNoMan.postNotif(
+                buildNotif(TEST_PACKAGE, 1, "notif1child").setGroup(mContext, "group1"));
+        NotifEvent notif2summary = mNoMan.postNotif(
+                buildNotif(TEST_PACKAGE2, 2, "notif2summary").setGroup(mContext, "group2")
+                        .setGroupSummary(mContext, true));
+        NotifEvent notif2child1 = mNoMan.postNotif(
+                buildNotif(TEST_PACKAGE2, 2, "notif2child1").setGroup(mContext, "group2"));
+        NotifEvent notif2child2 = mNoMan.postNotif(
+                buildNotif(TEST_PACKAGE2, 2, "notif2child2").setGroup(mContext, "group2"));
+        NotificationEntry entry1summary = mCollectionListener.getEntry(notif1summary.key);
+        NotificationEntry entry1child = mCollectionListener.getEntry(notif1child.key);
+        NotificationEntry entry2summary = mCollectionListener.getEntry(notif2summary.key);
+        NotificationEntry entry2child1 = mCollectionListener.getEntry(notif2child1.key);
+        NotificationEntry entry2child2 = mCollectionListener.getEntry(notif2child2.key);
+
+        // WHEN one child from each group are manually dismissed together
+        mCollection.dismissNotifications(
+                List.of(new Pair<>(entry1child, defaultStats(entry1child)),
+                        new Pair<>(entry2child1, defaultStats(entry2child1))));
+
+        // THEN the summary for the singleton child is dismissed, but not the other summary
+        verify(mInterceptor1).shouldInterceptDismissal(entry1summary);
+        verify(mInterceptor1).shouldInterceptDismissal(entry1child);
+        verify(mInterceptor1, never()).shouldInterceptDismissal(entry2summary);
+        verify(mInterceptor1).shouldInterceptDismissal(entry2child1);
+        verify(mInterceptor1, never()).shouldInterceptDismissal(entry2child2);
     }
 
     @Test

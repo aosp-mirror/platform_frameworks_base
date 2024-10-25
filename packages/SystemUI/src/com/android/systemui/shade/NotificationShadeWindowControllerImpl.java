@@ -154,7 +154,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
             IActivityManager activityManager,
             DozeParameters dozeParameters,
             StatusBarStateController statusBarStateController,
-            ConfigurationController configurationController,
+            @ShadeDisplayAware ConfigurationController configurationController,
             KeyguardViewMediator keyguardViewMediator,
             KeyguardBypassController keyguardBypassController,
             @Main Executor mainExecutor,

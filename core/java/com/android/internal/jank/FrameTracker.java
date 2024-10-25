@@ -16,13 +16,9 @@
 
 package com.android.internal.jank;
 
-import static android.view.SurfaceControl.JankData.DISPLAY_HAL;
-import static android.view.SurfaceControl.JankData.JANK_APP_DEADLINE_MISSED;
+import static android.view.SurfaceControl.JankData.JANK_APPLICATION;
+import static android.view.SurfaceControl.JankData.JANK_COMPOSER;
 import static android.view.SurfaceControl.JankData.JANK_NONE;
-import static android.view.SurfaceControl.JankData.JANK_SURFACEFLINGER_DEADLINE_MISSED;
-import static android.view.SurfaceControl.JankData.JANK_SURFACEFLINGER_GPU_DEADLINE_MISSED;
-import static android.view.SurfaceControl.JankData.PREDICTION_ERROR;
-import static android.view.SurfaceControl.JankData.SURFACE_FLINGER_SCHEDULING;
 
 import static com.android.internal.jank.DisplayRefreshRate.UNKNOWN_REFRESH_RATE;
 import static com.android.internal.jank.DisplayRefreshRate.VARIABLE_REFRESH_RATE;
@@ -181,23 +177,11 @@ public class FrameTracker implements HardwareRendererObserver.OnFrameMetricsAvai
                 case JANK_NONE:
                     str.append("JANK_NONE");
                     break;
-                case JANK_APP_DEADLINE_MISSED:
-                    str.append("JANK_APP_DEADLINE_MISSED");
+                case JANK_APPLICATION:
+                    str.append("JANK_APPLICATION");
                     break;
-                case JANK_SURFACEFLINGER_DEADLINE_MISSED:
-                    str.append("JANK_SURFACEFLINGER_DEADLINE_MISSED");
-                    break;
-                case JANK_SURFACEFLINGER_GPU_DEADLINE_MISSED:
-                    str.append("JANK_SURFACEFLINGER_GPU_DEADLINE_MISSED");
-                    break;
-                case DISPLAY_HAL:
-                    str.append("DISPLAY_HAL");
-                    break;
-                case PREDICTION_ERROR:
-                    str.append("PREDICTION_ERROR");
-                    break;
-                case SURFACE_FLINGER_SCHEDULING:
-                    str.append("SURFACE_FLINGER_SCHEDULING");
+                case JANK_COMPOSER:
+                    str.append("JANK_COMPOSER");
                     break;
                 default:
                     str.append("UNKNOWN: ").append(jankType);
@@ -628,16 +612,12 @@ public class FrameTracker implements HardwareRendererObserver.OnFrameMetricsAvai
             if (info.surfaceControlCallbackFired) {
                 totalFramesCount++;
                 boolean missedFrame = false;
-                if ((info.jankType & JANK_APP_DEADLINE_MISSED) != 0) {
+                if ((info.jankType & JANK_APPLICATION) != 0) {
                     Log.w(TAG, "Missed App frame:" + info + ", CUJ=" + name);
                     missedAppFramesCount++;
                     missedFrame = true;
                 }
-                if ((info.jankType & DISPLAY_HAL) != 0
-                        || (info.jankType & JANK_SURFACEFLINGER_DEADLINE_MISSED) != 0
-                        || (info.jankType & JANK_SURFACEFLINGER_GPU_DEADLINE_MISSED) != 0
-                        || (info.jankType & SURFACE_FLINGER_SCHEDULING) != 0
-                        || (info.jankType & PREDICTION_ERROR) != 0) {
+                if ((info.jankType & JANK_COMPOSER) != 0) {
                     Log.w(TAG, "Missed SF frame:" + info + ", CUJ=" + name);
                     missedSfFramesCount++;
                     missedFrame = true;

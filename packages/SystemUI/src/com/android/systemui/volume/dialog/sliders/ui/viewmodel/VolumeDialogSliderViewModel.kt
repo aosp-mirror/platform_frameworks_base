@@ -16,26 +16,85 @@
 
 package com.android.systemui.volume.dialog.sliders.ui.viewmodel
 
+import com.android.systemui.util.time.SystemClock
+import com.android.systemui.volume.Events
+import com.android.systemui.volume.dialog.dagger.scope.VolumeDialog
+import com.android.systemui.volume.dialog.domain.interactor.VolumeDialogVisibilityInteractor
 import com.android.systemui.volume.dialog.shared.model.VolumeDialogStreamModel
 import com.android.systemui.volume.dialog.sliders.domain.interactor.VolumeDialogSliderInteractor
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.stateIn
 
+/*
+ This prevents volume slider updates while user interacts with it. This is needed due to the
+ flawed VolumeDialogControllerImpl. It has a single threaded message queue that handles all state
+ updates and doesn't skip sequential updates of the same stream. This leads to a bottleneck when
+ user rigorously adjusts the slider.
+
+ Remove this when getting rid of the VolumeDialogControllerImpl as this doesn't happen in the
+ Volume Panel that uses the new coroutine-backed AudioRepository.
+*/
+// TODO(b/375355785) remove this
+private const val VOLUME_UPDATE_GRACE_PERIOD = 1000
+
+@OptIn(ExperimentalCoroutinesApi::class)
 class VolumeDialogSliderViewModel
 @AssistedInject
-constructor(@Assisted private val interactor: VolumeDialogSliderInteractor) {
+constructor(
+    @Assisted private val interactor: VolumeDialogSliderInteractor,
+    private val visibilityInteractor: VolumeDialogVisibilityInteractor,
+    @VolumeDialog private val coroutineScope: CoroutineScope,
+    private val systemClock: SystemClock,
+) {
 
-    val model: Flow<VolumeDialogStreamModel> = interactor.slider
+    private val userVolumeUpdates = MutableStateFlow<VolumeUpdate?>(null)
 
-    fun setStreamVolume(volume: Int) {
-        interactor.setStreamVolume(volume)
+    val model: Flow<VolumeDialogStreamModel> =
+        interactor.slider
+            .filter {
+                val lastVolumeUpdateTime = userVolumeUpdates.value?.timestampMillis ?: 0
+                getTimestampMillis() - lastVolumeUpdateTime > VOLUME_UPDATE_GRACE_PERIOD
+            }
+            .stateIn(coroutineScope, SharingStarted.Eagerly, null)
+            .filterNotNull()
+
+    init {
+        userVolumeUpdates
+            .filterNotNull()
+            .mapLatest { volume ->
+                interactor.setStreamVolume(volume.newVolumeLevel)
+                Events.writeEvent(Events.EVENT_TOUCH_LEVEL_CHANGED, model.first().stream, volume)
+            }
+            .launchIn(coroutineScope)
     }
+
+    fun setStreamVolume(volume: Int, fromUser: Boolean) {
+        if (fromUser) {
+            visibilityInteractor.resetDismissTimeout()
+            userVolumeUpdates.value =
+                VolumeUpdate(newVolumeLevel = volume, timestampMillis = getTimestampMillis())
+        }
+    }
+
+    private fun getTimestampMillis(): Long = systemClock.uptimeMillis()
 
     @AssistedFactory
     interface Factory {
 
         fun create(interactor: VolumeDialogSliderInteractor): VolumeDialogSliderViewModel
     }
+
+    private data class VolumeUpdate(val newVolumeLevel: Int, val timestampMillis: Long)
 }

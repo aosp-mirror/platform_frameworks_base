@@ -30,7 +30,6 @@ import android.accounts.AccountManager;
 import android.annotation.MainThread;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
-import android.app.ActivityThread;
 import android.app.AlertDialog;
 import android.app.Notification;
 import android.app.Notification.Action;
@@ -117,7 +116,9 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -173,6 +174,18 @@ public class BugreportProgressService extends Service {
     static final String EXTRA_INFO = "android.intent.extra.INFO";
     static final String EXTRA_EXTRA_ATTACHMENT_URIS =
             "android.intent.extra.EXTRA_ATTACHMENT_URIS";
+
+    private static final ThreadFactory sBugreportManagerCallbackThreadFactory =
+            new ThreadFactory() {
+                private static final ThreadFactory mFactory = Executors.defaultThreadFactory();
+
+                @Override
+                public Thread newThread(Runnable r) {
+                    Thread thread = mFactory.newThread(r);
+                    thread.setName("BRMgrCallbackThread");
+                    return thread;
+                }
+            };
 
     private static final int MSG_SERVICE_COMMAND = 1;
     private static final int MSG_DELAYED_SCREENSHOT = 2;
@@ -277,6 +290,7 @@ public class BugreportProgressService extends Service {
 
     private boolean mIsWatch;
     private boolean mIsTv;
+    private ExecutorService mBugreportSingleThreadExecutor;
 
     @Override
     public void onCreate() {
@@ -307,6 +321,8 @@ public class BugreportProgressService extends Service {
                         isTv(this) ? NotificationManager.IMPORTANCE_DEFAULT
                                 : NotificationManager.IMPORTANCE_LOW));
         mBugreportManager = mContext.getSystemService(BugreportManager.class);
+        mBugreportSingleThreadExecutor = Executors.newSingleThreadExecutor(
+                sBugreportManagerCallbackThreadFactory);
     }
 
     @Override
@@ -337,6 +353,7 @@ public class BugreportProgressService extends Service {
     public void onDestroy() {
         mServiceHandler.getLooper().quit();
         mScreenshotHandler.getLooper().quit();
+        mBugreportSingleThreadExecutor.close();
         super.onDestroy();
     }
 
@@ -714,8 +731,6 @@ public class BugreportProgressService extends Service {
             }
         }
 
-        final Executor executor = ActivityThread.currentActivityThread().getExecutor();
-
         Log.i(TAG, "bugreport type = " + bugreportType
                 + " bugreport file fd: " + bugreportFd
                 + " screenshot file fd: " + screenshotFd);
@@ -724,7 +739,8 @@ public class BugreportProgressService extends Service {
         try {
             synchronized (mLock) {
                 mBugreportManager.startBugreport(bugreportFd, screenshotFd,
-                        new BugreportParams(bugreportType), executor, bugreportCallback);
+                        new BugreportParams(bugreportType), mBugreportSingleThreadExecutor,
+                        bugreportCallback);
                 bugreportCallback.trackInfoWithIdLocked();
             }
         } catch (RuntimeException e) {

@@ -1625,16 +1625,18 @@ public class ActivityStarterTests extends WindowTestsBase {
         assertTrue(activityTop.isVisible());
         assertTrue(activityTop.isVisibleRequested());
 
+        final ActivityRecord[] outActivity = new ActivityRecord[1];
         final ActivityStarter starter = prepareStarter(FLAG_ACTIVITY_REORDER_TO_FRONT
                         | FLAG_ACTIVITY_NEW_TASK, false /* mockGetRootTask */);
         starter.mStartActivity = activityBot;
         task.inRecents = true;
-        starter.setInTask(task);
+        starter.setInTask(task).setOutActivity(outActivity);
         starter.getIntent().setComponent(activityBot.mActivityComponent);
         final int result = starter.setReason("testRecordActivityMovement").execute();
 
         assertEquals(START_DELIVERED_TO_TOP, result);
         assertNotNull(starter.mMovedToTopActivity);
+        assertEquals(activityBot, outActivity[0]);
 
         final ActivityStarter starter2 = prepareStarter(FLAG_ACTIVITY_REORDER_TO_FRONT
                         | FLAG_ACTIVITY_NEW_TASK, false /* mockGetRootTask */);

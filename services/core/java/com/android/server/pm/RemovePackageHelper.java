@@ -258,9 +258,10 @@ final class RemovePackageHelper {
      */
     public void clearPackageStateForUserLIF(PackageSetting ps, int userId, int flags) {
         final String packageName = ps.getPackageName();
-        // Step 1: always destroy app profiles.
-        mAppDataHelper.destroyAppProfilesLIF(packageName);
-
+        // Step 1: always destroy app profiles except when explicitly preserved
+        if ((flags & Installer.FLAG_CLEAR_APP_DATA_KEEP_ART_PROFILES) == 0) {
+            mAppDataHelper.destroyAppProfilesLIF(packageName);
+        }
         final AndroidPackage pkg;
         final SharedUserSetting sus;
         synchronized (mPm.mLock) {
@@ -277,7 +278,8 @@ final class RemovePackageHelper {
             resolvedPkg = PackageImpl.buildFakeForDeletion(packageName, ps.getVolumeUuid());
         }
 
-        int appDataDeletionFlags = FLAG_STORAGE_DE | FLAG_STORAGE_CE | FLAG_STORAGE_EXTERNAL;
+        int appDataDeletionFlags = FLAG_STORAGE_DE | FLAG_STORAGE_CE | FLAG_STORAGE_EXTERNAL
+                | (flags & Installer.FLAG_CLEAR_APP_DATA_KEEP_ART_PROFILES);
         // Personal data is preserved if the DELETE_KEEP_DATA flag is on
         if ((flags & PackageManager.DELETE_KEEP_DATA) != 0) {
             if ((flags & PackageManager.DELETE_ARCHIVE) != 0) {

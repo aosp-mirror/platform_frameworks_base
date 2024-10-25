@@ -50,6 +50,7 @@ constructor(
                 NotificationRowIconView(context, attrs).also { view ->
                     view.setIconProvider(createIconProvider(row, context))
                 }
+
             else -> null
         }
     }
@@ -61,13 +62,19 @@ constructor(
         val sbn = row.entry.sbn
         return object : NotificationIconProvider {
             override fun shouldShowAppIcon(): Boolean {
-                val shouldShowAppIcon = iconStyleProvider.shouldShowAppIcon(row.entry.sbn, context)
+                val shouldShowAppIcon = iconStyleProvider.shouldShowAppIcon(sbn, context)
                 row.setIsShowingAppIcon(shouldShowAppIcon)
                 return shouldShowAppIcon
             }
 
             override fun getAppIcon(): Drawable {
-                return appIconProvider.getOrFetchAppIcon(sbn.packageName, context)
+                val withWorkProfileBadge =
+                    iconStyleProvider.shouldShowWorkProfileBadge(sbn, context)
+                return appIconProvider.getOrFetchAppIcon(
+                    sbn.packageName,
+                    context,
+                    withWorkProfileBadge,
+                )
             }
         }
     }

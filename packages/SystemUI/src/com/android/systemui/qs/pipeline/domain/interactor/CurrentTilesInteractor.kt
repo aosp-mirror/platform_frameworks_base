@@ -63,7 +63,7 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 import kotlinx.coroutines.withContext
 
 /**
@@ -207,7 +207,7 @@ constructor(
                 }
             }
 
-            launch(backgroundDispatcher) {
+            launch(context = backgroundDispatcher) {
                 userAndTiles.collectLatest {
                     val newUser = it.userId
                     val newTileList = it.tiles
@@ -289,7 +289,7 @@ constructor(
     }
 
     override fun addTile(spec: TileSpec, position: Int) {
-        scope.launch(backgroundDispatcher) {
+        scope.launch(context = backgroundDispatcher) {
             // Block until the list is not empty
             currentTiles.filter { it.isNotEmpty() }.first()
             tileSpecRepository.addTile(userRepository.getSelectedUserInfo().id, spec, position)

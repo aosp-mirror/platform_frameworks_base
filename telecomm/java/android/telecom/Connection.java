@@ -2164,7 +2164,7 @@ public abstract class Connection extends Conferenceable {
     private CallAudioState mCallAudioState;
     private CallEndpoint mCallEndpoint;
     private Uri mAddress;
-    private int mAddressPresentation;
+    private int mAddressPresentation = TelecomManager.PRESENTATION_UNKNOWN;
     private String mCallerDisplayName;
     private int mCallerDisplayNamePresentation;
     private boolean mRingbackRequested = false;

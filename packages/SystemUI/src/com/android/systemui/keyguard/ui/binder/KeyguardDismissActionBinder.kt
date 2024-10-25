@@ -27,7 +27,7 @@ import dagger.Lazy
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /** Runs actions on keyguard dismissal. */
 @OptIn(ExperimentalCoroutinesApi::class)

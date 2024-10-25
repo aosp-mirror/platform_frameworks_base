@@ -26,7 +26,7 @@ import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.shared.Flags.ambientAod
 import com.android.systemui.statusbar.LightRevealScrim
 import com.android.systemui.wallpapers.ui.viewmodel.WallpaperViewModel
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 object LightRevealScrimViewBinder {
     @JvmStatic

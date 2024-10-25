@@ -23,6 +23,7 @@ import android.app.NotificationManager
 import android.content.Context
 import android.content.pm.LauncherApps
 import android.os.UserHandle
+import android.os.UserManager
 import android.provider.DeviceConfig
 import androidx.core.os.bundleOf
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags
@@ -109,6 +110,7 @@ class ExpandableNotificationRowBuilder(
     private val mKeyguardBypassController: KeyguardBypassController
     private val mGroupMembershipManager: GroupMembershipManager
     private val mGroupExpansionManager: GroupExpansionManager
+    private val mUserManager: UserManager
     private val mHeadsUpManager: HeadsUpManager
     private val mIconManager: IconManager
     private val mContentBinder: NotificationRowContentBinder
@@ -143,6 +145,7 @@ class ExpandableNotificationRowBuilder(
         mSmartReplyController = Mockito.mock(SmartReplyController::class.java, STUB_ONLY)
 
         mGroupExpansionManager = GroupExpansionManagerImpl(mDumpManager, mGroupMembershipManager)
+        mUserManager = Mockito.mock(UserManager::class.java, STUB_ONLY)
         mHeadsUpManager = Mockito.mock(HeadsUpManager::class.java, STUB_ONLY)
         mIconManager =
             IconManager(
@@ -289,7 +292,7 @@ class ExpandableNotificationRowBuilder(
             { Mockito.mock(NotificationViewFlipperFactory::class.java) },
             NotificationRowIconViewInflaterFactory(
                 AppIconProviderImpl(context, mDumpManager),
-                NotificationIconStyleProviderImpl(mDumpManager),
+                NotificationIconStyleProviderImpl(mUserManager, mDumpManager),
             ),
         )
     }

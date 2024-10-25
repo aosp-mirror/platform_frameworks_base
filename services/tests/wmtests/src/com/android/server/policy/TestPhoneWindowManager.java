@@ -822,9 +822,9 @@ class TestPhoneWindowManager {
     void assertTakeBugreport(boolean wasCalled) throws RemoteException {
         mTestLooper.dispatchAll();
         if (wasCalled) {
-            verify(mActivityManagerService).requestInteractiveBugReport();
+            verify(mActivityManagerService).launchBugReportHandlerApp();
         } else {
-            verify(mActivityManagerService, never()).requestInteractiveBugReport();
+            verify(mActivityManagerService, never()).launchBugReportHandlerApp();
         }
 
     }
