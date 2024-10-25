@@ -110,6 +110,7 @@ import com.android.wm.shell.desktopmode.DesktopTestHelpers.Companion.createSplit
 import com.android.wm.shell.desktopmode.minimize.DesktopWindowLimitRemoteHandler
 import com.android.wm.shell.desktopmode.persistence.Desktop
 import com.android.wm.shell.desktopmode.persistence.DesktopPersistentRepository
+import com.android.wm.shell.desktopmode.persistence.DesktopRepositoryInitializer
 import com.android.wm.shell.draganddrop.DragAndDropController
 import com.android.wm.shell.freeform.FreeformTaskTransitionStarter
 import com.android.wm.shell.recents.RecentTasksController
@@ -224,6 +225,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
   @Mock private lateinit var mockInputManager: InputManager
   @Mock private lateinit var mockFocusTransitionObserver: FocusTransitionObserver
   @Mock lateinit var motionEvent: MotionEvent
+  @Mock lateinit var repositoryInitializer: DesktopRepositoryInitializer
 
   private lateinit var mockitoSession: StaticMockitoSession
   @Mock
@@ -264,7 +266,8 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
     testScope = CoroutineScope(Dispatchers.Unconfined + SupervisorJob())
     shellInit = spy(ShellInit(testExecutor))
-    taskRepository = DesktopRepository(context, shellInit, persistentRepository, testScope)
+    taskRepository =
+      DesktopRepository(context, shellInit, persistentRepository, repositoryInitializer, testScope)
     desktopTasksLimiter =
         DesktopTasksLimiter(
             transitions,

@@ -64,6 +64,7 @@ class DesktopHeaderManageWindowsMenuTest : ShellTestCase() {
             context = context,
             shellInit = ShellInit(TestShellExecutor()),
             persistentRepository = mock(),
+            repositoryInitializer = mock(),
             mainCoroutineScope = mock()
         )
     }
