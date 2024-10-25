@@ -22,6 +22,9 @@ import com.android.systemui.common.ui.domain.interactor.configurationInteractor
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.media.controls.ui.view.qqsMediaHost
+import com.android.systemui.media.controls.ui.view.qsMediaHost
+import com.android.systemui.qs.composefragment.dagger.usingMediaInComposeFragment
 import com.android.systemui.qs.footerActionsController
 import com.android.systemui.qs.footerActionsViewModelFactory
 import com.android.systemui.qs.panels.domain.interactor.tileSquishinessInteractor
@@ -54,6 +57,9 @@ val Kosmos.qsFragmentComposeViewModelFactory by
                     largeScreenHeaderHelper,
                     tileSquishinessInteractor,
                     paginatedGridViewModel,
+                    qqsMediaHost,
+                    qsMediaHost,
+                    usingMediaInComposeFragment,
                     lifecycleScope,
                 )
             }

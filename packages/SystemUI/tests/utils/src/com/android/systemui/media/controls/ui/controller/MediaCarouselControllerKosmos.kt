@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,8 @@
 
 package com.android.systemui.media.controls.ui.controller
 
-import android.content.testableContext
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.Kosmos.Fixture
-import com.android.systemui.util.animation.UniqueObjectHostView
-import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 
-var Kosmos.mediaHierarchyManager by Fixture {
-    mock<MediaHierarchyManager> {
-        on { register(any()) }.thenAnswer { UniqueObjectHostView(this@Fixture.testableContext) }
-    }
-}
+/** Empty mock */
+val Kosmos.mediaCarouselController by Kosmos.Fixture { mock<MediaCarouselController>() }
