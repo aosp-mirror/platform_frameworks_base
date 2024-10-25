@@ -191,7 +191,7 @@ public class RavenwoodRuntimeEnvironmentController {
     /**
      * Initialize the environment.
      */
-    public static void init(RavenwoodConfig config) throws IOException {
+    public static void init(RavenwoodConfig config) {
         if (RAVENWOOD_VERBOSE_LOGGING) {
             Log.i(TAG, "init() called here", new RuntimeException("STACKTRACE"));
         }
