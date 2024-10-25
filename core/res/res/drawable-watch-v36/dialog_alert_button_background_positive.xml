@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <!--
   ~ Copyright (C) 2024 The Android Open Source Project
   ~
@@ -14,9 +15,16 @@
   ~ limitations under the License.
   -->
 
-<selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:state_enabled="false"
-          android:alpha="?attr/disabledAlpha"
-          android:color="?attr/materialColorOnSurface" />
-    <item android:color="?attr/materialColorPrimary" />
-</selector>
+<rotate xmlns:android="http://schemas.android.com/apk/res/android"
+        android:fromDegrees="-45"
+        android:toDegrees="-45"
+        android:pivotX="50%"
+        android:pivotY="50%">
+    <shape android:shape="rectangle">
+        <solid android:color="@color/btn_material_filled_background_color"/>
+        <corners android:radius="200dp" />
+        <size
+            android:width="63dp"
+            android:height="54dp" />
+    </shape>
+</rotate>
