@@ -185,6 +185,7 @@ constructor(
                 } else if (isOnKeyguard && !unlocking && isDreaming) {
                     Model(scrimState = ScrimState.DREAMING, unlocking = false)
                 } else {
+                    onKeyguardFadedAway(transitionState.isIdle(Scenes.Gone))
                     Model(scrimState = ScrimState.UNLOCKED, unlocking = unlocking)
                 }
             }
