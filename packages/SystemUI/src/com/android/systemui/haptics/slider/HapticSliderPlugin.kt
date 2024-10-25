@@ -18,30 +18,30 @@ package com.android.systemui.haptics.slider
 
 import android.view.MotionEvent
 import android.view.VelocityTracker
-import android.widget.SeekBar
 import androidx.annotation.VisibleForTesting
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.util.time.SystemClock
 import com.google.android.msdl.domain.MSDLPlayer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 /**
- * A plugin added to a manager of a [android.widget.SeekBar] that adds dynamic haptic feedback.
+ * A plugin added to a manager of a [HapticSlider] that adds dynamic haptic feedback.
  *
  * A [SliderStateProducer] is used as the producer of slider events, a
  * [SliderHapticFeedbackProvider] is used as the listener of slider states to play haptic feedback
  * depending on the state, and a [SliderStateTracker] is used as the state machine handler that
  * tracks and manipulates the slider state.
  */
-class SeekbarHapticPlugin
+class HapticSliderPlugin
 @JvmOverloads
 constructor(
     vibratorHelper: VibratorHelper,
     msdlPlayer: MSDLPlayer,
     systemClock: SystemClock,
+    private val slider: HapticSlider,
     sliderHapticFeedbackConfig: SliderHapticFeedbackConfig = SliderHapticFeedbackConfig(),
     private val sliderTrackerConfig: SeekableSliderTrackerConfig = SeekableSliderTrackerConfig(),
 ) {
@@ -128,46 +128,42 @@ constructor(
         }
     }
 
-    /** onStartTrackingTouch event from the slider's [android.widget.SeekBar] */
-    fun onStartTrackingTouch(seekBar: SeekBar) {
+    /** onStartTrackingTouch event from the slider. */
+    fun onStartTrackingTouch() {
         if (isTracking) {
             sliderEventProducer.onStartTracking(true)
         }
     }
 
-    /** onProgressChanged event from the slider's [android.widget.SeekBar] */
-    fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
+    /** onProgressChanged event from the slider's. */
+    fun onProgressChanged(progress: Int, fromUser: Boolean) {
         if (isTracking) {
             if (sliderTracker?.currentState == SliderState.IDLE && !fromUser) {
                 // This case translates to the slider starting to track program changes
-                sliderEventProducer.resetWithProgress(normalizeProgress(seekBar, progress))
+                sliderEventProducer.resetWithProgress(normalizeProgress(slider, progress))
                 sliderEventProducer.onStartTracking(false)
             } else {
-                sliderEventProducer.onProgressChanged(
-                    fromUser,
-                    normalizeProgress(seekBar, progress),
-                )
+                sliderEventProducer.onProgressChanged(fromUser, normalizeProgress(slider, progress))
             }
         }
     }
 
     /**
-     * Normalize the integer progress of a SeekBar to the range from 0F to 1F.
+     * Normalize the integer progress of a HapticSlider to the range from 0F to 1F.
      *
-     * @param[seekBar] The SeekBar that reports a progress.
-     * @param[progress] The integer progress of the SeekBar within its min and max values.
+     * @param[slider] The HapticSlider that reports a progress.
+     * @param[progress] The integer progress of the HapticSlider within its min and max values.
      * @return The progress in the range from 0F to 1F.
      */
-    private fun normalizeProgress(seekBar: SeekBar, progress: Int): Float {
-        if (seekBar.max == seekBar.min) {
+    private fun normalizeProgress(slider: HapticSlider, progress: Int): Float {
+        if (slider.max == slider.min) {
             return 1.0f
         }
-        val range = seekBar.max - seekBar.min
-        return (progress - seekBar.min) / range.toFloat()
+        return (progress - slider.min) / (slider.max - slider.min)
     }
 
-    /** onStopTrackingTouch event from the slider's [android.widget.SeekBar] */
-    fun onStopTrackingTouch(seekBar: SeekBar) {
+    /** onStopTrackingTouch event from the slider. */
+    fun onStopTrackingTouch() {
         if (isTracking) {
             sliderEventProducer.onStopTracking(true)
         }
