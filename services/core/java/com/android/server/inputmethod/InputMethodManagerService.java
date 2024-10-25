@@ -6141,22 +6141,13 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             final var bindingController = userData.mBindingController;
             client = userData.mCurClient;
             method = bindingController.getCurMethod();
-            p.println("    mCurMethodId=" + bindingController.getSelectedMethodId());
-            p.println("    mCurClient=" + client + " mCurSeq="
-                    + bindingController.getSequenceNumber());
+            p.println("    mBindingController:");
+            bindingController.dump(pw, "      ");
+            p.println("    mCurClient=" + client);
             p.println("    mFocusedWindowPerceptible=" + mFocusedWindowPerceptible);
             p.println("    mImeBindingState:");
             userData.mImeBindingState.dump(p, "      ");
-            p.println("    mCurId=" + bindingController.getCurId());
-            p.println("    mHaveConnection=" + bindingController.hasMainConnection());
             p.println("    mBoundToMethod=" + userData.mBoundToMethod);
-            p.println("    mVisibleBound=" + bindingController.isVisibleBound());
-            p.println("    mCurToken=" + bindingController.getCurToken());
-            p.println("    mCurTokenDisplayId=" + bindingController.getCurTokenDisplayId());
-            p.println("    mCurHostInputToken=" + bindingController.getCurHostInputToken());
-            p.println("    mCurIntent=" + bindingController.getCurIntent());
-            p.println("    mCurImeWindowVis=" + bindingController.getImeWindowVis());
-            p.println("    mCurMethod=" + method);
             p.println("    mEnabledSession=" + userData.mEnabledSession);
             p.println("    mVisibilityStateComputer:");
             userData.mVisibilityStateComputer.dump(pw, "      ");
