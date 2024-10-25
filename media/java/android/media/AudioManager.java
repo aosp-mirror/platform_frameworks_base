@@ -6156,6 +6156,11 @@ public class AudioManager {
      */
     public static final int DEVICE_OUT_BLE_BROADCAST = AudioSystem.DEVICE_OUT_BLE_BROADCAST;
     /** @hide
+     * The audio output device code for a wireless speaker group supporting multichannel content.
+     */
+    public static final int DEVICE_OUT_MULTICHANNEL_GROUP =
+            AudioSystem.DEVICE_OUT_MULTICHANNEL_GROUP;
+    /** @hide
      * This is not used as a returned value from {@link #getDevicesForStream}, but could be
      *  used in the future in a set method to select whatever default device is chosen by the
      *  platform-specific implementation.
