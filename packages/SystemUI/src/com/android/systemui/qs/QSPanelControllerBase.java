@@ -234,6 +234,12 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
             mMediaHost.addVisibilityChangeListener(mMediaHostVisibilityListener);
         }
         mView.addOnConfigurationChangedListener(mOnConfigurationChangedListener);
+        // We were not attached and the configuration may have changed, trigger the listener.
+        if (mView.hadConfigurationChangeWhileDetached()) {
+            mOnConfigurationChangedListener.onConfigurationChange(
+                    getContext().getResources().getConfiguration()
+            );
+        }
         setTiles();
         mLastOrientation = getResources().getConfiguration().orientation;
         mLastScreenLayout = getResources().getConfiguration().screenLayout;
