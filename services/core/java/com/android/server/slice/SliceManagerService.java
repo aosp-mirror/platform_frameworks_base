@@ -604,6 +604,11 @@ public class SliceManagerService extends ISliceManager.Stub {
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
+            if (action == null) {
+                Slog.w(TAG, "Intent broadcast does not contain action: " + intent);
+                return;
+            }
             final int userId  = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL);
             if (userId == UserHandle.USER_NULL) {
                 Slog.w(TAG, "Intent broadcast does not contain user handle: " + intent);
@@ -615,7 +620,7 @@ public class SliceManagerService extends ISliceManager.Stub {
                 Slog.w(TAG, "Intent broadcast does not contain package name: " + intent);
                 return;
             }
-            switch (intent.getAction()) {
+            switch (action) {
                 case Intent.ACTION_PACKAGE_REMOVED:
                     final boolean replacing =
                             intent.getBooleanExtra(Intent.EXTRA_REPLACING, false);
