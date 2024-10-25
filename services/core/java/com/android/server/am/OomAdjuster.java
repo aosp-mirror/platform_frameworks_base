@@ -78,7 +78,6 @@ import static android.os.Process.THREAD_GROUP_RESTRICTED;
 import static android.os.Process.THREAD_GROUP_TOP_APP;
 import static android.os.Process.THREAD_PRIORITY_DISPLAY;
 import static android.os.Process.THREAD_PRIORITY_TOP_APP_BOOST;
-import static android.os.Process.setProcessGroup;
 
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ALL;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BACKUP;
@@ -526,7 +525,7 @@ public class OomAdjuster {
                         + msg.obj + " to " + group);
             }
             try {
-                setProcessGroup(pid, group);
+                android.os.Process.setProcessGroup(pid, group);
             } catch (Exception e) {
                 if (DEBUG_ALL) {
                     Slog.w(TAG, "Failed setting process group of " + pid + " to " + group, e);
@@ -542,6 +541,11 @@ public class OomAdjuster {
         mTmpQueue = new ArrayDeque<ProcessRecord>(mConstants.CUR_MAX_CACHED_PROCESSES << 1);
         mNumSlots = ((CACHED_APP_MAX_ADJ - CACHED_APP_MIN_ADJ + 1) >> 1)
                 / CACHED_APP_IMPORTANCE_LEVELS;
+    }
+
+    void setProcessGroup(int pid, int group, String processName) {
+        mProcessGroupHandler.sendMessage(mProcessGroupHandler.obtainMessage(
+                0 /* unused */, pid, group, processName));
     }
 
     void initSettings() {
@@ -3489,8 +3493,8 @@ public class OomAdjuster {
                     processGroup = THREAD_GROUP_DEFAULT;
                     break;
             }
-            mProcessGroupHandler.sendMessage(mProcessGroupHandler.obtainMessage(
-                    0 /* unused */, app.getPid(), processGroup, app.processName));
+            setProcessGroup(app.getPid(), processGroup, app.processName);
+            mService.mPhantomProcessList.setProcessGroupForPhantomProcessOfApp(app, processGroup);
             try {
                 final int renderThreadTid = app.getRenderThreadTid();
                 if (curSchedGroup == SCHED_GROUP_TOP_APP) {
