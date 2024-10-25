@@ -22,12 +22,14 @@ import static android.telephony.TelephonyManager.ACTION_MULTI_SIM_CONFIG_CHANGED
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TargetApi;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.vcn.VcnManager;
 import android.net.vcn.util.PersistableBundleUtils.PersistableBundleWrapper;
+import android.os.Build;
 import android.os.Handler;
 import android.os.ParcelUuid;
 import android.os.PersistableBundle;
@@ -77,6 +79,8 @@ import java.util.Set;
  *
  * @hide
  */
+// TODO(b/374174952): Replace VANILLA_ICE_CREAM with BAKLAVA after Android B finalization
+@TargetApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
 public class TelephonySubscriptionTracker extends BroadcastReceiver {
     @NonNull private static final String TAG = TelephonySubscriptionTracker.class.getSimpleName();
     private static final boolean LOG_DBG = false; // STOPSHIP if true
