@@ -16,8 +16,6 @@
 
 package com.android.systemui.statusbar;
 
-import static android.app.Notification.EXTRA_REMOTE_INPUT_HISTORY_ITEMS;
-
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
@@ -25,7 +23,6 @@ import static junit.framework.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
 import android.app.Notification;
-import android.app.NotificationChannelGroup;
 import android.app.RemoteInputHistoryItem;
 import android.net.Uri;
 import android.os.UserHandle;
@@ -74,25 +71,6 @@ public class RemoteInputNotificationRebuilderTest extends SysuiTestCase {
     }
 
     @Test
-    public void testRebuildWithRemoteInput_invalidData() {
-        Uri uri = mock(Uri.class);
-        String mimeType = "image/jpeg";
-        String text = "image inserted";
-        mEntry.getSbn().getNotification().extras.putParcelableArray(
-                EXTRA_REMOTE_INPUT_HISTORY_ITEMS,
-                new NotificationChannelGroup[]{});
-        StatusBarNotification newSbn =
-                mRebuilder.rebuildWithRemoteInputInserted(
-                        mEntry, text, false, mimeType, uri);
-        RemoteInputHistoryItem[] messages = (RemoteInputHistoryItem[]) newSbn.getNotification()
-                .extras.getParcelableArray(EXTRA_REMOTE_INPUT_HISTORY_ITEMS);
-        assertEquals(1, messages.length);
-        assertEquals(text, messages[0].getText());
-        assertEquals(mimeType, messages[0].getMimeType());
-        assertEquals(uri, messages[0].getUri());
-    }
-
-    @Test
     public void testRebuildWithRemoteInput_noExistingInput_image() {
         Uri uri = mock(Uri.class);
         String mimeType = "image/jpeg";
@@ -101,7 +79,7 @@ public class RemoteInputNotificationRebuilderTest extends SysuiTestCase {
                 mRebuilder.rebuildWithRemoteInputInserted(
                         mEntry, text, false, mimeType, uri);
         RemoteInputHistoryItem[] messages = (RemoteInputHistoryItem[]) newSbn.getNotification()
-                .extras.getParcelableArray(EXTRA_REMOTE_INPUT_HISTORY_ITEMS);
+                .extras.getParcelableArray(Notification.EXTRA_REMOTE_INPUT_HISTORY_ITEMS);
         assertEquals(1, messages.length);
         assertEquals(text, messages[0].getText());
         assertEquals(mimeType, messages[0].getMimeType());
@@ -114,7 +92,7 @@ public class RemoteInputNotificationRebuilderTest extends SysuiTestCase {
                 mRebuilder.rebuildWithRemoteInputInserted(
                         mEntry, "A Reply", false, null, null);
         RemoteInputHistoryItem[] messages = (RemoteInputHistoryItem[]) newSbn.getNotification()
-                .extras.getParcelableArray(EXTRA_REMOTE_INPUT_HISTORY_ITEMS);
+                .extras.getParcelableArray(Notification.EXTRA_REMOTE_INPUT_HISTORY_ITEMS);
         assertEquals(1, messages.length);
         assertEquals("A Reply", messages[0].getText());
         assertFalse(newSbn.getNotification().extras
@@ -129,7 +107,7 @@ public class RemoteInputNotificationRebuilderTest extends SysuiTestCase {
                 mRebuilder.rebuildWithRemoteInputInserted(
                         mEntry, "A Reply", true, null, null);
         RemoteInputHistoryItem[] messages = (RemoteInputHistoryItem[]) newSbn.getNotification()
-                .extras.getParcelableArray(EXTRA_REMOTE_INPUT_HISTORY_ITEMS);
+                .extras.getParcelableArray(Notification.EXTRA_REMOTE_INPUT_HISTORY_ITEMS);
         assertEquals(1, messages.length);
         assertEquals("A Reply", messages[0].getText());
         assertTrue(newSbn.getNotification().extras
@@ -152,7 +130,7 @@ public class RemoteInputNotificationRebuilderTest extends SysuiTestCase {
         newSbn = mRebuilder.rebuildWithRemoteInputInserted(
                 entry, "Reply 2", true, null, null);
         RemoteInputHistoryItem[] messages = (RemoteInputHistoryItem[]) newSbn.getNotification()
-                .extras.getParcelableArray(EXTRA_REMOTE_INPUT_HISTORY_ITEMS);
+                .extras.getParcelableArray(Notification.EXTRA_REMOTE_INPUT_HISTORY_ITEMS);
         assertEquals(2, messages.length);
         assertEquals("Reply 2", messages[0].getText());
         assertEquals("A Reply", messages[1].getText());
@@ -175,7 +153,7 @@ public class RemoteInputNotificationRebuilderTest extends SysuiTestCase {
         newSbn = mRebuilder.rebuildWithRemoteInputInserted(
                 entry, "Reply 2", true, null, null);
         RemoteInputHistoryItem[] messages = (RemoteInputHistoryItem[]) newSbn.getNotification()
-                .extras.getParcelableArray(EXTRA_REMOTE_INPUT_HISTORY_ITEMS);
+                .extras.getParcelableArray(Notification.EXTRA_REMOTE_INPUT_HISTORY_ITEMS);
         assertEquals(2, messages.length);
         assertEquals("Reply 2", messages[0].getText());
         assertEquals(text, messages[1].getText());

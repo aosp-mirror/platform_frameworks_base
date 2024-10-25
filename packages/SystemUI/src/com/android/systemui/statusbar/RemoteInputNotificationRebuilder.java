@@ -128,8 +128,7 @@ public class RemoteInputNotificationRebuilder {
 
             // Read the whole remoteInputs list from the entry, then append all of those to the sbn.
             Parcelable[] oldHistoryItems = sbn.getNotification().extras
-                    .getParcelableArray(Notification.EXTRA_REMOTE_INPUT_HISTORY_ITEMS,
-                            RemoteInputHistoryItem.class);
+                    .getParcelableArray(Notification.EXTRA_REMOTE_INPUT_HISTORY_ITEMS);
 
             RemoteInputHistoryItem[] newHistoryItems = oldHistoryItems != null
                     ? Stream.concat(
@@ -145,8 +144,7 @@ public class RemoteInputNotificationRebuilder {
                         ? new RemoteInputHistoryItem(mimeType, uri, remoteInputText)
                         : new RemoteInputHistoryItem(remoteInputText);
                 Parcelable[] oldHistoryItems = sbn.getNotification().extras
-                        .getParcelableArray(Notification.EXTRA_REMOTE_INPUT_HISTORY_ITEMS,
-                                RemoteInputHistoryItem.class);
+                        .getParcelableArray(Notification.EXTRA_REMOTE_INPUT_HISTORY_ITEMS);
                 RemoteInputHistoryItem[] newHistoryItems = oldHistoryItems != null
                         ? Stream.concat(
                                 Stream.of(newItem),

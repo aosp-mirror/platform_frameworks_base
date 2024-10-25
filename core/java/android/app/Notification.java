@@ -1870,7 +1870,7 @@ public class Notification implements Parcelable
          * You can test if a RemoteInput matches these constraints using
          * {@link RemoteInput#isDataOnly}.
          */
-        static final String EXTRA_DATA_ONLY_INPUTS = "android.extra.DATA_ONLY_INPUTS";
+        private static final String EXTRA_DATA_ONLY_INPUTS = "android.extra.DATA_ONLY_INPUTS";
 
         /**
          * No semantic action defined.
@@ -2089,7 +2089,7 @@ public class Notification implements Parcelable
          * of non-textual RemoteInputs do not access these remote inputs.
          */
         public RemoteInput[] getDataOnlyRemoteInputs() {
-            return mExtras.getParcelableArray(EXTRA_DATA_ONLY_INPUTS, RemoteInput.class);
+            return getParcelableArrayFromBundle(mExtras, EXTRA_DATA_ONLY_INPUTS, RemoteInput.class);
         }
 
         /**
@@ -2330,8 +2330,8 @@ public class Notification implements Parcelable
                 checkContextualActionNullFields();
 
                 ArrayList<RemoteInput> dataOnlyInputs = new ArrayList<>();
-                RemoteInput[] previousDataInputs =
-                        mExtras.getParcelableArray(EXTRA_DATA_ONLY_INPUTS, RemoteInput.class);
+                RemoteInput[] previousDataInputs = getParcelableArrayFromBundle(
+                        mExtras, EXTRA_DATA_ONLY_INPUTS, RemoteInput.class);
                 if (previousDataInputs != null) {
                     for (RemoteInput input : previousDataInputs) {
                         dataOnlyInputs.add(input);
@@ -3091,8 +3091,7 @@ public class Notification implements Parcelable
                 visitor.accept(Uri.parse(extras.getString(EXTRA_BACKGROUND_IMAGE_URI)));
             }
 
-            ArrayList<Person> people =
-                    extras.getParcelableArrayList(EXTRA_PEOPLE_LIST, android.app.Person.class);
+            ArrayList<Person> people = extras.getParcelableArrayList(EXTRA_PEOPLE_LIST, android.app.Person.class);
             if (people != null && !people.isEmpty()) {
                 for (Person p : people) {
                     p.visitUris(visitor);
@@ -3118,8 +3117,8 @@ public class Notification implements Parcelable
                 person.visitUris(visitor);
             }
 
-            final Bundle[] messages = extras.getParcelableArray(EXTRA_MESSAGES,
-                    Bundle.class);
+            final Parcelable[] messages = extras.getParcelableArray(EXTRA_MESSAGES,
+                    Parcelable.class);
             if (!ArrayUtils.isEmpty(messages)) {
                 for (MessagingStyle.Message message : MessagingStyle.Message
                         .getMessagesFromBundleArray(messages)) {
@@ -3127,8 +3126,8 @@ public class Notification implements Parcelable
                 }
             }
 
-            final Bundle[] historic = extras.getParcelableArray(EXTRA_HISTORIC_MESSAGES,
-                    Bundle.class);
+            final Parcelable[] historic = extras.getParcelableArray(EXTRA_HISTORIC_MESSAGES,
+                    Parcelable.class);
             if (!ArrayUtils.isEmpty(historic)) {
                 for (MessagingStyle.Message message : MessagingStyle.Message
                         .getMessagesFromBundleArray(historic)) {
@@ -3839,9 +3838,17 @@ public class Notification implements Parcelable
      */
     private void fixDuplicateExtras() {
         if (extras != null) {
-            if (mLargeIcon != null) {
-                extras.putParcelable(EXTRA_LARGE_ICON, mLargeIcon);
-            }
+            fixDuplicateExtra(mLargeIcon, EXTRA_LARGE_ICON);
+        }
+    }
+
+    /**
+     * If we find an extra that's exactly the same as one of the "real" fields but refers to a
+     * separate object, replace it with the field's version to avoid holding duplicate copies.
+     */
+    private void fixDuplicateExtra(@Nullable Parcelable original, @NonNull String extraName) {
+        if (original != null && extras.getParcelable(extraName, Parcelable.class) != null) {
+            extras.putParcelable(extraName, original);
         }
     }
 
@@ -6615,8 +6622,8 @@ public class Notification implements Parcelable
                 big.setViewVisibility(R.id.actions_container, View.GONE);
             }
 
-            RemoteInputHistoryItem[] replyText = mN.extras.getParcelableArray(
-                    EXTRA_REMOTE_INPUT_HISTORY_ITEMS, RemoteInputHistoryItem.class);
+            RemoteInputHistoryItem[] replyText = getParcelableArrayFromBundle(
+                    mN.extras, EXTRA_REMOTE_INPUT_HISTORY_ITEMS, RemoteInputHistoryItem.class);
             if (validRemoteInput && replyText != null && replyText.length > 0
                     && !TextUtils.isEmpty(replyText[0].getText())
                     && p.maxRemoteInputHistory > 0) {
@@ -8020,7 +8027,8 @@ public class Notification implements Parcelable
      */
     public boolean hasImage() {
         if (isStyle(MessagingStyle.class) && extras != null) {
-            final Bundle[] messages = extras.getParcelableArray(EXTRA_MESSAGES, Bundle.class);
+            final Parcelable[] messages = extras.getParcelableArray(EXTRA_MESSAGES,
+                    Parcelable.class);
             if (!ArrayUtils.isEmpty(messages)) {
                 for (MessagingStyle.Message m : MessagingStyle.Message
                         .getMessagesFromBundleArray(messages)) {
@@ -9340,10 +9348,10 @@ public class Notification implements Parcelable
                 mUser = user;
             }
             mConversationTitle = extras.getCharSequence(EXTRA_CONVERSATION_TITLE);
-            Bundle[] messages = extras.getParcelableArray(EXTRA_MESSAGES, Bundle.class);
+            Parcelable[] messages = extras.getParcelableArray(EXTRA_MESSAGES, Parcelable.class);
             mMessages = Message.getMessagesFromBundleArray(messages);
             Parcelable[] histMessages = extras.getParcelableArray(EXTRA_HISTORIC_MESSAGES,
-                    Bundle.class);
+                    Parcelable.class);
             mHistoricMessages = Message.getMessagesFromBundleArray(histMessages);
             mIsGroupConversation = extras.getBoolean(EXTRA_IS_GROUP_CONVERSATION);
             mUnreadMessageCount = extras.getInt(EXTRA_CONVERSATION_UNREAD_MESSAGE_COUNT);
@@ -10210,8 +10218,8 @@ public class Notification implements Parcelable
             if (mBuilder.mActions.size() > 0) {
                 maxRows--;
             }
-            RemoteInputHistoryItem[] remoteInputHistory = mBuilder.mN.extras.getParcelableArray(
-                    EXTRA_REMOTE_INPUT_HISTORY_ITEMS,
+            RemoteInputHistoryItem[] remoteInputHistory = getParcelableArrayFromBundle(
+                    mBuilder.mN.extras, EXTRA_REMOTE_INPUT_HISTORY_ITEMS,
                     RemoteInputHistoryItem.class);
             if (remoteInputHistory != null
                     && remoteInputHistory.length > NUMBER_OF_HISTORY_ALLOWED_UNTIL_REDUCTION) {
@@ -13062,8 +13070,7 @@ public class Notification implements Parcelable
         public WearableExtender(Notification notif) {
             Bundle wearableBundle = notif.extras.getBundle(EXTRA_WEARABLE_EXTENSIONS);
             if (wearableBundle != null) {
-                List<Action> actions = wearableBundle.getParcelableArrayList(
-                        KEY_ACTIONS, Notification.Action.class);
+                List<Action> actions = wearableBundle.getParcelableArrayList(KEY_ACTIONS, android.app.Notification.Action.class);
                 if (actions != null) {
                     mActions.addAll(actions);
                 }
@@ -13072,8 +13079,8 @@ public class Notification implements Parcelable
                 mDisplayIntent = wearableBundle.getParcelable(
                         KEY_DISPLAY_INTENT, PendingIntent.class);
 
-                Notification[] pages =
-                        wearableBundle.getParcelableArray(KEY_PAGES, Notification.class);
+                Notification[] pages = getParcelableArrayFromBundle(
+                        wearableBundle, KEY_PAGES, Notification.class);
                 if (pages != null) {
                     Collections.addAll(mPages, pages);
                 }
@@ -14008,7 +14015,7 @@ public class Notification implements Parcelable
                 if (mParticipants != null && mParticipants.length > 1) {
                     author = mParticipants[0];
                 }
-                Bundle[] messages = new Bundle[mMessages.length];
+                Parcelable[] messages = new Parcelable[mMessages.length];
                 for (int i = 0; i < messages.length; i++) {
                     Bundle m = new Bundle();
                     m.putString(KEY_TEXT, mMessages[i]);
@@ -14030,7 +14037,8 @@ public class Notification implements Parcelable
                 if (b == null) {
                     return null;
                 }
-                Bundle[] parcelableMessages = b.getParcelableArray(KEY_MESSAGES, Bundle.class);
+                Parcelable[] parcelableMessages = b.getParcelableArray(KEY_MESSAGES,
+                        Parcelable.class);
                 String[] messages = null;
                 if (parcelableMessages != null) {
                     String[] tmp = new String[parcelableMessages.length];
@@ -14392,6 +14400,27 @@ public class Notification implements Parcelable
         public boolean isSuppressShowOverApps() {
             return mSuppressShowOverApps;
         }
+    }
+
+    /**
+     * Get an array of Parcelable objects from a parcelable array bundle field.
+     * Update the bundle to have a typed array so fetches in the future don't need
+     * to do an array copy.
+     */
+    @Nullable
+    private static <T extends Parcelable> T[] getParcelableArrayFromBundle(
+            Bundle bundle, String key, Class<T> itemClass) {
+        final Parcelable[] array = bundle.getParcelableArray(key, Parcelable.class);
+        final Class<?> arrayClass = Array.newInstance(itemClass, 0).getClass();
+        if (arrayClass.isInstance(array) || array == null) {
+            return (T[]) array;
+        }
+        final T[] typedArray = (T[]) Array.newInstance(itemClass, array.length);
+        for (int i = 0; i < array.length; i++) {
+            typedArray[i] = (T) array[i];
+        }
+        bundle.putParcelableArray(key, typedArray);
+        return typedArray;
     }
 
     private static class BuilderRemoteViews extends RemoteViews {
