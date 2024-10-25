@@ -127,6 +127,7 @@ import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.times
+import org.mockito.kotlin.KArgumentCaptor
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argThat
@@ -1278,12 +1279,45 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
             .toggleDesktopTaskSize(decor.mTaskInfo, ResizeTrigger.MAXIMIZE_BUTTON, null)
     }
 
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_FULLY_IMMERSIVE_IN_DESKTOP)
+    fun testImmersiveClick_togglesImmersiveState() {
+        val onImmersiveClickCaptor = argumentCaptor<() -> Unit>()
+        val decor = createOpenTaskDecoration(
+            windowingMode = WINDOWING_MODE_FREEFORM,
+            onImmersiveOrRestoreListenerCaptor = onImmersiveClickCaptor,
+            requestingImmersive = true,
+        )
+
+        onImmersiveClickCaptor.firstValue()
+
+        verify(mockDesktopTasksController)
+            .toggleDesktopTaskFullImmersiveState(decor.mTaskInfo)
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_FULLY_IMMERSIVE_IN_DESKTOP)
+    fun testImmersiveClick_closesMaximizeMenu() {
+        val onImmersiveClickCaptor = argumentCaptor<() -> Unit>()
+        val decor = createOpenTaskDecoration(
+            windowingMode = WINDOWING_MODE_FREEFORM,
+            onImmersiveOrRestoreListenerCaptor = onImmersiveClickCaptor,
+            requestingImmersive = true,
+        )
+
+        onImmersiveClickCaptor.firstValue()
+
+        verify(decor).closeMaximizeMenu()
+    }
+
     private fun createOpenTaskDecoration(
         @WindowingMode windowingMode: Int,
         taskSurface: SurfaceControl = SurfaceControl(),
         requestingImmersive: Boolean = false,
         onMaxOrRestoreListenerCaptor: ArgumentCaptor<Function0<Unit>> =
             forClass(Function0::class.java) as ArgumentCaptor<Function0<Unit>>,
+        onImmersiveOrRestoreListenerCaptor: KArgumentCaptor<() -> Unit> =
+            argumentCaptor<() -> Unit>(),
         onLeftSnapClickListenerCaptor: ArgumentCaptor<Function0<Unit>> =
             forClass(Function0::class.java) as ArgumentCaptor<Function0<Unit>>,
         onRightSnapClickListenerCaptor: ArgumentCaptor<Function0<Unit>> =
@@ -1307,6 +1341,8 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
         ))
         onTaskOpening(decor.mTaskInfo, taskSurface)
         verify(decor).setOnMaximizeOrRestoreClickListener(onMaxOrRestoreListenerCaptor.capture())
+        verify(decor)
+            .setOnImmersiveOrRestoreClickListener(onImmersiveOrRestoreListenerCaptor.capture())
         verify(decor).setOnLeftSnapClickListener(onLeftSnapClickListenerCaptor.capture())
         verify(decor).setOnRightSnapClickListener(onRightSnapClickListenerCaptor.capture())
         verify(decor).setOnToDesktopClickListener(onToDesktopClickListenerCaptor.capture())
