@@ -25,6 +25,7 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.shade.LargeScreenHeaderHelper
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.policy.SplitShadeStateController
 import dagger.Lazy
@@ -45,7 +46,7 @@ import kotlinx.coroutines.flow.map
 class SharedNotificationContainerInteractor
 @Inject
 constructor(
-    private val context: Context,
+    @ShadeDisplayAware private val context: Context,
     private val splitShadeStateController: Lazy<SplitShadeStateController>,
     private val shadeInteractor: Lazy<ShadeInteractor>,
     configurationInteractor: ConfigurationInteractor,
