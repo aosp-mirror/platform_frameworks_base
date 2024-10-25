@@ -26,4 +26,10 @@ parcelable AidlKeyGestureEvent {
     int action;
     int displayId;
     int flags;
+
+    // App launch parameters: only set when gestureType = KEY_GESTURE_TYPE_LAUNCH_APPLICATION
+    String appLaunchCategory;
+    String appLaunchRole;
+    String appLaunchPackageName;
+    String appLaunchClassName;
 }
