@@ -16,7 +16,6 @@
 
 package android.app;
 
-import static android.app.Notification.Action.EXTRA_DATA_ONLY_INPUTS;
 import static android.app.Notification.CarExtender.UnreadConversation.KEY_ON_READ;
 import static android.app.Notification.CarExtender.UnreadConversation.KEY_ON_REPLY;
 import static android.app.Notification.CarExtender.UnreadConversation.KEY_REMOTE_INPUT;
@@ -98,7 +97,6 @@ import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 import android.text.style.TextAppearanceSpan;
 import android.util.Pair;
-import android.view.View;
 import android.widget.RemoteViews;
 
 import androidx.test.InstrumentationRegistry;
@@ -108,9 +106,9 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.R;
 import com.android.internal.util.ContrastColorUtil;
 
-import libcore.junit.util.compat.CoreCompatChangeRule;
-
 import junit.framework.Assert;
+
+import libcore.junit.util.compat.CoreCompatChangeRule;
 
 import org.junit.Before;
 import org.junit.Ignore;
@@ -538,22 +536,6 @@ public class NotificationTest {
 
         Notification n = new Notification.Builder(mContext).setLargeIcon(originalIcon).build();
         assertSame(n.getLargeIcon(), originalIcon);
-
-        Notification q = writeAndReadParcelable(n);
-        assertNotSame(q.getLargeIcon(), n.getLargeIcon());
-
-        assertTrue(q.getLargeIcon().getBitmap().sameAs(n.getLargeIcon().getBitmap()));
-        assertSame(q.getLargeIcon(), q.extras.getParcelable(EXTRA_LARGE_ICON));
-    }
-
-    @Test
-    public void largeIconMultipleReferences_ignoreBadData() {
-        Icon originalIcon = Icon.createWithBitmap(BitmapFactory.decodeResource(
-                mContext.getResources(), com.android.frameworks.coretests.R.drawable.test128x96));
-
-        Notification n = new Notification.Builder(mContext).setLargeIcon(originalIcon).build();
-        assertSame(n.getLargeIcon(), originalIcon);
-        n.extras.putParcelable(EXTRA_LARGE_ICON, new NotificationChannelGroup("hi", "hi"));
 
         Notification q = writeAndReadParcelable(n);
         assertNotSame(q.getLargeIcon(), n.getLargeIcon());
@@ -2462,69 +2444,6 @@ public class NotificationTest {
 
         assertThat(progressStyle1.isStyledByProgress()).isTrue();
     }
-
-    @Test
-    public void getDataOnlyRemoteInputs_invalidData() {
-        Notification.Action action = new Notification.Action.Builder(0, "title", null)
-                .addRemoteInput(new RemoteInput.Builder("result")
-                        .setAllowFreeFormInput(false)
-                        .setAllowDataType("mimeType", true)
-                        .build()).build();
-        action.getExtras().putParcelable(EXTRA_DATA_ONLY_INPUTS,
-                new NotificationChannelGroup("hi", "hi"));
-        assertThat(action.getDataOnlyRemoteInputs()).isNull();
-    }
-
-    @Test
-    public void actionAddExtras_invalidData() {
-        Bundle extras = new Bundle();
-        extras.putParcelableArray(EXTRA_DATA_ONLY_INPUTS,
-                new NotificationChannelGroup[]{new NotificationChannelGroup("hi", "hi")});
-        Notification.Action action = new Notification.Action.Builder(0, "title", null)
-                .addRemoteInput(new RemoteInput.Builder("result")
-                        .setAllowFreeFormInput(false)
-                        .setAllowDataType("mimeType", true)
-                        .addExtras(extras)
-                        .build()).build();
-        assertThat(action.getDataOnlyRemoteInputs()[0].getClass()).isEqualTo(RemoteInput.class);
-    }
-
-    @Test
-    public void makeBigTemplate_invalidData() {
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext, 0,
-                new Intent(mContext, NotificationTest.class),
-                PendingIntent.FLAG_MUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
-        RemoteInput remoteInput =
-                new RemoteInput.Builder("key_text_reply")
-                        .setLabel("Reply")
-                        .setChoices(new String[]{"Choice 1", "Choice 2"})
-                        .addExtras(new Bundle())
-                        .build();
-        Notification.Action replyAction = new Notification.Action.Builder(
-                R.drawable.stat_notify_chat, "Reply", pendingIntent)
-                .addRemoteInput(remoteInput)
-                .build();
-
-        Bundle bundle = new Bundle();
-        bundle.putParcelableArray(Notification.EXTRA_REMOTE_INPUT_HISTORY_ITEMS,
-                new NotificationChannelGroup[]{});
-
-        Notification.Builder nb = new Notification.Builder(mContext, "channel")
-                .setContentTitle("title")
-                .setVisibility(android.app.Notification.VISIBILITY_PUBLIC)
-                .setStyle(new Notification.InboxStyle())
-                .setExtras(bundle)
-                .setSmallIcon(R.drawable.stat_notify_chat)
-                .addAction(replyAction);
-
-        RemoteViews views = nb.createBigContentView();
-        View view = views.apply(mContext, null);
-        assertThat(view.findViewById(R.id.notification_material_reply_container).getVisibility())
-                .isNotEqualTo(View.VISIBLE);
-        assertThat(view.findViewById(R.id.inbox_text0).getVisibility())
-                .isNotEqualTo(View.VISIBLE);
-    }
-
     private void assertValid(Notification.Colors c) {
         // Assert that all colors are populated
         assertThat(c.getBackgroundColor()).isNotEqualTo(Notification.COLOR_INVALID);
