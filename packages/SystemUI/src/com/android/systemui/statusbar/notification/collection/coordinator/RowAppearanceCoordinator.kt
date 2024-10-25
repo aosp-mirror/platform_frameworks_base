@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.notification.collection.coordinator
 
 import android.content.Context
 import com.android.systemui.res.R
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.statusbar.notification.AssistantFeedbackController
 import com.android.systemui.statusbar.notification.collection.ListEntry
 import com.android.systemui.statusbar.notification.collection.NotifPipeline
@@ -33,7 +34,7 @@ import javax.inject.Inject
  */
 @CoordinatorScope
 class RowAppearanceCoordinator @Inject internal constructor(
-    context: Context,
+    @ShadeDisplayAware context: Context,
     private var mAssistantFeedbackController: AssistantFeedbackController,
     private var mSectionStyleProvider: SectionStyleProvider
 ) : Coordinator {
