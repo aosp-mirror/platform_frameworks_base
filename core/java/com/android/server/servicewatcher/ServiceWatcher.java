@@ -16,6 +16,10 @@
 
 package com.android.server.servicewatcher;
 
+import static android.content.Context.BIND_AUTO_CREATE;
+import static android.content.Context.BIND_NOT_FOREGROUND;
+import static android.content.Context.BIND_NOT_VISIBLE;
+
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.content.ComponentName;
@@ -146,6 +150,10 @@ public interface ServiceWatcher {
         protected final @Nullable String mAction;
         protected final int mUid;
         protected final ComponentName mComponentName;
+        private final int mFlags;
+
+        private static final int DEFAULT_FLAGS =
+                BIND_AUTO_CREATE | BIND_NOT_FOREGROUND | BIND_NOT_VISIBLE;
 
         protected BoundServiceInfo(String action, ResolveInfo resolveInfo) {
             this(action, resolveInfo.serviceInfo.applicationInfo.uid,
@@ -153,9 +161,14 @@ public interface ServiceWatcher {
         }
 
         protected BoundServiceInfo(String action, int uid, ComponentName componentName) {
+            this(action, uid, componentName, DEFAULT_FLAGS);
+        }
+
+        protected BoundServiceInfo(String action, int uid, ComponentName componentName, int flags) {
             mAction = action;
             mUid = uid;
             mComponentName = Objects.requireNonNull(componentName);
+            mFlags = flags;
         }
 
         /** Returns the action associated with this bound service. */
@@ -173,6 +186,11 @@ public interface ServiceWatcher {
             return UserHandle.getUserId(mUid);
         }
 
+        /** Returns flags used when binding the service. */
+        public int getFlags() {
+            return mFlags;
+        }
+
         @Override
         public final boolean equals(Object o) {
             if (this == o) {
@@ -185,12 +203,13 @@ public interface ServiceWatcher {
             BoundServiceInfo that = (BoundServiceInfo) o;
             return mUid == that.mUid
                     && Objects.equals(mAction, that.mAction)
-                    && mComponentName.equals(that.mComponentName);
+                    && mComponentName.equals(that.mComponentName)
+                    && mFlags == that.mFlags;
         }
 
         @Override
         public final int hashCode() {
-            return Objects.hash(mAction, mUid, mComponentName);
+            return Objects.hash(mAction, mUid, mComponentName, mFlags);
         }
 
         @Override
