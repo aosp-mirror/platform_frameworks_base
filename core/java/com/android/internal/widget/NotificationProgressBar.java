@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
+import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
@@ -65,6 +66,11 @@ public final class NotificationProgressBar extends ProgressBar {
 
     @Nullable
     private Drawable mTracker = null;
+    private final int mTrackerHeight;
+    private int mTrackerWidth;
+    private int mTrackerPos;
+    private final Matrix mMatrix = new Matrix();
+    private Matrix mTrackerDrawMatrix = null;
 
     public NotificationProgressBar(Context context) {
         this(context, null);
@@ -92,6 +98,11 @@ public final class NotificationProgressBar extends ProgressBar {
         // via {@code setProgressTrackerIcon}.
         final Drawable tracker = a.getDrawable(R.styleable.NotificationProgressBar_tracker);
         setTracker(tracker);
+
+        // If this is configured to be non-zero, will scale the tracker drawable and ensure its
+        // aspect ration is between 2:1 to 1:2.
+        mTrackerHeight = a.getDimensionPixelSize(R.styleable.NotificationProgressBar_trackerHeight,
+                0);
     }
 
     /**
@@ -195,6 +206,10 @@ public final class NotificationProgressBar extends ProgressBar {
 
         if (tracker != null) {
             tracker.setCallback(this);
+            if (getMirrorForRtl()) {
+                tracker.setAutoMirrored(true);
+            }
+
             if (canResolveLayoutDirection()) {
                 tracker.setLayoutDirection(getLayoutDirection());
             }
@@ -207,6 +222,9 @@ public final class NotificationProgressBar extends ProgressBar {
         }
 
         mTracker = tracker;
+
+        configureTrackerBounds();
+
         invalidate();
 
         if (needUpdate) {
@@ -217,6 +235,43 @@ public final class NotificationProgressBar extends ProgressBar {
                 tracker.setState(getDrawableState());
             }
         }
+    }
+
+    private void configureTrackerBounds() {
+        // Reset the tracker draw matrix to null
+        mTrackerDrawMatrix = null;
+
+        if (mTracker == null || mTrackerHeight <= 0) {
+            return;
+        }
+
+        final int dWidth = mTracker.getIntrinsicWidth();
+        final int dHeight = mTracker.getIntrinsicHeight();
+        if (dWidth <= 0 || dHeight <= 0) {
+            return;
+        }
+        final int maxDWidth = dHeight * 2;
+        final int maxDHeight = dWidth * 2;
+
+        mTrackerDrawMatrix = mMatrix;
+        float scale;
+        float dx = 0, dy = 0;
+
+        if (dWidth > maxDWidth) {
+            scale = (float) mTrackerHeight / (float) dHeight;
+            dx = (maxDWidth * scale - dWidth * scale) * 0.5f;
+            mTrackerWidth = (int) (maxDWidth * scale);
+        } else if (dHeight > maxDHeight) {
+            scale = (float) mTrackerHeight * 0.5f / (float) dWidth;
+            dy = (maxDHeight * scale - dHeight * scale) * 0.5f;
+            mTrackerWidth = mTrackerHeight / 2;
+        } else {
+            scale = (float) mTrackerHeight / (float) dHeight;
+            mTrackerWidth = (int) (dWidth * scale);
+        }
+
+        mTrackerDrawMatrix.setScale(scale, scale);
+        mTrackerDrawMatrix.postTranslate(Math.round(dx), Math.round(dy));
     }
 
     @Override
@@ -278,7 +333,8 @@ public final class NotificationProgressBar extends ProgressBar {
         // The max height does not incorporate padding, whereas the height
         // parameter does.
         final int barHeight = Math.min(getMaxHeight(), paddedHeight);
-        final int trackerHeight = tracker == null ? 0 : tracker.getIntrinsicHeight();
+        final int trackerHeight = tracker == null ? 0
+                : ((mTrackerHeight == 0) ? tracker.getIntrinsicHeight() : mTrackerHeight);
 
         // Apply offset to whichever item is taller.
         final int barOffsetY;
@@ -323,7 +379,7 @@ public final class NotificationProgressBar extends ProgressBar {
         int available = w - mPaddingLeft - mPaddingRight;
         final int trackerWidth = tracker.getIntrinsicWidth();
         final int trackerHeight = tracker.getIntrinsicHeight();
-        available -= trackerWidth;
+        available -= ((mTrackerHeight == 0) ? trackerWidth : mTrackerWidth);
 
         final int trackerPos = (int) (scale * available + 0.5f);
 
@@ -337,7 +393,8 @@ public final class NotificationProgressBar extends ProgressBar {
             bottom = offsetY + trackerHeight;
         }
 
-        final int left = (isLayoutRtl() && getMirrorForRtl()) ? available - trackerPos : trackerPos;
+        mTrackerPos = (isLayoutRtl() && getMirrorForRtl()) ? available - trackerPos : trackerPos;
+        final int left = 0;
         final int right = left + trackerWidth;
 
         final Drawable background = getBackground();
@@ -373,9 +430,13 @@ public final class NotificationProgressBar extends ProgressBar {
     private void drawTracker(Canvas canvas) {
         if (mTracker != null) {
             final int saveCount = canvas.save();
-            // Translate the padding. For the x, we need to allow the tracker to
-            // draw in its extra space
-            canvas.translate(mPaddingLeft, mPaddingTop);
+            // Translate the canvas origin to tracker position to make the draw matrix and the RtL
+            // transformations work.
+            canvas.translate(mPaddingLeft + mTrackerPos, mPaddingTop);
+            canvas.clipRect(0, 0, mTrackerWidth, mTrackerHeight);
+            if (mTrackerDrawMatrix != null) {
+                canvas.concat(mTrackerDrawMatrix);
+            }
             mTracker.draw(canvas);
             canvas.restoreToCount(saveCount);
         }
