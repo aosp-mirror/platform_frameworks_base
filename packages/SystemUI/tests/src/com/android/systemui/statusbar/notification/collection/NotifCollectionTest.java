@@ -72,7 +72,6 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.util.ArrayMap;
 import android.util.ArraySet;
-import android.util.Pair;
 
 import androidx.annotation.NonNull;
 import androidx.test.filters.SmallTest;
@@ -1292,8 +1291,8 @@ public class NotifCollectionTest extends SysuiTestCase {
 
         // WHEN both notifications are manually dismissed together
         mCollection.dismissNotifications(
-                List.of(new Pair<>(entry1, defaultStats(entry1)),
-                        new Pair<>(entry2, defaultStats(entry2))));
+                List.of(entryWithDefaultStats(entry1),
+                        entryWithDefaultStats(entry2)));
 
         // THEN build list is only called one time
         verifyBuiltList(List.of(entry1, entry2));
@@ -1311,8 +1310,8 @@ public class NotifCollectionTest extends SysuiTestCase {
         DismissedByUserStats stats1 = defaultStats(entry1);
         DismissedByUserStats stats2 = defaultStats(entry2);
         mCollection.dismissNotifications(
-                List.of(new Pair<>(entry1, defaultStats(entry1)),
-                        new Pair<>(entry2, defaultStats(entry2))));
+                List.of(entryWithDefaultStats(entry1),
+                        entryWithDefaultStats(entry2)));
 
         // THEN we send the dismissals to system server
         FakeExecutor.exhaustExecutors(mBgExecutor);
@@ -1343,8 +1342,8 @@ public class NotifCollectionTest extends SysuiTestCase {
 
         // WHEN both notifications are manually dismissed together
         mCollection.dismissNotifications(
-                List.of(new Pair<>(entry1, defaultStats(entry1)),
-                        new Pair<>(entry2, defaultStats(entry2))));
+                List.of(entryWithDefaultStats(entry1),
+                        entryWithDefaultStats(entry2)));
 
         // THEN the entries are marked as dismissed
         assertEquals(DISMISSED, entry1.getDismissState());
@@ -1368,8 +1367,8 @@ public class NotifCollectionTest extends SysuiTestCase {
 
         // WHEN both notifications are manually dismissed together
         mCollection.dismissNotifications(
-                List.of(new Pair<>(entry1, defaultStats(entry1)),
-                        new Pair<>(entry2, defaultStats(entry2))));
+                List.of(entryWithDefaultStats(entry1),
+                        entryWithDefaultStats(entry2)));
 
         // THEN all interceptors get checked
         verify(mInterceptor1).shouldInterceptDismissal(entry1);
@@ -1409,8 +1408,8 @@ public class NotifCollectionTest extends SysuiTestCase {
 
         // WHEN one child from each group are manually dismissed together
         mCollection.dismissNotifications(
-                List.of(new Pair<>(entry1child, defaultStats(entry1child)),
-                        new Pair<>(entry2child1, defaultStats(entry2child1))));
+                List.of(entryWithDefaultStats(entry1child),
+                        entryWithDefaultStats(entry2child1)));
 
         // THEN the summary for the singleton child is dismissed, but not the other summary
         verify(mInterceptor1).shouldInterceptDismissal(entry1summary);
@@ -1804,6 +1803,10 @@ public class NotifCollectionTest extends SysuiTestCase {
                 DISMISSAL_SHADE,
                 DISMISS_SENTIMENT_NEUTRAL,
                 NotificationVisibility.obtain(entry.getKey(), 7, 2, true));
+    }
+
+    private static EntryWithDismissStats entryWithDefaultStats(NotificationEntry entry) {
+        return new EntryWithDismissStats(entry, defaultStats(entry));
     }
 
     private CollectionEvent postNotif(NotificationEntryBuilder builder) {
