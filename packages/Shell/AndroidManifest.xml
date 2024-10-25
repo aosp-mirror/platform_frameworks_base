@@ -951,6 +951,9 @@
     <!-- Permission required for CTS test - CtsAppTestCases -->
     <uses-permission android:name="android.permission.KILL_UID" />
 
+    <!-- Permission required for CTS test - CtsTelephonyTestCases -->
+    <uses-permission android:name="android.permission.READ_BASIC_PHONE_STATE" />
+
     <application
         android:label="@string/app_label"
         android:theme="@android:style/Theme.DeviceDefault.DayNight"
