@@ -33,6 +33,13 @@ flag {
 }
 
 flag {
+  name: "notifications_redesign_footer_view"
+  namespace: "systemui"
+  description: "Notifications Redesign: Update the look of the notifications footer."
+  bug: "375010573"
+}
+
+flag {
    name: "notification_row_content_binder_refactor"
    namespace: "systemui"
    description: "Convert the NotificationContentInflater to Kotlin and restructure it to support modern views"
