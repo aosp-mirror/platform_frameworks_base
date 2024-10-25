@@ -637,6 +637,45 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
 
     @Test
     @DisableSceneContainer
+    fun boundsStableWhenGoingToAlternateBouncer() =
+        testScope.runTest {
+            val bounds by collectLastValue(underTest.bounds)
+
+            // Start on lockscreen
+            showLockscreen()
+
+            keyguardInteractor.setNotificationContainerBounds(
+                NotificationContainerBounds(top = 1f, bottom = 2f)
+            )
+
+            assertThat(bounds).isEqualTo(NotificationContainerBounds(top = 1f, bottom = 2f))
+
+            // Begin transition to AOD
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(LOCKSCREEN, ALTERNATE_BOUNCER, 0f, TransitionState.STARTED)
+            )
+            runCurrent()
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(LOCKSCREEN, ALTERNATE_BOUNCER, 0f, TransitionState.RUNNING)
+            )
+            runCurrent()
+
+            // This is the last step before FINISHED is sent, which could trigger a change in bounds
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(LOCKSCREEN, ALTERNATE_BOUNCER, 1f, TransitionState.RUNNING)
+            )
+            runCurrent()
+            assertThat(bounds).isEqualTo(NotificationContainerBounds(top = 1f, bottom = 2f))
+
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(LOCKSCREEN, ALTERNATE_BOUNCER, 1f, TransitionState.FINISHED)
+            )
+            runCurrent()
+            assertThat(bounds).isEqualTo(NotificationContainerBounds(top = 1f, bottom = 2f))
+        }
+
+    @Test
+    @DisableSceneContainer
     fun boundsDoNotChangeWhileLockscreenToAodTransitionIsActive() =
         testScope.runTest {
             val bounds by collectLastValue(underTest.bounds)
