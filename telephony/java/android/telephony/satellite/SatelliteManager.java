@@ -40,6 +40,7 @@ import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyCallback;
 import android.telephony.TelephonyFrameworkInitializer;
 import android.telephony.TelephonyManager;
+import android.telephony.TelephonyRegistryManager;
 
 import com.android.internal.telephony.IIntegerConsumer;
 import com.android.internal.telephony.ITelephony;
@@ -109,6 +110,8 @@ public final class SatelliteManager {
      * Context this SatelliteManager is for.
      */
     @Nullable private final Context mContext;
+
+    private TelephonyRegistryManager mTelephonyRegistryMgr;
 
     /**
      * Create an instance of the SatelliteManager.
@@ -741,6 +744,65 @@ public final class SatelliteManager {
      */
     public static final String METADATA_SATELLITE_MANUAL_CONNECT_P2P_SUPPORT =
             "android.telephony.METADATA_SATELLITE_MANUAL_CONNECT_P2P_SUPPORT";
+
+    /**
+     * Registers a {@link SatelliteStateChangeListener} to receive callbacks when the satellite
+     * state may have changed.
+     *
+     * <p>The callback method is immediately triggered with latest state on invoking this method if
+     * the state change has been notified before.
+     *
+     * @param executor The {@link Executor} where the {@code listener} will be invoked
+     * @param listener The listener to monitor the satellite state change
+     *
+     * @see SatelliteStateChangeListener
+     * @see TelephonyManager#hasCarrierPrivileges()
+     */
+    @FlaggedApi(Flags.FLAG_SATELLITE_STATE_CHANGE_LISTENER)
+    @RequiresPermission(anyOf = {android.Manifest.permission.READ_BASIC_PHONE_STATE,
+            android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
+            android.Manifest.permission.READ_PHONE_STATE,
+            "carrier privileges"})
+    public void registerStateChangeListener(@NonNull @CallbackExecutor Executor executor,
+            @NonNull SatelliteStateChangeListener listener) {
+        if (mContext == null) {
+            throw new IllegalStateException("Telephony service is null");
+        }
+
+        mTelephonyRegistryMgr = mContext.getSystemService(TelephonyRegistryManager.class);
+        if (mTelephonyRegistryMgr == null) {
+            throw new IllegalStateException("Telephony registry service is null");
+        }
+        mTelephonyRegistryMgr.addSatelliteStateChangeListener(executor, listener);
+    }
+
+    /**
+     * Unregisters the {@link SatelliteStateChangeListener} previously registered with
+     * {@link #registerStateChangeListener(Executor, SatelliteStateChangeListener)}.
+     *
+     * <p>It will be a no-op if the {@code listener} is not currently registered.
+     *
+     * @param listener The listener to unregister
+     *
+     * @see SatelliteStateChangeListener
+     * @see TelephonyManager#hasCarrierPrivileges()
+     */
+    @FlaggedApi(Flags.FLAG_SATELLITE_STATE_CHANGE_LISTENER)
+    @RequiresPermission(anyOf = {android.Manifest.permission.READ_BASIC_PHONE_STATE,
+            android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
+            android.Manifest.permission.READ_PHONE_STATE,
+            "carrier privileges"})
+    public void unregisterStateChangeListener(@NonNull SatelliteStateChangeListener listener) {
+        if (mContext == null) {
+            throw new IllegalStateException("Telephony service is null");
+        }
+
+        mTelephonyRegistryMgr = mContext.getSystemService(TelephonyRegistryManager.class);
+        if (mTelephonyRegistryMgr == null) {
+            throw new IllegalStateException("Telephony registry service is null");
+        }
+        mTelephonyRegistryMgr.removeSatelliteStateChangeListener(listener);
+    }
 
     /**
      * Request to enable or disable the satellite modem and demo mode.
