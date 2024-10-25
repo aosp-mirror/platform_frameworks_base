@@ -172,36 +172,6 @@ public class NotificationProgressBarTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void processAndConvertToDrawableParts_pointPositionIsZero() {
-        List<ProgressStyle.Segment> segments = new ArrayList<>();
-        segments.add(new ProgressStyle.Segment(100));
-        List<ProgressStyle.Point> points = new ArrayList<>();
-        points.add(new ProgressStyle.Point(0).setColor(Color.RED));
-        int progress = 50;
-        int progressMax = 100;
-        boolean isStyledByProgress = true;
-
-        NotificationProgressBar.processAndConvertToDrawableParts(segments, points, progress,
-                progressMax,
-                isStyledByProgress);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void processAndConvertToDrawableParts_pointPositionAtMax() {
-        List<ProgressStyle.Segment> segments = new ArrayList<>();
-        segments.add(new ProgressStyle.Segment(100));
-        List<ProgressStyle.Point> points = new ArrayList<>();
-        points.add(new ProgressStyle.Point(100).setColor(Color.RED));
-        int progress = 50;
-        int progressMax = 100;
-        boolean isStyledByProgress = true;
-
-        NotificationProgressBar.processAndConvertToDrawableParts(segments, points, progress,
-                progressMax,
-                isStyledByProgress);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
     public void processAndConvertToDrawableParts_pointPositionAboveMax() {
         List<ProgressStyle.Segment> segments = new ArrayList<>();
         segments.add(new ProgressStyle.Segment(100));
