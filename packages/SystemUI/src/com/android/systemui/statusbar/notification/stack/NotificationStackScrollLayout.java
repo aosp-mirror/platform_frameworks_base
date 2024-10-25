@@ -678,7 +678,9 @@ public class NotificationStackScrollLayout
         mGroupMembershipManager = Dependency.get(GroupMembershipManager.class);
         mGroupExpansionManager = Dependency.get(GroupExpansionManager.class);
         setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES);
-        setWindowInsetsAnimationCallback(mInsetsCallback);
+        if (!SceneContainerFlag.isEnabled()) {
+            setWindowInsetsAnimationCallback(mInsetsCallback);
+        }
     }
 
     /**
@@ -2086,6 +2088,7 @@ public class NotificationStackScrollLayout
     }
 
     private void updateImeInset(WindowInsets windowInsets) {
+        SceneContainerFlag.assertInLegacyMode();
         mImeInset = windowInsets.getInsets(WindowInsets.Type.ime()).bottom;
 
         if (mFooterView != null && mFooterView.getViewState() != null) {
@@ -2112,7 +2115,7 @@ public class NotificationStackScrollLayout
         if (cutout != null) {
             mWaterfallTopInset = cutout.getWaterfallInsets().top;
         }
-        if (!mIsInsetAnimationRunning) {
+        if (!SceneContainerFlag.isEnabled() && !mIsInsetAnimationRunning) {
             // update bottom inset e.g. after rotation
             updateImeInset(insets);
         }
@@ -2513,6 +2516,7 @@ public class NotificationStackScrollLayout
     }
 
     private int getImeInset() {
+        SceneContainerFlag.assertInLegacyMode();
         // The NotificationStackScrollLayout does not extend all the way to the bottom of the
         // display. Therefore, subtract that space from the mImeInset, in order to only include
         // the portion of the bottom inset that actually overlaps the NotificationStackScrollLayout.

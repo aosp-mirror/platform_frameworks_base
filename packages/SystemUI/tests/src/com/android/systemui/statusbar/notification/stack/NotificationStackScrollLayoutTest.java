@@ -1206,6 +1206,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableSceneContainer
     public void testWindowInsetAnimationProgress_updatesBottomInset() {
         int imeInset = 100;
         WindowInsets windowInsets = new WindowInsets.Builder()
