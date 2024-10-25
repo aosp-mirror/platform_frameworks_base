@@ -159,6 +159,7 @@ import com.android.systemui.telephony.TelephonyListenerManager;
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
 import com.android.systemui.util.kotlin.JavaAdapter;
 import com.android.systemui.util.settings.GlobalSettings;
+import com.android.systemui.utils.FieldSetter;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -172,7 +173,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.MockitoSession;
-import org.mockito.internal.util.reflection.FieldSetter;
 import org.mockito.quality.Strictness;
 
 import java.util.ArrayList;

@@ -39,6 +39,7 @@ import static android.service.notification.NotificationListenerService.REASON_TI
 import static android.service.notification.NotificationListenerService.REASON_UNAUTOBUNDLED;
 import static android.service.notification.NotificationListenerService.REASON_USER_STOPPED;
 
+import static com.android.systemui.Flags.notificationsDismissPrunedSummaries;
 import static com.android.systemui.statusbar.notification.NotificationUtils.logKey;
 import static com.android.systemui.statusbar.notification.collection.NotificationEntry.DismissState.DISMISSED;
 import static com.android.systemui.statusbar.notification.collection.NotificationEntry.DismissState.NOT_DISMISSED;
@@ -69,6 +70,7 @@ import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.IStatusBarService;
+import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
@@ -111,6 +113,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -277,6 +280,10 @@ public class NotifCollection implements Dumpable, PipelineDumpable {
         Assert.isMainThread();
         checkForReentrantCall();
 
+        if (notificationsDismissPrunedSummaries()) {
+            entriesToDismiss = includeSummariesToDismiss(entriesToDismiss);
+        }
+
         final int entryCount = entriesToDismiss.size();
         final List<NotificationEntry> entriesToLocallyDismiss = new ArrayList<>();
         for (int i = 0; i < entriesToDismiss.size(); i++) {
@@ -334,6 +341,36 @@ public class NotifCollection implements Dumpable, PipelineDumpable {
 
         locallyDismissNotifications(entriesToLocallyDismiss);
         dispatchEventsAndRebuildList("dismissNotifications");
+    }
+
+    private List<Pair<NotificationEntry, DismissedByUserStats>> includeSummariesToDismiss(
+            List<Pair<NotificationEntry, DismissedByUserStats>> entriesToDismiss) {
+        final HashSet<NotificationEntry> entriesSet = new HashSet<>(entriesToDismiss.size());
+        for (Pair<NotificationEntry, DismissedByUserStats> entryToStats : entriesToDismiss) {
+            entriesSet.add(entryToStats.first);
+        }
+
+        final List<Pair<NotificationEntry, DismissedByUserStats>> entriesPlusSummaries =
+                new ArrayList<>(entriesToDismiss.size() + 1);
+        for (Pair<NotificationEntry, DismissedByUserStats> entryToStats : entriesToDismiss) {
+            entriesPlusSummaries.add(entryToStats);
+            NotificationEntry summary = fetchSummaryToDismiss(entryToStats.first);
+            if (summary != null && !entriesSet.contains(summary)) {
+                DismissedByUserStats currentStats = entryToStats.second;
+                NotificationVisibility summaryVisibility = NotificationVisibility.obtain(
+                        summary.getKey(),
+                        summary.getRanking().getRank(),
+                        currentStats.notificationVisibility.count,
+                        /* visible= */ false);
+                DismissedByUserStats summaryStats = new DismissedByUserStats(
+                        currentStats.dismissalSurface,
+                        currentStats.dismissalSentiment,
+                        summaryVisibility
+                );
+                entriesPlusSummaries.add(new Pair<>(summary, summaryStats));
+            }
+        }
+        return entriesPlusSummaries;
     }
 
     /**
@@ -1062,6 +1099,16 @@ public class NotifCollection implements Dumpable, PipelineDumpable {
         }
     }
 
+    @Nullable
+    private NotificationEntry fetchSummaryToDismiss(NotificationEntry entry) {
+        if (isOnlyChildInGroup(entry)) {
+            String group = entry.getSbn().getGroupKey();
+            NotificationEntry summary = getGroupSummary(group);
+            if (summary != null && isDismissable(summary)) return summary;
+        }
+        return null;
+    }
+
     /** A single method interface that callers can pass in when registering future dismissals */
     public interface DismissedByUserStatsCreator {
         DismissedByUserStats createDismissedByUserStats(NotificationEntry entry);
@@ -1090,16 +1137,6 @@ public class NotifCollection implements Dumpable, PipelineDumpable {
                     + " reason=" + cancellationReasonDebugString(cancellationReason)
                     + " summary=" + logKey(mSummaryToDismiss)
                     + ">";
-        }
-
-        @Nullable
-        private NotificationEntry fetchSummaryToDismiss(NotificationEntry entry) {
-            if (isOnlyChildInGroup(entry)) {
-                String group = entry.getSbn().getGroupKey();
-                NotificationEntry summary = getGroupSummary(group);
-                if (summary != null && isDismissable(summary)) return summary;
-            }
-            return null;
         }
 
         /** called when the entry has been removed from the collection */

@@ -8755,21 +8755,9 @@ public class AppOpsManager {
      * Do a quick check for whether an application might be able to perform an operation.
      * This is <em>not</em> a security check; you must use {@link #noteOp(String, int, String,
      * String, String)} or {@link #startOp(String, int, String, String, String)} for your actual
-     * security checks, which also ensure that the given uid and package name are consistent. This
-     * function can just be used for a quick check to see if an operation has been disabled for the
-     * application, as an early reject of some work.  This does not modify the time stamp or other
-     * data about the operation.
-     *
-     * <p>Important things this will not do (which you need to ultimate use
-     * {@link #noteOp(String, int, String, String, String)} or
-     * {@link #startOp(String, int, String, String, String)} to cover):</p>
-     * <ul>
-     *     <li>Verifying the uid and package are consistent, so callers can't spoof
-     *     their identity.</li>
-     *     <li>Taking into account the current foreground/background state of the
-     *     app; apps whose mode varies by this state will always be reported
-     *     as {@link #MODE_ALLOWED}.</li>
-     * </ul>
+     * security checks. This function can just be used for a quick check to see if an operation has
+     * been disabled for the application, as an early reject of some work.  This does not modify the
+     * time stamp or other data about the operation.
      *
      * @param op The operation to check.  One of the OPSTR_* constants.
      * @param uid The user id of the application attempting to perform the operation.

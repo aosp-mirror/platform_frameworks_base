@@ -71,6 +71,7 @@ import static android.content.Intent.EXTRA_REPLACING;
 import static android.content.pm.PermissionInfo.PROTECTION_DANGEROUS;
 import static android.content.pm.PermissionInfo.PROTECTION_FLAG_APPOP;
 import static android.permission.flags.Flags.deviceAwareAppOpNewSchemaEnabled;
+import static android.permission.flags.Flags.checkOpValidatePackage;
 
 import static com.android.internal.util.FrameworkStatsLog.APP_OP_NOTE_OP_OR_CHECK_OP_BINDER_API_CALLED;
 import static com.android.internal.util.FrameworkStatsLog.APP_OP_NOTE_OP_OR_CHECK_OP_BINDER_API_CALLED__BINDER_API__CHECK_OPERATION;
@@ -2860,20 +2861,30 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     private int checkOperationImpl(int code, int uid, String packageName,
              @Nullable String attributionTag, int virtualDeviceId, boolean raw) {
-        verifyIncomingOp(code);
-        if (!isValidVirtualDeviceId(virtualDeviceId)) {
-            Slog.w(TAG,
-                    "checkOperationImpl returned MODE_IGNORED as virtualDeviceId " + virtualDeviceId
-                            + " is invalid");
-            return AppOpsManager.MODE_IGNORED;
-        }
-        if (!isIncomingPackageValid(packageName, UserHandle.getUserId(uid))) {
-            return AppOpsManager.opToDefaultMode(code);
-        }
+        String resolvedPackageName;
+        if (!shouldUseNewCheckOp()) {
+            verifyIncomingOp(code);
+            if (!isValidVirtualDeviceId(virtualDeviceId)) {
+                Slog.w(TAG, "checkOperationImpl returned MODE_IGNORED as virtualDeviceId "
+                        + virtualDeviceId + " is invalid");
+                return AppOpsManager.MODE_IGNORED;
+            }
+            if (!isIncomingPackageValid(packageName, UserHandle.getUserId(uid))) {
+                return AppOpsManager.opToDefaultMode(code);
+            }
 
-        String resolvedPackageName = AppOpsManager.resolvePackageName(uid, packageName);
-        if (resolvedPackageName == null) {
-            return AppOpsManager.MODE_IGNORED;
+            resolvedPackageName = AppOpsManager.resolvePackageName(uid, packageName);
+            if (resolvedPackageName == null) {
+                return AppOpsManager.MODE_IGNORED;
+            }
+        } else {
+            // Note, this flag changes the behavior in this case: invalid packages now don't
+            // succeed checkOp
+            resolvedPackageName = validateOpRequest(code, uid, packageName,
+                    virtualDeviceId, false, "checkOperation");
+            if (resolvedPackageName == null) {
+                return AppOpsManager.MODE_IGNORED;
+            }
         }
         return checkOperationUnchecked(code, uid, resolvedPackageName, attributionTag,
                 virtualDeviceId, raw);
@@ -3147,25 +3158,37 @@ public class AppOpsService extends IAppOpsService.Stub {
              @Nullable String attributionTag, int virtualDeviceId,
              boolean shouldCollectAsyncNotedOp, @Nullable String message,
              boolean shouldCollectMessage) {
-        verifyIncomingUid(uid);
-        verifyIncomingOp(code);
-        if (!isValidVirtualDeviceId(virtualDeviceId)) {
-            Slog.w(TAG,
-                    "checkOperationImpl returned MODE_IGNORED as virtualDeviceId " + virtualDeviceId
-                            + " is invalid");
-            return new SyncNotedAppOp(AppOpsManager.MODE_IGNORED, code, attributionTag,
-                    packageName);
-        }
-        if (!isIncomingPackageValid(packageName, UserHandle.getUserId(uid))) {
-            return new SyncNotedAppOp(AppOpsManager.MODE_ERRORED, code, attributionTag,
-                    packageName);
+        String resolvedPackageName;
+        if (!shouldUseNewCheckOp()) {
+            verifyIncomingUid(uid);
+            verifyIncomingOp(code);
+            if (!isValidVirtualDeviceId(virtualDeviceId)) {
+                Slog.w(TAG, "checkOperationImpl returned MODE_IGNORED as virtualDeviceId "
+                        + virtualDeviceId + " is invalid");
+                return new SyncNotedAppOp(AppOpsManager.MODE_IGNORED, code, attributionTag,
+                        packageName);
+            }
+            if (!isIncomingPackageValid(packageName, UserHandle.getUserId(uid))) {
+                return new SyncNotedAppOp(AppOpsManager.MODE_ERRORED, code, attributionTag,
+                        packageName);
+            }
+
+            resolvedPackageName = AppOpsManager.resolvePackageName(uid, packageName);
+            if (resolvedPackageName == null) {
+                return new SyncNotedAppOp(AppOpsManager.MODE_IGNORED, code, attributionTag,
+                        packageName);
+            }
+        } else {
+            // Note, this flag changes the behavior in this case:
+            // invalid package is now IGNORE instead of ERROR for consistency
+            resolvedPackageName = validateOpRequest(code, uid, packageName,
+                    virtualDeviceId, true, "noteOperation");
+            if (resolvedPackageName == null) {
+                return new SyncNotedAppOp(AppOpsManager.MODE_IGNORED, code, attributionTag,
+                        packageName);
+            }
         }
 
-        String resolvedPackageName = AppOpsManager.resolvePackageName(uid, packageName);
-        if (resolvedPackageName == null) {
-            return new SyncNotedAppOp(AppOpsManager.MODE_IGNORED, code, attributionTag,
-                    packageName);
-        }
         return noteOperationUnchecked(code, uid, resolvedPackageName, attributionTag,
                 virtualDeviceId, Process.INVALID_UID, null, null,
                 Context.DEVICE_ID_DEFAULT, AppOpsManager.OP_FLAG_SELF, shouldCollectAsyncNotedOp,
@@ -3602,24 +3625,35 @@ public class AppOpsService extends IAppOpsService.Stub {
             boolean startIfModeDefault, boolean shouldCollectAsyncNotedOp, @NonNull String message,
             boolean shouldCollectMessage, @AttributionFlags int attributionFlags,
             int attributionChainId) {
-        verifyIncomingUid(uid);
-        verifyIncomingOp(code);
-        if (!isValidVirtualDeviceId(virtualDeviceId)) {
-            Slog.w(TAG,
-                    "startOperationImpl returned MODE_IGNORED as virtualDeviceId " + virtualDeviceId
-                            + " is invalid");
-            return new SyncNotedAppOp(AppOpsManager.MODE_IGNORED, code, attributionTag,
-                    packageName);
-        }
-        if (!isIncomingPackageValid(packageName, UserHandle.getUserId(uid))) {
-            return new SyncNotedAppOp(AppOpsManager.MODE_ERRORED, code, attributionTag,
-                    packageName);
-        }
+        String resolvedPackageName;
+        if (!shouldUseNewCheckOp()) {
+            verifyIncomingUid(uid);
+            verifyIncomingOp(code);
+            if (!isValidVirtualDeviceId(virtualDeviceId)) {
+                Slog.w(TAG, "startOperationImpl returned MODE_IGNORED as virtualDeviceId "
+                        + virtualDeviceId + " is invalid");
+                return new SyncNotedAppOp(AppOpsManager.MODE_IGNORED, code, attributionTag,
+                        packageName);
+            }
+            if (!isIncomingPackageValid(packageName, UserHandle.getUserId(uid))) {
+                return new SyncNotedAppOp(AppOpsManager.MODE_ERRORED, code, attributionTag,
+                        packageName);
+            }
 
-        String resolvedPackageName = AppOpsManager.resolvePackageName(uid, packageName);
-        if (resolvedPackageName == null) {
-            return new SyncNotedAppOp(AppOpsManager.MODE_IGNORED, code, attributionTag,
-                    packageName);
+            resolvedPackageName = AppOpsManager.resolvePackageName(uid, packageName);
+            if (resolvedPackageName == null) {
+                return new SyncNotedAppOp(AppOpsManager.MODE_IGNORED, code, attributionTag,
+                        packageName);
+            }
+        } else {
+            // Note, this flag changes the behavior in this case:
+            // invalid package is now IGNORE instead of ERROR for consistency
+            resolvedPackageName = validateOpRequest(code, uid, packageName,
+                    virtualDeviceId, true, "startOperation");
+            if (resolvedPackageName == null) {
+                return new SyncNotedAppOp(AppOpsManager.MODE_IGNORED, code, attributionTag,
+                        packageName);
+            }
         }
 
         // As a special case for OP_RECORD_AUDIO_HOTWORD, OP_RECEIVE_AMBIENT_TRIGGER_AUDIO and
@@ -4341,6 +4375,48 @@ public class AppOpsService extends IAppOpsService.Stub {
                 || (permInfo.getProtectionFlags() & PROTECTION_FLAG_APPOP) != 0;
     }
 
+    private boolean shouldUseNewCheckOp() {
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            return checkOpValidatePackage();
+        } catch (Exception e) {
+            // before device provider init, only on old storage
+            return true;
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    /**
+     * Validates arguments for a particular op request
+     * @param shouldVerifyUid - If the calling uid needs perms for other uids, due to the method
+     * being an appop write.
+     * @param methodName - For logging purposes
+     * @return The resolved package for the request, null on any failure
+     */
+    private @Nullable String validateOpRequest(int code, int uid, String packageName, int vdi,
+            boolean shouldVerifyUid, String methodName) {
+        verifyIncomingOp(code);
+        if (shouldVerifyUid) {
+            verifyIncomingUid(uid);
+        }
+        if (!isValidVirtualDeviceId(vdi)) {
+            Slog.w(TAG, methodName + ": error due to virtualDeviceId " + vdi + " is invalid");
+            return null;
+        }
+        if (!isIncomingPackageValid(packageName, UserHandle.getUserId(uid))) {
+            Slog.w(TAG, methodName + ": error due to package: " + packageName
+                            + " is invalid for " + uid);
+            return null;
+        }
+        String resolvedPackageName = AppOpsManager.resolvePackageName(uid, packageName);
+        if (resolvedPackageName == null) {
+            Slog.w(TAG, methodName + ": error due to unable to resolve uid: " + uid);
+            return null;
+        }
+        return resolvedPackageName;
+    }
+
     private void verifyIncomingProxyUid(@NonNull AttributionSource attributionSource) {
         if (attributionSource.getUid() == Binder.getCallingUid()) {
             return;
@@ -4995,17 +5071,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                     }
 
                     success = true;
-                } catch (IllegalStateException e) {
-                    Slog.w(TAG, "Failed parsing " + e);
-                } catch (NullPointerException e) {
-                    Slog.w(TAG, "Failed parsing " + e);
-                } catch (NumberFormatException e) {
-                    Slog.w(TAG, "Failed parsing " + e);
-                } catch (XmlPullParserException e) {
-                    Slog.w(TAG, "Failed parsing " + e);
-                } catch (IOException e) {
-                    Slog.w(TAG, "Failed parsing " + e);
-                } catch (IndexOutOfBoundsException e) {
+                } catch (Exception e) {
                     Slog.w(TAG, "Failed parsing " + e);
                 } finally {
                     if (!success) {

@@ -27,6 +27,7 @@ import com.android.settingslib.bluetooth.CachedBluetoothDevice
 import com.android.settingslib.bluetooth.LocalBluetoothManager
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.testKosmos
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineDispatcher
@@ -48,6 +49,7 @@ import org.mockito.junit.MockitoRule
 class DeviceItemInteractorTest : SysuiTestCase() {
 
     @get:Rule val mockitoRule: MockitoRule = MockitoJUnit.rule()
+    private val kosmos = testKosmos()
 
     @Mock private lateinit var bluetoothTileDialogRepository: BluetoothTileDialogRepository
 
@@ -99,6 +101,7 @@ class DeviceItemInteractorTest : SysuiTestCase() {
             interactor =
                 DeviceItemInteractor(
                     bluetoothTileDialogRepository,
+                    kosmos.audioSharingInteractor,
                     audioManager,
                     adapter,
                     localBluetoothManager,
@@ -107,7 +110,7 @@ class DeviceItemInteractorTest : SysuiTestCase() {
                     listOf(createFactory({ true }, deviceItem1)),
                     emptyList(),
                     testScope.backgroundScope,
-                    dispatcher
+                    dispatcher,
                 )
 
             val latest by collectLastValue(interactor.deviceItemUpdate)
@@ -126,6 +129,7 @@ class DeviceItemInteractorTest : SysuiTestCase() {
             interactor =
                 DeviceItemInteractor(
                     bluetoothTileDialogRepository,
+                    kosmos.audioSharingInteractor,
                     audioManager,
                     adapter,
                     localBluetoothManager,
@@ -134,7 +138,7 @@ class DeviceItemInteractorTest : SysuiTestCase() {
                     listOf(createFactory({ false }, deviceItem1)),
                     emptyList(),
                     testScope.backgroundScope,
-                    dispatcher
+                    dispatcher,
                 )
 
             val latest by collectLastValue(interactor.deviceItemUpdate)
@@ -153,6 +157,7 @@ class DeviceItemInteractorTest : SysuiTestCase() {
             interactor =
                 DeviceItemInteractor(
                     bluetoothTileDialogRepository,
+                    kosmos.audioSharingInteractor,
                     audioManager,
                     adapter,
                     localBluetoothManager,
@@ -161,7 +166,7 @@ class DeviceItemInteractorTest : SysuiTestCase() {
                     listOf(createFactory({ true }, deviceItem1)),
                     emptyList(),
                     testScope.backgroundScope,
-                    dispatcher
+                    dispatcher,
                 )
 
             val latest by collectLastValue(interactor.deviceItemUpdate)
@@ -180,6 +185,7 @@ class DeviceItemInteractorTest : SysuiTestCase() {
             interactor =
                 DeviceItemInteractor(
                     bluetoothTileDialogRepository,
+                    kosmos.audioSharingInteractor,
                     audioManager,
                     adapter,
                     localBluetoothManager,
@@ -187,11 +193,11 @@ class DeviceItemInteractorTest : SysuiTestCase() {
                     logger,
                     listOf(
                         createFactory({ false }, deviceItem1),
-                        createFactory({ true }, deviceItem2)
+                        createFactory({ true }, deviceItem2),
                     ),
                     emptyList(),
                     testScope.backgroundScope,
-                    dispatcher
+                    dispatcher,
                 )
 
             val latest by collectLastValue(interactor.deviceItemUpdate)
@@ -210,6 +216,7 @@ class DeviceItemInteractorTest : SysuiTestCase() {
             interactor =
                 DeviceItemInteractor(
                     bluetoothTileDialogRepository,
+                    kosmos.audioSharingInteractor,
                     audioManager,
                     adapter,
                     localBluetoothManager,
@@ -218,19 +225,19 @@ class DeviceItemInteractorTest : SysuiTestCase() {
                     listOf(
                         createFactory(
                             { cachedDevice -> cachedDevice.device == device1 },
-                            deviceItem1
+                            deviceItem1,
                         ),
                         createFactory(
                             { cachedDevice -> cachedDevice.device == device2 },
-                            deviceItem2
-                        )
+                            deviceItem2,
+                        ),
                     ),
                     listOf(
                         DeviceItemType.SAVED_BLUETOOTH_DEVICE,
-                        DeviceItemType.CONNECTED_BLUETOOTH_DEVICE
+                        DeviceItemType.CONNECTED_BLUETOOTH_DEVICE,
                     ),
                     testScope.backgroundScope,
-                    dispatcher
+                    dispatcher,
                 )
             `when`(deviceItem1.type).thenReturn(DeviceItemType.CONNECTED_BLUETOOTH_DEVICE)
             `when`(deviceItem2.type).thenReturn(DeviceItemType.SAVED_BLUETOOTH_DEVICE)
@@ -251,6 +258,7 @@ class DeviceItemInteractorTest : SysuiTestCase() {
             interactor =
                 DeviceItemInteractor(
                     bluetoothTileDialogRepository,
+                    kosmos.audioSharingInteractor,
                     audioManager,
                     adapter,
                     localBluetoothManager,
@@ -259,16 +267,16 @@ class DeviceItemInteractorTest : SysuiTestCase() {
                     listOf(
                         createFactory(
                             { cachedDevice -> cachedDevice.device == device1 },
-                            deviceItem1
+                            deviceItem1,
                         ),
                         createFactory(
                             { cachedDevice -> cachedDevice.device == device2 },
-                            deviceItem2
-                        )
+                            deviceItem2,
+                        ),
                     ),
                     listOf(DeviceItemType.CONNECTED_BLUETOOTH_DEVICE),
                     testScope.backgroundScope,
-                    dispatcher
+                    dispatcher,
                 )
             `when`(deviceItem1.type).thenReturn(DeviceItemType.CONNECTED_BLUETOOTH_DEVICE)
             `when`(deviceItem2.type).thenReturn(DeviceItemType.CONNECTED_BLUETOOTH_DEVICE)
@@ -291,6 +299,7 @@ class DeviceItemInteractorTest : SysuiTestCase() {
             interactor =
                 DeviceItemInteractor(
                     bluetoothTileDialogRepository,
+                    kosmos.audioSharingInteractor,
                     audioManager,
                     adapter,
                     localBluetoothManager,
@@ -299,7 +308,7 @@ class DeviceItemInteractorTest : SysuiTestCase() {
                     listOf(createFactory({ true }, deviceItem2)),
                     emptyList(),
                     testScope.backgroundScope,
-                    dispatcher
+                    dispatcher,
                 )
             val latest by collectLastValue(interactor.deviceItemUpdate)
             val latestShowSeeAll by collectLastValue(interactor.showSeeAllUpdate)
@@ -312,13 +321,14 @@ class DeviceItemInteractorTest : SysuiTestCase() {
 
     private fun createFactory(
         isFilterMatchFunc: (CachedBluetoothDevice) -> Boolean,
-        deviceItem: DeviceItem
+        deviceItem: DeviceItem,
     ): DeviceItemFactory {
         return object : DeviceItemFactory() {
             override fun isFilterMatched(
                 context: Context,
                 cachedDevice: CachedBluetoothDevice,
-                audioManager: AudioManager
+                audioManager: AudioManager,
+                audioSharingAvailable: Boolean,
             ) = isFilterMatchFunc(cachedDevice)
 
             override fun create(context: Context, cachedDevice: CachedBluetoothDevice) = deviceItem

@@ -240,8 +240,14 @@
     <dimen name="bubble_popup_content_max_width">300dp</dimen>
     <!-- Horizontal margin for the bubble popup view. -->
     <dimen name="bubble_popup_margin_horizontal">32dp</dimen>
-    <!-- Top margin for the bubble popup view. -->
-    <dimen name="bubble_popup_margin_top">16dp</dimen>
+    <!-- Top margin for the bubble bar education views. -->
+    <dimen name="bubble_popup_margin_top">24dp</dimen>
+    <!-- Bottom margin for the bubble bar education views. -->
+    <dimen name="bubble_popup_margin_bottom">32dp</dimen>
+    <!-- Text margin for the bubble bar education views. -->
+    <dimen name="bubble_popup_text_margin">16dp</dimen>
+    <!-- Size of icons in the bubble bar education views. -->
+    <dimen name="bubble_popup_icon_size">32dp</dimen>
     <!-- Width for the bubble popup view arrow. -->
     <dimen name="bubble_popup_arrow_width">12dp</dimen>
     <!-- Height for the bubble popup view arrow. -->
@@ -250,6 +256,8 @@
     <dimen name="bubble_popup_arrow_corner_radius">2dp</dimen>
     <!-- Padding for the bubble popup view contents. -->
     <dimen name="bubble_popup_padding">24dp</dimen>
+    <!-- Elevation of the popup user education views for the bubble bar -->
+    <dimen name="bubble_popup_elevation">2dp</dimen>
     <!-- The size of the caption bar inset at the top of bubble bar expanded view. -->
     <dimen name="bubble_bar_expanded_view_caption_height">36dp</dimen>
     <!-- The width of the caption bar at the top of bubble bar expanded view. -->

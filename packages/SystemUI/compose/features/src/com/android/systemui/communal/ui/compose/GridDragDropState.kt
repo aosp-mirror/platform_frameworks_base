@@ -182,7 +182,8 @@ internal constructor(
                     val itemBoundingBox = IntRect(item.offset, item.size)
                     draggingItemKey != item.key &&
                         contentListState.isItemEditable(item.index) &&
-                        draggingBoundingBox.contains(itemBoundingBox.center)
+                        (draggingBoundingBox.contains(itemBoundingBox.center) ||
+                            itemBoundingBox.contains(draggingBoundingBox.center))
                 }
             } else {
                 state.layoutInfo.visibleItemsInfo

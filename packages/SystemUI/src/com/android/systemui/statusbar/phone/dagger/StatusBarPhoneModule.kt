@@ -78,8 +78,11 @@ interface StatusBarPhoneModule {
             return if (StatusBarConnectedDisplays.isEnabled) {
                 // Will be started through MultiDisplayStatusBarStarter
                 CoreStartable.NOP
-            } else {
+            } else if (StatusBarSimpleFragment.isEnabled) {
                 defaultInitializerLazy.get()
+            } else {
+                // Will be started through CentralSurfaces
+                CoreStartable.NOP
             }
         }
 
@@ -114,24 +117,6 @@ interface StatusBarPhoneModule {
                 initializerStore.defaultDisplay,
                 statusBarWindowControllerStore.defaultDisplay,
             )
-        }
-
-        @Provides
-        @SysUISingleton
-        @IntoMap
-        @ClassKey(StatusBarOrchestrator::class)
-        fun orchestratorCoreStartable(
-            @Default orchestratorLazy: Lazy<StatusBarOrchestrator>
-        ): CoreStartable {
-            return if (StatusBarConnectedDisplays.isEnabled) {
-                // Will be started through MultiDisplayStatusBarStarter
-                CoreStartable.NOP
-            } else if (StatusBarSimpleFragment.isEnabled) {
-                orchestratorLazy.get()
-            } else {
-                // Will be started through CentralSurfacesImpl
-                CoreStartable.NOP
-            }
         }
 
         @Provides

@@ -28,6 +28,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.SceneScope
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.grid.ui.compose.VerticalSpannedGrid
+import com.android.systemui.haptics.msdl.qs.TileHapticsViewModelFactoryProvider
 import com.android.systemui.lifecycle.rememberViewModel
 import com.android.systemui.qs.panels.shared.model.SizedTileImpl
 import com.android.systemui.qs.panels.ui.compose.PaginatableGridLayout
@@ -49,6 +50,7 @@ class InfiniteGridLayout
 constructor(
     private val iconTilesViewModel: IconTilesViewModel,
     private val viewModelFactory: InfiniteGridViewModel.Factory,
+    private val tileHapticsViewModelFactoryProvider: TileHapticsViewModelFactoryProvider,
 ) : PaginatableGridLayout {
 
     @Composable
@@ -92,6 +94,7 @@ constructor(
                 iconOnly = iconTilesViewModel.isIconTile(it.tile.spec),
                 modifier = Modifier.element(it.tile.spec.toElementKey(spanIndex)),
                 squishiness = { squishiness },
+                tileHapticsViewModelFactoryProvider = tileHapticsViewModelFactoryProvider,
                 coroutineScope = scope,
                 bounceableInfo = bounceables.bounceableInfo(it, spanIndex, column, columns),
             )

@@ -72,7 +72,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.compose.animation.Expandable
 import com.android.compose.animation.scene.SceneScope
-import com.android.compose.modifiers.background
+import com.android.compose.modifiers.fadingBackground
 import com.android.compose.theme.colorAttr
 import com.android.systemui.animation.Expandable
 import com.android.systemui.common.shared.model.Icon
@@ -107,7 +107,7 @@ fun SceneScope.FooterActionsWithAnimatedVisibility(
                 animationSpec = tween(customizingAnimationDuration),
                 targetHeight = { 0 },
             ) + fadeOut(tween(customizingAnimationDuration)),
-        modifier = modifier.fillMaxWidth()
+        modifier = modifier.fillMaxWidth(),
     ) {
         QuickSettingsTheme {
             // This view has its own horizontal padding
@@ -165,12 +165,8 @@ fun FooterActions(
     val contentColor = MaterialTheme.colorScheme.onSurface
     val backgroundTopRadius = dimensionResource(R.dimen.qs_corner_radius)
     val backgroundModifier =
-        remember(
-            backgroundColor,
-            backgroundAlpha,
-            backgroundTopRadius,
-        ) {
-            Modifier.background(
+        remember(backgroundColor, backgroundAlpha, backgroundTopRadius) {
+            Modifier.fadingBackground(
                 backgroundColor,
                 backgroundAlpha::value,
                 RoundedCornerShape(topStart = backgroundTopRadius, topEnd = backgroundTopRadius),
@@ -210,9 +206,7 @@ fun FooterActions(
             },
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        CompositionLocalProvider(
-            LocalContentColor provides contentColor,
-        ) {
+        CompositionLocalProvider(LocalContentColor provides contentColor) {
             if (security == null && foregroundServices == null) {
                 Spacer(Modifier.weight(1f))
             }
@@ -238,19 +232,13 @@ private fun SecurityButton(
             { expandable -> onClick(context, expandable) }
         }
 
-    TextButton(
-        model.icon,
-        model.text,
-        showNewDot = false,
-        onClick = onClick,
-        modifier,
-    )
+    TextButton(model.icon, model.text, showNewDot = false, onClick = onClick, modifier)
 }
 
 /** The foreground services button. */
 @Composable
 private fun RowScope.ForegroundServicesButton(
-    model: FooterActionsForegroundServicesButtonViewModel,
+    model: FooterActionsForegroundServicesButtonViewModel
 ) {
     if (model.displayText) {
         TextButton(
@@ -271,10 +259,7 @@ private fun RowScope.ForegroundServicesButton(
 
 /** A button with an icon. */
 @Composable
-private fun IconButton(
-    model: FooterActionsButtonViewModel,
-    modifier: Modifier = Modifier,
-) {
+private fun IconButton(model: FooterActionsButtonViewModel, modifier: Modifier = Modifier) {
     Expandable(
         color = colorAttr(model.backgroundColor),
         shape = CircleShape,
@@ -282,11 +267,7 @@ private fun IconButton(
         modifier = modifier,
     ) {
         val tint = model.iconTint?.let { Color(it) } ?: Color.Unspecified
-        Icon(
-            model.icon,
-            tint = tint,
-            modifier = Modifier.size(20.dp),
-        )
+        Icon(model.icon, tint = tint, modifier = Modifier.size(20.dp))
     }
 }
 
@@ -316,10 +297,7 @@ private fun NumberButton(
             Box(
                 Modifier.fillMaxSize()
                     .clip(CircleShape)
-                    .indication(
-                        interactionSource,
-                        LocalIndication.current,
-                    )
+                    .indication(interactionSource, LocalIndication.current)
             ) {
                 Text(
                     number.toString(),

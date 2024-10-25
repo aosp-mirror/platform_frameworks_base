@@ -29,7 +29,7 @@ import com.android.systemui.bouncer.shared.model.Message
 import com.android.systemui.bouncer.ui.BouncerMessageView
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.log.BouncerLogger
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 object BouncerMessageViewBinder {
     @JvmStatic

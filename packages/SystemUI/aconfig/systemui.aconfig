@@ -81,6 +81,16 @@ flag {
 }
 
 flag {
+    name: "notifications_footer_visibility_fix"
+    namespace: "systemui"
+    description: "Fixes a bug where the footer would briefly appear when dismissing a HUN"
+    bug: "356552869"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "notifications_footer_view_refactor"
     namespace: "systemui"
     description: "Enables the refactored version of the footer view in the notification shade "
@@ -126,6 +136,13 @@ flag {
     description: "Replaces NotifLiveDataStore with ActiveNotificationListRepository, and updates consumers. "
         "Should not bring any behavior changes."
     bug: "308623704"
+}
+
+flag {
+    name: "notifications_dismiss_pruned_summaries"
+    namespace: "systemui"
+    description: "NotifCollection.dismissNotifications will now dismiss summaries that are pruned from the shade."
+    bug: "355967751"
 }
 
 flag {
@@ -411,9 +428,9 @@ flag {
 }
 
 flag {
-    name: "status_bar_notification_chips"
+    name: "status_bar_ron_chips"
     namespace: "systemui"
-    description: "Show promoted ongoing notifications as chips in the status bar"
+    description: "Show rich ongoing notifications as chips in the status bar"
     bug: "361346412"
 }
 

@@ -32,7 +32,7 @@ import java.io.PrintWriter
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /** Provides per display instances of [DisplayWindowProperties]. */
 interface DisplayWindowPropertiesRepository {
@@ -76,9 +76,7 @@ constructor(
     }
 
     override fun start() {
-        backgroundApplicationScope.launch(
-            CoroutineName("DisplayWindowPropertiesRepositoryImpl#start")
-        ) {
+        backgroundApplicationScope.launch("DisplayWindowPropertiesRepositoryImpl#start") {
             displayRepository.displayRemovalEvent.collect { removedDisplayId ->
                 properties.row(removedDisplayId).clear()
             }

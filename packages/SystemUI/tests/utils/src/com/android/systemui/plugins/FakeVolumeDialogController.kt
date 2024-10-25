@@ -43,30 +43,36 @@ class FakeVolumeDialogController(private val audioManager: AudioManager) : Volum
     private var state = VolumeDialogController.State()
 
     override fun setActiveStream(stream: Int) {
-        // ensure streamState existence for the active stream
-        state.states.getOrElse(stream) {
-            VolumeDialogController.StreamState().also { streamState ->
-                state.states.put(stream, streamState)
-            }
-        }
-        state.activeStream = stream
-    }
-
-    override fun setStreamVolume(stream: Int, userLevel: Int) {
-        val streamState =
-            state.states.getOrElse(stream) {
+        updateState {
+            // ensure streamState existence for the active stream`
+            states.getOrElse(stream) {
                 VolumeDialogController.StreamState().also { streamState ->
                     state.states.put(stream, streamState)
                 }
             }
-        streamState.level = userLevel.coerceIn(streamState.levelMin, streamState.levelMax)
+            activeStream = stream
+        }
+    }
+
+    override fun setStreamVolume(stream: Int, userLevel: Int) {
+        updateState {
+            val streamState =
+                states.getOrElse(stream) {
+                    VolumeDialogController.StreamState().also { streamState ->
+                        states.put(stream, streamState)
+                    }
+                }
+            streamState.level = userLevel.coerceIn(streamState.levelMin, streamState.levelMax)
+        }
     }
 
     override fun setRingerMode(ringerModeNormal: Int, external: Boolean) {
-        if (external) {
-            state.ringerModeExternal = ringerModeNormal
-        } else {
-            state.ringerModeInternal = ringerModeNormal
+        updateState {
+            if (external) {
+                ringerModeExternal = ringerModeNormal
+            } else {
+                ringerModeInternal = ringerModeNormal
+            }
         }
     }
 
