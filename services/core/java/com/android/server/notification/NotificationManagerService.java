@@ -82,6 +82,8 @@ import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_STATUS_BA
 import static android.app.NotificationManager.zenModeFromInterruptionFilter;
 import static android.app.StatusBarManager.ACTION_KEYGUARD_PRIVATE_NOTIFICATIONS_CHANGED;
 import static android.app.StatusBarManager.EXTRA_KM_PRIVATE_NOTIFS_ALLOWED;
+import static android.app.backup.NotificationLoggingConstants.DATA_TYPE_ZEN_CONFIG;
+import static android.app.backup.NotificationLoggingConstants.ERROR_XML_PARSING;
 import static android.content.Context.BIND_ALLOW_WHITELIST_MANAGEMENT;
 import static android.content.Context.BIND_AUTO_CREATE;
 import static android.content.Context.BIND_FOREGROUND_SERVICE;
@@ -162,8 +164,6 @@ import static com.android.internal.util.Preconditions.checkNotNull;
 import static com.android.server.am.PendingIntentRecord.FLAG_ACTIVITY_SENDER;
 import static com.android.server.am.PendingIntentRecord.FLAG_BROADCAST_SENDER;
 import static com.android.server.am.PendingIntentRecord.FLAG_SERVICE_SENDER;
-import static android.app.backup.NotificationLoggingConstants.DATA_TYPE_ZEN_CONFIG;
-import static android.app.backup.NotificationLoggingConstants.ERROR_XML_PARSING;
 import static com.android.server.notification.Flags.expireBitmaps;
 import static com.android.server.policy.PhoneWindowManager.TOAST_WINDOW_ANIM_BUFFER;
 import static com.android.server.policy.PhoneWindowManager.TOAST_WINDOW_TIMEOUT;
@@ -1927,6 +1927,12 @@ public class NotificationManagerService extends SystemService {
             boolean hasSensitiveContent, int lifespanMs) {
         FrameworkStatsLog.write(FrameworkStatsLog.SENSITIVE_NOTIFICATION_REDACTION, hasPosted,
                 hasSensitiveContent, lifespanMs);
+    }
+
+    protected void logClassificationChannelAdjustmentReceived(boolean hasPosted, boolean isAlerting,
+                                                              int classification, int lifespanMs) {
+        FrameworkStatsLog.write(FrameworkStatsLog.NOTIFICATION_CHANNEL_CLASSIFICATION,
+                hasPosted, isAlerting, classification, lifespanMs);
     }
 
     protected final BroadcastReceiver mLocaleChangeReceiver = new BroadcastReceiver() {
@@ -6988,8 +6994,15 @@ public class NotificationManagerService extends SystemService {
                 if (newChannel == null || newChannel.getId().equals(r.getChannel().getId())) {
                     adjustments.remove(KEY_TYPE);
                 } else {
+                    // Save the app-provided type for logging.
+                    int classification = adjustments.getInt(KEY_TYPE);
                     // swap app provided type with the real thing
                     adjustments.putParcelable(KEY_TYPE, newChannel);
+                    // Note that this value of isAlerting does not fully indicate whether a notif
+                    // would make a sound or HUN on device; it is an approximation for metrics.
+                    boolean isAlerting = r.getChannel().getImportance() >= IMPORTANCE_DEFAULT;
+                    logClassificationChannelAdjustmentReceived(isPosted, isAlerting, classification,
+                            r.getLifespanMs(System.currentTimeMillis()));
                 }
             }
             r.addAdjustment(adjustment);
