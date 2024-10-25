@@ -51,7 +51,7 @@ constructor(
     @Application private val applicationScope: CoroutineScope,
     @ShadeDisplayAware private val context: Context,
     @ShadeTouchLog private val touchLog: LogBuffer,
-    private val configurationRepository: ConfigurationRepository,
+    @ShadeDisplayAware private val configurationRepository: ConfigurationRepository,
     private val shadeRepository: ShadeRepository,
     private val splitShadeStateController: SplitShadeStateController,
     private val scrimShadeTransitionController: ScrimShadeTransitionController,

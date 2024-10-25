@@ -53,6 +53,7 @@ import com.android.systemui.notifications.ui.composable.ConstrainedNotificationS
 import com.android.systemui.notifications.ui.composable.SnoozeableHeadsUpNotificationSpace
 import com.android.systemui.res.R
 import com.android.systemui.shade.LargeScreenHeaderHelper
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.AlwaysOnDisplayNotificationIconViewStore
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.NotificationIconContainerViewBinder
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.StatusBarIconViewBindingFailureTracker
@@ -84,7 +85,7 @@ constructor(
     stackScrollLayout: NotificationStackScrollLayout,
     sharedNotificationContainerBinder: SharedNotificationContainerBinder,
     private val keyguardRootViewModel: KeyguardRootViewModel,
-    private val configurationState: ConfigurationState,
+    @ShadeDisplayAware private val configurationState: ConfigurationState,
     private val iconBindingFailureTracker: StatusBarIconViewBindingFailureTracker,
     private val nicAodViewModel: NotificationIconContainerAlwaysOnDisplayViewModel,
     private val nicAodIconViewStore: AlwaysOnDisplayNotificationIconViewStore,
