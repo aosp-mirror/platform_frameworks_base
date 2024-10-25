@@ -305,6 +305,7 @@ public class TrustManager {
      *
      * @hide
      */
+    @RequiresPermission(Manifest.permission.ACCESS_FINE_LOCATION)
     public boolean isInSignificantPlace() {
         try {
             return mService.isInSignificantPlace();
