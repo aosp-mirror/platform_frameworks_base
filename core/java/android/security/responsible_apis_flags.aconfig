@@ -69,6 +69,7 @@ flag {
     description: "Android Advanced Protection Mode Service and Manager"
     bug: "352420507"
     is_fixed_read_only: true
+    is_exported: true
 }
 
 flag {
