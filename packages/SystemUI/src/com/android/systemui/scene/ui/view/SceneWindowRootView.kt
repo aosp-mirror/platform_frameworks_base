@@ -77,6 +77,11 @@ class SceneWindowRootView(context: Context, attrs: AttributeSet?) : WindowRootVi
         }
     }
 
+    override fun onTouchEvent(event: MotionEvent?): Boolean {
+        event?.let { motionEventHandler?.onEmptySpaceMotionEvent(it) }
+        return super.onTouchEvent(event)
+    }
+
     companion object {
         private const val TAG = "SceneWindowRootView"
     }
