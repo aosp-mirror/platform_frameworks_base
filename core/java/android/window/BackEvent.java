@@ -23,7 +23,6 @@ import static com.android.window.flags.Flags.predictiveBackTimestampApi;
 import android.annotation.FlaggedApi;
 import android.annotation.FloatRange;
 import android.annotation.IntDef;
-import android.util.TimeUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -76,7 +75,7 @@ public final class BackEvent {
     }
 
     /**
-     * Creates a new {@link BackEvent} instance with the current uptime as frame time.
+     * Creates a new {@link BackEvent} instance with a frame time of 0.
      *
      * @param touchX Absolute X location of the touch point of this event.
      * @param touchY Absolute Y location of the touch point of this event.
@@ -88,7 +87,7 @@ public final class BackEvent {
         mTouchY = touchY;
         mProgress = progress;
         mSwipeEdge = swipeEdge;
-        mFrameTimeMillis = System.nanoTime() / TimeUtils.NANOS_PER_MS;
+        mFrameTimeMillis = 0;
     }
 
     /**
