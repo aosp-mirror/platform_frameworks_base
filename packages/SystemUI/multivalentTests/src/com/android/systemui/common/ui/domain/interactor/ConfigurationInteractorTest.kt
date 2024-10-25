@@ -55,7 +55,7 @@ class ConfigurationInteractorTest : SysuiTestCase() {
         testableResources.overrideConfiguration(configuration)
         configurationRepository = FakeConfigurationRepository()
         testScope = TestScope()
-        underTest = ConfigurationInteractor(configurationRepository)
+        underTest = ConfigurationInteractorImpl(configurationRepository)
     }
 
     @Test
@@ -207,7 +207,7 @@ class ConfigurationInteractorTest : SysuiTestCase() {
             updateDisplay(
                 width = DISPLAY_HEIGHT,
                 height = DISPLAY_WIDTH,
-                rotation = Surface.ROTATION_90
+                rotation = Surface.ROTATION_90,
             )
             runCurrent()
 
@@ -217,7 +217,7 @@ class ConfigurationInteractorTest : SysuiTestCase() {
     private fun updateDisplay(
         width: Int = DISPLAY_WIDTH,
         height: Int = DISPLAY_HEIGHT,
-        @Surface.Rotation rotation: Int = Surface.ROTATION_0
+        @Surface.Rotation rotation: Int = Surface.ROTATION_0,
     ) {
         configuration.windowConfiguration.maxBounds.set(Rect(0, 0, width, height))
         configuration.windowConfiguration.displayRotation = rotation
