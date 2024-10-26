@@ -15,8 +15,7 @@
  */
 package com.android.internal.widget.remotecompose.core.operations;
 
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.INT;
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.UTF8;
+import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.UTF8;
 
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
@@ -24,13 +23,12 @@ import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.SerializableToString;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
+import com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation;
 import com.android.internal.widget.remotecompose.core.operations.utilities.StringSerializer;
 
 import java.util.List;
 
-/**
- * Operation to deal with Text data
- */
+/** Operation to deal with Text data */
 public class TextData implements Operation, SerializableToString {
     private static final int OP_CODE = Operations.DATA_TEXT;
     private static final String CLASS_NAME = "TextData";
@@ -50,14 +48,12 @@ public class TextData implements Operation, SerializableToString {
 
     @Override
     public String toString() {
-        return "TextData[" + mTextId + "] = \""
-                + Utils.trimString(mText, 10) + "\"";
+        return "TextData[" + mTextId + "] = \"" + Utils.trimString(mText, 10) + "\"";
     }
 
     public static String name() {
         return CLASS_NAME;
     }
-
 
     public static int id() {
         return OP_CODE;
@@ -69,7 +65,6 @@ public class TextData implements Operation, SerializableToString {
         buffer.writeUTF8(text);
     }
 
-
     public static void read(WireBuffer buffer, List<Operation> operations) {
         int textId = buffer.readInt();
 
@@ -77,17 +72,12 @@ public class TextData implements Operation, SerializableToString {
         operations.add(new TextData(textId, text));
     }
 
-
     public static void documentation(DocumentationBuilder doc) {
-        doc.operation("Data Operations",
-                        OP_CODE,
-                        CLASS_NAME)
+        doc.operation("Data Operations", OP_CODE, CLASS_NAME)
                 .description("Encode a string ")
-                .field(INT, "id", "id string")
-                .field(UTF8, "text",
-                        "encode text as a string");
+                .field(DocumentedOperation.INT, "id", "id string")
+                .field(UTF8, "text", "encode text as a string");
     }
-
 
     @Override
     public void apply(RemoteContext context) {
@@ -101,8 +91,7 @@ public class TextData implements Operation, SerializableToString {
 
     @Override
     public void serializeToString(int indent, StringSerializer serializer) {
-        serializer.append(indent, getSerializedName() + "<" + mTextId
-                + "> = \"" + mText + "\"");
+        serializer.append(indent, getSerializedName() + "<" + mTextId + "> = \"" + mText + "\"");
     }
 
     private String getSerializedName() {

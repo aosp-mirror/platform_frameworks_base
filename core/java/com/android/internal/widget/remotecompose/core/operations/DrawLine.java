@@ -15,14 +15,13 @@
  */
 package com.android.internal.widget.remotecompose.core.operations;
 
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.FLOAT;
-
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.PaintContext;
 import com.android.internal.widget.remotecompose.core.SerializableToString;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
+import com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation;
 import com.android.internal.widget.remotecompose.core.operations.utilities.StringSerializer;
 
 import java.util.List;
@@ -36,7 +35,6 @@ public class DrawLine extends DrawBase4 implements SerializableToString {
         read(m, buffer, operations);
     }
 
-
     public static int id() {
         return OP_CODE;
     }
@@ -46,33 +44,32 @@ public class DrawLine extends DrawBase4 implements SerializableToString {
     }
 
     public static void documentation(DocumentationBuilder doc) {
-        doc.operation("Canvas Operations",
-                        OP_CODE,
-                        CLASS_NAME)
+        doc.operation("Canvas Operations", OP_CODE, CLASS_NAME)
                 .description("Draw a line segment")
-                .field(FLOAT, "startX",
+                .field(
+                        DocumentedOperation.FLOAT,
+                        "startX",
                         "The x-coordinate of the start point of the line")
-                .field(FLOAT, "startY",
+                .field(
+                        DocumentedOperation.FLOAT,
+                        "startY",
                         "The y-coordinate of the start point of the line")
-                .field(FLOAT, "endX",
+                .field(
+                        DocumentedOperation.FLOAT,
+                        "endX",
                         "The x-coordinate of the end point of the line")
-                .field(FLOAT, "endY",
+                .field(
+                        DocumentedOperation.FLOAT,
+                        "endY",
                         "The y-coordinate of the end point of the line");
     }
 
-    protected void write(WireBuffer buffer,
-                         float v1,
-                         float v2,
-                         float v3,
-                         float v4) {
+    @Override
+    protected void write(WireBuffer buffer, float v1, float v2, float v3, float v4) {
         apply(buffer, v1, v2, v3, v4);
     }
 
-    public DrawLine(
-            float left,
-            float top,
-            float right,
-            float bottom) {
+    public DrawLine(float left, float top, float right, float bottom) {
         super(left, top, right, bottom);
         mName = "DrawLine";
     }
@@ -91,14 +88,11 @@ public class DrawLine extends DrawBase4 implements SerializableToString {
      * @param x2 end x of the line
      * @param y2 end y of the line
      */
-    public static void apply(WireBuffer buffer,
-                             float x1,
-                             float y1,
-                             float x2,
-                             float y2) {
+    public static void apply(WireBuffer buffer, float x1, float y1, float x2, float y2) {
         write(buffer, OP_CODE, x1, y1, x2, y2);
     }
 
+    @Override
     public void serializeToString(int indent, StringSerializer serializer) {
         String x1 = "" + mX1;
         if (Float.isNaN(mX1Value)) {
@@ -116,8 +110,6 @@ public class DrawLine extends DrawBase4 implements SerializableToString {
         if (Float.isNaN(mY2Value)) {
             y2 = "[" + Utils.idFromNan(mY2Value) + " = " + mY2 + "]";
         }
-        serializer.append(indent, CLASS_NAME
-                + "(" + x1 + ", " + y1 + ", " + x2 + ", " +  y2 + ")"
-        );
+        serializer.append(indent, CLASS_NAME + "(" + x1 + ", " + y1 + ", " + x2 + ", " + y2 + ")");
     }
 }

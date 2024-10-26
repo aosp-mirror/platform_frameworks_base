@@ -22,6 +22,7 @@ import com.android.internal.widget.remotecompose.core.operations.Utils;
 import com.android.internal.widget.remotecompose.core.operations.layout.Component;
 import com.android.internal.widget.remotecompose.core.operations.utilities.ArrayAccess;
 import com.android.internal.widget.remotecompose.core.operations.utilities.CollectionsAccess;
+import com.android.internal.widget.remotecompose.core.operations.utilities.DataMap;
 
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
@@ -31,9 +32,9 @@ import java.time.ZoneOffset;
 /**
  * Specify an abstract context used to playback RemoteCompose documents
  *
- * This allows us to intercept the different operations in a document and react to them.
+ * <p>This allows us to intercept the different operations in a document and react to them.
  *
- * We also contain a PaintContext, so that any operation can draw as needed.
+ * <p>We also contain a PaintContext, so that any operation can draw as needed.
  */
 public abstract class RemoteContext {
     protected CoreDocument mDocument;
@@ -73,8 +74,7 @@ public abstract class RemoteContext {
     }
 
     /**
-     * Load a path under an id.
-     * Paths can be use in clip drawPath and drawTweenPath
+     * Load a path under an id. Paths can be use in clip drawPath and drawTweenPath
      *
      * @param instanceId
      * @param floatPath
@@ -85,7 +85,7 @@ public abstract class RemoteContext {
      * Associate a name with a give id.
      *
      * @param varName the name
-     * @param varId   the id (color,integer,float etc.)
+     * @param varId the id (color,integer,float etc.)
      * @param varType thetype
      */
     public abstract void loadVariableName(String varName, int varId, int varType);
@@ -93,7 +93,7 @@ public abstract class RemoteContext {
     /**
      * Save a color under a given id
      *
-     * @param id    the id of the color
+     * @param id the id of the color
      * @param color the color to set
      */
     public abstract void loadColor(int id, int color);
@@ -118,35 +118,33 @@ public abstract class RemoteContext {
     }
 
     /**
-     * Set the value of a named Color.
-     * This overrides the color in the document
+     * Set the value of a named Color. This overrides the color in the document
      *
      * @param colorName the name of the color to override
-     * @param color     Override the default color
+     * @param color Override the default color
      */
     public abstract void setNamedColorOverride(String colorName, int color);
 
     /**
-     * Set the value of a named String.
-     * This overrides the string in the document
+     * Set the value of a named String. This overrides the string in the document
+     *
      * @param stringName the name of the string to override
      * @param value Override the default string
      */
     public abstract void setNamedStringOverride(String stringName, String value);
 
-
     /**
      * Allows to clear a named String.
      *
-     * If an override exists, we revert back to the default value in the document.
+     * <p>If an override exists, we revert back to the default value in the document.
      *
      * @param stringName the name of the string to override
      */
     public abstract void clearNamedStringOverride(String stringName);
 
     /**
-     * Set the value of a named Integer.
-     * This overrides the integer in the document
+     * Set the value of a named Integer. This overrides the integer in the document
+     *
      * @param integerName the name of the integer to override
      * @param value Override the default integer
      */
@@ -155,34 +153,41 @@ public abstract class RemoteContext {
     /**
      * Allows to clear a named Integer.
      *
-     * If an override exists, we revert back to the default value in the document.
+     * <p>If an override exists, we revert back to the default value in the document.
      *
      * @param integerName the name of the integer to override
      */
     public abstract void clearNamedIntegerOverride(String integerName);
 
-
     /**
      * Support Collections by registering this collection
      *
-     * @param id         id of the collection
+     * @param id id of the collection
      * @param collection the collection under this id
      */
     public abstract void addCollection(int id, ArrayAccess collection);
+
+    public abstract void putDataMap(int id, DataMap map);
+
+    public abstract DataMap getDataMap(int id);
 
     public abstract void runAction(int id, String metadata);
 
     public abstract void runNamedAction(int textId);
 
+    public abstract void putObject(int mId, Object command);
+
+    public abstract Object getObject(int mId);
 
     /**
      * The context can be used in a few different mode, allowing operations to skip being executed:
-     * - UNSET : all operations will get executed
-     * - DATA : only operations dealing with DATA (eg loading a bitmap) should execute
-     * - PAINT : only operations painting should execute
+     * - UNSET : all operations will get executed - DATA : only operations dealing with DATA (eg
+     * loading a bitmap) should execute - PAINT : only operations painting should execute
      */
     public enum ContextMode {
-        UNSET, DATA, PAINT
+        UNSET,
+        DATA,
+        PAINT
     }
 
     public int getTheme() {
@@ -229,9 +234,13 @@ public abstract class RemoteContext {
     // Operations
     ///////////////////////////////////////////////////////////////////////////////////////////////
 
-    public void header(int majorVersion, int minorVersion, int patchVersion,
-                       int width, int height, long capabilities
-    ) {
+    public void header(
+            int majorVersion,
+            int minorVersion,
+            int patchVersion,
+            int width,
+            int height,
+            long capabilities) {
         mRemoteComposeState.setWindowWidth(width);
         mRemoteComposeState.setWindowHeight(height);
         mDocument.setVersion(majorVersion, minorVersion, patchVersion);
@@ -243,21 +252,14 @@ public abstract class RemoteContext {
     /**
      * Sets the way the player handles the content
      *
-     * @param scroll    set the horizontal behavior (NONE|SCROLL_HORIZONTAL|SCROLL_VERTICAL)
+     * @param scroll set the horizontal behavior (NONE|SCROLL_HORIZONTAL|SCROLL_VERTICAL)
      * @param alignment set the alignment of the content (TOP|CENTER|BOTTOM|START|END)
-     * @param sizing    set the type of sizing for the content (NONE|SIZING_LAYOUT|SIZING_SCALE)
-     * @param mode      set the mode of sizing, either LAYOUT modes or SCALE modes
-     *                  the LAYOUT modes are:
-     *                  - LAYOUT_MATCH_PARENT
-     *                  - LAYOUT_WRAP_CONTENT
-     *                  or adding an horizontal mode and a vertical mode:
-     *                  - LAYOUT_HORIZONTAL_MATCH_PARENT
-     *                  - LAYOUT_HORIZONTAL_WRAP_CONTENT
-     *                  - LAYOUT_HORIZONTAL_FIXED
-     *                  - LAYOUT_VERTICAL_MATCH_PARENT
-     *                  - LAYOUT_VERTICAL_WRAP_CONTENT
-     *                  - LAYOUT_VERTICAL_FIXED
-     *                  The LAYOUT_*_FIXED modes will use the intrinsic document size
+     * @param sizing set the type of sizing for the content (NONE|SIZING_LAYOUT|SIZING_SCALE)
+     * @param mode set the mode of sizing, either LAYOUT modes or SCALE modes the LAYOUT modes are:
+     *     - LAYOUT_MATCH_PARENT - LAYOUT_WRAP_CONTENT or adding an horizontal mode and a vertical
+     *     mode: - LAYOUT_HORIZONTAL_MATCH_PARENT - LAYOUT_HORIZONTAL_WRAP_CONTENT -
+     *     LAYOUT_HORIZONTAL_FIXED - LAYOUT_VERTICAL_MATCH_PARENT - LAYOUT_VERTICAL_WRAP_CONTENT -
+     *     LAYOUT_VERTICAL_FIXED The LAYOUT_*_FIXED modes will use the intrinsic document size
      */
     public void setRootContentBehavior(int scroll, int alignment, int sizing, int mode) {
         mDocument.setRootContentBehavior(scroll, alignment, sizing, mode);
@@ -281,16 +283,16 @@ public abstract class RemoteContext {
      * Save a bitmap under an imageId
      *
      * @param imageId the id of the image
-     * @param width   the width of the image
-     * @param height  the height of the image
-     * @param bitmap  the bytes that represent the image
+     * @param width the width of the image
+     * @param height the height of the image
+     * @param bitmap the bytes that represent the image
      */
     public abstract void loadBitmap(int imageId, int width, int height, byte[] bitmap);
 
     /**
      * Save a string under a given id
      *
-     * @param id   the id of the string
+     * @param id the id of the string
      * @param text the value to set
      */
     public abstract void loadText(int id, String text);
@@ -306,7 +308,7 @@ public abstract class RemoteContext {
     /**
      * Load a float
      *
-     * @param id    id of the float
+     * @param id id of the float
      * @param value the value to set
      */
     public abstract void loadFloat(int id, float value);
@@ -314,21 +316,19 @@ public abstract class RemoteContext {
     /**
      * Load a integer
      *
-     * @param id    id of the integer
+     * @param id id of the integer
      * @param value the value to set
      */
     public abstract void loadInteger(int id, int value);
-
 
     public abstract void overrideInteger(int id, int value);
 
     public abstract void overrideText(int id, int valueId);
 
     /**
-     * Load an animated float associated with an id
-     * Todo: Remove?
+     * Load an animated float associated with an id Todo: Remove?
      *
-     * @param id            the id of the float
+     * @param id the id of the float
      * @param animatedFloat The animated float
      */
     public abstract void loadAnimatedFloat(int id, FloatExpression animatedFloat);
@@ -336,7 +336,7 @@ public abstract class RemoteContext {
     /**
      * Save a shader under and ID
      *
-     * @param id    the id of the Shader
+     * @param id the id of the Shader
      * @param value the shader
      */
     public abstract void loadShader(int id, ShaderData value);
@@ -368,7 +368,7 @@ public abstract class RemoteContext {
     /**
      * called to notify system that a command is interested in a variable
      *
-     * @param id              track when this id changes value
+     * @param id track when this id changes value
      * @param variableSupport call back when value changes
      */
     public abstract void listensTo(int id, VariableSupport variableSupport);
@@ -401,33 +401,25 @@ public abstract class RemoteContext {
     public static final int ID_WEEK_DAY = 11;
     public static final int ID_DAY_OF_MONTH = 12;
 
-    /**
-     * CONTINUOUS_SEC is seconds from midnight looping every hour 0-3600
-     */
+    /** CONTINUOUS_SEC is seconds from midnight looping every hour 0-3600 */
     public static final float FLOAT_CONTINUOUS_SEC = Utils.asNan(ID_CONTINUOUS_SEC);
-    /**
-     * seconds run from Midnight=0 quantized to seconds hour 0..3599
-     */
+
+    /** seconds run from Midnight=0 quantized to seconds hour 0..3599 */
     public static final float FLOAT_TIME_IN_SEC = Utils.asNan(ID_TIME_IN_SEC);
-    /**
-     * minutes run from Midnight=0 quantized to minutes 0..1439
-     */
+
+    /** minutes run from Midnight=0 quantized to minutes 0..1439 */
     public static final float FLOAT_TIME_IN_MIN = Utils.asNan(ID_TIME_IN_MIN);
-    /**
-     * hours run from Midnight=0 quantized to Hours 0-23
-     */
+
+    /** hours run from Midnight=0 quantized to Hours 0-23 */
     public static final float FLOAT_TIME_IN_HR = Utils.asNan(ID_TIME_IN_HR);
-    /**
-     * Moth of Year quantized to MONTHS 1-12. 1 = January
-     */
+
+    /** Moth of Year quantized to MONTHS 1-12. 1 = January */
     public static final float FLOAT_CALENDAR_MONTH = Utils.asNan(ID_CALENDAR_MONTH);
-    /**
-     * DAY OF THE WEEK 1-7. 1 = Monday
-     */
+
+    /** DAY OF THE WEEK 1-7. 1 = Monday */
     public static final float FLOAT_WEEK_DAY = Utils.asNan(ID_WEEK_DAY);
-    /**
-     * DAY OF THE MONTH 1-31
-     */
+
+    /** DAY OF THE MONTH 1-31 */
     public static final float FLOAT_DAY_OF_MONTH = Utils.asNan(ID_DAY_OF_MONTH);
 
     public static final float FLOAT_WINDOW_WIDTH = Utils.asNan(ID_WINDOW_WIDTH);
@@ -446,7 +438,8 @@ public abstract class RemoteContext {
     }
 
     public static float getTime(float fl) {
-        LocalDateTime dateTime = LocalDateTime.now();
+        LocalDateTime dateTime =
+                LocalDateTime.now(ZoneId.systemDefault()); // TODO, pass in a timezone explicitly?
         // This define the time in the format
         // seconds run from Midnight=0 quantized to seconds hour 0..3599
         // minutes run from Midnight=0 quantized to minutes 0..1439
@@ -463,7 +456,6 @@ public abstract class RemoteContext {
         int currentSeconds = minute * 60 + seconds;
         float sec = currentSeconds + dateTime.getNano() * 1E-9f;
         int day_week = dateTime.getDayOfWeek().getValue();
-
 
         ZoneId zone = ZoneId.systemDefault();
         OffsetDateTime offsetDateTime = dateTime.atZone(zone).toOffsetDateTime();
@@ -488,8 +480,6 @@ public abstract class RemoteContext {
         return fl;
     }
 
-
-
     public abstract void addClickArea(
             int id,
             int contentDescription,
@@ -497,7 +487,5 @@ public abstract class RemoteContext {
             float top,
             float right,
             float bottom,
-            int metadataId
-    );
+            int metadataId);
 }
-
