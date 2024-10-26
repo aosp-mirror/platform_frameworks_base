@@ -19,8 +19,7 @@ package com.android.server.integrity.parser;
 import android.annotation.Nullable;
 
 /**
- * A wrapper class to represent an indexing range that is identified by the {@link
- * RuleIndexingController}.
+ * A wrapper class to represent an indexing range.
  */
 public class RuleIndexRange {
     private int mStartIndex;

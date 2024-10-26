@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.notification.footer.ui.viewbinder
 
 import android.view.View
 import androidx.lifecycle.lifecycleScope
+import com.android.systemui.Flags
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.statusbar.notification.NotificationActivityStarter
 import com.android.systemui.statusbar.notification.emptyshade.shared.ModesEmptyShadeFix
@@ -63,14 +64,16 @@ object FooterViewBinder {
         notificationActivityStarter: NotificationActivityStarter,
     ) = coroutineScope {
         launch { bindClearAllButton(footer, viewModel, clearAllNotifications) }
-        launch {
-            bindManageOrHistoryButton(
-                footer,
-                viewModel,
-                launchNotificationSettings,
-                launchNotificationHistory,
-                notificationActivityStarter,
-            )
+        if (!Flags.notificationsRedesignFooterView()) {
+            launch {
+                bindManageOrHistoryButton(
+                    footer,
+                    viewModel,
+                    launchNotificationSettings,
+                    launchNotificationHistory,
+                    notificationActivityStarter,
+                )
+            }
         }
         launch { bindMessage(footer, viewModel) }
     }

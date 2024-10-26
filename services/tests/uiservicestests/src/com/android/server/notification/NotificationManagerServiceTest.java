@@ -45,6 +45,9 @@ import static android.app.Notification.GROUP_ALERT_CHILDREN;
 import static android.app.Notification.VISIBILITY_PRIVATE;
 import static android.app.NotificationChannel.NEWS_ID;
 import static android.app.NotificationChannel.DEFAULT_CHANNEL_ID;
+import static android.app.NotificationChannel.PROMOTIONS_ID;
+import static android.app.NotificationChannel.RECS_ID;
+import static android.app.NotificationChannel.SOCIAL_MEDIA_ID;
 import static android.app.NotificationChannel.USER_LOCKED_ALLOW_BUBBLE;
 import static android.app.NotificationManager.ACTION_INTERRUPTION_FILTER_CHANGED;
 import static android.app.NotificationManager.BUBBLE_PREFERENCE_ALL;
@@ -98,7 +101,10 @@ import static android.service.notification.Adjustment.KEY_IMPORTANCE;
 import static android.service.notification.Adjustment.KEY_TEXT_REPLIES;
 import static android.service.notification.Adjustment.KEY_TYPE;
 import static android.service.notification.Adjustment.KEY_USER_SENTIMENT;
+import static android.service.notification.Adjustment.TYPE_CONTENT_RECOMMENDATION;
 import static android.service.notification.Adjustment.TYPE_NEWS;
+import static android.service.notification.Adjustment.TYPE_PROMOTION;
+import static android.service.notification.Adjustment.TYPE_SOCIAL_MEDIA;
 import static android.service.notification.Condition.SOURCE_CONTEXT;
 import static android.service.notification.Condition.SOURCE_USER_ACTION;
 import static android.service.notification.Condition.STATE_TRUE;
@@ -16767,6 +16773,24 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         r.applyAdjustments();
 
         assertThat(r.getChannel().getId()).isEqualTo(NEWS_ID);
+
+        signals.putInt(KEY_TYPE, TYPE_PROMOTION);
+        mBinderService.applyAdjustmentFromAssistant(null, adjustment);
+        waitForIdle();
+        r.applyAdjustments();
+        assertThat(r.getChannel().getId()).isEqualTo(PROMOTIONS_ID);
+
+        signals.putInt(KEY_TYPE, TYPE_SOCIAL_MEDIA);
+        mBinderService.applyAdjustmentFromAssistant(null, adjustment);
+        waitForIdle();
+        r.applyAdjustments();
+        assertThat(r.getChannel().getId()).isEqualTo(SOCIAL_MEDIA_ID);
+
+        signals.putInt(KEY_TYPE, TYPE_CONTENT_RECOMMENDATION);
+        mBinderService.applyAdjustmentFromAssistant(null, adjustment);
+        waitForIdle();
+        r.applyAdjustments();
+        assertThat(r.getChannel().getId()).isEqualTo(RECS_ID);
     }
 
     @Test
@@ -17066,7 +17090,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     @EnableFlags(FLAG_NOTIFICATION_CLASSIFICATION)
     public void testAppCannotUseReservedBundleChannels() throws Exception {
-        mBinderService.getBubblePreferenceForPackage(mPkg, mUid);
+        mService.mPreferencesHelper.createReservedChannel(mPkg, mUid, TYPE_NEWS);
         NotificationChannel news = mBinderService.getNotificationChannel(
                 mPkg, mContext.getUserId(), mPkg, NEWS_ID);
         assertThat(news).isNotNull();

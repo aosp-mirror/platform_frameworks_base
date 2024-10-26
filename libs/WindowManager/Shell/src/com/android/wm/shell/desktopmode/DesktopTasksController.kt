@@ -373,7 +373,7 @@ class DesktopTasksController(
         }
         logV("moveBackgroundTaskToDesktop with taskId=%d", taskId)
         // TODO(342378842): Instead of using default display, support multiple displays
-        val taskToMinimize = bringDesktopAppsToFrontBeforeShowingNewTask(
+        val taskIdToMinimize = bringDesktopAppsToFrontBeforeShowingNewTask(
             DEFAULT_DISPLAY, wct, taskId)
         val runOnTransit = desktopImmersiveController.exitImmersiveIfApplicable(
             wct = wct,
@@ -388,7 +388,7 @@ class DesktopTasksController(
         )
         // TODO(343149901): Add DPI changes for task launch
         val transition = enterDesktopTaskTransitionHandler.moveToDesktop(wct, transitionSource)
-        addPendingMinimizeTransition(transition, taskToMinimize)
+        taskIdToMinimize?.let { addPendingMinimizeTransition(transition, it) }
         runOnTransit?.invoke(transition)
         return true
     }
@@ -412,12 +412,12 @@ class DesktopTasksController(
             excludeTaskId = task.taskId,
         )
         // Bring other apps to front first
-        val taskToMinimize =
+        val taskIdToMinimize =
             bringDesktopAppsToFrontBeforeShowingNewTask(task.displayId, wct, task.taskId)
         addMoveToDesktopChanges(wct, task)
 
         val transition = enterDesktopTaskTransitionHandler.moveToDesktop(wct, transitionSource)
-        addPendingMinimizeTransition(transition, taskToMinimize)
+        taskIdToMinimize?.let { addPendingMinimizeTransition(transition, it) }
         runOnTransit?.invoke(transition)
     }
 
@@ -452,14 +452,14 @@ class DesktopTasksController(
         val wct = WindowContainerTransaction()
         exitSplitIfApplicable(wct, taskInfo)
         moveHomeTask(wct, toTop = true)
-        val taskToMinimize =
+        val taskIdToMinimize =
             bringDesktopAppsToFrontBeforeShowingNewTask(taskInfo.displayId, wct, taskInfo.taskId)
         addMoveToDesktopChanges(wct, taskInfo)
         val runOnTransit = desktopImmersiveController.exitImmersiveIfApplicable(
             wct, taskInfo.displayId)
         val transition = dragToDesktopTransitionHandler.finishDragToDesktopTransition(wct)
         transition?.let {
-            addPendingMinimizeTransition(it, taskToMinimize)
+            taskIdToMinimize?.let { taskId -> addPendingMinimizeTransition(it, taskId) }
             runOnTransit?.invoke(transition)
         }
     }
@@ -651,7 +651,13 @@ class DesktopTasksController(
             excludeTaskId = taskInfo.taskId,
         )
         val transition =
-            startLaunchTransition(TRANSIT_TO_FRONT, wct, taskInfo.taskId, remoteTransition)
+            startLaunchTransition(
+                TRANSIT_TO_FRONT,
+                wct,
+                taskInfo.taskId,
+                remoteTransition,
+                taskInfo.displayId
+            )
         runOnTransit?.invoke(transition)
     }
 
@@ -660,15 +666,15 @@ class DesktopTasksController(
         wct: WindowContainerTransaction,
         taskId: Int,
         remoteTransition: RemoteTransition?,
+        displayId: Int = DEFAULT_DISPLAY,
     ): IBinder {
-        val taskToMinimize: RunningTaskInfo? =
-            addAndGetMinimizeChanges(DEFAULT_DISPLAY, wct, taskId)
+        val taskIdToMinimize = addAndGetMinimizeChanges(displayId, wct, taskId)
         if (remoteTransition == null) {
             val t = transitions.startTransition(transitionType, wct, null /* handler */)
-            addPendingMinimizeTransition(t, taskToMinimize)
+            taskIdToMinimize?.let { addPendingMinimizeTransition(t, it) }
             return t
         }
-        if (taskToMinimize == null) {
+        if (taskIdToMinimize == null) {
             val remoteTransitionHandler = OneShotRemoteHandler(mainExecutor, remoteTransition)
             val t = transitions.startTransition(transitionType, wct, remoteTransitionHandler)
             remoteTransitionHandler.setTransition(t)
@@ -676,10 +682,10 @@ class DesktopTasksController(
         }
         val remoteTransitionHandler =
             DesktopWindowLimitRemoteHandler(
-                mainExecutor, rootTaskDisplayAreaOrganizer, remoteTransition, taskToMinimize.taskId)
+                mainExecutor, rootTaskDisplayAreaOrganizer, remoteTransition, taskIdToMinimize)
         val t = transitions.startTransition(transitionType, wct, remoteTransitionHandler)
         remoteTransitionHandler.setTransition(t)
-        addPendingMinimizeTransition(t, taskToMinimize)
+        taskIdToMinimize?.let { addPendingMinimizeTransition(t, it) }
         return t
     }
 
@@ -1032,13 +1038,13 @@ class DesktopTasksController(
         displayId: Int,
         wct: WindowContainerTransaction,
         newTaskIdInFront: Int
-    ): RunningTaskInfo? = bringDesktopAppsToFront(displayId, wct, newTaskIdInFront)
+    ): Int? = bringDesktopAppsToFront(displayId, wct, newTaskIdInFront)
 
     private fun bringDesktopAppsToFront(
         displayId: Int,
         wct: WindowContainerTransaction,
         newTaskIdInFront: Int? = null
-    ): RunningTaskInfo? {
+    ): Int? {
         logV("bringDesktopAppsToFront, newTaskId=%d", newTaskIdInFront)
         // Move home to front, ensures that we go back home when all desktop windows are closed
         moveHomeTask(wct, toTop = true)
@@ -1054,11 +1060,10 @@ class DesktopTasksController(
             taskRepository.getExpandedTasksOrdered(displayId)
         // If we're adding a new Task we might need to minimize an old one
         // TODO(b/365725441): Handle non running task minimization
-        val taskToMinimize: RunningTaskInfo? =
+        val taskIdToMinimize: Int? =
             if (newTaskIdInFront != null && desktopTasksLimiter.isPresent) {
-                desktopTasksLimiter
-                    .get()
-                    .getTaskToMinimize(
+                desktopTasksLimiter.get()
+                    .getTaskIdToMinimize(
                         expandedTasksOrderedFrontToBack,
                         newTaskIdInFront
                     )
@@ -1068,7 +1073,7 @@ class DesktopTasksController(
 
         expandedTasksOrderedFrontToBack
             // If there is a Task to minimize, let it stay behind the Home Task
-            .filter { taskId -> taskId != taskToMinimize?.taskId }
+            .filter { taskId -> taskId != taskIdToMinimize }
             .reversed() // Start from the back so the front task is brought forward last
             .forEach { taskId ->
                 val runningTaskInfo = shellTaskOrganizer.getRunningTaskInfo(taskId)
@@ -1089,7 +1094,7 @@ class DesktopTasksController(
         taskbarDesktopTaskListener?.
             onTaskbarCornerRoundingUpdate(doesAnyTaskRequireTaskbarRounding(displayId))
 
-        return taskToMinimize
+        return taskIdToMinimize
     }
 
     private fun moveHomeTask(wct: WindowContainerTransaction, toTop: Boolean) {
@@ -1341,7 +1346,7 @@ class DesktopTasksController(
         val options = createNewWindowOptions(callingTask)
         if (options.launchWindowingMode == WINDOWING_MODE_FREEFORM) {
             wct.startTask(requestedTaskId, options.toBundle())
-            val taskToMinimize = bringDesktopAppsToFrontBeforeShowingNewTask(
+            val taskIdToMinimize = bringDesktopAppsToFrontBeforeShowingNewTask(
                 callingTask.displayId, wct, requestedTaskId)
             val runOnTransit = desktopImmersiveController.exitImmersiveIfApplicable(
                 wct = wct,
@@ -1349,7 +1354,7 @@ class DesktopTasksController(
                 excludeTaskId = requestedTaskId,
             )
             val transition = transitions.startTransition(TRANSIT_OPEN, wct, null)
-            addPendingMinimizeTransition(transition, taskToMinimize)
+            taskIdToMinimize?.let { addPendingMinimizeTransition(transition, it) }
             runOnTransit?.invoke(transition)
         } else {
             val splitPosition = splitScreenController.determineNewInstancePosition(callingTask)
@@ -1489,9 +1494,9 @@ class DesktopTasksController(
         // 1) Exit immersive if needed.
         desktopImmersiveController.exitImmersiveIfApplicable(transition, wct, task.displayId)
         // 2) minimize a Task if needed.
-        val taskToMinimize = addAndGetMinimizeChanges(task.displayId, wct, task.taskId)
-        if (taskToMinimize != null) {
-            addPendingMinimizeTransition(transition, taskToMinimize)
+        val taskIdToMinimize = addAndGetMinimizeChanges(task.displayId, wct, task.taskId)
+        if (taskIdToMinimize != null) {
+            addPendingMinimizeTransition(transition, taskIdToMinimize)
             return wct
         }
         return if (wct.isEmpty) null else wct
@@ -1515,9 +1520,8 @@ class DesktopTasksController(
 
                 // Desktop Mode is already showing and we're launching a new Task - we might need to
                 // minimize another Task.
-                val taskToMinimize =
-                    addAndGetMinimizeChanges(task.displayId, wct, task.taskId)
-                addPendingMinimizeTransition(transition, taskToMinimize)
+                val taskIdToMinimize = addAndGetMinimizeChanges(task.displayId, wct, task.taskId)
+                taskIdToMinimize?.let { addPendingMinimizeTransition(transition, it) }
                 desktopImmersiveController.exitImmersiveIfApplicable(
                     transition, wct, task.displayId
                 )
@@ -1683,7 +1687,7 @@ class DesktopTasksController(
         displayId: Int,
         wct: WindowContainerTransaction,
         newTaskId: Int
-    ): RunningTaskInfo? {
+    ): Int? {
         if (!desktopTasksLimiter.isPresent) return null
         return desktopTasksLimiter
             .get()
@@ -1692,9 +1696,9 @@ class DesktopTasksController(
 
     private fun addPendingMinimizeTransition(
         transition: IBinder,
-        taskToMinimize: RunningTaskInfo?
+        taskIdToMinimize: Int,
     ) {
-        if (taskToMinimize == null) return
+        val taskToMinimize = shellTaskOrganizer.getRunningTaskInfo(taskIdToMinimize) ?: return
         desktopTasksLimiter.ifPresent {
             it.addPendingMinimizeChange(transition, taskToMinimize.displayId, taskToMinimize.taskId)
         }

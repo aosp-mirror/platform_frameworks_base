@@ -16,6 +16,8 @@
 
 package android.app;
 
+import static android.service.notification.Flags.notificationClassification;
+
 import android.annotation.CallbackExecutor;
 import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
@@ -752,6 +754,11 @@ public class NotificationManager {
         INotificationManager service = getService();
         String pkg = mContext.getPackageName();
 
+        if (notificationClassification()
+                && NotificationChannel.SYSTEM_RESERVED_IDS.contains(notification.getChannelId())) {
+            return;
+        }
+
         try {
             if (localLOGV) Log.v(TAG, pkg + ": notify(" + id + ", " + notification + ")");
             service.enqueueNotificationWithTag(pkg, mContext.getOpPackageName(), tag, id,
@@ -1131,6 +1138,10 @@ public class NotificationManager {
      * had before it was deleted.
      */
     public void deleteNotificationChannel(String channelId) {
+        if (notificationClassification()
+                && NotificationChannel.SYSTEM_RESERVED_IDS.contains(channelId)) {
+            return;
+        }
         INotificationManager service = getService();
         try {
             service.deleteNotificationChannel(mContext.getPackageName(), channelId);

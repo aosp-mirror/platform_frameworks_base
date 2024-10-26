@@ -64,7 +64,6 @@ import com.android.systemui.scene.data.repository.Idle
 import com.android.systemui.scene.data.repository.Transition
 import com.android.systemui.scene.data.repository.setTransition
 import com.android.systemui.scene.shared.model.Scenes
-import com.android.systemui.shade.data.repository.fakeShadeRepository
 import com.android.systemui.shade.mockLargeScreenHeaderHelper
 import com.android.systemui.shade.shadeTestUtil
 import com.android.systemui.statusbar.notification.stack.domain.interactor.sharedNotificationContainerInteractor
@@ -116,36 +115,18 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
         kosmos.aodBurnInViewModel = aodBurnInViewModel
     }
 
-    val testScope = kosmos.testScope
-    val configurationRepository
-        get() = kosmos.fakeConfigurationRepository
-
-    val keyguardRepository
-        get() = kosmos.fakeKeyguardRepository
-
-    val keyguardInteractor
-        get() = kosmos.keyguardInteractor
-
-    val keyguardRootViewModel
-        get() = kosmos.keyguardRootViewModel
-
-    val keyguardTransitionRepository
-        get() = kosmos.fakeKeyguardTransitionRepository
-
-    val shadeTestUtil
-        get() = kosmos.shadeTestUtil
-
-    val sharedNotificationContainerInteractor
-        get() = kosmos.sharedNotificationContainerInteractor
-
-    val largeScreenHeaderHelper
-        get() = kosmos.mockLargeScreenHeaderHelper
-
-    val communalSceneRepository
-        get() = kosmos.communalSceneRepository
-
-    val shadeRepository
-        get() = kosmos.fakeShadeRepository
+    private val testScope = kosmos.testScope
+    private val configurationRepository by lazy { kosmos.fakeConfigurationRepository }
+    private val keyguardRepository by lazy { kosmos.fakeKeyguardRepository }
+    private val keyguardInteractor by lazy { kosmos.keyguardInteractor }
+    private val keyguardRootViewModel by lazy { kosmos.keyguardRootViewModel }
+    private val keyguardTransitionRepository by lazy { kosmos.fakeKeyguardTransitionRepository }
+    private val shadeTestUtil by lazy { kosmos.shadeTestUtil }
+    private val sharedNotificationContainerInteractor by lazy {
+        kosmos.sharedNotificationContainerInteractor
+    }
+    private val largeScreenHeaderHelper by lazy { kosmos.mockLargeScreenHeaderHelper }
+    private val communalSceneRepository by lazy { kosmos.communalSceneRepository }
 
     lateinit var underTest: SharedNotificationContainerViewModel
 
@@ -632,6 +613,45 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
                 NotificationContainerBounds(top = 1f, bottom = 2f)
             )
 
+            assertThat(bounds).isEqualTo(NotificationContainerBounds(top = 1f, bottom = 2f))
+        }
+
+    @Test
+    @DisableSceneContainer
+    fun boundsStableWhenGoingToAlternateBouncer() =
+        testScope.runTest {
+            val bounds by collectLastValue(underTest.bounds)
+
+            // Start on lockscreen
+            showLockscreen()
+
+            keyguardInteractor.setNotificationContainerBounds(
+                NotificationContainerBounds(top = 1f, bottom = 2f)
+            )
+
+            assertThat(bounds).isEqualTo(NotificationContainerBounds(top = 1f, bottom = 2f))
+
+            // Begin transition to AOD
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(LOCKSCREEN, ALTERNATE_BOUNCER, 0f, TransitionState.STARTED)
+            )
+            runCurrent()
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(LOCKSCREEN, ALTERNATE_BOUNCER, 0f, TransitionState.RUNNING)
+            )
+            runCurrent()
+
+            // This is the last step before FINISHED is sent, which could trigger a change in bounds
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(LOCKSCREEN, ALTERNATE_BOUNCER, 1f, TransitionState.RUNNING)
+            )
+            runCurrent()
+            assertThat(bounds).isEqualTo(NotificationContainerBounds(top = 1f, bottom = 2f))
+
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(LOCKSCREEN, ALTERNATE_BOUNCER, 1f, TransitionState.FINISHED)
+            )
+            runCurrent()
             assertThat(bounds).isEqualTo(NotificationContainerBounds(top = 1f, bottom = 2f))
         }
 
@@ -1227,6 +1247,75 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
             )
             runCurrent()
             assertThat(alpha).isEqualTo(1f)
+        }
+
+    @Test
+    @DisableSceneContainer
+    fun notificationAbsoluteBottom() =
+        testScope.runTest {
+            var notificationCount = 2
+            val calculateSpace = { _: Float, _: Boolean -> notificationCount }
+            val shelfHeight = 10F
+            val heightForNotification = 20F
+            val calculateHeight = { count: Int -> count * heightForNotification + shelfHeight }
+            val stackAbsoluteBottom by
+                collectLastValue(
+                    underTest.getNotificationStackAbsoluteBottom(
+                        calculateSpace,
+                        calculateHeight,
+                        shelfHeight,
+                    )
+                )
+            advanceTimeBy(50L)
+            showLockscreen()
+
+            shadeTestUtil.setSplitShade(false)
+            keyguardInteractor.setNotificationContainerBounds(
+                NotificationContainerBounds(top = 100F, bottom = 300F)
+            )
+            configurationRepository.onAnyConfigurationChange()
+
+            assertThat(stackAbsoluteBottom).isEqualTo(150F)
+
+            // Also updates when directly requested (as it would from NotificationStackScrollLayout)
+            notificationCount = 3
+            sharedNotificationContainerInteractor.notificationStackChanged()
+            advanceTimeBy(50L)
+            assertThat(stackAbsoluteBottom).isEqualTo(170F)
+        }
+
+    @Test
+    @DisableSceneContainer
+    fun notificationAbsoluteBottom_maxNotificationIsZero_noShelfHeight() =
+        testScope.runTest {
+            var notificationCount = 2
+            val calculateSpace = { _: Float, _: Boolean -> notificationCount }
+            val shelfHeight = 10F
+            val heightForNotification = 20F
+            val calculateHeight = { count: Int -> count * heightForNotification + shelfHeight }
+            val stackAbsoluteBottom by
+                collectLastValue(
+                    underTest.getNotificationStackAbsoluteBottom(
+                        calculateSpace,
+                        calculateHeight,
+                        shelfHeight,
+                    )
+                )
+            advanceTimeBy(50L)
+            showLockscreen()
+
+            shadeTestUtil.setSplitShade(false)
+            keyguardInteractor.setNotificationContainerBounds(
+                NotificationContainerBounds(top = 100F, bottom = 300F)
+            )
+            configurationRepository.onAnyConfigurationChange()
+
+            assertThat(stackAbsoluteBottom).isEqualTo(150F)
+
+            notificationCount = 0
+            sharedNotificationContainerInteractor.notificationStackChanged()
+            advanceTimeBy(50L)
+            assertThat(stackAbsoluteBottom).isEqualTo(100F)
         }
 
     private suspend fun TestScope.showLockscreen() {

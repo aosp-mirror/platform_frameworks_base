@@ -30,6 +30,7 @@ import com.android.systemui.privacy.OngoingPrivacyChip
 import com.android.systemui.privacy.PrivacyItem
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.model.TransitionKeys.SlightlyFasterShadeCollapse
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.shade.domain.interactor.PrivacyChipInteractor
 import com.android.systemui.shade.domain.interactor.ShadeHeaderClockInteractor
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
@@ -53,7 +54,7 @@ import com.android.app.tracing.coroutines.launchTraced as launch
 class ShadeHeaderViewModel
 @AssistedInject
 constructor(
-    context: Context,
+    @ShadeDisplayAware context: Context,
     private val activityStarter: ActivityStarter,
     private val shadeInteractor: ShadeInteractor,
     private val mobileIconsInteractor: MobileIconsInteractor,

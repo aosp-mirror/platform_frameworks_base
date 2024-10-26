@@ -33,6 +33,7 @@ import com.android.launcher3.util.UserIconInfo
 import com.android.systemui.Dumpable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.statusbar.notification.collection.NotifCollectionCache
 import com.android.systemui.util.asIndenting
 import com.android.systemui.util.withIncreasedIndent
@@ -67,7 +68,7 @@ interface AppIconProvider {
 @SysUISingleton
 class AppIconProviderImpl
 @Inject
-constructor(private val sysuiContext: Context, dumpManager: DumpManager) :
+constructor(@ShadeDisplayAware private val sysuiContext: Context, dumpManager: DumpManager) :
     AppIconProvider, Dumpable {
     init {
         dumpManager.registerNormalDumpable(TAG, this)

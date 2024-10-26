@@ -17,12 +17,17 @@
 package com.android.systemui.animation;
 
 import android.annotation.FloatRange;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.graphics.Rect;
 import android.view.SurfaceControl;
 
 import java.util.concurrent.Executor;
 
-/** An interface representing an UI component on the display. */
+/**
+ * An interface representing an UI component on the display.
+ * @hide
+ */
 public interface UIComponent {
 
     /** Get the current alpha of this UI. */
@@ -32,39 +37,48 @@ public interface UIComponent {
     boolean isVisible();
 
     /** Get the bounds of this UI in its display. */
+    @NonNull
     Rect getBounds();
 
     /** Create a new {@link Transaction} that can update this UI. */
+    @NonNull
     Transaction newTransaction();
 
     /**
      * A transaction class for updating {@link UIComponent}.
      *
      * @param <T> the subtype of {@link UIComponent} that this {@link Transaction} can handle.
+     * @hide
      */
     interface Transaction<T extends UIComponent> {
         /** Update alpha of an UI. Execution will be delayed until {@link #commit()} is called. */
-        Transaction setAlpha(T ui, @FloatRange(from = 0.0, to = 1.0) float alpha);
+        Transaction setAlpha(@NonNull T ui, @FloatRange(from = 0.0, to = 1.0) float alpha);
 
         /**
          * Update visibility of an UI. Execution will be delayed until {@link #commit()} is called.
          */
-        Transaction setVisible(T ui, boolean visible);
+        @NonNull
+        Transaction setVisible(@NonNull T ui, boolean visible);
 
         /** Update bounds of an UI. Execution will be delayed until {@link #commit()} is called. */
-        Transaction setBounds(T ui, Rect bounds);
+        @NonNull
+        Transaction setBounds(@NonNull T ui, @NonNull Rect bounds);
 
         /**
          * Attach a ui to the transition leash. Execution will be delayed until {@link #commit()} is
          * called.
          */
-        Transaction attachToTransitionLeash(T ui, SurfaceControl transitionLeash, int w, int h);
+        @NonNull
+        Transaction attachToTransitionLeash(
+                @NonNull T ui, @NonNull SurfaceControl transitionLeash, int w, int h);
 
         /**
          * Detach a ui from the transition leash. Execution will be delayed until {@link #commit} is
          * called.
          */
-        Transaction detachFromTransitionLeash(T ui, Executor executor, Runnable onDone);
+        @NonNull
+        Transaction detachFromTransitionLeash(
+                @NonNull T ui, @NonNull Executor executor, @Nullable Runnable onDone);
 
         /** Commit any pending changes added to this transaction. */
         void commit();

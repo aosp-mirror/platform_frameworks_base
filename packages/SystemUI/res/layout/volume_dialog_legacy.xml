@@ -45,7 +45,7 @@
             android:orientation="vertical"
             android:gravity="right">
 
-            <include layout="@layout/volume_ringer_drawer" />
+            <include layout="@layout/volume_ringer_drawer_legacy" />
 
             <FrameLayout
                 android:visibility="gone"

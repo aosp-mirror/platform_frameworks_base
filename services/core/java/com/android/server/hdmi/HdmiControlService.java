@@ -4344,6 +4344,7 @@ public class HdmiControlService extends SystemService {
         if (deviceType == HdmiDeviceInfo.DEVICE_PLAYBACK) {
             HdmiCecLocalDevicePlayback playback = playback();
             playback.dismissUiOnActiveSourceStatusRecovered();
+            playback.removeAction(RequestActiveSourceAction.class);
             playback.setActiveSource(playback.getDeviceInfo().getLogicalAddress(), physicalAddress,
                     caller);
             playback.wakeUpIfActiveSource();

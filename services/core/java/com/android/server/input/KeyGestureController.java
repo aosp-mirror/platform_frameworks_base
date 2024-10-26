@@ -1012,16 +1012,16 @@ final class KeyGestureController {
         if (device == null) {
             return;
         }
+        KeyGestureEvent keyGestureEvent = new KeyGestureEvent(event);
         if (event.action == KeyGestureEvent.ACTION_GESTURE_COMPLETE) {
             KeyboardMetricsCollector.logKeyboardSystemsEventReportedAtom(device, event.keycodes,
-                    event.modifierState,
-                    KeyGestureEvent.keyGestureTypeToLogEvent(event.gestureType));
+                    event.modifierState, keyGestureEvent.getLogEvent());
         }
         notifyAllListeners(event);
         while (mLastHandledEvents.size() >= MAX_TRACKED_EVENTS) {
             mLastHandledEvents.removeFirst();
         }
-        mLastHandledEvents.addLast(new KeyGestureEvent(event));
+        mLastHandledEvents.addLast(keyGestureEvent);
     }
 
     @MainThread
