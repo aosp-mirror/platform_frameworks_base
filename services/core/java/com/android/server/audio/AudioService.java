@@ -1608,7 +1608,14 @@ public class AudioService extends IAudioService.Stub
                 if (dev == AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP) {
                     enabled = mAvrcpAbsVolSupported;
                 }
-                mAudioSystem.setDeviceAbsoluteVolumeEnabled(dev, /*address=*/"", enabled, stream);
+                final int result = mAudioSystem.setDeviceAbsoluteVolumeEnabled(dev, /*address=*/"",
+                        enabled, stream);
+                if (result != AudioSystem.AUDIO_STATUS_OK) {
+                    sVolumeLogger.enqueueAndSlog(
+                            new VolumeEvent(VolumeEvent.VOL_ABS_DEVICE_ENABLED_ERROR,
+                                    result, dev, enabled, stream).eventToString(), ALOGE, TAG);
+
+                }
             });
         }
     }
@@ -2069,7 +2076,13 @@ public class AudioService extends IAudioService.Stub
                 if (dev == AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP) {
                     enabled = mAvrcpAbsVolSupported;
                 }
-                mAudioSystem.setDeviceAbsoluteVolumeEnabled(dev, /*address=*/"", enabled, stream);
+                final int result = mAudioSystem.setDeviceAbsoluteVolumeEnabled(dev, /*address=*/"",
+                        enabled, stream);
+                if (result != AudioSystem.AUDIO_STATUS_OK) {
+                    sVolumeLogger.enqueueAndSlog(
+                            new VolumeEvent(VolumeEvent.VOL_ABS_DEVICE_ENABLED_ERROR,
+                                    result, dev, enabled, stream).eventToString(), ALOGE, TAG);
+                }
             });
         }
 
@@ -4917,15 +4930,27 @@ public class AudioService extends IAudioService.Stub
     private void onUpdateContextualVolumes() {
         final int streamType = getBluetoothContextualVolumeStream();
 
+        Log.i(TAG,
+                "onUpdateContextualVolumes: absolute volume driving streams " + streamType
+                + " avrcp supported: " + mAvrcpAbsVolSupported);
         synchronized (mCachedAbsVolDrivingStreamsLock) {
             mCachedAbsVolDrivingStreams.replaceAll((absDev, stream) -> {
                 boolean enabled = true;
                 if (absDev == AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP) {
                     enabled = mAvrcpAbsVolSupported;
+                    if (!enabled) {
+                        Log.w(TAG, "Updating avrcp not supported in onUpdateContextualVolumes");
+                    }
                 }
-                if (stream != streamType || !enabled) {
-                    mAudioSystem.setDeviceAbsoluteVolumeEnabled(absDev, /*address=*/"",
-                            enabled, streamType);
+                if (stream != streamType) {
+                    final int result = mAudioSystem.setDeviceAbsoluteVolumeEnabled(absDev,
+                            /*address=*/"", enabled, streamType);
+                    if (result != AudioSystem.AUDIO_STATUS_OK) {
+                        sVolumeLogger.enqueueAndSlog(
+                                new VolumeEvent(VolumeEvent.VOL_ABS_DEVICE_ENABLED_ERROR,
+                                        result, absDev, enabled, streamType).eventToString(), ALOGE,
+                                TAG);
+                    }
                 }
                 return streamType;
             });
@@ -10563,14 +10588,23 @@ public class AudioService extends IAudioService.Stub
     }
 
     /*package*/ void setAvrcpAbsoluteVolumeSupported(boolean support) {
+        Log.i(TAG, "setAvrcpAbsoluteVolumeSupported support " + support);
         synchronized (mCachedAbsVolDrivingStreamsLock) {
             mAvrcpAbsVolSupported = support;
             if (absVolumeIndexFix()) {
                 int a2dpDev = AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP;
                 mCachedAbsVolDrivingStreams.compute(a2dpDev, (dev, stream) -> {
                     if (!mAvrcpAbsVolSupported) {
-                        mAudioSystem.setDeviceAbsoluteVolumeEnabled(a2dpDev, /*address=*/
-                                "", /*enabled*/false, AudioSystem.STREAM_DEFAULT);
+                        final int result = mAudioSystem.setDeviceAbsoluteVolumeEnabled(
+                                a2dpDev, /*address=*/"", /*enabled*/false,
+                                AudioSystem.STREAM_DEFAULT);
+                        if (result != AudioSystem.AUDIO_STATUS_OK) {
+                            sVolumeLogger.enqueueAndSlog(
+                                    new VolumeEvent(VolumeEvent.VOL_ABS_DEVICE_ENABLED_ERROR,
+                                            result, a2dpDev, /*enabled=*/false,
+                                            AudioSystem.STREAM_DEFAULT).eventToString(), ALOGE,
+                                    TAG);
+                        }
                         return null;
                     }
                     // For A2DP and AVRCP we need to set the driving stream based on the
@@ -10578,8 +10612,14 @@ public class AudioService extends IAudioService.Stub
                     // and setStreamVolume that the driving abs volume stream is consistent.
                     int streamToDriveAbs = getBluetoothContextualVolumeStream();
                     if (stream == null || stream != streamToDriveAbs) {
-                        mAudioSystem.setDeviceAbsoluteVolumeEnabled(a2dpDev, /*address=*/
-                                "", /*enabled*/true, streamToDriveAbs);
+                        final int result = mAudioSystem.setDeviceAbsoluteVolumeEnabled(a2dpDev,
+                                /*address=*/"", /*enabled*/true, streamToDriveAbs);
+                        if (result != AudioSystem.AUDIO_STATUS_OK) {
+                            sVolumeLogger.enqueueAndSlog(
+                                    new VolumeEvent(VolumeEvent.VOL_ABS_DEVICE_ENABLED_ERROR,
+                                            result, a2dpDev, /*enabled=*/true,
+                                            streamToDriveAbs).eventToString(), ALOGE, TAG);
+                        }
                     }
                     return streamToDriveAbs;
                 });
@@ -12679,7 +12719,7 @@ public class AudioService extends IAudioService.Stub
         pw.println("\nLoudness alignment:");
         mLoudnessCodecHelper.dump(pw);
 
-        pw.println("\nAbsolute voume devices:");
+        pw.println("\nAbsolute volume devices with their volume driving streams:");
         synchronized (mCachedAbsVolDrivingStreamsLock) {
             mCachedAbsVolDrivingStreams.forEach((dev, stream) -> pw.println(
                     "Device type: 0x" + Integer.toHexString(dev) + ", driving stream " + stream));
