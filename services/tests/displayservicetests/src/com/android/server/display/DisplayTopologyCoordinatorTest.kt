@@ -21,7 +21,7 @@ import android.view.Display
 import android.view.DisplayInfo
 import org.junit.Before
 import org.junit.Test
-import org.mockito.ArgumentMatchers.anyDouble
+import org.mockito.ArgumentMatchers.anyFloat
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
@@ -55,9 +55,9 @@ class DisplayTopologyCoordinatorTest {
 
         coordinator.onDisplayAdded(displayInfo)
 
-        val widthDp = displayInfo.logicalWidth * (DisplayMetrics.DENSITY_DEFAULT.toDouble()
+        val widthDp = displayInfo.logicalWidth * (DisplayMetrics.DENSITY_DEFAULT.toFloat()
                 / displayInfo.logicalDensityDpi)
-        val heightDp = displayInfo.logicalHeight * (DisplayMetrics.DENSITY_DEFAULT.toDouble()
+        val heightDp = displayInfo.logicalHeight * (DisplayMetrics.DENSITY_DEFAULT.toFloat()
                 / displayInfo.logicalDensityDpi)
         verify(mockTopology).addDisplay(displayInfo.displayId, widthDp, heightDp)
     }
@@ -68,7 +68,7 @@ class DisplayTopologyCoordinatorTest {
 
         coordinator.onDisplayAdded(displayInfo)
 
-        verify(mockTopology, never()).addDisplay(anyInt(), anyDouble(), anyDouble())
+        verify(mockTopology, never()).addDisplay(anyInt(), anyFloat(), anyFloat())
     }
 
     @Test
@@ -78,6 +78,6 @@ class DisplayTopologyCoordinatorTest {
 
         coordinator.onDisplayAdded(displayInfo)
 
-        verify(mockTopology, never()).addDisplay(anyInt(), anyDouble(), anyDouble())
+        verify(mockTopology, never()).addDisplay(anyInt(), anyFloat(), anyFloat())
     }
 }

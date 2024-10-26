@@ -2064,5 +2064,11 @@
 
     <dimen name="volume_panel_slice_vertical_padding">8dp</dimen>
     <dimen name="volume_panel_slice_horizontal_padding">24dp</dimen>
+
+    <dimen name="volume_dialog_ringer_container_padding">10dp</dimen>
+    <dimen name="volume_ringer_item_size">40dp</dimen>
+    <dimen name="volume_ringer_icon_size">20dp</dimen>
+    <dimen name="volume_ringer_item_radius">12dp</dimen>
+    <dimen name="volume_dialog_ringer_item_margin_bottom">8dp</dimen>
     <!-- Volume end -->
 </resources>

@@ -182,7 +182,7 @@ class DefaultClockFaceLayout(val view: View) : ClockFaceLayout {
 interface ClockEvents {
     @get:ProtectedReturn("return false;")
     /** Set to enable or disable swipe interaction */
-    var isReactiveTouchInteractionEnabled: Boolean
+    var isReactiveTouchInteractionEnabled: Boolean // TODO(b/364664388): Remove/Rename
 
     /** Call whenever timezone changes */
     fun onTimeZoneChanged(timeZone: TimeZone)
@@ -321,9 +321,6 @@ constructor(
 
     /** True if the clock will react to tone changes in the seed color */
     val isReactiveToTone: Boolean = true,
-
-    /** True if the clock is capable of changing style in reaction to touches */
-    val isReactiveToTouch: Boolean = false,
 
     /** Font axes that can be modified on this clock */
     val axes: List<ClockReactiveAxis> = listOf(),

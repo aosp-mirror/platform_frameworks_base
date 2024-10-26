@@ -1627,7 +1627,7 @@ public class SoundTrigger {
             boolean allowMultipleTriggers = in.readBoolean();
             KeyphraseRecognitionExtra[] keyphrases =
                     in.createTypedArray(KeyphraseRecognitionExtra.CREATOR);
-            byte[] data = in.readBlob();
+            byte[] data = in.createByteArray();
             int audioCapabilities = in.readInt();
             return new RecognitionConfig(captureRequested, allowMultipleTriggers, keyphrases, data,
                     audioCapabilities);
@@ -1638,7 +1638,7 @@ public class SoundTrigger {
             dest.writeBoolean(mCaptureRequested);
             dest.writeBoolean(mAllowMultipleTriggers);
             dest.writeTypedArray(mKeyphrases, flags);
-            dest.writeBlob(mData);
+            dest.writeByteArray(mData);
             dest.writeInt(mAudioCapabilities);
         }
 

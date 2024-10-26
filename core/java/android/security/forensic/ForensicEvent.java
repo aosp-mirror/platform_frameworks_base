@@ -61,6 +61,14 @@ public final class ForensicEvent implements Parcelable {
         in.readMap(mKeyValuePairs, getClass().getClassLoader(), String.class, String.class);
     }
 
+    public String getType() {
+        return mType;
+    }
+
+    public Map<String, String> getKeyValuePairs() {
+        return mKeyValuePairs;
+    }
+
     @Override
     public void writeToParcel(@NonNull Parcel out, int flags) {
         out.writeString(mType);

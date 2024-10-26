@@ -4445,9 +4445,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
      * @return the uid of the owner this session
      */
     public int getInstallerUid() {
-        synchronized (mLock) {
-            return mInstallerUid;
-        }
+        return mInstallerUid;
     }
 
     /**

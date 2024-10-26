@@ -51,6 +51,7 @@ import android.content.pm.ApplicationInfo;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.input.InputManager;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -812,7 +813,10 @@ public class BackAnimationControllerTest extends ShellTestCase {
         if (taskId != INVALID_TASK_ID) {
             final ActivityManager.RunningTaskInfo taskInfo = new ActivityManager.RunningTaskInfo();
             taskInfo.taskId = taskId;
-            taskInfo.token = new WindowContainerToken(mock(IWindowContainerToken.class));
+            final IWindowContainerToken mockT = mock(IWindowContainerToken.class);
+            Binder binder = new Binder();
+            doReturn(binder).when(mockT).asBinder();
+            taskInfo.token = new WindowContainerToken(mockT);
             change = new TransitionInfo.Change(
                     taskInfo.token, b.build());
             change.setTaskInfo(taskInfo);

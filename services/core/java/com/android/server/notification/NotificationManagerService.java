@@ -49,10 +49,6 @@ import static android.app.Notification.FLAG_ONLY_ALERT_ONCE;
 import static android.app.Notification.FLAG_PROMOTED_ONGOING;
 import static android.app.Notification.FLAG_USER_INITIATED_JOB;
 import static android.app.NotificationChannel.CONVERSATION_CHANNEL_ID_FORMAT;
-import static android.app.NotificationChannel.NEWS_ID;
-import static android.app.NotificationChannel.PROMOTIONS_ID;
-import static android.app.NotificationChannel.RECS_ID;
-import static android.app.NotificationChannel.SOCIAL_MEDIA_ID;
 import static android.app.NotificationChannel.SYSTEM_RESERVED_IDS;
 import static android.app.NotificationManager.ACTION_APP_BLOCK_STATE_CHANGED;
 import static android.app.NotificationManager.ACTION_AUTOMATIC_ZEN_RULE_STATUS_CHANGED;
@@ -108,9 +104,7 @@ import static android.os.UserHandle.USER_NULL;
 import static android.os.UserHandle.USER_SYSTEM;
 import static android.service.notification.Adjustment.KEY_TYPE;
 import static android.service.notification.Adjustment.TYPE_CONTENT_RECOMMENDATION;
-import static android.service.notification.Adjustment.TYPE_NEWS;
 import static android.service.notification.Adjustment.TYPE_PROMOTION;
-import static android.service.notification.Adjustment.TYPE_SOCIAL_MEDIA;
 import static android.service.notification.Flags.callstyleCallbackApi;
 import static android.service.notification.Flags.notificationClassification;
 import static android.service.notification.Flags.notificationForceGrouping;
@@ -6924,21 +6918,19 @@ public class NotificationManagerService extends SystemService {
 
     @GuardedBy("mNotificationLock")
     @Nullable
+    @FlaggedApi(android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION)
     private NotificationChannel getClassificationChannelLocked(NotificationRecord r,
             Bundle adjustments) {
         int type = adjustments.getInt(KEY_TYPE);
-        if (TYPE_NEWS == type) {
-            return mPreferencesHelper.getNotificationChannel(
-                    r.getSbn().getPackageName(), r.getUid(), NEWS_ID, false);
-        } else if (TYPE_PROMOTION == type) {
-            return mPreferencesHelper.getNotificationChannel(
-                    r.getSbn().getPackageName(), r.getUid(), PROMOTIONS_ID, false);
-        } else if (TYPE_SOCIAL_MEDIA == type) {
-            return mPreferencesHelper.getNotificationChannel(
-                    r.getSbn().getPackageName(), r.getUid(), SOCIAL_MEDIA_ID, false);
-        } else if (TYPE_CONTENT_RECOMMENDATION == type) {
-            return mPreferencesHelper.getNotificationChannel(
-                    r.getSbn().getPackageName(), r.getUid(), RECS_ID, false);
+        if (type >= TYPE_PROMOTION && type <= TYPE_CONTENT_RECOMMENDATION) {
+            NotificationChannel channel = mPreferencesHelper.getReservedChannel(
+                    r.getSbn().getPackageName(), r.getUid(), type);
+            if (channel == null) {
+                channel = mPreferencesHelper.createReservedChannel(
+                        r.getSbn().getPackageName(), r.getUid(), type);
+                handleSavePolicyFile();
+            }
+            return channel;
         }
         return null;
     }

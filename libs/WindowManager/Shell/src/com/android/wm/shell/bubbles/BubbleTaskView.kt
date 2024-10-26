@@ -16,14 +16,11 @@
 
 package com.android.wm.shell.bubbles
 
-import android.app.ActivityTaskManager
 import android.app.ActivityTaskManager.INVALID_TASK_ID
 import android.content.ComponentName
-import android.os.RemoteException
-import android.util.Log
 import androidx.annotation.VisibleForTesting
+import com.android.wm.shell.Flags
 import com.android.wm.shell.taskview.TaskView
-import com.android.wm.shell.transition.Transitions.ENABLE_SHELL_TRANSITIONS
 import java.util.concurrent.Executor
 
 /**
@@ -89,21 +86,8 @@ class BubbleTaskView(val taskView: TaskView, executor: Executor) {
      * This should be called after all other cleanup animations have finished.
      */
     fun cleanup() {
-        if (taskId != INVALID_TASK_ID) {
-            // Ensure the task is removed from WM
-            if (ENABLE_SHELL_TRANSITIONS) {
-                taskView.removeTask()
-            } else {
-                try {
-                    ActivityTaskManager.getService().removeTask(taskId)
-                } catch (e: RemoteException) {
-                    Log.w(TAG, e.message ?: "")
-                }
-            }
+        if (Flags.enableTaskViewControllerCleanup() || taskId != INVALID_TASK_ID) {
+            taskView.removeTask()
         }
-    }
-
-    private companion object {
-        const val TAG = "BubbleTaskView"
     }
 }

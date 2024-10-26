@@ -1228,7 +1228,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             String callingFeatureId, Intent intent, String resolvedType, IBinder resultTo,
             String resultWho, int requestCode, int startFlags, ProfilerInfo profilerInfo,
             Bundle bOptions) {
-        mAmInternal.addCreatorToken(intent, callingPackage);
         return startActivityAsUser(caller, callingPackage, callingFeatureId, intent, resolvedType,
                 resultTo, resultWho, requestCode, startFlags, profilerInfo, bOptions,
                 UserHandle.getCallingUserId());

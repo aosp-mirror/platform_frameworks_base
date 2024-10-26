@@ -89,8 +89,8 @@ class DisplayTopologyCoordinator {
      * @param info The display info
      * @return The width of the display in dp
      */
-    private double getWidth(DisplayInfo info) {
-        return info.logicalWidth * (double) DisplayMetrics.DENSITY_DEFAULT
+    private float getWidth(DisplayInfo info) {
+        return info.logicalWidth * (float) DisplayMetrics.DENSITY_DEFAULT
                 / info.logicalDensityDpi;
     }
 
@@ -98,8 +98,8 @@ class DisplayTopologyCoordinator {
      * @param info The display info
      * @return The height of the display in dp
      */
-    private double getHeight(DisplayInfo info) {
-        return info.logicalHeight * (double) DisplayMetrics.DENSITY_DEFAULT
+    private float getHeight(DisplayInfo info) {
+        return info.logicalHeight * (float) DisplayMetrics.DENSITY_DEFAULT
                 / info.logicalDensityDpi;
     }
 

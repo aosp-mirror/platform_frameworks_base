@@ -22,6 +22,7 @@ import androidx.lifecycle.lifecycleScope
 import com.android.app.tracing.TraceUtils.traceAsync
 import com.android.internal.logging.MetricsLogger
 import com.android.internal.logging.nano.MetricsProto
+import com.android.systemui.Flags
 import com.android.systemui.common.ui.ConfigurationState
 import com.android.systemui.common.ui.view.setImportantForAccessibilityYesNo
 import com.android.systemui.dagger.qualifiers.Background
@@ -145,7 +146,9 @@ constructor(
             // The footer needs to be re-inflated every time the theme or the font size changes.
             configuration
                 .inflateLayout<FooterView>(
-                    R.layout.status_bar_notification_footer,
+                    if (Flags.notificationsRedesignFooterView())
+                        R.layout.status_bar_notification_footer_redesign
+                    else R.layout.status_bar_notification_footer,
                     parentView,
                     attachToRoot = false,
                 )

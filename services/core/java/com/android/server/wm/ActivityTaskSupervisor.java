@@ -242,6 +242,8 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
     static {
         ACTION_TO_RUNTIME_PERMISSION.put(MediaStore.ACTION_IMAGE_CAPTURE,
                 Manifest.permission.CAMERA);
+        ACTION_TO_RUNTIME_PERMISSION.put(MediaStore.ACTION_MOTION_PHOTO_CAPTURE,
+                Manifest.permission.CAMERA);
         ACTION_TO_RUNTIME_PERMISSION.put(MediaStore.ACTION_VIDEO_CAPTURE,
                 Manifest.permission.CAMERA);
         ACTION_TO_RUNTIME_PERMISSION.put(Intent.ACTION_CALL,

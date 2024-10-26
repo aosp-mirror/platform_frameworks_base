@@ -61,7 +61,7 @@ constructor(
 
     fun start() {
         scope.launch {
-            if (internalTransitionInteractor.currentTransitionInfoInternal.value.from != OFF) {
+            if (internalTransitionInteractor.currentTransitionInfoInternal().from != OFF) {
                 Log.e(
                     "KeyguardTransitionInteractor",
                     "showLockscreenOnBoot emitted, but we've already " +
