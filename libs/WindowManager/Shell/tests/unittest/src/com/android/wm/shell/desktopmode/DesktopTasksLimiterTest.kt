@@ -329,7 +329,7 @@ class DesktopTasksLimiterTest : ShellTestCase() {
                         wct = wct,
                         newFrontTaskId = setUpFreeformTask().taskId)
 
-        assertThat(minimizedTaskId).isEqualTo(tasks.first())
+        assertThat(minimizedTaskId).isEqualTo(tasks.first().taskId)
         assertThat(wct.hierarchyOps.size).isEqualTo(1)
         assertThat(wct.hierarchyOps[0].type).isEqualTo(HIERARCHY_OP_TYPE_REORDER)
         assertThat(wct.hierarchyOps[0].toTop).isFalse() // Reorder to bottom
@@ -355,7 +355,7 @@ class DesktopTasksLimiterTest : ShellTestCase() {
     fun getTaskToMinimize_tasksWithinLimit_returnsNull() {
         val tasks = (1..MAX_TASK_LIMIT).map { setUpFreeformTask() }
 
-        val minimizedTask = desktopTasksLimiter.getTaskToMinimize(
+        val minimizedTask = desktopTasksLimiter.getTaskIdToMinimize(
                 visibleOrderedTasks = tasks.map { it.taskId })
 
         assertThat(minimizedTask).isNull()
@@ -365,11 +365,11 @@ class DesktopTasksLimiterTest : ShellTestCase() {
     fun getTaskToMinimize_tasksAboveLimit_returnsBackTask() {
         val tasks = (1..MAX_TASK_LIMIT + 1).map { setUpFreeformTask() }
 
-        val minimizedTask = desktopTasksLimiter.getTaskToMinimize(
+        val minimizedTask = desktopTasksLimiter.getTaskIdToMinimize(
                 visibleOrderedTasks = tasks.map { it.taskId })
 
         // first == front, last == back
-        assertThat(minimizedTask).isEqualTo(tasks.last())
+        assertThat(minimizedTask).isEqualTo(tasks.last().taskId)
     }
 
     @Test
@@ -379,23 +379,23 @@ class DesktopTasksLimiterTest : ShellTestCase() {
                 interactionJankMonitor, mContext, handler)
         val tasks = (1..MAX_TASK_LIMIT2 + 1).map { setUpFreeformTask() }
 
-        val minimizedTask = desktopTasksLimiter.getTaskToMinimize(
+        val minimizedTask = desktopTasksLimiter.getTaskIdToMinimize(
             visibleOrderedTasks = tasks.map { it.taskId })
 
         // first == front, last == back
-        assertThat(minimizedTask).isEqualTo(tasks.last())
+        assertThat(minimizedTask).isEqualTo(tasks.last().taskId)
     }
 
     @Test
     fun getTaskToMinimize_withNewTask_tasksAboveLimit_returnsBackTask() {
         val tasks = (1..MAX_TASK_LIMIT).map { setUpFreeformTask() }
 
-        val minimizedTask = desktopTasksLimiter.getTaskToMinimize(
+        val minimizedTask = desktopTasksLimiter.getTaskIdToMinimize(
                 visibleOrderedTasks = tasks.map { it.taskId },
                 newTaskIdInFront = setUpFreeformTask().taskId)
 
         // first == front, last == back
-        assertThat(minimizedTask).isEqualTo(tasks.last())
+        assertThat(minimizedTask).isEqualTo(tasks.last().taskId)
     }
 
     @Test

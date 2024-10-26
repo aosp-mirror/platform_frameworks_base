@@ -157,6 +157,13 @@ java_library {
 }
 
 filegroup {
+    name: "wm_shell-shared-utils",
+    srcs: [
+        "shared/src/com/android/wm/shell/shared/TransitionUtil.java",
+    ],
+}
+
+filegroup {
     name: "wm_shell-shared-aidls",
 
     srcs: [

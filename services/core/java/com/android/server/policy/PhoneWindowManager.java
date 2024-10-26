@@ -149,6 +149,7 @@ import android.hardware.hdmi.HdmiAudioSystemClient;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiPlaybackClient;
 import android.hardware.hdmi.HdmiPlaybackClient.OneTouchPlayCallback;
+import android.hardware.input.AppLaunchData;
 import android.hardware.input.InputManager;
 import android.hardware.input.KeyGestureEvent;
 import android.media.AudioManager;
@@ -4037,6 +4038,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     case KeyGestureEvent.KEY_GESTURE_TYPE_LANGUAGE_SWITCH:
                     case KeyGestureEvent.KEY_GESTURE_TYPE_ACCESSIBILITY_SHORTCUT:
                     case KeyGestureEvent.KEY_GESTURE_TYPE_CLOSE_ALL_DIALOGS:
+                    case KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_APPLICATION:
                         return true;
                     case KeyGestureEvent.KEY_GESTURE_TYPE_SCREENSHOT_CHORD:
                     case KeyGestureEvent.KEY_GESTURE_TYPE_RINGER_TOGGLE_CHORD:
@@ -4276,6 +4278,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         mTalkbackShortcutController.toggleTalkback(mCurrentUserId,
                                 TalkbackShortcutController.ShortcutSource.KEYBOARD);
                     }
+                    return true;
+                }
+                break;
+            case KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_APPLICATION:
+                AppLaunchData data = event.getAppLaunchData();
+                if (complete && isUserSetupComplete() && !keyguardOn
+                        && data != null && mModifierShortcutManager.launchApplication(data)) {
+                    dismissKeyboardShortcutsMenu();
                     return true;
                 }
                 break;
@@ -6948,6 +6958,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (modifierShortcutManagerMultiuser()) {
             mModifierShortcutManager.setCurrentUser(UserHandle.of(newUserId));
         }
+        mInputManagerInternal.setCurrentUser(newUserId);
     }
 
     @Override

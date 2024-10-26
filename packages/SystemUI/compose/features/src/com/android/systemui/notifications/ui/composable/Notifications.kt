@@ -375,9 +375,13 @@ fun SceneScope.NotificationScrollingStack(
     LaunchedEffect(shadeScrollState) { viewModel.setScrollState(shadeScrollState) }
 
     // if contentHeight drops below minimum visible scrim height while scrim is
-    // expanded, reset scrim offset.
-    LaunchedEffect(stackHeight, scrimOffset) {
-        snapshotFlow { stackHeight.intValue < minVisibleScrimHeight() && scrimOffset.value < 0f }
+    // expanded and IME is not showing, reset scrim offset.
+    LaunchedEffect(stackHeight, scrimOffset, imeTop) {
+        snapshotFlow {
+                stackHeight.intValue < minVisibleScrimHeight() &&
+                    scrimOffset.value < 0f &&
+                    imeTop.floatValue <= 0f
+            }
             .collect { shouldCollapse -> if (shouldCollapse) scrimOffset.animateTo(0f, tween()) }
     }
 

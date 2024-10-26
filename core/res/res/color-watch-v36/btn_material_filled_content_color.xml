@@ -18,6 +18,5 @@
     <item android:state_enabled="false"
           android:alpha="?attr/primaryContentAlpha"
           android:color="?attr/materialColorOnSurface" />
-    <item android:state_enabled="true"
-          android:color="?attr/materialColorOnPrimary" />
+    <item android:color="?attr/materialColorOnPrimary" />
 </selector>

@@ -95,16 +95,18 @@ abstract class FlingOnBackAnimationCallback(
     final override fun onBackProgressed(backEvent: BackEvent) {
         val interpolatedProgress = progressInterpolator.getInterpolation(backEvent.progress)
         if (predictiveBackTimestampApi()) {
-            velocityTracker.addMovement(
-                MotionEvent.obtain(
-                    /* downTime */ downTime!!,
-                    /* eventTime */ backEvent.frameTimeMillis,
-                    /* action */ ACTION_MOVE,
-                    /* x */ interpolatedProgress * SCALE_FACTOR,
-                    /* y */ 0f,
-                    /* metaState */ 0,
+            downTime?.let { downTime ->
+                velocityTracker.addMovement(
+                    MotionEvent.obtain(
+                        /* downTime */ downTime,
+                        /* eventTime */ backEvent.frameTimeMillis,
+                        /* action */ ACTION_MOVE,
+                        /* x */ interpolatedProgress * SCALE_FACTOR,
+                        /* y */ 0f,
+                        /* metaState */ 0,
+                    )
                 )
-            )
+            }
             lastBackEvent =
                 BackEvent(
                     backEvent.touchX,

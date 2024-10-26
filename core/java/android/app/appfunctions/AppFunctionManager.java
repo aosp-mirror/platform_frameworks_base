@@ -42,10 +42,37 @@ import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 /**
- * Provides app functions related functionalities.
+ * Provides access to app functions.
  *
- * <p>App function is a specific piece of functionality that an app offers to the system. These
- * functionalities can be integrated into various system features.
+ * <p>An app function is a piece of functionality that apps expose to the system for cross-app
+ * orchestration.
+ *
+ * <p>**Developer Workflow:**
+ *
+ * <p>Most developers should interact with app functions through the AppFunctions SDK. This SDK
+ * library offers a more convenient and type-safe way to represent the inputs and outputs of an app
+ * function, using custom data classes called "AppFunction Schemas".
+ *
+ * <p>The suggested way to build an app function is to use the AppFunctions SDK. The SDK provides
+ * custom data classes (AppFunctions Schemas) and handles the conversion to the underlying {@link
+ * android.app.appsearch.GenericDocument}/{@link android.os.Bundle} format used in {@link
+ * ExecuteAppFunctionRequest} and {@link ExecuteAppFunctionResponse}.
+ *
+ * <p>**Discovering (Listing) App Functions:**
+ *
+ * <p>When there is a package change or the device starts up, the metadata of available functions is
+ * indexed on-device by {@link AppSearchManager}. AppSearch stores the indexed information as a
+ * {@code AppFunctionStaticMetadata} document. This allows other apps and the app itself to discover
+ * these functions using the AppSearch search APIs. Visibility to this metadata document is based on
+ * the packages that have visibility to the app providing the app functions.
+ *
+ * <p>**Executing App Functions:**
+ *
+ * <p>Requests to execute a function are built using the {@link ExecuteAppFunctionRequest} class.
+ * Callers need the {@code android.permission.EXECUTE_APP_FUNCTIONS} or {@code
+ * android.permission.EXECUTE_APP_FUNCTIONS_TRUSTED} permission to execute app functions from other
+ * apps. An app has automatic visibility to its own functions and doesn't need these permissions to
+ * call its own functions via {@code AppFunctionManager}.
  */
 @FlaggedApi(FLAG_ENABLE_APP_FUNCTION_MANAGER)
 @SystemService(Context.APP_FUNCTION_SERVICE)

@@ -646,6 +646,8 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             NavigationBarController navigationBarController,
             AccessibilityFloatingMenuController accessibilityFloatingMenuController,
             Lazy<AssistManager> assistManagerLazy,
+            // TODO: b/374267505 - Decouple the config change needed for shade window classes from
+            //  the one for other windows.
             ConfigurationController configurationController,
             NotificationShadeWindowController notificationShadeWindowController,
             Lazy<NotificationShadeWindowViewController> notificationShadeWindowViewControllerLazy,
@@ -1975,6 +1977,10 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
      * meantime, just update the things that we know change.
      */
     void updateResources() {
+        // TODO: b/374267505 - we shouldn't propagate this from here. Each class should be
+        //  listening at the correct configuration change. For example, shade window classes should
+        //  be listening at @ShadeDisplayAware configurations (as it can be on a different display.
+
         // Update the quick setting tiles
         if (mQSPanelController != null) {
             mQSPanelController.updateResources();

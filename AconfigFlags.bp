@@ -349,12 +349,20 @@ aconfig_declarations {
     name: "android.security.flags-aconfig",
     package: "android.security",
     container: "system",
+    exportable: true,
     srcs: ["core/java/android/security/*.aconfig"],
 }
 
 java_aconfig_library {
     name: "android.security.flags-aconfig-java",
     aconfig_declarations: "android.security.flags-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+java_aconfig_library {
+    name: "android.security.flags-aconfig-java-export",
+    aconfig_declarations: "android.security.flags-aconfig",
+    mode: "exported",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 
