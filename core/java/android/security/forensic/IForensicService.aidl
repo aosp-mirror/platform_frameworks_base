@@ -24,9 +24,12 @@ import android.security.forensic.IForensicServiceStateCallback;
  * @hide
  */
 interface IForensicService {
-    void monitorState(IForensicServiceStateCallback callback);
-    void makeVisible(IForensicServiceCommandCallback callback);
-    void makeInvisible(IForensicServiceCommandCallback callback);
+    @EnforcePermission("READ_FORENSIC_STATE")
+    void addStateCallback(IForensicServiceStateCallback callback);
+    @EnforcePermission("READ_FORENSIC_STATE")
+    void removeStateCallback(IForensicServiceStateCallback callback);
+    @EnforcePermission("MANAGE_FORENSIC_STATE")
     void enable(IForensicServiceCommandCallback callback);
+    @EnforcePermission("MANAGE_FORENSIC_STATE")
     void disable(IForensicServiceCommandCallback callback);
 }

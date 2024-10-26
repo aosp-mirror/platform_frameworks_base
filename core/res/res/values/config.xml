@@ -7212,8 +7212,8 @@
     <!-- Package for opening identity check settings page [CHAR LIMIT=NONE] [DO NOT TRANSLATE] -->
     <string name="identity_check_settings_package_name">com\u002eandroid\u002esettings</string>
 
-    <!-- The name of the service for forensic backup transport. -->
-    <string name="config_forensicBackupTransport" translatable="false"></string>
+    <!-- The name of the service for forensic event transport. -->
+    <string name="config_forensicEventTransport" translatable="false"></string>
 
     <!-- Whether to enable fp unlock when screen turns off on udfps devices -->
     <bool name="config_screen_off_udfps_enabled">false</bool>
