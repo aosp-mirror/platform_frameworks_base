@@ -493,6 +493,7 @@ android_library {
         },
     },
     use_resource_processor: true,
+    resource_dirs: [],
     static_libs: [
         "//frameworks/libs/systemui:compilelib",
         "SystemUI-res",
