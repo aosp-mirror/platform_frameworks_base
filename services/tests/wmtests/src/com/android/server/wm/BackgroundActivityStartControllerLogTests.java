@@ -23,7 +23,6 @@ import static com.android.server.wm.BackgroundActivityStartControllerTests.setVi
 import static com.google.common.truth.Truth.assertThat;
 
 import android.app.ActivityOptions;
-import android.app.BackgroundStartPrivileges;
 import android.content.Intent;
 import android.platform.test.annotations.Presubmit;
 
@@ -189,7 +188,7 @@ public class BackgroundActivityStartControllerLogTests {
     private void useIntent(int uid) {
         mState = mController.new BalState(uid, APP1_PID,
                 "calling.package", uid, APP1_PID, null,
-                null, BackgroundStartPrivileges.NONE, null, new Intent(),
+                null, false, null, new Intent(),
                 ActivityOptions.makeBasic());
     }
 
@@ -200,7 +199,7 @@ public class BackgroundActivityStartControllerLogTests {
     private void usePendingIntent(int callerUid, int realCallerUid) {
         mState = mController.new BalState(callerUid, APP1_PID,
                 "calling.package", realCallerUid, APP2_PID, null,
-                mPendingIntentRecord, BackgroundStartPrivileges.NONE, null, new Intent(),
+                mPendingIntentRecord, false, null, new Intent(),
                 ActivityOptions.makeBasic());
     }
 }

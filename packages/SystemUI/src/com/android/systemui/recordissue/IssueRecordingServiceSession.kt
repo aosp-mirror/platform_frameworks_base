@@ -55,8 +55,10 @@ class IssueRecordingServiceSession(
     var screenRecord = false
 
     fun start() {
-        bgExecutor.execute { traceurConnection.startTracing(traceConfig) }
-        issueRecordingState.isRecording = true
+        bgExecutor.execute {
+            traceurConnection.startTracing(traceConfig)
+            issueRecordingState.isRecording = true
+        }
     }
 
     fun stop() {
@@ -69,8 +71,8 @@ class IssueRecordingServiceSession(
                 )
             }
             traceurConnection.stopTracing()
+            issueRecordingState.isRecording = false
         }
-        issueRecordingState.isRecording = false
     }
 
     fun share(notificationId: Int, screenRecording: Uri?) {

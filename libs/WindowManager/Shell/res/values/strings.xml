@@ -317,7 +317,10 @@
     <string name="desktop_mode_maximize_menu_snap_text">Snap Screen</string>
     <!-- Snap resizing non-resizable string. -->
     <string name="desktop_mode_non_resizable_snap_text">App can\'t be moved here</string>
-    <!-- Accessibility text for the Maximize Menu's maximize button [CHAR LIMIT=NONE] -->
+    <!-- Accessibility text for the Maximize Menu's immersive button [CHAR LIMIT=NONE] -->
+    <string name="desktop_mode_maximize_menu_immersive_button_text">Immersive</string>
+    <!-- Accessibility text for the Maximize Menu's immersive restore button [CHAR LIMIT=NONE] -->
+    <string name="desktop_mode_maximize_menu_immersive_restore_button_text">Restore</string>
     <string name="desktop_mode_maximize_menu_maximize_button_text">Maximize</string>
     <!-- Accessibility text for the Maximize Menu's restore button [CHAR LIMIT=NONE] -->
     <string name="desktop_mode_maximize_menu_restore_button_text">Restore</string>

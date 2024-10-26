@@ -19,6 +19,7 @@ package com.android.systemui.recordissue
 import android.app.IActivityManager
 import android.app.NotificationManager
 import android.net.Uri
+import android.os.Handler
 import android.os.UserHandle
 import android.testing.TestableLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -33,6 +34,7 @@ import com.android.systemui.qs.pipeline.domain.interactor.PanelInteractor
 import com.android.systemui.settings.UserContextProvider
 import com.android.systemui.settings.userFileManager
 import com.android.systemui.settings.userTracker
+import com.android.systemui.util.settings.fakeGlobalSettings
 import com.android.traceur.TraceConfig
 import com.google.common.truth.Truth
 import org.junit.Before
@@ -55,7 +57,13 @@ class IssueRecordingServiceSessionTest : SysuiTestCase() {
     private val dialogTransitionAnimator: DialogTransitionAnimator = kosmos.dialogTransitionAnimator
     private lateinit var traceurConnection: TraceurConnection
     private val issueRecordingState =
-        IssueRecordingState(kosmos.userTracker, kosmos.userFileManager)
+        IssueRecordingState(
+            kosmos.userTracker,
+            kosmos.userFileManager,
+            Handler.getMain(),
+            mContext.contentResolver,
+            kosmos.fakeGlobalSettings,
+        )
 
     private val iActivityManager = mock<IActivityManager>()
     private val notificationManager = mock<NotificationManager>()
