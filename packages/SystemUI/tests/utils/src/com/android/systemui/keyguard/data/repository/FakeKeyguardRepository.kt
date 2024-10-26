@@ -131,6 +131,10 @@ class FakeKeyguardRepository @Inject constructor() : KeyguardRepository {
     override val shortcutAbsoluteTop: StateFlow<Float>
         get() = _shortcutAbsoluteTop.asStateFlow()
 
+    private val _notificationStackAbsoluteBottom = MutableStateFlow(0F)
+    override val notificationStackAbsoluteBottom: StateFlow<Float>
+        get() = _notificationStackAbsoluteBottom.asStateFlow()
+
     private val _isKeyguardEnabled = MutableStateFlow(true)
     override val isKeyguardEnabled: StateFlow<Boolean> = _isKeyguardEnabled.asStateFlow()
 
@@ -292,6 +296,10 @@ class FakeKeyguardRepository @Inject constructor() : KeyguardRepository {
 
     override fun setShortcutAbsoluteTop(top: Float) {
         _shortcutAbsoluteTop.value = top
+    }
+
+    override fun setNotificationStackAbsoluteBottom(bottom: Float) {
+        _notificationStackAbsoluteBottom.value = bottom
     }
 
     override fun setCanIgnoreAuthAndReturnToGone(canWake: Boolean) {

@@ -43,6 +43,7 @@ import android.view.ViewConfiguration;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.policy.TaskResizingAlgorithm;
+import com.android.window.flags.Flags;
 import com.android.wm.shell.R;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.pip.PipBoundsAlgorithm;
@@ -182,7 +183,7 @@ public class PipResizeGestureHandler {
     private void reloadResources() {
         final Resources res = mContext.getResources();
         mDelta = res.getDimensionPixelSize(R.dimen.pip_resize_edge_size);
-        mEnableDragCornerResize = res.getBoolean(R.bool.config_pipEnableDragCornerResize);
+        mEnableDragCornerResize = Flags.enableDesktopWindowingPip();
         mTouchSlop = ViewConfiguration.get(mContext).getScaledTouchSlop();
     }
 

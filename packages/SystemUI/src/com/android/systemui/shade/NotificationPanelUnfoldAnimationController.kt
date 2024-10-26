@@ -34,7 +34,7 @@ import javax.inject.Inject
 class NotificationPanelUnfoldAnimationController
 @Inject
 constructor(
-    private val context: Context,
+    @ShadeDisplayAware private val context: Context,
     statusBarStateController: StatusBarStateController,
     progressProvider: NaturalRotationUnfoldProgressProvider,
 ) {

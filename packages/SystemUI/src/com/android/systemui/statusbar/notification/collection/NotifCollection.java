@@ -63,14 +63,12 @@ import android.service.notification.NotificationListenerService.RankingMap;
 import android.service.notification.StatusBarNotification;
 import android.util.ArrayMap;
 import android.util.Log;
-import android.util.Pair;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.IStatusBarService;
-import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
@@ -276,7 +274,7 @@ public class NotifCollection implements Dumpable, PipelineDumpable {
      * Dismisses multiple notifications on behalf of the user.
      */
     public void dismissNotifications(
-            List<Pair<NotificationEntry, DismissedByUserStats>> entriesToDismiss) {
+            List<EntryWithDismissStats> entriesToDismiss) {
         Assert.isMainThread();
         checkForReentrantCall();
 
@@ -287,8 +285,8 @@ public class NotifCollection implements Dumpable, PipelineDumpable {
         final int entryCount = entriesToDismiss.size();
         final List<NotificationEntry> entriesToLocallyDismiss = new ArrayList<>();
         for (int i = 0; i < entriesToDismiss.size(); i++) {
-            NotificationEntry entry = entriesToDismiss.get(i).first;
-            DismissedByUserStats stats = entriesToDismiss.get(i).second;
+            NotificationEntry entry = entriesToDismiss.get(i).getEntry();
+            DismissedByUserStats stats = entriesToDismiss.get(i).getStats();
 
             requireNonNull(stats);
             NotificationEntry storedEntry = mNotificationSet.get(entry.getKey());
@@ -343,31 +341,20 @@ public class NotifCollection implements Dumpable, PipelineDumpable {
         dispatchEventsAndRebuildList("dismissNotifications");
     }
 
-    private List<Pair<NotificationEntry, DismissedByUserStats>> includeSummariesToDismiss(
-            List<Pair<NotificationEntry, DismissedByUserStats>> entriesToDismiss) {
+    private List<EntryWithDismissStats> includeSummariesToDismiss(
+            List<EntryWithDismissStats> entriesToDismiss) {
         final HashSet<NotificationEntry> entriesSet = new HashSet<>(entriesToDismiss.size());
-        for (Pair<NotificationEntry, DismissedByUserStats> entryToStats : entriesToDismiss) {
-            entriesSet.add(entryToStats.first);
+        for (EntryWithDismissStats entryToStats : entriesToDismiss) {
+            entriesSet.add(entryToStats.getEntry());
         }
 
-        final List<Pair<NotificationEntry, DismissedByUserStats>> entriesPlusSummaries =
+        final List<EntryWithDismissStats> entriesPlusSummaries =
                 new ArrayList<>(entriesToDismiss.size() + 1);
-        for (Pair<NotificationEntry, DismissedByUserStats> entryToStats : entriesToDismiss) {
+        for (EntryWithDismissStats entryToStats : entriesToDismiss) {
             entriesPlusSummaries.add(entryToStats);
-            NotificationEntry summary = fetchSummaryToDismiss(entryToStats.first);
+            NotificationEntry summary = fetchSummaryToDismiss(entryToStats.getEntry());
             if (summary != null && !entriesSet.contains(summary)) {
-                DismissedByUserStats currentStats = entryToStats.second;
-                NotificationVisibility summaryVisibility = NotificationVisibility.obtain(
-                        summary.getKey(),
-                        summary.getRanking().getRank(),
-                        currentStats.notificationVisibility.count,
-                        /* visible= */ false);
-                DismissedByUserStats summaryStats = new DismissedByUserStats(
-                        currentStats.dismissalSurface,
-                        currentStats.dismissalSentiment,
-                        summaryVisibility
-                );
-                entriesPlusSummaries.add(new Pair<>(summary, summaryStats));
+                entriesPlusSummaries.add(entryToStats.copyForEntry(summary));
             }
         }
         return entriesPlusSummaries;
@@ -379,7 +366,7 @@ public class NotifCollection implements Dumpable, PipelineDumpable {
     public void dismissNotification(
             NotificationEntry entry,
             @NonNull DismissedByUserStats stats) {
-        dismissNotifications(List.of(new Pair<>(entry, stats)));
+        dismissNotifications(List.of(new EntryWithDismissStats(entry, stats)));
     }
 
     /**

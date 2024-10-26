@@ -30,7 +30,7 @@ internal class LargeScreenShadeInterpolatorImpl
 @Inject
 internal constructor(
     @ShadeDisplayAware configurationController: ConfigurationController,
-    private val context: Context,
+    @ShadeDisplayAware private val context: Context,
     private val splitShadeInterpolator: SplitShadeInterpolator,
     private val portraitShadeInterpolator: LargeScreenPortraitShadeInterpolator,
     private val splitShadeStateController: SplitShadeStateController,

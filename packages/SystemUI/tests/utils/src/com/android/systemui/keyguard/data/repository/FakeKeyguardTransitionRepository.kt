@@ -18,6 +18,7 @@
 package com.android.systemui.keyguard.data.repository
 
 import android.annotation.FloatRange
+import com.android.systemui.Flags.transitionRaceCondition
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionInfo
@@ -88,6 +89,13 @@ class FakeKeyguardTransitionRepository(
             )
         )
     override var currentTransitionInfoInternal = _currentTransitionInfo.asStateFlow()
+    override var currentTransitionInfo =
+        TransitionInfo(
+            ownerName = "",
+            from = KeyguardState.OFF,
+            to = KeyguardState.LOCKSCREEN,
+            animator = null,
+        )
 
     init {
         // Seed with a FINISHED transition in OFF, same as the real repository.
@@ -261,8 +269,13 @@ class FakeKeyguardTransitionRepository(
         validateStep: Boolean = true,
     ) {
         if (step.transitionState == TransitionState.STARTED) {
-            _currentTransitionInfo.value =
-                TransitionInfo(from = step.from, to = step.to, animator = null, ownerName = "")
+            if (transitionRaceCondition()) {
+                currentTransitionInfo =
+                    TransitionInfo(from = step.from, to = step.to, animator = null, ownerName = "")
+            } else {
+                _currentTransitionInfo.value =
+                    TransitionInfo(from = step.from, to = step.to, animator = null, ownerName = "")
+            }
         }
 
         _transitions.replayCache.last().let { lastStep ->
@@ -308,7 +321,11 @@ class FakeKeyguardTransitionRepository(
     }
 
     override suspend fun startTransition(info: TransitionInfo): UUID? {
-        _currentTransitionInfo.value = info
+        if (transitionRaceCondition()) {
+            currentTransitionInfo = info
+        } else {
+            _currentTransitionInfo.value = info
+        }
 
         if (sendTransitionStepsOnStartTransition) {
             sendTransitionSteps(from = info.from, to = info.to, testScope = testScope)

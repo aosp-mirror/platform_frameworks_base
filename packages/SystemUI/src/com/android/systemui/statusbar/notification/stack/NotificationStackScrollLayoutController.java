@@ -43,7 +43,6 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
-import android.util.Pair;
 import android.util.Property;
 import android.view.Display;
 import android.view.MotionEvent;
@@ -105,6 +104,7 @@ import com.android.systemui.statusbar.notification.HeadsUpTouchHelper.HeadsUpNot
 import com.android.systemui.statusbar.notification.LaunchAnimationParameters;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
+import com.android.systemui.statusbar.notification.collection.EntryWithDismissStats;
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -1188,7 +1188,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
 
     public int getIntrinsicContentHeight() {
         SceneContainerFlag.assertInLegacyMode();
-        return mView.getIntrinsicContentHeight();
+        return (int) mView.getIntrinsicContentHeight();
     }
 
     /**
@@ -1777,12 +1777,12 @@ public class NotificationStackScrollLayoutController implements Dumpable {
             mNotifCollection.dismissAllNotifications(
                     mLockscreenUserManager.getCurrentUserId());
         } else {
-            final List<Pair<NotificationEntry, DismissedByUserStats>>
+            final List<EntryWithDismissStats>
                     entriesWithRowsDismissedFromShade = new ArrayList<>();
             for (ExpandableNotificationRow row : viewsToRemove) {
                 final NotificationEntry entry = row.getEntry();
                 entriesWithRowsDismissedFromShade.add(
-                        new Pair<>(entry, getDismissedByUserStats(entry)));
+                        new EntryWithDismissStats(entry, getDismissedByUserStats(entry)));
             }
             mNotifCollection.dismissNotifications(entriesWithRowsDismissedFromShade);
         }

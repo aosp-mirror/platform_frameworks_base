@@ -33,6 +33,13 @@ flag {
 }
 
 flag {
+  name: "notifications_redesign_footer_view"
+  namespace: "systemui"
+  description: "Notifications Redesign: Update the look of the notifications footer."
+  bug: "375010573"
+}
+
+flag {
    name: "notification_row_content_binder_refactor"
    namespace: "systemui"
    description: "Convert the NotificationContentInflater to Kotlin and restructure it to support modern views"
@@ -1111,6 +1118,13 @@ flag {
 }
 
 flag {
+  name: "communal_standalone_support"
+  namespace: "systemui"
+  description: "Support communal features without a dock"
+  bug: "352301247"
+}
+
+flag {
     name: "dream_overlay_updated_font"
     namespace: "systemui"
     description: "Flag to enable updated font settings for dream overlay"
@@ -1550,6 +1564,16 @@ flag {
   namespace: "systemui"
   description: "Enables the shade window to move between displays"
   bug: "362719719"
+}
+
+flag {
+  name: "transition_race_condition"
+  namespace: "systemui"
+  description: "Thread-safe keyguard transitions"
+  bug: "358533338"
+  metadata {
+       purpose: PURPOSE_BUGFIX
+  }
 }
 
 flag {

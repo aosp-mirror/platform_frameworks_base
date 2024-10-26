@@ -14,7 +14,7 @@ import javax.inject.Inject
 class QsBatteryModeController
 @Inject
 constructor(
-    private val context: Context,
+    @ShadeDisplayAware private val context: Context,
     insetsProviderStore: StatusBarContentInsetsProviderStore,
 ) {
 

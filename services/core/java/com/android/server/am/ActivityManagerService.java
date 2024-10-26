@@ -2772,8 +2772,12 @@ public class ActivityManagerService extends IActivityManager.Stub
             // Add common services.
             // IMPORTANT: Before adding services here, make sure ephemeral apps can access them too.
             // Enable the check in ApplicationThread.bindApplication() to make sure.
-            if (!android.server.Flags.removeJavaServiceManagerCache()) {
-                addServiceToMap(mAppBindArgs, "permissionmgr");
+
+            // Removing User Service and App Ops Service from cache breaks boot for auto.
+            // Removing permissionmgr breaks tests for Android Auto due to SELinux restrictions.
+            // TODO: fix SELinux restrictions and remove caching for Android Auto.
+            if (mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE)
+                    || !android.server.Flags.removeJavaServiceManagerCache()) {
                 addServiceToMap(mAppBindArgs, Context.ALARM_SERVICE);
                 addServiceToMap(mAppBindArgs, Context.DISPLAY_SERVICE);
                 addServiceToMap(mAppBindArgs, Context.NETWORKMANAGEMENT_SERVICE);
@@ -2790,16 +2794,16 @@ public class ActivityManagerService extends IActivityManager.Stub
                 addServiceToMap(mAppBindArgs, Context.POWER_SERVICE);
                 addServiceToMap(mAppBindArgs, "mount");
                 addServiceToMap(mAppBindArgs, Context.PLATFORM_COMPAT_SERVICE);
+                addServiceToMap(mAppBindArgs, "permissionmgr");
+                addServiceToMap(mAppBindArgs, Context.APP_OPS_SERVICE);
+                addServiceToMap(mAppBindArgs, Context.USER_SERVICE);
             }
             // See b/79378449
             // Getting the window service and package service binder from servicemanager
             // is blocked for Apps. However they are necessary for apps.
-            // Removing User Service and App Ops Service from cache breaks boot for auto.
             // TODO: remove exception
-            addServiceToMap(mAppBindArgs, Context.APP_OPS_SERVICE);
             addServiceToMap(mAppBindArgs, "package");
             addServiceToMap(mAppBindArgs, Context.WINDOW_SERVICE);
-            addServiceToMap(mAppBindArgs, Context.USER_SERVICE);
         }
         return mAppBindArgs;
     }
@@ -5550,6 +5554,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             IIntentReceiver finishedReceiver, String requiredPermission, Bundle options) {
         if (target instanceof PendingIntentRecord) {
             final PendingIntentRecord originalRecord = (PendingIntentRecord) target;
+
+            addCreatorToken(intent, originalRecord.getPackageName());
 
             // In multi-display scenarios, there can be background users who execute the
             // PendingIntent. In these scenarios, we don't want to use the foreground user as the
