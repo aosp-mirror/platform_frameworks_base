@@ -17,6 +17,7 @@
 package com.android.settingslib.preference
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.annotation.XmlRes
@@ -41,7 +42,7 @@ open class PreferenceFragment :
         createPreferenceScreen(PreferenceScreenFactory(this))
 
     override fun createPreferenceScreen(factory: PreferenceScreenFactory): PreferenceScreen? {
-        preferenceScreenBindingHelper?.close()
+        preferenceScreenBindingHelper?.onDestroy()
         preferenceScreenBindingHelper = null
 
         val context = factory.context
@@ -66,9 +67,11 @@ open class PreferenceFragment :
                     bindRecursively(it, preferenceBindingFactory, preferenceHierarchy)
                 } ?: return null
             }
+
         preferenceScreenBindingHelper =
             PreferenceScreenBindingHelper(
                 context,
+                this,
                 preferenceBindingFactory,
                 preferenceScreen,
                 preferenceHierarchy,
@@ -87,10 +90,42 @@ open class PreferenceFragment :
     override fun getPreferenceScreenBindingKey(context: Context): String? =
         arguments?.getString(EXTRA_BINDING_SCREEN_KEY)
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        preferenceScreenBindingHelper?.onCreate()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        preferenceScreenBindingHelper?.onStart()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        preferenceScreenBindingHelper?.onResume()
+    }
+
+    override fun onPause() {
+        preferenceScreenBindingHelper?.onPause()
+        super.onPause()
+    }
+
+    override fun onStop() {
+        preferenceScreenBindingHelper?.onStop()
+        super.onStop()
+    }
+
     override fun onDestroy() {
-        preferenceScreenBindingHelper?.close()
+        preferenceScreenBindingHelper?.onDestroy()
         preferenceScreenBindingHelper = null
         super.onDestroy()
+    }
+
+    @Suppress("DEPRECATION")
+    @Deprecated("Deprecated in Java")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        preferenceScreenBindingHelper?.onActivityResult(requestCode, resultCode, data)
     }
 
     protected fun getPreferenceKeysInHierarchy(): Set<String> =

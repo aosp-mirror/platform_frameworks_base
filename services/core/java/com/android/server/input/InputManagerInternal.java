@@ -127,6 +127,13 @@ public abstract class InputManagerInternal {
      */
     public abstract void notifyInputMethodConnectionActive(boolean connectionIsActive);
 
+    /**
+     * Notify user id changes to input.
+     *
+     * TODO(b/362473586): Cleanup after input shifts to Lifecycle with user change callbacks
+     */
+    public abstract void setCurrentUser(@UserIdInt int newUserId);
+
     /** Callback interface for notifications relating to the lid switch. */
     public interface LidSwitchCallback {
         /**

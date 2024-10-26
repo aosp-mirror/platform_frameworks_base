@@ -4247,7 +4247,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * This key will only be present for devices which advertise the
      * {@link android.hardware.camera2.CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_ULTRA_HIGH_RESOLUTION_SENSOR }
      * capability or devices where {@link CameraCharacteristics#getAvailableCaptureRequestKeys }
-     * lists {@link CaptureRequest#SENSOR_PIXEL_MODE {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode}}</p>
+     * lists {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode}.</p>
      * <p><b>Units</b>: Pixel coordinates on the image sensor</p>
      * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      *
@@ -4273,7 +4273,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * This key will only be present for devices which advertise the
      * {@link android.hardware.camera2.CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_ULTRA_HIGH_RESOLUTION_SENSOR }
      * capability or devices where {@link CameraCharacteristics#getAvailableCaptureRequestKeys }
-     * lists {@link CaptureRequest#SENSOR_PIXEL_MODE {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode}}</p>
+     * lists {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode}.</p>
      * <p><b>Units</b>: Pixels</p>
      * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      *
@@ -4298,7 +4298,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * This key will only be present for devices which advertise the
      * {@link android.hardware.camera2.CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_ULTRA_HIGH_RESOLUTION_SENSOR }
      * capability or devices where {@link CameraCharacteristics#getAvailableCaptureRequestKeys }
-     * lists {@link CaptureRequest#SENSOR_PIXEL_MODE {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode}}</p>
+     * lists {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode}.</p>
      * <p><b>Units</b>: Pixel coordinates on the image sensor</p>
      * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      *
@@ -4332,7 +4332,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <ul>
      * <li>This key will be present if
      *   {@link CameraCharacteristics#getAvailableCaptureRequestKeys }
-     *   lists {@link CaptureRequest#SENSOR_PIXEL_MODE {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode}}, since RAW
+     *   lists {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode}, since RAW
      *   images may not necessarily have a regular bayer pattern when
      *   {@link CaptureRequest#SENSOR_PIXEL_MODE {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode}} is set to
      *   {@link android.hardware.camera2.CameraMetadata#SENSOR_PIXEL_MODE_MAXIMUM_RESOLUTION }.</li>

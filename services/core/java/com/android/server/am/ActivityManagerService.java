@@ -632,8 +632,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     static final String EXTRA_DESCRIPTION = "android.intent.extra.DESCRIPTION";
     static final String EXTRA_BUGREPORT_TYPE = "android.intent.extra.BUGREPORT_TYPE";
     static final String EXTRA_BUGREPORT_NONCE = "android.intent.extra.BUGREPORT_NONCE";
-    static final String EXTRA_EXTRA_ATTACHMENT_URI =
-            "android.intent.extra.EXTRA_ATTACHMENT_URI";
+    static final String EXTRA_EXTRA_ATTACHMENT_URIS =
+            "android.intent.extra.EXTRA_ATTACHMENT_URIS";
 
     /**
      * The maximum number of bytes that {@link #setProcessStateSummary} accepts.
@@ -2772,8 +2772,12 @@ public class ActivityManagerService extends IActivityManager.Stub
             // Add common services.
             // IMPORTANT: Before adding services here, make sure ephemeral apps can access them too.
             // Enable the check in ApplicationThread.bindApplication() to make sure.
-            if (!android.server.Flags.removeJavaServiceManagerCache()) {
-                addServiceToMap(mAppBindArgs, "permissionmgr");
+
+            // Removing User Service and App Ops Service from cache breaks boot for auto.
+            // Removing permissionmgr breaks tests for Android Auto due to SELinux restrictions.
+            // TODO: fix SELinux restrictions and remove caching for Android Auto.
+            if (mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE)
+                    || !android.server.Flags.removeJavaServiceManagerCache()) {
                 addServiceToMap(mAppBindArgs, Context.ALARM_SERVICE);
                 addServiceToMap(mAppBindArgs, Context.DISPLAY_SERVICE);
                 addServiceToMap(mAppBindArgs, Context.NETWORKMANAGEMENT_SERVICE);
@@ -2782,16 +2786,17 @@ public class ActivityManagerService extends IActivityManager.Stub
                 addServiceToMap(mAppBindArgs, Context.INPUT_METHOD_SERVICE);
                 addServiceToMap(mAppBindArgs, Context.INPUT_SERVICE);
                 addServiceToMap(mAppBindArgs, "graphicsstats");
-                addServiceToMap(mAppBindArgs, Context.APP_OPS_SERVICE);
                 addServiceToMap(mAppBindArgs, "content");
                 addServiceToMap(mAppBindArgs, Context.JOB_SCHEDULER_SERVICE);
                 addServiceToMap(mAppBindArgs, Context.NOTIFICATION_SERVICE);
                 addServiceToMap(mAppBindArgs, Context.VIBRATOR_SERVICE);
                 addServiceToMap(mAppBindArgs, Context.ACCOUNT_SERVICE);
                 addServiceToMap(mAppBindArgs, Context.POWER_SERVICE);
-                addServiceToMap(mAppBindArgs, Context.USER_SERVICE);
                 addServiceToMap(mAppBindArgs, "mount");
                 addServiceToMap(mAppBindArgs, Context.PLATFORM_COMPAT_SERVICE);
+                addServiceToMap(mAppBindArgs, "permissionmgr");
+                addServiceToMap(mAppBindArgs, Context.APP_OPS_SERVICE);
+                addServiceToMap(mAppBindArgs, Context.USER_SERVICE);
             }
             // See b/79378449
             // Getting the window service and package service binder from servicemanager
@@ -5550,6 +5555,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (target instanceof PendingIntentRecord) {
             final PendingIntentRecord originalRecord = (PendingIntentRecord) target;
 
+            addCreatorToken(intent, originalRecord.getPackageName());
+
             // In multi-display scenarios, there can be background users who execute the
             // PendingIntent. In these scenarios, we don't want to use the foreground user as the
             // current user.
@@ -7660,7 +7667,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     public void requestBugReportWithDescription(@Nullable String shareTitle,
             @Nullable String shareDescription, int bugreportType, long nonce,
-            @Nullable Uri extraAttachment) {
+            @Nullable List<Uri> extraAttachments) {
         String type = null;
         switch (bugreportType) {
             case BugreportParams.BUGREPORT_MODE_FULL:
@@ -7715,8 +7722,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         triggerShellBugreport.setPackage(SHELL_APP_PACKAGE);
         triggerShellBugreport.putExtra(EXTRA_BUGREPORT_TYPE, bugreportType);
         triggerShellBugreport.putExtra(EXTRA_BUGREPORT_NONCE, nonce);
-        if (extraAttachment != null) {
-            triggerShellBugreport.putExtra(EXTRA_EXTRA_ATTACHMENT_URI, extraAttachment);
+        if (extraAttachments != null && !extraAttachments.isEmpty()) {
+            triggerShellBugreport.putParcelableArrayListExtra(EXTRA_EXTRA_ATTACHMENT_URIS,
+                    new ArrayList(extraAttachments));
             triggerShellBugreport.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         }
         triggerShellBugreport.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
@@ -7775,9 +7783,9 @@ public class ActivityManagerService extends IActivityManager.Stub
      * Takes an interactive bugreport with a progress notification. Also attaches given file uri.
      */
     @Override
-    public void requestBugReportWithExtraAttachment(@NonNull Uri extraAttachment) {
+    public void requestBugReportWithExtraAttachments(@NonNull List<Uri> extraAttachments) {
         requestBugReportWithDescription(null, null, BugreportParams.BUGREPORT_MODE_INTERACTIVE, 0L,
-                extraAttachment);
+                extraAttachments);
     }
 
     /**

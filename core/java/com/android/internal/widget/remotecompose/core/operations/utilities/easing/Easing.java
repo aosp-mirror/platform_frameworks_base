@@ -15,19 +15,14 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.utilities.easing;
 
-/**
- * The standard interface to Easing functions
- */
+/** The standard interface to Easing functions */
 public abstract class Easing {
     int mType;
-    /**
-     * get the value at point x
-     */
+
+    /** get the value at point x */
     public abstract float get(float x);
 
-    /**
-     * get the slope of the easing function at at x
-     */
+    /** get the slope of the easing function at at x */
     public abstract float getDiff(float x);
 
     public int getType() {
@@ -44,5 +39,4 @@ public abstract class Easing {
     public static final int SPLINE_CUSTOM = 12;
     public static final int EASE_OUT_BOUNCE = 13;
     public static final int EASE_OUT_ELASTIC = 14;
-
 }

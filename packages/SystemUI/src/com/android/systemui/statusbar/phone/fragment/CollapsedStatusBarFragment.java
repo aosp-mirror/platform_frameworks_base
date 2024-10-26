@@ -56,7 +56,8 @@ import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.OperatorNameView;
 import com.android.systemui.statusbar.OperatorNameViewController;
 import com.android.systemui.statusbar.StatusBarState;
-import com.android.systemui.statusbar.chips.notification.shared.StatusBarNotifChips;
+import com.android.systemui.statusbar.chips.ron.shared.StatusBarRonChips;
+import com.android.systemui.statusbar.core.StatusBarConnectedDisplays;
 import com.android.systemui.statusbar.core.StatusBarSimpleFragment;
 import com.android.systemui.statusbar.disableflags.DisableFlagsLogger;
 import com.android.systemui.statusbar.events.SystemStatusAnimationCallback;
@@ -656,7 +657,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         }
         boolean showSecondaryOngoingActivityChip =
                 Flags.statusBarScreenSharingChips()
-                        && StatusBarNotifChips.isEnabled()
+                        && StatusBarRonChips.isEnabled()
                         && mHasSecondaryOngoingActivity;
 
         return new StatusBarVisibilityModel(
@@ -698,7 +699,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
 
         boolean showSecondaryOngoingActivityChip =
                 // Secondary chips are only supported when RONs are enabled.
-                StatusBarNotifChips.isEnabled()
+                StatusBarRonChips.isEnabled()
                         && visibilityModel.getShowSecondaryOngoingActivityChip()
                         && !disableNotifications;
         if (showSecondaryOngoingActivityChip) {
@@ -711,8 +712,14 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     private boolean shouldHideStatusBar() {
         StatusBarSimpleFragment.assertInLegacyMode();
 
+        boolean isDefaultDisplay = getContext().getDisplayId() == Display.DEFAULT_DISPLAY;
+        boolean shouldHideForCurrentDisplay =
+                !StatusBarConnectedDisplays.isEnabled() || isDefaultDisplay;
         if (!mShadeExpansionStateManager.isClosed()
-                && mPanelExpansionInteractor.shouldHideStatusBarIconsWhenExpanded()) {
+                && mPanelExpansionInteractor.shouldHideStatusBarIconsWhenExpanded()
+                //TODO(b/373310629): for now the shade only shows on the main display.
+                // Remove this once there is a display aware API for the shade.
+                && shouldHideForCurrentDisplay) {
             return true;
         }
 
@@ -825,7 +832,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     }
 
     private void showSecondaryOngoingActivityChip(boolean animate) {
-        StatusBarNotifChips.assertInNewMode();
+        StatusBarRonChips.assertInNewMode();
         StatusBarSimpleFragment.assertInLegacyMode();
         animateShow(mSecondaryOngoingActivityChip, animate);
     }

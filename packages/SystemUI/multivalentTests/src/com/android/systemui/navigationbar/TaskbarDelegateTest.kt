@@ -35,44 +35,30 @@ import org.mockito.MockitoAnnotations
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class TaskbarDelegateTest : SysuiTestCase() {
-    val DISPLAY_ID = 0;
-    val MODE_GESTURE = 0;
-    val MODE_THREE_BUTTON = 1;
+    val DISPLAY_ID = 0
+
+    val MODE_GESTURE = 0
+
+    val MODE_THREE_BUTTON = 1
 
     private lateinit var mTaskStackChangeListeners: TaskStackChangeListeners
     private lateinit var mTaskbarDelegate: TaskbarDelegate
-    @Mock
-    lateinit var mEdgeBackGestureHandler : EdgeBackGestureHandler
-    @Mock
-    lateinit var mLightBarControllerFactory : LightBarTransitionsController.Factory
-    @Mock
-    lateinit var mLightBarTransitionController: LightBarTransitionsController
-    @Mock
-    lateinit var mCommandQueue: CommandQueue
-    @Mock
-    lateinit var mOverviewProxyService: OverviewProxyService
-    @Mock
-    lateinit var mNavBarHelper: NavBarHelper
-    @Mock
-    lateinit var mNavigationModeController: NavigationModeController
-    @Mock
-    lateinit var mSysUiState: SysUiState
-    @Mock
-    lateinit var mDumpManager: DumpManager
-    @Mock
-    lateinit var mAutoHideController: AutoHideController
-    @Mock
-    lateinit var mLightBarController: LightBarController
-    @Mock
-    lateinit var mOptionalPip: Optional<Pip>
-    @Mock
-    lateinit var mBackAnimation: BackAnimation
-    @Mock
-    lateinit var mCurrentSysUiState: NavBarHelper.CurrentSysuiState
-    @Mock
-    lateinit var mStatusBarKeyguardViewManager: StatusBarKeyguardViewManager
-    @Mock
-    lateinit var mStatusBarStateController: StatusBarStateController
+    @Mock lateinit var mEdgeBackGestureHandler: EdgeBackGestureHandler
+    @Mock lateinit var mLightBarControllerFactory: LightBarTransitionsController.Factory
+    @Mock lateinit var mLightBarTransitionController: LightBarTransitionsController
+    @Mock lateinit var mCommandQueue: CommandQueue
+    @Mock lateinit var mOverviewProxyService: OverviewProxyService
+    @Mock lateinit var mNavBarHelper: NavBarHelper
+    @Mock lateinit var mNavigationModeController: NavigationModeController
+    @Mock lateinit var mSysUiState: SysUiState
+    @Mock lateinit var mDumpManager: DumpManager
+    @Mock lateinit var mAutoHideController: AutoHideController
+    @Mock lateinit var mLightBarController: LightBarController
+    @Mock lateinit var mOptionalPip: Optional<Pip>
+    @Mock lateinit var mBackAnimation: BackAnimation
+    @Mock lateinit var mCurrentSysUiState: NavBarHelper.CurrentSysuiState
+    @Mock lateinit var mStatusBarKeyguardViewManager: StatusBarKeyguardViewManager
+    @Mock lateinit var mStatusBarStateController: StatusBarStateController
 
     @Before
     fun setup() {
@@ -82,11 +68,26 @@ class TaskbarDelegateTest : SysuiTestCase() {
         `when`(mNavBarHelper.currentSysuiState).thenReturn(mCurrentSysUiState)
         `when`(mSysUiState.setFlag(anyLong(), anyBoolean())).thenReturn(mSysUiState)
         mTaskStackChangeListeners = TaskStackChangeListeners.getTestInstance()
-        mTaskbarDelegate = TaskbarDelegate(context, mLightBarControllerFactory,
-            mStatusBarKeyguardViewManager, mStatusBarStateController)
-        mTaskbarDelegate.setDependencies(mCommandQueue, mOverviewProxyService, mNavBarHelper,
-        mNavigationModeController, mSysUiState, mDumpManager, mAutoHideController,
-                mLightBarController, mOptionalPip, mBackAnimation, mTaskStackChangeListeners)
+        mTaskbarDelegate =
+            TaskbarDelegate(
+                context,
+                mLightBarControllerFactory,
+                mStatusBarKeyguardViewManager,
+                mStatusBarStateController,
+            )
+        mTaskbarDelegate.setDependencies(
+            mCommandQueue,
+            mOverviewProxyService,
+            mNavBarHelper,
+            mNavigationModeController,
+            mSysUiState,
+            mDumpManager,
+            mAutoHideController,
+            mLightBarController,
+            mOptionalPip,
+            mBackAnimation,
+            mTaskStackChangeListeners,
+        )
     }
 
     @Test
@@ -108,10 +109,12 @@ class TaskbarDelegateTest : SysuiTestCase() {
     fun screenPinningEnabled_updatesSysuiState() {
         mTaskbarDelegate.init(DISPLAY_ID)
         mTaskStackChangeListeners.listenerImpl.onLockTaskModeChanged(
-            ActivityManager.LOCK_TASK_MODE_PINNED)
-        verify(mSysUiState, times(1)).setFlag(
-            ArgumentMatchers.eq(QuickStepContract.SYSUI_STATE_SCREEN_PINNING),
-            ArgumentMatchers.eq(true)
+            ActivityManager.LOCK_TASK_MODE_PINNED
         )
+        verify(mSysUiState, times(1))
+            .setFlag(
+                ArgumentMatchers.eq(QuickStepContract.SYSUI_STATE_SCREEN_PINNING),
+                ArgumentMatchers.eq(true),
+            )
     }
 }

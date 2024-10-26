@@ -74,6 +74,12 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
     @GuardedBy("mLock")
     private final DeviceStateManagerFoldingFeatureProducer mFoldingFeatureProducer;
 
+    /**
+     * The last reported folding features from the device. This is initialized in the constructor
+     * because the data change callback added to {@link #mFoldingFeatureProducer} is immediately
+     * called. This is due to current device state from the device state manager already being
+     * available in the {@link DeviceStateManagerFoldingFeatureProducer}.
+     */
     @GuardedBy("mLock")
     private final List<CommonFoldingFeature> mLastReportedFoldingFeatures = new ArrayList<>();
 
@@ -308,6 +314,7 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
      * @param context a proxy for the {@link android.view.Window} that contains the
      *                {@link DisplayFeature}.
      */
+    @NonNull
     private WindowLayoutInfo getWindowLayoutInfo(@NonNull @UiContext Context context,
             List<CommonFoldingFeature> storedFeatures) {
         List<DisplayFeature> displayFeatureList = getDisplayFeatures(context, storedFeatures);
@@ -326,6 +333,14 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
         synchronized (mLock) {
             return getWindowLayoutInfo(displayId, windowConfiguration,
                     mLastReportedFoldingFeatures);
+        }
+    }
+
+    @Override
+    @NonNull
+    public WindowLayoutInfo getCurrentWindowLayoutInfo(@NonNull @UiContext Context context) {
+        synchronized (mLock) {
+            return getWindowLayoutInfo(context, mLastReportedFoldingFeatures);
         }
     }
 

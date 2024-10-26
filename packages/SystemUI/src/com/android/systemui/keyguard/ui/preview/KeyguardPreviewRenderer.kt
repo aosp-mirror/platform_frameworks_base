@@ -80,6 +80,7 @@ import com.android.systemui.keyguard.ui.viewmodel.OccludingAppDeviceEntryMessage
 import com.android.systemui.monet.ColorScheme
 import com.android.systemui.monet.Style
 import com.android.systemui.plugins.clocks.ClockController
+import com.android.systemui.plugins.clocks.ThemeConfig
 import com.android.systemui.plugins.clocks.WeatherData
 import com.android.systemui.res.R
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
@@ -104,7 +105,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import org.json.JSONException
@@ -653,9 +654,13 @@ constructor(
             // Note that when [wallpaperColors] is null, isWallpaperDark is true.
             val isWallpaperDark: Boolean =
                 (colors.colorHints.and(WallpaperColors.HINT_SUPPORTS_DARK_TEXT)) == 0
-            clock.events.onSeedColorChanged(
-                if (isWallpaperDark) lightClockColor else darkClockColor
-            )
+            val theme =
+                ThemeConfig(
+                    isWallpaperDark,
+                    if (isWallpaperDark) lightClockColor else darkClockColor,
+                )
+            clock.smallClock.events.onThemeChanged(theme)
+            clock.largeClock.events.onThemeChanged(theme)
         }
         // In clock preview, we should have a seed color for clock
         // before setting clock to clockEventController to avoid updateColor with seedColor == null

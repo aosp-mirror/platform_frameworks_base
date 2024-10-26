@@ -15,8 +15,8 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.layout;
 
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.FLOAT;
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.INT;
+import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.FLOAT;
+import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT;
 
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
@@ -75,8 +75,19 @@ public class ComponentStart implements ComponentStartOperation {
 
     @Override
     public String toString() {
-        return "COMPONENT_START (type " + mType + " " + typeDescription(mType)
-                + ") - (" + mX + ", " + mY + " - " + mWidth + " x " + mHeight + ")";
+        return "COMPONENT_START (type "
+                + mType
+                + " "
+                + typeDescription(mType)
+                + ") - ("
+                + mX
+                + ", "
+                + mY
+                + " - "
+                + mWidth
+                + " x "
+                + mHeight
+                + ")";
     }
 
     @Override
@@ -149,8 +160,8 @@ public class ComponentStart implements ComponentStartOperation {
         return Operations.COMPONENT_START;
     }
 
-    public static void apply(WireBuffer buffer, int type, int componentId,
-                             float width, float height) {
+    public static void apply(
+            WireBuffer buffer, int type, int componentId, float width, float height) {
         buffer.start(Operations.COMPONENT_START);
         buffer.writeInt(type);
         buffer.writeInt(componentId);
@@ -172,8 +183,8 @@ public class ComponentStart implements ComponentStartOperation {
 
     public static void documentation(DocumentationBuilder doc) {
         doc.operation("Layout Operations", id(), name())
-                .description("Basic component encapsulating draw commands."
-                        + "This is not resizable.")
+                .description(
+                        "Basic component encapsulating draw commands." + "This is not resizable.")
                 .field(INT, "TYPE", "Type of components")
                 .field(INT, "COMPONENT_ID", "unique id for this component")
                 .field(FLOAT, "WIDTH", "width of the component")

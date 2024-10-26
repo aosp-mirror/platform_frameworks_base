@@ -50,7 +50,6 @@ import com.android.systemui.shared.clocks.LogUtil
 import com.android.systemui.shared.clocks.RenderType
 import com.android.systemui.shared.clocks.TextStyle
 import java.lang.Thread
-import kotlin.math.ceil
 import kotlin.math.max
 import kotlin.math.min
 
@@ -94,11 +93,6 @@ open class SimpleDigitalClockTextView(
     private var aodDozingInterpolator: Interpolator? = null
 
     @VisibleForTesting lateinit var textAnimator: TextAnimator
-    @VisibleForTesting var outlineAnimator: TextAnimator? = null
-    // used for hollow style for AOD version
-    // because stroke style for some fonts have some unwanted inner strokes
-    // we want to draw this layer on top to oclude them
-    @VisibleForTesting var innerAnimator: TextAnimator? = null
 
     lateinit var typefaceCache: TypefaceVariantCache
         private set
@@ -108,8 +102,6 @@ open class SimpleDigitalClockTextView(
         if (this::textAnimator.isInitialized) {
             textAnimator.typefaceCache = value
         }
-        outlineAnimator?.typefaceCache = value
-        innerAnimator?.typefaceCache = value
     }
 
     @VisibleForTesting
@@ -136,32 +128,14 @@ open class SimpleDigitalClockTextView(
         set(value) = super.setText(value)
 
     var textBorderWidth = 0F
-    var aodBorderWidth = 0F
     var baselineFromMeasure = 0
+    var lockscreenColor = Color.WHITE
 
-    var textFillColor: Int? = null
-    var textOutlineColor = TEXT_OUTLINE_DEFAULT_COLOR
-    var aodFillColor = AOD_DEFAULT_COLOR
-    var aodOutlineColor = AOD_OUTLINE_DEFAULT_COLOR
-
-    override fun updateColors(assets: AssetLoader, isRegionDark: Boolean) {
-        val fillColor = if (isRegionDark) textStyle.fillColorLight else textStyle.fillColorDark
-        textFillColor =
-            fillColor?.let { assets.readColor(it) }
-                ?: assets.seedColor
-                ?: getDefaultColor(assets, isRegionDark)
-        // for NumberOverlapView to read correct color
-        lockScreenPaint.color = textFillColor as Int
-        textStyle.outlineColor?.let { textOutlineColor = assets.readColor(it) }
-            ?: run { textOutlineColor = TEXT_OUTLINE_DEFAULT_COLOR }
-        (aodStyle.fillColorLight ?: aodStyle.fillColorDark)?.let {
-            aodFillColor = assets.readColor(it)
-        } ?: run { aodFillColor = AOD_DEFAULT_COLOR }
-        aodStyle.outlineColor?.let { aodOutlineColor = assets.readColor(it) }
-            ?: run { aodOutlineColor = AOD_OUTLINE_DEFAULT_COLOR }
+    override fun updateColor(color: Int) {
+        lockscreenColor = color
+        lockScreenPaint.color = lockscreenColor
         if (dozeFraction < 1f) {
-            textAnimator.setTextStyle(color = textFillColor, animate = false)
-            outlineAnimator?.setTextStyle(color = textOutlineColor, animate = false)
+            textAnimator.setTextStyle(color = lockscreenColor, animate = false)
         }
         invalidate()
     }
@@ -183,13 +157,9 @@ open class SimpleDigitalClockTextView(
         if (layout != null) {
             if (!this::textAnimator.isInitialized) {
                 textAnimator = textAnimatorFactory(layout, ::invalidate)
-                outlineAnimator = textAnimatorFactory(layout) {}
-                innerAnimator = textAnimatorFactory(layout) {}
                 setInterpolatorPaint()
             } else {
                 textAnimator.updateLayout(layout)
-                outlineAnimator?.updateLayout(layout)
-                innerAnimator?.updateLayout(layout)
             }
             baselineFromMeasure = layout.getLineBaseline(0)
         } else {
@@ -248,10 +218,7 @@ open class SimpleDigitalClockTextView(
             canvas.translate(0F, measuredHeight.toFloat())
             canvas.rotate(-90F)
         }
-        logger.d({ "onDraw(); ls: $str1; aod: $str2;" }) {
-            str1 = textAnimator.textInterpolator.shapedText
-            str2 = outlineAnimator?.textInterpolator?.shapedText
-        }
+        logger.d({ "onDraw(); ls: $str1" }) { str1 = textAnimator.textInterpolator.shapedText }
         val translation = getLocalTranslation()
         canvas.translate(translation.x.toFloat(), translation.y.toFloat())
         digitTranslateAnimator?.let {
@@ -266,7 +233,6 @@ open class SimpleDigitalClockTextView(
                 (-translation.y + measuredHeight).toFloat(),
                 null,
             )
-            outlineAnimator?.draw(canvas)
             canvas.saveLayer(
                 -translation.x.toFloat(),
                 -translation.y.toFloat(),
@@ -274,11 +240,8 @@ open class SimpleDigitalClockTextView(
                 (-translation.y + measuredHeight).toFloat(),
                 Paint().also { it.xfermode = PorterDuffXfermode(PorterDuff.Mode.DST_OUT) },
             )
-            innerAnimator?.draw(canvas)
             canvas.restore()
             canvas.restore()
-        } else if (aodStyle.renderType != RenderType.CHANGE_WEIGHT) {
-            outlineAnimator?.draw(canvas)
         }
         textAnimator.draw(canvas)
 
@@ -309,30 +272,13 @@ open class SimpleDigitalClockTextView(
         val fvar = if (isDozing) aodStyle.fontVariation else textStyle.fontVariation
         textAnimator.setTextStyle(
             animate = isAnimated && isAnimationEnabled,
-            color = if (isDozing) aodFillColor else textFillColor,
+            color = if (isDozing) AOD_COLOR else lockscreenColor,
             textSize = if (isDozing) aodFontSizePx else lockScreenPaint.textSize,
             fvar = fvar,
             duration = aodStyle.transitionDuration,
             interpolator = aodDozingInterpolator,
         )
         updateTextBoundsForTextAnimator()
-        outlineAnimator?.setTextStyle(
-            animate = isAnimated && isAnimationEnabled,
-            color = if (isDozing) aodOutlineColor else textOutlineColor,
-            textSize = if (isDozing) aodFontSizePx else lockScreenPaint.textSize,
-            fvar = fvar,
-            strokeWidth = if (isDozing) aodBorderWidth else textBorderWidth,
-            duration = aodStyle.transitionDuration,
-            interpolator = aodDozingInterpolator,
-        )
-        innerAnimator?.setTextStyle(
-            animate = isAnimated && isAnimationEnabled,
-            color = Color.WHITE,
-            textSize = if (isDozing) aodFontSizePx else lockScreenPaint.textSize,
-            fvar = fvar,
-            duration = aodStyle.transitionDuration,
-            interpolator = aodDozingInterpolator,
-        )
     }
 
     override fun animateCharge() {
@@ -345,8 +291,6 @@ open class SimpleDigitalClockTextView(
         val endFvar = if (dozeFraction == 0F) textStyle.fontVariation else aodStyle.fontVariation
         val startAnimPhase2 = Runnable {
             textAnimator.setTextStyle(fvar = endFvar, animate = isAnimationEnabled)
-            outlineAnimator?.setTextStyle(fvar = endFvar, animate = isAnimationEnabled)
-            innerAnimator?.setTextStyle(fvar = endFvar, animate = isAnimationEnabled)
             updateTextBoundsForTextAnimator()
         }
         textAnimator.setTextStyle(
@@ -354,8 +298,6 @@ open class SimpleDigitalClockTextView(
             animate = isAnimationEnabled,
             onAnimationEnd = startAnimPhase2,
         )
-        outlineAnimator?.setTextStyle(fvar = middleFvar, animate = isAnimationEnabled)
-        innerAnimator?.setTextStyle(fvar = middleFvar, animate = isAnimationEnabled)
         updateTextBoundsForTextAnimator()
     }
 
@@ -373,8 +315,6 @@ open class SimpleDigitalClockTextView(
             requestLayout()
         } else {
             textAnimator.updateLayout(layout)
-            outlineAnimator?.updateLayout(layout)
-            innerAnimator?.updateLayout(layout)
         }
     }
 
@@ -500,8 +440,7 @@ open class SimpleDigitalClockTextView(
             this.aodStyle = textStyle.copy()
         }
         this.aodStyle.transitionInterpolator?.let { aodDozingInterpolator = it.interpolator }
-        aodBorderWidth = parser.convert(this.aodStyle.borderWidth ?: DEFAULT_AOD_STROKE_WIDTH)
-        lockScreenPaint.strokeWidth = ceil(max(textBorderWidth, aodBorderWidth))
+        lockScreenPaint.strokeWidth = textBorderWidth
         measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED)
         setInterpolatorPaint()
         recomputeMaxSingleDigitSizes()
@@ -524,27 +463,14 @@ open class SimpleDigitalClockTextView(
             val lastUnconstrainedHeight = textBounds.height() + lockScreenPaint.strokeWidth * 2
             fontSizeAdjustFactor = lastUnconstrainedHeight / lastUnconstrainedTextSize
         }
-        textStyle.borderWidthScale?.let {
-            textBorderWidth = fontSizePx * it
-            if (dozeFraction < 1.0F) {
-                outlineAnimator?.setTextStyle(strokeWidth = textBorderWidth, animate = false)
-            }
-        }
-        aodStyle.borderWidthScale?.let {
-            aodBorderWidth = fontSizePx * it
-            if (dozeFraction > 0.0F) {
-                outlineAnimator?.setTextStyle(strokeWidth = aodBorderWidth, animate = false)
-            }
-        }
+        textStyle.borderWidthScale?.let { textBorderWidth = fontSizePx * it }
 
-        lockScreenPaint.strokeWidth = ceil(max(textBorderWidth, aodBorderWidth))
+        lockScreenPaint.strokeWidth = textBorderWidth
         recomputeMaxSingleDigitSizes()
 
         if (this::textAnimator.isInitialized) {
             textAnimator.setTextStyle(textSize = lockScreenPaint.textSize, animate = false)
         }
-        outlineAnimator?.setTextStyle(textSize = lockScreenPaint.textSize, animate = false)
-        innerAnimator?.setTextStyle(textSize = lockScreenPaint.textSize, animate = false)
     }
 
     private fun recomputeMaxSingleDigitSizes() {
@@ -570,42 +496,7 @@ open class SimpleDigitalClockTextView(
             textAnimator.setTextStyle(
                 fvar = textStyle.fontVariation,
                 textSize = lockScreenPaint.textSize,
-                color = textFillColor,
-                animate = false,
-            )
-        }
-
-        if (outlineAnimator != null) {
-            outlineAnimator!!
-                .textInterpolator
-                .targetPaint
-                .set(
-                    TextPaint(lockScreenPaint).also {
-                        it.style =
-                            if (aodStyle.renderType == RenderType.HOLLOW_TEXT)
-                                Paint.Style.FILL_AND_STROKE
-                            else Paint.Style.STROKE
-                    }
-                )
-            outlineAnimator!!.textInterpolator.onTargetPaintModified()
-            outlineAnimator!!.setTextStyle(
-                fvar = aodStyle.fontVariation,
-                textSize = lockScreenPaint.textSize,
-                color = Color.TRANSPARENT,
-                animate = false,
-            )
-        }
-
-        if (innerAnimator != null) {
-            innerAnimator!!
-                .textInterpolator
-                .targetPaint
-                .set(TextPaint(lockScreenPaint).also { it.style = Paint.Style.FILL })
-            innerAnimator!!.textInterpolator.onTargetPaintModified()
-            innerAnimator!!.setTextStyle(
-                fvar = aodStyle.fontVariation,
-                textSize = lockScreenPaint.textSize,
-                color = Color.WHITE,
+                color = lockscreenColor,
                 animate = false,
             )
         }
@@ -641,14 +532,7 @@ open class SimpleDigitalClockTextView(
     }
 
     companion object {
-        val DEFAULT_AOD_STROKE_WIDTH = "2dp"
-        val TEXT_OUTLINE_DEFAULT_COLOR = Color.TRANSPARENT
-        val AOD_DEFAULT_COLOR = Color.TRANSPARENT
-        val AOD_OUTLINE_DEFAULT_COLOR = Color.WHITE
-        private val DEFAULT_LIGHT_COLOR = "@android:color/system_accent1_100+0"
-        private val DEFAULT_DARK_COLOR = "@android:color/system_accent2_600+0"
-
-        fun getDefaultColor(assets: AssetLoader, isRegionDark: Boolean) =
-            assets.readColor(if (isRegionDark) DEFAULT_LIGHT_COLOR else DEFAULT_DARK_COLOR)
+        val AOD_STROKE_WIDTH = "2dp"
+        val AOD_COLOR = Color.WHITE
     }
 }

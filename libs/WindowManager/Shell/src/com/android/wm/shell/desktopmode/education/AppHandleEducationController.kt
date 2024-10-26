@@ -325,10 +325,15 @@ class AppHandleEducationController(
   /**
    * Listens to the changes to [WindowingEducationProto#hasEducationViewedTimestampMillis()] in
    * datastore proto object.
+   *
+   * If [SHOULD_OVERRIDE_EDUCATION_CONDITIONS] is true, this flow will always emit false. That means
+   * it will emit education has not been viewed yet always.
    */
   private fun isEducationViewedFlow(): Flow<Boolean> =
       appHandleEducationDatastoreRepository.dataStoreFlow
-          .map { preferences -> preferences.hasEducationViewedTimestampMillis() }
+          .map { preferences ->
+            preferences.hasEducationViewedTimestampMillis() && !SHOULD_OVERRIDE_EDUCATION_CONDITIONS
+          }
           .distinctUntilChanged()
 
   /**
@@ -352,5 +357,10 @@ class AppHandleEducationController(
 
     val APP_HANDLE_EDUCATION_TIMEOUT_MILLIS: Long
       get() = SystemProperties.getLong("persist.windowing_app_handle_education_timeout", 400L)
+
+    val SHOULD_OVERRIDE_EDUCATION_CONDITIONS: Boolean
+      get() =
+          SystemProperties.getBoolean(
+              "persist.desktop_windowing_app_handle_education_override_conditions", false)
   }
 }

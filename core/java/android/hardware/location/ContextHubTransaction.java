@@ -69,7 +69,6 @@ public class ContextHubTransaction<T> {
     public static final int TYPE_ENABLE_NANOAPP = 2;
     public static final int TYPE_DISABLE_NANOAPP = 3;
     public static final int TYPE_QUERY_NANOAPPS = 4;
-    @FlaggedApi(Flags.FLAG_RELIABLE_MESSAGE)
     public static final int TYPE_RELIABLE_MESSAGE = 5;
 
     /**
@@ -123,10 +122,8 @@ public class ContextHubTransaction<T> {
      * Failure mode when the Context Hub HAL was not available.
      */
     public static final int RESULT_FAILED_HAL_UNAVAILABLE = 8;
-    /**
-     * Failure mode when the operation is not supported.
-     */
-    @FlaggedApi(Flags.FLAG_RELIABLE_MESSAGE)
+
+    /** Failure mode when the operation is not supported. */
     public static final int RESULT_FAILED_NOT_SUPPORTED = 9;
 
     /**
@@ -232,11 +229,8 @@ public class ContextHubTransaction<T> {
                 return upperCase ? "Disable" : "disable";
             case ContextHubTransaction.TYPE_QUERY_NANOAPPS:
                 return upperCase ? "Query" : "query";
-            case ContextHubTransaction.TYPE_RELIABLE_MESSAGE: {
-                if (Flags.reliableMessage()) {
-                    return upperCase ? "Reliable Message" : "reliable message";
-                }
-            }
+            case ContextHubTransaction.TYPE_RELIABLE_MESSAGE:
+                return upperCase ? "Reliable Message" : "reliable message";
             default:
                 return upperCase ? "Unknown" : "unknown";
         }

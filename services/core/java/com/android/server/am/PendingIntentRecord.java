@@ -629,7 +629,8 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
                                     allIntents, allResolvedTypes, resultTo, mergedOptions, userId,
                                     false /* validateIncomingUser */,
                                     this /* originatingPendingIntent */,
-                                    getBackgroundStartPrivilegesForActivitySender(allowlistToken));
+                                    getBackgroundStartPrivilegesForActivitySender(allowlistToken)
+                                            .allowsBackgroundActivityStarts());
                         } else {
                             res = controller.mAtmInternal.startActivityInPackage(uid, callingPid,
                                     callingUid, key.packageName, key.featureId, finalIntent,
@@ -637,7 +638,8 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
                                     mergedOptions, userId, null, "PendingIntentRecord",
                                     false /* validateIncomingUser */,
                                     this /* originatingPendingIntent */,
-                                    getBackgroundStartPrivilegesForActivitySender(allowlistToken));
+                                    getBackgroundStartPrivilegesForActivitySender(allowlistToken)
+                                            .allowsBackgroundActivityStarts());
                         }
                     } catch (RuntimeException e) {
                         Slog.w(TAG, "Unable to send startActivity intent", e);

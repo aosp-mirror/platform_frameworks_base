@@ -304,7 +304,7 @@ public class BackgroundActivityStartController {
         private final @ActivityManager.ProcessState int mRealCallingUidProcState;
         private final boolean mIsRealCallingUidPersistentSystemProcess;
         private final PendingIntentRecord mOriginatingPendingIntent;
-        private final BackgroundStartPrivileges mForcedBalByPiSender;
+        private final boolean mAllowBalExemptionForSystemProcess;
         private final Intent mIntent;
         private final WindowProcessController mCallerApp;
         private final WindowProcessController mRealCallerApp;
@@ -319,7 +319,7 @@ public class BackgroundActivityStartController {
                  int realCallingUid, int realCallingPid,
                  WindowProcessController callerApp,
                  PendingIntentRecord originatingPendingIntent,
-                 BackgroundStartPrivileges forcedBalByPiSender,
+                 boolean allowBalExemptionForSystemProcess,
                  ActivityRecord resultRecord,
                  Intent intent,
                  ActivityOptions checkedOptions) {
@@ -329,7 +329,7 @@ public class BackgroundActivityStartController {
             mRealCallingUid = realCallingUid;
             mRealCallingPid = realCallingPid;
             mCallerApp = callerApp;
-            mForcedBalByPiSender = forcedBalByPiSender;
+            mAllowBalExemptionForSystemProcess = allowBalExemptionForSystemProcess;
             mOriginatingPendingIntent = originatingPendingIntent;
             mIntent = intent;
             mRealCallingPackage = mService.getPackageNameIfUnique(realCallingUid, realCallingPid);
@@ -549,7 +549,8 @@ public class BackgroundActivityStartController {
                     ActivityManager.class, "PROCESS_STATE_", mCallingUidProcState));
             sb.append("; isCallingUidPersistentSystemProcess: ")
                     .append(mIsCallingUidPersistentSystemProcess);
-            sb.append("; forcedBalByPiSender: ").append(mForcedBalByPiSender);
+            sb.append("; allowBalExemptionForSystemProcess: ")
+                    .append(mAllowBalExemptionForSystemProcess);
             sb.append("; intent: ").append(mIntent);
             sb.append("; callerApp: ").append(mCallerApp);
             if (mCallerApp != null) {
@@ -704,8 +705,8 @@ public class BackgroundActivityStartController {
      * @param callerApp The process that calls this method (only if not a PendingIntent)
      * @param originatingPendingIntent PendingIntentRecord that originated this activity start or
      *        null if not originated by PendingIntent
-     * @param forcedBalByPiSender If set to allow, the
-     *        PendingIntent's sender will try to force allow background activity starts.
+     * @param allowBalExemptionForSystemProcess If set to true, the
+     *        PendingIntent's sender will allow additional exemptions.
      *        This is only possible if the sender of the PendingIntent is a system process.
      * @param resultRecord If not null, this indicates that the caller expects a result.
      * @param intent Intent that should be started.
@@ -722,7 +723,7 @@ public class BackgroundActivityStartController {
             int realCallingPid,
             WindowProcessController callerApp,
             PendingIntentRecord originatingPendingIntent,
-            BackgroundStartPrivileges forcedBalByPiSender,
+            boolean allowBalExemptionForSystemProcess,
             ActivityRecord resultRecord,
             Intent intent,
             ActivityOptions checkedOptions) {
@@ -734,7 +735,7 @@ public class BackgroundActivityStartController {
 
         BalState state = new BalState(callingUid, callingPid, callingPackage,
                 realCallingUid, realCallingPid, callerApp, originatingPendingIntent,
-                forcedBalByPiSender, resultRecord, intent, checkedOptions);
+                allowBalExemptionForSystemProcess, resultRecord, intent, checkedOptions);
 
         // In the case of an SDK sandbox calling uid, check if the corresponding app uid has a
         // visible window.
@@ -1069,7 +1070,7 @@ public class BackgroundActivityStartController {
 
         // if the realCallingUid is a persistent system process, abort if the IntentSender
         // wasn't allowed to start an activity
-        if (state.mForcedBalByPiSender.allowsBackgroundActivityStarts()
+        if (state.mAllowBalExemptionForSystemProcess
                 && state.mIsRealCallingUidPersistentSystemProcess) {
             return new BalVerdict(BAL_ALLOW_ALLOWLISTED_UID,
                     /*background*/ false,
@@ -1385,7 +1386,7 @@ public class BackgroundActivityStartController {
 
         String packageName =  mService.mContext.getPackageManager().getNameForUid(callingUid);
         BalState state = new BalState(callingUid, callingPid, packageName, INVALID_UID,
-                INVALID_PID, null, null, null, null, null, ActivityOptions.makeBasic());
+                INVALID_PID, null, null, false, null, null, ActivityOptions.makeBasic());
         @BalCode int balCode = checkBackgroundActivityStartAllowedByCaller(state).mCode;
         if (balCode == BAL_ALLOW_ALLOWLISTED_UID
                 || balCode == BAL_ALLOW_ALLOWLISTED_COMPONENT

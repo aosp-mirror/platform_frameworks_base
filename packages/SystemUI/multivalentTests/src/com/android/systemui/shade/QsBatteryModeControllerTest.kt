@@ -6,12 +6,11 @@ import android.graphics.Rect
 import android.view.DisplayCutout
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.battery.BatteryMeterView
-import com.android.systemui.statusbar.phone.StatusBarContentInsetsProvider
-import com.android.systemui.util.mockito.mock
-import com.android.systemui.util.mockito.whenever
+import com.android.systemui.res.R
+import com.android.systemui.statusbar.data.repository.fakeStatusBarContentInsetsProviderStore
+import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Rule
@@ -19,6 +18,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnit
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
@@ -35,9 +36,12 @@ class QsBatteryModeControllerTest : SysuiTestCase() {
         const val QS_END_FRAME = 58
     }
 
+    private val kosmos = testKosmos()
+    private val insetsProviderStore = kosmos.fakeStatusBarContentInsetsProviderStore
+    private val insetsProvider = insetsProviderStore.defaultDisplay
+
     @JvmField @Rule val mockitoRule = MockitoJUnit.rule()!!
 
-    @Mock private lateinit var insetsProvider: StatusBarContentInsetsProvider
     @Mock private lateinit var mockedContext: Context
     @Mock private lateinit var mockedResources: Resources
 
@@ -49,8 +53,7 @@ class QsBatteryModeControllerTest : SysuiTestCase() {
         whenever(mockedResources.getInteger(R.integer.fade_in_start_frame)).thenReturn(QS_END_FRAME)
         whenever(mockedResources.getInteger(R.integer.fade_out_complete_frame))
             .thenReturn(QQS_START_FRAME)
-
-        controller = QsBatteryModeController(mockedContext, insetsProvider)
+        controller = QsBatteryModeController(mockedContext, insetsProviderStore)
     }
 
     @Test
@@ -96,5 +99,6 @@ class QsBatteryModeControllerTest : SysuiTestCase() {
     }
 
     private fun Int.prevFrameToFraction(): Float = (this - 1) / MOTION_LAYOUT_MAX_FRAME.toFloat()
+
     private fun Int.nextFrameToFraction(): Float = (this + 1) / MOTION_LAYOUT_MAX_FRAME.toFloat()
 }

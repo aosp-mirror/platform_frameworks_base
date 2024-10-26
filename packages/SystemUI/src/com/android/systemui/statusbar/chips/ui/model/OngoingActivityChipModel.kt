@@ -20,7 +20,7 @@ import android.view.View
 import com.android.systemui.Flags
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.statusbar.StatusBarIconView
-import com.android.systemui.statusbar.chips.notification.shared.StatusBarNotifChips
+import com.android.systemui.statusbar.chips.ron.shared.StatusBarRonChips
 
 /** Model representing the display of an ongoing activity as a chip in the status bar. */
 sealed class OngoingActivityChipModel {
@@ -91,7 +91,10 @@ sealed class OngoingActivityChipModel {
             override val onClickListener: View.OnClickListener?,
         ) : Shown(icon, colors, onClickListener) {
             init {
-                StatusBarNotifChips.assertInNewMode()
+                check(StatusBarRonChips.isEnabled) {
+                    "OngoingActivityChipModel.Shown.ShortTimeDelta created even though " +
+                        "Flags.statusBarRonChips is not enabled"
+                }
             }
 
             override val logName = "Shown.ShortTimeDelta"

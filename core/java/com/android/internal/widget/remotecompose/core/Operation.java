@@ -15,14 +15,10 @@
  */
 package com.android.internal.widget.remotecompose.core;
 
-/**
- * Base interface for RemoteCompose operations
- */
+/** Base interface for RemoteCompose operations */
 public interface Operation {
 
-    /**
-     * add the operation to the buffer
-     */
+    /** add the operation to the buffer */
     void write(WireBuffer buffer);
 
     /**
@@ -32,8 +28,6 @@ public interface Operation {
      */
     void apply(RemoteContext context);
 
-    /**
-     * Debug utility to display an operation + indentation
-     */
+    /** Debug utility to display an operation + indentation */
     String deepToString(String indent);
 }

@@ -39,7 +39,7 @@ import javax.inject.Named
 import javax.inject.Provider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /**
  * Callback that will be invoked when the Room database is created. Then the database will be

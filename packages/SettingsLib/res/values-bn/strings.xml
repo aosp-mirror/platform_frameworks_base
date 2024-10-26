@@ -357,6 +357,10 @@
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"কানেক্টিভিটি ফিচার উন্নত করার বিষয়টি চালু করা হয়েছে।"</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"স্থানীয় টার্মিনাল"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"স্থানীয় শেল অ্যাক্সেসের প্রস্তাব করে এমন টার্মিনাল অ্যাপ্লিকেশন সক্ষম করুন"</string>
+    <!-- no translation found for enable_linux_terminal_title (5076044866895670637) -->
+    <skip />
+    <!-- no translation found for enable_linux_terminal_summary (5893216510985145320) -->
+    <skip />
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP পরীক্ষণ"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"HDCP চেক করার আচরণ সেট করুন"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"ডিবাগিং"</string>
@@ -686,11 +690,9 @@
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"চালু করা আছে"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"এই পরিবর্তনটি প্রয়োগ করার জন্য আপনার ডিভাইসটি অবশ্যই রিবুট করতে হবে। এখনই রিবুট করুন বা বাতিল করুন।"</string>
     <string name="media_transfer_wired_headphone_name" msgid="8698668536022665254">"তারযুক্ত হেডফোন"</string>
-    <!-- no translation found for media_transfer_headphone_name (1157798825650178478) -->
-    <skip />
+    <string name="media_transfer_headphone_name" msgid="1157798825650178478">"তারযুক্ত অডিও"</string>
     <string name="media_transfer_usb_audio_name" msgid="1789292056757821355">"USB অডিও"</string>
-    <!-- no translation found for media_transfer_wired_device_mic_name (7115192790725088698) -->
-    <skip />
+    <string name="media_transfer_wired_device_mic_name" msgid="7115192790725088698">"তারযুক্ত মাইক্রোফোন"</string>
     <string name="media_transfer_usb_device_mic_name" msgid="7171789543226269822">"USB মাইক্রোফোন"</string>
     <string name="media_transfer_bt_device_mic_name" msgid="1870669402238687618">"BT মাইক্রোফোন"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"চালু আছে"</string>

@@ -35,7 +35,7 @@ import com.android.systemui.res.R
 import com.android.systemui.util.NotificationChannels
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /** Coordinator responsible for showing/hiding the task switcher notification. */
 @SysUISingleton

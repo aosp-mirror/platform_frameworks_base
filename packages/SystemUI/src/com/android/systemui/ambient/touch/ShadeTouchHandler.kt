@@ -34,7 +34,7 @@ import javax.inject.Inject
 import javax.inject.Named
 import kotlin.math.abs
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /**
  * [ShadeTouchHandler] is responsible for handling swipe down gestures over dream to bring down the

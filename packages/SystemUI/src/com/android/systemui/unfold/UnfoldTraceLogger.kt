@@ -29,7 +29,7 @@ import com.android.systemui.util.Utils.isDeviceFoldable
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 import kotlinx.coroutines.plus
 
 /**

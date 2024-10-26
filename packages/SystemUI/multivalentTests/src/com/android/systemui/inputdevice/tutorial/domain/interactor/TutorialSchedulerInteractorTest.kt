@@ -22,6 +22,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.inputdevice.tutorial.data.repository.DeviceType
 import com.android.systemui.inputdevice.tutorial.data.repository.TutorialSchedulerRepository
 import com.android.systemui.inputdevice.tutorial.domain.interactor.TutorialSchedulerInteractor.TutorialType
+import com.android.systemui.inputdevice.tutorial.inputDeviceTutorialLogger
 import com.android.systemui.keyboard.data.repository.FakeKeyboardRepository
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
@@ -62,10 +63,15 @@ class TutorialSchedulerInteractorTest : SysuiTestCase() {
             TutorialSchedulerRepository(
                 context,
                 dataStoreScope,
-                dataStoreName = "TutorialSchedulerInteractorTest"
+                dataStoreName = "TutorialSchedulerInteractorTest",
             )
         underTest =
-            TutorialSchedulerInteractor(keyboardRepository, touchpadRepository, schedulerRepository)
+            TutorialSchedulerInteractor(
+                keyboardRepository,
+                touchpadRepository,
+                schedulerRepository,
+                kosmos.inputDeviceTutorialLogger,
+            )
     }
 
     @After

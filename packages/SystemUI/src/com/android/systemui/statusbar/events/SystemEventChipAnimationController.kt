@@ -33,6 +33,7 @@ import androidx.core.animation.ValueAnimator
 import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.res.R
+import com.android.systemui.statusbar.data.repository.StatusBarContentInsetsProviderStore
 import com.android.systemui.statusbar.phone.StatusBarContentInsetsChangedListener
 import com.android.systemui.statusbar.phone.StatusBarContentInsetsProvider
 import com.android.systemui.statusbar.window.StatusBarWindowController
@@ -453,12 +454,12 @@ object SystemEventChipAnimationControllerModule {
         factory: SystemEventChipAnimationControllerImpl.Factory,
         context: Context,
         statusBarWindowControllerStore: StatusBarWindowControllerStore,
-        contentInsetsProvider: StatusBarContentInsetsProvider,
+        contentInsetsProviderStore: StatusBarContentInsetsProviderStore,
     ): SystemEventChipAnimationController {
         return factory.create(
             context,
             statusBarWindowControllerStore.defaultDisplay,
-            contentInsetsProvider,
+            contentInsetsProviderStore.defaultDisplay,
         )
     }
 }

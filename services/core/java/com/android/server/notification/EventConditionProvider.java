@@ -16,7 +16,6 @@
 
 package com.android.server.notification;
 
-import android.annotation.Nullable;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
@@ -68,7 +67,7 @@ public class EventConditionProvider extends SystemConditionProviderService {
     private final Handler mWorker;
     private final HandlerThread mThread;
 
-    @Nullable private UserHandle mCurrentUser;
+    private UserHandle mCurrentUser = UserHandle.SYSTEM;
     private boolean mConnected;
     private boolean mRegistered;
     private boolean mBootComplete;  // don't hammer the calendar provider until boot completes.
@@ -119,18 +118,19 @@ public class EventConditionProvider extends SystemConditionProviderService {
             @Override
             public void onReceive(Context context, Intent intent) {
                 if (android.app.Flags.modesHsum()) {
-                    if (mCurrentUser != null) {
-                        // Possibly the intent signals a profile added on a different user, but it
-                        // doesn't matter (except for a bit of wasted work here). We will reload
-                        // trackers for that user when we switch.
-                        reloadTrackers(mCurrentUser);
-                    }
+                    // Possibly the intent signals a profile added on a different user, but it
+                    // doesn't matter (except for a bit of wasted work here). We will reload
+                    // trackers for that user when we switch.
+                    reloadTrackers(mCurrentUser);
                 } else {
                     reloadTrackers();
                 }
             }
         }, filter);
-        if (!android.app.Flags.modesHsum()) {
+
+        if (android.app.Flags.modesHsum()) {
+            reloadTrackers(UserHandle.SYSTEM);
+        } else {
             reloadTrackers();
         }
     }
@@ -138,8 +138,10 @@ public class EventConditionProvider extends SystemConditionProviderService {
     @Override
     public void onUserSwitched(UserHandle user) {
         if (DEBUG) Slog.d(TAG, "onUserSwitched: " + user);
-        mCurrentUser = user;
-        reloadTrackers(user);
+        if (mCurrentUser.getIdentifier() != user.getIdentifier()) {
+            mCurrentUser = user;
+            reloadTrackers(user);
+        }
     }
 
     @Override
@@ -274,12 +276,23 @@ public class EventConditionProvider extends SystemConditionProviderService {
                     final int userId = EventInfo.resolveUserId(event.userId);
                     final CalendarTracker tracker = mTrackers.get(userId);
                     if (tracker == null) {
-                        Slog.w(TAG, "No calendar tracker found for user " + userId);
+                        Slog.w(TAG,
+                                "No calendar tracker found for user " + userId + " and calendar = "
+                                        + event.calName);
                         conditionsToNotify.add(createCondition(conditionId, Condition.STATE_FALSE));
                         continue;
                     }
                     result = tracker.checkEvent(event, now);
                 }
+
+                if (result == null) {
+                    Slog.e(TAG, "No CheckEventResult for userId=" + event.userId + ", calId="
+                            + event.calendarId + ", calName=" + event.calName
+                            + "; trackers count is " + mTrackers.size());
+                    conditionsToNotify.add(createCondition(conditionId, Condition.STATE_FALSE));
+                    continue;
+                }
+
                 if (result.recheckAt != 0
                         && (reevaluateAt == 0 || result.recheckAt < reevaluateAt)) {
                     reevaluateAt = result.recheckAt;

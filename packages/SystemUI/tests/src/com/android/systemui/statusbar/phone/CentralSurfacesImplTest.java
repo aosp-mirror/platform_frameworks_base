@@ -172,9 +172,9 @@ import com.android.systemui.statusbar.OperatorNameViewController;
 import com.android.systemui.statusbar.PulseExpansionHandler;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.StatusBarStateControllerImpl;
+import com.android.systemui.statusbar.core.StatusBarConnectedDisplays;
 import com.android.systemui.statusbar.core.StatusBarInitializerImpl;
 import com.android.systemui.statusbar.core.StatusBarOrchestrator;
-import com.android.systemui.statusbar.core.StatusBarSimpleFragment;
 import com.android.systemui.statusbar.data.repository.FakeStatusBarModeRepository;
 import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
@@ -1135,7 +1135,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     }
 
     @Test
-    @DisableFlags(StatusBarSimpleFragment.FLAG_NAME)
+    @DisableFlags(StatusBarConnectedDisplays.FLAG_NAME)
     public void bubbleBarVisibility() {
         createCentralSurfaces();
         mCentralSurfaces.onStatusBarWindowStateChanged(WINDOW_STATE_HIDDEN);

@@ -60,7 +60,7 @@ abstract class FlingOnBackAnimationCallback(
                         it.touchY,
                         progress / SCALE_FACTOR,
                         it.swipeEdge,
-                        it.frameTime,
+                        it.frameTimeMillis,
                     )
                 onBackProgressedCompat(backEvent)
             }
@@ -87,7 +87,7 @@ abstract class FlingOnBackAnimationCallback(
         }
         reset()
         if (predictiveBackTimestampApi()) {
-            downTime = backEvent.frameTime
+            downTime = backEvent.frameTimeMillis
         }
         onBackStartedCompat(backEvent)
     }
@@ -95,23 +95,25 @@ abstract class FlingOnBackAnimationCallback(
     final override fun onBackProgressed(backEvent: BackEvent) {
         val interpolatedProgress = progressInterpolator.getInterpolation(backEvent.progress)
         if (predictiveBackTimestampApi()) {
-            velocityTracker.addMovement(
-                MotionEvent.obtain(
-                    /* downTime */ downTime!!,
-                    /* eventTime */ backEvent.frameTime,
-                    /* action */ ACTION_MOVE,
-                    /* x */ interpolatedProgress * SCALE_FACTOR,
-                    /* y */ 0f,
-                    /* metaState */ 0,
+            downTime?.let { downTime ->
+                velocityTracker.addMovement(
+                    MotionEvent.obtain(
+                        /* downTime */ downTime,
+                        /* eventTime */ backEvent.frameTimeMillis,
+                        /* action */ ACTION_MOVE,
+                        /* x */ interpolatedProgress * SCALE_FACTOR,
+                        /* y */ 0f,
+                        /* metaState */ 0,
+                    )
                 )
-            )
+            }
             lastBackEvent =
                 BackEvent(
                     backEvent.touchX,
                     backEvent.touchY,
                     interpolatedProgress,
                     backEvent.swipeEdge,
-                    backEvent.frameTime,
+                    backEvent.frameTimeMillis,
                 )
         } else {
             lastBackEvent =

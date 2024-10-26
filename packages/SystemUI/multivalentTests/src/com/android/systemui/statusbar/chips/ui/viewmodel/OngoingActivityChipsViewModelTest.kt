@@ -25,6 +25,7 @@ import android.platform.test.annotations.DisableFlags
 import android.view.View
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.systemui.Flags.FLAG_STATUS_BAR_RON_CHIPS
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.coroutines.collectLastValue
@@ -39,8 +40,7 @@ import com.android.systemui.screenrecord.data.model.ScreenRecordModel
 import com.android.systemui.screenrecord.data.repository.screenRecordRepository
 import com.android.systemui.statusbar.chips.mediaprojection.domain.interactor.MediaProjectionChipInteractorTest.Companion.NORMAL_PACKAGE
 import com.android.systemui.statusbar.chips.mediaprojection.domain.interactor.MediaProjectionChipInteractorTest.Companion.setUpPackageManagerForMediaProjection
-import com.android.systemui.statusbar.chips.notification.demo.ui.viewmodel.demoNotifChipViewModel
-import com.android.systemui.statusbar.chips.notification.shared.StatusBarNotifChips
+import com.android.systemui.statusbar.chips.ron.demo.ui.viewmodel.demoRonChipViewModel
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 import com.android.systemui.statusbar.chips.ui.view.ChipBackgroundContainer
 import com.android.systemui.statusbar.phone.SystemUIDialog
@@ -66,11 +66,13 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
-/** Tests for [OngoingActivityChipsViewModel] when the [StatusBarNotifChips] flag is disabled. */
+/**
+ * Tests for [OngoingActivityChipsViewModel] when the [FLAG_STATUS_BAR_RON_CHIPS] flag is disabled.
+ */
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 @OptIn(ExperimentalCoroutinesApi::class)
-@DisableFlags(StatusBarNotifChips.FLAG_NAME)
+@DisableFlags(FLAG_STATUS_BAR_RON_CHIPS)
 class OngoingActivityChipsViewModelTest : SysuiTestCase() {
     private val kosmos = Kosmos().also { it.testCase = this }
     private val testScope = kosmos.testScope
@@ -97,11 +99,11 @@ class OngoingActivityChipsViewModelTest : SysuiTestCase() {
     @Before
     fun setUp() {
         setUpPackageManagerForMediaProjection(kosmos)
-        kosmos.demoNotifChipViewModel.start()
+        kosmos.demoRonChipViewModel.start()
         val icon =
             BitmapDrawable(
                 context.resources,
-                Bitmap.createBitmap(/* width= */ 100, /* height= */ 100, Bitmap.Config.ARGB_8888),
+                Bitmap.createBitmap(/* width= */ 100, /* height= */ 100, Bitmap.Config.ARGB_8888)
             )
         whenever(kosmos.packageManager.getApplicationIcon(any<String>())).thenReturn(icon)
     }
@@ -323,7 +325,7 @@ class OngoingActivityChipsViewModelTest : SysuiTestCase() {
             latest: OngoingActivityChipModel?,
             chipView: View,
             dialog: SystemUIDialog,
-            kosmos: Kosmos,
+            kosmos: Kosmos
         ): DialogInterface.OnClickListener {
             // Capture the action that would get invoked when the user clicks "Stop" on the dialog
             lateinit var dialogStopAction: DialogInterface.OnClickListener

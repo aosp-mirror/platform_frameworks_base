@@ -23,3 +23,9 @@ val Kosmos.mockStatusBarContentInsetsProvider by
     Kosmos.Fixture { mock<StatusBarContentInsetsProvider>() }
 
 var Kosmos.statusBarContentInsetsProvider by Kosmos.Fixture { mockStatusBarContentInsetsProvider }
+
+val Kosmos.fakeStatusBarContentInsetsProviderFactory by
+    Kosmos.Fixture { FakeStatusBarContentInsetsProviderFactory() }
+
+var Kosmos.statusBarContentInsetsProviderFactory: StatusBarContentInsetsProviderImpl.Factory by
+    Kosmos.Fixture { fakeStatusBarContentInsetsProviderFactory }

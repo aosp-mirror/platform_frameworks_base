@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.notification.footer.ui.viewbinder
 
 import android.view.View
 import androidx.lifecycle.lifecycleScope
+import com.android.systemui.Flags
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.statusbar.notification.NotificationActivityStarter
 import com.android.systemui.statusbar.notification.emptyshade.shared.ModesEmptyShadeFix
@@ -28,7 +29,7 @@ import com.android.systemui.util.ui.stopAnimating
 import com.android.systemui.util.ui.value
 import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /** Binds a [FooterView] to its [view model][FooterViewModel]. */
 object FooterViewBinder {
@@ -63,14 +64,16 @@ object FooterViewBinder {
         notificationActivityStarter: NotificationActivityStarter,
     ) = coroutineScope {
         launch { bindClearAllButton(footer, viewModel, clearAllNotifications) }
-        launch {
-            bindManageOrHistoryButton(
-                footer,
-                viewModel,
-                launchNotificationSettings,
-                launchNotificationHistory,
-                notificationActivityStarter,
-            )
+        if (!Flags.notificationsRedesignFooterView()) {
+            launch {
+                bindManageOrHistoryButton(
+                    footer,
+                    viewModel,
+                    launchNotificationSettings,
+                    launchNotificationHistory,
+                    notificationActivityStarter,
+                )
+            }
         }
         launch { bindMessage(footer, viewModel) }
     }

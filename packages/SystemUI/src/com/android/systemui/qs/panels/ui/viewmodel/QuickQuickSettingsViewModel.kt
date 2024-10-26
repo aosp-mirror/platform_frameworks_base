@@ -18,6 +18,7 @@ package com.android.systemui.qs.panels.ui.viewmodel
 
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.haptics.msdl.qs.TileHapticsViewModelFactoryProvider
 import com.android.systemui.qs.panels.domain.interactor.QuickQuickSettingsRowInteractor
 import com.android.systemui.qs.panels.shared.model.SizedTile
 import com.android.systemui.qs.panels.shared.model.SizedTileImpl
@@ -45,6 +46,7 @@ constructor(
     val squishinessViewModel: TileSquishinessViewModel,
     private val iconTilesViewModel: IconTilesViewModel,
     @Application private val applicationScope: CoroutineScope,
+    val tileHapticsViewModelFactoryProvider: TileHapticsViewModelFactoryProvider,
 ) {
 
     val columns = qsColumnsViewModel.columns

@@ -32,7 +32,7 @@ interface SimpleDigitalClockView {
 
     fun applyTextSize(targetFontSizePx: Float?, constrainedByHeight: Boolean = false)
 
-    fun updateColors(assets: AssetLoader, isRegionDark: Boolean)
+    fun updateColor(color: Int)
 
     fun refreshTime()
 

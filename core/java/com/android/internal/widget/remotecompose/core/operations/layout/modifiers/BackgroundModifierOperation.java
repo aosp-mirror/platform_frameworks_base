@@ -15,7 +15,7 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.layout.modifiers;
 
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.FLOAT;
+import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.FLOAT;
 
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
@@ -28,9 +28,7 @@ import com.android.internal.widget.remotecompose.core.operations.utilities.Strin
 
 import java.util.List;
 
-/**
- * Component size-aware background draw
- */
+/** Component size-aware background draw */
 public class BackgroundModifierOperation extends DecoratorModifierOperation {
     private static final int OP_CODE = Operations.MODIFIER_BACKGROUND;
     private static final String CLASS_NAME = "BackgroundModifierOperation";
@@ -46,9 +44,16 @@ public class BackgroundModifierOperation extends DecoratorModifierOperation {
 
     public PaintBundle mPaint = new PaintBundle();
 
-    public BackgroundModifierOperation(float x, float y, float width, float height,
-                                       float r, float g, float b, float a,
-                                       int shapeType) {
+    public BackgroundModifierOperation(
+            float x,
+            float y,
+            float width,
+            float height,
+            float r,
+            float g,
+            float b,
+            float a,
+            int shapeType) {
         this.mX = x;
         this.mY = y;
         this.mWidth = width;
@@ -67,10 +72,27 @@ public class BackgroundModifierOperation extends DecoratorModifierOperation {
 
     @Override
     public void serializeToString(int indent, StringSerializer serializer) {
-        serializer.append(indent, "BACKGROUND = [" + mX + ", "
-                + mY + ", " + mWidth + ", " + mHeight
-                + "] color [" + mR + ", " + mG + ", " + mB + ", " + mA
-                + "] shape [" + mShapeType + "]");
+        serializer.append(
+                indent,
+                "BACKGROUND = ["
+                        + mX
+                        + ", "
+                        + mY
+                        + ", "
+                        + mWidth
+                        + ", "
+                        + mHeight
+                        + "] color ["
+                        + mR
+                        + ", "
+                        + mG
+                        + ", "
+                        + mB
+                        + ", "
+                        + mA
+                        + "] shape ["
+                        + mShapeType
+                        + "]");
     }
 
     @Override
@@ -92,8 +114,17 @@ public class BackgroundModifierOperation extends DecoratorModifierOperation {
         return OP_CODE;
     }
 
-    public static void apply(WireBuffer buffer, float x, float y, float width, float height,
-                             float r, float g, float b, float a, int shapeType) {
+    public static void apply(
+            WireBuffer buffer,
+            float x,
+            float y,
+            float width,
+            float height,
+            float r,
+            float g,
+            float b,
+            float a,
+            int shapeType) {
         buffer.start(OP_CODE);
         buffer.writeFloat(x);
         buffer.writeFloat(y);
@@ -118,10 +149,8 @@ public class BackgroundModifierOperation extends DecoratorModifierOperation {
         float a = buffer.readFloat();
         // shape type
         int shapeType = buffer.readInt();
-        operations.add(new BackgroundModifierOperation(x, y, width, height,
-                r, g, b, a, shapeType));
+        operations.add(new BackgroundModifierOperation(x, y, width, height, r, g, b, a, shapeType));
     }
-
 
     @Override
     public void paint(PaintContext context) {
@@ -133,16 +162,13 @@ public class BackgroundModifierOperation extends DecoratorModifierOperation {
         if (mShapeType == ShapeType.RECTANGLE) {
             context.drawRect(0f, 0f, mWidth, mHeight);
         } else if (mShapeType == ShapeType.CIRCLE) {
-            context.drawCircle(mWidth / 2f, mHeight / 2f,
-                    Math.min(mWidth, mHeight) / 2f);
+            context.drawCircle(mWidth / 2f, mHeight / 2f, Math.min(mWidth, mHeight) / 2f);
         }
         context.restorePaint();
     }
 
     public static void documentation(DocumentationBuilder doc) {
-        doc.operation("Modifier Operations",
-                        OP_CODE,
-                        CLASS_NAME)
+        doc.operation("Modifier Operations", OP_CODE, CLASS_NAME)
                 .description("define the Background Modifier")
                 .field(FLOAT, "x", "")
                 .field(FLOAT, "y", "")

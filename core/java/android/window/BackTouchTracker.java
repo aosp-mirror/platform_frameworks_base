@@ -151,7 +151,7 @@ public class BackTouchTracker {
         return new BackMotionEvent(
                 /* touchX = */ mInitTouchX,
                 /* touchY = */ mInitTouchY,
-                /* frameTime = */ 0,
+                /* frameTimeMillis = */ 0,
                 /* progress = */ 0,
                 /* triggerBack = */ mTriggerBack,
                 /* swipeEdge = */ mSwipeEdge,
@@ -236,7 +236,7 @@ public class BackTouchTracker {
         return new BackMotionEvent(
                 /* touchX = */ mLatestTouchX,
                 /* touchY = */ mLatestTouchY,
-                /* frameTime = */ 0,
+                /* frameTimeMillis = */ 0,
                 /* progress = */ progress,
                 /* triggerBack = */ mTriggerBack,
                 /* swipeEdge = */ mSwipeEdge,

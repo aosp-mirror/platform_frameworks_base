@@ -26,6 +26,7 @@ import android.os.BatteryUsageStatsQuery;
 import android.os.Handler;
 import android.os.Process;
 import android.util.Log;
+import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.os.Clock;
@@ -350,13 +351,14 @@ public class BatteryUsageStatsProvider {
 
         synchronized (stats) {
             final List<PowerCalculator> powerCalculators = getPowerCalculators();
-            if (!powerCalculators.isEmpty()) {
-                if (monotonicStartTime != MonotonicClock.UNDEFINED
-                        || monotonicEndTime != MonotonicClock.UNDEFINED) {
-                    throw new IllegalStateException("BatteryUsageStatsQuery specifies a time "
-                            + "range that is incompatible with PowerCalculators: "
-                            + powerCalculators);
-                }
+            boolean usePowerCalculators = !powerCalculators.isEmpty();
+            if (usePowerCalculators
+                    && (monotonicStartTime != MonotonicClock.UNDEFINED
+                    || monotonicEndTime != MonotonicClock.UNDEFINED)) {
+                Slog.wtfStack(TAG, "BatteryUsageStatsQuery specifies a time "
+                        + "range that is incompatible with PowerCalculators: "
+                        + powerCalculators);
+                usePowerCalculators = false;
             }
 
             if (monotonicStartTime == MonotonicClock.UNDEFINED) {
@@ -371,7 +373,7 @@ public class BatteryUsageStatsProvider {
                 batteryUsageStatsBuilder.setStatsEndTimestamp(currentTimeMs);
             }
 
-            if (!powerCalculators.isEmpty()) {
+            if (usePowerCalculators) {
                 final long realtimeUs = mClock.elapsedRealtime() * 1000;
                 final long uptimeUs = mClock.uptimeMillis() * 1000;
                 final int[] powerComponents = query.getPowerComponents();
