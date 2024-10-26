@@ -28,6 +28,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.customization.R
 import com.android.systemui.plugins.clocks.ClockId
 import com.android.systemui.plugins.clocks.ClockSettings
+import com.android.systemui.plugins.clocks.ThemeConfig
 import com.android.systemui.shared.clocks.DefaultClockController.Companion.DOZE_COLOR
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
@@ -72,8 +73,7 @@ class DefaultClockProviderTest : SysuiTestCase() {
             .thenReturn(mockSmallClockView)
         whenever(layoutInflater.inflate(eq(R.layout.clock_default_large), any(), anyBoolean()))
             .thenReturn(mockLargeClockView)
-        whenever(resources.getString(R.string.clock_default_name))
-            .thenReturn("DEFAULT_CLOCK_NAME")
+        whenever(resources.getString(R.string.clock_default_name)).thenReturn("DEFAULT_CLOCK_NAME")
         whenever(resources.getString(R.string.clock_default_description))
             .thenReturn("DEFAULT_CLOCK_DESC")
         whenever(resources.getDrawable(R.drawable.clock_default_thumbnail, null))
@@ -108,7 +108,7 @@ class DefaultClockProviderTest : SysuiTestCase() {
         verify(mockSmallClockView).setColors(DOZE_COLOR, Color.MAGENTA)
         verify(mockLargeClockView).setColors(DOZE_COLOR, Color.MAGENTA)
 
-        clock.initialize(resources, 0f, 0f)
+        clock.initialize(true, 0f, 0f)
 
         val expectedColor = 0
         verify(mockSmallClockView).setColors(DOZE_COLOR, expectedColor)
@@ -167,21 +167,22 @@ class DefaultClockProviderTest : SysuiTestCase() {
     }
 
     @Test
-    fun defaultClock_events_onColorPaletteChanged() {
+    fun defaultClock_events_onThemeChanged_noSeed() {
         val expectedColor = 0
         val clock = provider.createClock(DEFAULT_CLOCK_ID)
 
         verify(mockSmallClockView).setColors(DOZE_COLOR, Color.MAGENTA)
         verify(mockLargeClockView).setColors(DOZE_COLOR, Color.MAGENTA)
 
-        clock.events.onColorPaletteChanged(resources)
+        clock.smallClock.events.onThemeChanged(ThemeConfig(true, null))
+        clock.largeClock.events.onThemeChanged(ThemeConfig(true, null))
 
         verify(mockSmallClockView).setColors(DOZE_COLOR, expectedColor)
         verify(mockLargeClockView).setColors(DOZE_COLOR, expectedColor)
     }
 
     @Test
-    fun defaultClock_events_onSeedColorChanged() {
+    fun defaultClock_events_onThemeChanged_newSeed() {
         val initSeedColor = 10
         val newSeedColor = 20
         val clock = provider.createClock(ClockSettings(DEFAULT_CLOCK_ID, initSeedColor))
@@ -189,7 +190,8 @@ class DefaultClockProviderTest : SysuiTestCase() {
         verify(mockSmallClockView).setColors(DOZE_COLOR, initSeedColor)
         verify(mockLargeClockView).setColors(DOZE_COLOR, initSeedColor)
 
-        clock.events.onSeedColorChanged(newSeedColor)
+        clock.smallClock.events.onThemeChanged(ThemeConfig(true, newSeedColor))
+        clock.largeClock.events.onThemeChanged(ThemeConfig(true, newSeedColor))
 
         verify(mockSmallClockView).setColors(DOZE_COLOR, newSeedColor)
         verify(mockLargeClockView).setColors(DOZE_COLOR, newSeedColor)
@@ -210,7 +212,7 @@ class DefaultClockProviderTest : SysuiTestCase() {
     fun test_aodClock_always_whiteColor() {
         val clock = provider.createClock(DEFAULT_CLOCK_ID)
         clock.smallClock.animations.doze(0.9f) // set AOD mode to active
-        clock.smallClock.events.onRegionDarknessChanged(true)
+        clock.smallClock.events.onThemeChanged(ThemeConfig(true, null))
         verify((clock.smallClock.view as AnimatableClockView), never()).animateAppearOnLockscreen()
     }
 }

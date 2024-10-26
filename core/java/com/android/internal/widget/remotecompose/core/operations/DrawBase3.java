@@ -25,11 +25,8 @@ import com.android.internal.widget.remotecompose.core.WireBuffer;
 
 import java.util.List;
 
-/**
- * Base class for commands that take 3 float
- */
-public abstract class DrawBase3 extends PaintOperation
-        implements VariableSupport {
+/** Base class for commands that take 3 float */
+public abstract class DrawBase3 extends PaintOperation implements VariableSupport {
 
     protected String mName = "DrawRectBase";
     float mV1;
@@ -39,10 +36,7 @@ public abstract class DrawBase3 extends PaintOperation
     float mValue2;
     float mValue3;
 
-    public DrawBase3(
-            float v1,
-            float v2,
-            float v3) {
+    public DrawBase3(float v1, float v2, float v3) {
         mValue1 = v1;
         mValue2 = v2;
         mValue3 = v3;
@@ -54,12 +48,9 @@ public abstract class DrawBase3 extends PaintOperation
 
     @Override
     public void updateVariables(RemoteContext context) {
-        mV1 = (Utils.isVariable(mValue1))
-                ? context.getFloat(Utils.idFromNan(mValue1)) : mValue1;
-        mV2 = (Utils.isVariable(mValue2))
-                ? context.getFloat(Utils.idFromNan(mValue2)) : mValue2;
-        mV3 = (Utils.isVariable(mValue3))
-                ? context.getFloat(Utils.idFromNan(mValue3)) : mValue3;
+        mV1 = Utils.isVariable(mValue1) ? context.getFloat(Utils.idFromNan(mValue1)) : mValue1;
+        mV2 = Utils.isVariable(mValue2) ? context.getFloat(Utils.idFromNan(mValue2)) : mValue2;
+        mV3 = Utils.isVariable(mValue3) ? context.getFloat(Utils.idFromNan(mValue3)) : mValue3;
     }
 
     @Override
@@ -80,21 +71,21 @@ public abstract class DrawBase3 extends PaintOperation
         write(buffer, mV1, mV2, mV3);
     }
 
-    protected abstract void write(WireBuffer buffer,
-                                  float v1,
-                                  float v2,
-                                  float v3);
+    protected abstract void write(WireBuffer buffer, float v1, float v2, float v3);
 
     interface Maker {
-        DrawBase3 create(float v1,
-                         float v2,
-                         float v3);
+        DrawBase3 create(float v1, float v2, float v3);
     }
 
     @Override
     public String toString() {
-        return mName + " " + floatToString(mV1) + " " + floatToString(mV2)
-                + " " + floatToString(mV3);
+        return mName
+                + " "
+                + floatToString(mV1)
+                + " "
+                + floatToString(mV2)
+                + " "
+                + floatToString(mV3);
     }
 
     public static void read(Maker maker, WireBuffer buffer, List<Operation> operations) {
@@ -106,17 +97,14 @@ public abstract class DrawBase3 extends PaintOperation
     }
 
     /**
-     * Construct and Operation from the 3 variables.
-     * This must be overridden by subclasses
+     * Construct and Operation from the 3 variables. This must be overridden by subclasses
      *
      * @param x1
      * @param y1
      * @param x2
      * @return
      */
-    public Operation construct(float x1,
-                               float y1,
-                               float x2) {
+    public Operation construct(float x1, float y1, float x2) {
         return null;
     }
 }

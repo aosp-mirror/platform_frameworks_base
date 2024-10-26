@@ -28,7 +28,6 @@
         android:id="@+id/volume_dialog_floating_sliders_container"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:background="@drawable/volume_dialog_background"
         android:divider="@drawable/volume_dialog_floating_sliders_spacer"
         android:gravity="bottom"
         android:orientation="horizontal"
@@ -36,6 +35,7 @@
         android:showDividers="middle" />
 
     <LinearLayout
+        android:id="@+id/volume_dialog"
         android:layout_width="@dimen/volume_dialog_width"
         android:layout_height="wrap_content"
         android:background="@drawable/volume_dialog_background"
@@ -45,16 +45,11 @@
         android:paddingVertical="@dimen/volume_dialog_vertical_padding"
         android:showDividers="middle">
 
-        <FrameLayout
-            android:id="@+id/volume_dialog_ringer_button"
-            android:layout_width="@dimen/volume_dialog_button_size"
-            android:layout_height="@dimen/volume_dialog_button_size" />
+        <include layout="@layout/volume_ringer_drawer" />
 
-        <include
-            android:id="@+id/volume_dialog_slider"
-            layout="@layout/volume_dialog_slider" />
+        <include layout="@layout/volume_dialog_slider" />
 
-        <Button
+        <ImageButton
             android:id="@+id/volume_dialog_settings"
             android:layout_width="@dimen/volume_dialog_button_size"
             android:layout_height="@dimen/volume_dialog_button_size"

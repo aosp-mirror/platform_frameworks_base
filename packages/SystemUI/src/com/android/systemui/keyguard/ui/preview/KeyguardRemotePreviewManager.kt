@@ -44,7 +44,7 @@ import com.android.systemui.util.kotlin.logD
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 @SysUISingleton
 class KeyguardRemotePreviewManager
@@ -214,7 +214,7 @@ class PreviewLifecycleObserver(
             this.onDestroy = null
             val hostToken = rendererToDestroy.hostToken
             hostToken?.unlinkToDeath(this, 0)
-            scope.launch(mainDispatcher) { rendererToDestroy.destroy() }
+            scope.launch(context = mainDispatcher) { rendererToDestroy.destroy() }
             rendererToDestroy.id
         }
     }

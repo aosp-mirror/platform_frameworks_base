@@ -15,7 +15,7 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.layout;
 
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.INT;
+import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT;
 
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
@@ -24,13 +24,17 @@ import com.android.internal.widget.remotecompose.core.documentation.Documentatio
 
 import java.util.List;
 
-/**
- * Represents the content of a CanvasLayout (i.e. contains the canvas commands)
- */
+/** Represents the content of a CanvasLayout (i.e. contains the canvas commands) */
 public class CanvasContent extends Component implements ComponentStartOperation {
 
-    public CanvasContent(int componentId, float x, float y,
-                         float width, float height, Component parent, int animationId) {
+    public CanvasContent(
+            int componentId,
+            float x,
+            float y,
+            float width,
+            float height,
+            Component parent,
+            int animationId) {
         super(parent, componentId, animationId, x, y, width, height);
     }
 
@@ -42,7 +46,8 @@ public class CanvasContent extends Component implements ComponentStartOperation 
         return Operations.LAYOUT_CANVAS_CONTENT;
     }
 
-    @Override protected String getSerializedName() {
+    @Override
+    protected String getSerializedName() {
         return "CANVAS_CONTENT";
     }
 
@@ -53,8 +58,7 @@ public class CanvasContent extends Component implements ComponentStartOperation 
 
     public static void read(WireBuffer buffer, List<Operation> operations) {
         int componentId = buffer.readInt();
-        operations.add(new CanvasContent(
-                componentId, 0, 0, 0, 0, null, -1));
+        operations.add(new CanvasContent(componentId, 0, 0, 0, 0, null, -1));
     }
 
     public static void documentation(DocumentationBuilder doc) {

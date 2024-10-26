@@ -15,7 +15,7 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.layout;
 
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.INT;
+import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT;
 
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
@@ -32,38 +32,66 @@ import com.android.internal.widget.remotecompose.core.operations.utilities.Strin
 
 import java.util.List;
 
-/**
- * Represents the root layout component. Entry point to the component tree layout/paint.
- */
+/** Represents the root layout component. Entry point to the component tree layout/paint. */
 public class RootLayoutComponent extends Component implements ComponentStartOperation {
     int mCurrentId = -1;
 
-    public RootLayoutComponent(int componentId, float x, float y,
-                               float width, float height, Component parent, int animationId) {
+    public RootLayoutComponent(
+            int componentId,
+            float x,
+            float y,
+            float width,
+            float height,
+            Component parent,
+            int animationId) {
         super(parent, componentId, animationId, x, y, width, height);
     }
 
-    public RootLayoutComponent(int componentId, float x, float y,
-                               float width, float height, Component parent) {
+    public RootLayoutComponent(
+            int componentId, float x, float y, float width, float height, Component parent) {
         super(parent, componentId, -1, x, y, width, height);
     }
 
     @Override
     public String toString() {
-        return "ROOT " + mComponentId + " (" + mX + ", " + mY + " - "
-                + mWidth + " x " + mHeight + ") " + mVisibility;
+        return "ROOT "
+                + mComponentId
+                + " ("
+                + mX
+                + ", "
+                + mY
+                + " - "
+                + mWidth
+                + " x "
+                + mHeight
+                + ") "
+                + mVisibility;
     }
 
     @Override
     public void serializeToString(int indent, StringSerializer serializer) {
-        serializer.append(indent, "ROOT [" + mComponentId + ":" + mAnimationId
-                + "] = [" + mX + ", " + mY + ", " + mWidth + ", " + mHeight + "] " + mVisibility);
+        serializer.append(
+                indent,
+                "ROOT ["
+                        + mComponentId
+                        + ":"
+                        + mAnimationId
+                        + "] = ["
+                        + mX
+                        + ", "
+                        + mY
+                        + ", "
+                        + mWidth
+                        + ", "
+                        + mHeight
+                        + "] "
+                        + mVisibility);
     }
 
     /**
-     * Traverse the hierarchy and assign generated ids to component without ids.
-     * Most components would already have ids assigned during the document creation, but this
-     * allow us to take care of any components added during the inflation.
+     * Traverse the hierarchy and assign generated ids to component without ids. Most components
+     * would already have ids assigned during the document creation, but this allow us to take care
+     * of any components added during the inflation.
      *
      * @param lastId the last known generated id
      */
@@ -84,9 +112,7 @@ public class RootLayoutComponent extends Component implements ComponentStartOper
         }
     }
 
-    /**
-     * This will measure then layout the tree of components
-     */
+    /** This will measure then layout the tree of components */
     public void layout(RemoteContext context) {
         if (!mNeedsMeasure) {
             return;
@@ -100,8 +126,7 @@ public class RootLayoutComponent extends Component implements ComponentStartOper
         for (Operation op : mList) {
             if (op instanceof Measurable) {
                 Measurable m = (Measurable) op;
-                m.measure(context.getPaintContext(),
-                        0f, mWidth, 0f, mHeight, measurePass);
+                m.measure(context.getPaintContext(), 0f, mWidth, 0f, mHeight, measurePass);
                 m.layout(context, measurePass);
             }
         }
@@ -161,15 +186,16 @@ public class RootLayoutComponent extends Component implements ComponentStartOper
 
     public static void read(WireBuffer buffer, List<Operation> operations) {
         int componentId = buffer.readInt();
-        operations.add(new RootLayoutComponent(
-                componentId, 0, 0, 0, 0, null, -1));
+        operations.add(new RootLayoutComponent(componentId, 0, 0, 0, 0, null, -1));
     }
 
     public static void documentation(DocumentationBuilder doc) {
         doc.operation("Layout Operations", id(), name())
                 .field(INT, "COMPONENT_ID", "unique id for this component")
-                .description("Root element for a document. Other components / layout managers "
-                        + "are children in the component tree starting from this Root component.");
+                .description(
+                        "Root element for a document. Other components / layout managers are"
+                                + " children in the component tree starting from"
+                                + "this Root component.");
     }
 
     @Override

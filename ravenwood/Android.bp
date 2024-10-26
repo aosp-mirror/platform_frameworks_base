@@ -310,7 +310,7 @@ sh_test_host {
     name: "ravenwood-stats-checker",
     src: "scripts/ravenwood-stats-checker.sh",
     test_suites: ["general-tests"],
-    data: [
+    device_common_data: [
         ":framework-minus-apex.ravenwood-base_all{hoststubgen_framework-minus-apex_stats.csv}",
         ":framework-minus-apex.ravenwood-base_all{hoststubgen_framework-minus-apex_apis.csv}",
         ":framework-minus-apex.ravenwood-base_all{hoststubgen_framework-minus-apex_keep_all.txt}",
@@ -319,6 +319,16 @@ sh_test_host {
         ":services.core.ravenwood-base{hoststubgen_services.core_apis.csv}",
         ":services.core.ravenwood-base{hoststubgen_services.core_keep_all.txt}",
         ":services.core.ravenwood-base{hoststubgen_services.core_dump.txt}",
+
+        ":framework-configinfrastructure.ravenwood-base{framework-configinfrastructure_stats.csv}",
+        ":framework-configinfrastructure.ravenwood-base{framework-configinfrastructure_apis.csv}",
+        ":framework-configinfrastructure.ravenwood-base{framework-configinfrastructure_keep_all.txt}",
+        ":framework-configinfrastructure.ravenwood-base{framework-configinfrastructure_dump.txt}",
+
+        ":framework-statsd.ravenwood-base{framework-statsd_stats.csv}",
+        ":framework-statsd.ravenwood-base{framework-statsd_apis.csv}",
+        ":framework-statsd.ravenwood-base{framework-statsd_keep_all.txt}",
+        ":framework-statsd.ravenwood-base{framework-statsd_dump.txt}",
     ],
 }
 
@@ -402,6 +412,9 @@ android_ravenwood_libgroup {
 
         // DeviceConfig
         "framework-configinfrastructure.ravenwood",
+
+        // StatsD
+        "framework-statsd.ravenwood",
 
         // Provide runtime versions of utils linked in below
         "junit",

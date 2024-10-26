@@ -79,14 +79,15 @@ public final class ExecuteAppFunctionResponse implements Parcelable {
     /** The caller does not have the permission to execute an app function. */
     public static final int RESULT_DENIED = 1;
 
-    /** An unknown error occurred while processing the call in the AppFunctionService. */
+    /**
+     * An unknown error occurred while processing the call in the AppFunctionService.
+     *
+     * <p>This error is thrown when the service is connected in the remote application but an
+     * unexpected error is thrown from the bound application.
+     */
     public static final int RESULT_APP_UNKNOWN_ERROR = 2;
 
-    /**
-     * An internal error occurred within AppFunctionManagerService.
-     *
-     * <p>This error may be considered similar to {@link IllegalStateException}
-     */
+    /** An internal unexpected error coming from the system. */
     public static final int RESULT_INTERNAL_ERROR = 3;
 
     /**

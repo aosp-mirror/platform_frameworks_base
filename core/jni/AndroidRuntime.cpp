@@ -177,6 +177,7 @@ extern int register_android_app_backup_FullBackup(JNIEnv *env);
 extern int register_android_app_Activity(JNIEnv *env);
 extern int register_android_app_ActivityThread(JNIEnv *env);
 extern int register_android_app_NativeActivity(JNIEnv *env);
+extern int register_android_app_PropertyInvalidatedCache(JNIEnv* env);
 extern int register_android_media_RemoteDisplay(JNIEnv *env);
 extern int register_android_util_jar_StrictJarFile(JNIEnv* env);
 extern int register_android_view_InputChannel(JNIEnv* env);
@@ -1659,6 +1660,7 @@ static const RegJNIRec gRegJNI[] = {
         REG_JNI(register_android_app_Activity),
         REG_JNI(register_android_app_ActivityThread),
         REG_JNI(register_android_app_NativeActivity),
+        REG_JNI(register_android_app_PropertyInvalidatedCache),
         REG_JNI(register_android_util_jar_StrictJarFile),
         REG_JNI(register_android_view_InputChannel),
         REG_JNI(register_android_view_InputEventReceiver),

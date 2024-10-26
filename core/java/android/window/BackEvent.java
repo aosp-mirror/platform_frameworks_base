@@ -23,7 +23,6 @@ import static com.android.window.flags.Flags.predictiveBackTimestampApi;
 import android.annotation.FlaggedApi;
 import android.annotation.FloatRange;
 import android.annotation.IntDef;
-import android.util.TimeUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -58,7 +57,7 @@ public final class BackEvent {
     private final float mTouchX;
     private final float mTouchY;
     private final float mProgress;
-    private final long mFrameTime;
+    private final long mFrameTimeMillis;
 
     @SwipeEdge
     private final int mSwipeEdge;
@@ -68,7 +67,7 @@ public final class BackEvent {
         if (predictiveBackTimestampApi()) {
             return new BackEvent(backMotionEvent.getTouchX(), backMotionEvent.getTouchY(),
                     backMotionEvent.getProgress(), backMotionEvent.getSwipeEdge(),
-                    backMotionEvent.getFrameTime());
+                    backMotionEvent.getFrameTimeMillis());
         } else {
             return new BackEvent(backMotionEvent.getTouchX(), backMotionEvent.getTouchY(),
                     backMotionEvent.getProgress(), backMotionEvent.getSwipeEdge());
@@ -76,7 +75,7 @@ public final class BackEvent {
     }
 
     /**
-     * Creates a new {@link BackEvent} instance with the current uptime as frame time.
+     * Creates a new {@link BackEvent} instance with a frame time of 0.
      *
      * @param touchX Absolute X location of the touch point of this event.
      * @param touchY Absolute Y location of the touch point of this event.
@@ -88,7 +87,7 @@ public final class BackEvent {
         mTouchY = touchY;
         mProgress = progress;
         mSwipeEdge = swipeEdge;
-        mFrameTime = System.nanoTime() / TimeUtils.NANOS_PER_MS;
+        mFrameTimeMillis = 0;
     }
 
     /**
@@ -98,16 +97,16 @@ public final class BackEvent {
      * @param touchY Absolute Y location of the touch point of this event.
      * @param progress Value between 0 and 1 on how far along the back gesture is.
      * @param swipeEdge Indicates which edge the swipe starts from.
-     * @param frameTime frame time of the back event.
+     * @param frameTimeMillis frame time of the back event.
      */
     @FlaggedApi(FLAG_PREDICTIVE_BACK_TIMESTAMP_API)
     public BackEvent(float touchX, float touchY, float progress, @SwipeEdge int swipeEdge,
-            long frameTime) {
+            long frameTimeMillis) {
         mTouchX = touchX;
         mTouchY = touchY;
         mProgress = progress;
         mSwipeEdge = swipeEdge;
-        mFrameTime = frameTime;
+        mFrameTimeMillis = frameTimeMillis;
     }
 
     /**
@@ -160,8 +159,8 @@ public final class BackEvent {
      * Returns the frameTime of the BackEvent in milliseconds. Useful for calculating velocity.
      */
     @FlaggedApi(FLAG_PREDICTIVE_BACK_TIMESTAMP_API)
-    public long getFrameTime() {
-        return mFrameTime;
+    public long getFrameTimeMillis() {
+        return mFrameTimeMillis;
     }
 
     @Override
@@ -177,7 +176,7 @@ public final class BackEvent {
                 && mTouchY == that.mTouchY
                 && mProgress == that.mProgress
                 && mSwipeEdge == that.mSwipeEdge
-                && mFrameTime == that.mFrameTime;
+                && mFrameTimeMillis == that.mFrameTimeMillis;
     }
 
     @Override
@@ -187,7 +186,7 @@ public final class BackEvent {
                 + ", mTouchY=" + mTouchY
                 + ", mProgress=" + mProgress
                 + ", mSwipeEdge=" + mSwipeEdge
-                + ", mFrameTime=" + mFrameTime + "ms"
+                + ", mFrameTimeMillis=" + mFrameTimeMillis
                 + "}";
     }
 }

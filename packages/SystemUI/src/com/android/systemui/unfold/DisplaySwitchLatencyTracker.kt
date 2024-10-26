@@ -53,7 +53,7 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 import kotlinx.coroutines.withTimeout
 
 /**
@@ -86,7 +86,7 @@ constructor(
         if (!isDeviceFoldable(context.resources, deviceStateManager)) {
             return
         }
-        applicationScope.launch(backgroundDispatcher) {
+        applicationScope.launch(context = backgroundDispatcher) {
             deviceStateRepository.state
                 .pairwise()
                 .filter {

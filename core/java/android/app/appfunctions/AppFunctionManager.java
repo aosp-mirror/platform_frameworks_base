@@ -42,12 +42,38 @@ import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 /**
- * Provides app functions related functionalities.
+ * Provides access to app functions.
  *
- * <p>App function is a specific piece of functionality that an app offers to the system. These
- * functionalities can be integrated into various system features.
+ * <p>An app function is a piece of functionality that apps expose to the system for cross-app
+ * orchestration.
+ *
+ * <p>**Developer Workflow:**
+ *
+ * <p>Most developers should interact with app functions through the AppFunctions SDK. This SDK
+ * library offers a more convenient and type-safe way to represent the inputs and outputs of an app
+ * function, using custom data classes called "AppFunction Schemas".
+ *
+ * <p>The suggested way to build an app function is to use the AppFunctions SDK. The SDK provides
+ * custom data classes (AppFunctions Schemas) and handles the conversion to the underlying {@link
+ * android.app.appsearch.GenericDocument}/{@link android.os.Bundle} format used in {@link
+ * ExecuteAppFunctionRequest} and {@link ExecuteAppFunctionResponse}.
+ *
+ * <p>**Discovering (Listing) App Functions:**
+ *
+ * <p>When there is a package change or the device starts up, the metadata of available functions is
+ * indexed on-device by {@link AppSearchManager}. AppSearch stores the indexed information as a
+ * {@code AppFunctionStaticMetadata} document. This allows other apps and the app itself to discover
+ * these functions using the AppSearch search APIs. Visibility to this metadata document is based on
+ * the packages that have visibility to the app providing the app functions.
+ *
+ * <p>**Executing App Functions:**
+ *
+ * <p>Requests to execute a function are built using the {@link ExecuteAppFunctionRequest} class.
+ * Callers need the {@code android.permission.EXECUTE_APP_FUNCTIONS} or {@code
+ * android.permission.EXECUTE_APP_FUNCTIONS_TRUSTED} permission to execute app functions from other
+ * apps. An app has automatic visibility to its own functions and doesn't need these permissions to
+ * call its own functions via {@code AppFunctionManager}.
  */
-// TODO(b/357551503): Implement get and set enabled app function APIs.
 @FlaggedApi(FLAG_ENABLE_APP_FUNCTION_MANAGER)
 @SystemService(Context.APP_FUNCTION_SERVICE)
 public final class AppFunctionManager {
@@ -111,17 +137,19 @@ public final class AppFunctionManager {
      * @param request the request to execute the app function
      * @param executor the executor to run the callback
      * @param cancellationSignal the cancellation signal to cancel the execution.
-     * @param callback the callback to receive the function execution result. if the calling app
-     *     does not own the app function or does not have {@code
+     * @param callback the callback to receive the function execution result.
+     *     <p>If the calling app does not own the app function or does not have {@code
      *     android.permission.EXECUTE_APP_FUNCTIONS_TRUSTED} or {@code
      *     android.permission.EXECUTE_APP_FUNCTIONS}, the execution result will contain {@code
      *     ExecuteAppFunctionResponse.RESULT_DENIED}.
+     *     <p>If the caller only has {@code android.permission.EXECUTE_APP_FUNCTIONS} but the
+     *     function requires {@code android.permission.EXECUTE_APP_FUNCTIONS_TRUSTED}, the execution
+     *     result will contain {@code ExecuteAppFunctionResponse.RESULT_DENIED}
+     *     <p>If the function requested for execution is disabled, then the execution result will
+     *     contain {@code ExecuteAppFunctionResponse.RESULT_DISABLED}
+     *     <p>If the cancellation signal is issued, the operation is cancelled and no response is
+     *     returned to the caller.
      */
-    // TODO(b/357551503): Document the behavior when the cancellation signal is issued.
-    // TODO(b/360864791): Document that apps can opt-out from being executed by callers with
-    //   EXECUTE_APP_FUNCTIONS and how a caller knows whether a function is opted out.
-    // TODO(b/357551503): Update documentation when get / set APIs are implemented that this will
-    //   also return RESULT_DENIED if the app function is disabled.
     @RequiresPermission(
             anyOf = {
                 Manifest.permission.EXECUTE_APP_FUNCTIONS_TRUSTED,

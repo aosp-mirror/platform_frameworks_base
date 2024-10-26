@@ -18,14 +18,19 @@ package com.android.wm.shell.bubbles
 
 import android.content.ComponentName
 import android.content.Context
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
+import android.platform.test.flag.junit.SetFlagsRule
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.wm.shell.Flags
 import com.android.wm.shell.taskview.TaskView
 
 import com.google.common.truth.Truth.assertThat
 import com.google.common.util.concurrent.MoreExecutors.directExecutor
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
@@ -35,6 +40,9 @@ import org.mockito.kotlin.verify
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class BubbleTaskViewTest {
+
+    @get:Rule
+    val setFlagsRule = SetFlagsRule()
 
     private lateinit var bubbleTaskView: BubbleTaskView
     private val context = ApplicationProvider.getApplicationContext<Context>()
@@ -75,14 +83,33 @@ class BubbleTaskViewTest {
         assertThat(actualComponentName).isEqualTo(componentName)
     }
 
+    @DisableFlags(Flags.FLAG_ENABLE_TASK_VIEW_CONTROLLER_CLEANUP)
     @Test
-    fun cleanup_invalidTaskId_doesNotRemoveTask() {
+    fun cleanup_flagOff_invalidTaskId_doesNotRemoveTask() {
         bubbleTaskView.cleanup()
         verify(taskView, never()).removeTask()
     }
 
+    @EnableFlags(Flags.FLAG_ENABLE_TASK_VIEW_CONTROLLER_CLEANUP)
     @Test
-    fun cleanup_validTaskId_removesTask() {
+    fun cleanup_flagOn_invalidTaskId_removesTask() {
+        bubbleTaskView.cleanup()
+        verify(taskView).removeTask()
+    }
+
+    @DisableFlags(Flags.FLAG_ENABLE_TASK_VIEW_CONTROLLER_CLEANUP)
+    @Test
+    fun cleanup_flagOff_validTaskId_removesTask() {
+        val componentName = ComponentName(context, "TestClass")
+        bubbleTaskView.listener.onTaskCreated(123, componentName)
+
+        bubbleTaskView.cleanup()
+        verify(taskView).removeTask()
+    }
+
+    @EnableFlags(Flags.FLAG_ENABLE_TASK_VIEW_CONTROLLER_CLEANUP)
+    @Test
+    fun cleanup_flagOn_validTaskId_removesTask() {
         val componentName = ComponentName(context, "TestClass")
         bubbleTaskView.listener.onTaskCreated(123, componentName)
 

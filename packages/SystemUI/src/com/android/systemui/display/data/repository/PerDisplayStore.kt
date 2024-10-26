@@ -23,7 +23,7 @@ import java.io.PrintWriter
 import java.util.concurrent.ConcurrentHashMap
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /** Provides per display instances of [T]. */
 interface PerDisplayStore<T> {
@@ -76,11 +76,11 @@ abstract class PerDisplayStoreImpl<T>(
         }
     }
 
-    abstract fun createInstanceForDisplay(displayId: Int): T
+    protected abstract fun createInstanceForDisplay(displayId: Int): T
 
     override fun start() {
         val instanceType = instanceClass.simpleName
-        backgroundApplicationScope.launch(CoroutineName("PerDisplayStore#<$instanceType>start")) {
+        backgroundApplicationScope.launch("PerDisplayStore#<$instanceType>start") {
             displayRepository.displayRemovalEvent.collect { removedDisplayId ->
                 val removedInstance = perDisplayInstances.remove(removedDisplayId)
                 removedInstance?.let { onDisplayRemovalAction(it) }

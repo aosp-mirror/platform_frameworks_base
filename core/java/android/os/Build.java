@@ -1274,6 +1274,12 @@ public class Build {
          * Vanilla Ice Cream.
          */
         public static final int VANILLA_ICE_CREAM = 35;
+
+        /**
+         * Baklava.
+         */
+        @FlaggedApi(Flags.FLAG_MAJOR_MINOR_VERSIONING_SCHEME)
+        public static final int BAKLAVA = CUR_DEVELOPMENT;
     }
 
     /** @hide */
@@ -1313,6 +1319,7 @@ public class Build {
         VERSION_CODES_FULL.TIRAMISU,
         VERSION_CODES_FULL.UPSIDE_DOWN_CAKE,
         VERSION_CODES_FULL.VANILLA_ICE_CREAM,
+        VERSION_CODES_FULL.BAKLAVA,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface SdkIntFull {}
@@ -1514,6 +1521,11 @@ public class Build {
          */
         public static final int VANILLA_ICE_CREAM =
                 VERSION_CODES.VANILLA_ICE_CREAM * SDK_INT_MULTIPLIER;
+
+        /**
+         * The upcoming, not yet finalized, version of Android.
+         */
+        public static final int BAKLAVA = VERSION_CODES.BAKLAVA * SDK_INT_MULTIPLIER;
     }
 
     /**

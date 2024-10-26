@@ -36,7 +36,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.mapLatest
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 import kotlinx.coroutines.withContext
 
 /**
@@ -55,7 +55,7 @@ constructor(
 ) {
     enum class Scope {
         Local,
-        Global
+        Global,
     }
 
     private val _localGestureBlockedMatchers = MutableStateFlow<Set<TaskMatcher>>(setOf())
@@ -86,7 +86,7 @@ constructor(
         combine(
             _topActivity,
             gestureRepository.gestureBlockedMatchers,
-            _localGestureBlockedMatchers.asStateFlow()
+            _localGestureBlockedMatchers.asStateFlow(),
         ) { runningTask, global, local ->
             runningTask != null && (global + local).any { it.matches(runningTask) }
         }

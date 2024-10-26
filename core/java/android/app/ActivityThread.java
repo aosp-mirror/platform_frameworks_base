@@ -7681,7 +7681,7 @@ public final class ActivityThread extends ClientTransactionHandler
         });
 
         // Register callback to report native memory metrics post GC cleanup
-        if (Flags.reportPostgcMemoryMetrics() &&
+        if (Flags.reportPostgcMemoryMetricsReadonly() &&
             com.android.libcore.readonly.Flags.postCleanupApis()) {
             VMRuntime.addPostCleanupCallback(new Runnable() {
                 @Override public void run() {

@@ -1463,6 +1463,12 @@
     <!-- The text for the notification history link. [CHAR LIMIT=40] -->
     <string name="manage_notifications_history_text">History</string>
 
+    <!-- The accessibility description for the notification settings button in the notification shade. -->
+    <string name="notification_settings_button_description">Notification settings</string>
+
+    <!-- The accessibility description for the notification history button in the notification shade. -->
+    <string name="notification_history_button_description">Notification history</string>
+
     <!-- Section title for notifications that have recently appeared. [CHAR LIMIT=40] -->
     <string name="notification_section_header_incoming">New</string>
 

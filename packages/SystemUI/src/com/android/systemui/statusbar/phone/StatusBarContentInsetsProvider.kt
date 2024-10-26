@@ -24,6 +24,7 @@ import android.graphics.Point
 import android.graphics.Rect
 import android.util.LruCache
 import android.util.Pair
+import android.view.Display.DEFAULT_DISPLAY
 import android.view.DisplayCutout
 import android.view.Surface
 import androidx.annotation.VisibleForTesting
@@ -37,7 +38,7 @@ import com.android.systemui.SysUICutoutProvider
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.commandline.CommandRegistry
-import com.android.systemui.statusbar.phone.StatusBarContentInsetsProviderImpl.CacheKey
+import com.android.systemui.statusbar.core.StatusBarConnectedDisplays
 import com.android.systemui.statusbar.policy.CallbackController
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.leak.RotationUtils.ROTATION_LANDSCAPE
@@ -68,6 +69,17 @@ import java.lang.Math.max
  */
 interface StatusBarContentInsetsProvider :
     CallbackController<StatusBarContentInsetsChangedListener> {
+
+    /**
+     * Called when the [StatusBarContentInsetsProvider] should start doing its work and allocate its
+     * resources.
+     */
+    fun start()
+
+    /**
+     * Called when the [StatusBarContentInsetsProvider] should stop and do any required clean up.
+     */
+    fun stop()
 
     /**
      * Some views may need to care about whether or not the current top display cutout is located in
@@ -157,10 +169,15 @@ constructor(
             context.resources.getBoolean(R.bool.config_enablePrivacyDot)
         }
 
-    init {
+    private val nameSuffix =
+        if (context.displayId == DEFAULT_DISPLAY) "" else context.displayId.toString()
+    private val dumpableName = TAG + nameSuffix
+    private val commandName = StatusBarInsetsCommand.NAME + nameSuffix
+
+    override fun start() {
         configurationController.addCallback(this)
-        dumpManager.registerDumpable(TAG, this)
-        commandRegistry.registerCommand(StatusBarInsetsCommand.NAME) {
+        dumpManager.registerDumpable(dumpableName, this)
+        commandRegistry.registerCommand(commandName) {
             StatusBarInsetsCommand(
                 object : StatusBarInsetsCommand.Callback {
                     override fun onExecute(
@@ -172,6 +189,13 @@ constructor(
                 }
             )
         }
+    }
+
+    override fun stop() {
+        StatusBarConnectedDisplays.assertInNewMode()
+        configurationController.removeCallback(this)
+        dumpManager.unregisterDumpable(dumpableName)
+        commandRegistry.unregisterCommand(commandName)
     }
 
     override fun addCallback(listener: StatusBarContentInsetsChangedListener) {

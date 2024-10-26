@@ -2884,14 +2884,13 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
             // Send the request to the verifier and wait for its response before the rest of
             // the installation can proceed.
+            final VerifierCallback verifierCallback = new VerifierCallback();
             if (!mVerifierController.startVerificationSession(mPm::snapshotComputer, userId,
                     sessionId, getPackageName(), Uri.fromFile(stageDir), signingInfo,
                     declaredLibraries, mVerificationPolicy.get(), /* extensionParams= */ null,
-                    new VerifierCallback(), /* retry= */ false)) {
-                // A verifier is installed but cannot be connected. Installation disallowed.
-                onSessionVerificationFailure(INSTALL_FAILED_INTERNAL_ERROR,
-                        "A verifier agent is available on device but cannot be connected.",
-                        /* extras= */ null);
+                    verifierCallback, /* retry= */ false)) {
+                // A verifier is installed but cannot be connected.
+                verifierCallback.onConnectionFailed();
             }
         } else {
             // No need to check with verifier. Proceed with the rest of the verification.
@@ -2995,7 +2994,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                         onSessionVerificationFailure(INSTALL_FAILED_VERIFICATION_FAILURE,
                                 "A verifier agent is available on device but cannot be connected.",
                                 bundle);
-
                     });
         }
         /**
@@ -4447,9 +4445,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
      * @return the uid of the owner this session
      */
     public int getInstallerUid() {
-        synchronized (mLock) {
-            return mInstallerUid;
-        }
+        return mInstallerUid;
     }
 
     /**

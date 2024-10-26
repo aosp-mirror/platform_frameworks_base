@@ -41,7 +41,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /**
  * Runs the given [block] every time the [View] becomes attached (or immediately after calling this
@@ -117,7 +117,7 @@ private fun createLifecycleOwnerAndRun(
         onCreate()
         // TODO(b/370595466): Refactor to support installing CoroutineTracingContext on the
         //                    top-level CoroutineScope used as the lifecycleScope
-        lifecycleScope.launch(coroutineContext) { block(view) }
+        lifecycleScope.launch(context = coroutineContext) { block(view) }
     }
 }
 

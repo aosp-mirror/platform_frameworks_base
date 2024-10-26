@@ -25,7 +25,6 @@ val Kosmos.paginatedGridViewModel by
         PaginatedGridViewModel(
             iconTilesViewModel,
             qsColumnsViewModel,
-            iconLabelVisibilityViewModel,
             paginatedGridInteractor,
             applicationCoroutineScope,
         )

@@ -20,11 +20,10 @@ import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.operations.utilities.StringSerializer;
 
-/**
- * Operations representing actions on the document
- */
+/** Operations representing actions on the document */
 public interface ActionOperation extends Operation {
     void serializeToString(int indent, StringSerializer serializer);
-    void runAction(RemoteContext context, CoreDocument document,
-                   Component component, float x, float y);
+
+    void runAction(
+            RemoteContext context, CoreDocument document, Component component, float x, float y);
 }

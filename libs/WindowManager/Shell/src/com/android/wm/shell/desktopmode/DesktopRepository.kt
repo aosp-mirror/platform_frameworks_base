@@ -129,19 +129,24 @@ class DesktopRepository (
                 DesktopModeStatus.getMaxTaskLimit(context).takeIf { it > 0 }
                     ?: desktop.zOrderedTasksCount
 
+            var visibleTasksCount = 0
             desktop.zOrderedTasksList
                 // Reverse it so we initialize the repo from bottom to top.
                 .reversed()
-                .mapNotNull { taskId ->
-                    desktop.tasksByTaskIdMap[taskId]?.takeIf {
-                        it.desktopTaskState == DesktopTaskState.VISIBLE
-                    }
-                }
-                .take(maxTasks)
+                .mapNotNull { taskId -> desktop.tasksByTaskIdMap[taskId] }
                 .forEach { task ->
-                    addOrMoveFreeformTaskToTop(desktop.displayId, task.taskId)
-                    addActiveTask(desktop.displayId, task.taskId)
-                    updateTaskVisibility(desktop.displayId, task.taskId, visible = false)
+                    if (task.desktopTaskState == DesktopTaskState.VISIBLE
+                        && visibleTasksCount < maxTasks
+                    ) {
+                        visibleTasksCount++
+                        addOrMoveFreeformTaskToTop(desktop.displayId, task.taskId)
+                        addActiveTask(desktop.displayId, task.taskId)
+                        updateTaskVisibility(desktop.displayId, task.taskId, visible = false)
+                    } else {
+                        addActiveTask(desktop.displayId, task.taskId)
+                        updateTaskVisibility(desktop.displayId, task.taskId, visible = false)
+                        minimizeTask(desktop.displayId, task.taskId)
+                    }
                 }
         }
     }
@@ -260,11 +265,11 @@ class DesktopRepository (
         ArraySet(desktopTaskDataByDisplayId[displayId]?.minimizedTasks)
 
     /** Returns all active non-minimized tasks for [displayId] ordered from top to bottom. */
-    fun getActiveNonMinimizedOrderedTasks(displayId: Int): List<Int> =
+    fun getExpandedTasksOrdered(displayId: Int): List<Int> =
         getFreeformTasksInZOrder(displayId).filter { !isMinimizedTask(it) }
 
     /** Returns the count of active non-minimized tasks for [displayId]. */
-    fun getActiveNonMinimizedTaskCount(displayId: Int): Int {
+    fun getExpandedTaskCount(displayId: Int): Int {
         return getActiveTasks(displayId).count { !isMinimizedTask(it) }
     }
 
