@@ -89,6 +89,7 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.SyncNotedAppOp;
 import android.app.backup.BackupAnnotations;
+import android.content.ClipData;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -100,6 +101,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ServiceInfo;
+import android.graphics.Rect;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.Bundle;
@@ -204,6 +206,16 @@ public class ActivityManagerServiceTest {
 
     private static final String TEST_AUTHORITY = "test_authority";
     private static final String TEST_MIME_TYPE = "application/test_type";
+    private static final Uri TEST_URI = Uri.parse("content://com.example/people");
+    private static final int TEST_CREATOR_UID = 12345;
+    private static final String TEST_CREATOR_PACKAGE = "android.content.testCreatorPackage";
+    private static final String TEST_TYPE = "testType";
+    private static final String TEST_IDENTIFIER = "testIdentifier";
+    private static final String TEST_CATEGORY = "testCategory";
+    private static final String TEST_LAUNCH_TOKEN = "testLaunchToken";
+    private static final ComponentName TEST_COMPONENT = new ComponentName(TEST_PACKAGE,
+            "TestClass");
+    private static final int ALL_SET_FLAG = 0xFFFFFFFF;
 
     private static final int[] UID_RECORD_CHANGES = {
         UidRecord.CHANGE_PROCSTATE,
@@ -1412,6 +1424,34 @@ public class ActivityManagerServiceTest {
         // local created intent should not have EXTENDED_FLAG_MISSING_CREATOR_OR_INVALID_TOKEN set.
         assertThat(extraIntent3.getExtendedFlags()
                 & Intent.EXTENDED_FLAG_MISSING_CREATOR_OR_INVALID_TOKEN).isEqualTo(0);
+    }
+
+    @Test
+    public void testUseCloneForCreatorTokenAndOriginalIntent_createSameIntentCreatorToken() {
+        Intent testIntent = new Intent(TEST_ACTION1)
+                .setComponent(TEST_COMPONENT)
+                .setDataAndType(TEST_URI, TEST_TYPE)
+                .setIdentifier(TEST_IDENTIFIER)
+                .addCategory(TEST_CATEGORY);
+        testIntent.setOriginalIntent(new Intent(TEST_ACTION2));
+        testIntent.setSelector(new Intent(TEST_ACTION3));
+        testIntent.setSourceBounds(new Rect(0, 0, 100, 100));
+        testIntent.setLaunchToken(TEST_LAUNCH_TOKEN);
+        testIntent.addFlags(ALL_SET_FLAG)
+                .addExtendedFlags(ALL_SET_FLAG);
+        ClipData testClipData = ClipData.newHtmlText("label", "text", "<html/>");
+        testClipData.addItem(new ClipData.Item(new Intent(TEST_ACTION1)));
+        testClipData.addItem(new ClipData.Item(TEST_URI));
+        testIntent.putExtra(TEST_EXTRA_KEY1, TEST_EXTRA_VALUE1);
+
+        ActivityManagerService.IntentCreatorToken tokenForFullIntent =
+                new ActivityManagerService.IntentCreatorToken(TEST_CREATOR_UID,
+                        TEST_CREATOR_PACKAGE, testIntent);
+        ActivityManagerService.IntentCreatorToken tokenForCloneIntent =
+                new ActivityManagerService.IntentCreatorToken(TEST_CREATOR_UID,
+                        TEST_CREATOR_PACKAGE, testIntent.cloneForCreatorToken());
+
+        assertThat(tokenForFullIntent.getKeyFields()).isEqualTo(tokenForCloneIntent.getKeyFields());
     }
 
     private void verifyWaitingForNetworkStateUpdate(long curProcStateSeq,
