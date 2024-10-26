@@ -38,7 +38,6 @@ import org.junit.runner.Runner;
 import org.junit.runner.manipulation.Filter;
 import org.junit.runner.manipulation.Filterable;
 import org.junit.runner.manipulation.NoTestsRemainException;
-import org.junit.runner.notification.Failure;
 import org.junit.runner.notification.RunNotifier;
 import org.junit.runners.BlockJUnit4ClassRunner;
 import org.junit.runners.Suite;
@@ -94,7 +93,7 @@ public final class RavenwoodAwareTestRunner extends RavenwoodAwareTestRunnerBase
     /** Keeps track of the runner on the current thread. */
     private static final ThreadLocal<RavenwoodAwareTestRunner> sCurrentRunner = new ThreadLocal<>();
 
-    static RavenwoodAwareTestRunner getCurrentRunner() {
+    private static RavenwoodAwareTestRunner getCurrentRunner() {
         var runner = sCurrentRunner.get();
         if (runner == null) {
             throw new RuntimeException("Current test runner not set!");
@@ -102,11 +101,9 @@ public final class RavenwoodAwareTestRunner extends RavenwoodAwareTestRunnerBase
         return runner;
     }
 
-    private final Class<?> mTestJavaClass;
+    final Class<?> mTestJavaClass;
+    private final Runner mRealRunner;
     private TestClass mTestClass = null;
-    private Runner mRealRunner = null;
-    private Description mDescription = null;
-    private Throwable mExceptionInConstructor = null;
 
     /**
      * Stores internal states / methods associated with this runner that's only needed in
@@ -114,50 +111,37 @@ public final class RavenwoodAwareTestRunner extends RavenwoodAwareTestRunnerBase
      */
     final RavenwoodRunnerState mState = new RavenwoodRunnerState(this);
 
-    public TestClass getTestClass() {
-        return mTestClass;
-    }
-
     /**
      * Constructor.
      */
     public RavenwoodAwareTestRunner(Class<?> testClass) {
         RavenwoodRuntimeEnvironmentController.globalInitOnce();
         mTestJavaClass = testClass;
-        try {
-            /*
-             * If the class has @DisabledOnRavenwood, then we'll delegate to
-             * ClassSkippingTestRunner, which simply skips it.
-             *
-             * We need to do it before instantiating TestClass for b/367694651.
-             */
-            if (!RavenwoodEnablementChecker.shouldRunClassOnRavenwood(testClass, true)) {
-                mRealRunner = new ClassSkippingTestRunner(testClass);
-                mDescription = mRealRunner.getDescription();
-                return;
-            }
 
-            mTestClass = new TestClass(testClass);
-
-            Log.v(TAG, "RavenwoodAwareTestRunner starting for " + testClass.getCanonicalName());
-
-            onRunnerInitializing();
-
-            mRealRunner = instantiateRealRunner(mTestClass);
-            mDescription = mRealRunner.getDescription();
-        } catch (Throwable th) {
-            // If we throw in the constructor, Tradefed may not report it and just ignore the class,
-            // so record it and throw it when the test actually started.
-            Log.e(TAG, "Fatal: Exception detected in constructor", th);
-            mExceptionInConstructor = new RuntimeException("Exception detected in constructor",
-                    th);
-            mDescription = Description.createTestDescription(testClass, "Constructor");
-
-            // This is for testing if tradefed is fixed.
-            if ("1".equals(System.getenv("RAVENWOOD_THROW_EXCEPTION_IN_TEST_RUNNER"))) {
-                throw th;
-            }
+        /*
+         * If the class has @DisabledOnRavenwood, then we'll delegate to
+         * ClassSkippingTestRunner, which simply skips it.
+         *
+         * We need to do it before instantiating TestClass for b/367694651.
+         */
+        if (!RavenwoodEnablementChecker.shouldRunClassOnRavenwood(testClass, true)) {
+            mRealRunner = new ClassSkippingTestRunner(testClass);
+            return;
         }
+
+        mTestClass = new TestClass(testClass);
+
+        Log.v(TAG, "RavenwoodAwareTestRunner starting for " + testClass.getCanonicalName());
+
+        // This is needed to make AndroidJUnit4ClassRunner happy.
+        InstrumentationRegistry.registerInstance(null, Bundle.EMPTY);
+
+        // Hook point to allow more customization.
+        runAnnotatedMethodsOnRavenwood(RavenwoodTestRunnerInitializing.class, null);
+
+        mRealRunner = instantiateRealRunner(mTestClass);
+
+        mState.enterTestRunner();
     }
 
     @Override
@@ -165,23 +149,11 @@ public final class RavenwoodAwareTestRunner extends RavenwoodAwareTestRunnerBase
         return mRealRunner;
     }
 
-    /**
-     * Run the bare minimum setup to initialize the wrapped runner.
-     */
-    // This method is called by the ctor, so never make it virtual.
-    private void onRunnerInitializing() {
-        // This is needed to make AndroidJUnit4ClassRunner happy.
-        InstrumentationRegistry.registerInstance(null, Bundle.EMPTY);
-
-        // Hook point to allow more customization.
-        runAnnotatedMethodsOnRavenwood(RavenwoodTestRunnerInitializing.class, null);
-    }
-
     private void runAnnotatedMethodsOnRavenwood(Class<? extends Annotation> annotationClass,
             Object instance) {
         Log.v(TAG, "runAnnotatedMethodsOnRavenwood() " + annotationClass.getName());
 
-        for (var method : getTestClass().getAnnotatedMethods(annotationClass)) {
+        for (var method : mTestClass.getAnnotatedMethods(annotationClass)) {
             ensureIsPublicVoidMethod(method.getMethod(), /* isStatic=*/ instance == null);
 
             var methodDesc = method.getDeclaringClass().getName() + "."
@@ -192,11 +164,6 @@ public final class RavenwoodAwareTestRunner extends RavenwoodAwareTestRunnerBase
                 throw logAndFail("Caught exception while running method " + methodDesc, e);
             }
         }
-    }
-
-    @Override
-    public Description getDescription() {
-        return mDescription;
     }
 
     @Override
@@ -216,10 +183,6 @@ public final class RavenwoodAwareTestRunner extends RavenwoodAwareTestRunnerBase
             dumpDescription(description);
         }
 
-        if (maybeReportExceptionFromConstructor(notifier)) {
-            return;
-        }
-
         // TODO(b/365976974): handle nested classes better
         final boolean skipRunnerHook =
                 mRealRunnerTakesRunnerBuilder && mRealRunner instanceof Suite;
@@ -228,7 +191,7 @@ public final class RavenwoodAwareTestRunner extends RavenwoodAwareTestRunnerBase
         try {
             if (!skipRunnerHook) {
                 try {
-                    mState.enterTestClass(description);
+                    mState.enterTestClass();
                 } catch (Throwable th) {
                     notifier.reportBeforeTestFailure(description, th);
                     return;
@@ -249,18 +212,6 @@ public final class RavenwoodAwareTestRunner extends RavenwoodAwareTestRunnerBase
                 }
             }
         }
-    }
-
-    /** Throw the exception detected in the constructor, if any. */
-    private boolean maybeReportExceptionFromConstructor(RunNotifier notifier) {
-        if (mExceptionInConstructor == null) {
-            return false;
-        }
-        notifier.fireTestStarted(mDescription);
-        notifier.fireTestFailure(new Failure(mDescription, mExceptionInConstructor));
-        notifier.fireTestFinished(mDescription);
-
-        return true;
     }
 
     private Statement wrapWithHooks(Statement base, Description description, Scope scope,
@@ -338,7 +289,7 @@ public final class RavenwoodAwareTestRunner extends RavenwoodAwareTestRunnerBase
             mState.enterTestMethod(description);
         }
 
-        final var classDescription = mState.getClassDescription();
+        final var classDescription = getDescription();
 
         // Class-level annotations are checked by the runner already, so we only check
         // method-level annotations here.
@@ -360,7 +311,7 @@ public final class RavenwoodAwareTestRunner extends RavenwoodAwareTestRunnerBase
     private boolean onAfter(Description description, Scope scope, Order order, Throwable th) {
         Log.v(TAG, "onAfter: description=" + description + ", " + scope + ", " + order + ", " + th);
 
-        final var classDescription = mState.getClassDescription();
+        final var classDescription = getDescription();
 
         if (scope == Scope.Instance && order == Order.Outer) {
             // End of a test method.
