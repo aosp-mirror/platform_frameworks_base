@@ -288,6 +288,7 @@ constructor(
                     startTransitionTo(
                         KeyguardState.GONE,
                         modeOnCanceled = TransitionModeOnCanceled.RESET,
+                        ownerReason = "keyguard interactor says keyguard is going away",
                     )
                 }
         }

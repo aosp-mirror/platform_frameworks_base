@@ -32,9 +32,7 @@ import com.android.internal.widget.remotecompose.core.operations.layout.modifier
 
 import java.util.ArrayList;
 
-/**
- * Component with modifiers and children
- */
+/** Component with modifiers and children */
 public class LayoutComponent extends Component {
 
     protected WidthModifierOperation mWidthModifier = null;
@@ -54,8 +52,14 @@ public class LayoutComponent extends Component {
     protected ComponentModifiers mComponentModifiers = new ComponentModifiers();
     protected ArrayList<Component> mChildrenComponents = new ArrayList<>();
 
-    public LayoutComponent(Component parent, int componentId, int animationId,
-                           float x, float y, float width, float height) {
+    public LayoutComponent(
+            Component parent,
+            int componentId,
+            int animationId,
+            float x,
+            float y,
+            float width,
+            float height) {
         super(parent, componentId, animationId, x, y, width, height);
     }
 
@@ -90,7 +94,6 @@ public class LayoutComponent extends Component {
     public float getPaddingBottom() {
         return mPaddingBottom;
     }
-
 
     public WidthModifierOperation getWidthModifier() {
         return mWidthModifier;
@@ -237,10 +240,7 @@ public class LayoutComponent extends Component {
         context.restore();
     }
 
-
-    /**
-     * Traverse the modifiers to compute indicated dimension
-     */
+    /** Traverse the modifiers to compute indicated dimension */
     public float computeModifierDefinedWidth() {
         float s = 0f;
         float e = 0f;
@@ -283,9 +283,7 @@ public class LayoutComponent extends Component {
         return s + e;
     }
 
-    /**
-     * Traverse the modifiers to compute indicated dimension
-     */
+    /** Traverse the modifiers to compute indicated dimension */
     public float computeModifierDefinedHeight() {
         float t = 0f;
         float b = 0f;
@@ -328,4 +326,7 @@ public class LayoutComponent extends Component {
         return t + b;
     }
 
+    public ArrayList<Component> getChildrenComponents() {
+        return mChildrenComponents;
+    }
 }
