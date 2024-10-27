@@ -79,6 +79,7 @@ import com.android.server.lights.LogicalLight;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import com.android.internal.annotations.GuardedBy;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -119,6 +120,8 @@ public final class NotificationAttentionHelper {
     );
 
     private final Context mContext;
+    //This is NMS.mNotificationLock.
+    private final Object mLock;
     private final PackageManager mPackageManager;
     private final TelephonyManager mTelephonyManager;
     private final UserManager mUm;
@@ -132,6 +135,7 @@ public final class NotificationAttentionHelper {
 
     private VibratorHelper mVibratorHelper;
     // The last key in this list owns the hardware.
+    @GuardedBy("mLock")
     ArrayList<String> mLights = new ArrayList<>();
     private LogicalLight mNotificationLight;
     private LogicalLight mAttentionLight;
@@ -149,8 +153,10 @@ public final class NotificationAttentionHelper {
     private String mVibrateNotificationKey;
     private boolean mSystemReady;
     private boolean mInCallStateOffHook = false;
+    @GuardedBy("mLock")
     private boolean mScreenOn = true;
     private boolean mUserPresent = false;
+    @GuardedBy("mLock")
     private boolean mNotificationPulseEnabled;
     private final Uri mInCallNotificationUri;
     private final AudioAttributes mInCallNotificationAudioAttributes;
@@ -166,12 +172,13 @@ public final class NotificationAttentionHelper {
     private final PolitenessStrategy mStrategy;
     private int mCurrentWorkProfileId = UserHandle.USER_NULL;
 
-    public NotificationAttentionHelper(Context context, LightsManager lightsManager,
+    public NotificationAttentionHelper(Context context, Object lock, LightsManager lightsManager,
             AccessibilityManager accessibilityManager, PackageManager packageManager,
             UserManager userManager, NotificationUsageStats usageStats,
             NotificationManagerPrivate notificationManagerPrivate,
             ZenModeHelper zenModeHelper, SystemUiSystemPropertiesFlags.FlagResolver flagResolver) {
         mContext = context;
+        mLock = lock;
         mPackageManager = packageManager;
         mTelephonyManager = context.getSystemService(TelephonyManager.class);
         mAccessibilityManager = accessibilityManager;
@@ -315,9 +322,11 @@ public final class NotificationAttentionHelper {
     private void loadUserSettings() {
         boolean pulseEnabled = Settings.System.getIntForUser(mContext.getContentResolver(),
                 Settings.System.NOTIFICATION_LIGHT_PULSE, 0, UserHandle.USER_CURRENT) != 0;
-        if (mNotificationPulseEnabled != pulseEnabled) {
-            mNotificationPulseEnabled = pulseEnabled;
-            updateLightsLocked();
+        synchronized (mLock) {
+            if (mNotificationPulseEnabled != pulseEnabled) {
+                mNotificationPulseEnabled = pulseEnabled;
+                updateLightsLocked();
+            }
         }
 
         if (Flags.politeNotifications()) {
@@ -1063,7 +1072,8 @@ public final class NotificationAttentionHelper {
         }
     }
 
-    public void dump(PrintWriter pw, String prefix, NotificationManagerService.DumpFilter filter) {
+    public void dumpLocked(PrintWriter pw, String prefix,
+            NotificationManagerService.DumpFilter filter) {
         pw.println("\n  Notification attention state:");
         pw.print(prefix);
         pw.println("  mSoundNotificationKey=" + mSoundNotificationKey);
@@ -1591,16 +1601,22 @@ public final class NotificationAttentionHelper {
             if (action.equals(Intent.ACTION_SCREEN_ON)) {
                 // Keep track of screen on/off state, but do not turn off the notification light
                 // until user passes through the lock screen or views the notification.
-                mScreenOn = true;
-                updateLightsLocked();
+                synchronized (mLock) {
+                    mScreenOn = true;
+                    updateLightsLocked();
+                }
             } else if (action.equals(Intent.ACTION_SCREEN_OFF)) {
-                mScreenOn = false;
-                mUserPresent = false;
-                updateLightsLocked();
+                synchronized (mLock) {
+                    mScreenOn = false;
+                    mUserPresent = false;
+                    updateLightsLocked();
+                }
             } else if (action.equals(TelephonyManager.ACTION_PHONE_STATE_CHANGED)) {
                 mInCallStateOffHook = TelephonyManager.EXTRA_STATE_OFFHOOK
                         .equals(intent.getStringExtra(TelephonyManager.EXTRA_STATE));
-                updateLightsLocked();
+                synchronized (mLock) {
+                    updateLightsLocked();
+                }
             } else if (action.equals(Intent.ACTION_USER_PRESENT)) {
                 mUserPresent = true;
                 // turn off LED when user passes through lock screen
@@ -1662,9 +1678,11 @@ public final class NotificationAttentionHelper {
                         Settings.System.NOTIFICATION_LIGHT_PULSE, 0,
                         UserHandle.USER_CURRENT)
                         != 0;
-                if (mNotificationPulseEnabled != pulseEnabled) {
-                    mNotificationPulseEnabled = pulseEnabled;
-                    updateLightsLocked();
+                synchronized (mLock) {
+                    if (mNotificationPulseEnabled != pulseEnabled) {
+                        mNotificationPulseEnabled = pulseEnabled;
+                        updateLightsLocked();
+                    }
                 }
             }
             if (Flags.politeNotifications()) {
@@ -1747,7 +1765,9 @@ public final class NotificationAttentionHelper {
 
     @VisibleForTesting
     void setScreenOn(boolean on) {
-        mScreenOn = on;
+        synchronized (mLock) {
+            mScreenOn = on;
+        }
     }
 
     @VisibleForTesting

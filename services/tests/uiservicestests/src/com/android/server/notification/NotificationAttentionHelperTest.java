@@ -243,9 +243,10 @@ public class NotificationAttentionHelperTest extends UiServiceTestCase {
     }
 
     private void initAttentionHelper(TestableFlagResolver flagResolver) {
-        mAttentionHelper = new NotificationAttentionHelper(getContext(), mock(LightsManager.class),
-                mAccessibilityManager, mPackageManager, mUserManager, mUsageStats,
-                mService.mNotificationManagerPrivate, mock(ZenModeHelper.class), flagResolver);
+        mAttentionHelper = new NotificationAttentionHelper(getContext(), new Object(),
+                mock(LightsManager.class),mAccessibilityManager, mPackageManager,
+                mUserManager, mUsageStats, mService.mNotificationManagerPrivate,
+                mock(ZenModeHelper.class), flagResolver);
         mAttentionHelper.onSystemReady();
         mAttentionHelper.setVibratorHelper(spy(new VibratorHelper(getContext())));
         mAttentionHelper.setAudioManager(mAudioManager);

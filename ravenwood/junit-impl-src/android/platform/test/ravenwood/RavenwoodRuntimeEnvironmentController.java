@@ -16,6 +16,8 @@
 
 package android.platform.test.ravenwood;
 
+import static android.platform.test.ravenwood.RavenwoodSystemServer.ANDROID_PACKAGE_NAME;
+
 import static com.android.ravenwood.common.RavenwoodCommonUtils.RAVENWOOD_INST_RESOURCE_APK;
 import static com.android.ravenwood.common.RavenwoodCommonUtils.RAVENWOOD_RESOURCE_APK;
 import static com.android.ravenwood.common.RavenwoodCommonUtils.RAVENWOOD_VERBOSE_LOGGING;
@@ -40,6 +42,7 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
+import android.provider.DeviceConfig_host;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.util.Log;
@@ -136,9 +139,6 @@ public class RavenwoodRuntimeEnvironmentController {
 
     private static RavenwoodConfig sConfig;
     private static RavenwoodSystemProperties sProps;
-    // TODO: use the real UiAutomation class instead of a mock
-    private static UiAutomation sMockUiAutomation;
-    private static Set<String> sAdoptedPermissions = Collections.emptySet();
     private static boolean sInitialized = false;
 
     /**
@@ -186,7 +186,6 @@ public class RavenwoodRuntimeEnvironmentController {
                 "androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner");
 
         assertMockitoVersion();
-        sMockUiAutomation = createMockUiAutomation();
     }
 
     /**
@@ -270,9 +269,16 @@ public class RavenwoodRuntimeEnvironmentController {
         config.mInstContext = instContext;
         config.mTargetContext = targetContext;
 
+        final Supplier<Resources> systemResourcesLoader = () -> {
+            return config.mState.loadResources(null);
+        };
+
+        config.mState.mSystemServerContext =
+                new RavenwoodContext(ANDROID_PACKAGE_NAME, main, systemResourcesLoader);
+
         // Prepare other fields.
         config.mInstrumentation = new Instrumentation();
-        config.mInstrumentation.basicInit(instContext, targetContext, sMockUiAutomation);
+        config.mInstrumentation.basicInit(instContext, targetContext, createMockUiAutomation());
         InstrumentationRegistry.registerInstance(config.mInstrumentation, Bundle.EMPTY);
 
         RavenwoodSystemServer.init(config);
@@ -317,7 +323,9 @@ public class RavenwoodRuntimeEnvironmentController {
             ((RavenwoodContext) config.mTargetContext).cleanUp();
             config.mTargetContext = null;
         }
-        sMockUiAutomation.dropShellPermissionIdentity();
+        if (config.mState.mSystemServerContext != null) {
+            config.mState.mSystemServerContext.cleanUp();
+        }
 
         Looper.getMainLooper().quit();
         Looper.clearMainLooperForTest();
@@ -332,6 +340,8 @@ public class RavenwoodRuntimeEnvironmentController {
             Binder.restoreCallingIdentity(sOriginalIdentityToken);
         }
         android.os.Process.reset$ravenwood();
+
+        DeviceConfig_host.reset();
 
         try {
             ResourcesManager.setInstance(null); // Better structure needed.
@@ -418,28 +428,30 @@ public class RavenwoodRuntimeEnvironmentController {
                 () -> Class.forName("org.mockito.Matchers"));
     }
 
+    // TODO: use the real UiAutomation class instead of a mock
     private static UiAutomation createMockUiAutomation() {
+        final Set[] adoptedPermission = { Collections.emptySet() };
         var mock = mock(UiAutomation.class, inv -> {
             HostTestUtils.onThrowMethodCalled();
             return null;
         });
         doAnswer(inv -> {
-            sAdoptedPermissions = UiAutomation.ALL_PERMISSIONS;
+            adoptedPermission[0] = UiAutomation.ALL_PERMISSIONS;
             return null;
         }).when(mock).adoptShellPermissionIdentity();
         doAnswer(inv -> {
             if (inv.getArgument(0) == null) {
-                sAdoptedPermissions = UiAutomation.ALL_PERMISSIONS;
+                adoptedPermission[0] = UiAutomation.ALL_PERMISSIONS;
             } else {
-                sAdoptedPermissions = (Set) Set.of(inv.getArguments());
+                adoptedPermission[0] = Set.of(inv.getArguments());
             }
             return null;
         }).when(mock).adoptShellPermissionIdentity(any());
         doAnswer(inv -> {
-            sAdoptedPermissions = Collections.emptySet();
+            adoptedPermission[0] = Collections.emptySet();
             return null;
         }).when(mock).dropShellPermissionIdentity();
-        doAnswer(inv -> sAdoptedPermissions).when(mock).getAdoptedShellPermissions();
+        doAnswer(inv -> adoptedPermission[0]).when(mock).getAdoptedShellPermissions();
         return mock;
     }
 

@@ -5807,9 +5807,9 @@ class Task extends TaskFragment {
     }
 
     private boolean canMoveTaskToBack(Task task) {
-        // Checks whether a task is a child of this task because it can be reparetned when
+        // Checks whether a task is a child of this task because it can be reparented when
         // transition is deferred.
-        if (task != this && task.getParent() != this) {
+        if (task != this && !task.isDescendantOf(this)) {
             return false;
         }
 
