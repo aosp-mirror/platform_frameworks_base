@@ -17,8 +17,11 @@
 package com.android.systemui.volume.dialog.ui.utils
 
 import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
+import android.animation.ValueAnimator
 import android.view.ViewPropertyAnimator
 import kotlin.coroutines.resume
+import kotlinx.coroutines.CancellableContinuation
 import kotlinx.coroutines.suspendCancellableCoroutine
 
 /**
@@ -39,11 +42,12 @@ suspend fun ViewPropertyAnimator.suspendAnimate(
             }
 
             override fun onAnimationEnd(animation: Animator) {
-                continuation.resume(Unit)
+                continuation.resumeIfCan(Unit)
                 animationListener?.onAnimationEnd(animation)
             }
 
             override fun onAnimationCancel(animation: Animator) {
+                continuation.resumeIfCan(Unit)
                 animationListener?.onAnimationCancel(animation)
             }
 
@@ -53,4 +57,31 @@ suspend fun ViewPropertyAnimator.suspendAnimate(
         }
     )
     continuation.invokeOnCancellation { this.cancel() }
+}
+
+/**
+ * Starts animation and suspends until it's finished. Cancels the animation if the running coroutine
+ * is cancelled.
+ */
+@Suppress("UNCHECKED_CAST")
+suspend fun <T> ValueAnimator.awaitAnimation(onValueChanged: (T) -> Unit) {
+    suspendCancellableCoroutine { continuation ->
+        addListener(
+            object : AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: Animator) = continuation.resumeIfCan(Unit)
+
+                override fun onAnimationCancel(animation: Animator) = continuation.resumeIfCan(Unit)
+            }
+        )
+        addUpdateListener { onValueChanged(it.animatedValue as T) }
+
+        start()
+        continuation.invokeOnCancellation { cancel() }
+    }
+}
+
+private fun <T> CancellableContinuation<T>.resumeIfCan(value: T) {
+    if (!isCancelled && !isCompleted) {
+        resume(value)
+    }
 }

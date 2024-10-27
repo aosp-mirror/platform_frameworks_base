@@ -5499,6 +5499,9 @@
   <java-symbol type="bool" name="config_am_disablePssProfiling" />
   <java-symbol type="dimen" name="config_am_pssToRssThresholdModifier" />
 
+  <!-- For OomAdjuster cached app tiers configurability -->
+  <java-symbol type="integer" name="config_am_tieredCachedAdjUiTierSize" />
+
   <java-symbol type="raw" name="default_ringtone_vibration_effect" />
 
   <!-- For activity embedding divider -->
@@ -5636,4 +5639,10 @@
   <!-- Identity check strings -->
   <java-symbol type="string" name="identity_check_settings_action" />
   <java-symbol type="string" name="identity_check_settings_package_name" />
+
+  <!-- Forensic backup transport -->
+  <java-symbol type="string" name="config_forensicBackupTransport" />
+
+  <!-- Fingerprint screen off unlock config -->
+  <java-symbol type="bool" name="config_screen_off_udfps_enabled" />
 </resources>

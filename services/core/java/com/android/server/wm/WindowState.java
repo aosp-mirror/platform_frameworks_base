@@ -3304,6 +3304,16 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 android.os.Process.killProcess(mSession.mPid);
             }
         }
+
+        // Because the client is notified to be invisible, it should no longer be considered as
+        // drawn state. This prevent the app from showing incomplete content if the app is
+        // requested to be visible in a short time (e.g. before activity stopped).
+        if (Flags.resetDrawStateOnClientInvisible() && !clientVisible && mActivityRecord != null
+                && mWinAnimator.mDrawState == HAS_DRAWN) {
+            mWinAnimator.resetDrawState();
+            // Make sure the app can report drawn if it becomes visible again.
+            forceReportingResized();
+        }
     }
 
     void onStartFreezingScreen() {

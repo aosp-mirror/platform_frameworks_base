@@ -53,6 +53,8 @@ android_robolectric_test {
         "mockito-robolectric-prebuilt",
         "mockito-kotlin2",
         "truth",
+        "flag-junit-base",
+        "flag-junit",
     ],
     auto_gen_config: true,
 }

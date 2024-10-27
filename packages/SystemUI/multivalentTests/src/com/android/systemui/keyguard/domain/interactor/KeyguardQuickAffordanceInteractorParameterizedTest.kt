@@ -20,7 +20,6 @@ package com.android.systemui.keyguard.domain.interactor
 import android.app.admin.DevicePolicyManager
 import android.content.Intent
 import android.os.UserHandle
-import androidx.test.filters.FlakyTest
 import androidx.test.filters.SmallTest
 import com.android.internal.widget.LockPatternUtils
 import com.android.keyguard.logging.KeyguardQuickAffordancesLogger
@@ -79,10 +78,6 @@ import platform.test.runner.parameterized.ParameterizedAndroidJunit4
 import platform.test.runner.parameterized.Parameters
 
 @OptIn(ExperimentalCoroutinesApi::class)
-@FlakyTest(
-    bugId = 292574995,
-    detail = "on certain architectures all permutations with startActivity=true is causing failures"
-)
 @SmallTest
 @RunWith(ParameterizedAndroidJunit4::class)
 @DisableSceneContainer
@@ -93,11 +88,7 @@ class KeyguardQuickAffordanceInteractorParameterizedTest : SysuiTestCase() {
         private val DRAWABLE =
             mock<Icon> {
                 whenever(this.contentDescription)
-                    .thenReturn(
-                        ContentDescription.Resource(
-                            res = CONTENT_DESCRIPTION_RESOURCE_ID,
-                        )
-                    )
+                    .thenReturn(ContentDescription.Resource(res = CONTENT_DESCRIPTION_RESOURCE_ID))
             }
         private const val CONTENT_DESCRIPTION_RESOURCE_ID = 1337
 
@@ -273,13 +264,7 @@ class KeyguardQuickAffordanceInteractorParameterizedTest : SysuiTestCase() {
                 context = context,
                 userFileManager =
                     mock<UserFileManager>().apply {
-                        whenever(
-                                getSharedPreferences(
-                                    anyString(),
-                                    anyInt(),
-                                    anyInt(),
-                                )
-                            )
+                        whenever(getSharedPreferences(anyString(), anyInt(), anyInt()))
                             .thenReturn(FakeSharedPreferences())
                     },
                 userTracker = userTracker,
@@ -316,9 +301,7 @@ class KeyguardQuickAffordanceInteractorParameterizedTest : SysuiTestCase() {
         underTest =
             KeyguardQuickAffordanceInteractor(
                 keyguardInteractor =
-                    KeyguardInteractorFactory.create(
-                            featureFlags = featureFlags,
-                        )
+                    KeyguardInteractorFactory.create(featureFlags = featureFlags)
                         .keyguardInteractor,
                 shadeInteractor = kosmos.shadeInteractor,
                 lockPatternUtils = lockPatternUtils,
@@ -350,9 +333,7 @@ class KeyguardQuickAffordanceInteractorParameterizedTest : SysuiTestCase() {
 
             homeControls.setState(
                 lockScreenState =
-                    KeyguardQuickAffordanceConfig.LockScreenState.Visible(
-                        icon = DRAWABLE,
-                    )
+                    KeyguardQuickAffordanceConfig.LockScreenState.Visible(icon = DRAWABLE)
             )
             homeControls.onTriggeredResult =
                 if (startActivity) {

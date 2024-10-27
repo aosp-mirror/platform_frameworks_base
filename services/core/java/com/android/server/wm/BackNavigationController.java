@@ -201,6 +201,9 @@ class BackNavigationController {
             infoBuilder.setTouchableRegion(window.getFrame());
             infoBuilder.setAppProgressAllowed((window.getAttrs().privateFlags
                     & PRIVATE_FLAG_APP_PROGRESS_GENERATION_ALLOWED) != 0);
+            if (currentTask != null) {
+                infoBuilder.setFocusedTaskId(currentTask.mTaskId);
+            }
             mNavigationMonitor.startMonitor(window, navigationObserver);
 
             ProtoLog.d(WM_DEBUG_BACK_PREVIEW, "startBackNavigation currentTask=%s, "
@@ -991,7 +994,9 @@ class BackNavigationController {
         // Ensure the final animation targets which hidden by transition could be visible.
         for (int i = 0; i < targets.size(); i++) {
             final WindowContainer wc = targets.get(i).mContainer;
-            wc.prepareSurfaces();
+            if (wc.mSurfaceControl != null) {
+                wc.prepareSurfaces();
+            }
         }
 
         // The pending builder could be cleared due to prepareSurfaces
@@ -1325,16 +1330,13 @@ class BackNavigationController {
             if (!allWindowDrawn) {
                 return;
             }
-            final SurfaceControl startingSurface = mOpenAnimAdaptor.mStartingSurface;
-            if (startingSurface != null && startingSurface.isValid()) {
-                startTransaction.addTransactionCommittedListener(Runnable::run, () -> {
-                    synchronized (mWindowManagerService.mGlobalLock) {
-                        if (mOpenAnimAdaptor != null) {
-                            mOpenAnimAdaptor.cleanUpWindowlessSurface(true);
-                        }
+            startTransaction.addTransactionCommittedListener(Runnable::run, () -> {
+                synchronized (mWindowManagerService.mGlobalLock) {
+                    if (mOpenAnimAdaptor != null) {
+                        mOpenAnimAdaptor.cleanUpWindowlessSurface(true);
                     }
-                });
-            }
+                }
+            });
         }
 
         void clearBackAnimateTarget(boolean cancel) {

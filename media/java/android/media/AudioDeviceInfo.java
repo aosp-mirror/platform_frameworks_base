@@ -279,6 +279,7 @@ public final class AudioDeviceInfo {
             TYPE_AUX_LINE,
             TYPE_IP,
             TYPE_BUS,
+            TYPE_REMOTE_SUBMIX,
             TYPE_HEARING_AID,
             TYPE_BUILTIN_SPEAKER_SAFE,
             TYPE_BLE_HEADSET,
@@ -312,6 +313,7 @@ public final class AudioDeviceInfo {
             case TYPE_AUX_LINE:
             case TYPE_IP:
             case TYPE_BUS:
+            case TYPE_REMOTE_SUBMIX:
             case TYPE_HEARING_AID:
             case TYPE_BUILTIN_SPEAKER_SAFE:
             case TYPE_BLE_HEADSET:

@@ -370,7 +370,10 @@ public final class BatteryUsageStatsQuery implements Parcelable {
          * and most battery stats resets.
          */
         public Builder accumulated() {
-            mFlags |= FLAG_BATTERY_USAGE_STATS_ACCUMULATED;
+            mFlags |= FLAG_BATTERY_USAGE_STATS_ACCUMULATED
+                    | FLAG_BATTERY_USAGE_STATS_INCLUDE_POWER_STATE
+                    | FLAG_BATTERY_USAGE_STATS_INCLUDE_SCREEN_STATE
+                    | FLAG_BATTERY_USAGE_STATS_INCLUDE_PROCESS_STATE_DATA;
             return this;
         }
 

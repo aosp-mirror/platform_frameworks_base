@@ -23,6 +23,7 @@ import com.android.systemui.contextualeducation.GestureType
 import com.android.systemui.contextualeducation.GestureType.ALL_APPS
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.education.ContextualEducationMetricsLogger
 import com.android.systemui.education.dagger.ContextualEducationModule.EduClock
 import com.android.systemui.education.data.model.GestureEduModel
 import com.android.systemui.education.shared.model.EducationInfo
@@ -50,7 +51,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.merge
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /** Allow listening to new contextual education triggered */
 @SysUISingleton
@@ -62,6 +63,7 @@ constructor(
     private val userInputDeviceRepository: UserInputDeviceRepository,
     private val tutorialRepository: TutorialSchedulerRepository,
     private val overviewProxyService: OverviewProxyService,
+    private val metricsLogger: ContextualEducationMetricsLogger,
     @EduClock private val clock: Clock,
 ) : CoreStartable {
 
@@ -129,9 +131,11 @@ constructor(
                     if (isUsageSessionExpired(it)) {
                         contextualEducationInteractor.startNewUsageSession(it.gestureType)
                     } else if (isEducationNeeded(it)) {
+                        val educationType = getEduType(it)
                         _educationTriggered.value =
-                            EducationInfo(it.gestureType, getEduType(it), it.userId)
+                            EducationInfo(it.gestureType, educationType, it.userId)
                         contextualEducationInteractor.updateOnEduTriggered(it.gestureType)
+                        metricsLogger.logContextualEducationTriggered(it.gestureType, educationType)
                     }
                 }
         }

@@ -33,7 +33,7 @@ import android.view.RemoteAnimationTarget;
 public final class BackMotionEvent implements Parcelable {
     private final float mTouchX;
     private final float mTouchY;
-    private final long mFrameTime;
+    private final long mFrameTimeMillis;
     private final float mProgress;
     private final boolean mTriggerBack;
 
@@ -49,7 +49,7 @@ public final class BackMotionEvent implements Parcelable {
      *
      * @param touchX Absolute X location of the touch point of this event.
      * @param touchY Absolute Y location of the touch point of this event.
-     * @param frameTime Event time of the corresponding touch event.
+     * @param frameTimeMillis Event time of the corresponding touch event.
      * @param progress Value between 0 and 1 on how far along the back gesture is.
      * @param triggerBack Indicates whether the back arrow is in the triggered state or not
      * @param swipeEdge Indicates which edge the swipe starts from.
@@ -59,14 +59,14 @@ public final class BackMotionEvent implements Parcelable {
     public BackMotionEvent(
             float touchX,
             float touchY,
-            long frameTime,
+            long frameTimeMillis,
             float progress,
             boolean triggerBack,
             @BackEvent.SwipeEdge int swipeEdge,
             @Nullable RemoteAnimationTarget departingAnimationTarget) {
         mTouchX = touchX;
         mTouchY = touchY;
-        mFrameTime = frameTime;
+        mFrameTimeMillis = frameTimeMillis;
         mProgress = progress;
         mTriggerBack = triggerBack;
         mSwipeEdge = swipeEdge;
@@ -80,7 +80,7 @@ public final class BackMotionEvent implements Parcelable {
         mTriggerBack = in.readBoolean();
         mSwipeEdge = in.readInt();
         mDepartingAnimationTarget = in.readTypedObject(RemoteAnimationTarget.CREATOR);
-        mFrameTime = in.readLong();
+        mFrameTimeMillis = in.readLong();
     }
 
     @NonNull
@@ -109,7 +109,7 @@ public final class BackMotionEvent implements Parcelable {
         dest.writeBoolean(mTriggerBack);
         dest.writeInt(mSwipeEdge);
         dest.writeTypedObject(mDepartingAnimationTarget, flags);
-        dest.writeLong(mFrameTime);
+        dest.writeLong(mFrameTimeMillis);
     }
 
     /**
@@ -156,8 +156,8 @@ public final class BackMotionEvent implements Parcelable {
     /**
      * Returns the frame time of the BackMotionEvent in milliseconds.
      */
-    public long getFrameTime() {
-        return mFrameTime;
+    public long getFrameTimeMillis() {
+        return mFrameTimeMillis;
     }
 
     /**
@@ -175,7 +175,7 @@ public final class BackMotionEvent implements Parcelable {
         return "BackMotionEvent{"
                 + "mTouchX=" + mTouchX
                 + ", mTouchY=" + mTouchY
-                + ", mFrameTime=" + mFrameTime + "ms"
+                + ", mFrameTimeMillis=" + mFrameTimeMillis
                 + ", mProgress=" + mProgress
                 + ", mTriggerBack=" + mTriggerBack
                 + ", mSwipeEdge=" + mSwipeEdge

@@ -19,7 +19,6 @@ package android.content.pm.verify.pkg;
 import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
-import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.content.pm.Flags;
 import android.content.pm.PackageInstaller;
@@ -166,8 +165,8 @@ public final class VerificationSession implements Parcelable {
     /**
      * Get the value of Clock.elapsedRealtime() at which time this verification
      * will timeout as incomplete if no other verification response is provided.
+     * @throws SecurityException if the caller is not the current verifier bound by the system.
      */
-    @RequiresPermission(android.Manifest.permission.VERIFICATION_AGENT)
     public long getTimeoutTime() {
         try {
             return mSession.getTimeoutTime(mId);
@@ -190,8 +189,8 @@ public final class VerificationSession implements Parcelable {
     /**
      * Override the verification policy for this session.
      * @return True if the override was successful, False otherwise.
+     * @throws SecurityException if the caller is not the current verifier bound by the system.
      */
-    @RequiresPermission(android.Manifest.permission.VERIFICATION_AGENT)
     public boolean setVerificationPolicy(@PackageInstaller.VerificationPolicy int policy) {
         if (mVerificationPolicy == policy) {
             // No effective policy change
@@ -215,8 +214,8 @@ public final class VerificationSession implements Parcelable {
      * This may be called multiple times. If the request would bypass any max
      * duration by the system, the method will return a lower value than the
      * requested amount that indicates how much the time was extended.
+     * @throws SecurityException if the caller is not the current verifier bound by the system.
      */
-    @RequiresPermission(android.Manifest.permission.VERIFICATION_AGENT)
     public long extendTimeRemaining(long additionalMs) {
         try {
             return mSession.extendTimeRemaining(mId, additionalMs);
@@ -227,9 +226,9 @@ public final class VerificationSession implements Parcelable {
 
     /**
      * Report to the system that verification could not be completed along
-     * with an approximate reason to pass on to the installer.
+     * with an approximate reason to pass on to the installer.]
+     * @throws SecurityException if the caller is not the current verifier bound by the system.
      */
-    @RequiresPermission(android.Manifest.permission.VERIFICATION_AGENT)
     public void reportVerificationIncomplete(@VerificationIncompleteReason int reason) {
         try {
             mSession.reportVerificationIncomplete(mId, reason);
@@ -242,11 +241,11 @@ public final class VerificationSession implements Parcelable {
      * Report to the system that the verification has completed and the
      * install process may act on that status to either block in the case
      * of failure or continue to process the install in the case of success.
+     * @throws SecurityException if the caller is not the current verifier bound by the system.
      */
-    @RequiresPermission(android.Manifest.permission.VERIFICATION_AGENT)
     public void reportVerificationComplete(@NonNull VerificationStatus status) {
         try {
-            mSession.reportVerificationComplete(mId, status);
+            mSession.reportVerificationComplete(mId, status,  /* extensionResponse= */ null);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -256,12 +255,12 @@ public final class VerificationSession implements Parcelable {
      * Same as {@link #reportVerificationComplete(VerificationStatus)}, but also provide
      * a result to the extension params provided in the request, which will be passed to the
      * installer in the installation result.
+     * @throws SecurityException if the caller is not the current verifier bound by the system.
      */
-    @RequiresPermission(android.Manifest.permission.VERIFICATION_AGENT)
     public void reportVerificationComplete(@NonNull VerificationStatus status,
-            @NonNull PersistableBundle response) {
+            @NonNull PersistableBundle extensionResponse) {
         try {
-            mSession.reportVerificationCompleteWithExtensionResponse(mId, status, response);
+            mSession.reportVerificationComplete(mId, status, extensionResponse);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

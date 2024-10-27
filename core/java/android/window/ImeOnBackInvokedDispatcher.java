@@ -238,7 +238,7 @@ public class ImeOnBackInvokedDispatcher implements OnBackInvokedDispatcher, Parc
             try {
                 long frameTime = 0;
                 if (predictiveBackTimestampApi()) {
-                    frameTime = backEvent.getFrameTime();
+                    frameTime = backEvent.getFrameTimeMillis();
                 }
                 mIOnBackInvokedCallback.onBackStarted(
                         new BackMotionEvent(backEvent.getTouchX(), backEvent.getTouchY(), frameTime,
@@ -254,7 +254,7 @@ public class ImeOnBackInvokedDispatcher implements OnBackInvokedDispatcher, Parc
             try {
                 long frameTime = 0;
                 if (predictiveBackTimestampApi()) {
-                    frameTime = backEvent.getFrameTime();
+                    frameTime = backEvent.getFrameTimeMillis();
                 }
                 mIOnBackInvokedCallback.onBackProgressed(
                         new BackMotionEvent(backEvent.getTouchX(), backEvent.getTouchY(), frameTime,

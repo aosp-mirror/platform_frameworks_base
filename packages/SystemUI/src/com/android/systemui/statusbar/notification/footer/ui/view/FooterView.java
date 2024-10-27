@@ -40,6 +40,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 
 import com.android.settingslib.Utils;
+import com.android.systemui.Flags;
 import com.android.systemui.res.R;
 import com.android.systemui.statusbar.notification.ColorUpdateLogger;
 import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor;
@@ -59,6 +60,9 @@ public class FooterView extends StackScrollerDecorView {
 
     private FooterViewButton mClearAllButton;
     private FooterViewButton mManageOrHistoryButton;
+    // The settings & history buttons replace the single manage/history button in the redesign
+    private FooterViewButton mSettingsButton;
+    private FooterViewButton mHistoryButton;
     private boolean mShouldBeHidden;
     private boolean mShowHistory;
     // String cache, for performance reasons.
@@ -269,7 +273,12 @@ public class FooterView extends StackScrollerDecorView {
         }
         super.onFinishInflate();
         mClearAllButton = (FooterViewButton) findSecondaryView();
-        mManageOrHistoryButton = findViewById(R.id.manage_text);
+        if (Flags.notificationsRedesignFooterView()) {
+            mSettingsButton = findViewById(R.id.settings_button);
+            mHistoryButton = findViewById(R.id.history_button);
+        } else {
+            mManageOrHistoryButton = findViewById(R.id.manage_text);
+        }
         mSeenNotifsFooterTextView = findViewById(R.id.unlock_prompt_footer);
         if (!FooterViewRefactor.isEnabled()) {
             updateResources();
@@ -342,8 +351,10 @@ public class FooterView extends StackScrollerDecorView {
             updateClearAllButtonText();
             updateClearAllButtonDescription();
 
-            updateManageOrHistoryButtonText();
-            updateManageOrHistoryButtonDescription();
+            if (!Flags.notificationsRedesignFooterView()) {
+                updateManageOrHistoryButtonText();
+                updateManageOrHistoryButtonDescription();
+            }
 
             updateMessageString();
             updateMessageIcon();
@@ -420,8 +431,16 @@ public class FooterView extends StackScrollerDecorView {
         }
         mClearAllButton.setBackground(clearAllBg);
         mClearAllButton.setTextColor(onSurface);
-        mManageOrHistoryButton.setBackground(manageBg);
-        mManageOrHistoryButton.setTextColor(onSurface);
+        if (Flags.notificationsRedesignFooterView()) {
+            mSettingsButton.setBackground(manageBg);
+            mSettingsButton.setCompoundDrawableTintList(ColorStateList.valueOf(onSurface));
+
+            mHistoryButton.setBackground(manageBg);
+            mHistoryButton.setCompoundDrawableTintList(ColorStateList.valueOf(onSurface));
+        } else {
+            mManageOrHistoryButton.setBackground(manageBg);
+            mManageOrHistoryButton.setTextColor(onSurface);
+        }
         mSeenNotifsFooterTextView.setTextColor(onSurface);
         mSeenNotifsFooterTextView.setCompoundDrawableTintList(ColorStateList.valueOf(onSurface));
         ColorUpdateLogger colorUpdateLogger = ColorUpdateLogger.getInstance();

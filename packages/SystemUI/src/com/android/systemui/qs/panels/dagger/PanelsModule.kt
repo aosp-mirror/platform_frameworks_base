@@ -23,6 +23,8 @@ import com.android.systemui.qs.panels.data.repository.DefaultLargeTilesRepositor
 import com.android.systemui.qs.panels.data.repository.DefaultLargeTilesRepositoryImpl
 import com.android.systemui.qs.panels.data.repository.GridLayoutTypeRepository
 import com.android.systemui.qs.panels.data.repository.GridLayoutTypeRepositoryImpl
+import com.android.systemui.qs.panels.domain.interactor.EditTilesResetInteractor
+import com.android.systemui.qs.panels.domain.interactor.SizedTilesResetInteractor
 import com.android.systemui.qs.panels.shared.model.GridLayoutType
 import com.android.systemui.qs.panels.shared.model.InfiniteGridLayoutType
 import com.android.systemui.qs.panels.shared.model.PaginatedGridLayoutType
@@ -31,8 +33,6 @@ import com.android.systemui.qs.panels.ui.compose.GridLayout
 import com.android.systemui.qs.panels.ui.compose.PaginatableGridLayout
 import com.android.systemui.qs.panels.ui.compose.PaginatedGridLayout
 import com.android.systemui.qs.panels.ui.compose.infinitegrid.InfiniteGridLayout
-import com.android.systemui.qs.panels.ui.viewmodel.IconLabelVisibilityViewModel
-import com.android.systemui.qs.panels.ui.viewmodel.IconLabelVisibilityViewModelImpl
 import com.android.systemui.qs.panels.ui.viewmodel.IconTilesViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.IconTilesViewModelImpl
 import com.android.systemui.qs.panels.ui.viewmodel.QSColumnsSizeViewModelImpl
@@ -53,14 +53,12 @@ interface PanelsModule {
     @Binds
     fun bindGridLayoutTypeRepository(impl: GridLayoutTypeRepositoryImpl): GridLayoutTypeRepository
 
+    @Binds
+    fun bindEditTilesResetInteractor(impl: SizedTilesResetInteractor): EditTilesResetInteractor
+
     @Binds fun bindIconTilesViewModel(impl: IconTilesViewModelImpl): IconTilesViewModel
 
     @Binds fun bindQSColumnsViewModel(impl: QSColumnsSizeViewModelImpl): QSColumnsViewModel
-
-    @Binds
-    fun bindIconLabelVisibilityViewModel(
-        impl: IconLabelVisibilityViewModelImpl
-    ): IconLabelVisibilityViewModel
 
     @Binds
     @PaginatedBaseLayoutType

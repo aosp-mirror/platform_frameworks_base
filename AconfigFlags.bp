@@ -21,6 +21,7 @@ aconfig_declarations_group {
     java_aconfig_libraries: [
         // !!! KEEP THIS LIST ALPHABETICAL !!!
         "aconfig_mediacodec_flags_java_lib",
+        "aconfig_trade_in_mode_flags_java_lib",
         "android-sdk-flags-java",
         "android.adaptiveauth.flags-aconfig-java",
         "android.app.appfunctions.flags-aconfig-java",
@@ -123,7 +124,7 @@ aconfig_declarations_group {
 
 filegroup {
     name: "framework-minus-apex-aconfig-srcjars",
-    srcs: [
+    device_common_srcs: [
         ":framework-minus-apex-aconfig-declarations{.srcjars}",
     ],
 }
@@ -1559,6 +1560,10 @@ java_aconfig_library {
     name: "android.crashrecovery.flags-aconfig-java",
     aconfig_declarations: "android.crashrecovery.flags-aconfig",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
+    apex_available: [
+        "//apex_available:platform",
+        "com.android.crashrecovery",
+    ],
 }
 
 java_aconfig_library {

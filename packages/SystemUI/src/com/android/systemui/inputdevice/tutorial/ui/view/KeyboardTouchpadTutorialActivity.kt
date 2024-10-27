@@ -40,7 +40,7 @@ import com.android.systemui.inputdevice.tutorial.ui.viewmodel.Screen.BACK_GESTUR
 import com.android.systemui.inputdevice.tutorial.ui.viewmodel.Screen.HOME_GESTURE
 import java.util.Optional
 import javax.inject.Inject
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /**
  * Activity for out of the box experience for keyboard and touchpad. Note that it's possible that

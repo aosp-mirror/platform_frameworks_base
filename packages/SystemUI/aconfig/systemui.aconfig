@@ -33,6 +33,13 @@ flag {
 }
 
 flag {
+  name: "notifications_redesign_footer_view"
+  namespace: "systemui"
+  description: "Notifications Redesign: Update the look of the notifications footer."
+  bug: "375010573"
+}
+
+flag {
    name: "notification_row_content_binder_refactor"
    namespace: "systemui"
    description: "Convert the NotificationContentInflater to Kotlin and restructure it to support modern views"
@@ -81,6 +88,16 @@ flag {
 }
 
 flag {
+    name: "notifications_footer_visibility_fix"
+    namespace: "systemui"
+    description: "Fixes a bug where the footer would briefly appear when dismissing a HUN"
+    bug: "356552869"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "notifications_footer_view_refactor"
     namespace: "systemui"
     description: "Enables the refactored version of the footer view in the notification shade "
@@ -126,6 +143,13 @@ flag {
     description: "Replaces NotifLiveDataStore with ActiveNotificationListRepository, and updates consumers. "
         "Should not bring any behavior changes."
     bug: "308623704"
+}
+
+flag {
+    name: "notifications_dismiss_pruned_summaries"
+    namespace: "systemui"
+    description: "NotifCollection.dismissNotifications will now dismiss summaries that are pruned from the shade."
+    bug: "355967751"
 }
 
 flag {
@@ -411,9 +435,9 @@ flag {
 }
 
 flag {
-    name: "status_bar_notification_chips"
+    name: "status_bar_ron_chips"
     namespace: "systemui"
-    description: "Show promoted ongoing notifications as chips in the status bar"
+    description: "Show rich ongoing notifications as chips in the status bar"
     bug: "361346412"
 }
 
@@ -1094,6 +1118,13 @@ flag {
 }
 
 flag {
+  name: "communal_standalone_support"
+  namespace: "systemui"
+  description: "Support communal features without a dock"
+  bug: "352301247"
+}
+
+flag {
     name: "dream_overlay_updated_font"
     namespace: "systemui"
     description: "Flag to enable updated font settings for dream overlay"
@@ -1144,6 +1175,13 @@ flag {
   name: "media_controls_button_media3"
   namespace: "systemui"
   description: "Enable media action buttons updates using media3"
+  bug: "360196209"
+}
+
+flag {
+  name: "media_controls_button_media3_placement"
+  namespace: "systemui"
+  description: "Use media3 API for action button placement preferences"
   bug: "360196209"
 }
 
@@ -1522,6 +1560,23 @@ flag {
 }
 
 flag {
+  name: "shade_window_goes_around"
+  namespace: "systemui"
+  description: "Enables the shade window to move between displays"
+  bug: "362719719"
+}
+
+flag {
+  name: "transition_race_condition"
+  namespace: "systemui"
+  description: "Thread-safe keyguard transitions"
+  bug: "358533338"
+  metadata {
+       purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
    name: "media_projection_request_attribution_fix"
    namespace: "systemui"
    description: "Ensure MediaProjection consent requests are properly attributed"
@@ -1552,8 +1607,28 @@ flag {
 }
 
 flag {
+   name: "hide_ringer_button_in_single_volume_mode"
+   namespace: "systemui"
+   description: "When the device is in single volume mode, hide the ringer button because it doesn't work"
+   bug: "374870615"
+   metadata {
+       purpose: PURPOSE_BUGFIX
+   }
+}
+
+flag {
     name: "qs_tile_detailed_view"
     namespace: "systemui"
     description: "Enables the tile detailed view UI."
     bug: "374173773"
+}
+
+flag {
+  name: "ensure_enr_views_visibility"
+  namespace: "systemui"
+  description: "Ensures public and private visibilities"
+  bug: "361552380"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
 }

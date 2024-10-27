@@ -16,6 +16,8 @@
 
 package com.android.systemui.recordissue
 
+import android.content.ContentResolver
+import android.os.Handler
 import android.testing.TestableLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -23,11 +25,15 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.settings.userFileManager
 import com.android.systemui.settings.userTracker
+import com.android.systemui.util.settings.fakeGlobalSettings
 import com.google.common.truth.Truth
-import java.util.concurrent.CountDownLatch
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mock
+import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.any
+import org.mockito.kotlin.verify
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
@@ -36,10 +42,19 @@ class IssueRecordingStateTest : SysuiTestCase() {
 
     private val kosmos = Kosmos()
     private lateinit var underTest: IssueRecordingState
+    @Mock private lateinit var resolver: ContentResolver
 
     @Before
     fun setup() {
-        underTest = IssueRecordingState(kosmos.userTracker, kosmos.userFileManager)
+        MockitoAnnotations.initMocks(this)
+        underTest =
+            IssueRecordingState(
+                kosmos.userTracker,
+                kosmos.userFileManager,
+                Handler.getMain(),
+                resolver,
+                kosmos.fakeGlobalSettings,
+            )
     }
 
     @Test
@@ -47,7 +62,14 @@ class IssueRecordingStateTest : SysuiTestCase() {
         val expected = true
 
         underTest.takeBugreport = expected
-        underTest = IssueRecordingState(kosmos.userTracker, kosmos.userFileManager)
+        underTest =
+            IssueRecordingState(
+                kosmos.userTracker,
+                kosmos.userFileManager,
+                Handler.getMain(),
+                resolver,
+                kosmos.fakeGlobalSettings,
+            )
 
         Truth.assertThat(underTest.takeBugreport).isEqualTo(expected)
     }
@@ -57,7 +79,14 @@ class IssueRecordingStateTest : SysuiTestCase() {
         val expected = true
 
         underTest.recordScreen = expected
-        underTest = IssueRecordingState(kosmos.userTracker, kosmos.userFileManager)
+        underTest =
+            IssueRecordingState(
+                kosmos.userTracker,
+                kosmos.userFileManager,
+                Handler.getMain(),
+                resolver,
+                kosmos.fakeGlobalSettings,
+            )
 
         Truth.assertThat(underTest.recordScreen).isEqualTo(expected)
     }
@@ -65,7 +94,14 @@ class IssueRecordingStateTest : SysuiTestCase() {
     @Test
     fun hasUserApprovedScreenRecording_isTrue_afterBeingMarkedAsCompleted() {
         underTest.markUserApprovalForScreenRecording()
-        underTest = IssueRecordingState(kosmos.userTracker, kosmos.userFileManager)
+        underTest =
+            IssueRecordingState(
+                kosmos.userTracker,
+                kosmos.userFileManager,
+                Handler.getMain(),
+                resolver,
+                kosmos.fakeGlobalSettings,
+            )
 
         Truth.assertThat(underTest.hasUserApprovedScreenRecording).isEqualTo(true)
     }
@@ -75,35 +111,35 @@ class IssueRecordingStateTest : SysuiTestCase() {
         val expected = setOf("a", "b", "c")
 
         underTest.tagTitles = expected
-        underTest = IssueRecordingState(kosmos.userTracker, kosmos.userFileManager)
+        underTest =
+            IssueRecordingState(
+                kosmos.userTracker,
+                kosmos.userFileManager,
+                Handler.getMain(),
+                resolver,
+                kosmos.fakeGlobalSettings,
+            )
 
         Truth.assertThat(underTest.tagTitles).isEqualTo(expected)
     }
 
     @Test
-    fun isRecording_callsListeners_onTheValueChanging() {
-        val count = CountDownLatch(1)
-        val listener = Runnable { count.countDown() }
+    fun addListener_registersContentObserver_ifListOfListenersIsNotEmpty() {
+        val listener = Runnable { /* No-op */ }
 
         underTest.addListener(listener)
-        underTest.isRecording = true
 
-        Truth.assertThat(count.count).isEqualTo(0)
+        verify(resolver).registerContentObserver(any(), any(), any())
     }
 
     @Test
-    fun isRecording_callsOnlyListeners_whoHaveNotBeenRemoved() {
-        val count1 = CountDownLatch(1)
-        val count2 = CountDownLatch(1)
-        val listener1 = Runnable { count1.countDown() }
-        val listener2 = Runnable { count2.countDown() }
+    fun removeListener_unRegistersContentObserver_ifListOfListenersIsEmpty() {
+        val listener = Runnable { /* No-op */ }
 
-        underTest.addListener(listener1)
-        underTest.removeListener(listener1)
-        underTest.addListener(listener2)
-        underTest.isRecording = true
+        underTest.addListener(listener)
+        underTest.removeListener(listener)
 
-        Truth.assertThat(count1.count).isEqualTo(1)
-        Truth.assertThat(count2.count).isEqualTo(0)
+        verify(resolver).registerContentObserver(any(), any(), any())
+        verify(resolver).unregisterContentObserver(any())
     }
 }

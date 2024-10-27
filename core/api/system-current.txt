@@ -209,6 +209,8 @@ package android {
     field public static final String MANAGE_FACTORY_RESET_PROTECTION = "android.permission.MANAGE_FACTORY_RESET_PROTECTION";
     field public static final String MANAGE_GAME_ACTIVITY = "android.permission.MANAGE_GAME_ACTIVITY";
     field public static final String MANAGE_GAME_MODE = "android.permission.MANAGE_GAME_MODE";
+    field @FlaggedApi("android.media.tv.flags.media_quality_fw") public static final String MANAGE_GLOBAL_PICTURE_QUALITY_SERVICE = "android.permission.MANAGE_GLOBAL_PICTURE_QUALITY_SERVICE";
+    field @FlaggedApi("android.media.tv.flags.media_quality_fw") public static final String MANAGE_GLOBAL_SOUND_QUALITY_SERVICE = "android.permission.MANAGE_GLOBAL_SOUND_QUALITY_SERVICE";
     field public static final String MANAGE_HOTWORD_DETECTION = "android.permission.MANAGE_HOTWORD_DETECTION";
     field public static final String MANAGE_IPSEC_TUNNELS = "android.permission.MANAGE_IPSEC_TUNNELS";
     field public static final String MANAGE_LOW_POWER_STANDBY = "android.permission.MANAGE_LOW_POWER_STANDBY";
@@ -4637,7 +4639,7 @@ package android.content.pm.verify.pkg {
 
   @FlaggedApi("android.content.pm.verification_service") public final class VerificationSession implements android.os.Parcelable {
     method public int describeContents();
-    method @RequiresPermission(android.Manifest.permission.VERIFICATION_AGENT) public long extendTimeRemaining(long);
+    method public long extendTimeRemaining(long);
     method @NonNull public java.util.List<android.content.pm.SharedLibraryInfo> getDeclaredLibraries();
     method @NonNull public android.os.PersistableBundle getExtensionParams();
     method public int getId();
@@ -4645,12 +4647,12 @@ package android.content.pm.verify.pkg {
     method @NonNull public String getPackageName();
     method @NonNull public android.content.pm.SigningInfo getSigningInfo();
     method @NonNull public android.net.Uri getStagedPackageUri();
-    method @RequiresPermission(android.Manifest.permission.VERIFICATION_AGENT) public long getTimeoutTime();
+    method public long getTimeoutTime();
     method public int getVerificationPolicy();
-    method @RequiresPermission(android.Manifest.permission.VERIFICATION_AGENT) public void reportVerificationComplete(@NonNull android.content.pm.verify.pkg.VerificationStatus);
-    method @RequiresPermission(android.Manifest.permission.VERIFICATION_AGENT) public void reportVerificationComplete(@NonNull android.content.pm.verify.pkg.VerificationStatus, @NonNull android.os.PersistableBundle);
-    method @RequiresPermission(android.Manifest.permission.VERIFICATION_AGENT) public void reportVerificationIncomplete(int);
-    method @RequiresPermission(android.Manifest.permission.VERIFICATION_AGENT) public boolean setVerificationPolicy(int);
+    method public void reportVerificationComplete(@NonNull android.content.pm.verify.pkg.VerificationStatus);
+    method public void reportVerificationComplete(@NonNull android.content.pm.verify.pkg.VerificationStatus, @NonNull android.os.PersistableBundle);
+    method public void reportVerificationIncomplete(int);
+    method public boolean setVerificationPolicy(int);
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.verify.pkg.VerificationSession> CREATOR;
     field public static final int VERIFICATION_INCOMPLETE_NETWORK_UNAVAILABLE = 1; // 0x1
@@ -6054,7 +6056,7 @@ package android.hardware.location {
     method @NonNull public android.hardware.location.ContextHubInfo getAttachedHub();
     method @IntRange(from=0, to=65535) public int getId();
     method @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB) public int sendMessageToNanoApp(@NonNull android.hardware.location.NanoAppMessage);
-    method @FlaggedApi("android.chre.flags.reliable_message") @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB) public android.hardware.location.ContextHubTransaction<java.lang.Void> sendReliableMessageToNanoApp(@NonNull android.hardware.location.NanoAppMessage);
+    method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB) public android.hardware.location.ContextHubTransaction<java.lang.Void> sendReliableMessageToNanoApp(@NonNull android.hardware.location.NanoAppMessage);
   }
 
   public class ContextHubClientCallback {
@@ -6090,7 +6092,7 @@ package android.hardware.location {
     method public String getToolchain();
     method public int getToolchainVersion();
     method public String getVendor();
-    method @FlaggedApi("android.chre.flags.reliable_message") public boolean supportsReliableMessages();
+    method public boolean supportsReliableMessages();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.hardware.location.ContextHubInfo> CREATOR;
   }
@@ -6174,7 +6176,7 @@ package android.hardware.location {
     field public static final int RESULT_FAILED_BAD_PARAMS = 2; // 0x2
     field public static final int RESULT_FAILED_BUSY = 4; // 0x4
     field public static final int RESULT_FAILED_HAL_UNAVAILABLE = 8; // 0x8
-    field @FlaggedApi("android.chre.flags.reliable_message") public static final int RESULT_FAILED_NOT_SUPPORTED = 9; // 0x9
+    field public static final int RESULT_FAILED_NOT_SUPPORTED = 9; // 0x9
     field public static final int RESULT_FAILED_SERVICE_INTERNAL_FAILURE = 7; // 0x7
     field public static final int RESULT_FAILED_TIMEOUT = 6; // 0x6
     field public static final int RESULT_FAILED_UNINITIALIZED = 3; // 0x3
@@ -6184,7 +6186,7 @@ package android.hardware.location {
     field public static final int TYPE_ENABLE_NANOAPP = 2; // 0x2
     field public static final int TYPE_LOAD_NANOAPP = 0; // 0x0
     field public static final int TYPE_QUERY_NANOAPPS = 4; // 0x4
-    field @FlaggedApi("android.chre.flags.reliable_message") public static final int TYPE_RELIABLE_MESSAGE = 5; // 0x5
+    field public static final int TYPE_RELIABLE_MESSAGE = 5; // 0x5
     field public static final int TYPE_UNLOAD_NANOAPP = 1; // 0x1
   }
 
@@ -6367,15 +6369,15 @@ package android.hardware.location {
 
   public final class NanoAppMessage implements android.os.Parcelable {
     method public static android.hardware.location.NanoAppMessage createMessageFromNanoApp(long, int, byte[], boolean);
-    method @FlaggedApi("android.chre.flags.reliable_message") @NonNull public static android.hardware.location.NanoAppMessage createMessageFromNanoApp(long, int, @NonNull byte[], boolean, boolean, int);
+    method @NonNull public static android.hardware.location.NanoAppMessage createMessageFromNanoApp(long, int, @NonNull byte[], boolean, boolean, int);
     method public static android.hardware.location.NanoAppMessage createMessageToNanoApp(long, int, byte[]);
     method public int describeContents();
     method public byte[] getMessageBody();
-    method @FlaggedApi("android.chre.flags.reliable_message") public int getMessageSequenceNumber();
+    method public int getMessageSequenceNumber();
     method public int getMessageType();
     method public long getNanoAppId();
     method public boolean isBroadcastMessage();
-    method @FlaggedApi("android.chre.flags.reliable_message") public boolean isReliable();
+    method public boolean isReliable();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.hardware.location.NanoAppMessage> CREATOR;
   }
@@ -6528,6 +6530,92 @@ package android.hardware.radio {
     field @NonNull public static final android.os.Parcelable.Creator<android.hardware.radio.ProgramSelector.Identifier> CREATOR;
   }
 
+  @FlaggedApi("android.hardware.radio.hd_radio_emergency_alert_system") public final class RadioAlert implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public java.util.List<android.hardware.radio.RadioAlert.AlertInfo> getInfoList();
+    method public int getMessageType();
+    method public int getStatus();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field public static final int CATEGORY_CBRNE = 10; // 0xa
+    field public static final int CATEGORY_ENV = 7; // 0x7
+    field public static final int CATEGORY_FIRE = 5; // 0x5
+    field public static final int CATEGORY_GEO = 0; // 0x0
+    field public static final int CATEGORY_HEALTH = 6; // 0x6
+    field public static final int CATEGORY_INFRA = 9; // 0x9
+    field public static final int CATEGORY_MET = 1; // 0x1
+    field public static final int CATEGORY_OTHER = 11; // 0xb
+    field public static final int CATEGORY_RESCUE = 4; // 0x4
+    field public static final int CATEGORY_SAFETY = 2; // 0x2
+    field public static final int CATEGORY_SECURITY = 3; // 0x3
+    field public static final int CATEGORY_TRANSPORT = 8; // 0x8
+    field public static final int CERTAINTY_LIKELY = 1; // 0x1
+    field public static final int CERTAINTY_OBSERVED = 0; // 0x0
+    field public static final int CERTAINTY_POSSIBLE = 2; // 0x2
+    field public static final int CERTAINTY_UNKNOWN = 4; // 0x4
+    field public static final int CERTAINTY_UNLIKELY = 3; // 0x3
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.radio.RadioAlert> CREATOR;
+    field public static final int MESSAGE_TYPE_ALERT = 0; // 0x0
+    field public static final int MESSAGE_TYPE_CANCEL = 2; // 0x2
+    field public static final int MESSAGE_TYPE_UPDATE = 1; // 0x1
+    field public static final int SEVERITY_EXTREME = 0; // 0x0
+    field public static final int SEVERITY_MINOR = 3; // 0x3
+    field public static final int SEVERITY_MODERATE = 2; // 0x2
+    field public static final int SEVERITY_SEVERE = 1; // 0x1
+    field public static final int SEVERITY_UNKNOWN = 4; // 0x4
+    field public static final int STATUS_ACTUAL = 0; // 0x0
+    field public static final int STATUS_EXERCISE = 1; // 0x1
+    field public static final int STATUS_TEST = 2; // 0x2
+    field public static final int URGENCY_EXPECTED = 1; // 0x1
+    field public static final int URGENCY_FUTURE = 2; // 0x2
+    field public static final int URGENCY_IMMEDIATE = 0; // 0x0
+    field public static final int URGENCY_PAST = 3; // 0x3
+    field public static final int URGENCY_UNKNOWN = 4; // 0x4
+  }
+
+  public static final class RadioAlert.AlertArea implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public java.util.List<android.hardware.radio.RadioAlert.Geocode> getGeocodes();
+    method @NonNull public java.util.List<android.hardware.radio.RadioAlert.Polygon> getPolygons();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.radio.RadioAlert.AlertArea> CREATOR;
+  }
+
+  public static final class RadioAlert.AlertInfo implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public java.util.List<android.hardware.radio.RadioAlert.AlertArea> getAreas();
+    method @NonNull public int[] getCategories();
+    method public int getCertainty();
+    method @NonNull public String getDescription();
+    method @Nullable public String getLanguage();
+    method public int getSeverity();
+    method public int getUrgency();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.radio.RadioAlert.AlertInfo> CREATOR;
+  }
+
+  public static final class RadioAlert.Coordinate implements android.os.Parcelable {
+    method public int describeContents();
+    method @FloatRange(from=-90.0, to=90.0) public double getLatitude();
+    method @FloatRange(from=-180.0, to=180.0) public double getLongitude();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.radio.RadioAlert.Coordinate> CREATOR;
+  }
+
+  public static final class RadioAlert.Geocode implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public String getValue();
+    method @NonNull public String getValueName();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.radio.RadioAlert.Geocode> CREATOR;
+  }
+
+  public static final class RadioAlert.Polygon implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public java.util.List<android.hardware.radio.RadioAlert.Coordinate> getCoordinates();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.radio.RadioAlert.Polygon> CREATOR;
+  }
+
   public class RadioManager {
     method @RequiresPermission(android.Manifest.permission.ACCESS_BROADCAST_RADIO) public void addAnnouncementListener(@NonNull java.util.Set<java.lang.Integer>, @NonNull android.hardware.radio.Announcement.OnListUpdatedListener);
     method @RequiresPermission(android.Manifest.permission.ACCESS_BROADCAST_RADIO) public void addAnnouncementListener(@NonNull java.util.concurrent.Executor, @NonNull java.util.Set<java.lang.Integer>, @NonNull android.hardware.radio.Announcement.OnListUpdatedListener);
@@ -6663,6 +6751,7 @@ package android.hardware.radio {
 
   public static class RadioManager.ProgramInfo implements android.os.Parcelable {
     method public int describeContents();
+    method @FlaggedApi("android.hardware.radio.hd_radio_emergency_alert_system") @Nullable public android.hardware.radio.RadioAlert getAlert();
     method @Deprecated public int getChannel();
     method @Nullable public android.hardware.radio.ProgramSelector.Identifier getLogicallyTunedTo();
     method public android.hardware.radio.RadioMetadata getMetadata();
@@ -7251,6 +7340,7 @@ package android.media {
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void setSupportedSystemUsages(@NonNull int[]);
     method @RequiresPermission(anyOf={android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED, android.Manifest.permission.MODIFY_AUDIO_ROUTING}) public void setVolumeGroupVolumeIndex(int, int, int);
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void setVolumeIndexForAttributes(@NonNull android.media.AudioAttributes, int, int);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void setWiredDeviceConnectionState(@NonNull android.media.AudioDeviceAttributes, int);
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public boolean supportsBluetoothVariableLatency();
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void unregisterAudioPolicy(@NonNull android.media.audiopolicy.AudioPolicy);
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void unregisterAudioPolicyAsync(@NonNull android.media.audiopolicy.AudioPolicy);
@@ -7260,6 +7350,8 @@ package android.media {
     field public static final int AUDIOFOCUS_FLAG_DELAY_OK = 1; // 0x1
     field public static final int AUDIOFOCUS_FLAG_LOCK = 4; // 0x4
     field public static final int AUDIOFOCUS_FLAG_PAUSES_ON_DUCKABLE_LOSS = 2; // 0x2
+    field @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public static final int DEVICE_CONNECTION_STATE_CONNECTED = 1; // 0x1
+    field @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public static final int DEVICE_CONNECTION_STATE_DISCONNECTED = 0; // 0x0
     field public static final int DEVICE_VOLUME_BEHAVIOR_ABSOLUTE = 3; // 0x3
     field public static final int DEVICE_VOLUME_BEHAVIOR_ABSOLUTE_ADJUST_ONLY = 5; // 0x5
     field public static final int DEVICE_VOLUME_BEHAVIOR_ABSOLUTE_MULTI_MODE = 4; // 0x4
@@ -9429,6 +9521,7 @@ package android.media.tv.tuner.frontend {
     method public int getSignalStrength();
     method public int getSnr();
     method public int getSpectralInversion();
+    method @FlaggedApi("android.media.tv.flags.tuner_w_apis") @NonNull public android.media.tv.tuner.frontend.StandardExt getStandardExt();
     method @NonNull public int[] getStreamIds();
     method public int getSymbolRate();
     method @IntRange(from=0, to=65535) public int getSystemId();
@@ -9483,6 +9576,7 @@ package android.media.tv.tuner.frontend {
     field public static final int FRONTEND_STATUS_TYPE_SIGNAL_STRENGTH = 6; // 0x6
     field public static final int FRONTEND_STATUS_TYPE_SNR = 1; // 0x1
     field public static final int FRONTEND_STATUS_TYPE_SPECTRAL = 10; // 0xa
+    field @FlaggedApi("android.media.tv.flags.tuner_w_apis") public static final int FRONTEND_STATUS_TYPE_STANDARD_EXT = 47; // 0x2f
     field public static final int FRONTEND_STATUS_TYPE_STREAM_IDS = 39; // 0x27
     field public static final int FRONTEND_STATUS_TYPE_SYMBOL_RATE = 7; // 0x7
     field public static final int FRONTEND_STATUS_TYPE_T2_SYSTEM_ID = 29; // 0x1d
@@ -9772,6 +9866,11 @@ package android.media.tv.tuner.frontend {
     method public void onSignalTypeReported(int);
     method public void onSymbolRatesReported(@NonNull int[]);
     method public default void onUnlocked();
+  }
+
+  @FlaggedApi("android.media.tv.flags.tuner_w_apis") public final class StandardExt {
+    method public int getDvbsStandardExt();
+    method public int getDvbtStandardExt();
   }
 
 }

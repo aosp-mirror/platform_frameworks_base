@@ -253,7 +253,7 @@ func TestCombinedApisDefaults(t *testing.T) {
 	`)
 
 	subModuleDependsOnSelectAppendedModule := java.CheckModuleHasDependency(t,
-		result.TestContext, "foo-current.txt", "", "framework-foo")
+		result.TestContext, "foo-current.txt", "android_common", "framework-foo")
 	android.AssertBoolEquals(t, "Submodule expected to depend on the select-appended module",
 		true, subModuleDependsOnSelectAppendedModule)
 }

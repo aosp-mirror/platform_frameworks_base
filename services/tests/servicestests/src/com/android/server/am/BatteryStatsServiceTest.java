@@ -56,6 +56,7 @@ public final class BatteryStatsServiceTest {
         Handler handler = new Handler(mBgThread.getLooper());
         mBatteryStatsService = new BatteryStatsService(context, systemDir);
         mBatteryStatsService.setRailsStatsCollectionEnabled(false);
+        mBatteryStatsService.systemServicesReady();
     }
 
     @After

@@ -32,6 +32,7 @@ import android.content.pm.parsing.result.ParseResult;
 import android.content.res.ApkAssets;
 import android.content.res.XmlResourceParser;
 import android.os.Build;
+import android.os.SystemProperties;
 import android.os.Trace;
 import android.text.TextUtils;
 import android.util.ArrayMap;
@@ -44,6 +45,7 @@ import com.android.internal.pm.pkg.component.flags.Flags;
 import com.android.internal.util.ArrayUtils;
 
 import libcore.io.IoUtils;
+import libcore.util.HexEncoding;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -88,6 +90,7 @@ public class ApkLiteParseUtils {
     private static final String TAG_USES_SDK = "uses-sdk";
     private static final String TAG_USES_SPLIT = "uses-split";
     private static final String TAG_MANIFEST = "manifest";
+    private static final String TAG_USES_SDK_LIBRARY = "uses-sdk-library";
     private static final String TAG_SDK_LIBRARY = "sdk-library";
     private static final int SDK_VERSION = Build.VERSION.SDK_INT;
     private static final String[] SDK_CODENAMES = Build.VERSION.ACTIVE_CODENAMES;
@@ -460,6 +463,9 @@ public class ApkLiteParseUtils {
         boolean hasDeviceAdminReceiver = false;
 
         boolean isSdkLibrary = false;
+        List<String> usesSdkLibraries = new ArrayList<>();
+        long[] usesSdkLibrariesVersionsMajor = new long[0];
+        String[][] usesSdkLibrariesCertDigests = new String[0][0];
         List<SharedLibraryInfo> declaredLibraries = new ArrayList<>();
 
         // Only search the tree when the tag is the direct child of <manifest> tag
@@ -523,6 +529,57 @@ public class ApkLiteParseUtils {
                             hasDeviceAdminReceiver |= isDeviceAdminReceiver(parser,
                                     hasBindDeviceAdminPermission);
                             break;
+                        case TAG_USES_SDK_LIBRARY:
+                            String usesSdkLibName = parser.getAttributeValue(
+                                    ANDROID_RES_NAMESPACE, "name");
+                            long usesSdkLibVersionMajor = parser.getAttributeIntValue(
+                                    ANDROID_RES_NAMESPACE, "versionMajor", -1);
+                            String usesSdkCertDigest = parser.getAttributeValue(
+                                     ANDROID_RES_NAMESPACE, "certDigest");
+
+                            if (usesSdkLibName == null || usesSdkLibName.isBlank()
+                                    || usesSdkLibVersionMajor < 0) {
+                                return input.error(
+                                        PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED,
+                                        "Bad uses-sdk-library declaration name: "
+                                                + usesSdkLibName
+                                                + " version: " + usesSdkLibVersionMajor);
+                            }
+
+                            if (usesSdkLibraries.contains(usesSdkLibName)) {
+                                return input.error(
+                                        PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED,
+                                        "Bad uses-sdk-library declaration. Depending on"
+                                                + " multiple versions of SDK library: "
+                                                + usesSdkLibName);
+                            }
+
+                            usesSdkLibraries.add(usesSdkLibName);
+                            usesSdkLibrariesVersionsMajor = ArrayUtils.appendLong(
+                                    usesSdkLibrariesVersionsMajor, usesSdkLibVersionMajor,
+                                    /*allowDuplicates=*/ true);
+
+                            // We allow ":" delimiters in the SHA declaration as this is the format
+                            // emitted by the certtool making it easy for developers to copy/paste.
+                            // TODO(372862145): Add test for this replacement
+                            usesSdkCertDigest = usesSdkCertDigest.replace(":", "").toLowerCase();
+
+                            if ("".equals(usesSdkCertDigest)) {
+                                // Test-only uses-sdk-library empty certificate digest override.
+                                usesSdkCertDigest = SystemProperties.get(
+                                        "debug.pm.uses_sdk_library_default_cert_digest", "");
+                                // Validate the overridden digest.
+                                try {
+                                    HexEncoding.decode(usesSdkCertDigest, false);
+                                } catch (IllegalArgumentException e) {
+                                    usesSdkCertDigest = "";
+                                }
+                            }
+                            // TODO(372862145): Add support for multiple signer
+                            usesSdkLibrariesCertDigests = ArrayUtils.appendElement(String[].class,
+                                    usesSdkLibrariesCertDigests, new String[]{usesSdkCertDigest},
+                                    /*allowDuplicates=*/ true);
+                            break;
                         case TAG_SDK_LIBRARY:
                             isSdkLibrary = true;
                             // Mirrors ParsingPackageUtils#parseSdkLibrary until lite and full
@@ -534,7 +591,7 @@ public class ApkLiteParseUtils {
                             if (sdkLibName == null || sdkLibVersionMajor < 0) {
                                 return input.error(
                                         PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED,
-                                        "Bad uses-sdk-library declaration name: " + sdkLibName
+                                        "Bad sdk-library declaration name: " + sdkLibName
                                                 + " version: " + sdkLibVersionMajor);
                             }
                             declaredLibraries.add(new SharedLibraryInfo(
@@ -694,8 +751,9 @@ public class ApkLiteParseUtils {
                         overlayIsStatic, overlayPriority, requiredSystemPropertyName,
                         requiredSystemPropertyValue, minSdkVersion, targetSdkVersion,
                         rollbackDataPolicy, requiredSplitTypes.first, requiredSplitTypes.second,
-                        hasDeviceAdminReceiver, isSdkLibrary, updatableSystem, emergencyInstaller,
-                        declaredLibraries));
+                        hasDeviceAdminReceiver, isSdkLibrary, usesSdkLibraries,
+                        usesSdkLibrariesVersionsMajor, usesSdkLibrariesCertDigests,
+                        updatableSystem, emergencyInstaller, declaredLibraries));
     }
 
     private static boolean isDeviceAdminReceiver(

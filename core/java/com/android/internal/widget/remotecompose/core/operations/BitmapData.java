@@ -15,8 +15,8 @@
  */
 package com.android.internal.widget.remotecompose.core.operations;
 
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.INT;
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.INT_ARRAY;
+import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT;
+import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT_ARRAY;
 
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
@@ -24,14 +24,14 @@ import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.SerializableToString;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
+import com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation;
 import com.android.internal.widget.remotecompose.core.operations.utilities.StringSerializer;
 
 import java.util.List;
 
 /**
- * Operation to deal with bitmap data
- * On getting an Image during a draw call the bitmap is compressed and saved
- * in playback the image is decompressed
+ * Operation to deal with bitmap data On getting an Image during a draw call the bitmap is
+ * compressed and saved in playback the image is decompressed
  */
 public class BitmapData implements Operation, SerializableToString {
     private static final int OP_CODE = Operations.DATA_BITMAP;
@@ -67,7 +67,6 @@ public class BitmapData implements Operation, SerializableToString {
         return "BITMAP DATA " + mImageId;
     }
 
-
     public static String name() {
         return CLASS_NAME;
     }
@@ -84,7 +83,6 @@ public class BitmapData implements Operation, SerializableToString {
         buffer.writeBuffer(bitmap);
     }
 
-
     public static void read(WireBuffer buffer, List<Operation> operations) {
         int imageId = buffer.readInt();
         int width = buffer.readInt();
@@ -99,19 +97,13 @@ public class BitmapData implements Operation, SerializableToString {
         operations.add(new BitmapData(imageId, width, height, bitmap));
     }
 
-
     public static void documentation(DocumentationBuilder doc) {
-        doc.operation("Data Operations",
-                        OP_CODE,
-                        CLASS_NAME)
+        doc.operation("Data Operations", OP_CODE, CLASS_NAME)
                 .description("Bitmap data")
-                .field(INT, "id", "id of bitmap data")
-                .field(INT, "width",
-                        "width of the image")
-                .field(INT, "height",
-                        "height of the image")
-                .field(INT_ARRAY, "values", "length",
-                        "Array of ints");
+                .field(DocumentedOperation.INT, "id", "id of bitmap data")
+                .field(INT, "width", "width of the image")
+                .field(INT, "height", "height of the image")
+                .field(INT_ARRAY, "values", "length", "Array of ints");
     }
 
     @Override
@@ -124,9 +116,10 @@ public class BitmapData implements Operation, SerializableToString {
         return indent + toString();
     }
 
+    @Override
     public void serializeToString(int indent, StringSerializer serializer) {
-        serializer.append(indent, CLASS_NAME
-                + " id " + mImageId + " (" + mImageWidth + "x" + mImageHeight + ")");
+        serializer.append(
+                indent,
+                CLASS_NAME + " id " + mImageId + " (" + mImageWidth + "x" + mImageHeight + ")");
     }
-
 }

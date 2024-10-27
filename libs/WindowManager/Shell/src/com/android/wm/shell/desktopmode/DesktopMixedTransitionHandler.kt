@@ -23,6 +23,7 @@ import android.os.Handler
 import android.os.IBinder
 import android.view.SurfaceControl
 import android.view.WindowManager
+import android.window.DesktopModeFlags
 import android.window.TransitionInfo
 import android.window.TransitionRequestInfo
 import android.window.WindowContainerTransaction
@@ -58,9 +59,12 @@ class DesktopMixedTransitionHandler(
         freeformTaskTransitionHandler.startMinimizedModeTransition(wct)
 
     /** Starts close transition and handles or delegates desktop task close animation. */
-    override fun startRemoveTransition(wct: WindowContainerTransaction?) {
+    override fun startRemoveTransition(wct: WindowContainerTransaction?): IBinder {
+        if (!DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_EXIT_TRANSITIONS.isTrue) {
+            return freeformTaskTransitionHandler.startRemoveTransition(wct)
+        }
         requireNotNull(wct)
-        transitions.startTransition(WindowManager.TRANSIT_CLOSE, wct, /* handler= */ this)
+        return transitions.startTransition(WindowManager.TRANSIT_CLOSE, wct, /* handler= */ this)
     }
 
     /** Returns null, as it only handles transitions started from Shell. */
@@ -138,7 +142,7 @@ class DesktopMixedTransitionHandler(
 
     private fun isLastDesktopTask(change: TransitionInfo.Change): Boolean =
         change.taskInfo?.let {
-            desktopRepository.getActiveNonMinimizedTaskCount(it.displayId) == 1
+            desktopRepository.getExpandedTaskCount(it.displayId) == 1
         } ?: false
 
     private fun findCloseDesktopTaskChange(info: TransitionInfo): TransitionInfo.Change? {

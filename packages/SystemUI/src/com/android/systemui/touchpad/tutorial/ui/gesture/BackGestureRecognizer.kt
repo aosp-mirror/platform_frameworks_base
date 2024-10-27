@@ -18,6 +18,9 @@ package com.android.systemui.touchpad.tutorial.ui.gesture
 
 import android.util.MathUtils
 import android.view.MotionEvent
+import com.android.systemui.touchpad.tutorial.ui.gesture.GestureDirection.LEFT
+import com.android.systemui.touchpad.tutorial.ui.gesture.GestureDirection.RIGHT
+import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState.InProgress
 import kotlin.math.abs
 
 /**
@@ -33,6 +36,10 @@ class BackGestureRecognizer(private val gestureDistanceThresholdPx: Int) : Gestu
         gestureStateChangedCallback = callback
     }
 
+    override fun clearGestureStateCallback() {
+        gestureStateChangedCallback = {}
+    }
+
     override fun accept(event: MotionEvent) {
         if (!isThreeFingerTouchpadSwipe(event)) return
         val gestureState = distanceTracker.processEvent(event)
@@ -40,7 +47,13 @@ class BackGestureRecognizer(private val gestureDistanceThresholdPx: Int) : Gestu
             gestureStateChangedCallback,
             gestureState,
             isFinished = { abs(it.deltaX) >= gestureDistanceThresholdPx },
-            progress = { MathUtils.saturate(abs(it.deltaX / gestureDistanceThresholdPx)) },
+            progress = ::getProgress,
         )
+    }
+
+    private fun getProgress(it: Moving): InProgress {
+        val direction = if (it.deltaX > 0) RIGHT else LEFT
+        val value = MathUtils.saturate(abs(it.deltaX / gestureDistanceThresholdPx))
+        return InProgress(value, direction)
     }
 }

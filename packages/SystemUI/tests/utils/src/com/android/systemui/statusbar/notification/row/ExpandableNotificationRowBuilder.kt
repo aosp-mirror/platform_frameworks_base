@@ -23,6 +23,7 @@ import android.app.NotificationManager
 import android.content.Context
 import android.content.pm.LauncherApps
 import android.os.UserHandle
+import android.os.UserManager
 import android.provider.DeviceConfig
 import androidx.core.os.bundleOf
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags
@@ -85,7 +86,6 @@ import com.android.systemui.statusbar.policy.dagger.RemoteInputViewSubcomponent
 import com.android.systemui.util.Assert.runWithCurrentThreadAsMainThread
 import com.android.systemui.util.DeviceConfigProxyFake
 import com.android.systemui.util.concurrency.FakeExecutor
-import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
 import com.android.systemui.wmshell.BubblesManager
@@ -110,6 +110,7 @@ class ExpandableNotificationRowBuilder(
     private val mKeyguardBypassController: KeyguardBypassController
     private val mGroupMembershipManager: GroupMembershipManager
     private val mGroupExpansionManager: GroupExpansionManager
+    private val mUserManager: UserManager
     private val mHeadsUpManager: HeadsUpManager
     private val mIconManager: IconManager
     private val mContentBinder: NotificationRowContentBinder
@@ -126,6 +127,7 @@ class ExpandableNotificationRowBuilder(
     private val mMainCoroutineContext = mTestScope.coroutineContext
     private val mFakeSystemClock = FakeSystemClock()
     private val mMainExecutor = FakeExecutor(mFakeSystemClock)
+    private val mDumpManager = DumpManager()
 
     init {
         featureFlags.setDefault(Flags.ENABLE_NOTIFICATIONS_SIMULATE_SLOW_MEASURE)
@@ -142,8 +144,8 @@ class ExpandableNotificationRowBuilder(
         mGroupMembershipManager = GroupMembershipManagerImpl()
         mSmartReplyController = Mockito.mock(SmartReplyController::class.java, STUB_ONLY)
 
-        val dumpManager = DumpManager()
-        mGroupExpansionManager = GroupExpansionManagerImpl(dumpManager, mGroupMembershipManager)
+        mGroupExpansionManager = GroupExpansionManagerImpl(mDumpManager, mGroupMembershipManager)
+        mUserManager = Mockito.mock(UserManager::class.java, STUB_ONLY)
         mHeadsUpManager = Mockito.mock(HeadsUpManager::class.java, STUB_ONLY)
         mIconManager =
             IconManager(
@@ -289,8 +291,8 @@ class ExpandableNotificationRowBuilder(
             NotificationOptimizedLinearLayoutFactory(),
             { Mockito.mock(NotificationViewFlipperFactory::class.java) },
             NotificationRowIconViewInflaterFactory(
-                AppIconProviderImpl(context),
-                NotificationIconStyleProviderImpl(),
+                AppIconProviderImpl(context, mDumpManager),
+                NotificationIconStyleProviderImpl(mUserManager, mDumpManager),
             ),
         )
     }

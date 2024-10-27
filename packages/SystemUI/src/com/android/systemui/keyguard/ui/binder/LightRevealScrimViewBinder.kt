@@ -19,13 +19,14 @@ package com.android.systemui.keyguard.ui.binder
 import android.animation.ValueAnimator
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
+import com.android.app.animation.Interpolators.ALPHA_IN
 import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.keyguard.ui.viewmodel.LightRevealScrimViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.shared.Flags.ambientAod
 import com.android.systemui.statusbar.LightRevealScrim
 import com.android.systemui.wallpapers.ui.viewmodel.WallpaperViewModel
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 object LightRevealScrimViewBinder {
     @JvmStatic
@@ -43,14 +44,24 @@ object LightRevealScrimViewBinder {
                         }
                     }
                     launch("$TAG#viewModel.maxAlpha") {
-                        viewModel.maxAlpha.collect { alpha ->
+                        var animator: ValueAnimator? = null
+                        viewModel.maxAlpha.collect { (alpha, animate) ->
                             if (alpha != revealScrim.alpha) {
-                                ValueAnimator.ofFloat(revealScrim.alpha, alpha).apply {
-                                    duration = 400
-                                    addUpdateListener { animation ->
-                                        revealScrim.alpha = animation.getAnimatedValue() as Float
-                                    }
-                                    start()
+                                animator?.cancel()
+                                if (!animate) {
+                                    revealScrim.alpha = alpha
+                                } else {
+                                    animator =
+                                        ValueAnimator.ofFloat(revealScrim.alpha, alpha).apply {
+                                            startDelay = 333
+                                            duration = 733
+                                            interpolator = ALPHA_IN
+                                            addUpdateListener { animation ->
+                                                revealScrim.alpha =
+                                                    animation.getAnimatedValue() as Float
+                                            }
+                                            start()
+                                        }
                                 }
                             }
                         }

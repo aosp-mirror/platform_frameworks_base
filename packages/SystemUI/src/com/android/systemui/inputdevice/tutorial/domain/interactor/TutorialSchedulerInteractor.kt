@@ -18,6 +18,7 @@ package com.android.systemui.inputdevice.tutorial.domain.interactor
 
 import android.os.SystemProperties
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.inputdevice.tutorial.InputDeviceTutorialLogger
 import com.android.systemui.inputdevice.tutorial.data.repository.DeviceType
 import com.android.systemui.inputdevice.tutorial.data.repository.DeviceType.KEYBOARD
 import com.android.systemui.inputdevice.tutorial.data.repository.DeviceType.TOUCHPAD
@@ -47,12 +48,13 @@ class TutorialSchedulerInteractor
 constructor(
     keyboardRepository: KeyboardRepository,
     touchpadRepository: TouchpadRepository,
-    private val repo: TutorialSchedulerRepository
+    private val repo: TutorialSchedulerRepository,
+    private val logger: InputDeviceTutorialLogger,
 ) {
     private val isAnyDeviceConnected =
         mapOf(
             KEYBOARD to keyboardRepository.isAnyKeyboardConnected,
-            TOUCHPAD to touchpadRepository.isAnyTouchpadConnected
+            TOUCHPAD to touchpadRepository.isAnyTouchpadConnected,
         )
 
     private val touchpadScheduleFlow = flow {
@@ -71,10 +73,14 @@ constructor(
 
     private suspend fun schedule(deviceType: DeviceType) {
         if (!repo.wasEverConnected(deviceType)) {
+            logger.d("Waiting for $deviceType to connect")
             waitForDeviceConnection(deviceType)
+            logger.logDeviceFirstConnection(deviceType)
             repo.updateFirstConnectionTime(deviceType, Instant.now())
         }
-        delay(remainingTime(start = repo.firstConnectionTime(deviceType)!!))
+        val remainingTime = remainingTime(start = repo.firstConnectionTime(deviceType)!!)
+        logger.d("Tutorial is scheduled in ${remainingTime.inWholeSeconds} seconds")
+        delay(remainingTime)
         waitForDeviceConnection(deviceType)
     }
 
@@ -92,6 +98,7 @@ constructor(
             if (tutorialType == TutorialType.TOUCHPAD || tutorialType == TutorialType.BOTH)
                 repo.updateLaunchTime(TOUCHPAD, Instant.now())
 
+            logger.logTutorialLaunched(tutorialType)
             tutorialType
         }
 
@@ -119,7 +126,7 @@ constructor(
                 Duration.ofSeconds(
                     SystemProperties.getLong(
                         "persist.peripheral_tutorial_delay_sec",
-                        DEFAULT_LAUNCH_DELAY_SEC
+                        DEFAULT_LAUNCH_DELAY_SEC,
                     )
                 )
     }
@@ -128,6 +135,6 @@ constructor(
         KEYBOARD,
         TOUCHPAD,
         BOTH,
-        NONE
+        NONE,
     }
 }

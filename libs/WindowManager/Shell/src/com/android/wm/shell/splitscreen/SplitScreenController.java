@@ -471,12 +471,12 @@ public class SplitScreenController implements SplitDragPolicy.Starter,
         mStageCoordinator.onKeyguardStateChanged(visible, occluded);
     }
 
-    public void onFinishedWakingUp() {
-        mStageCoordinator.onFinishedWakingUp();
-    }
-
     public void onStartedGoingToSleep() {
         mStageCoordinator.onStartedGoingToSleep();
+    }
+
+    public void onStartedWakingUp() {
+        mStageCoordinator.onStartedWakingUp();
     }
 
     public void exitSplitScreenOnHide(boolean exitSplitScreenOnHide) {
@@ -1084,13 +1084,13 @@ public class SplitScreenController implements SplitDragPolicy.Starter,
         }
 
         @Override
-        public void onFinishedWakingUp() {
-            mMainExecutor.execute(SplitScreenController.this::onFinishedWakingUp);
+        public void onStartedGoingToSleep() {
+            mMainExecutor.execute(SplitScreenController.this::onStartedGoingToSleep);
         }
 
         @Override
-        public void onStartedGoingToSleep() {
-            mMainExecutor.execute(SplitScreenController.this::onStartedGoingToSleep);
+        public void onStartedWakingUp() {
+            mMainExecutor.execute(SplitScreenController.this::onStartedWakingUp);
         }
 
         @Override

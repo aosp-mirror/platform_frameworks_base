@@ -3027,7 +3027,11 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         // The task order may be changed by finishIfPossible() for adjusting focus if there are
         // nested tasks, so add all activities into a list to avoid missed removals.
         final ArrayList<ActivityRecord> removingActivities = new ArrayList<>();
-        forAllActivities((Consumer<ActivityRecord>) removingActivities::add);
+        forAllActivities((r) -> {
+            if (!r.finishing) {
+                removingActivities.add(r);
+            }
+        });
         for (int i = removingActivities.size() - 1; i >= 0; --i) {
             final ActivityRecord r = removingActivities.get(i);
             if (withTransition && r.isVisible()) {

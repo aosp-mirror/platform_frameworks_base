@@ -681,6 +681,20 @@ public class TelephonyCallback {
     public static final int EVENT_CARRIER_ROAMING_NTN_ELIGIBLE_STATE_CHANGED = 43;
 
     /**
+     * Event for listening to changes in carrier roaming non-terrestrial network available services
+     * via callback onCarrierRoamingNtnAvailableServicesChanged().
+     * This callback is triggered when the available services provided by the carrier roaming
+     * satellite changes. The carrier roaming satellite is defined by the following conditions.
+     * <ul>
+     * <li>Subscription supports attaching to satellite which is defined by
+     * {@link CarrierConfigManager#KEY_SATELLITE_ATTACH_SUPPORTED_BOOL} </li>
+     * </ul>
+     *
+     * @hide
+     */
+    public static final int EVENT_CARRIER_ROAMING_NTN_AVAILABLE_SERVICES_CHANGED = 44;
+
+    /**
      * @hide
      */
     @IntDef(prefix = {"EVENT_"}, value = {
@@ -726,7 +740,8 @@ public class TelephonyCallback {
             EVENT_EMERGENCY_CALLBACK_MODE_CHANGED,
             EVENT_SIMULTANEOUS_CELLULAR_CALLING_SUBSCRIPTIONS_CHANGED,
             EVENT_CARRIER_ROAMING_NTN_MODE_CHANGED,
-            EVENT_CARRIER_ROAMING_NTN_ELIGIBLE_STATE_CHANGED
+            EVENT_CARRIER_ROAMING_NTN_ELIGIBLE_STATE_CHANGED,
+            EVENT_CARRIER_ROAMING_NTN_AVAILABLE_SERVICES_CHANGED
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface TelephonyEvent {
@@ -1784,6 +1799,15 @@ public class TelephonyCallback {
          * </ul>
          */
         default void onCarrierRoamingNtnEligibleStateChanged(boolean eligible) {}
+
+        /**
+         * Callback invoked when carrier roaming non-terrestrial network available
+         * service changes.
+         *
+         * @param availableServices The list of the supported services.
+         */
+        default void onCarrierRoamingNtnAvailableServicesChanged(
+                @NetworkRegistrationInfo.ServiceType List<Integer> availableServices) {}
     }
 
     /**
@@ -2234,6 +2258,20 @@ public class TelephonyCallback {
 
             Binder.withCleanCallingIdentity(() -> mExecutor.execute(
                     () -> listener.onCarrierRoamingNtnEligibleStateChanged(eligible)));
+        }
+
+        public void onCarrierRoamingNtnAvailableServicesChanged(
+                @NetworkRegistrationInfo.ServiceType int[] availableServices) {
+            if (!Flags.carrierRoamingNbIotNtn()) return;
+
+            CarrierRoamingNtnModeListener listener =
+                    (CarrierRoamingNtnModeListener) mTelephonyCallbackWeakRef.get();
+            if (listener == null) return;
+
+            List<Integer> ServiceList = Arrays.stream(availableServices).boxed()
+                    .collect(Collectors.toList());
+            Binder.withCleanCallingIdentity(() -> mExecutor.execute(
+                    () -> listener.onCarrierRoamingNtnAvailableServicesChanged(ServiceList)));
         }
     }
 }

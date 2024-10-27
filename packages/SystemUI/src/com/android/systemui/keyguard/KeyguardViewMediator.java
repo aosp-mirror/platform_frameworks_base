@@ -2975,7 +2975,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
         @Override
         public void run() {
             Trace.beginSection("KeyguardViewMediator.mKeyGuardGoingAwayRunnable");
-            if (DEBUG) Log.d(TAG, "keyguardGoingAway");
+            Log.d(TAG, "keyguardGoingAwayRunnable");
             mKeyguardViewControllerLazy.get().keyguardGoingAway();
 
             int flags = 0;

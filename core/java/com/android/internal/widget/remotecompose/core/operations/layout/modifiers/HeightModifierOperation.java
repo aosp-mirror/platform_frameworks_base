@@ -15,8 +15,8 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.layout.modifiers;
 
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.FLOAT;
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.INT;
+import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.FLOAT;
+import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT;
 
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
@@ -25,9 +25,7 @@ import com.android.internal.widget.remotecompose.core.documentation.Documentatio
 
 import java.util.List;
 
-/**
- * Set the height dimension on a component
- */
+/** Set the height dimension on a component */
 public class HeightModifierOperation extends DimensionModifierOperation {
     private static final int OP_CODE = Operations.MODIFIER_HEIGHT;
     public static final String CLASS_NAME = "HeightModifierOperation";
@@ -81,9 +79,7 @@ public class HeightModifierOperation extends DimensionModifierOperation {
     }
 
     public static void documentation(DocumentationBuilder doc) {
-        doc.operation("Modifier Operations",
-                        OP_CODE,
-                        CLASS_NAME)
+        doc.operation("Modifier Operations", OP_CODE, CLASS_NAME)
                 .description("define the animation")
                 .field(INT, "type", "")
                 .field(FLOAT, "value", "");

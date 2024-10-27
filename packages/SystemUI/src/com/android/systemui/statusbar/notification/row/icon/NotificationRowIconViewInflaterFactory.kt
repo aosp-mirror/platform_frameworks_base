@@ -21,6 +21,7 @@ import android.graphics.drawable.Drawable
 import android.util.AttributeSet
 import android.view.View
 import com.android.internal.widget.NotificationRowIconView
+import com.android.internal.widget.NotificationRowIconView.NotificationIconProvider
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.NotifRemoteViewsFactory
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder
@@ -47,20 +48,34 @@ constructor(
         return when (name) {
             NotificationRowIconView::class.java.name ->
                 NotificationRowIconView(context, attrs).also { view ->
-                    val sbn = row.entry.sbn
-                    view.setIconProvider(
-                        object : NotificationRowIconView.NotificationIconProvider {
-                            override fun shouldShowAppIcon(): Boolean {
-                                return iconStyleProvider.shouldShowAppIcon(row.entry.sbn, context)
-                            }
-
-                            override fun getAppIcon(): Drawable {
-                                return appIconProvider.getOrFetchAppIcon(sbn.packageName, context)
-                            }
-                        }
-                    )
+                    view.setIconProvider(createIconProvider(row, context))
                 }
+
             else -> null
+        }
+    }
+
+    private fun createIconProvider(
+        row: ExpandableNotificationRow,
+        context: Context,
+    ): NotificationIconProvider {
+        val sbn = row.entry.sbn
+        return object : NotificationIconProvider {
+            override fun shouldShowAppIcon(): Boolean {
+                val shouldShowAppIcon = iconStyleProvider.shouldShowAppIcon(sbn, context)
+                row.setIsShowingAppIcon(shouldShowAppIcon)
+                return shouldShowAppIcon
+            }
+
+            override fun getAppIcon(): Drawable {
+                val withWorkProfileBadge =
+                    iconStyleProvider.shouldShowWorkProfileBadge(sbn, context)
+                return appIconProvider.getOrFetchAppIcon(
+                    sbn.packageName,
+                    context,
+                    withWorkProfileBadge,
+                )
+            }
         }
     }
 }

@@ -15,8 +15,8 @@
  */
 package com.android.internal.widget.remotecompose.core.operations;
 
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.FLOAT_ARRAY;
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.INT;
+import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.FLOAT_ARRAY;
+import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT;
 
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
@@ -24,6 +24,7 @@ import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.VariableSupport;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
+import com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation;
 
 import java.util.Arrays;
 import java.util.List;
@@ -46,8 +47,7 @@ public class PathData implements Operation, VariableSupport {
         for (int i = 0; i < mFloatPath.length; i++) {
             float v = mFloatPath[i];
             if (Utils.isVariable(v)) {
-                mOutputPath[i] = (Float.isNaN(v))
-                        ? context.getFloat(Utils.idFromNan(v)) : v;
+                mOutputPath[i] = Float.isNaN(v) ? context.getFloat(Utils.idFromNan(v)) : v;
             } else {
                 mOutputPath[i] = v;
             }
@@ -79,30 +79,15 @@ public class PathData implements Operation, VariableSupport {
     }
 
     /**
-     * public float[] getFloatPath(PaintContext context) {
-     * float[] ret = mRetFloats; // Assume retFloats is declared elsewhere
-     * if (ret == null) {
-     * return mFloatPath; // Assume floatPath is declared elsewhere
-     * }
-     * float[] localRef = mRef; // Assume ref is of type Float[]
-     * if (localRef == null) {
-     * for (int i = 0; i < mFloatPath.length; i++) {
-     * ret[i] = mFloatPath[i];
-     * }
-     * } else {
-     * for (int i = 0; i < mFloatPath.length; i++) {
-     * float lr = localRef[i];
-     * if (Float.isNaN(lr)) {
-     * ret[i] = Utils.getActualValue(lr);
-     * } else {
-     * ret[i] = mFloatPath[i];
-     * }
-     * }
-     * }
-     * return ret;
-     * }
+     * public float[] getFloatPath(PaintContext context) { float[] ret = mRetFloats; // Assume
+     * retFloats is declared elsewhere if (ret == null) { return mFloatPath; // Assume floatPath is
+     * declared elsewhere } float[] localRef = mRef; // Assume ref is of type Float[] if (localRef
+     * == null) { for (int i = 0; i < mFloatPath.length; i++) { ret[i] = mFloatPath[i]; } } else {
+     * for (int i = 0; i < mFloatPath.length; i++) { float lr = localRef[i]; if (Float.isNaN(lr)) {
+     * ret[i] = Utils.getActualValue(lr); } else { ret[i] = mFloatPath[i]; } } } return ret; }
      */
     public static final int MOVE = 10;
+
     public static final int LINE = 11;
     public static final int QUADRATIC = 12;
     public static final int CONIC = 13;
@@ -145,16 +130,12 @@ public class PathData implements Operation, VariableSupport {
     }
 
     public static void documentation(DocumentationBuilder doc) {
-        doc.operation("Data Operations",
-                        OP_CODE,
-                        CLASS_NAME)
+        doc.operation("Data Operations", OP_CODE, CLASS_NAME)
                 .description("Encode a Path ")
-                .field(INT, "id", "id string")
+                .field(DocumentedOperation.INT, "id", "id string")
                 .field(INT, "length", "id string")
-                .field(FLOAT_ARRAY, "pathData", "length",
-                        "path encoded as floats");
+                .field(FLOAT_ARRAY, "pathData", "length", "path encoded as floats");
     }
-
 
     public static String pathString(float[] path) {
         if (path == null) {
@@ -208,5 +189,4 @@ public class PathData implements Operation, VariableSupport {
     public void apply(RemoteContext context) {
         context.loadPathData(mInstanceId, mOutputPath);
     }
-
 }

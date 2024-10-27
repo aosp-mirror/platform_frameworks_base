@@ -56,6 +56,7 @@ import com.android.keyguard.TrustGrantFlags;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.Flags;
+import com.android.systemui.animation.back.FlingOnBackAnimationCallback;
 import com.android.systemui.biometrics.domain.interactor.UdfpsOverlayInteractor;
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerCallbackInteractor;
@@ -236,9 +237,10 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             }
     };
 
-    private final OnBackAnimationCallback mOnBackInvokedCallback = new OnBackAnimationCallback() {
+    private final OnBackAnimationCallback mOnBackInvokedCallback =
+            new FlingOnBackAnimationCallback() {
         @Override
-        public void onBackInvoked() {
+        public void onBackInvokedCompat() {
             if (DEBUG) {
                 Log.d(TAG, "onBackInvokedCallback() called, invoking onBackPressed()");
             }
@@ -249,21 +251,21 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         }
 
         @Override
-        public void onBackProgressed(BackEvent event) {
+        public void onBackProgressedCompat(@NonNull BackEvent event) {
             if (shouldPlayBackAnimation() && mPrimaryBouncerView.getDelegate() != null) {
                 mPrimaryBouncerView.getDelegate().getBackCallback().onBackProgressed(event);
             }
         }
 
         @Override
-        public void onBackCancelled() {
+        public void onBackCancelledCompat() {
             if (shouldPlayBackAnimation() && mPrimaryBouncerView.getDelegate() != null) {
                 mPrimaryBouncerView.getDelegate().getBackCallback().onBackCancelled();
             }
         }
 
         @Override
-        public void onBackStarted(BackEvent event) {
+        public void onBackStartedCompat(@NonNull BackEvent event) {
             if (shouldPlayBackAnimation() && mPrimaryBouncerView.getDelegate() != null) {
                 mPrimaryBouncerView.getDelegate().getBackCallback().onBackStarted(event);
             }
@@ -1535,6 +1537,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     }
 
     public boolean interceptMediaKey(KeyEvent event) {
+        ComposeBouncerFlags.assertInLegacyMode();
         return mPrimaryBouncerView.getDelegate() != null
                 && mPrimaryBouncerView.getDelegate().interceptMediaKey(event);
     }

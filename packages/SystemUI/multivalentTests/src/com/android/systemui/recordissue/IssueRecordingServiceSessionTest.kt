@@ -19,6 +19,7 @@ package com.android.systemui.recordissue
 import android.app.IActivityManager
 import android.app.NotificationManager
 import android.net.Uri
+import android.os.Handler
 import android.os.UserHandle
 import android.testing.TestableLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -33,6 +34,7 @@ import com.android.systemui.qs.pipeline.domain.interactor.PanelInteractor
 import com.android.systemui.settings.UserContextProvider
 import com.android.systemui.settings.userFileManager
 import com.android.systemui.settings.userTracker
+import com.android.systemui.util.settings.fakeGlobalSettings
 import com.android.traceur.TraceConfig
 import com.google.common.truth.Truth
 import org.junit.Before
@@ -55,11 +57,18 @@ class IssueRecordingServiceSessionTest : SysuiTestCase() {
     private val dialogTransitionAnimator: DialogTransitionAnimator = kosmos.dialogTransitionAnimator
     private lateinit var traceurConnection: TraceurConnection
     private val issueRecordingState =
-        IssueRecordingState(kosmos.userTracker, kosmos.userFileManager)
+        IssueRecordingState(
+            kosmos.userTracker,
+            kosmos.userFileManager,
+            Handler.getMain(),
+            mContext.contentResolver,
+            kosmos.fakeGlobalSettings,
+        )
 
     private val iActivityManager = mock<IActivityManager>()
     private val notificationManager = mock<NotificationManager>()
     private val panelInteractor = mock<PanelInteractor>()
+    private val screenRecordingStartTimeStore = mock<ScreenRecordingStartTimeStore>()
 
     private lateinit var underTest: IssueRecordingServiceSession
 
@@ -76,6 +85,7 @@ class IssueRecordingServiceSessionTest : SysuiTestCase() {
                 iActivityManager,
                 notificationManager,
                 userContextProvider,
+                screenRecordingStartTimeStore,
             )
     }
 
@@ -90,7 +100,7 @@ class IssueRecordingServiceSessionTest : SysuiTestCase() {
 
     @Test
     fun stopsTracing_afterReceivingStopTracingCommand() {
-        underTest.stop(mContext.contentResolver)
+        underTest.stop()
         bgExecutor.runAllReady()
 
         Truth.assertThat(issueRecordingState.isRecording).isFalse()
@@ -107,24 +117,24 @@ class IssueRecordingServiceSessionTest : SysuiTestCase() {
 
     @Test
     fun requestBugreport_afterReceivingShareCommand_withTakeBugreportTrue() {
-        issueRecordingState.takeBugreport = true
+        underTest.takeBugReport = true
         val uri = mock<Uri>()
 
         underTest.share(0, uri)
         bgExecutor.runAllReady()
 
-        verify(iActivityManager).requestBugReportWithExtraAttachment(uri)
+        verify(iActivityManager).requestBugReportWithExtraAttachments(any())
     }
 
     @Test
     fun sharesTracesDirectly_afterReceivingShareCommand_withTakeBugreportFalse() {
-        issueRecordingState.takeBugreport = false
+        underTest.takeBugReport = false
         val uri = mock<Uri>()
 
         underTest.share(0, uri)
         bgExecutor.runAllReady()
 
-        verify(traceurConnection).shareTraces(uri)
+        verify(traceurConnection).shareTraces(any())
     }
 
     @Test

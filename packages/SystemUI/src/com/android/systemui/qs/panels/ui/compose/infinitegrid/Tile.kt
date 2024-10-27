@@ -64,9 +64,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.Expandable
 import com.android.compose.animation.bounceable
 import com.android.compose.modifiers.thenIf
+import com.android.systemui.Flags
 import com.android.systemui.animation.Expandable
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.compose.modifiers.sysuiResTag
+import com.android.systemui.haptics.msdl.qs.TileHapticsViewModel
+import com.android.systemui.haptics.msdl.qs.TileHapticsViewModelFactoryProvider
+import com.android.systemui.lifecycle.rememberViewModel
 import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.qs.panels.ui.compose.BounceableInfo
 import com.android.systemui.qs.panels.ui.compose.infinitegrid.CommonTileDefaults.InactiveCornerRadius
@@ -78,7 +82,7 @@ import com.android.systemui.qs.tileimpl.QSTileImpl
 import com.android.systemui.res.R
 import java.util.function.Supplier
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 private const val TEST_TAG_SMALL = "qs_tile_small"
 private const val TEST_TAG_LARGE = "qs_tile_large"
@@ -109,6 +113,7 @@ fun Tile(
     squishiness: () -> Float,
     coroutineScope: CoroutineScope,
     bounceableInfo: BounceableInfo,
+    tileHapticsViewModelFactoryProvider: TileHapticsViewModelFactoryProvider,
     modifier: Modifier = Modifier,
 ) {
     val state by tile.state.collectAsStateWithLifecycle(tile.currentState)
@@ -116,6 +121,10 @@ fun Tile(
     val resources = resources()
     val uiState = remember(state, resources) { state.toUiState(resources) }
     val colors = TileDefaults.getColorForState(uiState)
+    val hapticsViewModel: TileHapticsViewModel? =
+        rememberViewModel(traceName = "TileHapticsViewModel") {
+            tileHapticsViewModelFactoryProvider.getHapticsViewModelFactory()?.create(tile)
+        }
 
     // TODO(b/361789146): Draw the shapes instead of clipping
     val tileShape = TileDefaults.animateTileShape(uiState.state)
@@ -129,6 +138,7 @@ fun Tile(
             },
         shape = tileShape,
         squishiness = squishiness,
+        hapticsViewModel = hapticsViewModel,
         modifier =
             modifier
                 .fillMaxWidth()
@@ -143,11 +153,19 @@ fun Tile(
         TileContainer(
             onClick = {
                 tile.onClick(expandable)
+                hapticsViewModel?.setTileInteractionState(
+                    TileHapticsViewModel.TileInteractionState.CLICKED
+                )
                 if (uiState.accessibilityUiState.toggleableState != null) {
                     coroutineScope.launch { currentBounceableInfo.bounceable.animateBounce() }
                 }
             },
-            onLongClick = { tile.onLongClick(expandable) },
+            onLongClick = {
+                hapticsViewModel?.setTileInteractionState(
+                    TileHapticsViewModel.TileInteractionState.LONG_CLICKED
+                )
+                tile.onLongClick(expandable)
+            },
             uiState = uiState,
             iconOnly = iconOnly,
         ) {
@@ -160,19 +178,30 @@ fun Tile(
                 )
             } else {
                 val iconShape = TileDefaults.animateIconShape(uiState.state)
+                val secondaryClick: (() -> Unit)? =
+                    {
+                            hapticsViewModel?.setTileInteractionState(
+                                TileHapticsViewModel.TileInteractionState.CLICKED
+                            )
+                            tile.onSecondaryClick()
+                        }
+                        .takeIf { uiState.handlesSecondaryClick }
+                val longClick: (() -> Unit)? =
+                    {
+                            hapticsViewModel?.setTileInteractionState(
+                                TileHapticsViewModel.TileInteractionState.LONG_CLICKED
+                            )
+                            tile.onLongClick(expandable)
+                        }
+                        .takeIf { uiState.handlesLongClick }
                 LargeTileContent(
                     label = uiState.label,
                     secondaryLabel = uiState.secondaryLabel,
                     icon = icon,
                     colors = colors,
                     iconShape = iconShape,
-                    toggleClickSupported = state.handlesSecondaryClick,
-                    onClick = {
-                        if (state.handlesSecondaryClick) {
-                            tile.onSecondaryClick()
-                        }
-                    },
-                    onLongClick = { tile.onLongClick(expandable) },
+                    toggleClick = secondaryClick,
+                    onLongClick = longClick,
                     accessibilityUiState = uiState.accessibilityUiState,
                     squishiness = squishiness,
                 )
@@ -186,6 +215,7 @@ private fun TileExpandable(
     color: Color,
     shape: Shape,
     squishiness: () -> Float,
+    hapticsViewModel: TileHapticsViewModel?,
     modifier: Modifier = Modifier,
     content: @Composable (Expandable) -> Unit,
 ) {
@@ -194,7 +224,7 @@ private fun TileExpandable(
         shape = shape,
         modifier = modifier.clip(shape).verticalSquish(squishiness),
     ) {
-        content(it)
+        content(hapticsViewModel?.createStateAwareExpandable(it) ?: it)
     }
 }
 
@@ -255,6 +285,7 @@ fun Modifier.tileCombinedClickable(
             onLongClick = onLongClick,
             onClickLabel = uiState.accessibilityUiState.clickLabel,
             onLongClickLabel = longPressLabel,
+            hapticFeedbackEnabled = !Flags.msdlFeedback(),
         )
         .semantics {
             role = uiState.accessibilityUiState.accessibilityRole

@@ -94,7 +94,7 @@ public class BatteryUsageStatsProviderTest {
     }
 
     @Test
-    public void test_getBatteryUsageStats() {
+    public void test_getBatteryUsageStats() throws IOException {
         final BatteryUsageStats batteryUsageStats = prepareBatteryUsageStats(false);
 
         final List<UidBatteryConsumer> uidBatteryConsumers =
@@ -121,24 +121,27 @@ public class BatteryUsageStatsProviderTest {
 
         assertThat(batteryUsageStats.getStatsStartTimestamp()).isEqualTo(12345);
         assertThat(batteryUsageStats.getStatsEndTimestamp()).isEqualTo(180 * MINUTE_IN_MS);
+        batteryUsageStats.close();
     }
 
     @Test
-    public void batteryLevelInfo_charging() {
+    public void batteryLevelInfo_charging() throws IOException {
         final BatteryUsageStats batteryUsageStats = prepareBatteryUsageStats(true);
         assertThat(batteryUsageStats.getBatteryCapacity()).isEqualTo(4000.0);
         assertThat(batteryUsageStats.getChargeTimeRemainingMs()).isEqualTo(1_200_000);
+        batteryUsageStats.close();
     }
 
     @Test
-    public void batteryLevelInfo_onBattery() {
+    public void batteryLevelInfo_onBattery() throws IOException {
         final BatteryUsageStats batteryUsageStats = prepareBatteryUsageStats(false);
         assertThat(batteryUsageStats.getBatteryCapacity()).isEqualTo(4000.0);
         assertThat(batteryUsageStats.getBatteryTimeRemainingMs()).isEqualTo(600_000);
+        batteryUsageStats.close();
     }
 
     @Test
-    public void test_selectPowerComponents() {
+    public void test_selectPowerComponents() throws IOException {
         BatteryStatsImpl batteryStats = prepareBatteryStats(false);
 
         BatteryUsageStatsProvider provider = new BatteryUsageStatsProvider(mContext,
@@ -163,6 +166,8 @@ public class BatteryUsageStatsProviderTest {
         assertThat(
                 uidBatteryConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_FLASHLIGHT))
                 .isEqualTo(0);
+
+        batteryUsageStats.close();
     }
 
     private BatteryStatsImpl prepareBatteryStats(boolean plugInAtTheEnd) {
@@ -260,7 +265,7 @@ public class BatteryUsageStatsProviderTest {
 
         MultiStatePowerAttributor powerAttributor = new MultiStatePowerAttributor(mContext,
                 mock(PowerStatsStore.class), mStatsRule.getPowerProfile(),
-                mStatsRule.getCpuScalingPolicies(), () -> 3500, new PowerStatsUidResolver());
+                mStatsRule.getCpuScalingPolicies(), () -> 3500);
         powerAttributor.setPowerComponentSupported(BatteryConsumer.POWER_COMPONENT_AUDIO,
                 true);
         powerAttributor.setPowerComponentSupported(BatteryConsumer.POWER_COMPONENT_FLASHLIGHT,
@@ -274,7 +279,7 @@ public class BatteryUsageStatsProviderTest {
     }
 
     @Test
-    public void testWriteAndReadHistory() {
+    public void testWriteAndReadHistory() throws IOException {
         MockBatteryStatsImpl batteryStats = mStatsRule.getBatteryStats();
         synchronized (batteryStats) {
             batteryStats.setRecordAllHistoryLocked(true);
@@ -306,6 +311,8 @@ public class BatteryUsageStatsProviderTest {
 
         Parcel in = Parcel.obtain();
         batteryUsageStats.writeToParcel(in, 0);
+        batteryUsageStats.close();
+
         final byte[] bytes = in.marshall();
 
         Parcel out = Parcel.obtain();
@@ -349,10 +356,12 @@ public class BatteryUsageStatsProviderTest {
 
         assertThat(iterator.hasNext()).isFalse();
         assertThat(iterator.next()).isNull();
+
+        unparceled.close();
     }
 
     @Test
-    public void testWriteAndReadHistoryTags() {
+    public void testWriteAndReadHistoryTags() throws IOException {
         MockBatteryStatsImpl batteryStats = mStatsRule.getBatteryStats();
         synchronized (batteryStats) {
             batteryStats.setRecordAllHistoryLocked(true);
@@ -399,6 +408,8 @@ public class BatteryUsageStatsProviderTest {
         if (!RavenwoodRule.isUnderRavenwood()) {
             assertThat(parcel.dataSize()).isAtMost(128_000);
         }
+
+        batteryUsageStats.close();
 
         parcel.setDataPosition(0);
 
@@ -461,7 +472,7 @@ public class BatteryUsageStatsProviderTest {
     }
 
     @Test
-    public void testAggregateBatteryStats() {
+    public void testAggregateBatteryStats() throws IOException {
         BatteryStatsImpl batteryStats = mStatsRule.getBatteryStats();
 
         setTime(5 * MINUTE_IN_MS);
@@ -563,6 +574,8 @@ public class BatteryUsageStatsProviderTest {
                 .getConsumedPower(BatteryConsumer.POWER_COMPONENT_FLASHLIGHT))
                 .isWithin(0.1)
                 .of(180.0);
+
+        stats.close();
     }
 
     @Test
@@ -600,7 +613,7 @@ public class BatteryUsageStatsProviderTest {
 
         MultiStatePowerAttributor powerAttributor = new MultiStatePowerAttributor(mContext,
                 powerStatsStore, mStatsRule.getPowerProfile(), mStatsRule.getCpuScalingPolicies(),
-                () -> 3500, new PowerStatsUidResolver());
+                () -> 3500);
         for (int powerComponentId = 0; powerComponentId < BatteryConsumer.POWER_COMPONENT_COUNT;
                 powerComponentId++) {
             powerAttributor.setPowerComponentSupported(powerComponentId, true);
@@ -689,6 +702,8 @@ public class BatteryUsageStatsProviderTest {
                 .isEqualTo(60 * MINUTE_IN_MS);
 
         assertThat(count[0]).isEqualTo(expectedNumberOfUpdates);
+
+        stats.close();
     }
 
     private void setTime(long timeMs) {
@@ -733,6 +748,7 @@ public class BatteryUsageStatsProviderTest {
                     .isWithin(PRECISION).of(8.33333);
             assertThat(uid.getConsumedPower(componentId1))
                     .isWithin(PRECISION).of(8.33333);
+            stats.close();
             return null;
         }).when(powerStatsStore).storeBatteryUsageStatsAsync(anyLong(), any());
 
@@ -750,7 +766,7 @@ public class BatteryUsageStatsProviderTest {
     }
 
     @Test
-    public void testAggregateBatteryStats_incompatibleSnapshot() {
+    public void testAggregateBatteryStats_incompatibleSnapshot() throws IOException {
         MockBatteryStatsImpl batteryStats = mStatsRule.getBatteryStats();
         batteryStats.initMeasuredEnergyStats(new String[]{"FOO", "BAR"});
 
@@ -776,6 +792,8 @@ public class BatteryUsageStatsProviderTest {
         when(powerStatsStore.loadPowerStatsSpan(1, BatteryUsageStatsSection.TYPE))
                 .thenReturn(span1);
 
+        span1.close();
+
         BatteryUsageStatsProvider provider = new BatteryUsageStatsProvider(mContext,
                 mock(PowerAttributor.class), mStatsRule.getPowerProfile(),
                 mStatsRule.getCpuScalingPolicies(), powerStatsStore, 0, mMockClock);
@@ -787,5 +805,7 @@ public class BatteryUsageStatsProviderTest {
         assertThat(stats.getCustomPowerComponentNames())
                 .isEqualTo(batteryStats.getCustomEnergyConsumerNames());
         assertThat(stats.getStatsDuration()).isEqualTo(1234);
+
+        stats.close();
     }
 }

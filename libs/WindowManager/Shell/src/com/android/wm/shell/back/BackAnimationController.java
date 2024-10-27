@@ -95,6 +95,7 @@ import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.Transitions;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
 
@@ -120,7 +121,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
     @ShellMainThread private final Handler mHandler;
 
     /** True when a back gesture is ongoing */
-    private boolean mBackGestureStarted = false;
+    @VisibleForTesting public boolean mBackGestureStarted = false;
 
     /** Tracks if an uninterruptible animation is in progress */
     private boolean mPostCommitAnimationInProgress = false;
@@ -163,6 +164,9 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
      * (and navigation) associated with {@link #mCurrentTracker} have not yet finished.
      */
     private BackTouchTracker mQueuedTracker = new BackTouchTracker();
+
+    private final BackTransitionObserver mBackTransitionObserver =
+            new BackTransitionObserver();
 
     private final Runnable mAnimationTimeoutRunnable = () -> {
         ProtoLog.w(WM_SHELL_BACK_PREVIEW, "Animation didn't finish in %d ms. Resetting...",
@@ -268,6 +272,8 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         mBackTransitionHandler = new BackTransitionHandler();
         mTransitions.addHandler(mBackTransitionHandler);
         mHandler = handler;
+        mTransitions.registerObserver(mBackTransitionObserver);
+        mBackTransitionObserver.setBackTransitionHandler(mBackTransitionHandler);
         updateTouchableArea();
     }
 
@@ -506,6 +512,11 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
             ProtoLog.d(WM_SHELL_BACK_PREVIEW,
                     "Ignoring MotionEvent because two gestures are already being queued.");
             return;
+        } else if (mBackGestureStarted && mCurrentTracker.isInInitialState()
+                && mQueuedTracker.isInInitialState()) {
+            ProtoLog.e(WM_SHELL_BACK_PREVIEW,
+                    "Both touch trackers in initial state and mBackGestureStarted=true");
+            mBackGestureStarted = false;
         }
 
         if (keyAction == MotionEvent.ACTION_DOWN) {
@@ -729,6 +740,13 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
     }
 
     /**
+     * @return Latest task id which back gesture has occurred on it.
+     */
+    public int getLatestTriggerBackTask() {
+        return mBackTransitionObserver.mFocusedTaskId;
+    }
+
+    /**
      * Sets to true when the back gesture has passed the triggering threshold, false otherwise.
      */
     public void setTriggerBack(boolean triggerBack) {
@@ -792,6 +810,11 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         boolean triggerBack = activeTouchTracker.getTriggerBack();
         ProtoLog.d(WM_SHELL_BACK_PREVIEW, "onGestureFinished() mTriggerBack == %s", triggerBack);
 
+        if (triggerBack) {
+            mBackTransitionObserver.update(mBackNavigationInfo != null
+                            ? mBackNavigationInfo.getFocusedTaskId()
+                            : INVALID_TASK_ID);
+        }
         // Reset gesture states.
         mThresholdCrossed = false;
         mPointersPilfered = false;
@@ -968,7 +991,6 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         ProtoLog.d(WM_SHELL_BACK_PREVIEW, "BackAnimationController: finishBackNavigation()");
         mActiveCallback = null;
         mApps = null;
-        mShouldStartOnNextMoveEvent = false;
         mOnBackStartDispatched = false;
         mThresholdCrossed = false;
         mPointersPilfered = false;
@@ -1218,6 +1240,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
             }
 
             if (shouldCancelAnimation(info)) {
+                mPrepareOpenTransition = null;
                 return false;
             }
 
@@ -1255,42 +1278,42 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
             }
             // Copy initial changes to final transition
             final TransitionInfo init = mOpenTransitionInfo;
-            // find prepare open target
+            // Find prepare open target
             boolean openShowWallpaper = false;
-            ComponentName openComponent = null;
+            final ArrayList<OpenChangeInfo> targets = new ArrayList<>();
             int tmpSize;
-            int openTaskId = INVALID_TASK_ID;
-            WindowContainerToken openToken = null;
             for (int j = init.getChanges().size() - 1; j >= 0; --j) {
                 final TransitionInfo.Change change = init.getChanges().get(j);
-                if (change.hasFlags(FLAG_BACK_GESTURE_ANIMATED)) {
-                    openComponent = findComponentName(change);
-                    openTaskId = findTaskId(change);
-                    openToken = findToken(change);
+                if (change.hasFlags(FLAG_BACK_GESTURE_ANIMATED)
+                        && TransitionUtil.isOpeningMode(change.getMode())) {
+                    final ComponentName openComponent = findComponentName(change);
+                    final int openTaskId = findTaskId(change);
+                    final WindowContainerToken openToken = findToken(change);
+                    if (openComponent == null && openTaskId == INVALID_TASK_ID
+                            && openToken == null) {
+                        continue;
+                    }
+                    targets.add(new OpenChangeInfo(openComponent, openTaskId, openToken));
                     if (change.hasFlags(FLAG_SHOW_WALLPAPER)) {
                         openShowWallpaper = true;
                     }
-                    break;
                 }
             }
-            if (openComponent == null && openTaskId == INVALID_TASK_ID && openToken == null) {
+            if (targets.isEmpty()) {
                 // This shouldn't happen, but if that happen, consume the initial transition anyway.
                 Log.e(TAG, "Unable to merge following transition, cannot find the gesture "
                         + "animated target from the open transition=" + mOpenTransitionInfo);
                 mOpenTransitionInfo = null;
                 return;
             }
-            // find first non-prepare open target
+            // Find first non-prepare open target
             boolean isOpen = false;
             tmpSize = info.getChanges().size();
             for (int j = 0; j < tmpSize; ++j) {
                 final TransitionInfo.Change change = info.getChanges().get(j);
-                final ComponentName firstNonOpen = findComponentName(change);
-                final int firstTaskId = findTaskId(change);
-                if ((firstNonOpen != null && firstNonOpen != openComponent)
-                        || (firstTaskId != INVALID_TASK_ID && firstTaskId != openTaskId)) {
-                    // this is original close target, potential be close, but cannot determine from
-                    // it
+                if (isOpenChangeMatched(targets, change)) {
+                    // This is original close target, potential be close, but cannot determine
+                    // from it.
                     if (change.hasFlags(FLAG_BACK_GESTURE_ANIMATED)) {
                         isOpen = !TransitionUtil.isClosingMode(change.getMode());
                     } else {
@@ -1299,33 +1322,44 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
                     }
                 }
             }
-
             if (!isOpen) {
                 // Close transition, the transition info should be:
                 // init info(open A & wallpaper)
                 // current info(close B target)
                 // remove init info(open/change A target & wallpaper)
                 boolean moveToTop = false;
+                boolean excludeOpenTarget = false;
+                boolean mergePredictive = false;
                 for (int j = info.getChanges().size() - 1; j >= 0; --j) {
                     final TransitionInfo.Change change = info.getChanges().get(j);
-                    if (isSameChangeTarget(openComponent, openTaskId, openToken, change)) {
+                    if (isOpenChangeMatched(targets, change)) {
+                        if (TransitionUtil.isClosingMode(change.getMode())) {
+                            excludeOpenTarget = true;
+                        }
                         moveToTop = change.hasFlags(FLAG_MOVED_TO_TOP);
                         info.getChanges().remove(j);
                     } else if ((openShowWallpaper && change.hasFlags(FLAG_IS_WALLPAPER))
                             || !change.hasFlags(FLAG_BACK_GESTURE_ANIMATED)) {
                         info.getChanges().remove(j);
+                    } else if (!mergePredictive && TransitionUtil.isClosingMode(change.getMode())) {
+                        mergePredictive = true;
                     }
                 }
                 // Ignore merge if there is no close target
-                if (!info.getChanges().isEmpty()) {
+                if (!info.getChanges().isEmpty() && mergePredictive) {
                     tmpSize = init.getChanges().size();
                     for (int i = 0; i < tmpSize; ++i) {
                         final TransitionInfo.Change change = init.getChanges().get(i);
                         if (change.hasFlags(FLAG_IS_WALLPAPER)) {
                             continue;
                         }
-                        if (moveToTop) {
-                            if (isSameChangeTarget(openComponent, openTaskId, openToken, change)) {
+                        if (isOpenChangeMatched(targets, change)) {
+                            if (excludeOpenTarget) {
+                                // App has triggered another change during predictive back
+                                // transition, filter out predictive back target.
+                                continue;
+                            }
+                            if (moveToTop) {
                                 change.setFlags(change.getFlags() | FLAG_MOVED_TO_TOP);
                             }
                         }
@@ -1354,7 +1388,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
                 if (nonBackClose && nonBackOpen) {
                     for (int j = info.getChanges().size() - 1; j >= 0; --j) {
                         final TransitionInfo.Change change = info.getChanges().get(j);
-                        if (isSameChangeTarget(openComponent, openTaskId, openToken, change)) {
+                        if (isOpenChangeMatched(targets, change)) {
                             info.getChanges().remove(j);
                         } else if ((openShowWallpaper && change.hasFlags(FLAG_IS_WALLPAPER))) {
                             info.getChanges().remove(j);
@@ -1637,12 +1671,90 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         final ComponentName openChange = findComponentName(change);
         final int firstTaskId = findTaskId(change);
         final WindowContainerToken openToken = findToken(change);
-        return (openChange != null && openChange == topActivity)
+        return (openChange != null && openChange.equals(topActivity))
                 || (firstTaskId != INVALID_TASK_ID && firstTaskId == taskId)
-                || (openToken != null && token == openToken);
+                || (openToken != null && openToken.equals(token));
+    }
+
+    static boolean isOpenChangeMatched(@NonNull ArrayList<OpenChangeInfo> targets,
+            TransitionInfo.Change change) {
+        for (int i = targets.size() - 1; i >= 0; --i) {
+            final OpenChangeInfo next = targets.get(i);
+            if (isSameChangeTarget(next.mOpenComponent, next.mOpenTaskId, next.mOpenToken,
+                    change)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static boolean canBeTransitionTarget(TransitionInfo.Change change) {
         return findComponentName(change) != null || findTaskId(change) != INVALID_TASK_ID;
+    }
+
+    // Record the latest back gesture happen on which task.
+    static class BackTransitionObserver implements Transitions.TransitionObserver {
+        int mFocusedTaskId = INVALID_TASK_ID;
+        IBinder mFocusTaskMonitorToken;
+        private BackTransitionHandler mBackTransitionHandler;
+        void setBackTransitionHandler(BackTransitionHandler handler) {
+            mBackTransitionHandler = handler;
+        }
+
+        void update(int focusedTaskId) {
+            mFocusedTaskId = focusedTaskId;
+        }
+
+        @Override
+        public void onTransitionReady(@NonNull IBinder transition, @NonNull TransitionInfo info,
+                @NonNull SurfaceControl.Transaction startTransaction,
+                @NonNull SurfaceControl.Transaction finishTransaction) {
+            if (mFocusedTaskId == INVALID_TASK_ID) {
+                return;
+            }
+            for (int i = info.getChanges().size() - 1; i >= 0; --i) {
+                final TransitionInfo.Change c = info.getChanges().get(i);
+                if (c.getTaskInfo() != null && c.getTaskInfo().taskId == mFocusedTaskId) {
+                    mFocusTaskMonitorToken = transition;
+                    break;
+                }
+            }
+            // Transition happen but the task isn't involved, reset.
+            if (mFocusTaskMonitorToken == null) {
+                mFocusedTaskId = INVALID_TASK_ID;
+            }
+        }
+
+        @Override
+        public void onTransitionMerged(@NonNull IBinder merged, @NonNull IBinder playing) {
+            if (mFocusTaskMonitorToken == merged) {
+                mFocusTaskMonitorToken = playing;
+            }
+            if (mBackTransitionHandler.mClosePrepareTransition == merged) {
+                mBackTransitionHandler.mClosePrepareTransition = null;
+            }
+        }
+
+        @Override
+        public void onTransitionFinished(@NonNull IBinder transition, boolean aborted) {
+            if (mFocusTaskMonitorToken == transition) {
+                mFocusedTaskId = INVALID_TASK_ID;
+            }
+            if (mBackTransitionHandler.mClosePrepareTransition == transition) {
+                mBackTransitionHandler.mClosePrepareTransition = null;
+            }
+        }
+    }
+
+    static class OpenChangeInfo {
+        final ComponentName mOpenComponent;
+        final int mOpenTaskId;
+        final WindowContainerToken mOpenToken;
+        OpenChangeInfo(ComponentName openComponent, int openTaskId,
+                WindowContainerToken openToken) {
+            mOpenComponent = openComponent;
+            mOpenTaskId = openTaskId;
+            mOpenToken = openToken;
+        }
     }
 }

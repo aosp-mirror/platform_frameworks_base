@@ -131,6 +131,7 @@ import static android.window.DesktopModeFlags.ENABLE_CAPTION_COMPAT_INSET_FORCE_
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
 import static com.android.text.flags.Flags.disableHandwritingInitiatorForIme;
 import static com.android.window.flags.Flags.enableBufferTransformHintFromDisplay;
+import static com.android.window.flags.Flags.predictiveBackSwipeEdgeNoneApi;
 import static com.android.window.flags.Flags.setScPropertiesInClient;
 import static com.android.window.flags.Flags.systemUiImmersiveConfirmationDialog;
 
@@ -7559,8 +7560,13 @@ public final class ViewRootImpl implements ViewParent,
                         // - 0 means the button was pressed.
                         // - 1 means the button continues to be pressed (long press).
                         if (keyEvent.getRepeatCount() == 0) {
-                            animationCallback.onBackStarted(
-                                    new BackEvent(0, 0, 0f, BackEvent.EDGE_LEFT));
+                            BackEvent backEvent;
+                            if (predictiveBackSwipeEdgeNoneApi()) {
+                                backEvent = new BackEvent(0, 0, 0f, BackEvent.EDGE_NONE);
+                            } else {
+                                backEvent = new BackEvent(0, 0, 0f, BackEvent.EDGE_LEFT);
+                            }
+                            animationCallback.onBackStarted(backEvent);
                         }
                         break;
                     case KeyEvent.ACTION_UP:

@@ -18,9 +18,11 @@ package com.android.systemui.notifications.ui.composable
 
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.util.fastCoerceAtLeast
 import androidx.compose.ui.util.fastCoerceAtMost
 import com.android.compose.nestedscroll.PriorityNestedScrollConnection
+import com.android.compose.nestedscroll.ScrollController
 
 /**
  * A [NestedScrollConnection] that listens for all vertical scroll events and responds in the
@@ -58,33 +60,40 @@ fun NotificationScrimNestedScrollConnection(
             offsetAvailable > 0 && (scrimOffset() < maxScrimOffset || isCurrentGestureOverscroll())
         },
         canStartPostFling = { false },
-        canStopOnPreFling = { false },
-        onStart = { offsetAvailable -> onStart(offsetAvailable) },
-        onScroll = { offsetAvailable, _ ->
-            val currentHeight = scrimOffset()
-            val amountConsumed =
-                if (offsetAvailable > 0) {
-                    val amountLeft = maxScrimOffset - currentHeight
-                    offsetAvailable.fastCoerceAtMost(amountLeft)
-                } else {
-                    val amountLeft = minScrimOffset() - currentHeight
-                    offsetAvailable.fastCoerceAtLeast(amountLeft)
+        onStart = { firstScroll ->
+            onStart(firstScroll)
+            object : ScrollController {
+                override fun onScroll(deltaScroll: Float, source: NestedScrollSource): Float {
+                    val currentHeight = scrimOffset()
+                    val amountConsumed =
+                        if (deltaScroll > 0) {
+                            val amountLeft = maxScrimOffset - currentHeight
+                            deltaScroll.fastCoerceAtMost(amountLeft)
+                        } else {
+                            val amountLeft = minScrimOffset() - currentHeight
+                            deltaScroll.fastCoerceAtLeast(amountLeft)
+                        }
+                    snapScrimOffset(currentHeight + amountConsumed)
+                    return amountConsumed
                 }
-            snapScrimOffset(currentHeight + amountConsumed)
-            amountConsumed
-        },
-        onStop = { velocityAvailable ->
-            onStop(velocityAvailable)
-            if (scrimOffset() < minScrimOffset()) {
-                animateScrimOffset(minScrimOffset())
-            }
-            // Don't consume the velocity on pre/post fling
-            0f
-        },
-        onCancel = {
-            onStop(0f)
-            if (scrimOffset() < minScrimOffset()) {
-                animateScrimOffset(minScrimOffset())
+
+                override suspend fun onStop(initialVelocity: Float): Float {
+                    onStop(initialVelocity)
+                    if (scrimOffset() < minScrimOffset()) {
+                        animateScrimOffset(minScrimOffset())
+                    }
+                    // Don't consume the velocity on pre/post fling
+                    return 0f
+                }
+
+                override fun onCancel() {
+                    onStop(0f)
+                    if (scrimOffset() < minScrimOffset()) {
+                        animateScrimOffset(minScrimOffset())
+                    }
+                }
+
+                override fun canStopOnPreFling() = false
             }
         },
     )

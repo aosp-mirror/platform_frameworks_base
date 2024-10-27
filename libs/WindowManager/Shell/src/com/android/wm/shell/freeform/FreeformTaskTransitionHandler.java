@@ -99,9 +99,11 @@ public class FreeformTaskTransitionHandler
 
 
     @Override
-    public void startRemoveTransition(WindowContainerTransaction wct) {
+    public IBinder startRemoveTransition(WindowContainerTransaction wct) {
         final int type = WindowManager.TRANSIT_CLOSE;
-        mPendingTransitionTokens.add(mTransitions.startTransition(type, wct, this));
+        final IBinder transition = mTransitions.startTransition(type, wct, this);
+        mPendingTransitionTokens.add(transition);
+        return transition;
     }
 
     @Override
@@ -229,8 +231,7 @@ public class FreeformTaskTransitionHandler
         SurfaceControl.Transaction t = new SurfaceControl.Transaction();
         SurfaceControl sc = change.getLeash();
         finishT.hide(sc);
-        Rect startBounds = new Rect(change.getTaskInfo().configuration.windowConfiguration
-                .getBounds());
+        final Rect startBounds = new Rect(change.getStartAbsBounds());
         animator.addUpdateListener(animation -> {
             t.setPosition(sc, startBounds.left,
                     startBounds.top + (animation.getAnimatedFraction() * screenHeight));

@@ -61,7 +61,7 @@ license {
 
 filegroup {
     name: "framework-non-updatable-sources",
-    srcs: [
+    device_common_srcs: [
         // Java/AIDL sources under frameworks/base
         ":framework-annotations",
         ":framework-blobstore-sources",
@@ -109,7 +109,7 @@ filegroup {
         ":android.hardware.radio.voice-V3-java-source",
         ":android.hardware.security.keymint-V3-java-source",
         ":android.hardware.security.secureclock-V1-java-source",
-        ":android.hardware.thermal-V2-java-source",
+        ":android.hardware.thermal-V3-java-source",
         ":android.hardware.tv.tuner-V3-java-source",
         ":android.security.apc-java-source",
         ":android.security.authorization-java-source",
