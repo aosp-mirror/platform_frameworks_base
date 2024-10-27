@@ -290,3 +290,111 @@ java_genrule {
         "core-icu4j-for-host.ravenwood.jar",
     ],
 }
+
+///////////////////////////////////
+// framework-configinfrastructure
+///////////////////////////////////
+
+java_genrule {
+    name: "framework-configinfrastructure.ravenwood-base",
+    tools: ["hoststubgen"],
+    cmd: "$(location hoststubgen) " +
+        "@$(location :ravenwood-standard-options) " +
+
+        "--debug-log $(location framework-configinfrastructure.log) " +
+        "--stats-file $(location framework-configinfrastructure_stats.csv) " +
+        "--supported-api-list-file $(location framework-configinfrastructure_apis.csv) " +
+        "--gen-keep-all-file $(location framework-configinfrastructure_keep_all.txt) " +
+        "--gen-input-dump-file $(location framework-configinfrastructure_dump.txt) " +
+
+        "--out-impl-jar $(location ravenwood.jar) " +
+        "--in-jar $(location :framework-configinfrastructure.impl{.jar}) " +
+
+        "--policy-override-file $(location :ravenwood-common-policies) " +
+        "--policy-override-file $(location :framework-configinfrastructure-ravenwood-policies) ",
+    srcs: [
+        ":framework-configinfrastructure.impl{.jar}",
+
+        ":ravenwood-common-policies",
+        ":framework-configinfrastructure-ravenwood-policies",
+        ":ravenwood-standard-options",
+    ],
+    out: [
+        "ravenwood.jar",
+
+        // Following files are created just as FYI.
+        "framework-configinfrastructure_keep_all.txt",
+        "framework-configinfrastructure_dump.txt",
+
+        "framework-configinfrastructure.log",
+        "framework-configinfrastructure_stats.csv",
+        "framework-configinfrastructure_apis.csv",
+    ],
+    visibility: ["//visibility:private"],
+}
+
+java_genrule {
+    name: "framework-configinfrastructure.ravenwood",
+    defaults: ["ravenwood-internal-only-visibility-genrule"],
+    cmd: "cp $(in) $(out)",
+    srcs: [
+        ":framework-configinfrastructure.ravenwood-base{ravenwood.jar}",
+    ],
+    out: [
+        "framework-configinfrastructure.ravenwood.jar",
+    ],
+}
+
+///////////////////////////////////
+// framework-statsd
+///////////////////////////////////
+
+java_genrule {
+    name: "framework-statsd.ravenwood-base",
+    tools: ["hoststubgen"],
+    cmd: "$(location hoststubgen) " +
+        "@$(location :ravenwood-standard-options) " +
+
+        "--debug-log $(location framework-statsd.log) " +
+        "--stats-file $(location framework-statsd_stats.csv) " +
+        "--supported-api-list-file $(location framework-statsd_apis.csv) " +
+        "--gen-keep-all-file $(location framework-statsd_keep_all.txt) " +
+        "--gen-input-dump-file $(location framework-statsd_dump.txt) " +
+
+        "--out-impl-jar $(location ravenwood.jar) " +
+        "--in-jar $(location :framework-statsd.impl{.jar}) " +
+
+        "--policy-override-file $(location :ravenwood-common-policies) " +
+        "--policy-override-file $(location :framework-statsd-ravenwood-policies) ",
+    srcs: [
+        ":framework-statsd.impl{.jar}",
+
+        ":ravenwood-common-policies",
+        ":framework-statsd-ravenwood-policies",
+        ":ravenwood-standard-options",
+    ],
+    out: [
+        "ravenwood.jar",
+
+        // Following files are created just as FYI.
+        "framework-statsd_keep_all.txt",
+        "framework-statsd_dump.txt",
+
+        "framework-statsd.log",
+        "framework-statsd_stats.csv",
+        "framework-statsd_apis.csv",
+    ],
+    visibility: ["//visibility:private"],
+}
+
+java_genrule {
+    name: "framework-statsd.ravenwood",
+    defaults: ["ravenwood-internal-only-visibility-genrule"],
+    cmd: "cp $(in) $(out)",
+    srcs: [
+        ":framework-statsd.ravenwood-base{ravenwood.jar}",
+    ],
+    out: [
+        "framework-statsd.ravenwood.jar",
+    ],
+}

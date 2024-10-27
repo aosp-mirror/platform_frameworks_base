@@ -70,10 +70,6 @@ public class VcnContext {
         return mIsInTestMode;
     }
 
-    public boolean isFlagNetworkMetricMonitorEnabled() {
-        return mFeatureFlags.networkMetricMonitor();
-    }
-
     public boolean isFlagIpSecTransformStateEnabled() {
         // TODO: b/328844044: Ideally this code should gate the behavior by checking the
         // android.net.platform.flags.ipsec_transform_state flag but that flag is not accessible

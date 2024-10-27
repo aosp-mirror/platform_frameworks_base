@@ -42,6 +42,10 @@ public class RavenwoodConfigState {
 
     private final RavenwoodConfig mConfig;
 
+    // TODO: Move the other contexts from RavenwoodConfig to here too? They're used by
+    // RavenwoodRule too, but RavenwoodRule can probably use InstrumentationRegistry?
+    RavenwoodContext mSystemServerContext;
+
     public RavenwoodConfigState(RavenwoodConfig config) {
         mConfig = config;
     }
