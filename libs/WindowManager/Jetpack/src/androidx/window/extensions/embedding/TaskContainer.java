@@ -48,8 +48,6 @@ import androidx.window.extensions.embedding.SplitAttributes.SplitType;
 import androidx.window.extensions.embedding.SplitAttributes.SplitType.ExpandContainersSplitType;
 import androidx.window.extensions.embedding.SplitAttributes.SplitType.RatioSplitType;
 
-import com.android.window.flags.Flags;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -634,11 +632,7 @@ class TaskContainer {
         // pin container.
         updateAlwaysOnTopOverlayIfNecessary();
 
-        // TODO(b/289875940): Making backup-restore as an opt-in solution, before the flag goes
-        //  to next-food.
-        if (Flags.aeBackStackRestore()) {
-            mSplitController.scheduleBackup();
-        }
+        mSplitController.scheduleBackup();
     }
 
     private void updateAlwaysOnTopOverlayIfNecessary() {

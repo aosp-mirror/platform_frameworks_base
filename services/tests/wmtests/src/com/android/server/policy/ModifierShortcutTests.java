@@ -43,6 +43,8 @@ import static android.view.KeyEvent.KEYCODE_Z;
 import android.app.role.RoleManager;
 import android.content.ComponentName;
 import android.content.Intent;
+import android.hardware.input.AppLaunchData;
+import android.hardware.input.KeyGestureEvent;
 import android.os.RemoteException;
 import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
@@ -85,7 +87,8 @@ public class ModifierShortcutTests extends ShortcutKeyTestBase {
      * Test meta+ shortcuts defined in bookmarks.xml.
      */
     @Test
-    public void testMetaShortcuts() {
+    @DisableFlags(com.android.hardware.input.Flags.FLAG_USE_KEY_GESTURE_EVENT_HANDLER)
+    public void testMetaShortcuts_withoutKeyGestureEventHandling() {
         for (int i = 0; i < INTENT_SHORTCUTS.size(); i++) {
             final int keyCode = INTENT_SHORTCUTS.keyAt(i);
             final String category = INTENT_SHORTCUTS.valueAt(i);
@@ -110,6 +113,49 @@ public class ModifierShortcutTests extends ShortcutKeyTestBase {
         mPhoneWindowManager.assertLaunchCategory(Intent.CATEGORY_APP_CONTACTS);
 
         sendKeyCombination(new int[]{KEYCODE_META_LEFT, KEYCODE_SHIFT_LEFT, KEYCODE_J}, 0);
+        mPhoneWindowManager.assertActivityTargetLaunched(
+                new ComponentName("com.test", "com.test.BookmarkTest"));
+
+    }
+
+    @Test
+    @EnableFlags(com.android.hardware.input.Flags.FLAG_USE_KEY_GESTURE_EVENT_HANDLER)
+    public void testMetaShortcuts_withKeyGestureEventHandling() {
+        for (int i = 0; i < INTENT_SHORTCUTS.size(); i++) {
+            final String category = INTENT_SHORTCUTS.valueAt(i);
+            mPhoneWindowManager.sendKeyGestureEvent(
+                    new KeyGestureEvent.Builder()
+                            .setKeyGestureType(KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_APPLICATION)
+                            .setAction(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
+                            .setAppLaunchData(AppLaunchData.createLaunchDataForCategory(category))
+                            .build()
+            );
+            mPhoneWindowManager.assertLaunchCategory(category);
+        }
+
+        mPhoneWindowManager.overrideRoleManager();
+        for (int i = 0; i < ROLE_SHORTCUTS.size(); i++) {
+            final String role = ROLE_SHORTCUTS.valueAt(i);
+
+            mPhoneWindowManager.sendKeyGestureEvent(
+                    new KeyGestureEvent.Builder()
+                            .setKeyGestureType(KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_APPLICATION)
+                            .setAction(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
+                            .setAppLaunchData(AppLaunchData.createLaunchDataForRole(role))
+                            .build()
+            );
+            mPhoneWindowManager.assertLaunchRole(role);
+        }
+
+        mPhoneWindowManager.sendKeyGestureEvent(
+                new KeyGestureEvent.Builder()
+                        .setKeyGestureType(KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_APPLICATION)
+                        .setAction(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
+                        .setAppLaunchData(
+                                new AppLaunchData.ComponentData("com.test",
+                                        "com.test.BookmarkTest"))
+                        .build()
+        );
         mPhoneWindowManager.assertActivityTargetLaunched(
                 new ComponentName("com.test", "com.test.BookmarkTest"));
 

@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
@@ -30,6 +31,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastCoerceAtLeast
 import com.android.compose.nestedscroll.PriorityNestedScrollConnection
+import com.android.compose.nestedscroll.ScrollController
 import kotlin.math.max
 import kotlin.math.roundToInt
 import kotlin.math.tanh
@@ -92,20 +94,29 @@ fun NotificationStackNestedScrollConnection(
             offsetAvailable < 0f && offsetBeforeStart < 0f && !canScrollForward()
         },
         canStartPostFling = { velocityAvailable -> velocityAvailable < 0f && !canScrollForward() },
-        canStopOnPreFling = { false },
-        onStart = { offsetAvailable -> onStart(offsetAvailable) },
-        onScroll = { offsetAvailable, _ ->
-            val minOffset = 0f
-            val consumed = offsetAvailable.fastCoerceAtLeast(minOffset - stackOffset())
-            if (consumed != 0f) {
-                onScroll(consumed)
+        onStart = { firstScroll ->
+            onStart(firstScroll)
+            object : ScrollController {
+                override fun onScroll(deltaScroll: Float, source: NestedScrollSource): Float {
+                    val minOffset = 0f
+                    val consumed = deltaScroll.fastCoerceAtLeast(minOffset - stackOffset())
+                    if (consumed != 0f) {
+                        onScroll(consumed)
+                    }
+                    return consumed
+                }
+
+                override suspend fun onStop(initialVelocity: Float): Float {
+                    onStop(initialVelocity)
+                    return initialVelocity
+                }
+
+                override fun onCancel() {
+                    onStop(0f)
+                }
+
+                override fun canStopOnPreFling() = false
             }
-            consumed
         },
-        onStop = { velocityAvailable ->
-            onStop(velocityAvailable)
-            velocityAvailable
-        },
-        onCancel = { onStop(0f) },
     )
 }

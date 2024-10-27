@@ -29,6 +29,7 @@ import com.android.internal.logging.UiEventLogger.UiEventEnum
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.settings.UserTracker
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.shared.notifications.domain.interactor.NotificationSettingsInteractor
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionDecisionProvider.Decision
@@ -72,7 +73,7 @@ constructor(
     private val systemSettings: SystemSettings,
     private val packageManager: PackageManager,
     private val bubbles: Optional<Bubbles>,
-    private val context: Context,
+    @ShadeDisplayAware private val context: Context,
     private val notificationManager: NotificationManager,
     private val settingsInteractor: NotificationSettingsInteractor
 ) : VisualInterruptionDecisionProvider {

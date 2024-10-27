@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs.tiles.impl.irecording
 
+import android.os.Handler
 import android.os.UserHandle
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -28,6 +29,7 @@ import com.android.systemui.qs.tiles.base.interactor.DataUpdateTrigger
 import com.android.systemui.recordissue.IssueRecordingState
 import com.android.systemui.settings.fakeUserFileManager
 import com.android.systemui.settings.userTracker
+import com.android.systemui.util.settings.fakeGlobalSettings
 import com.google.common.truth.Truth
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
@@ -51,7 +53,14 @@ class IssueRecordingDataInteractorTest : SysuiTestCase() {
 
     @Before
     fun setup() {
-        state = IssueRecordingState(userTracker, userFileManager)
+        state =
+            IssueRecordingState(
+                userTracker,
+                userFileManager,
+                Handler.getMain(),
+                mContext.contentResolver,
+                kosmos.fakeGlobalSettings,
+            )
         underTest = IssueRecordingDataInteractor(state, kosmos.testScope.testScheduler)
     }
 
@@ -67,10 +76,12 @@ class IssueRecordingDataInteractorTest : SysuiTestCase() {
             Truth.assertThat(data?.isRecording).isFalse()
 
             state.isRecording = true
+            state.onRecordingChangeListener.onChange(true)
             runCurrent()
             Truth.assertThat(data?.isRecording).isTrue()
 
             state.isRecording = false
+            state.onRecordingChangeListener.onChange(true)
             runCurrent()
             Truth.assertThat(data?.isRecording).isFalse()
         }

@@ -29,6 +29,7 @@ import com.android.systemui.power.shared.model.ScreenPowerState
 import com.android.systemui.power.shared.model.WakeSleepReason
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.statusbar.LightRevealEffect
+import com.android.systemui.util.kotlin.BooleanFlowOperators.anyOf
 import com.android.systemui.util.kotlin.sample
 import dagger.Lazy
 import javax.inject.Inject
@@ -38,7 +39,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 @SysUISingleton
 class LightRevealScrimInteractor
@@ -96,16 +97,19 @@ constructor(
 
     /** Limit the max alpha for the scrim to allow for some transparency */
     val maxAlpha: Flow<Float> =
-        transitionInteractor
-            .isInTransition(
-                edge = Edge.create(Scenes.Gone, KeyguardState.AOD),
-                edgeWithoutSceneContainer = Edge.create(KeyguardState.GONE, KeyguardState.AOD),
+        anyOf(
+                transitionInteractor.isInTransition(
+                    edge = Edge.create(Scenes.Gone, KeyguardState.AOD),
+                    edgeWithoutSceneContainer = Edge.create(KeyguardState.GONE, KeyguardState.AOD),
+                ),
+                transitionInteractor.isInTransition(
+                    Edge.create(KeyguardState.OCCLUDED, KeyguardState.AOD)
+                ),
             )
             .flatMapLatest { isInTransition ->
-                // During GONE->AOD transitions, the home screen and wallpaper are still visible
-                // until
-                // WM is told to hide them, which occurs at the end of the animation. Use an opaque
-                // scrim until this transition is complete
+                // During transitions like GONE->AOD, surfaces like the launcher may be visible
+                // until WM is told to hide them, which occurs at the end of the animation. Use an
+                // opaque scrim until this transition is complete.
                 if (isInTransition) {
                     flowOf(1f)
                 } else {
@@ -149,7 +153,6 @@ constructor(
             KeyguardState.DOZING -> false
             KeyguardState.AOD -> false
             KeyguardState.DREAMING -> true
-            KeyguardState.DREAMING_LOCKSCREEN_HOSTED -> true
             KeyguardState.GLANCEABLE_HUB -> true
             KeyguardState.ALTERNATE_BOUNCER -> true
             KeyguardState.PRIMARY_BOUNCER -> true

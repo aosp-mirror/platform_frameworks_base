@@ -87,6 +87,8 @@ import com.android.wm.shell.common.MultiInstanceHelper
 import com.android.wm.shell.common.ShellExecutor
 import com.android.wm.shell.common.SyncTransactionQueue
 import com.android.wm.shell.desktopmode.DesktopActivityOrientationChangeHandler
+import com.android.wm.shell.desktopmode.DesktopModeEventLogger
+import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.ResizeTrigger
 import com.android.wm.shell.desktopmode.DesktopRepository
 import com.android.wm.shell.desktopmode.DesktopTasksController
 import com.android.wm.shell.desktopmode.DesktopTasksController.SnapPosition
@@ -125,6 +127,7 @@ import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.times
+import org.mockito.kotlin.KArgumentCaptor
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argThat
@@ -194,7 +197,11 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
     @Mock private lateinit var mockAppHandleEducationController: AppHandleEducationController
     @Mock private lateinit var mockFocusTransitionObserver: FocusTransitionObserver
     @Mock private lateinit var mockCaptionHandleRepository: WindowDecorCaptionHandleRepository
+    @Mock private lateinit var motionEvent: MotionEvent
+    @Mock lateinit var displayController: DisplayController
+    @Mock lateinit var displayLayout: DisplayLayout
     private lateinit var spyContext: TestableContext
+    private lateinit var desktopModeEventLogger: DesktopModeEventLogger
 
     private val transactionFactory = Supplier<SurfaceControl.Transaction> {
         SurfaceControl.Transaction()
@@ -224,6 +231,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
         shellInit = ShellInit(mockShellExecutor)
         windowDecorByTaskIdSpy.clear()
         spyContext.addMockSystemService(InputManager::class.java, mockInputManager)
+        desktopModeEventLogger = mock<DesktopModeEventLogger>()
         desktopModeWindowDecorViewModel = DesktopModeWindowDecorViewModel(
                 spyContext,
                 mockShellExecutor,
@@ -256,7 +264,8 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
                 mockCaptionHandleRepository,
                 Optional.of(mockActivityOrientationChangeHandler),
                 mockTaskPositionerFactory,
-                mockFocusTransitionObserver
+                mockFocusTransitionObserver,
+                desktopModeEventLogger
         )
         desktopModeWindowDecorViewModel.setSplitScreenController(mockSplitScreenController)
         whenever(mockDisplayController.getDisplayLayout(any())).thenReturn(mockDisplayLayout)
@@ -299,6 +308,10 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
             argumentCaptor<DesktopModeKeyguardChangeListener>()
         verify(mockShellController).addKeyguardChangeListener(keyguardChangedCaptor.capture())
         desktopModeOnKeyguardChangedListener = keyguardChangedCaptor.firstValue
+        whenever(displayController.getDisplayLayout(anyInt())).thenReturn(displayLayout)
+        whenever(displayLayout.getStableBounds(any())).thenAnswer { i ->
+            (i.arguments.first() as Rect).set(STABLE_BOUNDS)
+        }
     }
 
     @After
@@ -612,7 +625,11 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
 
         maxOrRestoreListenerCaptor.value.invoke()
 
-        verify(mockDesktopTasksController).toggleDesktopTaskSize(decor.mTaskInfo)
+        verify(mockDesktopTasksController).toggleDesktopTaskSize(
+            decor.mTaskInfo,
+            ResizeTrigger.MAXIMIZE_MENU,
+            null
+        )
     }
 
     @Test
@@ -647,7 +664,9 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
             eq(decor.mTaskInfo),
             taskSurfaceCaptor.capture(),
             eq(currentBounds),
-            eq(SnapPosition.LEFT)
+            eq(SnapPosition.LEFT),
+            eq(ResizeTrigger.SNAP_LEFT_MENU),
+            eq(null)
         )
         assertEquals(taskSurfaceCaptor.firstValue, decor.mTaskSurface)
     }
@@ -685,7 +704,9 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
             eq(decor.mTaskInfo),
             taskSurfaceCaptor.capture(),
             eq(currentBounds),
-            eq(SnapPosition.LEFT)
+            eq(SnapPosition.LEFT),
+            eq(ResizeTrigger.SNAP_LEFT_MENU),
+            eq(null)
         )
         assertEquals(decor.mTaskSurface, taskSurfaceCaptor.firstValue)
     }
@@ -704,7 +725,9 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
         onLeftSnapClickListenerCaptor.value.invoke()
 
         verify(mockDesktopTasksController, never())
-            .snapToHalfScreen(eq(decor.mTaskInfo), any(), eq(currentBounds), eq(SnapPosition.LEFT))
+            .snapToHalfScreen(eq(decor.mTaskInfo), any(), eq(currentBounds), eq(SnapPosition.LEFT),
+                eq(ResizeTrigger.MAXIMIZE_BUTTON),
+                eq(null))
         verify(mockToast).show()
     }
 
@@ -725,7 +748,9 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
             eq(decor.mTaskInfo),
             taskSurfaceCaptor.capture(),
             eq(currentBounds),
-            eq(SnapPosition.RIGHT)
+            eq(SnapPosition.RIGHT),
+            eq(ResizeTrigger.SNAP_RIGHT_MENU),
+            eq(null)
         )
         assertEquals(decor.mTaskSurface, taskSurfaceCaptor.firstValue)
     }
@@ -763,7 +788,9 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
             eq(decor.mTaskInfo),
             taskSurfaceCaptor.capture(),
             eq(currentBounds),
-            eq(SnapPosition.RIGHT)
+            eq(SnapPosition.RIGHT),
+            eq(ResizeTrigger.SNAP_RIGHT_MENU),
+            eq(null)
         )
         assertEquals(decor.mTaskSurface, taskSurfaceCaptor.firstValue)
     }
@@ -782,7 +809,9 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
         onRightSnapClickListenerCaptor.value.invoke()
 
         verify(mockDesktopTasksController, never())
-            .snapToHalfScreen(eq(decor.mTaskInfo), any(), eq(currentBounds), eq(SnapPosition.RIGHT))
+            .snapToHalfScreen(eq(decor.mTaskInfo), any(), eq(currentBounds), eq(SnapPosition.RIGHT),
+                eq(ResizeTrigger.MAXIMIZE_BUTTON),
+                eq(null))
         verify(mockToast).show()
     }
 
@@ -909,7 +938,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
     }
 
     @Test
-    fun testDecor_onClickToSplitScreen_disposesStatusBarInputLayer() {
+    fun testDecor_onClickToSplitScreen_detachesStatusBarInputLayer() {
         val toSplitScreenListenerCaptor = forClass(Function0::class.java)
                 as ArgumentCaptor<Function0<Unit>>
         val decor = createOpenTaskDecoration(
@@ -919,7 +948,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
 
         toSplitScreenListenerCaptor.value.invoke()
 
-        verify(decor).disposeStatusBarInputLayer()
+        verify(decor).detachStatusBarInputLayer()
     }
 
     @Test
@@ -1247,7 +1276,38 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
         onClickListenerCaptor.value.onClick(view)
 
         verify(mockDesktopTasksController)
-            .toggleDesktopTaskSize(decor.mTaskInfo)
+            .toggleDesktopTaskSize(decor.mTaskInfo, ResizeTrigger.MAXIMIZE_BUTTON, null)
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_FULLY_IMMERSIVE_IN_DESKTOP)
+    fun testImmersiveClick_togglesImmersiveState() {
+        val onImmersiveClickCaptor = argumentCaptor<() -> Unit>()
+        val decor = createOpenTaskDecoration(
+            windowingMode = WINDOWING_MODE_FREEFORM,
+            onImmersiveOrRestoreListenerCaptor = onImmersiveClickCaptor,
+            requestingImmersive = true,
+        )
+
+        onImmersiveClickCaptor.firstValue()
+
+        verify(mockDesktopTasksController)
+            .toggleDesktopTaskFullImmersiveState(decor.mTaskInfo)
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_FULLY_IMMERSIVE_IN_DESKTOP)
+    fun testImmersiveClick_closesMaximizeMenu() {
+        val onImmersiveClickCaptor = argumentCaptor<() -> Unit>()
+        val decor = createOpenTaskDecoration(
+            windowingMode = WINDOWING_MODE_FREEFORM,
+            onImmersiveOrRestoreListenerCaptor = onImmersiveClickCaptor,
+            requestingImmersive = true,
+        )
+
+        onImmersiveClickCaptor.firstValue()
+
+        verify(decor).closeMaximizeMenu()
     }
 
     private fun createOpenTaskDecoration(
@@ -1256,6 +1316,8 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
         requestingImmersive: Boolean = false,
         onMaxOrRestoreListenerCaptor: ArgumentCaptor<Function0<Unit>> =
             forClass(Function0::class.java) as ArgumentCaptor<Function0<Unit>>,
+        onImmersiveOrRestoreListenerCaptor: KArgumentCaptor<() -> Unit> =
+            argumentCaptor<() -> Unit>(),
         onLeftSnapClickListenerCaptor: ArgumentCaptor<Function0<Unit>> =
             forClass(Function0::class.java) as ArgumentCaptor<Function0<Unit>>,
         onRightSnapClickListenerCaptor: ArgumentCaptor<Function0<Unit>> =
@@ -1279,6 +1341,8 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
         ))
         onTaskOpening(decor.mTaskInfo, taskSurface)
         verify(decor).setOnMaximizeOrRestoreClickListener(onMaxOrRestoreListenerCaptor.capture())
+        verify(decor)
+            .setOnImmersiveOrRestoreClickListener(onImmersiveOrRestoreListenerCaptor.capture())
         verify(decor).setOnLeftSnapClickListener(onLeftSnapClickListenerCaptor.capture())
         verify(decor).setOnRightSnapClickListener(onRightSnapClickListenerCaptor.capture())
         verify(decor).setOnToDesktopClickListener(onToDesktopClickListenerCaptor.capture())
@@ -1337,7 +1401,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
         whenever(
             mockDesktopModeWindowDecorFactory.create(
                 any(), any(), any(), any(), any(), any(), eq(task), any(), any(), any(), any(),
-                any(), any(), any(), any(), any(), any(), any())
+                any(), any(), any(), any(), any(), any(), any(), any())
         ).thenReturn(decoration)
         decoration.mTaskInfo = task
         whenever(decoration.user).thenReturn(mockUserHandle)
@@ -1378,5 +1442,6 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
         private const val TAG = "DesktopModeWindowDecorViewModelTests"
         private val STABLE_INSETS = Rect(0, 100, 0, 0)
         private val INITIAL_BOUNDS = Rect(0, 0, 100, 100)
+        private val STABLE_BOUNDS = Rect(0, 0, 1000, 1000)
     }
 }

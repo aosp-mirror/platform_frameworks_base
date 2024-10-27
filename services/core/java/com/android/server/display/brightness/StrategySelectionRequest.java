@@ -42,17 +42,21 @@ public final class StrategySelectionRequest {
 
     private boolean mIsStylusBeingUsed;
 
+    private boolean mIsWearBedtimeModeEnabled;
+
     public StrategySelectionRequest(DisplayManagerInternal.DisplayPowerRequest displayPowerRequest,
             int targetDisplayState, float lastUserSetScreenBrightness,
             boolean userSetBrightnessChanged,
             DisplayManagerInternal.DisplayOffloadSession displayOffloadSession,
-            boolean isStylusBeingUsed) {
+            boolean isStylusBeingUsed,
+            boolean isWearBedtimeModeEnabled) {
         mDisplayPowerRequest = displayPowerRequest;
         mTargetDisplayState = targetDisplayState;
         mLastUserSetScreenBrightness = lastUserSetScreenBrightness;
         mUserSetBrightnessChanged = userSetBrightnessChanged;
         mDisplayOffloadSession = displayOffloadSession;
         mIsStylusBeingUsed = isStylusBeingUsed;
+        mIsWearBedtimeModeEnabled = isWearBedtimeModeEnabled;
     }
 
     public DisplayManagerInternal.DisplayPowerRequest getDisplayPowerRequest() {
@@ -70,6 +74,10 @@ public final class StrategySelectionRequest {
 
     public boolean isUserSetBrightnessChanged() {
         return mUserSetBrightnessChanged;
+    }
+
+    public boolean isWearBedtimeModeEnabled() {
+        return mIsWearBedtimeModeEnabled;
     }
 
     public DisplayManagerInternal.DisplayOffloadSession getDisplayOffloadSession() {
@@ -91,7 +99,8 @@ public final class StrategySelectionRequest {
                 && mLastUserSetScreenBrightness == other.getLastUserSetScreenBrightness()
                 && mUserSetBrightnessChanged == other.isUserSetBrightnessChanged()
                 && mDisplayOffloadSession.equals(other.getDisplayOffloadSession())
-                && mIsStylusBeingUsed == other.isStylusBeingUsed();
+                && mIsStylusBeingUsed == other.isStylusBeingUsed()
+                && mIsWearBedtimeModeEnabled == other.isWearBedtimeModeEnabled();
     }
 
     @Override

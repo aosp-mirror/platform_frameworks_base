@@ -131,7 +131,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 @SuppressLint("ValidFragment")
 class QSFragmentCompose
@@ -221,7 +221,7 @@ constructor(
                 { notificationScrimClippingParams.params.top },
                 // Only allow scrolling when we are fully expanded. That way, we don't intercept
                 // swipes in lockscreen (when somehow QS is receiving touches).
-                { scrollState.canScrollForward && viewModel.isQsFullyExpanded },
+                { (scrollState.canScrollForward && viewModel.isQsFullyExpanded) || isCustomizing },
             )
         frame.addView(
             composeView,

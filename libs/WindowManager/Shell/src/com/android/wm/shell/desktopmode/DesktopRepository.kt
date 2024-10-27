@@ -30,7 +30,6 @@ import androidx.core.util.valueIterator
 import com.android.internal.protolog.ProtoLog
 import com.android.window.flags.Flags
 import com.android.wm.shell.desktopmode.persistence.DesktopPersistentRepository
-import com.android.wm.shell.desktopmode.persistence.DesktopTask
 import com.android.wm.shell.desktopmode.persistence.DesktopTaskState
 import com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE
 import com.android.wm.shell.shared.annotations.ShellMainThread
@@ -124,26 +123,30 @@ class DesktopRepository (
         if (!Flags.enableDesktopWindowingPersistence()) return
         //  TODO: b/365962554 - Handle the case that user moves to desktop before it's initialized
         mainCoroutineScope.launch {
-            val desktop = persistentRepository.readDesktop()
+            val desktop = persistentRepository.readDesktop() ?: return@launch
+
             val maxTasks =
                 DesktopModeStatus.getMaxTaskLimit(context).takeIf { it > 0 }
                     ?: desktop.zOrderedTasksCount
 
+            var visibleTasksCount = 0
             desktop.zOrderedTasksList
                 // Reverse it so we initialize the repo from bottom to top.
                 .reversed()
-                .map { taskId ->
-                    desktop.tasksByTaskIdMap.getOrDefault(
-                        taskId,
-                        DesktopTask.getDefaultInstance()
-                    )
-                }
-                .filter { task -> task.desktopTaskState == DesktopTaskState.VISIBLE }
-                .take(maxTasks)
+                .mapNotNull { taskId -> desktop.tasksByTaskIdMap[taskId] }
                 .forEach { task ->
-                    addOrMoveFreeformTaskToTop(desktop.displayId, task.taskId)
-                    addActiveTask(desktop.displayId, task.taskId)
-                    updateTaskVisibility(desktop.displayId, task.taskId, visible = false)
+                    if (task.desktopTaskState == DesktopTaskState.VISIBLE
+                        && visibleTasksCount < maxTasks
+                    ) {
+                        visibleTasksCount++
+                        addOrMoveFreeformTaskToTop(desktop.displayId, task.taskId)
+                        addActiveTask(desktop.displayId, task.taskId)
+                        updateTaskVisibility(desktop.displayId, task.taskId, visible = false)
+                    } else {
+                        addActiveTask(desktop.displayId, task.taskId)
+                        updateTaskVisibility(desktop.displayId, task.taskId, visible = false)
+                        minimizeTask(desktop.displayId, task.taskId)
+                    }
                 }
         }
     }
@@ -262,11 +265,11 @@ class DesktopRepository (
         ArraySet(desktopTaskDataByDisplayId[displayId]?.minimizedTasks)
 
     /** Returns all active non-minimized tasks for [displayId] ordered from top to bottom. */
-    fun getActiveNonMinimizedOrderedTasks(displayId: Int): List<Int> =
+    fun getExpandedTasksOrdered(displayId: Int): List<Int> =
         getFreeformTasksInZOrder(displayId).filter { !isMinimizedTask(it) }
 
     /** Returns the count of active non-minimized tasks for [displayId]. */
-    fun getActiveNonMinimizedTaskCount(displayId: Int): Int {
+    fun getExpandedTaskCount(displayId: Int): Int {
         return getActiveTasks(displayId).count { !isMinimizedTask(it) }
     }
 
@@ -522,6 +525,7 @@ class DesktopRepository (
                 "${innerPrefix}freeformTasksInZOrder=${data.freeformTasksInZOrder.toDumpString()}"
             )
             pw.println("${innerPrefix}minimizedTasks=${data.minimizedTasks.toDumpString()}")
+            pw.println("${innerPrefix}fullImmersiveTaskId=${data.fullImmersiveTaskId}")
         }
     }
 

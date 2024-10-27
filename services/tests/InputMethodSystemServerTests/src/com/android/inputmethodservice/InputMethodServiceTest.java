@@ -159,15 +159,16 @@ public class InputMethodServiceTest {
 
         // Press home key to hide soft keyboard.
         Log.i(TAG, "Press home");
-        verifyInputViewStatus(
-                () -> assertThat(mUiDevice.pressHome()).isTrue(),
-                true /* expected */,
-                false /* inputViewStarted */);
         if (Flags.refactorInsetsController()) {
+            assertThat(mUiDevice.pressHome()).isTrue();
             // The IME visibility is only sent at the end of the animation. Therefore, we have to
             // wait until the visibility was sent to the server and the IME window hidden.
             eventually(() -> assertThat(mInputMethodService.isInputViewShown()).isFalse());
         } else {
+            verifyInputViewStatus(
+                    () -> assertThat(mUiDevice.pressHome()).isTrue(),
+                    true /* expected */,
+                    false /* inputViewStarted */);
             assertThat(mInputMethodService.isInputViewShown()).isFalse();
         }
     }

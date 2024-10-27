@@ -20,9 +20,11 @@ import static android.content.pm.PackageManager.FEATURE_LEANBACK;
 import static android.content.pm.PackageManager.FEATURE_WATCH;
 import static android.view.WindowManagerPolicyConstants.FLAG_INTERACTIVE;
 
+import static com.android.hardware.input.Flags.keyboardA11yShortcutControl;
 import static com.android.hardware.input.Flags.useKeyGestureEventHandler;
 import static com.android.hardware.input.Flags.useKeyGestureEventHandlerMultiPressGestures;
 import static com.android.server.flags.Flags.newBugreportKeyboardShortcut;
+import static com.android.window.flags.Flags.enableMoveToNextDisplayShortcut;
 
 import android.annotation.BinderThread;
 import android.annotation.MainThread;
@@ -576,6 +578,17 @@ final class KeyGestureController {
                             focusedToken, /* flags = */0);
                 }
                 break;
+            case KeyEvent.KEYCODE_T:
+                if (keyboardA11yShortcutControl()) {
+                    if (firstDown && event.isMetaPressed() && event.isAltPressed()) {
+                        return handleKeyGesture(deviceId, new int[]{keyCode},
+                                KeyEvent.META_META_ON | KeyEvent.META_ALT_ON,
+                                KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_TALKBACK,
+                                KeyGestureEvent.ACTION_GESTURE_COMPLETE, displayId,
+                                focusedToken, /* flags = */0);
+                    }
+                }
+                break;
             case KeyEvent.KEYCODE_DEL:
                 if (newBugreportKeyboardShortcut()) {
                     if (firstDown && mEnableBugReportKeyboardShortcut && event.isMetaPressed()
@@ -650,6 +663,18 @@ final class KeyGestureController {
                                 KeyEvent.META_META_ON | KeyEvent.META_ALT_ON,
                                 KeyGestureEvent.KEY_GESTURE_TYPE_CHANGE_SPLITSCREEN_FOCUS_RIGHT,
                                 KeyGestureEvent.ACTION_GESTURE_COMPLETE, displayId,
+                                focusedToken, /* flags = */0);
+                    }
+                }
+                break;
+            case KeyEvent.KEYCODE_D:
+                if (enableMoveToNextDisplayShortcut()) {
+                    if (firstDown && event.isMetaPressed() && event.isCtrlPressed()) {
+                        return handleKeyGesture(deviceId, new int[]{keyCode},
+                                KeyEvent.META_META_ON | KeyEvent.META_CTRL_ON,
+                                KeyGestureEvent.KEY_GESTURE_TYPE_MOVE_TO_NEXT_DISPLAY,
+                                KeyGestureEvent.ACTION_GESTURE_COMPLETE,
+                                displayId,
                                 focusedToken, /* flags = */0);
                     }
                 }
@@ -987,16 +1012,16 @@ final class KeyGestureController {
         if (device == null) {
             return;
         }
+        KeyGestureEvent keyGestureEvent = new KeyGestureEvent(event);
         if (event.action == KeyGestureEvent.ACTION_GESTURE_COMPLETE) {
             KeyboardMetricsCollector.logKeyboardSystemsEventReportedAtom(device, event.keycodes,
-                    event.modifierState,
-                    KeyGestureEvent.keyGestureTypeToLogEvent(event.gestureType));
+                    event.modifierState, keyGestureEvent.getLogEvent());
         }
         notifyAllListeners(event);
         while (mLastHandledEvents.size() >= MAX_TRACKED_EVENTS) {
             mLastHandledEvents.removeFirst();
         }
-        mLastHandledEvents.addLast(new KeyGestureEvent(event));
+        mLastHandledEvents.addLast(keyGestureEvent);
     }
 
     @MainThread

@@ -38,6 +38,8 @@ import com.android.internal.logging.testing.UiEventLoggerFake;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.screenshot.scroll.ScrollCaptureClient.Session;
 
+import org.junit.Assume;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -48,6 +50,12 @@ import org.junit.runner.RunWith;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class ScrollCaptureControllerTest extends SysuiTestCase {
+
+    @Before
+    public void assumeOnDevice() {
+        // TODO(b/373930957) this class hangs under robolectric
+        Assume.assumeFalse(isRobolectricTest());
+    }
 
     private static final ScrollCaptureResponse EMPTY_RESPONSE =
             new ScrollCaptureResponse.Builder().build();

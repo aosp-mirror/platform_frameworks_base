@@ -111,10 +111,12 @@ constructor(
 
     override fun handleSetListening(listening: Boolean) {
         super.handleSetListening(listening)
-        if (listening) {
-            issueRecordingState.addListener(onRecordingChangeListener)
-        } else {
-            issueRecordingState.removeListener(onRecordingChangeListener)
+        bgExecutor.execute {
+            if (listening) {
+                issueRecordingState.addListener(onRecordingChangeListener)
+            } else {
+                issueRecordingState.removeListener(onRecordingChangeListener)
+            }
         }
     }
 
@@ -152,7 +154,14 @@ constructor(
         recordingController.startCountdown(
             DELAY_MS,
             INTERVAL_MS,
-            pendingServiceIntent(getStartIntent(userContextProvider.userContext)),
+            pendingServiceIntent(
+                getStartIntent(
+                    userContextProvider.userContext,
+                    issueRecordingState.traceConfig,
+                    issueRecordingState.recordScreen,
+                    issueRecordingState.takeBugreport,
+                )
+            ),
             pendingServiceIntent(getStopIntent(userContextProvider.userContext)),
         )
 

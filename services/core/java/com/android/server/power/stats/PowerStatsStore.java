@@ -331,9 +331,10 @@ public class PowerStatsStore {
         ipw.increaseIndent();
         List<PowerStatsSpan.Metadata> contents = getTableOfContents();
         for (PowerStatsSpan.Metadata metadata : contents) {
-            PowerStatsSpan span = loadPowerStatsSpan(metadata.getId());
-            if (span != null) {
-                span.dump(ipw);
+            try (PowerStatsSpan span = loadPowerStatsSpan(metadata.getId())) {
+                if (span != null) {
+                    span.dump(ipw);
+                }
             }
         }
         ipw.decreaseIndent();

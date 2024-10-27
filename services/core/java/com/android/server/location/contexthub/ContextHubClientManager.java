@@ -236,7 +236,7 @@ import java.util.function.Consumer;
         }
 
         if (message.isBroadcastMessage()) {
-            if (Flags.reliableMessageImplementation() && message.isReliable()) {
+            if (message.isReliable()) {
                 Log.e(TAG, "Received reliable broadcast message from " + message.getNanoAppId());
                 return ErrorCode.PERMANENT_ERROR;
             }

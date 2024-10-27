@@ -80,6 +80,7 @@ import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.fingerprint.IFingerprintAuthenticatorsRegisteredCallback;
 import android.hardware.usb.UsbManager;
 import android.nfc.NfcAdapter;
+import android.os.BatteryManager;
 import android.os.CancellationSignal;
 import android.os.Handler;
 import android.os.Looper;
@@ -345,9 +346,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     // Device provisioning state
     private boolean mDeviceProvisioned;
 
-    // Battery status
+    // Battery status (null until first update is received)
     @VisibleForTesting
-    BatteryStatus mBatteryStatus;
+    BatteryStatus mBatteryStatus = null;
     @VisibleForTesting
     boolean mIncompatibleCharger;
 
@@ -2367,9 +2368,27 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             watchForDeviceProvisioning();
         }
 
-        // Take a guess at initial SIM state, battery status and PLMN until we get an update
-        mBatteryStatus = new BatteryStatus(BATTERY_STATUS_UNKNOWN, /* level= */ 100, /* plugged= */
-                0, CHARGING_POLICY_DEFAULT, /* maxChargingWattage= */0, /* present= */true);
+        // Request the initial battery level
+        mBackgroundExecutor.execute(() -> {
+            BatteryManager batteryManager = mContext.getSystemService(BatteryManager.class);
+            int level = -1;
+            if (batteryManager != null) {
+                int capacity = batteryManager.getIntProperty(
+                        BatteryManager.BATTERY_PROPERTY_CAPACITY);
+                if (capacity >= 0 && capacity <= 100) {
+                    level = capacity;
+                }
+            }
+            // Don't override if a valid battery status update has come in
+            final BatteryStatus status = new BatteryStatus(BATTERY_STATUS_UNKNOWN,
+                    /* level= */ level, /* plugged= */ 0, CHARGING_POLICY_DEFAULT,
+                    /* maxChargingWattage= */0, /* present= */true);
+            mMainExecutor.execute(() -> {
+                if (mBatteryStatus == null) {
+                    handleBatteryUpdate(status);
+                }
+            });
+        });
 
         // Watch for interesting updates
         final IntentFilter filter = new IntentFilter();
@@ -3591,6 +3610,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     }
 
     private boolean isBatteryUpdateInteresting(BatteryStatus old, BatteryStatus current) {
+        if (old == null) {
+            return true;
+        }
         final boolean nowPluggedIn = current.isPluggedIn();
         final boolean wasPluggedIn = old.isPluggedIn();
         final boolean stateChangedWhilePluggedIn = wasPluggedIn && nowPluggedIn
@@ -3687,7 +3709,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
 
     private void sendUpdates(KeyguardUpdateMonitorCallback callback) {
         // Notify listener of the current state
-        callback.onRefreshBatteryInfo(mBatteryStatus);
+        if (mBatteryStatus != null) {
+            callback.onRefreshBatteryInfo(mBatteryStatus);
+        }
         callback.onTimeChanged();
         callback.onPhoneStateChanged(mPhoneState);
         callback.onRefreshCarrierInfo();

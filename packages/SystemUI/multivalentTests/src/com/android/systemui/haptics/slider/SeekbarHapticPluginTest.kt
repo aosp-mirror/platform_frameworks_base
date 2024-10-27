@@ -20,6 +20,7 @@ import android.widget.SeekBar
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.haptics.msdl.msdlPlayer
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.statusbar.VibratorHelper
@@ -141,11 +142,7 @@ class SeekbarHapticPluginTest : SysuiTestCase() {
         }
 
     private fun createPlugin() {
-        plugin =
-            SeekbarHapticPlugin(
-                vibratorHelper,
-                kosmos.fakeSystemClock,
-            )
+        plugin = SeekbarHapticPlugin(vibratorHelper, kosmos.msdlPlayer, kosmos.fakeSystemClock)
     }
 
     companion object {

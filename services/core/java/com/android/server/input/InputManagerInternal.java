@@ -127,6 +127,13 @@ public abstract class InputManagerInternal {
      */
     public abstract void notifyInputMethodConnectionActive(boolean connectionIsActive);
 
+    /**
+     * Notify user id changes to input.
+     *
+     * TODO(b/362473586): Cleanup after input shifts to Lifecycle with user change callbacks
+     */
+    public abstract void setCurrentUser(@UserIdInt int newUserId);
+
     /** Callback interface for notifications relating to the lid switch. */
     public interface LidSwitchCallback {
         /**
@@ -262,4 +269,26 @@ public abstract class InputManagerInternal {
      */
     public abstract void handleKeyGestureInKeyGestureController(int deviceId, int[] keycodes,
             int modifierState, @KeyGestureEvent.KeyGestureType int event);
+
+    /**
+     * Sets the magnification scale factor for pointer icons.
+     *
+     * @param displayId   the ID of the display where the new scale factor is applied.
+     * @param scaleFactor the new scale factor to be applied for pointer icons.
+     */
+    public abstract void setAccessibilityPointerIconScaleFactor(int displayId, float scaleFactor);
+
+    /**
+     * Set whether the given input device can wake up the kernel from sleep
+     * when it generates input events. By default, usually only internal (built-in)
+     * input devices can wake the kernel from sleep. For an external input device
+     * that supports remote wakeup to be able to wake the kernel, this must be called
+     * after each time the device is connected/added.
+     *
+     * @param deviceId the device ID of the input device.
+     * @param enabled When true, device will be configured to wake up kernel.
+     *
+     * @return true if setting power wakeup was successful.
+     */
+    public abstract boolean setKernelWakeEnabled(int deviceId, boolean enabled);
 }

@@ -194,23 +194,20 @@ public class ContextHubClient implements Closeable {
     /**
      * Sends a reliable message to a nanoapp.
      *
-     * This method is similar to {@link ContextHubClient#sendMessageToNanoApp} with the
+     * <p>This method is similar to {@link ContextHubClient#sendMessageToNanoApp} with the
      * difference that it expects the message to be acknowledged by CHRE.
      *
-     * The transaction succeeds after we received an ACK from CHRE without error.
-     * In all other cases the transaction will fail.
+     * <p>The transaction succeeds after we received an ACK from CHRE without error. In all other
+     * cases the transaction will fail.
      */
     @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
     @NonNull
-    @FlaggedApi(Flags.FLAG_RELIABLE_MESSAGE)
     public ContextHubTransaction<Void> sendReliableMessageToNanoApp(
             @NonNull NanoAppMessage message) {
         ContextHubTransaction<Void> transaction =
                 new ContextHubTransaction<>(ContextHubTransaction.TYPE_RELIABLE_MESSAGE);
 
-        if (!Flags.reliableMessageImplementation() ||
-            !mAttachedHub.supportsReliableMessages() ||
-            message.isBroadcastMessage()) {
+        if (!mAttachedHub.supportsReliableMessages() || message.isBroadcastMessage()) {
             transaction.setResponse(new ContextHubTransaction.Response<Void>(
                     ContextHubTransaction.RESULT_FAILED_NOT_SUPPORTED, null));
             return transaction;

@@ -32,6 +32,7 @@ import com.android.systemui.statusbar.core.StatusBarInitializerStore
 import com.android.systemui.statusbar.core.StatusBarOrchestrator
 import com.android.systemui.statusbar.core.StatusBarSimpleFragment
 import com.android.systemui.statusbar.data.repository.StatusBarModeRepositoryStore
+import com.android.systemui.statusbar.events.PrivacyDotViewControllerModule
 import com.android.systemui.statusbar.phone.CentralSurfacesCommandQueueCallbacks
 import com.android.systemui.statusbar.window.StatusBarWindowControllerStore
 import com.android.systemui.statusbar.window.data.repository.StatusBarWindowStateRepositoryStore
@@ -45,7 +46,7 @@ import dagger.multibindings.IntoMap
 import kotlinx.coroutines.CoroutineScope
 
 /** Similar in purpose to [StatusBarModule], but scoped only to phones */
-@Module
+@Module(includes = [PrivacyDotViewControllerModule::class])
 interface StatusBarPhoneModule {
 
     @Binds
@@ -77,8 +78,11 @@ interface StatusBarPhoneModule {
             return if (StatusBarConnectedDisplays.isEnabled) {
                 // Will be started through MultiDisplayStatusBarStarter
                 CoreStartable.NOP
-            } else {
+            } else if (StatusBarSimpleFragment.isEnabled) {
                 defaultInitializerLazy.get()
+            } else {
+                // Will be started through CentralSurfaces
+                CoreStartable.NOP
             }
         }
 
@@ -113,24 +117,6 @@ interface StatusBarPhoneModule {
                 initializerStore.defaultDisplay,
                 statusBarWindowControllerStore.defaultDisplay,
             )
-        }
-
-        @Provides
-        @SysUISingleton
-        @IntoMap
-        @ClassKey(StatusBarOrchestrator::class)
-        fun orchestratorCoreStartable(
-            @Default orchestratorLazy: Lazy<StatusBarOrchestrator>
-        ): CoreStartable {
-            return if (StatusBarConnectedDisplays.isEnabled) {
-                // Will be started through MultiDisplayStatusBarStarter
-                CoreStartable.NOP
-            } else if (StatusBarSimpleFragment.isEnabled) {
-                orchestratorLazy.get()
-            } else {
-                // Will be started through CentralSurfacesImpl
-                CoreStartable.NOP
-            }
         }
 
         @Provides

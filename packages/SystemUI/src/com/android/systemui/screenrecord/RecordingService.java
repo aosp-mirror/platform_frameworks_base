@@ -43,7 +43,9 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.dagger.qualifiers.LongRunning;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.mediaprojection.MediaProjectionCaptureTarget;
+import com.android.systemui.recordissue.ScreenRecordingStartTimeStore;
 import com.android.systemui.res.R;
+import com.android.systemui.screenrecord.ScreenMediaRecorder.SavedRecording;
 import com.android.systemui.screenrecord.ScreenMediaRecorder.ScreenMediaRecorderListener;
 import com.android.systemui.settings.UserContextProvider;
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil;
@@ -92,6 +94,7 @@ public class RecordingService extends Service implements ScreenMediaRecorderList
     private boolean mShowTaps;
     private boolean mOriginalShowTaps;
     private ScreenMediaRecorder mRecorder;
+    private final ScreenRecordingStartTimeStore mScreenRecordingStartTimeStore;
     private final Executor mLongExecutor;
     private final UiEventLogger mUiEventLogger;
     protected final NotificationManager mNotificationManager;
@@ -103,7 +106,8 @@ public class RecordingService extends Service implements ScreenMediaRecorderList
     public RecordingService(RecordingController controller, @LongRunning Executor executor,
             @Main Handler handler, UiEventLogger uiEventLogger,
             NotificationManager notificationManager,
-            UserContextProvider userContextTracker, KeyguardDismissUtil keyguardDismissUtil) {
+            UserContextProvider userContextTracker, KeyguardDismissUtil keyguardDismissUtil,
+            ScreenRecordingStartTimeStore screenRecordingStartTimeStore) {
         mController = controller;
         mLongExecutor = executor;
         mMainHandler = handler;
@@ -111,6 +115,7 @@ public class RecordingService extends Service implements ScreenMediaRecorderList
         mNotificationManager = notificationManager;
         mUserContextTracker = userContextTracker;
         mKeyguardDismissUtil = keyguardDismissUtil;
+        mScreenRecordingStartTimeStore = screenRecordingStartTimeStore;
     }
 
     /**
@@ -178,7 +183,8 @@ public class RecordingService extends Service implements ScreenMediaRecorderList
                         currentUid,
                         mAudioSource,
                         captureTarget,
-                        this
+                        this,
+                        mScreenRecordingStartTimeStore
                 );
 
                 if (startRecording()) {
@@ -379,8 +385,7 @@ public class RecordingService extends Service implements ScreenMediaRecorderList
     }
 
     @VisibleForTesting
-    protected Notification createSaveNotification(
-            @Nullable ScreenMediaRecorder.SavedRecording recording) {
+    protected Notification createSaveNotification(@Nullable SavedRecording recording) {
         Uri uri = recording != null ? recording.getUri() : null;
         Intent viewIntent = new Intent(Intent.ACTION_VIEW)
                 .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_GRANT_READ_URI_PERMISSION)
@@ -501,15 +506,13 @@ public class RecordingService extends Service implements ScreenMediaRecorderList
         mLongExecutor.execute(() -> {
             try {
                 Log.d(getTag(), "saving recording");
-                Notification notification = createSaveNotification(
-                        getRecorder() != null ? getRecorder().save() : null);
+                SavedRecording savedRecording = getRecorder() != null ? getRecorder().save() : null;
                 postGroupSummaryNotification(
                         currentUser,
                         strings().getSaveTitle(),
                         GROUP_KEY_SAVED,
                         NOTIF_GROUP_ID_SAVED);
-                mNotificationManager.notifyAsUser(null, mNotificationId,  notification,
-                        currentUser);
+                onRecordingSaved(savedRecording, currentUser);
             } catch (IOException | IllegalStateException e) {
                 Log.e(getTag(), "Error saving screen recording: " + e.getMessage());
                 e.printStackTrace();
@@ -517,6 +520,12 @@ public class RecordingService extends Service implements ScreenMediaRecorderList
                 mNotificationManager.cancelAsUser(null, mNotificationId, currentUser);
             }
         });
+    }
+
+    protected void onRecordingSaved(ScreenMediaRecorder.SavedRecording savedRecording,
+            UserHandle currentUser) {
+        mNotificationManager.notifyAsUser(null, mNotificationId,
+                createSaveNotification(savedRecording), currentUser);
     }
 
     private void setTapsVisible(boolean turnOn) {

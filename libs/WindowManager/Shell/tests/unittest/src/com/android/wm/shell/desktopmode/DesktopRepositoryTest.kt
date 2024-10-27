@@ -898,7 +898,7 @@ class DesktopRepositoryTest : ShellTestCase() {
     }
 
     @Test
-    fun getActiveNonMinimizedOrderedTasks_returnsFreeformTasksInCorrectOrder() {
+    fun getExpandedTasksOrdered_returnsFreeformTasksInCorrectOrder() {
         repo.addActiveTask(displayId = DEFAULT_DISPLAY, taskId = 1)
         repo.addActiveTask(displayId = DEFAULT_DISPLAY, taskId = 2)
         repo.addActiveTask(displayId = DEFAULT_DISPLAY, taskId = 3)
@@ -907,13 +907,13 @@ class DesktopRepositoryTest : ShellTestCase() {
         repo.addOrMoveFreeformTaskToTop(displayId = 0, taskId = 2)
         repo.addOrMoveFreeformTaskToTop(displayId = 0, taskId = 1)
 
-        val tasks = repo.getActiveNonMinimizedOrderedTasks(displayId = 0)
+        val tasks = repo.getExpandedTasksOrdered(displayId = 0)
 
         assertThat(tasks).containsExactly(1, 2, 3).inOrder()
     }
 
     @Test
-    fun getActiveNonMinimizedOrderedTasks_excludesMinimizedTasks() {
+    fun getExpandedTasksOrdered_excludesMinimizedTasks() {
         repo.addActiveTask(displayId = DEFAULT_DISPLAY, taskId = 1)
         repo.addActiveTask(displayId = DEFAULT_DISPLAY, taskId = 2)
         repo.addActiveTask(displayId = DEFAULT_DISPLAY, taskId = 3)
@@ -923,7 +923,7 @@ class DesktopRepositoryTest : ShellTestCase() {
         repo.addOrMoveFreeformTaskToTop(displayId = DEFAULT_DISPLAY, taskId = 1)
         repo.minimizeTask(displayId = DEFAULT_DISPLAY, taskId = 2)
 
-        val tasks = repo.getActiveNonMinimizedOrderedTasks(displayId = DEFAULT_DISPLAY)
+        val tasks = repo.getExpandedTasksOrdered(displayId = DEFAULT_DISPLAY)
 
         assertThat(tasks).containsExactly(1, 3).inOrder()
     }

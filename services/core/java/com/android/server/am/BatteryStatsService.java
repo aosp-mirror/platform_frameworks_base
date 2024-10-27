@@ -62,6 +62,7 @@ import android.os.BatteryUsageStatsQuery;
 import android.os.Binder;
 import android.os.BluetoothBatteryStats;
 import android.os.Bundle;
+import android.os.ConditionVariable;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -213,6 +214,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     private final HandlerThread mHandlerThread;
     private final Handler mHandler;
     private final Object mLock = new Object();
+    private final ConditionVariable mSystemReady = new ConditionVariable(false);
 
     private final Object mPowerStatsLock = new Object();
     @GuardedBy("mPowerStatsLock")
@@ -413,6 +415,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         mHandlerThread = new HandlerThread("batterystats-handler");
         mHandlerThread.start();
         mHandler = new Handler(mHandlerThread.getLooper());
+        mHandler.post(mSystemReady::block);
 
         mMonotonicClock = new MonotonicClock(new File(systemDir, "monotonic_clock.xml"));
         mPowerProfile = new PowerProfile(context);
@@ -443,8 +446,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
         mPowerStatsStore = new PowerStatsStore(systemDir, mHandler);
         mPowerAttributor = new MultiStatePowerAttributor(mContext, mPowerStatsStore, mPowerProfile,
-                mCpuScalingPolicies, () -> mStats.getBatteryCapacity(),
-                mPowerStatsUidResolver);
+                mCpuScalingPolicies, () -> mStats.getBatteryCapacity());
         mPowerStatsScheduler = createPowerStatsScheduler(mContext);
 
         int accumulatedBatteryUsageStatsSpanSize = mContext.getResources().getInteger(
@@ -648,6 +650,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         dataConnectionStats.startMonitoring();
 
         registerStatsCallbacks();
+        mSystemReady.open();
     }
 
     private static boolean isBatteryUsageStatsAccumulationSupported() {
@@ -3178,12 +3181,15 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             mStats.collectPowerStatsSamples();
         }
 
-        BatteryUsageStats batteryUsageStats =
-                mBatteryUsageStatsProvider.getBatteryUsageStats(mStats, query);
-        if (proto) {
-            batteryUsageStats.dumpToProto(fd);
-        } else {
-            batteryUsageStats.dump(pw, "  ");
+        try (BatteryUsageStats batteryUsageStats =
+                     mBatteryUsageStatsProvider.getBatteryUsageStats(mStats, query)) {
+            if (proto) {
+                batteryUsageStats.dumpToProto(fd);
+            } else {
+                batteryUsageStats.dump(pw, "  ");
+            }
+        } catch (IOException e) {
+            Slog.e(TAG, "Cannot close BatteryUsageStats", e);
         }
     }
 

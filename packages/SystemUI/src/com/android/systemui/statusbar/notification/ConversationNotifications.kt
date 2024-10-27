@@ -29,6 +29,7 @@ import com.android.internal.widget.MessagingLayout
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.inflation.BindEventManager
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection
@@ -141,7 +142,7 @@ class ConversationNotificationManager
 @Inject
 constructor(
     bindEventManager: BindEventManager,
-    private val context: Context,
+    @ShadeDisplayAware private val context: Context,
     private val notifCollection: CommonNotifCollection,
     @Main private val mainHandler: Handler
 ) {

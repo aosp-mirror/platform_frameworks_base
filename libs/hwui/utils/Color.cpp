@@ -17,7 +17,6 @@
 #include "Color.h"
 
 #include <Properties.h>
-#include <aidl/android/hardware/graphics/common/Dataspace.h>
 #include <android/hardware_buffer.h>
 #include <android/native_window.h>
 #include <ui/ColorSpace.h>
@@ -222,8 +221,7 @@ android_dataspace ColorSpaceToADataSpace(SkColorSpace* colorSpace, SkColorType c
         if (nearlyEqual(fn, SkNamedTransferFn::kRec2020)) {
             return HAL_DATASPACE_BT2020;
         } else if (nearlyEqual(fn, SkNamedTransferFn::kSRGB)) {
-            return static_cast<android_dataspace>(
-                    ::aidl::android::hardware::graphics::common::Dataspace::DISPLAY_BT2020);
+            return static_cast<android_dataspace>(HAL_DATASPACE_DISPLAY_BT2020);
         }
     }
 

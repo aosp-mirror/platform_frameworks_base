@@ -103,6 +103,10 @@ import com.android.wm.shell.back.BackAnimation;
 import com.android.wm.shell.desktopmode.DesktopMode;
 import com.android.wm.shell.pip.Pip;
 
+import dagger.assisted.Assisted;
+import dagger.assisted.AssistedFactory;
+import dagger.assisted.AssistedInject;
+
 import kotlinx.coroutines.Job;
 
 import java.io.PrintWriter;
@@ -117,7 +121,6 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
-import javax.inject.Inject;
 import javax.inject.Provider;
 
 /**
@@ -414,8 +417,21 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
         }
     };
 
+    /**
+     * Factory for EdgeBackGestureHandler. Necessary because per-display contexts can't be injected.
+     * With this, you can pass in a specific context that knows what display it is in.
+     */
+    @AssistedFactory
+    public interface Factory {
+        /**
+         * Creates a new EdgeBackGestureHandler with the given context.
+         */
+        EdgeBackGestureHandler create(Context context);
+    }
+
+    @AssistedInject
     EdgeBackGestureHandler(
-            Context context,
+            @Assisted Context context,
             OverviewProxyService overviewProxyService,
             SysUiState sysUiState,
             PluginManager pluginManager,
@@ -751,7 +767,10 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
     }
 
     private void resetEdgeBackPlugin() {
-        setEdgeBackPlugin(mBackPanelControllerFactory.create(mContext));
+        BackPanelController backPanelController = mBackPanelControllerFactory.create(mContext,
+                mUiThreadContext.getHandler());
+        backPanelController.init();
+        setEdgeBackPlugin(backPanelController);
     }
 
     private void setEdgeBackPlugin(NavigationEdgeBackPlugin edgeBackPlugin) {
@@ -1326,113 +1345,6 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
                             mLightBarControllerProvider.get()
                                     .customizeStatusBarAppearance(appearance)));
             }
-        }
-    }
-
-    /**
-     * Injectable instance to create a new EdgeBackGestureHandler.
-     *
-     * Necessary because we don't have good handling of per-display contexts at the moment. With
-     * this, you can pass in a specific context that knows what display it is in.
-     */
-    public static class Factory {
-        private final OverviewProxyService mOverviewProxyService;
-        private final SysUiState mSysUiState;
-        private final PluginManager mPluginManager;
-        private final UiThreadContext mUiThreadContext;
-        private final Executor mBackgroundExecutor;
-        private final Handler mBgHandler;
-        private final UserTracker mUserTracker;
-        private final NavigationModeController mNavigationModeController;
-        private final BackPanelController.Factory mBackPanelControllerFactory;
-        private final ViewConfiguration mViewConfiguration;
-        private final WindowManager mWindowManager;
-        private final IWindowManager mWindowManagerService;
-        private final InputManager mInputManager;
-        private final Optional<Pip> mPipOptional;
-        private final Optional<DesktopMode> mDesktopModeOptional;
-        private final FalsingManager mFalsingManager;
-        private final Provider<BackGestureTfClassifierProvider>
-                mBackGestureTfClassifierProviderProvider;
-        private final Provider<LightBarController> mLightBarControllerProvider;
-        private final NotificationShadeWindowController mNotificationShadeWindowController;
-
-        private final GestureInteractor mGestureInteractor;
-
-        private final JavaAdapter mJavaAdapter;
-
-        @Inject
-        public Factory(OverviewProxyService overviewProxyService,
-                        SysUiState sysUiState,
-                        PluginManager pluginManager,
-                        @BackPanelUiThread UiThreadContext uiThreadContext,
-                        @Background Executor backgroundExecutor,
-                        @Background Handler bgHandler,
-                        UserTracker userTracker,
-                        NavigationModeController navigationModeController,
-                        BackPanelController.Factory backPanelControllerFactory,
-                        ViewConfiguration viewConfiguration,
-                        WindowManager windowManager,
-                        IWindowManager windowManagerService,
-                        InputManager inputManager,
-                        Optional<Pip> pipOptional,
-                        Optional<DesktopMode> desktopModeOptional,
-                        FalsingManager falsingManager,
-                        Provider<BackGestureTfClassifierProvider>
-                                backGestureTfClassifierProviderProvider,
-                        Provider<LightBarController> lightBarControllerProvider,
-                        NotificationShadeWindowController notificationShadeWindowController,
-                        GestureInteractor gestureInteractor,
-                        JavaAdapter javaAdapter) {
-            mOverviewProxyService = overviewProxyService;
-            mSysUiState = sysUiState;
-            mPluginManager = pluginManager;
-            mUiThreadContext = uiThreadContext;
-            mBackgroundExecutor = backgroundExecutor;
-            mBgHandler = bgHandler;
-            mUserTracker = userTracker;
-            mNavigationModeController = navigationModeController;
-            mBackPanelControllerFactory = backPanelControllerFactory;
-            mViewConfiguration = viewConfiguration;
-            mWindowManager = windowManager;
-            mWindowManagerService = windowManagerService;
-            mInputManager = inputManager;
-            mPipOptional = pipOptional;
-            mDesktopModeOptional = desktopModeOptional;
-            mFalsingManager = falsingManager;
-            mBackGestureTfClassifierProviderProvider = backGestureTfClassifierProviderProvider;
-            mLightBarControllerProvider = lightBarControllerProvider;
-            mNotificationShadeWindowController = notificationShadeWindowController;
-            mGestureInteractor = gestureInteractor;
-            mJavaAdapter = javaAdapter;
-        }
-
-        /** Construct a {@link EdgeBackGestureHandler}. */
-        public EdgeBackGestureHandler create(Context context) {
-            return mUiThreadContext.runWithScissors(
-                    () -> new EdgeBackGestureHandler(
-                            context,
-                            mOverviewProxyService,
-                            mSysUiState,
-                            mPluginManager,
-                            mUiThreadContext,
-                            mBackgroundExecutor,
-                            mBgHandler,
-                            mUserTracker,
-                            mNavigationModeController,
-                            mBackPanelControllerFactory,
-                            mViewConfiguration,
-                            mWindowManager,
-                            mWindowManagerService,
-                            mInputManager,
-                            mPipOptional,
-                            mDesktopModeOptional,
-                            mFalsingManager,
-                            mBackGestureTfClassifierProviderProvider,
-                            mLightBarControllerProvider,
-                            mNotificationShadeWindowController,
-                            mGestureInteractor,
-                            mJavaAdapter));
         }
     }
 

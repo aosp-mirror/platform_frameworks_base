@@ -57,6 +57,8 @@ class WindowExtensionsImpl implements WindowExtensions {
      */
     private static final int NO_LEVEL_OVERRIDE = -1;
 
+    private static final int EXTENSIONS_VERSION_V9 = 9;
+
     private static final int EXTENSIONS_VERSION_V8 = 8;
 
     private static final int EXTENSIONS_VERSION_V7 = 7;
@@ -80,6 +82,9 @@ class WindowExtensionsImpl implements WindowExtensions {
      */
     @VisibleForTesting
     static int getExtensionsVersionCurrentPlatform() {
+        if (Flags.wlinfoOncreate()) {
+            return EXTENSIONS_VERSION_V9;
+        }
         if (Flags.aeBackStackRestore()) {
             return EXTENSIONS_VERSION_V8;
         }

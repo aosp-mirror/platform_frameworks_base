@@ -2234,6 +2234,25 @@ public class HdmiCecLocalDeviceTvTest {
     }
 
     @Test
+    public void handleReportPhysicalAddress_samePathAsActiveSource_differentLA_newActiveSource() {
+        // This scenario can be reproduced if active source is hotplugged out and replaced with
+        // another device that might have another LA.
+        int physicalAddress = 0x1000;
+        mHdmiControlService.setActiveSource(Constants.ADDR_PLAYBACK_1, physicalAddress,
+                "HdmiControlServiceTest");
+        mHdmiCecLocalDeviceTv.setActivePath(physicalAddress);
+        HdmiCecMessage reportPhysicalAddressFromPlayback2 =
+                HdmiCecMessageBuilder.buildReportPhysicalAddressCommand(ADDR_PLAYBACK_2,
+                        physicalAddress, HdmiDeviceInfo.DEVICE_PLAYBACK);
+        HdmiCecMessage setStreamPath = HdmiCecMessageBuilder.buildSetStreamPath(ADDR_TV,
+                physicalAddress);
+        mNativeWrapper.onCecMessage(reportPhysicalAddressFromPlayback2);
+        mTestLooper.dispatchAll();
+
+        assertThat(mNativeWrapper.getResultMessages()).contains(setStreamPath);
+    }
+
+    @Test
     public void onOneTouchPlay_wakeUp_addCecDevice() {
         assertThat(mHdmiControlService.getHdmiCecNetwork().getDeviceInfoList(false))
                 .isEmpty();

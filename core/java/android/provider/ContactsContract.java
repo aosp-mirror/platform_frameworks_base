@@ -3071,6 +3071,14 @@ public final class ContactsContract {
                     "queryDefaultAccountForNewContacts";
 
             /**
+             * Action used to launch the UI to move contacts to the default account.
+             */
+            @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+            public static final String ACTION_MOVE_CONTACTS_TO_DEFAULT_ACCOUNT =
+                    "android.provider.action.MOVE_CONTACTS_TO_DEFAULT_ACCOUNT";
+
+
+            /**
              * Represents the state of the default account, and the actual {@link Account} if it's
              * a cloud account.
              * If the default account is set to {@link #DEFAULT_ACCOUNT_STATE_LOCAL} or

@@ -43,7 +43,7 @@ java_test_host {
     data_device_bins_both: [
         "block_device_writer",
     ],
-    data: [
+    device_common_data: [
         ":FsVerityTestApp",
     ],
 }

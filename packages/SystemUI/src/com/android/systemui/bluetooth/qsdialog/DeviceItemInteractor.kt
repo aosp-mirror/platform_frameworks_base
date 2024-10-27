@@ -50,6 +50,7 @@ class DeviceItemInteractor
 @Inject
 constructor(
     private val bluetoothTileDialogRepository: BluetoothTileDialogRepository,
+    private val audioSharingInteractor: AudioSharingInteractor,
     private val audioManager: AudioManager,
     private val bluetoothAdapter: BluetoothAdapter? = BluetoothAdapter.getDefaultAdapter(),
     private val localBluetoothManager: LocalBluetoothManager?,
@@ -76,7 +77,7 @@ constructor(
                     object : BluetoothCallback {
                         override fun onActiveDeviceChanged(
                             activeDevice: CachedBluetoothDevice?,
-                            bluetoothProfile: Int
+                            bluetoothProfile: Int,
                         ) {
                             super.onActiveDeviceChanged(activeDevice, bluetoothProfile)
                             logger.logActiveDeviceChanged(activeDevice?.address, bluetoothProfile)
@@ -86,30 +87,27 @@ constructor(
                         override fun onProfileConnectionStateChanged(
                             cachedDevice: CachedBluetoothDevice,
                             state: Int,
-                            bluetoothProfile: Int
+                            bluetoothProfile: Int,
                         ) {
                             super.onProfileConnectionStateChanged(
                                 cachedDevice,
                                 state,
-                                bluetoothProfile
+                                bluetoothProfile,
                             )
                             logger.logProfileConnectionStateChanged(
                                 cachedDevice.address,
                                 state.toString(),
-                                bluetoothProfile
+                                bluetoothProfile,
                             )
                             trySendWithFailureLogging(Unit, TAG, "onProfileConnectionStateChanged")
                         }
 
                         override fun onAclConnectionStateChanged(
                             cachedDevice: CachedBluetoothDevice,
-                            state: Int
+                            state: Int,
                         ) {
                             super.onAclConnectionStateChanged(cachedDevice, state)
-                            // Listen only when a device is disconnecting
-                            if (state == 0) {
-                                trySendWithFailureLogging(Unit, TAG, "onAclConnectionStateChanged")
-                            }
+                            trySendWithFailureLogging(Unit, TAG, "onAclConnectionStateChanged")
                         }
                     }
                 localBluetoothManager?.eventManager?.registerCallback(listener)
@@ -121,11 +119,19 @@ constructor(
     internal suspend fun updateDeviceItems(context: Context, trigger: DeviceFetchTrigger) {
         withContext(backgroundDispatcher) {
             val start = systemClock.elapsedRealtime()
+            val audioSharingAvailable = audioSharingInteractor.audioSharingAvailable()
             val deviceItems =
                 bluetoothTileDialogRepository.cachedDevices
                     .mapNotNull { cachedDevice ->
                         deviceItemFactoryList
-                            .firstOrNull { it.isFilterMatched(context, cachedDevice, audioManager) }
+                            .firstOrNull {
+                                it.isFilterMatched(
+                                    context,
+                                    cachedDevice,
+                                    audioManager,
+                                    audioSharingAvailable,
+                                )
+                            }
                             ?.create(context, cachedDevice)
                     }
                     .sort(deviceItemDisplayPriority, bluetoothAdapter?.mostRecentlyConnectedDevices)
@@ -136,13 +142,13 @@ constructor(
                 logger.logDeviceFetch(
                     JobStatus.FINISHED,
                     trigger,
-                    systemClock.elapsedRealtime() - start
+                    systemClock.elapsedRealtime() - start,
                 )
             } else {
                 logger.logDeviceFetch(
                     JobStatus.CANCELLED,
                     trigger,
-                    systemClock.elapsedRealtime() - start
+                    systemClock.elapsedRealtime() - start,
                 )
             }
         }
@@ -150,7 +156,7 @@ constructor(
 
     private fun List<DeviceItem>.sort(
         displayPriority: List<DeviceItemType>,
-        mostRecentlyConnectedDevices: List<BluetoothDevice>?
+        mostRecentlyConnectedDevices: List<BluetoothDevice>?,
     ): List<DeviceItem> {
         return this.sortedWith(
             compareBy<DeviceItem> { displayPriority.indexOf(it.type) }

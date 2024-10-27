@@ -63,9 +63,9 @@ import static com.android.server.wm.ActivityRecord.State.PAUSED;
 import static com.android.server.wm.ActivityRecord.State.RESTARTING_PROCESS;
 import static com.android.server.wm.ActivityRecord.State.RESUMED;
 import static com.android.server.wm.ActivityRecord.State.STOPPED;
+import static com.android.server.wm.AppCompatConfiguration.LETTERBOX_POSITION_MULTIPLIER_CENTER;
 import static com.android.server.wm.AppCompatUtils.computeAspectRatio;
 import static com.android.server.wm.DisplayContent.IME_TARGET_LAYERING;
-import static com.android.server.wm.AppCompatConfiguration.LETTERBOX_POSITION_MULTIPLIER_CENTER;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -95,13 +95,11 @@ import android.compat.testing.PlatformCompatChangeRule;
 import android.content.ComponentName;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ActivityInfo.ScreenOrientation;
-import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Insets;
 import android.graphics.Rect;
 import android.os.Binder;
-import android.os.RemoteException;
 import android.os.UserHandle;
 import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
@@ -1570,7 +1568,7 @@ public class SizeCompatTests extends WindowTestsBase {
                 new TestSplitOrganizer(mAtm, activity.getDisplayContent());
 
         // Move activity to split screen which takes half of the screen.
-        mTask.reparent(organizer.mPrimary, POSITION_TOP, /* moveParents= */ false , "test");
+        mTask.reparent(organizer.mPrimary, POSITION_TOP, /* moveParents= */ false, "test");
         organizer.mPrimary.setBounds(0, 0, 1000, 1400);
         assertEquals(WINDOWING_MODE_MULTI_WINDOW, mTask.getWindowingMode());
         assertEquals(WINDOWING_MODE_MULTI_WINDOW, activity.getWindowingMode());
@@ -1957,7 +1955,7 @@ public class SizeCompatTests extends WindowTestsBase {
         final TestSplitOrganizer organizer =
                 new TestSplitOrganizer(mAtm, mActivity.getDisplayContent());
         // Move activity to multi-window which takes half of the screen.
-        mTask.reparent(organizer.mPrimary, POSITION_TOP, /* moveParents= */ false , "test");
+        mTask.reparent(organizer.mPrimary, POSITION_TOP, /* moveParents= */ false, "test");
         organizer.mPrimary.setBounds(0, 0, screenWidth, getExpectedSplitSize(screenHeight));
         assertEquals(WINDOWING_MODE_MULTI_WINDOW, mTask.getWindowingMode());
         assertEquals(WINDOWING_MODE_MULTI_WINDOW, mActivity.getWindowingMode());
@@ -1993,7 +1991,7 @@ public class SizeCompatTests extends WindowTestsBase {
         final TestSplitOrganizer organizer =
                 new TestSplitOrganizer(mAtm, mActivity.getDisplayContent());
         // Move activity to multi-window which takes half of the screen.
-        mTask.reparent(organizer.mPrimary, POSITION_TOP, /* moveParents= */ false , "test");
+        mTask.reparent(organizer.mPrimary, POSITION_TOP, /* moveParents= */ false, "test");
         organizer.mPrimary.setBounds(0, 0, screenWidth, getExpectedSplitSize(screenHeight));
         assertEquals(WINDOWING_MODE_MULTI_WINDOW, mTask.getWindowingMode());
         assertEquals(WINDOWING_MODE_MULTI_WINDOW, mActivity.getWindowingMode());
@@ -2126,7 +2124,7 @@ public class SizeCompatTests extends WindowTestsBase {
         setUpDisplaySizeWithApp(screenWidth, screenHeight);
         mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
         mActivity.mWmService.mAppCompatConfiguration
-                        .setIsSplitScreenAspectRatioForUnresizableAppsEnabled(true);
+                .setIsSplitScreenAspectRatioForUnresizableAppsEnabled(true);
 
         mActivity.mWmService.mAppCompatConfiguration.setFixedOrientationLetterboxAspectRatio(1.1f);
 
@@ -2147,7 +2145,7 @@ public class SizeCompatTests extends WindowTestsBase {
         final TestSplitOrganizer organizer =
                 new TestSplitOrganizer(mAtm, mActivity.getDisplayContent());
         // Move activity to split screen which takes half of the screen.
-        mTask.reparent(organizer.mPrimary, POSITION_TOP, /* moveParents= */ false , "test");
+        mTask.reparent(organizer.mPrimary, POSITION_TOP, /* moveParents= */ false, "test");
         organizer.mPrimary.setBounds(0, 0, getExpectedSplitSize(screenWidth), screenHeight);
         assertEquals(WINDOWING_MODE_MULTI_WINDOW, mTask.getWindowingMode());
         assertEquals(WINDOWING_MODE_MULTI_WINDOW, mActivity.getWindowingMode());
@@ -2392,13 +2390,11 @@ public class SizeCompatTests extends WindowTestsBase {
         spyOn(activity.mWmService.mAppCompatConfiguration);
         doReturn(enabled).when(activity.mWmService.mAppCompatConfiguration)
                 .isUserAppAspectRatioSettingsEnabled();
-        // Set user aspect ratio override
-        final IPackageManager pm = mAtm.getPackageManager();
-        try {
-            doReturn(aspectRatio).when(pm)
-                    .getUserMinAspectRatio(activity.packageName, activity.mUserId);
-        } catch (RemoteException ignored) {
-        }
+        final AppCompatAspectRatioOverrides aspectRatioOverrides =
+                activity.mAppCompatController.getAppCompatAspectRatioOverrides();
+        spyOn(aspectRatioOverrides);
+        // Set user aspect ratio override.
+        doReturn(aspectRatio).when(aspectRatioOverrides).getUserMinAspectRatioOverrideCode();
 
         prepareLimitedBounds(activity, screenOrientation, isUnresizable);
 
@@ -2507,7 +2503,7 @@ public class SizeCompatTests extends WindowTestsBase {
         final TestSplitOrganizer organizer =
                 new TestSplitOrganizer(mAtm, activity.getDisplayContent());
         // Move activity to split screen which takes half of the screen.
-        mTask.reparent(organizer.mPrimary, POSITION_TOP, /* moveParents= */ false , "test");
+        mTask.reparent(organizer.mPrimary, POSITION_TOP, /* moveParents= */ false, "test");
         organizer.mPrimary.setBounds(0, 0, getExpectedSplitSize(screenWidth), screenHeight);
         assertEquals(WINDOWING_MODE_MULTI_WINDOW, mTask.getWindowingMode());
         assertEquals(WINDOWING_MODE_MULTI_WINDOW, activity.getWindowingMode());
@@ -2542,7 +2538,7 @@ public class SizeCompatTests extends WindowTestsBase {
         final TestSplitOrganizer organizer =
                 new TestSplitOrganizer(mAtm, activity.getDisplayContent());
         // Move activity to split screen which takes half of the screen.
-        mTask.reparent(organizer.mPrimary, POSITION_TOP, /* moveParents= */ false , "test");
+        mTask.reparent(organizer.mPrimary, POSITION_TOP, /* moveParents= */ false, "test");
         organizer.mPrimary.setBounds(0, 0, screenWidth, getExpectedSplitSize(screenHeight));
         assertEquals(WINDOWING_MODE_MULTI_WINDOW, mTask.getWindowingMode());
         assertEquals(WINDOWING_MODE_MULTI_WINDOW, activity.getWindowingMode());
@@ -2663,7 +2659,7 @@ public class SizeCompatTests extends WindowTestsBase {
         setUpDisplaySizeWithApp(screenWidth, screenHeight);
         mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
         mActivity.mWmService.mAppCompatConfiguration
-                        .setIsSplitScreenAspectRatioForUnresizableAppsEnabled(true);
+                .setIsSplitScreenAspectRatioForUnresizableAppsEnabled(true);
 
         mActivity.mWmService.mAppCompatConfiguration.setFixedOrientationLetterboxAspectRatio(1.1f);
 
@@ -2684,7 +2680,7 @@ public class SizeCompatTests extends WindowTestsBase {
         final TestSplitOrganizer organizer =
                 new TestSplitOrganizer(mAtm, mActivity.getDisplayContent());
         // Move activity to split screen which takes half of the screen.
-        mTask.reparent(organizer.mPrimary, POSITION_TOP, /* moveParents= */ false , "test");
+        mTask.reparent(organizer.mPrimary, POSITION_TOP, /* moveParents= */ false, "test");
         organizer.mPrimary.setBounds(0, 0, screenWidth, getExpectedSplitSize(screenHeight));
         assertEquals(WINDOWING_MODE_MULTI_WINDOW, mTask.getWindowingMode());
         assertEquals(WINDOWING_MODE_MULTI_WINDOW, mActivity.getWindowingMode());
@@ -2712,7 +2708,7 @@ public class SizeCompatTests extends WindowTestsBase {
         final TestSplitOrganizer organizer =
                 new TestSplitOrganizer(mAtm, mActivity.getDisplayContent());
         // Move activity to split screen which takes half of the screen.
-        mTask.reparent(organizer.mPrimary, POSITION_TOP, /* moveParents= */ false , "test");
+        mTask.reparent(organizer.mPrimary, POSITION_TOP, /* moveParents= */ false, "test");
         organizer.mPrimary.setBounds(0, 0, displayWidth, getExpectedSplitSize(displayHeight));
         assertEquals(WINDOWING_MODE_MULTI_WINDOW, mTask.getWindowingMode());
         assertEquals(WINDOWING_MODE_MULTI_WINDOW, mActivity.getWindowingMode());
@@ -2748,7 +2744,7 @@ public class SizeCompatTests extends WindowTestsBase {
         final TestSplitOrganizer organizer =
                 new TestSplitOrganizer(mAtm, mActivity.getDisplayContent());
         // Move activity to split screen which takes half of the screen.
-        mTask.reparent(organizer.mPrimary, POSITION_TOP, /* moveParents= */ false , "test");
+        mTask.reparent(organizer.mPrimary, POSITION_TOP, /* moveParents= */ false, "test");
         organizer.mPrimary.setBounds(0, 0, getExpectedSplitSize(displayWidth), displayHeight);
         assertEquals(WINDOWING_MODE_MULTI_WINDOW, mTask.getWindowingMode());
         assertEquals(WINDOWING_MODE_MULTI_WINDOW, mActivity.getWindowingMode());
@@ -2879,7 +2875,7 @@ public class SizeCompatTests extends WindowTestsBase {
         // App bounds should be 700x1400 with the ratio as the display.
         assertEquals(rotatedDisplayBounds.height(), rotatedActivityBounds.height());
         assertEquals(rotatedDisplayBounds.height() * rotatedDisplayBounds.height()
-                        / rotatedDisplayBounds.width(), rotatedActivityBounds.width());
+                / rotatedDisplayBounds.width(), rotatedActivityBounds.width());
     }
 
     @Test
@@ -2899,7 +2895,7 @@ public class SizeCompatTests extends WindowTestsBase {
         // Launch another portrait fixed app.
         spyOn(mTask);
         setBooted(display.mWmService.mAtmService);
-        final ActivityRecord newActivity = new ActivityBuilder(display.mWmService.mAtmService)
+        final ActivityRecord newActivity = getActivityBuilderWithoutTask()
                 .setResizeMode(RESIZE_MODE_UNRESIZEABLE)
                 .setScreenOrientation(SCREEN_ORIENTATION_PORTRAIT)
                 .setTask(mTask)
@@ -2967,7 +2963,7 @@ public class SizeCompatTests extends WindowTestsBase {
         // Launch another portrait fixed app with max aspect ratio as 1.3.
         spyOn(mTask);
         setBooted(display.mWmService.mAtmService);
-        final ActivityRecord newActivity = new ActivityBuilder(display.mWmService.mAtmService)
+        final ActivityRecord newActivity = getActivityBuilderWithoutTask()
                 .setResizeMode(RESIZE_MODE_UNRESIZEABLE)
                 .setMaxAspectRatio(1.3f)
                 .setScreenOrientation(SCREEN_ORIENTATION_PORTRAIT)
@@ -3328,7 +3324,7 @@ public class SizeCompatTests extends WindowTestsBase {
         final Rect originalBounds = new Rect(mActivity.getBounds());
 
         // Move activity to split screen which takes half of the screen.
-        mTask.reparent(organizer.mPrimary, POSITION_TOP, /* moveParents= */ false , "test");
+        mTask.reparent(organizer.mPrimary, POSITION_TOP, /* moveParents= */ false, "test");
         organizer.mPrimary.setBounds(0, 0, 1000, 1400);
         assertEquals(WINDOWING_MODE_MULTI_WINDOW, mTask.getWindowingMode());
         assertEquals(WINDOWING_MODE_MULTI_WINDOW, mActivity.getWindowingMode());
@@ -3444,7 +3440,7 @@ public class SizeCompatTests extends WindowTestsBase {
         prepareUnresizable(mActivity, 1.1f, SCREEN_ORIENTATION_PORTRAIT);
 
         // Move activity to split screen which takes half of the screen.
-        mTask.reparent(organizer.mPrimary, POSITION_TOP, /* moveParents= */ false , "test");
+        mTask.reparent(organizer.mPrimary, POSITION_TOP, /* moveParents= */ false, "test");
         organizer.mPrimary.setBounds(0, 0, 1400, 1000);
         assertEquals(WINDOWING_MODE_MULTI_WINDOW, mTask.getWindowingMode());
         assertEquals(WINDOWING_MODE_MULTI_WINDOW, mActivity.getWindowingMode());
@@ -3468,7 +3464,7 @@ public class SizeCompatTests extends WindowTestsBase {
         prepareUnresizable(mActivity, 1.1f, SCREEN_ORIENTATION_LANDSCAPE);
 
         // Move activity to split screen which takes half of the screen.
-        mTask.reparent(organizer.mPrimary, POSITION_TOP, /* moveParents= */ false , "test");
+        mTask.reparent(organizer.mPrimary, POSITION_TOP, /* moveParents= */ false, "test");
         organizer.mPrimary.setBounds(0, 0, 1000, 1400);
         assertEquals(WINDOWING_MODE_MULTI_WINDOW, mTask.getWindowingMode());
         assertEquals(WINDOWING_MODE_MULTI_WINDOW, mActivity.getWindowingMode());
@@ -3909,7 +3905,7 @@ public class SizeCompatTests extends WindowTestsBase {
         final DisplayPolicy policy = display.getDisplayPolicy();
         DisplayPolicy.DecorInsets.Info decorInfo = policy.getDecorInsetsInfo(ROTATION_90,
                 display.mBaseDisplayHeight, display.mBaseDisplayWidth);
-        decorInfo.mNonDecorInsets.set(130, 0,  60, 0);
+        decorInfo.mNonDecorInsets.set(130, 0, 60, 0);
         spyOn(policy);
         doReturn(decorInfo).when(policy).getDecorInsetsInfo(ROTATION_90,
                 display.mBaseDisplayHeight, display.mBaseDisplayWidth);
@@ -4145,6 +4141,7 @@ public class SizeCompatTests extends WindowTestsBase {
         // can be aligned inside parentAppBounds
         assertEquals(activity.getBounds(), new Rect(175, 0, 2275, 1000));
     }
+
     @Test
     @DisableCompatChanges({ActivityInfo.INSETS_DECOUPLED_CONFIGURATION_ENFORCED})
     public void testApplyAspectRatio_activityCannotAlignWithParentAppHorizontal() {
@@ -4198,7 +4195,7 @@ public class SizeCompatTests extends WindowTestsBase {
         final DisplayPolicy policy = display.getDisplayPolicy();
         DisplayPolicy.DecorInsets.Info decorInfo = policy.getDecorInsetsInfo(ROTATION_90,
                 display.mBaseDisplayHeight, display.mBaseDisplayWidth);
-        decorInfo.mNonDecorInsets.set(0, 130,  0, 60);
+        decorInfo.mNonDecorInsets.set(0, 130, 0, 60);
         spyOn(policy);
         doReturn(decorInfo).when(policy).getDecorInsetsInfo(ROTATION_90,
                 display.mBaseDisplayHeight, display.mBaseDisplayWidth);
@@ -4451,7 +4448,7 @@ public class SizeCompatTests extends WindowTestsBase {
         mActivity.mResolveConfigHint.mUseOverrideInsetsForConfig = true;
         // Set task as freeform
         mTask.setWindowingMode(WindowConfiguration.WINDOWING_MODE_FREEFORM);
-        prepareUnresizable(mActivity,  SCREEN_ORIENTATION_PORTRAIT);
+        prepareUnresizable(mActivity, SCREEN_ORIENTATION_PORTRAIT);
 
         Rect bounds = new Rect(mActivity.getWindowConfiguration().getBounds());
         Rect appBounds = new Rect(mActivity.getWindowConfiguration().getAppBounds());
@@ -4791,7 +4788,7 @@ public class SizeCompatTests extends WindowTestsBase {
         final float maxAspect = 1.8f;
         final float minAspect = 1.5f;
         prepareLimitedBounds(mActivity, maxAspect, minAspect,
-                ActivityInfo.SCREEN_ORIENTATION_LOCKED, true /* isUnresizable */);
+                ActivityInfo.SCREEN_ORIENTATION_NOSENSOR, true /* isUnresizable */);
 
         assertTrue(mActivity.isUniversalResizeable());
         assertTrue(mActivity.isResizeable());
@@ -4827,12 +4824,7 @@ public class SizeCompatTests extends WindowTestsBase {
         assertFalse(mActivity.isUniversalResizeable());
 
         mDisplayContent.setIgnoreOrientationRequest(true);
-        final int swDp = mDisplayContent.getConfiguration().smallestScreenWidthDp;
-        if (swDp < WindowManager.LARGE_SCREEN_SMALLEST_SCREEN_WIDTH_DP) {
-            final int height = 100 + (int) (mDisplayContent.getDisplayMetrics().density
-                    * WindowManager.LARGE_SCREEN_SMALLEST_SCREEN_WIDTH_DP);
-            resizeDisplay(mDisplayContent, 100 + height, height);
-        }
+        makeDisplayLargeScreen(mDisplayContent);
         assertTrue(mActivity.isUniversalResizeable());
     }
 

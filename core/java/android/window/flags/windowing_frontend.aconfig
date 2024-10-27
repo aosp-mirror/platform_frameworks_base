@@ -9,6 +9,16 @@ flag {
 }
 
 flag {
+  name: "reset_draw_state_on_client_invisible"
+  namespace: "windowing_frontend"
+  description: "Reset draw state if the client is notified to be invisible"
+  bug: "373023636"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
     name: "wait_for_transition_on_display_switch"
     namespace: "windowing_frontend"
     description: "Waits for Shell transition to start before unblocking the screen after display switch"
@@ -319,6 +329,14 @@ flag {
     name: "predictive_back_timestamp_api"
     namespace: "systemui"
     description: "expose timestamp in BackEvent (API extension)"
+    is_fixed_read_only: true
+    bug: "362938401"
+}
+
+flag {
+    name: "predictive_back_swipe_edge_none_api"
+    namespace: "systemui"
+    description: "EDGE_NONE swipeEdge option in BackEvent"
     is_fixed_read_only: true
     bug: "362938401"
 }

@@ -50,7 +50,6 @@ import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.data.repository.ShadeRepository
-import com.android.systemui.statusbar.notification.stack.domain.interactor.SharedNotificationContainerInteractor
 import com.android.systemui.util.kotlin.Utils.Companion.sample as sampleCombine
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
@@ -93,7 +92,6 @@ constructor(
     private val fromGoneTransitionInteractor: Provider<FromGoneTransitionInteractor>,
     private val fromLockscreenTransitionInteractor: Provider<FromLockscreenTransitionInteractor>,
     private val fromOccludedTransitionInteractor: Provider<FromOccludedTransitionInteractor>,
-    sharedNotificationContainerInteractor: Provider<SharedNotificationContainerInteractor>,
     @Application applicationScope: CoroutineScope,
 ) {
     // TODO(b/296118689): move to a repository
@@ -104,15 +102,16 @@ constructor(
         SceneContainerFlag.assertInLegacyMode()
         combineTransform(
                 _notificationPlaceholderBounds,
-                sharedNotificationContainerInteractor.get().configurationBasedDimensions,
                 keyguardTransitionInteractor.isInTransition(
                     edge = Edge.create(from = LOCKSCREEN, to = AOD)
                 ),
-            ) { bounds, cfg, isTransitioningToAod ->
+                shadeRepository.isShadeLayoutWide,
+                configurationInteractor.dimensionPixelSize(R.dimen.keyguard_split_shade_top_margin),
+            ) { bounds, isTransitioningToAod, useSplitShade, keyguardSplitShadeTopMargin ->
                 if (isTransitioningToAod) {
                     // Keep bounds stable during this transition, to prevent cases like smartspace
                     // popping in and adjusting the bounds. A prime example would be media playing,
-                    // which then updates smartspace on transition to AOD
+                    // which then updates smartspace on transition to AOD.
                     return@combineTransform
                 }
 
@@ -120,8 +119,8 @@ constructor(
                 // legacy placement behavior within notifications for splitshade.
                 emit(
                     if (MigrateClocksToBlueprint.isEnabled) {
-                        if (cfg.useSplitShade) {
-                            bounds.copy(bottom = bounds.bottom - cfg.keyguardSplitShadeTopMargin)
+                        if (useSplitShade) {
+                            bounds.copy(bottom = bounds.bottom - keyguardSplitShadeTopMargin)
                         } else {
                             bounds
                         }
@@ -189,9 +188,6 @@ constructor(
     /** Whether any dreaming is running, including the doze dream. */
     val isDreamingAny: Flow<Boolean> = repository.isDreaming
 
-    /** Whether the system is dreaming and the active dream is hosted in lockscreen */
-    val isActiveDreamLockscreenHosted: StateFlow<Boolean> = repository.isActiveDreamLockscreenHosted
-
     /** Event for when the camera gesture is detected */
     val onCameraLaunchDetected: Flow<CameraLaunchSourceModel> =
         repository.onCameraLaunchDetected.filter { it.type != CameraLaunchType.IGNORE }
@@ -244,7 +240,7 @@ constructor(
 
     /** Whether the keyguard is going away. */
     @Deprecated("Use KeyguardTransitionInteractor + KeyguardState.GONE")
-    val isKeyguardGoingAway: Flow<Boolean> = repository.isKeyguardGoingAway
+    val isKeyguardGoingAway: StateFlow<Boolean> = repository.isKeyguardGoingAway.asStateFlow()
 
     /** Keyguard can be clipped at the top as the shade is dragged */
     val topClippingBounds: Flow<Int?> by lazy {
@@ -477,10 +473,6 @@ constructor(
         }
     }
 
-    fun setIsActiveDreamLockscreenHosted(isLockscreenHosted: Boolean) {
-        repository.setIsActiveDreamLockscreenHosted(isLockscreenHosted)
-    }
-
     /** Sets whether quick settings or quick-quick settings is visible. */
     fun setQuickSettingsVisible(isVisible: Boolean) {
         repository.setQuickSettingsVisible(isVisible)
@@ -547,6 +539,14 @@ constructor(
 
     fun setShortcutAbsoluteTop(top: Float) {
         repository.setShortcutAbsoluteTop(top)
+    }
+
+    fun setIsKeyguardGoingAway(isGoingAway: Boolean) {
+        repository.isKeyguardGoingAway.value = isGoingAway
+    }
+
+    fun setNotificationStackAbsoluteBottom(bottom: Float) {
+        repository.setNotificationStackAbsoluteBottom(bottom)
     }
 
     companion object {

@@ -101,9 +101,9 @@ interface PreferenceBinding {
                     preference.setEntryValues(values)
                 }
             } else if (preference is SeekBarPreference && this is RangeValue) {
-                preference.min = minValue
-                preference.max = maxValue
-                preference.seekBarIncrement = incrementStep
+                preference.min = getMinValue(context)
+                preference.max = getMaxValue(context)
+                preference.seekBarIncrement = getIncrementStep(context)
             }
         }
     }

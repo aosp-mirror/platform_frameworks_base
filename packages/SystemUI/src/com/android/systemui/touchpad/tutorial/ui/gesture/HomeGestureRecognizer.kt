@@ -18,6 +18,7 @@ package com.android.systemui.touchpad.tutorial.ui.gesture
 
 import android.util.MathUtils
 import android.view.MotionEvent
+import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState.InProgress
 
 /** Recognizes touchpad home gesture, that is - using three fingers on touchpad - swiping up. */
 class HomeGestureRecognizer(private val gestureDistanceThresholdPx: Int) : GestureRecognizer {
@@ -29,6 +30,10 @@ class HomeGestureRecognizer(private val gestureDistanceThresholdPx: Int) : Gestu
         gestureStateChangedCallback = callback
     }
 
+    override fun clearGestureStateCallback() {
+        gestureStateChangedCallback = {}
+    }
+
     override fun accept(event: MotionEvent) {
         if (!isThreeFingerTouchpadSwipe(event)) return
         val gestureState = distanceTracker.processEvent(event)
@@ -36,7 +41,7 @@ class HomeGestureRecognizer(private val gestureDistanceThresholdPx: Int) : Gestu
             gestureStateChangedCallback,
             gestureState,
             isFinished = { -it.deltaY >= gestureDistanceThresholdPx },
-            progress = { MathUtils.saturate(-it.deltaY / gestureDistanceThresholdPx) },
+            progress = { InProgress(MathUtils.saturate(-it.deltaY / gestureDistanceThresholdPx)) },
         )
     }
 }

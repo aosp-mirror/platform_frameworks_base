@@ -52,6 +52,7 @@ sealed interface Transformation {
 internal class SharedElementTransformation(
     override val matcher: ElementMatcher,
     internal val enabled: Boolean,
+    internal val elevateInContent: ContentKey?,
 ) : Transformation
 
 /** A transformation that changes the value of an element property, like its size or offset. */

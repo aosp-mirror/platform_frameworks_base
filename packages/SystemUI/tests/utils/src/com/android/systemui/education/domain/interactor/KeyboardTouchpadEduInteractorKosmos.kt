@@ -17,6 +17,7 @@
 package com.android.systemui.education.domain.interactor
 
 import android.hardware.input.InputManager
+import com.android.systemui.education.ContextualEducationMetricsLogger
 import com.android.systemui.education.data.repository.fakeEduClock
 import com.android.systemui.inputdevice.data.repository.UserInputDeviceRepository
 import com.android.systemui.inputdevice.tutorial.tutorialSchedulerRepository
@@ -41,11 +42,13 @@ var Kosmos.keyboardTouchpadEduInteractor by
                     touchpadRepository,
                     userRepository,
                 ),
-            tutorialSchedulerRepository,
-            mockOverviewProxyService,
+            tutorialRepository = tutorialSchedulerRepository,
+            overviewProxyService = mockOverviewProxyService,
+            metricsLogger = mockEduMetricsLogger,
             clock = fakeEduClock,
         )
     }
 
+var Kosmos.mockEduMetricsLogger by Kosmos.Fixture { mock<ContextualEducationMetricsLogger>() }
 var Kosmos.mockOverviewProxyService by Kosmos.Fixture { mock<OverviewProxyService>() }
 var Kosmos.mockEduInputManager by Kosmos.Fixture { mock<InputManager>() }

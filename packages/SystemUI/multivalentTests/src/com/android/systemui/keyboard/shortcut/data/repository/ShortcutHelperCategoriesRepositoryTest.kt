@@ -17,6 +17,7 @@
 package com.android.systemui.keyboard.shortcut.data.repository
 
 import android.hardware.input.fakeInputManager
+import android.view.KeyEvent.KEYCODE_1
 import android.view.KeyEvent.KEYCODE_A
 import android.view.KeyEvent.KEYCODE_B
 import android.view.KeyEvent.KEYCODE_C
@@ -24,6 +25,7 @@ import android.view.KeyEvent.KEYCODE_D
 import android.view.KeyEvent.KEYCODE_E
 import android.view.KeyEvent.KEYCODE_F
 import android.view.KeyEvent.KEYCODE_G
+import android.view.KeyEvent.META_FUNCTION_ON
 import android.view.KeyboardShortcutGroup
 import android.view.KeyboardShortcutInfo
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -87,6 +89,48 @@ class ShortcutHelperCategoriesRepositoryTest : SysuiTestCase() {
     }
 
     @Test
+    fun categories_keycodeAndModifiersAreMappedSeparatelyWhenIdentical() =
+        testScope.runTest {
+            fakeSystemSource.setGroups(simpleGroup(simpleShortcutInfo(KEYCODE_1)))
+
+            helper.toggle(deviceId = 123)
+            val categories by collectLastValue(repo.categories)
+
+            val systemCategory = categories?.firstOrNull { it.type == ShortcutCategoryType.System }
+
+            // Keycode 0x8 should be translated to the Key 1 instead of modifier FN
+            // which has the same keycode.
+            val expectedCategory =
+                ShortcutCategory(
+                    type = ShortcutCategoryType.System,
+                    simpleSubCategory(simpleShortcut("1")),
+                )
+
+            assertThat(systemCategory).isEqualTo(expectedCategory)
+        }
+
+    @Test
+    fun categories_keyCodeAndModifierHaveSameCode_codesAreMappedCorrectly() =
+        testScope.runTest {
+            fakeSystemSource.setGroups(simpleGroup(simpleShortcutInfo(KEYCODE_1, META_FUNCTION_ON)))
+
+            helper.toggle(deviceId = 123)
+            val categories by collectLastValue(repo.categories)
+
+            val systemCategory = categories?.firstOrNull { it.type == ShortcutCategoryType.System }
+
+            // Keycode 0x8 should be translated to the Key 1 instead of modifier FN
+            // which has the same keycode. while modifier mask 0x8 should be translated to FN.
+            val expectedCategory =
+                ShortcutCategory(
+                    type = ShortcutCategoryType.System,
+                    simpleSubCategory(simpleShortcut("Fn", "1")),
+                )
+
+            assertThat(systemCategory).isEqualTo(expectedCategory)
+        }
+
+    @Test
     fun categories_multipleSubscribers_replaysExistingValueToNewSubscribers() =
         testScope.runTest {
             fakeSystemSource.setGroups(TestShortcuts.systemGroups)
@@ -111,24 +155,14 @@ class ShortcutHelperCategoriesRepositoryTest : SysuiTestCase() {
         testScope.runTest {
             fakeSystemSource.setGroups(
                 listOf(
-                    simpleGroup(
-                        simpleShortcutInfo(KEYCODE_A),
-                        simpleShortcutInfo(KEYCODE_B),
-                    ),
-                    simpleGroup(
-                        simpleShortcutInfo(KEYCODE_C),
-                    ),
+                    simpleGroup(simpleShortcutInfo(KEYCODE_A), simpleShortcutInfo(KEYCODE_B)),
+                    simpleGroup(simpleShortcutInfo(KEYCODE_C)),
                 )
             )
             fakeMultiTaskingSource.setGroups(
                 listOf(
-                    simpleGroup(
-                        simpleShortcutInfo(KEYCODE_D),
-                    ),
-                    simpleGroup(
-                        simpleShortcutInfo(KEYCODE_E),
-                        simpleShortcutInfo(KEYCODE_F),
-                    ),
+                    simpleGroup(simpleShortcutInfo(KEYCODE_D)),
+                    simpleGroup(simpleShortcutInfo(KEYCODE_E), simpleShortcutInfo(KEYCODE_F)),
                 )
             )
             fakeAppCategoriesSource.setGroups(listOf(simpleGroup(simpleShortcutInfo(KEYCODE_G))))
@@ -144,16 +178,11 @@ class ShortcutHelperCategoriesRepositoryTest : SysuiTestCase() {
                         listOf(
                             simpleSubCategory(simpleShortcut("B")),
                             simpleSubCategory(simpleShortcut("C")),
-                        )
+                        ),
                     ),
                     ShortcutCategory(
                         ShortcutCategoryType.MultiTasking,
-                        listOf(
-                            simpleSubCategory(
-                                simpleShortcut("E"),
-                                simpleShortcut("F"),
-                            ),
-                        )
+                        listOf(simpleSubCategory(simpleShortcut("E"), simpleShortcut("F"))),
                     ),
                 )
         }
@@ -164,14 +193,14 @@ class ShortcutHelperCategoriesRepositoryTest : SysuiTestCase() {
     private fun simpleShortcut(vararg keys: String) =
         Shortcut(
             label = simpleShortcutLabel,
-            commands = listOf(ShortcutCommand(keys.map { ShortcutKey.Text(it) }))
+            commands = listOf(ShortcutCommand(keys.map { ShortcutKey.Text(it) })),
         )
 
     private fun simpleGroup(vararg shortcuts: KeyboardShortcutInfo) =
         KeyboardShortcutGroup(simpleGroupLabel, shortcuts.asList())
 
-    private fun simpleShortcutInfo(keyCode: Int = 0) =
-        KeyboardShortcutInfo(simpleShortcutLabel, keyCode, /* modifiers= */ 0)
+    private fun simpleShortcutInfo(keyCode: Int = 0, modifiers: Int = 0) =
+        KeyboardShortcutInfo(simpleShortcutLabel, keyCode, modifiers)
 
     private val simpleShortcutLabel = "shortcut label"
     private val simpleGroupLabel = "group label"

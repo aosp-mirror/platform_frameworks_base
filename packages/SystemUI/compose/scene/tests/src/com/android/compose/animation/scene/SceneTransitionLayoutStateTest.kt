@@ -43,6 +43,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertThrows
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -767,5 +768,13 @@ class SceneTransitionLayoutStateTest {
 
         assertThat(state.transitionState).isIdle()
         assertThat(state.transitionState).hasCurrentScene(SceneC)
+    }
+
+    @Test
+    fun transition_progressTo() {
+        val transition = transition(from = SceneA, to = SceneB, progress = { 0.2f })
+        assertThat(transition.progressTo(SceneB)).isEqualTo(0.2f)
+        assertThat(transition.progressTo(SceneA)).isEqualTo(1f - 0.2f)
+        assertThrows(IllegalArgumentException::class.java) { transition.progressTo(SceneC) }
     }
 }

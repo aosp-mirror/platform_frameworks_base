@@ -32,7 +32,7 @@ import dagger.multibindings.ClassKey
 import dagger.multibindings.IntoMap
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 @Module(includes = [SecureSettingsRepositoryModule::class, SystemSettingsRepositoryModule::class])
 object NotificationSettingsRepositoryModule {

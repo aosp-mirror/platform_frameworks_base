@@ -234,7 +234,7 @@ custom_platform_bootclasspath {
     ],
 }
 
-genrule { // This module exists to make the srcjar output available to Make.
+java_genrule { // This module exists to make the srcjar output available to Make.
     name: "platform-bootclasspath.srcjar",
     srcs: [":platform-bootclasspath{.srcjar}"],
     out: ["platform-bootclasspath.srcjar"],

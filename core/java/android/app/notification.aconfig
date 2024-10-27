@@ -287,3 +287,10 @@ flag {
   description: "Adds logging for notification/modes backup and restore events"
   bug: "289524803"
 }
+
+flag {
+  name: "notification_classification_ui"
+  namespace: "systemui"
+  description: "Adds UI for NAS classification of notifications"
+  bug: "367996732"
+}

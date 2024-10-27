@@ -432,6 +432,9 @@ class Task extends TaskFragment {
     // This number will be assigned when we evaluate OOM scores for all visible tasks.
     int mLayerRank = LAYER_RANK_INVISIBLE;
 
+    /** A 0~100 ratio to indicate the percentage of visible area on screen of a freeform task. */
+    int mNonOccludedFreeformAreaRatio;
+
     /* Unique identifier for this task. */
     final int mTaskId;
     /* User for which this task was created. */
@@ -1204,6 +1207,28 @@ class Task extends TaskFragment {
 
         // Ensure all animations are finished at same time in split-screen mode.
         forAllActivities(ActivityRecord::updateAnimatingActivityRegistry);
+    }
+
+    @Override
+    void onResize() {
+        super.onResize();
+        updateTaskLayerForFreeform();
+    }
+
+    @Override
+    void onMovedByResize() {
+        super.onMovedByResize();
+        updateTaskLayerForFreeform();
+    }
+
+    private void updateTaskLayerForFreeform() {
+        if (!com.android.window.flags.Flags.processPriorityPolicyForMultiWindowMode()) {
+            return;
+        }
+        if (!isVisibleRequested() || !inFreeformWindowingMode()) {
+            return;
+        }
+        mRootWindowContainer.invalidateTaskLayersAndUpdateOomAdjIfNeeded();
     }
 
     @Override
@@ -3410,6 +3435,36 @@ class Task extends TaskFragment {
         info.requestedVisibleTypes = (windowState != null && Flags.enableFullyImmersiveInDesktop())
                 ? windowState.getRequestedVisibleTypes() : WindowInsets.Type.defaultVisible();
         AppCompatUtils.fillAppCompatTaskInfo(this, info, top);
+        info.topActivityMainWindowFrame = calculateTopActivityMainWindowFrameForTaskInfo(top);
+    }
+
+    /**
+     * Returns the top activity's main window frame if it doesn't match
+     * {@link ActivityRecord#getBounds() the top activity bounds}, or {@code null}, otherwise.
+     *
+     * @param top The top running activity of the task
+     */
+    @Nullable
+    private static Rect calculateTopActivityMainWindowFrameForTaskInfo(
+            @Nullable ActivityRecord top) {
+        if (!Flags.betterSupportNonMatchParentActivity()) {
+            return null;
+        }
+        if (top == null) {
+            return null;
+        }
+        final WindowState mainWindow = top.findMainWindow();
+        if (mainWindow == null) {
+            return null;
+        }
+        if (!mainWindow.mHaveFrame) {
+            return null;
+        }
+        final Rect windowFrame = mainWindow.getFrame();
+        if (top.getBounds().equals(windowFrame)) {
+            return null;
+        }
+        return windowFrame;
     }
 
     /**
@@ -5918,6 +5973,10 @@ class Task extends TaskFragment {
         if (mLastNonFullscreenBounds != null) {
             pw.print(prefix); pw.print("  mLastNonFullscreenBounds=");
             pw.println(mLastNonFullscreenBounds);
+        }
+        if (mNonOccludedFreeformAreaRatio != 0) {
+            pw.print(prefix); pw.print("  mNonOccludedFreeformAreaRatio=");
+            pw.println(mNonOccludedFreeformAreaRatio);
         }
         if (isLeafTask()) {
             pw.println(prefix + "  isSleeping=" + shouldSleepActivities());

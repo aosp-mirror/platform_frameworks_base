@@ -22,7 +22,7 @@ import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.material3.Text
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
-import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource.Companion.UserInput
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
@@ -294,15 +294,10 @@ class DraggableHandlerTest {
             available: Offset,
             consumedByScroll: Offset = Offset.Zero,
         ) {
-            val consumedByPreScroll =
-                onPreScroll(available = available, source = NestedScrollSource.Drag)
+            val consumedByPreScroll = onPreScroll(available = available, source = UserInput)
             val consumed = consumedByPreScroll + consumedByScroll
 
-            onPostScroll(
-                consumed = consumed,
-                available = available - consumed,
-                source = NestedScrollSource.Drag,
-            )
+            onPostScroll(consumed = consumed, available = available - consumed, source = UserInput)
         }
 
         fun NestedScrollConnection.preFling(
@@ -738,7 +733,7 @@ class DraggableHandlerTest {
         val nestedScroll = nestedScrollConnection(nestedScrollBehavior = EdgeWithPreview)
         nestedScroll.onPreScroll(
             available = downOffset(fractionOfScreen = 0.1f),
-            source = NestedScrollSource.Drag,
+            source = UserInput,
         )
         assertIdle(currentScene = SceneA)
     }
@@ -750,7 +745,7 @@ class DraggableHandlerTest {
             nestedScroll.onPostScroll(
                 consumed = Offset.Zero,
                 available = Offset.Zero,
-                source = NestedScrollSource.Drag,
+                source = UserInput,
             )
 
         assertIdle(currentScene = SceneA)
@@ -764,7 +759,7 @@ class DraggableHandlerTest {
             nestedScroll.onPostScroll(
                 consumed = Offset.Zero,
                 available = downOffset(fractionOfScreen = 0.1f),
-                source = NestedScrollSource.Drag,
+                source = UserInput,
             )
 
         assertTransition(currentScene = SceneA)
@@ -784,16 +779,12 @@ class DraggableHandlerTest {
         val consumed =
             nestedScroll.onPreScroll(
                 available = downOffset(fractionOfScreen = 0.1f),
-                source = NestedScrollSource.Drag,
+                source = UserInput,
             )
         assertThat(progress).isEqualTo(0.2f)
 
         // do nothing on postScroll
-        nestedScroll.onPostScroll(
-            consumed = consumed,
-            available = Offset.Zero,
-            source = NestedScrollSource.Drag,
-        )
+        nestedScroll.onPostScroll(consumed = consumed, available = Offset.Zero, source = UserInput)
         assertThat(progress).isEqualTo(0.2f)
 
         nestedScroll.scroll(available = downOffset(fractionOfScreen = 0.1f))
@@ -813,10 +804,7 @@ class DraggableHandlerTest {
         nestedScroll.preFling(available = Velocity.Zero)
 
         // a pre scroll event, that could be intercepted by DraggableHandlerImpl
-        nestedScroll.onPreScroll(
-            available = Offset(0f, secondScroll),
-            source = NestedScrollSource.Drag,
-        )
+        nestedScroll.onPreScroll(available = Offset(0f, secondScroll), source = UserInput)
     }
 
     @Test
@@ -858,6 +846,34 @@ class DraggableHandlerTest {
 
         advanceUntilIdle()
         assertIdle(SceneB)
+    }
+
+    @Test
+    fun duringATransition_aNewScrollGesture_shouldTakeControl() = runGestureTest {
+        val nestedScroll = nestedScrollConnection(nestedScrollBehavior = EdgeWithPreview)
+        // First gesture
+        nestedScroll.scroll(available = downOffset(fractionOfScreen = 0.1f))
+        assertTransition(currentScene = SceneA)
+        nestedScroll.preFling(available = Velocity.Zero)
+        assertTransition(currentScene = SceneA)
+
+        // Second gesture, it starts during onStop() animation
+        nestedScroll.scroll(downOffset(0.1f))
+        assertTransition(currentScene = SceneA)
+
+        // Allows onStop() to complete or cancel
+        advanceUntilIdle()
+
+        // Second gesture continues
+        nestedScroll.scroll(downOffset(0.1f))
+        assertTransition(currentScene = SceneA)
+
+        // Second gesture ends
+        nestedScroll.preFling(available = Velocity.Zero)
+        assertTransition(currentScene = SceneA)
+
+        advanceUntilIdle()
+        assertIdle(currentScene = SceneA)
     }
 
     @Test
@@ -1304,6 +1320,26 @@ class DraggableHandlerTest {
                 assertThat(consumedVelocity).isGreaterThan(-velocityThreshold)
             },
         )
+    }
+
+    @Test
+    fun scrollKeepPriorityEvenIfWeCanNoLongerScrollOnThatDirection() = runGestureTest {
+        // Overscrolling on scene B does nothing.
+        layoutState.transitions = transitions { overscrollDisabled(SceneB, Orientation.Vertical) }
+        val nestedScroll = nestedScrollConnection(nestedScrollBehavior = EdgeAlways)
+
+        // Overscroll is disabled, it will scroll up to 100%
+        nestedScroll.scroll(available = upOffset(fractionOfScreen = 2f))
+        assertTransition(fromScene = SceneA, toScene = SceneB, progress = 1f)
+
+        // We need to maintain scroll priority even if the scene transition can no longer consume
+        // the scroll gesture.
+        nestedScroll.scroll(available = upOffset(fractionOfScreen = 0.1f))
+        assertTransition(fromScene = SceneA, toScene = SceneB, progress = 1f)
+
+        // A scroll gesture in the opposite direction allows us to return to the previous scene.
+        nestedScroll.scroll(available = downOffset(fractionOfScreen = 0.5f))
+        assertTransition(fromScene = SceneA, toScene = SceneB, progress = 0.5f)
     }
 
     @Test

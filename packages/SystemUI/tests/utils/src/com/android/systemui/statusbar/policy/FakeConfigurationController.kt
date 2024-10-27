@@ -23,7 +23,7 @@ class FakeConfigurationController @Inject constructor() :
         listeners -= listener
     }
 
-    override fun onConfigurationChanged(newConfiguration: Configuration?) {
+    override fun onConfigurationChanged(newConfiguration: Configuration) {
         listeners.forEach { it.onConfigChanged(newConfiguration) }
     }
 
@@ -36,7 +36,7 @@ class FakeConfigurationController @Inject constructor() :
     }
 
     fun notifyConfigurationChanged() {
-        onConfigurationChanged(newConfiguration = null)
+        onConfigurationChanged(newConfiguration = Configuration())
     }
 
     fun notifyLayoutDirectionChanged(isRtl: Boolean) {

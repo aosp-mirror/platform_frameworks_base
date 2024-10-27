@@ -7054,6 +7054,9 @@
          RSS is being collected instead. -->
     <item name="config_am_pssToRssThresholdModifier" format="float" type="dimen">1.5</item>
 
+    <!-- The size of the UI tier if cached app oom_adj_score tiers are enabled. -->
+    <integer name="config_am_tieredCachedAdjUiTierSize">10</integer>
+
     <!-- Whether unlocking and waking a device are sequenced -->
     <bool name="config_orderUnlockAndWake">false</bool>
 
@@ -7175,4 +7178,10 @@
     <string name="identity_check_settings_action"></string>
     <!-- Package for opening identity check settings page [CHAR LIMIT=NONE] [DO NOT TRANSLATE] -->
     <string name="identity_check_settings_package_name">com\u002eandroid\u002esettings</string>
+
+    <!-- The name of the service for forensic backup transport. -->
+    <string name="config_forensicBackupTransport" translatable="false"></string>
+
+    <!-- Whether to enable fp unlock when screen turns off on udfps devices -->
+    <bool name="config_screen_off_udfps_enabled">false</bool>
 </resources>

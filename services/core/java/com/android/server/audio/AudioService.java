@@ -68,10 +68,11 @@ import static com.android.media.audio.Flags.audioserverPermissions;
 import static com.android.media.audio.Flags.disablePrescaleAbsoluteVolume;
 import static com.android.media.audio.Flags.equalScoLeaVcIndexRange;
 import static com.android.media.audio.Flags.replaceStreamBtSco;
-import static com.android.media.audio.Flags.ringerModeAffectsAlarm;
 import static com.android.media.audio.Flags.ringMyCar;
+import static com.android.media.audio.Flags.ringerModeAffectsAlarm;
 import static com.android.media.audio.Flags.setStreamVolumeOrder;
 import static com.android.media.audio.Flags.vgsVssSyncMuteOrder;
+import static com.android.media.flags.Flags.enableAudioInputDeviceRoutingAndVolumeControl;
 import static com.android.server.audio.SoundDoseHelper.ACTION_CHECK_MUSIC_ACTIVE;
 import static com.android.server.utils.EventLogger.Event.ALOGE;
 import static com.android.server.utils.EventLogger.Event.ALOGI;
@@ -491,6 +492,10 @@ public class AudioService extends IAudioService.Stub
     private static final int MSG_INIT_SPATIALIZER = 102;
     private static final int MSG_INIT_ADI_DEVICE_STATES = 103;
 
+    private static final int MSG_INIT_INPUT_GAINS = 104;
+    private static final int MSG_SET_INPUT_GAIN_INDEX = 105;
+    private static final int MSG_PERSIST_INPUT_GAIN_INDEX = 106;
+
     // end of messages handled under wakelock
 
     // retry delay in case of failure to indicate system ready to AudioFlinger
@@ -511,6 +516,11 @@ public class AudioService extends IAudioService.Stub
      *  Mapping which contains for each stream type its associated {@link VolumeStreamState}
      **/
     private SparseArray<VolumeStreamState> mStreamStates;
+
+    /**
+     * @see InputDeviceVolumeHelper
+     */
+    private InputDeviceVolumeHelper mInputDeviceVolumeHelper;
 
     /*package*/ int getVssVolumeForDevice(int stream, int device) {
         final VolumeStreamState streamState = mStreamStates.get(stream);
@@ -1501,6 +1511,15 @@ public class AudioService extends IAudioService.Stub
                 0 /* arg1 */, 0 /* arg2 */, null /* obj */, 0 /* delay */);
         queueMsgUnderWakeLock(mAudioHandler, MSG_INIT_SPATIALIZER,
                 0 /* arg1 */, 0 /* arg2 */, null /* obj */, 0 /* delay */);
+        if (enableAudioInputDeviceRoutingAndVolumeControl()) {
+            queueMsgUnderWakeLock(
+                    mAudioHandler,
+                    MSG_INIT_INPUT_GAINS,
+                    0 /* arg1 */,
+                    0 /* arg2 */,
+                    null /* obj */,
+                    0 /* delay */);
+        }
 
         mDisplayManager = context.getSystemService(DisplayManager.class);
 
@@ -1589,9 +1608,26 @@ public class AudioService extends IAudioService.Stub
                 if (dev == AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP) {
                     enabled = mAvrcpAbsVolSupported;
                 }
-                mAudioSystem.setDeviceAbsoluteVolumeEnabled(dev, /*address=*/"", enabled, stream);
+                final int result = mAudioSystem.setDeviceAbsoluteVolumeEnabled(dev, /*address=*/"",
+                        enabled, stream);
+                if (result != AudioSystem.AUDIO_STATUS_OK) {
+                    sVolumeLogger.enqueueAndSlog(
+                            new VolumeEvent(VolumeEvent.VOL_ABS_DEVICE_ENABLED_ERROR,
+                                    result, dev, enabled, stream).eventToString(), ALOGE, TAG);
+
+                }
             });
         }
+    }
+
+    /** Called by handling of MSG_INIT_INPUT_GAINS */
+    private void onInitInputGains() {
+        mInputDeviceVolumeHelper =
+                new InputDeviceVolumeHelper(
+                        mSettings,
+                        mContentResolver,
+                        mSettingsLock,
+                        System.INPUT_GAIN_INDEX_SETTINGS);
     }
 
     private SubscriptionManager.OnSubscriptionsChangedListener mSubscriptionChangedListener =
@@ -2040,7 +2076,13 @@ public class AudioService extends IAudioService.Stub
                 if (dev == AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP) {
                     enabled = mAvrcpAbsVolSupported;
                 }
-                mAudioSystem.setDeviceAbsoluteVolumeEnabled(dev, /*address=*/"", enabled, stream);
+                final int result = mAudioSystem.setDeviceAbsoluteVolumeEnabled(dev, /*address=*/"",
+                        enabled, stream);
+                if (result != AudioSystem.AUDIO_STATUS_OK) {
+                    sVolumeLogger.enqueueAndSlog(
+                            new VolumeEvent(VolumeEvent.VOL_ABS_DEVICE_ENABLED_ERROR,
+                                    result, dev, enabled, stream).eventToString(), ALOGE, TAG);
+                }
             });
         }
 
@@ -3567,8 +3609,10 @@ public class AudioService extends IAudioService.Stub
      * @see AudioManager#addOnDevicesForAttributesChangedListener(
      *      AudioAttributes, Executor, OnDevicesForAttributesChangedListener)
      */
+    @android.annotation.EnforcePermission(anyOf = { MODIFY_AUDIO_ROUTING, QUERY_AUDIO_STATE })
     public void addOnDevicesForAttributesChangedListener(AudioAttributes attributes,
             IDevicesForAttributesCallback callback) {
+        super.addOnDevicesForAttributesChangedListener_enforcePermission();
         mAudioSystem.addOnDevicesForAttributesChangedListener(
                 attributes, false /* forVolume */, callback);
     }
@@ -4886,15 +4930,27 @@ public class AudioService extends IAudioService.Stub
     private void onUpdateContextualVolumes() {
         final int streamType = getBluetoothContextualVolumeStream();
 
+        Log.i(TAG,
+                "onUpdateContextualVolumes: absolute volume driving streams " + streamType
+                + " avrcp supported: " + mAvrcpAbsVolSupported);
         synchronized (mCachedAbsVolDrivingStreamsLock) {
             mCachedAbsVolDrivingStreams.replaceAll((absDev, stream) -> {
                 boolean enabled = true;
                 if (absDev == AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP) {
                     enabled = mAvrcpAbsVolSupported;
+                    if (!enabled) {
+                        Log.w(TAG, "Updating avrcp not supported in onUpdateContextualVolumes");
+                    }
                 }
-                if (stream != streamType || !enabled) {
-                    mAudioSystem.setDeviceAbsoluteVolumeEnabled(absDev, /*address=*/"",
-                            enabled, streamType);
+                if (stream != streamType) {
+                    final int result = mAudioSystem.setDeviceAbsoluteVolumeEnabled(absDev,
+                            /*address=*/"", enabled, streamType);
+                    if (result != AudioSystem.AUDIO_STATUS_OK) {
+                        sVolumeLogger.enqueueAndSlog(
+                                new VolumeEvent(VolumeEvent.VOL_ABS_DEVICE_ENABLED_ERROR,
+                                        result, absDev, enabled, streamType).eventToString(), ALOGE,
+                                TAG);
+                    }
                 }
                 return streamType;
             });
@@ -5738,6 +5794,90 @@ public class AudioService extends IAudioService.Stub
                 ? STREAM_VOLUME_ALIAS_VOICE[aliasStreamType]
                         == STREAM_VOLUME_ALIAS_VOICE[AudioSystem.STREAM_SYSTEM]
                 : aliasStreamType == sStreamVolumeAlias.get(AudioSystem.STREAM_SYSTEM);
+    }
+
+    /**
+     * @see AudioDeviceVolumeManager#setInputGainIndex(AudioDeviceAttributes, int)
+     */
+    @Override
+    @android.annotation.EnforcePermission(MODIFY_AUDIO_SETTINGS_PRIVILEGED)
+    public void setInputGainIndex(@NonNull AudioDeviceAttributes ada, int index) {
+        super.setInputGainIndex_enforcePermission();
+
+        if (mInputDeviceVolumeHelper.setInputGainIndex(ada, index)) {
+            // Post message to set system volume (it in turn will post a message
+            // to persist).
+            sendMsg(
+                    mAudioHandler,
+                    MSG_SET_INPUT_GAIN_INDEX,
+                    SENDMSG_QUEUE,
+                    /*arg1*/ index,
+                    /*arg2*/ 0,
+                    /*obj*/ ada,
+                    /*delay*/ 0);
+        }
+    }
+
+    private void setInputGainIndexInt(@NonNull AudioDeviceAttributes ada, int index) {
+        // TODO(b/364923030): call AudioSystem to apply input gain in native layer.
+
+        // Post a persist input gain msg.
+        sendMsg(
+                mAudioHandler,
+                MSG_PERSIST_INPUT_GAIN_INDEX,
+                SENDMSG_QUEUE,
+                /*arg1*/ index,
+                /*arg2*/ 0,
+                /*obj*/ ada,
+                PERSIST_DELAY);
+    }
+
+    private void persistInputGainIndex(@NonNull AudioDeviceAttributes ada, int index) {
+        mInputDeviceVolumeHelper.persistInputGainIndex(ada, index);
+    }
+
+    /**
+     * @see AudioDeviceVolumeManager#getInputGainIndex(AudioDeviceAttributes)
+     */
+    @Override
+    @android.annotation.EnforcePermission(MODIFY_AUDIO_SETTINGS_PRIVILEGED)
+    public int getInputGainIndex(@NonNull AudioDeviceAttributes ada) {
+        super.getInputGainIndex_enforcePermission();
+
+        return mInputDeviceVolumeHelper.getInputGainIndex(ada);
+    }
+
+    /**
+     * @see AudioDeviceVolumeManager#getMaxInputGainIndex()
+     */
+    @Override
+    @android.annotation.EnforcePermission(MODIFY_AUDIO_SETTINGS_PRIVILEGED)
+    public int getMaxInputGainIndex() {
+        super.getMaxInputGainIndex_enforcePermission();
+
+        return mInputDeviceVolumeHelper.getMaxInputGainIndex();
+    }
+
+    /**
+     * @see AudioDeviceVolumeManager#getMinInputGainIndex()
+     */
+    @Override
+    @android.annotation.EnforcePermission(MODIFY_AUDIO_SETTINGS_PRIVILEGED)
+    public int getMinInputGainIndex() {
+        super.getMinInputGainIndex_enforcePermission();
+
+        return mInputDeviceVolumeHelper.getMinInputGainIndex();
+    }
+
+    /**
+     * @see AudioDeviceVolumeManager#isInputGainFixed(AudioDeviceAttributes)
+     */
+    @Override
+    @android.annotation.EnforcePermission(MODIFY_AUDIO_SETTINGS_PRIVILEGED)
+    public boolean isInputGainFixed(@NonNull AudioDeviceAttributes ada) {
+        super.isInputGainFixed_enforcePermission();
+
+        return mInputDeviceVolumeHelper.isInputGainFixed(ada);
     }
 
     /** @see AudioManager#setMicrophoneMute(boolean) */
@@ -10075,6 +10215,14 @@ public class AudioService extends IAudioService.Stub
                     vgs.persistVolumeGroup(msg.arg1);
                     break;
 
+                case MSG_SET_INPUT_GAIN_INDEX:
+                    setInputGainIndexInt((AudioDeviceAttributes) msg.obj, msg.arg1);
+                    break;
+
+                case MSG_PERSIST_INPUT_GAIN_INDEX:
+                    persistInputGainIndex((AudioDeviceAttributes) msg.obj, msg.arg1);
+                    break;
+
                 case MSG_PERSIST_RINGER_MODE:
                     // note that the value persisted is the current ringer mode, not the
                     // value of ringer mode as of the time the request was made to persist
@@ -10142,6 +10290,11 @@ public class AudioService extends IAudioService.Stub
 
                 case MSG_INIT_STREAMS_VOLUMES:
                     onInitStreamsAndVolumes();
+                    mAudioEventWakeLock.release();
+                    break;
+
+                case MSG_INIT_INPUT_GAINS:
+                    onInitInputGains();
                     mAudioEventWakeLock.release();
                     break;
 
@@ -10435,14 +10588,23 @@ public class AudioService extends IAudioService.Stub
     }
 
     /*package*/ void setAvrcpAbsoluteVolumeSupported(boolean support) {
+        Log.i(TAG, "setAvrcpAbsoluteVolumeSupported support " + support);
         synchronized (mCachedAbsVolDrivingStreamsLock) {
             mAvrcpAbsVolSupported = support;
             if (absVolumeIndexFix()) {
                 int a2dpDev = AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP;
                 mCachedAbsVolDrivingStreams.compute(a2dpDev, (dev, stream) -> {
                     if (!mAvrcpAbsVolSupported) {
-                        mAudioSystem.setDeviceAbsoluteVolumeEnabled(a2dpDev, /*address=*/
-                                "", /*enabled*/false, AudioSystem.STREAM_DEFAULT);
+                        final int result = mAudioSystem.setDeviceAbsoluteVolumeEnabled(
+                                a2dpDev, /*address=*/"", /*enabled*/false,
+                                AudioSystem.STREAM_DEFAULT);
+                        if (result != AudioSystem.AUDIO_STATUS_OK) {
+                            sVolumeLogger.enqueueAndSlog(
+                                    new VolumeEvent(VolumeEvent.VOL_ABS_DEVICE_ENABLED_ERROR,
+                                            result, a2dpDev, /*enabled=*/false,
+                                            AudioSystem.STREAM_DEFAULT).eventToString(), ALOGE,
+                                    TAG);
+                        }
                         return null;
                     }
                     // For A2DP and AVRCP we need to set the driving stream based on the
@@ -10450,8 +10612,14 @@ public class AudioService extends IAudioService.Stub
                     // and setStreamVolume that the driving abs volume stream is consistent.
                     int streamToDriveAbs = getBluetoothContextualVolumeStream();
                     if (stream == null || stream != streamToDriveAbs) {
-                        mAudioSystem.setDeviceAbsoluteVolumeEnabled(a2dpDev, /*address=*/
-                                "", /*enabled*/true, streamToDriveAbs);
+                        final int result = mAudioSystem.setDeviceAbsoluteVolumeEnabled(a2dpDev,
+                                /*address=*/"", /*enabled*/true, streamToDriveAbs);
+                        if (result != AudioSystem.AUDIO_STATUS_OK) {
+                            sVolumeLogger.enqueueAndSlog(
+                                    new VolumeEvent(VolumeEvent.VOL_ABS_DEVICE_ENABLED_ERROR,
+                                            result, a2dpDev, /*enabled=*/true,
+                                            streamToDriveAbs).eventToString(), ALOGE, TAG);
+                        }
                     }
                     return streamToDriveAbs;
                 });
@@ -12551,7 +12719,7 @@ public class AudioService extends IAudioService.Stub
         pw.println("\nLoudness alignment:");
         mLoudnessCodecHelper.dump(pw);
 
-        pw.println("\nAbsolute voume devices:");
+        pw.println("\nAbsolute volume devices with their volume driving streams:");
         synchronized (mCachedAbsVolDrivingStreamsLock) {
             mCachedAbsVolDrivingStreams.forEach((dev, stream) -> pw.println(
                     "Device type: 0x" + Integer.toHexString(dev) + ", driving stream " + stream));

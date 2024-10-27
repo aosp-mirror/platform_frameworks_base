@@ -58,7 +58,7 @@ import java.io.PrintWriter
 import java.util.concurrent.Executor
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /** A controller to handle the ongoing call chip in the collapsed status bar. */
 @SysUISingleton

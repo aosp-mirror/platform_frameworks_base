@@ -16,6 +16,7 @@
 
 package android.view;
 
+import static android.view.flags.Flags.FLAG_SURFACE_VIEW_GET_SURFACE_PACKAGE;
 import static android.view.flags.Flags.FLAG_SURFACE_VIEW_SET_COMPOSITION_ORDER;
 import static android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
 import static android.view.WindowManagerPolicyConstants.APPLICATION_MEDIA_OVERLAY_SUBLAYER;
@@ -27,6 +28,7 @@ import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.CompatibilityInfo.Translator;
@@ -2112,7 +2114,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
     }
 
     /**
-     * Display the view-hierarchy embedded within a {@link SurfaceControlViewHost.SurfacePackage}
+     * Displays the view-hierarchy embedded within a {@link SurfaceControlViewHost.SurfacePackage}
      * within this SurfaceView.
      *
      * This can be called independently of the SurfaceView lifetime callbacks. SurfaceView
@@ -2131,6 +2133,8 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
      * of this particular {@link SurfaceControlViewHost.SurfacePackage} will be taken by the
      * SurfaceView the underlying {@link SurfaceControlViewHost} remains managed by it's original
      * remote-owner.
+     *
+     * Users can call {@link SurfaceView#clearChildSurfacePackage} to clear the package.
      *
      * @param p The SurfacePackage to embed.
      */
@@ -2153,6 +2157,46 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
             requestEmbeddedFocus(true);
         }
         invalidate();
+    }
+
+    /**
+     * Returns the {@link SurfaceControlViewHost.SurfacePackage} that was set on this SurfaceView.
+     *
+     * Note: This method will return {@code null} if
+     * {@link #setChildSurfacePackage(SurfaceControlViewHost.SurfacePackage)}
+     * has not been called or if {@link #clearChildSurfacePackage()} has been called.
+     *
+     * @see #setChildSurfacePackage(SurfaceControlViewHost.SurfacePackage)
+     */
+    @SuppressLint("GetterSetterNullability")
+    @FlaggedApi(FLAG_SURFACE_VIEW_GET_SURFACE_PACKAGE)
+    public @Nullable SurfaceControlViewHost.SurfacePackage getChildSurfacePackage() {
+        return mSurfacePackage;
+    }
+
+    /**
+     * Clears the {@link SurfaceControlViewHost.SurfacePackage} that was set on this SurfaceView.
+     * This hides any content rendered by the provided
+     * {@link SurfaceControlViewHost.SurfacePackage}.
+     *
+     * @see #setChildSurfacePackage(SurfaceControlViewHost.SurfacePackage)
+     */
+    @FlaggedApi(FLAG_SURFACE_VIEW_GET_SURFACE_PACKAGE)
+    public void clearChildSurfacePackage() {
+        if (mSurfacePackage != null) {
+            mSurfaceControlViewHostParent.detach();
+            mEmbeddedWindowParams.clear();
+
+            // Reparent the SurfaceControl to remove the content on screen.
+            final SurfaceControl sc = mSurfacePackage.getSurfaceControl();
+            final SurfaceControl.Transaction transaction = new Transaction();
+            transaction.reparent(sc, null);
+            mSurfacePackage.release();
+            applyTransactionOnVriDraw(transaction);
+
+            mSurfacePackage = null;
+            invalidate();
+        }
     }
 
     private void reparentSurfacePackage(SurfaceControl.Transaction t,

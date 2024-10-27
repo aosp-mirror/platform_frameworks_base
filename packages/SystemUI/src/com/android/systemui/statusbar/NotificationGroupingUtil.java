@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar;
 
+import android.app.Flags;
 import android.app.Notification;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
@@ -60,20 +61,6 @@ public class NotificationGroupingUtil {
             return row.getEntry().getSbn().getNotification();
         }
     };
-    private static final IconComparator ICON_VISIBILITY_COMPARATOR = new IconComparator() {
-        public boolean compare(View parent, View child, Object parentData,
-                Object childData) {
-            return hasSameIcon(parentData, childData)
-                    && hasSameColor(parentData, childData);
-        }
-    };
-    private static final IconComparator GREY_COMPARATOR = new IconComparator() {
-        public boolean compare(View parent, View child, Object parentData,
-                Object childData) {
-            return !hasSameIcon(parentData, childData)
-                    || hasSameColor(parentData, childData);
-        }
-    };
     private static final ResultApplicator GREY_APPLICATOR = new ResultApplicator() {
         @Override
         public void apply(View parent, View view, boolean apply, boolean reset) {
@@ -90,34 +77,58 @@ public class NotificationGroupingUtil {
 
     public NotificationGroupingUtil(ExpandableNotificationRow row) {
         mRow = row;
+
+        final IconComparator iconVisibilityComparator = new IconComparator(mRow) {
+            public boolean compare(View parent, View child, Object parentData,
+                    Object childData) {
+                return hasSameIcon(parentData, childData)
+                        && hasSameColor(parentData, childData);
+            }
+        };
+        final IconComparator greyComparator = new IconComparator(mRow) {
+            public boolean compare(View parent, View child, Object parentData,
+                    Object childData) {
+                if (Flags.notificationsRedesignAppIcons() && mRow.isShowingAppIcon()) {
+                    return false;
+                }
+                return !hasSameIcon(parentData, childData)
+                        || hasSameColor(parentData, childData);
+            }
+        };
+
         // To hide the icons if they are the same and the color is the same
         mProcessors.add(new Processor(mRow,
                 com.android.internal.R.id.icon,
                 ICON_EXTRACTOR,
-                ICON_VISIBILITY_COMPARATOR,
+                iconVisibilityComparator,
                 VISIBILITY_APPLICATOR));
-        // To grey them out the icons and expand button when the icons are not the same
+        // To grey out the icons when they are not the same, or they have the same color
         mProcessors.add(new Processor(mRow,
                 com.android.internal.R.id.status_bar_latest_event_content,
                 ICON_EXTRACTOR,
-                GREY_COMPARATOR,
+                greyComparator,
                 GREY_APPLICATOR));
+        // To show the large icon on the left side instead if all the small icons are the same
         mProcessors.add(new Processor(mRow,
                 com.android.internal.R.id.status_bar_latest_event_content,
                 ICON_EXTRACTOR,
-                ICON_VISIBILITY_COMPARATOR,
+                iconVisibilityComparator,
                 LEFT_ICON_APPLICATOR));
+        // To only show the work profile icon in the group header
         mProcessors.add(new Processor(mRow,
                 com.android.internal.R.id.profile_badge,
                 null /* Extractor */,
                 BADGE_COMPARATOR,
                 VISIBILITY_APPLICATOR));
+        // To hide the app name in group children
         mProcessors.add(new Processor(mRow,
                 com.android.internal.R.id.app_name_text,
                 null,
                 APP_NAME_COMPARATOR,
                 APP_NAME_APPLICATOR));
+        // To hide the header text if it's the same
         mProcessors.add(Processor.forTextView(mRow, com.android.internal.R.id.header_text));
+
         mDividers.add(com.android.internal.R.id.header_text_divider);
         mDividers.add(com.android.internal.R.id.header_text_secondary_divider);
         mDividers.add(com.android.internal.R.id.time_divider);
@@ -261,6 +272,7 @@ public class NotificationGroupingUtil {
             mParentData = mExtractor == null ? null : mExtractor.extractData(mParentRow);
             mApply = !mComparator.isEmpty(mParentView);
         }
+
         public void compareToGroupParent(ExpandableNotificationRow row) {
             if (!mApply) {
                 return;
@@ -356,12 +368,21 @@ public class NotificationGroupingUtil {
     }
 
     private abstract static class IconComparator implements ViewComparator {
+        private final ExpandableNotificationRow mRow;
+
+        IconComparator(ExpandableNotificationRow row) {
+            mRow = row;
+        }
+
         @Override
         public boolean compare(View parent, View child, Object parentData, Object childData) {
             return false;
         }
 
         protected boolean hasSameIcon(Object parentData, Object childData) {
+            if (Flags.notificationsRedesignAppIcons() && mRow.isShowingAppIcon()) {
+                return true;
+            }
             Icon parentIcon = getIcon((Notification) parentData);
             Icon childIcon = getIcon((Notification) childData);
             return parentIcon.sameAs(childIcon);

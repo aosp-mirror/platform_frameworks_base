@@ -39,3 +39,11 @@ flag {
   description: "This flag controls whether LSKF fallback is removed from biometric prompt when the phone is outside trusted locations"
   bug: "322081563"
 }
+
+flag {
+  name: "screen_off_unlock_udfps"
+  is_exported: true
+  namespace: "biometrics_integration"
+  description: "This flag controls Whether to enable fp unlock when screen turns off on udfps devices"
+  bug: "373792870"
+}

@@ -15,10 +15,21 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.utilities;
 
+/**
+ * Support a standardized interface to commands that contain arrays All commands that implement
+ * array access will be collected in a map in the state TODO refactor to DataAccess,
+ * FloatArrayAccess, ListAccess, MapAccess
+ */
 public interface ArrayAccess {
     float getFloatValue(int index);
+
+    default int getId(int index) {
+        return 0;
+    }
+
     float[] getFloats();
-    int getFloatsLength();
+
+    int getLength();
 
     default int getIntValue(int index) {
         return (int) getFloatValue(index);

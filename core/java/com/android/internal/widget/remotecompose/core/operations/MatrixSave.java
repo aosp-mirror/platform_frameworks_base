@@ -47,7 +47,6 @@ public class MatrixSave extends PaintOperation {
         return CLASS_NAME;
     }
 
-
     public static int id() {
         return OP_CODE;
     }
@@ -57,9 +56,7 @@ public class MatrixSave extends PaintOperation {
     }
 
     public static void documentation(DocumentationBuilder doc) {
-        doc.operation("Canvas Operations",
-                        OP_CODE,
-                        CLASS_NAME)
+        doc.operation("Canvas Operations", OP_CODE, CLASS_NAME)
                 .description("Save the matrix and clip to a stack");
     }
 

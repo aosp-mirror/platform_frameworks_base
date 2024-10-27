@@ -16,16 +16,29 @@
 
 package android.app;
 
+import static android.app.PropertyInvalidatedCache.NONCE_UNSET;
+import static android.app.PropertyInvalidatedCache.NonceStore.INVALID_NONCE_INDEX;
+import static com.android.internal.os.Flags.FLAG_APPLICATION_SHARED_MEMORY_ENABLED;
+
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import com.android.internal.os.ApplicationSharedMemory;
 
 import android.platform.test.annotations.IgnoreUnderRavenwood;
+import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.platform.test.ravenwood.RavenwoodRule;
 
 import androidx.test.filters.SmallTest;
 
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -43,6 +56,9 @@ import org.junit.Test;
 public class PropertyInvalidatedCacheTests {
     @Rule
     public final RavenwoodRule mRavenwood = new RavenwoodRule();
+
+    public final CheckFlagsRule mCheckFlagsRule =
+            DeviceFlagsValueProvider.createCheckFlagsRule();
 
     // Configuration for creating caches
     private static final String MODULE = PropertyInvalidatedCache.MODULE_TEST;
@@ -84,14 +100,20 @@ public class PropertyInvalidatedCacheTests {
         public Boolean apply(Integer x) {
             return mServer.query(x);
         }
+
         @Override
         public boolean shouldBypassCache(Integer x) {
             return x % 13 == 0;
         }
     }
 
-    // Clear the test mode after every test, in case this process is used for other
-    // tests. This also resets the test property map.
+    // Prepare for testing.
+    @Before
+    public void setUp() throws Exception {
+        PropertyInvalidatedCache.setTestMode(true);
+    }
+
+    // Ensure all test configurations are cleared.
     @After
     public void tearDown() throws Exception {
         PropertyInvalidatedCache.setTestMode(false);
@@ -110,9 +132,6 @@ public class PropertyInvalidatedCacheTests {
         PropertyInvalidatedCache<Integer, Boolean> testCache =
                 new PropertyInvalidatedCache<>(4, MODULE, API, "cache1",
                         new ServerQuery(tester));
-
-        PropertyInvalidatedCache.setTestMode(true);
-        testCache.testPropertyName();
 
         tester.verify(0);
         assertEquals(tester.value(3), testCache.query(3));
@@ -223,22 +242,16 @@ public class PropertyInvalidatedCacheTests {
 
         TestCache(String module, String api) {
             this(module, api, new TestQuery());
-            setTestMode(true);
-            testPropertyName();
         }
 
         TestCache(String module, String api, TestQuery query) {
             super(4, module, api, api, query);
             mQuery = query;
-            setTestMode(true);
-            testPropertyName();
         }
 
         public int getRecomputeCount() {
             return mQuery.getRecomputeCount();
         }
-
-
     }
 
     @Test
@@ -374,5 +387,103 @@ public class PropertyInvalidatedCacheTests {
         n1 = PropertyInvalidatedCache.createPropertyName(
             PropertyInvalidatedCache.MODULE_BLUETOOTH, "getState");
         assertEquals(n1, "cache_key.bluetooth.get_state");
+    }
+
+    // Verify that test mode works properly.
+    @Test
+    public void testTestMode() {
+        // Create a cache that will write a system nonce.
+        TestCache sysCache = new TestCache(PropertyInvalidatedCache.MODULE_SYSTEM, "mode1");
+        try {
+            // Invalidate the cache, which writes the system property.  There must be a permission
+            // failure.
+            sysCache.invalidateCache();
+            fail("expected permission failure");
+        } catch (RuntimeException e) {
+            // The expected exception is a bare RuntimeException.  The test does not attempt to
+            // validate the text of the exception message.
+        }
+
+        sysCache.testPropertyName();
+        // Invalidate the cache.  This must succeed because the property has been marked for
+        // testing.
+        sysCache.invalidateCache();
+
+        // Create a cache that uses MODULE_TEST.  Invalidation succeeds whether or not the
+        // property is tagged as being tested.
+        TestCache testCache = new TestCache(PropertyInvalidatedCache.MODULE_TEST, "mode2");
+        testCache.invalidateCache();
+        testCache.testPropertyName();
+        testCache.invalidateCache();
+
+        // Clear test mode.  This fails if test mode is not enabled.
+        PropertyInvalidatedCache.setTestMode(false);
+        try {
+            PropertyInvalidatedCache.setTestMode(false);
+            fail("expected an IllegalStateException");
+        } catch (IllegalStateException e) {
+            // The expected exception.
+        }
+        // Configuring a property for testing must fail if test mode is false.
+        TestCache cache2 = new TestCache(PropertyInvalidatedCache.MODULE_SYSTEM, "mode3");
+        try {
+            cache2.testPropertyName();
+            fail("expected an IllegalStateException");
+        } catch (IllegalStateException e) {
+            // The expected exception.
+        }
+
+        // Re-enable test mode (so that the cleanup for the test does not throw).
+        PropertyInvalidatedCache.setTestMode(true);
+    }
+
+    // Verify the behavior of shared memory nonce storage.  This does not directly test the cache
+    // storing nonces in shared memory.
+    @RequiresFlagsEnabled(FLAG_APPLICATION_SHARED_MEMORY_ENABLED)
+    @Test
+    public void testSharedMemoryStorage() {
+        // Fetch a shared memory instance for testing.
+        ApplicationSharedMemory shmem = ApplicationSharedMemory.create();
+
+        // Create a server-side store and a client-side store.  The server's store is mutable and
+        // the client's store is not mutable.
+        PropertyInvalidatedCache.NonceStore server =
+                new PropertyInvalidatedCache.NonceStore(shmem.getSystemNonceBlock(), true);
+        PropertyInvalidatedCache.NonceStore client =
+                new PropertyInvalidatedCache.NonceStore(shmem.getSystemNonceBlock(), false);
+
+        final String name1 = "name1";
+        assertEquals(server.getHandleForName(name1), INVALID_NONCE_INDEX);
+        assertEquals(client.getHandleForName(name1), INVALID_NONCE_INDEX);
+        final int index1 = server.storeName(name1);
+        assertNotEquals(index1, INVALID_NONCE_INDEX);
+        assertEquals(server.getHandleForName(name1), index1);
+        assertEquals(client.getHandleForName(name1), index1);
+        assertEquals(server.storeName(name1), index1);
+
+        assertEquals(server.getNonce(index1), NONCE_UNSET);
+        assertEquals(client.getNonce(index1), NONCE_UNSET);
+        final int value1 = 4;
+        server.setNonce(index1, value1);
+        assertEquals(server.getNonce(index1), value1);
+        assertEquals(client.getNonce(index1), value1);
+        final int value2 = 8;
+        server.setNonce(index1, value2);
+        assertEquals(server.getNonce(index1), value2);
+        assertEquals(client.getNonce(index1), value2);
+
+        final String name2 = "name2";
+        assertEquals(server.getHandleForName(name2), INVALID_NONCE_INDEX);
+        assertEquals(client.getHandleForName(name2), INVALID_NONCE_INDEX);
+        final int index2 = server.storeName(name2);
+        assertNotEquals(index2, INVALID_NONCE_INDEX);
+        assertEquals(server.getHandleForName(name2), index2);
+        assertEquals(client.getHandleForName(name2), index2);
+        assertEquals(server.storeName(name2), index2);
+
+        // The names are different, so the indices must be different.
+        assertNotEquals(index1, index2);
+
+        shmem.close();
     }
 }

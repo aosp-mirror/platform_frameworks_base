@@ -175,6 +175,7 @@ public class InputManagerService extends IInputManager.Stub
     private static final int MSG_DELIVER_INPUT_DEVICES_CHANGED = 1;
     private static final int MSG_RELOAD_DEVICE_ALIASES = 2;
     private static final int MSG_DELIVER_TABLET_MODE_CHANGED = 3;
+    private static final int MSG_CURRENT_USER_CHANGED = 4;
 
     private static final int DEFAULT_VIBRATION_MAGNITUDE = 192;
     private static final AdditionalDisplayInputProperties
@@ -184,6 +185,8 @@ public class InputManagerService extends IInputManager.Stub
 
     private final Context mContext;
     private final InputManagerHandler mHandler;
+    @UserIdInt
+    private int mCurrentUserId = UserHandle.USER_SYSTEM;
     private DisplayManagerInternal mDisplayManagerInternal;
 
     private WindowManagerInternal mWindowManagerInternal;
@@ -2982,6 +2985,10 @@ public class InputManagerService extends IInputManager.Stub
         mKeyGestureController.unregisterKeyGestureHandler(handler, Binder.getCallingPid());
     }
 
+    private void handleCurrentUserChanged(@UserIdInt int userId) {
+        mCurrentUserId = userId;
+    }
+
     /**
      * Callback interface implemented by the Window Manager.
      */
@@ -3149,6 +3156,9 @@ public class InputManagerService extends IInputManager.Stub
                     long whenNanos = (args.argi1 & 0xFFFFFFFFL) | ((long) args.argi2 << 32);
                     boolean inTabletMode = (boolean) args.arg1;
                     deliverTabletModeChanged(whenNanos, inTabletMode);
+                    break;
+                case MSG_CURRENT_USER_CHANGED:
+                    handleCurrentUserChanged((int) msg.obj);
                     break;
             }
         }
@@ -3506,6 +3516,21 @@ public class InputManagerService extends IInputManager.Stub
                 int modifierState, @KeyGestureEvent.KeyGestureType int gestureType) {
             mKeyGestureController.handleKeyGesture(deviceId, keycodes, modifierState, gestureType);
         }
+
+        @Override
+        public void setAccessibilityPointerIconScaleFactor(int displayId, float scaleFactor) {
+            InputManagerService.this.setAccessibilityPointerIconScaleFactor(displayId, scaleFactor);
+        }
+
+        @Override
+        public void setCurrentUser(@UserIdInt int newUserId) {
+            mHandler.obtainMessage(MSG_CURRENT_USER_CHANGED, newUserId).sendToTarget();
+        }
+
+        @Override
+        public boolean setKernelWakeEnabled(int deviceId, boolean enabled) {
+            return mNative.setKernelWakeEnabled(deviceId, enabled);
+        }
     }
 
     @Override
@@ -3686,6 +3711,10 @@ public class InputManagerService extends IInputManager.Stub
 
     void setPointerScale(float scale) {
         mPointerIconCache.setPointerScale(scale);
+    }
+
+    void setAccessibilityPointerIconScaleFactor(int displayId, float scaleFactor) {
+        mPointerIconCache.setAccessibilityScaleFactor(displayId, scaleFactor);
     }
 
     interface KeyboardBacklightControllerInterface {

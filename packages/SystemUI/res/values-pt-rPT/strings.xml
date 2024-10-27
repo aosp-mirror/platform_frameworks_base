@@ -687,7 +687,7 @@
     <string name="volume_panel_spatial_audio_title" msgid="3367048857932040660">"Áudio espacial"</string>
     <string name="volume_panel_spatial_audio_off" msgid="4177490084606772989">"Desativar"</string>
     <string name="volume_panel_spatial_audio_fixed" msgid="3136080137827746046">"Corrigido"</string>
-    <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"Head tracking"</string>
+    <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"Posição da cabeça"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"Toque para alterar o modo de campainha"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"desativar som"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"reativar som"</string>
@@ -1405,6 +1405,8 @@
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Ícone de expandir"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"ou"</string>
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"Indicador para arrastar"</string>
+    <!-- no translation found for shortcut_helper_keyboard_settings_buttons_label (6720967595915985259) -->
+    <skip />
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"Navegue com o teclado"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"Aprenda atalhos de teclado"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"Navegue com o touchpad"</string>
@@ -1462,4 +1464,6 @@
     <string name="qs_edit_mode_category_providedByApps" msgid="8346112074897919019">"Disponibilizado por apps"</string>
     <string name="qs_edit_mode_category_display" msgid="4749511439121053942">"Ecrã"</string>
     <string name="qs_edit_mode_category_unknown" msgid="509314252124053550">"Desconhecido"</string>
+    <string name="qs_edit_mode_reset_dialog_title" msgid="8841270491554460726">"Reponha os mosaicos"</string>
+    <string name="qs_edit_mode_reset_dialog_content" msgid="8626426097929954027">"Repor os mosaicos para a ordem e os tamanhos originais?"</string>
 </resources>

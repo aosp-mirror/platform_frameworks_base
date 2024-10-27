@@ -348,3 +348,24 @@ flag {
     description: "Enables a switch to change the concequence of dragging a window to the top edge."
     bug: "372614715"
 }
+
+flag {
+    name: "enable_task_resizing_keyboard_shortcuts"
+    namespace: "lse_desktop_experience"
+    description: "Enables keyboard shortcuts for resizing tasks in desktop mode."
+    bug: "335819608"
+}
+
+flag {
+    name: "enable_display_windowing_mode_switching"
+    namespace: "lse_desktop_experience"
+    description: "Change the default display's windowing mode to freeform when display connected in extended mode."
+    bug: "374849026"
+}
+
+flag {
+    name: "enable_desktop_windowing_pip"
+    namespace: "lse_desktop_experience"
+    description: "Enables PiP features in desktop mode."
+    bug: "350475854"
+}
