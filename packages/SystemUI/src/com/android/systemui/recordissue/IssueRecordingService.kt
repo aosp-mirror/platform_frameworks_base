@@ -24,6 +24,7 @@ import android.content.res.Resources
 import android.net.Uri
 import android.os.Handler
 import android.os.IBinder
+import android.os.UserHandle
 import android.util.Log
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.animation.DialogTransitionAnimator
@@ -34,6 +35,7 @@ import com.android.systemui.res.R
 import com.android.systemui.screenrecord.RecordingController
 import com.android.systemui.screenrecord.RecordingService
 import com.android.systemui.screenrecord.RecordingServiceStrings
+import com.android.systemui.screenrecord.ScreenMediaRecorder.SavedRecording
 import com.android.systemui.settings.UserContextProvider
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil
 import com.android.traceur.MessageConstants.INTENT_EXTRA_TRACE_TYPE
@@ -142,6 +144,18 @@ constructor(
             else -> {}
         }
         return super.onStartCommand(intent, flags, startId)
+    }
+
+    /**
+     * If the user chooses to create a bugreport, we do not want to make them click share twice. To
+     * avoid that, the code immediately triggers the bugreport flow which will handle the rest.
+     */
+    override fun onRecordingSaved(recording: SavedRecording?, currentUser: UserHandle) {
+        if (session.takeBugReport) {
+            session.share(mNotificationId, recording?.uri)
+        } else {
+            super.onRecordingSaved(recording, currentUser)
+        }
     }
 
     companion object {

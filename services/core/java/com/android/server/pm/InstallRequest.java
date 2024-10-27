@@ -169,6 +169,8 @@ final class InstallRequest {
 
     private final boolean mHasAppMetadataFileFromInstaller;
 
+    private boolean mKeepArtProfile = false;
+
     // New install
     InstallRequest(InstallingSession params) {
         mUserId = params.getUser().getIdentifier();
@@ -1058,5 +1060,13 @@ final class InstallRequest {
         if (mPackageMetrics != null) {
             mPackageMetrics.onStepFinished(PackageMetrics.STEP_FREEZE_INSTALL);
         }
+    }
+
+    void setKeepArtProfile(boolean keepArtProfile) {
+        mKeepArtProfile = keepArtProfile;
+    }
+
+    boolean isKeepArtProfile() {
+        return mKeepArtProfile;
     }
 }

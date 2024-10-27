@@ -172,15 +172,12 @@ private class SwipeToSceneNode(
 }
 
 /** Find the [ScrollBehaviorOwner] for the current orientation. */
-internal fun DelegatableNode.requireScrollBehaviorOwner(
+internal fun DelegatableNode.findScrollBehaviorOwner(
     draggableHandler: DraggableHandlerImpl
-): ScrollBehaviorOwner {
-    val ancestorNode =
-        checkNotNull(findNearestAncestor(draggableHandler.nestedScrollKey)) {
-            "This should never happen! Couldn't find a ScrollBehaviorOwner. " +
-                "Are we inside an SceneTransitionLayout?"
-        }
-    return ancestorNode as ScrollBehaviorOwner
+): ScrollBehaviorOwner? {
+    // If there are no scenes in a particular orientation, the corresponding ScrollBehaviorOwnerNode
+    // is removed from the composition.
+    return findNearestAncestor(draggableHandler.nestedScrollKey) as? ScrollBehaviorOwner
 }
 
 internal fun interface ScrollBehaviorOwner {

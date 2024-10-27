@@ -923,12 +923,15 @@ public final class NfcOemExtension {
     }
 
     private @CardEmulation.ProtocolAndTechnologyRoute int routeStringToInt(String route) {
-        return switch (route) {
-            case "DH" -> PROTOCOL_AND_TECHNOLOGY_ROUTE_DH;
-            case "eSE" -> PROTOCOL_AND_TECHNOLOGY_ROUTE_ESE;
-            case "SIM" -> PROTOCOL_AND_TECHNOLOGY_ROUTE_UICC;
-            default -> throw new IllegalStateException("Unexpected value: " + route);
-        };
+        if (route.equals("DH")) {
+            return PROTOCOL_AND_TECHNOLOGY_ROUTE_DH;
+        } else if (route.startsWith("eSE")) {
+            return PROTOCOL_AND_TECHNOLOGY_ROUTE_ESE;
+        } else if (route.startsWith("SIM")) {
+            return PROTOCOL_AND_TECHNOLOGY_ROUTE_UICC;
+        } else {
+            throw new IllegalStateException("Unexpected value: " + route);
+        }
     }
 
     private class ReceiverWrapper<T> implements Consumer<T> {

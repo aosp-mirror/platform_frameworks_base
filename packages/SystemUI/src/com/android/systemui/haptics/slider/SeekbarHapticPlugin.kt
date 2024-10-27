@@ -26,7 +26,7 @@ import com.google.android.msdl.domain.MSDLPlayer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /**
  * A plugin added to a manager of a [android.widget.SeekBar] that adds dynamic haptic feedback.

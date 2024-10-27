@@ -54,7 +54,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onCompletion
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withTimeout
 
@@ -95,7 +95,7 @@ constructor(
             )
         controller.init()
 
-        applicationScope.launch(bgDispatcher) {
+        applicationScope.launch(context = bgDispatcher) {
             powerInteractor.screenPowerState.collect {
                 if (it == ScreenPowerState.SCREEN_ON) {
                     readyCallback = null
@@ -103,7 +103,7 @@ constructor(
             }
         }
 
-        applicationScope.launch(bgDispatcher) {
+        applicationScope.launch(context = bgDispatcher) {
             deviceStateRepository.state
                 .map { it == DeviceStateRepository.DeviceState.FOLDED }
                 .distinctUntilChanged()

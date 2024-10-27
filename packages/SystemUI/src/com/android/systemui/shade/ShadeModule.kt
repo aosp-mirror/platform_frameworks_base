@@ -51,7 +51,7 @@ import javax.inject.Provider
 /** Module for classes related to the notification shade. */
 @Module(
     includes =
-        [StartShadeModule::class, ShadeViewProviderModule::class, ShadeDisplayAwareModule::class]
+        [StartShadeModule::class, ShadeViewProviderModule::class]
 )
 abstract class ShadeModule {
     companion object {

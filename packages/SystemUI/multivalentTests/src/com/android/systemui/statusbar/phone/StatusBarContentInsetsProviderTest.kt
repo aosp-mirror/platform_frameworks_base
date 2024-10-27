@@ -36,14 +36,15 @@ import com.android.systemui.util.leak.RotationUtils.ROTATION_NONE
 import com.android.systemui.util.leak.RotationUtils.ROTATION_SEASCAPE
 import com.android.systemui.util.leak.RotationUtils.ROTATION_UPSIDE_DOWN
 import com.android.systemui.util.leak.RotationUtils.Rotation
-import com.android.systemui.util.mockito.mock
-import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
-import junit.framework.Assert.assertTrue
+import com.google.common.truth.Truth.assertWithMessage
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.any
+import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 
 @RunWith(AndroidJUnit4::class)
 @SmallTest
@@ -1018,7 +1019,39 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
 
     // Regression test for b/245799099
     @Test
-    fun onMaxBoundsChanged_listenerNotified() {
+    fun onMaxBoundsChanged_afterStart_listenerNotified() {
+        // Start out with an existing configuration with bounds
+        configuration.windowConfiguration.setMaxBounds(0, 0, 100, 100)
+        configurationController.onConfigurationChanged(configuration)
+        val provider =
+            StatusBarContentInsetsProviderImpl(
+                contextMock,
+                configurationController,
+                mock<DumpManager>(),
+                mock<CommandRegistry>(),
+                mock<SysUICutoutProvider>(),
+            )
+        val listener =
+            object : StatusBarContentInsetsChangedListener {
+                var triggered = false
+
+                override fun onStatusBarContentInsetsChanged() {
+                    triggered = true
+                }
+            }
+        provider.start()
+        provider.addCallback(listener)
+
+        // WHEN the config is updated with new bounds
+        configuration.windowConfiguration.setMaxBounds(0, 0, 456, 789)
+        configurationController.onConfigurationChanged(configuration)
+
+        // THEN the listener is notified
+        assertThat(listener.triggered).isTrue()
+    }
+
+    @Test
+    fun onMaxBoundsChanged_beforeStart_listenerNotNotified() {
         // Start out with an existing configuration with bounds
         configuration.windowConfiguration.setMaxBounds(0, 0, 100, 100)
         configurationController.onConfigurationChanged(configuration)
@@ -1041,15 +1074,16 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
         provider.addCallback(listener)
 
         // WHEN the config is updated with new bounds
+        // but provider is not started
         configuration.windowConfiguration.setMaxBounds(0, 0, 456, 789)
         configurationController.onConfigurationChanged(configuration)
 
-        // THEN the listener is notified
-        assertThat(listener.triggered).isTrue()
+        // THEN the listener is not notified
+        assertThat(listener.triggered).isFalse()
     }
 
     @Test
-    fun onDensityOrFontScaleChanged_listenerNotified() {
+    fun onDensityOrFontScaleChanged_beforeStart_listenerNotNotified() {
         configuration.densityDpi = 12
         val provider =
             StatusBarContentInsetsProviderImpl(
@@ -1069,6 +1103,36 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
             }
         provider.addCallback(listener)
 
+        // WHEN the config is updated, but the provider is not started
+        configuration.densityDpi = 20
+        configurationController.onConfigurationChanged(configuration)
+
+        // THEN the listener is NOT notified
+        assertThat(listener.triggered).isFalse()
+    }
+
+    @Test
+    fun onDensityOrFontScaleChanged_afterStart_listenerNotified() {
+        configuration.densityDpi = 12
+        val provider =
+            StatusBarContentInsetsProviderImpl(
+                contextMock,
+                configurationController,
+                mock<DumpManager>(),
+                mock<CommandRegistry>(),
+                mock<SysUICutoutProvider>(),
+            )
+        val listener =
+            object : StatusBarContentInsetsChangedListener {
+                var triggered = false
+
+                override fun onStatusBarContentInsetsChanged() {
+                    triggered = true
+                }
+            }
+        provider.start()
+        provider.addCallback(listener)
+
         // WHEN the config is updated
         configuration.densityDpi = 20
         configurationController.onConfigurationChanged(configuration)
@@ -1078,7 +1142,34 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
     }
 
     @Test
-    fun onThemeChanged_listenerNotified() {
+    fun onThemeChanged_afterStart_listenerNotified() {
+        val provider =
+            StatusBarContentInsetsProviderImpl(
+                contextMock,
+                configurationController,
+                mock<DumpManager>(),
+                mock<CommandRegistry>(),
+                mock<SysUICutoutProvider>(),
+            )
+        val listener =
+            object : StatusBarContentInsetsChangedListener {
+                var triggered = false
+
+                override fun onStatusBarContentInsetsChanged() {
+                    triggered = true
+                }
+            }
+        provider.start()
+        provider.addCallback(listener)
+
+        configurationController.notifyThemeChanged()
+
+        // THEN the listener is notified
+        assertThat(listener.triggered).isTrue()
+    }
+
+    @Test
+    fun onThemeChanged_beforeStart_listenerNotNotified() {
         val provider =
             StatusBarContentInsetsProviderImpl(
                 contextMock,
@@ -1099,8 +1190,7 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
 
         configurationController.notifyThemeChanged()
 
-        // THEN the listener is notified
-        assertThat(listener.triggered).isTrue()
+        assertThat(listener.triggered).isFalse()
     }
 
     private fun assertRects(
@@ -1109,12 +1199,13 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
         @Rotation currentRotation: Int,
         @Rotation targetRotation: Int,
     ) {
-        assertTrue(
-            "Rects must match. currentRotation=${RotationUtils.toString(currentRotation)}" +
-                " targetRotation=${RotationUtils.toString(targetRotation)}" +
-                " expected=$expected actual=$actual",
-            expected.equals(actual),
-        )
+        assertWithMessage(
+                "Rects must match. currentRotation=${RotationUtils.toString(currentRotation)}" +
+                    " targetRotation=${RotationUtils.toString(targetRotation)}" +
+                    " expected=$expected actual=$actual"
+            )
+            .that(actual)
+            .isEqualTo(expected)
     }
 
     private fun setNoCutout() {
@@ -1136,8 +1227,7 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
     }
 
     private fun setCameraProtectionBounds(protectionBounds: Rect) {
-        val protectionInfo =
-            mock<CameraProtectionInfo> { whenever(this.bounds).thenReturn(protectionBounds) }
+        val protectionInfo = mock<CameraProtectionInfo> { on { bounds } doReturn protectionBounds }
         whenever(sysUICutout.cameraProtection).thenReturn(protectionInfo)
     }
 

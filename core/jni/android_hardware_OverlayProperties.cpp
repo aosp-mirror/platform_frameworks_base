@@ -213,6 +213,6 @@ int register_android_hardware_OverlayProperties(JNIEnv* env) {
     clazz = FindClassOrDie(env, "android/hardware/LutProperties");
     gLutPropertiesClassInfo.clazz = MakeGlobalRefOrDie(env, clazz);
     gLutPropertiesClassInfo.ctor =
-            GetMethodIDOrDie(env, gLutPropertiesClassInfo.clazz, "<init>", "(IJ[I)V");
+            GetMethodIDOrDie(env, gLutPropertiesClassInfo.clazz, "<init>", "(II[I)V");
     return err;
 }

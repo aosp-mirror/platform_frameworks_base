@@ -65,6 +65,7 @@ import com.android.systemui.statusbar.notification.domain.interactor.Notificatio
 import com.android.systemui.statusbar.notification.stack.AmbientState
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.phone.CentralSurfaces
+import com.android.systemui.statusbar.phone.ConfigurationForwarder
 import com.android.systemui.statusbar.phone.DozeScrimController
 import com.android.systemui.statusbar.phone.DozeServiceHost
 import com.android.systemui.statusbar.phone.PhoneStatusBarViewController
@@ -219,6 +220,7 @@ class NotificationShadeWindowViewControllerTest(flags: FlagsParameterization) : 
                 primaryBouncerInteractor,
                 alternateBouncerInteractor,
                 mock(BouncerViewBinder::class.java),
+                mock(ConfigurationForwarder::class.java),
             )
         underTest.setupExpandedStatusBar()
         underTest.setDragDownHelper(dragDownHelper)

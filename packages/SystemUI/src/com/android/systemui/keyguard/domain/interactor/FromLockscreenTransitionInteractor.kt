@@ -40,6 +40,7 @@ import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.data.repository.ShadeRepository
 import com.android.systemui.util.kotlin.Utils.Companion.sample as sampleCombine
+import com.android.systemui.util.kotlin.sample
 import java.util.UUID
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
@@ -51,7 +52,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 @SysUISingleton
 class FromLockscreenTransitionInteractor
@@ -132,11 +133,10 @@ constructor(
         scope.launch("$TAG#listenForLockscreenToDreaming") {
             keyguardInteractor.isAbleToDream
                 .filterRelevantKeyguardState()
-                .sampleCombine(
-                    internalTransitionInteractor.currentTransitionInfoInternal,
-                    transitionInteractor.isFinishedIn(KeyguardState.LOCKSCREEN),
-                )
-                .collect { (isAbleToDream, transitionInfo, isOnLockscreen) ->
+                .sample(transitionInteractor.isFinishedIn(KeyguardState.LOCKSCREEN), ::Pair)
+                .collect { (isAbleToDream, isOnLockscreen) ->
+                    val transitionInfo =
+                        internalTransitionInteractor.currentTransitionInfoInternal()
                     val isTransitionInterruptible =
                         transitionInfo.to == KeyguardState.LOCKSCREEN &&
                             !invalidFromStates.contains(transitionInfo.from)
@@ -179,7 +179,6 @@ constructor(
             shadeRepository.legacyShadeExpansion
                 .sampleCombine(
                     transitionInteractor.startedKeyguardTransitionStep,
-                    internalTransitionInteractor.currentTransitionInfoInternal,
                     keyguardInteractor.statusBarState,
                     keyguardInteractor.isKeyguardDismissible,
                     keyguardInteractor.isKeyguardOccluded,
@@ -188,11 +187,12 @@ constructor(
                     (
                         shadeExpansion,
                         startedStep,
-                        currentTransitionInfo,
                         statusBarState,
                         isKeyguardUnlocked,
                         isKeyguardOccluded) ->
                     val id = transitionId
+                    val currentTransitionInfo =
+                        internalTransitionInteractor.currentTransitionInfoInternal()
                     if (id != null) {
                         if (startedStep.to == KeyguardState.PRIMARY_BOUNCER) {
                             // An existing `id` means a transition is started, and calls to
@@ -288,6 +288,7 @@ constructor(
                     startTransitionTo(
                         KeyguardState.GONE,
                         modeOnCanceled = TransitionModeOnCanceled.RESET,
+                        ownerReason = "keyguard interactor says keyguard is going away",
                     )
                 }
         }
@@ -358,7 +359,7 @@ constructor(
         if (!communalSettingsInteractor.isCommunalFlagEnabled()) {
             return
         }
-        scope.launch(mainDispatcher) {
+        scope.launch(context = mainDispatcher) {
             glanceableHubTransitions.listenForGlanceableHubTransition(
                 transitionOwnerName = TAG,
                 fromState = KeyguardState.LOCKSCREEN,

@@ -21,6 +21,7 @@ import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -40,7 +41,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.android.compose.modifiers.background
 import com.android.compose.modifiers.height
 import com.android.compose.modifiers.width
 import com.android.systemui.deviceentry.shared.model.BiometricMessage
@@ -82,16 +82,13 @@ fun AlternateBouncer(
         Box(
             contentAlignment = Alignment.TopCenter,
             modifier =
-                Modifier.background(color = Colors.AlternateBouncerBackgroundColor, alpha = { 1f })
-                    .pointerInput(Unit) {
-                        detectTapGestures(
-                            onTap = { alternateBouncerDependencies.viewModel.onTapped() }
-                        )
-                    },
+                Modifier.background(color = Colors.AlternateBouncerBackgroundColor).pointerInput(
+                    Unit
+                ) {
+                    detectTapGestures(onTap = { alternateBouncerDependencies.viewModel.onTapped() })
+                },
         ) {
-            StatusMessage(
-                viewModel = alternateBouncerDependencies.messageAreaViewModel,
-            )
+            StatusMessage(viewModel = alternateBouncerDependencies.messageAreaViewModel)
         }
 
         udfpsIconLocation?.let { udfpsLocation ->
@@ -103,12 +100,7 @@ fun AlternateBouncer(
                         Modifier.width { udfpsLocation.width }
                             .height { udfpsLocation.height }
                             .fillMaxHeight()
-                            .offset {
-                                IntOffset(
-                                    x = udfpsLocation.left,
-                                    y = udfpsLocation.top,
-                                )
-                            },
+                            .offset { IntOffset(x = udfpsLocation.left, y = udfpsLocation.top) },
                 )
             }
 

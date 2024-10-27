@@ -199,6 +199,7 @@ import com.android.systemui.statusbar.PowerButtonReveal;
 import com.android.systemui.statusbar.PulseExpansionHandler;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
+import com.android.systemui.statusbar.core.StatusBarConnectedDisplays;
 import com.android.systemui.statusbar.core.StatusBarInitializer;
 import com.android.systemui.statusbar.core.StatusBarSimpleFragment;
 import com.android.systemui.statusbar.data.model.StatusBarMode;
@@ -645,6 +646,8 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             NavigationBarController navigationBarController,
             AccessibilityFloatingMenuController accessibilityFloatingMenuController,
             Lazy<AssistManager> assistManagerLazy,
+            // TODO: b/374267505 - Decouple the config change needed for shade window classes from
+            //  the one for other windows.
             ConfigurationController configurationController,
             NotificationShadeWindowController notificationShadeWindowController,
             Lazy<NotificationShadeWindowViewController> notificationShadeWindowViewControllerLazy,
@@ -808,7 +811,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mStartingSurfaceOptional = startingSurfaceOptional;
         mDreamManager = dreamManager;
         lockscreenShadeTransitionController.setCentralSurfaces(this);
-        if (!StatusBarSimpleFragment.isEnabled()) {
+        if (!StatusBarConnectedDisplays.isEnabled()) {
             statusBarWindowStateController.addListener(this::onStatusBarWindowStateChanged);
         }
         mScreenOffAnimationController = screenOffAnimationController;
@@ -896,7 +899,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mWallpaperSupported = mWallpaperManager.isWallpaperSupported();
 
         RegisterStatusBarResult result = null;
-        if (!StatusBarSimpleFragment.isEnabled()) {
+        if (!StatusBarConnectedDisplays.isEnabled()) {
             try {
                 result = mBarService.registerStatusBar(mCommandQueue);
             } catch (RemoteException ex) {
@@ -909,9 +912,9 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         // Set up the initial notification state. This needs to happen before CommandQueue.disable()
         setUpPresenter();
 
-        // When the StatusBarSimpleFragment flag is enabled, this logic will be done in
+        // When the StatusBarConnectedDisplays flag is enabled, this logic will be done in
         // StatusBarOrchestrator
-        if (!StatusBarSimpleFragment.isEnabled()) {
+        if (!StatusBarConnectedDisplays.isEnabled()) {
             if ((result.mTransientBarTypes & WindowInsets.Type.statusBars()) != 0) {
                 mStatusBarModeRepository.getDefaultDisplay().showTransient();
             }
@@ -1010,9 +1013,9 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
 
         mAccessibilityFloatingMenuController.init();
 
-        // When the StatusBarSimpleFragment flag is enabled, this logic will be done in
+        // When the StatusBarConnectedDisplays flag is enabled, this logic will be done in
         // StatusBarOrchestrator
-        if (!StatusBarSimpleFragment.isEnabled()) {
+        if (!StatusBarConnectedDisplays.isEnabled()) {
             // set the initial view visibility
             int disabledFlags1 = result.mDisabledFlags1;
             int disabledFlags2 = result.mDisabledFlags2;
@@ -1179,9 +1182,9 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mWallpaperController.setRootView(getNotificationShadeWindowView());
 
         mDemoModeController.addCallback(mDemoModeCallback);
-        // When the StatusBarSimpleFragment flag is enabled, this logic will be done in
+        // When the StatusBarConnectedDisplays flag is enabled, this logic will be done in
         // StatusBarOrchestrator.
-        if (!StatusBarSimpleFragment.isEnabled()) {
+        if (!StatusBarConnectedDisplays.isEnabled()) {
             mJavaAdapter.alwaysCollectFlow(
                     mStatusBarModeRepository.getDefaultDisplay().isTransientShown(),
                     this::onTransientShownChanged);
@@ -1198,9 +1201,9 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 mShadeExpansionStateManager.addExpansionListener(mWakeUpCoordinator);
         mWakeUpCoordinator.onPanelExpansionChanged(currentState);
 
-        // When the StatusBarSimpleFragment flag is enabled, all this logic will be done in
+        // When the StatusBarConnectedDisplays flag is enabled, all this logic will be done in
         // StatusBarOrchestrator.
-        if (!StatusBarSimpleFragment.isEnabled()) {
+        if (!StatusBarConnectedDisplays.isEnabled()) {
             // Allow plugins to reference DarkIconDispatcher and StatusBarStateController
             mPluginDependencyProvider.allowPluginDependency(DarkIconDispatcher.class);
             mPluginDependencyProvider.allowPluginDependency(StatusBarStateController.class);
@@ -1222,6 +1225,8 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                         setBouncerShowingForStatusBarComponents(mBouncerShowing);
                         checkBarModes();
                     });
+        }
+        if (!StatusBarSimpleFragment.isEnabled() && !StatusBarConnectedDisplays.isEnabled()) {
             // When the flag is on, we register the fragment as a core startable and this is not
             // needed
             mStatusBarInitializer.initializeStatusBar();
@@ -1229,16 +1234,16 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
 
         mStatusBarTouchableRegionManager.setup(getNotificationShadeWindowView());
 
-        if (!StatusBarSimpleFragment.isEnabled()) {
+        if (!StatusBarConnectedDisplays.isEnabled()) {
             createNavigationBar(result);
         }
 
         mAmbientIndicationContainer = getNotificationShadeWindowView().findViewById(
                 R.id.ambient_indication_container);
 
-        // When the StatusBarSimpleFragment flag is enabled, all this logic will be done in
+        // When the StatusBarConnectedDisplays flag is enabled, all this logic will be done in
         // StatusBarOrchestrator.
-        if (!StatusBarSimpleFragment.isEnabled()) {
+        if (!StatusBarConnectedDisplays.isEnabled()) {
             mAutoHideController.setStatusBar(
                     new AutoHideUiElement() {
                         @Override
@@ -1498,14 +1503,14 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
      * @param state2 disable2 flags
      */
     protected void setUpDisableFlags(int state1, int state2) {
-        StatusBarSimpleFragment.assertInLegacyMode();
+        StatusBarConnectedDisplays.assertInLegacyMode();
         mCommandQueue.disable(mDisplayId, state1, state2, false /* animate */);
     }
 
     // TODO(b/117478341): This was left such that CarStatusBar can override this method.
     // Try to remove this.
     protected void createNavigationBar(@Nullable RegisterStatusBarResult result) {
-        StatusBarSimpleFragment.assertInLegacyMode();
+        StatusBarConnectedDisplays.assertInLegacyMode();
         mNavigationBarController.createNavigationBars(true /* includeDefaultDisplay */, result);
     }
 
@@ -1718,9 +1723,9 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     @Override
     public void checkBarModes() {
         if (mDemoModeController.isInDemoMode()) return;
-        // When the StatusBarSimpleFragment flag is enabled, this logic will be done in
+        // When the StatusBarConnectedDisplays flag is enabled, this logic will be done in
         // StatusBarOrchestrator.
-        if (!StatusBarSimpleFragment.isEnabled() && mStatusBarTransitions != null) {
+        if (!StatusBarConnectedDisplays.isEnabled() && mStatusBarTransitions != null) {
             checkBarMode(
                     mStatusBarModeRepository.getDefaultDisplay().getStatusBarMode().getValue(),
                     mStatusBarWindowState,
@@ -1751,9 +1756,9 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     }
 
     private void finishBarAnimations() {
-        // When the StatusBarSimpleFragment flag is enabled, this logic will be done in
+        // When the StatusBarConnectedDisplays flag is enabled, this logic will be done in
         // StatusBarOrchestrator.
-        if (!StatusBarSimpleFragment.isEnabled() && mStatusBarTransitions != null) {
+        if (!StatusBarConnectedDisplays.isEnabled() && mStatusBarTransitions != null) {
             mStatusBarTransitions.finishAnimations();
         }
         mNavigationBarController.finishBarAnimations(mDisplayId);
@@ -1795,14 +1800,14 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         }
 
         pw.print("  mInteractingWindows="); pw.println(mInteractingWindows);
-        if (!StatusBarSimpleFragment.isEnabled()) {
+        if (!StatusBarConnectedDisplays.isEnabled()) {
             pw.print("  mStatusBarWindowState=");
             pw.println(windowStateToString(mStatusBarWindowState));
         }
         pw.print("  mDozing="); pw.println(mDozing);
         pw.print("  mWallpaperSupported= "); pw.println(mWallpaperSupported);
 
-        if (!StatusBarSimpleFragment.isEnabled()) {
+        if (!StatusBarConnectedDisplays.isEnabled()) {
             CentralSurfaces.dumpBarTransitions(
                     pw, "PhoneStatusBarTransitions", mStatusBarTransitions);
         }
@@ -1878,9 +1883,9 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     private void createAndAddWindows(@Nullable RegisterStatusBarResult result) {
         makeStatusBarView(result);
         mNotificationShadeWindowController.attach();
-        // When the StatusBarSimpleFragment flag is enabled, this logic will be done in
+        // When the StatusBarConnectedDisplays flag is enabled, this logic will be done in
         // StatusBarOrchestrator
-        if (!StatusBarSimpleFragment.isEnabled()) {
+        if (!StatusBarConnectedDisplays.isEnabled()) {
             mStatusBarWindowControllerStore.getDefaultDisplay().attach();
         }
     }
@@ -1972,6 +1977,10 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
      * meantime, just update the things that we know change.
      */
     void updateResources() {
+        // TODO: b/374267505 - we shouldn't propagate this from here. Each class should be
+        //  listening at the correct configuration change. For example, shade window classes should
+        //  be listening at @ShadeDisplayAware configurations (as it can be on a different display.
+
         // Update the quick setting tiles
         if (mQSPanelController != null) {
             mQSPanelController.updateResources();
@@ -2507,7 +2516,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         int importance = bouncerShowing
                 ? IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
                 : IMPORTANT_FOR_ACCESSIBILITY_AUTO;
-        if (!StatusBarSimpleFragment.isEnabled() && mPhoneStatusBarViewController != null) {
+        if (!StatusBarConnectedDisplays.isEnabled() && mPhoneStatusBarViewController != null) {
             mPhoneStatusBarViewController.setImportantForAccessibility(importance);
         }
         mShadeSurface.setImportantForAccessibility(importance);

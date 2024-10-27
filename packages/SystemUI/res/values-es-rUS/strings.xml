@@ -554,7 +554,7 @@
     <string name="media_projection_entry_cast_permission_dialog_option_text_single_app" msgid="6073353940838561981">"Transmitir una app"</string>
     <string name="media_projection_entry_cast_permission_dialog_option_text_entire_screen" msgid="8389508187954155307">"Transmitir pantalla entera"</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="4040447861037324017">"Cuando transmitas la pantalla entera, todo lo que se muestre es visible. Por lo tanto, debes tener cuidado con contraseñas, detalles de pagos, mensajes, fotos, audios y videos."</string>
-    <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="7487834861348460736">"Cuando transmitas una app, todo lo que se muestre o reproduzcas en ella será visible. Por lo tanto, debes tener cuidado con contraseñas, detalles de pagos, mensajes, fotos, audios y videos."</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="7487834861348460736">"Cuando transmitas una app, todo lo que se muestre o reproduzca en ella será visible. Por lo tanto, debes tener cuidado con contraseñas, detalles de pagos, mensajes, fotos, audios y videos."</string>
     <string name="media_projection_entry_cast_permission_dialog_continue_entire_screen" msgid="3261124185304676483">"Transmitir pantalla"</string>
     <string name="media_projection_entry_cast_app_selector_title" msgid="6323062146661922387">"Elige la app para transmitir"</string>
     <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"¿Quieres empezar a compartir?"</string>
@@ -1405,6 +1405,8 @@
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Ícono de expandir"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"o"</string>
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"Controlador de arrastre"</string>
+    <!-- no translation found for shortcut_helper_keyboard_settings_buttons_label (6720967595915985259) -->
+    <skip />
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"Navega con el teclado"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"Aprende combinaciones de teclas"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"Navega con el panel táctil"</string>
@@ -1462,4 +1464,8 @@
     <string name="qs_edit_mode_category_providedByApps" msgid="8346112074897919019">"Proporcionado por apps"</string>
     <string name="qs_edit_mode_category_display" msgid="4749511439121053942">"Pantalla"</string>
     <string name="qs_edit_mode_category_unknown" msgid="509314252124053550">"Desconocido"</string>
+    <!-- no translation found for qs_edit_mode_reset_dialog_title (8841270491554460726) -->
+    <skip />
+    <!-- no translation found for qs_edit_mode_reset_dialog_content (8626426097929954027) -->
+    <skip />
 </resources>

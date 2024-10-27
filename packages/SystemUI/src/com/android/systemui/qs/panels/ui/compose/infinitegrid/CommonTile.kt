@@ -23,6 +23,7 @@ import androidx.compose.animation.graphics.res.animatedVectorResource
 import androidx.compose.animation.graphics.res.rememberAnimatedVectorPainter
 import androidx.compose.animation.graphics.vector.AnimatedImageVector
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -57,8 +58,8 @@ import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.semantics.toggleableState
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.android.compose.modifiers.background
 import com.android.compose.modifiers.thenIf
+import com.android.systemui.Flags
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.ui.compose.Icon
 import com.android.systemui.common.ui.compose.load
@@ -92,11 +93,12 @@ fun LargeTileContent(
                 Modifier.size(CommonTileDefaults.ToggleTargetSize).thenIf(toggleClick != null) {
                     Modifier.clip(iconShape)
                         .verticalSquish(squishiness)
-                        .background(colors.iconBackground, { 1f })
+                        .background(colors.iconBackground)
                         .combinedClickable(
                             onClick = toggleClick!!,
                             onLongClick = onLongClick,
                             onLongClickLabel = longPressLabel,
+                            hapticFeedbackEnabled = !Flags.msdlFeedback(),
                         )
                         .thenIf(accessibilityUiState != null) {
                             Modifier.semantics {

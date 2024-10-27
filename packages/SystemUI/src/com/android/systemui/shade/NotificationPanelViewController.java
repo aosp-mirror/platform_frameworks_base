@@ -668,7 +668,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     @Inject
     public NotificationPanelViewController(NotificationPanelView view,
             @Main Handler handler,
-            LayoutInflater layoutInflater,
+            @ShadeDisplayAware LayoutInflater layoutInflater,
             FeatureFlags featureFlags,
             NotificationWakeUpCoordinator coordinator,
             PulseExpansionHandler pulseExpansionHandler,
@@ -689,7 +689,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             MetricsLogger metricsLogger,
             ShadeLogger shadeLogger,
-            ConfigurationController configurationController,
+            @ShadeDisplayAware ConfigurationController configurationController,
             Provider<FlingAnimationUtils.Builder> flingAnimationUtilsBuilder,
             StatusBarTouchableRegionManager statusBarTouchableRegionManager,
             ConversationNotificationManager conversationNotificationManager,

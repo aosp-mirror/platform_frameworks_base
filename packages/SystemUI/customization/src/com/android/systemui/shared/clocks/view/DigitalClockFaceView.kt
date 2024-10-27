@@ -27,7 +27,6 @@ import com.android.systemui.log.core.MessageBuffer
 import com.android.systemui.plugins.clocks.AlarmData
 import com.android.systemui.plugins.clocks.WeatherData
 import com.android.systemui.plugins.clocks.ZenData
-import com.android.systemui.shared.clocks.AssetLoader
 import com.android.systemui.shared.clocks.LogUtil
 import java.util.Locale
 
@@ -122,8 +121,8 @@ abstract class DigitalClockFaceView(ctx: Context, messageBuffer: MessageBuffer) 
 
     open fun onPositionUpdated(fromLeft: Int, direction: Int, fraction: Float) {}
 
-    fun updateColors(assets: AssetLoader, isRegionDark: Boolean) {
-        digitalClockTextViewMap.forEach { _, view -> view.updateColors(assets, isRegionDark) }
+    fun updateColor(color: Int) {
+        digitalClockTextViewMap.forEach { _, view -> view.updateColor(color) }
         invalidate()
     }
 

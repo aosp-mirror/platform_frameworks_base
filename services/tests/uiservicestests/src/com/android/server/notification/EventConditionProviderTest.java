@@ -124,9 +124,12 @@ public class EventConditionProviderTest extends UiServiceTestCase {
 
     @Test
     @EnableFlags(android.app.Flags.FLAG_MODES_HSUM)
-    public void onBootComplete_waitsForUserSwitched() {
+    public void onBootComplete_loadsTrackersForSystemUser() {
         mService.onBootComplete();
-        assertThat(mService.getTrackers().size()).isEqualTo(0);
+
+        assertThat(mService.getTrackers().size()).isEqualTo(1);
+        assertThat(mService.getTrackers().keyAt(0)).isEqualTo(UserHandle.USER_SYSTEM);
+        assertThat(mService.getTrackers().valueAt(0).getUserId()).isEqualTo(UserHandle.USER_SYSTEM);
     }
 
     @Test
@@ -157,5 +160,22 @@ public class EventConditionProviderTest extends UiServiceTestCase {
         assertThat(mService.getTrackers().valueAt(0).getUserId()).isEqualTo(42);
         assertThat(mService.getTrackers().keyAt(1)).isEqualTo(43);
         assertThat(mService.getTrackers().valueAt(1).getUserId()).isEqualTo(43);
+    }
+
+    @Test
+    @EnableFlags(android.app.Flags.FLAG_MODES_HSUM)
+    public void onUserSwitched_sameUser_doesNothing() {
+        UserHandle someUser = UserHandle.of(42);
+        when(mUserManager.getProfiles(eq(42))).thenReturn(List.of(new UserInfo(42, "user 42", 0)));
+
+        mService.onUserSwitched(someUser);
+        assertThat(mService.getTrackers().size()).isEqualTo(1);
+        assertThat(mService.getTrackers().keyAt(0)).isEqualTo(42);
+        CalendarTracker originalTracker = mService.getTrackers().valueAt(0);
+
+        mService.onUserSwitched(someUser);
+        assertThat(mService.getTrackers().size()).isEqualTo(1);
+        assertThat(mService.getTrackers().keyAt(0)).isEqualTo(42);
+        assertThat(mService.getTrackers().valueAt(0)).isSameInstanceAs(originalTracker);
     }
 }

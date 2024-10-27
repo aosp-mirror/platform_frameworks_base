@@ -17278,6 +17278,18 @@ public class TelephonyManager {
     }
 
     /**
+     * Setup sISms for testing.
+     *
+     * @hide
+     */
+    @VisibleForTesting
+    public static void setupISmsForTest(ISms iSms) {
+        synchronized (sCacheLock) {
+            sISms = iSms;
+        }
+    }
+
+    /**
      * Whether device can connect to 5G network when two SIMs are active.
      *
      * @hide TODO b/153669716: remove or make system API.

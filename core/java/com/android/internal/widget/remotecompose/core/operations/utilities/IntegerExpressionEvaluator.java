@@ -18,8 +18,8 @@ package com.android.internal.widget.remotecompose.core.operations.utilities;
 /**
  * High performance Integer expression evaluator
  *
- * The evaluation is based on int opMask, int[]exp
- * exp[i] is an operator if (opMask*(1 << i) != 0)
+ * <p>The evaluation is based on int opMask, int[]exp exp[i] is an operator if (opMask*(1 << i) !=
+ * 0)
  */
 public class IntegerExpressionEvaluator {
     static IntMap<String> sNames = new IntMap<>();
@@ -51,16 +51,14 @@ public class IntegerExpressionEvaluator {
     public static final int I_IFELSE = OFFSET + 22;
     public static final int I_MAD = OFFSET + 23;
 
-    public static final float LAST_OP = 24;
+    public static final float LAST_OP = 25;
 
     public static final int I_VAR1 = OFFSET + 24;
-    public static final int I_VAR2 = OFFSET + 24;
-
+    public static final int I_VAR2 = OFFSET + 25;
 
     int[] mStack;
     int[] mLocalStack = new int[128];
     int[] mVar;
-
 
     interface Op {
         int eval(int sp);
@@ -68,9 +66,10 @@ public class IntegerExpressionEvaluator {
 
     /**
      * Evaluate an integer expression
+     *
      * @param mask bits that are operators
-     * @param exp rpn sequence of values and operators
-     * @param var variables if the expression is a function
+     * @param exp  rpn sequence of values and operators
+     * @param var  variables if the expression is a function
      * @return return the results of evaluating the expression
      */
     public int eval(int mask, int[] exp, int... var) {
@@ -90,10 +89,11 @@ public class IntegerExpressionEvaluator {
 
     /**
      * Evaluate a integer expression
+     *
      * @param mask bits that are operators
-     * @param exp rpn sequence of values and operators
-     * @param len the number of values in the expression
-     * @param var variables if the expression is a function
+     * @param exp  rpn sequence of values and operators
+     * @param len  the number of values in the expression
+     * @param var  variables if the expression is a function
      * @return return the results of evaluating the expression
      */
     public int eval(int mask, int[] exp, int len, int... var) {
@@ -114,9 +114,10 @@ public class IntegerExpressionEvaluator {
 
     /**
      * Evaluate a int expression
+     *
      * @param opMask bits that are operators
-     * @param exp rpn sequence of values and operators
-     * @param var variables if the expression is a function
+     * @param exp    rpn sequence of values and operators
+     * @param var    variables if the expression is a function
      * @return return the results of evaluating the expression
      */
     public int evalDB(int opMask, int[] exp, int... var) {
@@ -150,11 +151,11 @@ public class IntegerExpressionEvaluator {
                 mStack[sp - 1] = mStack[sp - 1] * mStack[sp];
                 return sp - 1;
             },
-            (sp) -> {  // DIV
+            (sp) -> { // DIV
                 mStack[sp - 1] = mStack[sp - 1] / mStack[sp];
                 return sp - 1;
             },
-            (sp) -> {  // MOD
+            (sp) -> { // MOD
                 mStack[sp - 1] = mStack[sp - 1] % mStack[sp];
                 return sp - 1;
             },
@@ -183,8 +184,7 @@ public class IntegerExpressionEvaluator {
                 return sp - 1;
             },
             (sp) -> { // COPY_SIGN copy the sing of (using bit magic)
-                mStack[sp - 1] = (mStack[sp - 1] ^ (mStack[sp] >> 31))
-                        - (mStack[sp] >> 31);
+                mStack[sp - 1] = (mStack[sp - 1] ^ (mStack[sp] >> 31)) - (mStack[sp] >> 31);
                 return sp - 1;
             },
             (sp) -> { // MIN
@@ -219,22 +219,18 @@ public class IntegerExpressionEvaluator {
                 mStack[sp] = (mStack[sp] >> 31) | (-mStack[sp] >>> 31);
                 return sp;
             },
-
             (sp) -> { // CLAMP(min,max, val)
-                mStack[sp - 2] = Math.min(Math.max(mStack[sp - 2], mStack[sp]),
-                        mStack[sp - 1]);
+                mStack[sp - 2] = Math.min(Math.max(mStack[sp - 2], mStack[sp]), mStack[sp - 1]);
                 return sp - 2;
             },
             (sp) -> { // Ternary conditional
-                mStack[sp - 2] = (mStack[sp] > 0)
-                        ? mStack[sp - 1] : mStack[sp - 2];
+                mStack[sp - 2] = (mStack[sp] > 0) ? mStack[sp - 1] : mStack[sp - 2];
                 return sp - 2;
             },
             (sp) -> { // MAD
                 mStack[sp - 2] = mStack[sp] + mStack[sp - 1] * mStack[sp - 2];
                 return sp - 2;
             },
-
             (sp) -> { // first var =
                 mStack[sp] = mVar[0];
                 return sp;
@@ -296,7 +292,7 @@ public class IntegerExpressionEvaluator {
      * Convert an expression encoded as an array of ints int to a string
      *
      * @param opMask bits that are operators
-     * @param exp rpn sequence of values and operators
+     * @param exp    rpn sequence of values and operators
      * @param labels String that represent the variable names
      * @return
      */
@@ -328,7 +324,7 @@ public class IntegerExpressionEvaluator {
      * Convert an expression encoded as an array of ints int ot a string
      *
      * @param opMask bit mask of operators vs commands
-     * @param exp rpn sequence of values and operators
+     * @param exp    rpn sequence of values and operators
      * @return string representation of the expression
      */
     public static String toString(int opMask, int[] exp) {
@@ -357,8 +353,9 @@ public class IntegerExpressionEvaluator {
 
     /**
      * This creates an infix string expression
+     *
      * @param opMask The bits that are operators
-     * @param exp the array of expressions
+     * @param exp    the array of expressions
      * @return infix string
      */
     public static String toStringInfix(int opMask, int[] exp) {
@@ -375,24 +372,39 @@ public class IntegerExpressionEvaluator {
                     return sNames.get(id) + "(" + toString(mask, exp, sp - 1) + ") ";
                 case 2:
                     if (infix(id)) {
-                        return "(" + toString(mask, exp, sp - 2)
-                                + " " + sNames.get(id) + " "
-                                + toString(mask, exp, sp - 1) + ") ";
+                        return "("
+                                + toString(mask, exp, sp - 2)
+                                + " "
+                                + sNames.get(id)
+                                + " "
+                                + toString(mask, exp, sp - 1)
+                                + ") ";
                     } else {
-                        return sNames.get(id) + "("
-                                + toString(mask, exp, sp - 2) + ", "
-                                + toString(mask, exp, sp - 1) + ")";
+                        return sNames.get(id)
+                                + "("
+                                + toString(mask, exp, sp - 2)
+                                + ", "
+                                + toString(mask, exp, sp - 1)
+                                + ")";
                     }
                 case 3:
                     if (infix(id)) {
-                        return "((" + toString(mask, exp, sp + 3) + ") ? "
-                                + toString(mask, exp, sp - 2) + ":"
-                                + toString(mask, exp, sp - 1) + ")";
+                        return "(("
+                                + toString(mask, exp, sp + 3)
+                                + ") ? "
+                                + toString(mask, exp, sp - 2)
+                                + ":"
+                                + toString(mask, exp, sp - 1)
+                                + ")";
                     } else {
                         return sNames.get(id)
-                                + "(" + toString(mask, exp, sp - 3)
-                                + ", " + toString(mask, exp, sp - 2)
-                                + ", " + toString(mask, exp, sp - 1) + ")";
+                                + "("
+                                + toString(mask, exp, sp - 3)
+                                + ", "
+                                + toString(mask, exp, sp - 2)
+                                + ", "
+                                + toString(mask, exp, sp - 1)
+                                + ")";
                     }
             }
         }
@@ -401,11 +413,32 @@ public class IntegerExpressionEvaluator {
 
     static final int[] NO_OF_OPS = {
             -1, // no op
-            2, 2, 2, 2, 2, // + - * / %
-            2, 2, 2, 2, 2, 2, 2, 2, 2, //<<, >> , >>> , | , &, ^, min max
-            1, 1, 1, 1, 1, 1,  // neg, abs, ++, -- , not , sign
-            3, 3, 3, // clamp, ifElse, mad,
-            0, 0, 0 // mad, ?:,
+            2,
+            2,
+            2,
+            2,
+            2, // + - * / %
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2, // <<, >> , >>> , | , &, ^, min max
+            1,
+            1,
+            1,
+            1,
+            1,
+            1, // neg, abs, ++, -- , not , sign
+            3,
+            3,
+            3, // clamp, ifElse, mad,
+            0,
+            0,
+            0 // mad, ?:,
             // a[0],a[1],a[2]
     };
 
@@ -416,13 +449,14 @@ public class IntegerExpressionEvaluator {
      * @return true if the operator is infix
      */
     static boolean infix(int n) {
-        return ((n < 12));
+        return n < 12;
     }
 
     /**
      * is it an id or operation
+     *
      * @param opMask the bits that mark elements as an operation
-     * @param i the bit to check
+     * @param i      the bit to check
      * @return true if the bit is 1
      */
     public static boolean isOperation(int opMask, int i) {

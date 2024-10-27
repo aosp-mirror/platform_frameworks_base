@@ -128,10 +128,10 @@ private class NestedScrollToSceneNode(
 ) : DelegatingNode() {
     private var scrollBehaviorOwner: ScrollBehaviorOwner? = null
 
-    private fun requireScrollBehaviorOwner(): ScrollBehaviorOwner {
+    private fun findScrollBehaviorOwner(): ScrollBehaviorOwner? {
         var behaviorOwner = scrollBehaviorOwner
         if (behaviorOwner == null) {
-            behaviorOwner = requireScrollBehaviorOwner(layoutImpl.draggableHandler(orientation))
+            behaviorOwner = findScrollBehaviorOwner(layoutImpl.draggableHandler(orientation))
             scrollBehaviorOwner = behaviorOwner
         }
         return behaviorOwner
@@ -156,8 +156,8 @@ private class NestedScrollToSceneNode(
                 // transition between scenes. We can assume that the behavior is only needed if
                 // there is some remaining amount.
                 if (available != Offset.Zero) {
-                    requireScrollBehaviorOwner()
-                        .updateScrollBehaviors(
+                    findScrollBehaviorOwner()
+                        ?.updateScrollBehaviors(
                             topOrLeftBehavior = topOrLeftBehavior,
                             bottomOrRightBehavior = bottomOrRightBehavior,
                             isExternalOverscrollGesture = isExternalOverscrollGesture,

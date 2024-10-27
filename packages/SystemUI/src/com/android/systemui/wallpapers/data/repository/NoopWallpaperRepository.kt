@@ -35,6 +35,4 @@ class NoopWallpaperRepository @Inject constructor() : WallpaperRepository {
     override val wallpaperInfo: StateFlow<WallpaperInfo?> = MutableStateFlow(null).asStateFlow()
     override val wallpaperSupportsAmbientMode = MutableStateFlow(false).asStateFlow()
     override var rootView: View? = null
-
-    override fun setNotificationStackAbsoluteBottom(bottom: Float) {}
 }

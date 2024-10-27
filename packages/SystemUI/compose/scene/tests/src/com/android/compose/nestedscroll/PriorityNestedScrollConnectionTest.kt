@@ -20,6 +20,7 @@ package com.android.compose.nestedscroll
 
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource.Companion.UserInput
 import androidx.compose.ui.unit.Velocity
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -48,17 +49,26 @@ class PriorityNestedScrollConnectionTest {
             canStartPreScroll = { _, _, _ -> canStartPreScroll },
             canStartPostScroll = { _, _, _ -> canStartPostScroll },
             canStartPostFling = { canStartPostFling },
-            canStopOnPreFling = { canStopOnPreFling },
-            onStart = { isStarted = true },
-            onScroll = { offsetAvailable, _ ->
-                lastScroll = offsetAvailable
-                if (consumeScroll) offsetAvailable else 0f
+            onStart = { _ ->
+                isStarted = true
+                object : ScrollController {
+                    override fun onScroll(deltaScroll: Float, source: NestedScrollSource): Float {
+                        lastScroll = deltaScroll
+                        return if (consumeScroll) deltaScroll else 0f
+                    }
+
+                    override suspend fun onStop(initialVelocity: Float): Float {
+                        lastStop = initialVelocity
+                        return if (consumeStop) initialVelocity else 0f
+                    }
+
+                    override fun onCancel() {
+                        isCancelled = true
+                    }
+
+                    override fun canStopOnPreFling() = canStopOnPreFling
+                }
             },
-            onStop = {
-                lastStop = it
-                if (consumeStop) it else 0f
-            },
-            onCancel = { isCancelled = true },
         )
 
     @Test

@@ -52,7 +52,7 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 
-@EnableFlags(StatusBarSimpleFragment.FLAG_NAME)
+@EnableFlags(StatusBarConnectedDisplays.FLAG_NAME)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class StatusBarOrchestratorTest : SysuiTestCase() {

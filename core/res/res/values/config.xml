@@ -7054,6 +7054,9 @@
          RSS is being collected instead. -->
     <item name="config_am_pssToRssThresholdModifier" format="float" type="dimen">1.5</item>
 
+    <!-- The size of the UI tier if cached app oom_adj_score tiers are enabled. -->
+    <integer name="config_am_tieredCachedAdjUiTierSize">10</integer>
+
     <!-- Whether unlocking and waking a device are sequenced -->
     <bool name="config_orderUnlockAndWake">false</bool>
 

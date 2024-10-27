@@ -52,6 +52,7 @@ import com.android.systemui.plugins.clocks.ClockFaceController
 import com.android.systemui.plugins.clocks.ClockFaceEvents
 import com.android.systemui.plugins.clocks.ClockMessageBuffers
 import com.android.systemui.plugins.clocks.ClockTickRate
+import com.android.systemui.plugins.clocks.ThemeConfig
 import com.android.systemui.plugins.clocks.ZenData
 import com.android.systemui.plugins.clocks.ZenData.ZenMode
 import com.android.systemui.res.R
@@ -81,7 +82,6 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.ArgumentMatchers.anyFloat
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
@@ -151,6 +151,8 @@ class ClockEventControllerTest : SysuiTestCase() {
             .thenReturn(ClockFaceConfig(tickRate = ClockTickRate.PER_MINUTE))
         whenever(largeClockController.config)
             .thenReturn(ClockFaceConfig(tickRate = ClockTickRate.PER_MINUTE))
+        whenever(smallClockController.theme).thenReturn(ThemeConfig(true, null))
+        whenever(largeClockController.theme).thenReturn(ThemeConfig(true, null))
 
         zenModeRepository.addMode(MANUAL_DND_INACTIVE)
 
@@ -205,14 +207,15 @@ class ClockEventControllerTest : SysuiTestCase() {
     @Test
     fun themeChanged_verifyClockPaletteUpdated() =
         runBlocking(IMMEDIATE) {
-            verify(smallClockEvents).onRegionDarknessChanged(anyBoolean())
-            verify(largeClockEvents).onRegionDarknessChanged(anyBoolean())
+            verify(smallClockEvents).onThemeChanged(any())
+            verify(largeClockEvents).onThemeChanged(any())
 
             val captor = argumentCaptor<ConfigurationController.ConfigurationListener>()
             verify(configurationController).addCallback(capture(captor))
             captor.value.onThemeChanged()
 
-            verify(events).onColorPaletteChanged(any())
+            verify(smallClockEvents, times(2)).onThemeChanged(any())
+            verify(largeClockEvents, times(2)).onThemeChanged(any())
         }
 
     @Test
