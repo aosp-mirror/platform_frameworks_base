@@ -44,7 +44,7 @@ class FlashlightMapperTest : SysuiTestCase() {
                     addOverride(R.drawable.qs_flashlight_icon_on, TestStubDrawable())
                 }
                 .resources,
-            context.theme
+            context.theme,
         )
     }
 
@@ -74,7 +74,7 @@ class FlashlightMapperTest : SysuiTestCase() {
 
         val expectedIcon =
             Icon.Loaded(context.getDrawable(R.drawable.qs_flashlight_icon_on)!!, null)
-        val actualIcon = tileState.icon()
+        val actualIcon = tileState.icon
         assertThat(actualIcon).isEqualTo(expectedIcon)
     }
 
@@ -85,7 +85,7 @@ class FlashlightMapperTest : SysuiTestCase() {
 
         val expectedIcon =
             Icon.Loaded(context.getDrawable(R.drawable.qs_flashlight_icon_off)!!, null)
-        val actualIcon = tileState.icon()
+        val actualIcon = tileState.icon
         assertThat(actualIcon).isEqualTo(expectedIcon)
     }
 
@@ -96,7 +96,7 @@ class FlashlightMapperTest : SysuiTestCase() {
 
         val expectedIcon =
             Icon.Loaded(context.getDrawable(R.drawable.qs_flashlight_icon_off)!!, null)
-        val actualIcon = tileState.icon()
+        val actualIcon = tileState.icon
         assertThat(actualIcon).isEqualTo(expectedIcon)
     }
 

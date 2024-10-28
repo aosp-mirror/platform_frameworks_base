@@ -19,6 +19,7 @@ package com.android.systemui.qs.tiles.viewmodel
 import android.content.Context
 import android.os.UserHandle
 import android.util.Log
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.internal.logging.InstanceId
 import com.android.systemui.Dumpable
 import com.android.systemui.animation.Expandable
@@ -42,7 +43,6 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.takeWhile
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 // TODO(b/http://b/299909989): Use QSTileViewModel directly after the rollout
 class QSTileViewModelAdapter
@@ -223,7 +223,7 @@ constructor(
         fun mapState(
             context: Context,
             viewModelState: QSTileState,
-            config: QSTileConfig
+            config: QSTileConfig,
         ): QSTile.State =
             // we have to use QSTile.BooleanState to support different side icons
             // which are bound to instanceof QSTile.BooleanState in QSTileView.
@@ -241,7 +241,7 @@ constructor(
                     viewModelState.supportedActions.contains(QSTileState.UserAction.TOGGLE_CLICK)
 
                 icon =
-                    when (val stateIcon = viewModelState.icon()) {
+                    when (val stateIcon = viewModelState.icon) {
                         is Icon.Loaded ->
                             if (viewModelState.iconRes == null) DrawableIcon(stateIcon.drawable)
                             else DrawableIconWithRes(stateIcon.drawable, viewModelState.iconRes)
