@@ -1217,7 +1217,7 @@ public class ActivityStarterTests extends WindowTestsBase {
 
     @Test
     public void testRecycleTaskWakeUpWhenDreaming() {
-        doNothing().when(mWm.mAtmService.mTaskSupervisor).wakeUp(anyString());
+        doNothing().when(mWm.mAtmService.mTaskSupervisor).wakeUp(anyInt(), anyString());
         doReturn(true).when(mWm.mAtmService).isDreaming();
         final ActivityStarter starter = prepareStarter(0 /* flags */);
         final ActivityRecord target = new ActivityBuilder(mAtm).setCreateTask(true).build();
@@ -1232,7 +1232,7 @@ public class ActivityStarterTests extends WindowTestsBase {
         assertTrue(target.currentLaunchCanTurnScreenOn());
         // In real case, dream activity has a higher priority (TaskDisplayArea#getPriority) that
         // will be put at a higher z-order. So it relies on wakeUp() to be dismissed.
-        verify(mWm.mAtmService.mTaskSupervisor).wakeUp(anyString());
+        verify(mWm.mAtmService.mTaskSupervisor).wakeUp(eq(target.getDisplayId()), anyString());
     }
 
     @Test
