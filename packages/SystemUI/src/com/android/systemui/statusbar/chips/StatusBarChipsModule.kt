@@ -20,7 +20,7 @@ import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.LogBufferFactory
-import com.android.systemui.statusbar.chips.ron.demo.ui.viewmodel.DemoRonChipViewModel
+import com.android.systemui.statusbar.chips.notification.demo.ui.viewmodel.DemoNotifChipViewModel
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -31,8 +31,8 @@ import dagger.multibindings.IntoMap
 abstract class StatusBarChipsModule {
     @Binds
     @IntoMap
-    @ClassKey(DemoRonChipViewModel::class)
-    abstract fun binds(impl: DemoRonChipViewModel): CoreStartable
+    @ClassKey(DemoNotifChipViewModel::class)
+    abstract fun binds(impl: DemoNotifChipViewModel): CoreStartable
 
     companion object {
         @Provides

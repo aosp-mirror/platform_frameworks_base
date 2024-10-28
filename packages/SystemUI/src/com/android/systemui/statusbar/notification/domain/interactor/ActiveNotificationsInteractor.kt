@@ -17,7 +17,7 @@ package com.android.systemui.statusbar.notification.domain.interactor
 
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
-import com.android.systemui.statusbar.chips.ron.shared.StatusBarRonChips
+import com.android.systemui.statusbar.chips.notification.shared.StatusBarNotifChips
 import com.android.systemui.statusbar.notification.collection.render.NotifStats
 import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationListRepository
 import com.android.systemui.statusbar.notification.shared.ActiveNotificationGroupModel
@@ -78,7 +78,7 @@ constructor(
 
     /** The notifications that are promoted and ongoing. Sorted by priority order. */
     val promotedOngoingNotifications: Flow<List<ActiveNotificationModel>> =
-        if (StatusBarRonChips.isEnabled) {
+        if (StatusBarNotifChips.isEnabled) {
             // TODO(b/364653005): Filter all the notifications down to just the promoted ones.
             // TODO(b/364653005): [ongoingCallNotification] should be incorporated into this flow
             // instead of being separate.

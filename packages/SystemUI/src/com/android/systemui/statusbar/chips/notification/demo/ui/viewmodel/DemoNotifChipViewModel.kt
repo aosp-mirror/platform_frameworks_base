@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.chips.ron.demo.ui.viewmodel
+package com.android.systemui.statusbar.chips.notification.demo.ui.viewmodel
 
 import android.content.pm.PackageManager
 import android.content.pm.PackageManager.NameNotFoundException
@@ -22,7 +22,7 @@ import android.graphics.drawable.Drawable
 import com.android.systemui.CoreStartable
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.statusbar.chips.ron.shared.StatusBarRonChips
+import com.android.systemui.statusbar.chips.notification.shared.StatusBarNotifChips
 import com.android.systemui.statusbar.chips.ui.model.ColorsModel
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipViewModel
@@ -37,25 +37,25 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 /**
- * A view model that will emit demo RON chips (rich ongoing notification chips) from [chip] based on
- * adb commands sent by the user.
+ * A view model that will emit demo promoted ongoing notification chips from [chip] based on adb
+ * commands sent by the user.
  *
  * Example adb commands:
  *
  * To show a chip with the SysUI icon and custom text and color:
  * ```
- * adb shell cmd statusbar demo-ron -p com.android.systemui -t 10min -c "\\#434343"
+ * adb shell cmd statusbar demo-notif -p com.android.systemui -t 10min -c "\\#434343"
  * ```
  *
  * To hide the chip:
  * ```
- * adb shell cmd statusbar demo-ron --hide
+ * adb shell cmd statusbar demo-notif --hide
  * ```
  *
- * See [DemoRonCommand] for more information on the adb command spec.
+ * See [DemoNotifCommand] for more information on the adb command spec.
  */
 @SysUISingleton
-class DemoRonChipViewModel
+class DemoNotifChipViewModel
 @Inject
 constructor(
     private val commandRegistry: CommandRegistry,
@@ -63,19 +63,19 @@ constructor(
     private val systemClock: SystemClock,
 ) : OngoingActivityChipViewModel, CoreStartable {
     override fun start() {
-        commandRegistry.registerCommand("demo-ron") { DemoRonCommand() }
+        commandRegistry.registerCommand(DEMO_COMMAND_NAME) { DemoNotifCommand() }
     }
 
     private val _chip =
         MutableStateFlow<OngoingActivityChipModel>(OngoingActivityChipModel.Hidden())
     override val chip: StateFlow<OngoingActivityChipModel> = _chip.asStateFlow()
 
-    private inner class DemoRonCommand : ParseableCommand("demo-ron") {
+    private inner class DemoNotifCommand : ParseableCommand(DEMO_COMMAND_NAME) {
         private val packageName: String? by
             param(
                 longName = "packageName",
                 shortName = "p",
-                description = "The package name for the demo RON app",
+                description = "The package name for app \"posting\" the demo notification",
                 valueParser = Type.String,
             )
 
@@ -99,15 +99,12 @@ constructor(
             )
 
         private val hide by
-            flag(
-                longName = "hide",
-                description = "Hides any existing demo RON chip",
-            )
+            flag(longName = "hide", description = "Hides any existing demo notification chip")
 
         override fun execute(pw: PrintWriter) {
-            if (!StatusBarRonChips.isEnabled) {
+            if (!StatusBarNotifChips.isEnabled) {
                 pw.println(
-                    "Error: com.android.systemui.status_bar_ron_chips must be enabled " +
+                    "Error: com.android.systemui.status_bar_notification_chips must be enabled " +
                         "before using this demo feature"
                 )
                 return
@@ -167,8 +164,12 @@ constructor(
                 return null
             }
             return OngoingActivityChipModel.ChipIcon.FullColorAppIcon(
-                Icon.Loaded(drawable = iconDrawable, contentDescription = null),
+                Icon.Loaded(drawable = iconDrawable, contentDescription = null)
             )
         }
+    }
+
+    companion object {
+        private const val DEMO_COMMAND_NAME = "demo-notif"
     }
 }

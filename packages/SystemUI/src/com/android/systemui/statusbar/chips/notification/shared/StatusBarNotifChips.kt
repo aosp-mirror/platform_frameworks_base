@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.chips.ron.shared
+package com.android.systemui.statusbar.chips.notification.shared
 
 import com.android.systemui.Flags
 import com.android.systemui.flags.FlagToken
 import com.android.systemui.flags.RefactorFlagUtils
 
-/** Helper for reading or using the status bar RON chips flag state. */
+/** Helper for reading or using the status bar promoted notification chips flag state. */
 @Suppress("NOTHING_TO_INLINE")
-object StatusBarRonChips {
+object StatusBarNotifChips {
     /** The aconfig flag name */
-    const val FLAG_NAME = Flags.FLAG_STATUS_BAR_RON_CHIPS
+    const val FLAG_NAME = Flags.FLAG_STATUS_BAR_NOTIFICATION_CHIPS
 
     /** A token used for dependency declaration */
     val token: FlagToken
@@ -33,7 +33,7 @@ object StatusBarRonChips {
     /** Is the refactor enabled */
     @JvmStatic
     inline val isEnabled
-        get() = Flags.statusBarRonChips()
+        get() = Flags.statusBarNotificationChips()
 
     /**
      * Called to ensure code is only run when the flag is enabled. This protects users from the
