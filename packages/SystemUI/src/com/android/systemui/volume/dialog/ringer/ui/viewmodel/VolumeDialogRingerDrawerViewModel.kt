@@ -34,11 +34,10 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.stateIn
 
@@ -56,13 +55,12 @@ constructor(
 
     private val drawerState = MutableStateFlow<RingerDrawerState>(RingerDrawerState.Initial)
 
-    val ringerViewModel: Flow<RingerViewModel> =
+    val ringerViewModel: StateFlow<RingerViewModelState> =
         combine(interactor.ringerModel, drawerState) { ringerModel, state ->
                 ringerModel.toViewModel(state)
             }
             .flowOn(backgroundDispatcher)
-            .stateIn(coroutineScope, SharingStarted.Eagerly, null)
-            .filterNotNull()
+            .stateIn(coroutineScope, SharingStarted.Eagerly, RingerViewModelState.Unavailable)
 
     // Vibration attributes.
     private val sonificiationVibrationAttributes =
@@ -105,16 +103,22 @@ constructor(
 
     private fun VolumeDialogRingerModel.toViewModel(
         drawerState: RingerDrawerState
-    ): RingerViewModel {
+    ): RingerViewModelState {
         val currentIndex = availableModes.indexOf(currentRingerMode)
         if (currentIndex == -1) {
             volumeDialogLogger.onCurrentRingerModeIsUnsupported(currentRingerMode)
         }
-        return RingerViewModel(
-            availableButtons = availableModes.map { mode -> toButtonViewModel(mode) },
-            currentButtonIndex = currentIndex,
-            drawerState = drawerState,
-        )
+        return if (currentIndex == -1 || isSingleVolume) {
+            RingerViewModelState.Unavailable
+        } else {
+            RingerViewModelState.Available(
+                RingerViewModel(
+                    availableButtons = availableModes.map { mode -> toButtonViewModel(mode) },
+                    currentButtonIndex = currentIndex,
+                    drawerState = drawerState,
+                )
+            )
+        }
     }
 
     private fun VolumeDialogRingerModel.toButtonViewModel(
