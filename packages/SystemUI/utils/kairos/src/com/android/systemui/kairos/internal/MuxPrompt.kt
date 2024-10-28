@@ -25,36 +25,26 @@ import com.android.systemui.kairos.util.Left
 import com.android.systemui.kairos.util.Maybe
 import com.android.systemui.kairos.util.None
 import com.android.systemui.kairos.util.Right
-import com.android.systemui.kairos.util.filterJust
-import com.android.systemui.kairos.util.map
 import com.android.systemui.kairos.util.partitionEithers
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.withLock
 
+private typealias MuxPromptMovingResult<K, V> = Pair<MuxResult<K, V>, MuxResult<K, V>?>
+
 internal class MuxPromptMovingNode<K : Any, V>(
-    lifecycle: MuxLifecycle<Pair<Map<K, V>, Map<K, PullNode<V>>?>>,
-    private val spec: MuxActivator<Pair<Map<K, V>, Map<K, PullNode<V>>?>>,
-) :
-    MuxNode<K, V, Pair<Map<K, V>, Map<K, PullNode<V>>?>>(lifecycle),
-    Key<Pair<Map<K, V>, Map<K, PullNode<V>>?>> {
+    lifecycle: MuxLifecycle<MuxPromptMovingResult<K, V>>,
+    private val spec: MuxActivator<MuxPromptMovingResult<K, V>>,
+) : MuxNode<K, V, MuxPromptMovingResult<K, V>>(lifecycle), Key<MuxPromptMovingResult<K, V>> {
 
     @Volatile var patchData: Map<K, Maybe<TFlowImpl<V>>>? = null
     @Volatile var patches: MuxPromptPatchNode<K, V>? = null
 
-    @Volatile private var reEval: Pair<Map<K, V>, Map<K, PullNode<V>>?>? = null
-
-    override fun hasCurrentValueLocked(transactionStore: TransactionStore): Boolean =
-        transactionStore.contains(this)
-
-    override suspend fun hasCurrentValue(transactionStore: TransactionStore): Boolean =
-        mutex.withLock { hasCurrentValueLocked(transactionStore) }
+    @Volatile private var reEval: MuxPromptMovingResult<K, V>? = null
 
     override suspend fun visit(evalScope: EvalScope) {
-        val preSwitchResults: Map<K, V> = upstreamData.toMap()
+        val preSwitchResults: MuxResult<K, V> = upstreamData.toMap()
         upstreamData.clear()
 
         val patch: Map<K, Maybe<TFlowImpl<V>>>? = patchData
@@ -85,6 +75,7 @@ internal class MuxPromptMovingNode<K : Any, V>(
                             adjustDownstreamDepths(evalScope, coroutineScope = this)
                         }
                         if (evalResult != null) {
+                            epoch = evalScope.epoch
                             evalScope.setResult(this@MuxPromptMovingNode, evalResult)
                             if (!scheduleAll(downstreamSet, evalScope)) {
                                 evalScope.scheduleDeactivation(this@MuxPromptMovingNode)
@@ -97,11 +88,11 @@ internal class MuxPromptMovingNode<K : Any, V>(
     }
 
     private suspend fun doEval(
-        preSwitchResults: Map<K, V>,
+        preSwitchResults: MuxResult<K, V>,
         patch: Map<K, Maybe<TFlowImpl<V>>>?,
         evalScope: EvalScope,
-    ): Pair<Boolean, Pair<Map<K, V>, Map<K, PullNode<V>>?>?> {
-        val newlySwitchedIn: Map<K, PullNode<V>>? =
+    ): Pair<Boolean, MuxPromptMovingResult<K, V>?> {
+        val newlySwitchedIn: MuxResult<K, V>? =
             patch?.let {
                 // We have a patch, process additions/updates and removals
                 val (adds, removes) =
@@ -194,10 +185,7 @@ internal class MuxPromptMovingNode<K : Any, V>(
         }
     }
 
-    private suspend fun adjustDownstreamDepths(
-        evalScope: EvalScope,
-        coroutineScope: CoroutineScope,
-    ) {
+    private fun adjustDownstreamDepths(evalScope: EvalScope, coroutineScope: CoroutineScope) {
         if (depthTracker.dirty_depthIncreased()) {
             // schedule downstream nodes on the compaction scheduler; this scheduler is drained at
             // the end of this eval depth, so that all depth increases are applied before we advance
@@ -215,9 +203,8 @@ internal class MuxPromptMovingNode<K : Any, V>(
         }
     }
 
-    override suspend fun getPushEvent(
-        evalScope: EvalScope
-    ): Maybe<Pair<Map<K, V>, Map<K, PullNode<V>>?>> = evalScope.getCurrentValue(key = this)
+    override suspend fun getPushEvent(evalScope: EvalScope): MuxPromptMovingResult<K, V> =
+        evalScope.getCurrentValue(key = this)
 
     override suspend fun doDeactivate() {
         // Update lifecycle
@@ -264,18 +251,11 @@ internal class MuxPromptMovingNode<K : Any, V>(
 }
 
 internal class MuxPromptEvalNode<K, V>(
-    private val movingNode: PullNode<Pair<Map<K, V>, Map<K, PullNode<V>>?>>
-) : PullNode<Map<K, V>> {
-    override suspend fun getPushEvent(evalScope: EvalScope): Maybe<Map<K, V>> =
-        movingNode.getPushEvent(evalScope).map { (preSwitchResults, newlySwitchedIn) ->
-            coroutineScope {
-                newlySwitchedIn
-                    ?.map { (k, v) -> async { v.getPushEvent(evalScope).map { k to it } } }
-                    ?.awaitAll()
-                    ?.asSequence()
-                    ?.filterJust()
-                    ?.toMap(preSwitchResults.toMutableMap()) ?: preSwitchResults
-            }
+    private val movingNode: PullNode<MuxPromptMovingResult<K, V>>
+) : PullNode<MuxResult<K, V>> {
+    override suspend fun getPushEvent(evalScope: EvalScope): MuxResult<K, V> =
+        movingNode.getPushEvent(evalScope).let { (preSwitchResults, newlySwitchedIn) ->
+            newlySwitchedIn?.toMap(preSwitchResults.toMutableMap()) ?: preSwitchResults
         }
 }
 
@@ -288,11 +268,8 @@ internal class MuxPromptPatchNode<K : Any, V>(private val muxNode: MuxPromptMovi
     lateinit var upstream: NodeConnection<Map<K, Maybe<TFlowImpl<V>>>>
 
     override suspend fun schedule(evalScope: EvalScope) {
-        val upstreamResult = upstream.getPushEvent(evalScope)
-        if (upstreamResult is Just) {
-            muxNode.patchData = upstreamResult.value
-            muxNode.schedule(evalScope)
-        }
+        muxNode.patchData = upstream.getPushEvent(evalScope)
+        muxNode.schedule(evalScope)
     }
 
     override suspend fun adjustDirectUpstream(scheduler: Scheduler, oldDepth: Int, newDepth: Int) {
@@ -350,18 +327,18 @@ internal class MuxPromptPatchNode<K : Any, V>(private val muxNode: MuxPromptMovi
     }
 }
 
-internal fun <K : Any, A> switchPromptImpl(
-    getStorage: suspend EvalScope.() -> Map<K, TFlowImpl<A>>,
-    getPatches: suspend EvalScope.() -> TFlowImpl<Map<K, Maybe<TFlowImpl<A>>>>,
-): TFlowImpl<Map<K, A>> {
+internal fun <K : Any, V> switchPromptImpl(
+    getStorage: suspend EvalScope.() -> Map<K, TFlowImpl<V>>,
+    getPatches: suspend EvalScope.() -> TFlowImpl<Map<K, Maybe<TFlowImpl<V>>>>,
+): TFlowImpl<MuxResult<K, V>> {
     val moving =
         MuxLifecycle(
-            object : MuxActivator<Pair<Map<K, A>, Map<K, PullNode<A>>?>> {
+            object : MuxActivator<MuxPromptMovingResult<K, V>> {
                 override suspend fun activate(
                     evalScope: EvalScope,
-                    lifecycle: MuxLifecycle<Pair<Map<K, A>, Map<K, PullNode<A>>?>>,
-                ): MuxNode<*, *, Pair<Map<K, A>, Map<K, PullNode<A>>?>>? {
-                    val storage: Map<K, TFlowImpl<A>> = getStorage(evalScope)
+                    lifecycle: MuxLifecycle<MuxPromptMovingResult<K, V>>,
+                ): MuxNode<*, *, MuxPromptMovingResult<K, V>>? {
+                    val storage: Map<K, TFlowImpl<V>> = getStorage(evalScope)
                     // Initialize mux node and switched-in connections.
                     val movingNode =
                         MuxPromptMovingNode(lifecycle, this).apply {
@@ -379,11 +356,7 @@ internal fun <K : Any, A> switchPromptImpl(
                                                     .apply { upstream = conn }
                                                     .also {
                                                         if (needsEval) {
-                                                            val result =
-                                                                conn.getPushEvent(evalScope)
-                                                            if (result is Just) {
-                                                                upstreamData[key] = result.value
-                                                            }
+                                                            upstreamData[key] = conn.directUpstream
                                                         }
                                                     }
                                             }
@@ -401,10 +374,7 @@ internal fun <K : Any, A> switchPromptImpl(
                                         patches = patchNode
 
                                         if (needsEval) {
-                                            val result = conn.getPushEvent(evalScope)
-                                            if (result is Just) {
-                                                patchData = result.value
-                                            }
+                                            patchData = conn.getPushEvent(evalScope)
                                         }
                                     }
                             }

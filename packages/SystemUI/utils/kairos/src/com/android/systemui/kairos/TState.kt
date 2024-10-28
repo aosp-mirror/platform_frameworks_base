@@ -29,7 +29,7 @@ import com.android.systemui.kairos.internal.activated
 import com.android.systemui.kairos.internal.cached
 import com.android.systemui.kairos.internal.constInit
 import com.android.systemui.kairos.internal.constS
-import com.android.systemui.kairos.internal.filterNode
+import com.android.systemui.kairos.internal.filterImpl
 import com.android.systemui.kairos.internal.flatMap
 import com.android.systemui.kairos.internal.init
 import com.android.systemui.kairos.internal.map
@@ -469,7 +469,7 @@ internal constructor(internal val network: Network, initialValue: Deferred<T>) :
         val operatorName = "MutableTState"
         lateinit var state: TStateSource<T>
         val calm: TFlowImpl<T> =
-            filterNode({ mapImpl(upstream = { changes.activated() }) { it!!.await() } }) { new ->
+            filterImpl({ mapImpl(upstream = { changes.activated() }) { it!!.await() } }) { new ->
                     new != state.getCurrentWithEpoch(evalScope = this).first
                 }
                 .cached()

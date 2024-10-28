@@ -16,8 +16,6 @@
 
 package com.android.systemui.kairos.internal
 
-import com.android.systemui.kairos.util.Maybe
-
 /*
 Dmux
 Muxes + Branch
@@ -68,7 +66,7 @@ internal sealed interface PullNode<out A> {
      * will read from the cache, otherwise it will perform a full evaluation, even if invoked
      * multiple times within a transaction.
      */
-    suspend fun getPushEvent(evalScope: EvalScope): Maybe<A>
+    suspend fun getPushEvent(evalScope: EvalScope): A
 }
 
 /*
@@ -76,7 +74,7 @@ Muxes + DmuxBranch
  */
 internal sealed interface PushNode<A> : PullNode<A> {
 
-    suspend fun hasCurrentValue(transactionStore: TransactionStore): Boolean
+    suspend fun hasCurrentValue(evalScope: EvalScope): Boolean
 
     val depthTracker: DepthTracker
 

@@ -26,11 +26,11 @@ import com.android.systemui.kairos.internal.TFlowImpl
 import com.android.systemui.kairos.internal.activated
 import com.android.systemui.kairos.internal.cached
 import com.android.systemui.kairos.internal.constInit
-import com.android.systemui.kairos.internal.filterNode
+import com.android.systemui.kairos.internal.filterImpl
+import com.android.systemui.kairos.internal.filterJustImpl
 import com.android.systemui.kairos.internal.init
 import com.android.systemui.kairos.internal.map
 import com.android.systemui.kairos.internal.mapImpl
-import com.android.systemui.kairos.internal.mapMaybeNode
 import com.android.systemui.kairos.internal.mergeNodes
 import com.android.systemui.kairos.internal.mergeNodesLeft
 import com.android.systemui.kairos.internal.neverImpl
@@ -121,11 +121,8 @@ val <A> TState<A>.stateChanges: TFlow<A>
  * @see mapNotNull
  */
 @ExperimentalFrpApi
-fun <A, B> TFlow<A>.mapMaybe(transform: suspend FrpTransactionScope.(A) -> Maybe<B>): TFlow<B> {
-    val pulse =
-        mapMaybeNode({ init.connect(evalScope = this) }) { runInTransactionScope { transform(it) } }
-    return TFlowInit(constInit(name = null, pulse))
-}
+fun <A, B> TFlow<A>.mapMaybe(transform: suspend FrpTransactionScope.(A) -> Maybe<B>): TFlow<B> =
+    map(transform).filterJust()
 
 /**
  * Returns a [TFlow] that contains only the non-null results of applying [transform] to each value
@@ -140,14 +137,17 @@ fun <A, B> TFlow<A>.mapNotNull(transform: suspend FrpTransactionScope.(A) -> B?)
     }
 
 /** Returns a [TFlow] containing only values of the original [TFlow] that are not null. */
-@ExperimentalFrpApi fun <A> TFlow<A?>.filterNotNull(): TFlow<A> = mapNotNull { it }
+@ExperimentalFrpApi
+fun <A> TFlow<A?>.filterNotNull(): TFlow<A> = mapCheap { it.toMaybe() }.filterJust()
 
 /** Shorthand for `mapNotNull { it as? A }`. */
 @ExperimentalFrpApi
-inline fun <reified A> TFlow<*>.filterIsInstance(): TFlow<A> = mapNotNull { it as? A }
+inline fun <reified A> TFlow<*>.filterIsInstance(): TFlow<A> = mapCheap { it as? A }.filterNotNull()
 
 /** Shorthand for `mapMaybe { it }`. */
-@ExperimentalFrpApi fun <A> TFlow<Maybe<A>>.filterJust(): TFlow<A> = mapMaybe { it }
+@ExperimentalFrpApi
+fun <A> TFlow<Maybe<A>>.filterJust(): TFlow<A> =
+    TFlowInit(constInit(name = null, filterJustImpl { init.connect(evalScope = this) }))
 
 /**
  * Returns a [TFlow] containing the results of applying [transform] to each value of the original
@@ -203,8 +203,8 @@ fun <A> TFlow<A>.onEach(action: suspend FrpTransactionScope.(A) -> Unit): TFlow<
 @ExperimentalFrpApi
 fun <A> TFlow<A>.filter(predicate: suspend FrpTransactionScope.(A) -> Boolean): TFlow<A> {
     val pulse =
-        filterNode({ init.connect(evalScope = this) }) { runInTransactionScope { predicate(it) } }
-    return TFlowInit(constInit(name = null, pulse.cached()))
+        filterImpl({ init.connect(evalScope = this) }) { runInTransactionScope { predicate(it) } }
+    return TFlowInit(constInit(name = null, pulse))
 }
 
 /**
@@ -455,7 +455,9 @@ fun <A> TState<TFlow<A>>.switchPromptly(): TFlow<A> {
                 mapImpl({ patches }) { newFlow -> mapOf(Unit to just(newFlow.init.connect(this))) }
             },
         )
-    return TFlowInit(constInit(name = null, mapImpl({ switchNode }) { it.getValue(Unit) }))
+    return TFlowInit(
+        constInit(name = null, mapImpl({ switchNode }) { it.getValue(Unit).getPushEvent(this) })
+    )
 }
 
 /**

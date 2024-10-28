@@ -14,25 +14,17 @@
  * limitations under the License.
  */
 
-@file:Suppress("NOTHING_TO_INLINE")
-
 package com.android.systemui.kairos.internal
 
 import com.android.systemui.kairos.internal.util.hashString
-import com.android.systemui.kairos.util.Just
-import com.android.systemui.kairos.util.Maybe
-import com.android.systemui.kairos.util.flatMap
-import com.android.systemui.kairos.util.getMaybe
 import java.util.concurrent.ConcurrentHashMap
-import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
 internal class DemuxNode<K, A>(
-    private val branchNodeByKey: ConcurrentHashMap<K, DemuxBranchNode<K, A>>,
+    private val branchNodeByKey: ConcurrentHashMap<K, DemuxNode<K, A>.BranchNode>,
     val lifecycle: DemuxLifecycle<K, A>,
     private val spec: DemuxActivator<K, A>,
 ) : SchedulableNode {
@@ -44,25 +36,23 @@ internal class DemuxNode<K, A>(
 
     lateinit var upstreamConnection: NodeConnection<Map<K, A>>
 
-    fun getAndMaybeAddDownstream(key: K): DemuxBranchNode<K, A> =
-        branchNodeByKey.getOrPut(key) { DemuxBranchNode(key, this) }
+    @Volatile private var epoch: Long = Long.MIN_VALUE
 
-    override suspend fun schedule(evalScope: EvalScope) {
+    suspend fun hasCurrentValueLocked(evalScope: EvalScope, key: K): Boolean =
+        evalScope.epoch == epoch && upstreamConnection.getPushEvent(evalScope).contains(key)
+
+    suspend fun hasCurrentValue(evalScope: EvalScope, key: K): Boolean =
+        mutex.withLock { hasCurrentValueLocked(evalScope, key) }
+
+    fun getAndMaybeAddDownstream(key: K): BranchNode =
+        branchNodeByKey.getOrPut(key) { BranchNode(key) }
+
+    override suspend fun schedule(evalScope: EvalScope) = coroutineScope {
         val upstreamResult = upstreamConnection.getPushEvent(evalScope)
-        if (upstreamResult is Just) {
-            coroutineScope {
-                val outerScope = this
-                mutex.withLock {
-                    coroutineScope {
-                        for ((key, _) in upstreamResult.value) {
-                            launch {
-                                branchNodeByKey[key]?.let { branch ->
-                                    outerScope.launch { branch.schedule(evalScope) }
-                                }
-                            }
-                        }
-                    }
-                }
+        mutex.withLock {
+            updateEpoch(evalScope)
+            for ((key, _) in upstreamResult) {
+                branchNodeByKey[key]?.let { branch -> launch { branch.schedule(evalScope) } }
             }
         }
     }
@@ -194,58 +184,63 @@ internal class DemuxNode<K, A>(
             upstreamConnection.removeDownstreamAndDeactivateIfNeeded(downstream = schedulable)
         }
     }
-}
 
-internal class DemuxBranchNode<K, A>(val key: K, private val demuxNode: DemuxNode<K, A>) :
-    PushNode<A> {
-
-    private val mutex = Mutex()
-
-    val downstreamSet = DownstreamSet()
-
-    override val depthTracker: DepthTracker
-        get() = demuxNode.upstreamConnection.depthTracker
-
-    override suspend fun hasCurrentValue(transactionStore: TransactionStore): Boolean =
-        demuxNode.upstreamConnection.hasCurrentValue(transactionStore)
-
-    override suspend fun getPushEvent(evalScope: EvalScope): Maybe<A> =
-        demuxNode.upstreamConnection.getPushEvent(evalScope).flatMap { it.getMaybe(key) }
-
-    override suspend fun addDownstream(downstream: Schedulable) {
-        mutex.withLock { downstreamSet.add(downstream) }
+    fun updateEpoch(evalScope: EvalScope) {
+        epoch = evalScope.epoch
     }
 
-    override suspend fun removeDownstream(downstream: Schedulable) {
-        mutex.withLock { downstreamSet.remove(downstream) }
-    }
+    suspend fun getPushEvent(evalScope: EvalScope, key: K): A =
+        upstreamConnection.getPushEvent(evalScope).getValue(key)
 
-    override suspend fun removeDownstreamAndDeactivateIfNeeded(downstream: Schedulable) {
-        val canDeactivate =
-            mutex.withLock {
-                downstreamSet.remove(downstream)
-                downstreamSet.isEmpty()
+    inner class BranchNode(val key: K) : PushNode<A> {
+
+        private val mutex = Mutex()
+
+        val downstreamSet = DownstreamSet()
+
+        override val depthTracker: DepthTracker
+            get() = upstreamConnection.depthTracker
+
+        override suspend fun hasCurrentValue(evalScope: EvalScope): Boolean =
+            hasCurrentValue(evalScope, key)
+
+        override suspend fun getPushEvent(evalScope: EvalScope): A = getPushEvent(evalScope, key)
+
+        override suspend fun addDownstream(downstream: Schedulable) {
+            mutex.withLock { downstreamSet.add(downstream) }
+        }
+
+        override suspend fun removeDownstream(downstream: Schedulable) {
+            mutex.withLock { downstreamSet.remove(downstream) }
+        }
+
+        override suspend fun removeDownstreamAndDeactivateIfNeeded(downstream: Schedulable) {
+            val canDeactivate =
+                mutex.withLock {
+                    downstreamSet.remove(downstream)
+                    downstreamSet.isEmpty()
+                }
+            if (canDeactivate) {
+                removeDownstreamAndDeactivateIfNeeded(key)
             }
-        if (canDeactivate) {
-            demuxNode.removeDownstreamAndDeactivateIfNeeded(key)
         }
-    }
 
-    override suspend fun deactivateIfNeeded() {
-        if (mutex.withLock { downstreamSet.isEmpty() }) {
-            demuxNode.removeDownstreamAndDeactivateIfNeeded(key)
+        override suspend fun deactivateIfNeeded() {
+            if (mutex.withLock { downstreamSet.isEmpty() }) {
+                removeDownstreamAndDeactivateIfNeeded(key)
+            }
         }
-    }
 
-    override suspend fun scheduleDeactivationIfNeeded(evalScope: EvalScope) {
-        if (mutex.withLock { downstreamSet.isEmpty() }) {
-            evalScope.scheduleDeactivation(this)
+        override suspend fun scheduleDeactivationIfNeeded(evalScope: EvalScope) {
+            if (mutex.withLock { downstreamSet.isEmpty() }) {
+                evalScope.scheduleDeactivation(this)
+            }
         }
-    }
 
-    suspend fun schedule(evalScope: EvalScope) {
-        if (!coroutineScope { mutex.withLock { scheduleAll(downstreamSet, evalScope) } }) {
-            evalScope.scheduleDeactivation(this)
+        suspend fun schedule(evalScope: EvalScope) {
+            if (!coroutineScope { mutex.withLock { scheduleAll(downstreamSet, evalScope) } }) {
+                evalScope.scheduleDeactivation(this)
+            }
         }
     }
 }
@@ -254,30 +249,39 @@ internal fun <K, A> DemuxImpl(
     upstream: suspend EvalScope.() -> TFlowImpl<Map<K, A>>,
     numKeys: Int?,
 ): DemuxImpl<K, A> =
-    DemuxImpl(
-        DemuxLifecycle(
-            object : DemuxActivator<K, A> {
-                override suspend fun activate(
-                    evalScope: EvalScope,
-                    lifecycle: DemuxLifecycle<K, A>,
-                ): Pair<DemuxNode<K, A>, Boolean>? {
-                    val dmux = DemuxNode(ConcurrentHashMap(numKeys ?: 16), lifecycle, this)
-                    return upstream
-                        .invoke(evalScope)
-                        .activate(evalScope, downstream = dmux.schedulable)
-                        ?.let { (conn, needsEval) ->
-                            dmux.apply { upstreamConnection = conn } to needsEval
-                        }
-                }
+    DemuxImpl(DemuxLifecycle(DemuxLifecycleState.Inactive(DemuxActivator(numKeys, upstream))))
+
+internal class DemuxActivator<K, A>(
+    private val numKeys: Int?,
+    private val upstream: suspend EvalScope.() -> TFlowImpl<Map<K, A>>,
+) {
+    suspend fun activate(
+        evalScope: EvalScope,
+        lifecycle: DemuxLifecycle<K, A>,
+    ): Pair<DemuxNode<K, A>, Set<K>>? {
+        val demux = DemuxNode(ConcurrentHashMap(numKeys ?: 16), lifecycle, this)
+        return upstream
+            .invoke(evalScope)
+            .activate(evalScope, downstream = demux.schedulable)
+            ?.let { (conn, needsEval) ->
+                Pair(
+                    demux.apply { upstreamConnection = conn },
+                    if (needsEval) {
+                        demux.updateEpoch(evalScope)
+                        conn.getPushEvent(evalScope).keys
+                    } else {
+                        emptySet()
+                    },
+                )
             }
-        )
-    )
+    }
+}
 
 internal class DemuxImpl<in K, out A>(private val dmux: DemuxLifecycle<K, A>) {
     fun eventsForKey(key: K): TFlowImpl<A> = TFlowCheap { downstream ->
         dmux.activate(evalScope = this, key)?.let { (branchNode, needsEval) ->
             branchNode.addDownstream(downstream)
-            val branchNeedsEval = needsEval && branchNode.getPushEvent(evalScope = this) is Just
+            val branchNeedsEval = needsEval && branchNode.hasCurrentValue(evalScope = this)
             ActivationResult(
                 connection = NodeConnection(branchNode, branchNode),
                 needsEval = branchNeedsEval,
@@ -291,38 +295,29 @@ internal class DemuxLifecycle<K, A>(@Volatile var lifecycleState: DemuxLifecycle
 
     override fun toString(): String = "TFlowDmuxState[$hashString][$lifecycleState][$mutex]"
 
-    suspend fun activate(evalScope: EvalScope, key: K): Pair<DemuxBranchNode<K, A>, Boolean>? =
-        coroutineScope {
-            mutex
-                .withLock {
-                    when (val state = lifecycleState) {
-                        is DemuxLifecycleState.Dead -> null
-                        is DemuxLifecycleState.Active ->
-                            state.node.getAndMaybeAddDownstream(key) to
-                                async {
-                                    state.node.upstreamConnection.hasCurrentValue(
-                                        evalScope.transactionStore
-                                    )
-                                }
-                        is DemuxLifecycleState.Inactive -> {
-                            state.spec
-                                .activate(evalScope, this@DemuxLifecycle)
-                                .also { result ->
-                                    lifecycleState =
-                                        if (result == null) {
-                                            DemuxLifecycleState.Dead
-                                        } else {
-                                            DemuxLifecycleState.Active(result.first)
-                                        }
-                                }
-                                ?.let { (node, needsEval) ->
-                                    node.getAndMaybeAddDownstream(key) to
-                                        CompletableDeferred(needsEval)
+    suspend fun activate(evalScope: EvalScope, key: K): Pair<DemuxNode<K, A>.BranchNode, Boolean>? =
+        mutex.withLock {
+            when (val state = lifecycleState) {
+                is DemuxLifecycleState.Dead -> null
+                is DemuxLifecycleState.Active ->
+                    state.node.getAndMaybeAddDownstream(key) to
+                        state.node.hasCurrentValueLocked(evalScope, key)
+                is DemuxLifecycleState.Inactive -> {
+                    state.spec
+                        .activate(evalScope, this@DemuxLifecycle)
+                        .also { result ->
+                            lifecycleState =
+                                if (result == null) {
+                                    DemuxLifecycleState.Dead
+                                } else {
+                                    DemuxLifecycleState.Active(result.first)
                                 }
                         }
-                    }
+                        ?.let { (node, needsEval) ->
+                            node.getAndMaybeAddDownstream(key) to (key in needsEval)
+                        }
                 }
-                ?.let { (branch, result) -> branch to result.await() }
+            }
         }
 }
 
@@ -337,13 +332,3 @@ internal sealed interface DemuxLifecycleState<out K, out A> {
 
     data object Dead : DemuxLifecycleState<Nothing, Nothing>
 }
-
-internal interface DemuxActivator<K, A> {
-    suspend fun activate(
-        evalScope: EvalScope,
-        lifecycle: DemuxLifecycle<K, A>,
-    ): Pair<DemuxNode<K, A>, Boolean>?
-}
-
-internal inline fun <K, A> DemuxLifecycle(onSubscribe: DemuxActivator<K, A>) =
-    DemuxLifecycle(DemuxLifecycleState.Inactive(onSubscribe))

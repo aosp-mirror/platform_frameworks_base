@@ -16,7 +16,6 @@
 
 package com.android.systemui.kairos.internal
 
-import com.android.systemui.kairos.util.Just
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
@@ -37,7 +36,7 @@ internal class Output<A>(
     suspend fun visit(evalScope: EvalScope) {
         val upstreamResult = result
         check(upstreamResult !== NoResult) { "output visited with null upstream result" }
-        result = null
+        result = NoResult
         @Suppress("UNCHECKED_CAST") evalScope.onEmit(upstreamResult as A)
     }
 
@@ -46,12 +45,9 @@ internal class Output<A>(
     }
 
     suspend fun schedule(evalScope: EvalScope) {
-        val upstreamResult =
+        result =
             checkNotNull(upstream) { "output scheduled with null upstream" }.getPushEvent(evalScope)
-        if (upstreamResult is Just) {
-            result = upstreamResult.value
-            evalScope.scheduleOutput(this)
-        }
+        evalScope.scheduleOutput(this)
     }
 }
 
