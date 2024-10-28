@@ -187,10 +187,10 @@ final class InputMethodMenuControllerNew {
 
     void dump(@NonNull Printer pw, @NonNull String prefix) {
         final boolean showing = isShowing();
-        pw.println(prefix + "  isShowing: " + showing);
+        pw.println(prefix + "isShowing: " + showing);
 
         if (showing) {
-            pw.println(prefix + "  menuItems: " + mMenuItems);
+            pw.println(prefix + "menuItems: " + mMenuItems);
         }
     }
 
