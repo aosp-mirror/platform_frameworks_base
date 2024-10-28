@@ -107,10 +107,29 @@ public class FooterView extends StackScrollerDecorView {
         setClearAllButtonVisible(visible, animate, /* onAnimationEnded = */ null);
     }
 
-    /** Set the visibility of the "Manage"/"History" button to {@code visible}. */
+    /**
+     * Set the visibility of the "Manage"/"History" button to {@code visible}. This is replaced by
+     * two separate buttons in the redesign.
+     */
     public void setManageOrHistoryButtonVisible(boolean visible) {
         NotifRedesignFooter.assertInLegacyMode();
         mManageOrHistoryButton.setVisibility(visible ? View.VISIBLE : View.GONE);
+    }
+
+    /** Set the visibility of the Settings button to {@code visible}. */
+    public void setSettingsButtonVisible(boolean visible) {
+        if (NotifRedesignFooter.isUnexpectedlyInLegacyMode()) {
+            return;
+        }
+        mSettingsButton.setVisibility(visible ? View.VISIBLE : View.GONE);
+    }
+
+    /** Set the visibility of the History button to {@code visible}. */
+    public void setHistoryButtonVisible(boolean visible) {
+        if (NotifRedesignFooter.isUnexpectedlyInLegacyMode()) {
+            return;
+        }
+        mHistoryButton.setVisibility(visible ? View.VISIBLE : View.GONE);
     }
 
     /**
