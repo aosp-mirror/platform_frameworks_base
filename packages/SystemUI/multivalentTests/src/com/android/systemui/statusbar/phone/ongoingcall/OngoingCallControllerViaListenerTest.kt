@@ -36,7 +36,6 @@ import com.android.systemui.Flags.FLAG_STATUS_BAR_USE_REPOS_FOR_CALL_CHIP
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.testScope
 import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.res.R
@@ -58,7 +57,6 @@ import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
-import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -144,6 +142,7 @@ class OngoingCallControllerViaListenerTest : SysuiTestCase() {
         controller.start()
         controller.addCallback(mockOngoingCallListener)
         controller.setChipView(chipView)
+        onTeardown { controller.tearDownChipView() }
 
         val collectionListenerCaptor = ArgumentCaptor.forClass(NotifCollectionListener::class.java)
         verify(notificationCollection).addCollectionListener(collectionListenerCaptor.capture())
@@ -151,11 +150,6 @@ class OngoingCallControllerViaListenerTest : SysuiTestCase() {
 
         `when`(mockIActivityManager.getUidProcessState(eq(CALL_UID), nullable(String::class.java)))
             .thenReturn(PROC_STATE_INVISIBLE)
-    }
-
-    @After
-    fun tearDown() {
-        controller.tearDownChipView()
     }
 
     @Test
@@ -224,7 +218,7 @@ class OngoingCallControllerViaListenerTest : SysuiTestCase() {
         notifCollectionListener.onEntryUpdated(notification.build())
         chipView.measure(
             View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
-            View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
+            View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
         )
 
         assertThat(chipView.findViewById<View>(R.id.ongoing_activity_chip_time)?.measuredWidth)
@@ -241,7 +235,7 @@ class OngoingCallControllerViaListenerTest : SysuiTestCase() {
         notifCollectionListener.onEntryUpdated(notification.build())
         chipView.measure(
             View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
-            View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
+            View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
         )
 
         assertThat(chipView.findViewById<View>(R.id.ongoing_activity_chip_time)?.measuredWidth)
@@ -257,7 +251,7 @@ class OngoingCallControllerViaListenerTest : SysuiTestCase() {
         notifCollectionListener.onEntryUpdated(notification.build())
         chipView.measure(
             View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
-            View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
+            View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
         )
 
         assertThat(chipView.findViewById<View>(R.id.ongoing_activity_chip_time)?.measuredWidth)
@@ -668,7 +662,7 @@ class OngoingCallControllerViaListenerTest : SysuiTestCase() {
 
     private fun createCallNotifEntry(
         callStyle: Notification.CallStyle,
-        nullContentIntent: Boolean = false
+        nullContentIntent: Boolean = false,
     ): NotificationEntry {
         val notificationEntryBuilder = NotificationEntryBuilder()
         notificationEntryBuilder.modifyNotification(context).style = callStyle
