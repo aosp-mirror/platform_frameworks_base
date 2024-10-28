@@ -8,12 +8,3 @@ flag {
      description: "Controls whether to report memory metrics post GC cleanup"
      bug: "331243037"
 }
-
-flag {
-     namespace: "system_performance"
-     name: "report_postgc_memory_metrics_readonly"
-     is_exported: false
-     description: "Controls whether to report memory metrics post GC cleanup (readonly)"
-     bug: "331243037"
-     is_fixed_read_only: true
-}
