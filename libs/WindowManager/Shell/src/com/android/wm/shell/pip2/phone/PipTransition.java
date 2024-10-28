@@ -30,9 +30,6 @@ import static com.android.wm.shell.transition.Transitions.TRANSIT_EXIT_PIP;
 import static com.android.wm.shell.transition.Transitions.TRANSIT_REMOVE_PIP;
 import static com.android.wm.shell.transition.Transitions.TRANSIT_RESIZE_PIP;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.animation.ValueAnimator;
 import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.PictureInPictureParams;
@@ -362,31 +359,17 @@ public class PipTransition extends PipTransitionController implements
         animator.setEnterStartState(pipChange, pipActivityChange);
         animator.onEnterAnimationUpdate(1.0f /* fraction */, startTransaction);
         startTransaction.apply();
+
+        if (swipePipToHomeOverlay != null) {
+            // fadeout the overlay if needed.
+            startOverlayFadeoutAnimation(swipePipToHomeOverlay, () -> {
+                SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
+                tx.remove(swipePipToHomeOverlay);
+                tx.apply();
+            });
+        }
         finishInner();
         return true;
-    }
-
-    private void startOverlayFadeoutAnimation() {
-        ValueAnimator animator = ValueAnimator.ofFloat(1f, 0f);
-        animator.setDuration(CONTENT_OVERLAY_FADE_OUT_DELAY_MS);
-        animator.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                super.onAnimationEnd(animation);
-                SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
-                tx.remove(mPipTransitionState.getSwipePipToHomeOverlay());
-                tx.apply();
-
-                // We have fully completed enter-PiP animation after the overlay is gone.
-                mPipTransitionState.setState(PipTransitionState.ENTERED_PIP);
-            }
-        });
-        animator.addUpdateListener(animation -> {
-            float alpha = (float) animation.getAnimatedValue();
-            SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
-            tx.setAlpha(mPipTransitionState.getSwipePipToHomeOverlay(), alpha).apply();
-        });
-        animator.start();
     }
 
     private boolean startBoundsTypeEnterAnimation(@NonNull TransitionInfo info,
@@ -405,15 +388,18 @@ public class PipTransition extends PipTransitionController implements
             return false;
         }
 
-        Rect endBounds = pipChange.getEndAbsBounds();
-        SurfaceControl pipLeash = mPipTransitionState.mPinnedTaskLeash;
-        Preconditions.checkNotNull(pipLeash, "Leash is null for bounds transition.");
+        final Rect startBounds = pipChange.getStartAbsBounds();
+        final Rect endBounds = pipChange.getEndAbsBounds();
 
-        Rect sourceRectHint = null;
-        if (pipChange.getTaskInfo() != null
-                && pipChange.getTaskInfo().pictureInPictureParams != null) {
-            sourceRectHint = pipChange.getTaskInfo().pictureInPictureParams.getSourceRectHint();
-        }
+        final PictureInPictureParams params = pipChange.getTaskInfo().pictureInPictureParams;
+        final float aspectRatio = mPipBoundsAlgorithm.getAspectRatioOrDefault(params);
+
+        final Rect sourceRectHint = PipBoundsAlgorithm.getValidSourceHintRect(params, startBounds,
+                endBounds);
+
+        final SurfaceControl pipLeash = mPipTransitionState.mPinnedTaskLeash;
+        final Rect adjustedSourceRectHint = sourceRectHint != null ? new Rect(sourceRectHint)
+                : PipUtils.getEnterPipWithOverlaySrcRectHint(startBounds, aspectRatio);
 
         // For opening type transitions, if there is a change of mode TO_FRONT/OPEN,
         // make sure that change has alpha of 1f, since it's init state might be set to alpha=0f
@@ -441,12 +427,34 @@ public class PipTransition extends PipTransitionController implements
         }
 
         PipEnterAnimator animator = new PipEnterAnimator(mContext, pipLeash,
-                startTransaction, finishTransaction, endBounds, sourceRectHint, delta);
+                startTransaction, finishTransaction, endBounds, adjustedSourceRectHint, delta);
+        if (sourceRectHint == null) {
+            // update the src-rect-hint in params in place, to set up initial animator transform.
+            params.getSourceRectHint().set(adjustedSourceRectHint);
+            animator.setAppIconContentOverlay(
+                    mContext, startBounds, endBounds, pipChange.getTaskInfo().topActivityInfo,
+                    mPipBoundsState.getLauncherState().getAppIconSizePx());
+        }
         animator.setAnimationStartCallback(() -> animator.setEnterStartState(pipChange,
                 pipActivityChange));
-        animator.setAnimationEndCallback(this::finishInner);
+        animator.setAnimationEndCallback(() -> {
+            if (animator.getContentOverlayLeash() != null) {
+                startOverlayFadeoutAnimation(animator.getContentOverlayLeash(),
+                        animator::clearAppIconOverlay);
+            }
+            finishInner();
+        });
         animator.start();
         return true;
+    }
+
+    private void startOverlayFadeoutAnimation(@NonNull SurfaceControl overlayLeash,
+            @NonNull Runnable onAnimationEnd) {
+        PipAlphaAnimator animator = new PipAlphaAnimator(mContext, overlayLeash,
+                null /* startTx */, PipAlphaAnimator.FADE_OUT);
+        animator.setDuration(CONTENT_OVERLAY_FADE_OUT_DELAY_MS);
+        animator.setAnimationEndCallback(onAnimationEnd);
+        animator.start();
     }
 
     private void handleBoundsTypeFixedRotation(TransitionInfo.Change pipTaskChange,
@@ -696,9 +704,7 @@ public class PipTransition extends PipTransitionController implements
 
     private void finishInner() {
         finishTransition(null /* tx */);
-        if (mPipTransitionState.getSwipePipToHomeOverlay() != null) {
-            startOverlayFadeoutAnimation();
-        } else if (mPipTransitionState.getState() == PipTransitionState.ENTERING_PIP) {
+        if (mPipTransitionState.getState() == PipTransitionState.ENTERING_PIP) {
             // If we were entering PiP (i.e. playing the animation) with a valid srcRectHint,
             // and then we get a signal on client finishing its draw after the transition
             // has ended, then we have fully entered PiP.

@@ -29,6 +29,8 @@ android_app {
     static_libs: [
         "WindowManager-Shell",
         "platform-screenshot-diff-core",
+        "ScreenshotComposeUtilsLib", // ComposableScreenshotTestRule & Theme.PlatformUi.Screenshot
+        "SystemUI-res", // Theme.SystemUI (dragged in by ScreenshotComposeUtilsLib)
     ],
     asset_dirs: ["goldens/robolectric"],
     manifest: "AndroidManifestRobolectric.xml",
@@ -63,6 +65,8 @@ android_test {
     ],
     static_libs: [
         "WindowManager-Shell",
+        "ScreenshotComposeUtilsLib", // ComposableScreenshotTestRule & Theme.PlatformUi.Screenshot
+        "SystemUI-res", // Theme.SystemUI (dragged in by ScreenshotComposeUtilsLib)
         "junit",
         "androidx.test.runner",
         "androidx.test.rules",

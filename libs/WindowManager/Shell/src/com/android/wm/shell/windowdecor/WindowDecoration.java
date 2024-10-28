@@ -131,12 +131,15 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
                 }
             };
 
-    RunningTaskInfo mTaskInfo;
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    public RunningTaskInfo mTaskInfo;
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    public Context mDecorWindowContext;
     int mLayoutResId;
-    final SurfaceControl mTaskSurface;
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    public final SurfaceControl mTaskSurface;
 
     Display mDisplay;
-    Context mDecorWindowContext;
     SurfaceControl mDecorationContainerSurface;
 
     SurfaceControl mCaptionContainerSurface;
@@ -197,6 +200,14 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         final InsetsState insetsState = mDisplayController.getInsetsState(mTaskInfo.displayId);
         mIsStatusBarVisible = insetsState != null
                 && InsetsStateKt.isVisible(insetsState, statusBars());
+    }
+
+    /**
+     * Gets the decoration's task leash.
+     * @return the decoration' task surface used to manipulate the task.
+     */
+    public SurfaceControl getLeash() {
+        return mTaskSurface;
     }
 
     /**

@@ -456,6 +456,10 @@ public class PipController implements ConfigurationChangeListener,
         }
     }
 
+    private void setLauncherAppIconSize(int iconSizePx) {
+        mPipBoundsState.getLauncherState().setAppIconSizePx(iconSizePx);
+    }
+
     /**
      * The interface for calls from outside the Shell, within the host process.
      */
@@ -571,7 +575,10 @@ public class PipController implements ConfigurationChangeListener,
         }
 
         @Override
-        public void setLauncherAppIconSize(int iconSizePx) {}
+        public void setLauncherAppIconSize(int iconSizePx) {
+            executeRemoteCallWithTaskPermission(mController, "setLauncherAppIconSize",
+                    (controller) -> controller.setLauncherAppIconSize(iconSizePx));
+        }
 
         @Override
         public void setPipAnimationListener(IPipAnimationListener listener) {
