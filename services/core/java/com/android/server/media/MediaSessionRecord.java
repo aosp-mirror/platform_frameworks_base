@@ -241,44 +241,40 @@ public class MediaSessionRecord extends MediaSessionRecordImpl implements IBinde
     @GuardedBy("mLock")
     private @UserEngagementState int mUserEngagementState = USER_DISENGAGED;
 
-    @IntDef({USER_PERMANENTLY_ENGAGED, USER_TEMPORARY_ENGAGED, USER_DISENGAGED})
+    @IntDef({USER_PERMANENTLY_ENGAGED, USER_TEMPORARILY_ENGAGED, USER_DISENGAGED})
     @Retention(RetentionPolicy.SOURCE)
     private @interface UserEngagementState {}
 
     /**
-     * Indicates that the session is active and in one of the user engaged states.
+     * Indicates that the session is {@linkplain MediaSession#isActive() active} and in one of the
+     * {@linkplain PlaybackState#isActive() active states}.
      *
      * @see #updateUserEngagedStateIfNeededLocked(boolean)
      */
     private static final int USER_PERMANENTLY_ENGAGED = 0;
 
     /**
-     * Indicates that the session is active and in {@link PlaybackState#STATE_PAUSED} state.
+     * Indicates that the session is {@linkplain MediaSession#isActive() active} and has recently
+     * switched to one of the {@linkplain PlaybackState#isActive() inactive states}.
      *
      * @see #updateUserEngagedStateIfNeededLocked(boolean)
      */
-    private static final int USER_TEMPORARY_ENGAGED = 1;
+    private static final int USER_TEMPORARILY_ENGAGED = 1;
 
     /**
-     * Indicates that the session is either not active or in one of the user disengaged states
+     * Indicates that the session is either not {@linkplain MediaSession#isActive() active} or in
+     * one of the {@linkplain PlaybackState#isActive() inactive states}.
      *
      * @see #updateUserEngagedStateIfNeededLocked(boolean)
      */
     private static final int USER_DISENGAGED = 2;
 
     /**
-     * Indicates the duration of the temporary engaged states, in milliseconds.
+     * Indicates the duration of the temporary engaged state, in milliseconds.
      *
-     * <p>Some {@link MediaSession} states like {@link PlaybackState#STATE_PAUSED} are temporarily
-     * engaged, meaning the corresponding session is only considered in an engaged state for the
-     * duration of this timeout, and only if coming from an engaged state.
-     *
-     * <p>For example, if a session is transitioning from a user-engaged state {@link
-     * PlaybackState#STATE_PLAYING} to a temporary user-engaged state {@link
-     * PlaybackState#STATE_PAUSED}, then the session will be considered in a user-engaged state for
-     * the duration of this timeout, starting at the transition instant. However, a temporary
-     * user-engaged state is not considered user-engaged when transitioning from a non-user engaged
-     * state {@link PlaybackState#STATE_STOPPED}.
+     * <p>When switching to an {@linkplain PlaybackState#isActive() inactive state}, the user is
+     * treated as temporarily engaged, meaning the corresponding session is only considered in an
+     * engaged state for the duration of this timeout, and only if coming from an engaged state.
      */
     private static final int TEMP_USER_ENGAGED_TIMEOUT_MS = 600000;
 
@@ -1117,15 +1113,13 @@ public class MediaSessionRecord extends MediaSessionRecordImpl implements IBinde
         }
         int oldUserEngagedState = mUserEngagementState;
         int newUserEngagedState;
-        if (!isActive() || mPlaybackState == null || mDestroyed) {
+        if (!isActive() || mPlaybackState == null) {
             newUserEngagedState = USER_DISENGAGED;
-        } else if (isActive() && mPlaybackState.isActive()) {
+        } else if (mPlaybackState.isActive()) {
             newUserEngagedState = USER_PERMANENTLY_ENGAGED;
-        } else if (mPlaybackState.getState() == PlaybackState.STATE_PAUSED) {
-            newUserEngagedState =
-                    oldUserEngagedState == USER_PERMANENTLY_ENGAGED || !isTimeoutExpired
-                            ? USER_TEMPORARY_ENGAGED
-                            : USER_DISENGAGED;
+        } else if (oldUserEngagedState == USER_PERMANENTLY_ENGAGED
+                || (oldUserEngagedState == USER_TEMPORARILY_ENGAGED && !isTimeoutExpired)) {
+            newUserEngagedState = USER_TEMPORARILY_ENGAGED;
         } else {
             newUserEngagedState = USER_DISENGAGED;
         }
@@ -1134,7 +1128,7 @@ public class MediaSessionRecord extends MediaSessionRecordImpl implements IBinde
         }
 
         mUserEngagementState = newUserEngagedState;
-        if (newUserEngagedState == USER_TEMPORARY_ENGAGED) {
+        if (newUserEngagedState == USER_TEMPORARILY_ENGAGED) {
             mHandler.postDelayed(
                     mUserEngagementTimeoutExpirationRunnable, TEMP_USER_ENGAGED_TIMEOUT_MS);
         } else {
