@@ -294,6 +294,9 @@ class DesktopRepository (
                 taskId, isVisible, displayId)
             logD("VisibleTaskCount has changed from %d to %d", prevCount, newCount)
             notifyVisibleTaskListeners(displayId, newCount)
+            if (Flags.enableDesktopWindowingPersistence()) {
+                updatePersistentRepository(displayId)
+            }
         }
     }
 
