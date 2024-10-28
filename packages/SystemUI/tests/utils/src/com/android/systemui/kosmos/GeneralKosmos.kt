@@ -8,9 +8,26 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 
 var Kosmos.testDispatcher by Fixture { StandardTestDispatcher() }
-var Kosmos.unconfinedTestDispatcher by Fixture { UnconfinedTestDispatcher() }
+
+/**
+ * Force this Kosmos to use a [StandardTestDispatcher], regardless of the current Kosmos default. In
+ * short, no launch blocks will be run on this dispatcher until `TestCoroutineScheduler.runCurrent`
+ * is called. See [StandardTestDispatcher] for details.
+ *
+ * For details on this migration, see http://go/thetiger
+ */
+fun Kosmos.useStandardTestDispatcher() = apply { testDispatcher = StandardTestDispatcher() }
+
+/**
+ * Force this Kosmos to use an [UnconfinedTestDispatcher], regardless of the current Kosmos default.
+ * In short, launch blocks will be executed eagerly without waiting for
+ * `TestCoroutineScheduler.runCurrent`. See [UnconfinedTestDispatcher] for details.
+ *
+ * For details on this migration, see http://go/thetiger
+ */
+fun Kosmos.useUnconfinedTestDispatcher() = apply { testDispatcher = UnconfinedTestDispatcher() }
+
 var Kosmos.testScope by Fixture { TestScope(testDispatcher) }
-var Kosmos.unconfinedTestScope by Fixture { TestScope(unconfinedTestDispatcher) }
 var Kosmos.applicationCoroutineScope by Fixture { testScope.backgroundScope }
 var Kosmos.testCase: SysuiTestCase by Fixture()
 var Kosmos.backgroundCoroutineContext: CoroutineContext by Fixture {
