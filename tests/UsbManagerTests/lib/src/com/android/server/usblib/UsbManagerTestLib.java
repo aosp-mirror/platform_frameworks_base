@@ -18,19 +18,27 @@ package com.android.server.usblib;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
+import android.hardware.usb.UsbAccessory;
 import android.hardware.usb.UsbManager;
+import android.hardware.usb.flags.Flags;
 import android.os.Binder;
+import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.util.Log;
 
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.io.FileDescriptor;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -43,12 +51,35 @@ public class UsbManagerTestLib {
 
     private UsbManager mUsbManagerSys;
     private UsbManager mUsbManagerMock;
-    @Mock private android.hardware.usb.IUsbManager mMockUsbService;
+    @Mock
+    private android.hardware.usb.IUsbManager mMockUsbService;
+    private TestParcelFileDescriptor mTestParcelFileDescriptor = new TestParcelFileDescriptor(
+            new ParcelFileDescriptor(new FileDescriptor()));
+    @Mock
+    private UsbAccessory mMockUsbAccessory;
 
     /**
      * Counter for tracking UsbOperation operations.
      */
     private static final AtomicInteger sUsbOperationCount = new AtomicInteger();
+
+    private class TestParcelFileDescriptor extends ParcelFileDescriptor {
+
+        private final AtomicInteger mCloseCount = new AtomicInteger();
+
+        TestParcelFileDescriptor(ParcelFileDescriptor wrapped) {
+            super(wrapped);
+        }
+
+        @Override
+        public void close() {
+            int unused = mCloseCount.incrementAndGet();
+        }
+
+        public void clearCloseCount() {
+            mCloseCount.set(0);
+        }
+    }
 
     public UsbManagerTestLib(Context context) {
         MockitoAnnotations.initMocks(this);
@@ -74,6 +105,34 @@ public class UsbManagerTestLib {
         mUsbManagerSys.setCurrentFunctions(functions);
     }
 
+    private InputStream openAccessoryInputStream(UsbAccessory accessory) {
+        try {
+            when(mMockUsbService.openAccessory(accessory)).thenReturn(mTestParcelFileDescriptor);
+        } catch (RemoteException remEx) {
+            Log.w(TAG, "RemoteException");
+        }
+
+        if (Flags.enableAccessoryStreamApi()) {
+            return mUsbManagerMock.openAccessoryInputStream(accessory);
+        }
+
+        throw new UnsupportedOperationException("Stream APIs not available");
+    }
+
+    private OutputStream openAccessoryOutputStream(UsbAccessory accessory) {
+        try {
+            when(mMockUsbService.openAccessory(accessory)).thenReturn(mTestParcelFileDescriptor);
+        } catch (RemoteException remEx) {
+            Log.w(TAG, "RemoteException");
+        }
+
+        if (Flags.enableAccessoryStreamApi()) {
+            return mUsbManagerMock.openAccessoryOutputStream(accessory);
+        }
+
+        throw new UnsupportedOperationException("Stream APIs not available");
+    }
+
     private void testSetGetCurrentFunctions_Matched(long functions) {
         setCurrentFunctions(functions);
         assertEquals("CurrentFunctions mismatched: ", functions, getCurrentFunctions());
@@ -94,7 +153,7 @@ public class UsbManagerTestLib {
         try {
             setCurrentFunctions(functions);
 
-            verify(mMockUsbService).setCurrentFunctions(eq(functions), operationId);
+            verify(mMockUsbService).setCurrentFunctions(eq(functions), eq(operationId));
         } catch (RemoteException remEx) {
             Log.w(TAG, "RemoteException");
         }
@@ -118,7 +177,7 @@ public class UsbManagerTestLib {
         int operationId = sUsbOperationCount.incrementAndGet() + Binder.getCallingUid();
         setCurrentFunctions(functions);
 
-        verify(mMockUsbService).setCurrentFunctions(eq(functions), operationId);
+        verify(mMockUsbService).setCurrentFunctions(eq(functions), eq(operationId));
     }
 
     public void testGetCurrentFunctions_shouldMatched() {
@@ -138,4 +197,47 @@ public class UsbManagerTestLib {
         testSetCurrentFunctionsMock_Matched(UsbManager.FUNCTION_RNDIS);
         testSetCurrentFunctionsMock_Matched(UsbManager.FUNCTION_NCM);
     }
+
+    public void testParcelFileDescriptorClosedWhenAllOpenStreamsAreClosed() {
+        mTestParcelFileDescriptor.clearCloseCount();
+        try {
+            try (InputStream ignored = openAccessoryInputStream(mMockUsbAccessory)) {
+                //noinspection EmptyTryBlock
+                try (OutputStream ignored2 = openAccessoryOutputStream(mMockUsbAccessory)) {
+                    // do nothing
+                }
+            }
+
+            // ParcelFileDescriptor is closed only once.
+            assertEquals(mTestParcelFileDescriptor.mCloseCount.get(), 1);
+            mTestParcelFileDescriptor.clearCloseCount();
+        } catch (IOException e) {
+            // do nothing
+        }
+    }
+
+    public void testOnlyOneOpenInputStreamAllowed() {
+        try {
+            //noinspection EmptyTryBlock
+            try (InputStream ignored = openAccessoryInputStream(mMockUsbAccessory)) {
+                assertThrows(IllegalStateException.class,
+                        () -> openAccessoryInputStream(mMockUsbAccessory));
+            }
+        } catch (IOException e) {
+            // do nothing
+        }
+    }
+
+    public void testOnlyOneOpenOutputStreamAllowed() {
+        try {
+            //noinspection EmptyTryBlock
+            try (OutputStream ignored = openAccessoryOutputStream(mMockUsbAccessory)) {
+                assertThrows(IllegalStateException.class,
+                        () -> openAccessoryOutputStream(mMockUsbAccessory));
+            }
+        } catch (IOException e) {
+            // do nothing
+        }
+    }
+
 }
