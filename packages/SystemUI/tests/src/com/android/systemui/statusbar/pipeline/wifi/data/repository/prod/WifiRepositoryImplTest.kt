@@ -16,13 +16,19 @@
 
 package com.android.systemui.statusbar.pipeline.wifi.data.repository.prod
 
+import android.content.Context
+import android.content.pm.UserInfo
 import android.net.wifi.ScanResult
 import android.net.wifi.WifiManager
 import android.net.wifi.WifiManager.UNKNOWN_SSID
 import android.net.wifi.sharedconnectivity.app.NetworkProviderInfo
+import android.os.UserHandle
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
 import android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID
 import android.testing.TestableLooper
 import androidx.test.filters.SmallTest
+import com.android.systemui.Flags.FLAG_MULTIUSER_WIFI_PICKER_TRACKER_SUPPORT
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.log.LogBuffer
@@ -33,12 +39,10 @@ import com.android.systemui.statusbar.pipeline.wifi.data.repository.prod.WifiRep
 import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel
 import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiScanEntry
 import com.android.systemui.testKosmos
+import com.android.systemui.user.data.repository.fakeUserRepository
+import com.android.systemui.user.data.repository.userRepository
 import com.android.systemui.util.concurrency.FakeExecutor
-import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
-import com.android.systemui.util.mockito.capture
-import com.android.systemui.util.mockito.mock
-import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.fakeSystemClock
 import com.android.wifitrackerlib.HotspotNetworkEntry
 import com.android.wifitrackerlib.HotspotNetworkEntry.DeviceType
@@ -56,7 +60,12 @@ import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
-import org.mockito.Mockito.verify
+import org.mockito.kotlin.any
+import org.mockito.kotlin.capture
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.times
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 
 /**
  * Note: Most of these tests are duplicates of [WifiRepositoryImplTest] tests.
@@ -67,8 +76,9 @@ import org.mockito.Mockito.verify
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
-class WifiRepositoryImplTest : SysuiTestCase() {
+class WifiRepositoryImplTest() : SysuiTestCase() {
     private val kosmos = testKosmos()
+    private val userRepository = kosmos.fakeUserRepository
 
     // Using lazy means that the class will only be constructed once it's fetched. Because the
     // repository internally sets some values on construction, we need to set up some test
@@ -76,6 +86,8 @@ class WifiRepositoryImplTest : SysuiTestCase() {
     // inside each test case without needing to manually recreate the repository.
     private val underTest: WifiRepositoryImpl by lazy {
         WifiRepositoryImpl(
+            mContext,
+            userRepository,
             testScope.backgroundScope,
             executor,
             dispatcher,
@@ -101,7 +113,8 @@ class WifiRepositoryImplTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
-        whenever(wifiPickerTrackerFactory.create(any(), capture(callbackCaptor), any()))
+        userRepository.setUserInfos(listOf(PRIMARY_USER, ANOTHER_USER))
+        whenever(wifiPickerTrackerFactory.create(any(), any(), capture(callbackCaptor), any()))
             .thenReturn(wifiPickerTracker)
     }
 
@@ -1203,6 +1216,95 @@ class WifiRepositoryImplTest : SysuiTestCase() {
             assertThat(latest).isEmpty()
         }
 
+    // TODO(b/371586248): This test currently require currentUserContext to be public for testing,
+    // this needs to
+    // be updated to capture the argument instead so currentUserContext can be private.
+    @Test
+    @EnableFlags(FLAG_MULTIUSER_WIFI_PICKER_TRACKER_SUPPORT)
+    fun oneUserVerifyCreatingWifiPickerTracker_multiuserFlagEnabled() =
+        testScope.runTest {
+            val primaryUserMockContext = mock<Context>()
+            mContext.prepareCreateContextAsUser(
+                UserHandle.of(PRIMARY_USER_ID),
+                primaryUserMockContext,
+            )
+
+            userRepository.setSelectedUserInfo(PRIMARY_USER)
+            runCurrent()
+            val currentUserContext by collectLastValue(underTest.selectedUserContext)
+
+            assertThat(currentUserContext).isEqualTo(primaryUserMockContext)
+            verify(wifiPickerTrackerFactory).create(any(), any(), any(), any())
+        }
+
+    // TODO(b/371586248): This test currently require currentUserContext to be public for testing,
+    // this needs to
+    // be updated to capture the argument instead so currentUserContext can be private.
+    @Test
+    @EnableFlags(FLAG_MULTIUSER_WIFI_PICKER_TRACKER_SUPPORT)
+    fun changeUserVerifyCreatingWifiPickerTracker_multiuserEnabled() =
+        testScope.runTest {
+            val primaryUserMockContext = mock<Context>()
+            mContext.prepareCreateContextAsUser(
+                UserHandle.of(PRIMARY_USER_ID),
+                primaryUserMockContext,
+            )
+
+            runCurrent()
+            userRepository.setSelectedUserInfo(PRIMARY_USER)
+            runCurrent()
+            val currentUserContext by collectLastValue(underTest.selectedUserContext)
+
+            assertThat(currentUserContext).isEqualTo(primaryUserMockContext)
+
+            val otherUserMockContext = mock<Context>()
+            mContext.prepareCreateContextAsUser(
+                UserHandle.of(ANOTHER_USER_ID),
+                otherUserMockContext,
+            )
+
+            runCurrent()
+            userRepository.setSelectedUserInfo(ANOTHER_USER)
+            runCurrent()
+            val otherUserContext by collectLastValue(underTest.selectedUserContext)
+
+            assertThat(otherUserContext).isEqualTo(otherUserMockContext)
+            verify(wifiPickerTrackerFactory, times(2)).create(any(), any(), any(), any())
+        }
+
+    // TODO(b/371586248): This test currently require currentUserContext to be public for testing,
+    // this needs to
+    // be updated to capture the argument instead so currentUserContext can be private.
+    @Test
+    @DisableFlags(FLAG_MULTIUSER_WIFI_PICKER_TRACKER_SUPPORT)
+    fun changeUserVerifyCreatingWifiPickerTracker_multiuserDisabled() =
+        testScope.runTest {
+            val primaryUserMockContext = mock<Context>()
+            mContext.prepareCreateContextAsUser(
+                UserHandle.of(PRIMARY_USER_ID),
+                primaryUserMockContext,
+            )
+
+            runCurrent()
+            userRepository.setSelectedUserInfo(PRIMARY_USER)
+            runCurrent()
+            val currentUserContext by collectLastValue(underTest.selectedUserContext)
+
+            assertThat(currentUserContext).isEqualTo(primaryUserMockContext)
+
+            val otherUserMockContext = mock<Context>()
+            mContext.prepareCreateContextAsUser(
+                UserHandle.of(ANOTHER_USER_ID),
+                otherUserMockContext,
+            )
+
+            runCurrent()
+            userRepository.setSelectedUserInfo(ANOTHER_USER)
+            runCurrent()
+
+            verify(wifiPickerTrackerFactory, times(1)).create(any(), any(), any(), any())
+        }
+
     private fun getCallback(): WifiPickerTracker.WifiPickerTrackerCallback {
         testScope.runCurrent()
         return callbackCaptor.value
@@ -1231,5 +1333,20 @@ class WifiRepositoryImplTest : SysuiTestCase() {
 
     private companion object {
         const val TITLE = "AB"
+        private const val PRIMARY_USER_ID = 0
+        private val PRIMARY_USER =
+            UserInfo(
+                /* id= */ PRIMARY_USER_ID,
+                /* name= */ "primary user",
+                /* flags= */ UserInfo.FLAG_PROFILE,
+            )
+
+        private const val ANOTHER_USER_ID = 1
+        private val ANOTHER_USER =
+            UserInfo(
+                /* id= */ ANOTHER_USER_ID,
+                /* name= */ "another user",
+                /* flags= */ UserInfo.FLAG_PROFILE,
+            )
     }
 }
