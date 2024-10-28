@@ -25,11 +25,8 @@ import com.android.internal.widget.remotecompose.core.WireBuffer;
 
 import java.util.List;
 
-/**
- * Base class for draw commands that take 4 floats
- */
-public abstract class DrawBase4 extends PaintOperation
-        implements VariableSupport {
+/** Base class for draw commands that take 4 floats */
+public abstract class DrawBase4 extends PaintOperation implements VariableSupport {
     protected String mName = "DrawRectBase";
     protected float mX1;
     protected float mY1;
@@ -40,11 +37,7 @@ public abstract class DrawBase4 extends PaintOperation
     float mX2Value;
     float mY2Value;
 
-    public DrawBase4(
-            float x1,
-            float y1,
-            float x2,
-            float y2) {
+    public DrawBase4(float x1, float y1, float x2, float y2) {
         mX1Value = x1;
         mY1Value = y1;
         mX2Value = x2;
@@ -58,14 +51,10 @@ public abstract class DrawBase4 extends PaintOperation
 
     @Override
     public void updateVariables(RemoteContext context) {
-        mX1 = (Float.isNaN(mX1Value))
-                ? context.getFloat(Utils.idFromNan(mX1Value)) : mX1Value;
-        mY1 = (Float.isNaN(mY1Value))
-                ? context.getFloat(Utils.idFromNan(mY1Value)) : mY1Value;
-        mX2 = (Float.isNaN(mX2Value))
-                ? context.getFloat(Utils.idFromNan(mX2Value)) : mX2Value;
-        mY2 = (Float.isNaN(mY2Value))
-                ? context.getFloat(Utils.idFromNan(mY2Value)) : mY2Value;
+        mX1 = Float.isNaN(mX1Value) ? context.getFloat(Utils.idFromNan(mX1Value)) : mX1Value;
+        mY1 = Float.isNaN(mY1Value) ? context.getFloat(Utils.idFromNan(mY1Value)) : mY1Value;
+        mX2 = Float.isNaN(mX2Value) ? context.getFloat(Utils.idFromNan(mX2Value)) : mX2Value;
+        mY2 = Float.isNaN(mY2Value) ? context.getFloat(Utils.idFromNan(mY2Value)) : mY2Value;
     }
 
     @Override
@@ -89,23 +78,23 @@ public abstract class DrawBase4 extends PaintOperation
         write(buffer, mX1, mY1, mX2, mY2);
     }
 
-    protected abstract void write(WireBuffer buffer,
-                                  float v1,
-                                  float v2,
-                                  float v3,
-                                  float v4);
+    protected abstract void write(WireBuffer buffer, float v1, float v2, float v3, float v4);
 
     protected interface Maker {
-        DrawBase4 create(float v1,
-                         float v2,
-                         float v3,
-                         float v4);
+        DrawBase4 create(float v1, float v2, float v3, float v4);
     }
 
     @Override
     public String toString() {
-        return mName + " " + floatToString(mX1Value, mX1) + " " + floatToString(mY1Value, mY1)
-                + " " + floatToString(mX2Value, mX2) + " " + floatToString(mY2Value, mY2);
+        return mName
+                + " "
+                + floatToString(mX1Value, mX1)
+                + " "
+                + floatToString(mY1Value, mY1)
+                + " "
+                + floatToString(mX2Value, mX2)
+                + " "
+                + floatToString(mY2Value, mY2);
     }
 
     public static void read(Maker maker, WireBuffer buffer, List<Operation> operations) {
@@ -127,13 +116,9 @@ public abstract class DrawBase4 extends PaintOperation
      * @param y2
      * @return
      */
-    public Operation construct(float x1,
-                               float y1,
-                               float x2,
-                               float y2) {
+    public Operation construct(float x1, float y1, float x2, float y2) {
         return null;
     }
-
 
     /**
      * Writes out the operation to the buffer
@@ -145,12 +130,8 @@ public abstract class DrawBase4 extends PaintOperation
      * @param x2
      * @param y2
      */
-    protected static void write(WireBuffer buffer,
-                                int opCode,
-                                float x1,
-                                float y1,
-                                float x2,
-                                float y2) {
+    protected static void write(
+            WireBuffer buffer, int opCode, float x1, float y1, float x2, float y2) {
         buffer.start(opCode);
         buffer.writeFloat(x1);
         buffer.writeFloat(y1);
@@ -158,4 +139,3 @@ public abstract class DrawBase4 extends PaintOperation
         buffer.writeFloat(y2);
     }
 }
-

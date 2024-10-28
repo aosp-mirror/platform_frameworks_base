@@ -228,6 +228,8 @@ public class MockingOomAdjusterTests {
                 mock(BatteryStatsService.class));
         setFieldValue(ActivityManagerService.class, mService, "mInjector",
                 new ActivityManagerService.Injector(mContext));
+        setFieldValue(ActivityManagerService.class, mService, "mPhantomProcessList",
+                new PhantomProcessList(mService));
         doReturn(mock(AppOpsManager.class)).when(mService).getAppOpsManager();
         doCallRealMethod().when(mService).enqueueOomAdjTargetLocked(any(ProcessRecord.class));
         doCallRealMethod().when(mService).updateOomAdjPendingTargetsLocked(OOM_ADJ_REASON_ACTIVITY);

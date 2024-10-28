@@ -31,9 +31,7 @@ import com.android.internal.widget.remotecompose.player.RemoteComposeDocument;
 
 import java.util.Set;
 
-/**
- * Internal view handling the actual painting / interactions
- */
+/** Internal view handling the actual painting / interactions */
 public class RemoteComposeCanvas extends FrameLayout implements View.OnAttachStateChangeListener {
 
     static final boolean USE_VIEW_AREA_CLICK = true; // Use views to represent click areas
@@ -102,13 +100,17 @@ public class RemoteComposeCanvas extends FrameLayout implements View.OnAttachSta
     private void updateClickAreas() {
         if (USE_VIEW_AREA_CLICK && mDocument != null) {
             mHasClickAreas = false;
-            Set<CoreDocument.ClickAreaRepresentation> clickAreas = mDocument
-                    .getDocument().getClickAreas();
+            Set<CoreDocument.ClickAreaRepresentation> clickAreas =
+                    mDocument.getDocument().getClickAreas();
             removeAllViews();
             for (CoreDocument.ClickAreaRepresentation area : clickAreas) {
-                ClickAreaView viewArea = new ClickAreaView(getContext(), mDebug,
-                        area.getId(), area.getContentDescription(),
-                        area.getMetadata());
+                ClickAreaView viewArea =
+                        new ClickAreaView(
+                                getContext(),
+                                mDebug,
+                                area.getId(),
+                                area.getContentDescription(),
+                                area.getMetadata());
                 int w = (int) area.width();
                 int h = (int) area.height();
                 FrameLayout.LayoutParams param = new FrameLayout.LayoutParams(w, h);
@@ -116,8 +118,8 @@ public class RemoteComposeCanvas extends FrameLayout implements View.OnAttachSta
                 param.height = h;
                 param.leftMargin = (int) area.getLeft();
                 param.topMargin = (int) area.getTop();
-                viewArea.setOnClickListener(view1
-                        -> mDocument.getDocument().performClick(area.getId()));
+                viewArea.setOnClickListener(
+                        view1 -> mDocument.getDocument().performClick(area.getId()));
                 addView(viewArea, param);
             }
             if (!clickAreas.isEmpty()) {
@@ -201,23 +203,19 @@ public class RemoteComposeCanvas extends FrameLayout implements View.OnAttachSta
             return super.onTouchEvent(event);
         }
         switch (event.getActionMasked()) {
-            case MotionEvent.ACTION_DOWN: {
+            case MotionEvent.ACTION_DOWN:
                 mActionDownPoint.x = (int) event.getX();
                 mActionDownPoint.y = (int) event.getY();
                 mInActionDown = true;
                 return true;
-            }
-            case MotionEvent.ACTION_CANCEL: {
+            case MotionEvent.ACTION_CANCEL:
                 mInActionDown = false;
                 return true;
-            }
-            case MotionEvent.ACTION_UP: {
+            case MotionEvent.ACTION_UP:
                 mInActionDown = false;
                 performClick();
                 return true;
-            }
-            case MotionEvent.ACTION_MOVE: {
-            }
+            case MotionEvent.ACTION_MOVE:
         }
         return false;
     }
@@ -227,8 +225,9 @@ public class RemoteComposeCanvas extends FrameLayout implements View.OnAttachSta
         if (USE_VIEW_AREA_CLICK && mHasClickAreas) {
             return super.performClick();
         }
-        mDocument.getDocument().onClick(mARContext,
-                 (float) mActionDownPoint.x, (float) mActionDownPoint.y);
+        mDocument
+                .getDocument()
+                .onClick(mARContext, (float) mActionDownPoint.x, (float) mActionDownPoint.y);
         super.performClick();
         invalidate();
         return true;
@@ -305,6 +304,4 @@ public class RemoteComposeCanvas extends FrameLayout implements View.OnAttachSta
             invalidate();
         }
     }
-
 }
-

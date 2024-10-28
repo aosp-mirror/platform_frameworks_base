@@ -5735,6 +5735,8 @@
     <declare-styleable name="NotificationProgressBar">
         <!-- Draws the tracker on a NotificationProgressBar. -->
         <attr name="tracker" format="reference" />
+        <!-- Height of the tracker. -->
+        <attr name="trackerHeight" format="dimension" />
     </declare-styleable>
 
     <declare-styleable name="StackView">

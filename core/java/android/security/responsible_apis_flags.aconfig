@@ -69,7 +69,6 @@ flag {
     description: "Android Advanced Protection Mode Service and Manager"
     bug: "352420507"
     is_fixed_read_only: true
-    is_exported: true
 }
 
 flag {
@@ -85,4 +84,13 @@ flag {
     namespace: "responsible_apis"
     description: "Prevent intent redirect attacks by aborting or throwing security exception"
     bug: "361143368"
+}
+
+flag {
+    name: "enable_intent_matching_flags"
+    is_exported: true
+    namespace: "permissions"
+    is_fixed_read_only: true
+    description: "Applies intentMatchingFlags while matching intents to application components"
+    bug: "364354494"
 }

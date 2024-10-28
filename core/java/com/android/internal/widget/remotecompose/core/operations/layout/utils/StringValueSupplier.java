@@ -15,12 +15,11 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.layout.utils;
 
-/**
- * Basic interface for a lambda (used for logging)
- */
+/** Basic interface for a lambda (used for logging) */
 public interface StringValueSupplier {
     /**
      * returns a string value
+     *
      * @return a string
      */
     String getString();

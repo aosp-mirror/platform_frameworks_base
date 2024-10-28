@@ -15,20 +15,17 @@
  */
 package com.android.internal.widget.remotecompose.core.operations;
 
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.INT;
-
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.RemoteComposeOperation;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
+import com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation;
 
 import java.util.List;
 
-/**
- * Describe a content description for the document
- */
+/** Describe a content description for the document */
 public class RootContentDescription implements RemoteComposeOperation {
     private static final int OP_CODE = Operations.ROOT_CONTENT_DESCRIPTION;
     private static final String CLASS_NAME = "RootContentDescription";
@@ -82,13 +79,9 @@ public class RootContentDescription implements RemoteComposeOperation {
         operations.add(header);
     }
 
-
     public static void documentation(DocumentationBuilder doc) {
-        doc.operation("Protocol Operations",
-                        OP_CODE,
-                        CLASS_NAME)
+        doc.operation("Protocol Operations", OP_CODE, CLASS_NAME)
                 .description("Content description of root")
-                .field(INT, "id", "id of Int");
-
+                .field(DocumentedOperation.INT, "id", "id of Int");
     }
 }
