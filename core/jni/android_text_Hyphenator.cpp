@@ -14,16 +14,18 @@
  * limitations under the License.
  */
 
+#include <core_jni_helpers.h>
+#include <cutils/trace.h>
 #include <fcntl.h>
+#include <minikin/Hyphenator.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <tracing_perfetto.h>
+#include <unicode/uloc.h>
 #include <unistd.h>
 
 #include <algorithm>
-
-#include <core_jni_helpers.h>
-#include <minikin/Hyphenator.h>
 
 namespace android {
 
@@ -77,6 +79,23 @@ static void addHyphenator(const std::string& locale, int minPrefix, int minSuffi
 
 static void addHyphenatorAlias(const std::string& from, const std::string& to) {
     minikin::addHyphenatorAlias(from, to);
+}
+
+/*
+ * Cache the subtag key map by calling uloc_forLanguageTag with a subtag.
+ * minikin calls uloc_forLanguageTag with an Unicode extension specifying
+ * the line breaking strictness. Parsing the extension requires loading the key map
+ * from keyTypeData.res in the ICU.
+ * "lb" is the key commonly used by minikin. "ca" is a common legacy key mapping to
+ * the "calendar" key. It ensures that the key map is loaded and cached in icu4c.
+ * "en-Latn-US" is a common locale used in the Android system regardless what default locale
+ * is selected in the Settings app.
+ */
+inline static void cacheUnicodeExtensionSubtagsKeyMap() {
+    UErrorCode status = U_ZERO_ERROR;
+    char localeID[ULOC_FULLNAME_CAPACITY] = {};
+    uloc_forLanguageTag("en-Latn-US-u-lb-loose-ca-gregory", localeID, ULOC_FULLNAME_CAPACITY,
+                        nullptr, &status);
 }
 
 static void init() {
@@ -190,6 +209,10 @@ static void init() {
     addHyphenatorAlias("und-Orya", "or");  // Oriya
     addHyphenatorAlias("und-Taml", "ta");  // Tamil
     addHyphenatorAlias("und-Telu", "te");  // Telugu
+
+    tracing_perfetto::traceBegin(ATRACE_TAG_VIEW, "CacheUnicodeExtensionSubtagsKeyMap");
+    cacheUnicodeExtensionSubtagsKeyMap();
+    tracing_perfetto::traceEnd(ATRACE_TAG_VIEW); // CacheUnicodeExtensionSubtagsKeyMap
 }
 
 static const JNINativeMethod gMethods[] = {
