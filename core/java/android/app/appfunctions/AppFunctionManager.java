@@ -47,10 +47,10 @@ import java.util.function.Consumer;
  * <p>An app function is a piece of functionality that apps expose to the system for cross-app
  * orchestration.
  *
- * <p>**Developer Workflow:**
+ * <p>**Building App Functions:**
  *
- * <p>Most developers should interact with app functions through the AppFunctions SDK. This SDK
- * library offers a more convenient and type-safe way to represent the inputs and outputs of an app
+ * <p>Most developers should build app functions through the AppFunctions SDK. This SDK library
+ * offers a more convenient and type-safe way to represent the inputs and outputs of an app
  * function, using custom data classes called "AppFunction Schemas".
  *
  * <p>The suggested way to build an app function is to use the AppFunctions SDK. The SDK provides
