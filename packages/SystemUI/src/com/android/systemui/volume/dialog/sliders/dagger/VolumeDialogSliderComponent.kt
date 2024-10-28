@@ -17,6 +17,7 @@
 package com.android.systemui.volume.dialog.sliders.dagger
 
 import com.android.systemui.volume.dialog.sliders.domain.model.VolumeDialogSliderType
+import com.android.systemui.volume.dialog.sliders.ui.VolumeDialogOverscrollViewBinder
 import com.android.systemui.volume.dialog.sliders.ui.VolumeDialogSliderHapticsViewBinder
 import com.android.systemui.volume.dialog.sliders.ui.VolumeDialogSliderTouchesViewBinder
 import com.android.systemui.volume.dialog.sliders.ui.VolumeDialogSliderViewBinder
@@ -36,6 +37,8 @@ interface VolumeDialogSliderComponent {
     fun sliderTouchesViewBinder(): VolumeDialogSliderTouchesViewBinder
 
     fun sliderHapticsViewBinder(): VolumeDialogSliderHapticsViewBinder
+
+    fun overscrollViewBinder(): VolumeDialogOverscrollViewBinder
 
     @Subcomponent.Factory
     interface Factory {

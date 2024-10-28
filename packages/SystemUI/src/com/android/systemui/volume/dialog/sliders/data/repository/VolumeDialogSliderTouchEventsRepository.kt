@@ -16,7 +16,6 @@
 
 package com.android.systemui.volume.dialog.sliders.data.repository
 
-import android.annotation.SuppressLint
 import android.view.MotionEvent
 import com.android.systemui.volume.dialog.sliders.dagger.VolumeDialogSliderScope
 import javax.inject.Inject
@@ -27,7 +26,6 @@ import kotlinx.coroutines.flow.filterNotNull
 @VolumeDialogSliderScope
 class VolumeDialogSliderTouchEventsRepository @Inject constructor() {
 
-    @SuppressLint("SharedFlowCreation")
     private val mutableSliderTouchEvents: MutableStateFlow<MotionEvent?> = MutableStateFlow(null)
     val sliderTouchEvent: Flow<MotionEvent> = mutableSliderTouchEvents.filterNotNull()
 
