@@ -395,7 +395,7 @@ public class NavigationBarControllerImpl implements
         if (navBar != null) {
             navBar.checkNavBarModes();
         } else {
-            mTaskbarDelegate.checkNavBarModes();
+            mTaskbarDelegate.checkNavBarModes(displayId);
         }
     }
 
@@ -405,7 +405,7 @@ public class NavigationBarControllerImpl implements
         if (navBar != null) {
             navBar.finishBarAnimations();
         } else {
-            mTaskbarDelegate.finishBarAnimations();
+            mTaskbarDelegate.finishBarAnimations(displayId);
         }
     }
 
@@ -415,7 +415,7 @@ public class NavigationBarControllerImpl implements
         if (navBar != null) {
             navBar.touchAutoDim();
         } else {
-            mTaskbarDelegate.touchAutoDim();
+            mTaskbarDelegate.touchAutoDim(displayId);
         }
     }
 
@@ -425,7 +425,7 @@ public class NavigationBarControllerImpl implements
         if (navBar != null) {
             navBar.transitionTo(barMode, animate);
         } else {
-            mTaskbarDelegate.transitionTo(barMode, animate);
+            mTaskbarDelegate.transitionTo(displayId, barMode, animate);
         }
     }
 
