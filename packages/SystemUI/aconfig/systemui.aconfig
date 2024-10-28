@@ -1625,3 +1625,10 @@ flag {
     purpose: PURPOSE_BUGFIX
   }
 }
+
+flag {
+  name: "shade_expands_on_status_bar_long_press"
+  namespace: "systemui"
+  description: "Expands the shade on long press of any status bar"
+  bug: "371224114"
+}
