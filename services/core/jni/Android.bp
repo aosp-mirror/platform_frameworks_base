@@ -55,7 +55,6 @@ cc_library_static {
         "com_android_server_powerstats_PowerStatsService.cpp",
         "com_android_server_power_stats_CpuPowerStatsCollector.cpp",
         "com_android_server_hint_HintManagerService.cpp",
-        "com_android_server_SerialService.cpp",
         "com_android_server_soundtrigger_middleware_AudioSessionProviderImpl.cpp",
         "com_android_server_soundtrigger_middleware_ExternalCaptureStateTracker.cpp",
         "com_android_server_stats_pull_StatsPullAtomService.cpp",
