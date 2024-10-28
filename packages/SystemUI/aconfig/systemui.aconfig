@@ -991,6 +991,16 @@ flag {
 }
 
 flag {
+    name: "shortcut_helper_key_glyph"
+    namespace: "systemui"
+    description: "Allow showing key glyph in shortcut helper"
+    bug: "353902478"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
   name: "dream_overlay_bouncer_swipe_direction_filtering"
   namespace: "systemui"
   description: "do not initiate bouncer swipe when the direction is opposite of the expansion"
