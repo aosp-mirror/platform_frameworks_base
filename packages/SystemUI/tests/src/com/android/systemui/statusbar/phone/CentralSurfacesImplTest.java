@@ -176,6 +176,7 @@ import com.android.systemui.statusbar.core.StatusBarConnectedDisplays;
 import com.android.systemui.statusbar.core.StatusBarInitializerImpl;
 import com.android.systemui.statusbar.core.StatusBarOrchestrator;
 import com.android.systemui.statusbar.data.repository.FakeStatusBarModeRepository;
+import com.android.systemui.statusbar.data.repository.StatusBarModePerDisplayRepository;
 import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.NotificationLaunchAnimatorControllerProvider;
@@ -387,6 +388,9 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
 
     private final BrightnessMirrorShowingInteractor mBrightnessMirrorShowingInteractor =
             mKosmos.getBrightnessMirrorShowingInteractor();
+
+    private final StatusBarModePerDisplayRepository mStatusBarModePerDisplayRepository =
+            mKosmos.getStatusBarModePerDisplayRepository();
     private ScrimController mScrimController;
 
     @Before
@@ -537,6 +541,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 mAutoHideController,
                 new StatusBarInitializerImpl(
                         mStatusBarWindowController,
+                        mStatusBarModePerDisplayRepository,
                         mCollapsedStatusBarFragmentProvider,
                         mock(StatusBarRootFactory.class),
                         mock(HomeStatusBarComponent.Factory.class),
