@@ -715,7 +715,7 @@ fun calculateWidgetSize(item: CommunalContentModel, isResizable: Boolean): Widge
             WidgetSizeInfo(minHeightPx, maxHeightPx)
         }
     } else {
-        WidgetSizeInfo(0, Int.MAX_VALUE)
+        WidgetSizeInfo(0, 0)
     }
 }
 

@@ -480,6 +480,24 @@ class ResizeableItemFrameViewModelTest : SysuiTestCase() {
     fun testIllegalState_resizeMultipleZeroOrNegative() =
         testScope.runTest { updateGridLayout(singleSpanGrid.copy(resizeMultiple = 0)) }
 
+    @Test
+    fun testZeroHeights_cannotResize() = runTestWithSnapshots {
+        val zeroHeightGrid =
+            singleSpanGrid.copy(
+                totalSpans = 2,
+                currentSpan = 1,
+                currentRow = 0,
+                minHeightPx = 0,
+                maxHeightPx = 0,
+            )
+        updateGridLayout(zeroHeightGrid)
+
+        val topState = underTest.topDragState
+        val bottomState = underTest.bottomDragState
+        assertThat(topState.anchors.toList()).containsExactly(0 to 0f)
+        assertThat(bottomState.anchors.toList()).containsExactly(0 to 0f)
+    }
+
     private fun TestScope.updateGridLayout(gridLayout: GridLayout) {
         underTest.setGridLayoutInfo(
             verticalItemSpacingPx = gridLayout.verticalItemSpacingPx,
