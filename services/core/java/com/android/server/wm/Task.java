@@ -3423,6 +3423,8 @@ class Task extends TaskFragment {
                 ? top.getLastParentBeforePip().mTaskId : INVALID_TASK_ID;
         info.shouldDockBigOverlays = top != null && top.shouldDockBigOverlays;
         info.mTopActivityLocusId = top != null ? top.getLocusId() : null;
+        info.isTopActivityLimitSystemEducationDialogs = top != null
+              ? top.mShouldLimitSystemEducationDialogs : false;
         final Task parentTask = getParent() != null ? getParent().asTask() : null;
         info.parentTaskId = parentTask != null && parentTask.mCreatedByOrganizer
                 ? parentTask.mTaskId
