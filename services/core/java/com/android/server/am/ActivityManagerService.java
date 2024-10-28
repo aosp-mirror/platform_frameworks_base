@@ -2896,9 +2896,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 addServiceToMap(mAppBindArgs, Context.POWER_SERVICE);
                 addServiceToMap(mAppBindArgs, "mount");
                 addServiceToMap(mAppBindArgs, Context.PLATFORM_COMPAT_SERVICE);
-                addServiceToMap(mAppBindArgs, "permissionmgr");
-                addServiceToMap(mAppBindArgs, Context.APP_OPS_SERVICE);
-                addServiceToMap(mAppBindArgs, Context.USER_SERVICE);
             }
             // See b/79378449
             // Getting the window service and package service binder from servicemanager
@@ -2906,6 +2903,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             // TODO: remove exception
             addServiceToMap(mAppBindArgs, "package");
             addServiceToMap(mAppBindArgs, Context.WINDOW_SERVICE);
+            addServiceToMap(mAppBindArgs, Context.USER_SERVICE);
+            addServiceToMap(mAppBindArgs, "permissionmgr");
+            addServiceToMap(mAppBindArgs, Context.APP_OPS_SERVICE);
         }
         return mAppBindArgs;
     }
