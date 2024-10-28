@@ -118,6 +118,7 @@ import com.android.wm.shell.transition.FocusTransitionObserver
 import com.android.wm.shell.transition.OneShotRemoteHandler
 import com.android.wm.shell.transition.Transitions
 import com.android.wm.shell.transition.Transitions.TransitionFinishCallback
+import com.android.wm.shell.windowdecor.DesktopModeWindowDecoration
 import com.android.wm.shell.windowdecor.DragPositioningCallbackUtility
 import com.android.wm.shell.windowdecor.MoveToDesktopAnimator
 import com.android.wm.shell.windowdecor.OnTaskRepositionAnimationListener
@@ -125,6 +126,7 @@ import com.android.wm.shell.windowdecor.OnTaskResizeAnimationListener
 import com.android.wm.shell.windowdecor.extension.isFullscreen
 import com.android.wm.shell.windowdecor.extension.isMultiWindow
 import com.android.wm.shell.windowdecor.extension.requestingImmersive
+import com.android.wm.shell.windowdecor.tiling.DesktopTilingDecorViewModel
 import java.io.PrintWriter
 import java.util.Optional
 import java.util.concurrent.Executor
@@ -163,6 +165,7 @@ class DesktopTasksController(
     private val inputManager: InputManager,
     private val focusTransitionObserver: FocusTransitionObserver,
     private val desktopModeEventLogger: DesktopModeEventLogger,
+    private val desktopTilingDecorViewModel: DesktopTilingDecorViewModel,
 ) :
     RemoteCallable<DesktopTasksController>,
     Transitions.TransitionHandler,
@@ -237,6 +240,7 @@ class DesktopTasksController(
                 override fun onAnimationStateChanged(running: Boolean) {
                     logV("Recents animation state changed running=%b", running)
                     recentsAnimationRunning = running
+                    desktopTilingDecorViewModel.onOverviewAnimationStateChange(running)
                 }
             }
         )
@@ -492,6 +496,7 @@ class DesktopTasksController(
         taskInfo: RunningTaskInfo,
     ): ((IBinder) -> Unit)? {
         val taskId = taskInfo.taskId
+        desktopTilingDecorViewModel.removeTaskIfTiled(displayId, taskId)
         if (taskRepository.isOnlyVisibleNonClosingTask(taskId)) {
             removeWallpaperActivity(wct)
         }
@@ -532,6 +537,7 @@ class DesktopTasksController(
     /** Move a task with given `taskId` to fullscreen */
     fun moveToFullscreen(taskId: Int, transitionSource: DesktopModeTransitionSource) {
         shellTaskOrganizer.getRunningTaskInfo(taskId)?.let { task ->
+            desktopTilingDecorViewModel.removeTaskIfTiled(task.displayId, taskId)
             moveToFullscreenWithAnimation(task, task.positionInParent, transitionSource)
         }
     }
@@ -539,6 +545,7 @@ class DesktopTasksController(
     /** Enter fullscreen by moving the focused freeform task in given `displayId` to fullscreen. */
     fun enterFullscreen(displayId: Int, transitionSource: DesktopModeTransitionSource) {
         getFocusedFreeformTask(displayId)?.let {
+            desktopTilingDecorViewModel.removeTaskIfTiled(displayId, it.taskId)
             moveToFullscreenWithAnimation(it, it.positionInParent, transitionSource)
         }
     }
@@ -546,6 +553,7 @@ class DesktopTasksController(
     /** Move a desktop app to split screen. */
     fun moveToSplit(task: RunningTaskInfo) {
         logV( "moveToSplit taskId=%s", task.taskId)
+        desktopTilingDecorViewModel.removeTaskIfTiled(task.displayId, task.taskId)
         val wct = WindowContainerTransaction()
         wct.setBounds(task.token, Rect())
         // Rather than set windowing mode to multi-window at task level, set it to
@@ -643,6 +651,11 @@ class DesktopTasksController(
     @JvmOverloads
     fun moveTaskToFront(taskInfo: RunningTaskInfo, remoteTransition: RemoteTransition? = null) {
         logV("moveTaskToFront taskId=%s", taskInfo.taskId)
+        // If a task is tiled, another task should be brought to foreground with it so let
+        // tiling controller handle the request.
+        if (desktopTilingDecorViewModel.moveTaskToFrontIfTiled(taskInfo)) {
+            return
+        }
         val wct = WindowContainerTransaction()
         wct.reorder(taskInfo.token, true /* onTop */, true /* includingParents */)
         val runOnTransit = desktopImmersiveController.exitImmersiveIfApplicable(
@@ -804,11 +817,11 @@ class DesktopTasksController(
         } else {
             // Save current bounds so that task can be restored back to original bounds if necessary
             // and toggle to the stable bounds.
+            desktopTilingDecorViewModel.removeTaskIfTiled(taskInfo.displayId, taskInfo.taskId)
             taskRepository.saveBoundsBeforeMaximize(taskInfo.taskId, currentTaskBounds)
 
             destinationBounds.set(calculateMaximizeBounds(displayLayout, taskInfo))
         }
-
 
 
         val shouldRestoreToSnap =
@@ -918,7 +931,20 @@ class DesktopTasksController(
         position: SnapPosition,
         resizeTrigger: ResizeTrigger,
         motionEvent: MotionEvent?,
+        desktopWindowDecoration: DesktopModeWindowDecoration,
     ) {
+        if (DesktopModeFlags.ENABLE_TILE_RESIZING.isTrue()) {
+            val isTiled = desktopTilingDecorViewModel.snapToHalfScreen(
+                taskInfo,
+                desktopWindowDecoration,
+                position,
+                currentDragBounds,
+            )
+            if (isTiled) {
+                taskbarDesktopTaskListener?.onTaskbarCornerRoundingUpdate(true)
+            }
+            return
+        }
         val destinationBounds = getSnapBounds(taskInfo, position)
         desktopModeEventLogger.logTaskResizingEnded(
             resizeTrigger,
@@ -938,7 +964,7 @@ class DesktopTasksController(
                     taskSurface,
                     startBounds = currentDragBounds,
                     endBounds = destinationBounds,
-                    isResizable = taskInfo.isResizeable
+                    isResizable = taskInfo.isResizeable,
                 )
             }
             return
@@ -958,6 +984,7 @@ class DesktopTasksController(
         currentDragBounds: Rect,
         dragStartBounds: Rect,
         motionEvent: MotionEvent,
+        desktopModeWindowDecoration: DesktopModeWindowDecoration,
     ) {
         releaseVisualIndicator()
         if (!taskInfo.isResizeable && DISABLE_NON_RESIZABLE_APP_SNAP_RESIZE.isTrue()) {
@@ -992,6 +1019,7 @@ class DesktopTasksController(
                 position,
                 resizeTrigger,
                 motionEvent,
+                desktopModeWindowDecoration,
             )
         }
     }
@@ -1499,7 +1527,11 @@ class DesktopTasksController(
             addPendingMinimizeTransition(transition, taskIdToMinimize)
             return wct
         }
-        return if (wct.isEmpty) null else wct
+        if (!wct.isEmpty) {
+            desktopTilingDecorViewModel.removeTaskIfTiled(task.displayId, task.taskId)
+            return wct
+        }
+        return null
     }
 
     private fun handleFullscreenTaskLaunch(
@@ -1565,6 +1597,7 @@ class DesktopTasksController(
 
         if (!DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION.isTrue()) {
             taskRepository.addClosingTask(task.displayId, task.taskId)
+            desktopTilingDecorViewModel.removeTaskIfTiled(task.displayId, task.taskId)
         }
 
         taskbarDesktopTaskListener?.onTaskbarCornerRoundingUpdate(
@@ -1812,6 +1845,7 @@ class DesktopTasksController(
         taskBounds: Rect
     ) {
         if (taskInfo.windowingMode != WINDOWING_MODE_FREEFORM) return
+        desktopTilingDecorViewModel.removeTaskIfTiled(taskInfo.displayId, taskInfo.taskId)
         updateVisualIndicator(taskInfo, taskSurface, inputX, taskBounds.top.toFloat(),
             DragStartState.FROM_FREEFORM)
     }
@@ -1861,6 +1895,7 @@ class DesktopTasksController(
         validDragArea: Rect,
         dragStartBounds: Rect,
         motionEvent: MotionEvent,
+        desktopModeWindowDecoration: DesktopModeWindowDecoration,
     ) {
         if (taskInfo.configuration.windowConfiguration.windowingMode != WINDOWING_MODE_FREEFORM) {
             return
@@ -1887,6 +1922,7 @@ class DesktopTasksController(
                     currentDragBounds,
                     dragStartBounds,
                     motionEvent,
+                    desktopModeWindowDecoration,
                 )
             }
             IndicatorType.TO_SPLIT_RIGHT_INDICATOR -> {
@@ -1897,6 +1933,7 @@ class DesktopTasksController(
                     currentDragBounds,
                     dragStartBounds,
                     motionEvent,
+                    desktopModeWindowDecoration,
                 )
             }
             IndicatorType.NO_INDICATOR -> {
@@ -2090,6 +2127,7 @@ class DesktopTasksController(
     // TODO(b/366397912): Support full multi-user mode in Windowing.
     override fun onUserChanged(newUserId: Int, userContext: Context) {
         userId = newUserId
+        desktopTilingDecorViewModel.onUserChange()
     }
 
     /** Called when a task's info changes. */
