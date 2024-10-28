@@ -740,6 +740,13 @@ flag {
 }
 
 flag {
+    name: "smartspace_swipe_event_logging"
+    namespace: "systemui"
+    description: "Log card swipe events in smartspace"
+    bug: "374150422"
+}
+
+flag {
    name: "pin_input_field_styled_focus_state"
    namespace: "systemui"
    description: "Enables styled focus states on pin input field if keyboard is connected"
