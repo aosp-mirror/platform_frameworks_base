@@ -85,6 +85,7 @@ import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
 import android.os.UserHandle;
+import android.service.voice.VisualQueryDetectedResult;
 import android.speech.tts.TextToSpeech;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
@@ -6289,6 +6290,13 @@ public final class Settings {
         public static final String TOUCHPAD_RIGHT_CLICK_ZONE = "touchpad_right_click_zone";
 
         /**
+         * Whether to enable system gestures (three- and four-finger swipes) on touchpads.
+         *
+         * @hide
+         */
+        public static final String TOUCHPAD_SYSTEM_GESTURES = "touchpad_system_gestures";
+
+        /**
          * Whether to enable reversed vertical scrolling for connected mice.
          *
          * When enabled, scrolling down on the mouse wheel will move the screen up and vice versa.
@@ -6541,6 +6549,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(TOUCHPAD_TAP_TO_CLICK);
             PRIVATE_SETTINGS.add(TOUCHPAD_TAP_DRAGGING);
             PRIVATE_SETTINGS.add(TOUCHPAD_RIGHT_CLICK_ZONE);
+            PRIVATE_SETTINGS.add(TOUCHPAD_SYSTEM_GESTURES);
             PRIVATE_SETTINGS.add(CAMERA_FLASH_NOTIFICATION);
             PRIVATE_SETTINGS.add(SCREEN_FLASH_NOTIFICATION);
             PRIVATE_SETTINGS.add(SCREEN_FLASH_NOTIFICATION_COLOR);

@@ -348,6 +348,7 @@ public:
     void setShouldNotifyTouchpadHardwareState(bool enabled);
     void setTouchpadRightClickZoneEnabled(bool enabled);
     void setTouchpadThreeFingerTapShortcutEnabled(bool enabled);
+    void setTouchpadSystemGesturesEnabled(bool enabled);
     void setInputDeviceEnabled(uint32_t deviceId, bool enabled);
     void setShowTouches(bool enabled);
     void setNonInteractiveDisplays(const std::set<ui::LogicalDisplayId>& displayIds);
@@ -517,6 +518,9 @@ private:
         // True to use three-finger tap as a customizable shortcut; false to use it as a
         // middle-click.
         bool touchpadThreeFingerTapShortcutEnabled{false};
+
+        // True to enable system gestures (three- and four-finger swipes) on touchpads.
+        bool touchpadSystemGesturesEnabled{true};
 
         // True if a pointer icon should be shown for stylus pointers.
         bool stylusPointerIconEnabled{false};
@@ -790,6 +794,7 @@ void NativeInputManager::getReaderConfiguration(InputReaderConfiguration* outCon
         outConfig->touchpadRightClickZoneEnabled = mLocked.touchpadRightClickZoneEnabled;
         outConfig->touchpadThreeFingerTapShortcutEnabled =
                 mLocked.touchpadThreeFingerTapShortcutEnabled;
+        outConfig->touchpadSystemGesturesEnabled = mLocked.touchpadSystemGesturesEnabled;
 
         outConfig->disabledDevices = mLocked.disabledInputDevices;
 
@@ -1522,6 +1527,22 @@ void NativeInputManager::setTouchpadThreeFingerTapShortcutEnabled(bool enabled) 
 
         ALOGI("Setting touchpad three finger tap shortcut to %s.", toString(enabled));
         mLocked.touchpadThreeFingerTapShortcutEnabled = enabled;
+    } // release lock
+
+    mInputManager->getReader().requestRefreshConfiguration(
+            InputReaderConfiguration::Change::TOUCHPAD_SETTINGS);
+}
+
+void NativeInputManager::setTouchpadSystemGesturesEnabled(bool enabled) {
+    { // acquire lock
+        std::scoped_lock _l(mLock);
+
+        if (mLocked.touchpadSystemGesturesEnabled == enabled) {
+            return;
+        }
+
+        ALOGI("Setting touchpad system gestures enabled to %s.", toString(enabled));
+        mLocked.touchpadSystemGesturesEnabled = enabled;
     } // release lock
 
     mInputManager->getReader().requestRefreshConfiguration(
@@ -2481,6 +2502,13 @@ static void nativeSetTouchpadThreeFingerTapShortcutEnabled(JNIEnv* env, jobject 
     getNativeInputManager(env, nativeImplObj)->setTouchpadThreeFingerTapShortcutEnabled(enabled);
 }
 
+static void nativeSetTouchpadSystemGesturesEnabled(JNIEnv* env, jobject nativeImplObj,
+                                                   jboolean enabled) {
+    NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
+
+    im->setTouchpadSystemGesturesEnabled(enabled);
+}
+
 static void nativeSetShowTouches(JNIEnv* env, jobject nativeImplObj, jboolean enabled) {
     NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
 
@@ -3169,6 +3197,7 @@ static const JNINativeMethod gInputManagerMethods[] = {
         {"setTouchpadRightClickZoneEnabled", "(Z)V", (void*)nativeSetTouchpadRightClickZoneEnabled},
         {"setTouchpadThreeFingerTapShortcutEnabled", "(Z)V",
          (void*)nativeSetTouchpadThreeFingerTapShortcutEnabled},
+        {"setTouchpadSystemGesturesEnabled", "(Z)V", (void*)nativeSetTouchpadSystemGesturesEnabled},
         {"setShowTouches", "(Z)V", (void*)nativeSetShowTouches},
         {"setNonInteractiveDisplays", "([I)V", (void*)nativeSetNonInteractiveDisplays},
         {"reloadCalibration", "()V", (void*)nativeReloadCalibration},
