@@ -50,10 +50,10 @@ import org.mockito.kotlin.whenever
 
 @SmallTest
 @OptIn(ExperimentalCoroutinesApi::class)
-class EndShareToAppDialogDelegateTest : SysuiTestCase() {
+class EndShareScreenToAppDialogDelegateTest : SysuiTestCase() {
     private val kosmos = Kosmos().also { it.testCase = this }
     private val sysuiDialog = mock<SystemUIDialog>()
-    private lateinit var underTest: EndShareToAppDialogDelegate
+    private lateinit var underTest: EndShareScreenToAppDialogDelegate
 
     @Test
     fun icon() {
@@ -117,7 +117,7 @@ class EndShareToAppDialogDelegateTest : SysuiTestCase() {
             MediaProjectionState.Projecting.SingleTask(
                 HOST_PACKAGE,
                 hostDeviceName = null,
-                createTask(taskId = 1, baseIntent = baseIntent)
+                createTask(taskId = 1, baseIntent = baseIntent),
             )
         )
 
@@ -142,7 +142,7 @@ class EndShareToAppDialogDelegateTest : SysuiTestCase() {
             MediaProjectionState.Projecting.SingleTask(
                 HOST_PACKAGE,
                 hostDeviceName = null,
-                createTask(taskId = 1, baseIntent = baseIntent)
+                createTask(taskId = 1, baseIntent = baseIntent),
             )
         )
 
@@ -181,7 +181,7 @@ class EndShareToAppDialogDelegateTest : SysuiTestCase() {
             verify(sysuiDialog)
                 .setPositiveButton(
                     eq(R.string.share_to_app_stop_dialog_button),
-                    clickListener.capture()
+                    clickListener.capture(),
                 )
 
             // Verify that clicking the button stops the recording
@@ -195,12 +195,13 @@ class EndShareToAppDialogDelegateTest : SysuiTestCase() {
 
     private fun createAndSetDelegate(state: MediaProjectionState.Projecting) {
         underTest =
-            EndShareToAppDialogDelegate(
+            EndShareScreenToAppDialogDelegate(
                 kosmos.endMediaProjectionDialogHelper,
                 kosmos.applicationContext,
                 stopAction = kosmos.mediaProjectionChipInteractor::stopProjecting,
                 ProjectionChipModel.Projecting(
-                    ProjectionChipModel.Type.SHARE_TO_APP,
+                    ProjectionChipModel.Receiver.ShareToApp,
+                    ProjectionChipModel.ContentType.Screen,
                     state,
                 ),
             )
@@ -213,7 +214,7 @@ class EndShareToAppDialogDelegateTest : SysuiTestCase() {
             MediaProjectionState.Projecting.SingleTask(
                 HOST_PACKAGE,
                 hostDeviceName = null,
-                createTask(taskId = 1)
+                createTask(taskId = 1),
             )
     }
 }

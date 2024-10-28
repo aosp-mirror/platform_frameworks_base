@@ -26,7 +26,7 @@ import com.android.systemui.statusbar.chips.sharetoapp.ui.viewmodel.ShareToAppCh
 import com.android.systemui.statusbar.phone.SystemUIDialog
 
 /** A dialog that lets the user stop an ongoing share-screen-to-app event. */
-class EndShareToAppDialogDelegate(
+class EndShareScreenToAppDialogDelegate(
     private val endMediaProjectionDialogHelper: EndMediaProjectionDialogHelper,
     private val context: Context,
     private val stopAction: () -> Unit,
@@ -71,7 +71,7 @@ class EndShareToAppDialogDelegate(
             if (hostAppName != null) {
                 context.getString(
                     R.string.share_to_app_stop_dialog_message_entire_screen_with_host_app,
-                    hostAppName
+                    hostAppName,
                 )
             } else {
                 context.getString(R.string.share_to_app_stop_dialog_message_entire_screen)
