@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 package com.android.internal.widget.remotecompose.core.documentation;
+
 public class StringPair {
     String mName;
     String mValue;
@@ -26,6 +27,7 @@ public class StringPair {
     public String getName() {
         return mName;
     }
+
     public String getValue() {
         return mValue;
     }

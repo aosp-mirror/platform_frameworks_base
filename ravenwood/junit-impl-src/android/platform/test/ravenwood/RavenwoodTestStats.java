@@ -90,9 +90,7 @@ public class RavenwoodTestStats {
         // Create the "latest" symlink.
         Path symlink = Paths.get(tmpdir, basename + "latest.csv");
         try {
-            if (Files.exists(symlink)) {
-                Files.delete(symlink);
-            }
+            Files.deleteIfExists(symlink);
             Files.createSymbolicLink(symlink, Paths.get(mOutputFile.getName()));
 
         } catch (IOException e) {

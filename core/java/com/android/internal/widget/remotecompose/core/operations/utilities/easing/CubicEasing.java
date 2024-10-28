@@ -16,7 +16,6 @@
 package com.android.internal.widget.remotecompose.core.operations.utilities.easing;
 
 class CubicEasing extends Easing {
-    float mType = 0;
     float mX1 = 0f;
     float mY1 = 0f;
     float mX2 = 0f;
@@ -92,25 +91,24 @@ class CubicEasing extends Easing {
         return mY1 * f1 + mY2 * f2 + f3;
     }
 
-    private float getDiffX(float t) {
-        float t1 = 1 - t;
-        return 3 * t1 * t1 * mX1 + 6 * t1 * t * (mX2 - mX1) + 3 * t * t * (1 - mX2);
-    }
+    //    private float getDiffX(float t) {
+    //        float t1 = 1 - t;
+    //        return 3 * t1 * t1 * mX1 + 6 * t1 * t * (mX2 - mX1) + 3 * t * t * (1 - mX2);
+    //    }
 
-    private float getDiffY(float t) {
-        float t1 = 1 - t;
-        return 3 * t1 * t1 * mY1 + 6 * t1 * t * (mY2 - mY1) + 3 * t * t * (1 - mY2);
-    }
+    //    private float getDiffY(float t) {
+    //        float t1 = 1 - t;
+    //        return 3 * t1 * t1 * mY1 + 6 * t1 * t * (mY2 - mY1) + 3 * t * t * (1 - mY2);
+    //    }
 
-    /**
-     * binary search for the region and linear interpolate the answer
-     */
+    /** binary search for the region and linear interpolate the answer */
+    @Override
     public float getDiff(float x) {
         float t = 0.5f;
         float range = 0.5f;
         while (range > D_ERROR) {
             float tx = getX(t);
-            range *= 0.5;
+            range *= 0.5f;
             if (tx < x) {
                 t += range;
             } else {
@@ -124,9 +122,8 @@ class CubicEasing extends Easing {
         return (y2 - y1) / (x2 - x1);
     }
 
-    /**
-     * binary search for the region and linear interpolate the answer
-     */
+    /** binary search for the region and linear interpolate the answer */
+    @Override
     public float get(float x) {
         if (x <= 0.0f) {
             return 0f;

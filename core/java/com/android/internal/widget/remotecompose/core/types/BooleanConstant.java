@@ -15,28 +15,35 @@
  */
 package com.android.internal.widget.remotecompose.core.types;
 
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.BYTE;
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.INT;
+import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.BYTE;
 
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
+import com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation;
 
 import java.util.List;
 
-/**
- * Used to represent a boolean
- */
+/** Used to represent a boolean */
 public class BooleanConstant implements Operation {
     private static final int OP_CODE = Operations.DATA_BOOLEAN;
-    boolean mValue = false;
+    private boolean mValue = false;
     private int mId;
 
     public BooleanConstant(int id, boolean value) {
         mId = id;
         mValue = value;
+    }
+
+    /**
+     * Get the value of the boolean constant
+     *
+     * @return the value of the boolean
+     */
+    public boolean getValue() {
+        return mValue;
     }
 
     @Override
@@ -45,9 +52,7 @@ public class BooleanConstant implements Operation {
     }
 
     @Override
-    public void apply(RemoteContext context) {
-
-    }
+    public void apply(RemoteContext context) {}
 
     @Override
     public String deepToString(String indent) {
@@ -88,14 +93,9 @@ public class BooleanConstant implements Operation {
     }
 
     public static void documentation(DocumentationBuilder doc) {
-        doc.operation("Expressions Operations",
-                        OP_CODE,
-                        "BooleanConstant")
+        doc.operation("Expressions Operations", OP_CODE, "BooleanConstant")
                 .description("A boolean and its associated id")
-                .field(INT, "id", "id of Int")
-                .field(BYTE, "value",
-                        "8-bit 0 or 1");
-
+                .field(DocumentedOperation.INT, "id", "id of Int")
+                .field(BYTE, "value", "8-bit 0 or 1");
     }
-
 }
