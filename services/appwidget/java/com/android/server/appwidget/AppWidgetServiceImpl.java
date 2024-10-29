@@ -16,6 +16,7 @@
 
 package com.android.server.appwidget;
 
+import static android.appwidget.flags.Flags.checkRemoteViewsUriPermission;
 import static android.appwidget.flags.Flags.remoteAdapterConversion;
 import static android.appwidget.flags.Flags.remoteViewsProto;
 import static android.appwidget.flags.Flags.removeAppWidgetServiceIoFromCriticalPath;
@@ -62,6 +63,7 @@ import android.appwidget.AppWidgetProviderInfo;
 import android.appwidget.PendingHostUpdate;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.Intent.FilterComparison;
@@ -150,6 +152,8 @@ import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
 import com.android.server.WidgetBackupProvider;
+import com.android.server.uri.GrantUri;
+import com.android.server.uri.UriGrantsManagerInternal;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -2547,6 +2551,10 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
 
         // Make sure the package runs under the caller uid.
         mSecurityPolicy.enforceCallFromPackage(callingPackage);
+        // Make sure RemoteViews do not contain URIs that the caller cannot access.
+        if (checkRemoteViewsUriPermission()) {
+            checkRemoteViewsUris(views);
+        }
         synchronized (mLock) {
             ensureGroupStateLoadedLocked(userId);
 
@@ -2564,6 +2572,39 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 }
             }
         }
+    }
+
+    /**
+     * Checks that all of the Uris in the given RemoteViews are accessible to the caller.
+     */
+    private void checkRemoteViewsUris(RemoteViews views) {
+        UriGrantsManagerInternal uriGrantsManager = LocalServices.getService(
+                UriGrantsManagerInternal.class);
+        int callingUid = Binder.getCallingUid();
+        int callingUser = UserHandle.getCallingUserId();
+        views.visitUris(uri -> {
+            switch (uri.getScheme()) {
+                // Check that content:// URIs are accessible to the caller.
+                case ContentResolver.SCHEME_CONTENT:
+                    boolean canAccessUri = uriGrantsManager.checkUriPermission(
+                            GrantUri.resolve(callingUser, uri,
+                                    Intent.FLAG_GRANT_READ_URI_PERMISSION), callingUid,
+                            Intent.FLAG_GRANT_READ_URI_PERMISSION,
+                            /* isFullAccessForContentUri= */ true);
+                    if (!canAccessUri) {
+                        throw new SecurityException(
+                                "Provider uid " + callingUid + " cannot access URI " + uri);
+                    }
+                    break;
+                // android.resource:// URIs are always allowed.
+                case ContentResolver.SCHEME_ANDROID_RESOURCE:
+                    break;
+                // file:// and any other schemes are disallowed.
+                case ContentResolver.SCHEME_FILE:
+                default:
+                    throw new SecurityException("Disallowed URI " + uri + " in RemoteViews.");
+            }
+        });
     }
 
     /**
