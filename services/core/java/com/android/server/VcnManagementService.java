@@ -524,6 +524,9 @@ public class VcnManagementService extends IVcnManagementService.Stub {
         @Override
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
+            if (action == null) {
+                return;
+            }
 
             switch (action) {
                 case Intent.ACTION_PACKAGE_ADDED: // Fallthrough
