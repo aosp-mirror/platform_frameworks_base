@@ -17,11 +17,13 @@
 package com.android.systemui.statusbar.core
 
 import android.view.Display
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.display.data.repository.DisplayRepository
 import com.android.systemui.display.data.repository.DisplayScopeRepository
+import com.android.systemui.statusbar.data.repository.PrivacyDotWindowControllerStore
 import com.android.systemui.statusbar.data.repository.StatusBarModeRepositoryStore
 import com.android.systemui.statusbar.window.StatusBarWindowControllerStore
 import com.android.systemui.statusbar.window.data.repository.StatusBarWindowStateRepositoryStore
@@ -29,7 +31,6 @@ import com.android.systemui.util.kotlin.pairwiseBy
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.onStart
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 /**
  * Responsible for creating and starting the status bar components for each display. Also does it
@@ -48,6 +49,7 @@ constructor(
     private val initializerStore: StatusBarInitializerStore,
     private val statusBarWindowControllerStore: StatusBarWindowControllerStore,
     private val statusBarInitializerStore: StatusBarInitializerStore,
+    private val privacyDotWindowControllerStore: PrivacyDotWindowControllerStore,
 ) : CoreStartable {
 
     init {
@@ -71,6 +73,7 @@ constructor(
         val displayId = display.displayId
         createAndStartOrchestratorForDisplay(displayId)
         createAndStartInitializerForDisplay(displayId)
+        startPrivacyDotForDisplay(displayId)
     }
 
     private fun createAndStartOrchestratorForDisplay(displayId: Int) {
@@ -88,5 +91,13 @@ constructor(
 
     private fun createAndStartInitializerForDisplay(displayId: Int) {
         statusBarInitializerStore.forDisplay(displayId).start()
+    }
+
+    private fun startPrivacyDotForDisplay(displayId: Int) {
+        if (displayId == Display.DEFAULT_DISPLAY) {
+            // For the default display, privacy dot is started via ScreenDecorations
+            return
+        }
+        privacyDotWindowControllerStore.forDisplay(displayId).start()
     }
 }
