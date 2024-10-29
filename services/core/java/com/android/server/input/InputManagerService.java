@@ -3022,6 +3022,7 @@ public class InputManagerService extends IInputManager.Stub
 
     private void handleCurrentUserChanged(@UserIdInt int userId) {
         mCurrentUserId = userId;
+        mKeyGestureController.setCurrentUserId(userId);
     }
 
     /**
