@@ -19,6 +19,7 @@ package com.android.systemui.brightness.data.repository
 import android.annotation.SuppressLint
 import android.hardware.display.BrightnessInfo
 import android.hardware.display.DisplayManager
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.brightness.shared.model.BrightnessLog
 import com.android.systemui.brightness.shared.model.LinearBrightness
 import com.android.systemui.brightness.shared.model.formatBrightness
@@ -46,7 +47,6 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
-import com.android.app.tracing.coroutines.launchTraced as launch
 import kotlinx.coroutines.withContext
 
 /**
@@ -90,10 +90,7 @@ constructor(
     @Background private val backgroundContext: CoroutineContext,
 ) : ScreenBrightnessRepository {
 
-    private val apiQueue =
-        Channel<SetBrightnessMethod>(
-            capacity = UNLIMITED,
-        )
+    private val apiQueue = Channel<SetBrightnessMethod>(capacity = UNLIMITED)
 
     init {
         applicationScope.launch(context = backgroundContext) {
@@ -132,7 +129,8 @@ constructor(
                 displayManager.registerDisplayListener(
                     listener,
                     null,
-                    DisplayManager.EVENT_FLAG_DISPLAY_BRIGHTNESS,
+                    /* eventFlags */ 0,
+                    DisplayManager.PRIVATE_EVENT_FLAG_DISPLAY_BRIGHTNESS,
                 )
 
                 awaitClose { displayManager.unregisterDisplayListener(listener) }
@@ -190,8 +188,10 @@ constructor(
 
     private sealed interface SetBrightnessMethod {
         val value: LinearBrightness
+
         @JvmInline
         value class Temporary(override val value: LinearBrightness) : SetBrightnessMethod
+
         @JvmInline
         value class Permanent(override val value: LinearBrightness) : SetBrightnessMethod
     }
@@ -201,7 +201,7 @@ constructor(
             LOG_BUFFER_BRIGHTNESS_CHANGE_TAG,
             if (permanent) LogLevel.DEBUG else LogLevel.VERBOSE,
             { str1 = value.formatBrightness() },
-            { "Change requested: $str1" }
+            { "Change requested: $str1" },
         )
     }
 

@@ -203,11 +203,13 @@ public class DisplayManagerServiceTest {
 
     private static final String VIRTUAL_DISPLAY_NAME = "Test Virtual Display";
     private static final String PACKAGE_NAME = "com.android.frameworks.displayservicetests";
-    private static final long STANDARD_DISPLAY_EVENTS = DisplayManager.EVENT_FLAG_DISPLAY_ADDED
-            | DisplayManager.EVENT_FLAG_DISPLAY_CHANGED
-            | DisplayManager.EVENT_FLAG_DISPLAY_REMOVED;
+    private static final long STANDARD_DISPLAY_EVENTS =
+            DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_ADDED
+            | DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_CHANGED
+            | DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_REMOVED;
     private static final long STANDARD_AND_CONNECTION_DISPLAY_EVENTS =
-            STANDARD_DISPLAY_EVENTS | DisplayManager.EVENT_FLAG_DISPLAY_CONNECTION_CHANGED;
+            STANDARD_DISPLAY_EVENTS
+                    | DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_CONNECTION_CHANGED;
 
     private static final String EVENT_DISPLAY_ADDED = "EVENT_DISPLAY_ADDED";
     private static final String EVENT_DISPLAY_REMOVED = "EVENT_DISPLAY_REMOVED";
@@ -2379,7 +2381,7 @@ public class DisplayManagerServiceTest {
         // register display listener callback
         FakeDisplayManagerCallback callback = new FakeDisplayManagerCallback();
         long allEventsExceptDisplayAdded = STANDARD_DISPLAY_EVENTS
-                & ~DisplayManager.EVENT_FLAG_DISPLAY_ADDED;
+                & ~DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_ADDED;
         displayManagerBinderService.registerCallbackWithEventMask(callback,
                 allEventsExceptDisplayAdded);
 
@@ -2450,7 +2452,7 @@ public class DisplayManagerServiceTest {
 
         FakeDisplayManagerCallback callback = new FakeDisplayManagerCallback();
         long allEventsExceptDisplayRemoved = STANDARD_DISPLAY_EVENTS
-                & ~DisplayManager.EVENT_FLAG_DISPLAY_REMOVED;
+                & ~DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_REMOVED;
         displayManagerBinderService.registerCallbackWithEventMask(callback,
                 allEventsExceptDisplayRemoved);
 

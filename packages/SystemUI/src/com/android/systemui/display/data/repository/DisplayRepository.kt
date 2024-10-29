@@ -264,7 +264,8 @@ constructor(
                 displayManager.registerDisplayListener(
                     callback,
                     backgroundHandler,
-                    DisplayManager.EVENT_FLAG_DISPLAY_CONNECTION_CHANGED,
+                    /* eventFlags */ 0,
+                    DisplayManager.PRIVATE_EVENT_FLAG_DISPLAY_CONNECTION_CHANGED,
                 )
                 awaitClose { displayManager.unregisterDisplayListener(callback) }
             }
