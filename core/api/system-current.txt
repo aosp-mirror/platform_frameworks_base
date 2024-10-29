@@ -705,6 +705,7 @@ package android.app {
     field public static final String OPSTR_READ_MEDIA_IMAGES = "android:read_media_images";
     field public static final String OPSTR_READ_MEDIA_VIDEO = "android:read_media_video";
     field public static final String OPSTR_READ_MEDIA_VISUAL_USER_SELECTED = "android:read_media_visual_user_selected";
+    field @FlaggedApi("android.permission.flags.platform_oxygen_saturation_enabled") public static final String OPSTR_READ_OXYGEN_SATURATION = "android:read_oxygen_saturation";
     field @FlaggedApi("android.permission.flags.platform_skin_temperature_enabled") public static final String OPSTR_READ_SKIN_TEMPERATURE = "android:read_skin_temperature";
     field public static final String OPSTR_READ_WRITE_HEALTH_DATA = "android:read_write_health_data";
     field public static final String OPSTR_RECEIVE_AMBIENT_TRIGGER_AUDIO = "android:receive_ambient_trigger_audio";
