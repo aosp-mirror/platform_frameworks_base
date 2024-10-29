@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.chips.screenrecord.domain.interactor
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
@@ -32,8 +33,10 @@ import com.google.common.truth.Truth.assertThat
 import kotlin.test.Test
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import org.junit.runner.RunWith
 
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class ScreenRecordChipInteractorTest : SysuiTestCase() {
     private val kosmos = Kosmos().also { it.testCase = this }
     private val testScope = kosmos.testScope
