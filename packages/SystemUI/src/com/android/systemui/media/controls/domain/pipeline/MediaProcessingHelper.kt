@@ -42,7 +42,7 @@ fun isSameMediaData(
     context: Context,
     newController: MediaController,
     new: MediaData,
-    old: MediaData?
+    old: MediaData?,
 ): Boolean {
     if (old == null || !mediaControlsPostsOptimization()) return false
 
@@ -71,7 +71,7 @@ fun isSameMediaData(
 /** Returns whether actions lists are equal. */
 fun areCustomActionListsEqual(
     first: List<PlaybackState.CustomAction>?,
-    second: List<PlaybackState.CustomAction>?
+    second: List<PlaybackState.CustomAction>?,
 ): Boolean {
     // Same object, or both null
     if (first === second) {
@@ -94,7 +94,7 @@ fun areCustomActionListsEqual(
 
 private fun areCustomActionsEqual(
     firstAction: PlaybackState.CustomAction,
-    secondAction: PlaybackState.CustomAction
+    secondAction: PlaybackState.CustomAction,
 ): Boolean {
     if (
         firstAction.action != secondAction.action ||
@@ -139,8 +139,9 @@ private fun areActionsEqual(
     context: Context,
     newController: MediaController,
     new: MediaData,
-    old: MediaData
+    old: MediaData,
 ): Boolean {
+    // TODO(b/360196209): account for actions generated from media3
     val oldState = MediaController(context, old.token!!).playbackState
     return if (
         new.semanticActions == null &&
@@ -164,7 +165,7 @@ private fun areActionsEqual(
         oldState?.actions == newController.playbackState?.actions &&
             areCustomActionListsEqual(
                 oldState?.customActions,
-                newController.playbackState?.customActions
+                newController.playbackState?.customActions,
             )
     } else {
         false
