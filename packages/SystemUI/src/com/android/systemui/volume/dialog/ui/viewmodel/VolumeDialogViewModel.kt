@@ -17,7 +17,6 @@
 package com.android.systemui.volume.dialog.ui.viewmodel
 
 import android.content.Context
-import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.res.R
 import com.android.systemui.volume.dialog.domain.interactor.VolumeDialogVisibilityInteractor
 import com.android.systemui.volume.dialog.shared.model.VolumeDialogVisibilityModel
@@ -27,7 +26,6 @@ import com.android.systemui.volume.dialog.sliders.domain.interactor.VolumeDialog
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
@@ -41,7 +39,7 @@ constructor(
     dialogVisibilityInteractor: VolumeDialogVisibilityInteractor,
     volumeDialogSlidersInteractor: VolumeDialogSlidersInteractor,
     private val volumeDialogSliderInteractorFactory: VolumeDialogSliderInteractor.Factory,
-) : ExclusiveActivatable() {
+) {
 
     val dialogVisibilityModel: Flow<VolumeDialogVisibilityModel> =
         dialogVisibilityInteractor.dialogVisibility
@@ -52,10 +50,6 @@ constructor(
                 context.getString(R.string.volume_dialog_title, sliderModel.streamLabel(context))
             }
         }
-
-    override suspend fun onActivated(): Nothing {
-        awaitCancellation()
-    }
 
     @AssistedFactory
     interface Factory {

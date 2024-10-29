@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.volume.dialog.ui.viewmodel
+package com.android.systemui.volume.dialog.ui
 
 import android.content.Context
 import android.content.res.Resources
@@ -41,7 +41,7 @@ import kotlinx.coroutines.flow.stateIn
  * Consume or use [kotlinx.coroutines.flow.first] to get the value.
  */
 @VolumeDialogScope
-class VolumeDialogResourcesViewModel
+class VolumeDialogResources
 @Inject
 constructor(
     @VolumeDialog private val coroutineScope: CoroutineScope,

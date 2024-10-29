@@ -37,10 +37,10 @@ import com.android.systemui.volume.dialog.ringer.ui.binder.VolumeDialogRingerVie
 import com.android.systemui.volume.dialog.settings.ui.binder.VolumeDialogSettingsButtonViewBinder
 import com.android.systemui.volume.dialog.shared.model.VolumeDialogVisibilityModel
 import com.android.systemui.volume.dialog.sliders.ui.VolumeDialogSlidersViewBinder
+import com.android.systemui.volume.dialog.ui.VolumeDialogResources
 import com.android.systemui.volume.dialog.ui.utils.JankListenerFactory
 import com.android.systemui.volume.dialog.ui.utils.suspendAnimate
 import com.android.systemui.volume.dialog.ui.viewmodel.VolumeDialogGravityViewModel
-import com.android.systemui.volume.dialog.ui.viewmodel.VolumeDialogResourcesViewModel
 import com.android.systemui.volume.dialog.ui.viewmodel.VolumeDialogViewModel
 import com.android.systemui.volume.dialog.utils.VolumeTracer
 import javax.inject.Inject
@@ -59,7 +59,7 @@ import kotlinx.coroutines.flow.onEach
 class VolumeDialogViewBinder
 @Inject
 constructor(
-    private val volumeResources: VolumeDialogResourcesViewModel,
+    private val volumeResources: VolumeDialogResources,
     private val gravityViewModel: VolumeDialogGravityViewModel,
     private val viewModelFactory: VolumeDialogViewModel.Factory,
     private val jankListenerFactory: JankListenerFactory,
