@@ -14,21 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.systemui.volume.panel.component.volume.slider.ui.viewmodel
+package com.android.systemui.haptics.slider
 
-import com.android.systemui.haptics.slider.compose.ui.SliderHapticsViewModel
-import kotlinx.coroutines.flow.StateFlow
+interface SliderQuantization {
+    /** What is the step size between discrete steps of the slider */
+    val stepSize: Float
 
-/** Controls the behaviour of a volume slider. */
-interface SliderViewModel {
+    data class Continuous(override val stepSize: Float = Float.MIN_VALUE) : SliderQuantization
 
-    val slider: StateFlow<SliderState>
-
-    val hapticsViewModelFactory: SliderHapticsViewModel.Factory
-
-    fun onValueChanged(state: SliderState, newValue: Float)
-
-    fun onValueChangeFinished()
-
-    fun toggleMuted(state: SliderState)
+    data class Discrete(override val stepSize: Float) : SliderQuantization
 }
