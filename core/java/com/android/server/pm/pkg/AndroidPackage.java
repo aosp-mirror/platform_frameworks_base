@@ -91,6 +91,28 @@ import java.util.UUID;
 public interface AndroidPackage {
 
     /**
+     * An array containing the drawable resources that used for the launcher
+     * activity icons.
+     *
+     * @see R.attr#alternateLauncherIcons
+     * @hide
+     */
+    @Immutable.Ignore
+    @Nullable
+    int[] getAlternateLauncherIconResIds();
+
+    /**
+     * An array containing the string resources that used for the launcher
+     * activity labels.
+     *
+     * @see R.attr#alternateLauncherLabels
+     * @hide
+     */
+    @Immutable.Ignore
+    @Nullable
+    int[] getAlternateLauncherLabelResIds();
+
+    /**
      * @see ApplicationInfo#className
      * @see R.styleable#AndroidManifestApplication_name
      */
