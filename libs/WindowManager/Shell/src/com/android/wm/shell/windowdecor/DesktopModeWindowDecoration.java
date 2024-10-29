@@ -1452,7 +1452,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
 
     void closeManageWindowsMenu() {
         if (mManageWindowsMenu != null) {
-            mManageWindowsMenu.close();
+            mManageWindowsMenu.animateClose();
         }
         mManageWindowsMenu = null;
     }

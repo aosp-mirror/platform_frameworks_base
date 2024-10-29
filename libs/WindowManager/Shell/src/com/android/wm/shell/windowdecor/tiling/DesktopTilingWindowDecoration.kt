@@ -27,6 +27,7 @@ import android.util.Slog
 import android.view.SurfaceControl
 import android.view.SurfaceControl.Transaction
 import android.view.WindowManager.TRANSIT_CHANGE
+import android.view.WindowManager.TRANSIT_OPEN
 import android.view.WindowManager.TRANSIT_TO_BACK
 import android.view.WindowManager.TRANSIT_TO_FRONT
 import android.window.TransitionInfo
@@ -342,7 +343,9 @@ class DesktopTilingWindowDecoration(
 
     private fun isMinimized(changeMode: Int, infoType: Int): Boolean {
         return (changeMode == TRANSIT_TO_BACK &&
-            (infoType == TRANSIT_MINIMIZE || infoType == TRANSIT_TO_BACK))
+            (infoType == TRANSIT_MINIMIZE ||
+                infoType == TRANSIT_TO_BACK ||
+                infoType == TRANSIT_OPEN))
     }
 
     class AppResizingHelper(

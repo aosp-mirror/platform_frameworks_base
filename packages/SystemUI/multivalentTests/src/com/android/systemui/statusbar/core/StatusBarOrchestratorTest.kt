@@ -22,9 +22,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.bouncer.data.repository.fakeKeyguardBouncerRepository
-import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.kosmos.unconfinedTestDispatcher
+import com.android.systemui.kosmos.useUnconfinedTestDispatcher
 import com.android.systemui.plugins.DarkIconDispatcher
 import com.android.systemui.plugins.mockPluginDependencyProvider
 import com.android.systemui.plugins.statusbar.StatusBarStateController
@@ -57,7 +56,7 @@ import org.mockito.kotlin.verify
 @RunWith(AndroidJUnit4::class)
 class StatusBarOrchestratorTest : SysuiTestCase() {
 
-    private val kosmos = testKosmos().also { it.testDispatcher = it.unconfinedTestDispatcher }
+    private val kosmos = testKosmos().useUnconfinedTestDispatcher()
     private val testScope = kosmos.testScope
     private val fakeStatusBarModePerDisplayRepository = kosmos.fakeStatusBarModePerDisplayRepository
     private val mockPluginDependencyProvider = kosmos.mockPluginDependencyProvider

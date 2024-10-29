@@ -62,6 +62,7 @@ val Kosmos.bouncerSceneContentViewModel by Fixture {
         passwordViewModelFactory = passwordBouncerViewModelFactory,
         bouncerHapticPlayer = bouncerHapticPlayer,
         keyguardMediaKeyInteractor = keyguardMediaKeyInteractor,
+        bouncerActionButtonInteractor = bouncerActionButtonInteractor,
     )
 }
 

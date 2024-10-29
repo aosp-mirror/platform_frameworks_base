@@ -23,8 +23,9 @@ import android.provider.Settings
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.kosmos.unconfinedTestDispatcher
-import com.android.systemui.kosmos.unconfinedTestScope
+import com.android.systemui.kosmos.testDispatcher
+import com.android.systemui.kosmos.testScope
+import com.android.systemui.kosmos.useUnconfinedTestDispatcher
 import com.android.systemui.res.R
 import com.android.systemui.settings.FakeUserTracker
 import com.android.systemui.shared.keyguard.shared.model.KeyguardQuickAffordanceSlots
@@ -33,7 +34,7 @@ import com.android.systemui.util.FakeSharedPreferences
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
-import com.android.systemui.util.settings.unconfinedDispatcherFakeSettings
+import com.android.systemui.util.settings.fakeSettings
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -51,10 +52,10 @@ import org.mockito.MockitoAnnotations
 @RunWith(AndroidJUnit4::class)
 class KeyguardQuickAffordanceLegacySettingSyncerTest : SysuiTestCase() {
 
-    private val kosmos = testKosmos()
-    private val testDispatcher = kosmos.unconfinedTestDispatcher
-    private val testScope = kosmos.unconfinedTestScope
-    private val settings = kosmos.unconfinedDispatcherFakeSettings
+    private val kosmos = testKosmos().useUnconfinedTestDispatcher()
+    private val testDispatcher = kosmos.testDispatcher
+    private val testScope = kosmos.testScope
+    private val settings = kosmos.fakeSettings
 
     @Mock private lateinit var sharedPrefs: FakeSharedPreferences
 
@@ -79,13 +80,7 @@ class KeyguardQuickAffordanceLegacySettingSyncerTest : SysuiTestCase() {
                 context = context,
                 userFileManager =
                     mock {
-                        whenever(
-                                getSharedPreferences(
-                                    anyString(),
-                                    anyInt(),
-                                    anyInt(),
-                                )
-                            )
+                        whenever(getSharedPreferences(anyString(), anyInt(), anyInt()))
                             .thenReturn(FakeSharedPreferences())
                     },
                 userTracker = FakeUserTracker(),
@@ -109,17 +104,14 @@ class KeyguardQuickAffordanceLegacySettingSyncerTest : SysuiTestCase() {
         testScope.runTest {
             val job = underTest.startSyncing()
 
-            settings.putInt(
-                Settings.Secure.LOCKSCREEN_SHOW_CONTROLS,
-                1,
-            )
+            settings.putInt(Settings.Secure.LOCKSCREEN_SHOW_CONTROLS, 1)
 
             assertThat(
                     selectionManager
                         .getSelections()
                         .getOrDefault(
                             KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START,
-                            emptyList()
+                            emptyList(),
                         )
                 )
                 .contains(BuiltInKeyguardQuickAffordanceKeys.HOME_CONTROLS)
@@ -132,21 +124,15 @@ class KeyguardQuickAffordanceLegacySettingSyncerTest : SysuiTestCase() {
         testScope.runTest {
             val job = underTest.startSyncing()
 
-            settings.putInt(
-                Settings.Secure.LOCKSCREEN_SHOW_CONTROLS,
-                1,
-            )
-            settings.putInt(
-                Settings.Secure.LOCKSCREEN_SHOW_CONTROLS,
-                0,
-            )
+            settings.putInt(Settings.Secure.LOCKSCREEN_SHOW_CONTROLS, 1)
+            settings.putInt(Settings.Secure.LOCKSCREEN_SHOW_CONTROLS, 0)
 
             assertThat(
                     selectionManager
                         .getSelections()
                         .getOrDefault(
                             KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START,
-                            emptyList()
+                            emptyList(),
                         )
                 )
                 .doesNotContain(BuiltInKeyguardQuickAffordanceKeys.HOME_CONTROLS)
@@ -161,7 +147,7 @@ class KeyguardQuickAffordanceLegacySettingSyncerTest : SysuiTestCase() {
 
             selectionManager.setSelections(
                 KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_END,
-                listOf(BuiltInKeyguardQuickAffordanceKeys.QUICK_ACCESS_WALLET)
+                listOf(BuiltInKeyguardQuickAffordanceKeys.QUICK_ACCESS_WALLET),
             )
 
             advanceUntilIdle()
@@ -177,11 +163,11 @@ class KeyguardQuickAffordanceLegacySettingSyncerTest : SysuiTestCase() {
 
             selectionManager.setSelections(
                 KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_END,
-                listOf(BuiltInKeyguardQuickAffordanceKeys.QUICK_ACCESS_WALLET)
+                listOf(BuiltInKeyguardQuickAffordanceKeys.QUICK_ACCESS_WALLET),
             )
             selectionManager.setSelections(
                 KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_END,
-                emptyList()
+                emptyList(),
             )
 
             assertThat(settings.getInt(Settings.Secure.LOCKSCREEN_SHOW_WALLET)).isEqualTo(0)

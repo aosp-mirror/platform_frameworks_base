@@ -19,8 +19,6 @@ package com.android.settingslib.datastore
 import android.content.ContentResolver
 import android.database.ContentObserver
 import android.net.Uri
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import java.util.concurrent.Executor
 import java.util.concurrent.atomic.AtomicInteger
@@ -39,7 +37,7 @@ abstract class SettingsStore(protected val contentResolver: ContentResolver) :
     private val counter = AtomicInteger()
 
     private val contentObserver =
-        object : ContentObserver(Handler(Looper.getMainLooper())) {
+        object : ContentObserver(HandlerExecutor.main) {
             override fun onChange(selfChange: Boolean) {
                 super.onChange(selfChange, null)
             }

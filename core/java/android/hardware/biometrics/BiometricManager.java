@@ -87,16 +87,19 @@ public class BiometricManager {
             BiometricConstants.BIOMETRIC_ERROR_LOCKOUT;
 
     /**
-     * Mandatory biometrics is not effective.
-     * @hide
+     * Identity Check is currently not active.
+     *
+     * This device either doesn't have this feature enabled, or it's not considered in a
+     * high-risk environment that requires extra security measures for accessing sensitive data.
      */
-    public static final int BIOMETRIC_ERROR_MANDATORY_NOT_ACTIVE =
-            BiometricConstants.BIOMETRIC_ERROR_MANDATORY_NOT_ACTIVE;
+    @FlaggedApi(Flags.FLAG_IDENTITY_CHECK_API)
+    public static final int BIOMETRIC_ERROR_IDENTITY_CHECK_NOT_ACTIVE =
+            BiometricConstants.BIOMETRIC_ERROR_IDENTITY_CHECK_NOT_ACTIVE;
 
     /**
-     * Biometrics is not allowed to verify in apps.
-     * @hide
+     * Biometrics is not allowed to verify the user in apps.
      */
+    @FlaggedApi(Flags.FLAG_IDENTITY_CHECK_API)
     public static final int BIOMETRIC_ERROR_NOT_ENABLED_FOR_APPS =
             BiometricConstants.BIOMETRIC_ERROR_NOT_ENABLED_FOR_APPS;
 
@@ -136,7 +139,7 @@ public class BiometricManager {
             BIOMETRIC_ERROR_NO_HARDWARE,
             BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED,
             BIOMETRIC_ERROR_LOCKOUT,
-            BIOMETRIC_ERROR_MANDATORY_NOT_ACTIVE})
+            BIOMETRIC_ERROR_IDENTITY_CHECK_NOT_ACTIVE})
     @Retention(RetentionPolicy.SOURCE)
     public @interface BiometricError {}
 
@@ -160,7 +163,7 @@ public class BiometricManager {
                 BIOMETRIC_WEAK,
                 BIOMETRIC_CONVENIENCE,
                 DEVICE_CREDENTIAL,
-                MANDATORY_BIOMETRICS,
+                IDENTITY_CHECK,
         })
         @Retention(RetentionPolicy.SOURCE)
         @interface Types {}
@@ -239,20 +242,24 @@ public class BiometricManager {
         int DEVICE_CREDENTIAL = 1 << 15;
 
         /**
-         * The bit is used to request for mandatory biometrics.
+         * The bit is used to request for Identity Check.
          *
-         * <p> The requirements to trigger mandatory biometrics are as follows:
-         * 1. User must have enabled the toggle for mandatory biometrics is settings
-         * 2. User must have enrollments for all {@link #BIOMETRIC_STRONG} sensors available
-         * 3. The device must not be in a trusted location
+         * Identity Check is a feature which requires class 3 biometric authentication to access
+         * sensitive surfaces when the device is outside trusted places.
+         *
+         * <p> The requirements to trigger Identity Check are as follows:
+         * 1. User must have enabled the toggle for Identity Check in settings
+         * 2. User must have enrollments for at least one {@link #BIOMETRIC_STRONG} sensor
+         * 3. The device is determined to be in a high risk environment, for example if it is
+         *    outside of the user's trusted locations or fails to meet similar conditions.
+         * 4. The Identity Check requirements bit must be true
          * </p>
          *
          * <p> If all the above conditions are satisfied, only {@link #BIOMETRIC_STRONG} sensors
          * will be eligible for authentication, and device credential fallback will be dropped.
-         * @hide
          */
-        int MANDATORY_BIOMETRICS = 1 << 16;
-
+        @FlaggedApi(Flags.FLAG_IDENTITY_CHECK_API)
+        int IDENTITY_CHECK = 1 << 16;
     }
 
     /**

@@ -16,12 +16,15 @@
 
 package com.android.systemui.volume.panel.component.volume.slider.ui.viewmodel
 
+import com.android.systemui.haptics.slider.compose.ui.SliderHapticsViewModel
 import kotlinx.coroutines.flow.StateFlow
 
 /** Controls the behaviour of a volume slider. */
 interface SliderViewModel {
 
     val slider: StateFlow<SliderState>
+
+    val hapticsViewModelFactory: SliderHapticsViewModel.Factory
 
     fun onValueChanged(state: SliderState, newValue: Float)
 

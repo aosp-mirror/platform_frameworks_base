@@ -357,10 +357,8 @@
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"ਵਿਸਤ੍ਰਿਤ ਕਨੈਕਟੀਵਿਟੀ ਵਿਸ਼ੇਸ਼ਤਾ ਨੂੰ ਚਾਲੂ ਕਰਦਾ ਹੈ।"</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"ਸਥਾਨਕ ਟਰਮੀਨਲ"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"ਟਰਮੀਨਲ ਐਪ ਨੂੰ ਚਾਲੂ ਕਰੋ ਜੋ ਸਥਾਨਕ ਸ਼ੈਲ ਪਹੁੰਚ ਪੇਸ਼ਕਸ਼ ਕਰਦਾ ਹੈ"</string>
-    <!-- no translation found for enable_linux_terminal_title (5076044866895670637) -->
-    <skip />
-    <!-- no translation found for enable_linux_terminal_summary (5893216510985145320) -->
-    <skip />
+    <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Linux ਵਿਕਾਸ ਵਾਤਾਵਰਨ"</string>
+    <string name="enable_linux_terminal_summary" msgid="5893216510985145320">"Android \'ਤੇ Linux ਦੀ ਟਰਮੀਨਲ ਐਪ ਚਲਾਓ"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP ਜਾਂਚ"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"HDCP ਜਾਂਚ ਵਿਵਹਾਰ ਸੈੱਟ ਕਰੋ"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"ਡੀਬੱਗਿੰਗ"</string>

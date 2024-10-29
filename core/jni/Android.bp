@@ -73,10 +73,12 @@ cc_library_shared_for_libandroid_runtime {
 
     srcs: [
         "android_animation_PropertyValuesHolder.cpp",
+        "android_content_res_ApkAssets.cpp",
         "android_os_SystemClock.cpp",
         "android_os_SystemProperties.cpp",
         "android_os_Trace.cpp",
         "android_text_AndroidCharacter.cpp",
+        "android_util_AssetManager.cpp",
         "android_util_EventLog.cpp",
         "android_util_Log.cpp",
         "android_util_StringBlock.cpp",
@@ -203,7 +205,6 @@ cc_library_shared_for_libandroid_runtime {
                 "android_os_incremental_IncrementalManager.cpp",
                 "android_net_LocalSocketImpl.cpp",
                 "android_service_DataLoaderService.cpp",
-                "android_util_AssetManager.cpp",
                 "android_util_Binder.cpp",
                 "android_util_CharsetUtils.cpp",
                 "android_util_MemoryIntArray.cpp",
@@ -251,7 +252,6 @@ cc_library_shared_for_libandroid_runtime {
                 "android_backup_BackupHelperDispatcher.cpp",
                 "android_app_PropertyInvalidatedCache.cpp",
                 "android_app_backup_FullBackup.cpp",
-                "android_content_res_ApkAssets.cpp",
                 "android_content_res_ObbScanner.cpp",
                 "android_content_res_Configuration.cpp",
                 "android_content_res_ResourceTimer.cpp",
@@ -443,7 +443,6 @@ cc_library_shared_for_libandroid_runtime {
         },
         host_linux: {
             srcs: [
-                "android_content_res_ApkAssets.cpp",
                 "android_database_CursorWindow.cpp",
                 "android_database_SQLiteCommon.cpp",
                 "android_database_SQLiteConnection.cpp",
@@ -458,7 +457,6 @@ cc_library_shared_for_libandroid_runtime {
                 "android_view_InputEventReceiver.cpp",
                 "android_view_InputEventSender.cpp",
 
-                "android_util_AssetManager.cpp",
                 "android_util_Binder.cpp",
 
                 "android_util_FileObserver.cpp",

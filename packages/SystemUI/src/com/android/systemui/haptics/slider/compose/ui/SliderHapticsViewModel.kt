@@ -143,23 +143,30 @@ constructor(
             SliderEventType.STARTED_TRACKING_TOUCH -> {
                 startingProgress = normalized
                 currentSliderEventType = SliderEventType.PROGRESS_CHANGE_BY_USER
+                sliderStateProducer.onProgressChanged(true, normalized)
             }
             SliderEventType.PROGRESS_CHANGE_BY_USER -> {
-                velocityTracker.addPosition(System.currentTimeMillis(), normalized.toOffset())
+                addVelocityDataPoint(value)
                 currentSliderEventType = SliderEventType.PROGRESS_CHANGE_BY_USER
                 sliderStateProducer.onProgressChanged(true, normalized)
             }
             SliderEventType.STARTED_TRACKING_PROGRAM -> {
                 startingProgress = normalized
                 currentSliderEventType = SliderEventType.PROGRESS_CHANGE_BY_PROGRAM
+                sliderStateProducer.onProgressChanged(false, normalized)
             }
             SliderEventType.PROGRESS_CHANGE_BY_PROGRAM -> {
-                velocityTracker.addPosition(System.currentTimeMillis(), normalized.toOffset())
+                addVelocityDataPoint(value)
                 currentSliderEventType = SliderEventType.PROGRESS_CHANGE_BY_PROGRAM
                 sliderStateProducer.onProgressChanged(false, normalized)
             }
             else -> {}
         }
+    }
+
+    fun addVelocityDataPoint(value: Float) {
+        val normalized = value.normalize()
+        velocityTracker.addPosition(System.currentTimeMillis(), normalized.toOffset())
     }
 
     fun onValueChangeEnded() {
@@ -174,8 +181,10 @@ constructor(
         velocityTracker.resetTracking()
     }
 
+    private fun ClosedFloatingPointRange<Float>.length(): Float = endInclusive - start
+
     private fun Float.normalize(): Float =
-        (this / (sliderRange.endInclusive - sliderRange.start)).coerceIn(0f, 1f)
+        ((this - sliderRange.start) / sliderRange.length()).coerceIn(0f, 1f)
 
     private fun Float.toOffset(): Offset =
         when (orientation) {

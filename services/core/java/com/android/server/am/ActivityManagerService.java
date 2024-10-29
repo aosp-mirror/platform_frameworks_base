@@ -134,6 +134,7 @@ import static android.provider.Settings.Global.WAIT_FOR_DEBUGGER;
 import static android.util.FeatureFlagUtils.SETTINGS_ENABLE_MONITOR_PHANTOM_PROCS;
 import static android.view.Display.INVALID_DISPLAY;
 
+import static com.android.internal.util.FrameworkStatsLog.INTENT_CREATOR_TOKEN_ADDED;
 import static com.android.internal.util.FrameworkStatsLog.UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__NEW_MUTABLE_IMPLICIT_PENDING_INTENT_RETRIEVED;
 import static com.android.sdksandbox.flags.Flags.sdkSandboxInstrumentationInfo;
 import static com.android.server.am.ActiveServices.FGS_SAW_RESTRICTIONS;
@@ -2794,9 +2795,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 addServiceToMap(mAppBindArgs, Context.POWER_SERVICE);
                 addServiceToMap(mAppBindArgs, "mount");
                 addServiceToMap(mAppBindArgs, Context.PLATFORM_COMPAT_SERVICE);
-                addServiceToMap(mAppBindArgs, "permissionmgr");
-                addServiceToMap(mAppBindArgs, Context.APP_OPS_SERVICE);
-                addServiceToMap(mAppBindArgs, Context.USER_SERVICE);
             }
             // See b/79378449
             // Getting the window service and package service binder from servicemanager
@@ -2804,6 +2802,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             // TODO: remove exception
             addServiceToMap(mAppBindArgs, "package");
             addServiceToMap(mAppBindArgs, Context.WINDOW_SERVICE);
+            addServiceToMap(mAppBindArgs, Context.USER_SERVICE);
+            addServiceToMap(mAppBindArgs, "permissionmgr");
+            addServiceToMap(mAppBindArgs, Context.APP_OPS_SERVICE);
         }
         return mAppBindArgs;
     }
@@ -19291,12 +19292,14 @@ public class ActivityManagerService extends IActivityManager.Stub
                             + "} does not correspond to an intent in the extra bundle.");
                     continue;
                 }
-                Slog.wtf(TAG,
-                        "A creator token is added to an intent. creatorPackage: " + creatorPackage
-                                + "; intent: " + intent);
-                IBinder creatorToken = createIntentCreatorToken(extraIntent, creatorPackage);
+                IntentCreatorToken creatorToken = createIntentCreatorToken(extraIntent,
+                        creatorPackage);
                 if (creatorToken != null) {
                     extraIntent.setCreatorToken(creatorToken);
+                    Slog.wtf(TAG, "A creator token is added to an intent. creatorPackage: "
+                            + creatorPackage + "; intent: " + intent);
+                    FrameworkStatsLog.write(INTENT_CREATOR_TOKEN_ADDED,
+                            creatorToken.getCreatorUid());
                 }
             } catch (Exception e) {
                 Slog.wtf(TAG,
@@ -19307,7 +19310,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
-    private IBinder createIntentCreatorToken(Intent intent, String creatorPackage) {
+    private IntentCreatorToken createIntentCreatorToken(Intent intent, String creatorPackage) {
         if (IntentCreatorToken.isValid(intent)) return null;
         int creatorUid = getCallingUid();
         IntentCreatorToken.Key key = new IntentCreatorToken.Key(creatorUid, creatorPackage, intent);

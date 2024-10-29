@@ -16,15 +16,16 @@
 
 package com.android.systemui.settings.brightness
 
-import android.testing.AndroidTestingRunner
 import android.view.MotionEvent
 import android.widget.SeekBar
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.settingslib.RestrictedLockUtils
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingManagerFake
-import com.android.systemui.haptics.slider.SeekbarHapticPlugin
+import com.android.systemui.haptics.slider.HapticSlider
+import com.android.systemui.haptics.slider.HapticSliderPlugin
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.policy.BrightnessMirrorController
@@ -51,7 +52,7 @@ import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class BrightnessSliderControllerTest : SysuiTestCase() {
 
     @Mock private lateinit var brightnessSliderView: BrightnessSliderView
@@ -86,7 +87,12 @@ class BrightnessSliderControllerTest : SysuiTestCase() {
                 brightnessSliderView,
                 mFalsingManager,
                 uiEventLogger,
-                SeekbarHapticPlugin(vibratorHelper, msdlPlayer, systemClock),
+                HapticSliderPlugin(
+                    vibratorHelper,
+                    msdlPlayer,
+                    systemClock,
+                    HapticSlider.SeekBar(seekBar),
+                ),
                 activityStarter,
             )
         mController.init()
