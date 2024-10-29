@@ -16,25 +16,26 @@
 
 package com.android.systemui.haptics.slider
 
-import android.view.View
-import androidx.lifecycle.lifecycleScope
-import com.android.systemui.lifecycle.repeatWhenAttached
-import kotlinx.coroutines.awaitCancellation
+sealed interface HapticSlider {
 
-object HapticSliderViewBinder {
-    /**
-     * Binds a [HapticSliderPlugin] to a [View]. The binded view should be a
-     * [android.widget.SeekBar] or a container of a [android.widget.SeekBar]
-     */
-    @JvmStatic
-    fun bind(view: View?, plugin: HapticSliderPlugin) {
-        view?.repeatWhenAttached {
-            plugin.startInScope(lifecycleScope)
-            try {
-                awaitCancellation()
-            } finally {
-                plugin.stop()
-            }
-        }
+    val min: Float
+    val max: Float
+
+    class SeekBar(val seekBar: android.widget.SeekBar) : HapticSlider {
+
+        override val min: Float
+            get() = seekBar.min.toFloat()
+
+        override val max: Float
+            get() = seekBar.max.toFloat()
+    }
+
+    class Slider(val slider: com.google.android.material.slider.Slider) : HapticSlider {
+
+        override val min: Float
+            get() = slider.valueFrom
+
+        override val max: Float
+            get() = slider.valueTo
     }
 }
