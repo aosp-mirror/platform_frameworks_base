@@ -130,6 +130,7 @@ import com.android.wm.shell.windowdecor.DesktopModeWindowDecorViewModel;
 import com.android.wm.shell.windowdecor.WindowDecorViewModel;
 import com.android.wm.shell.windowdecor.additionalviewcontainer.AdditionalSystemViewContainer;
 import com.android.wm.shell.windowdecor.education.DesktopWindowingEducationTooltipController;
+import com.android.wm.shell.windowdecor.tiling.DesktopTilingDecorViewModel;
 
 import dagger.Binds;
 import dagger.Lazy;
@@ -649,7 +650,8 @@ public abstract class WMShellModule {
             InteractionJankMonitor interactionJankMonitor,
             InputManager inputManager,
             FocusTransitionObserver focusTransitionObserver,
-            DesktopModeEventLogger desktopModeEventLogger) {
+            DesktopModeEventLogger desktopModeEventLogger,
+            DesktopTilingDecorViewModel desktopTilingDecorViewModel) {
         return new DesktopTasksController(context, shellInit, shellCommandHandler, shellController,
                 displayController, shellTaskOrganizer, syncQueue, rootTaskDisplayAreaOrganizer,
                 dragAndDropController, transitions, keyguardManager,
@@ -661,8 +663,32 @@ public abstract class WMShellModule {
                 desktopModeLoggerTransitionObserver, launchAdjacentController,
                 recentsTransitionHandler, multiInstanceHelper, mainExecutor, desktopTasksLimiter,
                 recentTasksController.orElse(null), interactionJankMonitor, mainHandler,
-                inputManager, focusTransitionObserver,
-                desktopModeEventLogger);
+                inputManager, focusTransitionObserver, desktopModeEventLogger,
+                desktopTilingDecorViewModel);
+    }
+
+    @WMSingleton
+    @Provides
+    static DesktopTilingDecorViewModel provideDesktopTilingViewModel(Context context,
+            DisplayController displayController,
+            RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
+            SyncTransactionQueue syncQueue,
+            Transitions transitions,
+            ShellTaskOrganizer shellTaskOrganizer,
+            ToggleResizeDesktopTaskTransitionHandler toggleResizeDesktopTaskTransitionHandler,
+            ReturnToDragStartAnimator returnToDragStartAnimator,
+            @DynamicOverride DesktopRepository desktopRepository) {
+        return new DesktopTilingDecorViewModel(
+                context,
+                displayController,
+                rootTaskDisplayAreaOrganizer,
+                syncQueue,
+                transitions,
+                shellTaskOrganizer,
+                toggleResizeDesktopTaskTransitionHandler,
+                returnToDragStartAnimator,
+                desktopRepository
+        );
     }
 
     @WMSingleton

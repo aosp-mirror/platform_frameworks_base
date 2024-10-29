@@ -756,6 +756,56 @@ public class AccessibilityNodeInfo implements Parcelable {
     public static final String ACTION_ARGUMENT_SCROLL_AMOUNT_FLOAT =
             "android.view.accessibility.action.ARGUMENT_SCROLL_AMOUNT_FLOAT";
 
+    // Expanded state types.
+
+    /**
+     * Expanded state for a non-expandable element
+     *
+     * @see #getExpandedState()
+     * @see #setExpandedState(int)
+     */
+    @FlaggedApi(Flags.FLAG_A11Y_EXPANSION_STATE_API)
+    public static final int EXPANDED_STATE_UNDEFINED = 0;
+
+    /**
+     * Expanded state for a collapsed expandable element.
+     *
+     * @see #getExpandedState()
+     * @see #setExpandedState(int)
+     */
+    @FlaggedApi(Flags.FLAG_A11Y_EXPANSION_STATE_API)
+    public static final int EXPANDED_STATE_COLLAPSED = 1;
+
+    /**
+     * Expanded state for an expanded expandable element that can still be expanded further.
+     *
+     * @see #getExpandedState()
+     * @see #setExpandedState(int)
+     */
+    @FlaggedApi(Flags.FLAG_A11Y_EXPANSION_STATE_API)
+    public static final int EXPANDED_STATE_PARTIAL = 2;
+
+    /**
+     * Expanded state for a expanded expandable element that cannot be expanded further.
+     *
+     * @see #getExpandedState()
+     * @see #setExpandedState(int)
+     */
+    @FlaggedApi(Flags.FLAG_A11Y_EXPANSION_STATE_API)
+    public static final int EXPANDED_STATE_FULL = 3;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(
+            prefix = "EXPANDED_STATE_",
+            value = {
+                EXPANDED_STATE_UNDEFINED,
+                EXPANDED_STATE_COLLAPSED,
+                EXPANDED_STATE_PARTIAL,
+                EXPANDED_STATE_FULL,
+            })
+    public @interface ExpandedState {}
+
     // Focus types.
 
     /**
@@ -1047,6 +1097,10 @@ public class AccessibilityNodeInfo implements Parcelable {
 
     private int mMaxTextLength = -1;
     private int mMovementGranularities;
+
+    // TODO(b/362782158) Initialize mExpandedState explicitly with
+    // the EXPANDED_STATE_UNDEFINED state when flagging is removed.
+    private int mExpandedState;
 
     private int mTextSelectionStart = UNDEFINED_SELECTION_INDEX;
     private int mTextSelectionEnd = UNDEFINED_SELECTION_INDEX;
@@ -1928,6 +1982,47 @@ public class AccessibilityNodeInfo implements Parcelable {
      */
     public int getMovementGranularities() {
         return mMovementGranularities;
+    }
+
+    /**
+     * Sets the expanded state of the node.
+     *
+     * <p><strong>Note:</strong> Cannot be called from an {@link
+     * android.accessibilityservice.AccessibilityService}. This class is made immutable before being
+     * delivered to an {@link android.accessibilityservice.AccessibilityService}.
+     *
+     * @param state new expanded state of this node.
+     * @throws IllegalArgumentException If state is not one of:
+     *     <ul>
+     *       <li>{@link #EXPANDED_STATE_UNDEFINED}
+     *       <li>{@link #EXPANDED_STATE_COLLAPSED}
+     *       <li>{@link #EXPANDED_STATE_PARTIAL}
+     *       <li>{@link #EXPANDED_STATE_FULL}
+     *     </ul>
+     *
+     * @throws IllegalStateException If called from an AccessibilityService
+     */
+    @FlaggedApi(Flags.FLAG_A11Y_EXPANSION_STATE_API)
+    public void setExpandedState(@ExpandedState int state) {
+        enforceValidExpandedState(state);
+        enforceNotSealed();
+        mExpandedState = state;
+    }
+
+    /**
+     * Gets the expanded state for this node.
+     *
+     * @return The expanded state, one of:
+     *     <ul>
+     *       <li>{@link #EXPANDED_STATE_UNDEFINED}
+     *       <li>{@link #EXPANDED_STATE_COLLAPSED}
+     *       <li>{@link #EXPANDED_STATE_FULL}
+     *       <li>{@link #EXPANDED_STATE_PARTIAL}
+     *     </ul>
+     */
+    @FlaggedApi(Flags.FLAG_A11Y_EXPANSION_STATE_API)
+    public @ExpandedState int getExpandedState() {
+        return mExpandedState;
     }
 
     /**
@@ -4369,6 +4464,20 @@ public class AccessibilityNodeInfo implements Parcelable {
         }
     }
 
+    private void enforceValidExpandedState(int state) {
+        if (Flags.a11yExpansionStateApi()) {
+            switch (state) {
+                case EXPANDED_STATE_UNDEFINED:
+                case EXPANDED_STATE_COLLAPSED:
+                case EXPANDED_STATE_PARTIAL:
+                case EXPANDED_STATE_FULL:
+                    return;
+                default:
+                    throw new IllegalArgumentException("Unknown expanded state: " + state);
+            }
+        }
+    }
+
     /**
      * Enforces that this instance is not sealed.
      *
@@ -4623,6 +4732,11 @@ public class AccessibilityNodeInfo implements Parcelable {
         if (mChecked != DEFAULT.mChecked) {
             nonDefaultFields |= bitAt(fieldIndex);
         }
+        fieldIndex++;
+        if (mExpandedState != DEFAULT.mExpandedState) {
+            nonDefaultFields |= bitAt(fieldIndex);
+        }
+
         int totalFields = fieldIndex;
         parcel.writeLong(nonDefaultFields);
 
@@ -4794,6 +4908,9 @@ public class AccessibilityNodeInfo implements Parcelable {
         if (isBitSet(nonDefaultFields, fieldIndex++)) {
             parcel.writeInt(mChecked);
         }
+        if (isBitSet(nonDefaultFields, fieldIndex++)) {
+            parcel.writeInt(mExpandedState);
+        }
 
         if (DEBUG) {
             fieldIndex--;
@@ -4883,6 +5000,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         mLeashedParent = other.mLeashedParent;
         mLeashedParentNodeId = other.mLeashedParentNodeId;
         mChecked = other.mChecked;
+        mExpandedState = other.mExpandedState;
     }
 
     private void initCopyInfos(AccessibilityNodeInfo other) {
@@ -5075,6 +5193,9 @@ public class AccessibilityNodeInfo implements Parcelable {
         if (isBitSet(nonDefaultFields, fieldIndex++)) {
             mChecked = parcel.readInt();
         }
+        if (isBitSet(nonDefaultFields, fieldIndex++)) {
+            mExpandedState = parcel.readInt();
+        }
 
         mSealed = sealed;
     }
@@ -5249,6 +5370,26 @@ public class AccessibilityNodeInfo implements Parcelable {
         }
     }
 
+    private static String getExpandedStateSymbolicName(int state) {
+        if (Flags.a11yExpansionStateApi()) {
+            switch (state) {
+                case EXPANDED_STATE_UNDEFINED:
+                    return "EXPANDED_STATE_UNDEFINED";
+                case EXPANDED_STATE_COLLAPSED:
+                    return "EXPANDED_STATE_COLLAPSED";
+                case EXPANDED_STATE_PARTIAL:
+                    return "EXPANDED_STATE_PARTIAL";
+                case EXPANDED_STATE_FULL:
+                    return "EXPANDED_STATE_FULL";
+                default:
+                    throw new IllegalArgumentException("Unknown expanded state: " + state);
+            }
+        } else {
+            // TODO(b/362782158) Remove when flag is removed.
+            return "";
+        }
+    }
+
     private static boolean canPerformRequestOverConnection(int connectionId,
             int windowId, long accessibilityNodeId) {
         final boolean hasWindowId = windowId != AccessibilityWindowInfo.UNDEFINED_WINDOW_ID;
@@ -5346,6 +5487,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         builder.append("; containerTitle: ").append(mContainerTitle);
         builder.append("; viewIdResName: ").append(mViewIdResourceName);
         builder.append("; uniqueId: ").append(mUniqueId);
+        builder.append("; expandedState: ").append(getExpandedStateSymbolicName(mExpandedState));
 
         builder.append("; checkable: ").append(isCheckable());
         builder.append("; checked: ").append(isChecked());

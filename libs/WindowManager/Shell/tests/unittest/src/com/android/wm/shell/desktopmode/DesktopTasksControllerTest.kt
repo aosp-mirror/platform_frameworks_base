@@ -128,6 +128,8 @@ import com.android.wm.shell.transition.TestRemoteTransition
 import com.android.wm.shell.transition.Transitions
 import com.android.wm.shell.transition.Transitions.ENABLE_SHELL_TRANSITIONS
 import com.android.wm.shell.transition.Transitions.TransitionHandler
+import com.android.wm.shell.windowdecor.DesktopModeWindowDecoration
+import com.android.wm.shell.windowdecor.tiling.DesktopTilingDecorViewModel
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
 import java.util.function.Consumer
@@ -223,6 +225,10 @@ class DesktopTasksControllerTest : ShellTestCase() {
   @Mock lateinit var motionEvent: MotionEvent
 
   private lateinit var mockitoSession: StaticMockitoSession
+  @Mock
+  private lateinit var desktopTilingDecorViewModel: DesktopTilingDecorViewModel
+  @Mock
+  private lateinit var desktopWindowDecoration: DesktopModeWindowDecoration
   private lateinit var controller: DesktopTasksController
   private lateinit var shellInit: ShellInit
   private lateinit var taskRepository: DesktopRepository
@@ -336,6 +342,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
         mockInputManager,
         mockFocusTransitionObserver,
         desktopModeEventLogger,
+        desktopTilingDecorViewModel,
       )
   }
 
@@ -2835,7 +2842,9 @@ class DesktopTasksControllerTest : ShellTestCase() {
         Rect(100, -100, 500, 1000), /* currentDragBounds */
         Rect(0, 50, 2000, 2000), /* validDragArea */
         Rect() /* dragStartBounds */,
-        motionEvent)
+        motionEvent,
+        desktopWindowDecoration,
+        )
     val rectAfterEnd = Rect(100, 50, 500, 1150)
     verify(transitions)
         .startTransition(
@@ -2871,7 +2880,9 @@ class DesktopTasksControllerTest : ShellTestCase() {
       currentDragBounds, /* currentDragBounds */
       Rect(0, 50, 2000, 2000) /* validDragArea */,
       Rect() /* dragStartBounds */,
-      motionEvent)
+      motionEvent,
+      desktopWindowDecoration,
+      )
 
 
     verify(transitions)
@@ -3135,6 +3146,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
   }
 
   @Test
+  @DisableFlags(Flags.FLAG_ENABLE_TILE_RESIZING)
   fun snapToHalfScreen_getSnapBounds_calculatesBoundsForResizable() {
     val bounds = Rect(100, 100, 300, 300)
     val task = setUpFreeformTask(DEFAULT_DISPLAY, bounds).apply {
@@ -3150,7 +3162,8 @@ class DesktopTasksControllerTest : ShellTestCase() {
       STABLE_BOUNDS.left, STABLE_BOUNDS.top, STABLE_BOUNDS.right / 2, STABLE_BOUNDS.bottom
     )
 
-    controller.snapToHalfScreen(task, mockSurface, currentDragBounds, SnapPosition.LEFT, ResizeTrigger.SNAP_LEFT_MENU, motionEvent)
+    controller.snapToHalfScreen(task, mockSurface, currentDragBounds, SnapPosition.LEFT,
+      ResizeTrigger.SNAP_LEFT_MENU, motionEvent, desktopWindowDecoration)
     // Assert bounds set to stable bounds
     val wct = getLatestToggleResizeDesktopTaskWct(currentDragBounds)
     assertThat(findBoundsChange(wct, task)).isEqualTo(expectedBounds)
@@ -3165,6 +3178,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
   }
 
   @Test
+  @DisableFlags(Flags.FLAG_ENABLE_TILE_RESIZING)
   fun snapToHalfScreen_snapBoundsWhenAlreadySnapped_animatesSurfaceWithoutWCT() {
     // Set up task to already be in snapped-left bounds
     val bounds = Rect(
@@ -3180,8 +3194,8 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
     // Attempt to snap left again
     val currentDragBounds = Rect(bounds).apply { offset(-100, 0) }
-    controller.snapToHalfScreen(task, mockSurface, currentDragBounds, SnapPosition.LEFT, ResizeTrigger.SNAP_LEFT_MENU, motionEvent)
-
+    controller.snapToHalfScreen(task, mockSurface, currentDragBounds, SnapPosition.LEFT,
+      ResizeTrigger.SNAP_LEFT_MENU, motionEvent, desktopWindowDecoration)
     // Assert that task is NOT updated via WCT
     verify(toggleResizeDesktopTaskTransitionHandler, never()).startTransition(any(), any())
 
@@ -3204,7 +3218,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
   }
 
   @Test
-  @DisableFlags(Flags.FLAG_DISABLE_NON_RESIZABLE_APP_SNAP_RESIZING)
+  @DisableFlags(Flags.FLAG_DISABLE_NON_RESIZABLE_APP_SNAP_RESIZING, Flags.FLAG_ENABLE_TILE_RESIZING)
   fun handleSnapResizingTask_nonResizable_snapsToHalfScreen() {
     val task = setUpFreeformTask(DEFAULT_DISPLAY, Rect(0, 0, 200, 100)).apply {
       isResizeable = false
@@ -3215,7 +3229,9 @@ class DesktopTasksControllerTest : ShellTestCase() {
       Rect(STABLE_BOUNDS.left, STABLE_BOUNDS.top, STABLE_BOUNDS.right / 2, STABLE_BOUNDS.bottom)
 
     controller.handleSnapResizingTask(
-      task, SnapPosition.LEFT, mockSurface, currentDragBounds, preDragBounds, motionEvent
+
+      task, SnapPosition.LEFT, mockSurface, currentDragBounds, preDragBounds, motionEvent,
+      desktopWindowDecoration
     )
     val wct = getLatestToggleResizeDesktopTaskWct(currentDragBounds)
     assertThat(findBoundsChange(wct, task)).isEqualTo(
@@ -3239,7 +3255,8 @@ class DesktopTasksControllerTest : ShellTestCase() {
     val currentDragBounds = Rect(0, 100, 300, 500)
 
     controller.handleSnapResizingTask(
-      task, SnapPosition.LEFT, mockSurface, currentDragBounds, preDragBounds, motionEvent)
+      task, SnapPosition.LEFT, mockSurface, currentDragBounds, preDragBounds, motionEvent,
+      desktopWindowDecoration)
     verify(mReturnToDragStartAnimator).start(
       eq(task.taskId),
       eq(mockSurface),

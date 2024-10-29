@@ -24,6 +24,7 @@ import android.os.VibrationEffect;
 import android.os.vibrator.Flags;
 import android.os.vibrator.PrebakedSegment;
 import android.os.vibrator.PrimitiveSegment;
+import android.os.vibrator.PwleSegment;
 import android.os.vibrator.RampSegment;
 import android.os.vibrator.VibrationEffectSegment;
 import android.util.IntArray;
@@ -166,12 +167,20 @@ final class VibrationStepConductor {
             return new ComposePwleVibratorStep(this, startTime, controller, effect, segmentIndex,
                     pendingVibratorOffDeadline);
         }
+        if (segment instanceof PwleSegment) {
+            return new ComposePwleV2VibratorStep(this, startTime, controller, effect,
+                    segmentIndex, pendingVibratorOffDeadline);
+        }
         return new SetAmplitudeVibratorStep(this, startTime, controller, effect, segmentIndex,
                 pendingVibratorOffDeadline);
     }
 
-    /** Called when this conductor is going to be started running by the VibrationThread. */
-    public void prepareToStart() {
+    /**
+     * Called when this conductor is going to be started running by the VibrationThread.
+     *
+     * @return True if the vibration effect can be played, false otherwise.
+     */
+    public boolean prepareToStart() {
         if (Build.IS_DEBUGGABLE) {
             expectIsVibrationThread(true);
         }
@@ -182,7 +191,11 @@ final class VibrationStepConductor {
         // Scale resolves the default amplitudes from the effect before scaling them.
         mVibration.scaleEffects(mVibrationScaler);
 
-        mVibration.adaptToDevice(mDeviceAdapter);
+        if (!mVibration.adaptToDevice(mDeviceAdapter)) {
+            // Unable to adapt vibration effect for playback. This likely indicates the presence
+            // of unsupported segments. The original effect will be ignored.
+            return false;
+        }
         CombinedVibration.Sequential sequentialEffect = toSequential(mVibration.getEffectToPlay());
         mPendingVibrateSteps++;
         // This count is decremented at the completion of the step, so we don't subtract one.
@@ -191,6 +204,8 @@ final class VibrationStepConductor {
         // Vibration will start playing in the Vibrator, following the effect timings and delays.
         // Report current time as the vibration start time, for debugging.
         mVibration.stats.reportStarted();
+
+        return true;
     }
 
     public HalVibration getVibration() {

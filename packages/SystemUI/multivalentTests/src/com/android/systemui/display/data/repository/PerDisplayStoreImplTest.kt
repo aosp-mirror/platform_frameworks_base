@@ -20,9 +20,8 @@ import android.view.Display
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.kosmos.unconfinedTestDispatcher
+import com.android.systemui.kosmos.useUnconfinedTestDispatcher
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.runBlocking
@@ -37,7 +36,7 @@ import org.mockito.kotlin.mock
 @SmallTest
 class PerDisplayStoreImplTest : SysuiTestCase() {
 
-    private val kosmos = testKosmos().also { it.testDispatcher = it.unconfinedTestDispatcher }
+    private val kosmos = testKosmos().useUnconfinedTestDispatcher()
     private val testScope = kosmos.testScope
     private val fakeDisplayRepository = kosmos.displayRepository
 

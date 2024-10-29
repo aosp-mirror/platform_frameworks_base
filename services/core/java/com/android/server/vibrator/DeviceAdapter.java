@@ -47,6 +47,11 @@ final class DeviceAdapter implements CombinedVibration.VibratorAdapter {
      * instance is created with the final segment list.
      */
     private final List<VibrationSegmentsAdapter> mSegmentAdapters;
+    /**
+     * The vibration segment validators that can validate VibrationEffectSegments entries based on
+     * the VibratorInfo.
+     */
+    private final List<VibrationSegmentsValidator> mSegmentsValidators;
 
     DeviceAdapter(VibrationSettings settings, SparseArray<VibratorController> vibrators) {
         mSegmentAdapters = Arrays.asList(
@@ -60,7 +65,13 @@ final class DeviceAdapter implements CombinedVibration.VibratorAdapter {
                 // Split segments based on their duration and device supported limits
                 new SplitSegmentsAdapter(),
                 // Clip amplitudes and frequencies of final segments based on device bandwidth curve
-                new ClippingAmplitudeAndFrequencyAdapter()
+                new ClippingAmplitudeAndFrequencyAdapter(),
+                // Split Pwle segments based on their duration and device supported limits
+                new SplitPwleSegmentsAdapter()
+        );
+        mSegmentsValidators = List.of(
+                // Validate Pwle segments base on the vibrators frequency range
+                new PwleSegmentsValidator()
         );
         mAvailableVibrators = vibrators;
         mAvailableVibratorIds = new int[vibrators.size()];
@@ -78,7 +89,6 @@ final class DeviceAdapter implements CombinedVibration.VibratorAdapter {
         return mAvailableVibratorIds;
     }
 
-    @NonNull
     @Override
     public VibrationEffect adaptToVibrator(int vibratorId, @NonNull VibrationEffect effect) {
         if (!(effect instanceof VibrationEffect.Composed composed)) {
@@ -100,6 +110,14 @@ final class DeviceAdapter implements CombinedVibration.VibratorAdapter {
         for (int i = 0; i < adapterCount; i++) {
             newRepeatIndex =
                     mSegmentAdapters.get(i).adaptToVibrator(info, newSegments, newRepeatIndex);
+        }
+
+        // Validate the vibration segments. If a segment is not supported, ignore the entire
+        // vibration effect.
+        for (int i = 0; i < mSegmentsValidators.size(); i++) {
+            if (!mSegmentsValidators.get(i).hasValidSegments(info, newSegments)) {
+                return null;
+            }
         }
 
         return new VibrationEffect.Composed(newSegments, newRepeatIndex);
