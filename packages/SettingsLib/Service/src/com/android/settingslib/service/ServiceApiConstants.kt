@@ -19,3 +19,4 @@ package com.android.settingslib.service
 const val PREFERENCE_SERVICE_ACTION = "com.android.settingslib.PREFERENCE_SERVICE"
 
 internal const val API_GET_PREFERENCE_GRAPH = 1
+internal const val API_PREFERENCE_SETTER = 2
