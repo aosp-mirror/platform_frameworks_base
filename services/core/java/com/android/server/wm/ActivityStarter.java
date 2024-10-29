@@ -2350,7 +2350,8 @@ class ActivityStarter {
         // When there is a reused activity and the current result is a trampoline activity,
         // set the reused activity as the result.
         if (mLastStartActivityRecord != null
-                && (mLastStartActivityRecord.finishing || mLastStartActivityRecord.noDisplay)) {
+                && (mLastStartActivityRecord.finishing
+                    || mLastStartActivityRecord.isNoDisplay())) {
             mLastStartActivityRecord = targetTaskTop;
         }
 

@@ -3432,9 +3432,9 @@ class Task extends TaskFragment {
         info.isFocused = isFocused();
         info.isVisible = hasVisibleChildren();
         info.isVisibleRequested = isVisibleRequested();
+        info.isTopActivityNoDisplay = top != null && top.isNoDisplay();
         info.isSleeping = shouldSleepActivities();
         info.isTopActivityTransparent = top != null && !top.fillsParent();
-        info.isTopActivityStyleFloating = top != null && top.isStyleFloating();
         info.lastNonFullscreenBounds = topTask.mLastNonFullscreenBounds;
         final WindowState windowState = top != null ? top.findMainWindow() : null;
         info.requestedVisibleTypes = (windowState != null && Flags.enableFullyImmersiveInDesktop())
@@ -4724,7 +4724,7 @@ class Task extends TaskFragment {
             }
         }
         if (likelyResolvedMode != WINDOWING_MODE_FULLSCREEN
-                && topActivity != null && !topActivity.noDisplay
+                && topActivity != null && !topActivity.isNoDisplay()
                 && topActivity.canForceResizeNonResizable(likelyResolvedMode)) {
             // Inform the user that they are starting an app that may not work correctly in
             // multi-window mode.
