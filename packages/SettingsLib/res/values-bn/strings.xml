@@ -357,10 +357,8 @@
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"কানেক্টিভিটি ফিচার উন্নত করার বিষয়টি চালু করা হয়েছে।"</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"স্থানীয় টার্মিনাল"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"স্থানীয় শেল অ্যাক্সেসের প্রস্তাব করে এমন টার্মিনাল অ্যাপ্লিকেশন সক্ষম করুন"</string>
-    <!-- no translation found for enable_linux_terminal_title (5076044866895670637) -->
-    <skip />
-    <!-- no translation found for enable_linux_terminal_summary (5893216510985145320) -->
-    <skip />
+    <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Linux ডেভেলপমেন্ট এনভায়র্নমেন্ট"</string>
+    <string name="enable_linux_terminal_summary" msgid="5893216510985145320">"Android-এ Linux টার্মিনাল রান করান"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP পরীক্ষণ"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"HDCP চেক করার আচরণ সেট করুন"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"ডিবাগিং"</string>
