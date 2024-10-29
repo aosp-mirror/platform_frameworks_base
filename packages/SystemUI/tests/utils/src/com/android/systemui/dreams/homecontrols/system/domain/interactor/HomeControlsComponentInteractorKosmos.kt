@@ -13,21 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.systemui.dreams.homecontrols
+package com.android.systemui.dreams.homecontrols.system.domain.interactor
 
-import android.os.powerManager
-import android.service.dream.dreamManager
-import com.android.systemui.common.domain.interactor.packageChangeInteractor
 import com.android.systemui.controls.dagger.ControlsComponent
 import com.android.systemui.controls.management.ControlsListingController
 import com.android.systemui.controls.panels.authorizedPanelsRepository
 import com.android.systemui.controls.panels.selectedComponentRepository
-import com.android.systemui.dreams.homecontrols.domain.interactor.HomeControlsComponentInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.user.data.repository.fakeUserRepository
 import com.android.systemui.util.mockito.mock
-import com.android.systemui.util.time.fakeSystemClock
 
 val Kosmos.homeControlsComponentInteractor by
     Kosmos.Fixture {
@@ -37,10 +32,6 @@ val Kosmos.homeControlsComponentInteractor by
             authorizedPanelsRepository = authorizedPanelsRepository,
             userRepository = fakeUserRepository,
             bgScope = applicationCoroutineScope,
-            systemClock = fakeSystemClock,
-            powerManager = powerManager,
-            dreamManager = dreamManager,
-            packageChangeInteractor = packageChangeInteractor,
         )
     }
 

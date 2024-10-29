@@ -20,40 +20,32 @@ import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.content.pm.ServiceInfo
 import android.content.pm.UserInfo
-import android.os.PowerManager
-import android.os.UserHandle
-import android.os.powerManager
-import android.service.dream.dreamManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.common.data.repository.fakePackageChangeRepository
 import com.android.systemui.controls.ControlsServiceInfo
 import com.android.systemui.controls.panels.SelectedComponentRepository
 import com.android.systemui.controls.panels.authorizedPanelsRepository
 import com.android.systemui.controls.panels.selectedComponentRepository
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.dreams.homecontrols.domain.interactor.HomeControlsComponentInteractor.Companion.MAX_UPDATE_CORRELATION_DELAY
+import com.android.systemui.dreams.homecontrols.system.domain.interactor.controlsComponent
+import com.android.systemui.dreams.homecontrols.system.domain.interactor.controlsListingController
+import com.android.systemui.dreams.homecontrols.system.domain.interactor.homeControlsComponentInteractor
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.settings.fakeUserTracker
 import com.android.systemui.testKosmos
 import com.android.systemui.user.data.repository.fakeUserRepository
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.mockito.withArgCaptor
-import com.android.systemui.util.time.fakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import java.util.Optional
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.ArgumentMatchers.anyInt
-import org.mockito.Mockito.anyLong
-import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -68,7 +60,6 @@ class HomeControlsComponentInteractorTest : SysuiTestCase() {
     @Before
     fun setUp() =
         with(kosmos) {
-            fakeSystemClock.setCurrentTimeMillis(0)
             fakeUserRepository.setUserInfos(listOf(PRIMARY_USER, ANOTHER_USER))
             whenever(controlsComponent.getControlsListingController())
                 .thenReturn(Optional.of(controlsListingController))
@@ -172,113 +163,6 @@ class HomeControlsComponentInteractorTest : SysuiTestCase() {
             }
         }
 
-    @Test
-    fun testMonitoringUpdatesAndRestart() =
-        with(kosmos) {
-            testScope.runTest {
-                setActiveUser(PRIMARY_USER)
-                authorizedPanelsRepository.addAuthorizedPanels(setOf(TEST_PACKAGE))
-                selectedComponentRepository.setSelectedComponent(TEST_SELECTED_COMPONENT_PANEL)
-                whenever(controlsListingController.getCurrentServices())
-                    .thenReturn(
-                        listOf(ControlsServiceInfo(TEST_COMPONENT, "panel", hasPanel = true))
-                    )
-
-                val job = launch { underTest.monitorUpdatesAndRestart() }
-                val panelComponent by collectLastValue(underTest.panelComponent)
-
-                assertThat(panelComponent).isEqualTo(TEST_COMPONENT)
-                verify(dreamManager, never()).startDream()
-
-                fakeSystemClock.advanceTime(100)
-                // The package update is started.
-                fakePackageChangeRepository.notifyUpdateStarted(
-                    TEST_PACKAGE,
-                    UserHandle.of(PRIMARY_USER_ID),
-                )
-                fakeSystemClock.advanceTime(MAX_UPDATE_CORRELATION_DELAY.inWholeMilliseconds)
-                // Task fragment becomes empty as a result of the update.
-                underTest.onDreamEndUnexpectedly()
-
-                runCurrent()
-                verify(dreamManager, never()).startDream()
-
-                fakeSystemClock.advanceTime(500)
-                // The package update is finished.
-                fakePackageChangeRepository.notifyUpdateFinished(
-                    TEST_PACKAGE,
-                    UserHandle.of(PRIMARY_USER_ID),
-                )
-
-                runCurrent()
-                verify(dreamManager).startDream()
-                job.cancel()
-            }
-        }
-
-    @Test
-    fun testMonitoringUpdatesAndRestart_dreamEndsAfterDelay() =
-        with(kosmos) {
-            testScope.runTest {
-                setActiveUser(PRIMARY_USER)
-                authorizedPanelsRepository.addAuthorizedPanels(setOf(TEST_PACKAGE))
-                selectedComponentRepository.setSelectedComponent(TEST_SELECTED_COMPONENT_PANEL)
-                whenever(controlsListingController.getCurrentServices())
-                    .thenReturn(
-                        listOf(ControlsServiceInfo(TEST_COMPONENT, "panel", hasPanel = true))
-                    )
-
-                val job = launch { underTest.monitorUpdatesAndRestart() }
-                val panelComponent by collectLastValue(underTest.panelComponent)
-
-                assertThat(panelComponent).isEqualTo(TEST_COMPONENT)
-                verify(dreamManager, never()).startDream()
-
-                fakeSystemClock.advanceTime(100)
-                // The package update is started.
-                fakePackageChangeRepository.notifyUpdateStarted(
-                    TEST_PACKAGE,
-                    UserHandle.of(PRIMARY_USER_ID),
-                )
-                fakeSystemClock.advanceTime(MAX_UPDATE_CORRELATION_DELAY.inWholeMilliseconds + 100)
-                // Task fragment becomes empty as a result of the update.
-                underTest.onDreamEndUnexpectedly()
-
-                runCurrent()
-                verify(dreamManager, never()).startDream()
-
-                fakeSystemClock.advanceTime(500)
-                // The package update is finished.
-                fakePackageChangeRepository.notifyUpdateFinished(
-                    TEST_PACKAGE,
-                    UserHandle.of(PRIMARY_USER_ID),
-                )
-
-                runCurrent()
-                verify(dreamManager, never()).startDream()
-                job.cancel()
-            }
-        }
-
-    @Test
-    fun testDreamUnexpectedlyEnds_triggersUserActivity() =
-        with(kosmos) {
-            testScope.runTest {
-                fakeSystemClock.setUptimeMillis(100000L)
-                verify(powerManager, never()).userActivity(anyLong(), anyInt(), anyInt())
-
-                // Dream ends unexpectedly
-                underTest.onDreamEndUnexpectedly()
-
-                verify(powerManager)
-                    .userActivity(
-                        100000L,
-                        PowerManager.USER_ACTIVITY_EVENT_OTHER,
-                        PowerManager.USER_ACTIVITY_FLAG_NO_CHANGE_LIGHTS
-                    )
-            }
-        }
-
     private fun runServicesUpdate(hasPanelBoolean: Boolean = true) {
         val listings =
             listOf(ControlsServiceInfo(TEST_COMPONENT, "panel", hasPanel = hasPanelBoolean))
@@ -297,7 +181,7 @@ class HomeControlsComponentInteractorTest : SysuiTestCase() {
     private fun ControlsServiceInfo(
         componentName: ComponentName,
         label: CharSequence,
-        hasPanel: Boolean
+        hasPanel: Boolean,
     ): ControlsServiceInfo {
         val serviceInfo =
             ServiceInfo().apply {
@@ -312,7 +196,7 @@ class HomeControlsComponentInteractorTest : SysuiTestCase() {
         context: Context,
         serviceInfo: ServiceInfo,
         private val label: CharSequence,
-        hasPanel: Boolean
+        hasPanel: Boolean,
     ) : ControlsServiceInfo(context, serviceInfo) {
 
         init {
@@ -332,7 +216,7 @@ class HomeControlsComponentInteractorTest : SysuiTestCase() {
             UserInfo(
                 /* id= */ PRIMARY_USER_ID,
                 /* name= */ "primary user",
-                /* flags= */ UserInfo.FLAG_PRIMARY
+                /* flags= */ UserInfo.FLAG_PRIMARY,
             )
 
         private const val ANOTHER_USER_ID = 1
@@ -340,7 +224,7 @@ class HomeControlsComponentInteractorTest : SysuiTestCase() {
             UserInfo(
                 /* id= */ ANOTHER_USER_ID,
                 /* name= */ "another user",
-                /* flags= */ UserInfo.FLAG_PRIMARY
+                /* flags= */ UserInfo.FLAG_PRIMARY,
             )
         private const val TEST_PACKAGE = "pkg"
         private val TEST_COMPONENT = ComponentName(TEST_PACKAGE, "service")
