@@ -235,6 +235,7 @@ public class SettingsToPropertiesMapper {
         "text",
         "threadnetwork",
         "treble",
+        "tv_os_media",
         "tv_system_ui",
         "usb",
         "vibrator",
