@@ -21,12 +21,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.modifiers.height
@@ -53,17 +51,13 @@ constructor(
         @SuppressLint("InflateParams")
         val view =
             remember(context) {
-                (LayoutInflater.from(context)
-                        .inflate(
-                            R.layout.keyguard_status_bar,
-                            null,
-                            false,
-                        ) as KeyguardStatusBarView)
+                (LayoutInflater.from(context).inflate(R.layout.keyguard_status_bar, null, false)
+                        as KeyguardStatusBarView)
                     .also {
                         it.layoutParams =
                             ViewGroup.LayoutParams(
                                 ViewGroup.LayoutParams.MATCH_PARENT,
-                                ViewGroup.LayoutParams.WRAP_CONTENT
+                                ViewGroup.LayoutParams.WRAP_CONTENT,
                             )
                     }
             }
@@ -92,10 +86,8 @@ constructor(
                 view
             },
             modifier =
-                Modifier.fillMaxWidth().padding(horizontal = 16.dp).height {
-                    Utils.getStatusBarHeaderHeightKeyguard(context)
-                },
-            update = { viewController.setDisplayCutout(viewDisplayCutout) }
+                modifier.fillMaxWidth().height { Utils.getStatusBarHeaderHeightKeyguard(context) },
+            update = { viewController.setDisplayCutout(viewDisplayCutout) },
         )
     }
 }
