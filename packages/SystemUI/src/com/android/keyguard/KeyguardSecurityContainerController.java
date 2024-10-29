@@ -1102,8 +1102,11 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         }
 
         mView.initMode(mode, mGlobalSettings, mFalsingManager, mUserSwitcherController,
-                () -> showMessage(getContext().getString(R.string.keyguard_unlock_to_continue),
-                        /* colorState= */ null, /* animated= */ true), mFalsingA11yDelegate);
+                () -> {
+                        String msg = getContext().getString(R.string.keyguard_unlock_to_continue);
+                        showMessage(msg, /* colorState= */ null, /* animated= */ true);
+                        mBouncerMessageInteractor.setUnlockToContinueMessage(msg);
+                }, mFalsingA11yDelegate);
     }
 
     public void reportFailedUnlockAttempt(int userId, int timeoutMs) {
