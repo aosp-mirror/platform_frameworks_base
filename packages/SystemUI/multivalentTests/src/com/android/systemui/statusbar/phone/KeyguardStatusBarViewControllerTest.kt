@@ -16,6 +16,7 @@
 package com.android.systemui.statusbar.phone
 
 import android.app.StatusBarManager
+import android.graphics.Insets
 import android.os.UserHandle
 import android.os.UserManager
 import android.platform.test.annotations.DisableFlags
@@ -23,6 +24,7 @@ import android.platform.test.annotations.EnableFlags
 import android.provider.Settings
 import android.testing.TestableLooper
 import android.testing.TestableLooper.RunWithLooper
+import android.testing.ViewUtils
 import android.view.LayoutInflater
 import android.view.View
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -34,17 +36,21 @@ import com.android.keyguard.logging.KeyguardLogger
 import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.battery.BatteryMeterViewController
+import com.android.systemui.communal.data.repository.fakeCommunalSceneRepository
 import com.android.systemui.communal.domain.interactor.communalSceneInteractor
+import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.flags.DisableSceneContainer
 import com.android.systemui.flags.EnableSceneContainer
+import com.android.systemui.keyguard.ui.viewmodel.glanceableHubToLockscreenTransitionViewModel
+import com.android.systemui.keyguard.ui.viewmodel.lockscreenToGlanceableHubTransitionViewModel
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.plugins.statusbar.statusBarStateController
 import com.android.systemui.res.R
 import com.android.systemui.shade.ShadeViewStateProvider
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.StatusBarState
-import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.data.repository.StatusBarContentInsetsProviderStore
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler
 import com.android.systemui.statusbar.phone.ui.StatusBarIconController
@@ -54,13 +60,16 @@ import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.statusbar.policy.UserInfoController
 import com.android.systemui.statusbar.ui.viewmodel.keyguardStatusBarViewModel
+import com.android.systemui.statusbar.ui.viewmodel.statusBarUserChipViewModel
 import com.android.systemui.testKosmos
-import com.android.systemui.user.ui.viewmodel.StatusBarUserChipViewModel
+import com.android.systemui.user.data.repository.fakeUserRepository
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.settings.SecureSettings
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.runCurrent
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
@@ -70,12 +79,11 @@ import org.mockito.ArgumentMatchers
 import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito
-import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-@RunWithLooper
+@RunWithLooper(setAsMainLooper = true)
 class KeyguardStatusBarViewControllerTest : SysuiTestCase() {
     private lateinit var kosmos: Kosmos
     private lateinit var testScope: TestScope
@@ -106,16 +114,10 @@ class KeyguardStatusBarViewControllerTest : SysuiTestCase() {
 
     @Mock private lateinit var biometricUnlockController: BiometricUnlockController
 
-    @Mock private lateinit var statusBarStateController: SysuiStatusBarStateController
-
-    @Mock private lateinit var statusBarContentInsetsProvider: StatusBarContentInsetsProvider
-
     @Mock
     private lateinit var statusBarContentInsetsProviderStore: StatusBarContentInsetsProviderStore
 
     @Mock private lateinit var userManager: UserManager
-
-    @Mock private lateinit var statusBarUserChipViewModel: StatusBarUserChipViewModel
 
     @Captor
     private lateinit var configurationListenerCaptor:
@@ -139,21 +141,29 @@ class KeyguardStatusBarViewControllerTest : SysuiTestCase() {
     private val fakeExecutor = FakeExecutor(FakeSystemClock())
     private val backgroundExecutor = FakeExecutor(FakeSystemClock())
 
+    private lateinit var looper: TestableLooper
+
     @Before
     @Throws(Exception::class)
     fun setup() {
+        looper = TestableLooper.get(this)
         kosmos = testKosmos()
         testScope = kosmos.testScope
         shadeViewStateProvider = TestShadeViewStateProvider()
+
+        Mockito.`when`(
+                kosmos.statusBarContentInsetsProvider.getStatusBarContentInsetsForCurrentRotation()
+            )
+            .thenReturn(Insets.of(0, 0, 0, 0))
 
         MockitoAnnotations.initMocks(this)
 
         Mockito.`when`(iconManagerFactory.create(ArgumentMatchers.any(), ArgumentMatchers.any()))
             .thenReturn(iconManager)
         Mockito.`when`(statusBarContentInsetsProviderStore.defaultDisplay)
-            .thenReturn(statusBarContentInsetsProvider)
+            .thenReturn(kosmos.statusBarContentInsetsProvider)
         allowTestableLooperAsMainThread()
-        TestableLooper.get(this).runWithLooper {
+        looper.runWithLooper {
             keyguardStatusBarView =
                 Mockito.spy(
                     LayoutInflater.from(mContext).inflate(R.layout.keyguard_status_bar, null)
@@ -167,6 +177,7 @@ class KeyguardStatusBarViewControllerTest : SysuiTestCase() {
 
     private fun createController(): KeyguardStatusBarViewController {
         return KeyguardStatusBarViewController(
+            kosmos.testDispatcher,
             keyguardStatusBarView,
             carrierTextController,
             configurationController,
@@ -182,10 +193,10 @@ class KeyguardStatusBarViewControllerTest : SysuiTestCase() {
             keyguardUpdateMonitor,
             kosmos.keyguardStatusBarViewModel,
             biometricUnlockController,
-            statusBarStateController,
+            kosmos.statusBarStateController,
             statusBarContentInsetsProviderStore,
             userManager,
-            statusBarUserChipViewModel,
+            kosmos.statusBarUserChipViewModel,
             secureSettings,
             commandQueue,
             fakeExecutor,
@@ -193,6 +204,8 @@ class KeyguardStatusBarViewControllerTest : SysuiTestCase() {
             logger,
             statusOverlayHoverListenerFactory,
             kosmos.communalSceneInteractor,
+            kosmos.glanceableHubToLockscreenTransitionViewModel,
+            kosmos.lockscreenToGlanceableHubTransitionViewModel,
         )
     }
 
@@ -682,21 +695,22 @@ class KeyguardStatusBarViewControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun testNewUserSwitcherDisablesAvatar_newUiOn() {
-        // GIVEN the status bar user switcher chip is enabled
-        Mockito.`when`(statusBarUserChipViewModel.chipEnabled).thenReturn(true)
+    fun testNewUserSwitcherDisablesAvatar_newUiOn() =
+        testScope.runTest {
+            // GIVEN the status bar user switcher chip is enabled
+            kosmos.fakeUserRepository.isStatusBarUserChipEnabled = true
 
-        // WHEN the controller is created
-        controller = createController()
+            // WHEN the controller is created
+            controller = createController()
 
-        // THEN keyguard status bar view avatar is disabled
-        Truth.assertThat(keyguardStatusBarView.isKeyguardUserAvatarEnabled).isFalse()
-    }
+            // THEN keyguard status bar view avatar is disabled
+            Truth.assertThat(keyguardStatusBarView.isKeyguardUserAvatarEnabled).isFalse()
+        }
 
     @Test
     fun testNewUserSwitcherDisablesAvatar_newUiOff() {
         // GIVEN the status bar user switcher chip is disabled
-        Mockito.`when`(statusBarUserChipViewModel.chipEnabled).thenReturn(false)
+        kosmos.fakeUserRepository.isStatusBarUserChipEnabled = false
 
         // WHEN the controller is created
         controller = createController()
@@ -752,12 +766,7 @@ class KeyguardStatusBarViewControllerTest : SysuiTestCase() {
     }
 
     private fun updateStatusBarState(state: Int) {
-        val statusBarStateListenerCaptor =
-            ArgumentCaptor.forClass(StatusBarStateController.StateListener::class.java)
-        Mockito.verify(statusBarStateController).addCallback(statusBarStateListenerCaptor.capture())
-        val callback = statusBarStateListenerCaptor.value
-
-        callback.onStateChanged(state)
+        kosmos.statusBarStateController.setState(state)
     }
 
     @Test
@@ -773,6 +782,36 @@ class KeyguardStatusBarViewControllerTest : SysuiTestCase() {
         // Since we're disabled, we don't actually animate in and stay invisible
         Truth.assertThat(keyguardStatusBarView.visibility).isEqualTo(View.INVISIBLE)
     }
+
+    @Test
+    fun animateToGlanceableHub_affectsAlpha() =
+        testScope.runTest {
+            controller.init()
+            val transitionAlphaAmount = .5f
+            ViewUtils.attachView(keyguardStatusBarView)
+            looper.processAllMessages()
+            updateStateToKeyguard()
+            kosmos.fakeCommunalSceneRepository.snapToScene(CommunalScenes.Communal)
+            runCurrent()
+            controller.updateCommunalAlphaTransition(transitionAlphaAmount)
+            Truth.assertThat(keyguardStatusBarView.getAlpha()).isEqualTo(transitionAlphaAmount)
+        }
+
+    @Test
+    fun animateToGlanceableHub_alphaResetOnCommunalNotShowing() =
+        testScope.runTest {
+            controller.init()
+            val transitionAlphaAmount = .5f
+            ViewUtils.attachView(keyguardStatusBarView)
+            looper.processAllMessages()
+            updateStateToKeyguard()
+            kosmos.fakeCommunalSceneRepository.snapToScene(CommunalScenes.Communal)
+            runCurrent()
+            controller.updateCommunalAlphaTransition(transitionAlphaAmount)
+            kosmos.fakeCommunalSceneRepository.snapToScene(CommunalScenes.Blank)
+            runCurrent()
+            Truth.assertThat(keyguardStatusBarView.getAlpha()).isNotEqualTo(transitionAlphaAmount)
+        }
 
     /**
      * Calls [com.android.keyguard.KeyguardUpdateMonitorCallback.onFinishedGoingToSleep] to ensure
