@@ -32,8 +32,10 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
@@ -68,6 +70,7 @@ class TilingDividerViewTest : ShellTestCase() {
         tilingDividerView.handleMotionEvent(viewMock, downMotionEvent)
         verify(dividerMoveCallbackMock, times(1)).onDividerMoveStart(any())
 
+        whenever(dividerMoveCallbackMock.onDividerMove(any())).thenReturn(true)
         val motionEvent =
             getMotionEvent(downTime, MotionEvent.ACTION_MOVE, x.toFloat(), y.toFloat())
         tilingDividerView.handleMotionEvent(viewMock, motionEvent)
@@ -77,6 +80,24 @@ class TilingDividerViewTest : ShellTestCase() {
             getMotionEvent(downTime, MotionEvent.ACTION_UP, x.toFloat(), y.toFloat())
         tilingDividerView.handleMotionEvent(viewMock, upMotionEvent)
         verify(dividerMoveCallbackMock, times(1)).onDividerMovedEnd(any())
+    }
+
+    @Test
+    @UiThreadTest
+    fun testCallbackOnTouch_doesNotHappen_whenNoTouchMove() {
+        val x = 5
+        val y = 5
+        val downTime: Long = SystemClock.uptimeMillis()
+
+        val downMotionEvent =
+            getMotionEvent(downTime, MotionEvent.ACTION_DOWN, x.toFloat(), y.toFloat())
+        tilingDividerView.handleMotionEvent(viewMock, downMotionEvent)
+        verify(dividerMoveCallbackMock, times(1)).onDividerMoveStart(any())
+
+        val upMotionEvent =
+            getMotionEvent(downTime, MotionEvent.ACTION_UP, x.toFloat(), y.toFloat())
+        tilingDividerView.handleMotionEvent(viewMock, upMotionEvent)
+        verify(dividerMoveCallbackMock, never()).onDividerMovedEnd(any())
     }
 
     private fun getMotionEvent(eventTime: Long, action: Int, x: Float, y: Float): MotionEvent {
