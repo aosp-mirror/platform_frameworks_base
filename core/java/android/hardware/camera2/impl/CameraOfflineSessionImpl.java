@@ -16,11 +16,13 @@
 
 package android.hardware.camera2.impl;
 
+import static com.android.internal.util.Preconditions.checkNotNull;
+
+import android.annotation.FlaggedApi;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraDevice;
-import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CameraOfflineSession;
 import android.hardware.camera2.CameraOfflineSession.CameraOfflineSessionCallback;
 import android.hardware.camera2.CaptureFailure;
@@ -40,15 +42,15 @@ import android.util.Range;
 import android.util.SparseArray;
 import android.view.Surface;
 
+import com.android.internal.camera.flags.Flags;
+
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.Executor;
-
-import static com.android.internal.util.Preconditions.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class CameraOfflineSessionImpl extends CameraOfflineSession
         implements IBinder.DeathRecipient {
@@ -173,6 +175,12 @@ public class CameraOfflineSessionImpl extends CameraOfflineSession
         public void onRepeatingRequestError(long lastFrameNumber, int repeatingRequestId) {
             Log.e(TAG, "Unexpected repeating request error received. Last frame number is " +
                     lastFrameNumber);
+        }
+
+        @Override
+        @FlaggedApi(Flags.FLAG_CAMERA_MULTI_CLIENT)
+        public void onClientSharedAccessPriorityChanged(boolean primaryClient) {
+            Log.v(TAG, "onClientSharedAccessPriorityChanged primaryClient = " + primaryClient);
         }
 
         @Override
