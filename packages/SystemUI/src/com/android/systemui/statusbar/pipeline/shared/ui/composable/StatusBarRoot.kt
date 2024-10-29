@@ -35,6 +35,7 @@ import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.plugins.DarkIconDispatcher
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.data.repository.DarkIconDispatcherStore
+import com.android.systemui.statusbar.events.domain.interactor.SystemStatusEventAnimationInteractor
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.NotificationIconContainerStatusBarViewBinder
 import com.android.systemui.statusbar.phone.NotificationIconContainer
 import com.android.systemui.statusbar.phone.PhoneStatusBarView
@@ -59,6 +60,7 @@ constructor(
     private val iconController: StatusBarIconController,
     private val ongoingCallController: OngoingCallController,
     private val darkIconDispatcherStore: DarkIconDispatcherStore,
+    private val eventAnimationInteractor: SystemStatusEventAnimationInteractor,
 ) {
     fun create(root: ViewGroup, andThen: (ViewGroup) -> Unit): ComposeView {
         val composeView = ComposeView(root.context)
@@ -73,6 +75,7 @@ constructor(
                     iconController = iconController,
                     ongoingCallController = ongoingCallController,
                     darkIconDispatcher = darkIconDispatcherStore.forDisplay(root.context.displayId),
+                    eventAnimationInteractor = eventAnimationInteractor,
                     onViewCreated = andThen,
                 )
             }
@@ -102,6 +105,7 @@ fun StatusBarRoot(
     iconController: StatusBarIconController,
     ongoingCallController: OngoingCallController,
     darkIconDispatcher: DarkIconDispatcher,
+    eventAnimationInteractor: SystemStatusEventAnimationInteractor,
     onViewCreated: (ViewGroup) -> Unit,
 ) {
     // None of these methods are used when [StatusBarRootModernization] is on.
@@ -181,6 +185,8 @@ fun StatusBarRoot(
                         statusBarViewBinder.bind(
                             phoneStatusBarView,
                             statusBarViewModel,
+                            eventAnimationInteractor::animateStatusBarContentForChipEnter,
+                            eventAnimationInteractor::animateStatusBarContentForChipExit,
                             nopVisibilityChangeListener,
                         )
                     }
