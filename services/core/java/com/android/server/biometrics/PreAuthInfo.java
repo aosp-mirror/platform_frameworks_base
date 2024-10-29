@@ -112,7 +112,7 @@ class PreAuthInfo {
             throws RemoteException {
 
         final boolean isOnlyMandatoryBiometricsRequested = promptInfo.getAuthenticators()
-                == BiometricManager.Authenticators.MANDATORY_BIOMETRICS;
+                == BiometricManager.Authenticators.IDENTITY_CHECK;
         boolean isMandatoryBiometricsAuthentication = false;
 
         if (dropCredentialFallback(promptInfo.getAuthenticators(),
@@ -180,8 +180,8 @@ class PreAuthInfo {
     private static boolean dropCredentialFallback(int authenticators,
             boolean isMandatoryBiometricsEnabled, ITrustManager trustManager) {
         final boolean isMandatoryBiometricsRequested =
-                (authenticators & BiometricManager.Authenticators.MANDATORY_BIOMETRICS)
-                        == BiometricManager.Authenticators.MANDATORY_BIOMETRICS;
+                (authenticators & BiometricManager.Authenticators.IDENTITY_CHECK)
+                        == BiometricManager.Authenticators.IDENTITY_CHECK;
         if (Flags.mandatoryBiometrics() && isMandatoryBiometricsEnabled
                 && isMandatoryBiometricsRequested) {
             try {

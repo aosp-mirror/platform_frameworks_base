@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.server.integrity.parser;
+package com.android.systemui.haptics.slider
 
-import android.content.integrity.Rule;
+interface SliderQuantization {
+    /** What is the step size between discrete steps of the slider */
+    val stepSize: Float
 
-import java.util.List;
+    data class Continuous(override val stepSize: Float = Float.MIN_VALUE) : SliderQuantization
 
-/** A helper class to parse rules into the {@link Rule} model. */
-public interface RuleParser {
-
-    /** Parse rules from bytes. */
-    List<Rule> parse(byte[] ruleBytes) throws RuleParseException;
-
-    /** Parse rules from an input stream. */
-    List<Rule> parse(RandomAccessObject randomAccessObject, List<RuleIndexRange> ruleIndexRanges)
-            throws RuleParseException;
+    data class Discrete(override val stepSize: Float) : SliderQuantization
 }

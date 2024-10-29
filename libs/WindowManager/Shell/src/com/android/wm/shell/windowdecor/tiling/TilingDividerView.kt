@@ -49,11 +49,10 @@ class TilingDividerView : FrameLayout, View.OnTouchListener, DragDetector.Motion
     var handleRegionWidth: Int = 0
     private var handleRegionHeight = 0
     private var lastAcceptedPos = 0
-    @VisibleForTesting
-    var handleStartY = 0
-    @VisibleForTesting
-    var handleEndY = 0
+    @VisibleForTesting var handleStartY = 0
+    @VisibleForTesting var handleEndY = 0
     private var canResize = false
+    private var resized = false
     /**
      * Tracks divider bar visible bounds in screen-based coordination. Used to calculate with
      * insets.
@@ -209,7 +208,6 @@ class TilingDividerView : FrameLayout, View.OnTouchListener, DragDetector.Motion
                 if (!isWithinHandleRegion(yTouchPosInDivider)) return true
                 callback.onDividerMoveStart(touchPos)
                 setTouching()
-                startPos = touchPos
                 canResize = true
             }
 
@@ -223,19 +221,20 @@ class TilingDividerView : FrameLayout, View.OnTouchListener, DragDetector.Motion
                 val pos = dividerBounds.left + touchPos - startPos
                 if (callback.onDividerMove(pos)) {
                     lastAcceptedPos = touchPos
+                    resized = true
                 }
             }
 
             MotionEvent.ACTION_CANCEL,
             MotionEvent.ACTION_UP -> {
                 if (!canResize) return true
-                dividerBounds.left = dividerBounds.left + lastAcceptedPos - startPos
-                if (moving) {
+                if (moving && resized) {
+                    dividerBounds.left = dividerBounds.left + lastAcceptedPos - startPos
                     callback.onDividerMovedEnd(dividerBounds.left)
-                    moving = false
-                    canResize = false
                 }
-
+                moving = false
+                canResize = false
+                resized = false
                 releaseTouching()
             }
         }

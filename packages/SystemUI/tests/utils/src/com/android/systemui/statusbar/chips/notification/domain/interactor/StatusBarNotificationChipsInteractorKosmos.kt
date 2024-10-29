@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,21 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.systemui.dagger;
+package com.android.systemui.statusbar.chips.notification.domain.interactor
 
-import com.android.systemui.keyguard.dagger.KeyguardModule;
-import com.android.systemui.recents.RecentsModule;
-import com.android.systemui.statusbar.dagger.CentralSurfacesModule;
+import com.android.systemui.kosmos.Kosmos
 
-import dagger.Module;
-
-/**
- * SystemUI objects that are injectable should go here.
- */
-@Module(includes = {
-        RecentsModule.class,
-        CentralSurfacesModule.class,
-        KeyguardModule.class,
-})
-public abstract class SystemUIBinder {
-}
+val Kosmos.statusBarNotificationChipsInteractor: StatusBarNotificationChipsInteractor by
+    Kosmos.Fixture { StatusBarNotificationChipsInteractor() }

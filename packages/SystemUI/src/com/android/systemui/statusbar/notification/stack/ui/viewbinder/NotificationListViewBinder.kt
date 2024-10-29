@@ -22,7 +22,6 @@ import androidx.lifecycle.lifecycleScope
 import com.android.app.tracing.TraceUtils.traceAsync
 import com.android.internal.logging.MetricsLogger
 import com.android.internal.logging.nano.MetricsProto
-import com.android.systemui.Flags
 import com.android.systemui.common.ui.ConfigurationState
 import com.android.systemui.common.ui.view.setImportantForAccessibilityYesNo
 import com.android.systemui.dagger.qualifiers.Background
@@ -40,6 +39,7 @@ import com.android.systemui.statusbar.notification.emptyshade.ui.view.EmptyShade
 import com.android.systemui.statusbar.notification.emptyshade.ui.viewbinder.EmptyShadeViewBinder
 import com.android.systemui.statusbar.notification.emptyshade.ui.viewmodel.EmptyShadeViewModel
 import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor
+import com.android.systemui.statusbar.notification.footer.shared.NotifRedesignFooter
 import com.android.systemui.statusbar.notification.footer.ui.view.FooterView
 import com.android.systemui.statusbar.notification.footer.ui.viewbinder.FooterViewBinder
 import com.android.systemui.statusbar.notification.footer.ui.viewmodel.FooterViewModel
@@ -146,7 +146,7 @@ constructor(
             // The footer needs to be re-inflated every time the theme or the font size changes.
             configuration
                 .inflateLayout<FooterView>(
-                    if (Flags.notificationsRedesignFooterView())
+                    if (NotifRedesignFooter.isEnabled)
                         R.layout.status_bar_notification_footer_redesign
                     else R.layout.status_bar_notification_footer,
                     parentView,

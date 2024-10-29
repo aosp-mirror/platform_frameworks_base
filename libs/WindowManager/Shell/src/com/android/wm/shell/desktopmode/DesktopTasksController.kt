@@ -698,7 +698,7 @@ class DesktopTasksController(
                 mainExecutor, rootTaskDisplayAreaOrganizer, remoteTransition, taskIdToMinimize)
         val t = transitions.startTransition(transitionType, wct, remoteTransitionHandler)
         remoteTransitionHandler.setTransition(t)
-        taskIdToMinimize?.let { addPendingMinimizeTransition(t, it) }
+        taskIdToMinimize.let { addPendingMinimizeTransition(t, it) }
         return t
     }
 
@@ -1250,10 +1250,7 @@ class DesktopTasksController(
                     // Check if freeform task launch during recents should be handled
                     shouldHandleMidRecentsFreeformLaunch -> handleMidRecentsFreeformTaskLaunch(task)
                     // Check if the closing task needs to be handled
-                    TransitionUtil.isClosingType(request.type) -> handleTaskClosing(
-                        task,
-                        request.type
-                    )
+                    TransitionUtil.isClosingType(request.type) -> handleTaskClosing(task)
                     // Check if the top task shouldn't be allowed to enter desktop mode
                     isIncompatibleTask(task) -> handleIncompatibleTaskLaunch(task)
                     // Check if fullscreen task should be updated
@@ -1579,10 +1576,7 @@ class DesktopTasksController(
     }
 
     /** Handle task closing by removing wallpaper activity if it's the last active task */
-    private fun handleTaskClosing(
-        task: RunningTaskInfo,
-        transitionType: Int
-    ): WindowContainerTransaction? {
+    private fun handleTaskClosing(task: RunningTaskInfo): WindowContainerTransaction? {
         logV("handleTaskClosing")
         if (!isDesktopModeShowing(task.displayId))
             return null
@@ -1603,7 +1597,7 @@ class DesktopTasksController(
         taskbarDesktopTaskListener?.onTaskbarCornerRoundingUpdate(
             doesAnyTaskRequireTaskbarRounding(
                 task.displayId,
-                task.id
+                task.taskId
             )
         )
         return if (wct.isEmpty) null else wct
