@@ -1695,7 +1695,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
   }
 
   @Test
-  fun onDesktopWindowMinimize_singleActiveTask_hasWallpaperActivityToken_removesWallpaper() {
+  fun onTaskMinimize_singleActiveTask_hasWallpaperActivityToken_removesWallpaper() {
     val task = setUpFreeformTask()
     val transition = Binder()
     whenever(freeformTaskTransitionStarter.startMinimizedModeTransition(any()))
@@ -2382,8 +2382,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     taskRepository.wallpaperActivityToken = wallpaperToken
     taskRepository.minimizeTask(displayId = DEFAULT_DISPLAY, taskId = task2.taskId)
     // Task is being minimized so mark it as not visible.
-    taskRepository
-      .updateTaskVisibility(displayId = DEFAULT_DISPLAY, task2.taskId, false)
+    taskRepository.updateTask(displayId = DEFAULT_DISPLAY, task2.taskId, isVisible = false)
     val result = controller.handleRequest(Binder(), createTransition(task2, type = TRANSIT_TO_BACK))
 
     assertNull(result, "Should not handle request")
@@ -2497,8 +2496,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     taskRepository.wallpaperActivityToken = wallpaperToken
     taskRepository.minimizeTask(displayId = DEFAULT_DISPLAY, taskId = task2.taskId)
     // Task is being minimized so mark it as not visible.
-    taskRepository
-      .updateTaskVisibility(displayId = DEFAULT_DISPLAY, task2.taskId, false)
+    taskRepository.updateTask(displayId = DEFAULT_DISPLAY, task2.taskId, isVisible = false)
     val result = controller.handleRequest(Binder(), createTransition(task2, type = TRANSIT_TO_BACK))
 
     assertNull(result, "Should not handle request")
@@ -2573,8 +2571,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     task3.isFocused = false
     taskRepository.wallpaperActivityToken = wallpaperToken
     taskRepository.minimizeTask(DEFAULT_DISPLAY, task1.taskId)
-    taskRepository.updateTaskVisibility(DEFAULT_DISPLAY, task3.taskId,
-      visible = false)
+    taskRepository.updateTask(DEFAULT_DISPLAY, task3.taskId, isVisible = false)
 
     controller.enterFullscreen(DEFAULT_DISPLAY, transitionSource = UNKNOWN)
 
@@ -2928,8 +2925,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     task3.isFocused = false
     taskRepository.wallpaperActivityToken = wallpaperToken
     taskRepository.minimizeTask(DEFAULT_DISPLAY, task1.taskId)
-    taskRepository.updateTaskVisibility(DEFAULT_DISPLAY, task3.taskId,
-      visible = false)
+    taskRepository.updateTask(DEFAULT_DISPLAY, task3.taskId, isVisible = false)
 
     controller.enterSplit(DEFAULT_DISPLAY, leftOrTop = false)
 
@@ -3422,7 +3418,6 @@ class DesktopTasksControllerTest : ShellTestCase() {
     )
   }
 
-
   @Test
   fun onUnhandledDrag_newFreeformIntent() {
     testOnUnhandledDrag(DesktopModeVisualIndicator.IndicatorType.TO_DESKTOP_INDICATOR,
@@ -3808,11 +3803,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     } else {
       whenever(shellTaskOrganizer.getRunningTaskInfo(task.taskId)).thenReturn(task)
     }
-    if (active) {
-      taskRepository.addActiveTask(displayId, task.taskId)
-      taskRepository.updateTaskVisibility(displayId, task.taskId, visible = true)
-    }
-    taskRepository.addOrMoveFreeformTaskToTop(displayId, task.taskId)
+    taskRepository.addTask(displayId, task.taskId, isVisible = active)
     if (!background) {
       runningTasks.add(task)
     }
@@ -3915,13 +3906,11 @@ class DesktopTasksControllerTest : ShellTestCase() {
   }
 
   private fun markTaskVisible(task: RunningTaskInfo) {
-    taskRepository.updateTaskVisibility(
-        task.displayId, task.taskId, visible = true)
+    taskRepository.updateTask(task.displayId, task.taskId, isVisible = true)
   }
 
   private fun markTaskHidden(task: RunningTaskInfo) {
-    taskRepository.updateTaskVisibility(
-        task.displayId, task.taskId, visible = false)
+    taskRepository.updateTask(task.displayId, task.taskId, isVisible = false)
   }
 
   private fun getLatestWct(
@@ -3929,7 +3918,6 @@ class DesktopTasksControllerTest : ShellTestCase() {
       handlerClass: Class<out TransitionHandler>? = null
   ): WindowContainerTransaction {
     val arg = ArgumentCaptor.forClass(WindowContainerTransaction::class.java)
-
     if (handlerClass == null) {
       verify(transitions).startTransition(eq(type), arg.capture(), isNull())
     } else {
@@ -4046,7 +4034,6 @@ private fun WindowContainerTransaction.assertNoRemoveAt(index: Int, token: Windo
 }
 
 private fun WindowContainerTransaction.hasRemoveAt(index: Int, token: WindowContainerToken) {
-
   assertIndexInBounds(index)
   val op = hierarchyOps[index]
   assertThat(op.type).isEqualTo(HIERARCHY_OP_TYPE_REMOVE_TASK)

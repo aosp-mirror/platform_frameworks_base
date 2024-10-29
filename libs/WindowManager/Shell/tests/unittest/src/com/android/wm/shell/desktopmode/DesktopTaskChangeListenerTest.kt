@@ -61,7 +61,7 @@ class DesktopTaskChangeListenerTest : ShellTestCase() {
 
     desktopTaskChangeListener.onTaskOpening(task)
 
-    verify(desktopRepository, never()).addOrMoveFreeformTaskToTop(task.displayId, task.taskId)
+    verify(desktopRepository, never()).addTask(task.displayId, task.taskId, task.isVisible)
     verify(desktopRepository, never()).removeFreeformTask(task.displayId, task.taskId)
   }
 
@@ -82,9 +82,7 @@ class DesktopTaskChangeListenerTest : ShellTestCase() {
 
     desktopTaskChangeListener.onTaskOpening(task)
 
-    verify(desktopRepository).addOrMoveFreeformTaskToTop(task.displayId, task.taskId)
-    verify(desktopRepository).addActiveTask(task.displayId, task.taskId)
-    verify(desktopRepository).updateTaskVisibility(task.displayId, task.taskId, visible = true)
+    verify(desktopRepository).addTask(task.displayId, task.taskId, task.isVisible)
   }
 
   @Test
@@ -94,7 +92,7 @@ class DesktopTaskChangeListenerTest : ShellTestCase() {
 
     desktopTaskChangeListener.onTaskOpening(task)
 
-    verify(desktopRepository).addOrMoveFreeformTaskToTop(task.displayId, task.taskId)
+    verify(desktopRepository).addTask(task.displayId, task.taskId, task.isVisible)
   }
 
   @Test
@@ -114,8 +112,7 @@ class DesktopTaskChangeListenerTest : ShellTestCase() {
 
     desktopTaskChangeListener.onTaskChanging(task)
 
-    verify(desktopRepository).addActiveTask(task.displayId, task.taskId)
-    verify(desktopRepository).updateTaskVisibility(task.displayId, task.taskId, task.isVisible)
+    verify(desktopRepository).updateTask(task.displayId, task.taskId, task.isVisible)
   }
 
   @Test
@@ -125,7 +122,7 @@ class DesktopTaskChangeListenerTest : ShellTestCase() {
 
     desktopTaskChangeListener.onTaskChanging(task)
 
-    verify(desktopRepository).updateTaskVisibility(task.displayId, task.taskId, task.isVisible)
+    verify(desktopRepository).updateTask(task.displayId, task.taskId, task.isVisible)
   }
 
   @Test
@@ -147,7 +144,7 @@ class DesktopTaskChangeListenerTest : ShellTestCase() {
 
     desktopTaskChangeListener.onTaskClosing(task)
 
-    verify(desktopRepository).updateTaskVisibility(task.displayId, task.taskId, visible = false)
+    verify(desktopRepository).updateTask(task.displayId, task.taskId, isVisible = false)
     verify(desktopRepository).minimizeTask(task.displayId, task.taskId)
   }
 

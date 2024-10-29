@@ -248,8 +248,8 @@ class DesktopTasksLimiterTest : ShellTestCase() {
     @Test
     @DisableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION)
     fun removeLeftoverMinimizedTasks_activeNonMinimizedTasksStillAround_doesNothing() {
-        desktopTaskRepo.addActiveTask(displayId = DEFAULT_DISPLAY, taskId = 1)
-        desktopTaskRepo.addActiveTask(displayId = DEFAULT_DISPLAY, taskId = 2)
+        desktopTaskRepo.addTask(displayId = DEFAULT_DISPLAY, taskId = 1, isVisible = true)
+        desktopTaskRepo.addTask(displayId = DEFAULT_DISPLAY, taskId = 2, isVisible = true)
         desktopTaskRepo.minimizeTask(displayId = DEFAULT_DISPLAY, taskId = 2)
 
         val wct = WindowContainerTransaction()
@@ -487,29 +487,26 @@ class DesktopTasksLimiterTest : ShellTestCase() {
         verify(interactionJankMonitor).end(eq(CUJ_DESKTOP_MODE_MINIMIZE_WINDOW))
     }
 
-    private fun setUpFreeformTask(
-            displayId: Int = DEFAULT_DISPLAY,
-    ): RunningTaskInfo {
+    private fun setUpFreeformTask(displayId: Int = DEFAULT_DISPLAY): RunningTaskInfo {
         val task = createFreeformTask(displayId)
         `when`(shellTaskOrganizer.getRunningTaskInfo(task.taskId)).thenReturn(task)
-        desktopTaskRepo.addActiveTask(displayId, task.taskId)
-        desktopTaskRepo.addOrMoveFreeformTaskToTop(displayId, task.taskId)
+        desktopTaskRepo.addTask(displayId, task.taskId, task.isVisible)
         return task
     }
 
     private fun markTaskVisible(task: RunningTaskInfo) {
-        desktopTaskRepo.updateTaskVisibility(
+        desktopTaskRepo.updateTask(
                 task.displayId,
                 task.taskId,
-                visible = true
+                isVisible = true
         )
     }
 
     private fun markTaskHidden(task: RunningTaskInfo) {
-        desktopTaskRepo.updateTaskVisibility(
+        desktopTaskRepo.updateTask(
                 task.displayId,
                 task.taskId,
-                visible = false
+                isVisible = false
         )
     }
 
