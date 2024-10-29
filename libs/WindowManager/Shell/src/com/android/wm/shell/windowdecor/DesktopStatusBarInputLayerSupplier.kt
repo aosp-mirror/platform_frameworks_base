@@ -66,7 +66,7 @@ class DesktopStatusBarInputLayerSupplier(
         lp.inputFeatures = WindowManager.LayoutParams.INPUT_FEATURE_SPY
         lp.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
         val view = View(context)
-        view.visibility = View.INVISIBLE
+        view.visibility = View.GONE
         return AdditionalSystemViewContainer(
             WindowManagerWrapper(
                 context.getSystemService<WindowManager>(WindowManager::class.java)

@@ -131,7 +131,7 @@ internal class AppHandleViewHolder(
         }
         // Remove the old input layer when changing to a new one.
         if (statusBarInputLayer != null) detachStatusBarInputLayer()
-        if (statusBarLayer.view.visibility == View.INVISIBLE) {
+        if (statusBarLayer.view.visibility == View.GONE) {
             statusBarLayer.view.visibility = View.VISIBLE
         }
         statusBarInputLayer = statusBarLayer
