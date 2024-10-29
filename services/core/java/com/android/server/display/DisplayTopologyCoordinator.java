@@ -85,13 +85,26 @@ class DisplayTopologyCoordinator {
     }
 
     /**
+     * Update the topology with display changes.
+     * @param info The new display info
+     */
+    void onDisplayChanged(DisplayInfo info) {
+        synchronized (mSyncRoot) {
+            if (mTopology.updateDisplay(info.displayId, getWidth(info), getHeight(info))) {
+                sendTopologyUpdateLocked();
+            }
+        }
+    }
+
+    /**
      * Remove a display from the topology.
      * @param displayId The logical display ID
      */
     void onDisplayRemoved(int displayId) {
         synchronized (mSyncRoot) {
-            mTopology.removeDisplay(displayId);
-            sendTopologyUpdateLocked();
+            if (mTopology.removeDisplay(displayId)) {
+                sendTopologyUpdateLocked();
+            }
         }
     }
 

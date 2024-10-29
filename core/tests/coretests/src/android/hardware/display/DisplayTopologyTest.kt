@@ -86,7 +86,7 @@ class DisplayTopologyTest {
         verifyDisplay(display1, displayId1, width1, height1, noOfChildren = 1)
 
         val display2 = display1.children[0]
-        verifyDisplay(display1.children[0], displayId2, width2, height2, POSITION_TOP,
+        verifyDisplay(display2, displayId2, width2, height2, POSITION_TOP,
             offset = width1 / 2 - width2 / 2, noOfChildren = 1)
 
         var display = display2
@@ -94,6 +94,76 @@ class DisplayTopologyTest {
             display = display.children[0]
             // The last display should have no children
             verifyDisplay(display, id = i, width1, height1, POSITION_RIGHT, offset = 0f,
+                noOfChildren = if (i < noOfDisplays) 1 else 0)
+        }
+    }
+
+    @Test
+    fun updateDisplay() {
+        val displayId = 1
+        val width = 800f
+        val height = 600f
+
+        val newWidth = 1000f
+        val newHeight = 500f
+        topology.addDisplay(displayId, width, height)
+        assertThat(topology.updateDisplay(displayId, newWidth, newHeight)).isTrue()
+
+        assertThat(topology.primaryDisplayId).isEqualTo(displayId)
+        verifyDisplay(topology.root!!, displayId, newWidth, newHeight, noOfChildren = 0)
+    }
+
+    @Test
+    fun updateDisplay_notUpdated() {
+        val displayId = 1
+        val width = 800f
+        val height = 600f
+        topology.addDisplay(displayId, width, height)
+
+        // Same size
+        assertThat(topology.updateDisplay(displayId, width, height)).isFalse()
+
+        // Display doesn't exist
+        assertThat(topology.updateDisplay(/* displayId= */ 100, width, height)).isFalse()
+
+        assertThat(topology.primaryDisplayId).isEqualTo(displayId)
+        verifyDisplay(topology.root!!, displayId, width, height, noOfChildren = 0)
+    }
+
+    @Test
+    fun updateDisplayDoesNotAffectDefaultTopology() {
+        val width1 = 700f
+        val height = 600f
+        topology.addDisplay(/* displayId= */ 1, width1, height)
+
+        val width2 = 800f
+        val noOfDisplays = 30
+        for (i in 2..noOfDisplays) {
+            topology.addDisplay(/* displayId= */ i, width2, height)
+        }
+
+        val displaysToUpdate = arrayOf(3, 7, 18)
+        val newWidth = 1000f
+        val newHeight = 1500f
+        for (i in displaysToUpdate) {
+            assertThat(topology.updateDisplay(/* displayId= */ i, newWidth, newHeight)).isTrue()
+        }
+
+        assertThat(topology.primaryDisplayId).isEqualTo(1)
+
+        val display1 = topology.root!!
+        verifyDisplay(display1, id = 1, width1, height, noOfChildren = 1)
+
+        val display2 = display1.children[0]
+        verifyDisplay(display2, id = 2, width2, height, POSITION_TOP,
+            offset = width1 / 2 - width2 / 2, noOfChildren = 1)
+
+        var display = display2
+        for (i in 3..noOfDisplays) {
+            display = display.children[0]
+            // The last display should have no children
+            verifyDisplay(display, id = i, if (i in displaysToUpdate) newWidth else width2,
+                if (i in displaysToUpdate) newHeight else height, POSITION_RIGHT, offset = 0f,
                 noOfChildren = if (i < noOfDisplays) 1 else 0)
         }
     }
@@ -117,7 +187,7 @@ class DisplayTopologyTest {
         }
 
         var removedDisplays = arrayOf(20)
-        topology.removeDisplay(20)
+        assertThat(topology.removeDisplay(20)).isTrue()
 
         assertThat(topology.primaryDisplayId).isEqualTo(displayId1)
 
@@ -139,11 +209,11 @@ class DisplayTopologyTest {
                 noOfChildren = if (i < noOfDisplays) 1 else 0)
         }
 
-        topology.removeDisplay(22)
+        assertThat(topology.removeDisplay(22)).isTrue()
         removedDisplays += 22
-        topology.removeDisplay(23)
+        assertThat(topology.removeDisplay(23)).isTrue()
         removedDisplays += 23
-        topology.removeDisplay(25)
+        assertThat(topology.removeDisplay(25)).isTrue()
         removedDisplays += 25
 
         assertThat(topology.primaryDisplayId).isEqualTo(displayId1)
@@ -174,7 +244,7 @@ class DisplayTopologyTest {
         val height = 600f
 
         topology.addDisplay(displayId, width, height)
-        topology.removeDisplay(displayId)
+        assertThat(topology.removeDisplay(displayId)).isTrue()
 
         assertThat(topology.primaryDisplayId).isEqualTo(Display.INVALID_DISPLAY)
         assertThat(topology.root).isNull()
@@ -187,7 +257,7 @@ class DisplayTopologyTest {
         val height = 600f
 
         topology.addDisplay(displayId, width, height)
-        topology.removeDisplay(3)
+        assertThat(topology.removeDisplay(3)).isFalse()
 
         assertThat(topology.primaryDisplayId).isEqualTo(displayId)
         verifyDisplay(topology.root!!, displayId, width, height, noOfChildren = 0)
@@ -203,7 +273,7 @@ class DisplayTopologyTest {
         topology = DisplayTopology(/* root= */ null, displayId2)
         topology.addDisplay(displayId1, width, height)
         topology.addDisplay(displayId2, width, height)
-        topology.removeDisplay(displayId2)
+        assertThat(topology.removeDisplay(displayId2)).isTrue()
 
         assertThat(topology.primaryDisplayId).isEqualTo(displayId1)
         verifyDisplay(topology.root!!, displayId1, width, height, noOfChildren = 0)
