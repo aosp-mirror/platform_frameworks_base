@@ -113,6 +113,7 @@ import com.android.wm.shell.desktopmode.DesktopTasksLimiter;
 import com.android.wm.shell.desktopmode.DesktopWallpaperActivity;
 import com.android.wm.shell.desktopmode.WindowDecorCaptionHandleRepository;
 import com.android.wm.shell.desktopmode.education.AppHandleEducationController;
+import com.android.wm.shell.desktopmode.education.AppToWebEducationController;
 import com.android.wm.shell.freeform.FreeformTaskTransitionStarter;
 import com.android.wm.shell.shared.FocusTransitionListener;
 import com.android.wm.shell.shared.annotations.ShellBackgroundThread;
@@ -177,6 +178,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
     private final WindowDecorCaptionHandleRepository mWindowDecorCaptionHandleRepository;
     private final Optional<DesktopTasksLimiter> mDesktopTasksLimiter;
     private final AppHandleEducationController mAppHandleEducationController;
+    private final AppToWebEducationController mAppToWebEducationController;
     private final AppHeaderViewHolder.Factory mAppHeaderViewHolderFactory;
     private boolean mTransitionDragActive;
 
@@ -251,6 +253,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
             MultiInstanceHelper multiInstanceHelper,
             Optional<DesktopTasksLimiter> desktopTasksLimiter,
             AppHandleEducationController appHandleEducationController,
+            AppToWebEducationController appToWebEducationController,
             WindowDecorCaptionHandleRepository windowDecorCaptionHandleRepository,
             Optional<DesktopActivityOrientationChangeHandler> activityOrientationChangeHandler,
             FocusTransitionObserver focusTransitionObserver,
@@ -284,6 +287,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
                 interactionJankMonitor,
                 desktopTasksLimiter,
                 appHandleEducationController,
+                appToWebEducationController,
                 windowDecorCaptionHandleRepository,
                 activityOrientationChangeHandler,
                 new TaskPositionerFactory(),
@@ -321,6 +325,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
             InteractionJankMonitor interactionJankMonitor,
             Optional<DesktopTasksLimiter> desktopTasksLimiter,
             AppHandleEducationController appHandleEducationController,
+            AppToWebEducationController appToWebEducationController,
             WindowDecorCaptionHandleRepository windowDecorCaptionHandleRepository,
             Optional<DesktopActivityOrientationChangeHandler> activityOrientationChangeHandler,
             TaskPositionerFactory taskPositionerFactory,
@@ -356,6 +361,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
         mInteractionJankMonitor = interactionJankMonitor;
         mDesktopTasksLimiter = desktopTasksLimiter;
         mAppHandleEducationController = appHandleEducationController;
+        mAppToWebEducationController = appToWebEducationController;
         mWindowDecorCaptionHandleRepository = windowDecorCaptionHandleRepository;
         mActivityOrientationChangeHandler = activityOrientationChangeHandler;
         mAssistContentRequester = assistContentRequester;

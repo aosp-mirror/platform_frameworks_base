@@ -95,6 +95,7 @@ import com.android.wm.shell.desktopmode.DesktopTasksController.SnapPosition
 import com.android.wm.shell.desktopmode.DesktopTasksLimiter
 import com.android.wm.shell.desktopmode.WindowDecorCaptionHandleRepository
 import com.android.wm.shell.desktopmode.education.AppHandleEducationController
+import com.android.wm.shell.desktopmode.education.AppToWebEducationController
 import com.android.wm.shell.freeform.FreeformTaskTransitionStarter
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
 import com.android.wm.shell.shared.desktopmode.DesktopModeTransitionSource
@@ -195,6 +196,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
             DesktopModeWindowDecorViewModel.TaskPositionerFactory
     @Mock private lateinit var mockTaskPositioner: TaskPositioner
     @Mock private lateinit var mockAppHandleEducationController: AppHandleEducationController
+    @Mock private lateinit var mockAppToWebEducationController: AppToWebEducationController
     @Mock private lateinit var mockFocusTransitionObserver: FocusTransitionObserver
     @Mock private lateinit var mockCaptionHandleRepository: WindowDecorCaptionHandleRepository
     @Mock private lateinit var motionEvent: MotionEvent
@@ -261,6 +263,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
                 mockInteractionJankMonitor,
                 Optional.of(mockTasksLimiter),
                 mockAppHandleEducationController,
+                mockAppToWebEducationController,
                 mockCaptionHandleRepository,
                 Optional.of(mockActivityOrientationChangeHandler),
                 mockTaskPositionerFactory,

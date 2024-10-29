@@ -650,4 +650,11 @@
     <dimen name="open_by_default_settings_dialog_radio_button_height">64dp</dimen>
     <!-- The width of radio buttons in the open by default settings dialog. -->
     <dimen name="open_by_default_settings_dialog_radio_button_width">316dp</dimen>
+
+    <!-- The width of the desktop windowing education promo. -->
+    <dimen name="desktop_windowing_education_promo_width">412dp</dimen>
+    <!-- The height of the desktop windowing education promo. -->
+    <dimen name="desktop_windowing_education_promo_height">352dp</dimen>
+    <!-- The corner radius of the desktop windowing education promo. -->
+    <dimen name="desktop_windowing_education_promo_corner_radius">28dp</dimen>
 </resources>
