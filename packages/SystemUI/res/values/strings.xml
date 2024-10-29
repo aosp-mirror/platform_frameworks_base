@@ -3917,10 +3917,10 @@
     </string>
     <!-- Title for the Reset Tiles dialog in QS Edit mode. [CHAR LIMIT=NONE] -->
     <string name="qs_edit_mode_reset_dialog_title">
-        Reset tiles
+        Reset all tiles?
     </string>
     <!-- Content of the Reset Tiles dialog in QS Edit mode. [CHAR LIMIT=NONE] -->
     <string name="qs_edit_mode_reset_dialog_content">
-        Reset tiles to their original order and sizes?
+        All Quick Settings tiles will reset to the device’s original settings
     </string>
 </resources>

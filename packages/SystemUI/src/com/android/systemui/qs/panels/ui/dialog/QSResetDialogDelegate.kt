@@ -23,7 +23,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import com.android.compose.PlatformButton
-import com.android.compose.PlatformOutlinedButton
+import com.android.compose.PlatformTextButton
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dialog.ui.composable.AlertDialogContent
 import com.android.systemui.qs.panels.domain.interactor.EditTilesResetInteractor
@@ -84,8 +84,8 @@ constructor(
                     Text(stringResource(id = android.R.string.ok))
                 }
             },
-            neutralButton = {
-                PlatformOutlinedButton(onClick = { dialog.dismiss() }) {
+            negativeButton = {
+                PlatformTextButton(onClick = { dialog.dismiss() }) {
                     Text(stringResource(id = android.R.string.cancel))
                 }
             },
