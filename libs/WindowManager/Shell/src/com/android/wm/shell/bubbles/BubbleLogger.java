@@ -145,6 +145,9 @@ public class BubbleLogger {
         @UiEvent(doc = "bubble promoted from overflow back to bubble bar")
         BUBBLE_BAR_OVERFLOW_REMOVE_BACK_TO_BAR(1949),
 
+        @UiEvent(doc = "while bubble bar is expanded, switch to another/existing bubble")
+        BUBBLE_BAR_BUBBLE_SWITCHED(1977)
+
         // endregion
         ;
 
