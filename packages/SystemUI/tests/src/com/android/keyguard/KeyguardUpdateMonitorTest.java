@@ -2267,6 +2267,23 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     }
 
     @Test
+    public void isSimPinSecureReturnsFalseWhenEmpty() {
+        assertThat(mKeyguardUpdateMonitor.isSimPinSecure()).isFalse();
+    }
+
+    @Test
+    public void isSimPinSecureReturnsTrueWhenOneSlotIsLocked() {
+        // Slot 0 is locked
+        mKeyguardUpdateMonitor.handleSimStateChange(10, 0,
+                TelephonyManager.SIM_STATE_PIN_REQUIRED);
+        // Slot 1 is not ready
+        mKeyguardUpdateMonitor.handleSimStateChange(11, 1,
+                TelephonyManager.SIM_STATE_NOT_READY);
+
+        assertThat(mKeyguardUpdateMonitor.isSimPinSecure()).isTrue();
+    }
+
+    @Test
     public void onAuthEnrollmentChangesCallbacksAreNotified() {
         KeyguardUpdateMonitorCallback callback = mock(KeyguardUpdateMonitorCallback.class);
         ArgumentCaptor<AuthController.Callback> authCallback = ArgumentCaptor.forClass(

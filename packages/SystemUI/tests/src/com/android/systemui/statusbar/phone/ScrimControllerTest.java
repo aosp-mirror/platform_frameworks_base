@@ -1978,6 +1978,17 @@ public class ScrimControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void primaryBouncerToGoneOnFinishCallsLightBarController() {
+        reset(mLightBarController);
+        mScrimController.mBouncerToGoneTransition.accept(
+                new TransitionStep(KeyguardState.PRIMARY_BOUNCER, KeyguardState.GONE, 0f,
+                        TransitionState.FINISHED, "ScrimControllerTest"));
+
+        verify(mLightBarController).setScrimState(
+                any(ScrimState.class), anyFloat(), any(GradientColors.class));
+    }
+
+    @Test
     public void testDoNotAnimateChangeIfOccludeAnimationPlaying() {
         mScrimController.setOccludeAnimationPlaying(true);
         mScrimController.legacyTransitionTo(ScrimState.UNLOCKED);

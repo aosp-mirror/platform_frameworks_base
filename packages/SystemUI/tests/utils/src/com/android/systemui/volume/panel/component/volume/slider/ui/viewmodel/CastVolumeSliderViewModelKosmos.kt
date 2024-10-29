@@ -17,6 +17,7 @@
 package com.android.systemui.volume.panel.component.volume.slider.ui.viewmodel
 
 import android.content.applicationContext
+import com.android.systemui.haptics.slider.sliderHapticsViewModelFactory
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.volume.mediaDeviceSessionInteractor
 import com.android.systemui.volume.panel.component.mediaoutput.shared.model.MediaDeviceSession
@@ -27,13 +28,14 @@ val Kosmos.castVolumeSliderViewModelFactory by
         object : CastVolumeSliderViewModel.Factory {
             override fun create(
                 session: MediaDeviceSession,
-                coroutineScope: CoroutineScope
+                coroutineScope: CoroutineScope,
             ): CastVolumeSliderViewModel {
                 return CastVolumeSliderViewModel(
                     session,
                     coroutineScope,
                     applicationContext,
                     mediaDeviceSessionInteractor,
+                    sliderHapticsViewModelFactory,
                 )
             }
         }

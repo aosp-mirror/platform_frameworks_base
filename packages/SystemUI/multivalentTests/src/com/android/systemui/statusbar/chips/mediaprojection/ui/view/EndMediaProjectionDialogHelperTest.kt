@@ -21,6 +21,7 @@ import android.content.Intent
 import android.content.packageManager
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.kosmos.Kosmos
@@ -31,6 +32,7 @@ import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.statusbar.phone.mockSystemUIDialogFactory
 import com.google.common.truth.Truth.assertThat
 import kotlin.test.Test
+import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
@@ -38,6 +40,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class EndMediaProjectionDialogHelperTest : SysuiTestCase() {
     private val kosmos = Kosmos().also { it.testCase = this }
 

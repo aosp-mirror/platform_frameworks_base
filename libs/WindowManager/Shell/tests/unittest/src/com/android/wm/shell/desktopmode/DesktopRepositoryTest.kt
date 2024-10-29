@@ -18,6 +18,7 @@ package com.android.wm.shell.desktopmode
 
 import android.graphics.Rect
 import android.platform.test.annotations.EnableFlags
+import android.platform.test.flag.junit.SetFlagsRule
 import android.testing.AndroidTestingRunner
 import android.util.ArraySet
 import android.view.Display.DEFAULT_DISPLAY
@@ -43,6 +44,7 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
@@ -57,6 +59,8 @@ import org.mockito.kotlin.whenever
 @RunWith(AndroidTestingRunner::class)
 @ExperimentalCoroutinesApi
 class DesktopRepositoryTest : ShellTestCase() {
+
+    @JvmField @Rule val setFlagsRule = SetFlagsRule()
 
     private lateinit var repo: DesktopRepository
     private lateinit var shellInit: ShellInit

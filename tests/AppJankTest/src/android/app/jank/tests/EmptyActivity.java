@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.server.integrity.parser;
+package android.app.jank.tests;
 
-import android.annotation.NonNull;
+import android.app.Activity;
 
-/**
- * Thrown when rule parsing fails.
- */
-public class RuleParseException extends Exception {
-    public RuleParseException(@NonNull String message) {
-        super(message);
-    }
-
-    public RuleParseException(@NonNull String message, @NonNull Throwable cause) {
-        super(message, cause);
-    }
+public class EmptyActivity extends Activity {
 }

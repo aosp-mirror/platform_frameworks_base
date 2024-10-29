@@ -16,8 +16,8 @@
 
 package com.android.systemui.inputdevice.tutorial.ui.composable
 
+import android.content.res.Configuration
 import androidx.annotation.RawRes
-import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.background
@@ -36,6 +36,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.android.systemui.inputdevice.tutorial.ui.composable.TutorialActionState.Finished
@@ -66,23 +67,13 @@ fun ActionTutorialContent(
                 .safeDrawingPadding()
                 .padding(start = 48.dp, top = 100.dp, end = 48.dp, bottom = 8.dp),
     ) {
-        Row(modifier = Modifier.fillMaxWidth().weight(1f)) {
-            TutorialDescription(
-                titleTextId =
-                    if (actionState is Finished) config.strings.titleSuccessResId
-                    else config.strings.titleResId,
-                titleColor = config.colors.title,
-                bodyTextId =
-                    if (actionState is Finished) config.strings.bodySuccessResId
-                    else config.strings.bodyResId,
-                modifier = Modifier.weight(1f),
-            )
-            Spacer(modifier = Modifier.width(76.dp))
-            TutorialAnimation(
-                actionState,
-                config,
-                modifier = Modifier.weight(1f).padding(top = 8.dp),
-            )
+        when (LocalConfiguration.current.orientation) {
+            Configuration.ORIENTATION_LANDSCAPE -> {
+                HorizontalDescriptionAndAnimation(actionState, config, Modifier.weight(1f))
+            }
+            else -> {
+                VerticalDescriptionAndAnimation(actionState, config, Modifier.weight(1f))
+            }
         }
         AnimatedVisibility(visible = actionState is Finished, enter = fadeIn()) {
             DoneButton(onDoneButtonClicked = onDoneButtonClicked)
@@ -91,17 +82,56 @@ fun ActionTutorialContent(
 }
 
 @Composable
-fun TutorialDescription(
-    @StringRes titleTextId: Int,
-    titleColor: Color,
-    @StringRes bodyTextId: Int,
+private fun HorizontalDescriptionAndAnimation(
+    actionState: TutorialActionState,
+    config: TutorialScreenConfig,
     modifier: Modifier = Modifier,
 ) {
+    Row(modifier = modifier.fillMaxWidth()) {
+        TutorialDescription(actionState, config, modifier = Modifier.weight(1f))
+        Spacer(modifier = Modifier.width(70.dp))
+        TutorialAnimation(actionState, config, modifier = Modifier.weight(1f))
+    }
+}
+
+@Composable
+private fun VerticalDescriptionAndAnimation(
+    actionState: TutorialActionState,
+    config: TutorialScreenConfig,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier = modifier.fillMaxWidth().padding(horizontal = 40.dp, vertical = 40.dp)) {
+        Spacer(modifier = Modifier.weight(0.1f))
+        TutorialDescription(
+            actionState,
+            config,
+            modifier =
+                Modifier.weight(0.2f)
+                    // extra padding to better align with animation which has embedded padding
+                    .padding(horizontal = 15.dp),
+        )
+        Spacer(modifier = Modifier.width(70.dp))
+        TutorialAnimation(actionState, config, modifier = Modifier.weight(1f))
+    }
+}
+
+@Composable
+fun TutorialDescription(
+    actionState: TutorialActionState,
+    config: TutorialScreenConfig,
+    modifier: Modifier = Modifier,
+) {
+    val (titleTextId, bodyTextId) =
+        if (actionState is Finished) {
+            config.strings.titleSuccessResId to config.strings.bodySuccessResId
+        } else {
+            config.strings.titleResId to config.strings.bodyResId
+        }
     Column(verticalArrangement = Arrangement.Top, modifier = modifier) {
         Text(
             text = stringResource(id = titleTextId),
             style = MaterialTheme.typography.displayLarge,
-            color = titleColor,
+            color = config.colors.title,
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(

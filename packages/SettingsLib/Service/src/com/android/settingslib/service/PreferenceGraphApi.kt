@@ -21,8 +21,8 @@ import com.android.settingslib.graph.GetPreferenceGraphApiHandler
 import com.android.settingslib.graph.GetPreferenceGraphRequest
 
 /** Api to get preference graph. */
-internal class PreferenceGraphApi(activityClasses: Set<String>) :
-    GetPreferenceGraphApiHandler(activityClasses) {
+internal class PreferenceGraphApi : GetPreferenceGraphApiHandler() {
+
     override val id: Int
         get() = API_GET_PREFERENCE_GRAPH
 
@@ -31,7 +31,5 @@ internal class PreferenceGraphApi(activityClasses: Set<String>) :
         myUid: Int,
         callingUid: Int,
         request: GetPreferenceGraphRequest,
-    ): Boolean {
-        return true // TODO: add permission check
-    }
+    ) = true
 }

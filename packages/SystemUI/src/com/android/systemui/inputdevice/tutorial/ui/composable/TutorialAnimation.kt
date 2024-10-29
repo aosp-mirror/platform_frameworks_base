@@ -24,11 +24,13 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.node.Ref
 import androidx.compose.ui.util.lerp
@@ -49,7 +51,7 @@ fun TutorialAnimation(
     config: TutorialScreenConfig,
     modifier: Modifier = Modifier,
 ) {
-    Box(modifier = modifier.fillMaxWidth()) {
+    Box(contentAlignment = Alignment.Center, modifier = modifier.fillMaxWidth()) {
         AnimatedContent(
             targetState = actionState::class,
             transitionSpec = {
@@ -97,6 +99,7 @@ private fun EducationAnimation(
         composition = composition,
         progress = { progress },
         dynamicProperties = animationProperties,
+        modifier = Modifier.fillMaxSize(),
     )
 }
 
@@ -112,6 +115,7 @@ private fun SuccessAnimation(
         composition = composition,
         progress = { progress },
         dynamicProperties = animationProperties,
+        modifier = Modifier.fillMaxSize(),
     )
 }
 
@@ -142,6 +146,7 @@ private fun InProgressAnimation(
         composition = composition,
         progress = { lerp(start = startProgress, stop = endProgress, fraction = progress) },
         dynamicProperties = animationProperties,
+        modifier = Modifier.fillMaxSize(),
     )
 }
 
