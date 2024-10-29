@@ -172,7 +172,7 @@ public class VolumeDialogControllerImplTest extends SysuiTestCase {
         mVolumeController.setDeviceInteractive(false);
         when(mWakefullnessLifcycle.getWakefulness()).thenReturn(
                 WakefulnessLifecycle.WAKEFULNESS_AWAKE);
-        mVolumeController.onVolumeChangedW(0, AudioManager.FLAG_SHOW_UI);
+        mVolumeController.onVolumeChangedW(0, AudioManager.FLAG_SHOW_UI, true);
         verify(mCallback, never()).onShowRequested(Events.SHOW_REASON_VOLUME_CHANGED, false,
                 LOCK_TASK_MODE_NONE);
     }
@@ -182,7 +182,7 @@ public class VolumeDialogControllerImplTest extends SysuiTestCase {
         mVolumeController.setDeviceInteractive(true);
         when(mWakefullnessLifcycle.getWakefulness()).thenReturn(
                 WakefulnessLifecycle.WAKEFULNESS_AWAKE);
-        mVolumeController.onVolumeChangedW(0, AudioManager.FLAG_SHOW_UI);
+        mVolumeController.onVolumeChangedW(0, AudioManager.FLAG_SHOW_UI, true);
         verify(mCallback, times(1)).onShowRequested(Events.SHOW_REASON_VOLUME_CHANGED, false,
                 LOCK_TASK_MODE_NONE);
     }
@@ -192,11 +192,11 @@ public class VolumeDialogControllerImplTest extends SysuiTestCase {
         mVolumeController.setDeviceInteractive(true);
         when(mWakefullnessLifcycle.getWakefulness()).thenReturn(
                 WakefulnessLifecycle.WAKEFULNESS_AWAKE);
-        mVolumeController.onVolumeChangedW(0, AudioManager.FLAG_SHOW_UI);
+        mVolumeController.onVolumeChangedW(0, AudioManager.FLAG_SHOW_UI, true);
         mVolumeController.setDeviceInteractive(false);
         when(mWakefullnessLifcycle.getWakefulness()).thenReturn(
                 WakefulnessLifecycle.WAKEFULNESS_GOING_TO_SLEEP);
-        mVolumeController.onVolumeChangedW(0, AudioManager.FLAG_SHOW_UI);
+        mVolumeController.onVolumeChangedW(0, AudioManager.FLAG_SHOW_UI, true);
         verify(mCallback, times(1)).onShowRequested(Events.SHOW_REASON_VOLUME_CHANGED, false,
                 LOCK_TASK_MODE_NONE);
     }
@@ -210,7 +210,7 @@ public class VolumeDialogControllerImplTest extends SysuiTestCase {
                 AudioManager.DEVICE_OUT_BLE_HEADSET);
 
         mVolumeController.onVolumeChangedW(
-                AudioManager.STREAM_VOICE_CALL, AudioManager.FLAG_SHOW_UI);
+                AudioManager.STREAM_VOICE_CALL, AudioManager.FLAG_SHOW_UI, true);
 
         verify(mCallback, times(1)).onStateChanged(any());
     }
@@ -224,7 +224,7 @@ public class VolumeDialogControllerImplTest extends SysuiTestCase {
                 AudioManager.DEVICE_OUT_BLUETOOTH_A2DP);
 
         mVolumeController.onVolumeChangedW(
-                AudioManager.STREAM_VOICE_CALL, AudioManager.FLAG_SHOW_UI);
+                AudioManager.STREAM_VOICE_CALL, AudioManager.FLAG_SHOW_UI, true);
 
         verify(mCallback, never()).onStateChanged(any());
     }
@@ -241,14 +241,16 @@ public class VolumeDialogControllerImplTest extends SysuiTestCase {
                 .thenReturn(AudioManager.DEVICE_NONE);
 
         mVolumeController.mInAudioSharing = true;
-        mVolumeController.onVolumeChangedW(AudioManager.STREAM_MUSIC, AudioManager.FLAG_SHOW_UI);
+        mVolumeController.onVolumeChangedW(
+                AudioManager.STREAM_MUSIC, AudioManager.FLAG_SHOW_UI, true);
         verify(mCallback).onStateChanged(stateCaptor.capture());
         assertThat(stateCaptor.getValue().states.contains(AudioManager.STREAM_MUSIC)).isTrue();
         assertThat(stateCaptor.getValue().states.get(AudioManager.STREAM_MUSIC).routedToBluetooth)
                 .isTrue();
 
         mVolumeController.mInAudioSharing = false;
-        mVolumeController.onVolumeChangedW(AudioManager.STREAM_MUSIC, AudioManager.FLAG_SHOW_UI);
+        mVolumeController.onVolumeChangedW(
+                AudioManager.STREAM_MUSIC, AudioManager.FLAG_SHOW_UI, true);
         verify(mCallback, times(2)).onStateChanged(stateCaptor.capture());
         assertThat(stateCaptor.getValue().states.contains(AudioManager.STREAM_MUSIC)).isTrue();
         assertThat(stateCaptor.getValue().states.get(AudioManager.STREAM_MUSIC).routedToBluetooth)
