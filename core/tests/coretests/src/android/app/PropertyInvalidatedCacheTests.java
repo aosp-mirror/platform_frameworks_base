@@ -39,11 +39,7 @@ import org.junit.Test;
  *  atest FrameworksCoreTests:PropertyInvalidatedCacheTests
  */
 @SmallTest
-@IgnoreUnderRavenwood(blockedBy = PropertyInvalidatedCache.class)
 public class PropertyInvalidatedCacheTests {
-    @Rule
-    public final RavenwoodRule mRavenwood = new RavenwoodRule();
-
     // Configuration for creating caches
     private static final String MODULE = PropertyInvalidatedCache.MODULE_TEST;
     private static final String API = "testApi";

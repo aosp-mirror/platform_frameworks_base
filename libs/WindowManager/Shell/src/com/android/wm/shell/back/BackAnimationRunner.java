@@ -25,12 +25,15 @@ import android.util.Log;
 import android.view.IRemoteAnimationFinishedCallback;
 import android.view.IRemoteAnimationRunner;
 import android.view.RemoteAnimationTarget;
+import android.view.SurfaceControl;
 import android.window.IBackAnimationRunner;
 import android.window.IOnBackInvokedCallback;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.jank.Cuj.CujType;
 import com.android.wm.shell.common.InteractionJankMonitorUtils;
+
+import java.lang.ref.WeakReference;
 
 /**
  * Used to register the animation callback and runner, it will trigger result if gesture was finish
@@ -80,22 +83,49 @@ public class BackAnimationRunner {
         return mCallback;
     }
 
+    private Runnable mFinishedCallback;
+    private RemoteAnimationTarget[] mApps;
+    private IRemoteAnimationFinishedCallback mRemoteCallback;
+
+    private static class RemoteAnimationFinishedStub extends IRemoteAnimationFinishedCallback.Stub {
+        //the binder callback should not hold strong reference to it to avoid memory leak.
+        private WeakReference<BackAnimationRunner> mRunnerRef;
+
+        private RemoteAnimationFinishedStub(BackAnimationRunner runner) {
+            mRunnerRef = new WeakReference<>(runner);
+        }
+
+        @Override
+        public void onAnimationFinished() {
+            BackAnimationRunner runner = mRunnerRef.get();
+            if (runner == null) {
+                return;
+            }
+            if (runner.shouldMonitorCUJ(runner.mApps)) {
+                InteractionJankMonitorUtils.endTracing(runner.mCujType);
+            }
+
+            runner.mFinishedCallback.run();
+            for (int i = runner.mApps.length - 1; i >= 0; --i) {
+                 SurfaceControl sc = runner.mApps[i].leash;
+                 if (sc != null && sc.isValid()) {
+                     sc.release();
+                 }
+            }
+            runner.mApps = null;
+            runner.mFinishedCallback = null;
+        }
+    }
+
     /**
      * Called from {@link IBackAnimationRunner}, it will deliver these
      * {@link RemoteAnimationTarget}s to the corresponding runner.
      */
     void startAnimation(RemoteAnimationTarget[] apps, RemoteAnimationTarget[] wallpapers,
             RemoteAnimationTarget[] nonApps, Runnable finishedCallback) {
-        final IRemoteAnimationFinishedCallback callback =
-                new IRemoteAnimationFinishedCallback.Stub() {
-                    @Override
-                    public void onAnimationFinished() {
-                        if (shouldMonitorCUJ(apps)) {
-                            InteractionJankMonitorUtils.endTracing(mCujType);
-                        }
-                        finishedCallback.run();
-                    }
-                };
+        mFinishedCallback = finishedCallback;
+        mApps = apps;
+        if (mRemoteCallback == null) mRemoteCallback = new RemoteAnimationFinishedStub(this);
         mWaitingAnimation = false;
         if (shouldMonitorCUJ(apps)) {
             InteractionJankMonitorUtils.beginTracing(
@@ -103,7 +133,7 @@ public class BackAnimationRunner {
         }
         try {
             getRunner().onAnimationStart(TRANSIT_OLD_UNSET, apps, wallpapers,
-                    nonApps, callback);
+                    nonApps, mRemoteCallback);
         } catch (RemoteException e) {
             Log.w(TAG, "Failed call onAnimationStart", e);
         }
