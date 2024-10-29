@@ -145,21 +145,7 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
                     || containsConsumer(consumer)) {
                 return;
             }
-            final IllegalArgumentException exception = new IllegalArgumentException(
-                    "Context must be a UI Context with display association, which should be"
-                    + " an Activity, WindowContext or InputMethodService");
-            if (!context.isUiContext()) {
-                throw exception;
-            }
-            if (context.getAssociatedDisplayId() == INVALID_DISPLAY) {
-                // This is to identify if #isUiContext of a non-UI Context is overridden.
-                // #isUiContext is more likely to be overridden than #getAssociatedDisplayId
-                // since #isUiContext is a public API.
-                StrictMode.onIncorrectContextUsed("The registered Context is a UI Context "
-                        + "but not associated with any display. "
-                        + "This Context may not receive any WindowLayoutInfo update. "
-                        + dumpAllBaseContextToString(context), exception);
-            }
+            assertUiContext(context);
             Log.d(TAG, "Register WindowLayoutInfoListener on "
                     + dumpAllBaseContextToString(context));
             mFoldingFeatureProducer.getData((features) -> {
@@ -339,6 +325,7 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
     @Override
     @NonNull
     public WindowLayoutInfo getCurrentWindowLayoutInfo(@NonNull @UiContext Context context) {
+        assertUiContext(context);
         synchronized (mLock) {
             return getWindowLayoutInfo(context, mLastReportedFoldingFeatures);
         }
@@ -351,6 +338,25 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
     @NonNull
     public SupportedWindowFeatures getSupportedWindowFeatures() {
         return mSupportedWindowFeatures;
+    }
+
+    private void assertUiContext(@NonNull Context context) {
+        final IllegalArgumentException exception = new IllegalArgumentException(
+                "Context must be a UI Context with display association, which should be "
+                        + "an Activity, WindowContext or InputMethodService");
+        if (!context.isUiContext()) {
+            throw exception;
+        }
+        if (context.getAssociatedDisplayId() == INVALID_DISPLAY) {
+            // This is to identify if #isUiContext of a non-UI Context is overridden.
+            // #isUiContext is more likely to be overridden than #getAssociatedDisplayId
+            // since #isUiContext is a public API.
+            StrictMode.onIncorrectContextUsed("The given context is a UI context, "
+                    + "but it is not associated with any display. "
+                    + "This context may not receive WindowLayoutInfo updates and "
+                    + "may get an empty WindowLayoutInfo return value. "
+                    + dumpAllBaseContextToString(context), exception);
+        }
     }
 
     /** @see #getWindowLayoutInfo(Context, List) */

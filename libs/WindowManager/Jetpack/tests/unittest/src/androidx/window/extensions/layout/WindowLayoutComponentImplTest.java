@@ -72,6 +72,11 @@ public class WindowLayoutComponentImplTest {
         mWindowLayoutComponent.onDisplayFeaturesChanged(Collections.emptyList());
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void testAddWindowLayoutListener_nonUiContext_throwsError() {
+        mWindowLayoutComponent.addWindowLayoutInfoListener(mAppContext, info -> {});
+    }
+
     @Test
     public void testGetCurrentWindowLayoutInfo_noFoldingFeature_returnsEmptyList() {
         final Context testUiContext = new TestUiContext(mAppContext);
@@ -102,12 +107,9 @@ public class WindowLayoutComponentImplTest {
                 featureRect, FoldingFeature.TYPE_HINGE, FoldingFeature.STATE_FLAT));
     }
 
-    @Test
-    public void testGetCurrentWindowLayoutInfo_nonUiContext_returnsEmptyList() {
-        final WindowLayoutInfo layoutInfo =
-                mWindowLayoutComponent.getCurrentWindowLayoutInfo(mAppContext);
-
-        assertThat(layoutInfo.getDisplayFeatures()).isEmpty();
+    @Test(expected = IllegalArgumentException.class)
+    public void testGetCurrentWindowLayoutInfo_nonUiContext_throwsError() {
+        mWindowLayoutComponent.getCurrentWindowLayoutInfo(mAppContext);
     }
 
     /**
