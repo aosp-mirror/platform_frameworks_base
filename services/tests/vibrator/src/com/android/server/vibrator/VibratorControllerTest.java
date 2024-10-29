@@ -44,6 +44,7 @@ import android.os.VibratorInfo;
 import android.os.test.TestLooper;
 import android.os.vibrator.PrebakedSegment;
 import android.os.vibrator.PrimitiveSegment;
+import android.os.vibrator.PwleSegment;
 import android.os.vibrator.RampSegment;
 
 import androidx.test.InstrumentationRegistry;
@@ -265,6 +266,22 @@ public class VibratorControllerTest {
         assertTrue(controller.isVibrating());
 
         verify(mNativeWrapperMock).composePwle(eq(primitives), eq(Braking.NONE), eq(12L));
+    }
+
+    @Test
+    public void on_withComposedPwleV2_performsEffect() {
+        mockVibratorCapabilities(IVibrator.CAP_COMPOSE_PWLE_EFFECTS_V2);
+        when(mNativeWrapperMock.composePwleV2(any(), anyLong())).thenReturn(15L);
+        VibratorController controller = createController();
+
+        PwleSegment[] primitives = new PwleSegment[]{
+                new PwleSegment(/* startAmplitude= */ 0, /* endAmplitude= */ 1,
+                        /* startFrequencyHz= */ 100, /* endFrequencyHz= */ 200, /* duration= */ 10)
+        };
+        assertEquals(15L, controller.on(primitives, 12));
+        assertTrue(controller.isVibrating());
+
+        verify(mNativeWrapperMock).composePwleV2(eq(primitives), eq(12L));
     }
 
     @Test

@@ -366,6 +366,106 @@ class ResizeableItemFrameViewModelTest : SysuiTestCase() {
             assertThat(bottomState.anchors.toList()).containsExactly(0 to 0f)
         }
 
+    @Test
+    fun testCanExpand_atTopPosition_withMultipleAnchors_returnsTrue() =
+        testScope.runTest {
+            val twoRowGrid = singleSpanGrid.copy(totalSpans = 2, currentSpan = 1, currentRow = 0)
+
+            updateGridLayout(twoRowGrid)
+            assertThat(underTest.canExpand()).isTrue()
+            assertThat(underTest.bottomDragState.anchors.toList())
+                .containsAtLeast(0 to 0f, 1 to 45f)
+        }
+
+    @Test
+    fun testCanExpand_atTopPosition_withSingleAnchors_returnsFalse() =
+        testScope.runTest {
+            val oneRowGrid = singleSpanGrid.copy(totalSpans = 1, currentSpan = 1, currentRow = 0)
+            updateGridLayout(oneRowGrid)
+            assertThat(underTest.canExpand()).isFalse()
+        }
+
+    @Test
+    fun testCanExpand_atBottomPosition_withMultipleAnchors_returnsTrue() =
+        testScope.runTest {
+            val twoRowGrid = singleSpanGrid.copy(totalSpans = 2, currentSpan = 1, currentRow = 1)
+            updateGridLayout(twoRowGrid)
+            assertThat(underTest.canExpand()).isTrue()
+            assertThat(underTest.topDragState.anchors.toList()).containsAtLeast(0 to 0f, -1 to -45f)
+        }
+
+    @Test
+    fun testCanShrink_atMinimumHeight_returnsFalse() =
+        testScope.runTest {
+            val oneRowGrid = singleSpanGrid.copy(totalSpans = 1, currentSpan = 1, currentRow = 0)
+            updateGridLayout(oneRowGrid)
+            assertThat(underTest.canShrink()).isFalse()
+        }
+
+    @Test
+    fun testCanShrink_atFullSize_checksBottomDragState() = runTestWithSnapshots {
+        val twoSpanGrid = singleSpanGrid.copy(totalSpans = 2, currentSpan = 2, currentRow = 0)
+        updateGridLayout(twoSpanGrid)
+
+        assertThat(underTest.canShrink()).isTrue()
+        assertThat(underTest.bottomDragState.anchors.toList()).containsAtLeast(0 to 0f, -1 to -45f)
+    }
+
+    @Test
+    fun testResizeByAccessibility_expandFromBottom_usesTopDragState() = runTestWithSnapshots {
+        val resizeInfo by collectLastValue(underTest.resizeInfo)
+
+        val twoSpanGrid = singleSpanGrid.copy(totalSpans = 2, currentSpan = 1, currentRow = 1)
+        updateGridLayout(twoSpanGrid)
+
+        underTest.expandToNextAnchor()
+
+        assertThat(resizeInfo).isEqualTo(ResizeInfo(1, DragHandle.TOP))
+    }
+
+    @Test
+    fun testResizeByAccessibility_expandFromTop_usesBottomDragState() = runTestWithSnapshots {
+        val resizeInfo by collectLastValue(underTest.resizeInfo)
+
+        val twoSpanGrid = singleSpanGrid.copy(totalSpans = 2, currentSpan = 1, currentRow = 0)
+        updateGridLayout(twoSpanGrid)
+
+        underTest.expandToNextAnchor()
+
+        assertThat(resizeInfo).isEqualTo(ResizeInfo(1, DragHandle.BOTTOM))
+    }
+
+    @Test
+    fun testResizeByAccessibility_shrinkFromFull_usesBottomDragState() = runTestWithSnapshots {
+        val resizeInfo by collectLastValue(underTest.resizeInfo)
+
+        val twoSpanGrid = singleSpanGrid.copy(totalSpans = 2, currentSpan = 2, currentRow = 0)
+        updateGridLayout(twoSpanGrid)
+
+        underTest.shrinkToNextAnchor()
+
+        assertThat(resizeInfo).isEqualTo(ResizeInfo(-1, DragHandle.BOTTOM))
+    }
+
+    @Test
+    fun testResizeByAccessibility_cannotResizeAtMinSize() = runTestWithSnapshots {
+        val resizeInfo by collectLastValue(underTest.resizeInfo)
+
+        // Set up grid at minimum size
+        val minSizeGrid =
+            singleSpanGrid.copy(
+                totalSpans = 2,
+                currentSpan = 1,
+                minHeightPx = singleSpanGrid.minHeightPx,
+                currentRow = 0,
+            )
+        updateGridLayout(minSizeGrid)
+
+        underTest.shrinkToNextAnchor()
+
+        assertThat(resizeInfo).isNull()
+    }
+
     @Test(expected = IllegalArgumentException::class)
     fun testIllegalState_maxHeightLessThanMinHeight() =
         testScope.runTest {
@@ -379,6 +479,24 @@ class ResizeableItemFrameViewModelTest : SysuiTestCase() {
     @Test(expected = IllegalArgumentException::class)
     fun testIllegalState_resizeMultipleZeroOrNegative() =
         testScope.runTest { updateGridLayout(singleSpanGrid.copy(resizeMultiple = 0)) }
+
+    @Test
+    fun testZeroHeights_cannotResize() = runTestWithSnapshots {
+        val zeroHeightGrid =
+            singleSpanGrid.copy(
+                totalSpans = 2,
+                currentSpan = 1,
+                currentRow = 0,
+                minHeightPx = 0,
+                maxHeightPx = 0,
+            )
+        updateGridLayout(zeroHeightGrid)
+
+        val topState = underTest.topDragState
+        val bottomState = underTest.bottomDragState
+        assertThat(topState.anchors.toList()).containsExactly(0 to 0f)
+        assertThat(bottomState.anchors.toList()).containsExactly(0 to 0f)
+    }
 
     private fun TestScope.updateGridLayout(gridLayout: GridLayout) {
         underTest.setGridLayoutInfo(

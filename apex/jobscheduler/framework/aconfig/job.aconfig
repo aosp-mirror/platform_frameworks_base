@@ -30,3 +30,10 @@ flag {
    description: "Enables automatic cancellation of jobs due to leaked JobParameters, reducing unnecessary battery drain and improving system efficiency. This includes logging and traces for better issue diagnosis."
    bug: "349688611"
 }
+
+flag {
+    name: "ignore_important_while_foreground"
+    namespace: "backstage_power"
+    description: "Ignore the important_while_foreground flag and change the related APIs to be not effective"
+    bug: "374175032"
+}

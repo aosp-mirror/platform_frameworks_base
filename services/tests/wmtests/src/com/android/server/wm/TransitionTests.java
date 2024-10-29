@@ -2354,6 +2354,11 @@ public class TransitionTests extends WindowTestsBase {
         // ChangeInfo#mCommonAncestor should be set after reparent.
         final Transition.ChangeInfo change = transition.mChanges.get(activity);
         assertEquals(newParent.getDisplayArea(), change.mCommonAncestor);
+
+        // WindowContainer#onDisplayChanged should collect the moved task.
+        final DisplayContent newDisplay = createNewDisplay();
+        newParent.reparent(newDisplay.getDefaultTaskDisplayArea(), true /* onTop */);
+        assertTrue(transition.mParticipants.contains(newParent));
     }
 
     @Test

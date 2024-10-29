@@ -651,6 +651,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(Flags.FLAG_TRANSITION_RACE_CONDITION)
     fun switchToAOD_whenAvailable_whenDeviceSleepsLocked() =
         testScope.runTest {
             kosmos.lockscreenSceneTransitionInteractor.start()
@@ -680,6 +681,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(Flags.FLAG_TRANSITION_RACE_CONDITION)
     fun switchToDozing_whenAodUnavailable_whenDeviceSleepsLocked() =
         testScope.runTest {
             kosmos.lockscreenSceneTransitionInteractor.start()
@@ -698,6 +700,56 @@ class SceneContainerStartableTest : SysuiTestCase() {
             runCurrent()
 
             assertThat(currentTransitionInfo?.to).isEqualTo(KeyguardState.DOZING)
+        }
+
+    @Test
+    @EnableFlags(Flags.FLAG_TRANSITION_RACE_CONDITION)
+    fun switchToAOD_whenAvailable_whenDeviceSleepsLocked_transitionFlagEnabled() =
+        testScope.runTest {
+            kosmos.lockscreenSceneTransitionInteractor.start()
+            val asleepState by collectLastValue(kosmos.keyguardInteractor.asleepKeyguardState)
+            val transitionState =
+                prepareState(isDeviceUnlocked = false, initialSceneKey = Scenes.Shade)
+            kosmos.keyguardRepository.setAodAvailable(true)
+            runCurrent()
+            assertThat(asleepState).isEqualTo(KeyguardState.AOD)
+            underTest.start()
+            powerInteractor.setAsleepForTest()
+            runCurrent()
+            transitionState.value =
+                ObservableTransitionState.Transition(
+                    fromScene = Scenes.Shade,
+                    toScene = Scenes.Lockscreen,
+                    currentScene = flowOf(Scenes.Lockscreen),
+                    progress = flowOf(0.5f),
+                    isInitiatedByUserInput = true,
+                    isUserInputOngoing = flowOf(false),
+                )
+            runCurrent()
+
+            assertThat(kosmos.keyguardTransitionRepository.currentTransitionInfo.to)
+                .isEqualTo(KeyguardState.AOD)
+        }
+
+    @Test
+    @EnableFlags(Flags.FLAG_TRANSITION_RACE_CONDITION)
+    fun switchToDozing_whenAodUnavailable_whenDeviceSleepsLocked_transitionFlagEnabled() =
+        testScope.runTest {
+            kosmos.lockscreenSceneTransitionInteractor.start()
+            val asleepState by collectLastValue(kosmos.keyguardInteractor.asleepKeyguardState)
+            val transitionState =
+                prepareState(isDeviceUnlocked = false, initialSceneKey = Scenes.Shade)
+            kosmos.keyguardRepository.setAodAvailable(false)
+            runCurrent()
+            assertThat(asleepState).isEqualTo(KeyguardState.DOZING)
+            underTest.start()
+            powerInteractor.setAsleepForTest()
+            runCurrent()
+            transitionState.value = Transition(from = Scenes.Shade, to = Scenes.Lockscreen)
+            runCurrent()
+
+            assertThat(kosmos.keyguardTransitionRepository.currentTransitionInfo.to)
+                .isEqualTo(KeyguardState.DOZING)
         }
 
     @Test
