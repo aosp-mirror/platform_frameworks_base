@@ -289,6 +289,11 @@ public class RecentTasksController implements TaskStackListenerCallback,
     }
 
     @Override
+    public void onTaskChangedThroughTransition(@NonNull ActivityManager.RunningTaskInfo taskInfo) {
+        notifyTaskInfoChanged(taskInfo);
+    }
+
+    @Override
     public void onTaskMovedToFrontThroughTransition(
             ActivityManager.RunningTaskInfo runningTaskInfo) {
         notifyTaskMovedToFront(runningTaskInfo);
@@ -352,6 +357,19 @@ public class RecentTasksController implements TaskStackListenerCallback,
             mListener.onRunningTaskChanged(taskInfo);
         } catch (RemoteException e) {
             Slog.w(TAG, "Failed call onRunningTaskChanged", e);
+        }
+    }
+
+    private void notifyTaskInfoChanged(ActivityManager.RunningTaskInfo taskInfo) {
+        if (mListener == null
+                || !DesktopModeFlags.ENABLE_TASK_STACK_OBSERVER_IN_SHELL.isTrue()
+                || taskInfo.realActivity == null) {
+            return;
+        }
+        try {
+            mListener.onTaskInfoChanged(taskInfo);
+        } catch (RemoteException e) {
+            Slog.w(TAG, "Failed call onTaskInfoChanged", e);
         }
     }
 
@@ -635,6 +653,11 @@ public class RecentTasksController implements TaskStackListenerCallback,
             @Override
             public void onTaskMovedToFront(ActivityManager.RunningTaskInfo taskInfo) {
                 mListener.call(l -> l.onTaskMovedToFront(taskInfo));
+            }
+
+            @Override
+            public void onTaskInfoChanged(ActivityManager.RunningTaskInfo taskInfo) {
+                mListener.call(l -> l.onTaskInfoChanged(taskInfo));
             }
         };
 
