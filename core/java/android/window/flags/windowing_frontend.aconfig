@@ -389,3 +389,10 @@ flag {
     is_fixed_read_only: true
     bug: "362938401"
 }
+
+flag {
+    name: "predictive_back_three_button_nav"
+    namespace: "systemui"
+    description: "Enable Predictive Back Animation for 3-button-nav"
+    bug: "373544911"
+}
