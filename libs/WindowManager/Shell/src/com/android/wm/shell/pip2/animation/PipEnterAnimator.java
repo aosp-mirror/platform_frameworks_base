@@ -192,22 +192,7 @@ public class PipEnterAnimator extends ValueAnimator
      * calculated differently from generic transitions.
      * @param pipChange PiP change received as a transition target.
      */
-    public void setEnterStartState(@NonNull TransitionInfo.Change pipChange,
-            @NonNull TransitionInfo.Change pipActivityChange) {
-        PipUtils.calcEndTransform(pipActivityChange, pipChange, mInitActivityScale,
-                mInitActivityPos);
-        if (mStartTransaction != null && pipActivityChange.getLeash() != null) {
-            mStartTransaction.setCrop(pipActivityChange.getLeash(), null);
-            mStartTransaction.setScale(pipActivityChange.getLeash(), mInitActivityScale.x,
-                    mInitActivityScale.y);
-            mStartTransaction.setPosition(pipActivityChange.getLeash(), mInitActivityPos.x,
-                    mInitActivityPos.y);
-            mFinishTransaction.setCrop(pipActivityChange.getLeash(), null);
-            mFinishTransaction.setScale(pipActivityChange.getLeash(), mInitActivityScale.x,
-                    mInitActivityScale.y);
-            mFinishTransaction.setPosition(pipActivityChange.getLeash(), mInitActivityPos.x,
-                    mInitActivityPos.y);
-        }
+    public void setEnterStartState(@NonNull TransitionInfo.Change pipChange) {
         PipUtils.calcStartTransform(pipChange, mInitScale, mInitPos, mInitCrop);
     }
 
