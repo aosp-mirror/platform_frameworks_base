@@ -45,14 +45,14 @@ import org.mockito.junit.MockitoRule
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 @OptIn(ExperimentalCoroutinesApi::class)
-class SeekbarHapticPluginTest : SysuiTestCase() {
+class HapticSliderPluginTest : SysuiTestCase() {
 
     private val kosmos = Kosmos()
 
     @Rule @JvmField val mMockitoRule: MockitoRule = MockitoJUnit.rule()
     @Mock private lateinit var vibratorHelper: VibratorHelper
     private val seekBar = SeekBar(mContext)
-    private lateinit var plugin: SeekbarHapticPlugin
+    private lateinit var plugin: HapticSliderPlugin
 
     @Before
     fun setup() {
@@ -95,7 +95,7 @@ class SeekbarHapticPluginTest : SysuiTestCase() {
         // GIVEN an onKeyDown that starts the wait and a program progress change that advances the
         // slider state to ARROW_HANDLE_MOVED_ONCE
         plugin.onKeyDown()
-        plugin.onProgressChanged(seekBar, 50, false)
+        plugin.onProgressChanged(50, false)
         testScheduler.runCurrent()
         assertThat(plugin.trackerState).isEqualTo(SliderState.ARROW_HANDLE_MOVED_ONCE)
 
@@ -112,7 +112,7 @@ class SeekbarHapticPluginTest : SysuiTestCase() {
         // GIVEN an onKeyDown that starts the wait and a program progress change that advances the
         // slider state to ARROW_HANDLE_MOVED_ONCE
         plugin.onKeyDown()
-        plugin.onProgressChanged(seekBar, 50, false)
+        plugin.onProgressChanged(50, false)
         testScheduler.runCurrent()
         assertThat(plugin.trackerState).isEqualTo(SliderState.ARROW_HANDLE_MOVED_ONCE)
 
@@ -142,7 +142,13 @@ class SeekbarHapticPluginTest : SysuiTestCase() {
         }
 
     private fun createPlugin() {
-        plugin = SeekbarHapticPlugin(vibratorHelper, kosmos.msdlPlayer, kosmos.fakeSystemClock)
+        plugin =
+            HapticSliderPlugin(
+                vibratorHelper,
+                kosmos.msdlPlayer,
+                kosmos.fakeSystemClock,
+                HapticSlider.SeekBar(seekBar),
+            )
     }
 
     companion object {

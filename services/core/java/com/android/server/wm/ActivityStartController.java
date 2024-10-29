@@ -190,7 +190,8 @@ public class ActivityStartController {
                 .setOutActivity(tmpOutRecord)
                 .setCallingUid(0)
                 .setActivityInfo(aInfo)
-                .setActivityOptions(options.toBundle())
+                .setActivityOptions(options.toBundle(),
+                        Binder.getCallingPid(), Binder.getCallingUid())
                 .execute();
         mLastHomeActivityStartRecord = tmpOutRecord[0];
         if (rootHomeTask.mInResumeTopActivity) {

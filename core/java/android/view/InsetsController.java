@@ -1083,7 +1083,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         }
     }
 
-    boolean isPredictiveBackImeHideAnimInProgress() {
+    public boolean isPredictiveBackImeHideAnimInProgress() {
         return mIsPredictiveBackImeHideAnimInProgress;
     }
 

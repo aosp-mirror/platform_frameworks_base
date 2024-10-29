@@ -65,11 +65,10 @@ class DesktopHeaderManageWindowsMenu(
     var menuViewContainer: AdditionalViewContainer? = null
 
     init {
-        show(snapshotList, onIconClickListener, onOutsideClickListener)
-    }
-
-    override fun close() {
-        menuViewContainer?.releaseView()
+        createMenu(snapshotList, onIconClickListener, onOutsideClickListener)
+        menuView.rootView.pivotX = 0f
+        menuView.rootView.pivotY = 0f
+        animateOpen()
     }
 
     override fun addToContainer(menuView: ManageWindowsView) {
@@ -138,5 +137,9 @@ class DesktopHeaderManageWindowsMenu(
             viewHost,
             surfaceControlTransactionSupplier
         )
+    }
+
+    override fun removeFromContainer() {
+        menuViewContainer?.releaseView()
     }
 }

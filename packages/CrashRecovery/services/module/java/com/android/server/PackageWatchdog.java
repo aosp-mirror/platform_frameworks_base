@@ -19,6 +19,7 @@ package com.android.server;
 import static android.content.Intent.ACTION_REBOOT;
 import static android.content.Intent.ACTION_SHUTDOWN;
 import static android.service.watchdog.ExplicitHealthCheckService.PackageConfig;
+import static android.util.Xml.Encoding.UTF_8;
 
 import static com.android.server.crashrecovery.CrashRecoveryUtils.dumpCrashRecoveryEvents;
 
@@ -58,13 +59,14 @@ import android.util.XmlUtils;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.FastXmlSerializer;
 import com.android.modules.utils.BackgroundThread;
-import com.android.modules.utils.TypedXmlPullParser;
-import com.android.modules.utils.TypedXmlSerializer;
 
 import libcore.io.IoUtils;
 
+import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlSerializer;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -1152,7 +1154,8 @@ public class PackageWatchdog {
         mAllObservers.clear();
         try {
             infile = mPolicyFile.openRead();
-            final TypedXmlPullParser parser = Xml.resolvePullParser(infile);
+            final XmlPullParser parser = Xml.newPullParser();
+            parser.setInput(infile, UTF_8.name());
             XmlUtils.beginDocument(parser, TAG_PACKAGE_WATCHDOG);
             int outerDepth = parser.getDepth();
             while (XmlUtils.nextElementWithin(parser, outerDepth)) {
@@ -1163,7 +1166,7 @@ public class PackageWatchdog {
             }
         } catch (FileNotFoundException e) {
             // Nothing to monitor
-        } catch (IOException | NumberFormatException | XmlPullParserException e) {
+        } catch (Exception e) {
             Slog.wtf(TAG, "Unable to read monitored packages, deleting file", e);
             mPolicyFile.delete();
         } finally {
@@ -1237,10 +1240,11 @@ public class PackageWatchdog {
             }
 
             try {
-                TypedXmlSerializer out = Xml.resolveSerializer(stream);
+                XmlSerializer out = new FastXmlSerializer();
+                out.setOutput(stream, UTF_8.name());
                 out.startDocument(null, true);
                 out.startTag(null, TAG_PACKAGE_WATCHDOG);
-                out.attributeInt(null, ATTR_VERSION, DB_VERSION);
+                out.attribute(null, ATTR_VERSION, Integer.toString(DB_VERSION));
                 for (int oIndex = 0; oIndex < mAllObservers.size(); oIndex++) {
                     mAllObservers.valueAt(oIndex).writeLocked(out);
                 }
@@ -1356,12 +1360,12 @@ public class PackageWatchdog {
          * Does not persist any package failure thresholds.
          */
         @GuardedBy("mLock")
-        public boolean writeLocked(TypedXmlSerializer out) {
+        public boolean writeLocked(XmlSerializer out) {
             try {
                 out.startTag(null, TAG_OBSERVER);
                 out.attribute(null, ATTR_NAME, name);
                 if (Flags.recoverabilityDetection()) {
-                    out.attributeInt(null, ATTR_MITIGATION_COUNT, mMitigationCount);
+                    out.attribute(null, ATTR_MITIGATION_COUNT, Integer.toString(mMitigationCount));
                 }
                 for (int i = 0; i < mPackages.size(); i++) {
                     MonitoredPackage p = mPackages.valueAt(i);
@@ -1486,7 +1490,7 @@ public class PackageWatchdog {
          * #loadFromFile which in turn is only called on construction of the
          * singleton PackageWatchdog.
          **/
-        public static ObserverInternal read(TypedXmlPullParser parser, PackageWatchdog watchdog) {
+        public static ObserverInternal read(XmlPullParser parser, PackageWatchdog watchdog) {
             String observerName = null;
             int observerMitigationCount = 0;
             if (TAG_OBSERVER.equals(parser.getName())) {
@@ -1501,9 +1505,9 @@ public class PackageWatchdog {
             try {
                 if (Flags.recoverabilityDetection()) {
                     try {
-                        observerMitigationCount =
-                                parser.getAttributeInt(null, ATTR_MITIGATION_COUNT);
-                    } catch (XmlPullParserException e) {
+                        observerMitigationCount = Integer.parseInt(
+                                parser.getAttributeValue(null, ATTR_MITIGATION_COUNT));
+                    } catch (Exception e) {
                         Slog.i(
                             TAG,
                             "ObserverInternal mitigation count was not present.");
@@ -1579,13 +1583,14 @@ public class PackageWatchdog {
                 hasPassedHealthCheck, mitigationCalls);
     }
 
-    MonitoredPackage parseMonitoredPackage(TypedXmlPullParser parser)
+    MonitoredPackage parseMonitoredPackage(XmlPullParser parser)
             throws XmlPullParserException {
         String packageName = parser.getAttributeValue(null, ATTR_NAME);
-        long duration = parser.getAttributeLong(null, ATTR_DURATION);
-        long healthCheckDuration = parser.getAttributeLong(null,
-                        ATTR_EXPLICIT_HEALTH_CHECK_DURATION);
-        boolean hasPassedHealthCheck = parser.getAttributeBoolean(null, ATTR_PASSED_HEALTH_CHECK);
+        long duration = Long.parseLong(parser.getAttributeValue(null, ATTR_DURATION));
+        long healthCheckDuration = Long.parseLong(parser.getAttributeValue(null,
+                ATTR_EXPLICIT_HEALTH_CHECK_DURATION));
+        boolean hasPassedHealthCheck = Boolean.parseBoolean(parser.getAttributeValue(null,
+                ATTR_PASSED_HEALTH_CHECK));
         LongArrayQueue mitigationCalls = parseLongArrayQueue(
                 parser.getAttributeValue(null, ATTR_MITIGATION_CALLS));
         return newMonitoredPackage(packageName,
@@ -1643,12 +1648,13 @@ public class PackageWatchdog {
          * @hide
          */
         @GuardedBy("mLock")
-        public void writeLocked(TypedXmlSerializer out) throws IOException {
+        public void writeLocked(XmlSerializer out) throws IOException {
             out.startTag(null, TAG_PACKAGE);
             out.attribute(null, ATTR_NAME, getName());
-            out.attributeLong(null, ATTR_DURATION, mDurationMs);
-            out.attributeLong(null, ATTR_EXPLICIT_HEALTH_CHECK_DURATION, mHealthCheckDurationMs);
-            out.attributeBoolean(null, ATTR_PASSED_HEALTH_CHECK, mHasPassedHealthCheck);
+            out.attribute(null, ATTR_DURATION, Long.toString(mDurationMs));
+            out.attribute(null, ATTR_EXPLICIT_HEALTH_CHECK_DURATION,
+                    Long.toString(mHealthCheckDurationMs));
+            out.attribute(null, ATTR_PASSED_HEALTH_CHECK, Boolean.toString(mHasPassedHealthCheck));
             LongArrayQueue normalizedCalls = normalizeMitigationCalls();
             out.attribute(null, ATTR_MITIGATION_CALLS, longArrayQueueToString(normalizedCalls));
             out.endTag(null, TAG_PACKAGE);

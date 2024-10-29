@@ -336,6 +336,13 @@ flag {
 }
 
 flag {
+    name: "enable_desktop_app_launch_transitions"
+    namespace: "lse_desktop_experience"
+    description: "Enables custom transitions for app launches in Desktop Mode."
+    bug: "375992828"
+}
+
+flag {
     name: "enable_move_to_next_display_shortcut"
     namespace: "lse_desktop_experience"
     description: "Add new keyboard shortcut of moving a task into next display"
@@ -368,4 +375,11 @@ flag {
     namespace: "lse_desktop_experience"
     description: "Enables PiP features in desktop mode."
     bug: "350475854"
+}
+
+flag {
+    name: "enable_desktop_windowing_hsum"
+    namespace: "lse_desktop_experience"
+    description: "Enables HSUM on desktop mode."
+    bug: "366397912"
 }

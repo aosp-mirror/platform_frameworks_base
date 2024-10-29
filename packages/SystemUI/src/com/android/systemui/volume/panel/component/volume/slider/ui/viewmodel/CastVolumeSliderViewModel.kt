@@ -19,6 +19,7 @@ package com.android.systemui.volume.panel.component.volume.slider.ui.viewmodel
 import android.content.Context
 import android.media.session.MediaController.PlaybackInfo
 import com.android.systemui.common.shared.model.Icon
+import com.android.systemui.haptics.slider.compose.ui.SliderHapticsViewModel
 import com.android.systemui.res.R
 import com.android.systemui.volume.panel.component.mediaoutput.domain.interactor.MediaDeviceSessionInteractor
 import com.android.systemui.volume.panel.component.mediaoutput.shared.model.MediaDeviceSession
@@ -40,6 +41,7 @@ constructor(
     @Assisted private val coroutineScope: CoroutineScope,
     private val context: Context,
     private val mediaDeviceSessionInteractor: MediaDeviceSessionInteractor,
+    override val hapticsViewModelFactory: SliderHapticsViewModel.Factory,
 ) : SliderViewModel {
 
     override val slider: StateFlow<SliderState> =

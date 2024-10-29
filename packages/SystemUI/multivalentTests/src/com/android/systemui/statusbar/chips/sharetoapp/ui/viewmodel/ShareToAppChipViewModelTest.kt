@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.chips.sharetoapp.ui.viewmodel
 import android.content.DialogInterface
 import android.platform.test.annotations.EnableFlags
 import android.view.View
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.jank.Cuj
 import com.android.systemui.Flags.FLAG_STATUS_BAR_SHOW_AUDIO_ONLY_PROJECTION_CHIP
@@ -51,6 +52,7 @@ import com.google.common.truth.Truth.assertThat
 import kotlin.test.Test
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
+import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
@@ -60,6 +62,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class ShareToAppChipViewModelTest : SysuiTestCase() {
     private val kosmos = Kosmos().also { it.testCase = this }
     private val testScope = kosmos.testScope
