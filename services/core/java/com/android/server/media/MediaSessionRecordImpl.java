@@ -206,6 +206,10 @@ public abstract class MediaSessionRecordImpl {
      */
     public abstract void expireTempEngaged();
 
+    /** Notifies record that the global priority session active state changed. */
+    public abstract void onGlobalPrioritySessionActiveChanged(
+            boolean isGlobalPrioritySessionActive);
+
     @Override
     public final boolean equals(Object o) {
         if (this == o) return true;

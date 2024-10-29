@@ -161,6 +161,11 @@ public class MediaSession2Record extends MediaSessionRecordImpl {
     }
 
     @Override
+    public void onGlobalPrioritySessionActiveChanged(boolean isGlobalPrioritySessionActive) {
+        // NA as MediaSession2 doesn't support UserEngagementStates for FGS.
+    }
+
+    @Override
     public boolean sendMediaButton(String packageName, int pid, int uid, boolean asSystemService,
             KeyEvent ke, int sequenceId, ResultReceiver cb) {
         // TODO(jaewan): Implement.

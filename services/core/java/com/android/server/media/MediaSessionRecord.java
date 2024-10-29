@@ -234,7 +234,9 @@ public class MediaSessionRecord extends MediaSessionRecordImpl implements IBinde
     private final Runnable mUserEngagementTimeoutExpirationRunnable =
             () -> {
                 synchronized (mLock) {
-                    updateUserEngagedStateIfNeededLocked(/* isTimeoutExpired= */ true);
+                    updateUserEngagedStateIfNeededLocked(
+                            /* isTimeoutExpired= */ true,
+                            /* isGlobalPrioritySessionActive= */ false);
                 }
             };
 
@@ -600,7 +602,8 @@ public class MediaSessionRecord extends MediaSessionRecordImpl implements IBinde
             mSessionCb.mCb.asBinder().unlinkToDeath(this, 0);
             mDestroyed = true;
             mPlaybackState = null;
-            updateUserEngagedStateIfNeededLocked(/* isTimeoutExpired= */ true);
+            updateUserEngagedStateIfNeededLocked(
+                    /* isTimeoutExpired= */ true, /* isGlobalPrioritySessionActive= */ false);
             mHandler.post(MessageHandler.MSG_DESTROYED);
         }
     }
@@ -615,6 +618,24 @@ public class MediaSessionRecord extends MediaSessionRecordImpl implements IBinde
     @Override
     public void expireTempEngaged() {
         mHandler.post(mUserEngagementTimeoutExpirationRunnable);
+    }
+
+    @Override
+    public void onGlobalPrioritySessionActiveChanged(boolean isGlobalPrioritySessionActive) {
+        mHandler.post(
+                () -> {
+                    synchronized (mLock) {
+                        if (isGlobalPrioritySessionActive) {
+                            mHandler.removeCallbacks(mUserEngagementTimeoutExpirationRunnable);
+                        } else {
+                            if (mUserEngagementState == USER_TEMPORARILY_ENGAGED) {
+                                mHandler.postDelayed(
+                                        mUserEngagementTimeoutExpirationRunnable,
+                                        TEMP_USER_ENGAGED_TIMEOUT_MS);
+                            }
+                        }
+                    }
+                });
     }
 
     /**
@@ -1107,7 +1128,8 @@ public class MediaSessionRecord extends MediaSessionRecordImpl implements IBinde
     }
 
     @GuardedBy("mLock")
-    private void updateUserEngagedStateIfNeededLocked(boolean isTimeoutExpired) {
+    private void updateUserEngagedStateIfNeededLocked(
+            boolean isTimeoutExpired, boolean isGlobalPrioritySessionActive) {
         if (!Flags.enableNotifyingActivityManagerWithMediaSessionStatusChange()) {
             return;
         }
@@ -1128,7 +1150,7 @@ public class MediaSessionRecord extends MediaSessionRecordImpl implements IBinde
         }
 
         mUserEngagementState = newUserEngagedState;
-        if (newUserEngagedState == USER_TEMPORARILY_ENGAGED) {
+        if (newUserEngagedState == USER_TEMPORARILY_ENGAGED && !isGlobalPrioritySessionActive) {
             mHandler.postDelayed(
                     mUserEngagementTimeoutExpirationRunnable, TEMP_USER_ENGAGED_TIMEOUT_MS);
         } else {
@@ -1183,9 +1205,11 @@ public class MediaSessionRecord extends MediaSessionRecordImpl implements IBinde
                         .logFgsApiEnd(ActivityManager.FOREGROUND_SERVICE_API_TYPE_MEDIA_PLAYBACK,
                                 callingUid, callingPid);
             }
+            boolean isGlobalPrioritySessionActive = mService.isGlobalPrioritySessionActive();
             synchronized (mLock) {
                 mIsActive = active;
-                updateUserEngagedStateIfNeededLocked(/* isTimeoutExpired= */ false);
+                updateUserEngagedStateIfNeededLocked(
+                        /* isTimeoutExpired= */ false, isGlobalPrioritySessionActive);
             }
             long token = Binder.clearCallingIdentity();
             try {
@@ -1342,9 +1366,11 @@ public class MediaSessionRecord extends MediaSessionRecordImpl implements IBinde
             boolean shouldUpdatePriority = ALWAYS_PRIORITY_STATES.contains(newState)
                     || (!TRANSITION_PRIORITY_STATES.contains(oldState)
                     && TRANSITION_PRIORITY_STATES.contains(newState));
+            boolean isGlobalPrioritySessionActive = mService.isGlobalPrioritySessionActive();
             synchronized (mLock) {
                 mPlaybackState = state;
-                updateUserEngagedStateIfNeededLocked(/* isTimeoutExpired= */ false);
+                updateUserEngagedStateIfNeededLocked(
+                        /* isTimeoutExpired= */ false, isGlobalPrioritySessionActive);
             }
             final long token = Binder.clearCallingIdentity();
             try {
