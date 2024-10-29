@@ -28,7 +28,7 @@ fun PreferenceGroup.inflatePreferenceHierarchy(
     hierarchy: PreferenceHierarchy,
     storages: MutableMap<KeyValueStore, PreferenceDataStore> = mutableMapOf(),
 ) {
-    preferenceBindingFactory.bind(this, hierarchy.metadata)
+    preferenceBindingFactory.bind(this, hierarchy)
     hierarchy.forEach {
         val metadata = it.metadata
         val preferenceBinding =
@@ -40,7 +40,7 @@ fun PreferenceGroup.inflatePreferenceHierarchy(
             addPreference(preferenceGroup)
             preferenceGroup.inflatePreferenceHierarchy(preferenceBindingFactory, it)
         } else {
-            preferenceBindingFactory.bind(widget, metadata, preferenceBinding)
+            preferenceBindingFactory.bind(widget, it, preferenceBinding)
             (metadata as? PersistentPreference<*>)?.storage(context)?.let { storage ->
                 widget.preferenceDataStore =
                     storages.getOrPut(storage) { PreferenceDataStoreAdapter(storage) }

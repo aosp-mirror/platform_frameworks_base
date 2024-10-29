@@ -19,6 +19,7 @@ package com.android.settingslib.preference
 import androidx.preference.Preference
 import com.android.settingslib.metadata.MainSwitchPreference
 import com.android.settingslib.metadata.PreferenceGroup
+import com.android.settingslib.metadata.PreferenceHierarchyNode
 import com.android.settingslib.metadata.PreferenceMetadata
 import com.android.settingslib.metadata.SwitchPreference
 
@@ -34,9 +35,13 @@ interface PreferenceBindingFactory {
      */
     fun bind(
         preference: Preference,
-        metadata: PreferenceMetadata,
+        node: PreferenceHierarchyNode,
         preferenceBinding: PreferenceBinding? = null,
-    ) = (preferenceBinding ?: getPreferenceBinding(metadata))?.bind(preference, metadata)
+    ) {
+        val binding = (preferenceBinding ?: getPreferenceBinding(node.metadata)) ?: return
+        binding.bind(preference, node.metadata)
+        node.order?.let { preference.order = it }
+    }
 
     /** Returns the [PreferenceBinding] associated with the [PreferenceMetadata]. */
     fun getPreferenceBinding(metadata: PreferenceMetadata): PreferenceBinding?

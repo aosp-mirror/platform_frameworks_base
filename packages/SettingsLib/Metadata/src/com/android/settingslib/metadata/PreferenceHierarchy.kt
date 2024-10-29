@@ -17,7 +17,15 @@
 package com.android.settingslib.metadata
 
 /** A node in preference hierarchy that is associated with [PreferenceMetadata]. */
-open class PreferenceHierarchyNode internal constructor(val metadata: PreferenceMetadata)
+open class PreferenceHierarchyNode internal constructor(val metadata: PreferenceMetadata) {
+    /**
+     * Preference order in the hierarchy.
+     *
+     * When a preference appears on different screens, different order values could be specified.
+     */
+    var order: Int? = null
+        internal set
+}
 
 /**
  * Preference hierarchy describes the structure of preferences recursively.
@@ -30,9 +38,7 @@ class PreferenceHierarchy internal constructor(metadata: PreferenceMetadata) :
     private val children = mutableListOf<PreferenceHierarchyNode>()
 
     /** Adds a preference to the hierarchy. */
-    operator fun PreferenceMetadata.unaryPlus() {
-        children.add(PreferenceHierarchyNode(this))
-    }
+    operator fun PreferenceMetadata.unaryPlus() = +PreferenceHierarchyNode(this)
 
     /**
      * Adds preference screen with given key (as a placeholder) to the hierarchy.
@@ -45,13 +51,20 @@ class PreferenceHierarchy internal constructor(metadata: PreferenceMetadata) :
      *
      * @throws NullPointerException if screen is not registered to [PreferenceScreenRegistry]
      */
-    operator fun String.unaryPlus() {
-        children.add(PreferenceHierarchyNode(PreferenceScreenRegistry[this]!!))
-    }
+    operator fun String.unaryPlus() = +PreferenceHierarchyNode(PreferenceScreenRegistry[this]!!)
+
+    operator fun PreferenceHierarchyNode.unaryPlus() = also { children.add(it) }
+
+    /** Specifies preference order in the hierarchy. */
+    infix fun PreferenceHierarchyNode.order(order: Int) = apply { this.order = order }
 
     /** Adds a preference to the hierarchy. */
-    fun add(metadata: PreferenceMetadata) {
-        children.add(PreferenceHierarchyNode(metadata))
+    @JvmOverloads
+    fun add(metadata: PreferenceMetadata, order: Int? = null) {
+        PreferenceHierarchyNode(metadata).also {
+            it.order = order
+            children.add(it)
+        }
     }
 
     /** Adds a preference to the hierarchy before a specific preference. */
@@ -72,8 +85,12 @@ class PreferenceHierarchy internal constructor(metadata: PreferenceMetadata) :
     operator fun PreferenceGroup.unaryPlus() = PreferenceHierarchy(this).also { children.add(it) }
 
     /** Adds a preference group and returns its preference hierarchy. */
-    fun addGroup(metadata: PreferenceGroup): PreferenceHierarchy =
-        PreferenceHierarchy(metadata).also { children.add(it) }
+    @JvmOverloads
+    fun addGroup(metadata: PreferenceGroup, order: Int? = null): PreferenceHierarchy =
+        PreferenceHierarchy(metadata).also {
+            this.order = order
+            children.add(it)
+        }
 
     /**
      * Adds preference screen with given key (as a placeholder) to the hierarchy.
@@ -91,7 +108,7 @@ class PreferenceHierarchy internal constructor(metadata: PreferenceMetadata) :
     }
 
     /** Extensions to add more preferences to the hierarchy. */
-    operator fun plusAssign(init: PreferenceHierarchy.() -> Unit) = init(this)
+    operator fun PreferenceHierarchy.plusAssign(init: PreferenceHierarchy.() -> Unit) = init(this)
 
     /** Traversals preference hierarchy and applies given action. */
     fun forEach(action: (PreferenceHierarchyNode) -> Unit) {
@@ -117,17 +134,17 @@ class PreferenceHierarchy internal constructor(metadata: PreferenceMetadata) :
         return null
     }
 
-    /** Returns all the [PreferenceMetadata]s appear in the hierarchy. */
-    fun getAllPreferences(): List<PreferenceMetadata> =
-        mutableListOf<PreferenceMetadata>().also { getAllPreferences(it) }
+    /** Returns all the [PreferenceHierarchyNode]s appear in the hierarchy. */
+    fun getAllPreferences(): List<PreferenceHierarchyNode> =
+        mutableListOf<PreferenceHierarchyNode>().also { getAllPreferences(it) }
 
-    private fun getAllPreferences(result: MutableList<PreferenceMetadata>) {
-        result.add(metadata)
+    private fun getAllPreferences(result: MutableList<PreferenceHierarchyNode>) {
+        result.add(this)
         for (child in children) {
             if (child is PreferenceHierarchy) {
                 child.getAllPreferences(result)
             } else {
-                result.add(child.metadata)
+                result.add(child)
             }
         }
     }
