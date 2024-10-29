@@ -32,11 +32,7 @@ class DesktopTaskChangeListener(
       return
     }
     if (isFreeformTask(taskInfo)) {
-      desktopRepository.addOrMoveFreeformTaskToTop(taskInfo.displayId, taskInfo.taskId)
-      if (taskInfo.isVisible) {
-        desktopRepository.addActiveTask(taskInfo.displayId, taskInfo.taskId)
-        desktopRepository.updateTaskVisibility(taskInfo.displayId, taskInfo.taskId, visible = true)
-      }
+      desktopRepository.addTask(taskInfo.displayId, taskInfo.taskId, taskInfo.isVisible)
     }
   }
 
@@ -46,9 +42,9 @@ class DesktopTaskChangeListener(
     // Case 1: Freeform task is changed in Desktop Mode.
     if (isFreeformTask(taskInfo)) {
       if (taskInfo.isVisible) {
-        desktopRepository.addActiveTask(taskInfo.displayId, taskInfo.taskId)
+        desktopRepository.addTask(taskInfo.displayId, taskInfo.taskId, taskInfo.isVisible)
       }
-      desktopRepository.updateTaskVisibility(
+      desktopRepository.updateTask(
           taskInfo.displayId, taskInfo.taskId, taskInfo.isVisible)
     } else {
       // Case 2: Freeform task is changed outside Desktop Mode.
@@ -87,7 +83,7 @@ class DesktopTaskChangeListener(
       desktopRepository.removeClosingTask(taskInfo.taskId)
       desktopRepository.removeFreeformTask(taskInfo.displayId, taskInfo.taskId)
     } else {
-      desktopRepository.updateTaskVisibility(taskInfo.displayId, taskInfo.taskId, visible = false)
+      desktopRepository.updateTask(taskInfo.displayId, taskInfo.taskId, isVisible = false)
       desktopRepository.minimizeTask(taskInfo.displayId, taskInfo.taskId)
     }
   }

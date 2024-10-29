@@ -28,7 +28,6 @@ import static com.android.window.flags.Flags.FLAG_SHOW_DESKTOP_WINDOWING_DEV_OPT
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -124,10 +123,7 @@ public final class FreeformTaskListenerTests extends ShellTestCase {
 
         mFreeformTaskListener.onTaskAppeared(task, mMockSurfaceControl);
 
-        verify(mDesktopRepository).addOrMoveFreeformTaskToTop(task.displayId, task.taskId);
-        verify(mDesktopRepository).addActiveTask(task.displayId, task.taskId);
-        verify(mDesktopRepository)
-                .updateTaskVisibility(task.displayId, task.taskId, task.isVisible);
+        verify(mDesktopRepository).addTask(task.displayId, task.taskId, task.isVisible = true);
     }
 
     @Test
@@ -139,10 +135,7 @@ public final class FreeformTaskListenerTests extends ShellTestCase {
 
         mFreeformTaskListener.onTaskAppeared(task, mMockSurfaceControl);
 
-        verify(mDesktopRepository).addOrMoveFreeformTaskToTop(task.displayId, task.taskId);
-        verify(mDesktopRepository, never()).addActiveTask(task.displayId, task.taskId);
-        verify(mDesktopRepository, never())
-                .updateTaskVisibility(task.displayId, task.taskId, task.isVisible);
+        verify(mDesktopRepository).addTask(task.displayId, task.taskId, task.isVisible);
     }
 
     @Test
@@ -154,10 +147,7 @@ public final class FreeformTaskListenerTests extends ShellTestCase {
 
         mFreeformTaskListener.onTaskAppeared(task, mMockSurfaceControl);
 
-        verify(mDesktopRepository, never()).addOrMoveFreeformTaskToTop(task.displayId, task.taskId);
-        verify(mDesktopRepository, never()).addActiveTask(task.displayId, task.taskId);
-        verify(mDesktopRepository, never())
-                .updateTaskVisibility(task.displayId, task.taskId, task.isVisible);
+        verify(mDesktopRepository, never()).addTask(task.displayId, task.taskId, task.isVisible);
     }
 
     @Test
@@ -168,7 +158,7 @@ public final class FreeformTaskListenerTests extends ShellTestCase {
 
         mFreeformTaskListener.onFocusTaskChanged(task);
 
-        verify(mDesktopRepository).addOrMoveFreeformTaskToTop(task.displayId, task.taskId);
+        verify(mDesktopRepository).addTask(task.displayId, task.taskId, task.isVisible);
     }
 
     @Test
@@ -182,7 +172,7 @@ public final class FreeformTaskListenerTests extends ShellTestCase {
         mFreeformTaskListener.onFocusTaskChanged(fullscreenTask);
 
         verify(mDesktopRepository, never())
-                .addOrMoveFreeformTaskToTop(fullscreenTask.displayId, fullscreenTask.taskId);
+                .addTask(fullscreenTask.displayId, fullscreenTask.taskId, fullscreenTask.isVisible);
     }
 
     @Test
@@ -275,7 +265,7 @@ public final class FreeformTaskListenerTests extends ShellTestCase {
 
     @Test
     @DisableFlags(FLAG_ENABLE_WINDOWING_TRANSITION_HANDLERS_OBSERVERS)
-    public void onTaskInfoChanged_noTransitionObservers_updatesTaskVisibility() {
+    public void onTaskInfoChanged_noTransitionObservers_updatesTask() {
         ActivityManager.RunningTaskInfo task =
                 new TestRunningTaskInfoBuilder().setWindowingMode(WINDOWING_MODE_FREEFORM).build();
         task.isVisible = true;
@@ -284,9 +274,7 @@ public final class FreeformTaskListenerTests extends ShellTestCase {
         mFreeformTaskListener.onTaskInfoChanged(task);
 
         verify(mTaskChangeListener, never()).onTaskChanging(any());
-        verify(mDesktopRepository, times(2)).addActiveTask(task.displayId, task.taskId);
-        verify(mDesktopRepository, times(2))
-                .updateTaskVisibility(task.displayId, task.taskId, task.isVisible);
+        verify(mDesktopRepository).updateTask(task.displayId, task.taskId, task.isVisible);
     }
 
     @Test
@@ -302,7 +290,7 @@ public final class FreeformTaskListenerTests extends ShellTestCase {
 
         verify(mTaskChangeListener).onNonTransitionTaskChanging(any());
         verify(mDesktopRepository, never())
-                .updateTaskVisibility(task.displayId, task.taskId, task.isVisible);
+                .updateTask(task.displayId, task.taskId, task.isVisible);
     }
 
     @After
