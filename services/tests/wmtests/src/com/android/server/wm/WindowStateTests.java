@@ -406,11 +406,11 @@ public class WindowStateTests extends WindowTestsBase {
         final var powerManager = mWm.mPowerManager;
         clearInvocations(powerManager);
         firstWindow.prepareWindowToDisplayDuringRelayout(false /*wasVisible*/);
-        verify(powerManager).wakeUp(anyLong(), anyInt(), anyString());
+        verify(powerManager).wakeUp(anyLong(), anyInt(), anyString(), anyInt());
 
         clearInvocations(powerManager);
         secondWindow.prepareWindowToDisplayDuringRelayout(false /*wasVisible*/);
-        verify(powerManager).wakeUp(anyLong(), anyInt(), anyString());
+        verify(powerManager).wakeUp(anyLong(), anyInt(), anyString(), anyInt());
     }
 
     private void testPrepareWindowToDisplayDuringRelayout(WindowState appWindow,
@@ -420,9 +420,9 @@ public class WindowStateTests extends WindowTestsBase {
         appWindow.prepareWindowToDisplayDuringRelayout(false /* wasVisible */);
 
         if (expectedWakeupCalled) {
-            verify(powerManager).wakeUp(anyLong(), anyInt(), anyString());
+            verify(powerManager).wakeUp(anyLong(), anyInt(), anyString(), anyInt());
         } else {
-            verify(powerManager, never()).wakeUp(anyLong(), anyInt(), anyString());
+            verify(powerManager, never()).wakeUp(anyLong(), anyInt(), anyString(), anyInt());
         }
         // If wakeup is expected to be called, the currentLaunchCanTurnScreenOn should be false
         // because the state will be consumed.

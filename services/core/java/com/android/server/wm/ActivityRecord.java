@@ -6459,7 +6459,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         returningOptions = null;
 
         if (canTurnScreenOn()) {
-            mTaskSupervisor.wakeUp("turnScreenOnFlag");
+            mTaskSupervisor.wakeUp(getDisplayId(), "turnScreenOnFlag");
         } else {
             // If the screen is going to turn on because the caller explicitly requested it and
             // the keyguard is not showing don't attempt to sleep. Otherwise the Activity will
