@@ -122,7 +122,7 @@ class PreferenceScreenBindingHelper(
 
         // bind preference to update UI
         preferenceScreen.findPreference<Preference>(key)?.let {
-            preferenceBindingFactory.bind(it, preferences[key])
+            preferences[key]?.let { metadata -> preferenceBindingFactory.bind(it, metadata) }
         }
 
         // check reason to avoid potential infinite loop
@@ -225,7 +225,7 @@ class PreferenceScreenBindingHelper(
             preferences: Map<String, PreferenceMetadata>,
             storages: MutableMap<KeyValueStore, PreferenceDataStore> = mutableMapOf(),
         ) {
-            preferenceBindingFactory.bind(this, preferences[key])
+            preferences[key]?.let { preferenceBindingFactory.bind(this, it) }
             val count = preferenceCount
             for (index in 0 until count) {
                 val preference = getPreference(index)
@@ -233,7 +233,7 @@ class PreferenceScreenBindingHelper(
                     preference.bindRecursively(preferenceBindingFactory, preferences, storages)
                 } else {
                     preferences[preference.key]?.let {
-                        preferenceBindingFactory.getPreferenceBinding(it)?.bind(preference, it)
+                        preferenceBindingFactory.bind(preference, it)
                         (it as? PersistentPreference<*>)?.storage(context)?.let { storage ->
                             preference.preferenceDataStore =
                                 storages.getOrPut(storage) { PreferenceDataStoreAdapter(storage) }
@@ -242,10 +242,5 @@ class PreferenceScreenBindingHelper(
                 }
             }
         }
-
-        private fun PreferenceBindingFactory.bind(
-            preference: Preference,
-            metadata: PreferenceMetadata?,
-        ) = metadata?.let { getPreferenceBinding(it)?.bind(preference, it) }
     }
 }

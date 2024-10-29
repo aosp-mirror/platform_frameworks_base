@@ -16,6 +16,7 @@
 
 package com.android.settingslib.preference
 
+import androidx.preference.Preference
 import com.android.settingslib.metadata.MainSwitchPreference
 import com.android.settingslib.metadata.PreferenceGroup
 import com.android.settingslib.metadata.PreferenceMetadata
@@ -23,6 +24,19 @@ import com.android.settingslib.metadata.SwitchPreference
 
 /** Factory to map [PreferenceMetadata] to [PreferenceBinding]. */
 interface PreferenceBindingFactory {
+
+    /**
+     * Binds [Preference] and its associated [PreferenceMetadata] with given [PreferenceBinding]
+     * (`getPreferenceBinding(metadata)` is used if [preferenceBinding] is `null`).
+     *
+     * Subclass could override this callback to handle common binding logic. For instance,
+     * restricted preference with policy transparency.
+     */
+    fun bind(
+        preference: Preference,
+        metadata: PreferenceMetadata,
+        preferenceBinding: PreferenceBinding? = null,
+    ) = (preferenceBinding ?: getPreferenceBinding(metadata))?.bind(preference, metadata)
 
     /** Returns the [PreferenceBinding] associated with the [PreferenceMetadata]. */
     fun getPreferenceBinding(metadata: PreferenceMetadata): PreferenceBinding?
