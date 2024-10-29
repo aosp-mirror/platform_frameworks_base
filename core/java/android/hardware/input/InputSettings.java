@@ -522,8 +522,11 @@ public class InputSettings {
      * @hide
      */
     public static boolean useTouchpadThreeFingerTapShortcut(@NonNull Context context) {
-        // TODO(b/365063048): determine whether to enable the shortcut based on the settings.
-        return isTouchpadThreeFingerTapShortcutFeatureFlagEnabled();
+        int customizedShortcut = Settings.System.getIntForUser(context.getContentResolver(),
+                Settings.System.TOUCHPAD_THREE_FINGER_TAP_CUSTOMIZATION,
+                KeyGestureEvent.KEY_GESTURE_TYPE_UNSPECIFIED, UserHandle.USER_CURRENT);
+        return customizedShortcut != KeyGestureEvent.KEY_GESTURE_TYPE_UNSPECIFIED
+                && isTouchpadThreeFingerTapShortcutFeatureFlagEnabled();
     }
 
     /**
