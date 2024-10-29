@@ -58,6 +58,7 @@ import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.withArgCaptor
 import com.android.systemui.util.time.SystemClock
 import com.android.systemui.wmshell.BubblesManager
+import com.google.android.msdl.domain.MSDLPlayer
 import java.util.Optional
 import junit.framework.Assert
 import org.junit.After
@@ -110,6 +111,7 @@ class ExpandableNotificationRowControllerTest : SysuiTestCase() {
     private val dismissibilityProvider: NotificationDismissibilityProvider = mock()
     private val statusBarService: IStatusBarService = mock()
     private val uiEventLogger: UiEventLogger = mock()
+    private val msdlPlayer: MSDLPlayer = mock()
     private lateinit var controller: ExpandableNotificationRowController
 
     @Before
@@ -150,7 +152,8 @@ class ExpandableNotificationRowControllerTest : SysuiTestCase() {
                 dragController,
                 dismissibilityProvider,
                 statusBarService,
-                uiEventLogger
+                uiEventLogger,
+                msdlPlayer,
             )
         whenever(view.childrenContainer).thenReturn(childrenContainer)
 
@@ -268,14 +271,14 @@ class ExpandableNotificationRowControllerTest : SysuiTestCase() {
         controller.mSettingsListener.onSettingChanged(
             BUBBLES_SETTING_URI,
             view.entry.sbn.userId,
-            "1"
+            "1",
         )
         verify(childView).setBubblesEnabledForUser(true)
 
         controller.mSettingsListener.onSettingChanged(
             BUBBLES_SETTING_URI,
             view.entry.sbn.userId,
-            "9"
+            "9",
         )
         verify(childView).setBubblesEnabledForUser(false)
     }
