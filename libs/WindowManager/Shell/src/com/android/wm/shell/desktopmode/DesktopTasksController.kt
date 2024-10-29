@@ -697,6 +697,7 @@ class DesktopTasksController(
                 transitionType = transitionType,
                 wct = wct,
                 taskId = taskId,
+                minimizingTaskId = taskIdToMinimize,
                 exitingImmersiveTask = exitingImmersiveTask,
             )
             taskIdToMinimize?.let { addPendingMinimizeTransition(t, it) }
@@ -1429,6 +1430,7 @@ class DesktopTasksController(
                 )
             val transition = transitions.startTransition(TRANSIT_OPEN, wct, null)
             taskIdToMinimize?.let { addPendingMinimizeTransition(transition, it) }
+            addPendingAppLaunchTransition(transition, requestedTaskId, taskIdToMinimize)
             exitResult.asExit()?.runOnTransitionStart?.invoke(transition)
         } else {
             val splitPosition = splitScreenController.determineNewInstancePosition(callingTask)
@@ -1569,6 +1571,7 @@ class DesktopTasksController(
         desktopImmersiveController.exitImmersiveIfApplicable(transition, wct, task.displayId)
         // 2) minimize a Task if needed.
         val taskIdToMinimize = addAndGetMinimizeChanges(task.displayId, wct, task.taskId)
+        addPendingAppLaunchTransition(transition, task.taskId, taskIdToMinimize)
         if (taskIdToMinimize != null) {
             addPendingMinimizeTransition(transition, taskIdToMinimize)
             return wct
@@ -1600,6 +1603,7 @@ class DesktopTasksController(
                 // minimize another Task.
                 val taskIdToMinimize = addAndGetMinimizeChanges(task.displayId, wct, task.taskId)
                 taskIdToMinimize?.let { addPendingMinimizeTransition(transition, it) }
+                addPendingAppLaunchTransition(transition, task.taskId, taskIdToMinimize)
                 desktopImmersiveController.exitImmersiveIfApplicable(
                     transition, wct, task.displayId
                 )
@@ -1778,6 +1782,20 @@ class DesktopTasksController(
         desktopTasksLimiter.ifPresent {
             it.addPendingMinimizeChange(transition, taskToMinimize.displayId, taskToMinimize.taskId)
         }
+    }
+
+    private fun addPendingAppLaunchTransition(
+        transition: IBinder,
+        launchTaskId: Int,
+        minimizeTaskId: Int?,
+    ) {
+        if (!DesktopModeFlags.ENABLE_DESKTOP_APP_LAUNCH_TRANSITIONS.isTrue) {
+            return
+        }
+        // TODO b/359523924: pass immersive task here?
+        desktopMixedTransitionHandler.addPendingMixedTransition(
+            DesktopMixedTransitionHandler.PendingMixedTransition.Launch(
+                transition, launchTaskId, minimizeTaskId, /* exitingImmersiveTask= */ null))
     }
 
     fun removeDesktop(displayId: Int) {

@@ -1410,7 +1410,8 @@ class DesktopTasksControllerTest : ShellTestCase() {
       eq(TRANSIT_TO_FRONT),
       any(),
       eq(freeformTasks[0].taskId),
-      anyOrNull()
+      anyOrNull(),
+      anyOrNull(),
     )).thenReturn(Binder())
 
     controller.moveTaskToFront(freeformTasks[0], remoteTransition = null)
@@ -1468,7 +1469,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     val task = createTaskInfo(1001)
     whenever(shellTaskOrganizer.getRunningTaskInfo(task.taskId)).thenReturn(null)
     whenever(desktopMixedTransitionHandler
-      .startLaunchTransition(eq(TRANSIT_OPEN), any(), eq(task.taskId), anyOrNull()))
+      .startLaunchTransition(eq(TRANSIT_OPEN), any(), eq(task.taskId), anyOrNull(), anyOrNull()))
       .thenReturn(Binder())
 
     controller.moveTaskToFront(task.taskId, remoteTransition = null)
@@ -3689,7 +3690,8 @@ class DesktopTasksControllerTest : ShellTestCase() {
         runOnTransitionStart = runOnStartTransit,
       ))
     whenever(desktopMixedTransitionHandler
-      .startLaunchTransition(any(), any(), anyInt(), anyOrNull())).thenReturn(transition)
+      .startLaunchTransition(any(), any(), anyInt(), anyOrNull(), anyOrNull()))
+      .thenReturn(transition)
 
     controller.moveTaskToFront(task.taskId, remoteTransition = null)
 
@@ -3710,7 +3712,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
         runOnTransitionStart = runOnStartTransit,
       ))
     whenever(desktopMixedTransitionHandler
-      .startLaunchTransition(any(), any(), eq(task.taskId), anyOrNull()))
+      .startLaunchTransition(any(), any(), eq(task.taskId), anyOrNull(), anyOrNull()))
       .thenReturn(transition)
 
     controller.moveTaskToFront(task.taskId, remoteTransition = null)
@@ -4099,7 +4101,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     val arg: ArgumentCaptor<WindowContainerTransaction> =
       ArgumentCaptor.forClass(WindowContainerTransaction::class.java)
     verify(desktopMixedTransitionHandler)
-      .startLaunchTransition(eq(type), capture(arg), anyInt(), anyOrNull())
+      .startLaunchTransition(eq(type), capture(arg), anyInt(), anyOrNull(), anyOrNull())
     return arg.value
   }
 
