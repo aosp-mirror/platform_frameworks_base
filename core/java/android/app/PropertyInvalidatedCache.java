@@ -70,6 +70,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * @hide
  */
 @TestApi
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class PropertyInvalidatedCache<Query, Result> {
     /**
      * This is a configuration class that customizes a cache instance.
@@ -798,9 +799,17 @@ public class PropertyInvalidatedCache<Query, Result> {
             = new ConcurrentHashMap<>();
 
     // True if shared memory is flag-enabled, false otherwise.  Read the flags exactly once.
-    private static final boolean sSharedMemoryAvailable =
-            com.android.internal.os.Flags.applicationSharedMemoryEnabled()
-            && android.app.Flags.picUsesSharedMemory();
+    private static final boolean sSharedMemoryAvailable = isSharedMemoryAvailable();
+
+    @android.ravenwood.annotation.RavenwoodReplace
+    private static boolean isSharedMemoryAvailable() {
+        return com.android.internal.os.Flags.applicationSharedMemoryEnabled()
+                && android.app.Flags.picUsesSharedMemory();
+    }
+
+    private static boolean isSharedMemoryAvailable$ravenwood() {
+        return false; // Always disable shared memory on Ravenwood. (for now)
+    }
 
     // Return true if this cache can use shared memory for its nonce.  Shared memory may be used
     // if the module is the system.
