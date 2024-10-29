@@ -19,6 +19,7 @@ package com.android.wm.shell.bubbles.bar
 import android.annotation.SuppressLint
 import android.view.MotionEvent
 import android.view.View
+import androidx.annotation.VisibleForTesting
 import com.android.wm.shell.bubbles.BubblePositioner
 import com.android.wm.shell.shared.bubbles.DismissView
 import com.android.wm.shell.shared.bubbles.RelativeTouchListener
@@ -32,7 +33,7 @@ class BubbleBarExpandedViewDragController(
     private val animationHelper: BubbleBarAnimationHelper,
     private val bubblePositioner: BubblePositioner,
     private val pinController: BubbleExpandedViewPinController,
-    private val dragListener: DragListener
+    @get:VisibleForTesting val dragListener: DragListener,
 ) {
 
     var isStuckToDismiss: Boolean = false
@@ -107,7 +108,7 @@ class BubbleBarExpandedViewDragController(
             viewInitialX: Float,
             viewInitialY: Float,
             dx: Float,
-            dy: Float
+            dy: Float,
         ) {
             if (!isMoving) {
                 isMoving = true
@@ -127,7 +128,7 @@ class BubbleBarExpandedViewDragController(
             dx: Float,
             dy: Float,
             velX: Float,
-            velY: Float
+            velY: Float,
         ) {
             finishDrag()
         }
@@ -152,7 +153,7 @@ class BubbleBarExpandedViewDragController(
     private inner class MagnetListener : MagnetizedObject.MagnetListener {
         override fun onStuckToTarget(
             target: MagnetizedObject.MagneticTarget,
-            draggedObject: MagnetizedObject<*>
+            draggedObject: MagnetizedObject<*>,
         ) {
             isStuckToDismiss = true
             pinController.onStuckToDismissTarget()
@@ -163,7 +164,7 @@ class BubbleBarExpandedViewDragController(
             draggedObject: MagnetizedObject<*>,
             velX: Float,
             velY: Float,
-            wasFlungOut: Boolean
+            wasFlungOut: Boolean,
         ) {
             isStuckToDismiss = false
             animationHelper.animateUnstuckFromDismissView(target)
@@ -171,7 +172,7 @@ class BubbleBarExpandedViewDragController(
 
         override fun onReleasedInTarget(
             target: MagnetizedObject.MagneticTarget,
-            draggedObject: MagnetizedObject<*>
+            draggedObject: MagnetizedObject<*>,
         ) {
             dragListener.onReleased(inDismiss = true)
             pinController.onDragEnd()
