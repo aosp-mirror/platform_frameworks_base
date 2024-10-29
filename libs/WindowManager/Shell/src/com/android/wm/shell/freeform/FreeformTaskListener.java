@@ -17,7 +17,6 @@
 package com.android.wm.shell.freeform;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
-
 import static com.android.wm.shell.ShellTaskOrganizer.TASK_LISTENER_TYPE_FREEFORM;
 
 import android.app.ActivityManager.RunningTaskInfo;
@@ -54,6 +53,7 @@ public class FreeformTaskListener implements ShellTaskOrganizer.TaskListener,
     private final Optional<DesktopTasksController> mDesktopTasksController;
     private final WindowDecorViewModel mWindowDecorationViewModel;
     private final LaunchAdjacentController mLaunchAdjacentController;
+    private final Optional<TaskChangeListener> mTaskChangeListener;
 
     private final SparseArray<State> mTasks = new SparseArray<>();
 
@@ -69,13 +69,15 @@ public class FreeformTaskListener implements ShellTaskOrganizer.TaskListener,
             Optional<DesktopRepository> desktopRepository,
             Optional<DesktopTasksController> desktopTasksController,
             LaunchAdjacentController launchAdjacentController,
-            WindowDecorViewModel windowDecorationViewModel) {
+            WindowDecorViewModel windowDecorationViewModel,
+            Optional<TaskChangeListener> taskChangeListener) {
         mContext = context;
         mShellTaskOrganizer = shellTaskOrganizer;
         mWindowDecorationViewModel = windowDecorationViewModel;
         mDesktopRepository = desktopRepository;
         mDesktopTasksController = desktopTasksController;
         mLaunchAdjacentController = launchAdjacentController;
+        mTaskChangeListener = taskChangeListener;
         if (shellInit != null) {
             shellInit.addInitCallback(this::onInit, this);
         }
@@ -100,7 +102,8 @@ public class FreeformTaskListener implements ShellTaskOrganizer.TaskListener,
         state.mLeash = leash;
         mTasks.put(taskInfo.taskId, state);
 
-        if (DesktopModeStatus.canEnterDesktopMode(mContext)) {
+        if (!DesktopModeFlags.ENABLE_WINDOWING_TRANSITION_HANDLERS_OBSERVERS.isTrue() &&
+                DesktopModeStatus.canEnterDesktopMode(mContext)) {
             mDesktopRepository.ifPresent(repository -> {
                 repository.addOrMoveFreeformTaskToTop(taskInfo.displayId, taskInfo.taskId);
                 if (taskInfo.isVisible) {
@@ -119,7 +122,8 @@ public class FreeformTaskListener implements ShellTaskOrganizer.TaskListener,
                 taskInfo.taskId);
         mTasks.remove(taskInfo.taskId);
 
-        if (DesktopModeStatus.canEnterDesktopMode(mContext)) {
+        if (!DesktopModeFlags.ENABLE_WINDOWING_TRANSITION_HANDLERS_OBSERVERS.isTrue() &&
+                DesktopModeStatus.canEnterDesktopMode(mContext)) {
             mDesktopRepository.ifPresent(repository -> {
                 // TODO: b/370038902 - Handle Activity#finishAndRemoveTask.
                 if (!DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION.isTrue()
@@ -148,13 +152,20 @@ public class FreeformTaskListener implements ShellTaskOrganizer.TaskListener,
         mWindowDecorationViewModel.onTaskInfoChanged(taskInfo);
         state.mTaskInfo = taskInfo;
         if (DesktopModeStatus.canEnterDesktopMode(mContext)) {
-            mDesktopRepository.ifPresent(repository -> {
-                if (taskInfo.isVisible) {
-                    repository.addActiveTask(taskInfo.displayId, taskInfo.taskId);
-                }
-                repository.updateTaskVisibility(taskInfo.displayId, taskInfo.taskId,
+            if (DesktopModeFlags.ENABLE_WINDOWING_TRANSITION_HANDLERS_OBSERVERS.isTrue()) {
+                // Pass task info changes to the [TaskChangeListener] since [TransitionsObserver]
+                // does not propagate all task info changes.
+                mTaskChangeListener.ifPresent(listener ->
+                    listener.onNonTransitionTaskChanging(taskInfo));
+            } else {
+                mDesktopRepository.ifPresent(repository -> {
+                    if (taskInfo.isVisible) {
+                        repository.addActiveTask(taskInfo.displayId, taskInfo.taskId);
+                    }
+                    repository.updateTaskVisibility(taskInfo.displayId, taskInfo.taskId,
                         taskInfo.isVisible);
-            });
+                });
+            }
         }
         updateLaunchAdjacentController();
     }
