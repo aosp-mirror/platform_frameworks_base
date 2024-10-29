@@ -18986,10 +18986,10 @@ package android.webkit {
     field public final android.content.pm.Signature[] signatures;
   }
 
-  public final class WebViewUpdateService {
-    method public static android.webkit.WebViewProviderInfo[] getAllWebViewPackages();
-    method public static String getCurrentWebViewPackageName();
-    method @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS) public static android.webkit.WebViewProviderInfo[] getValidWebViewPackages();
+  @Deprecated @FlaggedApi("android.webkit.update_service_ipc_wrapper") public final class WebViewUpdateService {
+    method @Deprecated public static android.webkit.WebViewProviderInfo[] getAllWebViewPackages();
+    method @Deprecated public static String getCurrentWebViewPackageName();
+    method @Deprecated @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS) public static android.webkit.WebViewProviderInfo[] getValidWebViewPackages();
   }
 
 }
