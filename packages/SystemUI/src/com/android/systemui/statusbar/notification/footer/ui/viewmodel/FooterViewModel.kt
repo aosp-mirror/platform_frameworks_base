@@ -95,6 +95,10 @@ class FooterViewModel(
                     .toAnimatedValueFlow(),
         )
 
+    // Settings buttons are not visible when the message is.
+    val settingsButtonVisible: Flow<Boolean> = message.isVisible.map { !it }
+    val historyButtonVisible: Flow<Boolean> = message.isVisible.map { !it }
+
     val manageButtonShouldLaunchHistory =
         notificationSettingsInteractor.isNotificationHistoryEnabled
 
