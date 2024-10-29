@@ -25,7 +25,9 @@ import android.view.View
 import android.widget.FrameLayout
 import androidx.core.animation.Animator
 import com.android.app.animation.Interpolators
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.internal.annotations.GuardedBy
+import com.android.systemui.ScreenDecorationsThread
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
@@ -53,7 +55,6 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import java.util.concurrent.Executor
 import kotlinx.coroutines.CoroutineScope
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 /**
  * Understands how to keep the persistent privacy dot in the corner of the screen in
@@ -80,10 +81,6 @@ interface PrivacyDotViewController {
     var currentViewState: ViewState
 
     var showingListener: ShowingListener?
-
-    fun setUiExecutor(e: DelayableExecutor)
-
-    fun getUiExecutor(): DelayableExecutor?
 
     @UiThread fun setNewRotation(rot: Int)
 
@@ -117,6 +114,7 @@ constructor(
     @Assisted private val contentInsetsProvider: StatusBarContentInsetsProvider,
     private val animationScheduler: SystemStatusAnimationScheduler,
     shadeInteractor: ShadeInteractor?,
+    @ScreenDecorationsThread val uiExecutor: DelayableExecutor,
 ) : PrivacyDotViewController {
     private lateinit var tl: View
     private lateinit var tr: View
@@ -136,9 +134,6 @@ constructor(
     private val lock = Object()
     private var cancelRunnable: Runnable? = null
 
-    // Privacy dots are created in ScreenDecoration's UiThread, which is not the main thread
-    private var uiExecutor: DelayableExecutor? = null
-
     private val views: Sequence<View>
         get() = if (!this::tl.isInitialized) sequenceOf() else sequenceOf(tl, tr, br, bl)
 
@@ -155,7 +150,7 @@ constructor(
     private val configurationListener =
         object : ConfigurationController.ConfigurationListener {
             override fun onLayoutDirectionChanged(isRtl: Boolean) {
-                uiExecutor?.execute {
+                uiExecutor.execute {
                     // If rtl changed, hide all dots until the next state resolves
                     setCornerVisibilities(View.INVISIBLE)
 
@@ -196,14 +191,6 @@ constructor(
         contentInsetsProvider.removeCallback(insetsChangedListener)
         configurationController.removeCallback(configurationListener)
         stateController.removeCallback(statusBarStateListener)
-    }
-
-    override fun setUiExecutor(e: DelayableExecutor) {
-        uiExecutor = e
-    }
-
-    override fun getUiExecutor(): DelayableExecutor? {
-        return uiExecutor
     }
 
     @UiThread

@@ -71,15 +71,15 @@ class PrivacyDotViewControllerTest : SysuiTestCase() {
 
     private fun createController() =
         PrivacyDotViewControllerImpl(
-                executor,
-                testScope.backgroundScope,
-                statusBarStateController,
-                configurationController,
-                contentInsetsProvider,
-                animationScheduler = mock<SystemStatusAnimationScheduler>(),
-                shadeInteractor = null,
-            )
-            .also { it.setUiExecutor(executor) }
+            executor,
+            testScope.backgroundScope,
+            statusBarStateController,
+            configurationController,
+            contentInsetsProvider,
+            animationScheduler = mock<SystemStatusAnimationScheduler>(),
+            shadeInteractor = null,
+            uiExecutor = executor,
+        )
 
     @Test
     fun topMargin_topLeftView_basedOnSeascapeArea() {
