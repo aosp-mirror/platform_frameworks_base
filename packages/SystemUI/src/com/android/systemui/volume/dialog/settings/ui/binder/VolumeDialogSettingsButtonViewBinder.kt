@@ -26,6 +26,8 @@ import com.android.systemui.volume.dialog.dagger.scope.VolumeDialogScope
 import com.android.systemui.volume.dialog.settings.ui.viewmodel.VolumeDialogSettingsButtonViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 
 @VolumeDialogScope
 class VolumeDialogSettingsButtonViewBinder
@@ -42,7 +44,12 @@ constructor(private val viewModelFactory: VolumeDialogSettingsButtonViewModel.Fa
                     factory = { viewModelFactory.create() },
                 ) { viewModel ->
                     setSnapshotBinding {
-                        visibility = if (viewModel.isVisible) View.VISIBLE else View.GONE
+                        viewModel.isVisible
+                            .onEach { isVisible ->
+                                visibility = if (isVisible) View.VISIBLE else View.GONE
+                            }
+                            .launchIn(this)
+
                         button.setOnClickListener { viewModel.onButtonClicked() }
                     }
 
