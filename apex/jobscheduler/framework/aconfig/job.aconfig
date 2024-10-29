@@ -25,10 +25,10 @@ flag {
 }
 
 flag {
-   name: "cleanup_empty_jobs"
+   name: "handle_abandoned_jobs"
    namespace: "backstage_power"
-   description: "Enables automatic cancellation of jobs due to leaked JobParameters, reducing unnecessary battery drain and improving system efficiency. This includes logging and traces for better issue diagnosis."
-   bug: "349688611"
+   description: "Detect, report and take action on jobs that maybe abandoned by the app without calling jobFinished."
+   bug: "372529068"
 }
 
 flag {
