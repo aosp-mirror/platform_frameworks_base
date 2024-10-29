@@ -34,11 +34,14 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.res.Configuration;
 import android.graphics.Rect;
+import android.hardware.display.DisplayManagerGlobal;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.StrictMode;
 import android.util.ArrayMap;
 import android.util.Log;
+import android.view.DisplayInfo;
+import android.view.Surface;
 
 import androidx.annotation.GuardedBy;
 import androidx.annotation.NonNull;
@@ -96,8 +99,29 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
 
     private final SupportedWindowFeatures mSupportedWindowFeatures;
 
+    private final DisplayStateProvider mDisplayStateProvider;
+
     public WindowLayoutComponentImpl(@NonNull Context context,
             @NonNull DeviceStateManagerFoldingFeatureProducer foldingFeatureProducer) {
+        this(context, foldingFeatureProducer, new DisplayStateProvider() {
+            @Override
+            public int getDisplayRotation(@NonNull WindowConfiguration windowConfiguration) {
+                return windowConfiguration.getDisplayRotation();
+            }
+
+            @NonNull
+            @Override
+            public DisplayInfo getDisplayInfo(int displayId) {
+                return DisplayManagerGlobal.getInstance().getDisplayInfo(displayId);
+            }
+        });
+    }
+
+    @VisibleForTesting
+    WindowLayoutComponentImpl(@NonNull Context context,
+            @NonNull DeviceStateManagerFoldingFeatureProducer foldingFeatureProducer,
+            @NonNull DisplayStateProvider displayStateProvider) {
+        mDisplayStateProvider = displayStateProvider;
         ((Application) context.getApplicationContext())
                 .registerActivityLifecycleCallbacks(new NotifyOnConfigurationChanged());
         mFoldingFeatureProducer = foldingFeatureProducer;
@@ -401,15 +425,16 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
 
         // We will transform the feature bounds to the Activity window, so using the rotation
         // from the same source (WindowConfiguration) to make sure they are synchronized.
-        final int rotation = windowConfiguration.getDisplayRotation();
+        final int rotation = mDisplayStateProvider.getDisplayRotation(windowConfiguration);
+        final DisplayInfo displayInfo = mDisplayStateProvider.getDisplayInfo(displayId);
 
         for (CommonFoldingFeature baseFeature : storedFeatures) {
             Integer state = convertToExtensionState(baseFeature.getState());
             if (state == null) {
                 continue;
             }
-            Rect featureRect = baseFeature.getRect();
-            rotateRectToDisplayRotation(displayId, rotation, featureRect);
+            final Rect featureRect = baseFeature.getRect();
+            rotateRectToDisplayRotation(displayInfo, rotation, featureRect);
             transformToWindowSpaceRect(windowConfiguration, featureRect);
 
             if (isZero(featureRect)) {
@@ -529,5 +554,14 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
         @Override
         public void onLowMemory() {
         }
+    }
+
+    @VisibleForTesting
+    interface DisplayStateProvider {
+        @Surface.Rotation
+        int getDisplayRotation(@NonNull WindowConfiguration windowConfiguration);
+
+        @NonNull
+        DisplayInfo getDisplayInfo(int displayId);
     }
 }
