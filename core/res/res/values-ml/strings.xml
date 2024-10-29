@@ -1943,6 +1943,8 @@
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"ഓഫാണ്"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> - <xliff:g id="END">%2$s</xliff:g>"</string>
+    <!-- no translation found for zen_mode_trigger_summary_range_words (7228261413029290750) -->
+    <skip />
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"എല്ലാ കലണ്ടറിലും"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> ചില ശബ്‌ദങ്ങൾ മ്യൂട്ട് ചെയ്യുന്നു"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"നിങ്ങളുടെ ഉപകരണത്തിൽ ഒരു ആന്തരിക പ്രശ്‌നമുണ്ട്, ഫാക്‌ടറി വിവര പുനഃസജ്ജീകരണം ചെയ്യുന്നതുവരെ ഇതു അസ്ഥിരമായിരിക്കാനിടയുണ്ട്."</string>
@@ -2424,6 +2426,14 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"മൊബൈൽ അല്ലെങ്കിൽ വൈഫൈ നെറ്റ്‌വർക്ക് ഇല്ലാതെ സന്ദേശങ്ങൾ അയയ്ക്കുകയും സ്വീകരിക്കുകയും ചെയ്യുക"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages തുറക്കുക"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"ഇത് പ്രവർത്തിക്കുന്നത് എങ്ങനെയാണ്"</string>
+    <!-- no translation found for satellite_manual_selection_state_popup_title (8545991934926661974) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_message (1928101658551382450) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_ok (2459664752624985095) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_cancel (973605633339469252) -->
+    <skip />
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"തീർപ്പാക്കിയിട്ടില്ല..."</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"ഫിംഗർപ്രിന്റ് അൺലോക്ക് വീണ്ടും സജ്ജീകരിക്കുക"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> ഇനി തിരിച്ചറിയാനാകില്ല."</string>
@@ -2445,7 +2455,7 @@
     <string name="keyboard_shortcut_group_applications_music" msgid="2051507523525651067">"സംഗീതം"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="3571770335653387606">"കലണ്ടർ"</string>
     <string name="keyboard_shortcut_group_applications_calculator" msgid="6753209559716091507">"കാൽക്കുലേറ്റർ"</string>
-    <string name="keyboard_shortcut_group_applications_maps" msgid="7950000659522589471">"മാപ്പുകൾ"</string>
+    <string name="keyboard_shortcut_group_applications_maps" msgid="7950000659522589471">"Maps"</string>
     <string name="keyboard_shortcut_group_applications" msgid="3010389163951364798">"ആപ്പുകൾ"</string>
     <string name="fingerprint_loe_notification_msg" msgid="3927447270148854546">"നിങ്ങളുടെ ഫിംഗർപ്രിന്റുകൾ ഇനി തിരിച്ചറിയാനാകില്ല. ഫിംഗർപ്രിന്റ് അൺലോക്ക് വീണ്ടും സജ്ജീകരിക്കുക."</string>
 </resources>
