@@ -13,10 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.platform.test.ravenwood;
+package android.platform.test.annotations.internal;
 
-/** Stub class. The actual implementation is in junit-impl-src. */
-public class RavenwoodConfigState {
-    public RavenwoodConfigState(RavenwoodConfig config) {
-    }
+import static java.lang.annotation.ElementType.TYPE;
+
+import org.junit.runner.Runner;
+
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+@Inherited
+@Target({TYPE})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface InnerRunner {
+    Class<? extends Runner> value();
 }
