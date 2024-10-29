@@ -16,20 +16,21 @@
 package com.android.internal.widget.remotecompose.core;
 
 /**
- * Interface for operators that interact with variables
- * Through this they register to listen to particular variables
- * and are notified when they change
+ * Interface for operators that interact with variables Through this they register to listen to
+ * particular variables and are notified when they change
  */
 public interface VariableSupport {
     /**
-     * Call to allow an operator to register interest in variables.
-     * Typically they call context.listensTo(id, this)
+     * Call to allow an operator to register interest in variables. Typically they call
+     * context.listensTo(id, this)
+     *
      * @param context
      */
     void registerListening(RemoteContext context);
 
     /**
      * Called to be notified that the variables you are interested have changed.
+     *
      * @param context
      */
     void updateVariables(RemoteContext context);

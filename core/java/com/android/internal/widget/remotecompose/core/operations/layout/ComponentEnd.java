@@ -61,14 +61,14 @@ public class ComponentEnd implements Operation {
         return 1 + 4 + 4 + 4;
     }
 
-
     public static void read(WireBuffer buffer, List<Operation> operations) {
         operations.add(new ComponentEnd());
     }
 
     public static void documentation(DocumentationBuilder doc) {
         doc.operation("Layout Operations", id(), name())
-                .description("End tag for components / layouts. This operation marks the end"
-                        + "of a component");
+                .description(
+                        "End tag for components / layouts. This operation marks the end"
+                                + "of a component");
     }
 }

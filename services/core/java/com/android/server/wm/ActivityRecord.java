@@ -1439,7 +1439,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     boolean scheduleTopResumedActivityChanged(boolean onTop) {
-        if (!attachedToProcess()) {
+        if (!attachedToProcess() || isState(DESTROYING, DESTROYED)) {
             ProtoLog.w(WM_DEBUG_STATES,
                     "Can't report activity position update - client not running, "
                             + "activityRecord=%s", this);
@@ -1792,8 +1792,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
         prevDc.onRunningActivityChanged();
 
-        // TODO(b/169035022): move to a more-appropriate place.
-        mTransitionController.collect(this);
         if (prevDc.mOpeningApps.remove(this)) {
             // Transfer opening transition to new display.
             mDisplayContent.mOpeningApps.add(this);
@@ -4916,7 +4914,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             final ActivityLifecycleItem lifecycleItem = getLifecycleItemForCurrentStateForResult();
             try {
                 if (lifecycleItem != null) {
-                    mAtmService.getLifecycleManager().scheduleTransactionAndLifecycleItems(
+                    mAtmService.getLifecycleManager().scheduleTransactionItems(
                             app.getThread(), activityResultItem, lifecycleItem);
                 } else {
                     Slog.w(TAG, "Unable to get the lifecycle item for state " + mState
@@ -6461,7 +6459,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         returningOptions = null;
 
         if (canTurnScreenOn()) {
-            mTaskSupervisor.wakeUp("turnScreenOnFlag");
+            mTaskSupervisor.wakeUp(getDisplayId(), "turnScreenOnFlag");
         } else {
             // If the screen is going to turn on because the caller explicitly requested it and
             // the keyguard is not showing don't attempt to sleep. Otherwise the Activity will
@@ -8180,7 +8178,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     @ActivityInfo.ScreenOrientation
     protected int getOverrideOrientation() {
         int candidateOrientation = super.getOverrideOrientation();
-        if (ActivityInfo.isFixedOrientation(candidateOrientation) && isUniversalResizeable()) {
+        if (candidateOrientation != ActivityInfo.SCREEN_ORIENTATION_LOCKED
+                && ActivityInfo.isFixedOrientation(candidateOrientation)
+                && isUniversalResizeable()) {
             candidateOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
         }
         return mAppCompatController.getOrientationPolicy()
@@ -9629,7 +9629,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             } else {
                 lifecycleItem = new PauseActivityItem(token);
             }
-            mAtmService.getLifecycleManager().scheduleTransactionAndLifecycleItems(
+            mAtmService.getLifecycleManager().scheduleTransactionItems(
                     app.getThread(), callbackItem, lifecycleItem);
             startRelaunching();
             // Note: don't need to call pauseIfSleepingLocked() here, because the caller will only

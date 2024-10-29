@@ -103,9 +103,7 @@ constructor(
         }
 
     override fun start() {
-        if (StatusBarSimpleFragment.isEnabled) {
-            doStart()
-        }
+        doStart()
     }
 
     override fun initializeStatusBar() {

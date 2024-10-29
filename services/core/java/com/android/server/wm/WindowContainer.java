@@ -1117,6 +1117,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      */
     void onDisplayChanged(DisplayContent dc) {
         if (mDisplayContent != null && mDisplayContent != dc) {
+            mTransitionController.collect(this);
             // Cancel any change transition queued-up for this container on the old display when
             // this container is moved from the old display.
             mDisplayContent.mClosingChangingContainers.remove(this);

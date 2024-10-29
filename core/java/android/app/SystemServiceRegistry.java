@@ -1750,10 +1750,13 @@ public final class SystemServiceRegistry {
                         @Override
                         public AdvancedProtectionManager createService(ContextImpl ctx)
                                 throws ServiceNotFoundException {
-                            IBinder iBinder = ServiceManager.getServiceOrThrow(
+                            IBinder iBinder = ServiceManager.getService(
                                     Context.ADVANCED_PROTECTION_SERVICE);
                             IAdvancedProtectionService service =
                                     IAdvancedProtectionService.Stub.asInterface(iBinder);
+                            if (service == null) {
+                                return null;
+                            }
                             return new AdvancedProtectionManager(service);
                         }
                     });

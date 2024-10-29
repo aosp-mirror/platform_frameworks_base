@@ -256,8 +256,15 @@ public class SensorController {
                 Slog.e(TAG, "Received invalid ParcelFileDescriptor");
                 return BAD_VALUE;
             }
+
+            SharedMemory sharedMemory;
+            try {
+                sharedMemory = SharedMemory.fromFileDescriptor(fd);
+            } catch (IllegalArgumentException e) {
+                Slog.e(TAG, "Failed to create shared memory: " + e);
+                return BAD_VALUE;
+            }
             final int channelHandle = sNextDirectChannelHandle.getAndIncrement();
-            SharedMemory sharedMemory = SharedMemory.fromFileDescriptor(fd);
             try {
                 mCallback.onDirectChannelCreated(channelHandle, sharedMemory);
             } catch (RemoteException e) {

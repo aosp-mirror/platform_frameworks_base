@@ -18,6 +18,7 @@ package com.android.compose.nestedscroll
 
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.util.fastCoerceAtLeast
 import androidx.compose.ui.util.fastCoerceAtMost
 
@@ -54,23 +55,38 @@ fun LargeTopAppBarNestedScrollConnection(
             offsetAvailable > 0 && height() < maxHeight()
         },
         canStartPostFling = { false },
-        canStopOnPreFling = { false },
-        onStart = { /* do nothing */ },
-        onScroll = { offsetAvailable, _ ->
-            val currentHeight = height()
-            val amountConsumed =
-                if (offsetAvailable > 0) {
-                    val amountLeft = maxHeight() - currentHeight
-                    offsetAvailable.fastCoerceAtMost(amountLeft)
-                } else {
-                    val amountLeft = minHeight() - currentHeight
-                    offsetAvailable.fastCoerceAtLeast(amountLeft)
-                }
-            onHeightChanged(currentHeight + amountConsumed)
-            amountConsumed
-        },
-        // Don't consume the velocity on pre/post fling
-        onStop = { 0f },
-        onCancel = { /* do nothing */ },
+        onStart = { LargeTopAppBarScrollController(height, maxHeight, minHeight, onHeightChanged) },
     )
+}
+
+private class LargeTopAppBarScrollController(
+    val height: () -> Float,
+    val maxHeight: () -> Float,
+    val minHeight: () -> Float,
+    val onHeightChanged: (Float) -> Unit,
+) : ScrollController {
+    override fun onScroll(deltaScroll: Float, source: NestedScrollSource): Float {
+        val currentHeight = height()
+        val amountConsumed =
+            if (deltaScroll > 0) {
+                val amountLeft = maxHeight() - currentHeight
+                deltaScroll.fastCoerceAtMost(amountLeft)
+            } else {
+                val amountLeft = minHeight() - currentHeight
+                deltaScroll.fastCoerceAtLeast(amountLeft)
+            }
+        onHeightChanged(currentHeight + amountConsumed)
+        return amountConsumed
+    }
+
+    override suspend fun onStop(initialVelocity: Float): Float {
+        // Don't consume the velocity on pre/post fling
+        return 0f
+    }
+
+    override fun onCancel() {
+        // do nothing
+    }
+
+    override fun canStopOnPreFling() = false
 }

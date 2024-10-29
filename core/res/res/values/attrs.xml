@@ -5731,6 +5731,14 @@
         </attr>
     </declare-styleable>
 
+    <!-- @hide internal use only -->
+    <declare-styleable name="NotificationProgressBar">
+        <!-- Draws the tracker on a NotificationProgressBar. -->
+        <attr name="tracker" format="reference" />
+        <!-- Height of the tracker. -->
+        <attr name="trackerHeight" format="dimension" />
+    </declare-styleable>
+
     <declare-styleable name="StackView">
         <!-- Color of the res-out outline. -->
         <attr name="resOutColor" format="color" />

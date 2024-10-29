@@ -249,6 +249,7 @@ cc_library_shared_for_libandroid_runtime {
                 "android_backup_BackupDataOutput.cpp",
                 "android_backup_FileBackupHelperBase.cpp",
                 "android_backup_BackupHelperDispatcher.cpp",
+                "android_app_PropertyInvalidatedCache.cpp",
                 "android_app_backup_FullBackup.cpp",
                 "android_content_res_ApkAssets.cpp",
                 "android_content_res_ObbScanner.cpp",

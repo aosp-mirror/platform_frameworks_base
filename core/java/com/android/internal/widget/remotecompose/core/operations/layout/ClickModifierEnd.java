@@ -57,14 +57,14 @@ public class ClickModifierEnd implements Operation {
         buffer.start(id());
     }
 
-
     public static void read(WireBuffer buffer, List<Operation> operations) {
         operations.add(new ClickModifierEnd());
     }
 
     public static void documentation(DocumentationBuilder doc) {
         doc.operation("Layout Operations", id(), name())
-                .description("End tag for click modifiers. This operation marks the end"
-                        + "of a click modifier");
+                .description(
+                        "End tag for click modifiers. This operation marks the end"
+                                + "of a click modifier");
     }
 }

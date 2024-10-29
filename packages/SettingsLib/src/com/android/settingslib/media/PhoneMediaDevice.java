@@ -41,9 +41,9 @@ import android.media.RouteListingPreference;
 import android.os.SystemProperties;
 import android.util.Log;
 
-import androidx.annotation.VisibleForTesting;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 
 import com.android.settingslib.R;
 import com.android.settingslib.media.flags.Flags;
@@ -98,7 +98,7 @@ public class PhoneMediaDevice extends MediaDevice {
             case TYPE_USB_ACCESSORY:
                 name =
                         inputRoutingEnabledAndIsDesktop(context)
-                                ? context.getString(R.string.media_transfer_usb_audio_name)
+                                ? routeInfo.getName()
                                 : context.getString(R.string.media_transfer_wired_headphone_name);
                 break;
             case TYPE_DOCK:

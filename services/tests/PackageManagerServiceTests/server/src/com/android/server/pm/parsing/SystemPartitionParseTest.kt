@@ -17,6 +17,7 @@
 package com.android.server.pm.parsing
 
 import android.content.pm.PackageManager
+import android.content.pm.parsing.ApkLiteParseUtils
 import android.platform.test.annotations.Postsubmit
 import com.android.internal.pm.parsing.PackageParserException
 import com.android.internal.pm.pkg.parsing.ParsingPackageUtils
@@ -81,8 +82,10 @@ class SystemPartitionParseTest {
         val exceptions = buildApks()
                 .map {
                     runCatching {
-                        parser.parsePackage(
+                        if (ApkLiteParseUtils.isApkFile(it) || it.isDirectory()) {
+                            parser.parsePackage(
                                 it, ParsingPackageUtils.PARSE_IS_SYSTEM_DIR, false /*useCaches*/)
+                        }
                     }
                 }
                 .mapNotNull { it.exceptionOrNull() }

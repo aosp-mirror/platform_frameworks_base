@@ -159,6 +159,7 @@ import com.android.systemui.telephony.TelephonyListenerManager;
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
 import com.android.systemui.util.kotlin.JavaAdapter;
 import com.android.systemui.util.settings.GlobalSettings;
+import com.android.systemui.utils.FieldSetter;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -172,7 +173,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.MockitoSession;
-import org.mockito.internal.util.reflection.FieldSetter;
 import org.mockito.quality.Strictness;
 
 import java.util.ArrayList;
@@ -2264,6 +2264,23 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
                 TelephonyManager.SIM_STATE_PIN_REQUIRED);
         verify(keyguardUpdateMonitorCallback).onSimStateChanged(validSubId, slotId,
                 TelephonyManager.SIM_STATE_PIN_REQUIRED);
+    }
+
+    @Test
+    public void isSimPinSecureReturnsFalseWhenEmpty() {
+        assertThat(mKeyguardUpdateMonitor.isSimPinSecure()).isFalse();
+    }
+
+    @Test
+    public void isSimPinSecureReturnsTrueWhenOneSlotIsLocked() {
+        // Slot 0 is locked
+        mKeyguardUpdateMonitor.handleSimStateChange(10, 0,
+                TelephonyManager.SIM_STATE_PIN_REQUIRED);
+        // Slot 1 is not ready
+        mKeyguardUpdateMonitor.handleSimStateChange(11, 1,
+                TelephonyManager.SIM_STATE_NOT_READY);
+
+        assertThat(mKeyguardUpdateMonitor.isSimPinSecure()).isTrue();
     }
 
     @Test

@@ -19,6 +19,7 @@ package com.android.systemui.volume.dialog.ringer.domain
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.plugins.volumeDialogController
+import com.android.systemui.volume.data.repository.audioSystemRepository
 import com.android.systemui.volume.dialog.domain.interactor.volumeDialogStateInteractor
 
 val Kosmos.volumeDialogRingerInteractor by
@@ -27,5 +28,6 @@ val Kosmos.volumeDialogRingerInteractor by
             coroutineScope = applicationCoroutineScope,
             volumeDialogStateInteractor = volumeDialogStateInteractor,
             controller = volumeDialogController,
+            audioSystemRepository = audioSystemRepository,
         )
     }

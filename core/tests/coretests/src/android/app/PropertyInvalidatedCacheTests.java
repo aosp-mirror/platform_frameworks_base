@@ -16,13 +16,23 @@
 
 package android.app;
 
+import static android.app.PropertyInvalidatedCache.NONCE_UNSET;
+import static android.app.PropertyInvalidatedCache.NonceStore.INVALID_NONCE_INDEX;
+import static com.android.internal.os.Flags.FLAG_APPLICATION_SHARED_MEMORY_ENABLED;
+
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import com.android.internal.os.ApplicationSharedMemory;
+
 import android.platform.test.annotations.IgnoreUnderRavenwood;
+import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.platform.test.ravenwood.RavenwoodRule;
 
 import androidx.test.filters.SmallTest;
@@ -46,6 +56,9 @@ import org.junit.Test;
 public class PropertyInvalidatedCacheTests {
     @Rule
     public final RavenwoodRule mRavenwood = new RavenwoodRule();
+
+    public final CheckFlagsRule mCheckFlagsRule =
+            DeviceFlagsValueProvider.createCheckFlagsRule();
 
     // Configuration for creating caches
     private static final String MODULE = PropertyInvalidatedCache.MODULE_TEST;
@@ -422,5 +435,55 @@ public class PropertyInvalidatedCacheTests {
 
         // Re-enable test mode (so that the cleanup for the test does not throw).
         PropertyInvalidatedCache.setTestMode(true);
+    }
+
+    // Verify the behavior of shared memory nonce storage.  This does not directly test the cache
+    // storing nonces in shared memory.
+    @RequiresFlagsEnabled(FLAG_APPLICATION_SHARED_MEMORY_ENABLED)
+    @Test
+    public void testSharedMemoryStorage() {
+        // Fetch a shared memory instance for testing.
+        ApplicationSharedMemory shmem = ApplicationSharedMemory.create();
+
+        // Create a server-side store and a client-side store.  The server's store is mutable and
+        // the client's store is not mutable.
+        PropertyInvalidatedCache.NonceStore server =
+                new PropertyInvalidatedCache.NonceStore(shmem.getSystemNonceBlock(), true);
+        PropertyInvalidatedCache.NonceStore client =
+                new PropertyInvalidatedCache.NonceStore(shmem.getSystemNonceBlock(), false);
+
+        final String name1 = "name1";
+        assertEquals(server.getHandleForName(name1), INVALID_NONCE_INDEX);
+        assertEquals(client.getHandleForName(name1), INVALID_NONCE_INDEX);
+        final int index1 = server.storeName(name1);
+        assertNotEquals(index1, INVALID_NONCE_INDEX);
+        assertEquals(server.getHandleForName(name1), index1);
+        assertEquals(client.getHandleForName(name1), index1);
+        assertEquals(server.storeName(name1), index1);
+
+        assertEquals(server.getNonce(index1), NONCE_UNSET);
+        assertEquals(client.getNonce(index1), NONCE_UNSET);
+        final int value1 = 4;
+        server.setNonce(index1, value1);
+        assertEquals(server.getNonce(index1), value1);
+        assertEquals(client.getNonce(index1), value1);
+        final int value2 = 8;
+        server.setNonce(index1, value2);
+        assertEquals(server.getNonce(index1), value2);
+        assertEquals(client.getNonce(index1), value2);
+
+        final String name2 = "name2";
+        assertEquals(server.getHandleForName(name2), INVALID_NONCE_INDEX);
+        assertEquals(client.getHandleForName(name2), INVALID_NONCE_INDEX);
+        final int index2 = server.storeName(name2);
+        assertNotEquals(index2, INVALID_NONCE_INDEX);
+        assertEquals(server.getHandleForName(name2), index2);
+        assertEquals(client.getHandleForName(name2), index2);
+        assertEquals(server.storeName(name2), index2);
+
+        // The names are different, so the indices must be different.
+        assertNotEquals(index1, index2);
+
+        shmem.close();
     }
 }

@@ -19,12 +19,14 @@ import android.view.LayoutInflater
 import com.android.systemui.customization.R
 import com.android.systemui.log.core.LogLevel
 import com.android.systemui.log.core.LogcatOnlyMessageBuffer
+import com.android.systemui.plugins.clocks.AxisType
 import com.android.systemui.plugins.clocks.ClockController
 import com.android.systemui.plugins.clocks.ClockId
 import com.android.systemui.plugins.clocks.ClockMessageBuffers
 import com.android.systemui.plugins.clocks.ClockMetadata
 import com.android.systemui.plugins.clocks.ClockPickerConfig
 import com.android.systemui.plugins.clocks.ClockProvider
+import com.android.systemui.plugins.clocks.ClockReactiveAxis
 import com.android.systemui.plugins.clocks.ClockSettings
 import com.android.systemui.shared.clocks.view.HorizontalAlignment
 import com.android.systemui.shared.clocks.view.VerticalAlignment
@@ -85,8 +87,21 @@ class DefaultClockProvider(
             // TODO(b/352049256): Update placeholder to actual resource
             resources.getDrawable(R.drawable.clock_default_thumbnail, null),
             isReactiveToTone = true,
-            isReactiveToTouch = isClockReactiveVariantsEnabled,
-            axes = listOf(), // TODO: Ater some picker definition
+            // TODO(b/364673969): Populate the rest of this
+            axes =
+                if (isClockReactiveVariantsEnabled)
+                    listOf(
+                        ClockReactiveAxis(
+                            key = "wdth",
+                            type = AxisType.Slider,
+                            maxValue = 1000f,
+                            minValue = 100f,
+                            currentValue = 400f,
+                            name = "Width",
+                            description = "Glyph Width",
+                        )
+                    )
+                else listOf(),
         )
     }
 

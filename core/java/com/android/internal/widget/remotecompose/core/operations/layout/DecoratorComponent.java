@@ -24,6 +24,7 @@ import com.android.internal.widget.remotecompose.core.RemoteContext;
  */
 public interface DecoratorComponent {
     void layout(RemoteContext context, float width, float height);
-    void onClick(RemoteContext context, CoreDocument document,
-                 Component component, float x, float y);
+
+    void onClick(
+            RemoteContext context, CoreDocument document, Component component, float x, float y);
 }

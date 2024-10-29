@@ -1692,24 +1692,15 @@ public class QuotaControllerTest {
                         3 * MINUTE_IN_MILLIS, 5), false);
         final long timeUntilQuotaConsumedMs = 7 * MINUTE_IN_MILLIS;
         JobStatus job = createJobStatus("testGetMaxJobExecutionTimeLocked", 0);
-        //noinspection deprecation
-        JobStatus jobDefIWF = createJobStatus("testGetMaxJobExecutionTimeLocked",
-                createJobInfoBuilder(1)
-                        .setImportantWhileForeground(true)
-                        .setPriority(JobInfo.PRIORITY_DEFAULT)
-                        .build());
         JobStatus jobHigh = createJobStatus("testGetMaxJobExecutionTimeLocked",
                 createJobInfoBuilder(2).setPriority(JobInfo.PRIORITY_HIGH).build());
         setStandbyBucket(RARE_INDEX, job);
-        setStandbyBucket(RARE_INDEX, jobDefIWF);
         setStandbyBucket(RARE_INDEX, jobHigh);
 
         setCharging();
         synchronized (mQuotaController.mLock) {
             assertEquals(JobSchedulerService.Constants.DEFAULT_RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
                     mQuotaController.getMaxJobExecutionTimeMsLocked((job)));
-            assertEquals(JobSchedulerService.Constants.DEFAULT_RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
-                    mQuotaController.getMaxJobExecutionTimeMsLocked((jobDefIWF)));
             assertEquals(JobSchedulerService.Constants.DEFAULT_RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
                     mQuotaController.getMaxJobExecutionTimeMsLocked((jobHigh)));
         }
@@ -1720,8 +1711,6 @@ public class QuotaControllerTest {
             assertEquals(timeUntilQuotaConsumedMs,
                     mQuotaController.getMaxJobExecutionTimeMsLocked((job)));
             assertEquals(JobSchedulerService.Constants.DEFAULT_RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
-                    mQuotaController.getMaxJobExecutionTimeMsLocked((jobDefIWF)));
-            assertEquals(JobSchedulerService.Constants.DEFAULT_RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
                     mQuotaController.getMaxJobExecutionTimeMsLocked((jobHigh)));
         }
 
@@ -1730,9 +1719,8 @@ public class QuotaControllerTest {
         // Top-stared jobs are out of quota enforcement.
         setProcessState(ActivityManager.PROCESS_STATE_TOP);
         synchronized (mQuotaController.mLock) {
-            trackJobs(job, jobDefIWF, jobHigh);
+            trackJobs(job, jobHigh);
             mQuotaController.prepareForExecutionLocked(job);
-            mQuotaController.prepareForExecutionLocked(jobDefIWF);
             mQuotaController.prepareForExecutionLocked(jobHigh);
         }
         setProcessState(ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND);
@@ -1740,11 +1728,8 @@ public class QuotaControllerTest {
             assertEquals(timeUntilQuotaConsumedMs,
                     mQuotaController.getMaxJobExecutionTimeMsLocked((job)));
             assertEquals(JobSchedulerService.Constants.DEFAULT_RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
-                    mQuotaController.getMaxJobExecutionTimeMsLocked((jobDefIWF)));
-            assertEquals(JobSchedulerService.Constants.DEFAULT_RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
                     mQuotaController.getMaxJobExecutionTimeMsLocked((jobHigh)));
             mQuotaController.maybeStopTrackingJobLocked(job, null);
-            mQuotaController.maybeStopTrackingJobLocked(jobDefIWF, null);
             mQuotaController.maybeStopTrackingJobLocked(jobHigh, null);
         }
 
@@ -1752,8 +1737,6 @@ public class QuotaControllerTest {
         synchronized (mQuotaController.mLock) {
             assertEquals(timeUntilQuotaConsumedMs,
                     mQuotaController.getMaxJobExecutionTimeMsLocked(job));
-            assertEquals(timeUntilQuotaConsumedMs,
-                    mQuotaController.getMaxJobExecutionTimeMsLocked(jobDefIWF));
             assertEquals(timeUntilQuotaConsumedMs,
                     mQuotaController.getMaxJobExecutionTimeMsLocked(jobHigh));
         }
@@ -1762,9 +1745,8 @@ public class QuotaControllerTest {
         // Quota is enforced for top-started job after the process leaves TOP/BTOP state.
         setProcessState(ActivityManager.PROCESS_STATE_TOP);
         synchronized (mQuotaController.mLock) {
-            trackJobs(job, jobDefIWF, jobHigh);
+            trackJobs(job, jobHigh);
             mQuotaController.prepareForExecutionLocked(job);
-            mQuotaController.prepareForExecutionLocked(jobDefIWF);
             mQuotaController.prepareForExecutionLocked(jobHigh);
         }
         setProcessState(ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND);
@@ -1772,11 +1754,8 @@ public class QuotaControllerTest {
             assertEquals(timeUntilQuotaConsumedMs,
                     mQuotaController.getMaxJobExecutionTimeMsLocked((job)));
             assertEquals(timeUntilQuotaConsumedMs,
-                    mQuotaController.getMaxJobExecutionTimeMsLocked((jobDefIWF)));
-            assertEquals(timeUntilQuotaConsumedMs,
                     mQuotaController.getMaxJobExecutionTimeMsLocked((jobHigh)));
             mQuotaController.maybeStopTrackingJobLocked(job, null);
-            mQuotaController.maybeStopTrackingJobLocked(jobDefIWF, null);
             mQuotaController.maybeStopTrackingJobLocked(jobHigh, null);
         }
 
@@ -1785,9 +1764,141 @@ public class QuotaControllerTest {
             assertEquals(timeUntilQuotaConsumedMs,
                     mQuotaController.getMaxJobExecutionTimeMsLocked(job));
             assertEquals(timeUntilQuotaConsumedMs,
-                    mQuotaController.getMaxJobExecutionTimeMsLocked(jobDefIWF));
-            assertEquals(timeUntilQuotaConsumedMs,
                     mQuotaController.getMaxJobExecutionTimeMsLocked(jobHigh));
+        }
+    }
+
+    @Test
+    public void testGetMaxJobExecutionTimeLocked_Regular_ImportantWhileForeground() {
+        mQuotaController.saveTimingSession(0, SOURCE_PACKAGE,
+                createTimingSession(sElapsedRealtimeClock.millis() - (6 * MINUTE_IN_MILLIS),
+                        3 * MINUTE_IN_MILLIS, 5), false);
+        final long timeUntilQuotaConsumedMs = 7 * MINUTE_IN_MILLIS;
+        JobStatus job = createJobStatus("testGetMaxJobExecutionTimeLocked", 0);
+        //noinspection deprecation
+        JobStatus jobDefIWF;
+        mSetFlagsRule.disableFlags(android.app.job.Flags.FLAG_IGNORE_IMPORTANT_WHILE_FOREGROUND);
+        jobDefIWF = createJobStatus("testGetMaxJobExecutionTimeLocked_IWF",
+                createJobInfoBuilder(1)
+                        .setImportantWhileForeground(true)
+                        .setPriority(JobInfo.PRIORITY_DEFAULT)
+                        .build());
+
+        setStandbyBucket(RARE_INDEX, jobDefIWF);
+        setCharging();
+        synchronized (mQuotaController.mLock) {
+            assertEquals(JobSchedulerService.Constants.DEFAULT_RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+                    mQuotaController.getMaxJobExecutionTimeMsLocked((jobDefIWF)));
+        }
+
+        setDischarging();
+        setProcessState(getProcessStateQuotaFreeThreshold());
+        synchronized (mQuotaController.mLock) {
+            assertEquals(JobSchedulerService.Constants.DEFAULT_RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+                    mQuotaController.getMaxJobExecutionTimeMsLocked((jobDefIWF)));
+        }
+
+        // Top-started job
+        mSetFlagsRule.disableFlags(Flags.FLAG_ENFORCE_QUOTA_POLICY_TO_TOP_STARTED_JOBS);
+        // Top-stared jobs are out of quota enforcement.
+        setProcessState(ActivityManager.PROCESS_STATE_TOP);
+        synchronized (mQuotaController.mLock) {
+            trackJobs(jobDefIWF);
+            mQuotaController.prepareForExecutionLocked(jobDefIWF);
+        }
+        setProcessState(ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND);
+        synchronized (mQuotaController.mLock) {
+            assertEquals(JobSchedulerService.Constants.DEFAULT_RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+                    mQuotaController.getMaxJobExecutionTimeMsLocked((jobDefIWF)));
+            mQuotaController.maybeStopTrackingJobLocked(jobDefIWF, null);
+        }
+
+        setProcessState(ActivityManager.PROCESS_STATE_RECEIVER);
+        synchronized (mQuotaController.mLock) {
+            assertEquals(timeUntilQuotaConsumedMs,
+                    mQuotaController.getMaxJobExecutionTimeMsLocked(jobDefIWF));
+        }
+
+        mSetFlagsRule.enableFlags(Flags.FLAG_ENFORCE_QUOTA_POLICY_TO_TOP_STARTED_JOBS);
+        // Quota is enforced for top-started job after the process leaves TOP/BTOP state.
+        setProcessState(ActivityManager.PROCESS_STATE_TOP);
+        synchronized (mQuotaController.mLock) {
+            trackJobs(jobDefIWF);
+            mQuotaController.prepareForExecutionLocked(jobDefIWF);
+        }
+        setProcessState(ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND);
+        synchronized (mQuotaController.mLock) {
+            assertEquals(timeUntilQuotaConsumedMs,
+                    mQuotaController.getMaxJobExecutionTimeMsLocked((jobDefIWF)));
+            mQuotaController.maybeStopTrackingJobLocked(jobDefIWF, null);
+        }
+
+        setProcessState(ActivityManager.PROCESS_STATE_RECEIVER);
+        synchronized (mQuotaController.mLock) {
+            assertEquals(timeUntilQuotaConsumedMs,
+                    mQuotaController.getMaxJobExecutionTimeMsLocked(jobDefIWF));
+        }
+
+        mSetFlagsRule.enableFlags(android.app.job.Flags.FLAG_IGNORE_IMPORTANT_WHILE_FOREGROUND);
+        jobDefIWF = createJobStatus("testGetMaxJobExecutionTimeLocked_IWF",
+                createJobInfoBuilder(1)
+                        .setImportantWhileForeground(true)
+                        .setPriority(JobInfo.PRIORITY_DEFAULT)
+                        .build());
+
+        setStandbyBucket(RARE_INDEX, jobDefIWF);
+        setCharging();
+        synchronized (mQuotaController.mLock) {
+            assertEquals(JobSchedulerService.Constants.DEFAULT_RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+                    mQuotaController.getMaxJobExecutionTimeMsLocked((jobDefIWF)));
+        }
+
+        setDischarging();
+        setProcessState(getProcessStateQuotaFreeThreshold());
+        synchronized (mQuotaController.mLock) {
+            assertEquals(timeUntilQuotaConsumedMs,
+                    mQuotaController.getMaxJobExecutionTimeMsLocked((jobDefIWF)));
+        }
+
+        // Top-started job
+        mSetFlagsRule.disableFlags(Flags.FLAG_ENFORCE_QUOTA_POLICY_TO_TOP_STARTED_JOBS);
+        // Top-stared jobs are out of quota enforcement.
+        setProcessState(ActivityManager.PROCESS_STATE_TOP);
+        synchronized (mQuotaController.mLock) {
+            trackJobs(jobDefIWF);
+            mQuotaController.prepareForExecutionLocked(jobDefIWF);
+        }
+        setProcessState(ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND);
+        synchronized (mQuotaController.mLock) {
+            assertEquals(timeUntilQuotaConsumedMs,
+                    mQuotaController.getMaxJobExecutionTimeMsLocked((jobDefIWF)));
+            mQuotaController.maybeStopTrackingJobLocked(jobDefIWF, null);
+        }
+
+        setProcessState(ActivityManager.PROCESS_STATE_RECEIVER);
+        synchronized (mQuotaController.mLock) {
+            assertEquals(timeUntilQuotaConsumedMs,
+                    mQuotaController.getMaxJobExecutionTimeMsLocked(jobDefIWF));
+        }
+
+        mSetFlagsRule.enableFlags(Flags.FLAG_ENFORCE_QUOTA_POLICY_TO_TOP_STARTED_JOBS);
+        // Quota is enforced for top-started job after the process leaves TOP/BTOP state.
+        setProcessState(ActivityManager.PROCESS_STATE_TOP);
+        synchronized (mQuotaController.mLock) {
+            trackJobs(jobDefIWF);
+            mQuotaController.prepareForExecutionLocked(jobDefIWF);
+        }
+        setProcessState(ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND);
+        synchronized (mQuotaController.mLock) {
+            assertEquals(timeUntilQuotaConsumedMs,
+                    mQuotaController.getMaxJobExecutionTimeMsLocked((jobDefIWF)));
+            mQuotaController.maybeStopTrackingJobLocked(jobDefIWF, null);
+        }
+
+        setProcessState(ActivityManager.PROCESS_STATE_RECEIVER);
+        synchronized (mQuotaController.mLock) {
+            assertEquals(timeUntilQuotaConsumedMs,
+                    mQuotaController.getMaxJobExecutionTimeMsLocked(jobDefIWF));
         }
     }
 

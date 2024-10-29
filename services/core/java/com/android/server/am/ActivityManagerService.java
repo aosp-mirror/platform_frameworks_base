@@ -134,6 +134,7 @@ import static android.provider.Settings.Global.WAIT_FOR_DEBUGGER;
 import static android.util.FeatureFlagUtils.SETTINGS_ENABLE_MONITOR_PHANTOM_PROCS;
 import static android.view.Display.INVALID_DISPLAY;
 
+import static com.android.internal.util.FrameworkStatsLog.INTENT_CREATOR_TOKEN_ADDED;
 import static com.android.internal.util.FrameworkStatsLog.UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__NEW_MUTABLE_IMPLICIT_PENDING_INTENT_RETRIEVED;
 import static com.android.sdksandbox.flags.Flags.sdkSandboxInstrumentationInfo;
 import static com.android.server.am.ActiveServices.FGS_SAW_RESTRICTIONS;
@@ -2772,8 +2773,12 @@ public class ActivityManagerService extends IActivityManager.Stub
             // Add common services.
             // IMPORTANT: Before adding services here, make sure ephemeral apps can access them too.
             // Enable the check in ApplicationThread.bindApplication() to make sure.
-            if (!android.server.Flags.removeJavaServiceManagerCache()) {
-                addServiceToMap(mAppBindArgs, "permissionmgr");
+
+            // Removing User Service and App Ops Service from cache breaks boot for auto.
+            // Removing permissionmgr breaks tests for Android Auto due to SELinux restrictions.
+            // TODO: fix SELinux restrictions and remove caching for Android Auto.
+            if (mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE)
+                    || !android.server.Flags.removeJavaServiceManagerCache()) {
                 addServiceToMap(mAppBindArgs, Context.ALARM_SERVICE);
                 addServiceToMap(mAppBindArgs, Context.DISPLAY_SERVICE);
                 addServiceToMap(mAppBindArgs, Context.NETWORKMANAGEMENT_SERVICE);
@@ -2794,12 +2799,12 @@ public class ActivityManagerService extends IActivityManager.Stub
             // See b/79378449
             // Getting the window service and package service binder from servicemanager
             // is blocked for Apps. However they are necessary for apps.
-            // Removing User Service and App Ops Service from cache breaks boot for auto.
             // TODO: remove exception
-            addServiceToMap(mAppBindArgs, Context.APP_OPS_SERVICE);
             addServiceToMap(mAppBindArgs, "package");
             addServiceToMap(mAppBindArgs, Context.WINDOW_SERVICE);
             addServiceToMap(mAppBindArgs, Context.USER_SERVICE);
+            addServiceToMap(mAppBindArgs, "permissionmgr");
+            addServiceToMap(mAppBindArgs, Context.APP_OPS_SERVICE);
         }
         return mAppBindArgs;
     }
@@ -5550,6 +5555,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             IIntentReceiver finishedReceiver, String requiredPermission, Bundle options) {
         if (target instanceof PendingIntentRecord) {
             final PendingIntentRecord originalRecord = (PendingIntentRecord) target;
+
+            addCreatorToken(intent, originalRecord.getPackageName());
 
             // In multi-display scenarios, there can be background users who execute the
             // PendingIntent. In these scenarios, we don't want to use the foreground user as the
@@ -19285,12 +19292,14 @@ public class ActivityManagerService extends IActivityManager.Stub
                             + "} does not correspond to an intent in the extra bundle.");
                     continue;
                 }
-                Slog.wtf(TAG,
-                        "A creator token is added to an intent. creatorPackage: " + creatorPackage
-                                + "; intent: " + intent);
-                IBinder creatorToken = createIntentCreatorToken(extraIntent, creatorPackage);
+                IntentCreatorToken creatorToken = createIntentCreatorToken(extraIntent,
+                        creatorPackage);
                 if (creatorToken != null) {
                     extraIntent.setCreatorToken(creatorToken);
+                    Slog.wtf(TAG, "A creator token is added to an intent. creatorPackage: "
+                            + creatorPackage + "; intent: " + intent);
+                    FrameworkStatsLog.write(INTENT_CREATOR_TOKEN_ADDED,
+                            creatorToken.getCreatorUid());
                 }
             } catch (Exception e) {
                 Slog.wtf(TAG,
@@ -19301,7 +19310,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
-    private IBinder createIntentCreatorToken(Intent intent, String creatorPackage) {
+    private IntentCreatorToken createIntentCreatorToken(Intent intent, String creatorPackage) {
         if (IntentCreatorToken.isValid(intent)) return null;
         int creatorUid = getCallingUid();
         IntentCreatorToken.Key key = new IntentCreatorToken.Key(creatorUid, creatorPackage, intent);

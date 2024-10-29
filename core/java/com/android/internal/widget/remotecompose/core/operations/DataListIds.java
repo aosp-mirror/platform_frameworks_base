@@ -15,8 +15,8 @@
  */
 package com.android.internal.widget.remotecompose.core.operations;
 
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.INT;
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.INT_ARRAY;
+import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT;
+import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT_ARRAY;
 
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
@@ -24,39 +24,29 @@ import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.VariableSupport;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
+import com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation;
 import com.android.internal.widget.remotecompose.core.operations.utilities.ArrayAccess;
 
 import java.util.Arrays;
 import java.util.List;
 
-public class DataListIds implements VariableSupport, ArrayAccess, Operation  {
+public class DataListIds implements VariableSupport, ArrayAccess, Operation {
     private static final int OP_CODE = Operations.ID_LIST;
     private static final String CLASS_NAME = "IdListData";
     int mId;
     int[] mIds;
-    float[] mValues;
     private static final int MAX_LIST = 2000;
 
     public DataListIds(int id, int[] ids) {
         mId = id;
         mIds = ids;
-        mValues = new float[ids.length];
     }
 
     @Override
-    public void updateVariables(RemoteContext context) {
-        for (int i = 0; i < mIds.length; i++) {
-            int id = mIds[i];
-            mValues[i] = context.getFloat(id);
-        }
-    }
+    public void updateVariables(RemoteContext context) {}
 
     @Override
-    public void registerListening(RemoteContext context) {
-        for (int mId : mIds) {
-            context.listensTo(mId, this);
-        }
-    }
+    public void registerListening(RemoteContext context) {}
 
     @Override
     public void write(WireBuffer buffer) {
@@ -65,7 +55,7 @@ public class DataListIds implements VariableSupport, ArrayAccess, Operation  {
 
     @Override
     public String toString() {
-        return "map " + "\"" + Arrays.toString(mIds) + "\"";
+        return "map[" + Utils.idString(mId) + "]  \"" + Arrays.toString(mIds) + "\"";
     }
 
     public static void apply(WireBuffer buffer, int id, int[] ids) {
@@ -92,15 +82,11 @@ public class DataListIds implements VariableSupport, ArrayAccess, Operation  {
     }
 
     public static void documentation(DocumentationBuilder doc) {
-        doc.operation("Data Operations",
-                        OP_CODE,
-                        CLASS_NAME)
+        doc.operation("Data Operations", OP_CODE, CLASS_NAME)
                 .description("a list of id's")
-                .field(INT, "id", "id the array")
+                .field(DocumentedOperation.INT, "id", "id the array")
                 .field(INT, "length", "number of ids")
-                .field(INT_ARRAY, "ids[n]", "length",
-                        "ids of other variables");
-
+                .field(INT_ARRAY, "ids[n]", "length", "ids of other variables");
     }
 
     @Override
@@ -115,16 +101,26 @@ public class DataListIds implements VariableSupport, ArrayAccess, Operation  {
 
     @Override
     public float getFloatValue(int index) {
-        return mValues[index];
+        return Float.NaN;
+    }
+
+    @Override
+    public int getId(int index) {
+        return mIds[index];
     }
 
     @Override
     public float[] getFloats() {
-        return mValues;
+        return null;
     }
 
     @Override
-    public int getFloatsLength() {
-        return mValues.length;
+    public int getLength() {
+        return mIds.length;
+    }
+
+    @Override
+    public int getIntValue(int index) {
+        return 0;
     }
 }

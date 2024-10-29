@@ -31,4 +31,6 @@ data class VolumeDialogRingerModel(
     val level: Int,
     /** Ring stream maximum level */
     val levelMax: Int,
+    /** in single volume mode */
+    val isSingleVolume: Boolean,
 )

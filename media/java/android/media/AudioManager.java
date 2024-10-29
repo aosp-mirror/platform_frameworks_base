@@ -896,6 +896,30 @@ public class AudioManager {
      */
     public static final int USE_DEFAULT_STREAM_TYPE = Integer.MIN_VALUE;
 
+    /** @hide */
+    @IntDef(flag = false, prefix = "DEVICE_STATE", value = {
+            DEVICE_CONNECTION_STATE_DISCONNECTED,
+            DEVICE_CONNECTION_STATE_CONNECTED}
+            )
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface DeviceConnectionState {}
+
+    /**
+     * @hide The device connection state for disconnected devices.
+     */
+    @SystemApi
+    @SuppressLint("UnflaggedApi") // b/373465238
+    @RequiresPermission(Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public static final int DEVICE_CONNECTION_STATE_DISCONNECTED = 0;
+
+    /**
+     * @hide The device connection state for connected devices.
+     */
+    @SystemApi
+    @SuppressLint("UnflaggedApi") // b/373465238
+    @RequiresPermission(Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public static final int DEVICE_CONNECTION_STATE_CONNECTED = 1;
+
     private static IAudioService sService;
 
     /**
@@ -6726,14 +6750,16 @@ public class AudioManager {
     }
 
     /**
+     * @hide
      * Indicate wired accessory connection state change and attributes.
-     * @param state      new connection state: 1 connected, 0 disconnected
      * @param attributes attributes of the connected device
-     * {@hide}
+     * @param state      new connection state
      */
-    @UnsupportedAppUsage
+    @SystemApi
+    @SuppressLint("UnflaggedApi") // b/373465238
     @RequiresPermission(Manifest.permission.MODIFY_AUDIO_ROUTING)
-    public void setWiredDeviceConnectionState(AudioDeviceAttributes attributes, int state) {
+    public void setWiredDeviceConnectionState(@NonNull AudioDeviceAttributes attributes,
+            @DeviceConnectionState int state) {
         final IAudioService service = getService();
         try {
             service.setWiredDeviceConnectionState(attributes, state,

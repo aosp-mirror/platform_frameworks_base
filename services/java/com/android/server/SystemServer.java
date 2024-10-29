@@ -28,6 +28,7 @@ import static android.system.OsConstants.O_RDONLY;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import static com.android.server.utils.TimingsTraceAndSlog.SYSTEM_SERVER_TIMING_TAG;
+import static com.android.tradeinmode.flags.Flags.enableTradeInMode;
 
 import android.annotation.NonNull;
 import android.annotation.StringRes;
@@ -1399,10 +1400,6 @@ public final class SystemServer implements Dumpable {
         mSystemServiceManager.startService(BatteryService.class);
         t.traceEnd();
 
-        t.traceBegin("StartTradeInModeService");
-        mSystemServiceManager.startService(TradeInModeService.class);
-        t.traceEnd();
-
         // Tracks application usage stats.
         t.traceBegin("StartUsageService");
         mSystemServiceManager.startService(UsageStatsService.class);
@@ -1772,6 +1769,13 @@ public final class SystemServer implements Dumpable {
                 mSystemServiceManager.startService(AdvancedProtectionService.Lifecycle.class);
                 t.traceEnd();
             }
+
+            if (!isWatch && !isTv && !isAutomotive && enableTradeInMode()) {
+                t.traceBegin("StartTradeInModeService");
+                mSystemServiceManager.startService(TradeInModeService.class);
+                t.traceEnd();
+            }
+
         } catch (Throwable e) {
             Slog.e("System", "******************************************");
             Slog.e("System", "************ Failure starting core service");
@@ -3037,8 +3041,13 @@ public final class SystemServer implements Dumpable {
                     || context.getPackageManager().hasSystemFeature(
                             PackageManager.FEATURE_WIFI_RTT)) {
                 t.traceBegin("RangingService");
-                mSystemServiceManager.startServiceFromJar(RANGING_SERVICE_CLASS,
-                        RANGING_APEX_SERVICE_JAR_PATH);
+                // TODO: b/375264320 - Remove after RELEASE_RANGING_STACK is ramped to next.
+                try {
+                    mSystemServiceManager.startServiceFromJar(RANGING_SERVICE_CLASS,
+                            RANGING_APEX_SERVICE_JAR_PATH);
+                } catch (Throwable e) {
+                    Slog.d(TAG, "service-ranging.jar not found, not starting RangingService");
+                }
                 t.traceEnd();
             }
         }

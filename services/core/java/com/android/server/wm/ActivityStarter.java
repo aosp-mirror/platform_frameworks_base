@@ -95,7 +95,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
-import android.app.BackgroundStartPrivileges;
 import android.app.IApplicationThread;
 import android.app.PendingIntent;
 import android.app.ProfilerInfo;
@@ -430,7 +429,7 @@ class ActivityStarter {
         WaitResult waitResult;
         int filterCallingUid;
         PendingIntentRecord originatingPendingIntent;
-        BackgroundStartPrivileges forcedBalByPiSender;
+        boolean allowBalExemptionForSystemProcess;
         boolean freezeScreen;
 
         final StringBuilder logMessage = new StringBuilder();
@@ -496,7 +495,7 @@ class ActivityStarter {
             allowPendingRemoteAnimationRegistryLookup = true;
             filterCallingUid = UserHandle.USER_NULL;
             originatingPendingIntent = null;
-            forcedBalByPiSender = BackgroundStartPrivileges.NONE;
+            allowBalExemptionForSystemProcess = false;
             freezeScreen = false;
             errorCallbackToken = null;
         }
@@ -540,7 +539,7 @@ class ActivityStarter {
                     = request.allowPendingRemoteAnimationRegistryLookup;
             filterCallingUid = request.filterCallingUid;
             originatingPendingIntent = request.originatingPendingIntent;
-            forcedBalByPiSender = request.forcedBalByPiSender;
+            allowBalExemptionForSystemProcess = request.allowBalExemptionForSystemProcess;
             freezeScreen = request.freezeScreen;
             errorCallbackToken = request.errorCallbackToken;
         }
@@ -1275,8 +1274,8 @@ class ActivityStarter {
                         "Creator PermissionPolicyService.checkStartActivity Caused abortion.",
                         intent, intentCreatorUid, intentCreatorPackage, callingUid, callingPackage);
             }
-            intent.removeCreatorTokenInfo();
         }
+        intent.removeCreatorToken();
 
         // Merge the two options bundles, while realCallerOptions takes precedence.
         ActivityOptions checkedOptions = options != null
@@ -1298,7 +1297,7 @@ class ActivityStarter {
                             realCallingPid,
                             callerApp,
                             request.originatingPendingIntent,
-                            request.forcedBalByPiSender,
+                            request.allowBalExemptionForSystemProcess,
                             resultRecord,
                             intent,
                             checkedOptions);
@@ -2374,6 +2373,9 @@ class ActivityStarter {
             return START_SUCCESS;
         }
 
+        if (mMovedToTopActivity != null) {
+            targetTaskTop = mMovedToTopActivity;
+        }
         // The reusedActivity could be finishing, for example of starting an activity with
         // FLAG_ACTIVITY_CLEAR_TOP flag. In that case, use the top running activity in the
         // task instead.
@@ -2395,7 +2397,8 @@ class ActivityStarter {
         // This is moving an existing task to front. But since dream activity has a higher z-order
         // to cover normal activities, it needs the awakening event to be dismissed.
         if (mService.isDreaming() && targetTaskTop.canTurnScreenOn()) {
-            targetTaskTop.mTaskSupervisor.wakeUp("recycleTask#turnScreenOnFlag");
+            targetTaskTop.mTaskSupervisor.wakeUp(
+                    targetTaskTop.getDisplayId(), "recycleTask#turnScreenOnFlag");
         }
 
         mLastStartActivityRecord = targetTaskTop;
@@ -2612,7 +2615,7 @@ class ActivityStarter {
         mInTaskFragment = null;
         mAddingToTaskFragment = null;
         mAddingToTask = false;
-
+        mMovedToTopActivity = null;
         mSourceRootTask = null;
 
         mTargetRootTask = null;
@@ -3466,8 +3469,8 @@ class ActivityStarter {
         return this;
     }
 
-    ActivityStarter setActivityOptions(Bundle bOptions) {
-        return setActivityOptions(SafeActivityOptions.fromBundle(bOptions));
+    ActivityStarter setActivityOptions(Bundle bOptions, int callingPid, int callingUid) {
+        return setActivityOptions(SafeActivityOptions.fromBundle(bOptions, callingPid, callingUid));
     }
 
     ActivityStarter setIgnoreTargetSecurity(boolean ignoreTargetSecurity) {
@@ -3530,8 +3533,9 @@ class ActivityStarter {
         return this;
     }
 
-    ActivityStarter setBackgroundStartPrivileges(BackgroundStartPrivileges forcedBalByPiSender) {
-        mRequest.forcedBalByPiSender = forcedBalByPiSender;
+    ActivityStarter setAllowBalExemptionForSystemProcess(
+            boolean allowBalExemptionForSystemProcess) {
+        mRequest.allowBalExemptionForSystemProcess = allowBalExemptionForSystemProcess;
         return this;
     }
 

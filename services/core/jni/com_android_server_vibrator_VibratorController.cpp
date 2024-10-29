@@ -73,6 +73,13 @@ static struct {
     jfieldID endFrequencyHz;
     jfieldID duration;
 } sRampClassInfo;
+static struct {
+    jfieldID startAmplitude;
+    jfieldID endAmplitude;
+    jfieldID startFrequencyHz;
+    jfieldID endFrequencyHz;
+    jfieldID duration;
+} sPwleClassInfo;
 
 static_assert(static_cast<uint8_t>(V1_0::EffectStrength::LIGHT) ==
               static_cast<uint8_t>(Aidl::EffectStrength::LIGHT));
@@ -179,6 +186,15 @@ static Aidl::ActivePwle activePwleFromJavaPrimitive(JNIEnv* env, jobject ramp) {
             static_cast<float>(env->GetFloatField(ramp, sRampClassInfo.startFrequencyHz));
     pwle.endFrequency = static_cast<float>(env->GetFloatField(ramp, sRampClassInfo.endFrequencyHz));
     pwle.duration = static_cast<int32_t>(env->GetIntField(ramp, sRampClassInfo.duration));
+    return pwle;
+}
+
+static Aidl::PwleV2Primitive pwleV2PrimitiveFromJavaPrimitive(JNIEnv* env, jobject pwleObj) {
+    Aidl::PwleV2Primitive pwle;
+    pwle.amplitude = static_cast<float>(env->GetFloatField(pwleObj, sPwleClassInfo.endAmplitude));
+    pwle.frequencyHz =
+            static_cast<float>(env->GetFloatField(pwleObj, sPwleClassInfo.endFrequencyHz));
+    pwle.timeMillis = static_cast<int32_t>(env->GetIntField(pwleObj, sPwleClassInfo.duration));
     return pwle;
 }
 
@@ -399,6 +415,31 @@ static jlong vibratorPerformPwleEffect(JNIEnv* env, jclass /* clazz */, jlong pt
     return result.isOk() ? totalDuration.count() : (result.isUnsupported() ? 0 : -1);
 }
 
+static jlong vibratorPerformPwleV2Effect(JNIEnv* env, jclass /* clazz */, jlong ptr,
+                                         jobjectArray waveform, jlong vibrationId) {
+    VibratorControllerWrapper* wrapper = reinterpret_cast<VibratorControllerWrapper*>(ptr);
+    if (wrapper == nullptr) {
+        ALOGE("vibratorPerformPwleV2Effect failed because native wrapper was not initialized");
+        return -1;
+    }
+    size_t size = env->GetArrayLength(waveform);
+    Aidl::CompositePwleV2 composite;
+    std::vector<Aidl::PwleV2Primitive> primitives;
+    for (size_t i = 0; i < size; i++) {
+        jobject element = env->GetObjectArrayElement(waveform, i);
+        Aidl::PwleV2Primitive pwle = pwleV2PrimitiveFromJavaPrimitive(env, element);
+        primitives.push_back(pwle);
+    }
+    composite.pwlePrimitives = primitives;
+
+    auto callback = wrapper->createCallback(vibrationId);
+    auto composePwleV2Fn = [&composite, &callback](vibrator::HalWrapper* hal) {
+        return hal->composePwleV2(composite, callback);
+    };
+    auto result = wrapper->halCall<void>(composePwleV2Fn, "composePwleV2");
+    return result.isOk();
+}
+
 static void vibratorAlwaysOnEnable(JNIEnv* env, jclass /* clazz */, jlong ptr, jlong id,
                                    jlong effect, jlong strength) {
     VibratorControllerWrapper* wrapper = reinterpret_cast<VibratorControllerWrapper*>(ptr);
@@ -579,6 +620,8 @@ static const JNINativeMethod method_table[] = {
          (void*)vibratorPerformComposedEffect},
         {"performPwleEffect", "(J[Landroid/os/vibrator/RampSegment;IJ)J",
          (void*)vibratorPerformPwleEffect},
+        {"performPwleV2Effect", "(J[Landroid/os/vibrator/PwleSegment;J)J",
+         (void*)vibratorPerformPwleV2Effect},
         {"setExternalControl", "(JZ)V", (void*)vibratorSetExternalControl},
         {"alwaysOnEnable", "(JJJJ)V", (void*)vibratorAlwaysOnEnable},
         {"alwaysOnDisable", "(JJ)V", (void*)vibratorAlwaysOnDisable},
@@ -603,6 +646,13 @@ int register_android_server_vibrator_VibratorController(JavaVM* jvm, JNIEnv* env
     sRampClassInfo.startFrequencyHz = GetFieldIDOrDie(env, rampClass, "mStartFrequencyHz", "F");
     sRampClassInfo.endFrequencyHz = GetFieldIDOrDie(env, rampClass, "mEndFrequencyHz", "F");
     sRampClassInfo.duration = GetFieldIDOrDie(env, rampClass, "mDuration", "I");
+
+    jclass pwleClass = FindClassOrDie(env, "android/os/vibrator/PwleSegment");
+    sPwleClassInfo.startAmplitude = GetFieldIDOrDie(env, pwleClass, "mStartAmplitude", "F");
+    sPwleClassInfo.endAmplitude = GetFieldIDOrDie(env, pwleClass, "mEndAmplitude", "F");
+    sPwleClassInfo.startFrequencyHz = GetFieldIDOrDie(env, pwleClass, "mStartFrequencyHz", "F");
+    sPwleClassInfo.endFrequencyHz = GetFieldIDOrDie(env, pwleClass, "mEndFrequencyHz", "F");
+    sPwleClassInfo.duration = GetFieldIDOrDie(env, pwleClass, "mDuration", "I");
 
     jclass frequencyProfileLegacyClass =
             FindClassOrDie(env, "android/os/VibratorInfo$FrequencyProfileLegacy");

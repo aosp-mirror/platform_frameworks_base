@@ -26,6 +26,7 @@ import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.dagger.ShadeTouchLog
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.shade.ShadeExpansionStateManager
 import com.android.systemui.shade.TouchLogger.Companion.logTouchesTo
 import com.android.systemui.shade.data.repository.ShadeRepository
@@ -41,14 +42,14 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 @SysUISingleton
 class ShadeStartable
 @Inject
 constructor(
     @Application private val applicationScope: CoroutineScope,
-    @Application private val applicationContext: Context,
+    @ShadeDisplayAware private val context: Context,
     @ShadeTouchLog private val touchLog: LogBuffer,
     private val configurationRepository: ConfigurationRepository,
     private val shadeRepository: ShadeRepository,
@@ -94,7 +95,7 @@ constructor(
                 // Force initial collection.
                 .onStart { emit(Unit) }
                 .collect {
-                    val resources = applicationContext.resources
+                    val resources = context.resources
                     // The configuration for 'shouldUseSplitNotificationShade' dictates the width of
                     // the shade in both split-shade and dual-shade modes.
                     shadeRepository.setShadeLayoutWide(

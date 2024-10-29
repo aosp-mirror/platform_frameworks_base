@@ -146,6 +146,10 @@ android_test {
         ":BinderProxyCountingTestService",
         ":AppThatUsesAppOps",
         ":AppThatCallsBinderMethods",
+        ":HelloWorldSdk1",
+        ":HelloWorldUsingSdk1AndSdk1",
+        ":HelloWorldUsingSdk1And2",
+        ":HelloWorldUsingSdkMalformedNegativeVersion",
     ],
 }
 

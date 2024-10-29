@@ -471,6 +471,10 @@ public class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     void startRoutingControl(int oldPath, int newPath, IHdmiControlCallback callback) {
         assertRunOnServiceThread();
         if (oldPath == newPath) {
+            HdmiCecMessage setStreamPath =
+                    HdmiCecMessageBuilder.buildSetStreamPath(getDeviceInfo().getLogicalAddress(),
+                            oldPath);
+            mService.sendCecCommand(setStreamPath);
             return;
         }
         HdmiCecMessage routingChange =
@@ -642,7 +646,8 @@ public class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         int address = message.getSource();
         int type = message.getParams()[2];
 
-        if (!mService.getHdmiCecNetwork().isInDeviceList(address, path)) {
+        if (!ActiveSource.of(address, path).equals(getActiveSource())) {
+            HdmiLogger.debug("Check if a new device is connected to the active path");
             handleNewDeviceAtTheTailOfActivePath(path);
         }
         startNewDeviceAction(ActiveSource.of(address, path), type);
@@ -792,6 +797,10 @@ public class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
                     @Override
                     public void onDeviceDiscoveryDone(List<HdmiDeviceInfo> deviceInfos) {
                         for (HdmiDeviceInfo info : deviceInfos) {
+                            if (!isInputReady(info.getDeviceId())) {
+                                mService.getHdmiCecNetwork().removeCecDevice(
+                                        HdmiCecLocalDeviceTv.this, info.getLogicalAddress());
+                            }
                             mService.getHdmiCecNetwork().addCecDevice(info);
                         }
 

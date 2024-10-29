@@ -20,7 +20,7 @@ import com.android.systemui.util.kotlin.sample
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.awaitCancellation
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /** View binder responsible for binding the compose version of the bouncer. */
 object ComposeBouncerViewBinder {
