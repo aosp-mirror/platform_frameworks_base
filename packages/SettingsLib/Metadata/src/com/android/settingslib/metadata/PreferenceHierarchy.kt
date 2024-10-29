@@ -67,18 +67,39 @@ class PreferenceHierarchy internal constructor(metadata: PreferenceMetadata) :
         }
     }
 
-    /** Adds a preference to the hierarchy before a specific preference. */
+    /** Adds a preference to the hierarchy before given key. */
     fun addBefore(key: String, metadata: PreferenceMetadata) {
-        var foundIndex = children.indexOfFirst { it.metadata.key == key }
-        if (foundIndex == -1) foundIndex = children.size
-        children.add(foundIndex, PreferenceHierarchyNode(metadata))
+        val (list, index) = findPreference(key) ?: (children to children.size)
+        list.add(index, PreferenceHierarchyNode(metadata))
     }
 
-    /** Adds a preference to the hierarchy after a specific preference. */
+    /** Adds a preference group to the hierarchy before given key. */
+    fun addGroupBefore(key: String, metadata: PreferenceMetadata): PreferenceHierarchy {
+        val (list, index) = findPreference(key) ?: (children to children.size)
+        return PreferenceHierarchy(metadata).also { list.add(index, it) }
+    }
+
+    /** Adds a preference to the hierarchy after given key. */
     fun addAfter(key: String, metadata: PreferenceMetadata) {
-        var foundIndex = children.indexOfFirst { it.metadata.key == key }
-        if (foundIndex == -1) foundIndex = children.size else foundIndex++
-        children.add(foundIndex, PreferenceHierarchyNode(metadata))
+        val (list, index) = findPreference(key) ?: (children to children.size - 1)
+        list.add(index + 1, PreferenceHierarchyNode(metadata))
+    }
+
+    /** Adds a preference group to the hierarchy after given key. */
+    fun addGroupAfter(key: String, metadata: PreferenceMetadata): PreferenceHierarchy {
+        val (list, index) = findPreference(key) ?: (children to children.size - 1)
+        return PreferenceHierarchy(metadata).also { list.add(index + 1, it) }
+    }
+
+    private fun findPreference(key: String): Pair<MutableList<PreferenceHierarchyNode>, Int>? {
+        children.forEachIndexed { index, node ->
+            if (node.metadata.key == key) return children to index
+            if (node is PreferenceHierarchy) {
+                val result = node.findPreference(key)
+                if (result != null) return result
+            }
+        }
+        return null
     }
 
     /** Adds a preference group to the hierarchy. */
