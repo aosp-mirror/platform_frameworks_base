@@ -19,12 +19,14 @@ package com.android.systemui.keyboard.shortcut.data.repository
 import android.content.Context
 import android.graphics.drawable.Icon
 import android.hardware.input.InputManager
+import android.hardware.input.KeyGlyphMap
 import android.util.Log
 import android.view.InputDevice
 import android.view.KeyCharacterMap
 import android.view.KeyEvent
 import android.view.KeyboardShortcutGroup
 import android.view.KeyboardShortcutInfo
+import com.android.systemui.Flags.shortcutHelperKeyGlyph
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.keyboard.shortcut.data.source.KeyboardShortcutGroupsSource
@@ -142,7 +144,10 @@ constructor(
         return if (type == null) {
             null
         } else {
+            val keyGlyphMap =
+                if (shortcutHelperKeyGlyph()) inputManager.getKeyGlyphMap(inputDevice.id) else null
             toShortcutCategory(
+                keyGlyphMap,
                 inputDevice.keyCharacterMap,
                 type,
                 groups,
@@ -163,6 +168,7 @@ constructor(
     }
 
     private fun toShortcutCategory(
+        keyGlyphMap: KeyGlyphMap?,
         keyCharacterMap: KeyCharacterMap,
         type: ShortcutCategoryType,
         shortcutGroups: List<KeyboardShortcutGroup>,
@@ -175,6 +181,7 @@ constructor(
                     ShortcutSubCategory(
                         shortcutGroup.label.toString(),
                         toShortcuts(
+                            keyGlyphMap,
                             keyCharacterMap,
                             shortcutGroup.items,
                             keepIcons,
@@ -192,6 +199,7 @@ constructor(
     }
 
     private fun toShortcuts(
+        keyGlyphMap: KeyGlyphMap?,
         keyCharacterMap: KeyCharacterMap,
         infoList: List<KeyboardShortcutInfo>,
         keepIcons: Boolean,
@@ -203,14 +211,16 @@ constructor(
                 // keycode, or they could have a baseCharacter instead of a keycode.
                 it.keycode == KeyEvent.KEYCODE_UNKNOWN || supportedKeyCodes.contains(it.keycode)
             }
-            .mapNotNull { toShortcut(keyCharacterMap, it, keepIcons) }
+            .mapNotNull { toShortcut(keyGlyphMap, keyCharacterMap, it, keepIcons) }
 
     private fun toShortcut(
+        keyGlyphMap: KeyGlyphMap?,
         keyCharacterMap: KeyCharacterMap,
         shortcutInfo: KeyboardShortcutInfo,
         keepIcon: Boolean,
     ): Shortcut? {
-        val shortcutCommand = toShortcutCommand(keyCharacterMap, shortcutInfo) ?: return null
+        val shortcutCommand =
+            toShortcutCommand(keyGlyphMap, keyCharacterMap, shortcutInfo) ?: return null
         return Shortcut(
             label = shortcutInfo.label!!.toString(),
             icon = toShortcutIcon(keepIcon, shortcutInfo),
@@ -235,6 +245,7 @@ constructor(
     }
 
     private fun toShortcutCommand(
+        keyGlyphMap: KeyGlyphMap?,
         keyCharacterMap: KeyCharacterMap,
         info: KeyboardShortcutInfo,
     ): ShortcutCommand? {
@@ -242,7 +253,7 @@ constructor(
         var remainingModifiers = info.modifiers
         SUPPORTED_MODIFIERS.forEach { supportedModifier ->
             if ((supportedModifier and remainingModifiers) != 0) {
-                keys += toShortcutModifierKey(supportedModifier) ?: return null
+                keys += toShortcutModifierKey(keyGlyphMap, supportedModifier) ?: return null
                 // "Remove" the modifier from the remaining modifiers
                 remainingModifiers = remainingModifiers and supportedModifier.inv()
             }
@@ -253,7 +264,9 @@ constructor(
             return null
         }
         if (info.keycode != 0 || info.baseCharacter > Char.MIN_VALUE) {
-            keys += toShortcutKey(keyCharacterMap, info.keycode, info.baseCharacter) ?: return null
+            keys +=
+                toShortcutKey(keyGlyphMap, keyCharacterMap, info.keycode, info.baseCharacter)
+                    ?: return null
         }
         if (keys.isEmpty()) {
             Log.wtf(TAG, "No keys for $info")
@@ -262,10 +275,15 @@ constructor(
         return ShortcutCommand(keys)
     }
 
-    private fun toShortcutModifierKey(modifierMask: Int): ShortcutKey? {
+    private fun toShortcutModifierKey(keyGlyphMap: KeyGlyphMap?, modifierMask: Int): ShortcutKey? {
+        val modifierDrawable = keyGlyphMap?.getDrawableForModifierState(context, modifierMask)
+        if (modifierDrawable != null) {
+            return ShortcutKey.Icon.DrawableIcon(drawable = modifierDrawable)
+        }
+
         val iconResId = ShortcutHelperKeys.keyIcons[modifierMask]
         if (iconResId != null) {
-            return ShortcutKey.Icon(iconResId)
+            return ShortcutKey.Icon.ResIdIcon(iconResId)
         }
 
         val modifierLabel = ShortcutHelperKeys.modifierLabels[modifierMask]
@@ -277,13 +295,19 @@ constructor(
     }
 
     private fun toShortcutKey(
+        keyGlyphMap: KeyGlyphMap?,
         keyCharacterMap: KeyCharacterMap,
         keyCode: Int,
         baseCharacter: Char = Char.MIN_VALUE,
     ): ShortcutKey? {
+        val keycodeDrawable = keyGlyphMap?.getDrawableForKeycode(context, keyCode)
+        if (keycodeDrawable != null) {
+            return ShortcutKey.Icon.DrawableIcon(drawable = keycodeDrawable)
+        }
+
         val iconResId = ShortcutHelperKeys.keyIcons[keyCode]
         if (iconResId != null) {
-            return ShortcutKey.Icon(iconResId)
+            return ShortcutKey.Icon.ResIdIcon(iconResId)
         }
         if (baseCharacter > Char.MIN_VALUE) {
             return ShortcutKey.Text(baseCharacter.uppercase())

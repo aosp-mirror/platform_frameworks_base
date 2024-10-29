@@ -28,7 +28,7 @@ class ShortcutCommandBuilder {
     }
 
     fun key(@DrawableRes drawableResId: Int) {
-        keys += ShortcutKey.Icon(drawableResId)
+        keys += ShortcutKey.Icon.ResIdIcon(drawableResId)
     }
 
     fun build() = ShortcutCommand(keys)
