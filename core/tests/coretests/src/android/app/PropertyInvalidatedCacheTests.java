@@ -420,7 +420,9 @@ public class PropertyInvalidatedCacheTests {
         PropertyInvalidatedCache.setTestMode(false);
         try {
             PropertyInvalidatedCache.setTestMode(false);
-            fail("expected an IllegalStateException");
+            if (Flags.enforcePicTestmodeProtocol()) {
+                fail("expected an IllegalStateException");
+            }
         } catch (IllegalStateException e) {
             // The expected exception.
         }
