@@ -376,3 +376,10 @@ flag {
     description: "Enables PiP features in desktop mode."
     bug: "350475854"
 }
+
+flag {
+    name: "enable_desktop_windowing_hsum"
+    namespace: "lse_desktop_experience"
+    description: "Enables HSUM on desktop mode."
+    bug: "366397912"
+}
