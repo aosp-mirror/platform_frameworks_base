@@ -31,6 +31,7 @@ class FakeDisplayWindowPropertiesRepository : DisplayWindowPropertiesRepository 
                     windowType = windowType,
                     context = mock(),
                     windowManager = mock(),
+                    layoutInflater = mock(),
                 )
                 .also { properties.put(displayId, windowType, it) }
     }
