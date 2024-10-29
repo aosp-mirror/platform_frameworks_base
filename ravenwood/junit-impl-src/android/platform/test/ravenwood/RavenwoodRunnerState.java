@@ -20,8 +20,8 @@ import static com.android.ravenwood.common.RavenwoodCommonUtils.ensureIsPublicMe
 import static org.junit.Assert.fail;
 
 import android.annotation.Nullable;
+import android.util.Log;
 
-import com.android.internal.annotations.GuardedBy;
 import com.android.ravenwood.common.RavenwoodRuntimeException;
 
 import org.junit.ClassRule;
@@ -29,9 +29,7 @@ import org.junit.Rule;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 
-import java.io.IOException;
 import java.lang.reflect.Field;
-import java.util.WeakHashMap;
 
 /**
  * Used to store various states associated with the current test runner that's inly needed
@@ -44,10 +42,6 @@ import java.util.WeakHashMap;
  */
 public final class RavenwoodRunnerState {
     private static final String TAG = "RavenwoodRunnerState";
-
-    @GuardedBy("sStates")
-    private static final WeakHashMap<RavenwoodAwareTestRunner, RavenwoodRunnerState> sStates =
-            new WeakHashMap<>();
 
     private final RavenwoodAwareTestRunner mRunner;
 
@@ -69,7 +63,8 @@ public final class RavenwoodRunnerState {
         return mClassDescription;
     }
 
-    public void enterTestClass(Description classDescription) throws IOException {
+    public void enterTestClass(Description classDescription) {
+        Log.i(TAG, "enterTestClass: description=" + classDescription);
         mClassDescription = classDescription;
 
         mHasRavenwoodRule = hasRavenwoodRule(mRunner.getTestClass().getJavaClass());
@@ -81,6 +76,7 @@ public final class RavenwoodRunnerState {
     }
 
     public void exitTestClass() {
+        Log.i(TAG, "exitTestClass: description=" + mClassDescription);
         if (mCurrentConfig != null) {
             try {
                 RavenwoodRuntimeEnvironmentController.reset();
@@ -98,7 +94,7 @@ public final class RavenwoodRunnerState {
         mMethodDescription = null;
     }
 
-    public void enterRavenwoodRule(RavenwoodRule rule) throws IOException {
+    public void enterRavenwoodRule(RavenwoodRule rule) {
         if (!mHasRavenwoodRule) {
             fail("If you have a RavenwoodRule in your test, make sure the field type is"
                     + " RavenwoodRule so Ravenwood can detect it.");
