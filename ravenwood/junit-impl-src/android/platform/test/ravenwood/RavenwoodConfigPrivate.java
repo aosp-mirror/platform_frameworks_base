@@ -15,8 +15,22 @@
  */
 package android.platform.test.ravenwood;
 
-/** Stub class. The actual implementation is in junit-impl-src. */
-public class RavenwoodConfigState {
-    public RavenwoodConfigState(RavenwoodConfig config) {
+import android.annotation.Nullable;
+
+import java.util.function.BiConsumer;
+
+/**
+ * Contains Ravenwood private APIs.
+ */
+public class RavenwoodConfigPrivate {
+    private RavenwoodConfigPrivate() {
+    }
+
+    /**
+     * Set a listener for onCriticalError(), for testing. If a listener is set, we won't call
+     * System.exit().
+     */
+    public static void setCriticalErrorHandler(@Nullable BiConsumer<String, Throwable> handler) {
+        RavenwoodAwareTestRunner.sCriticalErrorHandler = handler;
     }
 }
