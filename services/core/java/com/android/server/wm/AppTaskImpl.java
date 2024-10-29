@@ -175,13 +175,14 @@ class AppTaskImpl extends IAppTask.Stub {
                 throw new IllegalArgumentException("Bad app thread " + appThread);
             }
         }
-
+        final int callingPid = Binder.getCallingPid();
+        final int callingUid = Binder.getCallingUid();
         return mService.getActivityStartController().obtainStarter(intent, "AppTaskImpl")
                 .setCaller(appThread)
                 .setCallingPackage(callingPackage)
                 .setCallingFeatureId(callingFeatureId)
                 .setResolvedType(resolvedType)
-                .setActivityOptions(bOptions)
+                .setActivityOptions(bOptions, callingPid, callingUid)
                 .setUserId(callingUser)
                 .setInTask(task)
                 .execute();
