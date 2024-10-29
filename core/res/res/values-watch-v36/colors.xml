@@ -15,9 +15,4 @@
   -->
 <!-- TODO(b/372524566): update color token's value to match material3 design. -->
 <resources>
-    <color name="system_primary_dark">#E9DDFF</color>
-    <color name="system_primary_fixed_dim">#D0BCFF</color>
-    <color name="system_on_primary_dark">#210F48</color>
-    <color name="system_primary_container_dark">#4D3D76</color>
-    <color name="system_on_primary_container_dark">#F6EDFF</color>
 </resources>

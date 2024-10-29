@@ -34,6 +34,7 @@ import android.os.LocaleList;
 import android.os.Parcel;
 import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.text.InputType;
 import android.text.Spannable;
 import android.text.SpannableString;
@@ -86,6 +87,8 @@ public class EditorInfoTest {
         TEST_EDITOR_INFO.contentMimeTypes = new String[] {"image/png"};
         TEST_EDITOR_INFO.targetInputMethodUser = UserHandle.of(TEST_USER_ID);
     }
+
+    private final DeviceFlagsValueProvider mFlagsValueProvider = new DeviceFlagsValueProvider();
 
     /**
      * Makes sure that {@code null} {@link EditorInfo#targetInputMethodUser} can be copied via
@@ -522,7 +525,9 @@ public class EditorInfoTest {
         info.setSupportedHandwritingGestures(Arrays.asList(SelectGesture.class));
         info.setSupportedHandwritingGesturePreviews(
                 Stream.of(SelectGesture.class).collect(Collectors.toSet()));
-        if (Flags.editorinfoHandwritingEnabled()) {
+        final boolean isStylusHandwritingEnabled =
+                mFlagsValueProvider.getBoolean(Flags.FLAG_EDITORINFO_HANDWRITING_ENABLED);
+        if (isStylusHandwritingEnabled) {
             info.setStylusHandwritingEnabled(true);
         }
         info.packageName = "android.view.inputmethod";
@@ -548,8 +553,7 @@ public class EditorInfoTest {
                         + "prefix2: hintLocales=[en,es,zh]\n"
                         + "prefix2: supportedHandwritingGestureTypes=SELECT\n"
                         + "prefix2: supportedHandwritingGesturePreviewTypes=SELECT\n"
-                        + "prefix2: isStylusHandwritingEnabled="
-                                + Flags.editorinfoHandwritingEnabled() + "\n"
+                        + "prefix2: isStylusHandwritingEnabled=" + isStylusHandwritingEnabled + "\n"
                         + "prefix2: contentMimeTypes=[image/png]\n"
                         + "prefix2: targetInputMethodUserId=10\n");
     }
