@@ -335,7 +335,7 @@
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"ghi âm"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Hoạt động thể chất"</string>
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"truy cập vào hoạt động thể chất"</string>
-    <string name="permgrouplab_camera" msgid="9090413408963547706">"Máy ảnh"</string>
+    <string name="permgrouplab_camera" msgid="9090413408963547706">"Camera"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"chụp ảnh và quay video"</string>
     <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"Thiết bị ở gần"</string>
     <string name="permgroupdesc_nearby_devices" msgid="3213561597116913508">"khám phá và kết nối với các thiết bị ở gần"</string>
@@ -1943,6 +1943,8 @@
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Tắt"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> – <xliff:g id="END">%2$s</xliff:g>"</string>
+    <!-- no translation found for zen_mode_trigger_summary_range_words (7228261413029290750) -->
+    <skip />
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"Bất kỳ lịch nào"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> đang tắt một số âm thanh"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"Đã xảy ra sự cố nội bộ với thiết bị của bạn và thiết bị có thể sẽ không ổn định cho tới khi bạn thiết lập lại dữ liệu ban đầu."</string>
@@ -2135,7 +2137,7 @@
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Đóng"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Hệ thống"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Cài đặt"</string>
-    <string name="notification_appops_camera_active" msgid="8177643089272352083">"Máy ảnh"</string>
+    <string name="notification_appops_camera_active" msgid="8177643089272352083">"Camera"</string>
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"Micrô"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"hiển thị qua các ứng dụng khác trên màn hình của bạn"</string>
     <string name="notification_feedback_indicator" msgid="663476517711323016">"Gửi ý kiến phản hồi"</string>
@@ -2424,6 +2426,14 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Gửi và nhận tin nhắn mà không cần mạng di động hoặc Wi-Fi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Mở ứng dụng Tin nhắn"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Cách hoạt động"</string>
+    <!-- no translation found for satellite_manual_selection_state_popup_title (8545991934926661974) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_message (1928101658551382450) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_ok (2459664752624985095) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_cancel (973605633339469252) -->
+    <skip />
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Đang chờ xử lý..."</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Thiết lập lại tính năng Mở khoá bằng vân tay"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"Không nhận dạng được <xliff:g id="FINGERPRINT">%s</xliff:g> nữa."</string>
