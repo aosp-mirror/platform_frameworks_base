@@ -6184,7 +6184,6 @@ public class Intent implements Parcelable, Cloneable {
      * {@link #EXTRA_CHOOSER_RESULT_INTENT_SENDER}.
      * </p>
      */
-    @FlaggedApi(android.service.chooser.Flags.FLAG_CHOOSER_PAYLOAD_TOGGLING)
     public static final String EXTRA_CHOOSER_ADDITIONAL_CONTENT_URI =
             "android.intent.extra.CHOOSER_ADDITIONAL_CONTENT_URI";
 
@@ -6194,7 +6193,6 @@ public class Intent implements Parcelable, Cloneable {
      * An integer, zero-based index into {@link #EXTRA_STREAM} argument indicating the item that
      * should be focused by the Chooser in preview.
      */
-    @FlaggedApi(android.service.chooser.Flags.FLAG_CHOOSER_PAYLOAD_TOGGLING)
     public static final String EXTRA_CHOOSER_FOCUSED_ITEM_POSITION =
             "android.intent.extra.CHOOSER_FOCUSED_ITEM_POSITION";
 
