@@ -19,12 +19,11 @@ package com.android.settingslib.preference
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import androidx.preference.Preference
 import androidx.preference.PreferenceDataStore
 import androidx.preference.PreferenceGroup
 import androidx.preference.PreferenceScreen
+import com.android.settingslib.datastore.HandlerExecutor
 import com.android.settingslib.datastore.KeyValueStore
 import com.android.settingslib.datastore.KeyedDataObservable
 import com.android.settingslib.datastore.KeyedObservable
@@ -37,7 +36,6 @@ import com.android.settingslib.metadata.PreferenceMetadata
 import com.android.settingslib.metadata.PreferenceScreenRegistry
 import com.google.common.collect.ImmutableMap
 import com.google.common.collect.ImmutableMultimap
-import java.util.concurrent.Executor
 
 /**
  * Helper to bind preferences on given [preferenceScreen].
@@ -54,13 +52,7 @@ class PreferenceScreenBindingHelper(
     private val preferenceHierarchy: PreferenceHierarchy,
 ) : KeyedDataObservable<String>() {
 
-    private val handler = Handler(Looper.getMainLooper())
-    private val executor =
-        object : Executor {
-            override fun execute(command: Runnable) {
-                handler.post(command)
-            }
-        }
+    private val mainExecutor = HandlerExecutor.main
 
     private val preferenceLifecycleContext =
         object : PreferenceLifecycleContext(context) {
@@ -121,8 +113,8 @@ class PreferenceScreenBindingHelper(
         this.lifecycleAwarePreferences = lifecycleAwarePreferences.toTypedArray()
 
         preferenceObserver = KeyedObserver { key, reason -> onPreferenceChange(key, reason) }
-        addObserver(preferenceObserver, executor)
-        for (storage in storages) storage.addObserver(storageObserver, executor)
+        addObserver(preferenceObserver, mainExecutor)
+        for (storage in storages) storage.addObserver(storageObserver, mainExecutor)
     }
 
     private fun onPreferenceChange(key: String?, reason: Int) {
