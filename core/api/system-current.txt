@@ -7066,6 +7066,7 @@ package android.hardware.usb {
   public class UsbManager {
     method @RequiresPermission(android.Manifest.permission.MANAGE_USB) public long getCurrentFunctions();
     method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_USB) public java.util.List<android.hardware.usb.UsbPort> getPorts();
+    method @FlaggedApi("android.hardware.usb.flags.expose_usb_speed_system_api") @RequiresPermission(android.Manifest.permission.MANAGE_USB) public int getUsbBandwidthMbps();
     method @RequiresPermission(android.Manifest.permission.MANAGE_USB) public void grantPermission(android.hardware.usb.UsbDevice, String);
     method public static boolean isUvcSupportEnabled();
     method @RequiresPermission(android.Manifest.permission.MANAGE_USB) public void registerDisplayPortAltModeInfoListener(@NonNull java.util.concurrent.Executor, @NonNull android.hardware.usb.UsbManager.DisplayPortAltModeInfoListener);
@@ -7092,6 +7093,14 @@ package android.hardware.usb {
     field public static final long FUNCTION_UVC = 128L; // 0x80L
     field public static final String USB_CONFIGURED = "configured";
     field public static final String USB_CONNECTED = "connected";
+    field @FlaggedApi("android.hardware.usb.flags.expose_usb_speed_system_api") public static final int USB_DATA_TRANSFER_RATE_10G = 10240; // 0x2800
+    field @FlaggedApi("android.hardware.usb.flags.expose_usb_speed_system_api") public static final int USB_DATA_TRANSFER_RATE_20G = 20480; // 0x5000
+    field @FlaggedApi("android.hardware.usb.flags.expose_usb_speed_system_api") public static final int USB_DATA_TRANSFER_RATE_40G = 40960; // 0xa000
+    field @FlaggedApi("android.hardware.usb.flags.expose_usb_speed_system_api") public static final int USB_DATA_TRANSFER_RATE_5G = 5120; // 0x1400
+    field @FlaggedApi("android.hardware.usb.flags.expose_usb_speed_system_api") public static final int USB_DATA_TRANSFER_RATE_FULL_SPEED = 12; // 0xc
+    field @FlaggedApi("android.hardware.usb.flags.expose_usb_speed_system_api") public static final int USB_DATA_TRANSFER_RATE_HIGH_SPEED = 480; // 0x1e0
+    field @FlaggedApi("android.hardware.usb.flags.expose_usb_speed_system_api") public static final int USB_DATA_TRANSFER_RATE_LOW_SPEED = 2; // 0x2
+    field @FlaggedApi("android.hardware.usb.flags.expose_usb_speed_system_api") public static final int USB_DATA_TRANSFER_RATE_UNKNOWN = -1; // 0xffffffff
     field public static final String USB_FUNCTION_NCM = "ncm";
     field public static final String USB_FUNCTION_RNDIS = "rndis";
   }
