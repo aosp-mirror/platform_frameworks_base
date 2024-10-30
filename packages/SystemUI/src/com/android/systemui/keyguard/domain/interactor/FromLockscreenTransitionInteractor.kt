@@ -39,7 +39,6 @@ import com.android.systemui.power.shared.model.WakeSleepReason.FOLD
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.data.repository.ShadeRepository
-import com.android.systemui.util.kotlin.Utils.Companion.sample as sampleCombine
 import com.android.systemui.util.kotlin.sample
 import java.util.UUID
 import javax.inject.Inject
@@ -52,7 +51,6 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 @SysUISingleton
 class FromLockscreenTransitionInteractor
@@ -176,99 +174,89 @@ constructor(
         if (SceneContainerFlag.isEnabled) return
         var transitionId: UUID? = null
         scope.launch("$TAG#listenForLockscreenToPrimaryBouncerDragging") {
-            shadeRepository.legacyShadeExpansion
-                .sampleCombine(
-                    transitionInteractor.startedKeyguardTransitionStep,
-                    keyguardInteractor.statusBarState,
-                    keyguardInteractor.isKeyguardDismissible,
-                    keyguardInteractor.isKeyguardOccluded,
-                )
-                .collect {
-                    (
-                        shadeExpansion,
-                        startedStep,
-                        statusBarState,
-                        isKeyguardUnlocked,
-                        isKeyguardOccluded) ->
-                    val id = transitionId
-                    val currentTransitionInfo =
-                        internalTransitionInteractor.currentTransitionInfoInternal()
-                    if (id != null) {
-                        if (startedStep.to == KeyguardState.PRIMARY_BOUNCER) {
-                            // An existing `id` means a transition is started, and calls to
-                            // `updateTransition` will control it until FINISHED or CANCELED
-                            var nextState =
-                                if (shadeExpansion == 0f) {
-                                    TransitionState.FINISHED
-                                } else if (shadeExpansion == 1f) {
-                                    TransitionState.CANCELED
-                                } else {
-                                    TransitionState.RUNNING
-                                }
+            shadeRepository.legacyShadeExpansion.collect { shadeExpansion ->
+                val statusBarState = keyguardInteractor.statusBarState.value
+                val isKeyguardUnlocked = keyguardInteractor.isKeyguardDismissible.value
+                val isKeyguardOccluded = keyguardInteractor.isKeyguardOccluded.value
+                val startedStep = transitionInteractor.startedKeyguardTransitionStep.value
 
-                            // startTransition below will issue the CANCELED directly
-                            if (nextState != TransitionState.CANCELED) {
-                                transitionRepository.updateTransition(
-                                    id,
-                                    // This maps the shadeExpansion to a much faster curve, to match
-                                    // the existing logic
-                                    1f -
-                                        MathUtils.constrainedMap(0f, 1f, 0.95f, 1f, shadeExpansion),
-                                    nextState,
-                                )
+                val id = transitionId
+                val currentTransitionInfo =
+                    internalTransitionInteractor.currentTransitionInfoInternal()
+                if (id != null) {
+                    if (startedStep.to == KeyguardState.PRIMARY_BOUNCER) {
+                        // An existing `id` means a transition is started, and calls to
+                        // `updateTransition` will control it until FINISHED or CANCELED
+                        var nextState =
+                            if (shadeExpansion == 0f) {
+                                TransitionState.FINISHED
+                            } else if (shadeExpansion == 1f) {
+                                TransitionState.CANCELED
+                            } else {
+                                TransitionState.RUNNING
                             }
 
-                            if (
-                                nextState == TransitionState.CANCELED ||
-                                    nextState == TransitionState.FINISHED
-                            ) {
-                                transitionId = null
-                            }
-
-                            // If canceled, just put the state back
-                            // TODO(b/278086361): This logic should happen in
-                            //  FromPrimaryBouncerInteractor.
-                            if (nextState == TransitionState.CANCELED) {
-                                transitionRepository.startTransition(
-                                    TransitionInfo(
-                                        ownerName =
-                                            "$name " +
-                                                "(on behalf of FromPrimaryBouncerInteractor)",
-                                        from = KeyguardState.PRIMARY_BOUNCER,
-                                        to =
-                                            if (isKeyguardOccluded) KeyguardState.OCCLUDED
-                                            else KeyguardState.LOCKSCREEN,
-                                        modeOnCanceled = TransitionModeOnCanceled.REVERSE,
-                                        animator =
-                                            getDefaultAnimatorForTransitionsToState(
-                                                    KeyguardState.LOCKSCREEN
-                                                )
-                                                .apply { duration = 100L },
-                                    )
-                                )
-                            }
+                        // startTransition below will issue the CANCELED directly
+                        if (nextState != TransitionState.CANCELED) {
+                            transitionRepository.updateTransition(
+                                id,
+                                // This maps the shadeExpansion to a much faster curve, to match
+                                // the existing logic
+                                1f - MathUtils.constrainedMap(0f, 1f, 0.95f, 1f, shadeExpansion),
+                                nextState,
+                            )
                         }
-                    } else {
-                        // TODO (b/251849525): Remove statusbarstate check when that state is
-                        // integrated into KeyguardTransitionRepository
+
                         if (
-                            // Use currentTransitionInfo to decide whether to start the transition.
-                            currentTransitionInfo.to == KeyguardState.LOCKSCREEN &&
-                                shadeExpansion > 0f &&
-                                shadeExpansion < 1f &&
-                                shadeRepository.legacyShadeTracking.value &&
-                                !isKeyguardUnlocked &&
-                                statusBarState == KEYGUARD
+                            nextState == TransitionState.CANCELED ||
+                                nextState == TransitionState.FINISHED
                         ) {
-                            transitionId =
-                                startTransitionTo(
-                                    toState = KeyguardState.PRIMARY_BOUNCER,
-                                    animator = null, // transition will be manually controlled,
-                                    ownerReason = "#listenForLockscreenToPrimaryBouncerDragging",
+                            transitionId = null
+                        }
+
+                        // If canceled, just put the state back
+                        // TODO(b/278086361): This logic should happen in
+                        //  FromPrimaryBouncerInteractor.
+                        if (nextState == TransitionState.CANCELED) {
+                            transitionRepository.startTransition(
+                                TransitionInfo(
+                                    ownerName =
+                                        "$name " + "(on behalf of FromPrimaryBouncerInteractor)",
+                                    from = KeyguardState.PRIMARY_BOUNCER,
+                                    to =
+                                        if (isKeyguardOccluded) KeyguardState.OCCLUDED
+                                        else KeyguardState.LOCKSCREEN,
+                                    modeOnCanceled = TransitionModeOnCanceled.REVERSE,
+                                    animator =
+                                        getDefaultAnimatorForTransitionsToState(
+                                                KeyguardState.LOCKSCREEN
+                                            )
+                                            .apply { duration = 100L },
                                 )
+                            )
                         }
                     }
+                } else {
+                    // TODO (b/251849525): Remove statusbarstate check when that state is
+                    // integrated into KeyguardTransitionRepository
+                    if (
+                        // Use currentTransitionInfo to decide whether to start the transition.
+                        currentTransitionInfo.to == KeyguardState.LOCKSCREEN &&
+                            shadeExpansion > 0f &&
+                            shadeExpansion < 1f &&
+                            shadeRepository.legacyShadeTracking.value &&
+                            !isKeyguardUnlocked &&
+                            statusBarState == KEYGUARD
+                    ) {
+                        transitionId =
+                            startTransitionTo(
+                                toState = KeyguardState.PRIMARY_BOUNCER,
+                                animator = null, // transition will be manually controlled,
+                                ownerReason = "#listenForLockscreenToPrimaryBouncerDragging",
+                            )
+                    }
                 }
+            }
         }
     }
 
