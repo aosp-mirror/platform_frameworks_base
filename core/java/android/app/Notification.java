@@ -11831,7 +11831,7 @@ public class Notification implements Parcelable
                     if (length <= 0) continue;
 
                     try {
-                        totalLength += Math.addExact(totalLength, length);
+                        totalLength = Math.addExact(totalLength, length);
                         segments.add(sanitizeSegment(segment, backgroundColor,
                                 defaultProgressColor));
                     } catch (ArithmeticException e) {
@@ -11853,7 +11853,6 @@ public class Notification implements Parcelable
                 for (Point point : mProgressPoints) {
                     final int position = point.getPosition();
                     if (position < 0 || position > totalLength) continue;
-
                     points.add(sanitizePoint(point, backgroundColor, defaultProgressColor));
                 }
 
