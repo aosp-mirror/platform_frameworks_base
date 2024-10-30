@@ -77,7 +77,11 @@ fun ActionTutorialContent(
             }
         }
         val buttonAlpha by animateFloatAsState(if (actionState is Finished) 1f else 0f)
-        DoneButton(onDoneButtonClicked, Modifier.graphicsLayer { alpha = buttonAlpha })
+        DoneButton(
+            onDoneButtonClicked = onDoneButtonClicked,
+            modifier = Modifier.graphicsLayer { alpha = buttonAlpha },
+            enabled = actionState is Finished,
+        )
     }
 }
 
