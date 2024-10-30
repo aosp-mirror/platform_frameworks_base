@@ -6516,7 +6516,7 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         Configuration globalConfig = mergedConfiguration.getGlobalConfiguration();
-        final Configuration overrideConfig = mergedConfiguration.getOverrideConfiguration();
+        Configuration overrideConfig = mergedConfiguration.getOverrideConfiguration();
         if (DEBUG_CONFIGURATION) Log.v(mTag,
                 "Applying new config to window " + mWindowAttributes.getTitle()
                         + ", globalConfig: " + globalConfig
@@ -6525,7 +6525,9 @@ public final class ViewRootImpl implements ViewParent,
         final CompatibilityInfo ci = mDisplay.getDisplayAdjustments().getCompatibilityInfo();
         if (!ci.equals(CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO)) {
             globalConfig = new Configuration(globalConfig);
+            overrideConfig = new Configuration(overrideConfig);
             ci.applyToConfiguration(mNoncompatDensity, globalConfig);
+            ci.applyToConfiguration(mNoncompatDensity, overrideConfig);
         }
 
         synchronized (sConfigCallbacks) {
@@ -9290,7 +9292,7 @@ public final class ViewRootImpl implements ViewParent,
             boolean insetsPending) throws RemoteException {
         final WindowConfiguration winConfigFromAm = getConfiguration().windowConfiguration;
         final WindowConfiguration winConfigFromWm =
-                mLastReportedMergedConfiguration.getGlobalConfiguration().windowConfiguration;
+                mLastReportedMergedConfiguration.getMergedConfiguration().windowConfiguration;
         final WindowConfiguration winConfig = getCompatWindowConfiguration();
         final int measuredWidth = mMeasuredWidth;
         final int measuredHeight = mMeasuredHeight;
