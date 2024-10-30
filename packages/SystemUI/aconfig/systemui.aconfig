@@ -908,16 +908,6 @@ flag {
 }
 
 flag {
-    name: "delayed_wakelock_release_on_background_thread"
-    namespace: "systemui"
-    description: "Released delayed wakelocks on background threads to avoid janking screen transitions."
-    bug: "316128516"
-    metadata {
-        purpose: PURPOSE_BUGFIX
-    }
-}
-
-flag {
     name: "notify_power_manager_user_activity_background"
     namespace: "systemui"
     description: "Decide whether to notify the user activity to power manager in the background thread."
