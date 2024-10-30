@@ -20,6 +20,7 @@ import com.android.systemui.statusbar.data.repository.RemoteInputRepositoryModul
 import com.android.systemui.statusbar.data.repository.StatusBarConfigurationControllerModule
 import com.android.systemui.statusbar.data.repository.StatusBarContentInsetsProviderStoreModule
 import com.android.systemui.statusbar.data.repository.StatusBarModeRepositoryModule
+import com.android.systemui.statusbar.data.repository.SystemEventChipAnimationControllerStoreModule
 import com.android.systemui.statusbar.phone.data.StatusBarPhoneDataLayerModule
 import dagger.Module
 
@@ -32,6 +33,7 @@ import dagger.Module
             StatusBarContentInsetsProviderStoreModule::class,
             StatusBarModeRepositoryModule::class,
             StatusBarPhoneDataLayerModule::class,
+            SystemEventChipAnimationControllerStoreModule::class,
         ]
 )
 object StatusBarDataLayerModule
