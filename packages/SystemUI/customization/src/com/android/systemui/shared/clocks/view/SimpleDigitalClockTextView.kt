@@ -41,6 +41,7 @@ import com.android.systemui.animation.TypefaceVariantCache
 import com.android.systemui.customization.R
 import com.android.systemui.log.core.Logger
 import com.android.systemui.log.core.MessageBuffer
+import com.android.systemui.plugins.clocks.ClockFontAxisSetting
 import com.android.systemui.shared.clocks.AssetLoader
 import com.android.systemui.shared.clocks.ClockAnimation
 import com.android.systemui.shared.clocks.DigitTranslateAnimator
@@ -140,6 +141,25 @@ open class SimpleDigitalClockTextView(
         invalidate()
     }
 
+    override fun updateAxes(axes: List<ClockFontAxisSetting>) {
+        val sb = StringBuilder()
+        sb.append("'opsz' 144")
+
+        for (axis in axes) {
+            if (sb.length > 0) sb.append(", ")
+            sb.append("'${axis.key}' ${axis.value.toInt()}")
+        }
+
+        val fvar = sb.toString()
+        lockScreenPaint.typeface = typefaceCache.getTypefaceForVariant(fvar)
+        typeface = lockScreenPaint.typeface
+        textAnimator.setTextStyle(fvar = fvar, animate = true)
+        measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED)
+        recomputeMaxSingleDigitSizes()
+        requestLayout()
+        invalidate()
+    }
+
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         logger.d("onMeasure()")
         if (isVertical) {
@@ -189,6 +209,7 @@ open class SimpleDigitalClockTextView(
                     MeasureSpec.getMode(measuredHeight),
                 )
         }
+
         if (MeasureSpec.getMode(widthMeasureSpec) == EXACTLY) {
             expectedWidth = widthMeasureSpec
         } else {
