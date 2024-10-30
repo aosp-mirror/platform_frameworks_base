@@ -83,3 +83,12 @@ flag {
   is_exported: true
   is_fixed_read_only: true
 }
+
+flag {
+  name: "not_keyguard_category"
+  namespace: "app_widgets"
+  description: "Adds the NOT_KEYGUARD category to AppWidgetInfo categories"
+  bug: "365169792"
+  is_exported: true
+  is_fixed_read_only: true
+}
