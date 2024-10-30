@@ -10,6 +10,14 @@ flag {
 }
 
 flag {
+     name: "mainline_vcn_module_api"
+     namespace: "vcn"
+     description: "Expose APIs from VCN for mainline migration"
+     is_exported: true
+     bug: "376339506"
+}
+
+flag {
     name: "safe_mode_timeout_config"
     namespace: "vcn"
     description: "Feature flag for adjustable safe mode timeout"
