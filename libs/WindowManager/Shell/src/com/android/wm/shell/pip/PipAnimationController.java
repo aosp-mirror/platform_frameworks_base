@@ -27,6 +27,7 @@ import android.animation.RectEvaluator;
 import android.animation.ValueAnimator;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.app.AppCompatTaskInfo;
 import android.app.TaskInfo;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
@@ -593,10 +594,13 @@ public class PipAnimationController {
             // insets to calculate the window crop
             final Rect initialSourceValue;
             final Rect mainWindowFrame = taskInfo.topActivityMainWindowFrame;
+            final AppCompatTaskInfo compatInfo = taskInfo.appCompatTaskInfo;
+            final boolean isSizeCompatOrLetterboxed = compatInfo.isTopActivityInSizeCompat()
+                    || compatInfo.isTopActivityLetterboxed();
             // For the animation to swipe PIP to home or restore a PIP task from home, we don't
             // override to the main window frame since we should animate the whole task.
             final boolean shouldUseMainWindowFrame = mainWindowFrame != null
-                    && !alwaysAnimateTaskBounds;
+                    && !alwaysAnimateTaskBounds && !isSizeCompatOrLetterboxed;
             final boolean changeOrientation =
                     rotationDelta == ROTATION_90 || rotationDelta == ROTATION_270;
             final Rect baseBounds = new Rect(baseValue);
