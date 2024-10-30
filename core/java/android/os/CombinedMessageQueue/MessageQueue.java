@@ -139,7 +139,7 @@ public final class MessageQueue {
         }
     }
 
-    private class MatchDeliverableMessages extends MessageCompare {
+    private static final class MatchDeliverableMessages extends MessageCompare {
         @Override
         public boolean compareMessage(Message m, Handler h, int what, Object object, Runnable r,
                 long when) {
@@ -954,7 +954,7 @@ public final class MessageQueue {
         }
     }
 
-    private class MatchBarrierToken extends MessageCompare {
+    private static final class MatchBarrierToken extends MessageCompare {
         int mBarrierToken;
 
         MatchBarrierToken(int token) {
@@ -1167,7 +1167,7 @@ public final class MessageQueue {
         return true;
     }
 
-    private static class MatchHandlerWhatAndObject extends MessageCompare {
+    private static final class MatchHandlerWhatAndObject extends MessageCompare {
         @Override
         public boolean compareMessage(Message m, Handler h, int what, Object object, Runnable r,
                 long when) {
@@ -1199,7 +1199,7 @@ public final class MessageQueue {
         }
     }
 
-    private static class MatchHandlerWhatAndObjectEquals extends MessageCompare {
+    private static final class MatchHandlerWhatAndObjectEquals extends MessageCompare {
         @Override
         public boolean compareMessage(Message m, Handler h, int what, Object object, Runnable r,
                 long when) {
@@ -1232,7 +1232,7 @@ public final class MessageQueue {
         }
     }
 
-    private static class MatchHandlerRunnableAndObject extends MessageCompare {
+    private static final class MatchHandlerRunnableAndObject extends MessageCompare {
         @Override
         public boolean compareMessage(Message m, Handler h, int what, Object object, Runnable r,
                 long when) {
@@ -1266,7 +1266,7 @@ public final class MessageQueue {
         }
     }
 
-    private static class MatchHandler extends MessageCompare {
+    private static final class MatchHandler extends MessageCompare {
         @Override
         public boolean compareMessage(Message m, Handler h, int what, Object object, Runnable r,
                 long when) {
@@ -1449,7 +1449,7 @@ public final class MessageQueue {
         }
     }
 
-    private static class MatchHandlerRunnableAndObjectEquals extends MessageCompare {
+    private static final class MatchHandlerRunnableAndObjectEquals extends MessageCompare {
         @Override
         public boolean compareMessage(Message m, Handler h, int what, Object object, Runnable r,
                 long when) {
@@ -1512,7 +1512,7 @@ public final class MessageQueue {
         }
     }
 
-    private static class MatchHandlerAndObject extends MessageCompare {
+    private static final class MatchHandlerAndObject extends MessageCompare {
         @Override
         public boolean compareMessage(Message m, Handler h, int what, Object object, Runnable r,
                 long when) {
@@ -1573,7 +1573,7 @@ public final class MessageQueue {
         }
     }
 
-    private static class MatchHandlerAndObjectEquals extends MessageCompare {
+    private static final class MatchHandlerAndObjectEquals extends MessageCompare {
         @Override
         public boolean compareMessage(Message m, Handler h, int what, Object object, Runnable r,
                 long when) {
@@ -1680,7 +1680,7 @@ public final class MessageQueue {
         }
     }
 
-    private static class MatchAllMessages extends MessageCompare {
+    private static final class MatchAllMessages extends MessageCompare {
         @Override
         public boolean compareMessage(Message m, Handler h, int what, Object object, Runnable r,
                 long when) {
@@ -1692,7 +1692,7 @@ public final class MessageQueue {
         findOrRemoveMessages(null, -1, null, null, 0, mMatchAllMessages, true);
     }
 
-    private static class MatchAllFutureMessages extends MessageCompare {
+    private static final class MatchAllFutureMessages extends MessageCompare {
         @Override
         public boolean compareMessage(Message m, Handler h, int what, Object object, Runnable r,
                 long when) {
