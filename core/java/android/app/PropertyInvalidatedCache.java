@@ -953,7 +953,12 @@ public class PropertyInvalidatedCache<Query, Result> {
     public static void setTestMode(boolean mode) {
         synchronized (sGlobalLock) {
             if (sTestMode == mode) {
-                throw new IllegalStateException("cannot set test mode redundantly: mode=" + mode);
+                final String msg = "cannot set test mode redundantly: mode=" + mode;
+                if (Flags.enforcePicTestmodeProtocol()) {
+                    throw new IllegalStateException(msg);
+                } else {
+                    Log.e(TAG, msg);
+                }
             }
             sTestMode = mode;
             if (mode) {
