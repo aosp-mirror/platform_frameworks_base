@@ -1667,3 +1667,12 @@ flag {
   description: "Expands the shade on long press of any status bar"
   bug: "371224114"
 }
+
+
+flag {
+    name: "keyboard_shortcut_helper_shortcut_customizer"
+    namespace: "systemui"
+    description: "An implementation of shortcut customizations through shortcut helper."
+    bug: "365064144"
+}
+
