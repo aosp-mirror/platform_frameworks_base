@@ -127,7 +127,6 @@ class DesktopTilingWindowDecoration(
                     resizeMetadata.getLeash(),
                     startBounds = currentBounds,
                     endBounds = destinationBounds,
-                    isResizable = taskInfo.isResizeable,
                 )
             }
         }
