@@ -16,10 +16,6 @@
 
 package com.android.server.servicewatcher;
 
-import static android.content.Context.BIND_AUTO_CREATE;
-import static android.content.Context.BIND_NOT_FOREGROUND;
-import static android.content.Context.BIND_NOT_VISIBLE;
-
 import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
@@ -214,7 +210,7 @@ class ServiceWatcherImpl<TBoundServiceInfo extends BoundServiceInfo> implements 
                     mBoundServiceInfo.getComponentName());
             try {
                 if (!mContext.bindServiceAsUser(bindIntent, this,
-                        BIND_AUTO_CREATE | BIND_NOT_FOREGROUND | BIND_NOT_VISIBLE,
+                        mBoundServiceInfo.getFlags(),
                         mHandler, UserHandle.of(mBoundServiceInfo.getUserId()))) {
                     Log.e(TAG, "[" + mTag + "] unexpected bind failure - retrying later");
                     mRebinder = this::bind;
