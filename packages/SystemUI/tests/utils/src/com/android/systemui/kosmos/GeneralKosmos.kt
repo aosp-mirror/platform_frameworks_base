@@ -6,6 +6,8 @@ import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runCurrent
+import kotlinx.coroutines.test.runTest
 
 var Kosmos.testDispatcher by Fixture { StandardTestDispatcher() }
 
@@ -34,3 +36,12 @@ var Kosmos.backgroundCoroutineContext: CoroutineContext by Fixture {
     testScope.backgroundScope.coroutineContext
 }
 var Kosmos.mainCoroutineContext: CoroutineContext by Fixture { testScope.coroutineContext }
+
+/**
+ * Run this test body with a [Kosmos] as receiver, and using the [testScope] currently installed in
+ * that kosmos instance
+ */
+fun Kosmos.runTest(testBody: suspend Kosmos.() -> Unit) =
+    testScope.runTest { this@runTest.testBody() }
+
+fun Kosmos.runCurrent() = testScope.runCurrent()
