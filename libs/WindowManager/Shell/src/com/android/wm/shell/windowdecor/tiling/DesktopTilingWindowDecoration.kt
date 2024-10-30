@@ -23,6 +23,7 @@ import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.Rect
 import android.os.IBinder
+import android.os.UserHandle
 import android.util.Slog
 import android.view.SurfaceControl
 import android.view.SurfaceControl.Transaction
@@ -361,6 +362,8 @@ class DesktopTilingWindowDecoration(
         private lateinit var resizeVeilBitmap: Bitmap
         private lateinit var resizeVeil: ResizeVeil
         private val displayContext = displayController.getDisplayContext(taskInfo.displayId)
+        private val userContext =
+            context.createContextAsUser(UserHandle.of(taskInfo.userId), /* flags= */ 0)
 
         fun initIfNeeded() {
             if (!isInitialised) {
@@ -379,7 +382,7 @@ class DesktopTilingWindowDecoration(
                 displayContext?.let {
                     createIconFactory(displayContext, R.dimen.desktop_mode_resize_veil_icon_size)
                 } ?: return
-            val pm = context.getApplicationContext().getPackageManager()
+            val pm = userContext.getPackageManager()
             val activityInfo = pm.getActivityInfo(baseActivity, 0 /* flags */)
             val provider = IconProvider(displayContext)
             val appIconDrawable = provider.getIcon(activityInfo)
