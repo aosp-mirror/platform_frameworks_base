@@ -117,6 +117,7 @@ static struct {
     jfieldID activeDisplayModeId;
     jfieldID renderFrameRate;
     jfieldID hasArrSupport;
+    jfieldID frameRateCategoryRate;
     jfieldID supportedColorModes;
     jfieldID activeColorMode;
     jfieldID hdrCapabilities;
@@ -291,6 +292,11 @@ static struct {
     jfieldID bufferId;
     jfieldID frameNumber;
 } gStalledTransactionInfoClassInfo;
+
+static struct {
+    jclass clazz;
+    jmethodID ctor;
+} gFrameRateCategoryRateClassInfo;
 
 constexpr ui::Dataspace pickDataspaceFromColorMode(const ui::ColorMode colorMode) {
     switch (colorMode) {
@@ -1388,6 +1394,13 @@ static jobject nativeGetStaticDisplayInfo(JNIEnv* env, jclass clazz, jlong id) {
     return object;
 }
 
+static jobject convertFrameRateCategoryRateToJavaObject(
+        JNIEnv* env, const ui::FrameRateCategoryRate& frameRateCategoryRate) {
+    return env->NewObject(gFrameRateCategoryRateClassInfo.clazz,
+                          gFrameRateCategoryRateClassInfo.ctor, frameRateCategoryRate.getNormal(),
+                          frameRateCategoryRate.getHigh());
+}
+
 static jobject convertDisplayModeToJavaObject(JNIEnv* env, const ui::DisplayMode& config) {
     jobject object = env->NewObject(gDisplayModeClassInfo.clazz, gDisplayModeClassInfo.ctor);
     env->SetIntField(object, gDisplayModeClassInfo.id, config.id);
@@ -1456,6 +1469,8 @@ static jobject nativeGetDynamicDisplayInfo(JNIEnv* env, jclass clazz, jlong disp
                      info.activeDisplayModeId);
     env->SetFloatField(object, gDynamicDisplayInfoClassInfo.renderFrameRate, info.renderFrameRate);
     env->SetBooleanField(object, gDynamicDisplayInfoClassInfo.hasArrSupport, info.hasArrSupport);
+    env->SetObjectField(object, gDynamicDisplayInfoClassInfo.frameRateCategoryRate,
+                        convertFrameRateCategoryRateToJavaObject(env, info.frameRateCategoryRate));
     jintArray colorModesArray = env->NewIntArray(info.supportedColorModes.size());
     if (colorModesArray == NULL) {
         jniThrowException(env, "java/lang/OutOfMemoryError", NULL);
@@ -2666,6 +2681,15 @@ int register_android_view_SurfaceControl(JNIEnv* env)
             GetFieldIDOrDie(env, dynamicInfoClazz, "renderFrameRate", "F");
     gDynamicDisplayInfoClassInfo.hasArrSupport =
             GetFieldIDOrDie(env, dynamicInfoClazz, "hasArrSupport", "Z");
+
+    gDynamicDisplayInfoClassInfo.frameRateCategoryRate =
+            GetFieldIDOrDie(env, dynamicInfoClazz, "frameRateCategoryRate",
+                            "Landroid/view/FrameRateCategoryRate;");
+    jclass frameRateCategoryRateClazz = FindClassOrDie(env, "android/view/FrameRateCategoryRate");
+    gFrameRateCategoryRateClassInfo.clazz = MakeGlobalRefOrDie(env, frameRateCategoryRateClazz);
+    gFrameRateCategoryRateClassInfo.ctor =
+            GetMethodIDOrDie(env, frameRateCategoryRateClazz, "<init>", "(FF)V");
+
     gDynamicDisplayInfoClassInfo.supportedColorModes =
             GetFieldIDOrDie(env, dynamicInfoClazz, "supportedColorModes", "[I");
     gDynamicDisplayInfoClassInfo.activeColorMode =

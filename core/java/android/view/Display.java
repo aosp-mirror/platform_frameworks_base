@@ -22,6 +22,7 @@ import static android.hardware.flags.Flags.FLAG_OVERLAYPROPERTIES_CLASS_API;
 
 import static com.android.server.display.feature.flags.Flags.FLAG_HIGHEST_HDR_SDR_RATIO_API;
 import static com.android.server.display.feature.flags.Flags.FLAG_ENABLE_HAS_ARR_SUPPORT;
+import static com.android.server.display.feature.flags.Flags.FLAG_ENABLE_GET_SUGGESTED_FRAME_RATE;
 
 import android.Manifest;
 import android.annotation.FlaggedApi;
@@ -1275,6 +1276,60 @@ public final class Display {
         synchronized (mLock) {
             updateDisplayInfoLocked();
             return mDisplayInfo.hasArrSupport;
+        }
+    }
+
+    @FlaggedApi(FLAG_ENABLE_GET_SUGGESTED_FRAME_RATE)
+    public static final int FRAME_RATE_CATEGORY_NORMAL = 0;
+    @FlaggedApi(FLAG_ENABLE_GET_SUGGESTED_FRAME_RATE)
+    public static final int FRAME_RATE_CATEGORY_HIGH = 1;
+
+    /**
+     * @hide
+     */
+    @IntDef(prefix = {"FRAME_RATE_CATEGORY_"},
+            value = {
+                FRAME_RATE_CATEGORY_NORMAL,
+                FRAME_RATE_CATEGORY_HIGH
+            })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface FrameRateCategory {}
+
+    /**
+     * <p> Gets the display-defined frame rate given a descriptive frame rate category. </p>
+     *
+     * <p> For example, an animation that does not require fast render rates can use
+     * the {@link #FRAME_RATE_CATEGORY_NORMAL} to get the suggested frame rate.
+     * The suggested frame rate then can be used in the
+     * {@link Surface.FrameRateParams.Builder#setDesiredRateRange} for desiredMinRate.
+     *
+     * <pre>{@code
+     *  float desiredMinRate = display.getSuggestedFrameRate(FRAME_RATE_CATEGORY_NORMAL);
+     *  Surface.FrameRateParams params = new Surface.FrameRateParams.Builder().
+     *                                      setDesiredRateRange(desiredMinRate, Float.MAX).build();
+     *  surface.setFrameRate(params);
+     * }</pre>
+     * </p>
+     *
+     * @param category either {@link #FRAME_RATE_CATEGORY_NORMAL}
+     *                 or {@link #FRAME_RATE_CATEGORY_HIGH}
+     *
+     * @see Surface#setFrameRate(Surface.FrameRateParams)
+     * @see SurfaceControl.Transaction#setFrameRate(SurfaceControl, Surface.FrameRateParams)
+     * @throws IllegalArgumentException when category is not {@link #FRAME_RATE_CATEGORY_NORMAL}
+     * or {@link #FRAME_RATE_CATEGORY_HIGH}
+     */
+    @FlaggedApi(FLAG_ENABLE_GET_SUGGESTED_FRAME_RATE)
+    public float getSuggestedFrameRate(@FrameRateCategory int category) {
+        synchronized (mLock) {
+            updateDisplayInfoLocked();
+            if (category == FRAME_RATE_CATEGORY_HIGH) {
+                return mDisplayInfo.frameRateCategoryRate.getHigh();
+            } else if (category == FRAME_RATE_CATEGORY_NORMAL) {
+                return mDisplayInfo.frameRateCategoryRate.getNormal();
+            } else {
+                throw new IllegalArgumentException("Invalid FrameRateCategory provided");
+            }
         }
     }
 
