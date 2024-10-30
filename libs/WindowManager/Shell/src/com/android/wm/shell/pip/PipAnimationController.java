@@ -176,12 +176,12 @@ public class PipAnimationController {
     public PipTransitionAnimator getAnimator(TaskInfo taskInfo, SurfaceControl leash,
             Rect baseBounds, Rect startBounds, Rect endBounds, Rect sourceHintRect,
             @PipAnimationController.TransitionDirection int direction, float startingAngle,
-            @Surface.Rotation int rotationDelta) {
+            @Surface.Rotation int rotationDelta, boolean alwaysAnimateTaskBounds) {
         if (mCurrentAnimator == null) {
             mCurrentAnimator = setupPipTransitionAnimator(
                     PipTransitionAnimator.ofBounds(taskInfo, leash, startBounds, startBounds,
                             endBounds, sourceHintRect, direction, 0 /* startingAngle */,
-                            rotationDelta));
+                            rotationDelta, alwaysAnimateTaskBounds));
         } else if (mCurrentAnimator.getAnimationType() == ANIM_TYPE_ALPHA
                 && mCurrentAnimator.isRunning()) {
             // If we are still animating the fade into pip, then just move the surface and ensure
@@ -197,7 +197,8 @@ public class PipAnimationController {
             mCurrentAnimator.cancel();
             mCurrentAnimator = setupPipTransitionAnimator(
                     PipTransitionAnimator.ofBounds(taskInfo, leash, baseBounds, startBounds,
-                            endBounds, sourceHintRect, direction, startingAngle, rotationDelta));
+                            endBounds, sourceHintRect, direction, startingAngle, rotationDelta,
+                            alwaysAnimateTaskBounds));
         }
         return mCurrentAnimator;
     }
@@ -585,28 +586,29 @@ public class PipAnimationController {
         static PipTransitionAnimator<Rect> ofBounds(TaskInfo taskInfo, SurfaceControl leash,
                 Rect baseValue, Rect startValue, Rect endValue, Rect sourceRectHint,
                 @PipAnimationController.TransitionDirection int direction, float startingAngle,
-                @Surface.Rotation int rotationDelta) {
+                @Surface.Rotation int rotationDelta, boolean alwaysAnimateTaskBounds) {
             final boolean isOutPipDirection = isOutPipDirection(direction);
             final boolean isInPipDirection = isInPipDirection(direction);
             // Just for simplicity we'll interpolate between the source rect hint insets and empty
             // insets to calculate the window crop
             final Rect initialSourceValue;
             final Rect mainWindowFrame = taskInfo.topActivityMainWindowFrame;
-            final boolean hasNonMatchFrame = mainWindowFrame != null;
+            // For the animation to swipe PIP to home or restore a PIP task from home, we don't
+            // override to the main window frame since we should animate the whole task.
+            final boolean shouldUseMainWindowFrame = mainWindowFrame != null
+                    && !alwaysAnimateTaskBounds;
             final boolean changeOrientation =
                     rotationDelta == ROTATION_90 || rotationDelta == ROTATION_270;
             final Rect baseBounds = new Rect(baseValue);
             final Rect startBounds = new Rect(startValue);
             final Rect endBounds = new Rect(endValue);
             if (isOutPipDirection) {
-                // TODO(b/356277166): handle rotation change with activity that provides main window
-                //  frame.
-                if (hasNonMatchFrame && !changeOrientation) {
+                if (shouldUseMainWindowFrame && !changeOrientation) {
                     endBounds.set(mainWindowFrame);
                 }
                 initialSourceValue = new Rect(endBounds);
             } else if (isInPipDirection) {
-                if (hasNonMatchFrame) {
+                if (shouldUseMainWindowFrame) {
                     baseBounds.set(mainWindowFrame);
                     if (startValue.equals(baseValue)) {
                         // If the start value is at initial state as in PIP animation, also override
@@ -635,9 +637,19 @@ public class PipAnimationController {
             if (changeOrientation) {
                 lastEndRect = new Rect(endBounds);
                 rotatedEndRect = new Rect(endBounds);
-                // Rotate the end bounds according to the rotation delta because the display will
-                // be rotated to the same orientation.
-                rotateBounds(rotatedEndRect, initialSourceValue, rotationDelta);
+                // TODO(b/375977163): polish the animation to restoring the PIP task back from
+                //  swipe-pip-to-home. Ideally we should send the transitionInfo after reparenting
+                //  the PIP activity back to the original task.
+                if (shouldUseMainWindowFrame) {
+                    // If we should animate the main window frame, set it to the rotatedRect
+                    // instead. The end bounds reported by transitionInfo is the bounds before
+                    // rotation, while main window frame is calculated after the rotation.
+                    rotatedEndRect.set(mainWindowFrame);
+                } else {
+                    // Rotate the end bounds according to the rotation delta because the display
+                    // will be rotated to the same orientation.
+                    rotateBounds(rotatedEndRect, initialSourceValue, rotationDelta);
+                }
                 // Use the rect that has the same orientation as the hint rect.
                 initialContainerRect = isOutPipDirection ? rotatedEndRect : initialSourceValue;
             } else {

@@ -884,7 +884,8 @@ public class PipTransition extends PipTransitionController {
         final PipAnimationController.PipTransitionAnimator animator =
                 mPipAnimationController.getAnimator(taskInfo, pipChange.getLeash(),
                         startBounds, startBounds, endBounds, null, TRANSITION_DIRECTION_LEAVE_PIP,
-                        0 /* startingAngle */, pipRotateDelta);
+                        0 /* startingAngle */, pipRotateDelta,
+                        false /* alwaysAnimateTaskBounds */);
         animator.setTransitionDirection(TRANSITION_DIRECTION_LEAVE_PIP)
                 .setPipAnimationCallback(mPipAnimationCallback)
                 .setDuration(mEnterExitAnimationDuration)
@@ -899,7 +900,7 @@ public class PipTransition extends PipTransitionController {
         final PipAnimationController.PipTransitionAnimator animator =
                 mPipAnimationController.getAnimator(taskInfo, leash, baseBounds, startBounds,
                         endBounds, sourceHintRect, TRANSITION_DIRECTION_LEAVE_PIP,
-                        0 /* startingAngle */, rotationDelta);
+                        0 /* startingAngle */, rotationDelta, false /* alwaysAnimateTaskBounds */);
         animator.setTransitionDirection(TRANSITION_DIRECTION_LEAVE_PIP)
                 .setDuration(mEnterExitAnimationDuration);
         if (startTransaction != null) {
@@ -1095,8 +1096,6 @@ public class PipTransition extends PipTransitionController {
         if (taskInfo.pictureInPictureParams != null
                 && taskInfo.pictureInPictureParams.isAutoEnterEnabled()
                 && mPipTransitionState.getInSwipePipToHomeTransition()) {
-            // TODO(b/356277166): add support to swipe PIP to home with
-            //  non-match parent activity.
             handleSwipePipToHomeTransition(startTransaction, finishTransaction, leash,
                     sourceHintRect, destinationBounds, taskInfo);
             return;
@@ -1118,7 +1117,7 @@ public class PipTransition extends PipTransitionController {
         if (enterAnimationType == ANIM_TYPE_BOUNDS) {
             animator = mPipAnimationController.getAnimator(taskInfo, leash, currentBounds,
                     currentBounds, destinationBounds, sourceHintRect, TRANSITION_DIRECTION_TO_PIP,
-                    0 /* startingAngle */, rotationDelta);
+                    0 /* startingAngle */, rotationDelta, false /* alwaysAnimateTaskBounds */);
             if (sourceHintRect == null) {
                 // We use content overlay when there is no source rect hint to enter PiP use bounds
                 // animation. We also temporarily disallow app icon overlay and use color overlay
@@ -1241,10 +1240,14 @@ public class PipTransition extends PipTransitionController {
         // to avoid flicker.
         final Rect savedDisplayCutoutInsets = new Rect(pipTaskInfo.displayCutoutInsets);
         pipTaskInfo.displayCutoutInsets.setEmpty();
+        // Always use the task bounds even if the PIP activity doesn't match parent because the app
+        // and the whole task will move behind. We should animate the whole task bounds in this
+        // case.
         final PipAnimationController.PipTransitionAnimator animator =
                 mPipAnimationController.getAnimator(pipTaskInfo, leash, sourceBounds, sourceBounds,
                         destinationBounds, sourceHintRect, TRANSITION_DIRECTION_TO_PIP,
-                        0 /* startingAngle */, ROTATION_0 /* rotationDelta */)
+                        0 /* startingAngle */, ROTATION_0 /* rotationDelta */,
+                        true /* alwaysAnimateTaskBounds */)
                         .setPipTransactionHandler(mTransactionConsumer)
                         .setTransitionDirection(TRANSITION_DIRECTION_TO_PIP);
         // The start state is the end state for swipe-auto-pip.

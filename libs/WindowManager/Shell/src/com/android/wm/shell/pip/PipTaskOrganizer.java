@@ -1838,9 +1838,11 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
                 ? mPipBoundsState.getBounds() : currentBounds;
         final boolean existingAnimatorRunning = mPipAnimationController.getCurrentAnimator() != null
                 && mPipAnimationController.getCurrentAnimator().isRunning();
+        // For resize animation, we always animate the whole PIP task bounds.
         final PipAnimationController.PipTransitionAnimator<?> animator = mPipAnimationController
                 .getAnimator(mTaskInfo, mLeash, baseBounds, currentBounds, destinationBounds,
-                        sourceHintRect, direction, startingAngle, rotationDelta);
+                        sourceHintRect, direction, startingAngle, rotationDelta,
+                        true /* alwaysAnimateTaskBounds */);
         animator.setTransitionDirection(direction)
                 .setPipTransactionHandler(mPipTransactionHandler)
                 .setDuration(durationMs);
