@@ -323,7 +323,7 @@ public class AuthContainerView extends LinearLayout
         final boolean isLandscape = mContext.getResources().getConfiguration().orientation
                 == Configuration.ORIENTATION_LANDSCAPE;
         mPromptSelectorInteractorProvider = promptSelectorInteractorProvider;
-        mPromptSelectorInteractorProvider.get().setPrompt(mConfig.mPromptInfo, mEffectiveUserId,
+        mPromptSelectorInteractorProvider.get().setPrompt(mConfig.mPromptInfo, mConfig.mUserId,
                 getRequestId(), biometricModalities, mConfig.mOperationId, mConfig.mOpPackageName,
                 false /*onSwitchToCredential*/, isLandscape);
 
