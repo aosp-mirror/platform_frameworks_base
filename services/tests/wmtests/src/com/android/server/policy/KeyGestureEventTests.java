@@ -331,6 +331,7 @@ public class KeyGestureEventTests extends ShortcutKeyTestBase {
         mPhoneWindowManager.setupAssistForLaunch();
         mPhoneWindowManager.overrideTogglePanel();
         mPhoneWindowManager.overrideInjectKeyEvent();
+        mPhoneWindowManager.overrideRoleManager();
     }
 
     @Test
