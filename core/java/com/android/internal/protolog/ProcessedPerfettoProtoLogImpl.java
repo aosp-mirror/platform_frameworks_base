@@ -132,9 +132,9 @@ public class ProcessedPerfettoProtoLogImpl extends PerfettoProtoLogImpl {
     @Deprecated
     @Override
     void dumpViewerConfig() {
-        Log.d(LOG_TAG, "Dumping viewer config to trace");
+        Log.d(LOG_TAG, "Dumping viewer config to trace from " + mViewerConfigFilePath);
         Utils.dumpViewerConfig(mDataSource, mViewerConfigInputStreamProvider);
-        Log.d(LOG_TAG, "Dumped viewer config to trace");
+        Log.d(LOG_TAG, "Successfully dumped viewer config to trace from " + mViewerConfigFilePath);
     }
 
     @NonNull
