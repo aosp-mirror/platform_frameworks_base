@@ -41,6 +41,7 @@ import android.aconfigd.Aconfigd.StorageReturnMessage;
 import android.aconfigd.Aconfigd.StorageReturnMessages;
 import static com.android.aconfig_new_storage.Flags.enableAconfigStorageDaemon;
 import static com.android.aconfig_new_storage.Flags.supportImmediateLocalOverrides;
+import static com.android.aconfig_new_storage.Flags.supportClearLocalOverridesImmediately;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -525,14 +526,21 @@ public class SettingsToPropertiesMapper {
      * @param proto
      * @param packageName the package of the flag
      * @param flagName the name of the flag
+     * @param immediate if true, clear immediately; otherwise, clear on next reboot
+     *
+     * @hide
      */
-    static void writeFlagOverrideRemovalRequest(
-        ProtoOutputStream proto, String packageName, String flagName) {
+    public static void writeFlagOverrideRemovalRequest(
+        ProtoOutputStream proto, String packageName, String flagName, boolean immediate) {
       long msgsToken = proto.start(StorageRequestMessages.MSGS);
       long msgToken = proto.start(StorageRequestMessage.REMOVE_LOCAL_OVERRIDE_MESSAGE);
       proto.write(StorageRequestMessage.RemoveLocalOverrideMessage.PACKAGE_NAME, packageName);
       proto.write(StorageRequestMessage.RemoveLocalOverrideMessage.FLAG_NAME, flagName);
       proto.write(StorageRequestMessage.RemoveLocalOverrideMessage.REMOVE_ALL, false);
+      proto.write(StorageRequestMessage.RemoveLocalOverrideMessage.REMOVE_OVERRIDE_TYPE,
+          immediate
+              ? StorageRequestMessage.REMOVE_LOCAL_IMMEDIATE
+              : StorageRequestMessage.REMOVE_LOCAL_ON_REBOOT);
       proto.end(msgToken);
       proto.end(msgsToken);
     }
@@ -609,7 +617,11 @@ public class SettingsToPropertiesMapper {
             String realFlagName = fullFlagName.substring(idx+1);
 
             if (Flags.syncLocalOverridesRemovalNewStorage() && flagValue == null) {
-              writeFlagOverrideRemovalRequest(requests, packageName, realFlagName);
+              if (supportClearLocalOverridesImmediately()) {
+                writeFlagOverrideRemovalRequest(requests, packageName, realFlagName, true);
+              } else {
+                writeFlagOverrideRemovalRequest(requests, packageName, realFlagName, false);
+              }
             } else {
               writeFlagOverrideRequest(requests, packageName, realFlagName, flagValue, true);
             }
