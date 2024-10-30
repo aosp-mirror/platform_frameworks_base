@@ -239,6 +239,13 @@ flag {
 }
 
 flag {
+  name: "use_frozen_aware_remote_callback_list"
+  namespace: "permissions"
+  description: "Whether to use the new frozen-aware RemoteCallbackList API for op noted callbacks."
+  bug: "361157077"
+}
+
+flag {
     name: "wallet_role_icon_property_enabled"
     is_exported: true
     namespace: "wallet_integration"

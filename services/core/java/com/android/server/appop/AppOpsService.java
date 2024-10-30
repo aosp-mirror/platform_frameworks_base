@@ -70,8 +70,10 @@ import static android.content.Intent.ACTION_PACKAGE_REMOVED;
 import static android.content.Intent.EXTRA_REPLACING;
 import static android.content.pm.PermissionInfo.PROTECTION_DANGEROUS;
 import static android.content.pm.PermissionInfo.PROTECTION_FLAG_APPOP;
-import static android.permission.flags.Flags.deviceAwareAppOpNewSchemaEnabled;
+import static android.os.Flags.binderFrozenStateChangeCallback;
 import static android.permission.flags.Flags.checkOpValidatePackage;
+import static android.permission.flags.Flags.deviceAwareAppOpNewSchemaEnabled;
+import static android.permission.flags.Flags.useFrozenAwareRemoteCallbackList;
 
 import static com.android.internal.util.FrameworkStatsLog.APP_OP_NOTE_OP_OR_CHECK_OP_BINDER_API_CALLED;
 import static com.android.internal.util.FrameworkStatsLog.APP_OP_NOTE_OP_OR_CHECK_OP_BINDER_API_CALLED__BINDER_API__CHECK_OPERATION;
@@ -3543,20 +3545,23 @@ public class AppOpsService extends IAppOpsService.Stub {
 
         synchronized (this) {
             RemoteCallbackList<IAppOpsAsyncNotedCallback> callbacks = mAsyncOpWatchers.get(key);
+            if (callbacks == null && binderFrozenStateChangeCallback()
+                    && useFrozenAwareRemoteCallbackList()) {
+                callbacks = new RemoteCallbackList.Builder<IAppOpsAsyncNotedCallback>(
+                        RemoteCallbackList.FROZEN_CALLEE_POLICY_DROP)
+                        .setInterfaceDiedCallback((rcl, cb, cookie) ->
+                            stopWatchingAsyncNoted(packageName, callback)
+                        ).build();
+            }
             if (callbacks == null) {
                 callbacks = new RemoteCallbackList<IAppOpsAsyncNotedCallback>() {
-                    @Override
-                    public void onCallbackDied(IAppOpsAsyncNotedCallback callback) {
-                        synchronized (AppOpsService.this) {
-                            if (getRegisteredCallbackCount() == 0) {
-                                mAsyncOpWatchers.remove(key);
-                            }
+                        @Override
+                        public void onCallbackDied(IAppOpsAsyncNotedCallback cb) {
+                            stopWatchingAsyncNoted(packageName, callback);
                         }
-                    }
-                };
-                mAsyncOpWatchers.put(key, callbacks);
+                    };
             }
-
+            mAsyncOpWatchers.put(key, callbacks);
             callbacks.register(callback);
         }
     }
