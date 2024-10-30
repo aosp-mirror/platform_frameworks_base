@@ -17,18 +17,33 @@
 package com.android.systemui.qs.ui.viewmodel
 
 import com.android.systemui.brightness.ui.viewmodel.BrightnessSliderViewModel
-import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.qs.panels.ui.viewmodel.EditModeViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.QuickQuickSettingsViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.TileGridViewModel
-import javax.inject.Inject
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 
-@SysUISingleton
 class QuickSettingsContainerViewModel
-@Inject
+@AssistedInject
 constructor(
-    val brightnessSliderViewModel: BrightnessSliderViewModel,
+    brightnessSliderViewModelFactory: BrightnessSliderViewModel.Factory,
+    @Assisted supportsBrightnessMirroring: Boolean,
     val tileGridViewModel: TileGridViewModel,
     val editModeViewModel: EditModeViewModel,
     val quickQuickSettingsViewModel: QuickQuickSettingsViewModel,
-)
+) : ExclusiveActivatable() {
+
+    val brightnessSliderViewModel =
+        brightnessSliderViewModelFactory.create(supportsBrightnessMirroring)
+
+    override suspend fun onActivated(): Nothing {
+        brightnessSliderViewModel.activate()
+    }
+
+    @AssistedFactory
+    interface Factory {
+        fun create(supportsBrightnessMirroring: Boolean): QuickSettingsContainerViewModel
+    }
+}

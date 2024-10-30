@@ -552,7 +552,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
                 && mShowVolumeDialog;
     }
 
-    boolean onVolumeChangedW(int stream, int flags) {
+    boolean onVolumeChangedW(int stream, int flags, boolean sendChanges) {
         final boolean showUI = shouldShowUI(flags);
         final boolean fromKey = (flags & AudioManager.FLAG_FROM_KEY) != 0;
         final boolean showVibrateHint = (flags & AudioManager.FLAG_SHOW_VIBRATE_HINT) != 0;
@@ -564,7 +564,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
         int lastAudibleStreamVolume = getAudioManagerStreamVolume(stream);
         changed |= updateStreamLevelW(stream, lastAudibleStreamVolume);
         changed |= checkRoutedToBluetoothW(showUI ? AudioManager.STREAM_MUSIC : stream);
-        if (changed) {
+        if (changed && sendChanges) {
             mCallbacks.onStateChanged(mState);
         }
         if (showUI) {
@@ -950,7 +950,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case VOLUME_CHANGED: onVolumeChangedW(msg.arg1, msg.arg2); break;
+                case VOLUME_CHANGED: onVolumeChangedW(msg.arg1, msg.arg2, true); break;
                 case DISMISS_REQUESTED: onDismissRequestedW(msg.arg1); break;
                 case GET_STATE: onGetStateW(); break;
                 case SET_RINGER_MODE: onSetRingerModeW(msg.arg1, msg.arg2 != 0); break;
@@ -1307,7 +1307,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
                 if (D.BUG) Log.d(TAG, "onReceive VOLUME_CHANGED_ACTION stream=" + stream
                         + " oldLevel=" + oldLevel);
                 if (stream != STREAM_UNKNOWN) {
-                    changed |= onVolumeChangedW(stream, 0);
+                    changed |= onVolumeChangedW(stream, 0, false);
                 }
             } else if (action.equals(AudioManager.STREAM_DEVICES_CHANGED_ACTION)) {
                 final int stream = intent.getIntExtra(AudioManager.EXTRA_VOLUME_STREAM_TYPE,
@@ -1320,7 +1320,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
                         + stream + " devices=" + devices + " oldDevices=" + oldDevices);
                 if (stream != STREAM_UNKNOWN) {
                     changed |= checkRoutedToBluetoothW(stream);
-                    changed |= onVolumeChangedW(stream, 0);
+                    changed |= onVolumeChangedW(stream, 0, false);
                 }
             } else if (action.equals(AudioManager.STREAM_MUTE_CHANGED_ACTION)) {
                 final int stream = intent.getIntExtra(AudioManager.EXTRA_VOLUME_STREAM_TYPE,

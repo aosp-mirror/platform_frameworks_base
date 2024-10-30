@@ -28,7 +28,7 @@ import com.android.wm.shell.windowdecor.WindowDecorViewModel
 class FreeformTaskTransitionStarterInitializer(
     shellInit: ShellInit,
     private val windowDecorViewModel: WindowDecorViewModel,
-    private val freeformTaskTransitionStarter: FreeformTaskTransitionStarter
+    private val freeformTaskTransitionStarter: FreeformTaskTransitionStarter,
 ) {
     init {
         shellInit.addInitCallback(::onShellInit, this)

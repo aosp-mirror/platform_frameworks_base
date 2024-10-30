@@ -19,10 +19,10 @@ package com.android.settingslib.metadata
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import androidx.annotation.AnyThread
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
+import androidx.fragment.app.Fragment
 
 /**
  * Interface provides preference metadata (title, summary, icon, etc.).
@@ -133,9 +133,6 @@ interface PreferenceMetadata {
 
     /** Returns preference intent. */
     fun intent(context: Context): Intent? = null
-
-    /** Returns preference order. */
-    fun order(context: Context): Int? = null
 
     /**
      * Returns the preference title.

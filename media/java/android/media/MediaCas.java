@@ -16,12 +16,16 @@
 
 package android.media;
 
+import static android.media.tv.flags.Flags.FLAG_SET_RESOURCE_HOLDER_RETAIN;
+
 import static com.android.media.flags.Flags.FLAG_UPDATE_CLIENT_PROFILE_PRIORITY;
 
 import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.content.Context;
 import android.hardware.cas.AidlCasPluginDescriptor;
@@ -511,18 +515,20 @@ public final class MediaCas implements AutoCloseable {
 
     private final TunerResourceManager.ResourcesReclaimListener mResourceListener =
             new TunerResourceManager.ResourcesReclaimListener() {
-            @Override
-            public void onReclaimResources() {
-                synchronized (mSessionMap) {
-                    List<Session> sessionList = new ArrayList<>(mSessionMap.keySet());
-                    for (Session casSession: sessionList) {
-                        casSession.close();
+                @Override
+                public void onReclaimResources() {
+                    synchronized (mSessionMap) {
+                        List<Session> sessionList = new ArrayList<>(mSessionMap.keySet());
+                        for (Session casSession : sessionList) {
+                            casSession.close();
+                        }
+                    }
+                    if (mEventHandler != null) {
+                        mEventHandler.sendMessage(
+                                mEventHandler.obtainMessage(EventHandler.MSG_CAS_RESOURCE_LOST));
                     }
                 }
-                mEventHandler.sendMessage(mEventHandler.obtainMessage(
-                        EventHandler.MSG_CAS_RESOURCE_LOST));
-            }
-        };
+            };
 
     /**
      * Describe a CAS plugin with its CA_system_ID and string name.
@@ -988,10 +994,30 @@ public final class MediaCas implements AutoCloseable {
      * @param priority the new priority. Any negative value would cause no-op on priority setting
      *     and the API would only process nice value setting in that case.
      * @param niceValue the nice value.
+     * @hide
      */
     @FlaggedApi(FLAG_UPDATE_CLIENT_PROFILE_PRIORITY)
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.TUNER_RESOURCE_ACCESS)
     public boolean updateResourcePriority(int priority, int niceValue) {
         return mTunerResourceManager.updateClientPriority(mClientId, priority, niceValue);
+    }
+
+    /**
+     * Determines whether the resource holder retains ownership of the resource during a challenge
+     * scenario, when both resource holder and resource challenger have same processId and same
+     * priority.
+     *
+     * @param resourceHolderRetain Set to {@code true} to allow the resource holder to retain
+     *     ownership, or false to allow the resource challenger to acquire the resource.
+     *     If not explicitly set, resourceHolderRetain is set to {@code false}.
+     * @hide
+     */
+    @FlaggedApi(FLAG_SET_RESOURCE_HOLDER_RETAIN)
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.TUNER_RESOURCE_ACCESS)
+    public void setResourceHolderRetain(boolean resourceHolderRetain) {
+        mTunerResourceManager.setResourceHolderRetain(mClientId, resourceHolderRetain);
     }
 
     IHwBinder getBinder() {

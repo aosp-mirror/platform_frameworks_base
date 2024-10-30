@@ -18,8 +18,7 @@ package com.android.systemui.inputdevice.tutorial.ui.composable
 
 import android.content.res.Configuration
 import androidx.annotation.RawRes
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -34,8 +33,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -75,9 +76,12 @@ fun ActionTutorialContent(
                 VerticalDescriptionAndAnimation(actionState, config, Modifier.weight(1f))
             }
         }
-        AnimatedVisibility(visible = actionState is Finished, enter = fadeIn()) {
-            DoneButton(onDoneButtonClicked = onDoneButtonClicked)
-        }
+        val buttonAlpha by animateFloatAsState(if (actionState is Finished) 1f else 0f)
+        DoneButton(
+            onDoneButtonClicked = onDoneButtonClicked,
+            modifier = Modifier.graphicsLayer { alpha = buttonAlpha },
+            enabled = actionState is Finished,
+        )
     }
 }
 

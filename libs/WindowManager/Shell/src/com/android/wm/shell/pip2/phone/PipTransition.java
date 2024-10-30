@@ -35,6 +35,7 @@ import android.app.ActivityManager;
 import android.app.PictureInPictureParams;
 import android.content.Context;
 import android.graphics.Point;
+import android.graphics.PointF;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -276,21 +277,25 @@ public class PipTransition extends PipTransitionController implements
         if (pipChange == null) {
             return false;
         }
-        SurfaceControl pipLeash = pipChange.getLeash();
+        // We expect the PiP activity as a separate change in a config-at-end transition;
+        // only flings are not using config-at-end for resize bounds changes
+        TransitionInfo.Change pipActivityChange = getDeferConfigActivityChange(info,
+                pipChange.getTaskInfo().getToken());
+        if (pipActivityChange != null) {
+            // Transform calculations use PiP params by default, so make sure they are null to
+            // default to using bounds for scaling calculations instead.
+            pipChange.getTaskInfo().pictureInPictureParams = null;
+            prepareConfigAtEndActivity(startTransaction, finishTransaction, pipChange,
+                    pipActivityChange);
+        }
 
-        // Even though the final bounds and crop are applied with finishTransaction since
-        // this is a visible change, we still need to handle the app draw coming in. Snapshot
-        // covering app draw during collection will be removed by startTransaction. So we make
-        // the crop equal to the final bounds and then let the current
-        // animator scale the leash back to starting bounds.
-        // Note: animator is responsible for applying the startTx but NOT finishTx.
+        SurfaceControl pipLeash = pipChange.getLeash();
         startTransaction.setWindowCrop(pipLeash, pipChange.getEndAbsBounds().width(),
                 pipChange.getEndAbsBounds().height());
 
-        // TODO: b/275910498 Couple this routine with a new implementation of the PiP animator.
         // Classes interested in continuing the animation would subscribe to this state update
-        // getting info such as endBounds, startTx, and finishTx as an extra Bundle once
-        // animators are in place. Once done state needs to be updated to CHANGED_PIP_BOUNDS.
+        // getting info such as endBounds, startTx, and finishTx as an extra Bundle
+        // Once done state needs to be updated to CHANGED_PIP_BOUNDS via {@link PipScheduler#}.
         Bundle extra = new Bundle();
         extra.putParcelable(PIP_START_TX, startTransaction);
         extra.putParcelable(PIP_FINISH_TX, finishTransaction);
@@ -353,10 +358,12 @@ public class PipTransition extends PipTransitionController implements
             sourceRectHint = pipChange.getTaskInfo().pictureInPictureParams.getSourceRectHint();
         }
 
+        prepareConfigAtEndActivity(startTransaction, finishTransaction, pipChange,
+                pipActivityChange);
         startTransaction.merge(finishTransaction);
         PipEnterAnimator animator = new PipEnterAnimator(mContext, pipLeash,
                 startTransaction, finishTransaction, destinationBounds, sourceRectHint, delta);
-        animator.setEnterStartState(pipChange, pipActivityChange);
+        animator.setEnterStartState(pipChange);
         animator.onEnterAnimationUpdate(1.0f /* fraction */, startTransaction);
         startTransaction.apply();
 
@@ -368,7 +375,7 @@ public class PipTransition extends PipTransitionController implements
                 tx.apply();
             });
         }
-        finishInner();
+        finishTransition();
         return true;
     }
 
@@ -393,13 +400,12 @@ public class PipTransition extends PipTransitionController implements
 
         final PictureInPictureParams params = pipChange.getTaskInfo().pictureInPictureParams;
         final float aspectRatio = mPipBoundsAlgorithm.getAspectRatioOrDefault(params);
-
         final Rect sourceRectHint = PipBoundsAlgorithm.getValidSourceHintRect(params, startBounds,
                 endBounds);
-
-        final SurfaceControl pipLeash = mPipTransitionState.mPinnedTaskLeash;
         final Rect adjustedSourceRectHint = sourceRectHint != null ? new Rect(sourceRectHint)
                 : PipUtils.getEnterPipWithOverlaySrcRectHint(startBounds, aspectRatio);
+
+        final SurfaceControl pipLeash = mPipTransitionState.mPinnedTaskLeash;
 
         // For opening type transitions, if there is a change of mode TO_FRONT/OPEN,
         // make sure that change has alpha of 1f, since it's init state might be set to alpha=0f
@@ -435,14 +441,16 @@ public class PipTransition extends PipTransitionController implements
                     mContext, startBounds, endBounds, pipChange.getTaskInfo().topActivityInfo,
                     mPipBoundsState.getLauncherState().getAppIconSizePx());
         }
-        animator.setAnimationStartCallback(() -> animator.setEnterStartState(pipChange,
-                pipActivityChange));
+
+        prepareConfigAtEndActivity(startTransaction, finishTransaction, pipChange,
+                pipActivityChange);
+        animator.setAnimationStartCallback(() -> animator.setEnterStartState(pipChange));
         animator.setAnimationEndCallback(() -> {
             if (animator.getContentOverlayLeash() != null) {
                 startOverlayFadeoutAnimation(animator.getContentOverlayLeash(),
                         animator::clearAppIconOverlay);
             }
-            finishInner();
+            finishTransition();
         });
         animator.start();
         return true;
@@ -512,8 +520,7 @@ public class PipTransition extends PipTransitionController implements
         PipAlphaAnimator animator = new PipAlphaAnimator(mContext, pipLeash, startTransaction,
                 PipAlphaAnimator.FADE_IN);
         // This should update the pip transition state accordingly after we stop playing.
-        animator.setAnimationEndCallback(this::finishInner);
-
+        animator.setAnimationEndCallback(this::finishTransition);
         animator.start();
         return true;
     }
@@ -569,12 +576,7 @@ public class PipTransition extends PipTransitionController implements
         PipExpandAnimator animator = new PipExpandAnimator(mContext, pipLeash,
                 startTransaction, finishTransaction, endBounds, startBounds, endBounds,
                 sourceRectHint, Surface.ROTATION_0);
-
-        animator.setAnimationEndCallback(() -> {
-            mPipTransitionState.setState(PipTransitionState.EXITED_PIP);
-            finishCallback.onTransitionFinished(null);
-        });
-
+        animator.setAnimationEndCallback(this::finishTransition);
         animator.start();
         return true;
     }
@@ -698,33 +700,54 @@ public class PipTransition extends PipTransitionController implements
         return isPipMovedToBack || isPipClosed || isPipDismissed;
     }
 
+    private void prepareConfigAtEndActivity(@NonNull SurfaceControl.Transaction startTx,
+            @NonNull SurfaceControl.Transaction finishTx,
+            @NonNull TransitionInfo.Change pipChange,
+            @NonNull TransitionInfo.Change pipActivityChange) {
+        PointF initActivityScale = new PointF();
+        PointF initActivityPos = new PointF();
+        PipUtils.calcEndTransform(pipActivityChange, pipChange, initActivityScale,
+                initActivityPos);
+        if (pipActivityChange.getLeash() != null) {
+            startTx.setCrop(pipActivityChange.getLeash(), null);
+            startTx.setScale(pipActivityChange.getLeash(), initActivityScale.x,
+                    initActivityScale.y);
+            startTx.setPosition(pipActivityChange.getLeash(), initActivityPos.x,
+                    initActivityPos.y);
+
+            finishTx.setCrop(pipActivityChange.getLeash(), null);
+            finishTx.setScale(pipActivityChange.getLeash(), initActivityScale.x,
+                    initActivityScale.y);
+            finishTx.setPosition(pipActivityChange.getLeash(), initActivityPos.x,
+                    initActivityPos.y);
+        }
+    }
+
     //
     // Miscellaneous callbacks and listeners
     //
 
-    private void finishInner() {
-        finishTransition(null /* tx */);
-        if (mPipTransitionState.getState() == PipTransitionState.ENTERING_PIP) {
-            // If we were entering PiP (i.e. playing the animation) with a valid srcRectHint,
-            // and then we get a signal on client finishing its draw after the transition
-            // has ended, then we have fully entered PiP.
-            mPipTransitionState.setState(PipTransitionState.ENTERED_PIP);
-        }
-    }
-
     @Override
-    public void finishTransition(@Nullable SurfaceControl.Transaction tx) {
-        WindowContainerTransaction wct = null;
-        if (tx != null && mPipTransitionState.mPipTaskToken != null) {
-            // Outside callers can only provide a transaction to be applied with the final draw.
-            // So no actual WM changes can be applied for this transition after this point.
-            wct = new WindowContainerTransaction();
-            wct.setBoundsChangeTransaction(mPipTransitionState.mPipTaskToken, tx);
-        }
+    public void finishTransition() {
         if (mFinishCallback != null) {
-            mFinishCallback.onTransitionFinished(wct);
+            mFinishCallback.onTransitionFinished(null /* finishWct */);
             mFinishCallback = null;
         }
+
+        final int currentState = mPipTransitionState.getState();
+        int nextState = PipTransitionState.UNDEFINED;
+        switch (currentState) {
+            case PipTransitionState.ENTERING_PIP:
+                nextState = PipTransitionState.ENTERED_PIP;
+                break;
+            case PipTransitionState.CHANGING_PIP_BOUNDS:
+                nextState = PipTransitionState.CHANGED_PIP_BOUNDS;
+                break;
+            case PipTransitionState.EXITING_PIP:
+                nextState = PipTransitionState.EXITED_PIP;
+                break;
+        }
+        mPipTransitionState.setState(nextState);
     }
 
     @Override

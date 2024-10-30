@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 The Android Open Source Project
+ * Copyright 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,18 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.ui.viewmodel
+package android.hardware.input;
 
-import com.android.systemui.kosmos.Kosmos
+/** @hide */
+@JavaDerive(equals=true)
+parcelable AidlInputGestureData {
+    int keycode;
+    int modifierState;
+    int gestureType;
 
-val Kosmos.quickSettingsShadeUserActionsViewModel: QuickSettingsShadeUserActionsViewModel by
-    Kosmos.Fixture {
-        QuickSettingsShadeUserActionsViewModel(
-            quickSettingsContainerViewModel = quickSettingsContainerViewModel,
-        )
-    }
+    // App launch parameters: Only set if gestureType is KEY_GESTURE_TYPE_LAUNCH_APPLICATION
+    String appLaunchCategory;
+    String appLaunchRole;
+    String appLaunchPackageName;
+    String appLaunchClassName;
+}

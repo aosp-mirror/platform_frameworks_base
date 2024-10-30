@@ -668,7 +668,8 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
                             BiometricsProtoEnums.CLIENT_UNKNOWN,
                             mAuthenticationStatsCollector),
                     mBiometricContext,
-                    mFaceSensors.get(sensorId).getAuthenticatorIds());
+                    mFaceSensors.get(sensorId).getAuthenticatorIds(),
+                    BiometricsProtoEnums.UNENROLL_REASON_USER_REQUEST);
             scheduleForSensor(sensorId, client, mBiometricStateCallback);
         });
     }

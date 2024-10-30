@@ -54,8 +54,10 @@ import com.android.systemui.keyguard.shared.model.Edge;
 import com.android.systemui.keyguard.shared.model.KeyguardState;
 import com.android.systemui.keyguard.shared.model.TransitionState;
 import com.android.systemui.keyguard.shared.model.TransitionStep;
+import com.android.systemui.qs.flags.QSComposeFragment;
 import com.android.systemui.res.R;
 import com.android.systemui.scene.shared.flag.SceneContainerFlag;
+import com.android.systemui.settings.brightness.domain.interactor.BrightnessMirrorShowingInteractor;
 import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor;
 import com.android.systemui.shade.shared.flag.ShadeWindowGoesAround;
 import com.android.systemui.shared.animation.DisableSubpixelTextTransitionListener;
@@ -191,7 +193,8 @@ public class NotificationShadeWindowViewController implements Dumpable {
             PrimaryBouncerInteractor primaryBouncerInteractor,
             AlternateBouncerInteractor alternateBouncerInteractor,
             BouncerViewBinder bouncerViewBinder,
-            @ShadeDisplayAware ConfigurationForwarder configurationForwarder) {
+            @ShadeDisplayAware ConfigurationForwarder configurationForwarder,
+            BrightnessMirrorShowingInteractor brightnessMirrorShowingInteractor) {
         mLockscreenShadeTransitionController = transitionController;
         mFalsingCollector = falsingCollector;
         mStatusBarStateController = statusBarStateController;
@@ -232,6 +235,11 @@ public class NotificationShadeWindowViewController implements Dumpable {
                 mView,
                 notificationLaunchAnimationInteractor.isLaunchAnimationRunning(),
                 this::setExpandAnimationRunning);
+        if (QSComposeFragment.isEnabled()) {
+            collectFlow(mView,
+                    brightnessMirrorShowingInteractor.isShowing(),
+                    this::setBrightnessMirrorShowingForDepth);
+        }
 
         var keyguardUnfoldTransition = unfoldComponent.map(
                 SysUIUnfoldComponent::getKeyguardUnfoldTransition);
@@ -701,6 +709,10 @@ public class NotificationShadeWindowViewController implements Dumpable {
         if (MigrateClocksToBlueprint.isEnabled()) {
             mDragDownHelper.stopDragging();
         }
+    }
+
+    private void setBrightnessMirrorShowingForDepth(boolean showing) {
+        mDepthController.setBrightnessMirrorVisible(showing);
     }
 
     @Override

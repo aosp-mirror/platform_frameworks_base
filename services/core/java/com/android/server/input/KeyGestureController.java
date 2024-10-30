@@ -28,17 +28,22 @@ import static com.android.window.flags.Flags.enableMoveToNextDisplayShortcut;
 
 import android.annotation.BinderThread;
 import android.annotation.MainThread;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
+import android.annotation.UserIdInt;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.database.ContentObserver;
+import android.hardware.input.AidlInputGestureData;
 import android.hardware.input.AidlKeyGestureEvent;
 import android.hardware.input.IKeyGestureEventListener;
 import android.hardware.input.IKeyGestureHandler;
+import android.hardware.input.InputGestureData;
 import android.hardware.input.InputManager;
+import android.hardware.input.InputSettings;
 import android.hardware.input.KeyGestureEvent;
 import android.os.Handler;
 import android.os.IBinder;
@@ -66,6 +71,7 @@ import com.android.server.policy.KeyCombinationManager;
 
 import java.util.ArrayDeque;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
@@ -108,6 +114,7 @@ final class KeyGestureController {
     private final int mSystemPid;
     private final KeyCombinationManager mKeyCombinationManager;
     private final SettingsObserver mSettingsObserver;
+    private final InputGestureManager mInputGestureManager = new InputGestureManager();
 
     // Pending actions
     private boolean mPendingMetaAction;
@@ -584,6 +591,54 @@ final class KeyGestureController {
                         return handleKeyGesture(deviceId, new int[]{keyCode},
                                 KeyEvent.META_META_ON | KeyEvent.META_ALT_ON,
                                 KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_TALKBACK,
+                                KeyGestureEvent.ACTION_GESTURE_COMPLETE, displayId,
+                                focusedToken, /* flags = */0);
+                    }
+                }
+                break;
+            case KeyEvent.KEYCODE_3:
+                if (InputSettings.isAccessibilityBounceKeysFeatureEnabled()
+                        && keyboardA11yShortcutControl()) {
+                    if (firstDown && event.isMetaPressed() && event.isAltPressed()) {
+                        return handleKeyGesture(deviceId, new int[]{keyCode},
+                                KeyEvent.META_META_ON | KeyEvent.META_ALT_ON,
+                                KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_BOUNCE_KEYS,
+                                KeyGestureEvent.ACTION_GESTURE_COMPLETE, displayId,
+                                focusedToken, /* flags = */0);
+                    }
+                }
+                break;
+            case KeyEvent.KEYCODE_4:
+                if (InputSettings.isAccessibilityMouseKeysFeatureFlagEnabled()
+                        && keyboardA11yShortcutControl()) {
+                    if (firstDown && event.isMetaPressed() && event.isAltPressed()) {
+                        return handleKeyGesture(deviceId, new int[]{keyCode},
+                                KeyEvent.META_META_ON | KeyEvent.META_ALT_ON,
+                                KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_MOUSE_KEYS,
+                                KeyGestureEvent.ACTION_GESTURE_COMPLETE, displayId,
+                                focusedToken, /* flags = */0);
+                    }
+                }
+                break;
+            case KeyEvent.KEYCODE_5:
+                if (InputSettings.isAccessibilityStickyKeysFeatureEnabled()
+                        && keyboardA11yShortcutControl()) {
+                    if (firstDown && event.isMetaPressed() && event.isAltPressed()) {
+                        return handleKeyGesture(deviceId, new int[]{keyCode},
+                                KeyEvent.META_META_ON | KeyEvent.META_ALT_ON,
+                                KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_STICKY_KEYS,
+                                KeyGestureEvent.ACTION_GESTURE_COMPLETE, displayId,
+                                focusedToken, /* flags = */0);
+                    }
+                }
+                break;
+            case KeyEvent.KEYCODE_6:
+                if (InputSettings.isAccessibilitySlowKeysFeatureFlagEnabled()
+                        && keyboardA11yShortcutControl()) {
+                    if (firstDown && event.isMetaPressed() && event.isAltPressed()) {
+                        return handleKeyGesture(deviceId, new int[]{keyCode},
+                                KeyEvent.META_META_ON | KeyEvent.META_ALT_ON,
+                                KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_SLOW_KEYS,
                                 KeyGestureEvent.ACTION_GESTURE_COMPLETE, displayId,
                                 focusedToken, /* flags = */0);
                     }
@@ -1085,6 +1140,37 @@ final class KeyGestureController {
         }
     }
 
+    @BinderThread
+    @InputManager.CustomInputGestureResult
+    public int addCustomInputGesture(@UserIdInt int userId,
+            @NonNull AidlInputGestureData inputGestureData) {
+        return mInputGestureManager.addCustomInputGesture(userId,
+                new InputGestureData(inputGestureData));
+    }
+
+    @BinderThread
+    @InputManager.CustomInputGestureResult
+    public int removeCustomInputGesture(@UserIdInt int userId,
+            @NonNull AidlInputGestureData inputGestureData) {
+        return mInputGestureManager.removeCustomInputGesture(userId,
+                new InputGestureData(inputGestureData));
+    }
+
+    @BinderThread
+    public void removeAllCustomInputGestures(@UserIdInt int userId) {
+        mInputGestureManager.removeAllCustomInputGestures(userId);
+    }
+
+    @BinderThread
+    public AidlInputGestureData[] getCustomInputGestures(@UserIdInt int userId) {
+        List<InputGestureData> customGestures = mInputGestureManager.getCustomInputGestures(userId);
+        AidlInputGestureData[] result = new AidlInputGestureData[customGestures.size()];
+        for (int i = 0; i < customGestures.size(); i++) {
+            result[i] = customGestures.get(i).getAidlData();
+        }
+        return result;
+    }
+
     private void onKeyGestureEventListenerDied(int pid) {
         synchronized (mKeyGestureEventListenerRecords) {
             mKeyGestureEventListenerRecords.remove(pid);
@@ -1286,5 +1372,6 @@ final class KeyGestureController {
         }
         ipw.decreaseIndent();
         mKeyCombinationManager.dump("", ipw);
+        mInputGestureManager.dump(ipw);
     }
 }

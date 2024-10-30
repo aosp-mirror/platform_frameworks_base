@@ -45,6 +45,7 @@ import android.view.DisplayAddress;
 import android.view.DisplayCutout;
 import android.view.DisplayEventReceiver;
 import android.view.DisplayShape;
+import android.view.FrameRateCategoryRate;
 import android.view.RoundedCorners;
 import android.view.SurfaceControl;
 
@@ -247,6 +248,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         private boolean mDisplayModeSpecsInvalid;
         private int mActiveColorMode;
         private boolean mHasArrSupport;
+        private FrameRateCategoryRate mFrameRateCategoryRate;
         private Display.HdrCapabilities mHdrCapabilities;
         private boolean mAllmSupported;
         private boolean mGameContentTypeSupported;
@@ -313,6 +315,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             changed |= updateAllmSupport(dynamicInfo.autoLowLatencyModeSupported);
             changed |= updateGameContentTypeSupport(dynamicInfo.gameContentTypeSupported);
             changed |= updateHasArrSupportLocked(dynamicInfo.hasArrSupport);
+            changed |= updateFrameRateCategoryRatesLocked(dynamicInfo.frameRateCategoryRate);
 
             if (changed) {
                 mHavePendingChanges = true;
@@ -604,6 +607,15 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             return true;
         }
 
+        private boolean updateFrameRateCategoryRatesLocked(
+                FrameRateCategoryRate newFrameRateCategoryRate) {
+            if (Objects.equals(mFrameRateCategoryRate, newFrameRateCategoryRate)) {
+                return false;
+            }
+            mFrameRateCategoryRate = newFrameRateCategoryRate;
+            return true;
+        }
+
         private boolean updateHasArrSupportLocked(boolean newHasArrSupport) {
             if (mHasArrSupport == newHasArrSupport) {
                 return false;
@@ -695,6 +707,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 }
                 mInfo.hdrCapabilities = mHdrCapabilities;
                 mInfo.hasArrSupport = mHasArrSupport;
+                mInfo.frameRateCategoryRate = mFrameRateCategoryRate;
                 mInfo.appVsyncOffsetNanos = mActiveSfDisplayMode.appVsyncOffsetNanos;
                 mInfo.presentationDeadlineNanos = mActiveSfDisplayMode.presentationDeadlineNanos;
                 mInfo.state = mState;

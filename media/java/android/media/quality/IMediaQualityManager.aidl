@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.ui.viewmodel
+package android.media.quality;
 
-import com.android.systemui.kosmos.Kosmos
-
-val Kosmos.quickSettingsShadeSceneContentViewModel: QuickSettingsShadeSceneContentViewModel by
-    Kosmos.Fixture {
-        QuickSettingsShadeSceneContentViewModel(
-            quickSettingsContainerViewModel = quickSettingsContainerViewModel,
-        )
-    }
+/**
+ * Interface for Media Quality Manager
+ * @hide
+ */
+interface IMediaQualityManager {
+}

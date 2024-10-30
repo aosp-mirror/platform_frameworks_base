@@ -39,6 +39,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
@@ -73,6 +74,7 @@ class DesktopTilingDecorViewModelTest : ShellTestCase() {
                 returnToDragStartAnimatorMock,
                 desktopRepository,
             )
+        whenever(contextMock.createContextAsUser(any(), any())).thenReturn(contextMock)
     }
 
     @Test

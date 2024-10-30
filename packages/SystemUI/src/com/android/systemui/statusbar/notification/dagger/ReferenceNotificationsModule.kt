@@ -14,25 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.ui.viewmodel
+package com.android.systemui.statusbar.notification.dagger
 
-import dagger.assisted.AssistedFactory
-import dagger.assisted.AssistedInject
+import com.android.systemui.statusbar.notification.row.NotificationRowModule
+import dagger.Module
 
 /**
- * Models UI state used to render the content of the quick settings shade scene.
- *
- * Different from [QuickSettingsShadeUserActionsViewModel], which only models user actions that can
- * be performed to navigate to other scenes.
+ * A module that includes the standard notifications classes that most SysUI variants need. Variants
+ * are free to not include this module and instead write a custom notifications module.
  */
-class QuickSettingsShadeSceneContentViewModel
-@AssistedInject
-constructor(
-    val quickSettingsContainerViewModel: QuickSettingsContainerViewModel,
-) {
-
-    @AssistedFactory
-    interface Factory {
-        fun create(): QuickSettingsShadeSceneContentViewModel
-    }
-}
+@Module(includes = [NotificationsModule::class, NotificationRowModule::class])
+object ReferenceNotificationsModule

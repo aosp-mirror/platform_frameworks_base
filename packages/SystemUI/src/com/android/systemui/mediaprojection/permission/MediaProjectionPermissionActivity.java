@@ -53,6 +53,7 @@ import android.text.BidiFormatter;
 import android.text.TextPaint;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Display;
 import android.view.Window;
 
 import com.android.systemui.flags.FeatureFlags;
@@ -158,8 +159,11 @@ public class MediaProjectionPermissionActivity extends Activity {
                             mUid, SessionCreationSource.APP);
                 }
                 final IMediaProjection projection =
-                        MediaProjectionServiceHelper.createOrReuseProjection(mUid, mPackageName,
-                                mReviewGrantedConsentRequired);
+                        MediaProjectionServiceHelper.createOrReuseProjection(
+                                mUid,
+                                mPackageName,
+                                mReviewGrantedConsentRequired,
+                                Display.DEFAULT_DISPLAY);
 
                 LaunchCookie launchCookie = launchingIntent.getParcelableExtra(
                         MediaProjectionManager.EXTRA_LAUNCH_COOKIE, LaunchCookie.class);
@@ -279,7 +283,9 @@ public class MediaProjectionPermissionActivity extends Activity {
                 dialog -> {
                     ScreenShareOption selectedOption = dialog.getSelectedScreenShareOption();
                     grantMediaProjectionPermission(
-                            selectedOption.getMode(), hasCastingCapabilities);
+                            selectedOption.getMode(),
+                            hasCastingCapabilities,
+                            selectedOption.getDisplayId());
                 };
         Runnable onCancelClicked = () -> finish(RECORD_CANCEL, /* projection= */ null);
         if (hasCastingCapabilities) {
@@ -368,10 +374,11 @@ public class MediaProjectionPermissionActivity extends Activity {
     }
 
     private void grantMediaProjectionPermission(
-            int screenShareMode, boolean hasCastingCapabilities) {
+            int screenShareMode, boolean hasCastingCapabilities, int displayId) {
         try {
-            IMediaProjection projection = MediaProjectionServiceHelper.createOrReuseProjection(
-                    mUid, mPackageName, mReviewGrantedConsentRequired);
+            IMediaProjection projection =
+                    MediaProjectionServiceHelper.createOrReuseProjection(
+                            mUid, mPackageName, mReviewGrantedConsentRequired, displayId);
             if (screenShareMode == ENTIRE_SCREEN) {
                 final Intent intent = new Intent();
                 setCommonIntentExtras(intent, hasCastingCapabilities, projection);

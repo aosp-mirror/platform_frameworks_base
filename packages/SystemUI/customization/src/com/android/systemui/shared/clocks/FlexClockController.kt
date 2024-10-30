@@ -23,8 +23,8 @@ import com.android.systemui.plugins.clocks.AlarmData
 import com.android.systemui.plugins.clocks.ClockConfig
 import com.android.systemui.plugins.clocks.ClockController
 import com.android.systemui.plugins.clocks.ClockEvents
+import com.android.systemui.plugins.clocks.ClockFontAxisSetting
 import com.android.systemui.plugins.clocks.ClockMessageBuffers
-import com.android.systemui.plugins.clocks.ClockReactiveSetting
 import com.android.systemui.plugins.clocks.ThemeConfig
 import com.android.systemui.plugins.clocks.WeatherData
 import com.android.systemui.plugins.clocks.ZenData
@@ -113,9 +113,9 @@ class FlexClockController(
                 largeClock.events.onZenDataChanged(data)
             }
 
-            override fun onReactiveAxesChanged(axes: List<ClockReactiveSetting>) {
-                smallClock.events.onReactiveAxesChanged(axes)
-                largeClock.events.onReactiveAxesChanged(axes)
+            override fun onFontAxesChanged(axes: List<ClockFontAxisSetting>) {
+                smallClock.events.onFontAxesChanged(axes)
+                largeClock.events.onFontAxesChanged(axes)
             }
         }
 

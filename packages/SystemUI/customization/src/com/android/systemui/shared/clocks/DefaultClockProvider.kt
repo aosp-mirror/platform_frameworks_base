@@ -21,12 +21,12 @@ import com.android.systemui.log.core.LogLevel
 import com.android.systemui.log.core.LogcatOnlyMessageBuffer
 import com.android.systemui.plugins.clocks.AxisType
 import com.android.systemui.plugins.clocks.ClockController
+import com.android.systemui.plugins.clocks.ClockFontAxis
 import com.android.systemui.plugins.clocks.ClockId
 import com.android.systemui.plugins.clocks.ClockMessageBuffers
 import com.android.systemui.plugins.clocks.ClockMetadata
 import com.android.systemui.plugins.clocks.ClockPickerConfig
 import com.android.systemui.plugins.clocks.ClockProvider
-import com.android.systemui.plugins.clocks.ClockReactiveAxis
 import com.android.systemui.plugins.clocks.ClockSettings
 import com.android.systemui.shared.clocks.view.HorizontalAlignment
 import com.android.systemui.shared.clocks.view.VerticalAlignment
@@ -91,15 +91,42 @@ class DefaultClockProvider(
             axes =
                 if (isClockReactiveVariantsEnabled)
                     listOf(
-                        ClockReactiveAxis(
-                            key = "wdth",
-                            type = AxisType.Slider,
-                            maxValue = 1000f,
-                            minValue = 100f,
+                        ClockFontAxis(
+                            key = "wght",
+                            type = AxisType.Float,
+                            minValue = 1f,
                             currentValue = 400f,
+                            maxValue = 1000f,
+                            name = "Weight",
+                            description = "Glyph Weight",
+                        ),
+                        ClockFontAxis(
+                            key = "wdth",
+                            type = AxisType.Float,
+                            minValue = 25f,
+                            currentValue = 100f,
+                            maxValue = 151f,
                             name = "Width",
                             description = "Glyph Width",
-                        )
+                        ),
+                        ClockFontAxis(
+                            key = "ROND",
+                            type = AxisType.Boolean,
+                            minValue = 0f,
+                            currentValue = 0f,
+                            maxValue = 100f,
+                            name = "Round",
+                            description = "Glyph Roundness",
+                        ),
+                        ClockFontAxis(
+                            key = "slnt",
+                            type = AxisType.Boolean,
+                            minValue = 0f,
+                            currentValue = 0f,
+                            maxValue = -10f,
+                            name = "Slant",
+                            description = "Glyph Slant",
+                        ),
                     )
                 else listOf(),
         )
@@ -121,12 +148,12 @@ class DefaultClockProvider(
                                         FontTextStyle(
                                             lineHeight = 147.25f,
                                             fontVariation =
-                                                "'wght' 603, 'wdth' 100, 'opsz' 144, 'ROND' 100",
+                                                "'wght' 603, 'wdth' 100, 'opsz' 144, 'ROND' 100, 'slnt' 0",
                                         ),
                                     aodStyle =
                                         FontTextStyle(
                                             fontVariation =
-                                                "'wght' 74, 'wdth' 43, 'opsz' 144, 'ROND' 100",
+                                                "'wght' 74, 'wdth' 43, 'opsz' 144, 'ROND' 100, 'slnt' 0",
                                             fillColorLight = "#FFFFFFFF",
                                             outlineColor = "#00000000",
                                             renderType = RenderType.CHANGE_WEIGHT,
@@ -147,12 +174,12 @@ class DefaultClockProvider(
                                         FontTextStyle(
                                             lineHeight = 147.25f,
                                             fontVariation =
-                                                "'wght' 603, 'wdth' 100, 'opsz' 144, 'ROND' 100",
+                                                "'wght' 603, 'wdth' 100, 'opsz' 144, 'ROND' 100, 'slnt' 0",
                                         ),
                                     aodStyle =
                                         FontTextStyle(
                                             fontVariation =
-                                                "'wght' 74, 'wdth' 43, 'opsz' 144, 'ROND' 100",
+                                                "'wght' 74, 'wdth' 43, 'opsz' 144, 'ROND' 100, 'slnt' 0",
                                             fillColorLight = "#FFFFFFFF",
                                             outlineColor = "#00000000",
                                             renderType = RenderType.CHANGE_WEIGHT,
@@ -173,12 +200,12 @@ class DefaultClockProvider(
                                         FontTextStyle(
                                             lineHeight = 147.25f,
                                             fontVariation =
-                                                "'wght' 603, 'wdth' 100, 'opsz' 144, 'ROND' 100",
+                                                "'wght' 603, 'wdth' 100, 'opsz' 144, 'ROND' 100, 'slnt' 0",
                                         ),
                                     aodStyle =
                                         FontTextStyle(
                                             fontVariation =
-                                                "'wght' 74, 'wdth' 43, 'opsz' 144, 'ROND' 100",
+                                                "'wght' 74, 'wdth' 43, 'opsz' 144, 'ROND' 100, 'slnt' 0",
                                             fillColorLight = "#FFFFFFFF",
                                             outlineColor = "#00000000",
                                             renderType = RenderType.CHANGE_WEIGHT,
@@ -199,12 +226,12 @@ class DefaultClockProvider(
                                         FontTextStyle(
                                             lineHeight = 147.25f,
                                             fontVariation =
-                                                "'wght' 603, 'wdth' 100, 'opsz' 144, 'ROND' 100",
+                                                "'wght' 603, 'wdth' 100, 'opsz' 144, 'ROND' 100, 'slnt' 0",
                                         ),
                                     aodStyle =
                                         FontTextStyle(
                                             fontVariation =
-                                                "'wght' 74, 'wdth' 43, 'opsz' 144, 'ROND' 100",
+                                                "'wght' 74, 'wdth' 43, 'opsz' 144, 'ROND' 100, 'slnt' 0",
                                             fillColorLight = "#FFFFFFFF",
                                             outlineColor = "#00000000",
                                             renderType = RenderType.CHANGE_WEIGHT,
@@ -229,12 +256,14 @@ class DefaultClockProvider(
                         timespec = DigitalTimespec.TIME_FULL_FORMAT,
                         style =
                             FontTextStyle(
-                                fontVariation = "'wght' 600, 'wdth' 100, 'opsz' 144, 'ROND' 100",
+                                fontVariation =
+                                    "'wght' 600, 'wdth' 100, 'opsz' 144, 'ROND' 100, 'slnt' 0",
                                 fontSizeScale = 0.98f,
                             ),
                         aodStyle =
                             FontTextStyle(
-                                fontVariation = "'wght' 133, 'wdth' 43, 'opsz' 144, 'ROND' 100",
+                                fontVariation =
+                                    "'wght' 133, 'wdth' 43, 'opsz' 144, 'ROND' 100, 'slnt' 0",
                                 fillColorLight = "#FFFFFFFF",
                                 outlineColor = "#00000000",
                                 renderType = RenderType.CHANGE_WEIGHT,

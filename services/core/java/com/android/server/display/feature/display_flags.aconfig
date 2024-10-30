@@ -430,3 +430,11 @@ flag {
     bug: "350617205"
     is_fixed_read_only: true
 }
+
+flag {
+    name: "enable_get_suggested_frame_rate"
+    namespace: "core_graphics"
+    description: "Flag for an API to get suggested frame rates"
+    bug: "361433796"
+    is_fixed_read_only: true
+}

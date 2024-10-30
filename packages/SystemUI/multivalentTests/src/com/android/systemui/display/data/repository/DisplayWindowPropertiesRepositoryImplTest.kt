@@ -19,6 +19,7 @@ package com.android.systemui.display.data.repository
 import android.content.testableContext
 import android.platform.test.annotations.EnableFlags
 import android.view.Display
+import android.view.layoutInflater
 import android.view.mockWindowManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -49,14 +50,18 @@ class DisplayWindowPropertiesRepositoryImplTest : SysuiTestCase() {
 
     private val applicationContext = kosmos.testableContext
     private val applicationWindowManager = kosmos.mockWindowManager
+    private val applicationLayoutInflater = kosmos.layoutInflater
 
-    private val repo =
+    // Lazy so that @EnableFlags has time to run before this repo is instantiated
+    private val repo by lazy {
         DisplayWindowPropertiesRepositoryImpl(
             kosmos.applicationCoroutineScope,
             applicationContext,
             applicationWindowManager,
+            kosmos.layoutInflater,
             fakeDisplayRepository,
         )
+    }
 
     @Before
     fun start() {
@@ -81,6 +86,7 @@ class DisplayWindowPropertiesRepositoryImplTest : SysuiTestCase() {
                         windowType = WINDOW_TYPE_FOO,
                         context = applicationContext,
                         windowManager = applicationWindowManager,
+                        layoutInflater = applicationLayoutInflater,
                     )
                 )
         }
@@ -99,6 +105,14 @@ class DisplayWindowPropertiesRepositoryImplTest : SysuiTestCase() {
             val displayContext = repo.get(NON_DEFAULT_DISPLAY_ID, WINDOW_TYPE_FOO)
 
             assertThat(displayContext.windowManager).isNotSameInstanceAs(applicationWindowManager)
+        }
+
+    @Test
+    fun get_nonDefaultDisplayId_returnsNewLayoutInflater() =
+        testScope.runTest {
+            val displayContext = repo.get(NON_DEFAULT_DISPLAY_ID, WINDOW_TYPE_FOO)
+
+            assertThat(displayContext.layoutInflater).isNotSameInstanceAs(applicationLayoutInflater)
         }
 
     @Test
