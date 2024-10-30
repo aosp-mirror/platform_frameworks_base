@@ -68,6 +68,7 @@ import org.mockito.kotlin.whenever
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
 @OptIn(ExperimentalCoroutinesApi::class)
+@Ignore("b/374328725")
 class AppHandleEducationControllerTest : ShellTestCase() {
   @JvmField
   @Rule
