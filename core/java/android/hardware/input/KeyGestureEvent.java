@@ -109,6 +109,10 @@ public final class KeyGestureEvent {
     public static final int KEY_GESTURE_TYPE_CLOSE_ALL_DIALOGS = 61;
     public static final int KEY_GESTURE_TYPE_MOVE_TO_NEXT_DISPLAY = 62;
     public static final int KEY_GESTURE_TYPE_TOGGLE_TALKBACK = 63;
+    public static final int KEY_GESTURE_TYPE_TOGGLE_STICKY_KEYS = 64;
+    public static final int KEY_GESTURE_TYPE_TOGGLE_BOUNCE_KEYS = 65;
+    public static final int KEY_GESTURE_TYPE_TOGGLE_SLOW_KEYS = 66;
+    public static final int KEY_GESTURE_TYPE_TOGGLE_MOUSE_KEYS = 67;
 
     public static final int FLAG_CANCELLED = 1;
 
@@ -187,6 +191,10 @@ public final class KeyGestureEvent {
             KEY_GESTURE_TYPE_CLOSE_ALL_DIALOGS,
             KEY_GESTURE_TYPE_MOVE_TO_NEXT_DISPLAY,
             KEY_GESTURE_TYPE_TOGGLE_TALKBACK,
+            KEY_GESTURE_TYPE_TOGGLE_STICKY_KEYS,
+            KEY_GESTURE_TYPE_TOGGLE_BOUNCE_KEYS,
+            KEY_GESTURE_TYPE_TOGGLE_SLOW_KEYS,
+            KEY_GESTURE_TYPE_TOGGLE_MOUSE_KEYS
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface KeyGestureType {
@@ -733,6 +741,14 @@ public final class KeyGestureEvent {
                 return "KEY_GESTURE_TYPE_CLOSE_ALL_DIALOGS";
             case KEY_GESTURE_TYPE_TOGGLE_TALKBACK:
                 return "KEY_GESTURE_TYPE_TOGGLE_TALKBACK";
+            case KEY_GESTURE_TYPE_TOGGLE_STICKY_KEYS:
+                return "KEY_GESTURE_TYPE_TOGGLE_STICKY_KEYS";
+            case KEY_GESTURE_TYPE_TOGGLE_BOUNCE_KEYS:
+                return "KEY_GESTURE_TYPE_TOGGLE_BOUNCE_KEYS";
+            case KEY_GESTURE_TYPE_TOGGLE_SLOW_KEYS:
+                return "KEY_GESTURE_TYPE_TOGGLE_SLOW_KEYS";
+            case KEY_GESTURE_TYPE_TOGGLE_MOUSE_KEYS:
+                return "KEY_GESTURE_TYPE_TOGGLE_MOUSE_KEYS";
             default:
                 return Integer.toHexString(value);
         }

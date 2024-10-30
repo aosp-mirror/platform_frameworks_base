@@ -405,7 +405,7 @@
     <string name="permdesc_getTasks" msgid="7388138607018233726">"به برنامه امکان می‌دهد اطلاعات مربوط به کارهای در حال اجرای اخیر و کنونی را بازیابی کند. این ممکن است به برنامه امکان دهد به اطلاعات مربوط به برنامه‌هایی که در دستگاه استفاده می‌شوند دست یابد."</string>
     <string name="permlab_manageProfileAndDeviceOwners" msgid="639849495253987493">"مدیریت نمایه و مالکان دستگاه"</string>
     <string name="permdesc_manageProfileAndDeviceOwners" msgid="7304240671781989283">"به برنامه‌ها امکان می‌دهد، مالکان نمایه و مالک دستگاه را تنظیم کنند."</string>
-    <string name="permlab_reorderTasks" msgid="7598562301992923804">"تنظیم مجدد ترتیب برنامه‌های در حال اجرا"</string>
+    <string name="permlab_reorderTasks" msgid="7598562301992923804">"تغییر ترتیب برنامه‌های درحال اجرا"</string>
     <string name="permdesc_reorderTasks" msgid="8796089937352344183">"‏به برنامه اجازه می‎دهد تا کارها را به پیش‌زمینه و پس‌زمینه منتقل کند. برنامه‎ ممکن است بدون دخالت شما این کار را انجام دهد."</string>
     <string name="permlab_enableCarMode" msgid="893019409519325311">"فعال کردن حالت خودرو"</string>
     <string name="permdesc_enableCarMode" msgid="56419168820473508">"‏به برنامه اجازه می‎دهد تا حالت خودرو را فعال کند."</string>
@@ -463,7 +463,7 @@
     <string name="permdesc_writeSettings" msgid="8293047411196067188">"‏به برنامه اجازه می‎دهد تا داده‎های تنظیم سیستم را تغییر دهد. برنامه‌های مخرب می‎توانند پیکربندی سیستم شما را خراب کنند."</string>
     <string name="permlab_receiveBootCompleted" msgid="6643339400247325379">"اجرا شدن در هنگام راه‌اندازی"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="5565659082718177484">"به برنامه اجازه می‌دهد که به محض پایان راه‌اندازی سیستم، راه‌اندازی شود. این ویژگی ممکن است باعث شود راه‌اندازی دستگاه مدت زمان بیشتری طول بکشد و به برنامه اجازه می‌دهد با همیشه درحال اجرا بودنش باعث کاهش سرعت کلی دستگاه شود."</string>
-    <string name="permdesc_receiveBootCompleted" product="tv" msgid="4900842256047614307">"‏به برنامه اجازه می‌دهد به‌محض اتمام راه‌اندازی سیستم، خود را راه‌اندازی کند. ممکن است این مجوز باعث شود دستگاه Android TV آهسته‌تر راه‌اندازی شود و به برنامه اجازه می‌دهد با همیشه درحال اجرا بودن، سرعت کلی دستگاه را کاهش دهد."</string>
+    <string name="permdesc_receiveBootCompleted" product="tv" msgid="4900842256047614307">"‏به برنامه اجازه می‌دهد به‌محض تمام کردن راه‌اندازی سیستم، خود را راه‌اندازی کند. ممکن است این مجوز باعث شود دستگاه Android TV آهسته‌تر راه‌اندازی شود و به برنامه اجازه می‌دهد با همیشه درحال اجرا بودن، سرعت کلی دستگاه را کاهش دهد."</string>
     <string name="permdesc_receiveBootCompleted" product="default" msgid="7912677044558690092">"به برنامه اجازه می‌دهد که به محض پایان راه‌اندازی سیستم، راه‌اندازی شود. این ویژگی ممکن است باعث شود راه‌اندازی دستگاه مدت زمان بیشتری طول بکشد و به برنامه اجازه می‌دهد با همیشه درحال اجرا بودنش باعث کاهش سرعت کلی دستگاه شود."</string>
     <string name="permlab_broadcastSticky" msgid="4552241916400572230">"ارسال پخش چسبنده"</string>
     <string name="permdesc_broadcastSticky" product="tablet" msgid="5058486069846384013">"‏به برنامه اجازه می‎دهد تا پخش‌های ماندگار را که پس از اتمام پخش باقی می‎مانند ارسال کند. استفاده بیش از حد این ویژگی ممکن است باعث مصرف بیش از حد حافظه و در نتیجه کندی یا ناپایداری رایانهٔ لوحی شود."</string>
@@ -1290,9 +1290,9 @@
     <string name="app_upgrading_toast" msgid="1016267296049455585">"<xliff:g id="APPLICATION">%1$s</xliff:g> درحال ارتقا است...."</string>
     <string name="android_preparing_apk" msgid="589736917792300956">"آماده‌سازی <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"درحال آغاز کردن برنامه‌ها."</string>
-    <string name="android_upgrading_complete" msgid="409800058018374746">"درحال اتمام راه‌اندازی."</string>
+    <string name="android_upgrading_complete" msgid="409800058018374746">"درحال تمام کردن راه‌اندازی."</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"دکمه روشن/خاموش را فشار دادید — این کار معمولاً صفحه‌نمایش را خاموش می‌کند.\n\nهنگام راه‌اندازی اثر انگشت، آرام تک‌ضرب بزنید."</string>
-    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"برای اتمام راه‌اندازی، صفحه را خاموش کنید"</string>
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"برای تمام کردن راه‌اندازی، صفحه را خاموش کنید"</string>
     <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"خاموش کردن"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"تأیید اثر انگشت را ادامه می‌دهید؟"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"دکمه روشن/خاموش را فشار دادید — این کار معمولاً صفحه‌نمایش را خاموش می‌کند.\n\nبرای تأیید اثر انگشتتان، آرام تک‌ضرب بزنید."</string>
@@ -1448,7 +1448,7 @@
     <string name="ext_media_checking_notification_message" product="tv" msgid="7986154434946021415">"درحال تجزیه‌وتحلیل فضای ذخیره‌سازی رسانه"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"<xliff:g id="NAME">%s</xliff:g> جدید"</string>
     <string name="ext_media_new_notification_title" product="automotive" msgid="9085349544984742727">"<xliff:g id="NAME">%s</xliff:g> کار نمی‌کند"</string>
-    <string name="ext_media_new_notification_message" msgid="6095403121990786986">"برای راه‌اندازی تک‌ضرب بزنید"</string>
+    <string name="ext_media_new_notification_message" msgid="6095403121990786986">"برای راه‌اندازی، تک‌ضرب بزنید"</string>
     <string name="ext_media_new_notification_message" product="tv" msgid="216863352100263668">"برای راه‌اندازی، انتخاب کنید"</string>
     <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"شاید لازم باشد دستگاه را دوباره قالب‌بندی کنید. برای خارج کردن، تک‌ضرب بزنید."</string>
     <string name="ext_media_ready_notification_message" msgid="7509496364380197369">"برای ذخیره کردن عکس، ویدیو، موسیقی و غیره"</string>
@@ -1460,7 +1460,7 @@
     <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"شاید لازم باشد دستگاه را دوباره قالب‌بندی کنید. برای خارج کردن، تک‌ضرب بزنید."</string>
     <string name="ext_media_unsupported_notification_title" msgid="3487534182861251401">"<xliff:g id="NAME">%s</xliff:g> تشخیص داده شد"</string>
     <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> کار نمی‌کند"</string>
-    <string name="ext_media_unsupported_notification_message" msgid="8463636521459807981">"برای راه‌اندازی تک‌ضرب بزنید."</string>
+    <string name="ext_media_unsupported_notification_message" msgid="8463636521459807981">"برای راه‌اندازی، تک‌ضرب بزنید."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="1595482802187036532">"برای راه‌اندازی <xliff:g id="NAME">%s</xliff:g> در قالب پشتیبانی‌شده، انتخاب کنید."</string>
     <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"شاید لازم باشد دستگاه را دوباره قالب‌بندی کنید"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g> به‌طور غیرمنتظره جدا شد"</string>
@@ -1943,6 +1943,8 @@
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"خاموش"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">"، "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> - <xliff:g id="END">%2$s</xliff:g>"</string>
+    <!-- no translation found for zen_mode_trigger_summary_range_words (7228261413029290750) -->
+    <skip />
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"هر تقویمی"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> درحال قطع کردن بعضی از صداهاست"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"دستگاهتان یک مشکل داخلی دارد، و ممکن است تا زمانی که بازنشانی داده‌های کارخانه انجام نگیرد، بی‌ثبات بماند."</string>
@@ -2424,6 +2426,14 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"‏ارسال و دریافت پیام بدون شبکه تلفن همراه یا Wi-Fi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"باز کردن «پیام‌نگار»"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"روش کار"</string>
+    <!-- no translation found for satellite_manual_selection_state_popup_title (8545991934926661974) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_message (1928101658551382450) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_ok (2459664752624985095) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_cancel (973605633339469252) -->
+    <skip />
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"درحال تعلیق…"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"راه‌اندازی مجدد «قفل‌گشایی با اثر انگشت»"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"‫<xliff:g id="FINGERPRINT">%s</xliff:g> دیگر قابل‌شناسایی نیست."</string>

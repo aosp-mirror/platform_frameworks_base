@@ -1404,6 +1404,49 @@ public abstract class VibrationEffect implements Parcelable {
     }
 
     /**
+     * Creates a new {@link VibrationEffect} that repeats the given effect indefinitely.
+     *
+     * <p>The input vibration must not be a repeating vibration. If it is, an
+     * {@link IllegalArgumentException} will be thrown.
+     *
+     * @param effect The {@link VibrationEffect} that will be repeated.
+     * @return A {@link VibrationEffect} that repeats the effect indefinitely.
+     * @throws IllegalArgumentException if the effect is already a repeating vibration.
+     */
+    @FlaggedApi(Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
+    @NonNull
+    public static VibrationEffect createRepeatingEffect(@NonNull VibrationEffect effect) {
+        return VibrationEffect.startComposition()
+                .repeatEffectIndefinitely(effect)
+                .compose();
+    }
+
+    /**
+     * Creates a new {@link VibrationEffect} by merging the preamble and repeating vibration effect.
+     *
+     * <p>Neither input vibration may already be repeating. An {@link IllegalArgumentException} will
+     * be thrown if either input vibration is set to repeat indefinitely.
+     *
+     * @param preamble        The starting vibration effect, which must be finite.
+     * @param repeatingEffect The vibration effect to be repeated indefinitely after the preamble.
+     * @return A {@link VibrationEffect} that plays the preamble once followed by the
+     * `repeatingEffect` indefinitely.
+     * @throws IllegalArgumentException if either preamble or repeatingEffect is already a repeating
+     *                                  vibration.
+     */
+    @FlaggedApi(Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
+    @NonNull
+    public static VibrationEffect createRepeatingEffect(@NonNull VibrationEffect preamble,
+            @NonNull VibrationEffect repeatingEffect) {
+        Preconditions.checkArgument(preamble.getDuration() < Long.MAX_VALUE,
+                "Can't repeat an indefinitely repeating effect.");
+        return VibrationEffect.startComposition()
+                .addEffect(preamble)
+                .repeatEffectIndefinitely(repeatingEffect)
+                .compose();
+    }
+
+    /**
      * A composition of haptic elements that are combined to be playable as a single
      * {@link VibrationEffect}.
      *

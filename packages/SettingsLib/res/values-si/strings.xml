@@ -357,10 +357,8 @@
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"වැඩිදියුණු කළ සබැඳුම් හැකියා විශේෂාංගය සබල කරයි."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"අභ්‍යන්තර අන්තය"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"දේශීය ෂෙල් ප්‍රවේශනය පිරිනමන ටර්මිනල් යෙදුම සබල කරන්න"</string>
-    <!-- no translation found for enable_linux_terminal_title (5076044866895670637) -->
-    <skip />
-    <!-- no translation found for enable_linux_terminal_summary (5893216510985145320) -->
-    <skip />
+    <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Linux සංවර්ධන පරිසරය"</string>
+    <string name="enable_linux_terminal_summary" msgid="5893216510985145320">"Android මත Linux ටර්මිනලය ධාවනය කරන්න"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP පරික්ෂාව"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"HDCP පරික්ෂා හැසිරීම සකසන්න"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"නිදොස්කරණය"</string>

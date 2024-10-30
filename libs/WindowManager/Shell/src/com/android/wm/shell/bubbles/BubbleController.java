@@ -833,7 +833,7 @@ public class BubbleController implements ConfigurationChangeListener,
             // window to show this in, but we use a separate code path.
             // TODO(b/273312602): consider foldables where we do need a stack view when folded
             if (mLayerView == null) {
-                mLayerView = new BubbleBarLayerView(mContext, this, mBubbleData);
+                mLayerView = new BubbleBarLayerView(mContext, this, mBubbleData, mLogger);
                 mLayerView.setUnBubbleConversationCallback(mSysuiProxy::onUnbubbleConversation);
             }
         } else {
@@ -1759,6 +1759,9 @@ public class BubbleController implements ConfigurationChangeListener,
     @MainThread
     public void removeAllBubbles(@Bubbles.DismissReason int reason) {
         mBubbleData.dismissAll(reason);
+        if (reason == Bubbles.DISMISS_USER_GESTURE) {
+            mLogger.log(BubbleLogger.Event.BUBBLE_BAR_DISMISSED_DRAG_BAR);
+        }
     }
 
     private void onEntryAdded(BubbleEntry entry) {

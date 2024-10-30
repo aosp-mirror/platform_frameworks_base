@@ -1943,6 +1943,8 @@
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"사용 중지"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g>~<xliff:g id="END">%2$s</xliff:g>"</string>
+    <!-- no translation found for zen_mode_trigger_summary_range_words (7228261413029290750) -->
+    <skip />
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"모든 캘린더"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g>(이)가 일부 소리를 음소거함"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"사용 중인 기기 내부에 문제가 발생했습니다. 초기화할 때까지 불안정할 수 있습니다."</string>
@@ -2424,6 +2426,14 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"모바일 또는 Wi-Fi 네트워크 없이 메시지 주고받기"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"메시지 열기"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"작동 방식"</string>
+    <!-- no translation found for satellite_manual_selection_state_popup_title (8545991934926661974) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_message (1928101658551382450) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_ok (2459664752624985095) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_cancel (973605633339469252) -->
+    <skip />
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"대기 중…"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"지문 잠금 해제 다시 설정"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> 지문을 더 이상 인식할 수 없습니다."</string>
