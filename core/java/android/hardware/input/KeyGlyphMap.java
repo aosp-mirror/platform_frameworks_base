@@ -158,6 +158,15 @@ public final class KeyGlyphMap implements Parcelable {
         return getDrawable(context, mModifierGlyphs.get(modifier, 0));
     }
 
+    /**
+     * Provides the drawable resource for the glyph for a modifier state (e.g. META_META_ON).
+     * Returns null if not available.
+     */
+    @Nullable
+    public Drawable getDrawableForModifierState(Context context, int modifierState) {
+        return getDrawable(context, mModifierGlyphs.get(modifierState, 0));
+    }
+
     @Nullable
     private Drawable getDrawable(Context context, @DrawableRes int drawableRes) {
         PackageManager pm = context.getPackageManager();
