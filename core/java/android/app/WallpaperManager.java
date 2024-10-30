@@ -1623,14 +1623,15 @@ public class WallpaperManager {
      *                   If false, return areas relative to the cropped bitmap.
      * @return A List of Rect where the Rect is within the cropped/original bitmap, and corresponds
      *          to what is displayed. The Rect may have a larger width/height ratio than the screen
-     *          due to parallax. Return {@code null} if the wallpaper is not an ImageWallpaper.
-     *          Also return {@code null} when called with which={@link #FLAG_LOCK} if there is a
+     *          due to parallax. Return an empty list if the wallpaper is not an ImageWallpaper.
+     *          Also return an empty list when called with which={@link #FLAG_LOCK} if there is a
      *          shared home + lock wallpaper.
      * @hide
      */
     @FlaggedApi(FLAG_MULTI_CROP)
+    @TestApi
     @RequiresPermission(READ_WALLPAPER_INTERNAL)
-    @Nullable
+    @NonNull
     public List<Rect> getBitmapCrops(@NonNull List<Point> displaySizes,
             @SetWallpaperFlags int which, boolean originalBitmap) {
         checkExactlyOneWallpaperFlagSet(which);
@@ -1664,7 +1665,8 @@ public class WallpaperManager {
      * @hide
      */
     @FlaggedApi(FLAG_MULTI_CROP)
-    @Nullable
+    @TestApi
+    @NonNull
     public List<Rect> getBitmapCrops(@NonNull Point bitmapSize, @NonNull List<Point> displaySizes,
             @Nullable Map<Point, Rect> cropHints) {
         try {
@@ -2371,7 +2373,6 @@ public class WallpaperManager {
     /**
      * Version of setBitmap that defines how the wallpaper will be positioned for different
      * display sizes.
-     * Requires permission {@link android.Manifest.permission#SET_WALLPAPER}.
      * @param cropHints map from screen dimensions to a sub-region of the image to display for those
      *                  dimensions. The {@code Rect} sub-region may have a larger width/height ratio
      *                  than the screen dimensions to apply a horizontal parallax effect. If the
@@ -2380,6 +2381,7 @@ public class WallpaperManager {
      * @hide
      */
     @FlaggedApi(FLAG_MULTI_CROP)
+    @TestApi
     @RequiresPermission(android.Manifest.permission.SET_WALLPAPER)
     public int setBitmapWithCrops(@Nullable Bitmap fullImage, @NonNull Map<Point, Rect> cropHints,
             boolean allowBackup, @SetWallpaperFlags int which) throws IOException {
@@ -2562,7 +2564,6 @@ public class WallpaperManager {
     /**
      * Version of setStream that defines how the wallpaper will be positioned for different
      * display sizes.
-     * Requires permission {@link android.Manifest.permission#SET_WALLPAPER}.
      * @param cropHints map from screen dimensions to a sub-region of the image to display for those
      *                  dimensions. The {@code Rect} sub-region may have a larger width/height ratio
      *                  than the screen dimensions to apply a horizontal parallax effect. If the
@@ -2571,9 +2572,11 @@ public class WallpaperManager {
      * @hide
      */
     @FlaggedApi(FLAG_MULTI_CROP)
+    @TestApi
     @RequiresPermission(android.Manifest.permission.SET_WALLPAPER)
-    public int setStreamWithCrops(InputStream bitmapData, @NonNull Map<Point, Rect> cropHints,
-            boolean allowBackup, @SetWallpaperFlags int which) throws IOException {
+    public int setStreamWithCrops(@NonNull InputStream bitmapData,
+            @NonNull Map<Point, Rect> cropHints, boolean allowBackup, @SetWallpaperFlags int which)
+            throws IOException {
         SparseArray<Rect> crops = new SparseArray<>();
         cropHints.forEach((k, v) -> crops.put(getOrientation(k), v));
         return setStreamWithCrops(bitmapData, crops, allowBackup, which);
@@ -2583,15 +2586,15 @@ public class WallpaperManager {
      * Similar to {@link #setStreamWithCrops(InputStream, Map, boolean, int)}, but using
      * {@link ScreenOrientation} as keys of the cropHints map. Used for backup & restore, since
      * WallpaperBackupAgent stores orientations rather than the exact display size.
-     * Requires permission {@link android.Manifest.permission#SET_WALLPAPER}.
      * @param cropHints map from {@link ScreenOrientation} to a sub-region of the image to display
      *                  for that screen orientation.
      * @hide
      */
     @FlaggedApi(FLAG_MULTI_CROP)
     @RequiresPermission(android.Manifest.permission.SET_WALLPAPER)
-    public int setStreamWithCrops(InputStream bitmapData, @NonNull SparseArray<Rect> cropHints,
-            boolean allowBackup, @SetWallpaperFlags int which) throws IOException {
+    public int setStreamWithCrops(@NonNull InputStream bitmapData,
+            @NonNull SparseArray<Rect> cropHints, boolean allowBackup, @SetWallpaperFlags int which)
+            throws IOException {
         if (sGlobals.mService == null) {
             Log.w(TAG, "WallpaperService not running");
             throw new RuntimeException(new DeadSystemException());
