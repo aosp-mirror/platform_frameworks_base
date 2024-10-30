@@ -184,6 +184,7 @@ import com.android.server.pm.UserManagerInternal;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageState;
 import com.android.server.policy.AppOpsPolicy;
+import com.android.server.selinux.RateLimiter;
 
 import dalvik.annotation.optimization.NeverCompile;
 
@@ -203,6 +204,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -352,6 +354,10 @@ public class AppOpsService extends IAppOpsService.Stub {
     final SparseArray<UidState> mUidStates = new SparseArray<>();
     @GuardedBy("this")
     private boolean mUidStatesInitialized;
+
+    // A rate limiter to prevent excessive Atom pushing. Used by noteOperation.
+    private static final Duration RATE_LIMITER_WINDOW = Duration.ofMillis(10);
+    private final RateLimiter mRateLimiter = new RateLimiter(RATE_LIMITER_WINDOW);
 
     volatile @NonNull HistoricalRegistry mHistoricalRegistry = new HistoricalRegistry(this);
 
@@ -3137,10 +3143,12 @@ public class AppOpsService extends IAppOpsService.Stub {
             boolean shouldCollectMessage) {
         if (Binder.getCallingPid() != Process.myPid()
                 && Flags.appopAccessTrackingLoggingEnabled()) {
-            FrameworkStatsLog.write(
-                    APP_OP_NOTE_OP_OR_CHECK_OP_BINDER_API_CALLED, uid, code,
-                    APP_OP_NOTE_OP_OR_CHECK_OP_BINDER_API_CALLED__BINDER_API__NOTE_OPERATION,
-                    attributionTag != null);
+            if (mRateLimiter.tryAcquire()) {
+                FrameworkStatsLog.write(
+                        APP_OP_NOTE_OP_OR_CHECK_OP_BINDER_API_CALLED, uid, code,
+                        APP_OP_NOTE_OP_OR_CHECK_OP_BINDER_API_CALLED__BINDER_API__NOTE_OPERATION,
+                        attributionTag != null);
+            }
         }
         return mCheckOpsDelegateDispatcher.noteOperation(code, uid, packageName,
                 attributionTag, Context.DEVICE_ID_DEFAULT, shouldCollectAsyncNotedOp, message,
