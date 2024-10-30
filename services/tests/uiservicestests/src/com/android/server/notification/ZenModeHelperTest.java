@@ -6249,6 +6249,50 @@ public class ZenModeHelperTest extends UiServiceTestCase {
     }
 
     @Test
+    @EnableFlags({FLAG_MODES_API, FLAG_MODES_UI})
+    public void applyGlobalZenModeAsImplicitZenRule_again_refreshesRuleName() {
+        mZenModeHelper.mConfig.automaticRules.clear();
+        mZenModeHelper.applyGlobalZenModeAsImplicitZenRule(UserHandle.CURRENT,
+                mContext.getPackageName(), CUSTOM_PKG_UID, ZEN_MODE_IMPORTANT_INTERRUPTIONS);
+        assertThat(mZenModeHelper.mConfig.automaticRules).hasSize(1);
+        assertThat(mZenModeHelper.mConfig.automaticRules.valueAt(0).name)
+                .isEqualTo("Do Not Disturb (" + CUSTOM_APP_LABEL + ")");
+        // "Break" the rule name to check that applying again restores it.
+        mZenModeHelper.mConfig.automaticRules.valueAt(0).name = "BOOM!";
+
+        mZenModeHelper.applyGlobalZenModeAsImplicitZenRule(UserHandle.CURRENT,
+                mContext.getPackageName(), CUSTOM_PKG_UID, ZEN_MODE_ALARMS);
+
+        assertThat(mZenModeHelper.mConfig.automaticRules.valueAt(0).name)
+                .isEqualTo("Do Not Disturb (" + CUSTOM_APP_LABEL + ")");
+    }
+
+    @Test
+    @EnableFlags({FLAG_MODES_API, FLAG_MODES_UI})
+    public void applyGlobalZenModeAsImplicitZenRule_again_doesNotChangeCustomizedRuleName() {
+        mZenModeHelper.mConfig.automaticRules.clear();
+        mZenModeHelper.applyGlobalZenModeAsImplicitZenRule(UserHandle.CURRENT,
+                mContext.getPackageName(), CUSTOM_PKG_UID, ZEN_MODE_IMPORTANT_INTERRUPTIONS);
+        assertThat(mZenModeHelper.mConfig.automaticRules).hasSize(1);
+        assertThat(mZenModeHelper.mConfig.automaticRules.valueAt(0).name)
+                .isEqualTo("Do Not Disturb (" + CUSTOM_APP_LABEL + ")");
+        String ruleId = ZenModeConfig.implicitRuleId(mContext.getPackageName());
+
+        // User chooses a new name.
+        AutomaticZenRule azr = mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT, ruleId);
+        mZenModeHelper.updateAutomaticZenRule(UserHandle.CURRENT, ruleId,
+                new AutomaticZenRule.Builder(azr).setName("User chose this").build(),
+                ORIGIN_USER_IN_SYSTEMUI, "reason", SYSTEM_UID);
+
+        // App triggers the rule again.
+        mZenModeHelper.applyGlobalZenModeAsImplicitZenRule(UserHandle.CURRENT,
+                mContext.getPackageName(), CUSTOM_PKG_UID, ZEN_MODE_ALARMS);
+
+        assertThat(mZenModeHelper.mConfig.automaticRules.valueAt(0).name)
+                .isEqualTo("User chose this");
+    }
+
+    @Test
     @DisableFlags(FLAG_MODES_API)
     public void applyGlobalZenModeAsImplicitZenRule_flagOff_ignored() {
         mZenModeHelper.mConfig.automaticRules.clear();
@@ -6396,6 +6440,50 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 .build();
         assertThat(getOnlyElement(mZenModeHelper.mConfig.automaticRules.values()).zenPolicy)
                 .isEqualTo(originalEffectiveZenPolicy.overwrittenWith(appsSecondZenPolicy));
+    }
+
+    @Test
+    @EnableFlags({FLAG_MODES_API, FLAG_MODES_UI})
+    public void applyGlobalPolicyAsImplicitZenRule_again_refreshesRuleName() {
+        mZenModeHelper.mConfig.automaticRules.clear();
+        mZenModeHelper.applyGlobalPolicyAsImplicitZenRule(UserHandle.CURRENT,
+                mContext.getPackageName(), CUSTOM_PKG_UID, new Policy(0, 0, 0));
+        assertThat(mZenModeHelper.mConfig.automaticRules).hasSize(1);
+        assertThat(mZenModeHelper.mConfig.automaticRules.valueAt(0).name)
+                .isEqualTo("Do Not Disturb (" + CUSTOM_APP_LABEL + ")");
+        // "Break" the rule name to check that updating it again restores it.
+        mZenModeHelper.mConfig.automaticRules.valueAt(0).name = "BOOM!";
+
+        mZenModeHelper.applyGlobalPolicyAsImplicitZenRule(UserHandle.CURRENT,
+                mContext.getPackageName(), CUSTOM_PKG_UID, new Policy(0, 0, 0));
+
+        assertThat(mZenModeHelper.mConfig.automaticRules.valueAt(0).name)
+                .isEqualTo("Do Not Disturb (" + CUSTOM_APP_LABEL + ")");
+    }
+
+    @Test
+    @EnableFlags({FLAG_MODES_API, FLAG_MODES_UI})
+    public void applyGlobalPolicyAsImplicitZenRule_again_doesNotChangeCustomizedRuleName() {
+        mZenModeHelper.mConfig.automaticRules.clear();
+        mZenModeHelper.applyGlobalPolicyAsImplicitZenRule(UserHandle.CURRENT,
+                mContext.getPackageName(), CUSTOM_PKG_UID, new Policy(0, 0, 0));
+        assertThat(mZenModeHelper.mConfig.automaticRules).hasSize(1);
+        assertThat(mZenModeHelper.mConfig.automaticRules.valueAt(0).name)
+                .isEqualTo("Do Not Disturb (" + CUSTOM_APP_LABEL + ")");
+        String ruleId = ZenModeConfig.implicitRuleId(mContext.getPackageName());
+
+        // User chooses a new name.
+        AutomaticZenRule azr = mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT, ruleId);
+        mZenModeHelper.updateAutomaticZenRule(UserHandle.CURRENT, ruleId,
+                new AutomaticZenRule.Builder(azr).setName("User chose this").build(),
+                ORIGIN_USER_IN_SYSTEMUI, "reason", SYSTEM_UID);
+
+        // App updates the implicit rule again.
+        mZenModeHelper.applyGlobalPolicyAsImplicitZenRule(UserHandle.CURRENT,
+                mContext.getPackageName(), CUSTOM_PKG_UID, new Policy(0, 0, 0));
+
+        assertThat(mZenModeHelper.mConfig.automaticRules.valueAt(0).name)
+                .isEqualTo("User chose this");
     }
 
     @Test
@@ -7247,9 +7335,10 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         rule.zenMode = zenMode;
         rule.zenPolicy = policy;
         rule.pkg = ownerPkg;
-        rule.name = CUSTOM_APP_LABEL;
-        if (!Flags.modesUi()) {
-            rule.iconResName = ICON_RES_NAME;
+        if (Flags.modesUi()) {
+            rule.name = mContext.getString(R.string.zen_mode_implicit_name, CUSTOM_APP_LABEL);
+        } else {
+            rule.name = CUSTOM_APP_LABEL;
         }
         rule.triggerDescription = mContext.getString(R.string.zen_mode_implicit_trigger_description,
                 CUSTOM_APP_LABEL);
