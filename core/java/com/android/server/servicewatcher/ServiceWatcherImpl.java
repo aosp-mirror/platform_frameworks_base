@@ -46,6 +46,8 @@ import java.util.Objects;
  * Implementation of ServiceWatcher. Keeping the implementation separate from the interface allows
  * us to store the generic relationship between the service supplier and the service listener, while
  * hiding the generics from clients, simplifying the API.
+ *
+ * @hide
  */
 class ServiceWatcherImpl<TBoundServiceInfo extends BoundServiceInfo> implements ServiceWatcher,
         ServiceChangedListener {

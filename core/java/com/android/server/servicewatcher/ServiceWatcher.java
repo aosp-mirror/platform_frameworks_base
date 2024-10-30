@@ -52,6 +52,8 @@ import java.util.Objects;
  * whether any particular {@link BinderOperation} will succeed. Clients must ensure they do not rely
  * on this, and instead use {@link ServiceListener} notifications as necessary to recover from
  * failures.
+ *
+ * @hide
  */
 public interface ServiceWatcher {
 
