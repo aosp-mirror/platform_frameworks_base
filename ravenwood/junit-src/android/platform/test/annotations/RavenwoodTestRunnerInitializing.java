@@ -13,10 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.platform.test.ravenwood;
+package android.platform.test.annotations;
 
-/** Stub class. The actual implementaetion is in junit-impl-src. */
-public class RavenwoodRunnerState {
-    public RavenwoodRunnerState(RavenwoodAwareTestRunner runner) {
-    }
+import static java.lang.annotation.ElementType.METHOD;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+/**
+ * An annotation similar to JUnit's BeforeClass, but this gets executed before
+ * the inner runner is instantiated, and only on Ravenwood.
+ * It can be used to initialize what's needed by the inner runner.
+ */
+@Target({METHOD})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface RavenwoodTestRunnerInitializing {
 }

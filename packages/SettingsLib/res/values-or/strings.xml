@@ -357,10 +357,8 @@
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"ଏନହାନ୍ସଡ୍ କନେକ୍ଟିଭିଟି ଫିଚର୍ ସକ୍ଷମ କରିଥାଏ।"</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"ସ୍ଥାନୀୟ ଟର୍ମିନାଲ୍‌"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"ସ୍ଥାନୀୟ ଶେଲ୍‌କୁ ଆକ‌ସେସ୍‌ ଦେଉଥିବା ଟର୍ମିନଲ୍‌ ଆପ୍‌କୁ ସକ୍ଷମ କରନ୍ତୁ"</string>
-    <!-- no translation found for enable_linux_terminal_title (5076044866895670637) -->
-    <skip />
-    <!-- no translation found for enable_linux_terminal_summary (5893216510985145320) -->
-    <skip />
+    <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Linux ଡେଭେଲପମେଣ୍ଟର ପରିବେଶ"</string>
+    <string name="enable_linux_terminal_summary" msgid="5893216510985145320">"Androidରେ Linux ଟର୍ମିନାଲ ଚାଲୁ କରନ୍ତୁ"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP ଯାଞ୍ଚ"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"HDCPର ଯାଞ୍ଚ ଗତିବିଧି ସେଟ୍‍ କରନ୍ତୁ"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"ଡିବଗ୍‌ କରୁଛି"</string>

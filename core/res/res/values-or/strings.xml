@@ -329,7 +329,7 @@
     <string name="permgroupdesc_storage" msgid="5378659041354582769">"ଆପଣଙ୍କ ଡିଭାଇସରେ ଥିବା ଫାଇଲଗୁଡ଼ିକୁ ଆକ୍ସେସ କରନ୍ତୁ"</string>
     <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"ମ୍ୟୁଜିକ ଏବଂ ଅଡିଓ"</string>
     <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"ଆପଣଙ୍କ ଡିଭାଇସରେ ମ୍ୟୁଜିକ ଏବଂ ଅଡିଓକୁ ଆକ୍ସେସ କରନ୍ତୁ"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"ଫଟୋ ଏବଂ ଭିଡିଓଗୁଡ଼ିକ"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"ଫଟୋ ଏବଂ ଭିଡିଓ"</string>
     <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"ଆପଣଙ୍କ ଡିଭାଇସରେ ଫଟୋ ଏବଂ ଭିଡିଓଗୁଡ଼ିକୁ ଆକ୍ସେସ କରନ୍ତୁ"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"ମାଇକ୍ରୋଫୋନ"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"ଅଡିଓ ରେକର୍ଡ କରେ"</string>
@@ -1393,7 +1393,7 @@
     <string name="no_permissions" msgid="5729199278862516390">"କୌଣସି ଅନୁମତିର ଆବଶ୍ୟକତା ନାହିଁ"</string>
     <string name="perm_costs_money" msgid="749054595022779685">"ଶୁଳ୍କ ଲାଗୁ ହୋଇପାରେ"</string>
     <string name="dlg_ok" msgid="5103447663504839312">"ଠିକ ଅଛି"</string>
-    <string name="usb_charging_notification_title" msgid="1674124518282666955">"USB ମାଧ୍ୟମରେ ଏହି ଡିଭାଇସ୍‌ ଚାର୍ଜ ହେଉଛି"</string>
+    <string name="usb_charging_notification_title" msgid="1674124518282666955">"USB ମାଧ୍ୟମରେ ଏହି ଡିଭାଇସ ଚାର୍ଜ ହେଉଛି"</string>
     <string name="usb_supplying_notification_title" msgid="5378546632408101811">"USB ମାଧ୍ୟମରେ ଯୋଡ଼ାଯାଇଥିବା ଡିଭାଇସ୍ ଚାର୍ଜ ହେଉଛି"</string>
     <string name="usb_mtp_notification_title" msgid="1065989144124499810">"USB ଫାଇଲ୍ ଟ୍ରାନ୍ସଫର୍ ଚାଲୁ କରାଗଲା"</string>
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"USB ମାଧ୍ୟମରେ PTPକୁ ଚାଲୁ କରାଗଲା"</string>
@@ -1943,6 +1943,8 @@
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"ବନ୍ଦ ଅଛି"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> - <xliff:g id="END">%2$s</xliff:g>"</string>
+    <!-- no translation found for zen_mode_trigger_summary_range_words (7228261413029290750) -->
+    <skip />
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"ଯେକୌଣସି କ୍ୟାଲେଣ୍ଡର୍‌"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> କିଛି ସାଉଣ୍ଡକୁ ମ୍ୟୁଟ୍ କରୁଛି"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"ଆପଣଙ୍କ ଡିଭାଇସ୍‍ରେ ଏକ ସମସ୍ୟା ରହିଛି ଏବଂ ଆପଣ ଫ୍ୟାକ୍ଟୋରୀ ଡାଟା ରିସେଟ୍‍ ନକରିବା ପର୍ଯ୍ୟନ୍ତ ଏହା ଅସ୍ଥିର ରହିପାରେ।"</string>
@@ -2067,7 +2069,7 @@
     <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"ଡିଭାଇସ୍‌ ଷ୍ଟୋରେଜ୍‌"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"USB ଡିବଗିଂ"</string>
     <string name="time_picker_hour_label" msgid="4208590187662336864">"ଘଣ୍ଟା"</string>
-    <string name="time_picker_minute_label" msgid="8307452311269824553">"ମିନିଟ୍"</string>
+    <string name="time_picker_minute_label" msgid="8307452311269824553">"ମିନିଟ"</string>
     <string name="time_picker_header_text" msgid="9073802285051516688">"ସମୟ ସେଟ୍‌ କରନ୍ତୁ"</string>
     <string name="time_picker_input_error" msgid="8386271930742451034">"ଏକ ମାନ୍ୟ ସମୟ ଲେଖନ୍ତୁ"</string>
     <string name="time_picker_prompt_label" msgid="303588544656363889">"ସମୟରେ ଟାଇପ୍‍ କରନ୍ତୁ"</string>
@@ -2424,6 +2426,14 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"ଏକ ମୋବାଇଲ କିମ୍ବା ୱାଇ-ଫାଇ ନେଟୱାର୍କ ବିନା ମେସେଜ ପଠାନ୍ତୁ ଏବଂ ପାଆନ୍ତୁ"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages ଖୋଲନ୍ତୁ"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"ଏହା କିପରି କାମ କରେ"</string>
+    <!-- no translation found for satellite_manual_selection_state_popup_title (8545991934926661974) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_message (1928101658551382450) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_ok (2459664752624985095) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_cancel (973605633339469252) -->
+    <skip />
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"ବାକି ଅଛି…"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"ଫିଙ୍ଗରପ୍ରିଣ୍ଟ ଅନଲକ ପୁଣି ସେଟ ଅପ କରନ୍ତୁ"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g>କୁ ଆଉ ଚିହ୍ନଟ କରାଯାଇପାରିବ ନାହିଁ।"</string>
@@ -2446,6 +2456,6 @@
     <string name="keyboard_shortcut_group_applications_calendar" msgid="3571770335653387606">"Calendar"</string>
     <string name="keyboard_shortcut_group_applications_calculator" msgid="6753209559716091507">"କାଲକୁଲେଟର"</string>
     <string name="keyboard_shortcut_group_applications_maps" msgid="7950000659522589471">"Maps"</string>
-    <string name="keyboard_shortcut_group_applications" msgid="3010389163951364798">"ଆପ୍ଲିକେସନଗୁଡ଼ିକ"</string>
+    <string name="keyboard_shortcut_group_applications" msgid="3010389163951364798">"ଆପ୍ଲିକେସନ"</string>
     <string name="fingerprint_loe_notification_msg" msgid="3927447270148854546">"ଆପଣଙ୍କ ଟିପଚିହ୍ନକୁ ଆଉ ଚିହ୍ନଟ କରାଯାଇପାରିବ ନାହିଁ। ଫିଙ୍ଗରପ୍ରିଣ୍ଟ ଅନଲକ ପୁଣି ସେଟ ଅପ କରନ୍ତୁ।"</string>
 </resources>

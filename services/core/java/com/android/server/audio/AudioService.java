@@ -2070,22 +2070,6 @@ public class AudioService extends IAudioService.Stub
 
         onIndicateSystemReady();
 
-        synchronized (mCachedAbsVolDrivingStreamsLock) {
-            mCachedAbsVolDrivingStreams.forEach((dev, stream) -> {
-                boolean enabled = true;
-                if (dev == AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP) {
-                    enabled = mAvrcpAbsVolSupported;
-                }
-                final int result = mAudioSystem.setDeviceAbsoluteVolumeEnabled(dev, /*address=*/"",
-                        enabled, stream);
-                if (result != AudioSystem.AUDIO_STATUS_OK) {
-                    sVolumeLogger.enqueueAndSlog(
-                            new VolumeEvent(VolumeEvent.VOL_ABS_DEVICE_ENABLED_ERROR,
-                                    result, dev, enabled, stream).eventToString(), ALOGE, TAG);
-                }
-            });
-        }
-
         // indicate the end of reconfiguration phase to audio HAL
         AudioSystem.setParameters("restarting=false");
 
@@ -2198,6 +2182,22 @@ public class AudioService extends IAudioService.Stub
             sendMsg(mAudioHandler, MSG_REINIT_VOLUMES, SENDMSG_NOOP, 0, 0,
                     caller /*obj*/, 2 * INDICATE_SYSTEM_READY_RETRY_DELAY_MS);
             return;
+        }
+
+        synchronized (mCachedAbsVolDrivingStreamsLock) {
+            mCachedAbsVolDrivingStreams.forEach((dev, stream) -> {
+                boolean enabled = true;
+                if (dev == AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP) {
+                    enabled = mAvrcpAbsVolSupported;
+                }
+                final int result = mAudioSystem.setDeviceAbsoluteVolumeEnabled(dev, /*address=*/"",
+                        enabled, stream);
+                if (result != AudioSystem.AUDIO_STATUS_OK) {
+                    sVolumeLogger.enqueueAndSlog(
+                            new VolumeEvent(VolumeEvent.VOL_ABS_DEVICE_ENABLED_ERROR,
+                                    result, dev, enabled, stream).eventToString(), ALOGE, TAG);
+                }
+            });
         }
 
         // did it work? check based on min/max values of some basic streams
