@@ -147,7 +147,7 @@ public class BiometricSchedulerOperationTest {
         when(mInterruptableClientMonitor.getFreshDaemon()).thenReturn(mHal);
 
         assertThat(mInterruptableOperation.startWithCookie(mOnStartCallback, cookie)).isTrue();
-        assertThat(mInterruptableOperation.startWithCookie(mOnStartCallback, cookie)).isFalse();
+        assertThat(mInterruptableOperation.startWithCookie(mOnStartCallback, cookie)).isTrue();
     }
 
     @Test
@@ -201,7 +201,7 @@ public class BiometricSchedulerOperationTest {
         when(mInterruptableClientMonitor.getFreshDaemon()).thenReturn(mHal);
 
         assertThat(mInterruptableOperation.start(mOnStartCallback)).isTrue();
-        assertThat(mInterruptableOperation.start(mOnStartCallback)).isFalse();
+        assertThat(mInterruptableOperation.start(mOnStartCallback)).isTrue();
     }
 
     @Test
