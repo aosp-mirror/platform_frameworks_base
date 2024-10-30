@@ -2380,6 +2380,11 @@ SurfaceComposerClient::Transaction* android_view_SurfaceTransaction_getNativeSur
     }
 }
 
+static void nativeEnableDebugLogCallPoints(JNIEnv* env, jclass clazz, jlong transactionObj) {
+    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
+    transaction->enableDebugLogCallPoints();
+}
+
 static const JNINativeMethod sSurfaceControlMethods[] = {
         // clang-format off
     {"nativeCreate", "(Landroid/view/SurfaceSession;Ljava/lang/String;IIIIJLandroid/os/Parcel;)J",
@@ -2626,6 +2631,7 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
     {"nativeNotifyShutdown", "()V",
             (void*)nativeNotifyShutdown },
     {"nativeSetLuts", "(JJ[F[I[I[I[I)V", (void*)nativeSetLuts },
+    {"nativeEnableDebugLogCallPoints", "(J)V", (void*)nativeEnableDebugLogCallPoints },
         // clang-format on
 };
 
