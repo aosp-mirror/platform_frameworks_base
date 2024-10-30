@@ -105,7 +105,7 @@ class SidecarConverterTest {
         val emptyGd = GenericDocument.Builder<GenericDocument.Builder<*>>("", "", "").build()
         val platformResponse =
             ExecuteAppFunctionResponse.newFailure(
-                ExecuteAppFunctionResponse.RESULT_INTERNAL_ERROR,
+                ExecuteAppFunctionResponse.RESULT_SYSTEM_ERROR,
                 null,
                 null
             )
@@ -119,7 +119,7 @@ class SidecarConverterTest {
         assertThat(sidecarResponse.resultDocument.id).isEqualTo(emptyGd.id)
         assertThat(sidecarResponse.resultDocument.schemaType).isEqualTo(emptyGd.schemaType)
         assertThat(sidecarResponse.resultCode)
-            .isEqualTo(ExecuteAppFunctionResponse.RESULT_INTERNAL_ERROR)
+            .isEqualTo(ExecuteAppFunctionResponse.RESULT_SYSTEM_ERROR)
         assertThat(sidecarResponse.errorMessage).isNull()
     }
 
@@ -152,7 +152,7 @@ class SidecarConverterTest {
         val emptyGd = GenericDocument.Builder<GenericDocument.Builder<*>>("", "", "").build()
         val sidecarResponse =
             com.google.android.appfunctions.sidecar.ExecuteAppFunctionResponse.newFailure(
-                ExecuteAppFunctionResponse.RESULT_INTERNAL_ERROR,
+                ExecuteAppFunctionResponse.RESULT_SYSTEM_ERROR,
                 null,
                 null
             )
@@ -166,7 +166,7 @@ class SidecarConverterTest {
         assertThat(platformResponse.resultDocument.id).isEqualTo(emptyGd.id)
         assertThat(platformResponse.resultDocument.schemaType).isEqualTo(emptyGd.schemaType)
         assertThat(platformResponse.resultCode)
-            .isEqualTo(ExecuteAppFunctionResponse.RESULT_INTERNAL_ERROR)
+            .isEqualTo(ExecuteAppFunctionResponse.RESULT_SYSTEM_ERROR)
         assertThat(platformResponse.errorMessage).isNull()
     }
 }

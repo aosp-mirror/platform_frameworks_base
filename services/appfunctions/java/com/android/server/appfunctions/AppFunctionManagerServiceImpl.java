@@ -86,7 +86,6 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
     private final Context mContext;
     private final Map<String, Object> mLocks = new WeakHashMap<>();
 
-
     public AppFunctionManagerServiceImpl(@NonNull Context context) {
         this(
                 context,
@@ -201,7 +200,7 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
         if (mCallerValidator.isUserOrganizationManaged(targetUser)) {
             safeExecuteAppFunctionCallback.onResult(
                     ExecuteAppFunctionResponse.newFailure(
-                            ExecuteAppFunctionResponse.RESULT_INTERNAL_ERROR,
+                            ExecuteAppFunctionResponse.RESULT_SYSTEM_ERROR,
                             "Cannot run on a device with a device owner or from the managed"
                                     + " profile.",
                             /* extras= */ null));
@@ -256,7 +255,7 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
                             if (serviceIntent == null) {
                                 safeExecuteAppFunctionCallback.onResult(
                                         ExecuteAppFunctionResponse.newFailure(
-                                                ExecuteAppFunctionResponse.RESULT_INTERNAL_ERROR,
+                                                ExecuteAppFunctionResponse.RESULT_SYSTEM_ERROR,
                                                 "Cannot find the target service.",
                                                 /* extras= */ null));
                                 return;
@@ -449,7 +448,7 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
             Slog.e(TAG, "Failed to bind to the AppFunctionService");
             safeExecuteAppFunctionCallback.onResult(
                     ExecuteAppFunctionResponse.newFailure(
-                            ExecuteAppFunctionResponse.RESULT_INTERNAL_ERROR,
+                            ExecuteAppFunctionResponse.RESULT_SYSTEM_ERROR,
                             "Failed to bind the AppFunctionService.",
                             /* extras= */ null));
         }
@@ -464,7 +463,7 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
         if (e instanceof CompletionException) {
             e = e.getCause();
         }
-        int resultCode = ExecuteAppFunctionResponse.RESULT_INTERNAL_ERROR;
+        int resultCode = ExecuteAppFunctionResponse.RESULT_SYSTEM_ERROR;
         if (e instanceof AppSearchException appSearchException) {
             resultCode =
                     mapAppSearchResultFailureCodeToExecuteAppFunctionResponse(
@@ -486,13 +485,13 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
 
         switch (resultCode) {
             case AppSearchResult.RESULT_NOT_FOUND:
-                return ExecuteAppFunctionResponse.RESULT_INVALID_ARGUMENT;
+                return ExecuteAppFunctionResponse.RESULT_FUNCTION_NOT_FOUND;
             case AppSearchResult.RESULT_INVALID_ARGUMENT:
             case AppSearchResult.RESULT_INTERNAL_ERROR:
             case AppSearchResult.RESULT_SECURITY_ERROR:
                 // fall-through
         }
-        return ExecuteAppFunctionResponse.RESULT_INTERNAL_ERROR;
+        return ExecuteAppFunctionResponse.RESULT_SYSTEM_ERROR;
     }
 
     private void registerAppSearchObserver(@NonNull TargetUser user) {
@@ -543,12 +542,13 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
                                     });
         }
     }
+
     /**
      * Retrieves the lock object associated with the given package name.
      *
-     * This method returns the lock object from the {@code mLocks} map if it exists.
-     * If no lock is found for the given package name, a new lock object is created,
-     * stored in the map, and returned.
+     * <p>This method returns the lock object from the {@code mLocks} map if it exists. If no lock
+     * is found for the given package name, a new lock object is created, stored in the map, and
+     * returned.
      */
     @VisibleForTesting
     @NonNull

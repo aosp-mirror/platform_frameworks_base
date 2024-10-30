@@ -76,18 +76,23 @@ public final class ExecuteAppFunctionResponse {
     /**
      * The caller tried to execute a disabled app function.
      *
-     * <p>This error is in the request error category.
-     *
      * <p>This error is in the {@link #ERROR_CATEGORY_REQUEST_ERROR} category.
      */
     public static final int RESULT_DISABLED = 1002;
+
+    /**
+     * The caller tried to execute a function that does not exist.
+     *
+     * <p>This error is in the {@link #ERROR_CATEGORY_REQUEST_ERROR} category.
+     */
+    public static final int RESULT_FUNCTION_NOT_FOUND = 1003;
 
     /**
      * An internal unexpected error coming from the system.
      *
      * <p>This error is in the {@link #ERROR_CATEGORY_SYSTEM} category.
      */
-    public static final int RESULT_INTERNAL_ERROR = 2000;
+    public static final int RESULT_SYSTEM_ERROR = 2000;
 
     /**
      * The operation was cancelled. Use this error code to report that a cancellation is done after
@@ -327,7 +332,8 @@ public final class ExecuteAppFunctionResponse {
                 RESULT_OK,
                 RESULT_DENIED,
                 RESULT_APP_UNKNOWN_ERROR,
-                RESULT_INTERNAL_ERROR,
+                RESULT_SYSTEM_ERROR,
+                RESULT_FUNCTION_NOT_FOUND,
                 RESULT_INVALID_ARGUMENT,
                 RESULT_DISABLED,
                 RESULT_CANCELLED
