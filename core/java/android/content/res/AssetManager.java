@@ -75,10 +75,7 @@ public final class AssetManager implements AutoCloseable {
     private static final String TAG = "AssetManager";
     private static final boolean DEBUG_REFS = false;
 
-    /**
-     * @hide
-     */
-    public static final String FRAMEWORK_APK_PATH = getFrameworkApkPath();
+    private static final String FRAMEWORK_APK_PATH = getFrameworkApkPath();
     private static final String FRAMEWORK_APK_PATH_DEVICE = "/system/framework/framework-res.apk";
     private static final String FRAMEWORK_APK_PATH_RAVENWOOD = "ravenwood-data/framework-res.apk";
 
