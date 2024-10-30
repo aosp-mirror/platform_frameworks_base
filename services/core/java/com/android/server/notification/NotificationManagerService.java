@@ -105,6 +105,7 @@ import static android.os.UserHandle.USER_SYSTEM;
 import static android.service.notification.Adjustment.KEY_TYPE;
 import static android.service.notification.Adjustment.TYPE_CONTENT_RECOMMENDATION;
 import static android.service.notification.Adjustment.TYPE_PROMOTION;
+import static android.service.notification.Flags.FLAG_NOTIFICATION_CONVERSATION_CHANNEL_MANAGEMENT;
 import static android.service.notification.Flags.callstyleCallbackApi;
 import static android.service.notification.Flags.notificationClassification;
 import static android.service.notification.Flags.notificationForceGrouping;
@@ -6678,6 +6679,33 @@ public class NotificationManagerService extends SystemService {
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
+        }
+
+        @Override
+        @FlaggedApi(FLAG_NOTIFICATION_CONVERSATION_CHANNEL_MANAGEMENT)
+        public NotificationChannel createConversationNotificationChannelForPackageFromPrivilegedListener(
+                INotificationListener token, String pkg, UserHandle user,
+                String parentId, String conversationId) throws RemoteException {
+            Objects.requireNonNull(pkg);
+            Objects.requireNonNull(user);
+            Objects.requireNonNull(parentId);
+            Objects.requireNonNull(conversationId);
+
+            verifyPrivilegedListener(token, user, true);
+
+            int uid = getUidForPackageAndUser(pkg, user);
+            NotificationChannel conversationChannel =
+                    mPreferencesHelper.getNotificationChannel(pkg, uid, parentId, false).copy();
+            String conversationChannelId = String.format(
+                    CONVERSATION_CHANNEL_ID_FORMAT, parentId, conversationId);
+            conversationChannel.setId(conversationChannelId);
+            conversationChannel.setConversationId(parentId, conversationId);
+            createNotificationChannelsImpl(
+                    pkg, uid, new ParceledListSlice(Arrays.asList(conversationChannel)));
+            handleSavePolicyFile();
+
+            return mPreferencesHelper.getConversationNotificationChannel(
+                    pkg, uid, parentId, conversationId, false, false).copy();
         }
 
         @Override
