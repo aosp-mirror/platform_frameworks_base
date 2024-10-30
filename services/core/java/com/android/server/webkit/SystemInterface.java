@@ -55,12 +55,8 @@ public interface SystemInterface {
      */
     List<UserPackage> getPackageInfoForProviderAllUsers(WebViewProviderInfo configInfo);
 
-    int getMultiProcessSetting();
-    void setMultiProcessSetting(int value);
-    void notifyZygote(boolean enableMultiProcess);
     /** Start the zygote if it's not already running. */
     void ensureZygoteStarted();
-    boolean isMultiProcessDefaultEnabled();
 
     void pinWebviewIfRequired(ApplicationInfo appInfo);
 }
