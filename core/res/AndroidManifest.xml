@@ -851,6 +851,7 @@
     <protected-broadcast android:name="android.telephony.action.ACTION_SATELLITE_SUBSCRIBER_ID_LIST_CHANGED" />
     <protected-broadcast android:name="android.service.ondeviceintelligence.MODEL_LOADED" />
     <protected-broadcast android:name="android.service.ondeviceintelligence.MODEL_UNLOADED" />
+    <protected-broadcast android:name="android.telephony.action.ACTION_SATELLITE_START_NON_EMERGENCY_SESSION" />
 
 
     <!-- ====================================================================== -->
