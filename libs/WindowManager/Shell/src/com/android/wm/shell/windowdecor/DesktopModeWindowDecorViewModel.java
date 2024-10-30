@@ -187,7 +187,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
             new ExclusionRegionListenerImpl();
 
     private final SparseArray<DesktopModeWindowDecoration> mWindowDecorByTaskId;
-    private final DragStartListenerImpl mDragStartListener = new DragStartListenerImpl();
+    private final DragEventListenerImpl mDragEventListener = new DragEventListenerImpl();
     private final InputMonitorFactory mInputMonitorFactory;
     private TaskOperations mTaskOperations;
     private final Supplier<SurfaceControl.Transaction> mTransactionFactory;
@@ -613,7 +613,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
                     decoration.mTaskInfo.configuration.windowConfiguration.getBounds(),
                     left ? SnapPosition.LEFT : SnapPosition.RIGHT,
                     resizeTrigger,
-                    motionEvent);
+                    motionEvent,
+                    mWindowDecorByTaskId.get(taskId));
         }
 
         decoration.closeHandleMenu();
@@ -1072,7 +1073,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
                             taskInfo, decoration.mTaskSurface, position,
                             new PointF(e.getRawX(dragPointerIdx), e.getRawY(dragPointerIdx)),
                             newTaskBounds, decoration.calculateValidDragArea(),
-                            new Rect(mOnDragStartInitialBounds), e);
+                            new Rect(mOnDragStartInitialBounds), e,
+                            mWindowDecorByTaskId.get(taskInfo.taskId));
                     if (touchingButton && !mHasLongClicked) {
                         // We need the input event to not be consumed here to end the ripple
                         // effect on the touched button. We will reset drag state in the ensuing
@@ -1524,7 +1526,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
                 mTaskOrganizer,
                 windowDecoration,
                 mDisplayController,
-                mDragStartListener,
+                mDragEventListener,
                 mTransitions,
                 mInteractionJankMonitor,
                 mTransactionFactory,
@@ -1667,12 +1669,17 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
         }
     }
 
-    private class DragStartListenerImpl
-            implements DragPositioningCallbackUtility.DragStartListener {
+    private class DragEventListenerImpl
+            implements DragPositioningCallbackUtility.DragEventListener {
         @Override
         public void onDragStart(int taskId) {
             final DesktopModeWindowDecoration decoration = mWindowDecorByTaskId.get(taskId);
             decoration.closeHandleMenu();
+        }
+
+        @Override
+        public void onDragMove(int taskId) {
+
         }
     }
 
@@ -1767,7 +1774,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
                 ShellTaskOrganizer taskOrganizer,
                 DesktopModeWindowDecoration windowDecoration,
                 DisplayController displayController,
-                DragPositioningCallbackUtility.DragStartListener dragStartListener,
+                DragPositioningCallbackUtility.DragEventListener dragEventListener,
                 Transitions transitions,
                 InteractionJankMonitor interactionJankMonitor,
                 Supplier<SurfaceControl.Transaction> transactionFactory,
@@ -1777,7 +1784,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
                             taskOrganizer,
                             windowDecoration,
                             displayController,
-                            dragStartListener,
+                            dragEventListener,
                             transitions,
                             interactionJankMonitor,
                             handler)
@@ -1786,7 +1793,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
                             transitions,
                             windowDecoration,
                             displayController,
-                            dragStartListener,
+                            dragEventListener,
                             transactionFactory);
 
             if (DesktopModeFlags.ENABLE_WINDOWING_SCALED_RESIZING.isTrue()) {

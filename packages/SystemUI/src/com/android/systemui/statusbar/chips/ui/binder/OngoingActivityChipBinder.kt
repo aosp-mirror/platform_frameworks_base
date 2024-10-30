@@ -28,7 +28,7 @@ import android.widget.TextView
 import com.android.systemui.common.ui.binder.IconViewBinder
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.StatusBarIconView
-import com.android.systemui.statusbar.chips.ron.shared.StatusBarRonChips
+import com.android.systemui.statusbar.chips.notification.shared.StatusBarNotifChips
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 import com.android.systemui.statusbar.chips.ui.view.ChipBackgroundContainer
 import com.android.systemui.statusbar.chips.ui.view.ChipChronometer
@@ -102,7 +102,7 @@ object OngoingActivityChipBinder {
                 defaultIconView.tintView(iconTint)
             }
             is OngoingActivityChipModel.ChipIcon.FullColorAppIcon -> {
-                StatusBarRonChips.assertInNewMode()
+                StatusBarNotifChips.assertInNewMode()
                 IconViewBinder.bind(icon.impl, defaultIconView)
                 defaultIconView.visibility = View.VISIBLE
                 defaultIconView.untintView()

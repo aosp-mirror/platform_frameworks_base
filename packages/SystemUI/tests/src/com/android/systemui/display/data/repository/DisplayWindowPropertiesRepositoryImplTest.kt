@@ -25,9 +25,8 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.display.shared.model.DisplayWindowProperties
 import com.android.systemui.kosmos.applicationCoroutineScope
-import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.kosmos.unconfinedTestDispatcher
+import com.android.systemui.kosmos.useUnconfinedTestDispatcher
 import com.android.systemui.statusbar.core.StatusBarConnectedDisplays
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
@@ -44,7 +43,7 @@ import org.mockito.kotlin.mock
 @SmallTest
 class DisplayWindowPropertiesRepositoryImplTest : SysuiTestCase() {
 
-    private val kosmos = testKosmos().also { it.testDispatcher = it.unconfinedTestDispatcher }
+    private val kosmos = testKosmos().useUnconfinedTestDispatcher()
     private val fakeDisplayRepository = kosmos.displayRepository
     private val testScope = kosmos.testScope
 

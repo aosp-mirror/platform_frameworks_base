@@ -30,6 +30,7 @@ import com.google.android.msdl.domain.MSDLPlayer
 import kotlin.math.abs
 import kotlin.math.min
 import kotlin.math.pow
+import kotlin.math.round
 
 /**
  * Listener of slider events that triggers haptic feedback.
@@ -124,12 +125,43 @@ class SliderHapticFeedbackProvider(
         val deltaProgress = abs(normalizedSliderProgress - dragTextureLastProgress)
         if (deltaProgress < config.deltaProgressForDragThreshold) return
 
+        // Check if the progress is a discrete step so haptics can be delivered
+        if (
+            config.sliderStepSize > 0 &&
+                !normalizedSliderProgress.isDiscreteStep(config.sliderStepSize)
+        ) {
+            return
+        }
+
         val powerScale = scaleOnDragTexture(absoluteVelocity, normalizedSliderProgress)
 
         // Deliver haptic feedback
-        performContinuousSliderDragVibration(powerScale)
+        when {
+            config.sliderStepSize == 0f -> performContinuousSliderDragVibration(powerScale)
+            config.sliderStepSize > 0f -> performDiscreteSliderDragVibration(powerScale)
+        }
         dragTextureLastTime = currentTime
         dragTextureLastProgress = normalizedSliderProgress
+    }
+
+    private fun Float.isDiscreteStep(stepSize: Float, epsilon: Float = 0.001f): Boolean {
+        if (stepSize <= 0f) return false
+        val division = this / stepSize
+        return abs(division - round(division)) < epsilon
+    }
+
+    private fun performDiscreteSliderDragVibration(scale: Float) {
+        if (Flags.msdlFeedback()) {
+            val properties =
+                InteractionProperties.DynamicVibrationScale(scale, VIBRATION_ATTRIBUTES_PIPELINING)
+            msdlPlayer.playToken(MSDLToken.DRAG_INDICATOR_DISCRETE, properties)
+        } else {
+            val effect =
+                VibrationEffect.startComposition()
+                    .addPrimitive(VibrationEffect.Composition.PRIMITIVE_TICK, scale)
+                    .compose()
+            vibratorHelper.vibrate(effect, VIBRATION_ATTRIBUTES_PIPELINING)
+        }
     }
 
     private fun performContinuousSliderDragVibration(scale: Float) {

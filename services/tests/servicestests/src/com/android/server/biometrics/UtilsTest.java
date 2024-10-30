@@ -212,24 +212,24 @@ public class UtilsTest {
                 mContext, Authenticators.BIOMETRIC_MIN_STRENGTH));
 
         assertThrows(SecurityException.class, () -> Utils.isValidAuthenticatorConfig(
-                        mContext, Authenticators.MANDATORY_BIOMETRICS));
+                        mContext, Authenticators.IDENTITY_CHECK));
 
         doNothing().when(mContext).enforceCallingOrSelfPermission(
                 eq(SET_BIOMETRIC_DIALOG_ADVANCED), any());
 
         if (Flags.mandatoryBiometrics()) {
             assertTrue(Utils.isValidAuthenticatorConfig(mContext,
-                    Authenticators.MANDATORY_BIOMETRICS));
+                    Authenticators.IDENTITY_CHECK));
         } else {
             assertFalse(Utils.isValidAuthenticatorConfig(mContext,
-                    Authenticators.MANDATORY_BIOMETRICS));
+                    Authenticators.IDENTITY_CHECK));
         }
 
         // The rest of the bits are not allowed to integrate with the public APIs
         for (int i = 8; i < 32; i++) {
             final int authenticator = 1 << i;
             if (authenticator == Authenticators.DEVICE_CREDENTIAL
-                    || authenticator == Authenticators.MANDATORY_BIOMETRICS) {
+                    || authenticator == Authenticators.IDENTITY_CHECK) {
                 continue;
             }
             assertFalse(Utils.isValidAuthenticatorConfig(mContext, 1 << i));
@@ -307,8 +307,8 @@ public class UtilsTest {
                         BiometricManager.BIOMETRIC_ERROR_LOCKOUT},
                 {BiometricConstants.BIOMETRIC_ERROR_LOCKOUT_PERMANENT,
                         BiometricManager.BIOMETRIC_ERROR_LOCKOUT},
-                {BiometricConstants.BIOMETRIC_ERROR_MANDATORY_NOT_ACTIVE,
-                        BiometricManager.BIOMETRIC_ERROR_MANDATORY_NOT_ACTIVE}
+                {BiometricConstants.BIOMETRIC_ERROR_IDENTITY_CHECK_NOT_ACTIVE,
+                        BiometricManager.BIOMETRIC_ERROR_IDENTITY_CHECK_NOT_ACTIVE}
         };
 
         for (int i = 0; i < testCases.length; i++) {

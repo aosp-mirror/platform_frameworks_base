@@ -22,7 +22,6 @@ import static org.junit.Assert.fail;
 
 import android.content.Intent;
 import android.os.RemoteException;
-import android.testing.AndroidTestingRunner;
 import android.util.Log;
 import android.view.Display;
 import android.view.IScrollCaptureResponseListener;
@@ -30,6 +29,7 @@ import android.view.IWindowManager;
 import android.view.ScrollCaptureResponse;
 import android.view.WindowManagerGlobal;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
@@ -45,7 +45,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Tests the of internal framework Scroll Capture API from SystemUI.
  */
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @SmallTest
 @Ignore
 public class ScrollCaptureFrameworkSmokeTest extends SysuiTestCase {

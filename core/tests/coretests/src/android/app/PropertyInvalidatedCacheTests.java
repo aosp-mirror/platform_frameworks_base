@@ -52,11 +52,7 @@ import org.junit.Test;
  *  atest FrameworksCoreTests:PropertyInvalidatedCacheTests
  */
 @SmallTest
-@IgnoreUnderRavenwood(blockedBy = PropertyInvalidatedCache.class)
 public class PropertyInvalidatedCacheTests {
-    @Rule
-    public final RavenwoodRule mRavenwood = new RavenwoodRule();
-
     public final CheckFlagsRule mCheckFlagsRule =
             DeviceFlagsValueProvider.createCheckFlagsRule();
 
@@ -389,9 +385,11 @@ public class PropertyInvalidatedCacheTests {
         assertEquals(n1, "cache_key.bluetooth.get_state");
     }
 
-    // Verify that test mode works properly.
+    // Verify that invalidating the cache from an app process would fail due to lack of permissions.
     @Test
-    public void testTestMode() {
+    @android.platform.test.annotations.DisabledOnRavenwood(
+            reason = "SystemProperties doesn't have permission check")
+    public void testPermissionFailure() {
         // Create a cache that will write a system nonce.
         TestCache sysCache = new TestCache(PropertyInvalidatedCache.MODULE_SYSTEM, "mode1");
         try {
@@ -403,6 +401,13 @@ public class PropertyInvalidatedCacheTests {
             // The expected exception is a bare RuntimeException.  The test does not attempt to
             // validate the text of the exception message.
         }
+    }
+
+    // Verify that test mode works properly.
+    @Test
+    public void testTestMode() {
+        // Create a cache that will write a system nonce.
+        TestCache sysCache = new TestCache(PropertyInvalidatedCache.MODULE_SYSTEM, "mode1");
 
         sysCache.testPropertyName();
         // Invalidate the cache.  This must succeed because the property has been marked for
@@ -420,7 +425,9 @@ public class PropertyInvalidatedCacheTests {
         PropertyInvalidatedCache.setTestMode(false);
         try {
             PropertyInvalidatedCache.setTestMode(false);
-            fail("expected an IllegalStateException");
+            if (Flags.enforcePicTestmodeProtocol()) {
+                fail("expected an IllegalStateException");
+            }
         } catch (IllegalStateException e) {
             // The expected exception.
         }
@@ -441,6 +448,8 @@ public class PropertyInvalidatedCacheTests {
     // storing nonces in shared memory.
     @RequiresFlagsEnabled(FLAG_APPLICATION_SHARED_MEMORY_ENABLED)
     @Test
+    @android.platform.test.annotations.DisabledOnRavenwood(
+            reason = "PIC doesn't use SharedMemory on Ravenwood")
     public void testSharedMemoryStorage() {
         // Fetch a shared memory instance for testing.
         ApplicationSharedMemory shmem = ApplicationSharedMemory.create();

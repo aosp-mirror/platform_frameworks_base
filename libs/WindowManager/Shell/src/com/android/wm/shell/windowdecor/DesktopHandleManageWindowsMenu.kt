@@ -53,11 +53,8 @@ class DesktopHandleManageWindowsMenu(
     private var menuViewContainer: AdditionalViewContainer? = null
 
     init {
-        show(snapshotList, onIconClickListener, onOutsideClickListener)
-    }
-
-    override fun close() {
-        menuViewContainer?.releaseView()
+        createMenu(snapshotList, onIconClickListener, onOutsideClickListener)
+        animateOpen()
     }
 
     private fun calculateMenuPosition(): Point {
@@ -105,5 +102,9 @@ class DesktopHandleManageWindowsMenu(
                     WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH,
             view = menuView.rootView,
         )
+    }
+
+    override fun removeFromContainer() {
+        menuViewContainer?.releaseView()
     }
 }

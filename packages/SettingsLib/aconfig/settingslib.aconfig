@@ -159,3 +159,10 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "hearing_devices_ambient_volume_control"
+    namespace: "accessibility"
+    description: "Enable the ambient volume control in device details and hearing devices dialog."
+    bug: "357878944"
+}

@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar.dagger;
 
 import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.emergency.EmergencyGestureModule;
 import com.android.systemui.statusbar.notification.dagger.NotificationsModule;
 import com.android.systemui.statusbar.notification.row.NotificationRowModule;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
@@ -32,7 +31,7 @@ import dagger.Module;
  */
 @Module(includes = {CentralSurfacesDependenciesModule.class,
         StatusBarNotificationPresenterModule.class,
-        NotificationsModule.class, NotificationRowModule.class, EmergencyGestureModule.class})
+        NotificationsModule.class, NotificationRowModule.class})
 public interface CentralSurfacesModule {
     /**
      * Provides our instance of CentralSurfaces which is considered optional.

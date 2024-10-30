@@ -18,10 +18,13 @@ package com.android.systemui.statusbar.notification.footer.ui.viewbinder
 
 import android.view.View
 import androidx.lifecycle.lifecycleScope
-import com.android.systemui.Flags
+import com.android.app.tracing.coroutines.launchTraced as launch
+import com.android.internal.jank.InteractionJankMonitor
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.statusbar.notification.NotificationActivityStarter
+import com.android.systemui.statusbar.notification.NotificationActivityStarter.SettingsIntent
 import com.android.systemui.statusbar.notification.emptyshade.shared.ModesEmptyShadeFix
+import com.android.systemui.statusbar.notification.footer.shared.NotifRedesignFooter
 import com.android.systemui.statusbar.notification.footer.ui.view.FooterView
 import com.android.systemui.statusbar.notification.footer.ui.viewmodel.FooterViewModel
 import com.android.systemui.util.ui.isAnimating
@@ -29,7 +32,6 @@ import com.android.systemui.util.ui.stopAnimating
 import com.android.systemui.util.ui.value
 import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.coroutineScope
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 /** Binds a [FooterView] to its [view model][FooterViewModel]. */
 object FooterViewBinder {
@@ -64,7 +66,7 @@ object FooterViewBinder {
         notificationActivityStarter: NotificationActivityStarter,
     ) = coroutineScope {
         launch { bindClearAllButton(footer, viewModel, clearAllNotifications) }
-        if (!Flags.notificationsRedesignFooterView()) {
+        if (!NotifRedesignFooter.isEnabled) {
             launch {
                 bindManageOrHistoryButton(
                     footer,
@@ -74,6 +76,9 @@ object FooterViewBinder {
                     notificationActivityStarter,
                 )
             }
+        } else {
+            launch { bindSettingsButton(footer, viewModel, notificationActivityStarter) }
+            launch { bindHistoryButton(footer, viewModel, notificationActivityStarter) }
         }
         launch { bindMessage(footer, viewModel) }
     }
@@ -114,6 +119,50 @@ object FooterViewBinder {
                     footer.setClearAllButtonVisible(isVisible.value, /* animate= */ false)
                 }
             }
+        }
+    }
+
+    private suspend fun bindSettingsButton(
+        footer: FooterView,
+        viewModel: FooterViewModel,
+        notificationActivityStarter: NotificationActivityStarter,
+    ) = coroutineScope {
+        val settingsIntent =
+            SettingsIntent.forNotificationSettings(
+                cujType = InteractionJankMonitor.CUJ_SHADE_APP_LAUNCH_FROM_HISTORY_BUTTON
+            )
+        val onClickListener = { view: View ->
+            notificationActivityStarter.startSettingsIntent(view, settingsIntent)
+        }
+        footer.setSettingsButtonClickListener(onClickListener)
+
+        launch {
+            // NOTE: This visibility change is never animated. We also don't need to do anything
+            // special about the onClickListener here, since we're changing the visibility to
+            // GONE so it won't be clickable anyway.
+            viewModel.settingsButtonVisible.collect { footer.setSettingsButtonVisible(it) }
+        }
+    }
+
+    private suspend fun bindHistoryButton(
+        footer: FooterView,
+        viewModel: FooterViewModel,
+        notificationActivityStarter: NotificationActivityStarter,
+    ) = coroutineScope {
+        val settingsIntent =
+            SettingsIntent.forNotificationHistory(
+                cujType = InteractionJankMonitor.CUJ_SHADE_APP_LAUNCH_FROM_HISTORY_BUTTON
+            )
+        val onClickListener = { view: View ->
+            notificationActivityStarter.startSettingsIntent(view, settingsIntent)
+        }
+        footer.setHistoryButtonClickListener(onClickListener)
+
+        launch {
+            // NOTE: This visibility change is never animated. We also don't need to do anything
+            // special about the onClickListener here, since we're changing the visibility to
+            // GONE so it won't be clickable anyway.
+            viewModel.historyButtonVisible.collect { footer.setHistoryButtonVisible(it) }
         }
     }
 
