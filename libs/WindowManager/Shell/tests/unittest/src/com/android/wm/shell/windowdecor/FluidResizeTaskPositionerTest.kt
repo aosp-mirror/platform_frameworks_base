@@ -47,6 +47,7 @@ import org.mockito.kotlin.doReturn
 import java.util.function.Supplier
 import org.mockito.Mockito.eq
 import org.mockito.Mockito.mock
+import org.mockito.kotlin.times
 import org.mockito.Mockito.`when` as whenever
 
 /**
@@ -66,7 +67,7 @@ class FluidResizeTaskPositionerTest : ShellTestCase() {
     @Mock
     private lateinit var mockWindowDecoration: WindowDecoration<*>
     @Mock
-    private lateinit var mockDragStartListener: DragPositioningCallbackUtility.DragStartListener
+    private lateinit var mockDragEventListener: DragPositioningCallbackUtility.DragEventListener
 
     @Mock
     private lateinit var taskToken: WindowContainerToken
@@ -140,7 +141,7 @@ class FluidResizeTaskPositionerTest : ShellTestCase() {
                 mockTransitions,
                 mockWindowDecoration,
                 mockDisplayController,
-                mockDragStartListener,
+                mockDragEventListener,
                 mockTransactionFactory
         )
     }
@@ -220,6 +221,7 @@ class FluidResizeTaskPositionerTest : ShellTestCase() {
                         change.configuration.windowConfiguration.bounds == rectAfterMove
             }
         })
+        verify(mockDragEventListener, times(1)).onDragMove(eq(TASK_ID))
 
         taskPositioner.onDragPositioningEnd(
                 STARTING_BOUNDS.left.toFloat() + 10,

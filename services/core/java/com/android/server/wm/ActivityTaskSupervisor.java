@@ -2525,9 +2525,9 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
         }
     }
 
-    void wakeUp(String reason) {
+    void wakeUp(int displayId, String reason) {
         mPowerManager.wakeUp(SystemClock.uptimeMillis(), PowerManager.WAKE_REASON_APPLICATION,
-                "android.server.am:TURN_ON:" + reason);
+                "android.server.am:TURN_ON:" + reason, displayId);
     }
 
     /** Starts a batch of visibility updates. */

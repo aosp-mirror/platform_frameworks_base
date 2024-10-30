@@ -46,6 +46,7 @@ public abstract class VibrationEffectSegment implements Parcelable {
     static final int PARCEL_TOKEN_PRIMITIVE = 2;
     static final int PARCEL_TOKEN_STEP = 3;
     static final int PARCEL_TOKEN_RAMP = 4;
+    static final int PARCEL_TOKEN_PWLE = 5;
 
     /** Prevent subclassing from outside of this package */
     VibrationEffectSegment() {
@@ -223,6 +224,11 @@ public abstract class VibrationEffectSegment implements Parcelable {
                             return new PrebakedSegment(in);
                         case PARCEL_TOKEN_PRIMITIVE:
                             return new PrimitiveSegment(in);
+                        case PARCEL_TOKEN_PWLE:
+                            if (Flags.normalizedPwleEffects()) {
+                                return new PwleSegment(in);
+                            }
+                            // Fall through if the flag is not enabled.
                         default:
                             throw new IllegalStateException(
                                     "Unexpected vibration event type token in parcel.");

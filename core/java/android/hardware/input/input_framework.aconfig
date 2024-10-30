@@ -141,3 +141,10 @@ flag {
   description: "Adds shortcuts to toggle and control a11y features"
   bug: "373458181"
 }
+
+flag {
+  name: "override_power_key_behavior_in_focused_window"
+  namespace: "input_native"
+  description: "Allows privileged focused windows to capture power key events."
+  bug: "357144512"
+}

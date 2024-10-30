@@ -36,6 +36,7 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Log;
+import android.view.Display;
 import android.widget.Toast;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -76,6 +77,7 @@ public class RecordingService extends Service implements ScreenMediaRecorderList
     private static final String EXTRA_AUDIO_SOURCE = "extra_useAudio";
     private static final String EXTRA_SHOW_TAPS = "extra_showTaps";
     private static final String EXTRA_CAPTURE_TARGET = "extra_captureTarget";
+    private static final String EXTRA_DISPLAY_ID = "extra_displayId";
 
     protected static final String ACTION_START = "com.android.systemui.screenrecord.START";
     protected static final String ACTION_SHOW_START_NOTIF =
@@ -141,6 +143,30 @@ public class RecordingService extends Service implements ScreenMediaRecorderList
                 .putExtra(EXTRA_CAPTURE_TARGET, captureTarget);
     }
 
+    /**
+     * Get an intent to start the recording service.
+     *
+     * @param context Context from the requesting activity
+     * @param resultCode The result code from {@link android.app.Activity#onActivityResult(int, int,
+     *     android.content.Intent)}
+     * @param audioSource The ordinal value of the audio source {@link
+     *     com.android.systemui.screenrecord.ScreenRecordingAudioSource}
+     * @param showTaps True to make touches visible while recording
+     * @param captureTarget pass this parameter to capture a specific part instead of the full
+     *     screen
+     * @param displayId The id of the display to record.
+     */
+    public static Intent getStartIntent(
+            Context context,
+            int resultCode,
+            int audioSource,
+            boolean showTaps,
+            int displayId,
+            @Nullable MediaProjectionCaptureTarget captureTarget) {
+        return getStartIntent(context, resultCode, audioSource, showTaps, captureTarget)
+                .putExtra(EXTRA_DISPLAY_ID, displayId);
+    }
+
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent == null) {
@@ -174,6 +200,7 @@ public class RecordingService extends Service implements ScreenMediaRecorderList
                 mOriginalShowTaps = Settings.System.getInt(
                         getApplicationContext().getContentResolver(),
                         Settings.System.SHOW_TOUCHES, 0) != 0;
+                int displayId = intent.getIntExtra(EXTRA_DISPLAY_ID, Display.DEFAULT_DISPLAY);
 
                 setTapsVisible(mShowTaps);
 
@@ -183,6 +210,7 @@ public class RecordingService extends Service implements ScreenMediaRecorderList
                         currentUid,
                         mAudioSource,
                         captureTarget,
+                        displayId,
                         this,
                         mScreenRecordingStartTimeStore
                 );

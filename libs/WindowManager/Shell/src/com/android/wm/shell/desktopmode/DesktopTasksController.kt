@@ -87,6 +87,7 @@ import com.android.wm.shell.common.ShellExecutor
 import com.android.wm.shell.common.SingleInstanceRemoteListener
 import com.android.wm.shell.common.SyncTransactionQueue
 import com.android.wm.shell.compatui.isTopActivityExemptFromDesktopWindowing
+import com.android.wm.shell.desktopmode.DesktopImmersiveController.ExitResult
 import com.android.wm.shell.desktopmode.DesktopModeVisualIndicator.DragStartState
 import com.android.wm.shell.desktopmode.DesktopModeVisualIndicator.IndicatorType
 import com.android.wm.shell.desktopmode.DesktopRepository.VisibleTasksListener
@@ -118,6 +119,7 @@ import com.android.wm.shell.transition.FocusTransitionObserver
 import com.android.wm.shell.transition.OneShotRemoteHandler
 import com.android.wm.shell.transition.Transitions
 import com.android.wm.shell.transition.Transitions.TransitionFinishCallback
+import com.android.wm.shell.windowdecor.DesktopModeWindowDecoration
 import com.android.wm.shell.windowdecor.DragPositioningCallbackUtility
 import com.android.wm.shell.windowdecor.MoveToDesktopAnimator
 import com.android.wm.shell.windowdecor.OnTaskRepositionAnimationListener
@@ -125,6 +127,7 @@ import com.android.wm.shell.windowdecor.OnTaskResizeAnimationListener
 import com.android.wm.shell.windowdecor.extension.isFullscreen
 import com.android.wm.shell.windowdecor.extension.isMultiWindow
 import com.android.wm.shell.windowdecor.extension.requestingImmersive
+import com.android.wm.shell.windowdecor.tiling.DesktopTilingDecorViewModel
 import java.io.PrintWriter
 import java.util.Optional
 import java.util.concurrent.Executor
@@ -144,6 +147,7 @@ class DesktopTasksController(
     private val transitions: Transitions,
     private val keyguardManager: KeyguardManager,
     private val returnToDragStartAnimator: ReturnToDragStartAnimator,
+    private val desktopMixedTransitionHandler: DesktopMixedTransitionHandler,
     private val enterDesktopTaskTransitionHandler: EnterDesktopTaskTransitionHandler,
     private val exitDesktopTaskTransitionHandler: ExitDesktopTaskTransitionHandler,
     private val desktopModeDragAndDropTransitionHandler: DesktopModeDragAndDropTransitionHandler,
@@ -163,6 +167,7 @@ class DesktopTasksController(
     private val inputManager: InputManager,
     private val focusTransitionObserver: FocusTransitionObserver,
     private val desktopModeEventLogger: DesktopModeEventLogger,
+    private val desktopTilingDecorViewModel: DesktopTilingDecorViewModel,
 ) :
     RemoteCallable<DesktopTasksController>,
     Transitions.TransitionHandler,
@@ -237,6 +242,7 @@ class DesktopTasksController(
                 override fun onAnimationStateChanged(running: Boolean) {
                     logV("Recents animation state changed running=%b", running)
                     recentsAnimationRunning = running
+                    desktopTilingDecorViewModel.onOverviewAnimationStateChange(running)
                 }
             }
         )
@@ -375,7 +381,7 @@ class DesktopTasksController(
         // TODO(342378842): Instead of using default display, support multiple displays
         val taskIdToMinimize = bringDesktopAppsToFrontBeforeShowingNewTask(
             DEFAULT_DISPLAY, wct, taskId)
-        val runOnTransit = desktopImmersiveController.exitImmersiveIfApplicable(
+        val exitResult = desktopImmersiveController.exitImmersiveIfApplicable(
             wct = wct,
             displayId = DEFAULT_DISPLAY,
             excludeTaskId = taskId,
@@ -389,7 +395,7 @@ class DesktopTasksController(
         // TODO(343149901): Add DPI changes for task launch
         val transition = enterDesktopTaskTransitionHandler.moveToDesktop(wct, transitionSource)
         taskIdToMinimize?.let { addPendingMinimizeTransition(transition, it) }
-        runOnTransit?.invoke(transition)
+        exitResult.asExit()?.runOnTransitionStart?.invoke(transition)
         return true
     }
 
@@ -406,7 +412,7 @@ class DesktopTasksController(
         }
         logV("moveRunningTaskToDesktop taskId=%d", task.taskId)
         exitSplitIfApplicable(wct, task)
-        val runOnTransit = desktopImmersiveController.exitImmersiveIfApplicable(
+        val exitResult = desktopImmersiveController.exitImmersiveIfApplicable(
             wct = wct,
             displayId = task.displayId,
             excludeTaskId = task.taskId,
@@ -418,7 +424,7 @@ class DesktopTasksController(
 
         val transition = enterDesktopTaskTransitionHandler.moveToDesktop(wct, transitionSource)
         taskIdToMinimize?.let { addPendingMinimizeTransition(transition, it) }
-        runOnTransit?.invoke(transition)
+        exitResult.asExit()?.runOnTransitionStart?.invoke(transition)
     }
 
     /**
@@ -455,12 +461,12 @@ class DesktopTasksController(
         val taskIdToMinimize =
             bringDesktopAppsToFrontBeforeShowingNewTask(taskInfo.displayId, wct, taskInfo.taskId)
         addMoveToDesktopChanges(wct, taskInfo)
-        val runOnTransit = desktopImmersiveController.exitImmersiveIfApplicable(
+        val exitResult = desktopImmersiveController.exitImmersiveIfApplicable(
             wct, taskInfo.displayId)
         val transition = dragToDesktopTransitionHandler.finishDragToDesktopTransition(wct)
         transition?.let {
             taskIdToMinimize?.let { taskId -> addPendingMinimizeTransition(it, taskId) }
-            runOnTransit?.invoke(transition)
+            exitResult.asExit()?.runOnTransitionStart?.invoke(transition)
         }
     }
 
@@ -492,6 +498,7 @@ class DesktopTasksController(
         taskInfo: RunningTaskInfo,
     ): ((IBinder) -> Unit)? {
         val taskId = taskInfo.taskId
+        desktopTilingDecorViewModel.removeTaskIfTiled(displayId, taskId)
         if (taskRepository.isOnlyVisibleNonClosingTask(taskId)) {
             removeWallpaperActivity(wct)
         }
@@ -502,7 +509,8 @@ class DesktopTasksController(
                 taskId
             )
         )
-        return desktopImmersiveController.exitImmersiveIfApplicable(wct, taskInfo)
+        return desktopImmersiveController.exitImmersiveIfApplicable(wct, taskInfo).asExit()
+            ?.runOnTransitionStart
     }
 
     fun minimizeTask(taskInfo: RunningTaskInfo) {
@@ -515,7 +523,7 @@ class DesktopTasksController(
             removeWallpaperActivity(wct)
         }
         // Notify immersive handler as it might need to exit immersive state.
-        val runOnTransit = desktopImmersiveController.exitImmersiveIfApplicable(wct, taskInfo)
+        val exitResult = desktopImmersiveController.exitImmersiveIfApplicable(wct, taskInfo)
 
         wct.reorder(taskInfo.token, false)
         val transition = freeformTaskTransitionStarter.startMinimizedModeTransition(wct)
@@ -526,12 +534,13 @@ class DesktopTasksController(
                 taskId = taskId
             )
         }
-        runOnTransit?.invoke(transition)
+        exitResult.asExit()?.runOnTransitionStart?.invoke(transition)
     }
 
     /** Move a task with given `taskId` to fullscreen */
     fun moveToFullscreen(taskId: Int, transitionSource: DesktopModeTransitionSource) {
         shellTaskOrganizer.getRunningTaskInfo(taskId)?.let { task ->
+            desktopTilingDecorViewModel.removeTaskIfTiled(task.displayId, taskId)
             moveToFullscreenWithAnimation(task, task.positionInParent, transitionSource)
         }
     }
@@ -539,6 +548,7 @@ class DesktopTasksController(
     /** Enter fullscreen by moving the focused freeform task in given `displayId` to fullscreen. */
     fun enterFullscreen(displayId: Int, transitionSource: DesktopModeTransitionSource) {
         getFocusedFreeformTask(displayId)?.let {
+            desktopTilingDecorViewModel.removeTaskIfTiled(displayId, it.taskId)
             moveToFullscreenWithAnimation(it, it.positionInParent, transitionSource)
         }
     }
@@ -546,6 +556,7 @@ class DesktopTasksController(
     /** Move a desktop app to split screen. */
     fun moveToSplit(task: RunningTaskInfo) {
         logV( "moveToSplit taskId=%s", task.taskId)
+        desktopTilingDecorViewModel.removeTaskIfTiled(task.displayId, task.taskId)
         val wct = WindowContainerTransaction()
         wct.setBounds(task.token, Rect())
         // Rather than set windowing mode to multi-window at task level, set it to
@@ -619,7 +630,7 @@ class DesktopTasksController(
         logV("moveBackgroundTaskToFront taskId=%s", taskId)
         val wct = WindowContainerTransaction()
         // TODO: b/342378842 - Instead of using default display, support multiple displays
-        val runOnTransit = desktopImmersiveController.exitImmersiveIfApplicable(
+        val exitResult = desktopImmersiveController.exitImmersiveIfApplicable(
             wct = wct,
             displayId = DEFAULT_DISPLAY,
             excludeTaskId = taskId,
@@ -630,8 +641,13 @@ class DesktopTasksController(
                 launchWindowingMode = WINDOWING_MODE_FREEFORM
             }.toBundle(),
         )
-        val transition = startLaunchTransition(TRANSIT_OPEN, wct, taskId, remoteTransition)
-        runOnTransit?.invoke(transition)
+        val transition = startLaunchTransition(
+            TRANSIT_OPEN,
+            wct,
+            taskId,
+            remoteTransition = remoteTransition
+        )
+        exitResult.asExit()?.runOnTransitionStart?.invoke(transition)
     }
 
     /**
@@ -643,34 +659,46 @@ class DesktopTasksController(
     @JvmOverloads
     fun moveTaskToFront(taskInfo: RunningTaskInfo, remoteTransition: RemoteTransition? = null) {
         logV("moveTaskToFront taskId=%s", taskInfo.taskId)
+        // If a task is tiled, another task should be brought to foreground with it so let
+        // tiling controller handle the request.
+        if (desktopTilingDecorViewModel.moveTaskToFrontIfTiled(taskInfo)) {
+            return
+        }
         val wct = WindowContainerTransaction()
         wct.reorder(taskInfo.token, true /* onTop */, true /* includingParents */)
-        val runOnTransit = desktopImmersiveController.exitImmersiveIfApplicable(
+        val result = desktopImmersiveController.exitImmersiveIfApplicable(
             wct = wct,
             displayId = taskInfo.displayId,
             excludeTaskId = taskInfo.taskId,
         )
-        val transition =
-            startLaunchTransition(
-                TRANSIT_TO_FRONT,
-                wct,
-                taskInfo.taskId,
-                remoteTransition,
-                taskInfo.displayId
-            )
-        runOnTransit?.invoke(transition)
+        val exitResult = if (result is ExitResult.Exit) { result } else { null }
+        val transition = startLaunchTransition(
+            transitionType = TRANSIT_TO_FRONT,
+            wct = wct,
+            taskId = taskInfo.taskId,
+            exitingImmersiveTask = exitResult?.exitingTask,
+            remoteTransition = remoteTransition,
+            displayId = taskInfo.displayId,
+        )
+        exitResult?.runOnTransitionStart?.invoke(transition)
     }
 
     private fun startLaunchTransition(
         transitionType: Int,
         wct: WindowContainerTransaction,
         taskId: Int,
-        remoteTransition: RemoteTransition?,
+        exitingImmersiveTask: Int? = null,
+        remoteTransition: RemoteTransition? = null,
         displayId: Int = DEFAULT_DISPLAY,
     ): IBinder {
         val taskIdToMinimize = addAndGetMinimizeChanges(displayId, wct, taskId)
         if (remoteTransition == null) {
-            val t = transitions.startTransition(transitionType, wct, null /* handler */)
+            val t = desktopMixedTransitionHandler.startLaunchTransition(
+                transitionType = transitionType,
+                wct = wct,
+                taskId = taskId,
+                exitingImmersiveTask = exitingImmersiveTask,
+            )
             taskIdToMinimize?.let { addPendingMinimizeTransition(t, it) }
             return t
         }
@@ -685,7 +713,7 @@ class DesktopTasksController(
                 mainExecutor, rootTaskDisplayAreaOrganizer, remoteTransition, taskIdToMinimize)
         val t = transitions.startTransition(transitionType, wct, remoteTransitionHandler)
         remoteTransitionHandler.setTransition(t)
-        taskIdToMinimize?.let { addPendingMinimizeTransition(t, it) }
+        taskIdToMinimize.let { addPendingMinimizeTransition(t, it) }
         return t
     }
 
@@ -804,11 +832,11 @@ class DesktopTasksController(
         } else {
             // Save current bounds so that task can be restored back to original bounds if necessary
             // and toggle to the stable bounds.
+            desktopTilingDecorViewModel.removeTaskIfTiled(taskInfo.displayId, taskInfo.taskId)
             taskRepository.saveBoundsBeforeMaximize(taskInfo.taskId, currentTaskBounds)
 
             destinationBounds.set(calculateMaximizeBounds(displayLayout, taskInfo))
         }
-
 
 
         val shouldRestoreToSnap =
@@ -918,7 +946,20 @@ class DesktopTasksController(
         position: SnapPosition,
         resizeTrigger: ResizeTrigger,
         motionEvent: MotionEvent?,
+        desktopWindowDecoration: DesktopModeWindowDecoration,
     ) {
+        if (DesktopModeFlags.ENABLE_TILE_RESIZING.isTrue()) {
+            val isTiled = desktopTilingDecorViewModel.snapToHalfScreen(
+                taskInfo,
+                desktopWindowDecoration,
+                position,
+                currentDragBounds,
+            )
+            if (isTiled) {
+                taskbarDesktopTaskListener?.onTaskbarCornerRoundingUpdate(true)
+            }
+            return
+        }
         val destinationBounds = getSnapBounds(taskInfo, position)
         desktopModeEventLogger.logTaskResizingEnded(
             resizeTrigger,
@@ -938,7 +979,7 @@ class DesktopTasksController(
                     taskSurface,
                     startBounds = currentDragBounds,
                     endBounds = destinationBounds,
-                    isResizable = taskInfo.isResizeable
+                    isResizable = taskInfo.isResizeable,
                 )
             }
             return
@@ -958,6 +999,7 @@ class DesktopTasksController(
         currentDragBounds: Rect,
         dragStartBounds: Rect,
         motionEvent: MotionEvent,
+        desktopModeWindowDecoration: DesktopModeWindowDecoration,
     ) {
         releaseVisualIndicator()
         if (!taskInfo.isResizeable && DISABLE_NON_RESIZABLE_APP_SNAP_RESIZE.isTrue()) {
@@ -992,6 +1034,7 @@ class DesktopTasksController(
                 position,
                 resizeTrigger,
                 motionEvent,
+                desktopModeWindowDecoration,
             )
         }
     }
@@ -1222,10 +1265,7 @@ class DesktopTasksController(
                     // Check if freeform task launch during recents should be handled
                     shouldHandleMidRecentsFreeformLaunch -> handleMidRecentsFreeformTaskLaunch(task)
                     // Check if the closing task needs to be handled
-                    TransitionUtil.isClosingType(request.type) -> handleTaskClosing(
-                        task,
-                        request.type
-                    )
+                    TransitionUtil.isClosingType(request.type) -> handleTaskClosing(task)
                     // Check if the top task shouldn't be allowed to enter desktop mode
                     isIncompatibleTask(task) -> handleIncompatibleTaskLaunch(task)
                     // Check if fullscreen task should be updated
@@ -1348,14 +1388,15 @@ class DesktopTasksController(
             wct.startTask(requestedTaskId, options.toBundle())
             val taskIdToMinimize = bringDesktopAppsToFrontBeforeShowingNewTask(
                 callingTask.displayId, wct, requestedTaskId)
-            val runOnTransit = desktopImmersiveController.exitImmersiveIfApplicable(
-                wct = wct,
-                displayId = callingTask.displayId,
-                excludeTaskId = requestedTaskId,
-            )
+            val exitResult = desktopImmersiveController
+                .exitImmersiveIfApplicable(
+                    wct = wct,
+                    displayId = callingTask.displayId,
+                    excludeTaskId = requestedTaskId,
+                )
             val transition = transitions.startTransition(TRANSIT_OPEN, wct, null)
             taskIdToMinimize?.let { addPendingMinimizeTransition(transition, it) }
-            runOnTransit?.invoke(transition)
+            exitResult.asExit()?.runOnTransitionStart?.invoke(transition)
         } else {
             val splitPosition = splitScreenController.determineNewInstancePosition(callingTask)
             splitScreenController.startTask(requestedTaskId, splitPosition,
@@ -1499,7 +1540,11 @@ class DesktopTasksController(
             addPendingMinimizeTransition(transition, taskIdToMinimize)
             return wct
         }
-        return if (wct.isEmpty) null else wct
+        if (!wct.isEmpty) {
+            desktopTilingDecorViewModel.removeTaskIfTiled(task.displayId, task.taskId)
+            return wct
+        }
+        return null
     }
 
     private fun handleFullscreenTaskLaunch(
@@ -1547,10 +1592,7 @@ class DesktopTasksController(
     }
 
     /** Handle task closing by removing wallpaper activity if it's the last active task */
-    private fun handleTaskClosing(
-        task: RunningTaskInfo,
-        transitionType: Int
-    ): WindowContainerTransaction? {
+    private fun handleTaskClosing(task: RunningTaskInfo): WindowContainerTransaction? {
         logV("handleTaskClosing")
         if (!isDesktopModeShowing(task.displayId))
             return null
@@ -1565,12 +1607,13 @@ class DesktopTasksController(
 
         if (!DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION.isTrue()) {
             taskRepository.addClosingTask(task.displayId, task.taskId)
+            desktopTilingDecorViewModel.removeTaskIfTiled(task.displayId, task.taskId)
         }
 
         taskbarDesktopTaskListener?.onTaskbarCornerRoundingUpdate(
             doesAnyTaskRequireTaskbarRounding(
                 task.displayId,
-                task.id
+                task.taskId
             )
         )
         return if (wct.isEmpty) null else wct
@@ -1812,6 +1855,7 @@ class DesktopTasksController(
         taskBounds: Rect
     ) {
         if (taskInfo.windowingMode != WINDOWING_MODE_FREEFORM) return
+        desktopTilingDecorViewModel.removeTaskIfTiled(taskInfo.displayId, taskInfo.taskId)
         updateVisualIndicator(taskInfo, taskSurface, inputX, taskBounds.top.toFloat(),
             DragStartState.FROM_FREEFORM)
     }
@@ -1861,6 +1905,7 @@ class DesktopTasksController(
         validDragArea: Rect,
         dragStartBounds: Rect,
         motionEvent: MotionEvent,
+        desktopModeWindowDecoration: DesktopModeWindowDecoration,
     ) {
         if (taskInfo.configuration.windowConfiguration.windowingMode != WINDOWING_MODE_FREEFORM) {
             return
@@ -1887,6 +1932,7 @@ class DesktopTasksController(
                     currentDragBounds,
                     dragStartBounds,
                     motionEvent,
+                    desktopModeWindowDecoration,
                 )
             }
             IndicatorType.TO_SPLIT_RIGHT_INDICATOR -> {
@@ -1897,6 +1943,7 @@ class DesktopTasksController(
                     currentDragBounds,
                     dragStartBounds,
                     motionEvent,
+                    desktopModeWindowDecoration,
                 )
             }
             IndicatorType.NO_INDICATOR -> {
@@ -2090,6 +2137,7 @@ class DesktopTasksController(
     // TODO(b/366397912): Support full multi-user mode in Windowing.
     override fun onUserChanged(newUserId: Int, userContext: Context) {
         userId = newUserId
+        desktopTilingDecorViewModel.onUserChange()
     }
 
     /** Called when a task's info changes. */

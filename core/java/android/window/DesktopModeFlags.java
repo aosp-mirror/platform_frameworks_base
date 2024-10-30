@@ -49,6 +49,7 @@ public enum DesktopModeFlags {
     ENABLE_CAPTION_COMPAT_INSET_FORCE_CONSUMPTION_ALWAYS(
             Flags::enableCaptionCompatInsetForceConsumptionAlways, true),
     ENABLE_CASCADING_WINDOWS(Flags::enableCascadingWindows, true),
+    ENABLE_TILE_RESIZING(Flags::enableTileResizing, true),
     ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY(
             Flags::enableDesktopWindowingWallpaperActivity, true),
     ENABLE_DESKTOP_WINDOWING_MODALS_POLICY(Flags::enableDesktopWindowingModalsPolicy, true),

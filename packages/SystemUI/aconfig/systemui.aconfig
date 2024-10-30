@@ -378,6 +378,17 @@ flag {
 }
 
 flag {
+    name: "status_bar_show_audio_only_projection_chip"
+    namespace: "systemui"
+    description: "Show chip on the left side of the status bar when a user is only sharing *audio* "
+        "during a media projection"
+    bug: "373308507"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "status_bar_use_repos_for_call_chip"
     namespace: "systemui"
     description: "Use repositories as the source of truth for call notifications shown as a chip in"
@@ -435,9 +446,9 @@ flag {
 }
 
 flag {
-    name: "status_bar_ron_chips"
+    name: "status_bar_notification_chips"
     namespace: "systemui"
-    description: "Show rich ongoing notifications as chips in the status bar"
+    description: "Show promoted ongoing notifications as chips in the status bar"
     bug: "361346412"
 }
 
@@ -729,6 +740,13 @@ flag {
 }
 
 flag {
+    name: "smartspace_swipe_event_logging"
+    namespace: "systemui"
+    description: "Log card swipe events in smartspace"
+    bug: "374150422"
+}
+
+flag {
    name: "pin_input_field_styled_focus_state"
    namespace: "systemui"
    description: "Enables styled focus states on pin input field if keyboard is connected"
@@ -988,6 +1006,16 @@ flag {
     namespace: "systemui"
     description: "Allow showing education for physical keyboard and touchpad"
     bug: "317496783"
+}
+
+flag {
+    name: "shortcut_helper_key_glyph"
+    namespace: "systemui"
+    description: "Allow showing key glyph in shortcut helper"
+    bug: "353902478"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
 }
 
 flag {
@@ -1631,4 +1659,11 @@ flag {
   metadata {
     purpose: PURPOSE_BUGFIX
   }
+}
+
+flag {
+  name: "shade_expands_on_status_bar_long_press"
+  namespace: "systemui"
+  description: "Expands the shade on long press of any status bar"
+  bug: "371224114"
 }

@@ -16,7 +16,6 @@
 
 package android.view;
 
-import static android.inputmethodservice.InputMethodService.ENABLE_HIDE_IME_CAPTION_BAR;
 import static android.os.Trace.TRACE_TAG_VIEW;
 import static android.view.InsetsControllerProto.CONTROL;
 import static android.view.InsetsControllerProto.STATE;
@@ -1083,7 +1082,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         }
     }
 
-    boolean isPredictiveBackImeHideAnimInProgress() {
+    public boolean isPredictiveBackImeHideAnimInProgress() {
         return mIsPredictiveBackImeHideAnimInProgress;
     }
 
@@ -2148,9 +2147,6 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
 
     @Override
     public void setImeCaptionBarInsetsHeight(int height) {
-        if (!ENABLE_HIDE_IME_CAPTION_BAR) {
-            return;
-        }
         Rect newFrame = new Rect(mFrame.left, mFrame.bottom - height, mFrame.right, mFrame.bottom);
         InsetsSource source = mState.peekSource(ID_IME_CAPTION_BAR);
         if (mImeCaptionBarInsetsHeight != height

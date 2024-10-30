@@ -373,7 +373,10 @@ public final class AppRestrictionController {
         @Override
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
-            switch (intent.getAction()) {
+            if (action == null) {
+                return;
+            }
+            switch (action) {
                 case Intent.ACTION_PACKAGE_ADDED: {
                     if (!intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
                         final int uid = intent.getIntExtra(Intent.EXTRA_UID, -1);

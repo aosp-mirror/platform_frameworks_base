@@ -16,11 +16,14 @@
 package com.android.ravenwoodtest.bivalenttest.ravenizer;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 
 import android.platform.test.annotations.DisabledOnRavenwood;
-import android.platform.test.ravenwood.RavenwoodAwareTestRunner.RavenwoodTestRunnerInitializing;
+import android.platform.test.annotations.RavenwoodTestRunnerInitializing;
 import android.platform.test.ravenwood.RavenwoodRule;
 import android.util.Log;
+
+import androidx.test.platform.app.InstrumentationRegistry;
 
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
@@ -29,6 +32,8 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.util.List;
 
 /**
  * Make sure RavenwoodAwareTestRunnerTest properly delegates to the original runner,
@@ -61,13 +66,22 @@ public class RavenwoodAwareTestRunnerTest {
         sCallTracker.incrementMethodCallCount();
     }
 
+    public RavenwoodAwareTestRunnerTest() {
+        // Make sure the environment is already initialized when the constructor is called
+        assertNotNull(InstrumentationRegistry.getInstrumentation());
+    }
+
     @Test
     public void test1() {
         sCallTracker.incrementMethodCallCount();
     }
 
+    public static List<String> testParams() {
+        return List.of("foo", "bar");
+    }
+
     @Test
-    @Parameters({"foo", "bar"})
+    @Parameters(method = "testParams")
     public void testWithParams(String arg) {
         sCallTracker.incrementMethodCallCount();
     }

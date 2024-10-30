@@ -145,6 +145,9 @@ public class BubbleLogger {
         @UiEvent(doc = "bubble promoted from overflow back to bubble bar")
         BUBBLE_BAR_OVERFLOW_REMOVE_BACK_TO_BAR(1949),
 
+        @UiEvent(doc = "while bubble bar is expanded, switch to another/existing bubble")
+        BUBBLE_BAR_BUBBLE_SWITCHED(1977)
+
         // endregion
         ;
 
@@ -165,8 +168,14 @@ public class BubbleLogger {
     }
 
     /**
-     * @param b Bubble involved in this UI event
-     * @param e UI event
+     * Log an UIEvent
+     */
+    public void log(UiEventLogger.UiEventEnum e) {
+        mUiEventLogger.log(e);
+    }
+
+    /**
+     * Log an UIEvent with the given bubble info
      */
     public void log(Bubble b, UiEventLogger.UiEventEnum e) {
         mUiEventLogger.logWithInstanceId(e, b.getAppUid(), b.getPackageName(), b.getInstanceId());

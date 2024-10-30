@@ -24,6 +24,9 @@ android_test {
         "platform-test-annotations",
         "services.core",
         "truth",
+        "Nene",
+        "Harrier",
+        "TestApp",
     ],
 
     platform_apis: true,

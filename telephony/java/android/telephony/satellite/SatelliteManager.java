@@ -710,6 +710,16 @@ public final class SatelliteManager {
     public static final String ACTION_SATELLITE_SUBSCRIBER_ID_LIST_CHANGED =
             "android.telephony.action.ACTION_SATELLITE_SUBSCRIBER_ID_LIST_CHANGED";
 
+
+    /**
+     * This intent will be broadcasted to start a non-emergency session.
+     * This intent will be sent only to the app with component defined in
+     * config_satellite_carrier_roaming_non_emergency_session_class and package defined in
+     * config_satellite_gateway_service_package
+     * @hide
+     */
+    public static final String ACTION_SATELLITE_START_NON_EMERGENCY_SESSION =
+            "android.telephony.action.ACTION_SATELLITE_START_NON_EMERGENCY_SESSION";
     /**
      * Meta-data represents whether the application supports P2P SMS over carrier roaming satellite
      * which needs manual trigger to connect to satellite. The messaging applications that supports

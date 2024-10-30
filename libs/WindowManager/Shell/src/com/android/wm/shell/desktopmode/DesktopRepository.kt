@@ -139,12 +139,9 @@ class DesktopRepository (
                         && visibleTasksCount < maxTasks
                     ) {
                         visibleTasksCount++
-                        addOrMoveFreeformTaskToTop(desktop.displayId, task.taskId)
-                        addActiveTask(desktop.displayId, task.taskId)
-                        updateTaskVisibility(desktop.displayId, task.taskId, visible = false)
+                        addTask(desktop.displayId, task.taskId, isVisible = false)
                     } else {
-                        addActiveTask(desktop.displayId, task.taskId)
-                        updateTaskVisibility(desktop.displayId, task.taskId, visible = false)
+                        addTask(desktop.displayId, task.taskId, isVisible = false)
                         minimizeTask(desktop.displayId, task.taskId)
                     }
                 }
@@ -204,8 +201,15 @@ class DesktopRepository (
         visibleTasksListeners.remove(visibleTasksListener)
     }
 
+    /** Adds task with [taskId] to the list of freeform tasks on [displayId]. */
+    fun addTask(displayId: Int, taskId: Int, isVisible: Boolean) {
+        addOrMoveFreeformTaskToTop(displayId, taskId)
+        addActiveTask(displayId, taskId)
+        updateTask(displayId, taskId, isVisible)
+    }
+
     /** Adds task with [taskId] to the list of active tasks on [displayId]. */
-    fun addActiveTask(displayId: Int, taskId: Int) {
+    private fun addActiveTask(displayId: Int, taskId: Int) {
         // Removes task if it is active on another display excluding [displayId].
         removeActiveTask(taskId, excludedDisplayId = displayId)
 
@@ -219,7 +223,7 @@ class DesktopRepository (
     fun removeActiveTask(taskId: Int, excludedDisplayId: Int? = null) {
         desktopTaskDataByDisplayId.forEach { displayId, desktopTaskData ->
             if ((displayId != excludedDisplayId)
-                    && desktopTaskData.activeTasks.remove(taskId)) {
+                && desktopTaskData.activeTasks.remove(taskId)) {
                 logD("Removed active task=%d displayId=%d", taskId, displayId)
                 updateActiveTasksListeners(displayId)
             }
@@ -292,8 +296,8 @@ class DesktopRepository (
      * If task was visible on a different display with a different [displayId], removes from
      * the set of visible tasks on that display and notifies listeners.
      */
-    fun updateTaskVisibility(displayId: Int, taskId: Int, visible: Boolean) {
-        if (visible) {
+    fun updateTask(displayId: Int, taskId: Int, isVisible: Boolean) {
+        if (isVisible) {
             // If task is visible, remove it from any other display besides [displayId].
             removeVisibleTask(taskId, excludedDisplayId = displayId)
         } else if (displayId == INVALID_DISPLAY) {
@@ -302,7 +306,7 @@ class DesktopRepository (
             return
         }
         val prevCount = getVisibleTaskCount(displayId)
-        if (visible) {
+        if (isVisible) {
             desktopTaskDataByDisplayId.getOrCreate(displayId).visibleTasks.add(taskId)
             unminimizeTask(displayId, taskId)
         } else {
@@ -311,7 +315,7 @@ class DesktopRepository (
         val newCount = getVisibleTaskCount(displayId)
         if (prevCount != newCount) {
             logD("Update task visibility taskId=%d visible=%b displayId=%d",
-                taskId, visible, displayId)
+                taskId, isVisible, displayId)
             logD("VisibleTaskCount has changed from %d to %d", prevCount, newCount)
             notifyVisibleTaskListeners(displayId, newCount)
         }
@@ -355,7 +359,7 @@ class DesktopRepository (
      *
      * Unminimizes the task if it is minimized.
      */
-    fun addOrMoveFreeformTaskToTop(displayId: Int, taskId: Int) {
+    private fun addOrMoveFreeformTaskToTop(displayId: Int, taskId: Int) {
         logD("Add or move task to top: display=%d taskId=%d", taskId, displayId)
         desktopTaskDataByDisplayId[displayId]?.freeformTasksInZOrder?.remove(taskId)
         desktopTaskDataByDisplayId.getOrCreate(displayId).freeformTasksInZOrder.add(0, taskId)
@@ -378,7 +382,7 @@ class DesktopRepository (
             logD("Minimize Task: display=%d, task=%d", displayId, taskId)
             desktopTaskDataByDisplayId.getOrCreate(displayId).minimizedTasks.add(taskId)
         }
-
+        updateTask(displayId, taskId, isVisible = false)
         if (Flags.enableDesktopWindowingPersistence()) {
             updatePersistentRepository(displayId)
         }
@@ -426,7 +430,7 @@ class DesktopRepository (
         // Remove task from unminimized task if it is minimized.
         unminimizeTask(displayId, taskId)
         removeActiveTask(taskId)
-        updateTaskVisibility(displayId, taskId, visible = false)
+        removeVisibleTask(taskId)
         if (Flags.enableDesktopWindowingPersistence()) {
             updatePersistentRepository(displayId)
         }

@@ -16,7 +16,6 @@
 
 package android.app.wearable;
 
-import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.os.Parcel;
@@ -30,7 +29,6 @@ import java.time.Duration;
  *
  * @hide
  */
-@FlaggedApi(Flags.FLAG_ENABLE_DATA_REQUEST_OBSERVER_API)
 @SystemApi
 public final class WearableSensingDataRequest implements Parcelable {
     private static final int MAX_REQUEST_SIZE = 200;
@@ -164,7 +162,6 @@ public final class WearableSensingDataRequest implements Parcelable {
     }
 
     /** A builder for WearableSensingDataRequest. */
-    @FlaggedApi(Flags.FLAG_ENABLE_DATA_REQUEST_OBSERVER_API)
     public static final class Builder {
         private int mDataType;
         private PersistableBundle mRequestDetails;

@@ -47,3 +47,10 @@ flag {
   description: "This flag controls Whether to enable fp unlock when screen turns off on udfps devices"
   bug: "373792870"
 }
+
+flag {
+  name: "identity_check_api"
+  namespace: "biometrics_framework"
+  description: "This flag is for API changes related to Identity Check"
+  bug: "373424727"
+}

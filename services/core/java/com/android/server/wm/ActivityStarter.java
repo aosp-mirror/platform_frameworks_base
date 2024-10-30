@@ -2397,7 +2397,8 @@ class ActivityStarter {
         // This is moving an existing task to front. But since dream activity has a higher z-order
         // to cover normal activities, it needs the awakening event to be dismissed.
         if (mService.isDreaming() && targetTaskTop.canTurnScreenOn()) {
-            targetTaskTop.mTaskSupervisor.wakeUp("recycleTask#turnScreenOnFlag");
+            targetTaskTop.mTaskSupervisor.wakeUp(
+                    targetTaskTop.getDisplayId(), "recycleTask#turnScreenOnFlag");
         }
 
         mLastStartActivityRecord = targetTaskTop;
@@ -3468,8 +3469,8 @@ class ActivityStarter {
         return this;
     }
 
-    ActivityStarter setActivityOptions(Bundle bOptions) {
-        return setActivityOptions(SafeActivityOptions.fromBundle(bOptions));
+    ActivityStarter setActivityOptions(Bundle bOptions, int callingPid, int callingUid) {
+        return setActivityOptions(SafeActivityOptions.fromBundle(bOptions, callingPid, callingUid));
     }
 
     ActivityStarter setIgnoreTargetSecurity(boolean ignoreTargetSecurity) {

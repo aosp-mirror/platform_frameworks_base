@@ -4421,6 +4421,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             mPendingBroadcasts.remove(userId);
             mAppsFilter.onUserDeleted(snapshotComputer(), userId);
             mPermissionManager.onUserRemoved(userId);
+            mInstallerService.onUserRemoved(userId);
         }
         mInstantAppRegistry.onUserRemoved(userId);
         mPackageMonitorCallbackHelper.onUserRemoved(userId);
@@ -4471,6 +4472,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             mLegacyPermissionManager.grantDefaultPermissions(userId);
             mPermissionManager.setDefaultPermissionGrantFingerprint(Build.FINGERPRINT, userId);
             mDomainVerificationManager.clearUser(userId);
+            mInstallerService.onUserAdded(userId);
         }
     }
 

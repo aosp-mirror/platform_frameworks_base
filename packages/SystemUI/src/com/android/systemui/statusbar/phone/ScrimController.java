@@ -446,6 +446,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
                             mStatusBarKeyguardViewManager.onKeyguardFadedAway();
                         }
                         dispatchScrimsVisible();
+                        dispatchBackScrimState(mScrimBehind.getViewAlpha());
                     }
                 };
 

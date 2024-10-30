@@ -3355,7 +3355,14 @@ package android.app.wallpapereffectsgeneration {
 
 package android.app.wearable {
 
-  @FlaggedApi("android.app.wearable.enable_data_request_observer_api") public final class WearableSensingDataRequest implements android.os.Parcelable {
+  @FlaggedApi("android.app.wearable.enable_concurrent_wearable_connections") public interface WearableConnection {
+    method @NonNull public android.os.ParcelFileDescriptor getConnection();
+    method @NonNull public android.os.PersistableBundle getMetadata();
+    method public void onConnectionAccepted();
+    method public void onError(int);
+  }
+
+  public final class WearableSensingDataRequest implements android.os.Parcelable {
     method public int describeContents();
     method public int getDataSize();
     method public int getDataType();
@@ -3367,29 +3374,35 @@ package android.app.wearable {
     field @NonNull public static final android.os.Parcelable.Creator<android.app.wearable.WearableSensingDataRequest> CREATOR;
   }
 
-  @FlaggedApi("android.app.wearable.enable_data_request_observer_api") public static final class WearableSensingDataRequest.Builder {
+  public static final class WearableSensingDataRequest.Builder {
     ctor public WearableSensingDataRequest.Builder(int);
     method @NonNull public android.app.wearable.WearableSensingDataRequest build();
     method @NonNull public android.app.wearable.WearableSensingDataRequest.Builder setRequestDetails(@NonNull android.os.PersistableBundle);
   }
 
   public class WearableSensingManager {
-    method @FlaggedApi("android.app.wearable.enable_data_request_observer_api") @Nullable public static android.app.wearable.WearableSensingDataRequest getDataRequestFromIntent(@NonNull android.content.Intent);
-    method @FlaggedApi("android.app.wearable.enable_provide_wearable_connection_api") @RequiresPermission(android.Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE) public void provideConnection(@NonNull android.os.ParcelFileDescriptor, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>);
+    method @FlaggedApi("android.app.wearable.enable_concurrent_wearable_connections") @RequiresPermission(android.Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE) public int getAvailableConnectionCount();
+    method @Nullable public static android.app.wearable.WearableSensingDataRequest getDataRequestFromIntent(@NonNull android.content.Intent);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE) public void provideConnection(@NonNull android.os.ParcelFileDescriptor, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>);
+    method @FlaggedApi("android.app.wearable.enable_concurrent_wearable_connections") @RequiresPermission(android.Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE) public void provideConnection(@NonNull android.app.wearable.WearableConnection, @NonNull java.util.concurrent.Executor);
     method @RequiresPermission(android.Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE) public void provideData(@NonNull android.os.PersistableBundle, @Nullable android.os.SharedMemory, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>);
     method @Deprecated @RequiresPermission(android.Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE) public void provideDataStream(@NonNull android.os.ParcelFileDescriptor, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>);
-    method @FlaggedApi("android.app.wearable.enable_data_request_observer_api") @RequiresPermission(android.Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE) public void registerDataRequestObserver(int, @NonNull android.app.PendingIntent, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>);
+    method @FlaggedApi("android.app.wearable.enable_provide_read_only_pfd") @RequiresPermission(android.Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE) public void provideReadOnlyParcelFileDescriptor(@NonNull android.os.ParcelFileDescriptor, @NonNull android.os.PersistableBundle, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE) public void registerDataRequestObserver(int, @NonNull android.app.PendingIntent, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>);
+    method @FlaggedApi("android.app.wearable.enable_concurrent_wearable_connections") @RequiresPermission(android.Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE) public void removeAllConnections();
+    method @FlaggedApi("android.app.wearable.enable_concurrent_wearable_connections") @RequiresPermission(android.Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE) public boolean removeConnection(@NonNull android.app.wearable.WearableConnection);
     method @FlaggedApi("android.app.wearable.enable_hotword_wearable_sensing_api") @RequiresPermission(android.Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE) public void startHotwordRecognition(@Nullable android.content.ComponentName, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>);
     method @FlaggedApi("android.app.wearable.enable_hotword_wearable_sensing_api") @RequiresPermission(android.Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE) public void stopHotwordRecognition(@NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>);
-    method @FlaggedApi("android.app.wearable.enable_data_request_observer_api") @RequiresPermission(android.Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE) public void unregisterDataRequestObserver(int, @NonNull android.app.PendingIntent, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE) public void unregisterDataRequestObserver(int, @NonNull android.app.PendingIntent, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>);
     field public static final int STATUS_ACCESS_DENIED = 5; // 0x5
-    field @FlaggedApi("android.app.wearable.enable_provide_wearable_connection_api") public static final int STATUS_CHANNEL_ERROR = 7; // 0x7
+    field public static final int STATUS_CHANNEL_ERROR = 7; // 0x7
+    field @FlaggedApi("android.app.wearable.enable_concurrent_wearable_connections") public static final int STATUS_MAX_CONCURRENT_CONNECTIONS_EXCEEDED = 9; // 0x9
     field public static final int STATUS_SERVICE_UNAVAILABLE = 3; // 0x3
     field public static final int STATUS_SUCCESS = 1; // 0x1
     field public static final int STATUS_UNKNOWN = 0; // 0x0
     field @Deprecated public static final int STATUS_UNSUPPORTED = 2; // 0x2
-    field @FlaggedApi("android.app.wearable.enable_data_request_observer_api") public static final int STATUS_UNSUPPORTED_DATA_TYPE = 8; // 0x8
-    field @FlaggedApi("android.app.wearable.enable_unsupported_operation_status_code") public static final int STATUS_UNSUPPORTED_OPERATION = 6; // 0x6
+    field public static final int STATUS_UNSUPPORTED_DATA_TYPE = 8; // 0x8
+    field public static final int STATUS_UNSUPPORTED_OPERATION = 6; // 0x6
     field public static final int STATUS_WEARABLE_UNAVAILABLE = 4; // 0x4
   }
 
@@ -14086,34 +14099,9 @@ package android.service.wallpapereffectsgeneration {
 
 }
 
-package android.service.watchdog {
-
-  public abstract class ExplicitHealthCheckService extends android.app.Service {
-    ctor public ExplicitHealthCheckService();
-    method public final void notifyHealthCheckPassed(@NonNull String);
-    method @NonNull public final android.os.IBinder onBind(@NonNull android.content.Intent);
-    method public abstract void onCancelHealthCheck(@NonNull String);
-    method @NonNull public abstract java.util.List<java.lang.String> onGetRequestedPackages();
-    method @NonNull public abstract java.util.List<android.service.watchdog.ExplicitHealthCheckService.PackageConfig> onGetSupportedPackages();
-    method public abstract void onRequestHealthCheck(@NonNull String);
-    field public static final String BIND_PERMISSION = "android.permission.BIND_EXPLICIT_HEALTH_CHECK_SERVICE";
-    field public static final String SERVICE_INTERFACE = "android.service.watchdog.ExplicitHealthCheckService";
-  }
-
-  public static final class ExplicitHealthCheckService.PackageConfig implements android.os.Parcelable {
-    ctor public ExplicitHealthCheckService.PackageConfig(@NonNull String, long);
-    method public int describeContents();
-    method public long getHealthCheckTimeoutMillis();
-    method @NonNull public String getPackageName();
-    method public void writeToParcel(android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.service.watchdog.ExplicitHealthCheckService.PackageConfig> CREATOR;
-  }
-
-}
-
 package android.service.wearable {
 
-  @FlaggedApi("android.app.wearable.enable_data_request_observer_api") public interface WearableSensingDataRequester {
+  public interface WearableSensingDataRequester {
     method public void requestData(@NonNull android.app.wearable.WearableSensingDataRequest, @NonNull java.util.function.Consumer<java.lang.Integer>);
     field public static final int STATUS_OBSERVER_CANCELLED = 2; // 0x2
     field public static final int STATUS_SUCCESS = 1; // 0x1
@@ -14126,11 +14114,13 @@ package android.service.wearable {
     ctor public WearableSensingService();
     method @Nullable public final android.os.IBinder onBind(@NonNull android.content.Intent);
     method @BinderThread public abstract void onDataProvided(@NonNull android.os.PersistableBundle, @Nullable android.os.SharedMemory, @NonNull java.util.function.Consumer<java.lang.Integer>);
-    method @FlaggedApi("android.app.wearable.enable_data_request_observer_api") @BinderThread public void onDataRequestObserverRegistered(int, @NonNull String, @NonNull android.service.wearable.WearableSensingDataRequester, @NonNull java.util.function.Consumer<java.lang.Integer>);
-    method @FlaggedApi("android.app.wearable.enable_data_request_observer_api") @BinderThread public void onDataRequestObserverUnregistered(int, @NonNull String, @NonNull android.service.wearable.WearableSensingDataRequester, @NonNull java.util.function.Consumer<java.lang.Integer>);
+    method @BinderThread public void onDataRequestObserverRegistered(int, @NonNull String, @NonNull android.service.wearable.WearableSensingDataRequester, @NonNull java.util.function.Consumer<java.lang.Integer>);
+    method @BinderThread public void onDataRequestObserverUnregistered(int, @NonNull String, @NonNull android.service.wearable.WearableSensingDataRequester, @NonNull java.util.function.Consumer<java.lang.Integer>);
     method @BinderThread public abstract void onDataStreamProvided(@NonNull android.os.ParcelFileDescriptor, @NonNull java.util.function.Consumer<java.lang.Integer>);
     method @BinderThread public abstract void onQueryServiceStatus(@NonNull java.util.Set<java.lang.Integer>, @NonNull String, @NonNull java.util.function.Consumer<android.service.ambientcontext.AmbientContextDetectionServiceStatus>);
-    method @FlaggedApi("android.app.wearable.enable_provide_wearable_connection_api") @BinderThread public void onSecureConnectionProvided(@NonNull android.os.ParcelFileDescriptor, @NonNull java.util.function.Consumer<java.lang.Integer>);
+    method @FlaggedApi("android.app.wearable.enable_provide_read_only_pfd") @BinderThread public void onReadOnlyParcelFileDescriptorProvided(@NonNull android.os.ParcelFileDescriptor, @NonNull android.os.PersistableBundle, @NonNull java.util.function.Consumer<java.lang.Integer>);
+    method @BinderThread public void onSecureConnectionProvided(@NonNull android.os.ParcelFileDescriptor, @NonNull java.util.function.Consumer<java.lang.Integer>);
+    method @FlaggedApi("android.app.wearable.enable_concurrent_wearable_connections") @BinderThread public void onSecureConnectionProvided(@NonNull android.os.ParcelFileDescriptor, @NonNull android.os.PersistableBundle, @NonNull java.util.function.Consumer<java.lang.Integer>);
     method @BinderThread public abstract void onStartDetection(@NonNull android.app.ambientcontext.AmbientContextEventRequest, @NonNull String, @NonNull java.util.function.Consumer<android.service.ambientcontext.AmbientContextDetectionServiceStatus>, @NonNull java.util.function.Consumer<android.service.ambientcontext.AmbientContextDetectionResult>);
     method @FlaggedApi("android.app.wearable.enable_hotword_wearable_sensing_api") @BinderThread public void onStartHotwordRecognition(@NonNull java.util.function.Consumer<android.service.voice.HotwordAudioStream>, @NonNull java.util.function.Consumer<java.lang.Integer>);
     method public abstract void onStopDetection(@NonNull String);

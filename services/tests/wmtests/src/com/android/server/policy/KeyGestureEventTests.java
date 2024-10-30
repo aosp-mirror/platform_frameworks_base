@@ -26,6 +26,7 @@ import static com.android.server.policy.PhoneWindowManager.POWER_VOLUME_UP_BEHAV
 import static com.android.server.policy.PhoneWindowManager.POWER_VOLUME_UP_BEHAVIOR_MUTE;
 import static com.android.server.policy.PhoneWindowManager.SETTINGS_KEY_BEHAVIOR_NOTIFICATION_PANEL;
 
+import android.hardware.input.InputSettings;
 import android.hardware.input.KeyGestureEvent;
 import android.os.RemoteException;
 import android.platform.test.annotations.DisableFlags;
@@ -405,6 +406,36 @@ public class KeyGestureEventTests extends ShortcutKeyTestBase {
                 META_ON | ALT_ON);
     }
 
+    @Test
+    @EnableFlags({com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_SHORTCUT_CONTROL,
+            com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_BOUNCE_KEYS_FLAG,
+            com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_SLOW_KEYS_FLAG,
+            com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_STICKY_KEYS_FLAG,
+            com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_MOUSE_KEYS})
+    @DisableFlags(com.android.hardware.input.Flags.FLAG_USE_KEY_GESTURE_EVENT_HANDLER)
+    public void testKeyboardAccessibilityToggleShortcutPress() {
+        testShortcutInternal("Meta + Alt + 3 -> Toggle Bounce Keys",
+                new int[]{META_KEY, ALT_KEY, KeyEvent.KEYCODE_3},
+                KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_BOUNCE_KEYS,
+                KeyEvent.KEYCODE_3,
+                META_ON | ALT_ON);
+        testShortcutInternal("Meta + Alt + 4 -> Toggle Mouse Keys",
+                new int[]{META_KEY, ALT_KEY, KeyEvent.KEYCODE_4},
+                KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_MOUSE_KEYS,
+                KeyEvent.KEYCODE_4,
+                META_ON | ALT_ON);
+        testShortcutInternal("Meta + Alt + 5 -> Toggle Sticky Keys",
+                new int[]{META_KEY, ALT_KEY, KeyEvent.KEYCODE_5},
+                KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_STICKY_KEYS,
+                KeyEvent.KEYCODE_5,
+                META_ON | ALT_ON);
+        testShortcutInternal("Meta + Alt + 6 -> Toggle Slow Keys",
+                new int[]{META_KEY, ALT_KEY, KeyEvent.KEYCODE_6},
+                KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_SLOW_KEYS,
+                KeyEvent.KEYCODE_6,
+                META_ON | ALT_ON);
+    }
+
     private void testShortcutInternal(String testName, int[] testKeys,
             @KeyGestureEvent.KeyGestureType int expectedKeyGestureType, int expectedKey,
             int expectedModifierState) {
@@ -722,5 +753,57 @@ public class KeyGestureEventTests extends ShortcutKeyTestBase {
         Assert.assertTrue(
                 sendKeyGestureEventComplete(KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_TALKBACK));
         mPhoneWindowManager.assertTalkBack(false);
+    }
+
+    @Test
+    @EnableFlags({com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_SHORTCUT_CONTROL,
+            com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_STICKY_KEYS_FLAG})
+    public void testKeyGestureToggleStickyKeys() {
+        Assert.assertTrue(
+                sendKeyGestureEventComplete(KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_STICKY_KEYS));
+        Assert.assertTrue(InputSettings.isAccessibilityStickyKeysEnabled(mContext));
+
+        Assert.assertTrue(
+                sendKeyGestureEventComplete(KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_STICKY_KEYS));
+        Assert.assertFalse(InputSettings.isAccessibilityStickyKeysEnabled(mContext));
+    }
+
+    @Test
+    @EnableFlags({com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_SHORTCUT_CONTROL,
+            com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_SLOW_KEYS_FLAG})
+    public void testKeyGestureToggleSlowKeys() {
+        Assert.assertTrue(
+                sendKeyGestureEventComplete(KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_SLOW_KEYS));
+        Assert.assertTrue(InputSettings.isAccessibilitySlowKeysEnabled(mContext));
+
+        Assert.assertTrue(
+                sendKeyGestureEventComplete(KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_SLOW_KEYS));
+        Assert.assertFalse(InputSettings.isAccessibilitySlowKeysEnabled(mContext));
+    }
+
+    @Test
+    @EnableFlags({com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_SHORTCUT_CONTROL,
+            com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_MOUSE_KEYS})
+    public void testKeyGestureToggleMouseKeys() {
+        Assert.assertTrue(
+                sendKeyGestureEventComplete(KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_MOUSE_KEYS));
+        Assert.assertTrue(InputSettings.isAccessibilityMouseKeysEnabled(mContext));
+
+        Assert.assertTrue(
+                sendKeyGestureEventComplete(KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_MOUSE_KEYS));
+        Assert.assertFalse(InputSettings.isAccessibilityMouseKeysEnabled(mContext));
+    }
+
+    @Test
+    @EnableFlags({com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_SHORTCUT_CONTROL,
+            com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_BOUNCE_KEYS_FLAG})
+    public void testKeyGestureToggleBounceKeys() {
+        Assert.assertTrue(
+                sendKeyGestureEventComplete(KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_BOUNCE_KEYS));
+        Assert.assertTrue(InputSettings.isAccessibilityBounceKeysEnabled(mContext));
+
+        Assert.assertTrue(
+                sendKeyGestureEventComplete(KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_BOUNCE_KEYS));
+        Assert.assertFalse(InputSettings.isAccessibilityBounceKeysEnabled(mContext));
     }
 }

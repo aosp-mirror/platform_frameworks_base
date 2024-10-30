@@ -70,7 +70,7 @@ class DesktopHeaderManageWindowsMenuTest : ShellTestCase() {
 
     @After
     fun tearDown() {
-        menu.close()
+        menu.animateClose()
     }
 
     @Test

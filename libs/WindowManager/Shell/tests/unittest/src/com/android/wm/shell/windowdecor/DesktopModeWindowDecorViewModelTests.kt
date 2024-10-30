@@ -666,7 +666,8 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
             eq(currentBounds),
             eq(SnapPosition.LEFT),
             eq(ResizeTrigger.SNAP_LEFT_MENU),
-            eq(null)
+            eq(null),
+            eq(decor)
         )
         assertEquals(taskSurfaceCaptor.firstValue, decor.mTaskSurface)
     }
@@ -706,7 +707,8 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
             eq(currentBounds),
             eq(SnapPosition.LEFT),
             eq(ResizeTrigger.SNAP_LEFT_MENU),
-            eq(null)
+            eq(null),
+            eq(decor),
         )
         assertEquals(decor.mTaskSurface, taskSurfaceCaptor.firstValue)
     }
@@ -727,7 +729,9 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
         verify(mockDesktopTasksController, never())
             .snapToHalfScreen(eq(decor.mTaskInfo), any(), eq(currentBounds), eq(SnapPosition.LEFT),
                 eq(ResizeTrigger.MAXIMIZE_BUTTON),
-                eq(null))
+                eq(null),
+                eq(decor),
+            )
         verify(mockToast).show()
     }
 
@@ -750,7 +754,8 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
             eq(currentBounds),
             eq(SnapPosition.RIGHT),
             eq(ResizeTrigger.SNAP_RIGHT_MENU),
-            eq(null)
+            eq(null),
+            eq(decor),
         )
         assertEquals(decor.mTaskSurface, taskSurfaceCaptor.firstValue)
     }
@@ -790,7 +795,8 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
             eq(currentBounds),
             eq(SnapPosition.RIGHT),
             eq(ResizeTrigger.SNAP_RIGHT_MENU),
-            eq(null)
+            eq(null),
+            eq(decor),
         )
         assertEquals(decor.mTaskSurface, taskSurfaceCaptor.firstValue)
     }
@@ -811,7 +817,9 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
         verify(mockDesktopTasksController, never())
             .snapToHalfScreen(eq(decor.mTaskInfo), any(), eq(currentBounds), eq(SnapPosition.RIGHT),
                 eq(ResizeTrigger.MAXIMIZE_BUTTON),
-                eq(null))
+                eq(null),
+                eq(decor),
+        )
         verify(mockToast).show()
     }
 

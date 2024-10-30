@@ -30,6 +30,7 @@ import com.android.systemui.haptics.fakeVibratorHelper
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.plugins.fakeVolumeDialogController
 import com.android.systemui.testKosmos
+import com.android.systemui.volume.data.repository.audioSystemRepository
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
@@ -65,8 +66,8 @@ class VolumeDialogRingerDrawerViewModelTest : SysuiTestCase() {
 
             setUpRingerModeAndOpenDrawer(normalRingerMode)
 
-            assertThat(ringerViewModel).isNotNull()
-            assertThat(ringerViewModel?.drawerState)
+            assertThat(ringerViewModel).isInstanceOf(RingerViewModelState.Available::class.java)
+            assertThat((ringerViewModel as RingerViewModelState.Available).uiModel.drawerState)
                 .isEqualTo(RingerDrawerState.Open(normalRingerMode))
         }
 
@@ -80,8 +81,8 @@ class VolumeDialogRingerDrawerViewModelTest : SysuiTestCase() {
             underTest.onRingerButtonClicked(normalRingerMode)
             controller.getState()
 
-            assertThat(ringerViewModel).isNotNull()
-            assertThat(ringerViewModel?.drawerState)
+            assertThat(ringerViewModel).isInstanceOf(RingerViewModelState.Available::class.java)
+            assertThat((ringerViewModel as RingerViewModelState.Available).uiModel.drawerState)
                 .isEqualTo(RingerDrawerState.Closed(normalRingerMode))
         }
 
@@ -97,16 +98,12 @@ class VolumeDialogRingerDrawerViewModelTest : SysuiTestCase() {
             controller.getState()
             runCurrent()
 
-            assertThat(ringerViewModel).isNotNull()
-            assertThat(
-                    ringerViewModel
-                        ?.availableButtons
-                        ?.get(ringerViewModel!!.currentButtonIndex)
-                        ?.ringerMode
-                )
+            assertThat(ringerViewModel).isInstanceOf(RingerViewModelState.Available::class.java)
+
+            var uiModel = (ringerViewModel as RingerViewModelState.Available).uiModel
+            assertThat(uiModel.availableButtons[uiModel.currentButtonIndex]?.ringerMode)
                 .isEqualTo(vibrateRingerMode)
-            assertThat(ringerViewModel?.drawerState)
-                .isEqualTo(RingerDrawerState.Closed(vibrateRingerMode))
+            assertThat(uiModel.drawerState).isEqualTo(RingerDrawerState.Closed(vibrateRingerMode))
 
             val silentRingerMode = RingerMode(RINGER_MODE_SILENT)
             // Open drawer
@@ -118,27 +115,48 @@ class VolumeDialogRingerDrawerViewModelTest : SysuiTestCase() {
             controller.getState()
             runCurrent()
 
-            assertThat(ringerViewModel).isNotNull()
-            assertThat(
-                    ringerViewModel
-                        ?.availableButtons
-                        ?.get(ringerViewModel!!.currentButtonIndex)
-                        ?.ringerMode
-                )
+            assertThat(ringerViewModel).isInstanceOf(RingerViewModelState.Available::class.java)
+
+            uiModel = (ringerViewModel as RingerViewModelState.Available).uiModel
+            assertThat(uiModel.availableButtons[uiModel.currentButtonIndex]?.ringerMode)
                 .isEqualTo(silentRingerMode)
-            assertThat(ringerViewModel?.drawerState)
-                .isEqualTo(RingerDrawerState.Closed(silentRingerMode))
+            assertThat(uiModel.drawerState).isEqualTo(RingerDrawerState.Closed(silentRingerMode))
             assertThat(controller.hasScheduledTouchFeedback).isFalse()
             assertThat(vibratorHelper.totalVibrations).isEqualTo(2)
         }
 
-    private fun TestScope.setUpRingerModeAndOpenDrawer(selectedRingerMode: RingerMode) {
-        controller.setStreamVolume(STREAM_RING, 50)
-        controller.setRingerMode(selectedRingerMode.value, false)
-        runCurrent()
+    @Test
+    fun onVolumeSingleMode_ringerIsUnavailable() =
+        testScope.runTest {
+            val ringerViewModel by collectLastValue(underTest.ringerViewModel)
 
+            kosmos.audioSystemRepository.setIsSingleVolume(true)
+            setUpRingerMode(RingerMode(RINGER_MODE_NORMAL))
+
+            assertThat(ringerViewModel).isInstanceOf(RingerViewModelState.Unavailable::class.java)
+        }
+
+    @Test
+    fun setUnsupportedRingerMode_ringerIsUnavailable() =
+        testScope.runTest {
+            val ringerViewModel by collectLastValue(underTest.ringerViewModel)
+
+            controller.setHasVibrator(false)
+            setUpRingerMode(RingerMode(RINGER_MODE_VIBRATE))
+
+            assertThat(ringerViewModel).isInstanceOf(RingerViewModelState.Unavailable::class.java)
+        }
+
+    private fun TestScope.setUpRingerModeAndOpenDrawer(selectedRingerMode: RingerMode) {
+        setUpRingerMode(selectedRingerMode)
         underTest.onRingerButtonClicked(RingerMode(selectedRingerMode.value))
         controller.getState()
+        runCurrent()
+    }
+
+    private fun TestScope.setUpRingerMode(selectedRingerMode: RingerMode) {
+        controller.setStreamVolume(STREAM_RING, 50)
+        controller.setRingerMode(selectedRingerMode.value, false)
         runCurrent()
     }
 }

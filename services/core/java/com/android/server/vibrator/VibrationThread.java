@@ -263,7 +263,15 @@ final class VibrationThread extends Thread {
     private void playVibration() {
         Trace.traceBegin(TRACE_TAG_VIBRATOR, "playVibration");
         try {
-            mExecutingConductor.prepareToStart();
+            if (!mExecutingConductor.prepareToStart()) {
+                // The effect cannot be played, start clean-up tasks and notify
+                // callback immediately.
+                clientVibrationCompleteIfNotAlready(
+                        new Vibration.EndInfo(Status.IGNORED_UNSUPPORTED));
+
+                return;
+            }
+
             while (!mExecutingConductor.isFinished()) {
                 boolean readyToRun = mExecutingConductor.waitUntilNextStepIsDue();
                 // If we waited, don't run the next step, but instead re-evaluate status.

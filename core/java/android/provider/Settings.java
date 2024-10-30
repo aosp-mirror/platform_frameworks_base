@@ -11085,6 +11085,12 @@ public final class Settings {
         public static final String SFPS_PERFORMANT_AUTH_ENABLED = "sfps_performant_auth_enabled_v2";
 
         /**
+         * Whether or not the UDFPS device is enabling the screen off unlock settings.
+         * @hide
+         */
+        public static final String SCREEN_OFF_UNLOCK_UDFPS_ENABLED = "screen_off_udfps_enabled";
+
+        /**
          * Whether or not debugging is enabled.
          * @hide
          */

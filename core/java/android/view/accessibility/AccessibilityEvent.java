@@ -798,6 +798,18 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
     @FlaggedApi(Flags.FLAG_TRI_STATE_CHECKED)
     public static final int CONTENT_CHANGE_TYPE_CHECKED = 1 << 13;
 
+    /**
+     * Change type for {@link #TYPE_WINDOW_CONTENT_CHANGED} event: The source node changed its
+     * expanded state which is returned by {@link AccessibilityNodeInfo#getExpandedState()}. The
+     * view changing the node's expanded state should call {@link
+     * AccessibilityNodeInfo#setExpandedState(int)} and then send this event.
+     *
+     * @see AccessibilityNodeInfo#getExpandedState()
+     * @see AccessibilityNodeInfo#setExpandedState(int)
+     */
+    @FlaggedApi(Flags.FLAG_A11Y_EXPANSION_STATE_API)
+    public static final int CONTENT_CHANGE_TYPE_EXPANDED = 1 << 14;
+
     // Speech state change types.
 
     /** Change type for {@link #TYPE_SPEECH_STATE_CHANGE} event: another service is speaking. */

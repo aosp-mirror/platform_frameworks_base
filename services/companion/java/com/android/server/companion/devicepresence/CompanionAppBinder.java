@@ -95,7 +95,10 @@ public class CompanionAppBinder {
     /**
      * On package changed.
      */
-    public void onPackagesChanged(@UserIdInt int userId) {
+    public void onPackagesChanged(@UserIdInt int userId, String packageName) {
+        // TODO: We shouldn't need to clean up the whole user registry. We only need to remove the
+        //       package. I will do it in a separate change since it's not appropriate to use
+        //       PerUser anymore.
         mCompanionServicesRegister.invalidate(userId);
     }
 

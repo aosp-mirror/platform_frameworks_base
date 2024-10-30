@@ -73,6 +73,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
@@ -639,7 +640,7 @@ private fun ActionArea(viewModel: BouncerSceneContentViewModel, modifier: Modifi
     val appearMoveAnimatable = remember { Animatable(0f) }
     val appearAnimationInitialOffset = with(LocalDensity.current) { 80.dp.toPx() }
 
-    actionButton?.let { actionButtonViewModel ->
+    actionButton?.let { actionButtonModel ->
         LaunchedEffect(Unit) {
             appearFadeInAnimatable.animateTo(
                 targetValue = 1f,
@@ -678,12 +679,14 @@ private fun ActionArea(viewModel: BouncerSceneContentViewModel, modifier: Modifi
                     .background(color = MaterialTheme.colorScheme.tertiaryContainer)
                     .semantics { role = Role.Button }
                     .combinedClickable(
-                        onClick = { actionButtonViewModel.onClick() },
-                        onLongClick = actionButtonViewModel.onLongClick?.let { { it.invoke() } },
+                        onClick = { actionButton?.let { viewModel.onActionButtonClicked(it) } },
+                        onLongClick = {
+                            actionButton?.let { viewModel.onActionButtonLongClicked(it) }
+                        },
                     )
         ) {
             Text(
-                text = actionButtonViewModel.label,
+                text = stringResource(id = actionButtonModel.labelResId),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onTertiaryContainer,
                 modifier = Modifier.align(Alignment.Center).padding(ButtonDefaults.ContentPadding),

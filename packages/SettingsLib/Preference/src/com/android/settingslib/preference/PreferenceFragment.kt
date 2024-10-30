@@ -129,7 +129,7 @@ open class PreferenceFragment :
     }
 
     protected fun getPreferenceKeysInHierarchy(): Set<String> =
-        preferenceScreenBindingHelper?.getPreferences()?.map { it.key }?.toSet() ?: setOf()
+        preferenceScreenBindingHelper?.getPreferences()?.map { it.metadata.key }?.toSet() ?: setOf()
 
     companion object {
         private const val TAG = "PreferenceFragment"
