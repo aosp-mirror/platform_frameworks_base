@@ -14,22 +14,17 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.notification.dagger
+package com.android.systemui.statusbar.notification.promoted
 
-import com.android.systemui.statusbar.notification.promoted.PromotedNotificationsModule
-import com.android.systemui.statusbar.notification.row.NotificationRowModule
+import com.android.systemui.dagger.SysUISingleton
+import dagger.Binds
 import dagger.Module
 
-/**
- * A module that includes the standard notifications classes that most SysUI variants need. Variants
- * are free to not include this module and instead write a custom notifications module.
- */
-@Module(
-    includes =
-        [
-            NotificationsModule::class,
-            NotificationRowModule::class,
-            PromotedNotificationsModule::class,
-        ]
-)
-object ReferenceNotificationsModule
+@Module
+abstract class PromotedNotificationsModule {
+    @Binds
+    @SysUISingleton
+    abstract fun bindPromotedNotificationsProvider(
+        impl: PromotedNotificationsProviderImpl
+    ): PromotedNotificationsProvider
+}
