@@ -436,6 +436,17 @@ public class TelephonySubscriptionTracker extends BroadcastReceiver {
             return mPrivilegedPackages.keySet();
         }
 
+        /** Returns all subscription groups */
+        @NonNull
+        public Set<ParcelUuid> getAllSubscriptionGroups() {
+            final Set<ParcelUuid> subGroups = new ArraySet<>();
+            for (SubscriptionInfo subInfo : mSubIdToInfoMap.values()) {
+                subGroups.add(subInfo.getGroupUuid());
+            }
+
+            return subGroups;
+        }
+
         /** Checks if the provided package is carrier privileged for the specified sub group. */
         public boolean packageHasPermissionsForSubscriptionGroup(
                 @NonNull ParcelUuid subGrp, @NonNull String packageName) {

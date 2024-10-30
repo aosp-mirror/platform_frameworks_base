@@ -70,6 +70,7 @@ import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
 import android.net.Uri;
+import android.net.vcn.Flags;
 import android.net.vcn.IVcnStatusCallback;
 import android.net.vcn.IVcnUnderlyingNetworkPolicyListener;
 import android.net.vcn.VcnConfig;
@@ -84,6 +85,7 @@ import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.test.TestLooper;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
@@ -102,6 +104,7 @@ import com.android.server.vcn.util.PersistableBundleUtils;
 import com.android.server.vcn.util.PersistableBundleUtils.PersistableBundleWrapper;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -119,6 +122,8 @@ import java.util.UUID;
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class VcnManagementServiceTest {
+    @Rule public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
+
     private static final String CONTEXT_ATTRIBUTION_TAG = "VCN";
     private static final String TEST_PACKAGE_NAME =
             VcnManagementServiceTest.class.getPackage().getName();
@@ -288,6 +293,8 @@ public class VcnManagementServiceTest {
         doReturn(Collections.singleton(TRANSPORT_WIFI))
                 .when(mMockDeps)
                 .getRestrictedTransports(any(), any(), any());
+
+        mSetFlagsRule.enableFlags(Flags.FLAG_FIX_CONFIG_GARBAGE_COLLECTION);
     }
 
 
@@ -437,6 +444,14 @@ public class VcnManagementServiceTest {
             }
             return subIds;
         }).when(snapshot).getAllSubIdsInGroup(any());
+
+        doAnswer(invocation -> {
+            final Set<ParcelUuid> subGroups = new ArraySet<>();
+            for (Entry<Integer, ParcelUuid> entry : subIdToGroupMap.entrySet()) {
+                subGroups.add(entry.getValue());
+            }
+            return subGroups;
+        }).when(snapshot).getAllSubscriptionGroups();
 
         return snapshot;
     }
@@ -1480,6 +1495,28 @@ public class VcnManagementServiceTest {
                 Collections.singletonMap(TEST_SUBSCRIPTION_ID, TEST_UUID_2));
 
         verify(mMockPolicyListener).onPolicyChanged();
+    }
+
+    @Test
+    public void testGarbageCollectionKeepConfigUntilNewSnapshot() throws Exception {
+        setupActiveSubscription(TEST_UUID_2);
+        startAndGetVcnInstance(TEST_UUID_2);
+
+        // Report loss of subscription from mSubMgr
+        doReturn(Collections.emptyList()).when(mSubMgr).getSubscriptionsInGroup(any());
+        triggerSubscriptionTrackerCbAndGetSnapshot(
+                TEST_UUID_2,
+                Collections.singleton(TEST_UUID_2),
+                Collections.singletonMap(TEST_SUBSCRIPTION_ID, TEST_UUID_2));
+
+        assertTrue(mVcnMgmtSvc.getConfigs().containsKey(TEST_UUID_2));
+
+        // Report loss of subscription from snapshot
+        triggerSubscriptionTrackerCbAndGetSnapshot(null, Collections.emptySet());
+
+        mTestLooper.moveTimeForward(VcnManagementService.CARRIER_PRIVILEGES_LOST_TEARDOWN_DELAY_MS);
+        mTestLooper.dispatchAll();
+        assertFalse(mVcnMgmtSvc.getConfigs().containsKey(TEST_UUID_2));
     }
 
     @Test

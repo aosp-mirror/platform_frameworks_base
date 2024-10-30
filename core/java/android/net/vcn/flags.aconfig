@@ -15,3 +15,13 @@ flag {
     description: "Feature flag for adjustable safe mode timeout"
     bug: "317406085"
 }
+
+flag {
+    name: "fix_config_garbage_collection"
+    namespace: "vcn"
+    description: "Handle race condition in subscription change"
+    bug: "370862489"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}
