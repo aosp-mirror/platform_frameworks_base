@@ -1137,5 +1137,11 @@
                 android:name="android.service.dream"
                 android:resource="@xml/home_controls_dream_metadata" />
         </service>
+
+        <service android:name="com.android.systemui.dreams.homecontrols.system.HomeControlsRemoteService"
+            android:singleUser="true"
+            android:exported="false"
+            />
+
     </application>
 </manifest>

@@ -14,29 +14,18 @@
  * limitations under the License.
  */
 
-package com.android.systemui.dreams.homecontrols
+package com.android.systemui.dreams.homecontrols.service
 
 import android.app.Activity
-import android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN
+import android.app.WindowConfiguration
 import android.content.Intent
 import android.graphics.Rect
 import android.os.Binder
 import android.window.TaskFragmentCreationParams
 import android.window.TaskFragmentInfo
 import android.window.TaskFragmentOperation
-import android.window.TaskFragmentOperation.OP_TYPE_DELETE_TASK_FRAGMENT
-import android.window.TaskFragmentOperation.OP_TYPE_REORDER_TO_TOP_OF_TASK
 import android.window.TaskFragmentOrganizer
-import android.window.TaskFragmentOrganizer.TASK_FRAGMENT_TRANSIT_CHANGE
-import android.window.TaskFragmentOrganizer.TASK_FRAGMENT_TRANSIT_CLOSE
-import android.window.TaskFragmentOrganizer.TASK_FRAGMENT_TRANSIT_OPEN
 import android.window.TaskFragmentTransaction
-import android.window.TaskFragmentTransaction.TYPE_ACTIVITY_REPARENTED_TO_TASK
-import android.window.TaskFragmentTransaction.TYPE_TASK_FRAGMENT_APPEARED
-import android.window.TaskFragmentTransaction.TYPE_TASK_FRAGMENT_ERROR
-import android.window.TaskFragmentTransaction.TYPE_TASK_FRAGMENT_INFO_CHANGED
-import android.window.TaskFragmentTransaction.TYPE_TASK_FRAGMENT_PARENT_INFO_CHANGED
-import android.window.TaskFragmentTransaction.TYPE_TASK_FRAGMENT_VANISHED
 import android.window.WindowContainerTransaction
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.util.concurrency.DelayableExecutor
@@ -65,7 +54,7 @@ constructor(
             activity: Activity,
             @Assisted("onCreateCallback") onCreateCallback: FragmentInfoCallback,
             @Assisted("onInfoChangedCallback") onInfoChangedCallback: FragmentInfoCallback,
-            hide: () -> Unit
+            hide: () -> Unit,
         ): TaskFragmentComponent
     }
 
@@ -90,26 +79,28 @@ constructor(
             change.taskFragmentInfo?.let { taskFragmentInfo ->
                 if (taskFragmentInfo.fragmentToken == fragmentToken) {
                     when (change.type) {
-                        TYPE_TASK_FRAGMENT_APPEARED -> {
+                        TaskFragmentTransaction.TYPE_TASK_FRAGMENT_APPEARED -> {
                             resultT.addTaskFragmentOperation(
                                 fragmentToken,
-                                TaskFragmentOperation.Builder(OP_TYPE_REORDER_TO_TOP_OF_TASK)
-                                    .build()
+                                TaskFragmentOperation.Builder(
+                                        TaskFragmentOperation.OP_TYPE_REORDER_TO_TOP_OF_TASK
+                                    )
+                                    .build(),
                             )
 
                             onCreateCallback(taskFragmentInfo)
                         }
-                        TYPE_TASK_FRAGMENT_INFO_CHANGED -> {
+                        TaskFragmentTransaction.TYPE_TASK_FRAGMENT_INFO_CHANGED -> {
                             onInfoChangedCallback(taskFragmentInfo)
                         }
-                        TYPE_TASK_FRAGMENT_VANISHED -> {
+                        TaskFragmentTransaction.TYPE_TASK_FRAGMENT_VANISHED -> {
                             hide()
                         }
-                        TYPE_TASK_FRAGMENT_PARENT_INFO_CHANGED -> {}
-                        TYPE_TASK_FRAGMENT_ERROR -> {
+                        TaskFragmentTransaction.TYPE_TASK_FRAGMENT_PARENT_INFO_CHANGED -> {}
+                        TaskFragmentTransaction.TYPE_TASK_FRAGMENT_ERROR -> {
                             hide()
                         }
-                        TYPE_ACTIVITY_REPARENTED_TO_TASK -> {}
+                        TaskFragmentTransaction.TYPE_ACTIVITY_REPARENTED_TO_TASK -> {}
                         else ->
                             throw IllegalArgumentException(
                                 "Unknown TaskFragmentEvent=" + change.type
@@ -121,8 +112,8 @@ constructor(
         organizer.onTransactionHandled(
             transaction.transactionToken,
             resultT,
-            TASK_FRAGMENT_TRANSIT_CHANGE,
-            false
+            TaskFragmentOrganizer.TASK_FRAGMENT_TRANSIT_CHANGE,
+            false,
         )
     }
 
@@ -132,15 +123,15 @@ constructor(
             TaskFragmentCreationParams.Builder(
                     organizer.organizerToken,
                     fragmentToken,
-                    activity.activityToken!!
+                    activity.activityToken!!,
                 )
                 .setInitialRelativeBounds(Rect())
-                .setWindowingMode(WINDOWING_MODE_FULLSCREEN)
+                .setWindowingMode(WindowConfiguration.WINDOWING_MODE_FULLSCREEN)
                 .build()
         organizer.applyTransaction(
             WindowContainerTransaction().createTaskFragment(fragmentOptions),
-            TASK_FRAGMENT_TRANSIT_CHANGE,
-            false
+            TaskFragmentOrganizer.TASK_FRAGMENT_TRANSIT_CHANGE,
+            false,
         )
     }
 
@@ -151,8 +142,8 @@ constructor(
     fun startActivityInTaskFragment(intent: Intent) {
         organizer.applyTransaction(
             WindowContainerTransaction().startActivity(intent),
-            TASK_FRAGMENT_TRANSIT_OPEN,
-            false
+            TaskFragmentOrganizer.TASK_FRAGMENT_TRANSIT_OPEN,
+            false,
         )
     }
 
@@ -162,10 +153,13 @@ constructor(
             WindowContainerTransaction()
                 .addTaskFragmentOperation(
                     fragmentToken,
-                    TaskFragmentOperation.Builder(OP_TYPE_DELETE_TASK_FRAGMENT).build()
+                    TaskFragmentOperation.Builder(
+                            TaskFragmentOperation.OP_TYPE_DELETE_TASK_FRAGMENT
+                        )
+                        .build(),
                 ),
-            TASK_FRAGMENT_TRANSIT_CLOSE,
-            false
+            TaskFragmentOrganizer.TASK_FRAGMENT_TRANSIT_CLOSE,
+            false,
         )
         organizer.unregisterOrganizer()
     }

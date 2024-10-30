@@ -14,24 +14,28 @@
  * limitations under the License.
  */
 
-package com.android.systemui.dreams.homecontrols
+package com.android.systemui.dreams.homecontrols.system
 
 import android.content.ComponentName
 import android.content.Context
 import android.content.pm.PackageManager
 import android.service.controls.flags.Flags.homePanelDream
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.CoreStartable
+import com.android.systemui.Flags.homeControlsDreamHsum
 import com.android.systemui.dagger.qualifiers.Background
-import com.android.systemui.dreams.homecontrols.domain.interactor.HomeControlsComponentInteractor
+import com.android.systemui.dreams.homecontrols.HomeControlsDreamService
+import com.android.systemui.dreams.homecontrols.system.domain.interactor.HomeControlsComponentInteractor
+import com.android.systemui.settings.UserContextProvider
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 class HomeControlsDreamStartable
 @Inject
 constructor(
     context: Context,
-    private val packageManager: PackageManager,
+    private val systemPackageManager: PackageManager,
+    private val userContextProvider: UserContextProvider,
     private val homeControlsComponentInteractor: HomeControlsComponentInteractor,
     @Background private val bgScope: CoroutineScope,
 ) : CoreStartable {
@@ -57,10 +61,16 @@ constructor(
             } else {
                 PackageManager.COMPONENT_ENABLED_STATE_DISABLED
             }
+        val packageManager =
+            if (homeControlsDreamHsum()) {
+                userContextProvider.userContext.packageManager
+            } else {
+                systemPackageManager
+            }
         packageManager.setComponentEnabledSetting(
             componentName,
             packageState,
-            PackageManager.DONT_KILL_APP
+            PackageManager.DONT_KILL_APP,
         )
     }
 }
