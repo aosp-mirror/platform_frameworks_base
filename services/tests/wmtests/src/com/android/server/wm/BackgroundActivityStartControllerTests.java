@@ -194,7 +194,6 @@ public class BackgroundActivityStartControllerTests {
         mService.mTaskSupervisor = mSupervisor;
         mService.mContext = mContext;
         setViaReflection(mService, "mActiveUids", mActiveUids);
-        setViaReflection(mService, "mGlobalLock", new WindowManagerGlobalLock());
         Mockito.when(mService.getPackageManagerInternalLocked()).thenReturn(
                 mPackageManagerInternal);
         mService.mRootWindowContainer = mRootWindowContainer;
