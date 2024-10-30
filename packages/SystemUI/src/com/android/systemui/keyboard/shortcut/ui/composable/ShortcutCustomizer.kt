@@ -1,0 +1,272 @@
+/*
+ * Copyright (C) 2024 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.android.systemui.keyboard.shortcut.ui.composable
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.sizeIn
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ErrorOutline
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.key.KeyEvent
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.android.systemui.keyboard.shortcut.shared.model.ShortcutKey
+import com.android.systemui.keyboard.shortcut.ui.model.ShortcutCustomizationUiState
+import com.android.systemui.res.R
+
+@Composable
+fun AssignNewShortcutDialog(
+    uiState: ShortcutCustomizationUiState,
+    modifier: Modifier = Modifier,
+    onKeyPress: (KeyEvent) -> Boolean,
+    onCancel: () -> Unit,
+) {
+    if (uiState is ShortcutCustomizationUiState.AddShortcutDialog) {
+        Column(modifier = modifier) {
+            Title(
+                uiState.shortcutLabel,
+                modifier = Modifier.padding(horizontal = 24.dp).width(316.dp),
+            )
+            Description(
+                modifier = Modifier.padding(top = 24.dp, start = 24.dp, end = 24.dp).width(316.dp)
+            )
+            PromptShortcutModifier(
+                modifier =
+                    Modifier.padding(top = 24.dp, start = 116.5.dp, end = 116.5.dp)
+                        .width(131.dp)
+                        .height(48.dp),
+                defaultModifierKey = uiState.defaultCustomShortcutModifierKey,
+            )
+            SelectedKeyCombinationContainer(
+                shouldShowErrorMessage = uiState.shouldShowErrorMessage,
+                onKeyPress = onKeyPress,
+            )
+            KeyCombinationAlreadyInUseErrorMessage(uiState.shouldShowErrorMessage)
+            DialogButtons(onCancel, isValidKeyCombination = uiState.isValidKeyCombination)
+        }
+    }
+}
+
+@Composable
+fun DialogButtons(onCancel: () -> Unit, isValidKeyCombination: Boolean) {
+    Row(
+        modifier =
+            Modifier.padding(top = 24.dp, start = 24.dp, end = 24.dp)
+                .sizeIn(minWidth = 316.dp, minHeight = 48.dp),
+        verticalAlignment = Alignment.Bottom,
+        horizontalArrangement = Arrangement.End,
+    ) {
+        ShortcutHelperButton(
+            shape = RoundedCornerShape(50.dp),
+            onClick = onCancel,
+            color = Color.Transparent,
+            width = 80.dp,
+            contentColor = MaterialTheme.colorScheme.primary,
+            text = stringResource(R.string.shortcut_helper_customize_dialog_cancel_button_label),
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        ShortcutHelperButton(
+            onClick = {},
+            color = MaterialTheme.colorScheme.primary,
+            width = 116.dp,
+            contentColor = MaterialTheme.colorScheme.onPrimary,
+            text =
+                stringResource(R.string.shortcut_helper_customize_dialog_set_shortcut_button_label),
+            enabled = isValidKeyCombination,
+        )
+    }
+}
+
+@Composable
+fun KeyCombinationAlreadyInUseErrorMessage(shouldShowErrorMessage: Boolean) {
+    if (shouldShowErrorMessage) {
+        Box(modifier = Modifier.padding(horizontal = 16.dp).width(332.dp).height(40.dp)) {
+            Text(
+                text = stringResource(R.string.shortcut_helper_customize_dialog_error_message),
+                style = MaterialTheme.typography.bodyMedium,
+                fontSize = 14.sp,
+                lineHeight = 20.sp,
+                fontWeight = FontWeight.W500,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.padding(start = 24.dp).width(252.dp),
+            )
+        }
+    }
+}
+
+@Composable
+fun SelectedKeyCombinationContainer(
+    keyCombination: String =
+        stringResource(R.string.shortcut_helper_add_shortcut_dialog_placeholder),
+    shouldShowErrorMessage: Boolean,
+    onKeyPress: (KeyEvent) -> Boolean,
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isFocused by interactionSource.collectIsFocusedAsState()
+    val outlineColor =
+        if (!isFocused) MaterialTheme.colorScheme.outline
+        else if (shouldShowErrorMessage) MaterialTheme.colorScheme.error
+        else MaterialTheme.colorScheme.primary
+
+    ClickableShortcutSurface(
+        onClick = {},
+        color = Color.Transparent,
+        shape = RoundedCornerShape(50.dp),
+        modifier =
+            Modifier.padding(all = 16.dp)
+                .sizeIn(minWidth = 332.dp, minHeight = 56.dp)
+                .border(width = 2.dp, color = outlineColor, shape = RoundedCornerShape(50.dp))
+                .onPreviewKeyEvent { onKeyPress(it) },
+        interactionSource = interactionSource,
+    ) {
+        Row(
+            modifier = Modifier.padding(start = 24.dp, top = 16.dp, end = 16.dp, bottom = 16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = keyCombination,
+                style = MaterialTheme.typography.headlineSmall,
+                fontSize = 16.sp,
+                lineHeight = 24.sp,
+                fontWeight = FontWeight.W500,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.width(252.dp),
+            )
+            Spacer(modifier = Modifier.weight(1f))
+            if (shouldShowErrorMessage) {
+                Icon(
+                    imageVector = Icons.Default.ErrorOutline,
+                    contentDescription = null,
+                    modifier = Modifier.size(20.dp),
+                    tint = MaterialTheme.colorScheme.error,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun Title(title: String, modifier: Modifier = Modifier) {
+    Text(
+        text = title,
+        style = MaterialTheme.typography.headlineSmall,
+        fontSize = 24.sp,
+        modifier = modifier.wrapContentSize(Alignment.Center),
+        color = MaterialTheme.colorScheme.onSurface,
+        lineHeight = 32.sp,
+    )
+}
+
+@Composable
+private fun Description(modifier: Modifier = Modifier) {
+    Text(
+        text = stringResource(id = R.string.shortcut_helper_customize_mode_sub_title),
+        style = MaterialTheme.typography.bodyMedium,
+        fontSize = 14.sp,
+        lineHeight = 20.sp,
+        modifier = modifier.wrapContentSize(Alignment.Center),
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+}
+
+@Composable
+private fun PromptShortcutModifier(
+    modifier: Modifier,
+    defaultModifierKey: ShortcutKey.Icon.ResIdIcon,
+) {
+    Row(modifier = modifier, horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+        ActionKeyContainer(defaultModifierKey)
+        PlusIconContainer()
+    }
+}
+
+@Composable
+private fun ActionKeyContainer(defaultModifierKey: ShortcutKey.Icon.ResIdIcon) {
+    Row(
+        modifier =
+            Modifier.height(48.dp)
+                .width(105.dp)
+                .background(
+                    color = MaterialTheme.colorScheme.surface,
+                    shape = RoundedCornerShape(16.dp),
+                )
+                .padding(all = 12.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        ActionKeyIcon(defaultModifierKey)
+        ActionKeyText()
+    }
+}
+
+@Composable
+fun ActionKeyText() {
+    Text(
+        text = "Action",
+        style = MaterialTheme.typography.titleMedium,
+        fontSize = 16.sp,
+        lineHeight = 24.sp,
+        modifier = Modifier.wrapContentSize(Alignment.Center),
+        color = MaterialTheme.colorScheme.onSurface,
+    )
+}
+
+@Composable
+private fun ActionKeyIcon(defaultModifierKey: ShortcutKey.Icon.ResIdIcon) {
+    Icon(
+        painter = painterResource(id = defaultModifierKey.drawableResId),
+        contentDescription = stringResource(R.string.shortcut_helper_content_description_meta_key),
+        modifier = Modifier.size(24.dp).wrapContentSize(Alignment.Center),
+    )
+}
+
+@Composable
+private fun PlusIconContainer() {
+    Icon(
+        tint = MaterialTheme.colorScheme.onSurface,
+        imageVector = Icons.Default.Add,
+        contentDescription =
+            stringResource(id = R.string.shortcut_helper_content_description_plus_icon),
+        modifier = Modifier.padding(vertical = 12.dp).size(24.dp).wrapContentSize(Alignment.Center),
+    )
+}

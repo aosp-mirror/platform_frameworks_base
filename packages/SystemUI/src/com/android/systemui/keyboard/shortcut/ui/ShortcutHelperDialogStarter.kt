@@ -24,6 +24,7 @@ import android.os.UserHandle
 import android.provider.Settings
 import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.layout.width
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -47,15 +48,18 @@ class ShortcutHelperDialogStarter
 @Inject
 constructor(
     @Application private val applicationScope: CoroutineScope,
-    private val viewModel: ShortcutHelperViewModel,
+    private val shortcutHelperViewModel: ShortcutHelperViewModel,
+    shortcutCustomizationDialogStarterFactory: ShortcutCustomizationDialogStarter.Factory,
     private val dialogFactory: SystemUIDialogFactory,
     private val activityStarter: ActivityStarter,
 ) : CoreStartable {
 
     @VisibleForTesting var dialog: Dialog? = null
+    private val shortcutCustomizationDialogStarter =
+        shortcutCustomizationDialogStarterFactory.create()
 
     override fun start() {
-        viewModel.shouldShow
+        shortcutHelperViewModel.shouldShow
             .map { shouldShow ->
                 if (shouldShow) {
                     dialog = createShortcutHelperDialog().also { it.show() }
@@ -69,16 +73,21 @@ constructor(
     private fun createShortcutHelperDialog(): Dialog {
         return dialogFactory.createBottomSheet(
             content = { dialog ->
-                val shortcutsUiState by viewModel.shortcutsUiState.collectAsStateWithLifecycle()
+                val shortcutsUiState by
+                    shortcutHelperViewModel.shortcutsUiState.collectAsStateWithLifecycle()
+                LaunchedEffect(Unit) { shortcutCustomizationDialogStarter.activate() }
                 ShortcutHelper(
                     modifier = Modifier.width(getWidth()),
                     shortcutsUiState = shortcutsUiState,
                     onKeyboardSettingsClicked = { onKeyboardSettingsClicked(dialog) },
-                    onSearchQueryChanged = { viewModel.onSearchQueryChanged(it) },
+                    onSearchQueryChanged = { shortcutHelperViewModel.onSearchQueryChanged(it) },
+                    onCustomizationRequested = {
+                        shortcutCustomizationDialogStarter.onAddShortcutDialogRequested(it)
+                    },
                 )
-                dialog.setOnDismissListener { viewModel.onViewClosed() }
+                dialog.setOnDismissListener { shortcutHelperViewModel.onViewClosed() }
             },
-            maxWidth = ShortcutHelperBottomSheet.LargeScreenWidthLandscape
+            maxWidth = ShortcutHelperBottomSheet.LargeScreenWidthLandscape,
         )
     }
 

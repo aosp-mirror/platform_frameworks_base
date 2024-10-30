@@ -98,19 +98,20 @@ fun SystemUIDialogFactory.create(
     theme: Int = SystemUIDialog.DEFAULT_THEME,
     dismissOnDeviceLock: Boolean = SystemUIDialog.DEFAULT_DISMISS_ON_DEVICE_LOCK,
     @GravityInt dialogGravity: Int? = null,
+    dialogDelegate: DialogDelegate<SystemUIDialog> =
+        object : DialogDelegate<SystemUIDialog> {
+            override fun onCreate(dialog: SystemUIDialog, savedInstanceState: Bundle?) {
+                super.onCreate(dialog, savedInstanceState)
+                dialogGravity?.let { dialog.window?.setGravity(it) }
+            }
+        },
     content: @Composable (SystemUIDialog) -> Unit,
 ): ComponentSystemUIDialog {
     return create(
         context = context,
         theme = theme,
         dismissOnDeviceLock = dismissOnDeviceLock,
-        delegate =
-            object : DialogDelegate<SystemUIDialog> {
-                override fun onCreate(dialog: SystemUIDialog, savedInstanceState: Bundle?) {
-                    super.onCreate(dialog, savedInstanceState)
-                    dialogGravity?.let { dialog.window?.setGravity(it) }
-                }
-            },
+        delegate = dialogDelegate,
         content = content,
     )
 }

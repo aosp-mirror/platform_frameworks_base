@@ -3738,6 +3738,11 @@
          is a component that shows the user which keyboard shortcuts they can use.
          [CHAR LIMIT=NONE] -->
     <string name="shortcut_helper_customize_mode_title">Customize keyboard shortcuts</string>
+    <!-- Sub title at the top of the keyboard shortcut helper customization dialog. Explains to the
+         user what action they need to take in the customization dialog to assign a new custom shortcut.
+         The helper is a component that shows the user which keyboard shortcuts they can use.
+         [CHAR LIMIT=NONE] -->
+    <string name="shortcut_helper_customize_mode_sub_title">Press key to assign shortcut</string>
     <!-- Placeholder text shown in the search box of the keyboard shortcut helper, when the user
          hasn't typed in anything in the search box yet. The helper is a  component that shows the
          user which keyboard shortcuts they can use. [CHAR LIMIT=NONE] -->
@@ -3749,6 +3754,16 @@
          use. The helper shows shortcuts in categories, which can be collapsed or expanded.
          [CHAR LIMIT=NONE] -->
     <string name="shortcut_helper_content_description_collapse_icon">Collapse icon</string>
+    <!-- Content description of the Meta key (also called Action Key) icon that prompts users to
+         press some key combination starting with meta key to assign new key combination to shortcut
+         in shortcut helper customization dialog. The helper is a  component that shows the  user
+         which keyboard shortcuts they can use. [CHAR LIMIT=NONE] -->
+    <string name="shortcut_helper_content_description_meta_key">Action or Meta key icon</string>
+    <!-- Content description of the plus icon after the meta key icon prompts users to
+         press some key combination starting with meta key to assign new key combination to shortcut
+         in shortcut helper customization dialog. The helper is a  component that shows the  user
+         which keyboard shortcuts they can use. [CHAR LIMIT=NONE] -->
+    <string name="shortcut_helper_content_description_plus_icon">Plus icon</string>
     <!-- Description text of the button that allows user to customize shortcuts in keyboard
          shortcut helper The helper is a  component that shows the  user which keyboard shortcuts
          they can use. [CHAR LIMIT=NONE] -->
@@ -3779,6 +3794,24 @@
          open keyboard settings while in shortcut helper. The helper is a  component that shows the
          user which keyboard shortcuts they can use. [CHAR LIMIT=NONE] -->
     <string name="shortcut_helper_keyboard_settings_buttons_label">Keyboard Settings</string>
+    <!-- Label on the set shortcut button in keyboard shortcut helper customize dialog, that allows user to
+         confirm and assign key combination to selected shortcut. The helper is a  component that
+         shows the user which keyboard shortcuts they can use. [CHAR LIMIT=NONE] -->
+    <string name="shortcut_helper_customize_dialog_set_shortcut_button_label">Set shortcut</string>
+    <!-- Label on the cancel button in keyboard shortcut helper customize dialog, that allows user to
+         cancel and exit shortcut customization dialog, returning to the main shortcut helper page.
+         The helper is a  component that shows the user which keyboard shortcuts they can use.
+         [CHAR LIMIT=NONE] -->
+    <string name="shortcut_helper_customize_dialog_cancel_button_label">Cancel</string>
+    <!-- Placeholder text, prompting user to Press key combination assign to shortcut. This is shown
+         in shortcut helper's "Add Custom Shortcut" Dialog text field when user hasn't pressed
+         any key  yet. The helper is a component that shows the user which keyboard shortcuts
+         they can use. [CHAR LIMIT=NONE] -->
+    <string name="shortcut_helper_add_shortcut_dialog_placeholder">Press key</string>
+    <!-- Error message displayed when the user select a key combination that is already in use while
+         assigning a new custom key combination to a shortcut in shortcut helper. The helper is a
+         component that shows the user which keyboard shortcuts they can use. [CHAR LIMIT=NONE] -->
+    <string name="shortcut_helper_customize_dialog_error_message">Key combination already in use. Try another key.</string>
 
 
     <!-- Keyboard touchpad tutorial scheduler-->
