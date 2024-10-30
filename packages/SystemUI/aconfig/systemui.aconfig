@@ -59,11 +59,19 @@ flag {
 flag {
    name: "notification_over_expansion_clipping_fix"
    namespace: "systemui"
-   description: "fix NSSL clipping when over-expanding; fixes split shade bug."
+   description: "Fix NSSL clipping when over-expanding; fixes split shade bug."
    bug: "288553572"
    metadata {
         purpose: PURPOSE_BUGFIX
    }
+}
+
+flag {
+    name: "notification_add_x_on_hover_to_dismiss"
+    namespace: "systemui"
+    description: "Adds an x to notifications which shows up on mouse hover, allowing the user to "
+        "dismiss a notification with mouse."
+    bug: "376297472"
 }
 
 flag {
