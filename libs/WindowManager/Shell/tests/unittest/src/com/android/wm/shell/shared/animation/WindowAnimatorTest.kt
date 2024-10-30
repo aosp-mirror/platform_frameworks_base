@@ -16,7 +16,7 @@
 
 package com.android.wm.shell.shared.animation
 
-import android.animation.ValueAnimator
+import android.graphics.PointF
 import android.graphics.Rect
 import android.util.DisplayMetrics
 import android.view.SurfaceControl
@@ -31,6 +31,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.anyFloat
+import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 
@@ -44,12 +45,33 @@ class WindowAnimatorTest {
 
     private val displayMetrics = DisplayMetrics().apply { density = 1f }
 
+    private val positionXArgumentCaptor = argumentCaptor<Float>()
+    private val positionYArgumentCaptor = argumentCaptor<Float>()
+    private val scaleXArgumentCaptor = argumentCaptor<Float>()
+    private val scaleYArgumentCaptor = argumentCaptor<Float>()
+
     @Before
     fun setup() {
         whenever(change.leash).thenReturn(leash)
-        whenever(change.startAbsBounds).thenReturn(START_BOUNDS)
+        whenever(change.endAbsBounds).thenReturn(END_BOUNDS)
         whenever(transaction.setPosition(any(), anyFloat(), anyFloat())).thenReturn(transaction)
         whenever(transaction.setScale(any(), anyFloat(), anyFloat())).thenReturn(transaction)
+        whenever(
+            transaction.setPosition(
+                any(),
+                positionXArgumentCaptor.capture(),
+                positionYArgumentCaptor.capture(),
+            )
+        )
+            .thenReturn(transaction)
+        whenever(
+            transaction.setScale(
+                any(),
+                scaleXArgumentCaptor.capture(),
+                scaleYArgumentCaptor.capture(),
+            )
+        )
+            .thenReturn(transaction)
     }
 
     @Test
@@ -67,16 +89,18 @@ class WindowAnimatorTest {
                 change,
                 transaction
             )
+        valueAnimator.start()
 
         assertThat(valueAnimator.duration).isEqualTo(100L)
         assertThat(valueAnimator.interpolator).isEqualTo(Interpolators.STANDARD_ACCELERATE)
-        assertStartAndEndBounds(valueAnimator, startBounds = START_BOUNDS, endBounds = START_BOUNDS)
+        val expectedPosition = PointF(END_BOUNDS.left.toFloat(), END_BOUNDS.top.toFloat())
+        assertTransactionParams(expectedPosition, expectedScale = PointF(1f, 1f))
     }
 
     @Test
-    fun createBoundsAnimator_startScaleAndOffset_returnsCorrectBounds() = runOnUiThread {
+    fun createBoundsAnimator_startScaleAndOffset_correctPosAndScale() = runOnUiThread {
         val bounds = Rect(/* left= */ 100, /* top= */ 200, /* right= */ 300, /* bottom= */ 400)
-        whenever(change.startAbsBounds).thenReturn(bounds)
+        whenever(change.endAbsBounds).thenReturn(bounds)
         val boundsAnimParams =
             WindowAnimator.BoundsAnimationParams(
                 durationMs = 100L,
@@ -92,19 +116,18 @@ class WindowAnimatorTest {
                 change,
                 transaction
             )
+        valueAnimator.start()
 
-        assertStartAndEndBounds(
-            valueAnimator,
-            startBounds =
-                Rect(/* left= */ 150, /* top= */ 260, /* right= */ 250, /* bottom= */ 360),
-            endBounds = bounds,
+        assertTransactionParams(
+            expectedPosition = PointF(150f, 260f),
+            expectedScale = PointF(0.5f, 0.5f),
         )
     }
 
     @Test
-    fun createBoundsAnimator_endScaleAndOffset_returnsCorrectBounds() = runOnUiThread {
+    fun createBoundsAnimator_endScaleAndOffset_correctPosAndScale() = runOnUiThread {
         val bounds = Rect(/* left= */ 100, /* top= */ 200, /* right= */ 300, /* bottom= */ 400)
-        whenever(change.startAbsBounds).thenReturn(bounds)
+        whenever(change.endAbsBounds).thenReturn(bounds)
         val boundsAnimParams =
             WindowAnimator.BoundsAnimationParams(
                 durationMs = 100L,
@@ -120,28 +143,56 @@ class WindowAnimatorTest {
                 change,
                 transaction
             )
+        valueAnimator.start()
+        valueAnimator.end()
 
-        assertStartAndEndBounds(
-            valueAnimator,
-            startBounds = bounds,
-            endBounds = Rect(/* left= */ 150, /* top= */ 260, /* right= */ 250, /* bottom= */ 360),
+        assertTransactionParams(
+            expectedPosition = PointF(150f, 260f),
+            expectedScale = PointF(0.5f, 0.5f),
         )
     }
 
-    private fun assertStartAndEndBounds(
-        valueAnimator: ValueAnimator,
-        startBounds: Rect,
-        endBounds: Rect,
-    ) {
-        valueAnimator.start()
-        valueAnimator.animatedValue
-        assertThat(valueAnimator.animatedValue).isEqualTo(startBounds)
-        valueAnimator.end()
-        assertThat(valueAnimator.animatedValue).isEqualTo(endBounds)
+    @Test
+    fun createBoundsAnimator_middleOfAnimation_correctPosAndScale() = runOnUiThread {
+        val bounds = Rect(/* left= */ 100, /* top= */ 200, /* right= */ 300, /* bottom= */ 400)
+        whenever(change.endAbsBounds).thenReturn(bounds)
+        val boundsAnimParams =
+            WindowAnimator.BoundsAnimationParams(
+                durationMs = 100L,
+                endOffsetYDp = 10f,
+                startScale = 0.5f,
+                endScale = 0.9f,
+                interpolator = Interpolators.LINEAR,
+            )
+
+        val valueAnimator =
+            WindowAnimator.createBoundsAnimator(
+                displayMetrics,
+                boundsAnimParams,
+                change,
+                transaction
+            )
+        valueAnimator.currentPlayTime = 50
+
+        assertTransactionParams(
+            // We should have a window of size 140x140, which we centre by placing at pos 130, 230.
+            // Then add 10*0.5 as y-offset
+            expectedPosition = PointF(130f, 235f),
+            expectedScale = PointF(0.7f, 0.7f),
+        )
+    }
+
+    private fun assertTransactionParams(expectedPosition: PointF, expectedScale: PointF) {
+        assertThat(positionXArgumentCaptor.lastValue).isWithin(TOLERANCE).of(expectedPosition.x)
+        assertThat(positionYArgumentCaptor.lastValue).isWithin(TOLERANCE).of(expectedPosition.y)
+        assertThat(scaleXArgumentCaptor.lastValue).isWithin(TOLERANCE).of(expectedScale.x)
+        assertThat(scaleYArgumentCaptor.lastValue).isWithin(TOLERANCE).of(expectedScale.y)
     }
 
     companion object {
-        private val START_BOUNDS =
+        private val END_BOUNDS =
             Rect(/* left= */ 10, /* top= */ 20, /* right= */ 30, /* bottom= */ 40)
+
+        private const val TOLERANCE = 1e-3f
     }
 }
