@@ -53,6 +53,15 @@ class FakeKeyguardTransitionRepository(
     private val initInLockscreen: Boolean = true,
 
     /**
+     * Initial value for [FakeKeyguardTransitionRepository.sendTransitionStepsOnStartTransition].
+     * This needs to be configurable in the constructor since some transitions are triggered on
+     * init, before a test has the chance to set sendTransitionStepsOnStartTransition to false.
+     */
+    private val initiallySendTransitionStepsOnStartTransition: Boolean = true,
+    private val testScope: TestScope,
+) : KeyguardTransitionRepository {
+
+    /**
      * If true, calls to [startTransition] will automatically emit STARTED, RUNNING, and FINISHED
      * transition steps from/to the given states.
      *
@@ -64,11 +73,9 @@ class FakeKeyguardTransitionRepository(
      *
      * If your test needs to make assertions at specific points between STARTED/FINISHED, or if it's
      * difficult to set up all of the conditions to make the transition interactors actually call
-     * startTransition, then construct a FakeKeyguardTransitionRepository with this value false.
+     * startTransition, set this value to false.
      */
-    private val sendTransitionStepsOnStartTransition: Boolean = true,
-    private val testScope: TestScope,
-) : KeyguardTransitionRepository {
+    var sendTransitionStepsOnStartTransition = initiallySendTransitionStepsOnStartTransition
 
     private val _transitions =
         MutableSharedFlow<TransitionStep>(replay = 3, onBufferOverflow = BufferOverflow.DROP_OLDEST)
@@ -77,7 +84,11 @@ class FakeKeyguardTransitionRepository(
     @Inject
     constructor(
         testScope: TestScope
-    ) : this(initInLockscreen = true, sendTransitionStepsOnStartTransition = true, testScope)
+    ) : this(
+        initInLockscreen = true,
+        initiallySendTransitionStepsOnStartTransition = true,
+        testScope
+    )
 
     private val _currentTransitionInfo: MutableStateFlow<TransitionInfo> =
         MutableStateFlow(
@@ -176,6 +187,20 @@ class FakeKeyguardTransitionRepository(
         testScheduler: TestCoroutineScheduler,
         throughTransitionState: TransitionState = TransitionState.FINISHED,
     ) {
+        val lastStep = _transitions.replayCache.lastOrNull()
+        if (lastStep != null && lastStep.transitionState != TransitionState.FINISHED) {
+            sendTransitionStep(
+                step =
+                TransitionStep(
+                    transitionState = TransitionState.CANCELED,
+                    from = lastStep.from,
+                    to = lastStep.to,
+                    value = 0f,
+                )
+            )
+            testScheduler.runCurrent()
+        }
+
         sendTransitionStep(
             step =
                 TransitionStep(
