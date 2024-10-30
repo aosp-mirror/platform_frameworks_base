@@ -857,13 +857,45 @@ public class AccessibilityNodeInfo implements Parcelable {
      * <p>
      * The data can be retrieved from the {@code Bundle} returned by {@link #getExtras()} using this
      * string as a key for {@link Bundle#getParcelableArray(String, Class)}. The
-     * {@link android.graphics.RectF} will be null for characters that either do not exist or are
-     * off the screen.
+     * {@link android.graphics.RectF} will be {@code null} for characters that either do not exist
+     * or are off the screen.
+     * <p>
+     * Note that character locations returned are modified by changes in display magnification.
      *
      * {@see #refreshWithExtraData(String, Bundle)}
      */
     public static final String EXTRA_DATA_TEXT_CHARACTER_LOCATION_KEY =
             "android.view.accessibility.extra.DATA_TEXT_CHARACTER_LOCATION_KEY";
+
+    /**
+     * Key used to request and locate extra data for text character location in
+     * window coordinates. This key requests that an array of
+     * {@link android.graphics.RectF}s be added to the extras. This request is made
+     * with {@link #refreshWithExtraData(String, Bundle)}. The arguments taken by
+     * this request are two integers:
+     * {@link #EXTRA_DATA_TEXT_CHARACTER_LOCATION_ARG_START_INDEX} and
+     * {@link #EXTRA_DATA_TEXT_CHARACTER_LOCATION_ARG_LENGTH}. The starting index
+     * must be valid inside the CharSequence returned by {@link #getText()}, and
+     * the length must be positive.
+     * <p>
+     * Providers may advertise that they support text characters in window coordinates using
+     * {@link #setAvailableExtraData(List)}. Services may check if an implementation supports text
+     * characters in window coordinates with {@link #getAvailableExtraData()}.
+     * <p>
+     * The data can be retrieved from the {@code Bundle} returned by
+     * {@link #getExtras()} using this string as a key for
+     * {@link Bundle#getParcelableArray(String, Class)}. The
+     * {@link android.graphics.RectF} will be {@code null} for characters that either do
+     * not exist or are outside of the window bounds.
+     * <p>
+     * Note that character locations in window bounds are not modified by
+     * changes in display magnification.
+     *
+     * {@see #refreshWithExtraData(String, Bundle)}
+     */
+    @FlaggedApi(Flags.FLAG_A11Y_CHARACTER_IN_WINDOW_API)
+    public static final String EXTRA_DATA_TEXT_CHARACTER_LOCATION_IN_WINDOW_KEY =
+            "android.view.accessibility.extra.DATA_TEXT_CHARACTER_LOCATION_IN_WINDOW_KEY";
 
     /**
      * Integer argument specifying the start index of the requested text location data. Must be
