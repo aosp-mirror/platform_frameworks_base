@@ -27,6 +27,6 @@ val Kosmos.quickSettingsShadeOverlayContentViewModel: QuickSettingsShadeOverlayC
             shadeInteractor = shadeInteractor,
             sceneInteractor = sceneInteractor,
             shadeHeaderViewModelFactory = shadeHeaderViewModelFactory,
-            quickSettingsContainerViewModel = quickSettingsContainerViewModel,
+            quickSettingsContainerViewModelFactory = quickSettingsContainerViewModelFactory,
         )
     }
