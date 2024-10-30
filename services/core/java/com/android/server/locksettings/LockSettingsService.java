@@ -1221,8 +1221,8 @@ public class LockSettingsService extends ILockSettings.Stub {
                 Slog.i(TAG, "Synthetic password is already not protected by Weaver");
             }
         } else if (sp == null) {
-            Slogf.wtf(TAG, "Failed to unwrap synthetic password for unsecured user %d", userId);
-            return;
+            throw new IllegalStateException(
+                    "Failed to unwrap synthetic password for unsecured user " + userId);
         }
 
         // Call setCeStorageProtection(), to re-encrypt the CE key with the SP if it's currently
