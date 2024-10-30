@@ -1715,11 +1715,10 @@ public class TelephonyCallback {
          * @see TelephonyManager#EMERGENCY_CALLBACK_MODE_SMS
          *
          * @param timerDuration is the time remaining in the emergency callback mode.
-         * @param subId The subscription ID used to start the emergency callback mode.
+         * @param subscriptionId The subscription ID used to start the emergency callback mode.
          */
-        @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
         void onCallbackModeStarted(@TelephonyManager.EmergencyCallbackModeType int type,
-                @NonNull Duration timerDuration, int subId);
+                @NonNull Duration timerDuration, int subscriptionId);
 
         /**
          * Indicates that emergency callback mode has been re-started.
@@ -1734,11 +1733,10 @@ public class TelephonyCallback {
          * @see TelephonyManager#EMERGENCY_CALLBACK_MODE_SMS
          *
          * @param timerDuration is the time remaining in the emergency callback mode.
-         * @param subId The subscription ID used to restart the emergency callback mode.
+         * @param subscriptionId The subscription ID used to restart the emergency callback mode.
          */
-        @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
         void onCallbackModeRestarted(@TelephonyManager.EmergencyCallbackModeType int type,
-                @NonNull Duration timerDuration, int subId);
+                @NonNull Duration timerDuration, int subscriptionId);
 
         /**
          * Indicates that emergency callback mode has been stopped.
@@ -1759,11 +1757,10 @@ public class TelephonyCallback {
          * @see TelephonyManager#STOP_REASON_TIMER_EXPIRED
          * @see TelephonyManager#STOP_REASON_USER_ACTION
          *
-         * @param subId is the current subscription used the emergency callback mode.
+         * @param subscriptionId is the current subscription used the emergency callback mode.
          */
-        @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
         void onCallbackModeStopped(@TelephonyManager.EmergencyCallbackModeType int type,
-                @TelephonyManager.EmergencyCallbackModeStopReason int reason, int subId);
+                @TelephonyManager.EmergencyCallbackModeStopReason int reason, int subscriptionId);
     }
 
     /**
@@ -2192,7 +2189,7 @@ public class TelephonyCallback {
 
         @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
         public void onCallbackModeStarted(@TelephonyManager.EmergencyCallbackModeType int type,
-                long durationMillis, int subId) {
+                long durationMillis, int subscriptionId) {
             if (!Flags.emergencyCallbackModeNotification()) return;
 
             EmergencyCallbackModeListener listener =
@@ -2203,12 +2200,12 @@ public class TelephonyCallback {
             final Duration timerDuration = Duration.ofMillis(durationMillis);
             Binder.withCleanCallingIdentity(
                     () -> mExecutor.execute(() -> listener.onCallbackModeStarted(type,
-                            timerDuration, subId)));
+                            timerDuration, subscriptionId)));
         }
 
         @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
         public void onCallbackModeRestarted(@TelephonyManager.EmergencyCallbackModeType int type,
-                long durationMillis, int subId) {
+                long durationMillis, int subscriptionId) {
             if (!Flags.emergencyCallbackModeNotification()) return;
 
             EmergencyCallbackModeListener listener =
@@ -2219,12 +2216,12 @@ public class TelephonyCallback {
             final Duration timerDuration = Duration.ofMillis(durationMillis);
             Binder.withCleanCallingIdentity(
                     () -> mExecutor.execute(() -> listener.onCallbackModeRestarted(type,
-                            timerDuration, subId)));
+                            timerDuration, subscriptionId)));
         }
 
         @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
         public void onCallbackModeStopped(@TelephonyManager.EmergencyCallbackModeType int type,
-                @TelephonyManager.EmergencyCallbackModeStopReason int reason, int subId) {
+                @TelephonyManager.EmergencyCallbackModeStopReason int reason, int subscriptionId) {
             if (!Flags.emergencyCallbackModeNotification()) return;
 
             EmergencyCallbackModeListener listener =
@@ -2235,7 +2232,7 @@ public class TelephonyCallback {
 
             Binder.withCleanCallingIdentity(
                     () -> mExecutor.execute(() -> listener.onCallbackModeStopped(type, reason,
-                            subId)));
+                            subscriptionId)));
         }
 
         public void onCarrierRoamingNtnModeChanged(boolean active) {
