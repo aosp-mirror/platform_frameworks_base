@@ -857,6 +857,39 @@ class DesktopTasksController(
         toggleResizeDesktopTaskTransitionHandler.startTransition(wct)
     }
 
+    private fun dragToMaximizeDesktopTask(
+        taskInfo: RunningTaskInfo,
+        taskSurface: SurfaceControl,
+        currentDragBounds: Rect,
+        motionEvent: MotionEvent
+    ) {
+        val displayLayout = displayController.getDisplayLayout(taskInfo.displayId) ?: return
+        val stableBounds = Rect()
+        displayLayout.getStableBounds(stableBounds)
+        if (isTaskMaximized(taskInfo, stableBounds)) {
+            // Handle the case where we attempt to drag-to-maximize when already maximized: the task
+            // position won't need to change but we want to animate the surface going back to the
+            // maximized position.
+            val containerBounds = taskInfo.configuration.windowConfiguration.bounds
+            if (containerBounds != currentDragBounds) {
+                returnToDragStartAnimator.start(
+                    taskInfo.taskId,
+                    taskSurface,
+                    startBounds = currentDragBounds,
+                    endBounds = containerBounds,
+                    isResizable = taskInfo.isResizeable
+                )
+            }
+            return
+        }
+
+        // TODO(b/375356605): Introduce a new ResizeTrigger for drag-to-top.
+        desktopModeEventLogger.logTaskResizingStarted(
+            ResizeTrigger.UNKNOWN_RESIZE_TRIGGER, motionEvent, taskInfo, displayController
+        )
+        toggleDesktopTaskSize(taskInfo, ResizeTrigger.UNKNOWN_RESIZE_TRIGGER, motionEvent)
+    }
+
     private fun getMaximizeBounds(taskInfo: RunningTaskInfo, stableBounds: Rect): Rect {
         if (taskInfo.isResizeable) {
             // if resizable then expand to entire stable bounds (full display minus insets)
@@ -1918,11 +1951,15 @@ class DesktopTasksController(
             )
         when (indicatorType) {
             IndicatorType.TO_FULLSCREEN_INDICATOR -> {
-                moveToFullscreenWithAnimation(
-                    taskInfo,
-                    position,
-                    DesktopModeTransitionSource.TASK_DRAG
-                )
+                if (DesktopModeStatus.shouldMaximizeWhenDragToTopEdge(context)) {
+                    dragToMaximizeDesktopTask(taskInfo, taskSurface, currentDragBounds, motionEvent)
+                } else {
+                    moveToFullscreenWithAnimation(
+                        taskInfo,
+                        position,
+                        DesktopModeTransitionSource.TASK_DRAG
+                    )
+                }
             }
             IndicatorType.TO_SPLIT_LEFT_INDICATOR -> {
                 handleSnapResizingTask(
