@@ -3455,15 +3455,15 @@ public final class SurfaceControl implements Parcelable {
          * @return this This transaction for chaining
          * @hide
          */
-        public @NonNull Transaction setCrop(@NonNull SurfaceControl sc, float top, float left,
-                float bottom, float right) {
+        public @NonNull Transaction setCrop(@NonNull SurfaceControl sc, float left, float top,
+                float right, float bottom) {
             checkPreconditions(sc);
             if (SurfaceControlRegistry.sCallStackDebuggingEnabled) {
                 SurfaceControlRegistry.getProcessInstance().checkCallStackDebugging(
                         "setCrop", this, sc, "crop={" + top + ", " + left + ", " +
                         bottom + ", " + right + "}");
             }
-            nativeSetCrop(mNativeObject, sc.mNativeObject, top, left, bottom, right);
+            nativeSetCrop(mNativeObject, sc.mNativeObject, left, top, right, bottom);
             return this;
         }
 
