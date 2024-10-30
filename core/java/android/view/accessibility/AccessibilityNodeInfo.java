@@ -856,7 +856,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * inside the CharSequence returned by {@link #getText()}, and the length must be positive.
      * <p>
      * The data can be retrieved from the {@code Bundle} returned by {@link #getExtras()} using this
-     * string as a key for {@link Bundle#getParcelableArray(String)}. The
+     * string as a key for {@link Bundle#getParcelableArray(String, Class)}. The
      * {@link android.graphics.RectF} will be null for characters that either do not exist or are
      * off the screen.
      *
