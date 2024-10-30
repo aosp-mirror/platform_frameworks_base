@@ -81,7 +81,7 @@ class DesktopImmersiveControllerTest : ShellTestCase() {
     @Before
     fun setUp() {
         desktopRepository = DesktopRepository(
-            context, ShellInit(TestShellExecutor()), mock(), mock()
+            context, ShellInit(TestShellExecutor()), mock(), mock(), mock()
         )
         whenever(mockDisplayController.getDisplayLayout(DEFAULT_DISPLAY))
             .thenReturn(mockDisplayLayout)

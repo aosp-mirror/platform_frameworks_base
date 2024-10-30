@@ -88,6 +88,8 @@ import com.android.wm.shell.desktopmode.education.AppHandleEducationController;
 import com.android.wm.shell.desktopmode.education.AppHandleEducationFilter;
 import com.android.wm.shell.desktopmode.education.data.AppHandleEducationDatastoreRepository;
 import com.android.wm.shell.desktopmode.persistence.DesktopPersistentRepository;
+import com.android.wm.shell.desktopmode.persistence.DesktopRepositoryInitializer;
+import com.android.wm.shell.desktopmode.persistence.DesktopRepositoryInitializerImpl;
 import com.android.wm.shell.draganddrop.DragAndDropController;
 import com.android.wm.shell.draganddrop.GlobalDragListener;
 import com.android.wm.shell.freeform.FreeformComponents;
@@ -909,8 +911,12 @@ public abstract class WMShellModule {
             Context context,
             ShellInit shellInit,
             DesktopPersistentRepository desktopPersistentRepository,
-            @ShellMainThread CoroutineScope mainScope) {
-        return new DesktopRepository(context, shellInit, desktopPersistentRepository, mainScope);
+            DesktopRepositoryInitializer desktopRepositoryInitializer,
+            @ShellMainThread CoroutineScope mainScope
+    ) {
+        return new DesktopRepository(context, shellInit, desktopPersistentRepository,
+                desktopRepositoryInitializer,
+                mainScope);
     }
 
     @WMSingleton
@@ -1055,6 +1061,16 @@ public abstract class WMShellModule {
     static DesktopPersistentRepository provideDesktopPersistentRepository(
             Context context, @ShellBackgroundThread CoroutineScope bgScope) {
         return new DesktopPersistentRepository(context, bgScope);
+    }
+
+    @WMSingleton
+    @Provides
+    static DesktopRepositoryInitializer provideDesktopRepositoryInitializer(
+            Context context,
+            DesktopPersistentRepository desktopPersistentRepository,
+            @ShellMainThread CoroutineScope mainScope) {
+        return new DesktopRepositoryInitializerImpl(context, desktopPersistentRepository,
+                mainScope);
     }
 
     //

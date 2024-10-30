@@ -41,6 +41,7 @@ import com.android.wm.shell.ShellTestCase
 import com.android.wm.shell.common.ShellExecutor
 import com.android.wm.shell.desktopmode.DesktopTestHelpers.Companion.createFreeformTask
 import com.android.wm.shell.desktopmode.persistence.DesktopPersistentRepository
+import com.android.wm.shell.desktopmode.persistence.DesktopRepositoryInitializer
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
 import com.android.wm.shell.sysui.ShellInit
 import com.android.wm.shell.transition.TransitionInfoBuilder
@@ -89,6 +90,7 @@ class DesktopTasksLimiterTest : ShellTestCase() {
     @Mock lateinit var handler: Handler
     @Mock lateinit var testExecutor: ShellExecutor
     @Mock lateinit var persistentRepository: DesktopPersistentRepository
+    @Mock lateinit var repositoryInitializer: DesktopRepositoryInitializer
 
     private lateinit var mockitoSession: StaticMockitoSession
     private lateinit var desktopTasksLimiter: DesktopTasksLimiter
@@ -106,7 +108,13 @@ class DesktopTasksLimiterTest : ShellTestCase() {
         testScope = CoroutineScope(Dispatchers.Unconfined + SupervisorJob())
 
         desktopTaskRepo =
-            DesktopRepository(context, shellInit, persistentRepository, testScope)
+            DesktopRepository(
+                context,
+                shellInit,
+                persistentRepository,
+                repositoryInitializer,
+                testScope
+            )
         desktopTasksLimiter =
             DesktopTasksLimiter(transitions, desktopTaskRepo, shellTaskOrganizer, MAX_TASK_LIMIT,
                 interactionJankMonitor, mContext, handler)

@@ -43,6 +43,7 @@ import com.android.wm.shell.desktopmode.DesktopTestHelpers.Companion.createFreef
 import com.android.wm.shell.desktopmode.DesktopTestHelpers.Companion.createFullscreenTask
 import com.android.wm.shell.desktopmode.persistence.Desktop
 import com.android.wm.shell.desktopmode.persistence.DesktopPersistentRepository
+import com.android.wm.shell.desktopmode.persistence.DesktopRepositoryInitializer
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
 import com.android.wm.shell.sysui.ShellInit
 import com.android.wm.shell.transition.Transitions
@@ -50,10 +51,10 @@ import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertTrue
 import kotlin.test.assertNotNull
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.setMain
@@ -94,6 +95,7 @@ class DesktopActivityOrientationChangeHandlerTest : ShellTestCase() {
     @Mock lateinit var resizeTransitionHandler: ToggleResizeDesktopTaskTransitionHandler
     @Mock lateinit var taskStackListener: TaskStackListenerImpl
     @Mock lateinit var persistentRepository: DesktopPersistentRepository
+    @Mock lateinit var repositoryInitializer: DesktopRepositoryInitializer
 
     private lateinit var mockitoSession: StaticMockitoSession
     private lateinit var handler: DesktopActivityOrientationChangeHandler
@@ -116,7 +118,13 @@ class DesktopActivityOrientationChangeHandlerTest : ShellTestCase() {
         testScope = CoroutineScope(Dispatchers.Unconfined + SupervisorJob())
         shellInit = spy(ShellInit(testExecutor))
         taskRepository =
-            DesktopRepository(context, shellInit, persistentRepository, testScope)
+            DesktopRepository(
+                context,
+                shellInit,
+                persistentRepository,
+                repositoryInitializer,
+                testScope
+            )
         whenever(shellTaskOrganizer.getRunningTasks(anyInt())).thenAnswer { runningTasks }
         whenever(transitions.startTransition(anyInt(), any(), isNull())).thenAnswer { Binder() }
         whenever(runBlocking { persistentRepository.readDesktop(any(), any()) }).thenReturn(
