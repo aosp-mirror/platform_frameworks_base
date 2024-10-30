@@ -1835,7 +1835,6 @@ public class ApplicationPackageManager extends PackageManager {
 
                 if (false) {
                     RuntimeException e = new RuntimeException("here");
-                    e.fillInStackTrace();
                     Log.w(TAG, "Getting drawable 0x" + Integer.toHexString(resId)
                                     + " from package " + packageName
                                     + ": app scale=" + r.getCompatibilityInfo().applicationScale

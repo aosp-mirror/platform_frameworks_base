@@ -5286,7 +5286,6 @@ public class ActivityManager {
         if (!exported) {
             /*
             RuntimeException here = new RuntimeException("here");
-            here.fillInStackTrace();
             Slog.w(TAG, "Permission denied: checkComponentPermission() owningUid=" + owningUid,
                     here);
             */
