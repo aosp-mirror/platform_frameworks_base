@@ -40,6 +40,7 @@ import static android.service.notification.ZenModeConfig.ORIGIN_USER_IN_SYSTEMUI
 import static android.service.notification.ZenModeConfig.ZenRule.OVERRIDE_ACTIVATE;
 import static android.service.notification.ZenModeConfig.ZenRule.OVERRIDE_DEACTIVATE;
 import static android.service.notification.ZenModeConfig.implicitRuleId;
+import static android.service.notification.ZenModeConfig.isImplicitRuleId;
 
 import static com.android.internal.util.FrameworkStatsLog.DND_MODE_RULE;
 import static com.android.internal.util.Preconditions.checkArgument;
@@ -167,7 +168,6 @@ public class ZenModeHelper {
     private final Clock mClock;
     private final SettingsObserver mSettingsObserver;
     private final AppOpsManager mAppOps;
-    private final NotificationManager mNotificationManager;
     private final ZenModeConfig mDefaultConfig;
     private final ArrayList<Callback> mCallbacks = new ArrayList<Callback>();
     private final ZenModeFiltering mFiltering;
@@ -214,7 +214,6 @@ public class ZenModeHelper {
         mClock = clock;
         addCallback(mMetrics);
         mAppOps = context.getSystemService(AppOpsManager.class);
-        mNotificationManager = context.getSystemService(NotificationManager.class);
 
         mDefaultConfig = Flags.modesUi()
                 ? ZenModeConfig.getDefaultConfig()
@@ -657,7 +656,12 @@ public class ZenModeHelper {
                     // (whether initialized here or set via app or user).
                     rule.zenPolicy = config.getZenPolicy().copy();
                     newConfig.automaticRules.put(rule.id, rule);
+                } else {
+                    if (Flags.modesUi()) {
+                        updateImplicitZenRuleNameAndDescription(rule);
+                    }
                 }
+
                 // If the user has changed the rule's *zenMode*, then don't let app overwrite it.
                 // We allow the update if the user has only changed other aspects of the rule.
                 if ((rule.userModifiedFields & AutomaticZenRule.FIELD_INTERRUPTION_FILTER) == 0) {
@@ -704,7 +708,12 @@ public class ZenModeHelper {
                 rule = newImplicitZenRule(callingPkg);
                 rule.zenMode = Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
                 newConfig.automaticRules.put(rule.id, rule);
+            } else {
+                if (Flags.modesUi()) {
+                    updateImplicitZenRuleNameAndDescription(rule);
+                }
             }
+
             // If the user has changed the rule's *ZenPolicy*, then don't let app overwrite it.
             // We allow the update if the user has only changed other aspects of the rule.
             if (rule.zenPolicyUserModifiedFields == 0) {
@@ -774,24 +783,8 @@ public class ZenModeHelper {
         rule.id = implicitRuleId(pkg);
         rule.pkg = pkg;
         rule.creationTime = mClock.millis();
-
-        Binder.withCleanCallingIdentity(() -> {
-            try {
-                ApplicationInfo applicationInfo = mPm.getApplicationInfo(pkg, 0);
-                rule.name = applicationInfo.loadLabel(mPm).toString();
-                if (!Flags.modesUi()) {
-                    rule.iconResName = drawableResIdToResName(pkg, applicationInfo.icon);
-                }
-            } catch (PackageManager.NameNotFoundException e) {
-                // Should not happen, since it's the app calling us (?)
-                Log.w(TAG, "Package not found for creating implicit zen rule");
-                rule.name = "Unknown";
-            }
-        });
-
+        updateImplicitZenRuleNameAndDescription(rule);
         rule.type = AutomaticZenRule.TYPE_OTHER;
-        rule.triggerDescription = mContext.getString(R.string.zen_mode_implicit_trigger_description,
-                rule.name);
         rule.condition = null;
         rule.conditionId = new Uri.Builder()
                 .scheme(Condition.SCHEME)
@@ -804,6 +797,38 @@ public class ZenModeHelper {
         rule.component = null;
         rule.configurationActivity = null;
         return rule;
+    }
+
+    private void updateImplicitZenRuleNameAndDescription(ZenRule rule) {
+        checkArgument(isImplicitRuleId(rule.id));
+        requireNonNull(rule.pkg, "Implicit rule is not associated to package yet!");
+
+        String pkgAppName = Binder.withCleanCallingIdentity(() -> {
+            try {
+                ApplicationInfo applicationInfo = mPm.getApplicationInfo(rule.pkg, 0);
+                return applicationInfo.loadLabel(mPm).toString();
+            } catch (PackageManager.NameNotFoundException e) {
+                // Should not happen. When creating it's the app calling us, and when updating
+                // the rule would've been deleted if the package was removed.
+                Slog.e(TAG, "Package not found when updating implicit zen rule name", e);
+                return null;
+            }
+        });
+
+        if (pkgAppName != null) {
+            if ((rule.userModifiedFields & AutomaticZenRule.FIELD_NAME) == 0) {
+                if (Flags.modesUi()) {
+                    rule.name = mContext.getString(R.string.zen_mode_implicit_name, pkgAppName);
+                } else {
+                    rule.name = pkgAppName;
+                }
+            }
+            rule.triggerDescription = mContext.getString(
+                    R.string.zen_mode_implicit_trigger_description, pkgAppName);
+        } else if (rule.name == null) {
+            // We must give a new rule SOME name. But this path should never be hit.
+            rule.name = "Unknown";
+        }
     }
 
     boolean removeAutomaticZenRule(UserHandle user, String id, @ConfigOrigin int origin,
@@ -1127,6 +1152,8 @@ public class ZenModeHelper {
                 for (ZenRule rule : newConfig.automaticRules.values()) {
                     if (SystemZenRules.isSystemOwnedRule(rule)) {
                         updated |= SystemZenRules.updateTriggerDescription(mContext, rule);
+                    } else if (isImplicitRuleId(rule.id)) {
+                        updateImplicitZenRuleNameAndDescription(rule);
                     }
                 }
             }
