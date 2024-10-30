@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs.panels.ui.viewmodel
 
+import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.qs.panels.ui.dialog.QSResetDialogDelegate
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -27,10 +28,14 @@ constructor(
     val gridSizeViewModel: QSColumnsViewModel,
     val squishinessViewModel: TileSquishinessViewModel,
     private val resetDialogDelegate: QSResetDialogDelegate,
-) {
+) : ExclusiveActivatable() {
 
     fun showResetDialog() {
         resetDialogDelegate.showDialog()
+    }
+
+    override suspend fun onActivated(): Nothing {
+        gridSizeViewModel.activate()
     }
 
     @AssistedFactory

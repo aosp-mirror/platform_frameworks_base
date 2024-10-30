@@ -28,7 +28,7 @@ import com.android.systemui.qs.composefragment.dagger.usingMediaInComposeFragmen
 import com.android.systemui.qs.footerActionsController
 import com.android.systemui.qs.footerActionsViewModelFactory
 import com.android.systemui.qs.panels.domain.interactor.tileSquishinessInteractor
-import com.android.systemui.qs.panels.ui.viewmodel.paginatedGridViewModel
+import com.android.systemui.qs.panels.ui.viewmodel.inFirstPageViewModel
 import com.android.systemui.qs.ui.viewmodel.quickSettingsContainerViewModelFactory
 import com.android.systemui.shade.largeScreenHeaderHelper
 import com.android.systemui.shade.transition.largeScreenShadeInterpolator
@@ -56,7 +56,7 @@ val Kosmos.qsFragmentComposeViewModelFactory by
                     configurationInteractor,
                     largeScreenHeaderHelper,
                     tileSquishinessInteractor,
-                    paginatedGridViewModel,
+                    inFirstPageViewModel,
                     qqsMediaHost,
                     qsMediaHost,
                     usingMediaInComposeFragment,

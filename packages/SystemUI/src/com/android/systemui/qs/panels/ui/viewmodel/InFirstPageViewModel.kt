@@ -16,15 +16,14 @@
 
 package com.android.systemui.qs.panels.ui.viewmodel
 
-import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.qs.panels.domain.interactor.paginatedGridInteractor
+import com.android.systemui.dagger.SysUISingleton
+import javax.inject.Inject
 
-val Kosmos.paginatedGridViewModel by
-    Kosmos.Fixture {
-        PaginatedGridViewModel(
-            iconTilesViewModel,
-            qsColumnsViewModel,
-            paginatedGridInteractor,
-            inFirstPageViewModel,
-        )
-    }
+/*
+ * Tracks whether the current HorizontalPager (using this viewmodel) is in the first page.
+ * This requires it to be a `@SysUISingleton` to be shared between viewmodels.
+ */
+@SysUISingleton
+class InFirstPageViewModel @Inject constructor() {
+    var inFirstPage = true
+}

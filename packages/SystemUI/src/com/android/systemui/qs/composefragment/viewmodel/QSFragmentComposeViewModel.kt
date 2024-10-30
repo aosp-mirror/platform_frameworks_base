@@ -48,7 +48,7 @@ import com.android.systemui.qs.FooterActionsController
 import com.android.systemui.qs.composefragment.dagger.QSFragmentComposeModule
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel
 import com.android.systemui.qs.panels.domain.interactor.TileSquishinessInteractor
-import com.android.systemui.qs.panels.ui.viewmodel.PaginatedGridViewModel
+import com.android.systemui.qs.panels.ui.viewmodel.InFirstPageViewModel
 import com.android.systemui.qs.ui.viewmodel.QuickSettingsContainerViewModel
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.model.Scenes
@@ -93,7 +93,7 @@ constructor(
     configurationInteractor: ConfigurationInteractor,
     private val largeScreenHeaderHelper: LargeScreenHeaderHelper,
     private val squishinessInteractor: TileSquishinessInteractor,
-    private val paginatedGridViewModel: PaginatedGridViewModel,
+    private val inFirstPageViewModel: InFirstPageViewModel,
     @Named(QUICK_QS_PANEL) val qqsMediaHost: MediaHost,
     @Named(QS_PANEL) val qsMediaHost: MediaHost,
     @Named(QSFragmentComposeModule.QS_USING_MEDIA_PLAYER) private val usingMedia: Boolean,
@@ -204,7 +204,7 @@ constructor(
     var collapseExpandAccessibilityAction: Runnable? = null
 
     val inFirstPage: Boolean
-        get() = paginatedGridViewModel.inFirstPage
+        get() = inFirstPageViewModel.inFirstPage
 
     var overScrollAmount by mutableStateOf(0)
 
