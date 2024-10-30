@@ -102,6 +102,8 @@ public final class Bitmap implements Parcelable {
 
     private static volatile int sDefaultDensity = -1;
 
+    private long mId;
+
     /**
      * For backwards compatibility, allows the app layer to change the default
      * density when running old apps.
@@ -152,18 +154,19 @@ public final class Bitmap implements Parcelable {
     Bitmap(long nativeBitmap, int width, int height, int density,
             boolean requestPremultiplied, byte[] ninePatchChunk,
             NinePatch.InsetStruct ninePatchInsets) {
-        this(nativeBitmap, width, height, density, requestPremultiplied, ninePatchChunk,
+        this(0, nativeBitmap, width, height, density, requestPremultiplied, ninePatchChunk,
                 ninePatchInsets, true);
     }
 
     // called from JNI and Bitmap_Delegate.
-    Bitmap(long nativeBitmap, int width, int height, int density,
+    Bitmap(long id, long nativeBitmap, int width, int height, int density,
             boolean requestPremultiplied, byte[] ninePatchChunk,
             NinePatch.InsetStruct ninePatchInsets, boolean fromMalloc) {
         if (nativeBitmap == 0) {
             throw new RuntimeException("internal error: native bitmap is 0");
         }
 
+        mId = id;
         mWidth = width;
         mHeight = height;
         mRequestPremultiplied = requestPremultiplied;
