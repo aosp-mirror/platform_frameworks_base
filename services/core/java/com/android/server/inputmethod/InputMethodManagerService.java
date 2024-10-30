@@ -6078,8 +6078,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         p.println("  mSystemReady=" + mSystemReady);
         p.println("  mInteractive=" + mIsInteractive);
         p.println("  mConcurrentMultiUserModeEnabled=" + mConcurrentMultiUserModeEnabled);
-        p.println("  ENABLE_HIDE_IME_CAPTION_BAR="
-                + InputMethodService.ENABLE_HIDE_IME_CAPTION_BAR);
         final int currentImeUserId;
         synchronized (ImfLock.class) {
             currentImeUserId = mCurrentImeUserId;
