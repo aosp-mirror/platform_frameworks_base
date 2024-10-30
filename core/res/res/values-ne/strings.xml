@@ -590,7 +590,7 @@
     <string name="permdesc_changeWifiMulticastState" product="default" msgid="8296627590220222740">"तपाईँको फोन मात्र होइन, मल्टिकास्ट ठेगानाहरूको प्रयोग गरे Wi-Fi नेटवर्कका सबै उपकरणहरूमा पठाइएका प्याकेटहरू प्राप्त गर्न एपलाई अनुमति दिन्छ। यसले गैर-मल्टिकास्ट मोडभन्दा बढी उर्जा प्रयोग गर्छ।"</string>
     <string name="permlab_bluetoothAdmin" msgid="6490373569441946064">"ब्लुटुथ सेटिङहरूमा पहुँच गर्नुहोस्"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="5370837055438574863">"स्थानीय ब्लुटुथ ट्याब्लेटलाई कन्फिगर गर्नको लागि र टाढाका उपकरणहरूलाई पत्ता लगाउन र जोड्नको लागि एपलाई अनुमति दिन्छ।"</string>
-    <string name="permdesc_bluetoothAdmin" product="tv" msgid="1623992984547014588">"एपलाई तपाईंको Android टिभी डिभाइसको ब्लुटुथ कन्फिगर गर्ने तथा टाढा रहेका यन्त्रहरू पत्ता लगाई ती यन्त्रहरूसँग जोडा बनाउने अनुमति दिन्छ।"</string>
+    <string name="permdesc_bluetoothAdmin" product="tv" msgid="1623992984547014588">"एपलाई तपाईंको Android टिभी डिभाइसको ब्लुटुथ कन्फिगर गर्ने तथा टाढा रहेका यन्त्रहरू पत्ता लगाई ती यन्त्रहरूसँग कनेक्ट गर्ने अनुमति दिन्छ।"</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="7381341743021234863">"एपलाई स्थानीय ब्लुटुथ फोन कन्फिगर गर्न र टाढाका उपकरणहरूसँग खोज गर्न र जोडी गर्न अनुमति दिन्छ।"</string>
     <string name="permlab_accessWimaxState" msgid="7029563339012437434">"WiMAXसँग जोड्नुहोस् वा छुटाउनुहोस्"</string>
     <string name="permdesc_accessWimaxState" msgid="5372734776802067708">"एपलाई वाइम्याक्स सक्षम छ कि छैन र जडान भएको कुनै पनि वाइम्याक्स नेटवर्कहरूको बारेमा जानकारी निर्धारिण गर्न अनुमति दिन्छ।"</string>

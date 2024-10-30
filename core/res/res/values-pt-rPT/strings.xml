@@ -1944,8 +1944,7 @@
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Desativada"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> – <xliff:g id="END">%2$s</xliff:g>"</string>
-    <!-- no translation found for zen_mode_trigger_summary_range_words (7228261413029290750) -->
-    <skip />
+    <string name="zen_mode_trigger_summary_range_words" msgid="7228261413029290750">"<xliff:g id="START">%1$s</xliff:g> – <xliff:g id="END">%2$s</xliff:g>"</string>
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"Qualquer calendário"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> está a desativar alguns sons."</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"Existe um problema interno no seu dispositivo e pode ficar instável até efetuar uma reposição de dados de fábrica."</string>
@@ -2427,14 +2426,10 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Envie e receba mensagens sem uma rede móvel ou Wi-Fi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Abre a app Mensagens"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Como funciona"</string>
-    <!-- no translation found for satellite_manual_selection_state_popup_title (8545991934926661974) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_message (1928101658551382450) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_ok (2459664752624985095) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_cancel (973605633339469252) -->
-    <skip />
+    <string name="satellite_manual_selection_state_popup_title" msgid="8545991934926661974">"Ative a opção \"Selecionar rede automaticamente\""</string>
+    <string name="satellite_manual_selection_state_popup_message" msgid="1928101658551382450">"Ative a opção \"Selecionar rede automaticamente\" nas Definições para que o telemóvel possa encontrar uma rede que funcione com o satélite"</string>
+    <string name="satellite_manual_selection_state_popup_ok" msgid="2459664752624985095">"Ativar"</string>
+    <string name="satellite_manual_selection_state_popup_cancel" msgid="973605633339469252">"Retroceder"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Pendente…"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Configure o Desbloqueio por impressão digital novamente"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"Já não é possível reconhecer <xliff:g id="FINGERPRINT">%s</xliff:g>."</string>
