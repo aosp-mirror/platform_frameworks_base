@@ -365,6 +365,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     private final TouchHandler mTouchHandler = new TouchHandler();
 
     private long mDownTime;
+    private long mStatusBarLongPressDowntime;
     private boolean mTouchSlopExceededBeforeDown;
     private float mOverExpansion;
     private CentralSurfaces mCentralSurfaces;
@@ -3098,6 +3099,25 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         }
     }
 
+    /** @deprecated Temporary a11y solution until dual shade launch b/371224114 */
+    @Override
+    @Deprecated
+    public void onStatusBarLongPress(MotionEvent event) {
+        mShadeLog.d("Status Bar was long pressed.");
+        ShadeExpandsOnStatusBarLongPress.assertInNewMode();
+        mStatusBarLongPressDowntime = event.getDownTime();
+        if (isTracking()) {
+            onTrackingStopped(true);
+        }
+        if (isExpanded() && !mQsController.getExpanded()) {
+            mShadeLog.d("Status Bar was long pressed. Expanding to QS.");
+            expandToQs();
+        } else {
+            mShadeLog.d("Status Bar was long pressed. Expanding to Notifications.");
+            expandToNotifications();
+        }
+    }
+
     @Override
     public int getBarState() {
         return mBarState;
@@ -3761,6 +3781,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     private void endMotionEvent(MotionEvent event, float x, float y, boolean forceCancel) {
         mShadeLog.logEndMotionEvent("endMotionEvent called", forceCancel, false);
         mTrackingPointer = -1;
+        mStatusBarLongPressDowntime = 0L;
         mAmbientState.setSwipingUp(false);
         if ((isTracking() && mTouchSlopExceeded) || Math.abs(x - mInitialExpandX) > mTouchSlop
                 || Math.abs(y - mInitialExpandY) > mTouchSlop
@@ -5077,6 +5098,13 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                 }
                 return true;
             }
+            // This touch session has already resulted in shade expansion. Ignore everything else.
+            if (ShadeExpandsOnStatusBarLongPress.isEnabled()
+                    && event.getActionMasked() != MotionEvent.ACTION_DOWN
+                    && event.getDownTime() == mStatusBarLongPressDowntime) {
+                mShadeLog.d("Touch has same down time as Status Bar long press. Ignoring.");
+                return false;
+            }
             if (event.getActionMasked() == MotionEvent.ACTION_DOWN && isFullyCollapsed()) {
                 mMetricsLogger.count(COUNTER_PANEL_OPEN, 1);
                 handled = true;
@@ -5157,6 +5185,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                     mUpdateFlingOnLayout = false;
                     mMotionAborted = false;
                     mDownTime = mSystemClock.uptimeMillis();
+                    mStatusBarLongPressDowntime = 0L;
                     mTouchAboveFalsingThreshold = false;
                     mCollapsedAndHeadsUpOnDown =
                             isFullyCollapsed() && mHeadsUpManager.hasPinnedHeadsUp();
