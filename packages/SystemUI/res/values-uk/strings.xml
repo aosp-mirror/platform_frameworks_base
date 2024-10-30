@@ -112,6 +112,8 @@
     <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"Записати відео з екрана?"</string>
     <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"Записувати один додаток"</string>
     <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"Записувати весь екран"</string>
+    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen_for_display (3754611651558838691) -->
+    <skip />
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"Коли ви записуєте вміст усього екрана, на відео потрапляє все, що на ньому відображається. Тому будьте уважні з паролями, повідомленнями, фотографіями, аудіо, відео, платіжною інформацією тощо."</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"Коли ви записуєте додаток, на відео потрапляє все, що відображається або відтворюється в ньому. Тому будьте уважні з паролями, повідомленнями, фотографіями, аудіо, відео, платіжною інформацією тощо."</string>
     <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"Записувати вміст екрана"</string>
@@ -1413,15 +1415,21 @@
     <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"Поточний додаток"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Доступність"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Комбінації клавіш"</string>
+    <!-- no translation found for shortcut_helper_customize_mode_title (1467657117101096033) -->
+    <skip />
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Комбінації клавіш для пошуку"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"Нічого не знайдено"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Значок згортання"</string>
+    <!-- no translation found for shortcut_helper_customize_button_text (3124983502748069338) -->
+    <skip />
+    <!-- no translation found for shortcut_helper_done_button_text (7249905942125386191) -->
+    <skip />
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Значок розгортання"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"або"</string>
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"Маркер переміщення"</string>
     <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"Налаштування клавіатури"</string>
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"Навігація за допомогою клавіатури"</string>
-    <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"Комбінації клавіш: докладніше"</string>
+    <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"Дізнайтеся більше про комбінації клавіш"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"Навігація за допомогою сенсорної панелі"</string>
     <string name="launch_touchpad_tutorial_notification_content" msgid="7931085031240753226">"Жести для сенсорної панелі: докладніше"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_title" msgid="1940023776496198762">"Навігація за допомогою клавіатури й сенсорної панелі"</string>

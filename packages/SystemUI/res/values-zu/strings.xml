@@ -112,6 +112,8 @@
     <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"Rekhoda isikrini sakho?"</string>
     <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"Rekhoda i-app eyodwa"</string>
     <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"Rekhoda sonke isikrini"</string>
+    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen_for_display (3754611651558838691) -->
+    <skip />
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"Uma urekhoda sonke isikrini sakho, noma yini evela esikrinini iyarekhodwa. Ngakho-ke qaphela ngezinto ezifana namaphasiwedi, imininingwane yenkokhelo, imilayezo, izithombe, nomsindo nevidiyo."</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"Uma urekhoda i-app, noma yini evezwa noma edlala kuleyo app iyarekhodwa. Ngakho-ke qaphela ngezinto ezifana namaphasiwedi, imininingwane yenkokhelo, imilayezo, izithombe, nomsindo nevidiyo."</string>
     <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"Rekhoda isikrini"</string>
@@ -1413,9 +1415,15 @@
     <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"I-App yamanje"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Ukufinyeleleka"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Izinqamuleli zekhibhodi"</string>
+    <!-- no translation found for shortcut_helper_customize_mode_title (1467657117101096033) -->
+    <skip />
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Sesha izinqamuleli"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"Ayikho imiphumela yosesho"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Goqa isithonjana"</string>
+    <!-- no translation found for shortcut_helper_customize_button_text (3124983502748069338) -->
+    <skip />
+    <!-- no translation found for shortcut_helper_done_button_text (7249905942125386191) -->
+    <skip />
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Nweba isithonjana"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"noma"</string>
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"Hudula isibambi"</string>

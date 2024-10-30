@@ -112,6 +112,8 @@
     <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"ଆପଣଙ୍କ ସ୍କ୍ରିନକୁ ରେକର୍ଡ କରିବେ?"</string>
     <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"ଗୋଟିଏ ଆପ ରେକର୍ଡ କରନ୍ତୁ"</string>
     <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"ସମ୍ପୂର୍ଣ୍ଣ ସ୍କ୍ରିନ ରେକର୍ଡ କରନ୍ତୁ"</string>
+    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen_for_display (3754611651558838691) -->
+    <skip />
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"ଆପଣ ଆପଣଙ୍କର ସମ୍ପୂର୍ଣ୍ଣ ସ୍କ୍ରିନ ରେକର୍ଡ କରିବା ସମୟରେ, ଆପଣଙ୍କ ସ୍କ୍ରିନରେ ଦେଖାଯାଉଥିବା ସବୁକିଛି ରେକର୍ଡ ହୋଇଥାଏ। ତେଣୁ ପାସୱାର୍ଡ, ପେମେଣ୍ଟ ବିବରଣୀ, ମେସେଜ, ଫଟୋ ଏବଂ ଅଡିଓ ଓ ଭିଡିଓ ପରି ବିଷୟଗୁଡ଼ିକ ପ୍ରତି ସତର୍କ ରୁହନ୍ତୁ।"</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"ଆପଣ ଏକ ଆପ ରେକର୍ଡ କରିବା ସମୟରେ, ସେହି ଆପରେ ଦେଖାଯାଉଥିବା କିମ୍ବା ପ୍ଲେ ହେଉଥିବା ସବୁକିଛି ରେକର୍ଡ ହୋଇଥାଏ। ତେଣୁ ପାସୱାର୍ଡ, ପେମେଣ୍ଟ ବିବରଣୀ, ମେସେଜ, ଫଟୋ ଏବଂ ଅଡିଓ ଓ ଭିଡିଓ ପରି ବିଷୟଗୁଡ଼ିକ ପ୍ରତି ସତର୍କ ରୁହନ୍ତୁ।"</string>
     <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"ସ୍କ୍ରିନ ରେକର୍ଡ କରନ୍ତୁ"</string>
@@ -1413,9 +1415,15 @@
     <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"ବର୍ତ୍ତମାନର ଆପ"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"ଆକ୍ସେସିବିଲିଟୀ"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"କୀବୋର୍ଡ ସର୍ଟକଟ"</string>
+    <!-- no translation found for shortcut_helper_customize_mode_title (1467657117101096033) -->
+    <skip />
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"ସର୍ଚ୍ଚ ସର୍ଟକଟ"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"କୌଣସି ସର୍ଚ୍ଚ ଫଳାଫଳ ନାହିଁ"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"ଆଇକନକୁ ସଙ୍କୁଚିତ କରନ୍ତୁ"</string>
+    <!-- no translation found for shortcut_helper_customize_button_text (3124983502748069338) -->
+    <skip />
+    <!-- no translation found for shortcut_helper_done_button_text (7249905942125386191) -->
+    <skip />
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"ଆଇକନକୁ ବିସ୍ତାର କରନ୍ତୁ"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"କିମ୍ବା"</string>
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"ଡ୍ରାଗ ହେଣ୍ଡେଲ"</string>

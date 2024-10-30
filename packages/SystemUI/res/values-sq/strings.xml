@@ -112,6 +112,8 @@
     <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"Të regjistrohet ekrani?"</string>
     <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"Regjistro një aplikacion"</string>
     <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"Regjistro të gjithë ekranin"</string>
+    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen_for_display (3754611651558838691) -->
+    <skip />
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"Kur regjistron të gjithë ekranin, regjistrohet çdo gjë e shfaqur në ekranin tënd. Prandaj, ki kujdes me gjërat si fjalëkalimet, detajet e pagesave, mesazhet, fotografitë, si dhe audion dhe videon."</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"Kur regjistron një aplikacion, regjistrohet çdo gjë që shfaqet ose luhet në atë aplikacion. Prandaj, ki kujdes me gjërat si fjalëkalimet, detajet e pagesave, mesazhet, fotografitë, si dhe audion dhe videon."</string>
     <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"Regjistro ekranin"</string>
@@ -1413,9 +1415,15 @@
     <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"Aplikacioni aktual"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Qasshmëria"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Shkurtoret e tastierës"</string>
+    <!-- no translation found for shortcut_helper_customize_mode_title (1467657117101096033) -->
+    <skip />
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Kërko për shkurtoret"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"Asnjë rezultat kërkimi"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Ikona e palosjes"</string>
+    <!-- no translation found for shortcut_helper_customize_button_text (3124983502748069338) -->
+    <skip />
+    <!-- no translation found for shortcut_helper_done_button_text (7249905942125386191) -->
+    <skip />
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Ikona e zgjerimit"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"ose"</string>
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"Doreza e zvarritjes"</string>

@@ -112,6 +112,8 @@
     <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"क्या आपको स्क्रीन रिकॉर्ड करनी है?"</string>
     <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"एक ऐप्लिकेशन की रिकॉर्डिंग करें"</string>
     <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"पूरी स्क्रीन रिकॉर्ड करें"</string>
+    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen_for_display (3754611651558838691) -->
+    <skip />
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"पूरी स्क्रीन रिकॉर्ड करते समय, स्क्रीन पर दिखने वाली हर चीज़ रिकॉर्ड की जाती है. इसलिए पासवर्ड, पेमेंट के तरीके की जानकारी, मैसेज,  डिवाइस पर चल रहे ऑडियो और वीडियो, और फ़ोटो जैसी चीज़ों को लेकर सावधानी बरतें."</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"किसी ऐप्लिकेशन को रिकॉर्ड करने के दौरान, उस पर दिख रहा कॉन्टेंट या चल रहा मीडिया दूसरी स्क्रीन पर भी रिकॉर्ड होता है. इसलिए, रिकॉर्ड करते समय पासवर्ड, पेमेंट के तरीके की जानकारी, मैसेज, फ़ोटो, ऑडियो, और वीडियो को लेकर सावधानी बरतें."</string>
     <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"स्क्रीन रिकॉर्ड करें"</string>
@@ -1413,9 +1415,15 @@
     <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"मौजूदा ऐप्लिकेशन"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"सुलभता"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"कीबोर्ड शॉर्टकट"</string>
+    <!-- no translation found for shortcut_helper_customize_mode_title (1467657117101096033) -->
+    <skip />
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"सर्च शॉर्टकट"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"खोज का कोई नतीजा नहीं मिला"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"छोटा करने का आइकॉन"</string>
+    <!-- no translation found for shortcut_helper_customize_button_text (3124983502748069338) -->
+    <skip />
+    <!-- no translation found for shortcut_helper_done_button_text (7249905942125386191) -->
+    <skip />
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"बड़ा करने का आइकॉन"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"या"</string>
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"खींचकर छोड़ने वाला हैंडल"</string>

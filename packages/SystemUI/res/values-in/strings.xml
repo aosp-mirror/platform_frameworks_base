@@ -112,6 +112,8 @@
     <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"Rekam layar Anda?"</string>
     <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"Rekam satu aplikasi"</string>
     <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"Rekam seluruh layar"</string>
+    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen_for_display (3754611651558838691) -->
+    <skip />
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"Saat Anda merekam seluruh layar, semua hal yang ditampilkan di layar akan direkam. Jadi, berhati-hatilah saat memasukkan sandi, detail pembayaran, pesan, foto, audio, dan video."</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"Jika Anda merekam aplikasi, semua hal yang ditampilkan atau diputar di aplikasi tersebut akan direkam. Jadi, berhati-hatilah saat memasukkan sandi, detail pembayaran, pesan, foto, audio, dan video."</string>
     <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"Rekam layar"</string>
@@ -409,7 +411,7 @@
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Mode satu tangan"</string>
     <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"Alat bantu dengar"</string>
     <string name="quick_settings_hearing_devices_connected" msgid="6519069502397037781">"Aktif"</string>
-    <string name="quick_settings_hearing_devices_disconnected" msgid="8907061223998176187">"Terputus"</string>
+    <string name="quick_settings_hearing_devices_disconnected" msgid="8907061223998176187">"Tidak terhubung"</string>
     <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"Alat bantu dengar"</string>
     <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"Sambungkan perangkat baru"</string>
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"Klik untuk menyambungkan perangkat baru"</string>
@@ -1190,7 +1192,7 @@
     <string name="media_output_dialog_group" msgid="5571251347877452212">"Grup"</string>
     <string name="media_output_dialog_single_device" msgid="3102758980643351058">"1 perangkat dipilih"</string>
     <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"<xliff:g id="COUNT">%1$d</xliff:g> perangkat dipilih"</string>
-    <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(terputus)"</string>
+    <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(tidak terhubung)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"Tidak dapat beralih. Ketuk untuk mencoba lagi."</string>
     <string name="media_output_dialog_pairing_new" msgid="5098212763195577270">"Hubungkan perangkat"</string>
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Buka aplikasi untuk mentransmisikan sesi ini."</string>
@@ -1413,9 +1415,15 @@
     <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"Aplikasi Saat Ini"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Aksesibilitas"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Pintasan keyboard"</string>
+    <!-- no translation found for shortcut_helper_customize_mode_title (1467657117101096033) -->
+    <skip />
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Pintasan penelusuran"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"Tidak ada hasil penelusuran"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Ikon ciutkan"</string>
+    <!-- no translation found for shortcut_helper_customize_button_text (3124983502748069338) -->
+    <skip />
+    <!-- no translation found for shortcut_helper_done_button_text (7249905942125386191) -->
+    <skip />
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Ikon luaskan"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"atau"</string>
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"Handel geser"</string>
