@@ -60,6 +60,7 @@ import static com.android.server.am.ProcessList.PERCEPTIBLE_RECENT_FOREGROUND_AP
 import static com.android.server.am.ProcessList.PERSISTENT_PROC_ADJ;
 import static com.android.server.am.ProcessList.PERSISTENT_SERVICE_ADJ;
 import static com.android.server.am.ProcessList.PREVIOUS_APP_ADJ;
+import static com.android.server.am.ProcessList.PREVIOUS_APP_MAX_ADJ;
 import static com.android.server.am.ProcessList.SCHED_GROUP_BACKGROUND;
 import static com.android.server.am.ProcessList.SCHED_GROUP_DEFAULT;
 import static com.android.server.am.ProcessList.SCHED_GROUP_FOREGROUND_WINDOW;
@@ -129,6 +130,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 
 /**
  * Test class for {@link OomAdjuster}.
@@ -899,8 +901,25 @@ public class MockingOomAdjusterTests {
 
     @SuppressWarnings("GuardedBy")
     @Test
+    public void testUpdateOomAdj_DoPending_PreviousApp() {
+        testUpdateOomAdj_PreviousApp(apps -> {
+            for (ProcessRecord app : apps) {
+                mProcessStateController.enqueueUpdateTarget(app);
+            }
+            mProcessStateController.runPendingUpdate(OOM_ADJ_REASON_NONE);
+        });
+    }
+
+    @SuppressWarnings("GuardedBy")
+    @Test
     public void testUpdateOomAdj_DoAll_PreviousApp() {
-        final int numberOfApps = 15;
+        testUpdateOomAdj_PreviousApp(apps -> {
+            mProcessStateController.runFullUpdate(OOM_ADJ_REASON_NONE);
+        });
+    }
+
+    private void testUpdateOomAdj_PreviousApp(Consumer<ProcessRecord[]> updater) {
+        final int numberOfApps = 105;
         final ProcessRecord[] apps = new ProcessRecord[numberOfApps];
         for (int i = 0; i < numberOfApps; i++) {
             apps[i] = spy(makeDefaultProcessRecord(MOCKAPP_PID + i, MOCKAPP_UID + i,
@@ -911,10 +930,11 @@ public class MockingOomAdjusterTests {
         }
         setWakefulness(PowerManagerInternal.WAKEFULNESS_AWAKE);
         setProcessesToLru(apps);
-        mProcessStateController.runFullUpdate(OOM_ADJ_REASON_NONE);
-
+        updater.accept(apps);
         for (int i = 0; i < numberOfApps; i++) {
-            assertProcStates(apps[i], PROCESS_STATE_LAST_ACTIVITY, PREVIOUS_APP_ADJ,
+            final int mruIndex = numberOfApps - i - 1;
+            final int expectedAdj = Math.min(PREVIOUS_APP_ADJ + mruIndex, PREVIOUS_APP_MAX_ADJ);
+            assertProcStates(apps[i], PROCESS_STATE_LAST_ACTIVITY, expectedAdj,
                     SCHED_GROUP_BACKGROUND, "previous");
         }
 
@@ -3184,7 +3204,8 @@ public class MockingOomAdjusterTests {
         setProcessesToLru(app1, app2);
         mProcessStateController.runFullUpdate(OOM_ADJ_REASON_NONE);
 
-        assertProcStates(app1, PROCESS_STATE_LAST_ACTIVITY, PREVIOUS_APP_ADJ,
+        assertProcStates(app1, PROCESS_STATE_LAST_ACTIVITY,
+                PREVIOUS_APP_ADJ + (Flags.oomadjusterPrevLaddering() ? 1 : 0),
                 SCHED_GROUP_BACKGROUND, "recent-provider");
         assertProcStates(app2, PROCESS_STATE_LAST_ACTIVITY, PREVIOUS_APP_ADJ,
                 SCHED_GROUP_BACKGROUND, "recent-provider");

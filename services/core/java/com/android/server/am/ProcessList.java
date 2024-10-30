@@ -225,6 +225,7 @@ public final class ProcessList {
     // UI flow such as clicking on a URI in the e-mail app to view in the browser,
     // and then pressing back to return to e-mail.
     public static final int PREVIOUS_APP_ADJ = 700;
+    public static final int PREVIOUS_APP_MAX_ADJ = Flags.oomadjusterPrevLaddering() ? 799 : 700;
 
     // This is a process holding the home application -- we want to try
     // avoiding killing it, even if it would normally be in the background,
