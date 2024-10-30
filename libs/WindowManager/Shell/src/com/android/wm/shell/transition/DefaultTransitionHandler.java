@@ -566,7 +566,8 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
                     options = change.getAnimationOptions();
                 }
                 if (options != null) {
-                    attachThumbnail(animations, onAnimFinish, change, options, cornerRadius);
+                    attachThumbnail(animations, onAnimFinish, change, info.getAnimationOptions(),
+                            cornerRadius);
                 }
             }
         }
