@@ -225,7 +225,7 @@ fun DefaultEditTileGrid(
                         if (dragIsInProgress) {
                             RemoveTileTarget()
                         } else {
-                            Text(text = "Hold and drag to rearrange tiles.")
+                            Text(text = stringResource(id = R.string.drag_to_rearrange_tiles))
                         }
                     }
                 }
@@ -243,7 +243,9 @@ fun DefaultEditTileGrid(
                             spacedBy(dimensionResource(id = R.dimen.qs_label_container_margin)),
                         modifier = modifier.fillMaxSize(),
                     ) {
-                        EditGridHeader { Text(text = "Hold and drag to add tiles.") }
+                        EditGridHeader {
+                            Text(text = stringResource(id = R.string.drag_to_add_tiles))
+                        }
 
                         AvailableTileGrid(otherTiles, selectionState, columns, listState)
                     }
@@ -289,7 +291,7 @@ private fun RemoveTileTarget() {
                 .padding(10.dp),
     ) {
         Icon(imageVector = Icons.Default.Clear, contentDescription = null)
-        Text(text = "Remove")
+        Text(text = stringResource(id = R.string.qs_customize_remove))
     }
 }
 
