@@ -13,12 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package com.android.systemui.keyguard.data.repository
+package com.android.systemui.tuner
 
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.testDispatcher
-import com.android.systemui.statusbar.policy.devicePostureController
+import com.android.systemui.kosmos.Kosmos.Fixture
+import org.mockito.kotlin.mock
 
-val Kosmos.devicePostureRepository: DevicePostureRepository by
-    Kosmos.Fixture { DevicePostureRepositoryImpl(devicePostureController, testDispatcher) }
+val Kosmos.tunerService by Fixture { mock<TunerService>() }

@@ -16,9 +16,8 @@
 
 package com.android.systemui.keyguard.data.repository
 
+import com.android.systemui.dump.dumpManager
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.testDispatcher
-import com.android.systemui.statusbar.policy.devicePostureController
 
-val Kosmos.devicePostureRepository: DevicePostureRepository by
-    Kosmos.Fixture { DevicePostureRepositoryImpl(devicePostureController, testDispatcher) }
+val Kosmos.pulseExpansionRepository: PulseExpansionRepository by
+    Kosmos.Fixture { PulseExpansionRepository(dumpManager) }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,15 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.systemui.statusbar.notification.data.repository
+
+package com.android.systemui.keyguard.data.repository
 
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dump.DumpManager
+import com.android.systemui.util.kotlin.FlowDumperImpl
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 
-/** View-states pertaining to notifications on the keyguard. */
 @SysUISingleton
-class NotificationsKeyguardViewStateRepository @Inject constructor() {
-    /** Are notifications fully hidden from view? */
-    val areNotificationsFullyHidden = MutableStateFlow(false)
+class PulseExpansionRepository @Inject constructor(dumpManager: DumpManager) :
+    FlowDumperImpl(dumpManager) {
+    /**
+     * Whether the notification panel is expanding from the user swiping downward on a notification
+     * from the pulsing state, or swiping anywhere on the screen when face bypass is enabled
+     */
+    val isPulseExpanding: MutableStateFlow<Boolean> =
+        MutableStateFlow(false).dumpValue("pulseExpanding")
 }

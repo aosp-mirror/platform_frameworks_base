@@ -26,6 +26,7 @@ import com.android.systemui.communal.data.repository.communalSceneRepository
 import com.android.systemui.communal.domain.interactor.communalInteractor
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.keyguard.domain.interactor.pulseExpansionInteractor
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.log.logcatLogBuffer
@@ -86,6 +87,7 @@ class NotificationWakeUpCoordinatorTest : SysuiTestCase() {
 
     private var bypassEnabled: Boolean = false
     private var statusBarState: Int = StatusBarState.KEYGUARD
+
     private fun eased(dozeAmount: Float) =
         notificationWakeUpCoordinator.dozeAmountInterpolator.getInterpolation(dozeAmount)
 
@@ -119,6 +121,7 @@ class NotificationWakeUpCoordinatorTest : SysuiTestCase() {
                 logger,
                 kosmos.notificationsKeyguardInteractor,
                 kosmos.communalInteractor,
+                kosmos.pulseExpansionInteractor,
             )
         statusBarStateCallback = withArgCaptor {
             verify(statusBarStateController).addCallback(capture())
