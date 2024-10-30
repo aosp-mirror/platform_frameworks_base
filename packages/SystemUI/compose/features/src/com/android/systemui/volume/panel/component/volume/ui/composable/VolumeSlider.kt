@@ -48,7 +48,6 @@ import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.dp
 import com.android.compose.PlatformSlider
 import com.android.compose.PlatformSliderColors
-import com.android.systemui.Flags
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.ui.compose.Icon
 import com.android.systemui.compose.modifiers.sysuiResTag
@@ -66,15 +65,15 @@ fun VolumeSlider(
     onIconTapped: () -> Unit,
     modifier: Modifier = Modifier,
     sliderColors: PlatformSliderColors,
-    hapticsViewModelFactory: SliderHapticsViewModel.Factory,
+    hapticsViewModelFactory: SliderHapticsViewModel.Factory?,
 ) {
     val value by valueState(state)
     val interactionSource = remember { MutableInteractionSource() }
     val sliderStepSize = 1f / (state.valueRange.endInclusive - state.valueRange.start)
     val hapticsViewModel: SliderHapticsViewModel? =
-        if (Flags.hapticsForComposeSliders()) {
+        hapticsViewModelFactory?.let {
             rememberViewModel(traceName = "SliderHapticsViewModel") {
-                hapticsViewModelFactory.create(
+                it.create(
                     interactionSource,
                     state.valueRange,
                     Orientation.Horizontal,
@@ -93,8 +92,6 @@ fun VolumeSlider(
                     ),
                 )
             }
-        } else {
-            null
         }
 
     // Perform haptics due to UI composition

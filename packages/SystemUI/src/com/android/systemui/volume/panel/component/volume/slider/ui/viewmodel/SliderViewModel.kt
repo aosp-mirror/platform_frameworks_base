@@ -24,11 +24,11 @@ interface SliderViewModel {
 
     val slider: StateFlow<SliderState>
 
-    val hapticsViewModelFactory: SliderHapticsViewModel.Factory
-
     fun onValueChanged(state: SliderState, newValue: Float)
 
     fun onValueChangeFinished()
 
     fun toggleMuted(state: SliderState)
+
+    fun getSliderHapticsViewModelFactory(): SliderHapticsViewModel.Factory?
 }

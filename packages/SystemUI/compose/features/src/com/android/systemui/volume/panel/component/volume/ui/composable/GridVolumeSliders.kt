@@ -49,7 +49,7 @@ fun GridVolumeSliders(
                 onValueChangeFinished = { sliderViewModel.onValueChangeFinished() },
                 onIconTapped = { sliderViewModel.toggleMuted(sliderState) },
                 sliderColors = sliderColors,
-                hapticsViewModelFactory = sliderViewModel.hapticsViewModelFactory,
+                hapticsViewModelFactory = sliderViewModel.getSliderHapticsViewModelFactory(),
             )
         }
     }
