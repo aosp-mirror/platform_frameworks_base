@@ -1652,6 +1652,13 @@ flag {
 }
 
 flag {
+    name: "bouncer_ui_revamp"
+    namespace: "systemui"
+    description: "Updates to background (blur), button animations and font changes."
+    bug: "376491880"
+}
+
+flag {
   name: "ensure_enr_views_visibility"
   namespace: "systemui"
   description: "Ensures public and private visibilities"
