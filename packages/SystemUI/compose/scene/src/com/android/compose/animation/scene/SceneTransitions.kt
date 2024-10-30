@@ -33,10 +33,10 @@ import com.android.compose.animation.scene.transformation.EdgeTranslate
 import com.android.compose.animation.scene.transformation.Fade
 import com.android.compose.animation.scene.transformation.OverscrollTranslate
 import com.android.compose.animation.scene.transformation.PropertyTransformation
-import com.android.compose.animation.scene.transformation.RangedPropertyTransformation
 import com.android.compose.animation.scene.transformation.ScaleSize
 import com.android.compose.animation.scene.transformation.SharedElementTransformation
 import com.android.compose.animation.scene.transformation.Transformation
+import com.android.compose.animation.scene.transformation.TransformationWithRange
 import com.android.compose.animation.scene.transformation.Translate
 
 /** The transitions configuration of a [SceneTransitionLayout]. */
@@ -233,7 +233,7 @@ interface TransformationSpec {
     val distance: UserActionDistance?
 
     /** The list of [Transformation] applied to elements during this transition. */
-    val transformations: List<Transformation>
+    val transformations: List<TransformationWithRange<*>>
 
     companion object {
         internal val Empty =
@@ -325,7 +325,7 @@ internal class TransformationSpecImpl(
     override val progressSpec: AnimationSpec<Float>,
     override val swipeSpec: SpringSpec<Float>?,
     override val distance: UserActionDistance?,
-    override val transformations: List<Transformation>,
+    override val transformations: List<TransformationWithRange<*>>,
 ) : TransformationSpec {
     private val cache = mutableMapOf<ElementKey, MutableMap<ContentKey, ElementTransformations>>()
 
@@ -340,42 +340,14 @@ internal class TransformationSpecImpl(
         element: ElementKey,
         content: ContentKey,
     ): ElementTransformations {
-        var shared: SharedElementTransformation? = null
-        var offset: PropertyTransformation<Offset>? = null
-        var size: PropertyTransformation<IntSize>? = null
-        var drawScale: PropertyTransformation<Scale>? = null
-        var alpha: PropertyTransformation<Float>? = null
+        var shared: TransformationWithRange<SharedElementTransformation>? = null
+        var offset: TransformationWithRange<PropertyTransformation<Offset>>? = null
+        var size: TransformationWithRange<PropertyTransformation<IntSize>>? = null
+        var drawScale: TransformationWithRange<PropertyTransformation<Scale>>? = null
+        var alpha: TransformationWithRange<PropertyTransformation<Float>>? = null
 
-        fun <T> onPropertyTransformation(
-            root: PropertyTransformation<T>,
-            current: PropertyTransformation<T> = root,
-        ) {
-            when (current) {
-                is Translate,
-                is OverscrollTranslate,
-                is EdgeTranslate,
-                is AnchoredTranslate -> {
-                    throwIfNotNull(offset, element, name = "offset")
-                    offset = root as PropertyTransformation<Offset>
-                }
-                is ScaleSize,
-                is AnchoredSize -> {
-                    throwIfNotNull(size, element, name = "size")
-                    size = root as PropertyTransformation<IntSize>
-                }
-                is DrawScale -> {
-                    throwIfNotNull(drawScale, element, name = "drawScale")
-                    drawScale = root as PropertyTransformation<Scale>
-                }
-                is Fade -> {
-                    throwIfNotNull(alpha, element, name = "alpha")
-                    alpha = root as PropertyTransformation<Float>
-                }
-                is RangedPropertyTransformation -> onPropertyTransformation(root, current.delegate)
-            }
-        }
-
-        transformations.fastForEach { transformation ->
+        transformations.fastForEach { transformationWithRange ->
+            val transformation = transformationWithRange.transformation
             if (!transformation.matcher.matches(element, content)) {
                 return@fastForEach
             }
@@ -383,16 +355,50 @@ internal class TransformationSpecImpl(
             when (transformation) {
                 is SharedElementTransformation -> {
                     throwIfNotNull(shared, element, name = "shared")
-                    shared = transformation
+                    shared =
+                        transformationWithRange
+                            as TransformationWithRange<SharedElementTransformation>
                 }
-                is PropertyTransformation<*> -> onPropertyTransformation(transformation)
+                is Translate,
+                is OverscrollTranslate,
+                is EdgeTranslate,
+                is AnchoredTranslate -> {
+                    throwIfNotNull(offset, element, name = "offset")
+                    offset =
+                        transformationWithRange
+                            as TransformationWithRange<PropertyTransformation<Offset>>
+                }
+                is ScaleSize,
+                is AnchoredSize -> {
+                    throwIfNotNull(size, element, name = "size")
+                    size =
+                        transformationWithRange
+                            as TransformationWithRange<PropertyTransformation<IntSize>>
+                }
+                is DrawScale -> {
+                    throwIfNotNull(drawScale, element, name = "drawScale")
+                    drawScale =
+                        transformationWithRange
+                            as TransformationWithRange<PropertyTransformation<Scale>>
+                }
+                is Fade -> {
+                    throwIfNotNull(alpha, element, name = "alpha")
+                    alpha =
+                        transformationWithRange
+                            as TransformationWithRange<PropertyTransformation<Float>>
+                }
+                else -> error("Unknown transformation: $transformation")
             }
         }
 
         return ElementTransformations(shared, offset, size, drawScale, alpha)
     }
 
-    private fun throwIfNotNull(previous: Transformation?, element: ElementKey, name: String) {
+    private fun throwIfNotNull(
+        previous: TransformationWithRange<*>?,
+        element: ElementKey,
+        name: String,
+    ) {
         if (previous != null) {
             error("$element has multiple $name transformations")
         }
@@ -401,9 +407,9 @@ internal class TransformationSpecImpl(
 
 /** The transformations of an element during a transition. */
 internal class ElementTransformations(
-    val shared: SharedElementTransformation?,
-    val offset: PropertyTransformation<Offset>?,
-    val size: PropertyTransformation<IntSize>?,
-    val drawScale: PropertyTransformation<Scale>?,
-    val alpha: PropertyTransformation<Float>?,
+    val shared: TransformationWithRange<SharedElementTransformation>?,
+    val offset: TransformationWithRange<PropertyTransformation<Offset>>?,
+    val size: TransformationWithRange<PropertyTransformation<IntSize>>?,
+    val drawScale: TransformationWithRange<PropertyTransformation<Scale>>?,
+    val alpha: TransformationWithRange<PropertyTransformation<Float>>?,
 )

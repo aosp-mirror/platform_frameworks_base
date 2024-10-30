@@ -28,8 +28,8 @@ import com.android.compose.animation.scene.TestScenes.SceneB
 import com.android.compose.animation.scene.TestScenes.SceneC
 import com.android.compose.animation.scene.content.state.TransitionState
 import com.android.compose.animation.scene.transformation.OverscrollTranslate
-import com.android.compose.animation.scene.transformation.Transformation
 import com.android.compose.animation.scene.transformation.TransformationRange
+import com.android.compose.animation.scene.transformation.TransformationWithRange
 import com.android.compose.test.transition
 import com.google.common.truth.Correspondence
 import com.google.common.truth.Truth.assertThat
@@ -310,7 +310,8 @@ class TransitionDslTest {
         }
 
         val overscrollSpec = transitions.overscrollSpecs.single()
-        val transformation = overscrollSpec.transformationSpec.transformations.single()
+        val transformation =
+            overscrollSpec.transformationSpec.transformations.single().transformation
         assertThat(transformation).isInstanceOf(OverscrollTranslate::class.java)
     }
 
@@ -344,7 +345,7 @@ class TransitionDslTest {
 
     companion object {
         private val TRANSFORMATION_RANGE =
-            Correspondence.transforming<Transformation, TransformationRange?>(
+            Correspondence.transforming<TransformationWithRange<*>, TransformationRange?>(
                 { it?.range },
                 "has range equal to",
             )
