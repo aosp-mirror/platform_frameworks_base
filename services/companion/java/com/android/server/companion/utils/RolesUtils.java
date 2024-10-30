@@ -23,12 +23,16 @@ import android.annotation.SuppressLint;
 import android.annotation.UserIdInt;
 import android.app.role.RoleManager;
 import android.companion.AssociationInfo;
+import android.companion.AssociationRequest;
 import android.content.Context;
 import android.os.Binder;
 import android.os.UserHandle;
+import android.util.ArraySet;
 import android.util.Slog;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 
 /** Utility methods for accessing {@link RoleManager} APIs. */
@@ -36,6 +40,13 @@ import java.util.function.Consumer;
 public final class RolesUtils {
 
     private static final String TAG = "CDM_RolesUtils";
+
+    private static final Set<String> ROLELESS_DEVICE_PROFILES;
+    static {
+        final Set<String> profiles = new ArraySet<>();
+        profiles.add(AssociationRequest.DEVICE_PROFILE_WEARABLE_SENSING);
+        ROLELESS_DEVICE_PROFILES = Collections.unmodifiableSet(profiles);
+    }
 
     /**
      * Check if the package holds the role.
@@ -105,6 +116,13 @@ public final class RolesUtils {
                         }
                     })
         );
+    }
+
+    /**
+     * Return true if the device profile is not tied to an Android role.
+     */
+    public static boolean isRolelessProfile(String deviceProfile) {
+        return ROLELESS_DEVICE_PROFILES.contains(deviceProfile);
     }
 
     private RolesUtils() {}
