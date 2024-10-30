@@ -679,6 +679,8 @@ public class AudioDeviceBroker {
                 elapsed = System.currentTimeMillis() - start;
                 if (elapsed >= SET_COMMUNICATION_DEVICE_TIMEOUT_MS) {
                     Log.e(TAG, "Timeout waiting for communication device update.");
+                    // reset counter to avoid sticky out of sync condition
+                    mCommunicationDeviceUpdateCount = 0;
                     break;
                 }
             }
@@ -1321,9 +1323,9 @@ public class AudioDeviceBroker {
         sendLMsgNoDelay(MSG_II_SET_LE_AUDIO_OUT_VOLUME, SENDMSG_REPLACE, info);
     }
 
-    /*package*/ void postSetModeOwner(int mode, int pid, int uid) {
-        sendLMsgNoDelay(MSG_I_SET_MODE_OWNER, SENDMSG_REPLACE,
-                new AudioModeInfo(mode, pid, uid));
+    /*package*/ void postSetModeOwner(int mode, int pid, int uid, boolean signal) {
+        sendLMsgNoDelay(signal ? MSG_L_SET_MODE_OWNER_SIGNAL : MSG_L_SET_MODE_OWNER,
+                SENDMSG_REPLACE, new AudioModeInfo(mode, pid, uid));
     }
 
     /*package*/ void postBluetoothDeviceConfigChange(@NonNull BtDeviceInfo info) {
@@ -2025,7 +2027,8 @@ public class AudioDeviceBroker {
                         mBtHelper.setAvrcpAbsoluteVolumeIndex(msg.arg1);
                     }
                     break;
-                case MSG_I_SET_MODE_OWNER:
+                case MSG_L_SET_MODE_OWNER:
+                case MSG_L_SET_MODE_OWNER_SIGNAL:
                     synchronized (mSetModeLock) {
                         synchronized (mDeviceStateLock) {
                             int btScoRequesterUid = bluetoothScoRequestOwnerUid();
@@ -2035,6 +2038,9 @@ public class AudioDeviceBroker {
                                         btScoRequesterUid, "setNewModeOwner");
                             }
                         }
+                    }
+                    if (msg.what == MSG_L_SET_MODE_OWNER_SIGNAL) {
+                        mAudioService.decrementAudioModeResetCount();
                     }
                     break;
 
@@ -2224,7 +2230,8 @@ public class AudioDeviceBroker {
     private static final int MSG_REPORT_NEW_ROUTES = 13;
     private static final int MSG_II_SET_HEARING_AID_VOLUME = 14;
     private static final int MSG_I_SET_AVRCP_ABSOLUTE_VOLUME = 15;
-    private static final int MSG_I_SET_MODE_OWNER = 16;
+    private static final int MSG_L_SET_MODE_OWNER = 16;
+    private static final int MSG_L_SET_MODE_OWNER_SIGNAL = 17;
 
     private static final int MSG_I_BT_SERVICE_DISCONNECTED_PROFILE = 22;
     private static final int MSG_IL_BT_SERVICE_CONNECTED_PROFILE = 23;
