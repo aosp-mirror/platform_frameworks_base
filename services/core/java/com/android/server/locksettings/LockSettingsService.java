@@ -1183,9 +1183,7 @@ public class LockSettingsService extends ILockSettings.Stub {
 
             // If config_disableWeaverOnUnsecuredUsers=true, then the Weaver HAL may be buggy and
             // need multiple retries before it works here to unwrap the SP, if the SP was already
-            // protected by Weaver.  Note that the problematic HAL can also deadlock if called with
-            // the ActivityManagerService lock held, but that should not be a problem here since
-            // that lock isn't held here, unlike unlockUserKeyIfUnsecured() where it is.
+            // protected by Weaver.
             for (int i = 0; i < 12 && sp == null; i++) {
                 Slog.e(TAG, "Failed to unwrap synthetic password. Waiting 5 seconds to retry.");
                 SystemClock.sleep(5000);
