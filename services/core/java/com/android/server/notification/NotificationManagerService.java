@@ -161,6 +161,8 @@ import static com.android.internal.util.Preconditions.checkNotNull;
 import static com.android.server.am.PendingIntentRecord.FLAG_ACTIVITY_SENDER;
 import static com.android.server.am.PendingIntentRecord.FLAG_BROADCAST_SENDER;
 import static com.android.server.am.PendingIntentRecord.FLAG_SERVICE_SENDER;
+import static android.app.backup.NotificationLoggingConstants.DATA_TYPE_ZEN_CONFIG;
+import static android.app.backup.NotificationLoggingConstants.ERROR_XML_PARSING;
 import static com.android.server.notification.Flags.expireBitmaps;
 import static com.android.server.policy.PhoneWindowManager.TOAST_WINDOW_ANIM_BUFFER;
 import static com.android.server.policy.PhoneWindowManager.TOAST_WINDOW_TIMEOUT;
@@ -1098,7 +1100,7 @@ public class NotificationManagerService extends SystemService {
     }
 
     void readPolicyXml(InputStream stream, boolean forRestore, int userId,
-            BackupRestoreEventLogger logger)
+            @Nullable BackupRestoreEventLogger logger)
             throws XmlPullParserException, NumberFormatException, IOException {
         final TypedXmlPullParser parser;
         if (forRestore) {
@@ -1114,7 +1116,27 @@ public class NotificationManagerService extends SystemService {
         int outerDepth = parser.getDepth();
         while (XmlUtils.nextElementWithin(parser, outerDepth)) {
             if (ZenModeConfig.ZEN_TAG.equals(parser.getName())) {
-                mZenModeHelper.readXml(parser, forRestore, userId);
+                int successfulReads = 0;
+                int unsuccessfulReads = 0;
+                try {
+                    boolean loadedCorrectly =
+                            mZenModeHelper.readXml(parser, forRestore, userId, logger);
+                    if (loadedCorrectly)
+                        successfulReads++;
+                    else
+                        unsuccessfulReads++;
+                } catch (Exception e) {
+                    Slog.wtf(TAG, "failed to read config", e);
+                    unsuccessfulReads++;
+                }
+                if (logger != null) {
+                    logger.logItemsRestored(DATA_TYPE_ZEN_CONFIG, successfulReads);
+                    if (unsuccessfulReads > 0) {
+                        logger.logItemsRestoreFailed(
+                                DATA_TYPE_ZEN_CONFIG, unsuccessfulReads, ERROR_XML_PARSING);
+                    }
+                }
+
             } else if (PreferencesHelper.TAG_RANKING.equals(parser.getName())){
                 mPreferencesHelper.readXml(parser, forRestore, userId);
             }
@@ -1246,7 +1268,7 @@ public class NotificationManagerService extends SystemService {
         }
     }
 
-    private void writePolicyXml(OutputStream stream, boolean forBackup, int userId,
+    void writePolicyXml(OutputStream stream, boolean forBackup, int userId,
             BackupRestoreEventLogger logger)  throws IOException {
         final TypedXmlSerializer out;
         if (forBackup) {
@@ -1258,7 +1280,7 @@ public class NotificationManagerService extends SystemService {
         out.startDocument(null, true);
         out.startTag(null, TAG_NOTIFICATION_POLICY);
         out.attributeInt(null, ATTR_VERSION, DB_VERSION);
-        mZenModeHelper.writeXml(out, forBackup, null, userId);
+        mZenModeHelper.writeXml(out, forBackup, null, userId, logger);
         mPreferencesHelper.writeXml(out, forBackup, userId);
         mListeners.writeXml(out, forBackup, userId);
         mAssistants.writeXml(out, forBackup, userId);
