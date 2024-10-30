@@ -703,6 +703,7 @@ public abstract class WMShellModule {
             Transitions transitions,
             KeyguardManager keyguardManager,
             ReturnToDragStartAnimator returnToDragStartAnimator,
+            Optional<DesktopMixedTransitionHandler> desktopMixedTransitionHandler,
             EnterDesktopTaskTransitionHandler enterDesktopTransitionHandler,
             ExitDesktopTaskTransitionHandler exitDesktopTransitionHandler,
             DesktopModeDragAndDropTransitionHandler desktopModeDragAndDropTransitionHandler,
@@ -736,6 +737,7 @@ public abstract class WMShellModule {
                 transitions,
                 keyguardManager,
                 returnToDragStartAnimator,
+                desktopMixedTransitionHandler.get(),
                 enterDesktopTransitionHandler,
                 exitDesktopTransitionHandler,
                 desktopModeDragAndDropTransitionHandler,
@@ -960,6 +962,7 @@ public abstract class WMShellModule {
             @DynamicOverride DesktopRepository desktopRepository,
             FreeformTaskTransitionHandler freeformTaskTransitionHandler,
             CloseDesktopTaskTransitionHandler closeDesktopTaskTransitionHandler,
+            Optional<DesktopImmersiveController> desktopImmersiveController,
             InteractionJankMonitor interactionJankMonitor,
             @ShellMainThread Handler handler) {
         if (!DesktopModeStatus.canEnterDesktopMode(context)) {
@@ -972,6 +975,7 @@ public abstract class WMShellModule {
                         desktopRepository,
                         freeformTaskTransitionHandler,
                         closeDesktopTaskTransitionHandler,
+                        desktopImmersiveController.get(),
                         interactionJankMonitor,
                         handler));
     }

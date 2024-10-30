@@ -196,6 +196,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
   @Mock lateinit var transitions: Transitions
   @Mock lateinit var keyguardManager: KeyguardManager
   @Mock lateinit var mReturnToDragStartAnimator: ReturnToDragStartAnimator
+  @Mock lateinit var desktopMixedTransitionHandler: DesktopMixedTransitionHandler
   @Mock lateinit var exitDesktopTransitionHandler: ExitDesktopTaskTransitionHandler
   @Mock lateinit var enterDesktopTransitionHandler: EnterDesktopTaskTransitionHandler
   @Mock lateinit var dragAndDropTransitionHandler: DesktopModeDragAndDropTransitionHandler
@@ -288,6 +289,12 @@ class DesktopTasksControllerTest : ShellTestCase() {
     val tda = DisplayAreaInfo(MockToken().token(), DEFAULT_DISPLAY, 0)
     tda.configuration.windowConfiguration.windowingMode = WINDOWING_MODE_FULLSCREEN
     whenever(rootTaskDisplayAreaOrganizer.getDisplayAreaInfo(DEFAULT_DISPLAY)).thenReturn(tda)
+    whenever(mMockDesktopImmersiveController
+      .exitImmersiveIfApplicable(any(), any<RunningTaskInfo>()))
+      .thenReturn(DesktopImmersiveController.ExitResult.NoExit)
+    whenever(mMockDesktopImmersiveController
+      .exitImmersiveIfApplicable(any(), anyInt(), anyOrNull()))
+      .thenReturn(DesktopImmersiveController.ExitResult.NoExit)
 
     controller = createController()
     controller.setSplitScreenController(splitScreenController)
@@ -323,6 +330,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
         transitions,
         keyguardManager,
         mReturnToDragStartAnimator,
+        desktopMixedTransitionHandler,
         enterDesktopTransitionHandler,
         exitDesktopTransitionHandler,
         dragAndDropTransitionHandler,
@@ -1389,7 +1397,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
     controller.moveTaskToFront(task1, remoteTransition = null)
 
-    val wct = getLatestWct(type = TRANSIT_TO_FRONT)
+    val wct = getLatestDesktopMixedTaskWct(type = TRANSIT_TO_FRONT)
     assertThat(wct.hierarchyOps).hasSize(1)
     wct.assertReorderAt(index = 0, task1)
   }
@@ -1398,10 +1406,16 @@ class DesktopTasksControllerTest : ShellTestCase() {
   fun moveTaskToFront_bringsTasksOverLimit_minimizesBackTask() {
     setUpHomeTask()
     val freeformTasks = (1..MAX_TASK_LIMIT + 1).map { _ -> setUpFreeformTask() }
+    whenever(desktopMixedTransitionHandler.startLaunchTransition(
+      eq(TRANSIT_TO_FRONT),
+      any(),
+      eq(freeformTasks[0].taskId),
+      anyOrNull()
+    )).thenReturn(Binder())
 
     controller.moveTaskToFront(freeformTasks[0], remoteTransition = null)
 
-    val wct = getLatestWct(type = TRANSIT_TO_FRONT)
+    val wct = getLatestDesktopMixedTaskWct(type = TRANSIT_TO_FRONT)
     assertThat(wct.hierarchyOps.size).isEqualTo(2) // move-to-front + minimize
     wct.assertReorderAt(0, freeformTasks[0], toTop = true)
     wct.assertReorderAt(1, freeformTasks[1], toTop = false)
@@ -1443,7 +1457,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
     controller.moveTaskToFront(task.taskId, remoteTransition = null)
 
-    val wct = getLatestWct(type = TRANSIT_OPEN)
+    val wct = getLatestDesktopMixedTaskWct(type = TRANSIT_OPEN)
     assertThat(wct.hierarchyOps).hasSize(1)
     wct.assertLaunchTaskAt(0, task.taskId, WINDOWING_MODE_FREEFORM)
   }
@@ -1453,10 +1467,13 @@ class DesktopTasksControllerTest : ShellTestCase() {
     val freeformTasks = (1..MAX_TASK_LIMIT).map { _ -> setUpFreeformTask() }
     val task = createTaskInfo(1001)
     whenever(shellTaskOrganizer.getRunningTaskInfo(task.taskId)).thenReturn(null)
+    whenever(desktopMixedTransitionHandler
+      .startLaunchTransition(eq(TRANSIT_OPEN), any(), eq(task.taskId), anyOrNull()))
+      .thenReturn(Binder())
 
     controller.moveTaskToFront(task.taskId, remoteTransition = null)
 
-    val wct = getLatestWct(type = TRANSIT_OPEN)
+    val wct = getLatestDesktopMixedTaskWct(type = TRANSIT_OPEN)
     assertThat(wct.hierarchyOps.size).isEqualTo(2) // launch + minimize
     wct.assertLaunchTaskAt(0, task.taskId, WINDOWING_MODE_FREEFORM)
     wct.assertReorderAt(1, freeformTasks[0], toTop = false)
@@ -1791,7 +1808,10 @@ class DesktopTasksControllerTest : ShellTestCase() {
     whenever(freeformTaskTransitionStarter.startMinimizedModeTransition(any()))
       .thenReturn(transition)
     whenever(mMockDesktopImmersiveController.exitImmersiveIfApplicable(any(), eq(task)))
-      .thenReturn(runOnTransit)
+      .thenReturn(DesktopImmersiveController.ExitResult.Exit(
+        exitingTask = task.taskId,
+        runOnTransitionStart = runOnTransit,
+      ))
 
     controller.minimizeTask(task)
 
@@ -3101,7 +3121,10 @@ class DesktopTasksControllerTest : ShellTestCase() {
       .thenReturn(transition)
     whenever(mMockDesktopImmersiveController
       .exitImmersiveIfApplicable(any(), eq(immersiveTask.displayId), eq(freeformTask.taskId)))
-      .thenReturn(runOnStartTransit)
+      .thenReturn(DesktopImmersiveController.ExitResult.Exit(
+        exitingTask = immersiveTask.taskId,
+        runOnTransitionStart = runOnStartTransit,
+      ))
 
     runOpenInstance(immersiveTask, freeformTask.taskId)
 
@@ -3502,7 +3525,11 @@ class DesktopTasksControllerTest : ShellTestCase() {
     val runOnStartTransit = RunOnStartTransitionCallback()
     val transition = Binder()
     whenever(mMockDesktopImmersiveController
-      .exitImmersiveIfApplicable(wct, task.displayId, task.taskId)).thenReturn(runOnStartTransit)
+      .exitImmersiveIfApplicable(wct, task.displayId, task.taskId))
+      .thenReturn(DesktopImmersiveController.ExitResult.Exit(
+        exitingTask = 5,
+        runOnTransitionStart = runOnStartTransit,
+      ))
     whenever(enterDesktopTransitionHandler.moveToDesktop(wct, UNKNOWN)).thenReturn(transition)
 
     controller.moveTaskToDesktop(taskId = task.taskId, wct = wct, transitionSource = UNKNOWN)
@@ -3519,7 +3546,11 @@ class DesktopTasksControllerTest : ShellTestCase() {
     val runOnStartTransit = RunOnStartTransitionCallback()
     val transition = Binder()
     whenever(mMockDesktopImmersiveController
-      .exitImmersiveIfApplicable(wct, task.displayId, task.taskId)).thenReturn(runOnStartTransit)
+      .exitImmersiveIfApplicable(wct, task.displayId, task.taskId))
+      .thenReturn(DesktopImmersiveController.ExitResult.Exit(
+        exitingTask = 5,
+        runOnTransitionStart = runOnStartTransit,
+      ))
     whenever(enterDesktopTransitionHandler.moveToDesktop(wct, UNKNOWN)).thenReturn(transition)
 
     controller.moveTaskToDesktop(taskId = task.taskId, wct = wct, transitionSource = UNKNOWN)
@@ -3536,8 +3567,12 @@ class DesktopTasksControllerTest : ShellTestCase() {
     val transition = Binder()
     whenever(mMockDesktopImmersiveController
       .exitImmersiveIfApplicable(any(), eq(task.displayId), eq(task.taskId)))
-      .thenReturn(runOnStartTransit)
-    whenever(transitions.startTransition(any(), any(), anyOrNull())).thenReturn(transition)
+      .thenReturn(DesktopImmersiveController.ExitResult.Exit(
+        exitingTask = 5,
+        runOnTransitionStart = runOnStartTransit,
+      ))
+    whenever(desktopMixedTransitionHandler
+      .startLaunchTransition(any(), any(), anyInt(), anyOrNull())).thenReturn(transition)
 
     controller.moveTaskToFront(task.taskId, remoteTransition = null)
 
@@ -3553,8 +3588,13 @@ class DesktopTasksControllerTest : ShellTestCase() {
     val transition = Binder()
     whenever(mMockDesktopImmersiveController
       .exitImmersiveIfApplicable(any(), eq(task.displayId), eq(task.taskId)))
-      .thenReturn(runOnStartTransit)
-    whenever(transitions.startTransition(any(), any(), anyOrNull())).thenReturn(transition)
+      .thenReturn(DesktopImmersiveController.ExitResult.Exit(
+        exitingTask = 5,
+        runOnTransitionStart = runOnStartTransit,
+      ))
+    whenever(desktopMixedTransitionHandler
+      .startLaunchTransition(any(), any(), eq(task.taskId), anyOrNull()))
+      .thenReturn(transition)
 
     controller.moveTaskToFront(task.taskId, remoteTransition = null)
 
@@ -3933,6 +3973,16 @@ class DesktopTasksControllerTest : ShellTestCase() {
         ArgumentCaptor.forClass(WindowContainerTransaction::class.java)
     verify(toggleResizeDesktopTaskTransitionHandler, atLeastOnce())
         .startTransition(capture(arg), eq(currentBounds))
+    return arg.value
+  }
+
+  private fun getLatestDesktopMixedTaskWct(
+    @WindowManager.TransitionType type: Int = TRANSIT_OPEN,
+  ): WindowContainerTransaction {
+    val arg: ArgumentCaptor<WindowContainerTransaction> =
+      ArgumentCaptor.forClass(WindowContainerTransaction::class.java)
+    verify(desktopMixedTransitionHandler)
+      .startLaunchTransition(eq(type), capture(arg), anyInt(), anyOrNull())
     return arg.value
   }
 
