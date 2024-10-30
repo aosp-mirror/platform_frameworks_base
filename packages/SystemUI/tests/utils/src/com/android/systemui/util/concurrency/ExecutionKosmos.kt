@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.systemui.volume.panel.component.mediaoutput.domain.interactor
+package com.android.systemui.util.concurrency
 
-import android.os.Handler
-import android.os.looper
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.testScope
 
-var Kosmos.mediaControllerInteractor: MediaControllerInteractor by
-    Kosmos.Fixture { MediaControllerInteractorImpl(Handler(looper), testScope.testScheduler) }
+val Kosmos.fakeExecution: FakeExecution by
+    Kosmos.Fixture { FakeExecution().apply { simulateMainThread = false } }
+var Kosmos.execution: Execution by Kosmos.Fixture { fakeExecution }
