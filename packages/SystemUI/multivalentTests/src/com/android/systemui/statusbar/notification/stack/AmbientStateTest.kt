@@ -16,10 +16,12 @@
 
 package com.android.systemui.statusbar.notification.stack
 
-import androidx.test.ext.junit.runners.AndroidJUnit4
+import android.platform.test.flag.junit.FlagsParameterization
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.flags.DisableSceneContainer
+import com.android.systemui.flags.andSceneContainer
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolator
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
@@ -30,12 +32,14 @@ import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4
+import platform.test.runner.parameterized.Parameters
 
 private const val MAX_PULSE_HEIGHT = 100000f
 
-@RunWith(AndroidJUnit4::class)
+@RunWith(ParameterizedAndroidJunit4::class)
 @SmallTest
-class AmbientStateTest : SysuiTestCase() {
+class AmbientStateTest(flags: FlagsParameterization) : SysuiTestCase() {
 
     private val dumpManager = mock<DumpManager>()
     private val sectionProvider = StackScrollAlgorithm.SectionProvider { _, _ -> false }
@@ -45,6 +49,18 @@ class AmbientStateTest : SysuiTestCase() {
     private val avalancheController = mock<AvalancheController>()
 
     private lateinit var sut: AmbientState
+
+    companion object {
+        @JvmStatic
+        @Parameters(name = "{0}")
+        fun getParams(): List<FlagsParameterization> {
+            return FlagsParameterization.allCombinationsOf().andSceneContainer()
+        }
+    }
+
+    init {
+        mSetFlagsRule.setFlagsParameterization(flags)
+    }
 
     @Before
     fun setUp() {
@@ -56,7 +72,7 @@ class AmbientStateTest : SysuiTestCase() {
                 bypassController,
                 statusBarKeyguardViewManager,
                 largeScreenShadeInterpolator,
-                avalancheController
+                avalancheController,
             )
     }
 
@@ -97,6 +113,7 @@ class AmbientStateTest : SysuiTestCase() {
 
         assertThat(sut.pulseHeight).isEqualTo(expected)
     }
+
     // endregion
 
     // region statusBarState
@@ -119,6 +136,7 @@ class AmbientStateTest : SysuiTestCase() {
 
         assertThat(sut.isFlingRequiredAfterLockScreenSwipeUp).isTrue()
     }
+
     // endregion
 
     // region hideAmount
@@ -141,6 +159,7 @@ class AmbientStateTest : SysuiTestCase() {
 
         assertThat(sut.pulseHeight).isEqualTo(1f)
     }
+
     // endregion
 
     // region dozeAmount
@@ -173,6 +192,7 @@ class AmbientStateTest : SysuiTestCase() {
 
         assertThat(sut.pulseHeight).isEqualTo(1f)
     }
+
     // endregion
 
     // region trackedHeadsUpRow
@@ -189,10 +209,12 @@ class AmbientStateTest : SysuiTestCase() {
 
         assertThat(sut.trackedHeadsUpRow).isNull()
     }
+
     // endregion
 
     // region isSwipingUp
     @Test
+    @DisableSceneContainer
     fun isSwipingUp_whenValueChangedToTrue_shouldRequireFling() {
         sut.isSwipingUp = false
         sut.isFlingRequiredAfterLockScreenSwipeUp = false
@@ -203,6 +225,7 @@ class AmbientStateTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableSceneContainer
     fun isSwipingUp_whenValueChangedToFalse_shouldRequireFling() {
         sut.isSwipingUp = true
         sut.isFlingRequiredAfterLockScreenSwipeUp = false
@@ -211,10 +234,12 @@ class AmbientStateTest : SysuiTestCase() {
 
         assertThat(sut.isFlingRequiredAfterLockScreenSwipeUp).isTrue()
     }
+
     // endregion
 
     // region isFlinging
     @Test
+    @DisableSceneContainer
     fun isFlinging_shouldNotNeedFling() {
         sut.arrangeFlinging(true)
 
@@ -224,6 +249,7 @@ class AmbientStateTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableSceneContainer
     fun isFlinging_whenNotOnLockScreen_shouldDoNothing() {
         sut.arrangeFlinging(true)
         sut.setStatusBarState(StatusBarState.SHADE)
@@ -235,6 +261,7 @@ class AmbientStateTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableSceneContainer
     fun isFlinging_whenValueChangedToTrue_shouldDoNothing() {
         sut.arrangeFlinging(false)
 
@@ -242,10 +269,12 @@ class AmbientStateTest : SysuiTestCase() {
 
         assertThat(sut.isFlingRequiredAfterLockScreenSwipeUp).isTrue()
     }
+
     // endregion
 
     // region scrollY
     @Test
+    @DisableSceneContainer
     fun scrollY_shouldSetValueGreaterThanZero() {
         sut.scrollY = 0
 
@@ -255,6 +284,7 @@ class AmbientStateTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableSceneContainer
     fun scrollY_shouldNotSetValueLessThanZero() {
         sut.scrollY = 0
 
@@ -262,21 +292,24 @@ class AmbientStateTest : SysuiTestCase() {
 
         assertThat(sut.scrollY).isEqualTo(0)
     }
+
     // endregion
 
     // region setOverScrollAmount
+    @Test
+    @DisableSceneContainer
     fun setOverScrollAmount_shouldSetValueOnTop() {
-        sut.setOverScrollAmount(/* amount = */ 10f, /* onTop = */ true)
+        sut.setOverScrollAmount(/* amount= */ 10f, /* onTop= */ true)
 
-        val resultOnTop = sut.getOverScrollAmount(/* top = */ true)
-        val resultOnBottom = sut.getOverScrollAmount(/* top = */ false)
+        val resultOnTop = sut.getOverScrollAmount(/* top= */ true)
+        val resultOnBottom = sut.getOverScrollAmount(/* top= */ false)
 
         assertThat(resultOnTop).isEqualTo(10f)
         assertThat(resultOnBottom).isEqualTo(0f)
     }
 
     fun setOverScrollAmount_shouldSetValueOnBottom() {
-        sut.setOverScrollAmount(/* amount = */ 10f, /* onTop = */ false)
+        sut.setOverScrollAmount(/* amount= */ 10f, /* onTop= */ false)
 
         val resultOnTop = sut.getOverScrollAmount(/* top */ true)
         val resultOnBottom = sut.getOverScrollAmount(/* top */ false)
@@ -284,6 +317,7 @@ class AmbientStateTest : SysuiTestCase() {
         assertThat(resultOnTop).isEqualTo(0f)
         assertThat(resultOnBottom).isEqualTo(10f)
     }
+
     // endregion
 
     // region IsPulseExpanding
@@ -317,6 +351,7 @@ class AmbientStateTest : SysuiTestCase() {
 
         assertThat(sut.isPulseExpanding).isFalse()
     }
+
     // endregion
 
     // region isOnKeyguard
@@ -333,6 +368,7 @@ class AmbientStateTest : SysuiTestCase() {
 
         assertThat(sut.isOnKeyguard).isFalse()
     }
+
     // endregion
 
     // region mIsClosing
