@@ -1,8 +1,10 @@
 package com.android.systemui.kosmos
 
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.Kosmos.Fixture
 import kotlin.coroutines.CoroutineContext
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -45,3 +47,5 @@ fun Kosmos.runTest(testBody: suspend Kosmos.() -> Unit) =
     testScope.runTest { this@runTest.testBody() }
 
 fun Kosmos.runCurrent() = testScope.runCurrent()
+
+fun <T> Kosmos.collectLastValue(flow: Flow<T>) = testScope.collectLastValue(flow)
