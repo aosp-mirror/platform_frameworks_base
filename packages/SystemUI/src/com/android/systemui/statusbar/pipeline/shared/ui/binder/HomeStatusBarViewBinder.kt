@@ -22,6 +22,7 @@ import android.view.View
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.app.animation.Interpolators
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.Flags
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.lifecycle.repeatWhenAttached
@@ -30,13 +31,12 @@ import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.statusbar.chips.notification.shared.StatusBarNotifChips
 import com.android.systemui.statusbar.chips.ui.binder.OngoingActivityChipBinder
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
-import com.android.systemui.statusbar.core.StatusBarSimpleFragment
+import com.android.systemui.statusbar.core.StatusBarRootModernization
 import com.android.systemui.statusbar.notification.shared.NotificationsLiveDataStoreRefactor
 import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragment
 import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.HomeStatusBarViewModel
 import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.HomeStatusBarViewModel.VisibilityModel
 import javax.inject.Inject
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 /**
  * Interface to assist with binding the [CollapsedStatusBarFragment] to [HomeStatusBarViewModel].
@@ -91,7 +91,7 @@ class HomeStatusBarViewBinderImpl @Inject constructor() : HomeStatusBarViewBinde
                     launch {
                         viewModel.primaryOngoingActivityChip.collect { primaryChipModel ->
                             OngoingActivityChipBinder.bind(primaryChipModel, primaryChipView)
-                            if (StatusBarSimpleFragment.isEnabled) {
+                            if (StatusBarRootModernization.isEnabled) {
                                 when (primaryChipModel) {
                                     is OngoingActivityChipModel.Shown ->
                                         primaryChipView.show(shouldAnimateChange = true)
@@ -133,7 +133,7 @@ class HomeStatusBarViewBinderImpl @Inject constructor() : HomeStatusBarViewBinde
                             // enough space for it.
                             OngoingActivityChipBinder.bind(chips.secondary, secondaryChipView)
 
-                            if (StatusBarSimpleFragment.isEnabled) {
+                            if (StatusBarRootModernization.isEnabled) {
                                 primaryChipView.adjustVisibility(chips.primary.toVisibilityModel())
                                 secondaryChipView.adjustVisibility(
                                     chips.secondary.toVisibilityModel()
@@ -160,7 +160,7 @@ class HomeStatusBarViewBinderImpl @Inject constructor() : HomeStatusBarViewBinde
                     }
                 }
 
-                if (StatusBarSimpleFragment.isEnabled) {
+                if (StatusBarRootModernization.isEnabled) {
                     val clockView = view.requireViewById<View>(R.id.clock)
                     launch { viewModel.isClockVisible.collect { clockView.adjustVisibility(it) } }
 

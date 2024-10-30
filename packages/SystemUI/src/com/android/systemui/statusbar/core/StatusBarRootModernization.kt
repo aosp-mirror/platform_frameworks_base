@@ -21,9 +21,9 @@ import com.android.systemui.flags.FlagToken
 import com.android.systemui.flags.RefactorFlagUtils
 
 /** Helper for reading and using the status bar simple fragment flag state */
-object StatusBarSimpleFragment {
+object StatusBarRootModernization {
     /** Aconfig flag for removing the fragment */
-    const val FLAG_NAME = Flags.FLAG_STATUS_BAR_SIMPLE_FRAGMENT
+    const val FLAG_NAME = Flags.FLAG_STATUS_BAR_ROOT_MODERNIZATION
 
     /** A token used for dependency declaration */
     val token: FlagToken
@@ -32,7 +32,7 @@ object StatusBarSimpleFragment {
     /** Is the refactor enabled */
     @JvmStatic
     inline val isEnabled
-        get() = Flags.statusBarSimpleFragment()
+        get() = Flags.statusBarRootModernization()
 
     /**
      * Called to ensure code is only run when the flag is enabled. This protects users from the
