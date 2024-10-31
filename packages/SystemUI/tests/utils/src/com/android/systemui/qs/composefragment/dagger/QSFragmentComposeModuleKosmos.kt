@@ -14,17 +14,8 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.panels.ui.viewmodel
+package com.android.systemui.qs.composefragment.dagger
 
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.qs.panels.domain.interactor.paginatedGridInteractor
 
-val Kosmos.paginatedGridViewModel by
-    Kosmos.Fixture {
-        PaginatedGridViewModel(
-            iconTilesViewModel,
-            qsColumnsViewModel,
-            paginatedGridInteractor,
-            inFirstPageViewModel,
-        )
-    }
+var Kosmos.usingMediaInComposeFragment by Kosmos.Fixture<Boolean>()

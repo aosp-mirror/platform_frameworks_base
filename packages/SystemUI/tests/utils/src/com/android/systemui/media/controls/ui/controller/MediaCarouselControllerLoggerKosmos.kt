@@ -14,17 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.panels.ui.viewmodel
+package com.android.systemui.media.controls.ui.controller
 
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.qs.panels.domain.interactor.paginatedGridInteractor
+import com.android.systemui.log.core.FakeLogBuffer
 
-val Kosmos.paginatedGridViewModel by
-    Kosmos.Fixture {
-        PaginatedGridViewModel(
-            iconTilesViewModel,
-            qsColumnsViewModel,
-            paginatedGridInteractor,
-            inFirstPageViewModel,
-        )
-    }
+val Kosmos.mediaCarouselControllerLogger by
+    Kosmos.Fixture { MediaCarouselControllerLogger(FakeLogBuffer.Factory.create()) }

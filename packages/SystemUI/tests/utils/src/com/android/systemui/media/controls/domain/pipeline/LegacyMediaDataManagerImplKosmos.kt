@@ -14,17 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.panels.ui.viewmodel
+package com.android.systemui.media.controls.domain.pipeline
 
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.qs.panels.domain.interactor.paginatedGridInteractor
+import org.mockito.kotlin.mock
 
-val Kosmos.paginatedGridViewModel by
-    Kosmos.Fixture {
-        PaginatedGridViewModel(
-            iconTilesViewModel,
-            qsColumnsViewModel,
-            paginatedGridInteractor,
-            inFirstPageViewModel,
-        )
-    }
+/** Empty mock */
+val Kosmos.legacyMediaDataManagerImpl by Kosmos.Fixture { mock<LegacyMediaDataManagerImpl>() }
