@@ -42,15 +42,6 @@ class FakeCommunalWidgetRepository(private val coroutineScope: CoroutineScope) :
             val id = nextWidgetId++
             val providerInfo = createAppWidgetProviderInfo(provider, user.identifier)
 
-            fakeDatabase[id] =
-                CommunalWidgetContentModel.Available(
-                    appWidgetId = id,
-                    rank = rank ?: 0,
-                    providerInfo = providerInfo,
-                    spanY = 3,
-                )
-            updateListFromDatabase()
-
             val configured = configurator?.configureWidget(id) != false
             if (configured) {
                 onConfigured(id, providerInfo, rank ?: -1)
