@@ -35,12 +35,15 @@ import com.android.compose.test.runMonotonicClockTest
 import com.android.compose.test.transition
 import com.google.common.truth.Truth.assertThat
 import kotlin.coroutines.cancellation.CancellationException
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertThrows
 import org.junit.Rule
@@ -600,5 +603,48 @@ class SceneTransitionLayoutStateTest {
         assertThrows(IllegalStateException::class.java) {
             runBlocking { state.startTransition(transition) }
         }
+    }
+
+    @Test
+    fun transitionFinishedWhenScopeIsEmpty() = runTest {
+        val state = MutableSceneTransitionLayoutState(SceneA)
+
+        // Start a transition.
+        val transition = transition(from = SceneA, to = SceneB)
+        state.startTransitionImmediately(backgroundScope, transition)
+        assertThat(state.transitionState).isSceneTransition()
+
+        // Start a job in the transition scope.
+        val jobCompletable = CompletableDeferred<Unit>()
+        transition.coroutineScope.launch { jobCompletable.await() }
+
+        // Finish the transition (i.e. make its #run() method return). The transition should not be
+        // considered as finished yet given that there is a job still running in its scope.
+        transition.finish()
+        runCurrent()
+        assertThat(state.transitionState).isSceneTransition()
+
+        // Finish the job in the scope. Now the transition should be considered as finished.
+        jobCompletable.complete(Unit)
+        runCurrent()
+        assertThat(state.transitionState).isIdle()
+    }
+
+    @Test
+    fun transitionScopeIsCancelledWhenTransitionIsForceFinished() = runTest {
+        val state = MutableSceneTransitionLayoutState(SceneA)
+
+        // Start a transition.
+        val transition = transition(from = SceneA, to = SceneB)
+        state.startTransitionImmediately(backgroundScope, transition)
+        assertThat(state.transitionState).isSceneTransition()
+
+        // Start a job in the transition scope that never finishes.
+        val job = transition.coroutineScope.launch { awaitCancellation() }
+
+        // Force snap state to SceneB to force finish all current transitions.
+        state.snapToScene(SceneB)
+        assertThat(state.transitionState).isIdle()
+        assertThat(job.isCancelled).isTrue()
     }
 }
