@@ -1222,7 +1222,7 @@ public class UserManagerService extends IUserManager.Stub {
         // Mark the user for removal.
         addRemovingUserIdLocked(ui.id);
         ui.partial = true;
-        ui.flags |= UserInfo.FLAG_DISABLED;
+        addUserInfoFlags(ui, UserInfo.FLAG_DISABLED);
     }
 
     /* Prunes out any partially created or partially removed users. */
@@ -1264,7 +1264,7 @@ public class UserManagerService extends IUserManager.Stub {
                 if (ui.preCreated) {
                     preCreatedUsers.add(ui);
                     addRemovingUserIdLocked(ui.id);
-                    ui.flags |= UserInfo.FLAG_DISABLED;
+                    addUserInfoFlags(ui, UserInfo.FLAG_DISABLED);
                     ui.partial = true;
                 }
             }
@@ -2120,13 +2120,43 @@ public class UserManagerService extends IUserManager.Stub {
                 info = getUserInfoLU(userId);
                 if (info != null && !info.isEnabled()) {
                     wasUserDisabled = true;
-                    info.flags ^= UserInfo.FLAG_DISABLED;
+                    removeUserInfoFlags(info, UserInfo.FLAG_DISABLED);
                     writeUserLP(getUserDataLU(info.id));
                 }
             }
         }
         if (wasUserDisabled && info != null && info.isProfile()) {
             sendProfileAddedBroadcast(info.profileGroupId, info.id);
+        }
+    }
+
+    /**
+     * This method is for monitoring flag changes on users flags and invalidate cache relevant to
+     * the change. The method add flags and invalidateOnUserInfoFlagChange for the flags which
+     * has changed.
+     * @param userInfo of existing user in mUsers list
+     * @param flags to be added to userInfo
+     */
+    private void addUserInfoFlags(UserInfo userInfo, @UserInfoFlag int flags) {
+        int diff = ~userInfo.flags & flags;
+        if (diff > 0) {
+            userInfo.flags |= diff;
+            UserManager.invalidateOnUserInfoFlagChange(diff);
+        }
+    }
+
+    /**
+     * This method is for monitoring flag changes on users flags and invalidate cache relevant to
+     * the change. The method remove flags and invalidateOnUserInfoFlagChange for the flags which
+     * has changed.
+     * @param userInfo of existing user in mUsers list
+     * @param flags to be removed from userInfo
+     */
+    private void removeUserInfoFlags(UserInfo userInfo, @UserInfoFlag int flags) {
+        int diff = userInfo.flags & flags;
+        if (diff > 0) {
+            userInfo.flags ^= diff;
+            UserManager.invalidateOnUserInfoFlagChange(diff);
         }
     }
 
@@ -6245,7 +6275,7 @@ public class UserManagerService extends IUserManager.Stub {
                 userData.info.guestToRemove = true;
                 // Mark it as disabled, so that it isn't returned any more when
                 // profiles are queried.
-                userData.info.flags |= UserInfo.FLAG_DISABLED;
+                addUserInfoFlags(userData.info, UserInfo.FLAG_DISABLED);
                 writeUserLP(userData);
             }
         } finally {
@@ -6390,7 +6420,7 @@ public class UserManagerService extends IUserManager.Stub {
                 }
                 // Mark it as disabled, so that it isn't returned any more when
                 // profiles are queried.
-                userData.info.flags |= UserInfo.FLAG_DISABLED;
+                addUserInfoFlags(userData.info, UserInfo.FLAG_DISABLED);
                 writeUserLP(userData);
             }
 
@@ -7789,7 +7819,7 @@ public class UserManagerService extends IUserManager.Stub {
                if (userInfo != null && userInfo.isEphemeral()) {
                     // Do not allow switching back to the ephemeral user again as the user is going
                     // to be deleted.
-                    userInfo.flags |= UserInfo.FLAG_DISABLED;
+                    addUserInfoFlags(userInfo, UserInfo.FLAG_DISABLED);
                     if (userInfo.isGuest()) {
                         // Indicate that the guest will be deleted after it stops.
                         userInfo.guestToRemove = true;
