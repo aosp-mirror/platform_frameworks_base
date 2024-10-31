@@ -40,9 +40,9 @@
         android:layout_height="wrap_content"
         android:background="@drawable/volume_dialog_background"
         android:divider="@drawable/volume_dialog_spacer"
+        android:paddingVertical="@dimen/volume_dialog_vertical_padding"
         android:gravity="center_horizontal"
         android:orientation="vertical"
-        android:paddingVertical="@dimen/volume_dialog_vertical_padding"
         android:showDividers="middle">
 
         <include layout="@layout/volume_ringer_drawer" />

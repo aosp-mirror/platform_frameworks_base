@@ -20,9 +20,8 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:gravity="center"
-    android:paddingLeft="@dimen/volume_dialog_ringer_container_padding"
-    android:paddingTop="@dimen/volume_dialog_ringer_container_padding"
-    android:paddingRight="@dimen/volume_dialog_ringer_container_padding"
+    android:paddingLeft="@dimen/volume_dialog_ringer_horizontal_padding"
+    android:paddingRight="@dimen/volume_dialog_ringer_horizontal_padding"
     android:layoutDirection="ltr"
     android:clipToPadding="false"
     android:clipChildren="false"
@@ -31,7 +30,6 @@
     <!-- Drawer view, invisible by default. -->
     <FrameLayout
         android:id="@+id/volume_drawer_container"
-        android:alpha="0.0"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
@@ -40,9 +38,8 @@
         <FrameLayout
             android:id="@+id/volume_drawer_selection_background"
             android:alpha="0.0"
-            android:layout_width="@dimen/volume_ringer_item_size"
-            android:layout_marginBottom="8dp"
-            android:layout_height="@dimen/volume_ringer_item_size"
+            android:layout_width="@dimen/volume_dialog_ringer_drawer_button_size"
+            android:layout_height="@dimen/volume_dialog_ringer_drawer_button_size"
             android:layout_gravity="bottom|right"
             android:background="@drawable/volume_drawer_selection_bg" />
 
@@ -52,64 +49,7 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <FrameLayout
-                android:id="@+id/volume_drawer_vibrate"
-                android:layout_width="@dimen/volume_ringer_item_size"
-                android:layout_height="@dimen/volume_ringer_item_size"
-                android:layout_marginBottom="8dp"
-                android:contentDescription="@string/volume_ringer_hint_vibrate"
-                android:gravity="center"
-                android:background="@drawable/volume_ringer_item_bg">
-
-                <ImageView
-                    android:id="@+id/volume_drawer_vibrate_icon"
-                    android:layout_width="@dimen/volume_ringer_icon_size"
-                    android:layout_height="@dimen/volume_ringer_icon_size"
-                    android:layout_gravity="center"
-                    android:src="@drawable/ic_volume_ringer_vibrate"
-                    android:tint="?androidprv:attr/materialColorOnSurface" />
-
-            </FrameLayout>
-
-            <FrameLayout
-                android:id="@+id/volume_drawer_mute"
-                android:layout_width="@dimen/volume_ringer_item_size"
-                android:layout_height="@dimen/volume_ringer_item_size"
-                android:layout_marginBottom="8dp"
-                android:accessibilityTraversalAfter="@id/volume_drawer_vibrate"
-                android:contentDescription="@string/volume_ringer_hint_mute"
-                android:gravity="center"
-                android:background="@drawable/volume_ringer_item_bg">
-
-                <ImageView
-                    android:id="@+id/volume_drawer_mute_icon"
-                    android:layout_width="@dimen/volume_ringer_icon_size"
-                    android:layout_height="@dimen/volume_ringer_icon_size"
-                    android:layout_gravity="center"
-                    android:src="@drawable/ic_speaker_mute"
-                    android:tint="?androidprv:attr/materialColorOnSurface" />
-
-            </FrameLayout>
-
-            <FrameLayout
-                android:id="@+id/volume_drawer_normal"
-                android:layout_width="@dimen/volume_ringer_item_size"
-                android:layout_height="@dimen/volume_ringer_item_size"
-                android:layout_marginBottom="8dp"
-                android:accessibilityTraversalAfter="@id/volume_drawer_mute"
-                android:contentDescription="@string/volume_ringer_hint_unmute"
-                android:gravity="center"
-                android:background="@drawable/volume_ringer_item_bg">
-
-                <ImageView
-                    android:id="@+id/volume_drawer_normal_icon"
-                    android:layout_width="@dimen/volume_ringer_icon_size"
-                    android:layout_height="@dimen/volume_ringer_icon_size"
-                    android:layout_gravity="center"
-                    android:src="@drawable/ic_speaker_on"
-                    android:tint="?androidprv:attr/materialColorOnSurface" />
-
-            </FrameLayout>
+            <!-- add ringer buttons here -->
 
         </LinearLayout>
 
@@ -117,23 +57,16 @@
 
     <!-- The current ringer selection. When the drawer is opened, this animates to the corresponding
          position in the drawer. When the drawer is closed, it animates back. -->
-    <FrameLayout
-        android:id="@+id/volume_new_ringer_active_icon_container"
-        android:layout_width="@dimen/volume_ringer_item_size"
-        android:layout_height="@dimen/volume_ringer_item_size"
-        android:layout_marginBottom="8dp"
-        android:layout_gravity="bottom|right"
+    <ImageButton
+        android:id="@+id/volume_new_ringer_active_button"
+        android:layout_width="@dimen/volume_dialog_ringer_drawer_button_size"
+        android:layout_height="@dimen/volume_dialog_ringer_drawer_button_size"
+        android:layout_marginBottom="@dimen/volume_dialog_components_spacing"
+        android:background="@drawable/volume_drawer_selection_bg"
         android:contentDescription="@string/volume_ringer_change"
-        android:background="@drawable/volume_drawer_selection_bg">
-
-        <ImageView
-            android:id="@+id/volume_new_ringer_active_icon"
-            android:layout_width="@dimen/volume_ringer_icon_size"
-            android:layout_height="@dimen/volume_ringer_icon_size"
-            android:layout_gravity="center"
-            android:tint="?androidprv:attr/materialColorOnPrimary"
-            android:src="@drawable/ic_volume_media" />
-
-    </FrameLayout>
+        android:gravity="center"
+        android:padding="10dp"
+        android:src="@drawable/ic_volume_media"
+        android:tint="?androidprv:attr/materialColorOnPrimary" />
 
 </FrameLayout>

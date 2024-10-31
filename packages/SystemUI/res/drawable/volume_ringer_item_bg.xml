@@ -16,7 +16,7 @@
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     android:shape="rectangle" >
-    <size android:width="@dimen/volume_ringer_item_size" android:height="@dimen/volume_ringer_item_size"/>
+    <size android:width="@dimen/volume_dialog_ringer_drawer_button_size" android:height="@dimen/volume_dialog_ringer_drawer_button_size"/>
     <solid android:color="?androidprv:attr/materialColorSurfaceContainerHighest" />
-    <corners android:radius="@dimen/volume_ringer_item_radius" />
+    <corners android:radius="@dimen/volume_dialog_background_square_corner_radius" />
 </shape>

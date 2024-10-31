@@ -22,6 +22,8 @@ data class RingerViewModel(
     val availableButtons: List<RingerButtonViewModel?>,
     /** The index of the currently selected button */
     val currentButtonIndex: Int,
+    /** Currently selected button. */
+    val selectedButton: RingerButtonViewModel,
     /** For open and close animations */
     val drawerState: RingerDrawerState,
 )
