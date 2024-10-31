@@ -748,10 +748,13 @@ flag {
 }
 
 flag {
-    name: "smartspace_swipe_event_logging"
+    name: "smartspace_swipe_event_logging_fix"
     namespace: "systemui"
     description: "Log card swipe events in smartspace"
     bug: "374150422"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+   }
 }
 
 flag {
