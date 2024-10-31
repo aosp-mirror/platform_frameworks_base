@@ -65,13 +65,12 @@ android_ravenwood_test {
         "androidx.annotation_annotation",
         "androidx.test.rules",
         "androidx.test.uiautomator_uiautomator",
+        "androidx.test.ext.junit",
         "modules-utils-binary-xml",
         "flag-junit",
     ],
     srcs: [
-        // b/375477626 -- somehow this test is failing in presubmit on AOSP.
-        // This module is devlopped internal-fast, so we don't need to run it on AOSP.
-        //        "src/com/android/server/power/stats/*.java",
+        "src/com/android/server/power/stats/*.java",
     ],
     java_resources: [
         "res/xml/power_profile*.xml",
