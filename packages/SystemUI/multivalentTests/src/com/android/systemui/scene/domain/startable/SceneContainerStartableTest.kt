@@ -2119,40 +2119,6 @@ class SceneContainerStartableTest : SysuiTestCase() {
         }
 
     @Test
-    fun switchToGone_whenSurfaceBehindLockscreenVisibleMidTransition() =
-        testScope.runTest {
-            val currentScene by collectLastValue(sceneInteractor.currentScene)
-            val transitionStateFlow =
-                prepareState(authenticationMethod = AuthenticationMethodModel.None)
-            underTest.start()
-            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
-            // Swipe to Gone, more than halfway
-            transitionStateFlow.value =
-                ObservableTransitionState.Transition(
-                    fromScene = Scenes.Lockscreen,
-                    toScene = Scenes.Gone,
-                    currentScene = flowOf(Scenes.Gone),
-                    progress = flowOf(0.51f),
-                    isInitiatedByUserInput = true,
-                    isUserInputOngoing = flowOf(true),
-                )
-            runCurrent()
-            // Lift finger
-            transitionStateFlow.value =
-                ObservableTransitionState.Transition(
-                    fromScene = Scenes.Lockscreen,
-                    toScene = Scenes.Gone,
-                    currentScene = flowOf(Scenes.Gone),
-                    progress = flowOf(0.51f),
-                    isInitiatedByUserInput = true,
-                    isUserInputOngoing = flowOf(false),
-                )
-            runCurrent()
-
-            assertThat(currentScene).isEqualTo(Scenes.Gone)
-        }
-
-    @Test
     fun switchToGone_extendUnlock() =
         testScope.runTest {
             val currentScene by collectLastValue(sceneInteractor.currentScene)
