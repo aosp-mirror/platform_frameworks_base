@@ -58,6 +58,7 @@ java_test_host {
         "junit",
         "objenesis",
         "mockito",
+        "systemfeatures-gen-lib",
         "truth",
     ],
 }
