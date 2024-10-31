@@ -31,6 +31,7 @@ import static android.view.MotionEvent.ACTION_UP;
 import static android.view.WindowInsets.Type.statusBars;
 
 import static com.android.internal.jank.Cuj.CUJ_DESKTOP_MODE_ENTER_MODE_APP_HANDLE_MENU;
+import static com.android.window.flags.Flags.enableDisplayFocusInShellTransitions;
 import static com.android.wm.shell.compatui.AppCompatUtils.isTopActivityExemptFromDesktopWindowing;
 import static com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.ResizeTrigger;
 import static com.android.wm.shell.desktopmode.DesktopModeVisualIndicator.IndicatorType.TO_FULLSCREEN_INDICATOR;
@@ -474,7 +475,12 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
             removeTaskFromEventReceiver(oldTaskInfo.displayId);
             incrementEventReceiverTasks(taskInfo.displayId);
         }
-        decoration.relayout(taskInfo, decoration.mHasGlobalFocus);
+        if (enableDisplayFocusInShellTransitions()) {
+            // Pass the current global focus status to avoid updates outside of a ShellTransition.
+            decoration.relayout(taskInfo, decoration.mHasGlobalFocus);
+        } else {
+            decoration.relayout(taskInfo, taskInfo.isFocused);
+        }
         mActivityOrientationChangeHandler.ifPresent(handler ->
                 handler.handleActivityOrientationChange(oldTaskInfo, taskInfo));
     }
