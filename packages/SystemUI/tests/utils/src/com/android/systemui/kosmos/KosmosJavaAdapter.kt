@@ -50,6 +50,7 @@ import com.android.systemui.keyguard.domain.interactor.fromPrimaryBouncerTransit
 import com.android.systemui.keyguard.domain.interactor.keyguardClockInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
+import com.android.systemui.keyguard.domain.interactor.pulseExpansionInteractor
 import com.android.systemui.model.sceneContainerPlugin
 import com.android.systemui.plugins.statusbar.statusBarStateController
 import com.android.systemui.power.data.repository.fakePowerRepository
@@ -124,6 +125,7 @@ class KosmosJavaAdapter() {
     val sceneBackInteractor by lazy { kosmos.sceneBackInteractor }
     val falsingCollector by lazy { kosmos.falsingCollector }
     val powerInteractor by lazy { kosmos.powerInteractor }
+    val pulseExpansionInteractor by lazy { kosmos.pulseExpansionInteractor }
     val deviceEntryInteractor by lazy { kosmos.deviceEntryInteractor }
     val deviceEntryUdfpsInteractor by lazy { kosmos.deviceEntryUdfpsInteractor }
     val deviceUnlockedInteractor by lazy { kosmos.deviceUnlockedInteractor }

@@ -421,6 +421,8 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     @NonNull
     private String[] mUsesStaticLibrariesSorted;
 
+    private Map<String, Boolean> mFeatureFlagState = new ArrayMap<>();
+
     @NonNull
     public static PackageImpl forParsing(@NonNull String packageName, @NonNull String baseCodePath,
             @NonNull String codePath, @NonNull TypedArray manifestArray, boolean isCoreApp,
@@ -2819,6 +2821,7 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
         queriesProviders = Collections.unmodifiableSet(queriesProviders);
         mimeGroups = Collections.unmodifiableSet(mimeGroups);
         mKnownActivityEmbeddingCerts = Collections.unmodifiableSet(mKnownActivityEmbeddingCerts);
+        mFeatureFlagState = Collections.unmodifiableMap(mFeatureFlagState);
     }
 
     @Override
@@ -3118,6 +3121,8 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        writeFeatureFlagState(dest);
+
         sForBoolean.parcel(this.supportsSmallScreens, dest, flags);
         sForBoolean.parcel(this.supportsNormalScreens, dest, flags);
         sForBoolean.parcel(this.supportsLargeScreens, dest, flags);
@@ -3267,6 +3272,27 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
         dest.writeBoolean(this.mAllowCrossUidActivitySwitchFromBelow);
     }
 
+    private void writeFeatureFlagState(@NonNull Parcel dest) {
+        // Use a string array to encode flag state. One string per flag in the form `<flag>=<value>`
+        // where value is 0 (disabled), 1 (enabled) or ? (unknown flag or value).
+        int featureFlagCount = this.mFeatureFlagState.size();
+        String[] featureFlagStateAsArray = new String[featureFlagCount];
+        var entryIterator = this.mFeatureFlagState.entrySet().iterator();
+        for (int i = 0; i < featureFlagCount; i++) {
+            var entry = entryIterator.next();
+            Boolean flagValue = entry.getValue();
+            if (flagValue == null) {
+                featureFlagStateAsArray[i] = entry.getKey() + "=?";
+            } else if (flagValue.booleanValue()) {
+                featureFlagStateAsArray[i] = entry.getKey() + "=1";
+            } else {
+                featureFlagStateAsArray[i] = entry.getKey() + "=0";
+            }
+
+        }
+        dest.writeStringArray(featureFlagStateAsArray);
+    }
+
     public PackageImpl(Parcel in) {
         this(in, /* callback */ null);
     }
@@ -3275,6 +3301,9 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
         mCallback = callback;
         // We use the boot classloader for all classes that we load.
         final ClassLoader boot = Object.class.getClassLoader();
+
+        readFeatureFlagState(in);
+
         this.supportsSmallScreens = sForBoolean.unparcel(in);
         this.supportsNormalScreens = sForBoolean.unparcel(in);
         this.supportsLargeScreens = sForBoolean.unparcel(in);
@@ -3438,6 +3467,27 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
 
         // Do not call makeImmutable here as cached parsing will need
         // to mutate this instance before it's finalized.
+    }
+
+    private void readFeatureFlagState(@NonNull Parcel in) {
+        // See comment in writeFeatureFlagState() for encoding of flag state.
+        String[] featureFlagStateAsArray = in.createStringArray();
+        for (String s : featureFlagStateAsArray) {
+            int sepIndex = s.lastIndexOf('=');
+            if (sepIndex >= 0 && sepIndex == s.length() - 2) {
+                String flagPackageAndName = s.substring(0, sepIndex);
+                char c = s.charAt(sepIndex + 1);
+                Boolean flagValue = null;
+                if (c == '1') {
+                    flagValue = Boolean.TRUE;
+                } else if (c == '0') {
+                    flagValue = Boolean.FALSE;
+                } else if (c != '?') {
+                    continue;
+                }
+                this.mFeatureFlagState.put(flagPackageAndName, flagValue);
+            }
+        }
     }
 
     @NonNull
@@ -3658,6 +3708,18 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
 
     public String getBaseAppDataDeviceProtectedDirForSystemUser() {
         return mBaseAppDataDeviceProtectedDirForSystemUser;
+    }
+
+    @Override
+    public PackageImpl addFeatureFlag(
+            @NonNull String flagPackageAndName,
+            @Nullable Boolean flagValue) {
+        mFeatureFlagState.put(flagPackageAndName, flagValue);
+        return this;
+    }
+
+    public Map<String, Boolean> getFeatureFlagState() {
+        return mFeatureFlagState;
     }
 
     /**

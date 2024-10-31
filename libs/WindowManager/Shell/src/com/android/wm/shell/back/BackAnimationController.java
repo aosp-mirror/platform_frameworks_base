@@ -19,6 +19,7 @@ package com.android.wm.shell.back;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.view.RemoteAnimationTarget.MODE_CLOSING;
 import static android.view.RemoteAnimationTarget.MODE_OPENING;
+import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE_PREPARE_BACK_NAVIGATION;
 import static android.window.TransitionInfo.FLAG_BACK_GESTURE_ANIMATED;
 import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
@@ -1262,6 +1263,15 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
             return handleCloseTransition(info, st, ft, finishCallback);
         }
 
+        @Override
+        public void onTransitionConsumed(@NonNull IBinder transition, boolean aborted,
+                @Nullable SurfaceControl.Transaction finishTransaction) {
+            if (transition == mClosePrepareTransition && aborted) {
+                mClosePrepareTransition = null;
+                applyFinishOpenTransition();
+            }
+        }
+
         void createClosePrepareTransition() {
             if (mClosePrepareTransition != null) {
                 Log.e(TAG, "Re-create close prepare transition");
@@ -1324,8 +1334,8 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
             }
             if (!isOpen) {
                 // Close transition, the transition info should be:
-                // init info(open A & wallpaper)
-                // current info(close B target)
+                // init info(open A & wallpaper) => init info(open A & change B & wallpaper)
+                // current info(close B target) => current info(change A & close B)
                 // remove init info(open/change A target & wallpaper)
                 boolean moveToTop = false;
                 boolean excludeOpenTarget = false;
@@ -1515,14 +1525,17 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
                 return false;
             }
             SurfaceControl openingLeash = null;
+            SurfaceControl closingLeash = null;
             if (mApps != null) {
                 for (int i = mApps.length - 1; i >= 0; --i) {
                     if (mApps[i].mode == MODE_OPENING) {
                         openingLeash = mApps[i].leash;
+                    } else if (mApps[i].mode == MODE_CLOSING) {
+                        closingLeash = mApps[i].leash;
                     }
                 }
             }
-            if (openingLeash != null) {
+            if (openingLeash != null && closingLeash != null) {
                 int rootIdx = -1;
                 for (int i = info.getChanges().size() - 1; i >= 0; --i) {
                     final TransitionInfo.Change c = info.getChanges().get(i);
@@ -1532,6 +1545,9 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
                         st.reparent(c.getLeash(), openingLeash);
                         st.setAlpha(c.getLeash(), 1.0f);
                         rootIdx = TransitionUtil.rootIndexFor(c, info);
+                    } else if (c.hasFlags(FLAG_BACK_GESTURE_ANIMATED)
+                            && c.getMode() == TRANSIT_CHANGE) {
+                        st.reparent(c.getLeash(), closingLeash);
                     }
                 }
                 // The root leash and the leash of opening target should actually in the same level,

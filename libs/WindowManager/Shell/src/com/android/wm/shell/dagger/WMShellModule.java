@@ -88,6 +88,8 @@ import com.android.wm.shell.desktopmode.education.AppHandleEducationController;
 import com.android.wm.shell.desktopmode.education.AppHandleEducationFilter;
 import com.android.wm.shell.desktopmode.education.data.AppHandleEducationDatastoreRepository;
 import com.android.wm.shell.desktopmode.persistence.DesktopPersistentRepository;
+import com.android.wm.shell.desktopmode.persistence.DesktopRepositoryInitializer;
+import com.android.wm.shell.desktopmode.persistence.DesktopRepositoryInitializerImpl;
 import com.android.wm.shell.draganddrop.DragAndDropController;
 import com.android.wm.shell.draganddrop.GlobalDragListener;
 import com.android.wm.shell.freeform.FreeformComponents;
@@ -703,6 +705,7 @@ public abstract class WMShellModule {
             Transitions transitions,
             KeyguardManager keyguardManager,
             ReturnToDragStartAnimator returnToDragStartAnimator,
+            Optional<DesktopMixedTransitionHandler> desktopMixedTransitionHandler,
             EnterDesktopTaskTransitionHandler enterDesktopTransitionHandler,
             ExitDesktopTaskTransitionHandler exitDesktopTransitionHandler,
             DesktopModeDragAndDropTransitionHandler desktopModeDragAndDropTransitionHandler,
@@ -736,6 +739,7 @@ public abstract class WMShellModule {
                 transitions,
                 keyguardManager,
                 returnToDragStartAnimator,
+                desktopMixedTransitionHandler.get(),
                 enterDesktopTransitionHandler,
                 exitDesktopTransitionHandler,
                 desktopModeDragAndDropTransitionHandler,
@@ -907,8 +911,12 @@ public abstract class WMShellModule {
             Context context,
             ShellInit shellInit,
             DesktopPersistentRepository desktopPersistentRepository,
-            @ShellMainThread CoroutineScope mainScope) {
-        return new DesktopRepository(context, shellInit, desktopPersistentRepository, mainScope);
+            DesktopRepositoryInitializer desktopRepositoryInitializer,
+            @ShellMainThread CoroutineScope mainScope
+    ) {
+        return new DesktopRepository(context, shellInit, desktopPersistentRepository,
+                desktopRepositoryInitializer,
+                mainScope);
     }
 
     @WMSingleton
@@ -960,6 +968,7 @@ public abstract class WMShellModule {
             @DynamicOverride DesktopRepository desktopRepository,
             FreeformTaskTransitionHandler freeformTaskTransitionHandler,
             CloseDesktopTaskTransitionHandler closeDesktopTaskTransitionHandler,
+            Optional<DesktopImmersiveController> desktopImmersiveController,
             InteractionJankMonitor interactionJankMonitor,
             @ShellMainThread Handler handler) {
         if (!DesktopModeStatus.canEnterDesktopMode(context)) {
@@ -972,6 +981,7 @@ public abstract class WMShellModule {
                         desktopRepository,
                         freeformTaskTransitionHandler,
                         closeDesktopTaskTransitionHandler,
+                        desktopImmersiveController.get(),
                         interactionJankMonitor,
                         handler));
     }
@@ -1051,6 +1061,16 @@ public abstract class WMShellModule {
     static DesktopPersistentRepository provideDesktopPersistentRepository(
             Context context, @ShellBackgroundThread CoroutineScope bgScope) {
         return new DesktopPersistentRepository(context, bgScope);
+    }
+
+    @WMSingleton
+    @Provides
+    static DesktopRepositoryInitializer provideDesktopRepositoryInitializer(
+            Context context,
+            DesktopPersistentRepository desktopPersistentRepository,
+            @ShellMainThread CoroutineScope mainScope) {
+        return new DesktopRepositoryInitializerImpl(context, desktopPersistentRepository,
+                mainScope);
     }
 
     //

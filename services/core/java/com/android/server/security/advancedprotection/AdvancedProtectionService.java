@@ -21,6 +21,7 @@ import static android.provider.Settings.Secure.ADVANCED_PROTECTION_MODE;
 import android.Manifest;
 import android.annotation.EnforcePermission;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.os.Binder;
 import android.os.Handler;
@@ -35,37 +36,55 @@ import android.provider.Settings;
 import android.security.advancedprotection.IAdvancedProtectionCallback;
 import android.security.advancedprotection.IAdvancedProtectionService;
 import android.util.ArrayMap;
+import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.pm.UserManagerInternal;
+import com.android.server.security.advancedprotection.features.AdvancedProtectionHook;
 
 import java.io.FileDescriptor;
 import java.util.ArrayList;
 
 /** @hide */
 public class AdvancedProtectionService extends IAdvancedProtectionService.Stub  {
+    private static final String TAG = "AdvancedProtectionService";
     private static final int MODE_CHANGED = 0;
     private static final int CALLBACK_ADDED = 1;
 
+    private final Context mContext;
     private final Handler mHandler;
     private final AdvancedProtectionStore mStore;
+
+    // Features owned by the service - their code will be executed when state changes
+    private final ArrayList<AdvancedProtectionHook> mHooks = new ArrayList<>();
+    // External features - they will be called on state change
     private final ArrayMap<IBinder, IAdvancedProtectionCallback> mCallbacks = new ArrayMap<>();
 
     private AdvancedProtectionService(@NonNull Context context) {
         super(PermissionEnforcer.fromContext(context));
+        mContext = context;
         mHandler = new AdvancedProtectionHandler(FgThread.get().getLooper());
         mStore = new AdvancedProtectionStore(context);
     }
 
+    private void initFeatures(boolean enabled) {
+    }
+
+    // Only for tests
     @VisibleForTesting
     AdvancedProtectionService(@NonNull Context context, @NonNull AdvancedProtectionStore store,
-            @NonNull Looper looper, @NonNull PermissionEnforcer permissionEnforcer) {
+            @NonNull Looper looper, @NonNull PermissionEnforcer permissionEnforcer,
+            @Nullable AdvancedProtectionHook hook) {
         super(permissionEnforcer);
+        mContext = context;
         mStore = store;
         mHandler = new AdvancedProtectionHandler(looper);
+        if (hook != null) {
+            mHooks.add(hook);
+        }
     }
 
     @Override
@@ -100,8 +119,8 @@ public class AdvancedProtectionService extends IAdvancedProtectionService.Stub  
 
     @Override
     @EnforcePermission(Manifest.permission.QUERY_ADVANCED_PROTECTION_MODE)
-    public void unregisterAdvancedProtectionCallback(@NonNull IAdvancedProtectionCallback callback)
-            throws RemoteException {
+    public void unregisterAdvancedProtectionCallback(
+            @NonNull IAdvancedProtectionCallback callback) {
         unregisterAdvancedProtectionCallback_enforcePermission();
         synchronized (mCallbacks) {
             mCallbacks.remove(callback.asBinder());
@@ -118,6 +137,7 @@ public class AdvancedProtectionService extends IAdvancedProtectionService.Stub  
                 if (enabled != isAdvancedProtectionEnabledInternal()) {
                     mStore.store(enabled);
                     sendModeChanged(enabled);
+                    Slog.i(TAG, "Advanced protection is " + (enabled ? "enabled" : "disabled"));
                 }
             }
         } finally {
@@ -155,6 +175,17 @@ public class AdvancedProtectionService extends IAdvancedProtectionService.Stub  
         @Override
         public void onStart() {
             publishBinderService(Context.ADVANCED_PROTECTION_SERVICE, mService);
+        }
+
+        @Override
+        public void onBootPhase(@BootPhase int phase) {
+            if (phase == PHASE_SYSTEM_SERVICES_READY) {
+                boolean enabled = mService.isAdvancedProtectionEnabledInternal();
+                if (enabled) {
+                    Slog.i(TAG, "Advanced protection is enabled");
+                }
+                mService.initFeatures(enabled);
+            }
         }
     }
 
@@ -205,6 +236,12 @@ public class AdvancedProtectionService extends IAdvancedProtectionService.Stub  
         private void handleAllCallbacks(boolean enabled) {
             ArrayList<IAdvancedProtectionCallback> deadObjects = new ArrayList<>();
 
+            for (int i = 0; i < mHooks.size(); i++) {
+                AdvancedProtectionHook feature = mHooks.get(i);
+                if (feature.isAvailable()) {
+                    feature.onAdvancedProtectionChanged(enabled);
+                }
+            }
             synchronized (mCallbacks) {
                 for (int i = 0; i < mCallbacks.size(); i++) {
                     IAdvancedProtectionCallback callback = mCallbacks.valueAt(i);

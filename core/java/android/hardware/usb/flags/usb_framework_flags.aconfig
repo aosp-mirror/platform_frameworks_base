@@ -24,3 +24,10 @@ flag {
     description: "Feature flag to enable interface name as a parameter for device filter"
     bug: "312828160"
 }
+
+flag {
+    name: "expose_usb_speed_system_api"
+    namespace: "usb"
+    description: "Feature flag to enable exposing usb speed system api"
+    bug: "373653182"
+}

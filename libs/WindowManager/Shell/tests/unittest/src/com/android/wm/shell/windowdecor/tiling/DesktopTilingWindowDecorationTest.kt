@@ -112,6 +112,7 @@ class DesktopTilingWindowDecorationTest : ShellTestCase() {
                 returnToDragStartAnimator,
                 desktopRepository,
             )
+        whenever(context.createContextAsUser(any(), any())).thenReturn(context)
     }
 
     @Test
@@ -479,6 +480,7 @@ class DesktopTilingWindowDecorationTest : ShellTestCase() {
         assertThat(tilingDecoration.rightTaskResizingHelper).isNull()
         verify(desktopWindowDecoration, times(2)).removeDragResizeListener(any())
         verify(tiledTaskHelper, times(2)).dispose()
+        verify(context, never()).getApplicationContext()
     }
 
     private fun initTiledTaskHelperMock(taskInfo: ActivityManager.RunningTaskInfo) {

@@ -59,6 +59,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.PointerInputChange
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.approachLayout
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.layout.onSizeChanged
@@ -76,6 +79,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.compose.animation.scene.ContentKey
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.ElementMatcher
@@ -131,7 +135,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.map
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 @SuppressLint("ValidFragment")
 class QSFragmentCompose
@@ -149,11 +152,11 @@ constructor(
 
     private lateinit var viewModel: QSFragmentComposeViewModel
 
-    private val qsHeight = MutableStateFlow(0)
     private val qqsVisible = MutableStateFlow(false)
     private val qqsPositionOnRoot = Rect()
     private val composeViewPositionOnScreen = Rect()
     private val scrollState = ScrollState(0)
+    private val locationTemp = IntArray(2)
 
     // Inside object for namespacing
     private val notificationScrimClippingParams =
@@ -247,7 +250,11 @@ constructor(
                             Modifier.notificationScrimClip {
                                 notificationScrimClippingParams.params
                             }
-                        },
+                        }
+                        // Disable touches in the whole composable while the mirror is showing.
+                        // While the mirror is showing, an ancestor of the ComposeView is made
+                        // alpha 0, but touches are still being captured by the composables.
+                        .gesturesDisabled(viewModel.showingMirror),
             ) {
                 val isEditing by
                     viewModel.containerViewModel.editModeViewModel.isEditing
@@ -324,8 +331,27 @@ constructor(
     }
 
     override fun getQsMinExpansionHeight(): Int {
-        // TODO (b/353253277) implement split screen
-        return viewModel.qqsHeight
+        return if (viewModel.isInSplitShade) {
+            getQsMinExpansionHeightForSplitShade()
+        } else {
+            viewModel.qqsHeight
+        }
+    }
+
+    /**
+     * Returns the min expansion height for split shade.
+     *
+     * On split shade, QS is always expanded and goes from the top of the screen to the bottom of
+     * the QS container.
+     */
+    private fun getQsMinExpansionHeightForSplitShade(): Int {
+        view?.getLocationOnScreen(locationTemp)
+        val top = locationTemp.get(1)
+        // We want to get the original top position, so we subtract any translation currently set.
+        val originalTop = (top - (view?.translationY ?: 0f)).toInt()
+        // On split shade the QS view doesn't start at the top of the screen, so we need to add the
+        // top margin.
+        return originalTop + (view?.height ?: 0)
     }
 
     override fun getDesiredHeight(): Int {
@@ -629,14 +655,15 @@ constructor(
                         )
                     }
                 }
-            }
-            QuickSettingsTheme {
-                FooterActions(
-                    viewModel = viewModel.footerActionsViewModel,
-                    qsVisibilityLifecycleOwner = this@QSFragmentCompose,
-                    modifier =
-                        Modifier.sysuiResTag("qs_footer_actions").element(ElementKeys.FooterActions),
-                )
+                QuickSettingsTheme {
+                    FooterActions(
+                        viewModel = viewModel.footerActionsViewModel,
+                        qsVisibilityLifecycleOwner = this@QSFragmentCompose,
+                        modifier =
+                            Modifier.sysuiResTag("qs_footer_actions")
+                                .element(ElementKeys.FooterActions),
+                    )
+                }
             }
         }
     }
@@ -871,3 +898,19 @@ private class FrameLayoutTouchPassthrough(
         return super.onInterceptTouchEvent(ev)
     }
 }
+
+private fun Modifier.gesturesDisabled(disabled: Boolean) =
+    if (disabled) {
+        pointerInput(Unit) {
+            awaitPointerEventScope {
+                // we should wait for all new pointer events
+                while (true) {
+                    awaitPointerEvent(pass = PointerEventPass.Initial)
+                        .changes
+                        .forEach(PointerInputChange::consume)
+                }
+            }
+        }
+    } else {
+        this
+    }

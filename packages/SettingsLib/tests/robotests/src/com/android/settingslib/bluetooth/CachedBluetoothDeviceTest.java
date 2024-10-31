@@ -1952,9 +1952,6 @@ public class CachedBluetoothDeviceTest {
 
     @Test
     public void leAudioHidDevice_leAudioEnabled_setPreferredTransportToLE() {
-
-        when(mProfileManager.getHidProfile()).thenReturn(mHidProfile);
-        when(mProfileManager.getLeAudioProfile()).thenReturn(mLeAudioProfile);
         when(mLeAudioProfile.isEnabled(mDevice)).thenReturn(true);
 
         updateProfileStatus(mHidProfile, BluetoothProfile.STATE_CONNECTED);
@@ -1965,8 +1962,6 @@ public class CachedBluetoothDeviceTest {
 
     @Test
     public void leAudioHidDevice_leAudioDisabled_setPreferredTransportToBredr() {
-        when(mProfileManager.getHidProfile()).thenReturn(mHidProfile);
-        when(mProfileManager.getLeAudioProfile()).thenReturn(mLeAudioProfile);
         when(mLeAudioProfile.isEnabled(mDevice)).thenReturn(false);
 
         updateProfileStatus(mLeAudioProfile, BluetoothProfile.STATE_CONNECTED);

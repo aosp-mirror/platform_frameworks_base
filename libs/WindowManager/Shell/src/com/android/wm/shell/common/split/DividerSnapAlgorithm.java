@@ -118,8 +118,16 @@ public class DividerSnapAlgorithm {
         mDisplayHeight = displayHeight;
         mIsLeftRightSplit = isLeftRightSplit;
         mInsets.set(insets);
-        mSnapMode = isMinimizedMode ? SNAP_MODE_MINIMIZED :
-                res.getInteger(com.android.internal.R.integer.config_dockedStackDividerSnapMode);
+        if (Flags.enableFlexibleTwoAppSplit()) {
+            // In flexible split, we always use a fixed ratio (50%, 66%, or 90%) for splitting
+            mSnapMode = SNAP_FIXED_RATIO;
+        } else {
+            // Set SNAP_MODE_MINIMIZED, SNAP_MODE_16_9, or SNAP_FIXED_RATIO depending on config
+            mSnapMode = isMinimizedMode
+                    ? SNAP_MODE_MINIMIZED
+                    : res.getInteger(
+                            com.android.internal.R.integer.config_dockedStackDividerSnapMode);
+        }
         mFreeSnapMode = res.getBoolean(
                 com.android.internal.R.bool.config_dockedStackDividerFreeSnapMode);
         mFixedRatio = res.getFraction(
@@ -129,8 +137,7 @@ public class DividerSnapAlgorithm {
         mCalculateRatiosBasedOnAvailableSpace = res.getBoolean(
                 com.android.internal.R.bool.config_flexibleSplitRatios);
         // If this is a small screen or a foldable, use offscreen ratios
-        mAllowOffscreenRatios =
-                Flags.enableFlexibleTwoAppSplit() && SplitScreenUtils.allowOffscreenRatios(res);
+        mAllowOffscreenRatios = SplitScreenUtils.allowOffscreenRatios(res);
         mTaskHeightInMinimizedMode = isHomeResizable ? res.getDimensionPixelSize(
                 com.android.internal.R.dimen.task_height_of_minimized_mode) : 0;
         calculateTargets(isLeftRightSplit, dockSide);
@@ -299,9 +306,9 @@ public class DividerSnapAlgorithm {
     private void addNonDismissingTargets(boolean isLeftRightSplit, int topPosition,
             int bottomPosition, int dividerMax) {
         @PersistentSnapPosition int firstTarget =
-                mAllowOffscreenRatios ? SNAP_TO_2_10_90 : SNAP_TO_2_33_66;
+                areOffscreenRatiosSupported() ? SNAP_TO_2_10_90 : SNAP_TO_2_33_66;
         @PersistentSnapPosition int lastTarget =
-                mAllowOffscreenRatios ? SNAP_TO_2_90_10 : SNAP_TO_2_66_33;
+                areOffscreenRatiosSupported() ? SNAP_TO_2_90_10 : SNAP_TO_2_66_33;
         maybeAddTarget(topPosition, topPosition - getStartInset(), firstTarget);
         addMiddleTarget(isLeftRightSplit);
         maybeAddTarget(bottomPosition,
@@ -313,14 +320,21 @@ public class DividerSnapAlgorithm {
         int end = isLeftRightSplit
                 ? mDisplayWidth - mInsets.right
                 : mDisplayHeight - mInsets.bottom;
-        int size = (int) (mFixedRatio * (end - start)) - mDividerSize / 2;
 
-        if (mAllowOffscreenRatios) {
-            // TODO (b/349828130): This is a placeholder value, real measurements to come
-            size = (int) (0.3f * (end - start)) - mDividerSize / 2;
-        } else if (mCalculateRatiosBasedOnAvailableSpace) {
-            size = Math.max(size, mMinimalSizeResizableTask);
+        int size;
+        if (Flags.enableFlexibleTwoAppSplit()) {
+            float ratio = areOffscreenRatiosSupported()
+                    ? SplitLayout.OFFSCREEN_ASYMMETRIC_RATIO
+                    : SplitLayout.ONSCREEN_ONLY_ASYMMETRIC_RATIO;
+            size = (int) (ratio * (end - start)) - mDividerSize / 2;
+        } else {
+            size = (int) (mFixedRatio * (end - start)) - mDividerSize / 2;
+
+            if (mCalculateRatiosBasedOnAvailableSpace) {
+                size = Math.max(size, mMinimalSizeResizableTask);
+            }
         }
+
         int topPosition = start + size;
         int bottomPosition = end - size - mDividerSize;
         addNonDismissingTargets(isLeftRightSplit, topPosition, bottomPosition, dividerMax);
@@ -347,7 +361,7 @@ public class DividerSnapAlgorithm {
      * meets the minimal size requirement.
      */
     private void maybeAddTarget(int position, int smallerSize, @SnapPosition int snapPosition) {
-        if (smallerSize >= mMinimalSizeResizableTask || mAllowOffscreenRatios) {
+        if (smallerSize >= mMinimalSizeResizableTask || areOffscreenRatiosSupported()) {
             mTargets.add(new SnapTarget(position, snapPosition));
         }
     }

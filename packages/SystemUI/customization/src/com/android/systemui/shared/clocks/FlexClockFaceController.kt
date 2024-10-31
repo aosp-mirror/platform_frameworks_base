@@ -32,7 +32,7 @@ import com.android.systemui.plugins.clocks.ClockFaceConfig
 import com.android.systemui.plugins.clocks.ClockFaceController
 import com.android.systemui.plugins.clocks.ClockFaceEvents
 import com.android.systemui.plugins.clocks.ClockFaceLayout
-import com.android.systemui.plugins.clocks.ClockReactiveSetting
+import com.android.systemui.plugins.clocks.ClockFontAxisSetting
 import com.android.systemui.plugins.clocks.DefaultClockFaceLayout
 import com.android.systemui.plugins.clocks.ThemeConfig
 import com.android.systemui.plugins.clocks.WeatherData
@@ -136,13 +136,16 @@ class FlexClockFaceController(
 
         override fun onFontSettingChanged(fontSizePx: Float) {
             layerController.faceEvents.onFontSettingChanged(fontSizePx)
+            view.requestLayout()
         }
 
         override fun onThemeChanged(theme: ThemeConfig) {
             layerController.faceEvents.onThemeChanged(theme)
         }
 
-        override fun onReactiveAxesChanged(axes: List<ClockReactiveSetting>) {}
+        override fun onFontAxesChanged(axes: List<ClockFontAxisSetting>) {
+            layerController.events.onFontAxesChanged(axes)
+        }
 
         /**
          * targetRegion passed to all customized clock applies counter translationY of

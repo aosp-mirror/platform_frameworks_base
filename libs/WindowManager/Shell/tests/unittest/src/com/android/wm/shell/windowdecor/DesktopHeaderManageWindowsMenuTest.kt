@@ -64,13 +64,14 @@ class DesktopHeaderManageWindowsMenuTest : ShellTestCase() {
             context = context,
             shellInit = ShellInit(TestShellExecutor()),
             persistentRepository = mock(),
+            repositoryInitializer = mock(),
             mainCoroutineScope = mock()
         )
     }
 
     @After
     fun tearDown() {
-        menu.close()
+        menu.animateClose()
     }
 
     @Test

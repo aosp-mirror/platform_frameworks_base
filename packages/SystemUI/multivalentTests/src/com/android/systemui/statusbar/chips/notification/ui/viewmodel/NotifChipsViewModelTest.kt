@@ -17,12 +17,14 @@
 package com.android.systemui.statusbar.chips.notification.ui.viewmodel
 
 import android.platform.test.annotations.EnableFlags
+import android.view.View
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.statusbar.StatusBarIconView
+import com.android.systemui.statusbar.chips.notification.domain.interactor.statusBarNotificationChipsInteractor
 import com.android.systemui.statusbar.chips.notification.shared.StatusBarNotifChips
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 import com.android.systemui.statusbar.notification.data.model.activeNotificationModel
@@ -100,6 +102,30 @@ class NotifChipsViewModelTest : SysuiTestCase() {
             assertThat(latest).hasSize(2)
             assertIsNotifChip(latest!![0], firstIcon)
             assertIsNotifChip(latest!![1], secondIcon)
+        }
+
+    @Test
+    fun chips_clickingChipNotifiesInteractor() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.chips)
+            val latestChipTap by
+                collectLastValue(
+                    kosmos.statusBarNotificationChipsInteractor.promotedNotificationChipTapEvent
+                )
+
+            setNotifs(
+                listOf(
+                    activeNotificationModel(
+                        key = "clickTest",
+                        statusBarChipIcon = mock<StatusBarIconView>(),
+                    )
+                )
+            )
+            val chip = latest!![0]
+
+            chip.onClickListener!!.onClick(mock<View>())
+
+            assertThat(latestChipTap).isEqualTo("clickTest")
         }
 
     private fun setNotifs(notifs: List<ActiveNotificationModel>) {

@@ -123,6 +123,9 @@ public interface ParsingPackage {
 
     ParsingPackage addQueriesProvider(String authority);
 
+    /** Adds a feature flag (`android:featureFlag` attribute) encountered in the manifest. */
+    ParsingPackage addFeatureFlag(@NonNull String flagPackageAndName, @Nullable Boolean flagValue);
+
     /** Sets a process name -> {@link ParsedProcess} map coming from the <processes> tag. */
     ParsingPackage setProcesses(@NonNull Map<String, ParsedProcess> processes);
 

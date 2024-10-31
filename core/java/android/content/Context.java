@@ -4325,6 +4325,7 @@ public abstract class Context {
            //@hide: ECM_ENHANCED_CONFIRMATION_SERVICE,
             CONTACT_KEYS_SERVICE,
             RANGING_SERVICE,
+            MEDIA_QUALITY_SERVICE,
             ADVANCED_PROTECTION_SERVICE,
 
     })
@@ -6765,6 +6766,17 @@ public abstract class Context {
      * @hide
      */
     public static final String SUPERVISION_SERVICE = "supervision";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a
+     * {@link android.media.quality.MediaQuality} for standardize picture and audio
+     * API parameters.
+     *
+     * @see #getSystemService(String)
+     * @see android.media.quality.MediaQuality
+     */
+    @FlaggedApi(android.media.tv.flags.Flags.FLAG_MEDIA_QUALITY_FW)
+    public static final String MEDIA_QUALITY_SERVICE = "media_quality";
 
     /**
      * Determine whether the given permission is allowed for a particular

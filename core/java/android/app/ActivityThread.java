@@ -1747,7 +1747,7 @@ public final class ActivityThread extends ClientTransactionHandler
             printRow(pw, TWO_COUNT_COLUMNS, "Death Recipients:", binderDeathObjectCount,
                     "WebViews:", webviewInstanceCount);
 
-            if (com.android.libcore.Flags.nativeMetrics()) {
+            if (com.android.libcore.readonly.Flags.nativeMetrics()) {
                 dumpMemInfoNativeAllocations(pw);
             }
 
@@ -7681,7 +7681,9 @@ public final class ActivityThread extends ClientTransactionHandler
         });
 
         // Register callback to report native memory metrics post GC cleanup
-        if (Flags.reportPostgcMemoryMetricsReadonly() &&
+        // Note: we do not report memory metrics of isolated processes unless
+        // their native allocations become more significant
+        if (!Process.isIsolated() && Flags.reportPostgcMemoryMetrics() &&
             com.android.libcore.readonly.Flags.postCleanupApis()) {
             VMRuntime.addPostCleanupCallback(new Runnable() {
                 @Override public void run() {

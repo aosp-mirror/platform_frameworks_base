@@ -81,7 +81,7 @@ class DesktopImmersiveControllerTest : ShellTestCase() {
     @Before
     fun setUp() {
         desktopRepository = DesktopRepository(
-            context, ShellInit(TestShellExecutor()), mock(), mock()
+            context, ShellInit(TestShellExecutor()), mock(), mock(), mock()
         )
         whenever(mockDisplayController.getDisplayLayout(DEFAULT_DISPLAY))
             .thenReturn(mockDisplayLayout)
@@ -347,7 +347,7 @@ class DesktopImmersiveControllerTest : ShellTestCase() {
             wct = wct,
             displayId = DEFAULT_DISPLAY,
             excludeTaskId = task.taskId
-        )?.invoke(transition)
+        ).asExit()?.runOnTransitionStart?.invoke(transition)
 
         assertThat(controller.pendingExternalExitTransitions.any { exit ->
             exit.transition == transition && exit.displayId == DEFAULT_DISPLAY
@@ -402,7 +402,8 @@ class DesktopImmersiveControllerTest : ShellTestCase() {
             immersive = true
         )
 
-        controller.exitImmersiveIfApplicable(wct, task)?.invoke(transition)
+        controller.exitImmersiveIfApplicable(wct, task)
+            .asExit()?.runOnTransitionStart?.invoke(transition)
 
         assertThat(controller.pendingExternalExitTransitions.any { exit ->
             exit.transition == transition && exit.displayId == DEFAULT_DISPLAY
@@ -412,23 +413,36 @@ class DesktopImmersiveControllerTest : ShellTestCase() {
 
     @Test
     @EnableFlags(Flags.FLAG_ENABLE_FULLY_IMMERSIVE_IN_DESKTOP)
-    fun exitImmersiveIfApplicable_byTask_notInImmersive_doesNotAddPendingExitOnRun() {
+    fun exitImmersiveIfApplicable_byTask_notInImmersive_doesNotExit() {
         val task = createFreeformTask()
         whenever(mockShellTaskOrganizer.getRunningTaskInfo(task.taskId)).thenReturn(task)
         val wct = WindowContainerTransaction()
-        val transition = Binder()
         desktopRepository.setTaskInFullImmersiveState(
-            displayId = DEFAULT_DISPLAY,
+            displayId = task.displayId,
             taskId = task.taskId,
             immersive = false
         )
 
-        controller.exitImmersiveIfApplicable(wct, task)?.invoke(transition)
+        val result = controller.exitImmersiveIfApplicable(wct, task)
 
-        assertThat(controller.pendingExternalExitTransitions.any { exit ->
-            exit.transition == transition && exit.displayId == DEFAULT_DISPLAY
-                    && exit.taskId == task.taskId
-        }).isFalse()
+        assertThat(result).isEqualTo(DesktopImmersiveController.ExitResult.NoExit)
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_FULLY_IMMERSIVE_IN_DESKTOP)
+    fun exitImmersiveIfApplicable_byDisplay_notInImmersive_doesNotExit() {
+        val task = createFreeformTask()
+        whenever(mockShellTaskOrganizer.getRunningTaskInfo(task.taskId)).thenReturn(task)
+        val wct = WindowContainerTransaction()
+        desktopRepository.setTaskInFullImmersiveState(
+            displayId = task.displayId,
+            taskId = task.taskId,
+            immersive = false
+        )
+
+        val result = controller.exitImmersiveIfApplicable(wct, task.displayId)
+
+        assertThat(result).isEqualTo(DesktopImmersiveController.ExitResult.NoExit)
     }
 
     @Test
@@ -631,7 +645,8 @@ class DesktopImmersiveControllerTest : ShellTestCase() {
             taskId = task.taskId,
             immersive = true
         )
-        controller.exitImmersiveIfApplicable(wct, task)?.invoke(Binder())
+        controller.exitImmersiveIfApplicable(wct, task)
+            .asExit()?.runOnTransitionStart?.invoke(Binder())
 
         controller.moveTaskToNonImmersive(task)
 

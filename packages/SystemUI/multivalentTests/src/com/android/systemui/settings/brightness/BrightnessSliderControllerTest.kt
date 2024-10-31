@@ -16,9 +16,9 @@
 
 package com.android.systemui.settings.brightness
 
-import android.testing.AndroidTestingRunner
 import android.view.MotionEvent
 import android.widget.SeekBar
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.settingslib.RestrictedLockUtils
@@ -52,7 +52,7 @@ import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class BrightnessSliderControllerTest : SysuiTestCase() {
 
     @Mock private lateinit var brightnessSliderView: BrightnessSliderView

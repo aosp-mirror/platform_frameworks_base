@@ -29,7 +29,7 @@ import com.android.systemui.controls.dagger.StartControlsStartableModule
 import com.android.systemui.dagger.qualifiers.PerUser
 import com.android.systemui.dreams.AssistantAttentionMonitor
 import com.android.systemui.dreams.DreamMonitor
-import com.android.systemui.dreams.homecontrols.HomeControlsDreamStartable
+import com.android.systemui.dreams.homecontrols.system.HomeControlsDreamStartable
 import com.android.systemui.globalactions.GlobalActionsComponent
 import com.android.systemui.haptics.msdl.MSDLCoreStartable
 import com.android.systemui.keyboard.KeyboardUI

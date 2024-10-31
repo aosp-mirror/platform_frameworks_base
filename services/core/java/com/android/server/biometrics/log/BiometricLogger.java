@@ -32,6 +32,8 @@ import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.biometrics.AuthenticationStatsCollector;
 import com.android.server.biometrics.Utils;
 
+import java.util.Arrays;
+
 /**
  * Logger for all reported Biometric framework events.
  */
@@ -254,7 +256,7 @@ public class BiometricLogger {
 
     /** Log enrollment outcome. */
     public void logOnEnrolled(int targetUserId, long latency, boolean enrollSuccessful,
-            int source) {
+            int source, int templateId) {
         if (!mShouldLogMetrics) {
             return;
         }
@@ -265,7 +267,8 @@ public class BiometricLogger {
                     + ", Client: " + mStatsClient
                     + ", Latency: " + latency
                     + ", Lux: " + mALSProbe.getMostRecentLux()
-                    + ", Success: " + enrollSuccessful);
+                    + ", Success: " + enrollSuccessful
+                    + ", TemplateId: " + templateId);
         } else {
             Slog.v(TAG, "Enroll latency: " + latency);
         }
@@ -275,7 +278,51 @@ public class BiometricLogger {
         }
 
         mSink.enroll(mStatsModality, mStatsAction, mStatsClient,
-                targetUserId, latency, enrollSuccessful, mALSProbe.getMostRecentLux(), source);
+                targetUserId, latency, enrollSuccessful, mALSProbe.getMostRecentLux(), source,
+                templateId);
+    }
+
+    /** Log un-enrollment. */
+    public void logOnUnEnrolled(int targetUserId, int reason, int templateId) {
+        if (!mShouldLogMetrics) {
+            return;
+        }
+
+        if (DEBUG) {
+            Slog.v(TAG, "UnEnrolled! Modality: " + mStatsModality
+                    + ", User: " + targetUserId
+                    + ", reason: " + reason
+                    + ", templateId: " + templateId);
+        }
+
+        if (shouldSkipLogging()) {
+            return;
+        }
+
+        mSink.unenrolled(mStatsModality, targetUserId, reason, templateId);
+    }
+
+    /** Log enumeration. */
+    public void logOnEnumerated(int targetUserId, int result, int[] templateIdsHal,
+            int[] templateIdsFramework) {
+        if (!mShouldLogMetrics) {
+            return;
+        }
+
+        if (DEBUG) {
+            Slog.v(TAG, "Enumerated! Modality: " + mStatsModality
+                    + ", User: " + targetUserId
+                    + ", result: " + result
+                    + ", templateIdsHal: " + Arrays.toString(templateIdsHal)
+                    + ", templateIdsFramework: " + Arrays.toString(templateIdsFramework));
+        }
+
+        if (shouldSkipLogging()) {
+            return;
+        }
+
+        mSink.enumerated(mStatsModality, targetUserId, result, templateIdsHal,
+                templateIdsFramework);
     }
 
     /** Report unexpected enrollment reported by the HAL. */

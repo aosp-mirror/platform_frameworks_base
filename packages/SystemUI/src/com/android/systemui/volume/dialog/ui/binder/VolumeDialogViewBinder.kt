@@ -17,19 +17,30 @@
 package com.android.systemui.volume.dialog.ui.binder
 
 import android.app.Dialog
+import android.graphics.Color
+import android.graphics.PixelFormat
+import android.graphics.drawable.ColorDrawable
 import android.view.Gravity
 import android.view.View
+import android.view.ViewGroup
+import android.view.Window
+import android.view.WindowManager
 import com.android.internal.view.RotationPolicy
 import com.android.systemui.lifecycle.WindowLifecycleState
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.lifecycle.viewModel
+import com.android.systemui.res.R
 import com.android.systemui.volume.SystemUIInterpolators
+import com.android.systemui.volume.dialog.dagger.scope.VolumeDialog
 import com.android.systemui.volume.dialog.dagger.scope.VolumeDialogScope
+import com.android.systemui.volume.dialog.ringer.ui.binder.VolumeDialogRingerViewBinder
+import com.android.systemui.volume.dialog.settings.ui.binder.VolumeDialogSettingsButtonViewBinder
 import com.android.systemui.volume.dialog.shared.model.VolumeDialogVisibilityModel
+import com.android.systemui.volume.dialog.sliders.ui.VolumeDialogSlidersViewBinder
+import com.android.systemui.volume.dialog.ui.VolumeDialogResources
 import com.android.systemui.volume.dialog.ui.utils.JankListenerFactory
 import com.android.systemui.volume.dialog.ui.utils.suspendAnimate
 import com.android.systemui.volume.dialog.ui.viewmodel.VolumeDialogGravityViewModel
-import com.android.systemui.volume.dialog.ui.viewmodel.VolumeDialogResourcesViewModel
 import com.android.systemui.volume.dialog.ui.viewmodel.VolumeDialogViewModel
 import com.android.systemui.volume.dialog.utils.VolumeTracer
 import javax.inject.Inject
@@ -40,6 +51,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.onEach
 
 /** Binds the root view of the Volume Dialog. */
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -47,14 +59,20 @@ import kotlinx.coroutines.flow.mapLatest
 class VolumeDialogViewBinder
 @Inject
 constructor(
-    private val volumeResources: VolumeDialogResourcesViewModel,
+    private val volumeResources: VolumeDialogResources,
     private val gravityViewModel: VolumeDialogGravityViewModel,
     private val viewModelFactory: VolumeDialogViewModel.Factory,
     private val jankListenerFactory: JankListenerFactory,
     private val tracer: VolumeTracer,
+    @VolumeDialog private val coroutineScope: CoroutineScope,
+    private val volumeDialogRingerViewBinder: VolumeDialogRingerViewBinder,
+    private val slidersViewBinder: VolumeDialogSlidersViewBinder,
+    private val settingsButtonViewBinder: VolumeDialogSettingsButtonViewBinder,
 ) {
 
-    fun bind(dialog: Dialog, view: View) {
+    fun bind(dialog: Dialog) {
+        setupDialog(dialog)
+        val view: View = dialog.requireViewById(R.id.volume_dialog_container)
         view.alpha = 0f
         view.repeatWhenAttached {
             view.viewModel(
@@ -62,11 +80,46 @@ constructor(
                 minWindowLifecycleState = WindowLifecycleState.ATTACHED,
                 factory = { viewModelFactory.create() },
             ) { viewModel ->
+                viewModel.dialogTitle.onEach { dialog.window?.setTitle(it) }.launchIn(this)
+
                 animateVisibility(view, dialog, viewModel.dialogVisibilityModel)
 
                 awaitCancellation()
             }
         }
+        volumeDialogRingerViewBinder.bind(view)
+        slidersViewBinder.bind(view)
+        settingsButtonViewBinder.bind(view)
+    }
+
+    /** Configures [Window] for the [Dialog]. */
+    private fun setupDialog(dialog: Dialog) {
+        with(dialog.window!!) {
+            clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
+            addFlags(
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or
+                    WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH or
+                    WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED
+            )
+            addPrivateFlags(WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY)
+
+            requestFeature(Window.FEATURE_NO_TITLE)
+            setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+            setType(WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY)
+            setWindowAnimations(-1)
+            setFormat(PixelFormat.TRANSLUCENT)
+
+            attributes =
+                attributes.apply {
+                    title = "VolumeDialog" // Not the same as Window#setTitle
+                }
+            setLayout(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+
+            gravityViewModel.dialogGravity.onEach { setGravity(it) }.launchIn(coroutineScope)
+        }
+        dialog.setContentView(R.layout.volume_dialog)
+        dialog.setCanceledOnTouchOutside(true)
     }
 
     private fun CoroutineScope.animateVisibility(

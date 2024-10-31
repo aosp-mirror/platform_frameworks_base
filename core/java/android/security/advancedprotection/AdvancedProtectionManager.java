@@ -42,7 +42,7 @@ import java.util.concurrent.Executor;
 @FlaggedApi(Flags.FLAG_AAPM_API)
 @SystemService(Context.ADVANCED_PROTECTION_SERVICE)
 public class AdvancedProtectionManager {
-    private static final String TAG = "AdvancedProtectionM";
+    private static final String TAG = "AdvancedProtectionMgr";
 
     private final ConcurrentHashMap<Callback, IAdvancedProtectionCallback>
             mCallbackMap = new ConcurrentHashMap<>();
@@ -73,7 +73,7 @@ public class AdvancedProtectionManager {
      * Registers a {@link Callback} to be notified of changes to the Advanced Protection state.
      *
      * <p>The provided callback will be called on the specified executor with the updated
-     * {@link AdvancedProtectionState}. Methods are called when the state changes, as well as once
+     * state. Methods are called when the state changes, as well as once
      * on initial registration.
      *
      * @param executor The executor of where the callback will execute.
