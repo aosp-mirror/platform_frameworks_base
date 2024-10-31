@@ -28,14 +28,13 @@ import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.power.domain.interactor.PowerInteractorFactory
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.shade.data.repository.FakeShadeRepository
-import com.android.systemui.statusbar.notification.stack.domain.interactor.SharedNotificationContainerInteractor
-import com.android.systemui.statusbar.notification.stack.domain.interactor.SharedNotificationContainerInteractor.ConfigurationBasedDimensions
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
+import org.mockito.kotlin.any
 
 /**
  * Simply put, I got tired of adding a constructor argument and then having to tweak dozens of
@@ -55,7 +54,6 @@ object KeyguardInteractorFactory {
         fromGoneTransitionInteractor: FromGoneTransitionInteractor = mock(),
         fromLockscreenTransitionInteractor: FromLockscreenTransitionInteractor = mock(),
         fromOccludedTransitionInteractor: FromOccludedTransitionInteractor = mock(),
-        sharedNotificationContainerInteractor: SharedNotificationContainerInteractor? = null,
         powerInteractor: PowerInteractor = PowerInteractorFactory.create().powerInteractor,
         testScope: CoroutineScope = TestScope(),
     ): WithDependencies {
@@ -66,24 +64,8 @@ object KeyguardInteractorFactory {
             mock<KeyguardTransitionInteractor>().also {
                 whenever(it.currentKeyguardState).thenReturn(currentKeyguardStateFlow)
                 whenever(it.transitionState).thenReturn(transitionStateFlow)
+                whenever(it.isFinishedIn(any(), any())).thenReturn(MutableStateFlow(false))
             }
-        val configurationDimensionFlow = MutableSharedFlow<ConfigurationBasedDimensions>()
-        configurationDimensionFlow.tryEmit(
-            ConfigurationBasedDimensions(
-                useSplitShade = false,
-                useLargeScreenHeader = false,
-                marginHorizontal = 0,
-                marginBottom = 0,
-                marginTop = 0,
-                marginTopLargeScreen = 0,
-                keyguardSplitShadeTopMargin = 0,
-            )
-        )
-        val sncInteractor =
-            sharedNotificationContainerInteractor
-                ?: mock<SharedNotificationContainerInteractor>().also {
-                    whenever(it.configurationBasedDimensions).thenReturn(configurationDimensionFlow)
-                }
         return WithDependencies(
             repository = repository,
             featureFlags = featureFlags,
@@ -102,7 +84,6 @@ object KeyguardInteractorFactory {
                 fromGoneTransitionInteractor = { fromGoneTransitionInteractor },
                 fromLockscreenTransitionInteractor = { fromLockscreenTransitionInteractor },
                 fromOccludedTransitionInteractor = { fromOccludedTransitionInteractor },
-                sharedNotificationContainerInteractor = { sncInteractor },
                 applicationScope = testScope,
             ),
         )

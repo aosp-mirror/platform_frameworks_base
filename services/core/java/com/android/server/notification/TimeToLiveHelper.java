@@ -188,7 +188,11 @@ public class TimeToLiveHelper {
                         timeoutKey = earliest.second;
                     }
                 }
-                mNm.timeoutNotification(timeoutKey);
+                if (timeoutKey != null) {
+                    mNm.timeoutNotification(timeoutKey);
+                } else {
+                    Slog.wtf(TAG, "Alarm triggered but should have been cleaned up already");
+                }
             }
         }
     };

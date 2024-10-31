@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs.panels.ui.viewmodel
 
+import com.android.systemui.haptics.msdl.tileHapticsViewModelFactoryProvider
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.qs.panels.domain.interactor.quickQuickSettingsRowInteractor
@@ -25,9 +26,11 @@ val Kosmos.quickQuickSettingsViewModel by
     Kosmos.Fixture {
         QuickQuickSettingsViewModel(
             currentTilesInteractor,
-            fixedColumnsSizeViewModel,
+            qsColumnsViewModel,
             quickQuickSettingsRowInteractor,
+            tileSquishinessViewModel,
             iconTilesViewModel,
             applicationCoroutineScope,
+            tileHapticsViewModelFactoryProvider,
         )
     }

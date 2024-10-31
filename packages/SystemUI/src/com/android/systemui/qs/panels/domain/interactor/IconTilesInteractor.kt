@@ -27,7 +27,6 @@ import com.android.systemui.qs.pipeline.shared.TileSpec
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 
@@ -36,42 +35,36 @@ import kotlinx.coroutines.flow.stateIn
 class IconTilesInteractor
 @Inject
 constructor(
-    repo: DefaultLargeTilesRepository,
+    private val repo: DefaultLargeTilesRepository,
     private val currentTilesInteractor: CurrentTilesInteractor,
     private val preferencesInteractor: QSPreferencesInteractor,
     @PanelsLog private val logBuffer: LogBuffer,
-    @Application private val applicationScope: CoroutineScope
+    @Application private val applicationScope: CoroutineScope,
 ) {
-
     val largeTilesSpecs =
-        combine(preferencesInteractor.largeTilesSpecs, currentTilesInteractor.currentTiles) {
-                largeTiles,
-                currentTiles ->
-                if (currentTiles.isEmpty()) {
-                    largeTiles
-                } else {
-                    // Only current tiles can be resized, so observe the current tiles and find the
-                    // intersection between them and the large tiles.
-                    val newLargeTiles = largeTiles intersect currentTiles.map { it.spec }.toSet()
-                    if (newLargeTiles != largeTiles) {
-                        preferencesInteractor.setLargeTilesSpecs(newLargeTiles)
-                    }
-                    newLargeTiles
-                }
-            }
+        preferencesInteractor.largeTilesSpecs
             .onEach { logChange(it) }
             .stateIn(applicationScope, SharingStarted.Eagerly, repo.defaultLargeTiles)
 
     fun isIconTile(spec: TileSpec): Boolean = !largeTilesSpecs.value.contains(spec)
 
-    fun resize(spec: TileSpec) {
+    fun setLargeTiles(specs: Set<TileSpec>) {
+        preferencesInteractor.setLargeTilesSpecs(specs)
+    }
+
+    fun resetToDefault() {
+        preferencesInteractor.setLargeTilesSpecs(repo.defaultLargeTiles)
+    }
+
+    fun resize(spec: TileSpec, toIcon: Boolean) {
         if (!isCurrent(spec)) {
             return
         }
 
-        if (largeTilesSpecs.value.contains(spec)) {
+        val isIcon = !largeTilesSpecs.value.contains(spec)
+        if (toIcon && !isIcon) {
             preferencesInteractor.setLargeTilesSpecs(largeTilesSpecs.value - spec)
-        } else {
+        } else if (!toIcon && isIcon) {
             preferencesInteractor.setLargeTilesSpecs(largeTilesSpecs.value + spec)
         }
     }
@@ -85,7 +78,7 @@ constructor(
             LOG_BUFFER_LARGE_TILES_SPECS_CHANGE_TAG,
             LogLevel.DEBUG,
             { str1 = specs.toString() },
-            { "Large tiles change: $str1" }
+            { "Large tiles change: $str1" },
         )
     }
 

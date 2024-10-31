@@ -58,7 +58,8 @@ public final class ScreenOffBrightnessStrategyTest {
         DisplayBrightnessState updatedDisplayBrightnessState =
                 mScreenOffBrightnessModeStrategy.updateBrightness(
                         new StrategyExecutionRequest(displayPowerRequest, 0.2f,
-                                /* userSetBrightnessChanged= */ false));
+                                /* userSetBrightnessChanged= */ false,
+                                /* isStylusBeingUsed */ false));
         assertEquals(updatedDisplayBrightnessState, expectedDisplayBrightnessState);
     }
 }

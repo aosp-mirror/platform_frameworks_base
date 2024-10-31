@@ -18,8 +18,6 @@ package com.android.systemui.accessibility;
 
 import static android.view.WindowManager.ScreenshotSource.SCREENSHOT_ACCESSIBILITY_ACTIONS;
 
-import static com.android.internal.accessibility.common.ShortcutConstants.CHOOSER_PACKAGE_NAME;
-
 import android.accessibilityservice.AccessibilityService;
 import android.app.PendingIntent;
 import android.app.RemoteAction;
@@ -45,7 +43,6 @@ import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.Flags;
 
 import com.android.internal.R;
-import com.android.internal.accessibility.dialog.AccessibilityButtonChooserActivity;
 import com.android.internal.accessibility.util.AccessibilityUtils;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ScreenshotHelper;
@@ -561,16 +558,13 @@ public class SystemActions implements CoreStartable, ConfigurationController.Con
     }
 
     private void handleAccessibilityButton() {
-        AccessibilityManager.getInstance(mContext).notifyAccessibilityButtonClicked(
+        mA11yManager.notifyAccessibilityButtonClicked(
                 mDisplayTracker.getDefaultDisplayId());
     }
 
     private void handleAccessibilityButtonChooser() {
-        final Intent intent = new Intent(AccessibilityManager.ACTION_CHOOSE_ACCESSIBILITY_BUTTON);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        final String chooserClassName = AccessibilityButtonChooserActivity.class.getName();
-        intent.setClassName(CHOOSER_PACKAGE_NAME, chooserClassName);
-        mContext.startActivityAsUser(intent, mUserTracker.getUserHandle());
+        mA11yManager.notifyAccessibilityButtonLongClicked(
+                mDisplayTracker.getDefaultDisplayId());
     }
 
     private void handleAccessibilityShortcut() {

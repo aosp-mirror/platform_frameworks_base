@@ -18,6 +18,7 @@ package com.android.wm.shell.windowdecor
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
+import android.annotation.DrawableRes
 import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.Color
@@ -32,7 +33,7 @@ import androidx.core.animation.doOnEnd
 import androidx.core.animation.doOnStart
 import androidx.core.content.ContextCompat
 import com.android.wm.shell.R
-import com.android.wm.shell.shared.desktopmode.DesktopModeFlags
+import android.window.DesktopModeFlags
 
 private const val OPEN_MAXIMIZE_MENU_DELAY_ON_HOVER_MS = 350
 private const val MAX_DRAWABLE_ALPHA = 255
@@ -108,7 +109,7 @@ class MaximizeButtonView(
         baseForegroundColor: Int? = null,
         rippleDrawable: RippleDrawable? = null
     ) {
-        if (DesktopModeFlags.THEMED_APP_HEADERS.isEnabled(context)) {
+        if (DesktopModeFlags.ENABLE_THEMED_APP_HEADERS.isTrue()) {
             requireNotNull(iconForegroundColor) { "Icon foreground color must be non-null" }
             requireNotNull(baseForegroundColor) { "Base foreground color must be non-null" }
             requireNotNull(rippleDrawable) { "Ripple drawable must be non-null" }
@@ -130,6 +131,11 @@ class MaximizeButtonView(
                     R.color.desktop_mode_caption_button_color_selector_light))
             }
         }
+    }
+
+    /** Set the drawable resource to use for the maximize button. */
+    fun setIcon(@DrawableRes icon: Int) {
+        maximizeWindow.setImageResource(icon)
     }
 
     companion object {

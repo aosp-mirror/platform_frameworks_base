@@ -21,6 +21,7 @@ import android.app.DreamManager
 import com.android.systemui.CoreStartable
 import com.android.systemui.Flags.glanceableHubAllowKeyguardWhenDreaming
 import com.android.systemui.Flags.restartDreamOnUnocclude
+import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
 import com.android.systemui.communal.domain.interactor.CommunalSettingsInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
@@ -55,6 +56,7 @@ constructor(
     private val keyguardInteractor: KeyguardInteractor,
     private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
     private val dreamManager: DreamManager,
+    private val communalSceneInteractor: CommunalSceneInteractor,
     @Background private val bgScope: CoroutineScope,
 ) : CoreStartable {
     /** Flow that emits when the dream should be started underneath the glanceable hub. */
@@ -63,9 +65,13 @@ constructor(
                 keyguardTransitionInteractor
                     .transitionValue(Scenes.Communal, KeyguardState.GLANCEABLE_HUB)
                     .map { it == 1f },
-                not(keyguardInteractor.isDreaming),
+                // Use isDreamingAny because isDreaming is false in doze and doesn't change again
+                // when the screen turns on, which causes the dream to not start underneath the hub.
+                not(keyguardInteractor.isDreamingAny),
                 // TODO(b/362830856): Remove this workaround.
                 keyguardInteractor.isKeyguardShowing,
+                not(communalSceneInteractor.isLaunchingWidget),
+                not(keyguardInteractor.isKeyguardOccluded),
             )
             .filter { it }
 

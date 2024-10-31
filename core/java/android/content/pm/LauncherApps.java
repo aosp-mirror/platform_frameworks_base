@@ -778,8 +778,18 @@ public class LauncherApps {
     public List<LauncherActivityInfo> getActivityList(String packageName, UserHandle user) {
         logErrorForInvalidProfileAccess(user);
         try {
-            return convertToActivityList(mService.getLauncherActivities(mContext.getPackageName(),
-                    packageName, user), user);
+            final List<LauncherActivityInfo> activityList = convertToActivityList(
+                    mService.getLauncherActivities(
+                            mContext.getPackageName(),
+                            packageName,
+                            user
+                    ), user);
+            if (activityList.isEmpty()) {
+                // b/350144057
+                Log.d(TAG, "getActivityList: No launchable activities found for"
+                        + "packageName=" + packageName + ", user=" + user);
+            }
+            return activityList;
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }

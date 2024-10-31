@@ -15,7 +15,9 @@
  */
 package com.android.internal.widget.remotecompose.core.operations;
 
-import com.android.internal.widget.remotecompose.core.CompanionOperation;
+import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.FLOAT;
+import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT;
+
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.PaintContext;
@@ -23,11 +25,13 @@ import com.android.internal.widget.remotecompose.core.PaintOperation;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.VariableSupport;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
+import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
 
 import java.util.List;
 
 public class DrawBitmap extends PaintOperation implements VariableSupport {
-    public static final Companion COMPANION = new Companion();
+    private static final int OP_CODE = Operations.DRAW_BITMAP;
+    private static final String CLASS_NAME = "DrawBitmap";
     float mLeft;
     float mTop;
     float mRight;
@@ -40,12 +44,7 @@ public class DrawBitmap extends PaintOperation implements VariableSupport {
     int mDescriptionId = 0;
 
     public DrawBitmap(
-            int imageId,
-            float left,
-            float top,
-            float right,
-            float bottom,
-            int descriptionId) {
+            int imageId, float left, float top, float right, float bottom, int descriptionId) {
         mLeft = left;
         mTop = top;
         mRight = right;
@@ -56,14 +55,10 @@ public class DrawBitmap extends PaintOperation implements VariableSupport {
 
     @Override
     public void updateVariables(RemoteContext context) {
-        mOutputLeft = (Float.isNaN(mLeft))
-                ? context.getFloat(Utils.idFromNan(mLeft)) : mLeft;
-        mOutputTop = (Float.isNaN(mTop))
-                ? context.getFloat(Utils.idFromNan(mTop)) : mTop;
-        mOutputRight = (Float.isNaN(mRight))
-                ? context.getFloat(Utils.idFromNan(mRight)) : mRight;
-        mOutputBottom = (Float.isNaN(mBottom))
-                ? context.getFloat(Utils.idFromNan(mBottom)) : mBottom;
+        mOutputLeft = Float.isNaN(mLeft) ? context.getFloat(Utils.idFromNan(mLeft)) : mLeft;
+        mOutputTop = Float.isNaN(mTop) ? context.getFloat(Utils.idFromNan(mTop)) : mTop;
+        mOutputRight = Float.isNaN(mRight) ? context.getFloat(Utils.idFromNan(mRight)) : mRight;
+        mOutputBottom = Float.isNaN(mBottom) ? context.getFloat(Utils.idFromNan(mBottom)) : mBottom;
     }
 
     @Override
@@ -84,64 +79,74 @@ public class DrawBitmap extends PaintOperation implements VariableSupport {
 
     @Override
     public void write(WireBuffer buffer) {
-        COMPANION.apply(buffer, mId, mLeft, mTop, mRight, mBottom, mDescriptionId);
+        apply(buffer, mId, mLeft, mTop, mRight, mBottom, mDescriptionId);
     }
 
     @Override
     public String toString() {
-        return "DrawBitmap (desc=" + mDescriptionId + ")" + mLeft + " " + mTop
-                + " " + mRight + " " + mBottom + ";";
+        return "DrawBitmap (desc="
+                + mDescriptionId
+                + ")"
+                + mLeft
+                + " "
+                + mTop
+                + " "
+                + mRight
+                + " "
+                + mBottom
+                + ";";
     }
 
-    public static class Companion implements CompanionOperation {
-        private Companion() {
-        }
+    public static void read(WireBuffer buffer, List<Operation> operations) {
+        int id = buffer.readInt();
+        float sLeft = buffer.readFloat();
+        float srcTop = buffer.readFloat();
+        float srcRight = buffer.readFloat();
+        float srcBottom = buffer.readFloat();
+        int discriptionId = buffer.readInt();
 
-        @Override
-        public void read(WireBuffer buffer, List<Operation> operations) {
-            int id = buffer.readInt();
-            float sLeft = buffer.readFloat();
-            float srcTop = buffer.readFloat();
-            float srcRight = buffer.readFloat();
-            float srcBottom = buffer.readFloat();
-            int discriptionId = buffer.readInt();
+        DrawBitmap op = new DrawBitmap(id, sLeft, srcTop, srcRight, srcBottom, discriptionId);
+        operations.add(op);
+    }
 
-            DrawBitmap op = new DrawBitmap(id, sLeft, srcTop, srcRight, srcBottom, discriptionId);
-            operations.add(op);
-        }
+    public static String name() {
+        return CLASS_NAME;
+    }
 
-        @Override
-        public String name() {
-            return "DrawOval";
-        }
+    public static int id() {
+        return OP_CODE;
+    }
 
-        @Override
-        public int id() {
-            return Operations.DRAW_BITMAP;
-        }
+    public static void apply(
+            WireBuffer buffer,
+            int id,
+            float left,
+            float top,
+            float right,
+            float bottom,
+            int descriptionId) {
+        buffer.start(Operations.DRAW_BITMAP);
+        buffer.writeInt(id);
+        buffer.writeFloat(left);
+        buffer.writeFloat(top);
+        buffer.writeFloat(right);
+        buffer.writeFloat(bottom);
+        buffer.writeInt(descriptionId);
+    }
 
-        public void apply(WireBuffer buffer,
-                          int id,
-                          float left,
-                          float top,
-                          float right,
-                          float bottom,
-                          int descriptionId) {
-            buffer.start(Operations.DRAW_BITMAP);
-            buffer.writeInt(id);
-            buffer.writeFloat(left);
-            buffer.writeFloat(top);
-            buffer.writeFloat(right);
-            buffer.writeFloat(bottom);
-            buffer.writeInt(descriptionId);
-        }
+    public static void documentation(DocumentationBuilder doc) {
+        doc.operation("Draw Operations", OP_CODE, CLASS_NAME)
+                .description("Draw a bitmap")
+                .field(INT, "id", "id of float")
+                .field(FLOAT, "left", "The left side of the image")
+                .field(FLOAT, "top", "The top of the image")
+                .field(FLOAT, "right", "The right side of the image")
+                .field(FLOAT, "bottom", "The bottom of the image")
+                .field(INT, "descriptionId", "id of string");
     }
 
     @Override
     public void paint(PaintContext context) {
-        context.drawBitmap(mId, mOutputLeft,
-                mOutputTop,
-                mOutputRight,
-                mOutputBottom);
+        context.drawBitmap(mId, mOutputLeft, mOutputTop, mOutputRight, mOutputBottom);
     }
 }

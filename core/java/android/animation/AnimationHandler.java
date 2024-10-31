@@ -81,6 +81,25 @@ public class AnimationHandler {
      */
     private final ArrayList<WeakReference<Object>> mAnimatorRequestors = new ArrayList<>();
 
+    /**
+     * The callbacks which will invoke {@link Animator#notifyEndListeners(boolean)} on next frame.
+     * It is only used if {@link Animator#setPostNotifyEndListenerEnabled(boolean)} sets true.
+     */
+    private ArrayList<Runnable> mPendingEndAnimationListeners;
+
+    /**
+     * The value of {@link Choreographer#getVsyncId()} at the last animation frame.
+     * It is only used if {@link Animator#setPostNotifyEndListenerEnabled(boolean)} sets true.
+     */
+    private long mLastAnimationFrameVsyncId;
+
+    /**
+     * The value of {@link Choreographer#getVsyncId()} when calling
+     * {@link Animator#notifyEndListeners(boolean)}.
+     * It is only used if {@link Animator#setPostNotifyEndListenerEnabled(boolean)} sets true.
+     */
+    private long mEndAnimationFrameVsyncId;
+
     private final Choreographer.FrameCallback mFrameCallback = new Choreographer.FrameCallback() {
         @Override
         public void doFrame(long frameTimeNanos) {
@@ -330,6 +349,39 @@ public class AnimationHandler {
             mAnimationCallbacks.set(id, null);
             mListDirty = true;
         }
+    }
+
+    /**
+     * Returns the vsyncId of last animation frame if the given {@param currentVsyncId} matches
+     * the vsyncId from the end callback of animation. Otherwise it returns the given vsyncId.
+     * It only takes effect if {@link #postEndAnimationCallback(Runnable)} is called.
+     */
+    public long getLastAnimationFrameVsyncId(long currentVsyncId) {
+        return currentVsyncId == mEndAnimationFrameVsyncId && mLastAnimationFrameVsyncId != 0
+                ? mLastAnimationFrameVsyncId : currentVsyncId;
+    }
+
+    /** Runs the given callback on next frame to notify the end of the animation. */
+    public void postEndAnimationCallback(Runnable notifyEndAnimation) {
+        if (mPendingEndAnimationListeners == null) {
+            mPendingEndAnimationListeners = new ArrayList<>();
+        }
+        mPendingEndAnimationListeners.add(notifyEndAnimation);
+        if (mPendingEndAnimationListeners.size() > 1) {
+            return;
+        }
+        final Choreographer choreographer = Choreographer.getInstance();
+        mLastAnimationFrameVsyncId = choreographer.getVsyncId();
+        getProvider().postFrameCallback(frame -> {
+            mEndAnimationFrameVsyncId = choreographer.getVsyncId();
+            // The animation listeners can only get vsyncId of last animation frame in this frame
+            // by getLastAnimationFrameVsyncId(currentVsyncId).
+            while (mPendingEndAnimationListeners.size() > 0) {
+                mPendingEndAnimationListeners.remove(0).run();
+            }
+            mEndAnimationFrameVsyncId = 0;
+            mLastAnimationFrameVsyncId = 0;
+        });
     }
 
     private void doAnimationFrame(long frameTime) {

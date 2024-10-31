@@ -17,27 +17,24 @@
 package com.android.server.input;
 
 import android.content.Context;
-import android.hardware.input.InputManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.util.ArrayMap;
 import android.util.FeatureFlagUtils;
-import android.view.InputDevice;
 
 import com.android.internal.annotations.GuardedBy;
 
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * A component of {@link InputManagerService} responsible for managing key remappings.
  *
  * @hide
  */
-final class KeyRemapper implements InputManager.InputDeviceListener {
+final class KeyRemapper {
 
-    private static final int MSG_UPDATE_EXISTING_DEVICES = 1;
+    private static final int MSG_UPDATE_EXISTING_KEY_REMAPPING = 1;
     private static final int MSG_REMAP_KEY = 2;
     private static final int MSG_CLEAR_ALL_REMAPPING = 3;
 
@@ -49,7 +46,7 @@ final class KeyRemapper implements InputManager.InputDeviceListener {
     private final Handler mHandler;
 
     KeyRemapper(Context context, NativeInputManagerService nativeService,
-            PersistentDataStore dataStore, Looper looper) {
+                PersistentDataStore dataStore, Looper looper) {
         mContext = context;
         mNative = nativeService;
         mDataStore = dataStore;
@@ -57,13 +54,7 @@ final class KeyRemapper implements InputManager.InputDeviceListener {
     }
 
     public void systemRunning() {
-        InputManager inputManager = Objects.requireNonNull(
-                mContext.getSystemService(InputManager.class));
-        inputManager.registerInputDeviceListener(this, mHandler);
-
-        Message msg = Message.obtain(mHandler, MSG_UPDATE_EXISTING_DEVICES,
-                inputManager.getInputDeviceIds());
-        mHandler.sendMessage(msg);
+        Message.obtain(mHandler, MSG_UPDATE_EXISTING_KEY_REMAPPING).sendToTarget();
     }
 
     public void remapKey(int fromKey, int toKey) {
@@ -91,19 +82,19 @@ final class KeyRemapper implements InputManager.InputDeviceListener {
         }
     }
 
-    private void addKeyRemapping(int fromKey, int toKey) {
-        InputManager inputManager = Objects.requireNonNull(
-                mContext.getSystemService(InputManager.class));
-        for (int deviceId : inputManager.getInputDeviceIds()) {
-            InputDevice inputDevice = inputManager.getInputDevice(deviceId);
-            if (inputDevice != null && !inputDevice.isVirtual() && inputDevice.isFullKeyboard()) {
-                mNative.addKeyRemapping(deviceId, fromKey, toKey);
-            }
+    private void setKeyRemapping(Map<Integer, Integer> keyRemapping) {
+        int index = 0;
+        int[] fromKeycodesArr = new int[keyRemapping.size()];
+        int[] toKeycodesArr = new int[keyRemapping.size()];
+        for (Map.Entry<Integer, Integer> entry : keyRemapping.entrySet()) {
+            fromKeycodesArr[index] = entry.getKey();
+            toKeycodesArr[index] = entry.getValue();
+            index++;
         }
+        mNative.setKeyRemapping(fromKeycodesArr, toKeycodesArr);
     }
 
     private void remapKeyInternal(int fromKey, int toKey) {
-        addKeyRemapping(fromKey, toKey);
         synchronized (mDataStore) {
             try {
                 if (fromKey == toKey) {
@@ -114,6 +105,7 @@ final class KeyRemapper implements InputManager.InputDeviceListener {
             } finally {
                 mDataStore.saveIfNeeded();
             }
+            setKeyRemapping(mDataStore.getKeyRemapping());
         }
     }
 
@@ -123,45 +115,25 @@ final class KeyRemapper implements InputManager.InputDeviceListener {
                 Map<Integer, Integer> keyRemapping = mDataStore.getKeyRemapping();
                 for (int fromKey : keyRemapping.keySet()) {
                     mDataStore.clearMappedKey(fromKey);
-
-                    // Remapping to itself will clear the remapping on native side
-                    addKeyRemapping(fromKey, fromKey);
                 }
             } finally {
                 mDataStore.saveIfNeeded();
             }
+            setKeyRemapping(mDataStore.getKeyRemapping());
         }
     }
 
-    @Override
-    public void onInputDeviceAdded(int deviceId) {
+    public void updateExistingKeyMapping() {
         if (!supportRemapping()) {
             return;
         }
-        InputManager inputManager = Objects.requireNonNull(
-                mContext.getSystemService(InputManager.class));
-        InputDevice inputDevice = inputManager.getInputDevice(deviceId);
-        if (inputDevice != null && !inputDevice.isVirtual() && inputDevice.isFullKeyboard()) {
-            Map<Integer, Integer> remapping = getKeyRemapping();
-            remapping.forEach(
-                    (fromKey, toKey) -> mNative.addKeyRemapping(deviceId, fromKey, toKey));
-        }
-    }
-
-    @Override
-    public void onInputDeviceRemoved(int deviceId) {
-    }
-
-    @Override
-    public void onInputDeviceChanged(int deviceId) {
+        setKeyRemapping(getKeyRemapping());
     }
 
     private boolean handleMessage(Message msg) {
         switch (msg.what) {
-            case MSG_UPDATE_EXISTING_DEVICES:
-                for (int deviceId : (int[]) msg.obj) {
-                    onInputDeviceAdded(deviceId);
-                }
+            case MSG_UPDATE_EXISTING_KEY_REMAPPING:
+                updateExistingKeyMapping();
                 return true;
             case MSG_REMAP_KEY:
                 remapKeyInternal(msg.arg1, msg.arg2);

@@ -35,7 +35,8 @@ import com.android.server.notification.NotificationDelegate;
 
 public interface StatusBarManagerInternal {
     void setNotificationDelegate(NotificationDelegate delegate);
-    void showScreenPinningRequest(int taskId);
+    /** Show a screen pinning request for a specific task. */
+    void showScreenPinningRequest(int taskId, int userId);
     void showAssistDisclosure();
 
     void preloadRecentApps();
@@ -136,7 +137,7 @@ public interface StatusBarManagerInternal {
      *
      * @param hidesStatusBar whether it is being hidden
      */
-    void setTopAppHidesStatusBar(boolean hidesStatusBar);
+    void setTopAppHidesStatusBar(int displayId, boolean hidesStatusBar);
 
     boolean showShutdownUi(boolean isReboot, String requestString);
 
@@ -149,17 +150,18 @@ public interface StatusBarManagerInternal {
 
     /**
      * Notify System UI that the system get into or exit immersive mode.
+     * @param displayId The changed display Id.
      * @param rootDisplayAreaId The changed display area Id.
      * @param isImmersiveMode {@code true} if the display area get into immersive mode.
      */
-    void immersiveModeChanged(int rootDisplayAreaId, boolean isImmersiveMode);
+    void immersiveModeChanged(int displayId, int rootDisplayAreaId, boolean isImmersiveMode);
 
     /**
      * Show a rotation suggestion that a user may approve to rotate the screen.
      *
      * @param rotation rotation suggestion
      */
-    void onProposedRotationChanged(int rotation, boolean isValid);
+    void onProposedRotationChanged(int displayId, int rotation, boolean isValid);
 
     /**
      * Notifies System UI that the display is ready to show system decorations.

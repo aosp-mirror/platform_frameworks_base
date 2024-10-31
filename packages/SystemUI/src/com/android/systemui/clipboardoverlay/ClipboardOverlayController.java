@@ -710,9 +710,16 @@ public class ClipboardOverlayController implements ClipboardListener.ClipboardOv
     @Override
     public void onShareButtonTapped() {
         if (clipboardSharedTransitions()) {
-            if (mClipboardModel.getType() != ClipboardModel.Type.OTHER) {
-                finishWithSharedTransition(CLIPBOARD_OVERLAY_SHARE_TAPPED,
-                        IntentCreator.getShareIntent(mClipboardModel.getClipData(), mContext));
+            switch (mClipboardModel.getType()) {
+                case TEXT:
+                case URI:
+                    finish(CLIPBOARD_OVERLAY_SHARE_TAPPED,
+                            IntentCreator.getShareIntent(mClipboardModel.getClipData(), mContext));
+                    break;
+                case IMAGE:
+                    finishWithSharedTransition(CLIPBOARD_OVERLAY_SHARE_TAPPED,
+                            IntentCreator.getShareIntent(mClipboardModel.getClipData(), mContext));
+                    break;
             }
         }
     }

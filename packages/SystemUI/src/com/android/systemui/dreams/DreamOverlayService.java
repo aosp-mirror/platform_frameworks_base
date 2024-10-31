@@ -296,6 +296,8 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
             mStateController.setLowLightActive(false);
             mStateController.setEntryAnimationsFinished(false);
 
+            mDreamOverlayCallbackController.onWakeUp();
+
             if (mDreamOverlayContainerViewController != null) {
                 mDreamOverlayContainerViewController.destroy();
                 mDreamOverlayContainerViewController = null;
@@ -499,6 +501,9 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
 
         mDreamOverlayContainerViewController =
                 dreamOverlayComponent.getDreamOverlayContainerViewController();
+
+        // Touch monitor are also used with SceneContainer. See individual touch handlers for
+        // handling of SceneContainer.
         mTouchMonitor = ambientTouchComponent.getTouchMonitor();
         mTouchMonitor.init();
 

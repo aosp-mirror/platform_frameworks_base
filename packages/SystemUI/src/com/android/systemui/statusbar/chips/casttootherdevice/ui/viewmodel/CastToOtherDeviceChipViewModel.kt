@@ -68,23 +68,24 @@ constructor(
     private val endMediaProjectionDialogHelper: EndMediaProjectionDialogHelper,
     @StatusBarChipsLog private val logger: LogBuffer,
 ) : OngoingActivityChipViewModel {
-    /**
-     * The cast chip to show, based only on MediaProjection API events.
-     *
-     * This chip will only be [OngoingActivityChipModel.Shown] when the user is casting their
-     * *screen*. If the user is only casting audio, this chip will be
-     * [OngoingActivityChipModel.Hidden].
-     */
+    /** The cast chip to show, based only on MediaProjection API events. */
     private val projectionChip: StateFlow<OngoingActivityChipModel> =
         mediaProjectionChipInteractor.projection
             .map { projectionModel ->
                 when (projectionModel) {
                     is ProjectionChipModel.NotProjecting -> OngoingActivityChipModel.Hidden()
                     is ProjectionChipModel.Projecting -> {
-                        if (projectionModel.type != ProjectionChipModel.Type.CAST_TO_OTHER_DEVICE) {
-                            OngoingActivityChipModel.Hidden()
-                        } else {
-                            createCastScreenToOtherDeviceChip(projectionModel)
+                        when (projectionModel.receiver) {
+                            ProjectionChipModel.Receiver.CastToOtherDevice -> {
+                                when (projectionModel.contentType) {
+                                    ProjectionChipModel.ContentType.Screen ->
+                                        createCastScreenToOtherDeviceChip(projectionModel)
+                                    ProjectionChipModel.ContentType.Audio ->
+                                        createIconOnlyCastChip(deviceName = null)
+                                }
+                            }
+                            ProjectionChipModel.Receiver.ShareToApp ->
+                                OngoingActivityChipModel.Hidden()
                         }
                     }
                 }
@@ -98,9 +99,9 @@ constructor(
      * This chip will be [OngoingActivityChipModel.Shown] when the user is casting their screen *or*
      * their audio.
      *
-     * The MediaProjection APIs are not invoked for casting *only audio* to another device because
-     * MediaProjection is only concerned with *screen* sharing (see b/342169876). We listen to
-     * MediaRouter APIs here to cover audio-only casting.
+     * The MediaProjection APIs are typically not invoked for casting *only audio* to another device
+     * because MediaProjection is only concerned with *screen* sharing (see b/342169876). We listen
+     * to MediaRouter APIs here to cover audio-only casting.
      *
      * Note that this means we will start showing the cast chip before the casting actually starts,
      * for **both** audio-only casting and screen casting. MediaRouter is aware of all
@@ -139,7 +140,7 @@ constructor(
                         str1 = projection.logName
                         str2 = router.logName
                     },
-                    { "projectionChip=$str1 > routerChip=$str2" }
+                    { "projectionChip=$str1 > routerChip=$str2" },
                 )
 
                 // A consequence of b/269975671 is that MediaRouter and MediaProjection APIs fire at
@@ -186,7 +187,7 @@ constructor(
     }
 
     private fun createCastScreenToOtherDeviceChip(
-        state: ProjectionChipModel.Projecting,
+        state: ProjectionChipModel.Projecting
     ): OngoingActivityChipModel.Shown {
         return OngoingActivityChipModel.Shown.Timer(
             icon =
@@ -195,7 +196,7 @@ constructor(
                         CAST_TO_OTHER_DEVICE_ICON,
                         // This string is "Casting screen"
                         ContentDescription.Resource(
-                            R.string.cast_screen_to_other_device_chip_accessibility_label,
+                            R.string.cast_screen_to_other_device_chip_accessibility_label
                         ),
                     )
                 ),
@@ -236,9 +237,7 @@ constructor(
         )
     }
 
-    private fun createCastScreenToOtherDeviceDialogDelegate(
-        state: ProjectionChipModel.Projecting,
-    ) =
+    private fun createCastScreenToOtherDeviceDialogDelegate(state: ProjectionChipModel.Projecting) =
         EndCastScreenToOtherDeviceDialogDelegate(
             endMediaProjectionDialogHelper,
             context,

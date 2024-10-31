@@ -21,8 +21,8 @@ import android.app.IApplicationThread;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.IRecentsAnimationRunner;
 
+import com.android.wm.shell.recents.IRecentsAnimationRunner;
 import com.android.wm.shell.recents.IRecentTasksListener;
 import com.android.wm.shell.shared.GroupedRecentTaskInfo;
 

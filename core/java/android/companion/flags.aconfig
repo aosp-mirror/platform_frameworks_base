@@ -55,3 +55,11 @@ flag {
     description: "Enable association failure code API"
     bug: "331459560"
 }
+
+flag {
+    name: "association_device_icon"
+    is_exported: true
+    namespace: "companion"
+    description: "Enable set device icon API"
+    bug: "341057668"
+}

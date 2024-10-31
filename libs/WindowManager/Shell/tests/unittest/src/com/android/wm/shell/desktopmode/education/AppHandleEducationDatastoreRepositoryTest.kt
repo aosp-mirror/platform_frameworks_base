@@ -26,6 +26,7 @@ import androidx.test.filters.SmallTest
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.wm.shell.desktopmode.education.data.AppHandleEducationDatastoreRepository
 import com.android.wm.shell.desktopmode.education.data.WindowingEducationProto
+import com.android.wm.shell.util.GMAIL_PACKAGE_NAME
 import com.android.wm.shell.util.createWindowingEducationProto
 import com.google.common.truth.Truth.assertThat
 import java.io.File
@@ -108,8 +109,25 @@ class AppHandleEducationDatastoreRepositoryTest {
         assertThat(result).isEqualTo(windowingEducationProto)
       }
 
+  @Test
+  fun updateEducationViewedTimestampMillis_updatesDatastoreProto() =
+      runTest(StandardTestDispatcher()) {
+        datastoreRepository.updateEducationViewedTimestampMillis(true)
+
+        val result = testDatastore.data.first().hasEducationViewedTimestampMillis()
+        assertThat(result).isEqualTo(true)
+      }
+
+  @Test
+  fun updateFeatureUsedTimestampMillis_updatesDatastoreProto() =
+      runTest(StandardTestDispatcher()) {
+        datastoreRepository.updateFeatureUsedTimestampMillis(true)
+
+        val result = testDatastore.data.first().hasFeatureUsedTimestampMillis()
+        assertThat(result).isEqualTo(true)
+      }
+
   companion object {
-    private const val GMAIL_PACKAGE_NAME = "com.google.android.gm"
     private const val APP_HANDLE_EDUCATION_DATASTORE_TEST_FILE = "app_handle_education_test.pb"
   }
 }

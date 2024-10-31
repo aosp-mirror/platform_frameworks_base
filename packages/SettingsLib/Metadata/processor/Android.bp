@@ -1,0 +1,11 @@
+package {
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
+java_plugin {
+    name: "SettingsLibMetadata-processor",
+    srcs: ["src/**/*.kt"],
+    processor_class: "com.android.settingslib.metadata.PreferenceScreenAnnotationProcessor",
+    java_resource_dirs: ["resources"],
+    visibility: ["//visibility:public"],
+}

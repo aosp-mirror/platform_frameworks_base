@@ -18,7 +18,7 @@ package com.android.server.wm;
 
 import static android.content.Context.MEDIA_PROJECTION_SERVICE;
 
-import static com.android.internal.protolog.ProtoLogGroup.WM_ERROR;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_ERROR;
 
 import android.media.projection.IMediaProjectionManager;
 import android.media.projection.IMediaProjectionWatcherCallback;

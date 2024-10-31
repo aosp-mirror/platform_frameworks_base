@@ -48,7 +48,7 @@ import org.junit.runners.Parameterized
  *     Stop tracing
  * ```
  *
- * To run this test: `atest FlickerTests:ChangeAppRotationTest`
+ * To run this test: `atest FlickerTestsRotation:ChangeAppRotationTest`
  *
  * To run only the presubmit assertions add: `--
  *

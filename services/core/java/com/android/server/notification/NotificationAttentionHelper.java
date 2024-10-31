@@ -17,6 +17,7 @@
 package com.android.server.notification;
 
 import static android.app.Flags.sortSectionByTime;
+import static android.app.Notification.CATEGORY_MESSAGE;
 import static android.app.Notification.FLAG_INSISTENT;
 import static android.app.Notification.FLAG_ONLY_ALERT_ONCE;
 import static android.app.NotificationManager.IMPORTANCE_MIN;
@@ -42,6 +43,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.content.pm.ShortcutInfo;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.database.ContentObserver;
@@ -79,6 +81,7 @@ import com.android.server.lights.LogicalLight;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import com.android.internal.annotations.GuardedBy;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -118,7 +121,40 @@ public final class NotificationAttentionHelper {
             Intent.ACTION_MANAGED_PROFILE_AVAILABLE, new Pair<>(Intent.EXTRA_QUIET_MODE, false)
     );
 
+    // Bits 1, 2, 3, 4 are already taken by: beep|buzz|blink|cooldown
+    static final int MUTE_REASON_NOT_MUTED = 0;
+    static final int MUTE_REASON_NOT_AUDIBLE = 1 << 5;
+    static final int MUTE_REASON_SILENT_UPDATE = 1 << 6;
+    static final int MUTE_REASON_POST_SILENTLY = 1 << 7;
+    static final int MUTE_REASON_LISTENER_HINT = 1 << 8;
+    static final int MUTE_REASON_DND = 1 << 9;
+    static final int MUTE_REASON_GROUP_ALERT = 1 << 10;
+    static final int MUTE_REASON_FLAG_SILENT = 1 << 11;
+    static final int MUTE_REASON_RATE_LIMIT = 1 << 12;
+    static final int MUTE_REASON_OTHER_INSISTENT_PLAYING = 1 << 13;
+    static final int MUTE_REASON_SUPPRESSED_BUBBLE = 1 << 14;
+    static final int MUTE_REASON_COOLDOWN = 1 << 15;
+
+    @IntDef(prefix = { "MUTE_REASON_" }, value = {
+        MUTE_REASON_NOT_MUTED,
+        MUTE_REASON_NOT_AUDIBLE,
+        MUTE_REASON_SILENT_UPDATE,
+        MUTE_REASON_POST_SILENTLY,
+        MUTE_REASON_LISTENER_HINT,
+        MUTE_REASON_DND,
+        MUTE_REASON_GROUP_ALERT,
+        MUTE_REASON_FLAG_SILENT,
+        MUTE_REASON_RATE_LIMIT,
+        MUTE_REASON_OTHER_INSISTENT_PLAYING,
+        MUTE_REASON_SUPPRESSED_BUBBLE,
+        MUTE_REASON_COOLDOWN,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @interface MuteReason {}
+
     private final Context mContext;
+    //This is NMS.mNotificationLock.
+    private final Object mLock;
     private final PackageManager mPackageManager;
     private final TelephonyManager mTelephonyManager;
     private final UserManager mUm;
@@ -132,6 +168,7 @@ public final class NotificationAttentionHelper {
 
     private VibratorHelper mVibratorHelper;
     // The last key in this list owns the hardware.
+    @GuardedBy("mLock")
     ArrayList<String> mLights = new ArrayList<>();
     private LogicalLight mNotificationLight;
     private LogicalLight mAttentionLight;
@@ -150,8 +187,10 @@ public final class NotificationAttentionHelper {
     private String mVibrateNotificationKey;
     private boolean mSystemReady;
     private boolean mInCallStateOffHook = false;
+    @GuardedBy("mLock")
     private boolean mScreenOn = true;
     private boolean mUserPresent = false;
+    @GuardedBy("mLock")
     private boolean mNotificationPulseEnabled;
     private final Uri mInCallNotificationUri;
     private final AudioAttributes mInCallNotificationAudioAttributes;
@@ -167,12 +206,13 @@ public final class NotificationAttentionHelper {
     private final PolitenessStrategy mStrategy;
     private int mCurrentWorkProfileId = UserHandle.USER_NULL;
 
-    public NotificationAttentionHelper(Context context, LightsManager lightsManager,
+    public NotificationAttentionHelper(Context context, Object lock, LightsManager lightsManager,
             AccessibilityManager accessibilityManager, PackageManager packageManager,
             UserManager userManager, NotificationUsageStats usageStats,
             NotificationManagerPrivate notificationManagerPrivate,
             ZenModeHelper zenModeHelper, SystemUiSystemPropertiesFlags.FlagResolver flagResolver) {
         mContext = context;
+        mLock = lock;
         mPackageManager = packageManager;
         mTelephonyManager = context.getSystemService(TelephonyManager.class);
         mAccessibilityManager = accessibilityManager;
@@ -335,9 +375,11 @@ public final class NotificationAttentionHelper {
     private void loadUserSettings() {
         boolean pulseEnabled = Settings.System.getIntForUser(mContext.getContentResolver(),
                 Settings.System.NOTIFICATION_LIGHT_PULSE, 0, UserHandle.USER_CURRENT) != 0;
-        if (mNotificationPulseEnabled != pulseEnabled) {
-            mNotificationPulseEnabled = pulseEnabled;
-            updateLightsLocked();
+        synchronized (mLock) {
+            if (mNotificationPulseEnabled != pulseEnabled) {
+                mNotificationPulseEnabled = pulseEnabled;
+                updateLightsLocked();
+            }
         }
 
         if (Flags.politeNotifications()) {
@@ -388,15 +430,12 @@ public final class NotificationAttentionHelper {
         boolean buzz = false;
         boolean beep = false;
         boolean blink = false;
+        @MuteReason int shouldMuteReason = MUTE_REASON_NOT_MUTED;
 
         final String key = record.getKey();
 
         if (DEBUG) {
             Log.d(TAG, "buzzBeepBlinkLocked " + record);
-        }
-
-        if (isPoliteNotificationFeatureEnabled(record)) {
-            mStrategy.onNotificationPosted(record);
         }
 
         // Should this notification make noise, vibe, or use the LED?
@@ -443,7 +482,8 @@ public final class NotificationAttentionHelper {
                 boolean vibrateOnly =
                         hasValidVibrate && mNotificationCooldownVibrateUnlocked && mUserPresent;
                 boolean hasAudibleAlert = hasValidSound || hasValidVibrate;
-                if (hasAudibleAlert && !shouldMuteNotificationLocked(record, signals)) {
+                shouldMuteReason = shouldMuteNotificationLocked(record, signals, hasAudibleAlert);
+                if (shouldMuteReason == MUTE_REASON_NOT_MUTED) {
                     if (!sentAccessibilityEvent) {
                         sendAccessibilityEvent(record);
                         sentAccessibilityEvent = true;
@@ -541,15 +581,17 @@ public final class NotificationAttentionHelper {
             }
         }
         final int buzzBeepBlinkLoggingCode =
-                (buzz ? 1 : 0) | (beep ? 2 : 0) | (blink ? 4 : 0) | getPoliteBit(record);
+                (buzz ? 1 : 0) | (beep ? 2 : 0) | (blink ? 4 : 0)
+                | getPoliteBit(record) | shouldMuteReason;
         if (buzzBeepBlinkLoggingCode > 0) {
             MetricsLogger.action(record.getLogMaker()
                     .setCategory(MetricsEvent.NOTIFICATION_ALERT)
                     .setType(MetricsEvent.TYPE_OPEN)
                     .setSubtype(buzzBeepBlinkLoggingCode));
             EventLogTags.writeNotificationAlert(key, buzz ? 1 : 0, beep ? 1 : 0, blink ? 1 : 0,
-                    getPolitenessState(record));
+                    getPolitenessState(record), shouldMuteReason);
         }
+
         if (Flags.politeNotifications()) {
             // Update last alert time
             if (buzz || beep) {
@@ -594,41 +636,46 @@ public final class NotificationAttentionHelper {
                 mNMP.getNotificationByKey(mVibrateNotificationKey));
     }
 
-    boolean shouldMuteNotificationLocked(final NotificationRecord record, final Signals signals) {
+    @MuteReason int shouldMuteNotificationLocked(final NotificationRecord record,
+            final Signals signals, boolean hasAudibleAlert) {
+        // Suppressed because no audible alert
+        if (!hasAudibleAlert) {
+            return MUTE_REASON_NOT_AUDIBLE;
+        }
         // Suppressed because it's a silent update
         final Notification notification = record.getNotification();
         if (record.isUpdate && (notification.flags & FLAG_ONLY_ALERT_ONCE) != 0) {
-            return true;
+            return MUTE_REASON_SILENT_UPDATE;
         }
 
         // Suppressed because a user manually unsnoozed something (or similar)
         if (record.shouldPostSilently()) {
-            return true;
+            return MUTE_REASON_POST_SILENTLY;
         }
 
         // muted by listener
         final String disableEffects = disableNotificationEffects(record, signals.listenerHints);
         if (disableEffects != null) {
             ZenLog.traceDisableEffects(record, disableEffects);
-            return true;
+            return MUTE_REASON_LISTENER_HINT;
         }
 
         // suppressed due to DND
         if (record.isIntercepted()) {
-            return true;
+            return MUTE_REASON_DND;
         }
 
         // Suppressed because another notification in its group handles alerting
         if (record.getSbn().isGroup()) {
             if (notification.suppressAlertingDueToGrouping()) {
-                return true;
+                return MUTE_REASON_GROUP_ALERT;
             }
         }
 
         // Suppressed because notification was explicitly flagged as silent
         if (android.service.notification.Flags.notificationSilentFlag()) {
             if (notification.isSilent()) {
-                return true;
+                return MUTE_REASON_FLAG_SILENT;
             }
         }
 
@@ -636,12 +683,12 @@ public final class NotificationAttentionHelper {
         final String pkg = record.getSbn().getPackageName();
         if (mUsageStats.isAlertRateLimited(pkg)) {
             Slog.e(TAG, "Muting recently noisy " + record.getKey());
-            return true;
+            return MUTE_REASON_RATE_LIMIT;
         }
 
         // A different looping ringtone, such as an incoming call is playing
         if (isCurrentlyInsistent() && !isInsistentUpdate(record)) {
-            return true;
+            return MUTE_REASON_OTHER_INSISTENT_PLAYING;
         }
 
         // Suppressed since it's a non-interruptive update to a bubble-suppressed notification
@@ -650,11 +697,23 @@ public final class NotificationAttentionHelper {
         if (record.isUpdate && !record.isInterruptive() && isBubbleOrOverflowed
                 && record.getNotification().getBubbleMetadata() != null) {
             if (record.getNotification().getBubbleMetadata().isNotificationSuppressed()) {
-                return true;
+                return MUTE_REASON_SUPPRESSED_BUBBLE;
             }
         }
 
-        return false;
+        if (isPoliteNotificationFeatureEnabled(record)) {
+            // Notify the politeness strategy that an alerting notification is posted
+            if (!isInsistentUpdate(record)) {
+                mStrategy.onNotificationPosted(record);
+            }
+
+            // Suppress if politeness is muted and it's not an update for insistent
+            if (getPolitenessState(record) == PolitenessStrategy.POLITE_STATE_MUTED) {
+                return MUTE_REASON_COOLDOWN;
+            }
+        }
+
+        return MUTE_REASON_NOT_MUTED;
     }
 
     private boolean isLoopingRingtoneNotification(final NotificationRecord playingRecord) {
@@ -1098,7 +1157,8 @@ public final class NotificationAttentionHelper {
         }
     }
 
-    public void dump(PrintWriter pw, String prefix, NotificationManagerService.DumpFilter filter) {
+    public void dumpLocked(PrintWriter pw, String prefix,
+            NotificationManagerService.DumpFilter filter) {
         pw.println("\n  Notification attention state:");
         pw.print(prefix);
         pw.println("  mSoundNotificationKey=" + mSoundNotificationKey);
@@ -1199,12 +1259,6 @@ public final class NotificationAttentionHelper {
          */
         void setApplyCooldownPerPackage(boolean applyPerPackage) {
             mApplyPerPackage = applyPerPackage;
-        }
-
-        boolean shouldIgnoreNotification(final NotificationRecord record) {
-            // Ignore auto-group summaries => don't count them as app-posted notifications
-            // for the cooldown budget
-            return (record.getSbn().isGroup() && GroupHelper.isAggregatedGroup(record));
         }
 
         /**
@@ -1358,10 +1412,6 @@ public final class NotificationAttentionHelper {
 
         @Override
         public void onNotificationPosted(final NotificationRecord record) {
-            if (shouldIgnoreNotification(record)) {
-                return;
-            }
-
             long timeSinceLastNotif =
                     System.currentTimeMillis() - getLastNotificationUpdateTimeMs(record);
 
@@ -1434,10 +1484,6 @@ public final class NotificationAttentionHelper {
         @Override
         void onNotificationPosted(NotificationRecord record) {
             if (isAvalancheActive()) {
-                if (shouldIgnoreNotification(record)) {
-                    return;
-                }
-
                 long timeSinceLastNotif =
                     System.currentTimeMillis() - getLastNotificationUpdateTimeMs(record);
 
@@ -1607,7 +1653,7 @@ public final class NotificationAttentionHelper {
             }
 
             // recent conversation
-            if (record.isConversation()
+            if ((record.isConversation() || isConversationMessage(record))
                     && record.getNotification().getWhen() > mLastAvalancheTriggerTimestamp) {
                 return true;
             }
@@ -1622,6 +1668,21 @@ public final class NotificationAttentionHelper {
 
             return false;
         }
+
+        // Relaxed signals for conversations messages
+        private boolean isConversationMessage(final NotificationRecord record) {
+            if (!CATEGORY_MESSAGE.equals(record.getSbn().getNotification().category)) {
+                return false;
+            }
+            if (record.getChannel().isDemoted()) {
+                return false;
+            }
+            final ShortcutInfo shortcut = record.getShortcutInfo();
+            if (shortcut == null) {
+                return false;
+            }
+            return true;
+        }
     }
 
     //======================  Observers  =============================
@@ -1629,20 +1690,29 @@ public final class NotificationAttentionHelper {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
+            if (action == null) {
+                return;
+            }
 
             if (action.equals(Intent.ACTION_SCREEN_ON)) {
                 // Keep track of screen on/off state, but do not turn off the notification light
                 // until user passes through the lock screen or views the notification.
-                mScreenOn = true;
-                updateLightsLocked();
+                synchronized (mLock) {
+                    mScreenOn = true;
+                    updateLightsLocked();
+                }
             } else if (action.equals(Intent.ACTION_SCREEN_OFF)) {
-                mScreenOn = false;
-                mUserPresent = false;
-                updateLightsLocked();
+                synchronized (mLock) {
+                    mScreenOn = false;
+                    mUserPresent = false;
+                    updateLightsLocked();
+                }
             } else if (action.equals(TelephonyManager.ACTION_PHONE_STATE_CHANGED)) {
                 mInCallStateOffHook = TelephonyManager.EXTRA_STATE_OFFHOOK
                         .equals(intent.getStringExtra(TelephonyManager.EXTRA_STATE));
-                updateLightsLocked();
+                synchronized (mLock) {
+                    updateLightsLocked();
+                }
             } else if (action.equals(Intent.ACTION_USER_PRESENT)) {
                 mUserPresent = true;
                 // turn off LED when user passes through lock screen
@@ -1704,9 +1774,11 @@ public final class NotificationAttentionHelper {
                         Settings.System.NOTIFICATION_LIGHT_PULSE, 0,
                         UserHandle.USER_CURRENT)
                         != 0;
-                if (mNotificationPulseEnabled != pulseEnabled) {
-                    mNotificationPulseEnabled = pulseEnabled;
-                    updateLightsLocked();
+                synchronized (mLock) {
+                    if (mNotificationPulseEnabled != pulseEnabled) {
+                        mNotificationPulseEnabled = pulseEnabled;
+                        updateLightsLocked();
+                    }
                 }
             }
             if (Flags.politeNotifications()) {
@@ -1789,7 +1861,9 @@ public final class NotificationAttentionHelper {
 
     @VisibleForTesting
     void setScreenOn(boolean on) {
-        mScreenOn = on;
+        synchronized (mLock) {
+            mScreenOn = on;
+        }
     }
 
     @VisibleForTesting

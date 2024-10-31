@@ -20,6 +20,7 @@ import com.android.internal.jank.InteractionJankMonitor
 import com.android.systemui.animation.DialogCuj
 import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.animation.Expandable
+import com.android.systemui.coroutines.newTracingContext
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.statusbar.phone.SystemUIDialog
@@ -62,7 +63,7 @@ constructor(
             }
             return
         } else {
-            coroutineScope = CoroutineScope(bgDispatcher)
+            coroutineScope = CoroutineScope(bgDispatcher + newTracingContext("InternetDialogScope"))
             dialog =
                 dialogFactory
                     .create(aboveStatusBar, canConfigMobileData, canConfigWifi, coroutineScope)

@@ -138,10 +138,6 @@ std::mutex& PointerController::getLock() const {
     return mDisplayInfoListener->mLock;
 }
 
-std::optional<FloatRect> PointerController::getBounds() const {
-    return mCursorController.getBounds();
-}
-
 void PointerController::move(float deltaX, float deltaY) {
     const ui::LogicalDisplayId displayId = mCursorController.getDisplayId();
     vec2 transformed;

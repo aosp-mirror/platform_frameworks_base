@@ -125,12 +125,12 @@ public class BinderDeathDispatcherTest {
         }
 
         @Override
-        public void addFrozenStateChangeCallback(IFrozenStateChangeCallback callback)
+        public void addFrozenStateChangeCallback(FrozenStateChangeCallback callback)
                 throws RemoteException {
         }
 
         @Override
-        public boolean removeFrozenStateChangeCallback(IFrozenStateChangeCallback callback) {
+        public boolean removeFrozenStateChangeCallback(FrozenStateChangeCallback callback) {
             return false;
         }
 

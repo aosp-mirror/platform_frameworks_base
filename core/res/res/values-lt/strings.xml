@@ -1748,8 +1748,7 @@
     <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"Programa užstoja leidimo užklausą, todėl negalima patvirtinti jūsų atsakymo."</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Norėdami naudoti funkciją, palieskite ją:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Funkcijų, kurioms bus naudojamas pritaikomumo mygtukas, pasirinkimas"</string>
-    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (2245540598834891500) -->
-    <skip />
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2245540598834891500">"Funkcijų, kurioms bus naudojami garsumo spartieji klavišai, pasirinkimas"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"Paslauga „<xliff:g id="SERVICE_NAME">%s</xliff:g>“ išjungta"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Redaguoti sparčiuosius klavišus"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Atlikta"</string>
@@ -1946,6 +1945,8 @@
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Išjungti"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g>–<xliff:g id="END">%2$s</xliff:g>"</string>
+    <!-- no translation found for zen_mode_trigger_summary_range_words (7228261413029290750) -->
+    <skip />
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"Bet kuris kalendorius"</string>
     <string name="muted_by" msgid="91464083490094950">"„<xliff:g id="THIRD_PARTY">%1$s</xliff:g>“ nutildo kai kuriuos garsus"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"Iškilo vidinė su jūsų įrenginiu susijusi problema, todėl įrenginys gali veikti nestabiliai, kol neatkursite gamyklinių duomenų."</string>
@@ -2013,6 +2014,7 @@
     <string name="set_up_screen_lock_title" msgid="8346083801616474030">"Ekrano užrako nustatymas"</string>
     <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Nustatykite ekrano užraktą"</string>
     <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"Jei norite naudoti privačią erdvę, nustatykite ekrano užraktą šiame įrenginyje"</string>
+    <string name="private_space_set_up_screen_lock_for_reset" msgid="7817091386408432097">"Jei norite ištrinti privačią erdvę, nustatykite ekrano užraktą šiame įrenginyje"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Programa nepasiekiama."</string>
     <string name="app_blocked_message" msgid="542972921087873023">"Programa „<xliff:g id="APP_NAME">%1$s</xliff:g>“ šiuo metu nepasiekiama."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"„<xliff:g id="ACTIVITY">%1$s</xliff:g>“ nepasiekiama"</string>
@@ -2131,11 +2133,6 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Skambučiai ir pranešimai vibruos"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Skambučiai ir pranešimai bus nutildyti"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Sistemos pakeitimai"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Netrukdymo režimas"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Naujiena: naudojant netrukdymo režimą pranešimai slepiami"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Palieskite, kad sužinotumėte daugiau ir pakeistumėte."</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Netrukdymo režimas pakeistas"</string>
-    <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Palieskite, kad patikrintumėte, kas blokuojama."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Peržiūrėkite pranešimų nustatymus"</string>
     <string name="review_notification_settings_text" msgid="5916244866751849279">"Tryliktos ir naujesnių versijų „Android” jūsų įdiegtoms programoms reikia suteikti leidimą siųsti pranešimus. Palieskite, kad pakeistumėte šį leidimą esamoms programoms."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Priminti vėliau"</string>
@@ -2431,6 +2428,14 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Siųskite ir gaukite pranešimus be mobiliojo ryšio ar „Wi-Fi“ tinklo"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Atidaryti programą „Messages“"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Kaip tai veikia"</string>
+    <!-- no translation found for satellite_manual_selection_state_popup_title (8545991934926661974) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_message (1928101658551382450) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_ok (2459664752624985095) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_cancel (973605633339469252) -->
+    <skip />
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Laukiama..."</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Atrakinimo piršto atspaudu nustatymas dar kartą"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> nebegalima atpažinti."</string>

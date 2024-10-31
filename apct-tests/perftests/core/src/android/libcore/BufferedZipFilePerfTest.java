@@ -16,9 +16,8 @@
 
 package android.libcore;
 
-import androidx.benchmark.BenchmarkState;
-import androidx.benchmark.junit4.BenchmarkRule;
-
+import android.perftests.utils.BenchmarkState;
+import android.perftests.utils.PerfStatusReporter;
 
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -40,8 +39,7 @@ import java.util.zip.ZipOutputStream;
 @RunWith(AndroidJUnit4.class)
 @LargeTest
 public final class BufferedZipFilePerfTest {
-    @Rule
-    public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
+    @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
 
     int[] mReadSize = new int[] {4, 32, 128};
     int[] mCompressedSize = new int[] {128, 1024, 8192, 65536};
@@ -69,7 +67,7 @@ public final class BufferedZipFilePerfTest {
 
     @Test
     public void timeUnbufferedRead() throws Exception {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             for (int i = 0; i < mCompressedSize.length; i++) {
                 for (int j = 0; j < mReadSize.length; j++) {
@@ -89,7 +87,7 @@ public final class BufferedZipFilePerfTest {
 
     @Test
     public void timeBufferedRead() throws Exception {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             for (int i = 0; i < mCompressedSize.length; i++) {
                 for (int j = 0; j < mReadSize.length; j++) {

@@ -28,11 +28,9 @@
 #include "pipeline/skia/AnimatedDrawables.h"
 #include "utils/Macros.h"
 
-class SkAnimatedImage;
 enum class SkBlendMode;
 class SkCanvasState;
 class SkRRect;
-class SkRuntimeShaderBuilder;
 class SkVertices;
 
 namespace minikin {

@@ -17,7 +17,8 @@
 package com.android.systemui.statusbar.notification.stack.ui.viewbinder
 
 import android.util.Log
-import com.android.app.tracing.coroutines.flow.filter
+import com.android.app.tracing.coroutines.flow.collectTraced
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.common.ui.ConfigurationState
 import com.android.systemui.common.ui.view.onLayoutChanged
 import com.android.systemui.dagger.SysUISingleton
@@ -37,7 +38,6 @@ import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.launch
 
 /** Binds the [NotificationScrollView]. */
 @SysUISingleton
@@ -79,39 +79,62 @@ constructor(
             launch {
                 viewModel
                     .shadeScrimShape(cornerRadius = scrimRadius, viewLeftOffset = viewLeftOffset)
-                    .collect { view.setScrimClippingShape(it) }
+                    .collectTraced { view.setScrimClippingShape(it) }
             }
 
-            launch { viewModel.maxAlpha.collect { view.setMaxAlpha(it) } }
-            launch { viewModel.scrolledToTop.collect { view.setScrolledToTop(it) } }
+            launch { viewModel.maxAlpha.collectTraced { view.setMaxAlpha(it) } }
+            launch { viewModel.shadeScrollState.collect { view.setScrollState(it) } }
             launch {
-                viewModel.expandFraction.collect { view.setExpandFraction(it.coerceIn(0f, 1f)) }
+                viewModel.expandFraction.collectTraced {
+                    view.setExpandFraction(it.coerceIn(0f, 1f))
+                }
             }
-            launch { viewModel.qsExpandFraction.collect { view.setQsExpandFraction(it) } }
-            launch { viewModel.isScrollable.collect { view.setScrollingEnabled(it) } }
-            launch { viewModel.isDozing.collect { isDozing -> view.setDozing(isDozing) } }
+            launch { viewModel.qsExpandFraction.collectTraced { view.setQsExpandFraction(it) } }
             launch {
-                viewModel.isPulsing.collect { isPulsing ->
+                viewModel.isShowingStackOnLockscreen.collectTraced {
+                    view.setShowingStackOnLockscreen(it)
+                }
+            }
+            launch {
+                viewModel.alphaForLockscreenFadeIn.collectTraced {
+                    view.setAlphaForLockscreenFadeIn(it)
+                }
+            }
+            launch { viewModel.isScrollable.collectTraced { view.setScrollingEnabled(it) } }
+            launch { viewModel.isDozing.collectTraced { isDozing -> view.setDozing(isDozing) } }
+            launch {
+                viewModel.isPulsing.collectTraced { isPulsing ->
                     view.setPulsing(isPulsing, viewModel.shouldAnimatePulse.value)
                 }
             }
             launch {
                 viewModel.shouldResetStackTop
                     .filter { it }
-                    .collect { view.setStackTop(-(view.getHeadsUpInset().toFloat())) }
+                    .collectTraced { view.setStackTop(-(view.getHeadsUpInset().toFloat())) }
             }
             launch {
-                viewModel.shouldCloseGuts.filter { it }.collect { view.closeGutsOnSceneTouch() }
+                viewModel.shouldCloseGuts
+                    .filter { it }
+                    .collectTraced { view.closeGutsOnSceneTouch() }
+            }
+            launch {
+                viewModel.suppressHeightUpdates.collectTraced { view.suppressHeightUpdates(it) }
             }
 
             launchAndDispose {
                 view.setSyntheticScrollConsumer(viewModel.syntheticScrollConsumer)
                 view.setCurrentGestureOverscrollConsumer(viewModel.currentGestureOverscrollConsumer)
                 view.setCurrentGestureInGutsConsumer(viewModel.currentGestureInGutsConsumer)
+                view.setRemoteInputRowBottomBoundConsumer(
+                    viewModel.remoteInputRowBottomBoundConsumer
+                )
+                view.setAccessibilityScrollEventConsumer(viewModel.accessibilityScrollEventConsumer)
                 DisposableHandle {
                     view.setSyntheticScrollConsumer(null)
                     view.setCurrentGestureOverscrollConsumer(null)
                     view.setCurrentGestureInGutsConsumer(null)
+                    view.setRemoteInputRowBottomBoundConsumer(null)
+                    view.setAccessibilityScrollEventConsumer(null)
                 }
             }
         }

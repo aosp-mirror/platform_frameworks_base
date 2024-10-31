@@ -63,7 +63,6 @@ import com.android.systemui.display.DisplayModule;
 import com.android.systemui.doze.dagger.DozeComponent;
 import com.android.systemui.dreams.dagger.DreamModule;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.education.dagger.ContextualEducationModule;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.FlagDependenciesModule;
 import com.android.systemui.flags.FlagsModule;
@@ -71,6 +70,9 @@ import com.android.systemui.haptics.msdl.dagger.MSDLModule;
 import com.android.systemui.inputmethod.InputMethodModule;
 import com.android.systemui.keyboard.KeyboardModule;
 import com.android.systemui.keyevent.data.repository.KeyEventRepositoryModule;
+import com.android.systemui.keyguard.data.quickaffordance.KeyguardDataQuickAffordanceModule;
+import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancesMetricsLogger;
+import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancesMetricsLoggerImpl;
 import com.android.systemui.keyguard.ui.composable.LockscreenContent;
 import com.android.systemui.log.dagger.LogModule;
 import com.android.systemui.log.dagger.MonitorLog;
@@ -108,6 +110,7 @@ import com.android.systemui.security.data.repository.SecurityRepositoryModule;
 import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.ShadeController;
+import com.android.systemui.shade.ShadeDisplayAwareModule;
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolator;
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolatorImpl;
 import com.android.systemui.shared.condition.Monitor;
@@ -227,6 +230,7 @@ import javax.inject.Named;
         InputMethodModule.class,
         KeyEventRepositoryModule.class,
         KeyboardModule.class,
+        KeyguardDataQuickAffordanceModule.class,
         LetterboxModule.class,
         LogModule.class,
         MediaProjectionActivitiesModule.class,
@@ -266,14 +270,14 @@ import javax.inject.Named;
         CommonSystemUIUnfoldModule.class,
         TelephonyRepositoryModule.class,
         TemporaryDisplayModule.class,
+        ShadeDisplayAwareModule.class,
         TouchpadModule.class,
         TunerModule.class,
         UserDomainLayerModule.class,
         UserModule.class,
         UtilModule.class,
         NoteTaskModule.class,
-        WalletModule.class,
-        ContextualEducationModule.class
+        WalletModule.class
 },
         subcomponents = {
                 ComplicationComponent.class,
@@ -426,6 +430,11 @@ public abstract class SystemUIModule {
                 notifPipelineFlags,
                 sysuiMainExecutor,
                 sysuiUiBgExecutor));
+    }
+
+    @Provides
+    static KeyguardQuickAffordancesMetricsLogger providesKeyguardQuickAffordancesMetricsLogger() {
+        return new KeyguardQuickAffordancesMetricsLoggerImpl();
     }
 
     @Binds

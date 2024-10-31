@@ -228,9 +228,8 @@ public class ContextHubService extends IContextHubService.Stub {
             // Only process the message normally if not using test mode manager or if
             // the test mode manager call returned false as this indicates it did not
             // process the message.
-            boolean useTestModeManager = Flags.reliableMessageImplementation()
-                    && Flags.reliableMessageTestModeBehavior()
-                    && mIsTestModeEnabled.get();
+            boolean useTestModeManager =
+                    Flags.reliableMessageTestModeBehavior() && mIsTestModeEnabled.get();
             if (!useTestModeManager
                     || !mTestModeManager.handleNanoappMessage(() -> {
                         handleClientMessageCallback(mContextHubId, hostEndpointId,
@@ -444,8 +443,17 @@ public class ContextHubService extends IContextHubService.Stub {
         mSupportedContextHubPerms = hubInfo.second;
         mContextHubInfoList = new ArrayList<>(mContextHubIdToInfoMap.values());
         mClientManager = new ContextHubClientManager(mContext, mContextHubWrapper);
-        mTransactionManager = new ContextHubTransactionManager(
-                mContextHubWrapper, mClientManager, mNanoAppStateManager);
+
+        if (Flags.reduceLockingContextHubTransactionManager()) {
+            mTransactionManager =
+                    new ContextHubTransactionManager(
+                            mContextHubWrapper, mClientManager, mNanoAppStateManager);
+        } else {
+            mTransactionManager =
+                    new ContextHubTransactionManagerOld(
+                            mContextHubWrapper, mClientManager, mNanoAppStateManager);
+        }
+
         mSensorPrivacyManagerInternal =
                 LocalServices.getService(SensorPrivacyManagerInternal.class);
         return true;
@@ -936,8 +944,7 @@ public class ContextHubService extends IContextHubService.Stub {
     private void handleClientMessageCallback(int contextHubId, short hostEndpointId,
             NanoAppMessage message, List<String> nanoappPermissions,
             List<String> messagePermissions) {
-        if (!Flags.reliableMessageImplementation()
-                || !Flags.reliableMessageDuplicateDetectionService()) {
+        if (!Flags.reliableMessageDuplicateDetectionService()) {
             byte errorCode = mClientManager.onMessageFromNanoApp(contextHubId, hostEndpointId,
                     message, nanoappPermissions, messagePermissions);
             if (message.isReliable() && errorCode != ErrorCode.OK) {
@@ -1031,12 +1038,8 @@ public class ContextHubService extends IContextHubService.Stub {
      * @param messageSequenceNumber the message sequence number
      * @param errorCode the error code, one of the enum ErrorCode
      */
-    private void sendMessageDeliveryStatusToContextHub(int contextHubId,
-            int messageSequenceNumber, byte errorCode) {
-        if (!Flags.reliableMessageImplementation()) {
-            return;
-        }
-
+    private void sendMessageDeliveryStatusToContextHub(
+            int contextHubId, int messageSequenceNumber, byte errorCode) {
         MessageDeliveryStatus status = new MessageDeliveryStatus();
         status.messageSequenceNumber = messageSequenceNumber;
         status.errorCode = errorCode;

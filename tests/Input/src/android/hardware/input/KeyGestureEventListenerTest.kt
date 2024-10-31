@@ -26,20 +26,19 @@ import android.platform.test.flag.junit.SetFlagsRule
 import android.view.KeyEvent
 import androidx.test.core.app.ApplicationProvider
 import com.android.server.testutils.any
-import org.junit.After
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
-import org.junit.runner.RunWith
-import org.mockito.Mock
-import org.mockito.Mockito
-import org.mockito.Mockito.doAnswer
-import org.mockito.Mockito.`when`
-import org.mockito.junit.MockitoJUnitRunner
+import com.android.test.input.MockInputManagerRule
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.fail
+import org.junit.Before
+import org.junit.Rule
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.mockito.Mockito
+import org.mockito.Mockito.doAnswer
+import org.mockito.Mockito.`when`
+import org.mockito.junit.MockitoJUnitRunner
 
 /**
  * Tests for [InputManager.KeyGestureEventListener].
@@ -53,31 +52,28 @@ class KeyGestureEventListenerTest {
 
     companion object {
         const val DEVICE_ID = 1
-        val HOME_GESTURE_EVENT = KeyGestureEvent(
-            DEVICE_ID,
-            intArrayOf(KeyEvent.KEYCODE_H),
-            KeyEvent.META_META_ON or KeyEvent.META_META_LEFT_ON,
-            KeyGestureEvent.KEY_GESTURE_TYPE_HOME
-        )
+        val HOME_GESTURE_EVENT = KeyGestureEvent.Builder()
+            .setDeviceId(DEVICE_ID)
+            .setKeycodes(intArrayOf(KeyEvent.KEYCODE_H))
+            .setModifierState(KeyEvent.META_META_ON or KeyEvent.META_META_LEFT_ON)
+            .setKeyGestureType(KeyGestureEvent.KEY_GESTURE_TYPE_HOME)
+            .build()
     }
 
     @get:Rule
     val rule = SetFlagsRule()
+    @get:Rule
+    val inputManagerRule = MockInputManagerRule()
 
     private val testLooper = TestLooper()
     private val executor = HandlerExecutor(Handler(testLooper.looper))
     private var registeredListener: IKeyGestureEventListener? = null
     private lateinit var context: Context
     private lateinit var inputManager: InputManager
-    private lateinit var inputManagerGlobalSession: InputManagerGlobal.TestSession
-
-    @Mock
-    private lateinit var iInputManagerMock: IInputManager
 
     @Before
     fun setUp() {
         context = Mockito.spy(ContextWrapper(ApplicationProvider.getApplicationContext()))
-        inputManagerGlobalSession = InputManagerGlobal.createTestSession(iInputManagerMock)
         inputManager = InputManager(context)
         `when`(context.getSystemService(Mockito.eq(Context.INPUT_SERVICE)))
                 .thenReturn(inputManager)
@@ -92,7 +88,7 @@ class KeyGestureEventListenerTest {
             }
             registeredListener = listener
             null
-        }.`when`(iInputManagerMock).registerKeyGestureEventListener(any())
+        }.`when`(inputManagerRule.mock).registerKeyGestureEventListener(any())
 
         // Handle key gesture event listener being unregistered.
         doAnswer {
@@ -103,23 +99,19 @@ class KeyGestureEventListenerTest {
             }
             registeredListener = null
             null
-        }.`when`(iInputManagerMock).unregisterKeyGestureEventListener(any())
-    }
-
-    @After
-    fun tearDown() {
-        if (this::inputManagerGlobalSession.isInitialized) {
-            inputManagerGlobalSession.close()
-        }
+        }.`when`(inputManagerRule.mock).unregisterKeyGestureEventListener(any())
     }
 
     private fun notifyKeyGestureEvent(event: KeyGestureEvent) {
-        registeredListener!!.onKeyGestureEvent(
-            event.deviceId,
-            event.keycodes,
-            event.modifierState,
-            event.keyGestureType
-        )
+        val eventToSend = AidlKeyGestureEvent()
+        eventToSend.deviceId = event.deviceId
+        eventToSend.keycodes = event.keycodes
+        eventToSend.modifierState = event.modifierState
+        eventToSend.gestureType = event.keyGestureType
+        eventToSend.action = event.action
+        eventToSend.displayId = event.displayId
+        eventToSend.flags = event.flags
+        registeredListener!!.onKeyGestureEvent(eventToSend)
     }
 
     @Test

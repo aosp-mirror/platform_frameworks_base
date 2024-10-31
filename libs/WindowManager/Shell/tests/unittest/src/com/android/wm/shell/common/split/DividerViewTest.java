@@ -25,6 +25,7 @@ import static org.mockito.Mockito.verify;
 
 import android.content.res.Configuration;
 import android.graphics.Rect;
+import android.os.Handler;
 import android.os.SystemClock;
 import android.provider.DeviceConfig;
 import android.view.InputDevice;
@@ -55,6 +56,7 @@ public class DividerViewTest extends ShellTestCase {
     private @Mock DisplayController mDisplayController;
     private @Mock DisplayImeController mDisplayImeController;
     private @Mock ShellTaskOrganizer mTaskOrganizer;
+    private @Mock Handler mHandler;
     private SplitLayout mSplitLayout;
     private DividerView mDividerView;
 
@@ -65,7 +67,7 @@ public class DividerViewTest extends ShellTestCase {
         Configuration configuration = getConfiguration();
         mSplitLayout = new SplitLayout("TestSplitLayout", mContext, configuration,
                 mSplitLayoutHandler, mCallbacks, mDisplayController, mDisplayImeController,
-                mTaskOrganizer, SplitLayout.PARALLAX_NONE);
+                mTaskOrganizer, SplitLayout.PARALLAX_NONE, mHandler);
         SplitWindowManager splitWindowManager = new SplitWindowManager("TestSplitWindowManager",
                 mContext,
                 configuration, mCallbacks);

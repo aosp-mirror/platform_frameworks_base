@@ -36,7 +36,7 @@ namespace android {
 
 MinikinFontSkia::MinikinFontSkia(sk_sp<SkTypeface> typeface, int sourceId, const void* fontData,
                                  size_t fontSize, std::string_view filePath, int ttcIndex,
-                                 const std::vector<minikin::FontVariation>& axes)
+                                 const minikin::VariationSettings& axes)
         : mTypeface(std::move(typeface))
         , mSourceId(sourceId)
         , mFontData(fontData)
@@ -123,12 +123,12 @@ int MinikinFontSkia::GetFontIndex() const {
     return mTtcIndex;
 }
 
-const std::vector<minikin::FontVariation>& MinikinFontSkia::GetAxes() const {
+const minikin::VariationSettings& MinikinFontSkia::GetAxes() const {
     return mAxes;
 }
 
 std::shared_ptr<minikin::MinikinFont> MinikinFontSkia::createFontWithVariation(
-        const std::vector<minikin::FontVariation>& variations) const {
+        const minikin::VariationSettings& variations) const {
     SkFontArguments args;
 
     std::vector<SkFontArguments::VariationPosition::Coordinate> skVariation;

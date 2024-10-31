@@ -88,6 +88,13 @@ public final class MemInfoReader {
     }
 
     /**
+     * Amount of RAM that used by shared memory (shmem) and tmpfs
+     */
+    public long getShmemSizeKb() {
+        return mInfos[Debug.MEMINFO_SHMEM];
+    }
+
+    /**
      * Amount of RAM that the kernel is being used for caches, not counting caches
      * that are mapped in to processes.
      */

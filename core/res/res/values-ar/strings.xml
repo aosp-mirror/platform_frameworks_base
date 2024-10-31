@@ -1750,8 +1750,7 @@
     <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"تعذَّر التحقّق من ردّك بسبب حجب أحد التطبيقات طلب الحصول على الإذن."</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"انقر على ميزة لبدء استخدامها:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"اختيار الميزات التي تريد استخدامها مع زر أدوات تمكين الوصول"</string>
-    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (2245540598834891500) -->
-    <skip />
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2245540598834891500">"اختيار الميزات التي تريد استخدامها مع اختصار مفتاحَي مستوى الصوت"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"تم إيقاف <xliff:g id="SERVICE_NAME">%s</xliff:g>."</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"تعديل الاختصارات"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"تم"</string>
@@ -1948,6 +1947,8 @@
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"غير مفعَّل"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">"، "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"من <xliff:g id="START">%1$s</xliff:g> إلى <xliff:g id="END">%2$s</xliff:g>"</string>
+    <!-- no translation found for zen_mode_trigger_summary_range_words (7228261413029290750) -->
+    <skip />
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"أي تقويم"</string>
     <string name="muted_by" msgid="91464083490094950">"يعمل <xliff:g id="THIRD_PARTY">%1$s</xliff:g> على كتم بعض الأصوات."</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"حدثت مشكلة داخلية في جهازك، وقد لا يستقر وضعه حتى إجراء إعادة الضبط على الإعدادات الأصلية."</string>
@@ -2015,6 +2016,7 @@
     <string name="set_up_screen_lock_title" msgid="8346083801616474030">"ضبط قفل شاشة"</string>
     <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"ضبط قفل الشاشة"</string>
     <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"لاستخدام مساحتك الخاصة، يجب ضبط قفل شاشة على هذا الجهاز"</string>
+    <string name="private_space_set_up_screen_lock_for_reset" msgid="7817091386408432097">"لحذف المساحة الخاصة، يجب ضبط قفل شاشة على هذا الجهاز"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"التطبيق غير متاح"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"تطبيق <xliff:g id="APP_NAME">%1$s</xliff:g> غير متاح الآن."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"تطبيق <xliff:g id="ACTIVITY">%1$s</xliff:g> غير متاح"</string>
@@ -2133,11 +2135,6 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"سيهتز الهاتف عند تلقّي المكالمات والإشعارات."</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"سيتم كتم صوت الهاتف عند تلقي المكالمات والإشعارات."</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"تغييرات النظام"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"عدم الإزعاج"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"جديد: يؤدي تفعيل ميزة \"عدم الإزعاج\" إلى إخفاء الإشعارات."</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"انقر لمعرفة مزيد من المعلومات وإجراء التغيير."</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"تم تغيير ميزة \"عدم الإزعاج\""</string>
-    <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"انقر للاطّلاع على ما تم حظره."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"مراجعة إعدادات الإشعارات"</string>
     <string name="review_notification_settings_text" msgid="5916244866751849279">"‏بدءً من نظام التشغيل Android 13، يجب أن تحصل التطبيقات التي تُثبِّتها على إذن لإرسال الإشعارات. انقر لتغيير هذا الإذن للتطبيقات الحالية."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"تذكيري لاحقًا"</string>
@@ -2433,6 +2430,14 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"‏يمكنك إرسال الرسائل واستلامها بدون شبكة الجوّال أو شبكة Wi-Fi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"فتح تطبيق \"الرسائل\""</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"طريقة العمل"</string>
+    <!-- no translation found for satellite_manual_selection_state_popup_title (8545991934926661974) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_message (1928101658551382450) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_ok (2459664752624985095) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_cancel (973605633339469252) -->
+    <skip />
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"بانتظار الإزالة من الأرشيف…"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"إعادة إعداد ميزة \"فتح الجهاز ببصمة الإصبع\""</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"لا يمكن بعد الآن التعرّف على \"<xliff:g id="FINGERPRINT">%s</xliff:g>\"."</string>

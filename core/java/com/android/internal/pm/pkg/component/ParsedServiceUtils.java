@@ -138,7 +138,7 @@ public class ParsedServiceUtils {
             if (type != XmlPullParser.START_TAG) {
                 continue;
             }
-            if (ParsingPackageUtils.getAconfigFlags().skipCurrentElement(parser)) {
+            if (ParsingPackageUtils.getAconfigFlags().skipCurrentElement(pkg, parser)) {
                 continue;
             }
 

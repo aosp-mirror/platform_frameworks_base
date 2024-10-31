@@ -34,6 +34,8 @@ import androidx.test.core.app.ApplicationProvider;
 
 import com.google.common.truth.Expect;
 
+import com.android.server.utils.EventLogger;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -67,6 +69,8 @@ public final class FadeOutManagerTest {
     PlayerBase.PlayerIdCard mMockPlayerIdCard;
     @Mock
     AudioPlaybackConfiguration mMockPlaybackConfiguration;
+    @Mock
+    EventLogger mMockEventLogger;
 
     @Rule
     public final Expect expect = Expect.create();
@@ -193,7 +197,7 @@ public final class FadeOutManagerTest {
             String packageName, int uid, int flags) {
         MediaFocusControl mfc = new MediaFocusControl(mContext, null);
         return new FocusRequester(aa, AudioManager.AUDIOFOCUS_GAIN, flags, null, null, clientId,
-                null, packageName, uid, mfc, 1);
+                null, packageName, uid, mfc, 1, mMockEventLogger);
     }
 
     private PlayerBase.PlayerIdCard createPlayerIdCard(AudioAttributes aa, int playerType) {

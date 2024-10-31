@@ -432,9 +432,6 @@ public abstract class PowerStatsCollector {
 
             EnergyConsumerResult[] energy =
                     mConsumedEnergyRetriever.getConsumedEnergy(mEnergyConsumerIds);
-            System.out.println("mEnergyConsumerIds = " + Arrays.toString(mEnergyConsumerIds) + " "
-                    + "energy = "
-                    + Arrays.toString(energy));
             if (energy == null) {
                 return false;
             }

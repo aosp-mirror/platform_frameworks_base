@@ -27,6 +27,7 @@ import com.android.systemui.statusbar.notification.collection.PipelineDumper
 import com.android.systemui.statusbar.notification.collection.provider.SectionHeaderVisibilityProvider
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer
 import com.android.app.tracing.traceSection
+import com.android.systemui.shade.ShadeDisplayAware
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -36,7 +37,7 @@ import dagger.assisted.AssistedInject
  * currently populate the notification shade.
  */
 class ShadeViewManager @AssistedInject constructor(
-    context: Context,
+    @ShadeDisplayAware context: Context,
     @Assisted listContainer: NotificationListContainer,
     @Assisted private val stackController: NotifStackController,
     mediaContainerController: MediaContainerController,

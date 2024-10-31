@@ -16,8 +16,8 @@
 
 package android.libcore.regression;
 
-import androidx.benchmark.BenchmarkState;
-import androidx.benchmark.junit4.BenchmarkRule;
+import android.perftests.utils.BenchmarkState;
+import android.perftests.utils.PerfStatusReporter;
 
 import androidx.test.filters.LargeTest;
 
@@ -34,7 +34,7 @@ import java.util.Collection;
 @RunWith(JUnitParamsRunner.class)
 @LargeTest
 public class StringReplaceAllPerfTest {
-    @Rule public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
+    @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
 
     // NOTE: These estimates of MOVEABLE / NON_MOVEABLE are based on a knowledge of
     // ART implementation details. They make a difference here because JNI calls related
@@ -86,7 +86,7 @@ public class StringReplaceAllPerfTest {
     @Test
     @Parameters(method = "getData")
     public void timeReplaceAllTrivialPatternNonExistent(StringLengths stringLengths) {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             stringLengths.mValue.replaceAll("fish", "0");
         }
@@ -95,7 +95,7 @@ public class StringReplaceAllPerfTest {
     @Test
     @Parameters(method = "getData")
     public void timeReplaceTrivialPatternAllRepeated(StringLengths stringLengths) {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             stringLengths.mValue.replaceAll("jklm", "0");
         }
@@ -104,7 +104,7 @@ public class StringReplaceAllPerfTest {
     @Test
     @Parameters(method = "getData")
     public void timeReplaceAllTrivialPatternSingleOccurrence(StringLengths stringLengths) {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             stringLengths.mValue.replaceAll("qrst", "0");
         }

@@ -76,6 +76,7 @@ import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.IndentingPrintWriter;
 import android.util.LocalLog;
 import android.util.Log;
 import android.util.Slog;
@@ -83,7 +84,7 @@ import android.util.Slog;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.annotations.VisibleForTesting.Visibility;
-import com.android.internal.util.IndentingPrintWriter;
+import com.android.net.module.util.BinderUtils;
 import com.android.net.module.util.LocationPermissionChecker;
 import com.android.net.module.util.PermissionUtils;
 import com.android.server.vcn.TelephonySubscriptionTracker;
@@ -178,9 +179,10 @@ public class VcnManagementService extends IVcnManagementService.Stub {
 
     public static final boolean VDBG = false; // STOPSHIP: if true
 
+    // The system path is copied from Environment.getDataSystemDirectory
     @VisibleForTesting(visibility = Visibility.PRIVATE)
     static final String VCN_CONFIG_FILE =
-            new File(Environment.getDataSystemDirectory(), "vcn/configs.xml").getPath();
+            new File(Environment.getDataDirectory(), "system/vcn/configs.xml").getPath();
 
     // TODO(b/176956496): Directly use CarrierServiceBindHelper.UNBIND_DELAY_MILLIS
     @VisibleForTesting(visibility = Visibility.PRIVATE)
@@ -379,10 +381,12 @@ public class VcnManagementService extends IVcnManagementService.Stub {
         }
 
         /** Gets transports that need to be marked as restricted by the VCN from CarrierConfig */
+        // TODO: b/262269892 This method was created to perform experiments before the relevant API
+        // was exposed. Now it is obsolete and should be removed.
         @VisibleForTesting(visibility = Visibility.PRIVATE)
         public Set<Integer> getRestrictedTransportsFromCarrierConfig(
                 ParcelUuid subGrp, TelephonySubscriptionSnapshot lastSnapshot) {
-            if (!Build.IS_ENG && !Build.IS_USERDEBUG) {
+            if (!Build.isDebuggable()) {
                 return RESTRICTED_TRANSPORTS_DEFAULT;
             }
 
@@ -444,22 +448,16 @@ public class VcnManagementService extends IVcnManagementService.Stub {
         }
 
         final UserHandle userHandle = UserHandle.getUserHandleForUid(uid);
+        final UserManager userManager = mContext.getSystemService(UserManager.class);
 
-        if (Flags.enforceMainUser()) {
-            final UserManager userManager = mContext.getSystemService(UserManager.class);
-
-            Binder.withCleanCallingIdentity(
-                    () -> {
-                        if (!Objects.equals(userManager.getMainUser(), userHandle)) {
-                            throw new SecurityException(
-                                    "VcnManagementService can only be used by callers running as"
-                                            + " the main user");
-                        }
-                    });
-        } else if (!userHandle.isSystem()) {
-            throw new SecurityException(
-                    "VcnManagementService can only be used by callers running as the primary user");
-        }
+        BinderUtils.withCleanCallingIdentity(
+                () -> {
+                    if (!Objects.equals(userManager.getMainUser(), userHandle)) {
+                        throw new SecurityException(
+                                "VcnManagementService can only be used by callers running as"
+                                        + " the main user");
+                    }
+                });
     }
 
     private void enforceCallingUserAndCarrierPrivilege(
@@ -472,7 +470,7 @@ public class VcnManagementService extends IVcnManagementService.Stub {
         // TODO (b/172619301): Check based on events propagated from CarrierPrivilegesTracker
         final SubscriptionManager subMgr = mContext.getSystemService(SubscriptionManager.class);
         final List<SubscriptionInfo> subscriptionInfos = new ArrayList<>();
-        Binder.withCleanCallingIdentity(
+        BinderUtils.withCleanCallingIdentity(
                 () -> {
                     List<SubscriptionInfo> subsInGroup =
                             subMgr.getSubscriptionsInGroup(subscriptionGroup);
@@ -489,7 +487,10 @@ public class VcnManagementService extends IVcnManagementService.Stub {
 
             // Check subscription is active first; much cheaper/faster check, and an app (currently)
             // cannot be carrier privileged for inactive subscriptions.
-            if (subMgr.isValidSlotIndex(info.getSimSlotIndex())
+            final int simSlotIndex = info.getSimSlotIndex();
+            final boolean isValidSlotIndex =
+                    simSlotIndex >= 0 && simSlotIndex < telMgr.getActiveModemCount();
+            if (isValidSlotIndex
                     && telMgr.checkCarrierPrivilegesForPackage(pkgName)
                             == TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS) {
                 // TODO (b/173717728): Allow configuration for inactive, but manageable
@@ -524,6 +525,9 @@ public class VcnManagementService extends IVcnManagementService.Stub {
         @Override
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
+            if (action == null) {
+                return;
+            }
 
             switch (action) {
                 case Intent.ACTION_PACKAGE_ADDED: // Fallthrough
@@ -701,7 +705,7 @@ public class VcnManagementService extends IVcnManagementService.Stub {
     @GuardedBy("mLock")
     private void notifyAllPolicyListenersLocked() {
         for (final PolicyListenerBinderDeath policyListener : mRegisteredPolicyListeners.values()) {
-            Binder.withCleanCallingIdentity(() -> {
+            BinderUtils.withCleanCallingIdentity(() -> {
                 try {
                     policyListener.mListener.onPolicyChanged();
                 } catch (RemoteException e) {
@@ -716,7 +720,7 @@ public class VcnManagementService extends IVcnManagementService.Stub {
             @NonNull ParcelUuid subGroup, @VcnStatusCode int statusCode) {
         for (final VcnStatusCallbackInfo cbInfo : mRegisteredStatusCallbacks.values()) {
             if (isCallbackPermissioned(cbInfo, subGroup)) {
-                Binder.withCleanCallingIdentity(() -> {
+                BinderUtils.withCleanCallingIdentity(() -> {
                     try {
                         cbInfo.mCallback.onVcnStatusChanged(statusCode);
                     } catch (RemoteException e) {
@@ -796,7 +800,7 @@ public class VcnManagementService extends IVcnManagementService.Stub {
         enforceManageTestNetworksForTestMode(config);
         enforceCallingUserAndCarrierPrivilege(subscriptionGroup, opPkgName);
 
-        Binder.withCleanCallingIdentity(() -> {
+        BinderUtils.withCleanCallingIdentity(() -> {
             synchronized (mLock) {
                 mConfigs.put(subscriptionGroup, config);
                 startOrUpdateVcnLocked(subscriptionGroup, config);
@@ -854,7 +858,7 @@ public class VcnManagementService extends IVcnManagementService.Stub {
                 .checkPackage(mDeps.getBinderCallingUid(), opPkgName);
         enforceCarrierPrivilegeOrProvisioningPackage(subscriptionGroup, opPkgName);
 
-        Binder.withCleanCallingIdentity(() -> {
+        BinderUtils.withCleanCallingIdentity(() -> {
             synchronized (mLock) {
                 stopAndClearVcnConfigInternalLocked(subscriptionGroup);
                 writeConfigsToDiskLocked();
@@ -878,6 +882,7 @@ public class VcnManagementService extends IVcnManagementService.Stub {
 
     private void garbageCollectAndWriteVcnConfigsLocked() {
         final SubscriptionManager subMgr = mContext.getSystemService(SubscriptionManager.class);
+        final Set<ParcelUuid> subGroups = mLastSnapshot.getAllSubscriptionGroups();
 
         boolean shouldWrite = false;
 
@@ -885,11 +890,20 @@ public class VcnManagementService extends IVcnManagementService.Stub {
         while (configsIterator.hasNext()) {
             final ParcelUuid subGrp = configsIterator.next();
 
-            final List<SubscriptionInfo> subscriptions = subMgr.getSubscriptionsInGroup(subGrp);
-            if (subscriptions == null || subscriptions.isEmpty()) {
-                // Trim subGrps with no more subscriptions; must have moved to another subGrp
-                configsIterator.remove();
-                shouldWrite = true;
+            if (Flags.fixConfigGarbageCollection()) {
+                if (!subGroups.contains(subGrp)) {
+                    // Trim subGrps with no more subscriptions; must have moved to another subGrp
+                    logDbg("Garbage collect VcnConfig for group=" + subGrp);
+                    configsIterator.remove();
+                    shouldWrite = true;
+                }
+            } else {
+                final List<SubscriptionInfo> subscriptions = subMgr.getSubscriptionsInGroup(subGrp);
+                if (subscriptions == null || subscriptions.isEmpty()) {
+                    // Trim subGrps with no more subscriptions; must have moved to another subGrp
+                    configsIterator.remove();
+                    shouldWrite = true;
+                }
             }
         }
 
@@ -992,7 +1006,7 @@ public class VcnManagementService extends IVcnManagementService.Stub {
                 android.Manifest.permission.NETWORK_FACTORY,
                 android.Manifest.permission.MANAGE_TEST_NETWORKS);
 
-        Binder.withCleanCallingIdentity(() -> {
+        BinderUtils.withCleanCallingIdentity(() -> {
             PolicyListenerBinderDeath listenerBinderDeath = new PolicyListenerBinderDeath(listener);
 
             synchronized (mLock) {
@@ -1019,7 +1033,7 @@ public class VcnManagementService extends IVcnManagementService.Stub {
                 android.Manifest.permission.NETWORK_FACTORY,
                 android.Manifest.permission.MANAGE_TEST_NETWORKS);
 
-        Binder.withCleanCallingIdentity(() -> {
+        BinderUtils.withCleanCallingIdentity(() -> {
             synchronized (mLock) {
                 PolicyListenerBinderDeath listenerBinderDeath =
                         mRegisteredPolicyListeners.remove(listener.asBinder());
@@ -1083,7 +1097,7 @@ public class VcnManagementService extends IVcnManagementService.Stub {
                             + " MANAGE_TEST_NETWORKS");
         }
 
-        return Binder.withCleanCallingIdentity(() -> {
+        return BinderUtils.withCleanCallingIdentity(() -> {
             // Defensive copy in case this call is in-process and the given NetworkCapabilities
             // mutates
             final NetworkCapabilities ncCopy = new NetworkCapabilities(networkCapabilities);
@@ -1094,13 +1108,7 @@ public class VcnManagementService extends IVcnManagementService.Stub {
             synchronized (mLock) {
                 final Vcn vcn = mVcns.get(subGrp);
                 final VcnConfig vcnConfig = mConfigs.get(subGrp);
-                if (vcn != null) {
-                    if (vcnConfig == null) {
-                        // TODO: b/284381334 Investigate for the root cause of this issue
-                        // and handle it properly
-                        logWtf("Vcn instance exists but VcnConfig does not for " + subGrp);
-                    }
-
+                if (vcn != null && vcnConfig != null) {
                     if (vcn.getStatus() == VCN_STATUS_CODE_ACTIVE) {
                         isVcnManagedNetwork = true;
                     }
@@ -1120,6 +1128,8 @@ public class VcnManagementService extends IVcnManagementService.Stub {
                             }
                         }
                     }
+                } else if (vcn != null && vcnConfig == null) {
+                    logWtf("Vcn instance exists but VcnConfig does not for " + subGrp);
                 }
             }
 
@@ -1522,7 +1532,7 @@ public class VcnManagementService extends IVcnManagementService.Stub {
                 // Notify all registered StatusCallbacks for this subGroup
                 for (VcnStatusCallbackInfo cbInfo : mRegisteredStatusCallbacks.values()) {
                     if (isCallbackPermissioned(cbInfo, mSubGroup)) {
-                        Binder.withCleanCallingIdentity(() -> {
+                        BinderUtils.withCleanCallingIdentity(() -> {
                             try {
                                 cbInfo.mCallback.onGatewayConnectionError(
                                         gatewayConnectionName,

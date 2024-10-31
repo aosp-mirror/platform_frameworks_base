@@ -17,7 +17,7 @@
 package com.android.settingslib.spa.gallery.scaffold
 
 import android.os.Bundle
-import com.android.settingslib.spa.framework.common.SettingsEntryBuilder
+import androidx.compose.runtime.Composable
 import com.android.settingslib.spa.framework.common.SettingsPageProvider
 import com.android.settingslib.spa.framework.common.createSettingsPage
 import com.android.settingslib.spa.framework.compose.navigator
@@ -34,13 +34,13 @@ object PagerMainPageProvider : SettingsPageProvider {
         ScrollablePagerPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
     )
 
-    fun buildInjectEntry() = SettingsEntryBuilder.createInject(owner = owner)
-        .setUiLayoutFn {
-            Preference(object : PreferenceModel {
-                override val title = TITLE
-                override val onClick = navigator(name)
-            })
-        }
+    @Composable
+    fun Entry() {
+        Preference(object : PreferenceModel {
+            override val title = TITLE
+            override val onClick = navigator(name)
+        })
+    }
 
     override fun getTitle(arguments: Bundle?) = TITLE
 }

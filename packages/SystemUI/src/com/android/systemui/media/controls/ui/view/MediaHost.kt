@@ -20,10 +20,12 @@ import android.graphics.Rect
 import android.util.ArraySet
 import android.view.View
 import android.view.View.OnAttachStateChangeListener
+import com.android.systemui.Flags.mediaControlsUmoInflationInBackground
 import com.android.systemui.media.controls.domain.pipeline.MediaDataManager
 import com.android.systemui.media.controls.shared.model.MediaData
 import com.android.systemui.media.controls.shared.model.SmartspaceMediaData
 import com.android.systemui.media.controls.ui.controller.MediaCarouselController
+import com.android.systemui.media.controls.ui.controller.MediaCarouselControllerLogger
 import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager
 import com.android.systemui.media.controls.ui.controller.MediaHostStatesManager
 import com.android.systemui.media.controls.ui.controller.MediaLocation
@@ -40,6 +42,7 @@ class MediaHost(
     private val mediaDataManager: MediaDataManager,
     private val mediaHostStatesManager: MediaHostStatesManager,
     private val mediaCarouselController: MediaCarouselController,
+    private val debugLogger: MediaCarouselControllerLogger,
 ) : MediaHostState by state {
     lateinit var hostView: UniqueObjectHostView
     var location: Int = -1
@@ -91,8 +94,10 @@ class MediaHost(
                 data: MediaData,
                 immediately: Boolean,
                 receivedSmartspaceCardLatency: Int,
-                isSsReactivated: Boolean
+                isSsReactivated: Boolean,
             ) {
+                if (mediaControlsUmoInflationInBackground()) return
+
                 if (immediately) {
                     updateViewVisibility()
                 }
@@ -101,7 +106,7 @@ class MediaHost(
             override fun onSmartspaceMediaDataLoaded(
                 key: String,
                 data: SmartspaceMediaData,
-                shouldPrioritize: Boolean
+                shouldPrioritize: Boolean,
             ) {
                 updateViewVisibility()
             }
@@ -171,7 +176,7 @@ class MediaHost(
                         input.widthMeasureSpec =
                             View.MeasureSpec.makeMeasureSpec(
                                 View.MeasureSpec.getSize(input.widthMeasureSpec),
-                                View.MeasureSpec.EXACTLY
+                                View.MeasureSpec.EXACTLY,
                             )
                     }
                     // This will trigger a state change that ensures that we now have a state
@@ -214,6 +219,7 @@ class MediaHost(
         val newVisibility = if (visible) View.VISIBLE else View.GONE
         if (newVisibility != hostView.visibility) {
             hostView.visibility = newVisibility
+            debugLogger.logMediaHostVisibility(location, visible)
             visibleChangedListeners.forEach { it.invoke(visible) }
         }
     }

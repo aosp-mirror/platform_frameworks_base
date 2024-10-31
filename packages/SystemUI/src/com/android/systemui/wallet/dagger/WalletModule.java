@@ -25,6 +25,7 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.pipeline.shared.TileSpec;
+import com.android.systemui.qs.shared.model.TileCategory;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.qs.tiles.QuickAccessWalletTile;
 import com.android.systemui.qs.tiles.viewmodel.QSTileConfig;
@@ -34,14 +35,14 @@ import com.android.systemui.res.R;
 import com.android.systemui.wallet.controller.WalletContextualLocationsService;
 import com.android.systemui.wallet.ui.WalletActivity;
 
-import java.util.concurrent.Executor;
-
 import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.ClassKey;
 import dagger.multibindings.IntoMap;
 import dagger.multibindings.StringKey;
+
+import java.util.concurrent.Executor;
 
 /**
  * Module for injecting classes in Wallet.
@@ -90,6 +91,7 @@ public abstract class WalletModule {
                         R.string.wallet_title
                 ),
                 uiEventLogger.getNewInstanceId(),
+                TileCategory.UTILITIES,
                 tileSpec.getSpec(),
                 QSTilePolicy.NoRestrictions.INSTANCE
         );

@@ -88,9 +88,6 @@ class FakeKeyguardRepository @Inject constructor() : KeyguardRepository {
     private val _isDreamingWithOverlay = MutableStateFlow(false)
     override val isDreamingWithOverlay: Flow<Boolean> = _isDreamingWithOverlay
 
-    private val _isActiveDreamLockscreenHosted = MutableStateFlow(false)
-    override val isActiveDreamLockscreenHosted: StateFlow<Boolean> = _isActiveDreamLockscreenHosted
-
     private val _dozeAmount = MutableStateFlow(0f)
     override val linearDozeAmount: Flow<Float> = _dozeAmount
 
@@ -102,8 +99,7 @@ class FakeKeyguardRepository @Inject constructor() : KeyguardRepository {
 
     private val _isUdfpsSupported = MutableStateFlow(false)
 
-    private val _isKeyguardGoingAway = MutableStateFlow(false)
-    override val isKeyguardGoingAway: Flow<Boolean> = _isKeyguardGoingAway
+    override val isKeyguardGoingAway = MutableStateFlow(false)
 
     private val _biometricUnlockState =
         MutableStateFlow(BiometricUnlockModel(BiometricUnlockMode.NONE, null))
@@ -130,6 +126,14 @@ class FakeKeyguardRepository @Inject constructor() : KeyguardRepository {
 
     private val _isEncryptedOrLockdown = MutableStateFlow(true)
     override val isEncryptedOrLockdown: Flow<Boolean> = _isEncryptedOrLockdown
+
+    private val _shortcutAbsoluteTop = MutableStateFlow(0F)
+    override val shortcutAbsoluteTop: StateFlow<Float>
+        get() = _shortcutAbsoluteTop.asStateFlow()
+
+    private val _notificationStackAbsoluteBottom = MutableStateFlow(0F)
+    override val notificationStackAbsoluteBottom: StateFlow<Float>
+        get() = _notificationStackAbsoluteBottom.asStateFlow()
 
     private val _isKeyguardEnabled = MutableStateFlow(true)
     override val isKeyguardEnabled: StateFlow<Boolean> = _isKeyguardEnabled.asStateFlow()
@@ -165,7 +169,7 @@ class FakeKeyguardRepository @Inject constructor() : KeyguardRepository {
     }
 
     fun setKeyguardGoingAway(isGoingAway: Boolean) {
-        _isKeyguardGoingAway.value = isGoingAway
+        isKeyguardGoingAway.value = isGoingAway
     }
 
     fun setKeyguardOccluded(isOccluded: Boolean) {
@@ -231,17 +235,13 @@ class FakeKeyguardRepository @Inject constructor() : KeyguardRepository {
         _isDreamingWithOverlay.value = isDreaming
     }
 
-    override fun setIsActiveDreamLockscreenHosted(isLockscreenHosted: Boolean) {
-        _isActiveDreamLockscreenHosted.value = isLockscreenHosted
-    }
-
     fun setDozeAmount(dozeAmount: Float) {
         _dozeAmount.value = dozeAmount
     }
 
     override fun setBiometricUnlockState(
         mode: BiometricUnlockMode,
-        source: BiometricUnlockSource?
+        source: BiometricUnlockSource?,
     ) {
         _biometricUnlockState.tryEmit(BiometricUnlockModel(mode, source))
     }
@@ -292,6 +292,14 @@ class FakeKeyguardRepository @Inject constructor() : KeyguardRepository {
 
     override fun isShowKeyguardWhenReenabled(): Boolean {
         return isShowKeyguardWhenReenabled
+    }
+
+    override fun setShortcutAbsoluteTop(top: Float) {
+        _shortcutAbsoluteTop.value = top
+    }
+
+    override fun setNotificationStackAbsoluteBottom(bottom: Float) {
+        _notificationStackAbsoluteBottom.value = bottom
     }
 
     override fun setCanIgnoreAuthAndReturnToGone(canWake: Boolean) {

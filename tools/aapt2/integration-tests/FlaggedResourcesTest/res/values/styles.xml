@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+    <style name="style1">
+        <item name="android:windowIsTranslucent">true</item>
+    </style>
+    <style name="style1" android:featureFlag="test.package.falseFlag">
+        <item name="android:windowIsTranslucent">false</item>
+    </style>
+
+    <style name="style2">
+        <item name="android:windowIsTranslucent">false</item>
+    </style>
+    <style name="style2" android:featureFlag="test.package.trueFlag">
+        <item name="android:windowIsTranslucent">true</item>
+    </style>
+
+    <style name="style3">
+        <item name="android:windowIsTranslucent" android:featureFlag="!test.package.trueFlag">false</item>
+        <item name="android:windowIsTranslucent" android:featureFlag="test.package.trueFlag">true</item>
+    </style>
+</resources>

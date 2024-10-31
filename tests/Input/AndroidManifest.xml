@@ -32,6 +32,14 @@
              android:process=":externalProcess">
         </activity>
 
+        <activity android:name="com.android.test.input.CaptureEventActivity"
+            android:label="Capture events"
+            android:configChanges="touchscreen|uiMode|orientation|screenSize|screenLayout|keyboardHidden|uiMode|navigation|keyboard|density|fontScale|layoutDirection|locale|mcc|mnc|smallestScreenSize"
+            android:enableOnBackInvokedCallback="false"
+            android:turnScreenOn="true"
+            android:exported="true">
+        </activity>
+
     </application>
     <instrumentation android:name="androidx.test.runner.AndroidJUnitRunner"
                      android:targetPackage="com.android.test.input"

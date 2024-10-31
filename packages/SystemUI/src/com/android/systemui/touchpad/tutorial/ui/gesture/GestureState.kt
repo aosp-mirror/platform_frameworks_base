@@ -16,8 +16,16 @@
 
 package com.android.systemui.touchpad.tutorial.ui.gesture
 
-enum class GestureState {
-    NOT_STARTED,
-    IN_PROGRESS,
-    FINISHED
+sealed interface GestureState {
+    data object NotStarted : GestureState
+
+    data object Finished : GestureState
+
+    data class InProgress(val progress: Float = 0f, val direction: GestureDirection? = null) :
+        GestureState
+}
+
+enum class GestureDirection {
+    LEFT,
+    RIGHT,
 }

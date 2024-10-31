@@ -36,7 +36,7 @@ import com.android.systemui.statusbar.data.model.StatusBarMode
 import com.android.systemui.statusbar.phone.BoundsPair
 import com.android.systemui.statusbar.phone.LetterboxAppearanceCalculator
 import com.android.systemui.statusbar.phone.StatusBarBoundsProvider
-import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentComponent
+import com.android.systemui.statusbar.phone.fragment.dagger.HomeStatusBarComponent
 import com.android.systemui.statusbar.phone.ongoingcall.data.repository.OngoingCallRepository
 import com.android.systemui.statusbar.phone.ongoingcall.shared.model.OngoingCallModel
 import dagger.assisted.Assisted
@@ -174,7 +174,7 @@ constructor(
 
     private val _statusBarBounds = MutableStateFlow(BoundsPair(Rect(), Rect()))
 
-    override fun onStatusBarViewInitialized(component: StatusBarFragmentComponent) {
+    override fun onStatusBarViewInitialized(component: HomeStatusBarComponent) {
         val statusBarBoundsProvider = component.boundsProvider
         val listener =
             object : StatusBarBoundsProvider.BoundsChangeListener {
@@ -196,10 +196,9 @@ constructor(
 
     /** Modifies the raw [StatusBarAttributes] if letterboxing is needed. */
     private val modifiedStatusBarAttributes: StateFlow<ModifiedStatusBarAttributes?> =
-        combine(
-                _originalStatusBarAttributes,
-                _statusBarBounds,
-            ) { originalAttributes, statusBarBounds ->
+        combine(_originalStatusBarAttributes, _statusBarBounds) {
+                originalAttributes,
+                statusBarBounds ->
                 if (originalAttributes == null) {
                     null
                 } else {

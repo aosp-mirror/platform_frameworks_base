@@ -55,16 +55,16 @@ constructor(
             onCancel = { 1f },
         )
 
+    val deviceEntryBackgroundViewAlpha: Flow<Float> =
+        transitionAnimation.immediatelyTransitionTo(0f)
+
     override val deviceEntryParentViewAlpha: Flow<Float> =
         deviceEntryUdfpsInteractor.isUdfpsEnrolledAndEnabled.flatMapLatest {
             isUdfpsEnrolledAndEnabled ->
             if (isUdfpsEnrolledAndEnabled) {
                 transitionAnimation.immediatelyTransitionTo(1f)
             } else {
-                transitionAnimation.sharedFlow(
-                    duration = 250.milliseconds,
-                    onStep = { 1f - it },
-                )
+                transitionAnimation.sharedFlow(duration = 250.milliseconds, onStep = { 1f - it })
             }
         }
 }

@@ -36,15 +36,13 @@ import com.android.internal.widget.LockPatternView.Cell;
 import com.android.internal.widget.LockscreenCredential;
 import com.android.keyguard.EmergencyButtonController.EmergencyButtonCallback;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
-import com.android.systemui.bouncer.ui.helper.BouncerHapticHelper;
+import com.android.systemui.bouncer.ui.helper.BouncerHapticPlayer;
 import com.android.systemui.classifier.FalsingClassifier;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.res.R;
 import com.android.systemui.statusbar.policy.DevicePostureController;
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
-
-import com.google.android.msdl.domain.MSDLPlayer;
 
 import java.util.HashMap;
 import java.util.List;
@@ -70,7 +68,6 @@ public class KeyguardPatternViewController
     private LockPatternView mLockPatternView;
     private CountDownTimer mCountdownTimer;
     private AsyncTask<?, ?, ?> mPendingLockCheck;
-    private MSDLPlayer mMSDLPlayer;
 
     private EmergencyButtonCallback mEmergencyButtonCallback = new EmergencyButtonCallback() {
         @Override
@@ -80,7 +77,7 @@ public class KeyguardPatternViewController
     };
 
     private final LockPatternView.ExternalHapticsPlayer mExternalHapticsPlayer = () -> {
-        BouncerHapticHelper.INSTANCE.playPatternDotFeedback(mMSDLPlayer, mView);
+        mBouncerHapticPlayer.playPatternDotFeedback(mView);
     };
 
     /**
@@ -174,9 +171,8 @@ public class KeyguardPatternViewController
                 boolean isValidPattern) {
             boolean dismissKeyguard = mSelectedUserInteractor.getSelectedUserId() == userId;
             if (matched) {
-                BouncerHapticHelper.INSTANCE.playMSDLAuthenticationFeedback(
-                        /* authenticationSucceeded= */true,
-                        /* player =*/mMSDLPlayer
+                mBouncerHapticPlayer.playAuthenticationFeedback(
+                        /* authenticationSucceeded= */true
                 );
                 getKeyguardSecurityCallback().reportUnlockAttempt(userId, true, 0);
                 if (dismissKeyguard) {
@@ -185,9 +181,8 @@ public class KeyguardPatternViewController
                     getKeyguardSecurityCallback().dismiss(true, userId, SecurityMode.Pattern);
                 }
             } else {
-                BouncerHapticHelper.INSTANCE.playMSDLAuthenticationFeedback(
-                        /* authenticationSucceeded= */false,
-                        /* player =*/mMSDLPlayer
+                mBouncerHapticPlayer.playAuthenticationFeedback(
+                        /* authenticationSucceeded= */false
                 );
                 mLockPatternView.setDisplayMode(LockPatternView.DisplayMode.Wrong);
                 if (isValidPattern) {
@@ -216,9 +211,11 @@ public class KeyguardPatternViewController
             EmergencyButtonController emergencyButtonController,
             KeyguardMessageAreaController.Factory messageAreaControllerFactory,
             DevicePostureController postureController, FeatureFlags featureFlags,
-            SelectedUserInteractor selectedUserInteractor, MSDLPlayer msdlPlayer) {
+            SelectedUserInteractor selectedUserInteractor, BouncerHapticPlayer bouncerHapticPlayer
+    ) {
         super(view, securityMode, keyguardSecurityCallback, emergencyButtonController,
-                messageAreaControllerFactory, featureFlags, selectedUserInteractor);
+                messageAreaControllerFactory, featureFlags, selectedUserInteractor,
+                bouncerHapticPlayer);
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mLockPatternUtils = lockPatternUtils;
         mLatencyTracker = latencyTracker;
@@ -228,7 +225,6 @@ public class KeyguardPatternViewController
                 featureFlags.isEnabled(LOCKSCREEN_ENABLE_LANDSCAPE));
         mLockPatternView = mView.findViewById(R.id.lockPatternView);
         mPostureController = postureController;
-        mMSDLPlayer = msdlPlayer;
     }
 
     @Override

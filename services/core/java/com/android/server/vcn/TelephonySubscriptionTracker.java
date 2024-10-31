@@ -40,11 +40,11 @@ import android.telephony.TelephonyManager;
 import android.telephony.TelephonyManager.CarrierPrivilegesCallback;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.IndentingPrintWriter;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.annotations.VisibleForTesting.Visibility;
-import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.vcn.util.PersistableBundleUtils.PersistableBundleWrapper;
 
 import java.util.ArrayList;
@@ -322,9 +322,16 @@ public class TelephonySubscriptionTracker extends BroadcastReceiver {
 
         if (SubscriptionManager.isValidSubscriptionId(subId)) {
             // Get only configs as needed to save memory.
-            final PersistableBundle carrierConfig =
-                    CarrierConfigManager.getCarrierConfigSubset(mContext, subId,
-                            VcnManager.VCN_RELATED_CARRIER_CONFIG_KEYS);
+            PersistableBundle carrierConfig = new PersistableBundle();
+            try {
+                carrierConfig =
+                        mCarrierConfigManager.getConfigForSubId(
+                                subId, VcnManager.VCN_RELATED_CARRIER_CONFIG_KEYS);
+
+            } catch (RuntimeException exception) {
+                Slog.w(TAG, "CarrierConfigLoader is not available.");
+            }
+
             if (mDeps.isConfigForIdentifiedCarrier(carrierConfig)) {
                 mReadySubIdsBySlotId.put(slotId, subId);
 
@@ -427,6 +434,17 @@ public class TelephonySubscriptionTracker extends BroadcastReceiver {
         @NonNull
         public Set<ParcelUuid> getActiveSubscriptionGroups() {
             return mPrivilegedPackages.keySet();
+        }
+
+        /** Returns all subscription groups */
+        @NonNull
+        public Set<ParcelUuid> getAllSubscriptionGroups() {
+            final Set<ParcelUuid> subGroups = new ArraySet<>();
+            for (SubscriptionInfo subInfo : mSubIdToInfoMap.values()) {
+                subGroups.add(subInfo.getGroupUuid());
+            }
+
+            return subGroups;
         }
 
         /** Checks if the provided package is carrier privileged for the specified sub group. */

@@ -91,6 +91,8 @@ class OwnersData {
     private static final String ATTR_REQUIRED_PASSWORD_COMPLEXITY_MIGRATED =
             "passwordComplexityMigrated";
     private static final String ATTR_SUSPENDED_PACKAGES_MIGRATED = "suspendedPackagesMigrated";
+    private static final String ATTR_RESET_PASSWORD_WITH_TOKEN_MIGRATED =
+            "resetPasswordWithTokenMigrated";
     private static final String ATTR_MIGRATED_POST_UPGRADE = "migratedPostUpgrade";
 
     // Internal state for the device owner package.
@@ -122,6 +124,7 @@ class OwnersData {
     boolean mSecurityLoggingMigrated = false;
     boolean mRequiredPasswordComplexityMigrated = false;
     boolean mSuspendedPackagesMigrated = false;
+    boolean mResetPasswordWithTokenMigrated = false;
 
     boolean mPoliciesMigratedPostUpdate = false;
 
@@ -417,7 +420,10 @@ class OwnersData {
                         mSuspendedPackagesMigrated);
 
             }
-
+            if (Flags.resetPasswordWithTokenCoexistence()) {
+                out.attributeBoolean(null, ATTR_RESET_PASSWORD_WITH_TOKEN_MIGRATED,
+                        mResetPasswordWithTokenMigrated);
+            }
             out.endTag(null, TAG_POLICY_ENGINE_MIGRATION);
 
         }
@@ -488,6 +494,9 @@ class OwnersData {
                     mSuspendedPackagesMigrated = Flags.unmanagedModeMigration()
                             && parser.getAttributeBoolean(null,
                                     ATTR_SUSPENDED_PACKAGES_MIGRATED, false);
+                    mResetPasswordWithTokenMigrated = Flags.resetPasswordWithTokenCoexistence()
+                            && parser.getAttributeBoolean(null,
+                            ATTR_RESET_PASSWORD_WITH_TOKEN_MIGRATED, false);
 
                     break;
                 default:

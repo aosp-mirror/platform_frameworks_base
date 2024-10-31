@@ -76,8 +76,10 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 public class DefaultImeVisibilityApplierTest extends InputMethodManagerServiceTestBase {
 
+    private final DeviceFlagsValueProvider mFlagsValueProvider = new DeviceFlagsValueProvider();
+
     @Rule
-    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
+    public final CheckFlagsRule mCheckFlagsRule = new CheckFlagsRule(mFlagsValueProvider);
     private DefaultImeVisibilityApplier mVisibilityApplier;
 
     @Before
@@ -151,7 +153,7 @@ public class DefaultImeVisibilityApplierTest extends InputMethodManagerServiceTe
             mVisibilityApplier.applyImeVisibility(mWindowToken, ImeTracker.Token.empty(),
                     STATE_HIDE_IME_EXPLICIT, eq(SoftInputShowHideReason.NOT_SET), mUserId);
         }
-        if (Flags.refactorInsetsController()) {
+        if (mFlagsValueProvider.getBoolean(Flags.FLAG_REFACTOR_INSETS_CONTROLLER)) {
             verifySetImeVisibility(true /* setVisible */, false /* invoked */);
             verifySetImeVisibility(false /* setVisible */, true /* invoked */);
         } else {
@@ -168,7 +170,7 @@ public class DefaultImeVisibilityApplierTest extends InputMethodManagerServiceTe
             mVisibilityApplier.applyImeVisibility(mWindowToken, ImeTracker.Token.empty(),
                     STATE_HIDE_IME_NOT_ALWAYS, eq(SoftInputShowHideReason.NOT_SET), mUserId);
         }
-        if (Flags.refactorInsetsController()) {
+        if (mFlagsValueProvider.getBoolean(Flags.FLAG_REFACTOR_INSETS_CONTROLLER)) {
             verifySetImeVisibility(true /* setVisible */, false /* invoked */);
             verifySetImeVisibility(false /* setVisible */, true /* invoked */);
         } else {
@@ -182,7 +184,7 @@ public class DefaultImeVisibilityApplierTest extends InputMethodManagerServiceTe
             mVisibilityApplier.applyImeVisibility(mWindowToken, ImeTracker.Token.empty(),
                     STATE_SHOW_IME_IMPLICIT, eq(SoftInputShowHideReason.NOT_SET), mUserId);
         }
-        if (Flags.refactorInsetsController()) {
+        if (mFlagsValueProvider.getBoolean(Flags.FLAG_REFACTOR_INSETS_CONTROLLER)) {
             verifySetImeVisibility(true /* setVisible */, true /* invoked */);
             verifySetImeVisibility(false /* setVisible */, false /* invoked */);
         } else {
@@ -260,7 +262,7 @@ public class DefaultImeVisibilityApplierTest extends InputMethodManagerServiceTe
             verify(mVisibilityApplier).applyImeVisibility(
                     eq(mWindowToken), any(), eq(STATE_HIDE_IME),
                     eq(SoftInputShowHideReason.NOT_SET), eq(mUserId) /* userId */);
-            if (!Flags.refactorInsetsController()) {
+            if (!mFlagsValueProvider.getBoolean(Flags.FLAG_REFACTOR_INSETS_CONTROLLER)) {
                 verify(mInputMethodManagerService.mWindowManagerInternal).hideIme(eq(mWindowToken),
                         eq(displayIdToShowIme), and(not(eq(statsToken)), notNull()));
             }

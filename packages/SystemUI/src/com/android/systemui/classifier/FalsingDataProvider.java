@@ -282,6 +282,8 @@ public class FalsingDataProvider {
         return !mRecentKeyEvents.isEmpty();
     }
 
+    // Deprecated in favor of {@code isTouchScreenSource}, b/329221787
+    @Deprecated
     public boolean isFromTrackpad() {
         if (Flags.nonTouchscreenDevicesBypassFalsing()) {
             return false;

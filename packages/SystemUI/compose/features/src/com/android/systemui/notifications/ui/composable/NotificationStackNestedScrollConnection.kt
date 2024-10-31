@@ -23,10 +23,15 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.fastCoerceAtLeast
 import com.android.compose.nestedscroll.PriorityNestedScrollConnection
-import com.android.systemui.common.ui.compose.windowinsets.LocalRawScreenHeight
+import com.android.compose.nestedscroll.ScrollController
 import kotlin.math.max
 import kotlin.math.roundToInt
 import kotlin.math.tanh
@@ -36,9 +41,10 @@ import kotlinx.coroutines.launch
 @Composable
 fun Modifier.stackVerticalOverscroll(
     coroutineScope: CoroutineScope,
-    canScrollForward: () -> Boolean
+    canScrollForward: () -> Boolean,
 ): Modifier {
-    val screenHeight = LocalRawScreenHeight.current
+    val screenHeight =
+        with(LocalDensity.current) { LocalConfiguration.current.screenHeightDp.dp.toPx() }
     val overscrollOffset = remember { Animatable(0f) }
     val stackNestedScrollConnection = remember {
         NotificationStackNestedScrollConnection(
@@ -60,10 +66,10 @@ fun Modifier.stackVerticalOverscroll(
                     overscrollOffset.animateTo(
                         targetValue = 0f,
                         initialVelocity = velocityAvailable,
-                        animationSpec = tween()
+                        animationSpec = tween(),
                     )
                 }
-            }
+            },
         )
     }
 
@@ -83,21 +89,34 @@ fun NotificationStackNestedScrollConnection(
 ): PriorityNestedScrollConnection {
     return PriorityNestedScrollConnection(
         orientation = Orientation.Vertical,
-        canStartPreScroll = { _, _ -> false },
-        canStartPostScroll = { offsetAvailable, offsetBeforeStart ->
+        canStartPreScroll = { _, _, _ -> false },
+        canStartPostScroll = { offsetAvailable, offsetBeforeStart, _ ->
             offsetAvailable < 0f && offsetBeforeStart < 0f && !canScrollForward()
         },
         canStartPostFling = { velocityAvailable -> velocityAvailable < 0f && !canScrollForward() },
-        canContinueScroll = { stackOffset() > 0f },
-        canScrollOnFling = true,
-        onStart = { offsetAvailable -> onStart(offsetAvailable) },
-        onScroll = { offsetAvailable ->
-            onScroll(offsetAvailable)
-            offsetAvailable
-        },
-        onStop = { velocityAvailable ->
-            onStop(velocityAvailable)
-            velocityAvailable
+        onStart = { firstScroll ->
+            onStart(firstScroll)
+            object : ScrollController {
+                override fun onScroll(deltaScroll: Float, source: NestedScrollSource): Float {
+                    val minOffset = 0f
+                    val consumed = deltaScroll.fastCoerceAtLeast(minOffset - stackOffset())
+                    if (consumed != 0f) {
+                        onScroll(consumed)
+                    }
+                    return consumed
+                }
+
+                override suspend fun onStop(initialVelocity: Float): Float {
+                    onStop(initialVelocity)
+                    return initialVelocity
+                }
+
+                override fun onCancel() {
+                    onStop(0f)
+                }
+
+                override fun canStopOnPreFling() = false
+            }
         },
     )
 }

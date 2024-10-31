@@ -79,9 +79,7 @@ public class AttestationVerificationManager {
      * is also associated with a particular connection.
      *
      * <p>The {@code callback} is called with a result and {@link VerificationToken} (which may be
-     * null). The result is an integer (see constants in this class with the prefix {@code RESULT_}.
-     * The result is {@link #RESULT_SUCCESS} when at least one verifier has passed its checks. The
-     * token may be used in calls to other parts of the system.
+     * null). The result is an integer (see constants in {@link VerificationResultFlags}).
      *
      * <p>It's expected that a verifier will be able to decode and understand the passed values,
      * otherwise fail to verify. {@code attestation} should contain some type data to prevent parse
@@ -108,7 +106,7 @@ public class AttestationVerificationManager {
             @NonNull Bundle requirements,
             @NonNull byte[] attestation,
             @NonNull @CallbackExecutor Executor executor,
-            @NonNull BiConsumer<@VerificationResult Integer, VerificationToken> callback) {
+            @NonNull BiConsumer<@VerificationResultFlags Integer, VerificationToken> callback) {
         try {
             AndroidFuture<IVerificationResult> resultCallback = new AndroidFuture<>();
             resultCallback.thenAccept(result -> {
@@ -155,7 +153,7 @@ public class AttestationVerificationManager {
      */
     @RequiresPermission(Manifest.permission.USE_ATTESTATION_VERIFICATION_SERVICE)
     @CheckResult
-    @VerificationResult
+    @VerificationResultFlags
     public int verifyToken(
             @NonNull AttestationProfile profile,
             @LocalBindingType int localBindingType,
@@ -280,30 +278,66 @@ public class AttestationVerificationManager {
      */
     public static final int TYPE_CHALLENGE = 3;
 
-    /** @hide */
-    @IntDef(
-            prefix = {"RESULT_"},
-            value = {
-                    RESULT_UNKNOWN,
-                    RESULT_SUCCESS,
-                    RESULT_FAILURE,
-            })
-    @Retention(RetentionPolicy.SOURCE)
+    /**
+     * Verification result returned from {@link #verifyAttestation}.
+     *
+     * A value of {@code 0} indicates success. Otherwise, a bit flag is set from first failing stage
+     * below:
+     * <ol>
+     * <li> The received attestation's integrity (e.g. the certificate signatures) is validated.
+     * If this fails, {@link #FLAG_FAILURE_CERTS} will be returned with all other bits unset.
+     * <li> The local binding requirements are checked. If this fails,
+     * {@link #FLAG_FAILURE_LOCAL_BINDING_REQUIREMENTS} is returned with all other bits unset.
+     * <li> The profile requirements are checked. If this fails, a bit flag will be returned with
+     * some of the these bits set to indicate the type of profile requirement failure:
+     * {@link #FLAG_FAILURE_UNSUPPORTED_PROFILE}, {@link #FLAG_FAILURE_KEYSTORE_REQUIREMENTS},
+     * {@link #FLAG_FAILURE_BOOT_STATE}, and {@link #FLAG_FAILURE_PATCH_LEVEL_DIFF}.
+     * </ol>
+     *
+     * Note: The reason of the failure must be not be provided to the remote device.
+     *
+     * @hide
+     */
+    @IntDef(flag = true, prefix = {"FLAG_FAILURE_"},
+    value = {
+            FLAG_FAILURE_UNKNOWN,
+            FLAG_FAILURE_UNSUPPORTED_PROFILE,
+            FLAG_FAILURE_CERTS,
+            FLAG_FAILURE_LOCAL_BINDING_REQUIREMENTS,
+            FLAG_FAILURE_KEYSTORE_REQUIREMENTS,
+            FLAG_FAILURE_BOOT_STATE,
+            FLAG_FAILURE_PATCH_LEVEL_DIFF,
+    })
     @Target({ElementType.TYPE_PARAMETER, ElementType.TYPE_USE})
-    public @interface VerificationResult {
-    }
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface VerificationResultFlags{}
 
-    /** The result of the verification is unknown because it has a value unknown to this SDK. */
-    public static final int RESULT_UNKNOWN = 0;
+    /** Flag: If there are unknown failures e.g. runtime exception. 0 = no, 1 = yes. */
+    public static final int FLAG_FAILURE_UNKNOWN = 1;
 
-    /** The result of the verification was successful. */
-    public static final int RESULT_SUCCESS = 1;
+    /** Flag: If the AVF profile is supported. 0 = supported, 1 = not supported */
+    public static final int FLAG_FAILURE_UNSUPPORTED_PROFILE = 1 << 1;
 
     /**
-     * The result of the attestation verification was failure. The attestation could not be
-     * verified.
+     * Flag: Result bit for certs verification e.g. loading, generating, parsing certs.
+     * 0 = success, 1 = failure
      */
-    public static final int RESULT_FAILURE = 2;
+    public static final int FLAG_FAILURE_CERTS = 1 << 2;
+
+    /** Flag: Result bit for local binding requirements verification. 0 = success, 1 = failure. */
+    public static final int FLAG_FAILURE_LOCAL_BINDING_REQUIREMENTS = 1 << 3;
+
+    /**
+     * Flag: Result bit for KeyStore requirements verification.
+     * 0 = success, 1 = failure.
+     */
+    public static final int FLAG_FAILURE_KEYSTORE_REQUIREMENTS = 1 << 4;
+
+    /** Flag: Result bit for boot state verification. 0 = success, 1 = failure */
+    public static final int FLAG_FAILURE_BOOT_STATE = 1 << 5;
+
+    /** Flag: Result bit for patch level diff checks. 0 = success, 1 = failure. */
+    public static final int FLAG_FAILURE_PATCH_LEVEL_DIFF = 1 << 6;
 
     /**
      * Requirements bundle parameter key for a public key, a byte array.
@@ -321,6 +355,10 @@ public class AttestationVerificationManager {
 
     /** Requirements bundle parameter for a challenge. */
     public static final String PARAM_CHALLENGE = "localbinding.challenge";
+
+    /** Requirements bundle parameter for max patch level diff (int) for a peer device. **/
+    public static final String PARAM_MAX_PATCH_LEVEL_DIFF_MONTHS =
+            "param_max_patch_level_diff_months";
 
     /** @hide */
     public static String localBindingTypeToString(@LocalBindingType int localBindingType) {
@@ -346,27 +384,5 @@ public class AttestationVerificationManager {
                 return Integer.toString(localBindingType);
         }
         return text + "(" + localBindingType + ")";
-    }
-
-    /** @hide */
-    public static String verificationResultCodeToString(@VerificationResult int resultCode) {
-        final String text;
-        switch (resultCode) {
-            case RESULT_UNKNOWN:
-                text = "UNKNOWN";
-                break;
-
-            case RESULT_SUCCESS:
-                text = "SUCCESS";
-                break;
-
-            case RESULT_FAILURE:
-                text = "FAILURE";
-                break;
-
-            default:
-                return Integer.toString(resultCode);
-        }
-        return text + "(" + resultCode + ")";
     }
 }

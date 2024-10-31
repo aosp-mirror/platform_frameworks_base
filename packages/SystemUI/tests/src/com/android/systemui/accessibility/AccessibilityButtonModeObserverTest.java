@@ -32,12 +32,14 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.settings.UserTracker;
+import com.android.systemui.util.settings.SecureSettings;
 
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
@@ -66,7 +68,7 @@ public class AccessibilityButtonModeObserverTest extends SysuiTestCase {
                 Settings.Secure.ACCESSIBILITY_BUTTON_MODE,
                 Settings.Secure.ACCESSIBILITY_BUTTON_MODE_NAVIGATION_BAR, MY_USER_ID);
         mAccessibilityButtonModeObserver = new AccessibilityButtonModeObserver(mContext,
-                mUserTracker);
+                mUserTracker, Mockito.mock(SecureSettings.class));
     }
 
     @Test

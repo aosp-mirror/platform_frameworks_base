@@ -1356,6 +1356,7 @@ public class AppProfiler {
     @GuardedBy("mService")
     void setMemFactorOverrideLocked(@MemFactor int factor) {
         mMemFactorOverride = factor;
+        mService.mProcessStateController.setIsLastMemoryLevelNormal(isLastMemoryLevelNormal());
     }
 
     @GuardedBy({"mService", "mProcLock"})
@@ -1423,6 +1424,7 @@ public class AppProfiler {
         }
 
         mLastMemoryLevel = memFactor;
+        mService.mProcessStateController.setIsLastMemoryLevelNormal(isLastMemoryLevelNormal());
         mLastNumProcesses = mService.mProcessList.getLruSizeLOSP();
 
         // Dispatch UI_HIDDEN to processes that need it

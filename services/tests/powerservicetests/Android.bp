@@ -23,7 +23,7 @@ android_test {
     ],
 
     libs: [
-        "android.test.mock",
+        "android.test.mock.stubs.system",
     ],
 
     defaults: [

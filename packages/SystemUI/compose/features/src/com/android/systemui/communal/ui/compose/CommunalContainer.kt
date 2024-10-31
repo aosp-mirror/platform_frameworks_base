@@ -13,6 +13,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -44,8 +45,6 @@ import com.android.compose.animation.scene.Swipe
 import com.android.compose.animation.scene.SwipeDirection
 import com.android.compose.animation.scene.observableTransitionState
 import com.android.compose.animation.scene.transitions
-import com.android.compose.theme.LocalAndroidColorScheme
-import com.android.internal.R.attr.focusable
 import com.android.systemui.communal.shared.model.CommunalBackgroundType
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.communal.shared.model.CommunalTransitionKeys
@@ -72,7 +71,7 @@ object AllElements : ElementMatcher {
     override fun matches(key: ElementKey, content: ContentKey) = true
 }
 
-private object TransitionDuration {
+object TransitionDuration {
     const val BETWEEN_HUB_AND_EDIT_MODE_MS = 1000
     const val EDIT_MODE_TO_HUB_CONTENT_MS = 167
     const val EDIT_MODE_TO_HUB_GRID_DELAY_MS = 167
@@ -162,7 +161,6 @@ fun CommunalContainer(
             initialScene = currentSceneKey,
             canChangeScene = { _ -> viewModel.canChangeScene() },
             transitions = sceneTransitions,
-            enableInterruptions = false,
         )
     }
 
@@ -271,7 +269,7 @@ private fun BoxScope.DefaultBackground(
 /** Experimental hub background, static linear gradient */
 @Composable
 private fun BoxScope.StaticLinearGradient() {
-    val colors = LocalAndroidColorScheme.current
+    val colors = MaterialTheme.colorScheme
     Box(
         Modifier.matchParentSize()
             .background(
@@ -284,7 +282,7 @@ private fun BoxScope.StaticLinearGradient() {
 /** Experimental hub background, animated linear gradient */
 @Composable
 private fun BoxScope.AnimatedLinearGradient() {
-    val colors = LocalAndroidColorScheme.current
+    val colors = MaterialTheme.colorScheme
     Box(
         Modifier.matchParentSize()
             .background(colors.primary)

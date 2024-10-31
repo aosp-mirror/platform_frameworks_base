@@ -305,7 +305,7 @@ public final class AuthSession implements IBinder.DeathRecipient {
                     mSensors /* sensorIds */,
                     true /* credentialAllowed */,
                     false /* requireConfirmation */,
-                    mUserId,
+                    mPreAuthInfo.callingUserId,
                     mOperationId,
                     mOpPackageName,
                     mRequestId);
@@ -357,7 +357,7 @@ public final class AuthSession implements IBinder.DeathRecipient {
                             mSensors,
                             mPreAuthInfo.shouldShowCredential(),
                             requireConfirmation,
-                            mUserId,
+                            mPreAuthInfo.callingUserId,
                             mOperationId,
                             mOpPackageName,
                             mRequestId);
@@ -491,7 +491,7 @@ public final class AuthSession implements IBinder.DeathRecipient {
                             mSensors /* sensorIds */,
                             true /* credentialAllowed */,
                             false /* requireConfirmation */,
-                            mUserId,
+                            mPreAuthInfo.callingUserId,
                             mOperationId,
                             mOpPackageName,
                             mRequestId);
@@ -876,6 +876,14 @@ public final class AuthSession implements IBinder.DeathRecipient {
                             getEligibleModalities(),
                             mErrorEscrow,
                             mVendorCodeEscrow
+                    );
+                    break;
+
+                case BiometricPrompt.DISMISSED_REASON_ERROR_NO_WM:
+                    mClientReceiver.onError(
+                            getEligibleModalities(),
+                            BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE,
+                            0 /* vendorCode */
                     );
                     break;
 

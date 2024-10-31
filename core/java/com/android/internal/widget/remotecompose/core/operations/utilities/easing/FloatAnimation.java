@@ -15,9 +15,7 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.utilities.easing;
 
-/**
- * Support Animation of the FloatExpression
- */
+/** Support Animation of the FloatExpression */
 public class FloatAnimation extends Easing {
     float[] mSpec;
     // mSpec[0] = duration
@@ -25,12 +23,12 @@ public class FloatAnimation extends Easing {
     // mSpec[2..1+num_of_param] params
     // mSpec[2+num_of_param] starting Value
     Easing mEasingCurve;
-    private int mType = CUBIC_STANDARD;
+
     private float mDuration = 1;
     private float mWrap = Float.NaN;
     private float mInitialValue = Float.NaN;
     private float mTargetValue = Float.NaN;
-    private float mScale = 1;
+    //    private float mScale = 1;
     float mOffset = 0;
 
     @Override
@@ -51,19 +49,19 @@ public class FloatAnimation extends Easing {
     }
 
     public FloatAnimation() {
+        mType = CUBIC_STANDARD;
+        mEasingCurve = new CubicEasing(mType);
     }
 
     public FloatAnimation(float... description) {
+        mType = CUBIC_STANDARD;
         setAnimationDescription(description);
     }
 
-    public FloatAnimation(int type,
-                          float duration,
-                          float[] description,
-                          float initialValue,
-                          float wrap) {
-        setAnimationDescription(packToFloatArray(duration,
-                type, description, initialValue, wrap));
+    public FloatAnimation(
+            int type, float duration, float[] description, float initialValue, float wrap) {
+        mType = CUBIC_STANDARD;
+        setAnimationDescription(packToFloatArray(duration, type, description, initialValue, wrap));
     }
 
     /**
@@ -75,30 +73,32 @@ public class FloatAnimation extends Easing {
      * @param initialValue
      * @return
      */
-    public static float[] packToFloatArray(float duration,
-                                           int type,
-                                           float[] spec,
-                                           float initialValue,
-                                           float wrap) {
+    public static float[] packToFloatArray(
+            float duration, int type, float[] spec, float initialValue, float wrap) {
         int count = 0;
 
         if (!Float.isNaN(initialValue)) {
             count++;
         }
         if (spec != null) {
+
             count++;
         }
         if (spec != null || type != CUBIC_STANDARD) {
             count++;
             count += (spec == null) ? 0 : spec.length;
         }
-        if (duration != 1 || count > 0) {
-            count++;
-        }
+
         if (!Float.isNaN(initialValue)) {
             count++;
         }
         if (!Float.isNaN(wrap)) {
+            count++;
+        }
+        if (duration != 1 || count > 0) {
+            count++;
+        }
+        if (!Float.isNaN(wrap) || !Float.isNaN(initialValue)) {
             count++;
         }
         float[] ret = new float[count];
@@ -107,11 +107,10 @@ public class FloatAnimation extends Easing {
 
         if (ret.length > 0) {
             ret[pos++] = duration;
-
         }
         if (ret.length > 1) {
-            int wrapBit = (Float.isNaN(wrap)) ? 0 : 1;
-            int initBit = (Float.isNaN(initialValue)) ? 0 : 2;
+            int wrapBit = Float.isNaN(wrap) ? 0 : 1;
+            int initBit = Float.isNaN(initialValue) ? 0 : 2;
             int bits = type | ((wrapBit | initBit) << 8);
             ret[pos++] = Float.intBitsToFloat(specLen << 16 | bits);
         }
@@ -131,6 +130,7 @@ public class FloatAnimation extends Easing {
 
     /**
      * Create an animation based on a float encoding of the animation
+     *
      * @param description
      */
     public void setAnimationDescription(float[] description) {
@@ -165,11 +165,12 @@ public class FloatAnimation extends Easing {
                 mEasingCurve = new CubicEasing(type);
                 break;
             case CUBIC_CUSTOM:
-                mEasingCurve = new CubicEasing(params[offset + 0],
-                        params[offset + 1],
-                        params[offset + 2],
-                        params[offset + 3]
-                );
+                mEasingCurve =
+                        new CubicEasing(
+                                params[offset + 0],
+                                params[offset + 1],
+                                params[offset + 2],
+                                params[offset + 3]);
                 break;
             case EASE_OUT_BOUNCE:
                 mEasingCurve = new BounceCurve(type);
@@ -185,6 +186,7 @@ public class FloatAnimation extends Easing {
 
     /**
      * Get the duration the interpolate is to take
+     *
      * @return duration in seconds
      */
     public float getDuration() {
@@ -193,6 +195,7 @@ public class FloatAnimation extends Easing {
 
     /**
      * Set the initial Value
+     *
      * @param value
      */
     public void setInitialValue(float value) {
@@ -207,6 +210,7 @@ public class FloatAnimation extends Easing {
 
     /**
      * Set the target value to interpolate to
+     *
      * @param value
      */
     public void setTargetValue(float value) {
@@ -230,25 +234,23 @@ public class FloatAnimation extends Easing {
 
     private void setScaleOffset() {
         if (!Float.isNaN(mInitialValue) && !Float.isNaN(mTargetValue)) {
-            mScale = (mTargetValue - mInitialValue);
+            //            mScale = (mTargetValue - mInitialValue); // TODO: commented out because
+            // unused.
             mOffset = mInitialValue;
         } else {
-            mScale = 1;
+            //            mScale = 1; // TODO: commented out because its unused
             mOffset = 0;
         }
     }
 
-    /**
-     * get the value at time t in seconds since start
-     */
+    /** get the value at time t in seconds since start */
+    @Override
     public float get(float t) {
-        return mEasingCurve.get(t / mDuration)
-                * (mTargetValue - mInitialValue) + mInitialValue;
+        return mEasingCurve.get(t / mDuration) * (mTargetValue - mInitialValue) + mInitialValue;
     }
 
-    /**
-     * get the slope of the easing function at at x
-     */
+    /** get the slope of the easing function at at x */
+    @Override
     public float getDiff(float t) {
         return mEasingCurve.getDiff(t / mDuration) * (mTargetValue - mInitialValue);
     }
