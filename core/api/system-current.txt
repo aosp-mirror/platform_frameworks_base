@@ -12467,7 +12467,16 @@ package android.security {
 
 package android.security.advancedprotection {
 
-  @FlaggedApi("android.security.aapm_api") public class AdvancedProtectionManager {
+  @FlaggedApi("android.security.aapm_api") public final class AdvancedProtectionFeature implements android.os.Parcelable {
+    ctor public AdvancedProtectionFeature(@NonNull String);
+    method public int describeContents();
+    method @NonNull public String getId();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.security.advancedprotection.AdvancedProtectionFeature> CREATOR;
+  }
+
+  @FlaggedApi("android.security.aapm_api") public final class AdvancedProtectionManager {
+    method @NonNull @RequiresPermission(android.Manifest.permission.SET_ADVANCED_PROTECTION_MODE) public java.util.List<android.security.advancedprotection.AdvancedProtectionFeature> getAdvancedProtectionFeatures();
     method @RequiresPermission(android.Manifest.permission.SET_ADVANCED_PROTECTION_MODE) public void setAdvancedProtectionEnabled(boolean);
   }
 
