@@ -2270,6 +2270,8 @@
     <string name="system_multitasking_splitscreen_focus_lhs">Switch to app on left or above while using split screen</string>
     <!-- User visible title for the keyboard shortcut that replaces an app from one to another during split screen [CHAR LIMIT=70] -->
     <string name="system_multitasking_replace">During split screen: replace an app from one to another</string>
+    <!-- User visible title for the keyboard shortcut that moves a focused task to a next display [CHAR LIMIT=70] -->
+    <string name="system_multitasking_move_to_next_display">Move active window between displays</string>
 
     <!-- User visible title for the input keyboard shortcuts list. [CHAR LIMIT=70] -->
     <string name="keyboard_shortcut_group_input">Input</string>
