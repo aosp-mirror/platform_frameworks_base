@@ -49,10 +49,13 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.Insets;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.view.Display;
+import android.view.InsetsController;
+import android.view.InsetsSource;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
 import android.view.RoundedCorner;
@@ -153,6 +156,7 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
     private final ResizingEffectPolicy mSurfaceEffectPolicy;
     private final ShellTaskOrganizer mTaskOrganizer;
     private final InsetsState mInsetsState = new InsetsState();
+    private Insets mPinnedTaskbarInsets = Insets.NONE;
 
     private Context mContext;
     @VisibleForTesting DividerSnapAlgorithm mDividerSnapAlgorithm;
@@ -523,6 +527,7 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
     @Override
     public void insetsChanged(InsetsState insetsState) {
         mInsetsState.set(insetsState);
+
         if (!mInitialized) {
             return;
         }
@@ -531,7 +536,49 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
             // flicker.
             return;
         }
+
+        // Check to see if insets changed in such a way that the divider algorithm needs to be
+        // recalculated.
+        Insets pinnedTaskbarInsets = calculatePinnedTaskbarInsets(insetsState);
+        if (!mPinnedTaskbarInsets.equals(pinnedTaskbarInsets)) {
+            mPinnedTaskbarInsets = pinnedTaskbarInsets;
+            // Refresh the DividerSnapAlgorithm.
+            mDividerSnapAlgorithm = getSnapAlgorithm(mContext, mRootBounds);
+            // If the divider is no longer placed on a snap point, animate it to the nearest one.
+            DividerSnapAlgorithm.SnapTarget snapTarget =
+                    findSnapTarget(mDividerPosition, 0, false /* hardDismiss */);
+            if (snapTarget.position != mDividerPosition) {
+                snapToTarget(mDividerPosition, snapTarget,
+                        InsetsController.ANIMATION_DURATION_RESIZE,
+                        InsetsController.RESIZE_INTERPOLATOR);
+            }
+        }
+
         mSplitWindowManager.onInsetsChanged(insetsState);
+    }
+
+    /**
+     * Calculates the insets that might trigger a divider algorithm recalculation. Currently, only
+     * pinned Taskbar does this, and only when the IME is not showing.
+     */
+    private Insets calculatePinnedTaskbarInsets(InsetsState insetsState) {
+        if (insetsState.isSourceOrDefaultVisible(InsetsSource.ID_IME, WindowInsets.Type.ime())) {
+            return Insets.NONE;
+        }
+
+        // If IME is not showing...
+        for (int i = insetsState.sourceSize() - 1; i >= 0; i--) {
+            final InsetsSource source = insetsState.sourceAt(i);
+            // and Taskbar is pinned...
+            if (source.getType() == WindowInsets.Type.navigationBars()
+                    && source.hasFlags(InsetsSource.FLAG_INSETS_ROUNDED_CORNER)) {
+                // Return Insets representing the pinned taskbar state.
+                return source.calculateVisibleInsets(mRootBounds);
+            }
+        }
+
+        // Else, divider can calculate based on the full display.
+        return Insets.NONE;
     }
 
     @Override
@@ -631,8 +678,8 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
     }
 
     /**
-     * Same as {@link #snapToTarget(int, SnapTarget)}, with default animation duration and
-     * interpolator.
+     * Same as {@link #snapToTarget(int, SnapTarget, int, Interpolator)}, with default animation
+     * duration and interpolator.
      */
     public void snapToTarget(int currentPosition, SnapTarget snapTarget) {
         snapToTarget(currentPosition, snapTarget, FLING_RESIZE_DURATION,
@@ -683,6 +730,7 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
                 mDividerSize,
                 mIsLeftRightSplit,
                 insets,
+                mPinnedTaskbarInsets.toRect(),
                 mIsLeftRightSplit ? DOCKED_LEFT : DOCKED_TOP /* dockSide */);
     }
 
