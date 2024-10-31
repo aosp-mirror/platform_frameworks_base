@@ -364,16 +364,11 @@ public class CameraDeviceImpl extends CameraDevice
             throw new IllegalArgumentException("Null argument given");
         }
         mCameraId = cameraId;
-        if (Flags.singleThreadExecutor()) {
-            mDeviceCallback = new ClientStateCallback(executor, callback);
-            if (Flags.singleThreadExecutorNaming()) {
-                mDeviceExecutor = Executors.newSingleThreadExecutor(sThreadFactory);
-            } else {
-                mDeviceExecutor = Executors.newSingleThreadExecutor();
-            }
+        mDeviceCallback = new ClientStateCallback(executor, callback);
+        if (Flags.singleThreadExecutorNaming()) {
+            mDeviceExecutor = Executors.newSingleThreadExecutor(sThreadFactory);
         } else {
-            mDeviceCallback = callback;
-            mDeviceExecutor = executor;
+            mDeviceExecutor = Executors.newSingleThreadExecutor();
         }
         mCharacteristics = characteristics;
         mCameraManager = manager;

@@ -108,7 +108,7 @@ constructor(@NotificationInterruptLog val buffer: LogBuffer) {
             TAG,
             INFO,
             { bool1 = isEnabled },
-            { "Cooldown enabled: $isEnabled" }
+            { "Cooldown enabled: $bool1" }
         )
     }
 }

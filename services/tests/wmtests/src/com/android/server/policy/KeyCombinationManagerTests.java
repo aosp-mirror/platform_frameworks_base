@@ -71,12 +71,12 @@ public class KeyCombinationManagerTests {
                 new KeyCombinationManager.TwoKeysCombinationRule(KEYCODE_VOLUME_DOWN,
                         KEYCODE_POWER) {
                     @Override
-                    void execute() {
+                    public void execute() {
                         mAction1Triggered.countDown();
                     }
 
                     @Override
-                    void cancel() {
+                    public void cancel() {
                     }
                 });
 
@@ -85,21 +85,21 @@ public class KeyCombinationManagerTests {
                 new KeyCombinationManager.TwoKeysCombinationRule(KEYCODE_VOLUME_DOWN,
                         KEYCODE_VOLUME_UP) {
                     @Override
-                    boolean preCondition() {
+                    public boolean preCondition() {
                         return mPreCondition;
                     }
 
                     @Override
-                    void execute() {
+                    public void execute() {
                         mAction2Triggered.countDown();
                     }
 
                     @Override
-                    void cancel() {
+                    public void cancel() {
                     }
 
                     @Override
-                    long getKeyInterceptDelayMs() {
+                    public long getKeyInterceptDelayMs() {
                         return 0;
                     }
                 });
@@ -115,12 +115,12 @@ public class KeyCombinationManagerTests {
                     };
 
                     @Override
-                    void execute() {
+                    public void execute() {
                         mHandler.postDelayed(mAction, SCHEDULE_TIME);
                     }
 
                     @Override
-                    void cancel() {
+                    public void cancel() {
                         mHandler.removeCallbacks(mAction);
                     }
                 });
@@ -235,12 +235,12 @@ public class KeyCombinationManagerTests {
                 new KeyCombinationManager.TwoKeysCombinationRule(KEYCODE_VOLUME_DOWN,
                         KEYCODE_POWER) {
                     @Override
-                    void execute() {
+                    public void execute() {
                         mAction1Triggered.countDown();
                     }
 
                     @Override
-                    void cancel() {
+                    public void cancel() {
                     }
                 };
 

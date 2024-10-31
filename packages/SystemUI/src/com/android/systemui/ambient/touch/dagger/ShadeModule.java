@@ -22,8 +22,10 @@ import com.android.systemui.ambient.touch.ShadeTouchHandler;
 import com.android.systemui.ambient.touch.TouchHandler;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.res.R;
+import com.android.systemui.scene.ui.view.WindowRootView;
 
 import dagger.Binds;
+import dagger.BindsOptionalOf;
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoSet;
@@ -49,6 +51,13 @@ public abstract class ShadeModule {
     @IntoSet
     public abstract TouchHandler providesNotificationShadeTouchHandler(
             ShadeTouchHandler touchHandler);
+
+    /**
+     * Window root view is used to send touches to the scene container. Declaring as optional as it
+     * may not be present on all SysUI variants.
+     */
+    @BindsOptionalOf
+    abstract WindowRootView bindWindowRootView();
 
     /**
      * Provides the height of the gesture area for notification swipe down.

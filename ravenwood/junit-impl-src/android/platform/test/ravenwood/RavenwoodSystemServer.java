@@ -33,6 +33,9 @@ import java.util.List;
 import java.util.Set;
 
 public class RavenwoodSystemServer {
+
+    static final String ANDROID_PACKAGE_NAME = "android";
+
     /**
      * Set of services that we know how to provide under Ravenwood. We keep this set distinct
      * from {@code com.android.server.SystemServer} to give us the ability to choose either
@@ -61,19 +64,19 @@ public class RavenwoodSystemServer {
     private static TimingsTraceAndSlog sTimings;
     private static SystemServiceManager sServiceManager;
 
-    public static void init(RavenwoodRule rule) {
+    public static void init(RavenwoodConfig config) {
         // Avoid overhead if no services required
-        if (rule.mServicesRequired.isEmpty()) return;
+        if (config.mServicesRequired.isEmpty()) return;
 
         sStartedServices = new ArraySet<>();
         sTimings = new TimingsTraceAndSlog();
-        sServiceManager = new SystemServiceManager(rule.mContext);
+        sServiceManager = new SystemServiceManager(config.mState.mSystemServerContext);
         sServiceManager.setStartInfo(false,
                 SystemClock.elapsedRealtime(),
                 SystemClock.uptimeMillis());
         LocalServices.addService(SystemServiceManager.class, sServiceManager);
 
-        startServices(rule.mServicesRequired);
+        startServices(config.mServicesRequired);
         sServiceManager.sealStartedServices();
 
         // TODO: expand to include additional boot phases when relevant
@@ -81,7 +84,7 @@ public class RavenwoodSystemServer {
         sServiceManager.startBootPhase(sTimings, SystemService.PHASE_BOOT_COMPLETED);
     }
 
-    public static void reset(RavenwoodRule rule) {
+    public static void reset(RavenwoodConfig config) {
         // TODO: consider introducing shutdown boot phases
 
         LocalServices.removeServiceForTest(SystemServiceManager.class);

@@ -16,11 +16,9 @@
 
 package com.android.keyguard;
 
-import static com.android.systemui.Flags.msdlFeedback;
 import static com.android.systemui.Flags.pinInputFieldStyledFocusState;
 import static com.android.systemui.util.kotlin.JavaAdapterKt.collectFlow;
 
-import android.annotation.Nullable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.StateListDrawable;
@@ -37,13 +35,11 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.keyguard.domain.interactor.KeyguardKeyboardInteractor;
 import com.android.systemui.Flags;
+import com.android.systemui.bouncer.ui.helper.BouncerHapticPlayer;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.res.R;
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
-
-import com.google.android.msdl.data.model.MSDLToken;
-import com.google.android.msdl.domain.MSDLPlayer;
 
 public abstract class KeyguardPinBasedInputViewController<T extends KeyguardPinBasedInputView>
         extends KeyguardAbsKeyInputViewController<T> {
@@ -83,12 +79,12 @@ public abstract class KeyguardPinBasedInputViewController<T extends KeyguardPinB
             FeatureFlags featureFlags,
             SelectedUserInteractor selectedUserInteractor,
             KeyguardKeyboardInteractor keyguardKeyboardInteractor,
-            @Nullable MSDLPlayer msdlPlayer,
+            BouncerHapticPlayer bouncerHapticPlayer,
             UserActivityNotifier userActivityNotifier) {
         super(view, keyguardUpdateMonitor, securityMode, lockPatternUtils, keyguardSecurityCallback,
                 messageAreaControllerFactory, latencyTracker, falsingCollector,
-                emergencyButtonController, featureFlags, selectedUserInteractor, msdlPlayer,
-                userActivityNotifier);
+                emergencyButtonController, featureFlags, selectedUserInteractor,
+                bouncerHapticPlayer, userActivityNotifier);
         mLiftToActivateListener = liftToActivateListener;
         mFalsingCollector = falsingCollector;
         mKeyguardKeyboardInteractor = keyguardKeyboardInteractor;
@@ -110,16 +106,16 @@ public abstract class KeyguardPinBasedInputViewController<T extends KeyguardPinB
                 return false;
             });
             button.setAnimationEnabled(showAnimations);
-            button.setMSDLPlayer(mMSDLPlayer);
+            button.setBouncerHapticHelper(mBouncerHapticPlayer);
         }
         mPasswordEntry.setOnKeyListener(mOnKeyListener);
         mPasswordEntry.setUserActivityListener(this::onUserInput);
 
         View deleteButton = mView.findViewById(R.id.delete_button);
-        if (msdlFeedback()) {
+        if (mBouncerHapticPlayer.isEnabled()) {
             deleteButton.setOnTouchListener((View view, MotionEvent event) -> {
-                if (event.getActionMasked() == MotionEvent.ACTION_DOWN && mMSDLPlayer != null) {
-                    mMSDLPlayer.playToken(MSDLToken.KEYPRESS_DELETE, null);
+                if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
+                    mBouncerHapticPlayer.playDeleteKeyPressFeedback();
                 }
                 return false;
             });
@@ -137,8 +133,8 @@ public abstract class KeyguardPinBasedInputViewController<T extends KeyguardPinB
             if (mPasswordEntry.isEnabled()) {
                 mView.resetPasswordText(true /* animate */, true /* announce */);
             }
-            if (msdlFeedback() && mMSDLPlayer != null) {
-                mMSDLPlayer.playToken(MSDLToken.LONG_PRESS, null);
+            if (mBouncerHapticPlayer.isEnabled()) {
+                mBouncerHapticPlayer.playDeleteKeyLongPressedFeedback();
             } else {
                 mView.doHapticKeyClick();
             }
@@ -147,7 +143,7 @@ public abstract class KeyguardPinBasedInputViewController<T extends KeyguardPinB
 
         View okButton = mView.findViewById(R.id.key_enter);
         if (okButton != null) {
-            if (!msdlFeedback()) {
+            if (!mBouncerHapticPlayer.isEnabled()) {
                 okButton.setOnTouchListener(mActionButtonTouchListener);
             }
             okButton.setOnClickListener(v -> {
@@ -201,7 +197,7 @@ public abstract class KeyguardPinBasedInputViewController<T extends KeyguardPinB
 
         for (NumPadKey button : mView.getButtons()) {
             button.setOnTouchListener(null);
-            button.setMSDLPlayer(null);
+            button.setBouncerHapticHelper(null);
         }
     }
 

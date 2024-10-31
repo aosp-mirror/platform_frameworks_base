@@ -17,6 +17,7 @@
 package com.android.systemui.qs.tiles.impl.rotation.ui.mapper
 
 import android.content.res.Resources
+import android.hardware.devicestate.DeviceStateManager
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.qs.tiles.base.interactor.QSTileDataToStateMapper
@@ -25,6 +26,7 @@ import com.android.systemui.qs.tiles.viewmodel.QSTileConfig
 import com.android.systemui.qs.tiles.viewmodel.QSTileState
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.policy.DevicePostureController
+import com.android.systemui.util.Utils.isDeviceFoldable
 import javax.inject.Inject
 
 /** Maps [RotationLockTileModel] to [QSTileState]. */
@@ -33,7 +35,8 @@ class RotationLockTileMapper
 constructor(
     @Main private val resources: Resources,
     private val theme: Resources.Theme,
-    private val devicePostureController: DevicePostureController
+    private val devicePostureController: DevicePostureController,
+    private val deviceStateManager: DeviceStateManager
 ) : QSTileDataToStateMapper<RotationLockTileModel> {
     override fun map(config: QSTileConfig, data: RotationLockTileModel): QSTileState =
         QSTileState.build(resources, theme, config.uiConfig) {
@@ -58,7 +61,7 @@ constructor(
             this.icon = {
                 Icon.Loaded(resources.getDrawable(iconRes!!, theme), contentDescription = null)
             }
-            if (isDeviceFoldable()) {
+            if (isDeviceFoldable(resources, deviceStateManager)) {
                 this.secondaryLabel = getSecondaryLabelWithPosture(this.activationState)
             }
             this.stateDescription = this.secondaryLabel
@@ -66,11 +69,6 @@ constructor(
             supportedActions =
                 setOf(QSTileState.UserAction.CLICK, QSTileState.UserAction.LONG_CLICK)
         }
-
-    private fun isDeviceFoldable(): Boolean {
-        val intArray = resources.getIntArray(com.android.internal.R.array.config_foldedDeviceStates)
-        return intArray.isNotEmpty()
-    }
 
     private fun getSecondaryLabelWithPosture(activationState: QSTileState.ActivationState): String {
         val stateNames = resources.getStringArray(R.array.tile_states_rotation)

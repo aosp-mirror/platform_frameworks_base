@@ -16,8 +16,8 @@
 
 package android.libcore;
 
-import androidx.benchmark.BenchmarkState;
-import androidx.benchmark.junit4.BenchmarkRule;
+import android.perftests.utils.BenchmarkState;
+import android.perftests.utils.PerfStatusReporter;
 
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -39,7 +39,7 @@ public class ArrayListIterationPerfTest {
         int mSplat;
     }
     @Rule
-    public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
+    public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
 
     ArrayList<Foo> mList = new ArrayList<Foo>();
     {
@@ -47,7 +47,7 @@ public class ArrayListIterationPerfTest {
     }
     @Test
     public void timeArrayListIterationIndexed() {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             int sum = 0;
             ArrayList<Foo> list = mList;
@@ -59,7 +59,7 @@ public class ArrayListIterationPerfTest {
     }
     @Test
     public void timeArrayListIterationForEach() {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             int sum = 0;
             for (Foo a : mList) {

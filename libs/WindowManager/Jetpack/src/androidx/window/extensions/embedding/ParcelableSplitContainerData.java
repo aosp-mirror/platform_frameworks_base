@@ -89,13 +89,13 @@ class ParcelableSplitContainerData implements Parcelable {
     };
 
     @NonNull
-    private IBinder getPrimaryContainerToken() {
+    IBinder getPrimaryContainerToken() {
         return mSplitContainer != null ? mSplitContainer.getPrimaryContainer().getToken()
                 : mPrimaryContainerToken;
     }
 
     @NonNull
-    private IBinder getSecondaryContainerToken() {
+    IBinder getSecondaryContainerToken() {
         return mSplitContainer != null ? mSplitContainer.getSecondaryContainer().getToken()
                 : mSecondaryContainerToken;
     }

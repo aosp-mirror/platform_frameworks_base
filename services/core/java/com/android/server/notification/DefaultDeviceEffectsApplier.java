@@ -22,6 +22,7 @@ import static android.app.UiModeManager.MODE_ATTENTION_THEME_OVERLAY_OFF;
 import static com.android.server.notification.ZenLog.traceApplyDeviceEffect;
 import static com.android.server.notification.ZenLog.traceScheduleApplyDeviceEffect;
 
+import android.app.KeyguardManager;
 import android.app.UiModeManager;
 import android.app.WallpaperManager;
 import android.content.BroadcastReceiver;
@@ -53,6 +54,7 @@ class DefaultDeviceEffectsApplier implements DeviceEffectsApplier {
 
     private final Context mContext;
     private final ColorDisplayManager mColorDisplayManager;
+    private final KeyguardManager mKeyguardManager;
     private final PowerManager mPowerManager;
     private final UiModeManager mUiModeManager;
     private final WallpaperManager mWallpaperManager;
@@ -67,6 +69,7 @@ class DefaultDeviceEffectsApplier implements DeviceEffectsApplier {
     DefaultDeviceEffectsApplier(Context context) {
         mContext = context;
         mColorDisplayManager = context.getSystemService(ColorDisplayManager.class);
+        mKeyguardManager = context.getSystemService(KeyguardManager.class);
         mPowerManager = context.getSystemService(PowerManager.class);
         mUiModeManager = context.getSystemService(UiModeManager.class);
         WallpaperManager wallpaperManager = context.getSystemService(WallpaperManager.class);
@@ -133,12 +136,14 @@ class DefaultDeviceEffectsApplier implements DeviceEffectsApplier {
 
         // Changing the theme can be disruptive for the user (Activities are likely recreated, may
         // lose some state). Therefore we only apply the change immediately if the rule was
-        // activated manually, or we are initializing, or the screen is currently off/dreaming.
+        // activated manually, or we are initializing, or the screen is currently off/dreaming,
+        // or if the device is locked.
         if (origin == ZenModeConfig.ORIGIN_INIT
                 || origin == ZenModeConfig.ORIGIN_INIT_USER
                 || origin == ZenModeConfig.ORIGIN_USER_IN_SYSTEMUI
                 || origin == ZenModeConfig.ORIGIN_USER_IN_APP
-                || !mPowerManager.isInteractive()) {
+                || !mPowerManager.isInteractive()
+                || (android.app.Flags.modesUi() && mKeyguardManager.isKeyguardLocked())) {
             unregisterScreenOffReceiver();
             updateNightModeImmediately(useNightMode);
         } else {

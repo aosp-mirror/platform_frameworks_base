@@ -16,6 +16,7 @@
 
 package com.android.internal.pm.pkg.component;
 
+import static com.android.internal.pm.pkg.parsing.ParsingPackageUtils.PARSE_APK_IN_APEX;
 import static com.android.internal.pm.pkg.parsing.ParsingUtils.NOT_SET;
 
 import android.annotation.NonNull;
@@ -26,6 +27,7 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.os.Build;
+import android.permission.flags.Flags;
 import android.util.ArrayMap;
 import android.util.EventLog;
 import android.util.Slog;
@@ -49,7 +51,7 @@ public class ParsedPermissionUtils {
 
     @NonNull
     public static ParseResult<ParsedPermission> parsePermission(ParsingPackage pkg, Resources res,
-            XmlResourceParser parser, boolean useRoundIcon, ParseInput input)
+            XmlResourceParser parser, boolean useRoundIcon, ParseInput input, int flags)
             throws IOException, XmlPullParserException {
         String packageName = pkg.getPackageName();
         ParsedPermissionImpl permission = new ParsedPermissionImpl();
@@ -77,12 +79,18 @@ public class ParsedPermissionUtils {
 
             if (sa.hasValue(
                     R.styleable.AndroidManifestPermission_backgroundPermission)) {
-                if ("android".equals(packageName)) {
+                final boolean isApkInApex = (flags & PARSE_APK_IN_APEX) != 0;
+                final boolean canUseBackgroundPermissionAttr =
+                    "android".equals(packageName) ||
+                        (Flags.replaceBodySensorPermissionEnabled() && isApkInApex);
+                if (canUseBackgroundPermissionAttr) {
                     permission.setBackgroundPermission(sa.getNonResourceString(
-                            R.styleable.AndroidManifestPermission_backgroundPermission));
+                        R.styleable.AndroidManifestPermission_backgroundPermission));
                 } else {
+                    String allowedPackages = "'android'"
+                        + (Flags.replaceBodySensorPermissionEnabled() ? " and APK_IN_APEX" : "");
                     Slog.w(TAG, packageName + " defines a background permission. Only the "
-                            + "'android' package can do that.");
+                        + allowedPackages + " packages can do that.");
                 }
             }
 

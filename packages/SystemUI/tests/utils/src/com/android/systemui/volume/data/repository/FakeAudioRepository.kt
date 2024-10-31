@@ -18,6 +18,7 @@ package com.android.systemui.volume.data.repository
 
 import android.media.AudioDeviceInfo
 import android.media.AudioManager
+import android.view.KeyEvent
 import com.android.settingslib.volume.data.model.VolumeControllerEvent
 import com.android.settingslib.volume.data.repository.AudioRepository
 import com.android.settingslib.volume.shared.model.AudioStream
@@ -33,11 +34,7 @@ import kotlinx.coroutines.flow.update
 
 class FakeAudioRepository : AudioRepository {
 
-    private val unMutableStreams =
-        setOf(
-            AudioManager.STREAM_VOICE_CALL,
-            AudioManager.STREAM_ALARM,
-        )
+    private val unMutableStreams = setOf(AudioManager.STREAM_VOICE_CALL, AudioManager.STREAM_ALARM)
 
     private val mutableMode = MutableStateFlow(AudioManager.MODE_NORMAL)
     override val mode: StateFlow<Int> = mutableMode.asStateFlow()
@@ -64,6 +61,15 @@ class FakeAudioRepository : AudioRepository {
     private var mutableIsInitialized: Boolean = false
     val isInitialized: Boolean
         get() = mutableIsInitialized
+
+    private val _dispatchedKeyEvents = mutableListOf<KeyEvent>()
+
+    val dispatchedKeyEvents: List<KeyEvent>
+        get() {
+            val currentValue = _dispatchedKeyEvents.toList()
+            _dispatchedKeyEvents.clear()
+            return currentValue
+        }
 
     override fun init() {
         mutableIsInitialized = true
@@ -126,7 +132,7 @@ class FakeAudioRepository : AudioRepository {
         lastAudibleVolumes[audioStream] = volume
     }
 
-    override suspend fun setRingerMode(audioStream: AudioStream, mode: RingerMode) {
+    override suspend fun setRingerModeInternal(audioStream: AudioStream, mode: RingerMode) {
         mutableRingerMode.value = mode
     }
 
@@ -148,5 +154,9 @@ class FakeAudioRepository : AudioRepository {
         if (isInitialized) {
             mutableIsVolumeControllerVisible.value = isVisible
         }
+    }
+
+    override fun dispatchMediaKeyEvent(event: KeyEvent) {
+        _dispatchedKeyEvents.add(event)
     }
 }

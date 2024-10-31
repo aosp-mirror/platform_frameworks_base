@@ -66,6 +66,7 @@ final class RadioModule {
     private final Object mLock = new Object();
     private final Handler mHandler;
     private final RadioEventLogger mEventLogger;
+    private final RadioServiceUserController mUserController;
 
     @GuardedBy("mLock")
     private ITunerSession mHalTunerSession;
@@ -148,16 +149,18 @@ final class RadioModule {
     private final Set<TunerSession> mAidlTunerSessions = new ArraySet<>();
 
     @VisibleForTesting
-    RadioModule(@NonNull IBroadcastRadio service,
-            @NonNull RadioManager.ModuleProperties properties) {
+    RadioModule(IBroadcastRadio service, RadioManager.ModuleProperties properties,
+            RadioServiceUserController userController) {
         mProperties = Objects.requireNonNull(properties);
         mService = Objects.requireNonNull(service);
         mHandler = new Handler(Looper.getMainLooper());
+        mUserController = Objects.requireNonNull(userController, "User controller can not be null");
         mEventLogger = new RadioEventLogger(TAG, RADIO_EVENT_LOGGER_QUEUE_SIZE);
     }
 
     @Nullable
-    static RadioModule tryLoadingModule(int idx, @NonNull String fqName) {
+    static RadioModule tryLoadingModule(int idx, String fqName,
+            RadioServiceUserController controller) {
         try {
             Slogf.i(TAG, "Try loading module for idx " + idx + ", fqName " + fqName);
             IBroadcastRadio service = IBroadcastRadio.getService(fqName);
@@ -179,7 +182,7 @@ final class RadioModule {
             RadioManager.ModuleProperties prop = Convert.propertiesFromHal(idx, fqName,
                     service.getProperties(), amfmConfig.value, dabConfig.value);
 
-            return new RadioModule(service, prop);
+            return new RadioModule(service, prop, controller);
         } catch (RemoteException ex) {
             Slogf.e(TAG, "Failed to load module " + fqName, ex);
             return null;
@@ -208,7 +211,8 @@ final class RadioModule {
                 });
                 mHalTunerSession = Objects.requireNonNull(hwSession.value);
             }
-            TunerSession tunerSession = new TunerSession(this, mHalTunerSession, userCb);
+            TunerSession tunerSession = new TunerSession(this, mHalTunerSession, userCb,
+                    mUserController);
             mAidlTunerSessions.add(tunerSession);
 
             // Propagate state to new client. Note: These callbacks are invoked while holding mLock
@@ -375,7 +379,7 @@ final class RadioModule {
 
     @GuardedBy("mLock")
     private void fanoutAidlCallbackLocked(AidlCallbackRunnable runnable) {
-        int currentUserId = RadioServiceUserController.getCurrentUser();
+        int currentUserId = mUserController.getCurrentUser();
         List<TunerSession> deadSessions = null;
         for (TunerSession tunerSession : mAidlTunerSessions) {
             if (tunerSession.mUserId != currentUserId && tunerSession.mUserId

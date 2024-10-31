@@ -85,7 +85,7 @@ public class TestModeBuilder {
 
     public TestModeBuilder(ZenMode previous) {
         mId = previous.getId();
-        mRule = previous.getRule();
+        mRule = new AutomaticZenRule.Builder(previous.getRule()).build();
 
         mConfigZenRule = new ZenModeConfig.ZenRule();
         mConfigZenRule.enabled = previous.getRule().isEnabled();
@@ -164,6 +164,13 @@ public class TestModeBuilder {
     public TestModeBuilder setDeviceEffects(@Nullable ZenDeviceEffects deviceEffects) {
         mRule.setDeviceEffects(deviceEffects);
         mConfigZenRule.zenDeviceEffects = deviceEffects;
+        return this;
+    }
+
+    public TestModeBuilder setVisualEffect(int effect, boolean allowed) {
+        ZenPolicy newPolicy = new ZenPolicy.Builder(mRule.getZenPolicy())
+                .showVisualEffect(effect, allowed).build();
+        setZenPolicy(newPolicy);
         return this;
     }
 

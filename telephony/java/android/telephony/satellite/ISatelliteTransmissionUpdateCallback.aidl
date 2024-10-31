@@ -50,4 +50,11 @@ oneway interface ISatelliteTransmissionUpdateCallback {
      *                     Satellite location is based on magnetic north direction.
      */
     void onSatellitePositionChanged(in PointingInfo pointingInfo);
+
+    /**
+     * Called when framework receives a request to send a datagram.
+     *
+     * @param datagramType The type of the requested datagram.
+     */
+    void onSendDatagramRequested(int datagramType);
 }

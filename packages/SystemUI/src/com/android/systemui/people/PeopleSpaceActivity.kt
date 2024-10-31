@@ -29,7 +29,7 @@ import com.android.compose.theme.PlatformTheme
 import com.android.systemui.people.ui.compose.PeopleScreen
 import com.android.systemui.people.ui.viewmodel.PeopleViewModel
 import javax.inject.Inject
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /** People Tile Widget configuration activity that shows the user their conversation tiles. */
 class PeopleSpaceActivity

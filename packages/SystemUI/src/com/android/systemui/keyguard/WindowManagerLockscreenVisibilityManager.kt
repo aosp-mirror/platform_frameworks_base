@@ -26,6 +26,8 @@ import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.domain.interactor.KeyguardDismissTransitionInteractor
 import com.android.systemui.keyguard.ui.binder.KeyguardSurfaceBehindParamsApplier
 import com.android.systemui.statusbar.policy.KeyguardStateController
+import com.android.window.flags.Flags
+import com.android.wm.shell.keyguard.KeyguardTransitions
 import java.util.concurrent.Executor
 import javax.inject.Inject
 
@@ -42,6 +44,7 @@ constructor(
     private val keyguardStateController: KeyguardStateController,
     private val keyguardSurfaceBehindAnimator: KeyguardSurfaceBehindParamsApplier,
     private val keyguardDismissTransitionInteractor: KeyguardDismissTransitionInteractor,
+    private val keyguardTransitions: KeyguardTransitions
 ) {
 
     /**
@@ -97,6 +100,9 @@ constructor(
     /** Callback provided by WM to call once we're done with the going away animation. */
     private var goingAwayRemoteAnimationFinishedCallback: IRemoteAnimationFinishedCallback? = null
 
+    private val enableNewKeyguardShellTransitions: Boolean =
+        Flags.ensureKeyguardDoesTransitionStarting()
+
     /**
      * Set the visibility of the surface behind the keyguard, making the appropriate calls to Window
      * Manager to effect the change.
@@ -114,7 +120,14 @@ constructor(
             return
         }
 
+
+
         if (visible) {
+            if (enableNewKeyguardShellTransitions) {
+                keyguardTransitions.startKeyguardTransition(false /* keyguardShowing */, false /* aodShowing */)
+                isKeyguardGoingAway = true
+                return
+            }
             // Make the surface visible behind the keyguard by calling keyguardGoingAway. The
             // lockscreen is still showing as well, allowing us to animate unlocked.
             Log.d(TAG, "ActivityTaskManagerService#keyguardGoingAway()")
@@ -220,7 +233,11 @@ constructor(
                 "isLockscreenShowing=$lockscreenShowing, " +
                 "aodVisible=$aodVisible)."
         )
-        activityTaskManagerService.setLockScreenShown(lockscreenShowing, aodVisible)
+        if (enableNewKeyguardShellTransitions) {
+            keyguardTransitions.startKeyguardTransition(lockscreenShowing, aodVisible)
+        } else {
+            activityTaskManagerService.setLockScreenShown(lockscreenShowing, aodVisible)
+        }
         this.isLockscreenShowing = lockscreenShowing
         this.isAodVisible = aodVisible
     }

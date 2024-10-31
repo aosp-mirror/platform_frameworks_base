@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs.tiles.impl.irecording
 
+import android.os.Handler
 import android.os.UserHandle
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -30,12 +31,15 @@ import com.android.systemui.plugins.statusbar.statusBarStateController
 import com.android.systemui.qs.pipeline.domain.interactor.panelInteractor
 import com.android.systemui.qs.tiles.base.interactor.QSTileInput
 import com.android.systemui.qs.tiles.viewmodel.QSTileUserAction
+import com.android.systemui.recordissue.IssueRecordingState
 import com.android.systemui.recordissue.RecordIssueDialogDelegate
 import com.android.systemui.screenrecord.RecordingController
 import com.android.systemui.settings.UserContextProvider
+import com.android.systemui.settings.userFileManager
 import com.android.systemui.settings.userTracker
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil
 import com.android.systemui.statusbar.policy.keyguardStateController
+import com.android.systemui.util.settings.fakeGlobalSettings
 import com.google.common.truth.Truth
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -81,10 +85,17 @@ class IssueRecordingUserActionInteractorTest : SysuiTestCase() {
             underTest =
                 IssueRecordingUserActionInteractor(
                     testDispatcher,
+                    IssueRecordingState(
+                        userTracker,
+                        userFileManager,
+                        Handler.getMain(),
+                        mContext.contentResolver,
+                        kosmos.fakeGlobalSettings,
+                    ),
                     KeyguardDismissUtil(
                         keyguardStateController,
                         statusBarStateController,
-                        activityStarter
+                        activityStarter,
                     ),
                     keyguardStateController,
                     dialogTransitionAnimator,

@@ -23,6 +23,7 @@ import static org.mockito.Mockito.when;
 
 import android.database.Cursor;
 import android.database.MatrixCursor;
+import android.database.sqlite.SQLiteException;
 import android.net.Uri;
 import android.provider.Telephony.BaseMmsColumns;
 import android.provider.Telephony.Mms;
@@ -63,6 +64,7 @@ public final class MmsQueryHelperTest {
     private final List<MatrixCursor> mAddrCursors = new ArrayList<>();
     private EventConsumer mEventConsumer;
     private MmsQueryHelper mHelper;
+    private MmsContentProvider mMmsContentProvider;
 
     @Before
     public void setUp() {
@@ -73,7 +75,8 @@ public final class MmsQueryHelperTest {
         mAddrCursors.add(new MatrixCursor(ADDR_COLUMNS));
 
         MockContentResolver contentResolver = new MockContentResolver();
-        contentResolver.addProvider(MMS_AUTHORITY, new MmsContentProvider());
+        mMmsContentProvider = new MmsContentProvider();
+        contentResolver.addProvider(MMS_AUTHORITY, mMmsContentProvider);
         when(mContext.getContentResolver()).thenReturn(contentResolver);
 
         mEventConsumer = new EventConsumer();
@@ -84,6 +87,12 @@ public final class MmsQueryHelperTest {
     public void testQueryNoMessages() {
         assertFalse(mHelper.querySince(50_000L));
         assertFalse(mEventConsumer.mEventMap.containsKey(NORMALIZED_PHONE_NUMBER));
+    }
+
+    @Test
+    public void testQueryWithSQLiteException() {
+        mMmsContentProvider.setThrowSQLiteException(true);
+        assertFalse(mHelper.querySince(50_000L));
     }
 
     @Test
@@ -159,16 +168,25 @@ public final class MmsQueryHelperTest {
     }
 
     private class MmsContentProvider extends MockContentProvider {
+        private boolean mThrowSQLiteException = false;
 
         @Override
         public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs,
                 String sortOrder) {
+            if (mThrowSQLiteException) {
+                throw new SQLiteException();
+            }
+
             List<String> segments = uri.getPathSegments();
             if (segments.size() == 2 && "addr".equals(segments.get(1))) {
                 int messageId = Integer.valueOf(segments.get(0));
                 return mAddrCursors.get(messageId);
             }
             return mMmsCursor;
+        }
+
+        public void setThrowSQLiteException(boolean throwException) {
+            this.mThrowSQLiteException = throwException;
         }
     }
 }

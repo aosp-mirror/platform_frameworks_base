@@ -462,6 +462,33 @@ public final class MediaCodecInfo {
         @SuppressLint("AllUpper")
         public static final int COLOR_FormatYUVP010                 = 54;
 
+        /**
+         * P210 is 10-bit-per component 4:2:2 YCbCr semiplanar format.
+         * <p>
+         * This format uses 32 allocated bits per pixel with 20 bits of
+         * data per pixel. Chroma planes are subsampled by 2 both
+         * horizontally. Each chroma and luma component
+         * has 16 allocated bits in little-endian configuration with 10
+         * MSB of actual data.
+         *
+         * <pre>
+         *            byte                   byte
+         *  <--------- i --------> | <------ i + 1 ------>
+         * +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+         * |     UNUSED      |      Y/Cb/Cr                |
+         * +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+         *  0               5 6   7 0                    7
+         * bit
+         * </pre>
+         *
+         * Use this format with {@link Image}. This format corresponds
+         * to {@link android.graphics.ImageFormat#YCBCR_P210}.
+         * <p>
+         */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(android.media.codec.Flags.FLAG_P210_FORMAT_SUPPORT)
+        public static final int COLOR_FormatYUVP210                 = 60;
+
         /** @deprecated Use {@link #COLOR_FormatYUV420Flexible}. */
         public static final int COLOR_TI_FormatYUV420PackedSemiPlanar = 0x7f000100;
         // COLOR_FormatSurface indicates that the data will be a GraphicBuffer metadata reference.

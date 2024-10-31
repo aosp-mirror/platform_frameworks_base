@@ -16,11 +16,12 @@
 
 package com.android.server.wm;
 
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_DIMMER;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_DIMMER;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.graphics.Rect;
 import android.util.Log;
 import android.view.Surface;
@@ -55,7 +56,7 @@ class Dimmer {
         SurfaceControl mDimSurface;
         final WindowContainer<?> mHostContainer;
         // The last container to request to dim
-        private WindowContainer<?> mLastRequestedDimContainer;
+        private WindowState mLastDimmingWindow;
         /** Animation */
         private final DimmerAnimationHelper mAnimationHelper;
         boolean mSkipAnimation = false;
@@ -128,9 +129,9 @@ class Dimmer {
         /**
          * Set the parameters to prepare the dim to be relative parented to the dimming container
          */
-        void prepareReparent(@NonNull WindowContainer<?> geometryParent,
-                @NonNull WindowContainer<?> relativeParent, int relativeLayer) {
-            mAnimationHelper.setRequestedRelativeParent(relativeParent, relativeLayer);
+        void prepareReparent(@Nullable WindowContainer<?> geometryParent,
+                @NonNull WindowState relativeParent) {
+            mAnimationHelper.setRequestedRelativeParent(relativeParent);
             mAnimationHelper.setRequestedGeometryParent(geometryParent);
         }
 
@@ -146,7 +147,7 @@ class Dimmer {
          * Whether anyone is currently requesting the dim
          */
         boolean isDimming() {
-            return mLastRequestedDimContainer != null
+            return mLastDimmingWindow != null
                     && (mHostContainer.isVisibleRequested() || !Flags.useTasksDimOnly());
         }
 
@@ -186,7 +187,7 @@ class Dimmer {
      */
     void resetDimStates() {
         if (mDimState != null) {
-            mDimState.mLastRequestedDimContainer = null;
+            mDimState.mLastDimmingWindow = null;
         }
     }
 
@@ -200,7 +201,7 @@ class Dimmer {
      * @param alpha      Dim amount
      * @param blurRadius Blur amount
      */
-    protected void adjustAppearance(@NonNull WindowContainer<?> dimmingContainer,
+    protected void adjustAppearance(@NonNull WindowState dimmingContainer,
                                     float alpha, int blurRadius) {
         final DimState d = obtainDimState(dimmingContainer);
         d.prepareLookChange(alpha, blurRadius);
@@ -218,14 +219,13 @@ class Dimmer {
      * continue dimming. Indeed, this method won't be able to keep dimming or get a new DimState
      * without also adjusting the appearance.
      * @param geometryParent    The container that defines the geometry of the dim
-     * @param dimmingContainer      The container which to dim above. Should be a child of the host.
-     * @param relativeLayer  The position of the dim wrt the container
+     * @param dimmingContainer      The container that is dimming. The dim layer will be rel-z
+     *                              parented below it
      */
-    public void adjustPosition(@NonNull WindowContainer<?> geometryParent,
-                                    @NonNull WindowContainer<?> dimmingContainer,
-                                    int relativeLayer) {
+    public void adjustPosition(@Nullable WindowContainer<?> geometryParent,
+                                    @NonNull WindowState dimmingContainer) {
         if (mDimState != null) {
-            mDimState.prepareReparent(geometryParent, dimmingContainer, relativeLayer);
+            mDimState.prepareReparent(geometryParent, dimmingContainer);
         }
     }
 
@@ -250,9 +250,9 @@ class Dimmer {
             if (!Flags.useTasksDimOnly()) {
                 mDimState.adjustSurfaceLayout(t);
             }
-            final WindowState ws = mDimState.mLastRequestedDimContainer.asWindowState();
-            if (!mDimState.mIsVisible && ws != null && ws.mActivityRecord != null
-                    && ws.mActivityRecord.mStartingData != null) {
+            if (!mDimState.mIsVisible && mDimState.mLastDimmingWindow != null
+                    && mDimState.mLastDimmingWindow.mActivityRecord != null
+                    && mDimState.mLastDimmingWindow.mActivityRecord.mStartingData != null) {
                 // Skip enter animation while starting window is on top of its activity
                 mDimState.mSkipAnimation = true;
             }
@@ -261,12 +261,20 @@ class Dimmer {
         }
     }
 
+    boolean hasDimState() {
+        return mDimState != null;
+    }
+
+    boolean isDimming() {
+        return mDimState != null && mDimState.isDimming();
+    }
+
     @NonNull
-    private DimState obtainDimState(@NonNull WindowContainer<?> container) {
+    private DimState obtainDimState(@NonNull WindowState window) {
         if (mDimState == null) {
             mDimState = new DimState();
         }
-        mDimState.mLastRequestedDimContainer = container;
+        mDimState.mLastDimmingWindow = window;
         return mDimState;
     }
 
@@ -276,7 +284,6 @@ class Dimmer {
         return mDimState != null ? mDimState.mDimSurface : null;
     }
 
-    @Deprecated
     Rect getDimBounds() {
         return mDimState != null ? mDimState.mDimBounds : null;
     }

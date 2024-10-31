@@ -25,6 +25,7 @@ import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.util.fastForEach
+import com.android.compose.animation.scene.content.state.TransitionState
 import com.android.compose.animation.scene.transformation.AnchoredSize
 import com.android.compose.animation.scene.transformation.AnchoredTranslate
 import com.android.compose.animation.scene.transformation.DrawScale
@@ -50,7 +51,7 @@ internal constructor(
     private val transitionCache =
         mutableMapOf<
             ContentKey,
-            MutableMap<ContentKey, MutableMap<TransitionKey?, TransitionSpecImpl>>
+            MutableMap<ContentKey, MutableMap<TransitionKey?, TransitionSpecImpl>>,
         >()
 
     private val overscrollCache =
@@ -70,7 +71,7 @@ internal constructor(
     private fun findSpec(
         from: ContentKey,
         to: ContentKey,
-        key: TransitionKey?
+        key: TransitionKey?,
     ): TransitionSpecImpl {
         val spec = transition(from, to, key) { it.from == from && it.to == to }
         if (spec != null) {
@@ -152,6 +153,7 @@ internal constructor(
         internal val DefaultSwipeSpec =
             spring(
                 stiffness = Spring.StiffnessMediumLow,
+                dampingRatio = Spring.DampingRatioLowBouncy,
                 visibilityThreshold = OffsetVisibilityThreshold,
             )
 
@@ -190,20 +192,21 @@ interface TransitionSpec {
     fun reversed(): TransitionSpec
 
     /**
-     * The [TransformationSpec] associated to this [TransitionSpec].
+     * The [TransformationSpec] associated to this [TransitionSpec] for the given [transition].
      *
      * Note that this is called once whenever a transition associated to this [TransitionSpec] is
      * started.
      */
-    fun transformationSpec(): TransformationSpec
+    fun transformationSpec(transition: TransitionState.Transition): TransformationSpec
 
     /**
-     * The preview [TransformationSpec] associated to this [TransitionSpec].
+     * The preview [TransformationSpec] associated to this [TransitionSpec] for the given
+     * [transition].
      *
      * Note that this is called once whenever a transition associated to this [TransitionSpec] is
      * started.
      */
-    fun previewTransformationSpec(): TransformationSpec?
+    fun previewTransformationSpec(transition: TransitionState.Transition): TransformationSpec?
 }
 
 interface TransformationSpec {
@@ -240,7 +243,7 @@ interface TransformationSpec {
                 distance = null,
                 transformations = emptyList(),
             )
-        internal val EmptyProvider = { Empty }
+        internal val EmptyProvider = { _: TransitionState.Transition -> Empty }
     }
 }
 
@@ -248,9 +251,13 @@ internal class TransitionSpecImpl(
     override val key: TransitionKey?,
     override val from: ContentKey?,
     override val to: ContentKey?,
-    private val previewTransformationSpec: (() -> TransformationSpecImpl)? = null,
-    private val reversePreviewTransformationSpec: (() -> TransformationSpecImpl)? = null,
-    private val transformationSpec: () -> TransformationSpecImpl
+    private val previewTransformationSpec:
+        ((TransitionState.Transition) -> TransformationSpecImpl)? =
+        null,
+    private val reversePreviewTransformationSpec:
+        ((TransitionState.Transition) -> TransformationSpecImpl)? =
+        null,
+    private val transformationSpec: (TransitionState.Transition) -> TransformationSpecImpl,
 ) : TransitionSpec {
     override fun reversed(): TransitionSpecImpl {
         return TransitionSpecImpl(
@@ -259,22 +266,25 @@ internal class TransitionSpecImpl(
             to = from,
             previewTransformationSpec = reversePreviewTransformationSpec,
             reversePreviewTransformationSpec = previewTransformationSpec,
-            transformationSpec = {
-                val reverse = transformationSpec.invoke()
+            transformationSpec = { transition ->
+                val reverse = transformationSpec.invoke(transition)
                 TransformationSpecImpl(
                     progressSpec = reverse.progressSpec,
                     swipeSpec = reverse.swipeSpec,
                     distance = reverse.distance,
-                    transformations = reverse.transformations.map { it.reversed() }
+                    transformations = reverse.transformations.map { it.reversed() },
                 )
-            }
+            },
         )
     }
 
-    override fun transformationSpec(): TransformationSpecImpl = this.transformationSpec.invoke()
+    override fun transformationSpec(
+        transition: TransitionState.Transition
+    ): TransformationSpecImpl = transformationSpec.invoke(transition)
 
-    override fun previewTransformationSpec(): TransformationSpecImpl? =
-        previewTransformationSpec?.invoke()
+    override fun previewTransformationSpec(
+        transition: TransitionState.Transition
+    ): TransformationSpecImpl? = previewTransformationSpec?.invoke(transition)
 }
 
 /** The definition of the overscroll behavior of the [content]. */
@@ -382,11 +392,7 @@ internal class TransformationSpecImpl(
         return ElementTransformations(shared, offset, size, drawScale, alpha)
     }
 
-    private fun throwIfNotNull(
-        previous: Transformation?,
-        element: ElementKey,
-        name: String,
-    ) {
+    private fun throwIfNotNull(previous: Transformation?, element: ElementKey, name: String) {
         if (previous != null) {
             error("$element has multiple $name transformations")
         }

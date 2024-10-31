@@ -1123,6 +1123,15 @@ public class WindowTestsBase extends SystemServiceTestsBase {
         displayContent.onRequestedOverrideConfigurationChanged(c);
     }
 
+    static void makeDisplayLargeScreen(DisplayContent displayContent) {
+        final int swDp = displayContent.getConfiguration().smallestScreenWidthDp;
+        if (swDp < WindowManager.LARGE_SCREEN_SMALLEST_SCREEN_WIDTH_DP) {
+            final int height = 100 + (int) (displayContent.getDisplayMetrics().density
+                    * WindowManager.LARGE_SCREEN_SMALLEST_SCREEN_WIDTH_DP);
+            resizeDisplay(displayContent, 100 + height, height);
+        }
+    }
+
     /** Used for the tests that assume the display is portrait by default. */
     static void makeDisplayPortrait(DisplayContent displayContent) {
         if (displayContent.mBaseDisplayHeight <= displayContent.mBaseDisplayWidth) {
@@ -1223,7 +1232,14 @@ public class WindowTestsBase extends SystemServiceTestsBase {
     }
 
     static ComponentName getUniqueComponentName() {
-        return ComponentName.createRelative(DEFAULT_COMPONENT_PACKAGE_NAME,
+        return getUniqueComponentName(DEFAULT_COMPONENT_PACKAGE_NAME);
+    }
+
+    static ComponentName getUniqueComponentName(String packageName) {
+        if (packageName == null) {
+            packageName = DEFAULT_COMPONENT_PACKAGE_NAME;
+        }
+        return ComponentName.createRelative(packageName,
                 DEFAULT_COMPONENT_CLASS_NAME + sCurrentActivityId++);
     }
 
@@ -1298,8 +1314,7 @@ public class WindowTestsBase extends SystemServiceTestsBase {
         ActivityBuilder setActivityTheme(int theme) {
             mActivityTheme = theme;
             // Use the real package of test so it can get a valid context for theme.
-            mComponent = ComponentName.createRelative(mService.mContext.getPackageName(),
-                    DEFAULT_COMPONENT_CLASS_NAME + sCurrentActivityId++);
+            mComponent = getUniqueComponentName(mService.mContext.getPackageName());
             return this;
         }
 
@@ -1743,7 +1758,7 @@ public class WindowTestsBase extends SystemServiceTestsBase {
             if (mIntent == null) {
                 mIntent = new Intent();
                 if (mComponent == null) {
-                    mComponent = getUniqueComponentName();
+                    mComponent = getUniqueComponentName(mPackage);
                 }
                 mIntent.setComponent(mComponent);
                 mIntent.setFlags(mFlags);

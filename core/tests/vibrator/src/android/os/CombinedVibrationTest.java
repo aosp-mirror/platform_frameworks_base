@@ -22,6 +22,9 @@ import static junit.framework.Assert.assertTrue;
 
 import static org.testng.Assert.assertThrows;
 
+import android.hardware.vibrator.IVibrator;
+import android.util.SparseArray;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -134,6 +137,54 @@ public class CombinedVibrationTest {
     }
 
     @Test
+    public void testDurationMono_withVibratorSupportingPrimitives() {
+        SparseArray<VibratorInfo> infos = new SparseArray<>(2);
+        infos.put(1, new VibratorInfo.Builder(/* id= */ 1)
+                .setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS)
+                .setSupportedPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 5)
+                .setSupportedPrimitive(VibrationEffect.Composition.PRIMITIVE_TICK, 5)
+                .build());
+        infos.put(2, new VibratorInfo.Builder(/* id= */ 2)
+                .setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS)
+                .setSupportedPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 10)
+                .setSupportedPrimitive(VibrationEffect.Composition.PRIMITIVE_TICK, 1)
+                .build());
+
+        // Use max duration from all vibrators.
+        assertEquals(10, CombinedVibration.createParallel(
+                VibrationEffect.get(VibrationEffect.EFFECT_CLICK)).getDuration(infos));
+        assertEquals(111, CombinedVibration.createParallel(
+                        VibrationEffect.startComposition()
+                                .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK)
+                                .addPrimitive(VibrationEffect.Composition.PRIMITIVE_TICK, 1, 100)
+                                .compose())
+                .getDuration(infos));
+    }
+
+    @Test
+    public void testDurationMono_withVibratorNotSupportingPrimitives() {
+        SparseArray<VibratorInfo> infos = new SparseArray<>(2);
+        infos.put(1, new VibratorInfo.Builder(/* id= */ 1)
+                .setCapabilities(IVibrator.CAP_AMPLITUDE_CONTROL)
+                .build());
+        infos.put(2, new VibratorInfo.Builder(/* id= */ 2)
+                .setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS)
+                .setSupportedPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 10)
+                .setSupportedPrimitive(VibrationEffect.Composition.PRIMITIVE_TICK, 1)
+                .build());
+
+        // Use max duration from all vibrators.
+        assertEquals(-1, CombinedVibration.createParallel(
+                VibrationEffect.get(VibrationEffect.EFFECT_CLICK)).getDuration(infos));
+        assertEquals(-1, CombinedVibration.createParallel(
+                        VibrationEffect.startComposition()
+                                .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK)
+                                .addPrimitive(VibrationEffect.Composition.PRIMITIVE_TICK, 1, 100)
+                                .compose())
+                .getDuration(infos));
+    }
+
+    @Test
     public void testDurationStereo() {
         assertEquals(6, CombinedVibration.startParallel()
                 .addVibrator(1, VibrationEffect.createOneShot(1, 1))
@@ -156,6 +207,75 @@ public class CombinedVibrationTest {
     }
 
     @Test
+    public void testDurationStereo_withVibratorSupportingPrimitives() {
+        SparseArray<VibratorInfo> infos = new SparseArray<>(2);
+        infos.put(1, new VibratorInfo.Builder(/* id= */ 1)
+                .setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS)
+                .setSupportedPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 5)
+                .setSupportedPrimitive(VibrationEffect.Composition.PRIMITIVE_TICK, 5)
+                .build());
+        infos.put(2, new VibratorInfo.Builder(/* id= */ 2)
+                .setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS)
+                .setSupportedPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 10)
+                .setSupportedPrimitive(VibrationEffect.Composition.PRIMITIVE_TICK, 1)
+                .build());
+
+        // Use specific vibrator durations, then max effect duration
+        assertEquals(111, CombinedVibration.startParallel()
+                .addVibrator(1, VibrationEffect.startComposition()
+                        .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK)
+                        .addPrimitive(VibrationEffect.Composition.PRIMITIVE_TICK, 1, 100)
+                        .compose())
+                .addVibrator(2, VibrationEffect.startComposition()
+                        .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK)
+                        .addPrimitive(VibrationEffect.Composition.PRIMITIVE_TICK, 1, 100)
+                        .compose())
+                .combine()
+                .getDuration(infos));
+        assertEquals(110, CombinedVibration.startParallel()
+                .addVibrator(1, VibrationEffect.startComposition()
+                        .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK)
+                        .addPrimitive(VibrationEffect.Composition.PRIMITIVE_TICK, 1, 100)
+                        .compose())
+                .combine()
+                .getDuration(infos));
+    }
+
+    @Test
+    public void testDurationStereo_withVibratorNotSupportingPrimitives() {
+        SparseArray<VibratorInfo> infos = new SparseArray<>(2);
+        infos.put(1, new VibratorInfo.Builder(/* id= */ 1)
+                .setCapabilities(IVibrator.CAP_AMPLITUDE_CONTROL)
+                .build());
+        infos.put(2, new VibratorInfo.Builder(/* id= */ 2)
+                .setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS)
+                .setSupportedPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 10)
+                .setSupportedPrimitive(VibrationEffect.Composition.PRIMITIVE_TICK, 1)
+                .build());
+
+        // One vibrator does not support primitives
+        assertEquals(-1, CombinedVibration.startParallel()
+                .addVibrator(1, VibrationEffect.startComposition()
+                        .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK)
+                        .addPrimitive(VibrationEffect.Composition.PRIMITIVE_TICK, 1, 100)
+                        .compose())
+                .addVibrator(2, VibrationEffect.startComposition()
+                        .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK)
+                        .addPrimitive(VibrationEffect.Composition.PRIMITIVE_TICK, 1, 100)
+                        .compose())
+                .combine()
+                .getDuration(infos));
+        // Invalid vibrator ID
+        assertEquals(-1, CombinedVibration.startParallel()
+                .addVibrator(3, VibrationEffect.startComposition()
+                        .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK)
+                        .addPrimitive(VibrationEffect.Composition.PRIMITIVE_TICK, 1, 100)
+                        .compose())
+                .combine()
+                .getDuration(infos));
+    }
+
+    @Test
     public void testDurationSequential() {
         assertEquals(26, CombinedVibration.startSequential()
                 .addNext(1, VibrationEffect.createOneShot(10, 10), 10)
@@ -175,6 +295,59 @@ public class CombinedVibrationTest {
                         VibrationEffect.createWaveform(new long[]{1, 2, 3}, new int[]{1, 2, 3}, 0))
                 .combine()
                 .getDuration());
+    }
+
+    @Test
+    public void testDurationSequential_withVibratorSupportingPrimitives() {
+        SparseArray<VibratorInfo> infos = new SparseArray<>(2);
+        infos.put(1, new VibratorInfo.Builder(/* id= */ 1)
+                .setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS)
+                .setSupportedPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 5)
+                .setSupportedPrimitive(VibrationEffect.Composition.PRIMITIVE_TICK, 5)
+                .build());
+        infos.put(2, new VibratorInfo.Builder(/* id= */ 2)
+                .setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS)
+                .setSupportedPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 10)
+                .setSupportedPrimitive(VibrationEffect.Composition.PRIMITIVE_TICK, 1)
+                .build());
+
+        // Add each duration and delay
+        assertEquals(321, CombinedVibration.startSequential()
+                .addNext(1, VibrationEffect.startComposition()
+                        .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK)
+                        .addPrimitive(VibrationEffect.Composition.PRIMITIVE_TICK, 1, 100)
+                        .compose(), 100)
+                .addNext(2, VibrationEffect.startComposition()
+                        .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK)
+                        .addPrimitive(VibrationEffect.Composition.PRIMITIVE_TICK, 1, 100)
+                        .compose())
+                .combine()
+                .getDuration(infos));
+    }
+
+    @Test
+    public void testDurationSequential_withVibratorNotSupportingPrimitives() {
+        SparseArray<VibratorInfo> infos = new SparseArray<>(2);
+        infos.put(1, new VibratorInfo.Builder(/* id= */ 1)
+                .setCapabilities(IVibrator.CAP_AMPLITUDE_CONTROL)
+                .build());
+        infos.put(2, new VibratorInfo.Builder(/* id= */ 2)
+                .setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS)
+                .setSupportedPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 10)
+                .setSupportedPrimitive(VibrationEffect.Composition.PRIMITIVE_TICK, 1)
+                .build());
+
+        assertEquals(-1, CombinedVibration.startSequential()
+                .addNext(1, VibrationEffect.startComposition()
+                        .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK)
+                        .addPrimitive(VibrationEffect.Composition.PRIMITIVE_TICK, 1, 100)
+                        .compose(), 100)
+                .addNext(2, VibrationEffect.startComposition()
+                        .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK)
+                        .addPrimitive(VibrationEffect.Composition.PRIMITIVE_TICK, 1, 100)
+                        .compose())
+                .combine()
+                .getDuration(infos));
     }
 
     @Test

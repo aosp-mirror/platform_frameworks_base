@@ -19,6 +19,7 @@ package com.android.server.pm;
 import static android.Manifest.permission.GET_BACKGROUND_INSTALLED_PACKAGES;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.app.Flags;
@@ -64,6 +65,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -76,11 +79,23 @@ import java.util.TreeSet;
  * @hide
  */
 public class BackgroundInstallControlService extends SystemService {
+    public static final int INSTALL_EVENT_TYPE_UNKNOWN = 0;
+    public static final int INSTALL_EVENT_TYPE_INSTALL = 1;
+    public static final int INSTALL_EVENT_TYPE_UNINSTALL = 2;
+
+    @IntDef(
+            value = {
+                INSTALL_EVENT_TYPE_UNKNOWN,
+                INSTALL_EVENT_TYPE_INSTALL,
+                INSTALL_EVENT_TYPE_UNINSTALL,
+            })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface InstallEventType {}
+
     private static final String TAG = "BackgroundInstallControlService";
 
     private static final String DISK_FILE_NAME = "states";
     private static final String DISK_DIR_NAME = "bic";
-
     private static final String ENFORCE_PERMISSION_ERROR_MSG =
             "User is not permitted to call service: ";
 
@@ -313,7 +328,7 @@ public class BackgroundInstallControlService extends SystemService {
 
         initBackgroundInstalledPackages();
         mBackgroundInstalledPackages.add(userId, packageName);
-        mCallbackHelper.notifyAllCallbacks(userId, packageName);
+        mCallbackHelper.notifyAllCallbacks(userId, packageName, INSTALL_EVENT_TYPE_INSTALL);
         writeBackgroundInstalledPackagesToDisk();
     }
 
@@ -391,6 +406,7 @@ public class BackgroundInstallControlService extends SystemService {
         initBackgroundInstalledPackages();
         mBackgroundInstalledPackages.remove(userId, packageName);
         writeBackgroundInstalledPackagesToDisk();
+        mCallbackHelper.notifyAllCallbacks(userId, packageName, INSTALL_EVENT_TYPE_UNINSTALL);
     }
 
     void handleUsageEvent(UsageEvents.Event event, int userId) {

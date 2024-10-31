@@ -33,11 +33,14 @@ import com.android.systemui.plugins.DarkIconDispatcher
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.ui.view.WindowRootView
+import com.android.systemui.shade.LongPressGestureDetector
 import com.android.systemui.shade.ShadeController
+import com.android.systemui.shade.ShadeExpandsOnStatusBarLongPress
 import com.android.systemui.shade.ShadeLogger
 import com.android.systemui.shade.ShadeViewController
 import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor
 import com.android.systemui.shared.animation.UnfoldMoveFromCenterAnimator
+import com.android.systemui.statusbar.data.repository.StatusBarContentInsetsProviderStore
 import com.android.systemui.statusbar.policy.Clock
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.window.StatusBarWindowStateController
@@ -65,6 +68,7 @@ private constructor(
     private val shadeController: ShadeController,
     private val shadeViewController: ShadeViewController,
     private val panelExpansionInteractor: PanelExpansionInteractor,
+    private val longPressGestureDetector: Provider<LongPressGestureDetector>,
     private val windowRootView: Provider<WindowRootView>,
     private val shadeLogger: ShadeLogger,
     private val moveFromCenterAnimationController: StatusBarMoveFromCenterAnimationController?,
@@ -113,6 +117,10 @@ private constructor(
         addDarkReceivers()
         addCursorSupportToIconContainers()
 
+        if (ShadeExpandsOnStatusBarLongPress.isEnabled) {
+            mView.setLongPressGestureDetector(longPressGestureDetector.get())
+        }
+
         progressProvider?.setReadyToHandleTransition(true)
         configurationController.addCallback(configurationListener)
 
@@ -151,7 +159,11 @@ private constructor(
 
         startSideContainer = mView.requireViewById(R.id.status_bar_start_side_content)
         startSideContainer.setOnHoverListener(
-            statusOverlayHoverListenerFactory.createDarkAwareListener(startSideContainer)
+            statusOverlayHoverListenerFactory.createDarkAwareListener(
+                startSideContainer,
+                topHoverMargin = 6,
+                bottomHoverMargin = 6,
+            )
         )
         startSideContainer.setOnTouchListener(iconsOnTouchListener)
     }
@@ -210,7 +222,7 @@ private constructor(
                 event.action == MotionEvent.ACTION_UP || event.action == MotionEvent.ACTION_CANCEL
             centralSurfaces.setInteracting(
                 WINDOW_STATUS_BAR,
-                !upOrCancel || shadeController.isExpandedVisible
+                !upOrCancel || shadeController.isExpandedVisible,
             )
         }
     }
@@ -247,7 +259,7 @@ private constructor(
                         String.format(
                             "onTouchForwardedFromStatusBar: panel disabled, " +
                                 "ignoring touch at (${event.x.toInt()},${event.y.toInt()})"
-                        )
+                        ),
                     )
                 }
                 return false
@@ -266,7 +278,7 @@ private constructor(
                 if (!shadeViewController.isViewEnabled) {
                     shadeLogger.logMotionEvent(
                         event,
-                        "onTouchForwardedFromStatusBar: panel view disabled"
+                        "onTouchForwardedFromStatusBar: panel view disabled",
                     )
                     return true
                 }
@@ -323,13 +335,14 @@ private constructor(
         private val shadeController: ShadeController,
         private val shadeViewController: ShadeViewController,
         private val panelExpansionInteractor: PanelExpansionInteractor,
+        private val longPressGestureDetector: Provider<LongPressGestureDetector>,
         private val windowRootView: Provider<WindowRootView>,
         private val shadeLogger: ShadeLogger,
         private val viewUtil: ViewUtil,
         private val configurationController: ConfigurationController,
         private val statusOverlayHoverListenerFactory: StatusOverlayHoverListenerFactory,
         private val darkIconDispatcher: DarkIconDispatcher,
-        private val statusBarContentInsetsProvider: StatusBarContentInsetsProvider,
+        private val statusBarContentInsetsProviderStore: StatusBarContentInsetsProviderStore,
     ) {
         fun create(view: PhoneStatusBarView): PhoneStatusBarViewController {
             val statusBarMoveFromCenterAnimationController =
@@ -347,6 +360,7 @@ private constructor(
                 shadeController,
                 shadeViewController,
                 panelExpansionInteractor,
+                longPressGestureDetector,
                 windowRootView,
                 shadeLogger,
                 statusBarMoveFromCenterAnimationController,
@@ -355,7 +369,7 @@ private constructor(
                 configurationController,
                 statusOverlayHoverListenerFactory,
                 darkIconDispatcher,
-                statusBarContentInsetsProvider,
+                statusBarContentInsetsProviderStore.defaultDisplay,
             )
         }
     }

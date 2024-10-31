@@ -2033,7 +2033,10 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         tx.apply();
     }
 
-    private void cancelCurrentAnimator() {
+    /**
+     * Cancels the currently running animator if there is one and removes an overlay if present.
+     */
+    public void cancelCurrentAnimator() {
         final PipAnimationController.PipTransitionAnimator<?> animator =
                 mPipAnimationController.getCurrentAnimator();
         // remove any overlays if present

@@ -316,7 +316,7 @@ public class AudioPolicy {
         @NonNull
         public Builder setMediaProjection(@NonNull MediaProjection projection) {
             if (projection == null) {
-                throw new IllegalArgumentException("Invalid null volume callback");
+                throw new IllegalArgumentException("Invalid null media projection");
             }
             mProjection = projection;
             return this;
@@ -921,6 +921,29 @@ public class AudioPolicy {
     public @NonNull List<AudioFocusInfo> getFocusStack() {
         try {
             return getService().getFocusStack();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     * Causes the given audio focus owner to lose audio focus with
+     * {@link android.media.AudioManager#AUDIOFOCUS_LOSS}, and be removed from the focus stack.
+     * Unlike {@link #sendFocusLoss(AudioFocusInfo)}, the method causes the focus stack
+     * to be reevaluated as the discarded focus owner may have been at the top of stack,
+     * and now the new owner needs to be notified of the gain.
+     * @param focusLoser identifies the focus owner to discard from the focus stack
+     * @throws IllegalStateException if used on an unregistered policy, or a registered policy
+     * with no {@link AudioPolicyFocusListener} set
+     * @see #getFocusStack()
+     * @see #sendFocusLoss(AudioFocusInfo)
+     */
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public void sendFocusLossAndUpdate(@NonNull AudioFocusInfo focusLoser)
+            throws IllegalStateException {
+        try {
+            getService().sendFocusLossAndUpdate(Objects.requireNonNull(focusLoser), cb());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

@@ -15,18 +15,23 @@
  */
 package com.android.internal.widget.remotecompose.core.operations;
 
-import com.android.internal.widget.remotecompose.core.CompanionOperation;
+import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.FLOAT_ARRAY;
+import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT;
+
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.VariableSupport;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
+import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
+import com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation;
 
 import java.util.Arrays;
 import java.util.List;
 
 public class PathData implements Operation, VariableSupport {
-    public static final Companion COMPANION = new Companion();
+    private static final int OP_CODE = Operations.DATA_PATH;
+    private static final String CLASS_NAME = "PathData";
     int mInstanceId;
     float[] mFloatPath;
     float[] mOutputPath;
@@ -42,8 +47,7 @@ public class PathData implements Operation, VariableSupport {
         for (int i = 0; i < mFloatPath.length; i++) {
             float v = mFloatPath[i];
             if (Utils.isVariable(v)) {
-                mOutputPath[i] = (Float.isNaN(v))
-                        ? context.getFloat(Utils.idFromNan(v)) : v;
+                mOutputPath[i] = Float.isNaN(v) ? context.getFloat(Utils.idFromNan(v)) : v;
             } else {
                 mOutputPath[i] = v;
             }
@@ -52,16 +56,16 @@ public class PathData implements Operation, VariableSupport {
 
     @Override
     public void registerListening(RemoteContext context) {
-        for (int i = 0; i < mFloatPath.length; i++) {
-            if (Float.isNaN(mFloatPath[i])) {
-                context.listensTo(Utils.idFromNan(mFloatPath[i]), this);
+        for (float v : mFloatPath) {
+            if (Float.isNaN(v)) {
+                context.listensTo(Utils.idFromNan(v), this);
             }
         }
     }
 
     @Override
     public void write(WireBuffer buffer) {
-        COMPANION.apply(buffer, mInstanceId, mOutputPath);
+        apply(buffer, mInstanceId, mOutputPath);
     }
 
     @Override
@@ -75,30 +79,15 @@ public class PathData implements Operation, VariableSupport {
     }
 
     /**
-     * public float[] getFloatPath(PaintContext context) {
-     * float[] ret = mRetFloats; // Assume retFloats is declared elsewhere
-     * if (ret == null) {
-     * return mFloatPath; // Assume floatPath is declared elsewhere
-     * }
-     * float[] localRef = mRef; // Assume ref is of type Float[]
-     * if (localRef == null) {
-     * for (int i = 0; i < mFloatPath.length; i++) {
-     * ret[i] = mFloatPath[i];
-     * }
-     * } else {
-     * for (int i = 0; i < mFloatPath.length; i++) {
-     * float lr = localRef[i];
-     * if (Float.isNaN(lr)) {
-     * ret[i] = Utils.getActualValue(lr);
-     * } else {
-     * ret[i] = mFloatPath[i];
-     * }
-     * }
-     * }
-     * return ret;
-     * }
+     * public float[] getFloatPath(PaintContext context) { float[] ret = mRetFloats; // Assume
+     * retFloats is declared elsewhere if (ret == null) { return mFloatPath; // Assume floatPath is
+     * declared elsewhere } float[] localRef = mRef; // Assume ref is of type Float[] if (localRef
+     * == null) { for (int i = 0; i < mFloatPath.length; i++) { ret[i] = mFloatPath[i]; } } else {
+     * for (int i = 0; i < mFloatPath.length; i++) { float lr = localRef[i]; if (Float.isNaN(lr)) {
+     * ret[i] = Utils.getActualValue(lr); } else { ret[i] = mFloatPath[i]; } } } return ret; }
      */
     public static final int MOVE = 10;
+
     public static final int LINE = 11;
     public static final int QUADRATIC = 12;
     public static final int CONIC = 13;
@@ -113,40 +102,39 @@ public class PathData implements Operation, VariableSupport {
     public static final float CLOSE_NAN = Utils.asNan(CLOSE);
     public static final float DONE_NAN = Utils.asNan(DONE);
 
-    public static class Companion implements CompanionOperation {
+    public static String name() {
+        return CLASS_NAME;
+    }
 
-        private Companion() {
-        }
+    public static int id() {
+        return OP_CODE;
+    }
 
-        @Override
-        public String name() {
-            return "BitmapData";
+    public static void apply(WireBuffer buffer, int id, float[] data) {
+        buffer.start(Operations.DATA_PATH);
+        buffer.writeInt(id);
+        buffer.writeInt(data.length);
+        for (float datum : data) {
+            buffer.writeFloat(datum);
         }
+    }
 
-        @Override
-        public int id() {
-            return Operations.DATA_PATH;
+    public static void read(WireBuffer buffer, List<Operation> operations) {
+        int imageId = buffer.readInt();
+        int len = buffer.readInt();
+        float[] data = new float[len];
+        for (int i = 0; i < data.length; i++) {
+            data[i] = buffer.readFloat();
         }
+        operations.add(new PathData(imageId, data));
+    }
 
-        public void apply(WireBuffer buffer, int id, float[] data) {
-            buffer.start(Operations.DATA_PATH);
-            buffer.writeInt(id);
-            buffer.writeInt(data.length);
-            for (int i = 0; i < data.length; i++) {
-                buffer.writeFloat(data[i]);
-            }
-        }
-
-        @Override
-        public void read(WireBuffer buffer, List<Operation> operations) {
-            int imageId = buffer.readInt();
-            int len = buffer.readInt();
-            float[] data = new float[len];
-            for (int i = 0; i < data.length; i++) {
-                data[i] = buffer.readFloat();
-            }
-            operations.add(new PathData(imageId, data));
-        }
+    public static void documentation(DocumentationBuilder doc) {
+        doc.operation("Data Operations", OP_CODE, CLASS_NAME)
+                .description("Encode a Path ")
+                .field(DocumentedOperation.INT, "id", "id string")
+                .field(INT, "length", "id string")
+                .field(FLOAT_ARRAY, "pathData", "length", "path encoded as floats");
     }
 
     public static String pathString(float[] path) {
@@ -201,5 +189,4 @@ public class PathData implements Operation, VariableSupport {
     public void apply(RemoteContext context) {
         context.loadPathData(mInstanceId, mOutputPath);
     }
-
 }

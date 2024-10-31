@@ -15,17 +15,20 @@
  */
 package com.android.internal.widget.remotecompose.core.operations;
 
-import com.android.internal.widget.remotecompose.core.CompanionOperation;
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.PaintContext;
 import com.android.internal.widget.remotecompose.core.PaintOperation;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
+import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
+import com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation;
 
 import java.util.List;
 
 public class DrawPath extends PaintOperation {
-    public static final Companion COMPANION = new Companion();
+    private static final int OP_CODE = Operations.DRAW_PATH;
+    private static final String CLASS_NAME = "DrawPath";
+
     int mId;
     float mStart = 0;
     float mEnd = 1;
@@ -36,7 +39,7 @@ public class DrawPath extends PaintOperation {
 
     @Override
     public void write(WireBuffer buffer) {
-        COMPANION.apply(buffer, mId);
+        apply(buffer, mId);
     }
 
     @Override
@@ -44,31 +47,29 @@ public class DrawPath extends PaintOperation {
         return "DrawPath " + "[" + mId + "]" + ", " + mStart + ", " + mEnd;
     }
 
-    public static class Companion implements CompanionOperation {
-        private Companion() {
-        }
+    public static void read(WireBuffer buffer, List<Operation> operations) {
+        int id = buffer.readInt();
+        DrawPath op = new DrawPath(id);
+        operations.add(op);
+    }
 
-        @Override
-        public void read(WireBuffer buffer, List<Operation> operations) {
-            int id = buffer.readInt();
-            DrawPath op = new DrawPath(id);
-            operations.add(op);
-        }
+    public static String name() {
+        return CLASS_NAME;
+    }
 
-        @Override
-        public String name() {
-            return "DrawPath";
-        }
+    public static int id() {
+        return Operations.DRAW_PATH;
+    }
 
-        @Override
-        public int id() {
-            return Operations.DRAW_PATH;
-        }
+    public static void apply(WireBuffer buffer, int id) {
+        buffer.start(Operations.DRAW_PATH);
+        buffer.writeInt(id);
+    }
 
-        public void apply(WireBuffer buffer, int id) {
-            buffer.start(Operations.DRAW_PATH);
-            buffer.writeInt(id);
-        }
+    public static void documentation(DocumentationBuilder doc) {
+        doc.operation("Draw Operations", OP_CODE, CLASS_NAME)
+                .description("Draw a bitmap using integer coordinates")
+                .field(DocumentedOperation.INT, "id", "id of path");
     }
 
     @Override

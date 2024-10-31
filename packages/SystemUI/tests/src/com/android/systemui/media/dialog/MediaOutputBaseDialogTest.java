@@ -104,7 +104,7 @@ public class MediaOutputBaseDialogTest extends SysuiTestCase {
 
     private List<MediaController> mMediaControllers = new ArrayList<>();
     private MediaOutputBaseDialogImpl mMediaOutputBaseDialogImpl;
-    private MediaOutputController mMediaOutputController;
+    private MediaSwitchingController mMediaSwitchingController;
     private int mHeaderIconRes;
     private IconCompat mIconCompat;
     private CharSequence mHeaderTitle;
@@ -132,8 +132,8 @@ public class MediaOutputBaseDialogTest extends SysuiTestCase {
                 VolumePanelGlobalStateInteractorKosmosKt.getVolumePanelGlobalStateInteractor(
                         mKosmos);
 
-        mMediaOutputController =
-                new MediaOutputController(
+        mMediaSwitchingController =
+                new MediaSwitchingController(
                         mContext,
                         TEST_PACKAGE,
                         mContext.getUser(),
@@ -153,12 +153,13 @@ public class MediaOutputBaseDialogTest extends SysuiTestCase {
 
         // Using a fake package will cause routing operations to fail, so we intercept
         // scanning-related operations.
-        mMediaOutputController.mLocalMediaManager = mock(LocalMediaManager.class);
-        doNothing().when(mMediaOutputController.mLocalMediaManager).startScan();
-        doNothing().when(mMediaOutputController.mLocalMediaManager).stopScan();
+        mMediaSwitchingController.mLocalMediaManager = mock(LocalMediaManager.class);
+        doNothing().when(mMediaSwitchingController.mLocalMediaManager).startScan();
+        doNothing().when(mMediaSwitchingController.mLocalMediaManager).stopScan();
 
-        mMediaOutputBaseDialogImpl = new MediaOutputBaseDialogImpl(mContext, mBroadcastSender,
-                mMediaOutputController);
+        mMediaOutputBaseDialogImpl =
+                new MediaOutputBaseDialogImpl(
+                        mContext, mBroadcastSender, mMediaSwitchingController);
         mMediaOutputBaseDialogImpl.onCreate(new Bundle());
     }
 
@@ -176,7 +177,7 @@ public class MediaOutputBaseDialogTest extends SysuiTestCase {
     public void refresh_withIconCompat_iconIsVisible() {
         mIconCompat = IconCompat.createWithBitmap(
                 Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888));
-        when(mMediaOutputBaseAdapter.getController()).thenReturn(mMediaOutputController);
+        when(mMediaOutputBaseAdapter.getController()).thenReturn(mMediaSwitchingController);
 
         mMediaOutputBaseDialogImpl.refresh();
         final ImageView view = mMediaOutputBaseDialogImpl.mDialogView.requireViewById(
@@ -263,7 +264,7 @@ public class MediaOutputBaseDialogTest extends SysuiTestCase {
         when(mMediaOutputBaseAdapter.isDragging()).thenReturn(true);
         mMediaOutputBaseDialogImpl.refresh();
 
-        assertThat(mMediaOutputController.isRefreshing()).isFalse();
+        assertThat(mMediaSwitchingController.isRefreshing()).isFalse();
     }
 
     @Test
@@ -335,12 +336,14 @@ public class MediaOutputBaseDialogTest extends SysuiTestCase {
 
     class MediaOutputBaseDialogImpl extends MediaOutputBaseDialog {
 
-        MediaOutputBaseDialogImpl(Context context, BroadcastSender broadcastSender,
-                MediaOutputController mediaOutputController) {
+        MediaOutputBaseDialogImpl(
+                Context context,
+                BroadcastSender broadcastSender,
+                MediaSwitchingController mediaSwitchingController) {
             super(
                     context,
                     broadcastSender,
-                    mediaOutputController, /* includePlaybackAndAppMetadata */
+                    mediaSwitchingController, /* includePlaybackAndAppMetadata */
                     true);
 
             mAdapter = mMediaOutputBaseAdapter;

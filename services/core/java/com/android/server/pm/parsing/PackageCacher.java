@@ -33,6 +33,7 @@ import com.android.internal.pm.parsing.IPackageCacher;
 import com.android.internal.pm.parsing.PackageParser2;
 import com.android.internal.pm.parsing.pkg.PackageImpl;
 import com.android.internal.pm.parsing.pkg.ParsedPackage;
+import com.android.internal.pm.pkg.component.AconfigFlags;
 import com.android.internal.pm.pkg.parsing.ParsingPackageUtils;
 import com.android.server.pm.ApexManager;
 
@@ -41,6 +42,8 @@ import libcore.io.IoUtils;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class PackageCacher implements IPackageCacher {
@@ -56,6 +59,8 @@ public class PackageCacher implements IPackageCacher {
     private final File mCacheDir;
     @Nullable
     private final PackageParser2.Callback mCallback;
+
+    private static final AconfigFlags sAconfigFlags = ParsingPackageUtils.getAconfigFlags();
 
     public PackageCacher(File cacheDir) {
         this(cacheDir, null);
@@ -136,7 +141,7 @@ public class PackageCacher implements IPackageCacher {
      * Given a {@code packageFile} and a {@code cacheFile} returns whether the
      * cache file is up to date based on the mod-time of both files.
      */
-    private static boolean isCacheUpToDate(File packageFile, File cacheFile) {
+    private static boolean isCacheFileUpToDate(File packageFile, File cacheFile) {
         try {
             // In case packageFile is located on one of /apex mount points it's mtime will always be
             // 0. Instead, we can use mtime of the APEX file backing the corresponding mount point.
@@ -185,16 +190,36 @@ public class PackageCacher implements IPackageCacher {
 
         try {
             // If the cache is not up to date, return null.
-            if (!isCacheUpToDate(packageFile, cacheFile)) {
+            if (!isCacheFileUpToDate(packageFile, cacheFile)) {
                 return null;
             }
 
             final byte[] bytes = IoUtils.readFileAsByteArray(cacheFile.getAbsolutePath());
-            ParsedPackage parsed = fromCacheEntry(bytes);
+            final ParsedPackage parsed = fromCacheEntry(bytes);
             if (!packageFile.getAbsolutePath().equals(parsed.getPath())) {
                 // Don't use this cache if the path doesn't match
                 return null;
             }
+
+            if (!android.content.pm.Flags.includeFeatureFlagsInPackageCacher()) {
+                return parsed;
+            }
+
+            final Map<String, Boolean> featureFlagState =
+                    ((PackageImpl) parsed).getFeatureFlagState();
+            if (!featureFlagState.isEmpty()) {
+                Slog.d(TAG, "Feature flags for package " + packageFile + ": " + featureFlagState);
+                for (var entry : featureFlagState.entrySet()) {
+                    final String flagPackageAndName = entry.getKey();
+                    if (!Objects.equals(sAconfigFlags.getFlagValue(flagPackageAndName),
+                            entry.getValue())) {
+                        Slog.i(TAG, "Feature flag " + flagPackageAndName + " changed for package "
+                                + packageFile + "; cached result is invalid");
+                        return null;
+                    }
+                }
+            }
+
             return parsed;
         } catch (Throwable e) {
             Slog.w(TAG, "Error reading package cache: ", e);

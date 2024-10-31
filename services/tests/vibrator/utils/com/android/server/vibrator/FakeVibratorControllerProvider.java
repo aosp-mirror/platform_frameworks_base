@@ -26,6 +26,7 @@ import android.os.VibrationEffect;
 import android.os.VibratorInfo;
 import android.os.vibrator.PrebakedSegment;
 import android.os.vibrator.PrimitiveSegment;
+import android.os.vibrator.PwleSegment;
 import android.os.vibrator.RampSegment;
 import android.os.vibrator.StepSegment;
 import android.os.vibrator.VibrationEffectSegment;
@@ -68,12 +69,19 @@ public final class FakeVibratorControllerProvider {
     private int[] mSupportedPrimitives;
     private int mCompositionSizeMax;
     private int mPwleSizeMax;
+    private int mMaxEnvelopeEffectSize;
+    private int mMinEnvelopeEffectControlPointDurationMillis;
+    private int mMaxEnvelopeEffectControlPointDurationMillis;
     private float mMinFrequency = Float.NaN;
     private float mResonantFrequency = Float.NaN;
     private float mFrequencyResolution = Float.NaN;
     private float mQFactor = Float.NaN;
     private float[] mMaxAmplitudes;
+
+    private float[] mFrequenciesHz;
+    private float[] mOutputAccelerationsGs;
     private long mVendorEffectDuration = EFFECT_DURATION;
+    private long mPrimitiveDuration = EFFECT_DURATION;
 
     void recordEffectSegment(long vibrationId, VibrationEffectSegment segment) {
         mEffectSegments.computeIfAbsent(vibrationId, k -> new ArrayList<>()).add(segment);
@@ -165,7 +173,7 @@ public final class FakeVibratorControllerProvider {
             }
             long duration = 0;
             for (PrimitiveSegment primitive : primitives) {
-                duration += EFFECT_DURATION + primitive.getDelay();
+                duration += mPrimitiveDuration + primitive.getDelay();
                 recordEffectSegment(vibrationId, primitive);
             }
             applyLatency(mOnLatency);
@@ -183,6 +191,19 @@ public final class FakeVibratorControllerProvider {
             recordBraking(vibrationId, braking);
             applyLatency(mOnLatency);
             scheduleListener(duration, vibrationId);
+            return duration;
+        }
+
+        @Override
+        public long composePwleV2(PwleSegment[] primitives, long vibrationId) {
+            long duration = 0;
+            for (PwleSegment primitive: primitives) {
+                duration += primitive.getDuration();
+                recordEffectSegment(vibrationId, primitive);
+            }
+            applyLatency(mOnLatency);
+            scheduleListener(duration, vibrationId);
+
             return duration;
         }
 
@@ -215,8 +236,16 @@ public final class FakeVibratorControllerProvider {
             }
             infoBuilder.setCompositionSizeMax(mCompositionSizeMax);
             infoBuilder.setQFactor(mQFactor);
-            infoBuilder.setFrequencyProfile(new VibratorInfo.FrequencyProfile(
+            infoBuilder.setFrequencyProfileLegacy(new VibratorInfo.FrequencyProfileLegacy(
                     mResonantFrequency, mMinFrequency, mFrequencyResolution, mMaxAmplitudes));
+            infoBuilder.setFrequencyProfile(
+                    new VibratorInfo.FrequencyProfile(mResonantFrequency, mFrequenciesHz,
+                            mOutputAccelerationsGs));
+            infoBuilder.setMaxEnvelopeEffectSize(mMaxEnvelopeEffectSize);
+            infoBuilder.setMinEnvelopeEffectControlPointDurationMillis(
+                    mMinEnvelopeEffectControlPointDurationMillis);
+            infoBuilder.setMaxEnvelopeEffectControlPointDurationMillis(
+                    mMaxEnvelopeEffectControlPointDurationMillis);
             return mIsInfoLoadSuccessful;
         }
 
@@ -352,9 +381,44 @@ public final class FakeVibratorControllerProvider {
         mMaxAmplitudes = maxAmplitudes;
     }
 
+    /** Set the list of available frequencies. */
+    public void setFrequenciesHz(float[] frequenciesHz) {
+        mFrequenciesHz = frequenciesHz;
+    }
+
+    /** Set the max output acceleration achievable by the supported frequencies. */
+    public void setOutputAccelerationsGs(float[] outputAccelerationsGs) {
+        mOutputAccelerationsGs = outputAccelerationsGs;
+    }
+
     /** Set the duration of vendor effects in fake vibrator hardware. */
     public void setVendorEffectDuration(long durationMs) {
         mVendorEffectDuration = durationMs;
+    }
+
+    /** Set the duration of primitives in fake vibrator hardware. */
+    public void setPrimitiveDuration(long primitiveDuration) {
+        mPrimitiveDuration = primitiveDuration;
+    }
+
+    /**
+     * Set the maximum number of envelope effects control points supported in fake vibrator
+     * hardware.
+     */
+    public void setMaxEnvelopeEffectSize(int envelopeEffectControlPointsMax) {
+        mMaxEnvelopeEffectSize = envelopeEffectControlPointsMax;
+    }
+
+    /** Set the envelope effect minimum segment duration in fake vibrator hardware. */
+    public void setMinEnvelopeEffectControlPointDurationMillis(
+            int minEnvelopeEffectControlPointDurationMillis) {
+        mMinEnvelopeEffectControlPointDurationMillis = minEnvelopeEffectControlPointDurationMillis;
+    }
+
+    /** Set the envelope effect maximum segment duration in fake vibrator hardware. */
+    public void setMaxEnvelopeEffectControlPointDurationMillis(
+            int maxEnvelopeEffectControlPointDurationMillis) {
+        mMaxEnvelopeEffectControlPointDurationMillis = maxEnvelopeEffectControlPointDurationMillis;
     }
 
     /**

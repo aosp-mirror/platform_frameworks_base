@@ -35,8 +35,6 @@ import androidx.core.util.isEmpty
 import androidx.core.util.isNotEmpty
 import androidx.core.util.plus
 import androidx.core.util.putAll
-import com.android.internal.logging.InstanceId
-import com.android.internal.logging.InstanceIdSequence
 import com.android.internal.protolog.ProtoLog
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.EnterReason
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.ExitReason
@@ -48,8 +46,8 @@ import com.android.wm.shell.desktopmode.DesktopModeTransitionTypes.TRANSIT_EXIT_
 import com.android.wm.shell.desktopmode.DesktopModeTransitionTypes.TRANSIT_EXIT_DESKTOP_MODE_KEYBOARD_SHORTCUT
 import com.android.wm.shell.desktopmode.DesktopModeTransitionTypes.TRANSIT_EXIT_DESKTOP_MODE_TASK_DRAG
 import com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE
-import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
 import com.android.wm.shell.shared.TransitionUtil
+import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
 import com.android.wm.shell.sysui.ShellInit
 import com.android.wm.shell.transition.Transitions
 
@@ -65,12 +63,8 @@ class DesktopModeLoggerTransitionObserver(
     private val desktopModeEventLogger: DesktopModeEventLogger
 ) : Transitions.TransitionObserver {
 
-    private val idSequence: InstanceIdSequence by lazy { InstanceIdSequence(Int.MAX_VALUE) }
-
     init {
-        if (
-            Transitions.ENABLE_SHELL_TRANSITIONS && DesktopModeStatus.canEnterDesktopMode(context)
-        ) {
+        if (DesktopModeStatus.canEnterDesktopMode(context)) {
             shellInit.addInitCallback(this::onInit, this)
         }
     }
@@ -89,18 +83,14 @@ class DesktopModeLoggerTransitionObserver(
     // following enter reason could be Screen On
     private var wasPreviousTransitionExitByScreenOff: Boolean = false
 
-    // The instanceId for the current logging session
-    private var loggerInstanceId: InstanceId? = null
-
-    private val isSessionActive: Boolean
-        get() = loggerInstanceId != null
-
-    private fun setSessionInactive() {
-        loggerInstanceId = null
-    }
+    @VisibleForTesting var isSessionActive: Boolean = false
 
     fun onInit() {
         transitions.registerObserver(this)
+        SystemProperties.set(
+            VISIBLE_TASKS_COUNTER_SYSTEM_PROPERTY,
+            VISIBLE_TASKS_COUNTER_SYSTEM_PROPERTY_DEFAULT_VALUE)
+        desktopModeEventLogger.logTaskInfoStateInit()
     }
 
     override fun onTransitionReady(
@@ -245,38 +235,32 @@ class DesktopModeLoggerTransitionObserver(
         ) {
             // Sessions is finishing, log task updates followed by an exit event
             identifyAndLogTaskUpdates(
-                loggerInstanceId!!.id,
                 preTransitionVisibleFreeformTasks,
                 postTransitionVisibleFreeformTasks
             )
 
             desktopModeEventLogger.logSessionExit(
-                loggerInstanceId!!.id,
                 getExitReason(transitionInfo)
             )
-
-            setSessionInactive()
+            isSessionActive = false
         } else if (
             postTransitionVisibleFreeformTasks.isNotEmpty() &&
                 preTransitionVisibleFreeformTasks.isEmpty() &&
                 !isSessionActive
         ) {
             // Session is starting, log enter event followed by task updates
-            loggerInstanceId = idSequence.newInstanceId()
+            isSessionActive = true
             desktopModeEventLogger.logSessionEnter(
-                loggerInstanceId!!.id,
                 getEnterReason(transitionInfo)
             )
 
             identifyAndLogTaskUpdates(
-                loggerInstanceId!!.id,
                 preTransitionVisibleFreeformTasks,
                 postTransitionVisibleFreeformTasks
             )
         } else if (isSessionActive) {
             // Session is neither starting, nor finishing, log task updates if there are any
             identifyAndLogTaskUpdates(
-                loggerInstanceId!!.id,
                 preTransitionVisibleFreeformTasks,
                 postTransitionVisibleFreeformTasks
             )
@@ -289,7 +273,6 @@ class DesktopModeLoggerTransitionObserver(
 
     /** Compare the old and new state of taskInfos and identify and log the changes */
     private fun identifyAndLogTaskUpdates(
-        sessionId: Int,
         preTransitionVisibleFreeformTasks: SparseArray<TaskInfo>,
         postTransitionVisibleFreeformTasks: SparseArray<TaskInfo>
     ) {
@@ -300,7 +283,7 @@ class DesktopModeLoggerTransitionObserver(
             when {
                 // new tasks added
                 previousTaskInfo == null -> {
-                    desktopModeEventLogger.logTaskAdded(sessionId, currentTaskUpdate)
+                    desktopModeEventLogger.logTaskAdded(currentTaskUpdate)
                     Trace.setCounter(
                         Trace.TRACE_TAG_WINDOW_MANAGER,
                         VISIBLE_TASKS_COUNTER_NAME,
@@ -313,14 +296,14 @@ class DesktopModeLoggerTransitionObserver(
                 // TODO(b/347935387): Log changes only once they are stable.
                 buildTaskUpdateForTask(previousTaskInfo, postTransitionVisibleFreeformTasks.size())
                         != currentTaskUpdate ->
-                            desktopModeEventLogger.logTaskInfoChanged(sessionId, currentTaskUpdate)
+                            desktopModeEventLogger.logTaskInfoChanged(currentTaskUpdate)
             }
         }
 
         // find old tasks that were removed
         preTransitionVisibleFreeformTasks.forEach { taskId, taskInfo ->
             if (!postTransitionVisibleFreeformTasks.containsKey(taskId)) {
-                desktopModeEventLogger.logTaskRemoved(sessionId,
+                desktopModeEventLogger.logTaskRemoved(
                     buildTaskUpdateForTask(taskInfo, postTransitionVisibleFreeformTasks.size()))
                 Trace.setCounter(
                     Trace.TRACE_TAG_WINDOW_MANAGER,
@@ -399,6 +382,7 @@ class DesktopModeLoggerTransitionObserver(
             transitionInfo.type == TRANSIT_EXIT_DESKTOP_MODE_KEYBOARD_SHORTCUT ->
                 ExitReason.KEYBOARD_SHORTCUT_EXIT
             transitionInfo.isExitToRecentsTransition() -> ExitReason.RETURN_HOME_OR_OVERVIEW
+            transitionInfo.type == Transitions.TRANSIT_MINIMIZE -> ExitReason.TASK_MINIMIZED
             else -> {
                 ProtoLog.w(
                     WM_SHELL_DESKTOP_MODE,
@@ -413,13 +397,6 @@ class DesktopModeLoggerTransitionObserver(
     @VisibleForTesting
     fun addTaskInfosToCachedMap(taskInfo: TaskInfo) {
         visibleFreeformTaskInfos.set(taskInfo.taskId, taskInfo)
-    }
-
-    @VisibleForTesting fun getLoggerSessionId(): Int? = loggerInstanceId?.id
-
-    @VisibleForTesting
-    fun setLoggerSessionId(id: Int) {
-        loggerInstanceId = InstanceId.fakeInstanceId(id)
     }
 
     private fun TransitionInfo.Change.requireTaskInfo(): RunningTaskInfo {
@@ -441,5 +418,6 @@ class DesktopModeLoggerTransitionObserver(
         @VisibleForTesting
         const val VISIBLE_TASKS_COUNTER_SYSTEM_PROPERTY =
             "debug.tracing." + VISIBLE_TASKS_COUNTER_NAME
+        const val VISIBLE_TASKS_COUNTER_SYSTEM_PROPERTY_DEFAULT_VALUE = "0"
     }
 }

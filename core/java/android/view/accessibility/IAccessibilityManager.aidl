@@ -88,6 +88,8 @@ interface IAccessibilityManager {
     @EnforcePermission("STATUS_BAR_SERVICE")
     void notifyAccessibilityButtonClicked(int displayId, String targetName);
 
+    @EnforcePermission("STATUS_BAR_SERVICE")
+    void notifyAccessibilityButtonLongClicked(int displayId);
 
     @EnforcePermission("STATUS_BAR_SERVICE")
     void notifyAccessibilityButtonVisibilityChanged(boolean available);

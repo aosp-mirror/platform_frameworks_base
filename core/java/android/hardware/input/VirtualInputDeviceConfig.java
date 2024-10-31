@@ -57,7 +57,7 @@ public abstract class VirtualInputDeviceConfig {
         mVendorId = builder.mVendorId;
         mProductId = builder.mProductId;
         mAssociatedDisplayId = builder.mAssociatedDisplayId;
-        mInputDeviceName = Objects.requireNonNull(builder.mInputDeviceName);
+        mInputDeviceName = Objects.requireNonNull(builder.mInputDeviceName, "Missing device name");
 
         if (mAssociatedDisplayId == Display.INVALID_DISPLAY) {
             throw new IllegalArgumentException(
@@ -77,7 +77,7 @@ public abstract class VirtualInputDeviceConfig {
         mVendorId = in.readInt();
         mProductId = in.readInt();
         mAssociatedDisplayId = in.readInt();
-        mInputDeviceName = Objects.requireNonNull(in.readString8());
+        mInputDeviceName = Objects.requireNonNull(in.readString8(), "Missing device name");
     }
 
     /**
@@ -163,7 +163,6 @@ public abstract class VirtualInputDeviceConfig {
             return self();
         }
 
-
         /**
          * Sets the product id of the device, uniquely identifying the device within the address
          * space of a given vendor, identified by the device's vendor id.
@@ -179,6 +178,10 @@ public abstract class VirtualInputDeviceConfig {
          *
          * <p>The input device is restricted to the display with the given ID and may not send
          * events to any other display.</p>
+         * <p>The corresponding display must be trusted or mirror display.</p>
+         *
+         * @see android.hardware.display.DisplayManager#VIRTUAL_DISPLAY_FLAG_TRUSTED
+         * @see android.hardware.display.DisplayManager#VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR
          */
         @NonNull
         public T setAssociatedDisplayId(int displayId) {

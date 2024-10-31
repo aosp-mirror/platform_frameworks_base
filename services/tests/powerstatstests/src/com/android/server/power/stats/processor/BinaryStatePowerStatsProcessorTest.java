@@ -41,7 +41,6 @@ import androidx.annotation.NonNull;
 import com.android.internal.os.MonotonicClock;
 import com.android.internal.os.PowerStats;
 import com.android.server.power.stats.MockClock;
-import com.android.server.power.stats.PowerStatsUidResolver;
 import com.android.server.power.stats.format.BinaryStatePowerStatsLayout;
 
 import org.junit.Rule;
@@ -63,12 +62,10 @@ public class BinaryStatePowerStatsProcessorTest {
 
     private final MockClock mClock = new MockClock();
     private final MonotonicClock mMonotonicClock = new MonotonicClock(0, mClock);
-    private final PowerStatsUidResolver mUidResolver = new PowerStatsUidResolver();
 
     private static class TestBinaryStatePowerStatsProcessor extends BinaryStatePowerStatsProcessor {
-        TestBinaryStatePowerStatsProcessor(int powerComponentId,
-                double averagePowerMilliAmp, PowerStatsUidResolver uidResolver) {
-            super(powerComponentId, uidResolver, averagePowerMilliAmp);
+        TestBinaryStatePowerStatsProcessor(int powerComponentId, double averagePowerMilliAmp) {
+            super(powerComponentId, averagePowerMilliAmp);
         }
 
         @Override
@@ -83,7 +80,7 @@ public class BinaryStatePowerStatsProcessorTest {
 
         PowerComponentAggregatedPowerStats stats = createAggregatedPowerStats(
                 () -> new TestBinaryStatePowerStatsProcessor(
-                        POWER_COMPONENT,  /* averagePowerMilliAmp */ 100, mUidResolver));
+                        POWER_COMPONENT,  /* averagePowerMilliAmp */ 100));
 
         stats.noteStateChange(buildHistoryItem(0, true, APP_UID1));
 
@@ -161,7 +158,7 @@ public class BinaryStatePowerStatsProcessorTest {
 
         PowerComponentAggregatedPowerStats stats = createAggregatedPowerStats(
                 () -> new TestBinaryStatePowerStatsProcessor(
-                        POWER_COMPONENT,  /* averagePowerMilliAmp */ 100, mUidResolver));
+                        POWER_COMPONENT,  /* averagePowerMilliAmp */ 100));
 
         stats.start(0);
 

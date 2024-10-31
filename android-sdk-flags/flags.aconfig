@@ -1,0 +1,12 @@
+package: "android.sdk"
+container: "system"
+
+flag {
+    name: "major_minor_versioning_scheme"
+    namespace: "android_sdk"
+    description: "Use the new SDK major.minor versioning scheme (e.g. Android 40.1) which replaces the old single-integer scheme (e.g. Android 15)."
+    bug: "350458259"
+
+    # Use is_fixed_read_only because DeviceConfig may not be available when Build.VERSION_CODES is first accessed
+    is_fixed_read_only: true
+}

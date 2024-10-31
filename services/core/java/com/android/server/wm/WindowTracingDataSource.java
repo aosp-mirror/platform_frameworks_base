@@ -38,8 +38,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public final class WindowTracingDataSource extends DataSource<WindowTracingDataSource.Instance,
         WindowTracingDataSource.TlsState, Void> {
-    public static final String DATA_SOURCE_NAME = "android.windowmanager";
-
     public static class TlsState {
         public final Config mConfig;
         public final AtomicBoolean mIsStarting = new AtomicBoolean(true);
@@ -78,8 +76,8 @@ public final class WindowTracingDataSource extends DataSource<WindowTracingDataS
     @NonNull
     private final WeakReference<WindowTracingPerfetto> mWindowTracing;
 
-    public WindowTracingDataSource(WindowTracingPerfetto windowTracing) {
-        super(DATA_SOURCE_NAME);
+    public WindowTracingDataSource(WindowTracingPerfetto windowTracing, String dataSourceName) {
+        super(dataSourceName);
         mWindowTracing = new WeakReference<>(windowTracing);
 
         Producer.init(InitArguments.DEFAULTS);

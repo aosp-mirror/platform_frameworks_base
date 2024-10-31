@@ -21,6 +21,7 @@ package com.android.systemui.scene.domain.interactor
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.ObservableTransitionState
+import com.android.compose.animation.scene.ObservableTransitionState.Transition.ShowOrHideOverlay
 import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
@@ -38,6 +39,7 @@ import com.android.systemui.scene.domain.resolver.homeSceneFamilyResolver
 import com.android.systemui.scene.overlayKeys
 import com.android.systemui.scene.sceneContainerConfig
 import com.android.systemui.scene.sceneKeys
+import com.android.systemui.scene.shared.model.Overlays
 import com.android.systemui.scene.shared.model.SceneFamilies
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.fakeSceneDataSource
@@ -256,7 +258,7 @@ class SceneInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun transitioningTo() =
+    fun transitioningTo_sceneChange() =
         testScope.runTest {
             val transitionState =
                 MutableStateFlow<ObservableTransitionState>(
@@ -289,6 +291,51 @@ class SceneInteractorTest : SysuiTestCase() {
             assertThat(transitionTo).isEqualTo(Scenes.Shade)
 
             transitionState.value = ObservableTransitionState.Idle(Scenes.Shade)
+            assertThat(transitionTo).isNull()
+        }
+
+    @Test
+    fun transitioningTo_overlayChange() =
+        testScope.runTest {
+            val transitionState =
+                MutableStateFlow<ObservableTransitionState>(
+                    ObservableTransitionState.Idle(underTest.currentScene.value)
+                )
+            underTest.setTransitionState(transitionState)
+
+            val transitionTo by collectLastValue(underTest.transitioningTo)
+            assertThat(transitionTo).isNull()
+
+            underTest.showOverlay(Overlays.NotificationsShade, "reason")
+            assertThat(transitionTo).isNull()
+
+            val progress = MutableStateFlow(0f)
+            transitionState.value =
+                ShowOrHideOverlay(
+                    overlay = Overlays.NotificationsShade,
+                    fromContent = underTest.currentScene.value,
+                    toContent = Overlays.NotificationsShade,
+                    currentScene = underTest.currentScene.value,
+                    currentOverlays = underTest.currentOverlays,
+                    progress = progress,
+                    isInitiatedByUserInput = true,
+                    isUserInputOngoing = flowOf(true),
+                    previewProgress = flowOf(0f),
+                    isInPreviewStage = flowOf(false),
+                )
+            assertThat(transitionTo).isEqualTo(Overlays.NotificationsShade)
+
+            progress.value = 0.5f
+            assertThat(transitionTo).isEqualTo(Overlays.NotificationsShade)
+
+            progress.value = 1f
+            assertThat(transitionTo).isEqualTo(Overlays.NotificationsShade)
+
+            transitionState.value =
+                ObservableTransitionState.Idle(
+                    currentScene = underTest.currentScene.value,
+                    currentOverlays = setOf(Overlays.NotificationsShade),
+                )
             assertThat(transitionTo).isNull()
         }
 

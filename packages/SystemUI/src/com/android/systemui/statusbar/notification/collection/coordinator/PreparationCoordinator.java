@@ -27,6 +27,7 @@ import android.os.Trace;
 import android.service.notification.StatusBarNotification;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -49,13 +50,18 @@ import com.android.systemui.statusbar.notification.collection.render.NotifViewBa
 import com.android.systemui.statusbar.notification.collection.render.NotifViewController;
 import com.android.systemui.statusbar.notification.row.NotifInflationErrorManager;
 import com.android.systemui.statusbar.notification.row.NotifInflationErrorManager.NotifInflationErrorListener;
+import com.android.systemui.statusbar.notification.row.icon.AppIconProvider;
+import com.android.systemui.statusbar.notification.row.icon.NotificationIconStyleProvider;
 import com.android.systemui.statusbar.notification.row.shared.AsyncGroupHeaderViewInflation;
 import com.android.systemui.statusbar.notification.row.shared.AsyncHybridViewInflation;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -104,6 +110,8 @@ public class PreparationCoordinator implements Coordinator {
     /** How long we can delay a group while waiting for all children to inflate */
     private final long mMaxGroupInflationDelay;
     private final BindEventManagerImpl mBindEventManager;
+    private final AppIconProvider mAppIconProvider;
+    private final NotificationIconStyleProvider mNotificationIconStyleProvider;
 
     @Inject
     public PreparationCoordinator(
@@ -113,7 +121,9 @@ public class PreparationCoordinator implements Coordinator {
             NotifViewBarn viewBarn,
             NotifUiAdjustmentProvider adjustmentProvider,
             IStatusBarService service,
-            BindEventManagerImpl bindEventManager) {
+            BindEventManagerImpl bindEventManager,
+            AppIconProvider appIconProvider,
+            NotificationIconStyleProvider notificationIconStyleProvider) {
         this(
                 logger,
                 notifInflater,
@@ -122,6 +132,8 @@ public class PreparationCoordinator implements Coordinator {
                 adjustmentProvider,
                 service,
                 bindEventManager,
+                appIconProvider,
+                notificationIconStyleProvider,
                 CHILD_BIND_CUTOFF,
                 MAX_GROUP_INFLATION_DELAY);
     }
@@ -135,6 +147,8 @@ public class PreparationCoordinator implements Coordinator {
             NotifUiAdjustmentProvider adjustmentProvider,
             IStatusBarService service,
             BindEventManagerImpl bindEventManager,
+            AppIconProvider appIconProvider,
+            NotificationIconStyleProvider notificationIconStyleProvider,
             int childBindCutoff,
             long maxGroupInflationDelay) {
         mLogger = logger;
@@ -146,6 +160,8 @@ public class PreparationCoordinator implements Coordinator {
         mChildBindCutoff = childBindCutoff;
         mMaxGroupInflationDelay = maxGroupInflationDelay;
         mBindEventManager = bindEventManager;
+        mAppIconProvider = appIconProvider;
+        mNotificationIconStyleProvider = notificationIconStyleProvider;
     }
 
     @Override
@@ -155,6 +171,9 @@ public class PreparationCoordinator implements Coordinator {
                 () -> mNotifInflatingFilter.invalidateList("adjustmentProviderChanged"));
 
         pipeline.addCollectionListener(mNotifCollectionListener);
+        if (android.app.Flags.notificationsRedesignAppIcons()) {
+            pipeline.addOnBeforeTransformGroupsListener(this::purgeCaches);
+        }
         // Inflate after grouping/sorting since that affects what views to inflate.
         pipeline.addOnBeforeFinalizeFilterListener(this::inflateAllRequiredViews);
         pipeline.addFinalizeFilter(mNotifInflationErrorFilter);
@@ -259,6 +278,29 @@ public class PreparationCoordinator implements Coordinator {
                     "onNotifInflationErrorCleared for " + logKey(entry));
         }
     };
+
+    private void purgeCaches(Collection<ListEntry> entries) {
+        Set<String> wantedPackages = getPackages(entries);
+        mAppIconProvider.purgeCache(wantedPackages);
+        mNotificationIconStyleProvider.purgeCache(wantedPackages);
+    }
+
+    /**
+     * Get all app packages present in {@param entries}.
+     */
+    private static @NonNull Set<String> getPackages(Collection<ListEntry> entries) {
+        Set<String> packages = new HashSet<>();
+        for (ListEntry entry : entries) {
+            NotificationEntry notificationEntry = entry.getRepresentativeEntry();
+            if (notificationEntry == null) {
+                Log.wtf(TAG, "notification entry " + entry.getKey()
+                        + " has no representative entry");
+                continue;
+            }
+            packages.add(notificationEntry.getSbn().getPackageName());
+        }
+        return packages;
+    }
 
     private void inflateAllRequiredViews(List<ListEntry> entries) {
         for (int i = 0, size = entries.size(); i < size; i++) {

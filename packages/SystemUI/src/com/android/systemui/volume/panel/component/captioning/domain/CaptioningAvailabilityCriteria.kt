@@ -26,7 +26,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.flow.stateIn
 
 @VolumePanelScope
 class CaptioningAvailabilityCriteria
@@ -45,7 +45,7 @@ constructor(
                     else VolumePanelUiEvent.VOLUME_PANEL_LIVE_CAPTION_TOGGLE_GONE
                 )
             }
-            .shareIn(scope, SharingStarted.WhileSubscribed(), replay = 1)
+            .stateIn(scope, SharingStarted.WhileSubscribed(), false)
 
     override fun isAvailable(): Flow<Boolean> = availability
 }

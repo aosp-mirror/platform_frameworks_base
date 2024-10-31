@@ -17,23 +17,21 @@
 package com.android.systemui.qs.tiles.impl.internet.domain.model
 
 import com.android.systemui.common.shared.model.ContentDescription
-import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.shared.model.Text
+import com.android.systemui.statusbar.pipeline.shared.ui.model.InternetTileIconModel
 
 /** Model describing the state that the QS Internet tile should be in. */
 sealed interface InternetTileModel {
     val secondaryTitle: CharSequence?
     val secondaryLabel: Text?
-    val iconId: Int?
-    val icon: Icon?
+    val icon: InternetTileIconModel
     val stateDescription: ContentDescription?
     val contentDescription: ContentDescription?
 
     data class Active(
         override val secondaryTitle: CharSequence? = null,
         override val secondaryLabel: Text? = null,
-        override val iconId: Int? = null,
-        override val icon: Icon? = null,
+        override val icon: InternetTileIconModel = InternetTileIconModel.Cellular(1),
         override val stateDescription: ContentDescription? = null,
         override val contentDescription: ContentDescription? = null,
     ) : InternetTileModel
@@ -41,8 +39,7 @@ sealed interface InternetTileModel {
     data class Inactive(
         override val secondaryTitle: CharSequence? = null,
         override val secondaryLabel: Text? = null,
-        override val iconId: Int? = null,
-        override val icon: Icon? = null,
+        override val icon: InternetTileIconModel = InternetTileIconModel.Cellular(1),
         override val stateDescription: ContentDescription? = null,
         override val contentDescription: ContentDescription? = null,
     ) : InternetTileModel

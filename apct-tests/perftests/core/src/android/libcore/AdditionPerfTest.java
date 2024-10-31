@@ -16,8 +16,8 @@
 
 package android.libcore;
 
-import androidx.benchmark.BenchmarkState;
-import androidx.benchmark.junit4.BenchmarkRule;
+import android.perftests.utils.BenchmarkState;
+import android.perftests.utils.PerfStatusReporter;
 
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -34,11 +34,11 @@ import org.junit.runner.RunWith;
 public class AdditionPerfTest {
 
     @Rule
-    public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
+    public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
 
     @Test
     public void timeAddConstantToLocalInt() {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         int result = 0;
         while (state.keepRunning()) {
             result += 123;
@@ -46,7 +46,7 @@ public class AdditionPerfTest {
     }
     @Test
     public void timeAddTwoLocalInts() {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         int result = 0;
         int constant = 123;
         while (state.keepRunning()) {
@@ -55,7 +55,7 @@ public class AdditionPerfTest {
     }
     @Test
     public void timeAddConstantToLocalLong() {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         long result = 0;
         while (state.keepRunning()) {
             result += 123L;
@@ -63,7 +63,7 @@ public class AdditionPerfTest {
     }
     @Test
     public void timeAddTwoLocalLongs() {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         long result = 0;
         long constant = 123L;
         while (state.keepRunning()) {
@@ -72,7 +72,7 @@ public class AdditionPerfTest {
     }
     @Test
     public void timeAddConstantToLocalFloat() {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         float result = 0.0f;
         while (state.keepRunning()) {
             result += 123.0f;
@@ -80,7 +80,7 @@ public class AdditionPerfTest {
     }
     @Test
     public void timeAddTwoLocalFloats() {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         float result = 0.0f;
         float constant = 123.0f;
         while (state.keepRunning()) {
@@ -89,7 +89,7 @@ public class AdditionPerfTest {
     }
     @Test
     public void timeAddConstantToLocalDouble() {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         double result = 0.0;
         while (state.keepRunning()) {
             result += 123.0;
@@ -97,7 +97,7 @@ public class AdditionPerfTest {
     }
     @Test
     public void timeAddTwoLocalDoubles() {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         double result = 0.0;
         double constant = 123.0;
         while (state.keepRunning()) {

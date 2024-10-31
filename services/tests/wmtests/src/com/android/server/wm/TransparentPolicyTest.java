@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
@@ -233,6 +234,21 @@ public class TransparentPolicyTest extends WindowTestsBase {
             ta.setDisplayContentBounds(0, 0, 900, 1800);
             ta.checkTopActivityHasInheritedBoundsFrom(/* fromTop */ 1);
         })), /* displayWidth */ 500,  /* displayHeight */ 1000);
+    }
+
+    @Test
+    public void testNotRunStrategyToTranslucentActivitiesIfTaskIsFreeform() {
+        runTestScenario((robot) -> {
+            robot.transparentActivity((ta) -> {
+                ta.applyOnActivity((a) -> {
+                    a.setIgnoreOrientationRequest(true);
+                    ta.launchTransparentActivityInTask();
+                    a.setTaskWindowingMode(WINDOWING_MODE_FREEFORM);
+
+                    ta.checkTopActivityTransparentPolicyStateIsRunning(/* running */ false);
+                });
+            });
+        }, /* displayWidth */ 2800,  /* displayHeight */ 1400);
     }
 
     @Test

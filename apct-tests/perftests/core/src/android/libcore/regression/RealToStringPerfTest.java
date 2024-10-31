@@ -16,8 +16,8 @@
 
 package android.libcore.regression;
 
-import androidx.benchmark.BenchmarkState;
-import androidx.benchmark.junit4.BenchmarkRule;
+import android.perftests.utils.BenchmarkState;
+import android.perftests.utils.PerfStatusReporter;
 
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -29,7 +29,7 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 @LargeTest
 public class RealToStringPerfTest {
-    @Rule public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
+    @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
 
     private static final float SMALL = -123.45f;
     private static final float MEDIUM = -123.45e8f;
@@ -37,7 +37,7 @@ public class RealToStringPerfTest {
 
     @Test
     public void timeFloat_toString_NaN() {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             Float.toString(Float.NaN);
         }
@@ -45,7 +45,7 @@ public class RealToStringPerfTest {
 
     @Test
     public void timeFloat_toString_NEGATIVE_INFINITY() {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             Float.toString(Float.NEGATIVE_INFINITY);
         }
@@ -53,7 +53,7 @@ public class RealToStringPerfTest {
 
     @Test
     public void timeFloat_toString_POSITIVE_INFINITY() {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             Float.toString(Float.POSITIVE_INFINITY);
         }
@@ -61,7 +61,7 @@ public class RealToStringPerfTest {
 
     @Test
     public void timeFloat_toString_zero() {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             Float.toString(0.0f);
         }
@@ -69,7 +69,7 @@ public class RealToStringPerfTest {
 
     @Test
     public void timeFloat_toString_minusZero() {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             Float.toString(-0.0f);
         }
@@ -77,7 +77,7 @@ public class RealToStringPerfTest {
 
     @Test
     public void timeFloat_toString_small() {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             Float.toString(SMALL);
         }
@@ -85,7 +85,7 @@ public class RealToStringPerfTest {
 
     @Test
     public void timeFloat_toString_medium() {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             Float.toString(MEDIUM);
         }
@@ -93,7 +93,7 @@ public class RealToStringPerfTest {
 
     @Test
     public void timeFloat_toString_large() {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             Float.toString(LARGE);
         }
@@ -101,7 +101,7 @@ public class RealToStringPerfTest {
 
     @Test
     public void timeStringBuilder_small() {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             new StringBuilder().append(SMALL);
         }
@@ -109,7 +109,7 @@ public class RealToStringPerfTest {
 
     @Test
     public void timeStringBuilder_medium() {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             new StringBuilder().append(MEDIUM);
         }
@@ -117,7 +117,7 @@ public class RealToStringPerfTest {
 
     @Test
     public void timeStringBuilder_large() {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             new StringBuilder().append(LARGE);
         }
@@ -125,7 +125,7 @@ public class RealToStringPerfTest {
 
     @Test
     public void timeFormatter_small() {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             String.format("%f", SMALL);
         }
@@ -133,7 +133,7 @@ public class RealToStringPerfTest {
 
     @Test
     public void timeFormatter_medium() {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             String.format("%f", MEDIUM);
         }
@@ -141,7 +141,7 @@ public class RealToStringPerfTest {
 
     @Test
     public void timeFormatter_large() {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             String.format("%f", LARGE);
         }
@@ -149,7 +149,7 @@ public class RealToStringPerfTest {
 
     @Test
     public void timeFormatter_dot2f_small() {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             String.format("%.2f", SMALL);
         }
@@ -157,7 +157,7 @@ public class RealToStringPerfTest {
 
     @Test
     public void timeFormatter_dot2f_medium() {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             String.format("%.2f", MEDIUM);
         }
@@ -165,7 +165,7 @@ public class RealToStringPerfTest {
 
     @Test
     public void timeFormatter_dot2f_large() {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             String.format("%.2f", LARGE);
         }

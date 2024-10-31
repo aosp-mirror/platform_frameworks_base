@@ -357,6 +357,8 @@
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"향상된 연결 기능을 사용 설정합니다."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"로컬 터미널"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"로컬 셸 액세스를 제공하는 터미널 앱 사용"</string>
+    <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Linux 개발 환경"</string>
+    <string name="enable_linux_terminal_summary" msgid="5893216510985145320">"Android에서 Linux 터미널 실행"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP 확인"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"HDCP 확인 동작 설정"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"디버깅"</string>
@@ -564,8 +566,7 @@
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"알람 및 리마인더"</string>
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"이 앱이 알람을 설정하고 시간 기반 작업을 예약할 수 있도록 허용합니다. 이렇게 하면 백그라운드에서 앱 실행이 허용되어 배터리 사용량이 증가할 수 있습니다.\n\n이 권한을 사용 중지하면 이 앱에서 예약한 기존의 알람 및 시간 기반 일정이 작동하지 않습니다."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"일정 예약, 알람, 리마인더, 시계"</string>
-    <!-- no translation found for zen_mode_do_not_disturb_name (6798711401734798283) -->
-    <skip />
+    <string name="zen_mode_do_not_disturb_name" msgid="6798711401734798283">"방해 금지 모드"</string>
     <string name="zen_mode_settings_title" msgid="7374070457626419755">"방해 금지 모드"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"사용 설정"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"방해 금지 모드 사용 설정"</string>
@@ -583,6 +584,7 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"조금 전"</string>
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"이 휴대전화"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"이 태블릿"</string>
+    <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"이 컴퓨터(내부)"</string>
     <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
     <skip />
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"도크 스피커"</string>
@@ -685,7 +687,12 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"사용 중지됨"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"사용 설정됨"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"변경사항을 적용하려면 기기를 재부팅해야 합니다. 지금 재부팅하거나 취소하세요."</string>
-    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"유선 헤드폰"</string>
+    <string name="media_transfer_wired_headphone_name" msgid="8698668536022665254">"유선 헤드폰"</string>
+    <string name="media_transfer_headphone_name" msgid="1157798825650178478">"유선 오디오"</string>
+    <string name="media_transfer_usb_audio_name" msgid="1789292056757821355">"USB 오디오"</string>
+    <string name="media_transfer_wired_device_mic_name" msgid="7115192790725088698">"유선 마이크"</string>
+    <string name="media_transfer_usb_device_mic_name" msgid="7171789543226269822">"USB 마이크"</string>
+    <string name="media_transfer_bt_device_mic_name" msgid="1870669402238687618">"블루투스 마이크"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"사용"</string>
     <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"사용 안 함"</string>
     <string name="carrier_network_change_mode" msgid="4257621815706644026">"이동통신사 네트워크 변경"</string>

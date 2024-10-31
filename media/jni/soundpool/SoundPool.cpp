@@ -21,6 +21,9 @@
 #include <algorithm>
 #include <thread>
 
+#define ATRACE_TAG ATRACE_TAG_AUDIO
+#include <utils/Trace.h>
+
 #include "SoundPool.h"
 
 namespace android
@@ -135,8 +138,10 @@ int32_t SoundPool::play(int32_t soundID, float leftVolume, float rightVolume,
         return 0;
     }
 
+    ATRACE_BEGIN("SoundPool::play (native)");
     const int32_t streamID = mStreamManager.queueForPlay(
             sound, soundID, leftVolume, rightVolume, priority, loop, rate, playerIId);
+    ATRACE_END();
     ALOGV("%s returned %d", __func__, streamID);
 
     return streamID;

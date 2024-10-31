@@ -150,7 +150,7 @@ import javax.xml.datatype.DatatypeConfigurationException;
  *      <screenBrightnessDefault>0.65</screenBrightnessDefault>
  *      <powerThrottlingConfig>
  *        <brightnessLowestCapAllowed>0.1</brightnessLowestCapAllowed>
- *        <customAnimationRateSec>0.004</customAnimationRateSec>
+ *        <customAnimationRate>0.004</customAnimationRate>
  *        <pollingWindowMaxMillis>30000</pollingWindowMaxMillis>
  *        <pollingWindowMinMillis>10000</pollingWindowMinMillis>
  *          <powerThrottlingMap>
@@ -377,6 +377,7 @@ import javax.xml.datatype.DatatypeConfigurationException;
  *              </point>
  *            </map>
  *          </luxToBrightnessMapping>
+ *          <idleStylusTimeoutMillis>10000</idleStylusTimeoutMillis>
  *      </autoBrightness>
  *
  *      <screenBrightnessRampFastDecrease>0.01</screenBrightnessRampFastDecrease>
@@ -708,6 +709,10 @@ public class DisplayDeviceConfig {
 
     private static final int KEEP_CURRENT_BRIGHTNESS = -1;
 
+    // The default value to 0 which will signify that the stylus usage immediately stopped
+    // after it was started. This will make the system behave as if the stylus was never used
+    private static final int DEFAULT_IDLE_STYLUS_TIMEOUT_MILLIS = 0;
+
     private final Context mContext;
 
     // The details of the ambient light sensor associated with this display.
@@ -754,6 +759,9 @@ public class DisplayDeviceConfig {
     @Nullable
     private DisplayBrightnessMappingConfig mDisplayBrightnessMapping;
 
+    private int mIdleStylusTimeoutMillis =
+            DEFAULT_IDLE_STYLUS_TIMEOUT_MILLIS;
+
     private float mBacklightMinimum = Float.NaN;
     private float mBacklightMaximum = Float.NaN;
     private float mBrightnessDefault = Float.NaN;
@@ -795,7 +803,6 @@ public class DisplayDeviceConfig {
     private PowerThrottlingConfigData mPowerThrottlingConfigData;
     private DensityMapping mDensityMapping;
     private String mLoadedFrom = null;
-
 
     // Represents the auto-brightness brightening light debounce.
     private long mAutoBrightnessBrighteningLightDebounce =
@@ -1081,7 +1088,7 @@ public class DisplayDeviceConfig {
      */
     public float[] getNits() {
         if (mEvenDimmerBrightnessData != null) {
-            return mEvenDimmerBrightnessData.mNits;
+            return mEvenDimmerBrightnessData.nits;
         }
         return mNits;
     }
@@ -1094,7 +1101,7 @@ public class DisplayDeviceConfig {
     @VisibleForTesting
     public float[] getBacklight() {
         if (mEvenDimmerBrightnessData != null) {
-            return mEvenDimmerBrightnessData.mBacklight;
+            return mEvenDimmerBrightnessData.backlight;
         }
         return mBacklight;
     }
@@ -1108,7 +1115,7 @@ public class DisplayDeviceConfig {
      */
     public float getBacklightFromBrightness(float brightness) {
         if (mEvenDimmerBrightnessData != null) {
-            return mEvenDimmerBrightnessData.mBrightnessToBacklight.interpolate(brightness);
+            return mEvenDimmerBrightnessData.brightnessToBacklight.interpolate(brightness);
         }
         return mBrightnessToBacklightSpline.interpolate(brightness);
     }
@@ -1121,7 +1128,7 @@ public class DisplayDeviceConfig {
      */
     public float getBrightnessFromBacklight(float backlight) {
         if (mEvenDimmerBrightnessData != null) {
-            return mEvenDimmerBrightnessData.mBacklightToBrightness.interpolate(backlight);
+            return mEvenDimmerBrightnessData.backlightToBrightness.interpolate(backlight);
         }
         return mBacklightToBrightnessSpline.interpolate(backlight);
     }
@@ -1132,7 +1139,7 @@ public class DisplayDeviceConfig {
      */
     private Spline getBacklightToBrightnessSpline() {
         if (mEvenDimmerBrightnessData != null) {
-            return mEvenDimmerBrightnessData.mBacklightToBrightness;
+            return mEvenDimmerBrightnessData.backlightToBrightness;
         }
         return mBacklightToBrightnessSpline;
     }
@@ -1145,11 +1152,11 @@ public class DisplayDeviceConfig {
      */
     public float getNitsFromBacklight(float backlight) {
         if (mEvenDimmerBrightnessData != null) {
-            if (mEvenDimmerBrightnessData.mBacklightToNits == null) {
+            if (mEvenDimmerBrightnessData.backlightToNits == null) {
                 return INVALID_NITS;
             }
             backlight = Math.max(backlight, mBacklightMinimum);
-            return mEvenDimmerBrightnessData.mBacklightToNits.interpolate(backlight);
+            return mEvenDimmerBrightnessData.backlightToNits.interpolate(backlight);
         }
 
         if (mBacklightToNitsSpline == null) {
@@ -1166,14 +1173,14 @@ public class DisplayDeviceConfig {
      */
     public float getBacklightFromNits(float nits) {
         if (mEvenDimmerBrightnessData != null) {
-            return mEvenDimmerBrightnessData.mNitsToBacklight.interpolate(nits);
+            return mEvenDimmerBrightnessData.nitsToBacklight.interpolate(nits);
         }
         return mNitsToBacklightSpline.interpolate(nits);
     }
 
     private Spline getNitsToBacklightSpline() {
         if (mEvenDimmerBrightnessData != null) {
-            return mEvenDimmerBrightnessData.mNitsToBacklight;
+            return mEvenDimmerBrightnessData.nitsToBacklight;
         }
         return mNitsToBacklightSpline;
     }
@@ -1187,7 +1194,7 @@ public class DisplayDeviceConfig {
         if (mEvenDimmerBrightnessData == null) {
             return INVALID_NITS;
         }
-        return mEvenDimmerBrightnessData.mMinLuxToNits.interpolate(lux);
+        return mEvenDimmerBrightnessData.minLuxToNits.interpolate(lux);
     }
 
     /**
@@ -1198,7 +1205,7 @@ public class DisplayDeviceConfig {
         if (mEvenDimmerBrightnessData == null) {
             return PowerManager.BRIGHTNESS_MIN;
         }
-        return mEvenDimmerBrightnessData.mTransitionPoint;
+        return mEvenDimmerBrightnessData.transitionPoint;
     }
 
     /**
@@ -1269,7 +1276,7 @@ public class DisplayDeviceConfig {
      */
     public float[] getBrightness() {
         if (mEvenDimmerBrightnessData != null) {
-            return mEvenDimmerBrightnessData.mBrightness;
+            return mEvenDimmerBrightnessData.brightness;
         }
         return mBrightness;
     }
@@ -1686,7 +1693,6 @@ public class DisplayDeviceConfig {
                 + "\n"
                 + "mLuxThrottlingData=" + mLuxThrottlingData
                 + ", mHbmData=" + mHbmData
-
                 + ", mThermalBrightnessThrottlingDataMapByThrottlingId="
                 + mThermalBrightnessThrottlingDataMapByThrottlingId
                 + "\n"
@@ -1732,6 +1738,7 @@ public class DisplayDeviceConfig {
                 + ", mDisplayBrightnessMapping= " + mDisplayBrightnessMapping
                 + ", mDdcAutoBrightnessAvailable= " + mDdcAutoBrightnessAvailable
                 + ", mAutoBrightnessAvailable= " + mAutoBrightnessAvailable
+                + ", mIdleStylusTimeoutMillis= " + mIdleStylusTimeoutMillis
                 + "\n"
                 + "mDefaultLowBlockingZoneRefreshRate= " + mDefaultLowBlockingZoneRefreshRate
                 + ", mDefaultHighBlockingZoneRefreshRate= " + mDefaultHighBlockingZoneRefreshRate
@@ -2186,11 +2193,11 @@ public class DisplayDeviceConfig {
             return;
         }
         float lowestBrightnessCap = powerThrottlingCfg.getBrightnessLowestCapAllowed().floatValue();
-        float customAnimationRateSec = powerThrottlingCfg.getCustomAnimationRateSec().floatValue();
+        float customAnimationRate = powerThrottlingCfg.getCustomAnimationRate().floatValue();
         int pollingWindowMaxMillis = powerThrottlingCfg.getPollingWindowMaxMillis().intValue();
         int pollingWindowMinMillis = powerThrottlingCfg.getPollingWindowMinMillis().intValue();
         mPowerThrottlingConfigData = new PowerThrottlingConfigData(lowestBrightnessCap,
-                                                                   customAnimationRateSec,
+                                                                   customAnimationRate,
                                                                    pollingWindowMaxMillis,
                                                                    pollingWindowMinMillis);
     }
@@ -2391,7 +2398,16 @@ public class DisplayDeviceConfig {
         loadAutoBrightnessDarkeningLightDebounceIdle(autoBrightness);
         mDisplayBrightnessMapping = new DisplayBrightnessMappingConfig(mContext, mFlags,
                 autoBrightness, getBacklightToBrightnessSpline());
+        loadIdleStylusTimeoutMillis(autoBrightness);
         loadEnableAutoBrightness(autoBrightness);
+    }
+
+    /**
+     * Gets the timeout post the stylus usage after which the automatic brightness will be enabled
+     * again
+     */
+    public int getIdleStylusTimeoutMillis() {
+        return mIdleStylusTimeoutMillis;
     }
 
     /**
@@ -2619,13 +2635,13 @@ public class DisplayDeviceConfig {
                 List<NonNegativeFloatToFloatPoint> points = map.getMap().getPoint();
                 for (NonNegativeFloatToFloatPoint point : points) {
                     float lux = point.getFirst().floatValue();
-                    float maxBrightness = point.getSecond().floatValue();
-                    if (maxBrightness > hbmTransitionPoint) {
+                    float maxBacklight = point.getSecond().floatValue();
+                    if (maxBacklight > hbmTransitionPoint) {
                         Slog.wtf(TAG,
-                                "Invalid NBM config: maxBrightness is greater than hbm"
+                                "Invalid NBM config: maxBacklight is greater than hbm"
                                         + ".transitionPoint. type="
-                                        + type + "; lux=" + lux + "; maxBrightness="
-                                        + maxBrightness);
+                                        + type + "; lux=" + lux + "; maxBacklight="
+                                        + maxBacklight);
                         continue;
                     }
                     if (luxToTransitionPointMap.containsKey(lux)) {
@@ -2634,8 +2650,7 @@ public class DisplayDeviceConfig {
                                         + lux);
                         continue;
                     }
-                    luxToTransitionPointMap.put(lux,
-                            getBrightnessFromBacklight(maxBrightness));
+                    luxToTransitionPointMap.put(lux, getBrightnessFromBacklight(maxBacklight));
                 }
                 if (!luxToTransitionPointMap.isEmpty()) {
                     mLuxThrottlingData.put(mappedType, luxToTransitionPointMap);
@@ -2926,6 +2941,16 @@ public class DisplayDeviceConfig {
         return levels;
     }
 
+    private void loadIdleStylusTimeoutMillis(AutoBrightness autoBrightness) {
+        if (autoBrightness == null) {
+            return;
+        }
+        BigInteger idleStylusTimeoutMillis = autoBrightness.getIdleStylusTimeoutMillis();
+        if (idleStylusTimeoutMillis != null) {
+            mIdleStylusTimeoutMillis = idleStylusTimeoutMillis.intValue();
+        }
+    }
+
     private void loadEnableAutoBrightness(AutoBrightness autobrightness) {
         // mDdcAutoBrightnessAvailable is initialised to true, so that we fallback to using the
         // config.xml values if the autobrightness tag is not defined in the ddc file.
@@ -2987,16 +3012,16 @@ public class DisplayDeviceConfig {
         /** Lowest brightness cap allowed for this device. */
         public final float brightnessLowestCapAllowed;
         /** Time take to animate brightness in seconds. */
-        public final float customAnimationRateSec;
+        public final float customAnimationRate;
         /** Time window for maximum polling power in milliseconds. */
         public final int pollingWindowMaxMillis;
         /** Time window for minimum polling power in milliseconds. */
         public final int pollingWindowMinMillis;
         public PowerThrottlingConfigData(float brightnessLowestCapAllowed,
-                float customAnimationRateSec, int pollingWindowMaxMillis,
+                float customAnimationRate, int pollingWindowMaxMillis,
                 int pollingWindowMinMillis) {
             this.brightnessLowestCapAllowed = brightnessLowestCapAllowed;
-            this.customAnimationRateSec = customAnimationRateSec;
+            this.customAnimationRate = customAnimationRate;
             this.pollingWindowMaxMillis = pollingWindowMaxMillis;
             this.pollingWindowMinMillis = pollingWindowMinMillis;
         }
@@ -3006,7 +3031,7 @@ public class DisplayDeviceConfig {
             return "PowerThrottlingConfigData{"
                     + "brightnessLowestCapAllowed: "
                     + brightnessLowestCapAllowed
-                    + ", customAnimationRateSec: " + customAnimationRateSec
+                    + ", customAnimationRate: " + customAnimationRate
                     + ", pollingWindowMaxMillis: " + pollingWindowMaxMillis
                     + ", pollingWindowMinMillis: " + pollingWindowMinMillis
                     + "} ";

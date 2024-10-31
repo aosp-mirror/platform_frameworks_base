@@ -17,7 +17,7 @@
 package com.android.server.wm;
 
 
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_EMBEDDED_WINDOWS;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_EMBEDDED_WINDOWS;
 import static com.android.server.wm.IdentifierProto.HASH_CODE;
 import static com.android.server.wm.IdentifierProto.TITLE;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
@@ -33,10 +33,13 @@ import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 import android.view.InputApplicationHandle;
 import android.view.InputChannel;
+import android.view.WindowInsets;
 import android.window.InputTransferToken;
 
 import com.android.internal.protolog.ProtoLog;
 import com.android.server.input.InputManagerService;
+
+import java.util.ArrayList;
 
 /**
  * Keeps track of embedded windows.
@@ -145,6 +148,20 @@ class EmbeddedWindowController {
         return mWindowsByWindowToken.get(windowToken);
     }
 
+    @Nullable ArrayList<EmbeddedWindow> getByHostWindow(WindowState host) {
+        ArrayList<EmbeddedWindow> windows = null;
+        for (int i = mWindows.size() - 1; i >= 0; i--) {
+            final EmbeddedWindow ew = mWindows.valueAt(i);
+            if (ew.mHostWindowState == host) {
+                if (windows == null) {
+                    windows = new ArrayList<>();
+                }
+                windows.add(ew);
+            }
+        }
+        return windows;
+    }
+
     private boolean isValidTouchGestureParams(WindowState hostWindowState,
             EmbeddedWindow embeddedWindow) {
         if (embeddedWindow == null) {
@@ -180,24 +197,43 @@ class EmbeddedWindowController {
         return true;
     }
 
-    boolean transferToHost(@NonNull InputTransferToken embeddedWindowToken,
+    boolean transferToHost(int callingUid, @NonNull InputTransferToken embeddedWindowToken,
             @NonNull WindowState transferToHostWindowState) {
         EmbeddedWindow ew = getByInputTransferToken(embeddedWindowToken);
         if (!isValidTouchGestureParams(transferToHostWindowState, ew)) {
             return false;
         }
-        return mInputManagerService.transferTouchGesture(ew.getInputChannelToken(),
-                transferToHostWindowState.mInputChannelToken);
+        if (callingUid != ew.mOwnerUid) {
+            throw new SecurityException(
+                    "Transfer request must originate from owner of transferFromToken");
+        }
+        final boolean didTransfer = mInputManagerService.transferTouchGesture(
+                ew.getInputChannelToken(), transferToHostWindowState.mInputChannelToken);
+        if (didTransfer) {
+            ew.mGestureToEmbedded = false;
+        }
+        return didTransfer;
     }
 
-    boolean transferToEmbedded(WindowState hostWindowState,
+    boolean transferToEmbedded(int callingUid, WindowState hostWindowState,
             @NonNull InputTransferToken transferToToken) {
         final EmbeddedWindowController.EmbeddedWindow ew = getByInputTransferToken(transferToToken);
         if (!isValidTouchGestureParams(hostWindowState, ew)) {
             return false;
         }
-        return mInputManagerService.transferTouchGesture(hostWindowState.mInputChannelToken,
+        if (callingUid != hostWindowState.mOwnerUid) {
+            throw new SecurityException(
+                    "Transfer request must originate from owner of transferFromToken");
+        }
+        final boolean didTransfer = mInputManagerService.transferTouchGesture(
+                hostWindowState.mInputChannelToken,
                 ew.getInputChannelToken());
+        if (didTransfer) {
+            ew.mGestureToEmbedded = true;
+            mAtmService.mBackNavigationController.onEmbeddedWindowGestureTransferred(
+                    hostWindowState);
+        }
+        return didTransfer;
     }
 
     static class EmbeddedWindow implements InputTarget {
@@ -221,6 +257,13 @@ class EmbeddedWindowController {
         private final InputTransferToken mInputTransferToken;
 
         private boolean mIsFocusable;
+
+        // The EmbeddedWindow can only request the IME. All other insets types are requested by
+        // the host window.
+        private @WindowInsets.Type.InsetsType int mRequestedVisibleTypes = 0;
+
+        /** Whether the gesture is transferred to embedded window. */
+        boolean mGestureToEmbedded = false;
 
         /**
          * @param session  calling session to check ownership of the window
@@ -311,6 +354,27 @@ class EmbeddedWindowController {
         }
 
         @Override
+        public boolean isRequestedVisible(@WindowInsets.Type.InsetsType int types) {
+            return (mRequestedVisibleTypes & types) != 0;
+        }
+
+        @Override
+        public @WindowInsets.Type.InsetsType int getRequestedVisibleTypes() {
+            return mRequestedVisibleTypes;
+        }
+
+        /**
+         * Only the IME can be requested from the EmbeddedWindow.
+         * @param requestedVisibleTypes other types than {@link WindowInsets.Type.IME} are
+         *                              not sent to system server via WindowlessWindowManager.
+         */
+        void setRequestedVisibleTypes(@WindowInsets.Type.InsetsType int requestedVisibleTypes) {
+            if (mRequestedVisibleTypes != requestedVisibleTypes) {
+                mRequestedVisibleTypes = requestedVisibleTypes;
+            }
+        }
+
+        @Override
         public int getPid() {
             return mOwnerPid;
         }
@@ -375,6 +439,11 @@ class EmbeddedWindowController {
 
         @Override
         public boolean shouldControlIme() {
+            if (android.view.inputmethod.Flags.refactorInsetsController()) {
+                // EmbeddedWindow should never be able to control the IME directly, but only the
+                // RemoteInsetsControlTarget.
+                return false;
+            }
             return mHostWindowState != null;
         }
 

@@ -77,6 +77,16 @@ public final class PrimitiveSegment extends VibrationEffectSegment {
 
     /** @hide */
     @Override
+    public long getDuration(@Nullable VibratorInfo vibratorInfo) {
+        if (vibratorInfo == null) {
+            return getDuration();
+        }
+        int duration = vibratorInfo.getPrimitiveDuration(mPrimitiveId);
+        return duration > 0 ? duration + mDelay : getDuration();
+    }
+
+    /** @hide */
+    @Override
     public boolean areVibrationFeaturesSupported(@NonNull VibratorInfo vibratorInfo) {
         return vibratorInfo.isPrimitiveSupported(mPrimitiveId);
     }

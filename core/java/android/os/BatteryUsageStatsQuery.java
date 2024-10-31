@@ -20,6 +20,8 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.util.IntArray;
 
+import com.android.internal.os.MonotonicClock;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
@@ -77,14 +79,19 @@ public final class BatteryUsageStatsQuery implements Parcelable {
 
     public static final int FLAG_BATTERY_USAGE_STATS_INCLUDE_POWER_STATE = 0x0040;
 
+    public static final int FLAG_BATTERY_USAGE_STATS_ACCUMULATED = 0x0080;
+
     private static final long DEFAULT_MAX_STATS_AGE_MS = 5 * 60 * 1000;
 
     private final int mFlags;
     @NonNull
     private final int[] mUserIds;
     private final long mMaxStatsAgeMs;
-    private final long mFromTimestamp;
-    private final long mToTimestamp;
+
+    private final long mAggregatedFromTimestamp;
+    private final long mAggregatedToTimestamp;
+    private long mMonotonicStartTime;
+    private long mMonotonicEndTime;
     private final double mMinConsumedPowerThreshold;
     private final @BatteryConsumer.PowerComponentId int[] mPowerComponents;
 
@@ -94,8 +101,10 @@ public final class BatteryUsageStatsQuery implements Parcelable {
                 : new int[]{UserHandle.USER_ALL};
         mMaxStatsAgeMs = builder.mMaxStatsAgeMs;
         mMinConsumedPowerThreshold = builder.mMinConsumedPowerThreshold;
-        mFromTimestamp = builder.mFromTimestamp;
-        mToTimestamp = builder.mToTimestamp;
+        mAggregatedFromTimestamp = builder.mAggregateFromTimestamp;
+        mAggregatedToTimestamp = builder.mAggregateToTimestamp;
+        mMonotonicStartTime = builder.mMonotonicStartTime;
+        mMonotonicEndTime = builder.mMonotonicEndTime;
         mPowerComponents = builder.mPowerComponents;
     }
 
@@ -161,11 +170,27 @@ public final class BatteryUsageStatsQuery implements Parcelable {
     }
 
     /**
-     * Returns the exclusive lower bound of the stored snapshot timestamps that should be included
-     * in the aggregation.  Ignored if {@link #getToTimestamp()} is zero.
+     * Returns the exclusive lower bound of the battery history that should be included in
+     * the aggregated battery usage stats.
      */
-    public long getFromTimestamp() {
-        return mFromTimestamp;
+    public long getMonotonicStartTime() {
+        return mMonotonicStartTime;
+    }
+
+    /**
+     * Returns the inclusive upper bound of the battery history that should be included in
+     * the aggregated battery usage stats.
+     */
+    public long getMonotonicEndTime() {
+        return mMonotonicEndTime;
+    }
+
+    /**
+     * Returns the exclusive lower bound of the stored snapshot timestamps that should be included
+     * in the aggregation.  Ignored if {@link #getAggregatedToTimestamp()} is zero.
+     */
+    public long getAggregatedFromTimestamp() {
+        return mAggregatedFromTimestamp;
     }
 
     /**
@@ -173,8 +198,8 @@ public final class BatteryUsageStatsQuery implements Parcelable {
      * be included in the aggregation.  The default is to include only the current stats
      * accumulated since the latest battery reset.
      */
-    public long getToTimestamp() {
-        return mToTimestamp;
+    public long getAggregatedToTimestamp() {
+        return mAggregatedToTimestamp;
     }
 
     private BatteryUsageStatsQuery(Parcel in) {
@@ -183,8 +208,8 @@ public final class BatteryUsageStatsQuery implements Parcelable {
         in.readIntArray(mUserIds);
         mMaxStatsAgeMs = in.readLong();
         mMinConsumedPowerThreshold = in.readDouble();
-        mFromTimestamp = in.readLong();
-        mToTimestamp = in.readLong();
+        mAggregatedFromTimestamp = in.readLong();
+        mAggregatedToTimestamp = in.readLong();
         mPowerComponents = in.createIntArray();
     }
 
@@ -195,8 +220,8 @@ public final class BatteryUsageStatsQuery implements Parcelable {
         dest.writeIntArray(mUserIds);
         dest.writeLong(mMaxStatsAgeMs);
         dest.writeDouble(mMinConsumedPowerThreshold);
-        dest.writeLong(mFromTimestamp);
-        dest.writeLong(mToTimestamp);
+        dest.writeLong(mAggregatedFromTimestamp);
+        dest.writeLong(mAggregatedToTimestamp);
         dest.writeIntArray(mPowerComponents);
     }
 
@@ -226,8 +251,10 @@ public final class BatteryUsageStatsQuery implements Parcelable {
         private int mFlags;
         private IntArray mUserIds;
         private long mMaxStatsAgeMs = DEFAULT_MAX_STATS_AGE_MS;
-        private long mFromTimestamp;
-        private long mToTimestamp;
+        private long mMonotonicStartTime = MonotonicClock.UNDEFINED;
+        private long mMonotonicEndTime = MonotonicClock.UNDEFINED;
+        private long mAggregateFromTimestamp;
+        private long mAggregateToTimestamp;
         private double mMinConsumedPowerThreshold = 0;
         private @BatteryConsumer.PowerComponentId int[] mPowerComponents;
 
@@ -236,6 +263,17 @@ public final class BatteryUsageStatsQuery implements Parcelable {
          */
         public BatteryUsageStatsQuery build() {
             return new BatteryUsageStatsQuery(this);
+        }
+
+        /**
+         * Specifies the time range for the requested stats, in terms of MonotonicClock
+         * @param monotonicStartTime Inclusive starting monotonic timestamp
+         * @param monotonicEndTime Exclusive ending timestamp. Can be MonotonicClock.UNDEFINED
+         */
+        public Builder monotonicTimeRange(long monotonicStartTime, long monotonicEndTime) {
+            mMonotonicStartTime = monotonicStartTime;
+            mMonotonicEndTime = monotonicEndTime;
+            return this;
         }
 
         /**
@@ -328,14 +366,26 @@ public final class BatteryUsageStatsQuery implements Parcelable {
         }
 
         /**
+         * Requests the full continuously accumulated battery usage stats: across reboots
+         * and most battery stats resets.
+         */
+        public Builder accumulated() {
+            mFlags |= FLAG_BATTERY_USAGE_STATS_ACCUMULATED
+                    | FLAG_BATTERY_USAGE_STATS_INCLUDE_POWER_STATE
+                    | FLAG_BATTERY_USAGE_STATS_INCLUDE_SCREEN_STATE
+                    | FLAG_BATTERY_USAGE_STATS_INCLUDE_PROCESS_STATE_DATA;
+            return this;
+        }
+
+        /**
          * Requests to aggregate stored snapshots between the two supplied timestamps
          * @param fromTimestamp Exclusive starting timestamp, as per System.currentTimeMillis()
          * @param toTimestamp Inclusive ending timestamp, as per System.currentTimeMillis()
          */
         // TODO(b/298459065): switch to monotonic clock
         public Builder aggregateSnapshots(long fromTimestamp, long toTimestamp) {
-            mFromTimestamp = fromTimestamp;
-            mToTimestamp = toTimestamp;
+            mAggregateFromTimestamp = fromTimestamp;
+            mAggregateToTimestamp = toTimestamp;
             return this;
         }
 

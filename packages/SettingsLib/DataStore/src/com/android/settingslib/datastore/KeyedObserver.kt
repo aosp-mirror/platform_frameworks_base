@@ -199,3 +199,19 @@ open class KeyedDataObservable<K> : KeyedObservable<K> {
         }
     }
 }
+
+/** [KeyedObservable] with no-op implementations for all interfaces. */
+open class NoOpKeyedObservable<K> : KeyedObservable<K> {
+
+    override fun addObserver(observer: KeyedObserver<K?>, executor: Executor) = true
+
+    override fun addObserver(key: K, observer: KeyedObserver<K>, executor: Executor) = true
+
+    override fun removeObserver(observer: KeyedObserver<K?>) = true
+
+    override fun removeObserver(key: K, observer: KeyedObserver<K>) = true
+
+    override fun notifyChange(reason: Int) {}
+
+    override fun notifyChange(key: K, reason: Int) {}
+}

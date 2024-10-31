@@ -29,7 +29,6 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.util.TypedValue;
 import android.view.SurfaceControl;
-import android.view.SurfaceSession;
 import android.window.TaskSnapshot;
 
 /**
@@ -64,8 +63,19 @@ public abstract class PipContentOverlay {
      * @param currentBounds {@link Rect} of the current animation bounds.
      * @param fraction progress of the animation ranged from 0f to 1f.
      */
-    public abstract void onAnimationUpdate(SurfaceControl.Transaction atomicTx,
-            Rect currentBounds, float fraction);
+    public void onAnimationUpdate(SurfaceControl.Transaction atomicTx,
+            Rect currentBounds, float fraction) {}
+
+    /**
+     * Animates the internal {@link #mLeash} by a given fraction for a config-at-end transition.
+     * @param atomicTx {@link SurfaceControl.Transaction} to operate, you should not explicitly
+     *                 call apply on this transaction, it should be applied on the caller side.
+     * @param scale scaling to apply onto the overlay.
+     * @param fraction progress of the animation ranged from 0f to 1f.
+     * @param endBounds the final bounds PiP is animating into.
+     */
+    public void onAnimationUpdate(SurfaceControl.Transaction atomicTx,
+            float scale, float fraction, Rect endBounds) {}
 
     /** A {@link PipContentOverlay} uses solid color. */
     public static final class PipColorOverlay extends PipContentOverlay {
@@ -75,7 +85,7 @@ public abstract class PipContentOverlay {
 
         public PipColorOverlay(Context context) {
             mContext = context;
-            mLeash = new SurfaceControl.Builder(new SurfaceSession())
+            mLeash = new SurfaceControl.Builder()
                     .setCallsite(TAG)
                     .setName(LAYER_NAME)
                     .setColorLayer()
@@ -123,7 +133,7 @@ public abstract class PipContentOverlay {
         public PipSnapshotOverlay(TaskSnapshot snapshot, Rect sourceRectHint) {
             mSnapshot = snapshot;
             mSourceRectHint = new Rect(sourceRectHint);
-            mLeash = new SurfaceControl.Builder(new SurfaceSession())
+            mLeash = new SurfaceControl.Builder()
                     .setCallsite(TAG)
                     .setName(LAYER_NAME)
                     .build();
@@ -183,7 +193,7 @@ public abstract class PipContentOverlay {
 
             mBitmap = Bitmap.createBitmap(overlaySize, overlaySize, Bitmap.Config.ARGB_8888);
             prepareAppIconOverlay(appIcon);
-            mLeash = new SurfaceControl.Builder(new SurfaceSession())
+            mLeash = new SurfaceControl.Builder()
                     .setCallsite(TAG)
                     .setName(LAYER_NAME)
                     .build();

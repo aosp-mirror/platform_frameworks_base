@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
@@ -27,6 +28,8 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_TASK_ON_HOME;
 import static android.content.pm.ActivityInfo.FLAG_RELINQUISH_TASK_IDENTITY;
+import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
+import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
@@ -71,9 +74,9 @@ import static org.mockito.Mockito.never;
 
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
-import android.app.CameraCompatTaskInfo;
 import android.app.TaskInfo;
 import android.app.WindowConfiguration;
+import android.compat.testing.PlatformCompatChangeRule;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -96,9 +99,13 @@ import androidx.test.filters.MediumTest;
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
 
+import libcore.junit.util.compat.CoreCompatChangeRule;
+
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TestRule;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.xmlpull.v1.XmlPullParser;
@@ -120,6 +127,9 @@ import java.io.Reader;
 @Presubmit
 @RunWith(WindowTestRunner.class)
 public class TaskTests extends WindowTestsBase {
+
+    @Rule
+    public TestRule compatChangeRule = new PlatformCompatChangeRule();
 
     private static final String TASK_TAG = "task";
 
@@ -403,6 +413,85 @@ public class TaskTests extends WindowTestsBase {
     }
 
     @Test
+    @CoreCompatChangeRule.EnableCompatChanges({ActivityInfo.FORCE_RESIZE_APP})
+    public void testIsResizeable_nonResizeable_forceResize_overridesEnabled_Resizeable() {
+        final Task task = new TaskBuilder(mSupervisor)
+                .setCreateActivity(true)
+                .setComponent(
+                        ComponentName.createRelative(mContext, SizeCompatTests.class.getName()))
+                .build();
+        task.setResizeMode(RESIZE_MODE_UNRESIZEABLE);
+        // Override should take effect and task should be resizeable.
+        assertTrue(task.getTaskInfo().isResizeable);
+    }
+
+    @Test
+    @CoreCompatChangeRule.EnableCompatChanges({ActivityInfo.FORCE_RESIZE_APP})
+    public void testIsResizeable_nonResizeable_forceResize_overridesDisabled_nonResizeable() {
+        final Task task = new TaskBuilder(mSupervisor)
+                .setCreateActivity(true)
+                .setComponent(
+                        ComponentName.createRelative(mContext, SizeCompatTests.class.getName()))
+                .build();
+        task.setResizeMode(RESIZE_MODE_UNRESIZEABLE);
+
+        // Disallow resize overrides.
+        task.mAllowForceResizeOverride = false;
+
+        // Override should not take effect and task should be un-resizeable.
+        assertFalse(task.getTaskInfo().isResizeable);
+    }
+
+    @Test
+    @CoreCompatChangeRule.EnableCompatChanges({ActivityInfo.FORCE_NON_RESIZE_APP})
+    public void testIsResizeable_resizeable_forceNonResize_overridesEnabled_nonResizeable() {
+        final Task task = new TaskBuilder(mSupervisor)
+                .setCreateActivity(true)
+                .setComponent(
+                        ComponentName.createRelative(mContext, SizeCompatTests.class.getName()))
+                .build();
+        task.setResizeMode(RESIZE_MODE_RESIZEABLE);
+
+        // Override should take effect and task should be un-resizeable.
+        assertFalse(task.getTaskInfo().isResizeable);
+    }
+
+    @Test
+    @CoreCompatChangeRule.EnableCompatChanges({ActivityInfo.FORCE_NON_RESIZE_APP})
+    public void testIsResizeable_resizeable_forceNonResize_overridesDisabled_Resizeable() {
+        final Task task = new TaskBuilder(mSupervisor)
+                .setCreateActivity(true)
+                .setComponent(
+                        ComponentName.createRelative(mContext, SizeCompatTests.class.getName()))
+                .build();
+        task.setResizeMode(RESIZE_MODE_RESIZEABLE);
+
+        // Disallow resize overrides.
+        task.mAllowForceResizeOverride = false;
+
+        // Override should not take effect and task should be resizeable.
+        assertTrue(task.getTaskInfo().isResizeable);
+    }
+
+    @Test
+    @CoreCompatChangeRule.EnableCompatChanges({ActivityInfo.FORCE_NON_RESIZE_APP})
+    public void testIsResizeable_systemWideForceResize_compatForceNonResize__Resizeable() {
+        final Task task = new TaskBuilder(mSupervisor)
+                .setCreateActivity(true)
+                .setComponent(
+                        ComponentName.createRelative(mContext, SizeCompatTests.class.getName()))
+                .build();
+        task.setResizeMode(RESIZE_MODE_RESIZEABLE);
+
+        // Set system-wide force resizeable override.
+        task.mAtmService.mForceResizableActivities = true;
+
+        // System wide override should tak priority over app compat override so the task should
+        // remain resizeable.
+        assertTrue(task.getTaskInfo().isResizeable);
+    }
+
+    @Test
     public void testResolveNonResizableTaskWindowingMode() {
         // Test with no support non-resizable in multi window regardless the screen size.
         mAtm.mSupportsNonResizableMultiWindow = -1;
@@ -612,50 +701,6 @@ public class TaskTests extends WindowTestsBase {
         // FREEFORM restores bounds
         rootTask.setWindowingMode(WINDOWING_MODE_FREEFORM);
         assertEquals(freeformBounds, task.getBounds());
-    }
-
-    @Test
-    public void testTopActivityEligibleForUserAspectRatioButton() {
-        DisplayContent display = mAtm.mRootWindowContainer.getDefaultDisplay();
-        final Task rootTask = new TaskBuilder(mSupervisor).setCreateActivity(true)
-                .setWindowingMode(WINDOWING_MODE_FULLSCREEN).setDisplay(display).build();
-        final Task task = rootTask.getBottomMostTask();
-        final ActivityRecord root = task.getTopNonFinishingActivity();
-        spyOn(mWm.mAppCompatConfiguration);
-        spyOn(root);
-        spyOn(root.mAppCompatController.getAppCompatAspectRatioOverrides());
-
-        doReturn(true).when(root).fillsParent();
-        doReturn(true).when(
-                root.mAppCompatController.getAppCompatAspectRatioOverrides())
-                    .shouldEnableUserAspectRatioSettings();
-        doReturn(false).when(root).inSizeCompatMode();
-        doReturn(task).when(root).getOrganizedTask();
-
-        // The button should be eligible to be displayed
-        assertTrue(task.getTaskInfo()
-                .appCompatTaskInfo.eligibleForUserAspectRatioButton());
-
-        // When shouldApplyUserMinAspectRatioOverride is disable the button is not enabled
-        doReturn(false).when(
-                root.mAppCompatController.getAppCompatAspectRatioOverrides())
-                    .shouldEnableUserAspectRatioSettings();
-        assertFalse(task.getTaskInfo()
-                .appCompatTaskInfo.eligibleForUserAspectRatioButton());
-        doReturn(true).when(root.mAppCompatController
-                .getAppCompatAspectRatioOverrides()).shouldEnableUserAspectRatioSettings();
-
-        // When in size compat mode the button is not enabled
-        doReturn(true).when(root).inSizeCompatMode();
-        assertFalse(task.getTaskInfo()
-                .appCompatTaskInfo.eligibleForUserAspectRatioButton());
-        doReturn(false).when(root).inSizeCompatMode();
-
-        // When the top activity is transparent, the button is not enabled
-        doReturn(false).when(root).fillsParent();
-        assertFalse(task.getTaskInfo()
-                .appCompatTaskInfo.eligibleForUserAspectRatioButton());
-        doReturn(true).when(root).fillsParent();
     }
 
     @Test
@@ -2019,17 +2064,6 @@ public class TaskTests extends WindowTestsBase {
         assertEquals(fragment1.getChildAt(0), task.getBottomMostActivity());
         assertEquals(activitySamePackage, task.getBottomMostActivityInSamePackage());
         assertNotEquals(activityDifferentPackage, task.getBottomMostActivityInSamePackage());
-    }
-
-    @Test
-    public void getTaskInfoPropagatesCameraCompatMode() {
-        final Task task = new TaskBuilder(mSupervisor).setCreateActivity(true).build();
-        final ActivityRecord activity = task.getTopMostActivity();
-        activity.mAppCompatController.getAppCompatCameraOverrides()
-                .setFreeformCameraCompatMode(CameraCompatTaskInfo.CAMERA_COMPAT_FREEFORM_PORTRAIT);
-
-        assertEquals(CameraCompatTaskInfo.CAMERA_COMPAT_FREEFORM_PORTRAIT,
-                task.getTaskInfo().appCompatTaskInfo.cameraCompatTaskInfo.freeformCameraCompatMode);
     }
 
     @Test

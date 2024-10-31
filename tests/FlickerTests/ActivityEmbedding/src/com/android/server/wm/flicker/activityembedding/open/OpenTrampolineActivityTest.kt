@@ -23,7 +23,6 @@ import android.tools.flicker.legacy.FlickerBuilder
 import android.tools.flicker.legacy.LegacyFlickerTest
 import android.tools.flicker.legacy.LegacyFlickerTestFactory
 import android.tools.flicker.subject.region.RegionSubject
-import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.activityembedding.ActivityEmbeddingTestBase
 import com.android.server.wm.flicker.helpers.ActivityEmbeddingAppHelper
@@ -41,9 +40,8 @@ import org.junit.runners.Parameterized
  * Transitions: From A launch a trampoline Activity T, T launches secondary Activity B and finishes
  * itself, end up in split A|B.
  *
- * To run this test: `atest FlickerTestsOther:OpenTrampolineActivityTest`
+ * To run this test: `atest FlickerTestsActivityEmbedding:OpenTrampolineActivityTest`
  */
-@FlakyTest(bugId = 341209752)
 @RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)

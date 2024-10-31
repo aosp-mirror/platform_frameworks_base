@@ -1746,8 +1746,7 @@
     <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"Rakendus varjab loataotlust, nii et teie vastust ei saa kinnitada."</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Puudutage funktsiooni, et selle kasutamist alustada."</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Valige funktsioonid, mida juurdepääsetavuse nupuga kasutada"</string>
-    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (2245540598834891500) -->
-    <skip />
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2245540598834891500">"Valige helitugevuse nuppude otsetee funktsioonid"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> on välja lülitatud"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Muuda otseteid"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Valmis"</string>
@@ -1944,6 +1943,8 @@
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Väljas"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g>–<xliff:g id="END">%2$s</xliff:g>"</string>
+    <!-- no translation found for zen_mode_trigger_summary_range_words (7228261413029290750) -->
+    <skip />
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"Mis tahes kalender"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> vaigistab teatud helid"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"Seadmes ilmnes sisemine probleem ja seade võib olla ebastabiilne seni, kuni lähtestate seadme tehase andmetele."</string>
@@ -2011,6 +2012,7 @@
     <string name="set_up_screen_lock_title" msgid="8346083801616474030">"Seadistage ekraanilukk"</string>
     <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Seadistage ekraanilukk"</string>
     <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"Seadistage oma privaatse ruumi jaoks seadmele ekraanilukk"</string>
+    <string name="private_space_set_up_screen_lock_for_reset" msgid="7817091386408432097">"Privaatse ruumi kustutamiseks määrake selles seadmes ekraanilukk"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Rakendus ei ole saadaval"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ei ole praegu saadaval."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> ei ole saadaval"</string>
@@ -2129,11 +2131,6 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Kõnede ja märguannete puhul seade vibreerib"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Kõned ja märguanded on vaigistatud"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Süsteemi muudatused"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Mitte segada"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Uus: režiim Mitte segada peidab märguandeid"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Puudutage lisateabe vaatamiseks ja muutmiseks."</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Režiimi Mitte segada muudeti"</string>
-    <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Puudutage, et kontrollida, mis on blokeeritud."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Vaadake üle märguandeseaded"</string>
     <string name="review_notification_settings_text" msgid="5916244866751849279">"Alates operatsioonisüsteemist Android 13 vajavad installitavad rakendused märguannete saatmiseks teie luba. Puudutage, et muuta seda luba olemasolevate rakenduste jaoks."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Tuleta hiljem meelde"</string>
@@ -2429,6 +2426,14 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Sõnumite saatmine ja vastuvõtmine ilma mobiilside- või WiFi-võrguta"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Ava rakendus Messages"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Tööpõhimõtted"</string>
+    <!-- no translation found for satellite_manual_selection_state_popup_title (8545991934926661974) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_message (1928101658551382450) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_ok (2459664752624985095) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_cancel (973605633339469252) -->
+    <skip />
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Ootel …"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Seadistage sõrmejäljega avamine uuesti"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"Sõrmejälge <xliff:g id="FINGERPRINT">%s</xliff:g> ei saa enam tuvastada."</string>
@@ -2450,7 +2455,7 @@
     <string name="keyboard_shortcut_group_applications_music" msgid="2051507523525651067">"Muusika"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="3571770335653387606">"Kalender"</string>
     <string name="keyboard_shortcut_group_applications_calculator" msgid="6753209559716091507">"Kalkulaator"</string>
-    <string name="keyboard_shortcut_group_applications_maps" msgid="7950000659522589471">"Kaardid"</string>
+    <string name="keyboard_shortcut_group_applications_maps" msgid="7950000659522589471">"Maps"</string>
     <string name="keyboard_shortcut_group_applications" msgid="3010389163951364798">"Rakendused"</string>
     <string name="fingerprint_loe_notification_msg" msgid="3927447270148854546">"Teie sõrmejälgi ei saa enam tuvastada. Seadistage sõrmejäljega avamine uuesti."</string>
 </resources>

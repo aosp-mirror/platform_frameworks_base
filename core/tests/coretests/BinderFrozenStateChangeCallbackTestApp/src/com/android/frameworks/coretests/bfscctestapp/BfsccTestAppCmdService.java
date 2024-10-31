@@ -30,31 +30,30 @@ import java.util.concurrent.TimeUnit;
 
 public class BfsccTestAppCmdService extends Service {
     private IBfsccTestAppCmdService.Stub mBinder = new IBfsccTestAppCmdService.Stub() {
-        private final LinkedBlockingQueue<IBinder.IFrozenStateChangeCallback.State> mNotifications =
+        private final LinkedBlockingQueue<Integer> mNotifications =
                 new LinkedBlockingQueue<>();
 
         @Override
         public void listenTo(IBinder binder) throws RemoteException {
             binder.addFrozenStateChangeCallback(
-                    (IBinder who, IBinder.IFrozenStateChangeCallback.State state)
-                            -> mNotifications.offer(state));
+                    (IBinder who, int state) -> mNotifications.offer(state));
         }
 
         @Override
         public boolean[] waitAndConsumeNotifications() {
             List<Boolean> results = new ArrayList<>();
             try {
-                IBinder.IFrozenStateChangeCallback.State state =
-                        mNotifications.poll(5, TimeUnit.SECONDS);
+                Integer state = mNotifications.poll(5, TimeUnit.SECONDS);
                 if (state != null) {
-                    results.add(state == IBinder.IFrozenStateChangeCallback.State.FROZEN);
+                    results.add(
+                            state.intValue() == IBinder.FrozenStateChangeCallback.STATE_FROZEN);
                 }
             } catch (InterruptedException e) {
                 return null;
             }
             while (mNotifications.size() > 0) {
-                results.add(mNotifications.poll()
-                        == IBinder.IFrozenStateChangeCallback.State.FROZEN);
+                results.add(mNotifications.poll().intValue()
+                        == IBinder.FrozenStateChangeCallback.STATE_FROZEN);
             }
             boolean[] convertedResults = new boolean[results.size()];
             for (int i = 0; i < results.size(); i++) {

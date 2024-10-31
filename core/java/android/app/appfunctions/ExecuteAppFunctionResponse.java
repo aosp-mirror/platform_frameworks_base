@@ -79,14 +79,15 @@ public final class ExecuteAppFunctionResponse implements Parcelable {
     /** The caller does not have the permission to execute an app function. */
     public static final int RESULT_DENIED = 1;
 
-    /** An unknown error occurred while processing the call in the AppFunctionService. */
+    /**
+     * An unknown error occurred while processing the call in the AppFunctionService.
+     *
+     * <p>This error is thrown when the service is connected in the remote application but an
+     * unexpected error is thrown from the bound application.
+     */
     public static final int RESULT_APP_UNKNOWN_ERROR = 2;
 
-    /**
-     * An internal error occurred within AppFunctionManagerService.
-     *
-     * <p>This error may be considered similar to {@link IllegalStateException}
-     */
+    /** An internal unexpected error coming from the system. */
     public static final int RESULT_INTERNAL_ERROR = 3;
 
     /**
@@ -96,8 +97,14 @@ public final class ExecuteAppFunctionResponse implements Parcelable {
      */
     public static final int RESULT_INVALID_ARGUMENT = 4;
 
-    /** The operation was timed out. */
-    public static final int RESULT_TIMED_OUT = 5;
+    /** The caller tried to execute a disabled app function. */
+    public static final int RESULT_DISABLED = 5;
+
+    /**
+     * The operation was cancelled. Use this error code to report that a cancellation is done after
+     * receiving a cancellation signal.
+     */
+    public static final int RESULT_CANCELLED = 6;
 
     /** The result code of the app function execution. */
     @ResultCode private final int mResultCode;
@@ -149,7 +156,7 @@ public final class ExecuteAppFunctionResponse implements Parcelable {
      * Returns a successful response.
      *
      * @param resultDocument The return value of the executed function.
-     * @param extras The additional metadata data relevant to this function execution response.
+     * @param extras The additional metadata for this function execution response.
      */
     @NonNull
     @FlaggedApi(FLAG_ENABLE_APP_FUNCTION_MANAGER)
@@ -167,7 +174,7 @@ public final class ExecuteAppFunctionResponse implements Parcelable {
      * Returns a failure response.
      *
      * @param resultCode The result code of the app function execution.
-     * @param extras The additional metadata data relevant to this function execution response.
+     * @param extras The additional metadata for this function execution response.
      * @param errorMessage The error message associated with the result, if any.
      */
     @NonNull
@@ -209,13 +216,15 @@ public final class ExecuteAppFunctionResponse implements Parcelable {
      *       // Do something with the returnValue
      *     }
      * </pre>
+     *
+     * @see AppFunctionManager on how to determine the expected function return.
      */
     @NonNull
     public GenericDocument getResultDocument() {
         return mResultDocumentWrapper.getValue();
     }
 
-    /** Returns the extras of the app function execution. */
+    /** Returns the additional metadata for this function execution response. */
     @NonNull
     public Bundle getExtras() {
         return mExtras;
@@ -273,7 +282,8 @@ public final class ExecuteAppFunctionResponse implements Parcelable {
                 RESULT_APP_UNKNOWN_ERROR,
                 RESULT_INTERNAL_ERROR,
                 RESULT_INVALID_ARGUMENT,
-                RESULT_TIMED_OUT,
+                RESULT_DISABLED,
+                RESULT_CANCELLED
             })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ResultCode {}

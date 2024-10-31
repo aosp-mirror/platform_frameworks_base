@@ -16,8 +16,13 @@
 
 package com.android.systemui.statusbar.data.repository
 
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flowOf
 
 class FakeRemoteInputRepository : RemoteInputRepository {
     override val isRemoteInputActive = MutableStateFlow(false)
+    override val remoteInputRowBottomBound: Flow<Float?> = flowOf(null)
+
+    override fun setRemoteInputRowBottomBound(bottom: Float?) {}
 }

@@ -21,6 +21,7 @@ import static android.hardware.usb.UsbPortStatus.DATA_STATUS_DISABLED_FORCE;
 
 import android.Manifest;
 import android.annotation.CallbackExecutor;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.LongDef;
 import android.annotation.NonNull;
@@ -37,6 +38,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.hardware.usb.flags.Flags;
 import android.hardware.usb.gadget.GadgetFunction;
 import android.hardware.usb.gadget.UsbSpeed;
 import android.os.Binder;
@@ -509,7 +511,8 @@ public class UsbManager {
      *
      * @hide
      */
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @FlaggedApi(Flags.FLAG_EXPOSE_USB_SPEED_SYSTEM_API)
+    @SystemApi
     public static final int USB_DATA_TRANSFER_RATE_UNKNOWN = -1;
 
     /**
@@ -517,7 +520,8 @@ public class UsbManager {
      *
      * @hide
      */
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @FlaggedApi(Flags.FLAG_EXPOSE_USB_SPEED_SYSTEM_API)
+    @SystemApi
     public static final int USB_DATA_TRANSFER_RATE_LOW_SPEED = 2;
 
     /**
@@ -525,7 +529,8 @@ public class UsbManager {
      *
      * @hide
      */
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @FlaggedApi(Flags.FLAG_EXPOSE_USB_SPEED_SYSTEM_API)
+    @SystemApi
     public static final int USB_DATA_TRANSFER_RATE_FULL_SPEED = 12;
 
     /**
@@ -533,7 +538,8 @@ public class UsbManager {
      *
      * @hide
      */
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @FlaggedApi(Flags.FLAG_EXPOSE_USB_SPEED_SYSTEM_API)
+    @SystemApi
     public static final int USB_DATA_TRANSFER_RATE_HIGH_SPEED = 480;
 
     /**
@@ -541,7 +547,8 @@ public class UsbManager {
      *
      * @hide
      */
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @FlaggedApi(Flags.FLAG_EXPOSE_USB_SPEED_SYSTEM_API)
+    @SystemApi
     public static final int USB_DATA_TRANSFER_RATE_5G = 5 * 1024;
 
     /**
@@ -549,7 +556,8 @@ public class UsbManager {
      *
      * @hide
      */
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @FlaggedApi(Flags.FLAG_EXPOSE_USB_SPEED_SYSTEM_API)
+    @SystemApi
     public static final int USB_DATA_TRANSFER_RATE_10G = 10 * 1024;
 
     /**
@@ -557,7 +565,8 @@ public class UsbManager {
      *
      * @hide
      */
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @FlaggedApi(Flags.FLAG_EXPOSE_USB_SPEED_SYSTEM_API)
+    @SystemApi
     public static final int USB_DATA_TRANSFER_RATE_20G = 20 * 1024;
 
     /**
@@ -565,7 +574,8 @@ public class UsbManager {
      *
      * @hide
      */
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @FlaggedApi(Flags.FLAG_EXPOSE_USB_SPEED_SYSTEM_API)
+    @SystemApi
     public static final int USB_DATA_TRANSFER_RATE_40G = 40 * 1024;
 
     /**
@@ -1292,7 +1302,8 @@ public class UsbManager {
      *
      * @hide
      */
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @FlaggedApi(Flags.FLAG_EXPOSE_USB_SPEED_SYSTEM_API)
+    @SystemApi
     @RequiresPermission(Manifest.permission.MANAGE_USB)
     public int getUsbBandwidthMbps() {
         int usbSpeed;

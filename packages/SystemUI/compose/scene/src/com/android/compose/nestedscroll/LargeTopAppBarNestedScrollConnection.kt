@@ -18,6 +18,9 @@ package com.android.compose.nestedscroll
 
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.util.fastCoerceAtLeast
+import androidx.compose.ui.util.fastCoerceAtMost
 
 /**
  * A [NestedScrollConnection] that listens for all vertical scroll events and responds in the
@@ -43,35 +46,47 @@ fun LargeTopAppBarNestedScrollConnection(
         orientation = Orientation.Vertical,
         // When swiping up, the LargeTopAppBar will shrink (to [minHeight]) and the content will
         // expand. Then, you can then scroll down the content.
-        canStartPreScroll = { offsetAvailable, offsetBeforeStart ->
+        canStartPreScroll = { offsetAvailable, offsetBeforeStart, _ ->
             offsetAvailable < 0 && offsetBeforeStart == 0f && height() > minHeight()
         },
         // When swiping down, the content will scroll up until it reaches the top. Then, the
         // LargeTopAppBar will expand until it reaches its [maxHeight].
-        canStartPostScroll = { offsetAvailable, _ ->
+        canStartPostScroll = { offsetAvailable, _, _ ->
             offsetAvailable > 0 && height() < maxHeight()
         },
         canStartPostFling = { false },
-        canContinueScroll = {
-            val currentHeight = height()
-            minHeight() < currentHeight && currentHeight < maxHeight()
-        },
-        canScrollOnFling = true,
-        onStart = { /* do nothing */ },
-        onScroll = { offsetAvailable ->
-            val currentHeight = height()
-            val amountConsumed =
-                if (offsetAvailable > 0) {
-                    val amountLeft = maxHeight() - currentHeight
-                    offsetAvailable.coerceAtMost(amountLeft)
-                } else {
-                    val amountLeft = minHeight() - currentHeight
-                    offsetAvailable.coerceAtLeast(amountLeft)
-                }
-            onHeightChanged(currentHeight + amountConsumed)
-            amountConsumed
-        },
-        // Don't consume the velocity on pre/post fling
-        onStop = { 0f },
+        onStart = { LargeTopAppBarScrollController(height, maxHeight, minHeight, onHeightChanged) },
     )
+}
+
+private class LargeTopAppBarScrollController(
+    val height: () -> Float,
+    val maxHeight: () -> Float,
+    val minHeight: () -> Float,
+    val onHeightChanged: (Float) -> Unit,
+) : ScrollController {
+    override fun onScroll(deltaScroll: Float, source: NestedScrollSource): Float {
+        val currentHeight = height()
+        val amountConsumed =
+            if (deltaScroll > 0) {
+                val amountLeft = maxHeight() - currentHeight
+                deltaScroll.fastCoerceAtMost(amountLeft)
+            } else {
+                val amountLeft = minHeight() - currentHeight
+                deltaScroll.fastCoerceAtLeast(amountLeft)
+            }
+        onHeightChanged(currentHeight + amountConsumed)
+        return amountConsumed
+    }
+
+    override suspend fun onStop(initialVelocity: Float): Float {
+        // Don't consume the velocity on pre/post fling
+        return 0f
+    }
+
+    override fun onCancel() {
+        // do nothing
+    }
+
+    override fun canStopOnPreFling() = false
 }

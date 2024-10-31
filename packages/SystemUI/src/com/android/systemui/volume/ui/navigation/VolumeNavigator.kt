@@ -22,6 +22,7 @@ import android.provider.Settings
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.unit.dp
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
@@ -89,7 +90,7 @@ constructor(
             VolumePanelRoute.SETTINGS_VOLUME_PANEL ->
                 activityStarter.startActivity(
                     /* intent= */ Intent(Settings.Panel.ACTION_VOLUME),
-                    /* dismissShade= */ true
+                    /* dismissShade= */ true,
                 )
             VolumePanelRoute.SYSTEM_UI_VOLUME_PANEL ->
                 volumePanelFactory.create(aboveStatusBar = true, view = null)
@@ -122,6 +123,9 @@ constructor(
                     remember(coroutineScope) { viewModelFactory.create(coroutineScope) }
                 )
             },
+            isDraggable = false,
+            // TODO(b/337205027) change maxWidth
+            maxWidth = 800.dp,
         )
     }
 }
