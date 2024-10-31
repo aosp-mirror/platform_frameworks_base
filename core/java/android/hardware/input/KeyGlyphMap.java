@@ -133,6 +133,14 @@ public final class KeyGlyphMap implements Parcelable {
             }
         };
 
+        public int getModifierState() {
+            return mModifierState;
+        }
+
+        public int getKeycode() {
+            return mKeycode;
+        }
+
         @Override
         public int describeContents() {
             return 0;
