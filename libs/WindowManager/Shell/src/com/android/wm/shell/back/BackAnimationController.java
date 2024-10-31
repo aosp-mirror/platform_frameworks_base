@@ -191,6 +191,16 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
                 @Override
                 public void onResult(@Nullable Bundle result) {
                     mShellExecutor.execute(() -> {
+                        if (mBackGestureStarted && result != null && result.getBoolean(
+                                BackNavigationInfo.KEY_TOUCH_GESTURE_TRANSFERRED)) {
+                            // Host app won't able to process motion event anymore, so pilfer
+                            // pointers anyway.
+                            if (mBackNavigationInfo != null) {
+                                mBackNavigationInfo.disableAppProgressGenerationAllowed();
+                            }
+                            tryPilferPointers();
+                            return;
+                        }
                         if (!mBackGestureStarted || mPostCommitAnimationInProgress) {
                             // If an uninterruptible animation is already in progress, we should
                             // ignore this due to it may cause focus lost. (alpha = 0)
