@@ -24,6 +24,7 @@ sealed interface ShortcutsUiState {
         val searchQuery: String,
         val shortcutCategories: List<ShortcutCategoryUi>,
         val defaultSelectedCategory: ShortcutCategoryType?,
+        val isShortcutCustomizerFlagEnabled: Boolean = false,
     ) : ShortcutsUiState
 
     data object Inactive : ShortcutsUiState

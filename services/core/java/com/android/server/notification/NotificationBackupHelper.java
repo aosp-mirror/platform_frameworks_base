@@ -16,6 +16,8 @@
 
 package com.android.server.notification;
 
+import static android.app.backup.NotificationLoggingConstants.KEY_NOTIFICATIONS;
+
 import android.app.INotificationManager;
 import android.app.backup.BlobBackupHelper;
 import android.os.ServiceManager;
@@ -30,9 +32,6 @@ public class NotificationBackupHelper extends BlobBackupHelper {
 
     // Current version of the blob schema
     static final int BLOB_VERSION = 1;
-
-    // Key under which the payload blob is stored
-    static final String KEY_NOTIFICATIONS = "notifications";
 
     private final int mUserId;
 

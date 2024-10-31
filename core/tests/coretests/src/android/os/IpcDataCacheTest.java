@@ -489,7 +489,9 @@ public class IpcDataCacheTest {
         IpcDataCache.setTestMode(false);
         try {
             IpcDataCache.setTestMode(false);
-            fail("expected an IllegalStateException");
+            if (android.app.Flags.enforcePicTestmodeProtocol()) {
+                fail("expected an IllegalStateException");
+            }
         } catch (IllegalStateException e) {
             // The expected exception.
         }

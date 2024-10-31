@@ -27,6 +27,7 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.domain.interactor.PulseExpansionInteractor
 import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
@@ -81,6 +82,7 @@ constructor(
     private val communalInteractor: CommunalInteractor,
     private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
     private val notificationsKeyguardInteractor: NotificationsKeyguardInteractor,
+    private val pulseExpansionInteractor: PulseExpansionInteractor,
     notificationShadeWindowModel: NotificationShadeWindowModel,
     private val aodNotificationIconViewModel: NotificationIconContainerAlwaysOnDisplayViewModel,
     private val alternateBouncerToAodTransitionViewModel: AlternateBouncerToAodTransitionViewModel,
@@ -371,7 +373,7 @@ constructor(
 
     /** Is there an expanded pulse, are we animating in response? */
     private fun isPulseExpandingAnimated(): Flow<AnimatedValue<Boolean>> {
-        return notificationsKeyguardInteractor.isPulseExpanding
+        return pulseExpansionInteractor.isPulseExpanding
             .pairwise(initialValue = null)
             // If pulsing changes, start animating, unless it's the first emission
             .map { (prev, expanding) -> AnimatableEvent(expanding, startAnimating = prev != null) }

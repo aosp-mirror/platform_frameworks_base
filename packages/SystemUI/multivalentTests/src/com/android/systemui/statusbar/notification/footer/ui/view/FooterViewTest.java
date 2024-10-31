@@ -45,15 +45,16 @@ import androidx.test.filters.SmallTest;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.res.R;
 import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor;
+import com.android.systemui.statusbar.notification.footer.shared.NotifRedesignFooter;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.List;
+
 import platform.test.runner.parameterized.ParameterizedAndroidJunit4;
 import platform.test.runner.parameterized.Parameters;
-
-import java.util.List;
 
 @SmallTest
 @RunWith(ParameterizedAndroidJunit4.class)
@@ -61,7 +62,8 @@ public class FooterViewTest extends SysuiTestCase {
 
     @Parameters(name = "{0}")
     public static List<FlagsParameterization> getFlags() {
-        return FlagsParameterization.allCombinationsOf(FooterViewRefactor.FLAG_NAME);
+        return FlagsParameterization.progressionOf(FooterViewRefactor.FLAG_NAME,
+                NotifRedesignFooter.FLAG_NAME);
     }
 
     public FooterViewTest(FlagsParameterization flags) {
@@ -74,8 +76,13 @@ public class FooterViewTest extends SysuiTestCase {
 
     @Before
     public void setUp() {
-        mView = (FooterView) LayoutInflater.from(mSpyContext).inflate(
-                R.layout.status_bar_notification_footer, null, false);
+        if (NotifRedesignFooter.isEnabled()) {
+            mView = (FooterView) LayoutInflater.from(mSpyContext).inflate(
+                    R.layout.status_bar_notification_footer_redesign, null, false);
+        } else {
+            mView = (FooterView) LayoutInflater.from(mSpyContext).inflate(
+                    R.layout.status_bar_notification_footer, null, false);
+        }
         mView.setAnimationDuration(0);
     }
 
@@ -92,13 +99,14 @@ public class FooterViewTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableFlags(NotifRedesignFooter.FLAG_NAME)
     public void setManageOnClick() {
         mView.setManageButtonClickListener(mock(View.OnClickListener.class));
         assertTrue(mView.findViewById(R.id.manage_text).hasOnClickListeners());
     }
 
     @Test
-    @DisableFlags(FooterViewRefactor.FLAG_NAME)
+    @DisableFlags({FooterViewRefactor.FLAG_NAME, NotifRedesignFooter.FLAG_NAME})
     public void setHistoryShown() {
         mView.showHistory(true);
         assertTrue(mView.isHistoryShown());
@@ -107,7 +115,7 @@ public class FooterViewTest extends SysuiTestCase {
     }
 
     @Test
-    @DisableFlags(FooterViewRefactor.FLAG_NAME)
+    @DisableFlags({FooterViewRefactor.FLAG_NAME, NotifRedesignFooter.FLAG_NAME})
     public void setHistoryNotShown() {
         mView.showHistory(false);
         assertFalse(mView.isHistoryShown());
@@ -133,6 +141,7 @@ public class FooterViewTest extends SysuiTestCase {
 
     @Test
     @EnableFlags(FooterViewRefactor.FLAG_NAME)
+    @DisableFlags(NotifRedesignFooter.FLAG_NAME)
     public void testSetManageOrHistoryButtonText_resourceOnlyFetchedOnce() {
         int resId = R.string.manage_notifications_history_text;
         mView.setManageOrHistoryButtonText(resId);
@@ -151,7 +160,7 @@ public class FooterViewTest extends SysuiTestCase {
     }
 
     @Test
-    @DisableFlags(FooterViewRefactor.FLAG_NAME)
+    @DisableFlags({FooterViewRefactor.FLAG_NAME, NotifRedesignFooter.FLAG_NAME})
     public void testSetManageOrHistoryButtonText_expectsFlagEnabled() {
         clearInvocations(mSpyContext);
         int resId = R.string.manage_notifications_history_text;
@@ -161,6 +170,7 @@ public class FooterViewTest extends SysuiTestCase {
 
     @Test
     @EnableFlags(FooterViewRefactor.FLAG_NAME)
+    @DisableFlags(NotifRedesignFooter.FLAG_NAME)
     public void testSetManageOrHistoryButtonDescription_resourceOnlyFetchedOnce() {
         int resId = R.string.manage_notifications_history_text;
         mView.setManageOrHistoryButtonDescription(resId);
@@ -179,7 +189,7 @@ public class FooterViewTest extends SysuiTestCase {
     }
 
     @Test
-    @DisableFlags(FooterViewRefactor.FLAG_NAME)
+    @DisableFlags({FooterViewRefactor.FLAG_NAME, NotifRedesignFooter.FLAG_NAME})
     public void testSetManageOrHistoryButtonDescription_expectsFlagEnabled() {
         clearInvocations(mSpyContext);
         int resId = R.string.accessibility_clear_all;
@@ -207,7 +217,7 @@ public class FooterViewTest extends SysuiTestCase {
     }
 
     @Test
-    @DisableFlags(FooterViewRefactor.FLAG_NAME)
+    @DisableFlags({FooterViewRefactor.FLAG_NAME, NotifRedesignFooter.FLAG_NAME})
     public void testSetClearAllButtonText_expectsFlagEnabled() {
         clearInvocations(mSpyContext);
         int resId = R.string.clear_all_notifications_text;
@@ -235,7 +245,7 @@ public class FooterViewTest extends SysuiTestCase {
     }
 
     @Test
-    @DisableFlags(FooterViewRefactor.FLAG_NAME)
+    @DisableFlags({FooterViewRefactor.FLAG_NAME, NotifRedesignFooter.FLAG_NAME})
     public void testSetClearAllButtonDescription_expectsFlagEnabled() {
         clearInvocations(mSpyContext);
         int resId = R.string.accessibility_clear_all;
@@ -263,7 +273,7 @@ public class FooterViewTest extends SysuiTestCase {
     }
 
     @Test
-    @DisableFlags(FooterViewRefactor.FLAG_NAME)
+    @DisableFlags({FooterViewRefactor.FLAG_NAME, NotifRedesignFooter.FLAG_NAME})
     public void testSetMessageString_expectsFlagEnabled() {
         clearInvocations(mSpyContext);
         int resId = R.string.unlock_to_see_notif_text;
@@ -288,7 +298,7 @@ public class FooterViewTest extends SysuiTestCase {
     }
 
     @Test
-    @DisableFlags(FooterViewRefactor.FLAG_NAME)
+    @DisableFlags({FooterViewRefactor.FLAG_NAME, NotifRedesignFooter.FLAG_NAME})
     public void testSetMessageIcon_expectsFlagEnabled() {
         clearInvocations(mSpyContext);
         int resId = R.drawable.ic_friction_lock_closed;
@@ -310,4 +320,3 @@ public class FooterViewTest extends SysuiTestCase {
                 .isEqualTo(View.GONE);
     }
 }
-

@@ -203,12 +203,12 @@ interface ClockEvents {
     fun onZenDataChanged(data: ZenData)
 
     /** Update reactive axes for this clock */
-    fun onReactiveAxesChanged(axes: List<ClockReactiveSetting>)
+    fun onFontAxesChanged(axes: List<ClockFontAxisSetting>)
 }
 
 /** Axis setting value for a clock */
-data class ClockReactiveSetting(
-    /** Axis key; matches ClockReactiveAxis.key */
+data class ClockFontAxisSetting(
+    /** Axis key; matches ClockFontAxis.key */
     val key: String,
 
     /** Value to set this axis to */
@@ -323,11 +323,11 @@ constructor(
     val isReactiveToTone: Boolean = true,
 
     /** Font axes that can be modified on this clock */
-    val axes: List<ClockReactiveAxis> = listOf(),
+    val axes: List<ClockFontAxis> = listOf(),
 )
 
 /** Represents an Axis that can be modified */
-data class ClockReactiveAxis(
+data class ClockFontAxis(
     /** Axis key, not user renderable */
     val key: String,
 
@@ -348,15 +348,17 @@ data class ClockReactiveAxis(
 
     /** Description of the axis */
     val description: String,
-)
+) {
+    fun toSetting() = ClockFontAxisSetting(key, currentValue)
+}
 
 /** Axis user interaction modes */
 enum class AxisType {
-    /** Boolean toggle. Swaps between minValue & maxValue */
-    Toggle,
+    /** Continuous range between minValue & maxValue. */
+    Float,
 
-    /** Continuous slider between minValue & maxValue */
-    Slider,
+    /** Only minValue & maxValue are valid. No intermediate values between them are allowed. */
+    Boolean,
 }
 
 /** Render configuration for the full clock. Modifies the way systemUI behaves with this clock. */
@@ -404,7 +406,7 @@ data class ClockFaceConfig(
 data class ClockSettings(
     val clockId: ClockId? = null,
     val seedColor: Int? = null,
-    val axes: List<ClockReactiveSetting>? = null,
+    val axes: List<ClockFontAxisSetting>? = null,
 ) {
     // Exclude metadata from equality checks
     var metadata: JSONObject = JSONObject()

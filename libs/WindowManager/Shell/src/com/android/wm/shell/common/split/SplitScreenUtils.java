@@ -142,13 +142,25 @@ public class SplitScreenUtils {
     }
 
     /**
+     * Convenience function for {@link #isLargeScreen(Configuration)}.
+     */
+    public static boolean isLargeScreen(Resources res) {
+        return isLargeScreen(res.getConfiguration());
+    }
+
+    /**
+     * Returns whether the current device is a foldable
+     */
+    public static boolean isFoldable(Resources res) {
+        return res.getIntArray(com.android.internal.R.array.config_foldedDeviceStates).length != 0;
+    }
+
+    /**
      * Returns whether we should allow split ratios to go offscreen or not. If the device is a phone
      * or a foldable (either screen), we allow it.
      */
     public static boolean allowOffscreenRatios(Resources res) {
-        return !isLargeScreen(res.getConfiguration())
-                ||
-                res.getIntArray(com.android.internal.R.array.config_foldedDeviceStates).length != 0;
+        return Flags.enableFlexibleTwoAppSplit() && (!isLargeScreen(res) || isFoldable(res));
     }
 
     /**

@@ -1082,6 +1082,19 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             AdditionalSubtypeMapRepository.remove(userId);
             InputMethodSettingsRepository.remove(userId);
             mService.mUserDataRepository.remove(userId);
+            synchronized (ImfLock.class) {
+                final int nextOrCurrentUser = mService.mUserSwitchHandlerTask != null
+                        ? mService.mUserSwitchHandlerTask.mToUserId : mService.mCurrentImeUserId;
+                if (!mService.mConcurrentMultiUserModeEnabled && userId == nextOrCurrentUser) {
+                    // The current user was removed without an ongoing switch, or the user targeted
+                    // by the ongoing switch was removed. Switch to the current non-profile user
+                    // to allow starting input on it or one of its profile users later.
+                    // Note: non-profile users cannot be removed while they are the current user.
+                    final int currentUserId = mService.mActivityManagerInternal.getCurrentUserId();
+                    mService.scheduleSwitchUserTaskLocked(currentUserId,
+                            null /* clientToBeReset */);
+                }
+            }
         }
 
         @Override
@@ -1332,7 +1345,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                     + " prevUserId=" + prevUserId);
         }
 
-        // Clean up stuff for mCurrentUserId, which soon becomes the previous user.
+        // Clean up stuff for mCurrentImeUserId, which soon becomes the previous user.
 
         // TODO(b/338461930): Check if this is still necessary or not.
         onUnbindCurrentMethodByReset(prevUserId);
@@ -6078,8 +6091,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         p.println("  mSystemReady=" + mSystemReady);
         p.println("  mInteractive=" + mIsInteractive);
         p.println("  mConcurrentMultiUserModeEnabled=" + mConcurrentMultiUserModeEnabled);
-        p.println("  ENABLE_HIDE_IME_CAPTION_BAR="
-                + InputMethodService.ENABLE_HIDE_IME_CAPTION_BAR);
         final int currentImeUserId;
         synchronized (ImfLock.class) {
             currentImeUserId = mCurrentImeUserId;

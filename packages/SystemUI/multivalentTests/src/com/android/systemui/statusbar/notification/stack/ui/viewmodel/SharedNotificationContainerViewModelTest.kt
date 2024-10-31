@@ -19,6 +19,7 @@
 
 package com.android.systemui.statusbar.notification.stack.ui.viewmodel
 
+import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.FlagsParameterization
 import androidx.test.filters.SmallTest
@@ -66,10 +67,13 @@ import com.android.systemui.scene.data.repository.setTransition
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.mockLargeScreenHeaderHelper
 import com.android.systemui.shade.shadeTestUtil
+import com.android.systemui.shade.shared.flag.DualShade
 import com.android.systemui.statusbar.notification.stack.domain.interactor.sharedNotificationContainerInteractor
+import com.android.systemui.statusbar.notification.stack.ui.viewmodel.SharedNotificationContainerViewModel.HorizontalPosition
 import com.android.systemui.testKosmos
 import com.google.common.collect.Range
 import com.google.common.truth.Truth.assertThat
+import kotlin.test.assertIs
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
@@ -162,6 +166,83 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
             configurationRepository.onAnyConfigurationChange()
 
             assertThat(dimens!!.marginStart).isEqualTo(20)
+        }
+
+    @Test
+    fun validateHorizontalPositionSingleShade() =
+        testScope.runTest {
+            overrideDimensionPixelSize(R.dimen.shade_panel_width, 200)
+            val dimens by collectLastValue(underTest.configurationBasedDimensions)
+            shadeTestUtil.setSplitShade(false)
+
+            val horizontalPosition = checkNotNull(dimens).horizontalPosition
+            assertIs<HorizontalPosition.EdgeToEdge>(horizontalPosition)
+        }
+
+    @Test
+    fun validateHorizontalPositionSplitShade() =
+        testScope.runTest {
+            overrideDimensionPixelSize(R.dimen.shade_panel_width, 200)
+            val dimens by collectLastValue(underTest.configurationBasedDimensions)
+            shadeTestUtil.setSplitShade(true)
+
+            val horizontalPosition = checkNotNull(dimens).horizontalPosition
+            assertIs<HorizontalPosition.MiddleToEdge>(horizontalPosition)
+            assertThat(horizontalPosition.ratio).isEqualTo(0.5f)
+        }
+
+    @Test
+    @EnableSceneContainer
+    @DisableFlags(DualShade.FLAG_NAME)
+    fun validateHorizontalPositionInSceneContainerSingleShade() =
+        testScope.runTest {
+            overrideDimensionPixelSize(R.dimen.shade_panel_width, 200)
+            val dimens by collectLastValue(underTest.configurationBasedDimensions)
+            shadeTestUtil.setSplitShade(false)
+
+            val horizontalPosition = checkNotNull(dimens).horizontalPosition
+            assertIs<HorizontalPosition.EdgeToEdge>(horizontalPosition)
+        }
+
+    @Test
+    @EnableSceneContainer
+    @DisableFlags(DualShade.FLAG_NAME)
+    fun validateHorizontalPositionInSceneContainerSplitShade() =
+        testScope.runTest {
+            overrideDimensionPixelSize(R.dimen.shade_panel_width, 200)
+            val dimens by collectLastValue(underTest.configurationBasedDimensions)
+            shadeTestUtil.setSplitShade(true)
+
+            val horizontalPosition = checkNotNull(dimens).horizontalPosition
+            assertIs<HorizontalPosition.MiddleToEdge>(horizontalPosition)
+            assertThat(horizontalPosition.ratio).isEqualTo(0.5f)
+        }
+
+    @Test
+    @EnableSceneContainer
+    @EnableFlags(DualShade.FLAG_NAME)
+    fun validateHorizontalPositionInDualShade_narrowLayout() =
+        testScope.runTest {
+            overrideDimensionPixelSize(R.dimen.shade_panel_width, 200)
+            val dimens by collectLastValue(underTest.configurationBasedDimensions)
+            shadeTestUtil.setSplitShade(false)
+
+            val horizontalPosition = checkNotNull(dimens).horizontalPosition
+            assertIs<HorizontalPosition.EdgeToEdge>(horizontalPosition)
+        }
+
+    @Test
+    @EnableSceneContainer
+    @EnableFlags(DualShade.FLAG_NAME)
+    fun validateHorizontalPositionInDualShade_wideLayout() =
+        testScope.runTest {
+            overrideDimensionPixelSize(R.dimen.shade_panel_width, 200)
+            val dimens by collectLastValue(underTest.configurationBasedDimensions)
+            shadeTestUtil.setSplitShade(true)
+
+            val horizontalPosition = checkNotNull(dimens).horizontalPosition
+            assertIs<HorizontalPosition.FloatAtEnd>(horizontalPosition)
+            assertThat(horizontalPosition.width).isEqualTo(200)
         }
 
     @Test

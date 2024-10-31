@@ -7066,6 +7066,7 @@ package android.hardware.usb {
   public class UsbManager {
     method @RequiresPermission(android.Manifest.permission.MANAGE_USB) public long getCurrentFunctions();
     method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_USB) public java.util.List<android.hardware.usb.UsbPort> getPorts();
+    method @FlaggedApi("android.hardware.usb.flags.expose_usb_speed_system_api") @RequiresPermission(android.Manifest.permission.MANAGE_USB) public int getUsbBandwidthMbps();
     method @RequiresPermission(android.Manifest.permission.MANAGE_USB) public void grantPermission(android.hardware.usb.UsbDevice, String);
     method public static boolean isUvcSupportEnabled();
     method @RequiresPermission(android.Manifest.permission.MANAGE_USB) public void registerDisplayPortAltModeInfoListener(@NonNull java.util.concurrent.Executor, @NonNull android.hardware.usb.UsbManager.DisplayPortAltModeInfoListener);
@@ -7092,6 +7093,14 @@ package android.hardware.usb {
     field public static final long FUNCTION_UVC = 128L; // 0x80L
     field public static final String USB_CONFIGURED = "configured";
     field public static final String USB_CONNECTED = "connected";
+    field @FlaggedApi("android.hardware.usb.flags.expose_usb_speed_system_api") public static final int USB_DATA_TRANSFER_RATE_10G = 10240; // 0x2800
+    field @FlaggedApi("android.hardware.usb.flags.expose_usb_speed_system_api") public static final int USB_DATA_TRANSFER_RATE_20G = 20480; // 0x5000
+    field @FlaggedApi("android.hardware.usb.flags.expose_usb_speed_system_api") public static final int USB_DATA_TRANSFER_RATE_40G = 40960; // 0xa000
+    field @FlaggedApi("android.hardware.usb.flags.expose_usb_speed_system_api") public static final int USB_DATA_TRANSFER_RATE_5G = 5120; // 0x1400
+    field @FlaggedApi("android.hardware.usb.flags.expose_usb_speed_system_api") public static final int USB_DATA_TRANSFER_RATE_FULL_SPEED = 12; // 0xc
+    field @FlaggedApi("android.hardware.usb.flags.expose_usb_speed_system_api") public static final int USB_DATA_TRANSFER_RATE_HIGH_SPEED = 480; // 0x1e0
+    field @FlaggedApi("android.hardware.usb.flags.expose_usb_speed_system_api") public static final int USB_DATA_TRANSFER_RATE_LOW_SPEED = 2; // 0x2
+    field @FlaggedApi("android.hardware.usb.flags.expose_usb_speed_system_api") public static final int USB_DATA_TRANSFER_RATE_UNKNOWN = -1; // 0xffffffff
     field public static final String USB_FUNCTION_NCM = "ncm";
     field public static final String USB_FUNCTION_RNDIS = "rndis";
   }
@@ -7218,6 +7227,7 @@ package android.media {
     field @RequiresPermission(allOf={android.Manifest.permission.MODIFY_PHONE_STATE, android.Manifest.permission.MODIFY_AUDIO_ROUTING}) public static final int USAGE_CALL_ASSISTANT = 17; // 0x11
     field @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public static final int USAGE_EMERGENCY = 1000; // 0x3e8
     field @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public static final int USAGE_SAFETY = 1001; // 0x3e9
+    field @FlaggedApi("android.media.audio.speaker_cleanup_usage") @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public static final int USAGE_SPEAKER_CLEANUP = 1004; // 0x3ec
     field @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public static final int USAGE_VEHICLE_STATUS = 1002; // 0x3ea
   }
 
@@ -7570,6 +7580,11 @@ package android.media {
     method @NonNull public android.media.HwAudioSource build();
     method @NonNull public android.media.HwAudioSource.Builder setAudioAttributes(@NonNull android.media.AudioAttributes);
     method @NonNull public android.media.HwAudioSource.Builder setAudioDeviceInfo(@NonNull android.media.AudioDeviceInfo);
+  }
+
+  public final class MediaCas implements java.lang.AutoCloseable {
+    method @FlaggedApi("android.media.tv.flags.set_resource_holder_retain") @RequiresPermission("android.permission.TUNER_RESOURCE_ACCESS") public void setResourceHolderRetain(boolean);
+    method @FlaggedApi("com.android.media.flags.update_client_profile_priority") @RequiresPermission("android.permission.TUNER_RESOURCE_ACCESS") public boolean updateResourcePriority(int, int);
   }
 
   public final class MediaCodec {
@@ -8344,6 +8359,7 @@ package android.media.tv.tuner {
     method public int setLnaEnabled(boolean);
     method public int setMaxNumberOfFrontends(int, @IntRange(from=0) int);
     method public void setOnTuneEventListener(@NonNull java.util.concurrent.Executor, @NonNull android.media.tv.tuner.frontend.OnTuneEventListener);
+    method @FlaggedApi("android.media.tv.flags.set_resource_holder_retain") @RequiresPermission("android.permission.TUNER_RESOURCE_ACCESS") public void setResourceHolderRetain(boolean);
     method public void setResourceLostListener(@NonNull java.util.concurrent.Executor, @NonNull android.media.tv.tuner.Tuner.OnResourceLostListener);
     method public void shareFrontendFromTuner(@NonNull android.media.tv.tuner.Tuner);
     method public int transferOwner(@NonNull android.media.tv.tuner.Tuner);
@@ -10991,7 +11007,7 @@ package android.os {
   public class Environment {
     method @NonNull public static java.io.File getDataCePackageDirectoryForUser(@NonNull java.util.UUID, @NonNull android.os.UserHandle, @NonNull String);
     method @NonNull public static java.io.File getDataDePackageDirectoryForUser(@NonNull java.util.UUID, @NonNull android.os.UserHandle, @NonNull String);
-    method @FlaggedApi("android.crashrecovery.flags.enable_crashrecovery") @NonNull public static java.io.File getDataSystemDeDirectory();
+    method @FlaggedApi("android.crashrecovery.flags.enable_crashrecovery") @NonNull public static java.io.File getDataSystemDeviceProtectedDirectory();
     method @NonNull public static java.util.Collection<java.io.File> getInternalMediaDirectories();
     method @NonNull public static java.io.File getOdmDirectory();
     method @NonNull public static java.io.File getOemDirectory();
@@ -18179,7 +18195,7 @@ package android.telephony.satellite {
     method @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") public void onSatelliteDatagramReceived(long, @NonNull android.telephony.satellite.SatelliteDatagram, int, @NonNull java.util.function.Consumer<java.lang.Void>);
   }
 
-  @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") public final class SatelliteManager {
+  public final class SatelliteManager {
     method @FlaggedApi("com.android.internal.telephony.flags.carrier_enabled_satellite_flag") @RequiresPermission(android.Manifest.permission.SATELLITE_COMMUNICATION) public void addAttachRestrictionForCarrier(int, int, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>);
     method @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") @RequiresPermission(android.Manifest.permission.SATELLITE_COMMUNICATION) public void deprovisionService(@NonNull String, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>);
     method @FlaggedApi("com.android.internal.telephony.flags.carrier_enabled_satellite_flag") @NonNull @RequiresPermission(android.Manifest.permission.SATELLITE_COMMUNICATION) public java.util.Set<java.lang.Integer> getAttachRestrictionReasonsForCarrier(int);
@@ -19001,10 +19017,10 @@ package android.webkit {
     field public final android.content.pm.Signature[] signatures;
   }
 
-  public final class WebViewUpdateService {
-    method public static android.webkit.WebViewProviderInfo[] getAllWebViewPackages();
-    method public static String getCurrentWebViewPackageName();
-    method @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS) public static android.webkit.WebViewProviderInfo[] getValidWebViewPackages();
+  @Deprecated @FlaggedApi("android.webkit.update_service_ipc_wrapper") public final class WebViewUpdateService {
+    method @Deprecated public static android.webkit.WebViewProviderInfo[] getAllWebViewPackages();
+    method @Deprecated public static String getCurrentWebViewPackageName();
+    method @Deprecated @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS) public static android.webkit.WebViewProviderInfo[] getValidWebViewPackages();
   }
 
 }

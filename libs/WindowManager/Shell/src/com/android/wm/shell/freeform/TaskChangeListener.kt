@@ -24,27 +24,27 @@ import android.app.ActivityManager.RunningTaskInfo
  * The implementations are responsible for handle all the task management.
  */
 interface TaskChangeListener {
-  /** Notifies a task opening in freeform mode. */
-  fun onTaskOpening(taskInfo: RunningTaskInfo)
+    /** Notifies a task opening in freeform mode. */
+    fun onTaskOpening(taskInfo: RunningTaskInfo)
 
-  /** Notifies a task info update on the given task from Shell Transitions framework. */
-  fun onTaskChanging(taskInfo: RunningTaskInfo)
+    /** Notifies a task info update on the given task from Shell Transitions framework. */
+    fun onTaskChanging(taskInfo: RunningTaskInfo)
 
-  /**
-   * Notifies a task info update on the given task from [FreeformTaskListener].
-   *
-   * This is used to propagate task info changes since not all task changes are propagated from
-   * [TransitionObserver] in [onTaskChanging]. It is recommended to use [onTaskChanging] instead of
-   * this method where possible.
-   */
-  fun onNonTransitionTaskChanging(taskInfo: RunningTaskInfo)
+    /**
+     * Notifies a task info update on the given task from [FreeformTaskListener].
+     *
+     * This is used to propagate task info changes since not all task changes are propagated from
+     * [TransitionObserver] in [onTaskChanging]. It is recommended to use [onTaskChanging] instead
+     * of this method where possible.
+     */
+    fun onNonTransitionTaskChanging(taskInfo: RunningTaskInfo)
 
-  /** Notifies a task moving to the front. */
-  fun onTaskMovingToFront(taskInfo: RunningTaskInfo)
+    /** Notifies a task moving to the front. */
+    fun onTaskMovingToFront(taskInfo: RunningTaskInfo)
 
-  /** Notifies a task moving to the back. */
-  fun onTaskMovingToBack(taskInfo: RunningTaskInfo)
+    /** Notifies a task moving to the back. */
+    fun onTaskMovingToBack(taskInfo: RunningTaskInfo)
 
-  /** Notifies a task is closing. */
-  fun onTaskClosing(taskInfo: RunningTaskInfo)
+    /** Notifies a task is closing. */
+    fun onTaskClosing(taskInfo: RunningTaskInfo)
 }

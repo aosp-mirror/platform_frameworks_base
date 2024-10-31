@@ -17,6 +17,7 @@
 package com.android.wm.shell.freeform;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
+
 import static com.android.wm.shell.ShellTaskOrganizer.TASK_LISTENER_TYPE_FREEFORM;
 
 import android.app.ActivityManager.RunningTaskInfo;
@@ -33,7 +34,6 @@ import com.android.wm.shell.desktopmode.DesktopTasksController;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.sysui.ShellInit;
-import com.android.wm.shell.transition.Transitions;
 import com.android.wm.shell.windowdecor.WindowDecorViewModel;
 
 import java.io.PrintWriter;
@@ -56,11 +56,6 @@ public class FreeformTaskListener implements ShellTaskOrganizer.TaskListener,
     private final Optional<TaskChangeListener> mTaskChangeListener;
 
     private final SparseArray<State> mTasks = new SparseArray<>();
-
-    private static class State {
-        RunningTaskInfo mTaskInfo;
-        SurfaceControl mLeash;
-    }
 
     public FreeformTaskListener(
             Context context,
@@ -105,12 +100,7 @@ public class FreeformTaskListener implements ShellTaskOrganizer.TaskListener,
         if (!DesktopModeFlags.ENABLE_WINDOWING_TRANSITION_HANDLERS_OBSERVERS.isTrue() &&
                 DesktopModeStatus.canEnterDesktopMode(mContext)) {
             mDesktopRepository.ifPresent(repository -> {
-                repository.addOrMoveFreeformTaskToTop(taskInfo.displayId, taskInfo.taskId);
-                if (taskInfo.isVisible) {
-                    repository.addActiveTask(taskInfo.displayId, taskInfo.taskId);
-                    repository.updateTaskVisibility(taskInfo.displayId, taskInfo.taskId,
-                        /* visible= */ true);
-                }
+                repository.addTask(taskInfo.displayId, taskInfo.taskId, taskInfo.isVisible);
             });
         }
         updateLaunchAdjacentController();
@@ -133,7 +123,8 @@ public class FreeformTaskListener implements ShellTaskOrganizer.TaskListener,
                     repository.removeClosingTask(taskInfo.taskId);
                     repository.removeFreeformTask(taskInfo.displayId, taskInfo.taskId);
                 } else {
-                    repository.updateTaskVisibility(taskInfo.displayId, taskInfo.taskId, false);
+                    repository.updateTask(taskInfo.displayId, taskInfo.taskId, /* isVisible= */
+                            false);
                     repository.minimizeTask(taskInfo.displayId, taskInfo.taskId);
                 }
             });
@@ -156,14 +147,11 @@ public class FreeformTaskListener implements ShellTaskOrganizer.TaskListener,
                 // Pass task info changes to the [TaskChangeListener] since [TransitionsObserver]
                 // does not propagate all task info changes.
                 mTaskChangeListener.ifPresent(listener ->
-                    listener.onNonTransitionTaskChanging(taskInfo));
+                        listener.onNonTransitionTaskChanging(taskInfo));
             } else {
                 mDesktopRepository.ifPresent(repository -> {
-                    if (taskInfo.isVisible) {
-                        repository.addActiveTask(taskInfo.displayId, taskInfo.taskId);
-                    }
-                    repository.updateTaskVisibility(taskInfo.displayId, taskInfo.taskId,
-                        taskInfo.isVisible);
+                    repository.updateTask(taskInfo.displayId, taskInfo.taskId,
+                            taskInfo.isVisible);
                 });
             }
         }
@@ -190,7 +178,7 @@ public class FreeformTaskListener implements ShellTaskOrganizer.TaskListener,
                 taskInfo.taskId, taskInfo.isFocused);
         if (DesktopModeStatus.canEnterDesktopMode(mContext) && taskInfo.isFocused) {
             mDesktopRepository.ifPresent(repository -> {
-                repository.addOrMoveFreeformTaskToTop(taskInfo.displayId, taskInfo.taskId);
+                repository.addTask(taskInfo.displayId, taskInfo.taskId, taskInfo.isVisible);
             });
         }
     }
@@ -223,5 +211,10 @@ public class FreeformTaskListener implements ShellTaskOrganizer.TaskListener,
     @Override
     public String toString() {
         return TAG;
+    }
+
+    private static class State {
+        RunningTaskInfo mTaskInfo;
+        SurfaceControl mLeash;
     }
 }

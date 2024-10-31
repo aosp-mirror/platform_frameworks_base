@@ -19,7 +19,6 @@ package com.android.server.am;
 import android.annotation.Nullable;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
-import android.compat.annotation.Overridable;
 import android.content.IntentFilter;
 import android.os.UserHandle;
 import android.util.PrintWriterPrinter;
@@ -40,7 +39,6 @@ public final class BroadcastFilter extends IntentFilter {
      */
     @ChangeId
     @EnabledSince(targetSdkVersion = android.os.Build.VERSION_CODES.BASE)
-    @Overridable
     @VisibleForTesting
     static final long CHANGE_RESTRICT_PRIORITY_VALUES = 371309185L;
 

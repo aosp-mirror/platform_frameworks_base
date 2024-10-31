@@ -382,6 +382,18 @@ public final class MessageQueue {
         }
     }
 
+    private class MatchDeliverableMessages extends MessageCompare {
+        @Override
+        public boolean compareMessage(Message m, Handler h, int what, Object object, Runnable r,
+                long when) {
+            if (m.when <= when) {
+                return true;
+            }
+            return false;
+        }
+    }
+    private final MatchDeliverableMessages mMatchDeliverableMessages =
+            new MatchDeliverableMessages();
     /**
      * Returns true if the looper has no pending messages which are due to be processed.
      *
@@ -390,6 +402,12 @@ public final class MessageQueue {
      * @return True if the looper is idle.
      */
     public boolean isIdle() {
+        final long now = SystemClock.uptimeMillis();
+
+        if (stackHasMessages(null, 0, null, null, now, mMatchDeliverableMessages, false)) {
+            return false;
+        }
+
         MessageNode msgNode = null;
         MessageNode asyncMsgNode = null;
 
@@ -405,7 +423,6 @@ public final class MessageQueue {
             } catch (NoSuchElementException e) { }
         }
 
-        final long now = SystemClock.uptimeMillis();
         if ((msgNode != null && msgNode.getWhen() <= now)
                 || (asyncMsgNode != null && asyncMsgNode.getWhen() <= now)) {
             return false;

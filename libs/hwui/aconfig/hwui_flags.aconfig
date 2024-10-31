@@ -139,3 +139,10 @@ flag {
     purpose: PURPOSE_BUGFIX
   }
 }
+
+flag {
+  name: "bitmap_ashmem_long_name"
+  namespace: "core_graphics"
+  description: "Whether to have more information in ashmem filenames for bitmaps"
+  bug: "369619160"
+}
