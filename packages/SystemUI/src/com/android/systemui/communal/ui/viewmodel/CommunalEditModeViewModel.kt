@@ -141,8 +141,19 @@ constructor(
     override fun onReorderWidgets(widgetIdToRankMap: Map<Int, Int>) =
         communalInteractor.updateWidgetOrder(widgetIdToRankMap)
 
-    override fun onResizeWidget(appWidgetId: Int, spanY: Int, widgetIdToRankMap: Map<Int, Int>) {
+    override fun onResizeWidget(
+        appWidgetId: Int,
+        spanY: Int,
+        widgetIdToRankMap: Map<Int, Int>,
+        componentName: ComponentName,
+        rank: Int,
+    ) {
         communalInteractor.resizeWidget(appWidgetId, spanY, widgetIdToRankMap)
+        metricsLogger.logResizeWidget(
+            componentName = componentName.flattenToString(),
+            rank = rank,
+            spanY = spanY,
+        )
     }
 
     override fun onReorderWidgetStart() {

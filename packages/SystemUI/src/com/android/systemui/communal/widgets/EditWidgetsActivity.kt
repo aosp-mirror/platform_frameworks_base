@@ -33,6 +33,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.lifecycleScope
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.compose.theme.PlatformTheme
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.Flags.communalEditWidgetsActivityFinishFix
@@ -52,7 +53,6 @@ import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.settings.UserTracker
 import javax.inject.Inject
 import kotlinx.coroutines.flow.first
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 /** An Activity for editing the widgets that appear in hub mode. */
 class EditWidgetsActivity
