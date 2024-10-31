@@ -149,7 +149,7 @@ class AppCompatSizeCompatModePolicy {
             @NonNull Configuration newParentConfig) {
         mSizeCompatScale = mActivityRecord.mAppCompatController.getTransparentPolicy()
                 .findOpaqueNotFinishingActivityBelow()
-                .map(activityRecord -> mSizeCompatScale)
+                .map(ar -> Math.min(1.0f, ar.getCompatScale()))
                 .orElseGet(() -> calculateSizeCompatScale(
                         resolvedAppBounds, containerAppBounds, newParentConfig));
     }
