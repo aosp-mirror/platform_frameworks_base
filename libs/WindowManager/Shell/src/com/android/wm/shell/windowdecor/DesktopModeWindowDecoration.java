@@ -106,7 +106,6 @@ import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.shared.desktopmode.DesktopModeTransitionSource;
 import com.android.wm.shell.shared.desktopmode.ManageWindowsViewContainer;
 import com.android.wm.shell.splitscreen.SplitScreenController;
-import com.android.wm.shell.windowdecor.additionalviewcontainer.AdditionalSystemViewContainer;
 import com.android.wm.shell.windowdecor.extension.TaskInfoKt;
 import com.android.wm.shell.windowdecor.viewholder.AppHandleViewHolder;
 import com.android.wm.shell.windowdecor.viewholder.AppHeaderViewHolder;
@@ -206,7 +205,6 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     private final MultiInstanceHelper mMultiInstanceHelper;
     private final WindowDecorCaptionHandleRepository mWindowDecorCaptionHandleRepository;
     private final DesktopRepository mDesktopRepository;
-    private AdditionalSystemViewContainer mStatusBarInputLayer;
 
     DesktopModeWindowDecoration(
             Context context,
@@ -550,13 +548,13 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 notifyNoCaptionHandle();
             }
             mExclusionRegionListener.onExclusionRegionDismissed(mTaskInfo.taskId);
-            detachStatusBarInputLayer();
+            disposeStatusBarInputLayer();
             Trace.endSection(); // DesktopModeWindowDecoration#updateRelayoutParamsAndSurfaces
             return;
         }
 
         if (oldRootView != mResult.mRootView) {
-            detachStatusBarInputLayer();
+            disposeStatusBarInputLayer();
             mWindowDecorViewHolder = createViewHolder();
         }
         Trace.beginSection("DesktopModeWindowDecoration#relayout-binding");
@@ -574,9 +572,6 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                     mTaskInfo, position, mResult.mCaptionWidth, mResult.mCaptionHeight,
                     isCaptionVisible()
             ));
-            if (mStatusBarInputLayer != null) {
-                asAppHandle(mWindowDecorViewHolder).bindStatusBarInputLayer(mStatusBarInputLayer);
-            }
         } else {
             mWindowDecorViewHolder.bindData(new AppHeaderViewHolder.HeaderData(
                     mTaskInfo,
@@ -790,15 +785,15 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     }
 
     /**
-     * Detach the status bar input layer from this decoration. Intended to be
+     * Dispose of the view used to forward inputs in status bar region. Intended to be
      * used any time handle is no longer visible.
      */
-    void detachStatusBarInputLayer() {
+    void disposeStatusBarInputLayer() {
         if (!isAppHandle(mWindowDecorViewHolder)
                 || !Flags.enableHandleInputFix()) {
             return;
         }
-        asAppHandle(mWindowDecorViewHolder).detachStatusBarInputLayer();
+        asAppHandle(mWindowDecorViewHolder).disposeStatusBarInputLayer();
     }
 
     private WindowDecorationViewHolder createViewHolder() {
@@ -1638,7 +1633,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         closeManageWindowsMenu();
         mExclusionRegionListener.onExclusionRegionDismissed(mTaskInfo.taskId);
         disposeResizeVeil();
-        detachStatusBarInputLayer();
+        disposeStatusBarInputLayer();
         clearCurrentViewHostRunnable();
         if (canEnterDesktopMode(mContext) && Flags.enableDesktopWindowingAppHandleEducation()) {
             notifyNoCaptionHandle();
@@ -1753,16 +1748,6 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 + "windowingMode=" + windowingModeToString(mTaskInfo.getWindowingMode()) + ", "
                 + "isFocused=" + isFocused()
                 + "}";
-    }
-
-    /**
-     * Set the view container to be used to forward input through status bar. Null in cases
-     * where input forwarding isn't needed.
-     */
-    public void setStatusBarInputLayer(
-            @Nullable AdditionalSystemViewContainer additionalSystemViewContainer
-    ) {
-        mStatusBarInputLayer = additionalSystemViewContainer;
     }
 
     static class Factory {
