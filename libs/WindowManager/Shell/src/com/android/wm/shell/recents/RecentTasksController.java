@@ -47,7 +47,6 @@ import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.protolog.ProtoLog;
-import com.android.window.flags.Flags;
 import com.android.wm.shell.common.ExternalInterfaceBinder;
 import com.android.wm.shell.common.RemoteCallable;
 import com.android.wm.shell.common.ShellExecutor;
@@ -426,7 +425,7 @@ public class RecentTasksController implements TaskStackListenerCallback,
                 // If task has their app bounds set to null which happens after reboot, set the
                 // app bounds to persisted lastFullscreenBounds. Also set the position in parent
                 // to the top left of the bounds.
-                if (Flags.enableDesktopWindowingPersistence()
+                if (DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_PERSISTENCE.isTrue()
                         && taskInfo.configuration.windowConfiguration.getAppBounds() == null) {
                     taskInfo.configuration.windowConfiguration.setAppBounds(
                             taskInfo.lastNonFullscreenBounds);

@@ -1161,7 +1161,7 @@ class DesktopTasksController(
                 if (runningTaskInfo != null) {
                     // Task is already running, reorder it to the front
                     wct.reorder(runningTaskInfo.token, /* onTop= */ true)
-                } else if (Flags.enableDesktopWindowingPersistence()) {
+                } else if (DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_PERSISTENCE.isTrue()) {
                     // Task is not running, start it
                     wct.startTask(
                         taskId,
