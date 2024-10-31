@@ -167,6 +167,26 @@ class DeviceSettingRepositoryTest {
     }
 
     @Test
+    fun getDeviceSettingsConfig_expandable_success() {
+        testScope.runTest {
+            setUpConfigService(true, DEVICE_SETTING_CONFIG_EXPANDABLE)
+            `when`(settingProviderService1.serviceStatus)
+                .thenReturn(DeviceSettingsProviderServiceStatus(true))
+            `when`(settingProviderService2.serviceStatus)
+                .thenReturn(DeviceSettingsProviderServiceStatus(true))
+
+            val config = underTest.getDeviceSettingsConfig(cachedDevice)!!
+
+            assertThat(config.mainItems.map { it.settingId }).isEqualTo(
+                IntRange(
+                    DeviceSettingId.DEVICE_SETTING_ID_EXPANDABLE_1,
+                    DeviceSettingId.DEVICE_SETTING_ID_EXPANDABLE_1 + 14
+                ).toList()
+            )
+        }
+    }
+
+    @Test
     fun getDeviceSettingsConfig_noMetadata_returnNull() {
         testScope.runTest {
             `when`(
@@ -510,6 +530,13 @@ class DeviceSettingRepositoryTest {
                 SETTING_PROVIDER_SERVICE_CLASS_NAME_2,
                 SETTING_PROVIDER_SERVICE_INTENT_ACTION_2,
             )
+        val DEVICE_SETTING_APP_PROVIDED_ITEM_EXPANDABLE =
+            DeviceSettingItem(
+                DeviceSettingId.DEVICE_SETTING_ID_EXPANDABLE_1,
+                SETTING_PROVIDER_SERVICE_PACKAGE_NAME_1,
+                SETTING_PROVIDER_SERVICE_CLASS_NAME_1,
+                SETTING_PROVIDER_SERVICE_INTENT_ACTION_1,
+            )
         val DEVICE_SETTING_BUILT_IN_ITEM =
             DeviceSettingItem(
                 DeviceSettingId.DEVICE_SETTING_ID_BLUETOOTH_AUDIO_DEVICE_TYPE_GROUP,
@@ -579,6 +606,14 @@ class DeviceSettingRepositoryTest {
                     DEVICE_SETTING_BUILT_IN_BT_PROFILES_ITEM,
                 ),
                 listOf(DEVICE_SETTING_APP_PROVIDED_ITEM_2),
+                DEVICE_SETTING_HELP_ITEM,
+            )
+        val DEVICE_SETTING_CONFIG_EXPANDABLE =
+            DeviceSettingsConfig(
+                listOf(
+                    DEVICE_SETTING_APP_PROVIDED_ITEM_EXPANDABLE,
+                ),
+                listOf(),
                 DEVICE_SETTING_HELP_ITEM,
             )
     }

@@ -106,26 +106,40 @@ class DeviceSettingRepositoryImpl(
 
     private fun DeviceSettingsConfig.toModel(): DeviceSettingConfigModel =
         DeviceSettingConfigModel(
-            mainItems = mainContentItems.map { it.toModel() },
-            moreSettingsItems = moreSettingsItems.map { it.toModel() },
+            mainItems = mainContentItems.toModel(),
+            moreSettingsItems = moreSettingsItems.toModel(),
             moreSettingsHelpItem = moreSettingsHelpItem?.toModel(),
         )
 
-    private fun DeviceSettingItem.toModel(): DeviceSettingConfigItemModel {
+    private fun List<DeviceSettingItem>.toModel(): List<DeviceSettingConfigItemModel> {
+        return this.flatMap { item ->
+            if (item.settingId in EXPANDABLE_SETTING_IDS) {
+                IntRange(item.settingId, item.settingId + SETTING_ID_EXPAND_LIMIT - 1).map {
+                    item.toModel(overrideSettingId = it)
+                }
+            } else {
+                listOf(item.toModel())
+            }
+        }
+    }
+
+    private fun DeviceSettingItem.toModel(
+        overrideSettingId: Int? = null
+    ): DeviceSettingConfigItemModel {
         return if (!TextUtils.isEmpty(preferenceKey)) {
             if (settingId == DeviceSettingId.DEVICE_SETTING_ID_BLUETOOTH_PROFILES) {
                 BluetoothProfilesItem(
-                    settingId,
+                    overrideSettingId ?: settingId,
                     highlighted,
                     preferenceKey!!,
                     extras.getStringArrayList(DeviceSettingContract.INVISIBLE_PROFILES)
                         ?: emptyList(),
                 )
             } else {
-                CommonBuiltinItem(settingId, highlighted, preferenceKey!!)
+                CommonBuiltinItem(overrideSettingId ?: settingId, highlighted, preferenceKey!!)
             }
         } else {
-            AppProvidedItem(settingId, highlighted)
+            AppProvidedItem(overrideSettingId ?: settingId, highlighted)
         }
     }
 
@@ -134,6 +148,7 @@ class DeviceSettingRepositoryImpl(
             is DeviceSettingIntentAction -> DeviceSettingActionModel.IntentAction(this.intent)
             is DeviceSettingPendingIntentAction ->
                 DeviceSettingActionModel.PendingIntentAction(this.pendingIntent)
+
             else -> null
         }
 
@@ -150,7 +165,7 @@ class DeviceSettingRepositoryImpl(
                     summary = pref.summary,
                     icon = pref.icon?.let { DeviceSettingIcon.BitmapIcon(it) },
                     isAllowedChangingState = pref.isAllowedChangingState,
-                    action = pref.action?.toModel(),
+                    action = pref.action.toModel(),
                     switchState =
                         if (pref.hasSwitch()) {
                             DeviceSettingStateModel.ActionSwitchPreferenceState(pref.checked)
@@ -163,6 +178,7 @@ class DeviceSettingRepositoryImpl(
                         }
                     },
                 )
+
             is MultiTogglePreference ->
                 DeviceSettingModel.MultiTogglePreference(
                     cachedDevice = cachedDevice,
@@ -178,21 +194,33 @@ class DeviceSettingRepositoryImpl(
                         }
                     },
                 )
+
             is DeviceSettingFooterPreference ->
                 DeviceSettingModel.FooterPreference(
                     cachedDevice = cachedDevice,
                     id = settingId,
                     footerText = pref.footerText,
                 )
+
             is DeviceSettingHelpPreference ->
                 DeviceSettingModel.HelpPreference(
                     cachedDevice = cachedDevice,
                     id = settingId,
                     intent = pref.intent,
                 )
+
             else -> DeviceSettingModel.Unknown(cachedDevice, settingId)
         }
 
     private fun ToggleInfo.toModel(): ToggleModel =
         ToggleModel(label, DeviceSettingIcon.BitmapIcon(icon))
+
+    companion object {
+        private val EXPANDABLE_SETTING_IDS =
+            listOf(
+                DeviceSettingId.DEVICE_SETTING_ID_EXPANDABLE_1,
+                DeviceSettingId.DEVICE_SETTING_ID_EXPANDABLE_2,
+            )
+        private const val SETTING_ID_EXPAND_LIMIT = 15
+    }
 }
