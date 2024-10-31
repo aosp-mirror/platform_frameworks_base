@@ -70,7 +70,11 @@ public enum DesktopModeFlags {
     ENABLE_DESKTOP_WINDOWING_ENTER_TRANSITIONS(Flags::enableDesktopWindowingTransitions, false),
     ENABLE_DESKTOP_WINDOWING_EXIT_TRANSITIONS(Flags::enableDesktopWindowingExitTransitions, false),
     ENABLE_WINDOWING_TRANSITION_HANDLERS_OBSERVERS(
-            Flags::enableWindowingTransitionHandlersObservers, false);
+            Flags::enableWindowingTransitionHandlersObservers, false),
+    ENABLE_DESKTOP_APP_LAUNCH_ALTTAB_TRANSITIONS(
+            Flags::enableDesktopAppLaunchAlttabTransitions, false),
+    ENABLE_DESKTOP_APP_LAUNCH_TRANSITIONS(
+            Flags::enableDesktopAppLaunchTransitions, false);
 
     private static final String TAG = "DesktopModeFlagsUtil";
     // Function called to obtain aconfig flag value.
