@@ -8535,8 +8535,12 @@
         @hide
     -->
     <permission
-        android:name="android.permission.RECEIVE_PACKAGE_CHANGED_BROADCAST_ON_COMPONENT_STATE_CHANGED"
+        android:name="android.permission.INTERNAL_RECEIVE_PACKAGE_CHANGED_BROADCAST_ON_COMPONENT_STATE_CHANGED"
         android:protectionLevel="internal"
+        android:featureFlag="android.content.pm.reduce_broadcasts_for_component_state_changes"/>
+
+    <uses-permission
+        android:name="android.permission.INTERNAL_RECEIVE_PACKAGE_CHANGED_BROADCAST_ON_COMPONENT_STATE_CHANGED"
         android:featureFlag="android.content.pm.reduce_broadcasts_for_component_state_changes"/>
 
     <!-- Attribution for Geofencing service. -->
