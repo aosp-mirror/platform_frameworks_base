@@ -99,6 +99,7 @@ import android.view.KeyEvent.KEYCODE_PAGE_DOWN
 import android.view.KeyEvent.KEYCODE_PAGE_UP
 import android.view.KeyEvent.KEYCODE_PERIOD
 import android.view.KeyEvent.KEYCODE_RECENT_APPS
+import android.view.KeyEvent.KEYCODE_SCREENSHOT
 import android.view.KeyEvent.KEYCODE_SCROLL_LOCK
 import android.view.KeyEvent.KEYCODE_SHIFT_LEFT
 import android.view.KeyEvent.KEYCODE_SHIFT_RIGHT
@@ -123,6 +124,14 @@ object ShortcutHelperKeys {
             KEYCODE_BACK to R.drawable.ic_arrow_back_2,
             KEYCODE_HOME to R.drawable.ic_radio_button_unchecked,
             KEYCODE_RECENT_APPS to R.drawable.ic_check_box_outline_blank,
+        )
+
+    val keyLabelResIds =
+        mapOf(
+            KEYCODE_BACK to R.string.group_system_go_back,
+            KEYCODE_HOME to R.string.group_system_access_home_screen,
+            KEYCODE_RECENT_APPS to R.string.group_system_overview_open_apps,
+            KEYCODE_SCREENSHOT to R.string.group_system_full_screenshot,
         )
 
     val modifierLabels =
