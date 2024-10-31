@@ -29,7 +29,7 @@
     <item msgid="4613015005934755724">"Terhubung"</item>
     <item msgid="3763530049995655072">"Ditangguhkan"</item>
     <item msgid="7852381437933824454">"Memutus sambungan..."</item>
-    <item msgid="5046795712175415059">"Sambungan terputus"</item>
+    <item msgid="5046795712175415059">"Tidak terhubung"</item>
     <item msgid="2473654476624070462">"Gagal"</item>
     <item msgid="9146847076036105115">"Diblokir"</item>
     <item msgid="4543924085816294893">"Menghindari sambungan buruk untuk sementara"</item>
@@ -43,7 +43,7 @@
     <item msgid="1043944043827424501">"Terhubung ke <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</item>
     <item msgid="7445993821842009653">"Ditangguhkan"</item>
     <item msgid="1175040558087735707">"Diputus dari <xliff:g id="NETWORK_NAME">%1$s</xliff:g>…"</item>
-    <item msgid="699832486578171722">"Sambungan terputus"</item>
+    <item msgid="699832486578171722">"Tidak terhubung"</item>
     <item msgid="522383512264986901">"Gagal"</item>
     <item msgid="3602596701217484364">"Diblokir"</item>
     <item msgid="1999413958589971747">"Menghindari sambungan buruk untuk sementara"</item>

@@ -50,7 +50,7 @@
     <string name="wifi_security_owe" msgid="3343421403561657809">"Enhanced Open"</string>
     <string name="wifi_security_eap_suiteb" msgid="415842785991698142">"WPA3-Enterprise 192-bit"</string>
     <string name="wifi_remembered" msgid="3266709779723179188">"Disimpan"</string>
-    <string name="wifi_disconnected" msgid="7054450256284661757">"Terputus"</string>
+    <string name="wifi_disconnected" msgid="7054450256284661757">"Tidak terhubung"</string>
     <string name="wifi_disabled_generic" msgid="2651916945380294607">"Nonaktif"</string>
     <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"Kegagalan Konfigurasi IP"</string>
     <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"Masalah autentikasi"</string>
@@ -82,7 +82,7 @@
     <string name="speed_label_very_fast" msgid="8215718029533182439">"Sangat Cepat"</string>
     <string name="wifi_passpoint_expired" msgid="6540867261754427561">"Sudah tidak berlaku"</string>
     <string name="preference_summary_default_combination" msgid="2644094566845577901">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="DESCRIPTION">%2$s</xliff:g>"</string>
-    <string name="bluetooth_disconnected" msgid="7739366554710388701">"Sambungan terputus"</string>
+    <string name="bluetooth_disconnected" msgid="7739366554710388701">"Tidak terhubung"</string>
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"Memutus sambungan..."</string>
     <string name="bluetooth_connecting" msgid="5871702668260192755">"Menghubungkan…"</string>
     <string name="bluetooth_connected" msgid="8065345572198502293">"Terhubung<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>

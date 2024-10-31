@@ -82,7 +82,7 @@
     <string name="speed_label_very_fast" msgid="8215718029533182439">"เร็วมาก"</string>
     <string name="wifi_passpoint_expired" msgid="6540867261754427561">"หมดอายุแล้ว"</string>
     <string name="preference_summary_default_combination" msgid="2644094566845577901">"<xliff:g id="STATE">%1$s</xliff:g>/<xliff:g id="DESCRIPTION">%2$s</xliff:g>"</string>
-    <string name="bluetooth_disconnected" msgid="7739366554710388701">"ตัดการเชื่อมต่อ"</string>
+    <string name="bluetooth_disconnected" msgid="7739366554710388701">"ยกเลิกการเชื่อมต่อแล้ว"</string>
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"กำลังตัดการเชื่อมต่อ..."</string>
     <string name="bluetooth_connecting" msgid="5871702668260192755">"กำลังเชื่อมต่อ…"</string>
     <string name="bluetooth_connected" msgid="8065345572198502293">"เชื่อมต่อแล้ว<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>

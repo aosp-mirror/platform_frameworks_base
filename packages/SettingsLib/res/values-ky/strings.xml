@@ -258,7 +258,7 @@
     <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"QR кодунун сканерин колдонуп, жаңы түзмөктөрдү жупташтырыңыз"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Түзмөктү атайын код аркылуу жупташтыруу"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Жаңы түзмөктөрдү алты сандан турган код аркылуу жупташтырасыз"</string>
-    <string name="adb_paired_devices_title" msgid="5268997341526217362">"Жупташтырылган түзмөктөр"</string>
+    <string name="adb_paired_devices_title" msgid="5268997341526217362">"Байланышкан түзмөктөр"</string>
     <string name="adb_wireless_device_connected_summary" msgid="3039660790249148713">"Учурда туташып турган түзмөктөр"</string>
     <string name="adb_wireless_device_details_title" msgid="7129369670526565786">"Түзмөктүн чоо-жайы"</string>
     <string name="adb_device_forget" msgid="193072400783068417">"Унутулсун"</string>
