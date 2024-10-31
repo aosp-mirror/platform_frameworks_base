@@ -58,14 +58,14 @@ interface PropertyTransformation<T> : Transformation {
      * - the value at progress = 100% for elements that are leaving the layout (i.e. elements in the
      *   content we are transitioning from).
      *
-     * The returned value will be interpolated using the [transition] progress and [value], the
+     * The returned value will be interpolated using the [transition] progress and [idleValue], the
      * value of the property when we are idle.
      */
     fun PropertyTransformationScope.transform(
         content: ContentKey,
         element: ElementKey,
         transition: TransitionState.Transition,
-        value: T,
+        idleValue: T,
     ): T
 }
 

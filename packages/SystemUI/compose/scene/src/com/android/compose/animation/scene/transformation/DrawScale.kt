@@ -37,7 +37,7 @@ internal class DrawScale(
         content: ContentKey,
         element: ElementKey,
         transition: TransitionState.Transition,
-        value: Scale,
+        idleValue: Scale,
     ): Scale {
         return Scale(scaleX, scaleY, pivot)
     }

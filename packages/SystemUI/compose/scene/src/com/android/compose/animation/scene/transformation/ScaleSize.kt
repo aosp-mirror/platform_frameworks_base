@@ -36,11 +36,11 @@ internal class ScaleSize(
         content: ContentKey,
         element: ElementKey,
         transition: TransitionState.Transition,
-        value: IntSize,
+        idleValue: IntSize,
     ): IntSize {
         return IntSize(
-            width = (value.width * width).roundToInt(),
-            height = (value.height * height).roundToInt(),
+            width = (idleValue.width * width).roundToInt(),
+            height = (idleValue.height * height).roundToInt(),
         )
     }
 }

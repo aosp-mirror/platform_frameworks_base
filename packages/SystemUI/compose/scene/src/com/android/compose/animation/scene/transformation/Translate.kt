@@ -35,9 +35,9 @@ internal class Translate(
         content: ContentKey,
         element: ElementKey,
         transition: TransitionState.Transition,
-        value: Offset,
+        idleValue: Offset,
     ): Offset {
-        return Offset(value.x + x.toPx(), value.y + y.toPx())
+        return Offset(idleValue.x + x.toPx(), idleValue.y + y.toPx())
     }
 }
 

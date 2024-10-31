@@ -33,7 +33,7 @@ internal class AnchoredSize(
         content: ContentKey,
         element: ElementKey,
         transition: TransitionState.Transition,
-        value: IntSize,
+        idleValue: IntSize,
     ): IntSize {
         fun anchorSizeIn(content: ContentKey): IntSize {
             val size =
@@ -45,8 +45,8 @@ internal class AnchoredSize(
                     )
 
             return IntSize(
-                width = if (anchorWidth) size.width else value.width,
-                height = if (anchorHeight) size.height else value.height,
+                width = if (anchorWidth) size.width else idleValue.width,
+                height = if (anchorHeight) size.height else idleValue.height,
             )
         }
 
