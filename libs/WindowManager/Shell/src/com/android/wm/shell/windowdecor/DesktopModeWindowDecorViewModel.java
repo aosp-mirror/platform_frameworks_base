@@ -49,6 +49,7 @@ import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityTaskManager;
 import android.app.IActivityManager;
 import android.app.IActivityTaskManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Point;
@@ -1474,11 +1475,22 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
                 && isTopActivityExemptFromDesktopWindowing(mContext, taskInfo)) {
             return false;
         }
+        if (isPartOfDefaultHomePackage(taskInfo)) {
+            return false;
+        }
         return DesktopModeStatus.canEnterDesktopMode(mContext)
                 && !DesktopWallpaperActivity.isWallpaperTask(taskInfo)
                 && taskInfo.getWindowingMode() != WINDOWING_MODE_PINNED
                 && taskInfo.getActivityType() == ACTIVITY_TYPE_STANDARD
                 && !taskInfo.configuration.windowConfiguration.isAlwaysOnTop();
+    }
+
+    private boolean isPartOfDefaultHomePackage(RunningTaskInfo taskInfo) {
+        final ComponentName currentDefaultHome =
+                mContext.getPackageManager().getHomeActivities(new ArrayList<>());
+        return currentDefaultHome != null && taskInfo.baseActivity != null
+                && currentDefaultHome.getPackageName()
+                .equals(taskInfo.baseActivity.getPackageName());
     }
 
     private void createWindowDecoration(
