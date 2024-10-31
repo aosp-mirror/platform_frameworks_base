@@ -193,6 +193,42 @@ public abstract class PackageManager {
             "android.net.PROPERTY_SELF_CERTIFIED_NETWORK_CAPABILITIES";
 
     /**
+     * &lt;application&gt; level {@link android.content.pm.PackageManager.Property} tag
+     * specifying whether the app should be put into the "restricted" backup mode when it's started
+     * for backup and restore operations.
+     *
+     * <p> See <a
+     * href="https://developer.android.com/identity/data/autobackup#ImplementingBackupAgent"> for
+     * information about restricted mode</a>.
+     *
+     * <p> Starting with Android 16 apps may not be started in restricted mode based on this
+     * property.
+     *
+     * <p><b>Syntax:</b>
+     * <pre>
+     * &lt;application&gt;
+     *   &lt;property
+     *     android:name="android.app.backup.PROPERTY_USE_RESTRICTED_BACKUP_MODE"
+     *     android:value="true|false"/&gt;
+     * &lt;/application&gt;
+     * </pre>
+     *
+     * <p>If this property is set, the operating system will respect it for now (see Note below).
+     * If it's not set, the behavior depends on the SDK level that the app is targeting. For apps
+     * targeting SDK level {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM} or lower, the
+     * property defaults to {@code true}. For apps targeting SDK level
+     * {@link android.os.Build.VERSION_CODES#BAKLAVA} or higher, the operating system will make a
+     * decision dynamically.
+     *
+     * <p>Note: It's not recommended to set this property to {@code true} unless absolutely
+     * necessary. In a future Android version, this property may be deprecated in favor of removing
+     * restricted mode completely.
+     */
+    @FlaggedApi(com.android.server.backup.Flags.FLAG_ENABLE_RESTRICTED_MODE_CHANGES)
+    public static final String PROPERTY_USE_RESTRICTED_BACKUP_MODE =
+            "android.app.backup.PROPERTY_USE_RESTRICTED_BACKUP_MODE";
+
+    /**
      * Application level property that an app can specify to opt-out from having private data
      * directories both on the internal and external storages.
      *

@@ -1937,6 +1937,7 @@ package android.app.backup {
     method public android.os.IBinder getBinder();
     method public long getCurrentRestoreSet();
     method public int getNextFullRestoreDataChunk(android.os.ParcelFileDescriptor);
+    method @FlaggedApi("com.android.server.backup.enable_restricted_mode_changes") @NonNull public java.util.List<java.lang.String> getPackagesThatShouldNotUseRestrictedMode(@NonNull java.util.List<java.lang.String>, int);
     method public int getRestoreData(android.os.ParcelFileDescriptor);
     method public int getTransportFlags();
     method public int initializeDevice();

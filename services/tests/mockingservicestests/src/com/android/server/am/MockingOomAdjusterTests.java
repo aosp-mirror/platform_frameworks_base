@@ -3306,7 +3306,7 @@ public class MockingOomAdjusterTests {
         if (Flags.pushGlobalStateToOomadjuster()) {
             mProcessStateController.setBackupTarget(app, app.userId);
         } else {
-            BackupRecord backupTarget = new BackupRecord(null, 0, 0, 0);
+            BackupRecord backupTarget = new BackupRecord(null, 0, 0, 0, true);
             backupTarget.app = app;
             doReturn(backupTarget).when(mService.mBackupTargets).get(anyInt());
         }

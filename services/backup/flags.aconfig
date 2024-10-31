@@ -60,3 +60,12 @@ flag {
     bug: "331749778"
     is_fixed_read_only: true
 }
+
+flag {
+    name: "enable_restricted_mode_changes"
+    namespace: "onboarding"
+    description: "Enables the new framework behavior of not putting apps in restricted mode for "
+            "B&R operations in certain cases."
+    bug: "376661510"
+    is_fixed_read_only: true
+}
