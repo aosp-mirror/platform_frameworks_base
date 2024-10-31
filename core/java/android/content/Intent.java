@@ -899,7 +899,7 @@ public class Intent implements Parcelable, Cloneable {
         boolean isForeign = (intent.mLocalFlags & LOCAL_FLAG_FROM_PARCEL) != 0;
         boolean isWithoutTrustedCreatorToken =
                 (intent.mLocalFlags & Intent.LOCAL_FLAG_TRUSTED_CREATOR_TOKEN_PRESENT) == 0;
-        if (isForeign && isWithoutTrustedCreatorToken) {
+        if (isForeign && isWithoutTrustedCreatorToken && preventIntentRedirect()) {
             intent.addExtendedFlags(EXTENDED_FLAG_MISSING_CREATOR_OR_INVALID_TOKEN);
         }
     }
