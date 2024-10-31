@@ -129,8 +129,8 @@ public final class JobServiceContext implements ServiceConnection {
     private static final String[] VERB_STRINGS = {
             "VERB_BINDING", "VERB_STARTING", "VERB_EXECUTING", "VERB_STOPPING", "VERB_FINISHED"
     };
-    private static final String TRACE_JOB_FORCE_FINISHED_PREFIX = "forceJobFinished:";
-    private static final String TRACE_JOB_FORCE_FINISHED_DELIMITER = "#";
+    private static final String TRACE_ABANDONED_JOB = "abandonedJob:";
+    private static final String TRACE_ABANDONED_JOB_DELIMITER = "#";
 
     // States that a job occupies while interacting with the client.
     static final int VERB_BINDING = 0;
@@ -294,8 +294,8 @@ public final class JobServiceContext implements ServiceConnection {
         }
 
         @Override
-        public void forceJobFinished(int jobId) {
-            doForceJobFinished(this, jobId);
+        public void handleAbandonedJob(int jobId) {
+            doHandleAbandonedJob(this, jobId);
         }
 
         @Override
@@ -773,7 +773,7 @@ public final class JobServiceContext implements ServiceConnection {
      * This method just adds traces to evaluate jobs that leak jobparameters at the client.
      * It does not stop the job.
      */
-    void doForceJobFinished(JobCallback cb, int jobId) {
+    void doHandleAbandonedJob(JobCallback cb, int jobId) {
         final long ident = Binder.clearCallingIdentity();
         try {
             final JobStatus executing;
@@ -787,9 +787,9 @@ public final class JobServiceContext implements ServiceConnection {
             }
             if (executing != null && jobId == executing.getJobId()) {
                 final StringBuilder stateSuffix = new StringBuilder();
-                stateSuffix.append(TRACE_JOB_FORCE_FINISHED_PREFIX);
+                stateSuffix.append(TRACE_ABANDONED_JOB);
                 stateSuffix.append(executing.getBatteryName());
-                stateSuffix.append(TRACE_JOB_FORCE_FINISHED_DELIMITER);
+                stateSuffix.append(TRACE_ABANDONED_JOB_DELIMITER);
                 stateSuffix.append(executing.getJobId());
                 Trace.instant(Trace.TRACE_TAG_POWER, stateSuffix.toString());
             }

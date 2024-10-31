@@ -305,7 +305,7 @@ public final class AuthSession implements IBinder.DeathRecipient {
                     mSensors /* sensorIds */,
                     true /* credentialAllowed */,
                     false /* requireConfirmation */,
-                    mUserId,
+                    mPreAuthInfo.callingUserId,
                     mOperationId,
                     mOpPackageName,
                     mRequestId);
@@ -357,7 +357,7 @@ public final class AuthSession implements IBinder.DeathRecipient {
                             mSensors,
                             mPreAuthInfo.shouldShowCredential(),
                             requireConfirmation,
-                            mUserId,
+                            mPreAuthInfo.callingUserId,
                             mOperationId,
                             mOpPackageName,
                             mRequestId);
@@ -491,7 +491,7 @@ public final class AuthSession implements IBinder.DeathRecipient {
                             mSensors /* sensorIds */,
                             true /* credentialAllowed */,
                             false /* requireConfirmation */,
-                            mUserId,
+                            mPreAuthInfo.callingUserId,
                             mOperationId,
                             mOpPackageName,
                             mRequestId);

@@ -25,6 +25,7 @@ import androidx.annotation.VisibleForTesting
 import com.android.systemui.log.core.Logger
 import com.android.systemui.log.core.MessageBuffer
 import com.android.systemui.plugins.clocks.AlarmData
+import com.android.systemui.plugins.clocks.ClockFontAxisSetting
 import com.android.systemui.plugins.clocks.WeatherData
 import com.android.systemui.plugins.clocks.ZenData
 import com.android.systemui.shared.clocks.LogUtil
@@ -124,6 +125,11 @@ abstract class DigitalClockFaceView(ctx: Context, messageBuffer: MessageBuffer) 
     fun updateColor(color: Int) {
         digitalClockTextViewMap.forEach { _, view -> view.updateColor(color) }
         invalidate()
+    }
+
+    fun updateAxes(axes: List<ClockFontAxisSetting>) {
+        digitalClockTextViewMap.forEach { _, view -> view.updateAxes(axes) }
+        requestLayout()
     }
 
     fun onFontSettingChanged(fontSizePx: Float) {

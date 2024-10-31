@@ -21,42 +21,22 @@ import static org.junit.Assert.assertTrue;
 
 import android.os.Build;
 import android.os.PowerManager;
-import android.platform.test.flag.junit.FlagsParameterization;
-import android.platform.test.flag.junit.SetFlagsRule;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
-import com.android.systemui.Flags;
 import com.android.systemui.SysuiTestCase;
 
 import org.junit.After;
 import org.junit.Assume;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.util.List;
-
-import platform.test.runner.parameterized.ParameterizedAndroidJunit4;
-import platform.test.runner.parameterized.Parameters;
-
 
 @SmallTest
-@RunWith(ParameterizedAndroidJunit4.class)
+@RunWith(AndroidJUnit4.class)
 public class WakeLockTest extends SysuiTestCase {
-
-    @Parameters(name = "{0}")
-    public static List<FlagsParameterization> getFlags() {
-        return FlagsParameterization.allCombinationsOf(
-                Flags.FLAG_DELAYED_WAKELOCK_RELEASE_ON_BACKGROUND_THREAD);
-    }
-
-    @Rule public final SetFlagsRule mSetFlagsRule;
-
-    public WakeLockTest(FlagsParameterization flags) {
-        mSetFlagsRule = new SetFlagsRule(SetFlagsRule.DefaultInitValueType.NULL_DEFAULT, flags);
-    }
 
     private static final String WHY = "test";
     WakeLock mWakeLock;

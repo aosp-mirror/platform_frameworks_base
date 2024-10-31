@@ -1133,7 +1133,7 @@ public class BiometricService extends SystemService {
 
         return PreAuthInfo.create(mTrustManager, mDevicePolicyManager, mSettingObserver, mSensors,
                 userId, promptInfo, opPackageName, false /* checkDevicePolicyManager */,
-                getContext(), mBiometricCameraManager);
+                getContext(), mBiometricCameraManager, mUserManager);
     }
 
     /**
@@ -1520,9 +1520,9 @@ public class BiometricService extends SystemService {
         mHandler.post(() -> {
             try {
                 final PreAuthInfo preAuthInfo = PreAuthInfo.create(mTrustManager,
-                        mDevicePolicyManager, mSettingObserver, mSensors, userId, promptInfo,
-                        opPackageName, promptInfo.isDisallowBiometricsIfPolicyExists(),
-                        getContext(), mBiometricCameraManager);
+                        mDevicePolicyManager, mSettingObserver, mSensors, userId,
+                        promptInfo, opPackageName, promptInfo.isDisallowBiometricsIfPolicyExists(),
+                        getContext(), mBiometricCameraManager, mUserManager);
 
                 // Set the default title if necessary.
                 if (promptInfo.isUseDefaultTitle()) {
@@ -1572,8 +1572,8 @@ public class BiometricService extends SystemService {
                         promptInfo.setAuthenticators(Authenticators.DEVICE_CREDENTIAL);
                     }
 
-                    authenticateInternal(token, requestId, operationId, userId, receiver,
-                            opPackageName, promptInfo, preAuthInfo);
+                    authenticateInternal(token, requestId, operationId, preAuthInfo.userId,
+                            receiver, opPackageName, promptInfo, preAuthInfo);
                 } else {
                     receiver.onError(preAuthStatus.first /* modality */,
                             preAuthStatus.second /* errorCode */,

@@ -26,7 +26,7 @@ import com.android.systemui.qs.footerActionsController
 import com.android.systemui.qs.footerActionsViewModelFactory
 import com.android.systemui.qs.panels.domain.interactor.tileSquishinessInteractor
 import com.android.systemui.qs.panels.ui.viewmodel.paginatedGridViewModel
-import com.android.systemui.qs.ui.viewmodel.quickSettingsContainerViewModel
+import com.android.systemui.qs.ui.viewmodel.quickSettingsContainerViewModelFactory
 import com.android.systemui.shade.largeScreenHeaderHelper
 import com.android.systemui.shade.transition.largeScreenShadeInterpolator
 import com.android.systemui.statusbar.disableflags.data.repository.disableFlagsRepository
@@ -41,7 +41,7 @@ val Kosmos.qsFragmentComposeViewModelFactory by
                 lifecycleScope: LifecycleCoroutineScope
             ): QSFragmentComposeViewModel {
                 return QSFragmentComposeViewModel(
-                    quickSettingsContainerViewModel,
+                    quickSettingsContainerViewModelFactory,
                     mainResources,
                     footerActionsViewModelFactory,
                     footerActionsController,
