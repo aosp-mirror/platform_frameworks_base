@@ -248,7 +248,11 @@ public class WearableSensingManager {
      * @param executor Executor on which to run the consumer callback
      * @param statusConsumer A consumer that handles the status codes for providing the connection
      *     and errors in the encrypted channel.
+     * @deprecated Use {@link #provideConnection(WearableConnection, Executor)} instead to provide a
+     *     remote wearable device connection to the WearableSensingService
      */
+    @FlaggedApi(Flags.FLAG_ENABLE_CONCURRENT_WEARABLE_CONNECTIONS)
+    @Deprecated
     @RequiresPermission(Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE)
     public void provideConnection(
             @NonNull ParcelFileDescriptor wearableConnection,
