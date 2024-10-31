@@ -20,10 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.SceneScope
-import com.android.compose.animation.scene.UserAction
-import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.lifecycle.Activatable
-import kotlinx.coroutines.flow.Flow
 
 /**
  * Defines interface for classes that can describe a "scene".
@@ -33,32 +30,10 @@ import kotlinx.coroutines.flow.Flow
  * based on either user action (for example, swiping down while on the lock screen scene may switch
  * to the shade scene).
  */
-interface Scene : Activatable {
+interface Scene : Activatable, ActionableContent {
 
     /** Uniquely-identifying key for this scene. The key must be unique within its container. */
     val key: SceneKey
-
-    /**
-     * The mapping between [UserAction] and destination [UserActionResult]s.
-     *
-     * When the scene framework detects a user action, if the current scene has a map entry for that
-     * user action, the framework starts a transition to the scene in the map.
-     *
-     * Once the [Scene] becomes the current one, the scene framework will read this property and set
-     * up a collector to watch for new mapping values. If every map entry provided by the scene, the
-     * framework will set up user input handling for its [UserAction] and, if such a user action is
-     * detected, initiate a transition to the specified [UserActionResult].
-     *
-     * Note that reading from this method does _not_ mean that any user action has occurred.
-     * Instead, the property is read before any user action/gesture is detected so that the
-     * framework can decide whether to set up gesture/input detectors/listeners in case user actions
-     * of the given types ever occur.
-     *
-     * Note that a missing value for a specific [UserAction] means that the user action of the given
-     * type is not currently active in the scene and should be ignored by the framework, while the
-     * current scene is this one.
-     */
-    val destinationScenes: Flow<Map<UserAction, UserActionResult>>
 
     @Composable fun SceneScope.Content(modifier: Modifier)
 }

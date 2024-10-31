@@ -70,8 +70,10 @@ public class HearingDevicesDialogManager {
      * Shows the dialog.
      *
      * @param expandable {@link Expandable} from which the dialog is shown.
+     * @param launchSourceId the id indicates where the dialog is launched from.
      */
-    public void showDialog(Expandable expandable) {
+    public void showDialog(Expandable expandable,
+            @HearingDevicesUiEventLogger.LaunchSourceId int launchSourceId) {
         if (mDialog != null) {
             if (DEBUG) {
                 Log.d(TAG, "HearingDevicesDialog already showing. Destroy it first.");
@@ -91,7 +93,8 @@ public class HearingDevicesDialogManager {
                 });
         pairedHearingDeviceCheckTask.addListener(() -> {
             try {
-                mDialog = mDialogFactory.create(!pairedHearingDeviceCheckTask.get()).createDialog();
+                mDialog = mDialogFactory.create(!pairedHearingDeviceCheckTask.get(),
+                        launchSourceId).createDialog();
 
                 if (expandable != null) {
                     DialogTransitionAnimator.Controller controller =

@@ -313,7 +313,11 @@ interface NotificationRecordLogger {
         @UiEvent(doc = "Notification assistant generated notification action at 1 was clicked.")
         NOTIFICATION_ASSIST_ACTION_CLICKED_1(457),
         @UiEvent(doc = "Notification assistant generated notification action at 2 was clicked.")
-        NOTIFICATION_ASSIST_ACTION_CLICKED_2(458);
+        NOTIFICATION_ASSIST_ACTION_CLICKED_2(458),
+        @UiEvent(doc = "Notification was force autogrouped.")
+        NOTIFICATION_FORCE_GROUP(1843),
+        @UiEvent(doc = "Notification summary was force autogrouped.")
+        NOTIFICATION_FORCE_GROUP_SUMMARY(1844);
 
         private final int mId;
         NotificationEvent(int id) {

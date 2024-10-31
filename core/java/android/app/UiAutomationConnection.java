@@ -565,7 +565,12 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
             // Rethrow the exception. This will be propagated to the remote caller.
             throw ex;
         }
+        handleExecuteShellCommandProcess(process, sink, source, stderrSink);
+    }
 
+    private void handleExecuteShellCommandProcess(final java.lang.Process process,
+            final ParcelFileDescriptor sink, final ParcelFileDescriptor source,
+            final ParcelFileDescriptor stderrSink) {
         // Read from process and write to pipe
         final Thread readFromProcess;
         if (sink != null) {
@@ -625,6 +630,26 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
             }
         });
         cleanup.start();
+    }
+
+    @Override
+    public void executeShellCommandArrayWithStderr(final String[] command,
+            final ParcelFileDescriptor sink, final ParcelFileDescriptor source,
+            final ParcelFileDescriptor stderrSink) throws RemoteException {
+        synchronized (mLock) {
+            throwIfCalledByNotTrustedUidLocked();
+            throwIfShutdownLocked();
+            throwIfNotConnectedLocked();
+        }
+        final java.lang.Process process;
+
+        try {
+            process = Runtime.getRuntime().exec(command);
+        } catch (IOException exc) {
+            throw new RuntimeException(
+                    "Error running shell command '" + String.join(" ", command) + "'", exc);
+        }
+        handleExecuteShellCommandProcess(process, sink, source, stderrSink);
     }
 
     @Override

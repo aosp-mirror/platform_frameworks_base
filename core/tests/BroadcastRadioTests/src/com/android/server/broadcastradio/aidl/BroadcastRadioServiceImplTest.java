@@ -91,12 +91,13 @@ public final class BroadcastRadioServiceImplTest extends ExtendedRadioMockitoTes
     private IAnnouncementListener mAnnouncementListenerMock;
     @Mock
     private IBinder mListenerBinderMock;
+    @Mock
+    private RadioServiceUserController mUserControllerMock;
 
     @Override
     protected void initializeSession(StaticMockitoSessionBuilder builder) {
         builder.spyStatic(ServiceManager.class)
-                .spyStatic(RadioModule.class)
-                .spyStatic(RadioServiceUserController.class);
+                .spyStatic(RadioModule.class);
     }
 
     @Test
@@ -156,7 +157,7 @@ public final class BroadcastRadioServiceImplTest extends ExtendedRadioMockitoTes
     @Test
     public void openSession_forNonCurrentUser_throwsException() throws Exception {
         createBroadcastRadioService();
-        doReturn(false).when(() -> RadioServiceUserController.isCurrentOrSystemUser());
+        doReturn(false).when(mUserControllerMock).isCurrentOrSystemUser();
 
         IllegalStateException thrown = assertThrows(IllegalStateException.class,
                 () -> mBroadcastRadioService.openSession(FM_RADIO_MODULE_ID,
@@ -206,9 +207,9 @@ public final class BroadcastRadioServiceImplTest extends ExtendedRadioMockitoTes
     }
 
     private void createBroadcastRadioService() throws RemoteException {
-        doReturn(true).when(() -> RadioServiceUserController.isCurrentOrSystemUser());
+        doReturn(true).when(mUserControllerMock).isCurrentOrSystemUser();
         mockServiceManager();
-        mBroadcastRadioService = new BroadcastRadioServiceImpl(SERVICE_LIST);
+        mBroadcastRadioService = new BroadcastRadioServiceImpl(SERVICE_LIST, mUserControllerMock);
     }
 
     private void mockServiceManager() throws RemoteException {
@@ -222,9 +223,9 @@ public final class BroadcastRadioServiceImplTest extends ExtendedRadioMockitoTes
                 any(IServiceCallback.class)));
 
         doReturn(mFmRadioModuleMock).when(() -> RadioModule.tryLoadingModule(
-                eq(FM_RADIO_MODULE_ID), anyString(), any(IBinder.class)));
+                eq(FM_RADIO_MODULE_ID), anyString(), any(IBinder.class), any()));
         doReturn(mDabRadioModuleMock).when(() -> RadioModule.tryLoadingModule(
-                eq(DAB_RADIO_MODULE_ID), anyString(), any(IBinder.class)));
+                eq(DAB_RADIO_MODULE_ID), anyString(), any(IBinder.class), any()));
 
         when(mFmRadioModuleMock.getProperties()).thenReturn(mFmModuleMock);
         when(mDabRadioModuleMock.getProperties()).thenReturn(mDabModuleMock);

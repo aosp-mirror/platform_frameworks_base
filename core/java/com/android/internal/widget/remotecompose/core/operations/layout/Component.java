@@ -15,11 +15,17 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.layout;
 
+import com.android.internal.widget.remotecompose.core.CoreDocument;
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.PaintContext;
 import com.android.internal.widget.remotecompose.core.PaintOperation;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
+import com.android.internal.widget.remotecompose.core.SerializableToString;
+import com.android.internal.widget.remotecompose.core.VariableSupport;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
+import com.android.internal.widget.remotecompose.core.operations.BitmapData;
+import com.android.internal.widget.remotecompose.core.operations.ComponentValue;
+import com.android.internal.widget.remotecompose.core.operations.TextData;
 import com.android.internal.widget.remotecompose.core.operations.layout.animation.AnimateMeasure;
 import com.android.internal.widget.remotecompose.core.operations.layout.animation.AnimationSpec;
 import com.android.internal.widget.remotecompose.core.operations.layout.measure.ComponentMeasure;
@@ -30,11 +36,12 @@ import com.android.internal.widget.remotecompose.core.operations.paint.PaintBund
 import com.android.internal.widget.remotecompose.core.operations.utilities.StringSerializer;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
-/**
- * Generic Component class
- */
-public class Component extends PaintOperation implements Measurable {
+/** Generic Component class */
+public class Component extends PaintOperation implements Measurable, SerializableToString {
+
+    private static final boolean DEBUG = false;
 
     protected int mComponentId = -1;
     protected float mX;
@@ -44,6 +51,7 @@ public class Component extends PaintOperation implements Measurable {
     protected Component mParent;
     protected int mAnimationId = -1;
     public Visibility mVisibility = Visibility.VISIBLE;
+    public Visibility mScheduledVisibility = Visibility.VISIBLE;
     public ArrayList<Operation> mList = new ArrayList<>();
     public PaintOperation mPreTranslate;
     public boolean mNeedsMeasure = true;
@@ -52,22 +60,28 @@ public class Component extends PaintOperation implements Measurable {
     public AnimationSpec mAnimationSpec = new AnimationSpec();
     public boolean mFirstLayout = true;
     PaintBundle mPaint = new PaintBundle();
+    protected HashSet<ComponentValue> mComponentValues = new HashSet<>();
 
     public ArrayList<Operation> getList() {
         return mList;
     }
+
     public float getX() {
         return mX;
     }
+
     public float getY() {
         return mY;
     }
+
     public float getWidth() {
         return mWidth;
     }
+
     public float getHeight() {
         return mHeight;
     }
+
     public int getComponentId() {
         return mComponentId;
     }
@@ -79,17 +93,53 @@ public class Component extends PaintOperation implements Measurable {
     public Component getParent() {
         return mParent;
     }
+
     public void setX(float value) {
         mX = value;
     }
+
     public void setY(float value) {
         mY = value;
     }
+
     public void setWidth(float value) {
         mWidth = value;
     }
+
     public void setHeight(float value) {
         mHeight = value;
+    }
+
+    /**
+     * Utility function to update variables referencing this component dimensions
+     *
+     * @param context the current context
+     */
+    private void updateComponentValues(RemoteContext context) {
+        if (DEBUG) {
+            System.out.println(
+                    "UPDATE COMPONENT VALUES ("
+                            + mComponentValues.size()
+                            + ") FOR "
+                            + mComponentId);
+        }
+        for (ComponentValue v : mComponentValues) {
+            switch (v.getType()) {
+                case ComponentValue.WIDTH:
+                    context.loadFloat(v.getValueId(), mWidth);
+                    if (DEBUG) {
+                        System.out.println("Updating WIDTH for " + mComponentId + " to " + mWidth);
+                    }
+                    break;
+                case ComponentValue.HEIGHT:
+                    context.loadFloat(v.getValueId(), mHeight);
+                    if (DEBUG) {
+                        System.out.println(
+                                "Updating HEIGHT for " + mComponentId + " to " + mHeight);
+                    }
+                    break;
+            }
+        }
     }
 
     public void setComponentId(int id) {
@@ -100,8 +150,14 @@ public class Component extends PaintOperation implements Measurable {
         mAnimationId = id;
     }
 
-    public Component(Component parent, int componentId, int animationId,
-                     float x, float y, float width, float height) {
+    public Component(
+            Component parent,
+            int componentId,
+            int animationId,
+            float x,
+            float y,
+            float width,
+            float height) {
         this.mComponentId = componentId;
         this.mX = x;
         this.mY = y;
@@ -111,15 +167,20 @@ public class Component extends PaintOperation implements Measurable {
         this.mAnimationId = animationId;
     }
 
-    public Component(int componentId, float x, float y, float width, float height,
-                     Component parent) {
+    public Component(
+            int componentId, float x, float y, float width, float height, Component parent) {
         this(parent, componentId, -1, x, y, width, height);
     }
 
     public Component(Component component) {
-        this(component.mParent, component.mComponentId, component.mAnimationId,
-                component.mX, component.mY, component.mWidth, component.mHeight
-        );
+        this(
+                component.mParent,
+                component.mComponentId,
+                component.mAnimationId,
+                component.mX,
+                component.mY,
+                component.mWidth,
+                component.mHeight);
         mList.addAll(component.mList);
         finalizeCreation();
     }
@@ -145,10 +206,34 @@ public class Component extends PaintOperation implements Measurable {
         mParent = parent;
     }
 
+    /**
+     * This traverses the component tree and make sure to update variables referencing the component
+     * dimensions as needed.
+     *
+     * @param context the current context
+     */
+    public void updateVariables(RemoteContext context) {
+        if (!mComponentValues.isEmpty()) {
+            updateComponentValues(context);
+        }
+        for (Operation o : mList) {
+            if (o instanceof Component) {
+                ((Component) o).updateVariables(context);
+            }
+            if (o instanceof VariableSupport) {
+                o.apply(context);
+            }
+        }
+    }
+
+    public void addComponentValue(ComponentValue v) {
+        mComponentValues.add(v);
+    }
+
     public enum Visibility {
+        GONE,
         VISIBLE,
-        INVISIBLE,
-        GONE
+        INVISIBLE
     }
 
     public boolean isVisible() {
@@ -161,9 +246,44 @@ public class Component extends PaintOperation implements Measurable {
         return true;
     }
 
+    public void setVisibility(Visibility visibility) {
+        if (visibility != mVisibility || visibility != mScheduledVisibility) {
+            mScheduledVisibility = visibility;
+            invalidateMeasure();
+        }
+    }
+
     @Override
-    public void measure(PaintContext context, float minWidth, float maxWidth,
-                        float minHeight, float maxHeight, MeasurePass measure) {
+    public boolean suitableForTransition(Operation o) {
+        if (!(o instanceof Component)) {
+            return false;
+        }
+        if (mList.size() != ((Component) o).mList.size()) {
+            return false;
+        }
+        for (int i = 0; i < mList.size(); i++) {
+            Operation o1 = mList.get(i);
+            Operation o2 = ((Component) o).mList.get(i);
+            if (o1 instanceof Component && o2 instanceof Component) {
+                if (!((Component) o1).suitableForTransition(o2)) {
+                    return false;
+                }
+            }
+            if (o1 instanceof PaintOperation && !((PaintOperation) o1).suitableForTransition(o2)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public void measure(
+            PaintContext context,
+            float minWidth,
+            float maxWidth,
+            float minHeight,
+            float maxHeight,
+            MeasurePass measure) {
         ComponentMeasure m = measure.get(this);
         m.setW(mWidth);
         m.setH(mHeight);
@@ -172,26 +292,42 @@ public class Component extends PaintOperation implements Measurable {
     @Override
     public void layout(RemoteContext context, MeasurePass measure) {
         ComponentMeasure m = measure.get(this);
-        if (!mFirstLayout && context.isAnimationEnabled()) {
+        if (!mFirstLayout
+                && context.isAnimationEnabled()
+                && !(this instanceof LayoutComponentContent)) {
             if (mAnimateMeasure == null) {
-                ComponentMeasure origin = new ComponentMeasure(mComponentId,
-                        mX, mY, mWidth, mHeight, mVisibility);
-                ComponentMeasure target = new ComponentMeasure(mComponentId,
-                        m.getX(), m.getY(), m.getW(), m.getH(), m.getVisibility());
-                mAnimateMeasure = new AnimateMeasure(context.currentTime, this,
-                        origin, target,
-                        mAnimationSpec.getMotionDuration(), mAnimationSpec.getVisibilityDuration(),
-                        mAnimationSpec.getEnterAnimation(), mAnimationSpec.getExitAnimation(),
-                        mAnimationSpec.getMotionEasingType(),
-                        mAnimationSpec.getVisibilityEasingType());
+                ComponentMeasure origin =
+                        new ComponentMeasure(mComponentId, mX, mY, mWidth, mHeight, mVisibility);
+                ComponentMeasure target =
+                        new ComponentMeasure(
+                                mComponentId,
+                                m.getX(),
+                                m.getY(),
+                                m.getW(),
+                                m.getH(),
+                                m.getVisibility());
+                if (!target.same(origin)) {
+                    mAnimateMeasure =
+                            new AnimateMeasure(
+                                    context.currentTime,
+                                    this,
+                                    origin,
+                                    target,
+                                    mAnimationSpec.getMotionDuration(),
+                                    mAnimationSpec.getVisibilityDuration(),
+                                    mAnimationSpec.getEnterAnimation(),
+                                    mAnimationSpec.getExitAnimation(),
+                                    mAnimationSpec.getMotionEasingType(),
+                                    mAnimationSpec.getVisibilityEasingType());
+                }
             } else {
                 mAnimateMeasure.updateTarget(m, context.currentTime);
             }
         } else {
             mVisibility = m.getVisibility();
         }
-        mWidth = m.getW();
-        mHeight = m.getH();
+        setWidth(m.getW());
+        setHeight(m.getH());
         setLayoutPosition(m.getX(), m.getY());
         mFirstLayout = false;
     }
@@ -209,16 +345,16 @@ public class Component extends PaintOperation implements Measurable {
         return x >= lx1 && x < lx2 && y >= ly1 && y < ly2;
     }
 
-    public void onClick(float x, float y) {
+    public void onClick(RemoteContext context, CoreDocument document, float x, float y) {
         if (!contains(x, y)) {
             return;
         }
         for (Operation op : mList) {
             if (op instanceof Component) {
-                ((Component) op).onClick(x, y);
+                ((Component) op).onClick(context, document, x, y);
             }
             if (op instanceof ComponentModifiers) {
-                ((ComponentModifiers) op).onClick(x, y);
+                ((ComponentModifiers) op).onClick(context, document, this, x, y);
             }
         }
     }
@@ -226,10 +362,11 @@ public class Component extends PaintOperation implements Measurable {
     public void getLocationInWindow(float[] value) {
         value[0] += mX;
         value[1] += mY;
-        if (mParent != null && mParent instanceof Component) {
+        if (mParent != null) {
             if (mParent instanceof LayoutComponent) {
-                value[0] += ((LayoutComponent) mParent).getMarginLeft();
-                value[1] += ((LayoutComponent) mParent).getMarginTop();
+                LayoutComponent parent = (LayoutComponent) mParent;
+                value[0] += parent.getMarginLeft() + parent.getPaddingLeft();
+                value[1] += parent.getMarginTop() + parent.getPaddingTop();
             }
             mParent.getLocationInWindow(value);
         }
@@ -237,21 +374,50 @@ public class Component extends PaintOperation implements Measurable {
 
     @Override
     public String toString() {
-        return "COMPONENT(<" + mComponentId + "> " + getClass().getSimpleName()
-                + ") [" + mX + "," + mY + " - " + mWidth + " x " + mHeight + "] " + textContent()
-                + " Visibility (" + mVisibility + ") ";
+        return "COMPONENT(<"
+                + mComponentId
+                + "> "
+                + getClass().getSimpleName()
+                + ") ["
+                + mX
+                + ","
+                + mY
+                + " - "
+                + mWidth
+                + " x "
+                + mHeight
+                + "] "
+                + textContent()
+                + " Visibility ("
+                + mVisibility
+                + ") ";
     }
 
     protected String getSerializedName() {
         return "COMPONENT";
     }
 
+    @Override
     public void serializeToString(int indent, StringSerializer serializer) {
-        serializer.append(indent, getSerializedName() + " [" + mComponentId
-                + ":" + mAnimationId + "] = "
-                + "[" + mX + ", " + mY + ", " + mWidth + ", " + mHeight + "] "
-                + mVisibility
-        //        + " [" + mNeedsMeasure + ", " + mNeedsRepaint + "]"
+        serializer.append(
+                indent,
+                getSerializedName()
+                        + " ["
+                        + mComponentId
+                        + ":"
+                        + mAnimationId
+                        + "] = "
+                        + "["
+                        + mX
+                        + ", "
+                        + mY
+                        + ", "
+                        + mWidth
+                        + ", "
+                        + mHeight
+                        + "] "
+                        + mVisibility
+                //        + " [" + mNeedsMeasure + ", " + mNeedsRepaint + "]"
         );
     }
 
@@ -260,9 +426,7 @@ public class Component extends PaintOperation implements Measurable {
         // nothing
     }
 
-    /**
-     * Returns the top-level RootLayoutComponent
-     */
+    /** Returns the top-level RootLayoutComponent */
     public RootLayoutComponent getRoot() throws Exception {
         if (this instanceof RootLayoutComponent) {
             return (RootLayoutComponent) this;
@@ -292,8 +456,8 @@ public class Component extends PaintOperation implements Measurable {
     }
 
     /**
-     * Mark itself as needing to be remeasured, and walk back up the tree
-     * to mark each parents as well.
+     * Mark itself as needing to be remeasured, and walk back up the tree to mark each parents as
+     * well.
      */
     public void invalidateMeasure() {
         needsRepaint();
@@ -325,7 +489,7 @@ public class Component extends PaintOperation implements Measurable {
 
     public String textContent() {
         StringBuilder builder = new StringBuilder();
-        for (Operation op : mList) {
+        for (Operation ignored : mList) {
             String letter = "";
             // if (op instanceof DrawTextRun) {
             //   letter = "[" + ((DrawTextRun) op).text + "]";
@@ -382,6 +546,9 @@ public class Component extends PaintOperation implements Measurable {
             debugBox(this, context);
         }
         for (Operation op : mList) {
+            if (op instanceof BitmapData) {
+                ((BitmapData) op).apply(context.getContext());
+            }
             if (op instanceof PaintOperation) {
                 ((PaintOperation) op).paint(context);
             }
@@ -431,6 +598,14 @@ public class Component extends PaintOperation implements Measurable {
         for (Operation op : mList) {
             if (op instanceof Component) {
                 components.add((Component) op);
+            }
+        }
+    }
+
+    public void getData(ArrayList<TextData> data) {
+        for (Operation op : mList) {
+            if (op instanceof TextData) {
+                data.add((TextData) op);
             }
         }
     }

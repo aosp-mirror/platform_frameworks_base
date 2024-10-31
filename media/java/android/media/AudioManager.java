@@ -51,11 +51,13 @@ import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
 import android.compat.annotation.Overridable;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.AttributionSource;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.media.AudioAttributes.AttributeSystemUsage;
+import android.media.AudioDeviceInfo;
 import android.media.CallbackUtil.ListenerInfo;
 import android.media.audiopolicy.AudioPolicy;
 import android.media.audiopolicy.AudioPolicy.AudioPolicyFocusListener;
@@ -894,6 +896,30 @@ public class AudioManager {
      */
     public static final int USE_DEFAULT_STREAM_TYPE = Integer.MIN_VALUE;
 
+    /** @hide */
+    @IntDef(flag = false, prefix = "DEVICE_STATE", value = {
+            DEVICE_CONNECTION_STATE_DISCONNECTED,
+            DEVICE_CONNECTION_STATE_CONNECTED}
+            )
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface DeviceConnectionState {}
+
+    /**
+     * @hide The device connection state for disconnected devices.
+     */
+    @SystemApi
+    @SuppressLint("UnflaggedApi") // b/373465238
+    @RequiresPermission(Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public static final int DEVICE_CONNECTION_STATE_DISCONNECTED = 0;
+
+    /**
+     * @hide The device connection state for connected devices.
+     */
+    @SystemApi
+    @SuppressLint("UnflaggedApi") // b/373465238
+    @RequiresPermission(Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public static final int DEVICE_CONNECTION_STATE_CONNECTED = 1;
+
     private static IAudioService sService;
 
     /**
@@ -1135,7 +1161,7 @@ public class AudioManager {
         final IAudioService service = getService();
         try {
             service.setMasterMute(mute, flags, getContext().getOpPackageName(),
-                    UserHandle.getCallingUserId(), getContext().getAttributionTag());
+                    getContext().getUserId(), getContext().getAttributionTag());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1917,10 +1943,16 @@ public class AudioManager {
     @Deprecated public void setSpeakerphoneOn(boolean on) {
         final IAudioService service = getService();
         try {
-            service.setSpeakerphoneOn(mICallBack, on);
+            service.setSpeakerphoneOn(mICallBack, on, getAttributionSource());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    private AttributionSource getAttributionSource() {
+        Context context = getContext();
+        return (context != null)
+                     ? context.getAttributionSource() : AttributionSource.myAttributionSource();
     }
 
     /**
@@ -3088,7 +3120,8 @@ public class AudioManager {
         final IAudioService service = getService();
         try {
             service.startBluetoothSco(mICallBack,
-                    getContext().getApplicationInfo().targetSdkVersion);
+                    getContext().getApplicationInfo().targetSdkVersion,
+                    getAttributionSource());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -3113,7 +3146,7 @@ public class AudioManager {
     public void startBluetoothScoVirtualCall() {
         final IAudioService service = getService();
         try {
-            service.startBluetoothScoVirtualCall(mICallBack);
+            service.startBluetoothScoVirtualCall(mICallBack, getAttributionSource());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -3133,7 +3166,7 @@ public class AudioManager {
     @Deprecated public void stopBluetoothSco() {
         final IAudioService service = getService();
         try {
-            service.stopBluetoothSco(mICallBack);
+            service.stopBluetoothSco(mICallBack,  getAttributionSource());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -3245,7 +3278,7 @@ public class AudioManager {
         final IAudioService service = getService();
         try {
             service.setMicrophoneMute(on, getContext().getOpPackageName(),
-                    UserHandle.getCallingUserId(), getContext().getAttributionTag());
+                    getContext().getUserId(), getContext().getAttributionTag());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -6317,7 +6350,14 @@ public class AudioManager {
     /**
      * @hide
      * Get the audio devices that would be used for the routing of the given audio attributes.
-     * @param attributes the {@link AudioAttributes} for which the routing is being queried
+     * @param attributes the {@link AudioAttributes} for which the routing is being queried.
+     *   For queries about output devices (playback use cases), a valid usage must be specified in
+     *   the audio attributes via AudioAttributes.Builder.setUsage(). The capture preset MUST NOT
+     *   be changed from default.
+     *   For queries about input devices (capture use case), a valid capture preset MUST be
+     *   specified in the audio attributes via AudioAttributes.Builder.setCapturePreset(). If a
+     *   capture preset is present, then this has precedence over any usage or content type also
+     *   present in the audio attrirutes.
      * @return an empty list if there was an issue with the request, a list of audio devices
      *   otherwise (typically one device, except for duplicated paths).
      */
@@ -6710,14 +6750,16 @@ public class AudioManager {
     }
 
     /**
+     * @hide
      * Indicate wired accessory connection state change and attributes.
-     * @param state      new connection state: 1 connected, 0 disconnected
      * @param attributes attributes of the connected device
-     * {@hide}
+     * @param state      new connection state
      */
-    @UnsupportedAppUsage
+    @SystemApi
+    @SuppressLint("UnflaggedApi") // b/373465238
     @RequiresPermission(Manifest.permission.MODIFY_AUDIO_ROUTING)
-    public void setWiredDeviceConnectionState(AudioDeviceAttributes attributes, int state) {
+    public void setWiredDeviceConnectionState(@NonNull AudioDeviceAttributes attributes,
+            @DeviceConnectionState int state) {
         final IAudioService service = getService();
         try {
             service.setWiredDeviceConnectionState(attributes, state,
@@ -6978,6 +7020,27 @@ public class AudioManager {
     public void notifyVolumeControllerVisible(IVolumeController controller, boolean visible) {
         try {
             getService().notifyVolumeControllerVisible(controller, visible);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Test method for enabling/disabling the volume controller long press timeout for checking
+     * whether two consecutive volume adjustments should be treated as a volume long press.
+     *
+     * <p>Used only for testing
+     *
+     * @param enable true for enabling, otherwise will be disabled (test mode)
+     *
+     * @hide
+     **/
+    @TestApi
+    @SuppressLint("UnflaggedApi") // @TestApi without associated feature.
+    @RequiresPermission(Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)
+    public void setVolumeControllerLongPressTimeoutEnabled(boolean enable) {
+        try {
+            getService().setVolumeControllerLongPressTimeoutEnabled(enable);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -8136,7 +8199,7 @@ public class AudioManager {
      * @hide
      */
     public static MicrophoneInfo microphoneInfoFromAudioDeviceInfo(AudioDeviceInfo deviceInfo) {
-        int deviceType = deviceInfo.getType();
+        @AudioDeviceInfo.AudioDeviceType int deviceType = deviceInfo.getType();
         int micLocation = (deviceType == AudioDeviceInfo.TYPE_BUILTIN_MIC
                 || deviceType == AudioDeviceInfo.TYPE_TELEPHONY) ? MicrophoneInfo.LOCATION_MAINBODY
                 : deviceType == AudioDeviceInfo.TYPE_UNKNOWN ? MicrophoneInfo.LOCATION_UNKNOWN
@@ -8994,7 +9057,8 @@ public class AudioManager {
                 Log.w(TAG, "setCommunicationDevice: device not found: " + device);
                 return false;
             }
-            return getService().setCommunicationDevice(mICallBack, device.getId());
+            return getService().setCommunicationDevice(mICallBack, device.getId(),
+                    getAttributionSource());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -9006,7 +9070,7 @@ public class AudioManager {
      */
     public void clearCommunicationDevice() {
         try {
-            getService().setCommunicationDevice(mICallBack, 0);
+            getService().setCommunicationDevice(mICallBack, 0, getAttributionSource());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

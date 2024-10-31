@@ -35,6 +35,7 @@ import android.view.ViewGroup.LayoutParams;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
+import androidx.annotation.Nullable;
 import androidx.annotation.RawRes;
 import androidx.annotation.StringRes;
 import androidx.preference.Preference;
@@ -54,7 +55,7 @@ import java.io.InputStream;
 /**
  * IllustrationPreference is a preference that can play lottie format animation
  */
-public class IllustrationPreference extends Preference {
+public class IllustrationPreference extends Preference implements GroupSectionDividerMixin {
 
     private static final String TAG = "IllustrationPreference";
 
@@ -240,6 +241,14 @@ public class IllustrationPreference extends Preference {
      */
     public void setContentDescription(@StringRes int contentDescriptionResId) {
         setContentDescription(getContext().getText(contentDescriptionResId));
+    }
+
+    /**
+     * Gets the content description set by {@link #setContentDescription}.
+     */
+    @Nullable
+    public CharSequence getContentDescription() {
+        return mContentDescription;
     }
 
     /**

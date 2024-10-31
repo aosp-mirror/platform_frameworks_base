@@ -52,8 +52,8 @@ import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_STATES;
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_TASKS;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_STATES;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_TASKS;
 import static com.android.server.wm.ActivityRecord.State.PAUSED;
 import static com.android.server.wm.ActivityRecord.State.PAUSING;
 import static com.android.server.wm.ActivityRecord.State.RESTARTING_PROCESS;
@@ -96,7 +96,6 @@ import android.app.ActivityManagerInternal;
 import android.app.ActivityOptions;
 import android.app.AppOpsManager;
 import android.app.AppOpsManagerInternal;
-import android.app.BackgroundStartPrivileges;
 import android.app.IActivityClientController;
 import android.app.ProfilerInfo;
 import android.app.ResultInfo;
@@ -107,7 +106,6 @@ import android.app.servertransaction.LaunchActivityItem;
 import android.app.servertransaction.PauseActivityItem;
 import android.app.servertransaction.ResumeActivityItem;
 import android.app.servertransaction.StopActivityItem;
-import android.companion.virtual.VirtualDeviceManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -158,6 +156,7 @@ import com.android.server.LocalServices;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.am.HostingRecord;
 import com.android.server.am.UserState;
+import com.android.server.companion.virtual.VirtualDeviceManagerInternal;
 import com.android.server.pm.SaferIntentUtils;
 import com.android.server.utils.Slogf;
 import com.android.server.wm.ActivityMetricsLogger.LaunchingState;
@@ -242,6 +241,8 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
     static {
         ACTION_TO_RUNTIME_PERMISSION.put(MediaStore.ACTION_IMAGE_CAPTURE,
                 Manifest.permission.CAMERA);
+        ACTION_TO_RUNTIME_PERMISSION.put(MediaStore.ACTION_MOTION_PHOTO_CAPTURE,
+                Manifest.permission.CAMERA);
         ACTION_TO_RUNTIME_PERMISSION.put(MediaStore.ACTION_VIDEO_CAPTURE,
                 Manifest.permission.CAMERA);
         ACTION_TO_RUNTIME_PERMISSION.put(Intent.ACTION_CALL,
@@ -285,7 +286,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
     private WindowManagerService mWindowManager;
 
     private AppOpsManager mAppOpsManager;
-    private VirtualDeviceManager mVirtualDeviceManager;
+    private VirtualDeviceManagerInternal mVirtualDeviceManagerInternal;
 
     /** Common synchronization logic used to save things to disks. */
     PersisterQueue mPersisterQueue;
@@ -964,11 +965,12 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                     // transaction.
                     mService.getLifecycleManager().dispatchPendingTransaction(proc.getThread());
                 }
-                mService.getLifecycleManager().scheduleTransactionAndLifecycleItems(
-                        proc.getThread(), launchActivityItem, lifecycleItem,
+                mService.getLifecycleManager().scheduleTransactionItems(
+                        proc.getThread(),
                         // Immediately dispatch the transaction, so that if it fails, the server can
                         // restart the process and retry now.
-                        true /* shouldDispatchImmediately */);
+                        true /* shouldDispatchImmediately */,
+                        launchActivityItem, lifecycleItem);
 
                 if (procConfig.seq > mRootWindowContainer.getConfiguration().seq) {
                     // If the seq is increased, there should be something changed (e.g. registered
@@ -1298,16 +1300,24 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
         if (displayId == DEFAULT_DISPLAY || displayId == INVALID_DISPLAY)  {
             return Context.DEVICE_ID_DEFAULT;
         }
-        if (mVirtualDeviceManager == null) {
+        if (mVirtualDeviceManagerInternal == null) {
             if (mService.mHasCompanionDeviceSetupFeature) {
-                mVirtualDeviceManager =
-                        mService.mContext.getSystemService(VirtualDeviceManager.class);
+                mVirtualDeviceManagerInternal =
+                        LocalServices.getService(VirtualDeviceManagerInternal.class);
             }
-            if (mVirtualDeviceManager == null) {
+            if (mVirtualDeviceManagerInternal == null) {
                 return Context.DEVICE_ID_DEFAULT;
             }
         }
-        return mVirtualDeviceManager.getDeviceIdForDisplayId(displayId);
+        return mVirtualDeviceManagerInternal.getDeviceIdForDisplayId(displayId);
+    }
+
+    boolean isDeviceOwnerUid(int displayId, int callingUid) {
+        final int deviceId = getDeviceIdForDisplayId(displayId);
+        if (deviceId == Context.DEVICE_ID_DEFAULT || deviceId == Context.DEVICE_ID_INVALID) {
+            return false;
+        }
+        return mVirtualDeviceManagerInternal.getDeviceOwnerUid(deviceId) == callingUid;
     }
 
     private AppOpsManager getAppOpsManager() {
@@ -2272,6 +2282,9 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
      * sent to the new top resumed activity.
      */
     ActivityRecord updateTopResumedActivityIfNeeded(String reason) {
+        if (!readyToResume()) {
+            return mTopResumedActivity;
+        }
         final ActivityRecord prevTopActivity = mTopResumedActivity;
         final Task topRootTask = mRootWindowContainer.getTopDisplayFocusedRootTask();
         if (topRootTask == null || topRootTask.getTopResumedActivity() == prevTopActivity) {
@@ -2332,8 +2345,8 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                 && mTopResumedActivity.scheduleTopResumedActivityChanged(false /* onTop */)) {
             scheduleTopResumedStateLossTimeout(mTopResumedActivity);
             mTopResumedActivityWaitingForPrev = true;
-            mTopResumedActivity = null;
         }
+        mTopResumedActivity = null;
     }
 
     /** Schedule top resumed state change if previous top activity already reported back. */
@@ -2512,9 +2525,9 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
         }
     }
 
-    void wakeUp(String reason) {
+    void wakeUp(int displayId, String reason) {
         mPowerManager.wakeUp(SystemClock.uptimeMillis(), PowerManager.WAKE_REASON_APPLICATION,
-                "android.server.am:TURN_ON:" + reason);
+                "android.server.am:TURN_ON:" + reason, displayId);
     }
 
     /** Starts a batch of visibility updates. */
@@ -2564,14 +2577,21 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
         wpc.computeProcessActivityState();
     }
 
-    void computeProcessActivityStateBatch() {
+    boolean computeProcessActivityStateBatch() {
         if (mActivityStateChangedProcs.isEmpty()) {
-            return;
+            return false;
         }
+        boolean changed = false;
         for (int i = mActivityStateChangedProcs.size() - 1; i >= 0; i--) {
-            mActivityStateChangedProcs.get(i).computeProcessActivityState();
+            final WindowProcessController wpc = mActivityStateChangedProcs.get(i);
+            final int prevState = wpc.getActivityStateFlags();
+            wpc.computeProcessActivityState();
+            if (!changed && prevState != wpc.getActivityStateFlags()) {
+                changed = true;
+            }
         }
         mActivityStateChangedProcs.clear();
+        return changed;
     }
 
     /**
@@ -2854,7 +2874,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                     callingPid, callingUid, callingPackage, callingFeatureId, intent, null, null,
                     null, 0, 0, options, userId, task, "startActivityFromRecents",
                     false /* validateIncomingUser */, null /* originatingPendingIntent */,
-                    BackgroundStartPrivileges.NONE);
+                    /* allowBalExemptionForSystemProcess */ false);
         } finally {
             SaferIntentUtils.DISABLE_ENFORCE_INTENTS_TO_MATCH_INTENT_FILTERS.set(false);
             synchronized (mService.mGlobalLock) {

@@ -44,7 +44,8 @@ final class RoutingControlAction extends HdmiCecFeatureAction {
     static final int STATE_WAIT_FOR_ROUTING_INFORMATION = 1;
 
     // Time out in millseconds used for <Routing Information>
-    private static final int TIMEOUT_ROUTING_INFORMATION_MS = 1000;
+    @VisibleForTesting
+    static final int TIMEOUT_ROUTING_INFORMATION_MS = 1000;
 
     // If set to true, call {@link HdmiControlService#invokeInputChangeListener()} when
     // the routing control/active source change happens. The listener should be called if

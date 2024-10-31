@@ -29,6 +29,8 @@ import static com.android.server.hdmi.HdmiControlService.INITIATED_BY_WAKE_UP_ME
 import static com.android.server.hdmi.HdmiControlService.STANDBY_SCREEN_OFF;
 import static com.android.server.hdmi.HdmiControlService.WAKE_UP_SCREEN_ON;
 import static com.android.server.hdmi.RequestActiveSourceAction.TIMEOUT_WAIT_FOR_LAUNCHERX_API_CALL_MS;
+import static com.android.server.hdmi.RoutingControlAction.TIMEOUT_ROUTING_INFORMATION_MS;
+import static com.android.server.hdmi.RequestSadAction.RETRY_COUNTER_MAX;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -68,6 +70,7 @@ import org.junit.runners.JUnit4;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 @SmallTest
@@ -77,6 +80,7 @@ import java.util.concurrent.TimeUnit;
 public class HdmiCecLocalDeviceTvTest {
     private static final int TIMEOUT_MS = HdmiConfig.TIMEOUT_MS + 1;
     private static final int PORT_1 = 1;
+    private static final int PORT_2 = 2;
 
     private static final String[] SADS_NOT_TO_QUERY = new String[]{
             HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_MPEG1,
@@ -110,6 +114,10 @@ public class HdmiCecLocalDeviceTvTest {
     private boolean mWokenUp;
     private boolean mEarcBlocksArc;
     private List<DeviceEventListener> mDeviceEventListeners = new ArrayList<>();
+    private List<VendorCommandListener> mVendorCommandListeners = new ArrayList<>();
+    private boolean mDisableCecOnStandbyByLowEnergyMode;
+    private boolean mWasCecDisabledOnStandbyByLowEnergyMode;
+    private boolean mUseHdmiCecPowerStatusController;
 
     private class DeviceEventListener {
         private HdmiDeviceInfo mDevice;
@@ -126,6 +134,30 @@ public class HdmiCecLocalDeviceTvTest {
 
         HdmiDeviceInfo getDeviceInfo() {
             return mDevice;
+        }
+    }
+
+    private class VendorCommandListener {
+        private boolean mEnabled;
+        private int mReason;
+
+        VendorCommandListener(boolean enabled, int reason) {
+            this.mEnabled = enabled;
+            this.mReason = reason;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (!(obj instanceof VendorCommandListener)) {
+                return false;
+            }
+            VendorCommandListener other = (VendorCommandListener) obj;
+            return other.mReason == mReason && other.mEnabled == mEnabled;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(mEnabled, mReason);
         }
     }
 
@@ -166,6 +198,9 @@ public class HdmiCecLocalDeviceTvTest {
 
                     @Override
                     boolean isPowerStandby() {
+                        if (mUseHdmiCecPowerStatusController) {
+                            return mPowerStatusController.isPowerStatusStandby();
+                        }
                         return false;
                     }
 
@@ -185,6 +220,13 @@ public class HdmiCecLocalDeviceTvTest {
                     }
 
                     @Override
+                    boolean invokeVendorCommandListenersOnControlStateChanged(
+                            boolean enabled, int reason) {
+                        mVendorCommandListeners.add(new VendorCommandListener(enabled, reason));
+                        return true;
+                    }
+
+                    @Override
                     protected boolean earcBlocksArcConnection() {
                         return mEarcBlocksArc;
                     }
@@ -192,6 +234,21 @@ public class HdmiCecLocalDeviceTvTest {
                     @Override
                     protected void sendBroadcastAsUser(@RequiresPermission Intent intent) {
                         // do nothing
+                    }
+
+                    @Override
+                    protected boolean getDisableCecOnStandbyByLowEnergyMode() {
+                        return mDisableCecOnStandbyByLowEnergyMode;
+                    }
+
+                    @Override
+                    protected boolean getWasCecDisabledOnStandbyByLowEnergyMode() {
+                        return mWasCecDisabledOnStandbyByLowEnergyMode;
+                    }
+
+                    @Override
+                    protected void setWasCecDisabledOnStandbyByLowEnergyMode(boolean value) {
+                        mWasCecDisabledOnStandbyByLowEnergyMode = value;
                     }
                 };
 
@@ -215,7 +272,7 @@ public class HdmiCecLocalDeviceTvTest {
                 .setEarcSupported(false)
                 .build();
         hdmiPortInfos[1] =
-                new HdmiPortInfo.Builder(2, HdmiPortInfo.PORT_INPUT, 0x2000)
+                new HdmiPortInfo.Builder(PORT_2, HdmiPortInfo.PORT_INPUT, 0x2000)
                         .setCecSupported(true)
                         .setMhlSupported(false)
                         .setArcSupported(true)
@@ -238,6 +295,9 @@ public class HdmiCecLocalDeviceTvTest {
             mHdmiControlService.getHdmiCecConfig().setIntValue(
                     sad, HdmiControlManager.QUERY_SAD_DISABLED);
         }
+        mWasCecDisabledOnStandbyByLowEnergyMode = false;
+        mDisableCecOnStandbyByLowEnergyMode = false;
+        mUseHdmiCecPowerStatusController = false;
         mNativeWrapper.clearResultMessages();
     }
 
@@ -271,13 +331,12 @@ public class HdmiCecLocalDeviceTvTest {
         assertThat(mNativeWrapper.getResultMessages()).doesNotContain(reportArcInitiated);
 
         // Finish querying SADs
-        assertThat(mNativeWrapper.getResultMessages()).contains(SAD_QUERY);
-        mNativeWrapper.clearResultMessages();
-        mTestLooper.moveTimeForward(HdmiConfig.TIMEOUT_MS);
-        mTestLooper.dispatchAll();
-        assertThat(mNativeWrapper.getResultMessages()).contains(SAD_QUERY);
-        mTestLooper.moveTimeForward(HdmiConfig.TIMEOUT_MS);
-        mTestLooper.dispatchAll();
+        for (int i = 0; i <= RETRY_COUNTER_MAX; ++i) {
+            assertThat(mNativeWrapper.getResultMessages()).contains(SAD_QUERY);
+            mNativeWrapper.clearResultMessages();
+            mTestLooper.moveTimeForward(HdmiConfig.TIMEOUT_MS);
+            mTestLooper.dispatchAll();
+        }
 
         assertThat(mNativeWrapper.getResultMessages()).contains(reportArcInitiated);
         mNativeWrapper.clearResultMessages();
@@ -683,15 +742,43 @@ public class HdmiCecLocalDeviceTvTest {
         assertThat(mNativeWrapper.getResultMessages()).doesNotContain(reportArcInitiated);
 
         // Finish querying SADs
-        assertThat(mNativeWrapper.getResultMessages()).contains(SAD_QUERY);
-        mNativeWrapper.clearResultMessages();
-        mTestLooper.moveTimeForward(HdmiConfig.TIMEOUT_MS);
-        mTestLooper.dispatchAll();
-        assertThat(mNativeWrapper.getResultMessages()).contains(SAD_QUERY);
-        mTestLooper.moveTimeForward(HdmiConfig.TIMEOUT_MS);
-        mTestLooper.dispatchAll();
+        for (int i = 0; i <= RETRY_COUNTER_MAX; ++i) {
+            assertThat(mNativeWrapper.getResultMessages()).contains(SAD_QUERY);
+            mNativeWrapper.clearResultMessages();
+            mTestLooper.moveTimeForward(HdmiConfig.TIMEOUT_MS);
+            mTestLooper.dispatchAll();
+        }
 
         assertThat(mNativeWrapper.getResultMessages()).contains(reportArcInitiated);
+    }
+
+    @Test
+    public void handleInitiateArc_arcAlreadyEstablished_noRequestSad() {
+        // Emulate Audio device on port 0x2000 (supports ARC)
+        mNativeWrapper.setPortConnectionStatus(2, true);
+        HdmiCecMessage reportPhysicalAddress =
+                HdmiCecMessageBuilder.buildReportPhysicalAddressCommand(
+                        ADDR_AUDIO_SYSTEM, 0x2000, HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
+        mNativeWrapper.onCecMessage(reportPhysicalAddress);
+        mTestLooper.dispatchAll();
+
+        assertThat(mHdmiCecLocalDeviceTv.isArcEstablished()).isFalse();
+
+        HdmiCecMessage requestArcInitiation = HdmiCecMessageBuilder.buildInitiateArc(
+                ADDR_AUDIO_SYSTEM,
+                ADDR_TV);
+        mNativeWrapper.onCecMessage(requestArcInitiation);
+        mTestLooper.dispatchAll();
+
+        // Finish querying SADs
+        for (int i = 0; i <= RETRY_COUNTER_MAX; ++i) {
+            assertThat(mNativeWrapper.getResultMessages()).contains(SAD_QUERY);
+            mNativeWrapper.clearResultMessages();
+            mTestLooper.moveTimeForward(HdmiConfig.TIMEOUT_MS);
+            mTestLooper.dispatchAll();
+        }
+
+        assertThat(mHdmiCecLocalDeviceTv.isArcEstablished()).isTrue();
     }
 
     @Test
@@ -968,13 +1055,12 @@ public class HdmiCecLocalDeviceTvTest {
         // <Report ARC Initiated> should only be sent after SAD querying is done
         assertThat(mNativeWrapper.getResultMessages()).doesNotContain(reportArcInitiated);
         // Finish querying SADs
-        assertThat(mNativeWrapper.getResultMessages()).contains(SAD_QUERY);
-        mNativeWrapper.clearResultMessages();
-        mTestLooper.moveTimeForward(HdmiConfig.TIMEOUT_MS);
-        mTestLooper.dispatchAll();
-        assertThat(mNativeWrapper.getResultMessages()).contains(SAD_QUERY);
-        mTestLooper.moveTimeForward(HdmiConfig.TIMEOUT_MS);
-        mTestLooper.dispatchAll();
+        for (int i = 0; i <= RETRY_COUNTER_MAX; ++i) {
+            assertThat(mNativeWrapper.getResultMessages()).contains(SAD_QUERY);
+            mNativeWrapper.clearResultMessages();
+            mTestLooper.moveTimeForward(HdmiConfig.TIMEOUT_MS);
+            mTestLooper.dispatchAll();
+        }
 
         assertThat(mNativeWrapper.getResultMessages()).contains(reportArcInitiated);
         mNativeWrapper.clearResultMessages();
@@ -1169,13 +1255,12 @@ public class HdmiCecLocalDeviceTvTest {
         mTestLooper.dispatchAll();
 
         // Finish querying SADs
-        assertThat(mNativeWrapper.getResultMessages()).contains(SAD_QUERY);
-        mNativeWrapper.clearResultMessages();
-        mTestLooper.moveTimeForward(HdmiConfig.TIMEOUT_MS);
-        mTestLooper.dispatchAll();
-        assertThat(mNativeWrapper.getResultMessages()).contains(SAD_QUERY);
-        mTestLooper.moveTimeForward(HdmiConfig.TIMEOUT_MS);
-        mTestLooper.dispatchAll();
+        for (int i = 0; i <= RETRY_COUNTER_MAX; ++i) {
+            assertThat(mNativeWrapper.getResultMessages()).contains(SAD_QUERY);
+            mNativeWrapper.clearResultMessages();
+            mTestLooper.moveTimeForward(HdmiConfig.TIMEOUT_MS);
+            mTestLooper.dispatchAll();
+        }
 
         // ARC should be established after RequestSadAction is finished
         assertThat(mNativeWrapper.getResultMessages()).contains(reportArcInitiated);
@@ -1325,13 +1410,12 @@ public class HdmiCecLocalDeviceTvTest {
         assertThat(mNativeWrapper.getResultMessages()).doesNotContain(reportArcInitiated);
 
         // Finish querying SADs
-        assertThat(mNativeWrapper.getResultMessages()).contains(SAD_QUERY);
-        mNativeWrapper.clearResultMessages();
-        mTestLooper.moveTimeForward(HdmiConfig.TIMEOUT_MS);
-        mTestLooper.dispatchAll();
-        assertThat(mNativeWrapper.getResultMessages()).contains(SAD_QUERY);
-        mTestLooper.moveTimeForward(HdmiConfig.TIMEOUT_MS);
-        mTestLooper.dispatchAll();
+        for (int i = 0; i <= RETRY_COUNTER_MAX; ++i) {
+            assertThat(mNativeWrapper.getResultMessages()).contains(SAD_QUERY);
+            mNativeWrapper.clearResultMessages();
+            mTestLooper.moveTimeForward(HdmiConfig.TIMEOUT_MS);
+            mTestLooper.dispatchAll();
+        }
 
         assertThat(mNativeWrapper.getResultMessages()).contains(reportArcInitiated);
     }
@@ -2021,7 +2105,7 @@ public class HdmiCecLocalDeviceTvTest {
                 ADDR_TV);
         mTestLooper.dispatchAll();
 
-        assertThat(mHdmiCecLocalDeviceTv.getWasActiveSourceSetToConnectedDevice())
+        assertThat(mHdmiCecLocalDeviceTv.getWasActivePathSetToConnectedDevice())
                 .isFalse();
         mPowerManager.setInteractive(true);
         mTestLooper.dispatchAll();
@@ -2031,14 +2115,14 @@ public class HdmiCecLocalDeviceTvTest {
                 "HdmiCecLocalDeviceTvTest");
         mTestLooper.dispatchAll();
 
-        assertThat(mHdmiCecLocalDeviceTv.getWasActiveSourceSetToConnectedDevice())
+        assertThat(mHdmiCecLocalDeviceTv.getWasActivePathSetToConnectedDevice())
                 .isTrue();
         assertThat(mHdmiCecLocalDeviceTv.dispatchMessage(standbyMessage))
                 .isEqualTo(Constants.HANDLED);
         mTestLooper.dispatchAll();
 
         assertThat(mPowerManager.isInteractive()).isFalse();
-        assertThat(mHdmiCecLocalDeviceTv.getWasActiveSourceSetToConnectedDevice())
+        assertThat(mHdmiCecLocalDeviceTv.getWasActivePathSetToConnectedDevice())
                 .isFalse();
     }
 
@@ -2051,7 +2135,7 @@ public class HdmiCecLocalDeviceTvTest {
         mHdmiCecLocalDeviceTv = new MockTvDevice(mHdmiControlService);
         mTestLooper.dispatchAll();
 
-        assertThat(mHdmiCecLocalDeviceTv.getWasActiveSourceSetToConnectedDevice())
+        assertThat(mHdmiCecLocalDeviceTv.getWasActivePathSetToConnectedDevice())
                 .isFalse();
         mPowerManager.setInteractive(true);
 
@@ -2060,7 +2144,7 @@ public class HdmiCecLocalDeviceTvTest {
                 "HdmiCecLocalDeviceTvTest");
         mTestLooper.dispatchAll();
 
-        assertThat(mHdmiCecLocalDeviceTv.getWasActiveSourceSetToConnectedDevice())
+        assertThat(mHdmiCecLocalDeviceTv.getWasActivePathSetToConnectedDevice())
                 .isTrue();
         assertThat(mHdmiCecLocalDeviceTv.dispatchMessage(standbyMessage))
                 .isEqualTo(Constants.HANDLED);
@@ -2076,19 +2160,48 @@ public class HdmiCecLocalDeviceTvTest {
         mHdmiCecLocalDeviceTv = new MockTvDevice(mHdmiControlService);
         mTestLooper.dispatchAll();
 
-        assertThat(mHdmiCecLocalDeviceTv.getWasActiveSourceSetToConnectedDevice())
+        assertThat(mHdmiCecLocalDeviceTv.getWasActivePathSetToConnectedDevice())
                 .isFalse();
         mPowerManager.setInteractive(true);
 
-        assertThat(mHdmiCecLocalDeviceTv.getWasActiveSourceSetToConnectedDevice())
+        assertThat(mHdmiCecLocalDeviceTv.getWasActivePathSetToConnectedDevice())
                 .isFalse();
         assertThat(mHdmiCecLocalDeviceTv.dispatchMessage(standbyMessage))
                 .isEqualTo(Constants.HANDLED);
         mTestLooper.dispatchAll();
 
         assertThat(mPowerManager.isInteractive()).isFalse();
-        assertThat(mHdmiCecLocalDeviceTv.getWasActiveSourceSetToConnectedDevice())
+        assertThat(mHdmiCecLocalDeviceTv.getWasActivePathSetToConnectedDevice())
                 .isFalse();
+    }
+
+    @Test
+    public void handleStandby_fromNonActiveSource_previousActivePathSetToNonCecDevice_Standby() {
+        HdmiCecLocalDeviceTv hdmiCecLocalDeviceTv = new MockTvDevice(mHdmiControlService);
+        hdmiCecLocalDeviceTv.setDeviceInfo(mHdmiCecLocalDeviceTv.getDeviceInfo());
+        mTestLooper.dispatchAll();
+
+        assertThat(hdmiCecLocalDeviceTv.getWasActivePathSetToConnectedDevice())
+                .isFalse();
+        mPowerManager.setInteractive(true);
+        hdmiCecLocalDeviceTv.doManualPortSwitching(PORT_2, null);
+        mTestLooper.dispatchAll();
+
+        // Timeout the action RoutingControlAction such that the active path would be updated.
+        mTestLooper.moveTimeForward(TIMEOUT_ROUTING_INFORMATION_MS);
+        mTestLooper.dispatchAll();
+
+        assertThat(hdmiCecLocalDeviceTv.getWasActivePathSetToConnectedDevice())
+                .isTrue();
+        HdmiCecMessage standbyMessage = HdmiCecMessageBuilder.buildStandby(
+                ADDR_PLAYBACK_1, ADDR_TV);
+        assertThat(hdmiCecLocalDeviceTv.dispatchMessage(standbyMessage))
+                .isEqualTo(Constants.HANDLED);
+        mTestLooper.dispatchAll();
+
+        assertThat(mPowerManager.isInteractive()).isTrue();
+        assertThat(hdmiCecLocalDeviceTv.getWasActivePathSetToConnectedDevice())
+                .isTrue();
     }
 
     @Test
@@ -2118,6 +2231,25 @@ public class HdmiCecLocalDeviceTvTest {
 
         // NewDeviceAction did not start and <Give OSD Name> was not sent.
         assertThat(mNativeWrapper.getResultMessages()).doesNotContain(giveOsdName);
+    }
+
+    @Test
+    public void handleReportPhysicalAddress_samePathAsActiveSource_differentLA_newActiveSource() {
+        // This scenario can be reproduced if active source is hotplugged out and replaced with
+        // another device that might have another LA.
+        int physicalAddress = 0x1000;
+        mHdmiControlService.setActiveSource(Constants.ADDR_PLAYBACK_1, physicalAddress,
+                "HdmiControlServiceTest");
+        mHdmiCecLocalDeviceTv.setActivePath(physicalAddress);
+        HdmiCecMessage reportPhysicalAddressFromPlayback2 =
+                HdmiCecMessageBuilder.buildReportPhysicalAddressCommand(ADDR_PLAYBACK_2,
+                        physicalAddress, HdmiDeviceInfo.DEVICE_PLAYBACK);
+        HdmiCecMessage setStreamPath = HdmiCecMessageBuilder.buildSetStreamPath(ADDR_TV,
+                physicalAddress);
+        mNativeWrapper.onCecMessage(reportPhysicalAddressFromPlayback2);
+        mTestLooper.dispatchAll();
+
+        assertThat(mNativeWrapper.getResultMessages()).contains(setStreamPath);
     }
 
     @Test
@@ -2182,6 +2314,92 @@ public class HdmiCecLocalDeviceTvTest {
         assertThat(mHdmiCecLocalDeviceTv.getActions(SystemAudioActionFromTv.class)).hasSize(1);
     }
 
+    @Test
+    public void lowEnergyMode_disableCecOnStandby_reEnableOnWakeup() {
+        mDisableCecOnStandbyByLowEnergyMode = true;
+        mUseHdmiCecPowerStatusController = true;
+        mPowerManager.setIsLowPowerStandbyEnabled(true);
+
+        assertEquals(mHdmiCecLocalDeviceTv.mService.getHdmiCecConfig().getIntValue(
+                HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED),
+                HdmiControlManager.HDMI_CEC_CONTROL_ENABLED);
+        mHdmiControlService.onStandby(STANDBY_SCREEN_OFF);
+        mTestLooper.dispatchAll();
+
+        assertEquals(mHdmiCecLocalDeviceTv.mService.getHdmiCecConfig().getIntValue(
+                        HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED),
+                HdmiControlManager.HDMI_CEC_CONTROL_DISABLED);
+        assertTrue(mWasCecDisabledOnStandbyByLowEnergyMode);
+        mHdmiControlService.onWakeUp(WAKE_UP_SCREEN_ON);
+        mTestLooper.dispatchAll();
+
+        assertEquals(mHdmiCecLocalDeviceTv.mService.getHdmiCecConfig().getIntValue(
+                        HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED),
+                HdmiControlManager.HDMI_CEC_CONTROL_ENABLED);
+        assertFalse(mWasCecDisabledOnStandbyByLowEnergyMode);
+    }
+
+    @Test
+    public void lowEnergyMode_disableCecBeforeStandby_cecStaysDisabledOnWakeup() {
+        mDisableCecOnStandbyByLowEnergyMode = true;
+        mUseHdmiCecPowerStatusController = true;
+        mPowerManager.setIsLowPowerStandbyEnabled(true);
+
+        assertEquals(mHdmiCecLocalDeviceTv.mService.getHdmiCecConfig().getIntValue(
+                        HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED),
+                HdmiControlManager.HDMI_CEC_CONTROL_ENABLED);
+        mHdmiCecLocalDeviceTv.mService.getHdmiCecConfig().setIntValue(
+                HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED,
+                HdmiControlManager.HDMI_CEC_CONTROL_DISABLED);
+        mTestLooper.dispatchAll();
+
+        mHdmiControlService.onStandby(STANDBY_SCREEN_OFF);
+        mTestLooper.dispatchAll();
+
+        assertEquals(mHdmiCecLocalDeviceTv.mService.getHdmiCecConfig().getIntValue(
+                        HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED),
+                HdmiControlManager.HDMI_CEC_CONTROL_DISABLED);
+        assertFalse(mWasCecDisabledOnStandbyByLowEnergyMode);
+        mHdmiControlService.onWakeUp(WAKE_UP_SCREEN_ON);
+        mTestLooper.dispatchAll();
+
+        assertEquals(mHdmiCecLocalDeviceTv.mService.getHdmiCecConfig().getIntValue(
+                        HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED),
+                HdmiControlManager.HDMI_CEC_CONTROL_DISABLED);
+    }
+
+    @Test
+    public void lowEnergyMode_onWakeUp_reEnableCec_invokeVendorCommandListeners() {
+        mDisableCecOnStandbyByLowEnergyMode = true;
+        mUseHdmiCecPowerStatusController = true;
+        mPowerManager.setIsLowPowerStandbyEnabled(true);
+        VendorCommandListener vendorCommandListenerInvocationWakeup = new VendorCommandListener(
+                true, HdmiControlManager.CONTROL_STATE_CHANGED_REASON_WAKEUP);
+        VendorCommandListener vendorCommandListenerInvocationSettingChange =
+                new VendorCommandListener(true,
+                        HdmiControlManager.CONTROL_STATE_CHANGED_REASON_WAKEUP);
+
+        assertEquals(mHdmiCecLocalDeviceTv.mService.getHdmiCecConfig().getIntValue(
+                        HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED),
+                HdmiControlManager.HDMI_CEC_CONTROL_ENABLED);
+        mHdmiControlService.onStandby(STANDBY_SCREEN_OFF);
+        mTestLooper.dispatchAll();
+
+        assertEquals(mHdmiCecLocalDeviceTv.mService.getHdmiCecConfig().getIntValue(
+                        HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED),
+                HdmiControlManager.HDMI_CEC_CONTROL_DISABLED);
+        assertTrue(mWasCecDisabledOnStandbyByLowEnergyMode);
+        mVendorCommandListeners.clear();
+        mTestLooper.dispatchAll();
+
+        mHdmiControlService.onWakeUp(WAKE_UP_SCREEN_ON);
+        mTestLooper.dispatchAll();
+
+        assertThat(mVendorCommandListeners.size()).isEqualTo(2);
+        assertTrue(mVendorCommandListeners.contains(vendorCommandListenerInvocationWakeup));
+        assertTrue(mVendorCommandListeners.contains(vendorCommandListenerInvocationSettingChange));
+    }
+
     protected static class MockTvDevice extends HdmiCecLocalDeviceTv {
         MockTvDevice(HdmiControlService service) {
             super(service);
@@ -2189,7 +2407,7 @@ public class HdmiCecLocalDeviceTvTest {
 
         @Override
         protected int handleActiveSource(HdmiCecMessage message) {
-            setWasActiveSourceSetToConnectedDevice(true);
+            setWasActivePathSetToConnectedDevice(true);
             return super.handleActiveSource(message);
         }
     }

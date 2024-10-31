@@ -40,6 +40,7 @@ final class InputMethodDeviceConfigs {
                 if (KEY_HIDE_IME_WHEN_NO_EDITOR_FOCUS.equals(name)) {
                     mHideImeWhenNoEditorFocus = properties.getBoolean(name,
                             true /* defaultValue */);
+                    break;
                 }
             }
         };

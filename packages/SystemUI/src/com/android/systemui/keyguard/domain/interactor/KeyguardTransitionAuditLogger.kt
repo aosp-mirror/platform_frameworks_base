@@ -19,6 +19,7 @@ package com.android.systemui.keyguard.domain.interactor
 import com.android.keyguard.logging.KeyguardLogger
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.keyguard.ui.viewmodel.AodBurnInViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel
 import com.android.systemui.log.core.LogLevel.VERBOSE
 import com.android.systemui.power.domain.interactor.PowerInteractor
@@ -28,7 +29,7 @@ import com.android.systemui.statusbar.notification.stack.ui.viewmodel.SharedNoti
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 private val TAG = KeyguardTransitionAuditLogger::class.simpleName!!
 
@@ -44,6 +45,7 @@ constructor(
     private val powerInteractor: PowerInteractor,
     private val sharedNotificationContainerViewModel: SharedNotificationContainerViewModel,
     private val keyguardRootViewModel: KeyguardRootViewModel,
+    private val aodBurnInViewModel: AodBurnInViewModel,
     private val shadeInteractor: ShadeInteractor,
     private val keyguardOcclusionInteractor: KeyguardOcclusionInteractor,
 ) {
@@ -132,7 +134,7 @@ constructor(
         }
 
         scope.launch {
-            keyguardRootViewModel.burnInModel.debounce(20L).collect {
+            aodBurnInViewModel.movement.debounce(20L).collect {
                 logger.log(TAG, VERBOSE, "BurnInModel (debounced)", it)
             }
         }

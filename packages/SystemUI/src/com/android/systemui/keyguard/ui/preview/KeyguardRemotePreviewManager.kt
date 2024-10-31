@@ -25,8 +25,7 @@ import android.os.Messenger
 import android.util.ArrayMap
 import android.util.Log
 import androidx.annotation.VisibleForTesting
-import com.android.app.tracing.coroutines.runBlocking
-import com.android.systemui.Flags
+import com.android.app.tracing.coroutines.runBlockingTraced as runBlocking
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
@@ -45,7 +44,7 @@ import com.android.systemui.util.kotlin.logD
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 @SysUISingleton
 class KeyguardRemotePreviewManager
@@ -67,11 +66,7 @@ constructor(
         var observer: PreviewLifecycleObserver? = null
         return try {
             val renderer =
-                if (Flags.lockscreenPreviewRendererCreateOnMainThread()) {
-                    runBlocking("$TAG#previewRendererFactory.create", mainDispatcher) {
-                        previewRendererFactory.create(request)
-                    }
-                } else {
+                runBlocking("$TAG#previewRendererFactory.create", mainDispatcher) {
                     previewRendererFactory.create(request)
                 }
 
@@ -219,7 +214,7 @@ class PreviewLifecycleObserver(
             this.onDestroy = null
             val hostToken = rendererToDestroy.hostToken
             hostToken?.unlinkToDeath(this, 0)
-            scope.launch(mainDispatcher) { rendererToDestroy.destroy() }
+            scope.launch(context = mainDispatcher) { rendererToDestroy.destroy() }
             rendererToDestroy.id
         }
     }

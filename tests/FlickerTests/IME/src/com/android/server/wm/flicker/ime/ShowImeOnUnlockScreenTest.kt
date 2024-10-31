@@ -36,7 +36,7 @@ import org.junit.runners.Parameterized
 
 /**
  * Test IME window closing on lock and opening on screen unlock.
- * To run this test: `atest FlickerTestsIme2:ShowImeOnUnlockScreenTest`
+ * To run this test: `atest FlickerTestsIme:ShowImeOnUnlockScreenTest`
  */
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
@@ -54,7 +54,7 @@ class ShowImeOnUnlockScreenTest(flicker: LegacyFlickerTest) : BaseTest(flicker) 
         }
         transitions {
             device.sleep()
-            wmHelper.StateSyncBuilder().withoutTopVisibleAppWindows().waitForAndVerify()
+            wmHelper.StateSyncBuilder().withKeyguardShowing().waitForAndVerify()
             UnlockScreenRule.unlockScreen(device)
             wmHelper.StateSyncBuilder().withImeShown().waitForAndVerify()
         }

@@ -19,15 +19,17 @@ package android.os;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.TestApi;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Trace;
+import android.ravenwood.annotation.RavenwoodKeepWholeClass;
+import android.ravenwood.annotation.RavenwoodRedirect;
+import android.ravenwood.annotation.RavenwoodRedirectionClass;
 import android.util.Log;
 import android.util.Printer;
 import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
+
+import dalvik.annotation.optimization.NeverCompile;
 
 import java.io.FileDescriptor;
 import java.lang.annotation.Retention;
@@ -51,9 +53,8 @@ import java.util.concurrent.locks.ReentrantLock;
  * <p>You can retrieve the MessageQueue for the current thread with
  * {@link Looper#myQueue() Looper.myQueue()}.
  */
-@android.ravenwood.annotation.RavenwoodKeepWholeClass
-@android.ravenwood.annotation.RavenwoodNativeSubstitutionClass(
-        "com.android.platform.test.ravenwood.nativesubstitution.MessageQueue_host")
+@RavenwoodKeepWholeClass
+@RavenwoodRedirectionClass("MessageQueue_host")
 public final class MessageQueue {
     private static final String TAG = "ConcurrentMessageQueue";
     private static final boolean DEBUG = false;
@@ -345,11 +346,17 @@ public final class MessageQueue {
     // Barriers are indicated by messages with a null target whose arg1 field carries the token.
     private final AtomicInteger mNextBarrierToken = new AtomicInteger(1);
 
+    @RavenwoodRedirect
     private static native long nativeInit();
+    @RavenwoodRedirect
     private static native void nativeDestroy(long ptr);
+    @RavenwoodRedirect
     private native void nativePollOnce(long ptr, int timeoutMillis); /*non-static for callbacks*/
+    @RavenwoodRedirect
     private static native void nativeWake(long ptr);
+    @RavenwoodRedirect
     private static native boolean nativeIsPolling(long ptr);
+    @RavenwoodRedirect
     private static native void nativeSetFileDescriptorEvents(long ptr, int fd, int events);
 
     MessageQueue(boolean quitAllowed) {
@@ -375,6 +382,18 @@ public final class MessageQueue {
         }
     }
 
+    private class MatchDeliverableMessages extends MessageCompare {
+        @Override
+        public boolean compareMessage(Message m, Handler h, int what, Object object, Runnable r,
+                long when) {
+            if (m.when <= when) {
+                return true;
+            }
+            return false;
+        }
+    }
+    private final MatchDeliverableMessages mMatchDeliverableMessages =
+            new MatchDeliverableMessages();
     /**
      * Returns true if the looper has no pending messages which are due to be processed.
      *
@@ -383,6 +402,12 @@ public final class MessageQueue {
      * @return True if the looper is idle.
      */
     public boolean isIdle() {
+        final long now = SystemClock.uptimeMillis();
+
+        if (stackHasMessages(null, 0, null, null, now, mMatchDeliverableMessages, false)) {
+            return false;
+        }
+
         MessageNode msgNode = null;
         MessageNode asyncMsgNode = null;
 
@@ -398,7 +423,6 @@ public final class MessageQueue {
             } catch (NoSuchElementException e) { }
         }
 
-        final long now = SystemClock.uptimeMillis();
         if ((msgNode != null && msgNode.getWhen() <= now)
                 || (asyncMsgNode != null && asyncMsgNode.getWhen() <= now)) {
             return false;
@@ -749,7 +773,7 @@ public final class MessageQueue {
                 // Idle handles only run if the queue is empty or if the first message
                 // in the queue (possibly a barrier) is due to be handled in the future.
                 if (pendingIdleHandlerCount < 0
-                        && mNextPollTimeoutMillis != 0) {
+                        && isIdle()) {
                     pendingIdleHandlerCount = mIdleHandlers.size();
                 }
                 if (pendingIdleHandlerCount <= 0) {
@@ -1326,6 +1350,7 @@ public final class MessageQueue {
                 mMatchAllFutureMessages, true);
     }
 
+    @NeverCompile
     private void printPriorityQueueNodes() {
         Iterator<MessageNode> iterator = mPriorityQueue.iterator();
 
@@ -1337,6 +1362,7 @@ public final class MessageQueue {
         }
     }
 
+    @NeverCompile
     private int dumpPriorityQueue(ConcurrentSkipListSet<MessageNode> queue, Printer pw,
             String prefix, Handler h, int n) {
         int count = 0;
@@ -1352,6 +1378,7 @@ public final class MessageQueue {
         return count;
     }
 
+    @NeverCompile
     void dump(Printer pw, String prefix, Handler h) {
         long now = SystemClock.uptimeMillis();
         int n = 0;
@@ -1382,6 +1409,7 @@ public final class MessageQueue {
                 + ", quitting=" + (boolean) sQuitting.getVolatile(this) + ")");
     }
 
+    @NeverCompile
     private int dumpPriorityQueue(ConcurrentSkipListSet<MessageNode> queue,
             ProtoOutputStream proto) {
         int count = 0;
@@ -1394,6 +1422,7 @@ public final class MessageQueue {
         return count;
     }
 
+    @NeverCompile
     void dumpDebug(ProtoOutputStream proto, long fieldId) {
         final long messageQueueToken = proto.start(fieldId);
 

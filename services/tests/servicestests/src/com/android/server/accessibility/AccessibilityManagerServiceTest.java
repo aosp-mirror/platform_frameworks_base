@@ -35,6 +35,7 @@ import static com.android.internal.accessibility.common.ShortcutConstants.UserSh
 import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.HARDWARE;
 import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.QUICK_SETTINGS;
 import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.SOFTWARE;
+import static com.android.internal.accessibility.dialog.AccessibilityButtonChooserActivity.EXTRA_TYPE_TO_CHOOSE;
 import static com.android.server.accessibility.AccessibilityManagerService.ACTION_LAUNCH_HEARING_DEVICES_DIALOG;
 import static com.android.window.flags.Flags.FLAG_ALWAYS_DRAW_MAGNIFICATION_FULLSCREEN_BORDER;
 
@@ -62,8 +63,11 @@ import static org.mockito.Mockito.when;
 import android.Manifest;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.IAccessibilityServiceClient;
+import android.annotation.NonNull;
 import android.app.PendingIntent;
 import android.app.RemoteAction;
+import android.app.admin.DevicePolicyManager;
+import android.app.ecm.EnhancedConfirmationManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -211,6 +215,7 @@ public class AccessibilityManagerServiceTest {
     @Mock private FullScreenMagnificationController mMockFullScreenMagnificationController;
     @Mock private ProxyManager mProxyManager;
     @Mock private StatusBarManagerInternal mStatusBarManagerInternal;
+    @Mock private DevicePolicyManager mDevicePolicyManager;
     @Spy private IUserInitializationCompleteCallback mUserInitializationCompleteCallback;
     @Captor private ArgumentCaptor<Intent> mIntentArgumentCaptor;
     private IAccessibilityManager mA11yManagerServiceOnDevice;
@@ -240,6 +245,7 @@ public class AccessibilityManagerServiceTest {
                 UserManagerInternal.class, mMockUserManagerInternal);
         LocalServices.addService(StatusBarManagerInternal.class, mStatusBarManagerInternal);
         mInputFilter = mock(FakeInputFilter.class);
+        mTestableContext.addMockSystemService(DevicePolicyManager.class, mDevicePolicyManager);
 
         when(mMockMagnificationController.getMagnificationConnectionManager()).thenReturn(
                 mMockMagnificationConnectionManager);
@@ -1609,7 +1615,8 @@ public class AccessibilityManagerServiceTest {
                 List.of(tile)
         );
 
-        assertThat(mA11yms.getCurrentUserState().getA11yQsTargets()).doesNotContain(tile);
+        assertThat(mA11yms.getCurrentUserState()
+                .getShortcutTargetsLocked(QUICK_SETTINGS)).doesNotContain(tile.flattenToString());
     }
 
     @Test
@@ -1630,7 +1637,7 @@ public class AccessibilityManagerServiceTest {
                 List.of(tile)
         );
 
-        assertThat(mA11yms.getCurrentUserState().getA11yQsTargets())
+        assertThat(mA11yms.getCurrentUserState().getShortcutTargetsLocked(QUICK_SETTINGS))
                 .contains(TARGET_ALWAYS_ON_A11Y_SERVICE.flattenToString());
     }
 
@@ -1650,7 +1657,7 @@ public class AccessibilityManagerServiceTest {
         );
 
         assertThat(
-                mA11yms.getCurrentUserState().getA11yQsTargets()
+                mA11yms.getCurrentUserState().getShortcutTargetsLocked(QUICK_SETTINGS)
         ).containsExactlyElementsIn(List.of(
                 AccessibilityShortcutController.DALTONIZER_COMPONENT_NAME.flattenToString(),
                 AccessibilityShortcutController.COLOR_INVERSION_COMPONENT_NAME.flattenToString())
@@ -1670,7 +1677,7 @@ public class AccessibilityManagerServiceTest {
         );
 
         assertThat(
-                mA11yms.getCurrentUserState().getA11yQsTargets()
+                mA11yms.getCurrentUserState().getShortcutTargetsLocked(QUICK_SETTINGS)
         ).doesNotContain(
                 AccessibilityShortcutController.DALTONIZER_COMPONENT_NAME.flattenToString());
     }
@@ -2046,6 +2053,53 @@ public class AccessibilityManagerServiceTest {
     }
 
     @Test
+    public void showAccessibilityTargetSelection_navBarNavigationMode_softwareExtra() {
+        mFakePermissionEnforcer.grant(Manifest.permission.STATUS_BAR_SERVICE);
+        final AccessibilityUserState userState = new AccessibilityUserState(
+                UserHandle.USER_SYSTEM, mTestableContext, mA11yms);
+        mA11yms.mUserStates.put(UserHandle.USER_SYSTEM, userState);
+        Settings.Secure.putIntForUser(mTestableContext.getContentResolver(),
+                NAVIGATION_MODE, NAV_BAR_MODE_3BUTTON, userState.mUserId);
+
+        mA11yms.notifyAccessibilityButtonLongClicked(Display.DEFAULT_DISPLAY);
+        mTestableLooper.processAllMessages();
+
+        assertStartActivityWithExpectedShortcutType(mTestableContext.getMockContext(), SOFTWARE);
+    }
+
+    @Test
+    @DisableFlags(android.provider.Flags.FLAG_A11Y_STANDALONE_GESTURE_ENABLED)
+    public void showAccessibilityTargetSelection_gestureNavigationMode_softwareExtra() {
+        mFakePermissionEnforcer.grant(Manifest.permission.STATUS_BAR_SERVICE);
+        final AccessibilityUserState userState = new AccessibilityUserState(
+                UserHandle.USER_SYSTEM, mTestableContext, mA11yms);
+        mA11yms.mUserStates.put(UserHandle.USER_SYSTEM, userState);
+        Settings.Secure.putIntForUser(mTestableContext.getContentResolver(),
+                NAVIGATION_MODE, NAV_BAR_MODE_GESTURAL, userState.mUserId);
+
+        mA11yms.notifyAccessibilityButtonLongClicked(Display.DEFAULT_DISPLAY);
+        mTestableLooper.processAllMessages();
+
+        assertStartActivityWithExpectedShortcutType(mTestableContext.getMockContext(), SOFTWARE);
+    }
+
+    @Test
+    @EnableFlags(android.provider.Flags.FLAG_A11Y_STANDALONE_GESTURE_ENABLED)
+    public void showAccessibilityTargetSelection_gestureNavigationMode_gestureExtra() {
+        mFakePermissionEnforcer.grant(Manifest.permission.STATUS_BAR_SERVICE);
+        final AccessibilityUserState userState = new AccessibilityUserState(
+                UserHandle.USER_SYSTEM, mTestableContext, mA11yms);
+        mA11yms.mUserStates.put(UserHandle.USER_SYSTEM, userState);
+        Settings.Secure.putIntForUser(mTestableContext.getContentResolver(),
+                NAVIGATION_MODE, NAV_BAR_MODE_GESTURAL, userState.mUserId);
+
+        mA11yms.notifyAccessibilityButtonLongClicked(Display.DEFAULT_DISPLAY);
+        mTestableLooper.processAllMessages();
+
+        assertStartActivityWithExpectedShortcutType(mTestableContext.getMockContext(), GESTURE);
+    }
+
+    @Test
     public void registerUserInitializationCompleteCallback_isRegistered() {
         mA11yms.mUserInitializationCompleteCallbacks.clear();
 
@@ -2074,6 +2128,61 @@ public class AccessibilityManagerServiceTest {
         verify(mUserInitializationCompleteCallback).onUserInitializationComplete(
                 UserHandle.MIN_SECONDARY_USER_ID);
     }
+
+    @Test
+    @DisableFlags(android.provider.Flags.FLAG_A11Y_STANDALONE_GESTURE_ENABLED)
+    public void getShortcutTypeForGenericShortcutCalls_softwareType() {
+        final AccessibilityUserState userState = new AccessibilityUserState(
+                UserHandle.USER_SYSTEM, mTestableContext, mA11yms);
+        mA11yms.mUserStates.put(UserHandle.USER_SYSTEM, userState);
+
+        assertThat(mA11yms.getShortcutTypeForGenericShortcutCalls(userState.mUserId))
+                .isEqualTo(SOFTWARE);
+    }
+
+    @Test
+    @EnableFlags(android.provider.Flags.FLAG_A11Y_STANDALONE_GESTURE_ENABLED)
+    public void getShortcutTypeForGenericShortcutCalls_gestureNavigationMode_gestureType() {
+        final AccessibilityUserState userState = new AccessibilityUserState(
+                UserHandle.USER_SYSTEM, mTestableContext, mA11yms);
+        mA11yms.mUserStates.put(UserHandle.USER_SYSTEM, userState);
+        Settings.Secure.putIntForUser(mTestableContext.getContentResolver(),
+                NAVIGATION_MODE, NAV_BAR_MODE_GESTURAL, userState.mUserId);
+
+        assertThat(mA11yms.getShortcutTypeForGenericShortcutCalls(userState.mUserId))
+                .isEqualTo(GESTURE);
+    }
+
+    @Test
+    @EnableFlags(android.provider.Flags.FLAG_A11Y_STANDALONE_GESTURE_ENABLED)
+    public void getShortcutTypeForGenericShortcutCalls_buttonNavigationMode_softwareType() {
+        final AccessibilityUserState userState = new AccessibilityUserState(
+                UserHandle.USER_SYSTEM, mTestableContext, mA11yms);
+        mA11yms.mUserStates.put(UserHandle.USER_SYSTEM, userState);
+        Settings.Secure.putIntForUser(mTestableContext.getContentResolver(),
+                NAVIGATION_MODE, NAV_BAR_MODE_3BUTTON, userState.mUserId);
+
+        assertThat(mA11yms.getShortcutTypeForGenericShortcutCalls(userState.mUserId))
+                .isEqualTo(SOFTWARE);
+    }
+
+    @Test
+    @EnableFlags({android.permission.flags.Flags.FLAG_ENHANCED_CONFIRMATION_MODE_APIS_ENABLED,
+            android.security.Flags.FLAG_EXTEND_ECM_TO_ALL_SETTINGS})
+    public void isAccessibilityTargetAllowed_nonSystemUserId_useEcmWithNonSystemUserId() {
+        String fakePackageName = "FAKE_PACKAGE_NAME";
+        int uid = 0; // uid is not used in the actual implementation when flags are on
+        int userId = mTestableContext.getUserId() + 1234;
+        when(mDevicePolicyManager.getPermittedAccessibilityServices(userId)).thenReturn(
+                List.of(fakePackageName));
+        Context mockUserContext = mock(Context.class);
+        mTestableContext.addMockUserContext(userId, mockUserContext);
+
+        mA11yms.isAccessibilityTargetAllowed(fakePackageName, uid, userId);
+
+        verify(mockUserContext).getSystemService(EnhancedConfirmationManager.class);
+    }
+
 
     private Set<String> readStringsFromSetting(String setting) {
         final Set<String> result = new ArraySet<>();
@@ -2148,6 +2257,14 @@ public class AccessibilityManagerServiceTest {
                 Intent.EXTRA_COMPONENT_NAME)).isEqualTo(componentName);
     }
 
+    private void assertStartActivityWithExpectedShortcutType(Context mockContext,
+            @UserShortcutType int shortcutType) {
+        verify(mockContext).startActivityAsUser(mIntentArgumentCaptor.capture(),
+                any(Bundle.class), any(UserHandle.class));
+        assertThat(mIntentArgumentCaptor.getValue().getIntExtra(
+                EXTRA_TYPE_TO_CHOOSE, -1)).isEqualTo(shortcutType);
+    }
+
     private void setupShortcutTargetServices() {
         setupShortcutTargetServices(mA11yms.getCurrentUserState());
     }
@@ -2187,6 +2304,7 @@ public class AccessibilityManagerServiceTest {
 
         private final Context mMockContext;
         private final Map<String, List<BroadcastReceiver>> mBroadcastReceivers = new ArrayMap<>();
+        private ArrayMap<Integer, Context> mMockUserContexts = new ArrayMap<>();
 
         A11yTestableContext(Context base) {
             super(base);
@@ -2222,6 +2340,19 @@ public class AccessibilityManagerServiceTest {
 
         Context getMockContext() {
             return mMockContext;
+        }
+
+        public void addMockUserContext(int userId, Context context) {
+            mMockUserContexts.put(userId, context);
+        }
+
+        @Override
+        @NonNull
+        public Context createContextAsUser(UserHandle user, int flags) {
+            if (mMockUserContexts.containsKey(user.getIdentifier())) {
+                return mMockUserContexts.get(user.getIdentifier());
+            }
+            return super.createContextAsUser(user, flags);
         }
 
         Map<String, List<BroadcastReceiver>> getBroadcastReceivers() {

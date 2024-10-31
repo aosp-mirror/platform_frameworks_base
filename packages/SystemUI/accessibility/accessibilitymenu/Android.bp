@@ -41,6 +41,7 @@ android_app {
         "SettingsLibDisplayUtils",
         "SettingsLibSettingsTheme",
         "com_android_a11y_menu_flags_lib",
+        "//frameworks/libs/systemui:view_capture",
     ],
 
     optimize: {

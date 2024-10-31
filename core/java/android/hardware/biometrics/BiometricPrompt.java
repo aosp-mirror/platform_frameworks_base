@@ -139,6 +139,13 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
     public static final int DISMISSED_REASON_CONTENT_VIEW_MORE_OPTIONS = 8;
 
     /**
+     * Dialog dismissal due to the system being unable to retrieve a WindowManager instance required
+     * to show the dialog.
+     * @hide
+     */
+    public static final int DISMISSED_REASON_ERROR_NO_WM = 9;
+
+    /**
      * @hide
      */
     @IntDef({DISMISSED_REASON_BIOMETRIC_CONFIRMED,
@@ -148,7 +155,8 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
             DISMISSED_REASON_ERROR,
             DISMISSED_REASON_SERVER_REQUESTED,
             DISMISSED_REASON_CREDENTIAL_CONFIRMED,
-            DISMISSED_REASON_CONTENT_VIEW_MORE_OPTIONS})
+            DISMISSED_REASON_CONTENT_VIEW_MORE_OPTIONS,
+            DISMISSED_REASON_ERROR_NO_WM})
     @Retention(RetentionPolicy.SOURCE)
     public @interface DismissedReason {}
 

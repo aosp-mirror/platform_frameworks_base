@@ -29,18 +29,20 @@ class PaginatedGridViewModel
 @Inject
 constructor(
     iconTilesViewModel: IconTilesViewModel,
-    gridSizeViewModel: FixedColumnsSizeViewModel,
-    iconLabelVisibilityViewModel: IconLabelVisibilityViewModel,
+    gridSizeViewModel: QSColumnsViewModel,
     paginatedGridInteractor: PaginatedGridInteractor,
     @Application applicationScope: CoroutineScope,
-) :
-    IconTilesViewModel by iconTilesViewModel,
-    FixedColumnsSizeViewModel by gridSizeViewModel,
-    IconLabelVisibilityViewModel by iconLabelVisibilityViewModel {
+) : IconTilesViewModel by iconTilesViewModel, QSColumnsViewModel by gridSizeViewModel {
     val rows =
         paginatedGridInteractor.rows.stateIn(
             applicationScope,
             SharingStarted.WhileSubscribed(),
             paginatedGridInteractor.defaultRows,
         )
+
+    /*
+     * Tracks whether the current HorizontalPager (using this viewmodel) is in the first page.
+     * This requires it to be a `@SysUISingleton` to be shared between viewmodels.
+     */
+    var inFirstPage = true
 }

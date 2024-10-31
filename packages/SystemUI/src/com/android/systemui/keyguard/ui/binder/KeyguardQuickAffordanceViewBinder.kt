@@ -30,7 +30,7 @@ import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
-import com.android.app.tracing.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.keyguard.logging.KeyguardQuickAffordancesLogger
 import com.android.settingslib.Utils
 import com.android.systemui.animation.Expandable
@@ -51,7 +51,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /** This is only for a SINGLE Quick affordance */
 @SysUISingleton
@@ -93,7 +93,7 @@ constructor(
         val configurationBasedDimensions = MutableStateFlow(loadFromResources(view))
         val disposableHandle =
             view.repeatWhenAttached {
-                repeatOnLifecycle(Lifecycle.State.CREATED) {
+                repeatOnLifecycle(Lifecycle.State.STARTED) {
                     launch {
                         viewModel.collect { buttonModel ->
                             updateButton(
@@ -141,6 +141,7 @@ constructor(
         viewModel: KeyguardQuickAffordanceViewModel,
         messageDisplayer: (Int) -> Unit,
     ) {
+        logger.logUpdate(viewModel)
         if (!viewModel.isVisible) {
             view.isInvisible = true
             return

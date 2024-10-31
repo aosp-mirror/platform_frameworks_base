@@ -16,17 +16,17 @@
 
 package com.android.systemui.haptics.msdl.dagger
 
-import android.content.Context
+import android.annotation.SuppressLint
+import android.os.Vibrator
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Application
 import com.google.android.msdl.domain.MSDLPlayer
 import dagger.Module
 import dagger.Provides
 
 @Module
 object MSDLModule {
+    @SuppressLint("NonInjectedService")
     @Provides
     @SysUISingleton
-    fun provideMSDLPlayer(@Application context: Context): MSDLPlayer =
-        MSDLPlayer.createPlayer(context)
+    fun provideMSDLPlayer(vibrator: Vibrator?): MSDLPlayer = MSDLPlayer.createPlayer(vibrator)
 }

@@ -16,8 +16,6 @@
 
 package com.android.externalstorage;
 
-import static java.util.regex.Pattern.CASE_INSENSITIVE;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.usage.StorageStatsManager;
@@ -61,12 +59,15 @@ import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * Presents content of the shared (a.k.a. "external") storage.
@@ -89,12 +90,9 @@ public class ExternalStorageProvider extends FileSystemProvider {
     private static final Uri BASE_URI =
             new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT).authority(AUTHORITY).build();
 
-    /**
-     * Regex for detecting {@code /Android/data/}, {@code /Android/obb/} and
-     * {@code /Android/sandbox/} along with all their subdirectories and content.
-     */
-    private static final Pattern PATTERN_RESTRICTED_ANDROID_SUBTREES =
-            Pattern.compile("^Android/(?:data|obb|sandbox)(?:/.+)?", CASE_INSENSITIVE);
+    private static final String PRIMARY_EMULATED_STORAGE_PATH = "/storage/emulated/";
+
+    private static final String STORAGE_PATH = "/storage/";
 
     private static final String[] DEFAULT_ROOT_PROJECTION = new String[] {
             Root.COLUMN_ROOT_ID, Root.COLUMN_FLAGS, Root.COLUMN_ICON, Root.COLUMN_TITLE,
@@ -309,9 +307,68 @@ public class ExternalStorageProvider extends FileSystemProvider {
             return false;
         }
 
-        final String path = getPathFromDocId(documentId);
-        return PATTERN_RESTRICTED_ANDROID_SUBTREES.matcher(path).matches();
+        try {
+            final RootInfo root = getRootFromDocId(documentId);
+            final String canonicalPath = getPathFromDocId(documentId);
+            return isRestrictedPath(root.rootId, canonicalPath);
+        } catch (Exception e) {
+            return true;
+        }
     }
+
+    /**
+     * Based on the given root id and path, we restrict path access if file is Android/data or
+     * Android/obb or Android/sandbox or one of their subdirectories.
+     *
+     * @param canonicalPath of the file
+     * @return true if path is restricted
+     */
+    private boolean isRestrictedPath(String rootId, String canonicalPath) {
+        if (rootId == null || canonicalPath == null) {
+            return true;
+        }
+
+        final String rootPath;
+        if (rootId.equalsIgnoreCase(ROOT_ID_PRIMARY_EMULATED)) {
+            // Creates "/storage/emulated/<user-id>"
+            rootPath = PRIMARY_EMULATED_STORAGE_PATH + UserHandle.myUserId();
+        } else {
+            // Creates "/storage/<volume-uuid>"
+            rootPath = STORAGE_PATH + rootId;
+        }
+        List<java.nio.file.Path> restrictedPathList = Arrays.asList(
+                Paths.get(rootPath, "Android", "data"),
+                Paths.get(rootPath, "Android", "obb"),
+                Paths.get(rootPath, "Android", "sandbox"));
+        // We need to identify restricted parent paths which actually exist on the device
+        List<java.nio.file.Path> validRestrictedPathsToCheck = restrictedPathList.stream().filter(
+                Files::exists).collect(Collectors.toList());
+
+        boolean isRestricted = false;
+        java.nio.file.Path filePathToCheck = Paths.get(rootPath, canonicalPath);
+        try {
+            while (filePathToCheck != null) {
+                for (java.nio.file.Path restrictedPath : validRestrictedPathsToCheck) {
+                    if (Files.isSameFile(restrictedPath, filePathToCheck)) {
+                        isRestricted = true;
+                        Log.v(TAG, "Restricting access for path: " + filePathToCheck);
+                        break;
+                    }
+                }
+                if (isRestricted) {
+                    break;
+                }
+
+                filePathToCheck = filePathToCheck.getParent();
+            }
+        } catch (Exception e) {
+            Log.w(TAG, "Error in checking file equality check.", e);
+            isRestricted = true;
+        }
+
+        return isRestricted;
+    }
+
 
     /**
      * Check that the directory is the root of storage or blocked file from tree.

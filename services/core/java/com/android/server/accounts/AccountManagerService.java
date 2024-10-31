@@ -112,6 +112,7 @@ import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.modules.expresslog.Histogram;
@@ -1226,7 +1227,17 @@ public class AccountManagerService
                 // been re-enabled (after being updated for example), then we just overwrite the old
                 // values.
                 for (Entry<String, Integer> entry : knownAuth.entrySet()) {
-                    accountsDb.insertOrReplaceMetaAuthTypeAndUid(entry.getKey(), entry.getValue());
+                    String type = entry.getKey();
+                    Integer newUid = entry.getValue();
+                    if (!Objects.equals(metaAuthUid.get(type), newUid)) {
+                        FrameworkStatsLog.write(
+                                FrameworkStatsLog.ACCOUNT_MANAGER_EVENT,
+                                type,
+                                newUid,
+                                FrameworkStatsLog
+                                        .ACCOUNT_MANAGER_EVENT__EVENT_TYPE__AUTHENTICATOR_ADDED);
+                    }
+                    accountsDb.insertOrReplaceMetaAuthTypeAndUid(type, newUid);
                 }
 
                 final Map<Long, Account> accountsMap = accountsDb.findAllDeAccounts();
@@ -1945,6 +1956,11 @@ public class AccountManagerService
                     }
                     accounts.accountsDb.setTransactionSuccessful();
 
+                    FrameworkStatsLog.write(
+                            FrameworkStatsLog.ACCOUNT_MANAGER_EVENT,
+                            account.type,
+                            callingUid,
+                            FrameworkStatsLog.ACCOUNT_MANAGER_EVENT__EVENT_TYPE__ACCOUNT_ADDED);
                     logRecord(AccountsDb.DEBUG_ACTION_ACCOUNT_ADD, AccountsDb.TABLE_ACCOUNTS,
                             accountId,
                             accounts, callingUid);
@@ -2166,6 +2182,9 @@ public class AccountManagerService
             Log.i(TAG, "callingUid=" + callingUid + ", userId=" + accounts.userId
                     + " performing rename account");
             Account resultingAccount = renameAccountInternal(accounts, accountToRename, newName);
+            if (resultingAccount == null) {
+                resultingAccount = accountToRename;
+            }
             Bundle result = new Bundle();
             result.putString(AccountManager.KEY_ACCOUNT_NAME, resultingAccount.name);
             result.putString(AccountManager.KEY_ACCOUNT_TYPE, resultingAccount.type);
@@ -2541,6 +2560,11 @@ public class AccountManagerService
                     }
                     String action = userUnlocked ? AccountsDb.DEBUG_ACTION_ACCOUNT_REMOVE
                             : AccountsDb.DEBUG_ACTION_ACCOUNT_REMOVE_DE;
+                    FrameworkStatsLog.write(
+                            FrameworkStatsLog.ACCOUNT_MANAGER_EVENT,
+                            account.type,
+                            callingUid,
+                            FrameworkStatsLog.ACCOUNT_MANAGER_EVENT__EVENT_TYPE__ACCOUNT_REMOVED);
                     logRecord(action, AccountsDb.TABLE_ACCOUNTS, accountId, accounts);
                 }
             }
@@ -5059,6 +5083,8 @@ public class AccountManagerService
                     Log.e(TAG, String.format(tmpl, activityName, pkgName, mAccountType));
                     return false;
                 }
+                intent.setComponent(targetActivityInfo.getComponentName());
+                bundle.putParcelable(AccountManager.KEY_INTENT, intent);
                 return true;
             } finally {
                 Binder.restoreCallingIdentity(bid);
@@ -5080,14 +5106,15 @@ public class AccountManagerService
             Bundle simulateBundle = p.readBundle();
             p.recycle();
             Intent intent = bundle.getParcelable(AccountManager.KEY_INTENT, Intent.class);
-            if (intent != null && intent.getClass() != Intent.class) {
-                return false;
-            }
             Intent simulateIntent = simulateBundle.getParcelable(AccountManager.KEY_INTENT,
                     Intent.class);
             if (intent == null) {
                 return (simulateIntent == null);
             }
+            if (intent.getClass() != Intent.class || simulateIntent.getClass() != Intent.class) {
+                return false;
+            }
+
             if (!intent.filterEquals(simulateIntent)) {
                 return false;
             }

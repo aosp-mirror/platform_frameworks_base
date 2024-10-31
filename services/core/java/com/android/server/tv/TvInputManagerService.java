@@ -381,9 +381,11 @@ public final class TvInputManagerService extends SystemService {
                     // service to populate the hardware list.
                     serviceState = new ServiceState(component, userId);
                     userState.serviceStateMap.put(component, serviceState);
-                    updateServiceConnectionLocked(component, userId);
                 } else {
                     inputList.addAll(serviceState.hardwareInputMap.values());
+                }
+                if (serviceState.needInit) {
+                    updateServiceConnectionLocked(component, userId);
                 }
             } else {
                 try {
@@ -489,6 +491,27 @@ public final class TvInputManagerService extends SystemService {
         }
     }
 
+    @GuardedBy("mLock")
+    private void cleanUpHdmiDevices(int userId) {
+        if (DEBUG) {
+            Slog.d(TAG, "cleanUpHdmiDevices: user " + userId);
+        }
+        UserState userState = getOrCreateUserStateLocked(userId);
+        for (ServiceState serviceState : userState.serviceStateMap.values()) {
+            for (HdmiDeviceInfo device : mTvInputHardwareManager.getHdmiDeviceList()) {
+                try {
+                    if (serviceState.service != null) {
+                        serviceState.service.notifyHdmiDeviceRemoved(device);
+                    } else {
+                        serviceState.hdmiDeviceRemovedBuffer.add(device);
+                    }
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "error in notifyHdmiDeviceRemoved", e);
+                }
+            }
+        }
+    }
+
     private void startUser(int userId) {
         synchronized (mLock) {
             if (userId == mCurrentUserId || mRunningProfiles.contains(userId)) {
@@ -500,9 +523,13 @@ public final class TvInputManagerService extends SystemService {
             if (userInfo.isProfile()
                     && parentInfo != null
                     && parentInfo.id == mCurrentUserId) {
-                // only the children of the current user can be started in background
+                int prevUserId = mCurrentUserId;
                 mCurrentUserId = userId;
-                startProfileLocked(userId);
+                // only the children of the current user can be started in background
+                releaseSessionOfUserLocked(prevUserId);
+                cleanUpHdmiDevices(prevUserId);
+                unbindServiceOfUserLocked(prevUserId);
+                startProfileLocked(mCurrentUserId);
             }
         }
     }
@@ -515,6 +542,7 @@ public final class TvInputManagerService extends SystemService {
             }
 
             releaseSessionOfUserLocked(userId);
+            cleanUpHdmiDevices(userId);
             unbindServiceOfUserLocked(userId);
             mRunningProfiles.remove(userId);
         }
@@ -543,15 +571,19 @@ public final class TvInputManagerService extends SystemService {
                 unbindServiceOfUserLocked(runningId);
             }
             mRunningProfiles.clear();
-            releaseSessionOfUserLocked(mCurrentUserId);
-            unbindServiceOfUserLocked(mCurrentUserId);
 
+            int prevUserId = mCurrentUserId;
             mCurrentUserId = userId;
-            buildTvInputListLocked(userId, null);
-            buildTvContentRatingSystemListLocked(userId);
+
+            releaseSessionOfUserLocked(prevUserId);
+            cleanUpHdmiDevices(prevUserId);
+            unbindServiceOfUserLocked(prevUserId);
+
+            buildTvInputListLocked(mCurrentUserId, null);
+            buildTvContentRatingSystemListLocked(mCurrentUserId);
             mMessageHandler
                     .obtainMessage(MessageHandler.MSG_SWITCH_CONTENT_RESOLVER,
-                            getContentResolverForUser(userId))
+                            getContentResolverForUser(mCurrentUserId))
                     .sendToTarget();
         }
     }
@@ -590,6 +622,9 @@ public final class TvInputManagerService extends SystemService {
 
     @GuardedBy("mLock")
     private void unbindServiceOfUserLocked(int userId) {
+        if (DEBUG) {
+            Slog.d(TAG, "unbindServiceOfUserLocked: user " + userId);
+        }
         UserState userState = getUserStateLocked(userId);
         if (userState == null) {
             return;
@@ -599,15 +634,13 @@ public final class TvInputManagerService extends SystemService {
             ComponentName component = it.next();
             ServiceState serviceState = userState.serviceStateMap.get(component);
             if (serviceState != null && serviceState.sessionTokens.isEmpty()) {
-                if (serviceState.callback != null) {
-                    try {
-                        serviceState.service.unregisterCallback(serviceState.callback);
-                    } catch (RemoteException e) {
-                        Slog.e(TAG, "error in unregisterCallback", e);
-                    }
-                }
                 unbindService(serviceState);
-                it.remove();
+                if (!serviceState.isHardware) {
+                    it.remove();
+                } else {
+                    serviceState.hardwareInputMap.clear();
+                    serviceState.needInit = true;
+                }
             }
         }
     }
@@ -667,13 +700,6 @@ public final class TvInputManagerService extends SystemService {
             // Unregister all callbacks and unbind all services.
             for (ServiceState serviceState : userState.serviceStateMap.values()) {
                 if (serviceState.service != null) {
-                    if (serviceState.callback != null) {
-                        try {
-                            serviceState.service.unregisterCallback(serviceState.callback);
-                        } catch (RemoteException e) {
-                            Slog.e(TAG, "error in unregisterCallback", e);
-                        }
-                    }
                     unbindService(serviceState);
                 }
             }
@@ -788,7 +814,7 @@ public final class TvInputManagerService extends SystemService {
         boolean shouldBind;
         if (userId == mCurrentUserId || mRunningProfiles.contains(userId)) {
             shouldBind = !serviceState.sessionTokens.isEmpty()
-                    || (serviceState.isHardware && serviceState.neverConnected);
+                    || (serviceState.isHardware && serviceState.needInit);
         } else {
             // For a non-current user,
             // if sessionTokens is not empty, it contains recording sessions only
@@ -3306,7 +3332,20 @@ public final class TvInputManagerService extends SystemService {
         return filteredDisplayName;
     }
 
-    private static final class UserState {
+    private class TvInputManagerCallbackList extends RemoteCallbackList<ITvInputManagerCallback> {
+        @Override
+        public void onCallbackDied(ITvInputManagerCallback callback) {
+            synchronized (mLock) {
+                for (int i = 0; i < mUserStates.size(); i++) {
+                    int userId = mUserStates.keyAt(i);
+                    UserState userState = getOrCreateUserStateLocked(userId);
+                    userState.callbackPidUidMap.remove(callback);
+                }
+            }
+        }
+    }
+
+    private final class UserState {
         // A mapping from the TV input id to its TvInputState.
         private Map<String, TvInputState> inputMap = new HashMap<>();
 
@@ -3327,8 +3366,8 @@ public final class TvInputManagerService extends SystemService {
         private final Map<IBinder, SessionState> sessionStateMap = new HashMap<>();
 
         // A list of callbacks.
-        private final RemoteCallbackList<ITvInputManagerCallback> mCallbacks =
-                new RemoteCallbackList<>();
+        private final TvInputManagerCallbackList mCallbacks =
+                new TvInputManagerCallbackList();
 
         private final Map<ITvInputManagerCallback, Pair<Integer, Integer>> callbackPidUidMap =
                 new HashMap<>();
@@ -3405,13 +3444,13 @@ public final class TvInputManagerService extends SystemService {
         private ServiceCallback callback;
         private boolean bound;
         private boolean reconnecting;
-        private boolean neverConnected;
+        private boolean needInit;
 
         private ServiceState(ComponentName component, int userId) {
             this.component = component;
             this.connection = new InputServiceConnection(component, userId);
             this.isHardware = hasHardwarePermission(mContext.getPackageManager(), component);
-            this.neverConnected = true;
+            this.needInit = true;
         }
     }
 
@@ -3558,11 +3597,18 @@ public final class TvInputManagerService extends SystemService {
 
     @GuardedBy("mLock")
     private void unbindService(ServiceState serviceState) {
-        if (!serviceState.bound) {
+        if (serviceState == null || !serviceState.bound) {
             return;
         }
         if (DEBUG) {
             Slog.d(TAG, "unbindService(service=" + serviceState.component + ")");
+        }
+        if (serviceState.callback != null) {
+            try {
+                serviceState.service.unregisterCallback(serviceState.callback);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "error in unregisterCallback", e);
+            }
         }
         mContext.unbindService(serviceState.connection);
         serviceState.bound = false;
@@ -3612,11 +3658,9 @@ public final class TvInputManagerService extends SystemService {
         }
         ComponentName component = mTvInputHardwareManager.getInputMap().get(inputId).getComponent();
         ServiceState serviceState = getServiceStateLocked(component, userId);
-        boolean removed = serviceState.hardwareInputMap.remove(inputId) != null;
-        if (removed) {
-            buildTvInputListLocked(userId, null);
-            mTvInputHardwareManager.removeHardwareInput(inputId);
-        }
+        serviceState.hardwareInputMap.remove(inputId);
+        buildTvInputListLocked(userId, null);
+        mTvInputHardwareManager.removeHardwareInput(inputId);
     }
 
     private final class InputServiceConnection implements ServiceConnection {
@@ -3642,7 +3686,7 @@ public final class TvInputManagerService extends SystemService {
                 }
                 ServiceState serviceState = userState.serviceStateMap.get(mComponent);
                 serviceState.service = ITvInputService.Stub.asInterface(service);
-                serviceState.neverConnected = false;
+                serviceState.needInit = false;
 
                 // Register a callback, if we need to.
                 if (serviceState.isHardware && serviceState.callback == null) {
@@ -3781,9 +3825,9 @@ public final class TvInputManagerService extends SystemService {
                     if (serviceState.hardwareInputMap.containsKey(inputInfo.getId())) {
                         return;
                     }
-                    Slog.d("ServiceCallback",
-                            "addHardwareInput: device id " + deviceId + ", "
-                                    + inputInfo.toString());
+                    Slog.d(TAG, "ServiceCallback: addHardwareInput, deviceId: " + deviceId +
+                                ", inputInfo: " + inputInfo.toString() + " by " + mComponent +
+                                ", userId: " + mUserId);
                     mTvInputHardwareManager.addHardwareInput(deviceId, inputInfo);
                     addHardwareInputLocked(inputInfo, mComponent, mUserId);
                 }
@@ -3802,6 +3846,9 @@ public final class TvInputManagerService extends SystemService {
                     if (serviceState.hardwareInputMap.containsKey(inputInfo.getId())) {
                         return;
                     }
+                    Slog.d(TAG, "ServiceCallback: addHdmiInput, id: " + id +
+                                ", inputInfo: "+ inputInfo.toString() + " by " + mComponent +
+                                ", userId: " + mUserId);
                     mTvInputHardwareManager.addHdmiInput(id, inputInfo);
                     addHardwareInputLocked(inputInfo, mComponent, mUserId);
                     if (mOnScreenInputId != null && mOnScreenSessionState != null) {
@@ -3832,9 +3879,12 @@ public final class TvInputManagerService extends SystemService {
             final long identity = Binder.clearCallingIdentity();
             try {
                 synchronized (mLock) {
-                    Slog.d("ServiceCallback",
-                            "removeHardwareInput " + inputId + " by " + mComponent);
-                    removeHardwareInputLocked(inputId, mUserId);
+                    if (mUserId == mCurrentUserId) {
+                        Slog.d(TAG,
+                                "ServiceCallback: removeHardwareInput, inputId: " + inputId + " by "
+                                        + mComponent + ", userId: " + mUserId);
+                        removeHardwareInputLocked(inputId, mUserId);
+                    }
                 }
             } finally {
                 Binder.restoreCallingIdentity(identity);
@@ -4569,6 +4619,11 @@ public final class TvInputManagerService extends SystemService {
     private final class HardwareListener implements TvInputHardwareManager.Listener {
         @Override
         public void onStateChanged(String inputId, int state) {
+            if (DEBUG) {
+                Slog.d(TAG,
+                        "onStateChanged: inputId " + (inputId != null ? inputId : "null")
+                                + ", state " + state);
+            }
             synchronized (mLock) {
                 setStateLocked(inputId, state, mCurrentUserId);
             }
@@ -4576,6 +4631,11 @@ public final class TvInputManagerService extends SystemService {
 
         @Override
         public void onHardwareDeviceAdded(TvInputHardwareInfo info) {
+            if (DEBUG) {
+                Slog.d(TAG,
+                        "onHardwareDeviceAdded: TvInputHardwareInfo "
+                                + (info != null ? info.toString() : "null"));
+            }
             synchronized (mLock) {
                 UserState userState = getOrCreateUserStateLocked(mCurrentUserId);
                 // Broadcast the event to all hardware inputs.
@@ -4598,6 +4658,11 @@ public final class TvInputManagerService extends SystemService {
 
         @Override
         public void onHardwareDeviceRemoved(TvInputHardwareInfo info) {
+            if (DEBUG) {
+                Slog.d(TAG,
+                        "onHardwareDeviceRemoved: TvInputHardwareInfo "
+                                + (info != null ? info.toString() : "null"));
+            }
             synchronized (mLock) {
                 String relatedInputId =
                         mTvInputHardwareManager.getHardwareInputIdMap().get(info.getDeviceId());
@@ -4625,6 +4690,11 @@ public final class TvInputManagerService extends SystemService {
 
         @Override
         public void onHdmiDeviceAdded(HdmiDeviceInfo deviceInfo) {
+            if (DEBUG) {
+                Slog.d(TAG,
+                        "onHdmiDeviceAdded: HdmiDeviceInfo "
+                                + (deviceInfo != null ? deviceInfo.toString() : "null"));
+            }
             synchronized (mLock) {
                 UserState userState = getOrCreateUserStateLocked(mCurrentUserId);
                 // Broadcast the event to all hardware inputs.
@@ -4647,6 +4717,11 @@ public final class TvInputManagerService extends SystemService {
 
         @Override
         public void onHdmiDeviceRemoved(HdmiDeviceInfo deviceInfo) {
+            if (DEBUG) {
+                Slog.d(TAG,
+                        "onHdmiDeviceRemoved: HdmiDeviceInfo "
+                                + (deviceInfo != null ? deviceInfo.toString() : "null"));
+            }
             synchronized (mLock) {
                 String relatedInputId =
                         mTvInputHardwareManager.getHdmiInputIdMap().get(deviceInfo.getId());
@@ -4674,6 +4749,12 @@ public final class TvInputManagerService extends SystemService {
 
         @Override
         public void onHdmiDeviceUpdated(String inputId, HdmiDeviceInfo deviceInfo) {
+            if (DEBUG) {
+                Slog.d(TAG,
+                        "onHdmiDeviceUpdated: inputId " + (inputId != null ? inputId : "null")
+                                + ", deviceInfo: "
+                                + (deviceInfo != null ? deviceInfo.toString() : "null"));
+            }
             synchronized (mLock) {
                 Integer state;
                 switch (deviceInfo.getDevicePowerStatus()) {

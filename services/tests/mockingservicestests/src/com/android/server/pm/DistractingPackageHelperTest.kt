@@ -185,7 +185,8 @@ class DistractingPackageHelperTest : PackageHelperTestBase() {
         verify(pms, never()).scheduleWritePackageRestrictions(eq(TEST_USER_ID))
         verify(broadcastHelper, never()).sendPackageBroadcast(eq(
                 Intent.ACTION_DISTRACTING_PACKAGES_CHANGED), nullable(), nullable(), anyInt(),
-                nullable(), nullable(), any(), nullable(), nullable(), nullable(), nullable())
+                nullable(), nullable(), any(), nullable(), nullable(), nullable(), nullable(),
+                nullable())
 
         distractingPackageHelper.removeDistractingPackageRestrictions(pms.snapshotComputer(),
                 arrayOfNulls(0), TEST_USER_ID)

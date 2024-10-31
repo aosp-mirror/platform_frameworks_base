@@ -17,6 +17,8 @@
 package com.android.server.wm;
 
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
+import static android.window.TaskFragmentOrganizer.KEY_RESTORE_TASK_FRAGMENTS_INFO;
+import static android.window.TaskFragmentOrganizer.KEY_RESTORE_TASK_FRAGMENT_PARENT_INFO;
 import static android.window.TaskFragmentOrganizer.putErrorInfoInBundle;
 import static android.window.TaskFragmentTransaction.TYPE_ACTIVITY_REPARENTED_TO_TASK;
 import static android.window.TaskFragmentTransaction.TYPE_TASK_FRAGMENT_APPEARED;
@@ -25,7 +27,7 @@ import static android.window.TaskFragmentTransaction.TYPE_TASK_FRAGMENT_INFO_CHA
 import static android.window.TaskFragmentTransaction.TYPE_TASK_FRAGMENT_PARENT_INFO_CHANGED;
 import static android.window.TaskFragmentTransaction.TYPE_TASK_FRAGMENT_VANISHED;
 
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_WINDOW_ORGANIZER;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_WINDOW_ORGANIZER;
 import static com.android.server.wm.ActivityTaskManagerService.enforceTaskPermission;
 import static com.android.server.wm.TaskFragment.EMBEDDING_ALLOWED;
 import static com.android.server.wm.WindowOrganizerController.configurationsAreEqualForOrganizer;
@@ -59,7 +61,7 @@ import android.window.WindowContainerTransaction;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.ProtoLog;
-import com.android.internal.protolog.ProtoLogGroup;
+import com.android.internal.protolog.WmProtoLogGroups;
 import com.android.window.flags.Flags;
 
 import java.lang.annotation.Retention;
@@ -206,7 +208,13 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
             mOrganizerPid = pid;
             mAppThread = getAppThread(pid, mOrganizerUid);
             for (int i = mOrganizedTaskFragments.size() - 1; i >= 0; i--) {
-                mOrganizedTaskFragments.get(i).onTaskFragmentOrganizerRestarted(organizer);
+                final TaskFragment taskFragment = mOrganizedTaskFragments.get(i);
+                if (taskFragment.isAttached()
+                        && taskFragment.getTopNonFinishingActivity() != null) {
+                    taskFragment.onTaskFragmentOrganizerRestarted(organizer);
+                } else {
+                    mOrganizedTaskFragments.remove(taskFragment);
+                }
             }
             try {
                 mOrganizer.asBinder().linkToDeath(this, 0 /*flags*/);
@@ -421,7 +429,7 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
             }
 
             final IBinder activityToken;
-            if (activity.getPid() == mOrganizerPid) {
+            if (activity.getPid() == mOrganizerPid && activity.getUid() == mOrganizerUid) {
                 // We only pass the actual token if the activity belongs to the organizer process.
                 activityToken = activity.token;
             } else {
@@ -450,7 +458,8 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
                 change.setTaskFragmentToken(lastParentTfToken);
             }
             // Only pass the activity token to the client if it belongs to the same process.
-            if (nextFillTaskActivity != null && nextFillTaskActivity.getPid() == mOrganizerPid) {
+            if (nextFillTaskActivity != null && nextFillTaskActivity.getPid() == mOrganizerPid
+                    && nextFillTaskActivity.getUid() == mOrganizerUid) {
                 change.setOtherActivityToken(nextFillTaskActivity.token);
             }
             return change;
@@ -473,7 +482,7 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
             }
             final int transitionId = mWindowOrganizerController.getTransitionController()
                     .getCollectingTransitionId();
-            ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
+            ProtoLog.v(WmProtoLogGroups.WM_DEBUG_WINDOW_TRANSITIONS,
                     "Defer transition id=%d for TaskFragmentTransaction=%s", transitionId,
                     transaction.getTransactionToken());
             mDeferredTransitions.put(transaction.getTransactionToken(), transitionId);
@@ -494,13 +503,13 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
                     || mWindowOrganizerController.getTransitionController()
                     .getCollectingTransitionId() != transitionId) {
                 // This can happen when the transition is timeout or abort.
-                ProtoLog.w(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
+                ProtoLog.w(WmProtoLogGroups.WM_DEBUG_WINDOW_TRANSITIONS,
                         "Deferred transition id=%d has been continued before the"
                                 + " TaskFragmentTransaction=%s is finished",
                         transitionId, transactionToken);
                 return;
             }
-            ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
+            ProtoLog.v(WmProtoLogGroups.WM_DEBUG_WINDOW_TRANSITIONS,
                     "Continue transition id=%d for TaskFragmentTransaction=%s", transitionId,
                     transactionToken);
             mWindowOrganizerController.getTransitionController().continueTransitionReady();
@@ -545,6 +554,10 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
                         "Replacing existing organizer currently unsupported");
             }
 
+            if (pid <= 0) {
+                throw new IllegalStateException("Cannot register from invalid pid: " + pid);
+            }
+
             if (restoreFromCachedStateIfPossible(organizer, pid, uid, outSavedState)) {
                 return;
             }
@@ -575,8 +588,29 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
         }
 
         mCachedTaskFragmentOrganizerStates.remove(cachedState);
-        outSavedState.putAll(cachedState.mSavedState);
         cachedState.restore(organizer, pid);
+        outSavedState.putAll(cachedState.mSavedState);
+
+        // Collect the organized TfInfo and TfParentInfo in the system.
+        final ArrayList<TaskFragmentInfo> infos = new ArrayList<>();
+        final ArrayMap<Integer, Task> tasks = new ArrayMap<>();
+        final int fragmentCount = cachedState.mOrganizedTaskFragments.size();
+        for (int j = 0; j < fragmentCount; j++) {
+            final TaskFragment tf = cachedState.mOrganizedTaskFragments.get(j);
+            infos.add(tf.getTaskFragmentInfo());
+            if (!tasks.containsKey(tf.getTask().mTaskId)) {
+                tasks.put(tf.getTask().mTaskId, tf.getTask());
+            }
+        }
+        outSavedState.putParcelableArrayList(KEY_RESTORE_TASK_FRAGMENTS_INFO, infos);
+
+        final ArrayList<TaskFragmentParentInfo> parentInfos = new ArrayList<>();
+        for (int j = tasks.size() - 1; j >= 0; j--) {
+            parentInfos.add(tasks.valueAt(j).getTaskFragmentParentInfo());
+        }
+        outSavedState.putParcelableArrayList(KEY_RESTORE_TASK_FRAGMENT_PARENT_INFO,
+                parentInfos);
+
         mTaskFragmentOrganizerState.put(organizer.asBinder(), cachedState);
         mPendingTaskFragmentEvents.put(organizer.asBinder(), new ArrayList<>());
         return true;

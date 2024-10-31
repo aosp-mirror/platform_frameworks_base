@@ -18,14 +18,12 @@ package com.android.systemui.keyguard.domain.interactor
 
 import android.animation.ValueAnimator
 import com.android.app.animation.Interpolators
-import com.android.app.tracing.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.KeyguardWmStateRefactor
-import com.android.systemui.keyguard.data.repository.BiometricSettingsRepository
-import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionModeOnCanceled
@@ -38,7 +36,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 @SysUISingleton
 class FromGoneTransitionInteractor
@@ -54,9 +52,7 @@ constructor(
     powerInteractor: PowerInteractor,
     private val communalSceneInteractor: CommunalSceneInteractor,
     keyguardOcclusionInteractor: KeyguardOcclusionInteractor,
-    private val biometricSettingsRepository: BiometricSettingsRepository,
-    private val keyguardRepository: KeyguardRepository,
-    private val keyguardEnabledInteractor: KeyguardEnabledInteractor,
+    private val keyguardLockWhileAwakeInteractor: KeyguardLockWhileAwakeInteractor,
 ) :
     TransitionInteractor(
         fromState = KeyguardState.GONE,
@@ -73,13 +69,14 @@ constructor(
         if (SceneContainerFlag.isEnabled) return
         listenForGoneToAodOrDozing()
         listenForGoneToDreaming()
-        listenForGoneToLockscreenOrHub()
+        listenForGoneToLockscreenOrHubOrOccluded()
         listenForGoneToOccluded()
-        listenForGoneToDreamingLockscreenHosted()
     }
 
     fun showKeyguard() {
-        scope.launch("$TAG#showKeyguard") { startTransitionTo(KeyguardState.LOCKSCREEN) }
+        scope.launch("$TAG#showKeyguard") {
+            startTransitionTo(KeyguardState.LOCKSCREEN, ownerReason = "showKeyguard()")
+        }
     }
 
     /**
@@ -89,55 +86,36 @@ constructor(
      */
     private fun listenForGoneToOccluded() {
         scope.launch("$TAG#listenForGoneToOccluded") {
-            keyguardInteractor.showDismissibleKeyguard
-                .filterRelevantKeyguardState()
-                .sample(keyguardInteractor.isKeyguardOccluded, ::Pair)
-                .collect { (_, isKeyguardOccluded) ->
-                    if (isKeyguardOccluded) {
-                        startTransitionTo(
-                            KeyguardState.OCCLUDED,
-                            ownerReason = "Dismissible keyguard with occlusion"
-                        )
-                    }
+            keyguardInteractor.showDismissibleKeyguard.filterRelevantKeyguardState().collect {
+                if (keyguardInteractor.isKeyguardOccluded.value) {
+                    startTransitionTo(
+                        KeyguardState.OCCLUDED,
+                        ownerReason = "Dismissible keyguard with occlusion",
+                    )
                 }
+            }
         }
     }
 
     // Primarily for when the user chooses to lock down the device
-    private fun listenForGoneToLockscreenOrHub() {
+    private fun listenForGoneToLockscreenOrHubOrOccluded() {
         if (KeyguardWmStateRefactor.isEnabled) {
-            scope.launch("$TAG#listenForGoneToLockscreenOrHub") {
-                biometricSettingsRepository.isCurrentUserInLockdown
-                    .distinctUntilChanged()
-                    .filterRelevantKeyguardStateAnd { inLockdown -> inLockdown }
+            scope.launch {
+                keyguardLockWhileAwakeInteractor.lockWhileAwakeEvents
+                    .filterRelevantKeyguardState()
                     .sample(communalSceneInteractor.isIdleOnCommunalNotEditMode, ::Pair)
-                    .collect { (_, isIdleOnCommunal) ->
+                    .collect { (lockReason, idleOnCommunal) ->
                         val to =
-                            if (isIdleOnCommunal) {
+                            if (idleOnCommunal) {
                                 KeyguardState.GLANCEABLE_HUB
                             } else {
                                 KeyguardState.LOCKSCREEN
                             }
-                        startTransitionTo(to, ownerReason = "User initiated lockdown")
-                    }
-            }
-
-            scope.launch {
-                keyguardRepository.isKeyguardEnabled
-                    .filterRelevantKeyguardStateAnd { enabled -> enabled }
-                    .sample(keyguardEnabledInteractor.showKeyguardWhenReenabled)
-                    .filter { reshow -> reshow }
-                    .collect {
-                        startTransitionTo(
-                            KeyguardState.LOCKSCREEN,
-                            ownerReason =
-                                "Keyguard was re-enabled, and we weren't GONE when it " +
-                                    "was originally disabled"
-                        )
+                        startTransitionTo(to, ownerReason = "lockWhileAwake: $lockReason")
                     }
             }
         } else {
-            scope.launch("$TAG#listenForGoneToLockscreenOrHub") {
+            scope.launch("$TAG#listenForGoneToLockscreenOrHubOrOccluded") {
                 keyguardInteractor.isKeyguardShowing
                     .filterRelevantKeyguardStateAnd { isKeyguardShowing -> isKeyguardShowing }
                     .sample(communalSceneInteractor.isIdleOnCommunalNotEditMode, ::Pair)
@@ -145,32 +123,24 @@ constructor(
                         val to =
                             if (isIdleOnCommunal) {
                                 KeyguardState.GLANCEABLE_HUB
+                            } else if (keyguardInteractor.isKeyguardOccluded.value) {
+                                KeyguardState.OCCLUDED
                             } else {
                                 KeyguardState.LOCKSCREEN
                             }
-                        startTransitionTo(to)
+                        startTransitionTo(
+                            to,
+                            ownerReason = "keyguard interactor says keyguard is showing",
+                        )
                     }
             }
-        }
-    }
-
-    private fun listenForGoneToDreamingLockscreenHosted() {
-        scope.launch("$TAG#listenForGoneToDreamingLockscreenHosted") {
-            keyguardInteractor.isActiveDreamLockscreenHosted
-                .filterRelevantKeyguardStateAnd { isActiveDreamLockscreenHosted ->
-                    isActiveDreamLockscreenHosted
-                }
-                .collect { startTransitionTo(KeyguardState.DREAMING_LOCKSCREEN_HOSTED) }
         }
     }
 
     private fun listenForGoneToDreaming() {
         scope.launch("$TAG#listenForGoneToDreaming") {
             keyguardInteractor.isAbleToDream
-                .sample(keyguardInteractor.isActiveDreamLockscreenHosted, ::Pair)
-                .filterRelevantKeyguardStateAnd { (isAbleToDream, isActiveDreamLockscreenHosted) ->
-                    isAbleToDream && !isActiveDreamLockscreenHosted
-                }
+                .filterRelevantKeyguardStateAnd { isAbleToDream -> isAbleToDream }
                 .collect { startTransitionTo(KeyguardState.DREAMING) }
         }
     }
@@ -178,7 +148,7 @@ constructor(
     private fun listenForGoneToAodOrDozing() {
         scope.launch("$TAG#listenForGoneToAodOrDozing") {
             listenForSleepTransition(
-                modeOnCanceledFromStartedStep = { TransitionModeOnCanceled.RESET },
+                modeOnCanceledFromStartedStep = { TransitionModeOnCanceled.RESET }
             )
         }
     }

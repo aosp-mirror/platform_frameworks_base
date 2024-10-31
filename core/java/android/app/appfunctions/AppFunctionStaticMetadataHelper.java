@@ -27,9 +27,9 @@ import java.util.Objects;
 /**
  * Contains constants and helper related to static metadata represented with {@code
  * com.android.server.appsearch.appsindexer.appsearchtypes.AppFunctionStaticMetadata}.
- * <p>
- * The constants listed here **must not change** and be kept consistent with the canonical
- * static metadata class.
+ *
+ * <p>The constants listed here **must not change** and be kept consistent with the canonical static
+ * metadata class.
  *
  * @hide
  */
@@ -37,17 +37,19 @@ import java.util.Objects;
 public class AppFunctionStaticMetadataHelper {
     public static final String STATIC_SCHEMA_TYPE = "AppFunctionStaticMetadata";
     public static final String STATIC_PROPERTY_ENABLED_BY_DEFAULT = "enabledByDefault";
+    public static final String STATIC_PROPERTY_RESTRICT_CALLERS_WITH_EXECUTE_APP_FUNCTIONS =
+        "restrictCallersWithExecuteAppFunctions";
 
     public static final String APP_FUNCTION_STATIC_NAMESPACE = "app_functions";
+    public static final String PROPERTY_FUNCTION_ID = "functionId";
+    public static final String PROPERTY_PACKAGE_NAME = "packageName";
 
     // These are constants that has to be kept the same with {@code
     // com.android.server.appsearch.appsindexer.appsearchtypes.AppSearchHelper}.
     public static final String APP_FUNCTION_STATIC_METADATA_DB = "apps-db";
     public static final String APP_FUNCTION_INDEXER_PACKAGE = "android";
 
-    /**
-     * Returns a per-app static metadata schema name, to store all functions for that package.
-     */
+    /** Returns a per-app static metadata schema name, to store all functions for that package. */
     public static String getStaticSchemaNameForPackage(@NonNull String pkg) {
         return STATIC_SCHEMA_TYPE + "-" + Objects.requireNonNull(pkg);
     }
@@ -59,8 +61,8 @@ public class AppFunctionStaticMetadataHelper {
     }
 
     /**
-     * Returns the fully qualified Id used in AppSearch for the given package and function id
-     * app function static metadata.
+     * Returns the fully qualified Id used in AppSearch for the given package and function id app
+     * function static metadata.
      */
     public static String getStaticMetadataQualifiedId(String packageName, String functionId) {
         return DocumentIdUtil.createQualifiedId(

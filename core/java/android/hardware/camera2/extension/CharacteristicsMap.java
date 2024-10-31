@@ -36,7 +36,6 @@ import java.util.Set;
  * @hide
  */
 @SystemApi
-@FlaggedApi(Flags.FLAG_CONCERT_MODE)
 public class CharacteristicsMap {
     private final HashMap<String, CameraCharacteristics> mCharMap;
 
@@ -46,7 +45,6 @@ public class CharacteristicsMap {
      * @param charsMap       Maps camera ids to respective
      *                       {@link CameraCharacteristics}
      */
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
     CharacteristicsMap(@NonNull Map<String, CameraMetadataNative> charsMap) {
         mCharMap = new HashMap<>();
         for (Map.Entry<String, CameraMetadataNative> entry : charsMap.entrySet()) {
@@ -59,7 +57,6 @@ public class CharacteristicsMap {
      *
      * @return Set of the camera ids stored in the map
      */
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
     @NonNull
     public Set<String> getCameraIds() {
         return mCharMap.keySet();
@@ -74,7 +71,6 @@ public class CharacteristicsMap {
      * @return Valid {@link CameraCharacteristics} instance of null
      *         in case the camera id is not part of the map
      */
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
     @Nullable
     public CameraCharacteristics get(@NonNull String cameraId) {
         return mCharMap.get(cameraId);

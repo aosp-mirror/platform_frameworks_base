@@ -128,6 +128,12 @@ public class ApnSetting implements Parcelable {
     /** APN type for RCS (Rich Communication Services). */
     @FlaggedApi(Flags.FLAG_CARRIER_ENABLED_SATELLITE_FLAG)
     public static final int TYPE_RCS = ApnTypes.RCS;
+    /** APN type for OEM_PAID networks (Automotive PANS) */
+    @FlaggedApi(Flags.FLAG_OEM_PAID_PRIVATE)
+    public static final int TYPE_OEM_PAID = 1 << 16; // TODO(b/366194627): ApnTypes.OEM_PAID;
+    /** APN type for OEM_PRIVATE networks (Automotive PANS) */
+    @FlaggedApi(Flags.FLAG_OEM_PAID_PRIVATE)
+    public static final int TYPE_OEM_PRIVATE = 1 << 17; // TODO(b/366194627): ApnTypes.OEM_PRIVATE;
 
     /** @hide */
     @IntDef(flag = true, prefix = {"TYPE_"}, value = {
@@ -146,7 +152,9 @@ public class ApnSetting implements Parcelable {
             TYPE_BIP,
             TYPE_VSIM,
             TYPE_ENTERPRISE,
-            TYPE_RCS
+            TYPE_RCS,
+            TYPE_OEM_PAID,
+            TYPE_OEM_PRIVATE,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ApnType {
@@ -375,6 +383,27 @@ public class ApnSetting implements Parcelable {
     @SystemApi
     public static final String TYPE_RCS_STRING = "rcs";
 
+    /**
+     * APN type for OEM_PAID networks (Automotive PANS)
+     *
+     * Note: String representations of APN types are intended for system apps to communicate with
+     * modem components or carriers. Non-system apps should use the integer variants instead.
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_OEM_PAID_PRIVATE)
+    @SystemApi
+    public static final String TYPE_OEM_PAID_STRING = "oem_paid";
+
+    /**
+     * APN type for OEM_PRIVATE networks (Automotive PANS)
+     *
+     * Note: String representations of APN types are intended for system apps to communicate with
+     * modem components or carriers. Non-system apps should use the integer variants instead.
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_OEM_PAID_PRIVATE)
+    @SystemApi
+    public static final String TYPE_OEM_PRIVATE_STRING = "oem_private";
 
     /** @hide */
     @IntDef(prefix = { "AUTH_TYPE_" }, value = {
@@ -489,6 +518,8 @@ public class ApnSetting implements Parcelable {
         APN_TYPE_STRING_MAP.put(TYPE_VSIM_STRING, TYPE_VSIM);
         APN_TYPE_STRING_MAP.put(TYPE_BIP_STRING, TYPE_BIP);
         APN_TYPE_STRING_MAP.put(TYPE_RCS_STRING, TYPE_RCS);
+        APN_TYPE_STRING_MAP.put(TYPE_OEM_PAID_STRING, TYPE_OEM_PAID);
+        APN_TYPE_STRING_MAP.put(TYPE_OEM_PRIVATE_STRING, TYPE_OEM_PRIVATE);
 
         APN_TYPE_INT_MAP = new ArrayMap<>();
         APN_TYPE_INT_MAP.put(TYPE_DEFAULT, TYPE_DEFAULT_STRING);
@@ -507,6 +538,8 @@ public class ApnSetting implements Parcelable {
         APN_TYPE_INT_MAP.put(TYPE_VSIM, TYPE_VSIM_STRING);
         APN_TYPE_INT_MAP.put(TYPE_BIP, TYPE_BIP_STRING);
         APN_TYPE_INT_MAP.put(TYPE_RCS, TYPE_RCS_STRING);
+        APN_TYPE_INT_MAP.put(TYPE_OEM_PAID, TYPE_OEM_PAID_STRING);
+        APN_TYPE_INT_MAP.put(TYPE_OEM_PRIVATE, TYPE_OEM_PRIVATE_STRING);
 
         PROTOCOL_STRING_MAP = new ArrayMap<>();
         PROTOCOL_STRING_MAP.put("IP", PROTOCOL_IP);
@@ -2383,7 +2416,8 @@ public class ApnSetting implements Parcelable {
         public ApnSetting build() {
             if ((mApnTypeBitmask & (TYPE_DEFAULT | TYPE_MMS | TYPE_SUPL | TYPE_DUN | TYPE_HIPRI
                     | TYPE_FOTA | TYPE_IMS | TYPE_CBS | TYPE_IA | TYPE_EMERGENCY | TYPE_MCX
-                    | TYPE_XCAP | TYPE_VSIM | TYPE_BIP | TYPE_ENTERPRISE | TYPE_RCS)) == 0
+                    | TYPE_XCAP | TYPE_VSIM | TYPE_BIP | TYPE_ENTERPRISE | TYPE_RCS | TYPE_OEM_PAID
+                    | TYPE_OEM_PRIVATE)) == 0
                 || TextUtils.isEmpty(mApnName) || TextUtils.isEmpty(mEntryName)) {
                 return null;
             }

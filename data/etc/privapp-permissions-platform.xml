@@ -572,6 +572,7 @@ applications that come with the platform
         <permission name="android.permission.READ_BLOCKED_NUMBERS" />
         <!-- Permission required for CTS test - PackageManagerTest -->
         <permission name="android.permission.DOMAIN_VERIFICATION_AGENT"/>
+        <permission name="android.permission.VERIFICATION_AGENT"/>
         <!-- Permission required for CTS test CtsInputTestCases -->
         <permission name="android.permission.OVERRIDE_SYSTEM_KEY_BEHAVIOR_IN_FOCUSED_WINDOW" />
         <!-- Permission required for CTS test - PackageManagerShellCommandInstallTest -->
@@ -580,6 +581,16 @@ applications that come with the platform
         <permission name="android.permission.PREPARE_FACTORY_RESET" />
         <!-- Permission required for CTS test - FileIntegrityManagerTest -->
         <permission name="android.permission.SETUP_FSVERITY" />
+        <!-- Permissions required for CTS test - AppFunctionManagerTest -->
+        <permission name="android.permission.EXECUTE_APP_FUNCTIONS_TRUSTED" />
+        <permission name="android.permission.EXECUTE_APP_FUNCTIONS" />
+        <!-- Permission required for CTS test - CtsNfcTestCases -->
+        <permission name="android.permission.NFC_SET_CONTROLLER_ALWAYS_ON" />
+        <!-- Permission required for CTS test - CtsAppTestCases -->
+        <permission name="android.permission.KILL_UID" />
+        <!-- Permission required for CTS test - AdvancedProtectionManagerTest -->
+        <permission name="android.permission.SET_ADVANCED_PROTECTION_MODE" />
+        <permission name="android.permission.QUERY_ADVANCED_PROTECTION_MODE" />
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">
@@ -648,5 +659,10 @@ applications that come with the platform
    <privapp-permissions package="com.android.devicediagnostics">
         <permission name="android.permission.READ_PRIVILEGED_PHONE_STATE"/>
         <permission name="android.permission.BATTERY_STATS"/>
+        <permission name="android.permission.ENTER_TRADE_IN_MODE"/>
+    </privapp-permissions>
+
+    <privapp-permissions package="com.android.multiuser">
+        <permission name="android.permission.MANAGE_USERS"/>
     </privapp-permissions>
 </permissions>

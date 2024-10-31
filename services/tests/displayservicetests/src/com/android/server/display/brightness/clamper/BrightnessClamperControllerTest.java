@@ -226,7 +226,7 @@ public class BrightnessClamperControllerTest {
         float clampedBrightness = 0.6f;
         float customAnimationRate = 0.01f;
         when(mMockClamper.getBrightnessCap()).thenReturn(clampedBrightness);
-        when(mMockClamper.getType()).thenReturn(BrightnessClamper.Type.THERMAL);
+        when(mMockClamper.getType()).thenReturn(BrightnessClamper.Type.POWER);
         when(mMockClamper.getCustomAnimationRate()).thenReturn(customAnimationRate);
         when(mMockClamper.isActive()).thenReturn(false);
         mTestInjector.mCapturedChangeListener.onChanged();
@@ -250,7 +250,7 @@ public class BrightnessClamperControllerTest {
         float clampedBrightness = 0.6f;
         float customAnimationRate = 0.01f;
         when(mMockClamper.getBrightnessCap()).thenReturn(clampedBrightness);
-        when(mMockClamper.getType()).thenReturn(BrightnessClamper.Type.THERMAL);
+        when(mMockClamper.getType()).thenReturn(BrightnessClamper.Type.POWER);
         when(mMockClamper.getCustomAnimationRate()).thenReturn(customAnimationRate);
         when(mMockClamper.isActive()).thenReturn(true);
         mTestInjector.mCapturedChangeListener.onChanged();
@@ -274,7 +274,7 @@ public class BrightnessClamperControllerTest {
         float clampedBrightness = 0.8f;
         float customAnimationRate = 0.01f;
         when(mMockClamper.getBrightnessCap()).thenReturn(clampedBrightness);
-        when(mMockClamper.getType()).thenReturn(BrightnessClamper.Type.THERMAL);
+        when(mMockClamper.getType()).thenReturn(BrightnessClamper.Type.POWER);
         when(mMockClamper.getCustomAnimationRate()).thenReturn(customAnimationRate);
         when(mMockClamper.isActive()).thenReturn(true);
         mTestInjector.mCapturedChangeListener.onChanged();
@@ -298,7 +298,7 @@ public class BrightnessClamperControllerTest {
         float clampedBrightness = 0.6f;
         float customAnimationRate = 0.01f;
         when(mMockClamper.getBrightnessCap()).thenReturn(clampedBrightness);
-        when(mMockClamper.getType()).thenReturn(BrightnessClamper.Type.THERMAL);
+        when(mMockClamper.getType()).thenReturn(BrightnessClamper.Type.POWER);
         when(mMockClamper.getCustomAnimationRate()).thenReturn(customAnimationRate);
         when(mMockClamper.isActive()).thenReturn(true);
         mTestInjector.mCapturedChangeListener.onChanged();

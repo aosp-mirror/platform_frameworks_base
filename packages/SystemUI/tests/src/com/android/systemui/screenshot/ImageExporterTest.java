@@ -47,7 +47,6 @@ import androidx.exifinterface.media.ExifInterface;
 import androidx.test.filters.MediumTest;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.flags.FakeFeatureFlags;
 
 import com.google.common.util.concurrent.ListenableFuture;
 
@@ -79,7 +78,6 @@ public class ImageExporterTest extends SysuiTestCase {
     private static final ZonedDateTime CAPTURE_TIME =
             ZonedDateTime.of(LocalDateTime.of(2020, 12, 15, 13, 15), ZoneId.of("America/New_York"));
 
-    private FakeFeatureFlags mFeatureFlags = new FakeFeatureFlags();
     @Mock
     private ContentResolver mMockContentResolver;
 
@@ -125,7 +123,7 @@ public class ImageExporterTest extends SysuiTestCase {
     @Test
     public void testImageExport() throws ExecutionException, InterruptedException, IOException {
         ContentResolver contentResolver = mContext.getContentResolver();
-        ImageExporter exporter = new ImageExporter(contentResolver, mFeatureFlags);
+        ImageExporter exporter = new ImageExporter(contentResolver);
 
         UUID requestId = UUID.fromString("3c11da99-9284-4863-b1d5-6f3684976814");
         Bitmap original = createCheckerBitmap(10, 10, 10);
@@ -191,7 +189,7 @@ public class ImageExporterTest extends SysuiTestCase {
         // metadata are not affected by the specified file name.
         final String customizedFileName = "customized_file_name";
         ContentResolver contentResolver = mContext.getContentResolver();
-        ImageExporter exporter = new ImageExporter(contentResolver, mFeatureFlags);
+        ImageExporter exporter = new ImageExporter(contentResolver);
 
         UUID requestId = UUID.fromString("3c11da99-9284-4863-b1d5-6f3684976814");
         Bitmap original = createCheckerBitmap(10, 10, 10);
@@ -228,7 +226,7 @@ public class ImageExporterTest extends SysuiTestCase {
 
     @Test
     public void testSetUser() {
-        ImageExporter exporter = new ImageExporter(mMockContentResolver, mFeatureFlags);
+        ImageExporter exporter = new ImageExporter(mMockContentResolver);
 
         UserHandle imageUserHande = UserHandle.of(10);
 

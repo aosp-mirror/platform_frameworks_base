@@ -20,44 +20,39 @@ import static android.app.appfunctions.flags.Flags.enableAppFunctionManager;
 
 import android.annotation.NonNull;
 import android.content.Context;
-import android.content.pm.PackageManager;
 
 /**
- * Represents the system configuration of support for the {@code AppFunctionManager} and
- * associated systems.
+ * Represents the system configuration of support for the {@code AppFunctionManager} and associated
+ * systems.
  *
  * @hide
  */
 public class AppFunctionManagerConfiguration {
-    private final Context mContext;
-
     /**
      * Constructs a new instance of {@code AppFunctionManagerConfiguration}.
+     *
      * @param context context
      */
     public AppFunctionManagerConfiguration(@NonNull final Context context) {
-        mContext = context;
+        // Context can be used to access system features, etc.
     }
 
     /**
      * Indicates whether the current target is intended to support {@code AppFunctionManager}.
+     *
      * @return {@code true} if supported; otherwise {@code false}
      */
     public boolean isSupported() {
-        return enableAppFunctionManager() && !isWatch();
-
+        return enableAppFunctionManager();
     }
 
     /**
      * Indicates whether the current target is intended to support {@code AppFunctionManager}.
+     *
      * @param context context
      * @return {@code true} if supported; otherwise {@code false}
      */
     public static boolean isSupported(@NonNull final Context context) {
         return new AppFunctionManagerConfiguration(context).isSupported();
-    }
-
-    private boolean isWatch() {
-        return mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WATCH);
     }
 }

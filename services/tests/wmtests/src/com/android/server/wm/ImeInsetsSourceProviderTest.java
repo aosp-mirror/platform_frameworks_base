@@ -51,6 +51,7 @@ public class ImeInsetsSourceProviderTest extends WindowTestsBase {
     public void setUp() throws Exception {
         mImeProvider = mDisplayContent.getInsetsStateController().getImeSourceProvider();
         mImeProvider.getSource().setVisible(true);
+        mWm.mAnimator.ready();
     }
 
     @Test
@@ -151,8 +152,8 @@ public class ImeInsetsSourceProviderTest extends WindowTestsBase {
         assertFalse(mImeProvider.isScheduledAndReadyToShowIme());
         assertFalse(mImeProvider.isImeShowing());
 
-        // Starting the afterPrepareSurfacesRunnable picks up the show scheduled above.
-        mWm.mAnimator.executeAfterPrepareSurfacesRunnables();
+        // Waiting for the afterPrepareSurfacesRunnable picks up the show scheduled above.
+        waitUntilWindowAnimatorIdle();
         // No longer scheduled as it was already shown.
         assertFalse(mImeProvider.isScheduledAndReadyToShowIme());
         assertTrue(mImeProvider.isImeShowing());

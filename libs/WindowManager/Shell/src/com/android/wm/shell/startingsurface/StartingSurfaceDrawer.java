@@ -33,7 +33,6 @@ import android.hardware.display.DisplayManager;
 import android.util.SparseArray;
 import android.view.IWindow;
 import android.view.SurfaceControl;
-import android.view.SurfaceSession;
 import android.view.WindowManager;
 import android.view.WindowlessWindowManager;
 import android.window.SplashScreenView;
@@ -204,7 +203,7 @@ public class StartingSurfaceDrawer {
         @Override
         protected SurfaceControl getParentSurface(IWindow window,
                 WindowManager.LayoutParams attrs) {
-            final SurfaceControl.Builder builder = new SurfaceControl.Builder(new SurfaceSession())
+            final SurfaceControl.Builder builder = new SurfaceControl.Builder()
                     .setContainerLayer()
                     .setName("Windowless window")
                     .setHidden(false)

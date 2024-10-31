@@ -27,9 +27,9 @@ android_test {
     // Include all test java files.
     srcs: ["src/**/*.java"],
     libs: [
-        "android.test.runner",
-        "org.apache.http.legacy",
-        "android.test.base",
+        "android.test.runner.stubs",
+        "org.apache.http.legacy.stubs",
+        "android.test.base.stubs",
     ],
     static_libs: [
         "junit",

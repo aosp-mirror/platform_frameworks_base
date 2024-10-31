@@ -25,17 +25,26 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.fastCoerceAtLeast
 import com.android.compose.nestedscroll.PriorityNestedScrollConnection
+import com.android.compose.nestedscroll.ScrollController
+import kotlin.math.max
 import kotlin.math.roundToInt
+import kotlin.math.tanh
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @Composable
 fun Modifier.stackVerticalOverscroll(
     coroutineScope: CoroutineScope,
-    canScrollForward: () -> Boolean
+    canScrollForward: () -> Boolean,
 ): Modifier {
+    val screenHeight =
+        with(LocalDensity.current) { LocalConfiguration.current.screenHeightDp.dp.toPx() }
     val overscrollOffset = remember { Animatable(0f) }
     val stackNestedScrollConnection = remember {
         NotificationStackNestedScrollConnection(
@@ -43,7 +52,13 @@ fun Modifier.stackVerticalOverscroll(
             canScrollForward = canScrollForward,
             onScroll = { offsetAvailable ->
                 coroutineScope.launch {
-                    overscrollOffset.snapTo(overscrollOffset.value + offsetAvailable * 0.3f)
+                    val maxProgress = screenHeight * 0.2f
+                    val tilt = 3f
+                    var offset =
+                        overscrollOffset.value +
+                            maxProgress * tanh(x = offsetAvailable / (maxProgress * tilt))
+                    offset = max(offset, -1f * maxProgress)
+                    overscrollOffset.snapTo(offset)
                 }
             },
             onStop = { velocityAvailable ->
@@ -51,10 +66,10 @@ fun Modifier.stackVerticalOverscroll(
                     overscrollOffset.animateTo(
                         targetValue = 0f,
                         initialVelocity = velocityAvailable,
-                        animationSpec = tween()
+                        animationSpec = tween(),
                     )
                 }
-            }
+            },
         )
     }
 
@@ -74,27 +89,34 @@ fun NotificationStackNestedScrollConnection(
 ): PriorityNestedScrollConnection {
     return PriorityNestedScrollConnection(
         orientation = Orientation.Vertical,
-        canStartPreScroll = { _, _ -> false },
-        canStartPostScroll = { offsetAvailable, offsetBeforeStart ->
+        canStartPreScroll = { _, _, _ -> false },
+        canStartPostScroll = { offsetAvailable, offsetBeforeStart, _ ->
             offsetAvailable < 0f && offsetBeforeStart < 0f && !canScrollForward()
         },
         canStartPostFling = { velocityAvailable -> velocityAvailable < 0f && !canScrollForward() },
-        canContinueScroll = { source ->
-            if (source == NestedScrollSource.SideEffect) {
-                stackOffset() > STACK_OVERSCROLL_FLING_MIN_OFFSET
-            } else {
-                true
+        onStart = { firstScroll ->
+            onStart(firstScroll)
+            object : ScrollController {
+                override fun onScroll(deltaScroll: Float, source: NestedScrollSource): Float {
+                    val minOffset = 0f
+                    val consumed = deltaScroll.fastCoerceAtLeast(minOffset - stackOffset())
+                    if (consumed != 0f) {
+                        onScroll(consumed)
+                    }
+                    return consumed
+                }
+
+                override suspend fun onStop(initialVelocity: Float): Float {
+                    onStop(initialVelocity)
+                    return initialVelocity
+                }
+
+                override fun onCancel() {
+                    onStop(0f)
+                }
+
+                override fun canStopOnPreFling() = false
             }
-        },
-        canScrollOnFling = true,
-        onStart = { offsetAvailable -> onStart(offsetAvailable) },
-        onScroll = { offsetAvailable ->
-            onScroll(offsetAvailable)
-            offsetAvailable
-        },
-        onStop = { velocityAvailable ->
-            onStop(velocityAvailable)
-            velocityAvailable
         },
     )
 }

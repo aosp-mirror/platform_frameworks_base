@@ -18,13 +18,13 @@ package com.android.systemui.shared.system;
 
 import android.os.RemoteException;
 import android.util.Log;
-import android.view.IRecentsAnimationController;
 import android.view.SurfaceControl;
 import android.window.PictureInPictureSurfaceTransaction;
 import android.window.TaskSnapshot;
 
 import com.android.internal.os.IResultReceiver;
 import com.android.systemui.shared.recents.model.ThumbnailData;
+import com.android.wm.shell.recents.IRecentsAnimationController;
 
 public class RecentsAnimationControllerCompat {
 
@@ -55,14 +55,6 @@ public class RecentsAnimationControllerCompat {
             mAnimationController.setInputConsumerEnabled(enabled);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to set input consumer enabled state", e);
-        }
-    }
-
-    public void setAnimationTargetsBehindSystemBars(boolean behindSystemBars) {
-        try {
-            mAnimationController.setAnimationTargetsBehindSystemBars(behindSystemBars);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Failed to set whether animation targets are behind system bars", e);
         }
     }
 
@@ -103,22 +95,6 @@ public class RecentsAnimationControllerCompat {
         }
     }
 
-    public void setDeferCancelUntilNextTransition(boolean defer, boolean screenshot) {
-        try {
-            mAnimationController.setDeferCancelUntilNextTransition(defer, screenshot);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Failed to set deferred cancel with screenshot", e);
-        }
-    }
-
-    public void cleanupScreenshot() {
-        try {
-            mAnimationController.cleanupScreenshot();
-        } catch (RemoteException e) {
-            Log.e(TAG, "Failed to clean up screenshot of recents animation", e);
-        }
-    }
-
     /**
      * @see {{@link IRecentsAnimationController#setWillFinishToHome(boolean)}}.
      */
@@ -131,18 +107,6 @@ public class RecentsAnimationControllerCompat {
     }
 
     /**
-     * @see IRecentsAnimationController#removeTask
-     */
-    public boolean removeTask(int taskId) {
-        try {
-            return mAnimationController.removeTask(taskId);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Failed to remove remote animation target", e);
-            return false;
-        }
-    }
-
-    /**
      * @see IRecentsAnimationController#detachNavigationBarFromApp
      */
     public void detachNavigationBarFromApp(boolean moveHomeToTop) {
@@ -150,17 +114,6 @@ public class RecentsAnimationControllerCompat {
             mAnimationController.detachNavigationBarFromApp(moveHomeToTop);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to detach the navigation bar from app", e);
-        }
-    }
-
-    /**
-     * @see IRecentsAnimationController#animateNavigationBarToApp(long)
-     */
-    public void animateNavigationBarToApp(long duration) {
-        try {
-            mAnimationController.animateNavigationBarToApp(duration);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Failed to animate the navigation bar to app", e);
         }
     }
 }

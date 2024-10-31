@@ -19,9 +19,34 @@ android_test {
         "platform-test-annotations",
         "services.core",
         "truth",
+        "ApplicationSharedMemoryTestRule",
     ],
-    libs: ["android.test.runner"],
+    libs: ["android.test.runner.stubs.system"],
     platform_apis: true,
     certificate: "platform",
     test_suites: ["device-tests"],
+}
+
+test_module_config {
+    name: "FrameworksTimeServicesTests_time",
+    base: "FrameworksTimeServicesTests",
+    test_suites: ["device-tests"],
+    include_filters: [
+        "com.android.server.timezonedetector.",
+        "com.android.server.timedetector.",
+    ],
+}
+
+test_module_config {
+    name: "FrameworksTimeServicesTests_server_timedetector",
+    base: "FrameworksTimeServicesTests",
+    test_suites: ["device-tests"],
+    include_filters: ["com.android.server.timedetector."],
+}
+
+test_module_config {
+    name: "FrameworksTimeServicesTests_server_timezonedetector",
+    base: "FrameworksTimeServicesTests",
+    test_suites: ["device-tests"],
+    include_filters: ["com.android.server.timezonedetector."],
 }

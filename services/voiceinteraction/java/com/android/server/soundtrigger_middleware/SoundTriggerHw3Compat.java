@@ -36,6 +36,8 @@ import android.os.RemoteException;
 import android.os.ServiceSpecificException;
 import android.os.SystemClock;
 
+import com.android.server.FgThread;
+
 public class SoundTriggerHw3Compat implements ISoundTriggerHal {
     private final @NonNull ISoundTriggerHw mDriver;
     private final @NonNull Runnable mRebootRunnable;
@@ -217,7 +219,12 @@ public class SoundTriggerHw3Compat implements ISoundTriggerHal {
 
         @Override
         public void onResourcesAvailable() {
-            mDelegate.onResourcesAvailable();
+            // This call does not need to be sequenced relative to sessions on the upper levels.
+            // That is, if a new session gets this callback or if a already detached session gets
+            // this callback, because it is delayed, it doesn't matter, since this callback is
+            // purely informative and does not mutate any state -- it merely causes an already legal
+            // operation to be possibly re-attempted.
+            FgThread.getExecutor().execute(mDelegate::onResourcesAvailable);
         }
 
         @Override

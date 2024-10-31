@@ -34,7 +34,7 @@ import java.util.Map;
 
 /**
  * MediaMuxer facilitates muxing elementary streams. Currently MediaMuxer supports MP4, Webm
- * and 3GP file as the output. It also supports muxing B-frames in MP4 since Android Nougat.
+ * and 3GP file as the output. It also supports muxing B-frames in MP4 since Android Nougat MR1.
  * <p>
  * It is generally used like this:
  *
@@ -191,14 +191,14 @@ import java.util.Map;
     <td>&#9675;</td>
     <td>&#9679;</td>
    </tr>
-    <td align="center">Muxing B-Frames(bi-directional predicted frames)</td>
+    <td align="center">Muxing B-Frames (bi-directional predicted frames)</td>
     <td>&#9675;</td>
     <td>&#9675;</td>
     <td>&#9675;</td>
     <td>&#9675;</td>
     <td>&#9675;</td>
     <td>&#9675;</td>
-    <td>&#8277;</td>
+    <td>&#9675;</td>
     <td>&#8277;</td>
     <td>&#8277;</td>
    </tr>
@@ -584,45 +584,108 @@ final public class MediaMuxer {
      * The following table summarizes codec support for containers across android releases:
      *
      * <table>
-     *  <thead>
-     *   <tr>
-     *    <th rowspan=2>OS Version(s)</th>
-     *    <td colspan=3>Codec support</th>
-     *   </tr><tr>
-     *    <th>{@linkplain OutputFormat#MUXER_OUTPUT_MPEG_4 MP4}</th>
-     *    <th>{@linkplain OutputFormat#MUXER_OUTPUT_WEBM WEBM}</th>
-     *   </tr>
-     *  </thead>
-     *  <tbody>
-     *   <tr>
-     *    <td>{@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR2}</td>
-     *    <td rowspan=6>{@link MediaFormat#MIMETYPE_AUDIO_AAC AAC},<br>
-     *        {@link MediaFormat#MIMETYPE_AUDIO_AMR_NB NB-AMR},<br>
-     *        {@link MediaFormat#MIMETYPE_AUDIO_AMR_WB WB-AMR},<br>
-     *        {@link MediaFormat#MIMETYPE_VIDEO_H263 H.263},<br>
-     *        {@link MediaFormat#MIMETYPE_VIDEO_MPEG4 MPEG-4},<br>
-     *        {@link MediaFormat#MIMETYPE_VIDEO_AVC AVC} (H.264)</td>
-     *    <td rowspan=3>Not supported</td>
-     *   </tr><tr>
-     *    <td>{@link android.os.Build.VERSION_CODES#KITKAT}</td>
-     *   </tr><tr>
-     *    <td>{@link android.os.Build.VERSION_CODES#KITKAT_WATCH}</td>
-     *   </tr><tr>
-     *    <td>{@link android.os.Build.VERSION_CODES#LOLLIPOP}</td>
-     *    <td rowspan=3>{@link MediaFormat#MIMETYPE_AUDIO_VORBIS Vorbis},<br>
-     *        {@link MediaFormat#MIMETYPE_VIDEO_VP8 VP8}</td>
-     *   </tr><tr>
-     *    <td>{@link android.os.Build.VERSION_CODES#LOLLIPOP_MR1}</td>
-     *   </tr><tr>
-     *    <td>{@link android.os.Build.VERSION_CODES#M}</td>
-     *   </tr><tr>
-     *    <td>{@link android.os.Build.VERSION_CODES#N}</td>
-     *    <td>as above, plus<br>
-     *        {@link MediaFormat#MIMETYPE_VIDEO_HEVC HEVC} (H.265)</td>
-     *    <td>as above, plus<br>
-     *        {@link MediaFormat#MIMETYPE_VIDEO_VP9 VP9}</td>
-     *   </tr>
-     *  </tbody>
+     *   <thead>
+     *     <tr>
+     *       <th>Codec</th>
+     *       <th>{@linkplain OutputFormat#MUXER_OUTPUT_MPEG_4 MP4}</th>
+     *       <th>{@linkplain OutputFormat#MUXER_OUTPUT_WEBM WEBM}</th>
+     *       <th>{@linkplain OutputFormat#MUXER_OUTPUT_OGG OGG}</th>
+     *       <th>Supported From SDK version</th>
+     *     </tr>
+     *   </thead>
+     *   <tbody>
+     *     <tr>
+     *       <td>{@link MediaFormat#MIMETYPE_AUDIO_AAC AAC}</td>
+     *       <td>✓</td>
+     *       <td></td>
+     *       <td></td>
+     *       <td>17</td>
+     *     </tr>
+     *     <tr>
+     *       <td>{@link MediaFormat#MIMETYPE_AUDIO_AMR_NB NB-AMR}</td>
+     *       <td>✓</td>
+     *       <td></td>
+     *       <td></td>
+     *       <td>17</td>
+     *     </tr>
+     *     <tr>
+     *       <td>{@link MediaFormat#MIMETYPE_AUDIO_AMR_WB WB-AMR}</td>
+     *       <td>✓</td>
+     *       <td></td>
+     *       <td></td>
+     *       <td>17</td>
+     *     </tr>
+     *     <tr>
+     *       <td>{@link MediaFormat#MIMETYPE_VIDEO_H263 H.263}</td>
+     *       <td>✓</td>
+     *       <td></td>
+     *       <td></td>
+     *       <td>17</td>
+     *     </tr>
+     *     <tr>
+     *       <td>{@link MediaFormat#MIMETYPE_VIDEO_MPEG4 MPEG-4}</td>
+     *       <td>✓</td>
+     *       <td></td>
+     *       <td></td>
+     *       <td>17</td>
+     *     </tr>
+     *     <tr>
+     *       <td>{@link MediaFormat#MIMETYPE_VIDEO_AVC AVC} (H.264)</td>
+     *       <td>✓</td>
+     *       <td></td>
+     *       <td></td>
+     *       <td>17</td>
+     *     </tr>
+     *     <tr>
+     *       <td>{@link MediaFormat#MIMETYPE_AUDIO_VORBIS Vorbis}</td>
+     *       <td></td>
+     *       <td>✓</td>
+     *       <td></td>
+     *       <td>21</td>
+     *     </tr>
+     *     <tr>
+     *       <td>{@link MediaFormat#MIMETYPE_VIDEO_VP8 VP8}</td>
+     *       <td></td>
+     *       <td>✓</td>
+     *       <td></td>
+     *       <td>21</td>
+     *     </tr>
+     *     <tr>
+     *       <td>{@link MediaFormat#MIMETYPE_VIDEO_VP9 VP9}</td>
+     *       <td></td>
+     *       <td>✓</td>
+     *       <td></td>
+     *       <td>24</td>
+     *     </tr>
+     *     <tr>
+     *       <td>{@link MediaFormat#MIMETYPE_VIDEO_HEVC HEVC} (H.265)</td>
+     *       <td>✓</td>
+     *       <td></td>
+     *       <td></td>
+     *       <td>24</td>
+     *     </tr>
+     *     <tr>
+     *       <td>{@link MediaFormat#MIMETYPE_AUDIO_OPUS OPUS}</td>
+     *       <td></td>
+     *       <td>✓</td>
+     *       <td>✓</td>
+     *       <td>26</td>
+     *     </tr>
+     *     <tr>
+     *       <td>{@link MediaFormat#MIMETYPE_VIDEO_AV1 AV1}</td>
+     *       <td>✓</td>
+     *       <td></td>
+     *       <td></td>
+     *       <td>31</td>
+     *     </tr>
+     *     <tr>
+     *       <td>{@link MediaFormat#MIMETYPE_VIDEO_DOLBY_VISION Dolby Vision}</td>
+     *       <td>✓</td>
+     *       <td></td>
+     *       <td></td>
+     *       <td>32</td>
+     *     </tr>
+     *   </tbody>
      * </table>
      *
      * @param format The media format for the track.  This must not be an empty

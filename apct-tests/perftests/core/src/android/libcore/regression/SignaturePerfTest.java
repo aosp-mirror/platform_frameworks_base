@@ -15,8 +15,8 @@
  */
 package android.libcore.regression;
 
-import androidx.benchmark.BenchmarkState;
-import androidx.benchmark.junit4.BenchmarkRule;
+import android.perftests.utils.BenchmarkState;
+import android.perftests.utils.PerfStatusReporter;
 
 import androidx.test.filters.LargeTest;
 
@@ -41,7 +41,7 @@ import java.util.Map;
 @RunWith(JUnitParamsRunner.class)
 @LargeTest
 public class SignaturePerfTest {
-    @Rule public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
+    @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
 
     public static Collection<Object[]> getData() {
         return Arrays.asList(
@@ -117,7 +117,7 @@ public class SignaturePerfTest {
     @Parameters(method = "getData")
     public void timeSign(Algorithm algorithm, Implementation implementation) throws Exception {
         setUp(algorithm);
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             Signature signer;
             switch (implementation) {
@@ -140,7 +140,7 @@ public class SignaturePerfTest {
     @Parameters(method = "getData")
     public void timeVerify(Algorithm algorithm, Implementation implementation) throws Exception {
         setUp(algorithm);
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             Signature verifier;
             switch (implementation) {

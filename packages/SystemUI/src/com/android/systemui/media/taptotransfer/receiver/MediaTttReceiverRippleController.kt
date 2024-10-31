@@ -32,6 +32,7 @@ class MediaTttReceiverRippleController
 constructor(
     private val context: Context,
     private val windowManager: WindowManager,
+    private val mediaTttReceiverLogger: MediaTttReceiverLogger,
 ) {
 
     private var maxRippleWidth: Float = 0f
@@ -68,7 +69,9 @@ constructor(
         )
         rippleView.addOnAttachStateChangeListener(
             object : View.OnAttachStateChangeListener {
-                override fun onViewDetachedFromWindow(view: View) {}
+                override fun onViewDetachedFromWindow(view: View) {
+                    view.visibility = View.GONE
+                }
 
                 override fun onViewAttachedToWindow(view: View) {
                     if (view == null) {
@@ -80,7 +83,7 @@ constructor(
                     } else {
                         layoutRipple(attachedRippleView)
                     }
-                    attachedRippleView.expandRipple()
+                    attachedRippleView.expandRipple(mediaTttReceiverLogger)
                     attachedRippleView.removeOnAttachStateChangeListener(this)
                 }
             }
@@ -90,12 +93,12 @@ constructor(
     /** Expands the ripple to cover the screen. */
     fun expandToSuccessState(rippleView: ReceiverChipRippleView, onAnimationEnd: Runnable?) {
         layoutRipple(rippleView, isFullScreen = true)
-        rippleView.expandToFull(maxRippleHeight, onAnimationEnd)
+        rippleView.expandToFull(maxRippleHeight, mediaTttReceiverLogger, onAnimationEnd)
     }
 
     /** Collapses the ripple. */
     fun collapseRipple(rippleView: ReceiverChipRippleView, onAnimationEnd: Runnable? = null) {
-        rippleView.collapseRipple(onAnimationEnd)
+        rippleView.collapseRipple(mediaTttReceiverLogger, onAnimationEnd)
     }
 
     private fun layoutRipple(rippleView: ReceiverChipRippleView, isFullScreen: Boolean = false) {
@@ -125,7 +128,7 @@ constructor(
         iconRippleView.setMaxSize(radius * 0.8f, radius * 0.8f)
         iconRippleView.setCenter(
             width * 0.5f,
-            height - getReceiverIconSize() * 0.5f - getReceiverIconBottomMargin()
+            height - getReceiverIconSize() * 0.5f - getReceiverIconBottomMargin(),
         )
         iconRippleView.setColor(getRippleColor(), RIPPLE_OPACITY)
     }

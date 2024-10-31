@@ -136,7 +136,6 @@ public final class ExtensionSessionConfiguration {
      * or the color space implied by the dataSpace passed into an {@link ImageReader}'s
      * constructor.</p>
      */
-    @FlaggedApi(Flags.FLAG_EXTENSION_10_BIT)
     public void setColorSpace(@NonNull ColorSpace.Named colorSpace) {
         mColorSpace = colorSpace.ordinal();
         for (OutputConfiguration outputConfiguration : mOutputs) {
@@ -150,7 +149,6 @@ public final class ExtensionSessionConfiguration {
     /**
      * Clear the color space, such that the default color space will be used.
      */
-    @FlaggedApi(Flags.FLAG_EXTENSION_10_BIT)
     public void clearColorSpace() {
         mColorSpace = ColorSpaceProfiles.UNSPECIFIED;
         for (OutputConfiguration outputConfiguration : mOutputs) {
@@ -167,7 +165,6 @@ public final class ExtensionSessionConfiguration {
      * @return the currently set color space, or null
      *         if not set
      */
-    @FlaggedApi(Flags.FLAG_EXTENSION_10_BIT)
     @SuppressLint("MethodNameUnits")
     public @Nullable ColorSpace getColorSpace() {
         if (mColorSpace != ColorSpaceProfiles.UNSPECIFIED) {

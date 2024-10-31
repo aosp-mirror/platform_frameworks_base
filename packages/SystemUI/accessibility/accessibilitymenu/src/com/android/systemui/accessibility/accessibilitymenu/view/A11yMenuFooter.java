@@ -55,6 +55,8 @@ public class A11yMenuFooter {
     private View mBottomListDivider;
     private final A11yMenuFooterCallBack mCallBack;
     private final ViewGroup mMenuLayout;
+    private ViewGroup mFooterContainer;
+    private int mFooterContainerBaseHeight = 0;
     private int mRightToLeftDirection = LAYOUT_DIRECTION_LTR;
 
     public A11yMenuFooter(ViewGroup menuLayout, A11yMenuFooterCallBack callBack) {
@@ -74,6 +76,15 @@ public class A11yMenuFooter {
                 ? mPageRightBtn : mPageLeftBtn;
     }
 
+    void adjustFooterToDensityScale(float densityScale) {
+        mFooterContainer.getLayoutParams().height =
+                (int) (mFooterContainerBaseHeight / densityScale);
+    }
+
+    int getHeight() {
+        return mFooterContainer.getLayoutParams().height;
+    }
+
     /** Sets right to left direction of footer. */
     public void updateRightToLeftDirection(Configuration configuration) {
         mRightToLeftDirection = TextUtils.getLayoutDirectionFromLocale(
@@ -85,8 +96,9 @@ public class A11yMenuFooter {
     }
 
     private void configureFooterLayout(ViewGroup menuLayout) {
-        ViewGroup footerContainer = menuLayout.findViewById(R.id.footerlayout);
-        footerContainer.setVisibility(View.VISIBLE);
+        mFooterContainer = menuLayout.findViewById(R.id.footerlayout);
+        mFooterContainer.setVisibility(View.VISIBLE);
+        mFooterContainerBaseHeight = mFooterContainer.getLayoutParams().height;
 
         mPageLeftBtn = menuLayout.findViewById(R.id.menu_left_button);
         mPageRightBtn = menuLayout.findViewById(R.id.menu_right_button);

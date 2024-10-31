@@ -18,6 +18,7 @@ package com.android.systemui.deviceentry.domain.interactor
 
 import android.content.Context
 import android.content.Intent
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
@@ -34,6 +35,7 @@ import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticationStatus
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.power.domain.interactor.PowerInteractor
+import com.android.systemui.res.R
 import com.android.systemui.util.kotlin.combine
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
@@ -48,7 +50,6 @@ import kotlinx.coroutines.flow.filterNot
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
 
 /** Business logic for handling authentication events when an app is occluding the lockscreen. */
 @ExperimentalCoroutinesApi
@@ -70,7 +71,14 @@ constructor(
 ) {
     private val keyguardOccludedByApp: Flow<Boolean> =
         if (KeyguardWmStateRefactor.isEnabled) {
-            keyguardTransitionInteractor.currentKeyguardState.map { it == KeyguardState.OCCLUDED }
+            combine(
+                    keyguardTransitionInteractor.currentKeyguardState,
+                    communalSceneInteractor.isIdleOnCommunal,
+                    ::Pair,
+                )
+                .map { (currentState, isIdleOnCommunal) ->
+                    currentState == KeyguardState.OCCLUDED && !isIdleOnCommunal
+                }
         } else {
             combine(
                     keyguardInteractor.isKeyguardOccluded,
@@ -116,19 +124,28 @@ constructor(
             .ifKeyguardOccludedByApp(/* elseFlow */ flowOf(null))
 
     init {
-        scope.launch {
-            // On fingerprint success when the screen is on and not dreaming, go to the home screen
-            fingerprintUnlockSuccessEvents
-                .sample(
-                    combine(powerInteractor.isInteractive, keyguardInteractor.isDreaming, ::Pair),
-                )
-                .collect { (interactive, dreaming) ->
-                    if (interactive && !dreaming) {
-                        goToHomeScreen()
+        // This seems undesirable in most cases, except when a video is playing and can PiP when
+        // unlocked. It was originally added for tablets, so allow it there
+        if (context.resources.getBoolean(R.bool.config_goToHomeFromOccludedApps)) {
+            scope.launch {
+                // On fingerprint success when the screen is on and not dreaming, go to the home
+                // screen
+                fingerprintUnlockSuccessEvents
+                    .sample(
+                        combine(
+                            powerInteractor.isInteractive,
+                            keyguardInteractor.isDreaming,
+                            ::Pair,
+                        )
+                    )
+                    .collect { (interactive, dreaming) ->
+                        if (interactive && !dreaming) {
+                            goToHomeScreen()
+                        }
+                        // don't go to the home screen if the authentication is from
+                        // AOD/dozing/off/dreaming
                     }
-                    // don't go to the home screen if the authentication is from
-                    // AOD/dozing/off/dreaming
-                }
+            }
         }
 
         scope.launch {
@@ -148,7 +165,7 @@ constructor(
                         }
                     },
                     /* cancel= */ null,
-                    /* afterKeyguardGone */ false
+                    /* afterKeyguardGone */ false,
                 )
             }
         }

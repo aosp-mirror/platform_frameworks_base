@@ -22,6 +22,8 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.View.ACCESSIBILITY_LIVE_REGION_POLITE;
 import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
 
+import static com.android.app.viewcapture.ViewCaptureFactory.getViewCaptureAwareWindowManagerInstance;
+
 import static java.lang.Math.max;
 
 import android.animation.Animator;
@@ -53,6 +55,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.UiContext;
 
+import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
 import com.android.systemui.accessibility.accessibilitymenu.AccessibilityMenuService;
 import com.android.systemui.accessibility.accessibilitymenu.Flags;
 import com.android.systemui.accessibility.accessibilitymenu.R;
@@ -143,7 +146,9 @@ public class A11yMenuOverlayLayout {
         final Display display = mDisplayManager.getDisplay(DEFAULT_DISPLAY);
         final Context uiContext = mService.createWindowContext(
                 display, TYPE_ACCESSIBILITY_OVERLAY, /* options= */null);
-        final WindowManager windowManager = uiContext.getSystemService(WindowManager.class);
+        final ViewCaptureAwareWindowManager windowManager =
+                getViewCaptureAwareWindowManagerInstance(uiContext,
+                        com.android.systemui.Flags.enableViewCaptureTracing());
         mLayout = new A11yMenuFrameLayout(uiContext);
         updateLayoutPosition(uiContext);
         inflateLayoutAndSetOnTouchListener(mLayout, uiContext);
@@ -158,8 +163,8 @@ public class A11yMenuOverlayLayout {
 
     public void clearLayout() {
         if (mLayout != null) {
-            WindowManager windowManager =
-                    mLayout.getContext().getSystemService(WindowManager.class);
+            ViewCaptureAwareWindowManager windowManager = getViewCaptureAwareWindowManagerInstance(
+                    mLayout.getContext(), com.android.systemui.Flags.enableViewCaptureTracing());
             if (windowManager != null) {
                 windowManager.removeView(mLayout);
             }

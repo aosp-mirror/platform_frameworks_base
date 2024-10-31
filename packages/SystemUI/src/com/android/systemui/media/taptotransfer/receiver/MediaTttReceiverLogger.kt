@@ -19,24 +19,18 @@ package com.android.systemui.media.taptotransfer.receiver
 import android.app.StatusBarManager
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.core.LogLevel
 import com.android.systemui.media.taptotransfer.common.MediaTttLoggerUtils
 import com.android.systemui.temporarydisplay.TemporaryViewLogger
 import javax.inject.Inject
 
 /** A logger for all events related to the media tap-to-transfer receiver experience. */
 @SysUISingleton
-class MediaTttReceiverLogger
-@Inject
-constructor(
-    @MediaTttReceiverLogBuffer buffer: LogBuffer,
-) : TemporaryViewLogger<ChipReceiverInfo>(buffer, TAG) {
+class MediaTttReceiverLogger @Inject constructor(@MediaTttReceiverLogBuffer buffer: LogBuffer) :
+    TemporaryViewLogger<ChipReceiverInfo>(buffer, TAG) {
 
     /** Logs a change in the chip state for the given [mediaRouteId]. */
-    fun logStateChange(
-        stateName: String,
-        mediaRouteId: String,
-        packageName: String?,
-    ) {
+    fun logStateChange(stateName: String, mediaRouteId: String, packageName: String?) {
         MediaTttLoggerUtils.logStateChange(buffer, TAG, stateName, mediaRouteId, packageName)
     }
 
@@ -48,6 +42,30 @@ constructor(
     /** Logs that we couldn't find information for [packageName]. */
     fun logPackageNotFound(packageName: String) {
         MediaTttLoggerUtils.logPackageNotFound(buffer, TAG, packageName)
+    }
+
+    fun logRippleAnimationEnd(id: Int, type: String) {
+        buffer.log(
+            tag,
+            LogLevel.DEBUG,
+            {
+                int1 = id
+                str1 = type
+            },
+            { "ripple animation for view with id=$int1 is ended, animation type=$str1" },
+        )
+    }
+
+    fun logRippleAnimationStart(id: Int, type: String) {
+        buffer.log(
+            tag,
+            LogLevel.DEBUG,
+            {
+                int1 = id
+                str1 = type
+            },
+            { "ripple animation for view with id=$int1 is started, animation type=$str1" },
+        )
     }
 
     companion object {

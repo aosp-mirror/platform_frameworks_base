@@ -288,8 +288,7 @@ public final class MediaRouter2 {
 
     /**
      * Returns a proxy MediaRouter2 instance that allows you to control the routing of an app
-     * specified by {@code clientPackageName}. Returns {@code null} if the specified package name
-     * does not exist.
+     * specified by {@code clientPackageName}.
      *
      * <p>Proxy MediaRouter2 instances operate differently than regular MediaRouter2 instances:
      *
@@ -2771,7 +2770,7 @@ public final class MediaRouter2 {
                     || isSystemRouteReselection) {
                 transferToRoute(sessionInfo, route, mClientUser, mClientPackageName);
             } else {
-                requestCreateSession(sessionInfo, route, mClientUser, mClientPackageName);
+                requestCreateSession(sessionInfo, route);
             }
         }
 
@@ -2827,10 +2826,7 @@ public final class MediaRouter2 {
          * @param route The {@link MediaRoute2Info route} to transfer to.
          */
         private void requestCreateSession(
-                @NonNull RoutingSessionInfo oldSession,
-                @NonNull MediaRoute2Info route,
-                @NonNull UserHandle transferInitiatorUserHandle,
-                @NonNull String transferInitiatorPackageName) {
+                @NonNull RoutingSessionInfo oldSession, @NonNull MediaRoute2Info route) {
             if (TextUtils.isEmpty(oldSession.getClientPackageName())) {
                 Log.w(TAG, "requestCreateSession: Can't create a session without package name.");
                 this.onTransferFailed(oldSession, route);
@@ -2841,12 +2837,7 @@ public final class MediaRouter2 {
 
             try {
                 mMediaRouterService.requestCreateSessionWithManager(
-                        mClient,
-                        requestId,
-                        oldSession,
-                        route,
-                        transferInitiatorUserHandle,
-                        transferInitiatorPackageName);
+                        mClient, requestId, oldSession, route);
             } catch (RemoteException ex) {
                 throw ex.rethrowFromSystemServer();
             }

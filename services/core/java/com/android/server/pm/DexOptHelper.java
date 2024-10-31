@@ -19,6 +19,7 @@ package com.android.server.pm;
 import static android.content.pm.PackageManager.INSTALL_REASON_DEVICE_RESTORE;
 import static android.content.pm.PackageManager.INSTALL_REASON_DEVICE_SETUP;
 import static android.os.Trace.TRACE_TAG_DALVIK;
+import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 import static android.os.incremental.IncrementalManager.isIncrementalPath;
 
 import static com.android.server.LocalManagerRegistry.ManagerNotFoundException;
@@ -69,16 +70,17 @@ import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.LocalManagerRegistry;
 import com.android.server.LocalServices;
-import com.android.server.PinnerService;
 import com.android.server.art.ArtManagerLocal;
 import com.android.server.art.DexUseManagerLocal;
 import com.android.server.art.ReasonMapping;
 import com.android.server.art.model.ArtFlags;
 import com.android.server.art.model.DexoptParams;
 import com.android.server.art.model.DexoptResult;
+import com.android.server.pinner.PinnerService;
 import com.android.server.pm.PackageDexOptimizer.DexOptResult;
 import com.android.server.pm.dex.DexManager;
 import com.android.server.pm.dex.DexoptOptions;
+import com.android.server.pm.local.PackageManagerLocalImpl;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageState;
 import com.android.server.pm.pkg.PackageStateInternal;
@@ -87,6 +89,7 @@ import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -739,6 +742,68 @@ public final class DexOptHelper {
     }
 
     /**
+     * Perform dexopt if needed for the installation
+     */
+    static void performDexoptIfNeeded(InstallRequest installRequest, DexManager dexManager,
+            Context context, PackageManagerTracedLock.RawLock installLock) {
+
+        // Construct the DexoptOptions early to see if we should skip running dexopt.
+        //
+        // Do not run PackageDexOptimizer through the local performDexOpt
+        // method because `pkg` may not be in `mPackages` yet.
+        //
+        // Also, don't fail application installs if the dexopt step fails.
+        DexoptOptions dexoptOptions = getDexoptOptionsByInstallRequest(installRequest, dexManager);
+        // Check whether we need to dexopt the app.
+        //
+        // NOTE: it is IMPORTANT to call dexopt:
+        //   - after doRename which will sync the package data from AndroidPackage and
+        //     its corresponding ApplicationInfo.
+        //   - after installNewPackageLIF or replacePackageLIF which will update result with the
+        //     uid of the application (pkg.applicationInfo.uid).
+        //     This update happens in place!
+        //
+        // We only need to dexopt if the package meets ALL of the following conditions:
+        //   1) it is not an instant app or if it is then dexopt is enabled via gservices.
+        //   2) it is not debuggable.
+        //   3) it is not on Incremental File System.
+        //
+        // Note that we do not dexopt instant apps by default. dexopt can take some time to
+        // complete, so we skip this step during installation. Instead, we'll take extra time
+        // the first time the instant app starts. It's preferred to do it this way to provide
+        // continuous progress to the useur instead of mysteriously blocking somewhere in the
+        // middle of running an instant app. The default behaviour can be overridden
+        // via gservices.
+        //
+        // Furthermore, dexopt may be skipped, depending on the install scenario and current
+        // state of the device.
+        //
+        // TODO(b/174695087): instantApp and onIncremental should be removed and their install
+        //       path moved to SCENARIO_FAST.
+
+        final boolean performDexopt = DexOptHelper.shouldPerformDexopt(installRequest,
+                dexoptOptions, context);
+        if (performDexopt) {
+            // dexopt can take long, and ArtService doesn't require installd, so we release
+            // the lock here and re-acquire the lock after dexopt is finished.
+            if (installLock != null) {
+                installLock.unlock();
+            }
+            try {
+                Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dexopt");
+                DexoptResult dexOptResult = DexOptHelper.dexoptPackageUsingArtService(
+                        installRequest, dexoptOptions);
+                installRequest.onDexoptFinished(dexOptResult);
+            } finally {
+                Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+                if (installLock != null) {
+                    installLock.lock();
+                }
+            }
+        }
+    }
+
+    /**
      * Use ArtService to perform dexopt by the given InstallRequest.
      */
     static DexoptResult dexoptPackageUsingArtService(InstallRequest installRequest,
@@ -746,10 +811,16 @@ public final class DexOptHelper {
         final PackageSetting ps = installRequest.getScannedPackageSetting();
         final String packageName = ps.getPackageName();
 
+        PackageSetting uncommittedPs = null;
+        if (Flags.improveInstallFreeze()) {
+            uncommittedPs = ps;
+        }
+
         PackageManagerLocal packageManagerLocal =
                 LocalManagerRegistry.getManager(PackageManagerLocal.class);
         try (PackageManagerLocal.FilteredSnapshot snapshot =
-                     packageManagerLocal.withFilteredSnapshot()) {
+                     PackageManagerLocalImpl.withFilteredSnapshot(packageManagerLocal,
+                uncommittedPs)) {
             boolean ignoreDexoptProfile =
                     (installRequest.getInstallFlags()
                             & PackageManager.INSTALL_IGNORE_DEXOPT_PROFILE)
@@ -813,7 +884,8 @@ public final class DexOptHelper {
 
         @Override
         public void onApexStaged(@NonNull ApexStagedEvent event) {
-            mArtManager.onApexStaged(event.stagedApexModuleNames);
+            mArtManager.onApexStaged(Arrays.stream(event.stagedApexInfos)
+                    .map(info -> info.moduleName).toArray(String[]::new));
         }
     }
 }

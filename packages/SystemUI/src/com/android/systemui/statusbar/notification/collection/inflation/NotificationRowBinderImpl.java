@@ -37,6 +37,7 @@ import com.android.internal.util.NotificationMessagingUtil;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
+import com.android.systemui.shade.ShadeDisplayAware;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
@@ -86,7 +87,7 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
 
     @Inject
     public NotificationRowBinderImpl(
-            Context context,
+            @ShadeDisplayAware Context context,
             NotificationMessagingUtil notificationMessagingUtil,
             NotificationRemoteInputManager notificationRemoteInputManager,
             NotificationLockscreenUserManager notificationLockscreenUserManager,
@@ -275,7 +276,8 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
             }
         }
 
-        if (LockscreenOtpRedaction.isEnabled()) {
+        if (LockscreenOtpRedaction.isSingleLineViewEnabled()) {
+
             if (inflaterParams.isChildInGroup() && needsRedaction) {
                 params.requireContentViews(FLAG_CONTENT_VIEW_PUBLIC_SINGLE_LINE);
             } else {

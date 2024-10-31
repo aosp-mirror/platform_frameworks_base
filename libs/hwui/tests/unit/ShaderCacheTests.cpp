@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-#include <GrDirectContext.h>
 #include <Properties.h>
 #include <SkData.h>
 #include <SkRefCnt.h>
@@ -22,6 +21,7 @@
 #include <dirent.h>
 #include <errno.h>
 #include <gtest/gtest.h>
+#include <include/gpu/ganesh/GrDirectContext.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>

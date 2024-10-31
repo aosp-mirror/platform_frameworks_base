@@ -296,6 +296,8 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
             mStateController.setLowLightActive(false);
             mStateController.setEntryAnimationsFinished(false);
 
+            mDreamOverlayCallbackController.onWakeUp();
+
             if (mDreamOverlayContainerViewController != null) {
                 mDreamOverlayContainerViewController.destroy();
                 mDreamOverlayContainerViewController = null;
@@ -475,7 +477,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
                 mLifecycleOwner,
                 new HashSet<>(Arrays.asList(
                         dreamComplicationComponent.getHideComplicationTouchHandler(),
-                        dreamOverlayComponent.getCommunalTouchHandler())));
+                        dreamOverlayComponent.getCommunalTouchHandler())), TAG);
 
         setLifecycleStateLocked(Lifecycle.State.STARTED);
 
@@ -499,6 +501,9 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
 
         mDreamOverlayContainerViewController =
                 dreamOverlayComponent.getDreamOverlayContainerViewController();
+
+        // Touch monitor are also used with SceneContainer. See individual touch handlers for
+        // handling of SceneContainer.
         mTouchMonitor = ambientTouchComponent.getTouchMonitor();
         mTouchMonitor.init();
 
@@ -552,7 +557,8 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
     }
 
     private void updateGestureBlockingLocked() {
-        final boolean shouldBlock = !isDreamInPreviewMode() && !mShadeExpanded && !mBouncerShowing;
+        final boolean shouldBlock = mStarted && !mShadeExpanded && !mBouncerShowing
+                && !isDreamInPreviewMode();
 
         if (shouldBlock) {
             mGestureInteractor.addGestureBlockedMatcher(DREAM_TYPE_MATCHER,

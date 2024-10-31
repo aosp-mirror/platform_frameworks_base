@@ -21,5 +21,4 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Non verrai disturbatə da suoni e vibrazioni, ad eccezione di sveglie, promemoria, eventi, chiamate da contatti da te specificati ed elementi che hai scelto di continuare a riprodurre, inclusi video, musica e giochi."</string>
     <string name="zen_alarms_introduction" msgid="3987266042682300470">"Non verrai disturbatə da suoni e vibrazioni, ad eccezione delle sveglie. Potrai comunque sentire qualunque cosa decidi di riprodurre, inclusi video, musica e giochi."</string>
-    <string name="empty_user_name" msgid="3389155775773578300">"Amicɜ"</string>
 </resources>

@@ -50,7 +50,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.SurfaceControl;
-import android.view.SurfaceSession;
 import android.window.RemoteTransition;
 import android.window.WindowContainerTransaction;
 
@@ -75,6 +74,7 @@ import com.android.wm.shell.splitscreen.SplitScreen.SplitScreenListener;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.DefaultMixedHandler;
+import com.android.wm.shell.transition.FocusTransitionObserver;
 import com.android.wm.shell.transition.HomeTransitionObserver;
 import com.android.wm.shell.transition.Transitions;
 
@@ -97,9 +97,9 @@ public class StageCoordinatorTests extends ShellTestCase {
     @Mock
     private SyncTransactionQueue mSyncQueue;
     @Mock
-    private MainStage mMainStage;
+    private StageTaskListener mMainStage;
     @Mock
-    private SideStage mSideStage;
+    private StageTaskListener mSideStage;
     @Mock
     private SplitLayout mSplitLayout;
     @Mock
@@ -119,7 +119,6 @@ public class StageCoordinatorTests extends ShellTestCase {
     private final Rect mBounds2 = new Rect(5, 10, 15, 20);
     private final Rect mRootBounds = new Rect(0, 0, 45, 60);
 
-    private SurfaceSession mSurfaceSession = new SurfaceSession();
     private SurfaceControl mRootLeash;
     private SurfaceControl mDividerLeash;
     private ActivityManager.RunningTaskInfo mRootTask;
@@ -139,7 +138,7 @@ public class StageCoordinatorTests extends ShellTestCase {
                 mDisplayInsetsController, mSplitLayout, mTransitions, mTransactionPool,
                 mMainExecutor, mMainHandler, Optional.empty(), mLaunchAdjacentController,
                 Optional.empty()));
-        mDividerLeash = new SurfaceControl.Builder(mSurfaceSession).setName("fakeDivider").build();
+        mDividerLeash = new SurfaceControl.Builder().setName("fakeDivider").build();
 
         when(mSplitLayout.getBounds1()).thenReturn(mBounds1);
         when(mSplitLayout.getBounds2()).thenReturn(mBounds2);
@@ -149,7 +148,7 @@ public class StageCoordinatorTests extends ShellTestCase {
         when(mSplitLayout.getDividerLeash()).thenReturn(mDividerLeash);
 
         mRootTask = new TestRunningTaskInfoBuilder().build();
-        mRootLeash = new SurfaceControl.Builder(mSurfaceSession).setName("test").build();
+        mRootLeash = new SurfaceControl.Builder().setName("test").build();
         mStageCoordinator.onTaskAppeared(mRootTask, mRootLeash);
 
         mSideStage.mRootTaskInfo = new TestRunningTaskInfoBuilder().build();
@@ -230,17 +229,6 @@ public class StageCoordinatorTests extends ShellTestCase {
         mStageCoordinator.onLayoutSizeChanged(mSplitLayout);
 
         verify(listener).onSplitBoundsChanged(mRootBounds, mBounds1, mBounds2);
-    }
-
-    @Test
-    public void testRemoveFromSideStage() {
-        final ActivityManager.RunningTaskInfo task = new TestRunningTaskInfoBuilder().build();
-
-        doReturn(false).when(mMainStage).isActive();
-        mStageCoordinator.removeFromSideStage(task.taskId);
-
-        verify(mSideStage).removeTask(
-                eq(task.taskId), any(), any(WindowContainerTransaction.class));
     }
 
     @Test
@@ -332,7 +320,7 @@ public class StageCoordinatorTests extends ShellTestCase {
 
         assertEquals(mStageCoordinator.mLastActiveStage, STAGE_TYPE_MAIN);
 
-        mStageCoordinator.onFinishedWakingUp();
+        mStageCoordinator.onStartedWakingUp();
 
         verify(mTaskOrganizer).startNewTransition(eq(TRANSIT_SPLIT_DISMISS), notNull());
     }
@@ -431,7 +419,8 @@ public class StageCoordinatorTests extends ShellTestCase {
         ShellInit shellInit = new ShellInit(mMainExecutor);
         final Transitions t = new Transitions(mContext, shellInit, mock(ShellController.class),
                 mTaskOrganizer, mTransactionPool, mock(DisplayController.class), mMainExecutor,
-                mMainHandler, mAnimExecutor, mock(HomeTransitionObserver.class));
+                mMainHandler, mAnimExecutor, mock(HomeTransitionObserver.class),
+                mock(FocusTransitionObserver.class));
         shellInit.init();
         return t;
     }

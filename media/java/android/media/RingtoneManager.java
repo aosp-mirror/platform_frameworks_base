@@ -34,6 +34,7 @@ import android.content.pm.UserInfo;
 import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
 import android.database.StaleDataException;
+import android.media.audio.Flags;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
@@ -809,6 +810,12 @@ public class RingtoneManager {
         // Don't set the stream type
         Ringtone ringtone = getRingtone(context, ringtoneUri, -1 /* streamType */,
                 volumeShaperConfig, false);
+        if (Flags.enableRingtoneHapticsCustomization()
+                && Utils.isRingtoneVibrationSettingsSupported(context)
+                && Utils.hasVibration(ringtoneUri) && hasHapticChannels(ringtoneUri)) {
+            audioAttributes = new AudioAttributes.Builder(
+                    audioAttributes).setHapticChannelsMuted(true).build();
+        }
         if (ringtone != null) {
             ringtone.setAudioAttributesField(audioAttributes);
             if (!ringtone.createLocalMediaPlayer()) {
@@ -1082,7 +1089,24 @@ public class RingtoneManager {
         defaultRingtoneUri = ContentProvider.getUriWithoutUserId(defaultRingtoneUri);
         if (defaultRingtoneUri == null) {
             return -1;
-        } else if (defaultRingtoneUri.equals(Settings.System.DEFAULT_RINGTONE_URI)) {
+        }
+
+        if (Flags.enableRingtoneHapticsCustomization()
+                && Utils.hasVibration(defaultRingtoneUri)) {
+            // skip to check TYPE_ALARM because the customized haptic hasn't enabled in alarm
+            if (defaultRingtoneUri.toString()
+                    .contains(Settings.System.DEFAULT_RINGTONE_URI.toString())) {
+                return TYPE_RINGTONE;
+            } else if (defaultRingtoneUri.toString()
+                    .contains(Settings.System.DEFAULT_NOTIFICATION_URI.toString())) {
+                return TYPE_NOTIFICATION;
+            } else if (defaultRingtoneUri.toString()
+                    .contains(Settings.System.DEFAULT_ALARM_ALERT_URI.toString())) {
+                return TYPE_ALARM;
+            }
+        }
+
+        if (defaultRingtoneUri.equals(Settings.System.DEFAULT_RINGTONE_URI)) {
             return TYPE_RINGTONE;
         } else if (defaultRingtoneUri.equals(Settings.System.DEFAULT_NOTIFICATION_URI)) {
             return TYPE_NOTIFICATION;

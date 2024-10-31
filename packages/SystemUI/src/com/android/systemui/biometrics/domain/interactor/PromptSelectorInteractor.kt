@@ -104,6 +104,7 @@ class PromptSelectorInteractorImpl
 constructor(
     fingerprintPropertyRepository: FingerprintPropertyRepository,
     private val displayStateInteractor: DisplayStateInteractor,
+    private val credentialInteractor: CredentialInteractor,
     private val promptRepository: PromptRepository,
     private val lockPatternUtils: LockPatternUtils,
 ) : PromptSelectorInteractor {
@@ -177,7 +178,7 @@ constructor(
 
     override fun setPrompt(
         promptInfo: PromptInfo,
-        effectiveUserId: Int,
+        userId: Int,
         requestId: Long,
         modalities: BiometricModalities,
         challenge: Long,
@@ -185,6 +186,7 @@ constructor(
         onSwitchToCredential: Boolean,
         isLandscape: Boolean,
     ) {
+        val effectiveUserId = credentialInteractor.getCredentialOwnerOrSelfId(userId)
         val hasCredentialViewShown = promptKind.value.isCredential()
         val showBpForCredential =
             Flags.customBiometricPrompt() &&
@@ -211,10 +213,7 @@ constructor(
                                 PromptKind.Biometric.PaneType.ONE_PANE_NO_SENSOR_LANDSCAPE
                             else -> PromptKind.Biometric.PaneType.TWO_PANE_LANDSCAPE
                         }
-                    PromptKind.Biometric(
-                        modalities,
-                        paneType = paneType,
-                    )
+                    PromptKind.Biometric(modalities, paneType = paneType)
                 } else {
                     PromptKind.Biometric(modalities)
                 }
@@ -224,7 +223,7 @@ constructor(
 
         promptRepository.setPrompt(
             promptInfo = promptInfo,
-            userId = effectiveUserId,
+            userId = userId,
             requestId = requestId,
             gatekeeperChallenge = challenge,
             kind = kind,

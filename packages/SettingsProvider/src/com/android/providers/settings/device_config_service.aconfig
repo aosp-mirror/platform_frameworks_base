@@ -91,3 +91,13 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "support_local_overrides_sysprops"
+    namespace: "core_experiments_team_internal"
+    description: "When DeviceConfig overrides are deleted, delete new storage overrides too."
+    bug: "366022906"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}

@@ -31,8 +31,11 @@ import com.android.systemui.flags.fakeSystemPropertiesHelper
 import com.android.systemui.keyguard.data.repository.fakeBiometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFaceAuthRepository
 import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFingerprintAuthRepository
+import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.data.repository.fakeTrustRepository
+import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.AuthenticationFlags
+import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticationStatus
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAsleepForTest
@@ -211,7 +214,7 @@ class DeviceUnlockedInteractorTest : SysuiTestCase() {
             val deviceUnlockStatus by collectLastValue(underTest.deviceUnlockStatus)
             kosmos.fakeUserRepository.setSelectedUserInfo(
                 primaryUser,
-                SelectionStatus.SELECTION_COMPLETE
+                SelectionStatus.SELECTION_COMPLETE,
             )
 
             kosmos.fakeTrustRepository.setCurrentUserTrusted(true)
@@ -236,6 +239,49 @@ class DeviceUnlockedInteractorTest : SysuiTestCase() {
             kosmos.powerInteractor.setAsleepForTest()
             runCurrent()
 
+            assertThat(deviceUnlockStatus?.isUnlocked).isFalse()
+        }
+
+    @Test
+    fun deviceUnlockStatus_becomesUnlocked_whenFingerprintUnlocked_whileDeviceAsleepInAod() =
+        testScope.runTest {
+            val deviceUnlockStatus by collectLastValue(underTest.deviceUnlockStatus)
+            assertThat(deviceUnlockStatus?.isUnlocked).isFalse()
+
+            kosmos.fakeKeyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.LOCKSCREEN,
+                to = KeyguardState.AOD,
+                testScope = this,
+            )
+            kosmos.powerInteractor.setAsleepForTest()
+            runCurrent()
+
+            assertThat(deviceUnlockStatus?.isUnlocked).isFalse()
+
+            kosmos.fakeDeviceEntryFingerprintAuthRepository.setAuthenticationStatus(
+                SuccessFingerprintAuthenticationStatus(0, true)
+            )
+            runCurrent()
+            assertThat(deviceUnlockStatus?.isUnlocked).isTrue()
+        }
+
+    @Test
+    fun deviceUnlockStatus_staysLocked_whenFingerprintUnlocked_whileDeviceAsleep() =
+        testScope.runTest {
+            val deviceUnlockStatus by collectLastValue(underTest.deviceUnlockStatus)
+            assertThat(deviceUnlockStatus?.isUnlocked).isFalse()
+            assertThat(kosmos.keyguardTransitionInteractor.getCurrentState())
+                .isEqualTo(KeyguardState.LOCKSCREEN)
+
+            kosmos.powerInteractor.setAsleepForTest()
+            runCurrent()
+
+            assertThat(deviceUnlockStatus?.isUnlocked).isFalse()
+
+            kosmos.fakeDeviceEntryFingerprintAuthRepository.setAuthenticationStatus(
+                SuccessFingerprintAuthenticationStatus(0, true)
+            )
+            runCurrent()
             assertThat(deviceUnlockStatus?.isUnlocked).isFalse()
         }
 
@@ -273,7 +319,7 @@ class DeviceUnlockedInteractorTest : SysuiTestCase() {
                 LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN to
                     DeviceEntryRestrictionReason.UserLockdown,
                 LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW to
-                    DeviceEntryRestrictionReason.PolicyLockdown
+                    DeviceEntryRestrictionReason.PolicyLockdown,
             )
         }
 
@@ -285,7 +331,7 @@ class DeviceUnlockedInteractorTest : SysuiTestCase() {
             kosmos.fakeTrustRepository.setTrustUsuallyManaged(false)
             kosmos.fakeSystemPropertiesHelper.set(
                 DeviceUnlockedInteractor.SYS_BOOT_REASON_PROP,
-                "not mainline reboot"
+                "not mainline reboot",
             )
             runCurrent()
 
@@ -321,7 +367,7 @@ class DeviceUnlockedInteractorTest : SysuiTestCase() {
             kosmos.fakeTrustRepository.setTrustUsuallyManaged(false)
             kosmos.fakeSystemPropertiesHelper.set(
                 DeviceUnlockedInteractor.SYS_BOOT_REASON_PROP,
-                "not mainline reboot"
+                "not mainline reboot",
             )
             runCurrent()
 
@@ -358,7 +404,7 @@ class DeviceUnlockedInteractorTest : SysuiTestCase() {
             kosmos.fakeTrustRepository.setCurrentUserTrustManaged(false)
             kosmos.fakeSystemPropertiesHelper.set(
                 DeviceUnlockedInteractor.SYS_BOOT_REASON_PROP,
-                "not mainline reboot"
+                "not mainline reboot",
             )
             runCurrent()
 
@@ -394,12 +440,12 @@ class DeviceUnlockedInteractorTest : SysuiTestCase() {
                 collectLastValue(underTest.deviceEntryRestrictionReason)
             kosmos.fakeSystemPropertiesHelper.set(
                 DeviceUnlockedInteractor.SYS_BOOT_REASON_PROP,
-                DeviceUnlockedInteractor.REBOOT_MAINLINE_UPDATE
+                DeviceUnlockedInteractor.REBOOT_MAINLINE_UPDATE,
             )
             kosmos.fakeBiometricSettingsRepository.setAuthenticationFlags(
                 AuthenticationFlags(
                     userId = 1,
-                    flag = LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_BOOT
+                    flag = LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_BOOT,
                 )
             )
             runCurrent()

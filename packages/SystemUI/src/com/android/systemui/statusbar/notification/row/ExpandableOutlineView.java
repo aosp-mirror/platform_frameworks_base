@@ -365,11 +365,17 @@ public abstract class ExpandableOutlineView extends ExpandableView {
         DumpUtilsKt.withIncreasedIndent(pw, () -> {
             pw.println(getRoundableState().debugString());
             if (DUMP_VERBOSE) {
-                pw.println("mCustomOutline: " + mCustomOutline + " mOutlineRect: " + mOutlineRect);
-                pw.println("mOutlineAlpha: " + mOutlineAlpha);
-                pw.println("mAlwaysRoundBothCorners: " + mAlwaysRoundBothCorners);
+                dumpCustomOutline(pw, args);
             }
         });
     }
 
+    protected void dumpCustomOutline(IndentingPrintWriter pw, String[] args) {
+        pw.print("CustomOutline: ");
+        pw.print("mCustomOutline", mCustomOutline);
+        pw.print("mOutlineRect", mOutlineRect);
+        pw.print("mOutlineAlpha", mOutlineAlpha);
+        pw.print("mAlwaysRoundBothCorners", mAlwaysRoundBothCorners);
+        pw.println();
+    }
 }

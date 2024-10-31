@@ -46,7 +46,7 @@ import org.junit.runners.Parameterized
 /**
  * Test entering pip while changing orientation (from app in landscape to pip window in portrait)
  *
- * To run this test: `atest WMShellFlickerTestsPip2:EnterPipToOtherOrientation`
+ * To run this test: `atest WMShellFlickerTestsPip:EnterPipToOtherOrientation`
  *
  * Actions:
  * ```

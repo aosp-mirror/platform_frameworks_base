@@ -49,7 +49,7 @@ import static android.view.WindowManager.TRANSIT_FLAG_OPEN_BEHIND;
 import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_STATES;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_STATES;
 import static com.android.server.wm.ActivityRecord.State.PAUSED;
 import static com.android.server.wm.ActivityRecord.State.PAUSING;
 import static com.android.server.wm.ActivityRecord.State.RESUMED;
@@ -3027,7 +3027,11 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         // The task order may be changed by finishIfPossible() for adjusting focus if there are
         // nested tasks, so add all activities into a list to avoid missed removals.
         final ArrayList<ActivityRecord> removingActivities = new ArrayList<>();
-        forAllActivities((Consumer<ActivityRecord>) removingActivities::add);
+        forAllActivities((r) -> {
+            if (!r.finishing) {
+                removingActivities.add(r);
+            }
+        });
         for (int i = removingActivities.size() - 1; i >= 0; --i) {
             final ActivityRecord r = removingActivities.get(i);
             if (withTransition && r.isVisible()) {
@@ -3153,12 +3157,16 @@ class TaskFragment extends WindowContainer<WindowContainer> {
 
     /** Bounds to be used for dimming, as well as touch related tests. */
     void getDimBounds(@NonNull Rect out) {
-        if (mIsEmbedded && isDimmingOnParentTask() && getDimmer().getDimBounds() != null) {
-            // Return the task bounds if the dimmer is showing and should cover on the Task (not
-            // just on this embedded TaskFragment).
-            out.set(getTask().getBounds());
+        if (Flags.useTasksDimOnly() && mDimmer.hasDimState()) {
+            out.set(mDimmer.getDimBounds());
         } else {
-            out.set(getBounds());
+            if (mIsEmbedded && isDimmingOnParentTask() && getDimmer().getDimBounds() != null) {
+                // Return the task bounds if the dimmer is showing and should cover on the Task (not
+                // just on this embedded TaskFragment).
+                out.set(getTask().getBounds());
+            } else {
+                out.set(getBounds());
+            }
         }
     }
 
@@ -3189,10 +3197,16 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         mDimmer.resetDimStates();
         super.prepareSurfaces();
 
-        final Rect dimBounds = mDimmer.getDimBounds();
-        if (dimBounds != null) {
-            // Bounds need to be relative, as the dim layer is a child.
-            dimBounds.offsetTo(0 /* newLeft */, 0 /* newTop */);
+        if (!Flags.useTasksDimOnly()) {
+            final Rect dimBounds = mDimmer.getDimBounds();
+            if (dimBounds != null) {
+                // Bounds need to be relative, as the dim layer is a child.
+                dimBounds.offsetTo(0 /* newLeft */, 0 /* newTop */);
+                if (mDimmer.updateDims(getSyncTransaction())) {
+                    scheduleAnimation();
+                }
+            }
+        } else {
             if (mDimmer.updateDims(getSyncTransaction())) {
                 scheduleAnimation();
             }

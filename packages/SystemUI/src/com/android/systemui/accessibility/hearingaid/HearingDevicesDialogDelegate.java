@@ -42,6 +42,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Space;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -52,7 +53,7 @@ import androidx.annotation.VisibleForTesting;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.android.internal.logging.UiEventLogger;
+import com.android.settingslib.Utils;
 import com.android.settingslib.bluetooth.BluetoothCallback;
 import com.android.settingslib.bluetooth.CachedBluetoothDevice;
 import com.android.settingslib.bluetooth.HapClientProfile;
@@ -105,7 +106,8 @@ public class HearingDevicesDialogDelegate implements SystemUIDialog.Delegate,
     private final AudioManager mAudioManager;
     private final LocalBluetoothProfileManager mProfileManager;
     private final HapClientProfile mHapClientProfile;
-    private final UiEventLogger mUiEventLogger;
+    private final HearingDevicesUiEventLogger mUiEventLogger;
+    private final int mLaunchSourceId;
     private HearingDevicesListAdapter mDeviceListAdapter;
     private HearingDevicesPresetsController mPresetsController;
     private Context mApplicationContext;
@@ -153,20 +155,22 @@ public class HearingDevicesDialogDelegate implements SystemUIDialog.Delegate,
     public interface Factory {
         /** Create a {@link HearingDevicesDialogDelegate} instance */
         HearingDevicesDialogDelegate create(
-                boolean showPairNewDevice);
+                boolean showPairNewDevice,
+                @HearingDevicesUiEventLogger.LaunchSourceId int launchSource);
     }
 
     @AssistedInject
     public HearingDevicesDialogDelegate(
             @Application Context applicationContext,
             @Assisted boolean showPairNewDevice,
+            @Assisted @HearingDevicesUiEventLogger.LaunchSourceId int launchSourceId,
             SystemUIDialog.Factory systemUIDialogFactory,
             ActivityStarter activityStarter,
             DialogTransitionAnimator dialogTransitionAnimator,
             @Nullable LocalBluetoothManager localBluetoothManager,
             @Main Handler handler,
             AudioManager audioManager,
-            UiEventLogger uiEventLogger) {
+            HearingDevicesUiEventLogger uiEventLogger) {
         mApplicationContext = applicationContext;
         mShowPairNewDevice = showPairNewDevice;
         mSystemUIDialogFactory = systemUIDialogFactory;
@@ -178,6 +182,7 @@ public class HearingDevicesDialogDelegate implements SystemUIDialog.Delegate,
         mProfileManager = localBluetoothManager.getProfileManager();
         mHapClientProfile = mProfileManager.getHapClientProfile();
         mUiEventLogger = uiEventLogger;
+        mLaunchSourceId = launchSourceId;
     }
 
     @Override
@@ -191,7 +196,7 @@ public class HearingDevicesDialogDelegate implements SystemUIDialog.Delegate,
 
     @Override
     public void onDeviceItemGearClicked(@NonNull DeviceItem deviceItem, @NonNull View view) {
-        mUiEventLogger.log(HearingDevicesUiEvent.HEARING_DEVICES_GEAR_CLICK);
+        mUiEventLogger.log(HearingDevicesUiEvent.HEARING_DEVICES_GEAR_CLICK, mLaunchSourceId);
         dismissDialogIfExists();
         Intent intent = new Intent(ACTION_BLUETOOTH_DEVICE_DETAILS);
         Bundle bundle = new Bundle();
@@ -207,15 +212,17 @@ public class HearingDevicesDialogDelegate implements SystemUIDialog.Delegate,
         CachedBluetoothDevice cachedBluetoothDevice = deviceItem.getCachedBluetoothDevice();
         switch (deviceItem.getType()) {
             case ACTIVE_MEDIA_BLUETOOTH_DEVICE, CONNECTED_BLUETOOTH_DEVICE -> {
-                mUiEventLogger.log(HearingDevicesUiEvent.HEARING_DEVICES_DISCONNECT);
+                mUiEventLogger.log(HearingDevicesUiEvent.HEARING_DEVICES_DISCONNECT,
+                        mLaunchSourceId);
                 cachedBluetoothDevice.disconnect();
             }
             case AVAILABLE_MEDIA_BLUETOOTH_DEVICE -> {
-                mUiEventLogger.log(HearingDevicesUiEvent.HEARING_DEVICES_SET_ACTIVE);
+                mUiEventLogger.log(HearingDevicesUiEvent.HEARING_DEVICES_SET_ACTIVE,
+                        mLaunchSourceId);
                 cachedBluetoothDevice.setActive();
             }
             case SAVED_BLUETOOTH_DEVICE -> {
-                mUiEventLogger.log(HearingDevicesUiEvent.HEARING_DEVICES_CONNECT);
+                mUiEventLogger.log(HearingDevicesUiEvent.HEARING_DEVICES_CONNECT, mLaunchSourceId);
                 cachedBluetoothDevice.connect();
             }
         }
@@ -275,7 +282,15 @@ public class HearingDevicesDialogDelegate implements SystemUIDialog.Delegate,
         if (mLocalBluetoothManager == null) {
             return;
         }
-        mUiEventLogger.log(HearingDevicesUiEvent.HEARING_DEVICES_DIALOG_SHOW);
+
+        // Remove the default padding of the system ui dialog
+        View container = dialog.findViewById(android.R.id.custom);
+        if (container != null && container.getParent() != null) {
+            View containerParent = (View) container.getParent();
+            containerParent.setPadding(0, 0, 0, 0);
+        }
+
+        mUiEventLogger.log(HearingDevicesUiEvent.HEARING_DEVICES_DIALOG_SHOW, mLaunchSourceId);
         mPairButton = dialog.requireViewById(R.id.pair_new_device_button);
         mDeviceList = dialog.requireViewById(R.id.device_list);
         mPresetSpinner = dialog.requireViewById(R.id.preset_spinner);
@@ -363,7 +378,8 @@ public class HearingDevicesDialogDelegate implements SystemUIDialog.Delegate,
         mPresetSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                mUiEventLogger.log(HearingDevicesUiEvent.HEARING_DEVICES_PRESET_SELECT);
+                mUiEventLogger.log(HearingDevicesUiEvent.HEARING_DEVICES_PRESET_SELECT,
+                        mLaunchSourceId);
                 mPresetsController.selectPreset(
                         mPresetsController.getAllPresetInfo().get(position).getIndex());
             }
@@ -381,7 +397,7 @@ public class HearingDevicesDialogDelegate implements SystemUIDialog.Delegate,
     private void setupPairNewDeviceButton(SystemUIDialog dialog, @Visibility int visibility) {
         if (visibility == VISIBLE) {
             mPairButton.setOnClickListener(v -> {
-                mUiEventLogger.log(HearingDevicesUiEvent.HEARING_DEVICES_PAIR);
+                mUiEventLogger.log(HearingDevicesUiEvent.HEARING_DEVICES_PAIR, mLaunchSourceId);
                 dismissDialogIfExists();
                 final Intent intent = new Intent(Settings.ACTION_HEARING_DEVICE_PAIRING_SETTINGS);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -414,10 +430,16 @@ public class HearingDevicesDialogDelegate implements SystemUIDialog.Delegate,
         } catch (Resources.NotFoundException e) {
             Log.i(TAG, "No hearing devices related tool config resource");
         }
-        final int listSize = toolItemList.size();
-        for (int i = 0; i < listSize; i++) {
+        for (int i = 0; i < toolItemList.size(); i++) {
             View view = createHearingToolView(context, toolItemList.get(i));
             mRelatedToolsContainer.addView(view);
+            if (i != toolItemList.size() - 1) {
+                final int spaceSize = context.getResources().getDimensionPixelSize(
+                        R.dimen.hearing_devices_layout_margin);
+                Space space = new Space(context);
+                space.setLayoutParams(new LinearLayout.LayoutParams(spaceSize, 0));
+                mRelatedToolsContainer.addView(space);
+            }
         }
     }
 
@@ -478,6 +500,10 @@ public class HearingDevicesDialogDelegate implements SystemUIDialog.Delegate,
         TextView text = view.requireViewById(R.id.tool_name);
         view.setContentDescription(item.getToolName());
         icon.setImageDrawable(item.getToolIcon());
+        if (item.isCustomIcon()) {
+            icon.getDrawable().mutate().setTint(Utils.getColorAttr(context,
+                    com.android.internal.R.attr.materialColorOnPrimaryContainer).getDefaultColor());
+        }
         text.setText(item.getToolName());
         Intent intent = item.getToolIntent();
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -485,7 +511,8 @@ public class HearingDevicesDialogDelegate implements SystemUIDialog.Delegate,
             final String name = intent.getComponent() != null
                     ? intent.getComponent().flattenToString()
                     : intent.getPackage() + "/" + intent.getAction();
-            mUiEventLogger.log(HearingDevicesUiEvent.HEARING_DEVICES_RELATED_TOOL_CLICK, 0, name);
+            mUiEventLogger.log(HearingDevicesUiEvent.HEARING_DEVICES_RELATED_TOOL_CLICK,
+                    mLaunchSourceId, name);
             dismissDialogIfExists();
             mActivityStarter.postStartActivityDismissingKeyguard(intent, /* delay= */ 0,
                     mDialogTransitionAnimator.createActivityTransitionController(view));
@@ -502,7 +529,8 @@ public class HearingDevicesDialogDelegate implements SystemUIDialog.Delegate,
             return new ToolItem(
                     context.getString(R.string.quick_settings_hearing_devices_live_caption_title),
                     context.getDrawable(R.drawable.ic_volume_odi_captions),
-                    LIVE_CAPTION_INTENT);
+                    LIVE_CAPTION_INTENT,
+                    /* isCustomIcon= */ true);
         }
 
         return null;

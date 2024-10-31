@@ -23,7 +23,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.UserHandle;
 
-
 import java.util.Objects;
 
 /**
@@ -40,8 +39,7 @@ public final class ExecuteAppFunctionAidlRequest implements Parcelable {
                 public ExecuteAppFunctionAidlRequest createFromParcel(Parcel in) {
                     ExecuteAppFunctionRequest clientRequest =
                             ExecuteAppFunctionRequest.CREATOR.createFromParcel(in);
-                    UserHandle userHandle =
-                            UserHandle.CREATOR.createFromParcel(in);
+                    UserHandle userHandle = UserHandle.CREATOR.createFromParcel(in);
                     String callingPackage = in.readString8();
                     return new ExecuteAppFunctionAidlRequest(
                             clientRequest, userHandle, callingPackage);
@@ -53,19 +51,13 @@ public final class ExecuteAppFunctionAidlRequest implements Parcelable {
                 }
             };
 
-    /**
-     * The client request to execute an app function.
-     */
+    /** The client request to execute an app function. */
     private final ExecuteAppFunctionRequest mClientRequest;
 
-    /**
-     * The user handle of the user to execute the app function.
-     */
+    /** The user handle of the user to execute the app function. */
     private final UserHandle mUserHandle;
 
-    /**
-     * The package name of the app that is requesting to execute the app function.
-     */
+    /** The package name of the app that is requesting to execute the app function. */
     private final String mCallingPackage;
 
     public ExecuteAppFunctionAidlRequest(
@@ -87,25 +79,19 @@ public final class ExecuteAppFunctionAidlRequest implements Parcelable {
         dest.writeString8(mCallingPackage);
     }
 
-    /**
-     * Returns the client request to execute an app function.
-     */
+    /** Returns the client request to execute an app function. */
     @NonNull
     public ExecuteAppFunctionRequest getClientRequest() {
         return mClientRequest;
     }
 
-    /**
-     * Returns the user handle of the user to execute the app function.
-     */
+    /** Returns the user handle of the user to execute the app function. */
     @NonNull
     public UserHandle getUserHandle() {
         return mUserHandle;
     }
 
-    /**
-     * Returns the package name of the app that is requesting to execute the app function.
-     */
+    /** Returns the package name of the app that is requesting to execute the app function. */
     @NonNull
     public String getCallingPackage() {
         return mCallingPackage;

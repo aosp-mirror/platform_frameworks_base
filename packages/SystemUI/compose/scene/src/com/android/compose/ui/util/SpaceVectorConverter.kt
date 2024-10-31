@@ -22,8 +22,11 @@ import androidx.compose.ui.unit.Velocity
 
 interface SpaceVectorConverter {
     fun Offset.toFloat(): Float
+
     fun Velocity.toFloat(): Float
+
     fun Float.toOffset(): Offset
+
     fun Float.toVelocity(): Velocity
 }
 
@@ -36,15 +39,21 @@ fun SpaceVectorConverter(orientation: Orientation) =
 private val HorizontalConverter =
     object : SpaceVectorConverter {
         override fun Offset.toFloat() = x
+
         override fun Velocity.toFloat() = x
+
         override fun Float.toOffset() = Offset(this, 0f)
+
         override fun Float.toVelocity() = Velocity(this, 0f)
     }
 
 private val VerticalConverter =
     object : SpaceVectorConverter {
         override fun Offset.toFloat() = y
+
         override fun Velocity.toFloat() = y
+
         override fun Float.toOffset() = Offset(0f, this)
+
         override fun Float.toVelocity() = Velocity(0f, this)
     }

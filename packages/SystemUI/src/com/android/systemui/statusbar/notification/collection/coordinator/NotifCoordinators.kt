@@ -15,8 +15,6 @@
  */
 package com.android.systemui.statusbar.notification.collection.coordinator
 
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags.LOCKSCREEN_WALLPAPER_DREAM_ENABLED
 import com.android.systemui.statusbar.notification.collection.NotifPipeline
 import com.android.systemui.statusbar.notification.collection.NotificationClassificationFlag
 import com.android.systemui.statusbar.notification.collection.PipelineDumpable
@@ -25,7 +23,7 @@ import com.android.systemui.statusbar.notification.collection.SortBySectionTimeF
 import com.android.systemui.statusbar.notification.collection.coordinator.dagger.CoordinatorScope
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSectioner
 import com.android.systemui.statusbar.notification.collection.provider.SectionStyleProvider
-import com.android.systemui.statusbar.notification.shared.NotificationMinimalismPrototype
+import com.android.systemui.statusbar.notification.shared.NotificationMinimalism
 import com.android.systemui.statusbar.notification.shared.NotificationsLiveDataStoreRefactor
 import com.android.systemui.statusbar.notification.shared.PriorityPeopleSection
 import javax.inject.Inject
@@ -41,7 +39,6 @@ class NotifCoordinatorsImpl
 @Inject
 constructor(
     sectionStyleProvider: SectionStyleProvider,
-    featureFlags: FeatureFlags,
     dataStoreCoordinator: DataStoreCoordinator,
     hideLocallyDismissedNotifsCoordinator: HideLocallyDismissedNotifsCoordinator,
     hideNotifsForOtherUsersCoordinator: HideNotifsForOtherUsersCoordinator,
@@ -70,7 +67,6 @@ constructor(
     visualStabilityCoordinator: VisualStabilityCoordinator,
     sensitiveContentCoordinator: SensitiveContentCoordinator,
     dismissibilityCoordinator: DismissibilityCoordinator,
-    dreamCoordinator: DreamCoordinator,
     statsLoggerCoordinator: NotificationStatsLoggerCoordinator,
     bundleCoordinator: BundleCoordinator,
 ) : NotifCoordinators {
@@ -88,11 +84,10 @@ constructor(
         mCoordinators.add(hideLocallyDismissedNotifsCoordinator)
         mCoordinators.add(hideNotifsForOtherUsersCoordinator)
         mCoordinators.add(keyguardCoordinator)
-        if (NotificationMinimalismPrototype.isEnabled) {
+        if (NotificationMinimalism.isEnabled) {
             mCoordinators.add(lockScreenMinimalismCoordinator)
-        } else {
-            mCoordinators.add(unseenKeyguardCoordinator)
         }
+        mCoordinators.add(unseenKeyguardCoordinator)
         mCoordinators.add(rankingCoordinator)
         mCoordinators.add(colorizedFgsCoordinator)
         mCoordinators.add(deviceProvisionedCoordinator)
@@ -116,20 +111,16 @@ constructor(
         mCoordinators.add(remoteInputCoordinator)
         mCoordinators.add(dismissibilityCoordinator)
 
-        if (featureFlags.isEnabled(LOCKSCREEN_WALLPAPER_DREAM_ENABLED)) {
-            mCoordinators.add(dreamCoordinator)
-        }
-
         if (NotificationsLiveDataStoreRefactor.isEnabled) {
             mCoordinators.add(statsLoggerCoordinator)
         }
 
         // Manually add Ordered Sections
-        if (NotificationMinimalismPrototype.isEnabled) {
+        if (NotificationMinimalism.isEnabled) {
             mOrderedSections.add(lockScreenMinimalismCoordinator.topOngoingSectioner) // Top Ongoing
         }
         mOrderedSections.add(headsUpCoordinator.sectioner) // HeadsUp
-        if (NotificationMinimalismPrototype.isEnabled) {
+        if (NotificationMinimalism.isEnabled) {
             mOrderedSections.add(lockScreenMinimalismCoordinator.topUnseenSectioner) // Top Unseen
         }
         mOrderedSections.add(colorizedFgsCoordinator.sectioner) // ForegroundService
@@ -153,10 +144,7 @@ constructor(
         sectionStyleProvider.setMinimizedSections(setOf(rankingCoordinator.minimizedSectioner))
         if (SortBySectionTimeFlag.isEnabled) {
             sectionStyleProvider.setSilentSections(
-                listOf(
-                    rankingCoordinator.silentSectioner,
-                    rankingCoordinator.minimizedSectioner,
-                )
+                listOf(rankingCoordinator.silentSectioner, rankingCoordinator.minimizedSectioner)
             )
         } else {
             sectionStyleProvider.setSilentSections(

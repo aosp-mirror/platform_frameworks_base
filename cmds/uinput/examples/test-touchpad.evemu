@@ -1,0 +1,44 @@
+# EVEMU 1.2
+# This is an evemu "recording" of an Apple Magic Trackpad (1st generation), but
+# that doesn't actually make any movements. It just runs for a very long time,
+# to make Android think a touchpad is connected. This is useful for testing
+# things like the settings in System > Touchpad, which only appear when one is
+# connected.
+#
+# It can be played by piping it to the uinput command over ADB:
+#     $ adb shell uinput - < test-touchpad.evemu
+N: Fake touchpad
+I: 0005 05ac 030e 0160
+P: 05 00 00 00 00 00 00 00
+B: 00 0b 00 00 00 00 00 00 00
+B: 01 00 00 00 00 00 00 00 00
+B: 01 00 00 00 00 00 00 00 00
+B: 01 00 00 00 00 00 00 00 00
+B: 01 00 00 00 00 00 00 00 00
+B: 01 00 00 01 00 00 00 00 00
+B: 01 20 e5 00 00 00 00 00 00
+B: 01 00 00 00 00 00 00 00 00
+B: 01 00 00 00 00 00 00 00 00
+B: 01 00 00 00 00 00 00 00 00
+B: 01 00 00 00 00 00 00 00 00
+B: 01 00 00 00 00 00 00 00 00
+B: 01 00 00 00 00 00 00 00 00
+B: 02 00 00 00 00 00 00 00 00
+B: 03 03 00 00 00 00 80 73 02
+B: 04 10 00 00 00 00 00 00 00
+B: 05 00 00 00 00 00 00 00 00
+B: 11 00 00 00 00 00 00 00 00
+B: 12 00 00 00 00 00 00 00 00
+A: 00 -2909 3167 4 0 46
+A: 01 -2456 2565 4 0 45
+A: 2f 0 15 0 0 0
+A: 30 0 1020 4 0 0
+A: 31 0 1020 4 0 0
+A: 34 -31 32 1 0 0
+A: 35 -2909 3167 4 0 46
+A: 36 -2456 2565 4 0 45
+A: 39 0 65535 0 0 0
+E: 0.000001 0004 0005 1234
+E: 0.000001 0000 0000 0000
+E: 1000000000.000000 0004 0005 1235
+E: 1000000000.000000 0000 0000 0000

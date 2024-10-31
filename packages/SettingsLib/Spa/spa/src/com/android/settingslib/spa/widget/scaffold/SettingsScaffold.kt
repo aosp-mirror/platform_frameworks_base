@@ -55,6 +55,7 @@ fun SettingsScaffold(
 ) {
     ActivityTitle(title)
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = { SettingsTopAppBar(title, scrollBehavior, actions) },

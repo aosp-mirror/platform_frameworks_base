@@ -15,25 +15,25 @@
  */
 package com.android.internal.widget.remotecompose.core.operations;
 
-import android.util.Log;
-
-import com.android.internal.widget.remotecompose.core.CompanionOperation;
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.RemoteComposeOperation;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
+import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
+import com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation;
 
 import java.util.List;
 
 /**
  * Describe some basic information for a RemoteCompose document
- * <p>
- * It encodes the version of the document (following semantic versioning) as well
- * as the dimensions of the document in pixels.
+ *
+ * <p>It encodes the version of the document (following semantic versioning) as well as the
+ * dimensions of the document in pixels.
  */
 public class RootContentBehavior implements RemoteComposeOperation {
-
+    private static final int OP_CODE = Operations.ROOT_CONTENT_BEHAVIOR;
+    private static final String CLASS_NAME = "RootContentBehavior";
     int mScroll = NONE;
     int mSizing = NONE;
 
@@ -66,8 +66,8 @@ public class RootContentBehavior implements RemoteComposeOperation {
     public static final int ALIGNMENT_START = 16;
     public static final int ALIGNMENT_HORIZONTAL_CENTER = 32;
     public static final int ALIGNMENT_END = 64;
-    public static final int ALIGNMENT_CENTER = ALIGNMENT_HORIZONTAL_CENTER
-            + ALIGNMENT_VERTICAL_CENTER;
+    public static final int ALIGNMENT_CENTER =
+            ALIGNMENT_HORIZONTAL_CENTER + ALIGNMENT_VERTICAL_CENTER;
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
     // Layout mode
@@ -94,26 +94,17 @@ public class RootContentBehavior implements RemoteComposeOperation {
     public static final int SCALE_CROP = 5;
     public static final int SCALE_FILL_BOUNDS = 6;
 
-    public static final Companion COMPANION = new Companion();
-
     /**
      * Sets the way the player handles the content
      *
-     * @param scroll    set the horizontal behavior (NONE|SCROLL_HORIZONTAL|SCROLL_VERTICAL)
+     * @param scroll set the horizontal behavior (NONE|SCROLL_HORIZONTAL|SCROLL_VERTICAL)
      * @param alignment set the alignment of the content (TOP|CENTER|BOTTOM|START|END)
-     * @param sizing    set the type of sizing for the content (NONE|SIZING_LAYOUT|SIZING_SCALE)
-     * @param mode      set the mode of sizing, either LAYOUT modes or SCALE modes
-     *                  the LAYOUT modes are:
-     *                  - LAYOUT_MATCH_PARENT
-     *                  - LAYOUT_WRAP_CONTENT
-     *                  or adding an horizontal mode and a vertical mode:
-     *                  - LAYOUT_HORIZONTAL_MATCH_PARENT
-     *                  - LAYOUT_HORIZONTAL_WRAP_CONTENT
-     *                  - LAYOUT_HORIZONTAL_FIXED
-     *                  - LAYOUT_VERTICAL_MATCH_PARENT
-     *                  - LAYOUT_VERTICAL_WRAP_CONTENT
-     *                  - LAYOUT_VERTICAL_FIXED
-     *                  The LAYOUT_*_FIXED modes will use the intrinsic document size
+     * @param sizing set the type of sizing for the content (NONE|SIZING_LAYOUT|SIZING_SCALE)
+     * @param mode set the mode of sizing, either LAYOUT modes or SCALE modes the LAYOUT modes are:
+     *     - LAYOUT_MATCH_PARENT - LAYOUT_WRAP_CONTENT or adding an horizontal mode and a vertical
+     *     mode: - LAYOUT_HORIZONTAL_MATCH_PARENT - LAYOUT_HORIZONTAL_WRAP_CONTENT -
+     *     LAYOUT_HORIZONTAL_FIXED - LAYOUT_VERTICAL_MATCH_PARENT - LAYOUT_VERTICAL_WRAP_CONTENT -
+     *     LAYOUT_VERTICAL_FIXED The LAYOUT_*_FIXED modes will use the intrinsic document size
      */
     public RootContentBehavior(int scroll, int alignment, int sizing, int mode) {
         switch (scroll) {
@@ -122,45 +113,47 @@ public class RootContentBehavior implements RemoteComposeOperation {
             case SCROLL_VERTICAL:
                 mScroll = scroll;
                 break;
-            default: {
-                Log.e(TAG, "incorrect scroll value " + scroll);
-            }
+            default:
+                System.out.println(TAG + "incorrect scroll value " + scroll);
         }
         if (alignment == ALIGNMENT_CENTER) {
             mAlignment = alignment;
         } else {
             int horizontalContentAlignment = alignment & 0xF0;
             int verticalContentAlignment = alignment & 0xF;
-            boolean validHorizontalAlignment = horizontalContentAlignment == ALIGNMENT_START
-                    || horizontalContentAlignment == ALIGNMENT_HORIZONTAL_CENTER
-                    || horizontalContentAlignment == ALIGNMENT_END;
-            boolean validVerticalAlignment = verticalContentAlignment == ALIGNMENT_TOP
-                    || verticalContentAlignment == ALIGNMENT_VERTICAL_CENTER
-                    || verticalContentAlignment == ALIGNMENT_BOTTOM;
+            boolean validHorizontalAlignment =
+                    horizontalContentAlignment == ALIGNMENT_START
+                            || horizontalContentAlignment == ALIGNMENT_HORIZONTAL_CENTER
+                            || horizontalContentAlignment == ALIGNMENT_END;
+            boolean validVerticalAlignment =
+                    verticalContentAlignment == ALIGNMENT_TOP
+                            || verticalContentAlignment == ALIGNMENT_VERTICAL_CENTER
+                            || verticalContentAlignment == ALIGNMENT_BOTTOM;
             if (validHorizontalAlignment && validVerticalAlignment) {
                 mAlignment = alignment;
             } else {
-                Log.e(TAG, "incorrect alignment "
-                        + " h: " + horizontalContentAlignment
-                        + " v: " + verticalContentAlignment);
+                System.out.println(
+                        TAG
+                                + "incorrect alignment "
+                                + " h: "
+                                + horizontalContentAlignment
+                                + " v: "
+                                + verticalContentAlignment);
             }
         }
         switch (sizing) {
-            case SIZING_LAYOUT: {
-                Log.e(TAG, "sizing_layout is not yet supported");
-            }
-            break;
-            case SIZING_SCALE: {
+            case SIZING_LAYOUT:
+                System.out.println(TAG + "sizing_layout is not yet supported");
+                break;
+            case SIZING_SCALE:
                 mSizing = sizing;
-            }
-            break;
-            default: {
-                Log.e(TAG, "incorrect sizing value " + sizing);
-            }
+                break;
+            default:
+                System.out.println(TAG + "incorrect sizing value " + sizing);
         }
         if (mSizing == SIZING_LAYOUT) {
             if (mode != NONE) {
-                Log.e(TAG, "mode for sizing layout is not yet supported");
+                System.out.println(TAG + "mode for sizing layout is not yet supported");
             }
         } else if (mSizing == SIZING_SCALE) {
             switch (mode) {
@@ -172,22 +165,25 @@ public class RootContentBehavior implements RemoteComposeOperation {
                 case SCALE_FILL_BOUNDS:
                     mMode = mode;
                     break;
-                default: {
-                    Log.e(TAG, "incorrect mode for scale sizing, mode: " + mode);
-                }
+                default:
+                    System.out.println(TAG + "incorrect mode for scale sizing, mode: " + mode);
             }
         }
     }
 
     @Override
     public void write(WireBuffer buffer) {
-        COMPANION.apply(buffer, mScroll, mAlignment, mSizing, mMode);
+        apply(buffer, mScroll, mAlignment, mSizing, mMode);
     }
 
     @Override
     public String toString() {
-        return "ROOT_CONTENT_BEHAVIOR scroll: " + mScroll
-                + " sizing: " + mSizing + " mode: " + mMode;
+        return "ROOT_CONTENT_BEHAVIOR scroll: "
+                + mScroll
+                + " sizing: "
+                + mSizing
+                + " mode: "
+                + mMode;
     }
 
     @Override
@@ -200,37 +196,60 @@ public class RootContentBehavior implements RemoteComposeOperation {
         return toString();
     }
 
-    public static class Companion implements CompanionOperation {
-        private Companion() {
-        }
+    public static String name() {
+        return CLASS_NAME;
+    }
 
-        @Override
-        public String name() {
-            return "RootContentBehavior";
-        }
+    public static int id() {
+        return OP_CODE;
+    }
 
-        @Override
-        public int id() {
-            return Operations.ROOT_CONTENT_BEHAVIOR;
-        }
+    public static void apply(WireBuffer buffer, int scroll, int alignment, int sizing, int mode) {
+        buffer.start(OP_CODE);
+        buffer.writeInt(scroll);
+        buffer.writeInt(alignment);
+        buffer.writeInt(sizing);
+        buffer.writeInt(mode);
+    }
 
-        public void apply(WireBuffer buffer, int scroll, int alignment, int sizing, int mode) {
-            buffer.start(Operations.ROOT_CONTENT_BEHAVIOR);
-            buffer.writeInt(scroll);
-            buffer.writeInt(alignment);
-            buffer.writeInt(sizing);
-            buffer.writeInt(mode);
-        }
+    public static void read(WireBuffer buffer, List<Operation> operations) {
+        int scroll = buffer.readInt();
+        int alignment = buffer.readInt();
+        int sizing = buffer.readInt();
+        int mode = buffer.readInt();
+        RootContentBehavior rootContentBehavior =
+                new RootContentBehavior(scroll, alignment, sizing, mode);
+        operations.add(rootContentBehavior);
+    }
 
-        @Override
-        public void read(WireBuffer buffer, List<Operation> operations) {
-            int scroll = buffer.readInt();
-            int alignment = buffer.readInt();
-            int sizing = buffer.readInt();
-            int mode = buffer.readInt();
-            RootContentBehavior rootContentBehavior =
-                    new RootContentBehavior(scroll, alignment, sizing, mode);
-            operations.add(rootContentBehavior);
-        }
+    public static void documentation(DocumentationBuilder doc) {
+        doc.operation("Protocol Operations", OP_CODE, CLASS_NAME)
+                .description("Describes the behaviour of the root")
+                .field(DocumentedOperation.INT, "scroll", "scroll")
+                .possibleValues("SCROLL_HORIZONTAL", SCROLL_HORIZONTAL)
+                .possibleValues("SCROLL_VERTICAL", SCROLL_VERTICAL)
+                .field(DocumentedOperation.INT, "alignment", "alignment")
+                .possibleValues("ALIGNMENT_TOP", ALIGNMENT_TOP)
+                .possibleValues("ALIGNMENT_VERTICAL_CENTER", ALIGNMENT_VERTICAL_CENTER)
+                .possibleValues("ALIGNMENT_BOTTOM", ALIGNMENT_BOTTOM)
+                .possibleValues("ALIGNMENT_START", ALIGNMENT_START)
+                .possibleValues("ALIGNMENT_START", ALIGNMENT_START)
+                .possibleValues("ALIGNMENT_END", ALIGNMENT_END)
+                .field(DocumentedOperation.INT, "sizing", "sizing")
+                .possibleValues("SCALE_INSIDE", SCALE_INSIDE)
+                .possibleValues("SCALE_FIT", SCALE_FIT)
+                .possibleValues("SCALE_FILL_WIDTH", SCALE_FILL_WIDTH)
+                .possibleValues("SCALE_FILL_HEIGHT", SCALE_FILL_HEIGHT)
+                .possibleValues("SCALE_CROP", SCALE_CROP)
+                .possibleValues("SCALE_FILL_BOUNDS", SCALE_FILL_BOUNDS)
+                .field(DocumentedOperation.INT, "mode", "mode")
+                .possibleValues("LAYOUT_HORIZONTAL_MATCH_PARENT", LAYOUT_HORIZONTAL_MATCH_PARENT)
+                .possibleValues("LAYOUT_HORIZONTAL_WRAP_CONTENT", LAYOUT_HORIZONTAL_WRAP_CONTENT)
+                .possibleValues("LAYOUT_HORIZONTAL_FIXED", LAYOUT_HORIZONTAL_FIXED)
+                .possibleValues("LAYOUT_VERTICAL_MATCH_PARENT", LAYOUT_VERTICAL_MATCH_PARENT)
+                .possibleValues("LAYOUT_VERTICAL_WRAP_CONTENT", LAYOUT_VERTICAL_WRAP_CONTENT)
+                .possibleValues("LAYOUT_VERTICAL_FIXED", LAYOUT_VERTICAL_FIXED)
+                .possibleValues("LAYOUT_MATCH_PARENT", LAYOUT_MATCH_PARENT)
+                .possibleValues("LAYOUT_WRAP_CONTENT", LAYOUT_WRAP_CONTENT);
     }
 }

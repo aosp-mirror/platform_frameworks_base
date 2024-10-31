@@ -27,17 +27,16 @@ import com.android.systemui.deviceentry.domain.interactor.deviceEntryFaceAuthInt
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryHapticsInteractor
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
 import com.android.systemui.deviceentry.domain.interactor.deviceUnlockedInteractor
+import com.android.systemui.haptics.msdl.msdlPlayer
 import com.android.systemui.haptics.vibratorHelper
 import com.android.systemui.keyguard.dismissCallbackRegistry
 import com.android.systemui.keyguard.domain.interactor.keyguardEnabledInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
-import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.keyguard.domain.interactor.windowManagerLockscreenVisibilityInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.model.sysUiState
-import com.android.systemui.plugins.statusbar.statusBarStateController
 import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.scene.domain.interactor.sceneBackInteractor
 import com.android.systemui.scene.domain.interactor.sceneContainerOcclusionInteractor
@@ -61,7 +60,6 @@ val Kosmos.sceneContainerStartable by Fixture {
         deviceUnlockedInteractor = deviceUnlockedInteractor,
         bouncerInteractor = bouncerInteractor,
         keyguardInteractor = keyguardInteractor,
-        keyguardTransitionInteractor = keyguardTransitionInteractor,
         sysUiState = sysUiState,
         displayId = displayTracker.defaultDisplayId,
         sceneLogger = sceneLogger,
@@ -86,5 +84,6 @@ val Kosmos.sceneContainerStartable by Fixture {
         statusBarStateController = sysuiStatusBarStateController,
         alternateBouncerInteractor = alternateBouncerInteractor,
         vibratorHelper = vibratorHelper,
+        msdlPlayer = msdlPlayer,
     )
 }

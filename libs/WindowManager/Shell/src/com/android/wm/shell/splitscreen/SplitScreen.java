@@ -44,13 +44,13 @@ public interface SplitScreen {
     int STAGE_TYPE_UNDEFINED = -1;
     /**
      * The main stage type.
-     * @see MainStage
+     * @see StageTaskListener
      */
     int STAGE_TYPE_MAIN = 0;
 
     /**
      * The side stage type.
-     * @see SideStage
+     * @see StageTaskListener
      */
     int STAGE_TYPE_SIDE = 1;
 
@@ -110,11 +110,11 @@ public interface SplitScreen {
     void registerSplitAnimationListener(@NonNull SplitInvocationListener listener,
             @NonNull Executor executor);
 
-    /** Called when device waking up finished. */
-    void onFinishedWakingUp();
-
     /** Called when device starts going to sleep (screen off). */
     void onStartedGoingToSleep();
+
+    /** Called when device wakes up. */
+    void onStartedWakingUp();
 
     /** Called when requested to go to fullscreen from the current active split app. */
     void goToFullscreenFromSplit();

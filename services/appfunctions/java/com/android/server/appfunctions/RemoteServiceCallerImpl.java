@@ -16,41 +16,42 @@
 package com.android.server.appfunctions;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.os.CancellationSignal;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.Log;
+import android.util.Slog;
 
 import java.util.concurrent.Executor;
 import java.util.function.Function;
 
 /**
- * An implementation of {@link RemoteServiceCaller} that that is based on
- * {@link Context#bindService}.
+ * An implementation of {@link RemoteServiceCaller} that that is based on {@link
+ * Context#bindService}.
  *
  * @param <T> Class of wrapped service.
- * @hide
  */
 public class RemoteServiceCallerImpl<T> implements RemoteServiceCaller<T> {
     private static final String TAG = "AppFunctionsServiceCall";
 
-    @NonNull
-    private final Context mContext;
-    @NonNull
-    private final Function<IBinder, T> mInterfaceConverter;
+    @NonNull private final Context mContext;
+    @NonNull private final Function<IBinder, T> mInterfaceConverter;
     private final Handler mHandler = new Handler(Looper.getMainLooper());
     private final Executor mExecutor;
 
     /**
      * @param interfaceConverter A function responsible for converting an IBinder object into the
-     *                           desired service interface.
-     * @param executor           An Executor instance to dispatch callback.
-     * @param context            The system context.
+     *     desired service interface.
+     * @param executor An Executor instance to dispatch callback.
+     * @param context The system context.
      */
     public RemoteServiceCallerImpl(
             @NonNull Context context,
@@ -65,12 +66,20 @@ public class RemoteServiceCallerImpl<T> implements RemoteServiceCaller<T> {
     public boolean runServiceCall(
             @NonNull Intent intent,
             int bindFlags,
-            long timeoutInMillis,
             @NonNull UserHandle userHandle,
-            @NonNull RunServiceCallCallback<T> callback) {
+            long cancellationTimeoutMillis,
+            @NonNull CancellationSignal cancellationSignal,
+            @NonNull RunServiceCallCallback<T> callback,
+            @NonNull IBinder callerBinder) {
         OneOffServiceConnection serviceConnection =
                 new OneOffServiceConnection(
-                        intent, bindFlags, timeoutInMillis, userHandle, callback);
+                        intent,
+                        bindFlags,
+                        userHandle,
+                        cancellationTimeoutMillis,
+                        cancellationSignal,
+                        callback,
+                        callerBinder);
 
         return serviceConnection.bindAndRun();
     }
@@ -79,29 +88,30 @@ public class RemoteServiceCallerImpl<T> implements RemoteServiceCaller<T> {
             implements ServiceConnection, ServiceUsageCompleteListener {
         private final Intent mIntent;
         private final int mFlags;
-        private final long mTimeoutMillis;
         private final UserHandle mUserHandle;
         private final RunServiceCallCallback<T> mCallback;
-        private final Runnable mTimeoutCallback;
+        private final long mCancellationTimeoutMillis;
+        private final CancellationSignal mCancellationSignal;
+        private final Runnable mCancellationTimeoutRunnable;
+        private final IBinder mCallerBinder;
+        @Nullable private IBinder.DeathRecipient mDirectServiceVulture;
 
         OneOffServiceConnection(
                 @NonNull Intent intent,
                 int flags,
-                long timeoutMillis,
                 @NonNull UserHandle userHandle,
-                @NonNull RunServiceCallCallback<T> callback) {
+                long cancellationTimeoutMillis,
+                @NonNull CancellationSignal cancellationSignal,
+                @NonNull RunServiceCallCallback<T> callback,
+                @NonNull IBinder callerBinder) {
             mIntent = intent;
             mFlags = flags;
-            mTimeoutMillis = timeoutMillis;
             mCallback = callback;
-            mTimeoutCallback =
-                    () ->
-                            mExecutor.execute(
-                                    () -> {
-                                        safeUnbind();
-                                        mCallback.onTimedOut();
-                                    });
             mUserHandle = userHandle;
+            mCancellationTimeoutMillis = cancellationTimeoutMillis;
+            mCancellationSignal = cancellationSignal;
+            mCancellationTimeoutRunnable = this::safeUnbind;
+            mCallerBinder = callerBinder;
         }
 
         public boolean bindAndRun() {
@@ -109,7 +119,22 @@ public class RemoteServiceCallerImpl<T> implements RemoteServiceCaller<T> {
                     mContext.bindServiceAsUser(mIntent, this, mFlags, mUserHandle);
 
             if (bindServiceResult) {
-                mHandler.postDelayed(mTimeoutCallback, mTimeoutMillis);
+                mCancellationSignal.setOnCancelListener(
+                        () -> {
+                            mCallback.onCancelled();
+                            mHandler.postDelayed(
+                                    mCancellationTimeoutRunnable, mCancellationTimeoutMillis);
+                        });
+                mDirectServiceVulture =
+                        () -> {
+                            Slog.w(TAG, "Caller process onDeath signal received");
+                            mCancellationSignal.cancel();
+                        };
+                try {
+                    mCallerBinder.linkToDeath(mDirectServiceVulture, /* flags= */ 0);
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "Failed to link to death on " + mCallerBinder + ": ", e);
+                }
             } else {
                 safeUnbind();
             }
@@ -144,8 +169,11 @@ public class RemoteServiceCallerImpl<T> implements RemoteServiceCaller<T> {
 
         private void safeUnbind() {
             try {
-                mHandler.removeCallbacks(mTimeoutCallback);
+                mHandler.removeCallbacks(mCancellationTimeoutRunnable);
                 mContext.unbindService(this);
+                if (mDirectServiceVulture != null) {
+                    mCallerBinder.unlinkToDeath(mDirectServiceVulture, 0);
+                }
             } catch (Exception ex) {
                 Log.w(TAG, "Failed to unbind", ex);
             }

@@ -15,3 +15,6 @@ per-file *PowerStats* = file:/BATTERY_STATS_OWNERS
 # ANRs
 # Bug component : 158088 = per-file TimeoutRecord.java
 per-file TimeoutRecord.java = file:/PERFORMANCE_OWNERS
+
+# ApplicationSharedMemory
+per-file *ApplicationSharedMemory* = file:/PERFORMANCE_OWNERS

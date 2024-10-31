@@ -603,12 +603,6 @@ public class InputMethodService extends AbstractInputMethodService {
     @EnabledSince(targetSdkVersion = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     public static final long DISALLOW_INPUT_METHOD_INTERFACE_OVERRIDE = 148086656L;
 
-    /**
-     * Enable the logic to allow hiding the IME caption bar ("fake" IME navigation bar).
-     * @hide
-     */
-    public static final boolean ENABLE_HIDE_IME_CAPTION_BAR = true;
-
     LayoutInflater mInflater;
     TypedArray mThemeAttrs;
     @UnsupportedAppUsage
@@ -664,8 +658,13 @@ public class InputMethodService extends AbstractInputMethodService {
     
     int mStatusIcon;
 
+    /** Latest reported value of back disposition mode. */
     @BackDispositionMode
     int mBackDisposition;
+
+    /** Latest reported value of IME window visibility state. */
+    @ImeWindowVisibility
+    private int mImeWindowVisibility;
 
     private Object mLock = new Object();
     @GuardedBy("mLock")
@@ -1047,7 +1046,7 @@ public class InputMethodService extends AbstractInputMethodService {
                 ImeTracker.forLogging().onFailed(statsToken,
                         ImeTracker.PHASE_IME_ON_SHOW_SOFT_INPUT_TRUE);
             }
-            setImeWindowStatus(mapToImeWindowStatus(), mBackDisposition);
+            setImeWindowVisibility(computeImeWindowVis());
 
             final boolean isVisible = isInputViewShown();
             final boolean visibilityChanged = isVisible != wasVisible;
@@ -1357,9 +1356,22 @@ public class InputMethodService extends AbstractInputMethodService {
         mImeSurfaceRemoverRunnable = null;
     }
 
-    private void setImeWindowStatus(@ImeWindowVisibility int visibilityFlags,
+    /**
+     * Sets the IME window visibility state.
+     *
+     * @param vis the IME window visibility state to be set.
+     */
+    private void setImeWindowVisibility(@ImeWindowVisibility int vis) {
+        if (vis == mImeWindowVisibility) {
+            return;
+        }
+        mImeWindowVisibility = vis;
+        setImeWindowStatus(mImeWindowVisibility, mBackDisposition);
+    }
+
+    private void setImeWindowStatus(@ImeWindowVisibility int vis,
             @BackDispositionMode int backDisposition) {
-        mPrivOps.setImeWindowStatusAsync(visibilityFlags, backDisposition);
+        mPrivOps.setImeWindowStatusAsync(vis, backDisposition);
     }
 
     /** Set region of the keyboard to be avoided from back gesture */
@@ -1986,7 +1998,7 @@ public class InputMethodService extends AbstractInputMethodService {
             }
             // If user uses hard keyboard, IME button should always be shown.
             boolean showing = onEvaluateInputViewShown();
-            setImeWindowStatus(IME_ACTIVE | (showing ? IME_VISIBLE : 0), mBackDisposition);
+            setImeWindowVisibility(IME_ACTIVE | (showing ? IME_VISIBLE : 0));
         }
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
     }
@@ -2053,7 +2065,7 @@ public class InputMethodService extends AbstractInputMethodService {
             return;
         }
         mBackDisposition = disposition;
-        setImeWindowStatus(mapToImeWindowStatus(), mBackDisposition);
+        setImeWindowStatus(mImeWindowVisibility, mBackDisposition);
     }
 
     /**
@@ -3132,14 +3144,8 @@ public class InputMethodService extends AbstractInputMethodService {
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMS.showWindow");
         mDecorViewWasVisible = mDecorViewVisible;
         mInShowWindow = true;
-        final int previousImeWindowStatus =
-                (mDecorViewVisible ? IME_ACTIVE : 0) | (isInputViewShown()
-                        ? (!mWindowVisible ? -1 : IME_VISIBLE) : 0);
         startViews(prepareWindow(showInput));
-        final int nextImeWindowStatus = mapToImeWindowStatus();
-        if (previousImeWindowStatus != nextImeWindowStatus) {
-            setImeWindowStatus(nextImeWindowStatus, mBackDisposition);
-        }
+        setImeWindowVisibility(computeImeWindowVis());
 
         mNavigationBarController.onWindowShown();
         // compute visibility
@@ -3317,7 +3323,7 @@ public class InputMethodService extends AbstractInputMethodService {
         ImeTracker.forLogging().onProgress(statsToken, ImeTracker.PHASE_IME_HIDE_WINDOW);
         ImeTracing.getInstance().triggerServiceDump("InputMethodService#hideWindow", mDumper,
                 null /* icProto */);
-        setImeWindowStatus(0 /* visibilityFlags */, mBackDisposition);
+        setImeWindowVisibility(0 /* vis */);
         if (android.view.inputmethod.Flags.refactorInsetsController()) {
             // The ImeInsetsSourceProvider need the statsToken when dispatching the control. We
             // send the token here, so that another request in the provider can be cancelled.
@@ -4492,10 +4498,10 @@ public class InputMethodService extends AbstractInputMethodService {
         };
     }
 
+    /** Computes the IME window visibility state. */
     @ImeWindowVisibility
-    private int mapToImeWindowStatus() {
-        return IME_ACTIVE
-                | (isInputViewShown() ? IME_VISIBLE : 0);
+    private int computeImeWindowVis() {
+        return IME_ACTIVE | (isInputViewShown() ? IME_VISIBLE : 0);
     }
 
     /**

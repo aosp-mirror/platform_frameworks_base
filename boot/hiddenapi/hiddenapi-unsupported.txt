@@ -183,7 +183,6 @@ Landroid/view/autofill/IAutoFillManager$Stub$Proxy;-><init>(Landroid/os/IBinder;
 Landroid/view/autofill/IAutoFillManager$Stub;->asInterface(Landroid/os/IBinder;)Landroid/view/autofill/IAutoFillManager;
 Landroid/view/IAppTransitionAnimationSpecsFuture$Stub;-><init>()V
 Landroid/view/IDockedStackListener$Stub;-><init>()V
-Landroid/view/IRecentsAnimationRunner$Stub;-><init>()V
 Landroid/view/IRemoteAnimationRunner$Stub;-><init>()V
 Landroid/view/IRotationWatcher$Stub;-><init>()V
 Landroid/view/IWindow$Stub;-><init>()V

@@ -2,21 +2,23 @@ package com.android.systemui.bouncer.ui.binder
 
 import android.view.ViewGroup
 import com.android.keyguard.KeyguardMessageAreaController
-import com.android.keyguard.ViewMediatorCallback
 import com.android.keyguard.dagger.KeyguardBouncerComponent
-import com.android.systemui.authentication.domain.interactor.AuthenticationInteractor
 import com.android.systemui.bouncer.domain.interactor.BouncerMessageInteractor
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.bouncer.shared.flag.ComposeBouncerFlags
 import com.android.systemui.bouncer.ui.BouncerDialogFactory
+import com.android.systemui.bouncer.ui.viewmodel.BouncerContainerViewModel
 import com.android.systemui.bouncer.ui.viewmodel.BouncerSceneContentViewModel
 import com.android.systemui.bouncer.ui.viewmodel.KeyguardBouncerViewModel
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToGoneTransitionViewModel
 import com.android.systemui.log.BouncerLogger
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import dagger.Lazy
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 /** Helper data class that allows to lazy load all the dependencies of the legacy bouncer. */
@@ -39,12 +41,13 @@ constructor(
 data class ComposeBouncerDependencies
 @Inject
 constructor(
+    @Application val applicationScope: CoroutineScope,
+    val keyguardInteractor: KeyguardInteractor,
+    val selectedUserInteractor: SelectedUserInteractor,
     val legacyInteractor: PrimaryBouncerInteractor,
     val viewModelFactory: BouncerSceneContentViewModel.Factory,
     val dialogFactory: BouncerDialogFactory,
-    val authenticationInteractor: AuthenticationInteractor,
-    val viewMediatorCallback: ViewMediatorCallback?,
-    val selectedUserInteractor: SelectedUserInteractor,
+    val bouncerContainerViewModelFactory: BouncerContainerViewModel.Factory,
 )
 
 /**
@@ -63,12 +66,13 @@ constructor(
             val deps = composeBouncerDependencies.get()
             ComposeBouncerViewBinder.bind(
                 view,
+                deps.applicationScope,
                 deps.legacyInteractor,
+                deps.keyguardInteractor,
+                deps.selectedUserInteractor,
                 deps.viewModelFactory,
                 deps.dialogFactory,
-                deps.authenticationInteractor,
-                deps.selectedUserInteractor,
-                deps.viewMediatorCallback,
+                deps.bouncerContainerViewModelFactory,
             )
         } else {
             val deps = legacyBouncerDependencies.get()

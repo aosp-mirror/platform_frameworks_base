@@ -253,6 +253,7 @@ public class BubbleBarAnimationHelper {
             return;
         }
         setDragPivot(bbev);
+        bbev.setDragging(true);
         // Corner radius gets scaled, apply the reverse scale to ensure we have the desired radius
         final float cornerRadius = bbev.getDraggedCornerRadius() / EXPANDED_VIEW_DRAG_SCALE;
 
@@ -329,6 +330,7 @@ public class BubbleBarAnimationHelper {
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
                 bbev.resetPivot();
+                bbev.setDragging(false);
             }
         });
         startNewDragAnimation(animatorSet);

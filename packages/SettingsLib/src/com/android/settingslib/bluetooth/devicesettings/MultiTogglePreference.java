@@ -33,6 +33,7 @@ public class MultiTogglePreference extends DeviceSettingPreference implements Pa
     private final String mTitle;
     private final ImmutableList<ToggleInfo> mToggleInfos;
     private final int mState;
+    private final boolean mIsActive;
     private final boolean mIsAllowedChangingState;
     private final Bundle mExtras;
 
@@ -40,6 +41,7 @@ public class MultiTogglePreference extends DeviceSettingPreference implements Pa
             @NonNull String title,
             List<ToggleInfo> toggleInfos,
             int state,
+            boolean isActive,
             boolean allowChangingState,
             Bundle extras) {
         super(DeviceSettingType.DEVICE_SETTING_TYPE_MULTI_TOGGLE);
@@ -47,6 +49,7 @@ public class MultiTogglePreference extends DeviceSettingPreference implements Pa
         mTitle = title;
         mToggleInfos = ImmutableList.copyOf(toggleInfos);
         mState = state;
+        mIsActive = isActive;
         mIsAllowedChangingState = allowChangingState;
         mExtras = extras;
     }
@@ -67,9 +70,11 @@ public class MultiTogglePreference extends DeviceSettingPreference implements Pa
         List<ToggleInfo> toggleInfos = new ArrayList<>();
         in.readTypedList(toggleInfos, ToggleInfo.CREATOR);
         int state = in.readInt();
+        boolean isActive = in.readBoolean();
         boolean allowChangingState = in.readBoolean();
         Bundle extras = in.readBundle(Bundle.class.getClassLoader());
-        return new MultiTogglePreference(title, toggleInfos, state, allowChangingState, extras);
+        return new MultiTogglePreference(
+                title, toggleInfos, state, isActive, allowChangingState, extras);
     }
 
     public static final Creator<MultiTogglePreference> CREATOR =
@@ -99,6 +104,7 @@ public class MultiTogglePreference extends DeviceSettingPreference implements Pa
         dest.writeString(mTitle);
         dest.writeTypedList(mToggleInfos, flags);
         dest.writeInt(mState);
+        dest.writeBoolean(mIsActive);
         dest.writeBoolean(mIsAllowedChangingState);
         dest.writeBundle(mExtras);
     }
@@ -108,6 +114,7 @@ public class MultiTogglePreference extends DeviceSettingPreference implements Pa
         private String mTitle;
         private ImmutableList.Builder<ToggleInfo> mToggleInfos = new ImmutableList.Builder<>();
         private int mState;
+        private boolean mIsActive;
         private boolean mAllowChangingState;
         private Bundle mExtras = Bundle.EMPTY;
 
@@ -148,6 +155,19 @@ public class MultiTogglePreference extends DeviceSettingPreference implements Pa
         }
 
         /**
+         * Sets whether the current state is considered as an "active" state. If it's set to true,
+         * the toggle will be highlighted in UI.
+         *
+         * @param isActive The active state.
+         * @return Returns the Builder object.
+         */
+        @NonNull
+        public Builder setIsActive(boolean isActive) {
+            mIsActive = isActive;
+            return this;
+        }
+
+        /**
          * Sets whether state can be changed by user.
          *
          * @param allowChangingState Whether user is allowed to change state.
@@ -178,7 +198,7 @@ public class MultiTogglePreference extends DeviceSettingPreference implements Pa
         @NonNull
         public MultiTogglePreference build() {
             return new MultiTogglePreference(
-                    mTitle, mToggleInfos.build(), mState, mAllowChangingState, mExtras);
+                    mTitle, mToggleInfos.build(), mState, mIsActive, mAllowChangingState, mExtras);
         }
     }
 
@@ -199,6 +219,16 @@ public class MultiTogglePreference extends DeviceSettingPreference implements Pa
      */
     public int getState() {
         return mState;
+    }
+
+    /**
+     * Whether the current state is considered as an active state. If it's set to true, the toggle
+     * will be highlighted in UI.
+     *
+     * @return Returns the active state.
+     */
+    public boolean isActive() {
+        return mIsActive;
     }
 
     /**

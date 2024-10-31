@@ -1127,6 +1127,36 @@ namespace PaintGlue {
         return leftMinikinPaint == rightMinikinPaint;
     }
 
+    struct VariationBuilder {
+        std::vector<minikin::FontVariation> varSettings;
+    };
+
+    static jlong createFontVariationBuilder(CRITICAL_JNI_PARAMS_COMMA jint size) {
+        VariationBuilder* builder = new VariationBuilder();
+        builder->varSettings.reserve(size);
+        return reinterpret_cast<jlong>(builder);
+    }
+
+    static void addFontVariationToBuilder(CRITICAL_JNI_PARAMS_COMMA jlong builderPtr, jint tag,
+                                          jfloat value) {
+        VariationBuilder* builder = reinterpret_cast<VariationBuilder*>(builderPtr);
+        builder->varSettings.emplace_back(static_cast<minikin::AxisTag>(tag), value);
+    }
+
+    static void setFontVariationOverride(CRITICAL_JNI_PARAMS_COMMA jlong paintHandle,
+                                         jlong builderPtr) {
+        Paint* paint = reinterpret_cast<Paint*>(paintHandle);
+        if (builderPtr == 0) {
+            paint->setVariationOverride(minikin::VariationSettings());
+            return;
+        }
+
+        VariationBuilder* builder = reinterpret_cast<VariationBuilder*>(builderPtr);
+        paint->setVariationOverride(
+                minikin::VariationSettings(builder->varSettings, false /* sorted */));
+        delete builder;
+    }
+
 }; // namespace PaintGlue
 
 static const JNINativeMethod methods[] = {
@@ -1235,6 +1265,9 @@ static const JNINativeMethod methods[] = {
         {"nSetShadowLayer", "(JFFFJJ)V", (void*)PaintGlue::setShadowLayer},
         {"nHasShadowLayer", "(J)Z", (void*)PaintGlue::hasShadowLayer},
         {"nEqualsForTextMeasurement", "(JJ)Z", (void*)PaintGlue::equalsForTextMeasurement},
+        {"nCreateFontVariationBuilder", "(I)J", (void*)PaintGlue::createFontVariationBuilder},
+        {"nAddFontVariationToBuilder", "(JIF)V", (void*)PaintGlue::addFontVariationToBuilder},
+        {"nSetFontVariationOverride", "(JJ)V", (void*)PaintGlue::setFontVariationOverride},
 };
 
 int register_android_graphics_Paint(JNIEnv* env) {

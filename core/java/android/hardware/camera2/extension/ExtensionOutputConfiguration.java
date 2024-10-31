@@ -35,7 +35,6 @@ import java.util.List;
  * @hide
  */
 @SystemApi
-@FlaggedApi(Flags.FLAG_CONCERT_MODE)
 public class ExtensionOutputConfiguration {
     private final List<CameraOutputSurface> mSurfaces;
     private final String mPhysicalCameraId;
@@ -57,7 +56,6 @@ public class ExtensionOutputConfiguration {
      * @param surfaceGroupId    In case of surface group, this field must
      *                          contain the surface group id
      */
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
     public ExtensionOutputConfiguration(@NonNull List<CameraOutputSurface> outputs,
             int outputConfigId, @Nullable String physicalCameraId, int surfaceGroupId) {
         mSurfaces = outputs;
@@ -80,11 +78,7 @@ public class ExtensionOutputConfiguration {
         config.outputId = new OutputConfigId();
         config.outputId.id = mOutputConfigId;
         config.surfaceGroupId = mSurfaceGroupId;
-        if (Flags.extension10Bit()) {
-            config.dynamicRangeProfile = surface.getDynamicRangeProfile();
-        } else {
-            config.dynamicRangeProfile = DynamicRangeProfiles.STANDARD;
-        }
+        config.dynamicRangeProfile = surface.getDynamicRangeProfile();
     }
 
     @Nullable CameraOutputConfig getOutputConfig() {

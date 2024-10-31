@@ -1674,18 +1674,32 @@ public class LauncherAppsService extends SystemService {
         @Override
         public PendingIntent getActivityLaunchIntent(String callingPackage, ComponentName component,
                 UserHandle user) {
+            try {
+                Log.d(TAG,
+                        "getActivityLaunchIntent callingPackage=" + callingPackage + " component="
+                                + component + " user=" + user);
+            } catch (Exception e) {
+                Log.e(TAG, "getActivityLaunchIntent is called and error occurred when"
+                        + " printing the logs", e);
+            }
             if (mContext.checkPermission(android.Manifest.permission.START_TASKS_FROM_RECENTS,
                     injectBinderCallingPid(), injectBinderCallingUid())
                             != PackageManager.PERMISSION_GRANTED) {
+                Log.d(TAG, "getActivityLaunchIntent no permission callingPid="
+                        + injectBinderCallingPid() + " callingUid=" + injectBinderCallingUid());
                 throw new SecurityException("Permission START_TASKS_FROM_RECENTS required");
             }
             if (!canAccessProfile(user.getIdentifier(), "Cannot start activity")) {
+                Log.d(TAG, "getActivityLaunchIntent cannot access profile user="
+                        + user.getIdentifier());
                 throw new ActivityNotFoundException("Activity could not be found");
             }
 
             final Intent launchIntent = getMainActivityLaunchIntent(component, user,
                     false /* includeArchivedApps */);
             if (launchIntent == null) {
+                Log.d(TAG, "getActivityLaunchIntent cannot access profile user="
+                        + user.getIdentifier() + " component=" + component);
                 throw new SecurityException("Attempt to launch activity without "
                         + " category Intent.CATEGORY_LAUNCHER " + component);
             }
@@ -1965,6 +1979,17 @@ public class LauncherAppsService extends SystemService {
                     canLaunch = true;
                 }
                 if (!canLaunch) {
+                    try {
+                        Log.w(TAG, "getMainActivityLaunchIntent return null because it can't launch"
+                                + " component=" + component + " user=" + user + " appsSize=" + size
+                                + " includeArchivedApps=" + includeArchivedApps
+                                + " isArchivingEnabled=" + isArchivingEnabled()
+                                + " matchingArchivedAppActivityInfo="
+                                + getMatchingArchivedAppActivityInfo(component, user));
+                    } catch (Exception e) {
+                        Log.e(TAG, "getMainActivityLaunchIntent return null and error occurred when"
+                                + " printing the logs", e);
+                    }
                     return null;
                 }
             } finally {
@@ -2407,7 +2432,7 @@ public class LauncherAppsService extends SystemService {
                 final int callbackUserId = callbackUser.getIdentifier();
                 final int shortcutUserId = shortcutUser.getIdentifier();
 
-                if (shortcutUser == callbackUser) return true;
+                if ((shortcutUser.equals(callbackUser))) return true;
                 return mUserManagerInternal.isProfileAccessible(callbackUserId, shortcutUserId,
                         null, false);
             }
@@ -2441,16 +2466,28 @@ public class LauncherAppsService extends SystemService {
                                 final BroadcastCookie cookie =
                                         (BroadcastCookie) mListeners.getBroadcastCookie(i);
                                 if (!isEnabledProfileOf(cookie, user, "onPackageRemoved")) {
+                                    // b/350144057
+                                    Slog.d(TAG, "onPackageRemoved: Skipping - profile not enabled"
+                                            + " or not accessible for user=" + user
+                                            + ", packageName=" + packageName);
                                     continue;
                                 }
                                 if (!isCallingAppIdAllowed(appIdAllowList, UserHandle.getAppId(
                                         cookie.callingUid))) {
+                                    // b/350144057
+                                    Slog.d(TAG, "onPackageRemoved: Skipping - appId not allowed"
+                                            + " for user=" + user
+                                            + ", packageName=" + packageName);
                                     continue;
                                 }
                                 try {
+                                    // b/350144057
+                                    Slog.d(TAG, "onPackageRemoved: triggering onPackageRemoved"
+                                            + " for user=" + user
+                                            + ", packageName=" + packageName);
                                     listener.onPackageRemoved(user, packageName);
                                 } catch (RemoteException re) {
-                                    Slog.d(TAG, "Callback failed ", re);
+                                    Slog.d(TAG, "onPackageRemoved: Callback failed ", re);
                                 }
                             }
                         } finally {
@@ -2480,15 +2517,27 @@ public class LauncherAppsService extends SystemService {
                         IOnAppsChangedListener listener = mListeners.getBroadcastItem(i);
                         BroadcastCookie cookie = (BroadcastCookie) mListeners.getBroadcastCookie(i);
                         if (!isEnabledProfileOf(cookie, user, "onPackageAdded")) {
+                            // b/350144057
+                            Slog.d(TAG, "onPackageAdded: Skipping - profile not enabled"
+                                    + " or not accessible for user=" + user
+                                    + ", packageName=" + packageName);
                             continue;
                         }
                         if (!isPackageVisibleToListener(packageName, cookie, user)) {
+                            // b/350144057
+                            Slog.d(TAG, "onPackageAdded: Skipping - package filtered"
+                                    + " for user=" + user
+                                    + ", packageName=" + packageName);
                             continue;
                         }
                         try {
+                            // b/350144057
+                            Slog.d(TAG, "onPackageAdded: triggering onPackageAdded"
+                                    + " for user=" + user
+                                    + ", packageName=" + packageName);
                             listener.onPackageAdded(user, packageName);
                         } catch (RemoteException re) {
-                            Slog.d(TAG, "Callback failed ", re);
+                            Slog.d(TAG, "onPackageAdded: Callback failed ", re);
                         }
                     }
                 } finally {
@@ -2522,7 +2571,7 @@ public class LauncherAppsService extends SystemService {
                         try {
                             listener.onPackageChanged(user, packageName);
                         } catch (RemoteException re) {
-                            Slog.d(TAG, "Callback failed ", re);
+                            Slog.d(TAG, "onPackageChanged: Callback failed ", re);
                         }
                     }
                 } finally {

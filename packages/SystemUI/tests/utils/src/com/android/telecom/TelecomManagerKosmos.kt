@@ -21,4 +21,5 @@ import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.util.mockito.mock
 
-var Kosmos.telecomManager by Fixture<TelecomManager?> { mock() }
+val Kosmos.mockTelecomManager by Fixture<TelecomManager> { mock() }
+var Kosmos.telecomManager by Fixture<TelecomManager?> { mockTelecomManager }

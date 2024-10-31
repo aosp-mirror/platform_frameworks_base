@@ -619,8 +619,11 @@ bool SkiaCanvas::useGainmapShader(Bitmap& bitmap) {
     // If it's an unknown colortype then it's not a bitmap-backed canvas
     if (info.colorType() == SkColorType::kUnknown_SkColorType) return true;
 
+    auto colorSpace = info.colorSpace();
+    // If we don't have a colorspace, we can't apply a gainmap
+    if (!colorSpace) return false;
     skcms_TransferFunction tfn;
-    info.colorSpace()->transferFn(&tfn);
+    colorSpace->transferFn(&tfn);
 
     auto transferType = skcms_TransferFunction_getType(&tfn);
     switch (transferType) {
@@ -841,9 +844,6 @@ void SkiaCanvas::drawGlyphs(ReadGlyphFunc glyphFunc, int count, const Paint& pai
     sk_sp<SkTextBlob> textBlob(builder.make());
 
     applyLooper(&paintCopy, [&](const SkPaint& p) { mCanvas->drawTextBlob(textBlob, 0, 0, p); });
-    if (!text_feature::fix_double_underline()) {
-        drawTextDecorations(x, y, totalAdvance, paintCopy);
-    }
 }
 
 void SkiaCanvas::drawLayoutOnPath(const minikin::Layout& layout, float hOffset, float vOffset,

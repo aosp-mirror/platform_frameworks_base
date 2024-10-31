@@ -39,6 +39,7 @@ import static org.mockito.Mockito.when;
 import android.app.IActivityManager;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.graphics.Rect;
 import android.platform.test.flag.junit.FlagsParameterization;
 import android.testing.TestableLooper.RunWithLooper;
 import android.view.View;
@@ -53,6 +54,7 @@ import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.communal.domain.interactor.CommunalInteractor;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.flags.EnableSceneContainer;
 import com.android.systemui.flags.SceneContainerFlagParameterizationKt;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.kosmos.KosmosJavaAdapter;
@@ -464,6 +466,32 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
         final WindowManager.LayoutParams lp = lpList.get(lpList.size() - 1);
         assertThat(lp.preferredMaxDisplayRefreshRate).isEqualTo(0);
         assertThat(lp.preferredMinDisplayRefreshRate).isEqualTo(0);
+    }
+
+    @Test
+    @EnableSceneContainer
+    public void configChanged_boundsUpdate() {
+        when(mNotificationShadeWindowView.getWidth()).thenReturn(1600);
+        when(mNotificationShadeWindowView.getHeight()).thenReturn(800);
+        when(mNotificationShadeWindowView.getVisibility()).thenReturn(View.INVISIBLE);
+        Configuration newConfig = new Configuration();
+        // swap width and height in new bounds to simulate auto-rotate
+        newConfig.windowConfiguration.setBounds(new Rect(0, 0, 800, 1600));
+        mNotificationShadeWindowController.onConfigChanged(newConfig);
+        verify(mWindowManager, atLeastOnce()).updateViewLayout(any(), any());
+    }
+
+    @Test
+    @EnableSceneContainer
+    public void configChanged_boundsDontUpdate() {
+        when(mNotificationShadeWindowView.getWidth()).thenReturn(1600);
+        when(mNotificationShadeWindowView.getHeight()).thenReturn(800);
+        when(mNotificationShadeWindowView.getVisibility()).thenReturn(View.INVISIBLE);
+        Configuration newConfig = new Configuration();
+        // same bounds as view's current bounds
+        newConfig.windowConfiguration.setBounds(new Rect(0, 0, 1600, 800));
+        mNotificationShadeWindowController.onConfigChanged(newConfig);
+        verify(mWindowManager, never()).updateViewLayout(any(), any());
     }
 
     private void setKeyguardShowing() {
