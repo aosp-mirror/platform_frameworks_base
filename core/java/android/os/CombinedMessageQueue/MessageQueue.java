@@ -85,11 +85,6 @@ public final class MessageQueue {
     // queue for async messages when inserting a message at the tail.
     private int mLegacyAsyncMessageCount;
 
-    // The next barrier token.
-    // Barriers are indicated by messages with a null target whose arg1 field carries the token.
-    @UnsupportedAppUsage
-    private int mLegacyNextBarrierToken;
-
     /*
      * Select between two implementations of message queue. The legacy implementation is used
      * by default as it provides maximum compatibility with applications and tests that
@@ -900,7 +895,12 @@ public final class MessageQueue {
         // Enqueue a new sync barrier token.
         // We don't need to wake the queue because the purpose of a barrier is to stall it.
         if (sForceConcurrent) {
-            final int token = mNextBarrierToken.getAndIncrement();
+            final int token = mNextBarrierTokenAtomic.getAndIncrement();
+
+            // b/376573804: apps and tests may expect to be able to use reflection
+            // to read this value. Make some effort to support this legacy use case.
+            mNextBarrierToken = token + 1;
+
             final Message msg = Message.obtain();
 
             msg.markInUse();
@@ -915,7 +915,7 @@ public final class MessageQueue {
         }
 
         synchronized (this) {
-            final int token = mLegacyNextBarrierToken++;
+            final int token = mNextBarrierToken++;
             final Message msg = Message.obtain();
             msg.markInUse();
             msg.when = when;
@@ -2292,7 +2292,11 @@ public final class MessageQueue {
 
     // The next barrier token.
     // Barriers are indicated by messages with a null target whose arg1 field carries the token.
-    private final AtomicInteger mNextBarrierToken = new AtomicInteger(1);
+    private final AtomicInteger mNextBarrierTokenAtomic = new AtomicInteger(1);
+
+    // Must retain this for compatibility reasons.
+    @UnsupportedAppUsage
+    private int mNextBarrierToken;
 
     /* Protects mNextIsDrainingStack */
     private final ReentrantLock mDrainingLock = new ReentrantLock();
