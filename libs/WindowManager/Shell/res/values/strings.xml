@@ -305,6 +305,8 @@
     <string name="new_window_text">New Window</string>
     <!-- Accessibility text for the handle menu new window button [CHAR LIMIT=NONE] -->
     <string name="manage_windows_text">Manage Windows</string>
+    <!-- Accessibility text for the handle menu change aspect ratio button [CHAR LIMIT=NONE] -->
+    <string name="change_aspect_ratio_text">Change aspect ratio</string>
     <!-- Accessibility text for the handle menu close button [CHAR LIMIT=NONE] -->
     <string name="close_text">Close</string>
     <!-- Accessibility text for the handle menu close menu button [CHAR LIMIT=NONE] -->

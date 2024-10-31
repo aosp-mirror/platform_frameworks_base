@@ -155,6 +155,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     private Function0<Unit> mOnToSplitscreenClickListener;
     private Function0<Unit> mOnNewWindowClickListener;
     private Function0<Unit> mOnManageWindowsClickListener;
+    private Function0<Unit> mOnChangeAspectRatioClickListener;
     private DragPositioningCallback mDragPositioningCallback;
     private DragResizeInputListener mDragResizeListener;
     private Runnable mCurrentViewHostRunnable = null;
@@ -364,6 +365,11 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
      */
     void setManageWindowsClickListener(Function0<Unit> listener) {
         mOnManageWindowsClickListener = listener;
+    }
+
+    /** Registers a listener to be called when the aspect ratio action is triggered. */
+    void setOnChangeAspectRatioClickListener(Function0<Unit> listener) {
+        mOnChangeAspectRatioClickListener = listener;
     }
 
     void setCaptionListeners(
@@ -1352,6 +1358,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 && Flags.enableDesktopWindowingMultiInstanceFeatures();
         final boolean shouldShowManageWindowsButton = supportsMultiInstance
                 && mMinimumInstancesFound;
+        final boolean shouldShowChangeAspectRatioButton = HandleMenu.Companion
+                .shouldShowChangeAspectRatioButton(mTaskInfo);
         final boolean inDesktopImmersive = mDesktopRepository
                 .isTaskInFullImmersiveState(mTaskInfo.taskId);
         mHandleMenu = mHandleMenuFactory.create(
@@ -1364,6 +1372,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 canEnterDesktopMode(mContext),
                 supportsMultiInstance,
                 shouldShowManageWindowsButton,
+                shouldShowChangeAspectRatioButton,
                 getBrowserLink(),
                 mResult.mCaptionWidth,
                 mResult.mCaptionHeight,
@@ -1384,6 +1393,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 /* onToSplitScreenClickListener= */ mOnToSplitscreenClickListener,
                 /* onNewWindowClickListener= */ mOnNewWindowClickListener,
                 /* onManageWindowsClickListener= */ mOnManageWindowsClickListener,
+                /* onAspectRatioSettingsClickListener= */ mOnChangeAspectRatioClickListener,
                 /* openInBrowserClickListener= */ (intent) -> {
                     mOpenInBrowserClickListener.accept(intent);
                     onCapturedLinkExpired();

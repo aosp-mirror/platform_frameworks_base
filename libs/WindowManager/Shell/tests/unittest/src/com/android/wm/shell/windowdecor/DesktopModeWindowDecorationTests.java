@@ -261,8 +261,8 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
         doReturn(defaultDisplay).when(mMockDisplayController).getDisplay(Display.DEFAULT_DISPLAY);
         doReturn(mInsetsState).when(mMockDisplayController).getInsetsState(anyInt());
         when(mMockHandleMenuFactory.create(any(), any(), anyInt(), any(), any(), any(),
-                anyBoolean(), anyBoolean(), anyBoolean(), any(), anyInt(), anyInt(), anyInt(),
-                anyInt()))
+                anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(), any(), anyInt(), anyInt(),
+                anyInt(), anyInt()))
                 .thenReturn(mMockHandleMenu);
         when(mMockMultiInstanceHelper.supportsMultiInstanceSplit(any())).thenReturn(false);
         when(mMockAppHeaderViewHolderFactory.create(any(), any(), any(), any(), any(), any(), any(),
@@ -1174,6 +1174,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 any(),
                 any(),
                 any(),
+                any(),
                 openInBrowserCaptor.capture(),
                 any(),
                 any(),
@@ -1199,6 +1200,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 ArgumentCaptor.forClass(Function1.class);
         createHandleMenu(decor);
         verify(mMockHandleMenu).show(
+                any(),
                 any(),
                 any(),
                 any(),
@@ -1259,6 +1261,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 any(),
                 any(),
                 any(),
+                any(),
                 closeClickListener.capture(),
                 any(),
                 anyBoolean()
@@ -1281,6 +1284,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
         createHandleMenu(decoration);
 
         verify(mMockHandleMenu).show(
+                any(),
                 any(),
                 any(),
                 any(),
@@ -1433,7 +1437,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
 
     private void verifyHandleMenuCreated(@Nullable Uri uri) {
         verify(mMockHandleMenuFactory).create(any(), any(), anyInt(), any(), any(),
-                any(), anyBoolean(), anyBoolean(), anyBoolean(),
+                any(), anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(),
                 argThat(intent -> (uri == null && intent == null) || intent.getData().equals(uri)),
                 anyInt(), anyInt(), anyInt(), anyInt());
     }

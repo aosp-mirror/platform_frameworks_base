@@ -688,6 +688,12 @@ public class CompatUIController implements OnDisplaysChangedListener,
 
     private void launchUserAspectRatioSettings(
             @NonNull TaskInfo taskInfo, @NonNull ShellTaskOrganizer.TaskListener taskListener) {
+        launchUserAspectRatioSettings(mContext, taskInfo);
+    }
+
+    /** Launch the user aspect ratio settings for the package of the given task. */
+    public static void launchUserAspectRatioSettings(
+            @NonNull Context context, @NonNull TaskInfo taskInfo) {
         final Intent intent = new Intent(Settings.ACTION_MANAGE_USER_ASPECT_RATIO_SETTINGS);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -697,7 +703,7 @@ public class CompatUIController implements OnDisplaysChangedListener,
             intent.setData(packageUri);
         }
         final UserHandle userHandle = UserHandle.of(taskInfo.userId);
-        mContext.startActivityAsUser(intent, userHandle);
+        context.startActivityAsUser(intent, userHandle);
     }
 
     @VisibleForTesting
