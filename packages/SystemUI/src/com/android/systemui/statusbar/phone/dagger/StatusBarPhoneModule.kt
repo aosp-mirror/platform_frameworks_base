@@ -143,7 +143,7 @@ interface StatusBarPhoneModule {
         fun commandQueueInitializerCoreStartable(
             initializerLazy: Lazy<CommandQueueInitializer>
         ): CoreStartable {
-            return if (StatusBarSimpleFragment.isEnabled) {
+            return if (StatusBarConnectedDisplays.isEnabled) {
                 initializerLazy.get()
             } else {
                 CoreStartable.NOP
