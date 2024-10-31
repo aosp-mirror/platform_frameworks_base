@@ -5789,6 +5789,17 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     }
 
     /**
+     * Checks if this display is allowed to ignore fixed orientation, aspect ratio,
+     * and resizability of apps.
+     *
+     * <p>This can be set via
+     * {@link VirtualDisplayConfig.Builder#setIgnoreActivitySizeRestrictions}.</p>
+     */
+    boolean isDisplayIgnoreActivitySizeRestrictions() {
+        return mWmService.mDisplayWindowSettings.isIgnoreActivitySizeRestrictionsLocked(this);
+    }
+
+    /**
      * The direct child layer of the display to put all non-overlay windows. This is also used for
      * screen rotation animation so that there is a parent layer to put the animation leash.
      */

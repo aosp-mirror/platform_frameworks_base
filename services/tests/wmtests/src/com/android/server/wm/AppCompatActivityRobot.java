@@ -143,6 +143,10 @@ class AppCompatActivityRobot {
         doReturn(naturalOrientation).when(mDisplayContent).getNaturalOrientation();
     }
 
+    void setDisplayIgnoreActivitySizeRestrictions(boolean enabled) {
+        doReturn(enabled).when(mDisplayContent).isDisplayIgnoreActivitySizeRestrictions();
+    }
+
     void configureTaskBounds(@NonNull Rect taskBounds) {
         doReturn(taskBounds).when(mTaskStack.top()).getBounds();
     }
