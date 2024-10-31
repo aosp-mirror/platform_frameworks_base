@@ -56,11 +56,13 @@ private fun pointersInfo(
     startedPosition: Offset = Offset.Zero,
     pointersDown: Int = 1,
     isMouseWheel: Boolean = false,
+    pointersDownByType: Map<PointerType, Int> = mapOf(PointerType.Touch to pointersDown),
 ): PointersInfo {
     return PointersInfo(
         startedPosition = startedPosition,
         pointersDown = pointersDown,
         isMouseWheel = isMouseWheel,
+        pointersDownByType = pointersDownByType,
     )
 }
 

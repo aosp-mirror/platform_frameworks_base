@@ -227,6 +227,8 @@ private fun resolveSwipe(
             },
         // If the number of pointers is not specified, 1 is assumed.
         pointerCount = pointersInfo?.pointersDown ?: 1,
+        // Resolves the pointer type only if all pointers are of the same type.
+        pointersType = pointersInfo?.pointersDownByType?.keys?.singleOrNull(),
         fromSource = fromSource,
     )
 }

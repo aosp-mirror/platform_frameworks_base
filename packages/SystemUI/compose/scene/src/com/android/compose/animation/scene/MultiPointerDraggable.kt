@@ -33,6 +33,7 @@ import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.PointerId
 import androidx.compose.ui.input.pointer.PointerInputChange
 import androidx.compose.ui.input.pointer.PointerInputScope
+import androidx.compose.ui.input.pointer.PointerType
 import androidx.compose.ui.input.pointer.SuspendingPointerInputModifierNode
 import androidx.compose.ui.input.pointer.changedToDown
 import androidx.compose.ui.input.pointer.changedToUpIgnoreConsumed
@@ -52,6 +53,7 @@ import androidx.compose.ui.util.fastAll
 import androidx.compose.ui.util.fastAny
 import androidx.compose.ui.util.fastFilter
 import androidx.compose.ui.util.fastFirstOrNull
+import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.util.fastSumBy
 import com.android.compose.ui.util.SpaceVectorConverter
 import kotlin.coroutines.cancellation.CancellationException
@@ -676,11 +678,14 @@ internal fun interface PointersInfoOwner {
  *   this one.
  * @param pointersDown The number of pointers currently down.
  * @param isMouseWheel Indicates whether the last pointer event was a mouse wheel scroll.
+ * @param pointersDownByType Provide a map of pointer types to the count of pointers of that type
+ *   currently down/pressed.
  */
 internal data class PointersInfo(
     val startedPosition: Offset,
     val pointersDown: Int,
     val isMouseWheel: Boolean,
+    val pointersDownByType: Map<PointerType, Int>,
 ) {
     init {
         check(pointersDown > 0) { "We should have at least 1 pointer down, $pointersDown instead" }
@@ -696,5 +701,13 @@ private fun PointersInfo(
         startedPosition = startedPosition,
         pointersDown = pointersDown,
         isMouseWheel = lastPointerEvent.type == PointerEventType.Scroll,
+        pointersDownByType =
+            buildMap {
+                lastPointerEvent.changes.fastForEach { change ->
+                    if (!change.pressed) return@fastForEach
+                    val newValue = (get(change.type) ?: 0) + 1
+                    put(change.type, newValue)
+                }
+            },
     )
 }

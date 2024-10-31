@@ -72,6 +72,7 @@ private fun Content.shouldEnableSwipes(orientation: Orientation): Boolean {
  * @return The best matching [UserActionResult], or `null` if no match is found.
  */
 internal fun Content.findActionResultBestMatch(swipe: Swipe.Resolved): UserActionResult? {
+    var bestPoints = Int.MIN_VALUE
     var bestMatch: UserActionResult? = null
     userActions.forEach { (actionSwipe, actionResult) ->
         if (
@@ -81,19 +82,30 @@ internal fun Content.findActionResultBestMatch(swipe: Swipe.Resolved): UserActio
                 // The number of pointers down must match.
                 actionSwipe.pointerCount != swipe.pointerCount ||
                 // The action requires a specific fromSource.
-                (actionSwipe.fromSource != null && actionSwipe.fromSource != swipe.fromSource)
+                (actionSwipe.fromSource != null && actionSwipe.fromSource != swipe.fromSource) ||
+                // The action requires a specific pointerType.
+                (actionSwipe.pointersType != null && actionSwipe.pointersType != swipe.pointersType)
         ) {
             // This action is not eligible.
             return@forEach
         }
 
-        // Prioritize actions with a matching fromSource.
-        if (actionSwipe.fromSource == swipe.fromSource) {
+        val sameFromSource = actionSwipe.fromSource == swipe.fromSource
+        val samePointerType = actionSwipe.pointersType == swipe.pointersType
+        // Prioritize actions with a perfect match.
+        if (sameFromSource && samePointerType) {
             return actionResult
         }
 
+        var points = 0
+        if (sameFromSource) points++
+        if (samePointerType) points++
+
         // Otherwise, keep track of the best eligible action.
-        bestMatch = actionResult
+        if (points > bestPoints) {
+            bestPoints = points
+            bestMatch = actionResult
+        }
     }
     return bestMatch
 }
