@@ -51,6 +51,9 @@ import com.android.compose.animation.scene.animateSharedValueAsState
 import com.android.compose.animation.scene.element
 import com.android.compose.animation.scene.modifiers.noResizeDuringTransitions
 import com.android.compose.animation.scene.nestedScrollToScene
+import com.android.compose.modifiers.thenIf
+import com.android.compose.ui.graphics.ContainerState
+import com.android.compose.ui.graphics.container
 
 /** A content defined in a [SceneTransitionLayout], i.e. a scene or an overlay. */
 @Stable
@@ -62,6 +65,7 @@ internal sealed class Content(
     zIndex: Float,
 ) {
     internal val scope = ContentScopeImpl(layoutImpl, content = this)
+    val containerState = ContainerState()
 
     var content by mutableStateOf(content)
     var zIndex by mutableFloatStateOf(zIndex)
@@ -81,6 +85,9 @@ internal sealed class Content(
                     targetSize = lookaheadSize
                     val placeable = measurable.measure(constraints)
                     layout(placeable.width, placeable.height) { placeable.place(0, 0) }
+                }
+                .thenIf(layoutImpl.state.isElevationPossible(content = key, element = null)) {
+                    Modifier.container(containerState)
                 }
                 .testTag(key.testTag)
         ) {
@@ -106,7 +113,7 @@ internal class ContentScopeImpl(
     override fun Element(
         key: ElementKey,
         modifier: Modifier,
-        content: @Composable (ElementScope<ElementContentScope>.() -> Unit)
+        content: @Composable (ElementScope<ElementContentScope>.() -> Unit),
     ) {
         Element(layoutImpl, this@ContentScopeImpl.content, key, modifier, content)
     }
@@ -115,7 +122,7 @@ internal class ContentScopeImpl(
     override fun MovableElement(
         key: MovableElementKey,
         modifier: Modifier,
-        content: @Composable (ElementScope<MovableElementContentScope>.() -> Unit)
+        content: @Composable (ElementScope<MovableElementContentScope>.() -> Unit),
     ) {
         MovableElement(layoutImpl, this@ContentScopeImpl.content, key, modifier, content)
     }

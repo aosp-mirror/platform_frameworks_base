@@ -18,16 +18,18 @@ package com.android.server.input
 
 import android.content.Context
 import android.content.ContextWrapper
-import android.hardware.input.IInputManager
 import android.hardware.input.InputManager
-import android.hardware.input.InputManagerGlobal
 import android.os.test.TestLooper
 import android.platform.test.annotations.Presubmit
 import android.provider.Settings
 import android.view.InputDevice
 import android.view.KeyEvent
 import androidx.test.core.app.ApplicationProvider
-import org.junit.After
+import com.android.test.input.MockInputManagerRule
+import java.io.FileNotFoundException
+import java.io.FileOutputStream
+import java.io.IOException
+import java.io.InputStream
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
@@ -35,10 +37,6 @@ import org.junit.Test
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.junit.MockitoJUnit
-import java.io.FileNotFoundException
-import java.io.FileOutputStream
-import java.io.IOException
-import java.io.InputStream
 
 private fun createKeyboard(deviceId: Int): InputDevice =
     InputDevice.Builder()
@@ -73,15 +71,15 @@ class KeyRemapperTests {
     @get:Rule
     val rule = MockitoJUnit.rule()!!
 
-    @Mock
-    private lateinit var iInputManager: IInputManager
+    @get:Rule
+    val inputManagerRule = MockInputManagerRule()
+
     @Mock
     private lateinit var native: NativeInputManagerService
     private lateinit var mKeyRemapper: KeyRemapper
     private lateinit var context: Context
     private lateinit var dataStore: PersistentDataStore
     private lateinit var testLooper: TestLooper
-    private lateinit var inputManagerGlobalSession: InputManagerGlobal.TestSession
 
     @Before
     fun setup() {
@@ -104,25 +102,17 @@ class KeyRemapperTests {
             dataStore,
             testLooper.looper
         )
-        inputManagerGlobalSession = InputManagerGlobal.createTestSession(iInputManager)
         val inputManager = InputManager(context)
         Mockito.`when`(context.getSystemService(Mockito.eq(Context.INPUT_SERVICE)))
             .thenReturn(inputManager)
-        Mockito.`when`(iInputManager.inputDeviceIds).thenReturn(intArrayOf(DEVICE_ID))
-    }
-
-    @After
-    fun tearDown() {
-        if (this::inputManagerGlobalSession.isInitialized) {
-            inputManagerGlobalSession.close()
-        }
+        Mockito.`when`(inputManagerRule.mock.inputDeviceIds).thenReturn(intArrayOf(DEVICE_ID))
     }
 
     @Test
     fun testKeyRemapping_whenRemappingEnabled() {
         ModifierRemappingFlag(true).use {
             val keyboard = createKeyboard(DEVICE_ID)
-            Mockito.`when`(iInputManager.getInputDevice(DEVICE_ID)).thenReturn(keyboard)
+            Mockito.`when`(inputManagerRule.mock.getInputDevice(DEVICE_ID)).thenReturn(keyboard)
 
             for (i in REMAPPABLE_KEYS.indices) {
                 val fromKeyCode = REMAPPABLE_KEYS[i]
@@ -160,7 +150,7 @@ class KeyRemapperTests {
     fun testKeyRemapping_whenRemappingDisabled() {
         ModifierRemappingFlag(false).use {
             val keyboard = createKeyboard(DEVICE_ID)
-            Mockito.`when`(iInputManager.getInputDevice(DEVICE_ID)).thenReturn(keyboard)
+            Mockito.`when`(inputManagerRule.mock.getInputDevice(DEVICE_ID)).thenReturn(keyboard)
 
             mKeyRemapper.remapKey(REMAPPABLE_KEYS[0], REMAPPABLE_KEYS[1])
             testLooper.dispatchAll()

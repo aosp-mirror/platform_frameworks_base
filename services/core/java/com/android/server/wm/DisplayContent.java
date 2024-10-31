@@ -88,17 +88,17 @@ import static android.view.inputmethod.ImeTracker.DEBUG_IME_VISIBILITY;
 import static android.window.DisplayAreaOrganizer.FEATURE_IME;
 import static android.window.DisplayAreaOrganizer.FEATURE_ROOT;
 
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS;
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_BOOT;
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_CONTENT_RECORDING;
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_FOCUS;
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_FOCUS_LIGHT;
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_IME;
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_KEEP_SCREEN_ON;
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ORIENTATION;
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_SCREEN_ON;
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_WALLPAPER;
-import static com.android.internal.protolog.ProtoLogGroup.WM_SHOW_TRANSACTIONS;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_APP_TRANSITIONS;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_BOOT;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_CONTENT_RECORDING;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_FOCUS;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_FOCUS_LIGHT;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_IME;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_KEEP_SCREEN_ON;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_ORIENTATION;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_SCREEN_ON;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_WALLPAPER;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_SHOW_TRANSACTIONS;
 import static com.android.internal.util.LatencyTracker.ACTION_ROTATE_SCREEN;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_CONFIG;
@@ -707,6 +707,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     @Retention(RetentionPolicy.SOURCE)
     @interface InputMethodTarget {}
 
+    /** The surface parent window of the IME container. */
+    private WindowContainer mInputMethodSurfaceParentWindow;
     /** The surface parent of the IME container. */
     @VisibleForTesting
     SurfaceControl mInputMethodSurfaceParent;
@@ -735,8 +737,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     /** All tokens used to put activities on this root task to sleep (including mOffToken) */
     final ArrayList<RootWindowContainer.SleepToken> mAllSleepTokens = new ArrayList<>();
-    /** The token acquirer to put root tasks on the display to sleep */
-    private final ActivityTaskManagerInternal.SleepTokenAcquirer mOffTokenAcquirer;
 
     private boolean mSleeping;
 
@@ -1131,7 +1131,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         mDisplay = display;
         mDisplayId = display.getDisplayId();
         mCurrentUniqueDisplayId = display.getUniqueId();
-        mOffTokenAcquirer = mRootWindowContainer.mDisplayOffTokenAcquirer;
         mWallpaperController = new WallpaperController(mWmService, this);
         mWallpaperController.resetLargestDisplay(display);
         display.getDisplayInfo(mDisplayInfo);
@@ -1530,6 +1529,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     @ScreenOrientation
     int getLastOrientation() {
         return mDisplayRotation.getLastOrientation();
+    }
+
+    WindowContainer getImeParentWindow() {
+        return mInputMethodSurfaceParentWindow;
     }
 
     void registerRemoteAnimations(RemoteAnimationDefinition definition) {
@@ -4736,13 +4739,17 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 Slog.i(TAG_WM, "ImeContainer is organized. Skip updateImeParent.");
             }
             // Leave the ImeContainer where the DisplayAreaPolicy placed it.
-            // FEATURE_IME is organized by vendor so they are responible for placing the surface.
+            // FEATURE_IME is organized by vendor so they are responsible for placing the surface.
+            mInputMethodSurfaceParentWindow = null;
             mInputMethodSurfaceParent = null;
             return;
         }
 
-        final SurfaceControl newParent = computeImeParent();
+        final var newParentWindow = computeImeParent();
+        final SurfaceControl newParent =
+                newParentWindow != null ? newParentWindow.getSurfaceControl() : null;
         if (newParent != null && newParent != mInputMethodSurfaceParent) {
+            mInputMethodSurfaceParentWindow = newParentWindow;
             mInputMethodSurfaceParent = newParent;
             getSyncTransaction().reparent(mImeWindowsContainer.mSurfaceControl, newParent);
             if (DEBUG_IME_VISIBILITY) {
@@ -4803,7 +4810,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      * Computes the window the IME should be attached to.
      */
     @VisibleForTesting
-    SurfaceControl computeImeParent() {
+    WindowContainer computeImeParent() {
         if (!ImeTargetVisibilityPolicy.canComputeImeParent(mImeLayeringTarget, mImeInputTarget)) {
             return null;
         }
@@ -4811,11 +4818,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         // screen. If it's not covering the entire screen the IME might extend beyond the apps
         // bounds.
         if (shouldImeAttachedToApp()) {
-            return mImeLayeringTarget.mActivityRecord.getSurfaceControl();
+            return mImeLayeringTarget.mActivityRecord;
         }
         // Otherwise, we just attach it to where the display area policy put it.
-        return mImeWindowsContainer.getParent() != null
-                ? mImeWindowsContainer.getParent().getSurfaceControl() : null;
+        return mImeWindowsContainer.getParent();
     }
 
     void setLayoutNeeded() {
@@ -6157,9 +6163,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         final int displayState = mDisplayInfo.state;
         if (displayId != DEFAULT_DISPLAY) {
             if (displayState == Display.STATE_OFF) {
-                mOffTokenAcquirer.acquire(mDisplayId);
+                mRootWindowContainer.mDisplayOffTokenAcquirer.acquire(mDisplayId);
             } else if (displayState == Display.STATE_ON) {
-                mOffTokenAcquirer.release(mDisplayId);
+                mRootWindowContainer.mDisplayOffTokenAcquirer.release(mDisplayId);
             }
             ProtoLog.v(WM_DEBUG_CONTENT_RECORDING,
                     "Content Recording: Display %d state was (%d), is now (%d), so update "
@@ -6917,27 +6923,25 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 return;
             }
             if (mFixedRotationLaunchingApp.hasFixedRotationTransform(r)) {
+                if (!r.isVisible()) {
+                    // Let the opening activity update orientation.
+                    return;
+                }
                 if (mFixedRotationLaunchingApp.hasAnimatingFixedRotationTransition()) {
                     // Waiting until all of the associated activities have done animation, or the
                     // orientation would be updated too early and cause flickering.
                     return;
                 }
             } else {
-                // Handle a corner case that the task of {@link #mFixedRotationLaunchingApp} is no
-                // longer animating but the corresponding transition finished event won't notify.
-                // E.g. activity A transferred starting window to B, only A will receive transition
-                // finished event. A doesn't have fixed rotation but B is the rotated launching app.
-                final Task task = r.getTask();
-                if (task != mFixedRotationLaunchingApp.getTask()
+                // Check to skip updating display orientation by a non-top activity.
+                if ((!r.isVisible() || !mFixedRotationLaunchingApp.fillsParent())
                         // When closing a translucent task A (r.fillsParent() is false) to a
                         // visible task B, because only A has visibility change, there is only A's
                         // transition callback. Then it still needs to update orientation for B.
-                        && (!mWmService.mFlags.mRespectNonTopVisibleFixedOrientation
-                                || r.fillsParent())) {
-                    // Different tasks won't be in one activity transition animation.
+                        && r.fillsParent()) {
                     return;
                 }
-                if (task.getActivity(ActivityRecord::isInTransition) != null) {
+                if (r.inTransition()) {
                     return;
                     // Continue to update orientation because the transition of the top rotated
                     // launching activity is done.

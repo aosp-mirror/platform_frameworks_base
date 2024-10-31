@@ -42,6 +42,7 @@ enum class BluetoothTileDialogUiEvent(val metricId: Int) : UiEventLogger.UiEvent
     LAUNCH_SETTINGS_IN_SHARING_LE_DEVICE_CLICKED(1717),
     @UiEvent(doc = "Currently broadcasting and a non-LE audio supported device is clicked")
     LAUNCH_SETTINGS_IN_SHARING_NON_LE_DEVICE_CLICKED(1718),
+    @Deprecated("Use case no longer needed")
     @UiEvent(
         doc = "Not broadcasting, having one connected, another saved LE audio device is clicked"
     )
@@ -52,8 +53,13 @@ enum class BluetoothTileDialogUiEvent(val metricId: Int) : UiEventLogger.UiEvent
     )
     @UiEvent(doc = "Not broadcasting, one of the two connected LE audio devices is clicked")
     LAUNCH_SETTINGS_NOT_SHARING_CONNECTED_LE_DEVICE_CLICKED(1720),
+    @Deprecated("Use case no longer needed")
     @UiEvent(doc = "Not broadcasting, having two connected, the active LE audio devices is clicked")
-    LAUNCH_SETTINGS_NOT_SHARING_ACTIVE_LE_DEVICE_CLICKED(1881);
+    LAUNCH_SETTINGS_NOT_SHARING_ACTIVE_LE_DEVICE_CLICKED(1881),
+    @UiEvent(doc = "Clicked on switch active button on audio sharing dialog")
+    AUDIO_SHARING_DIALOG_SWITCH_ACTIVE_CLICKED(1890),
+    @UiEvent(doc = "Clicked on share audio button on audio sharing dialog")
+    AUDIO_SHARING_DIALOG_SHARE_AUDIO_CLICKED(1891);
 
     override fun getId() = metricId
 }

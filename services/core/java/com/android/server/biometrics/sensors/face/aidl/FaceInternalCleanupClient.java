@@ -63,12 +63,12 @@ public class FaceInternalCleanupClient extends InternalCleanupClient<Face, AidlS
             Supplier<AidlSession> lazyDaemon, IBinder token,
             int biometricId, int userId, String owner, BiometricUtils<Face> utils, int sensorId,
             @NonNull BiometricLogger logger, @NonNull BiometricContext biometricContext,
-            Map<Integer, Long> authenticatorIds) {
+            Map<Integer, Long> authenticatorIds, int reason) {
         // Internal remove does not need to send results to anyone. Cleanup (enumerate + remove)
         // is all done internally.
         return new FaceRemovalClient(context, lazyDaemon, token,
                 null /* ClientMonitorCallbackConverter */, new int[] {biometricId}, userId, owner,
-                utils, sensorId, logger, biometricContext, authenticatorIds);
+                utils, sensorId, logger, biometricContext, authenticatorIds, reason);
     }
 
     @Override

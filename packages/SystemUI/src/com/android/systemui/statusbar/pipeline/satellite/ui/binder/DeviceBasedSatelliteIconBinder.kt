@@ -23,7 +23,7 @@ import com.android.systemui.common.ui.binder.IconViewBinder
 import com.android.systemui.statusbar.pipeline.satellite.ui.viewmodel.DeviceBasedSatelliteViewModel
 import com.android.systemui.statusbar.pipeline.shared.ui.binder.ModernStatusBarViewBinding
 import com.android.systemui.statusbar.pipeline.shared.ui.view.SingleBindableStatusBarIconView
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 object DeviceBasedSatelliteIconBinder {
     fun bind(

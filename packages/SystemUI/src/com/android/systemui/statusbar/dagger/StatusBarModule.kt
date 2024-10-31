@@ -16,17 +16,31 @@
 
 package com.android.systemui.statusbar.dagger
 
+import android.content.Context
+import com.android.systemui.CameraProtectionLoader
 import com.android.systemui.CoreStartable
+import com.android.systemui.SysUICutoutProvider
+import com.android.systemui.SysUICutoutProviderImpl
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.LogBufferFactory
+import com.android.systemui.statusbar.core.StatusBarConnectedDisplays
 import com.android.systemui.statusbar.data.StatusBarDataLayerModule
 import com.android.systemui.statusbar.phone.LightBarController
+import com.android.systemui.statusbar.phone.StatusBarContentInsetsProvider
+import com.android.systemui.statusbar.phone.StatusBarContentInsetsProviderImpl
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallLog
+import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.ui.SystemBarUtilsProxyImpl
+import com.android.systemui.statusbar.window.MultiDisplayStatusBarWindowControllerStore
+import com.android.systemui.statusbar.window.SingleDisplayStatusBarWindowControllerStore
+import com.android.systemui.statusbar.window.StatusBarWindowController
+import com.android.systemui.statusbar.window.StatusBarWindowControllerImpl
+import com.android.systemui.statusbar.window.StatusBarWindowControllerStore
 import dagger.Binds
+import dagger.Lazy
 import dagger.Module
 import dagger.Provides
 import dagger.multibindings.ClassKey
@@ -42,6 +56,7 @@ import dagger.multibindings.IntoMap
  */
 @Module(includes = [StatusBarDataLayerModule::class, SystemBarUtilsProxyImpl.Module::class])
 abstract class StatusBarModule {
+
     @Binds
     @IntoMap
     @ClassKey(OngoingCallController::class)
@@ -57,12 +72,67 @@ abstract class StatusBarModule {
     @ClassKey(StatusBarSignalPolicy::class)
     abstract fun bindStatusBarSignalPolicy(impl: StatusBarSignalPolicy): CoreStartable
 
+    @Binds
+    @SysUISingleton
+    abstract fun statusBarWindowControllerFactory(
+        implFactory: StatusBarWindowControllerImpl.Factory
+    ): StatusBarWindowController.Factory
+
     companion object {
+
+        @Provides
+        @SysUISingleton
+        fun windowControllerStore(
+            multiDisplayImplLazy: Lazy<MultiDisplayStatusBarWindowControllerStore>,
+            singleDisplayImplLazy: Lazy<SingleDisplayStatusBarWindowControllerStore>,
+        ): StatusBarWindowControllerStore {
+            return if (StatusBarConnectedDisplays.isEnabled) {
+                multiDisplayImplLazy.get()
+            } else {
+                singleDisplayImplLazy.get()
+            }
+        }
+
+        @Provides
+        @SysUISingleton
+        @IntoMap
+        @ClassKey(MultiDisplayStatusBarWindowControllerStore::class)
+        fun multiDisplayControllerStoreAsCoreStartable(
+            storeLazy: Lazy<MultiDisplayStatusBarWindowControllerStore>
+        ): CoreStartable {
+            return if (StatusBarConnectedDisplays.isEnabled) {
+                storeLazy.get()
+            } else {
+                CoreStartable.NOP
+            }
+        }
+
         @Provides
         @SysUISingleton
         @OngoingCallLog
         fun provideOngoingCallLogBuffer(factory: LogBufferFactory): LogBuffer {
             return factory.create("OngoingCall", 75)
+        }
+
+        @Provides
+        @SysUISingleton
+        fun sysUiCutoutProvider(
+            factory: SysUICutoutProviderImpl.Factory,
+            context: Context,
+            cameraProtectionLoader: CameraProtectionLoader,
+        ): SysUICutoutProvider {
+            return factory.create(context, cameraProtectionLoader)
+        }
+
+        @Provides
+        @SysUISingleton
+        fun contentInsetsProvider(
+            factory: StatusBarContentInsetsProviderImpl.Factory,
+            context: Context,
+            configurationController: ConfigurationController,
+            sysUICutoutProvider: SysUICutoutProvider,
+        ): StatusBarContentInsetsProvider {
+            return factory.create(context, configurationController, sysUICutoutProvider)
         }
     }
 }

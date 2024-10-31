@@ -27,6 +27,7 @@ import androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
 import androidx.constraintlayout.widget.ConstraintSet.START
 import androidx.constraintlayout.widget.ConstraintSet.TOP
 import androidx.lifecycle.lifecycleScope
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.fragments.FragmentService
@@ -49,7 +50,6 @@ import dagger.Lazy
 import java.util.function.Consumer
 import javax.inject.Inject
 import kotlin.reflect.KMutableProperty0
-import kotlinx.coroutines.launch
 
 @VisibleForTesting internal const val INSET_DEBOUNCE_MILLIS = 500L
 
@@ -334,7 +334,7 @@ constructor(
 private data class Paddings(
     val containerPadding: Int,
     val notificationsMargin: Int,
-    val qsContainerPadding: Int
+    val qsContainerPadding: Int,
 )
 
 private fun KMutableProperty0<Int>.setAndReportChange(newValue: Int): Boolean {

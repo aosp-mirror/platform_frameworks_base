@@ -26,6 +26,7 @@ import android.graphics.Matrix
 import android.graphics.PointF
 import android.graphics.Rect
 import android.graphics.RectF
+import android.os.Handler
 import android.os.RemoteException
 import android.util.TimeUtils
 import android.view.Choreographer
@@ -53,6 +54,7 @@ import com.android.wm.shell.R
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer
 import com.android.wm.shell.protolog.ShellProtoLogGroup
 import com.android.wm.shell.shared.animation.Interpolators
+import com.android.wm.shell.shared.annotations.ShellMainThread
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -61,7 +63,8 @@ abstract class CrossActivityBackAnimation(
     private val context: Context,
     private val background: BackAnimationBackground,
     private val rootTaskDisplayAreaOrganizer: RootTaskDisplayAreaOrganizer,
-    protected val transaction: SurfaceControl.Transaction
+    protected val transaction: SurfaceControl.Transaction,
+    @ShellMainThread handler: Handler,
 ) : ShellBackAnimation() {
 
     protected val startClosingRect = RectF()
@@ -80,7 +83,13 @@ abstract class CrossActivityBackAnimation(
     private var statusbarHeight = SystemBarUtils.getStatusBarHeight(context)
 
     private val backAnimationRunner =
-        BackAnimationRunner(Callback(), Runner(), context, Cuj.CUJ_PREDICTIVE_BACK_CROSS_ACTIVITY)
+        BackAnimationRunner(
+            Callback(),
+            Runner(),
+            context,
+            Cuj.CUJ_PREDICTIVE_BACK_CROSS_ACTIVITY,
+            handler,
+        )
     private val initialTouchPos = PointF()
     private val transformMatrix = Matrix()
     private val tmpFloat9 = FloatArray(9)

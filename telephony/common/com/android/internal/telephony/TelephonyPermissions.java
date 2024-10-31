@@ -816,7 +816,8 @@ public final class TelephonyPermissions {
      * @param callingUid pass Binder.callingUid().
      */
     public static void enforceShellOnly(int callingUid, String message) {
-        if (callingUid == Process.SHELL_UID || callingUid == Process.ROOT_UID) {
+        if (UserHandle.isSameApp(callingUid, Process.SHELL_UID)
+                || UserHandle.isSameApp(callingUid, Process.ROOT_UID)) {
             return; // okay
         }
 
@@ -903,29 +904,6 @@ public final class TelephonyPermissions {
             Binder.restoreCallingIdentity(token);
         }
         return true;
-    }
-
-    /**
-     * Ensure the caller (or self, if not processing an IPC) has
-     * {@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE} or
-     * {@link android.Manifest.permission#READ_PHONE_NUMBERS}.
-     *
-     * @throws SecurityException if the caller does not have the required permission/privileges
-     */
-    @RequiresPermission(anyOf = {
-            android.Manifest.permission.READ_PHONE_NUMBERS,
-            android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE
-    })
-    public static boolean checkCallingOrSelfReadPrivilegedPhoneStatePermissionOrReadPhoneNumber(
-            Context context, int subId, String callingPackage, @Nullable String callingFeatureId,
-            String message) {
-        if (!SubscriptionManager.isValidSubscriptionId(subId)) {
-            return false;
-        }
-        return (context.checkCallingOrSelfPermission(
-                Manifest.permission.READ_PRIVILEGED_PHONE_STATE) == PERMISSION_GRANTED
-                || checkCallingOrSelfReadPhoneNumber(context, subId, callingPackage,
-                callingFeatureId, message));
     }
 
     /**

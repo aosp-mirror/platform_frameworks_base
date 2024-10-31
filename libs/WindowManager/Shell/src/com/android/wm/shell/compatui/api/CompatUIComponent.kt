@@ -24,7 +24,6 @@ import android.os.Binder
 import android.view.IWindow
 import android.view.SurfaceControl
 import android.view.SurfaceControlViewHost
-import android.view.SurfaceSession
 import android.view.View
 import android.view.WindowManager
 import android.view.WindowlessWindowManager
@@ -106,7 +105,7 @@ class CompatUIComponent(
         attrs: WindowManager.LayoutParams
     ): SurfaceControl? {
         val className = javaClass.simpleName
-        val builder = SurfaceControl.Builder(SurfaceSession())
+        val builder = SurfaceControl.Builder()
                 .setContainerLayer()
                 .setName(className + "Leash")
                 .setHidden(false)

@@ -53,12 +53,7 @@ import org.junit.runner.RunWith
 class AnimatedSharedAsStateTest {
     @get:Rule val rule = createComposeRule()
 
-    private data class Values(
-        val int: Int,
-        val float: Float,
-        val dp: Dp,
-        val color: Color,
-    )
+    private data class Values(val int: Int, val float: Float, val dp: Dp, val color: Color)
 
     private fun lerp(start: Values, stop: Values, fraction: Float): Values {
         return Values(
@@ -70,10 +65,7 @@ class AnimatedSharedAsStateTest {
     }
 
     @Composable
-    private fun ContentScope.Foo(
-        targetValues: Values,
-        onCurrentValueChanged: (Values) -> Unit,
-    ) {
+    private fun ContentScope.Foo(targetValues: Values, onCurrentValueChanged: (Values) -> Unit) {
         val key = TestElements.Foo
         Element(key, Modifier) {
             val int by animateElementIntAsState(targetValues.int, key = TestValues.Value1)
@@ -245,7 +237,7 @@ class AnimatedSharedAsStateTest {
             fromSceneContent = {
                 SceneValues(
                     targetValues = fromValues,
-                    onCurrentValueChanged = { lastValueInFrom = it }
+                    onCurrentValueChanged = { lastValueInFrom = it },
                 )
             },
             toSceneContent = {
@@ -457,7 +449,7 @@ class AnimatedSharedAsStateTest {
             rule.runOnUiThread {
                 MutableSceneTransitionLayoutStateImpl(
                     SceneA,
-                    transitions { overscrollDisabled(SceneB, Orientation.Horizontal) }
+                    transitions { overscrollDisabled(SceneB, Orientation.Horizontal) },
                 )
             }
 

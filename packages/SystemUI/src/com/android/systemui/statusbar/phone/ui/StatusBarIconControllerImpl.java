@@ -42,6 +42,7 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.demomode.DemoMode;
 import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.modes.shared.ModesUiIcons;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.StatusIconDisplayable;
 import com.android.systemui.statusbar.phone.StatusBarIconHolder;
@@ -242,10 +243,7 @@ public class StatusBarIconControllerImpl implements Tunable,
     public void setResourceIcon(String slot, @Nullable String resPackage,
             @DrawableRes int iconResId, @Nullable Drawable preloadedIcon,
             CharSequence contentDescription, StatusBarIcon.Shape shape) {
-        if (!usesModeIcons()) {
-            Log.wtf("TAG",
-                    "StatusBarIconController.setResourceIcon() should not be called without "
-                            + "MODES_UI & MODES_UI_ICONS!");
+        if (ModesUiIcons.isUnexpectedlyInLegacyMode()) {
             // Fall back to old implementation, although it will not load the icon if it's from a
             // different package.
             setIcon(slot, iconResId, contentDescription);
@@ -579,10 +577,5 @@ public class StatusBarIconControllerImpl implements Tunable,
         } else {
             return slot + EXTERNAL_SLOT_SUFFIX;
         }
-    }
-
-    static boolean usesModeIcons() {
-        return android.app.Flags.modesApi() && android.app.Flags.modesUi()
-                && android.app.Flags.modesUiIcons();
     }
 }

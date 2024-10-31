@@ -16,6 +16,7 @@
 
 package com.android.server.display;
 
+import android.annotation.Nullable;
 import android.hardware.display.BrightnessInfo;
 import android.os.Handler;
 import android.os.IBinder;
@@ -66,6 +67,10 @@ class BrightnessRangeController {
             mNormalBrightnessModeController.resetNbmData(
                     displayDeviceConfig.getLuxThrottlingData());
         }
+        if (flags.useNewHdrBrightnessModifier()) {
+            // HDR boost is handled by HdrBrightnessModifier and should be disabled in HbmController
+            mHbmController.disableHdrBoost();
+        }
         updateHdrClamper(info, displayToken, displayDeviceConfig);
     }
 
@@ -92,7 +97,7 @@ class BrightnessRangeController {
         return mHbmController.getNormalBrightnessMax();
     }
 
-    void loadFromConfig(HighBrightnessModeMetadata hbmMetadata, IBinder token,
+    void loadFromConfig(@Nullable HighBrightnessModeMetadata hbmMetadata, IBinder token,
             DisplayDeviceInfo info, DisplayDeviceConfig displayDeviceConfig) {
         applyChanges(
                 () -> mNormalBrightnessModeController.resetNbmData(

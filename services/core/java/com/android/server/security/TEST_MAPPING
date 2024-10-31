@@ -1,12 +1,7 @@
 {
     "presubmit": [
         {
-            "name": "CtsSecurityTestCases",
-            "options": [
-                {
-                    "include-filter": "android.security.cts.FileIntegrityManagerTest"
-                }
-            ],
+            "name": "CtsSecurityTestCases_cts_fileintegritymanagertest",
             "file_patterns": ["FileIntegrity[^/]*\\.java"]
         }
     ]

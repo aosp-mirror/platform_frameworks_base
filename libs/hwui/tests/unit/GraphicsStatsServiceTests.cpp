@@ -62,6 +62,7 @@ TEST(GraphicsStats, findRootPath) {
 
 TEST(GraphicsStats, saveLoad) {
     std::string path = findRootPath() + "/test_saveLoad";
+    uid_t uid = 123;
     std::string packageName = "com.test.saveLoad";
     MockProfileData mockData;
     mockData.editJankFrameCount() = 20;
@@ -75,12 +76,13 @@ TEST(GraphicsStats, saveLoad) {
     for (size_t i = 0; i < mockData.editSlowFrameCounts().size(); i++) {
         mockData.editSlowFrameCounts()[i] = (i % 5) + 1;
     }
-    GraphicsStatsService::saveBuffer(path, packageName, 5, 3000, 7000, &mockData);
+    GraphicsStatsService::saveBuffer(path, uid, packageName, 5, 3000, 7000, &mockData);
     protos::GraphicsStatsProto loadedProto;
     EXPECT_TRUE(GraphicsStatsService::parseFromFile(path, &loadedProto));
     // Clean up the file
     unlink(path.c_str());
 
+    EXPECT_EQ(uid, loadedProto.uid());
     EXPECT_EQ(packageName, loadedProto.package_name());
     EXPECT_EQ(5, loadedProto.version_code());
     EXPECT_EQ(3000, loadedProto.stats_start());
@@ -109,6 +111,7 @@ TEST(GraphicsStats, saveLoad) {
 TEST(GraphicsStats, merge) {
     std::string path = findRootPath() + "/test_merge";
     std::string packageName = "com.test.merge";
+    uid_t uid = 123;
     MockProfileData mockData;
     mockData.editJankFrameCount() = 20;
     mockData.editTotalFrameCount() = 100;
@@ -121,7 +124,7 @@ TEST(GraphicsStats, merge) {
     for (size_t i = 0; i < mockData.editSlowFrameCounts().size(); i++) {
         mockData.editSlowFrameCounts()[i] = (i % 5) + 1;
     }
-    GraphicsStatsService::saveBuffer(path, packageName, 5, 3000, 7000, &mockData);
+    GraphicsStatsService::saveBuffer(path, uid, packageName, 5, 3000, 7000, &mockData);
     mockData.editJankFrameCount() = 50;
     mockData.editTotalFrameCount() = 500;
     for (size_t i = 0; i < mockData.editFrameCounts().size(); i++) {
@@ -130,13 +133,15 @@ TEST(GraphicsStats, merge) {
     for (size_t i = 0; i < mockData.editSlowFrameCounts().size(); i++) {
         mockData.editSlowFrameCounts()[i] = ((i % 10) + 1) * 2;
     }
-    GraphicsStatsService::saveBuffer(path, packageName, 5, 7050, 10000, &mockData);
+
+    GraphicsStatsService::saveBuffer(path, uid, packageName, 5, 7050, 10000, &mockData);
 
     protos::GraphicsStatsProto loadedProto;
     EXPECT_TRUE(GraphicsStatsService::parseFromFile(path, &loadedProto));
     // Clean up the file
     unlink(path.c_str());
 
+    EXPECT_EQ(uid, loadedProto.uid());
     EXPECT_EQ(packageName, loadedProto.package_name());
     EXPECT_EQ(5, loadedProto.version_code());
     EXPECT_EQ(3000, loadedProto.stats_start());

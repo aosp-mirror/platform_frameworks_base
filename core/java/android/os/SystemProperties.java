@@ -21,13 +21,10 @@ import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.ravenwood.annotation.RavenwoodKeepWholeClass;
-import android.ravenwood.annotation.RavenwoodRedirect;
-import android.ravenwood.annotation.RavenwoodRedirectionClass;
 import android.util.Log;
 import android.util.MutableInt;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.ravenwood.RavenwoodEnvironment;
 
 import dalvik.annotation.optimization.CriticalNative;
 import dalvik.annotation.optimization.FastNative;
@@ -40,8 +37,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Predicate;
 
 /**
  * Gives access to the system properties store.  The system properties
@@ -58,7 +53,6 @@ import java.util.function.Predicate;
  */
 @SystemApi
 @RavenwoodKeepWholeClass
-@RavenwoodRedirectionClass("SystemProperties_host")
 public class SystemProperties {
     private static final String TAG = "SystemProperties";
     private static final boolean TRACK_KEY_ACCESS = false;
@@ -76,7 +70,7 @@ public class SystemProperties {
 
     @UnsupportedAppUsage
     @GuardedBy("sChangeCallbacks")
-    static final ArrayList<Runnable> sChangeCallbacks = new ArrayList<Runnable>();
+    private static final ArrayList<Runnable> sChangeCallbacks = new ArrayList<Runnable>();
 
     @GuardedBy("sRoReads")
     private static final HashMap<String, MutableInt> sRoReads =
@@ -102,19 +96,6 @@ public class SystemProperties {
         }
     }
 
-    /** @hide */
-    @RavenwoodRedirect
-    public static void init$ravenwood(Map<String, String> values,
-            Predicate<String> keyReadablePredicate, Predicate<String> keyWritablePredicate) {
-        throw RavenwoodEnvironment.notSupportedOnDevice();
-    }
-
-    /** @hide */
-    @RavenwoodRedirect
-    public static void reset$ravenwood() {
-        throw RavenwoodEnvironment.notSupportedOnDevice();
-    }
-
     // The one-argument version of native_get used to be a regular native function. Nowadays,
     // we use the two-argument form of native_get all the time, but we can't just delete the
     // one-argument overload: apps use it via reflection, as the UnsupportedAppUsage annotation
@@ -126,46 +107,34 @@ public class SystemProperties {
 
     @FastNative
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
-    @RavenwoodRedirect
     private static native String native_get(String key, String def);
     @FastNative
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
-    @RavenwoodRedirect
     private static native int native_get_int(String key, int def);
     @FastNative
     @UnsupportedAppUsage
-    @RavenwoodRedirect
     private static native long native_get_long(String key, long def);
     @FastNative
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
-    @RavenwoodRedirect
     private static native boolean native_get_boolean(String key, boolean def);
 
     @FastNative
-    @RavenwoodRedirect
     private static native long native_find(String name);
     @FastNative
-    @RavenwoodRedirect
     private static native String native_get(long handle);
     @CriticalNative
-    @RavenwoodRedirect
     private static native int native_get_int(long handle, int def);
     @CriticalNative
-    @RavenwoodRedirect
     private static native long native_get_long(long handle, long def);
     @CriticalNative
-    @RavenwoodRedirect
     private static native boolean native_get_boolean(long handle, boolean def);
 
     // _NOT_ FastNative: native_set performs IPC and can block
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
-    @RavenwoodRedirect
     private static native void native_set(String key, String def);
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
-    @RavenwoodRedirect
     private static native void native_add_change_callback();
-    @RavenwoodRedirect
     private static native void native_report_sysprop_change();
 
     /**
@@ -301,7 +270,7 @@ public class SystemProperties {
     }
 
     @SuppressWarnings("unused")  // Called from native code.
-    static void callChangeCallbacks() {
+    private static void callChangeCallbacks() {
         ArrayList<Runnable> callbacks = null;
         synchronized (sChangeCallbacks) {
             //Log.i("foo", "Calling " + sChangeCallbacks.size() + " change callbacks!");
@@ -323,6 +292,16 @@ public class SystemProperties {
             }
         } finally {
             Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    /**
+     * Clear all callback changes.
+     * @hide
+     */
+    public static void clearChangeCallbacksForTest() {
+        synchronized (sChangeCallbacks) {
+            sChangeCallbacks.clear();
         }
     }
 

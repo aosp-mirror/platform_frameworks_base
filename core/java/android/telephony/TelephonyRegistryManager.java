@@ -115,7 +115,6 @@ public class TelephonyRegistryManager {
                 ICarrierConfigChangeListener>
             mCarrierConfigChangeListenerMap = new ConcurrentHashMap<>();
 
-
     /** @hide **/
     public TelephonyRegistryManager(@NonNull Context context) {
         mContext = context;
@@ -1119,6 +1118,21 @@ public class TelephonyRegistryManager {
     }
 
     /**
+     * Notify external listeners that carrier roaming non-terrestrial available services changed.
+     * @param availableServices The list of the supported services.
+     * @hide
+     */
+    public void notifyCarrierRoamingNtnAvailableServicesChanged(
+            int subId, @NetworkRegistrationInfo.ServiceType int[] availableServices) {
+        try {
+            sRegistry.notifyCarrierRoamingNtnAvailableServicesChanged(subId, availableServices);
+        } catch (RemoteException ex) {
+            // system server crash
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Processes potential event changes from the provided {@link TelephonyCallback}.
      *
      * @param telephonyCallback callback for monitoring callback changes to the telephony state.
@@ -1273,12 +1287,9 @@ public class TelephonyRegistryManager {
 
         if (telephonyCallback instanceof TelephonyCallback.CarrierRoamingNtnModeListener) {
             eventList.add(TelephonyCallback.EVENT_CARRIER_ROAMING_NTN_MODE_CHANGED);
-        }
-
-        if (telephonyCallback instanceof TelephonyCallback.CarrierRoamingNtnModeListener) {
             eventList.add(TelephonyCallback.EVENT_CARRIER_ROAMING_NTN_ELIGIBLE_STATE_CHANGED);
+            eventList.add(TelephonyCallback.EVENT_CARRIER_ROAMING_NTN_AVAILABLE_SERVICES_CHANGED);
         }
-
         return eventList;
     }
 
@@ -1721,13 +1732,36 @@ public class TelephonyRegistryManager {
      * @param subId Sender subscription ID.
      * @param type for callback mode entry.
      *             See {@link TelephonyManager.EmergencyCallbackModeType}.
+     * @param durationMillis is the number of milliseconds remaining in the emergency callback
+     *                        mode.
      * @hide
      */
-    public void notifyCallBackModeStarted(int phoneId, int subId,
-            @TelephonyManager.EmergencyCallbackModeType int type) {
+    public void notifyCallbackModeStarted(int phoneId, int subId,
+            @TelephonyManager.EmergencyCallbackModeType int type, long durationMillis) {
         try {
-            Log.d(TAG, "notifyCallBackModeStarted:type=" + type);
-            sRegistry.notifyCallbackModeStarted(phoneId, subId, type);
+            Log.d(TAG, "notifyCallbackModeStarted:type=" + type);
+            sRegistry.notifyCallbackModeStarted(phoneId, subId, type, durationMillis);
+        } catch (RemoteException ex) {
+            // system process is dead
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Notify Callback Mode has been restarted.
+     * @param phoneId Sender phone ID.
+     * @param subId Sender subscription ID.
+     * @param type for callback mode entry.
+     *             See {@link TelephonyManager.EmergencyCallbackModeType}.
+     * @param durationMillis is the number of milliseconds remaining in the emergency callback
+     *                        mode.
+     * @hide
+     */
+    public void notifyCallbackModeRestarted(int phoneId, int subId,
+            @TelephonyManager.EmergencyCallbackModeType int type, long durationMillis) {
+        try {
+            Log.d(TAG, "notifyCallbackModeRestarted:type=" + type);
+            sRegistry.notifyCallbackModeRestarted(phoneId, subId, type, durationMillis);
         } catch (RemoteException ex) {
             // system process is dead
             throw ex.rethrowFromSystemServer();

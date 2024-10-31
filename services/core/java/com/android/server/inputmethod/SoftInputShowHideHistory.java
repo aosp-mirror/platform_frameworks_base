@@ -18,6 +18,7 @@ package com.android.server.inputmethod;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.os.SystemClock;
 import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
@@ -62,6 +63,8 @@ final class SoftInputShowHideHistory {
         final String mImeTargetNameFromWm;
         @Nullable
         final String mImeSurfaceParentName;
+        @UserIdInt
+        final int mImeUserId;
 
         Entry(ClientState client, EditorInfo editorInfo,
                 String focusedWindowName,
@@ -69,7 +72,7 @@ final class SoftInputShowHideHistory {
                 @SoftInputShowHideReason int reason,
                 boolean inFullscreenMode, String requestWindowName,
                 @Nullable String imeControlTargetName, @Nullable String imeTargetName,
-                @Nullable String imeSurfaceParentName) {
+                @Nullable String imeSurfaceParentName, @UserIdInt int imeUserId) {
             mClientState = client;
             mEditorInfo = editorInfo;
             mFocusedWindowName = focusedWindowName;
@@ -82,6 +85,7 @@ final class SoftInputShowHideHistory {
             mImeControlTargetName = imeControlTargetName;
             mImeTargetNameFromWm = imeTargetName;
             mImeSurfaceParentName = imeSurfaceParentName;
+            mImeUserId = imeUserId;
         }
     }
 
@@ -102,7 +106,8 @@ final class SoftInputShowHideHistory {
                 continue;
             }
             pw.print(prefix);
-            pw.println("SoftInputShowHide #" + entry.mSequenceNumber + ":");
+            pw.println("SoftInputShowHide[" + entry.mImeUserId + "] #"
+                    + entry.mSequenceNumber + ":");
 
             pw.print(prefix);
             pw.println("  time=" + formatter.format(Instant.ofEpochMilli(entry.mWallTime))

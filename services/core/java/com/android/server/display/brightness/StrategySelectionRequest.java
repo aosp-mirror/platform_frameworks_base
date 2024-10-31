@@ -40,15 +40,23 @@ public final class StrategySelectionRequest {
 
     private DisplayManagerInternal.DisplayOffloadSession mDisplayOffloadSession;
 
+    private boolean mIsStylusBeingUsed;
+
+    private boolean mIsWearBedtimeModeEnabled;
+
     public StrategySelectionRequest(DisplayManagerInternal.DisplayPowerRequest displayPowerRequest,
             int targetDisplayState, float lastUserSetScreenBrightness,
             boolean userSetBrightnessChanged,
-            DisplayManagerInternal.DisplayOffloadSession displayOffloadSession) {
+            DisplayManagerInternal.DisplayOffloadSession displayOffloadSession,
+            boolean isStylusBeingUsed,
+            boolean isWearBedtimeModeEnabled) {
         mDisplayPowerRequest = displayPowerRequest;
         mTargetDisplayState = targetDisplayState;
         mLastUserSetScreenBrightness = lastUserSetScreenBrightness;
         mUserSetBrightnessChanged = userSetBrightnessChanged;
         mDisplayOffloadSession = displayOffloadSession;
+        mIsStylusBeingUsed = isStylusBeingUsed;
+        mIsWearBedtimeModeEnabled = isWearBedtimeModeEnabled;
     }
 
     public DisplayManagerInternal.DisplayPowerRequest getDisplayPowerRequest() {
@@ -68,8 +76,16 @@ public final class StrategySelectionRequest {
         return mUserSetBrightnessChanged;
     }
 
+    public boolean isWearBedtimeModeEnabled() {
+        return mIsWearBedtimeModeEnabled;
+    }
+
     public DisplayManagerInternal.DisplayOffloadSession getDisplayOffloadSession() {
         return mDisplayOffloadSession;
+    }
+
+    public boolean isStylusBeingUsed() {
+        return mIsStylusBeingUsed;
     }
 
     @Override
@@ -82,12 +98,15 @@ public final class StrategySelectionRequest {
                 && mTargetDisplayState == other.getTargetDisplayState()
                 && mLastUserSetScreenBrightness == other.getLastUserSetScreenBrightness()
                 && mUserSetBrightnessChanged == other.isUserSetBrightnessChanged()
-                && mDisplayOffloadSession.equals(other.getDisplayOffloadSession());
+                && mDisplayOffloadSession.equals(other.getDisplayOffloadSession())
+                && mIsStylusBeingUsed == other.isStylusBeingUsed()
+                && mIsWearBedtimeModeEnabled == other.isWearBedtimeModeEnabled();
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(mDisplayPowerRequest, mTargetDisplayState,
-                mLastUserSetScreenBrightness, mUserSetBrightnessChanged, mDisplayOffloadSession);
+                mLastUserSetScreenBrightness, mUserSetBrightnessChanged, mDisplayOffloadSession,
+                mIsStylusBeingUsed);
     }
 }

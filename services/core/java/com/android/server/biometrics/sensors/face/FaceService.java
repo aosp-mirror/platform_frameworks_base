@@ -19,6 +19,7 @@ package com.android.server.biometrics.sensors.face;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.MANAGE_FACE;
 import static android.Manifest.permission.USE_BIOMETRIC_INTERNAL;
+import static android.hardware.face.FaceSensorConfigurations.getIFace;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -60,6 +61,7 @@ import android.util.proto.ProtoOutputStream;
 import android.view.Surface;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.SystemService;
@@ -753,7 +755,7 @@ public class FaceService extends SystemService {
     public FaceService(Context context) {
         this(context, null /* faceProviderFunction */, () -> IBiometricService.Stub.asInterface(
                 ServiceManager.getService(Context.BIOMETRIC_SERVICE)), null /* faceProvider */,
-                () -> ServiceManager.getDeclaredInstances(IFace.DESCRIPTOR));
+                () -> getDeclaredInstances());
     }
 
     @VisibleForTesting FaceService(Context context,
@@ -778,8 +780,7 @@ public class FaceService extends SystemService {
 
         mFaceProvider = faceProvider != null ? faceProvider : (name) -> {
             final String fqName = IFace.DESCRIPTOR + "/" + name;
-            final IFace face = IFace.Stub.asInterface(
-                    Binder.allowBlocking(ServiceManager.waitForDeclaredService(fqName)));
+            final IFace face = getIFace(fqName);
             if (face == null) {
                 Slog.e(TAG, "Unable to get declared service: " + fqName);
                 return null;
@@ -835,6 +836,23 @@ public class FaceService extends SystemService {
      */
     public static native void releaseSurfaceHandle(@NonNull NativeHandle handle);
 
+    /**
+     * Get all face hal instances declared in manifest
+     * @return instance names
+     */
+    public static String[] getDeclaredInstances() {
+        String[] a = ServiceManager.getDeclaredInstances(IFace.DESCRIPTOR);
+        Slog.i(TAG, "Before:getDeclaredInstances: IFace instance found, a.length="
+                + a.length);
+        if (!ArrayUtils.contains(a, "virtual")) {
+            // Now, the virtual hal is registered with IVirtualHal interface and it is also
+            //   moved from vendor to system_ext partition without a device manifest. So
+            //   if the old vhal is not declared, add here.
+            a = ArrayUtils.appendElement(String.class, a, "virtual");
+        }
+        Slog.i(TAG, "After:getDeclaredInstances: a.length=" + a.length);
+        return a;
+    }
 
     void syncEnrollmentsNow() {
         Utils.checkPermissionOrShell(getContext(), MANAGE_FACE);

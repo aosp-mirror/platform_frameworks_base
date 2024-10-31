@@ -24,6 +24,7 @@ import android.view.LayoutInflater
 import android.view.SurfaceControl
 import android.view.View
 import android.view.WindowManager
+import android.view.WindowManager.LayoutParams
 import com.android.wm.shell.windowdecor.WindowManagerWrapper
 
 /**
@@ -32,25 +33,11 @@ import com.android.wm.shell.windowdecor.WindowManagerWrapper
  */
 class AdditionalSystemViewContainer(
     private val windowManagerWrapper: WindowManagerWrapper,
-    taskId: Int,
-    x: Int,
-    y: Int,
-    width: Int,
-    height: Int,
-    flags: Int,
-    override val view: View
+    override val view: View,
+    val lp: LayoutParams
 ) : AdditionalViewContainer() {
-    val lp: WindowManager.LayoutParams = WindowManager.LayoutParams(
-        width, height, x, y,
-        WindowManager.LayoutParams.TYPE_STATUS_BAR_ADDITIONAL,
-        flags,
-        PixelFormat.TRANSPARENT
-    ).apply {
-        title = "Additional view container of Task=$taskId"
-        gravity = Gravity.LEFT or Gravity.TOP
-        setTrustedOverlay()
-    }
 
+    /** Provide a layout id of a view to inflate for this view container. */
     constructor(
         context: Context,
         windowManagerWrapper: WindowManagerWrapper,
@@ -63,15 +50,30 @@ class AdditionalSystemViewContainer(
         @LayoutRes layoutId: Int
     ) : this(
         windowManagerWrapper = windowManagerWrapper,
-        taskId = taskId,
-        x = x,
-        y = y,
-        width = width,
-        height = height,
-        flags = flags,
-        view = LayoutInflater.from(context).inflate(layoutId, null /* parent */)
+        view = LayoutInflater.from(context).inflate(layoutId, null /* parent */),
+        lp = createLayoutParams(x, y, width, height, flags, taskId)
     )
 
+    /** Provide a view directly for this view container */
+    constructor(
+        windowManagerWrapper: WindowManagerWrapper,
+        taskId: Int,
+        x: Int,
+        y: Int,
+        width: Int,
+        height: Int,
+        flags: Int,
+        view: View,
+        forciblyShownTypes: Int = 0
+    ) : this(
+        windowManagerWrapper = windowManagerWrapper,
+        view = view,
+        lp = createLayoutParams(x, y, width, height, flags, taskId).apply {
+            this.forciblyShownTypes = forciblyShownTypes
+        }
+    )
+
+    /** Do not supply a view at all, instead creating the view container with a basic view. */
     constructor(
         context: Context,
         windowManagerWrapper: WindowManagerWrapper,
@@ -83,12 +85,7 @@ class AdditionalSystemViewContainer(
         flags: Int
     ) : this(
         windowManagerWrapper = windowManagerWrapper,
-        taskId = taskId,
-        x = x,
-        y = y,
-        width = width,
-        height = height,
-        flags = flags,
+        lp = createLayoutParams(x, y, width, height, flags, taskId),
         view = View(context)
     )
 
@@ -101,10 +98,49 @@ class AdditionalSystemViewContainer(
     }
 
     override fun setPosition(t: SurfaceControl.Transaction, x: Float, y: Float) {
-        val lp = (view.layoutParams as WindowManager.LayoutParams).apply {
+        lp.apply {
             this.x = x.toInt()
             this.y = y.toInt()
         }
         windowManagerWrapper.updateViewLayout(view, lp)
+    }
+
+    class Factory {
+        fun create(
+            windowManagerWrapper: WindowManagerWrapper,
+            taskId: Int,
+            x: Int,
+            y: Int,
+            width: Int,
+            height: Int,
+            flags: Int,
+            view: View,
+        ): AdditionalSystemViewContainer =
+            AdditionalSystemViewContainer(
+                windowManagerWrapper = windowManagerWrapper,
+                view = view,
+                lp = createLayoutParams(x, y, width, height, flags, taskId)
+            )
+    }
+    companion object {
+        fun createLayoutParams(
+            x: Int,
+            y: Int,
+            width: Int,
+            height: Int,
+            flags: Int,
+            taskId: Int
+        ): LayoutParams {
+            return LayoutParams(
+                width, height, x, y,
+                LayoutParams.TYPE_STATUS_BAR_ADDITIONAL,
+                flags,
+                PixelFormat.TRANSPARENT
+            ).apply {
+                title = "Additional view container of Task=$taskId"
+                gravity = Gravity.LEFT or Gravity.TOP
+                setTrustedOverlay()
+            }
+        }
     }
 }

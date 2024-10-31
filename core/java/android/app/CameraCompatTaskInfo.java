@@ -36,20 +36,36 @@ public class CameraCompatTaskInfo implements Parcelable {
     public static final int CAMERA_COMPAT_FREEFORM_NONE = 0;
 
     /**
-     * The value to use when portrait camera compat treatment should be applied to a windowed task.
+     * The value to use when camera compat treatment should be applied to an activity requesting
+     * portrait orientation, while a device is in landscape. Applies only to freeform tasks.
      */
-    public static final int CAMERA_COMPAT_FREEFORM_PORTRAIT = 1;
+    public static final int CAMERA_COMPAT_FREEFORM_PORTRAIT_DEVICE_IN_LANDSCAPE = 1;
 
     /**
-     * The value to use when landscape camera compat treatment should be applied to a windowed task.
+     * The value to use when camera compat treatment should be applied to an activity requesting
+     * landscape orientation, while a device is in landscape. Applies only to freeform tasks.
      */
-    public static final int CAMERA_COMPAT_FREEFORM_LANDSCAPE = 2;
+    public static final int CAMERA_COMPAT_FREEFORM_LANDSCAPE_DEVICE_IN_LANDSCAPE = 2;
+
+    /**
+     * The value to use when camera compat treatment should be applied to an activity requesting
+     * portrait orientation, while a device is in portrait. Applies only to freeform tasks.
+     */
+    public static final int CAMERA_COMPAT_FREEFORM_PORTRAIT_DEVICE_IN_PORTRAIT = 3;
+
+    /**
+     * The value to use when camera compat treatment should be applied to an activity requesting
+     * landscape orientation, while a device is in portrait. Applies only to freeform tasks.
+     */
+    public static final int CAMERA_COMPAT_FREEFORM_LANDSCAPE_DEVICE_IN_PORTRAIT = 4;
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = { "CAMERA_COMPAT_FREEFORM_" }, value = {
             CAMERA_COMPAT_FREEFORM_NONE,
-            CAMERA_COMPAT_FREEFORM_PORTRAIT,
-            CAMERA_COMPAT_FREEFORM_LANDSCAPE,
+            CAMERA_COMPAT_FREEFORM_PORTRAIT_DEVICE_IN_LANDSCAPE,
+            CAMERA_COMPAT_FREEFORM_LANDSCAPE_DEVICE_IN_LANDSCAPE,
+            CAMERA_COMPAT_FREEFORM_PORTRAIT_DEVICE_IN_PORTRAIT,
+            CAMERA_COMPAT_FREEFORM_LANDSCAPE_DEVICE_IN_PORTRAIT,
     })
     public @interface FreeformCameraCompatMode {}
 
@@ -143,8 +159,14 @@ public class CameraCompatTaskInfo implements Parcelable {
             @FreeformCameraCompatMode int freeformCameraCompatMode) {
         return switch (freeformCameraCompatMode) {
             case CAMERA_COMPAT_FREEFORM_NONE -> "inactive";
-            case CAMERA_COMPAT_FREEFORM_PORTRAIT -> "portrait";
-            case CAMERA_COMPAT_FREEFORM_LANDSCAPE -> "landscape";
+            case CAMERA_COMPAT_FREEFORM_PORTRAIT_DEVICE_IN_LANDSCAPE ->
+                    "app-portrait-device-landscape";
+            case CAMERA_COMPAT_FREEFORM_LANDSCAPE_DEVICE_IN_LANDSCAPE ->
+                    "app-landscape-device-landscape";
+            case CAMERA_COMPAT_FREEFORM_PORTRAIT_DEVICE_IN_PORTRAIT ->
+                    "app-portrait-device-portrait";
+            case CAMERA_COMPAT_FREEFORM_LANDSCAPE_DEVICE_IN_PORTRAIT ->
+                    "app-landscape-device-portrait";
             default -> throw new AssertionError(
                     "Unexpected camera compat mode: " + freeformCameraCompatMode);
         };

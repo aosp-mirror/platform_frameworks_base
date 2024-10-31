@@ -26,8 +26,6 @@ import static android.app.NotificationManager.Policy.PRIORITY_CATEGORY_CONVERSAT
 import static android.app.NotificationManager.Policy.PRIORITY_CATEGORY_MESSAGES;
 import static android.app.NotificationManager.Policy.PRIORITY_CATEGORY_REPEAT_CALLERS;
 import static android.app.NotificationManager.Policy.PRIORITY_SENDERS_ANY;
-import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_STATUS_BAR;
-import static android.provider.Settings.Global.ZEN_MODE_ALARMS;
 import static android.provider.Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
 import static android.provider.Settings.Global.ZEN_MODE_NO_INTERRUPTIONS;
 import static android.provider.Settings.Global.ZEN_MODE_OFF;
@@ -57,7 +55,6 @@ import android.util.ArraySet;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.util.NotificationMessagingUtil;
 import com.android.server.UiServiceTestCase;
 
@@ -185,49 +182,6 @@ public class ZenModeFilteringTest extends UiServiceTestCase {
                 .build());
         NotificationRecord r = getNotificationRecord(c);
         assertFalse(mZenModeFiltering.isAlarm(r));
-    }
-
-    @Test
-    public void testSuppressDNDInfo_yes_VisEffectsAllowed() {
-        NotificationRecord r = getNotificationRecord();
-        when(r.getSbn().getPackageName()).thenReturn("android");
-        when(r.getSbn().getId()).thenReturn(SystemMessage.NOTE_ZEN_UPGRADE);
-        Policy policy = new Policy(0, 0, 0, Policy.getAllSuppressedVisualEffects()
-                - SUPPRESSED_EFFECT_STATUS_BAR, 0);
-
-        assertTrue(mZenModeFiltering.shouldIntercept(ZEN_MODE_IMPORTANT_INTERRUPTIONS, policy, r));
-    }
-
-    @Test
-    public void testSuppressDNDInfo_yes_WrongId() {
-        NotificationRecord r = getNotificationRecord();
-        when(r.getSbn().getPackageName()).thenReturn("android");
-        when(r.getSbn().getId()).thenReturn(SystemMessage.NOTE_ACCOUNT_CREDENTIAL_PERMISSION);
-        Policy policy = new Policy(0, 0, 0, Policy.getAllSuppressedVisualEffects(), 0);
-
-        assertTrue(mZenModeFiltering.shouldIntercept(ZEN_MODE_IMPORTANT_INTERRUPTIONS, policy, r));
-    }
-
-    @Test
-    public void testSuppressDNDInfo_yes_WrongPackage() {
-        NotificationRecord r = getNotificationRecord();
-        when(r.getSbn().getPackageName()).thenReturn("android2");
-        when(r.getSbn().getId()).thenReturn(SystemMessage.NOTE_ZEN_UPGRADE);
-        Policy policy = new Policy(0, 0, 0, Policy.getAllSuppressedVisualEffects(), 0);
-
-        assertTrue(mZenModeFiltering.shouldIntercept(ZEN_MODE_IMPORTANT_INTERRUPTIONS, policy, r));
-    }
-
-    @Test
-    public void testSuppressDNDInfo_no() {
-        NotificationRecord r = getNotificationRecord();
-        when(r.getSbn().getPackageName()).thenReturn("android");
-        when(r.getSbn().getId()).thenReturn(SystemMessage.NOTE_ZEN_UPGRADE);
-        Policy policy = new Policy(0, 0, 0, Policy.getAllSuppressedVisualEffects(), 0);
-
-        assertFalse(mZenModeFiltering.shouldIntercept(ZEN_MODE_IMPORTANT_INTERRUPTIONS, policy, r));
-        assertFalse(mZenModeFiltering.shouldIntercept(ZEN_MODE_ALARMS, policy, r));
-        assertFalse(mZenModeFiltering.shouldIntercept(ZEN_MODE_NO_INTERRUPTIONS, policy, r));
     }
 
     @Test

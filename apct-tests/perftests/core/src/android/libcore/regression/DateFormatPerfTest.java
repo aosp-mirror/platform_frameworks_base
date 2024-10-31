@@ -16,8 +16,8 @@
 
 package android.libcore.regression;
 
-import androidx.benchmark.BenchmarkState;
-import androidx.benchmark.junit4.BenchmarkRule;
+import android.perftests.utils.BenchmarkState;
+import android.perftests.utils.PerfStatusReporter;
 
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -33,7 +33,7 @@ import java.util.Locale;
 @RunWith(AndroidJUnit4.class)
 @LargeTest
 public final class DateFormatPerfTest {
-    @Rule public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
+    @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
 
     private Locale mLocale1;
     private Locale mLocale2;
@@ -50,7 +50,7 @@ public final class DateFormatPerfTest {
 
     @Test
     public void timeGetDateTimeInstance() throws Exception {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             DateFormat.getDateTimeInstance();
         }
@@ -58,7 +58,7 @@ public final class DateFormatPerfTest {
 
     @Test
     public void timeGetDateTimeInstance_multiple() throws Exception {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT, mLocale1);
             DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT, mLocale2);

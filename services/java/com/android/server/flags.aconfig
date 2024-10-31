@@ -10,6 +10,14 @@ flag {
 }
 
 flag {
+    name: "remove_java_service_manager_cache"
+    namespace: "system_performance"
+    description: "This flag turns off Java's Service Manager caching mechanism."
+    bug: "333854840"
+    is_fixed_read_only: true
+}
+
+flag {
      name: "remove_text_service"
      namespace: "wear_frameworks"
      description: "Remove TextServiceManagerService on Wear"
@@ -35,4 +43,12 @@ flag {
     namespace: "wear_systems"
     description: "Allow NetworkTimeUpdateService on Wear"
     bug: "327508176"
+}
+
+flag {
+     name: "remove_game_manager_service_from_wear"
+     namespace: "wear_frameworks"
+     description: "Remove GameManagerService from Wear"
+     bug: "340929737"
+     is_fixed_read_only: true
 }

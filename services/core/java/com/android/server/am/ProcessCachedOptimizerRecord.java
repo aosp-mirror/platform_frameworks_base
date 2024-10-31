@@ -18,8 +18,8 @@ package com.android.server.am;
 
 import android.annotation.IntDef;
 import android.annotation.UptimeMillisLong;
-import android.app.ActivityManagerInternal.OomAdjReason;
 import android.app.ActivityManagerInternal.FrozenProcessListener;
+import android.app.ActivityManagerInternal.OomAdjReason;
 import android.util.Pair;
 import android.util.TimeUtils;
 
@@ -338,7 +338,11 @@ final class ProcessCachedOptimizerRecord {
     boolean setShouldNotFreeze(boolean shouldNotFreeze, boolean dryRun,
             @ShouldNotFreezeReason int reason, int adjSeq) {
         if (dryRun) {
-            return mFrozen && !shouldNotFreeze;
+            if (Flags.unfreezeBindPolicyFix()) {
+                return mShouldNotFreeze != shouldNotFreeze;
+            } else {
+                return mFrozen && !shouldNotFreeze;
+            }
         }
         if (Flags.traceUpdateAppFreezeStateLsp()) {
             if (shouldNotFreeze) {

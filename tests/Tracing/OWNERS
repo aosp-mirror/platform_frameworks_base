@@ -1,0 +1,3 @@
+# Tracing owners
+# Bug component: 1157642
+include platform/development:/tools/winscope/OWNERS

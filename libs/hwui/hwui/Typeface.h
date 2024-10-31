@@ -74,8 +74,8 @@ public:
     static Typeface* createRelative(Typeface* src, Style desiredStyle);
     static Typeface* createAbsolute(Typeface* base, int weight, bool italic);
 
-    static Typeface* createFromTypefaceWithVariation(
-            Typeface* src, const std::vector<minikin::FontVariation>& variations);
+    static Typeface* createFromTypefaceWithVariation(Typeface* src,
+                                                     const minikin::VariationSettings& variations);
 
     static Typeface* createFromFamilies(
             std::vector<std::shared_ptr<minikin::FontFamily>>&& families, int weight, int italic,

@@ -16,8 +16,8 @@
 
 package android.libcore;
 
-import androidx.benchmark.BenchmarkState;
-import androidx.benchmark.junit4.BenchmarkRule;
+import android.perftests.utils.BenchmarkState;
+import android.perftests.utils.PerfStatusReporter;
 import android.util.Xml;
 
 import androidx.test.filters.LargeTest;
@@ -44,11 +44,11 @@ import java.nio.charset.StandardCharsets;
 public class XmlSerializerPerfTest {
 
     @Rule
-    public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
+    public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
 
     @Test
     public void timeFastSerializer_nonIndent_depth100() throws IOException {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             XmlSerializer serializer = Xml.newFastSerializer();
             runTest(serializer, 100);
@@ -57,7 +57,7 @@ public class XmlSerializerPerfTest {
 
     @Test
     public void timeFastSerializer_indent_depth100() throws IOException {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             XmlSerializer serializer = Xml.newFastSerializer();
             serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
@@ -67,7 +67,7 @@ public class XmlSerializerPerfTest {
 
     @Test
     public void timeKXmlSerializer_nonIndent_depth100() throws IOException {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             XmlSerializer serializer = XmlObjectFactory.newXmlSerializer();
             runTest(serializer, 100);
@@ -76,7 +76,7 @@ public class XmlSerializerPerfTest {
 
     @Test
     public void timeKXmlSerializer_indent_depth100() throws IOException {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             XmlSerializer serializer = XmlObjectFactory.newXmlSerializer();
             serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);

@@ -16,11 +16,15 @@
 
 package android.os;
 
+import android.annotation.FlaggedApi;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 
 import java.io.FileDescriptor;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * Base interface for a remotable object, the core part of a lightweight
@@ -377,9 +381,24 @@ public interface IBinder {
      */
     public boolean unlinkToDeath(@NonNull DeathRecipient recipient, int flags);
 
-    /** @hide */
-    interface IFrozenStateChangeCallback {
-        enum State {FROZEN, UNFROZEN};
+    /**
+     * A callback interface for receiving frozen state change events.
+     */
+    @FlaggedApi(Flags.FLAG_BINDER_FROZEN_STATE_CHANGE_CALLBACK)
+    interface FrozenStateChangeCallback {
+        /**
+         * @hide
+         */
+        @IntDef(prefix = {"STATE_"}, value = {
+                STATE_FROZEN,
+                STATE_UNFROZEN,
+        })
+        @Retention(RetentionPolicy.SOURCE)
+        @interface State {
+        }
+
+        int STATE_FROZEN = 0;
+        int STATE_UNFROZEN = 1;
 
         /**
          * Interface for receiving a callback when the process hosting an IBinder
@@ -387,13 +406,13 @@ public interface IBinder {
          * @param who The IBinder whose hosting process has changed state.
          * @param state The latest state.
          */
-        void onFrozenStateChanged(@NonNull IBinder who, State state);
+        void onFrozenStateChanged(@NonNull IBinder who, @State int state);
     }
 
     /**
-     * {@link addFrozenStateChangeCallback} provides a callback mechanism to notify about process
-     * frozen/unfrozen events. Upon registration and any subsequent state changes, the callback is
-     * invoked with the latest process frozen state.
+     * This method provides a callback mechanism to notify about process frozen/unfrozen events.
+     * Upon registration and any subsequent state changes, the callback is invoked with the latest
+     * process frozen state.
      *
      * <p>If the listener process (the one using this API) is itself frozen, state change events
      * might be combined into a single one with the latest frozen state. This single event would
@@ -410,19 +429,19 @@ public interface IBinder {
      *
      * <p>@throws {@link UnsupportedOperationException} if the kernel binder driver does not support
      * this feature.
-     * @hide
      */
-    default void addFrozenStateChangeCallback(@NonNull IFrozenStateChangeCallback callback)
+    @FlaggedApi(Flags.FLAG_BINDER_FROZEN_STATE_CHANGE_CALLBACK)
+    default void addFrozenStateChangeCallback(@NonNull FrozenStateChangeCallback callback)
             throws RemoteException {
         throw new UnsupportedOperationException();
     }
 
     /**
-     * Unregister a {@link IFrozenStateChangeCallback}. The callback will no longer be invoked when
+     * Unregister a {@link FrozenStateChangeCallback}. The callback will no longer be invoked when
      * the hosting process changes its frozen state.
-     * @hide
      */
-    default boolean removeFrozenStateChangeCallback(@NonNull IFrozenStateChangeCallback callback) {
+    @FlaggedApi(Flags.FLAG_BINDER_FROZEN_STATE_CHANGE_CALLBACK)
+    default boolean removeFrozenStateChangeCallback(@NonNull FrozenStateChangeCallback callback) {
         throw new UnsupportedOperationException();
     }
 }

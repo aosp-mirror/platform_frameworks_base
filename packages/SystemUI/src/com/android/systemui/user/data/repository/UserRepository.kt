@@ -53,7 +53,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 
@@ -195,7 +195,7 @@ constructor(
 
                 val callback =
                     object : UserTracker.Callback {
-                        override fun onUserChanging(newUser: Int, userContext: Context) {
+                        override fun onBeforeUserSwitching(newUser: Int) {
                             send(SelectionStatus.SELECTION_IN_PROGRESS)
                         }
 

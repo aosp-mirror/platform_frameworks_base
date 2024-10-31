@@ -24,6 +24,7 @@ import static com.android.wm.shell.Flags.enableTaskbarOnPhones;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.hardware.devicestate.DeviceStateManager;
 import android.hardware.display.DisplayManager;
 import android.os.Bundle;
 import android.os.RemoteException;
@@ -58,6 +59,7 @@ import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.AutoHideController;
 import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.systemui.util.Utils;
 import com.android.systemui.util.settings.SecureSettings;
 import com.android.wm.shell.back.BackAnimation;
 import com.android.wm.shell.pip.Pip;
@@ -128,7 +130,8 @@ public class NavigationBarControllerImpl implements
             Optional<Pip> pipOptional,
             Optional<BackAnimation> backAnimation,
             SecureSettings secureSettings,
-            DisplayTracker displayTracker) {
+            DisplayTracker displayTracker,
+            DeviceStateManager deviceStateManager) {
         mContext = context;
         mExecutor = mainExecutor;
         mNavigationBarComponentFactory = navigationBarComponentFactory;
@@ -146,9 +149,17 @@ public class NavigationBarControllerImpl implements
                 dumpManager, autoHideController, lightBarController, pipOptional,
                 backAnimation.orElse(null), taskStackChangeListeners);
         mIsLargeScreen = isLargeScreen(mContext);
-        mIsPhone =
-                mContext.getResources().getIntArray(R.array.config_foldedDeviceStates).length == 0;
+        mIsPhone = determineIfPhone(mContext, deviceStateManager);
         dumpManager.registerDumpable(this);
+    }
+
+    private boolean determineIfPhone(Context context, DeviceStateManager deviceStateManager) {
+        if (android.hardware.devicestate.feature.flags.Flags.deviceStatePropertyMigration()) {
+            return !Utils.isDeviceFoldable(context.getResources(), deviceStateManager);
+        } else {
+            return context.getResources().getIntArray(R.array.config_foldedDeviceStates).length
+                    == 0;
+        }
     }
 
     @Override

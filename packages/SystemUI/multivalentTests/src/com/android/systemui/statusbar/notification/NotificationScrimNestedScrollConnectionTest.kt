@@ -17,7 +17,7 @@
 package com.android.systemui.statusbar.notification
 
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource.Companion.UserInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -31,6 +31,7 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class NotificationScrimNestedScrollConnectionTest : SysuiTestCase() {
     private var isStarted = false
+    private var wasStarted = false
     private var scrimOffset = 0f
     private var contentHeight = 0f
     private var isCurrentGestureOverscroll = false
@@ -46,7 +47,10 @@ class NotificationScrimNestedScrollConnectionTest : SysuiTestCase() {
             minVisibleScrimHeight = { MIN_VISIBLE_SCRIM_HEIGHT },
             isCurrentGestureOverscroll = { isCurrentGestureOverscroll },
             onStart = { isStarted = true },
-            onStop = { isStarted = false },
+            onStop = {
+                wasStarted = true
+                isStarted = false
+            },
         )
 
     @Test
@@ -54,10 +58,7 @@ class NotificationScrimNestedScrollConnectionTest : SysuiTestCase() {
         contentHeight = COLLAPSED_CONTENT_HEIGHT
 
         val offsetConsumed =
-            scrollConnection.onPreScroll(
-                available = Offset(x = 0f, y = -1f),
-                source = NestedScrollSource.Drag,
-            )
+            scrollConnection.onPreScroll(available = Offset(x = 0f, y = -1f), source = UserInput)
 
         assertThat(offsetConsumed).isEqualTo(Offset.Zero)
         assertThat(isStarted).isEqualTo(false)
@@ -69,10 +70,7 @@ class NotificationScrimNestedScrollConnectionTest : SysuiTestCase() {
         scrimOffset = MIN_SCRIM_OFFSET
 
         val offsetConsumed =
-            scrollConnection.onPreScroll(
-                available = Offset(x = 0f, y = -1f),
-                source = NestedScrollSource.Drag,
-            )
+            scrollConnection.onPreScroll(available = Offset(x = 0f, y = -1f), source = UserInput)
 
         assertThat(offsetConsumed).isEqualTo(Offset.Zero)
         assertThat(isStarted).isEqualTo(false)
@@ -84,10 +82,7 @@ class NotificationScrimNestedScrollConnectionTest : SysuiTestCase() {
 
         val availableOffset = Offset(x = 0f, y = -1f)
         val offsetConsumed =
-            scrollConnection.onPreScroll(
-                available = availableOffset,
-                source = NestedScrollSource.Drag,
-            )
+            scrollConnection.onPreScroll(available = availableOffset, source = UserInput)
 
         assertThat(offsetConsumed).isEqualTo(availableOffset)
         assertThat(isStarted).isEqualTo(true)
@@ -101,10 +96,7 @@ class NotificationScrimNestedScrollConnectionTest : SysuiTestCase() {
         val availableOffset = Offset(x = 0f, y = -2f)
         val consumableOffset = Offset(x = 0f, y = -1f)
         val offsetConsumed =
-            scrollConnection.onPreScroll(
-                available = availableOffset,
-                source = NestedScrollSource.Drag,
-            )
+            scrollConnection.onPreScroll(available = availableOffset, source = UserInput)
 
         assertThat(offsetConsumed).isEqualTo(consumableOffset)
         assertThat(isStarted).isEqualTo(true)
@@ -116,7 +108,7 @@ class NotificationScrimNestedScrollConnectionTest : SysuiTestCase() {
             scrollConnection.onPostScroll(
                 consumed = Offset.Zero,
                 available = Offset(x = 0f, y = -1f),
-                source = NestedScrollSource.Drag,
+                source = UserInput,
             )
 
         assertThat(offsetConsumed).isEqualTo(Offset.Zero)
@@ -126,10 +118,7 @@ class NotificationScrimNestedScrollConnectionTest : SysuiTestCase() {
     @Test
     fun onScrollDown_canStartPreScroll_ignoreScroll() = runTest {
         val offsetConsumed =
-            scrollConnection.onPreScroll(
-                available = Offset(x = 0f, y = 1f),
-                source = NestedScrollSource.Drag,
-            )
+            scrollConnection.onPreScroll(available = Offset(x = 0f, y = 1f), source = UserInput)
 
         assertThat(offsetConsumed).isEqualTo(Offset.Zero)
         assertThat(isStarted).isEqualTo(false)
@@ -144,7 +133,7 @@ class NotificationScrimNestedScrollConnectionTest : SysuiTestCase() {
             scrollConnection.onPostScroll(
                 consumed = Offset.Zero,
                 available = availableOffset,
-                source = NestedScrollSource.Drag
+                source = UserInput,
             )
 
         assertThat(offsetConsumed).isEqualTo(availableOffset)
@@ -161,7 +150,7 @@ class NotificationScrimNestedScrollConnectionTest : SysuiTestCase() {
             scrollConnection.onPostScroll(
                 consumed = Offset.Zero,
                 available = availableOffset,
-                source = NestedScrollSource.Drag
+                source = UserInput,
             )
 
         assertThat(offsetConsumed).isEqualTo(consumableOffset)
@@ -176,10 +165,11 @@ class NotificationScrimNestedScrollConnectionTest : SysuiTestCase() {
             scrollConnection.onPostScroll(
                 consumed = Offset.Zero,
                 available = Offset(x = 0f, y = 1f),
-                source = NestedScrollSource.Drag
+                source = UserInput,
             )
 
         assertThat(offsetConsumed).isEqualTo(Offset.Zero)
+        assertThat(wasStarted).isEqualTo(false)
         assertThat(isStarted).isEqualTo(false)
     }
 
@@ -192,28 +182,24 @@ class NotificationScrimNestedScrollConnectionTest : SysuiTestCase() {
             scrollConnection.onPostScroll(
                 consumed = Offset.Zero,
                 available = Offset(x = 0f, y = 1f),
-                source = NestedScrollSource.Drag
+                source = UserInput,
             )
 
         assertThat(offsetConsumed).isEqualTo(Offset.Zero)
-        assertThat(isStarted).isEqualTo(true)
+        // Returning 0 offset will immediately stop the connection
+        assertThat(wasStarted).isEqualTo(true)
+        assertThat(isStarted).isEqualTo(false)
     }
 
     @Test
     fun canContinueScroll_inBetweenMinMaxOffset_true() = runTest {
         scrimOffset = (MIN_SCRIM_OFFSET + MAX_SCRIM_OFFSET) / 2f
         contentHeight = EXPANDED_CONTENT_HEIGHT
-        scrollConnection.onPreScroll(
-            available = Offset(x = 0f, y = -1f),
-            source = NestedScrollSource.Drag
-        )
+        scrollConnection.onPreScroll(available = Offset(x = 0f, y = -1f), source = UserInput)
 
         assertThat(isStarted).isEqualTo(true)
 
-        scrollConnection.onPreScroll(
-            available = Offset(x = 0f, y = 1f),
-            source = NestedScrollSource.Drag
-        )
+        scrollConnection.onPreScroll(available = Offset(x = 0f, y = 1f), source = UserInput)
 
         assertThat(isStarted).isEqualTo(true)
     }
@@ -222,17 +208,11 @@ class NotificationScrimNestedScrollConnectionTest : SysuiTestCase() {
     fun canContinueScroll_atMaxOffset_false() = runTest {
         scrimOffset = MAX_SCRIM_OFFSET
         contentHeight = EXPANDED_CONTENT_HEIGHT
-        scrollConnection.onPreScroll(
-            available = Offset(x = 0f, y = -1f),
-            source = NestedScrollSource.Drag
-        )
+        scrollConnection.onPreScroll(available = Offset(x = 0f, y = -1f), source = UserInput)
 
         assertThat(isStarted).isEqualTo(true)
 
-        scrollConnection.onPreScroll(
-            available = Offset(x = 0f, y = 1f),
-            source = NestedScrollSource.Drag
-        )
+        scrollConnection.onPreScroll(available = Offset(x = 0f, y = 1f), source = UserInput)
 
         assertThat(isStarted).isEqualTo(false)
     }

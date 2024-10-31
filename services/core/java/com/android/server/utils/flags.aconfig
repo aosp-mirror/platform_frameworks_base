@@ -17,3 +17,10 @@ flag {
      bug: "325594551"
 }
 
+flag {
+     name: "anr_timer_trace"
+     namespace: "system_performance"
+     is_fixed_read_only: true
+     description: "When true, start a trace if an ANR timer reaches 50%"
+     bug: "352085328"
+}

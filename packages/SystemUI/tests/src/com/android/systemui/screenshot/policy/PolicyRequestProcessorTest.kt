@@ -16,39 +16,145 @@
 package com.android.systemui.screenshot.policy
 
 import android.content.ComponentName
+import android.graphics.Bitmap
 import android.graphics.Insets
 import android.graphics.Rect
 import android.os.UserHandle
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
+import android.platform.test.flag.junit.SetFlagsRule
 import android.view.Display.DEFAULT_DISPLAY
 import android.view.WindowManager.ScreenshotSource.SCREENSHOT_KEY_CHORD
 import android.view.WindowManager.TAKE_SCREENSHOT_FULLSCREEN
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.android.systemui.Flags
+import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.screenshot.ImageCapture
 import com.android.systemui.screenshot.ScreenshotData
 import com.android.systemui.screenshot.data.model.DisplayContentScenarios.ActivityNames.FILES
+import com.android.systemui.screenshot.data.model.DisplayContentScenarios.Bounds.FULL_SCREEN
 import com.android.systemui.screenshot.data.model.DisplayContentScenarios.TaskSpec
+import com.android.systemui.screenshot.data.model.DisplayContentScenarios.emptyDisplayContent
+import com.android.systemui.screenshot.data.model.DisplayContentScenarios.launcherOnly
 import com.android.systemui.screenshot.data.model.DisplayContentScenarios.singleFullScreen
 import com.android.systemui.screenshot.data.repository.DisplayContentRepository
+import com.android.systemui.screenshot.data.repository.profileTypeRepository
+import com.android.systemui.screenshot.policy.CaptureType.FullScreen
+import com.android.systemui.screenshot.policy.CaptureType.IsolatedTask
 import com.android.systemui.screenshot.policy.TestUserIds.PERSONAL
 import com.android.systemui.screenshot.policy.TestUserIds.WORK
+import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class PolicyRequestProcessorTest {
+    private val kosmos = Kosmos()
 
-    val imageCapture =
-        object : ImageCapture {
-            override fun captureDisplay(displayId: Int, crop: Rect?) = null
+    private val screenshotRequest =
+        ScreenshotData(
+            TAKE_SCREENSHOT_FULLSCREEN,
+            SCREENSHOT_KEY_CHORD,
+            UserHandle.CURRENT,
+            topComponent = null,
+            originalScreenBounds = FULL_SCREEN,
+            taskId = -1,
+            originalInsets = Insets.NONE,
+            bitmap = null,
+            displayId = DEFAULT_DISPLAY,
+        )
 
-            override suspend fun captureTask(taskId: Int) = null
-        }
+    val defaultComponent = ComponentName("default", "Component")
+    val defaultOwner = UserHandle.of(PERSONAL)
+
+    @get:Rule val setFlagsRule: SetFlagsRule = SetFlagsRule()
+
+    /** Tests applying CaptureParameters with 'IsolatedTask' CaptureType */
+    @Test
+    @EnableFlags(Flags.FLAG_SCREENSHOT_POLICY_SPLIT_AND_DESKTOP_MODE)
+    fun testProcess_newPolicy_isolatedTask() = runTest {
+        val taskImage = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
+
+        /* Create a policy request processor with no capture policies */
+        val requestProcessor =
+            PolicyRequestProcessor(
+                Dispatchers.Unconfined,
+                createImageCapture(task = taskImage),
+                policy = ScreenshotPolicy(kosmos.profileTypeRepository),
+                policies = emptyList(),
+                defaultOwner = defaultOwner,
+                defaultComponent = defaultComponent,
+                displayTasks = { emptyDisplayContent },
+            )
+
+        val result =
+            requestProcessor.modify(
+                screenshotRequest,
+                CaptureParameters(
+                    IsolatedTask(taskId = TASK_ID, taskBounds = null),
+                    ComponentName.unflattenFromString(FILES),
+                    UserHandle.of(WORK),
+                ),
+            )
+
+        assertWithMessage("The screenshot bitmap").that(result.bitmap).isSameInstanceAs(taskImage)
+
+        assertWithMessage("The assigned owner of the screenshot")
+            .that(result.userHandle)
+            .isEqualTo(UserHandle.of(WORK))
+
+        assertWithMessage("The topComponent of the screenshot")
+            .that(result.topComponent)
+            .isEqualTo(ComponentName.unflattenFromString(FILES))
+
+        assertWithMessage("Task ID").that(result.taskId).isEqualTo(TASK_ID)
+    }
+
+    /** Tests applying CaptureParameters with 'FullScreen' CaptureType */
+    @Test
+    @EnableFlags(Flags.FLAG_SCREENSHOT_POLICY_SPLIT_AND_DESKTOP_MODE)
+    fun testProcess_newPolicy_fullScreen() = runTest {
+        val screenImage = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
+
+        /* Create a policy request processor with no capture policies */
+        val requestProcessor =
+            PolicyRequestProcessor(
+                Dispatchers.Unconfined,
+                createImageCapture(display = screenImage),
+                policy = ScreenshotPolicy(kosmos.profileTypeRepository),
+                policies = emptyList(),
+                defaultOwner = defaultOwner,
+                defaultComponent = defaultComponent,
+                displayTasks = { emptyDisplayContent },
+            )
+
+        val result =
+            requestProcessor.modify(
+                screenshotRequest,
+                CaptureParameters(FullScreen(displayId = 0), defaultComponent, defaultOwner),
+            )
+
+        assertWithMessage("The result bitmap").that(result.bitmap).isSameInstanceAs(screenImage)
+
+        assertWithMessage("The assigned owner of the screenshot")
+            .that(result.userHandle)
+            .isEqualTo(defaultOwner)
+
+        assertWithMessage("The topComponent of the screenshot")
+            .that(result.topComponent)
+            .isEqualTo(defaultComponent)
+
+        assertWithMessage("Task ID").that(result.taskId).isEqualTo(-1)
+    }
 
     /** Tests behavior when no policies are applied */
     @Test
+    @DisableFlags(Flags.FLAG_SCREENSHOT_POLICY_SPLIT_AND_DESKTOP_MODE)
     fun testProcess_defaultOwner_whenNoPolicyApplied() {
         val fullScreenWork = DisplayContentRepository {
             singleFullScreen(TaskSpec(taskId = TASK_ID, name = FILES, userId = WORK))
@@ -58,24 +164,25 @@ class PolicyRequestProcessorTest {
             ScreenshotData(
                 TAKE_SCREENSHOT_FULLSCREEN,
                 SCREENSHOT_KEY_CHORD,
-                null,
+                UserHandle.CURRENT,
                 topComponent = null,
-                screenBounds = Rect(0, 0, 1, 1),
+                originalScreenBounds = Rect(0, 0, 1, 1),
                 taskId = -1,
-                insets = Insets.NONE,
+                originalInsets = Insets.NONE,
                 bitmap = null,
-                displayId = DEFAULT_DISPLAY
+                displayId = DEFAULT_DISPLAY,
             )
 
         /* Create a policy request processor with no capture policies */
         val requestProcessor =
             PolicyRequestProcessor(
                 Dispatchers.Unconfined,
-                imageCapture,
+                createImageCapture(),
+                policy = ScreenshotPolicy(kosmos.profileTypeRepository),
                 policies = emptyList(),
                 defaultOwner = UserHandle.of(PERSONAL),
                 defaultComponent = ComponentName("default", "Component"),
-                displayTasks = fullScreenWork
+                displayTasks = fullScreenWork,
             )
 
         val result = runBlocking { requestProcessor.process(request) }
@@ -90,6 +197,72 @@ class PolicyRequestProcessorTest {
 
         assertWithMessage("Task ID").that(result.taskId).isEqualTo(TASK_ID)
     }
+
+    @Test
+    fun testProcess_throwsWhenCaptureFails() {
+        val request = ScreenshotData.forTesting()
+
+        /* Create a policy request processor with no capture policies */
+        val requestProcessor =
+            PolicyRequestProcessor(
+                Dispatchers.Unconfined,
+                createImageCapture(display = null),
+                policy = ScreenshotPolicy(kosmos.profileTypeRepository),
+                policies = emptyList(),
+                defaultComponent = ComponentName("default", "Component"),
+                displayTasks = DisplayContentRepository { launcherOnly() },
+            )
+
+        val result = runCatching { runBlocking { requestProcessor.process(request) } }
+
+        assertThat(result.isFailure).isTrue()
+    }
+
+    @Test
+    fun testProcess_throwsWhenTaskCaptureFails() {
+        val request = ScreenshotData.forTesting()
+        val fullScreenWork = DisplayContentRepository {
+            singleFullScreen(TaskSpec(taskId = TASK_ID, name = FILES, userId = WORK))
+        }
+
+        val captureTaskPolicy = CapturePolicy {
+            CapturePolicy.PolicyResult.Matched(
+                policy = "",
+                reason = "",
+                parameters =
+                    CaptureParameters(
+                        IsolatedTask(taskId = 0, taskBounds = null),
+                        null,
+                        UserHandle.CURRENT,
+                    ),
+            )
+        }
+
+        /* Create a policy request processor with no capture policies */
+        val requestProcessor =
+            PolicyRequestProcessor(
+                Dispatchers.Unconfined,
+                createImageCapture(task = null),
+                policy = ScreenshotPolicy(kosmos.profileTypeRepository),
+                policies = listOf(captureTaskPolicy),
+                defaultComponent = ComponentName("default", "Component"),
+                displayTasks = fullScreenWork,
+            )
+
+        val result = runCatching { runBlocking { requestProcessor.process(request) } }
+
+        assertThat(result.isFailure).isTrue()
+    }
+
+    private fun createImageCapture(
+        display: Bitmap? = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888),
+        task: Bitmap? = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888),
+    ) =
+        object : ImageCapture {
+            override fun captureDisplay(displayId: Int, crop: Rect?) = display
+
+            override suspend fun captureTask(taskId: Int) = task
+        }
 
     companion object {
         const val TASK_ID = 1001

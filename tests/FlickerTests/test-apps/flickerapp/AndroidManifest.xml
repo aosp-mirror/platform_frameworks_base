@@ -21,6 +21,15 @@
               android:targetSdkVersion="35"/>
 
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.MANAGE_MEDIA_PROJECTION" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.INSTANT_APP_FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION"/>
+    <uses-permission android:name="android.permission.ACCESS_SURFACE_FLINGER" />
+    <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS" />
+    <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL" />
 
     <application android:allowBackup="false"
                  android:supportsRtl="true">
@@ -106,6 +115,30 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <activity android:name=".NonResizeableFixedAspectRatioPortraitActivity"
+            android:theme="@style/CutoutNever"
+            android:resizeableActivity="false"
+            android:screenOrientation="portrait"
+            android:minAspectRatio="1.77"
+            android:taskAffinity="com.android.server.wm.flicker.testapp.NonResizeableFixedAspectRatioPortraitActivity"
+            android:label="NonResizeableFixedAspectRatioPortraitActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+        <activity android:name=".StartMediaProjectionActivity"
+            android:theme="@style/CutoutNever"
+            android:resizeableActivity="false"
+            android:taskAffinity="com.android.server.wm.flicker.testapp.StartMediaProjectionActivity"
+            android:label="StartMediaProjectionActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
         <activity android:name=".PortraitImmersiveActivity"
                   android:taskAffinity="com.android.server.wm.flicker.testapp.PortraitImmersiveActivity"
                   android:immersive="true"
@@ -123,6 +156,7 @@
         <activity android:name=".LaunchTransparentActivity"
                   android:resizeableActivity="false"
                   android:screenOrientation="portrait"
+                  android:minAspectRatio="1.77"
                   android:theme="@style/OptOutEdgeToEdge"
                   android:taskAffinity="com.android.server.wm.flicker.testapp.LaunchTransparentActivity"
                   android:label="LaunchTransparentActivity"
@@ -318,7 +352,8 @@
                   android:taskAffinity="com.android.server.wm.flicker.testapp.SplitScreenActivity"
                   android:theme="@style/CutoutShortEdges"
                   android:label="SplitScreenPrimaryActivity"
-                  android:exported="true">
+                  android:exported="true"
+                  android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
@@ -329,7 +364,8 @@
                   android:taskAffinity="com.android.server.wm.flicker.testapp.SplitScreenSecondaryActivity"
                   android:theme="@style/CutoutShortEdges"
                   android:label="SplitScreenSecondaryActivity"
-                  android:exported="true">
+                  android:exported="true"
+                  android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
@@ -403,6 +439,11 @@
             <meta-data
                 android:name="android.voice_interaction"
                 android:resource="@xml/interaction_service"/>
+        </service>
+        <service android:name="com.android.wm.shell.flicker.utils.MediaProjectionService"
+            android:foregroundServiceType="mediaProjection"
+            android:label="WMShellTestsMediaProjectionService"
+            android:enabled="true">
         </service>
     </application>
     <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION"/>

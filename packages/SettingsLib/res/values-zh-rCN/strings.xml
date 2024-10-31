@@ -357,6 +357,8 @@
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"启用增强连接性功能。"</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"本地终端"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"启用终端应用，以便在本地访问 Shell"</string>
+    <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Linux 开发环境"</string>
+    <string name="enable_linux_terminal_summary" msgid="5893216510985145320">"在 Android 上运行 Linux 终端"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP 检查"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"设置 HDCP 检查行为"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"调试"</string>
@@ -564,8 +566,7 @@
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"闹钟和提醒"</string>
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"允许该应用设置闹钟以及安排在特定时间执行某些操作。这项权限开启后，该应用将在后台运行，可能会消耗更多电池电量。\n\n如果您关闭此权限，该应用设置的现有闹钟将不会响起，而且该应用安排在特定时间执行的现有活动也不会执行。"</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"设置, 闹钟, 提醒, 时钟, schedule, alarm, reminder, clock"</string>
-    <!-- no translation found for zen_mode_do_not_disturb_name (6798711401734798283) -->
-    <skip />
+    <string name="zen_mode_do_not_disturb_name" msgid="6798711401734798283">"勿扰"</string>
     <string name="zen_mode_settings_title" msgid="7374070457626419755">"勿扰模式"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"开启"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"开启勿扰模式"</string>
@@ -583,6 +584,7 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"刚刚"</string>
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"这部手机"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"这部平板电脑"</string>
+    <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"此计算机（内部）"</string>
     <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
     <skip />
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"基座音箱"</string>
@@ -685,7 +687,12 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"已停用"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"已启用"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"设备必须重新启动才能应用此更改。您可以立即重新启动或取消。"</string>
-    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"有线耳机"</string>
+    <string name="media_transfer_wired_headphone_name" msgid="8698668536022665254">"有线耳机"</string>
+    <string name="media_transfer_headphone_name" msgid="1157798825650178478">"有线音频"</string>
+    <string name="media_transfer_usb_audio_name" msgid="1789292056757821355">"USB 音频"</string>
+    <string name="media_transfer_wired_device_mic_name" msgid="7115192790725088698">"有线麦克风"</string>
+    <string name="media_transfer_usb_device_mic_name" msgid="7171789543226269822">"USB 麦克风"</string>
+    <string name="media_transfer_bt_device_mic_name" msgid="1870669402238687618">"蓝牙麦克风"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"开启"</string>
     <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"关闭"</string>
     <string name="carrier_network_change_mode" msgid="4257621815706644026">"运营商网络正在更改"</string>

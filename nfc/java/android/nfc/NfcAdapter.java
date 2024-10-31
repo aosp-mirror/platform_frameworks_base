@@ -258,7 +258,7 @@ public final class NfcAdapter {
     /**
      * Mandatory String extra field in {@link #ACTION_TRANSACTION_DETECTED}
      * Indicates the Secure Element on which the transaction occurred.
-     * eSE1...eSEn for Embedded Secure Elements, SIM1...SIMn for UICC, etc.
+     * eSE1...eSEn for Embedded Secure Elements, SIM1...SIMn for UICC/EUICC, etc.
      */
     public static final String EXTRA_SECURE_ELEMENT_NAME = "android.nfc.extra.SECURE_ELEMENT_NAME";
 
@@ -559,6 +559,18 @@ public final class NfcAdapter {
     @Retention(RetentionPolicy.SOURCE)
     public @interface TagIntentAppPreferenceResult {}
 
+    /**
+     * Mode Type for {@link NfcOemExtension#setControllerAlwaysOnMode(int)}.
+     * @hide
+     */
+    public static final int CONTROLLER_ALWAYS_ON_MODE_DEFAULT = 1;
+
+    /**
+     * Mode Type for {@link NfcOemExtension#setControllerAlwaysOnMode(int)}.
+     * @hide
+     */
+    public static final int CONTROLLER_ALWAYS_ON_DISABLE = 0;
+
     // Guarded by sLock
     static boolean sIsInitialized = false;
     static boolean sHasNfcFeature;
@@ -721,7 +733,7 @@ public final class NfcAdapter {
      *
      * @return List<String> containing secure elements on the device which supports
      *                      off host card emulation. eSE for Embedded secure element,
-     *                      SIM for UICC, eSIM for EUICC and so on.
+     *                      SIM for UICC/EUICC and so on.
      * @hide
      */
     public @NonNull List<String> getSupportedOffHostSecureElements() {
@@ -740,11 +752,6 @@ public final class NfcAdapter {
         }
         if (pm.hasSystemFeature(PackageManager.FEATURE_NFC_OFF_HOST_CARD_EMULATION_ESE)) {
             offHostSE.add("eSE");
-        }
-        if (Flags.enableCardEmulationEuicc()
-                && callServiceReturn(
-                        () -> sCardEmulationService.isEuiccSupported(), false)) {
-            offHostSE.add("eSIM");
         }
         return offHostSE;
     }
@@ -1143,8 +1150,9 @@ public final class NfcAdapter {
     }
 
     /**
-     * Pauses polling for a {@code timeoutInMs} millis. If polling must be resumed before timeout,
-     * use {@link #resumePolling()}.
+     * Pauses NFC tag reader mode polling for a {@code timeoutInMs} millisecond.
+     * In case of {@code timeoutInMs} is zero or invalid polling will be stopped indefinitely
+     * use {@link #resumePolling() to resume the polling.
      * @hide
      */
     public void pausePolling(int timeoutInMs) {
@@ -1203,9 +1211,8 @@ public final class NfcAdapter {
     }
 
     /**
-     * Resumes default polling for the current device state if polling is paused. Calling
-     * this while polling is not paused is a no-op.
-     *
+     * Resumes default NFC tag reader mode polling for the current device state if polling is
+     * paused. Calling this while already in polling is a no-op.
      * @hide
      */
     public void resumePolling() {
@@ -2316,7 +2323,7 @@ public final class NfcAdapter {
      * <p>This API is for the NFCC internal state management. It allows to discriminate
      * the controller function from the NFC function by keeping the NFC controller on without
      * any NFC RF enabled if necessary.
-     * <p>This call is asynchronous. Register a listener {@link #ControllerAlwaysOnListener}
+     * <p>This call is asynchronous. Register a listener {@link ControllerAlwaysOnListener}
      * by {@link #registerControllerAlwaysOnListener} to find out when the operation is
      * complete.
      * <p>If this returns true, then either NFCC always on state has been set based on the value,
@@ -2330,7 +2337,8 @@ public final class NfcAdapter {
      * FEATURE_NFC_HOST_CARD_EMULATION, FEATURE_NFC_HOST_CARD_EMULATION_NFCF,
      * FEATURE_NFC_OFF_HOST_CARD_EMULATION_UICC and FEATURE_NFC_OFF_HOST_CARD_EMULATION_ESE
      * are unavailable
-     * @return void
+     * @return true if feature is supported by the device and operation has been initiated,
+     * false if the feature is not supported by the device.
      * @hide
      */
     @SystemApi
@@ -2339,8 +2347,13 @@ public final class NfcAdapter {
         if (!sHasNfcFeature && !sHasCeFeature) {
             throw new UnsupportedOperationException();
         }
-        return callServiceReturn(() ->  sService.setControllerAlwaysOn(value), false);
-
+        int mode = value ? CONTROLLER_ALWAYS_ON_MODE_DEFAULT : CONTROLLER_ALWAYS_ON_DISABLE;
+        try {
+            callService(() -> sService.setControllerAlwaysOn(mode));
+        } catch (UnsupportedOperationException e) {
+            return false;
+        }
+        return true;
     }
 
     /**

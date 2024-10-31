@@ -21,6 +21,7 @@ import static android.media.AudioManager.AUDIO_SESSION_ID_GENERATE;
 
 import static com.android.server.wm.ActivityInterceptorCallback.VIRTUAL_DEVICE_SERVICE_ORDERED_ID;
 
+import android.annotation.EnforcePermission;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -44,8 +45,6 @@ import android.content.AttributionSource;
 import android.content.Context;
 import android.content.Intent;
 import android.hardware.display.DisplayManagerInternal;
-import android.hardware.display.IVirtualDisplayCallback;
-import android.hardware.display.VirtualDisplayConfig;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -68,6 +67,7 @@ import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.DumpUtils;
+import com.android.internal.widget.LockPatternUtils;
 import com.android.modules.expresslog.Counter;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
@@ -123,11 +123,30 @@ public class VirtualDeviceManagerService extends SystemService {
     private final CompanionDeviceManager.OnAssociationsChangedListener mCdmAssociationListener =
             new CompanionDeviceManager.OnAssociationsChangedListener() {
                 @Override
-                @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
                 public void onAssociationsChanged(@NonNull List<AssociationInfo> associations) {
                     syncVirtualDevicesToCdmAssociations(associations);
                 }
             };
+
+    private class StrongAuthTracker extends LockPatternUtils.StrongAuthTracker {
+        final Set<Integer> mUsersInLockdown = new ArraySet<>();
+
+        StrongAuthTracker(Context context) {
+            super(context);
+        }
+
+        @Override
+        public synchronized void onStrongAuthRequiredChanged(int userId) {
+            if ((getStrongAuthForUser(userId) & STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN) > 0) {
+                if (mUsersInLockdown.add(userId) && mUsersInLockdown.size() == 1) {
+                    onLockdownChanged(true);
+                }
+            } else if (mUsersInLockdown.remove(userId) && mUsersInLockdown.isEmpty()) {
+                onLockdownChanged(false);
+            }
+        }
+    }
+    private StrongAuthTracker mStrongAuthTracker;
 
     private final RemoteCallbackList<IVirtualDeviceListener> mVirtualDeviceListeners =
             new RemoteCallbackList<>();
@@ -199,6 +218,20 @@ public class VirtualDeviceManagerService extends SystemService {
             } else {
                 Slog.e(TAG, "Failed to find CompanionDeviceManager. No CDM association info "
                         + " will be available.");
+            }
+        }
+        if (android.companion.virtualdevice.flags.Flags.deviceAwareDisplayPower()) {
+            mStrongAuthTracker = new StrongAuthTracker(getContext());
+            new LockPatternUtils(getContext()).registerStrongAuthTracker(mStrongAuthTracker);
+        }
+    }
+
+    // Called when the global lockdown state changes, i.e. lockdown is considered active if any user
+    // is in lockdown mode, and inactive if no users are in lockdown mode.
+    void onLockdownChanged(boolean lockdownActive) {
+        synchronized (mVirtualDeviceManagerLock) {
+            for (int i = 0; i < mVirtualDevices.size(); i++) {
+                mVirtualDevices.valueAt(i).onLockdownChanged(lockdownActive);
             }
         }
     }
@@ -306,7 +339,6 @@ public class VirtualDeviceManagerService extends SystemService {
         return true;
     }
 
-    @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     private void syncVirtualDevicesToCdmAssociations(List<AssociationInfo> associations) {
         Set<VirtualDeviceImpl> virtualDevicesToRemove = new HashSet<>();
         synchronized (mVirtualDeviceManagerLock) {
@@ -349,7 +381,6 @@ public class VirtualDeviceManagerService extends SystemService {
         cdm.removeOnAssociationsChangedListener(mCdmAssociationListener);
     }
 
-    @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     void onCdmAssociationsChanged(List<AssociationInfo> associations) {
         ArrayMap<String, AssociationInfo> vdmAssociations = new ArrayMap<>();
         for (int i = 0; i < associations.size(); ++i) {
@@ -419,7 +450,7 @@ public class VirtualDeviceManagerService extends SystemService {
                     }
                 };
 
-        @android.annotation.EnforcePermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
+        @EnforcePermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
         @Override // Binder call
         public IVirtualDevice createVirtualDevice(
                 IBinder token,
@@ -502,37 +533,6 @@ public class VirtualDeviceManagerService extends SystemService {
                     "virtual_devices.value_virtual_devices_created_with_uid_count",
                     attributionSource.getUid());
             return virtualDevice;
-        }
-
-        @Override // Binder call
-        public int createVirtualDisplay(VirtualDisplayConfig virtualDisplayConfig,
-                IVirtualDisplayCallback callback, IVirtualDevice virtualDevice, String packageName)
-                throws RemoteException {
-            Objects.requireNonNull(virtualDisplayConfig);
-            final int callingUid = getCallingUid();
-            if (!PermissionUtils.validateCallingPackageName(getContext(), packageName)) {
-                throw new SecurityException(
-                        "Package name " + packageName + " does not belong to calling uid "
-                                + callingUid);
-            }
-            VirtualDeviceImpl virtualDeviceImpl;
-            synchronized (mVirtualDeviceManagerLock) {
-                virtualDeviceImpl = mVirtualDevices.get(virtualDevice.getDeviceId());
-                if (virtualDeviceImpl == null) {
-                    throw new SecurityException(
-                            "Invalid VirtualDevice (deviceId = " + virtualDevice.getDeviceId()
-                                    + ")");
-                }
-            }
-            if (virtualDeviceImpl.getOwnerUid() != callingUid) {
-                throw new SecurityException(
-                        "uid " + callingUid
-                                + " is not the owner of the supplied VirtualDevice (deviceId = "
-                                + virtualDevice.getDeviceId() + ")");
-            }
-
-            return virtualDeviceImpl.createVirtualDisplay(
-                    virtualDisplayConfig, callback, packageName);
         }
 
         @Override // Binder call

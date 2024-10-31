@@ -20,6 +20,7 @@ import android.content.res.Configuration
 import android.content.res.Resources
 import android.graphics.Color
 import android.graphics.drawable.PaintDrawable
+import android.util.TypedValue
 import android.view.MotionEvent
 import android.view.View
 import android.view.View.OnHoverListener
@@ -27,10 +28,10 @@ import androidx.annotation.ColorInt
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import com.android.systemui.res.R
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.plugins.DarkIconDispatcher
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.phone.SysuiDarkIconDispatcher.DarkChange
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener
@@ -39,7 +40,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 class StatusOverlayHoverListenerFactory
 @Inject
@@ -65,6 +66,26 @@ constructor(
         createDarkAwareListener(view, darkIconDispatcher.darkChangeFlow())
 
     /**
+     * Creates listener using [DarkIconDispatcher] to determine light or dark color of the overlay
+     * Also sets margins for hover background relative to view bounds
+     */
+    fun createDarkAwareListener(
+        view: View,
+        leftHoverMargin: Int = 0,
+        rightHoverMargin: Int = 0,
+        topHoverMargin: Int = 0,
+        bottomHoverMargin: Int = 0,
+    ) =
+        createDarkAwareListener(
+            view,
+            darkIconDispatcher.darkChangeFlow(),
+            leftHoverMargin,
+            rightHoverMargin,
+            topHoverMargin,
+            bottomHoverMargin,
+        )
+
+    /**
      * Creates listener using provided [DarkChange] producer to determine light or dark color of the
      * overlay
      */
@@ -74,6 +95,25 @@ constructor(
             configurationController,
             resources,
             darkFlow.map { toHoverTheme(view, it) },
+        )
+
+    private fun createDarkAwareListener(
+        view: View,
+        darkFlow: StateFlow<DarkChange>,
+        leftHoverMargin: Int = 0,
+        rightHoverMargin: Int = 0,
+        topHoverMargin: Int = 0,
+        bottomHoverMargin: Int = 0,
+    ) =
+        StatusOverlayHoverListener(
+            view,
+            configurationController,
+            resources,
+            darkFlow.map { toHoverTheme(view, it) },
+            leftHoverMargin,
+            rightHoverMargin,
+            topHoverMargin,
+            bottomHoverMargin,
         )
 
     private fun toHoverTheme(view: View, darkChange: DarkChange): HoverTheme {
@@ -91,7 +131,7 @@ constructor(
  */
 enum class HoverTheme {
     LIGHT,
-    DARK
+    DARK,
 }
 
 /**
@@ -103,11 +143,19 @@ class StatusOverlayHoverListener(
     configurationController: ConfigurationController,
     private val resources: Resources,
     private val themeFlow: Flow<HoverTheme>,
+    private val leftHoverMargin: Int = 0,
+    private val rightHoverMargin: Int = 0,
+    private val topHoverMargin: Int = 0,
+    private val bottomHoverMargin: Int = 0,
 ) : OnHoverListener {
 
     @ColorInt private var darkColor: Int = 0
     @ColorInt private var lightColor: Int = 0
     private var cornerRadius = 0f
+    private var leftHoverMarginInPx: Int = 0
+    private var rightHoverMarginInPx: Int = 0
+    private var topHoverMarginInPx: Int = 0
+    private var bottomHoverMarginInPx: Int = 0
 
     private var lastTheme = HoverTheme.LIGHT
 
@@ -138,7 +186,12 @@ class StatusOverlayHoverListener(
             val drawable =
                 PaintDrawable(backgroundColor).apply {
                     setCornerRadius(cornerRadius)
-                    setBounds(0, 0, v.width, v.height)
+                    setBounds(
+                        /*left = */ 0 + leftHoverMarginInPx,
+                        /*top = */ 0 + topHoverMarginInPx,
+                        /*right = */ v.width - rightHoverMarginInPx,
+                        /*bottom = */ v.height - bottomHoverMarginInPx,
+                    )
                 }
             v.overlay.add(drawable)
         } else if (event.action == MotionEvent.ACTION_HOVER_EXIT) {
@@ -151,5 +204,18 @@ class StatusOverlayHoverListener(
         lightColor = resources.getColor(R.color.status_bar_icons_hover_color_light)
         darkColor = resources.getColor(R.color.status_bar_icons_hover_color_dark)
         cornerRadius = resources.getDimension(R.dimen.status_icons_hover_state_background_radius)
+        leftHoverMarginInPx = leftHoverMargin.dpToPx(resources)
+        rightHoverMarginInPx = rightHoverMargin.dpToPx(resources)
+        topHoverMarginInPx = topHoverMargin.dpToPx(resources)
+        bottomHoverMarginInPx = bottomHoverMargin.dpToPx(resources)
+    }
+
+    private fun Int.dpToPx(resources: Resources): Int {
+        return TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP,
+                toFloat(),
+                resources.displayMetrics,
+            )
+            .toInt()
     }
 }

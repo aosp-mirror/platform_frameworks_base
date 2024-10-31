@@ -2977,10 +2977,10 @@ interface ITelephony {
     void requestTimeForNextSatelliteVisibility(in ResultReceiver receiver);
 
     /**
-     * Inform whether the device is aligned with the satellite within in margin for demo mode.
+     * Inform whether the device is aligned with the satellite in both real and demo mode.
      *
-     * @param isAligned {@true} Device is aligned with the satellite for demo mode
-     *                  {@false} Device is not aligned with the satellite for demo mode
+     * @param isAligned {@true} Device is aligned with the satellite.
+     *                  {@false} Device is not aligned with the satellite.
      */
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
             + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
@@ -3015,6 +3015,14 @@ interface ITelephony {
      * @return {@code true} if the timeout duration is set successfully, {@code false} otherwise.
      */
     boolean setSatelliteListeningTimeoutDuration(in long timeoutMillis);
+
+    /**
+     * This API can be used by only CTS to control ingoring cellular service state event.
+     *
+     * @param enabled Whether to enable boolean config.
+     * @return {@code true} if the value is set successfully, {@code false} otherwise.
+     */
+    boolean setSatelliteIgnoreCellularServiceState(in boolean enabled);
 
     /**
      * This API can be used by only CTS to update satellite pointing UI app package and class names.
@@ -3409,4 +3417,42 @@ interface ITelephony {
      * @hide
      */
     boolean setSatelliteSubscriberIdListChangedIntentComponent(in String name);
+
+    /**
+     * This API can be used by only CTS to override the Euicc UI component.
+     *
+     * @param componentName ui component to be launched for testing
+     * @hide
+     */
+    void setTestEuiccUiComponent(in ComponentName componentName);
+
+    /**
+     * This API can be used by only CTS to retrieve the Euicc UI component.
+     *
+     * @return The Euicc UI component for testing.
+     * @hide
+     */
+    ComponentName getTestEuiccUiComponent();
+
+    /**
+     * This API can be used only for test purpose to override the carrier romaing Ntn eligibility
+     *
+     * @param status to update Ntn Eligibility.
+     * @param resetRequired to reset the overridden flag in satellite controller.
+     * @return {@code true} if the shell command is successful, {@code false} otherwise.
+     * @hide
+     */
+    boolean overrideCarrierRoamingNtnEligibilityChanged(
+            in boolean status, in boolean resetRequired);
+
+    /**
+     * Deliver the list of deprovisioned satellite subscriber infos.
+     *
+     * @param list The list of deprovisioned satellite subscriber infos.
+     * @param result The result receiver that returns whether deliver success or fail.
+     * @hide
+     */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
+            + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
+    void deprovisionSatellite(in List<SatelliteSubscriberInfo> list, in ResultReceiver result);
 }

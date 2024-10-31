@@ -18,7 +18,7 @@ package com.android.systemui.keyguard.ui.binder
 
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
-import com.android.app.tracing.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.keyguard.AuthKeyguardMessageArea
 import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerMessageAreaViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached

@@ -21,6 +21,8 @@ package com.android.systemui.shade.domain.interactor
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.ObservableTransitionState
+import com.android.compose.animation.scene.ObservableTransitionState.Transition.ShowOrHideOverlay
+import com.android.compose.animation.scene.OverlayKey
 import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
@@ -32,6 +34,7 @@ import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFingerprintA
 import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticationStatus
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.scene.domain.interactor.sceneInteractor
+import com.android.systemui.scene.shared.model.Overlays
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.fakeSceneDataSource
 import com.android.systemui.testKosmos
@@ -125,6 +128,63 @@ class PanelExpansionInteractorImplTest : SysuiTestCase() {
 
     @Test
     @EnableSceneContainer
+    fun legacyPanelExpansion_dualShade_whenIdle_whenLocked() =
+        testScope.runTest {
+            underTest = kosmos.panelExpansionInteractorImpl
+            val panelExpansion by collectLastValue(underTest.legacyPanelExpansion)
+
+            changeScene(Scenes.Lockscreen) { assertThat(panelExpansion).isEqualTo(1f) }
+            assertThat(panelExpansion).isEqualTo(1f)
+
+            changeScene(Scenes.Bouncer) { assertThat(panelExpansion).isEqualTo(1f) }
+            assertThat(panelExpansion).isEqualTo(1f)
+
+            showOverlay(Overlays.NotificationsShade) { assertThat(panelExpansion).isEqualTo(1f) }
+            assertThat(panelExpansion).isEqualTo(1f)
+
+            showOverlay(Overlays.QuickSettingsShade) { assertThat(panelExpansion).isEqualTo(1f) }
+            assertThat(panelExpansion).isEqualTo(1f)
+
+            changeScene(Scenes.Communal) { assertThat(panelExpansion).isEqualTo(1f) }
+            assertThat(panelExpansion).isEqualTo(1f)
+        }
+
+    @Test
+    @EnableSceneContainer
+    fun legacyPanelExpansion_dualShade_whenIdle_whenUnlocked() =
+        testScope.runTest {
+            underTest = kosmos.panelExpansionInteractorImpl
+            val unlockStatus by collectLastValue(deviceUnlockedInteractor.deviceUnlockStatus)
+            kosmos.fakeDeviceEntryFingerprintAuthRepository.setAuthenticationStatus(
+                SuccessFingerprintAuthenticationStatus(0, true)
+            )
+            runCurrent()
+
+            assertThat(unlockStatus)
+                .isEqualTo(DeviceUnlockStatus(true, DeviceUnlockSource.Fingerprint))
+
+            val panelExpansion by collectLastValue(underTest.legacyPanelExpansion)
+
+            changeScene(Scenes.Gone) { assertThat(panelExpansion).isEqualTo(0f) }
+            assertThat(panelExpansion).isEqualTo(0f)
+
+            showOverlay(Overlays.NotificationsShade) { progress ->
+                assertThat(panelExpansion).isEqualTo(progress)
+            }
+            assertThat(panelExpansion).isEqualTo(1f)
+
+            showOverlay(Overlays.QuickSettingsShade) {
+                // Notification shade is already expanded, so moving to QS shade should also be 1f.
+                assertThat(panelExpansion).isEqualTo(1f)
+            }
+            assertThat(panelExpansion).isEqualTo(1f)
+
+            changeScene(Scenes.Communal) { assertThat(panelExpansion).isEqualTo(1f) }
+            assertThat(panelExpansion).isEqualTo(1f)
+        }
+
+    @Test
+    @EnableSceneContainer
     fun shouldHideStatusBarIconsWhenExpanded_goneScene() =
         testScope.runTest {
             underTest = kosmos.panelExpansionInteractorImpl
@@ -192,5 +252,73 @@ class PanelExpansionInteractorImplTest : SysuiTestCase() {
         assertDuringProgress(progressFlow.value)
 
         assertThat(currentScene).isEqualTo(toScene)
+    }
+
+    private fun TestScope.showOverlay(
+        toOverlay: OverlayKey,
+        assertDuringProgress: ((progress: Float) -> Unit) = {},
+    ) {
+        val currentScene by collectLastValue(sceneInteractor.currentScene)
+        val currentOverlays by collectLastValue(sceneInteractor.currentOverlays)
+        val progressFlow = MutableStateFlow(0f)
+        transitionState.value =
+            if (checkNotNull(currentOverlays).isEmpty()) {
+                ShowOrHideOverlay(
+                    overlay = toOverlay,
+                    fromContent = checkNotNull(currentScene),
+                    toContent = toOverlay,
+                    currentScene = checkNotNull(currentScene),
+                    currentOverlays = flowOf(emptySet()),
+                    progress = progressFlow,
+                    isInitiatedByUserInput = true,
+                    isUserInputOngoing = flowOf(true),
+                    previewProgress = flowOf(0f),
+                    isInPreviewStage = flowOf(false),
+                )
+            } else {
+                ObservableTransitionState.Transition.ReplaceOverlay(
+                    fromOverlay = checkNotNull(currentOverlays).first(),
+                    toOverlay = toOverlay,
+                    currentScene = checkNotNull(currentScene),
+                    currentOverlays = flowOf(emptySet()),
+                    progress = progressFlow,
+                    isInitiatedByUserInput = true,
+                    isUserInputOngoing = flowOf(true),
+                    previewProgress = flowOf(0f),
+                    isInPreviewStage = flowOf(false),
+                )
+            }
+        runCurrent()
+        assertDuringProgress(progressFlow.value)
+
+        progressFlow.value = 0.2f
+        runCurrent()
+        assertDuringProgress(progressFlow.value)
+
+        progressFlow.value = 0.6f
+        runCurrent()
+        assertDuringProgress(progressFlow.value)
+
+        progressFlow.value = 1f
+        runCurrent()
+        assertDuringProgress(progressFlow.value)
+
+        transitionState.value =
+            ObservableTransitionState.Idle(
+                currentScene = checkNotNull(currentScene),
+                currentOverlays = setOf(toOverlay),
+            )
+        if (checkNotNull(currentOverlays).isEmpty()) {
+            fakeSceneDataSource.showOverlay(toOverlay)
+        } else {
+            fakeSceneDataSource.replaceOverlay(
+                from = checkNotNull(currentOverlays).first(),
+                to = toOverlay,
+            )
+        }
+        runCurrent()
+        assertDuringProgress(progressFlow.value)
+
+        assertThat(currentOverlays).containsExactly(toOverlay)
     }
 }

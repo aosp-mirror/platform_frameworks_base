@@ -39,7 +39,7 @@ class DesktopActivityOrientationChangeHandler(
     private val shellTaskOrganizer: ShellTaskOrganizer,
     private val taskStackListener: TaskStackListenerImpl,
     private val resizeHandler: ToggleResizeDesktopTaskTransitionHandler,
-    private val taskRepository: DesktopModeTaskRepository,
+    private val taskRepository: DesktopRepository,
 ) {
 
     init {

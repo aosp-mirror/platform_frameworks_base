@@ -48,8 +48,6 @@ public class BackTouchTracker {
      */
     private float mInitTouchX;
     private float mInitTouchY;
-    private float mLatestVelocityX;
-    private float mLatestVelocityY;
     private float mStartThresholdX;
     private int mSwipeEdge;
     private boolean mShouldUpdateStartLocation = false;
@@ -58,7 +56,7 @@ public class BackTouchTracker {
     /**
      * Updates the tracker with a new motion event.
      */
-    public void update(float touchX, float touchY, float velocityX, float velocityY) {
+    public void update(float touchX, float touchY) {
         /**
          * If back was previously cancelled but the user has started swiping in the forward
          * direction again, restart back.
@@ -73,8 +71,6 @@ public class BackTouchTracker {
         }
         mLatestTouchX = touchX;
         mLatestTouchY = touchY;
-        mLatestVelocityX = velocityX;
-        mLatestVelocityY = velocityY;
     }
 
     /** Sets whether the back gesture is past the trigger threshold. */
@@ -155,9 +151,8 @@ public class BackTouchTracker {
         return new BackMotionEvent(
                 /* touchX = */ mInitTouchX,
                 /* touchY = */ mInitTouchY,
+                /* frameTimeMillis = */ 0,
                 /* progress = */ 0,
-                /* velocityX = */ 0,
-                /* velocityY = */ 0,
                 /* triggerBack = */ mTriggerBack,
                 /* swipeEdge = */ mSwipeEdge,
                 /* departingAnimationTarget = */ target);
@@ -241,9 +236,8 @@ public class BackTouchTracker {
         return new BackMotionEvent(
                 /* touchX = */ mLatestTouchX,
                 /* touchY = */ mLatestTouchY,
+                /* frameTimeMillis = */ 0,
                 /* progress = */ progress,
-                /* velocityX = */ mLatestVelocityX,
-                /* velocityY = */ mLatestVelocityY,
                 /* triggerBack = */ mTriggerBack,
                 /* swipeEdge = */ mSwipeEdge,
                 /* departingAnimationTarget = */ null);

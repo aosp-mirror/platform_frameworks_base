@@ -44,7 +44,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -52,12 +53,14 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
+import android.app.IActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManagerInternal;
 import android.media.AudioManager;
 import android.os.Handler;
@@ -79,12 +82,10 @@ import androidx.test.InstrumentationRegistry;
 
 import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.internal.util.test.FakeSettingsProviderRule;
-import com.android.server.LocalServices;
 import com.android.server.companion.virtual.VirtualDeviceManagerInternal;
 import com.android.server.vibrator.VibrationSession.CallerInfo;
 import com.android.server.vibrator.VibrationSession.Status;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -101,8 +102,7 @@ public class VibrationSettingsTest {
     @Rule
     public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
 
-    private static final int OLD_USER_ID = 123;
-    private static final int NEW_USER_ID = 456;
+    private static final int USER_ID = 123;
     private static final int UID = 1;
     private static final int VIRTUAL_DEVICE_ID = 1;
     private static final String SYSUI_PACKAGE_NAME = "sysui";
@@ -132,13 +132,12 @@ public class VibrationSettingsTest {
     @Mock private VirtualDeviceManagerInternal mVirtualDeviceManagerInternalMock;
     @Mock private PackageManagerInternal mPackageManagerInternalMock;
     @Mock private AudioManager mAudioManagerMock;
+    @Mock private IActivityManager mActivityManagerMock;
     @Mock private VibrationConfig mVibrationConfigMock;
 
     private TestLooper mTestLooper;
     private ContextWrapper mContextSpy;
     private VibrationSettings mVibrationSettings;
-    private PowerManagerInternal.LowPowerModeListener mRegisteredPowerModeListener;
-    private BroadcastReceiver mRegisteredBatteryBroadcastReceiver;
 
     @Before
     public void setUp() throws Exception {
@@ -146,24 +145,21 @@ public class VibrationSettingsTest {
         mContextSpy = spy(new ContextWrapper(InstrumentationRegistry.getContext()));
 
         ContentResolver contentResolver = mSettingsProviderRule.mockContentResolver(mContextSpy);
-        when(mContextSpy.getContentResolver()).thenReturn(contentResolver);
-        when(mContextSpy.getSystemService(eq(Context.AUDIO_SERVICE))).thenReturn(mAudioManagerMock);
-        doAnswer(invocation -> {
-            mRegisteredPowerModeListener = invocation.getArgument(0);
-            return null;
-        }).when(mPowerManagerInternalMock).registerLowPowerModeObserver(any());
+        doReturn(contentResolver).when(mContextSpy).getContentResolver();
+
+        // Make sure broadcast receivers are not registered for this test, to avoid flakes.
+        doReturn(null).when(mContextSpy)
+                .registerReceiver(any(BroadcastReceiver.class), any(IntentFilter.class), anyInt());
+
         when(mPackageManagerInternalMock.getSystemUiServiceComponent())
                 .thenReturn(new ComponentName(SYSUI_PACKAGE_NAME, ""));
-
-        removeServicesForTest();
-        addServicesForTest();
 
         setDefaultIntensity(VIBRATION_INTENSITY_MEDIUM);
 
         setIgnoreVibrationsOnWirelessCharger(false);
-        createSystemReadyVibrationSettings();
-
         mockGoToSleep(/* goToSleepTime= */ 0, PowerManager.GO_TO_SLEEP_REASON_TIMEOUT);
+
+        createSystemReadyVibrationSettings();
     }
 
     private void createSystemReadyVibrationSettings() {
@@ -177,37 +173,18 @@ public class VibrationSettingsTest {
         setUserSetting(Settings.System.APPLY_RAMPING_RINGER, 0);
         setRingerMode(AudioManager.RINGER_MODE_NORMAL);
 
-        mVibrationSettings.onSystemReady();
-    }
-
-    private void removeServicesForTest() {
-        LocalServices.removeServiceForTest(PowerManagerInternal.class);
-        LocalServices.removeServiceForTest(PackageManagerInternal.class);
-        LocalServices.removeServiceForTest(VirtualDeviceManagerInternal.class);
-    }
-
-    private void addServicesForTest() {
-        LocalServices.addService(PowerManagerInternal.class, mPowerManagerInternalMock);
-        LocalServices.addService(PackageManagerInternal.class, mPackageManagerInternalMock);
-        LocalServices.addService(VirtualDeviceManagerInternal.class,
-                mVirtualDeviceManagerInternalMock);
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        removeServicesForTest();
+        mVibrationSettings.onSystemReady(mPackageManagerInternalMock, mPowerManagerInternalMock,
+                mActivityManagerMock, mVirtualDeviceManagerInternalMock, mAudioManagerMock);
     }
 
     @Test
     public void create_withOnlyRequiredSystemServices() {
-        // The only core services that we depend on are PowerManager and PackageManager
-        removeServicesForTest();
-        LocalServices.addService(PowerManagerInternal.class, mPowerManagerInternalMock);
-        LocalServices.addService(PackageManagerInternal.class, mPackageManagerInternalMock);
-
         VibrationSettings minimalVibrationSettings = new VibrationSettings(mContextSpy,
                 new Handler(mTestLooper.getLooper()), mVibrationConfigMock);
-        minimalVibrationSettings.onSystemReady();
+
+        // The only core services that we depend on are Power, Package and Activity managers
+        minimalVibrationSettings.onSystemReady(mPackageManagerInternalMock,
+                mPowerManagerInternalMock, mActivityManagerMock, null, null);
     }
 
     @Test
@@ -215,8 +192,8 @@ public class VibrationSettingsTest {
         mVibrationSettings.addListener(mListenerMock);
 
         // Testing the broadcast flow manually.
-        mVibrationSettings.mUserSwitchObserver.onUserSwitching(NEW_USER_ID);
-        mVibrationSettings.mUserSwitchObserver.onUserSwitchComplete(NEW_USER_ID);
+        mVibrationSettings.mUserSwitchObserver.onUserSwitching(USER_ID);
+        mVibrationSettings.mUserSwitchObserver.onUserSwitchComplete(USER_ID);
 
         verify(mListenerMock, times(2)).onChange();
     }
@@ -226,9 +203,9 @@ public class VibrationSettingsTest {
         mVibrationSettings.addListener(mListenerMock);
 
         // Testing the broadcast flow manually.
-        mVibrationSettings.mSettingChangeReceiver.onReceive(mContextSpy,
+        mVibrationSettings.mRingerModeBroadcastReceiver.onReceive(mContextSpy,
                 new Intent(AudioManager.INTERNAL_RINGER_MODE_CHANGED_ACTION));
-        mVibrationSettings.mSettingChangeReceiver.onReceive(mContextSpy,
+        mVibrationSettings.mRingerModeBroadcastReceiver.onReceive(mContextSpy,
                 new Intent(AudioManager.INTERNAL_RINGER_MODE_CHANGED_ACTION));
 
         verify(mListenerMock, times(2)).onChange();
@@ -250,9 +227,9 @@ public class VibrationSettingsTest {
         mVibrationSettings.addListener(mListenerMock);
 
         // Testing the broadcast flow manually.
-        mRegisteredPowerModeListener.onLowPowerModeChanged(LOW_POWER_STATE);
-        mRegisteredPowerModeListener.onLowPowerModeChanged(NORMAL_POWER_STATE);
-        mRegisteredPowerModeListener.onLowPowerModeChanged(NORMAL_POWER_STATE); // No change.
+        mVibrationSettings.mLowPowerModeListener.onLowPowerModeChanged(LOW_POWER_STATE);
+        mVibrationSettings.mLowPowerModeListener.onLowPowerModeChanged(NORMAL_POWER_STATE);
+        mVibrationSettings.mLowPowerModeListener.onLowPowerModeChanged(NORMAL_POWER_STATE); // Noop.
 
         verify(mListenerMock, times(2)).onChange();
     }
@@ -268,9 +245,9 @@ public class VibrationSettingsTest {
 
         // Trigger multiple observers manually.
         mVibrationSettings.mSettingObserver.onChange(false);
-        mRegisteredPowerModeListener.onLowPowerModeChanged(LOW_POWER_STATE);
-        mVibrationSettings.mUserSwitchObserver.onUserSwitchComplete(NEW_USER_ID);
-        mVibrationSettings.mSettingChangeReceiver.onReceive(mContextSpy,
+        mVibrationSettings.mLowPowerModeListener.onLowPowerModeChanged(LOW_POWER_STATE);
+        mVibrationSettings.mUserSwitchObserver.onUserSwitchComplete(USER_ID);
+        mVibrationSettings.mRingerModeBroadcastReceiver.onReceive(mContextSpy,
                 new Intent(AudioManager.INTERNAL_RINGER_MODE_CHANGED_ACTION));
 
         verifyNoMoreInteractions(mListenerMock);
@@ -311,11 +288,12 @@ public class VibrationSettingsTest {
 
     @Test
     public void wirelessChargingVibrationsEnabled_doesNotRegisterBatteryReceiver_allowsAnyUsage() {
-        setBatteryReceiverRegistrationResult(getBatteryChangedIntent(BATTERY_PLUGGED_WIRELESS));
         setIgnoreVibrationsOnWirelessCharger(false);
         createSystemReadyVibrationSettings();
 
-        assertNull(mRegisteredBatteryBroadcastReceiver);
+        verify(mContextSpy, never()).registerReceiver(any(BroadcastReceiver.class),
+                argThat(filter -> filter.matchAction(Intent.ACTION_BATTERY_CHANGED)), anyInt());
+
         for (int usage : ALL_USAGES) {
             assertVibrationNotIgnoredForUsage(usage);
         }
@@ -323,7 +301,6 @@ public class VibrationSettingsTest {
 
     @Test
     public void shouldIgnoreVibration_noBatteryIntentWhenSystemReady_allowsAnyUsage() {
-        setBatteryReceiverRegistrationResult(null);
         setIgnoreVibrationsOnWirelessCharger(true);
         createSystemReadyVibrationSettings();
 
@@ -335,7 +312,10 @@ public class VibrationSettingsTest {
     @Test
     public void shouldIgnoreVibration_onNonWirelessChargerWhenSystemReady_allowsAnyUsage() {
         Intent nonWirelessChargingIntent = getBatteryChangedIntent(BATTERY_PLUGGED_USB);
-        setBatteryReceiverRegistrationResult(nonWirelessChargingIntent);
+        doReturn(nonWirelessChargingIntent).when(mContextSpy).registerReceiver(
+                any(BroadcastReceiver.class),
+                argThat(filter -> filter.matchAction(Intent.ACTION_BATTERY_CHANGED)), anyInt());
+
         setIgnoreVibrationsOnWirelessCharger(true);
         createSystemReadyVibrationSettings();
 
@@ -347,7 +327,10 @@ public class VibrationSettingsTest {
     @Test
     public void shouldIgnoreVibration_onWirelessChargerWhenSystemReady_doesNotAllowFromAnyUsage() {
         Intent wirelessChargingIntent = getBatteryChangedIntent(BATTERY_PLUGGED_WIRELESS);
-        setBatteryReceiverRegistrationResult(wirelessChargingIntent);
+        doReturn(wirelessChargingIntent).when(mContextSpy).registerReceiver(
+                any(BroadcastReceiver.class),
+                argThat(filter -> filter.matchAction(Intent.ACTION_BATTERY_CHANGED)), anyInt());
+
         setIgnoreVibrationsOnWirelessCharger(true);
         createSystemReadyVibrationSettings();
 
@@ -358,13 +341,12 @@ public class VibrationSettingsTest {
 
     @Test
     public void shouldIgnoreVibration_receivesWirelessChargingIntent_doesNotAllowFromAnyUsage() {
-        Intent nonWirelessChargingIntent = getBatteryChangedIntent(BATTERY_PLUGGED_USB);
-        setBatteryReceiverRegistrationResult(nonWirelessChargingIntent);
         setIgnoreVibrationsOnWirelessCharger(true);
         createSystemReadyVibrationSettings();
 
         Intent wirelessChargingIntent = getBatteryChangedIntent(BATTERY_PLUGGED_WIRELESS);
-        mRegisteredBatteryBroadcastReceiver.onReceive(mContextSpy, wirelessChargingIntent);
+        mVibrationSettings.mBatteryBroadcastReceiver.onReceive(
+                mContextSpy, wirelessChargingIntent);
 
         for (int usage : ALL_USAGES) {
             assertVibrationIgnoredForUsage(usage, Status.IGNORED_ON_WIRELESS_CHARGER);
@@ -373,17 +355,21 @@ public class VibrationSettingsTest {
 
     @Test
     public void shouldIgnoreVibration_receivesNonWirelessChargingIntent_allowsAnyUsage() {
-        Intent wirelessChargingIntent = getBatteryChangedIntent(BATTERY_PLUGGED_WIRELESS);
-        setBatteryReceiverRegistrationResult(wirelessChargingIntent);
         setIgnoreVibrationsOnWirelessCharger(true);
         createSystemReadyVibrationSettings();
+
+        Intent wirelessChargingIntent = getBatteryChangedIntent(BATTERY_PLUGGED_WIRELESS);
+        mVibrationSettings.mBatteryBroadcastReceiver.onReceive(
+                mContextSpy, wirelessChargingIntent);
+
         // Check that initially, all usages are ignored due to the wireless charging.
         for (int usage : ALL_USAGES) {
             assertVibrationIgnoredForUsage(usage, Status.IGNORED_ON_WIRELESS_CHARGER);
         }
 
         Intent nonWirelessChargingIntent = getBatteryChangedIntent(BATTERY_PLUGGED_USB);
-        mRegisteredBatteryBroadcastReceiver.onReceive(mContextSpy, nonWirelessChargingIntent);
+        mVibrationSettings.mBatteryBroadcastReceiver.onReceive(
+                mContextSpy, nonWirelessChargingIntent);
 
         for (int usage : ALL_USAGES) {
             assertVibrationNotIgnoredForUsage(usage);
@@ -400,7 +386,7 @@ public class VibrationSettingsTest {
                 USAGE_HARDWARE_FEEDBACK
         ));
 
-        mRegisteredPowerModeListener.onLowPowerModeChanged(LOW_POWER_STATE);
+        mVibrationSettings.mLowPowerModeListener.onLowPowerModeChanged(LOW_POWER_STATE);
 
         for (int usage : ALL_USAGES) {
             if (expectedAllowedVibrations.contains(usage)) {
@@ -413,7 +399,7 @@ public class VibrationSettingsTest {
 
     @Test
     public void shouldIgnoreVibration_notInBatterySaverMode_allowsAnyUsage() {
-        mRegisteredPowerModeListener.onLowPowerModeChanged(NORMAL_POWER_STATE);
+        mVibrationSettings.mLowPowerModeListener.onLowPowerModeChanged(NORMAL_POWER_STATE);
 
         for (int usage : ALL_USAGES) {
             assertVibrationNotIgnoredForUsage(usage);
@@ -596,7 +582,7 @@ public class VibrationSettingsTest {
 
         // Testing the broadcast flow manually.
         when(mAudioManagerMock.getRingerModeInternal()).thenReturn(AudioManager.RINGER_MODE_SILENT);
-        mVibrationSettings.mSettingChangeReceiver.onReceive(mContextSpy,
+        mVibrationSettings.mRingerModeBroadcastReceiver.onReceive(mContextSpy,
                 new Intent(AudioManager.INTERNAL_RINGER_MODE_CHANGED_ACTION));
 
         assertVibrationIgnoredForUsage(USAGE_RINGTONE, Status.IGNORED_FOR_RINGER_MODE);
@@ -852,16 +838,15 @@ public class VibrationSettingsTest {
                 mVibrationSettings.getCurrentIntensity(USAGE_RINGTONE));
 
         // Test early update of settings based on new user id.
-        putUserSetting(Settings.System.RING_VIBRATION_INTENSITY, VIBRATION_INTENSITY_LOW,
-                NEW_USER_ID);
-        mVibrationSettings.mUserSwitchObserver.onUserSwitching(NEW_USER_ID);
+        putUserSetting(Settings.System.RING_VIBRATION_INTENSITY, VIBRATION_INTENSITY_LOW, USER_ID);
+        mVibrationSettings.mUserSwitchObserver.onUserSwitching(USER_ID);
         assertEquals(VIBRATION_INTENSITY_LOW,
                 mVibrationSettings.getCurrentIntensity(USAGE_RINGTONE));
 
         // Test later update of settings for UserHandle.USER_CURRENT.
         putUserSetting(Settings.System.RING_VIBRATION_INTENSITY, VIBRATION_INTENSITY_LOW,
                 UserHandle.USER_CURRENT);
-        mVibrationSettings.mUserSwitchObserver.onUserSwitchComplete(NEW_USER_ID);
+        mVibrationSettings.mUserSwitchObserver.onUserSwitchComplete(USER_ID);
         assertEquals(VIBRATION_INTENSITY_LOW,
                 mVibrationSettings.getCurrentIntensity(USAGE_RINGTONE));
     }
@@ -1009,7 +994,7 @@ public class VibrationSettingsTest {
     private void setRingerMode(int ringerMode) {
         when(mAudioManagerMock.getRingerModeInternal()).thenReturn(ringerMode);
         // Mock AudioManager broadcast of internal ringer mode change.
-        mVibrationSettings.mSettingChangeReceiver.onReceive(mContextSpy,
+        mVibrationSettings.mRingerModeBroadcastReceiver.onReceive(mContextSpy,
                 new Intent(AudioManager.INTERNAL_RINGER_MODE_CHANGED_ACTION));
     }
 
@@ -1022,14 +1007,6 @@ public class VibrationSettingsTest {
             @VibrationAttributes.Usage int usage) {
         VibrationAttributes attrs = VibrationAttributes.createForUsage(usage);
         return new CallerInfo(attrs, uid, VIRTUAL_DEVICE_ID, opPkg, null);
-    }
-
-    private void setBatteryReceiverRegistrationResult(Intent result) {
-        doAnswer(invocation -> {
-            mRegisteredBatteryBroadcastReceiver = invocation.getArgument(0);
-            return result;
-        }).when(mContextSpy).registerReceiver(any(BroadcastReceiver.class),
-                argThat(filter -> filter.matchAction(Intent.ACTION_BATTERY_CHANGED)), anyInt());
     }
 
     private Intent getBatteryChangedIntent(int extraPluggedValue) {

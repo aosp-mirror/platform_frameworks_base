@@ -44,7 +44,7 @@ android_test {
         "libstaticjvmtiagent",
     ],
     libs: [
-        "android.test.mock",
+        "android.test.mock.stubs.system",
     ],
     certificate: "platform",
     platform_apis: true,

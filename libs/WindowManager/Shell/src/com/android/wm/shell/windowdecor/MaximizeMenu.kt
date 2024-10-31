@@ -36,7 +36,6 @@ import android.graphics.drawable.StateListDrawable
 import android.graphics.drawable.shapes.RoundRectShape
 import android.util.StateSet
 import android.view.LayoutInflater
-import android.view.MotionEvent
 import android.view.MotionEvent.ACTION_HOVER_ENTER
 import android.view.MotionEvent.ACTION_HOVER_EXIT
 import android.view.MotionEvent.ACTION_HOVER_MOVE
@@ -51,16 +50,20 @@ import android.view.View.TRANSLATION_Z
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.WindowlessWindowManager
+import android.view.accessibility.AccessibilityEvent
 import android.widget.Button
 import android.widget.TextView
 import android.window.TaskConstants
 import androidx.compose.material3.ColorScheme
 import androidx.compose.ui.graphics.toArgb
 import androidx.core.animation.addListener
+import androidx.core.view.isGone
+import androidx.core.view.isVisible
 import com.android.wm.shell.R
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer
 import com.android.wm.shell.common.DisplayController
 import com.android.wm.shell.common.SyncTransactionQueue
+import com.android.wm.shell.desktopmode.calculateMaximizeBounds
 import com.android.wm.shell.shared.animation.Interpolators.EMPHASIZED_DECELERATE
 import com.android.wm.shell.shared.animation.Interpolators.FAST_OUT_LINEAR_IN
 import com.android.wm.shell.windowdecor.additionalviewcontainer.AdditionalViewHostViewContainer
@@ -72,7 +75,8 @@ import java.util.function.Supplier
 
 /**
  *  Menu that appears when user long clicks the maximize button. Gives the user the option to
- *  maximize the task or snap the task to the right or left half of the screen.
+ *  maximize the task or restore previous task bounds from the maximized state and to snap the task
+ *  to the right or left half of the screen.
  */
 class MaximizeMenu(
         private val syncQueue: SyncTransactionQueue,
@@ -90,7 +94,6 @@ class MaximizeMenu(
     private val cornerRadius = loadDimensionPixelSize(
             R.dimen.desktop_mode_maximize_menu_corner_radius
     ).toFloat()
-    private val menuWidth = loadDimensionPixelSize(R.dimen.desktop_mode_maximize_menu_width)
     private val menuHeight = loadDimensionPixelSize(R.dimen.desktop_mode_maximize_menu_height)
     private val menuPadding = loadDimensionPixelSize(R.dimen.desktop_mode_menu_padding)
 
@@ -102,7 +105,12 @@ class MaximizeMenu(
 
     /** Creates and shows the maximize window. */
     fun show(
+        isTaskInImmersiveMode: Boolean,
+        menuWidth: Int,
+        showImmersiveOption: Boolean,
+        showSnapOptions: Boolean,
         onMaximizeOrRestoreClickListener: () -> Unit,
+        onImmersiveOrRestoreClickListener: () -> Unit,
         onLeftSnapClickListener: () -> Unit,
         onRightSnapClickListener: () -> Unit,
         onHoverListener: (Boolean) -> Unit,
@@ -110,25 +118,35 @@ class MaximizeMenu(
     ) {
         if (maximizeMenu != null) return
         createMaximizeMenu(
+            isTaskInImmersiveMode = isTaskInImmersiveMode,
+            menuWidth = menuWidth,
+            showImmersiveOption = showImmersiveOption,
+            showSnapOptions = showSnapOptions,
             onMaximizeClickListener = onMaximizeOrRestoreClickListener,
+            onImmersiveOrRestoreClickListener = onImmersiveOrRestoreClickListener,
             onLeftSnapClickListener = onLeftSnapClickListener,
             onRightSnapClickListener = onRightSnapClickListener,
             onHoverListener = onHoverListener,
             onOutsideTouchListener = onOutsideTouchListener
         )
-        maximizeMenuView?.animateOpenMenu()
+        maximizeMenuView?.let { view ->
+            view.animateOpenMenu(onEnd = {
+                view.requestAccessibilityFocus()
+            })
+        }
     }
 
     /** Closes the maximize window and releases its view. */
-    fun close() {
+    fun close(onEnd: () -> Unit) {
         val view = maximizeMenuView
         val menu = maximizeMenu
         if (view == null) {
             menu?.releaseView()
         } else {
-            view.animateCloseMenu {
+            view.animateCloseMenu(onEnd = {
                 menu?.releaseView()
-            }
+                onEnd.invoke()
+            })
         }
         maximizeMenu = null
         maximizeMenuView = null
@@ -136,7 +154,12 @@ class MaximizeMenu(
 
     /** Create a maximize menu that is attached to the display area. */
     private fun createMaximizeMenu(
+        isTaskInImmersiveMode: Boolean,
+        menuWidth: Int,
+        showImmersiveOption: Boolean,
+        showSnapOptions: Boolean,
         onMaximizeClickListener: () -> Unit,
+        onImmersiveOrRestoreClickListener: () -> Unit,
         onLeftSnapClickListener: () -> Unit,
         onRightSnapClickListener: () -> Unit,
         onHoverListener: (Boolean) -> Unit,
@@ -170,11 +193,21 @@ class MaximizeMenu(
                 "MaximizeMenu")
         maximizeMenuView = MaximizeMenuView(
             context = decorWindowContext,
+            sizeToggleDirection = getSizeToggleDirection(),
+            immersiveConfig = if (showImmersiveOption) {
+                MaximizeMenuView.ImmersiveConfig.Visible(
+                    getImmersiveToggleDirection(isTaskInImmersiveMode)
+                )
+            } else {
+                MaximizeMenuView.ImmersiveConfig.Hidden
+            },
+            showSnapOptions = showSnapOptions,
             menuHeight = menuHeight,
             menuPadding = menuPadding,
         ).also { menuView ->
             menuView.bind(taskInfo)
             menuView.onMaximizeClickListener = onMaximizeClickListener
+            menuView.onImmersiveOrRestoreClickListener = onImmersiveOrRestoreClickListener
             menuView.onLeftSnapClickListener = onLeftSnapClickListener
             menuView.onRightSnapClickListener = onRightSnapClickListener
             menuView.onMenuHoverListener = onHoverListener
@@ -196,6 +229,27 @@ class MaximizeMenu(
         }
     }
 
+    private fun getSizeToggleDirection(): MaximizeMenuView.SizeToggleDirection {
+        val maximizeBounds = calculateMaximizeBounds(
+            displayController.getDisplayLayout(taskInfo.displayId)!!,
+            taskInfo
+        )
+        val maximized = taskInfo.configuration.windowConfiguration.bounds.equals(maximizeBounds)
+        return if (maximized)
+            MaximizeMenuView.SizeToggleDirection.RESTORE
+        else
+            MaximizeMenuView.SizeToggleDirection.MAXIMIZE
+    }
+
+    private fun getImmersiveToggleDirection(
+        isTaskImmersive: Boolean
+    ): MaximizeMenuView.ImmersiveToggleDirection =
+        if (isTaskImmersive) {
+            MaximizeMenuView.ImmersiveToggleDirection.EXIT
+        } else {
+            MaximizeMenuView.ImmersiveToggleDirection.ENTER
+        }
+
     private fun loadDimensionPixelSize(resourceId: Int): Int {
         return if (resourceId == Resources.ID_NULL) {
             0
@@ -205,43 +259,35 @@ class MaximizeMenu(
     }
 
     /**
-     * A valid menu input is one of the following:
-     * An input that happens in the menu views.
-     * Any input before the views have been laid out.
-     *
-     * @param inputPoint the input to compare against.
-     */
-    fun isValidMenuInput(ev: MotionEvent): Boolean {
-        val x = ev.rawX
-        val y = ev.rawY
-        return !viewsLaidOut() || (menuPosition.x <= x && menuPosition.x + menuWidth >= x &&
-                menuPosition.y <= y && menuPosition.y + menuHeight >= y)
-    }
-
-    /**
-     * Check if the views for maximize menu can be seen.
-     */
-    private fun viewsLaidOut(): Boolean {
-        return maximizeMenu?.view?.isLaidOut ?: false
-    }
-
-    /**
      * The view within the Maximize Menu, presents maximize, restore and snap-to-side options for
      * resizing a Task.
      */
     class MaximizeMenuView(
         context: Context,
+        private val sizeToggleDirection: SizeToggleDirection,
+        immersiveConfig: ImmersiveConfig,
+        showSnapOptions: Boolean,
         private val menuHeight: Int,
-        private val menuPadding: Int,
+        private val menuPadding: Int
     ) {
         val rootView = LayoutInflater.from(context)
             .inflate(R.layout.desktop_mode_window_decor_maximize_menu, null /* root */) as ViewGroup
         private val container = requireViewById(R.id.container)
         private val overlay = requireViewById(R.id.maximize_menu_overlay)
-        private val maximizeText =
-            requireViewById(R.id.maximize_menu_maximize_window_text) as TextView
-        private val maximizeButton =
-            requireViewById(R.id.maximize_menu_maximize_button) as Button
+        private val immersiveToggleContainer =
+            requireViewById(R.id.maximize_menu_immersive_toggle_container) as View
+        private val immersiveToggleButtonText =
+            requireViewById(R.id.maximize_menu_immersive_toggle_button_text) as TextView
+        private val immersiveToggleButton =
+            requireViewById(R.id.maximize_menu_immersive_toggle_button) as Button
+        private val sizeToggleContainer =
+            requireViewById(R.id.maximize_menu_size_toggle_container) as View
+        private val sizeToggleButtonText =
+            requireViewById(R.id.maximize_menu_size_toggle_button_text) as TextView
+        private val sizeToggleButton =
+            requireViewById(R.id.maximize_menu_size_toggle_button) as Button
+        private val snapContainer =
+            requireViewById(R.id.maximize_menu_snap_container) as View
         private val snapWindowText =
             requireViewById(R.id.maximize_menu_snap_window_text) as TextView
         private val snapRightButton =
@@ -257,10 +303,37 @@ class MaximizeMenu(
             .getDimensionPixelSize(R.dimen.desktop_mode_maximize_menu_buttons_outline_radius)
         private val outlineStroke = context.resources
             .getDimensionPixelSize(R.dimen.desktop_mode_maximize_menu_buttons_outline_stroke)
-        private val fillPadding = context.resources
-            .getDimensionPixelSize(R.dimen.desktop_mode_maximize_menu_buttons_fill_padding)
         private val fillRadius = context.resources
             .getDimensionPixelSize(R.dimen.desktop_mode_maximize_menu_buttons_fill_radius)
+
+        private val immersiveFillPadding = context.resources.getDimensionPixelSize(R.dimen
+            .desktop_mode_maximize_menu_immersive_button_fill_padding)
+        private val maximizeFillPaddingDefault = context.resources.getDimensionPixelSize(R.dimen
+            .desktop_mode_maximize_menu_snap_and_maximize_buttons_fill_padding)
+        private val maximizeFillPaddingBottom = context.resources.getDimensionPixelSize(R.dimen
+            .desktop_mode_maximize_menu_snap_and_maximize_buttons_fill_padding_bottom)
+        private val maximizeRestoreFillPaddingVertical = context.resources.getDimensionPixelSize(
+            R.dimen.desktop_mode_maximize_menu_restore_button_fill_vertical_padding)
+        private val maximizeRestoreFillPaddingHorizontal = context.resources.getDimensionPixelSize(
+            R.dimen.desktop_mode_maximize_menu_restore_button_fill_horizontal_padding)
+        private val maximizeFillPaddingRect = Rect(
+            maximizeFillPaddingDefault,
+            maximizeFillPaddingDefault,
+            maximizeFillPaddingDefault,
+            maximizeFillPaddingBottom
+        )
+        private val maximizeRestoreFillPaddingRect = Rect(
+            maximizeRestoreFillPaddingHorizontal,
+            maximizeRestoreFillPaddingVertical,
+            maximizeRestoreFillPaddingHorizontal,
+            maximizeRestoreFillPaddingVertical,
+        )
+        private val immersiveFillPaddingRect = Rect(
+            immersiveFillPadding,
+            immersiveFillPadding,
+            immersiveFillPadding,
+            immersiveFillPadding
+        )
 
         private val hoverTempRect = Rect()
         private var menuAnimatorSet: AnimatorSet? = null
@@ -269,6 +342,8 @@ class MaximizeMenu(
 
         /** Invoked when the maximize or restore option is clicked. */
         var onMaximizeClickListener: (() -> Unit)? = null
+        /** Invoked when the immersive or restore option is clicked. */
+        var onImmersiveOrRestoreClickListener: (() -> Unit)? = null
         /** Invoked when the left snap option is clicked. */
         var onLeftSnapClickListener: (() -> Unit)? = null
         /** Invoked when the right snap option is clicked. */
@@ -318,7 +393,12 @@ class MaximizeMenu(
                 return@setOnHoverListener false
             }
 
-            maximizeButton.setOnClickListener { onMaximizeClickListener?.invoke() }
+            immersiveToggleContainer.isGone = immersiveConfig is ImmersiveConfig.Hidden
+            sizeToggleContainer.isVisible = true
+            snapContainer.isGone = !showSnapOptions
+
+            immersiveToggleButton.setOnClickListener { onImmersiveOrRestoreClickListener?.invoke() }
+            sizeToggleButton.setOnClickListener { onMaximizeClickListener?.invoke() }
             snapRightButton.setOnClickListener { onRightSnapClickListener?.invoke() }
             snapLeftButton.setOnClickListener { onLeftSnapClickListener?.invoke() }
             rootView.setOnTouchListener { _, event ->
@@ -329,9 +409,36 @@ class MaximizeMenu(
                 true
             }
 
+            // Maximize/restore button.
+            val sizeToggleBtnTextId = if (sizeToggleDirection == SizeToggleDirection.RESTORE)
+                R.string.desktop_mode_maximize_menu_restore_button_text
+            else
+                R.string.desktop_mode_maximize_menu_maximize_button_text
+            val sizeToggleBtnText = context.resources.getText(sizeToggleBtnTextId)
+            sizeToggleButton.contentDescription = sizeToggleBtnText
+            sizeToggleButtonText.text = sizeToggleBtnText
+
+            // Immersive enter/exit button.
+            if (immersiveConfig is ImmersiveConfig.Visible) {
+                val immersiveToggleBtnTextId = when (immersiveConfig.direction) {
+                    ImmersiveToggleDirection.ENTER -> {
+                        R.string.desktop_mode_maximize_menu_immersive_button_text
+                    }
+
+                    ImmersiveToggleDirection.EXIT -> {
+                        R.string.desktop_mode_maximize_menu_immersive_restore_button_text
+                    }
+                }
+                val immersiveToggleBtnText = context.resources.getText(immersiveToggleBtnTextId)
+                immersiveToggleButton.contentDescription = immersiveToggleBtnText
+                immersiveToggleButtonText.text = immersiveToggleBtnText
+            }
+
             // To prevent aliasing.
-            maximizeButton.setLayerType(View.LAYER_TYPE_SOFTWARE, null)
-            maximizeText.setLayerType(View.LAYER_TYPE_SOFTWARE, null)
+            sizeToggleButton.setLayerType(View.LAYER_TYPE_SOFTWARE, null)
+            sizeToggleButtonText.setLayerType(View.LAYER_TYPE_SOFTWARE, null)
+            immersiveToggleButton.setLayerType(View.LAYER_TYPE_SOFTWARE, null)
+            immersiveToggleButtonText.setLayerType(View.LAYER_TYPE_SOFTWARE, null)
         }
 
         /** Bind the menu views to the new [RunningTaskInfo] data. */
@@ -342,8 +449,12 @@ class MaximizeMenu(
             rootView.background.setTint(style.backgroundColor)
 
             // Maximize option.
-            maximizeButton.background = style.maximizeOption.drawable
-            maximizeText.setTextColor(style.textColor)
+            sizeToggleButton.background = style.maximizeOption.drawable
+            sizeToggleButtonText.setTextColor(style.textColor)
+
+            // Immersive option.
+            immersiveToggleButton.background = style.immersiveOption.drawable
+            immersiveToggleButtonText.setTextColor(style.textColor)
 
             // Snap options.
             snapWindowText.setTextColor(style.textColor)
@@ -351,9 +462,11 @@ class MaximizeMenu(
         }
 
         /** Animate the opening of the menu */
-        fun animateOpenMenu() {
-            maximizeButton.setLayerType(View.LAYER_TYPE_HARDWARE, null)
-            maximizeText.setLayerType(View.LAYER_TYPE_HARDWARE, null)
+        fun animateOpenMenu(onEnd: () -> Unit) {
+            sizeToggleButton.setLayerType(View.LAYER_TYPE_HARDWARE, null)
+            sizeToggleButtonText.setLayerType(View.LAYER_TYPE_HARDWARE, null)
+            immersiveToggleButton.setLayerType(View.LAYER_TYPE_HARDWARE, null)
+            immersiveToggleButtonText.setLayerType(View.LAYER_TYPE_HARDWARE, null)
             menuAnimatorSet = AnimatorSet()
             menuAnimatorSet?.playTogether(
                 ObjectAnimator.ofFloat(rootView, SCALE_Y, STARTING_MENU_HEIGHT_SCALE, 1f)
@@ -382,9 +495,11 @@ class MaximizeMenu(
                         // Scale up the children of the maximize menu so that the menu
                         // scale is cancelled out and only the background is scaled.
                         val value = animatedValue as Float
-                        maximizeButton.scaleY = value
+                        sizeToggleButton.scaleY = value
+                        immersiveToggleButton.scaleY = value
                         snapButtonsLayout.scaleY = value
-                        maximizeText.scaleY = value
+                        sizeToggleButtonText.scaleY = value
+                        immersiveToggleButtonText.scaleY = value
                         snapWindowText.scaleY = value
                     }
                 },
@@ -403,9 +518,11 @@ class MaximizeMenu(
                         startDelay = CONTROLS_ALPHA_OPEN_MENU_ANIMATION_DELAY_MS
                         addUpdateListener {
                             val value = animatedValue as Float
-                            maximizeButton.alpha = value
+                            sizeToggleButton.alpha = value
+                            immersiveToggleButton.alpha = value
                             snapButtonsLayout.alpha = value
-                            maximizeText.alpha = value
+                            sizeToggleButtonText.alpha = value
+                            immersiveToggleButtonText.alpha = value
                             snapWindowText.alpha = value
                         }
                     },
@@ -417,8 +534,11 @@ class MaximizeMenu(
             )
             menuAnimatorSet?.addListener(
                 onEnd = {
-                    maximizeButton.setLayerType(View.LAYER_TYPE_SOFTWARE, null)
-                    maximizeText.setLayerType(View.LAYER_TYPE_SOFTWARE, null)
+                    sizeToggleButton.setLayerType(View.LAYER_TYPE_SOFTWARE, null)
+                    sizeToggleButtonText.setLayerType(View.LAYER_TYPE_SOFTWARE, null)
+                    immersiveToggleButton.setLayerType(View.LAYER_TYPE_SOFTWARE, null)
+                    immersiveToggleButtonText.setLayerType(View.LAYER_TYPE_SOFTWARE, null)
+                    onEnd.invoke()
                 }
             )
             menuAnimatorSet?.start()
@@ -426,8 +546,10 @@ class MaximizeMenu(
 
         /** Animate the closing of the menu */
         fun animateCloseMenu(onEnd: (() -> Unit)) {
-            maximizeButton.setLayerType(View.LAYER_TYPE_HARDWARE, null)
-            maximizeText.setLayerType(View.LAYER_TYPE_HARDWARE, null)
+            sizeToggleButton.setLayerType(View.LAYER_TYPE_HARDWARE, null)
+            sizeToggleButtonText.setLayerType(View.LAYER_TYPE_HARDWARE, null)
+            immersiveToggleButton.setLayerType(View.LAYER_TYPE_HARDWARE, null)
+            immersiveToggleButtonText.setLayerType(View.LAYER_TYPE_HARDWARE, null)
             cancelAnimation()
             menuAnimatorSet = AnimatorSet()
             menuAnimatorSet?.playTogether(
@@ -457,9 +579,11 @@ class MaximizeMenu(
                             // Scale up the children of the maximize menu so that the menu
                             // scale is cancelled out and only the background is scaled.
                             val value = animatedValue as Float
-                            maximizeButton.scaleY = value
+                            sizeToggleButton.scaleY = value
+                            immersiveToggleButton.scaleY = value
                             snapButtonsLayout.scaleY = value
-                            maximizeText.scaleY = value
+                            sizeToggleButtonText.scaleY = value
+                            immersiveToggleButtonText.scaleY = value
                             snapWindowText.scaleY = value
                         }
                     },
@@ -478,9 +602,11 @@ class MaximizeMenu(
                                 duration = ALPHA_ANIMATION_DURATION_MS
                                 addUpdateListener {
                                     val value = animatedValue as Float
-                                    maximizeButton.alpha = value
+                                    sizeToggleButton.alpha = value
+                                    immersiveToggleButton.alpha = value
                                     snapButtonsLayout.alpha = value
-                                    maximizeText.alpha = value
+                                    sizeToggleButtonText.alpha = value
+                                    immersiveToggleButtonText.alpha = value
                                     snapWindowText.alpha = value
                                 }
                             },
@@ -491,12 +617,30 @@ class MaximizeMenu(
             )
             menuAnimatorSet?.addListener(
                     onEnd = {
-                        maximizeButton.setLayerType(View.LAYER_TYPE_SOFTWARE, null)
-                        maximizeText.setLayerType(View.LAYER_TYPE_SOFTWARE, null)
+                        sizeToggleButton.setLayerType(View.LAYER_TYPE_SOFTWARE, null)
+                        sizeToggleButtonText.setLayerType(View.LAYER_TYPE_SOFTWARE, null)
+                        immersiveToggleButton.setLayerType(View.LAYER_TYPE_SOFTWARE, null)
+                        immersiveToggleButtonText.setLayerType(View.LAYER_TYPE_SOFTWARE, null)
                         onEnd?.invoke()
                     }
             )
             menuAnimatorSet?.start()
+        }
+
+        /** Request that the accessibility service focus on the menu. */
+        fun requestAccessibilityFocus() {
+            // Focus the first button in the menu by default.
+            if (immersiveToggleButton.isVisible) {
+                immersiveToggleButton.post {
+                    immersiveToggleButton.sendAccessibilityEvent(
+                        AccessibilityEvent.TYPE_VIEW_FOCUSED
+                    )
+                }
+                return
+            }
+            sizeToggleButton.post {
+                sizeToggleButton.sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_FOCUSED)
+            }
         }
 
         /** Cancel the menu animation. */
@@ -520,7 +664,21 @@ class MaximizeMenu(
                 backgroundColor = menuBackgroundColor,
                 textColor = colorScheme.onSurface.toArgb(),
                 maximizeOption = MenuStyle.MaximizeOption(
-                    drawable = createMaximizeDrawable(menuBackgroundColor, colorScheme)
+                    drawable = createMaximizeOrImmersiveDrawable(
+                        menuBackgroundColor,
+                        colorScheme,
+                        fillPadding = when (sizeToggleDirection) {
+                            SizeToggleDirection.MAXIMIZE -> maximizeFillPaddingRect
+                            SizeToggleDirection.RESTORE -> maximizeRestoreFillPaddingRect
+                        }
+                    )
+                ),
+                immersiveOption = MenuStyle.ImmersiveOption(
+                    drawable = createMaximizeOrImmersiveDrawable(
+                        menuBackgroundColor,
+                        colorScheme,
+                        fillPadding = immersiveFillPaddingRect,
+                    ),
                 ),
                 snapOptions = MenuStyle.SnapOptions(
                     inactiveSnapSideColor = colorScheme.outlineVariant.toArgb(),
@@ -587,19 +745,21 @@ class MaximizeMenu(
             }
         }
 
-        private fun createMaximizeDrawable(
+        private fun createMaximizeOrImmersiveDrawable(
             @ColorInt menuBackgroundColor: Int,
-            colorScheme: ColorScheme
+            colorScheme: ColorScheme,
+            fillPadding: Rect,
         ): StateListDrawable {
             val activeStrokeAndFill = colorScheme.primary.toArgb()
             val activeBackground = colorScheme.primary.toArgb().withAlpha(OPACITY_12)
-            val activeDrawable = createMaximizeButtonDrawable(
+            val activeDrawable = createMaximizeOrImmersiveButtonDrawable(
                 strokeAndFillColor = activeStrokeAndFill,
                 backgroundColor = activeBackground,
                 // Add a mask with the menu background's color because the active background color is
                 // semi transparent, otherwise the transparency will reveal the stroke/fill color
                 // behind it.
-                backgroundMask = menuBackgroundColor
+                backgroundMask = menuBackgroundColor,
+                fillPadding = fillPadding,
             )
             return StateListDrawable().apply {
                 addState(intArrayOf(android.R.attr.state_pressed), activeDrawable)
@@ -609,19 +769,21 @@ class MaximizeMenu(
                 // Inactive drawable.
                 addState(
                     StateSet.WILD_CARD,
-                    createMaximizeButtonDrawable(
+                    createMaximizeOrImmersiveButtonDrawable(
                         strokeAndFillColor = colorScheme.outlineVariant.toArgb(),
                         backgroundColor = colorScheme.surfaceContainerLow.toArgb(),
-                        backgroundMask = null // not needed because the bg color is fully opaque
+                        backgroundMask = null, // not needed because the bg color is fully opaque
+                        fillPadding = fillPadding,
                     )
                 )
             }
         }
 
-        private fun createMaximizeButtonDrawable(
+        private fun createMaximizeOrImmersiveButtonDrawable(
             @ColorInt strokeAndFillColor: Int,
             @ColorInt backgroundColor: Int,
-            @ColorInt backgroundMask: Int?
+            @ColorInt backgroundMask: Int?,
+            fillPadding: Rect,
         ): LayerDrawable {
             val layers = mutableListOf<Drawable>()
             // First (bottom) layer, effectively the button's border ring once its inner shape is
@@ -670,15 +832,18 @@ class MaximizeMenu(
                 paint.color = strokeAndFillColor
                 paint.style = Paint.Style.FILL
             })
+
             return LayerDrawable(layers.toTypedArray()).apply {
                 when (numberOfLayers) {
                     3 -> {
                         setLayerInset(1, outlineStroke)
-                        setLayerInset(2, fillPadding)
+                        setLayerInset(2, fillPadding.left, fillPadding.top,
+                            fillPadding.right, fillPadding.bottom)
                     }
                     4 -> {
                         setLayerInset(intArrayOf(1, 2), outlineStroke)
-                        setLayerInset(3, fillPadding)
+                        setLayerInset(3, fillPadding.left, fillPadding.top,
+                            fillPadding.right, fillPadding.bottom)
                     }
                     else -> error("Unexpected number of layers: $numberOfLayers")
                 }
@@ -702,9 +867,13 @@ class MaximizeMenu(
             @ColorInt val backgroundColor: Int,
             @ColorInt val textColor: Int,
             val maximizeOption: MaximizeOption,
+            val immersiveOption: ImmersiveOption,
             val snapOptions: SnapOptions,
         ) {
             data class MaximizeOption(
+                val drawable: StateListDrawable,
+            )
+            data class ImmersiveOption(
                 val drawable: StateListDrawable,
             )
             data class SnapOptions(
@@ -721,6 +890,24 @@ class MaximizeMenu(
         /** The possible selection states of the half-snap menu option. */
         enum class SnapToHalfSelection {
             NONE, LEFT, RIGHT
+        }
+
+        /** The possible immersive configs for this menu instance. */
+        sealed class ImmersiveConfig {
+            data class Visible(
+                val direction: ImmersiveToggleDirection,
+            ) : ImmersiveConfig()
+            data object Hidden : ImmersiveConfig()
+        }
+
+        /** The possible selection states of the size toggle button in the maximize menu. */
+        enum class SizeToggleDirection {
+            MAXIMIZE, RESTORE
+        }
+
+        /** The possible selection states of the immersive toggle button in the maximize menu. */
+        enum class ImmersiveToggleDirection {
+            ENTER, EXIT
         }
     }
 

@@ -242,7 +242,7 @@ public class TaskFragmentTest extends WindowTestsBase {
 
         final Rect relStartBounds = new Rect(mTaskFragment.getRelativeEmbeddedBounds());
         final DisplayPolicy displayPolicy = mDisplayContent.getDisplayPolicy();
-        displayPolicy.screenTurnedOff();
+        displayPolicy.screenTurnedOff(false /* acquireSleepToken */);
 
         assertFalse(mTaskFragment.okToAnimate());
 
@@ -884,7 +884,7 @@ public class TaskFragmentTest extends WindowTestsBase {
 
         // The ImeParent should be the display.
         assertEquals(mDisplayContent.getImeContainer().getParent().getSurfaceControl(),
-                mDisplayContent.computeImeParent());
+                mDisplayContent.computeImeParent().getSurfaceControl());
     }
 
     @Test

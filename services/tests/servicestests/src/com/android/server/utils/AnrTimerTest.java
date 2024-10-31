@@ -119,7 +119,7 @@ public class AnrTimerTest {
      */
     private class TestInjector extends AnrTimer.Injector {
         @Override
-        boolean anrTimerServiceEnabled() {
+        boolean serviceEnabled() {
             return mEnabled;
         }
     }

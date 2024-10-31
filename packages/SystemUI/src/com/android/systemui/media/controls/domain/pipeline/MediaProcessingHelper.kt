@@ -42,7 +42,7 @@ fun isSameMediaData(
     context: Context,
     newController: MediaController,
     new: MediaData,
-    old: MediaData?
+    old: MediaData?,
 ): Boolean {
     if (old == null || !mediaControlsPostsOptimization()) return false
 
@@ -71,7 +71,7 @@ fun isSameMediaData(
 /** Returns whether actions lists are equal. */
 fun areCustomActionListsEqual(
     first: List<PlaybackState.CustomAction>?,
-    second: List<PlaybackState.CustomAction>?
+    second: List<PlaybackState.CustomAction>?,
 ): Boolean {
     // Same object, or both null
     if (first === second) {
@@ -94,7 +94,7 @@ fun areCustomActionListsEqual(
 
 private fun areCustomActionsEqual(
     firstAction: PlaybackState.CustomAction,
-    secondAction: PlaybackState.CustomAction
+    secondAction: PlaybackState.CustomAction,
 ): Boolean {
     if (
         firstAction.action != secondAction.action ||
@@ -139,7 +139,7 @@ private fun areActionsEqual(
     context: Context,
     newController: MediaController,
     new: MediaData,
-    old: MediaData
+    old: MediaData,
 ): Boolean {
     val oldState = MediaController(context, old.token!!).playbackState
     return if (
@@ -150,8 +150,7 @@ private fun areActionsEqual(
         var same = true
         new.actions.asSequence().zip(old.actions.asSequence()).forEach {
             if (
-                it.first.actionIntent?.intent?.filterEquals(it.second.actionIntent?.intent) !=
-                    true ||
+                it.first.actionIntent?.intent != it.second.actionIntent?.intent ||
                     it.first.icon != it.second.icon ||
                     it.first.contentDescription != it.second.contentDescription
             ) {
@@ -164,7 +163,7 @@ private fun areActionsEqual(
         oldState?.actions == newController.playbackState?.actions &&
             areCustomActionListsEqual(
                 oldState?.customActions,
-                newController.playbackState?.customActions
+                newController.playbackState?.customActions,
             )
     } else {
         false
@@ -172,8 +171,5 @@ private fun areActionsEqual(
 }
 
 private fun areClickIntentsEqual(newIntent: PendingIntent?, oldIntent: PendingIntent?): Boolean {
-    if ((newIntent == null && oldIntent == null) || newIntent === oldIntent) return true
-    if (newIntent == null || oldIntent == null) return false
-
-    return newIntent.intent?.filterEquals(oldIntent.intent) == true
+    return newIntent == oldIntent
 }

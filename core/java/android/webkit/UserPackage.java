@@ -15,12 +15,14 @@
  */
 package android.webkit;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager.NameNotFoundException;
-import android.content.pm.UserInfo;
+import android.content.pm.PackageManager;
 import android.os.Build;
+import android.os.UserHandle;
 import android.os.UserManager;
 
 import java.util.ArrayList;
@@ -31,30 +33,31 @@ import java.util.List;
  * @hide
  */
 public class UserPackage {
-    private final UserInfo mUserInfo;
+    private final UserHandle mUser;
     private final PackageInfo mPackageInfo;
 
     public static final int MINIMUM_SUPPORTED_SDK = Build.VERSION_CODES.TIRAMISU;
 
-    public UserPackage(UserInfo user, PackageInfo packageInfo) {
-        this.mUserInfo = user;
-        this.mPackageInfo = packageInfo;
+    public UserPackage(@NonNull UserHandle user, @Nullable PackageInfo packageInfo) {
+        mUser = user;
+        mPackageInfo = packageInfo;
     }
 
     /**
      * Returns a list of (User,PackageInfo) pairs corresponding to the PackageInfos for all
      * device users for the package named {@param packageName}.
      */
-    public static List<UserPackage> getPackageInfosAllUsers(Context context,
-            String packageName, int packageFlags) {
-        List<UserInfo> users = getAllUsers(context);
+    public static @NonNull List<UserPackage> getPackageInfosAllUsers(@NonNull Context context,
+            @NonNull String packageName, int packageFlags) {
+        UserManager userManager = context.getSystemService(UserManager.class);
+        List<UserHandle> users = userManager.getUserHandles(false);
         List<UserPackage> userPackages = new ArrayList<UserPackage>(users.size());
-        for (UserInfo user : users) {
+        for (UserHandle user : users) {
+            PackageManager pm = context.createContextAsUser(user, 0).getPackageManager();
             PackageInfo packageInfo = null;
             try {
-                packageInfo = context.getPackageManager().getPackageInfoAsUser(
-                        packageName, packageFlags, user.id);
-            } catch (NameNotFoundException e) {
+                packageInfo = pm.getPackageInfo(packageName, packageFlags);
+            } catch (PackageManager.NameNotFoundException e) {
             }
             userPackages.add(new UserPackage(user, packageInfo));
         }
@@ -88,18 +91,11 @@ public class UserPackage {
         return packageInfo.applicationInfo.targetSdkVersion >= MINIMUM_SUPPORTED_SDK;
     }
 
-    public UserInfo getUserInfo() {
-        return mUserInfo;
+    public UserHandle getUser() {
+        return mUser;
     }
 
     public PackageInfo getPackageInfo() {
         return mPackageInfo;
     }
-
-
-    private static List<UserInfo> getAllUsers(Context context) {
-        UserManager userManager = (UserManager) context.getSystemService(Context.USER_SERVICE);
-        return userManager.getUsers();
-    }
-
 }

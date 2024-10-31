@@ -16,10 +16,13 @@
 
 package android.app.appfunctions;
 
+import android.annotation.Nullable;
 import android.app.appsearch.GenericDocument;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.MathUtils;
 
+import androidx.annotation.GuardedBy;
 import androidx.annotation.NonNull;
 
 import java.util.Objects;
@@ -31,24 +34,33 @@ import java.util.Objects;
  * <p>{#link {@link Parcel#writeBlob(byte[])}} could take care of whether to pass data via binder
  * directly or Android shared memory if the data is large.
  *
+ * <p>This class performs lazy unparcelling. The `GenericDocument` is only unparcelled
+ * from the underlying `Parcel` when {@link #getValue()} is called. This optimization
+ * allows the system server to pass through the generic document, without unparcel and parcel it.
+ *
  * @hide
  * @see Parcel#writeBlob(byte[])
  */
 public final class GenericDocumentWrapper implements Parcelable {
+    @Nullable
+    @GuardedBy("mLock")
+    private GenericDocument mGenericDocument;
+    @GuardedBy("mLock")
+    @Nullable private Parcel mParcel;
+    private final Object mLock = new Object();
+
     public static final Creator<GenericDocumentWrapper> CREATOR =
             new Creator<>() {
                 @Override
                 public GenericDocumentWrapper createFromParcel(Parcel in) {
-                    byte[] dataBlob = Objects.requireNonNull(in.readBlob());
-                    Parcel unmarshallParcel = Parcel.obtain();
-                    try {
-                        unmarshallParcel.unmarshall(dataBlob, 0, dataBlob.length);
-                        unmarshallParcel.setDataPosition(0);
-                        return new GenericDocumentWrapper(
-                                GenericDocument.createFromParcel(unmarshallParcel));
-                    } finally {
-                        unmarshallParcel.recycle();
-                    }
+                    int length = in.readInt();
+                    int offset = in.dataPosition();
+                    in.setDataPosition(MathUtils.addOrThrow(offset, length));
+
+                    Parcel p = Parcel.obtain();
+                    p.appendFrom(in, offset, length);
+                    p.setDataPosition(0);
+                    return new GenericDocumentWrapper(p);
                 }
 
                 @Override
@@ -56,16 +68,42 @@ public final class GenericDocumentWrapper implements Parcelable {
                     return new GenericDocumentWrapper[size];
                 }
             };
-    @NonNull private final GenericDocument mGenericDocument;
 
     public GenericDocumentWrapper(@NonNull GenericDocument genericDocument) {
         mGenericDocument = Objects.requireNonNull(genericDocument);
+        mParcel = null;
+    }
+
+    public GenericDocumentWrapper(@NonNull Parcel parcel) {
+        mGenericDocument = null;
+        mParcel = Objects.requireNonNull(parcel);
     }
 
     /** Returns the wrapped {@link android.app.appsearch.GenericDocument} */
     @NonNull
     public GenericDocument getValue() {
-        return mGenericDocument;
+        unparcel();
+        synchronized (mLock) {
+            return Objects.requireNonNull(mGenericDocument);
+        }
+    }
+
+    private void unparcel() {
+        synchronized (mLock) {
+            if (mGenericDocument != null) {
+                return;
+            }
+            byte[] dataBlob = Objects.requireNonNull(Objects.requireNonNull(mParcel).readBlob());
+            Parcel unmarshallParcel = Parcel.obtain();
+            try {
+                unmarshallParcel.unmarshall(dataBlob, 0, dataBlob.length);
+                unmarshallParcel.setDataPosition(0);
+                mGenericDocument = GenericDocument.createFromParcel(unmarshallParcel);
+                mParcel = null;
+            } finally {
+                unmarshallParcel.recycle();
+            }
+        }
     }
 
     @Override
@@ -75,13 +113,32 @@ public final class GenericDocumentWrapper implements Parcelable {
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
-        Parcel parcel = Parcel.obtain();
-        try {
-            mGenericDocument.writeToParcel(parcel, flags);
-            byte[] bytes = parcel.marshall();
-            dest.writeBlob(bytes);
-        } finally {
-            parcel.recycle();
+        synchronized (mLock) {
+            if (mGenericDocument != null) {
+                int lengthPos = dest.dataPosition();
+                // write a placeholder for length
+                dest.writeInt(-1);
+                Parcel tempParcel = Parcel.obtain();
+                byte[] bytes;
+                try {
+                    mGenericDocument.writeToParcel(tempParcel, flags);
+                    bytes = tempParcel.marshall();
+                } finally {
+                    tempParcel.recycle();
+                }
+                int startPos = dest.dataPosition();
+                dest.writeBlob(bytes);
+                int endPos = dest.dataPosition();
+                dest.setDataPosition(lengthPos);
+                // Overwrite the length placeholder
+                dest.writeInt(endPos - startPos);
+                dest.setDataPosition(endPos);
+
+            } else {
+                Parcel originalParcel = Objects.requireNonNull(mParcel);
+                dest.writeInt(originalParcel.dataSize());
+                dest.appendFrom(originalParcel, 0, originalParcel.dataSize());
+            }
         }
     }
 }

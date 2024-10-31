@@ -32,15 +32,17 @@ import static android.content.res.Configuration.ORIENTATION_UNDEFINED;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.os.UserHandle.USER_NULL;
 import static android.view.SurfaceControl.Transaction;
+import static android.view.WindowInsets.Type.InsetsType;
 import static android.view.WindowManager.LayoutParams.INVALID_WINDOW_TYPE;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.window.TaskFragmentAnimationParams.DEFAULT_ANIMATION_BACKGROUND_COLOR;
+import static android.window.DesktopModeFlags.ENABLE_CAPTION_COMPAT_INSET_FORCE_CONSUMPTION;
 
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ANIM;
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS;
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS_ANIM;
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ORIENTATION;
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_SYNC_ENGINE;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_ANIM;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_APP_TRANSITIONS;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_APP_TRANSITIONS_ANIM;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_ORIENTATION;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_SYNC_ENGINE;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 import static com.android.server.wm.AppTransition.MAX_APP_TRANSITION_DURATION;
 import static com.android.server.wm.AppTransition.isActivityTransitOld;
@@ -115,7 +117,6 @@ import com.android.server.wm.SurfaceAnimator.Animatable;
 import com.android.server.wm.SurfaceAnimator.AnimationType;
 import com.android.server.wm.SurfaceAnimator.OnAnimationFinishedCallback;
 import com.android.server.wm.utils.AlwaysTruePredicate;
-import com.android.window.flags.Flags;
 
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
@@ -172,6 +173,13 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      * The {@link InsetsSourceProvider}s provided by this window container.
      */
     protected SparseArray<InsetsSourceProvider> mInsetsSourceProviders = null;
+
+    /**
+     * The combined excluded insets types (combined mExcludeInsetsTypes and the
+     * mMergedExcludeInsetsTypes from its parent)
+     */
+    protected @InsetsType int mMergedExcludeInsetsTypes = 0;
+    private @InsetsType int mExcludeInsetsTypes = 0;
 
     @Nullable
     private ArrayMap<IBinder, DeathRecipient> mInsetsOwnerDeathRecipientMap;
@@ -457,7 +465,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         source.setFrame(provider.getArbitraryRectangle())
                 .updateSideHint(getBounds())
                 .setBoundingRects(provider.getBoundingRects());
-        if (Flags.enableCaptionCompatInsetForceConsumption()) {
+        if (ENABLE_CAPTION_COMPAT_INSET_FORCE_CONSUMPTION.isTrue()) {
             source.setFlags(provider.getFlags());
         }
         mLocalInsetsSources.put(id, source);
@@ -555,6 +563,49 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         return mControllableInsetProvider;
     }
 
+    /**
+     * Sets the excludeInsetsTypes of this window and updates the mMergedExcludeInsetsTypes of
+     * all child nodes in the hierarchy.
+     *
+     * @param excludeInsetsTypes the excluded {@link InsetsType} that should be set on this
+     *                           WindowContainer
+     */
+    void setExcludeInsetsTypes(@InsetsType int excludeInsetsTypes) {
+        if (excludeInsetsTypes == mExcludeInsetsTypes) {
+            return;
+        }
+        mExcludeInsetsTypes = excludeInsetsTypes;
+        mergeExcludeInsetsTypesAndNotifyInsetsChanged(
+                mParent != null ? mParent.mMergedExcludeInsetsTypes : 0);
+    }
+
+    private void mergeExcludeInsetsTypesAndNotifyInsetsChanged(
+            @InsetsType int excludeInsetsTypesFromParent) {
+        final ArraySet<WindowState> changedWindows = new ArraySet<>();
+        updateMergedExcludeInsetsTypes(excludeInsetsTypesFromParent, changedWindows);
+        if (getDisplayContent() != null) {
+            getDisplayContent().getInsetsStateController().notifyInsetsChanged(changedWindows);
+        }
+    }
+
+    private void updateMergedExcludeInsetsTypes(
+            @InsetsType int excludeInsetsTypesFromParent, ArraySet<WindowState> changedWindows) {
+        final int newMergedExcludeInsetsTypes = mExcludeInsetsTypes | excludeInsetsTypesFromParent;
+        if (newMergedExcludeInsetsTypes == mMergedExcludeInsetsTypes) {
+            return;
+        }
+        mMergedExcludeInsetsTypes = newMergedExcludeInsetsTypes;
+
+        final WindowState win = asWindowState();
+        if (win != null) {
+            changedWindows.add(win);
+        }
+        // Apply to all children
+        for (int i = mChildren.size() - 1; i >= 0; i--) {
+            final WindowContainer<?> child = mChildren.get(i);
+            child.updateMergedExcludeInsetsTypes(mMergedExcludeInsetsTypes, changedWindows);
+        }
+    }
 
     @Override
     final protected WindowContainer getParent() {
@@ -653,6 +704,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     void onParentChanged(ConfigurationContainer newParent, ConfigurationContainer oldParent) {
         super.onParentChanged(newParent, oldParent);
         if (mParent == null) {
+            mergeExcludeInsetsTypesAndNotifyInsetsChanged(0);
             return;
         }
 
@@ -667,6 +719,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             // new parent.
             reparentSurfaceControl(getSyncTransaction(), mParent.mSurfaceControl);
         }
+        mergeExcludeInsetsTypesAndNotifyInsetsChanged(mParent.mMergedExcludeInsetsTypes);
 
         // Either way we need to ask the parent to assign us a Z-order.
         mParent.assignChildLayers();
@@ -1064,6 +1117,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      */
     void onDisplayChanged(DisplayContent dc) {
         if (mDisplayContent != null && mDisplayContent != dc) {
+            mTransitionController.collect(this);
             // Cancel any change transition queued-up for this container on the old display when
             // this container is moved from the old display.
             mDisplayContent.mClosingChangingContainers.remove(this);
@@ -2875,6 +2929,15 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     }
 
     /**
+     * Go through the hierarchy to allow windows to request a dim if needed
+     */
+    void adjustDims() {
+        for (int i = 0; i < mChildren.size(); i++) {
+            mChildren.get(i).adjustDims();
+        }
+    }
+
+    /**
      * Trigger a call to prepareSurfaces from the animation thread, such that pending transactions
      * will be applied.
      */
@@ -4342,4 +4405,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         t.merge(mSyncTransaction);
     }
 
+    int getSyncTransactionCommitCallbackDepth() {
+        return mSyncTransactionCommitCallbackDepth;
+    }
 }

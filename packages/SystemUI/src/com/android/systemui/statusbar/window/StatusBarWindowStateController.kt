@@ -17,9 +17,9 @@
 package com.android.systemui.statusbar.window
 
 import android.app.StatusBarManager
-import android.app.StatusBarManager.WindowVisibleState
 import android.app.StatusBarManager.WINDOW_STATE_SHOWING
 import android.app.StatusBarManager.WINDOW_STATUS_BAR
+import android.app.StatusBarManager.WindowVisibleState
 import android.app.StatusBarManager.windowStateToString
 import android.util.Log
 import com.android.systemui.dagger.SysUISingleton
@@ -31,23 +31,28 @@ import javax.inject.Inject
 /**
  * A centralized class maintaining the state of the status bar window.
  *
+ * @deprecated use
+ *   [com.android.systemui.statusbar.window.data.repository.StatusBarWindowStateRepositoryStore.defaultDisplay]
+ *   repo instead.
+ *
  * Classes that want to get updates about the status bar window state should subscribe to this class
  * via [addListener] and should NOT add their own callback on [CommandQueue].
  */
 @SysUISingleton
-class StatusBarWindowStateController @Inject constructor(
-    @DisplayId private val thisDisplayId: Int,
-    commandQueue: CommandQueue
-) {
-    private val commandQueueCallback = object : CommandQueue.Callbacks {
-        override fun setWindowState(
-            displayId: Int,
-            @StatusBarManager.WindowType window: Int,
-            @WindowVisibleState state: Int
-        ) {
-            this@StatusBarWindowStateController.setWindowState(displayId, window, state)
+@Deprecated("Use StatusBarWindowStateRepositoryStore.defaultDisplay instead")
+class StatusBarWindowStateController
+@Inject
+constructor(@DisplayId private val thisDisplayId: Int, commandQueue: CommandQueue) {
+    private val commandQueueCallback =
+        object : CommandQueue.Callbacks {
+            override fun setWindowState(
+                displayId: Int,
+                @StatusBarManager.WindowType window: Int,
+                @WindowVisibleState state: Int,
+            ) {
+                this@StatusBarWindowStateController.setWindowState(displayId, window, state)
+            }
         }
-    }
     private val listeners: MutableSet<StatusBarWindowStateListener> = HashSet()
 
     @WindowVisibleState private var windowState: Int = WINDOW_STATE_SHOWING
@@ -71,7 +76,7 @@ class StatusBarWindowStateController @Inject constructor(
     private fun setWindowState(
         displayId: Int,
         @StatusBarManager.WindowType window: Int,
-        @WindowVisibleState state: Int
+        @WindowVisibleState state: Int,
     ) {
         if (displayId != thisDisplayId) {
             return

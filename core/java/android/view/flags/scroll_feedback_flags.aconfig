@@ -21,4 +21,5 @@ flag {
     name: "enable_touch_scroll_feedback"
     description: "Enables touchscreen haptic scroll feedback"
     bug: "331830899"
+    is_fixed_read_only: true
 }

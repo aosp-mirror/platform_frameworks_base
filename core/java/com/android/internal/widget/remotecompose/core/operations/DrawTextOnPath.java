@@ -15,78 +15,108 @@
  */
 package com.android.internal.widget.remotecompose.core.operations;
 
-import com.android.internal.widget.remotecompose.core.CompanionOperation;
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.PaintContext;
 import com.android.internal.widget.remotecompose.core.PaintOperation;
+import com.android.internal.widget.remotecompose.core.RemoteContext;
+import com.android.internal.widget.remotecompose.core.VariableSupport;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
+import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
+import com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation;
 
 import java.util.List;
 
-/**
- * Draw text along a path.
- */
-public class DrawTextOnPath extends PaintOperation {
-    public static final Companion COMPANION = new Companion();
+/** Draw text along a path. */
+public class DrawTextOnPath extends PaintOperation implements VariableSupport {
+    private static final int OP_CODE = Operations.DRAW_TEXT_ON_PATH;
+    private static final String CLASS_NAME = "DrawTextOnPath";
     int mPathId;
     public int mTextId;
     float mVOffset;
     float mHOffset;
+    float mOutVOffset;
+    float mOutHOffset;
 
     public DrawTextOnPath(int textId, int pathId, float hOffset, float vOffset) {
         mPathId = pathId;
         mTextId = textId;
-        mHOffset = vOffset;
-        mVOffset = hOffset;
+        mOutHOffset = mHOffset = hOffset;
+        mOutVOffset = mVOffset = vOffset;
+    }
+
+    @Override
+    public void updateVariables(RemoteContext context) {
+        mOutHOffset =
+                Float.isNaN(mHOffset) ? context.getFloat(Utils.idFromNan(mHOffset)) : mHOffset;
+        mOutVOffset =
+                Float.isNaN(mVOffset) ? context.getFloat(Utils.idFromNan(mVOffset)) : mVOffset;
+    }
+
+    @Override
+    public void registerListening(RemoteContext context) {
+        if (Float.isNaN(mHOffset)) {
+            context.listensTo(Utils.idFromNan(mHOffset), this);
+        }
+        if (Float.isNaN(mVOffset)) {
+            context.listensTo(Utils.idFromNan(mVOffset), this);
+        }
     }
 
     @Override
     public void write(WireBuffer buffer) {
-        COMPANION.apply(buffer, mTextId, mPathId, mHOffset, mVOffset);
+        apply(buffer, mTextId, mPathId, mHOffset, mVOffset);
     }
 
     @Override
     public String toString() {
-        return "DrawTextOnPath [" + mTextId + "] [" + mPathId + "] "
-                + mHOffset + ", " + mVOffset;
+        return "DrawTextOnPath ["
+                + mTextId
+                + "] ["
+                + mPathId
+                + "] "
+                + Utils.floatToString(mHOffset, mOutHOffset)
+                + ", "
+                + Utils.floatToString(mVOffset, mOutVOffset);
     }
 
-    public static class Companion implements CompanionOperation {
-        private Companion() {
-        }
+    public static void read(WireBuffer buffer, List<Operation> operations) {
+        int textId = buffer.readInt();
+        int pathId = buffer.readInt();
+        float vOffset = buffer.readFloat();
+        float hOffset = buffer.readFloat();
+        DrawTextOnPath op = new DrawTextOnPath(textId, pathId, hOffset, vOffset);
+        operations.add(op);
+    }
 
-        @Override
-        public void read(WireBuffer buffer, List<Operation> operations) {
-            int textId = buffer.readInt();
-            int pathId = buffer.readInt();
-            float hOffset = buffer.readFloat();
-            float vOffset = buffer.readFloat();
-            DrawTextOnPath op = new DrawTextOnPath(textId, pathId, hOffset, vOffset);
-            operations.add(op);
-        }
+    public static String name() {
+        return "DrawTextOnPath";
+    }
 
-        @Override
-        public String name() {
-            return "DrawTextOnPath";
-        }
+    public static int id() {
+        return Operations.DRAW_TEXT_ON_PATH;
+    }
 
-        @Override
-        public int id() {
-            return Operations.DRAW_TEXT_ON_PATH;
-        }
+    public static void apply(
+            WireBuffer buffer, int textId, int pathId, float hOffset, float vOffset) {
+        buffer.start(OP_CODE);
+        buffer.writeInt(textId);
+        buffer.writeInt(pathId);
+        buffer.writeFloat(vOffset);
+        buffer.writeFloat(hOffset);
+    }
 
-        public void apply(WireBuffer buffer, int textId, int pathId, float hOffset, float vOffset) {
-            buffer.start(Operations.DRAW_TEXT_ON_PATH);
-            buffer.writeInt(textId);
-            buffer.writeInt(pathId);
-            buffer.writeFloat(hOffset);
-            buffer.writeFloat(vOffset);
-        }
+    public static void documentation(DocumentationBuilder doc) {
+        doc.operation("Draw Operations", OP_CODE, CLASS_NAME)
+                .description("Draw text along path object")
+                .field(DocumentedOperation.INT, "textId", "id of the text")
+                .field(DocumentedOperation.INT, "pathId", "id of the path")
+                .field(DocumentedOperation.FLOAT, "xOffset", "x Shift of the text")
+                .field(DocumentedOperation.FLOAT, "yOffset", "y Shift of the text");
     }
 
     @Override
     public void paint(PaintContext context) {
-        context.drawTextOnPath(mTextId, mPathId, mHOffset, mVOffset);
+        context.drawTextOnPath(mTextId, mPathId, mOutHOffset, mOutVOffset);
     }
 }

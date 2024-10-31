@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 package com.android.server.wm;
+
+import static android.tools.traces.Utils.busyWaitForDataSourceRegistration;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
@@ -38,10 +40,13 @@ import androidx.test.filters.SmallTest;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.Mockito;
 
 import perfetto.protos.PerfettoConfig.WindowManagerConfig.LogFrequency;
+
+import java.io.IOException;
 
 /**
  * Test class for {@link WindowTracingPerfetto}.
@@ -49,93 +54,101 @@ import perfetto.protos.PerfettoConfig.WindowManagerConfig.LogFrequency;
 @SmallTest
 @Presubmit
 public class WindowTracingPerfettoTest {
-    private WindowManagerService mWmMock;
-    private Choreographer mChoreographer;
-    private WindowTracing mWindowTracing;
+    private static final String TEST_DATA_SOURCE_NAME = "android.windowmanager.test";
+
+    private static WindowManagerService sWmMock;
+    private static Choreographer sChoreographer;
+    private static WindowTracing sWindowTracing;
+
     private PerfettoTraceMonitor mTraceMonitor;
-    private ResultWriter mWriter;
+
+    @BeforeClass
+    public static void setUpOnce() throws Exception {
+        sWmMock = Mockito.mock(WindowManagerService.class);
+        Mockito.doNothing().when(sWmMock).dumpDebugLocked(Mockito.any(), Mockito.anyInt());
+        sChoreographer = Mockito.mock(Choreographer.class);
+        sWindowTracing = new WindowTracingPerfetto(sWmMock, sChoreographer,
+                new WindowManagerGlobalLock(), TEST_DATA_SOURCE_NAME);
+        busyWaitForDataSourceRegistration(TEST_DATA_SOURCE_NAME);
+    }
 
     @Before
-    public void setUp() throws Exception {
-        mWmMock = Mockito.mock(WindowManagerService.class);
-        Mockito.doNothing().when(mWmMock).dumpDebugLocked(Mockito.any(), Mockito.anyInt());
-
-        mChoreographer = Mockito.mock(Choreographer.class);
-
-        mWindowTracing = new WindowTracingPerfetto(mWmMock, mChoreographer,
-                new WindowManagerGlobalLock());
-
-        mWriter = new ResultWriter()
-            .forScenario(new ScenarioBuilder()
-                    .forClass(createTempFile("temp", "").getName()).build())
-            .withOutputDir(createTempDirectory("temp").toFile())
-            .setRunComplete();
+    public void setUp() throws IOException {
+        Mockito.clearInvocations(sWmMock);
     }
 
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() throws IOException {
         stopTracing();
     }
 
     @Test
     public void isEnabled_returnsFalseByDefault() {
-        assertFalse(mWindowTracing.isEnabled());
+        assertFalse(sWindowTracing.isEnabled());
     }
 
     @Test
-    public void isEnabled_returnsTrueAfterStartThenFalseAfterStop() {
+    public void isEnabled_returnsTrueAfterStartThenFalseAfterStop() throws IOException {
         startTracing(false);
-        assertTrue(mWindowTracing.isEnabled());
+        assertTrue(sWindowTracing.isEnabled());
 
         stopTracing();
-        assertFalse(mWindowTracing.isEnabled());
+        assertFalse(sWindowTracing.isEnabled());
     }
 
     @Test
     public void trace_ignoresLogStateCalls_ifTracingIsDisabled() {
-        mWindowTracing.logState("where");
-        verifyZeroInteractions(mWmMock);
+        sWindowTracing.logState("where");
+        verifyZeroInteractions(sWmMock);
     }
 
     @Test
-    public void trace_writesInitialStateSnapshot_whenTracingStarts() throws Exception {
+    public void trace_writesInitialStateSnapshot_whenTracingStarts() {
         startTracing(false);
-        verify(mWmMock, times(1)).dumpDebugLocked(any(), eq(WindowTracingLogLevel.ALL));
+        verify(sWmMock, times(1)).dumpDebugLocked(any(), eq(WindowTracingLogLevel.ALL));
     }
 
     @Test
-    public void trace_writesStateSnapshot_onLogStateCall() throws Exception {
+    public void trace_writesStateSnapshot_onLogStateCall() {
         startTracing(false);
-        mWindowTracing.logState("where");
-        verify(mWmMock, times(2)).dumpDebugLocked(any(), eq(WindowTracingLogLevel.ALL));
+        sWindowTracing.logState("where");
+        verify(sWmMock, times(2)).dumpDebugLocked(any(), eq(WindowTracingLogLevel.ALL));
     }
 
     @Test
-    public void dump_writesOneSingleStateSnapshot() throws Exception {
+    public void dump_writesOneSingleStateSnapshot() {
         startTracing(true);
-        mWindowTracing.logState("where");
-        verify(mWmMock, times(1)).dumpDebugLocked(any(), eq(WindowTracingLogLevel.ALL));
+        sWindowTracing.logState("where");
+        verify(sWmMock, times(1)).dumpDebugLocked(any(), eq(WindowTracingLogLevel.ALL));
     }
 
     private void startTracing(boolean isDump) {
         if (isDump) {
             mTraceMonitor = PerfettoTraceMonitor
                     .newBuilder()
-                    .enableWindowManagerDump()
+                    .enableWindowManagerDump(TEST_DATA_SOURCE_NAME)
                     .build();
         } else {
             mTraceMonitor = PerfettoTraceMonitor
                     .newBuilder()
-                    .enableWindowManagerTrace(LogFrequency.LOG_FREQUENCY_TRANSACTION)
+                    .enableWindowManagerTrace(LogFrequency.LOG_FREQUENCY_TRANSACTION,
+                            TEST_DATA_SOURCE_NAME)
                     .build();
         }
         mTraceMonitor.start();
     }
 
-    private void stopTracing() {
+    private void stopTracing() throws IOException {
         if (mTraceMonitor == null || !mTraceMonitor.isEnabled()) {
             return;
         }
-        mTraceMonitor.stop(mWriter);
+
+        ResultWriter writer = new ResultWriter()
+                .forScenario(new ScenarioBuilder()
+                        .forClass(createTempFile("temp", "").getName()).build())
+                .withOutputDir(createTempDirectory("temp").toFile())
+                .setRunComplete();
+
+        mTraceMonitor.stop(writer);
     }
 }

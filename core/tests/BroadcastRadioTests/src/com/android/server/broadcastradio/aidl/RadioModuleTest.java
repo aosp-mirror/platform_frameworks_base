@@ -34,6 +34,8 @@ import android.hardware.radio.RadioManager;
 import android.os.ParcelableException;
 import android.os.RemoteException;
 
+import com.android.server.broadcastradio.RadioServiceUserController;
+
 import com.google.common.truth.Expect;
 
 import org.junit.Before;
@@ -63,6 +65,8 @@ public final class RadioModuleTest {
     private IAnnouncementListener mListenerMock;
     @Mock
     private android.hardware.broadcastradio.ICloseHandle mHalCloseHandleMock;
+    @Mock
+    private RadioServiceUserController mUserControllerMock;
 
     // RadioModule under test
     private RadioModule mRadioModule;
@@ -70,7 +74,8 @@ public final class RadioModuleTest {
 
     @Before
     public void setup() throws RemoteException {
-        mRadioModule = new RadioModule(mBroadcastRadioMock, TEST_MODULE_PROPERTIES);
+        mRadioModule = new RadioModule(mBroadcastRadioMock, TEST_MODULE_PROPERTIES,
+                mUserControllerMock);
 
         // TODO(b/241118988): test non-null image for getImage method
         when(mBroadcastRadioMock.getImage(anyInt())).thenReturn(null);

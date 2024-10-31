@@ -654,52 +654,49 @@ public final class PageContentRepository {
 
         public void renderPage(int pageIndex, RenderSpec renderSpec,
                 OnPageContentAvailableCallback callback) {
-            // First, check if we have a rendered page for this index.
-            RenderedPage renderedPage = mPageContentCache.getRenderedPage(pageIndex);
-            if (renderedPage != null && renderedPage.state == RenderedPage.STATE_RENDERED) {
-                // If we have rendered page with same constraints - done.
-                if (renderedPage.renderSpec.equals(renderSpec)) {
-                    if (DEBUG) {
-                        Log.i(LOG_TAG, "Cache hit for page: " + pageIndex);
-                    }
-
-                    // Announce if needed.
-                    if (callback != null) {
-                        callback.onPageContentAvailable(renderedPage.content);
-                    }
-                    return;
-                } else {
-                    // If the constraints changed, mark the page obsolete.
-                    renderedPage.state = RenderedPage.STATE_SCRAP;
-                }
-            }
-
-            // Next, check if rendering this page is scheduled.
-            RenderPageTask renderTask = mPageToRenderTaskMap.get(pageIndex);
-            if (renderTask != null && !renderTask.isCancelled()) {
-                // If not rendered and constraints same....
-                if (renderTask.mRenderSpec.equals(renderSpec)) {
-                    if (renderTask.mCallback != null) {
-                        // If someone else is already waiting for this page - bad state.
-                        if (callback != null && renderTask.mCallback != callback) {
-                            throw new IllegalStateException("Page rendering not cancelled");
+            synchronized (mPageToRenderTaskMap) {
+                RenderedPage renderedPage = mPageContentCache.getRenderedPage(pageIndex);
+                if (renderedPage != null && renderedPage.state == RenderedPage.STATE_RENDERED) {
+                    // If we have rendered page with same constraints - done.
+                    if (renderedPage.renderSpec.equals(renderSpec)) {
+                        if (DEBUG) {
+                            Log.i(LOG_TAG, "Cache hit for page: " + pageIndex);
                         }
-                    } else {
-                        // No callback means we are preloading so just let the argument
-                        // callback be attached to our work in progress.
-                        renderTask.mCallback = callback;
-                    }
-                    return;
-                } else {
-                    // If not rendered and constraints changed - cancel rendering.
-                    renderTask.cancel(true);
-                }
-            }
 
-            // Oh well, we will have work to do...
-            renderTask = new RenderPageTask(pageIndex, renderSpec, callback);
-            mPageToRenderTaskMap.put(pageIndex, renderTask);
-            renderTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);
+                        // Announce if needed.
+                        if (callback != null) {
+                            callback.onPageContentAvailable(renderedPage.content);
+                        }
+                        return;
+                    } else {
+                        // If the constraints changed, mark the page obsolete.
+                        renderedPage.state = RenderedPage.STATE_SCRAP;
+                    }
+                }
+
+                // Next, check if rendering this page is scheduled.
+                RenderPageTask renderTask = mPageToRenderTaskMap.get(pageIndex);
+                if (renderTask != null && !renderTask.isCancelled()) {
+                    // If not rendered and constraints same....
+                    if (renderTask.mRenderSpec.equals(renderSpec)) {
+                        renderTask.mCallback = callback;
+                        return;
+                    } else {
+                        // If not rendered and constraints changed - cancel rendering.
+                        try {
+                            renderTask.cancel(true);
+                            mPageToRenderTaskMap.remove(pageIndex);
+                        } catch (Exception e) {
+                            Log.e(LOG_TAG, "Error cancelling RenderPageTask ", e);
+                        }
+                    }
+                }
+
+                // Oh well, we will have work to do...
+                renderTask = new RenderPageTask(pageIndex, renderSpec, callback);
+                mPageToRenderTaskMap.put(pageIndex, renderTask);
+                renderTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);
+            }
         }
 
         public void cancelRendering(int pageIndex) {

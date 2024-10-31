@@ -27,6 +27,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -47,12 +48,14 @@ import android.os.RemoteException;
 import android.os.VibrationEffect;
 import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.annotations.UsesFlags;
+import android.platform.test.flag.junit.FlagsParameterization;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.provider.MediaStore.Audio.AudioColumns;
+import android.provider.Settings;
 import android.test.mock.MockContentResolver;
 import android.util.Xml;
 
-import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.modules.utils.TypedXmlPullParser;
@@ -61,6 +64,7 @@ import com.android.modules.utils.TypedXmlSerializer;
 import com.google.common.base.Strings;
 
 import org.junit.Before;
+import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -71,20 +75,38 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.lang.reflect.Field;
 import java.util.Arrays;
+import java.util.List;
 import java.util.function.Consumer;
 
-@RunWith(AndroidJUnit4.class)
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4;
+import platform.test.runner.parameterized.Parameters;
+
+@RunWith(ParameterizedAndroidJunit4.class)
+@UsesFlags(android.app.Flags.class)
 @SmallTest
 @Presubmit
 public class NotificationChannelTest {
+    @ClassRule
+    public static final SetFlagsRule.ClassRule mSetFlagsClassRule = new SetFlagsRule.ClassRule();
+
+    @Parameters(name = "{0}")
+    public static List<FlagsParameterization> getParams() {
+        return FlagsParameterization.allCombinationsOf(
+                Flags.FLAG_NOTIF_CHANNEL_CROP_VIBRATION_EFFECTS);
+    }
+
     @Rule
-    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
+    public final SetFlagsRule mSetFlagsRule;
 
     private final String CLASS = "android.app.NotificationChannel";
 
     Context mContext;
     ContentProvider mContentProvider;
     IContentProvider mIContentProvider;
+
+    public NotificationChannelTest(FlagsParameterization flags) {
+        mSetFlagsRule = mSetFlagsClassRule.createSetFlagsRule(flags);
+    }
 
     @Before
     public void setUp() throws Exception {
@@ -376,6 +398,29 @@ public class NotificationChannelTest {
 
         NotificationChannel restoredChannel = backUpAndRestore(channel);
         assertThat(restoredChannel.getSound()).isEqualTo(uriAfterRestoredCanonicalized);
+    }
+
+    @Test
+    public void testWriteXmlForBackup_noAccessToFile() throws Exception {
+        Uri uri = Uri.parse("content://media/1");
+
+        AudioAttributes mAudioAttributes =
+                new AudioAttributes.Builder()
+                        .setContentType(AudioAttributes.CONTENT_TYPE_UNKNOWN)
+                        .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+                        .setFlags(AudioAttributes.FLAG_AUDIBILITY_ENFORCED)
+                        .build();
+
+        NotificationChannel channel = new NotificationChannel("id", "name", 3);
+        channel.setSound(uri, mAudioAttributes);
+
+        when(mIContentProvider.canonicalize(any(), any())).thenThrow(new SecurityException(""));
+        doThrow(new SecurityException("")).when(mIContentProvider)
+                .canonicalizeAsync(any(), any(), any());
+
+        NotificationChannel restoredChannel = backUpAndRestore(channel);
+        assertThat(restoredChannel.getSound())
+                .isEqualTo(Settings.System.DEFAULT_NOTIFICATION_URI);
     }
 
     @Test

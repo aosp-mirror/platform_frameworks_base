@@ -16,10 +16,13 @@
 
 package com.android.systemui.statusbar.policy.domain.interactor
 
+import android.app.NotificationManager.INTERRUPTION_FILTER_NONE
 import android.content.Context
 import android.provider.Settings
 import android.provider.Settings.Secure.ZEN_DURATION_FOREVER
 import android.provider.Settings.Secure.ZEN_DURATION_PROMPT
+import android.service.notification.ZenPolicy.STATE_DISALLOW
+import android.service.notification.ZenPolicy.VISUAL_EFFECT_NOTIFICATION_LIST
 import android.util.Log
 import androidx.concurrent.futures.await
 import com.android.settingslib.notification.data.repository.ZenModeRepository
@@ -27,7 +30,11 @@ import com.android.settingslib.notification.modes.ZenIcon
 import com.android.settingslib.notification.modes.ZenIconLoader
 import com.android.settingslib.notification.modes.ZenMode
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.modes.shared.ModesUi
 import com.android.systemui.shared.notifications.data.repository.NotificationSettingsRepository
+import com.android.systemui.statusbar.notification.emptyshade.shared.ModesEmptyShadeFix
+import com.android.systemui.statusbar.policy.data.repository.DeviceProvisioningRepository
+import com.android.systemui.statusbar.policy.data.repository.UserSetupRepository
 import com.android.systemui.statusbar.policy.domain.model.ActiveZenModes
 import com.android.systemui.statusbar.policy.domain.model.ZenModeInfo
 import java.time.Duration
@@ -36,6 +43,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 
@@ -51,7 +59,17 @@ constructor(
     private val notificationSettingsRepository: NotificationSettingsRepository,
     @Background private val bgDispatcher: CoroutineDispatcher,
     private val iconLoader: ZenIconLoader,
+    deviceProvisioningRepository: DeviceProvisioningRepository,
+    userSetupRepository: UserSetupRepository,
 ) {
+    val isZenAvailable: Flow<Boolean> =
+        combine(
+            deviceProvisioningRepository.isDeviceProvisioned,
+            userSetupRepository.isUserSetUp,
+        ) { isDeviceProvisioned, isUserSetUp ->
+            isDeviceProvisioned && isUserSetUp
+        }
+
     val isZenModeEnabled: Flow<Boolean> =
         zenModeRepository.globalZenMode
             .map {
@@ -80,12 +98,44 @@ constructor(
 
     val modes: Flow<List<ZenMode>> = zenModeRepository.modes
 
+    /**
+     * Returns the special "manual DND" mode.
+     *
+     * This is only meant as a temporary solution for "legacy" UI pieces that handle DND
+     * specifically; any new or migrated features should use modes more generally, through [modes]
+     * or [activeModes].
+     */
+    val dndMode: Flow<ZenMode?> by lazy {
+        ModesUi.assertInNewMode()
+        zenModeRepository.modes.map { modes -> modes.singleOrNull { it.isManualDnd } }
+    }
+
     /** Flow returning the currently active mode(s), if any. */
     val activeModes: Flow<ActiveZenModes> =
         modes
             .map { modes -> buildActiveZenModes(modes) }
             .flowOn(bgDispatcher)
             .distinctUntilChanged()
+
+    val activeModesBlockingEverything: Flow<ActiveZenModes> = getFilteredActiveModesFlow { mode ->
+        mode.interruptionFilter == INTERRUPTION_FILTER_NONE
+    }
+
+    val activeModesBlockingMedia: Flow<ActiveZenModes> = getFilteredActiveModesFlow { mode ->
+        mode.policy.priorityCategoryMedia == STATE_DISALLOW
+    }
+
+    val activeModesBlockingAlarms: Flow<ActiveZenModes> = getFilteredActiveModesFlow { mode ->
+        mode.policy.priorityCategoryAlarms == STATE_DISALLOW
+    }
+
+    private fun getFilteredActiveModesFlow(predicate: (ZenMode) -> Boolean): Flow<ActiveZenModes> {
+        return modes
+            .map { modes -> modes.filter { mode -> predicate(mode) } }
+            .map { modes -> buildActiveZenModes(modes) }
+            .flowOn(bgDispatcher)
+            .distinctUntilChanged()
+    }
 
     suspend fun getActiveModes() = buildActiveZenModes(zenModeRepository.getModes())
 
@@ -101,6 +151,25 @@ constructor(
     val mainActiveMode: Flow<ZenModeInfo?> =
         activeModes.map { a -> a.mainMode }.distinctUntilChanged()
 
+    val modesHidingNotifications: Flow<List<ZenMode>> by lazy {
+        if (ModesEmptyShadeFix.isUnexpectedlyInLegacyMode() || !ModesUi.isEnabled) {
+            flowOf(listOf())
+        } else {
+            modes
+                .map { modes ->
+                    modes.filter { mode ->
+                        mode.isActive &&
+                            !mode.policy.isVisualEffectAllowed(
+                                /* effect = */ VISUAL_EFFECT_NOTIFICATION_LIST,
+                                /* defaultVal = */ true,
+                            )
+                    }
+                }
+                .flowOn(bgDispatcher)
+                .distinctUntilChanged()
+        }
+    }
+
     suspend fun getModeIcon(mode: ZenMode): ZenIcon {
         return iconLoader.getIcon(context, mode).await()
     }
@@ -113,10 +182,11 @@ constructor(
                         Log.e(
                             TAG,
                             "Interactor cannot handle showing the zen duration prompt. " +
-                                "Please use EnableZenModeDialog when this setting is active."
+                                "Please use EnableZenModeDialog when this setting is active.",
                         )
                         null
                     }
+
                     ZEN_DURATION_FOREVER -> null
                     else -> Duration.ofMinutes(zenDuration.toLong())
                 }

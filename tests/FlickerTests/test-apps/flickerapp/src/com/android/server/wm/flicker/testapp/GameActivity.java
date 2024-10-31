@@ -71,7 +71,7 @@ public class GameActivity extends Activity implements SurfaceHolder.Callback {
         windowInsetsController.setSystemBarsBehavior(
                 WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
         );
-        // Hide both the status bar and the navigation bar.
-        windowInsetsController.hide(WindowInsetsCompat.Type.systemBars());
+        // Hide status bar only to avoid flakiness on gesture quick switch cases.
+        windowInsetsController.hide(WindowInsetsCompat.Type.statusBars());
     }
 }

@@ -16,8 +16,8 @@
 
 package android.libcore.regression;
 
-import androidx.benchmark.BenchmarkState;
-import androidx.benchmark.junit4.BenchmarkRule;
+import android.perftests.utils.BenchmarkState;
+import android.perftests.utils.PerfStatusReporter;
 
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -35,11 +35,11 @@ import java.util.Locale;
 @RunWith(AndroidJUnit4.class)
 @LargeTest
 public class FormatterPerfTest {
-    @Rule public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
+    @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
 
     @Test
     public void timeFormatter_NoFormatting() {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             Formatter f = new Formatter();
             f.format("this is a reasonably short string that doesn't actually need any formatting");
@@ -48,7 +48,7 @@ public class FormatterPerfTest {
 
     @Test
     public void timeStringBuilder_NoFormatting() {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             StringBuilder sb = new StringBuilder();
             sb.append("this is a reasonably short string that doesn't actually need formatting");
@@ -58,7 +58,7 @@ public class FormatterPerfTest {
     @Test
     public void timeFormatter_OneInt() {
         Integer value = Integer.valueOf(1024); // We're not trying to benchmark boxing here.
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             Formatter f = new Formatter();
             f.format("this is a reasonably short string that has an int %d in it", value);
@@ -69,7 +69,7 @@ public class FormatterPerfTest {
     public void timeFormatter_OneIntArabic() {
         Locale arabic = new Locale("ar");
         Integer value = Integer.valueOf(1024); // We're not trying to benchmark boxing here.
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             Formatter f = new Formatter();
             f.format(arabic, "this is a reasonably short string that has an int %d in it", value);
@@ -78,7 +78,7 @@ public class FormatterPerfTest {
 
     @Test
     public void timeStringBuilder_OneInt() {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             StringBuilder sb = new StringBuilder();
             sb.append("this is a reasonably short string that has an int ");
@@ -90,7 +90,7 @@ public class FormatterPerfTest {
     @Test
     public void timeFormatter_OneHexInt() {
         Integer value = Integer.valueOf(1024); // We're not trying to benchmark boxing here.
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             Formatter f = new Formatter();
             f.format("this is a reasonably short string that has an int %x in it", value);
@@ -99,7 +99,7 @@ public class FormatterPerfTest {
 
     @Test
     public void timeStringBuilder_OneHexInt() {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             StringBuilder sb = new StringBuilder();
             sb.append("this is a reasonably short string that has an int ");
@@ -111,7 +111,7 @@ public class FormatterPerfTest {
     @Test
     public void timeFormatter_OneFloat() {
         Float value = Float.valueOf(10.24f); // We're not trying to benchmark boxing here.
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             Formatter f = new Formatter();
             f.format("this is a reasonably short string that has a float %f in it", value);
@@ -121,7 +121,7 @@ public class FormatterPerfTest {
     @Test
     public void timeFormatter_OneFloat_dot2f() {
         Float value = Float.valueOf(10.24f); // We're not trying to benchmark boxing here.
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             Formatter f = new Formatter();
             f.format("this is a reasonably short string that has a float %.2f in it", value);
@@ -131,7 +131,7 @@ public class FormatterPerfTest {
     @Test
     public void timeFormatter_TwoFloats() {
         Float value = Float.valueOf(10.24f); // We're not trying to benchmark boxing here.
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             Formatter f = new Formatter();
             f.format("this is a short string that has two floats %f and %f in it", value, value);
@@ -140,7 +140,7 @@ public class FormatterPerfTest {
 
     @Test
     public void timeStringBuilder_OneFloat() {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             StringBuilder sb = new StringBuilder();
             sb.append("this is a reasonably short string that has a float ");
@@ -151,7 +151,7 @@ public class FormatterPerfTest {
 
     @Test
     public void timeFormatter_OneString() {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             Formatter f = new Formatter();
             f.format("this is a reasonably short string that has a string %s in it", "hello");
@@ -160,7 +160,7 @@ public class FormatterPerfTest {
 
     @Test
     public void timeStringBuilder_OneString() {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             StringBuilder sb = new StringBuilder();
             sb.append("this is a reasonably short string that has a string ");

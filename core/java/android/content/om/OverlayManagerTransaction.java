@@ -209,6 +209,7 @@ public final class OverlayManagerTransaction implements Parcelable {
      */
     public static final class Builder {
         private final List<Request> mRequests = new ArrayList<>();
+        private boolean mSelfTargeting = false;
 
         /**
          * Request that an overlay package be enabled and change its loading
@@ -242,6 +243,18 @@ public final class OverlayManagerTransaction implements Parcelable {
             @Request.RequestType final int type =
                 enable ? Request.TYPE_SET_ENABLED : Request.TYPE_SET_DISABLED;
             mRequests.add(new Request(type, overlay, userId));
+            return this;
+        }
+
+        /**
+         * Request that an overlay package be self-targeting. Self-targeting overlays enable
+         * applications to overlay on itself resources. The overlay target is itself, or the Android
+         * package, and the work range is only in caller application.
+         * @param selfTargeting whether the overlay is self-targeting, the default is false.
+         * @hide
+         */
+        public Builder setSelfTargeting(boolean selfTargeting) {
+            mSelfTargeting = selfTargeting;
             return this;
         }
 
@@ -286,7 +299,7 @@ public final class OverlayManagerTransaction implements Parcelable {
          */
         @NonNull
         public OverlayManagerTransaction build() {
-            return new OverlayManagerTransaction(mRequests, false /* selfTargeting */);
+            return new OverlayManagerTransaction(mRequests, mSelfTargeting);
         }
     }
 

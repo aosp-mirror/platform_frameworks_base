@@ -51,7 +51,6 @@ public:
 
     ~PointerController() override;
 
-    std::optional<FloatRect> getBounds() const override;
     void move(float deltaX, float deltaY) override;
     void setPosition(float x, float y) override;
     FloatPoint getPosition() const override;
@@ -166,9 +165,6 @@ public:
 
     ~TouchPointerController() override;
 
-    std::optional<FloatRect> getBounds() const override {
-        LOG_ALWAYS_FATAL("Should not be called");
-    }
     void move(float, float) override {
         LOG_ALWAYS_FATAL("Should not be called");
     }

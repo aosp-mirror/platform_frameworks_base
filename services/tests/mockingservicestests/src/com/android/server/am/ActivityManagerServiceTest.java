@@ -29,6 +29,7 @@ import static android.app.ActivityManager.PROCESS_STATE_TOP;
 import static android.app.ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND;
 import static android.app.ActivityManager.PROCESS_STATE_UNKNOWN;
 import static android.content.ContentResolver.SCHEME_CONTENT;
+import static android.content.Intent.FILL_IN_ACTION;
 import static android.os.PowerExemptionManager.REASON_DENIED;
 import static android.os.UserHandle.USER_ALL;
 import static android.util.DebugUtils.valueToString;
@@ -106,6 +107,7 @@ import android.os.IBinder;
 import android.os.IProgressListener;
 import android.os.Looper;
 import android.os.Message;
+import android.os.Parcel;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -1298,6 +1300,89 @@ public class ActivityManagerServiceTest {
         assertWithMessage("UserController.startUserOnDisplay() calls")
                 .that(mInjector.usersStartedOnSecondaryDisplays)
                 .containsExactly(new Pair<>(USER_ID, 42));
+    }
+
+    @Test
+    @RequiresFlagsEnabled(android.security.Flags.FLAG_PREVENT_INTENT_REDIRECT)
+    public void testAddCreatorToken() {
+        Intent intent = new Intent();
+        Intent extraIntent = new Intent("EXTRA_INTENT_ACTION");
+        intent.putExtra("EXTRA_INTENT0", extraIntent);
+
+        intent.collectExtraIntentKeys();
+        mAms.addCreatorToken(intent, TEST_PACKAGE);
+
+        ActivityManagerService.IntentCreatorToken token =
+                (ActivityManagerService.IntentCreatorToken) extraIntent.getCreatorToken();
+        assertThat(token).isNotNull();
+        assertThat(token.getCreatorUid()).isEqualTo(mInjector.getCallingUid());
+        assertThat(token.getCreatorPackage()).isEqualTo(TEST_PACKAGE);
+    }
+
+    @Test
+    @RequiresFlagsEnabled(android.security.Flags.FLAG_PREVENT_INTENT_REDIRECT)
+    public void testAddCreatorTokenForFillingIntent() {
+        Intent intent = new Intent();
+        Intent extraIntent = new Intent("EXTRA_INTENT_ACTION");
+        intent.putExtra("EXTRA_INTENT0", extraIntent);
+        Intent fillinIntent = new Intent();
+        Intent fillinExtraIntent = new Intent("FILLIN_EXTRA_INTENT_ACTION");
+        fillinIntent.putExtra("FILLIN_EXTRA_INTENT0", fillinExtraIntent);
+
+        fillinIntent.collectExtraIntentKeys();
+        intent.fillIn(fillinIntent, FILL_IN_ACTION);
+
+        mAms.addCreatorToken(fillinIntent, TEST_PACKAGE);
+
+        fillinExtraIntent = intent.getParcelableExtra("FILLIN_EXTRA_INTENT0", Intent.class);
+
+        ActivityManagerService.IntentCreatorToken token =
+                (ActivityManagerService.IntentCreatorToken) fillinExtraIntent.getCreatorToken();
+        assertThat(token).isNotNull();
+        assertThat(token.getCreatorUid()).isEqualTo(mInjector.getCallingUid());
+        assertThat(token.getCreatorPackage()).isEqualTo(TEST_PACKAGE);
+    }
+
+    @Test
+    @RequiresFlagsEnabled(android.security.Flags.FLAG_PREVENT_INTENT_REDIRECT)
+    public void testCheckCreatorToken() {
+        Intent intent = new Intent();
+        Intent extraIntent = new Intent("EXTRA_INTENT_ACTION");
+        intent.putExtra("EXTRA_INTENT", extraIntent);
+
+        intent.collectExtraIntentKeys();
+
+        // mimic client hack and sneak in an extra intent without going thru collectExtraIntentKeys.
+        Intent extraIntent2 = new Intent("EXTRA_INTENT_ACTION2");
+        intent.putExtra("EXTRA_INTENT2", extraIntent2);
+
+        // mock parceling on the client side, unparcling on the system server side, then
+        // addCreatorToken on system server side.
+        final Parcel parcel = Parcel.obtain();
+        intent.writeToParcel(parcel, 0);
+        parcel.setDataPosition(0);
+        Intent newIntent = new Intent();
+        newIntent.readFromParcel(parcel);
+        intent = newIntent;
+        mAms.addCreatorToken(intent, TEST_PACKAGE);
+        // entering the target app's process.
+        intent.checkCreatorToken();
+
+        Intent extraIntent3 = new Intent("EXTRA_INTENT_ACTION3");
+        intent.putExtra("EXTRA_INTENT3", extraIntent3);
+
+        extraIntent = intent.getParcelableExtra("EXTRA_INTENT", Intent.class);
+        extraIntent2 = intent.getParcelableExtra("EXTRA_INTENT2", Intent.class);
+        extraIntent3 = intent.getParcelableExtra("EXTRA_INTENT3", Intent.class);
+
+        assertThat(extraIntent.getExtendedFlags()
+                & Intent.EXTENDED_FLAG_MISSING_CREATOR_OR_INVALID_TOKEN).isEqualTo(0);
+        // sneaked in intent should have EXTENDED_FLAG_MISSING_CREATOR_OR_INVALID_TOKEN set.
+        assertThat(extraIntent2.getExtendedFlags()
+                & Intent.EXTENDED_FLAG_MISSING_CREATOR_OR_INVALID_TOKEN).isNotEqualTo(0);
+        // local created intent should not have EXTENDED_FLAG_MISSING_CREATOR_OR_INVALID_TOKEN set.
+        assertThat(extraIntent3.getExtendedFlags()
+                & Intent.EXTENDED_FLAG_MISSING_CREATOR_OR_INVALID_TOKEN).isEqualTo(0);
     }
 
     private void verifyWaitingForNetworkStateUpdate(long curProcStateSeq,

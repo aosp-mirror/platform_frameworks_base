@@ -182,7 +182,7 @@ interface ShadeRepository {
 
 /** Business logic for shade interactions */
 @SysUISingleton
-class ShadeRepositoryImpl @Inject constructor(@Application applicationContext: Context) :
+class ShadeRepositoryImpl @Inject constructor() :
     ShadeRepository {
     private val _qsExpansion = MutableStateFlow(0f)
     @Deprecated("Use ShadeInteractor.qsExpansion instead")

@@ -25,7 +25,9 @@
 #include <binder/Parcel.h>
 #include <camera/Camera.h>
 #include <camera/StringUtils.h>
+#include <com_android_internal_camera_flags.h>
 #include <cutils/properties.h>
+#include <gui/Flags.h>
 #include <gui/GLConsumer.h>
 #include <gui/Surface.h>
 #include <nativehelper/JNIHelp.h>
@@ -37,6 +39,7 @@
 #include "jni.h"
 
 using namespace android;
+namespace flags = com::android::internal::camera::flags;
 
 enum {
     // Keep up to date with Camera.java
@@ -527,14 +530,19 @@ void JNICameraContext::clearCallbackBuffers_l(JNIEnv *env, Vector<jbyteArray> *b
 }
 
 static bool attributionSourceStateForJavaParcel(JNIEnv *env, jobject jClientAttributionParcel,
+                                                bool useContextAttributionSource,
                                                 AttributionSourceState &clientAttribution) {
     const Parcel *clientAttributionParcel = parcelForJavaObject(env, jClientAttributionParcel);
     if (clientAttribution.readFromParcel(clientAttributionParcel) != ::android::OK) {
         jniThrowRuntimeException(env, "Fail to unparcel AttributionSourceState");
         return false;
     }
-    clientAttribution.uid = Camera::USE_CALLING_UID;
-    clientAttribution.pid = Camera::USE_CALLING_PID;
+
+    if (!(useContextAttributionSource && flags::use_context_attribution_source())) {
+        clientAttribution.uid = Camera::USE_CALLING_UID;
+        clientAttribution.pid = Camera::USE_CALLING_PID;
+    }
+
     return true;
 }
 
@@ -542,7 +550,9 @@ static jint android_hardware_Camera_getNumberOfCameras(JNIEnv *env, jobject thiz
                                                        jobject jClientAttributionParcel,
                                                        jint devicePolicy) {
     AttributionSourceState clientAttribution;
-    if (!attributionSourceStateForJavaParcel(env, jClientAttributionParcel, clientAttribution)) {
+    if (!attributionSourceStateForJavaParcel(env, jClientAttributionParcel,
+                                             /* useContextAttributionSource= */ false,
+                                             clientAttribution)) {
         return 0;
     }
     return Camera::getNumberOfCameras(clientAttribution, devicePolicy);
@@ -553,7 +563,9 @@ static void android_hardware_Camera_getCameraInfo(JNIEnv *env, jobject thiz, jin
                                                   jobject jClientAttributionParcel,
                                                   jint devicePolicy, jobject info_obj) {
     AttributionSourceState clientAttribution;
-    if (!attributionSourceStateForJavaParcel(env, jClientAttributionParcel, clientAttribution)) {
+    if (!attributionSourceStateForJavaParcel(env, jClientAttributionParcel,
+                                             /* useContextAttributionSource= */ false,
+                                             clientAttribution)) {
         return;
     }
 
@@ -587,7 +599,9 @@ static jint android_hardware_Camera_native_setup(JNIEnv *env, jobject thiz, jobj
                                                  jobject jClientAttributionParcel,
                                                  jint devicePolicy) {
     AttributionSourceState clientAttribution;
-    if (!attributionSourceStateForJavaParcel(env, jClientAttributionParcel, clientAttribution)) {
+    if (!attributionSourceStateForJavaParcel(env, jClientAttributionParcel,
+                                             /* useContextAttributionSource= */ true,
+                                             clientAttribution)) {
         return -EACCES;
     }
 
@@ -702,16 +716,20 @@ static void android_hardware_Camera_setPreviewSurface(JNIEnv *env, jobject thiz,
     sp<Camera> camera = get_native_camera(env, thiz, NULL);
     if (camera == 0) return;
 
-    sp<IGraphicBufferProducer> gbp;
     sp<Surface> surface;
     if (jSurface) {
         surface = android_view_Surface_getSurface(env, jSurface);
-        if (surface != NULL) {
-            gbp = surface->getIGraphicBufferProducer();
-        }
     }
 
+#if WB_LIBCAMERASERVICE_WITH_DEPENDENCIES
+    if (camera->setPreviewTarget(surface) != NO_ERROR) {
+#else
+    sp<IGraphicBufferProducer> gbp;
+    if (surface != NULL) {
+        gbp = surface->getIGraphicBufferProducer();
+    }
     if (camera->setPreviewTarget(gbp) != NO_ERROR) {
+#endif
         jniThrowException(env, "java/io/IOException", "setPreviewTexture failed");
     }
 }
@@ -723,6 +741,9 @@ static void android_hardware_Camera_setPreviewTexture(JNIEnv *env,
     sp<Camera> camera = get_native_camera(env, thiz, NULL);
     if (camera == 0) return;
 
+#if WB_LIBCAMERASERVICE_WITH_DEPENDENCIES
+    sp<Surface> surface;
+#endif
     sp<IGraphicBufferProducer> producer = NULL;
     if (jSurfaceTexture != NULL) {
         producer = SurfaceTexture_getProducer(env, jSurfaceTexture);
@@ -731,10 +752,16 @@ static void android_hardware_Camera_setPreviewTexture(JNIEnv *env,
                     "SurfaceTexture already released in setPreviewTexture");
             return;
         }
-
+#if WB_LIBCAMERASERVICE_WITH_DEPENDENCIES
+        surface = new Surface(producer);
+#endif
     }
 
+#if WB_LIBCAMERASERVICE_WITH_DEPENDENCIES
+    if (camera->setPreviewTarget(surface) != NO_ERROR) {
+#else
     if (camera->setPreviewTarget(producer) != NO_ERROR) {
+#endif
         jniThrowException(env, "java/io/IOException",
                 "setPreviewTexture failed");
     }
@@ -748,18 +775,32 @@ static void android_hardware_Camera_setPreviewCallbackSurface(JNIEnv *env,
     sp<Camera> camera = get_native_camera(env, thiz, &context);
     if (camera == 0) return;
 
+#if !WB_LIBCAMERASERVICE_WITH_DEPENDENCIES
     sp<IGraphicBufferProducer> gbp;
+#endif
     sp<Surface> surface;
     if (jSurface) {
         surface = android_view_Surface_getSurface(env, jSurface);
+        if (surface == NULL) {
+            jniThrowException(env, "java/lang/IllegalArgumentException",
+                              "android_view_Surface_getSurface failed");
+            return;
+        }
+
+#if !WB_LIBCAMERASERVICE_WITH_DEPENDENCIES
         if (surface != NULL) {
             gbp = surface->getIGraphicBufferProducer();
         }
+#endif
     }
     // Clear out normal preview callbacks
     context->setCallbackMode(env, false, false);
     // Then set up callback surface
+#if WB_LIBCAMERASERVICE_WITH_DEPENDENCIES
+    if (camera->setPreviewCallbackTarget(surface) != NO_ERROR) {
+#else
     if (camera->setPreviewCallbackTarget(gbp) != NO_ERROR) {
+#endif
         jniThrowException(env, "java/io/IOException", "setPreviewCallbackTarget failed");
     }
 }

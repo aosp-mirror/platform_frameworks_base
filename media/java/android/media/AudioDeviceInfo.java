@@ -279,6 +279,7 @@ public final class AudioDeviceInfo {
             TYPE_AUX_LINE,
             TYPE_IP,
             TYPE_BUS,
+            TYPE_REMOTE_SUBMIX,
             TYPE_HEARING_AID,
             TYPE_BUILTIN_SPEAKER_SAFE,
             TYPE_BLE_HEADSET,
@@ -312,6 +313,7 @@ public final class AudioDeviceInfo {
             case TYPE_AUX_LINE:
             case TYPE_IP:
             case TYPE_BUS:
+            case TYPE_REMOTE_SUBMIX:
             case TYPE_HEARING_AID:
             case TYPE_BUILTIN_SPEAKER_SAFE:
             case TYPE_BLE_HEADSET:
@@ -519,7 +521,7 @@ public final class AudioDeviceInfo {
         int[] counts = new int[countSet.size()];
         int index = 0;
         for (int count : countSet) {
-            counts[index++] = count; 
+            counts[index++] = count;
         }
         return counts;
     }
@@ -595,21 +597,22 @@ public final class AudioDeviceInfo {
     }
 
     /** @hide */
-    public static int convertDeviceTypeToInternalDevice(int deviceType) {
+    public static int convertDeviceTypeToInternalDevice(@AudioDeviceType int deviceType) {
         return EXT_TO_INT_DEVICE_MAPPING.get(deviceType, AudioSystem.DEVICE_NONE);
     }
 
     /** @hide */
-    public static int convertInternalDeviceToDeviceType(int intDevice) {
+    public static @AudioDeviceType int convertInternalDeviceToDeviceType(int intDevice) {
         return INT_TO_EXT_DEVICE_MAPPING.get(intDevice, TYPE_UNKNOWN);
     }
 
     /** @hide */
-    public static int convertDeviceTypeToInternalInputDevice(int deviceType) {
+    public static int convertDeviceTypeToInternalInputDevice(@AudioDeviceType int deviceType) {
         return convertDeviceTypeToInternalInputDevice(deviceType, "");
     }
     /** @hide */
-    public static int convertDeviceTypeToInternalInputDevice(int deviceType, String address) {
+    public static int convertDeviceTypeToInternalInputDevice(@AudioDeviceType int deviceType,
+            String address) {
         int internalType = EXT_TO_INT_INPUT_DEVICE_MAPPING.get(deviceType, AudioSystem.DEVICE_NONE);
         if (internalType == AudioSystem.DEVICE_IN_BUILTIN_MIC
                 && "back".equals(address)) {

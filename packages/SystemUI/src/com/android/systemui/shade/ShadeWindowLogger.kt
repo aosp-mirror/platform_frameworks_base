@@ -31,18 +31,13 @@ class ShadeWindowLogger @Inject constructor(@ShadeWindowLog private val buffer: 
     ConstantStringsLogger by ConstantStringsLoggerImpl(buffer, TAG) {
 
     fun logNewState(state: Any) {
-        buffer.log(
-            TAG,
-            DEBUG,
-            { str1 = state.toString() },
-            { "Applying new state: $str1" }
-        )
+        buffer.log(TAG, DEBUG, { str1 = state.toString() }, { "Applying new state: $str1" })
     }
 
     private inline fun log(
         logLevel: LogLevel,
         initializer: LogMessage.() -> Unit,
-        noinline printer: LogMessage.() -> String
+        noinline printer: LogMessage.() -> String,
     ) {
         buffer.log(TAG, logLevel, initializer, printer)
     }
@@ -52,7 +47,8 @@ class ShadeWindowLogger @Inject constructor(@ShadeWindowLog private val buffer: 
             TAG,
             DEBUG,
             { bool1 = visible },
-            { "Updating visibility, should be visible : $bool1" })
+            { "Updating visibility, should be visible : $bool1" },
+        )
     }
 
     fun logIsExpanded(
@@ -65,7 +61,7 @@ class ShadeWindowLogger @Inject constructor(@ShadeWindowLog private val buffer: 
         headsUpNotificationShowing: Boolean,
         scrimsVisibilityNotTransparent: Boolean,
         backgroundBlurRadius: Boolean,
-        launchingActivityFromNotification: Boolean
+        launchingActivityFromNotification: Boolean,
     ) {
         buffer.log(
             TAG,
@@ -82,11 +78,13 @@ class ShadeWindowLogger @Inject constructor(@ShadeWindowLog private val buffer: 
                 long2 = if (backgroundBlurRadius) 1 else 0
                 double1 = if (launchingActivityFromNotification) 1.0 else 0.0
             },
-            { "Setting isExpanded to $str1: forceWindowCollapsed $bool1, " +
+            {
+                "Setting isExpanded to $str1: forceWindowCollapsed $bool1, " +
                     "isKeyguardShowingAndNotOccluded $bool2, panelVisible $bool3, " +
                     "keyguardFadingAway $bool4, bouncerShowing $int1," +
                     "headsUpNotificationShowing $int2, scrimsVisibilityNotTransparent $long1," +
-                    "backgroundBlurRadius $long2, launchingActivityFromNotification $double1"}
+                    "backgroundBlurRadius $long2, launchingActivityFromNotification $double1"
+            },
         )
     }
 
@@ -95,7 +93,7 @@ class ShadeWindowLogger @Inject constructor(@ShadeWindowLog private val buffer: 
             TAG,
             DEBUG,
             { bool1 = visible },
-            { "Updating shade, should be visible and focusable: $bool1" }
+            { "Updating shade, should be visible and focusable: $bool1" },
         )
     }
 
@@ -104,7 +102,19 @@ class ShadeWindowLogger @Inject constructor(@ShadeWindowLog private val buffer: 
             TAG,
             DEBUG,
             { bool1 = focusable },
-            { "Updating shade, should be focusable : $bool1" }
+            { "Updating shade, should be focusable : $bool1" },
+        )
+    }
+
+    fun logConfigChangeWidthAdjust(originalWidth: Int, newWidth: Int) {
+        buffer.log(
+            TAG,
+            DEBUG,
+            {
+                int1 = originalWidth
+                int2 = newWidth
+            },
+            { "Config changed. SceneWindowRootView width updating from $int1 to $int2." },
         )
     }
 }

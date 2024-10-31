@@ -148,7 +148,7 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
 
         for (OutputConfiguration c : config.getOutputConfigurations()) {
             if (c.getDynamicRangeProfile() != DynamicRangeProfiles.STANDARD) {
-                if (Flags.extension10Bit() && Flags.cameraExtensionsCharacteristicsGet()) {
+                if (Flags.cameraExtensionsCharacteristicsGet()) {
                     DynamicRangeProfiles dynamicProfiles = extensionChars.get(
                             config.getExtension(),
                             CameraCharacteristics.REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES);
@@ -190,9 +190,7 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
                 new IntArray(CameraExtensionUtils.SUPPORTED_CAPTURE_OUTPUT_FORMATS.length);
         supportedCaptureOutputFormats.addAll(
                 CameraExtensionUtils.SUPPORTED_CAPTURE_OUTPUT_FORMATS);
-        if (Flags.extension10Bit()) {
-            supportedCaptureOutputFormats.add(ImageFormat.YCBCR_P010);
-        }
+        supportedCaptureOutputFormats.add(ImageFormat.YCBCR_P010);
         for (int format : supportedCaptureOutputFormats.toArray()) {
             List<Size> supportedSizes = extensionChars.getExtensionSupportedSizes(
                     config.getExtension(), format);
@@ -359,22 +357,20 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
             cameraOutput.setTimestampBase(OutputConfiguration.TIMESTAMP_BASE_SENSOR);
             cameraOutput.setReadoutTimestampEnabled(false);
             cameraOutput.setPhysicalCameraId(output.physicalCameraId);
-            if (Flags.extension10Bit()) {
-                boolean validDynamicRangeProfile = false;
-                for (long profile = DynamicRangeProfiles.STANDARD;
-                        profile < DynamicRangeProfiles.PUBLIC_MAX; profile <<= 1) {
-                    if (output.dynamicRangeProfile == profile) {
-                        validDynamicRangeProfile = true;
-                        break;
-                    }
+            boolean validDynamicRangeProfile = false;
+            for (long profile = DynamicRangeProfiles.STANDARD;
+                    profile < DynamicRangeProfiles.PUBLIC_MAX; profile <<= 1) {
+                if (output.dynamicRangeProfile == profile) {
+                    validDynamicRangeProfile = true;
+                    break;
                 }
-                if (validDynamicRangeProfile) {
-                    cameraOutput.setDynamicRangeProfile(output.dynamicRangeProfile);
-                } else {
-                    Log.e(TAG, "Extension configured dynamic range profile "
-                            + output.dynamicRangeProfile
-                            + " is not valid, using default DynamicRangeProfile.STANDARD");
-                }
+            }
+            if (validDynamicRangeProfile) {
+                cameraOutput.setDynamicRangeProfile(output.dynamicRangeProfile);
+            } else {
+                Log.e(TAG, "Extension configured dynamic range profile "
+                        + output.dynamicRangeProfile
+                        + " is not valid, using default DynamicRangeProfile.STANDARD");
             }
             outputList.add(cameraOutput);
             mCameraConfigMap.put(cameraOutput.getSurface(), output);
@@ -390,15 +386,13 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
         SessionConfiguration sessionConfiguration = new SessionConfiguration(sessionType,
                 outputList, new CameraExtensionUtils.HandlerExecutor(mHandler),
                 new SessionStateHandler());
-        if (Flags.extension10Bit()) {
-            if (sessionConfig.colorSpace >= 0
-                    && sessionConfig.colorSpace < ColorSpace.Named.values().length) {
-                sessionConfiguration.setColorSpace(
-                        ColorSpace.Named.values()[sessionConfig.colorSpace]);
-            } else {
-                Log.e(TAG, "Extension configured color space " + sessionConfig.colorSpace
-                        + " is not valid, using default unspecified color space");
-            }
+        if (sessionConfig.colorSpace >= 0
+                && sessionConfig.colorSpace < ColorSpace.Named.values().length) {
+            sessionConfiguration.setColorSpace(
+                    ColorSpace.Named.values()[sessionConfig.colorSpace]);
+        } else {
+            Log.e(TAG, "Extension configured color space " + sessionConfig.colorSpace
+                    + " is not valid, using default unspecified color space");
         }
         if ((sessionConfig.sessionParameter != null) &&
                 (!sessionConfig.sessionParameter.isEmpty())) {
@@ -459,16 +453,11 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
             ret.size.height = surfaceSize.getHeight();
             ret.imageFormat = SurfaceUtils.getSurfaceFormat(s);
 
-            if (Flags.extension10Bit()) {
-                ret.dynamicRangeProfile = o.getDynamicRangeProfile();
-                ColorSpace colorSpace = o.getColorSpace();
-                if (colorSpace != null) {
-                    ret.colorSpace = colorSpace.getId();
-                } else {
-                    ret.colorSpace = ColorSpaceProfiles.UNSPECIFIED;
-                }
+            ret.dynamicRangeProfile = o.getDynamicRangeProfile();
+            ColorSpace colorSpace = o.getColorSpace();
+            if (colorSpace != null) {
+                ret.colorSpace = colorSpace.getId();
             } else {
-                ret.dynamicRangeProfile = DynamicRangeProfiles.STANDARD;
                 ret.colorSpace = ColorSpaceProfiles.UNSPECIFIED;
             }
         } else {
@@ -884,17 +873,15 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
 
         @Override
         public void onCaptureProcessFailed(int captureSequenceId, int captureFailureReason) {
-            if (Flags.concertMode()) {
-                final long ident = Binder.clearCallingIdentity();
-                try {
-                    mClientExecutor.execute(
-                            () -> mClientCallbacks.onCaptureFailed(
-                                     CameraAdvancedExtensionSessionImpl.this, mClientRequest,
-                                    captureFailureReason
-                            ));
-                } finally {
-                    Binder.restoreCallingIdentity(ident);
-                }
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                mClientExecutor.execute(
+                        () -> mClientCallbacks.onCaptureFailed(
+                                 CameraAdvancedExtensionSessionImpl.this, mClientRequest,
+                                captureFailureReason
+                        ));
+            } finally {
+                Binder.restoreCallingIdentity(ident);
             }
         }
 

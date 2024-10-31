@@ -74,8 +74,12 @@ public class HomeTransitionObserver implements TransitionObserver,
             final boolean isBackGesture = change.hasFlags(FLAG_BACK_GESTURE_ANIMATED);
             if (taskInfo.getActivityType() == ACTIVITY_TYPE_HOME) {
                 if (Flags.migratePredictiveBackTransition()) {
-                    if (!isBackGesture && TransitionUtil.isOpenOrCloseMode(mode)) {
-                        notifyHomeVisibilityChanged(TransitionUtil.isOpeningType(mode));
+                    final boolean gestureToHomeTransition = isBackGesture
+                            && TransitionUtil.isClosingType(info.getType());
+                    if (gestureToHomeTransition
+                            || (!isBackGesture && TransitionUtil.isOpenOrCloseMode(mode))) {
+                        notifyHomeVisibilityChanged(gestureToHomeTransition
+                                || TransitionUtil.isOpeningType(mode));
                     }
                 } else {
                     if (TransitionUtil.isOpenOrCloseMode(mode) || isBackGesture) {

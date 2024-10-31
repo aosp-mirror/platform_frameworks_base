@@ -445,7 +445,7 @@ public class CarrierTextManagerTest extends SysuiTestCase {
 
         assertFalse(mWifiRepository.isWifiConnectedWithValidSsid());
         mWifiRepository.setWifiNetwork(
-                new WifiNetworkModel.Active(
+                WifiNetworkModel.Active.Companion.of(
                         /* isValidated= */ false,
                         /* level= */ 0,
                         /* ssid= */ "",

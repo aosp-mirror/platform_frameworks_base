@@ -27,6 +27,7 @@ import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.biometrics.AuthController
 import com.android.systemui.biometrics.data.repository.FakeFacePropertyRepository
 import com.android.systemui.decor.FaceScanningProviderFactory
+import com.android.systemui.decor.FaceScanningProviderFactoryImpl
 import com.android.systemui.log.ScreenDecorationsLogger
 import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.plugins.statusbar.StatusBarStateController
@@ -69,20 +70,20 @@ class FaceScanningProviderFactoryTest : SysuiTestCase() {
                 dmGlobal,
                 displayId,
                 displayInfo,
-                DisplayAdjustments.DEFAULT_DISPLAY_ADJUSTMENTS
+                DisplayAdjustments.DEFAULT_DISPLAY_ADJUSTMENTS,
             )
         whenever(dmGlobal.getDisplayInfo(eq(displayId))).thenReturn(displayInfo)
         val displayContext = context.createDisplayContext(display) as SysuiTestableContext
         displayContext.orCreateTestableResources.addOverride(
             R.array.config_displayUniqueIdArray,
-            arrayOf(displayId)
+            arrayOf(displayId),
         )
         displayContext.orCreateTestableResources.addOverride(
             R.bool.config_fillMainBuiltInDisplayCutout,
-            true
+            true,
         )
         underTest =
-            FaceScanningProviderFactory(
+            FaceScanningProviderFactoryImpl(
                 authController,
                 displayContext,
                 statusBarStateController,

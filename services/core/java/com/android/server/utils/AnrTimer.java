@@ -130,22 +130,35 @@ public abstract class AnrTimer<V> implements AutoCloseable {
     }
 
     /**
-     * Return true if freezing is enabled.  This has no effect if the service is not enabled.
+     * Return true if freezing is feature-enabled.  Freezing must still be enabled on a
+     * per-service basis.
      */
-    private static boolean anrTimerFreezerEnabled() {
+    private static boolean freezerFeatureEnabled() {
         return Flags.anrTimerFreezer();
+    }
+
+    /**
+     * Return true if tracing is feature-enabled.  This has no effect unless tracing is configured.
+     * Note that this does not represent any per-process overrides via an Injector.
+     */
+    public static boolean traceFeatureEnabled() {
+        return anrTimerServiceEnabled() && Flags.anrTimerTrace();
     }
 
     /**
      * This class allows test code to provide instance-specific overrides.
      */
     static class Injector {
-        boolean anrTimerServiceEnabled() {
+        boolean serviceEnabled() {
             return AnrTimer.anrTimerServiceEnabled();
         }
 
-        boolean anrTimerFreezerEnabled() {
-            return AnrTimer.anrTimerFreezerEnabled();
+        boolean freezerEnabled() {
+            return AnrTimer.freezerFeatureEnabled();
+        }
+
+        boolean traceEnabled() {
+            return AnrTimer.traceFeatureEnabled();
         }
     }
 
@@ -349,7 +362,7 @@ public abstract class AnrTimer<V> implements AutoCloseable {
         mWhat = what;
         mLabel = label;
         mArgs = args;
-        boolean enabled = args.mInjector.anrTimerServiceEnabled() && nativeTimersSupported();
+        boolean enabled = args.mInjector.serviceEnabled() && nativeTimersSupported();
         mFeature = createFeatureSwitch(enabled);
     }
 
@@ -448,7 +461,7 @@ public abstract class AnrTimer<V> implements AutoCloseable {
 
     /**
      * The FeatureDisabled class bypasses almost all AnrTimer logic.  It is used when the AnrTimer
-     * service is disabled via Flags.anrTimerServiceEnabled.
+     * service is disabled via Flags.anrTimerService().
      */
     private class FeatureDisabled extends FeatureSwitch {
         /** Start a timer by sending a message to the client's handler. */
@@ -515,7 +528,7 @@ public abstract class AnrTimer<V> implements AutoCloseable {
 
     /**
      * The FeatureEnabled class enables the AnrTimer logic.  It is used when the AnrTimer service
-     * is enabled via Flags.anrTimerServiceEnabled.
+     * is enabled via Flags.anrTimerService().
      */
     private class FeatureEnabled extends FeatureSwitch {
 
@@ -533,7 +546,7 @@ public abstract class AnrTimer<V> implements AutoCloseable {
         FeatureEnabled() {
             mNative = nativeAnrTimerCreate(mLabel,
                     mArgs.mExtend,
-                    mArgs.mFreeze && mArgs.mInjector.anrTimerFreezerEnabled());
+                    mArgs.mFreeze && mArgs.mInjector.freezerEnabled());
             if (mNative == 0) throw new IllegalArgumentException("unable to create native timer");
             synchronized (sAnrTimerList) {
                 sAnrTimerList.put(mNative, new WeakReference(AnrTimer.this));
@@ -550,7 +563,7 @@ public abstract class AnrTimer<V> implements AutoCloseable {
                 // exist.
                 if (cancel(arg)) mTotalRestarted++;
 
-                int timerId = nativeAnrTimerStart(mNative, pid, uid, timeoutMs);
+                final int timerId = nativeAnrTimerStart(mNative, pid, uid, timeoutMs);
                 if (timerId > 0) {
                     mTimerIdMap.put(arg, timerId);
                     mTimerArgMap.put(timerId, arg);
@@ -895,7 +908,7 @@ public abstract class AnrTimer<V> implements AutoCloseable {
     /** Dumpsys output, allowing for overrides. */
     @VisibleForTesting
     static void dump(@NonNull PrintWriter pw, boolean verbose, @NonNull Injector injector) {
-        if (!injector.anrTimerServiceEnabled()) return;
+        if (!injector.serviceEnabled()) return;
 
         final IndentingPrintWriter ipw = new IndentingPrintWriter(pw);
         ipw.println("AnrTimer statistics");
@@ -923,6 +936,18 @@ public abstract class AnrTimer<V> implements AutoCloseable {
     /** Dumpsys output.  There is no output if the feature is not enabled. */
     public static void dump(@NonNull PrintWriter pw, boolean verbose) {
         dump(pw, verbose, sDefaultInjector);
+    }
+
+    /**
+     * Set a trace specification.  The input is a set of strings.  On success, the function pushes
+     * the trace specification to all timers, and then returns a response message.  On failure,
+     * the function throws IllegalArgumentException and tracing is disabled.
+     *
+     * An empty specification has no effect other than returning the current trace specification.
+     */
+    @Nullable
+    public static String traceTimers(@Nullable String[] spec) {
+        return nativeAnrTimerTrace(spec);
     }
 
     /**
@@ -980,6 +1005,15 @@ public abstract class AnrTimer<V> implements AutoCloseable {
      * is a process that is unexpectedly stuck in the frozen state.
      */
     private static native boolean nativeAnrTimerRelease(long service, int timerId);
+
+    /**
+     * Configure tracing.  The input array is a set of words pulled from the command line.  All
+     * parsing happens inside the native layer.  The function returns a string which is either an
+     * error message (so nothing happened) or the current configuration after applying the config.
+     * Passing an null array or an empty array simply returns the current configuration.
+     * The function returns null if the native layer is not implemented.
+     */
+    private static native @Nullable String nativeAnrTimerTrace(@Nullable String[] config);
 
     /** Retrieve runtime dump information from the native layer. */
     private static native String[] nativeAnrTimerDump(long service);

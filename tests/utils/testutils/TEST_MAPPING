@@ -1,18 +1,7 @@
 {
   "presubmit": [
     {
-      "name": "frameworks-base-testutils-tests",
-      "options": [
-        {
-          "exclude-annotation": "androidx.test.filters.LargeTest"
-        },
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        },
-        {
-          "exclude-annotation": "org.junit.Ignore"
-        }
-      ]
+      "name": "frameworks-base-testutils-tests"
     }
   ],
   "postsubmit": [
