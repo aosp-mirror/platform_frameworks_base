@@ -1851,7 +1851,7 @@ class BackNavigationController {
                     tc.requestStartTransition(prepareOpen,
                             null /*startTask */, null /* remoteTransition */,
                             null /* displayChange */);
-                    prepareOpen.setReady(makeVisibles.get(0), true);
+                    prepareOpen.setReady(mCloseTarget, true);
                     return prepareOpen;
                 } else if (mSnapshot == null) {
                     return setLaunchBehind(visibleOpenActivities);
