@@ -804,6 +804,13 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     }
 
     @Test
+    public void onBackPressedResetsLeaveOnKeyguardHide() {
+        when(mPrimaryBouncerInteractor.isFullyShowing()).thenReturn(true);
+        mStatusBarKeyguardViewManager.onBackPressed();
+        verify(mStatusBarStateController).setLeaveOpenOnKeyguardHide(false);
+    }
+
+    @Test
     public void testResetHideBouncerWhenShowingIsFalse_alternateBouncerHides() {
         // GIVEN the keyguard is showing
         reset(mAlternateBouncerInteractor);
