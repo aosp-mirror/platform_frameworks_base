@@ -1259,6 +1259,14 @@ public class BubbleController implements ConfigurationChangeListener,
             // We still have bubbles, if we dragged an individual bubble to dismiss we were expanded
             // so re-expand to whatever is selected.
             showExpandedViewForBubbleBar();
+            if (bubbleKey.equals(selectedBubbleKey)) {
+                // We dragged the selected bubble to dismiss, log switch event
+                if (mBubbleData.getSelectedBubble() instanceof Bubble) {
+                    // Log only bubbles as overflow can't be dragged
+                    mLogger.log((Bubble) mBubbleData.getSelectedBubble(),
+                            BubbleLogger.Event.BUBBLE_BAR_BUBBLE_SWITCHED);
+                }
+            }
         }
     }
 
@@ -1301,10 +1309,16 @@ public class BubbleController implements ConfigurationChangeListener,
     public void expandStackAndSelectBubbleFromLauncher(String key, int topOnScreen) {
         mBubblePositioner.setBubbleBarTopOnScreen(topOnScreen);
 
+        boolean wasExpanded = (mLayerView != null && mLayerView.isExpanded());
+
         if (BubbleOverflow.KEY.equals(key)) {
             mBubbleData.setSelectedBubbleFromLauncher(mBubbleData.getOverflow());
             mLayerView.showExpandedView(mBubbleData.getOverflow());
-            mLogger.log(BubbleLogger.Event.BUBBLE_BAR_EXPANDED);
+            if (wasExpanded) {
+                mLogger.log(BubbleLogger.Event.BUBBLE_BAR_BUBBLE_SWITCHED);
+            } else {
+                mLogger.log(BubbleLogger.Event.BUBBLE_BAR_EXPANDED);
+            }
             return;
         }
 
@@ -1316,7 +1330,11 @@ public class BubbleController implements ConfigurationChangeListener,
             // already in the stack
             mBubbleData.setSelectedBubbleFromLauncher(b);
             mLayerView.showExpandedView(b);
-            mLogger.log(b, BubbleLogger.Event.BUBBLE_BAR_EXPANDED);
+            if (wasExpanded) {
+                mLogger.log(b, BubbleLogger.Event.BUBBLE_BAR_BUBBLE_SWITCHED);
+            } else {
+                mLogger.log(b, BubbleLogger.Event.BUBBLE_BAR_EXPANDED);
+            }
         } else if (mBubbleData.hasOverflowBubbleWithKey(b.getKey())) {
             // TODO: (b/271468319) handle overflow
         } else {
@@ -2045,6 +2063,9 @@ public class BubbleController implements ConfigurationChangeListener,
             // Only need to update the layer view if we're currently expanded for selection changes.
             if (mLayerView != null && mLayerView.isExpanded()) {
                 mLayerView.showExpandedView(selectedBubble);
+                if (selectedBubble instanceof Bubble bubble) {
+                    mLogger.log(bubble, BubbleLogger.Event.BUBBLE_BAR_BUBBLE_SWITCHED);
+                }
             }
         }
     };
