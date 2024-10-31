@@ -49,7 +49,6 @@ import static com.android.window.flags.Flags.balDontBringExistingBackgroundTaskS
 import static com.android.window.flags.Flags.balImproveRealCallerVisibilityCheck;
 import static com.android.window.flags.Flags.balImprovedMetrics;
 import static com.android.window.flags.Flags.balRequireOptInByPendingIntentCreator;
-import static com.android.window.flags.Flags.balRespectAppSwitchStateWhenCheckBoundByForegroundUid;
 import static com.android.window.flags.Flags.balShowToastsBlocked;
 import static com.android.window.flags.Flags.balStrictModeRo;
 
@@ -603,8 +602,6 @@ public class BackgroundActivityStartController {
                     .append(balImproveRealCallerVisibilityCheck());
             sb.append("; balRequireOptInByPendingIntentCreator: ")
                     .append(balRequireOptInByPendingIntentCreator());
-            sb.append("; balRespectAppSwitchStateWhenCheckBoundByForegroundUid: ")
-                    .append(balRespectAppSwitchStateWhenCheckBoundByForegroundUid());
             sb.append("; balDontBringExistingBackgroundTaskStackToFg: ")
                     .append(balDontBringExistingBackgroundTaskStackToFg());
             sb.append("]");
