@@ -118,7 +118,7 @@ class TilingDividerView : FrameLayout, View.OnTouchListener, DragDetector.Motion
             val dividerSize = resources.getDimensionPixelSize(R.dimen.split_divider_bar_width)
             val backgroundLeft = (width - dividerSize) / 2
             val backgroundTop = 0
-            val backgroundRight = left + dividerSize
+            val backgroundRight = backgroundLeft + dividerSize
             val backgroundBottom = height
             backgroundRect.set(backgroundLeft, backgroundTop, backgroundRight, backgroundBottom)
         }

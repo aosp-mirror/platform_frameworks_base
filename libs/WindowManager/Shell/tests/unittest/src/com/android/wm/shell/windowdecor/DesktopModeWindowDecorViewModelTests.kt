@@ -946,7 +946,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
     }
 
     @Test
-    fun testDecor_onClickToSplitScreen_detachesStatusBarInputLayer() {
+    fun testDecor_onClickToSplitScreen_disposesStatusBarInputLayer() {
         val toSplitScreenListenerCaptor = forClass(Function0::class.java)
                 as ArgumentCaptor<Function0<Unit>>
         val decor = createOpenTaskDecoration(
@@ -956,7 +956,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
 
         toSplitScreenListenerCaptor.value.invoke()
 
-        verify(decor).detachStatusBarInputLayer()
+        verify(decor).disposeStatusBarInputLayer()
     }
 
     @Test

@@ -17,7 +17,7 @@
 package android.hardware.display;
 
 
-import static android.hardware.display.DisplayManager.EventsMask;
+import static android.hardware.display.DisplayManager.EventFlag;
 import static android.view.Display.HdrCapabilities.HdrType;
 
 import android.Manifest;
@@ -130,7 +130,7 @@ public final class DisplayManagerGlobal {
     private final IDisplayManager mDm;
 
     private DisplayManagerCallback mCallback;
-    private @EventsMask long mRegisteredEventsMask = 0;
+    private @EventFlag long mRegisteredEventFlagsMask = 0;
     private final CopyOnWriteArrayList<DisplayListenerDelegate> mDisplayListeners =
             new CopyOnWriteArrayList<>();
 
@@ -346,10 +346,11 @@ public final class DisplayManagerGlobal {
      * @param packageName of the calling package.
      */
     public void registerDisplayListener(@NonNull DisplayListener listener,
-            @Nullable Handler handler, @EventsMask long eventsMask, String packageName) {
+            @Nullable Handler handler, @EventFlag long eventFlagsMask,
+            String packageName) {
         Looper looper = getLooperForHandler(handler);
         Handler springBoard = new Handler(looper);
-        registerDisplayListener(listener, new HandlerExecutor(springBoard), eventsMask,
+        registerDisplayListener(listener, new HandlerExecutor(springBoard), eventFlagsMask,
                 packageName);
     }
 
@@ -358,32 +359,32 @@ public final class DisplayManagerGlobal {
      *
      * @param listener The listener that will be called when display changes occur.
      * @param executor Executor for the thread that will be receiving the callbacks. Cannot be null.
-     * @param eventsMask Mask of events to be listened to.
+     * @param eventFlagsMask Flag of events to be listened to.
      * @param packageName of the calling package.
      */
     public void registerDisplayListener(@NonNull DisplayListener listener,
-            @NonNull Executor executor, @EventsMask long eventsMask, String packageName) {
+            @NonNull Executor executor, @EventFlag long eventFlagsMask, String packageName) {
         if (listener == null) {
             throw new IllegalArgumentException("listener must not be null");
         }
 
-        if (eventsMask == 0) {
+        if (eventFlagsMask == 0) {
             throw new IllegalArgumentException("The set of events to listen to must not be empty.");
         }
 
         if (extraLogging()) {
             Slog.i(TAG, "Registering Display Listener: "
-                    + Long.toBinaryString(eventsMask) + ", packageName: " + packageName);
+                    + Long.toBinaryString(eventFlagsMask) + ", packageName: " + packageName);
         }
 
         synchronized (mLock) {
             int index = findDisplayListenerLocked(listener);
             if (index < 0) {
-                mDisplayListeners.add(new DisplayListenerDelegate(listener, executor, eventsMask,
-                        packageName));
+                mDisplayListeners.add(new DisplayListenerDelegate(listener, executor,
+                        eventFlagsMask, packageName));
                 registerCallbackIfNeededLocked();
             } else {
-                mDisplayListeners.get(index).setEventsMask(eventsMask);
+                mDisplayListeners.get(index).setEventFlagsMask(eventFlagsMask);
             }
             updateCallbackIfNeededLocked();
             maybeLogAllDisplayListeners();
@@ -455,12 +456,12 @@ public final class DisplayManagerGlobal {
         return -1;
     }
 
-    @EventsMask
-    private int calculateEventsMaskLocked() {
+    @EventFlag
+    private int calculateEventFlagsMaskLocked() {
         int mask = 0;
         final int numListeners = mDisplayListeners.size();
         for (int i = 0; i < numListeners; i++) {
-            mask |= mDisplayListeners.get(i).mEventsMask;
+            mask |= mDisplayListeners.get(i).mEventFlagsMask;
         }
         if (mDispatchNativeCallbacks) {
             mask |= DisplayManager.EVENT_FLAG_DISPLAY_ADDED
@@ -478,14 +479,14 @@ public final class DisplayManagerGlobal {
     }
 
     private void updateCallbackIfNeededLocked() {
-        int mask = calculateEventsMaskLocked();
+        int mask = calculateEventFlagsMaskLocked();
         if (DEBUG) {
-            Log.d(TAG, "Mask for listener: " + mask);
+            Log.d(TAG, "Flag for listener: " + mask);
         }
-        if (mask != mRegisteredEventsMask) {
+        if (mask != mRegisteredEventFlagsMask) {
             try {
                 mDm.registerCallbackWithEventMask(mCallback, mask);
-                mRegisteredEventsMask = mask;
+                mRegisteredEventFlagsMask = mask;
             } catch (RemoteException ex) {
                 throw ex.rethrowFromSystemServer();
             }
@@ -1276,7 +1277,7 @@ public final class DisplayManagerGlobal {
 
     private static final class DisplayListenerDelegate {
         public final DisplayListener mListener;
-        public volatile long mEventsMask;
+        public volatile long mEventFlagsMask;
 
         private final DisplayInfo mDisplayInfo = new DisplayInfo();
         private final Executor mExecutor;
@@ -1284,10 +1285,10 @@ public final class DisplayManagerGlobal {
         private final String mPackageName;
 
         DisplayListenerDelegate(DisplayListener listener, @NonNull Executor executor,
-                @EventsMask long eventsMask, String packageName) {
+                @EventFlag long eventFlag, String packageName) {
             mExecutor = executor;
             mListener = listener;
-            mEventsMask = eventsMask;
+            mEventFlagsMask = eventFlag;
             mPackageName = packageName;
         }
 
@@ -1309,16 +1310,16 @@ public final class DisplayManagerGlobal {
             mGenerationId.incrementAndGet();
         }
 
-        void setEventsMask(@EventsMask long newEventsMask) {
-            mEventsMask = newEventsMask;
+        void setEventFlagsMask(@EventFlag long newEventsFlag) {
+            mEventFlagsMask = newEventsFlag;
         }
 
-        private void handleDisplayEventInner(int displayId, @DisplayEvent int event,
+        private void handleDisplayEventInner(int displayId, @DisplayEvent int eventFlagsMask,
                 @Nullable DisplayInfo info, boolean forceUpdate) {
             if (extraLogging()) {
-                Slog.i(TAG, "DLD(" + eventToString(event)
+                Slog.i(TAG, "DLD(" + eventToString(eventFlagsMask)
                         + ", display=" + displayId
-                        + ", mEventsMask=" + Long.toBinaryString(mEventsMask)
+                        + ", mEventsFlagMask=" + Long.toBinaryString(mEventFlagsMask)
                         + ", mPackageName=" + mPackageName
                         + ", displayInfo=" + info
                         + ", listener=" + mListener.getClass() + ")");
@@ -1326,18 +1327,18 @@ public final class DisplayManagerGlobal {
             if (DEBUG) {
                 Trace.beginSection(
                         TextUtils.trimToSize(
-                                "DLD(" + eventToString(event)
+                                "DLD(" + eventToString(eventFlagsMask)
                                 + ", display=" + displayId
                                 + ", listener=" + mListener.getClass() + ")", 127));
             }
-            switch (event) {
+            switch (eventFlagsMask) {
                 case EVENT_DISPLAY_ADDED:
-                    if ((mEventsMask & DisplayManager.EVENT_FLAG_DISPLAY_ADDED) != 0) {
+                    if ((mEventFlagsMask & DisplayManager.EVENT_FLAG_DISPLAY_ADDED) != 0) {
                         mListener.onDisplayAdded(displayId);
                     }
                     break;
                 case EVENT_DISPLAY_CHANGED:
-                    if ((mEventsMask & DisplayManager.EVENT_FLAG_DISPLAY_CHANGED) != 0) {
+                    if ((mEventFlagsMask & DisplayManager.EVENT_FLAG_DISPLAY_CHANGED) != 0) {
                         if (info != null && (forceUpdate || !info.equals(mDisplayInfo))) {
                             if (extraLogging()) {
                                 Slog.i(TAG, "Sending onDisplayChanged: Display Changed. Info: "
@@ -1349,27 +1350,29 @@ public final class DisplayManagerGlobal {
                     }
                     break;
                 case EVENT_DISPLAY_BRIGHTNESS_CHANGED:
-                    if ((mEventsMask & DisplayManager.EVENT_FLAG_DISPLAY_BRIGHTNESS) != 0) {
+                    if ((mEventFlagsMask & DisplayManager.EVENT_FLAG_DISPLAY_BRIGHTNESS) != 0) {
                         mListener.onDisplayChanged(displayId);
                     }
                     break;
                 case EVENT_DISPLAY_REMOVED:
-                    if ((mEventsMask & DisplayManager.EVENT_FLAG_DISPLAY_REMOVED) != 0) {
+                    if ((mEventFlagsMask & DisplayManager.EVENT_FLAG_DISPLAY_REMOVED) != 0) {
                         mListener.onDisplayRemoved(displayId);
                     }
                     break;
                 case EVENT_DISPLAY_HDR_SDR_RATIO_CHANGED:
-                    if ((mEventsMask & DisplayManager.EVENT_FLAG_HDR_SDR_RATIO_CHANGED) != 0) {
+                    if ((mEventFlagsMask & DisplayManager.EVENT_FLAG_HDR_SDR_RATIO_CHANGED) != 0) {
                         mListener.onDisplayChanged(displayId);
                     }
                     break;
                 case EVENT_DISPLAY_CONNECTED:
-                    if ((mEventsMask & DisplayManager.EVENT_FLAG_DISPLAY_CONNECTION_CHANGED) != 0) {
+                    if ((mEventFlagsMask & DisplayManager.EVENT_FLAG_DISPLAY_CONNECTION_CHANGED)
+                            != 0) {
                         mListener.onDisplayConnected(displayId);
                     }
                     break;
                 case EVENT_DISPLAY_DISCONNECTED:
-                    if ((mEventsMask & DisplayManager.EVENT_FLAG_DISPLAY_CONNECTION_CHANGED) != 0) {
+                    if ((mEventFlagsMask & DisplayManager.EVENT_FLAG_DISPLAY_CONNECTION_CHANGED)
+                            != 0) {
                         mListener.onDisplayDisconnected(displayId);
                     }
                     break;
@@ -1381,7 +1384,7 @@ public final class DisplayManagerGlobal {
 
         @Override
         public String toString() {
-            return "mask: {" + mEventsMask + "}, for " + mListener.getClass();
+            return "mEventFlagsMask: {" + mEventFlagsMask + "}, for " + mListener.getClass();
         }
     }
 

@@ -1047,6 +1047,7 @@ package android.app {
     method public int getUserLockedFields();
     method public boolean isDeleted();
     method public void populateFromXml(org.xmlpull.v1.XmlPullParser);
+    method @FlaggedApi("android.service.notification.notification_conversation_channel_management") public void setImportantConversation(boolean);
     method public org.json.JSONObject toJson() throws org.json.JSONException;
     method public void writeXml(org.xmlpull.v1.XmlSerializer) throws java.io.IOException;
     field public static final int USER_LOCKED_SOUND = 32; // 0x20
@@ -5286,11 +5287,13 @@ package android.hardware.display {
   public final class VirtualDisplayConfig implements android.os.Parcelable {
     method @FlaggedApi("android.companion.virtualdevice.flags.virtual_display_insets") @Nullable public android.view.DisplayCutout getDisplayCutout();
     method @FlaggedApi("android.companion.virtual.flags.vdm_custom_home") public boolean isHomeSupported();
+    method @FlaggedApi("com.android.window.flags.vdm_force_app_universal_resizable_api") public boolean isIgnoreActivitySizeRestrictions();
   }
 
   public static final class VirtualDisplayConfig.Builder {
     method @FlaggedApi("android.companion.virtualdevice.flags.virtual_display_insets") @NonNull public android.hardware.display.VirtualDisplayConfig.Builder setDisplayCutout(@Nullable android.view.DisplayCutout);
     method @FlaggedApi("android.companion.virtual.flags.vdm_custom_home") @NonNull public android.hardware.display.VirtualDisplayConfig.Builder setHomeSupported(boolean);
+    method @FlaggedApi("com.android.window.flags.vdm_force_app_universal_resizable_api") @NonNull public android.hardware.display.VirtualDisplayConfig.Builder setIgnoreActivitySizeRestrictions(boolean);
   }
 
 }
@@ -12464,7 +12467,16 @@ package android.security {
 
 package android.security.advancedprotection {
 
-  @FlaggedApi("android.security.aapm_api") public class AdvancedProtectionManager {
+  @FlaggedApi("android.security.aapm_api") public final class AdvancedProtectionFeature implements android.os.Parcelable {
+    ctor public AdvancedProtectionFeature(@NonNull String);
+    method public int describeContents();
+    method @NonNull public String getId();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.security.advancedprotection.AdvancedProtectionFeature> CREATOR;
+  }
+
+  @FlaggedApi("android.security.aapm_api") public final class AdvancedProtectionManager {
+    method @NonNull @RequiresPermission(android.Manifest.permission.SET_ADVANCED_PROTECTION_MODE) public java.util.List<android.security.advancedprotection.AdvancedProtectionFeature> getAdvancedProtectionFeatures();
     method @RequiresPermission(android.Manifest.permission.SET_ADVANCED_PROTECTION_MODE) public void setAdvancedProtectionEnabled(boolean);
   }
 

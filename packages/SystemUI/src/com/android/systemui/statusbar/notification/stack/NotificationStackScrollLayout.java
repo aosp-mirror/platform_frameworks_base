@@ -678,7 +678,9 @@ public class NotificationStackScrollLayout
         mGroupMembershipManager = Dependency.get(GroupMembershipManager.class);
         mGroupExpansionManager = Dependency.get(GroupExpansionManager.class);
         setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES);
-        setWindowInsetsAnimationCallback(mInsetsCallback);
+        if (!SceneContainerFlag.isEnabled()) {
+            setWindowInsetsAnimationCallback(mInsetsCallback);
+        }
     }
 
     /**
@@ -1694,7 +1696,7 @@ public class NotificationStackScrollLayout
             } else if (mQsFullScreen) {
                 int stackStartPosition =
                         getContentHeight() - getTopPadding() + getIntrinsicPadding();
-                int stackEndPosition = mMaxTopPadding + mShelf.getIntrinsicHeight();
+                int stackEndPosition = getMaxTopPadding() + mShelf.getIntrinsicHeight();
                 if (stackStartPosition <= stackEndPosition) {
                     stackHeight = stackEndPosition;
                 } else {
@@ -2086,6 +2088,7 @@ public class NotificationStackScrollLayout
     }
 
     private void updateImeInset(WindowInsets windowInsets) {
+        SceneContainerFlag.assertInLegacyMode();
         mImeInset = windowInsets.getInsets(WindowInsets.Type.ime()).bottom;
 
         if (mFooterView != null && mFooterView.getViewState() != null) {
@@ -2112,7 +2115,7 @@ public class NotificationStackScrollLayout
         if (cutout != null) {
             mWaterfallTopInset = cutout.getWaterfallInsets().top;
         }
-        if (!mIsInsetAnimationRunning) {
+        if (!SceneContainerFlag.isEnabled() && !mIsInsetAnimationRunning) {
             // update bottom inset e.g. after rotation
             updateImeInset(insets);
         }
@@ -2513,6 +2516,7 @@ public class NotificationStackScrollLayout
     }
 
     private int getImeInset() {
+        SceneContainerFlag.assertInLegacyMode();
         // The NotificationStackScrollLayout does not extend all the way to the bottom of the
         // display. Therefore, subtract that space from the mImeInset, in order to only include
         // the portion of the bottom inset that actually overlaps the NotificationStackScrollLayout.
@@ -2849,11 +2853,6 @@ public class NotificationStackScrollLayout
             onTopPaddingChanged(/* animate = */ animate && !mKeyguardBypassEnabled);
         }
         setExpandedHeight(mExpandedHeight);
-    }
-
-    public void setMaxTopPadding(int maxTopPadding) {
-        SceneContainerFlag.assertInLegacyMode();
-        mMaxTopPadding = maxTopPadding;
     }
 
     public int getLayoutMinHeight() {
@@ -3639,7 +3638,11 @@ public class NotificationStackScrollLayout
      * @return Whether a y coordinate is inside the content.
      */
     public boolean isInContentBounds(float y) {
-        return y < getHeight() - getEmptyBottomMarginInternal();
+        if (SceneContainerFlag.isEnabled()) {
+            return y < mAmbientState.getStackCutoff();
+        } else {
+            return y < getHeight() - getEmptyBottomMarginInternal();
+        }
     }
 
     private float getTouchSlop(MotionEvent event) {
@@ -5510,7 +5513,6 @@ public class NotificationStackScrollLayout
             println(pw, "alpha", getAlpha());
             println(pw, "suppressChildrenMeasureLayout", mSuppressChildrenMeasureAndLayout);
             println(pw, "scrollY", mAmbientState.getScrollY());
-            println(pw, "maxTopPadding", mMaxTopPadding);
             println(pw, "showShelfOnly", mShouldShowShelfOnly);
             println(pw, "qsExpandFraction", mQsExpansionFraction);
             println(pw, "isCurrentUserSetup", mIsCurrentUserSetup);
@@ -5547,6 +5549,7 @@ public class NotificationStackScrollLayout
                 println(pw, "intrinsicContentHeight", getIntrinsicContentHeight());
                 println(pw, "contentHeight", getContentHeight());
                 println(pw, "topPadding", getTopPadding());
+                println(pw, "maxTopPadding", getMaxTopPadding());
             }
         });
         pw.println();
@@ -6953,10 +6956,12 @@ public class NotificationStackScrollLayout
 
     /** Use {@link ScrollViewFields#intrinsicStackHeight}, when SceneContainerFlag is enabled. */
     private int getContentHeight() {
+        SceneContainerFlag.assertInLegacyMode();
         return mContentHeight;
     }
 
     private void setContentHeight(int contentHeight) {
+        SceneContainerFlag.assertInLegacyMode();
         mContentHeight = contentHeight;
     }
 
@@ -6965,10 +6970,23 @@ public class NotificationStackScrollLayout
      * @return the height of the content ignoring the footer.
      */
     public float getIntrinsicContentHeight() {
+        SceneContainerFlag.assertInLegacyMode();
         return mIntrinsicContentHeight;
     }
 
     private void setIntrinsicContentHeight(float intrinsicContentHeight) {
+        SceneContainerFlag.assertInLegacyMode();
         mIntrinsicContentHeight = intrinsicContentHeight;
+    }
+
+    private int getMaxTopPadding() {
+        SceneContainerFlag.assertInLegacyMode();
+        return mMaxTopPadding;
+    }
+
+    /** Not used with SceneContainerFlag, because we rely on the placeholder for placement. */
+    public void setMaxTopPadding(int maxTopPadding) {
+        SceneContainerFlag.assertInLegacyMode();
+        mMaxTopPadding = maxTopPadding;
     }
 }

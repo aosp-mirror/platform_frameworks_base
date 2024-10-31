@@ -40,9 +40,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.SceneScope
 import com.android.systemui.compose.modifiers.sysuiResTag
+import com.android.systemui.lifecycle.rememberViewModel
 import com.android.systemui.qs.panels.dagger.PaginatedBaseLayoutType
 import com.android.systemui.qs.panels.ui.compose.PaginatedGridLayout.Dimensions.FooterHeight
 import com.android.systemui.qs.panels.ui.compose.PaginatedGridLayout.Dimensions.InterPageSpacing
@@ -54,7 +54,7 @@ import javax.inject.Inject
 class PaginatedGridLayout
 @Inject
 constructor(
-    private val viewModel: PaginatedGridViewModel,
+    private val viewModelFactory: PaginatedGridViewModel.Factory,
     @PaginatedBaseLayoutType private val delegateGridLayout: PaginatableGridLayout,
 ) : GridLayout by delegateGridLayout {
     @Composable
@@ -63,13 +63,18 @@ constructor(
         modifier: Modifier,
         editModeStart: () -> Unit,
     ) {
+        val viewModel =
+            rememberViewModel(traceName = "PaginatedGridLayout-TileGrid") {
+                viewModelFactory.create()
+            }
+
         DisposableEffect(tiles) {
             val token = Any()
             tiles.forEach { it.startListening(token) }
             onDispose { tiles.forEach { it.stopListening(token) } }
         }
-        val columns by viewModel.columns.collectAsStateWithLifecycle()
-        val rows by viewModel.rows.collectAsStateWithLifecycle()
+        val columns by viewModel.columns
+        val rows = viewModel.rows
 
         val pages =
             remember(tiles, columns, rows) {

@@ -70,7 +70,7 @@ class MultitaskingShortcutsSource @Inject constructor(@Main private val resource
             },
             //  Change split screen focus to LHS:
             //   - Meta + Alt + Left arrow
-            shortcutInfo(resources.getString(R.string.system_multitasking_splitscreen_focus_rhs)) {
+            shortcutInfo(resources.getString(R.string.system_multitasking_splitscreen_focus_lhs)) {
                 command(META_META_ON or META_ALT_ON, KEYCODE_DPAD_LEFT)
             },
         )

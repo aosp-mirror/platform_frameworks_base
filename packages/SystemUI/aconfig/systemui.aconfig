@@ -1154,6 +1154,13 @@ flag {
 }
 
 flag {
+  name: "communal_hub_on_mobile"
+  namespace: "systemui"
+  description: "Brings the glanceable hub experience to mobile phones"
+  bug: "375689917"
+}
+
+flag {
     name: "dream_overlay_updated_font"
     namespace: "systemui"
     description: "Flag to enable updated font settings for dream overlay"

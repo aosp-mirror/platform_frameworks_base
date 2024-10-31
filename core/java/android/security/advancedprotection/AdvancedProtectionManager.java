@@ -29,6 +29,7 @@ import android.os.RemoteException;
 import android.security.Flags;
 import android.util.Log;
 
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 
@@ -41,7 +42,7 @@ import java.util.concurrent.Executor;
  */
 @FlaggedApi(Flags.FLAG_AAPM_API)
 @SystemService(Context.ADVANCED_PROTECTION_SERVICE)
-public class AdvancedProtectionManager {
+public final class AdvancedProtectionManager {
     private static final String TAG = "AdvancedProtectionMgr";
 
     private final ConcurrentHashMap<Callback, IAdvancedProtectionCallback>
@@ -141,6 +142,22 @@ public class AdvancedProtectionManager {
     public void setAdvancedProtectionEnabled(boolean enabled) {
         try {
             mService.setAdvancedProtectionEnabled(enabled);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the list of advanced protection features which are available on this device.
+     *
+     * @hide
+     */
+    @SystemApi
+    @NonNull
+    @RequiresPermission(Manifest.permission.SET_ADVANCED_PROTECTION_MODE)
+    public List<AdvancedProtectionFeature> getAdvancedProtectionFeatures() {
+        try {
+            return mService.getAdvancedProtectionFeatures();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
