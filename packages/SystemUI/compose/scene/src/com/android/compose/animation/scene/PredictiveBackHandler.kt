@@ -70,6 +70,7 @@ internal fun PredictiveBackHandler(
             // The predictive back APIs will automatically animate the progress for us in this case
             // so there is no need to animate it.
             cancelSpec = snap(),
+            animationScope = layoutImpl.animationScope,
         )
     }
 }
