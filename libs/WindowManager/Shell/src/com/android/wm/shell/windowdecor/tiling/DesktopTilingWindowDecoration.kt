@@ -483,7 +483,7 @@ class DesktopTilingWindowDecoration(
         }
     }
 
-    fun onUserChange() {
+    fun resetTilingSession() {
         if (leftTaskResizingHelper != null) {
             removeTask(leftTaskResizingHelper, taskVanished = false, shouldDelayUpdate = true)
             leftTaskResizingHelper = null
