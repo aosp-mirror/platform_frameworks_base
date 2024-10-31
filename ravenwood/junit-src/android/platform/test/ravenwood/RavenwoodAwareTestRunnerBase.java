@@ -74,7 +74,7 @@ abstract class RavenwoodAwareTestRunnerBase extends Runner implements Filterable
     }
 
     @Override
-    public Description getDescription() {
+    public final Description getDescription() {
         return getRealRunner().getDescription();
     }
 
