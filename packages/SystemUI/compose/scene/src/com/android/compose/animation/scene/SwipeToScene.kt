@@ -19,7 +19,6 @@ package com.android.compose.animation.scene
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollDispatcher
 import androidx.compose.ui.input.nestedscroll.nestedScrollModifierNode
 import androidx.compose.ui.input.pointer.PointerEvent
@@ -63,6 +62,40 @@ private fun Content.shouldEnableSwipes(orientation: Orientation): Boolean {
     }
 
     return userActions.keys.any { it is Swipe.Resolved && it.direction.orientation == orientation }
+}
+
+/**
+ * Finds the best matching [UserActionResult] for the given [swipe] within this [Content].
+ * Prioritizes actions with matching [Swipe.Resolved.fromSource].
+ *
+ * @param swipe The swipe to match against.
+ * @return The best matching [UserActionResult], or `null` if no match is found.
+ */
+internal fun Content.findActionResultBestMatch(swipe: Swipe.Resolved): UserActionResult? {
+    var bestMatch: UserActionResult? = null
+    userActions.forEach { (actionSwipe, actionResult) ->
+        if (
+            actionSwipe !is Swipe.Resolved ||
+                // The direction must match.
+                actionSwipe.direction != swipe.direction ||
+                // The number of pointers down must match.
+                actionSwipe.pointerCount != swipe.pointerCount ||
+                // The action requires a specific fromSource.
+                (actionSwipe.fromSource != null && actionSwipe.fromSource != swipe.fromSource)
+        ) {
+            // This action is not eligible.
+            return@forEach
+        }
+
+        // Prioritize actions with a matching fromSource.
+        if (actionSwipe.fromSource == swipe.fromSource) {
+            return actionResult
+        }
+
+        // Otherwise, keep track of the best eligible action.
+        bestMatch = actionResult
+    }
+    return bestMatch
 }
 
 private data class SwipeToSceneElement(
@@ -155,10 +188,10 @@ private class SwipeToSceneNode(
 
     override fun onCancelPointerInput() = multiPointerDraggableNode.onCancelPointerInput()
 
-    private fun startDragImmediately(startedPosition: Offset): Boolean {
+    private fun startDragImmediately(pointersInfo: PointersInfo): Boolean {
         // Immediately start the drag if the user can't swipe in the other direction and the gesture
         // handler can intercept it.
-        return !canOppositeSwipe() && draggableHandler.shouldImmediatelyIntercept(startedPosition)
+        return !canOppositeSwipe() && draggableHandler.shouldImmediatelyIntercept(pointersInfo)
     }
 
     private fun canOppositeSwipe(): Boolean {
