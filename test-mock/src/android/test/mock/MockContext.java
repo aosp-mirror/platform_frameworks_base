@@ -53,6 +53,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import java.util.concurrent.Executor;
 
 /**
@@ -604,6 +605,12 @@ public class MockContext extends Context {
 
     @Override
     public void unregisterReceiver(BroadcastReceiver receiver) {
+        throw new UnsupportedOperationException();
+    }
+
+    /** @hide */
+    @Override
+    public List<IntentFilter> getRegisteredIntentFilters(BroadcastReceiver receiver) {
         throw new UnsupportedOperationException();
     }
 

@@ -14301,6 +14301,10 @@ public class ActivityManagerService extends IActivityManager.Stub
         mBroadcastController.unregisterReceiver(receiver);
     }
 
+    public List<IntentFilter> getRegisteredIntentFilters(IIntentReceiver receiver) {
+        return mBroadcastController.getRegisteredIntentFilters(receiver);
+    }
+
     @GuardedBy("this")
     final int broadcastIntentLocked(ProcessRecord callerApp,
             String callerPackage, String callerFeatureId, Intent intent, String resolvedType,
