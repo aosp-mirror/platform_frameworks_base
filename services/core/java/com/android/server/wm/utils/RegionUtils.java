@@ -92,4 +92,9 @@ public class RegionUtils {
         }
         return area;
     }
+
+    /** Returns whether the sizes between the two Rects are equal. */
+    public static boolean sizeEquals(Rect a, Rect b) {
+        return a.width() == b.width() && a.height() == b.height();
+    }
 }
