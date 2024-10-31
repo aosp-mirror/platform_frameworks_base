@@ -16,13 +16,6 @@ flag {
 }
 
 flag {
-    name: "bal_show_toasts"
-    namespace: "responsible_apis"
-    description: "Enable toasts to indicate (potential) BAL blocking."
-    bug: "308059069"
-}
-
-flag {
     name: "bal_show_toasts_blocked"
     namespace: "responsible_apis"
     description: "Enable toasts to indicate actual BAL blocking."
