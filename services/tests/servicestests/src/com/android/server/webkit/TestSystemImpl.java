@@ -36,18 +36,15 @@ public class TestSystemImpl implements SystemInterface {
     Map<String, Map<Integer, PackageInfo>> mPackages = new HashMap();
     private final int mNumRelros;
     private final boolean mIsDebuggable;
-    private int mMultiProcessSetting;
-    private final boolean mMultiProcessDefault;
 
     public static final int PRIMARY_USER_ID = 0;
 
-    public TestSystemImpl(WebViewProviderInfo[] packageConfigs, int numRelros, boolean isDebuggable,
-            boolean multiProcessDefault) {
+    public TestSystemImpl(WebViewProviderInfo[] packageConfigs, int numRelros,
+            boolean isDebuggable) {
         mPackageConfigs = packageConfigs;
         mNumRelros = numRelros;
         mIsDebuggable = isDebuggable;
         mUsers.add(PRIMARY_USER_ID);
-        mMultiProcessDefault = multiProcessDefault;
     }
 
     public void addUser(int userId) {
@@ -181,25 +178,7 @@ public class TestSystemImpl implements SystemInterface {
     }
 
     @Override
-    public int getMultiProcessSetting() {
-        return mMultiProcessSetting;
-    }
-
-    @Override
-    public void setMultiProcessSetting(int value) {
-        mMultiProcessSetting = value;
-    }
-
-    @Override
-    public void notifyZygote(boolean enableMultiProcess) {}
-
-    @Override
     public void ensureZygoteStarted() {}
-
-    @Override
-    public boolean isMultiProcessDefaultEnabled() {
-        return mMultiProcessDefault;
-    }
 
     @Override
     public void pinWebviewIfRequired(ApplicationInfo appInfo) {}

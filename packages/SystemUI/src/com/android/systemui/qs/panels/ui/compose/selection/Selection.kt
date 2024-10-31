@@ -16,7 +16,11 @@
 
 package com.android.systemui.qs.panels.ui.compose.selection
 
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.animateIntAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Box
@@ -78,7 +82,6 @@ fun ResizableTileContainer(
         ResizingHandle(
             enabled = selected,
             selectionState = selectionState,
-            transition = selectionAlpha,
             tileWidths = tileWidths,
             modifier =
                 // Higher zIndex to make sure the handle is drawn above the content
@@ -91,7 +94,6 @@ fun ResizableTileContainer(
 private fun ResizingHandle(
     enabled: Boolean,
     selectionState: MutableSelectionState,
-    transition: () -> Float,
     tileWidths: () -> TileWidths?,
     modifier: Modifier = Modifier,
 ) {
@@ -126,19 +128,24 @@ private fun ResizingHandle(
                     }
             }
     ) {
-        ResizingDot(transition = transition, modifier = Modifier.align(Alignment.Center))
+        ResizingDot(enabled = enabled, modifier = Modifier.align(Alignment.Center))
     }
 }
 
 @Composable
 private fun ResizingDot(
-    transition: () -> Float,
+    enabled: Boolean,
     modifier: Modifier = Modifier,
     color: Color = MaterialTheme.colorScheme.primary,
 ) {
+    val alpha by animateFloatAsState(if (enabled) 1f else 0f)
+    val radius by
+        animateDpAsState(
+            if (enabled) ResizingDotSize / 2 else 0.dp,
+            animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
+        )
     Canvas(modifier = modifier.size(ResizingDotSize)) {
-        val v = transition()
-        drawCircle(color = color, radius = (ResizingDotSize / 2).toPx() * v, alpha = v)
+        drawCircle(color = color, radius = radius.toPx(), alpha = alpha)
     }
 }
 

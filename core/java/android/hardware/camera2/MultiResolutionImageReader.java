@@ -224,9 +224,8 @@ public class MultiResolutionImageReader implements AutoCloseable {
      * @see
      * android.hardware.camera2.params.MultiResolutionStreamConfigurationMap
      *
-     * @hide
      */
-    @FlaggedApi(Flags.FLAG_MULTIRESOLUTION_IMAGEREADER_USAGE_CONFIG)
+    @FlaggedApi(Flags.FLAG_MULTIRESOLUTION_IMAGEREADER_USAGE_PUBLIC)
     public MultiResolutionImageReader(
             @NonNull Collection<MultiResolutionStreamInfo> streams,
             @Format             int format,

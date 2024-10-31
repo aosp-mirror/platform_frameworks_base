@@ -17,25 +17,30 @@
 package com.android.systemui.qs.panels.ui.compose.selection
 
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.setValue
 import com.android.systemui.qs.panels.ui.compose.selection.ResizingDefaults.RESIZING_THRESHOLD
 
 class ResizingState(private val widths: TileWidths, private val onResize: () -> Unit) {
-    // Total drag offset of this resize operation
-    private var totalOffset = 0f
+    /** Total drag offset of this resize operation. */
+    private var totalOffset by mutableFloatStateOf(0f)
 
     /** Width in pixels of the resizing tile. */
     var width by mutableIntStateOf(widths.base)
 
+    /** Progression between icon (0) and large (1) sizes. */
+    val progression
+        get() = calculateProgression()
+
     // Whether the tile is currently over the threshold and should be a large tile
-    private var passedThreshold: Boolean = passedThreshold(calculateProgression(width))
+    private var passedThreshold: Boolean = passedThreshold(progression)
 
     fun onDrag(offset: Float) {
         totalOffset += offset
         width = (widths.base + totalOffset).toInt().coerceIn(widths.min, widths.max)
 
-        passedThreshold(calculateProgression(width)).let {
+        passedThreshold(progression).let {
             // Resize if we went over the threshold
             if (passedThreshold != it) {
                 passedThreshold = it
@@ -49,7 +54,7 @@ class ResizingState(private val widths: TileWidths, private val onResize: () -> 
     }
 
     /** The progression of the resizing tile between an icon tile (0f) and a large tile (1f) */
-    private fun calculateProgression(width: Int): Float {
+    private fun calculateProgression(): Float {
         return ((width - widths.min) / (widths.max - widths.min).toFloat()).coerceIn(0f, 1f)
     }
 }

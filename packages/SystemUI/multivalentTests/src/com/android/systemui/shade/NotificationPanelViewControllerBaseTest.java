@@ -619,7 +619,8 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                         mScreenOffAnimationController,
                         new NotificationWakeUpCoordinatorLogger(logcatLogBuffer()),
                         notifsKeyguardInteractor,
-                        mKosmos.getCommunalInteractor());
+                        mKosmos.getCommunalInteractor(),
+                        mKosmos.getPulseExpansionInteractor());
         mConfigurationController = new ConfigurationControllerImpl(mContext);
         PulseExpansionHandler expansionHandler = new PulseExpansionHandler(
                 mContext,

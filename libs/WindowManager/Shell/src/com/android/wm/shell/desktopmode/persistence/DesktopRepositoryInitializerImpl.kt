@@ -17,7 +17,7 @@
 package com.android.wm.shell.desktopmode.persistence
 
 import android.content.Context
-import com.android.window.flags.Flags
+import android.window.DesktopModeFlags
 import com.android.wm.shell.desktopmode.DesktopRepository
 import com.android.wm.shell.shared.annotations.ShellMainThread
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
@@ -36,7 +36,7 @@ class DesktopRepositoryInitializerImpl(
     @ShellMainThread private val mainCoroutineScope: CoroutineScope,
 ) : DesktopRepositoryInitializer {
     override fun initialize(repository: DesktopRepository) {
-        if (!Flags.enableDesktopWindowingPersistence()) return
+        if (!DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_PERSISTENCE.isTrue()) return
         //  TODO: b/365962554 - Handle the case that user moves to desktop before it's initialized
         mainCoroutineScope.launch {
             val desktop = persistentRepository.readDesktop() ?: return@launch

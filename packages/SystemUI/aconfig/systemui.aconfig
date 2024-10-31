@@ -59,11 +59,19 @@ flag {
 flag {
    name: "notification_over_expansion_clipping_fix"
    namespace: "systemui"
-   description: "fix NSSL clipping when over-expanding; fixes split shade bug."
+   description: "Fix NSSL clipping when over-expanding; fixes split shade bug."
    bug: "288553572"
    metadata {
         purpose: PURPOSE_BUGFIX
    }
+}
+
+flag {
+    name: "notification_add_x_on_hover_to_dismiss"
+    namespace: "systemui"
+    description: "Adds an x to notifications which shows up on mouse hover, allowing the user to "
+        "dismiss a notification with mouse."
+    bug: "376297472"
 }
 
 flag {
@@ -740,10 +748,13 @@ flag {
 }
 
 flag {
-    name: "smartspace_swipe_event_logging"
+    name: "smartspace_swipe_event_logging_fix"
     namespace: "systemui"
     description: "Log card swipe events in smartspace"
     bug: "374150422"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+   }
 }
 
 flag {
@@ -1140,6 +1151,13 @@ flag {
   namespace: "systemui"
   description: "Support communal features without a dock"
   bug: "352301247"
+}
+
+flag {
+  name: "communal_hub_on_mobile"
+  namespace: "systemui"
+  description: "Brings the glanceable hub experience to mobile phones"
+  bug: "375689917"
 }
 
 flag {
@@ -1615,6 +1633,16 @@ flag {
 }
 
 flag {
+  name: "home_controls_dream_hsum"
+  namespace: "systemui"
+  description: "Enables the home controls dream in HSUM"
+  bug: "370691405"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
    name: "only_show_media_stream_slider_in_single_volume_mode"
    namespace: "systemui"
    description: "When the device is in single volume mode, only show media stream slider and hide all other stream (e.g. call, notification, alarm, etc) sliders in volume panel"
@@ -1639,6 +1667,13 @@ flag {
     namespace: "systemui"
     description: "Enables the tile detailed view UI."
     bug: "374173773"
+}
+
+flag {
+    name: "bouncer_ui_revamp"
+    namespace: "systemui"
+    description: "Updates to background (blur), button animations and font changes."
+    bug: "376491880"
 }
 
 flag {

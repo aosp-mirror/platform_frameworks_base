@@ -61,6 +61,8 @@ import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
@@ -91,6 +93,11 @@ constructor(
     @Application private val appContext: Context,
     private val sceneInteractor: Lazy<SceneInteractor>,
 ) {
+    /**
+     * Whether a quick affordance is being launched. Quick Affordances are interactive lockscreen UI
+     * elements that allow the user to perform quick actions without unlocking their device.
+     */
+    val launchingAffordance: StateFlow<Boolean> = repository.get().launchingAffordance.asStateFlow()
 
     /**
      * Whether the UI should use the long press gesture to activate quick affordances.
@@ -167,11 +174,7 @@ constructor(
      * @param expandable An optional [Expandable] for the activity- or dialog-launch animation
      * @param slotId The id of the lockscreen slot that the affordance is in
      */
-    fun onQuickAffordanceTriggered(
-        configKey: String,
-        expandable: Expandable?,
-        slotId: String,
-    ) {
+    fun onQuickAffordanceTriggered(configKey: String, expandable: Expandable?, slotId: String) {
         val (decodedSlotId, decodedConfigKey) = configKey.decode()
         val config =
             repository.get().selections.value[decodedSlotId]?.find { it.key == decodedConfigKey }
@@ -191,10 +194,7 @@ constructor(
                 )
             is KeyguardQuickAffordanceConfig.OnTriggeredResult.Handled -> Unit
             is KeyguardQuickAffordanceConfig.OnTriggeredResult.ShowDialog ->
-                showDialog(
-                    result.dialog,
-                    result.expandable,
-                )
+                showDialog(result.dialog, result.expandable)
         }
     }
 
@@ -225,12 +225,7 @@ constructor(
 
         selections.add(affordanceId)
 
-        repository
-            .get()
-            .setSelections(
-                slotId = slotId,
-                affordanceIds = selections,
-            )
+        repository.get().setSelections(slotId = slotId, affordanceIds = selections)
 
         logger.logQuickAffordanceSelected(slotId, affordanceId)
         metricsLogger.logOnShortcutSelected(slotId, affordanceId)
@@ -274,12 +269,7 @@ constructor(
                 .getOrDefault(slotId, emptyList())
                 .toMutableList()
         return if (selections.remove(affordanceId)) {
-            repository
-                .get()
-                .setSelections(
-                    slotId = slotId,
-                    affordanceIds = selections,
-                )
+            repository.get().setSelections(slotId = slotId, affordanceIds = selections)
             true
         } else {
             false
@@ -399,9 +389,13 @@ constructor(
                 intent,
                 true /* dismissShade */,
                 expandable?.activityTransitionController(),
-                true /* showOverLockscreenWhenLocked */,
+                true, /* showOverLockscreenWhenLocked */
             )
         }
+    }
+
+    fun setLaunchingAffordance(isLaunchingAffordance: Boolean) {
+        repository.get().launchingAffordance.value = isLaunchingAffordance
     }
 
     private fun String.encode(slotId: String): String {
@@ -444,19 +438,19 @@ constructor(
             ),
             KeyguardPickerFlag(
                 name = Contract.FlagsTable.FLAG_NAME_MONOCHROMATIC_THEME,
-                value = featureFlags.isEnabled(Flags.MONOCHROMATIC_THEME)
+                value = featureFlags.isEnabled(Flags.MONOCHROMATIC_THEME),
             ),
             KeyguardPickerFlag(
                 name = Contract.FlagsTable.FLAG_NAME_WALLPAPER_PICKER_UI_FOR_AIWP,
-                value = featureFlags.isEnabled(Flags.WALLPAPER_PICKER_UI_FOR_AIWP)
+                value = featureFlags.isEnabled(Flags.WALLPAPER_PICKER_UI_FOR_AIWP),
             ),
             KeyguardPickerFlag(
                 name = Contract.FlagsTable.FLAG_NAME_PAGE_TRANSITIONS,
-                value = featureFlags.isEnabled(Flags.WALLPAPER_PICKER_PAGE_TRANSITIONS)
+                value = featureFlags.isEnabled(Flags.WALLPAPER_PICKER_PAGE_TRANSITIONS),
             ),
             KeyguardPickerFlag(
                 name = Contract.FlagsTable.FLAG_NAME_WALLPAPER_PICKER_PREVIEW_ANIMATION,
-                value = featureFlags.isEnabled(Flags.WALLPAPER_PICKER_PREVIEW_ANIMATION)
+                value = featureFlags.isEnabled(Flags.WALLPAPER_PICKER_PREVIEW_ANIMATION),
             ),
         )
     }

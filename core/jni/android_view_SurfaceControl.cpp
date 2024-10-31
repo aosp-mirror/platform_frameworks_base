@@ -298,6 +298,11 @@ static struct {
     jmethodID ctor;
 } gFrameRateCategoryRateClassInfo;
 
+static struct {
+    jclass clazz;
+    jmethodID asList;
+} gUtilArrays;
+
 constexpr ui::Dataspace pickDataspaceFromColorMode(const ui::ColorMode colorMode) {
     switch (colorMode) {
         case ui::ColorMode::DISPLAY_P3:
@@ -2206,10 +2211,13 @@ public:
             env->SetObjectArrayElement(jJankDataArray, i, jJankData);
             env->DeleteLocalRef(jJankData);
         }
-        env->CallVoidMethod(target,
-                gJankDataListenerClassInfo.onJankDataAvailable,
-                jJankDataArray);
+
+        jobject jJankDataList =
+                env->CallStaticObjectMethod(gUtilArrays.clazz, gUtilArrays.asList, jJankDataArray);
         env->DeleteLocalRef(jJankDataArray);
+
+        env->CallVoidMethod(target, gJankDataListenerClassInfo.onJankDataAvailable, jJankDataList);
+        env->DeleteLocalRef(jJankDataList);
         env->DeleteLocalRef(target);
 
         return true;
@@ -2858,7 +2866,7 @@ int register_android_view_SurfaceControl(JNIEnv* env)
     gJankDataListenerClassInfo.clazz = MakeGlobalRefOrDie(env, onJankDataListenerClazz);
     gJankDataListenerClassInfo.onJankDataAvailable =
             GetMethodIDOrDie(env, onJankDataListenerClazz, "onJankDataAvailable",
-                             "([Landroid/view/SurfaceControl$JankData;)V");
+                             "(Ljava/util/List;)V");
 
     jclass transactionCommittedListenerClazz =
             FindClassOrDie(env, "android/view/SurfaceControl$TransactionCommittedListener");
@@ -2933,6 +2941,10 @@ int register_android_view_SurfaceControl(JNIEnv* env)
     gStalledTransactionInfoClassInfo.frameNumber =
             GetFieldIDOrDie(env, stalledTransactionInfoClazz, "frameNumber", "J");
 
+    jclass utilArrays = FindClassOrDie(env, "java/util/Arrays");
+    gUtilArrays.clazz = MakeGlobalRefOrDie(env, utilArrays);
+    gUtilArrays.asList = GetStaticMethodIDOrDie(env, utilArrays, "asList",
+                                                "([Ljava/lang/Object;)Ljava/util/List;");
     return err;
 }
 

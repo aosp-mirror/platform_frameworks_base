@@ -34,7 +34,7 @@ fun ModeTileGrid(viewModel: ModesDialogViewModel) {
 
     LazyVerticalGrid(
         columns = GridCells.Fixed(1),
-        modifier = Modifier.fillMaxWidth().heightIn(max = 320.dp),
+        modifier = Modifier.fillMaxWidth().heightIn(max = 280.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {

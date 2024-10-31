@@ -37,6 +37,7 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLAS
 import static com.android.server.wm.AppCompatConfiguration.LETTERBOX_POSITION_MULTIPLIER_CENTER;
 import static com.android.server.wm.AppCompatConfiguration.MIN_FIXED_ORIENTATION_LETTERBOX_ASPECT_RATIO;
 import static com.android.server.wm.AppCompatUtils.isChangeEnabled;
+import static com.android.server.wm.AppCompatUtils.isDisplayIgnoreActivitySizeRestrictions;
 
 import android.annotation.NonNull;
 import android.content.pm.IPackageManager;
@@ -175,8 +176,17 @@ class AppCompatAspectRatioOverrides {
                 && mActivityRecord.mDisplayContent.getIgnoreOrientationRequest();
     }
 
+    /**
+     * Whether to ignore fixed orientation, aspect ratio and resizability of activity.
+     */
     boolean hasFullscreenOverride() {
-        return shouldApplyUserFullscreenOverride() || isSystemOverrideToFullscreenEnabled();
+        return shouldApplyUserFullscreenOverride() || isSystemOverrideToFullscreenEnabled()
+                || shouldIgnoreActivitySizeRestrictionsForDisplay();
+    }
+
+    boolean shouldIgnoreActivitySizeRestrictionsForDisplay() {
+        return isDisplayIgnoreActivitySizeRestrictions(mActivityRecord)
+                && !mAllowOrientationOverrideOptProp.isFalse();
     }
 
     float getUserMinAspectRatio() {

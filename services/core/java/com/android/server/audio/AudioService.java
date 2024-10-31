@@ -457,7 +457,7 @@ public class AudioService extends IAudioService.Stub
     private static final int MSG_UPDATE_AUDIO_MODE = 36;
     private static final int MSG_RECORDING_CONFIG_CHANGE = 37;
     private static final int MSG_BT_DEV_CHANGED = 38;
-
+    private static final int MSG_UPDATE_AUDIO_MODE_SIGNAL = 39;
     private static final int MSG_DISPATCH_AUDIO_MODE = 40;
     private static final int MSG_ROUTING_UPDATED = 41;
     private static final int MSG_INIT_HEADTRACKING_SENSORS = 42;
@@ -4804,16 +4804,14 @@ public class AudioService extends IAudioService.Stub
     }
 
     static class UpdateAudioModeInfo {
-        UpdateAudioModeInfo(int mode, int pid, String packageName, boolean signal) {
+        UpdateAudioModeInfo(int mode, int pid, String packageName) {
             mMode = mode;
             mPid = pid;
             mPackageName = packageName;
-            mSignal = signal;
         }
         private final int mMode;
         private final int mPid;
         private final String mPackageName;
-        private final boolean mSignal;
 
         int getMode() {
             return mMode;
@@ -4824,9 +4822,6 @@ public class AudioService extends IAudioService.Stub
         String getPackageName() {
             return mPackageName;
         }
-        boolean getSignal() {
-            return mSignal;
-        }
     }
 
     void postUpdateAudioMode(int msgPolicy, int mode, int pid, String packageName,
@@ -4835,8 +4830,8 @@ public class AudioService extends IAudioService.Stub
             if (signal) {
                 mAudioModeResetCount++;
             }
-            sendMsg(mAudioHandler, MSG_UPDATE_AUDIO_MODE, msgPolicy, 0, 0,
-                new UpdateAudioModeInfo(mode, pid, packageName, signal), delay);
+            sendMsg(mAudioHandler, signal ? MSG_UPDATE_AUDIO_MODE_SIGNAL : MSG_UPDATE_AUDIO_MODE,
+                    msgPolicy, 0, 0, new UpdateAudioModeInfo(mode, pid, packageName), delay);
         }
     }
 
@@ -6654,6 +6649,9 @@ public class AudioService extends IAudioService.Stub
                 // connections not started by the application changing the mode when pid changes
                 mDeviceBroker.postSetModeOwner(mode, pid, uid, signal);
             } else {
+                // reset here to avoid sticky out of sync condition (would have been reset
+                // by AudioDeviceBroker processing MSG_L_SET_MODE_OWNER_SIGNAL message)
+                resetAudioModeResetCount();
                 Log.w(TAG, "onUpdateAudioMode: failed to set audio mode to: " + mode);
             }
         }
@@ -10420,10 +10418,11 @@ public class AudioService extends IAudioService.Stub
                     break;
 
                 case MSG_UPDATE_AUDIO_MODE:
+                case MSG_UPDATE_AUDIO_MODE_SIGNAL:
                     synchronized (mDeviceBroker.mSetModeLock) {
                         UpdateAudioModeInfo info = (UpdateAudioModeInfo) msg.obj;
                         onUpdateAudioMode(info.getMode(), info.getPid(), info.getPackageName(),
-                                false /*force*/, info.getSignal());
+                                false /*force*/, msg.what == MSG_UPDATE_AUDIO_MODE_SIGNAL);
                     }
                     break;
 
@@ -11164,6 +11163,8 @@ public class AudioService extends IAudioService.Stub
                     elapsed = java.lang.System.currentTimeMillis() - start;
                     if (elapsed >= AUDIO_MODE_RESET_TIMEOUT_MS) {
                         Log.e(TAG, "Timeout waiting for audio mode reset");
+                        // reset count to avoid sticky out of sync state.
+                        resetAudioModeResetCount();
                         break;
                     }
                 }
@@ -11175,7 +11176,7 @@ public class AudioService extends IAudioService.Stub
         return mMediaFocusControl.abandonAudioFocus(fd, clientId, aa, callingPackageName);
     }
 
-    /** synchronization between setMode(NORMAL) and abandonAudioFocus() frmo Telecom */
+    /** synchronization between setMode(NORMAL) and abandonAudioFocus() from Telecom */
     private static final long AUDIO_MODE_RESET_TIMEOUT_MS = 3000;
 
     private final Object mAudioModeResetLock = new Object();
@@ -11190,6 +11191,13 @@ public class AudioService extends IAudioService.Stub
             } else {
                 Log.w(TAG, "mAudioModeResetCount already 0");
             }
+            mAudioModeResetLock.notify();
+        }
+    }
+
+    private void resetAudioModeResetCount() {
+        synchronized (mAudioModeResetLock) {
+            mAudioModeResetCount = 0;
             mAudioModeResetLock.notify();
         }
     }

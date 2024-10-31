@@ -536,7 +536,7 @@ flag {
 
 flag {
   name: "ignore_restrictions_when_deleting_private_profile"
-  namespace: "multiuser"
+  namespace: "profile_experiences"
   description: "Ignore any user restrictions when deleting private profiles."
   bug: "350953833"
   metadata {
