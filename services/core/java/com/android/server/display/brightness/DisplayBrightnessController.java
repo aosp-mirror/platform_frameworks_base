@@ -110,6 +110,9 @@ public final class DisplayBrightnessController {
     @VisibleForTesting
     AutomaticBrightnessController mAutomaticBrightnessController;
 
+    // True if the stylus is being used
+    private boolean mIsStylusBeingUsed;
+
     /**
      * The constructor of DisplayBrightnessController.
      */
@@ -147,12 +150,13 @@ public final class DisplayBrightnessController {
     public DisplayBrightnessState updateBrightness(
             DisplayManagerInternal.DisplayPowerRequest displayPowerRequest,
             int targetDisplayState,
-            DisplayManagerInternal.DisplayOffloadSession displayOffloadSession) {
+            DisplayManagerInternal.DisplayOffloadSession displayOffloadSession,
+            boolean isBedtimeModeWearEnabled) {
         DisplayBrightnessState state;
         synchronized (mLock) {
             mDisplayBrightnessStrategy = mDisplayBrightnessStrategySelector.selectStrategy(
                     constructStrategySelectionRequest(displayPowerRequest, targetDisplayState,
-                            displayOffloadSession));
+                            displayOffloadSession, isBedtimeModeWearEnabled));
             state = mDisplayBrightnessStrategy
                         .updateBrightness(constructStrategyExecutionRequest(displayPowerRequest));
         }
@@ -460,6 +464,8 @@ public final class DisplayBrightnessController {
         writer.println("  mScreenBrightnessDefault=" + mScreenBrightnessDefault);
         writer.println("  mPersistBrightnessNitsForDefaultDisplay="
                 + mPersistBrightnessNitsForDefaultDisplay);
+        writer.println("  mIsStylusBeingUsed="
+                + mIsStylusBeingUsed);
         synchronized (mLock) {
             writer.println("  mPendingScreenBrightness=" + mPendingScreenBrightness);
             writer.println("  mCurrentScreenBrightness=" + mCurrentScreenBrightness);
@@ -499,6 +505,18 @@ public final class DisplayBrightnessController {
         notifyCurrentScreenBrightness();
         mUserSetScreenBrightnessUpdated = true;
         return true;
+    }
+
+    /**
+     * Notifies if the stylus is currently being used or not.
+     */
+    public void setStylusBeingUsed(boolean isEnabled) {
+        mIsStylusBeingUsed = isEnabled;
+    }
+
+    @VisibleForTesting
+    boolean isStylusBeingUsed() {
+        return mIsStylusBeingUsed;
     }
 
     @VisibleForTesting
@@ -612,20 +630,22 @@ public final class DisplayBrightnessController {
     private StrategySelectionRequest constructStrategySelectionRequest(
             DisplayManagerInternal.DisplayPowerRequest displayPowerRequest,
             int targetDisplayState,
-            DisplayManagerInternal.DisplayOffloadSession displayOffloadSession) {
+            DisplayManagerInternal.DisplayOffloadSession displayOffloadSession,
+            boolean isBedtimeModeEnabled) {
         boolean userSetBrightnessChanged = updateUserSetScreenBrightness();
         float lastUserSetScreenBrightness;
         synchronized (mLock) {
             lastUserSetScreenBrightness = mLastUserSetScreenBrightness;
         }
         return new StrategySelectionRequest(displayPowerRequest, targetDisplayState,
-                lastUserSetScreenBrightness, userSetBrightnessChanged, displayOffloadSession);
+                lastUserSetScreenBrightness, userSetBrightnessChanged, displayOffloadSession,
+                mIsStylusBeingUsed, isBedtimeModeEnabled);
     }
 
     private StrategyExecutionRequest constructStrategyExecutionRequest(
             DisplayManagerInternal.DisplayPowerRequest displayPowerRequest) {
         float currentScreenBrightness = getCurrentBrightness();
         return new StrategyExecutionRequest(displayPowerRequest, currentScreenBrightness,
-                mUserSetScreenBrightnessUpdated);
+                mUserSetScreenBrightnessUpdated, mIsStylusBeingUsed);
     }
 }

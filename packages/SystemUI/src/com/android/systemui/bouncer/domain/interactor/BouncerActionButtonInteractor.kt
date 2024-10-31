@@ -88,43 +88,38 @@ constructor(
                 )
                 .map {
                     when {
-                        isReturnToCallButton() -> returnToCallButtonModel
-                        isEmergencyCallButton() -> emergencyCallButtonModel
+                        isReturnToCallButton() ->
+                            BouncerActionButtonModel.ReturnToCallButtonModel(
+                                labelResourceId = R.string.lockscreen_return_to_call
+                            )
+                        isEmergencyCallButton() ->
+                            BouncerActionButtonModel.EmergencyButtonModel(
+                                labelResourceId = R.string.lockscreen_emergency_call
+                            )
                         else -> null // Do not show the button.
                     }
                 }
                 .distinctUntilChanged()
         }
 
-    private val returnToCallButtonModel: BouncerActionButtonModel by lazy {
-        BouncerActionButtonModel(
-            label = applicationContext.getString(R.string.lockscreen_return_to_call),
-            onClick = {
-                prepareToPerformAction()
-                returnToCall()
-            },
-            onLongClick = null
-        )
+    fun onReturnToCallButtonClicked() {
+        prepareToPerformAction()
+        returnToCall()
     }
 
-    private val emergencyCallButtonModel: BouncerActionButtonModel by lazy {
-        BouncerActionButtonModel(
-            label = applicationContext.getString(R.string.lockscreen_emergency_call),
-            onClick = {
-                prepareToPerformAction()
-                dozeLogger.logEmergencyCall()
-                startEmergencyDialerActivity()
-            },
-            // TODO(b/308001302): The long click detector doesn't work properly, investigate.
-            onLongClick = {
-                if (emergencyAffordanceManager.needsEmergencyAffordance()) {
-                    prepareToPerformAction()
+    fun onEmergencyButtonClicked() {
+        prepareToPerformAction()
+        dozeLogger.logEmergencyCall()
+        startEmergencyDialerActivity()
+    }
 
-                    // TODO(b/298026988): Check that !longPressWasDragged before invoking.
-                    emergencyAffordanceManager.performEmergencyCall()
-                }
-            }
-        )
+    fun onEmergencyButtonLongClicked() {
+        if (emergencyAffordanceManager.needsEmergencyAffordance()) {
+            prepareToPerformAction()
+
+            // TODO(b/369767936): Check that !longPressWasDragged before invoking.
+            emergencyAffordanceManager.performEmergencyCall()
+        }
     }
 
     private fun startEmergencyDialerActivity() {
@@ -143,7 +138,7 @@ constructor(
             applicationContext.startActivityAsUser(
                 this,
                 ActivityOptions.makeCustomAnimation(applicationContext, 0, 0).toBundle(),
-                UserHandle(selectedUserInteractor.getSelectedUserId())
+                UserHandle(selectedUserInteractor.getSelectedUserId()),
             )
         }
     }

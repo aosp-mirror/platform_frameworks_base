@@ -20,7 +20,6 @@ import (
 	"github.com/google/blueprint/proptools"
 
 	"android/soong/android"
-	"android/soong/genrule"
 	"android/soong/java"
 )
 
@@ -29,6 +28,7 @@ const conscrypt = "conscrypt.module.public.api"
 const i18n = "i18n.module.public.api"
 const virtualization = "framework-virtualization"
 const location = "framework-location"
+const platformCrashrecovery = "framework-platformcrashrecovery"
 
 var core_libraries_modules = []string{art, conscrypt, i18n}
 
@@ -40,7 +40,7 @@ var core_libraries_modules = []string{art, conscrypt, i18n}
 // APIs.
 // In addition, the modules in this list are allowed to contribute to test APIs
 // stubs.
-var non_updatable_modules = []string{virtualization, location}
+var non_updatable_modules = []string{virtualization, location, platformCrashrecovery}
 
 // The intention behind this soong plugin is to generate a number of "merged"
 // API-related modules that would otherwise require a large amount of very
@@ -138,9 +138,10 @@ type libraryProps struct {
 }
 
 type fgProps struct {
-	Name       *string
-	Srcs       proptools.Configurable[[]string]
-	Visibility []string
+	Name               *string
+	Srcs               proptools.Configurable[[]string]
+	Device_common_srcs proptools.Configurable[[]string]
+	Visibility         []string
 }
 
 type defaultsProps struct {
@@ -201,7 +202,7 @@ func createMergedTxt(ctx android.LoadHookContext, txt MergedTxtDefinition, stubs
 		}
 	}
 	props.Visibility = []string{"//visibility:public"}
-	ctx.CreateModule(genrule.GenRuleFactory, &props)
+	ctx.CreateModule(java.GenRuleFactory, &props)
 }
 
 func createMergedAnnotationsFilegroups(ctx android.LoadHookContext, modules, system_server_modules proptools.Configurable[[]string]) {
@@ -230,7 +231,7 @@ func createMergedAnnotationsFilegroups(ctx android.LoadHookContext, modules, sys
 	} {
 		props := fgProps{}
 		props.Name = proptools.StringPtr(i.name)
-		props.Srcs = createSrcs(i.modules, i.tag)
+		props.Device_common_srcs = createSrcs(i.modules, i.tag)
 		ctx.CreateModule(android.FileGroupFactory, &props)
 	}
 }
@@ -429,7 +430,7 @@ func createMergedFrameworkSystemServerExportableStubs(ctx android.LoadHookContex
 func createPublicStubsSourceFilegroup(ctx android.LoadHookContext, modules proptools.Configurable[[]string]) {
 	props := fgProps{}
 	props.Name = proptools.StringPtr("all-modules-public-stubs-source")
-	props.Srcs = createSrcs(modules, "{.public.stubs.source}")
+	props.Device_common_srcs = createSrcs(modules, "{.public.stubs.source}")
 	props.Visibility = []string{"//frameworks/base"}
 	ctx.CreateModule(android.FileGroupFactory, &props)
 }
@@ -514,7 +515,7 @@ func (a *CombinedApis) createInternalModules(ctx android.LoadHookContext) {
 func combinedApisModuleFactory() android.Module {
 	module := &CombinedApis{}
 	module.AddProperties(&module.properties)
-	android.InitAndroidModule(module)
+	android.InitAndroidArchModule(module, android.DeviceSupported, android.MultilibCommon)
 	android.AddLoadHook(module, func(ctx android.LoadHookContext) { module.createInternalModules(ctx) })
 	return module
 }

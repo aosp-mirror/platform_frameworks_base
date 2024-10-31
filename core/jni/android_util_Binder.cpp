@@ -1747,9 +1747,9 @@ static const JNINativeMethod gBinderProxyMethods[] = {
     {"linkToDeathNative",   "(Landroid/os/IBinder$DeathRecipient;I)V", (void*)android_os_BinderProxy_linkToDeath},
     {"unlinkToDeathNative", "(Landroid/os/IBinder$DeathRecipient;I)Z", (void*)android_os_BinderProxy_unlinkToDeath},
     {"addFrozenStateChangeCallbackNative",
-        "(Landroid/os/IBinder$IFrozenStateChangeCallback;)V", (void*)android_os_BinderProxy_addFrozenStateChangeCallback},
+        "(Landroid/os/IBinder$FrozenStateChangeCallback;)V", (void*)android_os_BinderProxy_addFrozenStateChangeCallback},
     {"removeFrozenStateChangeCallbackNative",
-        "(Landroid/os/IBinder$IFrozenStateChangeCallback;)Z", (void*)android_os_BinderProxy_removeFrozenStateChangeCallback},
+        "(Landroid/os/IBinder$FrozenStateChangeCallback;)Z", (void*)android_os_BinderProxy_removeFrozenStateChangeCallback},
     {"getNativeFinalizer",  "()J", (void*)android_os_BinderProxy_getNativeFinalizer},
     {"getExtension",        "()Landroid/os/IBinder;", (void*)android_os_BinderProxy_getExtension},
 };
@@ -1774,7 +1774,7 @@ static int int_register_android_os_BinderProxy(JNIEnv* env)
                                    "(Landroid/os/IBinder$DeathRecipient;Landroid/os/IBinder;)V");
     gBinderProxyOffsets.mInvokeFrozenStateChangeCallback =
             GetStaticMethodIDOrDie(env, clazz, "invokeFrozenStateChangeCallback",
-                                   "(Landroid/os/IBinder$IFrozenStateChangeCallback;Landroid/os/"
+                                   "(Landroid/os/IBinder$FrozenStateChangeCallback;Landroid/os/"
                                    "IBinder;I)V");
     gBinderProxyOffsets.mNativeData = GetFieldIDOrDie(env, clazz, "mNativeData", "J");
 

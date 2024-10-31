@@ -26,6 +26,7 @@ import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
 import com.android.systemui.scene.shared.model.Scenes
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 
 @SysUISingleton
 class DozingToGlanceableHubTransitionViewModel
@@ -35,10 +36,16 @@ constructor(animationFlow: KeyguardTransitionAnimationFlow) : DeviceEntryIconTra
         animationFlow
             .setup(
                 duration = TO_GLANCEABLE_HUB_DURATION,
-                edge = Edge.create(DOZING, Scenes.Communal)
+                edge = Edge.create(DOZING, Scenes.Communal),
             )
             .setupWithoutSceneContainer(edge = Edge.create(DOZING, GLANCEABLE_HUB))
 
     override val deviceEntryParentViewAlpha: Flow<Float> =
         transitionAnimation.immediatelyTransitionTo(1f)
+
+    /**
+     * Hide notifications when transitioning directly from dozing to hub, such as when pressing
+     * power button when dozing and docked.
+     */
+    val notificationAlpha: Flow<Float> = flowOf(0f)
 }

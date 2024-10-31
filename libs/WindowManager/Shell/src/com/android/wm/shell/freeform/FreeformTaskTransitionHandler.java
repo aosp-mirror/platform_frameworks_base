@@ -19,17 +19,15 @@ package com.android.wm.shell.freeform;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 
-import static com.android.internal.jank.Cuj.CUJ_DESKTOP_MODE_EXIT_MODE_ON_LAST_WINDOW_CLOSE;
-
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.app.ActivityManager;
 import android.app.WindowConfiguration;
-import android.content.Context;
 import android.graphics.Rect;
 import android.os.IBinder;
 import android.util.ArrayMap;
+import android.util.DisplayMetrics;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
 import android.window.TransitionInfo;
@@ -39,13 +37,10 @@ import android.window.WindowContainerTransaction;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.android.internal.jank.InteractionJankMonitor;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.ShellExecutor;
-import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
-import com.android.wm.shell.sysui.ShellInit;
+import com.android.wm.shell.shared.animation.MinimizeAnimator;
 import com.android.wm.shell.transition.Transitions;
-import com.android.wm.shell.windowdecor.WindowDecorViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,12 +52,8 @@ import java.util.List;
 public class FreeformTaskTransitionHandler
         implements Transitions.TransitionHandler, FreeformTaskTransitionStarter {
     private static final int CLOSE_ANIM_DURATION = 400;
-    private final Context mContext;
     private final Transitions mTransitions;
-    private final WindowDecorViewModel mWindowDecorViewModel;
-    private final DesktopModeTaskRepository mDesktopModeTaskRepository;
     private final DisplayController mDisplayController;
-    private final InteractionJankMonitor mInteractionJankMonitor;
     private final ShellExecutor mMainExecutor;
     private final ShellExecutor mAnimExecutor;
 
@@ -71,30 +62,14 @@ public class FreeformTaskTransitionHandler
     private final ArrayMap<IBinder, ArrayList<Animator>> mAnimations = new ArrayMap<>();
 
     public FreeformTaskTransitionHandler(
-            ShellInit shellInit,
             Transitions transitions,
-            Context context,
-            WindowDecorViewModel windowDecorViewModel,
             DisplayController displayController,
             ShellExecutor mainExecutor,
-            ShellExecutor animExecutor,
-            DesktopModeTaskRepository desktopModeTaskRepository,
-            InteractionJankMonitor interactionJankMonitor) {
+            ShellExecutor animExecutor) {
         mTransitions = transitions;
-        mContext = context;
-        mWindowDecorViewModel = windowDecorViewModel;
-        mDesktopModeTaskRepository = desktopModeTaskRepository;
         mDisplayController = displayController;
-        mInteractionJankMonitor = interactionJankMonitor;
         mMainExecutor = mainExecutor;
         mAnimExecutor = animExecutor;
-        if (Transitions.ENABLE_SHELL_TRANSITIONS) {
-            shellInit.addInitCallback(this::onInit, this);
-        }
-    }
-
-    private void onInit() {
-        mWindowDecorViewModel.setFreeformTaskTransitionStarter(this);
     }
 
     @Override
@@ -126,9 +101,11 @@ public class FreeformTaskTransitionHandler
 
 
     @Override
-    public void startRemoveTransition(WindowContainerTransaction wct) {
+    public IBinder startRemoveTransition(WindowContainerTransaction wct) {
         final int type = WindowManager.TRANSIT_CLOSE;
-        mPendingTransitionTokens.add(mTransitions.startTransition(type, wct, this));
+        final IBinder transition = mTransitions.startTransition(type, wct, this);
+        mPendingTransitionTokens.add(transition);
+        return transition;
     }
 
     @Override
@@ -162,7 +139,7 @@ public class FreeformTaskTransitionHandler
                     break;
                 case WindowManager.TRANSIT_TO_BACK:
                     transitionHandled |= startMinimizeTransition(
-                            transition, info.getType(), change);
+                            transition, info.getType(), change, finishT, animations, onAnimFinish);
                     break;
                 case WindowManager.TRANSIT_CLOSE:
                     if (change.getTaskInfo().getWindowingMode() == WINDOWING_MODE_FREEFORM) {
@@ -231,7 +208,10 @@ public class FreeformTaskTransitionHandler
     private boolean startMinimizeTransition(
             IBinder transition,
             int type,
-            TransitionInfo.Change change) {
+            TransitionInfo.Change change,
+            SurfaceControl.Transaction finishT,
+            ArrayList<Animator> animations,
+            Runnable onAnimFinish) {
         if (!mPendingTransitionTokens.contains(transition)) {
             return false;
         }
@@ -240,7 +220,23 @@ public class FreeformTaskTransitionHandler
         if (type != Transitions.TRANSIT_MINIMIZE) {
             return false;
         }
-        // TODO(b/361524575): Add minimize animations
+
+        SurfaceControl.Transaction t = new SurfaceControl.Transaction();
+        SurfaceControl sc = change.getLeash();
+        finishT.hide(sc);
+        final DisplayMetrics displayMetrics =
+                mDisplayController
+                        .getDisplayContext(taskInfo.displayId).getResources().getDisplayMetrics();
+        final Animator animator = MinimizeAnimator.create(
+                displayMetrics,
+                change,
+                t,
+                (anim) -> {
+                    animations.remove(anim);
+                    onAnimFinish.run();
+                    return null;
+                });
+        animations.add(animator);
         return true;
     }
 
@@ -256,27 +252,18 @@ public class FreeformTaskTransitionHandler
         SurfaceControl.Transaction t = new SurfaceControl.Transaction();
         SurfaceControl sc = change.getLeash();
         finishT.hide(sc);
-        Rect startBounds = new Rect(change.getTaskInfo().configuration.windowConfiguration
-                .getBounds());
+        final Rect startBounds = new Rect(change.getStartAbsBounds());
         animator.addUpdateListener(animation -> {
             t.setPosition(sc, startBounds.left,
                     startBounds.top + (animation.getAnimatedFraction() * screenHeight));
             t.apply();
         });
-        if (mDesktopModeTaskRepository.getActiveNonMinimizedTaskCount(
-                        change.getTaskInfo().displayId) == 1) {
-            // Starting the jank trace if closing the last window in desktop mode.
-            mInteractionJankMonitor.begin(
-                    sc, mContext, CUJ_DESKTOP_MODE_EXIT_MODE_ON_LAST_WINDOW_CLOSE);
-        }
         animator.addListener(
                 new AnimatorListenerAdapter() {
                     @Override
                     public void onAnimationEnd(Animator animation) {
                         animations.remove(animator);
                         onAnimFinish.run();
-                        mInteractionJankMonitor.end(
-                                CUJ_DESKTOP_MODE_EXIT_MODE_ON_LAST_WINDOW_CLOSE);
                     }
                 });
         animations.add(animator);

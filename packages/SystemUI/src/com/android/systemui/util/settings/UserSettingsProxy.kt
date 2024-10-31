@@ -23,12 +23,13 @@ import android.net.Uri
 import android.os.UserHandle
 import android.provider.Settings.SettingNotFoundException
 import com.android.app.tracing.TraceUtils.trace
+import com.android.systemui.coroutines.newTracingContext
 import com.android.systemui.util.settings.SettingsProxy.Companion.parseFloat
 import com.android.systemui.util.settings.SettingsProxy.Companion.parseFloatOrThrow
 import com.android.systemui.util.settings.SettingsProxy.Companion.parseLongOrThrow
 import com.android.systemui.util.settings.SettingsProxy.Companion.parseLongOrUseDefault
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 import kotlinx.coroutines.withContext
 
 /**
@@ -78,7 +79,7 @@ interface UserSettingsProxy : SettingsProxy {
     }
 
     override fun registerContentObserverAsync(uri: Uri, settingsObserver: ContentObserver) =
-        CoroutineScope(backgroundDispatcher).launch {
+        CoroutineScope(backgroundDispatcher + newTracingContext("UserSettingsProxy-A")).launch {
             registerContentObserverForUserSync(uri, settingsObserver, userId)
         }
 
@@ -87,7 +88,7 @@ interface UserSettingsProxy : SettingsProxy {
     override fun registerContentObserverSync(
         uri: Uri,
         notifyForDescendants: Boolean,
-        settingsObserver: ContentObserver
+        settingsObserver: ContentObserver,
     ) {
         registerContentObserverForUserSync(uri, notifyForDescendants, settingsObserver, userId)
     }
@@ -110,9 +111,9 @@ interface UserSettingsProxy : SettingsProxy {
     override fun registerContentObserverAsync(
         uri: Uri,
         notifyForDescendants: Boolean,
-        settingsObserver: ContentObserver
+        settingsObserver: ContentObserver,
     ) =
-        CoroutineScope(backgroundDispatcher).launch {
+        CoroutineScope(backgroundDispatcher + newTracingContext("UserSettingsProxy-B")).launch {
             registerContentObserverForUserSync(uri, notifyForDescendants, settingsObserver, userId)
         }
 
@@ -155,9 +156,9 @@ interface UserSettingsProxy : SettingsProxy {
     fun registerContentObserverForUserAsync(
         name: String,
         settingsObserver: ContentObserver,
-        userHandle: Int
+        userHandle: Int,
     ) =
-        CoroutineScope(backgroundDispatcher).launch {
+        CoroutineScope(backgroundDispatcher + newTracingContext("UserSettingsProxy-C")).launch {
             registerContentObserverForUserSync(getUriFor(name), settingsObserver, userHandle)
         }
 
@@ -196,9 +197,9 @@ interface UserSettingsProxy : SettingsProxy {
     fun registerContentObserverForUserAsync(
         uri: Uri,
         settingsObserver: ContentObserver,
-        userHandle: Int
+        userHandle: Int,
     ) =
-        CoroutineScope(backgroundDispatcher).launch {
+        CoroutineScope(backgroundDispatcher + newTracingContext("UserSettingsProxy-D")).launch {
             registerContentObserverForUserSync(uri, settingsObserver, userHandle)
         }
 
@@ -213,9 +214,9 @@ interface UserSettingsProxy : SettingsProxy {
         uri: Uri,
         settingsObserver: ContentObserver,
         userHandle: Int,
-        @WorkerThread registered: Runnable
+        @WorkerThread registered: Runnable,
     ) =
-        CoroutineScope(backgroundDispatcher).launch {
+        CoroutineScope(backgroundDispatcher + newTracingContext("UserSettingsProxy-E")).launch {
             registerContentObserverForUserSync(uri, settingsObserver, userHandle)
             registered.run()
         }
@@ -272,14 +273,14 @@ interface UserSettingsProxy : SettingsProxy {
         name: String,
         notifyForDescendants: Boolean,
         settingsObserver: ContentObserver,
-        userHandle: Int
+        userHandle: Int,
     ) {
-        CoroutineScope(backgroundDispatcher).launch {
+        CoroutineScope(backgroundDispatcher + newTracingContext("UserSettingsProxy-F")).launch {
             registerContentObserverForUserSync(
                 getUriFor(name),
                 notifyForDescendants,
                 settingsObserver,
-                userHandle
+                userHandle,
             )
         }
     }
@@ -336,14 +337,14 @@ interface UserSettingsProxy : SettingsProxy {
         uri: Uri,
         notifyForDescendants: Boolean,
         settingsObserver: ContentObserver,
-        userHandle: Int
+        userHandle: Int,
     ) =
-        CoroutineScope(backgroundDispatcher).launch {
+        CoroutineScope(backgroundDispatcher + newTracingContext("UserSettingsProxy-G")).launch {
             registerContentObserverForUserSync(
                 uri,
                 notifyForDescendants,
                 settingsObserver,
-                userHandle
+                userHandle,
             )
         }
 

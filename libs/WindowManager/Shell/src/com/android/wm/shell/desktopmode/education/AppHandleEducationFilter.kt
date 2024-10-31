@@ -22,10 +22,13 @@ import android.content.Context
 import android.os.SystemClock
 import android.provider.Settings.Secure
 import com.android.wm.shell.R
+import com.android.wm.shell.desktopmode.CaptionState
+import com.android.wm.shell.desktopmode.education.AppHandleEducationController.Companion.SHOULD_OVERRIDE_EDUCATION_CONDITIONS
 import com.android.wm.shell.desktopmode.education.data.AppHandleEducationDatastoreRepository
 import com.android.wm.shell.desktopmode.education.data.WindowingEducationProto
 import java.time.Duration
 
+@kotlinx.coroutines.ExperimentalCoroutinesApi
 /** Filters incoming app handle education triggers based on set conditions. */
 class AppHandleEducationFilter(
     private val context: Context,
@@ -34,9 +37,20 @@ class AppHandleEducationFilter(
   private val usageStatsManager =
       context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
 
-  /** Returns true if conditions to show app handle education are met, returns false otherwise. */
-  suspend fun shouldShowAppHandleEducation(focusAppPackageName: String): Boolean {
+  /**
+   * Returns true if conditions to show app handle education are met, returns false otherwise.
+   *
+   * If [SHOULD_OVERRIDE_EDUCATION_CONDITIONS] is true, this method will always return
+   * ![captionState.isHandleMenuExpanded].
+   */
+  suspend fun shouldShowAppHandleEducation(captionState: CaptionState): Boolean {
+    if ((captionState as CaptionState.AppHandle).isHandleMenuExpanded) return false
+    if (SHOULD_OVERRIDE_EDUCATION_CONDITIONS) return true
+
+    val focusAppPackageName =
+        captionState.runningTaskInfo.topActivityInfo?.packageName ?: return false
     val windowingEducationProto = appHandleEducationDatastoreRepository.windowingEducationProto()
+
     return isFocusAppInAllowlist(focusAppPackageName) &&
         !isOtherEducationShowing() &&
         hasSufficientTimeSinceSetup() &&

@@ -17,6 +17,7 @@
 package android.window;
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
+import static com.android.window.flags.Flags.predictiveBackTimestampApi;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -66,7 +67,8 @@ public class BackProgressAnimator implements DynamicAnimation.OnAnimationUpdateL
                 reset();
             };
     private final DynamicAnimation.OnAnimationUpdateListener mOnBackInvokedFlingUpdateListener =
-            (animation, progress, velocity) -> updateProgressValue(progress, velocity);
+            (animation, progress, velocity) ->
+                    updateProgressValue(progress, velocity, animation.getLastFrameTime());
 
 
     private void setProgress(float progress) {
@@ -92,7 +94,9 @@ public class BackProgressAnimator implements DynamicAnimation.OnAnimationUpdateL
 
     @Override
     public void onAnimationUpdate(DynamicAnimation animation, float value, float velocity) {
-        if (mBackInvokedFinishRunnable == null) updateProgressValue(value, velocity);
+        if (mBackInvokedFinishRunnable == null) {
+            updateProgressValue(value, velocity, animation.getLastFrameTime());
+        }
     }
 
 
@@ -137,7 +141,9 @@ public class BackProgressAnimator implements DynamicAnimation.OnAnimationUpdateL
         mLastBackEvent = event;
         mCallback = callback;
         mBackAnimationInProgress = true;
-        updateProgressValue(0, 0);
+        updateProgressValue(/* progress */ 0, /* velocity */ 0,
+                /* frameTime */ System.nanoTime() / TimeUtils.NANOS_PER_MS);
+        onBackProgressed(event);
     }
 
     /**
@@ -146,7 +152,8 @@ public class BackProgressAnimator implements DynamicAnimation.OnAnimationUpdateL
     public void reset() {
         if (mBackCancelledFinishRunnable != null) {
             // Ensure that last progress value that apps see is 0
-            updateProgressValue(0, 0);
+            updateProgressValue(/* progress */ 0, /* velocity */ 0,
+                    /* frameTime */ System.nanoTime() / TimeUtils.NANOS_PER_MS);
             invokeBackCancelledRunnable();
         } else if (mBackInvokedFinishRunnable != null) {
             invokeBackInvokedRunnable();
@@ -212,6 +219,17 @@ public class BackProgressAnimator implements DynamicAnimation.OnAnimationUpdateL
         mBackCancelledFinishRunnable = null;
     }
 
+    /**
+     * Removes the finishCallback passed into {@link #onBackCancelled}
+     */
+    public void removeOnBackInvokedFinishCallback() {
+        if (mBackInvokedFlingAnim != null) {
+            mBackInvokedFlingAnim.removeUpdateListener(mOnBackInvokedFlingUpdateListener);
+            mBackInvokedFlingAnim.removeEndListener(mOnAnimationEndListener);
+        }
+        mBackInvokedFinishRunnable = null;
+    }
+
     /** Returns true if the back animation is in progress. */
     @VisibleForTesting(visibility = PACKAGE)
     public boolean isBackAnimationInProgress() {
@@ -225,14 +243,20 @@ public class BackProgressAnimator implements DynamicAnimation.OnAnimationUpdateL
         return mVelocity / SCALE_FACTOR;
     }
 
-    private void updateProgressValue(float progress, float velocity) {
+    private void updateProgressValue(float progress, float velocity, long frameTime) {
         mVelocity = velocity;
         if (mLastBackEvent == null || mCallback == null || !mBackAnimationInProgress) {
             return;
         }
-        mCallback.onProgressUpdate(
-                new BackEvent(mLastBackEvent.getTouchX(), mLastBackEvent.getTouchY(),
-                        progress / SCALE_FACTOR, mLastBackEvent.getSwipeEdge()));
+        BackEvent backEvent;
+        if (predictiveBackTimestampApi()) {
+            backEvent = new BackEvent(mLastBackEvent.getTouchX(), mLastBackEvent.getTouchY(),
+                    progress / SCALE_FACTOR, mLastBackEvent.getSwipeEdge(), frameTime);
+        } else {
+            backEvent = new BackEvent(mLastBackEvent.getTouchX(), mLastBackEvent.getTouchY(),
+                    progress / SCALE_FACTOR, mLastBackEvent.getSwipeEdge());
+        }
+        mCallback.onProgressUpdate(backEvent);
     }
 
     private void invokeBackCancelledRunnable() {

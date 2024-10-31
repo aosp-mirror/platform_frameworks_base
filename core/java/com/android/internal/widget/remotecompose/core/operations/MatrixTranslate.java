@@ -18,25 +18,59 @@ package com.android.internal.widget.remotecompose.core.operations;
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.PaintContext;
+import com.android.internal.widget.remotecompose.core.WireBuffer;
+import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
+import com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation;
+
+import java.util.List;
 
 public class MatrixTranslate extends DrawBase2 {
-    public static final Companion COMPANION =
-            new Companion(Operations.MATRIX_TRANSLATE) {
-                @Override
-                public Operation construct(float x1,
-                                           float y1
-                ) {
-                    return new MatrixTranslate(x1, y1);
-                }
-            };
+    public static final int OP_CODE = Operations.MATRIX_TRANSLATE;
+    public static final String CLASS_NAME = "MatrixTranslate";
+
+    public static void read(WireBuffer buffer, List<Operation> operations) {
+        Maker m = MatrixTranslate::new;
+        read(m, buffer, operations);
+    }
+
+    public static int id() {
+        return OP_CODE;
+    }
+
+    public static String name() {
+        return CLASS_NAME;
+    }
+
+    @Override
+    protected void write(WireBuffer buffer, float v1, float v2) {
+        apply(buffer, v1, v2);
+    }
+
+    public static void documentation(DocumentationBuilder doc) {
+        doc.operation("Canvas Operations", OP_CODE, "MatrixTranslate")
+                .description("Preconcat the current matrix with the specified translation")
+                .field(DocumentedOperation.FLOAT, "dx", "The distance to translate in X")
+                .field(DocumentedOperation.FLOAT, "dy", "The distance to translate in Y");
+    }
 
     public MatrixTranslate(float translateX, float translateY) {
         super(translateX, translateY);
-        mName = "MatrixTranslate";
+        mName = CLASS_NAME;
     }
 
     @Override
     public void paint(PaintContext context) {
         context.matrixTranslate(mV1, mV2);
+    }
+
+    /**
+     * Writes out the DrawOval to the buffer
+     *
+     * @param buffer buffer to write to
+     * @param x1 start x of DrawOval
+     * @param y1 start y of the DrawOval
+     */
+    public static void apply(WireBuffer buffer, float x1, float y1) {
+        write(buffer, OP_CODE, x1, y1);
     }
 }

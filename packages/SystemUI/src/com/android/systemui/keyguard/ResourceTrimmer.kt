@@ -31,7 +31,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /**
  * Releases cached resources on allocated by keyguard.
@@ -52,7 +52,7 @@ constructor(
 
     override fun start() {
         Log.d(LOG_TAG, "Resource trimmer registered.")
-        applicationScope.launch(bgDispatcher) {
+        applicationScope.launch(context = bgDispatcher) {
             keyguardTransitionInteractor
                 .isFinishedIn(scene = Scenes.Gone, stateWithoutSceneContainer = GONE)
                 .filter { isOnGone -> isOnGone }

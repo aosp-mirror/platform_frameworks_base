@@ -5337,7 +5337,9 @@
     <!-- Zen mode - name of default automatic calendar time-based rule that is triggered every night (when sleeping). [CHAR LIMIT=40] -->
     <string name="zen_mode_default_every_night_name">Sleeping</string>
 
-    <!-- Zen mode - Trigger description of the rule, indicating which app owns it. [CHAR_LIMIT=100] -->
+    <!-- Implicit zen mode - Name of the rule, indicating which app owns it. [CHAR_LIMIT=30] -->
+    <string name="zen_mode_implicit_name">Do Not Disturb (<xliff:g id="app_name" example="Gmail">%1$s</xliff:g>)</string>
+    <!-- Implicit zen mode - Trigger description of the rule, indicating which app owns it. [CHAR_LIMIT=100] -->
     <string name="zen_mode_implicit_trigger_description">Managed by <xliff:g id="app_name">%1$s</xliff:g></string>
     <!-- Zen mode - Condition summary when a rule is activated due to a call to setInterruptionFilter(). [CHAR_LIMIT=NONE] -->
     <string name="zen_mode_implicit_activated">On</string>
@@ -5348,6 +5350,8 @@
     <string name="zen_mode_trigger_summary_divider_text">,\u0020</string>
     <!-- [CHAR LIMIT=40] General template for a symbolic start - end range in a text summary, used for the trigger description of a Zen mode -->
     <string name="zen_mode_trigger_summary_range_symbol_combination"><xliff:g id="start" example="Sun">%1$s</xliff:g> - <xliff:g id="end" example="Thu">%2$s</xliff:g></string>
+    <!-- [CHAR LIMIT=40] General template for a start - end range in a text summary, used for the trigger description of a Zen mode -->
+    <string name="zen_mode_trigger_summary_range_words"><xliff:g id="start" example="Sunday">%1$s</xliff:g> to <xliff:g id="end" example="Thursday">%2$s</xliff:g></string>
     <!-- [CHAR LIMIT=40] Event-based rule calendar option value for any calendar, used for the trigger description of a Zen mode -->
     <string name="zen_mode_trigger_event_calendar_any">Any calendar</string>
 
@@ -5508,6 +5512,9 @@
     <string name="set_up_screen_lock_action_label">Set screen lock</string>
     <!-- Message shown in the dialog prompting the user to set up a screen lock to access private space [CHAR LIMIT=120] -->
     <string name="private_space_set_up_screen_lock_message">To use your private space, set a screen lock on this device</string>
+
+    <!-- Message shown in the dialog prompting the user to set up a screen lock to delete private space from Reset Options [CHAR LIMIT=120] -->
+    <string name="private_space_set_up_screen_lock_for_reset">To delete private space, set a screen lock on this device</string>
 
     <!-- Title of the dialog that is shown when the user tries to launch a blocked application [CHAR LIMIT=50] -->
     <string name="app_blocked_title">App is not available</string>
@@ -5815,16 +5822,6 @@
 
     <!-- Title for the notification channel notifying user of settings system changes. [CHAR LIMIT=NONE] -->
     <string name="notification_channel_system_changes">System changes</string>
-    <!-- Title for the notification channel notifying user of do not disturb system changes (i.e. Do Not Disturb has changed). [CHAR LIMIT=NONE] -->
-    <string name="notification_channel_do_not_disturb">Do Not Disturb</string>
-    <!-- Title of notification indicating do not disturb visual interruption settings have changed when upgrading to P -->
-    <string name="zen_upgrade_notification_visd_title">New: Do Not Disturb is hiding notifications</string>
-    <!-- Content of notification indicating users can tap on the notification to go to dnd behavior settings -->
-    <string name="zen_upgrade_notification_visd_content">Tap to learn more and change.</string>
-    <!-- Title of notification indicating do not disturb settings have changed when upgrading to P -->
-    <string name="zen_upgrade_notification_title">Do Not Disturb has changed</string>
-    <!-- Content of notification indicating users can tap on the notification to go to dnd behavior settings -->
-    <string name="zen_upgrade_notification_content">Tap to check what\'s blocked.</string>
 
     <!-- Notification permission informational notification text -->
     <!-- Title for notification inviting users to review their notification settings [CHAR LIMIT=NONE] -->
@@ -6515,6 +6512,14 @@ ul.</string>
     <string name="satellite_notification_open_message">Open Messages</string>
     <!-- Invoke Satellite setting activity of Settings -->
     <string name="satellite_notification_how_it_works">How it works</string>
+    <!-- Popup title when satellite start with manual selection -->
+    <string name="satellite_manual_selection_state_popup_title">Turn on \"Automatically select network\"</string>
+    <!-- Popup message when satellite start with manual selection -->
+    <string name="satellite_manual_selection_state_popup_message">Turn on \"Automatically select network\" in Settings so your phone can find a network that works with satellite</string>
+    <!-- Popup button for set network selection automatic -->
+    <string name="satellite_manual_selection_state_popup_ok">Turn on</string>
+    <!-- Popup button for cancel satellite request -->
+    <string name="satellite_manual_selection_state_popup_cancel">Go back</string>
     <!-- Initial/System provided label shown for an app which gets unarchived. [CHAR LIMIT=64]. -->
     <string name="unarchival_session_app_label">Pending...</string>
 

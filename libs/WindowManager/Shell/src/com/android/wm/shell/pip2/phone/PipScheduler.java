@@ -19,99 +19,51 @@ package com.android.wm.shell.pip2.phone;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 
 import static com.android.wm.shell.transition.Transitions.TRANSIT_EXIT_PIP;
+import static com.android.wm.shell.transition.Transitions.TRANSIT_REMOVE_PIP;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.view.SurfaceControl;
 import android.window.WindowContainerTransaction;
 
-import androidx.annotation.IntDef;
 import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
 
 import com.android.internal.protolog.ProtoLog;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.pip.PipBoundsState;
-import com.android.wm.shell.common.pip.PipUtils;
 import com.android.wm.shell.pip.PipTransitionController;
+import com.android.wm.shell.pip2.PipSurfaceTransactionHelper;
+import com.android.wm.shell.pip2.animation.PipAlphaAnimator;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
-
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 
 /**
  * Scheduler for Shell initiated PiP transitions and animations.
  */
 public class PipScheduler {
     private static final String TAG = PipScheduler.class.getSimpleName();
-    private static final String BROADCAST_FILTER = PipScheduler.class.getCanonicalName();
 
     private final Context mContext;
     private final PipBoundsState mPipBoundsState;
-    private final PhonePipMenuController mPipMenuController;
     private final ShellExecutor mMainExecutor;
     private final PipTransitionState mPipTransitionState;
-    private PipSchedulerReceiver mSchedulerReceiver;
     private PipTransitionController mPipTransitionController;
+    private final PipSurfaceTransactionHelper.SurfaceControlTransactionFactory
+            mSurfaceControlTransactionFactory;
 
     @Nullable private Runnable mUpdateMovementBoundsRunnable;
 
-    /**
-     * Temporary PiP CUJ codes to schedule PiP related transitions directly from Shell.
-     * This is used for a broadcast receiver to resolve intents. This should be removed once
-     * there is an equivalent of PipTouchHandler and PipResizeGestureHandler for PiP2.
-     */
-    private static final int PIP_EXIT_VIA_EXPAND_CODE = 0;
-    private static final int PIP_DOUBLE_TAP = 1;
-
-    @IntDef(value = {
-            PIP_EXIT_VIA_EXPAND_CODE,
-            PIP_DOUBLE_TAP
-    })
-    @Retention(RetentionPolicy.SOURCE)
-    @interface PipUserJourneyCode {}
-
-    /**
-     * A temporary broadcast receiver to initiate PiP CUJs.
-     */
-    private class PipSchedulerReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            int userJourneyCode = intent.getIntExtra("cuj_code_extra", 0);
-            switch (userJourneyCode) {
-                case PIP_EXIT_VIA_EXPAND_CODE:
-                    scheduleExitPipViaExpand();
-                    break;
-                case PIP_DOUBLE_TAP:
-                    scheduleDoubleTapToResize();
-                    break;
-                default:
-                    throw new IllegalStateException("unexpected CUJ code=" + userJourneyCode);
-            }
-        }
-    }
-
     public PipScheduler(Context context,
             PipBoundsState pipBoundsState,
-            PhonePipMenuController pipMenuController,
             ShellExecutor mainExecutor,
             PipTransitionState pipTransitionState) {
         mContext = context;
         mPipBoundsState = pipBoundsState;
-        mPipMenuController = pipMenuController;
         mMainExecutor = mainExecutor;
         mPipTransitionState = pipTransitionState;
 
-        if (PipUtils.isPip2ExperimentEnabled()) {
-            // temporary broadcast receiver to initiate exit PiP via expand
-            mSchedulerReceiver = new PipSchedulerReceiver();
-            ContextCompat.registerReceiver(mContext, mSchedulerReceiver,
-                    new IntentFilter(BROADCAST_FILTER), ContextCompat.RECEIVER_EXPORTED);
-        }
+        mSurfaceControlTransactionFactory =
+                new PipSurfaceTransactionHelper.VsyncSurfaceControlTransactionFactory();
     }
 
     ShellExecutor getMainExecutor() {
@@ -136,6 +88,18 @@ public class PipScheduler {
         return wct;
     }
 
+    @Nullable
+    private WindowContainerTransaction getRemovePipTransaction() {
+        if (mPipTransitionState.mPipTaskToken == null) {
+            return null;
+        }
+        WindowContainerTransaction wct = new WindowContainerTransaction();
+        wct.setBounds(mPipTransitionState.mPipTaskToken, null);
+        wct.setWindowingMode(mPipTransitionState.mPipTaskToken, WINDOWING_MODE_UNDEFINED);
+        wct.reorder(mPipTransitionState.mPipTaskToken, false);
+        return wct;
+    }
+
     /**
      * Schedules exit PiP via expand transition.
      */
@@ -149,10 +113,26 @@ public class PipScheduler {
         }
     }
 
-    /**
-     * Schedules resize PiP via double tap.
-     */
-    public void scheduleDoubleTapToResize() {}
+    // TODO: Optimize this by running the animation as part of the transition
+    /** Runs remove PiP animation and schedules remove PiP transition after the animation ends. */
+    public void removePipAfterAnimation() {
+        SurfaceControl.Transaction tx = mSurfaceControlTransactionFactory.getTransaction();
+        PipAlphaAnimator animator = new PipAlphaAnimator(mContext,
+                mPipTransitionState.mPinnedTaskLeash, tx, PipAlphaAnimator.FADE_OUT);
+        animator.setAnimationEndCallback(this::scheduleRemovePipImmediately);
+        animator.start();
+    }
+
+    /** Schedules remove PiP transition. */
+    private void scheduleRemovePipImmediately() {
+        WindowContainerTransaction wct = getRemovePipTransaction();
+        if (wct != null) {
+            mMainExecutor.execute(() -> {
+                mPipTransitionController.startExitTransition(TRANSIT_REMOVE_PIP, wct,
+                        null /* destinationBounds */);
+            });
+        }
+    }
 
     /**
      * Animates resizing of the pinned stack given the duration.
@@ -195,22 +175,12 @@ public class PipScheduler {
      * Note that we do not allow any actual WM Core changes at this point.
      *
      * @param toBounds destination bounds used only for internal state updates - not sent to Core.
-     * @param configAtEnd true if we are waiting for config updates at the end of the transition.
      */
-    public void scheduleFinishResizePip(Rect toBounds, boolean configAtEnd) {
-        // Make updates to the internal state to reflect new bounds
+    public void scheduleFinishResizePip(Rect toBounds) {
+        // Make updates to the internal state to reflect new bounds before updating any transitions
+        // related state; transition state updates can trigger callbacks that use the cached bounds.
         onFinishingPipResize(toBounds);
-
-        SurfaceControl.Transaction tx = null;
-        if (configAtEnd) {
-            tx = new SurfaceControl.Transaction();
-            tx.addTransactionCommittedListener(mMainExecutor, () -> {
-                mPipTransitionState.setState(PipTransitionState.CHANGED_PIP_BOUNDS);
-            });
-        } else {
-            mPipTransitionState.setState(PipTransitionState.CHANGED_PIP_BOUNDS);
-        }
-        mPipTransitionController.finishTransition(tx);
+        mPipTransitionController.finishTransition();
     }
 
     /**
@@ -263,7 +233,6 @@ public class PipScheduler {
             return;
         }
         mPipBoundsState.setBounds(newBounds);
-        mPipMenuController.updateMenuLayout(newBounds);
         maybeUpdateMovementBounds();
     }
 }

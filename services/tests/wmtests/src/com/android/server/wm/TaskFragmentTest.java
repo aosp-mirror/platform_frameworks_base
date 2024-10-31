@@ -884,7 +884,7 @@ public class TaskFragmentTest extends WindowTestsBase {
 
         // The ImeParent should be the display.
         assertEquals(mDisplayContent.getImeContainer().getParent().getSurfaceControl(),
-                mDisplayContent.computeImeParent());
+                mDisplayContent.computeImeParent().getSurfaceControl());
     }
 
     @Test

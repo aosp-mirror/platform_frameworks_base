@@ -24,7 +24,6 @@ import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.qs.panels.shared.model.SizedTile
 import com.android.systemui.qs.panels.shared.model.SizedTileImpl
 import com.android.systemui.qs.panels.ui.model.GridCell
-import com.android.systemui.qs.panels.ui.model.SpacerGridCell
 import com.android.systemui.qs.panels.ui.model.TileGridCell
 import com.android.systemui.qs.panels.ui.viewmodel.EditTileViewModel
 import com.android.systemui.qs.pipeline.shared.TileSpec
@@ -37,13 +36,6 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class EditTileListStateTest : SysuiTestCase() {
     private val underTest = EditTileListState(TestEditTiles, 4)
-
-    @Test
-    fun noDrag_listUnchanged() {
-        underTest.tiles.forEach { assertThat(it).isNotInstanceOf(SpacerGridCell::class.java) }
-        assertThat(underTest.tiles.map { (it as TileGridCell).tile.tileSpec })
-            .containsExactly(*TestEditTiles.map { it.tile.tileSpec }.toTypedArray())
-    }
 
     @Test
     fun startDrag_listHasSpacers() {
@@ -106,16 +98,6 @@ class EditTileListStateTest : SysuiTestCase() {
             .isEqualTo(
                 listOf("a", "b", "c", "spacer", "d", "newTile", "e", "spacer", "spacer", "spacer")
             )
-    }
-
-    @Test
-    fun droppedNewTile_spacersDisappear() {
-        underTest.onStarted(TestEditTiles[0])
-        underTest.onDrop()
-
-        assertThat(underTest.tiles.toStrings()).isEqualTo(listOf("a", "b", "c", "d", "e"))
-        assertThat(underTest.isMoving(TestEditTiles[0].tile.tileSpec)).isFalse()
-        assertThat(underTest.dragInProgress).isFalse()
     }
 
     @Test

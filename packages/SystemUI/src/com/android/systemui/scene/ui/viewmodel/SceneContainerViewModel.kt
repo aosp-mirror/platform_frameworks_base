@@ -17,7 +17,9 @@
 package com.android.systemui.scene.ui.viewmodel
 
 import android.view.MotionEvent
+import android.view.View
 import androidx.compose.runtime.getValue
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.compose.animation.scene.ContentKey
 import com.android.compose.animation.scene.DefaultEdgeDetector
 import com.android.compose.animation.scene.ObservableTransitionState
@@ -41,9 +43,12 @@ import com.android.systemui.statusbar.notification.stack.ui.view.SharedNotificat
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /** Models UI state for the scene container. */
 class SceneContainerViewModel
@@ -52,9 +57,11 @@ constructor(
     private val sceneInteractor: SceneInteractor,
     private val falsingInteractor: FalsingInteractor,
     private val powerInteractor: PowerInteractor,
-    private val shadeInteractor: ShadeInteractor,
+    shadeInteractor: ShadeInteractor,
     private val splitEdgeDetector: SplitEdgeDetector,
     private val logger: SceneLogger,
+    hapticsViewModelFactory: SceneContainerHapticsViewModel.Factory,
+    @Assisted view: View,
     @Assisted private val motionEventHandlerReceiver: (MotionEventHandler?) -> Unit,
 ) : ExclusiveActivatable() {
 
@@ -65,6 +72,10 @@ constructor(
 
     /** Whether the container is visible. */
     val isVisible: Boolean by hydrator.hydratedStateOf("isVisible", sceneInteractor.isVisible)
+
+    val allContentKeys: List<ContentKey> = sceneInteractor.allContentKeys
+
+    private val hapticsViewModel = hapticsViewModelFactory.create(view)
 
     /**
      * The [SwipeSourceDetector] to use for defining which edges of the screen can be defined in the
@@ -77,7 +88,7 @@ constructor(
             source =
                 shadeInteractor.shadeMode.map {
                     if (it is ShadeMode.Dual) splitEdgeDetector else DefaultEdgeDetector
-                }
+                },
         )
 
     override suspend fun onActivated(): Nothing {
@@ -96,7 +107,11 @@ constructor(
                 }
             )
 
-            hydrator.activate()
+            coroutineScope {
+                launch { hydrator.activate() }
+                launch("SceneContainerHapticsViewModel") { hapticsViewModel.activate() }
+            }
+            awaitCancellation()
         } finally {
             // Clears the previously-sent MotionEventHandler so the owner of the view-model releases
             // their reference to it.
@@ -163,10 +178,8 @@ constructor(
             when (toScene) {
                 Scenes.Bouncer -> Classifier.BOUNCER_UNLOCK
                 Scenes.Gone -> Classifier.UNLOCK
-                Scenes.NotificationsShade -> Classifier.NOTIFICATION_DRAG_DOWN
                 Scenes.Shade -> Classifier.NOTIFICATION_DRAG_DOWN
                 Scenes.QuickSettings -> Classifier.QUICK_SETTINGS
-                Scenes.QuickSettingsShade -> Classifier.QUICK_SETTINGS
                 else -> null
             }
 
@@ -200,7 +213,7 @@ constructor(
      * resolution target.
      */
     fun resolveSceneFamilies(
-        actionResultMap: Map<UserAction, UserActionResult>,
+        actionResultMap: Map<UserAction, UserActionResult>
     ): Map<UserAction, UserActionResult> {
         return actionResultMap.mapValues { (_, actionResult) ->
             when (actionResult) {
@@ -214,9 +227,10 @@ constructor(
                         )
                     }
                 }
+                // Overlay transitions don't use scene families, nothing to resolve.
                 is UserActionResult.ShowOverlay,
                 is UserActionResult.HideOverlay,
-                is UserActionResult.ReplaceByOverlay -> TODO("b/353679003: Support overlays")
+                is UserActionResult.ReplaceByOverlay -> null
             } ?: actionResult
         }
     }
@@ -259,6 +273,7 @@ constructor(
     @AssistedFactory
     interface Factory {
         fun create(
+            view: View,
             motionEventHandlerReceiver: (MotionEventHandler?) -> Unit,
         ): SceneContainerViewModel
     }

@@ -19,14 +19,19 @@ package com.android.server.profcollect;
 import static com.android.server.profcollect.ProfcollectForwardingService.LOG_TAG;
 
 import android.os.RemoteException;
+import android.os.ServiceSpecificException;
 import android.provider.DeviceConfig;
 import android.util.Log;
 
 import com.android.internal.os.BackgroundThread;
 
+import java.time.Instant;
 import java.util.concurrent.ThreadLocalRandom;
 
 public final class Utils {
+
+    private static Instant lastTraceTime = Instant.EPOCH;
+    private static final int TRACE_COOLDOWN_SECONDS = 30;
 
     public static boolean withFrequency(String configName, int defaultFrequency) {
         int threshold = DeviceConfig.getInt(
@@ -39,10 +44,13 @@ public final class Utils {
         if (mIProfcollect == null) {
             return false;
         }
+        if (isInCooldownOrReset()) {
+            return false;
+        }
         BackgroundThread.get().getThreadHandler().post(() -> {
             try {
                 mIProfcollect.trace_system(eventName);
-            } catch (RemoteException e) {
+            } catch (RemoteException | ServiceSpecificException e) {
                 Log.e(LOG_TAG, "Failed to initiate trace: " + e.getMessage());
             }
         });
@@ -53,10 +61,13 @@ public final class Utils {
         if (mIProfcollect == null) {
             return false;
         }
+        if (isInCooldownOrReset()) {
+            return false;
+        }
         BackgroundThread.get().getThreadHandler().postDelayed(() -> {
             try {
                 mIProfcollect.trace_system(eventName);
-            } catch (RemoteException e) {
+            } catch (RemoteException | ServiceSpecificException e) {
                 Log.e(LOG_TAG, "Failed to initiate trace: " + e.getMessage());
             }
         }, delayMs);
@@ -68,15 +79,30 @@ public final class Utils {
         if (mIProfcollect == null) {
             return false;
         }
+        if (isInCooldownOrReset()) {
+            return false;
+        }
         BackgroundThread.get().getThreadHandler().post(() -> {
             try {
                 mIProfcollect.trace_process(eventName,
                         processName,
                         durationMs);
-            } catch (RemoteException e) {
+            } catch (RemoteException | ServiceSpecificException e) {
                 Log.e(LOG_TAG, "Failed to initiate trace: " + e.getMessage());
             }
         });
+        return true;
+    }
+
+    /**
+     * Returns true if the last trace is within the cooldown period. If the last trace is outside
+     * the cooldown period, the last trace time is reset to the current time.
+     */
+    private static boolean isInCooldownOrReset() {
+        if (!Instant.now().isBefore(lastTraceTime.plusSeconds(TRACE_COOLDOWN_SECONDS))) {
+            lastTraceTime = Instant.now();
+            return false;
+        }
         return true;
     }
 }

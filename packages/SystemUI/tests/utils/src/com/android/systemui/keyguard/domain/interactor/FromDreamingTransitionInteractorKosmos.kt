@@ -16,6 +16,8 @@
 
 package com.android.systemui.keyguard.domain.interactor
 
+import android.service.dream.dreamManager
+import com.android.systemui.communal.domain.interactor.communalInteractor
 import com.android.systemui.communal.domain.interactor.communalSceneInteractor
 import com.android.systemui.communal.domain.interactor.communalSettingsInteractor
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
@@ -39,10 +41,12 @@ var Kosmos.fromDreamingTransitionInteractor by
             mainDispatcher = testDispatcher,
             keyguardInteractor = keyguardInteractor,
             glanceableHubTransitions = glanceableHubTransitions,
+            communalInteractor = communalInteractor,
             communalSceneInteractor = communalSceneInteractor,
             communalSettingsInteractor = communalSettingsInteractor,
             powerInteractor = powerInteractor,
             keyguardOcclusionInteractor = keyguardOcclusionInteractor,
+            dreamManager = dreamManager,
             deviceEntryInteractor = deviceEntryInteractor,
         )
     }

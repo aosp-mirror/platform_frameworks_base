@@ -39,11 +39,14 @@ import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.never;
 
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.TaskInfo;
 import android.content.LocusId;
 import android.content.pm.ParceledListSlice;
+import android.graphics.Point;
+import android.graphics.Rect;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -588,14 +591,50 @@ public class ShellTaskOrganizerTests extends ShellTestCase {
 
     @Test
     public void testRecentTasks_visibilityChanges_shouldNotifyTaskController() {
-        RunningTaskInfo task1 = createTaskInfo(/* taskId= */ 1, WINDOWING_MODE_FREEFORM);
+        RunningTaskInfo task1 = createFreeformTaskInfo(/* taskId= */ 1);
         mOrganizer.onTaskAppeared(task1, /* leash= */ null);
-        RunningTaskInfo task2 = createTaskInfo(/* taskId= */ 1, WINDOWING_MODE_FREEFORM);
+        RunningTaskInfo task2 = createFreeformTaskInfo(/* taskId= */ 1);
         task2.isVisible = false;
 
         mOrganizer.onTaskInfoChanged(task2);
 
         verify(mRecentTasksController).onTaskRunningInfoChanged(task2);
+    }
+
+    @Test
+    public void testRecentTasks_sizeChanges_shouldNotifyTaskController() {
+        RunningTaskInfo task1 = createFreeformTaskInfo(/* taskId= */ 1);
+        mOrganizer.onTaskAppeared(task1, /* leash= */ null);
+        RunningTaskInfo task2 = createFreeformTaskInfo(/* taskId= */ 1);
+        task2.configuration.windowConfiguration.setAppBounds(new Rect(0, 0, 300, 400));
+
+        mOrganizer.onTaskInfoChanged(task2);
+
+        verify(mRecentTasksController).onTaskRunningInfoChanged(task2);
+    }
+
+    @Test
+    public void testRecentTasks_positionChanges_shouldNotifyTaskController() {
+        RunningTaskInfo task1 = createFreeformTaskInfo(/* taskId= */ 1);
+        mOrganizer.onTaskAppeared(task1, /* leash= */ null);
+        RunningTaskInfo task2 = createFreeformTaskInfo(/* taskId= */ 1);
+        task2.positionInParent = new Point(200, 200);
+
+        mOrganizer.onTaskInfoChanged(task2);
+
+        verify(mRecentTasksController).onTaskRunningInfoChanged(task2);
+    }
+
+    @Test
+    public void testRecentTasks_visibilityChanges_notFreeForm_shouldNotNotifyTaskController() {
+        RunningTaskInfo task1_visible = createTaskInfo(/* taskId= */ 1, WINDOWING_MODE_FULLSCREEN);
+        mOrganizer.onTaskAppeared(task1_visible, /* leash= */ null);
+        RunningTaskInfo task1_hidden = createTaskInfo(/* taskId= */ 1, WINDOWING_MODE_FULLSCREEN);
+        task1_hidden.isVisible = false;
+
+        mOrganizer.onTaskInfoChanged(task1_hidden);
+
+        verify(mRecentTasksController, never()).onTaskRunningInfoChanged(task1_hidden);
     }
 
     @Test
@@ -633,6 +672,13 @@ public class ShellTaskOrganizerTests extends ShellTestCase {
         taskInfo.taskId = taskId;
         taskInfo.configuration.windowConfiguration.setWindowingMode(windowingMode);
         taskInfo.isVisible = true;
+        return taskInfo;
+    }
+
+    private static RunningTaskInfo createFreeformTaskInfo(int taskId) {
+        RunningTaskInfo taskInfo = createTaskInfo(taskId, WINDOWING_MODE_FREEFORM);
+        taskInfo.positionInParent = new Point(100, 100);
+        taskInfo.configuration.windowConfiguration.setAppBounds(new Rect(0, 0, 200, 200));
         return taskInfo;
     }
 

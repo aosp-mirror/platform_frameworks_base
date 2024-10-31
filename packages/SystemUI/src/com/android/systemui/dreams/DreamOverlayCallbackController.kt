@@ -39,8 +39,10 @@ class DreamOverlayCallbackController @Inject constructor() :
     }
 
     fun onWakeUp() {
-        isDreaming = false
-        callbacks.forEach { it.onWakeUp() }
+        if (isDreaming) {
+            isDreaming = false
+            callbacks.forEach { it.onWakeUp() }
+        }
     }
 
     fun onStartDream() {

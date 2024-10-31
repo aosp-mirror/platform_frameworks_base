@@ -21,7 +21,7 @@ import com.android.systemui.res.R
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /** Sub-binder for the [CredentialPasswordView]. */
 object CredentialPasswordViewBinder {

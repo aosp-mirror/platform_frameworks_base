@@ -24,13 +24,15 @@ import com.android.systemui.keyguard.ui.view.layout.blueprints.DefaultKeyguardBl
 import com.android.systemui.keyguard.ui.view.layout.blueprints.SplitShadeKeyguardBlueprint
 import com.android.systemui.keyguard.ui.view.layout.sections.ClockSection
 import com.android.systemui.keyguard.ui.view.layout.sections.SmartspaceSection
+import com.android.systemui.keyguard.ui.viewmodel.aodBurnInViewModel
 import com.android.systemui.keyguard.ui.viewmodel.keyguardClockViewModel
 import com.android.systemui.keyguard.ui.viewmodel.keyguardRootViewModel
 import com.android.systemui.keyguard.ui.viewmodel.keyguardSmartspaceViewModel
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.util.mockito.mock
+import com.android.systemui.shade.LargeScreenHeaderHelper
 import java.util.Optional
 import org.mockito.Mockito.spy
+import org.mockito.kotlin.mock
 
 val Kosmos.keyguardClockSection: ClockSection by
     Kosmos.Fixture {
@@ -41,6 +43,8 @@ val Kosmos.keyguardClockSection: ClockSection by
             smartspaceViewModel = keyguardSmartspaceViewModel,
             blueprintInteractor = { keyguardBlueprintInteractor },
             rootViewModel = keyguardRootViewModel,
+            aodBurnInViewModel = aodBurnInViewModel,
+            largeScreenHeaderHelperLazy = { mock<LargeScreenHeaderHelper>() },
         )
     }
 
@@ -95,11 +99,7 @@ val Kosmos.keyguardBlueprintRepository by
     Kosmos.Fixture {
         spy(
             KeyguardBlueprintRepository(
-                blueprints =
-                    setOf(
-                        defaultKeyguardBlueprint,
-                        splitShadeBlueprint,
-                    ),
+                blueprints = setOf(defaultKeyguardBlueprint, splitShadeBlueprint),
                 handler = fakeExecutorHandler,
                 assert = mock(),
             )

@@ -33,6 +33,8 @@ import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
 import java.io.BufferedReader;
@@ -153,13 +155,19 @@ public class DeviceInfoUtils {
         return null;
     }
 
-    public static String getSecurityPatch() {
+    /** Returns security patch in default locale. */
+    public static @Nullable String getSecurityPatch() {
+        return getSecurityPatch(Locale.getDefault());
+    }
+
+    /** Returns security patch in given locale. */
+    public static @Nullable String getSecurityPatch(@NonNull Locale locale) {
         String patch = Build.VERSION.SECURITY_PATCH;
         if (!"".equals(patch)) {
             try {
                 SimpleDateFormat template = new SimpleDateFormat("yyyy-MM-dd");
                 Date patchDate = template.parse(patch);
-                String format = DateFormat.getBestDateTimePattern(Locale.getDefault(), "dMMMMyyyy");
+                String format = DateFormat.getBestDateTimePattern(locale, "dMMMMyyyy");
                 patch = DateFormat.format(format, patchDate).toString();
             } catch (ParseException e) {
                 // broken parse; fall through and use the raw string

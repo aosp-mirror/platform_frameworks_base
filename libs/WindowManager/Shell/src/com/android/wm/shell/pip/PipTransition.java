@@ -463,7 +463,7 @@ public class PipTransition extends PipTransitionController {
         // so update fixed rotation state to default.
         mFixedRotationState = FIXED_ROTATION_UNDEFINED;
 
-        if (transition != mExitTransition) {
+        if (transition != mExitTransition && transition != mMoveToBackTransition) {
             return;
         }
         // This means an expand happened before enter-pip finished and we are now "merging" a
@@ -477,8 +477,10 @@ public class PipTransition extends PipTransitionController {
             cancelled = true;
         }
 
-        // Unset exitTransition AFTER cancel so that finishResize knows we are merging.
+        // Unset both exitTransition and moveToBackTransition AFTER cancel so that
+        // finishResize knows we are merging.
         mExitTransition = null;
+        mMoveToBackTransition = null;
         if (!cancelled) return;
         final ActivityManager.RunningTaskInfo taskInfo = mPipOrganizer.getTaskInfo();
         if (taskInfo != null) {
@@ -515,7 +517,8 @@ public class PipTransition extends PipTransitionController {
         // means we're expecting the exit transition will be "merged" into another transition
         // (likely a remote like launcher), so don't fire the finish-callback here -- wait until
         // the exit transition is merged.
-        if ((mExitTransition == null || isAnimatingLocally()) && mFinishCallback != null) {
+        if ((mExitTransition == null || mMoveToBackTransition == null || isAnimatingLocally())
+                && mFinishCallback != null) {
             final SurfaceControl leash = mPipOrganizer.getSurfaceControl();
             final boolean hasValidLeash = leash != null && leash.isValid();
             WindowContainerTransaction wct = null;
@@ -659,17 +662,6 @@ public class PipTransition extends PipTransitionController {
         for (int i = info.getChanges().size() - 1; i >= 0; --i) {
             final TransitionInfo.Change change = info.getChanges().get(i);
             if (mCurrentPipTaskToken.equals(change.getContainer())) {
-                return change;
-            }
-        }
-        return null;
-    }
-
-    @Nullable
-    private TransitionInfo.Change findFixedRotationChange(@NonNull TransitionInfo info) {
-        for (int i = info.getChanges().size() - 1; i >= 0; --i) {
-            final TransitionInfo.Change change = info.getChanges().get(i);
-            if (change.getEndFixedRotation() != ROTATION_UNDEFINED) {
                 return change;
             }
         }
@@ -1102,6 +1094,8 @@ public class PipTransition extends PipTransitionController {
             return;
         }
 
+        // NOTE(b/365300020): Legacy enter PiP path, clear the swipe state.
+        mPipTransitionState.setInSwipePipToHomeTransition(false);
         final int enterAnimationType = mEnterAnimationType;
         if (enterAnimationType == ANIM_TYPE_ALPHA) {
             startTransaction.setAlpha(leash, 0f);
@@ -1342,6 +1336,9 @@ public class PipTransition extends PipTransitionController {
         final SurfaceControl leash = pipChange.getLeash();
         final Rect destBounds = mPipOrganizer.getCurrentOrAnimatingBounds();
         final boolean isInPip = mPipTransitionState.isInPip();
+        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                "%s: Update pip for unhandled transition, change=%s, destBounds=%s, isInPip=%b",
+                TAG, pipChange, destBounds, isInPip);
         mSurfaceTransactionHelper
                 .crop(startTransaction, leash, destBounds)
                 .round(startTransaction, leash, isInPip)

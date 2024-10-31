@@ -36,7 +36,7 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
@@ -532,7 +532,7 @@ public class QSImplTest extends SysuiTestCase {
         other.onComponentCreated(mQsComponent, null);
 
         assertThat((View) other.getView().findViewById(R.id.qs_footer_actions)).isNull();
-        verifyZeroInteractions(mFooterActionsViewModel, mFooterActionsViewModelFactory);
+        verifyNoMoreInteractions(mFooterActionsViewModel, mFooterActionsViewModelFactory);
     }
 
     @Test

@@ -17,6 +17,7 @@
 package com.android.server.notification;
 
 import android.net.Uri;
+import android.os.UserHandle;
 import android.service.notification.ZenModeConfig;
 
 import java.io.PrintWriter;
@@ -37,6 +38,11 @@ public class CustomManualConditionProvider extends SystemConditionProviderServic
     @Override
     public void onBootComplete() {
         // Nothing to do.
+    }
+
+    @Override
+    public void onUserSwitched(UserHandle user) {
+        // Nothing to do because we won't ever call notifyConditions.
     }
 
     @Override

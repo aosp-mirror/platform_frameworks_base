@@ -46,7 +46,7 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 import kotlinx.coroutines.withContext
 
 /**
@@ -96,7 +96,7 @@ constructor(
         )
 
     init {
-        applicationScope.launch(backgroundContext) {
+        applicationScope.launch(context = backgroundContext) {
             for (call in apiQueue) {
                 val bounds = getMinMaxLinearBrightness()
                 val value = call.value.clamp(bounds.first, bounds.second).floatValue

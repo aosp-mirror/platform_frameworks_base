@@ -23,9 +23,7 @@ import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
 import android.content.pm.ServiceInfo
-import android.hardware.input.IInputManager
 import android.hardware.input.InputManager
-import android.hardware.input.InputManagerGlobal
 import android.hardware.input.KeyGlyphMap.KeyCombination
 import android.os.Bundle
 import android.os.test.TestLooper
@@ -36,8 +34,8 @@ import android.view.InputDevice
 import android.view.KeyEvent
 import androidx.test.core.app.ApplicationProvider
 import com.android.hardware.input.Flags
+import com.android.test.input.MockInputManagerRule
 import com.android.test.input.R
-import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
@@ -61,34 +59,31 @@ class KeyboardGlyphManagerTests {
         const val DEVICE_ID = 1
         const val VENDOR_ID = 0x1234
         const val PRODUCT_ID = 0x3456
+        const val DEVICE_ID2 = 2
+        const val VENDOR_ID2 = 0x1235
+        const val PRODUCT_ID2 = 0x3457
         const val PACKAGE_NAME = "KeyboardLayoutManagerTests"
         const val RECEIVER_NAME = "DummyReceiver"
     }
 
-    @JvmField
-    @Rule(order = 0)
+    @get:Rule
     val setFlagsRule = SetFlagsRule()
-
-    @JvmField
-    @Rule(order = 1)
+    @get:Rule
     val mockitoRule = MockitoJUnit.rule()!!
+    @get:Rule
+    val inputManagerRule = MockInputManagerRule()
 
     @Mock
     private lateinit var packageManager: PackageManager
 
-    @Mock
-    private lateinit var iInputManager: IInputManager
-
     private lateinit var keyboardGlyphManager: KeyboardGlyphManager
     private lateinit var context: Context
     private lateinit var testLooper: TestLooper
-    private lateinit var inputManagerGlobalSession: InputManagerGlobal.TestSession
     private lateinit var keyboardDevice: InputDevice
 
     @Before
     fun setup() {
         context = Mockito.spy(ContextWrapper(ApplicationProvider.getApplicationContext()))
-        inputManagerGlobalSession = InputManagerGlobal.createTestSession(iInputManager)
         testLooper = TestLooper()
         keyboardGlyphManager = KeyboardGlyphManager(context, testLooper.looper)
 
@@ -98,21 +93,17 @@ class KeyboardGlyphManagerTests {
         testLooper.dispatchAll()
     }
 
-    @After
-    fun tearDown() {
-        if (this::inputManagerGlobalSession.isInitialized) {
-            inputManagerGlobalSession.close()
-        }
-    }
-
     private fun setupInputDevices() {
         val inputManager = InputManager(context)
         Mockito.`when`(context.getSystemService(Mockito.eq(Context.INPUT_SERVICE)))
             .thenReturn(inputManager)
 
         keyboardDevice = createKeyboard(DEVICE_ID, VENDOR_ID, PRODUCT_ID, 0, "", "")
-        Mockito.`when`(iInputManager.inputDeviceIds).thenReturn(intArrayOf(DEVICE_ID))
-        Mockito.`when`(iInputManager.getInputDevice(DEVICE_ID)).thenReturn(keyboardDevice)
+        Mockito.`when`(inputManagerRule.mock.inputDeviceIds).thenReturn(intArrayOf(DEVICE_ID, DEVICE_ID2))
+        Mockito.`when`(inputManagerRule.mock.getInputDevice(DEVICE_ID)).thenReturn(keyboardDevice)
+
+        val keyboardDevice2 = createKeyboard(DEVICE_ID2, VENDOR_ID2, PRODUCT_ID2, 0, "", "")
+        Mockito.`when`(inputManagerRule.mock.getInputDevice(DEVICE_ID2)).thenReturn(keyboardDevice2)
     }
 
     private fun setupBroadcastReceiver() {
@@ -158,6 +149,10 @@ class KeyboardGlyphManagerTests {
             "Glyph map for test keyboard(deviceId=$DEVICE_ID) must exist",
             keyboardGlyphManager.getKeyGlyphMap(DEVICE_ID)
         )
+        assertNotNull(
+            "Glyph map for test keyboard(deviceId=$DEVICE_ID2) must exist",
+            keyboardGlyphManager.getKeyGlyphMap(DEVICE_ID2)
+        )
         assertNull(
             "Glyph map for non-existing keyboard must be null",
             keyboardGlyphManager.getKeyGlyphMap(-2)
@@ -173,6 +168,7 @@ class KeyboardGlyphManagerTests {
 
         assertNotNull(glyphMap.getDrawableForModifier(context, KeyEvent.KEYCODE_META_LEFT))
         assertNotNull(glyphMap.getDrawableForModifier(context, KeyEvent.KEYCODE_META_RIGHT))
+        assertNotNull(glyphMap.getDrawableForModifierState(context, KeyEvent.META_META_ON))
 
         val functionRowKeys = glyphMap.functionRowKeys
         assertEquals(1, functionRowKeys.size)

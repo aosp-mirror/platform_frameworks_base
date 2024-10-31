@@ -20,13 +20,10 @@ import android.annotation.StringRes
 import android.content.Context
 import android.os.UserHandle
 import android.text.Html
-import com.android.settingslib.graph.SignalDrawable
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.ContentDescription.Companion.loadContentDescription
-import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.shared.model.Text
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.qs.tiles.base.interactor.DataUpdateTrigger
 import com.android.systemui.qs.tiles.base.interactor.QSTileDataInteractor
 import com.android.systemui.qs.tiles.impl.internet.domain.model.InternetTileModel
@@ -36,12 +33,12 @@ import com.android.systemui.statusbar.pipeline.ethernet.domain.EthernetInteracto
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.MobileIconsInteractor
 import com.android.systemui.statusbar.pipeline.mobile.domain.model.SignalIconModel
 import com.android.systemui.statusbar.pipeline.shared.data.repository.ConnectivityRepository
+import com.android.systemui.statusbar.pipeline.shared.ui.model.InternetTileIconModel
 import com.android.systemui.statusbar.pipeline.wifi.domain.interactor.WifiInteractor
 import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel
 import com.android.systemui.statusbar.pipeline.wifi.ui.model.WifiIcon
 import com.android.systemui.utils.coroutines.flow.mapLatestConflated
 import javax.inject.Inject
-import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -51,7 +48,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalCoroutinesApi::class)
 /** Observes internet state changes providing the [InternetTileModel]. */
@@ -59,7 +55,6 @@ class InternetTileDataInteractor
 @Inject
 constructor(
     private val context: Context,
-    @Main private val mainCoroutineContext: CoroutineContext,
     @Application private val scope: CoroutineScope,
     airplaneModeRepository: AirplaneModeRepository,
     private val connectivityRepository: ConnectivityRepository,
@@ -79,8 +74,7 @@ constructor(
                 flowOf(
                     InternetTileModel.Active(
                         secondaryTitle = secondary,
-                        iconId = wifiIcon.icon.res,
-                        icon = Icon.Loaded(context.getDrawable(wifiIcon.icon.res)!!, null),
+                        icon = InternetTileIconModel.ResourceId(wifiIcon.icon.res),
                         stateDescription = wifiIcon.contentDescription,
                         contentDescription = ContentDescription.Loaded("$internetLabel,$secondary"),
                     )
@@ -116,11 +110,10 @@ constructor(
             if (it == null) {
                 notConnectedFlow
             } else {
-                combine(
-                        it.networkName,
-                        it.signalLevelIcon,
-                        mobileDataContentName,
-                    ) { networkNameModel, signalIcon, dataContentDescription ->
+                combine(it.networkName, it.signalLevelIcon, mobileDataContentName) {
+                        networkNameModel,
+                        signalIcon,
+                        dataContentDescription ->
                         Triple(networkNameModel, signalIcon, dataContentDescription)
                     }
                     .mapLatestConflated { (networkNameModel, signalIcon, dataContentDescription) ->
@@ -129,17 +122,12 @@ constructor(
                                 val secondary =
                                     mobileDataContentConcat(
                                         networkNameModel.name,
-                                        dataContentDescription
+                                        dataContentDescription,
                                     )
-
-                                val drawable =
-                                    withContext(mainCoroutineContext) { SignalDrawable(context) }
-                                drawable.setLevel(signalIcon.level)
-                                val loadedIcon = Icon.Loaded(drawable, null)
 
                                 InternetTileModel.Active(
                                     secondaryTitle = secondary,
-                                    icon = loadedIcon,
+                                    icon = InternetTileIconModel.Cellular(signalIcon.level),
                                     stateDescription =
                                         ContentDescription.Loaded(secondary.toString()),
                                     contentDescription = ContentDescription.Loaded(internetLabel),
@@ -150,9 +138,10 @@ constructor(
                                     signalIcon.icon.contentDescription.loadContentDescription(
                                         context
                                     )
+
                                 InternetTileModel.Active(
                                     secondaryTitle = secondary,
-                                    iconId = signalIcon.icon.res,
+                                    icon = InternetTileIconModel.Satellite(signalIcon.icon),
                                     stateDescription = ContentDescription.Loaded(secondary),
                                     contentDescription = ContentDescription.Loaded(internetLabel),
                                 )
@@ -164,7 +153,7 @@ constructor(
 
     private fun mobileDataContentConcat(
         networkName: String?,
-        dataContentDescription: CharSequence?
+        dataContentDescription: CharSequence?,
     ): CharSequence {
         if (dataContentDescription == null) {
             return networkName ?: ""
@@ -177,9 +166,9 @@ constructor(
             context.getString(
                 R.string.mobile_carrier_text_format,
                 networkName,
-                dataContentDescription
+                dataContentDescription,
             ),
-            0
+            0,
         )
     }
 
@@ -199,7 +188,7 @@ constructor(
                 flowOf(
                     InternetTileModel.Active(
                         secondaryLabel = secondary?.toText(),
-                        iconId = it.res,
+                        icon = InternetTileIconModel.ResourceId(it.res),
                         stateDescription = null,
                         contentDescription = secondary,
                     )
@@ -208,16 +197,18 @@ constructor(
         }
 
     private val notConnectedFlow: StateFlow<InternetTileModel> =
-        combine(
-                wifiInteractor.areNetworksAvailable,
-                airplaneModeRepository.isAirplaneMode,
-            ) { networksAvailable, isAirplaneMode ->
+        combine(wifiInteractor.areNetworksAvailable, airplaneModeRepository.isAirplaneMode) {
+                networksAvailable,
+                isAirplaneMode ->
                 when {
                     isAirplaneMode -> {
                         val secondary = context.getString(R.string.status_bar_airplane)
                         InternetTileModel.Inactive(
                             secondaryTitle = secondary,
-                            iconId = R.drawable.ic_qs_no_internet_unavailable,
+                            icon =
+                                InternetTileIconModel.ResourceId(
+                                    R.drawable.ic_qs_no_internet_unavailable
+                                ),
                             stateDescription = null,
                             contentDescription = ContentDescription.Loaded(secondary),
                         )
@@ -227,10 +218,13 @@ constructor(
                             context.getString(R.string.quick_settings_networks_available)
                         InternetTileModel.Inactive(
                             secondaryTitle = secondary,
-                            iconId = R.drawable.ic_qs_no_internet_available,
+                            icon =
+                                InternetTileIconModel.ResourceId(
+                                    R.drawable.ic_qs_no_internet_available
+                                ),
                             stateDescription = null,
                             contentDescription =
-                                ContentDescription.Loaded("$internetLabel,$secondary")
+                                ContentDescription.Loaded("$internetLabel,$secondary"),
                         )
                     }
                     else -> {
@@ -248,7 +242,7 @@ constructor(
      */
     override fun tileData(
         user: UserHandle,
-        triggers: Flow<DataUpdateTrigger>
+        triggers: Flow<DataUpdateTrigger>,
     ): Flow<InternetTileModel> =
         connectivityRepository.defaultConnections.flatMapLatest {
             when {
@@ -265,7 +259,7 @@ constructor(
         val NOT_CONNECTED_NETWORKS_UNAVAILABLE =
             InternetTileModel.Inactive(
                 secondaryLabel = Text.Resource(R.string.quick_settings_networks_unavailable),
-                iconId = R.drawable.ic_qs_no_internet_unavailable,
+                icon = InternetTileIconModel.ResourceId(R.drawable.ic_qs_no_internet_unavailable),
                 stateDescription = null,
                 contentDescription =
                     ContentDescription.Resource(R.string.quick_settings_networks_unavailable),

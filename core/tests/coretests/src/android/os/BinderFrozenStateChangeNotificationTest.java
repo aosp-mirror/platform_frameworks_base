@@ -52,7 +52,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * Tests functionality of {@link android.os.IBinder.IFrozenStateChangeCallback}.
+ * Tests functionality of {@link android.os.IBinder.FrozenStateChangeCallback}.
  */
 @RunWith(AndroidJUnit4.class)
 @IgnoreUnderRavenwood(blockedBy = ActivityManager.class)
@@ -157,7 +157,7 @@ public class BinderFrozenStateChangeNotificationTest {
     @Test
     public void onStateChangeNotCalledAfterCallbackRemoved() throws Exception {
         final LinkedBlockingQueue<Boolean> results = new LinkedBlockingQueue<>();
-        IBinder.IFrozenStateChangeCallback callback;
+        IBinder.FrozenStateChangeCallback callback;
         if ((callback = createCallback(mBfsccTestAppCmdService.asBinder(), results)) == null) {
             return;
         }
@@ -171,7 +171,7 @@ public class BinderFrozenStateChangeNotificationTest {
     public void multipleCallbacks() throws Exception {
         final LinkedBlockingQueue<Boolean> results1 = new LinkedBlockingQueue<>();
         final LinkedBlockingQueue<Boolean> results2 = new LinkedBlockingQueue<>();
-        IBinder.IFrozenStateChangeCallback callback1;
+        IBinder.FrozenStateChangeCallback callback1;
         if ((callback1 = createCallback(mBfsccTestAppCmdService.asBinder(), results1)) == null) {
             return;
         }
@@ -197,8 +197,8 @@ public class BinderFrozenStateChangeNotificationTest {
     public void onStateChangeCalledWithTheRightBinder() throws Exception {
         final IBinder binder = mBfsccTestAppCmdService.asBinder();
         final LinkedBlockingQueue<IBinder> results = new LinkedBlockingQueue<>();
-        IBinder.IFrozenStateChangeCallback callback =
-                (IBinder who, IBinder.IFrozenStateChangeCallback.State state) -> results.offer(who);
+        IBinder.FrozenStateChangeCallback callback =
+                (IBinder who, int state) -> results.offer(who);
         try {
             binder.addFrozenStateChangeCallback(callback);
         } catch (UnsupportedOperationException e) {
@@ -221,12 +221,12 @@ public class BinderFrozenStateChangeNotificationTest {
         }
     }
 
-    private IBinder.IFrozenStateChangeCallback createCallback(IBinder binder, Queue<Boolean> queue)
+    private IBinder.FrozenStateChangeCallback createCallback(IBinder binder, Queue<Boolean> queue)
             throws RemoteException {
         try {
-            final IBinder.IFrozenStateChangeCallback callback =
-                    (IBinder who, IBinder.IFrozenStateChangeCallback.State state) ->
-                            queue.offer(state == IBinder.IFrozenStateChangeCallback.State.FROZEN);
+            final IBinder.FrozenStateChangeCallback callback =
+                    (IBinder who, int state) ->
+                            queue.offer(state == IBinder.FrozenStateChangeCallback.STATE_FROZEN);
             binder.addFrozenStateChangeCallback(callback);
             return callback;
         } catch (UnsupportedOperationException e) {

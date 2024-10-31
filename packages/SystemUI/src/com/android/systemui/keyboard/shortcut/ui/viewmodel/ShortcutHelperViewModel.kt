@@ -17,6 +17,16 @@
 package com.android.systemui.keyboard.shortcut.ui.viewmodel
 
 import android.app.role.RoleManager
+import android.content.pm.PackageManager.NameNotFoundException
+import android.util.Log
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Android
+import androidx.compose.material.icons.filled.Apps
+import androidx.compose.material.icons.filled.Keyboard
+import androidx.compose.material.icons.filled.Tv
+import androidx.compose.material.icons.filled.VerticalSplit
+import com.android.compose.ui.graphics.painter.DrawablePainter
+import com.android.systemui.Flags.keyboardShortcutHelperShortcutCustomizer
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.keyboard.shortcut.domain.interactor.ShortcutHelperCategoriesInteractor
 import com.android.systemui.keyboard.shortcut.domain.interactor.ShortcutHelperStateInteractor
@@ -25,7 +35,10 @@ import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategory
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType.CurrentApp
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutSubCategory
+import com.android.systemui.keyboard.shortcut.ui.model.IconSource
+import com.android.systemui.keyboard.shortcut.ui.model.ShortcutCategoryUi
 import com.android.systemui.keyboard.shortcut.ui.model.ShortcutsUiState
+import com.android.systemui.res.R
 import com.android.systemui.settings.UserTracker
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
@@ -51,6 +64,7 @@ constructor(
 ) {
 
     private val searchQuery = MutableStateFlow("")
+    private val userContext = userTracker.createCurrentUserContext(userTracker.userContext)
 
     val shouldShow =
         categoriesInteractor.shortcutCategories
@@ -68,18 +82,84 @@ constructor(
                     val categoriesWithLauncherExcluded = excludeLauncherApp(categories)
                     val filteredCategories =
                         filterCategoriesBySearchQuery(query, categoriesWithLauncherExcluded)
+                    val shortcutCategoriesUi = convertCategoriesModelToUiModel(filteredCategories)
                     ShortcutsUiState.Active(
                         searchQuery = query,
-                        shortcutCategories = filteredCategories,
+                        shortcutCategories = shortcutCategoriesUi,
                         defaultSelectedCategory = getDefaultSelectedCategory(filteredCategories),
+                        isShortcutCustomizerFlagEnabled = keyboardShortcutHelperShortcutCustomizer(),
                     )
                 }
             }
             .stateIn(
                 scope = backgroundScope,
                 started = SharingStarted.Lazily,
-                initialValue = ShortcutsUiState.Inactive
+                initialValue = ShortcutsUiState.Inactive,
             )
+
+    private fun convertCategoriesModelToUiModel(
+        categories: List<ShortcutCategory>
+    ): List<ShortcutCategoryUi> {
+        return categories.map { category ->
+            ShortcutCategoryUi(
+                label = getShortcutCategoryLabel(category.type),
+                iconSource = getShortcutCategoryIcon(category.type),
+                shortcutCategory = category,
+            )
+        }
+    }
+
+    private fun getShortcutCategoryIcon(type: ShortcutCategoryType): IconSource {
+        return when (type) {
+            ShortcutCategoryType.System -> IconSource(imageVector = Icons.Default.Tv)
+            ShortcutCategoryType.MultiTasking ->
+                IconSource(imageVector = Icons.Default.VerticalSplit)
+            ShortcutCategoryType.InputMethodEditor ->
+                IconSource(imageVector = Icons.Default.Keyboard)
+            ShortcutCategoryType.AppCategories -> IconSource(imageVector = Icons.Default.Apps)
+            is CurrentApp -> {
+                try {
+                    val iconDrawable =
+                        userContext.packageManager.getApplicationIcon(type.packageName)
+                    IconSource(painter = DrawablePainter(drawable = iconDrawable))
+                } catch (e: NameNotFoundException) {
+                    Log.wtf(
+                        "ShortcutHelperViewModel",
+                        "Package not found when retrieving icon for ${type.packageName}",
+                    )
+                    IconSource(imageVector = Icons.Default.Android)
+                }
+            }
+        }
+    }
+
+    private fun getShortcutCategoryLabel(type: ShortcutCategoryType): String =
+        when (type) {
+            ShortcutCategoryType.System ->
+                userContext.getString(R.string.shortcut_helper_category_system)
+            ShortcutCategoryType.MultiTasking ->
+                userContext.getString(R.string.shortcut_helper_category_multitasking)
+            ShortcutCategoryType.InputMethodEditor ->
+                userContext.getString(R.string.shortcut_helper_category_input)
+            ShortcutCategoryType.AppCategories ->
+                userContext.getString(R.string.shortcut_helper_category_app_shortcuts)
+            is CurrentApp -> getApplicationLabelForCurrentApp(type)
+        }
+
+    private fun getApplicationLabelForCurrentApp(type: CurrentApp): String {
+        try {
+            val packageManagerForUser = userContext.packageManager
+            val currentAppInfo =
+                packageManagerForUser.getApplicationInfo(type.packageName, /* flags= */ 0)
+            return packageManagerForUser.getApplicationLabel(currentAppInfo).toString()
+        } catch (e: NameNotFoundException) {
+            Log.wtf(
+                "ShortcutHelperViewModel",
+                "Package Not found when retrieving Label for ${type.packageName}",
+            )
+            return "Current App"
+        }
+    }
 
     private suspend fun excludeLauncherApp(
         categories: List<ShortcutCategory>
@@ -111,7 +191,7 @@ constructor(
 
     private fun filterCategoriesBySearchQuery(
         query: String,
-        categories: List<ShortcutCategory>
+        categories: List<ShortcutCategory>,
     ): List<ShortcutCategory> {
         val lowerCaseTrimmedQuery = query.trim().lowercase()
         if (lowerCaseTrimmedQuery.isEmpty()) {
@@ -132,7 +212,7 @@ constructor(
 
     private fun filterSubCategoriesBySearchQuery(
         subCategories: List<ShortcutSubCategory>,
-        query: String
+        query: String,
     ) =
         subCategories
             .map { subCategory ->

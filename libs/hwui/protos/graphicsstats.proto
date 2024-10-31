@@ -58,6 +58,9 @@ message GraphicsStatsProto {
 
     // HWUI renders pipeline type: GL or Vulkan
     optional PipelineType pipeline = 8;
+
+    // The UID of the app
+    optional int32 uid = 9;
 }
 
 message GraphicsStatsJankSummaryProto {

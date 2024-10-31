@@ -92,6 +92,7 @@ oneway interface IApplicationThread {
             in Bundle coreSettings, in String buildSerial, in AutofillOptions autofillOptions,
             in ContentCaptureOptions contentCaptureOptions, in long[] disabledCompatChanges,
             in long[] loggableCompatChanges, in SharedMemory serializedSystemFontMap,
+            in FileDescriptor applicationSharedMemoryFd,
             long startRequestedElapsedTime, long startRequestedUptime);
     void runIsolatedEntryPoint(in String entryPoint, in String[] entryPointArgs);
     void scheduleExit();

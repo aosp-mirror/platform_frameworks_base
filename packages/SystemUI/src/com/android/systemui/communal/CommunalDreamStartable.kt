@@ -65,7 +65,9 @@ constructor(
                 keyguardTransitionInteractor
                     .transitionValue(Scenes.Communal, KeyguardState.GLANCEABLE_HUB)
                     .map { it == 1f },
-                not(keyguardInteractor.isDreaming),
+                // Use isDreamingAny because isDreaming is false in doze and doesn't change again
+                // when the screen turns on, which causes the dream to not start underneath the hub.
+                not(keyguardInteractor.isDreamingAny),
                 // TODO(b/362830856): Remove this workaround.
                 keyguardInteractor.isKeyguardShowing,
                 not(communalSceneInteractor.isLaunchingWidget),

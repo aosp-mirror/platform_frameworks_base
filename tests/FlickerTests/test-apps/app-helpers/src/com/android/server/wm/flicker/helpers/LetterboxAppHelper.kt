@@ -33,9 +33,9 @@ class LetterboxAppHelper
 @JvmOverloads
 constructor(
     instr: Instrumentation,
-    launcherName: String = ActivityOptions.NonResizeablePortraitActivity.LABEL,
+    launcherName: String = ActivityOptions.NonResizeableFixedAspectRatioPortraitActivity.LABEL,
     component: ComponentNameMatcher =
-        ActivityOptions.NonResizeablePortraitActivity.COMPONENT.toFlickerComponent()
+        ActivityOptions.NonResizeableFixedAspectRatioPortraitActivity.COMPONENT.toFlickerComponent()
 ) : StandardAppHelper(instr, launcherName, component) {
 
     private val gestureHelper: GestureHelper = GestureHelper(instrumentation)
@@ -128,6 +128,6 @@ constructor(
     }
 
     companion object {
-        private const val BOUNDS_OFFSET: Int = 100
+        private const val BOUNDS_OFFSET: Int = 50
     }
 }

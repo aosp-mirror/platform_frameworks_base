@@ -26,10 +26,7 @@ import com.android.systemui.shade.ui.composable.OverlayShade
 import com.android.systemui.shade.ui.composable.Shade
 import kotlin.time.Duration.Companion.milliseconds
 
-fun TransitionBuilder.toQuickSettingsShadeTransition(
-    edge: Edge = Edge.Top,
-    durationScale: Double = 1.0,
-) {
+fun TransitionBuilder.toQuickSettingsShadeTransition(durationScale: Double = 1.0) {
     spec = tween(durationMillis = (DefaultDuration * durationScale).inWholeMilliseconds.toInt())
     swipeSpec =
         spring(
@@ -38,7 +35,7 @@ fun TransitionBuilder.toQuickSettingsShadeTransition(
         )
     distance = UserActionDistance { fromSceneSize, _ -> fromSceneSize.height.toFloat() * 2 / 3f }
 
-    translate(OverlayShade.Elements.Panel, edge)
+    translate(OverlayShade.Elements.Panel, Edge.Top)
 
     fractionRange(end = .5f) { fade(OverlayShade.Elements.Scrim) }
 }

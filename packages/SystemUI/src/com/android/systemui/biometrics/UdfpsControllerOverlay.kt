@@ -23,8 +23,6 @@ import android.graphics.PixelFormat
 import android.graphics.Rect
 import android.hardware.biometrics.BiometricRequestConstants.REASON_AUTH_BP
 import android.hardware.biometrics.BiometricRequestConstants.REASON_AUTH_KEYGUARD
-import android.hardware.biometrics.BiometricRequestConstants.REASON_AUTH_OTHER
-import android.hardware.biometrics.BiometricRequestConstants.REASON_AUTH_SETTINGS
 import android.hardware.biometrics.BiometricRequestConstants.REASON_ENROLL_ENROLLING
 import android.hardware.biometrics.BiometricRequestConstants.REASON_ENROLL_FIND_SENSOR
 import android.hardware.biometrics.BiometricRequestConstants.RequestReason
@@ -42,7 +40,6 @@ import android.view.View
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityManager
 import android.view.accessibility.AccessibilityManager.TouchExplorationStateChangeListener
-import androidx.annotation.LayoutRes
 import androidx.annotation.VisibleForTesting
 import com.android.app.viewcapture.ViewCaptureAwareWindowManager
 import com.android.keyguard.KeyguardUpdateMonitor
@@ -56,7 +53,6 @@ import com.android.systemui.biometrics.ui.viewmodel.DeviceEntryUdfpsTouchOverlay
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
@@ -64,7 +60,6 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.res.R
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
-import com.android.systemui.statusbar.LockscreenShadeTransitionController
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.android.systemui.statusbar.phone.SystemUIDialogManager
 import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController
@@ -78,7 +73,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 private const val TAG = "UdfpsControllerOverlay"
 
@@ -102,7 +97,6 @@ constructor(
     private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
     private val dialogManager: SystemUIDialogManager,
     private val dumpManager: DumpManager,
-    private val transitionController: LockscreenShadeTransitionController,
     private val configurationController: ConfigurationController,
     private val keyguardStateController: KeyguardStateController,
     private val unlockedScreenOffAnimationController: UnlockedScreenOffAnimationController,
@@ -110,7 +104,7 @@ constructor(
     val requestId: Long,
     @RequestReason val requestReason: Int,
     private val controllerCallback: IUdfpsOverlayControllerCallback,
-    private val onTouch: (View, MotionEvent, Boolean) -> Boolean,
+    private val onTouch: (View, MotionEvent) -> Boolean,
     private val activityTransitionAnimator: ActivityTransitionAnimator,
     private val primaryBouncerInteractor: PrimaryBouncerInteractor,
     private val alternateBouncerInteractor: AlternateBouncerInteractor,
@@ -133,23 +127,15 @@ constructor(
             .map {} // map to Unit
     private var listenForCurrentKeyguardState: Job? = null
     private var addViewRunnable: Runnable? = null
-    private var overlayViewLegacy: UdfpsView? = null
-        private set
-
     private var overlayTouchView: UdfpsTouchOverlay? = null
 
     /**
-     * Get the current UDFPS overlay touch view which is a different View depending on whether the
-     * DeviceEntryUdfpsRefactor flag is enabled or not.
+     * Get the current UDFPS overlay touch view
      *
      * @return The view, when [isShowing], else null
      */
     fun getTouchOverlay(): View? {
-        return if (DeviceEntryUdfpsRefactor.isEnabled) {
-            overlayTouchView
-        } else {
-            overlayViewLegacy
-        }
+        return overlayTouchView
     }
 
     private var overlayParams: UdfpsOverlayParams = UdfpsOverlayParams()
@@ -161,7 +147,7 @@ constructor(
         WindowManager.LayoutParams(
                 WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL,
                 0 /* flags set in computeLayoutParams() */,
-                PixelFormat.TRANSLUCENT
+                PixelFormat.TRANSLUCENT,
             )
             .apply {
                 title = TAG
@@ -188,10 +174,6 @@ constructor(
     val isHiding: Boolean
         get() = getTouchOverlay() == null
 
-    /** The animation controller if the overlay [isShowing]. */
-    val animationViewController: UdfpsAnimationViewController<*>?
-        get() = overlayViewLegacy?.animationViewController
-
     private var touchExplorationEnabled = false
 
     private fun shouldRemoveEnrollmentUi(): Boolean {
@@ -199,7 +181,7 @@ constructor(
             return Settings.Global.getInt(
                 context.contentResolver,
                 SETTING_REMOVE_ENROLLMENT_UI,
-                0 /* def */
+                0, /* def */
             ) != 0
         }
         return false
@@ -212,63 +194,43 @@ constructor(
             overlayParams = params
             sensorBounds = Rect(params.sensorBounds)
             try {
-                if (DeviceEntryUdfpsRefactor.isEnabled) {
-                    overlayTouchView =
-                        (inflater.inflate(R.layout.udfps_touch_overlay, null, false)
-                                as UdfpsTouchOverlay)
-                            .apply {
-                                // This view overlaps the sensor area
-                                // prevent it from being selectable during a11y
-                                if (requestReason.isImportantForAccessibility()) {
-                                    importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
-                                }
-
-                                addViewNowOrLater(this, null)
-                                when (requestReason) {
-                                    REASON_AUTH_KEYGUARD ->
-                                        UdfpsTouchOverlayBinder.bind(
-                                            view = this,
-                                            viewModel = deviceEntryUdfpsTouchOverlayViewModel.get(),
-                                            udfpsOverlayInteractor = udfpsOverlayInteractor,
-                                        )
-                                    else ->
-                                        UdfpsTouchOverlayBinder.bind(
-                                            view = this,
-                                            viewModel = defaultUdfpsTouchOverlayViewModel.get(),
-                                            udfpsOverlayInteractor = udfpsOverlayInteractor,
-                                        )
-                                }
-                            }
-                } else {
-                    overlayViewLegacy =
-                        (inflater.inflate(R.layout.udfps_view, null, false) as UdfpsView).apply {
-                            overlayParams = params
-                            setUdfpsDisplayModeProvider(udfpsDisplayModeProvider)
-                            val animation = inflateUdfpsAnimation(this, controller)
-                            if (animation != null) {
-                                animation.init()
-                                animationViewController = animation
-                            }
+                overlayTouchView =
+                    (inflater.inflate(R.layout.udfps_touch_overlay, null, false)
+                            as UdfpsTouchOverlay)
+                        .apply {
                             // This view overlaps the sensor area
                             // prevent it from being selectable during a11y
                             if (requestReason.isImportantForAccessibility()) {
                                 importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
                             }
 
-                            addViewNowOrLater(this, animation)
-                            sensorRect = sensorBounds
+                            addViewNowOrLater(this, null)
+                            when (requestReason) {
+                                REASON_AUTH_KEYGUARD ->
+                                    UdfpsTouchOverlayBinder.bind(
+                                        view = this,
+                                        viewModel = deviceEntryUdfpsTouchOverlayViewModel.get(),
+                                        udfpsOverlayInteractor = udfpsOverlayInteractor,
+                                    )
+                                else ->
+                                    UdfpsTouchOverlayBinder.bind(
+                                        view = this,
+                                        viewModel = defaultUdfpsTouchOverlayViewModel.get(),
+                                        udfpsOverlayInteractor = udfpsOverlayInteractor,
+                                    )
+                            }
                         }
-                }
+
                 getTouchOverlay()?.apply {
                     touchExplorationEnabled = accessibilityManager.isTouchExplorationEnabled
                     overlayTouchListener = TouchExplorationStateChangeListener {
                         if (accessibilityManager.isTouchExplorationEnabled) {
-                            setOnHoverListener { v, event -> onTouch(v, event, true) }
+                            setOnHoverListener { v, event -> onTouch(v, event) }
                             setOnTouchListener(null)
                             touchExplorationEnabled = true
                         } else {
                             setOnHoverListener(null)
-                            setOnTouchListener { v, event -> onTouch(v, event, true) }
+                            setOnTouchListener { v, event -> onTouch(v, event) }
                             touchExplorationEnabled = false
                         }
                     }
@@ -312,7 +274,6 @@ constructor(
     }
 
     fun updateOverlayParams(updatedOverlayParams: UdfpsOverlayParams) {
-        DeviceEntryUdfpsRefactor.isUnexpectedlyInLegacyMode()
         overlayParams = updatedOverlayParams
         sensorBounds = updatedOverlayParams.sensorBounds
         getTouchOverlay()?.let {
@@ -326,108 +287,11 @@ constructor(
         }
     }
 
-    fun inflateUdfpsAnimation(
-        view: UdfpsView,
-        controller: UdfpsController
-    ): UdfpsAnimationViewController<*>? {
-        DeviceEntryUdfpsRefactor.assertInLegacyMode()
-
-        val isEnrollment =
-            when (requestReason) {
-                REASON_ENROLL_FIND_SENSOR,
-                REASON_ENROLL_ENROLLING -> true
-                else -> false
-            }
-
-        val filteredRequestReason =
-            if (isEnrollment && shouldRemoveEnrollmentUi()) {
-                REASON_AUTH_OTHER
-            } else {
-                requestReason
-            }
-
-        return when (filteredRequestReason) {
-            REASON_ENROLL_FIND_SENSOR,
-            REASON_ENROLL_ENROLLING -> {
-                // Enroll udfps UI is handled by settings, so use empty view here
-                UdfpsFpmEmptyViewController(
-                    view.addUdfpsView(R.layout.udfps_fpm_empty_view) {
-                        updateAccessibilityViewLocation(sensorBounds)
-                    },
-                    statusBarStateController,
-                    shadeInteractor,
-                    dialogManager,
-                    dumpManager,
-                    udfpsOverlayInteractor,
-                )
-            }
-            REASON_AUTH_KEYGUARD -> {
-                UdfpsKeyguardViewControllerLegacy(
-                    view.addUdfpsView(R.layout.udfps_keyguard_view_legacy) {
-                        updateSensorLocation(sensorBounds)
-                    },
-                    statusBarStateController,
-                    statusBarKeyguardViewManager,
-                    keyguardUpdateMonitor,
-                    dumpManager,
-                    transitionController,
-                    configurationController,
-                    keyguardStateController,
-                    unlockedScreenOffAnimationController,
-                    dialogManager,
-                    controller,
-                    activityTransitionAnimator,
-                    primaryBouncerInteractor,
-                    alternateBouncerInteractor,
-                    udfpsKeyguardAccessibilityDelegate,
-                    selectedUserInteractor,
-                    transitionInteractor,
-                    shadeInteractor,
-                    udfpsOverlayInteractor,
-                )
-            }
-            REASON_AUTH_BP -> {
-                // note: empty controller, currently shows no visual affordance
-                UdfpsBpViewController(
-                    view.addUdfpsView(R.layout.udfps_bp_view),
-                    statusBarStateController,
-                    shadeInteractor,
-                    dialogManager,
-                    dumpManager,
-                    udfpsOverlayInteractor,
-                )
-            }
-            REASON_AUTH_OTHER,
-            REASON_AUTH_SETTINGS -> {
-                UdfpsFpmEmptyViewController(
-                    view.addUdfpsView(R.layout.udfps_fpm_empty_view),
-                    statusBarStateController,
-                    shadeInteractor,
-                    dialogManager,
-                    dumpManager,
-                    udfpsOverlayInteractor,
-                )
-            }
-            else -> {
-                Log.e(TAG, "Animation for reason $requestReason not supported yet")
-                null
-            }
-        }
-    }
-
     /** Hide the overlay or return false and do nothing if it is already hidden. */
     fun hide(): Boolean {
         val wasShowing = isShowing
 
-        overlayViewLegacy?.apply {
-            if (isDisplayConfigured) {
-                unconfigureDisplay()
-            }
-            animationViewController = null
-        }
-        if (DeviceEntryUdfpsRefactor.isEnabled) {
-            udfpsDisplayModeProvider.disable(null)
-        }
+        udfpsDisplayModeProvider.disable(null)
         getTouchOverlay()?.apply {
             if (this.parent != null) {
                 windowManager.removeView(this)
@@ -440,7 +304,6 @@ constructor(
             }
         }
 
-        overlayViewLegacy = null
         overlayTouchView = null
         overlayTouchListener = null
         listenForCurrentKeyguardState?.cancel()
@@ -490,7 +353,7 @@ constructor(
                         Surface.rotationToString(rot) +
                         " animation=$animation" +
                         " isGoingToSleep=${keyguardUpdateMonitor.isGoingToSleep}" +
-                        " isOccluded=${keyguardStateController.isOccluded}"
+                        " isOccluded=${keyguardStateController.isOccluded}",
                 )
             } else {
                 Log.v(TAG, "Rotate UDFPS bounds " + Surface.rotationToString(rot))
@@ -498,14 +361,14 @@ constructor(
                     rotatedBounds,
                     overlayParams.naturalDisplayWidth,
                     overlayParams.naturalDisplayHeight,
-                    rot
+                    rot,
                 )
 
                 RotationUtils.rotateBounds(
                     sensorBounds,
                     overlayParams.naturalDisplayWidth,
                     overlayParams.naturalDisplayHeight,
-                    rot
+                    rot,
                 )
             }
         }
@@ -519,30 +382,13 @@ constructor(
     }
 
     private fun shouldRotate(animation: UdfpsAnimationViewController<*>?): Boolean {
-        val keyguardNotShowing =
-            if (DeviceEntryUdfpsRefactor.isEnabled) {
-                !keyguardStateController.isShowing
-            } else {
-                animation !is UdfpsKeyguardViewControllerLegacy
-            }
-
-        if (keyguardNotShowing) {
+        if (!keyguardStateController.isShowing) {
             // always rotate view if we're not on the keyguard
             return true
         }
 
         // on the keyguard, make sure we don't rotate if we're going to sleep or not occluded
         return !(keyguardUpdateMonitor.isGoingToSleep || !keyguardStateController.isOccluded)
-    }
-
-    private inline fun <reified T : View> UdfpsView.addUdfpsView(
-        @LayoutRes id: Int,
-        init: T.() -> Unit = {}
-    ): T {
-        val subView = inflater.inflate(id, null) as T
-        addView(subView)
-        subView.init()
-        return subView
     }
 }
 

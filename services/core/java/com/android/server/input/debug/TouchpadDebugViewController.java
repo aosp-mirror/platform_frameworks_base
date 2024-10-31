@@ -16,6 +16,7 @@
 
 package com.android.server.input.debug;
 
+import android.annotation.AnyThread;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.input.InputManager;
@@ -45,8 +46,8 @@ public class TouchpadDebugViewController implements InputManager.InputDeviceList
     private boolean mTouchpadVisualizerEnabled = false;
 
     public TouchpadDebugViewController(Context context, Looper looper,
-            InputManagerService inputManagerService) {
-        //TODO(b/363979581): Handle multi-display scenarios
+                                       InputManagerService inputManagerService) {
+        //TODO(b/369059937): Handle multi-display scenarios
         mContext = context;
         mHandler = new Handler(looper);
         mInputManagerService = inputManagerService;
@@ -75,6 +76,14 @@ public class TouchpadDebugViewController implements InputManager.InputDeviceList
                 onInputDeviceAdded(id);
             }
         }
+    }
+
+    /**
+     * Switch to showing the touchpad with the given device ID
+     */
+    public void switchVisualisationToTouchpadId(int newDeviceId) {
+        if (mTouchpadDebugView != null) hideDebugView(mTouchpadDebugView.getTouchpadId());
+        showDebugView(newDeviceId);
     }
 
     @Override
@@ -112,18 +121,20 @@ public class TouchpadDebugViewController implements InputManager.InputDeviceList
         final WindowManager wm = Objects.requireNonNull(
                 mContext.getSystemService(WindowManager.class));
 
-        mTouchpadDebugView = new TouchpadDebugView(mContext, touchpadId);
+        TouchpadHardwareProperties touchpadHardwareProperties =
+                mInputManagerService.getTouchpadHardwareProperties(
+                        touchpadId);
+
+        mTouchpadDebugView = new TouchpadDebugView(mContext, touchpadId,
+                touchpadHardwareProperties, this::switchVisualisationToTouchpadId);
         final WindowManager.LayoutParams mWindowLayoutParams =
                 mTouchpadDebugView.getWindowLayoutParams();
 
         wm.addView(mTouchpadDebugView, mWindowLayoutParams);
         Slog.d(TAG, "Touchpad debug view created.");
 
-        TouchpadHardwareProperties mTouchpadHardwareProperties =
-                mInputManagerService.getTouchpadHardwareProperties(
-                        touchpadId);
-        if (mTouchpadHardwareProperties != null) {
-            Slog.d(TAG, mTouchpadHardwareProperties.toString());
+        if (touchpadHardwareProperties != null) {
+            Slog.d(TAG, touchpadHardwareProperties.toString());
         } else {
             Slog.w(TAG, "Failed to retrieve touchpad hardware properties for "
                     + "device ID: " + touchpadId);
@@ -142,12 +153,33 @@ public class TouchpadDebugViewController implements InputManager.InputDeviceList
     }
 
     /**
-     * Notify the TouchpadDebugView with the new TouchpadHardwareState.
+     * Notifies about an update in the touchpad's hardware state.
+     *
+     * @param touchpadHardwareState the hardware state of a touchpad
+     * @param deviceId              the deviceId of the touchpad that is sending the hardware state
      */
+    @AnyThread
     public void updateTouchpadHardwareState(TouchpadHardwareState touchpadHardwareState,
                                             int deviceId) {
-        if (mTouchpadDebugView != null) {
-            mTouchpadDebugView.updateHardwareState(touchpadHardwareState, deviceId);
-        }
+        mHandler.post(() -> {
+            if (mTouchpadDebugView != null) {
+                mTouchpadDebugView.post(
+                        () -> mTouchpadDebugView.updateHardwareState(touchpadHardwareState,
+                                deviceId));
+            }
+        });
+    }
+
+    /**
+     * Notify the TouchpadDebugView of a new touchpad gesture.
+     */
+    @AnyThread
+    public void updateTouchpadGestureInfo(int gestureType, int deviceId) {
+        mHandler.post(() -> {
+            if (mTouchpadDebugView != null) {
+                mTouchpadDebugView.post(
+                        () -> mTouchpadDebugView.updateGestureInfo(gestureType, deviceId));
+            }
+        });
     }
 }

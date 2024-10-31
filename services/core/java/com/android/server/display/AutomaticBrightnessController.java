@@ -82,7 +82,8 @@ public class AutomaticBrightnessController {
     @IntDef(prefix = { "AUTO_BRIGHTNESS_MODE_" }, value = {
             AUTO_BRIGHTNESS_MODE_DEFAULT,
             AUTO_BRIGHTNESS_MODE_IDLE,
-            AUTO_BRIGHTNESS_MODE_DOZE
+            AUTO_BRIGHTNESS_MODE_DOZE,
+            AUTO_BRIGHTNESS_MODE_BEDTIME_WEAR
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface AutomaticBrightnessMode{}
@@ -90,6 +91,7 @@ public class AutomaticBrightnessController {
     public static final int AUTO_BRIGHTNESS_MODE_DEFAULT = 0;
     public static final int AUTO_BRIGHTNESS_MODE_IDLE = 1;
     public static final int AUTO_BRIGHTNESS_MODE_DOZE = 2;
+    public static final int AUTO_BRIGHTNESS_MODE_BEDTIME_WEAR = 3;
     public static final int AUTO_BRIGHTNESS_MODE_MAX = AUTO_BRIGHTNESS_MODE_DOZE;
 
     // How long the current sensor reading is assumed to be valid beyond the current time.
@@ -1279,8 +1281,9 @@ public class AutomaticBrightnessController {
     private boolean shouldApplyDozeScaleFactor() {
         // We don't apply the doze scale factor if we have a designated brightness curve for doze.
         return (mDisplayManagerFlags.isNormalBrightnessForDozeParameterEnabled()
-                ? !mUseNormalBrightnessForDoze && mDisplayPolicy == POLICY_DOZE
-                : Display.isDozeState(mDisplayState)) && getMode() != AUTO_BRIGHTNESS_MODE_DOZE;
+                ? (!mUseNormalBrightnessForDoze && mDisplayPolicy == POLICY_DOZE)
+                        || Display.isDozeState(mDisplayState) : Display.isDozeState(mDisplayState))
+                && getMode() != AUTO_BRIGHTNESS_MODE_DOZE;
     }
 
     private class ShortTermModel {

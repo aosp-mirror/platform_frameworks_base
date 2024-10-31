@@ -41,7 +41,7 @@ import kotlin.math.sign
 
 class ScreenshotAnimationController(
     private val view: ScreenshotShelfView,
-    private val viewModel: ScreenshotViewModel
+    private val viewModel: ScreenshotViewModel,
 ) {
     private var animator: Animator? = null
     private val screenshotPreview = view.requireViewById<ImageView>(R.id.screenshot_preview)
@@ -56,7 +56,7 @@ class ScreenshotAnimationController(
         listOf<View>(
             view.requireViewById(R.id.screenshot_preview_border),
             view.requireViewById(R.id.screenshot_badge),
-            view.requireViewById(R.id.screenshot_dismiss_button)
+            view.requireViewById(R.id.screenshot_dismiss_button),
         )
     private val fadeUI =
         listOf<View>(
@@ -70,9 +70,11 @@ class ScreenshotAnimationController(
     fun getEntranceAnimation(
         bounds: Rect,
         showFlash: Boolean,
-        onRevealMilestone: () -> Unit
+        onRevealMilestone: () -> Unit,
     ): Animator {
         val entranceAnimation = AnimatorSet()
+        view.alpha = 1f
+        view.translationX = 0f
 
         val previewAnimator = getPreviewAnimator(bounds)
 
@@ -142,7 +144,7 @@ class ScreenshotAnimationController(
     fun runLongScreenshotTransition(
         destRect: Rect,
         longScreenshot: ScrollCaptureController.LongScreenshot,
-        onTransitionEnd: Runnable
+        onTransitionEnd: Runnable,
     ): Animator {
         val animSet = AnimatorSet()
 
@@ -165,7 +167,7 @@ class ScreenshotAnimationController(
             matrix.setScale(currentScale, currentScale)
             matrix.postTranslate(
                 longScreenshot.left * currentScale,
-                longScreenshot.top * currentScale
+                longScreenshot.top * currentScale,
             )
             scrollTransitionPreview.setImageMatrix(matrix)
             val destinationScale: Float = destRect.width() / scrollTransitionPreview.width.toFloat()
@@ -315,7 +317,7 @@ class ScreenshotAnimationController(
     }
 
     private fun getAdjustedVelocity(requestedVelocity: Float?): Float {
-        return if (requestedVelocity == null) {
+        return if (requestedVelocity == null || abs(requestedVelocity) < .005f) {
             val isLTR = view.resources.configuration.layoutDirection == View.LAYOUT_DIRECTION_LTR
             // dismiss to the left in LTR locales, to the right in RTL
             if (isLTR) -MINIMUM_VELOCITY else MINIMUM_VELOCITY

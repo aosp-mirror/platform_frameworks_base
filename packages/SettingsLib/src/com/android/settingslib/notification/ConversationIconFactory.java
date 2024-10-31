@@ -87,7 +87,7 @@ public class ConversationIconFactory extends BaseIconFactory {
      * Returns the conversation info drawable
      */
     public Drawable getBaseIconDrawable(ShortcutInfo shortcutInfo) {
-        return mLauncherApps.getShortcutIconDrawable(shortcutInfo, mFillResIconDpi);
+        return mLauncherApps.getShortcutIconDrawable(shortcutInfo, mFullResIconDpi);
     }
 
     /**

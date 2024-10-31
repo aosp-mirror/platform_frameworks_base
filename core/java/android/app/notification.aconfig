@@ -6,6 +6,14 @@ container: "system"
 # flag relates to.
 
 flag {
+  name: "notifications_redesign_app_icons"
+  namespace: "systemui"
+  description: "Notifications Redesign: Use app icons in notification rows (not to be confused with"
+    " notifications_use_app_icons, notifications_use_app_icon_in_row which are just experiments)."
+  bug: "371174789"
+}
+
+flag {
   name: "modes_api"
   is_exported: true
   namespace: "systemui"
@@ -31,10 +39,40 @@ flag {
 }
 
 flag {
+  name: "modes_ui_empty_shade"
+  namespace: "systemui"
+  description: "Shows mode that is currently blocking notifications in the empty shade; dependent on flags modes_api and modes_ui"
+  bug: "366003631"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
   name: "modes_ui_test"
   namespace: "systemui"
   description: "Guards new CTS tests for Modes; dependent on flags modes_api and modes_ui"
   bug: "360862012"
+}
+
+flag {
+  name: "modes_hsum"
+  namespace: "systemui"
+  description: "Fixes for modes (and DND/Zen in general) with HSUM or secondary users"
+  bug: "366203070"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "modes_multiuser"
+  namespace: "systemui"
+  description: "Fixes for modes (and DND/Zen in general) when callers are not the current user"
+  bug: "323163267"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
 }
 
 flag {
@@ -102,6 +140,13 @@ flag {
   namespace: "systemui"
   description: "Experiment to restore the pre-S behavior where standard notifications are not expandable unless they have actions."
   bug: "339523906"
+}
+
+flag {
+  name: "notification_no_custom_view_conversations"
+  namespace: "systemui"
+  description: "Ensures that conversations are not allowed to use Custom Views."
+  bug: "368817201"
 }
 
 flag {
@@ -234,6 +279,28 @@ flag {
   name: "api_rich_ongoing"
   is_exported: true
   namespace: "systemui"
-  description: "Guards new android.app.richongoingnotification api"
+  description: "[RONs] Guards new RON-related APIs, including Notification.ProgressStyle"
   bug: "337261753"
+}
+
+flag {
+  name: "ui_rich_ongoing"
+  is_exported: true
+  namespace: "systemui"
+  description: "[RONs] Guards new promotion logic and UI, including AOD notification and Colorization"
+  bug: "367705002"
+}
+
+flag {
+  name: "backup_restore_logging"
+  namespace: "systemui"
+  description: "Adds logging for notification/modes backup and restore events"
+  bug: "289524803"
+}
+
+flag {
+  name: "notification_classification_ui"
+  namespace: "systemui"
+  description: "Adds UI for NAS classification of notifications"
+  bug: "367996732"
 }

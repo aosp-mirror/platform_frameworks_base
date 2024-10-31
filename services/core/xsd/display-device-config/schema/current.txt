@@ -8,17 +8,20 @@ package com.android.server.display.config {
     method public final java.math.BigInteger getDarkeningLightDebounceIdleMillis();
     method public final java.math.BigInteger getDarkeningLightDebounceMillis();
     method public boolean getEnabled();
+    method public final java.math.BigInteger getIdleStylusTimeoutMillis();
     method public final java.util.List<com.android.server.display.config.LuxToBrightnessMapping> getLuxToBrightnessMapping();
     method public final void setBrighteningLightDebounceIdleMillis(java.math.BigInteger);
     method public final void setBrighteningLightDebounceMillis(java.math.BigInteger);
     method public final void setDarkeningLightDebounceIdleMillis(java.math.BigInteger);
     method public final void setDarkeningLightDebounceMillis(java.math.BigInteger);
     method public void setEnabled(boolean);
+    method public final void setIdleStylusTimeoutMillis(java.math.BigInteger);
   }
 
   public enum AutoBrightnessModeName {
     method public String getRawName();
     enum_constant public static final com.android.server.display.config.AutoBrightnessModeName _default;
+    enum_constant public static final com.android.server.display.config.AutoBrightnessModeName bedtime_wear;
     enum_constant public static final com.android.server.display.config.AutoBrightnessModeName doze;
     enum_constant public static final com.android.server.display.config.AutoBrightnessModeName idle;
   }
@@ -91,8 +94,6 @@ package com.android.server.display.config {
   public class ComprehensiveBrightnessMap {
     ctor public ComprehensiveBrightnessMap();
     method @NonNull public final java.util.List<com.android.server.display.config.BrightnessPoint> getBrightnessPoint();
-    method public String getInterpolation();
-    method public void setInterpolation(String);
   }
 
   public class Density {
@@ -345,12 +346,12 @@ package com.android.server.display.config {
   public class PowerThrottlingConfig {
     ctor public PowerThrottlingConfig();
     method @NonNull public final java.math.BigDecimal getBrightnessLowestCapAllowed();
-    method @NonNull public final java.math.BigDecimal getCustomAnimationRateSec();
+    method @NonNull public final java.math.BigDecimal getCustomAnimationRate();
     method @NonNull public final java.math.BigInteger getPollingWindowMaxMillis();
     method @NonNull public final java.math.BigInteger getPollingWindowMinMillis();
     method public final java.util.List<com.android.server.display.config.PowerThrottlingMap> getPowerThrottlingMap();
     method public final void setBrightnessLowestCapAllowed(@NonNull java.math.BigDecimal);
-    method public final void setCustomAnimationRateSec(@NonNull java.math.BigDecimal);
+    method public final void setCustomAnimationRate(@NonNull java.math.BigDecimal);
     method public final void setPollingWindowMaxMillis(@NonNull java.math.BigInteger);
     method public final void setPollingWindowMinMillis(@NonNull java.math.BigInteger);
   }

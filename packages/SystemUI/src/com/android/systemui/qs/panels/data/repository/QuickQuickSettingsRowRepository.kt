@@ -34,6 +34,6 @@ constructor(
 ) {
     val rows =
         configurationRepository.onConfigurationChange.emitOnStart().map {
-            resources.getInteger(R.integer.quick_qs_panel_max_rows)
+            resources.getInteger(R.integer.quick_qs_paginated_grid_num_rows)
         }
 }

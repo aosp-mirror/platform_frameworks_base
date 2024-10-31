@@ -83,6 +83,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.WindowInsets.Side;
 import android.view.WindowInsets.Type;
+import android.view.accessibility.AccessibilityManager;
 
 import androidx.test.annotation.UiThreadTest;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -1599,7 +1600,6 @@ public class ViewRootImplTest {
                 nativeCreateASurfaceControlFromSurface(mViewRootImpl.mSurface));
     }
 
-    @EnableFlags(Flags.FLAG_INSETS_CONTROL_SEQ)
     @Test
     public void testHandleInsetsControlChanged() {
         mView = new View(sContext);
@@ -1628,6 +1628,42 @@ public class ViewRootImplTest {
             assertEquals(state1, controller.getLastDispatchedState());
             assertNotEquals(state0, controller.getLastDispatchedState());
         });
+    }
+
+    @Test
+    @EnableFlags(android.view.accessibility.Flags.FLAG_FOCUS_RECT_MIN_SIZE)
+    public void testAdjustAccessibilityFocusedBounds_largeEnoughBoundsAreUnchanged() {
+        final int strokeWidth = sContext.getSystemService(AccessibilityManager.class)
+                .getAccessibilityFocusStrokeWidth();
+        final int left, top, width, height;
+        left = top = 100;
+        width = height = strokeWidth * 2;
+        final Rect bounds = new Rect(left, top, left + width, top + height);
+        final Rect originalBounds = new Rect(bounds);
+
+        mViewRootImpl.adjustAccessibilityFocusedRectBoundsIfNeeded(bounds);
+
+        assertThat(bounds).isEqualTo(originalBounds);
+    }
+
+    @Test
+    @EnableFlags(android.view.accessibility.Flags.FLAG_FOCUS_RECT_MIN_SIZE)
+    public void testAdjustAccessibilityFocusedBounds_smallBoundsAreExpanded() {
+        final int strokeWidth = sContext.getSystemService(AccessibilityManager.class)
+                .getAccessibilityFocusStrokeWidth();
+        final int left, top, width, height;
+        left = top = 100;
+        width = height = strokeWidth;
+        final Rect bounds = new Rect(left, top, left + width, top + height);
+        final Rect originalBounds = new Rect(bounds);
+
+        mViewRootImpl.adjustAccessibilityFocusedRectBoundsIfNeeded(bounds);
+
+        // Bounds should be centered on the same point, but expanded to at least strokeWidth * 2
+        assertThat(bounds.centerX()).isEqualTo(originalBounds.centerX());
+        assertThat(bounds.centerY()).isEqualTo(originalBounds.centerY());
+        assertThat(bounds.width()).isAtLeast(strokeWidth * 2);
+        assertThat(bounds.height()).isAtLeast(strokeWidth * 2);
     }
 
     private boolean setForceDarkSysProp(boolean isForceDarkEnabled) {

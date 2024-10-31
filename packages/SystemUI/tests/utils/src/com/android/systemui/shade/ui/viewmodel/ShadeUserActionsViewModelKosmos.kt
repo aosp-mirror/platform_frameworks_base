@@ -19,11 +19,13 @@ package com.android.systemui.shade.ui.viewmodel
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.qs.ui.adapter.qsSceneAdapter
+import com.android.systemui.scene.domain.interactor.sceneBackInteractor
 import com.android.systemui.shade.domain.interactor.shadeInteractor
 
 val Kosmos.shadeUserActionsViewModel: ShadeUserActionsViewModel by Fixture {
     ShadeUserActionsViewModel(
         qsSceneAdapter = qsSceneAdapter,
         shadeInteractor = shadeInteractor,
+        sceneBackInteractor = sceneBackInteractor,
     )
 }

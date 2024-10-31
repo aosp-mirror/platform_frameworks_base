@@ -31,12 +31,11 @@ import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.log.core.FakeLogBuffer
-import com.android.systemui.log.table.TableLogBuffer
+import com.android.systemui.log.table.logcatTableLogBuffer
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.eq
-import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -78,7 +77,7 @@ class ScreenBrightnessDisplayManagerRepositoryTest : SysuiTestCase() {
                 displayId,
                 displayManager,
                 FakeLogBuffer.Factory.create(),
-                mock<TableLogBuffer>(),
+                logcatTableLogBuffer(kosmos, "screenBrightness"),
                 kosmos.applicationCoroutineScope,
                 kosmos.testDispatcher,
             )
@@ -163,7 +162,7 @@ class ScreenBrightnessDisplayManagerRepositoryTest : SysuiTestCase() {
 
                 changeBrightnessInfoAndNotify(
                     BrightnessInfo(0.5f, 0.1f, 0.7f),
-                    listenerCaptor.value
+                    listenerCaptor.value,
                 )
                 runCurrent()
 

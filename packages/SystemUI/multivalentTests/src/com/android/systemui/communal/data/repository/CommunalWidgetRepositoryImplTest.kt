@@ -25,8 +25,10 @@ import android.content.applicationContext
 import android.graphics.Bitmap
 import android.os.UserHandle
 import android.os.userManager
+import android.platform.test.annotations.EnableFlags
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.systemui.Flags.FLAG_COMMUNAL_WIDGET_RESIZING
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.data.repository.fakePackageChangeRepository
 import com.android.systemui.common.shared.model.PackageInstallSession
@@ -143,7 +145,8 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
     fun communalWidgets_queryWidgetsFromDb() =
         testScope.runTest {
             val communalItemRankEntry = CommunalItemRank(uid = 1L, rank = 1)
-            val communalWidgetItemEntry = CommunalWidgetItem(uid = 1L, 1, "pk_name/cls_name", 1L, 0)
+            val communalWidgetItemEntry =
+                CommunalWidgetItem(uid = 1L, 1, "pk_name/cls_name", 1L, 0, 3)
             fakeWidgets.value = mapOf(communalItemRankEntry to communalWidgetItemEntry)
             fakeProviders.value = mapOf(1 to providerInfoA)
 
@@ -155,6 +158,7 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
                         appWidgetId = communalWidgetItemEntry.widgetId,
                         providerInfo = providerInfoA,
                         rank = communalItemRankEntry.rank,
+                        spanY = communalWidgetItemEntry.spanY,
                     )
                 )
 
@@ -169,19 +173,15 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
             fakeWidgets.value =
                 mapOf(
                     CommunalItemRank(uid = 1L, rank = 1) to
-                        CommunalWidgetItem(uid = 1L, 1, "pk_1/cls_1", 1L, 0),
+                        CommunalWidgetItem(uid = 1L, 1, "pk_1/cls_1", 1L, 0, 3),
                     CommunalItemRank(uid = 2L, rank = 2) to
-                        CommunalWidgetItem(uid = 2L, 2, "pk_2/cls_2", 2L, 0),
+                        CommunalWidgetItem(uid = 2L, 2, "pk_2/cls_2", 2L, 0, 3),
                     CommunalItemRank(uid = 3L, rank = 3) to
-                        CommunalWidgetItem(uid = 3L, 3, "pk_3/cls_3", 3L, 0),
+                        CommunalWidgetItem(uid = 3L, 3, "pk_3/cls_3", 3L, 0, 3),
                     CommunalItemRank(uid = 4L, rank = 4) to
-                        CommunalWidgetItem(uid = 4L, 4, "pk_4/cls_4", 4L, 0),
+                        CommunalWidgetItem(uid = 4L, 4, "pk_4/cls_4", 4L, 0, 3),
                 )
-            fakeProviders.value =
-                mapOf(
-                    1 to providerInfoA,
-                    2 to providerInfoB,
-                )
+            fakeProviders.value = mapOf(1 to providerInfoA, 2 to providerInfoB)
 
             // Expect to see only widget 1 and 2
             val communalWidgets by collectLastValue(underTest.communalWidgets)
@@ -191,11 +191,13 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
                         appWidgetId = 1,
                         providerInfo = providerInfoA,
                         rank = 1,
+                        spanY = 3,
                     ),
                     CommunalWidgetContentModel.Available(
                         appWidgetId = 2,
                         providerInfo = providerInfoB,
                         rank = 2,
+                        spanY = 3,
                     ),
                 )
         }
@@ -207,15 +209,11 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
             fakeWidgets.value =
                 mapOf(
                     CommunalItemRank(uid = 1L, rank = 1) to
-                        CommunalWidgetItem(uid = 1L, 1, "pk_1/cls_1", 1L, 0),
+                        CommunalWidgetItem(uid = 1L, 1, "pk_1/cls_1", 1L, 0, 3),
                     CommunalItemRank(uid = 2L, rank = 2) to
-                        CommunalWidgetItem(uid = 2L, 2, "pk_2/cls_2", 2L, 0),
+                        CommunalWidgetItem(uid = 2L, 2, "pk_2/cls_2", 2L, 0, 3),
                 )
-            fakeProviders.value =
-                mapOf(
-                    1 to providerInfoA,
-                    2 to providerInfoB,
-                )
+            fakeProviders.value = mapOf(1 to providerInfoA, 2 to providerInfoB)
 
             // Expect two widgets
             val communalWidgets by collectLastValue(underTest.communalWidgets)
@@ -226,20 +224,18 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
                         appWidgetId = 1,
                         providerInfo = providerInfoA,
                         rank = 1,
+                        spanY = 3,
                     ),
                     CommunalWidgetContentModel.Available(
                         appWidgetId = 2,
                         providerInfo = providerInfoB,
                         rank = 2,
+                        spanY = 3,
                     ),
                 )
 
             // Provider info updated for widget 1
-            fakeProviders.value =
-                mapOf(
-                    1 to providerInfoC,
-                    2 to providerInfoB,
-                )
+            fakeProviders.value = mapOf(1 to providerInfoC, 2 to providerInfoB)
             runCurrent()
 
             assertThat(communalWidgets)
@@ -249,11 +245,13 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
                         // Verify that provider info updated
                         providerInfo = providerInfoC,
                         rank = 1,
+                        spanY = 3,
                     ),
                     CommunalWidgetContentModel.Available(
                         appWidgetId = 2,
                         providerInfo = providerInfoB,
                         rank = 2,
+                        spanY = 3,
                     ),
                 )
         }
@@ -269,7 +267,7 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
             whenever(
                     communalWidgetHost.allocateIdAndBindWidget(
                         any<ComponentName>(),
-                        any<UserHandle>()
+                        any<UserHandle>(),
                     )
                 )
                 .thenReturn(id)
@@ -294,7 +292,7 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
             whenever(
                     communalWidgetHost.allocateIdAndBindWidget(
                         any<ComponentName>(),
-                        any<UserHandle>()
+                        any<UserHandle>(),
                     )
                 )
                 .thenReturn(id)
@@ -303,7 +301,7 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
 
             verify(communalWidgetHost).allocateIdAndBindWidget(provider, mainUser)
             verify(communalWidgetDao, never())
-                .addWidget(anyInt(), any<ComponentName>(), anyInt(), anyInt())
+                .addWidget(anyInt(), any<ComponentName>(), anyInt(), anyInt(), anyInt())
             verify(appWidgetHost).deleteAppWidgetId(id)
 
             // Verify backup not requested
@@ -321,7 +319,7 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
             whenever(
                     communalWidgetHost.allocateIdAndBindWidget(
                         any<ComponentName>(),
-                        any<UserHandle>()
+                        any<UserHandle>(),
                     )
                 )
                 .thenReturn(id)
@@ -332,7 +330,7 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
 
             verify(communalWidgetHost).allocateIdAndBindWidget(provider, mainUser)
             verify(communalWidgetDao, never())
-                .addWidget(anyInt(), any<ComponentName>(), anyInt(), anyInt())
+                .addWidget(anyInt(), any<ComponentName>(), anyInt(), anyInt(), anyInt())
             verify(appWidgetHost).deleteAppWidgetId(id)
 
             // Verify backup not requested
@@ -350,7 +348,7 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
             whenever(
                     communalWidgetHost.allocateIdAndBindWidget(
                         any<ComponentName>(),
-                        any<UserHandle>()
+                        any<UserHandle>(),
                     )
                 )
                 .thenReturn(id)
@@ -650,8 +648,10 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
                     eq(newWidgetId),
                     componentNameCaptor.capture(),
                     eq(2),
-                    eq(testUserSerialNumber(workProfile))
+                    eq(testUserSerialNumber(workProfile)),
+                    anyInt(),
                 )
+
             assertThat(componentNameCaptor.firstValue)
                 .isEqualTo(ComponentName("pk_name", "fake_widget_2"))
         }
@@ -662,9 +662,9 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
             fakeWidgets.value =
                 mapOf(
                     CommunalItemRank(uid = 1L, rank = 1) to
-                        CommunalWidgetItem(uid = 1L, 1, "pk_1/cls_1", 1L, 0),
+                        CommunalWidgetItem(uid = 1L, 1, "pk_1/cls_1", 1L, 0, 3),
                     CommunalItemRank(uid = 2L, rank = 2) to
-                        CommunalWidgetItem(uid = 2L, 2, "pk_2/cls_2", 2L, 0),
+                        CommunalWidgetItem(uid = 2L, 2, "pk_2/cls_2", 2L, 0, 3),
                 )
 
             // Widget 1 is installed
@@ -690,6 +690,7 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
                         appWidgetId = 1,
                         providerInfo = providerInfoA,
                         rank = 1,
+                        spanY = 3,
                     ),
                     CommunalWidgetContentModel.Pending(
                         appWidgetId = 2,
@@ -697,6 +698,7 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
                         componentName = ComponentName("pk_2", "cls_2"),
                         icon = fakeIcon,
                         user = mainUser,
+                        spanY = 3,
                     ),
                 )
         }
@@ -707,7 +709,7 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
             fakeWidgets.value =
                 mapOf(
                     CommunalItemRank(uid = 1L, rank = 1) to
-                        CommunalWidgetItem(uid = 1L, 1, "pk_1/cls_1", 1L, 0),
+                        CommunalWidgetItem(uid = 1L, 1, "pk_1/cls_1", 1L, 0, 3)
                 )
 
             // Widget 1 is pending install
@@ -732,7 +734,8 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
                         componentName = ComponentName("pk_1", "cls_1"),
                         icon = fakeIcon,
                         user = mainUser,
-                    ),
+                        spanY = 3,
+                    )
                 )
 
             // Package for widget 1 finished installing
@@ -749,8 +752,24 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
                         appWidgetId = 1,
                         providerInfo = providerInfoA,
                         rank = 1,
-                    ),
+                        spanY = 3,
+                    )
                 )
+        }
+
+    @Test
+    @EnableFlags(FLAG_COMMUNAL_WIDGET_RESIZING)
+    fun updateWidgetSpanY_updatesWidgetInDaoAndRequestsBackup() =
+        testScope.runTest {
+            val widgetId = 1
+            val newSpanY = 6
+            val widgetIdToRankMap = emptyMap<Int, Int>()
+
+            underTest.resizeWidget(widgetId, newSpanY, widgetIdToRankMap)
+            runCurrent()
+
+            verify(communalWidgetDao).resizeWidget(widgetId, newSpanY, widgetIdToRankMap)
+            verify(backupManager).dataChanged()
         }
 
     private fun setAppWidgetIds(ids: List<Int>) {

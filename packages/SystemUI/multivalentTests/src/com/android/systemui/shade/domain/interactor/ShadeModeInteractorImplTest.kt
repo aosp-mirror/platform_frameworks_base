@@ -88,6 +88,26 @@ class ShadeModeInteractorImplTest : SysuiTestCase() {
         }
 
     @Test
+    @EnableFlags(DualShade.FLAG_NAME)
+    fun isDualShade_flagEnabled_true() =
+        testScope.runTest {
+            // Initiate collection.
+            val shadeMode by collectLastValue(underTest.shadeMode)
+
+            assertThat(underTest.isDualShade).isTrue()
+        }
+
+    @Test
+    @DisableFlags(DualShade.FLAG_NAME)
+    fun isDualShade_flagDisabled_false() =
+        testScope.runTest {
+            // Initiate collection.
+            val shadeMode by collectLastValue(underTest.shadeMode)
+
+            assertThat(underTest.isDualShade).isFalse()
+        }
+
+    @Test
     fun getTopEdgeSplitFraction_narrowScreen_splitInHalf() =
         testScope.runTest {
             // Ensure isShadeLayoutWide is collected.

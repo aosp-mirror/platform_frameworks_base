@@ -592,7 +592,7 @@ public abstract class ApexManager {
                 return apexSessionInfo;
             } catch (RemoteException re) {
                 Slog.e(TAG, "Unable to contact apexservice", re);
-                throw new RuntimeException(re);
+                return null;
             }
         }
 
@@ -607,7 +607,7 @@ public abstract class ApexManager {
                 return result;
             } catch (RemoteException re) {
                 Slog.e(TAG, "Unable to contact apexservice", re);
-                throw new RuntimeException(re);
+                return new SparseArray<>(0);
             }
         }
 
@@ -619,7 +619,9 @@ public abstract class ApexManager {
                 return apexInfoList;
             } catch (RemoteException re) {
                 Slog.e(TAG, "Unable to contact apexservice", re);
-                throw new RuntimeException(re);
+                throw new PackageManagerException(
+                        PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE,
+                        "apexd verification failed : " + re.getMessage());
             } catch (Exception e) {
                 throw new PackageManagerException(
                         PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE,
@@ -633,7 +635,7 @@ public abstract class ApexManager {
                 return waitForApexService().getStagedApexInfos(params);
             } catch (RemoteException re) {
                 Slog.w(TAG, "Unable to contact apexservice" + re.getMessage());
-                throw new RuntimeException(re);
+                return new ApexInfo[0];
             } catch (Exception e) {
                 Slog.w(TAG, "Failed to collect staged apex infos" + e.getMessage());
                 return new ApexInfo[0];
@@ -646,7 +648,9 @@ public abstract class ApexManager {
                 waitForApexService().markStagedSessionReady(sessionId);
             } catch (RemoteException re) {
                 Slog.e(TAG, "Unable to contact apexservice", re);
-                throw new RuntimeException(re);
+                throw new PackageManagerException(
+                        PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE,
+                        "Failed to mark apexd session as ready : " + re.getMessage());
             } catch (Exception e) {
                 throw new PackageManagerException(
                         PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE,

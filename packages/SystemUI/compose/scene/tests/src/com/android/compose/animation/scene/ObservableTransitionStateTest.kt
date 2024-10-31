@@ -47,12 +47,7 @@ class ObservableTransitionStateTest {
     @Test
     fun testObservableTransitionState() = runTest {
         val state =
-            rule.runOnUiThread {
-                MutableSceneTransitionLayoutState(
-                    SceneA,
-                    EmptyTestTransitions,
-                )
-            }
+            rule.runOnUiThread { MutableSceneTransitionLayoutState(SceneA, EmptyTestTransitions) }
 
         // Collect the current observable state into [observableState].
         // TODO(b/290184746): Use collectValues {} once it is extracted into a library that can be
@@ -82,7 +77,7 @@ class ObservableTransitionStateTest {
                     scene(SceneA) {}
                     scene(SceneB) {}
                 }
-            }
+            },
         ) {
             before {
                 assertThat(observableState()).isEqualTo(ObservableTransitionState.Idle(SceneA))
@@ -157,7 +152,7 @@ class ObservableTransitionStateTest {
             rule.runOnUiThread {
                 MutableSceneTransitionLayoutState(
                     SceneA,
-                    transitions = transitions { from(SceneA, to = SceneB, preview = {}) }
+                    transitions = transitions { from(SceneA, to = SceneB, preview = {}) },
                 )
             }
         rule.setContent {

@@ -16,6 +16,7 @@
 
 package android.view.accessibility;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -783,6 +784,31 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
      * @see AccessibilityNodeInfo#setEnabled
      */
     public static final int CONTENT_CHANGE_TYPE_ENABLED = 1 << 12;
+
+    /**
+     * Change type for {@link #TYPE_WINDOW_CONTENT_CHANGED} event:
+     * The source node changed its checked state, which is returned by
+     * {@link AccessibilityNodeInfo#getChecked()}.
+     * The view changing its checked state should call
+     * {@link AccessibilityNodeInfo#setChecked(int)} and then send this event.
+     *
+     * @see AccessibilityNodeInfo#getChecked()
+     * @see AccessibilityNodeInfo#setChecked(int)
+     */
+    @FlaggedApi(Flags.FLAG_TRI_STATE_CHECKED)
+    public static final int CONTENT_CHANGE_TYPE_CHECKED = 1 << 13;
+
+    /**
+     * Change type for {@link #TYPE_WINDOW_CONTENT_CHANGED} event: The source node changed its
+     * expanded state which is returned by {@link AccessibilityNodeInfo#getExpandedState()}. The
+     * view changing the node's expanded state should call {@link
+     * AccessibilityNodeInfo#setExpandedState(int)} and then send this event.
+     *
+     * @see AccessibilityNodeInfo#getExpandedState()
+     * @see AccessibilityNodeInfo#setExpandedState(int)
+     */
+    @FlaggedApi(Flags.FLAG_A11Y_EXPANSION_STATE_API)
+    public static final int CONTENT_CHANGE_TYPE_EXPANDED = 1 << 14;
 
     // Speech state change types.
 

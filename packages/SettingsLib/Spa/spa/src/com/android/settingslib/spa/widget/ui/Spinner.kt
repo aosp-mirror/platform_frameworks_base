@@ -19,9 +19,14 @@ package com.android.settingslib.spa.widget.ui
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.ExpandLess
 import androidx.compose.material.icons.outlined.ExpandMore
 import androidx.compose.material3.Button
@@ -38,20 +43,19 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.android.settingslib.spa.framework.theme.SettingsDimension
+import com.android.settingslib.spa.framework.theme.SettingsShape
 import com.android.settingslib.spa.framework.theme.SettingsTheme
 import com.android.settingslib.spa.framework.theme.isSpaExpressiveEnabled
 
-data class SpinnerOption(
-    val id: Int,
-    val text: String,
-)
+data class SpinnerOption(val id: Int, val text: String)
 
 @Composable
 fun Spinner(options: List<SpinnerOption>, selectedId: Int?, setId: (id: Int) -> Unit) {
@@ -62,51 +66,101 @@ fun Spinner(options: List<SpinnerOption>, selectedId: Int?, setId: (id: Int) -> 
     var expanded by rememberSaveable { mutableStateOf(false) }
 
     Box(
-        modifier = Modifier
-            .padding(
-                start = SettingsDimension.itemPaddingStart,
-                top = SettingsDimension.itemPaddingAround,
-                end = SettingsDimension.itemPaddingEnd,
-                bottom = SettingsDimension.itemPaddingAround,
-            )
-            .selectableGroup(),
-    ) {
-        val contentPadding = if (isSpaExpressiveEnabled) PaddingValues(
-            horizontal = SettingsDimension.spinnerHorizontalPadding,
-            vertical = SettingsDimension.spinnerVerticalPadding
-        ) else PaddingValues(horizontal = SettingsDimension.itemPaddingEnd)
-        Button(
-            modifier = Modifier.semantics { role = Role.DropdownList },
-            onClick = { expanded = true },
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-            ),
-            contentPadding = contentPadding,
-        ) {
-            SpinnerText(options.find { it.id == selectedId })
-            ExpandIcon(expanded)
-        }
-        DropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false },
-            modifier = Modifier.background(MaterialTheme.colorScheme.secondaryContainer),
-        ) {
-            for (option in options) {
-                DropdownMenuItem(
-                    text = {
-                        SpinnerText(
-                            option = option,
-                            modifier = Modifier.padding(end = 24.dp),
-                            color = MaterialTheme.colorScheme.onSecondaryContainer,
-                        )
-                    },
-                    onClick = {
-                        expanded = false
-                        setId(option.id)
-                    },
-                    contentPadding = contentPadding,
+        modifier =
+            Modifier.padding(
+                    start = SettingsDimension.itemPaddingStart,
+                    top = SettingsDimension.itemPaddingAround,
+                    end = SettingsDimension.itemPaddingEnd,
+                    bottom = SettingsDimension.itemPaddingAround,
                 )
+                .selectableGroup()
+    ) {
+        if (isSpaExpressiveEnabled) {
+            Button(
+                modifier = Modifier.semantics { role = Role.DropdownList },
+                onClick = { expanded = true },
+                colors =
+                    ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                    ),
+                contentPadding =
+                    PaddingValues(
+                        horizontal = SettingsDimension.spinnerHorizontalPadding,
+                        vertical = SettingsDimension.spinnerVerticalPadding,
+                    ),
+            ) {
+                SpinnerText(options.find { it.id == selectedId })
+                ExpandIcon(expanded)
+            }
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false },
+                shape = SettingsShape.CornerLarge,
+                modifier =
+                    Modifier.background(MaterialTheme.colorScheme.surfaceContainerLow)
+                        .padding(horizontal = SettingsDimension.paddingSmall),
+            ) {
+                for (option in options) {
+                    val selected = option.id == selectedId
+                    DropdownMenuItem(
+                        text = { SpinnerOptionText(option = option, selected) },
+                        onClick = {
+                            expanded = false
+                            setId(option.id)
+                        },
+                        contentPadding =
+                            PaddingValues(
+                                horizontal = SettingsDimension.paddingSmall,
+                                vertical = SettingsDimension.paddingExtraSmall1,
+                            ),
+                        modifier =
+                            Modifier.heightIn(min = SettingsDimension.spinnerOptionMinHeight)
+                                .then(
+                                    if (selected)
+                                        Modifier.clip(SettingsShape.CornerMedium2)
+                                            .background(MaterialTheme.colorScheme.primaryContainer)
+                                    else Modifier
+                                ),
+                    )
+                }
+            }
+        } else {
+            val contentPadding = PaddingValues(horizontal = SettingsDimension.itemPaddingEnd)
+            Button(
+                modifier = Modifier.semantics { role = Role.DropdownList },
+                onClick = { expanded = true },
+                colors =
+                    ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    ),
+                contentPadding = contentPadding,
+            ) {
+                SpinnerText(options.find { it.id == selectedId })
+                ExpandIcon(expanded)
+            }
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false },
+                modifier = Modifier.background(MaterialTheme.colorScheme.secondaryContainer),
+            ) {
+                for (option in options) {
+                    DropdownMenuItem(
+                        text = {
+                            SpinnerText(
+                                option = option,
+                                modifier = Modifier.padding(end = 24.dp),
+                                color = MaterialTheme.colorScheme.onSecondaryContainer,
+                            )
+                        },
+                        onClick = {
+                            expanded = false
+                            setId(option.id)
+                        },
+                        contentPadding = contentPadding,
+                    )
+                }
             }
         }
     }
@@ -115,10 +169,11 @@ fun Spinner(options: List<SpinnerOption>, selectedId: Int?, setId: (id: Int) -> 
 @Composable
 internal fun ExpandIcon(expanded: Boolean) {
     Icon(
-        imageVector = when {
-            expanded -> Icons.Outlined.ExpandLess
-            else -> Icons.Outlined.ExpandMore
-        },
+        imageVector =
+            when {
+                expanded -> Icons.Outlined.ExpandLess
+                else -> Icons.Outlined.ExpandMore
+            },
         contentDescription = null,
     )
 }
@@ -131,16 +186,40 @@ private fun SpinnerText(
 ) {
     Text(
         text = option?.text ?: "",
-        modifier = modifier
-            .padding(end = SettingsDimension.itemPaddingEnd)
-            .then(
-                if (!isSpaExpressiveEnabled)
-                    Modifier.padding(vertical = SettingsDimension.itemPaddingAround)
-                else Modifier
-            ),
+        modifier =
+            modifier
+                .padding(end = SettingsDimension.itemPaddingEnd)
+                .then(
+                    if (!isSpaExpressiveEnabled)
+                        Modifier.padding(vertical = SettingsDimension.itemPaddingAround)
+                    else Modifier
+                ),
         color = color,
         style = MaterialTheme.typography.labelLarge,
     )
+}
+
+@Composable
+private fun SpinnerOptionText(option: SpinnerOption?, selected: Boolean) {
+    Row {
+        if (selected) {
+            Icon(
+                imageVector = Icons.Outlined.Check,
+                modifier = Modifier.size(SettingsDimension.spinnerIconSize),
+                tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                contentDescription = null,
+            )
+            Spacer(Modifier.padding(SettingsDimension.paddingSmall))
+        }
+        Text(
+            text = option?.text ?: "",
+            modifier = Modifier.padding(end = SettingsDimension.itemPaddingEnd),
+            color =
+                if (selected) MaterialTheme.colorScheme.onPrimaryContainer
+                else MaterialTheme.colorScheme.onSurface,
+            style = MaterialTheme.typography.labelLarge,
+        )
+    }
 }
 
 @Preview(showBackground = true)

@@ -357,6 +357,8 @@
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Virkjar eiginleika aukinnar tengigetu."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Staðbundin skipanalína"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Virkja skipanalínuforrit sem leyfir staðbundinn skeljaraðgang"</string>
+    <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Þróunarumhverfi Linux"</string>
+    <string name="enable_linux_terminal_summary" msgid="5893216510985145320">"Keyra Linux-útstöð í Android"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP-athugun"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"Velja virkni HDCP-ath."</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"Villuleit"</string>
@@ -564,8 +566,7 @@
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Vekjarar og áminningar"</string>
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Leyfa þessu forriti að stilla vekjara og áætla aðgerðir sem þurfa að eiga sér stað innan ákveðins tímaramma. Þetta leyfir forritinu að keyra í bakgrunninum sem getur notað meiri rafhlöðuorku.\n\nEf slökkt er á þessari heimild munu núverandi vekjarar og tímasettir viðburðir sem þetta forrit stillir ekki virka."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"áætlun, vekjari, áminning, klukka"</string>
-    <!-- no translation found for zen_mode_do_not_disturb_name (6798711401734798283) -->
-    <skip />
+    <string name="zen_mode_do_not_disturb_name" msgid="6798711401734798283">"Ónáðið ekki"</string>
     <string name="zen_mode_settings_title" msgid="7374070457626419755">"Ónáðið ekki"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Kveikja"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Kveikja á „Ónáðið ekki“"</string>
@@ -583,6 +584,7 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"Rétt í þessu"</string>
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"Þessi sími"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"Þessi spjaldtölva"</string>
+    <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"Þessi tölva (innbyggður)"</string>
     <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
     <skip />
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Hátalaradokka"</string>
@@ -685,7 +687,12 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Slökkt"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Virkt"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Endurræsa þarf tækið til að þessi breyting taki gildi. Endurræstu núna eða hættu við."</string>
-    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"Heyrnartól með snúru"</string>
+    <string name="media_transfer_wired_headphone_name" msgid="8698668536022665254">"Heyrnartól með snúru"</string>
+    <string name="media_transfer_headphone_name" msgid="1157798825650178478">"Heyrnartól með snúru"</string>
+    <string name="media_transfer_usb_audio_name" msgid="1789292056757821355">"USB-hljóð"</string>
+    <string name="media_transfer_wired_device_mic_name" msgid="7115192790725088698">"Hljóðnemi með snúru"</string>
+    <string name="media_transfer_usb_device_mic_name" msgid="7171789543226269822">"USB-hljóðnemi"</string>
+    <string name="media_transfer_bt_device_mic_name" msgid="1870669402238687618">"BT-hljóðnemi"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"Kveikt"</string>
     <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"Slökkt"</string>
     <string name="carrier_network_change_mode" msgid="4257621815706644026">"Skiptir um farsímakerfi"</string>

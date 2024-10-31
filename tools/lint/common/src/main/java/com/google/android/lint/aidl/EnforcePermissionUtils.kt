@@ -103,3 +103,26 @@ fun getHelperMethodFix(
 
     return fix.build()
 }
+
+/**
+ * PermissionAnnotationDetector uses this method to determine whether a specific file should be
+ * checked for unannotated methods. Only files located in directories whose paths begin with one
+ * of these prefixes will be considered.
+ */
+fun isSystemServicePath(context: JavaContext): Boolean {
+    val systemServicePathPrefixes = setOf(
+        "frameworks/base/services",
+        "frameworks/base/apex",
+        "frameworks/opt/wear",
+        "packages/modules"
+    )
+
+    val filePath = context.file.path
+
+    // We perform `filePath.contains` instead of `filePath.startsWith` since getting the
+    // relative path of a source file is non-trivial. That is because `context.file.path`
+    // returns the path to where soong builds the file (i.e. /out/soong/...). Moreover, the
+    // logic to extract the relative path would need to consider several /out/soong/...
+    // locations patterns.
+    return systemServicePathPrefixes.any { filePath.contains(it) }
+}

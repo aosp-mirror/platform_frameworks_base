@@ -290,7 +290,7 @@ public class Watchdog implements Dumpable {
         public void scheduleCheckLocked(long handlerCheckerTimeoutMillis) {
             mWaitMaxMillis = handlerCheckerTimeoutMillis;
 
-            if (mCompleted) {
+            if (mCompleted && !mMonitorQueue.isEmpty()) {
                 // Safe to update monitors in queue, Handler is not in the middle of work
                 mMonitors.addAll(mMonitorQueue);
                 mMonitorQueue.clear();

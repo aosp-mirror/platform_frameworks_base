@@ -38,7 +38,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelUuid;
 import android.os.SystemClock;
-import android.provider.Settings;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
@@ -323,18 +322,27 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
     }
 
     private void updatePreferredTransport() {
-        if (mProfiles.stream().noneMatch(p -> p instanceof LeAudioProfile)
-                || mProfiles.stream().noneMatch(p -> p instanceof HidProfile)) {
+        LeAudioProfile leAudioProfile =
+                (LeAudioProfile)
+                        mProfiles.stream()
+                                .filter(p -> p instanceof LeAudioProfile)
+                                .findFirst()
+                                .orElse(null);
+        HidProfile hidProfile =
+                (HidProfile)
+                        mProfiles.stream()
+                                .filter(p -> p instanceof HidProfile)
+                                .findFirst()
+                                .orElse(null);
+        if (leAudioProfile == null || hidProfile == null) {
             return;
         }
         // Both LeAudioProfile and HidProfile are connectable.
-        if (!mProfileManager
-                .getHidProfile()
-                .setPreferredTransport(
-                        mDevice,
-                        mProfileManager.getLeAudioProfile().isEnabled(mDevice)
-                                ? BluetoothDevice.TRANSPORT_LE
-                                : BluetoothDevice.TRANSPORT_BREDR)) {
+        if (!hidProfile.setPreferredTransport(
+                mDevice,
+                leAudioProfile.isEnabled(mDevice)
+                        ? BluetoothDevice.TRANSPORT_LE
+                        : BluetoothDevice.TRANSPORT_BREDR)) {
             Log.w(TAG, "Fail to set preferred transport");
         }
     }
@@ -1291,12 +1299,10 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         if (BluetoothUtils.hasConnectedBroadcastSource(this, mBluetoothManager)) {
             // Gets summary for the buds which are in the audio sharing.
             int groupId = BluetoothUtils.getGroupId(this);
-            if (groupId != BluetoothCsipSetCoordinator.GROUP_ID_INVALID
-                    && groupId
-                            == Settings.Secure.getInt(
-                                    mContext.getContentResolver(),
-                                    "bluetooth_le_broadcast_fallback_active_group_id",
-                                    BluetoothCsipSetCoordinator.GROUP_ID_INVALID)) {
+            int primaryGroupId = BluetoothUtils.getPrimaryGroupIdForBroadcast(
+                    mContext.getContentResolver());
+            if ((primaryGroupId != BluetoothCsipSetCoordinator.GROUP_ID_INVALID)
+                    ? (groupId == primaryGroupId) : isActiveDevice(BluetoothProfile.LE_AUDIO)) {
                 // The buds are primary buds
                 return getSummaryWithBatteryInfo(
                         R.string.bluetooth_active_battery_level_untethered,

@@ -1,28 +1,13 @@
 {
   "presubmit": [
     {
-      "name": "CtsWebkitTestCases",
-      "options": [
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        }
-      ]
+      "name": "CtsWebkitTestCases"
     },
     {
-      "name": "CtsSdkSandboxWebkitTestCases",
-      "options": [
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        }
-      ]
+      "name": "CtsSdkSandboxWebkitTestCases"
     },
     {
-      "name": "CtsHostsideWebViewTests",
-      "options": [
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        }
-      ]
+      "name": "CtsHostsideWebViewTests"
     },
     {
       "name": "GtsWebViewTestCases",

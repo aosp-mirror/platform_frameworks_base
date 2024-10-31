@@ -37,11 +37,8 @@ import android.media.AudioManager;
 import android.media.AudioSystem;
 import android.media.IAudioService;
 import android.media.IVolumeController;
-import android.media.MediaRoute2Info;
 import android.media.MediaRouter2Manager;
-import android.media.RoutingSessionInfo;
 import android.media.VolumePolicy;
-import android.media.session.MediaController;
 import android.media.session.MediaController.PlaybackInfo;
 import android.media.session.MediaSession.Token;
 import android.net.Uri;
@@ -62,7 +59,6 @@ import android.view.accessibility.CaptioningManager;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.VisibleForTesting;
 import androidx.lifecycle.Observer;
 
 import com.android.internal.annotations.GuardedBy;
@@ -88,7 +84,6 @@ import dalvik.annotation.optimization.NeverCompile;
 
 import java.io.PrintWriter;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
@@ -114,8 +109,8 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
     // It is safe to use 99 as the broadcast stream now. There are only 10+ default audio
     // streams defined in AudioSystem for now and audio team is in the middle of restructure,
     // no new default stream is preferred.
-    @VisibleForTesting static final int DYNAMIC_STREAM_BROADCAST = 99;
-    private static final int DYNAMIC_STREAM_REMOTE_START_INDEX = 100;
+    public static final int DYNAMIC_STREAM_BROADCAST = 99;
+    public static final int DYNAMIC_STREAM_REMOTE_START_INDEX = 100;
     private static final AudioAttributes SONIFICIATION_VIBRATION_ATTRIBUTES =
             new AudioAttributes.Builder()
                     .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
@@ -217,7 +212,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
                 VolumeDialogControllerImpl.class.getSimpleName());
         mWorker = new W(mWorkerLooper);
         mRouter2Manager = MediaRouter2Manager.getInstance(mContext);
-        mMediaSessionsCallbacksW = new MediaSessionsCallbacks(mContext);
+        mMediaSessionsCallbacksW = new MediaSessionsCallbacks();
         mMediaSessions = createMediaSessions(mContext, mWorkerLooper, mMediaSessionsCallbacksW);
         mAudioSharingInteractor = audioSharingInteractor;
         mJavaAdapter = javaAdapter;
@@ -391,11 +386,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
     }
 
     public void notifyVisible(boolean visible) {
-        if (Flags.useVolumeController()) {
-            mVolumeControllerAdapter.notifyVolumeControllerVisible(visible);
-        } else {
-            mWorker.obtainMessage(W.NOTIFY_VISIBLE, visible ? 1 : 0, 0).sendToTarget();
-        }
+        mWorker.obtainMessage(W.NOTIFY_VISIBLE, visible ? 1 : 0, 0).sendToTarget();
     }
 
     public void userActivity() {
@@ -457,7 +448,11 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
     }
 
     private void onNotifyVisibleW(boolean visible) {
-        mAudio.notifyVolumeControllerVisible(mVolumeController, visible);
+        if (Flags.useVolumeController()) {
+            mVolumeControllerAdapter.notifyVolumeControllerVisible(visible);
+        } else {
+            mAudio.notifyVolumeControllerVisible(mVolumeController, visible);
+        }
         if (!visible) {
             if (updateActiveStreamW(-1)) {
                 mCallbacks.onStateChanged(mState);
@@ -539,10 +534,12 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
                                     != 0;
             changed |= updateStreamRoutedToBluetoothW(stream, routedToBluetooth);
         } else if (stream == AudioManager.STREAM_VOICE_CALL) {
-            final boolean routedToBluetooth =
-                    (mAudio.getDevicesForStream(AudioManager.STREAM_VOICE_CALL)
-                            & AudioManager.DEVICE_OUT_BLE_HEADSET) != 0;
-            changed |= updateStreamRoutedToBluetoothW(stream, routedToBluetooth);
+            final int devices = mAudio.getDevicesForStream(AudioManager.STREAM_VOICE_CALL);
+            final int bluetoothDevicesMask = (AudioManager.DEVICE_OUT_BLE_HEADSET
+                    | AudioManager.DEVICE_OUT_BLUETOOTH_SCO_HEADSET
+                    | AudioManager.DEVICE_OUT_BLUETOOTH_SCO_CARKIT);
+            changed |= updateStreamRoutedToBluetoothW(stream,
+                    (devices & bluetoothDevicesMask) != 0);
         }
         return changed;
     }
@@ -555,7 +552,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
                 && mShowVolumeDialog;
     }
 
-    boolean onVolumeChangedW(int stream, int flags) {
+    boolean onVolumeChangedW(int stream, int flags, boolean sendChanges) {
         final boolean showUI = shouldShowUI(flags);
         final boolean fromKey = (flags & AudioManager.FLAG_FROM_KEY) != 0;
         final boolean showVibrateHint = (flags & AudioManager.FLAG_SHOW_VIBRATE_HINT) != 0;
@@ -567,7 +564,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
         int lastAudibleStreamVolume = getAudioManagerStreamVolume(stream);
         changed |= updateStreamLevelW(stream, lastAudibleStreamVolume);
         changed |= checkRoutedToBluetoothW(showUI ? AudioManager.STREAM_MUSIC : stream);
-        if (changed) {
+        if (changed && sendChanges) {
             mCallbacks.onStateChanged(mState);
         }
         if (showUI) {
@@ -953,7 +950,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case VOLUME_CHANGED: onVolumeChangedW(msg.arg1, msg.arg2); break;
+                case VOLUME_CHANGED: onVolumeChangedW(msg.arg1, msg.arg2, true); break;
                 case DISMISS_REQUESTED: onDismissRequestedW(msg.arg1); break;
                 case GET_STATE: onGetStateW(); break;
                 case SET_RINGER_MODE: onSetRingerModeW(msg.arg1, msg.arg2 != 0); break;
@@ -1310,7 +1307,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
                 if (D.BUG) Log.d(TAG, "onReceive VOLUME_CHANGED_ACTION stream=" + stream
                         + " oldLevel=" + oldLevel);
                 if (stream != STREAM_UNKNOWN) {
-                    changed |= onVolumeChangedW(stream, 0);
+                    changed |= onVolumeChangedW(stream, 0, false);
                 }
             } else if (action.equals(AudioManager.STREAM_DEVICES_CHANGED_ACTION)) {
                 final int stream = intent.getIntExtra(AudioManager.EXTRA_VOLUME_STREAM_TYPE,
@@ -1323,7 +1320,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
                         + stream + " devices=" + devices + " oldDevices=" + oldDevices);
                 if (stream != STREAM_UNKNOWN) {
                     changed |= checkRoutedToBluetoothW(stream);
-                    changed |= onVolumeChangedW(stream, 0);
+                    changed |= onVolumeChangedW(stream, 0, false);
                 }
             } else if (action.equals(AudioManager.STREAM_MUTE_CHANGED_ACTION)) {
                 final int stream = intent.getIntExtra(AudioManager.EXTRA_VOLUME_STREAM_TYPE,
@@ -1358,16 +1355,9 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
         private final HashMap<Token, Integer> mRemoteStreams = new HashMap<>();
 
         private int mNextStream = DYNAMIC_STREAM_REMOTE_START_INDEX;
-        private final boolean mVolumeAdjustmentForRemoteGroupSessions;
-
-        public MediaSessionsCallbacks(Context context) {
-            mVolumeAdjustmentForRemoteGroupSessions = context.getResources().getBoolean(
-                    com.android.internal.R.bool.config_volumeAdjustmentForRemoteGroupSessions);
-        }
 
         @Override
         public void onRemoteUpdate(Token token, String name, PlaybackInfo pi) {
-            if (showForSession(token)) {
                 addStream(token, "onRemoteUpdate");
 
                 int stream = 0;
@@ -1394,12 +1384,10 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
                     Log.d(TAG, "onRemoteUpdate: " + name + ": " + ss.level + " of " + ss.levelMax);
                     mCallbacks.onStateChanged(mState);
                 }
-            }
         }
 
         @Override
         public void onRemoteVolumeChanged(Token token, int flags) {
-            if (showForSession(token)) {
                 addStream(token, "onRemoteVolumeChanged");
                 int stream = 0;
                 synchronized (mRemoteStreams) {
@@ -1418,27 +1406,27 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
                 if (showUI) {
                     onShowRequestedW(Events.SHOW_REASON_REMOTE_VOLUME_CHANGED);
                 }
-            }
         }
 
         @Override
         public void onRemoteRemoved(Token token) {
-            if (showForSession(token)) {
-                int stream = 0;
-                synchronized (mRemoteStreams) {
-                    if (!mRemoteStreams.containsKey(token)) {
-                        Log.d(TAG, "onRemoteRemoved: stream doesn't exist, "
-                                + "aborting remote removed for token:" + token.toString());
-                        return;
-                    }
-                    stream = mRemoteStreams.get(token);
+            int stream;
+            synchronized (mRemoteStreams) {
+                if (!mRemoteStreams.containsKey(token)) {
+                    Log.d(
+                            TAG,
+                            "onRemoteRemoved: stream doesn't exist, "
+                                    + "aborting remote removed for token:"
+                                    + token.toString());
+                    return;
                 }
-                mState.states.remove(stream);
-                if (mState.activeStream == stream) {
-                    updateActiveStreamW(-1);
-                }
-                mCallbacks.onStateChanged(mState);
+                stream = mRemoteStreams.get(token);
             }
+            mState.states.remove(stream);
+            if (mState.activeStream == stream) {
+                updateActiveStreamW(-1);
+            }
+            mCallbacks.onStateChanged(mState);
         }
 
         public void setStreamVolume(int stream, int level) {
@@ -1447,39 +1435,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
                 Log.w(TAG, "setStreamVolume: No token found for stream: " + stream);
                 return;
             }
-            if (showForSession(token)) {
-                mMediaSessions.setVolume(token, level);
-            }
-        }
-
-        private boolean showForSession(Token token) {
-            if (mVolumeAdjustmentForRemoteGroupSessions) {
-                if (DEBUG) {
-                    Log.d(TAG, "Volume adjustment for remote group sessions allowed,"
-                            + " showForSession: true");
-                }
-                return true;
-            }
-            MediaController ctr = new MediaController(mContext, token);
-            String packageName = ctr.getPackageName();
-            List<RoutingSessionInfo> sessions =
-                    mRouter2Manager.getRoutingSessions(packageName);
-            if (DEBUG) {
-                Log.d(TAG, "Found " + sessions.size() + " routing sessions for package name "
-                        + packageName);
-            }
-            for (RoutingSessionInfo session : sessions) {
-                if (DEBUG) {
-                    Log.d(TAG, "Found routingSessionInfo: " + session);
-                }
-                if (!session.isSystemSession()
-                        && session.getVolumeHandling() != MediaRoute2Info.PLAYBACK_VOLUME_FIXED) {
-                    return true;
-                }
-            }
-
-            Log.d(TAG, "No routing session for " + packageName);
-            return false;
+            mMediaSessions.setVolume(token, level);
         }
 
         private Token findToken(int stream) {

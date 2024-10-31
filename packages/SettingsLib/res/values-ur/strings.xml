@@ -94,7 +94,7 @@
     <string name="bluetooth_connected_no_headset_battery_level" msgid="2661863370509206428">"منسلک ہے (فون کے علاوہ)، بیٹری <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp_battery_level" msgid="6499078454894324287">"منسلک ہے (میڈیا کے علاوہ)، بیٹری <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="8477440576953067242">"منسلک ہے (فون یا میڈیا کے علاوہ)، بیٹری <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
-    <string name="bluetooth_active_battery_level" msgid="2685517576209066008">"فعال۔ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> بیٹری۔"</string>
+    <string name="bluetooth_active_battery_level" msgid="2685517576209066008">"‏فعال۔ ‎<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> بیٹری۔"</string>
     <string name="bluetooth_active_battery_level_untethered" msgid="4961338936672922617">"‏فعال۔ L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>، ‏R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> بیٹری۔"</string>
     <string name="bluetooth_active_battery_level_untethered_left" msgid="2895644748625343977">"فعال ہے۔ بایاں: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> بیٹری۔"</string>
     <string name="bluetooth_active_battery_level_untethered_right" msgid="7407517998880370179">"فعال ہے۔ دایاں: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> بیٹری۔"</string>
@@ -112,7 +112,7 @@
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"فعال ہے (بایاں اور دایاں)"</string>
     <string name="bluetooth_active_media_only_battery_level" msgid="7772517511061834073">"فعال (صرف میڈیا)۔ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> بیٹری۔"</string>
     <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"‏فعال (صرف میڈیا)۔ L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>، ‏R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> بیٹری۔"</string>
-    <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"منسلک ہے (آڈیو کے اشتراک کو سپورٹ کرتا ہے)۔ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> بیٹری۔"</string>
+    <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"‏منسلک ہے (آڈیو کے اشتراک کو سپورٹ کرتا ہے)۔ ‎<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> بیٹری۔"</string>
     <string name="bluetooth_battery_level_untethered_lea_support" msgid="803110681688633362">"‏منسلک ہے (آڈیو کے اشتراک کو سپورٹ کرتا ہے)۔ L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>، ‏R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> بیٹری۔"</string>
     <string name="bluetooth_battery_level_untethered_left_lea_support" msgid="7707464334346454950">"منسلک ہے (آڈیو کے اشتراک کو سپورٹ کرتا ہے)۔ بائيں: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> بیٹری۔"</string>
     <string name="bluetooth_battery_level_untethered_right_lea_support" msgid="8941549024377771038">"منسلک ہے (آڈیو کے اشتراک کو سپورٹ کرتا ہے)۔ دائيں: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> بیٹری۔"</string>
@@ -357,6 +357,8 @@
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"بہتر کردہ کنیکٹوٹی کی خصوصیات کو فعال کرتا ہے۔"</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"مقامی ٹرمینل"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"مقامی شیل رسائی پیش کرنے والی ٹرمینل ایپ فعال کریں"</string>
+    <string name="enable_linux_terminal_title" msgid="5076044866895670637">"‏‫Linux ڈیولپمنٹ ماحول"</string>
+    <string name="enable_linux_terminal_summary" msgid="5893216510985145320">"‏‫Android پر Linux ٹرمینل چلائیں"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"‏HDCP چیکنگ"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"‏HDCP چیکنگ برتاؤ سیٹ کریں"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"ڈیبگ کرنا"</string>
@@ -564,8 +566,7 @@
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"الارمز اور یاد دہانیاں"</string>
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"اس ایپ کو الارمز سیٹ کرنے اور وقت کے لحاظ سے حساس کارروائیوں کو شیڈول کرنے کی اجازت دیں۔ اس سے ایپ کو پس منظر میں چلنے کی اجازت ملتی ہے، جس میں زیادہ بیٹری استعمال ہو سکتی ہے۔\n\n اگر یہ اجازت آف ہے تو موجودہ الارمز اور اس ایپ کے ذریعے شیڈول کردہ وقت پر مبنی ایونٹس کام نہیں کریں گے۔"</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"شیڈول، الارم، یاد دہانی، گھڑی"</string>
-    <!-- no translation found for zen_mode_do_not_disturb_name (6798711401734798283) -->
-    <skip />
+    <string name="zen_mode_do_not_disturb_name" msgid="6798711401734798283">"ڈسٹرب نہ کریں"</string>
     <string name="zen_mode_settings_title" msgid="7374070457626419755">"ڈسٹرب نہ کریں"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"آن کریں"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"\'ڈسٹرب نہ کریں\' کو آن کریں"</string>
@@ -583,6 +584,7 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"ابھی ابھی"</string>
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"یہ فون"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"یہ ٹیبلیٹ"</string>
+    <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"یہ کمپیوٹر (داخلی)"</string>
     <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
     <skip />
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"ڈاک اسپیکر"</string>
@@ -685,7 +687,12 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"غیر فعال"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"فعال"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"اس تبدیلی کو لاگو کرنے کے ليے آپ کے آلہ کو ریبوٹ کرنا ضروری ہے۔ ابھی ریبوٹ کریں یا منسوخ کریں۔"</string>
-    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"وائرڈ ہیڈ فون"</string>
+    <string name="media_transfer_wired_headphone_name" msgid="8698668536022665254">"تار والا ہیڈ فون"</string>
+    <string name="media_transfer_headphone_name" msgid="1157798825650178478">"تار والا ہیڈ فون"</string>
+    <string name="media_transfer_usb_audio_name" msgid="1789292056757821355">"‏‫USB آڈیو"</string>
+    <string name="media_transfer_wired_device_mic_name" msgid="7115192790725088698">"تار والا مائیکروفون"</string>
+    <string name="media_transfer_usb_device_mic_name" msgid="7171789543226269822">"‏‫USB مائیکروفون"</string>
+    <string name="media_transfer_bt_device_mic_name" msgid="1870669402238687618">"‏‫BT مائیکروفون"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"آن"</string>
     <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"آف"</string>
     <string name="carrier_network_change_mode" msgid="4257621815706644026">"کیریئر نیٹ ورک کی تبدیلی"</string>

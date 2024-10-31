@@ -18,6 +18,7 @@ package android.hardware.input;
 
 import static com.android.input.flags.Flags.FLAG_INPUT_DEVICE_VIEW_BEHAVIOR_API;
 import static com.android.input.flags.Flags.FLAG_DEVICE_ASSOCIATIONS;
+import static com.android.hardware.input.Flags.enableCustomizableInputGestures;
 import static com.android.hardware.input.Flags.keyboardLayoutPreviewFlag;
 import static com.android.hardware.input.Flags.keyboardGlyphMap;
 
@@ -256,6 +257,52 @@ public final class InputManager {
         int REMAPPABLE_MODIFIER_KEY_SHIFT_RIGHT = KeyEvent.KEYCODE_SHIFT_RIGHT;
         int REMAPPABLE_MODIFIER_KEY_CAPS_LOCK = KeyEvent.KEYCODE_CAPS_LOCK;
     }
+
+    /**
+     * Custom input gesture error: Input gesture already exists
+     *
+     * @hide
+     */
+    public static final int CUSTOM_INPUT_GESTURE_RESULT_SUCCESS = 1;
+
+    /**
+     * Custom input gesture error: Input gesture already exists
+     *
+     * @hide
+     */
+    public static final int CUSTOM_INPUT_GESTURE_RESULT_ERROR_ALREADY_EXISTS = 2;
+
+    /**
+     * Custom input gesture error: Input gesture does not exist
+     *
+     * @hide
+     */
+    public static final int CUSTOM_INPUT_GESTURE_RESULT_ERROR_DOES_NOT_EXIST = 3;
+
+    /**
+     * Custom input gesture error: Input gesture is reserved for system action
+     *
+     * @hide
+     */
+    public static final int CUSTOM_INPUT_GESTURE_RESULT_ERROR_RESERVED_GESTURE = 4;
+
+    /**
+     * Custom input gesture error: Failure error code for all other errors/warnings
+     *
+     * @hide
+     */
+    public static final int CUSTOM_INPUT_GESTURE_RESULT_ERROR_OTHER = 5;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = { "CUSTOM_INPUT_GESTURE_RESULT_" }, value = {
+            CUSTOM_INPUT_GESTURE_RESULT_SUCCESS,
+            CUSTOM_INPUT_GESTURE_RESULT_ERROR_ALREADY_EXISTS,
+            CUSTOM_INPUT_GESTURE_RESULT_ERROR_DOES_NOT_EXIST,
+            CUSTOM_INPUT_GESTURE_RESULT_ERROR_RESERVED_GESTURE,
+            CUSTOM_INPUT_GESTURE_RESULT_ERROR_OTHER,
+    })
+    public @interface CustomInputGestureResult {}
 
     /**
      * Switch State: Unknown.
@@ -1406,6 +1453,111 @@ public final class InputManager {
     }
 
     /**
+     * Registers a key gesture event handler for {@link KeyGestureEvent} handling.
+     *
+     * @param handler the {@link KeyGestureEventHandler}
+     * @throws IllegalArgumentException if {@code handler} has already been registered previously.
+     * @throws NullPointerException     if {@code handler} or {@code executor} is null.
+     * @hide
+     * @see #unregisterKeyGestureEventHandler(KeyGestureEventHandler)
+     */
+    @RequiresPermission(Manifest.permission.MANAGE_KEY_GESTURES)
+    public void registerKeyGestureEventHandler(@NonNull KeyGestureEventHandler handler)
+            throws IllegalArgumentException {
+        mGlobal.registerKeyGestureEventHandler(handler);
+    }
+
+    /**
+     * Unregisters a previously added key gesture event handler.
+     *
+     * @param handler the {@link KeyGestureEventHandler}
+     * @hide
+     * @see #registerKeyGestureEventHandler(KeyGestureEventHandler)
+     */
+    @RequiresPermission(Manifest.permission.MANAGE_KEY_GESTURES)
+    public void unregisterKeyGestureEventHandler(@NonNull KeyGestureEventHandler handler) {
+        mGlobal.unregisterKeyGestureEventHandler(handler);
+    }
+
+    /** Adds a new custom input gesture
+     *
+     * @param inputGestureData gesture data to add as custom gesture
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.MANAGE_KEY_GESTURES)
+    @CustomInputGestureResult
+    public int addCustomInputGesture(@NonNull InputGestureData inputGestureData) {
+        if (!enableCustomizableInputGestures()) {
+            return CUSTOM_INPUT_GESTURE_RESULT_ERROR_OTHER;
+        }
+        try {
+            return mIm.addCustomInputGesture(inputGestureData.getAidlData());
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+        return CUSTOM_INPUT_GESTURE_RESULT_ERROR_OTHER;
+    }
+
+    /** Removes an existing custom gesture
+     *
+     * <p> NOTE: Should not be used to remove system gestures. This API is only to be used to
+     * remove gestures added using {@link #addCustomInputGesture(InputGestureData)}
+     *
+     * @param inputGestureData gesture data for the existing custom gesture to remove
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.MANAGE_KEY_GESTURES)
+    @CustomInputGestureResult
+    public int removeCustomInputGesture(@NonNull InputGestureData inputGestureData) {
+        if (!enableCustomizableInputGestures()) {
+            return CUSTOM_INPUT_GESTURE_RESULT_ERROR_OTHER;
+        }
+        try {
+            return mIm.removeCustomInputGesture(inputGestureData.getAidlData());
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+        return CUSTOM_INPUT_GESTURE_RESULT_ERROR_OTHER;
+    }
+
+    /** Removes all custom input gestures
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.MANAGE_KEY_GESTURES)
+    public void removeAllCustomInputGestures() {
+        if (!enableCustomizableInputGestures()) {
+            return;
+        }
+        try {
+            mIm.removeAllCustomInputGestures();
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
+    /** Get all custom input gestures
+     *
+     * @hide
+     */
+    public List<InputGestureData> getCustomInputGestures() {
+        List<InputGestureData> result = new ArrayList<>();
+        if (!enableCustomizableInputGestures()) {
+            return result;
+        }
+        try {
+            for (AidlInputGestureData data : mIm.getCustomInputGestures()) {
+                result.add(new InputGestureData(data));
+            }
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+        return result;
+    }
+
+    /**
      * A callback used to be notified about battery state changes for an input device. The
      * {@link #onBatteryStateChanged(int, long, BatteryState)} method will be called once after the
      * listener is successfully registered to provide the initial battery state of the device.
@@ -1521,5 +1673,36 @@ public final class InputManager {
          * @param event the gesture event that occurred.
          */
         void onKeyGestureEvent(@NonNull KeyGestureEvent event);
+    }
+
+    /**
+     * A callback used to notify about key gesture event start, complete and cancel. Unlike
+     * {@see KeyGestureEventListener} which is to listen to successfully handled key gestures, this
+     * interface allows system components to register handler for handling key gestures.
+     *
+     * @see #registerKeyGestureEventHandler(KeyGestureEventHandler)
+     * @see #unregisterKeyGestureEventHandler(KeyGestureEventHandler)
+     *
+     * <p> NOTE: All callbacks will occur on system main and input threads, so the caller needs
+     * to move time-consuming operations to appropriate handler threads.
+     * @hide
+     */
+    public interface KeyGestureEventHandler {
+        /**
+         * Called when a key gesture event starts, is completed, or is cancelled. If a handler
+         * returns {@code true}, it implies that the handler intends to handle the key gesture and
+         * only this handler will receive the future events for this key gesture.
+         *
+         * @param event the gesture event
+         */
+        boolean handleKeyGestureEvent(@NonNull KeyGestureEvent event,
+                @Nullable IBinder focusedToken);
+
+        /**
+         * Called to identify if a particular gesture is of interest to a handler.
+         *
+         * NOTE: If no active handler supports certain gestures, the gestures will not be captured.
+         */
+        boolean isKeyGestureSupported(@KeyGestureEvent.KeyGestureType int gestureType);
     }
 }

@@ -24,7 +24,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.android.systemui.communal.ui.viewmodel.CommunalTutorialIndicatorViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
 import kotlinx.coroutines.DisposableHandle
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /** View binder for communal tutorial indicator shown on keyguard. */
 object CommunalTutorialIndicatorViewBinder {

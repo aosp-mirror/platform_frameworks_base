@@ -20,6 +20,7 @@ import static com.android.wm.shell.pip2.phone.PipTransition.ANIMATING_BOUNDS_CHA
 
 import android.app.ActivityManager;
 import android.app.PictureInPictureParams;
+import android.app.RemoteAction;
 import android.content.Context;
 import android.graphics.Rect;
 import android.os.Bundle;
@@ -36,6 +37,9 @@ import com.android.wm.shell.common.pip.PipBoundsState;
 import com.android.wm.shell.common.pip.PipUtils;
 import com.android.wm.shell.pip2.animation.PipResizeAnimator;
 import com.android.wm.shell.shared.annotations.ShellMainThread;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A Task Listener implementation used only for CUJs and trigger paths that cannot be initiated via
@@ -57,6 +61,7 @@ public class PipTaskListener implements ShellTaskOrganizer.TaskListener,
             new PictureInPictureParams.Builder().build();
 
     private boolean mWaitingForAspectRatioChange = false;
+    private final List<PipParamsChangedCallback> mPipParamsChangedListeners = new ArrayList<>();
 
     public PipTaskListener(Context context,
             ShellTaskOrganizer shellTaskOrganizer,
@@ -85,8 +90,24 @@ public class PipTaskListener implements ShellTaskOrganizer.TaskListener,
         if (mPictureInPictureParams.equals(params)) {
             return;
         }
+        if (params != null && (PipUtils.remoteActionsChanged(params.getActions(),
+                mPictureInPictureParams.getActions())
+                || !PipUtils.remoteActionsMatch(params.getCloseAction(),
+                mPictureInPictureParams.getCloseAction()))) {
+            for (PipParamsChangedCallback listener : mPipParamsChangedListeners) {
+                listener.onActionsChanged(params.getActions(), params.getCloseAction());
+            }
+        }
         mPictureInPictureParams.copyOnlySet(params != null ? params
                 : new PictureInPictureParams.Builder().build());
+    }
+
+    /** Add a PipParamsChangedCallback listener. */
+    public void addParamsChangedListener(PipParamsChangedCallback listener) {
+        if (mPipParamsChangedListeners.contains(listener)) {
+            return;
+        }
+        mPipParamsChangedListeners.add(listener);
     }
 
     @NonNull
@@ -156,12 +177,19 @@ public class PipTaskListener implements ShellTaskOrganizer.TaskListener,
                             mPipBoundsState.getBounds(), destinationBounds, duration,
                             0f /* delta */);
                     animator.setAnimationEndCallback(() -> {
-                        mPipScheduler.scheduleFinishResizePip(
-                                destinationBounds, false /* configAtEnd */);
+                        mPipScheduler.scheduleFinishResizePip(destinationBounds);
                     });
                     animator.start();
                 }
                 break;
+        }
+    }
+
+    public interface PipParamsChangedCallback {
+        /**
+         * Called if either the actions or the close action changed.
+         */
+        default void onActionsChanged(List<RemoteAction> actions, RemoteAction closeAction) {
         }
     }
 }

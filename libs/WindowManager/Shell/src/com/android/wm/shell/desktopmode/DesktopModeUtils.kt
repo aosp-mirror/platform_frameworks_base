@@ -37,6 +37,23 @@ val DESKTOP_MODE_LANDSCAPE_APP_PADDING: Int =
     SystemProperties.getInt("persist.wm.debug.desktop_mode_landscape_app_padding", 25)
 
 /**
+ * Calculates the initial bounds to enter desktop, centered on the display.
+ */
+fun calculateDefaultDesktopTaskBounds(displayLayout: DisplayLayout): Rect {
+    // TODO(b/319819547): Account for app constraints so apps do not become letterboxed
+    val desiredWidth = (displayLayout.width() * DESKTOP_MODE_INITIAL_BOUNDS_SCALE).toInt()
+    val desiredHeight = (displayLayout.height() * DESKTOP_MODE_INITIAL_BOUNDS_SCALE).toInt()
+    val heightOffset = (displayLayout.height() - desiredHeight) / 2
+    val widthOffset = (displayLayout.width() - desiredWidth) / 2
+    return Rect(
+        widthOffset,
+        heightOffset,
+        desiredWidth + widthOffset,
+        desiredHeight + heightOffset
+    )
+}
+
+/**
  * Calculates the initial bounds required for an application to fill a scale of the display bounds
  * without any letterboxing. This is done by taking into account the applications fullscreen size,
  * aspect ratio, orientation and resizability to calculate an area this is compatible with the
@@ -123,6 +140,29 @@ fun calculateInitialBounds(
 }
 
 /**
+ * Calculates the maximized bounds of a task given in the given [DisplayLayout], taking
+ * resizability into consideration.
+ */
+fun calculateMaximizeBounds(
+    displayLayout: DisplayLayout,
+    taskInfo: RunningTaskInfo,
+): Rect {
+    val stableBounds = Rect()
+    displayLayout.getStableBounds(stableBounds)
+    if (taskInfo.isResizeable) {
+        // if resizable then expand to entire stable bounds (full display minus insets)
+        return Rect(stableBounds)
+    } else {
+        // if non-resizable then calculate max bounds according to aspect ratio
+        val activityAspectRatio = calculateAspectRatio(taskInfo)
+        val newSize = maximizeSizeGivenAspectRatio(taskInfo,
+            Size(stableBounds.width(), stableBounds.height()), activityAspectRatio)
+        return centerInArea(
+            newSize, stableBounds, stableBounds.left, stableBounds.top)
+    }
+}
+
+/**
  * Calculates the largest size that can fit in a given area while maintaining a specific aspect
  * ratio.
  */
@@ -162,7 +202,7 @@ fun maximizeSizeGivenAspectRatio(
 fun calculateAspectRatio(taskInfo: RunningTaskInfo): Float {
     val appLetterboxWidth = taskInfo.appCompatTaskInfo.topActivityLetterboxAppWidth
     val appLetterboxHeight = taskInfo.appCompatTaskInfo.topActivityLetterboxAppHeight
-    if (taskInfo.appCompatTaskInfo.isTopActivityLetterboxed) {
+    if (taskInfo.appCompatTaskInfo.isTopActivityLetterboxed || !taskInfo.canChangeAspectRatio) {
         return maxOf(appLetterboxWidth, appLetterboxHeight) /
             minOf(appLetterboxWidth, appLetterboxHeight).toFloat()
     }

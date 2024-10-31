@@ -50,9 +50,9 @@ android_test {
     platform_apis: true,
 
     libs: [
-        "android.test.runner",
-        "android.test.mock",
-        "android.test.base",
+        "android.test.runner.stubs.system",
+        "android.test.mock.stubs.system",
+        "android.test.base.stubs.system",
         "unsupportedappusage",
     ],
 }

@@ -46,9 +46,9 @@ class FutureGlobalSearchSessionTest {
     @After
     fun clearData() {
         val searchContext = SearchContext.Builder(TEST_DB).build()
-        FutureAppSearchSession(appSearchManager, testExecutor, searchContext).use {
+        FutureAppSearchSessionImpl(appSearchManager, testExecutor, searchContext).use {
             val setSchemaRequest = SetSchemaRequest.Builder().setForceOverride(true).build()
-            it.setSchema(setSchemaRequest)
+            it.setSchema(setSchemaRequest).get()
         }
     }
 
@@ -83,7 +83,7 @@ class FutureGlobalSearchSessionTest {
         assertThat(registerPackageObserver).isNull()
         // Trigger document change
         val searchContext = SearchContext.Builder(TEST_DB).build()
-        FutureAppSearchSession(appSearchManager, testExecutor, searchContext).use { session ->
+        FutureAppSearchSessionImpl(appSearchManager, testExecutor, searchContext).use { session ->
             val setSchemaRequest =
                 SetSchemaRequest.Builder()
                     .addSchemas(
@@ -94,8 +94,7 @@ class FutureGlobalSearchSessionTest {
             val schema = session.setSchema(setSchemaRequest)
             assertThat(schema.get()).isNotNull()
             val appFunctionRuntimeMetadata =
-                AppFunctionRuntimeMetadata.Builder(TEST_TARGET_PKG_NAME, TEST_FUNCTION_ID, "")
-                    .build()
+                AppFunctionRuntimeMetadata.Builder(TEST_TARGET_PKG_NAME, TEST_FUNCTION_ID).build()
             val putDocumentsRequest: PutDocumentsRequest =
                 PutDocumentsRequest.Builder()
                     .addGenericDocuments(appFunctionRuntimeMetadata)

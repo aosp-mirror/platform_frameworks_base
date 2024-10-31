@@ -45,6 +45,7 @@ import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Velocity
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.android.compose.modifiers.thenIf
 import com.google.common.truth.Truth.assertThat
 import kotlin.properties.Delegates
 import kotlinx.coroutines.coroutineScope
@@ -71,9 +72,9 @@ class MultiPointerDraggableTest {
             return delta
         }
 
-        override fun onStop(velocity: Float, canChangeContent: Boolean): Float {
+        override fun onStop(velocity: Float, canChangeContent: Boolean): SuspendedValue<Float> {
             onStop.invoke(velocity)
-            return velocity
+            return { velocity }
         }
     }
 
@@ -93,19 +94,20 @@ class MultiPointerDraggableTest {
             Box(
                 Modifier.size(with(LocalDensity.current) { Size(size, size).toDpSize() })
                     .nestedScrollDispatcher()
-                    .multiPointerDraggable(
-                        orientation = Orientation.Vertical,
-                        enabled = { enabled },
-                        startDragImmediately = { false },
-                        onDragStarted = { _, _, _ ->
-                            started = true
-                            SimpleDragController(
-                                onDrag = { dragged = true },
-                                onStop = { stopped = true },
-                            )
-                        },
-                        dispatcher = defaultDispatcher,
-                    )
+                    .thenIf(enabled) {
+                        Modifier.multiPointerDraggable(
+                            orientation = Orientation.Vertical,
+                            startDragImmediately = { false },
+                            onDragStarted = { _, _, _ ->
+                                started = true
+                                SimpleDragController(
+                                    onDrag = { dragged = true },
+                                    onStop = { stopped = true },
+                                )
+                            },
+                            dispatcher = defaultDispatcher,
+                        )
+                    }
             )
         }
 
@@ -163,7 +165,6 @@ class MultiPointerDraggableTest {
                     .nestedScrollDispatcher()
                     .multiPointerDraggable(
                         orientation = Orientation.Vertical,
-                        enabled = { true },
                         // We want to start a drag gesture immediately
                         startDragImmediately = { true },
                         onDragStarted = { _, _, _ ->
@@ -237,7 +238,6 @@ class MultiPointerDraggableTest {
                     .nestedScrollDispatcher()
                     .multiPointerDraggable(
                         orientation = Orientation.Vertical,
-                        enabled = { true },
                         startDragImmediately = { false },
                         onDragStarted = { _, _, _ ->
                             started = true
@@ -259,7 +259,7 @@ class MultiPointerDraggableTest {
                                         it
                                     }
                                 ),
-                                Orientation.Vertical
+                                Orientation.Vertical,
                             )
                             .fillMaxSize()
                     )
@@ -357,7 +357,6 @@ class MultiPointerDraggableTest {
                     .nestedScrollDispatcher()
                     .multiPointerDraggable(
                         orientation = Orientation.Vertical,
-                        enabled = { true },
                         startDragImmediately = { false },
                         onDragStarted = { _, _, _ ->
                             started = true
@@ -438,6 +437,9 @@ class MultiPointerDraggableTest {
 
         continueDraggingDown()
         assertThat(stopped).isTrue()
+
+        // Complete the gesture
+        rule.onRoot().performTouchInput { up() }
     }
 
     @Test
@@ -460,7 +462,6 @@ class MultiPointerDraggableTest {
                     .nestedScrollDispatcher()
                     .multiPointerDraggable(
                         orientation = Orientation.Vertical,
-                        enabled = { true },
                         startDragImmediately = { false },
                         onDragStarted = { _, _, _ ->
                             verticalStarted = true
@@ -473,7 +474,6 @@ class MultiPointerDraggableTest {
                     )
                     .multiPointerDraggable(
                         orientation = Orientation.Horizontal,
-                        enabled = { true },
                         startDragImmediately = { false },
                         onDragStarted = { _, _, _ ->
                             horizontalStarted = true
@@ -566,7 +566,6 @@ class MultiPointerDraggableTest {
                     .nestedScrollDispatcher()
                     .multiPointerDraggable(
                         orientation = Orientation.Vertical,
-                        enabled = { true },
                         startDragImmediately = { false },
                         swipeDetector =
                             object : SwipeDetector {
@@ -640,7 +639,7 @@ class MultiPointerDraggableTest {
                 override fun onPostScroll(
                     consumed: Offset,
                     available: Offset,
-                    source: NestedScrollSource
+                    source: NestedScrollSource,
                 ): Offset {
                     availableOnPostScroll = available.y
                     return Offset.Zero
@@ -653,7 +652,7 @@ class MultiPointerDraggableTest {
 
                 override suspend fun onPostFling(
                     consumed: Velocity,
-                    available: Velocity
+                    available: Velocity,
                 ): Velocity {
                     availableOnPostFling = available.y
                     return Velocity.Zero
@@ -668,7 +667,6 @@ class MultiPointerDraggableTest {
                     .nestedScrollDispatcher()
                     .multiPointerDraggable(
                         orientation = Orientation.Vertical,
-                        enabled = { true },
                         startDragImmediately = { false },
                         onDragStarted = { _, _, _ ->
                             SimpleDragController(
@@ -740,7 +738,6 @@ class MultiPointerDraggableTest {
                     .nestedScrollDispatcher()
                     .multiPointerDraggable(
                         orientation = Orientation.Vertical,
-                        enabled = { true },
                         startDragImmediately = { false },
                         onDragStarted = { _, _, _ ->
                             SimpleDragController(

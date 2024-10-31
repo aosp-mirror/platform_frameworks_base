@@ -30,7 +30,7 @@ import org.junit.runners.Parameterized
 /**
  * Test closing a pip window via the dismiss button
  *
- * To run this test: `atest WMShellFlickerTestsPip1:ClosePipWithDismissButtonTest`
+ * To run this test: `atest WMShellFlickerTestsPip:ClosePipWithDismissButtonTest`
  *
  * Actions:
  * ```

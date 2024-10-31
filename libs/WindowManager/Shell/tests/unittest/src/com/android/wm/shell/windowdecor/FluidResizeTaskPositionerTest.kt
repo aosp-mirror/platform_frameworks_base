@@ -47,6 +47,7 @@ import org.mockito.kotlin.doReturn
 import java.util.function.Supplier
 import org.mockito.Mockito.eq
 import org.mockito.Mockito.mock
+import org.mockito.kotlin.times
 import org.mockito.Mockito.`when` as whenever
 
 /**
@@ -66,7 +67,7 @@ class FluidResizeTaskPositionerTest : ShellTestCase() {
     @Mock
     private lateinit var mockWindowDecoration: WindowDecoration<*>
     @Mock
-    private lateinit var mockDragStartListener: DragPositioningCallbackUtility.DragStartListener
+    private lateinit var mockDragEventListener: DragPositioningCallbackUtility.DragEventListener
 
     @Mock
     private lateinit var taskToken: WindowContainerToken
@@ -121,6 +122,7 @@ class FluidResizeTaskPositionerTest : ShellTestCase() {
             displayId = DISPLAY_ID
             configuration.windowConfiguration.setBounds(STARTING_BOUNDS)
             configuration.windowConfiguration.displayRotation = ROTATION_90
+            isResizeable = true
         }
         `when`(mockWindowDecoration.calculateValidDragArea()).thenReturn(VALID_DRAG_AREA)
         mockWindowDecoration.mDisplay = mockDisplay
@@ -139,7 +141,7 @@ class FluidResizeTaskPositionerTest : ShellTestCase() {
                 mockTransitions,
                 mockWindowDecoration,
                 mockDisplayController,
-                mockDragStartListener,
+                mockDragEventListener,
                 mockTransactionFactory
         )
     }
@@ -219,6 +221,7 @@ class FluidResizeTaskPositionerTest : ShellTestCase() {
                         change.configuration.windowConfiguration.bounds == rectAfterMove
             }
         })
+        verify(mockDragEventListener, times(1)).onDragMove(eq(TASK_ID))
 
         taskPositioner.onDragPositioningEnd(
                 STARTING_BOUNDS.left.toFloat() + 10,
@@ -623,7 +626,7 @@ class FluidResizeTaskPositionerTest : ShellTestCase() {
 
     @Test
     fun testDragResize_resize_resizingTaskReorderedToTopWhenNotFocused() {
-        mockWindowDecoration.mTaskInfo.isFocused = false
+        mockWindowDecoration.mHasGlobalFocus = false
         taskPositioner.onDragPositioningStart(
                 CTRL_TYPE_RIGHT, // Resize right
                 STARTING_BOUNDS.left.toFloat(),
@@ -639,7 +642,7 @@ class FluidResizeTaskPositionerTest : ShellTestCase() {
 
     @Test
     fun testDragResize_resize_resizingTaskNotReorderedToTopWhenFocused() {
-        mockWindowDecoration.mTaskInfo.isFocused = true
+        mockWindowDecoration.mHasGlobalFocus = true
         taskPositioner.onDragPositioningStart(
                 CTRL_TYPE_RIGHT, // Resize right
                 STARTING_BOUNDS.left.toFloat(),
@@ -655,7 +658,7 @@ class FluidResizeTaskPositionerTest : ShellTestCase() {
 
     @Test
     fun testDragResize_drag_draggedTaskNotReorderedToTop() {
-        mockWindowDecoration.mTaskInfo.isFocused = false
+        mockWindowDecoration.mHasGlobalFocus = false
         taskPositioner.onDragPositioningStart(
                 CTRL_TYPE_UNDEFINED, // drag
                 STARTING_BOUNDS.left.toFloat(),

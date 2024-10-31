@@ -255,12 +255,6 @@ public class LegacyScreenshotController implements InteractiveScreenshotHandler 
         Assert.isMainThread();
 
         mCurrentRequestCallback = requestCallback;
-        if (screenshot.getType() == WindowManager.TAKE_SCREENSHOT_FULLSCREEN
-                && screenshot.getBitmap() == null) {
-            Rect bounds = getFullScreenRect();
-            screenshot.setBitmap(mImageCapture.captureDisplay(mDisplay.getDisplayId(), bounds));
-            screenshot.setScreenBounds(bounds);
-        }
 
         if (screenshot.getBitmap() == null) {
             Log.e(TAG, "handleScreenshot: Screenshot bitmap was null");
@@ -301,7 +295,7 @@ public class LegacyScreenshotController implements InteractiveScreenshotHandler 
         saveScreenshotInBackground(screenshot, requestId, finisher, result -> {
             if (result.uri != null) {
                 ScreenshotSavedResult savedScreenshot = new ScreenshotSavedResult(
-                        result.uri, screenshot.getUserOrDefault(), result.timestamp);
+                        result.uri, screenshot.getUserHandle(), result.timestamp);
                 mActionsController.setCompletedScreenshot(requestId, savedScreenshot);
             }
         });
@@ -319,28 +313,31 @@ public class LegacyScreenshotController implements InteractiveScreenshotHandler 
         setWindowFocusable(true);
         mViewProxy.requestFocus();
 
-        enqueueScrollCaptureRequest(requestId, screenshot.getUserHandle());
+        if (screenshot.getType() != WindowManager.TAKE_SCREENSHOT_PROVIDED_IMAGE) {
+            enqueueScrollCaptureRequest(requestId, screenshot.getUserHandle());
+        }
 
         attachWindow();
 
+        Rect bounds = screenshot.getOriginalScreenBounds();
         boolean showFlash;
         if (screenshot.getType() == WindowManager.TAKE_SCREENSHOT_PROVIDED_IMAGE) {
-            if (screenshot.getScreenBounds() != null
-                    && aspectRatiosMatch(screenshot.getBitmap(), screenshot.getInsets(),
-                    screenshot.getScreenBounds())) {
+            if (bounds != null
+                    && aspectRatiosMatch(screenshot.getBitmap(), screenshot.getOriginalInsets(),
+                    bounds)) {
                 showFlash = false;
             } else {
                 showFlash = true;
-                screenshot.setInsets(Insets.NONE);
-                screenshot.setScreenBounds(new Rect(0, 0, screenshot.getBitmap().getWidth(),
-                        screenshot.getBitmap().getHeight()));
+                bounds = new Rect(0, 0, screenshot.getBitmap().getWidth(),
+                        screenshot.getBitmap().getHeight());
             }
         } else {
             showFlash = true;
         }
 
+        final Rect animationBounds = bounds;
         mViewProxy.prepareEntranceAnimation(
-                () -> startAnimation(screenshot.getScreenBounds(), showFlash,
+                () -> startAnimation(animationBounds, showFlash,
                         () -> mMessageContainerController.onScreenshotTaken(screenshot)));
 
         mViewProxy.setScreenshot(screenshot);
@@ -505,8 +502,8 @@ public class LegacyScreenshotController implements InteractiveScreenshotHandler 
             return;
         }
         // delay starting scroll capture to make sure scrim is up before the app moves
-        mViewProxy.prepareScrollingTransition(response, mScreenBitmap, newScreenshot,
-                mScreenshotTakenInPortrait, () -> executeBatchScrollCapture(response, owner));
+        mViewProxy.prepareScrollingTransition(response, newScreenshot, mScreenshotTakenInPortrait,
+                () -> executeBatchScrollCapture(response, owner));
     }
 
     private void executeBatchScrollCapture(ScrollCaptureResponse response, UserHandle owner) {
@@ -646,7 +643,7 @@ public class LegacyScreenshotController implements InteractiveScreenshotHandler 
     private void saveScreenshotInBackground(ScreenshotData screenshot, UUID requestId,
             Consumer<Uri> finisher, Consumer<ImageExporter.Result> onResult) {
         ListenableFuture<ImageExporter.Result> future = mImageExporter.export(mBgExecutor,
-                requestId, screenshot.getBitmap(), screenshot.getUserOrDefault(),
+                requestId, screenshot.getBitmap(), screenshot.getUserHandle(),
                 mDisplay.getDisplayId());
         future.addListener(() -> {
             try {

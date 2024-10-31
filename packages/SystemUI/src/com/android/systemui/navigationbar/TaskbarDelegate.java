@@ -551,6 +551,12 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
     }
 
     @Override
+    public void appTransitionStarting(int displayId, long startTime, long duration,
+            boolean forced) {
+        appTransitionPending(false);
+    }
+
+    @Override
     public void appTransitionCancelled(int displayId) {
         appTransitionPending(false);
     }

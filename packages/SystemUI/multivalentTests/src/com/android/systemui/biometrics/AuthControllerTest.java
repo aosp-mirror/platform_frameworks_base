@@ -17,6 +17,7 @@
 package com.android.systemui.biometrics;
 
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRINT;
+import static android.view.Display.INVALID_DISPLAY;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -68,10 +69,12 @@ import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.fingerprint.IFingerprintAuthenticatorsRegisteredCallback;
 import android.os.Handler;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.os.UserManager;
 import android.testing.TestableContext;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
+import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.Surface;
 import android.view.WindowManager;
@@ -210,6 +213,7 @@ public class AuthControllerTest extends SysuiTestCase {
                 .thenReturn(true);
         when(mPackageManager.hasSystemFeature(PackageManager.FEATURE_FINGERPRINT))
                 .thenReturn(true);
+        when(mUserManager.isVisibleBackgroundUsersSupported()).thenReturn(false);
 
         when(mDialog1.getOpPackageName()).thenReturn("Dialog1");
         when(mDialog2.getOpPackageName()).thenReturn("Dialog2");
@@ -462,7 +466,7 @@ public class AuthControllerTest extends SysuiTestCase {
     @Test
     public void testShowInvoked_whenSystemRequested() {
         showDialog(new int[] {1} /* sensorIds */, false /* credentialAllowed */);
-        verify(mDialog1).show(any());
+        verify(mDialog1).show(mWindowManager);
     }
 
     @Test
@@ -679,7 +683,7 @@ public class AuthControllerTest extends SysuiTestCase {
         // 2) Client cancels authentication
 
         showDialog(new int[0] /* sensorIds */, true /* credentialAllowed */);
-        verify(mDialog1).show(any());
+        verify(mDialog1).show(mWindowManager);
 
         final byte[] credentialAttestation = generateRandomHAT();
 
@@ -695,7 +699,7 @@ public class AuthControllerTest extends SysuiTestCase {
     @Test
     public void testShowNewDialog_beforeOldDialogDismissed_SkipsAnimations() {
         showDialog(new int[] {1} /* sensorIds */, false /* credentialAllowed */);
-        verify(mDialog1).show(any());
+        verify(mDialog1).show(mWindowManager);
 
         showDialog(new int[] {1} /* sensorIds */, false /* credentialAllowed */);
 
@@ -703,7 +707,7 @@ public class AuthControllerTest extends SysuiTestCase {
         verify(mDialog1).dismissWithoutCallback(eq(false) /* animate */);
 
         // Second dialog should be shown without animation
-        verify(mDialog2).show(any());
+        verify(mDialog2).show(mWindowManager);
     }
 
     @Test
@@ -990,13 +994,97 @@ public class AuthControllerTest extends SysuiTestCase {
         verify(mDialog1, never()).show(any());
     }
 
+    @Test
+    public void testShowDialog_visibleBackgroundUser() {
+        int backgroundUserId = 1001;
+        int backgroundDisplayId = 1001;
+        when(mUserManager.isVisibleBackgroundUsersSupported()).thenReturn(true);
+        WindowManager wm = mockBackgroundUser(backgroundUserId, backgroundDisplayId,
+                true /* isVisible */, true /* hasUserManager */, true /* hasDisplay */);
+
+        showDialog(new int[]{1} /* sensorIds */, backgroundUserId /* userId */,
+                false /* credentialAllowed */);
+
+        verify(mDialog1).show(wm);
+    }
+
+    @Test
+    public void testShowDialog_invisibleBackgroundUser_defaultWM() {
+        int backgroundUserId = 1001;
+        when(mUserManager.isVisibleBackgroundUsersSupported()).thenReturn(true);
+        mockBackgroundUser(backgroundUserId, INVALID_DISPLAY,
+                false /* isVisible */, true /* hasUserManager */, true /* hasDisplay */);
+
+        showDialog(new int[]{1} /* sensorIds */, backgroundUserId /* userId */,
+                false /* credentialAllowed */);
+
+        verify(mDialog1).show(mWindowManager);
+    }
+
+    @Test
+    public void testShowDialog_visibleBackgroundUser_noUserManager_dismissError()
+            throws RemoteException {
+        int backgroundUserId = 1001;
+        int backgroundDisplayId = 1001;
+        when(mUserManager.isVisibleBackgroundUsersSupported()).thenReturn(true);
+        mockBackgroundUser(backgroundUserId, backgroundDisplayId,
+                true /* isVisible */, false /* hasUserManager */, true /* hasDisplay */);
+
+        showDialog(new int[]{1} /* sensorIds */, backgroundUserId /* userId */,
+                false /* credentialAllowed */);
+
+        verify(mDialog1, never()).show(any());
+        verify(mReceiver).onDialogDismissed(
+                eq(BiometricPrompt.DISMISSED_REASON_ERROR_NO_WM),
+                eq(null) /* credentialAttestation */);
+    }
+
+    @Test
+    public void testShowDialog_visibleBackgroundUser_invalidDisplayId_dismissError()
+            throws RemoteException {
+        int backgroundUserId = 1001;
+        when(mUserManager.isVisibleBackgroundUsersSupported()).thenReturn(true);
+        mockBackgroundUser(backgroundUserId, INVALID_DISPLAY,
+                true /* isVisible */, true /* hasUserManager */, false /* hasDisplay */);
+
+        showDialog(new int[]{1} /* sensorIds */, backgroundUserId /* userId */,
+                false /* credentialAllowed */);
+
+        verify(mDialog1, never()).show(any());
+        verify(mReceiver).onDialogDismissed(
+                eq(BiometricPrompt.DISMISSED_REASON_ERROR_NO_WM),
+                eq(null) /* credentialAttestation */);
+    }
+
+    @Test
+    public void testShowDialog_visibleBackgroundUser_invalidDisplay_dismissError()
+            throws RemoteException {
+        int backgroundUserId = 1001;
+        int backgroundDisplayId = 1001;
+        when(mUserManager.isVisibleBackgroundUsersSupported()).thenReturn(true);
+        mockBackgroundUser(backgroundUserId, backgroundDisplayId,
+                true /* isVisible */, true /* hasUserManager */, false /* hasDisplay */);
+
+        showDialog(new int[]{1} /* sensorIds */, backgroundUserId /* userId */,
+                false /* credentialAllowed */);
+
+        verify(mDialog1, never()).show(any());
+        verify(mReceiver).onDialogDismissed(
+                eq(BiometricPrompt.DISMISSED_REASON_ERROR_NO_WM),
+                eq(null) /* credentialAttestation */);
+    }
+
     private void showDialog(int[] sensorIds, boolean credentialAllowed) {
+        showDialog(sensorIds, 0 /* userId */, credentialAllowed);
+    }
+
+    private void showDialog(int[] sensorIds, int userId, boolean credentialAllowed) {
         mAuthController.showAuthenticationDialog(createTestPromptInfo(),
                 mReceiver /* receiver */,
                 sensorIds,
                 credentialAllowed,
                 true /* requireConfirmation */,
-                0 /* userId */,
+                userId /* userId */,
                 0 /* operationId */,
                 "testPackage",
                 REQUEST_ID);
@@ -1057,6 +1145,40 @@ public class AuthControllerTest extends SysuiTestCase {
         waitForIdleSync();
 
         assertTrue(mAuthController.isFaceAuthEnrolled(userId));
+    }
+
+    /**
+     * Create mocks related to visible background users.
+     *
+     * @param userId the user id of the background user to mock
+     * @param displayId display id of the background user
+     * @param isVisible whether the background user is a visible background user or not
+     * @param hasUserManager simulate whether the background user's context will return a mock
+     *                       UserManager instance or null
+     * @param hasDisplay simulate whether the background user's context will return a mock Display
+     *                   instance or null
+     * @return mock WindowManager instance associated with the background user's display context
+     */
+    private WindowManager mockBackgroundUser(int userId, int displayId, boolean isVisible,
+            boolean hasUserManager, boolean hasDisplay) {
+        Context mockUserContext = mock(Context.class);
+        Context mockDisplayContext = mock(Context.class);
+        UserManager mockUserManager = mock(UserManager.class);
+        Display mockDisplay = mock(Display.class);
+        WindowManager mockDisplayWM = mock(WindowManager.class);
+        doReturn(mockUserContext).when(mContextSpy).createContextAsUser(eq(UserHandle.of(userId)),
+                anyInt());
+        if (hasUserManager) {
+            when(mockUserContext.getSystemService(UserManager.class)).thenReturn(mockUserManager);
+        }
+        when(mockUserManager.isUserVisible()).thenReturn(isVisible);
+        when(mockUserManager.getMainDisplayIdAssignedToUser()).thenReturn(displayId);
+        if (hasDisplay) {
+            when(mDisplayManager.getDisplay(displayId)).thenReturn(mockDisplay);
+        }
+        doReturn(mockDisplayContext).when(mContextSpy).createDisplayContext(mockDisplay);
+        when(mockDisplayContext.getSystemService(WindowManager.class)).thenReturn(mockDisplayWM);
+        return mockDisplayWM;
     }
 
     private final class TestableAuthController extends AuthController {

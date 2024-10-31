@@ -74,6 +74,7 @@ import com.android.wm.shell.splitscreen.SplitScreen.SplitScreenListener;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.DefaultMixedHandler;
+import com.android.wm.shell.transition.FocusTransitionObserver;
 import com.android.wm.shell.transition.HomeTransitionObserver;
 import com.android.wm.shell.transition.Transitions;
 
@@ -231,17 +232,6 @@ public class StageCoordinatorTests extends ShellTestCase {
     }
 
     @Test
-    public void testRemoveFromSideStage() {
-        final ActivityManager.RunningTaskInfo task = new TestRunningTaskInfoBuilder().build();
-
-        doReturn(false).when(mMainStage).isActive();
-        mStageCoordinator.removeFromSideStage(task.taskId);
-
-        verify(mSideStage).removeTask(
-                eq(task.taskId), any(), any(WindowContainerTransaction.class));
-    }
-
-    @Test
     public void testResolveStartStage_beforeSplitActivated_setsStagePosition() {
         mStageCoordinator.setSideStagePosition(SPLIT_POSITION_TOP_OR_LEFT, null /* wct */);
 
@@ -330,7 +320,7 @@ public class StageCoordinatorTests extends ShellTestCase {
 
         assertEquals(mStageCoordinator.mLastActiveStage, STAGE_TYPE_MAIN);
 
-        mStageCoordinator.onFinishedWakingUp();
+        mStageCoordinator.onStartedWakingUp();
 
         verify(mTaskOrganizer).startNewTransition(eq(TRANSIT_SPLIT_DISMISS), notNull());
     }
@@ -429,7 +419,8 @@ public class StageCoordinatorTests extends ShellTestCase {
         ShellInit shellInit = new ShellInit(mMainExecutor);
         final Transitions t = new Transitions(mContext, shellInit, mock(ShellController.class),
                 mTaskOrganizer, mTransactionPool, mock(DisplayController.class), mMainExecutor,
-                mMainHandler, mAnimExecutor, mock(HomeTransitionObserver.class));
+                mMainHandler, mAnimExecutor, mock(HomeTransitionObserver.class),
+                mock(FocusTransitionObserver.class));
         shellInit.init();
         return t;
     }

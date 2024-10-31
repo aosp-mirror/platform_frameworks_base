@@ -43,7 +43,7 @@ import kotlinx.coroutines.test.runCurrent
 internal fun fingerprintSensorPropertiesInternal(
     ids: List<Int> = listOf(0),
     strong: Boolean = true,
-    sensorType: Int = FingerprintSensorProperties.TYPE_REAR
+    sensorType: Int = FingerprintSensorProperties.TYPE_REAR,
 ): List<FingerprintSensorPropertiesInternal> {
     val componentInfo =
         listOf(
@@ -52,15 +52,15 @@ internal fun fingerprintSensorPropertiesInternal(
                 "vendor/model/revision" /* hardwareVersion */,
                 "1.01" /* firmwareVersion */,
                 "00000001" /* serialNumber */,
-                "" /* softwareVersion */
+                "", /* softwareVersion */
             ),
             ComponentInfoInternal(
                 "matchingAlgorithm" /* componentId */,
                 "" /* hardwareVersion */,
                 "" /* firmwareVersion */,
                 "" /* serialNumber */,
-                "vendor/version/revision" /* softwareVersion */
-            )
+                "vendor/version/revision", /* softwareVersion */
+            ),
         )
     return ids.map { id ->
         FingerprintSensorPropertiesInternal(
@@ -69,7 +69,7 @@ internal fun fingerprintSensorPropertiesInternal(
             5 /* maxEnrollmentsPerUser */,
             componentInfo,
             sensorType,
-            false /* resetLockoutRequiresHardwareAuthToken */
+            false, /* resetLockoutRequiresHardwareAuthToken */
         )
     }
 }
@@ -86,15 +86,15 @@ internal fun faceSensorPropertiesInternal(
                 "vendor/model/revision" /* hardwareVersion */,
                 "1.01" /* firmwareVersion */,
                 "00000001" /* serialNumber */,
-                "" /* softwareVersion */
+                "", /* softwareVersion */
             ),
             ComponentInfoInternal(
                 "matchingAlgorithm" /* componentId */,
                 "" /* hardwareVersion */,
                 "" /* firmwareVersion */,
                 "" /* serialNumber */,
-                "vendor/version/revision" /* softwareVersion */
-            )
+                "vendor/version/revision", /* softwareVersion */
+            ),
         )
     return ids.map { id ->
         FaceSensorPropertiesInternal(
@@ -105,7 +105,7 @@ internal fun faceSensorPropertiesInternal(
             FaceSensorProperties.TYPE_RGB,
             true /* supportsFaceDetection */,
             true /* supportsSelfIllumination */,
-            false /* resetLockoutRequiresHardwareAuthToken */
+            false, /* resetLockoutRequiresHardwareAuthToken */
         )
     }
 }
@@ -186,7 +186,7 @@ internal fun TestScope.updateSfpsIndicatorRequests(
             isShowing = hasPrimaryBouncerRequest,
             isAnimatingAway = false,
             fpsDetectionRunning = true,
-            isUnlockingWithFpAllowed = true
+            isUnlockingWithFpAllowed = true,
         )
     }
 

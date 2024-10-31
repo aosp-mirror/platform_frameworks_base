@@ -48,8 +48,6 @@ import androidx.window.extensions.embedding.SplitAttributes.SplitType;
 import androidx.window.extensions.embedding.SplitAttributes.SplitType.ExpandContainersSplitType;
 import androidx.window.extensions.embedding.SplitAttributes.SplitType.RatioSplitType;
 
-import com.android.window.flags.Flags;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -156,7 +154,7 @@ class TaskContainer {
         mSplitController = splitController;
         for (ParcelableTaskFragmentContainerData tfData :
                 data.getParcelableTaskFragmentContainerDataList()) {
-            final TaskFragmentInfo info = taskFragmentInfoMap.get(tfData.mToken);
+            final TaskFragmentInfo info = taskFragmentInfoMap.remove(tfData.mToken);
             if (info != null && !info.isEmpty()) {
                 final TaskFragmentContainer container =
                         new TaskFragmentContainer(tfData, splitController, this);
@@ -377,8 +375,16 @@ class TaskContainer {
 
     @Nullable
     TaskFragmentContainer getContainerWithActivity(@NonNull IBinder activityToken) {
-        return getContainer(container -> container.hasAppearedActivity(activityToken)
-                || container.hasPendingAppearedActivity(activityToken));
+        // When the new activity is launched to the topmost TF because the source activity
+        // was in that TF, and the source activity is finished before resolving the new activity,
+        // we will try to see if the new activity match a rule with the split activities below.
+        // If matched, it can be reparented.
+        final TaskFragmentContainer taskFragmentContainer
+                = getContainer(container -> container.hasPendingAppearedActivity(activityToken));
+        if (taskFragmentContainer != null) {
+            return taskFragmentContainer;
+        }
+        return getContainer(container -> container.hasAppearedActivity(activityToken));
     }
 
     @Nullable
@@ -626,11 +632,7 @@ class TaskContainer {
         // pin container.
         updateAlwaysOnTopOverlayIfNecessary();
 
-        // TODO(b/289875940): Making backup-restore as an opt-in solution, before the flag goes
-        //  to next-food.
-        if (Flags.aeBackStackRestore()) {
-            mSplitController.scheduleBackup();
-        }
+        mSplitController.scheduleBackup();
     }
 
     private void updateAlwaysOnTopOverlayIfNecessary() {

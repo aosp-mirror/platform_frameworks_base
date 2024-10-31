@@ -15,19 +15,16 @@
  */
 package com.android.systemui.keyguard.ui.binder
 
-import com.android.keyguard.logging.KeyguardLogger
 import com.android.systemui.CoreStartable
 import com.android.systemui.bouncer.shared.flag.ComposeBouncerFlags
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.domain.interactor.KeyguardDismissActionInteractor
-import com.android.systemui.log.core.LogLevel
-import com.android.systemui.util.kotlin.sample
 import dagger.Lazy
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /** Runs actions on keyguard dismissal. */
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -37,7 +34,6 @@ class KeyguardDismissActionBinder
 constructor(
     private val interactorLazy: Lazy<KeyguardDismissActionInteractor>,
     @Application private val scope: CoroutineScope,
-    private val keyguardLogger: KeyguardLogger,
 ) : CoreStartable {
 
     override fun start() {
@@ -45,31 +41,6 @@ constructor(
             return
         }
 
-        val interactor = interactorLazy.get()
-        scope.launch {
-            interactor.executeDismissAction.collect {
-                log("executeDismissAction")
-                interactor.setKeyguardDone(it())
-                interactor.handleDismissAction()
-            }
-        }
-
-        scope.launch {
-            interactor.resetDismissAction.sample(interactor.onCancel).collect {
-                log("resetDismissAction")
-                it.run()
-                interactor.handleDismissAction()
-            }
-        }
-
-        scope.launch { interactor.dismissAction.collect { log("updatedDismissAction=$it") } }
-    }
-
-    private fun log(message: String) {
-        keyguardLogger.log(TAG, LogLevel.DEBUG, message)
-    }
-
-    companion object {
-        private const val TAG = "KeyguardDismissAction"
+        scope.launch { interactorLazy.get().activate() }
     }
 }

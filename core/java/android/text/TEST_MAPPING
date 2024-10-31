@@ -1,15 +1,7 @@
 {
   "presubmit": [
     {
-      "name": "CtsTextTestCases",
-      "options": [
-          {
-              "exclude-annotation": "androidx.test.filters.FlakyTest"
-          },
-          {
-              "exclude-annotation": "androidx.test.filters.LargeTest"
-          }
-      ]
+      "name": "CtsTextTestCases_text"
     }
   ]
 }

@@ -21,7 +21,6 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.AppProtoEnums;
-import android.app.BackgroundStartPrivileges;
 import android.app.IActivityManager;
 import android.app.IAppTask;
 import android.app.IApplicationThread;
@@ -179,15 +178,15 @@ public abstract class ActivityTaskManagerInternal {
      * @param validateIncomingUser Set true to skip checking {@code userId} with the calling UID.
      * @param originatingPendingIntent PendingIntentRecord that originated this activity start or
      *        null if not originated by PendingIntent
-     * @param forcedBalByPiSender If set to allow, the
-     *        PendingIntent's sender will try to force allow background activity starts.
+     * @param allowBalExemptionForSystemProcess If set to {@code true}, the
+     *        PendingIntent's sender will allow additional exemptions.
      *        This is only possible if the sender of the PendingIntent is a system process.
      */
     public abstract int startActivitiesInPackage(int uid, int realCallingPid, int realCallingUid,
             String callingPackage, @Nullable String callingFeatureId, Intent[] intents,
             String[] resolvedTypes, IBinder resultTo, SafeActivityOptions options, int userId,
             boolean validateIncomingUser, PendingIntentRecord originatingPendingIntent,
-            BackgroundStartPrivileges forcedBalByPiSender);
+            boolean allowBalExemptionForSystemProcess);
 
     /**
      * Start intent as a package.
@@ -202,8 +201,8 @@ public abstract class ActivityTaskManagerInternal {
      * @param validateIncomingUser Set true to skip checking {@code userId} with the calling UID.
      * @param originatingPendingIntent PendingIntentRecord that originated this activity start or
      *        null if not originated by PendingIntent
-     * @param forcedBalByPiSender If set to allow, the
-     *        PendingIntent's sender will try to force allow background activity starts.
+     * @param allowBalExemptionForSystemProcess If set to {@code true}, the
+     *        PendingIntent's sender will allow additional exemptions.
      *        This is only possible if the sender of the PendingIntent is a system process.
      */
     public abstract int startActivityInPackage(int uid, int realCallingPid, int realCallingUid,
@@ -211,7 +210,7 @@ public abstract class ActivityTaskManagerInternal {
             String resolvedType, IBinder resultTo, String resultWho, int requestCode,
             int startFlags, SafeActivityOptions options, int userId, Task inTask, String reason,
             boolean validateIncomingUser, PendingIntentRecord originatingPendingIntent,
-            BackgroundStartPrivileges forcedBalByPiSender);
+            boolean allowBalExemptionForSystemProcess);
 
     /**
      * Callback to be called on certain activity start scenarios.
@@ -589,7 +588,7 @@ public abstract class ActivityTaskManagerInternal {
      * sensitive environment.
      */
     public abstract TaskSnapshot getTaskSnapshotBlocking(int taskId,
-            boolean isLowResolution);
+            boolean isLowResolution, @TaskSnapshot.ReferenceFlags int usage);
 
     /** Returns true if uid is considered foreground for activity start purposes. */
     public abstract boolean isUidForeground(int uid);

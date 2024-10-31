@@ -57,6 +57,12 @@ public class PhonePipKeepClearAlgorithm implements PipKeepClearAlgorithmInterfac
         Rect startingBounds = pipBoundsState.getBounds().isEmpty()
                 ? pipBoundsAlgorithm.getEntryDestinationBoundsIgnoringKeepClearAreas()
                 : pipBoundsState.getBounds();
+        // If IME is not showing and restore bounds (pre-IME bounds) is not empty, we should set PiP
+        // bounds to the restore bounds.
+        if (!pipBoundsState.isImeShowing() && !pipBoundsState.getRestoreBounds().isEmpty()) {
+            startingBounds.set(pipBoundsState.getRestoreBounds());
+            pipBoundsState.clearRestoreBounds();
+        }
         Rect insets = new Rect();
         pipBoundsAlgorithm.getInsetBounds(insets);
         if (pipBoundsState.isImeShowing()) {

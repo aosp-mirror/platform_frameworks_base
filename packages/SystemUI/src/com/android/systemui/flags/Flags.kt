@@ -165,7 +165,7 @@ object Flags {
     val QS_USER_DETAIL_SHORTCUT =
         resourceBooleanFlag(
             R.bool.flag_lockscreen_qs_user_detail_shortcut,
-            "qs_user_detail_shortcut"
+            "qs_user_detail_shortcut",
         )
 
     // TODO(b/254512383): Tracking Bug
@@ -254,11 +254,6 @@ object Flags {
     @JvmField
     val WM_ENABLE_SHELL_TRANSITIONS =
         sysPropBooleanFlag("persist.wm.debug.shell_transit", default = true)
-
-    // TODO(b/256873975): Tracking Bug
-    @JvmField
-    @Keep
-    val WM_BUBBLE_BAR = sysPropBooleanFlag("persist.wm.debug.bubble_bar", default = false)
 
     // TODO(b/254513207): Tracking Bug to delete
     @Keep
@@ -364,11 +359,6 @@ object Flags {
     @JvmField
     val ZJ_285570694_LOCKSCREEN_TRANSITION_FROM_AOD =
         releasedFlag("zj_285570694_lockscreen_transition_from_aod")
-
-    // 3000 - dream
-    // TODO(b/285059790) : Tracking Bug
-    @JvmField
-    val LOCKSCREEN_WALLPAPER_DREAM_ENABLED = unreleasedFlag("enable_lockscreen_wallpaper_dream")
 
     // TODO(b/283447257): Tracking bug
     @JvmField
