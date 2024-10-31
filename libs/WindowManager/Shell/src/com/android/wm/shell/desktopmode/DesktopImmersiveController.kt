@@ -130,7 +130,8 @@ class DesktopImmersiveController(
         displayId: Int
     ) {
         if (!Flags.enableFullyImmersiveInDesktop()) return
-        exitImmersiveIfApplicable(wct, displayId)?.invoke(transition)
+        val result = exitImmersiveIfApplicable(wct, displayId)
+        result.asExit()?.runOnTransitionStart?.invoke(transition)
     }
 
     /**
@@ -145,16 +146,23 @@ class DesktopImmersiveController(
         wct: WindowContainerTransaction,
         displayId: Int,
         excludeTaskId: Int? = null,
-    ): ((IBinder) -> Unit)? {
-        if (!Flags.enableFullyImmersiveInDesktop()) return null
-        val immersiveTask = desktopRepository.getTaskInFullImmersiveState(displayId) ?: return null
+    ): ExitResult {
+        if (!Flags.enableFullyImmersiveInDesktop()) return ExitResult.NoExit
+        val immersiveTask = desktopRepository.getTaskInFullImmersiveState(displayId)
+            ?: return ExitResult.NoExit
         if (immersiveTask == excludeTaskId) {
-            return null
+            return ExitResult.NoExit
         }
-        val taskInfo = shellTaskOrganizer.getRunningTaskInfo(immersiveTask) ?: return null
+        val taskInfo = shellTaskOrganizer.getRunningTaskInfo(immersiveTask)
+            ?: return ExitResult.NoExit
         logV("Appending immersive exit for task: $immersiveTask in display: $displayId")
         wct.setBounds(taskInfo.token, getExitDestinationBounds(taskInfo))
-        return { transition -> addPendingImmersiveExit(immersiveTask, displayId, transition) }
+        return ExitResult.Exit(
+            exitingTask = immersiveTask,
+            runOnTransitionStart = { transition ->
+                addPendingImmersiveExit(immersiveTask, displayId, transition)
+            }
+        )
     }
 
     /**
@@ -167,22 +175,25 @@ class DesktopImmersiveController(
     fun exitImmersiveIfApplicable(
         wct: WindowContainerTransaction,
         taskInfo: RunningTaskInfo
-    ): ((IBinder) -> Unit)? {
-        if (!Flags.enableFullyImmersiveInDesktop()) return null
+    ): ExitResult {
+        if (!Flags.enableFullyImmersiveInDesktop()) return ExitResult.NoExit
         if (desktopRepository.isTaskInFullImmersiveState(taskInfo.taskId)) {
             // A full immersive task is being minimized, make sure the immersive state is broken
             // (i.e. resize back to max bounds).
             wct.setBounds(taskInfo.token, getExitDestinationBounds(taskInfo))
             logV("Appending immersive exit for task: ${taskInfo.taskId}")
-            return { transition ->
-                addPendingImmersiveExit(
-                    taskId = taskInfo.taskId,
-                    displayId = taskInfo.displayId,
-                    transition = transition
-                )
-            }
+            return ExitResult.Exit(
+                exitingTask = taskInfo.taskId,
+                runOnTransitionStart = { transition ->
+                    addPendingImmersiveExit(
+                        taskId = taskInfo.taskId,
+                        displayId = taskInfo.displayId,
+                        transition = transition
+                    )
+                }
+            )
         }
-        return null
+        return ExitResult.NoExit
     }
 
 
@@ -460,6 +471,20 @@ class DesktopImmersiveController(
         val displayId: Int,
         var transition: IBinder,
     )
+
+    /** The result of an external exit request. */
+    sealed class ExitResult {
+        /** An immersive task exit (meaning, resize) was appended to the request. */
+        data class Exit(
+            val exitingTask: Int,
+            val runOnTransitionStart: ((IBinder) -> Unit)
+        ) : ExitResult()
+        /** There was no exit appended to the request. */
+        data object NoExit : ExitResult()
+
+        /** Returns the result as an [Exit] or null if it isn't of that type. */
+        fun asExit(): Exit? = if (this is Exit) this else null
+    }
 
     private enum class Direction {
         ENTER, EXIT

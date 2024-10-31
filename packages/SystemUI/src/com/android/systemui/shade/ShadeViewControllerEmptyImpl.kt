@@ -35,60 +35,95 @@ open class ShadeViewControllerEmptyImpl @Inject constructor() :
     ShadeLockscreenInteractor,
     PanelExpansionInteractor {
     @Deprecated("Use ShadeInteractor instead") override fun expandToNotifications() {}
+
     @Deprecated("Use ShadeInteractor instead") override val isExpanded: Boolean = false
     override val isPanelExpanded: Boolean = false
+
     override fun animateCollapseQs(fullyCollapse: Boolean) {}
+
     override fun canBeCollapsed(): Boolean = false
+
     @Deprecated("Use ShadeAnimationInteractor instead") override val isCollapsing: Boolean = false
     @Deprecated("Use !ShadeInteractor.isAnyExpanded instead")
     override val isFullyCollapsed: Boolean = false
     override val isTracking: Boolean = false
     override val isViewEnabled: Boolean = false
+
     override fun shouldHideStatusBarIconsWhenExpanded() = false
+
     @Deprecated("Not supported by scenes") override fun blockExpansionForCurrentTouch() {}
+
     override fun startExpandLatencyTracking() {}
+
     override fun startBouncerPreHideAnimation() {}
+
     override fun dozeTimeTick() {}
+
     override fun resetViews(animate: Boolean) {}
+
     override val barState: Int = 0
+
     @Deprecated("Only supported by very old devices that will not adopt scenes.")
     override fun closeUserSwitcherIfOpen(): Boolean {
         return false
     }
+
     override fun onBackPressed() {}
+
     @Deprecated("According to b/318376223, shade predictive back is not be supported.")
     override fun onBackProgressed(progressFraction: Float) {}
+
     override fun setAlpha(alpha: Int, animate: Boolean) {}
+
     override fun setAlphaChangeAnimationEndAction(r: Runnable) {}
+
     @Deprecated("Not supported by scenes") override fun setPulsing(pulsing: Boolean) {}
+
     override fun setQsScrimEnabled(qsScrimEnabled: Boolean) {}
+
     override fun setAmbientIndicationTop(ambientIndicationTop: Int, ambientTextVisible: Boolean) {}
+
     override fun updateSystemUiStateFlags() {}
+
     override fun updateTouchableRegion() {}
+
     override fun transitionToExpandedShade(delay: Long) {}
 
     @Deprecated("Not supported by scenes") override fun resetViewGroupFade() {}
+
     @Deprecated("Not supported by scenes")
     override fun setKeyguardTransitionProgress(keyguardAlpha: Float, keyguardTranslationY: Int) {}
+
     @Deprecated("Not supported by scenes") override fun setOverStretchAmount(amount: Float) {}
+
     @Deprecated("TODO(b/325072511) delete this")
     override fun setKeyguardStatusBarAlpha(alpha: Float) {}
+
     override fun showAodUi() {}
+
     @Deprecated(
         "depends on the state you check, use {@link #isShadeFullyExpanded()},\n" +
             "{@link #isOnAod()}, {@link #isOnKeyguard()} instead."
     )
     override val isFullyExpanded = false
+
     override fun handleExternalTouch(event: MotionEvent): Boolean {
         return false
     }
+
     override fun handleExternalInterceptTouch(event: MotionEvent): Boolean {
         return false
     }
 
     override fun startInputFocusTransfer() {}
+
     override fun cancelInputFocusTransfer() {}
+
     override fun finishInputFocusTransfer(velocity: Float) {}
+
+    @Deprecated("Temporary a11y solution until dual shade launch b/371224114")
+    override fun onStatusBarLongPress(event: MotionEvent) {}
+
     override val shadeHeadsUpTracker = ShadeHeadsUpTrackerEmptyImpl()
     override val shadeFoldAnimator = ShadeFoldAnimatorEmptyImpl()
     @Deprecated("Use SceneInteractor.currentScene instead.")
@@ -98,20 +133,26 @@ open class ShadeViewControllerEmptyImpl @Inject constructor() :
 
 class ShadeHeadsUpTrackerEmptyImpl : ShadeHeadsUpTracker {
     override fun addTrackingHeadsUpListener(listener: Consumer<ExpandableNotificationRow>) {}
+
     override fun removeTrackingHeadsUpListener(listener: Consumer<ExpandableNotificationRow>) {}
+
     override fun setHeadsUpAppearanceController(
         headsUpAppearanceController: HeadsUpAppearanceController?
     ) {}
+
     override val trackedHeadsUpNotification: ExpandableNotificationRow? = null
 }
 
 class ShadeFoldAnimatorEmptyImpl : ShadeFoldAnimator {
     override fun prepareFoldToAodAnimation() {}
+
     override fun startFoldToAodAnimation(
         startAction: Runnable,
         endAction: Runnable,
         cancelAction: Runnable,
     ) {}
+
     override fun cancelFoldToAodAnimation() {}
+
     override val view: ViewGroup? = null
 }

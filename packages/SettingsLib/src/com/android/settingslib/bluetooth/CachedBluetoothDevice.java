@@ -322,18 +322,27 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
     }
 
     private void updatePreferredTransport() {
-        if (mProfiles.stream().noneMatch(p -> p instanceof LeAudioProfile)
-                || mProfiles.stream().noneMatch(p -> p instanceof HidProfile)) {
+        LeAudioProfile leAudioProfile =
+                (LeAudioProfile)
+                        mProfiles.stream()
+                                .filter(p -> p instanceof LeAudioProfile)
+                                .findFirst()
+                                .orElse(null);
+        HidProfile hidProfile =
+                (HidProfile)
+                        mProfiles.stream()
+                                .filter(p -> p instanceof HidProfile)
+                                .findFirst()
+                                .orElse(null);
+        if (leAudioProfile == null || hidProfile == null) {
             return;
         }
         // Both LeAudioProfile and HidProfile are connectable.
-        if (!mProfileManager
-                .getHidProfile()
-                .setPreferredTransport(
-                        mDevice,
-                        mProfileManager.getLeAudioProfile().isEnabled(mDevice)
-                                ? BluetoothDevice.TRANSPORT_LE
-                                : BluetoothDevice.TRANSPORT_BREDR)) {
+        if (!hidProfile.setPreferredTransport(
+                mDevice,
+                leAudioProfile.isEnabled(mDevice)
+                        ? BluetoothDevice.TRANSPORT_LE
+                        : BluetoothDevice.TRANSPORT_BREDR)) {
             Log.w(TAG, "Fail to set preferred transport");
         }
     }

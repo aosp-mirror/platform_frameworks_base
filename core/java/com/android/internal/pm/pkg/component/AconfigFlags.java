@@ -33,6 +33,7 @@ import android.util.Slog;
 import android.util.Xml;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.pm.pkg.parsing.ParsingPackage;
 import com.android.modules.utils.TypedXmlPullParser;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -199,7 +200,7 @@ public class AconfigFlags {
      * @return the current value of the given Aconfig flag, or null if there is no such flag
      */
     @Nullable
-    private Boolean getFlagValue(@NonNull String flagPackageAndName) {
+    public Boolean getFlagValue(@NonNull String flagPackageAndName) {
         Boolean value = mFlagValues.get(flagPackageAndName);
         if (DEBUG) {
             Slog.v(LOG_TAG, "Aconfig flag value for " + flagPackageAndName + " = " + value);
@@ -209,10 +210,13 @@ public class AconfigFlags {
 
     /**
      * Check if the element in {@code parser} should be skipped because of the feature flag.
+     * @param pkg The package being parsed
      * @param parser XML parser object currently parsing an element
      * @return true if the element is disabled because of its feature flag
      */
-    public boolean skipCurrentElement(@NonNull XmlResourceParser parser) {
+    public boolean skipCurrentElement(
+            @NonNull ParsingPackage pkg,
+            @NonNull XmlResourceParser parser) {
         if (!Flags.manifestFlagging()) {
             return false;
         }
@@ -227,18 +231,21 @@ public class AconfigFlags {
             featureFlag = featureFlag.substring(1).strip();
         }
         final Boolean flagValue = getFlagValue(featureFlag);
+        boolean shouldSkip = false;
         if (flagValue == null) {
             Slog.w(LOG_TAG, "Skipping element " + parser.getName()
                     + " due to unknown feature flag " + featureFlag);
-            return true;
-        }
-        // Skip if flag==false && attr=="flag" OR flag==true && attr=="!flag" (negated)
-        if (flagValue == negated) {
+            shouldSkip = true;
+        } else if (flagValue == negated) {
+            // Skip if flag==false && attr=="flag" OR flag==true && attr=="!flag" (negated)
             Slog.i(LOG_TAG, "Skipping element " + parser.getName()
                     + " behind feature flag " + featureFlag + " = " + flagValue);
-            return true;
+            shouldSkip = true;
         }
-        return false;
+        if (android.content.pm.Flags.includeFeatureFlagsInPackageCacher()) {
+            pkg.addFeatureFlag(featureFlag, flagValue);
+        }
+        return shouldSkip;
     }
 
     /**

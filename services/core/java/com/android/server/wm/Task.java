@@ -3297,22 +3297,25 @@ class Task extends TaskFragment {
         mDimmer.resetDimStates();
         super.prepareSurfaces();
 
-        final Rect dimBounds = mDimmer.getDimBounds();
-        if (dimBounds != null) {
-            getDimBounds(dimBounds);
+        Rect dimBounds = null;
+        if (!Flags.useTasksDimOnly()) {
+            dimBounds = mDimmer.getDimBounds();
+            if (dimBounds != null) {
+                getDimBounds(dimBounds);
 
-            // Bounds need to be relative, as the dim layer is a child.
-            if (inFreeformWindowingMode()) {
-                getBounds(mTmpRect);
-                dimBounds.offsetTo(dimBounds.left - mTmpRect.left, dimBounds.top - mTmpRect.top);
-            } else {
-                dimBounds.offsetTo(0, 0);
+                // Bounds need to be relative, as the dim layer is a child.
+                if (inFreeformWindowingMode()) {
+                    getBounds(mTmpRect);
+                    dimBounds.offset(-mTmpRect.left, -mTmpRect.top);
+                } else {
+                    dimBounds.offsetTo(0, 0);
+                }
             }
         }
 
         final SurfaceControl.Transaction t = getSyncTransaction();
 
-        if (dimBounds != null && mDimmer.updateDims(t)) {
+        if (mDimmer.hasDimState() && mDimmer.updateDims(t)) {
             scheduleAnimation();
         }
 

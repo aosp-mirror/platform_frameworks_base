@@ -3178,6 +3178,10 @@ public class HdmiControlService extends SystemService {
         HdmiCecLocalDeviceSource source = playback();
         if (source == null) {
             source = audioSystem();
+        } else {
+            // Cancel an existing timer to send the device to sleep since OTP was triggered.
+            playback().mDelayedStandbyOnActiveSourceLostHandler
+                    .removeCallbacksAndMessages(null);
         }
 
         if (source == null) {

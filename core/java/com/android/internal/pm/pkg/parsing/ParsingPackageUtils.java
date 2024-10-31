@@ -763,7 +763,7 @@ public class ParsingPackageUtils {
             if (outerDepth + 1 < parser.getDepth() || type != XmlPullParser.START_TAG) {
                 continue;
             }
-            if (sAconfigFlags.skipCurrentElement(parser)) {
+            if (sAconfigFlags.skipCurrentElement(pkg, parser)) {
                 continue;
             }
 
@@ -842,7 +842,7 @@ public class ParsingPackageUtils {
             if (type != XmlPullParser.START_TAG) {
                 continue;
             }
-            if (sAconfigFlags.skipCurrentElement(parser)) {
+            if (sAconfigFlags.skipCurrentElement(pkg, parser)) {
                 continue;
             }
 
@@ -988,7 +988,7 @@ public class ParsingPackageUtils {
             if (type != XmlPullParser.START_TAG) {
                 continue;
             }
-            if (sAconfigFlags.skipCurrentElement(parser)) {
+            if (sAconfigFlags.skipCurrentElement(pkg, parser)) {
                 continue;
             }
 
@@ -1610,7 +1610,7 @@ public class ParsingPackageUtils {
             if (type != XmlPullParser.START_TAG) {
                 continue;
             }
-            if (sAconfigFlags.skipCurrentElement(parser)) {
+            if (sAconfigFlags.skipCurrentElement(pkg, parser)) {
                 continue;
             }
 
@@ -1853,7 +1853,7 @@ public class ParsingPackageUtils {
             if (type != XmlPullParser.START_TAG) {
                 continue;
             }
-            if (sAconfigFlags.skipCurrentElement(parser)) {
+            if (sAconfigFlags.skipCurrentElement(pkg, parser)) {
                 continue;
             }
             if (parser.getName().equals("intent")) {
@@ -2202,7 +2202,7 @@ public class ParsingPackageUtils {
             if (type != XmlPullParser.START_TAG) {
                 continue;
             }
-            if (sAconfigFlags.skipCurrentElement(parser)) {
+            if (sAconfigFlags.skipCurrentElement(pkg, parser)) {
                 continue;
             }
 
@@ -2620,7 +2620,7 @@ public class ParsingPackageUtils {
                 }
             }
 
-            ParseResult<String[]> certResult = parseAdditionalCertificates(input, res, parser);
+            ParseResult<String[]> certResult = parseAdditionalCertificates(input, pkg, res, parser);
             if (certResult.isError()) {
                 return input.error(certResult);
             }
@@ -2674,7 +2674,8 @@ public class ParsingPackageUtils {
             // Fot apps targeting O-MR1 we require explicit enumeration of all certs.
             String[] additionalCertSha256Digests = EmptyArray.STRING;
             if (pkg.getTargetSdkVersion() >= Build.VERSION_CODES.O_MR1) {
-                ParseResult<String[]> certResult = parseAdditionalCertificates(input, res, parser);
+                ParseResult<String[]> certResult =
+                        parseAdditionalCertificates(input, pkg, res, parser);
                 if (certResult.isError()) {
                     return input.error(certResult);
                 }
@@ -2782,7 +2783,7 @@ public class ParsingPackageUtils {
     }
 
     private static ParseResult<String[]> parseAdditionalCertificates(ParseInput input,
-            Resources resources, XmlResourceParser parser)
+            ParsingPackage pkg, Resources resources, XmlResourceParser parser)
             throws XmlPullParserException, IOException {
         String[] certSha256Digests = EmptyArray.STRING;
         final int depth = parser.getDepth();
@@ -2793,7 +2794,7 @@ public class ParsingPackageUtils {
             if (type != XmlPullParser.START_TAG) {
                 continue;
             }
-            if (sAconfigFlags.skipCurrentElement(parser)) {
+            if (sAconfigFlags.skipCurrentElement(pkg, parser)) {
                 continue;
             }
 
