@@ -29,6 +29,7 @@ import android.view.SurfaceControl;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.android.internal.protolog.ProtoLog;
 import com.android.internal.util.Preconditions;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.ShellExecutor;
@@ -36,6 +37,7 @@ import com.android.wm.shell.common.pip.PipBoundsAlgorithm;
 import com.android.wm.shell.common.pip.PipBoundsState;
 import com.android.wm.shell.common.pip.PipUtils;
 import com.android.wm.shell.pip2.animation.PipResizeAnimator;
+import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.shared.annotations.ShellMainThread;
 
 import java.util.ArrayList;
@@ -121,6 +123,9 @@ public class PipTaskListener implements ShellTaskOrganizer.TaskListener,
         if (mPictureInPictureParams.equals(params)) {
             return;
         }
+        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                "onTaskInfoChanged: %s, state=%s oldParams=%s newParams=%s",
+                taskInfo.topActivity, mPipTransitionState, mPictureInPictureParams, params);
         setPictureInPictureParams(params);
         float newAspectRatio = mPictureInPictureParams.getAspectRatioFloat();
         if (PipUtils.aspectRatioChanged(newAspectRatio, mPipBoundsState.getAspectRatio())) {
