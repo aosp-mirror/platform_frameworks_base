@@ -507,7 +507,7 @@
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Επιτρέπει στην εφαρμογή την τροποποίηση καθολικών ρυθμίσεων ήχου, όπως η ένταση και ποιο ηχείο χρησιμοποιείται για έξοδο."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"εγγράφει ήχο"</string>
     <string name="permdesc_recordAudio" msgid="5857246765327514062">"Αυτή η εφαρμογή μπορεί να εγγράφει ήχο μέσω του μικροφώνου, όταν τη χρησιμοποιείτε."</string>
-    <string name="permlab_recordBackgroundAudio" msgid="5891032812308878254">"εγγραφή ήχου στο παρασκήνιο"</string>
+    <string name="permlab_recordBackgroundAudio" msgid="5891032812308878254">"ηχογράφηση στο παρασκήνιο"</string>
     <string name="permdesc_recordBackgroundAudio" msgid="1992623135737407516">"Αυτή η εφαρμογή μπορεί να εγγράφει ήχο μέσω του μικροφώνου, ανά πάσα στιγμή."</string>
     <string name="permlab_detectScreenCapture" msgid="4447042362828799433">"ανίχνευση καταγραφών οθόνης που περιέχουν τα παράθυρα της εφαρμογής"</string>
     <string name="permdesc_detectScreenCapture" msgid="3485784917960342284">"Η εφαρμογή θα λάβει ειδοποίηση όταν ληφθεί ένα στιγμιότυπο οθόνης ενώ βρίσκεται σε χρήση."</string>
@@ -541,7 +541,7 @@
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"προβολή και έλεγχος κλήσεων μέσω του συστήματος."</string>
     <string name="permdesc_callCompanionApp" msgid="8474168926184156261">"Επιτρέπει στην εφαρμογή να βλέπει και να ελέγχει τις εισερχόμενες κλήσεις στη συσκευή. Αυτό περιλαμβάνει πληροφορίες όπως τους αριθμούς κλήσεων για τις κλήσεις και την κατάσταση των κλήσεων."</string>
     <string name="permlab_exemptFromAudioRecordRestrictions" msgid="1164725468350759486">"εξαίρεση από περιορισμούς εγγραφής ήχου"</string>
-    <string name="permdesc_exemptFromAudioRecordRestrictions" msgid="2425117015896871976">"Εξαιρέστε την εφαρμογή από περιορισμούς για την εγγραφή ήχου."</string>
+    <string name="permdesc_exemptFromAudioRecordRestrictions" msgid="2425117015896871976">"Εξαιρέστε την εφαρμογή από περιορισμούς για την ηχογράφηση."</string>
     <string name="permlab_acceptHandover" msgid="2925523073573116523">"συνέχιση κλήσης από άλλη συσκευή"</string>
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"Επιτρέπει στην εφαρμογή να συνεχίσει μια κλήση η οποία ξεκίνησε σε άλλη εφαρμογή."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"ανάγνωση αριθμών τηλεφώνου"</string>
@@ -1405,7 +1405,7 @@
     <string name="usb_power_notification_message" msgid="7284765627437897702">"Φόρτιση συνδεδεμένης συσκευής. Πατήστε για περισσότερες επιλογές."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Εντοπίστηκε αναλογικό αξεσουάρ ήχου"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"Η συνδεδεμένη συσκευή δεν είναι συμβατή με αυτό το τηλέφωνο. Πατήστε για να μάθετε περισσότερα."</string>
-    <string name="adb_active_notification_title" msgid="408390247354560331">"Συνδέθηκε ο εντοπ. σφαλμ. USB"</string>
+    <string name="adb_active_notification_title" msgid="408390247354560331">"Eνεργός εντοπ. σφαλματών USB"</string>
     <string name="adb_active_notification_message" msgid="5617264033476778211">"Πατήστε για απενεργ. εντοπ. σφαλμ. USB"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"Επιλογή για απενεργοποίηση του εντοπισμού σφαλμάτων USB."</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"Συνδέθηκε ο ασύρματος εντοπισμός σφαλμάτων"</string>
@@ -1746,8 +1746,7 @@
     <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"Μια εφαρμογή αποκρύπτει το αίτημα άδειας, με αποτέλεσμα να μην είναι δυνατή η επαλήθευση της απάντησής σας."</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Πατήστε μια λειτουργία για να ξεκινήσετε να τη χρησιμοποιείτε:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Επιλέξτε τις λειτουργίες που θέλετε να χρησιμοποιείτε με το κουμπί προσβασιμότητας."</string>
-    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (2245540598834891500) -->
-    <skip />
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2245540598834891500">"Επιλέξτε τις λειτουργίες που θέλετε να χρησιμοποιείτε με τη συντόμευση κουμπιών έντασης ήχου"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"Η υπηρεσία <xliff:g id="SERVICE_NAME">%s</xliff:g> έχει απενεργοποιηθεί."</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Επεξεργασία συντομεύσεων"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Τέλος"</string>
@@ -1944,6 +1943,8 @@
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Ανενεργός"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> - <xliff:g id="END">%2$s</xliff:g>"</string>
+    <!-- no translation found for zen_mode_trigger_summary_range_words (7228261413029290750) -->
+    <skip />
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"Οποιοδήποτε ημερολόγιο"</string>
     <string name="muted_by" msgid="91464083490094950">"Το τρίτο μέρος <xliff:g id="THIRD_PARTY">%1$s</xliff:g> θέτει ορισμένους ήχους σε σίγαση"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"Υπάρχει ένα εσωτερικό πρόβλημα με τη συσκευή σας και ενδέχεται να είναι ασταθής μέχρι την επαναφορά των εργοστασιακών ρυθμίσεων."</string>
@@ -2011,6 +2012,7 @@
     <string name="set_up_screen_lock_title" msgid="8346083801616474030">"Ρυθμίστε ένα κλείδωμα οθόνης"</string>
     <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Ρύθμιση κλειδώματος οθόνης"</string>
     <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"Ορίστε κλείδωμα οθόνης"</string>
+    <string name="private_space_set_up_screen_lock_for_reset" msgid="7817091386408432097">"Για να διαγράψετε τον ιδιωτικό χώρο, ορίστε ένα κλείδωμα οθόνης σε αυτή τη συσκευή"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Η εφαρμογή δεν είναι διαθέσιμη"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"Η εφαρμογή <xliff:g id="APP_NAME">%1$s</xliff:g> δεν είναι διαθέσιμη αυτήν τη στιγμή."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> δεν διατίθεται"</string>
@@ -2129,11 +2131,6 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Θα υπάρχει δόνηση για κλήσεις και ειδοποιήσεις"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Οι κλήσεις και οι ειδοποιήσεις θα τεθούν σε παύση"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Αλλαγές στο σύστημα"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Μην ενοχλείτε"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Νέο: Η λειτουργία \"Μην ενοχλείτε\" αποκρύπτει ειδοποιήσεις"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Πατήστε για να μάθετε περισσότερα και να κάνετε αλλαγές."</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Η λειτουργία \"Μην ενοχλείτε\" άλλαξε"</string>
-    <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Πατήστε για να ελέγξετε το περιεχόμενο που έχει αποκλειστεί."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Έλεγχος ρυθμίσεων ειδοποιήσεων"</string>
     <string name="review_notification_settings_text" msgid="5916244866751849279">"Από το Android 13 και έπειτα, οι εφαρμογές που εγκαθιστάτε θα χρειάζονται την άδειά σας για την αποστολή ειδοποιήσεων. Πατήστε για να αλλάξετε αυτή την άδεια για υπάρχουσες εφαρμογές."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Υπενθύμιση αργότερα"</string>
@@ -2429,6 +2426,14 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Αποστολή και λήψη μηνυμάτων χωρίς δίκτυο κινητής τηλεφωνίας ή Wi-Fi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Άνοιγμα Messages"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Πώς λειτουργεί"</string>
+    <!-- no translation found for satellite_manual_selection_state_popup_title (8545991934926661974) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_message (1928101658551382450) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_ok (2459664752624985095) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_cancel (973605633339469252) -->
+    <skip />
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Σε εκκρεμότητα…"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Επαναρρύθμιση λειτουργίας Ξεκλείδωμα με δακτυλικό αποτύπωμα"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"Δεν είναι πλέον δυνατή η αναγνώριση του <xliff:g id="FINGERPRINT">%s</xliff:g>."</string>

@@ -60,7 +60,7 @@ class SliderPreferenceScreenshotTest(emulationSpec: DeviceEmulationSpec) {
                     override val onValueChangeFinished = {
                         println("onValueChangeFinished")
                     }
-                    override val icon = Icons.Outlined.AccessAlarm
+                    override val iconStart = Icons.Outlined.AccessAlarm
                 })
 
                 SliderPreference(object : SliderPreferenceModel {

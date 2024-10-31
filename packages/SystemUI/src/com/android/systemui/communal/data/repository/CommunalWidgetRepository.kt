@@ -21,6 +21,7 @@ import android.appwidget.AppWidgetProviderInfo
 import android.content.ComponentName
 import android.os.UserHandle
 import android.os.UserManager
+import com.android.systemui.Flags.communalWidgetResizing
 import com.android.systemui.common.data.repository.PackageChangeRepository
 import com.android.systemui.common.shared.model.PackageInstallSession
 import com.android.systemui.communal.data.backup.CommunalBackupUtils
@@ -50,7 +51,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /** Encapsulates the state of widgets for communal mode. */
 interface CommunalWidgetRepository {
@@ -82,7 +83,7 @@ interface CommunalWidgetRepository {
      *
      * @param widgetIdToRankMap mapping of the widget ids to the rank of the widget.
      */
-    fun updateWidgetOrder(widgetIdToRankMap: Map<Int, Int>) {}
+    fun updateWidgetOrder(widgetIdToRankMap: Map<Int, Int>)
 
     /**
      * Restores the database by reading a state file from disk and updating the widget ids according
@@ -92,6 +93,17 @@ interface CommunalWidgetRepository {
 
     /** Aborts the restore process and removes files from disk if necessary. */
     fun abortRestoreWidgets()
+
+    /**
+     * Update the spanY of a widget in the database.
+     *
+     * @param appWidgetId id of the widget to update.
+     * @param spanY new spanY value for the widget.
+     * @param widgetIdToRankMap mapping of the widget ids to its rank. Allows re-ordering widgets
+     *   alongside the resize, in case resizing also requires re-ordering. This ensures the
+     *   re-ordering is done in the same database transaction as the resize.
+     */
+    fun resizeWidget(appWidgetId: Int, spanY: Int, widgetIdToRankMap: Map<Int, Int>)
 }
 
 @SysUISingleton
@@ -118,19 +130,31 @@ constructor(
 
     /** Widget metadata from database + matching [AppWidgetProviderInfo] if any. */
     private val widgetEntries: Flow<List<CommunalWidgetEntry>> =
-        combine(
-            communalWidgetDao.getWidgets(),
-            communalWidgetHost.appWidgetProviders,
-        ) { entries, providers ->
+        combine(communalWidgetDao.getWidgets(), communalWidgetHost.appWidgetProviders) {
+            entries,
+            providers ->
             entries.mapNotNull { (rank, widget) ->
                 CommunalWidgetEntry(
                     appWidgetId = widget.widgetId,
                     componentName = widget.componentName,
                     rank = rank.rank,
-                    providerInfo = providers[widget.widgetId]
+                    providerInfo = providers[widget.widgetId],
+                    spanY = widget.spanY,
                 )
             }
         }
+
+    override fun resizeWidget(appWidgetId: Int, spanY: Int, widgetIdToRankMap: Map<Int, Int>) {
+        if (!communalWidgetResizing()) return
+        bgScope.launch {
+            communalWidgetDao.resizeWidget(appWidgetId, spanY, widgetIdToRankMap)
+            logger.i({ "Updated spanY of widget $int1 to $int2." }) {
+                int1 = appWidgetId
+                int2 = spanY
+            }
+            backupManager.dataChanged()
+        }
+    }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override val communalWidgets: Flow<List<CommunalWidgetContentModel>> =
@@ -197,6 +221,7 @@ constructor(
                     provider = provider,
                     rank = rank,
                     userSerialNumber = userManager.getUserSerialNumber(user.identifier),
+                    spanY = 3,
                 )
                 backupManager.dataChanged()
             } else {
@@ -325,6 +350,7 @@ constructor(
                         componentName = restoredWidget.componentName
                         rank = restoredWidget.rank
                         userSerialNumber = userManager.getUserSerialNumber(newUser.identifier)
+                        spanY = restoredWidget.spanY
                     }
                 }
             val newState = CommunalHubState().apply { widgets = newWidgets.toTypedArray() }
@@ -383,6 +409,7 @@ constructor(
             appWidgetId = entry.appWidgetId,
             providerInfo = entry.providerInfo!!,
             rank = entry.rank,
+            spanY = entry.spanY,
         )
     }
 
@@ -400,6 +427,7 @@ constructor(
                 appWidgetId = entry.appWidgetId,
                 providerInfo = entry.providerInfo!!,
                 rank = entry.rank,
+                spanY = entry.spanY,
             )
         }
 
@@ -412,6 +440,7 @@ constructor(
                 componentName = componentName,
                 icon = session.icon,
                 user = session.user,
+                spanY = entry.spanY,
             )
         } else {
             null
@@ -422,6 +451,7 @@ constructor(
         val appWidgetId: Int,
         val componentName: String,
         val rank: Int,
+        val spanY: Int,
         var providerInfo: AppWidgetProviderInfo? = null,
     )
 }

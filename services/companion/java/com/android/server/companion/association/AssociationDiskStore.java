@@ -17,10 +17,12 @@
 package com.android.server.companion.association;
 
 import static com.android.internal.util.XmlUtils.readBooleanAttribute;
+import static com.android.internal.util.XmlUtils.readByteArrayAttribute;
 import static com.android.internal.util.XmlUtils.readIntAttribute;
 import static com.android.internal.util.XmlUtils.readLongAttribute;
 import static com.android.internal.util.XmlUtils.readStringAttribute;
 import static com.android.internal.util.XmlUtils.writeBooleanAttribute;
+import static com.android.internal.util.XmlUtils.writeByteArrayAttribute;
 import static com.android.internal.util.XmlUtils.writeIntAttribute;
 import static com.android.internal.util.XmlUtils.writeLongAttribute;
 import static com.android.internal.util.XmlUtils.writeStringAttribute;
@@ -36,6 +38,7 @@ import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.annotation.UserIdInt;
 import android.companion.AssociationInfo;
+import android.graphics.drawable.Icon;
 import android.net.MacAddress;
 import android.os.Environment;
 import android.util.AtomicFile;
@@ -51,6 +54,7 @@ import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -172,6 +176,7 @@ public final class AssociationDiskStore {
     private static final String XML_ATTR_TIME_APPROVED = "time_approved";
     private static final String XML_ATTR_LAST_TIME_CONNECTED = "last_time_connected";
     private static final String XML_ATTR_SYSTEM_DATA_SYNC_FLAGS = "system_data_sync_flags";
+    private static final String XML_ATTR_DEVICE_ICON = "device_icon";
 
     private static final String LEGACY_XML_ATTR_DEVICE = "device";
 
@@ -393,7 +398,7 @@ public final class AssociationDiskStore {
         return new AssociationInfo(associationId, userId, appPackage, tag,
                 MacAddress.fromString(deviceAddress), null, profile, null,
                 /* managedByCompanionApp */ false, notify, /* revoked */ false, /* pending */ false,
-                timeApproved, Long.MAX_VALUE, /* systemDataSyncFlags */ 0);
+                timeApproved, Long.MAX_VALUE, /* systemDataSyncFlags */ 0, null);
     }
 
     private static Associations readAssociationsV1(@NonNull TypedXmlPullParser parser,
@@ -444,20 +449,22 @@ public final class AssociationDiskStore {
                 parser, XML_ATTR_LAST_TIME_CONNECTED, Long.MAX_VALUE);
         final int systemDataSyncFlags = readIntAttribute(parser,
                 XML_ATTR_SYSTEM_DATA_SYNC_FLAGS, 0);
+        final Icon deviceIcon = byteArrayToIcon(
+                readByteArrayAttribute(parser, XML_ATTR_DEVICE_ICON));
 
         return new AssociationInfo(associationId, userId, appPackage, tag, macAddress, displayName,
                 profile, null, selfManaged, notify, revoked, pending, timeApproved,
-                lastTimeConnected, systemDataSyncFlags);
+                lastTimeConnected, systemDataSyncFlags, deviceIcon);
     }
 
     private static void writeAssociations(@NonNull XmlSerializer parent,
             @NonNull Associations associations)
             throws IOException {
         final XmlSerializer serializer = parent.startTag(null, XML_TAG_ASSOCIATIONS);
+        writeIntAttribute(serializer, XML_ATTR_MAX_ID, associations.getMaxId());
         for (AssociationInfo association : associations.getAssociations()) {
             writeAssociation(serializer, association);
         }
-        writeIntAttribute(serializer, XML_ATTR_MAX_ID, associations.getMaxId());
         serializer.endTag(null, XML_TAG_ASSOCIATIONS);
     }
 
@@ -480,6 +487,8 @@ public final class AssociationDiskStore {
         writeLongAttribute(
                 serializer, XML_ATTR_LAST_TIME_CONNECTED, a.getLastTimeConnectedMs());
         writeIntAttribute(serializer, XML_ATTR_SYSTEM_DATA_SYNC_FLAGS, a.getSystemDataSyncFlags());
+        writeByteArrayAttribute(
+                serializer, XML_ATTR_DEVICE_ICON, iconToByteArray(a.getDeviceIcon()));
 
         serializer.endTag(null, XML_TAG_ASSOCIATION);
     }
@@ -493,5 +502,25 @@ public final class AssociationDiskStore {
 
     private static @Nullable MacAddress stringToMacAddress(@Nullable String address) {
         return address != null ? MacAddress.fromString(address) : null;
+    }
+
+    private static byte[] iconToByteArray(Icon deviceIcon)
+            throws IOException {
+        if (deviceIcon == null) {
+            return null;
+        }
+
+        ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+        deviceIcon.writeToStream(byteStream);
+        return byteStream.toByteArray();
+    }
+
+    private static Icon byteArrayToIcon(byte[] bytes) throws IOException {
+        if (bytes == null) {
+            return null;
+        }
+
+        ByteArrayInputStream byteStream = new ByteArrayInputStream(bytes);
+        return Icon.createFromStream(byteStream);
     }
 }

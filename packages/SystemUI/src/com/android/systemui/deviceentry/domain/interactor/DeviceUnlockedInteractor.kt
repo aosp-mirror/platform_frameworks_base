@@ -26,7 +26,9 @@ import com.android.systemui.deviceentry.shared.model.DeviceEntryRestrictionReaso
 import com.android.systemui.deviceentry.shared.model.DeviceUnlockSource
 import com.android.systemui.deviceentry.shared.model.DeviceUnlockStatus
 import com.android.systemui.flags.SystemPropertiesHelper
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.domain.interactor.TrustInteractor
+import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.utils.coroutines.flow.flatMapLatestConflated
 import javax.inject.Inject
@@ -36,6 +38,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
@@ -57,6 +60,7 @@ constructor(
     private val powerInteractor: PowerInteractor,
     private val biometricSettingsInteractor: DeviceEntryBiometricSettingsInteractor,
     private val systemPropertiesHelper: SystemPropertiesHelper,
+    keyguardTransitionInteractor: KeyguardTransitionInteractor,
 ) {
 
     private val deviceUnlockSource =
@@ -74,7 +78,7 @@ constructor(
             trustInteractor.isTrusted.filter { it }.map { DeviceUnlockSource.TrustAgent },
             authenticationInteractor.onAuthenticationResult
                 .filter { it }
-                .map { DeviceUnlockSource.BouncerInput }
+                .map { DeviceUnlockSource.BouncerInput },
         )
 
     private val faceEnrolledAndEnabled = biometricSettingsInteractor.isFaceAuthEnrolledAndEnabled
@@ -170,10 +174,20 @@ constructor(
                     combine(
                             powerInteractor.isAsleep,
                             isInLockdown,
-                            ::Pair,
+                            keyguardTransitionInteractor
+                                .transitionValue(KeyguardState.AOD)
+                                .map { it == 1f }
+                                .distinctUntilChanged(),
+                            ::Triple,
                         )
-                        .flatMapLatestConflated { (isAsleep, isInLockdown) ->
-                            if (isAsleep || isInLockdown) {
+                        .flatMapLatestConflated { (isAsleep, isInLockdown, isAod) ->
+                            val isForceLocked =
+                                when {
+                                    isAsleep && !isAod -> true
+                                    isInLockdown -> true
+                                    else -> false
+                                }
+                            if (isForceLocked) {
                                 flowOf(DeviceUnlockStatus(false, null))
                             } else {
                                 deviceUnlockSource.map { DeviceUnlockStatus(true, it) }

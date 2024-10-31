@@ -87,11 +87,12 @@ interface IJobCallback {
     void jobFinished(int jobId, boolean reschedule);
 
     /*
-     * Inform JobScheduler to force finish this job because the client has lost
-     * the job handle. jobFinished can no longer be called from the client.
+     * Inform JobScheduler that this job may have been abandoned because the client process
+     * has lost strong references to the JobParameters object without calling jobFinished.
+     *
      * @param jobId Unique integer used to identify this job
      */
-    void forceJobFinished(int jobId);
+    void handleAbandonedJob(int jobId);
 
     /*
      * Inform JobScheduler of a change in the estimated transfer payload.

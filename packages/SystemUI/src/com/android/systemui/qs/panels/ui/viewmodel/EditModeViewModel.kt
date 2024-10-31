@@ -16,6 +16,9 @@
 
 package com.android.systemui.qs.panels.ui.viewmodel
 
+import android.content.Context
+import androidx.compose.ui.util.fastMap
+import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.qs.panels.domain.interactor.EditTilesListInteractor
@@ -27,6 +30,7 @@ import com.android.systemui.qs.pipeline.domain.interactor.CurrentTilesInteractor
 import com.android.systemui.qs.pipeline.domain.interactor.CurrentTilesInteractor.Companion.POSITION_AT_END
 import com.android.systemui.qs.pipeline.domain.interactor.MinimumTilesInteractor
 import com.android.systemui.qs.pipeline.shared.TileSpec
+import com.android.systemui.util.kotlin.emitOnStart
 import javax.inject.Inject
 import javax.inject.Named
 import kotlinx.coroutines.CoroutineScope
@@ -35,6 +39,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
@@ -49,6 +54,8 @@ constructor(
     private val currentTilesInteractor: CurrentTilesInteractor,
     private val tilesAvailabilityInteractor: TilesAvailabilityInteractor,
     private val minTilesInteractor: MinimumTilesInteractor,
+    private val configurationInteractor: ConfigurationInteractor,
+    @Application private val applicationContext: Context,
     @Named("Default") private val defaultGridLayout: GridLayout,
     @Application private val applicationScope: CoroutineScope,
     gridLayoutTypeInteractor: GridLayoutTypeInteractor,
@@ -66,11 +73,7 @@ constructor(
     val gridLayout: StateFlow<GridLayout> =
         gridLayoutTypeInteractor.layout
             .map { gridLayoutMap[it] ?: defaultGridLayout }
-            .stateIn(
-                applicationScope,
-                SharingStarted.WhileSubscribed(),
-                defaultGridLayout,
-            )
+            .stateIn(applicationScope, SharingStarted.WhileSubscribed(), defaultGridLayout)
 
     /**
      * Flow of view models for each tile that should be visible in edit mode (or empty flow when not
@@ -99,38 +102,45 @@ constructor(
                             .map { it.tileSpec }
                             .minus(currentTilesInteractor.currentTilesSpecs.toSet())
                     )
-                currentTilesInteractor.currentTiles.map { tiles ->
-                    val currentSpecs = tiles.map { it.spec }
-                    val canRemoveTiles = currentSpecs.size > minimumTiles
-                    val allTiles = editTilesData.stockTiles + editTilesData.customTiles
-                    val allTilesMap = allTiles.associate { it.tileSpec to it }
-                    val currentTiles = currentSpecs.map { allTilesMap.get(it) }.filterNotNull()
-                    val nonCurrentTiles = allTiles.filter { it.tileSpec !in currentSpecs }
+                currentTilesInteractor.currentTiles
+                    .map { tiles ->
+                        val currentSpecs = tiles.map { it.spec }
+                        val canRemoveTiles = currentSpecs.size > minimumTiles
+                        val allTiles = editTilesData.stockTiles + editTilesData.customTiles
+                        val allTilesMap = allTiles.associate { it.tileSpec to it }
+                        val currentTiles = currentSpecs.map { allTilesMap.get(it) }.filterNotNull()
+                        val nonCurrentTiles = allTiles.filter { it.tileSpec !in currentSpecs }
 
-                    (currentTiles + nonCurrentTiles)
-                        .filterNot { it.tileSpec in unavailable }
-                        .map {
-                            val current = it.tileSpec in currentSpecs
-                            val availableActions = buildSet {
-                                if (current) {
-                                    add(AvailableEditActions.MOVE)
-                                    if (canRemoveTiles) {
-                                        add(AvailableEditActions.REMOVE)
+                        (currentTiles + nonCurrentTiles)
+                            .filterNot { it.tileSpec in unavailable }
+                            .map {
+                                val current = it.tileSpec in currentSpecs
+                                val availableActions = buildSet {
+                                    if (current) {
+                                        add(AvailableEditActions.MOVE)
+                                        if (canRemoveTiles) {
+                                            add(AvailableEditActions.REMOVE)
+                                        }
+                                    } else {
+                                        add(AvailableEditActions.ADD)
                                     }
-                                } else {
-                                    add(AvailableEditActions.ADD)
                                 }
+                                UnloadedEditTileViewModel(
+                                    it.tileSpec,
+                                    it.icon,
+                                    it.label,
+                                    it.appName,
+                                    current,
+                                    availableActions,
+                                    it.category,
+                                )
                             }
-                            EditTileViewModel(
-                                it.tileSpec,
-                                it.icon,
-                                it.label,
-                                it.appName,
-                                current,
-                                availableActions
-                            )
-                        }
-                }
+                    }
+                    .combine(configurationInteractor.onAnyConfigurationChange.emitOnStart()) {
+                        tiles,
+                        _ ->
+                        tiles.fastMap { it.load(applicationContext) }
+                    }
             } else {
                 emptyFlow()
             }
@@ -181,10 +191,5 @@ constructor(
 
     fun setTiles(tileSpecs: List<TileSpec>) {
         currentTilesInteractor.setTiles(tileSpecs)
-    }
-
-    /** Immediately resets the current tiles to the default list. */
-    fun resetCurrentTilesToDefault() {
-        throw NotImplementedError("This is not supported yet")
     }
 }

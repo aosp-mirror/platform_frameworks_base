@@ -20,7 +20,9 @@ import com.android.tools.lint.client.api.IssueRegistry
 import com.android.tools.lint.client.api.Vendor
 import com.android.tools.lint.detector.api.CURRENT_API
 import com.google.android.lint.aidl.EnforcePermissionDetector
+import com.google.android.lint.aidl.PermissionAnnotationDetector
 import com.google.android.lint.aidl.SimpleManualPermissionEnforcementDetector
+import com.google.android.lint.aidl.SimpleRequiresNoPermissionDetector
 import com.google.auto.service.AutoService
 
 @AutoService(IssueRegistry::class)
@@ -31,7 +33,9 @@ class AndroidGlobalIssueRegistry : IssueRegistry() {
             EnforcePermissionDetector.ISSUE_MISMATCHING_ENFORCE_PERMISSION,
             EnforcePermissionDetector.ISSUE_ENFORCE_PERMISSION_HELPER,
             EnforcePermissionDetector.ISSUE_MISUSING_ENFORCE_PERMISSION,
+            PermissionAnnotationDetector.ISSUE_MISSING_PERMISSION_ANNOTATION,
             SimpleManualPermissionEnforcementDetector.ISSUE_SIMPLE_MANUAL_PERMISSION_ENFORCEMENT,
+            SimpleRequiresNoPermissionDetector.ISSUE_SIMPLE_REQUIRES_NO_PERMISSION,
     )
 
     override val api: Int

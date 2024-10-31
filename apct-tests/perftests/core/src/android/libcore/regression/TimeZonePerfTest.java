@@ -16,8 +16,8 @@
 
 package android.libcore.regression;
 
-import androidx.benchmark.BenchmarkState;
-import androidx.benchmark.junit4.BenchmarkRule;
+import android.perftests.utils.BenchmarkState;
+import android.perftests.utils.PerfStatusReporter;
 
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -31,11 +31,11 @@ import java.util.TimeZone;
 @RunWith(AndroidJUnit4.class)
 @LargeTest
 public class TimeZonePerfTest {
-    @Rule public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
+    @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
 
     @Test
     public void timeTimeZone_getDefault() throws Exception {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             TimeZone.getDefault();
         }
@@ -43,7 +43,7 @@ public class TimeZonePerfTest {
 
     @Test
     public void timeTimeZone_getTimeZoneUTC() throws Exception {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             TimeZone.getTimeZone("UTC");
         }
@@ -52,7 +52,7 @@ public class TimeZonePerfTest {
     @Test
     public void timeTimeZone_getTimeZone_default() throws Exception {
         String defaultId = TimeZone.getDefault().getID();
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             TimeZone.getTimeZone(defaultId);
         }
@@ -61,7 +61,7 @@ public class TimeZonePerfTest {
     // A time zone with relatively few transitions.
     @Test
     public void timeTimeZone_getTimeZone_America_Caracas() throws Exception {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             TimeZone.getTimeZone("America/Caracas");
         }
@@ -70,7 +70,7 @@ public class TimeZonePerfTest {
     // A time zone with a lot of transitions.
     @Test
     public void timeTimeZone_getTimeZone_America_Santiago() throws Exception {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             TimeZone.getTimeZone("America/Santiago");
         }
@@ -78,7 +78,7 @@ public class TimeZonePerfTest {
 
     @Test
     public void timeTimeZone_getTimeZone_GMT_plus_10() throws Exception {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             TimeZone.getTimeZone("GMT+10");
         }

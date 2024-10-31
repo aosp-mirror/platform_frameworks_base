@@ -90,8 +90,6 @@ public class ResourcesProvider implements AutoCloseable, Closeable {
             throws IOException {
         Objects.requireNonNull(overlayInfo);
         Preconditions.checkArgument(overlayInfo.isFabricated(), "Not accepted overlay");
-        Preconditions.checkStringNotEmpty(
-                overlayInfo.getTargetOverlayableName(), "Without overlayable name");
         final String overlayName =
                 OverlayManagerImpl.checkOverlayNameValid(overlayInfo.getOverlayName());
         final String path =

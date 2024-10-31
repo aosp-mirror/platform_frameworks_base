@@ -22,9 +22,8 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.qs.panels.data.repository.DefaultLargeTilesRepository
 import com.android.systemui.qs.panels.data.repository.defaultLargeTilesRepository
+import com.android.systemui.qs.panels.domain.interactor.infiniteGridLayout
 import com.android.systemui.qs.panels.ui.viewmodel.MockTileViewModel
-import com.android.systemui.qs.panels.ui.viewmodel.fixedColumnsSizeViewModel
-import com.android.systemui.qs.panels.ui.viewmodel.iconTilesViewModel
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
@@ -43,13 +42,7 @@ class InfiniteGridLayoutTest : SysuiTestCase() {
                 }
         }
 
-    private val underTest =
-        with(kosmos) {
-            InfiniteGridLayout(
-                iconTilesViewModel,
-                fixedColumnsSizeViewModel,
-            )
-        }
+    private val underTest = kosmos.infiniteGridLayout
 
     @Test
     fun correctPagination_underOnePage_sameOrder() =
@@ -65,7 +58,7 @@ class InfiniteGridLayoutTest : SysuiTestCase() {
                         smallTile(),
                         largeTile(),
                         largeTile(),
-                        smallTile()
+                        smallTile(),
                     )
 
                 val pages = underTest.splitIntoPages(tiles, rows = rows, columns = columns)

@@ -110,6 +110,7 @@ import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.ZygoteProcess;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -133,6 +134,7 @@ import com.android.server.am.nano.VMCapability;
 import com.android.server.am.nano.VMInfo;
 import com.android.server.compat.PlatformCompat;
 import com.android.server.pm.UserManagerInternal;
+import com.android.server.utils.AnrTimer;
 import com.android.server.utils.Slogf;
 
 import dalvik.annotation.optimization.NeverCompile;
@@ -285,6 +287,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     return -1;
                 case "trace-ipc":
                     return runTraceIpc(pw);
+                case "trace-timer":
+                    return runTraceTimer(pw);
                 case "profile":
                     return runProfile(pw);
                 case "dumpheap":
@@ -439,6 +443,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     return runSetForegroundServiceDelegate(pw);
                 case "capabilities":
                     return runCapabilities(pw);
+                case "set-app-zygote-preload-timeout":
+                    return runSetAppZygotePreloadTimeout(pw);
                 default:
                     return handleDefaultCommands(cmd);
             }
@@ -446,6 +452,15 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("Remote exception: " + e);
         }
         return -1;
+    }
+
+    int runSetAppZygotePreloadTimeout(PrintWriter pw) throws RemoteException {
+        final String timeout = getNextArgRequired();
+        final int timeoutMs = Integer.parseInt(timeout);
+
+        ZygoteProcess.setAppZygotePreloadTimeout(timeoutMs);
+
+        return 0;
     }
 
     int runCapabilities(PrintWriter pw) throws RemoteException {
@@ -1060,6 +1075,23 @@ final class ActivityManagerShellCommand extends ShellCommand {
 
         pw.println("Stopped IPC tracing. Dumping logs to: " + filename);
         return 0;
+    }
+
+    // Update AnrTimer tracing.
+    private int runTraceTimer(PrintWriter pw) throws RemoteException {
+        if (!AnrTimer.traceFeatureEnabled()) return -1;
+
+        // Delegate all argument parsing to the AnrTimer method.
+        try {
+            final String result = AnrTimer.traceTimers(peekRemainingArgs());
+            if (result != null) {
+                pw.println(result);
+            }
+            return 0;
+        } catch (IllegalArgumentException e) {
+            getErrPrintWriter().println("Error: bad trace-timer command: " + e);
+            return -1;
+        }
     }
 
     // NOTE: current profiles can only be started on default display (even on automotive builds with
@@ -4352,6 +4384,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      start: start tracing IPC transactions.");
             pw.println("      stop: stop tracing IPC transactions and dump the results to file.");
             pw.println("      --dump-file <FILE>: Specify the file the trace should be dumped to.");
+            anrTimerHelp(pw);
             pw.println("  profile start [--user <USER_ID> current]");
             pw.println("          [--clock-type <TYPE>]");
             pw.println("          [" + PROFILER_OUTPUT_VERSION_FLAG + " VERSION]");
@@ -4602,7 +4635,24 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("  capabilities [--protobuf]");
             pw.println("         Output am supported features (text format). Options are:");
             pw.println("         --protobuf: format output using protobuffer");
+            pw.println("  set-app-zygote-preload-timeout <TIMEOUT_IN_MS>");
+            pw.println("         Set the timeout for preloading code in the app-zygote");
             Intent.printIntentArgsHelp(pw, "");
+        }
+    }
+
+    static void anrTimerHelp(PrintWriter pw) {
+        // Return silently if tracing is not feature-enabled.
+        if (!AnrTimer.traceFeatureEnabled()) return;
+
+        String h = AnrTimer.traceTimers(new String[]{"help"});
+        if (h == null) {
+            return;
+        }
+
+        pw.println("  trace-timer <cmd>");
+        for (String s : h.split("\n")) {
+            pw.println("         " + s);
         }
     }
 }

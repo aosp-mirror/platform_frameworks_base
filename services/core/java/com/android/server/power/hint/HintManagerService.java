@@ -21,6 +21,7 @@ import static android.os.Flags.adpfUseFmqChannel;
 import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
 import static com.android.server.power.hint.Flags.adpfSessionTag;
 import static com.android.server.power.hint.Flags.powerhintThreadCleanup;
+import static com.android.server.power.hint.Flags.resetOnForkEnabled;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -159,6 +160,8 @@ public final class HintManagerService extends SystemService {
 
     private static final String PROPERTY_SF_ENABLE_CPU_HINT = "debug.sf.enable_adpf_cpu_hint";
     private static final String PROPERTY_HWUI_ENABLE_HINT_MANAGER = "debug.hwui.use_hint_manager";
+
+    private Boolean mFMQUsesIntegratedEventFlag = false;
 
     @VisibleForTesting final IHintManager.Stub mService = new BinderService();
 
@@ -1032,7 +1035,7 @@ public final class HintManagerService extends SystemService {
         @Override
         public IHintSession createHintSessionWithConfig(@NonNull IBinder token,
                 @NonNull int[] tids, long durationNanos, @SessionTag int tag,
-                @Nullable SessionConfig config) {
+                SessionConfig config) {
             if (!isHalSupported()) {
                 throw new UnsupportedOperationException("PowerHAL is not supported!");
             }
@@ -1055,6 +1058,25 @@ public final class HintManagerService extends SystemService {
                     Slogf.w(TAG, errMsg);
                     throw new SecurityException(errMsg);
                 }
+                if (resetOnForkEnabled()){
+                    try {
+                        for (int tid : tids) {
+                            int policy = Process.getThreadScheduler(tid);
+                            // If the thread is not using the default scheduling policy (SCHED_OTHER),
+                            // we don't change it.
+                            if (policy != Process.SCHED_OTHER) {
+                                continue;
+                            }
+                            // set the SCHED_RESET_ON_FORK flag.
+                            int prio = Process.getThreadPriority(tid);
+                            Process.setThreadScheduler(tid, Process.SCHED_OTHER | Process.SCHED_RESET_ON_FORK, 0);
+                            Process.setThreadPriority(tid, prio);
+                        }
+                    } catch (Exception e) {
+                        Slog.e(TAG, "Failed to set SCHED_RESET_ON_FORK for tids "
+                                + Arrays.toString(tids), e);
+                    }
+                }
 
                 if (adpfSessionTag() && tag == SessionTag.APP) {
                     // If the category of the app is a game,
@@ -1070,7 +1092,7 @@ public final class HintManagerService extends SystemService {
                         default -> tag = SessionTag.APP;
                     }
                 }
-
+                config.id = -1;
                 Long halSessionPtr = null;
                 if (mConfigCreationSupport.get()) {
                     try {
@@ -1109,7 +1131,7 @@ public final class HintManagerService extends SystemService {
                     }
                 }
 
-                final long sessionId = config != null ? config.id : halSessionPtr;
+                final long sessionId = config.id != -1 ? config.id : halSessionPtr;
                 logPerformanceHintSessionAtom(
                         callingUid, sessionId, durationNanos, tids, tag);
 
@@ -1144,14 +1166,23 @@ public final class HintManagerService extends SystemService {
         }
 
         @Override
-        public ChannelConfig getSessionChannel(IBinder token) {
-            if (mPowerHalVersion < 5 || !adpfUseFmqChannel()) {
+        public @Nullable ChannelConfig getSessionChannel(IBinder token) {
+            if (mPowerHalVersion < 5 || !adpfUseFmqChannel()
+                    || mFMQUsesIntegratedEventFlag) {
                 return null;
             }
             java.util.Objects.requireNonNull(token);
             final int callingTgid = Process.getThreadGroupLeader(Binder.getCallingPid());
             final int callingUid = Binder.getCallingUid();
             ChannelItem item = getOrCreateMappedChannelItem(callingTgid, callingUid, token);
+            // FMQ V1 requires a separate event flag to be passed, and the default no-op
+            // implmenentation in PowerHAL does not return such a shared flag. This helps
+            // avoid using the FMQ on a default impl that does not support it.
+            if (item.getConfig().eventFlagDescriptor == null) {
+                mFMQUsesIntegratedEventFlag = true;
+                closeSessionChannel();
+                return null;
+            }
             return item.getConfig();
         };
 
@@ -1270,8 +1301,12 @@ public final class HintManagerService extends SystemService {
         @VisibleForTesting
         boolean updateHintAllowedByProcState(boolean allowed) {
             synchronized (this) {
-                if (allowed && !mUpdateAllowedByProcState && !mShouldForcePause) resume();
-                if (!allowed && mUpdateAllowedByProcState) pause();
+                if (allowed && !mUpdateAllowedByProcState && !mShouldForcePause) {
+                    resume();
+                }
+                if (!allowed && mUpdateAllowedByProcState) {
+                    pause();
+                }
                 mUpdateAllowedByProcState = allowed;
                 return mUpdateAllowedByProcState;
             }
@@ -1431,6 +1466,25 @@ public final class HintManagerService extends SystemService {
                                     invalidTid);
                             Slogf.w(TAG, errMsg);
                             throw new SecurityException(errMsg);
+                        }
+                        if (resetOnForkEnabled()){
+                            try {
+                                for (int tid : tids) {
+                                    int policy = Process.getThreadScheduler(tid);
+                                    // If the thread is not using the default scheduling policy (SCHED_OTHER),
+                                    // we don't change it.
+                                    if (policy != Process.SCHED_OTHER) {
+                                        continue;
+                                    }
+                                    // set the SCHED_RESET_ON_FORK flag.
+                                    int prio = Process.getThreadPriority(tid);
+                                    Process.setThreadScheduler(tid, Process.SCHED_OTHER | Process.SCHED_RESET_ON_FORK, 0);
+                                    Process.setThreadPriority(tid, prio);
+                                }
+                            } catch (Exception e) {
+                                Slog.e(TAG, "Failed to set SCHED_RESET_ON_FORK for tids "
+                                        + Arrays.toString(tids), e);
+                            }
                         }
                         if (powerhintThreadCleanup()) {
                             synchronized (mNonIsolatedTidsLock) {

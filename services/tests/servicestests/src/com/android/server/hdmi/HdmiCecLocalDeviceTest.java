@@ -19,6 +19,7 @@ import static android.hardware.hdmi.HdmiDeviceInfo.DEVICE_TV;
 
 import static com.android.server.SystemService.PHASE_SYSTEM_SERVICES_READY;
 import static com.android.server.hdmi.Constants.ADDR_AUDIO_SYSTEM;
+import static com.android.server.hdmi.Constants.ADDR_BROADCAST;
 import static com.android.server.hdmi.Constants.ADDR_PLAYBACK_1;
 import static com.android.server.hdmi.Constants.ADDR_TV;
 import static com.android.server.hdmi.Constants.MESSAGE_DEVICE_VENDOR_ID;
@@ -529,21 +530,32 @@ public class HdmiCecLocalDeviceTest {
     public void handleVendorCommand_notHandled() {
         HdmiCecMessage vendorCommand = HdmiCecMessageBuilder.buildVendorCommand(ADDR_TV,
                 ADDR_PLAYBACK_1, new byte[]{0});
-        mNativeWrapper.onCecMessage(vendorCommand);
+        @Constants.HandleMessageResult int result =
+                mHdmiLocalDevice.handleVendorCommand(vendorCommand);
         mTestLooper.dispatchAll();
 
-        HdmiCecMessageBuilder.buildFeatureAbortCommand(ADDR_PLAYBACK_1, ADDR_TV,
-                vendorCommand.getOpcode(), Constants.ABORT_REFUSED);
+        assertEquals(Constants.ABORT_REFUSED, result);
     }
 
     @Test
     public void handleVendorCommandWithId_notHandled_Cec14() {
         HdmiCecMessage vendorCommand = HdmiCecMessageBuilder.buildVendorCommandWithId(ADDR_TV,
                 ADDR_PLAYBACK_1, 0x1234, new byte[]{0});
-        mNativeWrapper.onCecMessage(vendorCommand);
+        @Constants.HandleMessageResult int result =
+                mHdmiLocalDevice.handleVendorCommandWithId(vendorCommand);
         mTestLooper.dispatchAll();
 
-        HdmiCecMessageBuilder.buildFeatureAbortCommand(ADDR_PLAYBACK_1, ADDR_TV,
-                vendorCommand.getOpcode(), Constants.ABORT_REFUSED);
+        assertEquals(Constants.ABORT_REFUSED, result);
+    }
+
+    @Test
+    public void handleVendorCommandWithId_broadcasted_handled() {
+        HdmiCecMessage vendorCommand = HdmiCecMessageBuilder.buildVendorCommandWithId(ADDR_TV,
+                ADDR_BROADCAST, 0x1234, new byte[]{0});
+        @Constants.HandleMessageResult int result =
+                mHdmiLocalDevice.handleVendorCommandWithId(vendorCommand);
+        mTestLooper.dispatchAll();
+
+        assertEquals(Constants.HANDLED, result);
     }
 }

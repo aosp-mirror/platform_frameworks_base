@@ -66,7 +66,7 @@ import java.util.List;
  *
  * @hide
  */
-class WebViewUpdateServiceImpl2 implements WebViewUpdateServiceInterface {
+class WebViewUpdateServiceImpl2 {
     private static final String TAG = WebViewUpdateServiceImpl2.class.getSimpleName();
 
     private static class WebViewPackageMissingException extends Exception {
@@ -125,7 +125,6 @@ class WebViewUpdateServiceImpl2 implements WebViewUpdateServiceInterface {
         mDefaultProvider = defaultProvider;
     }
 
-    @Override
     public void packageStateChanged(String packageName, int changedState, int userId) {
         // We don't early out here in different cases where we could potentially early-out (e.g. if
         // we receive PACKAGE_CHANGED for another user than the system user) since that would
@@ -216,7 +215,6 @@ class WebViewUpdateServiceImpl2 implements WebViewUpdateServiceInterface {
         mSystemInterface.enablePackageForAllUsers(mDefaultProvider.packageName, true);
     }
 
-    @Override
     public void prepareWebViewInSystemServer() {
         try {
             boolean repairNeeded = true;
@@ -256,7 +254,6 @@ class WebViewUpdateServiceImpl2 implements WebViewUpdateServiceInterface {
         mSystemInterface.ensureZygoteStarted();
     }
 
-    @Override
     public void handleNewUser(int userId) {
         // The system user is always started at boot, and by that point we have already run one
         // round of the package-changing logic (through prepareWebViewInSystemServer()), so early
@@ -265,7 +262,6 @@ class WebViewUpdateServiceImpl2 implements WebViewUpdateServiceInterface {
         handleUserChange();
     }
 
-    @Override
     public void handleUserRemoved(int userId) {
         handleUserChange();
     }
@@ -280,7 +276,6 @@ class WebViewUpdateServiceImpl2 implements WebViewUpdateServiceInterface {
         updateCurrentWebViewPackage(null);
     }
 
-    @Override
     public void notifyRelroCreationCompleted() {
         synchronized (mLock) {
             mNumRelroCreationsFinished++;
@@ -288,7 +283,6 @@ class WebViewUpdateServiceImpl2 implements WebViewUpdateServiceInterface {
         }
     }
 
-    @Override
     public WebViewProviderResponse waitForAndGetProvider() {
         PackageInfo webViewPackage = null;
         final long timeoutTimeMs = System.nanoTime() / NS_PER_MS + WAIT_TIMEOUT_MS;
@@ -334,7 +328,6 @@ class WebViewUpdateServiceImpl2 implements WebViewUpdateServiceInterface {
      * replacing that provider it will not be in use directly, but will be used when the relros
      * or the replacement are done).
      */
-    @Override
     public String changeProviderAndSetting(String newProviderName) {
         PackageInfo newPackage = updateCurrentWebViewPackage(newProviderName);
         if (newPackage == null) return "";
@@ -430,7 +423,6 @@ class WebViewUpdateServiceImpl2 implements WebViewUpdateServiceInterface {
     }
 
     /** Fetch only the currently valid WebView packages. */
-    @Override
     public WebViewProviderInfo[] getValidWebViewPackages() {
         ProviderAndPackageInfo[] providersAndPackageInfos = getValidWebViewPackagesAndInfos();
         WebViewProviderInfo[] providers =
@@ -445,7 +437,6 @@ class WebViewUpdateServiceImpl2 implements WebViewUpdateServiceInterface {
      * Returns the default WebView provider which should be first availableByDefault option in the
      * system config.
      */
-    @Override
     public WebViewProviderInfo getDefaultWebViewPackage() {
         return mDefaultProvider;
     }
@@ -550,12 +541,10 @@ class WebViewUpdateServiceImpl2 implements WebViewUpdateServiceInterface {
         return true;
     }
 
-    @Override
     public WebViewProviderInfo[] getWebViewPackages() {
         return mSystemInterface.getWebViewPackages();
     }
 
-    @Override
     public PackageInfo getCurrentWebViewPackage() {
         synchronized (mLock) {
             return mCurrentWebViewPackage;
@@ -708,20 +697,7 @@ class WebViewUpdateServiceImpl2 implements WebViewUpdateServiceInterface {
         return null;
     }
 
-    @Override
-    public boolean isMultiProcessEnabled() {
-        throw new IllegalStateException(
-                "isMultiProcessEnabled shouldn't be called if update_service_v2 flag is set.");
-    }
-
-    @Override
-    public void enableMultiProcess(boolean enable) {
-        throw new IllegalStateException(
-                "enableMultiProcess shouldn't be called if update_service_v2 flag is set.");
-    }
-
     /** Dump the state of this Service. */
-    @Override
     public void dumpState(PrintWriter pw) {
         pw.println("Current WebView Update Service state");
         synchronized (mLock) {

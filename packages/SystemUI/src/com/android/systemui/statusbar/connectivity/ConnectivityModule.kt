@@ -17,10 +17,12 @@
 package com.android.systemui.statusbar.connectivity
 
 import android.os.UserManager
+import com.android.systemui.bluetooth.qsdialog.dagger.AudioSharingModule
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags.SIGNAL_CALLBACK_DEPRECATION
 import com.android.systemui.qs.QsEventLogger
 import com.android.systemui.qs.pipeline.shared.TileSpec
+import com.android.systemui.qs.shared.model.TileCategory
 import com.android.systemui.qs.tileimpl.QSTileImpl
 import com.android.systemui.qs.tiles.AirplaneModeTile
 import com.android.systemui.qs.tiles.BluetoothTile
@@ -55,7 +57,7 @@ import dagger.Provides
 import dagger.multibindings.IntoMap
 import dagger.multibindings.StringKey
 
-@Module
+@Module(includes = [AudioSharingModule::class])
 interface ConnectivityModule {
 
     /** Inject BluetoothTile into tileMap in QSModule */
@@ -95,21 +97,21 @@ interface ConnectivityModule {
     @IntoMap
     @StringKey(AIRPLANE_MODE_TILE_SPEC)
     fun provideAirplaneModeAvailabilityInteractor(
-            impl: AirplaneModeTileDataInteractor
+        impl: AirplaneModeTileDataInteractor
     ): QSTileAvailabilityInteractor
 
     @Binds
     @IntoMap
     @StringKey(DATA_SAVER_TILE_SPEC)
     fun provideDataSaverAvailabilityInteractor(
-            impl: DataSaverTileDataInteractor
+        impl: DataSaverTileDataInteractor
     ): QSTileAvailabilityInteractor
 
     @Binds
     @IntoMap
     @StringKey(INTERNET_TILE_SPEC)
     fun provideInternetAvailabilityInteractor(
-            impl: InternetTileDataInteractor
+        impl: InternetTileDataInteractor
     ): QSTileAvailabilityInteractor
 
     companion object {
@@ -149,6 +151,7 @@ interface ConnectivityModule {
                     ),
                 instanceId = uiEventLogger.getNewInstanceId(),
                 policy = QSTilePolicy.Restricted(listOf(UserManager.DISALLOW_AIRPLANE_MODE)),
+                category = TileCategory.CONNECTIVITY,
             )
 
         /** Inject AirplaneModeTile into tileViewModelMap in QSModule */
@@ -180,6 +183,7 @@ interface ConnectivityModule {
                         labelRes = R.string.data_saver,
                     ),
                 instanceId = uiEventLogger.getNewInstanceId(),
+                category = TileCategory.CONNECTIVITY,
             )
 
         /** Inject DataSaverTile into tileViewModelMap in QSModule */
@@ -211,6 +215,7 @@ interface ConnectivityModule {
                         labelRes = R.string.quick_settings_internet_label,
                     ),
                 instanceId = uiEventLogger.getNewInstanceId(),
+                category = TileCategory.CONNECTIVITY,
             )
 
         /** Inject InternetTile into tileViewModelMap in QSModule */
@@ -242,6 +247,7 @@ interface ConnectivityModule {
                         labelRes = R.string.quick_settings_hotspot_label,
                     ),
                 instanceId = uiEventLogger.getNewInstanceId(),
+                category = TileCategory.CONNECTIVITY,
             )
 
         @Provides
@@ -256,6 +262,7 @@ interface ConnectivityModule {
                         labelRes = R.string.quick_settings_cast_title,
                     ),
                 instanceId = uiEventLogger.getNewInstanceId(),
+                category = TileCategory.CONNECTIVITY,
             )
 
         @Provides
@@ -270,6 +277,7 @@ interface ConnectivityModule {
                         labelRes = R.string.quick_settings_bluetooth_label,
                     ),
                 instanceId = uiEventLogger.getNewInstanceId(),
+                category = TileCategory.CONNECTIVITY,
             )
     }
 }

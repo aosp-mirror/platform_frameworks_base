@@ -34,9 +34,14 @@ import com.android.systemui.controls.panels.AuthorizedPanelsRepository
 import com.android.systemui.controls.panels.SelectedComponentRepository
 import com.android.systemui.controls.panels.authorizedPanelsRepository
 import com.android.systemui.controls.panels.selectedComponentRepository
-import com.android.systemui.dreams.homecontrols.domain.interactor.HomeControlsComponentInteractor
+import com.android.systemui.dreams.homecontrols.system.HomeControlsDreamStartable
+import com.android.systemui.dreams.homecontrols.system.domain.interactor.HomeControlsComponentInteractor
+import com.android.systemui.dreams.homecontrols.system.domain.interactor.controlsComponent
+import com.android.systemui.dreams.homecontrols.system.domain.interactor.controlsListingController
+import com.android.systemui.dreams.homecontrols.system.domain.interactor.homeControlsComponentInteractor
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.settings.userTracker
 import com.android.systemui.testKosmos
 import com.android.systemui.user.data.repository.FakeUserRepository
 import com.android.systemui.user.data.repository.fakeUserRepository
@@ -96,8 +101,9 @@ class HomeControlsDreamStartableTest : SysuiTestCase() {
             HomeControlsDreamStartable(
                 mContext,
                 packageManager,
+                kosmos.userTracker,
                 homeControlsComponentInteractor,
-                kosmos.applicationCoroutineScope
+                kosmos.applicationCoroutineScope,
             )
     }
 
@@ -113,7 +119,7 @@ class HomeControlsDreamStartableTest : SysuiTestCase() {
                 .setComponentEnabledSetting(
                     eq(componentName),
                     eq(PackageManager.COMPONENT_ENABLED_STATE_ENABLED),
-                    eq(PackageManager.DONT_KILL_APP)
+                    eq(PackageManager.DONT_KILL_APP),
                 )
         }
 
@@ -128,7 +134,7 @@ class HomeControlsDreamStartableTest : SysuiTestCase() {
                 .setComponentEnabledSetting(
                     eq(componentName),
                     eq(PackageManager.COMPONENT_ENABLED_STATE_DISABLED),
-                    eq(PackageManager.DONT_KILL_APP)
+                    eq(PackageManager.DONT_KILL_APP),
                 )
         }
 
@@ -143,14 +149,14 @@ class HomeControlsDreamStartableTest : SysuiTestCase() {
                 .setComponentEnabledSetting(
                     eq(componentName),
                     eq(PackageManager.COMPONENT_ENABLED_STATE_DISABLED),
-                    eq(PackageManager.DONT_KILL_APP)
+                    eq(PackageManager.DONT_KILL_APP),
                 )
         }
 
     private fun ControlsServiceInfo(
         componentName: ComponentName,
         label: CharSequence,
-        hasPanel: Boolean
+        hasPanel: Boolean,
     ): ControlsServiceInfo {
         val serviceInfo =
             ServiceInfo().apply {
@@ -165,7 +171,7 @@ class HomeControlsDreamStartableTest : SysuiTestCase() {
         context: Context,
         serviceInfo: ServiceInfo,
         private val label: CharSequence,
-        hasPanel: Boolean
+        hasPanel: Boolean,
     ) : ControlsServiceInfo(context, serviceInfo) {
 
         init {
@@ -185,7 +191,7 @@ class HomeControlsDreamStartableTest : SysuiTestCase() {
             UserInfo(
                 /* id= */ PRIMARY_USER_ID,
                 /* name= */ "primary user",
-                /* flags= */ UserInfo.FLAG_PRIMARY
+                /* flags= */ UserInfo.FLAG_PRIMARY,
             )
         private const val TEST_PACKAGE_PANEL = "pkg.panel"
         private val TEST_COMPONENT_PANEL = ComponentName(TEST_PACKAGE_PANEL, "service")
@@ -193,13 +199,13 @@ class HomeControlsDreamStartableTest : SysuiTestCase() {
             SelectedComponentRepository.SelectedComponent(
                 TEST_PACKAGE_PANEL,
                 TEST_COMPONENT_PANEL,
-                true
+                true,
             )
         private val TEST_SELECTED_COMPONENT_NON_PANEL =
             SelectedComponentRepository.SelectedComponent(
                 TEST_PACKAGE_PANEL,
                 TEST_COMPONENT_PANEL,
-                false
+                false,
             )
     }
 }

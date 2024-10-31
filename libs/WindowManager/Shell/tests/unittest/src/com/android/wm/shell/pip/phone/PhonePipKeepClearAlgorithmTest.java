@@ -109,6 +109,7 @@ public class PhonePipKeepClearAlgorithmTest extends ShellTestCase {
         final Rect pipBounds = new Rect(0, 0, 100, 100);
         final Rect keepClearRect = new Rect(50, 50, 150, 150);
         when(mMockPipBoundsState.getBounds()).thenReturn(pipBounds);
+        when(mMockPipBoundsState.getRestoreBounds()).thenReturn(new Rect(0, 0, 0, 0));
         when(mMockPipBoundsState.getRestrictedKeepClearAreas()).thenReturn(Set.of(keepClearRect));
         doAnswer(invocation -> {
             Rect arg0 = invocation.getArgument(0);
@@ -127,6 +128,7 @@ public class PhonePipKeepClearAlgorithmTest extends ShellTestCase {
         final Rect pipBounds = new Rect(0, 0, 100, 100);
         final Rect keepClearRect = new Rect(100, 100, 150, 150);
         when(mMockPipBoundsState.getBounds()).thenReturn(pipBounds);
+        when(mMockPipBoundsState.getRestoreBounds()).thenReturn(new Rect(0, 0, 0, 0));
         when(mMockPipBoundsState.getRestrictedKeepClearAreas()).thenReturn(Set.of(keepClearRect));
         doAnswer(invocation -> {
             Rect arg0 = invocation.getArgument(0);
@@ -145,6 +147,7 @@ public class PhonePipKeepClearAlgorithmTest extends ShellTestCase {
         final Rect pipBounds = new Rect(0, 0, 100, 100);
         final Rect keepClearRect = new Rect(50, 50, 150, 150);
         when(mMockPipBoundsState.getBounds()).thenReturn(pipBounds);
+        when(mMockPipBoundsState.getRestoreBounds()).thenReturn(new Rect(0, 0, 0, 0));
         when(mMockPipBoundsState.isStashed()).thenReturn(true);
         when(mMockPipBoundsState.getRestrictedKeepClearAreas()).thenReturn(Set.of(keepClearRect));
         doAnswer(invocation -> {
@@ -164,6 +167,7 @@ public class PhonePipKeepClearAlgorithmTest extends ShellTestCase {
         final Rect pipBounds = new Rect(0, 0, 100, 100);
         final Rect keepClearRect = new Rect(100, 100, 150, 150);
         when(mMockPipBoundsState.getBounds()).thenReturn(pipBounds);
+        when(mMockPipBoundsState.getRestoreBounds()).thenReturn(new Rect(0, 0, 0, 0));
         when(mMockPipBoundsState.isStashed()).thenReturn(true);
         when(mMockPipBoundsState.getRestrictedKeepClearAreas()).thenReturn(Set.of(keepClearRect));
         doAnswer(invocation -> {
@@ -185,6 +189,7 @@ public class PhonePipKeepClearAlgorithmTest extends ShellTestCase {
         final Rect expected = new Rect(
                 0, DISPLAY_BOUNDS.bottom - 100, 100, DISPLAY_BOUNDS.bottom);
         when(mMockPipBoundsState.getBounds()).thenReturn(pipBounds);
+        when(mMockPipBoundsState.getRestoreBounds()).thenReturn(new Rect(0, 0, 0, 0));
         doAnswer(invocation -> {
             Rect arg0 = invocation.getArgument(0);
             arg0.set(DISPLAY_BOUNDS);
@@ -205,6 +210,7 @@ public class PhonePipKeepClearAlgorithmTest extends ShellTestCase {
         final Rect expected = new Rect(
                 0, DISPLAY_BOUNDS.bottom - 100, 100, DISPLAY_BOUNDS.bottom);
         when(mMockPipBoundsState.getBounds()).thenReturn(pipBounds);
+        when(mMockPipBoundsState.getRestoreBounds()).thenReturn(new Rect(0, 0, 0, 0));
         doAnswer(invocation -> {
             Rect arg0 = invocation.getArgument(0);
             arg0.set(DISPLAY_BOUNDS);
@@ -227,6 +233,7 @@ public class PhonePipKeepClearAlgorithmTest extends ShellTestCase {
                 DISPLAY_BOUNDS.right - 100, DISPLAY_BOUNDS.bottom - 100,
                 DISPLAY_BOUNDS.right, DISPLAY_BOUNDS.bottom);
         when(mMockPipBoundsState.getBounds()).thenReturn(pipBounds);
+        when(mMockPipBoundsState.getRestoreBounds()).thenReturn(new Rect(0, 0, 0, 0));
         doAnswer(invocation -> {
             Rect arg0 = invocation.getArgument(0);
             arg0.set(DISPLAY_BOUNDS);
@@ -249,6 +256,7 @@ public class PhonePipKeepClearAlgorithmTest extends ShellTestCase {
                 DISPLAY_BOUNDS.right - 100, DISPLAY_BOUNDS.bottom - 100,
                 DISPLAY_BOUNDS.right, DISPLAY_BOUNDS.bottom);
         when(mMockPipBoundsState.getBounds()).thenReturn(pipBounds);
+        when(mMockPipBoundsState.getRestoreBounds()).thenReturn(new Rect(0, 0, 0, 0));
         doAnswer(invocation -> {
             Rect arg0 = invocation.getArgument(0);
             arg0.set(DISPLAY_BOUNDS);
@@ -269,6 +277,7 @@ public class PhonePipKeepClearAlgorithmTest extends ShellTestCase {
         final Rect expected = new Rect(
                 0, DISPLAY_BOUNDS.bottom - 100, 100, DISPLAY_BOUNDS.bottom);
         when(mMockPipBoundsState.getBounds()).thenReturn(pipBounds);
+        when(mMockPipBoundsState.getRestoreBounds()).thenReturn(new Rect(0, 0, 0, 0));
         when(mMockPipBoundsState.isStashed()).thenReturn(true);
         doAnswer(invocation -> {
             Rect arg0 = invocation.getArgument(0);
@@ -289,6 +298,7 @@ public class PhonePipKeepClearAlgorithmTest extends ShellTestCase {
         final Rect expected = new Rect(
                 0, DISPLAY_BOUNDS.bottom - 100, 100, DISPLAY_BOUNDS.bottom);
         when(mMockPipBoundsState.getBounds()).thenReturn(pipBounds);
+        when(mMockPipBoundsState.getRestoreBounds()).thenReturn(new Rect(0, 0, 0, 0));
         when(mMockPipBoundsState.isStashed()).thenReturn(true);
         doAnswer(invocation -> {
             Rect arg0 = invocation.getArgument(0);
@@ -300,5 +310,41 @@ public class PhonePipKeepClearAlgorithmTest extends ShellTestCase {
                 mMockPipBoundsState, mMockPipBoundsAlgorithm);
 
         assertEquals(expected, outBounds);
+    }
+
+    @Test
+    public void adjust_restoreBoundsPresent_appliesRestoreBounds() {
+        final Rect pipBounds = new Rect(0, 0, 100, 100);
+        final Rect restoreBounds = new Rect(50, 50, 150, 150);
+        when(mMockPipBoundsState.getBounds()).thenReturn(pipBounds);
+        when(mMockPipBoundsState.getRestoreBounds()).thenReturn(restoreBounds);
+        when(mMockPipBoundsState.hasUserMovedPip()).thenReturn(true);
+        doAnswer(invocation -> {
+            Rect arg0 = invocation.getArgument(0);
+            arg0.set(DISPLAY_BOUNDS);
+            return null;
+        }).when(mMockPipBoundsAlgorithm).getInsetBounds(any(Rect.class));
+
+        final Rect outBounds = mPipKeepClearAlgorithm.adjust(
+                mMockPipBoundsState, mMockPipBoundsAlgorithm);
+        assertEquals(restoreBounds, outBounds);
+    }
+
+    @Test
+    public void adjust_restoreBoundsCleared_boundsUnchanged() {
+        final Rect pipBounds = new Rect(0, 0, 100, 100);
+        final Rect restoreBounds = new Rect(0, 0, 0, 0);
+        when(mMockPipBoundsState.getBounds()).thenReturn(pipBounds);
+        when(mMockPipBoundsState.getRestoreBounds()).thenReturn(restoreBounds);
+        when(mMockPipBoundsState.hasUserMovedPip()).thenReturn(true);
+        doAnswer(invocation -> {
+            Rect arg0 = invocation.getArgument(0);
+            arg0.set(DISPLAY_BOUNDS);
+            return null;
+        }).when(mMockPipBoundsAlgorithm).getInsetBounds(any(Rect.class));
+
+        final Rect outBounds = mPipKeepClearAlgorithm.adjust(
+                mMockPipBoundsState, mMockPipBoundsAlgorithm);
+        assertEquals(pipBounds, outBounds);
     }
 }

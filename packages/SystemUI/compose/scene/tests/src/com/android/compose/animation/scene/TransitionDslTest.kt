@@ -23,11 +23,17 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.gestures.Orientation
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.android.compose.animation.scene.TestScenes.SceneA
+import com.android.compose.animation.scene.TestScenes.SceneB
+import com.android.compose.animation.scene.TestScenes.SceneC
+import com.android.compose.animation.scene.content.state.TransitionState
 import com.android.compose.animation.scene.transformation.OverscrollTranslate
 import com.android.compose.animation.scene.transformation.Transformation
 import com.android.compose.animation.scene.transformation.TransformationRange
+import com.android.compose.test.transition
 import com.google.common.truth.Correspondence
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertThrows
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -43,9 +49,9 @@ class TransitionDslTest {
     @Test
     fun manyTransitions() {
         val transitions = transitions {
-            from(TestScenes.SceneA, to = TestScenes.SceneB)
-            from(TestScenes.SceneB, to = TestScenes.SceneC)
-            from(TestScenes.SceneC, to = TestScenes.SceneA)
+            from(SceneA, to = SceneB)
+            from(SceneB, to = SceneC)
+            from(SceneC, to = SceneA)
         }
         assertThat(transitions.transitionSpecs).hasSize(3)
     }
@@ -53,50 +59,46 @@ class TransitionDslTest {
     @Test
     fun toFromBuilders() {
         val transitions = transitions {
-            from(TestScenes.SceneA, to = TestScenes.SceneB)
-            from(TestScenes.SceneB)
-            to(TestScenes.SceneC)
+            from(SceneA, to = SceneB)
+            from(SceneB)
+            to(SceneC)
         }
 
         assertThat(transitions.transitionSpecs)
             .comparingElementsUsing(
                 Correspondence.transforming<TransitionSpecImpl, Pair<ContentKey?, ContentKey?>>(
                     { it?.from to it?.to },
-                    "has (from, to) equal to"
+                    "has (from, to) equal to",
                 )
             )
-            .containsExactly(
-                TestScenes.SceneA to TestScenes.SceneB,
-                TestScenes.SceneB to null,
-                null to TestScenes.SceneC,
-            )
+            .containsExactly(SceneA to SceneB, SceneB to null, null to SceneC)
     }
+
+    private fun aToB() = transition(SceneA, SceneB)
 
     @Test
     fun defaultTransitionSpec() {
-        val transitions = transitions { from(TestScenes.SceneA, to = TestScenes.SceneB) }
-        val transformationSpec = transitions.transitionSpecs.single().transformationSpec()
+        val transitions = transitions { from(SceneA, to = SceneB) }
+        val transformationSpec = transitions.transitionSpecs.single().transformationSpec(aToB())
         assertThat(transformationSpec.progressSpec).isInstanceOf(SpringSpec::class.java)
     }
 
     @Test
     fun customTransitionSpec() {
         val transitions = transitions {
-            from(TestScenes.SceneA, to = TestScenes.SceneB) { spec = tween(durationMillis = 42) }
+            from(SceneA, to = SceneB) { spec = tween(durationMillis = 42) }
         }
-        val transformationSpec = transitions.transitionSpecs.single().transformationSpec()
+        val transformationSpec = transitions.transitionSpecs.single().transformationSpec(aToB())
         assertThat(transformationSpec.progressSpec).isInstanceOf(TweenSpec::class.java)
         assertThat((transformationSpec.progressSpec as TweenSpec).durationMillis).isEqualTo(42)
     }
 
     @Test
     fun defaultRange() {
-        val transitions = transitions {
-            from(TestScenes.SceneA, to = TestScenes.SceneB) { fade(TestElements.Foo) }
-        }
+        val transitions = transitions { from(SceneA, to = SceneB) { fade(TestElements.Foo) } }
 
         val transformations =
-            transitions.transitionSpecs.single().transformationSpec().transformations
+            transitions.transitionSpecs.single().transformationSpec(aToB()).transformations
         assertThat(transformations.size).isEqualTo(1)
         assertThat(transformations.single().range).isEqualTo(null)
     }
@@ -104,14 +106,14 @@ class TransitionDslTest {
     @Test
     fun fractionRange() {
         val transitions = transitions {
-            from(TestScenes.SceneA, to = TestScenes.SceneB) {
+            from(SceneA, to = SceneB) {
                 fractionRange(start = 0.1f, end = 0.8f) { fade(TestElements.Foo) }
                 fractionRange(start = 0.2f) { fade(TestElements.Foo) }
                 fractionRange(end = 0.9f) { fade(TestElements.Foo) }
                 fractionRange(
                     start = 0.1f,
                     end = 0.8f,
-                    easing = CubicBezierEasing(0.1f, 0.1f, 0f, 1f)
+                    easing = CubicBezierEasing(0.1f, 0.1f, 0f, 1f),
                 ) {
                     fade(TestElements.Foo)
                 }
@@ -119,25 +121,21 @@ class TransitionDslTest {
         }
 
         val transformations =
-            transitions.transitionSpecs.single().transformationSpec().transformations
+            transitions.transitionSpecs.single().transformationSpec(aToB()).transformations
         assertThat(transformations)
             .comparingElementsUsing(TRANSFORMATION_RANGE)
             .containsExactly(
                 TransformationRange(start = 0.1f, end = 0.8f),
                 TransformationRange(start = 0.2f, end = TransformationRange.BoundUnspecified),
                 TransformationRange(start = TransformationRange.BoundUnspecified, end = 0.9f),
-                TransformationRange(
-                    start = 0.1f,
-                    end = 0.8f,
-                    CubicBezierEasing(0.1f, 0.1f, 0f, 1f)
-                ),
+                TransformationRange(start = 0.1f, end = 0.8f, CubicBezierEasing(0.1f, 0.1f, 0f, 1f)),
             )
     }
 
     @Test
     fun timestampRange() {
         val transitions = transitions {
-            from(TestScenes.SceneA, to = TestScenes.SceneB) {
+            from(SceneA, to = SceneB) {
                 spec = tween(500)
 
                 timestampRange(startMillis = 100, endMillis = 300) { fade(TestElements.Foo) }
@@ -146,7 +144,7 @@ class TransitionDslTest {
                 timestampRange(
                     startMillis = 100,
                     endMillis = 300,
-                    easing = CubicBezierEasing(0.1f, 0.1f, 0f, 1f)
+                    easing = CubicBezierEasing(0.1f, 0.1f, 0f, 1f),
                 ) {
                     fade(TestElements.Foo)
                 }
@@ -154,7 +152,7 @@ class TransitionDslTest {
         }
 
         val transformations =
-            transitions.transitionSpecs.single().transformationSpec().transformations
+            transitions.transitionSpecs.single().transformationSpec(aToB()).transformations
         assertThat(transformations)
             .comparingElementsUsing(TRANSFORMATION_RANGE)
             .containsExactly(
@@ -164,7 +162,7 @@ class TransitionDslTest {
                 TransformationRange(
                     start = 100 / 500f,
                     end = 300 / 500f,
-                    easing = CubicBezierEasing(0.1f, 0.1f, 0f, 1f)
+                    easing = CubicBezierEasing(0.1f, 0.1f, 0f, 1f),
                 ),
             )
     }
@@ -172,7 +170,7 @@ class TransitionDslTest {
     @Test
     fun reversed() {
         val transitions = transitions {
-            from(TestScenes.SceneA, to = TestScenes.SceneB) {
+            from(SceneA, to = SceneB) {
                 spec = tween(500)
                 reversed {
                     fractionRange(start = 0.1f, end = 0.8f) { fade(TestElements.Foo) }
@@ -182,7 +180,7 @@ class TransitionDslTest {
         }
 
         val transformations =
-            transitions.transitionSpecs.single().transformationSpec().transformations
+            transitions.transitionSpecs.single().transformationSpec(aToB()).transformations
         assertThat(transformations)
             .comparingElementsUsing(TRANSFORMATION_RANGE)
             .containsExactly(
@@ -195,12 +193,12 @@ class TransitionDslTest {
     fun defaultReversed() {
         val transitions = transitions {
             from(
-                TestScenes.SceneA,
-                to = TestScenes.SceneB,
+                SceneA,
+                to = SceneB,
                 preview = { fractionRange(start = 0.1f, end = 0.8f) { fade(TestElements.Foo) } },
                 reversePreview = {
                     fractionRange(start = 0.5f, end = 0.6f) { fade(TestElements.Foo) }
-                }
+                },
             ) {
                 spec = tween(500)
                 fractionRange(start = 0.1f, end = 0.8f) { fade(TestElements.Foo) }
@@ -210,10 +208,9 @@ class TransitionDslTest {
 
         // Fetch the transition from B to A, which will automatically reverse the transition from A
         // to B we defined.
-        val transitionSpec =
-            transitions.transitionSpec(from = TestScenes.SceneB, to = TestScenes.SceneA, key = null)
+        val transitionSpec = transitions.transitionSpec(from = SceneB, to = SceneA, key = null)
 
-        val transformations = transitionSpec.transformationSpec().transformations
+        val transformations = transitionSpec.transformationSpec(aToB()).transformations
 
         assertThat(transformations)
             .comparingElementsUsing(TRANSFORMATION_RANGE)
@@ -222,22 +219,21 @@ class TransitionDslTest {
                 TransformationRange(start = 1f - 300 / 500f, end = 1f - 100 / 500f),
             )
 
-        val previewTransformations = transitionSpec.previewTransformationSpec()?.transformations
+        val previewTransformations =
+            transitionSpec.previewTransformationSpec(aToB())?.transformations
 
         assertThat(previewTransformations)
             .comparingElementsUsing(TRANSFORMATION_RANGE)
-            .containsExactly(
-                TransformationRange(start = 0.5f, end = 0.6f),
-            )
+            .containsExactly(TransformationRange(start = 0.5f, end = 0.6f))
     }
 
     @Test
     fun defaultPredictiveBack() {
         val transitions = transitions {
             from(
-                TestScenes.SceneA,
-                to = TestScenes.SceneB,
-                preview = { fractionRange(start = 0.1f, end = 0.8f) { fade(TestElements.Foo) } }
+                SceneA,
+                to = SceneB,
+                preview = { fractionRange(start = 0.1f, end = 0.8f) { fade(TestElements.Foo) } },
             ) {
                 spec = tween(500)
                 fractionRange(start = 0.1f, end = 0.8f) { fade(TestElements.Foo) }
@@ -249,12 +245,12 @@ class TransitionDslTest {
         // transition despite it not having the PredictiveBack key set.
         val transitionSpec =
             transitions.transitionSpec(
-                from = TestScenes.SceneA,
-                to = TestScenes.SceneB,
-                key = TransitionKey.PredictiveBack
+                from = SceneA,
+                to = SceneB,
+                key = TransitionKey.PredictiveBack,
             )
 
-        val transformations = transitionSpec.transformationSpec().transformations
+        val transformations = transitionSpec.transformationSpec(aToB()).transformations
 
         assertThat(transformations)
             .comparingElementsUsing(TRANSFORMATION_RANGE)
@@ -263,13 +259,12 @@ class TransitionDslTest {
                 TransformationRange(start = 100 / 500f, end = 300 / 500f),
             )
 
-        val previewTransformations = transitionSpec.previewTransformationSpec()?.transformations
+        val previewTransformations =
+            transitionSpec.previewTransformationSpec(aToB())?.transformations
 
         assertThat(previewTransformations)
             .comparingElementsUsing(TRANSFORMATION_RANGE)
-            .containsExactly(
-                TransformationRange(start = 0.1f, end = 0.8f),
-            )
+            .containsExactly(TransformationRange(start = 0.1f, end = 0.8f))
     }
 
     @Test
@@ -279,10 +274,10 @@ class TransitionDslTest {
         val transitions = transitions {
             defaultSwipeSpec = defaultSpec
 
-            from(TestScenes.SceneA, to = TestScenes.SceneB) {
+            from(SceneA, to = SceneB) {
                 // Default swipe spec.
             }
-            from(TestScenes.SceneA, to = TestScenes.SceneC) { swipeSpec = specFromAToC }
+            from(SceneA, to = SceneC) { swipeSpec = specFromAToC }
         }
 
         assertThat(transitions.defaultSwipeSpec).isSameInstanceAs(defaultSpec)
@@ -290,8 +285,8 @@ class TransitionDslTest {
         // A => B does not have a custom spec.
         assertThat(
                 transitions
-                    .transitionSpec(from = TestScenes.SceneA, to = TestScenes.SceneB, key = null)
-                    .transformationSpec()
+                    .transitionSpec(from = SceneA, to = SceneB, key = null)
+                    .transformationSpec(aToB())
                     .swipeSpec
             )
             .isNull()
@@ -299,8 +294,8 @@ class TransitionDslTest {
         // A => C has a custom swipe spec.
         assertThat(
                 transitions
-                    .transitionSpec(from = TestScenes.SceneA, to = TestScenes.SceneC, key = null)
-                    .transformationSpec()
+                    .transitionSpec(from = SceneA, to = SceneC, key = null)
+                    .transformationSpec(transition(from = SceneA, to = SceneC))
                     .swipeSpec
             )
             .isSameInstanceAs(specFromAToC)
@@ -309,7 +304,7 @@ class TransitionDslTest {
     @Test
     fun overscrollSpec() {
         val transitions = transitions {
-            overscroll(TestScenes.SceneA, Orientation.Vertical) {
+            overscroll(SceneA, Orientation.Vertical) {
                 translate(TestElements.Bar, x = { 1f }, y = { 2f })
             }
         }
@@ -321,9 +316,7 @@ class TransitionDslTest {
 
     @Test
     fun overscrollSpec_for_overscrollDisabled() {
-        val transitions = transitions {
-            overscrollDisabled(TestScenes.SceneA, Orientation.Vertical)
-        }
+        val transitions = transitions { overscrollDisabled(SceneA, Orientation.Vertical) }
         val overscrollSpec = transitions.overscrollSpecs.single()
         assertThat(overscrollSpec.transformationSpec.transformations).isEmpty()
     }
@@ -331,15 +324,29 @@ class TransitionDslTest {
     @Test
     fun overscrollSpec_throwIfTransformationsIsEmpty() {
         assertThrows(IllegalStateException::class.java) {
-            transitions { overscroll(TestScenes.SceneA, Orientation.Vertical) {} }
+            transitions { overscroll(SceneA, Orientation.Vertical) {} }
         }
+    }
+
+    @Test
+    fun transitionIsPassedToBuilder() = runTest {
+        var transitionPassedToBuilder: TransitionState.Transition? = null
+        val state =
+            MutableSceneTransitionLayoutState(
+                SceneA,
+                transitions { from(SceneA, to = SceneB) { transitionPassedToBuilder = transition } },
+            )
+
+        val transition = aToB()
+        state.startTransitionImmediately(animationScope = backgroundScope, transition)
+        assertThat(transitionPassedToBuilder).isSameInstanceAs(transition)
     }
 
     companion object {
         private val TRANSFORMATION_RANGE =
             Correspondence.transforming<Transformation, TransformationRange?>(
                 { it?.range },
-                "has range equal to"
+                "has range equal to",
             )
     }
 }

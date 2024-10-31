@@ -39,10 +39,8 @@ import kotlinx.coroutines.flow.Flow
 @SysUISingleton
 class AodToLockscreenTransitionViewModel
 @Inject
-constructor(
-    shadeInteractor: ShadeInteractor,
-    animationFlow: KeyguardTransitionAnimationFlow,
-) : DeviceEntryIconTransition {
+constructor(shadeInteractor: ShadeInteractor, animationFlow: KeyguardTransitionAnimationFlow) :
+    DeviceEntryIconTransition {
 
     private val transitionAnimation =
         animationFlow.setup(
@@ -54,13 +52,26 @@ constructor(
 
     /**
      * Begin the transition from wherever the y-translation value is currently. This helps ensure a
-     * smooth transition if a transition in canceled.
+     * smooth transition if the prior transition was canceled.
      */
     fun translationY(currentTranslationY: () -> Float?): Flow<StateToValue> {
         var startValue = 0f
         return transitionAnimation.sharedFlowWithState(
             duration = 500.milliseconds,
             onStart = { startValue = currentTranslationY() ?: 0f },
+            onStep = { MathUtils.lerp(startValue, 0f, FAST_OUT_SLOW_IN.getInterpolation(it)) },
+        )
+    }
+
+    /**
+     * Begin the transition from wherever the x-translation value is currently. This helps ensure a
+     * smooth transition if the prior transition was canceled.
+     */
+    fun translationX(currentTranslationX: () -> Float?): Flow<StateToValue> {
+        var startValue = 0f
+        return transitionAnimation.sharedFlowWithState(
+            duration = 500.milliseconds,
+            onStart = { startValue = currentTranslationX() ?: 0f },
             onStep = { MathUtils.lerp(startValue, 0f, FAST_OUT_SLOW_IN.getInterpolation(it)) },
         )
     }

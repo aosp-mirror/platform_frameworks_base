@@ -158,6 +158,7 @@ android_app {
     flags_packages: [
         "android.app.appfunctions.flags-aconfig",
         "android.app.contextualsearch.flags-aconfig",
+        "android.appwidget.flags-aconfig",
         "android.content.pm.flags-aconfig",
         "android.provider.flags-aconfig",
         "camera_platform_flags",
@@ -167,7 +168,9 @@ android_app {
         "android.os.flags-aconfig",
         "android.os.vibrator.flags-aconfig",
         "android.media.tv.flags-aconfig",
+        "android.security.flags-aconfig",
         "com.android.hardware.input.input-aconfig",
+        "aconfig_trade_in_mode_flags",
     ],
 }
 

@@ -16,6 +16,7 @@
 
 package android.app;
 
+import static android.app.PropertyInvalidatedCache.createSystemCacheKey;
 import static android.app.admin.DevicePolicyResources.Drawables.Style.SOLID_COLORED;
 import static android.app.admin.DevicePolicyResources.Drawables.Style.SOLID_NOT_COLORED;
 import static android.app.admin.DevicePolicyResources.Drawables.WORK_PROFILE_ICON;
@@ -131,6 +132,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.Immutable;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.SomeArgs;
+import com.android.internal.pm.RoSystemFeatures;
 import com.android.internal.util.UserIcons;
 
 import dalvik.system.VMRuntime;
@@ -817,10 +819,20 @@ public class ApplicationPackageManager extends PackageManager {
     private final static PropertyInvalidatedCache<HasSystemFeatureQuery, Boolean>
             mHasSystemFeatureCache =
             new PropertyInvalidatedCache<HasSystemFeatureQuery, Boolean>(
-                256, "cache_key.has_system_feature") {
+                256, createSystemCacheKey("has_system_feature")) {
                 @Override
                 public Boolean recompute(HasSystemFeatureQuery query) {
                     try {
+                        // As an optimization, check first to see if the feature was defined at
+                        // compile-time as either available or unavailable.
+                        // TODO(b/203143243): Consider hoisting this optimization out of the cache
+                        // after the trunk stable (build) flag has soaked and more features are
+                        // defined at compile-time.
+                        Boolean maybeHasSystemFeature =
+                                RoSystemFeatures.maybeHasFeature(query.name, query.version);
+                        if (maybeHasSystemFeature != null) {
+                            return maybeHasSystemFeature.booleanValue();
+                        }
                         return ActivityThread.currentActivityThread().getPackageManager().
                             hasSystemFeature(query.name, query.version);
                     } catch (RemoteException e) {
@@ -1127,7 +1139,7 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     private static final String CACHE_KEY_PACKAGES_FOR_UID_PROPERTY =
-            "cache_key.get_packages_for_uid";
+            createSystemCacheKey("get_packages_for_uid");
     private static final PropertyInvalidatedCache<Integer, GetPackagesForUidResult>
             mGetPackagesForUidCache =
             new PropertyInvalidatedCache<Integer, GetPackagesForUidResult>(

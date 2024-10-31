@@ -36,7 +36,7 @@ internal class EdgeTranslate(
         element: Element,
         stateInContent: Element.State,
         transition: TransitionState.Transition,
-        value: Offset
+        value: Offset,
     ): Offset {
         val sceneSize = layoutImpl.content(content).targetSize
         val elementSize = stateInContent.targetSize

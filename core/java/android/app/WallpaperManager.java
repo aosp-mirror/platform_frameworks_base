@@ -285,6 +285,14 @@ public class WallpaperManager {
     public static final String COMMAND_UNFREEZE = "android.wallpaper.unfreeze";
 
     /**
+     * Command for {@link #sendWallpaperCommand}: in sendWallpaperCommand put extra to this command
+     * to give the bounds of space between the bottom of notifications and the top of shortcuts
+     * @hide
+     */
+    public static final String COMMAND_LOCKSCREEN_LAYOUT_CHANGED =
+            "android.wallpaper.lockscreen_layout_changed";
+
+    /**
      * Extra passed back from setWallpaper() giving the new wallpaper's assigned ID.
      * @hide
      */
@@ -297,6 +305,14 @@ public class WallpaperManager {
      */
     public static final String EXTRA_FROM_FOREGROUND_APP =
             "android.service.wallpaper.extra.FROM_FOREGROUND_APP";
+
+    /**
+     * Extra passed on {@link Intent.ACTION_WALLPAPER_CHANGED} indicating if wallpaper was set from
+     * a foreground app.
+     * @hide
+     */
+    public static final String EXTRA_WHICH_WALLPAPER_CHANGED =
+            "android.service.wallpaper.extra.WHICH_WALLPAPER_CHANGED";
 
     /**
      * The different screen orientations. {@link #getOrientation} provides their exact definition.

@@ -23,10 +23,9 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.android.systemui.biometrics.domain.interactor.UdfpsOverlayInteractor
 import com.android.systemui.biometrics.ui.view.UdfpsTouchOverlay
 import com.android.systemui.biometrics.ui.viewmodel.UdfpsTouchOverlayViewModel
-import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor
 import com.android.systemui.lifecycle.repeatWhenAttached
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 @ExperimentalCoroutinesApi
 object UdfpsTouchOverlayBinder {
@@ -42,14 +41,13 @@ object UdfpsTouchOverlayBinder {
         viewModel: UdfpsTouchOverlayViewModel,
         udfpsOverlayInteractor: UdfpsOverlayInteractor,
     ) {
-        if (DeviceEntryUdfpsRefactor.isUnexpectedlyInLegacyMode()) return
         view.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.CREATED) {
                 launch {
                         viewModel.shouldHandleTouches.collect { shouldHandleTouches ->
                             Log.d(
                                 "UdfpsTouchOverlayBinder",
-                                "[$view]: update shouldHandleTouches=$shouldHandleTouches"
+                                "[$view]: update shouldHandleTouches=$shouldHandleTouches",
                             )
                             view.isInvisible = !shouldHandleTouches
                             udfpsOverlayInteractor.setHandleTouches(shouldHandleTouches)
@@ -58,7 +56,7 @@ object UdfpsTouchOverlayBinder {
                     .invokeOnCompletion {
                         Log.d(
                             "UdfpsTouchOverlayBinder",
-                            "[$view-detached]: update shouldHandleTouches=false"
+                            "[$view-detached]: update shouldHandleTouches=false",
                         )
                         udfpsOverlayInteractor.setHandleTouches(false)
                     }

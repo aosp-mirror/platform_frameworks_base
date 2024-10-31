@@ -16,8 +16,8 @@
 
 package android.libcore.regression;
 
-import androidx.benchmark.BenchmarkState;
-import androidx.benchmark.junit4.BenchmarkRule;
+import android.perftests.utils.BenchmarkState;
+import android.perftests.utils.PerfStatusReporter;
 
 import androidx.test.filters.LargeTest;
 
@@ -35,7 +35,7 @@ import java.util.Collection;
 @RunWith(JUnitParamsRunner.class)
 @LargeTest
 public class BitSetPerfTest {
-    @Rule public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
+    @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
 
     public static Collection<Object[]> getData() {
         return Arrays.asList(new Object[][] {{1000}, {10000}});
@@ -45,7 +45,7 @@ public class BitSetPerfTest {
     @Parameters(method = "getData")
     public void timeIsEmptyTrue(int size) {
         BitSet bitSet = new BitSet(size);
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             if (!bitSet.isEmpty()) throw new RuntimeException();
         }
@@ -56,7 +56,7 @@ public class BitSetPerfTest {
     public void timeIsEmptyFalse(int size) {
         BitSet bitSet = new BitSet(size);
         bitSet.set(bitSet.size() - 1);
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             if (bitSet.isEmpty()) throw new RuntimeException();
         }
@@ -66,7 +66,7 @@ public class BitSetPerfTest {
     @Parameters(method = "getData")
     public void timeGet(int size) {
         BitSet bitSet = new BitSet(size);
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         int i = 1;
         while (state.keepRunning()) {
             bitSet.get(++i % size);
@@ -77,7 +77,7 @@ public class BitSetPerfTest {
     @Parameters(method = "getData")
     public void timeClear(int size) {
         BitSet bitSet = new BitSet(size);
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         int i = 1;
         while (state.keepRunning()) {
             bitSet.clear(++i % size);
@@ -89,7 +89,7 @@ public class BitSetPerfTest {
     public void timeSet(int size) {
         BitSet bitSet = new BitSet(size);
         int i = 1;
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             bitSet.set(++i % size);
         }
@@ -100,7 +100,7 @@ public class BitSetPerfTest {
     public void timeSetOn(int size) {
         BitSet bitSet = new BitSet(size);
         int i = 1;
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             bitSet.set(++i % size, true);
         }
@@ -111,7 +111,7 @@ public class BitSetPerfTest {
     public void timeSetOff(int size) {
         BitSet bitSet = new BitSet(size);
         int i = 1;
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             bitSet.set(++i % size, false);
         }

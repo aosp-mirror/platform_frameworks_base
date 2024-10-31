@@ -4253,8 +4253,8 @@ public final class TvInputManager {
          *        AudioFormat.CHANNEL_OUT_DEFAULT.
          * @param format desired format. Use default when it's AudioFormat.ENCODING_DEFAULT.
          */
-        public void overrideAudioSink(int audioType, String audioAddress, int samplingRate,
-                int channelMask, int format) {
+        public void overrideAudioSink(@AudioDeviceInfo.AudioDeviceType int audioType,
+                String audioAddress, int samplingRate, int channelMask, int format) {
             try {
                 mInterface.overrideAudioSink(audioType, audioAddress, samplingRate, channelMask,
                         format);

@@ -1,12 +1,7 @@
 {
   "presubmit": [
     {
-      "name": "FrameworksMockingServicesTests",
-      "options": [
-        {
-          "include-filter": "com.android.server.backup"
-        }
-      ]
+      "name": "FrameworksMockingServicesTests_backup"
     },
     {
       "name": "CtsBackupTestCases",

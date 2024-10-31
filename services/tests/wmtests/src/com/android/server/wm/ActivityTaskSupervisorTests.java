@@ -376,7 +376,8 @@ public class ActivityTaskSupervisorTests extends WindowTestsBase {
         IBinder launchCookie = new Binder("test_launch_cookie");
         ActivityOptions options = ActivityOptions.makeBasic();
         options.setLaunchCookie(launchCookie);
-        SafeActivityOptions safeOptions = SafeActivityOptions.fromBundle(options.toBundle());
+        SafeActivityOptions safeOptions = SafeActivityOptions.fromBundle(options.toBundle(),
+                Binder.getCallingPid(), Binder.getCallingUid());
 
         doNothing().when(mSupervisor.mService).moveTaskToFrontLocked(eq(null), eq(null), anyInt(),
                 anyInt(), any());
@@ -393,7 +394,8 @@ public class ActivityTaskSupervisorTests extends WindowTestsBase {
         final ActivityRecord activity = new ActivityBuilder(mAtm).setCreateTask(true).build();
 
         SafeActivityOptions safeOptions = SafeActivityOptions.fromBundle(
-                ActivityOptions.makeBasic().toBundle());
+                ActivityOptions.makeBasic().toBundle(),
+                Binder.getCallingPid(), Binder.getCallingUid());
 
         doNothing().when(mSupervisor.mService).moveTaskToFrontLocked(eq(null), eq(null), anyInt(),
                 anyInt(), any());

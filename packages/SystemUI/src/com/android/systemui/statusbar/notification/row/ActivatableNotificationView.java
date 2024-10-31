@@ -449,7 +449,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
                 }
 
                 // We need to reset the View state, even if the animation was cancelled
-                onAppearAnimationFinished(isAppearing);
+                onAppearAnimationFinished(isAppearing, /* cancelled = */ !mRunWithoutInterruptions);
 
                 if (mRunWithoutInterruptions) {
                     InteractionJankMonitor.getInstance().end(getCujType(isAppearing));
@@ -463,6 +463,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
                 if (onStartedRunnable != null) {
                     onStartedRunnable.run();
                 }
+                onAppearAnimationStarted(isAppearing);
                 mRunWithoutInterruptions = true;
                 Configuration.Builder builder = Configuration.Builder
                         .withView(getCujType(isAppearing), ActivatableNotificationView.this);
@@ -486,6 +487,8 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
                 frameTimeNanos -> {
                     if (mAppearAnimator == cachedAnimator) {
                         mAppearAnimator.start();
+                    } else {
+                        onAppearAnimationSkipped(isAppearing);
                     }
                 }, delay);
     }
@@ -502,7 +505,13 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         }
     }
 
-    protected void onAppearAnimationFinished(boolean wasAppearing) {
+    protected void onAppearAnimationStarted(boolean isAppear) {
+    }
+
+    protected void onAppearAnimationSkipped(boolean isAppear) {
+    }
+
+    protected void onAppearAnimationFinished(boolean wasAppearing, boolean cancelled) {
     }
 
     private void cancelAppearAnimation() {
@@ -829,5 +838,14 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
                 mBackgroundNormal.dump(pw, args);
             });
         }
+    }
+
+    protected void dumpAppearAnimationProperties(IndentingPrintWriter pw, String[] args) {
+        pw.print("AppearAnimation: ");
+        pw.print("mDrawingAppearAnimation", mDrawingAppearAnimation);
+        pw.print("mAppearAnimationFraction", mAppearAnimationFraction);
+        pw.print("mIsHeadsUpAnimation", mIsHeadsUpAnimation);
+        pw.print("mTargetPoint", mTargetPoint);
+        pw.println();
     }
 }

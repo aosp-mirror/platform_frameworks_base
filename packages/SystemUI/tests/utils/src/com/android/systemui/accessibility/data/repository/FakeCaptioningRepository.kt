@@ -16,25 +16,31 @@
 
 package com.android.systemui.accessibility.data.repository
 
+import com.android.systemui.accessibility.data.model.CaptioningModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 class FakeCaptioningRepository : CaptioningRepository {
 
-    private val mutableIsSystemAudioCaptioningEnabled = MutableStateFlow(false)
-    override val isSystemAudioCaptioningEnabled: StateFlow<Boolean>
-        get() = mutableIsSystemAudioCaptioningEnabled.asStateFlow()
-
-    private val mutableIsSystemAudioCaptioningUiEnabled = MutableStateFlow(false)
-    override val isSystemAudioCaptioningUiEnabled: StateFlow<Boolean>
-        get() = mutableIsSystemAudioCaptioningUiEnabled.asStateFlow()
+    private val mutableCaptioningModel = MutableStateFlow<CaptioningModel?>(null)
+    override val captioningModel: StateFlow<CaptioningModel?> = mutableCaptioningModel.asStateFlow()
 
     override suspend fun setIsSystemAudioCaptioningEnabled(isEnabled: Boolean) {
-        mutableIsSystemAudioCaptioningEnabled.value = isEnabled
+        mutableCaptioningModel.value =
+            CaptioningModel(
+                isSystemAudioCaptioningEnabled = isEnabled,
+                isSystemAudioCaptioningUiEnabled =
+                    mutableCaptioningModel.value?.isSystemAudioCaptioningUiEnabled == true,
+            )
     }
 
-    fun setIsSystemAudioCaptioningUiEnabled(isSystemAudioCaptioningUiEnabled: Boolean) {
-        mutableIsSystemAudioCaptioningUiEnabled.value = isSystemAudioCaptioningUiEnabled
+    fun setIsSystemAudioCaptioningUiEnabled(isEnabled: Boolean) {
+        mutableCaptioningModel.value =
+            CaptioningModel(
+                isSystemAudioCaptioningEnabled =
+                    mutableCaptioningModel.value?.isSystemAudioCaptioningEnabled == true,
+                isSystemAudioCaptioningUiEnabled = isEnabled,
+            )
     }
 }

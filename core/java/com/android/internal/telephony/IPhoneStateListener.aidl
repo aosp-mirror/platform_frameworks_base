@@ -78,9 +78,11 @@ oneway interface IPhoneStateListener {
     void onAllowedNetworkTypesChanged(in int reason, in long allowedNetworkType);
     void onLinkCapacityEstimateChanged(in List<LinkCapacityEstimate> linkCapacityEstimateList);
     void onMediaQualityStatusChanged(in MediaQualityStatus mediaQualityStatus);
-    void onCallBackModeStarted(int type);
-    void onCallBackModeStopped(int type, int reason);
+    void onCallbackModeStarted(int type, long durationMillis, int subId);
+    void onCallbackModeRestarted(int type, long durationMillis, int subId);
+    void onCallbackModeStopped(int type, int reason, int subId);
     void onSimultaneousCallingStateChanged(in int[] subIds);
     void onCarrierRoamingNtnModeChanged(in boolean active);
     void onCarrierRoamingNtnEligibleStateChanged(in boolean eligible);
+    void onCarrierRoamingNtnAvailableServicesChanged(in int[] availableServices);
 }

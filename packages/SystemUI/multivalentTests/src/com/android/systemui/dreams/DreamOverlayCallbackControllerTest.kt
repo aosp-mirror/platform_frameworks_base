@@ -56,6 +56,7 @@ class DreamOverlayCallbackControllerTest : SysuiTestCase() {
 
         // Adding twice should not invoke twice
         reset(callback)
+        underTest.onStartDream()
         underTest.addCallback(callback)
         underTest.onWakeUp()
         verify(callback, times(1)).onWakeUp()
@@ -65,6 +66,19 @@ class DreamOverlayCallbackControllerTest : SysuiTestCase() {
         underTest.removeCallback(callback)
         underTest.onWakeUp()
         verify(callback, never()).onWakeUp()
+    }
+
+    @Test
+    fun onWakeUp_multipleCalls() {
+        underTest.onStartDream()
+        assertThat(underTest.isDreaming).isEqualTo(true)
+
+        underTest.addCallback(callback)
+        underTest.onWakeUp()
+        underTest.onWakeUp()
+        underTest.onWakeUp()
+        verify(callback, times(1)).onWakeUp()
+        assertThat(underTest.isDreaming).isEqualTo(false)
     }
 
     @Test

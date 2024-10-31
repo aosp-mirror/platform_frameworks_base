@@ -99,3 +99,24 @@ flag {
   description: "Causes TrustManagerService to listen for credential attempts and ignore reports from upstream"
   bug: "323086607"
 }
+
+flag {
+    name: "clear_strong_auth_on_add_primary_credential"
+    namespace: "biometrics"
+    description: "Clear StrongAuth on add credential"
+    bug: "320817991"
+}
+
+flag {
+    name: "afl_api"
+    namespace: "platform_security"
+    description: "AFL feature"
+    bug: "365994454"
+}
+
+flag {
+    name: "keystore_grant_api"
+    namespace: "hardware_backed_security"
+    description: "Feature flag for exposing KeyStore grant APIs"
+    bug: "351158708"
+}

@@ -25,7 +25,7 @@ package {
 android_test {
     name: "UpdatableSystemFontTest",
     srcs: ["src/**/*.java"],
-    libs: ["android.test.runner"],
+    libs: ["android.test.runner.stubs.test"],
     static_libs: [
         "androidx.test.ext.junit",
         "androidx.test.uiautomator_uiautomator",

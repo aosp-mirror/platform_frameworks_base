@@ -19,6 +19,7 @@ package com.android.systemui.deviceentry.domain.interactor
 import android.testing.TestableLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.authentication.data.repository.FakeAuthenticationRepository
@@ -42,11 +43,16 @@ import com.android.systemui.keyguard.data.repository.fakeTrustRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticationStatus
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.scene.domain.interactor.sceneBackInteractor
 import com.android.systemui.scene.domain.interactor.sceneInteractor
+import com.android.systemui.scene.domain.startable.sceneContainerStartable
 import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.statusbar.sysuiStatusBarStateController
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -66,10 +72,14 @@ class DeviceEntryInteractorTest : SysuiTestCase() {
     private val trustRepository by lazy { kosmos.fakeTrustRepository }
     private val sceneInteractor by lazy { kosmos.sceneInteractor }
     private val authenticationInteractor by lazy { kosmos.authenticationInteractor }
+    private val sceneBackInteractor by lazy { kosmos.sceneBackInteractor }
+    private val sceneContainerStartable by lazy { kosmos.sceneContainerStartable }
+    private val sysuiStatusBarStateController by lazy { kosmos.sysuiStatusBarStateController }
     private lateinit var underTest: DeviceEntryInteractor
 
     @Before
     fun setUp() {
+        sceneContainerStartable.start()
         underTest = kosmos.deviceEntryInteractor
     }
 
@@ -423,8 +433,37 @@ class DeviceEntryInteractorTest : SysuiTestCase() {
             assertThat(isUnlocked).isTrue()
         }
 
-    private fun switchToScene(sceneKey: SceneKey) {
+    @Test
+    fun isDeviceEntered_unlockedWhileOnShade_emitsTrue() =
+        testScope.runTest {
+            val isDeviceEntered by collectLastValue(underTest.isDeviceEntered)
+            assertThat(isDeviceEntered).isFalse()
+            val currentScene by collectLastValue(sceneInteractor.currentScene)
+            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
+
+            // Navigate to shade and bouncer:
+            switchToScene(Scenes.Shade)
+            assertThat(currentScene).isEqualTo(Scenes.Shade)
+            // Simulating a "leave it open when the keyguard is hidden" which means the bouncer will
+            // be
+            // shown and successful authentication should take the user back to where they are, the
+            // shade scene.
+            sysuiStatusBarStateController.setLeaveOpenOnKeyguardHide(true)
+            switchToScene(Scenes.Bouncer)
+            assertThat(currentScene).isEqualTo(Scenes.Bouncer)
+
+            assertThat(isDeviceEntered).isFalse()
+            // Authenticate with PIN to unlock and dismiss the lockscreen:
+            authenticationInteractor.authenticate(FakeAuthenticationRepository.DEFAULT_PIN)
+            runCurrent()
+
+            assertThat(isDeviceEntered).isTrue()
+        }
+
+    private fun TestScope.switchToScene(sceneKey: SceneKey) {
         sceneInteractor.changeScene(sceneKey, "reason")
+        sceneInteractor.setTransitionState(flowOf(ObservableTransitionState.Idle(sceneKey)))
+        runCurrent()
     }
 
     private suspend fun givenCanShowAlternateBouncer() {

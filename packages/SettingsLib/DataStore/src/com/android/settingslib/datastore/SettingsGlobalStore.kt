@@ -18,6 +18,7 @@ package com.android.settingslib.datastore
 
 import android.content.ContentResolver
 import android.content.Context
+import android.net.Uri
 import android.provider.Settings.Global
 import android.provider.Settings.SettingNotFoundException
 
@@ -29,11 +30,15 @@ import android.provider.Settings.SettingNotFoundException
 class SettingsGlobalStore private constructor(contentResolver: ContentResolver) :
     SettingsStore(contentResolver) {
 
+    override val uri: Uri
+        get() = Global.getUriFor("")
+
     override val tag: String
         get() = "SettingsGlobalStore"
 
     override fun contains(key: String): Boolean = Global.getString(contentResolver, key) != null
 
+    @Suppress("UNCHECKED_CAST")
     override fun <T : Any> getValue(key: String, valueType: Class<T>): T? =
         try {
             when (valueType) {

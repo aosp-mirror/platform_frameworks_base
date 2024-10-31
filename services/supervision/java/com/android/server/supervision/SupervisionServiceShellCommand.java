@@ -17,8 +17,7 @@
 package com.android.server.supervision;
 
 import android.os.ShellCommand;
-
-import java.io.PrintWriter;
+import android.os.UserHandle;
 
 public class SupervisionServiceShellCommand extends ShellCommand {
     private final SupervisionService mService;
@@ -32,30 +31,29 @@ public class SupervisionServiceShellCommand extends ShellCommand {
         if (cmd == null) {
             return handleDefaultCommands(null);
         }
-        final PrintWriter pw = getOutPrintWriter();
         switch (cmd) {
-            case "help": return help(pw);
-            case "is-enabled": return isEnabled(pw);
+            case "enable": return setEnabled(true);
+            case "disable": return setEnabled(false);
             default: return handleDefaultCommands(cmd);
         }
     }
 
-    private int help(PrintWriter pw) {
-        pw.println("Supervision service commands:");
-        pw.println("  help");
-        pw.println("      Prints this help text");
-        pw.println("  is-enabled");
-        pw.println("      Is supervision enabled");
-        return 0;
-    }
-
-    private int isEnabled(PrintWriter pw) {
-        pw.println(mService.isSupervisionEnabled());
+    private int setEnabled(boolean enabled) {
+        final var pw = getOutPrintWriter();
+        final var userId = UserHandle.parseUserArg(getNextArgRequired());
+        mService.setSupervisionEnabledForUser(userId, enabled);
         return 0;
     }
 
     @Override
     public void onHelp() {
-        help(getOutPrintWriter());
+        final var pw = getOutPrintWriter();
+        pw.println("Supervision service (supervision) commands:");
+        pw.println("  help");
+        pw.println("      Prints this help text");
+        pw.println("  enable <USER_ID>");
+        pw.println("      Enables supervision for the given user.");
+        pw.println("  disable <USER_ID>");
+        pw.println("      Disables supervision for the given user.");
     }
 }

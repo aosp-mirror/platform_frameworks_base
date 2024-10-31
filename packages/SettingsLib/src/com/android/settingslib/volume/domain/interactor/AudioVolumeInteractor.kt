@@ -68,7 +68,7 @@ class AudioVolumeInteractor(
         if (audioStream.value == AudioManager.STREAM_RING) {
             val mode =
                 if (isMuted) AudioManager.RINGER_MODE_VIBRATE else AudioManager.RINGER_MODE_NORMAL
-            audioRepository.setRingerMode(audioStream, RingerMode(mode))
+            audioRepository.setRingerModeInternal(audioStream, RingerMode(mode))
         }
         val mutedChanged = audioRepository.setMuted(audioStream, isMuted)
         if (mutedChanged && !isMuted) {

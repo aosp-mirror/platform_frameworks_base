@@ -1,0 +1,11 @@
+aconfig_declarations {
+    name: "locksettings_flags",
+    package: "com.android.server.locksettings",
+    container: "system",
+    srcs: ["*.aconfig"],
+}
+
+java_aconfig_library {
+    name: "locksettings_flags_lib",
+    aconfig_declarations: "locksettings_flags",
+}

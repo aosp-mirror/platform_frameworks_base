@@ -53,16 +53,13 @@ abstract class Vibration {
     public final long id;
     public final VibrationSession.CallerInfo callerInfo;
     public final VibrationStats stats = new VibrationStats();
-    public final IBinder callerToken;
 
     private VibrationSession.Status mStatus;
 
-    Vibration(@NonNull IBinder token, @NonNull VibrationSession.CallerInfo callerInfo) {
-        Objects.requireNonNull(token);
+    Vibration(@NonNull VibrationSession.CallerInfo callerInfo) {
         Objects.requireNonNull(callerInfo);
         mStatus = VibrationSession.Status.RUNNING;
         this.id = sNextVibrationId.getAndIncrement();
-        this.callerToken = token;
         this.callerInfo = callerInfo;
     }
 
@@ -91,14 +88,8 @@ abstract class Vibration {
         stats.reportEnded(endInfo.endedBy);
     }
 
-    /** Return true if vibration is a repeating vibration. */
-    abstract boolean isRepeating();
-
     /** Return {@link VibrationSession.DebugInfo} with read-only debug data about this vibration. */
     abstract VibrationSession.DebugInfo getDebugInfo();
-
-    /** Return {@link VibrationStats.StatsInfo} with read-only metrics about this vibration. */
-    abstract VibrationStats.StatsInfo getStatsInfo(long completionUptimeMillis);
 
     /** Immutable info passed as a signal to end a vibration. */
     static final class EndInfo {
@@ -149,35 +140,41 @@ abstract class Vibration {
      * potentially expensive or resource-linked objects, such as {@link IBinder}.
      */
     static final class DebugInfoImpl implements VibrationSession.DebugInfo {
-        final VibrationSession.Status mStatus;
-        final long mCreateTime;
-        final VibrationSession.CallerInfo mCallerInfo;
+        private final VibrationSession.Status mStatus;
+        private final VibrationStats.StatsInfo mStatsInfo;
+        private final VibrationSession.CallerInfo mCallerInfo;
         @Nullable
-        final CombinedVibration mPlayedEffect;
-
-        private final long mStartTime;
-        private final long mEndTime;
-        private final long mDurationMs;
+        private final CombinedVibration mPlayedEffect;
         @Nullable
         private final CombinedVibration mOriginalEffect;
         private final int mScaleLevel;
         private final float mAdaptiveScale;
 
-        DebugInfoImpl(VibrationSession.Status status, VibrationStats stats,
-                @Nullable CombinedVibration playedEffect,
-                @Nullable CombinedVibration originalEffect, int scaleLevel,
-                float adaptiveScale, @NonNull VibrationSession.CallerInfo callerInfo) {
+        private final long mCreateUptime;
+        private final long mCreateTime;
+        private final long mStartTime;
+        private final long mEndTime;
+        private final long mDurationMs;
+
+        DebugInfoImpl(VibrationSession.Status status,
+                @NonNull VibrationSession.CallerInfo callerInfo, int vibrationType,
+                VibrationStats stats, @Nullable CombinedVibration playedEffect,
+                @Nullable CombinedVibration originalEffect, int scaleLevel, float adaptiveScale) {
             Objects.requireNonNull(callerInfo);
-            mCreateTime = stats.getCreateTimeDebug();
-            mStartTime = stats.getStartTimeDebug();
-            mEndTime = stats.getEndTimeDebug();
-            mDurationMs = stats.getDurationDebug();
+            mCallerInfo = callerInfo;
+            mStatsInfo = stats.toStatsInfo(callerInfo.uid, vibrationType,
+                    callerInfo.attrs.getUsage(), status);
             mPlayedEffect = playedEffect;
             mOriginalEffect = originalEffect;
             mScaleLevel = scaleLevel;
             mAdaptiveScale = adaptiveScale;
-            mCallerInfo = callerInfo;
             mStatus = status;
+
+            mCreateUptime = stats.getCreateUptimeMillis();
+            mCreateTime = stats.getCreateTimeDebug();
+            mStartTime = stats.getStartTimeDebug();
+            mEndTime = stats.getEndTimeDebug();
+            mDurationMs = stats.getDurationDebug();
         }
 
         @Override
@@ -187,7 +184,7 @@ abstract class Vibration {
 
         @Override
         public long getCreateUptimeMillis() {
-            return mCreateTime;
+            return mCreateUptime;
         }
 
         @Override
@@ -219,6 +216,7 @@ abstract class Vibration {
         @Override
         public void logMetrics(VibratorFrameworkStatsLogger statsLogger) {
             statsLogger.logVibrationAdaptiveHapticScale(mCallerInfo.uid, mAdaptiveScale);
+            statsLogger.writeVibrationReportedAsync(mStatsInfo);
         }
 
         @Override

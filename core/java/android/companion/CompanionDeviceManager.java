@@ -20,6 +20,8 @@ import static android.Manifest.permission.REQUEST_COMPANION_PROFILE_APP_STREAMIN
 import static android.Manifest.permission.REQUEST_COMPANION_PROFILE_AUTOMOTIVE_PROJECTION;
 import static android.Manifest.permission.REQUEST_COMPANION_PROFILE_COMPUTER;
 import static android.Manifest.permission.REQUEST_COMPANION_PROFILE_WATCH;
+import static android.graphics.drawable.Icon.TYPE_URI;
+import static android.graphics.drawable.Icon.TYPE_URI_ADAPTIVE_BITMAP;
 
 
 import android.annotation.CallbackExecutor;
@@ -49,6 +51,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.Icon;
+import android.graphics.drawable.VectorDrawable;
 import android.net.MacAddress;
 import android.os.Binder;
 import android.os.Handler;
@@ -471,6 +478,15 @@ public final class CompanionDeviceManager {
         Objects.requireNonNull(callback, "Callback cannot be null");
         handler = Handler.mainIfNull(handler);
 
+        if (Flags.associationDeviceIcon()) {
+            final Icon deviceIcon = request.getDeviceIcon();
+
+            if (deviceIcon != null && !isValidIcon(deviceIcon, mContext)) {
+                throw new IllegalArgumentException("The size of the device icon must be "
+                        + "24dp x 24dp to ensure proper display");
+            }
+        }
+
         try {
             mService.associate(request, new AssociationRequestCallbackProxy(handler, callback),
                     mContext.getOpPackageName(), mContext.getUserId());
@@ -534,6 +550,15 @@ public final class CompanionDeviceManager {
         Objects.requireNonNull(request, "Request cannot be null");
         Objects.requireNonNull(executor, "Executor cannot be null");
         Objects.requireNonNull(callback, "Callback cannot be null");
+
+        if (Flags.associationDeviceIcon()) {
+            final Icon deviceIcon = request.getDeviceIcon();
+
+            if (deviceIcon != null && !isValidIcon(deviceIcon, mContext)) {
+                throw new IllegalArgumentException("The size of the device icon must be "
+                        + "24dp x 24dp to ensure proper display");
+            }
+        }
 
         try {
             mService.associate(request, new AssociationRequestCallbackProxy(executor, callback),
@@ -2026,5 +2051,35 @@ public final class CompanionDeviceManager {
                 out.flush();
             }
         }
+    }
+
+    private boolean isValidIcon(Icon icon, Context context) {
+        if (icon.getType() == TYPE_URI_ADAPTIVE_BITMAP || icon.getType() == TYPE_URI) {
+            throw new IllegalArgumentException("The URI based Icon is not supported.");
+        }
+        Drawable drawable = icon.loadDrawable(context);
+        float density = context.getResources().getDisplayMetrics().density;
+
+        if (drawable instanceof BitmapDrawable) {
+            Bitmap bitmap = ((BitmapDrawable) drawable).getBitmap();
+
+            float widthDp = bitmap.getWidth() / density;
+            float heightDp = bitmap.getHeight() / density;
+
+            if (widthDp != 24 || heightDp != 24) {
+                return false;
+            }
+        } else if (drawable instanceof VectorDrawable) {
+            VectorDrawable vectorDrawable = (VectorDrawable) drawable;
+            float widthDp = vectorDrawable.getIntrinsicWidth() / density;
+            float heightDp = vectorDrawable.getIntrinsicHeight() / density;
+
+            if (widthDp != 24 || heightDp != 24) {
+                return false;
+            }
+        } else {
+            throw new IllegalArgumentException("The format of the device icon is unsupported.");
+        }
+        return true;
     }
 }

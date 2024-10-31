@@ -17,6 +17,7 @@
 package com.android.server;
 
 import static android.app.Flags.modesApi;
+import static android.app.Flags.enableCurrentModeTypeBinderCache;
 import static android.app.Flags.enableNightModeBinderCache;
 import static android.app.UiModeManager.ContrastUtils.CONTRAST_DEFAULT_VALUE;
 import static android.app.UiModeManager.DEFAULT_PRIORITY;
@@ -32,11 +33,11 @@ import static android.app.UiModeManager.PROJECTION_TYPE_AUTOMOTIVE;
 import static android.app.UiModeManager.PROJECTION_TYPE_NONE;
 import static android.os.UserHandle.USER_SYSTEM;
 import static android.os.UserHandle.getCallingUserId;
-import static android.os.UserManager.isVisibleBackgroundUsersEnabled;
 import static android.provider.Settings.Secure.CONTRAST_LEVEL;
 import static android.util.TimeUtils.isTimeBetween;
 
 import static com.android.internal.util.FunctionalUtils.ignoreRemoteException;
+import static com.android.server.pm.UserManagerService.enforceCurrentUserIfVisibleBackgroundEnabled;
 
 import android.annotation.IntRange;
 import android.annotation.NonNull;
@@ -100,7 +101,6 @@ import com.android.internal.app.DisableCarModeActivity;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.util.DumpUtils;
-import com.android.server.pm.UserManagerService;
 import com.android.server.twilight.TwilightListener;
 import com.android.server.twilight.TwilightManager;
 import com.android.server.twilight.TwilightState;
@@ -139,7 +139,7 @@ final class UiModeManagerService extends SystemService {
 
     private int mLastBroadcastState = Intent.EXTRA_DOCK_STATE_UNDOCKED;
 
-    private final NightMode mNightMode = new NightMode(){
+    private final IntProperty mNightMode = new IntProperty(){
         private int mNightModeValue = UiModeManager.MODE_NIGHT_NO;
 
         @Override
@@ -193,7 +193,22 @@ final class UiModeManagerService extends SystemService {
     // flag set by resource, whether to night mode change for normal all or not.
     private boolean mNightModeLocked = false;
 
-    int mCurUiMode = 0;
+    private final IntProperty mCurUiMode = new IntProperty(){
+        private int mCurrentModeTypeValue = 0;
+
+        @Override
+        public int get() {
+            return mCurrentModeTypeValue;
+        }
+
+        @Override
+        public void set(int mode) {
+            mCurrentModeTypeValue = mode;
+            if (enableCurrentModeTypeBinderCache()) {
+                UiModeManager.invalidateCurrentModeTypeCache();
+            }
+        }
+    };
     private int mSetUiMode = 0;
     private boolean mHoldingConfiguration = false;
     private int mCurrentUser;
@@ -426,6 +441,11 @@ final class UiModeManagerService extends SystemService {
     @VisibleForTesting
     void setDreamsDisabledByAmbientModeSuppression(boolean disabledByAmbientModeSuppression) {
         mDreamsDisabledByAmbientModeSuppression = disabledByAmbientModeSuppression;
+    }
+
+    @VisibleForTesting
+    void setCurrentUser(int currentUserId) {
+        mCurrentUser = currentUserId;
     }
 
     @Override
@@ -811,7 +831,7 @@ final class UiModeManagerService extends SystemService {
             final long ident = Binder.clearCallingIdentity();
             try {
                 synchronized (mLock) {
-                    return mCurUiMode & Configuration.UI_MODE_TYPE_MASK;
+                    return mCurUiMode.get() & Configuration.UI_MODE_TYPE_MASK;
                 }
             } finally {
                 Binder.restoreCallingIdentity(ident);
@@ -849,9 +869,9 @@ final class UiModeManagerService extends SystemService {
                     throw new IllegalArgumentException("Unknown mode: " + mode);
             }
 
-            final int user = UserHandle.getCallingUserId();
-            enforceValidCallingUser(user);
+            enforceCurrentUserIfVisibleBackgroundEnabled(mCurrentUser);
 
+            final int user = UserHandle.getCallingUserId();
             final long ident = Binder.clearCallingIdentity();
             try {
                 synchronized (mLock) {
@@ -914,7 +934,7 @@ final class UiModeManagerService extends SystemService {
                 @AttentionModeThemeOverlayType int attentionModeThemeOverlayType) {
             setAttentionModeThemeOverlay_enforcePermission();
 
-            enforceValidCallingUser(UserHandle.getCallingUserId());
+            enforceCurrentUserIfVisibleBackgroundEnabled(mCurrentUser);
 
             synchronized (mLock) {
                 if (mAttentionModeThemeOverlay != attentionModeThemeOverlayType) {
@@ -1005,16 +1025,16 @@ final class UiModeManagerService extends SystemService {
                 return false;
             }
             final int user = Binder.getCallingUserHandle().getIdentifier();
-            enforceValidCallingUser(user);
-
             if (user != mCurrentUser && getContext().checkCallingOrSelfPermission(
                     android.Manifest.permission.INTERACT_ACROSS_USERS)
                     != PackageManager.PERMISSION_GRANTED) {
                 Slog.e(TAG, "Target user is not current user,"
                         + " INTERACT_ACROSS_USERS permission is required");
                 return false;
-
             }
+
+            enforceCurrentUserIfVisibleBackgroundEnabled(mCurrentUser);
+
             // Store the last requested bedtime night mode state so that we don't need to notify
             // anyone if the user decides to switch to the night mode to bedtime.
             if (modeCustomType == MODE_NIGHT_CUSTOM_TYPE_BEDTIME) {
@@ -1063,9 +1083,10 @@ final class UiModeManagerService extends SystemService {
                 Slog.e(TAG, "Set custom time start, requires MODIFY_DAY_NIGHT_MODE permission");
                 return;
             }
-            final int user = UserHandle.getCallingUserId();
-            enforceValidCallingUser(user);
 
+            enforceCurrentUserIfVisibleBackgroundEnabled(mCurrentUser);
+
+            final int user = UserHandle.getCallingUserId();
             final long ident = Binder.clearCallingIdentity();
             try {
                 LocalTime newTime = LocalTime.ofNanoOfDay(time * 1000);
@@ -1093,9 +1114,10 @@ final class UiModeManagerService extends SystemService {
                 Slog.e(TAG, "Set custom time end, requires MODIFY_DAY_NIGHT_MODE permission");
                 return;
             }
-            final int user = UserHandle.getCallingUserId();
-            enforceValidCallingUser(user);
 
+            enforceCurrentUserIfVisibleBackgroundEnabled(mCurrentUser);
+
+            final int user = UserHandle.getCallingUserId();
             final long ident = Binder.clearCallingIdentity();
             try {
                 LocalTime newTime = LocalTime.ofNanoOfDay(time * 1000);
@@ -1116,7 +1138,7 @@ final class UiModeManagerService extends SystemService {
             assertLegit(callingPackage);
             assertSingleProjectionType(projectionType);
             enforceProjectionTypePermissions(projectionType);
-            enforceValidCallingUser(getCallingUserId());
+            enforceCurrentUserIfVisibleBackgroundEnabled(mCurrentUser);
 
             synchronized (mLock) {
                 if (mProjectionHolders == null) {
@@ -1162,7 +1184,7 @@ final class UiModeManagerService extends SystemService {
             assertLegit(callingPackage);
             assertSingleProjectionType(projectionType);
             enforceProjectionTypePermissions(projectionType);
-            enforceValidCallingUser(getCallingUserId());
+            enforceCurrentUserIfVisibleBackgroundEnabled(mCurrentUser);
 
             return releaseProjectionUnchecked(projectionType, callingPackage);
         }
@@ -1204,7 +1226,7 @@ final class UiModeManagerService extends SystemService {
                 return;
             }
 
-            enforceValidCallingUser(getCallingUserId());
+            enforceCurrentUserIfVisibleBackgroundEnabled(mCurrentUser);
 
             synchronized (mLock) {
                 if (mProjectionListeners == null) {
@@ -1252,32 +1274,6 @@ final class UiModeManagerService extends SystemService {
             }
         }
     };
-
-    // This method validates whether calling user is valid in visible background users
-    // feature. Valid user is the current user or the system or in the same profile group as
-    // the current user.
-    private void enforceValidCallingUser(int userId) {
-        if (!isVisibleBackgroundUsersEnabled()) {
-            return;
-        }
-        if (LOG) {
-            Slog.d(TAG, "enforceValidCallingUser: userId=" + userId
-                    + " isSystemUser=" + (userId == USER_SYSTEM) + " current user=" + mCurrentUser
-                    + " callingPid=" + Binder.getCallingPid()
-                    + " callingUid=" + mInjector.getCallingUid());
-        }
-        long ident = Binder.clearCallingIdentity();
-        try {
-            if (userId != USER_SYSTEM && userId != mCurrentUser
-                    && !UserManagerService.getInstance().isSameProfileGroup(userId, mCurrentUser)) {
-                throw new SecurityException(
-                        "Calling user is not valid for level-1 compatibility in MUMD. "
-                                + "callingUserId=" + userId + " currentUserId=" + mCurrentUser);
-            }
-        } finally {
-            Binder.restoreCallingIdentity(ident);
-        }
-    }
 
     private void enforceProjectionTypePermissions(@UiModeManager.ProjectionType int p) {
         if ((p & PROJECTION_TYPE_AUTOMOTIVE) != 0) {
@@ -1519,7 +1515,7 @@ final class UiModeManagerService extends SystemService {
             pw.print(" mCarModeEnableFlags="); pw.print(mCarModeEnableFlags);
             pw.print(" mEnableCarDockLaunch="); pw.println(mEnableCarDockLaunch);
 
-            pw.print("  mCurUiMode=0x"); pw.print(Integer.toHexString(mCurUiMode));
+            pw.print("  mCurUiMode=0x"); pw.print(Integer.toHexString(mCurUiMode.get()));
             pw.print(" mUiModeLocked="); pw.print(mUiModeLocked);
             pw.print(" mSetUiMode=0x"); pw.println(Integer.toHexString(mSetUiMode));
 
@@ -1772,7 +1768,7 @@ final class UiModeManagerService extends SystemService {
                     + "; uiMode=" + uiMode);
         }
 
-        mCurUiMode = uiMode;
+        mCurUiMode.set(uiMode);
         if (!mHoldingConfiguration && (!mWaitForDeviceInactive || mPowerSave)) {
             mConfiguration.uiMode = uiMode;
         }
@@ -1919,7 +1915,7 @@ final class UiModeManagerService extends SystemService {
         boolean keepScreenOn = mCharging &&
                 ((mCarModeEnabled && mCarModeKeepsScreenOn &&
                 (mCarModeEnableFlags & UiModeManager.ENABLE_CAR_MODE_ALLOW_SLEEP) == 0) ||
-                (mCurUiMode == Configuration.UI_MODE_TYPE_DESK && mDeskModeKeepsScreenOn));
+                (mCurUiMode.get() == Configuration.UI_MODE_TYPE_DESK && mDeskModeKeepsScreenOn));
         if (keepScreenOn != mWakeLock.isHeld()) {
             if (keepScreenOn) {
                 mWakeLock.acquire();
@@ -2075,12 +2071,14 @@ final class UiModeManagerService extends SystemService {
 
     private void updateComputedNightModeLocked(boolean activate) {
         boolean newComputedValue = activate;
+        boolean appliedOverrides = false;
         if (mNightMode.get() != MODE_NIGHT_YES && mNightMode.get() != UiModeManager.MODE_NIGHT_NO) {
             if (mOverrideNightModeOn && !newComputedValue) {
                 newComputedValue = true;
             } else if (mOverrideNightModeOff && newComputedValue) {
                 newComputedValue = false;
             }
+            appliedOverrides = true;
         }
 
         if (modesApi()) {
@@ -2090,8 +2088,10 @@ final class UiModeManagerService extends SystemService {
                 case (UiModeManager.MODE_ATTENTION_THEME_OVERLAY_DAY) -> false;
                 default -> newComputedValue; // case OFF
             };
-        } else {
-            mComputedNightMode = newComputedValue;
+        }
+
+        if (appliedOverrides) {
+            return;
         }
 
         if (mNightMode.get() != MODE_NIGHT_AUTO || (mTwilightManager != null
@@ -2346,11 +2346,12 @@ final class UiModeManagerService extends SystemService {
     }
 
     /**
-     * Interface to contain the value for system night mode. We make the night mode accessible
-     * through this class to ensure that the reassignment of this value invalidates the cache.
+     * Interface to contain the value for an integral property. We make the property
+     * accessible through this class to ensure that the reassignment of this value invalidates the
+     * cache.
      */
-    private interface NightMode {
+    private interface IntProperty {
         int get();
-        void set(int mode);
+        void set(int value);
     }
 }

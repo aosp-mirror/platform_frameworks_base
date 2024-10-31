@@ -20,6 +20,7 @@ import android.view.View
 import com.android.systemui.Flags
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.statusbar.StatusBarIconView
+import com.android.systemui.statusbar.chips.notification.shared.StatusBarNotifChips
 
 /** Model representing the display of an ongoing activity as a chip in the status bar. */
 sealed class OngoingActivityChipModel {
@@ -76,6 +77,24 @@ sealed class OngoingActivityChipModel {
             override val onClickListener: View.OnClickListener?,
         ) : Shown(icon, colors, onClickListener) {
             override val logName = "Shown.Timer"
+        }
+
+        /**
+         * The chip shows the time delta between now and [time] in a short format, e.g. "15min" or
+         * "1hr ago".
+         */
+        data class ShortTimeDelta(
+            override val icon: ChipIcon,
+            override val colors: ColorsModel,
+            /** The time of the event that this chip represents. */
+            val time: Long,
+            override val onClickListener: View.OnClickListener?,
+        ) : Shown(icon, colors, onClickListener) {
+            init {
+                StatusBarNotifChips.assertInNewMode()
+            }
+
+            override val logName = "Shown.ShortTimeDelta"
         }
 
         /**

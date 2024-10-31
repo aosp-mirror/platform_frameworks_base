@@ -61,7 +61,7 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.kotlin.JavaAdapter;
 import com.android.wm.shell.desktopmode.DesktopMode;
-import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
+import com.android.wm.shell.desktopmode.DesktopRepository;
 import com.android.wm.shell.onehanded.OneHanded;
 import com.android.wm.shell.onehanded.OneHandedEventCallback;
 import com.android.wm.shell.onehanded.OneHandedTransitionCallback;
@@ -281,13 +281,13 @@ public final class WMShell implements
     void initSplitScreen(SplitScreen splitScreen) {
         mWakefulnessLifecycle.addObserver(new WakefulnessLifecycle.Observer() {
             @Override
-            public void onFinishedWakingUp() {
-                splitScreen.onFinishedWakingUp();
+            public void onStartedGoingToSleep() {
+                splitScreen.onStartedGoingToSleep();
             }
 
             @Override
-            public void onStartedGoingToSleep() {
-                splitScreen.onStartedGoingToSleep();
+            public void onStartedWakingUp() {
+                splitScreen.onStartedWakingUp();
             }
         });
         mCommandQueue.addCallback(new CommandQueue.Callbacks() {
@@ -393,7 +393,7 @@ public final class WMShell implements
 
     void initDesktopMode(DesktopMode desktopMode) {
         desktopMode.addVisibleTasksListener(
-                new DesktopModeTaskRepository.VisibleTasksListener() {
+                new DesktopRepository.VisibleTasksListener() {
                     @Override
                     public void onTasksVisibilityChanged(int displayId, int visibleTasksCount) {
                         if (displayId == Display.DEFAULT_DISPLAY) {

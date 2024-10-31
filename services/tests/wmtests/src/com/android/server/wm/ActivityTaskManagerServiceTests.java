@@ -382,13 +382,11 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
 
     @Test
     public void testResumeNextActivityOnCrashedAppDied() {
-        mSupervisor.beginDeferResume();
         final ActivityRecord homeActivity = new ActivityBuilder(mAtm)
                 .setTask(mRootWindowContainer.getDefaultTaskDisplayArea().getOrCreateRootHomeTask())
                 .build();
         final ActivityRecord activity = new ActivityBuilder(mAtm).setCreateTask(true).build();
         activity.setState(RESUMED, "test");
-        mSupervisor.endDeferResume();
 
         assertEquals(activity.app, mAtm.mInternal.getTopApp());
 
@@ -932,7 +930,6 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
         WindowProcessController wpc = createWindowProcessController(
                 DEFAULT_PACKAGE_NAME, DEFAULT_USER_ID);
         mAtm.mProcessMap.put(Binder.getCallingPid(), wpc);
-        mAtm.mInternal.onProcessAdded(wpc);
 
         ActivityTaskManagerInternal.PackageConfig appSpecificConfig = mAtm.mInternal
                 .getApplicationConfig(DEFAULT_PACKAGE_NAME, DEFAULT_USER_ID);
@@ -987,7 +984,6 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
         WindowProcessController wpc = createWindowProcessController(
                 DEFAULT_PACKAGE_NAME, DEFAULT_USER_ID);
         mAtm.mProcessMap.put(Binder.getCallingPid(), wpc);
-        mAtm.mInternal.onProcessAdded(wpc);
 
         ActivityTaskManagerInternal.PackageConfigurationUpdater packageConfigUpdater =
                 mAtm.mInternal.createPackageConfigurationUpdater(DEFAULT_PACKAGE_NAME,
@@ -1018,7 +1014,6 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
         WindowProcessController wpc = createWindowProcessController(
                 DEFAULT_PACKAGE_NAME, DEFAULT_USER_ID);
         mAtm.mProcessMap.put(Binder.getCallingPid(), wpc);
-        mAtm.mInternal.onProcessAdded(wpc);
 
         ActivityTaskManagerInternal.PackageConfigurationUpdater packageConfigUpdater =
                 mAtm.mInternal.createPackageConfigurationUpdater(DEFAULT_PACKAGE_NAME,
@@ -1048,6 +1043,7 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
         WindowProcessController wpc = new WindowProcessController(
                 mAtm, info, packageName, 0, userId, null, mMockListener);
         mAtm.mInternal.preBindApplication(wpc, info);
+        mAtm.mInternal.onProcessAdded(wpc);
         wpc.setThread(mock(IApplicationThread.class));
         return wpc;
     }

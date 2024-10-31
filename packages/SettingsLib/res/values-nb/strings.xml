@@ -357,6 +357,8 @@
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Slår på Forbedret tilkobling-funksjonen."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Lokal terminal"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Aktiver terminalappen som gir lokal kommandolistetilgang"</string>
+    <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Linux-utviklingsmiljø"</string>
+    <string name="enable_linux_terminal_summary" msgid="5893216510985145320">"Kjør Linux-terminal på Android"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP-kontroll"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"Angi HDPC-kontrolladferd"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"Feilsøking"</string>
@@ -518,7 +520,7 @@
     <string name="battery_info_status_charging_fast_v2" msgid="1825439848151256589">"Hurtiglading"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Kontrollert av administratoren"</string>
     <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"Kontrollert av en begrenset innstilling"</string>
-    <string name="disabled" msgid="8017887509554714950">"Slått av"</string>
+    <string name="disabled" msgid="8017887509554714950">"Deaktivert"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"Tillatt"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"Ikke tillatt"</string>
     <string name="install_other_apps" msgid="3232595082023199454">"Installer ukjente apper"</string>
@@ -564,8 +566,7 @@
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Alarmer og påminnelser"</string>
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Gi denne appen tillatelse til å angi alarmer og planlegge tidssensitive handlinger. Dette gir appen tillatelse til å kjøre i bakgrunnen, noe som kan bruke mer batteri.\n\nHvis denne tillatelsen er av, fungerer ikke eksisterende alarmer og tidsbaserte hendelser som er planlagt av denne appen."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"tidsplan, alarm, påminnelse, klokke"</string>
-    <!-- no translation found for zen_mode_do_not_disturb_name (6798711401734798283) -->
-    <skip />
+    <string name="zen_mode_do_not_disturb_name" msgid="6798711401734798283">"Ikke forstyrr"</string>
     <string name="zen_mode_settings_title" msgid="7374070457626419755">"Ikke forstyrr"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Slå på"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Slå på Ikke forstyrr"</string>
@@ -583,6 +584,7 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"Nå nettopp"</string>
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"Denne telefonen"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"Dette nettbrettet"</string>
+    <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"Denne datamaskinen (intern)"</string>
     <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
     <skip />
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Dokkhøyttaler"</string>
@@ -685,7 +687,12 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Slått av"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Slått på"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Enheten din må startes på nytt for at denne endringen skal tre i kraft. Start på nytt nå eller avbryt."</string>
-    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"hodetelefoner med kabel"</string>
+    <string name="media_transfer_wired_headphone_name" msgid="8698668536022665254">"Hodetelefoner med kabel"</string>
+    <string name="media_transfer_headphone_name" msgid="1157798825650178478">"Lyd med kabel"</string>
+    <string name="media_transfer_usb_audio_name" msgid="1789292056757821355">"USB-lyd"</string>
+    <string name="media_transfer_wired_device_mic_name" msgid="7115192790725088698">"Mikrofon med kabel"</string>
+    <string name="media_transfer_usb_device_mic_name" msgid="7171789543226269822">"USB-mikrofon"</string>
+    <string name="media_transfer_bt_device_mic_name" msgid="1870669402238687618">"BT-mikrofon"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"På"</string>
     <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"Av"</string>
     <string name="carrier_network_change_mode" msgid="4257621815706644026">"Bytting av operatørnettverk"</string>

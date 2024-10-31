@@ -1,22 +1,12 @@
 {
   "presubmit": [
     {
-      "name": "FrameworksInputMethodSystemServerTests",
-      "options": [
-        {"include-filter": "com.android.server.inputmethod"},
-        {"exclude-annotation": "androidx.test.filters.FlakyTest"},
-        {"exclude-annotation": "org.junit.Ignore"}
-      ]
+      "name": "FrameworksInputMethodSystemServerTests_server_inputmethod"
     }
   ],
   "postsubmit": [
     {
-      "name": "FrameworksImeTests",
-      "options": [
-        {"include-filter": "com.android.inputmethodservice"},
-        {"exclude-annotation": "androidx.test.filters.FlakyTest"},
-        {"exclude-annotation": "org.junit.Ignore"}
-      ]
+      "name": "FrameworksImeTests_android_inputmethodservice"
     }
   ]
 }
