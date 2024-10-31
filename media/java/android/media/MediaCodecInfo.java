@@ -23,6 +23,7 @@ import static android.media.codec.Flags.FLAG_HLG_EDITING;
 import static android.media.codec.Flags.FLAG_IN_PROCESS_SW_AUDIO_CODEC;
 import static android.media.codec.Flags.FLAG_NULL_OUTPUT_SURFACE;
 import static android.media.codec.Flags.FLAG_REGION_OF_INTEREST;
+import static android.media.codec.Flags.FLAG_APV_SUPPORT;
 import static android.media.MediaCodec.GetFlag;
 
 import android.annotation.FlaggedApi;
@@ -4495,6 +4496,265 @@ public final class MediaCodecInfo {
         /** AC-4 codec level corresponding to mdcompat 4 as per ETSI TS 103 190-2 v1.2.1 */
         @SuppressLint("AllUpper")
         public static final int AC4Level4       = 0x10;
+
+        // Profiles and levels/bands for APV Codec, corresponding to the definitions in
+        // "Advanced Professional Video", 10.1.3 Profiles, 10.1.4 Levels and Bands
+        // found at https://www.ietf.org/archive/id/draft-lim-apv-02.html
+
+        /**
+         * APV codec profile 422-10 as per IETF lim-apv-02, 10.1.3.1.1
+         */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVProfile422_10 =  0x01;
+
+        /**
+         * APV codec profile 422-10 as per IETF lim-apv-02, 10.1.3.1.1
+         * with HDR10.
+         */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVProfile422_10HDR10 =  0x1000;
+
+        /**
+         * APV codec profile 422-10 as per IETF lim-apv-02, 10.1.3.1.1
+         * with HDR10Plus.
+         */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVProfile422_10HDR10Plus =  0x2000;
+
+        // For APV Levels, the numerical values are constructed as follows:
+        //   ((0x100 << (level_num - 1)) | (1 << band))
+        // where:
+        //   - "level_num" is the APV Level numbered consecutively
+        //     (i.e., Level 1 == 1, Level 1.1 == 2, etc.)
+        //   - "band" is the APV Band
+
+        /** APV Codec Level 1, Band 0 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel1Band0 =  0x101;
+        /** APV Codec Level 1, Band 1 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel1Band1 =  0x102;
+        /** APV Codec Level 1, Band 2 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel1Band2 =  0x104;
+        /** APV Codec Level 1, Band 3 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel1Band3 =  0x108;
+        /** APV Codec Level 1.1, Band 0 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel11Band0 = 0x201;
+        /** APV Codec Level 1.1, Band 1 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel11Band1 = 0x202;
+        /** APV Codec Level 1.1, Band 2 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel11Band2 = 0x204;
+        /** APV Codec Level 1.1, Band 3 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel11Band3 = 0x208;
+        /** APV Codec Level 2, Band 0 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel2Band0 =  0x401;
+        /** APV Codec Level 2, Band 1 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel2Band1 =  0x402;
+        /** APV Codec Level 2, Band 2 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel2Band2 =  0x404;
+        /** APV Codec Level 2, Band 3 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel2Band3 =  0x408;
+        /** APV Codec Level 2.1, Band 0 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel21Band0 = 0x801;
+        /** APV Codec Level 2.1, Band 1 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel21Band1 = 0x802;
+        /** APV Codec Level 2.1, Band 2 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel21Band2 = 0x804;
+        /** APV Codec Level 2.1, Band 3 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel21Band3 = 0x808;
+        /** APV Codec Level 3, Band 0 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel3Band0 =  0x1001;
+        /** APV Codec Level 3, Band 1 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel3Band1 =  0x1002;
+        /** APV Codec Level 3, Band 2 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel3Band2 =  0x1004;
+        /** APV Codec Level 3, Band 3 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel3Band3 =  0x1008;
+        /** APV Codec Level 3.1, Band 0 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel31Band0 = 0x2001;
+        /** APV Codec Level 3.1, Band 1 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel31Band1 = 0x2002;
+        /** APV Codec Level 3.1, Band 2 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel31Band2 = 0x2004;
+        /** APV Codec Level 3.1, Band 3 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel31Band3 = 0x2008;
+        /** APV Codec Level 4, Band 0 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel4Band0 =  0x4001;
+        /** APV Codec Level 4, Band 1 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel4Band1 =  0x4002;
+        /** APV Codec Level 4, Band 2 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel4Band2 =  0x4004;
+        /** APV Codec Level 4, Band 3 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel4Band3 =  0x4008;
+        /** APV Codec Level 4.1, Band 0 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel41Band0 = 0x8001;
+        /** APV Codec Level 4.1, Band 1 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel41Band1 = 0x8002;
+        /** APV Codec Level 4.1, Band 2 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel41Band2 = 0x8004;
+        /** APV Codec Level 4.1, Band 3 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel41Band3 = 0x8008;
+        /** APV Codec Level 5, Band 0 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel5Band0 =  0x10001;
+        /** APV Codec Level 5, Band 1 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel5Band1 =  0x10002;
+        /** APV Codec Level 5, Band 2 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel5Band2 =  0x10004;
+        /** APV Codec Level 5, Band 3 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel5Band3 =  0x10008;
+        /** APV Codec Level 5.1, Band 0 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel51Band0 = 0x20001;
+        /** APV Codec Level 5.1, Band 1 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel51Band1 = 0x20002;
+        /** APV Codec Level 5.1, Band 2 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel51Band2 = 0x20004;
+        /** APV Codec Level 5.1, Band 3 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel51Band3 = 0x20008;
+        /** APV Codec Level 6, Band 0 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel6Band0 =  0x40001;
+        /** APV Codec Level 6, Band 1 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel6Band1 =  0x40002;
+        /** APV Codec Level 6, Band 2 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel6Band2 =  0x40004;
+        /** APV Codec Level 6, Band 3 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel6Band3 =  0x40008;
+        /** APV Codec Level 6.1, Band 0 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel61Band0 = 0x80001;
+        /** APV Codec Level 6.1, Band 1 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel61Band1 = 0x80002;
+        /** APV Codec Level 6.1, Band 2 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel61Band2 = 0x80004;
+        /** APV Codec Level 6.1, Band 3 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel61Band3 = 0x80008;
+        /** APV Codec Level 7, Band 0 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel7Band0 =  0x100001;
+        /** APV Codec Level 7, Band 1 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel7Band1 =  0x100002;
+        /** APV Codec Level 7, Band 2 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel7Band2 =  0x100004;
+        /** APV Codec Level 7, Band 3 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel7Band3 =  0x100008;
+        /** APV Codec Level 7.1, Band 0 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel71Band0 = 0x200001;
+        /** APV Codec Level 7.1, Band 1 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel71Band1 = 0x200002;
+        /** APV Codec Level 7.1, Band 2 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel71Band2 = 0x200004;
+        /** APV Codec Level 7.1, Band 3 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel71Band3 = 0x200008;
 
         /**
          * The profile of the media content. Depending on the type of media this can be
