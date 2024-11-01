@@ -14,22 +14,21 @@
  * limitations under the License.
  */
 
-package com.android.systemui.util.settings
+package com.android.systemui.util.settings.data.repository
 
+import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.backgroundCoroutineContext
+import com.android.systemui.kosmos.testDispatcher
+import com.android.systemui.user.data.repository.userRepository
+import com.android.systemui.util.settings.fakeSettings
 import com.android.systemui.util.settings.repository.UserAwareSecureSettingsRepository
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.map
 
-class FakeUserAwareSecureSettingsRepository : UserAwareSecureSettingsRepository {
-
-    private val settings = MutableStateFlow<Map<String, Boolean>>(mutableMapOf())
-
-    override fun boolSettingForActiveUser(name: String, defaultValue: Boolean): Flow<Boolean> {
-        return settings.map { it.getOrDefault(name, defaultValue) }
+val Kosmos.userAwareSecureSettingsRepository by
+    Kosmos.Fixture {
+        UserAwareSecureSettingsRepository(
+            fakeSettings,
+            userRepository,
+            testDispatcher,
+            backgroundCoroutineContext,
+        )
     }
-
-    fun setBoolSettingForActiveUser(name: String, value: Boolean) {
-        settings.value = settings.value.toMutableMap().apply { this[name] = value }
-    }
-}

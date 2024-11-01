@@ -14,25 +14,30 @@
  * limitations under the License.
  */
 
-package com.android.systemui.settings
+package com.android.systemui.util.settings.repository
 
-import android.content.ContentResolver
+import android.provider.Settings
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.shared.settings.data.repository.SystemSettingsRepository
-import com.android.systemui.shared.settings.data.repository.SystemSettingsRepositoryImpl
-import dagger.Module
-import dagger.Provides
+import com.android.systemui.user.data.repository.UserRepository
+import com.android.systemui.util.settings.SystemSettings
+import javax.inject.Inject
+import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineDispatcher
 
-@Module
-object SystemSettingsRepositoryModule {
-    @JvmStatic
-    @Provides
-    @SysUISingleton
-    fun provideSystemSettingsRepository(
-        contentResolver: ContentResolver,
-        @Background backgroundDispatcher: CoroutineDispatcher,
-    ): SystemSettingsRepository =
-        SystemSettingsRepositoryImpl(contentResolver, backgroundDispatcher)
-}
+/**
+ * Repository for observing values of [Settings.Secure] for the currently active user. That means
+ * when user is switched and the new user has different value, flow will emit new value.
+ */
+@SysUISingleton
+class UserAwareSystemSettingsRepository
+@Inject
+constructor(
+    systemSettings: SystemSettings,
+    userRepository: UserRepository,
+    @Background backgroundDispatcher: CoroutineDispatcher,
+    @Background bgContext: CoroutineContext,
+) :
+    UserAwareSettingsRepository(systemSettings, userRepository, backgroundDispatcher, bgContext),
+    SystemSettingsRepository

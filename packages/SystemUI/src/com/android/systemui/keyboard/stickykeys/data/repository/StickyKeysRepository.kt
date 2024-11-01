@@ -33,13 +33,13 @@ import com.android.systemui.keyboard.stickykeys.shared.model.ModifierKey.CTRL
 import com.android.systemui.keyboard.stickykeys.shared.model.ModifierKey.META
 import com.android.systemui.keyboard.stickykeys.shared.model.ModifierKey.SHIFT
 import com.android.systemui.util.settings.repository.UserAwareSecureSettingsRepository
+import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
-import javax.inject.Inject
 
 interface StickyKeysRepository {
     val stickyKeys: Flow<LinkedHashMap<ModifierKey, Locked>>
@@ -71,7 +71,7 @@ constructor(
 
     override val settingEnabled: Flow<Boolean> =
         secureSettingsRepository
-            .boolSettingForActiveUser(SETTING_KEY, defaultValue = false)
+            .boolSetting(SETTING_KEY, defaultValue = false)
             .onEach { stickyKeysLogger.logNewSettingValue(it) }
             .flowOn(backgroundDispatcher)
 
