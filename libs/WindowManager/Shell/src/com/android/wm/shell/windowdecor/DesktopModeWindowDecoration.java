@@ -1096,13 +1096,13 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             if (mAppIconBitmap != null && mAppName != null) {
                 return;
             }
-            final ComponentName baseActivity = mTaskInfo.baseActivity;
-            if (baseActivity == null) {
-                Slog.e(TAG, "Base activity component not found in task");
+            if (mTaskInfo.baseIntent == null) {
+                Slog.e(TAG, "Base intent not found in task");
                 return;
             }
             final PackageManager pm = mUserContext.getPackageManager();
-            final ActivityInfo activityInfo = pm.getActivityInfo(baseActivity, 0 /* flags */);
+            final ActivityInfo activityInfo =
+                    pm.getActivityInfo(mTaskInfo.baseIntent.getComponent(), 0 /* flags */);
             final IconProvider provider = new IconProvider(mContext);
             final Drawable appIconDrawable = provider.getIcon(activityInfo);
             final Drawable badgedAppIconDrawable = pm.getUserBadgedIcon(appIconDrawable,
