@@ -133,6 +133,21 @@ public class InputShellCommandTest {
         assertThat(mInputEventInjector.mInjectedEvents).isEmpty();
     }
 
+    @Test
+    public void testSwipeCommandEventFrequency() {
+        int[] durations = {100, 300, 500};
+        for (int durationMillis: durations) {
+            mInputEventInjector.mInjectedEvents.clear();
+            runCommand(String.format("swipe 200 800 200 200 %d", durationMillis));
+
+            // Add 2 events for ACTION_DOWN and ACTION_UP.
+            final int maxEventNum =
+                    (int) Math.ceil(InputShellCommand.SWIPE_EVENT_HZ_DEFAULT
+                            * (float) durationMillis / 1000) + 2;
+            assertThat(mInputEventInjector.mInjectedEvents.size()).isAtMost(maxEventNum);
+        }
+    }
+
     private InputEvent getSingleInjectedInputEvent() {
         assertThat(mInputEventInjector.mInjectedEvents).hasSize(1);
         return mInputEventInjector.mInjectedEvents.get(0);

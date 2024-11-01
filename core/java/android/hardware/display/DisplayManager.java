@@ -580,7 +580,7 @@ public final class DisplayManager {
             EVENT_FLAG_DISPLAY_CONNECTION_CHANGED,
     })
     @Retention(RetentionPolicy.SOURCE)
-    public @interface EventsMask {}
+    public @interface EventFlag {}
 
     /**
      * Event type for when a new display is added.
@@ -774,7 +774,7 @@ public final class DisplayManager {
      * @param listener The listener to register.
      * @param handler The handler on which the listener should be invoked, or null
      * if the listener should be invoked on the calling thread's looper.
-     * @param eventsMask A bitmask of the event types for which this listener is subscribed.
+     * @param eventFlagsMask A bitmask of the event types for which this listener is subscribed.
      *
      * @see #EVENT_FLAG_DISPLAY_ADDED
      * @see #EVENT_FLAG_DISPLAY_CHANGED
@@ -786,8 +786,8 @@ public final class DisplayManager {
      * @hide
      */
     public void registerDisplayListener(@NonNull DisplayListener listener,
-            @Nullable Handler handler, @EventsMask long eventsMask) {
-        mGlobal.registerDisplayListener(listener, handler, eventsMask,
+            @Nullable Handler handler, @EventFlag long eventFlagsMask) {
+        mGlobal.registerDisplayListener(listener, handler, eventFlagsMask,
                 ActivityThread.currentPackageName());
     }
 

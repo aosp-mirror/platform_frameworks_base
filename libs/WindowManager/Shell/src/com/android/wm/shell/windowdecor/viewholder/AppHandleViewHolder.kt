@@ -36,10 +36,13 @@ import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction
 import android.widget.ImageButton
 import androidx.core.view.ViewCompat
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat.AccessibilityActionCompat
+import com.android.internal.policy.SystemBarUtils
+import com.android.window.flags.Flags
 import com.android.wm.shell.R
 import com.android.wm.shell.shared.animation.Interpolators
 import com.android.wm.shell.windowdecor.WindowManagerWrapper
 import com.android.wm.shell.windowdecor.additionalviewcontainer.AdditionalSystemViewContainer
+import com.android.wm.shell.windowdecor.viewholder.WindowDecorationViewHolder.Data
 
 /**
  * A desktop mode window decoration used when the window is in full "focus" (i.e. fullscreen/split).
@@ -66,12 +69,10 @@ internal class AppHandleViewHolder(
     ) : Data()
 
     private lateinit var taskInfo: RunningTaskInfo
-    private val position: Point = Point()
-    private var width: Int = 0
-    private var height: Int = 0
     private val captionView: View = rootView.requireViewById(R.id.desktop_mode_caption)
     private val captionHandle: ImageButton = rootView.requireViewById(R.id.caption_handle)
     private val inputManager = context.getSystemService(InputManager::class.java)
+    private var statusBarInputLayerExists = false
 
     // An invisible View that takes up the same coordinates as captionHandle but is layered
     // above the status bar. The purpose of this View is to receive input intended for
@@ -111,54 +112,21 @@ internal class AppHandleViewHolder(
     ) {
         captionHandle.imageTintList = ColorStateList.valueOf(getCaptionHandleBarColor(taskInfo))
         this.taskInfo = taskInfo
-        this.position.set(position)
-        this.width = width
-        this.height = height
-        if (!isCaptionVisible && statusBarInputLayer != null) {
-            detachStatusBarInputLayer()
+        // If handle is not in status bar region(i.e., bottom stage in vertical split),
+        // do not create an input layer
+        if (position.y >= SystemBarUtils.getStatusBarHeight(context)) return
+        if (!isCaptionVisible && statusBarInputLayerExists) {
+            disposeStatusBarInputLayer()
             return
         }
-    }
-
-    fun bindStatusBarInputLayer(
-        statusBarLayer: AdditionalSystemViewContainer
-    ) {
-        // Input layer view modification takes a significant amount of time;
+        // Input layer view creation / modification takes a significant amount of time;
         // post them so we don't hold up DesktopModeWindowDecoration#relayout.
-        if (statusBarLayer == statusBarInputLayer) {
+        if (statusBarInputLayerExists) {
             handler.post { updateStatusBarInputLayer(position) }
-            return
-        }
-        // Remove the old input layer when changing to a new one.
-        if (statusBarInputLayer != null) detachStatusBarInputLayer()
-        if (statusBarLayer.view.visibility == View.GONE) {
-            statusBarLayer.view.visibility = View.VISIBLE
-        }
-        statusBarInputLayer = statusBarLayer
-        statusBarInputLayer?.let {
-            inputLayer -> setupAppHandleA11y(inputLayer.view)
-        }
-        handler.post {
-            val view = statusBarInputLayer?.view
-                ?: error("Unable to find statusBarInputLayer View")
-            // Caption handle is located within the status bar region, meaning the
-            // DisplayPolicy will attempt to transfer this input to status bar if it's
-            // a swipe down. Pilfer here to keep the gesture in handle alone.
-            view.setOnTouchListener { v, event ->
-                if (event.actionMasked == ACTION_DOWN) {
-                    inputManager.pilferPointers(v.viewRootImpl.inputToken)
-                }
-                captionHandle.dispatchTouchEvent(event)
-                return@setOnTouchListener true
-            }
-            view.setOnHoverListener { _, event ->
-                captionHandle.onHoverEvent(event)
-            }
-            val lp = statusBarInputLayer?.view?.layoutParams as WindowManager.LayoutParams
-            lp.x = position.x
-            lp.y = position.y
-            lp.width = width
-            lp.height = height
+        } else {
+            // Input layer is created on a delay; prevent multiple from being created.
+            statusBarInputLayerExists = true
+            handler.post { createStatusBarInputLayer(position, width, height) }
         }
     }
 
@@ -168,6 +136,40 @@ internal class AppHandleViewHolder(
 
     override fun onHandleMenuClosed() {
         animateCaptionHandleAlpha(startValue = 0f, endValue = 1f)
+    }
+
+    private fun createStatusBarInputLayer(handlePosition: Point,
+                                          handleWidth: Int,
+                                          handleHeight: Int) {
+        if (!Flags.enableHandleInputFix()) return
+        statusBarInputLayer = AdditionalSystemViewContainer(context, windowManagerWrapper,
+            taskInfo.taskId, handlePosition.x, handlePosition.y, handleWidth, handleHeight,
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+        )
+        val view = statusBarInputLayer?.view ?: error("Unable to find statusBarInputLayer View")
+        val lp = statusBarInputLayer?.lp ?: error("Unable to find statusBarInputLayer " +
+                "LayoutParams")
+        lp.title = "Handle Input Layer of task " + taskInfo.taskId
+        lp.setTrustedOverlay()
+        // Make this window a spy window to enable it to pilfer pointers from the system-wide
+        // gesture listener that receives events before window. This is to prevent notification
+        // shade gesture when we swipe down to enter desktop.
+        lp.inputFeatures = WindowManager.LayoutParams.INPUT_FEATURE_SPY
+        view.setOnHoverListener { _, event ->
+            captionHandle.onHoverEvent(event)
+        }
+        // Caption handle is located within the status bar region, meaning the
+        // DisplayPolicy will attempt to transfer this input to status bar if it's
+        // a swipe down. Pilfer here to keep the gesture in handle alone.
+        view.setOnTouchListener { v, event ->
+            if (event.actionMasked == ACTION_DOWN) {
+                inputManager.pilferPointers(v.viewRootImpl.inputToken)
+            }
+            captionHandle.dispatchTouchEvent(event)
+            return@setOnTouchListener true
+        }
+        setupAppHandleA11y(view)
+        windowManagerWrapper.updateViewLayout(view, lp)
     }
 
     private fun setupAppHandleA11y(view: View) {
@@ -222,12 +224,15 @@ internal class AppHandleViewHolder(
     }
 
     /**
-     * Remove the input listeners from the input layer and remove it from this view holder.
+     * Remove the input layer from [WindowManager]. Should be used when caption handle
+     * is not visible.
      */
-    fun detachStatusBarInputLayer() {
-        statusBarInputLayer?.view?.setOnTouchListener(null)
-        statusBarInputLayer?.view?.setOnHoverListener(null)
-        statusBarInputLayer = null
+    fun disposeStatusBarInputLayer() {
+        statusBarInputLayerExists = false
+        handler.post {
+            statusBarInputLayer?.releaseView()
+            statusBarInputLayer = null
+        }
     }
 
     private fun getCaptionHandleBarColor(taskInfo: RunningTaskInfo): Int {

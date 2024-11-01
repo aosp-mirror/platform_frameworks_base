@@ -114,18 +114,14 @@ public final class ExecuteAppFunctionRequest implements Parcelable {
      * <p>The bundle may have missing parameters. Developers are advised to implement defensive
      * handling measures.
      *
-     * <p>Similar to {@link #getFunctionIdentifier()} the parameters required by a function can be
-     * obtained by querying AppSearch for the corresponding {@code AppFunctionStaticMetadata}. This
-     * metadata will contain enough information for the caller to resolve the required parameters
-     * either using information from the metadata itself or using the AppFunction SDK for function
-     * callers.
+     * @see AppFunctionManager on how to determine the expected parameters.
      */
     @NonNull
     public GenericDocument getParameters() {
         return mParameters.getValue();
     }
 
-    /** Returns the additional data relevant to this function execution. */
+    /** Returns the additional metadata for this function execution request. */
     @NonNull
     public Bundle getExtras() {
         return mExtras;
@@ -153,19 +149,31 @@ public final class ExecuteAppFunctionRequest implements Parcelable {
         @NonNull
         private GenericDocument mParameters = new GenericDocument.Builder<>("", "", "").build();
 
+        /**
+         * Creates a new instance of this builder class.
+         *
+         * @param targetPackageName The package name of the target app providing the app function to
+         *     invoke.
+         * @param functionIdentifier The identifier used by the {@link AppFunctionService} from the
+         *     target app to uniquely identify the function to be invoked.
+         */
         public Builder(@NonNull String targetPackageName, @NonNull String functionIdentifier) {
             mTargetPackageName = Objects.requireNonNull(targetPackageName);
             mFunctionIdentifier = Objects.requireNonNull(functionIdentifier);
         }
 
-        /** Sets the additional data relevant to this function execution. */
+        /** Sets the additional metadata for this function execution request. */
         @NonNull
         public Builder setExtras(@NonNull Bundle extras) {
             mExtras = Objects.requireNonNull(extras);
             return this;
         }
 
-        /** Sets the function parameters. */
+        /**
+         * Sets the function parameters.
+         *
+         * @see #ExecuteAppFunctionRequest#getParameters()
+         */
         @NonNull
         public Builder setParameters(@NonNull GenericDocument parameters) {
             Objects.requireNonNull(parameters);

@@ -209,6 +209,7 @@ public class SettingsToPropertiesMapper {
         "pixel_perf",
         "pixel_sensors",
         "pixel_system_sw_video",
+        "pixel_video_sw",
         "pixel_watch",
         "platform_compat",
         "platform_security",

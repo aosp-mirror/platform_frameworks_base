@@ -107,6 +107,12 @@ class BackNavigationController {
         mNavigationMonitor.onFocusWindowChanged(newFocus);
     }
 
+    void onEmbeddedWindowGestureTransferred(@NonNull WindowState host) {
+        if (Flags.disallowAppProgressEmbeddedWindow()) {
+            mNavigationMonitor.onEmbeddedWindowGestureTransferred(host);
+        }
+    }
+
     /**
      * Set up the necessary leashes and build a {@link BackNavigationInfo} instance for an upcoming
      * back gesture animation.
@@ -178,6 +184,9 @@ class BackNavigationController {
                 return null;
             }
 
+            final ArrayList<EmbeddedWindowController.EmbeddedWindow> embeddedWindows = wmService
+                    .mEmbeddedWindowController.getByHostWindow(window);
+
             currentActivity = window.mActivityRecord;
             currentTask = window.getTask();
             if ((currentTask != null && !currentTask.isVisibleRequested())
@@ -199,11 +208,22 @@ class BackNavigationController {
             infoBuilder.setOnBackInvokedCallback(callbackInfo.getCallback());
             infoBuilder.setAnimationCallback(callbackInfo.isAnimationCallback());
             infoBuilder.setTouchableRegion(window.getFrame());
-            infoBuilder.setAppProgressAllowed((window.getAttrs().privateFlags
-                    & PRIVATE_FLAG_APP_PROGRESS_GENERATION_ALLOWED) != 0);
             if (currentTask != null) {
                 infoBuilder.setFocusedTaskId(currentTask.mTaskId);
             }
+            boolean transferGestureToEmbedded = false;
+            if (Flags.disallowAppProgressEmbeddedWindow() && embeddedWindows != null) {
+                for (int i = embeddedWindows.size() - 1; i >= 0; --i) {
+                    if (embeddedWindows.get(i).mGestureToEmbedded) {
+                        transferGestureToEmbedded = true;
+                        break;
+                    }
+                }
+            }
+            final boolean canInterruptInView = (window.getAttrs().privateFlags
+                    & PRIVATE_FLAG_APP_PROGRESS_GENERATION_ALLOWED) != 0;
+            infoBuilder.setAppProgressAllowed(canInterruptInView && !transferGestureToEmbedded
+                    && callbackInfo.isAnimationCallback());
             mNavigationMonitor.startMonitor(window, navigationObserver);
 
             ProtoLog.d(WM_DEBUG_BACK_PREVIEW, "startBackNavigation currentTask=%s, "
@@ -739,6 +759,20 @@ class BackNavigationController {
                     || (newFocus.mActivityRecord == mNavigatingWindow.mActivityRecord))) {
                 cancelBackNavigating("focusWindowChanged");
             }
+        }
+
+        /**
+         * Notify focus window has transferred touch gesture to embedded window. Shell should pilfer
+         * pointers so embedded process won't receive motion event.
+         *
+         */
+        void onEmbeddedWindowGestureTransferred(@NonNull WindowState host) {
+            if (!isMonitorForRemote() || host != mNavigatingWindow) {
+                return;
+            }
+            final Bundle result = new Bundle();
+            result.putBoolean(BackNavigationInfo.KEY_TOUCH_GESTURE_TRANSFERRED, true);
+            mObserver.sendResult(result);
         }
 
         /**

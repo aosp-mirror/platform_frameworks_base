@@ -48,7 +48,6 @@ import androidx.compose.ui.unit.round
 import androidx.compose.ui.util.fastCoerceIn
 import androidx.compose.ui.util.fastForEachReversed
 import androidx.compose.ui.util.lerp
-import com.android.compose.animation.scene.Element.State
 import com.android.compose.animation.scene.content.Content
 import com.android.compose.animation.scene.content.state.TransitionState
 import com.android.compose.animation.scene.transformation.PropertyTransformation
@@ -163,7 +162,7 @@ private fun Modifier.maybeElevateInContent(
     transitionStates: List<TransitionState>,
 ): Modifier {
     fun isSharedElement(
-        stateByContent: Map<ContentKey, State>,
+        stateByContent: Map<ContentKey, Element.State>,
         transition: TransitionState.Transition,
     ): Boolean {
         fun inFromContent() = transition.fromContent in stateByContent
@@ -1281,14 +1280,14 @@ private inline fun <T> computeValue(
                 checkNotNull(if (currentContent == toContent) toState else fromState)
             val idleValue = contentValue(overscrollState)
             val targetValue =
-                propertySpec.transform(
-                    layoutImpl,
-                    currentContent,
-                    element,
-                    overscrollState,
-                    transition,
-                    idleValue,
-                )
+                with(propertySpec) {
+                    layoutImpl.propertyTransformationScope.transform(
+                        currentContent,
+                        element.key,
+                        transition,
+                        idleValue,
+                    )
+                }
 
             // Make sure we don't read progress if values are the same and we don't need to
             // interpolate, so we don't invalidate the phase where this is read.
@@ -1376,24 +1375,26 @@ private inline fun <T> computeValue(
         val idleValue = contentValue(contentState)
         val isEntering = content == toContent
         val previewTargetValue =
-            previewTransformation.transform(
-                layoutImpl,
-                content,
-                element,
-                contentState,
-                transition,
-                idleValue,
-            )
+            with(previewTransformation) {
+                layoutImpl.propertyTransformationScope.transform(
+                    content,
+                    element.key,
+                    transition,
+                    idleValue,
+                )
+            }
 
         val targetValueOrNull =
-            transformation?.transform(
-                layoutImpl,
-                content,
-                element,
-                contentState,
-                transition,
-                idleValue,
-            )
+            transformation?.let { transformation ->
+                with(transformation) {
+                    layoutImpl.propertyTransformationScope.transform(
+                        content,
+                        element.key,
+                        transition,
+                        idleValue,
+                    )
+                }
+            }
 
         // Make sure we don't read progress if values are the same and we don't need to interpolate,
         // so we don't invalidate the phase where this is read.
@@ -1460,7 +1461,14 @@ private inline fun <T> computeValue(
 
     val idleValue = contentValue(contentState)
     val targetValue =
-        transformation.transform(layoutImpl, content, element, contentState, transition, idleValue)
+        with(transformation) {
+            layoutImpl.propertyTransformationScope.transform(
+                content,
+                element.key,
+                transition,
+                idleValue,
+            )
+        }
 
     // Make sure we don't read progress if values are the same and we don't need to interpolate, so
     // we don't invalidate the phase where this is read.
