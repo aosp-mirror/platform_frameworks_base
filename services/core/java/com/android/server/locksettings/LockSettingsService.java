@@ -91,6 +91,7 @@ import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
 import android.os.ShellCallback;
+import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -118,6 +119,7 @@ import android.util.ArraySet;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.LongSparseArray;
+import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
@@ -207,6 +209,9 @@ public class LockSettingsService extends ILockSettings.Stub {
     private static final String LSKF_LAST_CHANGED_TIME_KEY = "sp-handle-ts";
     private static final String USER_SERIAL_NUMBER_KEY = "serial-number";
 
+    private static final String MIGRATED_WEAVER_DISABLED_ON_UNSECURED_USERS =
+            "migrated_weaver_disabled_on_unsecured_users";
+
     // Duration that LockSettingsService will store the gatekeeper password for. This allows
     // multiple biometric enrollments without prompting the user to enter their password via
     // ConfirmLockPassword/ConfirmLockPattern multiple times. This needs to be at least the duration
@@ -261,6 +266,10 @@ public class LockSettingsService extends ILockSettings.Stub {
     @GuardedBy("mUserCreationAndRemovalLock")
     private boolean mThirdPartyAppsStarted;
 
+    // This list contains the (protectorId, userId) of any protectors that were by replaced by a
+    // migration and should be destroyed once rollback to the old build is no longer possible.
+    private ArrayList<Pair<Long, Integer>> mProtectorsToDestroyOnBootCompleted = new ArrayList<>();
+
     // Current password metrics for all secured users on the device. Updated when user unlocks the
     // device or changes password. Removed when user is stopped.
     @GuardedBy("this")
@@ -311,6 +320,10 @@ public class LockSettingsService extends ILockSettings.Stub {
             if (phase == PHASE_ACTIVITY_MANAGER_READY) {
                 mLockSettingsService.migrateOldDataAfterSystemReady();
                 mLockSettingsService.loadEscrowData();
+            } else if (phase == PHASE_BOOT_COMPLETED) {
+                // In the case of an upgrade, PHASE_BOOT_COMPLETED means that a rollback to the old
+                // build can no longer occur.  This is the time to destroy any migrated protectors.
+                mLockSettingsService.destroyMigratedProtectors();
             }
         }
 
@@ -953,6 +966,11 @@ public class LockSettingsService extends ILockSettings.Stub {
         return success;
     }
 
+    private boolean isWeaverDisabledOnUnsecuredUsers() {
+        return mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_disableWeaverOnUnsecuredUsers);
+    }
+
     // This is called when Weaver is guaranteed to be available (if the device supports Weaver).
     // It does any synthetic password related work that was delayed from earlier in the boot.
     private void onThirdPartyAppsStarted() {
@@ -986,7 +1004,9 @@ public class LockSettingsService extends ILockSettings.Stub {
             // If this gets interrupted (e.g. by the device powering off), there shouldn't be a
             // problem since this will run again on the next boot, and setUserKeyProtection() is
             // okay with the key being already protected by the given secret.
-            if (getString("migrated_all_users_to_sp_and_bound_ce", null, 0) == null) {
+            if (getString("migrated_all_users_to_sp_and_bound_ce", null, 0) == null
+                    || (isWeaverDisabledOnUnsecuredUsers()
+                        && !getBoolean(MIGRATED_WEAVER_DISABLED_ON_UNSECURED_USERS, false, 0))) {
                 for (UserInfo user : mUserManager.getAliveUsers()) {
                     removeStateForReusedUserIdIfNecessary(user.id, user.serialNumber);
                     synchronized (mSpManager) {
@@ -994,6 +1014,9 @@ public class LockSettingsService extends ILockSettings.Stub {
                     }
                 }
                 setString("migrated_all_users_to_sp_and_bound_ce", "true", 0);
+                if (isWeaverDisabledOnUnsecuredUsers()) {
+                    setBoolean(MIGRATED_WEAVER_DISABLED_ON_UNSECURED_USERS, true, 0);
+                }
             }
 
             mThirdPartyAppsStarted = true;
@@ -1010,18 +1033,72 @@ public class LockSettingsService extends ILockSettings.Stub {
         if (protectorId == SyntheticPasswordManager.NULL_PROTECTOR_ID) {
             Slogf.i(TAG, "Migrating unsecured user %d to SP-based credential", userId);
             initializeSyntheticPassword(userId);
-        } else {
-            Slogf.i(TAG, "Existing unsecured user %d has a synthetic password; re-encrypting CE " +
-                    "key with it", userId);
-            AuthenticationResult result = mSpManager.unlockLskfBasedProtector(
-                    getGateKeeperService(), protectorId, LockscreenCredential.createNone(), userId,
-                    null);
-            if (result.syntheticPassword == null) {
-                Slogf.wtf(TAG, "Failed to unwrap synthetic password for unsecured user %d", userId);
-                return;
-            }
-            setUserKeyProtection(userId, result.syntheticPassword.deriveFileBasedEncryptionKey());
+            return;
         }
+        Slogf.i(TAG, "Existing unsecured user %d has a synthetic password", userId);
+        AuthenticationResult result = mSpManager.unlockLskfBasedProtector(
+                getGateKeeperService(), protectorId, LockscreenCredential.createNone(), userId,
+                null);
+        SyntheticPassword sp = result.syntheticPassword;
+        if (isWeaverDisabledOnUnsecuredUsers()) {
+            Slog.i(TAG, "config_disableWeaverOnUnsecuredUsers=true");
+
+            // If config_disableWeaverOnUnsecuredUsers=true, then the Weaver HAL may be buggy and
+            // need multiple retries before it works here to unwrap the SP, if the SP was already
+            // protected by Weaver.  Note that the problematic HAL can also deadlock if called with
+            // the ActivityManagerService lock held, but that should not be a problem here since
+            // that lock isn't held here, unlike unlockUserKeyIfUnsecured() where it is.
+            for (int i = 0; i < 12 && sp == null; i++) {
+                Slog.e(TAG, "Failed to unwrap synthetic password. Waiting 5 seconds to retry.");
+                SystemClock.sleep(5000);
+                result = mSpManager.unlockLskfBasedProtector(getGateKeeperService(), protectorId,
+                            LockscreenCredential.createNone(), userId, null);
+                sp = result.syntheticPassword;
+            }
+            if (sp == null) {
+                throw new IllegalStateException(
+                        "Failed to unwrap synthetic password for unsecured user");
+            }
+            // If the SP is protected by Weaver, then remove the Weaver protection in order to make
+            // config_disableWeaverOnUnsecuredUsers=true take effect.
+            if (result.usedWeaver) {
+                Slog.i(TAG, "Removing Weaver protection from the synthetic password");
+                // Create a new protector, which will not use Weaver.
+                long newProtectorId = mSpManager.createLskfBasedProtector(
+                        getGateKeeperService(), LockscreenCredential.createNone(), sp, userId);
+
+                // Out of paranoia, make sure the new protector really works.
+                result = mSpManager.unlockLskfBasedProtector(getGateKeeperService(),
+                            newProtectorId, LockscreenCredential.createNone(), userId, null);
+                sp = result.syntheticPassword;
+                if (sp == null) {
+                    throw new IllegalStateException("New SP protector does not work");
+                }
+
+                // Replace the protector.  Wait until PHASE_BOOT_COMPLETED to destroy the old
+                // protector, since the Weaver slot erasure and freeing cannot be rolled back.
+                setCurrentLskfBasedProtectorId(newProtectorId, userId);
+                mProtectorsToDestroyOnBootCompleted.add(new Pair(protectorId, userId));
+            } else {
+                Slog.i(TAG, "Synthetic password is already not protected by Weaver");
+            }
+        } else if (sp == null) {
+            Slogf.wtf(TAG, "Failed to unwrap synthetic password for unsecured user %d", userId);
+            return;
+        }
+        Slogf.i(TAG, "Encrypting CE key of user %d with synthetic password", userId);
+        setUserKeyProtection(userId, sp.deriveFileBasedEncryptionKey());
+    }
+
+    private void destroyMigratedProtectors() {
+        if (!mProtectorsToDestroyOnBootCompleted.isEmpty()) {
+            synchronized (mSpManager) {
+                for (Pair<Long, Integer> pair : mProtectorsToDestroyOnBootCompleted) {
+                    mSpManager.destroyLskfBasedProtector(pair.first, pair.second);
+                }
+            }
+        }
+        mProtectorsToDestroyOnBootCompleted = null; // The list is no longer needed.
     }
 
     /**
