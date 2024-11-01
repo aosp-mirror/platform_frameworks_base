@@ -69,6 +69,7 @@ import android.view.KeyEvent;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.policy.IShortcutService;
 import com.android.server.policy.KeyCombinationManager;
 
 import java.util.ArrayDeque;
@@ -119,6 +120,7 @@ final class KeyGestureController {
     private final int mSystemPid;
     private final KeyCombinationManager mKeyCombinationManager;
     private final SettingsObserver mSettingsObserver;
+    private final AppLaunchShortcutManager mAppLaunchShortcutManager;
     private final InputGestureManager mInputGestureManager = new InputGestureManager();
     private static final Object mUserLock = new Object();
     @UserIdInt
@@ -178,6 +180,7 @@ final class KeyGestureController {
         });
         mKeyCombinationManager = new KeyCombinationManager(mHandler);
         mSettingsObserver = new SettingsObserver(mHandler);
+        mAppLaunchShortcutManager = new AppLaunchShortcutManager(mContext);
         initBehaviors();
         initKeyCombinationRules();
     }
@@ -437,6 +440,7 @@ final class KeyGestureController {
 
     public void systemRunning() {
         mSettingsObserver.observe();
+        mAppLaunchShortcutManager.systemRunning();
     }
 
     public boolean interceptKeyBeforeQueueing(KeyEvent event, int policyFlags) {
@@ -511,6 +515,18 @@ final class KeyGestureController {
         // Any key that is not Alt or Meta cancels Caps Lock combo tracking.
         if (mPendingCapsLockToggle && !KeyEvent.isMetaKey(keyCode) && !KeyEvent.isAltKey(keyCode)) {
             mPendingCapsLockToggle = false;
+        }
+
+        AppLaunchShortcutManager.InterceptKeyResult result = mAppLaunchShortcutManager.interceptKey(
+                event);
+        if (result.consumed()) {
+            return true;
+        }
+        if (result.appLaunchData() != null) {
+            return handleKeyGesture(deviceId, new int[]{keyCode}, metaState,
+                    KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_APPLICATION,
+                    KeyGestureEvent.ACTION_GESTURE_COMPLETE, displayId,
+                    focusedToken, /* flags = */0, result.appLaunchData());
         }
 
         switch (keyCode) {
@@ -1251,6 +1267,16 @@ final class KeyGestureController {
         return result;
     }
 
+    @BinderThread
+    public AidlInputGestureData[] getAppLaunchBookmarks() {
+        List<InputGestureData> bookmarks = mAppLaunchShortcutManager.getBookmarks();
+        AidlInputGestureData[] result = new AidlInputGestureData[bookmarks.size()];
+        for (int i = 0; i < bookmarks.size(); i++) {
+            result[i] = bookmarks.get(i).getAidlData();
+        }
+        return result;
+    }
+
     private void onKeyGestureEventListenerDied(int pid) {
         synchronized (mKeyGestureEventListenerRecords) {
             mKeyGestureEventListenerRecords.remove(pid);
@@ -1320,6 +1346,15 @@ final class KeyGestureController {
             record.mKeyGestureHandler.asBinder().unlinkToDeath(record, 0);
             mKeyGestureHandlerRecords.remove(pid);
         }
+    }
+
+    public void registerShortcutKey(long shortcutCode, IShortcutService shortcutKeyReceiver)
+            throws RemoteException {
+        mAppLaunchShortcutManager.registerShortcutKey(shortcutCode, shortcutKeyReceiver);
+    }
+
+    public List<InputGestureData> getBookmarks() {
+        return mAppLaunchShortcutManager.getBookmarks();
     }
 
     private void onKeyGestureHandlerDied(int pid) {
@@ -1464,6 +1499,7 @@ final class KeyGestureController {
         }
         ipw.decreaseIndent();
         mKeyCombinationManager.dump("", ipw);
+        mAppLaunchShortcutManager.dump(ipw);
         mInputGestureManager.dump(ipw);
     }
 }

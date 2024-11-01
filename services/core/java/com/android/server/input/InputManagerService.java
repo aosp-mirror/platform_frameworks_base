@@ -130,6 +130,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.inputmethod.InputMethodSubtypeHandle;
 import com.android.internal.os.SomeArgs;
+import com.android.internal.policy.IShortcutService;
 import com.android.internal.policy.KeyInterceptionInfo;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.Preconditions;
@@ -3020,6 +3021,11 @@ public class InputManagerService extends IInputManager.Stub
         return mKeyGestureController.getCustomInputGestures(UserHandle.getCallingUserId());
     }
 
+    @Override
+    public AidlInputGestureData[] getAppLaunchBookmarks() {
+        return mKeyGestureController.getAppLaunchBookmarks();
+    }
+
     private void handleCurrentUserChanged(@UserIdInt int userId) {
         mCurrentUserId = userId;
         mKeyGestureController.setCurrentUserId(userId);
@@ -3561,6 +3567,12 @@ public class InputManagerService extends IInputManager.Stub
         @Override
         public void setCurrentUser(@UserIdInt int newUserId) {
             mHandler.obtainMessage(MSG_CURRENT_USER_CHANGED, newUserId).sendToTarget();
+        }
+
+        @Override
+        public void registerShortcutKey(long shortcutCode, IShortcutService shortcutKeyReceiver)
+                throws RemoteException {
+            mKeyGestureController.registerShortcutKey(shortcutCode, shortcutKeyReceiver);
         }
 
         @Override

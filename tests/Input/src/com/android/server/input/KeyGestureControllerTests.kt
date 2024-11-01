@@ -16,13 +16,16 @@
 
 package com.android.server.input
 
+import android.app.role.RoleManager
 import android.content.Context
 import android.content.ContextWrapper
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Resources
-import android.hardware.input.IInputManager
+import android.content.res.XmlResourceParser
 import android.hardware.input.AidlKeyGestureEvent
 import android.hardware.input.AppLaunchData
+import android.hardware.input.IInputManager
 import android.hardware.input.IKeyGestureEventListener
 import android.hardware.input.IKeyGestureHandler
 import android.hardware.input.InputGestureData
@@ -39,9 +42,11 @@ import android.platform.test.annotations.EnableFlags
 import android.platform.test.annotations.Presubmit
 import android.platform.test.flag.junit.SetFlagsRule
 import android.view.InputDevice
+import android.view.KeyCharacterMap
 import android.view.KeyEvent
 import android.view.WindowManagerPolicyConstants.FLAG_INTERACTIVE
 import androidx.test.core.app.ApplicationProvider
+import com.android.dx.mockito.inline.extended.ExtendedMockito
 import com.android.internal.R
 import com.android.internal.annotations.Keep
 import com.android.internal.util.FrameworkStatsLog
@@ -99,7 +104,9 @@ class KeyGestureControllerTests {
     @Rule
     val extendedMockitoRule = ExtendedMockitoRule.Builder(this)
         .mockStatic(FrameworkStatsLog::class.java)
-        .mockStatic(SystemProperties::class.java).build()!!
+        .mockStatic(SystemProperties::class.java)
+        .mockStatic(KeyCharacterMap::class.java)
+        .build()!!
 
     @JvmField
     @Rule
@@ -123,8 +130,6 @@ class KeyGestureControllerTests {
     @Before
     fun setup() {
         context = Mockito.spy(ContextWrapper(ApplicationProvider.getApplicationContext()))
-        Mockito.`when`(context.resources).thenReturn(resources)
-        inputManagerGlobalSession = InputManagerGlobal.createTestSession(iInputManager)
         setupInputDevices()
         setupBehaviors()
         testLooper = TestLooper()
@@ -139,11 +144,12 @@ class KeyGestureControllerTests {
     }
 
     private fun setupBehaviors() {
-        Mockito.`when`(
-            resources.getBoolean(
-                com.android.internal.R.bool.config_enableScreenshotChord
-            )
-        ).thenReturn(true)
+        Mockito.`when`(resources.getBoolean(R.bool.config_enableScreenshotChord)).thenReturn(true)
+        val testBookmarks: XmlResourceParser = context.resources.getXml(
+            com.android.test.input.R.xml.bookmarks
+        )
+        Mockito.`when`(resources.getXml(R.xml.bookmarks)).thenReturn(testBookmarks)
+        Mockito.`when`(context.resources).thenReturn(resources)
         Mockito.`when`(packageManager.hasSystemFeature(PackageManager.FEATURE_WATCH))
             .thenReturn(true)
         Mockito.`when`(packageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK))
@@ -152,6 +158,10 @@ class KeyGestureControllerTests {
     }
 
     private fun setupInputDevices() {
+        val correctIm = context.getSystemService(InputManager::class.java)!!
+        val virtualDevice = correctIm.getInputDevice(KeyCharacterMap.VIRTUAL_KEYBOARD)!!
+        val kcm = virtualDevice.keyCharacterMap!!
+        inputManagerGlobalSession = InputManagerGlobal.createTestSession(iInputManager)
         val inputManager = InputManager(context)
         Mockito.`when`(context.getSystemService(Mockito.eq(Context.INPUT_SERVICE)))
             .thenReturn(inputManager)
@@ -159,6 +169,7 @@ class KeyGestureControllerTests {
         val keyboardDevice = InputDevice.Builder().setId(DEVICE_ID).build()
         Mockito.`when`(iInputManager.inputDeviceIds).thenReturn(intArrayOf(DEVICE_ID))
         Mockito.`when`(iInputManager.getInputDevice(DEVICE_ID)).thenReturn(keyboardDevice)
+        ExtendedMockito.`when`(KeyCharacterMap.load(Mockito.anyInt())).thenReturn(kcm)
     }
 
     private fun notifyHomeGestureCompleted(keyGestureController: KeyGestureController) {
@@ -635,6 +646,171 @@ class KeyGestureControllerTests {
                 0,
                 intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
             ),
+            TestData(
+                "META + B -> Launch Default Browser",
+                intArrayOf(KeyEvent.KEYCODE_META_LEFT, KeyEvent.KEYCODE_B),
+                KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_APPLICATION,
+                intArrayOf(KeyEvent.KEYCODE_B),
+                KeyEvent.META_META_ON,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE),
+                AppLaunchData.createLaunchDataForRole(RoleManager.ROLE_BROWSER)
+            ),
+            TestData(
+                "META + C -> Launch Default Contacts",
+                intArrayOf(KeyEvent.KEYCODE_META_LEFT, KeyEvent.KEYCODE_C),
+                KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_APPLICATION,
+                intArrayOf(KeyEvent.KEYCODE_C),
+                KeyEvent.META_META_ON,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE),
+                AppLaunchData.createLaunchDataForCategory(Intent.CATEGORY_APP_CONTACTS)
+            ),
+            TestData(
+                "META + E -> Launch Default Email",
+                intArrayOf(KeyEvent.KEYCODE_META_LEFT, KeyEvent.KEYCODE_E),
+                KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_APPLICATION,
+                intArrayOf(KeyEvent.KEYCODE_E),
+                KeyEvent.META_META_ON,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE),
+                AppLaunchData.createLaunchDataForCategory(Intent.CATEGORY_APP_EMAIL)
+            ),
+            TestData(
+                "META + K -> Launch Default Calendar",
+                intArrayOf(KeyEvent.KEYCODE_META_LEFT, KeyEvent.KEYCODE_K),
+                KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_APPLICATION,
+                intArrayOf(KeyEvent.KEYCODE_K),
+                KeyEvent.META_META_ON,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE),
+                AppLaunchData.createLaunchDataForCategory(Intent.CATEGORY_APP_CALENDAR)
+            ),
+            TestData(
+                "META + M -> Launch Default Maps",
+                intArrayOf(KeyEvent.KEYCODE_META_LEFT, KeyEvent.KEYCODE_M),
+                KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_APPLICATION,
+                intArrayOf(KeyEvent.KEYCODE_M),
+                KeyEvent.META_META_ON,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE),
+                AppLaunchData.createLaunchDataForCategory(Intent.CATEGORY_APP_MAPS)
+            ),
+            TestData(
+                "META + P -> Launch Default Music",
+                intArrayOf(KeyEvent.KEYCODE_META_LEFT, KeyEvent.KEYCODE_P),
+                KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_APPLICATION,
+                intArrayOf(KeyEvent.KEYCODE_P),
+                KeyEvent.META_META_ON,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE),
+                AppLaunchData.createLaunchDataForCategory(Intent.CATEGORY_APP_MUSIC)
+            ),
+            TestData(
+                "META + S -> Launch Default SMS",
+                intArrayOf(KeyEvent.KEYCODE_META_LEFT, KeyEvent.KEYCODE_S),
+                KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_APPLICATION,
+                intArrayOf(KeyEvent.KEYCODE_S),
+                KeyEvent.META_META_ON,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE),
+                AppLaunchData.createLaunchDataForRole(RoleManager.ROLE_SMS)
+            ),
+            TestData(
+                "META + U -> Launch Default Calculator",
+                intArrayOf(KeyEvent.KEYCODE_META_LEFT, KeyEvent.KEYCODE_U),
+                KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_APPLICATION,
+                intArrayOf(KeyEvent.KEYCODE_U),
+                KeyEvent.META_META_ON,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE),
+                AppLaunchData.createLaunchDataForCategory(Intent.CATEGORY_APP_CALCULATOR)
+            ),
+            TestData(
+                "META + SHIFT + B -> Launch Default Browser",
+                intArrayOf(
+                    KeyEvent.KEYCODE_META_LEFT,
+                    KeyEvent.KEYCODE_SHIFT_LEFT,
+                    KeyEvent.KEYCODE_B
+                ),
+                KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_APPLICATION,
+                intArrayOf(KeyEvent.KEYCODE_B),
+                KeyEvent.META_META_ON or KeyEvent.META_SHIFT_ON,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE),
+                AppLaunchData.createLaunchDataForRole(RoleManager.ROLE_BROWSER)
+            ),
+            TestData(
+                "META + SHIFT + C -> Launch Default Contacts",
+                intArrayOf(
+                    KeyEvent.KEYCODE_META_LEFT,
+                    KeyEvent.KEYCODE_SHIFT_LEFT,
+                    KeyEvent.KEYCODE_C
+                ),
+                KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_APPLICATION,
+                intArrayOf(KeyEvent.KEYCODE_C),
+                KeyEvent.META_META_ON or KeyEvent.META_SHIFT_ON,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE),
+                AppLaunchData.createLaunchDataForCategory(Intent.CATEGORY_APP_CONTACTS)
+            ),
+            TestData(
+                "META + SHIFT + J -> Launch Target Activity",
+                intArrayOf(
+                    KeyEvent.KEYCODE_META_LEFT,
+                    KeyEvent.KEYCODE_SHIFT_LEFT,
+                    KeyEvent.KEYCODE_J
+                ),
+                KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_APPLICATION,
+                intArrayOf(KeyEvent.KEYCODE_J),
+                KeyEvent.META_META_ON or KeyEvent.META_SHIFT_ON,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE),
+                AppLaunchData.createLaunchDataForComponent("com.test", "com.test.BookmarkTest")
+            ),
+            TestData(
+                "EXPLORER -> Launch Default Browser",
+                intArrayOf(KeyEvent.KEYCODE_EXPLORER),
+                KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_APPLICATION,
+                intArrayOf(KeyEvent.KEYCODE_EXPLORER),
+                0,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE),
+                AppLaunchData.createLaunchDataForRole(RoleManager.ROLE_BROWSER)
+            ),
+            TestData(
+                "ENVELOPE -> Launch Default Email",
+                intArrayOf(KeyEvent.KEYCODE_ENVELOPE),
+                KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_APPLICATION,
+                intArrayOf(KeyEvent.KEYCODE_ENVELOPE),
+                0,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE),
+                AppLaunchData.createLaunchDataForCategory(Intent.CATEGORY_APP_EMAIL)
+            ),
+            TestData(
+                "CONTACTS -> Launch Default Contacts",
+                intArrayOf(KeyEvent.KEYCODE_CONTACTS),
+                KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_APPLICATION,
+                intArrayOf(KeyEvent.KEYCODE_CONTACTS),
+                0,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE),
+                AppLaunchData.createLaunchDataForCategory(Intent.CATEGORY_APP_CONTACTS)
+            ),
+            TestData(
+                "CALENDAR -> Launch Default Calendar",
+                intArrayOf(KeyEvent.KEYCODE_CALENDAR),
+                KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_APPLICATION,
+                intArrayOf(KeyEvent.KEYCODE_CALENDAR),
+                0,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE),
+                AppLaunchData.createLaunchDataForCategory(Intent.CATEGORY_APP_CALENDAR)
+            ),
+            TestData(
+                "MUSIC -> Launch Default Music",
+                intArrayOf(KeyEvent.KEYCODE_MUSIC),
+                KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_APPLICATION,
+                intArrayOf(KeyEvent.KEYCODE_MUSIC),
+                0,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE),
+                AppLaunchData.createLaunchDataForCategory(Intent.CATEGORY_APP_MUSIC)
+            ),
+            TestData(
+                "CALCULATOR -> Launch Default Calculator",
+                intArrayOf(KeyEvent.KEYCODE_CALCULATOR),
+                KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_APPLICATION,
+                intArrayOf(KeyEvent.KEYCODE_CALCULATOR),
+                0,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE),
+                AppLaunchData.createLaunchDataForCategory(Intent.CATEGORY_APP_CALCULATOR)
+            ),
         )
     }
 
@@ -642,6 +818,8 @@ class KeyGestureControllerTests {
     @Parameters(method = "keyGestureEventHandlerTestArguments")
     fun testKeyGestures(test: TestData) {
         val keyGestureController = KeyGestureController(context, testLooper.looper)
+        keyGestureController.systemRunning()
+
         testKeyGestureInternal(keyGestureController, test)
     }
 
