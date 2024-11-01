@@ -319,12 +319,12 @@ public class WallpaperManager {
      * This is only used internally by the framework and the WallpaperBackupAgent.
      * @hide
      */
-    @IntDef(value = {
+    @IntDef(prefix = { "ORIENTATION_" }, value = {
             ORIENTATION_UNKNOWN,
-            PORTRAIT,
-            LANDSCAPE,
-            SQUARE_PORTRAIT,
-            SQUARE_LANDSCAPE,
+            ORIENTATION_PORTRAIT,
+            ORIENTATION_LANDSCAPE,
+            ORIENTATION_SQUARE_PORTRAIT,
+            ORIENTATION_SQUARE_LANDSCAPE,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ScreenOrientation {}
@@ -338,25 +338,25 @@ public class WallpaperManager {
      * Portrait orientation of most screens
      * @hide
      */
-    public static final int PORTRAIT = 0;
+    public static final int ORIENTATION_PORTRAIT = 0;
 
     /**
      * Landscape orientation of most screens
      * @hide
      */
-    public static final int LANDSCAPE = 1;
+    public static final int ORIENTATION_LANDSCAPE = 1;
 
     /**
      * Portrait orientation with similar width and height (e.g. the inner screen of a foldable)
      * @hide
      */
-    public static final int SQUARE_PORTRAIT = 2;
+    public static final int ORIENTATION_SQUARE_PORTRAIT = 2;
 
     /**
      * Landscape orientation with similar width and height (e.g. the inner screen of a foldable)
      * @hide
      */
-    public static final int SQUARE_LANDSCAPE = 3;
+    public static final int ORIENTATION_SQUARE_LANDSCAPE = 3;
 
     /**
      * Converts a (width, height) screen size to a {@link ScreenOrientation}.
@@ -367,10 +367,10 @@ public class WallpaperManager {
     public static @ScreenOrientation int getOrientation(Point screenSize) {
         float ratio = ((float) screenSize.x) / screenSize.y;
         // ratios between 3/4 and 4/3 are considered square
-        return ratio >= 4 / 3f ? LANDSCAPE
-                : ratio > 1f ? SQUARE_LANDSCAPE
-                : ratio > 3 / 4f ? SQUARE_PORTRAIT
-                : PORTRAIT;
+        return ratio >= 4 / 3f ? ORIENTATION_LANDSCAPE
+                : ratio > 1f ? ORIENTATION_SQUARE_LANDSCAPE
+                : ratio > 3 / 4f ? ORIENTATION_SQUARE_PORTRAIT
+                : ORIENTATION_PORTRAIT;
     }
 
     /**
@@ -379,10 +379,10 @@ public class WallpaperManager {
      */
     public static @ScreenOrientation int getRotatedOrientation(@ScreenOrientation int orientation) {
         switch (orientation) {
-            case PORTRAIT: return LANDSCAPE;
-            case LANDSCAPE: return PORTRAIT;
-            case SQUARE_PORTRAIT: return SQUARE_LANDSCAPE;
-            case SQUARE_LANDSCAPE: return SQUARE_PORTRAIT;
+            case ORIENTATION_PORTRAIT: return ORIENTATION_LANDSCAPE;
+            case ORIENTATION_LANDSCAPE: return ORIENTATION_PORTRAIT;
+            case ORIENTATION_SQUARE_PORTRAIT: return ORIENTATION_SQUARE_LANDSCAPE;
+            case ORIENTATION_SQUARE_LANDSCAPE: return ORIENTATION_SQUARE_PORTRAIT;
             default: return ORIENTATION_UNKNOWN;
         }
     }
