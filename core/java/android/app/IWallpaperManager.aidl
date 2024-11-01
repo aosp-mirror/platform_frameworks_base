@@ -24,6 +24,8 @@ import android.os.ParcelFileDescriptor;
 import android.app.IWallpaperManagerCallback;
 import android.app.ILocalWallpaperColorConsumer;
 import android.app.WallpaperInfo;
+import android.app.wallpaper.WallpaperDescription;
+import android.app.wallpaper.WallpaperInstance;
 import android.content.ComponentName;
 import android.app.WallpaperColors;
 
@@ -61,8 +63,8 @@ interface IWallpaperManager {
     /**
      * Set the live wallpaper.
      */
-    void setWallpaperComponentChecked(in ComponentName name, in String callingPackage, int which,
-            int userId);
+    void setWallpaperComponentChecked(in WallpaperDescription description, in String callingPackage,
+            int which, int userId);
 
     /**
      * Set the live wallpaper. This only affects the system wallpaper.
@@ -128,6 +130,13 @@ interface IWallpaperManager {
      * information about that wallpaper.  Otherwise, if it is a static image, simply return null.
      */
     WallpaperInfo getWallpaperInfoWithFlags(int which, int userId);
+
+   /**
+    * Return the instance information about the wallpaper described by `which`, or null if lock
+    * screen is requested and it is the same as home.
+    */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.READ_WALLPAPER_INTERNAL)")
+    WallpaperInstance getWallpaperInstance(int which, int userId);
 
     /**
      * Return a file descriptor for the file that contains metadata about the given user's
