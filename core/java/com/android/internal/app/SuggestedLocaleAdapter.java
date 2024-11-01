@@ -28,6 +28,7 @@ import android.widget.BaseAdapter;
 import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.LinearLayout;
+import android.widget.RadioButton;
 import android.widget.TextView;
 
 import com.android.internal.R;
@@ -242,11 +243,7 @@ public class SuggestedLocaleAdapter extends BaseAdapter implements Filterable {
                 break;
             case TYPE_SYSTEM_LANGUAGE_FOR_APP_LANGUAGE_PICKER:
                 TextView title;
-                LocaleStore.LocaleInfo info = (LocaleStore.LocaleInfo) getItem(position);
-                if (info == null) {
-                    throw new NullPointerException("Non header locale cannot be null.");
-                }
-                if (info.isAppCurrentLocale()) {
+                if (mHasSpecificAppPackageName) {
                     title = itemView.findViewById(R.id.language_picker_item);
                 } else {
                     title = itemView.findViewById(R.id.locale);
@@ -254,11 +251,22 @@ public class SuggestedLocaleAdapter extends BaseAdapter implements Filterable {
                 title.setText(R.string.system_locale_title);
                 break;
             case TYPE_CURRENT_LOCALE:
-                updateTextView(itemView,
-                        itemView.findViewById(R.id.language_picker_item), position);
+                updateTextView(
+                        itemView, itemView.findViewById(R.id.language_picker_item), position);
                 break;
             default:
-                updateTextView(itemView, itemView.findViewById(R.id.locale), position);
+                LocaleStore.LocaleInfo localeInfo = (LocaleStore.LocaleInfo) getItem(position);
+                if (localeInfo == null) {
+                    throw new NullPointerException("Non header locale cannot be null.");
+                }
+                if (mHasSpecificAppPackageName && localeInfo.isSuggested() && !mCountryMode) {
+                    updateTextView(
+                            itemView,
+                            itemView.findViewById(R.id.language_picker_item),
+                            position);
+                } else {
+                    updateTextView(itemView, itemView.findViewById(R.id.locale), position);
+                }
                 break;
         }
         return itemView;
@@ -280,20 +288,21 @@ public class SuggestedLocaleAdapter extends BaseAdapter implements Filterable {
                 }
                 break;
             case TYPE_SYSTEM_LANGUAGE_FOR_APP_LANGUAGE_PICKER:
-                if (((LocaleStore.LocaleInfo) getItem(position)).isAppCurrentLocale()) {
-                    shouldReuseView = convertView instanceof LinearLayout
-                            && convertView.findViewById(R.id.language_picker_item) != null;
-                    if (!shouldReuseView) {
-                        updatedView = mInflater.inflate(
-                                R.layout.app_language_picker_current_locale_item,
-                                parent, false);
+                if (mHasSpecificAppPackageName) {
+                    updatedView = mInflater.inflate(
+                        R.layout.app_language_picker_locale_item, parent, false);
+                    RadioButton option = updatedView.findViewById(R.id.checkbox);
+                    if (((LocaleStore.LocaleInfo) getItem(position)).isAppCurrentLocale()) {
+                        option.setChecked(true);
+                    } else {
+                        option.setChecked(false);
                     }
                 } else {
                     shouldReuseView = convertView instanceof TextView
-                            && convertView.findViewById(R.id.locale) != null;
+                        && convertView.findViewById(R.id.locale) != null;
                     if (!shouldReuseView) {
-                        updatedView = mInflater.inflate(
-                                R.layout.language_picker_item, parent, false);
+                        updatedView =
+                            mInflater.inflate(R.layout.language_picker_item, parent, false);
                     }
                 }
                 break;
@@ -302,14 +311,30 @@ public class SuggestedLocaleAdapter extends BaseAdapter implements Filterable {
                         && convertView.findViewById(R.id.language_picker_item) != null;
                 if (!shouldReuseView) {
                     updatedView = mInflater.inflate(
-                            R.layout.app_language_picker_current_locale_item, parent, false);
+                            R.layout.app_language_picker_locale_item, parent, false);
+                    RadioButton option = updatedView.findViewById(R.id.checkbox);
+                    option.setChecked(true);
                 }
                 break;
             default:
-                shouldReuseView = convertView instanceof TextView
+                LocaleStore.LocaleInfo localeInfo = (LocaleStore.LocaleInfo) getItem(position);
+                if (mHasSpecificAppPackageName
+                        && localeInfo.isSuggested() && !mCountryMode) {
+                    shouldReuseView = convertView instanceof LinearLayout
+                        && convertView.findViewById(R.id.language_picker_item) != null;
+                    if ((!shouldReuseView)) {
+                        updatedView = mInflater.inflate(
+                            R.layout.app_language_picker_locale_item, parent, false);
+                        RadioButton option = updatedView.findViewById(R.id.checkbox);
+                        option.setChecked(false);
+                    }
+                } else {
+                    shouldReuseView = convertView instanceof TextView
                         && convertView.findViewById(R.id.locale) != null;
-                if (!shouldReuseView) {
-                    updatedView = mInflater.inflate(R.layout.language_picker_item, parent, false);
+                    if ((!shouldReuseView)) {
+                        updatedView = mInflater.inflate(
+                            R.layout.language_picker_item, parent, false);
+                    }
                 }
                 break;
         }

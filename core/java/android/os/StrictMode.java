@@ -20,17 +20,22 @@ import static android.annotation.SystemApi.Client.MODULE_LIBRARIES;
 import static com.android.internal.util.FrameworkStatsLog.UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__EXPLICIT_INTENT_FILTER_UNMATCH;
 import static com.android.internal.util.FrameworkStatsLog.UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__INTERNAL_NON_EXPORTED_COMPONENT_MATCH;
 import static com.android.internal.util.FrameworkStatsLog.UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__NULL_ACTION_MATCH;
+import static com.android.window.flags.Flags.balStrictModeRo;
 
 import android.animation.ValueAnimator;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.app.ActivityManager;
+import android.app.ActivityTaskManager;
 import android.app.ActivityThread;
 import android.app.IActivityManager;
+import android.app.IBackgroundActivityLaunchCallback;
 import android.app.IUnsafeIntentStrictModeCallback;
+import android.app.PendingIntent;
 import android.app.compat.CompatChanges;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
@@ -45,6 +50,7 @@ import android.content.res.Configuration;
 import android.net.TrafficStats;
 import android.net.Uri;
 import android.os.storage.IStorageManager;
+import android.os.strictmode.BackgroundActivityLaunchViolation;
 import android.os.strictmode.CleartextNetworkViolation;
 import android.os.strictmode.ContentUriWithoutPermissionViolation;
 import android.os.strictmode.CredentialProtectedWhileLockedViolation;
@@ -82,6 +88,7 @@ import com.android.internal.os.RuntimeInit;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.HexDump;
 import com.android.internal.util.Preconditions;
+import com.android.window.flags.Flags;
 
 import dalvik.system.BlockGuard;
 import dalvik.system.CloseGuard;
@@ -266,6 +273,7 @@ public final class StrictMode {
             DETECT_VM_IMPLICIT_DIRECT_BOOT,
             DETECT_VM_INCORRECT_CONTEXT_USE,
             DETECT_VM_UNSAFE_INTENT_LAUNCH,
+            DETECT_VM_BACKGROUND_ACTIVITY_LAUNCH_ABORTED,
             PENALTY_GATHER,
             PENALTY_LOG,
             PENALTY_DIALOG,
@@ -309,6 +317,8 @@ public final class StrictMode {
     private static final int DETECT_VM_INCORRECT_CONTEXT_USE = 1 << 12;
     /** @hide */
     private static final int DETECT_VM_UNSAFE_INTENT_LAUNCH = 1 << 13;
+    /** @hide */
+    private static final int DETECT_VM_BACKGROUND_ACTIVITY_LAUNCH_ABORTED = 1 << 14;
 
     /** @hide */
     private static final int DETECT_VM_ALL = 0x0000ffff;
@@ -902,6 +912,9 @@ public final class StrictMode {
                 if (targetSdk >= Build.VERSION_CODES.S) {
                     detectUnsafeIntentLaunch();
                 }
+                if (balStrictModeRo() && targetSdk > Build.VERSION_CODES.VANILLA_ICE_CREAM) {
+                    detectBlockedBackgroundActivityLaunch();
+                }
 
                 // TODO: Decide whether to detect non SDK API usage beyond a certain API level.
                 // TODO: enable detectImplicitDirectBoot() once system is less noisy
@@ -1137,6 +1150,39 @@ public final class StrictMode {
              */
             public @NonNull Builder permitUnsafeIntentLaunch() {
                 return disable(DETECT_VM_UNSAFE_INTENT_LAUNCH);
+            }
+
+            /**
+             * Detects when your app is blocked from launching a background activity or a
+             * PendingIntent created by your app cannot be launched.
+             * <p>
+             * Starting an activity requires <a
+             * href="https://developer.android.com/guide/components/activities/background-starts
+             * ">specific permissions</a> which may depend on the state at runtime and especially
+             * in case of {@link android.app.PendingIntent} starts on the collaborating app.
+             * If the activity start is blocked methods like {@link Context#startActivity(Intent)}
+             * or {@link PendingIntent#send()} have no way to return that information. Instead you
+             * can use this strct mode feature to detect blocked starts.
+             * <p>
+             * Note that in some cases blocked starts may be unavoidable, e.g. when the user clicks
+             * the home button while the app tries to start a new activity.
+             */
+            @SuppressWarnings("BuilderSetStyle")
+            @FlaggedApi(Flags.FLAG_BAL_STRICT_MODE_RO)
+            public @NonNull Builder detectBlockedBackgroundActivityLaunch() {
+                return enable(DETECT_VM_BACKGROUND_ACTIVITY_LAUNCH_ABORTED);
+            }
+
+            /**
+             * Stops detecting whether your app is blocked from launching a background activity or
+             * a PendingIntent created by your app cannot be launched.
+             * <p>
+             * This disables the effect of {@link #detectBlockedBackgroundActivityLaunch()}.
+             */
+            @SuppressWarnings("BuilderSetStyle")
+            @FlaggedApi(Flags.FLAG_BAL_STRICT_MODE_RO)
+            public @NonNull Builder ignoreBlockedBackgroundActivityLaunch() {
+                return disable(DETECT_VM_BACKGROUND_ACTIVITY_LAUNCH_ABORTED);
             }
 
             /**
@@ -2133,7 +2179,22 @@ public final class StrictMode {
                 registerIntentMatchingRestrictionCallback();
             }
 
+            if ((sVmPolicy.mask & DETECT_VM_BACKGROUND_ACTIVITY_LAUNCH_ABORTED) != 0) {
+                registerBackgroundActivityLaunchCallback();
+            }
+
             setBlockGuardVmPolicy(sVmPolicy.mask);
+        }
+    }
+
+    private static void registerBackgroundActivityLaunchCallback() {
+        try {
+            ActivityTaskManager.getService().registerBackgroundActivityStartCallback(
+                    new BackgroundActivityLaunchCallback());
+        } catch (DeadObjectException e) {
+            // ignore
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException handling StrictMode violation", e);
         }
     }
 
@@ -2157,6 +2218,16 @@ public final class StrictMode {
                 ActivityManager.getService().registerStrictModeCallback(sUnsafeIntentCallback);
             } catch (RemoteException e) {
                 // system_server should not throw
+            }
+        }
+    }
+
+    private static final class BackgroundActivityLaunchCallback
+            extends IBackgroundActivityLaunchCallback.Stub {
+        @Override
+        public void onBackgroundActivityLaunchAborted(String message) {
+            if (StrictMode.vmBackgroundActivityLaunchEnabled()) {
+                StrictMode.onBackgroundActivityLaunchAborted(message);
             }
         }
     }
@@ -2233,6 +2304,11 @@ public final class StrictMode {
     /** @hide */
     public static boolean vmUnsafeIntentLaunchEnabled() {
         return (sVmPolicy.mask & DETECT_VM_UNSAFE_INTENT_LAUNCH) != 0;
+    }
+
+    /** @hide */
+    public static boolean vmBackgroundActivityLaunchEnabled() {
+        return (sVmPolicy.mask & DETECT_VM_BACKGROUND_ACTIVITY_LAUNCH_ABORTED) != 0;
     }
 
     /** @hide */
@@ -2400,6 +2476,11 @@ public final class StrictMode {
                 return;
         }
         onVmPolicyViolation(new UnsafeIntentLaunchViolation(intent, msg + intent));
+    }
+
+    /** @hide */
+    public static void onBackgroundActivityLaunchAborted(String message) {
+        onVmPolicyViolation(new BackgroundActivityLaunchViolation(message));
     }
 
     /** Assume locked until we hear otherwise */

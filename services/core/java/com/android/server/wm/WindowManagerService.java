@@ -8384,6 +8384,20 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         @Override
+        public void setIgnoreActivitySizeRestrictionsOnDisplay(@NonNull String displayUniqueId,
+                int displayType, boolean enabled) {
+            final long origId = Binder.clearCallingIdentity();
+            try {
+                synchronized (mGlobalLock) {
+                    mDisplayWindowSettings.setIgnoreActivitySizeRestrictionsOnDisplayLocked(
+                            displayUniqueId, displayType, enabled);
+                }
+            } finally {
+                Binder.restoreCallingIdentity(origId);
+            }
+        }
+
+        @Override
         public void clearDisplaySettings(String displayUniqueId, int displayType) {
             final long origId = Binder.clearCallingIdentity();
             try {

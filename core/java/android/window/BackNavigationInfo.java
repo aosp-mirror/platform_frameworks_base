@@ -87,6 +87,13 @@ public final class BackNavigationInfo implements Parcelable {
      */
     public static final String KEY_GESTURE_FINISHED = "GestureFinished";
 
+    /**
+     * Touch gestured has transferred to embedded window, Shell should pilfer pointers so the
+     * embedded won't receive motion events.
+     * @hide
+     */
+    public static final String KEY_TOUCH_GESTURE_TRANSFERRED = "TouchGestureTransferred";
+
 
     /**
      * Defines the type of back destinations a back even can lead to. This is used to define the
@@ -119,7 +126,7 @@ public final class BackNavigationInfo implements Parcelable {
     @NonNull
     private final Rect mTouchableRegion;
 
-    private final boolean mAppProgressGenerationAllowed;
+    private boolean mAppProgressGenerationAllowed;
     private final int mFocusedTaskId;
 
     /**
@@ -250,6 +257,14 @@ public final class BackNavigationInfo implements Parcelable {
      */
     public int getFocusedTaskId() {
         return mFocusedTaskId;
+    }
+
+    /**
+     * Force disable app to intercept back progress event.
+     * @hide
+     */
+    public void disableAppProgressGenerationAllowed() {
+        mAppProgressGenerationAllowed = false;
     }
 
     /**

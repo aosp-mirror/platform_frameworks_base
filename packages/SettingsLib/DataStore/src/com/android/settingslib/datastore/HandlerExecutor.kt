@@ -24,7 +24,7 @@ import java.util.concurrent.Executor
  * Adapter of [Handler] and [Executor], where the task is executed on handler with given looper.
  *
  * When current looper is same with the given looper, task passed to [Executor.execute] will be
- * executed immediately to improve better performance.
+ * executed immediately to achieve better performance.
  *
  * @param looper Looper of the handler.
  */

@@ -54,6 +54,7 @@ import android.view.WindowManager.TRANSIT_CLOSE
 import android.view.WindowManager.TRANSIT_NONE
 import android.view.WindowManager.TRANSIT_OPEN
 import android.view.WindowManager.TRANSIT_TO_FRONT
+import android.widget.Toast
 import android.window.DesktopModeFlags
 import android.window.DesktopModeFlags.DISABLE_NON_RESIZABLE_APP_SNAP_RESIZE
 import android.window.DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY
@@ -877,7 +878,6 @@ class DesktopTasksController(
                     taskSurface,
                     startBounds = currentDragBounds,
                     endBounds = containerBounds,
-                    isResizable = taskInfo.isResizeable
                 )
             }
             return
@@ -1012,7 +1012,6 @@ class DesktopTasksController(
                     taskSurface,
                     startBounds = currentDragBounds,
                     endBounds = destinationBounds,
-                    isResizable = taskInfo.isResizeable,
                 )
             }
             return
@@ -1046,7 +1045,13 @@ class DesktopTasksController(
                 taskSurface,
                 startBounds = currentDragBounds,
                 endBounds = dragStartBounds,
-                isResizable = taskInfo.isResizeable,
+                doOnEnd = {
+                    Toast.makeText(
+                        context,
+                        com.android.wm.shell.R.string.desktop_mode_non_resizable_snap_text,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                },
             )
         } else {
             val resizeTrigger = if (position == SnapPosition.LEFT) {
@@ -1156,7 +1161,7 @@ class DesktopTasksController(
                 if (runningTaskInfo != null) {
                     // Task is already running, reorder it to the front
                     wct.reorder(runningTaskInfo.token, /* onTop= */ true)
-                } else if (Flags.enableDesktopWindowingPersistence()) {
+                } else if (DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_PERSISTENCE.isTrue()) {
                     // Task is not running, start it
                     wct.startTask(
                         taskId,
@@ -1984,17 +1989,32 @@ class DesktopTasksController(
                 )
             }
             IndicatorType.NO_INDICATOR -> {
+                // Create a copy so that we can animate from the current bounds if we end up having
+                // to snap the surface back without a WCT change.
+                val destinationBounds = Rect(currentDragBounds)
                 // If task bounds are outside valid drag area, snap them inward
                 DragPositioningCallbackUtility.snapTaskBoundsIfNecessary(
-                    currentDragBounds,
+                    destinationBounds,
                     validDragArea
                 )
 
-                if (currentDragBounds == dragStartBounds) return
+                if (destinationBounds == dragStartBounds) {
+                    // There's no actual difference between the start and end bounds, so while a
+                    // WCT change isn't needed, the dragged surface still needs to be snapped back
+                    // to its original location.
+                    releaseVisualIndicator()
+                    returnToDragStartAnimator.start(
+                        taskInfo.taskId,
+                        taskSurface,
+                        startBounds = currentDragBounds,
+                        endBounds = dragStartBounds,
+                    )
+                    return
+                }
 
                 // Update task bounds so that the task position will match the position of its leash
                 val wct = WindowContainerTransaction()
-                wct.setBounds(taskInfo.token, currentDragBounds)
+                wct.setBounds(taskInfo.token, destinationBounds)
                 transitions.startTransition(TRANSIT_CHANGE, wct, null)
 
                 releaseVisualIndicator()

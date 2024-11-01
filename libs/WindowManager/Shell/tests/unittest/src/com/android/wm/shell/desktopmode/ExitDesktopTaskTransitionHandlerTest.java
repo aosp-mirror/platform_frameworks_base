@@ -19,8 +19,6 @@ package com.android.wm.shell.desktopmode;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 
-import static androidx.test.internal.runner.junit4.statement.UiThreadStatement.runOnUiThread;
-
 import static com.android.wm.shell.desktopmode.DesktopModeTransitionTypes.TRANSIT_EXIT_DESKTOP_MODE_UNKNOWN;
 
 import static org.junit.Assert.assertTrue;
@@ -28,6 +26,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import android.animation.AnimatorTestRule;
 import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.WindowConfiguration;
@@ -36,6 +35,8 @@ import android.content.res.Resources;
 import android.graphics.Point;
 import android.os.Handler;
 import android.os.IBinder;
+import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper;
 import android.util.DisplayMetrics;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
@@ -53,16 +54,22 @@ import com.android.wm.shell.shared.desktopmode.DesktopModeTransitionSource;
 import com.android.wm.shell.transition.Transitions;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.util.ArrayList;
 import java.util.function.Supplier;
 
 /** Tests of {@link com.android.wm.shell.desktopmode.ExitDesktopTaskTransitionHandler} */
 @SmallTest
+@TestableLooper.RunWithLooper
+@RunWith(AndroidTestingRunner.class)
 public class ExitDesktopTaskTransitionHandlerTest extends ShellTestCase {
+
+    @Rule
+    public final AnimatorTestRule mAnimatorTestRule = new AnimatorTestRule(this);
 
     @Mock
     private Transitions mTransitions;
@@ -105,7 +112,7 @@ public class ExitDesktopTaskTransitionHandlerTest extends ShellTestCase {
     }
 
     @Test
-    public void testTransitExitDesktopModeAnimation() throws Throwable {
+    public void testTransitExitDesktopModeAnimation() {
         final int transitionType = TRANSIT_EXIT_DESKTOP_MODE_UNKNOWN;
         final int taskId = 1;
         WindowContainerTransaction wct = new WindowContainerTransaction();
@@ -118,21 +125,16 @@ public class ExitDesktopTaskTransitionHandlerTest extends ShellTestCase {
         TransitionInfo.Change change =
                 createChange(WindowManager.TRANSIT_CHANGE, taskId, WINDOWING_MODE_FULLSCREEN);
         TransitionInfo info = createTransitionInfo(TRANSIT_EXIT_DESKTOP_MODE_UNKNOWN, change);
-        ArrayList<Exception> exceptions = new ArrayList<>();
-        runOnUiThread(() -> {
-            try {
-                assertTrue(mExitDesktopTaskTransitionHandler
-                        .startAnimation(mToken, info,
-                                new SurfaceControl.Transaction(),
-                                new SurfaceControl.Transaction(),
-                                mTransitionFinishCallback));
-            } catch (Exception e) {
-                exceptions.add(e);
-            }
-        });
-        if (!exceptions.isEmpty()) {
-            throw exceptions.get(0);
-        }
+
+        final boolean animated = mExitDesktopTaskTransitionHandler
+                .startAnimation(mToken, info,
+                        new SurfaceControl.Transaction(),
+                        new SurfaceControl.Transaction(),
+                        mTransitionFinishCallback);
+        mAnimatorTestRule.advanceTimeBy(
+                ExitDesktopTaskTransitionHandler.FULLSCREEN_ANIMATION_DURATION);
+
+        assertTrue(animated);
     }
 
     private TransitionInfo.Change createChange(@WindowManager.TransitionType int type, int taskId,

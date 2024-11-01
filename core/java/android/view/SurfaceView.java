@@ -40,6 +40,7 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.graphics.Region;
 import android.graphics.RenderNode;
 import android.hardware.input.InputManager;
@@ -1666,7 +1667,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
     }
 
     private final Rect mRTLastReportedPosition = new Rect();
-    private final Rect mRTLastSetCrop = new Rect();
+    private final RectF mRTLastSetCrop = new RectF();
 
     private class SurfaceViewPositionUpdateListener implements RenderNode.PositionUpdateListener {
         private final int mRtSurfaceWidth;
@@ -1711,16 +1712,18 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
 
         @Override
         public void positionChanged(long frameNumber, int left, int top, int right, int bottom,
-                int clipLeft, int clipTop, int clipRight, int clipBottom) {
+                int clipLeft, int clipTop, int clipRight, int clipBottom,
+                int nodeWidth, int nodeHeight) {
             try {
                 if (DEBUG_POSITION) {
                     Log.d(TAG, String.format(
                             "%d updateSurfacePosition RenderWorker, frameNr = %d, "
                                     + "position = [%d, %d, %d, %d] clip = [%d, %d, %d, %d] "
-                                    + "surfaceSize = %dx%d",
+                                    + "surfaceSize = %dx%d renderNodeSize = %d%d",
                             System.identityHashCode(SurfaceView.this), frameNumber,
                             left, top, right, bottom, clipLeft, clipTop, clipRight, clipBottom,
-                            mRtSurfaceWidth, mRtSurfaceHeight));
+                            mRtSurfaceWidth, mRtSurfaceHeight,
+                            nodeWidth, nodeHeight));
                 }
                 synchronized (mSurfaceControlLock) {
                     if (mSurfaceControl == null) return;
@@ -1735,14 +1738,29 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                             mRTLastReportedPosition.top /*positionTop*/,
                             postScaleX, postScaleY);
 
-                    mRTLastSetCrop.set(clipLeft, clipTop, clipRight, clipBottom);
+                    // The computed crop is in view-relative dimensions, however we need it to be
+                    // in buffer-relative dimensions. So scale the crop by the ratio between
+                    // the view's unscaled width/height (nodeWidth/Height), and the surface's
+                    // width/height
+                    // That is, if the Surface has a fixed size of 50x50, the SurfaceView is laid
+                    // out to a size of 100x100, and the SurfaceView is ultimately scaled to
+                    // 1000x1000, then we need to scale the crop by just the 2x from surface
+                    // domain to SV domain.
+                    final float surfaceToNodeScaleX = (float) mRtSurfaceWidth / (float) nodeWidth;
+                    final float surfaceToNodeScaleY = (float) mRtSurfaceHeight / (float) nodeHeight;
+                    mRTLastSetCrop.set(clipLeft * surfaceToNodeScaleX,
+                            clipTop * surfaceToNodeScaleY,
+                            clipRight * surfaceToNodeScaleX,
+                            clipBottom * surfaceToNodeScaleY);
+
                     if (DEBUG_POSITION) {
-                        Log.d(TAG, String.format("Setting layer crop = [%d, %d, %d, %d] "
+                        Log.d(TAG, String.format("Setting layer crop = [%f, %f, %f, %f] "
                                         + "from scale %f, %f", mRTLastSetCrop.left,
                                 mRTLastSetCrop.top, mRTLastSetCrop.right, mRTLastSetCrop.bottom,
-                                postScaleX, postScaleY));
+                                surfaceToNodeScaleX, surfaceToNodeScaleY));
                     }
-                    mPositionChangedTransaction.setCrop(mSurfaceControl, mRTLastSetCrop);
+                    mPositionChangedTransaction.setCrop(mSurfaceControl, mRTLastSetCrop.left,
+                            mRTLastSetCrop.top, mRTLastSetCrop.right, mRTLastSetCrop.bottom);
                     if (mRTLastSetCrop.isEmpty()) {
                         mPositionChangedTransaction.hide(mSurfaceControl);
                     } else {
