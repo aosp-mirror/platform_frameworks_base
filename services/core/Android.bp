@@ -239,6 +239,7 @@ java_library_static {
         "aconfig_new_storage_flags_lib",
         "powerstats_flags_lib",
         "locksettings_flags_lib",
+        "profiling_flags_lib",
     ],
     javac_shard_size: 50,
     javacflags: [
@@ -254,6 +255,13 @@ java_library_static {
             "FlaggedApi",
         ],
     },
+    jarjar_rules: ":services-jarjar-rules",
+    apex_available: ["//apex_available:platform"],
+}
+
+filegroup {
+    name: "services-jarjar-rules",
+    srcs: ["services-jarjar-rules.txt"],
 }
 
 java_genrule {
