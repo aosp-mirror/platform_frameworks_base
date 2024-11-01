@@ -18253,7 +18253,7 @@ package android.telephony.satellite {
     method @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") public void onSatelliteDatagramReceived(long, @NonNull android.telephony.satellite.SatelliteDatagram, int, @NonNull java.util.function.Consumer<java.lang.Void>);
   }
 
-  public final class SatelliteManager {
+  @FlaggedApi("com.android.internal.telephony.flags.satellite_state_change_listener") public final class SatelliteManager {
     method @FlaggedApi("com.android.internal.telephony.flags.carrier_enabled_satellite_flag") @RequiresPermission(android.Manifest.permission.SATELLITE_COMMUNICATION) public void addAttachRestrictionForCarrier(int, int, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>);
     method @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") @RequiresPermission(android.Manifest.permission.SATELLITE_COMMUNICATION) public void deprovisionService(@NonNull String, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>);
     method @FlaggedApi("com.android.internal.telephony.flags.carrier_enabled_satellite_flag") @NonNull @RequiresPermission(android.Manifest.permission.SATELLITE_COMMUNICATION) public java.util.Set<java.lang.Integer> getAttachRestrictionReasonsForCarrier(int);

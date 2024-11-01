@@ -47,6 +47,8 @@ import android.telephony.emergency.EmergencyNumber;
 import android.telephony.ims.ImsCallSession;
 import android.telephony.ims.ImsReasonInfo;
 import android.telephony.ims.MediaQualityStatus;
+import android.telephony.satellite.SatelliteStateChangeListener;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
 
@@ -55,12 +57,14 @@ import com.android.internal.listeners.ListenerExecutor;
 import com.android.internal.telephony.ICarrierConfigChangeListener;
 import com.android.internal.telephony.ICarrierPrivilegesCallback;
 import com.android.internal.telephony.IOnSubscriptionsChangedListener;
+import com.android.internal.telephony.ISatelliteStateChangeListener;
 import com.android.internal.telephony.ITelephonyRegistry;
 import com.android.server.telecom.flags.Flags;
 
 import java.lang.ref.WeakReference;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.WeakHashMap;
@@ -1480,6 +1484,111 @@ public class TelephonyRegistryManager {
             @NonNull TelephonyCallback callback, boolean notifyNow) {
         listenFromCallback(false, false, subId,
                 pkgName, attributionTag, callback, new int[0], notifyNow);
+    }
+
+    @NonNull
+    @GuardedBy("sSatelliteStateChangeListeners")
+    private static final Map<SatelliteStateChangeListener,
+                WeakReference<SatelliteStateChangeListenerWrapper>>
+            sSatelliteStateChangeListeners = new ArrayMap<>();
+
+    /**
+     * Register a {@link SatelliteStateChangeListener} to receive notification when Satellite state
+     * has changed.
+     *
+     * @param executor The {@link Executor} where the {@code listener} will be invoked
+     * @param listener The listener to monitor the satellite state change
+     * @hide
+     */
+    public void addSatelliteStateChangeListener(@NonNull @CallbackExecutor Executor executor,
+            @NonNull SatelliteStateChangeListener listener) {
+        if (listener == null || executor == null) {
+            throw new IllegalArgumentException("Listener and executor must be non-null");
+        }
+
+        synchronized (sSatelliteStateChangeListeners) {
+            WeakReference<SatelliteStateChangeListenerWrapper> existing =
+                    sSatelliteStateChangeListeners.get(listener);
+            if (existing != null && existing.get() != null) {
+                Log.d(TAG, "addSatelliteStateChangeListener: listener already registered");
+                return;
+            }
+            SatelliteStateChangeListenerWrapper wrapper =
+                    new SatelliteStateChangeListenerWrapper(executor, listener);
+            try {
+                sRegistry.addSatelliteStateChangeListener(
+                        wrapper,
+                        mContext.getOpPackageName(),
+                        mContext.getAttributionTag());
+                sSatelliteStateChangeListeners.put(listener, new WeakReference<>(wrapper));
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Unregister a {@link SatelliteStateChangeListener} to stop receiving notification when
+     * satellite state has changed.
+     *
+     * @param listener The listener previously registered with addSatelliteStateChangeListener.
+     * @hide
+     */
+    public void removeSatelliteStateChangeListener(@NonNull SatelliteStateChangeListener listener) {
+        if (listener == null) {
+            throw new IllegalArgumentException("listener must be non-null");
+        }
+
+        synchronized (sSatelliteStateChangeListeners) {
+            WeakReference<SatelliteStateChangeListenerWrapper> ref =
+                    sSatelliteStateChangeListeners.get(listener);
+            if (ref == null) return;
+            SatelliteStateChangeListenerWrapper wrapper = ref.get();
+            if (wrapper == null) return;
+            try {
+                sRegistry.removeSatelliteStateChangeListener(wrapper, mContext.getOpPackageName());
+                sSatelliteStateChangeListeners.remove(listener);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Notify the registrants that the satellite state has changed.
+     *
+     * @param isEnabled True if the satellite modem is enabled, false otherwise
+     * @hide
+     */
+    public void notifySatelliteStateChanged(boolean isEnabled) {
+        try {
+            sRegistry.notifySatelliteStateChanged(isEnabled);
+        } catch (RemoteException ex) {
+            // system process is dead
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    private static class SatelliteStateChangeListenerWrapper extends
+            ISatelliteStateChangeListener.Stub implements ListenerExecutor {
+        @NonNull private final WeakReference<SatelliteStateChangeListener> mListener;
+        @NonNull private final Executor mExecutor;
+
+        SatelliteStateChangeListenerWrapper(@NonNull Executor executor,
+                @NonNull SatelliteStateChangeListener listener) {
+            mExecutor = executor;
+            mListener = new WeakReference<>(listener);
+        }
+
+        @Override
+        public void onSatelliteEnabledStateChanged(boolean isEnabled) {
+            Binder.withCleanCallingIdentity(
+                    () ->
+                            executeSafely(
+                                    mExecutor,
+                                    mListener::get,
+                                    sscl -> sscl.onEnabledStateChanged(isEnabled)));
+        }
     }
 
     private static class CarrierPrivilegesCallbackWrapper extends ICarrierPrivilegesCallback.Stub
