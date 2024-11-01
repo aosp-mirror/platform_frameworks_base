@@ -165,6 +165,17 @@ public class RavenwoodRuntimeEnvironmentController {
         RavenwoodSystemProperties.initialize(RAVENWOOD_BUILD_PROP);
         setSystemProperties(null);
 
+        // Do this after loading RAVENWOOD_NATIVE_RUNTIME_NAME (which backs Os.setenv()),
+        // before loadFrameworkNativeCode() (which uses $ANDROID_LOG_TAGS).
+        if (RAVENWOOD_VERBOSE_LOGGING) {
+            RavenwoodCommonUtils.log(TAG, "Force enabling verbose logging");
+            try {
+                Os.setenv("ANDROID_LOG_TAGS", "*:v", true);
+            } catch (ErrnoException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
         // Make sure libandroid_runtime is loaded.
         RavenwoodNativeLoader.loadFrameworkNativeCode();
 
@@ -174,15 +185,6 @@ public class RavenwoodRuntimeEnvironmentController {
         // Touch some references early to ensure they're <clinit>'ed
         Objects.requireNonNull(Build.TYPE);
         Objects.requireNonNull(Build.VERSION.SDK);
-
-        if (RAVENWOOD_VERBOSE_LOGGING) {
-            RavenwoodCommonUtils.log(TAG, "Force enabling verbose logging");
-            try {
-                Os.setenv("ANDROID_LOG_TAGS", "*:v", true);
-            } catch (ErrnoException e) {
-                // Shouldn't happen.
-            }
-        }
 
         System.setProperty(RAVENWOOD_VERSION_JAVA_SYSPROP, "1");
         // This will let AndroidJUnit4 use the original runner.
