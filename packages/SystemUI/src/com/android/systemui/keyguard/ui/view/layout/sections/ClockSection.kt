@@ -186,12 +186,23 @@ constructor(
         constraints.apply {
             connect(customR.id.lockscreen_clock_view_large, START, PARENT_ID, START)
             connect(customR.id.lockscreen_clock_view_large, END, guideline, END)
-            connect(customR.id.lockscreen_clock_view_large, BOTTOM, R.id.device_entry_icon_view, TOP)
+            connect(
+                customR.id.lockscreen_clock_view_large,
+                BOTTOM,
+                R.id.device_entry_icon_view,
+                TOP,
+            )
             val largeClockTopMargin =
                 keyguardClockViewModel.getLargeClockTopMargin() +
                     getDimen(DATE_WEATHER_VIEW_HEIGHT) +
                     getDimen(ENHANCED_SMARTSPACE_HEIGHT)
-            connect(customR.id.lockscreen_clock_view_large, TOP, PARENT_ID, TOP, largeClockTopMargin)
+            connect(
+                customR.id.lockscreen_clock_view_large,
+                TOP,
+                PARENT_ID,
+                TOP,
+                largeClockTopMargin,
+            )
             constrainWidth(customR.id.lockscreen_clock_view_large, WRAP_CONTENT)
 
             // The following two lines make lockscreen_clock_view_large is constrained to available
