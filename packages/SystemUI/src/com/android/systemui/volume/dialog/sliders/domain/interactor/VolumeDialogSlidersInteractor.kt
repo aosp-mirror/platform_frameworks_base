@@ -84,7 +84,7 @@ constructor(
 
             // Always show the stream for audio sharing if it exists.
             if (
-                Flags.volumeDialogAudioSharingFix() &&
+                (Flags.volumeDialogAudioSharingFix() || Flags.audioSharingDeveloperOption()) &&
                     streamModel.stream == VolumeDialogControllerImpl.DYNAMIC_STREAM_BROADCAST
             ) {
                 return true

@@ -36,7 +36,7 @@ interface AudioSharingModule {
             impl: Lazy<AudioSharingInteractorImpl>,
             emptyImpl: Lazy<AudioSharingInteractorEmptyImpl>,
         ): AudioSharingInteractor =
-            if (Flags.volumeDialogAudioSharingFix()) {
+            if (Flags.volumeDialogAudioSharingFix() || Flags.audioSharingDeveloperOption()) {
                 impl.get()
             } else {
                 emptyImpl.get()
