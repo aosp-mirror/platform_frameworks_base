@@ -314,3 +314,12 @@ flag {
     description: "Enable AppOp mode caching in AppOpsManager"
     bug: "366013082"
 }
+
+flag {
+    name: "permission_tree_apis_deprecated"
+    is_fixed_read_only: true
+    is_exported: true
+    namespace: "permissions"
+    description: "This flag is used to deprecate permission tree related APIs"
+    bug: "376535612"
+}

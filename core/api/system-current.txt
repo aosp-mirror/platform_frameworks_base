@@ -7230,7 +7230,6 @@ package android.media {
     field @RequiresPermission(allOf={android.Manifest.permission.MODIFY_PHONE_STATE, android.Manifest.permission.MODIFY_AUDIO_ROUTING}) public static final int USAGE_CALL_ASSISTANT = 17; // 0x11
     field @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public static final int USAGE_EMERGENCY = 1000; // 0x3e8
     field @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public static final int USAGE_SAFETY = 1001; // 0x3e9
-    field @FlaggedApi("android.media.audio.speaker_cleanup_usage") @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public static final int USAGE_SPEAKER_CLEANUP = 1004; // 0x3ec
     field @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public static final int USAGE_VEHICLE_STATUS = 1002; // 0x3ea
   }
 
@@ -7605,7 +7604,7 @@ package android.media {
   public final class MediaRecorder.AudioSource {
     field @RequiresPermission(android.Manifest.permission.CAPTURE_AUDIO_OUTPUT) public static final int ECHO_REFERENCE = 1997; // 0x7cd
     field @RequiresPermission(android.Manifest.permission.CAPTURE_AUDIO_HOTWORD) public static final int HOTWORD = 1999; // 0x7cf
-    field @RequiresPermission(android.Manifest.permission.CAPTURE_AUDIO_OUTPUT) public static final int RADIO_TUNER = 1998; // 0x7ce
+    field @RequiresPermission(android.Manifest.permission.CAPTURE_TUNER_AUDIO_INPUT) public static final int RADIO_TUNER = 1998; // 0x7ce
     field @RequiresPermission(android.Manifest.permission.ACCESS_ULTRASOUND) public static final int ULTRASOUND = 2000; // 0x7d0
   }
 
