@@ -10,6 +10,9 @@ package {
 android_ravenwood_test {
     name: "RavenwoodRuntimeTest",
 
+    libs: [
+        "ravenwood-helper-runtime",
+    ],
     static_libs: [
         "androidx.annotation_annotation",
         "androidx.test.ext.junit",
