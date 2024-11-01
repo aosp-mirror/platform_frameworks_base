@@ -19,7 +19,6 @@ package com.android.server.stats.pull.netstats;
 import android.annotation.NonNull;
 import android.net.NetworkStats;
 import android.net.NetworkTemplate;
-import android.util.Log;
 
 import java.util.Objects;
 
@@ -34,7 +33,6 @@ import java.util.Objects;
  */
 public class NetworkStatsAccumulator {
 
-    private static final String TAG = "NetworkStatsAccumulator";
     private final NetworkTemplate mTemplate;
     private final boolean mWithTags;
     private final long mBucketDurationMillis;
@@ -59,9 +57,8 @@ public class NetworkStatsAccumulator {
     @NonNull
     public NetworkStats queryStats(long currentTimeMillis,
             @NonNull StatsQueryFunction queryFunction) {
-        NetworkStats completeStats = snapshotPlusFollowingStats(currentTimeMillis, queryFunction);
-        maybeExpandSnapshot(currentTimeMillis, completeStats, queryFunction);
-        return completeStats;
+        maybeExpandSnapshot(currentTimeMillis, queryFunction);
+        return snapshotPlusFollowingStats(currentTimeMillis, queryFunction);
     }
 
     /**
@@ -75,28 +72,15 @@ public class NetworkStatsAccumulator {
      * Expands the internal cumulative stats snapshot, if possible, by querying NetworkStats.
      */
     private void maybeExpandSnapshot(long currentTimeMillis,
-            NetworkStats completeStatsUntilCurrentTime,
             @NonNull StatsQueryFunction queryFunction) {
         // Update snapshot only if it is possible to expand it by at least one full bucket, and only
         // if the new snapshot's end is not in the active bucket.
         long newEndTimeMillis = currentTimeMillis - mBucketDurationMillis;
         if (newEndTimeMillis - mSnapshotEndTimeMillis > mBucketDurationMillis) {
-            Log.v(TAG,
-                    "Expanding snapshot (mTemplate=" + mTemplate + ", mWithTags=" + mWithTags
-                            + ") from " + mSnapshotEndTimeMillis + " to " + newEndTimeMillis
-                            + " at " + currentTimeMillis);
-            NetworkStats extraStats = queryFunction.queryNetworkStats(
-                    mTemplate, mWithTags, mSnapshotEndTimeMillis, newEndTimeMillis);
+            NetworkStats extraStats = queryFunction.queryNetworkStats(mTemplate, mWithTags,
+                    mSnapshotEndTimeMillis, newEndTimeMillis);
             mSnapshot = mSnapshot.add(extraStats);
             mSnapshotEndTimeMillis = newEndTimeMillis;
-
-            // NetworkStats queries interpolate historical data using integers maths, which makes
-            // queries non-transitive: Query(t0, t1) + Query(t1, t2) <= Query(t0, t2).
-            // Compute interpolation data loss from moving the snapshot's end-point, and add it to
-            // the snapshot to avoid under-counting.
-            NetworkStats newStats = snapshotPlusFollowingStats(currentTimeMillis, queryFunction);
-            NetworkStats interpolationLoss = completeStatsUntilCurrentTime.subtract(newStats);
-            mSnapshot = mSnapshot.add(interpolationLoss);
         }
     }
 
