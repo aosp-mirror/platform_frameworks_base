@@ -151,6 +151,7 @@ android_test {
         ":HelloWorldUsingSdk1And2",
         ":HelloWorldUsingSdkMalformedNegativeVersion",
         ":CtsStaticSharedLibConsumerApp1",
+        ":CtsStaticSharedLibConsumerApp3",
     ],
 }
 
