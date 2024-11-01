@@ -9278,10 +9278,15 @@ public class NotificationManagerService extends SystemService {
                                             // a group summary or children (complete a group)
                                             mHandler.postDelayed(() -> {
                                                 synchronized (mNotificationLock) {
-                                                    mGroupHelper.onNotificationPostedWithDelay(
-                                                        r, mNotificationList, mSummaryByGroupKey);
+                                                    NotificationRecord record =
+                                                            mNotificationsByKey.get(key);
+                                                    if (record != null) {
+                                                        mGroupHelper.onNotificationPostedWithDelay(
+                                                                record, mNotificationList,
+                                                                mSummaryByGroupKey);
+                                                    }
                                                 }
-                                            }, r.getKey(), DELAY_FORCE_REGROUP_TIME);
+                                            }, key, DELAY_FORCE_REGROUP_TIME);
                                         }
                                     }
 
@@ -9327,10 +9332,15 @@ public class NotificationManagerService extends SystemService {
                                     if (notificationForceGrouping()) {
                                         mHandler.postDelayed(() -> {
                                             synchronized (mNotificationLock) {
-                                                mGroupHelper.onNotificationPostedWithDelay(r,
-                                                        mNotificationList, mSummaryByGroupKey);
+                                                NotificationRecord record =
+                                                        mNotificationsByKey.get(key);
+                                                if (record != null) {
+                                                    mGroupHelper.onNotificationPostedWithDelay(
+                                                            record, mNotificationList,
+                                                            mSummaryByGroupKey);
+                                                }
                                             }
-                                        }, r.getKey(), DELAY_FORCE_REGROUP_TIME);
+                                        }, key, DELAY_FORCE_REGROUP_TIME);
                                     }
                                 }
                             }
@@ -10310,7 +10320,7 @@ public class NotificationManagerService extends SystemService {
                 }
                 mListeners.notifyRemovedLocked(r, reason, r.getStats());
                 if (notificationForceGrouping()) {
-                    mHandler.removeCallbacksAndMessages(r.getKey());
+                    mHandler.removeCallbacksAndEqualMessages(r.getKey());
                     mHandler.post(() -> {
                         synchronized (NotificationManagerService.this.mNotificationLock) {
                             mGroupHelper.onNotificationRemoved(r, mNotificationList);
