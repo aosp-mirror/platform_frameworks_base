@@ -46,7 +46,7 @@ class RavenizerOptions(
     var enableValidation: SetOnce<Boolean> = SetOnce(true),
 
     /** Whether the validation failure is fatal or not. */
-    var fatalValidation: SetOnce<Boolean> = SetOnce(false),
+    var fatalValidation: SetOnce<Boolean> = SetOnce(true),
 
     /** Whether to remove mockito and dexmaker classes. */
     var stripMockito: SetOnce<Boolean> = SetOnce(false),
