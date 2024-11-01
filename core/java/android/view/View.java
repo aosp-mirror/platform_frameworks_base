@@ -30,7 +30,9 @@ import static android.view.Surface.FRAME_RATE_COMPATIBILITY_FIXED_SOURCE;
 import static android.view.Surface.FRAME_RATE_COMPATIBILITY_GTE;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.accessibility.AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED;
+import static android.view.accessibility.Flags.FLAG_SUPPLEMENTAL_DESCRIPTION;
 import static android.view.accessibility.Flags.removeChildHoverCheckForTouchExploration;
+import static android.view.accessibility.Flags.supplementalDescription;
 import static android.view.displayhash.DisplayHashResultCallback.DISPLAY_HASH_ERROR_INVALID_BOUNDS;
 import static android.view.displayhash.DisplayHashResultCallback.DISPLAY_HASH_ERROR_MISSING_WINDOW;
 import static android.view.displayhash.DisplayHashResultCallback.DISPLAY_HASH_ERROR_NOT_VISIBLE_ON_SCREEN;
@@ -181,7 +183,6 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 import android.view.accessibility.AccessibilityNodeProvider;
 import android.view.accessibility.AccessibilityWindowInfo;
-import android.view.accessibility.Flags;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Transformation;
@@ -6541,7 +6542,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     setContentSensitivity(a.getInt(attr, CONTENT_SENSITIVITY_AUTO));
                     break;
                 default: {
-                    if (Flags.supplementalDescription()) {
+                    if (supplementalDescription()) {
                         if (attr == com.android.internal.R.styleable.View_supplementalDescription) {
                             setSupplementalDescription(a.getString(attr));
                         }
@@ -11843,7 +11844,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @see #getContentDescription()
      * @attr ref android.R.styleable#View_supplementalDescription
      */
-    @FlaggedApi(Flags.FLAG_SUPPLEMENTAL_DESCRIPTION)
+    @FlaggedApi(FLAG_SUPPLEMENTAL_DESCRIPTION)
     @ViewDebug.ExportedProperty(category = "accessibility")
     @InspectableProperty
     @Nullable
@@ -11962,7 +11963,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @see #setStateDescription(CharSequence) for state changes.
      * @attr ref android.R.styleable#View_supplementalDescription
      */
-    @FlaggedApi(Flags.FLAG_SUPPLEMENTAL_DESCRIPTION)
+    @FlaggedApi(FLAG_SUPPLEMENTAL_DESCRIPTION)
     @RemotableViewMethod
     public void setSupplementalDescription(@Nullable CharSequence supplementalDescription) {
         if (mSupplementalDescription == null) {
