@@ -20,6 +20,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.communal.data.repository.fakeCommunalSceneRepository
+import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.flags.DisableSceneContainer
 import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.kosmos.testScope
@@ -109,6 +111,23 @@ class StatusBarTouchableRegionManagerTest : SysuiTestCase() {
             sceneRepository.setTransitionState(
                 flowOf(ObservableTransitionState.Idle(currentScene = Scenes.Shade))
             )
+            runCurrent()
+
+            assertThat(underTest.shouldMakeEntireScreenTouchable()).isFalse()
+        }
+
+    @Test
+    @DisableSceneContainer
+    fun entireScreenTouchable_communalVisible() =
+        testScope.runTest {
+            assertThat(underTest.shouldMakeEntireScreenTouchable()).isFalse()
+
+            kosmos.fakeCommunalSceneRepository.snapToScene(CommunalScenes.Communal)
+            runCurrent()
+
+            assertThat(underTest.shouldMakeEntireScreenTouchable()).isTrue()
+
+            kosmos.fakeCommunalSceneRepository.snapToScene(CommunalScenes.Blank)
             runCurrent()
 
             assertThat(underTest.shouldMakeEntireScreenTouchable()).isFalse()

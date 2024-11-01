@@ -222,6 +222,13 @@ flag {
 }
 
 flag {
+    name: "supplemental_description"
+    namespace: "accessibility"
+    description: "Feature flag for supplemental description api"
+    bug: "375266174"
+}
+
+flag {
     name: "support_multiple_labeledby"
     namespace: "accessibility"
     description: "Feature flag for supporting multiple labels in AccessibilityNodeInfo labeledby api"

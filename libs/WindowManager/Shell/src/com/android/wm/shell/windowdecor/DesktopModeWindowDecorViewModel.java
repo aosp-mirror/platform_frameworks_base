@@ -130,7 +130,6 @@ import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.FocusTransitionObserver;
 import com.android.wm.shell.transition.Transitions;
 import com.android.wm.shell.windowdecor.DesktopModeWindowDecoration.ExclusionRegionListener;
-import com.android.wm.shell.windowdecor.additionalviewcontainer.AdditionalSystemViewContainer;
 import com.android.wm.shell.windowdecor.extension.InsetsStateKt;
 import com.android.wm.shell.windowdecor.extension.TaskInfoKt;
 import com.android.wm.shell.windowdecor.viewholder.AppHeaderViewHolder;
@@ -181,7 +180,6 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
     private boolean mTransitionDragActive;
 
     private SparseArray<EventReceiver> mEventReceiversByDisplay = new SparseArray<>();
-    private DesktopStatusBarInputLayerSupplier mStatusBarInputLayerSupplier;
 
     private final ExclusionRegionListener mExclusionRegionListener =
             new ExclusionRegionListenerImpl();
@@ -420,11 +418,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
                         return Unit.INSTANCE;
                     });
         }
-        if (Flags.enableHandleInputFix()) {
-            mStatusBarInputLayerSupplier =
-                    new DesktopStatusBarInputLayerSupplier(mContext, mMainHandler);
-            mFocusTransitionObserver.setLocalFocusTransitionListener(this, mMainExecutor);
-        }
+        mFocusTransitionObserver.setLocalFocusTransitionListener(this, mMainExecutor);
     }
 
     @Override
@@ -480,7 +474,6 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
             removeTaskFromEventReceiver(oldTaskInfo.displayId);
             incrementEventReceiverTasks(taskInfo.displayId);
         }
-        decoration.setStatusBarInputLayer(getStatusBarInputLayer(taskInfo));
         decoration.relayout(taskInfo, decoration.mHasGlobalFocus);
         mActivityOrientationChangeHandler.ifPresent(handler ->
                 handler.handleActivityOrientationChange(oldTaskInfo, taskInfo));
@@ -519,7 +512,6 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
         if (decoration == null) {
             createWindowDecoration(taskInfo, taskSurface, startT, finishT);
         } else {
-            decoration.setStatusBarInputLayer(getStatusBarInputLayer(taskInfo));
             decoration.relayout(taskInfo, startT, finishT, false /* applyStartTransactionOnDraw */,
                     false /* shouldSetTaskPositionAndCrop */,
                     mFocusTransitionObserver.hasGlobalFocus(taskInfo));
@@ -673,7 +665,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
         decoration.closeHandleMenu();
         // When the app enters split-select, the handle will no longer be visible, meaning
         // we shouldn't receive input for it any longer.
-        decoration.detachStatusBarInputLayer();
+        decoration.disposeStatusBarInputLayer();
         mDesktopTasksController.requestSplit(decoration.mTaskInfo, false /* leftOrTop */);
     }
 
@@ -1314,8 +1306,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
                         // should not be receiving any input.
                         if (resultType == TO_SPLIT_LEFT_INDICATOR
                                 || resultType == TO_SPLIT_RIGHT_INDICATOR) {
-                            relevantDecor.detachStatusBarInputLayer();
-                            // We should also detach the other split task's input layer if
+                            relevantDecor.disposeStatusBarInputLayer();
+                            // We should also dispose the other split task's input layer if
                             // applicable.
                             final int splitPosition = mSplitScreenController
                                     .getSplitPosition(relevantDecor.mTaskInfo.taskId);
@@ -1328,7 +1320,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
                                         mSplitScreenController.getTaskInfo(oppositePosition);
                                 if (oppositeTaskInfo != null) {
                                     mWindowDecorByTaskId.get(oppositeTaskInfo.taskId)
-                                            .detachStatusBarInputLayer();
+                                            .disposeStatusBarInputLayer();
                                 }
                             }
                         }
@@ -1578,25 +1570,12 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
                 touchEventListener, touchEventListener, touchEventListener, touchEventListener);
         windowDecoration.setExclusionRegionListener(mExclusionRegionListener);
         windowDecoration.setDragPositioningCallback(taskPositioner);
-        windowDecoration.setStatusBarInputLayer(getStatusBarInputLayer(taskInfo));
         windowDecoration.relayout(taskInfo, startT, finishT,
                 false /* applyStartTransactionOnDraw */, false /* shouldSetTaskPositionAndCrop */,
                 mFocusTransitionObserver.hasGlobalFocus(taskInfo));
         if (!Flags.enableHandleInputFix()) {
             incrementEventReceiverTasks(taskInfo.displayId);
         }
-    }
-
-    /** Decide which cached status bar input layer should be used for a decoration. */
-    private AdditionalSystemViewContainer getStatusBarInputLayer(
-            RunningTaskInfo taskInfo
-    ) {
-        if (mStatusBarInputLayerSupplier == null) return null;
-        return mStatusBarInputLayerSupplier.getStatusBarInputLayer(
-                taskInfo,
-                mSplitScreenController.getSplitPosition(taskInfo.taskId),
-                mSplitScreenController.isLeftRightSplit()
-        );
     }
 
     private RunningTaskInfo getOtherSplitTask(int taskId) {

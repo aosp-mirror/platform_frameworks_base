@@ -5896,6 +5896,29 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     /**
+     * Registers an app that uses the Strict Mode for detecting BAL.
+     *
+     * @param callback the callback to register
+     * @return {@code true} if the callback was registered successfully.
+     */
+    @Override
+    public boolean registerBackgroundActivityStartCallback(IBinder callback) {
+        return mTaskSupervisor.getBackgroundActivityLaunchController()
+                .addStrictModeCallback(Binder.getCallingUid(), callback);
+    }
+
+    /**
+     * Unregisters an app that uses the Strict Mode for detecting BAL.
+     *
+     * @param callback the callback to unregister
+     */
+    @Override
+    public void unregisterBackgroundActivityStartCallback(IBinder callback) {
+        mTaskSupervisor.getBackgroundActivityLaunchController()
+                .removeStrictModeCallback(Binder.getCallingUid(), callback);
+    }
+
+    /**
      * Wrap the {@link ActivityOptions} in {@link SafeActivityOptions} and attach caller options
      * that allow using the callers permissions to start background activities.
      */

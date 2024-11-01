@@ -16,9 +16,11 @@
 
 package com.google.android.appfunctions.sidecar;
 
+import android.Manifest;
 import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 import android.annotation.UserHandleAware;
 import android.content.Context;
@@ -103,6 +105,12 @@ public final class AppFunctionManager {
      * <p>See {@link android.app.appfunctions.AppFunctionManager#executeAppFunction} for the
      * documented behaviour of this method.
      */
+    @RequiresPermission(
+            anyOf = {
+                Manifest.permission.EXECUTE_APP_FUNCTIONS_TRUSTED,
+                Manifest.permission.EXECUTE_APP_FUNCTIONS
+            },
+            conditional = true)
     public void executeAppFunction(
             @NonNull ExecuteAppFunctionRequest sidecarRequest,
             @NonNull @CallbackExecutor Executor executor,
@@ -131,12 +139,31 @@ public final class AppFunctionManager {
      * <p>See {@link android.app.appfunctions.AppFunctionManager#isAppFunctionEnabled} for the
      * documented behaviour of this method.
      */
+    @RequiresPermission(
+            anyOf = {
+                Manifest.permission.EXECUTE_APP_FUNCTIONS_TRUSTED,
+                Manifest.permission.EXECUTE_APP_FUNCTIONS
+            },
+            conditional = true)
     public void isAppFunctionEnabled(
             @NonNull String functionIdentifier,
             @NonNull String targetPackage,
             @NonNull Executor executor,
             @NonNull OutcomeReceiver<Boolean, Exception> callback) {
         mManager.isAppFunctionEnabled(functionIdentifier, targetPackage, executor, callback);
+    }
+
+    /**
+     * Returns a boolean through a callback, indicating whether the app function is enabled.
+     *
+     * <p>See {@link android.app.appfunctions.AppFunctionManager#isAppFunctionEnabled} for the
+     * documented behaviour of this method.
+     */
+    public void isAppFunctionEnabled(
+            @NonNull String functionIdentifier,
+            @NonNull Executor executor,
+            @NonNull OutcomeReceiver<Boolean, Exception> callback) {
+        mManager.isAppFunctionEnabled(functionIdentifier, executor, callback);
     }
 
     /**

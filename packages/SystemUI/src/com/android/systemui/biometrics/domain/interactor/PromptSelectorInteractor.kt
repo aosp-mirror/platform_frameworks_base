@@ -16,7 +16,6 @@
 
 package com.android.systemui.biometrics.domain.interactor
 
-import android.hardware.biometrics.Flags
 import android.hardware.biometrics.PromptInfo
 import com.android.internal.widget.LockPatternUtils
 import com.android.systemui.biometrics.Utils
@@ -189,8 +188,7 @@ constructor(
         val effectiveUserId = credentialInteractor.getCredentialOwnerOrSelfId(userId)
         val hasCredentialViewShown = promptKind.value.isCredential()
         val showBpForCredential =
-            Flags.customBiometricPrompt() &&
-                !Utils.isBiometricAllowed(promptInfo) &&
+            !Utils.isBiometricAllowed(promptInfo) &&
                 isDeviceCredentialAllowed(promptInfo) &&
                 promptInfo.contentView != null &&
                 !promptInfo.isContentViewMoreOptionsButtonUsed

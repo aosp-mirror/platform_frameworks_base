@@ -51,9 +51,9 @@ import com.android.settingslib.metadata.PreferenceSummaryProvider
 import com.android.settingslib.metadata.PreferenceTitleProvider
 import com.android.settingslib.preference.PreferenceScreenFactory
 import com.android.settingslib.preference.PreferenceScreenProvider
+import java.util.Locale
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.util.Locale
 
 private const val TAG = "PreferenceGraphBuilder"
 
@@ -140,7 +140,7 @@ private constructor(private val context: Context, private val request: GetPrefer
         addPreferenceScreen(metadata.key) {
             preferenceScreenProto {
                 completeHierarchy = metadata.hasCompleteHierarchy()
-                root = metadata.getPreferenceHierarchy(context).toProto(true)
+                root = metadata.getPreferenceHierarchy(context).toProto(metadata, true)
             }
         }
 
@@ -237,23 +237,29 @@ private constructor(private val context: Context, private val request: GetPrefer
         this@toProto.intent?.let { actionTarget = it.toActionTarget() }
     }
 
-    private suspend fun PreferenceHierarchy.toProto(isRoot: Boolean): PreferenceGroupProto =
-        preferenceGroupProto {
-            preference = toProto(this@toProto, isRoot)
-            forEachAsync {
-                addPreferences(
-                    preferenceOrGroupProto {
-                        if (it is PreferenceHierarchy) {
-                            group = it.toProto(false)
-                        } else {
-                            preference = toProto(it, false)
-                        }
+    private suspend fun PreferenceHierarchy.toProto(
+        screenMetadata: PreferenceScreenMetadata,
+        isRoot: Boolean,
+    ): PreferenceGroupProto = preferenceGroupProto {
+        preference = toProto(screenMetadata, this@toProto, isRoot)
+        forEachAsync {
+            addPreferences(
+                preferenceOrGroupProto {
+                    if (it is PreferenceHierarchy) {
+                        group = it.toProto(screenMetadata, false)
+                    } else {
+                        preference = toProto(screenMetadata, it, false)
                     }
-                )
-            }
+                }
+            )
         }
+    }
 
-    private suspend fun toProto(node: PreferenceHierarchyNode, isRoot: Boolean) = preferenceProto {
+    private suspend fun toProto(
+        screenMetadata: PreferenceScreenMetadata,
+        node: PreferenceHierarchyNode,
+        isRoot: Boolean,
+    ) = preferenceProto {
         val metadata = node.metadata
         key = metadata.key
         metadata.getTitleTextProto(isRoot)?.let { title = it }
@@ -291,6 +297,7 @@ private constructor(private val context: Context, private val request: GetPrefer
             @Suppress("CheckReturnValue") addPreferenceScreenMetadata(metadata)
         }
         metadata.intent(context)?.let { actionTarget = it.toActionTarget() }
+        screenMetadata.getLaunchIntent(context, metadata)?.let { launchIntent = it.toProto() }
     }
 
     private fun PreferenceMetadata.getTitleTextProto(isRoot: Boolean): TextProto? {

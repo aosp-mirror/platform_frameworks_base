@@ -16,17 +16,25 @@
 
 package com.android.systemui.qs.panels.ui.viewmodel
 
-import com.android.systemui.dagger.SysUISingleton
+import androidx.compose.runtime.State
+import com.android.systemui.lifecycle.Activatable
+import com.android.systemui.lifecycle.ExclusiveActivatable
+import com.android.systemui.lifecycle.Hydrator
 import com.android.systemui.qs.panels.domain.interactor.QSColumnsInteractor
 import javax.inject.Inject
-import kotlinx.coroutines.flow.StateFlow
 
-interface QSColumnsViewModel {
-    val columns: StateFlow<Int>
+interface QSColumnsViewModel : Activatable {
+    val columns: State<Int>
 }
 
-@SysUISingleton
 class QSColumnsSizeViewModelImpl @Inject constructor(interactor: QSColumnsInteractor) :
-    QSColumnsViewModel {
-    override val columns: StateFlow<Int> = interactor.columns
+    QSColumnsViewModel, ExclusiveActivatable() {
+    private val hydrator = Hydrator("QSColumnsSizeViewModelImpl")
+
+    override val columns =
+        hydrator.hydratedStateOf(traceName = "columns", source = interactor.columns)
+
+    override suspend fun onActivated(): Nothing {
+        hydrator.activate()
+    }
 }

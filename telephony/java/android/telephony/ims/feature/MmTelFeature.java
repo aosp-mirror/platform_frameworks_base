@@ -16,6 +16,8 @@
 
 package android.telephony.ims.feature;
 
+import static com.android.internal.telephony.flags.Flags.FLAG_SUPPORT_IMS_MMTEL_INTERFACE;
+
 import android.annotation.CallbackExecutor;
 import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
@@ -964,6 +966,8 @@ public class MmTelFeature extends ImsFeature {
      *
      * @hide
      */
+    @FlaggedApi(FLAG_SUPPORT_IMS_MMTEL_INTERFACE)
+    @SystemApi
     public static final int EPS_FALLBACK_REASON_NO_NETWORK_TRIGGER = 1;
 
     /**
@@ -976,6 +980,8 @@ public class MmTelFeature extends ImsFeature {
      *
      * @hide
      */
+    @FlaggedApi(FLAG_SUPPORT_IMS_MMTEL_INTERFACE)
+    @SystemApi
     public static final int EPS_FALLBACK_REASON_NO_NETWORK_RESPONSE = 2;
 
     /** @hide */
@@ -1003,36 +1009,50 @@ public class MmTelFeature extends ImsFeature {
      * Emergency call
      * @hide
      */
+    @FlaggedApi(FLAG_SUPPORT_IMS_MMTEL_INTERFACE)
+    @SystemApi
     public static final int IMS_TRAFFIC_TYPE_EMERGENCY = 0;
     /**
      * Emergency SMS
      * @hide
      */
+    @FlaggedApi(FLAG_SUPPORT_IMS_MMTEL_INTERFACE)
+    @SystemApi
     public static final int IMS_TRAFFIC_TYPE_EMERGENCY_SMS = 1;
     /**
      * Voice call
      * @hide
      */
+    @FlaggedApi(FLAG_SUPPORT_IMS_MMTEL_INTERFACE)
+    @SystemApi
     public static final int IMS_TRAFFIC_TYPE_VOICE = 2;
     /**
      * Video call
      * @hide
      */
+    @FlaggedApi(FLAG_SUPPORT_IMS_MMTEL_INTERFACE)
+    @SystemApi
     public static final int IMS_TRAFFIC_TYPE_VIDEO = 3;
     /**
      * SMS over IMS
      * @hide
      */
+    @FlaggedApi(FLAG_SUPPORT_IMS_MMTEL_INTERFACE)
+    @SystemApi
     public static final int IMS_TRAFFIC_TYPE_SMS = 4;
     /**
      * IMS registration and subscription for reg event package (signaling)
      * @hide
      */
+    @FlaggedApi(FLAG_SUPPORT_IMS_MMTEL_INTERFACE)
+    @SystemApi
     public static final int IMS_TRAFFIC_TYPE_REGISTRATION = 5;
     /**
      * Ut/XCAP (XML Configuration Access Protocol)
      * @hide
      */
+    @FlaggedApi(FLAG_SUPPORT_IMS_MMTEL_INTERFACE)
+    @SystemApi
     public static final int IMS_TRAFFIC_TYPE_UT_XCAP = 6;
 
     /** @hide */
@@ -1046,11 +1066,15 @@ public class MmTelFeature extends ImsFeature {
      * Indicates that the traffic is an incoming traffic.
      * @hide
      */
+    @FlaggedApi(FLAG_SUPPORT_IMS_MMTEL_INTERFACE)
+    @SystemApi
     public static final int IMS_TRAFFIC_DIRECTION_INCOMING = 0;
     /**
      * Indicates that the traffic is an outgoing traffic.
      * @hide
      */
+    @FlaggedApi(FLAG_SUPPORT_IMS_MMTEL_INTERFACE)
+    @SystemApi
     public static final int IMS_TRAFFIC_DIRECTION_OUTGOING = 1;
 
     private IImsMmTelListener mListener;
@@ -1291,9 +1315,11 @@ public class MmTelFeature extends ImsFeature {
     /**
      * Triggers the EPS fallback procedure.
      *
-     * @param reason specifies the reason that causes EPS fallback.
+     * @param reason specifies the reason that EPS fallback was triggered.
      * @hide
      */
+    @FlaggedApi(FLAG_SUPPORT_IMS_MMTEL_INTERFACE)
+    @SystemApi
     public final void triggerEpsFallback(@EpsFallbackReason int reason) {
         IImsMmTelListener listener = getListener();
         if (listener == null) {
@@ -1344,6 +1370,8 @@ public class MmTelFeature extends ImsFeature {
      *
      * @hide
      */
+    @FlaggedApi(FLAG_SUPPORT_IMS_MMTEL_INTERFACE)
+    @SystemApi
     public final void startImsTrafficSession(@ImsTrafficType int trafficType,
             @AccessNetworkConstants.RadioAccessNetworkType int accessNetworkType,
             @ImsTrafficDirection int trafficDirection,
@@ -1387,6 +1415,8 @@ public class MmTelFeature extends ImsFeature {
      *
      * @hide
      */
+    @FlaggedApi(FLAG_SUPPORT_IMS_MMTEL_INTERFACE)
+    @SystemApi
     public final void modifyImsTrafficSession(
             @AccessNetworkConstants.RadioAccessNetworkType int accessNetworkType,
             @NonNull ImsTrafficSessionCallback callback) {
@@ -1417,6 +1447,8 @@ public class MmTelFeature extends ImsFeature {
      *
      * @hide
      */
+    @FlaggedApi(FLAG_SUPPORT_IMS_MMTEL_INTERFACE)
+    @SystemApi
     public final void stopImsTrafficSession(@NonNull ImsTrafficSessionCallback callback) {
         IImsMmTelListener listener = getListener();
         if (listener == null) {

@@ -68,7 +68,6 @@ import java.util.stream.Collectors;
  */
 @RequiresFeature(PackageManager.FEATURE_TELEPHONY_SATELLITE)
 @SystemApi
-@FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
 public final class SatelliteManager {
     private static final String TAG = "SatelliteManager";
 

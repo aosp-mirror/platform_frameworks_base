@@ -25,6 +25,7 @@ import static com.android.hardware.input.Flags.useKeyGestureEventHandler;
 import static com.android.hardware.input.Flags.useKeyGestureEventHandlerMultiPressGestures;
 import static com.android.server.flags.Flags.newBugreportKeyboardShortcut;
 import static com.android.window.flags.Flags.enableMoveToNextDisplayShortcut;
+import static com.android.window.flags.Flags.enableTaskResizingKeyboardShortcuts;
 
 import android.annotation.BinderThread;
 import android.annotation.MainThread;
@@ -728,6 +729,54 @@ final class KeyGestureController {
                         return handleKeyGesture(deviceId, new int[]{keyCode},
                                 KeyEvent.META_META_ON | KeyEvent.META_CTRL_ON,
                                 KeyGestureEvent.KEY_GESTURE_TYPE_MOVE_TO_NEXT_DISPLAY,
+                                KeyGestureEvent.ACTION_GESTURE_COMPLETE,
+                                displayId,
+                                focusedToken, /* flags = */0);
+                    }
+                }
+                break;
+            case KeyEvent.KEYCODE_LEFT_BRACKET:
+                if (enableTaskResizingKeyboardShortcuts()) {
+                    if (firstDown && event.isAltPressed()) {
+                        return handleKeyGesture(deviceId, new int[]{keyCode},
+                                KeyEvent.META_ALT_ON,
+                                KeyGestureEvent.KEY_GESTURE_TYPE_SNAP_LEFT_FREEFORM_WINDOW,
+                                KeyGestureEvent.ACTION_GESTURE_COMPLETE,
+                                displayId,
+                                focusedToken, /* flags = */0);
+                    }
+                }
+                break;
+            case KeyEvent.KEYCODE_RIGHT_BRACKET:
+                if (enableTaskResizingKeyboardShortcuts()) {
+                    if (firstDown && event.isAltPressed()) {
+                        return handleKeyGesture(deviceId, new int[]{keyCode},
+                                KeyEvent.META_ALT_ON,
+                                KeyGestureEvent.KEY_GESTURE_TYPE_SNAP_RIGHT_FREEFORM_WINDOW,
+                                KeyGestureEvent.ACTION_GESTURE_COMPLETE,
+                                displayId,
+                                focusedToken, /* flags = */0);
+                    }
+                }
+                break;
+            case KeyEvent.KEYCODE_EQUALS:
+                if (enableTaskResizingKeyboardShortcuts()) {
+                    if (firstDown && event.isAltPressed()) {
+                        return handleKeyGesture(deviceId, new int[]{keyCode},
+                                KeyEvent.META_ALT_ON,
+                                KeyGestureEvent.KEY_GESTURE_TYPE_MAXIMIZE_FREEFORM_WINDOW,
+                                KeyGestureEvent.ACTION_GESTURE_COMPLETE,
+                                displayId,
+                                focusedToken, /* flags = */0);
+                    }
+                }
+                break;
+            case KeyEvent.KEYCODE_MINUS:
+                if (enableTaskResizingKeyboardShortcuts()) {
+                    if (firstDown && event.isAltPressed()) {
+                        return handleKeyGesture(deviceId, new int[]{keyCode},
+                                KeyEvent.META_ALT_ON,
+                                KeyGestureEvent.KEY_GESTURE_TYPE_RESTORE_FREEFORM_WINDOW_SIZE,
                                 KeyGestureEvent.ACTION_GESTURE_COMPLETE,
                                 displayId,
                                 focusedToken, /* flags = */0);

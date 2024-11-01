@@ -884,6 +884,86 @@ class KeyGestureControllerTests {
     }
 
     @Test
+    @EnableFlags(com.android.window.flags.Flags.FLAG_ENABLE_TASK_RESIZING_KEYBOARD_SHORTCUTS)
+    fun testSnapLeftFreeformTask() {
+        val keyGestureController = KeyGestureController(context, testLooper.looper)
+        testKeyGestureInternal(
+            keyGestureController,
+            TestData(
+                "ALT + [ -> Resizes a task to fit the left half of the screen",
+                intArrayOf(
+                    KeyEvent.KEYCODE_ALT_LEFT,
+                    KeyEvent.KEYCODE_LEFT_BRACKET
+                ),
+                KeyGestureEvent.KEY_GESTURE_TYPE_SNAP_LEFT_FREEFORM_WINDOW,
+                intArrayOf(KeyEvent.KEYCODE_LEFT_BRACKET),
+                KeyEvent.META_ALT_ON,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
+            )
+        )
+    }
+
+    @Test
+    @EnableFlags(com.android.window.flags.Flags.FLAG_ENABLE_TASK_RESIZING_KEYBOARD_SHORTCUTS)
+    fun testSnapRightFreeformTask() {
+        val keyGestureController = KeyGestureController(context, testLooper.looper)
+        testKeyGestureInternal(
+            keyGestureController,
+            TestData(
+                "ALT + ] -> Resizes a task to fit the right half of the screen",
+                intArrayOf(
+                    KeyEvent.KEYCODE_ALT_LEFT,
+                    KeyEvent.KEYCODE_RIGHT_BRACKET
+                ),
+                KeyGestureEvent.KEY_GESTURE_TYPE_SNAP_RIGHT_FREEFORM_WINDOW,
+                intArrayOf(KeyEvent.KEYCODE_RIGHT_BRACKET),
+                KeyEvent.META_ALT_ON,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
+            )
+        )
+    }
+
+    @Test
+    @EnableFlags(com.android.window.flags.Flags.FLAG_ENABLE_TASK_RESIZING_KEYBOARD_SHORTCUTS)
+    fun testMaximizeFreeformTask() {
+        val keyGestureController = KeyGestureController(context, testLooper.looper)
+        testKeyGestureInternal(
+            keyGestureController,
+            TestData(
+                "ALT + '=' -> Maximizes a task to fit the screen",
+                intArrayOf(
+                    KeyEvent.KEYCODE_ALT_LEFT,
+                    KeyEvent.KEYCODE_EQUALS
+                ),
+                KeyGestureEvent.KEY_GESTURE_TYPE_MAXIMIZE_FREEFORM_WINDOW,
+                intArrayOf(KeyEvent.KEYCODE_EQUALS),
+                KeyEvent.META_ALT_ON,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
+            )
+        )
+    }
+
+    @Test
+    @EnableFlags(com.android.window.flags.Flags.FLAG_ENABLE_TASK_RESIZING_KEYBOARD_SHORTCUTS)
+    fun testRestoreFreeformTask() {
+        val keyGestureController = KeyGestureController(context, testLooper.looper)
+        testKeyGestureInternal(
+            keyGestureController,
+            TestData(
+                "ALT + '-' -> Restores a task size to its previous bounds",
+                intArrayOf(
+                    KeyEvent.KEYCODE_ALT_LEFT,
+                    KeyEvent.KEYCODE_MINUS
+                ),
+                KeyGestureEvent.KEY_GESTURE_TYPE_RESTORE_FREEFORM_WINDOW_SIZE,
+                intArrayOf(KeyEvent.KEYCODE_MINUS),
+                KeyEvent.META_ALT_ON,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
+            )
+        )
+    }
+
+    @Test
     fun testCapsLockPressNotified() {
         val keyGestureController = KeyGestureController(context, testLooper.looper)
         val listener = KeyGestureEventListener()

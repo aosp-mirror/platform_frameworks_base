@@ -842,8 +842,8 @@ public abstract class WMShellModule {
     @WMSingleton
     @Provides
     static ReturnToDragStartAnimator provideReturnToDragStartAnimator(
-            Context context, InteractionJankMonitor interactionJankMonitor) {
-        return new ReturnToDragStartAnimator(context, interactionJankMonitor);
+            InteractionJankMonitor interactionJankMonitor) {
+        return new ReturnToDragStartAnimator(interactionJankMonitor);
     }
 
     @WMSingleton

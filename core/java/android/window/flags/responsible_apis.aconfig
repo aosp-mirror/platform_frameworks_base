@@ -71,11 +71,20 @@ flag {
     bug: "339720406"
 }
 
+# replaced by bal_strict_mode_ro
 flag {
     name: "bal_strict_mode"
     namespace: "responsible_apis"
     description: "Strict mode flag"
     bug: "324089586"
+}
+
+flag {
+    name: "bal_strict_mode_ro"
+    namespace: "responsible_apis"
+    description: "Strict mode flag"
+    bug: "324089586"
+    is_fixed_read_only: true
 }
 
 flag {

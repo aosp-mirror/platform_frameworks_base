@@ -338,7 +338,7 @@ public class TvPipTransition extends PipTransitionController {
         final Rect pipBounds = mPipBoundsState.getBounds();
         mSurfaceTransactionHelper
                 .resetScale(startTransaction, pipLeash, pipBounds)
-                .crop(startTransaction, pipLeash, pipBounds)
+                .cropAndPosition(startTransaction, pipLeash, pipBounds)
                 .shadow(startTransaction, pipLeash, false);
 
         final SurfaceControl.Transaction transaction = mTransactionFactory.getTransaction();
@@ -420,7 +420,7 @@ public class TvPipTransition extends PipTransitionController {
 
         mSurfaceTransactionHelper
                 .resetScale(finishTransaction, leash, pipBounds)
-                .crop(finishTransaction, leash, pipBounds)
+                .cropAndPosition(finishTransaction, leash, pipBounds)
                 .shadow(finishTransaction, leash, false);
 
         final Rect currentBounds = pipChange.getStartAbsBounds();
@@ -443,7 +443,7 @@ public class TvPipTransition extends PipTransitionController {
                 SurfaceControl.Transaction tx = mTransactionFactory.getTransaction();
                 mSurfaceTransactionHelper
                         .resetScale(tx, leash, pipBounds)
-                        .crop(tx, leash, pipBounds)
+                        .cropAndPosition(tx, leash, pipBounds)
                         .shadow(tx, leash, false);
                 mShellTaskOrganizer.applyTransaction(resizePipWct);
                 tx.apply();

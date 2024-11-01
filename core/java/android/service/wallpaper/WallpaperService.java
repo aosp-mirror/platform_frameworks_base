@@ -221,14 +221,14 @@ public abstract class WallpaperService extends Service {
 
     /**
      * Wear products currently force a slight scaling transition to wallpapers
-     * when the QSS is opened. However, on Wear 6 (SDK 35) and above, 1P watch faces
+     * when the QSS is opened. However, on Wear 7 (SDK 37) and above, 1P watch faces
      * will be expected to either implement their own scaling, or to override this
      * method to allow the WallpaperController to continue to scale for them.
      *
      * @hide
      */
     @ChangeId
-    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.VANILLA_ICE_CREAM)
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.BAKLAVA)
     public static final long WEAROS_WALLPAPER_HANDLES_SCALING = 272527315L;
 
     static final class WallpaperCommand {

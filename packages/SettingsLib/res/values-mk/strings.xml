@@ -85,7 +85,7 @@
     <string name="bluetooth_disconnected" msgid="7739366554710388701">"Не е поврзано"</string>
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"Се исклучува..."</string>
     <string name="bluetooth_connecting" msgid="5871702668260192755">"Се поврзува..."</string>
-    <string name="bluetooth_connected" msgid="8065345572198502293">"Поврзан со <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected" msgid="8065345572198502293">"Поврзано<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_pairing" msgid="4269046942588193600">"Се спарува..."</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"Поврзан со <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> (без телефон)"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"Поврзан со <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> (без аудиовизуелни содржини)"</string>

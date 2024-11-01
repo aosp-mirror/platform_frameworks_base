@@ -24,22 +24,31 @@ import com.android.systemui.qs.panels.ui.viewmodel.TileGridViewModel
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 
 class QuickSettingsContainerViewModel
 @AssistedInject
 constructor(
     brightnessSliderViewModelFactory: BrightnessSliderViewModel.Factory,
+    quickQuickSettingsViewModelFactory: QuickQuickSettingsViewModel.Factory,
     @Assisted supportsBrightnessMirroring: Boolean,
     val tileGridViewModel: TileGridViewModel,
     val editModeViewModel: EditModeViewModel,
-    val quickQuickSettingsViewModel: QuickQuickSettingsViewModel,
 ) : ExclusiveActivatable() {
 
     val brightnessSliderViewModel =
         brightnessSliderViewModelFactory.create(supportsBrightnessMirroring)
 
+    val quickQuickSettingsViewModel = quickQuickSettingsViewModelFactory.create()
+
     override suspend fun onActivated(): Nothing {
-        brightnessSliderViewModel.activate()
+        coroutineScope {
+            launch { brightnessSliderViewModel.activate() }
+            launch { quickQuickSettingsViewModel.activate() }
+            awaitCancellation()
+        }
     }
 
     @AssistedFactory

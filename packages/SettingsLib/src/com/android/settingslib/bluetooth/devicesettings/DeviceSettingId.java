@@ -120,4 +120,10 @@ public @interface DeviceSettingId {
 
     /** Device setting ID for ANC. */
     int DEVICE_SETTING_ID_ANC = 1001;
+
+    /** Device setting expandable ID 1. */
+    int DEVICE_SETTING_ID_EXPANDABLE_1 = 3001;
+
+    /** Device setting expandable ID 2. */
+    int DEVICE_SETTING_ID_EXPANDABLE_2 = 3100;
 }

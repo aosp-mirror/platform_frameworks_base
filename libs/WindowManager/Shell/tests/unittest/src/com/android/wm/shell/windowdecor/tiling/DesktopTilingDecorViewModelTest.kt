@@ -36,6 +36,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
@@ -145,7 +146,7 @@ class DesktopTilingDecorViewModelTest : ShellTestCase() {
     }
 
     @Test
-    fun userChange_starting_allTilingSessionsShouldBeDestroyed() {
+    fun onUserChange_allTilingSessionsShouldBeDestroyed() {
         desktopTilingDecorViewModel.tilingTransitionHandlerByDisplayId.put(
             1,
             desktopTilingDecoration,
@@ -157,7 +158,29 @@ class DesktopTilingDecorViewModelTest : ShellTestCase() {
 
         desktopTilingDecorViewModel.onUserChange()
 
-        verify(desktopTilingDecoration, times(2)).onUserChange()
+        verify(desktopTilingDecoration, times(2)).resetTilingSession()
+    }
+
+    @Test
+    fun displayOrientationChange_tilingForDisplayShouldBeDestroyed() {
+        desktopTilingDecorViewModel.tilingTransitionHandlerByDisplayId.put(
+            1,
+            desktopTilingDecoration,
+        )
+        desktopTilingDecorViewModel.tilingTransitionHandlerByDisplayId.put(
+            2,
+            desktopTilingDecoration,
+        )
+
+        desktopTilingDecorViewModel.onDisplayChange(1, 1, 2, null, null)
+
+        verify(desktopTilingDecoration, times(1)).resetTilingSession()
+        verify(displayControllerMock, times(1))
+            .addDisplayChangingController(eq(desktopTilingDecorViewModel))
+
+        desktopTilingDecorViewModel.onDisplayChange(1, 1, 3, null, null)
+        // No extra calls after 180 degree change.
+        verify(desktopTilingDecoration, times(1)).resetTilingSession()
     }
 
     companion object {

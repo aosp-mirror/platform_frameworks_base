@@ -19,7 +19,6 @@ package com.android.internal.content.om;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.pm.PackagePartitions;
-import android.content.res.AssetManager;
 import android.os.Build;
 import android.os.Trace;
 import android.util.ArrayMap;
@@ -534,7 +533,7 @@ public class OverlayConfig {
      */
     @NonNull
     public String[] createImmutableFrameworkIdmapsInZygote() {
-        final String targetPath = AssetManager.FRAMEWORK_APK_PATH;
+        final String targetPath = "/system/framework/framework-res.apk";
         final ArrayList<String> idmapPaths = new ArrayList<>();
         final ArrayList<IdmapInvocation> idmapInvocations =
                 getImmutableFrameworkOverlayIdmapInvocations();

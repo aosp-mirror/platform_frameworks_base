@@ -67,6 +67,7 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
+import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 @SmallTest
@@ -690,10 +691,9 @@ public class FrameTrackerTest {
             FrameTracker tracker, long durationMillis, long vsyncId, @JankType int jankType) {
         final ArgumentCaptor<Runnable> captor = ArgumentCaptor.forClass(Runnable.class);
         doNothing().when(tracker).postCallback(captor.capture());
-        mListenerCapture.getValue().onJankDataAvailable(new JankData[] {
-                new JankData(vsyncId, jankType, FRAME_TIME_60Hz, FRAME_TIME_60Hz,
-                TimeUnit.MILLISECONDS.toNanos(durationMillis))
-        });
+        mListenerCapture.getValue().onJankDataAvailable(Arrays.asList(new JankData(
+                vsyncId, jankType, FRAME_TIME_60Hz, FRAME_TIME_60Hz,
+                TimeUnit.MILLISECONDS.toNanos(durationMillis))));
         captor.getValue().run();
     }
 }

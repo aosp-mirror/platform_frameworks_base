@@ -253,10 +253,10 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     private static final String MIGRATED_FRP2 = "migrated_frp2";
     private static final String MIGRATED_KEYSTORE_NS = "migrated_keystore_namespace";
-    private static final String MIGRATED_SP_CE_ONLY = "migrated_all_users_to_sp_and_bound_ce";
     private static final String MIGRATED_SP_FULL = "migrated_all_users_to_sp_and_bound_keys";
     private static final String MIGRATED_WEAVER_DISABLED_ON_UNSECURED_USERS =
             "migrated_weaver_disabled_on_unsecured_users";
+    // Note: some other migrated_* strings used to be used and may exist in the database already.
 
     // Duration that LockSettingsService will store the gatekeeper password for. This allows
     // multiple biometric enrollments without prompting the user to enter their password via
@@ -1219,21 +1219,16 @@ public class LockSettingsService extends ILockSettings.Stub {
                 Slog.i(TAG, "Synthetic password is already not protected by Weaver");
             }
         } else if (sp == null) {
-            Slogf.wtf(TAG, "Failed to unwrap synthetic password for unsecured user %d", userId);
-            return;
+            throw new IllegalStateException(
+                    "Failed to unwrap synthetic password for unsecured user " + userId);
         }
 
         // Call setCeStorageProtection(), to re-encrypt the CE key with the SP if it's currently
-        // encrypted by an empty secret.  Skip this if it was definitely already done as part of the
-        // upgrade to Android 14, since while setCeStorageProtection() is idempotent it does log
-        // some error messages when called again.  Do not skip this if
-        // config_disableWeaverOnUnsecuredUsers=true, since in that case we'd like to recover from
-        // the case where an earlier upgrade to Android 14 incorrectly skipped this step.
-        if (getString(MIGRATED_SP_CE_ONLY, null, 0) == null
-                || isWeaverDisabledOnUnsecuredUsers()) {
-            Slogf.i(TAG, "Encrypting CE key of user %d with synthetic password", userId);
-            setCeStorageProtection(userId, sp);
-        }
+        // encrypted by an empty secret.  If the CE key is already encrypted by the SP, then this is
+        // a no-op except for some log messages.
+        Slogf.i(TAG, "Encrypting CE key of user %d with synthetic password", userId);
+        setCeStorageProtection(userId, sp);
+
         Slogf.i(TAG, "Initializing Keystore super keys for user %d", userId);
         initKeystoreSuperKeys(userId, sp, /* allowExisting= */ true);
     }

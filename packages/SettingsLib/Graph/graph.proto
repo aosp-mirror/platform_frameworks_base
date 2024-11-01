@@ -74,6 +74,9 @@ message PreferenceProto {
   optional ActionTarget action_target = 12;
   // Preference value (if present, it means `persistent` is true).
   optional PreferenceValueProto value = 13;
+  // Intent to show and locate the preference (might have highlight animation on
+  // the preference).
+  optional IntentProto launch_intent = 14;
 
   // Target of an Intent
   message ActionTarget {

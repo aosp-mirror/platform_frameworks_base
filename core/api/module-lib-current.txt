@@ -102,6 +102,7 @@ package android.content {
     method @NonNull public android.os.UserHandle getUser();
     field public static final String PAC_PROXY_SERVICE = "pac_proxy";
     field public static final String TEST_NETWORK_SERVICE = "test_network";
+    field @FlaggedApi("android.os.mainline_vcn_platform_api") public static final String VCN_MANAGEMENT_SERVICE = "vcn_management";
     field @FlaggedApi("android.webkit.update_service_ipc_wrapper") public static final String WEBVIEW_UPDATE_SERVICE = "webviewupdate";
   }
 

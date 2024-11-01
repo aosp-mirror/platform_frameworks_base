@@ -241,7 +241,8 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
                     NoPreloadHolder.DEBUG_SQL_STATEMENTS, NoPreloadHolder.DEBUG_SQL_TIME,
                     mConfiguration.lookasideSlotSize, mConfiguration.lookasideSlotCount);
         } catch (SQLiteCantOpenDatabaseException e) {
-            final StringBuilder message = new StringBuilder(e.getMessage())
+            final StringBuilder message = new StringBuilder("Cannot open database ")
+                    .append("[").append(e.getMessage()).append("]")
                     .append(" '").append(file).append("'")
                     .append(" with flags 0x")
                     .append(Integer.toHexString(mConfiguration.openFlags));

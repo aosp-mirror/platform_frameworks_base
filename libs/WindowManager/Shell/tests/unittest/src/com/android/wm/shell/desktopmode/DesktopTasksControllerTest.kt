@@ -3029,7 +3029,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
       eq(mockSurface),
       eq(currentDragBounds),
       eq(STABLE_BOUNDS),
-      eq(true)
+      anyOrNull(),
     )
   }
 
@@ -3344,7 +3344,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
       eq(mockSurface),
       eq(currentDragBounds),
       eq(bounds),
-      eq(true)
+      anyOrNull(),
     )
     verify(desktopModeEventLogger, times(1)).logTaskResizingEnded(
       ResizeTrigger.SNAP_LEFT_MENU,
@@ -3401,7 +3401,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
       eq(mockSurface),
       eq(currentDragBounds),
       eq(preDragBounds),
-      eq(false)
+      any(),
     )
     verify(desktopModeEventLogger, never()).logTaskResizingStarted(
       any(),

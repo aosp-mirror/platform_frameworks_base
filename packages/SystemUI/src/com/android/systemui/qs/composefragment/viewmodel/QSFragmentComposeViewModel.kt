@@ -38,11 +38,17 @@ import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.lifecycle.Hydrator
+import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager
+import com.android.systemui.media.controls.ui.view.MediaHost
+import com.android.systemui.media.controls.ui.view.MediaHostState
+import com.android.systemui.media.dagger.MediaModule.QS_PANEL
+import com.android.systemui.media.dagger.MediaModule.QUICK_QS_PANEL
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.FooterActionsController
+import com.android.systemui.qs.composefragment.dagger.QSFragmentComposeModule
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel
 import com.android.systemui.qs.panels.domain.interactor.TileSquishinessInteractor
-import com.android.systemui.qs.panels.ui.viewmodel.PaginatedGridViewModel
+import com.android.systemui.qs.panels.ui.viewmodel.InFirstPageViewModel
 import com.android.systemui.qs.ui.viewmodel.QuickSettingsContainerViewModel
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.model.Scenes
@@ -60,10 +66,14 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import java.io.PrintWriter
+import javax.inject.Named
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 
@@ -83,7 +93,10 @@ constructor(
     configurationInteractor: ConfigurationInteractor,
     private val largeScreenHeaderHelper: LargeScreenHeaderHelper,
     private val squishinessInteractor: TileSquishinessInteractor,
-    private val paginatedGridViewModel: PaginatedGridViewModel,
+    private val inFirstPageViewModel: InFirstPageViewModel,
+    @Named(QUICK_QS_PANEL) val qqsMediaHost: MediaHost,
+    @Named(QS_PANEL) val qsMediaHost: MediaHost,
+    @Named(QSFragmentComposeModule.QS_USING_MEDIA_PLAYER) private val usingMedia: Boolean,
     @Assisted private val lifecycleScope: LifecycleCoroutineScope,
 ) : Dumpable, ExclusiveActivatable() {
 
@@ -191,7 +204,7 @@ constructor(
     var collapseExpandAccessibilityAction: Runnable? = null
 
     val inFirstPage: Boolean
-        get() = paginatedGridViewModel.inFirstPage
+        get() = inFirstPageViewModel.inFirstPage
 
     var overScrollAmount by mutableStateOf(0)
 
@@ -221,6 +234,30 @@ constructor(
             else -> largeScreenShadeInterpolator.getQsAlpha(alphaProgress)
         }
     }
+
+    val showingMirror: Boolean
+        get() = containerViewModel.brightnessSliderViewModel.showMirror
+
+    // The initial values in these two are not meaningful. The flow will emit on start the correct
+    // values. This is because we need to lazily fetch them after initMediaHosts.
+    val qqsMediaVisible by
+        hydrator.hydratedStateOf(
+            traceName = "qqsMediaVisible",
+            initialValue = usingMedia,
+            source =
+                if (usingMedia) {
+                    mediaHostVisible(qqsMediaHost)
+                } else {
+                    flowOf(false)
+                },
+        )
+
+    val qsMediaVisible by
+        hydrator.hydratedStateOf(
+            traceName = "qsMediaVisible",
+            initialValue = usingMedia,
+            source = if (usingMedia) mediaHostVisible(qsMediaHost) else flowOf(false),
+        )
 
     private var qsBounds by mutableStateOf(Rect())
 
@@ -258,9 +295,6 @@ constructor(
                     }
                     .onStart { emit(sysuiStatusBarStateController.state) },
         )
-
-    val showingMirror: Boolean
-        get() = containerViewModel.brightnessSliderViewModel.showMirror
 
     private val isKeyguardState: Boolean
         get() = statusBarState == StatusBarState.KEYGUARD
@@ -323,11 +357,25 @@ constructor(
         )
 
     override suspend fun onActivated(): Nothing {
+        initMediaHosts() // init regardless of using media (same as current QS).
         coroutineScope {
             launch { hydrateSquishinessInteractor() }
             launch { hydrator.activate() }
             launch { containerViewModel.activate() }
             awaitCancellation()
+        }
+    }
+
+    private fun initMediaHosts() {
+        qqsMediaHost.apply {
+            expansion = MediaHostState.EXPANDED
+            showsOnlyActiveMedia = true
+            init(MediaHierarchyManager.LOCATION_QQS)
+        }
+        qsMediaHost.apply {
+            expansion = MediaHostState.EXPANDED
+            showsOnlyActiveMedia = false
+            init(MediaHierarchyManager.LOCATION_QS)
         }
     }
 
@@ -373,6 +421,10 @@ constructor(
                 println("qqsHeight", "${qqsHeight}px")
                 println("qsScrollHeight", "${qsScrollHeight}px")
             }
+            printSection("Media") {
+                println("qqsMediaVisible", qqsMediaVisible)
+                println("qsMediaVisible", qsMediaVisible)
+            }
         }
     }
 
@@ -390,3 +442,21 @@ private fun Float.constrainSquishiness(): Float {
 }
 
 private val SHORT_PARALLAX_AMOUNT = 0.1f
+
+/**
+ * Returns a flow to track the visibility of a [MediaHost]. The flow will emit on start the visible
+ * state of the view.
+ */
+private fun mediaHostVisible(mediaHost: MediaHost): Flow<Boolean> {
+    return callbackFlow {
+            val listener: (Boolean) -> Unit = { visible: Boolean -> trySend(visible) }
+            mediaHost.addVisibilityChangeListener(listener)
+
+            awaitClose { mediaHost.removeVisibilityChangeListener(listener) }
+        }
+        // Need to use this to set initial state because on creation of the media host, the
+        // view visibility is not in sync with [MediaHost.visible], which is what we track with
+        // the listener. The correct state is set as part of init, so we need to get the state
+        // lazily.
+        .onStart { emit(mediaHost.visible) }
+}

@@ -748,10 +748,13 @@ flag {
 }
 
 flag {
-    name: "smartspace_swipe_event_logging"
+    name: "smartspace_swipe_event_logging_fix"
     namespace: "systemui"
     description: "Log card swipe events in smartspace"
     bug: "374150422"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+   }
 }
 
 flag {
@@ -1148,6 +1151,13 @@ flag {
   namespace: "systemui"
   description: "Support communal features without a dock"
   bug: "352301247"
+}
+
+flag {
+  name: "communal_hub_on_mobile"
+  namespace: "systemui"
+  description: "Brings the glanceable hub experience to mobile phones"
+  bug: "375689917"
 }
 
 flag {
