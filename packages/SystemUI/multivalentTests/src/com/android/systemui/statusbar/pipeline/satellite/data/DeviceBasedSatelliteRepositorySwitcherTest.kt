@@ -85,7 +85,7 @@ class DeviceBasedSatelliteRepositorySwitcherTest : SysuiTestCase() {
             demoDataSource,
             testScope.backgroundScope,
             context.resources,
-            )
+        )
 
     private val underTest =
         DeviceBasedSatelliteRepositorySwitcher(

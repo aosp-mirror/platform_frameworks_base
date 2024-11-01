@@ -96,12 +96,7 @@ constructor(
                 flowOf(0)
             }
             .distinctUntilChanged()
-            .logDiffsForTable(
-                tableLog,
-                columnPrefix = "",
-                columnName = COL_LEVEL,
-                initialValue = 0,
-            )
+            .logDiffsForTable(tableLog, columnPrefix = "", columnName = COL_LEVEL, initialValue = 0)
             .stateIn(scope, SharingStarted.WhileSubscribed(), 0)
 
     val isSatelliteProvisioned = repo.isSatelliteProvisioned
@@ -135,10 +130,9 @@ constructor(
     /** When all connections are considered OOS, satellite connectivity is potentially valid */
     val areAllConnectionsOutOfService =
         if (Flags.oemEnabledSatelliteFlag()) {
-                combine(
-                    allConnectionsOos,
-                    iconsInteractor.isDeviceInEmergencyCallsOnlyMode,
-                ) { connectionsOos, deviceEmergencyOnly ->
+                combine(allConnectionsOos, iconsInteractor.isDeviceInEmergencyCallsOnlyMode) {
+                    connectionsOos,
+                    deviceEmergencyOnly ->
                     logBuffer.log(
                         TAG,
                         LogLevel.INFO,

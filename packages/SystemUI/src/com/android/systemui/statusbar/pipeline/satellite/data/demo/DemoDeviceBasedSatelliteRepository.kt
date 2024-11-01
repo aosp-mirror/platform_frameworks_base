@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.pipeline.satellite.data.demo
 
 import android.content.res.Resources
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
@@ -27,7 +28,6 @@ import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 /** A satellite repository that represents the latest satellite values sent via demo mode. */
 @SysUISingleton
