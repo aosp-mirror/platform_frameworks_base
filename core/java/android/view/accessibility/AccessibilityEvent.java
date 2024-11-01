@@ -563,10 +563,13 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
 
     /**
      * Represents the event of an application making an announcement.
-     * <p>
-     * In general, follow the practices described in
-     * {@link View#announceForAccessibility(CharSequence)}.
+     *
+     * @deprecated Use one of the semantic alternative methods described in the documentation of
+     *     {@link View#announceForAccessibility(CharSequence)} instead of using this event, as
+     *     accessibility services may choose to ignore dispatch of this event type.
      */
+    @FlaggedApi(Flags.FLAG_DEPRECATE_ACCESSIBILITY_ANNOUNCEMENT_APIS)
+    @Deprecated
     public static final int TYPE_ANNOUNCEMENT = 1 << 14;
 
     /**
