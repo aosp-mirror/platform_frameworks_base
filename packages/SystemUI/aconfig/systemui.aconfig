@@ -1727,6 +1727,16 @@ flag {
 }
 
 flag {
+    name: "material_colors_10_2024"
+    namespace: "systemui"
+    description: "Adding new Material Tokens as of October 2024"
+    bug: "376195115"
+    metadata {
+        purpose: PURPOSE_FEATURE
+    }
+}
+
+flag {
     name: "qs_tile_detailed_view"
     namespace: "systemui"
     description: "Enables the tile detailed view UI."
@@ -1756,7 +1766,6 @@ flag {
   description: "Expands the shade on long press of any status bar"
   bug: "371224114"
 }
-
 
 flag {
     name: "keyboard_shortcut_helper_shortcut_customizer"
