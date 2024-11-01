@@ -16821,6 +16821,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         NotificationManagerService.WorkerHandler handler = mock(
                 NotificationManagerService.WorkerHandler.class);
         mService.setHandler(handler);
+        when(mAssistants.isAdjustmentKeyTypeAllowed(anyInt())).thenReturn(true);
 
         Bundle signals = new Bundle();
         signals.putInt(KEY_TYPE, TYPE_NEWS);

@@ -266,4 +266,7 @@ interface INotificationManager
 
     void setAdjustmentTypeSupportedState(in INotificationListener token, String key, boolean supported);
     List<String> getUnsupportedAdjustmentTypes();
+
+    int[] getAllowedAdjustmentKeyTypes();
+    void setAssistantAdjustmentKeyTypeState(int type, boolean enabled);
 }

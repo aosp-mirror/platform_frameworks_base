@@ -17,6 +17,9 @@ package com.android.server.notification;
 
 import static android.os.UserHandle.USER_ALL;
 import static android.service.notification.Adjustment.KEY_IMPORTANCE;
+import static android.service.notification.Adjustment.TYPE_CONTENT_RECOMMENDATION;
+import static android.service.notification.Adjustment.TYPE_NEWS;
+import static android.service.notification.Adjustment.TYPE_PROMOTION;
 
 import static com.android.server.notification.NotificationManagerService.DEFAULT_ALLOWED_ADJUSTMENTS;
 
@@ -58,6 +61,8 @@ import android.testing.TestableContext;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.IntArray;
+import android.util.Log;
+import android.util.Slog;
 import android.util.Xml;
 
 import androidx.test.runner.AndroidJUnit4;
@@ -689,5 +694,48 @@ public class NotificationAssistantsTest extends UiServiceTestCase {
 
         assertThat(mAssistants.getAllowedAssistantAdjustments())
                 .containsExactlyElementsIn(DEFAULT_ALLOWED_ADJUSTMENTS);
+    }
+
+    @Test
+    @EnableFlags(android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION)
+    public void testSetAssistantAdjustmentKeyTypeState_allow() {
+        assertThat(mAssistants.getAllowedAdjustmentKeyTypes()).asList()
+                .containsExactly(TYPE_PROMOTION);
+
+        mAssistants.setAssistantAdjustmentKeyTypeState(TYPE_CONTENT_RECOMMENDATION, true);
+
+        assertThat(mAssistants.getAllowedAdjustmentKeyTypes()).asList()
+                .containsExactlyElementsIn(List.of(TYPE_PROMOTION, TYPE_CONTENT_RECOMMENDATION));
+    }
+
+    @Test
+    @EnableFlags(android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION)
+    public void testSetAssistantAdjustmentKeyTypeState_disallow() {
+        mAssistants.setAssistantAdjustmentKeyTypeState(TYPE_PROMOTION, false);
+        assertThat(mAssistants.getAllowedAdjustmentKeyTypes()).isEmpty();
+    }
+
+    @Test
+    @EnableFlags(android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION)
+    public void testDisallowAdjustmentKeyType_readWriteXml() throws Exception {
+        mAssistants.loadDefaultsFromConfig(true);
+        mAssistants.setAssistantAdjustmentKeyTypeState(TYPE_PROMOTION, false);
+        mAssistants.setAssistantAdjustmentKeyTypeState(TYPE_NEWS, true);
+        mAssistants.setAssistantAdjustmentKeyTypeState(TYPE_CONTENT_RECOMMENDATION, true);
+
+        writeXmlAndReload(USER_ALL);
+
+        assertThat(mAssistants.getAllowedAdjustmentKeyTypes()).asList()
+                .containsExactlyElementsIn(List.of(TYPE_NEWS, TYPE_CONTENT_RECOMMENDATION));
+    }
+
+    @Test
+    public void testDefaultAllowedKeyAdjustments_readWriteXml() throws Exception {
+        mAssistants.loadDefaultsFromConfig(true);
+
+        writeXmlAndReload(USER_ALL);
+
+        assertThat(mAssistants.getAllowedAdjustmentKeyTypes()).asList()
+                .containsExactly(TYPE_PROMOTION);
     }
 }
