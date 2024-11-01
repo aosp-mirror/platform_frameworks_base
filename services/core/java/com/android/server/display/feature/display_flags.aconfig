@@ -438,3 +438,11 @@ flag {
     bug: "361433796"
     is_fixed_read_only: true
 }
+
+flag {
+    name: "enable_get_supported_refresh_rates"
+    namespace: "core_graphics"
+    description: "Flag to use the surfaceflinger rates for getSupportedRefreshRates"
+    bug: "365163968"
+    is_fixed_read_only: true
+}
