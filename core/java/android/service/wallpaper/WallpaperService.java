@@ -2623,7 +2623,12 @@ public abstract class WallpaperService extends Service {
 
         private void doAttachEngine() {
             Trace.beginSection("WPMS.onCreateEngine");
-            Engine engine = onCreateEngine(mDescription);
+            Engine engine;
+            if (mDescription != null) {
+                engine = onCreateEngine(mDescription);
+            } else {
+                engine = onCreateEngine();
+            }
             Trace.endSection();
             mEngine = engine;
             Trace.beginSection("WPMS.mConnection.attachEngine-" + mDisplayId);
