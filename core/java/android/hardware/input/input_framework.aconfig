@@ -1,7 +1,10 @@
 package: "com.android.hardware.input"
 container: "system"
 
-# Project link: https://gantry.corp.google.com/projects/android_platform_input_native/changes
+# Project link: https://gantry.corp.google.com/projects/android_platform_input/changes
+
+# NOTE: the input_native namespace is deprecated. New flags should be added to the input namespace
+# instead.
 
 flag {
     namespace: "input_native"
