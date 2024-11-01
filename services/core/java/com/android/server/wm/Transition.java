@@ -469,20 +469,17 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             if (transientRoot == null) continue;
             final WindowContainer<?> rootParent = transientRoot.getParent();
             if (rootParent == null || rootParent.getTopChild() == transientRoot) continue;
-            final ActivityRecord topOpaque = mController.mAtm.mTaskSupervisor.mOpaqueActivityHelper
-                    .getOpaqueActivity(rootParent, true /* ignoringKeyguard */);
-            if (transientRoot.compareTo(topOpaque.getRootTask()) < 0) {
-                occludedCount++;
+            for (int j = rootParent.getChildCount() - 1; j >= 0; --j) {
+                final WindowContainer<?> sibling = rootParent.getChildAt(j);
+                if (sibling == transientRoot) break;
+                if (!sibling.getWindowConfiguration().isAlwaysOnTop() && mController.mAtm
+                        .mTaskSupervisor.mOpaqueActivityHelper.getOpaqueActivity(sibling) != null) {
+                    occludedCount++;
+                    break;
+                }
             }
         }
         if (occludedCount == numTransient) {
-            for (int i = mTransientLaunches.size() - 1; i >= 0; --i) {
-                if (mTransientLaunches.keyAt(i).isDescendantOf(task)) {
-                    // Keep transient activity visible until transition finished, so it won't pause
-                    // with transient-hide tasks that may delay resuming the next top.
-                    return true;
-                }
-            }
             // Let transient-hide activities pause before transition is finished.
             return false;
         }

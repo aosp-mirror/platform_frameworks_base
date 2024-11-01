@@ -1632,6 +1632,8 @@ public class TransitionTests extends WindowTestsBase {
         transition.collect(taskA);
         transition.setTransientLaunch(recent, taskA);
         taskRecent.moveToFront("move-recent-to-front");
+        recent.setVisibility(true);
+        recent.setState(ActivityRecord.State.RESUMED, "test");
 
         // During collecting and playing, the recent is on top so it is visible naturally.
         // While B needs isTransientVisible to keep visibility because it is occluded by recents.
@@ -1644,15 +1646,21 @@ public class TransitionTests extends WindowTestsBase {
 
         // Switch to another task. For example, use gesture navigation to switch tasks.
         taskB.moveToFront("move-b-to-front");
+        appB.setVisibility(true);
         // The previous app (taskA) should be paused first so it loses transient visible. Because
         // visually it is taskA -> taskB, the pause -> resume order should be the same.
         assertFalse(controller.isTransientVisible(taskA));
-        // Keep the recent visible so there won't be 2 activities pausing at the same time. It is
-        // to avoid the latency to resume the current top, i.e. appB.
-        assertTrue(controller.isTransientVisible(taskRecent));
-        // The recent is paused after the transient transition is finished.
-        controller.finishTransition(ActionChain.testFinish(transition));
+        // The recent is occluded by appB.
         assertFalse(controller.isTransientVisible(taskRecent));
+        // Active transient launch won't be paused if the transition is not finished. It is to
+        // avoid the latency to resume the current top (appB) by waiting for both recent and appA
+        // to complete pause.
+        assertEquals(recent, taskRecent.getResumedActivity());
+        assertFalse(taskRecent.startPausing(false /* uiSleeping */, appB /* resuming */, "test"));
+        // ActivityRecord#makeInvisible will add the invisible recent to the stopping list.
+        // So when the transition finished, the recent can still be notified to pause and stop.
+        mDisplayContent.ensureActivitiesVisible(null /* starting */, true /* notifyClients */);
+        assertTrue(mSupervisor.mStoppingActivities.contains(recent));
     }
 
     @Test
