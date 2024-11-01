@@ -3918,7 +3918,9 @@ class Task extends TaskFragment {
             sb.append(" aI=");
             sb.append(affinityIntent.getComponent().flattenToShortString());
         }
-        sb.append(" isResizeable=").append(isResizeable());
+        if (!isResizeable()) {
+            sb.append(" nonResizable");
+        }
         if (mMinWidth != INVALID_MIN_SIZE || mMinHeight != INVALID_MIN_SIZE) {
             sb.append(" minWidth=").append(mMinWidth);
             sb.append(" minHeight=").append(mMinHeight);
