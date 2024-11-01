@@ -112,6 +112,8 @@
     <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"Želite posneti zaslon?"</string>
     <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"Snemanje ene aplikacije"</string>
     <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"Snemanje celotnega zaslona"</string>
+    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen_for_display (3754611651558838691) -->
+    <skip />
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"Pri snemanju celotnega zaslona se posname vse, kar je prikazano na zaslonu. Zato bodite previdni z gesli, podatki za plačilo, sporočili, fotografijami ter z zvokom in videom."</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"Pri snemanju aplikacije se posname vse, kar je prikazano ali predvajano v tej aplikaciji. Zato bodite previdni z gesli, podatki za plačilo, sporočili, fotografijami ter z zvokom in videom."</string>
     <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"Snemanje zaslona"</string>
@@ -1413,9 +1415,15 @@
     <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"Trenutna aplikacija"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Dostopnost"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Bližnjične tipke"</string>
+    <!-- no translation found for shortcut_helper_customize_mode_title (1467657117101096033) -->
+    <skip />
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Bližnjice za iskanje"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"Ni rezultatov iskanja"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Ikona za strnitev"</string>
+    <!-- no translation found for shortcut_helper_customize_button_text (3124983502748069338) -->
+    <skip />
+    <!-- no translation found for shortcut_helper_done_button_text (7249905942125386191) -->
+    <skip />
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Ikona za razširitev"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"ali"</string>
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"Ročica za vlečenje"</string>
