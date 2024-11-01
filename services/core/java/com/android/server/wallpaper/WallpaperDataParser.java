@@ -745,9 +745,9 @@ public class WallpaperDataParser {
 
     private static List<Pair<Integer, String>> screenDimensionPairs() {
         return List.of(
-                new Pair<>(WallpaperManager.PORTRAIT, "Portrait"),
-                new Pair<>(WallpaperManager.LANDSCAPE, "Landscape"),
-                new Pair<>(WallpaperManager.SQUARE_PORTRAIT, "SquarePortrait"),
-                new Pair<>(WallpaperManager.SQUARE_LANDSCAPE, "SquareLandscape"));
+                new Pair<>(WallpaperManager.ORIENTATION_PORTRAIT, "Portrait"),
+                new Pair<>(WallpaperManager.ORIENTATION_LANDSCAPE, "Landscape"),
+                new Pair<>(WallpaperManager.ORIENTATION_SQUARE_PORTRAIT, "SquarePortrait"),
+                new Pair<>(WallpaperManager.ORIENTATION_SQUARE_LANDSCAPE, "SquareLandscape"));
     }
 }
