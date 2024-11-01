@@ -15,10 +15,7 @@
   -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
-    android:paddingMode="stack" >
-    <size
-        android:height="@dimen/volume_dialog_ringer_drawer_button_size"
-        android:width="@dimen/volume_dialog_ringer_drawer_button_size" />
-    <solid android:color="?androidprv:attr/materialColorPrimary" />
-    <corners android:radius="@dimen/volume_dialog_ringer_selected_button_background_radius" />
+    android:shape="rectangle">
+    <corners android:radius="@dimen/volume_dialog_background_square_corner_radius" />
+    <solid android:color="?androidprv:attr/materialColorSurface" />
 </shape>
