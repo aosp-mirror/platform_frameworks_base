@@ -280,7 +280,7 @@ public class PipTaskOrganizerTest extends ShellTestCase {
 
     private void preparePipSurfaceTransactionHelper() {
         doReturn(mMockPipSurfaceTransactionHelper).when(mMockPipSurfaceTransactionHelper)
-                .crop(any(), any(), any());
+                .cropAndPosition(any(), any(), any());
         doReturn(mMockPipSurfaceTransactionHelper).when(mMockPipSurfaceTransactionHelper)
                 .resetScale(any(), any(), any());
         doReturn(mMockPipSurfaceTransactionHelper).when(mMockPipSurfaceTransactionHelper)
