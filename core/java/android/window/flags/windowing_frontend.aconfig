@@ -350,6 +350,17 @@ flag {
 }
 
 flag {
+  name: "defer_predictive_animation_if_no_snapshot"
+  namespace: "windowing_frontend"
+  description: "If no snapshot for previous window, start animation until the client has draw."
+  bug: "374621014"
+  is_fixed_read_only: true
+  metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
   name: "disallow_app_progress_embedded_window"
   namespace: "windowing_frontend"
   description: "Pilfer pointers when app transfer input gesture to embedded window."
