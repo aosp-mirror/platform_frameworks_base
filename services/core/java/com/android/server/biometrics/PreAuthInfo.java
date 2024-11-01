@@ -146,7 +146,7 @@ class PreAuthInfo {
         final List<Pair<BiometricSensor, Integer>> ineligibleSensors = new ArrayList<>();
 
         final int effectiveUserId;
-        if (Flags.privateSpaceBp()) {
+        if (Flags.effectiveUserBp()) {
             effectiveUserId = userManager.getCredentialOwnerProfile(userId);
         } else {
             effectiveUserId = userId;
