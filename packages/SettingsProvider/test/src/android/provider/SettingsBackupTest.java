@@ -944,7 +944,8 @@ public class SettingsBackupTest {
                         Settings.System.WEAR_ACCESSIBILITY_GESTURE_ENABLED_DURING_OOBE,
                         Settings.System.WEAR_TTS_PREWARM_ENABLED,
                         Settings.System.SCREEN_AUTO_BRIGHTNESS_ADJ,
-                        Settings.System.MULTI_AUDIO_FOCUS_ENABLED // form-factor/OEM specific
+                        Settings.System.MULTI_AUDIO_FOCUS_ENABLED, // form-factor/OEM specific
+                        Settings.System.HEARING_DEVICE_LOCAL_AMBIENT_VOLUME // internal cache
                 );
         if (!Flags.backUpSmoothDisplayAndForcePeakRefreshRate()) {
             settings.add(Settings.System.MIN_REFRESH_RATE);

@@ -679,6 +679,21 @@ class BroadcastController {
         }
     }
 
+    List<IntentFilter> getRegisteredIntentFilters(IIntentReceiver receiver) {
+        synchronized (mService) {
+            final ReceiverList rl = mRegisteredReceivers.get(receiver.asBinder());
+            if (rl == null) {
+                return null;
+            }
+            final ArrayList<IntentFilter> filters = new ArrayList<>();
+            final int count = rl.size();
+            for (int i = 0; i < count; ++i) {
+                filters.add(rl.get(i));
+            }
+            return filters;
+        }
+    }
+
     int broadcastIntentWithFeature(IApplicationThread caller, String callingFeatureId,
             Intent intent, String resolvedType, IIntentReceiver resultTo,
             int resultCode, String resultData, Bundle resultExtras,

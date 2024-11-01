@@ -156,7 +156,7 @@ public final class ExecuteAppFunctionResponse implements Parcelable {
      * Returns a successful response.
      *
      * @param resultDocument The return value of the executed function.
-     * @param extras The additional metadata data relevant to this function execution response.
+     * @param extras The additional metadata for this function execution response.
      */
     @NonNull
     @FlaggedApi(FLAG_ENABLE_APP_FUNCTION_MANAGER)
@@ -174,7 +174,7 @@ public final class ExecuteAppFunctionResponse implements Parcelable {
      * Returns a failure response.
      *
      * @param resultCode The result code of the app function execution.
-     * @param extras The additional metadata data relevant to this function execution response.
+     * @param extras The additional metadata for this function execution response.
      * @param errorMessage The error message associated with the result, if any.
      */
     @NonNull
@@ -216,13 +216,15 @@ public final class ExecuteAppFunctionResponse implements Parcelable {
      *       // Do something with the returnValue
      *     }
      * </pre>
+     *
+     * @see AppFunctionManager on how to determine the expected function return.
      */
     @NonNull
     public GenericDocument getResultDocument() {
         return mResultDocumentWrapper.getValue();
     }
 
-    /** Returns the extras of the app function execution. */
+    /** Returns the additional metadata for this function execution response. */
     @NonNull
     public Bundle getExtras() {
         return mExtras;

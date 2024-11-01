@@ -85,11 +85,6 @@ public final class MessageQueue {
     // queue for async messages when inserting a message at the tail.
     private int mLegacyAsyncMessageCount;
 
-    // The next barrier token.
-    // Barriers are indicated by messages with a null target whose arg1 field carries the token.
-    @UnsupportedAppUsage
-    private int mLegacyNextBarrierToken;
-
     /*
      * Select between two implementations of message queue. The legacy implementation is used
      * by default as it provides maximum compatibility with applications and tests that
@@ -139,7 +134,7 @@ public final class MessageQueue {
         }
     }
 
-    private class MatchDeliverableMessages extends MessageCompare {
+    private static final class MatchDeliverableMessages extends MessageCompare {
         @Override
         public boolean compareMessage(Message m, Handler h, int what, Object object, Runnable r,
                 long when) {
@@ -900,7 +895,12 @@ public final class MessageQueue {
         // Enqueue a new sync barrier token.
         // We don't need to wake the queue because the purpose of a barrier is to stall it.
         if (sForceConcurrent) {
-            final int token = mNextBarrierToken.getAndIncrement();
+            final int token = mNextBarrierTokenAtomic.getAndIncrement();
+
+            // b/376573804: apps and tests may expect to be able to use reflection
+            // to read this value. Make some effort to support this legacy use case.
+            mNextBarrierToken = token + 1;
+
             final Message msg = Message.obtain();
 
             msg.markInUse();
@@ -915,7 +915,7 @@ public final class MessageQueue {
         }
 
         synchronized (this) {
-            final int token = mLegacyNextBarrierToken++;
+            final int token = mNextBarrierToken++;
             final Message msg = Message.obtain();
             msg.markInUse();
             msg.when = when;
@@ -954,7 +954,7 @@ public final class MessageQueue {
         }
     }
 
-    private class MatchBarrierToken extends MessageCompare {
+    private static final class MatchBarrierToken extends MessageCompare {
         int mBarrierToken;
 
         MatchBarrierToken(int token) {
@@ -1167,7 +1167,7 @@ public final class MessageQueue {
         return true;
     }
 
-    private static class MatchHandlerWhatAndObject extends MessageCompare {
+    private static final class MatchHandlerWhatAndObject extends MessageCompare {
         @Override
         public boolean compareMessage(Message m, Handler h, int what, Object object, Runnable r,
                 long when) {
@@ -1199,7 +1199,7 @@ public final class MessageQueue {
         }
     }
 
-    private static class MatchHandlerWhatAndObjectEquals extends MessageCompare {
+    private static final class MatchHandlerWhatAndObjectEquals extends MessageCompare {
         @Override
         public boolean compareMessage(Message m, Handler h, int what, Object object, Runnable r,
                 long when) {
@@ -1232,7 +1232,7 @@ public final class MessageQueue {
         }
     }
 
-    private static class MatchHandlerRunnableAndObject extends MessageCompare {
+    private static final class MatchHandlerRunnableAndObject extends MessageCompare {
         @Override
         public boolean compareMessage(Message m, Handler h, int what, Object object, Runnable r,
                 long when) {
@@ -1266,7 +1266,7 @@ public final class MessageQueue {
         }
     }
 
-    private static class MatchHandler extends MessageCompare {
+    private static final class MatchHandler extends MessageCompare {
         @Override
         public boolean compareMessage(Message m, Handler h, int what, Object object, Runnable r,
                 long when) {
@@ -1449,7 +1449,7 @@ public final class MessageQueue {
         }
     }
 
-    private static class MatchHandlerRunnableAndObjectEquals extends MessageCompare {
+    private static final class MatchHandlerRunnableAndObjectEquals extends MessageCompare {
         @Override
         public boolean compareMessage(Message m, Handler h, int what, Object object, Runnable r,
                 long when) {
@@ -1512,7 +1512,7 @@ public final class MessageQueue {
         }
     }
 
-    private static class MatchHandlerAndObject extends MessageCompare {
+    private static final class MatchHandlerAndObject extends MessageCompare {
         @Override
         public boolean compareMessage(Message m, Handler h, int what, Object object, Runnable r,
                 long when) {
@@ -1573,7 +1573,7 @@ public final class MessageQueue {
         }
     }
 
-    private static class MatchHandlerAndObjectEquals extends MessageCompare {
+    private static final class MatchHandlerAndObjectEquals extends MessageCompare {
         @Override
         public boolean compareMessage(Message m, Handler h, int what, Object object, Runnable r,
                 long when) {
@@ -1680,7 +1680,7 @@ public final class MessageQueue {
         }
     }
 
-    private static class MatchAllMessages extends MessageCompare {
+    private static final class MatchAllMessages extends MessageCompare {
         @Override
         public boolean compareMessage(Message m, Handler h, int what, Object object, Runnable r,
                 long when) {
@@ -1692,7 +1692,7 @@ public final class MessageQueue {
         findOrRemoveMessages(null, -1, null, null, 0, mMatchAllMessages, true);
     }
 
-    private static class MatchAllFutureMessages extends MessageCompare {
+    private static final class MatchAllFutureMessages extends MessageCompare {
         @Override
         public boolean compareMessage(Message m, Handler h, int what, Object object, Runnable r,
                 long when) {
@@ -2292,7 +2292,11 @@ public final class MessageQueue {
 
     // The next barrier token.
     // Barriers are indicated by messages with a null target whose arg1 field carries the token.
-    private final AtomicInteger mNextBarrierToken = new AtomicInteger(1);
+    private final AtomicInteger mNextBarrierTokenAtomic = new AtomicInteger(1);
+
+    // Must retain this for compatibility reasons.
+    @UnsupportedAppUsage
+    private int mNextBarrierToken;
 
     /* Protects mNextIsDrainingStack */
     private final ReentrantLock mDrainingLock = new ReentrantLock();

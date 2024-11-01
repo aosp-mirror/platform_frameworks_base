@@ -3658,6 +3658,27 @@ public abstract class Context {
     public abstract void unregisterReceiver(BroadcastReceiver receiver);
 
     /**
+     * Returns the list of {@link IntentFilter} objects that have been registered for the given
+     * {@link BroadcastReceiver}.
+     *
+     * @param receiver The {@link BroadcastReceiver} whose registered intent filters
+     *                 should be retrieved.
+     *
+     * @return A list of registered intent filters, or an empty list if the given receiver is not
+     *         registered.
+     *
+     * @throws NullPointerException if the {@code receiver} is {@code null}.
+     *
+     * @hide
+     */
+    @SuppressLint("UnflaggedApi") // TestApi
+    @TestApi
+    @NonNull
+    public List<IntentFilter> getRegisteredIntentFilters(@NonNull BroadcastReceiver receiver) {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
+
+    /**
      * Request that a given application service be started.  The Intent
      * should either contain the complete class name of a specific service
      * implementation to start, or a specific package name to target.  If the
@@ -4873,6 +4894,8 @@ public abstract class Context {
      * @see android.net.vcn.VcnManager
      * @hide
      */
+    @FlaggedApi(android.os.Flags.FLAG_MAINLINE_VCN_PLATFORM_API)
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final String VCN_MANAGEMENT_SERVICE = "vcn_management";
 
     /**

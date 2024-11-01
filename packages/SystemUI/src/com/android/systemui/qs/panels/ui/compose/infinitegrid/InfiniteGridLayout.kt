@@ -72,7 +72,7 @@ constructor(
             rememberViewModel(traceName = "InfiniteGridLayout.TileGrid") {
                 viewModel.dynamicIconTilesViewModelFactory.create()
             }
-        val columns by viewModel.gridSizeViewModel.columns.collectAsStateWithLifecycle()
+        val columns by viewModel.gridSizeViewModel.columns
         val sizedTiles = tiles.map { SizedTileImpl(it, it.spec.width()) }
         val bounceables =
             remember(sizedTiles) { List(sizedTiles.size) { BounceableTileViewModel() } }
@@ -118,7 +118,7 @@ constructor(
             rememberViewModel(traceName = "InfiniteGridLayout.EditTileGrid") {
                 viewModel.dynamicIconTilesViewModelFactory.create()
             }
-        val columns by viewModel.gridSizeViewModel.columns.collectAsStateWithLifecycle()
+        val columns by viewModel.gridSizeViewModel.columns
         val largeTiles by iconTilesViewModel.largeTiles.collectAsStateWithLifecycle()
 
         // Non-current tiles should always be displayed as icon tiles.

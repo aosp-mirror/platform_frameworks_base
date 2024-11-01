@@ -19,6 +19,7 @@
 #include <HardwareBitmapUploader.h>
 #include <androidfw/Asset.h>
 #include <sys/stat.h>
+#include <utils/StatsUtils.h>
 
 #include <memory>
 
@@ -376,6 +377,7 @@ static jobject nativeDecodeRegion(JNIEnv* env, jobject, jlong brdHandle, jint in
             recycledBitmap->setGainmap(std::move(gainmap));
         }
         bitmap::reinitBitmap(env, javaBitmap, recycledBitmap->info(), !requireUnpremul);
+        uirenderer::logBitmapDecode(*recycledBitmap);
         return javaBitmap;
     }
 
@@ -392,12 +394,14 @@ static jobject nativeDecodeRegion(JNIEnv* env, jobject, jlong brdHandle, jint in
                 hardwareBitmap->setGainmap(std::move(gm));
             }
         }
+        uirenderer::logBitmapDecode(*hardwareBitmap);
         return bitmap::createBitmap(env, hardwareBitmap.release(), bitmapCreateFlags);
     }
     Bitmap* heapBitmap = heapAlloc.getStorageObjAndReset();
     if (hasGainmap && heapBitmap != nullptr) {
         heapBitmap->setGainmap(std::move(gainmap));
     }
+    uirenderer::logBitmapDecode(*heapBitmap);
     return android::bitmap::createBitmap(env, heapBitmap, bitmapCreateFlags);
 }
 

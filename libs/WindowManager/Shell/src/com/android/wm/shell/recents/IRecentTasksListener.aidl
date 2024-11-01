@@ -45,4 +45,7 @@ oneway interface IRecentTasksListener {
 
     /** A task has moved to front. */
     oneway void onTaskMovedToFront(in RunningTaskInfo taskInfo);
+
+    /** A task info has changed. */
+    oneway void onTaskInfoChanged(in RunningTaskInfo taskInfo);
 }

@@ -20,7 +20,6 @@ import static android.appwidget.flags.Flags.FLAG_DRAW_DATA_PARCEL;
 import static android.appwidget.flags.Flags.FLAG_REMOTE_VIEWS_PROTO;
 import static android.appwidget.flags.Flags.drawDataParcel;
 import static android.appwidget.flags.Flags.remoteAdapterConversion;
-import static android.util.TypedValue.TYPE_INT_COLOR_ARGB8;
 import static android.util.proto.ProtoInputStream.NO_MORE_FIELDS;
 import static android.view.inputmethod.Flags.FLAG_HOME_SCREEN_HANDWRITING_DELEGATOR;
 
@@ -55,10 +54,6 @@ import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.ServiceConnection;
-import android.content.om.FabricatedOverlay;
-import android.content.om.OverlayInfo;
-import android.content.om.OverlayManager;
-import android.content.om.OverlayManagerTransaction;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.ColorStateList;
@@ -84,12 +79,14 @@ import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.IBinder;
 import android.os.Parcel;
+import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.StrictMode;
 import android.os.Trace;
 import android.os.UserHandle;
+import android.system.Os;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.DisplayMetrics;
@@ -131,8 +128,11 @@ import com.android.internal.widget.remotecompose.player.RemoteComposePlayer;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.FileDescriptor;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -8552,8 +8552,12 @@ public class RemoteViews implements Parcelable, Filter {
      * @hide
      */
     public static final class ColorResources {
-        private static final String OVERLAY_NAME = "remote_views_color_resources";
-        private static final String OVERLAY_TARGET_PACKAGE_NAME = "android";
+        // Set of valid colors resources.
+        private static final int FIRST_RESOURCE_COLOR_ID = android.R.color.system_neutral1_0;
+        private static final int LAST_RESOURCE_COLOR_ID =
+            android.R.color.system_error_1000;
+        // Size, in bytes, of an entry in the array of colors in an ARSC file.
+        private static final int ARSC_ENTRY_SIZE = 16;
 
         private final ResourcesLoader mLoader;
         private final SparseIntArray mColorMapping;
@@ -8587,6 +8591,44 @@ public class RemoteViews implements Parcelable, Filter {
         }
 
         /**
+         * Creates the compiled resources content from the asset stored in the APK.
+         *
+         * The asset is a compiled resource with the correct resources name and correct ids, only
+         * the values are incorrect. The last value is at the very end of the file. The resources
+         * are in an array, the array's entries are 16 bytes each. We use this to work out the
+         * location of all the positions of the various resources.
+         */
+        @Nullable
+        private static byte[] createCompiledResourcesContent(Context context,
+                SparseIntArray colorResources) throws IOException {
+            byte[] content;
+            try (InputStream input = context.getResources().openRawResource(
+                    com.android.internal.R.raw.remote_views_color_resources)) {
+                ByteArrayOutputStream rawContent = readFileContent(input);
+                content = rawContent.toByteArray();
+            }
+            int valuesOffset =
+                    content.length - (LAST_RESOURCE_COLOR_ID & 0xffff) * ARSC_ENTRY_SIZE - 4;
+            if (valuesOffset < 0) {
+                Log.e(LOG_TAG, "ARSC file for theme colors is invalid.");
+                return null;
+            }
+            for (int colorRes = FIRST_RESOURCE_COLOR_ID; colorRes <= LAST_RESOURCE_COLOR_ID;
+                    colorRes++) {
+                // The last 2 bytes are the index in the color array.
+                int index = colorRes & 0xffff;
+                int offset = valuesOffset + index * ARSC_ENTRY_SIZE;
+                int value = colorResources.get(colorRes, context.getColor(colorRes));
+                // Write the 32 bit integer in little endian
+                for (int b = 0; b < 4; b++) {
+                    content[offset + b] = (byte) (value & 0xff);
+                    value >>= 8;
+                }
+            }
+            return content;
+        }
+
+        /**
          *  Adds a resource loader for theme colors to the given context.
          *
          * @param context Context of the view hosting the widget.
@@ -8597,38 +8639,31 @@ public class RemoteViews implements Parcelable, Filter {
         @Nullable
         public static ColorResources create(Context context, SparseIntArray colorMapping) {
             try {
-                String owningPackage = context.getPackageName();
-                FabricatedOverlay overlay = new FabricatedOverlay.Builder(owningPackage,
-                        OVERLAY_NAME, OVERLAY_TARGET_PACKAGE_NAME).build();
-
-                for (int i = 0; i < colorMapping.size(); i++) {
-                    overlay.setResourceValue(
-                            context.getResources().getResourceName(colorMapping.keyAt(i)),
-                            TYPE_INT_COLOR_ARGB8, colorMapping.valueAt(i), null);
-                }
-                OverlayManager overlayManager = context.getSystemService(OverlayManager.class);
-                OverlayManagerTransaction.Builder transaction =
-                        new OverlayManagerTransaction.Builder()
-                                .registerFabricatedOverlay(overlay)
-                                .setSelfTargeting(true);
-                overlayManager.commit(transaction.build());
-
-                OverlayInfo overlayInfo =
-                        overlayManager.getOverlayInfosForTarget(OVERLAY_TARGET_PACKAGE_NAME)
-                                .stream()
-                                .filter(info -> TextUtils.equals(info.overlayName, OVERLAY_NAME)
-                                        && TextUtils.equals(info.packageName, owningPackage))
-                                .findFirst()
-                                .orElse(null);
-                if (overlayInfo == null) {
-                    Log.e(LOG_TAG, "Failed to get overlay info ", new Throwable());
+                byte[] contentBytes = createCompiledResourcesContent(context, colorMapping);
+                if (contentBytes == null) {
                     return null;
                 }
-                ResourcesLoader colorsLoader = new ResourcesLoader();
-                colorsLoader.addProvider(ResourcesProvider.loadOverlay(overlayInfo));
-                return new ColorResources(colorsLoader, colorMapping.clone());
-            } catch (Exception e) {
-                Log.e(LOG_TAG, "Failed to add theme color overlay into loader", e);
+                FileDescriptor arscFile = null;
+                try {
+                    arscFile = Os.memfd_create("remote_views_theme_colors.arsc", 0 /* flags */);
+                    // Note: This must not be closed through the OutputStream.
+                    try (OutputStream pipeWriter = new FileOutputStream(arscFile)) {
+                        pipeWriter.write(contentBytes);
+
+                        try (ParcelFileDescriptor pfd = ParcelFileDescriptor.dup(arscFile)) {
+                            ResourcesLoader colorsLoader = new ResourcesLoader();
+                            colorsLoader.addProvider(ResourcesProvider
+                                    .loadFromTable(pfd, null /* assetsProvider */));
+                            return new ColorResources(colorsLoader, colorMapping.clone());
+                        }
+                    }
+                } finally {
+                    if (arscFile != null) {
+                        Os.close(arscFile);
+                    }
+                }
+            } catch (Exception ex) {
+                Log.e(LOG_TAG, "Failed to setup the context for theme colors", ex);
             }
             return null;
         }
