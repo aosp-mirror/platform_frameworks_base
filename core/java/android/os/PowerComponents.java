@@ -439,8 +439,8 @@ class PowerComponents {
                         }
                         final BatteryConsumer.Key key = builder.mData.layout.getKey(componentId,
                                 processState, screenState, powerState);
-                        builder.setConsumedPower(key, powerMah, model);
-                        builder.setUsageDurationMillis(key, durationMs);
+                        builder.addConsumedPower(key, powerMah, model);
+                        builder.addUsageDurationMillis(key, durationMs);
                         break;
                     }
                 }
@@ -468,6 +468,10 @@ class PowerComponents {
             }
         }
 
+        /**
+         * @deprecated use {@link #addConsumedPower(BatteryConsumer.Key, double, int)}
+         */
+        @Deprecated
         @NonNull
         public Builder setConsumedPower(BatteryConsumer.Key key, double componentPower,
                 int powerModel) {
@@ -489,6 +493,10 @@ class PowerComponents {
             return this;
         }
 
+        /**
+         * @deprecated use {@link #addUsageDurationMillis(BatteryConsumer.Key, long)}
+         */
+        @Deprecated
         @NonNull
         public Builder setUsageDurationMillis(BatteryConsumer.Key key,
                 long componentUsageDurationMillis) {
