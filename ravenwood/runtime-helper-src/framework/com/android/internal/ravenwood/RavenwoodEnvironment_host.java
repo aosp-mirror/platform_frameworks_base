@@ -23,14 +23,6 @@ public class RavenwoodEnvironment_host {
     }
 
     /**
-     * Called from {@link RavenwoodEnvironment#ensureRavenwoodInitialized()}.
-     */
-    public static void ensureRavenwoodInitialized() {
-        // Initialization is now done by RavenwoodAwareTestRunner.
-        // Should we remove it?
-    }
-
-    /**
      * Called from {@link RavenwoodEnvironment#getRavenwoodRuntimePath()}.
      */
     public static String getRavenwoodRuntimePath(RavenwoodEnvironment env) {

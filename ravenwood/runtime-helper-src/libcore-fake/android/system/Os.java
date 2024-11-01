@@ -16,6 +16,7 @@
 package android.system;
 
 import com.android.ravenwood.RavenwoodRuntimeNative;
+import com.android.ravenwood.RavenwoodRuntimeState;
 import com.android.ravenwood.common.JvmWorkaround;
 
 import java.io.FileDescriptor;
@@ -96,5 +97,17 @@ public final class Os {
 
     public static void setenv(String name, String value, boolean overwrite) throws ErrnoException {
         RavenwoodRuntimeNative.setenv(name, value, overwrite);
+    }
+
+    public static int getpid() {
+        return RavenwoodRuntimeState.sPid;
+    }
+
+    public static int getuid() {
+        return RavenwoodRuntimeState.sUid;
+    }
+
+    public static int gettid() {
+        return RavenwoodRuntimeNative.gettid();
     }
 }

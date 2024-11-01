@@ -40,6 +40,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.HandlerThread;
 import android.os.Looper;
+import android.os.Process_ravenwood;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.provider.DeviceConfig_host;
@@ -52,6 +53,7 @@ import androidx.test.platform.app.InstrumentationRegistry;
 import com.android.hoststubgen.hosthelper.HostTestUtils;
 import com.android.internal.os.RuntimeInit;
 import com.android.ravenwood.RavenwoodRuntimeNative;
+import com.android.ravenwood.RavenwoodRuntimeState;
 import com.android.ravenwood.common.RavenwoodCommonUtils;
 import com.android.ravenwood.common.RavenwoodRuntimeException;
 import com.android.ravenwood.common.SneakyThrow;
@@ -223,7 +225,9 @@ public class RavenwoodRuntimeEnvironmentController {
             Thread.setDefaultUncaughtExceptionHandler(sUncaughtExceptionHandler);
         }
 
-        android.os.Process.init$ravenwood(config.mUid, config.mPid);
+        RavenwoodRuntimeState.sUid = config.mUid;
+        RavenwoodRuntimeState.sPid = config.mPid;
+        RavenwoodRuntimeState.sTargetSdkLevel = config.mTargetSdkLevel;
         sOriginalIdentityToken = Binder.clearCallingIdentity();
         reinit();
         setSystemProperties(config.mSystemProperties);
@@ -350,8 +354,8 @@ public class RavenwoodRuntimeEnvironmentController {
         if (sOriginalIdentityToken != -1) {
             Binder.restoreCallingIdentity(sOriginalIdentityToken);
         }
-        android.os.Process.reset$ravenwood();
-
+        RavenwoodRuntimeState.reset();
+        Process_ravenwood.reset();
         DeviceConfig_host.reset();
 
         try {
