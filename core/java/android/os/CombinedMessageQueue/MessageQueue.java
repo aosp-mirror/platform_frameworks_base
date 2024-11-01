@@ -76,14 +76,14 @@ public final class MessageQueue {
     private final ArrayList<IdleHandler> mIdleHandlers = new ArrayList<IdleHandler>();
     private SparseArray<FileDescriptorRecord> mFileDescriptorRecords;
     private IdleHandler[] mPendingIdleHandlers;
-    private boolean mLegacyQuitting;
+    private boolean mQuitting;
 
     // Indicates whether next() is blocked waiting in pollOnce() with a non-zero timeout.
-    private boolean mLegacyBlocked;
+    private boolean mBlocked;
 
     // Tracks the number of async message. We use this in enqueueMessage() to avoid searching the
     // queue for async messages when inserting a message at the tail.
-    private int mLegacyAsyncMessageCount;
+    private int mAsyncMessageCount;
 
     /*
      * Select between two implementations of message queue. The legacy implementation is used
@@ -261,8 +261,8 @@ public final class MessageQueue {
 
     private boolean isPollingLocked() {
         // If the loop is quitting then it must not be idling.
-        // We can assume mPtr != 0 when mLegacyQuitting is false.
-        return !mLegacyQuitting && nativeIsPolling(mPtr);
+        // We can assume mPtr != 0 when mQuitting is false.
+        return !mQuitting && nativeIsPolling(mPtr);
     }
 
     /**
@@ -743,7 +743,7 @@ public final class MessageQueue {
                         nextPollTimeoutMillis = (int) Math.min(msg.when - now, Integer.MAX_VALUE);
                     } else {
                         // Got a message.
-                        mLegacyBlocked = false;
+                        mBlocked = false;
                         if (prevMsg != null) {
                             prevMsg.next = msg.next;
                             if (prevMsg.next == null) {
@@ -759,7 +759,7 @@ public final class MessageQueue {
                         if (DEBUG) Log.v(TAG_L, "Returning message: " + msg);
                         msg.markInUse();
                         if (msg.isAsynchronous()) {
-                            mLegacyAsyncMessageCount--;
+                            mAsyncMessageCount--;
                         }
                         if (TRACE) {
                             Trace.setCounter("MQ.Delivered", mMessagesDelivered.incrementAndGet());
@@ -772,7 +772,7 @@ public final class MessageQueue {
                 }
 
                 // Process the quit message now that all pending messages have been handled.
-                if (mLegacyQuitting) {
+                if (mQuitting) {
                     dispose();
                     return null;
                 }
@@ -786,7 +786,7 @@ public final class MessageQueue {
                 }
                 if (pendingIdleHandlerCount <= 0) {
                     // No idle handlers to run.  Loop and wait some more.
-                    mLegacyBlocked = true;
+                    mBlocked = true;
                     continue;
                 }
 
@@ -845,10 +845,10 @@ public final class MessageQueue {
             }
         } else {
             synchronized (this) {
-                if (mLegacyQuitting) {
+                if (mQuitting) {
                     return;
                 }
-                mLegacyQuitting = true;
+                mQuitting = true;
 
                 if (safe) {
                     removeAllFutureMessagesLocked();
@@ -856,7 +856,7 @@ public final class MessageQueue {
                     removeAllMessagesLocked();
                 }
 
-                // We can assume mPtr != 0 because mLegacyQuitting was previously false.
+                // We can assume mPtr != 0 because mQuitting was previously false.
                 nativeWake(mPtr);
             }
         }
@@ -1042,8 +1042,8 @@ public final class MessageQueue {
             p.recycleUnchecked();
 
             // If the loop is quitting then it is already awake.
-            // We can assume mPtr != 0 when mLegacyQuitting is false.
-            if (needWake && !mLegacyQuitting) {
+            // We can assume mPtr != 0 when mQuitting is false.
+            if (needWake && !mQuitting) {
                 nativeWake(mPtr);
             }
         }
@@ -1067,7 +1067,7 @@ public final class MessageQueue {
                 throw new IllegalStateException(msg + " This message is already in use.");
             }
 
-            if (mLegacyQuitting) {
+            if (mQuitting) {
                 IllegalStateException e = new IllegalStateException(
                         msg.target + " sending message to a Handler on a dead thread");
                 Log.w(TAG_L, e.getMessage(), e);
@@ -1083,7 +1083,7 @@ public final class MessageQueue {
                 // New head, wake up the event queue if blocked.
                 msg.next = p;
                 mMessages = msg;
-                needWake = mLegacyBlocked;
+                needWake = mBlocked;
                 if (p == null) {
                     mLast = mMessages;
                 }
@@ -1091,14 +1091,14 @@ public final class MessageQueue {
                 // Message is to be inserted at tail or middle of queue. Usually we don't have to
                 // wake up the event queue unless there is a barrier at the head of the queue and
                 // the message is the earliest asynchronous message in the queue.
-                needWake = mLegacyBlocked && p.target == null && msg.isAsynchronous();
+                needWake = mBlocked && p.target == null && msg.isAsynchronous();
 
                 // For readability, we split this portion of the function into two blocks based on
                 // whether tail tracking is enabled. This has a minor implication for the case
                 // where tail tracking is disabled. See the comment below.
                 if (Flags.messageQueueTailTracking()) {
                     if (when >= mLast.when) {
-                        needWake = needWake && mLegacyAsyncMessageCount == 0;
+                        needWake = needWake && mAsyncMessageCount == 0;
                         msg.next = null;
                         mLast.next = msg;
                         mLast = msg;
@@ -1156,10 +1156,10 @@ public final class MessageQueue {
             }
 
             if (msg.isAsynchronous()) {
-                mLegacyAsyncMessageCount++;
+                mAsyncMessageCount++;
             }
 
-            // We can assume mPtr != 0 because mLegacyQuitting is false.
+            // We can assume mPtr != 0 because mQuitting is false.
             if (needWake) {
                 nativeWake(mPtr);
             }
@@ -1313,7 +1313,7 @@ public final class MessageQueue {
                 Message n = p.next;
                 mMessages = n;
                 if (p.isAsynchronous()) {
-                    mLegacyAsyncMessageCount--;
+                    mAsyncMessageCount--;
                 }
                 p.recycleUnchecked();
                 p = n;
@@ -1331,7 +1331,7 @@ public final class MessageQueue {
                             && (object == null || n.obj == object)) {
                         Message nn = n.next;
                         if (n.isAsynchronous()) {
-                            mLegacyAsyncMessageCount--;
+                            mAsyncMessageCount--;
                         }
                         n.recycleUnchecked();
                         p.next = nn;
@@ -1365,7 +1365,7 @@ public final class MessageQueue {
                 Message n = p.next;
                 mMessages = n;
                 if (p.isAsynchronous()) {
-                    mLegacyAsyncMessageCount--;
+                    mAsyncMessageCount--;
                 }
                 p.recycleUnchecked();
                 p = n;
@@ -1383,7 +1383,7 @@ public final class MessageQueue {
                             && (object == null || object.equals(n.obj))) {
                         Message nn = n.next;
                         if (n.isAsynchronous()) {
-                            mLegacyAsyncMessageCount--;
+                            mAsyncMessageCount--;
                         }
                         n.recycleUnchecked();
                         p.next = nn;
@@ -1416,7 +1416,7 @@ public final class MessageQueue {
                 Message n = p.next;
                 mMessages = n;
                 if (p.isAsynchronous()) {
-                    mLegacyAsyncMessageCount--;
+                    mAsyncMessageCount--;
                 }
                 p.recycleUnchecked();
                 p = n;
@@ -1434,7 +1434,7 @@ public final class MessageQueue {
                             && (object == null || n.obj == object)) {
                         Message nn = n.next;
                         if (n.isAsynchronous()) {
-                            mLegacyAsyncMessageCount--;
+                            mAsyncMessageCount--;
                         }
                         n.recycleUnchecked();
                         p.next = nn;
@@ -1479,7 +1479,7 @@ public final class MessageQueue {
                 Message n = p.next;
                 mMessages = n;
                 if (p.isAsynchronous()) {
-                    mLegacyAsyncMessageCount--;
+                    mAsyncMessageCount--;
                 }
                 p.recycleUnchecked();
                 p = n;
@@ -1497,7 +1497,7 @@ public final class MessageQueue {
                             && (object == null || object.equals(n.obj))) {
                         Message nn = n.next;
                         if (n.isAsynchronous()) {
-                            mLegacyAsyncMessageCount--;
+                            mAsyncMessageCount--;
                         }
                         n.recycleUnchecked();
                         p.next = nn;
@@ -1541,7 +1541,7 @@ public final class MessageQueue {
                 Message n = p.next;
                 mMessages = n;
                 if (p.isAsynchronous()) {
-                    mLegacyAsyncMessageCount--;
+                    mAsyncMessageCount--;
                 }
                 p.recycleUnchecked();
                 p = n;
@@ -1558,7 +1558,7 @@ public final class MessageQueue {
                     if (n.target == h && (object == null || n.obj == object)) {
                         Message nn = n.next;
                         if (n.isAsynchronous()) {
-                            mLegacyAsyncMessageCount--;
+                            mAsyncMessageCount--;
                         }
                         n.recycleUnchecked();
                         p.next = nn;
@@ -1603,7 +1603,7 @@ public final class MessageQueue {
                 Message n = p.next;
                 mMessages = n;
                 if (p.isAsynchronous()) {
-                    mLegacyAsyncMessageCount--;
+                    mAsyncMessageCount--;
                 }
                 p.recycleUnchecked();
                 p = n;
@@ -1620,7 +1620,7 @@ public final class MessageQueue {
                     if (n.target == h && (object == null || object.equals(n.obj))) {
                         Message nn = n.next;
                         if (n.isAsynchronous()) {
-                            mLegacyAsyncMessageCount--;
+                            mAsyncMessageCount--;
                         }
                         n.recycleUnchecked();
                         p.next = nn;
@@ -1644,7 +1644,7 @@ public final class MessageQueue {
         }
         mMessages = null;
         mLast = null;
-        mLegacyAsyncMessageCount = 0;
+        mAsyncMessageCount = 0;
     }
 
     private void removeAllFutureMessagesLocked() {
@@ -1672,7 +1672,7 @@ public final class MessageQueue {
                     p = n;
                     n = p.next;
                     if (p.isAsynchronous()) {
-                        mLegacyAsyncMessageCount--;
+                        mAsyncMessageCount--;
                     }
                     p.recycleUnchecked();
                 } while (n != null);
@@ -1780,7 +1780,7 @@ public final class MessageQueue {
                 n++;
             }
             pw.println(prefix + "(Total messages: " + n + ", polling=" + isPollingLocked()
-                    + ", quitting=" + mLegacyQuitting + ")");
+                    + ", quitting=" + mQuitting + ")");
         }
     }
 
@@ -1824,7 +1824,7 @@ public final class MessageQueue {
                 msg.dumpDebug(proto, MessageQueueProto.MESSAGES);
             }
             proto.write(MessageQueueProto.IS_POLLING_LOCKED, isPollingLocked());
-            proto.write(MessageQueueProto.IS_QUITTING, mLegacyQuitting);
+            proto.write(MessageQueueProto.IS_QUITTING, mQuitting);
         }
         proto.end(messageQueueToken);
     }
