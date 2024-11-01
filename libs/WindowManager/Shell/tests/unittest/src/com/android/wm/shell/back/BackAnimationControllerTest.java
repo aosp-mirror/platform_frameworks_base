@@ -700,7 +700,7 @@ public class BackAnimationControllerTest extends ShellTestCase {
                 eq(tInfo), eq(st), eq(ft), eq(callback));
 
         mBackTransitionHandler.onAnimationFinished();
-        final TransitionInfo.Change openToClose = createAppChange(openTaskId, TRANSIT_CLOSE,
+        final TransitionInfo.Change openToClose = createAppChangeFromChange(open, TRANSIT_CLOSE,
                 FLAG_BACK_GESTURE_ANIMATED);
         tInfo2 = createTransitionInfo(TRANSIT_CLOSE_PREPARE_BACK_NAVIGATION, openToClose);
         mBackTransitionHandler.mClosePrepareTransition = mock(IBinder.class);
@@ -825,6 +825,16 @@ public class BackAnimationControllerTest extends ShellTestCase {
                 null, b.build());
 
         }
+        change.setMode(mode);
+        change.setFlags(flags);
+        return change;
+    }
+
+    private TransitionInfo.Change createAppChangeFromChange(
+            TransitionInfo.Change originalChange, @TransitionInfo.TransitionMode int mode,
+            @TransitionInfo.ChangeFlags int flags) {
+        final TransitionInfo.Change change = new TransitionInfo.Change(
+                originalChange.getTaskInfo().token, originalChange.getLeash());
         change.setMode(mode);
         change.setFlags(flags);
         return change;
