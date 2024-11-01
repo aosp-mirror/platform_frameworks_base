@@ -1016,6 +1016,10 @@
             android:exported="false">
         </activity>
 
+        <service
+            android:name="com.android.systemui.communal.widgets.GlanceableHubWidgetManagerService"
+            android:exported="false" />
+
         <!-- Doze with notifications, run in main sysui process for every user  -->
         <service
             android:name=".doze.DozeService"
