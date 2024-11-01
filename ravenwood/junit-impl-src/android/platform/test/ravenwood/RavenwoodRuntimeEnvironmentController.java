@@ -201,7 +201,7 @@ public class RavenwoodRuntimeEnvironmentController {
      */
     public static void init(RavenwoodAwareTestRunner runner) {
         if (RAVENWOOD_VERBOSE_LOGGING) {
-            Log.i(TAG, "init() called here: " + runner, new RuntimeException("STACKTRACE"));
+            Log.v(TAG, "init() called here: " + runner, new RuntimeException("STACKTRACE"));
         }
         if (sRunner == runner) {
             return;
@@ -314,7 +314,7 @@ public class RavenwoodRuntimeEnvironmentController {
      */
     public static void reset() {
         if (RAVENWOOD_VERBOSE_LOGGING) {
-            Log.i(TAG, "reset() called here", new RuntimeException("STACKTRACE"));
+            Log.v(TAG, "reset() called here", new RuntimeException("STACKTRACE"));
         }
         if (sRunner == null) {
             throw new RavenwoodRuntimeException("Internal error: reset() already called");
