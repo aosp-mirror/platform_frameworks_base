@@ -1800,10 +1800,9 @@
 
     <!-- Hearing devices dialog related dimensions -->
     <dimen name="hearing_devices_layout_margin">12dp</dimen>
-    <dimen name="hearing_devices_preset_spinner_height">72dp</dimen>
-    <dimen name="hearing_devices_preset_spinner_text_padding_start">20dp</dimen>
-    <dimen name="hearing_devices_preset_spinner_text_padding_vertical">15dp</dimen>
-    <dimen name="hearing_devices_preset_spinner_arrow_size">24dp</dimen>
+    <dimen name="hearing_devices_small_title_padding_horizontal">16dp</dimen>
+    <dimen name="hearing_devices_preset_spinner_padding">22dp</dimen>
+    <dimen name="hearing_devices_preset_spinner_icon_size">24dp</dimen>
     <dimen name="hearing_devices_preset_spinner_background_radius">28dp</dimen>
     <dimen name="hearing_devices_tool_icon_size">28dp</dimen>
 

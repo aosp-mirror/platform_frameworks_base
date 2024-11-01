@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
     Copyright (C) 2024 The Android Open Source Project
 
@@ -13,14 +14,9 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-
-<TextView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/hearing_devices_preset_option_text"
-    style="?android:attr/spinnerDropDownItemStyle"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:minHeight="@dimen/hearing_devices_preset_spinner_height"
-    android:paddingStart="@dimen/hearing_devices_preset_spinner_text_padding_start"
-    android:gravity="center_vertical"
-    android:textDirection="locale"
-    android:ellipsize="end" />
+<inset xmlns:android="http://schemas.android.com/apk/res/android"
+    android:drawable="@drawable/settingslib_switch_bar_bg_on"
+    android:insetTop="8dp"
+    android:insetBottom="8dp"
+    android:insetLeft="11dp"
+    android:insetRight="11dp" />
