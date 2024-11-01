@@ -811,10 +811,20 @@ public class PropertyInvalidatedCache<Query, Result> {
         return false; // Always disable shared memory on Ravenwood. (for now)
     }
 
+    /**
+     * Keys that cannot be put in shared memory yet.
+     */
+    private static boolean inSharedMemoryDenyList(@NonNull String name) {
+        final String pkginfo = PREFIX_SYSTEM + "package_info";
+        return name.equals(pkginfo);
+    };
+
     // Return true if this cache can use shared memory for its nonce.  Shared memory may be used
     // if the module is the system.
     private static boolean sharedMemoryOkay(@NonNull String name) {
-        return sSharedMemoryAvailable && name.startsWith(PREFIX_SYSTEM);
+        return sSharedMemoryAvailable
+                && name.startsWith(PREFIX_SYSTEM)
+                && !inSharedMemoryDenyList(name);
     }
 
     /**
