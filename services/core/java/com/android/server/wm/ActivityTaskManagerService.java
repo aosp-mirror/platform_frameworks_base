@@ -1854,6 +1854,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
         assertPackageMatchesCallingUid(callingPackage);
 
+        mAmInternal.addCreatorToken(intent, callingPackage);
+
         final ActivityOptions activityOptions = ActivityOptions.makeBasic();
         activityOptions.setLaunchTaskId(taskId);
         // Pass in the system UID to allow setting launch taskId with MANAGE_GAME_ACTIVITY.
