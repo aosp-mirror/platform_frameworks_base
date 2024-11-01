@@ -26,12 +26,10 @@ import android.annotation.Nullable;
 import android.os.Bundle;
 import android.platform.test.annotations.RavenwoodTestRunnerInitializing;
 import android.platform.test.annotations.internal.InnerRunner;
-import android.platform.test.ravenwood.RavenwoodTestStats.Result;
 import android.util.Log;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 
-import org.junit.AssumptionViolatedException;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runner.Runner;
@@ -171,10 +169,11 @@ public final class RavenwoodAwareTestRunner extends RavenwoodAwareTestRunnerBase
         final var notifier = new RavenwoodRunNotifier(realNotifier);
         final var description = getDescription();
 
+        RavenwoodTestStats.getInstance().attachToRunNotifier(notifier);
+
         if (mRealRunner instanceof ClassSkippingTestRunner) {
-            mRealRunner.run(notifier);
             Log.i(TAG, "onClassSkipped: description=" + description);
-            RavenwoodTestStats.getInstance().onClassSkipped(description);
+            mRealRunner.run(notifier);
             return;
         }
 
@@ -205,7 +204,6 @@ public final class RavenwoodAwareTestRunner extends RavenwoodAwareTestRunnerBase
 
             if (!skipRunnerHook) {
                 try {
-                    RavenwoodTestStats.getInstance().onClassFinished(description);
                     mState.exitTestClass();
                 } catch (Throwable th) {
                     notifier.reportAfterTestFailure(th);
@@ -295,8 +293,6 @@ public final class RavenwoodAwareTestRunner extends RavenwoodAwareTestRunnerBase
         // method-level annotations here.
         if (scope == Scope.Instance && order == Order.Outer) {
             if (!RavenwoodEnablementChecker.shouldEnableOnRavenwood(description, true)) {
-                RavenwoodTestStats.getInstance().onTestFinished(
-                        classDescription, description, Result.Skipped);
                 return false;
             }
         }
@@ -317,16 +313,6 @@ public final class RavenwoodAwareTestRunner extends RavenwoodAwareTestRunnerBase
             // End of a test method.
             mState.exitTestMethod();
 
-            final Result result;
-            if (th == null) {
-                result = Result.Passed;
-            } else if (th instanceof AssumptionViolatedException) {
-                result = Result.Skipped;
-            } else {
-                result = Result.Failed;
-            }
-
-            RavenwoodTestStats.getInstance().onTestFinished(classDescription, description, result);
         }
 
         // If RUN_DISABLED_TESTS is set, and the method did _not_ throw, make it an error.
