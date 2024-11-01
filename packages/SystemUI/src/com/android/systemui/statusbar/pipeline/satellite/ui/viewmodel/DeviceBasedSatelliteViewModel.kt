@@ -77,28 +77,32 @@ constructor(
 
     // This adds a 10 seconds delay before showing the icon
     private val shouldShowIconForOosAfterHysteresis: StateFlow<Boolean> =
-        interactor.areAllConnectionsOutOfService
-            .flatMapLatest { shouldShow ->
-                if (shouldShow) {
-                    logBuffer.log(
-                        TAG,
-                        LogLevel.INFO,
-                        { long1 = DELAY_DURATION.inWholeSeconds },
-                        { "Waiting $long1 seconds before showing the satellite icon" }
-                    )
-                    delay(DELAY_DURATION)
-                    flowOf(true)
-                } else {
-                    flowOf(false)
+        if (interactor.isOpportunisticSatelliteIconEnabled) {
+            interactor.areAllConnectionsOutOfService
+                .flatMapLatest { shouldShow ->
+                    if (shouldShow) {
+                        logBuffer.log(
+                            TAG,
+                            LogLevel.INFO,
+                            { long1 = DELAY_DURATION.inWholeSeconds },
+                            { "Waiting $long1 seconds before showing the satellite icon" }
+                        )
+                        delay(DELAY_DURATION)
+                        flowOf(true)
+                    } else {
+                        flowOf(false)
+                    }
                 }
-            }
-            .distinctUntilChanged()
-            .logDiffsForTable(
-                tableLog,
-                columnPrefix = "vm",
-                columnName = COL_VISIBLE_FOR_OOS,
-                initialValue = false,
-            )
+                .distinctUntilChanged()
+                .logDiffsForTable(
+                    tableLog,
+                    columnPrefix = "vm",
+                    columnName = COL_VISIBLE_FOR_OOS,
+                    initialValue = false,
+                )
+        } else {
+            flowOf(false)
+        }
             .stateIn(scope, SharingStarted.WhileSubscribed(), false)
 
     private val canShowIcon =

@@ -58,7 +58,11 @@ class DemoDeviceBasedSatelliteRepositoryTest : SysuiTestCase() {
                 whenever(it.satelliteEvents).thenReturn(fakeSatelliteEvents)
             }
 
-        underTest = DemoDeviceBasedSatelliteRepository(dataSource, testScope.backgroundScope)
+        underTest = DemoDeviceBasedSatelliteRepository(
+            dataSource,
+            testScope.backgroundScope,
+            context.resources,
+            )
     }
 
     @Test

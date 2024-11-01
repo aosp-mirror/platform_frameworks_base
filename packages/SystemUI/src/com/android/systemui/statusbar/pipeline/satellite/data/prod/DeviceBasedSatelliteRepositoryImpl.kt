@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.pipeline.satellite.data.prod
 
+import android.content.res.Resources
 import android.os.OutcomeReceiver
 import android.telephony.TelephonyCallback
 import android.telephony.TelephonyManager
@@ -31,10 +32,12 @@ import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCall
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.LogLevel
 import com.android.systemui.log.core.MessageInitializer
 import com.android.systemui.log.core.MessagePrinter
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.pipeline.dagger.DeviceBasedSatelliteInputLog
 import com.android.systemui.statusbar.pipeline.dagger.VerboseDeviceBasedSatelliteInputLog
 import com.android.systemui.statusbar.pipeline.satellite.data.RealDeviceBasedSatelliteRepository
@@ -146,9 +149,13 @@ constructor(
     @DeviceBasedSatelliteInputLog private val logBuffer: LogBuffer,
     @VerboseDeviceBasedSatelliteInputLog private val verboseLogBuffer: LogBuffer,
     private val systemClock: SystemClock,
+    @Main resources: Resources,
 ) : RealDeviceBasedSatelliteRepository {
 
     private val satelliteManager: SatelliteManager?
+
+    override val isOpportunisticSatelliteIconEnabled: Boolean =
+        resources.getBoolean(R.bool.config_showOpportunisticSatelliteIcon)
 
     // Some calls into satellite manager will throw exceptions if it is not supported.
     // This is never expected to change after boot, but may need to be retried in some cases

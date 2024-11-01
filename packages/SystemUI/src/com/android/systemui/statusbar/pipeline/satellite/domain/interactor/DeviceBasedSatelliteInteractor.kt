@@ -53,6 +53,9 @@ constructor(
     @DeviceBasedSatelliteInputLog private val logBuffer: LogBuffer,
     @DeviceBasedSatelliteTableLog private val tableLog: TableLogBuffer,
 ) {
+    /** Whether or not we should show the satellite icon when all connections are OOS */
+    val isOpportunisticSatelliteIconEnabled = repo.isOpportunisticSatelliteIconEnabled
+
     /** Must be observed by any UI showing Satellite iconography */
     val isSatelliteAllowed =
         if (Flags.oemEnabledSatelliteFlag()) {
