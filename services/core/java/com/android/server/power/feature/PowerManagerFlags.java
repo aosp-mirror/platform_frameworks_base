@@ -50,6 +50,11 @@ public class PowerManagerFlags {
     private final FlagState mFrameworkWakelockInfo =
             new FlagState(Flags.FLAG_FRAMEWORK_WAKELOCK_INFO, Flags::frameworkWakelockInfo);
 
+    private final FlagState mPolicyReasonInDisplayPowerRequest = new FlagState(
+            Flags.FLAG_POLICY_REASON_IN_DISPLAY_POWER_REQUEST,
+            Flags::policyReasonInDisplayPowerRequest
+    );
+
     /** Returns whether early-screen-timeout-detector is enabled on not. */
     public boolean isEarlyScreenTimeoutDetectorEnabled() {
         return mEarlyScreenTimeoutDetectorFlagState.isEnabled();
@@ -74,6 +79,13 @@ public class PowerManagerFlags {
      */
     public boolean isFrameworkWakelockInfoEnabled() {
         return mFrameworkWakelockInfo.isEnabled();
+    }
+
+    /**
+     * @return Whether the wakefulness reason is populated in DisplayPowerRequest.
+     */
+    public boolean isPolicyReasonInDisplayPowerRequestEnabled() {
+        return mPolicyReasonInDisplayPowerRequest.isEnabled();
     }
 
     /**
