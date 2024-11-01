@@ -131,7 +131,9 @@ public class MediaProjectionPermissionActivity extends Activity {
 
         // This activity is launched directly by an app, or system server. System server provides
         // the package name through the intent if so.
-        if (mPackageName == null) {
+        if (mPackageName == null || (
+                com.android.systemui.Flags.mediaProjectionRequestAttributionFix()
+                        && getCallingPackage() == null)) {
             if (launchingIntent.hasExtra(EXTRA_PACKAGE_REUSING_GRANTED_CONSENT)) {
                 mPackageName = launchingIntent.getStringExtra(
                         EXTRA_PACKAGE_REUSING_GRANTED_CONSENT);
