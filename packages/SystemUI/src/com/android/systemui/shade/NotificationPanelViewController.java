@@ -2042,6 +2042,9 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         }
         if (mQsController.getExpanded()) {
             mQsController.flingQs(0, FLING_COLLAPSE);
+        } else if (mBarState == KEYGUARD) {
+            mLockscreenShadeTransitionController.goToLockedShade(
+                    /* expandedView= */null, /* needsQSAnimation= */false);
         } else {
             expand(true /* animate */);
         }
@@ -3098,7 +3101,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         if (isTracking()) {
             onTrackingStopped(true);
         }
-        if (isExpanded() && !mQsController.getExpanded()) {
+        if (isExpanded() && mBarState != KEYGUARD && !mQsController.getExpanded()) {
             mShadeLog.d("Status Bar was long pressed. Expanding to QS.");
             expandToQs();
         } else {
@@ -5080,19 +5083,19 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             }
             boolean handled = mHeadsUpTouchHelper.onTouchEvent(event);
 
-            if (!mHeadsUpTouchHelper.isTrackingHeadsUp() && mQsController.handleTouch(
-                    event, isFullyCollapsed(), isShadeOrQsHeightAnimationRunning())) {
-                if (event.getActionMasked() != MotionEvent.ACTION_MOVE) {
-                    mShadeLog.logMotionEvent(event, "onTouch: handleQsTouch handled event");
-                }
-                return true;
-            }
             // This touch session has already resulted in shade expansion. Ignore everything else.
             if (ShadeExpandsOnStatusBarLongPress.isEnabled()
                     && event.getActionMasked() != MotionEvent.ACTION_DOWN
                     && event.getDownTime() == mStatusBarLongPressDowntime) {
                 mShadeLog.d("Touch has same down time as Status Bar long press. Ignoring.");
                 return false;
+            }
+            if (!mHeadsUpTouchHelper.isTrackingHeadsUp() && mQsController.handleTouch(
+                    event, isFullyCollapsed(), isShadeOrQsHeightAnimationRunning())) {
+                if (event.getActionMasked() != MotionEvent.ACTION_MOVE) {
+                    mShadeLog.logMotionEvent(event, "onTouch: handleQsTouch handled event");
+                }
+                return true;
             }
             if (event.getActionMasked() == MotionEvent.ACTION_DOWN && isFullyCollapsed()) {
                 mMetricsLogger.count(COUNTER_PANEL_OPEN, 1);

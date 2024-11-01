@@ -33,11 +33,11 @@ import com.android.systemui.plugins.DarkIconDispatcher
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.ui.view.WindowRootView
-import com.android.systemui.shade.LongPressGestureDetector
 import com.android.systemui.shade.ShadeController
 import com.android.systemui.shade.ShadeExpandsOnStatusBarLongPress
 import com.android.systemui.shade.ShadeLogger
 import com.android.systemui.shade.ShadeViewController
+import com.android.systemui.shade.StatusBarLongPressGestureDetector
 import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor
 import com.android.systemui.shared.animation.UnfoldMoveFromCenterAnimator
 import com.android.systemui.statusbar.data.repository.StatusBarContentInsetsProviderStore
@@ -68,7 +68,7 @@ private constructor(
     private val shadeController: ShadeController,
     private val shadeViewController: ShadeViewController,
     private val panelExpansionInteractor: PanelExpansionInteractor,
-    private val longPressGestureDetector: Provider<LongPressGestureDetector>,
+    private val statusBarLongPressGestureDetector: Provider<StatusBarLongPressGestureDetector>,
     private val windowRootView: Provider<WindowRootView>,
     private val shadeLogger: ShadeLogger,
     private val moveFromCenterAnimationController: StatusBarMoveFromCenterAnimationController?,
@@ -118,7 +118,7 @@ private constructor(
         addCursorSupportToIconContainers()
 
         if (ShadeExpandsOnStatusBarLongPress.isEnabled) {
-            mView.setLongPressGestureDetector(longPressGestureDetector.get())
+            mView.setLongPressGestureDetector(statusBarLongPressGestureDetector.get())
         }
 
         progressProvider?.setReadyToHandleTransition(true)
@@ -335,7 +335,7 @@ private constructor(
         private val shadeController: ShadeController,
         private val shadeViewController: ShadeViewController,
         private val panelExpansionInteractor: PanelExpansionInteractor,
-        private val longPressGestureDetector: Provider<LongPressGestureDetector>,
+        private val statusBarLongPressGestureDetector: Provider<StatusBarLongPressGestureDetector>,
         private val windowRootView: Provider<WindowRootView>,
         private val shadeLogger: ShadeLogger,
         private val viewUtil: ViewUtil,
@@ -360,7 +360,7 @@ private constructor(
                 shadeController,
                 shadeViewController,
                 panelExpansionInteractor,
-                longPressGestureDetector,
+                statusBarLongPressGestureDetector,
                 windowRootView,
                 shadeLogger,
                 statusBarMoveFromCenterAnimationController,
