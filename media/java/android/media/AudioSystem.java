@@ -93,7 +93,8 @@ public class AudioSystem
     /** @hide Used to identify the volume of audio streams for notifications */
     public static final int STREAM_NOTIFICATION = 5;
     /** @hide
-     *  Used to identify the volume of audio streams for phone calls when connected on bluetooth */
+     *  Used to identify the volume of audio streams for phone calls when connected on bluetooth
+     *  @deprecated use {@link #STREAM_VOICE_CALL} instead */
     public static final int STREAM_BLUETOOTH_SCO = 6;
     /** @hide Used to identify the volume of audio streams for enforced system sounds in certain
      * countries (e.g camera in Japan) */
@@ -110,7 +111,7 @@ public class AudioSystem
     public static final int STREAM_ASSISTANT = 11;
     /**
      * @hide
-     * @deprecated Use {@link #numStreamTypes() instead}
+     * @deprecated Use {@link #numStreamTypes()} instead
      */
     public static final int NUM_STREAMS = 5;
 
