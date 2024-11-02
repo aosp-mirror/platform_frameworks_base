@@ -1395,32 +1395,45 @@ public class UserManagerService extends IUserManager.Stub {
                     .getBoolean(com.android.internal.R.bool.config_bootToHeadlessSystemUser)) {
                 return UserHandle.USER_SYSTEM;
             }
-            // Return the previous foreground user, if there is one.
-            final int previousUser = getPreviousFullUserToEnterForeground();
-            if (previousUser != UserHandle.USER_NULL) {
-                Slogf.i(LOG_TAG, "Boot user is previous user %d", previousUser);
-                return previousUser;
-            }
-            // No previous user. Return the first switchable user if there is one.
-            synchronized (mUsersLock) {
-                final int userSize = mUsers.size();
-                for (int i = 0; i < userSize; i++) {
-                    final UserData userData = mUsers.valueAt(i);
-                    if (userData.info.supportsSwitchToByUser()) {
-                        int firstSwitchable = userData.info.id;
-                        Slogf.i(LOG_TAG,
-                                "Boot user is first switchable user %d", firstSwitchable);
-                        return firstSwitchable;
-                    }
-                }
-            }
-            // No switchable users found. Uh oh!
-            throw new UserManager.CheckedUserOperationException(
-                    "No switchable users found", USER_OPERATION_ERROR_UNKNOWN);
+            return getPreviousOrFirstSwitchableUser();
         }
         // Not HSUM, return system user.
         return UserHandle.USER_SYSTEM;
     }
+
+    private @UserIdInt int getPreviousOrFirstSwitchableUser()
+            throws UserManager.CheckedUserOperationException {
+        // Return the previous foreground user, if there is one.
+        final int previousUser = getPreviousFullUserToEnterForeground();
+        if (previousUser != UserHandle.USER_NULL) {
+            Slogf.i(LOG_TAG, "Boot user is previous user %d", previousUser);
+            return previousUser;
+        }
+        // No previous user. Return the first switchable user if there is one.
+        final int firstSwitchableUser = getFirstSwitchableUser();
+        if (firstSwitchableUser != UserHandle.USER_NULL) {
+            Slogf.i(LOG_TAG,
+                    "Boot user is first switchable user %d", firstSwitchableUser);
+            return firstSwitchableUser;
+        }
+        // No switchable users found. Uh oh!
+        throw new UserManager.CheckedUserOperationException(
+            "No switchable users found", USER_OPERATION_ERROR_UNKNOWN);
+    }
+
+    private @UserIdInt int getFirstSwitchableUser() {
+        synchronized (mUsersLock) {
+            final int userSize = mUsers.size();
+            for (int i = 0; i < userSize; i++) {
+                final UserData userData = mUsers.valueAt(i);
+                if (userData.info.supportsSwitchToByUser()) {
+                    int firstSwitchable = userData.info.id;
+                    return firstSwitchable;
+                }
+            }
+        }
+       return UserHandle.USER_NULL;
+   }
 
 
     @Override
