@@ -166,12 +166,6 @@ data class FontTextStyle(
     // A color literal like `#FF00FF` or a color resource like `@android:color/system_accent1_100`
     val fillColorDark: String? = null,
     override val fontSizeScale: Float? = null,
-    /**
-     * use `wdth` for width, `wght` for weight, 'opsz' for optical size single quote for tag name,
-     * and no quote for value separate different axis with `,` e.g. "'wght' 1000, 'wdth' 108, 'opsz'
-     * 90"
-     */
-    var fontVariation: String? = null,
     // used when alternate in one font file is needed
     var fontFeatureSettings: String? = null,
     val renderType: RenderType = RenderType.STROKE_TEXT,
