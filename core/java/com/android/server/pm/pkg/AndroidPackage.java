@@ -1514,4 +1514,10 @@ public interface AndroidPackage {
      * @hide
      */
     boolean isAllowCrossUidActivitySwitchFromBelow();
+
+    /**
+     * Returns the intent matching flags.
+     * @hide
+     */
+    int getIntentMatchingFlags();
 }
