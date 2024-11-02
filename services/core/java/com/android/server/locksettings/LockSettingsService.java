@@ -347,6 +347,8 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     private final StorageManagerInternal mStorageManagerInternal;
 
+    private final Object mGcWorkToken = new Object();
+
     // This class manages life cycle events for encrypted users on File Based Encryption (FBE)
     // devices. The most basic of these is to show/hide notifications about missing features until
     // the user unlocks the account and credential-encrypted storage is available.
@@ -3632,11 +3634,19 @@ public class LockSettingsService extends ILockSettings.Stub {
      * release references to the argument.
      */
     private void scheduleGc() {
+        // Cancel any existing GC request first, so that GC requests don't pile up if lockscreen
+        // credential operations are happening very quickly, e.g. as sometimes happens during tests.
+        //
+        // This delays the already-requested GC, but that is fine in practice where lockscreen
+        // operations don't happen very quickly.  And the precise time that the sanitization happens
+        // isn't very important; doing it within a minute can be fine, for example.
+        mHandler.removeCallbacksAndMessages(mGcWorkToken);
+
         mHandler.postDelayed(() -> {
             System.gc();
             System.runFinalization();
             System.gc();
-        }, 2000);
+        }, mGcWorkToken, 2000);
     }
 
     private class DeviceProvisionedObserver extends ContentObserver {

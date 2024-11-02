@@ -180,15 +180,8 @@ public class WallpaperDataParser {
             success = true;
         } catch (FileNotFoundException e) {
             Slog.w(TAG, "no current wallpaper -- first boot?");
-        } catch (NullPointerException e) {
-            Slog.w(TAG, "failed parsing " + file + " " + e);
-        } catch (NumberFormatException e) {
-            Slog.w(TAG, "failed parsing " + file + " " + e);
-        } catch (XmlPullParserException e) {
-            Slog.w(TAG, "failed parsing " + file + " " + e);
-        } catch (IOException e) {
-            Slog.w(TAG, "failed parsing " + file + " " + e);
-        } catch (IndexOutOfBoundsException e) {
+        } catch (NullPointerException | NumberFormatException | XmlPullParserException
+                 | IOException | IndexOutOfBoundsException e) {
             Slog.w(TAG, "failed parsing " + file + " " + e);
         }
         IoUtils.closeQuietly(stream);
@@ -256,12 +249,13 @@ public class WallpaperDataParser {
                     }
 
                     ComponentName comp = parseComponentName(parser);
-                    if (removeNextWallpaperComponent()) {
-                        wallpaperToParse.setComponent(comp);
-                    } else {
-                        wallpaperToParse.nextWallpaperComponent = comp;
+                    if (!liveWallpaperContentHandling()) {
+                        if (removeNextWallpaperComponent()) {
+                            wallpaperToParse.setComponent(comp);
+                        } else {
+                            wallpaperToParse.nextWallpaperComponent = comp;
+                        }
                     }
-
                     if (multiCrop()) {
                         parseWallpaperAttributes(parser, wallpaperToParse, keepDimensionHints);
                     }
@@ -745,9 +739,9 @@ public class WallpaperDataParser {
 
     private static List<Pair<Integer, String>> screenDimensionPairs() {
         return List.of(
-                new Pair<>(WallpaperManager.PORTRAIT, "Portrait"),
-                new Pair<>(WallpaperManager.LANDSCAPE, "Landscape"),
-                new Pair<>(WallpaperManager.SQUARE_PORTRAIT, "SquarePortrait"),
-                new Pair<>(WallpaperManager.SQUARE_LANDSCAPE, "SquareLandscape"));
+                new Pair<>(WallpaperManager.ORIENTATION_PORTRAIT, "Portrait"),
+                new Pair<>(WallpaperManager.ORIENTATION_LANDSCAPE, "Landscape"),
+                new Pair<>(WallpaperManager.ORIENTATION_SQUARE_PORTRAIT, "SquarePortrait"),
+                new Pair<>(WallpaperManager.ORIENTATION_SQUARE_LANDSCAPE, "SquareLandscape"));
     }
 }

@@ -33,6 +33,7 @@ import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
 import android.provider.Settings;
+import android.security.advancedprotection.AdvancedProtectionFeature;
 import android.security.advancedprotection.IAdvancedProtectionCallback;
 import android.security.advancedprotection.IAdvancedProtectionService;
 import android.util.ArrayMap;
@@ -44,9 +45,11 @@ import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.security.advancedprotection.features.AdvancedProtectionHook;
+import com.android.server.security.advancedprotection.features.AdvancedProtectionProvider;
 
 import java.io.FileDescriptor;
 import java.util.ArrayList;
+import java.util.List;
 
 /** @hide */
 public class AdvancedProtectionService extends IAdvancedProtectionService.Stub  {
@@ -58,10 +61,12 @@ public class AdvancedProtectionService extends IAdvancedProtectionService.Stub  
     private final Handler mHandler;
     private final AdvancedProtectionStore mStore;
 
-    // Features owned by the service - their code will be executed when state changes
+    // Features living with the service - their code will be executed when state changes
     private final ArrayList<AdvancedProtectionHook> mHooks = new ArrayList<>();
     // External features - they will be called on state change
     private final ArrayMap<IBinder, IAdvancedProtectionCallback> mCallbacks = new ArrayMap<>();
+    // For tracking only - not called on state change
+    private final ArrayList<AdvancedProtectionProvider> mProviders = new ArrayList<>();
 
     private AdvancedProtectionService(@NonNull Context context) {
         super(PermissionEnforcer.fromContext(context));
@@ -71,19 +76,27 @@ public class AdvancedProtectionService extends IAdvancedProtectionService.Stub  
     }
 
     private void initFeatures(boolean enabled) {
+        // Empty until features are added.
+        // Examples:
+        // mHooks.add(new SideloadingAdvancedProtectionHook(mContext, enabled));
+        // mProviders.add(new WifiAdvancedProtectionProvider());
     }
 
     // Only for tests
     @VisibleForTesting
     AdvancedProtectionService(@NonNull Context context, @NonNull AdvancedProtectionStore store,
             @NonNull Looper looper, @NonNull PermissionEnforcer permissionEnforcer,
-            @Nullable AdvancedProtectionHook hook) {
+            @Nullable AdvancedProtectionHook hook, @Nullable AdvancedProtectionProvider provider) {
         super(permissionEnforcer);
         mContext = context;
         mStore = store;
         mHandler = new AdvancedProtectionHandler(looper);
         if (hook != null) {
             mHooks.add(hook);
+        }
+
+        if (provider != null) {
+            mProviders.add(provider);
         }
     }
 
@@ -143,6 +156,25 @@ public class AdvancedProtectionService extends IAdvancedProtectionService.Stub  
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
+    }
+
+    @Override
+    @EnforcePermission(Manifest.permission.SET_ADVANCED_PROTECTION_MODE)
+    public List<AdvancedProtectionFeature> getAdvancedProtectionFeatures() {
+        getAdvancedProtectionFeatures_enforcePermission();
+        List<AdvancedProtectionFeature> features = new ArrayList<>();
+        for (int i = 0; i < mProviders.size(); i++) {
+            features.addAll(mProviders.get(i).getFeatures());
+        }
+
+        for (int i = 0; i < mHooks.size(); i++) {
+            AdvancedProtectionHook hook = mHooks.get(i);
+            if (hook.isAvailable()) {
+                features.add(hook.getFeature());
+            }
+        }
+
+        return features;
     }
 
     @Override

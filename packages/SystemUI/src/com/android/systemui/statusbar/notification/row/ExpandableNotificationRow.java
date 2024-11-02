@@ -1987,6 +1987,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         mColorUpdateLogger = colorUpdateLogger;
         mDismissibilityProvider = dismissibilityProvider;
         mFeatureFlags = featureFlags;
+        setHapticFeedbackEnabled(!com.android.systemui.Flags.msdlFeedback());
     }
 
     private void initDimens() {

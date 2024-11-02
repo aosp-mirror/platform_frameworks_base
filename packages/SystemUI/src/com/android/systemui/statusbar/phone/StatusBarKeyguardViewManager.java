@@ -1348,6 +1348,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         if (!canHandleBackPressed()) {
             return;
         }
+        mStatusBarStateController.setLeaveOpenOnKeyguardHide(false);
 
         boolean hideBouncerOverDream = isBouncerShowing()
                 && mDreamOverlayStateController.isOverlayActive();

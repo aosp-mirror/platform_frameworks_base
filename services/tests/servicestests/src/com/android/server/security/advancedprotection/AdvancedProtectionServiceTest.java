@@ -16,6 +16,8 @@
 
 package com.android.server.security.advancedprotection;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
@@ -28,15 +30,20 @@ import android.os.RemoteException;
 import android.os.test.FakePermissionEnforcer;
 import android.os.test.TestLooper;
 import android.provider.Settings;
+import android.security.advancedprotection.AdvancedProtectionFeature;
 import android.security.advancedprotection.IAdvancedProtectionCallback;
 
+import androidx.annotation.NonNull;
+
 import com.android.server.security.advancedprotection.features.AdvancedProtectionHook;
+import com.android.server.security.advancedprotection.features.AdvancedProtectionProvider;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @SuppressLint("VisibleForTests")
@@ -47,6 +54,7 @@ public class AdvancedProtectionServiceTest {
     private Context mContext;
     private AdvancedProtectionService.AdvancedProtectionStore mStore;
     private TestLooper mLooper;
+    AdvancedProtectionFeature mFeature = new AdvancedProtectionFeature("test-id");
 
     @Before
     public void setup() throws Settings.SettingNotFoundException {
@@ -70,8 +78,9 @@ public class AdvancedProtectionServiceTest {
         };
 
         mLooper = new TestLooper();
+
         mService = new AdvancedProtectionService(mContext, mStore, mLooper.getLooper(),
-                mPermissionEnforcer, null);
+                mPermissionEnforcer, null, null);
     }
 
     @Test
@@ -93,6 +102,12 @@ public class AdvancedProtectionServiceTest {
         AtomicBoolean callbackCaptor = new AtomicBoolean(false);
         AdvancedProtectionHook hook =
                 new AdvancedProtectionHook(mContext, true) {
+                    @NonNull
+                    @Override
+                    public AdvancedProtectionFeature getFeature() {
+                        return mFeature;
+                    }
+
                     @Override
                     public boolean isAvailable() {
                         return true;
@@ -105,7 +120,7 @@ public class AdvancedProtectionServiceTest {
                 };
 
         mService = new AdvancedProtectionService(mContext, mStore, mLooper.getLooper(),
-                mPermissionEnforcer, hook);
+                mPermissionEnforcer, hook, null);
         mService.setAdvancedProtectionEnabled(true);
         mLooper.dispatchNext();
 
@@ -117,6 +132,12 @@ public class AdvancedProtectionServiceTest {
         AtomicBoolean callbackCalledCaptor = new AtomicBoolean(false);
         AdvancedProtectionHook hook =
                 new AdvancedProtectionHook(mContext, true) {
+                    @NonNull
+                    @Override
+                    public AdvancedProtectionFeature getFeature() {
+                        return mFeature;
+                    }
+
                     @Override
                     public boolean isAvailable() {
                         return false;
@@ -129,7 +150,8 @@ public class AdvancedProtectionServiceTest {
                 };
 
         mService = new AdvancedProtectionService(mContext, mStore, mLooper.getLooper(),
-                mPermissionEnforcer, hook);
+                mPermissionEnforcer, hook, null);
+
         mService.setAdvancedProtectionEnabled(true);
         mLooper.dispatchNext();
         assertFalse(callbackCalledCaptor.get());
@@ -140,6 +162,12 @@ public class AdvancedProtectionServiceTest {
         AtomicBoolean callbackCalledCaptor = new AtomicBoolean(false);
         AdvancedProtectionHook hook =
                 new AdvancedProtectionHook(mContext, true) {
+                    @NonNull
+                    @Override
+                    public AdvancedProtectionFeature getFeature() {
+                        return mFeature;
+                    }
+
                     @Override
                     public boolean isAvailable() {
                         return true;
@@ -152,7 +180,7 @@ public class AdvancedProtectionServiceTest {
                 };
 
         mService = new AdvancedProtectionService(mContext, mStore, mLooper.getLooper(),
-                mPermissionEnforcer, hook);
+                mPermissionEnforcer, hook, null);
         mService.setAdvancedProtectionEnabled(true);
         mLooper.dispatchNext();
         assertTrue(callbackCalledCaptor.get());
@@ -206,6 +234,66 @@ public class AdvancedProtectionServiceTest {
 
         mLooper.dispatchNext();
         assertFalse(callbackCalledCaptor.get());
+    }
+
+    @Test
+    public void testGetFeatures() {
+        AdvancedProtectionFeature feature1 = new AdvancedProtectionFeature("id-1");
+        AdvancedProtectionFeature feature2 = new AdvancedProtectionFeature("id-2");
+        AdvancedProtectionHook hook = new AdvancedProtectionHook(mContext, true) {
+            @NonNull
+            @Override
+            public AdvancedProtectionFeature getFeature() {
+                return feature1;
+            }
+
+            @Override
+            public boolean isAvailable() {
+                return true;
+            }
+        };
+
+        AdvancedProtectionProvider provider = new AdvancedProtectionProvider() {
+            @Override
+            public List<AdvancedProtectionFeature> getFeatures() {
+                return List.of(feature2);
+            }
+        };
+
+        mService = new AdvancedProtectionService(mContext, mStore, mLooper.getLooper(),
+                mPermissionEnforcer, hook, provider);
+        List<AdvancedProtectionFeature> features = mService.getAdvancedProtectionFeatures();
+        assertThat(features, containsInAnyOrder(feature1, feature2));
+    }
+
+    @Test
+    public void testGetFeatures_featureNotAvailable() {
+        AdvancedProtectionFeature feature1 = new AdvancedProtectionFeature("id-1");
+        AdvancedProtectionFeature feature2 = new AdvancedProtectionFeature("id-2");
+        AdvancedProtectionHook hook = new AdvancedProtectionHook(mContext, true) {
+            @NonNull
+            @Override
+            public AdvancedProtectionFeature getFeature() {
+                return feature1;
+            }
+
+            @Override
+            public boolean isAvailable() {
+                return false;
+            }
+        };
+
+        AdvancedProtectionProvider provider = new AdvancedProtectionProvider() {
+            @Override
+            public List<AdvancedProtectionFeature> getFeatures() {
+                return List.of(feature2);
+            }
+        };
+
+        mService = new AdvancedProtectionService(mContext, mStore, mLooper.getLooper(),
+                mPermissionEnforcer, hook, provider);
+        List<AdvancedProtectionFeature> features = mService.getAdvancedProtectionFeatures();
+        assertThat(features, containsInAnyOrder(feature2));
     }
 
 

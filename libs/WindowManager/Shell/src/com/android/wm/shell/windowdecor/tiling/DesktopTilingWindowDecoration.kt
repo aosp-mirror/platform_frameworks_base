@@ -195,6 +195,7 @@ class DesktopTilingWindowDecoration(
         val builder = SurfaceControl.Builder()
         rootTdaOrganizer.attachToDisplayArea(displayId, builder)
         val leash = builder.setName(TILING_DIVIDER_TAG).setContainerLayer().build()
+        val displayContext = displayController.getDisplayContext(displayId) ?: return null
         val tilingManager =
             displayLayout?.let {
                 dividerBounds = inflateDividerBounds(it)
@@ -207,6 +208,7 @@ class DesktopTilingWindowDecoration(
                     this,
                     transactionSupplier,
                     dividerBounds,
+                    displayContext,
                 )
             }
         // a leash to present the divider on top of, without re-parenting.
@@ -483,7 +485,7 @@ class DesktopTilingWindowDecoration(
         }
     }
 
-    fun onUserChange() {
+    fun resetTilingSession() {
         if (leftTaskResizingHelper != null) {
             removeTask(leftTaskResizingHelper, taskVanished = false, shouldDelayUpdate = true)
             leftTaskResizingHelper = null

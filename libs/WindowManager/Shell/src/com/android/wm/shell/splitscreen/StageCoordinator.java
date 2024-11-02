@@ -30,7 +30,6 @@ import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_KEYGUARD_OCCLUDE;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
-import static android.view.WindowManager.transitTypeToString;
 import static android.window.TransitionInfo.FLAG_IS_DISPLAY;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REORDER;
 
@@ -73,6 +72,7 @@ import static com.android.wm.shell.splitscreen.SplitScreenController.exitReasonT
 import static com.android.wm.shell.transition.MixedTransitionHelper.getPipReplacingChange;
 import static com.android.wm.shell.transition.Transitions.TRANSIT_SPLIT_SCREEN_OPEN_TO_SIDE;
 import static com.android.wm.shell.transition.Transitions.TRANSIT_SPLIT_SCREEN_PAIR_OPEN;
+import static com.android.wm.shell.transition.Transitions.transitTypeToString;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;

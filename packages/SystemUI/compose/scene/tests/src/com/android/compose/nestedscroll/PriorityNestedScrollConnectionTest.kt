@@ -18,12 +18,15 @@
 
 package com.android.compose.nestedscroll
 
+import androidx.compose.foundation.gestures.FlingBehavior
 import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.ScrollScope
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource.Companion.UserInput
 import androidx.compose.ui.unit.Velocity
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.android.compose.test.runMonotonicClockTest
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
@@ -41,7 +44,16 @@ class PriorityNestedScrollConnectionTest {
     private var consumeScroll = true
     private var lastStop: Float? = null
     private var isCancelled: Boolean = false
-    private var consumeStop = true
+    private var onStopConsumeFlingToScroll = false
+    private var onStopConsumeAll = true
+
+    private val customFlingBehavior =
+        object : FlingBehavior {
+            override suspend fun ScrollScope.performFling(initialVelocity: Float): Float {
+                scrollBy(initialVelocity)
+                return initialVelocity / 2f
+            }
+        }
 
     private val scrollConnection =
         PriorityNestedScrollConnection(
@@ -57,9 +69,16 @@ class PriorityNestedScrollConnectionTest {
                         return if (consumeScroll) deltaScroll else 0f
                     }
 
-                    override suspend fun onStop(initialVelocity: Float): Float {
+                    override suspend fun OnStopScope.onStop(initialVelocity: Float): Float {
                         lastStop = initialVelocity
-                        return if (consumeStop) initialVelocity else 0f
+                        var velocityConsumed = 0f
+                        if (onStopConsumeFlingToScroll) {
+                            velocityConsumed = flingToScroll(initialVelocity, customFlingBehavior)
+                        }
+                        if (onStopConsumeAll) {
+                            velocityConsumed = initialVelocity
+                        }
+                        return velocityConsumed
                     }
 
                     override fun onCancel() {
@@ -175,6 +194,22 @@ class PriorityNestedScrollConnectionTest {
         scrollConnection.onPreFling(available = Velocity.Zero)
 
         assertThat(lastStop).isEqualTo(0f)
+    }
+
+    @Test
+    fun onStopScrollUsingFlingToScroll() = runMonotonicClockTest {
+        startPriorityModePostScroll()
+        onStopConsumeFlingToScroll = true
+        onStopConsumeAll = false
+        lastScroll = Float.NaN
+
+        val consumed = scrollConnection.onPreFling(available = Velocity(2f, 2f))
+
+        assertThat(lastStop).isEqualTo(2f)
+        // flingToScroll should try to scroll the content, customFlingBehavior uses the velocity.
+        assertThat(lastScroll).isEqualTo(2f)
+        // customFlingBehavior returns half of the vertical velocity.
+        assertThat(consumed).isEqualTo(Velocity(0f, 1f))
     }
 
     @Test

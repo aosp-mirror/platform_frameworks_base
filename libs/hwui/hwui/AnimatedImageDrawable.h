@@ -87,6 +87,11 @@ public:
     bool isRunning();
     int getRepetitionCount() const { return mSkAnimatedImage->getRepetitionCount(); }
     void setRepetitionCount(int count) { mSkAnimatedImage->setRepetitionCount(count); }
+    // Returns true if the filter mode is set to linear sampling; false if it is
+    // set to nearest neighbor sampling.
+    bool getFilterBitmap() const;
+    // Returns true if the filter mode was changed; false otherwise.
+    bool setFilterBitmap(bool filterBitmap);
 
     void setOnAnimationEndListener(std::unique_ptr<OnAnimationEndListener> listener) {
         mEndListener = std::move(listener);

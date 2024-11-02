@@ -112,6 +112,8 @@
     <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"ថត​អេក្រង់​របស់អ្នកឬ?"</string>
     <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"ថត​កម្មវិធី​ទោល"</string>
     <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"ថតអេក្រង់ទាំងមូល"</string>
+    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen_for_display (3754611651558838691) -->
+    <skip />
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"នៅពេល​អ្នកកំពុង​ថតអេក្រង់​ទាំងមូល​របស់អ្នក អ្វីគ្រប់យ៉ាង​ដែលបង្ហាញ​នៅលើ​អេក្រង់​របស់អ្នក​ត្រូវបាន​ថត។ ដូច្នេះ សូមប្រុងប្រយ័ត្នចំពោះអ្វីៗដូចជា ពាក្យសម្ងាត់ ព័ត៌មានលម្អិតអំពីការទូទាត់ប្រាក់ សារ រូបថត ព្រមទាំងសំឡេង និងវីដេអូ។"</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"នៅពេលអ្នក​កំពុង​ថតកម្មវិធី​ណាមួយ អ្វីគ្រប់យ៉ាង​ដែលបង្ហាញ ឬចាក់​នៅក្នុង​កម្មវិធីនោះ​ត្រូវបាន​ថត។ ដូច្នេះ សូមប្រុងប្រយ័ត្នចំពោះអ្វីៗដូចជា ពាក្យសម្ងាត់ ព័ត៌មានលម្អិតអំពីការទូទាត់ប្រាក់ សារ រូបថត ព្រមទាំងសំឡេង និងវីដេអូ។"</string>
     <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"ថត​អេក្រង់"</string>
@@ -1413,9 +1415,15 @@
     <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"កម្មវិធីបច្ចុប្បន្ន"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"ភាពងាយស្រួល"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"ផ្លូវកាត់​ក្ដារ​ចុច"</string>
+    <!-- no translation found for shortcut_helper_customize_mode_title (1467657117101096033) -->
+    <skip />
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"ផ្លូវ​កាត់ការស្វែងរក"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"គ្មាន​លទ្ធផល​ស្វែងរក​ទេ"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"រូបតំណាង \"បង្រួម\""</string>
+    <!-- no translation found for shortcut_helper_customize_button_text (3124983502748069338) -->
+    <skip />
+    <!-- no translation found for shortcut_helper_done_button_text (7249905942125386191) -->
+    <skip />
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"រូបតំណាង \"ពង្រីក\""</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"ឬ"</string>
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"ដង​អូស"</string>

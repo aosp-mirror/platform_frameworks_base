@@ -1797,6 +1797,7 @@
     <string name="volume_panel_spatial_audio_tracking">Head Tracking</string>
 
     <string name="volume_ringer_change">Tap to change ringer mode</string>
+    <string name="volume_ringer_mode">ringer mode</string>
 
     <!-- Hint for accessibility. For example: double tap to mute [CHAR_LIMIT=NONE] -->
     <string name="volume_ringer_hint_mute">mute</string>

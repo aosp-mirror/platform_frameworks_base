@@ -475,7 +475,7 @@ class DesktopTilingWindowDecorationTest : ShellTestCase() {
         tilingDecoration.rightTaskResizingHelper = tiledTaskHelper
         tilingDecoration.desktopTilingDividerWindowManager = desktopTilingDividerWindowManager
 
-        tilingDecoration.onUserChange()
+        tilingDecoration.resetTilingSession()
 
         assertThat(tilingDecoration.leftTaskResizingHelper).isNull()
         assertThat(tilingDecoration.rightTaskResizingHelper).isNull()

@@ -8543,6 +8543,18 @@
         android:name="android.permission.INTERNAL_RECEIVE_PACKAGE_CHANGED_BROADCAST_ON_COMPONENT_STATE_CHANGED"
         android:featureFlag="android.content.pm.reduce_broadcasts_for_component_state_changes"/>
 
+    <!-- @SystemApi
+        @FlaggedApi("android.media.tv.flags.kids_mode_tvdb_sharing")
+        This permission is required when accessing information related to
+        singleUser-ed TIS session.
+        <p>This should only be used by OEM.
+        <p>Protection level: signature|privileged|vendorPrivileged
+        @hide
+    -->
+    <permission android:name="android.permission.SINGLE_USER_TIS_ACCESS"
+        android:protectionLevel="signature|privileged|vendorPrivileged"
+        android:featureFlag="android.media.tv.flags.kids_mode_tvdb_sharing"/>
+
     <!-- Attribution for Geofencing service. -->
     <attribution android:tag="GeofencingService" android:label="@string/geofencing_service"/>
     <!-- Attribution for Country Detector. -->

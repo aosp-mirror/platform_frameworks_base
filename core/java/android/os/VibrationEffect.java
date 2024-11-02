@@ -1740,7 +1740,9 @@ public abstract class VibrationEffect implements Parcelable {
      *
      * <p>The waveform envelope builder offers more flexibility for creating waveform effects,
      * allowing control over vibration amplitude and frequency via smooth transitions between
-     * values.
+     * values. The waveform will start the first transition from the vibrator off state, using
+     * the same frequency of the first control point. To provide a different initial vibration
+     * frequency, use {@link #startWaveformEnvelope(float)}.
      *
      * <p>Note: To check whether waveform envelope effects are supported, use
      * {@link Vibrator#areEnvelopeEffectsSupported()}.
@@ -1751,6 +1753,32 @@ public abstract class VibrationEffect implements Parcelable {
     @NonNull
     public static VibrationEffect.WaveformEnvelopeBuilder startWaveformEnvelope() {
         return new WaveformEnvelopeBuilder();
+    }
+
+    /**
+     * Start building a waveform vibration with an initial frequency.
+     *
+     * <p>The waveform envelope builder offers more flexibility for creating waveform effects,
+     * allowing control over vibration amplitude and frequency via smooth transitions between
+     * values.
+     *
+     * <p>This is the same as {@link #startWaveformEnvelope()}, but the waveform will start
+     * vibrating at given frequency, in hertz, while it transitions to the new amplitude and
+     * frequency of the first control point.
+     *
+     * <p>Note: To check whether waveform envelope effects are supported, use
+     * {@link Vibrator#areEnvelopeEffectsSupported()}.
+     *
+     * @param initialFrequencyHz The starting frequency of the vibration, in hertz. Must be greater
+     *                           than zero.
+     *
+     * @see VibrationEffect.WaveformEnvelopeBuilder
+     */
+    @FlaggedApi(Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
+    @NonNull
+    public static VibrationEffect.WaveformEnvelopeBuilder startWaveformEnvelope(
+            @FloatRange(from = 0) float initialFrequencyHz) {
+        return new WaveformEnvelopeBuilder(initialFrequencyHz);
     }
 
     /**
@@ -1810,6 +1838,10 @@ public abstract class VibrationEffect implements Parcelable {
 
         private WaveformEnvelopeBuilder() {}
 
+        private WaveformEnvelopeBuilder(float initialFrequency) {
+            mLastFrequencyHz = initialFrequency;
+        }
+
         /**
          * Adds a new control point to the end of this waveform envelope.
          *
@@ -1841,7 +1873,7 @@ public abstract class VibrationEffect implements Parcelable {
                 @FloatRange(from = 0, to = 1) float amplitude,
                 @FloatRange(from = 0) float frequencyHz, int timeMillis) {
 
-            if (mSegments.isEmpty()) {
+            if (mLastFrequencyHz == 0) {
                 mLastFrequencyHz = frequencyHz;
             }
 
