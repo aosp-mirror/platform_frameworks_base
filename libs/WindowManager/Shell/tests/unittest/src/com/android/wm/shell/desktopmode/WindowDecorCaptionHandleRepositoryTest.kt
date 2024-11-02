@@ -49,7 +49,10 @@ class WindowDecorCaptionHandleRepositoryTest {
     val taskInfo = createTaskInfo(WINDOWING_MODE_FULLSCREEN, GMAIL_PACKAGE_NAME)
     val appHandleCaptionState =
         CaptionState.AppHandle(
-            taskInfo, false, Rect(/* left= */ 0, /* top= */ 1, /* right= */ 2, /* bottom= */ 3))
+          runningTaskInfo = taskInfo,
+          isHandleMenuExpanded = false,
+          globalAppHandleBounds = Rect(/* left= */ 0, /* top= */ 1, /* right= */ 2, /* bottom= */ 3),
+          isCapturedLinkAvailable = false)
 
     captionHandleRepository.notifyCaptionChanged(appHandleCaptionState)
 
@@ -61,7 +64,10 @@ class WindowDecorCaptionHandleRepositoryTest {
     val taskInfo = createTaskInfo(WINDOWING_MODE_FREEFORM, GMAIL_PACKAGE_NAME)
     val appHeaderCaptionState =
         CaptionState.AppHeader(
-            taskInfo, true, Rect(/* left= */ 0, /* top= */ 1, /* right= */ 2, /* bottom= */ 3))
+          runningTaskInfo = taskInfo,
+          isHeaderMenuExpanded = true,
+          globalAppChipBounds = Rect(/* left= */ 0, /* top= */ 1, /* right= */ 2, /* bottom= */ 3),
+          isCapturedLinkAvailable = false)
 
     captionHandleRepository.notifyCaptionChanged(appHeaderCaptionState)
 
