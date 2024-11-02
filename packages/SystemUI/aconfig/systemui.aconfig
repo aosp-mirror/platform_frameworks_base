@@ -26,6 +26,13 @@ flag {
 }
 
 flag {
+   name: "modes_ui_dialog_paging"
+   namespace: "systemui"
+   description: "Add pagination to the Modes dialog in quick settings."
+   bug: "376450983"
+}
+
+flag {
    name: "priority_people_section"
    namespace: "systemui"
    description: "Add a new section for priority people (aka important conversations)."

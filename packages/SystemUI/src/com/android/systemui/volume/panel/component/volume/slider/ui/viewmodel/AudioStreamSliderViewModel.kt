@@ -22,11 +22,13 @@ import android.media.AudioManager.STREAM_ALARM
 import android.media.AudioManager.STREAM_MUSIC
 import android.media.AudioManager.STREAM_NOTIFICATION
 import android.util.Log
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.internal.logging.UiEventLogger
 import com.android.settingslib.volume.domain.interactor.AudioVolumeInteractor
 import com.android.settingslib.volume.shared.model.AudioStream
 import com.android.settingslib.volume.shared.model.AudioStreamModel
 import com.android.settingslib.volume.shared.model.RingerMode
+import com.android.systemui.Flags
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.haptics.slider.compose.ui.SliderHapticsViewModel
 import com.android.systemui.modes.shared.ModesUiIcons
@@ -49,7 +51,6 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 /** Models a particular slider state. */
 class AudioStreamSliderViewModel
@@ -62,7 +63,7 @@ constructor(
     private val zenModeInteractor: ZenModeInteractor,
     private val uiEventLogger: UiEventLogger,
     private val volumePanelLogger: VolumePanelLogger,
-    override val hapticsViewModelFactory: SliderHapticsViewModel.Factory,
+    private val hapticsViewModelFactory: SliderHapticsViewModel.Factory,
 ) : SliderViewModel {
 
     private val volumeChanges = MutableStateFlow<Int?>(null)
@@ -170,6 +171,13 @@ constructor(
             audioVolumeInteractor.setMuted(audioStream, !audioViewModel.audioStreamModel.isMuted)
         }
     }
+
+    override fun getSliderHapticsViewModelFactory(): SliderHapticsViewModel.Factory? =
+        if (Flags.hapticsForComposeSliders() && slider.value != SliderState.Empty) {
+            hapticsViewModelFactory
+        } else {
+            null
+        }
 
     private fun AudioStreamModel.toState(
         isEnabled: Boolean,

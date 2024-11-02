@@ -249,7 +249,9 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
 
         if (!mTaskInfo.isVisible) {
             releaseViews(wct);
-            finishT.hide(mTaskSurface);
+            if (params.mSetTaskVisibilityPositionAndCrop) {
+                finishT.hide(mTaskSurface);
+            }
             return;
         }
 
@@ -422,7 +424,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
 
     private void updateTaskSurface(RelayoutParams params, SurfaceControl.Transaction startT,
             SurfaceControl.Transaction finishT, RelayoutResult<T> outResult) {
-        if (params.mSetTaskPositionAndCrop) {
+        if (params.mSetTaskVisibilityPositionAndCrop) {
             final Point taskPosition = mTaskInfo.positionInParent;
             startT.setWindowCrop(mTaskSurface, outResult.mWidth, outResult.mHeight);
             finishT.setWindowCrop(mTaskSurface, outResult.mWidth, outResult.mHeight)
@@ -437,8 +439,12 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
             shadowRadius =
                     loadDimension(mDecorWindowContext.getResources(), params.mShadowRadiusId);
         }
-        startT.setShadowRadius(mTaskSurface, shadowRadius).show(mTaskSurface);
+        startT.setShadowRadius(mTaskSurface, shadowRadius);
         finishT.setShadowRadius(mTaskSurface, shadowRadius);
+
+        if (params.mSetTaskVisibilityPositionAndCrop) {
+            startT.show(mTaskSurface);
+        }
 
         if (mTaskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM) {
             if (!DesktopModeStatus.isVeiledResizeEnabled()) {
@@ -758,7 +764,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         Configuration mWindowDecorConfig;
 
         boolean mApplyStartTransactionOnDraw;
-        boolean mSetTaskPositionAndCrop;
+        boolean mSetTaskVisibilityPositionAndCrop;
         boolean mHasGlobalFocus;
 
         void reset() {
@@ -777,7 +783,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
             mIsCaptionVisible = false;
 
             mApplyStartTransactionOnDraw = false;
-            mSetTaskPositionAndCrop = false;
+            mSetTaskVisibilityPositionAndCrop = false;
             mWindowDecorConfig = null;
             mHasGlobalFocus = false;
         }

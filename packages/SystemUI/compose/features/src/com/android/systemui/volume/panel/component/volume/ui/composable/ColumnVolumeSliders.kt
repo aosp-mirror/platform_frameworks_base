@@ -92,7 +92,7 @@ fun ColumnVolumeSliders(
                 onValueChangeFinished = { sliderViewModel.onValueChangeFinished() },
                 onIconTapped = { sliderViewModel.toggleMuted(sliderState) },
                 sliderColors = sliderColors,
-                hapticsViewModelFactory = sliderViewModel.hapticsViewModelFactory,
+                hapticsViewModelFactory = sliderViewModel.getSliderHapticsViewModelFactory(),
             )
 
             ExpandButton(
@@ -142,7 +142,8 @@ fun ColumnVolumeSliders(
                             onValueChangeFinished = { sliderViewModel.onValueChangeFinished() },
                             onIconTapped = { sliderViewModel.toggleMuted(sliderState) },
                             sliderColors = sliderColors,
-                            hapticsViewModelFactory = sliderViewModel.hapticsViewModelFactory,
+                            hapticsViewModelFactory =
+                                sliderViewModel.getSliderHapticsViewModelFactory(),
                         )
                     }
                 }

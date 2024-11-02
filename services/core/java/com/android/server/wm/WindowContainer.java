@@ -1117,7 +1117,9 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      */
     void onDisplayChanged(DisplayContent dc) {
         if (mDisplayContent != null && mDisplayContent != dc) {
-            mTransitionController.collect(this);
+            if (asWindowState() == null) {
+                mTransitionController.collect(this);
+            }
             // Cancel any change transition queued-up for this container on the old display when
             // this container is moved from the old display.
             mDisplayContent.mClosingChangingContainers.remove(this);
@@ -2119,7 +2121,8 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     }
 
     /**
-     * For all tasks at or below this container call the callback.
+     * Calls the given {@param callback} for all tasks in depth-first top-down z-order at or below
+     * this container.
      *
      * @param callback Calls the {@link ToBooleanFunction#apply} method for each task found and
      *                 stops the search if {@link ToBooleanFunction#apply} returns {@code true}.

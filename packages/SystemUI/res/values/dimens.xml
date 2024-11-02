@@ -584,6 +584,12 @@
     -->
     <dimen name="shade_panel_width">412dp</dimen>
 
+    <!--
+    The horizontal distance between the shade overlay panel (both notifications and quick settings)
+    and the edge of the screen. This is zero only on Compact screens (< sw600dp).
+    -->
+    <dimen name="shade_panel_margin_horizontal">0dp</dimen>
+
     <dimen name="brightness_mirror_height">48dp</dimen>
 
     <dimen name="volume_dialog_panel_transparent_padding_right">8dp</dimen>
@@ -2058,7 +2064,7 @@
     <!-- Volume start -->
     <dimen name="volume_dialog_background_corner_radius">30dp</dimen>
     <dimen name="volume_dialog_width">60dp</dimen>
-    <dimen name="volume_dialog_vertical_padding">6dp</dimen>
+    <dimen name="volume_dialog_vertical_padding">10dp</dimen>
     <dimen name="volume_dialog_components_spacing">8dp</dimen>
     <dimen name="volume_dialog_floating_sliders_spacing">8dp</dimen>
     <dimen name="volume_dialog_floating_sliders_vertical_padding">10dp</dimen>
@@ -2072,10 +2078,10 @@
     <dimen name="volume_panel_slice_vertical_padding">8dp</dimen>
     <dimen name="volume_panel_slice_horizontal_padding">24dp</dimen>
 
-    <dimen name="volume_dialog_ringer_container_padding">10dp</dimen>
-    <dimen name="volume_ringer_item_size">40dp</dimen>
-    <dimen name="volume_ringer_icon_size">20dp</dimen>
-    <dimen name="volume_ringer_item_radius">12dp</dimen>
-    <dimen name="volume_dialog_ringer_item_margin_bottom">8dp</dimen>
+    <dimen name="volume_dialog_ringer_horizontal_padding">10dp</dimen>
+    <dimen name="volume_dialog_ringer_drawer_button_size">40dp</dimen>
+    <dimen name="volume_dialog_ringer_drawer_button_icon_radius">10dp</dimen>
+    <dimen name="volume_dialog_background_square_corner_radius">12dp</dimen>
+    <dimen name="volume_dialog_ringer_selected_button_background_radius">20dp</dimen>
     <!-- Volume end -->
 </resources>

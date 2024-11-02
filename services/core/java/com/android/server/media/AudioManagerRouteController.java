@@ -32,6 +32,7 @@ import android.media.AudioDeviceCallback;
 import android.media.AudioDeviceInfo;
 import android.media.AudioManager;
 import android.media.MediaRoute2Info;
+import android.media.audio.Flags;
 import android.media.audiopolicy.AudioProductStrategy;
 import android.os.Handler;
 import android.os.HandlerExecutor;
@@ -711,5 +712,13 @@ import java.util.Objects;
                         MediaRoute2Info.TYPE_DOCK,
                         /* defaultRouteId= */ "ROUTE_ID_DOCK_ANALOG",
                         /* nameResource= */ R.string.default_audio_route_name_dock_speakers));
+        if (Flags.enableMultichannelGroupDevice()) {
+            AUDIO_DEVICE_INFO_TYPE_TO_ROUTE_INFO.put(
+                    AudioDeviceInfo.TYPE_MULTICHANNEL_GROUP,
+                    new SystemRouteInfo(
+                            MediaRoute2Info.TYPE_MULTICHANNEL_SPEAKER_GROUP,
+                            /* defaultRouteId= */ "ROUTE_ID_MULTICHANNEL_SPEAKER_GROUP",
+                            /* nameResource= */ R.string.default_audio_route_name_external_device));
+        }
     }
 }

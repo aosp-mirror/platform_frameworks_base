@@ -46,7 +46,7 @@ constructor(
 ) : CoreStartable {
 
     override fun start() {
-        StatusBarSimpleFragment.assertInNewMode()
+        StatusBarConnectedDisplays.assertInNewMode()
         val result: RegisterStatusBarResult =
             try {
                 barService.registerStatusBar(commandQueue)
