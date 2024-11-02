@@ -32,7 +32,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.verify
 
-@EnableFlags(StatusBarSimpleFragment.FLAG_NAME)
+@EnableFlags(StatusBarConnectedDisplays.FLAG_NAME)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class CommandQueueInitializerTest : SysuiTestCase() {

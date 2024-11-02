@@ -218,8 +218,6 @@ public class WindowDecorationTests extends ShellTestCase {
         verify(captionContainerSurfaceBuilder, never()).build();
         verify(mMockSurfaceControlViewHostFactory, never()).create(any(), any(), any());
 
-        verify(mMockSurfaceControlFinishT).hide(mMockTaskSurface);
-
         assertNull(mRelayoutResult.mRootView);
     }
 
@@ -281,8 +279,6 @@ public class WindowDecorationTests extends ShellTestCase {
 
         verify(mMockSurfaceControlStartT).setCornerRadius(mMockTaskSurface, CORNER_RADIUS);
         verify(mMockSurfaceControlFinishT).setCornerRadius(mMockTaskSurface, CORNER_RADIUS);
-        verify(mMockSurfaceControlStartT)
-                .show(mMockTaskSurface);
         verify(mMockSurfaceControlStartT).setShadowRadius(mMockTaskSurface, 10);
 
         assertEquals(300, mRelayoutResult.mWidth);
@@ -863,7 +859,7 @@ public class WindowDecorationTests extends ShellTestCase {
         final TestWindowDecoration windowDecor = createWindowDecoration(taskInfo);
 
 
-        mRelayoutParams.mSetTaskPositionAndCrop = false;
+        mRelayoutParams.mSetTaskVisibilityPositionAndCrop = false;
         windowDecor.relayout(taskInfo, true /* hasGlobalFocus */);
 
         verify(mMockSurfaceControlStartT, never()).setWindowCrop(
@@ -891,7 +887,7 @@ public class WindowDecorationTests extends ShellTestCase {
         taskInfo.configuration.densityDpi = DisplayMetrics.DENSITY_DEFAULT * 2;
         final TestWindowDecoration windowDecor = createWindowDecoration(taskInfo);
 
-        mRelayoutParams.mSetTaskPositionAndCrop = true;
+        mRelayoutParams.mSetTaskVisibilityPositionAndCrop = true;
         windowDecor.relayout(taskInfo, true /* hasGlobalFocus */);
 
         verify(mMockSurfaceControlStartT).setWindowCrop(

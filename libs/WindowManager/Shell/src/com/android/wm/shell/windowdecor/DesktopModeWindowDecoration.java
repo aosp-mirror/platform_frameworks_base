@@ -390,18 +390,25 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     @Override
     void relayout(ActivityManager.RunningTaskInfo taskInfo, boolean hasGlobalFocus) {
         final SurfaceControl.Transaction t = mSurfaceControlTransactionSupplier.get();
-        // The crop and position of the task should only be set when a task is fluid resizing. In
-        // all other cases, it is expected that the transition handler positions and crops the task
-        // in order to allow the handler time to animate before the task before the final
-        // position and crop are set.
-        final boolean shouldSetTaskPositionAndCrop = !DesktopModeStatus.isVeiledResizeEnabled()
-                && mTaskDragResizer.isResizingOrAnimating();
+        // The visibility, crop and position of the task should only be set when a task is
+        // fluid resizing. In all other cases, it is expected that the transition handler sets
+        // those task properties to allow the handler time to animate with full control of the task
+        // leash. In general, allowing the window decoration to set any of these is likely to cause
+        // incorrect frames and flickering because relayouts from TaskListener#onTaskInfoChanged
+        // aren't synchronized with shell transition callbacks, so if they come too early it
+        // might show/hide or crop the task at a bad time.
+        // Fluid resizing is exempt from this because it intentionally doesn't use shell
+        // transitions to resize the task, so onTaskInfoChanged relayouts is the only way to make
+        // sure the crop is set correctly.
+        final boolean shouldSetTaskVisibilityPositionAndCrop =
+                !DesktopModeStatus.isVeiledResizeEnabled()
+                        && mTaskDragResizer.isResizingOrAnimating();
         // For headers only (i.e. in freeform): use |applyStartTransactionOnDraw| so that the
         // transaction (that applies task crop) is synced with the buffer transaction (that draws
         // the View). Both will be shown on screen at the same, whereas applying them independently
         // causes flickering. See b/270202228.
         final boolean applyTransactionOnDraw = taskInfo.isFreeform();
-        relayout(taskInfo, t, t, applyTransactionOnDraw, shouldSetTaskPositionAndCrop,
+        relayout(taskInfo, t, t, applyTransactionOnDraw, shouldSetTaskVisibilityPositionAndCrop,
                 hasGlobalFocus);
         if (!applyTransactionOnDraw) {
             t.apply();
@@ -428,19 +435,19 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
 
     void relayout(ActivityManager.RunningTaskInfo taskInfo,
             SurfaceControl.Transaction startT, SurfaceControl.Transaction finishT,
-            boolean applyStartTransactionOnDraw, boolean shouldSetTaskPositionAndCrop,
+            boolean applyStartTransactionOnDraw, boolean shouldSetTaskVisibilityPositionAndCrop,
             boolean hasGlobalFocus) {
         Trace.beginSection("DesktopModeWindowDecoration#relayout");
         if (taskInfo.isFreeform()) {
             // The Task is in Freeform mode -> show its header in sync since it's an integral part
             // of the window itself - a delayed header might cause bad UX.
             relayoutInSync(taskInfo, startT, finishT, applyStartTransactionOnDraw,
-                    shouldSetTaskPositionAndCrop, hasGlobalFocus);
+                    shouldSetTaskVisibilityPositionAndCrop, hasGlobalFocus);
         } else {
             // The Task is outside Freeform mode -> allow the handle view to be delayed since the
             // handle is just a small addition to the window.
             relayoutWithDelayedViewHost(taskInfo, startT, finishT, applyStartTransactionOnDraw,
-                    shouldSetTaskPositionAndCrop, hasGlobalFocus);
+                    shouldSetTaskVisibilityPositionAndCrop, hasGlobalFocus);
         }
         Trace.endSection();
     }
@@ -448,12 +455,12 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     /** Run the whole relayout phase immediately without delay. */
     private void relayoutInSync(ActivityManager.RunningTaskInfo taskInfo,
             SurfaceControl.Transaction startT, SurfaceControl.Transaction finishT,
-            boolean applyStartTransactionOnDraw, boolean shouldSetTaskPositionAndCrop,
+            boolean applyStartTransactionOnDraw, boolean shouldSetTaskVisibilityPositionAndCrop,
             boolean hasGlobalFocus) {
         // Clear the current ViewHost runnable as we will update the ViewHost here
         clearCurrentViewHostRunnable();
         updateRelayoutParamsAndSurfaces(taskInfo, startT, finishT, applyStartTransactionOnDraw,
-                shouldSetTaskPositionAndCrop, hasGlobalFocus);
+                shouldSetTaskVisibilityPositionAndCrop, hasGlobalFocus);
         if (mResult.mRootView != null) {
             updateViewHost(mRelayoutParams, startT, mResult);
         }
@@ -475,7 +482,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
      */
     private void relayoutWithDelayedViewHost(ActivityManager.RunningTaskInfo taskInfo,
             SurfaceControl.Transaction startT, SurfaceControl.Transaction finishT,
-            boolean applyStartTransactionOnDraw, boolean shouldSetTaskPositionAndCrop,
+            boolean applyStartTransactionOnDraw, boolean shouldSetTaskVisibilityPositionAndCrop,
             boolean hasGlobalFocus) {
         if (applyStartTransactionOnDraw) {
             throw new IllegalArgumentException(
@@ -484,7 +491,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         // Clear the current ViewHost runnable as we will update the ViewHost here
         clearCurrentViewHostRunnable();
         updateRelayoutParamsAndSurfaces(taskInfo, startT, finishT,
-                false /* applyStartTransactionOnDraw */, shouldSetTaskPositionAndCrop,
+                false /* applyStartTransactionOnDraw */, shouldSetTaskVisibilityPositionAndCrop,
                 hasGlobalFocus);
         if (mResult.mRootView == null) {
             // This means something blocks the window decor from showing, e.g. the task is hidden.
@@ -499,7 +506,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     @SuppressLint("MissingPermission")
     private void updateRelayoutParamsAndSurfaces(ActivityManager.RunningTaskInfo taskInfo,
             SurfaceControl.Transaction startT, SurfaceControl.Transaction finishT,
-            boolean applyStartTransactionOnDraw, boolean shouldSetTaskPositionAndCrop,
+            boolean applyStartTransactionOnDraw, boolean shouldSetTaskVisibilityPositionAndCrop,
             boolean hasGlobalFocus) {
         Trace.beginSection("DesktopModeWindowDecoration#updateRelayoutParamsAndSurfaces");
 
@@ -524,9 +531,9 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         final boolean inFullImmersive = mDesktopRepository
                 .isTaskInFullImmersiveState(taskInfo.taskId);
         updateRelayoutParams(mRelayoutParams, mContext, taskInfo, applyStartTransactionOnDraw,
-                shouldSetTaskPositionAndCrop, mIsStatusBarVisible, mIsKeyguardVisibleAndOccluded,
-                inFullImmersive, mDisplayController.getInsetsState(taskInfo.displayId),
-                hasGlobalFocus);
+                shouldSetTaskVisibilityPositionAndCrop, mIsStatusBarVisible,
+                mIsKeyguardVisibleAndOccluded, inFullImmersive,
+                mDisplayController.getInsetsState(taskInfo.displayId), hasGlobalFocus);
 
         final WindowDecorLinearLayout oldRootView = mResult.mRootView;
         final SurfaceControl oldDecorationSurface = mDecorationContainerSurface;
@@ -852,7 +859,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             Context context,
             ActivityManager.RunningTaskInfo taskInfo,
             boolean applyStartTransactionOnDraw,
-            boolean shouldSetTaskPositionAndCrop,
+            boolean shouldSetTaskVisibilityPositionAndCrop,
             boolean isStatusBarVisible,
             boolean isKeyguardVisibleAndOccluded,
             boolean inFullImmersiveMode,
@@ -948,7 +955,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                     : R.dimen.freeform_decor_shadow_unfocused_thickness;
         }
         relayoutParams.mApplyStartTransactionOnDraw = applyStartTransactionOnDraw;
-        relayoutParams.mSetTaskPositionAndCrop = shouldSetTaskPositionAndCrop;
+        relayoutParams.mSetTaskVisibilityPositionAndCrop = shouldSetTaskVisibilityPositionAndCrop;
 
         // The configuration used to layout the window decoration. A copy is made instead of using
         // the original reference so that the configuration isn't mutated on config changes and
@@ -1089,13 +1096,13 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             if (mAppIconBitmap != null && mAppName != null) {
                 return;
             }
-            final ComponentName baseActivity = mTaskInfo.baseActivity;
-            if (baseActivity == null) {
-                Slog.e(TAG, "Base activity component not found in task");
+            if (mTaskInfo.baseIntent == null) {
+                Slog.e(TAG, "Base intent not found in task");
                 return;
             }
             final PackageManager pm = mUserContext.getPackageManager();
-            final ActivityInfo activityInfo = pm.getActivityInfo(baseActivity, 0 /* flags */);
+            final ActivityInfo activityInfo =
+                    pm.getActivityInfo(mTaskInfo.baseIntent.getComponent(), 0 /* flags */);
             final IconProvider provider = new IconProvider(mContext);
             final Drawable appIconDrawable = provider.getIcon(activityInfo);
             final Drawable badgedAppIconDrawable = pm.getUserBadgedIcon(appIconDrawable,

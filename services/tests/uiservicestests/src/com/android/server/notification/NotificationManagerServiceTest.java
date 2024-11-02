@@ -2895,6 +2895,44 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
+    @EnableFlags({FLAG_NOTIFICATION_FORCE_GROUPING,
+            android.app.Flags.FLAG_CHECK_AUTOGROUP_BEFORE_POST})
+    public void testRemoveScheduledForceGroup_onNotificationCanceled() throws Exception {
+        NotificationRecord r = generateNotificationRecord(mTestNotificationChannel, 0, "tag", null,
+                false);
+        when(mGroupHelper.onNotificationPosted(any(), anyBoolean())).thenReturn(false);
+        mService.addEnqueuedNotification(r);
+        NotificationManagerService.PostNotificationRunnable runnable =
+                mService.new PostNotificationRunnable(r.getKey(), r.getSbn().getPackageName(),
+                r.getUid(), mPostNotificationTrackerFactory.newTracker(null));
+        runnable.run();
+        waitForIdle();
+
+        // Post an update to the notification
+        NotificationRecord r_update =
+                generateNotificationRecord(mTestNotificationChannel, 0, "tag", null, false);
+        mService.addEnqueuedNotification(r_update);
+        runnable = mService.new PostNotificationRunnable(r_update.getKey(),
+                r_update.getSbn().getPackageName(), r_update.getUid(),
+                mPostNotificationTrackerFactory.newTracker(null));
+        runnable.run();
+        waitForIdle();
+
+        // Cancel the notification
+        mBinderService.cancelNotificationWithTag(r.getSbn().getPackageName(),
+                r.getSbn().getPackageName(), r.getSbn().getTag(),
+                r.getSbn().getId(), r.getSbn().getUserId());
+        waitForIdle();
+
+        mTestableLooper.moveTimeForward(DELAY_FORCE_REGROUP_TIME);
+        waitForIdle();
+
+        // Check that onNotificationPostedWithDelay was canceled
+        verify(mGroupHelper, times(1)).onNotificationPosted(any(), anyBoolean());
+        verify(mGroupHelper, never()).onNotificationPostedWithDelay(any(), any(), any());
+    }
+
+    @Test
     @EnableFlags(FLAG_NOTIFICATION_FORCE_GROUPING)
     public void testEnqueueNotification_forceGrouped_clearsSummaryFlag() throws Exception {
         final String originalGroupName = "originalGroup";

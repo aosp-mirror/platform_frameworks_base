@@ -22,6 +22,7 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.view.MotionEvent;
 import android.view.SurfaceControl;
+import android.app.wallpaper.WallpaperDescription;
 import android.os.Bundle;
 
 /**
@@ -50,4 +51,5 @@ interface IWallpaperEngine {
     SurfaceControl mirrorSurfaceControl();
     oneway void applyDimming(float dimAmount);
     oneway void setWallpaperFlags(int which);
+    @nullable WallpaperDescription onApplyWallpaper(int which);
 }

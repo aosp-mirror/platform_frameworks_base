@@ -196,10 +196,11 @@ class TransparentPolicy {
 
     // We evaluate the case when the policy should not be applied.
     private boolean shouldSkipTransparentPolicy(@Nullable ActivityRecord opaqueActivity) {
-        if (opaqueActivity == null || opaqueActivity.isEmbedded()) {
+        if (opaqueActivity == null || opaqueActivity.isEmbedded()
+                || !opaqueActivity.areBoundsLetterboxed()) {
             // We skip letterboxing if the translucent activity doesn't have any
             // opaque activities beneath or the activity below is embedded which
-            // never has letterbox.
+            // never has letterbox or the activity is not letterboxed at all.
             return true;
         }
         final AppCompatSizeCompatModePolicy scmPolicy = mActivityRecord.mAppCompatController

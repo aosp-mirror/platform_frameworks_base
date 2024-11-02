@@ -146,3 +146,11 @@ flag {
   description: "Whether to have more information in ashmem filenames for bitmaps"
   bug: "369619160"
 }
+
+flag {
+  name: "animated_image_drawable_filter_bitmap"
+  is_exported: true
+  namespace: "core_graphics"
+  description: "API's that enable animated image drawables to use nearest sampling when scaling."
+  bug: "370523334"
+}
