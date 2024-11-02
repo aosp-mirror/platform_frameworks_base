@@ -21,6 +21,7 @@ import android.annotation.NonNull;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Process;
+import android.os.UserHandle;
 import android.ravenwood.annotation.RavenwoodKeepWholeClass;
 import android.ravenwood.annotation.RavenwoodRedirect;
 import android.ravenwood.annotation.RavenwoodRedirectionClass;
@@ -112,7 +113,7 @@ public final class MessageQueue {
 
     MessageQueue(boolean quitAllowed) {
         if (!sUseConcurrentInitialized) {
-            sUseConcurrent = Process.myUid() < Process.FIRST_APPLICATION_UID;
+            sUseConcurrent = UserHandle.isCore(Process.myUid());
             sUseConcurrentInitialized = true;
         }
         mQuitAllowed = quitAllowed;
