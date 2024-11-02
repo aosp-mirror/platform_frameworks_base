@@ -17,10 +17,13 @@
 package com.android.server.input;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.hardware.input.InputGestureData;
 import android.hardware.input.InputManager;
 import android.util.IndentingPrintWriter;
 import android.util.SparseArray;
+import android.view.KeyEvent;
 
 import com.android.internal.annotations.GuardedBy;
 
@@ -39,6 +42,10 @@ import java.util.Objects;
  */
 final class InputGestureManager {
     private static final String TAG = "InputGestureManager";
+
+    private static final int KEY_GESTURE_META_MASK =
+            KeyEvent.META_CTRL_ON | KeyEvent.META_ALT_ON | KeyEvent.META_SHIFT_ON
+                    | KeyEvent.META_META_ON;
 
     @GuardedBy("mCustomInputGestures")
     private final SparseArray<Map<InputGestureData.Trigger, InputGestureData>>
@@ -93,6 +100,23 @@ final class InputGestureManager {
                 return List.of();
             }
             return new ArrayList<>(mCustomInputGestures.get(userId).values());
+        }
+    }
+
+    @Nullable
+    public InputGestureData getCustomGestureForKeyEvent(@UserIdInt int userId, KeyEvent event) {
+        final int keyCode = event.getKeyCode();
+        if (keyCode == KeyEvent.KEYCODE_UNKNOWN) {
+            return null;
+        }
+        synchronized (mCustomInputGestures) {
+            Map<InputGestureData.Trigger, InputGestureData> customGestures =
+                    mCustomInputGestures.get(userId);
+            if (customGestures == null) {
+                return null;
+            }
+            int modifierState = event.getMetaState() & KEY_GESTURE_META_MASK;
+            return customGestures.get(InputGestureData.createKeyTrigger(keyCode, modifierState));
         }
     }
 

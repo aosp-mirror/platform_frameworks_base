@@ -29,7 +29,6 @@ import static android.view.WindowManager.TRANSIT_SLEEP;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.view.WindowManager.fixScale;
-import static android.view.WindowManager.transitTypeToString;
 import static android.window.TransitionInfo.FLAGS_IS_NON_APP_WINDOW;
 import static android.window.TransitionInfo.FLAG_BACK_GESTURE_ANIMATED;
 import static android.window.TransitionInfo.FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY;
@@ -725,7 +724,7 @@ public class Transitions implements RemoteCallable<Transitions>,
             @NonNull SurfaceControl.Transaction t, @NonNull SurfaceControl.Transaction finishT) {
         info.setUnreleasedWarningCallSiteForAllSurfaces("Transitions.onTransitionReady");
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "onTransitionReady (#%d) %s: %s",
-                info.getDebugId(), transitionToken, info);
+                info.getDebugId(), transitionToken, info.toString("    " /* prefix */));
         int activeIdx = findByToken(mPendingTransitions, transitionToken);
         if (activeIdx < 0) {
             final ActiveTransition existing = mKnownTransitions.get(transitionToken);
@@ -1845,6 +1844,40 @@ public class Transitions implements RemoteCallable<Transitions>,
                 pw.println(transition.mHandler);
             }
         }
+    }
+
+    /**
+     * Like WindowManager#transitTypeToString(), but also covers known custom transition types as
+     * well.
+     */
+    public static String transitTypeToString(int transitType) {
+        if (transitType < TRANSIT_FIRST_CUSTOM) {
+            return WindowManager.transitTypeToString(transitType);
+        }
+
+        String typeStr = switch (transitType) {
+            case TRANSIT_EXIT_PIP -> "EXIT_PIP";
+            case TRANSIT_EXIT_PIP_TO_SPLIT -> "EXIT_PIP_TO_SPLIT";
+            case TRANSIT_REMOVE_PIP -> "REMOVE_PIP";
+            case TRANSIT_SPLIT_SCREEN_PAIR_OPEN -> "SPLIT_SCREEN_PAIR_OPEN";
+            case TRANSIT_SPLIT_SCREEN_OPEN_TO_SIDE -> "SPLIT_SCREEN_OPEN_TO_SIDE";
+            case TRANSIT_SPLIT_DISMISS_SNAP -> "SPLIT_DISMISS_SNAP";
+            case TRANSIT_SPLIT_DISMISS -> "SPLIT_DISMISS";
+            case TRANSIT_MAXIMIZE -> "MAXIMIZE";
+            case TRANSIT_RESTORE_FROM_MAXIMIZE -> "RESTORE_FROM_MAXIMIZE";
+            case TRANSIT_DESKTOP_MODE_START_DRAG_TO_DESKTOP -> "DESKTOP_MODE_START_DRAG_TO_DESKTOP";
+            case TRANSIT_DESKTOP_MODE_END_DRAG_TO_DESKTOP -> "DESKTOP_MODE_END_DRAG_TO_DESKTOP";
+            case TRANSIT_DESKTOP_MODE_CANCEL_DRAG_TO_DESKTOP ->
+                    "DESKTOP_MODE_CANCEL_DRAG_TO_DESKTOP";
+            case TRANSIT_DESKTOP_MODE_TOGGLE_RESIZE -> "DESKTOP_MODE_TOGGLE_RESIZE";
+            case TRANSIT_RESIZE_PIP -> "RESIZE_PIP";
+            case TRANSIT_TASK_FRAGMENT_DRAG_RESIZE -> "TASK_FRAGMENT_DRAG_RESIZE";
+            case TRANSIT_SPLIT_PASSTHROUGH -> "SPLIT_PASSTHROUGH";
+            case TRANSIT_CLEANUP_PIP_EXIT -> "CLEANUP_PIP_EXIT";
+            case TRANSIT_MINIMIZE -> "MINIMIZE";
+            default -> "";
+        };
+        return typeStr + "(FIRST_CUSTOM+" + (transitType - TRANSIT_FIRST_CUSTOM) + ")";
     }
 
     private static boolean getShellTransitEnabled() {

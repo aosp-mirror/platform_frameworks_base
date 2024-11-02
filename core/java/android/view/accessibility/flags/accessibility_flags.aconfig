@@ -222,6 +222,13 @@ flag {
 }
 
 flag {
+    name: "supplemental_description"
+    namespace: "accessibility"
+    description: "Feature flag for supplemental description api"
+    bug: "375266174"
+}
+
+flag {
     name: "support_multiple_labeledby"
     namespace: "accessibility"
     description: "Feature flag for supporting multiple labels in AccessibilityNodeInfo labeledby api"
@@ -250,4 +257,11 @@ flag {
     metadata {
         purpose: PURPOSE_BUGFIX
     }
+ }
+
+ flag {
+    name: "indeterminate_range_info"
+    namespace: "accessibility"
+    description: "Creates a way to create an INDETERMINATE RangeInfo"
+    bug: "376108874"
  }

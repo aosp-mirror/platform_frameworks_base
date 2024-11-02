@@ -610,6 +610,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
 
     @Test
     @DisableFlags({FooterViewRefactor.FLAG_NAME, NotifRedesignFooter.FLAG_NAME})
+    @DisableSceneContainer
     public void testUpdateFooter_remoteInput() {
         setBarStateForTest(StatusBarState.SHADE);
         mStackScroller.setCurrentUserSetup(true);
@@ -643,6 +644,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
 
     @Test
     @DisableFlags({FooterViewRefactor.FLAG_NAME, NotifRedesignFooter.FLAG_NAME})
+    @DisableSceneContainer
     public void testUpdateFooter_oneClearableNotification() {
         setBarStateForTest(StatusBarState.SHADE);
         mStackScroller.setCurrentUserSetup(true);
@@ -659,6 +661,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
 
     @Test
     @DisableFlags({FooterViewRefactor.FLAG_NAME, NotifRedesignFooter.FLAG_NAME})
+    @DisableSceneContainer
     public void testUpdateFooter_withoutHistory() {
         setBarStateForTest(StatusBarState.SHADE);
         mStackScroller.setCurrentUserSetup(true);
@@ -692,6 +695,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
 
     @Test
     @DisableFlags({FooterViewRefactor.FLAG_NAME, NotifRedesignFooter.FLAG_NAME})
+    @DisableSceneContainer
     public void testUpdateFooter_oneNonClearableNotification() {
         setBarStateForTest(StatusBarState.SHADE);
         mStackScroller.setCurrentUserSetup(true);

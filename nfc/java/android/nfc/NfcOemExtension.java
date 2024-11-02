@@ -82,6 +82,13 @@ public final class NfcOemExtension {
     private boolean mRfDiscoveryStarted = false;
 
     /**
+     * Broadcast Action: Sent on NFC stack initialization when NFC OEM extensions are enabled.
+     * <p> OEM extension modules should use this intent to start their extension service </p>
+     * @hide
+     */
+    public static final String ACTION_OEM_EXTENSION_INIT = "android.nfc.action.OEM_EXTENSION_INIT";
+
+    /**
      * Mode Type for {@link #setControllerAlwaysOnMode(int)}.
      * Enables the controller in default mode when NFC is disabled (existing API behavior).
      * works same as {@link NfcAdapter#setControllerAlwaysOn(boolean)}.

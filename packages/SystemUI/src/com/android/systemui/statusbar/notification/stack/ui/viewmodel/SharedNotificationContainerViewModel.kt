@@ -228,9 +228,14 @@ constructor(
                     configurationInteractor.onAnyConfigurationChange,
                 ) { isShadeLayoutWide, shadeMode, _ ->
                     with(context.resources) {
-                        // TODO(b/338033836): Define separate horizontal margins for dual shade.
                         val marginHorizontal =
-                            getDimensionPixelSize(R.dimen.notification_panel_margin_horizontal)
+                            getDimensionPixelSize(
+                                if (shadeMode is Dual) {
+                                    R.dimen.shade_panel_margin_horizontal
+                                } else {
+                                    R.dimen.notification_panel_margin_horizontal
+                                }
+                            )
 
                         val horizontalPosition =
                             when (shadeMode) {
@@ -248,10 +253,7 @@ constructor(
 
                         ConfigurationBasedDimensions(
                             horizontalPosition = horizontalPosition,
-                            marginStart =
-                                if (horizontalPosition is HorizontalPosition.EdgeToEdge)
-                                    marginHorizontal
-                                else 0,
+                            marginStart = if (shadeMode is Split) 0 else marginHorizontal,
                             marginEnd = marginHorizontal,
                             marginBottom =
                                 getDimensionPixelSize(R.dimen.notification_panel_margin_bottom),

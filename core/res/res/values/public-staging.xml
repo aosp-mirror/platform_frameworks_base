@@ -121,6 +121,8 @@
     <!-- @FlaggedApi("android.permission.flags.replace_body_sensor_permission_enabled")
          @hide @SystemApi -->
     <public name="backgroundPermission"/>
+    <!-- @FlaggedApi(android.view.accessibility.supplemental_description) -->
+    <public name="supplementalDescription"/>
   </staging-public-group>
 
   <staging-public-group type="id" first-id="0x01b60000">
