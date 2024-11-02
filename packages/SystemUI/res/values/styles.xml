@@ -557,6 +557,20 @@
         <item name="android:showWhenLocked">true</item>
     </style>
 
+    <style name="SystemUI.Material3.Slider.Volume">
+        <item name="trackHeight">40dp</item>
+        <item name="thumbHeight">52dp</item>
+    </style>
+
+    <style name="SystemUI.Material3.Slider" parent="@style/Widget.Material3.Slider">
+        <item name="labelStyle">@style/Widget.Material3.Slider.Label</item>
+        <item name="thumbColor">@color/slider_thumb_color</item>
+        <item name="tickColorActive">@color/slider_inactive_track_color</item>
+        <item name="tickColorInactive">@color/slider_active_track_color</item>
+        <item name="trackColorActive">@color/slider_active_track_color</item>
+        <item name="trackColorInactive">@color/slider_inactive_track_color</item>
+    </style>
+
     <style name="Theme.SystemUI.DayNightDialog" parent="@android:style/Theme.DeviceDefault.Light.Dialog"/>
 
     <style name="Theme.SystemUI.Dialog" parent="@style/Theme.SystemUI.DayNightDialog">

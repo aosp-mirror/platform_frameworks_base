@@ -18,8 +18,12 @@ package com.android.server.media.quality;
 
 import android.content.Context;
 import android.media.quality.IMediaQualityManager;
+import android.media.quality.PictureProfile;
 
 import com.android.server.SystemService;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This service manage picture profile and sound profile for TV setting. Also communicates with the
@@ -43,5 +47,26 @@ public class MediaQualityService extends SystemService {
 
     // TODO: Add additional APIs. b/373951081
     private final class BinderService extends IMediaQualityManager.Stub {
+        @Override
+        public PictureProfile createPictureProfile(PictureProfile pp) {
+            // TODO: implement
+            return pp;
+        }
+        @Override
+        public PictureProfile getPictureProfileById(long id) {
+            return null;
+        }
+        @Override
+        public List<PictureProfile> getPictureProfilesByPackage(String packageName) {
+            return new ArrayList<>();
+        }
+        @Override
+        public List<PictureProfile> getAvailablePictureProfiles() {
+            return new ArrayList<>();
+        }
+        @Override
+        public List<PictureProfile> getAvailableAllPictureProfiles() {
+            return new ArrayList<>();
+        }
     }
 }
