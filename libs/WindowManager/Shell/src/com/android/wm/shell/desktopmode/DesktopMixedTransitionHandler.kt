@@ -25,6 +25,7 @@ import android.view.SurfaceControl
 import android.view.WindowManager
 import android.window.DesktopModeFlags
 import android.window.TransitionInfo
+import android.window.TransitionInfo.Change
 import android.window.TransitionRequestInfo
 import android.window.WindowContainerTransaction
 import androidx.annotation.VisibleForTesting
@@ -32,10 +33,13 @@ import com.android.internal.jank.Cuj.CUJ_DESKTOP_MODE_EXIT_MODE_ON_LAST_WINDOW_C
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.protolog.ProtoLog
 import com.android.window.flags.Flags
+import com.android.wm.shell.RootTaskDisplayAreaOrganizer
 import com.android.wm.shell.freeform.FreeformTaskTransitionHandler
 import com.android.wm.shell.freeform.FreeformTaskTransitionStarter
 import com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE
+import com.android.wm.shell.shared.TransitionUtil
 import com.android.wm.shell.shared.annotations.ShellMainThread
+import com.android.wm.shell.sysui.ShellInit
 import com.android.wm.shell.transition.MixedTransitionHandler
 import com.android.wm.shell.transition.Transitions
 import com.android.wm.shell.transition.Transitions.TransitionFinishCallback
@@ -50,7 +54,13 @@ class DesktopMixedTransitionHandler(
     private val desktopImmersiveController: DesktopImmersiveController,
     private val interactionJankMonitor: InteractionJankMonitor,
     @ShellMainThread private val handler: Handler,
+    shellInit: ShellInit,
+    private val rootTaskDisplayAreaOrganizer: RootTaskDisplayAreaOrganizer,
 ) : MixedTransitionHandler, FreeformTaskTransitionStarter {
+
+    init {
+        shellInit.addInitCallback ({ transitions.addHandler(this) }, this)
+    }
 
     @VisibleForTesting
     val pendingMixedTransitions = mutableListOf<PendingMixedTransition>()
@@ -85,9 +95,11 @@ class DesktopMixedTransitionHandler(
         @WindowManager.TransitionType transitionType: Int,
         wct: WindowContainerTransaction,
         taskId: Int,
+        minimizingTaskId: Int? = null,
         exitingImmersiveTask: Int? = null,
     ): IBinder {
-        if (!Flags.enableFullyImmersiveInDesktop()) {
+        if (!Flags.enableFullyImmersiveInDesktop() &&
+            !DesktopModeFlags.ENABLE_DESKTOP_APP_LAUNCH_TRANSITIONS.isTrue) {
             return transitions.startTransition(transitionType, wct, /* handler= */ null)
         }
         if (exitingImmersiveTask == null) {
@@ -103,9 +115,15 @@ class DesktopMixedTransitionHandler(
                 pendingMixedTransitions.add(PendingMixedTransition.Launch(
                     transition = transition,
                     launchingTask = taskId,
-                    exitingImmersiveTask = exitingImmersiveTask
+                    minimizingTask = minimizingTaskId,
+                    exitingImmersiveTask = exitingImmersiveTask,
                 ))
             }
+    }
+
+    /** Notifies this handler that there is a pending transition for it to handle. */
+    fun addPendingMixedTransition(pendingMixedTransition: PendingMixedTransition) {
+        pendingMixedTransitions.add(pendingMixedTransition)
     }
 
     /** Returns null, as it only handles transitions started from Shell. */
@@ -123,7 +141,7 @@ class DesktopMixedTransitionHandler(
     ): Boolean {
         val pending = pendingMixedTransitions.find { pending -> pending.transition == transition }
             ?: return false.also {
-                logW("Should have pending desktop transition")
+                logV("No pending desktop transition")
             }
         pendingMixedTransitions.remove(pending)
         logV("Animating pending mixed transition: %s", pending)
@@ -191,6 +209,9 @@ class DesktopMixedTransitionHandler(
         val immersiveExitChange = pending.exitingImmersiveTask?.let { exitingTask ->
             findDesktopTaskChange(info, exitingTask)
         }
+        val minimizeChange = pending.minimizingTask?.let { minimizingTask ->
+            findDesktopTaskChange(info, minimizingTask)
+        }
         val launchChange = findDesktopTaskChange(info, pending.launchingTask)
             ?: error("Should have pending launching task change")
 
@@ -204,9 +225,17 @@ class DesktopMixedTransitionHandler(
         }
 
         logV(
-            "Animating pending mixed launch transition task#%d immersiveExitTask#%s",
-            launchChange.taskInfo!!.taskId, immersiveExitChange?.taskInfo?.taskId
+            "Animating mixed launch transition task#%d, minimizingTask#%s immersiveExitTask#%s",
+            launchChange.taskInfo!!.taskId, minimizeChange?.taskInfo?.taskId,
+            immersiveExitChange?.taskInfo?.taskId
         )
+        if (DesktopModeFlags.ENABLE_DESKTOP_APP_LAUNCH_TRANSITIONS.isTrue) {
+            // Only apply minimize change reparenting here if we implement the new app launch
+            // transitions, otherwise this reparenting is handled in the default handler.
+            minimizeChange?.let {
+                applyMinimizeChangeReparenting(info, minimizeChange, startTransaction)
+            }
+        }
         if (immersiveExitChange != null) {
             subAnimationCount = 2
             // Animate the immersive exit change separately.
@@ -257,7 +286,7 @@ class DesktopMixedTransitionHandler(
         change: TransitionInfo.Change,
         startTransaction: SurfaceControl.Transaction,
         finishTransaction: SurfaceControl.Transaction,
-        finishCallback: Transitions.TransitionFinishCallback,
+        finishCallback: TransitionFinishCallback,
     ): Boolean {
         // Starting the jank trace if closing the last window in desktop mode.
         interactionJankMonitor.begin(
@@ -278,6 +307,28 @@ class DesktopMixedTransitionHandler(
                 interactionJankMonitor.end(CUJ_DESKTOP_MODE_EXIT_MODE_ON_LAST_WINDOW_CLOSE)
             }
         )
+    }
+
+    /**
+     * Reparent the minimizing task back to its root display area.
+     *
+     * During the launch/minimize animation the all animated tasks will be reparented to a
+     * transition leash shown in front of other desktop tasks. Reparenting the minimizing task back
+     * to its root display area ensures that task stays behind other desktop tasks during the
+     * animation.
+     */
+    private fun applyMinimizeChangeReparenting(
+        info: TransitionInfo,
+        minimizeChange: Change,
+        startTransaction: SurfaceControl.Transaction,
+    ) {
+        require(TransitionUtil.isOpeningMode(info.type))
+        require(minimizeChange.taskInfo != null)
+        val taskInfo = minimizeChange.taskInfo!!
+        require(taskInfo.isFreeform)
+        logV("Reparenting minimizing task#%d", taskInfo.taskId)
+        rootTaskDisplayAreaOrganizer.reparentToDisplayArea(
+            taskInfo.displayId, minimizeChange.leash, startTransaction)
     }
 
     private fun dispatchToLeftoverHandler(
@@ -341,6 +392,7 @@ class DesktopMixedTransitionHandler(
         data class Launch(
             override val transition: IBinder,
             val launchingTask: Int,
+            val minimizingTask: Int?,
             val exitingImmersiveTask: Int?,
         ) : PendingMixedTransition()
     }

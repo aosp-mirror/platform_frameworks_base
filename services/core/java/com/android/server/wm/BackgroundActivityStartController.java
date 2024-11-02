@@ -49,7 +49,6 @@ import static com.android.window.flags.Flags.balDontBringExistingBackgroundTaskS
 import static com.android.window.flags.Flags.balImproveRealCallerVisibilityCheck;
 import static com.android.window.flags.Flags.balImprovedMetrics;
 import static com.android.window.flags.Flags.balRequireOptInByPendingIntentCreator;
-import static com.android.window.flags.Flags.balRequireOptInSameUid;
 import static com.android.window.flags.Flags.balRespectAppSwitchStateWhenCheckBoundByForegroundUid;
 import static com.android.window.flags.Flags.balShowToastsBlocked;
 import static com.android.window.flags.Flags.balStrictModeRo;
@@ -359,7 +358,7 @@ public class BackgroundActivityStartController {
             } else if (mIsCallForResult) {
                 mAutoOptInReason = AUTO_OPT_IN_CALL_FOR_RESULT;
                 mAutoOptInCaller = false;
-            } else if (callingUid == realCallingUid && !balRequireOptInSameUid()) {
+            } else if (callingUid == realCallingUid) {
                 mAutoOptInReason = AUTO_OPT_IN_SAME_UID;
                 mAutoOptInCaller = false;
             } else if (realCallerBackgroundActivityStartMode
@@ -604,7 +603,6 @@ public class BackgroundActivityStartController {
                     .append(balImproveRealCallerVisibilityCheck());
             sb.append("; balRequireOptInByPendingIntentCreator: ")
                     .append(balRequireOptInByPendingIntentCreator());
-            sb.append("; balRequireOptInSameUid: ").append(balRequireOptInSameUid());
             sb.append("; balRespectAppSwitchStateWhenCheckBoundByForegroundUid: ")
                     .append(balRespectAppSwitchStateWhenCheckBoundByForegroundUid());
             sb.append("; balDontBringExistingBackgroundTaskStackToFg: ")
@@ -1164,8 +1162,9 @@ public class BackgroundActivityStartController {
      * or {@link #BAL_BLOCK} if the launch should be blocked
      */
     BalVerdict checkBackgroundActivityStartAllowedByRealCallerInBackground(BalState state) {
-        if (state.mCheckedOptions.getPendingIntentBackgroundActivityStartMode()
-                == MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS
+        boolean allowAlways = state.mCheckedOptions.getPendingIntentBackgroundActivityStartMode()
+                == MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS;
+        if (allowAlways
                 && hasBalPermission(state.mRealCallingUid, state.mRealCallingPid)) {
             return new BalVerdict(BAL_ALLOW_PERMISSION,
                     /*background*/ false,
@@ -1177,8 +1176,7 @@ public class BackgroundActivityStartController {
                 + state.mRealCallingPid + ", " + state.mRealCallingPackage + ") "
                 + balStartModeToString(
                 state.mCheckedOptions.getPendingIntentBackgroundActivityStartMode()));
-        if (state.mCheckedOptions.getPendingIntentBackgroundActivityStartMode()
-                == MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS
+        if (allowAlways
                 && mService.hasSystemAlertWindowPermission(state.mRealCallingUid,
                 state.mRealCallingPid, state.mRealCallingPackage)) {
             Slog.w(
@@ -1192,7 +1190,7 @@ public class BackgroundActivityStartController {
 
         // if the realCallingUid is a persistent system process, abort if the IntentSender
         // wasn't allowed to start an activity
-        if (state.mAllowBalExemptionForSystemProcess
+        if ((allowAlways || state.mAllowBalExemptionForSystemProcess)
                 && state.mIsRealCallingUidPersistentSystemProcess) {
             return new BalVerdict(BAL_ALLOW_ALLOWLISTED_UID,
                     /*background*/ false,

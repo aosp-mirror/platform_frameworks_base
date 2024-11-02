@@ -259,6 +259,10 @@ class AppCompatActivityRobot {
         doReturn(embedded).when(mActivityStack.top()).isEmbedded();
     }
 
+    void setTopActivityHasLetterboxedBounds(boolean letterboxed) {
+        doReturn(letterboxed).when(mActivityStack.top()).areBoundsLetterboxed();
+    }
+
     void setTopActivityVisible(boolean isVisible) {
         doReturn(isVisible).when(mActivityStack.top()).isVisible();
     }

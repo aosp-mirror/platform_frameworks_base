@@ -382,6 +382,7 @@ package android {
     field public static final String SHOW_KEYGUARD_MESSAGE = "android.permission.SHOW_KEYGUARD_MESSAGE";
     field public static final String SHUTDOWN = "android.permission.SHUTDOWN";
     field public static final String SIGNAL_REBOOT_READINESS = "android.permission.SIGNAL_REBOOT_READINESS";
+    field @FlaggedApi("android.media.tv.flags.kids_mode_tvdb_sharing") public static final String SINGLE_USER_TIS_ACCESS = "android.permission.SINGLE_USER_TIS_ACCESS";
     field public static final String SOUND_TRIGGER_RUN_IN_BATTERY_SAVER = "android.permission.SOUND_TRIGGER_RUN_IN_BATTERY_SAVER";
     field public static final String STAGE_HEALTH_CONNECT_REMOTE_DATA = "android.permission.STAGE_HEALTH_CONNECT_REMOTE_DATA";
     field public static final String START_ACTIVITIES_FROM_BACKGROUND = "android.permission.START_ACTIVITIES_FROM_BACKGROUND";
@@ -703,6 +704,7 @@ package android.app {
     field public static final String OPSTR_READ_MEDIA_IMAGES = "android:read_media_images";
     field public static final String OPSTR_READ_MEDIA_VIDEO = "android:read_media_video";
     field public static final String OPSTR_READ_MEDIA_VISUAL_USER_SELECTED = "android:read_media_visual_user_selected";
+    field @FlaggedApi("android.permission.flags.platform_skin_temperature_enabled") public static final String OPSTR_READ_SKIN_TEMPERATURE = "android:read_skin_temperature";
     field public static final String OPSTR_READ_WRITE_HEALTH_DATA = "android:read_write_health_data";
     field public static final String OPSTR_RECEIVE_AMBIENT_TRIGGER_AUDIO = "android:receive_ambient_trigger_audio";
     field public static final String OPSTR_RECEIVE_EMERGENCY_BROADCAST = "android:receive_emergency_broadcast";
@@ -1265,8 +1267,10 @@ package android.app {
   public class WallpaperManager {
     method @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL) public void clearWallpaper(int, int);
     method @FloatRange(from=0.0f, to=1.0f) @RequiresPermission(android.Manifest.permission.SET_WALLPAPER_DIM_AMOUNT) public float getWallpaperDimAmount();
+    method @FlaggedApi("android.app.live_wallpaper_content_handling") @Nullable @RequiresPermission(android.Manifest.permission.READ_WALLPAPER_INTERNAL) public android.app.wallpaper.WallpaperInstance getWallpaperInstance(int);
     method public void setDisplayOffset(android.os.IBinder, int, int);
     method @RequiresPermission(android.Manifest.permission.SET_WALLPAPER_COMPONENT) public boolean setWallpaperComponent(android.content.ComponentName);
+    method @FlaggedApi("android.app.live_wallpaper_content_handling") @RequiresPermission(allOf={android.Manifest.permission.SET_WALLPAPER_COMPONENT, android.Manifest.permission.INTERACT_ACROSS_USERS_FULL}, conditional=true) public boolean setWallpaperComponentWithDescription(@NonNull android.app.wallpaper.WallpaperDescription, int);
     method @RequiresPermission(android.Manifest.permission.SET_WALLPAPER_COMPONENT) public boolean setWallpaperComponentWithFlags(@NonNull android.content.ComponentName, int);
     method @RequiresPermission(android.Manifest.permission.SET_WALLPAPER_DIM_AMOUNT) public void setWallpaperDimAmount(@FloatRange(from=0.0f, to=1.0f) float);
   }
@@ -7387,7 +7391,7 @@ package android.media {
     field public static final String EXTRA_VOLUME_STREAM_VALUE = "android.media.EXTRA_VOLUME_STREAM_VALUE";
     field public static final int FLAG_BLUETOOTH_ABS_VOLUME = 64; // 0x40
     field @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public static final int STREAM_ASSISTANT = 11; // 0xb
-    field public static final int STREAM_BLUETOOTH_SCO = 6; // 0x6
+    field @Deprecated @FlaggedApi("android.media.audio.deprecate_stream_bt_sco") public static final int STREAM_BLUETOOTH_SCO = 6; // 0x6
     field public static final int SUCCESS = 0; // 0x0
   }
 
@@ -8161,6 +8165,7 @@ package android.media.tv {
     method @RequiresPermission("android.permission.TUNER_RESOURCE_ACCESS") public int getClientPid(@NonNull String);
     method @RequiresPermission("android.permission.TUNER_RESOURCE_ACCESS") public int getClientPriority(int, @NonNull String);
     method @RequiresPermission("android.permission.TUNER_RESOURCE_ACCESS") public int getClientPriority(int);
+    method @FlaggedApi("android.media.tv.flags.kids_mode_tvdb_sharing") @RequiresPermission(android.Manifest.permission.SINGLE_USER_TIS_ACCESS) public int getClientUserId(@NonNull String);
     method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_TUNED_INFO) public java.util.List<android.media.tv.TunedInfo> getCurrentTunedInfos();
     method @NonNull @RequiresPermission("android.permission.DVB_DEVICE") public java.util.List<android.media.tv.DvbDeviceInfo> getDvbDeviceList();
     method @Nullable @RequiresPermission(android.Manifest.permission.TIS_EXTENSION_INTERFACE) public android.os.IBinder getExtensionInterface(@NonNull String, @NonNull String);
@@ -12109,7 +12114,7 @@ package android.provider {
   }
 
   public static final class ContactsContract.Settings implements android.provider.ContactsContract.SettingsColumns {
-    method @RequiresPermission(android.Manifest.permission.SET_DEFAULT_ACCOUNT_FOR_CONTACTS) public static void setDefaultAccount(@NonNull android.content.ContentResolver, @Nullable android.accounts.Account);
+    method @Deprecated @FlaggedApi("android.provider.new_default_account_api_enabled") @RequiresPermission(android.Manifest.permission.SET_DEFAULT_ACCOUNT_FOR_CONTACTS) public static void setDefaultAccount(@NonNull android.content.ContentResolver, @Nullable android.accounts.Account);
   }
 
   public static final class ContactsContract.SimContacts {
@@ -18253,7 +18258,7 @@ package android.telephony.satellite {
     method @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") public void onSatelliteDatagramReceived(long, @NonNull android.telephony.satellite.SatelliteDatagram, int, @NonNull java.util.function.Consumer<java.lang.Void>);
   }
 
-  public final class SatelliteManager {
+  @FlaggedApi("com.android.internal.telephony.flags.satellite_state_change_listener") public final class SatelliteManager {
     method @FlaggedApi("com.android.internal.telephony.flags.carrier_enabled_satellite_flag") @RequiresPermission(android.Manifest.permission.SATELLITE_COMMUNICATION) public void addAttachRestrictionForCarrier(int, int, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>);
     method @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") @RequiresPermission(android.Manifest.permission.SATELLITE_COMMUNICATION) public void deprovisionService(@NonNull String, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>);
     method @FlaggedApi("com.android.internal.telephony.flags.carrier_enabled_satellite_flag") @NonNull @RequiresPermission(android.Manifest.permission.SATELLITE_COMMUNICATION) public java.util.Set<java.lang.Integer> getAttachRestrictionReasonsForCarrier(int);

@@ -647,7 +647,11 @@ private fun BoxScope.ShortcutTextKey(key: ShortcutKey.Text) {
 @Composable
 private fun BoxScope.ShortcutIconKey(key: ShortcutKey.Icon) {
     Icon(
-        painter = painterResource(key.drawableResId),
+        painter =
+            when (key) {
+                is ShortcutKey.Icon.ResIdIcon -> painterResource(key.drawableResId)
+                is ShortcutKey.Icon.DrawableIcon -> rememberDrawablePainter(drawable = key.drawable)
+            },
         contentDescription = null,
         modifier = Modifier.align(Alignment.Center).padding(6.dp),
     )

@@ -165,3 +165,11 @@ flag {
     description: "Enabling security log for nfc state change"
     bug: "319934052"
 }
+
+flag {
+    name: "nfc_associated_role_services"
+    is_exported: true
+    namespace: "nfc"
+    description: "Share wallet role routing priority with associated services"
+    bug: "366243361"
+}

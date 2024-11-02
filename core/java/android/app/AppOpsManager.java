@@ -1618,9 +1618,12 @@ public class AppOpsManager {
     /** @hide Access to read heart rate sensor. */
     public static final int OP_READ_HEART_RATE = AppProtoEnums.APP_OP_READ_HEART_RATE;
 
+    /** @hide Access to read skin temperature. */
+    public static final int OP_READ_SKIN_TEMPERATURE = AppProtoEnums.APP_OP_READ_SKIN_TEMPERATURE;
+
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public static final int _NUM_OP = 150;
+    public static final int _NUM_OP = 151;
 
     /**
      * All app ops represented as strings.
@@ -1774,6 +1777,7 @@ public class AppOpsManager {
             OPSTR_EMERGENCY_LOCATION,
             OPSTR_RECEIVE_SENSITIVE_NOTIFICATIONS,
             OPSTR_READ_HEART_RATE,
+            OPSTR_READ_SKIN_TEMPERATURE,
     })
     public @interface AppOpString {}
 
@@ -2516,6 +2520,11 @@ public class AppOpsManager {
     @FlaggedApi(Flags.FLAG_REPLACE_BODY_SENSOR_PERMISSION_ENABLED)
     public static final String OPSTR_READ_HEART_RATE = "android:read_heart_rate";
 
+    /** @hide Access to read skin temperature. */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_PLATFORM_SKIN_TEMPERATURE_ENABLED)
+    public static final String OPSTR_READ_SKIN_TEMPERATURE = "android:read_skin_temperature";
+
     /** {@link #sAppOpsToNote} not initialized yet for this op */
     private static final byte SHOULD_COLLECT_NOTE_OP_NOT_INITIALIZED = 0;
     /** Should not collect noting of this app-op in {@link #sAppOpsToNote} */
@@ -2591,6 +2600,7 @@ public class AppOpsManager {
             OP_POST_NOTIFICATION,
             // Health
             Flags.replaceBodySensorPermissionEnabled() ? OP_READ_HEART_RATE : OP_NONE,
+            Flags.platformSkinTemperatureEnabled() ? OP_READ_SKIN_TEMPERATURE : OP_NONE,
     };
 
     /**
@@ -3102,6 +3112,11 @@ public class AppOpsManager {
         new AppOpInfo.Builder(OP_READ_HEART_RATE, OPSTR_READ_HEART_RATE, "READ_HEART_RATE")
             .setPermission(Flags.replaceBodySensorPermissionEnabled() ?
                 HealthPermissions.READ_HEART_RATE : null)
+            .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_READ_SKIN_TEMPERATURE, OPSTR_READ_SKIN_TEMPERATURE,
+            "READ_SKIN_TEMPERATURE").setPermission(
+                Flags.platformSkinTemperatureEnabled()
+                    ? HealthPermissions.READ_SKIN_TEMPERATURE : null)
             .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
     };
 

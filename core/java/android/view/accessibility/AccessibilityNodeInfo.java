@@ -6482,6 +6482,19 @@ public class AccessibilityNodeInfo implements Parcelable {
         /** Range type: percent with values from zero to one hundred. */
         public static final int RANGE_TYPE_PERCENT = 2;
 
+        /**
+         * Range type: indeterminate.
+         *
+         * A {@link RangeInfo} type used to represent a node which may typically expose range
+         * information but is presently in an indeterminate state, such as a {@link
+         * android.widget.ProgressBar} representing a loading operation of unknown duration.
+         * When using this type, the {@code min}, {@code max}, and {@code current} values used to
+         * construct an instance may be ignored. It is recommended to use {@code Float.NaN} for
+         * these values.
+         */
+        @FlaggedApi(Flags.FLAG_INDETERMINATE_RANGE_INFO)
+        public static final int RANGE_TYPE_INDETERMINATE = 3;
+
         private int mType;
         private float mMin;
         private float mMax;

@@ -70,7 +70,6 @@ import android.hardware.devicestate.DeviceStateManager;
 import android.hardware.devicestate.DeviceStateManager.DeviceStateCallback;
 import android.hardware.display.AmbientDisplayConfiguration;
 import android.hardware.display.DisplayManagerInternal;
-import android.hardware.display.DisplayManagerInternal.DisplayPowerRequest;
 import android.hardware.power.Boost;
 import android.hardware.power.Mode;
 import android.os.BatteryManager;
@@ -1894,15 +1893,6 @@ public class PowerManagerServiceTest {
     }
 
     @Test
-    public void testBoot_DesiredScreenPolicyShouldBeBright() {
-        createService();
-        startSystem();
-
-        assertThat(mService.getDesiredScreenPolicyLocked(Display.DEFAULT_DISPLAY)).isEqualTo(
-                DisplayPowerRequest.POLICY_BRIGHT);
-    }
-
-    @Test
     public void testQuiescentBoot_ShouldBeAsleep() {
         when(mSystemPropertiesMock.get(eq(SYSTEM_PROPERTY_QUIESCENT), any())).thenReturn("1");
         createService();
@@ -1911,40 +1901,6 @@ public class PowerManagerServiceTest {
         assertThat(mService.getGlobalWakefulnessLocked()).isEqualTo(WAKEFULNESS_ASLEEP);
         verify(mNotifierMock).onGlobalWakefulnessChangeStarted(eq(WAKEFULNESS_ASLEEP), anyInt(),
                 anyLong());
-    }
-
-    @Test
-    public void testQuiescentBoot_DesiredScreenPolicyShouldBeOff() {
-        when(mSystemPropertiesMock.get(eq(SYSTEM_PROPERTY_QUIESCENT), any())).thenReturn("1");
-        createService();
-        startSystem();
-        assertThat(mService.getDesiredScreenPolicyLocked(Display.DEFAULT_DISPLAY)).isEqualTo(
-                DisplayPowerRequest.POLICY_OFF);
-    }
-
-    @Test
-    public void testQuiescentBoot_WakeUp_DesiredScreenPolicyShouldBeBright() {
-        when(mSystemPropertiesMock.get(eq(SYSTEM_PROPERTY_QUIESCENT), any())).thenReturn("1");
-        createService();
-        startSystem();
-        forceAwake();
-        assertThat(mService.getDesiredScreenPolicyLocked(Display.DEFAULT_DISPLAY)).isEqualTo(
-                DisplayPowerRequest.POLICY_BRIGHT);
-    }
-
-    @Test
-    public void testQuiescentBoot_WakeKeyBeforeBootCompleted_AwakeAfterBootCompleted() {
-        when(mSystemPropertiesMock.get(eq(SYSTEM_PROPERTY_QUIESCENT), any())).thenReturn("1");
-        createService();
-        startSystem();
-
-        mService.getBinderServiceInstance().wakeUp(mClock.now(),
-                PowerManager.WAKE_REASON_UNKNOWN, "testing IPowerManager.wakeUp()", "pkg.name");
-
-        mService.onBootPhase(SystemService.PHASE_BOOT_COMPLETED);
-        assertThat(mService.getGlobalWakefulnessLocked()).isEqualTo(WAKEFULNESS_AWAKE);
-        assertThat(mService.getDesiredScreenPolicyLocked(Display.DEFAULT_DISPLAY_GROUP)).isEqualTo(
-                DisplayPowerRequest.POLICY_BRIGHT);
     }
 
     @Test

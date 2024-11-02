@@ -970,7 +970,10 @@ public abstract class WMShellModule {
             CloseDesktopTaskTransitionHandler closeDesktopTaskTransitionHandler,
             Optional<DesktopImmersiveController> desktopImmersiveController,
             InteractionJankMonitor interactionJankMonitor,
-            @ShellMainThread Handler handler) {
+            @ShellMainThread Handler handler,
+            ShellInit shellInit,
+            RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer
+    ) {
         if (!DesktopModeStatus.canEnterDesktopMode(context)) {
             return Optional.empty();
         }
@@ -983,7 +986,9 @@ public abstract class WMShellModule {
                         closeDesktopTaskTransitionHandler,
                         desktopImmersiveController.get(),
                         interactionJankMonitor,
-                        handler));
+                        handler,
+                        shellInit,
+                        rootTaskDisplayAreaOrganizer));
     }
 
     @WMSingleton

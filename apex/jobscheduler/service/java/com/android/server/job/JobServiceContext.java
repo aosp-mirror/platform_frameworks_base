@@ -618,6 +618,26 @@ public final class JobServiceContext implements ServiceConnection {
         return mRunningJob;
     }
 
+    @VisibleForTesting
+    void setRunningJobLockedForTest(JobStatus job) {
+        mRunningJob = job;
+    }
+
+    @VisibleForTesting
+    void setJobParamsLockedForTest(JobParameters params) {
+        mParams = params;
+    }
+
+    @VisibleForTesting
+    void setRunningCallbackLockedForTest(JobCallback callback) {
+        mRunningCallback = callback;
+    }
+
+    @VisibleForTesting
+    void setPendingStopReasonLockedForTest(int stopReason) {
+        mPendingStopReason = stopReason;
+    }
+
     @JobConcurrencyManager.WorkType
     int getRunningJobWorkType() {
         return mRunningJobWorkType;
@@ -786,6 +806,7 @@ public final class JobServiceContext implements ServiceConnection {
                 executing = getRunningJobLocked();
             }
             if (executing != null && jobId == executing.getJobId()) {
+                executing.setAbandoned(true);
                 final StringBuilder stateSuffix = new StringBuilder();
                 stateSuffix.append(TRACE_ABANDONED_JOB);
                 stateSuffix.append(executing.getBatteryName());
@@ -1364,8 +1385,9 @@ public final class JobServiceContext implements ServiceConnection {
     }
 
     /** Process MSG_TIMEOUT here. */
+    @VisibleForTesting
     @GuardedBy("mLock")
-    private void handleOpTimeoutLocked() {
+    void handleOpTimeoutLocked() {
         switch (mVerb) {
             case VERB_BINDING:
                 // The system may have been too busy. Don't drop the job or trigger an ANR.
@@ -1427,9 +1449,25 @@ public final class JobServiceContext implements ServiceConnection {
                     // Not an error - client ran out of time.
                     Slog.i(TAG, "Client timed out while executing (no jobFinished received)."
                             + " Sending onStop: " + getRunningJobNameLocked());
-                    mParams.setStopReason(JobParameters.STOP_REASON_TIMEOUT,
-                            JobParameters.INTERNAL_STOP_REASON_TIMEOUT, "client timed out");
-                    sendStopMessageLocked("timeout while executing");
+
+                    final JobStatus executing = getRunningJobLocked();
+                    int stopReason = JobParameters.STOP_REASON_TIMEOUT;
+                    int internalStopReason = JobParameters.INTERNAL_STOP_REASON_TIMEOUT;
+                    final StringBuilder stopMessage = new StringBuilder("timeout while executing");
+                    final StringBuilder debugStopReason = new StringBuilder("client timed out");
+
+                    if (android.app.job.Flags.handleAbandonedJobs()
+                            && executing != null && executing.isAbandoned()) {
+                        final String abandonedMessage = " and maybe abandoned";
+                        stopReason = JobParameters.STOP_REASON_TIMEOUT_ABANDONED;
+                        internalStopReason = JobParameters.INTERNAL_STOP_REASON_TIMEOUT_ABANDONED;
+                        stopMessage.append(abandonedMessage);
+                        debugStopReason.append(abandonedMessage);
+                    }
+
+                    mParams.setStopReason(stopReason,
+                                    internalStopReason, debugStopReason.toString());
+                    sendStopMessageLocked(stopMessage.toString());
                 } else if (nowElapsed >= earliestStopTimeElapsed) {
                     // We've given the app the minimum execution time. See if we should stop it or
                     // let it continue running
@@ -1479,8 +1517,9 @@ public final class JobServiceContext implements ServiceConnection {
      * Already running, need to stop. Will switch {@link #mVerb} from VERB_EXECUTING ->
      * VERB_STOPPING.
      */
+    @VisibleForTesting
     @GuardedBy("mLock")
-    private void sendStopMessageLocked(@Nullable String reason) {
+    void sendStopMessageLocked(@Nullable String reason) {
         removeOpTimeOutLocked();
         if (mVerb != VERB_EXECUTING) {
             Slog.e(TAG, "Sending onStopJob for a job that isn't started. " + mRunningJob);

@@ -9383,7 +9383,14 @@ public final class ContactsContract {
          * @param resolver the ContentResolver to query.
          * @return the default account for new contacts, or null if it's not set or set to NULL
          * account.
+         *
+         * @deprecated This API is only supported up to Android version
+         *      * {@link Build.VERSION_CODES#VANILLA_ICE_CREAM}. On later versions,
+         * {@link ContactsContract.RawContacts.DefaultAccount#getDefaultAccountForNewContacts}
+         * should be used.
          */
+        @Deprecated
+        @FlaggedApi(Flags.FLAG_NEW_DEFAULT_ACCOUNT_API_ENABLED)
         @Nullable
         public static Account getDefaultAccount(@NonNull ContentResolver resolver) {
             Bundle response = resolver.call(ContactsContract.AUTHORITY_URI,
@@ -9404,7 +9411,14 @@ public final class ContactsContract {
          * @param resolver the ContentResolver to query.
          * @param account the account to be set to default.
          * @hide
+         *
+         * @deprecated This API is only supported up to Android version
+         *      * {@link Build.VERSION_CODES#VANILLA_ICE_CREAM}. On later versions,
+         * {@link ContactsContract.RawContacts.DefaultAccount#setDefaultAccountForNewContacts}
+         * should be used.
          */
+        @Deprecated
+        @FlaggedApi(Flags.FLAG_NEW_DEFAULT_ACCOUNT_API_ENABLED)
         @SystemApi
         @RequiresPermission(android.Manifest.permission.SET_DEFAULT_ACCOUNT_FOR_CONTACTS)
         public static void setDefaultAccount(@NonNull ContentResolver resolver,

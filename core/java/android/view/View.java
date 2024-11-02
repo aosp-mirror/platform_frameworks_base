@@ -52,6 +52,7 @@ import static android.view.flags.Flags.toolkitFrameRateVelocityMappingReadOnly;
 import static android.view.flags.Flags.toolkitFrameRateViewEnablingReadOnly;
 import static android.view.flags.Flags.toolkitMetricsForFrameRateDecision;
 import static android.view.flags.Flags.toolkitSetFrameRateReadOnly;
+import static android.view.flags.Flags.toolkitViewgroupSetRequestedFrameRateApi;
 import static android.view.flags.Flags.viewVelocityApi;
 import static android.view.inputmethod.Flags.FLAG_HOME_SCREEN_HANDWRITING_DELEGATOR;
 import static android.view.inputmethod.Flags.initiationWithoutInputConnection;
@@ -2469,6 +2470,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             toolkitFrameRateVelocityMappingReadOnly();
     private static boolean sToolkitFrameRateAnimationBugfix25q1FlagValue =
             toolkitFrameRateAnimationBugfix25q1();
+    private static boolean sToolkitViewGroupFrameRateApiFlagValue =
+            toolkitViewgroupSetRequestedFrameRateApi();
 
     // Used to set frame rate compatibility.
     @Surface.FrameRateCompatibility int mFrameRateCompatibility =
@@ -3807,6 +3810,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *     1                            PFLAG4_HAS_DRAWN
      *    1                             PFLAG4_HAS_MOVED
      *   1                              PFLAG4_HAS_VIEW_PROPERTY_INVALIDATION
+     *  1                               PFLAG4_FORCED_OVERRIDE_FRAME_RATE
+     * 1                                PFLAG4_SELF_REQUESTED_FRAME_RATE
      * |-------|-------|-------|-------|
      */
 
@@ -3956,6 +3961,17 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Whether the invalidateViewProperty is involked at current frame.
      */
     private static final int PFLAG4_HAS_VIEW_PROPERTY_INVALIDATION = 0x20000000;
+
+    /**
+     * When set, this indicates whether the frame rate of the children should be
+     * forcibly overridden, even if it has been explicitly configured by a user request.
+     */
+    private static final int PFLAG4_FORCED_OVERRIDE_FRAME_RATE = 0x40000000;
+
+    /**
+     * When set, this indicates that the frame rate is configured based on a user request.
+     */
+    private static final int PFLAG4_SELF_REQUESTED_FRAME_RATE = 0x80000000;
 
     /* End of masks for mPrivateFlags4 */
 
@@ -34292,8 +34308,19 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     @FlaggedApi(FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
     public void setRequestedFrameRate(float frameRate) {
+        // Skip setting the frame rate if it's currently in forced override mode.
+        if (sToolkitViewGroupFrameRateApiFlagValue && getForcedOverrideFrameRateFlag()) {
+            return;
+        }
+
         if (sToolkitSetFrameRateReadOnlyFlagValue) {
             mPreferredFrameRate = frameRate;
+        }
+
+        if (sToolkitViewGroupFrameRateApiFlagValue) {
+            // If frameRate is Float.NaN, it means it's set to the default value.
+            // We only want to make the flag true, when the value is not Float.nan
+            setSelfRequestedFrameRateFlag(!Float.isNaN(mPreferredFrameRate));
         }
     }
 
@@ -34317,5 +34344,36 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             return mPreferredFrameRate;
         }
         return 0;
+    }
+
+    void overrideFrameRate(float frameRate, boolean forceOverride) {
+        setForcedOverrideFrameRateFlag(forceOverride);
+        if (forceOverride || !getSelfRequestedFrameRateFlag()) {
+            mPreferredFrameRate = frameRate;
+        }
+    }
+
+    void setForcedOverrideFrameRateFlag(boolean forcedOverride) {
+        if (forcedOverride) {
+            mPrivateFlags4 |= PFLAG4_FORCED_OVERRIDE_FRAME_RATE;
+        } else {
+            mPrivateFlags4 &= ~PFLAG4_FORCED_OVERRIDE_FRAME_RATE;
+        }
+    }
+
+    boolean getForcedOverrideFrameRateFlag() {
+        return (mPrivateFlags4 & PFLAG4_FORCED_OVERRIDE_FRAME_RATE) != 0;
+    }
+
+    void setSelfRequestedFrameRateFlag(boolean forcedOverride) {
+        if (forcedOverride) {
+            mPrivateFlags4 |= PFLAG4_SELF_REQUESTED_FRAME_RATE;
+        } else {
+            mPrivateFlags4 &= ~PFLAG4_SELF_REQUESTED_FRAME_RATE;
+        }
+    }
+
+    boolean getSelfRequestedFrameRateFlag() {
+        return (mPrivateFlags4 & PFLAG4_SELF_REQUESTED_FRAME_RATE) != 0;
     }
 }

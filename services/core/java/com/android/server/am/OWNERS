@@ -49,6 +49,7 @@ per-file User* = file:/MULTIUSER_OWNERS
 
 # Broadcasts
 per-file Broadcast* = file:/BROADCASTS_OWNERS
+per-file broadcasts_flags.aconfig = file:/BROADCASTS_OWNERS
 
 # Permissions & Packages
 per-file *Permission* = patb@google.com
