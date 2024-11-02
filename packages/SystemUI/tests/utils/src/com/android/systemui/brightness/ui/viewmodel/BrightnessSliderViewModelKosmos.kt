@@ -20,14 +20,19 @@ import com.android.systemui.brightness.domain.interactor.brightnessPolicyEnforce
 import com.android.systemui.brightness.domain.interactor.screenBrightnessInteractor
 import com.android.systemui.haptics.slider.sliderHapticsViewModelFactory
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.applicationCoroutineScope
+import com.android.systemui.settings.brightness.domain.interactor.brightnessMirrorShowingInteractor
 
-val Kosmos.brightnessSliderViewModel: BrightnessSliderViewModel by
+val Kosmos.brightnessSliderViewModelFactory: BrightnessSliderViewModel.Factory by
     Kosmos.Fixture {
-        BrightnessSliderViewModel(
-            screenBrightnessInteractor = screenBrightnessInteractor,
-            brightnessPolicyEnforcementInteractor = brightnessPolicyEnforcementInteractor,
-            applicationScope = applicationCoroutineScope,
-            hapticsViewModelFactory = sliderHapticsViewModelFactory,
-        )
+        object : BrightnessSliderViewModel.Factory {
+            override fun create(allowsMirroring: Boolean): BrightnessSliderViewModel {
+                return BrightnessSliderViewModel(
+                    screenBrightnessInteractor = screenBrightnessInteractor,
+                    brightnessPolicyEnforcementInteractor = brightnessPolicyEnforcementInteractor,
+                    hapticsViewModelFactory = sliderHapticsViewModelFactory,
+                    brightnessMirrorShowingInteractor = brightnessMirrorShowingInteractor,
+                    supportsMirroring = allowsMirroring,
+                )
+            }
+        }
     }

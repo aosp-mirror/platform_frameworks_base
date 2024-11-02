@@ -30,6 +30,7 @@ import com.android.wm.shell.TestShellExecutor
 import com.android.wm.shell.common.ShellExecutor
 import com.android.wm.shell.desktopmode.persistence.Desktop
 import com.android.wm.shell.desktopmode.persistence.DesktopPersistentRepository
+import com.android.wm.shell.desktopmode.persistence.DesktopRepositoryInitializer
 import com.android.wm.shell.sysui.ShellInit
 import com.google.common.truth.Truth.assertThat
 import junit.framework.Assert.fail
@@ -52,6 +53,7 @@ import org.mockito.Mockito.inOrder
 import org.mockito.Mockito.spy
 import org.mockito.kotlin.any
 import org.mockito.kotlin.never
+import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
@@ -68,6 +70,7 @@ class DesktopRepositoryTest : ShellTestCase() {
 
     @Mock private lateinit var testExecutor: ShellExecutor
     @Mock private lateinit var persistentRepository: DesktopPersistentRepository
+    @Mock lateinit var repositoryInitializer: DesktopRepositoryInitializer
 
     @Before
     fun setUp() {
@@ -75,7 +78,14 @@ class DesktopRepositoryTest : ShellTestCase() {
         datastoreScope = CoroutineScope(Dispatchers.Unconfined + SupervisorJob())
         shellInit = spy(ShellInit(testExecutor))
 
-        repo = DesktopRepository(context, shellInit, persistentRepository, datastoreScope)
+        repo =
+            DesktopRepository(
+                context,
+                shellInit,
+                persistentRepository,
+                repositoryInitializer,
+                datastoreScope
+            )
         whenever(runBlocking { persistentRepository.readDesktop(any(), any()) }).thenReturn(
             Desktop.getDefaultInstance()
         )
@@ -216,6 +226,33 @@ class DesktopRepositoryTest : ShellTestCase() {
         assertThat(repo.isClosingTask(99)).isFalse()
         assertThat(repo.isOnlyVisibleNonClosingTask(99)).isFalse()
     }
+
+    @Test
+    @EnableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_PERSISTENCE)
+    fun updateTaskVisibility_multipleTasks_persistsVisibleTasks() =
+        runTest(StandardTestDispatcher()) {
+            repo.updateTask(DEFAULT_DISPLAY, taskId = 1, isVisible = true)
+            repo.updateTask(DEFAULT_DISPLAY, taskId = 2, isVisible = true)
+
+            inOrder(persistentRepository).run {
+                verify(persistentRepository)
+                    .addOrUpdateDesktop(
+                        DEFAULT_USER_ID,
+                        DEFAULT_DESKTOP_ID,
+                        visibleTasks = ArraySet(arrayOf(1)),
+                        minimizedTasks = ArraySet(),
+                        freeformTasksInZOrder = arrayListOf()
+                    )
+                verify(persistentRepository)
+                    .addOrUpdateDesktop(
+                        DEFAULT_USER_ID,
+                        DEFAULT_DESKTOP_ID,
+                        visibleTasks = ArraySet(arrayOf(1, 2)),
+                        minimizedTasks = ArraySet(),
+                        freeformTasksInZOrder = arrayListOf()
+                    )
+            }
+        }
 
     @Test
     fun isOnlyVisibleNonClosingTask_singleVisibleClosingTask() {
@@ -605,7 +642,7 @@ class DesktopRepositoryTest : ShellTestCase() {
                         minimizedTasks = ArraySet(),
                         freeformTasksInZOrder = arrayListOf(7, 6, 5)
                     )
-                verify(persistentRepository)
+                verify(persistentRepository, times(2))
                     .addOrUpdateDesktop(
                         DEFAULT_USER_ID,
                         DEFAULT_DESKTOP_ID,

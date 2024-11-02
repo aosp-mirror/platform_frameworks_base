@@ -35,18 +35,18 @@
     },
     {
       "name": "CarLibHostUnitTest",
-      "host": true,
-      "keywords": ["automotive_code_coverage"]
+      "keywords": ["automotive_code_coverage"],
+      "host": true
     },
     {
       "name": "CarServiceHostUnitTest",
-      "host": true,
-      "keywords": ["automotive_code_coverage"]
+      "keywords": ["automotive_code_coverage"],
+      "host": true
     },
     {
       "name": "CarSystemUIRavenTests",
-      "host": true,
-      "keywords": ["automotive_code_coverage"]
+      "keywords": ["automotive_code_coverage"],
+      "host": true
     },
     {
       "name": "CtsAccountManagerTestCasesRavenwood",
@@ -62,6 +62,10 @@
     },
     {
       "name": "CtsDatabaseTestCasesRavenwood",
+      "host": true
+    },
+    {
+      "name": "CtsDeviceConfigTestCasesRavenwood",
       "host": true
     },
     {

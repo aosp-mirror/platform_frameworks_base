@@ -16,7 +16,7 @@
 
 package com.android.systemui.smartspace.config
 
-import com.android.systemui.Flags.smartspaceSwipeEventLogging
+import com.android.systemui.Flags.smartspaceSwipeEventLoggingFix
 import com.android.systemui.Flags.smartspaceViewpager2
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.plugins.BcSmartspaceConfigPlugin
@@ -30,5 +30,5 @@ class BcSmartspaceConfigProvider(private val featureFlags: FeatureFlags) :
         get() = smartspaceViewpager2()
 
     override val isSwipeEventLoggingEnabled: Boolean
-        get() = smartspaceSwipeEventLogging()
+        get() = smartspaceSwipeEventLoggingFix()
 }

@@ -2028,8 +2028,9 @@ public class PreferencesHelper implements RankingConfig {
      * </ul>
      */
     void syncChannelsBypassingDnd() {
-        mCurrentUserHasChannelsBypassingDnd = (mZenModeHelper.getNotificationPolicy().state
-                & NotificationManager.Policy.STATE_CHANNELS_BYPASSING_DND) != 0;
+        mCurrentUserHasChannelsBypassingDnd =
+                (mZenModeHelper.getNotificationPolicy(UserHandle.CURRENT).state
+                        & NotificationManager.Policy.STATE_CHANNELS_BYPASSING_DND) != 0;
 
         updateCurrentUserHasChannelsBypassingDnd(/* callingUid= */ Process.SYSTEM_UID,
                 /* fromSystemOrSystemUi= */ true);
@@ -2072,7 +2073,8 @@ public class PreferencesHelper implements RankingConfig {
         if (mCurrentUserHasChannelsBypassingDnd != haveBypassingApps) {
             mCurrentUserHasChannelsBypassingDnd = haveBypassingApps;
             if (android.app.Flags.modesUi()) {
-                mZenModeHelper.updateHasPriorityChannels(mCurrentUserHasChannelsBypassingDnd);
+                mZenModeHelper.updateHasPriorityChannels(UserHandle.CURRENT,
+                        mCurrentUserHasChannelsBypassingDnd);
             } else {
                 updateZenPolicy(mCurrentUserHasChannelsBypassingDnd, callingUid,
                         fromSystemOrSystemUi);
@@ -2099,8 +2101,10 @@ public class PreferencesHelper implements RankingConfig {
     //                     PreferencesHelper should otherwise not need to modify actual policy
     public void updateZenPolicy(boolean areChannelsBypassingDnd, int callingUid,
             boolean fromSystemOrSystemUi) {
-        NotificationManager.Policy policy = mZenModeHelper.getNotificationPolicy();
+        NotificationManager.Policy policy = mZenModeHelper.getNotificationPolicy(
+                UserHandle.CURRENT);
         mZenModeHelper.setNotificationPolicy(
+                UserHandle.CURRENT,
                 new NotificationManager.Policy(
                         policy.priorityCategories, policy.priorityCallSenders,
                         policy.priorityMessageSenders, policy.suppressedVisualEffects,

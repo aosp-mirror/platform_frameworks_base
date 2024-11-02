@@ -16,6 +16,7 @@
 
 package com.android.compose.nestedscroll
 
+import androidx.compose.foundation.gestures.FlingBehavior
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
@@ -41,6 +42,7 @@ fun LargeTopAppBarNestedScrollConnection(
     onHeightChanged: (Float) -> Unit,
     minHeight: () -> Float,
     maxHeight: () -> Float,
+    flingBehavior: FlingBehavior,
 ): PriorityNestedScrollConnection {
     return PriorityNestedScrollConnection(
         orientation = Orientation.Vertical,
@@ -55,7 +57,15 @@ fun LargeTopAppBarNestedScrollConnection(
             offsetAvailable > 0 && height() < maxHeight()
         },
         canStartPostFling = { false },
-        onStart = { LargeTopAppBarScrollController(height, maxHeight, minHeight, onHeightChanged) },
+        onStart = {
+            LargeTopAppBarScrollController(
+                height = height,
+                maxHeight = maxHeight,
+                minHeight = minHeight,
+                onHeightChanged = onHeightChanged,
+                flingBehavior = flingBehavior,
+            )
+        },
     )
 }
 
@@ -64,6 +74,7 @@ private class LargeTopAppBarScrollController(
     val maxHeight: () -> Float,
     val minHeight: () -> Float,
     val onHeightChanged: (Float) -> Unit,
+    val flingBehavior: FlingBehavior,
 ) : ScrollController {
     override fun onScroll(deltaScroll: Float, source: NestedScrollSource): Float {
         val currentHeight = height()
@@ -79,9 +90,8 @@ private class LargeTopAppBarScrollController(
         return amountConsumed
     }
 
-    override suspend fun onStop(initialVelocity: Float): Float {
-        // Don't consume the velocity on pre/post fling
-        return 0f
+    override suspend fun OnStopScope.onStop(initialVelocity: Float): Float {
+        return flingToScroll(initialVelocity, flingBehavior)
     }
 
     override fun onCancel() {

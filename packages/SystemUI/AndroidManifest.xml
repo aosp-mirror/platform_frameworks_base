@@ -30,6 +30,7 @@
     <uses-permission android:name="android.permission.READ_WALLPAPER_INTERNAL" />
 
     <!-- Used to read storage for all users -->
+    <uses-permission android:name="android.permission.STORAGE_INTERNAL" />
     <uses-permission android:name="android.permission.WRITE_MEDIA_STORAGE" />
     <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
@@ -1015,6 +1016,10 @@
             android:exported="false">
         </activity>
 
+        <service
+            android:name="com.android.systemui.communal.widgets.GlanceableHubWidgetManagerService"
+            android:exported="false" />
+
         <!-- Doze with notifications, run in main sysui process for every user  -->
         <service
             android:name=".doze.DozeService"
@@ -1137,5 +1142,11 @@
                 android:name="android.service.dream"
                 android:resource="@xml/home_controls_dream_metadata" />
         </service>
+
+        <service android:name="com.android.systemui.dreams.homecontrols.system.HomeControlsRemoteService"
+            android:singleUser="true"
+            android:exported="false"
+            />
+
     </application>
 </manifest>

@@ -115,11 +115,18 @@ public final class ClientProfile {
      */
     private int mPriority;
 
+    /**
+     * If resource holder retains ownership of the resource in a challenge scenario then value is
+     * true.
+     */
+    private boolean mResourceHolderRetain;
+
     private ClientProfile(Builder builder) {
         this.mId = builder.mId;
         this.mTvInputSessionId = builder.mTvInputSessionId;
         this.mUseCase = builder.mUseCase;
         this.mProcessId = builder.mProcessId;
+        this.mResourceHolderRetain = builder.mResourceHolderRetain;
     }
 
     public int getId() {
@@ -136,6 +143,14 @@ public final class ClientProfile {
 
     public int getProcessId() {
         return mProcessId;
+    }
+
+    /**
+     * Returns true when the resource holder retains ownership of the resource in a challenge
+     * scenario.
+     */
+    public boolean shouldResourceHolderRetain() {
+        return mResourceHolderRetain;
     }
 
     /**
@@ -177,6 +192,19 @@ public final class ClientProfile {
 
     public void setNiceValue(int niceValue) {
         mNiceValue = niceValue;
+    }
+
+    /**
+     * Determines whether the resource holder retains ownership of the resource during a challenge
+     * scenario, when both resource holder and resource challenger have same processId and same
+     * priority.
+     *
+     * @param resourceHolderRetain Set to true to allow the resource holder to retain ownership, or
+     *     false (or resourceHolderRetain not set at all) to allow the resource challenger to
+     *     acquire the resource. If not explicitly set, resourceHolderRetain is set to false.
+     */
+    public void setResourceHolderRetain(boolean resourceHolderRetain) {
+        mResourceHolderRetain = resourceHolderRetain;
     }
 
     /**
@@ -361,6 +389,7 @@ public final class ClientProfile {
         private String mTvInputSessionId;
         private int mUseCase;
         private int mProcessId;
+        private boolean mResourceHolderRetain = false;
 
         Builder(int id) {
             this.mId = id;
@@ -393,6 +422,18 @@ public final class ClientProfile {
           */
         public Builder processId(int processId) {
             this.mProcessId = processId;
+            return this;
+        }
+
+        /**
+         * Builder for {@link ClientProfile}.
+         *
+         * @param resourceHolderRetain the determining factor for resource ownership during
+         *     challenger scenario. The default behavior favors the resource challenger and grants
+         *     them ownership of the resource if resourceHolderRetain is not explicitly set to true.
+         */
+        public Builder resourceHolderRetain(boolean resourceHolderRetain) {
+            this.mResourceHolderRetain = resourceHolderRetain;
             return this;
         }
 

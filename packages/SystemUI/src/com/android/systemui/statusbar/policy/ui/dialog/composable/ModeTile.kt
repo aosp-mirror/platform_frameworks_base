@@ -46,7 +46,7 @@ import com.android.systemui.common.ui.compose.Icon
 import com.android.systemui.statusbar.policy.ui.dialog.viewmodel.ModeTileViewModel
 
 @Composable
-fun ModeTile(viewModel: ModeTileViewModel) {
+fun ModeTile(viewModel: ModeTileViewModel, modifier: Modifier = Modifier) {
     val tileColor: Color by
         animateColorAsState(
             if (viewModel.enabled) MaterialTheme.colorScheme.primary
@@ -59,7 +59,7 @@ fun ModeTile(viewModel: ModeTileViewModel) {
         )
 
     CompositionLocalProvider(LocalContentColor provides contentColor) {
-        Surface(color = tileColor, shape = RoundedCornerShape(16.dp)) {
+        Surface(color = tileColor, shape = RoundedCornerShape(16.dp), modifier = modifier) {
             Row(
                 modifier =
                     Modifier.combinedClickable(

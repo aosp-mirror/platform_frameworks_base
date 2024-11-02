@@ -25,4 +25,6 @@ interface IAppOpsUserService {
     void callApiThatNotesSyncOpOtherUidNativelyAndCheckLog(in IAppOpsUserClient client);
     void callApiThatNotesAsyncOpNativelyAndCheckCustomMessage(in IAppOpsUserClient client);
     void callApiThatNotesAsyncOpNativelyAndCheckLog(in IAppOpsUserClient client);
+    void callFreezeAndNoteSyncOp(in IAppOpsUserClient client);
+    void assertEmptyAsyncNoted();
 }

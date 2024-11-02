@@ -224,33 +224,56 @@ constructor(
         if (SceneContainerFlag.isEnabled) {
                 combine(
                     shadeInteractor.isShadeLayoutWide,
+                    shadeInteractor.shadeMode,
                     configurationInteractor.onAnyConfigurationChange,
-                ) { isShadeLayoutWide, _ ->
+                ) { isShadeLayoutWide, shadeMode, _ ->
                     with(context.resources) {
-                        // TODO(b/338033836): Define separate horizontal margins for dual shade.
                         val marginHorizontal =
-                            getDimensionPixelSize(R.dimen.notification_panel_margin_horizontal)
+                            getDimensionPixelSize(
+                                if (shadeMode is Dual) {
+                                    R.dimen.shade_panel_margin_horizontal
+                                } else {
+                                    R.dimen.notification_panel_margin_horizontal
+                                }
+                            )
+
+                        val horizontalPosition =
+                            when (shadeMode) {
+                                Single -> HorizontalPosition.EdgeToEdge
+                                Split -> HorizontalPosition.MiddleToEdge(ratio = 0.5f)
+                                Dual ->
+                                    if (isShadeLayoutWide) {
+                                        HorizontalPosition.FloatAtEnd(
+                                            width = getDimensionPixelSize(R.dimen.shade_panel_width)
+                                        )
+                                    } else {
+                                        HorizontalPosition.EdgeToEdge
+                                    }
+                            }
+
                         ConfigurationBasedDimensions(
-                            marginStart = if (isShadeLayoutWide) 0 else marginHorizontal,
+                            horizontalPosition = horizontalPosition,
+                            marginStart = if (shadeMode is Split) 0 else marginHorizontal,
                             marginEnd = marginHorizontal,
                             marginBottom =
                                 getDimensionPixelSize(R.dimen.notification_panel_margin_bottom),
                             // y position of the NSSL in the window needs to be 0 under scene
                             // container
                             marginTop = 0,
-                            useSplitShade = isShadeLayoutWide,
                         )
                     }
                 }
             } else {
                 interactor.configurationBasedDimensions.map {
                     ConfigurationBasedDimensions(
+                        horizontalPosition =
+                            if (it.useSplitShade) HorizontalPosition.MiddleToEdge()
+                            else HorizontalPosition.EdgeToEdge,
                         marginStart = if (it.useSplitShade) 0 else it.marginHorizontal,
                         marginEnd = it.marginHorizontal,
                         marginBottom = it.marginBottom,
                         marginTop =
                             if (it.useLargeScreenHeader) it.marginTopLargeScreen else it.marginTop,
-                        useSplitShade = it.useSplitShade,
                     )
                 }
             }
@@ -446,59 +469,63 @@ constructor(
      */
     private val alphaForShadeAndQsExpansion: Flow<Float> =
         if (SceneContainerFlag.isEnabled) {
-            shadeInteractor.shadeMode.flatMapLatest { shadeMode ->
-                when (shadeMode) {
-                    Single ->
-                        combineTransform(
-                            shadeInteractor.shadeExpansion,
-                            shadeInteractor.qsExpansion,
-                        ) { shadeExpansion, qsExpansion ->
-                            if (qsExpansion == 1f) {
-                                // Ensure HUNs will be visible in QS shade (at least while unlocked)
+                shadeInteractor.shadeMode.flatMapLatest { shadeMode ->
+                    when (shadeMode) {
+                        Single ->
+                            combineTransform(
+                                shadeInteractor.shadeExpansion,
+                                shadeInteractor.qsExpansion,
+                            ) { shadeExpansion, qsExpansion ->
+                                if (qsExpansion == 1f) {
+                                    // Ensure HUNs will be visible in QS shade (at least while
+                                    // unlocked)
+                                    emit(1f)
+                                } else if (shadeExpansion > 0f || qsExpansion > 0f) {
+                                    // Fade as QS shade expands
+                                    emit(1f - qsExpansion)
+                                }
+                            }
+                        Split -> isAnyExpanded.filter { it }.map { 1f }
+                        Dual ->
+                            combineTransform(
+                                headsUpNotificationInteractor.get().isHeadsUpOrAnimatingAway,
+                                shadeInteractor.shadeExpansion,
+                                shadeInteractor.qsExpansion,
+                            ) { isHeadsUpOrAnimatingAway, shadeExpansion, qsExpansion ->
+                                if (isHeadsUpOrAnimatingAway) {
+                                    // Ensure HUNs will be visible in QS shade (at least while
+                                    // unlocked)
+                                    emit(1f)
+                                } else if (shadeExpansion > 0f || qsExpansion > 0f) {
+                                    // Fade out as QS shade expands
+                                    emit(1f - qsExpansion)
+                                }
+                            }
+                    }
+                }
+            } else {
+                interactor.configurationBasedDimensions.flatMapLatest { configurationBasedDimensions
+                    ->
+                    combineTransform(shadeInteractor.shadeExpansion, shadeInteractor.qsExpansion) {
+                        shadeExpansion,
+                        qsExpansion ->
+                        if (shadeExpansion > 0f || qsExpansion > 0f) {
+                            if (configurationBasedDimensions.useSplitShade) {
                                 emit(1f)
-                            } else if (shadeExpansion > 0f || qsExpansion > 0f) {
+                            } else if (qsExpansion == 1f) {
+                                // Ensure HUNs will be visible in QS shade (at least while
+                                // unlocked)
+                                emit(1f)
+                            } else {
                                 // Fade as QS shade expands
                                 emit(1f - qsExpansion)
                             }
                         }
-                    Split -> isAnyExpanded.filter { it }.map { 1f }
-                    Dual ->
-                        combineTransform(
-                            headsUpNotificationInteractor.get().isHeadsUpOrAnimatingAway,
-                            shadeInteractor.shadeExpansion,
-                            shadeInteractor.qsExpansion,
-                        ) { isHeadsUpOrAnimatingAway, shadeExpansion, qsExpansion ->
-                            if (isHeadsUpOrAnimatingAway) {
-                                // Ensure HUNs will be visible in QS shade (at least while unlocked)
-                                emit(1f)
-                            } else if (shadeExpansion > 0f || qsExpansion > 0f) {
-                                // Fade out as QS shade expands
-                                emit(1f - qsExpansion)
-                            }
-                        }
-                }
-            }
-        } else {
-            interactor.configurationBasedDimensions.flatMapLatest { configurationBasedDimensions ->
-                combineTransform(shadeInteractor.shadeExpansion, shadeInteractor.qsExpansion) {
-                    shadeExpansion,
-                    qsExpansion ->
-                    if (shadeExpansion > 0f || qsExpansion > 0f) {
-                        if (configurationBasedDimensions.useSplitShade) {
-                            emit(1f)
-                        } else if (qsExpansion == 1f) {
-                            // Ensure HUNs will be visible in QS shade (at least while unlocked)
-                            emit(1f)
-                        } else {
-                            // Fade as QS shade expands
-                            emit(1f - qsExpansion)
-                        }
                     }
                 }
             }
-        }
-        .onStart { emit(1f) }
-        .dumpWhileCollecting("alphaForShadeAndQsExpansion")
+            .onStart { emit(1f) }
+            .dumpWhileCollecting("alphaForShadeAndQsExpansion")
 
     val panelAlpha = keyguardInteractor.panelAlpha
 
@@ -766,10 +793,25 @@ constructor(
     }
 
     data class ConfigurationBasedDimensions(
+        val horizontalPosition: HorizontalPosition,
         val marginStart: Int,
         val marginTop: Int,
         val marginEnd: Int,
         val marginBottom: Int,
-        val useSplitShade: Boolean,
     )
+
+    /** Specifies the horizontal layout constraints for the notification container. */
+    sealed interface HorizontalPosition {
+        /** The container is using the full width of the screen (minus any margins). */
+        data object EdgeToEdge : HorizontalPosition
+
+        /** The container is laid out from the given [ratio] of the screen width to the end edge. */
+        data class MiddleToEdge(val ratio: Float = 0.5f) : HorizontalPosition
+
+        /**
+         * The container has a fixed [width] and is aligned to the end of the screen. In this
+         * layout, the start edge of the container is floating, i.e. unconstrained.
+         */
+        data class FloatAtEnd(val width: Int) : HorizontalPosition
+    }
 }

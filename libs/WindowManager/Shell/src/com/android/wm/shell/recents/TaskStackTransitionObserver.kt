@@ -20,8 +20,9 @@ import android.app.ActivityManager.RunningTaskInfo
 import android.os.IBinder
 import android.util.ArrayMap
 import android.view.SurfaceControl
-import android.window.TransitionInfo
+import android.view.WindowManager.TRANSIT_CHANGE
 import android.window.DesktopModeFlags
+import android.window.TransitionInfo
 import com.android.wm.shell.shared.TransitionUtil
 import com.android.wm.shell.sysui.ShellInit
 import com.android.wm.shell.transition.Transitions
@@ -69,8 +70,10 @@ class TaskStackTransitionObserver(
                 // Find the first task that is opening, this should be the one at the front after
                 // the transition
                 if (TransitionUtil.isOpeningType(change.mode)) {
-                    notifyTaskStackTransitionObserverListeners(taskInfo)
+                    notifyOnTaskMovedToFront(taskInfo)
                     break
+                } else if (change.mode == TRANSIT_CHANGE) {
+                    notifyOnTaskChanged(taskInfo)
                 }
             }
         }
@@ -95,9 +98,15 @@ class TaskStackTransitionObserver(
         taskStackTransitionObserverListeners.remove(taskStackTransitionObserverListener)
     }
 
-    private fun notifyTaskStackTransitionObserverListeners(taskInfo: RunningTaskInfo) {
+    private fun notifyOnTaskMovedToFront(taskInfo: RunningTaskInfo) {
         taskStackTransitionObserverListeners.forEach { (listener, executor) ->
             executor.execute { listener.onTaskMovedToFrontThroughTransition(taskInfo) }
+        }
+    }
+
+    private fun notifyOnTaskChanged(taskInfo: RunningTaskInfo) {
+        taskStackTransitionObserverListeners.forEach { (listener, executor) ->
+            executor.execute { listener.onTaskChangedThroughTransition(taskInfo) }
         }
     }
 
@@ -105,5 +114,7 @@ class TaskStackTransitionObserver(
     interface TaskStackTransitionObserverListener {
         /** Called when a task is moved to front. */
         fun onTaskMovedToFrontThroughTransition(taskInfo: RunningTaskInfo) {}
+        /** Called when a task info has changed. */
+        fun onTaskChangedThroughTransition(taskInfo: RunningTaskInfo) {}
     }
 }

@@ -17,6 +17,7 @@
 package com.android.wm.shell.pip2.animation;
 
 import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.RectEvaluator;
 import android.animation.ValueAnimator;
 import android.content.Context;
@@ -27,6 +28,7 @@ import android.view.SurfaceControl;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.wm.shell.R;
 import com.android.wm.shell.pip2.PipSurfaceTransactionHelper;
 import com.android.wm.shell.shared.animation.Interpolators;
@@ -34,8 +36,7 @@ import com.android.wm.shell.shared.animation.Interpolators;
 /**
  * Animator that handles bounds animations for exit-via-expanding PIP.
  */
-public class PipExpandAnimator extends ValueAnimator
-        implements ValueAnimator.AnimatorUpdateListener, ValueAnimator.AnimatorListener {
+public class PipExpandAnimator extends ValueAnimator {
     @NonNull
     private final SurfaceControl mLeash;
     private final SurfaceControl.Transaction mStartTransaction;
@@ -58,11 +59,60 @@ public class PipExpandAnimator extends ValueAnimator
     // Bounds updated by the evaluator as animator is running.
     private final Rect mAnimatedRect = new Rect();
 
-    private final PipSurfaceTransactionHelper.SurfaceControlTransactionFactory
+    private PipSurfaceTransactionHelper.SurfaceControlTransactionFactory
             mSurfaceControlTransactionFactory;
     private final RectEvaluator mRectEvaluator;
     private final RectEvaluator mInsetEvaluator;
     private final PipSurfaceTransactionHelper mPipSurfaceTransactionHelper;
+
+    private final Animator.AnimatorListener mAnimatorListener = new AnimatorListenerAdapter() {
+        @Override
+        public void onAnimationStart(Animator animation) {
+            super.onAnimationStart(animation);
+            if (mAnimationStartCallback != null) {
+                mAnimationStartCallback.run();
+            }
+            if (mStartTransaction != null) {
+                mStartTransaction.apply();
+            }
+        }
+
+        @Override
+        public void onAnimationEnd(Animator animation) {
+            super.onAnimationEnd(animation);
+            if (mFinishTransaction != null) {
+                // finishTransaction might override some state (eg. corner radii) so we want to
+                // manually set the state to the end of the animation
+                mPipSurfaceTransactionHelper.scaleAndCrop(mFinishTransaction, mLeash,
+                                mSourceRectHint, mBaseBounds, mAnimatedRect, getInsets(1f),
+                                false /* isInPipDirection */, 1f)
+                        .round(mFinishTransaction, mLeash, false /* applyCornerRadius */)
+                        .shadow(mFinishTransaction, mLeash, false /* applyCornerRadius */);
+            }
+            if (mAnimationEndCallback != null) {
+                mAnimationEndCallback.run();
+            }
+        }
+    };
+
+    private final ValueAnimator.AnimatorUpdateListener mAnimatorUpdateListener =
+            new AnimatorUpdateListener() {
+                @Override
+                public void onAnimationUpdate(@NonNull ValueAnimator animation) {
+                    final SurfaceControl.Transaction tx =
+                            mSurfaceControlTransactionFactory.getTransaction();
+                    final float fraction = getAnimatedFraction();
+
+                    // TODO (b/350801661): implement fixed rotation
+                    Rect insets = getInsets(fraction);
+                    mPipSurfaceTransactionHelper.scaleAndCrop(tx, mLeash, mSourceRectHint,
+                                    mBaseBounds, mAnimatedRect,
+                                    insets, false /* isInPipDirection */, fraction)
+                            .round(tx, mLeash, false /* applyCornerRadius */)
+                            .shadow(tx, mLeash, false /* applyCornerRadius */);
+                    tx.apply();
+                }
+            };
 
     public PipExpandAnimator(Context context,
             @NonNull SurfaceControl leash,
@@ -105,8 +155,8 @@ public class PipExpandAnimator extends ValueAnimator
         setObjectValues(startBounds, endBounds);
         setEvaluator(mRectEvaluator);
         setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
-        addListener(this);
-        addUpdateListener(this);
+        addListener(mAnimatorListener);
+        addUpdateListener(mAnimatorUpdateListener);
     }
 
     public void setAnimationStartCallback(@NonNull Runnable runnable) {
@@ -117,58 +167,15 @@ public class PipExpandAnimator extends ValueAnimator
         mAnimationEndCallback = runnable;
     }
 
-    @Override
-    public void onAnimationStart(@NonNull Animator animation) {
-        if (mAnimationStartCallback != null) {
-            mAnimationStartCallback.run();
-        }
-        if (mStartTransaction != null) {
-            mStartTransaction.apply();
-        }
-    }
-
-    @Override
-    public void onAnimationEnd(@NonNull Animator animation) {
-        if (mFinishTransaction != null) {
-            // finishTransaction might override some state (eg. corner radii) so we want to
-            // manually set the state to the end of the animation
-            mPipSurfaceTransactionHelper.scaleAndCrop(mFinishTransaction, mLeash, mSourceRectHint,
-                            mBaseBounds, mAnimatedRect, getInsets(1f),
-                            false /* isInPipDirection */, 1f)
-                    .round(mFinishTransaction, mLeash, false /* applyCornerRadius */)
-                    .shadow(mFinishTransaction, mLeash, false /* applyCornerRadius */);
-        }
-        if (mAnimationEndCallback != null) {
-            mAnimationEndCallback.run();
-        }
-    }
-
-    @Override
-    public void onAnimationUpdate(@NonNull ValueAnimator animation) {
-        final SurfaceControl.Transaction tx = mSurfaceControlTransactionFactory.getTransaction();
-        final float fraction = getAnimatedFraction();
-
-        // TODO (b/350801661): implement fixed rotation
-
-        Rect insets = getInsets(fraction);
-        mPipSurfaceTransactionHelper.scaleAndCrop(tx, mLeash, mSourceRectHint,
-                        mBaseBounds, mAnimatedRect, insets, false /* isInPipDirection */, fraction)
-                .round(tx, mLeash, false /* applyCornerRadius */)
-                .shadow(tx, mLeash, false /* applyCornerRadius */);
-        tx.apply();
-    }
-
     private Rect getInsets(float fraction) {
         final Rect startInsets = mSourceRectHintInsets;
         final Rect endInsets = mZeroInsets;
         return mInsetEvaluator.evaluate(fraction, startInsets, endInsets);
     }
 
-    // no-ops
-
-    @Override
-    public void onAnimationCancel(@NonNull Animator animation) {}
-
-    @Override
-    public void onAnimationRepeat(@NonNull Animator animation) {}
+    @VisibleForTesting
+    void setSurfaceControlTransactionFactory(
+            @NonNull PipSurfaceTransactionHelper.SurfaceControlTransactionFactory factory) {
+        mSurfaceControlTransactionFactory = factory;
+    }
 }

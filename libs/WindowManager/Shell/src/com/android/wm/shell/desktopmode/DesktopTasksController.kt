@@ -54,6 +54,7 @@ import android.view.WindowManager.TRANSIT_CLOSE
 import android.view.WindowManager.TRANSIT_NONE
 import android.view.WindowManager.TRANSIT_OPEN
 import android.view.WindowManager.TRANSIT_TO_FRONT
+import android.widget.Toast
 import android.window.DesktopModeFlags
 import android.window.DesktopModeFlags.DISABLE_NON_RESIZABLE_APP_SNAP_RESIZE
 import android.window.DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY
@@ -697,6 +698,7 @@ class DesktopTasksController(
                 transitionType = transitionType,
                 wct = wct,
                 taskId = taskId,
+                minimizingTaskId = taskIdToMinimize,
                 exitingImmersiveTask = exitingImmersiveTask,
             )
             taskIdToMinimize?.let { addPendingMinimizeTransition(t, it) }
@@ -857,6 +859,38 @@ class DesktopTasksController(
         toggleResizeDesktopTaskTransitionHandler.startTransition(wct)
     }
 
+    private fun dragToMaximizeDesktopTask(
+        taskInfo: RunningTaskInfo,
+        taskSurface: SurfaceControl,
+        currentDragBounds: Rect,
+        motionEvent: MotionEvent
+    ) {
+        val displayLayout = displayController.getDisplayLayout(taskInfo.displayId) ?: return
+        val stableBounds = Rect()
+        displayLayout.getStableBounds(stableBounds)
+        if (isTaskMaximized(taskInfo, stableBounds)) {
+            // Handle the case where we attempt to drag-to-maximize when already maximized: the task
+            // position won't need to change but we want to animate the surface going back to the
+            // maximized position.
+            val containerBounds = taskInfo.configuration.windowConfiguration.bounds
+            if (containerBounds != currentDragBounds) {
+                returnToDragStartAnimator.start(
+                    taskInfo.taskId,
+                    taskSurface,
+                    startBounds = currentDragBounds,
+                    endBounds = containerBounds,
+                )
+            }
+            return
+        }
+
+        // TODO(b/375356605): Introduce a new ResizeTrigger for drag-to-top.
+        desktopModeEventLogger.logTaskResizingStarted(
+            ResizeTrigger.UNKNOWN_RESIZE_TRIGGER, motionEvent, taskInfo, displayController
+        )
+        toggleDesktopTaskSize(taskInfo, ResizeTrigger.UNKNOWN_RESIZE_TRIGGER, motionEvent)
+    }
+
     private fun getMaximizeBounds(taskInfo: RunningTaskInfo, stableBounds: Rect): Rect {
         if (taskInfo.isResizeable) {
             // if resizable then expand to entire stable bounds (full display minus insets)
@@ -979,7 +1013,6 @@ class DesktopTasksController(
                     taskSurface,
                     startBounds = currentDragBounds,
                     endBounds = destinationBounds,
-                    isResizable = taskInfo.isResizeable,
                 )
             }
             return
@@ -1013,7 +1046,13 @@ class DesktopTasksController(
                 taskSurface,
                 startBounds = currentDragBounds,
                 endBounds = dragStartBounds,
-                isResizable = taskInfo.isResizeable,
+                doOnEnd = {
+                    Toast.makeText(
+                        context,
+                        com.android.wm.shell.R.string.desktop_mode_non_resizable_snap_text,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                },
             )
         } else {
             val resizeTrigger = if (position == SnapPosition.LEFT) {
@@ -1123,7 +1162,7 @@ class DesktopTasksController(
                 if (runningTaskInfo != null) {
                     // Task is already running, reorder it to the front
                     wct.reorder(runningTaskInfo.token, /* onTop= */ true)
-                } else if (Flags.enableDesktopWindowingPersistence()) {
+                } else if (DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_PERSISTENCE.isTrue()) {
                     // Task is not running, start it
                     wct.startTask(
                         taskId,
@@ -1396,6 +1435,7 @@ class DesktopTasksController(
                 )
             val transition = transitions.startTransition(TRANSIT_OPEN, wct, null)
             taskIdToMinimize?.let { addPendingMinimizeTransition(transition, it) }
+            addPendingAppLaunchTransition(transition, requestedTaskId, taskIdToMinimize)
             exitResult.asExit()?.runOnTransitionStart?.invoke(transition)
         } else {
             val splitPosition = splitScreenController.determineNewInstancePosition(callingTask)
@@ -1536,6 +1576,7 @@ class DesktopTasksController(
         desktopImmersiveController.exitImmersiveIfApplicable(transition, wct, task.displayId)
         // 2) minimize a Task if needed.
         val taskIdToMinimize = addAndGetMinimizeChanges(task.displayId, wct, task.taskId)
+        addPendingAppLaunchTransition(transition, task.taskId, taskIdToMinimize)
         if (taskIdToMinimize != null) {
             addPendingMinimizeTransition(transition, taskIdToMinimize)
             return wct
@@ -1567,6 +1608,7 @@ class DesktopTasksController(
                 // minimize another Task.
                 val taskIdToMinimize = addAndGetMinimizeChanges(task.displayId, wct, task.taskId)
                 taskIdToMinimize?.let { addPendingMinimizeTransition(transition, it) }
+                addPendingAppLaunchTransition(transition, task.taskId, taskIdToMinimize)
                 desktopImmersiveController.exitImmersiveIfApplicable(
                     transition, wct, task.displayId
                 )
@@ -1747,6 +1789,20 @@ class DesktopTasksController(
         }
     }
 
+    private fun addPendingAppLaunchTransition(
+        transition: IBinder,
+        launchTaskId: Int,
+        minimizeTaskId: Int?,
+    ) {
+        if (!DesktopModeFlags.ENABLE_DESKTOP_APP_LAUNCH_TRANSITIONS.isTrue) {
+            return
+        }
+        // TODO b/359523924: pass immersive task here?
+        desktopMixedTransitionHandler.addPendingMixedTransition(
+            DesktopMixedTransitionHandler.PendingMixedTransition.Launch(
+                transition, launchTaskId, minimizeTaskId, /* exitingImmersiveTask= */ null))
+    }
+
     fun removeDesktop(displayId: Int) {
         if (!DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION.isTrue()) return
 
@@ -1918,11 +1974,15 @@ class DesktopTasksController(
             )
         when (indicatorType) {
             IndicatorType.TO_FULLSCREEN_INDICATOR -> {
-                moveToFullscreenWithAnimation(
-                    taskInfo,
-                    position,
-                    DesktopModeTransitionSource.TASK_DRAG
-                )
+                if (DesktopModeStatus.shouldMaximizeWhenDragToTopEdge(context)) {
+                    dragToMaximizeDesktopTask(taskInfo, taskSurface, currentDragBounds, motionEvent)
+                } else {
+                    moveToFullscreenWithAnimation(
+                        taskInfo,
+                        position,
+                        DesktopModeTransitionSource.TASK_DRAG
+                    )
+                }
             }
             IndicatorType.TO_SPLIT_LEFT_INDICATOR -> {
                 handleSnapResizingTask(
@@ -1947,17 +2007,32 @@ class DesktopTasksController(
                 )
             }
             IndicatorType.NO_INDICATOR -> {
+                // Create a copy so that we can animate from the current bounds if we end up having
+                // to snap the surface back without a WCT change.
+                val destinationBounds = Rect(currentDragBounds)
                 // If task bounds are outside valid drag area, snap them inward
                 DragPositioningCallbackUtility.snapTaskBoundsIfNecessary(
-                    currentDragBounds,
+                    destinationBounds,
                     validDragArea
                 )
 
-                if (currentDragBounds == dragStartBounds) return
+                if (destinationBounds == dragStartBounds) {
+                    // There's no actual difference between the start and end bounds, so while a
+                    // WCT change isn't needed, the dragged surface still needs to be snapped back
+                    // to its original location.
+                    releaseVisualIndicator()
+                    returnToDragStartAnimator.start(
+                        taskInfo.taskId,
+                        taskSurface,
+                        startBounds = currentDragBounds,
+                        endBounds = dragStartBounds,
+                    )
+                    return
+                }
 
                 // Update task bounds so that the task position will match the position of its leash
                 val wct = WindowContainerTransaction()
-                wct.setBounds(taskInfo.token, currentDragBounds)
+                wct.setBounds(taskInfo.token, destinationBounds)
                 transitions.startTransition(TRANSIT_CHANGE, wct, null)
 
                 releaseVisualIndicator()

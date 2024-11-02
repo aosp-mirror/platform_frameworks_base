@@ -54,6 +54,7 @@ import com.android.internal.util.FrameworkStatsLog;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -448,7 +449,7 @@ public class FrameTracker implements HardwareRendererObserver.OnFrameMetricsAvai
     }
 
     @Override
-    public void onJankDataAvailable(SurfaceControl.JankData[] jankData) {
+    public void onJankDataAvailable(List<SurfaceControl.JankData> jankData) {
         postCallback(() -> {
             try {
                 Trace.beginSection("FrameTracker#onJankDataAvailable");
@@ -832,7 +833,7 @@ public class FrameTracker implements HardwareRendererObserver.OnFrameMetricsAvai
         /** adds the jank listener to the given surface */
         public SurfaceControl.OnJankDataListenerRegistration addJankStatsListener(
                 SurfaceControl.OnJankDataListener listener, SurfaceControl surfaceControl) {
-            return surfaceControl.addJankDataListener(listener);
+            return surfaceControl.addOnJankDataListener(listener);
         }
     }
 

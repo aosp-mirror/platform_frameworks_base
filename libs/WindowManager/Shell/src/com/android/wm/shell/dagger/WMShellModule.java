@@ -86,8 +86,13 @@ import com.android.wm.shell.desktopmode.ToggleResizeDesktopTaskTransitionHandler
 import com.android.wm.shell.desktopmode.WindowDecorCaptionHandleRepository;
 import com.android.wm.shell.desktopmode.education.AppHandleEducationController;
 import com.android.wm.shell.desktopmode.education.AppHandleEducationFilter;
+import com.android.wm.shell.desktopmode.education.AppToWebEducationController;
+import com.android.wm.shell.desktopmode.education.AppToWebEducationFilter;
 import com.android.wm.shell.desktopmode.education.data.AppHandleEducationDatastoreRepository;
+import com.android.wm.shell.desktopmode.education.data.AppToWebEducationDatastoreRepository;
 import com.android.wm.shell.desktopmode.persistence.DesktopPersistentRepository;
+import com.android.wm.shell.desktopmode.persistence.DesktopRepositoryInitializer;
+import com.android.wm.shell.desktopmode.persistence.DesktopRepositoryInitializerImpl;
 import com.android.wm.shell.draganddrop.DragAndDropController;
 import com.android.wm.shell.draganddrop.GlobalDragListener;
 import com.android.wm.shell.freeform.FreeformComponents;
@@ -130,6 +135,7 @@ import com.android.wm.shell.windowdecor.CaptionWindowDecorViewModel;
 import com.android.wm.shell.windowdecor.DesktopModeWindowDecorViewModel;
 import com.android.wm.shell.windowdecor.WindowDecorViewModel;
 import com.android.wm.shell.windowdecor.additionalviewcontainer.AdditionalSystemViewContainer;
+import com.android.wm.shell.windowdecor.education.DesktopWindowingEducationPromoController;
 import com.android.wm.shell.windowdecor.education.DesktopWindowingEducationTooltipController;
 import com.android.wm.shell.windowdecor.tiling.DesktopTilingDecorViewModel;
 
@@ -286,6 +292,7 @@ public abstract class WMShellModule {
             MultiInstanceHelper multiInstanceHelper,
             Optional<DesktopTasksLimiter> desktopTasksLimiter,
             AppHandleEducationController appHandleEducationController,
+            AppToWebEducationController appToWebEducationController,
             WindowDecorCaptionHandleRepository windowDecorCaptionHandleRepository,
             Optional<DesktopActivityOrientationChangeHandler> desktopActivityOrientationHandler,
             FocusTransitionObserver focusTransitionObserver,
@@ -315,6 +322,7 @@ public abstract class WMShellModule {
                     multiInstanceHelper,
                     desktopTasksLimiter,
                     appHandleEducationController,
+                    appToWebEducationController,
                     windowDecorCaptionHandleRepository,
                     desktopActivityOrientationHandler,
                     focusTransitionObserver,
@@ -840,8 +848,8 @@ public abstract class WMShellModule {
     @WMSingleton
     @Provides
     static ReturnToDragStartAnimator provideReturnToDragStartAnimator(
-            Context context, InteractionJankMonitor interactionJankMonitor) {
-        return new ReturnToDragStartAnimator(context, interactionJankMonitor);
+            InteractionJankMonitor interactionJankMonitor) {
+        return new ReturnToDragStartAnimator(interactionJankMonitor);
     }
 
     @WMSingleton
@@ -909,8 +917,12 @@ public abstract class WMShellModule {
             Context context,
             ShellInit shellInit,
             DesktopPersistentRepository desktopPersistentRepository,
-            @ShellMainThread CoroutineScope mainScope) {
-        return new DesktopRepository(context, shellInit, desktopPersistentRepository, mainScope);
+            DesktopRepositoryInitializer desktopRepositoryInitializer,
+            @ShellMainThread CoroutineScope mainScope
+    ) {
+        return new DesktopRepository(context, shellInit, desktopPersistentRepository,
+                desktopRepositoryInitializer,
+                mainScope);
     }
 
     @WMSingleton
@@ -964,7 +976,10 @@ public abstract class WMShellModule {
             CloseDesktopTaskTransitionHandler closeDesktopTaskTransitionHandler,
             Optional<DesktopImmersiveController> desktopImmersiveController,
             InteractionJankMonitor interactionJankMonitor,
-            @ShellMainThread Handler handler) {
+            @ShellMainThread Handler handler,
+            ShellInit shellInit,
+            RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer
+    ) {
         if (!DesktopModeStatus.canEnterDesktopMode(context)) {
             return Optional.empty();
         }
@@ -977,7 +992,9 @@ public abstract class WMShellModule {
                         closeDesktopTaskTransitionHandler,
                         desktopImmersiveController.get(),
                         interactionJankMonitor,
-                        handler));
+                        handler,
+                        shellInit,
+                        rootTaskDisplayAreaOrganizer));
     }
 
     @WMSingleton
@@ -1029,6 +1046,20 @@ public abstract class WMShellModule {
                 context, additionalSystemViewContainerFactory, displayController);
     }
 
+    @WMSingleton
+    @Provides
+    static DesktopWindowingEducationPromoController provideDesktopWindowingEducationPromoController(
+            Context context,
+            AdditionalSystemViewContainer.Factory additionalSystemViewContainerFactory,
+            DisplayController displayController
+    ) {
+        return new DesktopWindowingEducationPromoController(
+                context,
+                additionalSystemViewContainerFactory,
+                displayController
+        );
+    }
+
     @OptIn(markerClass = ExperimentalCoroutinesApi.class)
     @WMSingleton
     @Provides
@@ -1052,9 +1083,51 @@ public abstract class WMShellModule {
 
     @WMSingleton
     @Provides
+    static AppToWebEducationDatastoreRepository provideAppToWebEducationDatastoreRepository(
+            Context context) {
+        return new AppToWebEducationDatastoreRepository(context);
+    }
+
+    @WMSingleton
+    @Provides
+    static AppToWebEducationFilter provideAppToWebEducationFilter(
+            Context context,
+            AppToWebEducationDatastoreRepository appToWebEducationDatastoreRepository) {
+        return new AppToWebEducationFilter(context, appToWebEducationDatastoreRepository);
+    }
+
+    @OptIn(markerClass = ExperimentalCoroutinesApi.class)
+    @WMSingleton
+    @Provides
+    static AppToWebEducationController provideAppToWebEducationController(
+            Context context,
+            AppToWebEducationFilter appToWebEducationFilter,
+            AppToWebEducationDatastoreRepository appToWebEducationDatastoreRepository,
+            WindowDecorCaptionHandleRepository windowDecorCaptionHandleRepository,
+            DesktopWindowingEducationPromoController desktopWindowingEducationPromoController,
+            @ShellMainThread CoroutineScope applicationScope,
+            @ShellBackgroundThread MainCoroutineDispatcher backgroundDispatcher) {
+        return new AppToWebEducationController(context, appToWebEducationFilter,
+                appToWebEducationDatastoreRepository, windowDecorCaptionHandleRepository,
+                desktopWindowingEducationPromoController, applicationScope,
+                backgroundDispatcher);
+    }
+
+    @WMSingleton
+    @Provides
     static DesktopPersistentRepository provideDesktopPersistentRepository(
             Context context, @ShellBackgroundThread CoroutineScope bgScope) {
         return new DesktopPersistentRepository(context, bgScope);
+    }
+
+    @WMSingleton
+    @Provides
+    static DesktopRepositoryInitializer provideDesktopRepositoryInitializer(
+            Context context,
+            DesktopPersistentRepository desktopPersistentRepository,
+            @ShellMainThread CoroutineScope mainScope) {
+        return new DesktopRepositoryInitializerImpl(context, desktopPersistentRepository,
+                mainScope);
     }
 
     //

@@ -23,6 +23,7 @@ import android.graphics.Rect
 import android.graphics.Region
 import android.os.Binder
 import android.view.LayoutInflater
+import android.view.RoundedCorner
 import android.view.SurfaceControl
 import android.view.SurfaceControlViewHost
 import android.view.View
@@ -53,12 +54,14 @@ class DesktopTilingDividerWindowManager(
     private val transitionHandler: DesktopTilingWindowDecoration,
     private val transactionSupplier: Supplier<SurfaceControl.Transaction>,
     private var dividerBounds: Rect,
+    private val displayContext: Context,
 ) : WindowlessWindowManager(config, leash, null), DividerMoveCallback, View.OnLayoutChangeListener {
     private lateinit var viewHost: SurfaceControlViewHost
     private var tilingDividerView: TilingDividerView? = null
     private var dividerShown = false
     private var handleRegionWidth: Int = -1
     private var setTouchRegion = true
+    private val maxRoundedCornerRadius = getMaxRoundedCornerRadius()
 
     /**
      * Gets bounds of divider window with screen based coordinate on the param Rect.
@@ -93,7 +96,11 @@ class DesktopTilingDividerWindowManager(
         getDividerBounds(tmpDividerBounds)
         dividerView.setup(this, tmpDividerBounds)
         t.setRelativeLayer(leash, relativeLeash, 1)
-            .setPosition(leash, dividerBounds.left.toFloat(), dividerBounds.top.toFloat())
+            .setPosition(
+                leash,
+                dividerBounds.left.toFloat() - maxRoundedCornerRadius,
+                dividerBounds.top.toFloat(),
+            )
             .show(leash)
         syncQueue.runInSync { transaction ->
             transaction.merge(t)
@@ -144,7 +151,7 @@ class DesktopTilingDividerWindowManager(
      */
     override fun onDividerMove(pos: Int): Boolean {
         val t = transactionSupplier.get()
-        t.setPosition(leash, pos.toFloat(), dividerBounds.top.toFloat())
+        t.setPosition(leash, pos.toFloat() - maxRoundedCornerRadius, dividerBounds.top.toFloat())
         val dividerWidth = dividerBounds.width()
         dividerBounds.set(pos, dividerBounds.top, pos + dividerWidth, dividerBounds.bottom)
         return transitionHandler.onDividerHandleMoved(dividerBounds, t)
@@ -157,7 +164,7 @@ class DesktopTilingDividerWindowManager(
     override fun onDividerMovedEnd(pos: Int) {
         setSlippery(true)
         val t = transactionSupplier.get()
-        t.setPosition(leash, pos.toFloat(), dividerBounds.top.toFloat())
+        t.setPosition(leash, pos.toFloat() - maxRoundedCornerRadius, dividerBounds.top.toFloat())
         val dividerWidth = dividerBounds.width()
         dividerBounds.set(pos, dividerBounds.top, pos + dividerWidth, dividerBounds.bottom)
         transitionHandler.onDividerHandleDragEnd(dividerBounds, t)
@@ -166,7 +173,7 @@ class DesktopTilingDividerWindowManager(
     private fun getWindowManagerParams(): WindowManager.LayoutParams {
         val lp =
             WindowManager.LayoutParams(
-                dividerBounds.width(),
+                dividerBounds.width() + 2 * maxRoundedCornerRadius,
                 dividerBounds.height(),
                 TYPE_DOCK_DIVIDER,
                 FLAG_NOT_FOCUSABLE or
@@ -224,5 +231,16 @@ class DesktopTilingDividerWindowManager(
             lp.flags = lp.flags and FLAG_SLIPPERY.inv()
         }
         viewHost.relayout(lp)
+    }
+
+    private fun getMaxRoundedCornerRadius(): Int {
+        val display = displayContext.display
+        return listOf(
+                RoundedCorner.POSITION_TOP_LEFT,
+                RoundedCorner.POSITION_TOP_RIGHT,
+                RoundedCorner.POSITION_BOTTOM_RIGHT,
+                RoundedCorner.POSITION_BOTTOM_LEFT,
+            )
+            .maxOf { position -> display.getRoundedCorner(position)?.getRadius() ?: 0 }
     }
 }

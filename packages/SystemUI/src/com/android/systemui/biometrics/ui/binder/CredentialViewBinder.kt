@@ -1,6 +1,5 @@
 package com.android.systemui.biometrics.ui.binder
 
-import android.hardware.biometrics.Flags
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
@@ -67,7 +66,7 @@ object CredentialViewBinder {
                     updateForContentDimensions(
                         containerWidth,
                         containerHeight,
-                        0 // animateDurationMs
+                        0, // animateDurationMs
                     )
                 }
             }
@@ -81,13 +80,11 @@ object CredentialViewBinder {
 
                         subtitleView.textOrHide = header.subtitle
                         descriptionView.textOrHide = header.description
-                        if (Flags.customBiometricPrompt()) {
-                            BiometricCustomizedViewBinder.bind(
-                                customizedViewContainer,
-                                header.contentView,
-                                legacyCallback
-                            )
-                        }
+                        BiometricCustomizedViewBinder.bind(
+                            customizedViewContainer,
+                            header.contentView,
+                            legacyCallback,
+                        )
 
                         iconView?.setImageDrawable(header.icon)
 

@@ -190,12 +190,12 @@ public final class NotificationProgressDrawable extends Drawable {
                 final float segWidth = segment.mFraction * totalWidth;
                 // Advance the start position to account for a point immediately prior.
                 final float startOffset = getSegStartOffset(prevPart, pointRadius,
-                        mState.mSegPointGap);
+                        mState.mSegPointGap, x);
                 final float start = x + startOffset;
                 // Retract the end position to account for the padding and a point immediately
                 // after.
                 final float endOffset = getSegEndOffset(nextPart, pointRadius, mState.mSegPointGap,
-                        mState.mSegSegGap);
+                        mState.mSegSegGap, x + segWidth, totalWidth);
                 final float end = x + segWidth - endOffset;
 
                 // Transparent is not allowed (and also is the default in the data), so use that
@@ -215,8 +215,17 @@ public final class NotificationProgressDrawable extends Drawable {
                 // width (ignoring offset and padding)
                 x += segWidth;
             } else if (part instanceof Point point) {
-                mPointRect.set((int) (x - pointRadius), (int) (centerY - pointRadius),
-                        (int) (x + pointRadius), (int) (centerY + pointRadius));
+                final float pointWidth = 2 * pointRadius;
+                float start = x - pointRadius;
+                if (start < 0) start = 0;
+                float end = start + pointWidth;
+                if (end > totalWidth) {
+                    end = totalWidth;
+                    if (totalWidth > pointWidth) start = totalWidth - pointWidth;
+                }
+                mPointRect.set((int) start, (int) (centerY - pointRadius), (int) end,
+                        (int) (centerY + pointRadius));
+
                 if (point.mIcon != null) {
                     point.mIcon.setBounds(mPointRect);
                     point.mIcon.draw(canvas);
@@ -238,14 +247,22 @@ public final class NotificationProgressDrawable extends Drawable {
         }
     }
 
-    private static float getSegStartOffset(Part prevPart, float pointRadius, float segPointGap) {
-        return (prevPart instanceof Point) ? pointRadius + segPointGap : 0F;
+    private static float getSegStartOffset(Part prevPart, float pointRadius, float segPointGap,
+            float startX) {
+        if (!(prevPart instanceof Point)) return 0F;
+        final float pointOffset = (startX < pointRadius) ? (pointRadius - startX) : 0;
+        return pointOffset + pointRadius + segPointGap;
     }
 
     private static float getSegEndOffset(Part nextPart, float pointRadius, float segPointGap,
-            float segSegGap) {
+            float segSegGap, float endX, float totalWidth) {
         if (nextPart == null) return 0F;
-        return (nextPart instanceof Point) ? segPointGap + pointRadius : segSegGap;
+        if (!(nextPart instanceof Point)) return segSegGap;
+
+        final float pointWidth = 2 * pointRadius;
+        final float pointOffset = (endX + pointRadius > totalWidth && totalWidth > pointWidth)
+                ? (endX + pointRadius - totalWidth) : 0;
+        return segPointGap + pointRadius + pointOffset;
     }
 
     @Override

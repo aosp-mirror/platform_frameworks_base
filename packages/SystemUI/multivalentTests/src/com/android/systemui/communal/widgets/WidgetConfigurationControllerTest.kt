@@ -22,6 +22,7 @@ import androidx.activity.ComponentActivity
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.communal.shared.model.fakeGlanceableHubMultiUserHelper
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.testKosmos
@@ -55,7 +56,12 @@ class WidgetConfigurationControllerTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         underTest =
-            WidgetConfigurationController(ownerActivity, appWidgetHost, kosmos.testDispatcher)
+            WidgetConfigurationController(
+                ownerActivity,
+                { appWidgetHost },
+                kosmos.testDispatcher,
+                kosmos.fakeGlanceableHubMultiUserHelper,
+            )
     }
 
     @Test
@@ -68,7 +74,7 @@ class WidgetConfigurationControllerTest : SysuiTestCase() {
                             eq(123),
                             anyInt(),
                             eq(WidgetConfigurationController.REQUEST_CODE),
-                            any()
+                            any(),
                         )
                     )
                     .thenThrow(ActivityNotFoundException())

@@ -1457,7 +1457,7 @@ public final class OutputConfiguration implements Parcelable {
     /**
      * Set the mirroring mode for a surface belonging to this OutputConfiguration
      *
-     * <p>This function is identical to {@link #setMirroMode(int)} if {@code surface} is
+     * <p>This function is identical to {@link #setMirrorMode(int)} if {@code surface} is
      * the only surface belonging to this OutputConfiguration.</p>
      *
      * <p>If this OutputConfiguration contains a deferred surface, the application can either

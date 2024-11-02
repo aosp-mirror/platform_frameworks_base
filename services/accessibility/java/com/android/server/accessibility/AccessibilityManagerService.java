@@ -52,6 +52,7 @@ import static com.android.internal.accessibility.AccessibilityShortcutController
 import static com.android.internal.accessibility.common.ShortcutConstants.CHOOSER_PACKAGE_NAME;
 import static com.android.internal.accessibility.common.ShortcutConstants.USER_SHORTCUT_TYPES;
 import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType;
+import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.ALL;
 import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.GESTURE;
 import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.HARDWARE;
 import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.QUICK_SETTINGS;
@@ -3897,6 +3898,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 userState.getShortcutTargetsLocked(HARDWARE);
         final Set<String> qsShortcutTargets =
                 userState.getShortcutTargetsLocked(QUICK_SETTINGS);
+        final Set<String> shortcutTargets = userState.getShortcutTargetsLocked(ALL);
         userState.mEnabledServices.forEach(componentName -> {
             if (packageName != null && componentName != null
                     && !packageName.equals(componentName.getPackageName())) {
@@ -3917,7 +3919,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             if (TextUtils.isEmpty(serviceName)) {
                 return;
             }
-            if (doesShortcutTargetsStringContain(buttonTargets, serviceName)
+            if (android.provider.Flags.a11yStandaloneGestureEnabled()) {
+                if (doesShortcutTargetsStringContain(shortcutTargets, serviceName)) {
+                    return;
+                }
+            } else if (doesShortcutTargetsStringContain(buttonTargets, serviceName)
                     || doesShortcutTargetsStringContain(shortcutKeyTargets, serviceName)
                     || doesShortcutTargetsStringContain(qsShortcutTargets, serviceName)) {
                 return;

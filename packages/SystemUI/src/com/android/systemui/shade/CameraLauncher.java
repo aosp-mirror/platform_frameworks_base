@@ -18,25 +18,33 @@ package com.android.systemui.shade;
 
 import com.android.systemui.camera.CameraGestureHelper;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.keyguard.domain.interactor.KeyguardQuickAffordanceInteractor;
+import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 
+import dagger.Lazy;
+
 import javax.inject.Inject;
+
 
 /** Handles launching camera from Shade. */
 @SysUISingleton
 public class CameraLauncher {
     private final CameraGestureHelper mCameraGestureHelper;
     private final KeyguardBypassController mKeyguardBypassController;
+    private final Lazy<KeyguardQuickAffordanceInteractor> mKeyguardQuickAffordanceInteractorLazy;
 
     private boolean mLaunchingAffordance;
 
     @Inject
     public CameraLauncher(
             CameraGestureHelper cameraGestureHelper,
-            KeyguardBypassController keyguardBypassController
+            KeyguardBypassController keyguardBypassController,
+            Lazy<KeyguardQuickAffordanceInteractor> keyguardQuickAffordanceInteractorLazy
     ) {
         mCameraGestureHelper = cameraGestureHelper;
         mKeyguardBypassController = keyguardBypassController;
+        mKeyguardQuickAffordanceInteractorLazy = keyguardQuickAffordanceInteractorLazy;
     }
 
     /** Launches the camera. */
@@ -54,7 +62,12 @@ public class CameraLauncher {
      */
     public void setLaunchingAffordance(boolean launchingAffordance) {
         mLaunchingAffordance = launchingAffordance;
-        mKeyguardBypassController.setLaunchingAffordance(launchingAffordance);
+        if (SceneContainerFlag.isEnabled()) {
+            mKeyguardQuickAffordanceInteractorLazy.get()
+                    .setLaunchingAffordance(launchingAffordance);
+        } else {
+            mKeyguardBypassController.setLaunchingAffordance(launchingAffordance);
+        }
     }
 
     /**

@@ -32,11 +32,13 @@ fun createAppHandleState(
     runningTaskInfo: RunningTaskInfo = createTaskInfo(),
     isHandleMenuExpanded: Boolean = false,
     globalAppHandleBounds: Rect = Rect(),
+    isCapturedLinkAvailable: Boolean = false
 ): CaptionState.AppHandle =
     CaptionState.AppHandle(
         runningTaskInfo = runningTaskInfo,
         isHandleMenuExpanded = isHandleMenuExpanded,
-        globalAppHandleBounds = globalAppHandleBounds)
+        globalAppHandleBounds = globalAppHandleBounds,
+        isCapturedLinkAvailable = isCapturedLinkAvailable)
 
 /**
  * Create an instance of [CaptionState.AppHeader] with parameters as properties.
@@ -47,11 +49,13 @@ fun createAppHeaderState(
     runningTaskInfo: RunningTaskInfo = createTaskInfo(),
     isHeaderMenuExpanded: Boolean = false,
     globalAppChipBounds: Rect = Rect(),
+    isCapturedLinkAvailable: Boolean = false
 ): CaptionState.AppHeader =
     CaptionState.AppHeader(
         runningTaskInfo = runningTaskInfo,
         isHeaderMenuExpanded = isHeaderMenuExpanded,
-        globalAppChipBounds = globalAppChipBounds)
+        globalAppChipBounds = globalAppChipBounds,
+        isCapturedLinkAvailable = isCapturedLinkAvailable)
 
 /**
  * Create an instance of [RunningTaskInfo] with parameters as properties.

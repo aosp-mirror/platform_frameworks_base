@@ -16,7 +16,9 @@
 
 package com.android.compose.nestedscroll
 
+import androidx.compose.foundation.gestures.FlingBehavior
 import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.ScrollScope
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
@@ -83,7 +85,16 @@ interface ScrollController {
      * @param initialVelocity The initial velocity of the scroll when stopping.
      * @return The consumed [initialVelocity] when the animation completes.
      */
-    suspend fun onStop(initialVelocity: Float): Float
+    suspend fun OnStopScope.onStop(initialVelocity: Float): Float
+}
+
+interface OnStopScope {
+    /**
+     * Emits scroll events by using the [initialVelocity] and the [FlingBehavior].
+     *
+     * @return consumed velocity
+     */
+    suspend fun flingToScroll(initialVelocity: Float, flingBehavior: FlingBehavior): Float
 }
 
 /**
@@ -307,7 +318,11 @@ class PriorityNestedScrollConnection(
         val controller = requireController(isStopping = false)
         return coroutineScope {
             try {
-                async { controller.onStop(velocity) }
+                async {
+                        with(controller) {
+                            OnStopScopeImpl(controller = controller).onStop(velocity)
+                        }
+                    }
                     // Allows others to interrupt the job.
                     .also { stoppingJob = it }
                     // Note: this can be cancelled by [interruptStopping]
@@ -334,5 +349,21 @@ class PriorityNestedScrollConnection(
     /** Resets the tracking of consumed offsets before entering priority mode. */
     private fun resetOffsetTracker() {
         offsetScrolledBeforePriorityMode = 0f
+    }
+}
+
+private class OnStopScopeImpl(private val controller: ScrollController) : OnStopScope {
+    override suspend fun flingToScroll(
+        initialVelocity: Float,
+        flingBehavior: FlingBehavior,
+    ): Float {
+        return with(flingBehavior) {
+            object : ScrollScope {
+                    override fun scrollBy(pixels: Float): Float {
+                        return controller.onScroll(pixels, NestedScrollSource.SideEffect)
+                    }
+                }
+                .performFling(initialVelocity)
+        }
     }
 }

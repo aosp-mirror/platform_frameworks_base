@@ -1797,6 +1797,7 @@
     <string name="volume_panel_spatial_audio_tracking">Head Tracking</string>
 
     <string name="volume_ringer_change">Tap to change ringer mode</string>
+    <string name="volume_ringer_mode">ringer mode</string>
 
     <!-- Hint for accessibility. For example: double tap to mute [CHAR_LIMIT=NONE] -->
     <string name="volume_ringer_hint_mute">mute</string>
@@ -3733,6 +3734,10 @@
     <!-- Title at the top of the keyboard shortcut helper UI. The helper is a component
          that shows the user which keyboard shortcuts they can use. [CHAR LIMIT=NONE] -->
     <string name="shortcut_helper_title">Keyboard shortcuts</string>
+    <!-- Title at the top of the keyboard shortcut helper UI when in customize mode. The helper
+         is a component that shows the user which keyboard shortcuts they can use.
+         [CHAR LIMIT=NONE] -->
+    <string name="shortcut_helper_customize_mode_title">Customize keyboard shortcuts</string>
     <!-- Placeholder text shown in the search box of the keyboard shortcut helper, when the user
          hasn't typed in anything in the search box yet. The helper is a  component that shows the
          user which keyboard shortcuts they can use. [CHAR LIMIT=NONE] -->
@@ -3744,6 +3749,14 @@
          use. The helper shows shortcuts in categories, which can be collapsed or expanded.
          [CHAR LIMIT=NONE] -->
     <string name="shortcut_helper_content_description_collapse_icon">Collapse icon</string>
+    <!-- Description text of the button that allows user to customize shortcuts in keyboard
+         shortcut helper The helper is a  component that shows the  user which keyboard shortcuts
+         they can use. [CHAR LIMIT=NONE] -->
+    <string name="shortcut_helper_customize_button_text">Customize</string>
+    <!-- Description text of the button that allows user to exit shortcut customization mode in
+         keyboard shortcut helper The helper is a  component that shows the  user which keyboard
+         shortcuts they can use. [CHAR LIMIT=NONE] -->
+    <string name="shortcut_helper_done_button_text">Done</string>
     <!-- Content description of the icon that allows to expand a keyboard shortcut helper category
          panel. The helper is a  component that shows the  user which keyboard shortcuts they can
          use. The helper shows shortcuts in categories, which can be collapsed or expanded.
@@ -3918,10 +3931,10 @@
     </string>
     <!-- Title for the Reset Tiles dialog in QS Edit mode. [CHAR LIMIT=NONE] -->
     <string name="qs_edit_mode_reset_dialog_title">
-        Reset tiles
+        Reset all tiles?
     </string>
     <!-- Content of the Reset Tiles dialog in QS Edit mode. [CHAR LIMIT=NONE] -->
     <string name="qs_edit_mode_reset_dialog_content">
-        Reset tiles to their original order and sizes?
+        All Quick Settings tiles will reset to the device’s original settings
     </string>
 </resources>

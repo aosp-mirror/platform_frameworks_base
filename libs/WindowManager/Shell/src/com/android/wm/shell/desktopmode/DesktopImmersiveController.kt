@@ -224,9 +224,9 @@ class DesktopImmersiveController(
         finishTransaction: SurfaceControl.Transaction,
         finishCallback: Transitions.TransitionFinishCallback
     ): Boolean {
-        logD("startAnimation transition=%s", transition)
         val state = requireState()
         if (transition != state.transition) return false
+        logD("startAnimation transition=%s", transition)
         animateResize(
             targetTaskId = state.taskId,
             info = info,
@@ -334,7 +334,6 @@ class DesktopImmersiveController(
         startTransaction: SurfaceControl.Transaction,
         finishTransaction: SurfaceControl.Transaction,
     ) {
-        logD("onTransitionReady transition=%s", transition)
         // Check if this is a pending external exit transition.
         val pendingExit = pendingExternalExitTransitions
             .firstOrNull { pendingExit -> pendingExit.transition == transition }
@@ -402,7 +401,6 @@ class DesktopImmersiveController(
     }
 
     override fun onTransitionMerged(merged: IBinder, playing: IBinder) {
-        logD("onTransitionMerged merged=%s playing=%s", merged, playing)
         val pendingExit = pendingExternalExitTransitions
             .firstOrNull { pendingExit -> pendingExit.transition == merged }
         if (pendingExit != null) {
@@ -415,7 +413,6 @@ class DesktopImmersiveController(
     }
 
     override fun onTransitionFinished(transition: IBinder, aborted: Boolean) {
-        logD("onTransitionFinished transition=%s aborted=%b", transition, aborted)
         val pendingExit = pendingExternalExitTransitions
             .firstOrNull { pendingExit -> pendingExit.transition == transition }
         if (pendingExit != null) {

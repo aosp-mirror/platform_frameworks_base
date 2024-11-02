@@ -16,10 +16,22 @@
 
 package android.media.quality;
 
+import android.annotation.CallbackExecutor;
 import android.annotation.FlaggedApi;
+import android.annotation.NonNull;
 import android.annotation.SystemService;
 import android.content.Context;
 import android.media.tv.flags.Flags;
+import android.os.RemoteException;
+
+import androidx.annotation.RequiresPermission;
+
+import com.android.internal.util.Preconditions;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.Executor;
 
 /**
  * Expose TV setting APIs for the application to use
@@ -33,6 +45,9 @@ public class MediaQualityManager {
 
     private final IMediaQualityManager mService;
     private final Context mContext;
+    private final Object mLock = new Object();
+    // @GuardedBy("mLock")
+    private final List<PictureProfileCallbackRecord> mPpCallbackRecords = new ArrayList<>();
 
     /**
      * @hide
@@ -40,5 +55,165 @@ public class MediaQualityManager {
     public MediaQualityManager(Context context, IMediaQualityManager service) {
         mContext = context;
         mService = service;
+        IPictureProfileCallback mqCallback = new IPictureProfileCallback.Stub() {
+            @Override
+            public void onPictureProfileAdded(long profileId, PictureProfile profile) {
+                synchronized (mLock) {
+                    for (PictureProfileCallbackRecord record : mPpCallbackRecords) {
+                        // TODO: filter callback record
+                        record.postPictureProfileAdded(profileId, profile);
+                    }
+                }
+            }
+            @Override
+            public void onPictureProfileUpdated(long profileId, PictureProfile profile) {
+                synchronized (mLock) {
+                    for (PictureProfileCallbackRecord record : mPpCallbackRecords) {
+                        // TODO: filter callback record
+                        record.postPictureProfileUpdated(profileId, profile);
+                    }
+                }
+            }
+        };
+    }
+
+    /**
+     * Registers a {@link PictureProfileCallback}.
+     * @hide
+     */
+    public void registerCallback(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull PictureProfileCallback callback) {
+        Preconditions.checkNotNull(callback);
+        Preconditions.checkNotNull(executor);
+        synchronized (mLock) {
+            mPpCallbackRecords.add(new PictureProfileCallbackRecord(callback, executor));
+        }
+    }
+
+    /**
+     * Unregisters the existing {@link PictureProfileCallback}.
+     * @hide
+     */
+    public void unregisterCallback(@NonNull final PictureProfileCallback callback) {
+        Preconditions.checkNotNull(callback);
+        synchronized (mLock) {
+            for (Iterator<PictureProfileCallbackRecord> it = mPpCallbackRecords.iterator();
+                    it.hasNext(); ) {
+                PictureProfileCallbackRecord record = it.next();
+                if (record.getCallback() == callback) {
+                    it.remove();
+                    break;
+                }
+            }
+        }
+    }
+
+
+    /**
+     * Gets picture profile by given profile ID.
+     * @return the corresponding picture profile if available; {@code null} if the ID doesn't
+     *         exist or the profile is not accessible to the caller.
+     */
+    public PictureProfile getPictureProfileById(long profileId) {
+        try {
+            return mService.getPictureProfileById(profileId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+
+    /** @SystemApi gets profiles that available to the given package */
+    @RequiresPermission(android.Manifest.permission.MANAGE_GLOBAL_PICTURE_QUALITY_SERVICE)
+    public List<PictureProfile> getPictureProfilesByPackage(String packageName) {
+        try {
+            return mService.getPictureProfilesByPackage(packageName);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /** Gets profiles that available to the caller package */
+    public List<PictureProfile> getAvailablePictureProfiles() {
+        try {
+            return mService.getAvailablePictureProfiles();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /** @SystemApi all stored picture profiles */
+    @RequiresPermission(android.Manifest.permission.MANAGE_GLOBAL_PICTURE_QUALITY_SERVICE)
+    public List<PictureProfile> getAvailableAllPictureProfiles() {
+        try {
+            return mService.getAvailableAllPictureProfiles();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+
+    /**
+     * Creates a picture profile and store it in the system.
+     *
+     * @return the stored profile with an assigned profile ID.
+     */
+    public PictureProfile createPictureProfile(PictureProfile pp) {
+        try {
+            return mService.createPictureProfile(pp);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    private static final class PictureProfileCallbackRecord {
+        private final PictureProfileCallback mCallback;
+        private final Executor mExecutor;
+
+        PictureProfileCallbackRecord(PictureProfileCallback callback, Executor executor) {
+            mCallback = callback;
+            mExecutor = executor;
+        }
+
+        public PictureProfileCallback getCallback() {
+            return mCallback;
+        }
+
+        public void postPictureProfileAdded(final long id, PictureProfile profile) {
+
+            mExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    mCallback.onPictureProfileAdded(id, profile);
+                }
+            });
+        }
+
+        public void postPictureProfileUpdated(final long id, PictureProfile profile) {
+            mExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    mCallback.onPictureProfileUpdated(id, profile);
+                }
+            });
+        }
+    }
+
+    /**
+     * Callback used to monitor status of picture profiles.
+     * @hide
+     */
+    public abstract static class PictureProfileCallback {
+        /**
+         * @hide
+         */
+        public void onPictureProfileAdded(long id, PictureProfile profile) {
+        }
+        /**
+         * @hide
+         */
+        public void onPictureProfileUpdated(long id, PictureProfile profile) {
+        }
     }
 }

@@ -21,6 +21,8 @@ package com.android.systemui.scene.ui.viewmodel
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.view.MotionEvent
+import android.view.MotionEvent.ACTION_DOWN
+import android.view.MotionEvent.ACTION_OUTSIDE
 import android.view.View
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -43,6 +45,7 @@ import com.android.systemui.shade.data.repository.fakeShadeRepository
 import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.shade.shared.flag.DualShade
 import com.android.systemui.shade.shared.model.ShadeMode
+import com.android.systemui.statusbar.data.repository.fakeRemoteInputRepository
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
@@ -68,6 +71,7 @@ class SceneContainerViewModelTest : SysuiTestCase() {
     private val fakeSceneDataSource by lazy { kosmos.fakeSceneDataSource }
     private val fakeShadeRepository by lazy { kosmos.fakeShadeRepository }
     private val sceneContainerConfig by lazy { kosmos.sceneContainerConfig }
+    private val fakeRemoteInputRepository by lazy { kosmos.fakeRemoteInputRepository }
     private val falsingManager by lazy { kosmos.fakeFalsingManager }
     private val view = mock<View>()
 
@@ -231,6 +235,35 @@ class SceneContainerViewModelTest : SysuiTestCase() {
             assertThat(kosmos.fakePowerRepository.userTouchRegistered).isFalse()
             underTest.onMotionEvent(mock())
             assertThat(kosmos.fakePowerRepository.userTouchRegistered).isTrue()
+        }
+
+    @Test
+    fun userInputOnEmptySpace_insideEvent() =
+        testScope.runTest {
+            assertThat(fakeRemoteInputRepository.areRemoteInputsClosed).isFalse()
+            val insideMotionEvent = MotionEvent.obtain(0, 0, ACTION_DOWN, 0f, 0f, 0)
+            underTest.onEmptySpaceMotionEvent(insideMotionEvent)
+            assertThat(fakeRemoteInputRepository.areRemoteInputsClosed).isFalse()
+        }
+
+    @Test
+    fun userInputOnEmptySpace_outsideEvent_remoteInputActive() =
+        testScope.runTest {
+            fakeRemoteInputRepository.isRemoteInputActive.value = true
+            assertThat(fakeRemoteInputRepository.areRemoteInputsClosed).isFalse()
+            val outsideMotionEvent = MotionEvent.obtain(0, 0, ACTION_OUTSIDE, 0f, 0f, 0)
+            underTest.onEmptySpaceMotionEvent(outsideMotionEvent)
+            assertThat(fakeRemoteInputRepository.areRemoteInputsClosed).isTrue()
+        }
+
+    @Test
+    fun userInputOnEmptySpace_outsideEvent_remoteInputInactive() =
+        testScope.runTest {
+            fakeRemoteInputRepository.isRemoteInputActive.value = false
+            assertThat(fakeRemoteInputRepository.areRemoteInputsClosed).isFalse()
+            val outsideMotionEvent = MotionEvent.obtain(0, 0, ACTION_OUTSIDE, 0f, 0f, 0)
+            underTest.onEmptySpaceMotionEvent(outsideMotionEvent)
+            assertThat(fakeRemoteInputRepository.areRemoteInputsClosed).isFalse()
         }
 
     @Test

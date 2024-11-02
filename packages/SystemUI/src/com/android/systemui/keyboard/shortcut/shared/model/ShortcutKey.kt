@@ -16,10 +16,15 @@
 
 package com.android.systemui.keyboard.shortcut.shared.model
 
+import android.graphics.drawable.Drawable
 import androidx.annotation.DrawableRes
 
 sealed interface ShortcutKey {
     data class Text(val value: String) : ShortcutKey
 
-    data class Icon(@DrawableRes val drawableResId: Int) : ShortcutKey
+    sealed interface Icon : ShortcutKey {
+        data class ResIdIcon(@DrawableRes val drawableResId: Int) : Icon
+
+        data class DrawableIcon(val drawable: Drawable) : Icon
+    }
 }

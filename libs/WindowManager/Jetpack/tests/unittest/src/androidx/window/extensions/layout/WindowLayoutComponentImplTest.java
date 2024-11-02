@@ -26,6 +26,8 @@ import android.content.ContextWrapper;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
 import android.view.Display;
+import android.view.DisplayInfo;
+import android.view.Surface;
 
 import androidx.annotation.NonNull;
 import androidx.test.core.app.ApplicationProvider;
@@ -72,6 +74,11 @@ public class WindowLayoutComponentImplTest {
         mWindowLayoutComponent.onDisplayFeaturesChanged(Collections.emptyList());
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void testAddWindowLayoutListener_nonUiContext_throwsError() {
+        mWindowLayoutComponent.addWindowLayoutInfoListener(mAppContext, info -> {});
+    }
+
     @Test
     public void testGetCurrentWindowLayoutInfo_noFoldingFeature_returnsEmptyList() {
         final Context testUiContext = new TestUiContext(mAppContext);
@@ -88,6 +95,29 @@ public class WindowLayoutComponentImplTest {
         final WindowConfiguration windowConfiguration =
                 testUiContext.getResources().getConfiguration().windowConfiguration;
         final Rect featureRect = windowConfiguration.getBounds();
+        // Mock DisplayStateProvider to control rotation and DisplayInfo, preventing dependency on
+        // the real device orientation or display configuration. This improves test reliability on
+        // devices like foldables or tablets that might have varying configurations.
+        final WindowLayoutComponentImpl.DisplayStateProvider displayStateProvider =
+                new WindowLayoutComponentImpl.DisplayStateProvider() {
+                    @Override
+                    public int getDisplayRotation(
+                            @NonNull WindowConfiguration windowConfiguration) {
+                        return Surface.ROTATION_0;
+                    }
+
+                    @NonNull
+                    @Override
+                    public DisplayInfo getDisplayInfo(int displayId) {
+                        final DisplayInfo displayInfo = new DisplayInfo();
+                        displayInfo.logicalWidth = featureRect.width();
+                        displayInfo.logicalHeight = featureRect.height();
+                        return displayInfo;
+                    }
+                };
+        mWindowLayoutComponent = new WindowLayoutComponentImpl(mAppContext,
+                mock(DeviceStateManagerFoldingFeatureProducer.class),
+                displayStateProvider);
         final CommonFoldingFeature foldingFeature = new CommonFoldingFeature(
                 CommonFoldingFeature.COMMON_TYPE_HINGE,
                 CommonFoldingFeature.COMMON_STATE_FLAT,
@@ -102,12 +132,9 @@ public class WindowLayoutComponentImplTest {
                 featureRect, FoldingFeature.TYPE_HINGE, FoldingFeature.STATE_FLAT));
     }
 
-    @Test
-    public void testGetCurrentWindowLayoutInfo_nonUiContext_returnsEmptyList() {
-        final WindowLayoutInfo layoutInfo =
-                mWindowLayoutComponent.getCurrentWindowLayoutInfo(mAppContext);
-
-        assertThat(layoutInfo.getDisplayFeatures()).isEmpty();
+    @Test(expected = IllegalArgumentException.class)
+    public void testGetCurrentWindowLayoutInfo_nonUiContext_throwsError() {
+        mWindowLayoutComponent.getCurrentWindowLayoutInfo(mAppContext);
     }
 
     /**

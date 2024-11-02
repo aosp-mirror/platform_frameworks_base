@@ -7,7 +7,7 @@ flag {
      is_exported: true
      is_fixed_read_only: true
      description: "PropertyInvalidatedCache uses shared memory for nonces."
-     bug: "366552454"
+     bug: "360897450"
 }
 
 flag {
@@ -16,5 +16,5 @@ flag {
      is_exported: true
      is_fixed_read_only: true
      description: "Enforce PropertyInvalidatedCache.setTestMode() protocol"
-     bug: "366552454"
+     bug: "360897450"
 }

@@ -162,8 +162,8 @@ interface PreferenceMetadata {
     /**
      * Returns the preference icon.
      *
-     * Implement [PreferenceIconProvider] interface if icon content is provided dynamically
-     * (e.g. icon is provided based on flag value).
+     * Implement [PreferenceIconProvider] interface if icon is provided dynamically (e.g. icon is
+     * provided based on flag value).
      */
     fun getPreferenceIcon(context: Context): Int =
         when {
@@ -212,4 +212,11 @@ interface PreferenceScreenMetadata : PreferenceMetadata {
      * conditions. DO NOT check any condition (except compile time flag) before adding a preference.
      */
     fun getPreferenceHierarchy(context: Context): PreferenceHierarchy
+
+    /**
+     * Returns the [Intent] to show current preference screen.
+     *
+     * @param metadata the preference to locate when show the screen
+     */
+    fun getLaunchIntent(context: Context, metadata: PreferenceMetadata?): Intent? = null
 }
