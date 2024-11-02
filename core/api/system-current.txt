@@ -2324,6 +2324,24 @@ package android.app.ondeviceintelligence {
     field public static final int FEATURE_STATUS_UNAVAILABLE = 0; // 0x0
   }
 
+  @FlaggedApi("android.app.ondeviceintelligence.flags.enable_on_device_intelligence_module") public final class InferenceInfo implements android.os.Parcelable {
+    method public int describeContents();
+    method public long getEndTimeMillis();
+    method public long getStartTimeMillis();
+    method public long getSuspendedTimeMillis();
+    method public int getUid();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.ondeviceintelligence.InferenceInfo> CREATOR;
+  }
+
+  public static final class InferenceInfo.Builder {
+    ctor public InferenceInfo.Builder(int);
+    method @NonNull public android.app.ondeviceintelligence.InferenceInfo build();
+    method @NonNull public android.app.ondeviceintelligence.InferenceInfo.Builder setEndTimeMillis(long);
+    method @NonNull public android.app.ondeviceintelligence.InferenceInfo.Builder setStartTimeMillis(long);
+    method @NonNull public android.app.ondeviceintelligence.InferenceInfo.Builder setSuspendedTimeMillis(long);
+  }
+
   @FlaggedApi("android.app.ondeviceintelligence.flags.enable_on_device_intelligence") public class OnDeviceIntelligenceException extends java.lang.Exception {
     ctor public OnDeviceIntelligenceException(int, @NonNull String, @NonNull android.os.PersistableBundle);
     ctor public OnDeviceIntelligenceException(int, @NonNull android.os.PersistableBundle);
@@ -2353,6 +2371,7 @@ package android.app.ondeviceintelligence {
   @FlaggedApi("android.app.ondeviceintelligence.flags.enable_on_device_intelligence") public final class OnDeviceIntelligenceManager {
     method @RequiresPermission(android.Manifest.permission.USE_ON_DEVICE_INTELLIGENCE) public void getFeature(int, @NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<android.app.ondeviceintelligence.Feature,android.app.ondeviceintelligence.OnDeviceIntelligenceException>);
     method @RequiresPermission(android.Manifest.permission.USE_ON_DEVICE_INTELLIGENCE) public void getFeatureDetails(@NonNull android.app.ondeviceintelligence.Feature, @NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<android.app.ondeviceintelligence.FeatureDetails,android.app.ondeviceintelligence.OnDeviceIntelligenceException>);
+    method @FlaggedApi("android.app.ondeviceintelligence.flags.enable_on_device_intelligence_module") @NonNull @RequiresPermission(android.Manifest.permission.DUMP) public java.util.List<android.app.ondeviceintelligence.InferenceInfo> getLatestInferenceInfo(long);
     method @Nullable @RequiresPermission(android.Manifest.permission.USE_ON_DEVICE_INTELLIGENCE) public String getRemoteServicePackageName();
     method @RequiresPermission(android.Manifest.permission.USE_ON_DEVICE_INTELLIGENCE) public void getVersion(@NonNull java.util.concurrent.Executor, @NonNull java.util.function.LongConsumer);
     method @RequiresPermission(android.Manifest.permission.USE_ON_DEVICE_INTELLIGENCE) public void listFeatures(@NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<java.util.List<android.app.ondeviceintelligence.Feature>,android.app.ondeviceintelligence.OnDeviceIntelligenceException>);
