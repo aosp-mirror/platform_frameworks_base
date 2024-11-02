@@ -242,6 +242,9 @@ interface IActivityTaskManager {
 
     boolean supportsLocalVoiceInteraction();
 
+    // Sets whether system educational dialogs should be limited
+    void setLimitSystemEducationDialogs(IBinder appToken, boolean limitSystemEducationDialogs);
+
     // Get device configuration
     ConfigurationInfo getDeviceConfigurationInfo();
 

@@ -629,6 +629,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     // The locusId associated with this activity, if set.
     private LocusId mLocusId;
 
+    // Whether the activity is requesting to limit the system's educational dialogs
+    public boolean mShouldLimitSystemEducationDialogs;
+
     // Whether the activity was launched from a bubble.
     private boolean mLaunchedFromBubble;
 
@@ -7298,6 +7301,16 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     LocusId getLocusId() {
         return mLocusId;
+    }
+
+    void setLimitSystemEducationDialogs(boolean limitSystemEducationDialogs) {
+        if (mShouldLimitSystemEducationDialogs == limitSystemEducationDialogs) return;
+        mShouldLimitSystemEducationDialogs = limitSystemEducationDialogs;
+        final Task task = getTask();
+        if (task != null) {
+            final boolean force = isVisibleRequested() && this == task.getTopNonFinishingActivity();
+            getTask().dispatchTaskInfoChangedIfNeeded(force);
+        }
     }
 
     public void reportScreenCaptured() {
