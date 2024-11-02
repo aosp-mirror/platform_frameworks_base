@@ -20,6 +20,7 @@ package com.android.systemui.qs.panels.ui.compose.infinitegrid
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.fadeIn
@@ -54,7 +55,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -69,21 +69,22 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.MeasureScope
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.layout.positionInRoot
@@ -103,6 +104,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.fastMap
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.compose.animation.bounceable
 import com.android.compose.modifiers.height
 import com.android.systemui.common.ui.compose.load
@@ -134,9 +136,10 @@ import com.android.systemui.qs.panels.ui.viewmodel.EditTileViewModel
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.qs.shared.model.groupAndSort
 import com.android.systemui.res.R
+import kotlin.math.roundToInt
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
-import com.android.app.tracing.coroutines.launchTraced as launch
+import kotlinx.coroutines.flow.collectLatest
 
 object TileType
 
@@ -222,7 +225,7 @@ fun DefaultEditTileGrid(
                         if (dragIsInProgress) {
                             RemoveTileTarget()
                         } else {
-                            Text(text = "Hold and drag to rearrange tiles.")
+                            Text(text = stringResource(id = R.string.drag_to_rearrange_tiles))
                         }
                     }
                 }
@@ -240,7 +243,9 @@ fun DefaultEditTileGrid(
                             spacedBy(dimensionResource(id = R.dimen.qs_label_container_margin)),
                         modifier = modifier.fillMaxSize(),
                     ) {
-                        EditGridHeader { Text(text = "Hold and drag to add tiles.") }
+                        EditGridHeader {
+                            Text(text = stringResource(id = R.string.drag_to_add_tiles))
+                        }
 
                         AvailableTileGrid(otherTiles, selectionState, columns, listState)
                     }
@@ -286,7 +291,7 @@ private fun RemoveTileTarget() {
                 .padding(10.dp),
     ) {
         Icon(imageVector = Icons.Default.Clear, contentDescription = null)
-        Text(text = "Remove")
+        Text(text = stringResource(id = R.string.qs_customize_remove))
     }
 }
 
@@ -409,7 +414,7 @@ private fun GridCell.key(index: Int, dragAndDropState: DragAndDropState): Any {
 /**
  * Adds a list of [GridCell] to the lazy grid
  *
- * @param cells the pairs of [GridCell] to [BounceableTileViewModel]
+ * @param cells the pairs of [GridCell] to [AnimatableTileViewModel]
  * @param dragAndDropState the [DragAndDropState] for this grid
  * @param selectionState the [MutableSelectionState] for this grid
  * @param onToggleSize the callback when a tile's size is toggled
@@ -545,9 +550,27 @@ private fun TileGridCell(
                     selectionState::unSelect,
                 )
                 .tileBackground(colors.background)
-                .tilePadding()
         ) {
-            EditTile(tile = cell.tile, iconOnly = cell.isIcon)
+            val targetValue = if (cell.isIcon) 0f else 1f
+            val animatedProgress = remember { Animatable(targetValue) }
+
+            if (selected) {
+                val resizingState = selectionState.resizingState
+                LaunchedEffect(targetValue, resizingState) {
+                    if (resizingState == null) {
+                        animatedProgress.animateTo(targetValue)
+                    } else {
+                        snapshotFlow { resizingState.progression }
+                            .collectLatest { animatedProgress.snapTo(it) }
+                    }
+                }
+            }
+
+            EditTile(
+                tile = cell.tile,
+                tileWidths = { tileWidths },
+                progress = { animatedProgress.value },
+            )
         }
     }
 }
@@ -612,45 +635,72 @@ private fun SpacerGridCell(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun BoxScope.EditTile(
+fun EditTile(
     tile: EditTileViewModel,
-    iconOnly: Boolean,
+    tileWidths: () -> TileWidths?,
+    progress: () -> Float,
     colors: TileColors = EditModeTileDefaults.editTileColors(),
 ) {
-    // Animated horizontal alignment from center (0f) to start (-1f)
-    val alignmentValue by
-        animateFloatAsState(
-            targetValue = if (iconOnly) 0f else -1f,
-            label = "QSEditTileContentAlignment",
-        )
-    val alignment by remember {
-        derivedStateOf { BiasAlignment(horizontalBias = alignmentValue, verticalBias = 0f) }
-    }
-    // Icon
-    Box(Modifier.size(ToggleTargetSize).align(alignment)) {
-        SmallTileContent(
-            icon = tile.icon,
-            color = colors.icon,
-            animateToEnd = true,
-            modifier = Modifier.align(Alignment.Center),
-        )
-    }
+    val iconSizeDiff = CommonTileDefaults.IconSize - CommonTileDefaults.LargeTileIconSize
+    Row(
+        horizontalArrangement = spacedBy(6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        modifier =
+            Modifier.layout { measurable, constraints ->
+                    // Always display the tile using the large size and trust the parent composable
+                    // to clip the content as needed. This stop the labels from being truncated.
+                    val width = tileWidths()?.max ?: constraints.maxWidth
+                    val placeable =
+                        measurable.measure(constraints.copy(minWidth = width, maxWidth = width))
+                    val currentProgress = progress()
+                    val startPadding =
+                        if (currentProgress == 0f) {
+                            // Find the center of the max width when the tile is icon only
+                            iconHorizontalCenter(constraints.maxWidth)
+                        } else {
+                            // Find the center of the minimum width to hold the same position as the
+                            // tile is resized.
+                            val basePadding =
+                                tileWidths()?.min?.let { iconHorizontalCenter(it) } ?: 0f
+                            // Large tiles, represented with a progress of 1f, have a 0.dp padding
+                            basePadding * (1f - currentProgress)
+                        }
 
-    // Labels, positioned after the icon
-    AnimatedVisibility(visible = !iconOnly, enter = fadeIn(), exit = fadeOut()) {
+                    layout(constraints.maxWidth, constraints.maxHeight) {
+                        placeable.place(startPadding.roundToInt(), 0)
+                    }
+                }
+                .tilePadding(),
+    ) {
+        // Icon
+        Box(Modifier.size(ToggleTargetSize)) {
+            SmallTileContent(
+                icon = tile.icon,
+                color = colors.icon,
+                animateToEnd = true,
+                size = { CommonTileDefaults.IconSize - iconSizeDiff * progress() },
+                modifier = Modifier.align(Alignment.Center),
+            )
+        }
+
+        // Labels, positioned after the icon
         LargeTileLabels(
             label = tile.label.text,
             secondaryLabel = tile.appName?.text,
             colors = colors,
-            modifier = Modifier.padding(start = ToggleTargetSize + TileArrangementPadding),
+            modifier = Modifier.weight(1f).graphicsLayer { alpha = progress() },
         )
     }
 }
 
+private fun MeasureScope.iconHorizontalCenter(containerSize: Int): Float {
+    return (containerSize - ToggleTargetSize.roundToPx()) / 2f -
+        CommonTileDefaults.TilePadding.toPx()
+}
+
 private fun Modifier.tileBackground(color: Color): Modifier {
-    return drawBehind {
-        drawRoundRect(SolidColor(color), cornerRadius = CornerRadius(InactiveCornerRadius.toPx()))
-    }
+    // Clip tile contents from overflowing past the tile
+    return clip(RoundedCornerShape(InactiveCornerRadius)).drawBehind { drawRect(color) }
 }
 
 private object EditModeTileDefaults {

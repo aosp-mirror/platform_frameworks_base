@@ -347,4 +347,26 @@ int AnimatedImageDrawable::currentFrameDuration() {
     return adjustFrameDuration(mSkAnimatedImage->currentFrameDuration());
 }
 
+bool AnimatedImageDrawable::getFilterBitmap() const {
+    const SkFilterMode kFilterBitmap = mSkAnimatedImage->getFilterMode();
+    if (kFilterBitmap == SkFilterMode::kLinear) {
+        return true;
+    }
+    return false;
+}
+
+bool AnimatedImageDrawable::setFilterBitmap(bool filterBitmap) {
+    if (filterBitmap) {
+        if (mSkAnimatedImage->getFilterMode() == SkFilterMode::kLinear) {
+            return false;
+        }
+        mSkAnimatedImage->setFilterMode(SkFilterMode::kLinear);
+    } else {
+        if (mSkAnimatedImage->getFilterMode() == SkFilterMode::kNearest) {
+            return false;
+        }
+        mSkAnimatedImage->setFilterMode(SkFilterMode::kNearest);
+    }
+    return true;
+}
 }  // namespace android

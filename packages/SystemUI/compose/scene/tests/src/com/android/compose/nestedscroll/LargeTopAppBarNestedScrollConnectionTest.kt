@@ -16,6 +16,8 @@
 
 package com.android.compose.nestedscroll
 
+import androidx.compose.foundation.gestures.FlingBehavior
+import androidx.compose.foundation.gestures.ScrollScope
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
@@ -29,6 +31,13 @@ class LargeTopAppBarNestedScrollConnectionTest(testCase: TestCase) {
     val scrollSource = testCase.scrollSource
 
     private var height = 0f
+    private val customFlingBehavior =
+        object : FlingBehavior {
+            override suspend fun ScrollScope.performFling(initialVelocity: Float): Float {
+                scrollBy(initialVelocity)
+                return initialVelocity / 2f
+            }
+        }
 
     private fun buildScrollConnection(heightRange: ClosedFloatingPointRange<Float>) =
         LargeTopAppBarNestedScrollConnection(
@@ -36,6 +45,7 @@ class LargeTopAppBarNestedScrollConnectionTest(testCase: TestCase) {
             onHeightChanged = { height = it },
             minHeight = { heightRange.start },
             maxHeight = { heightRange.endInclusive },
+            flingBehavior = customFlingBehavior,
         )
 
     private fun NestedScrollConnection.scroll(

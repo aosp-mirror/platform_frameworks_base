@@ -26,7 +26,7 @@ import android.os.VibrationEffect;
 import android.os.VibratorInfo;
 import android.os.vibrator.PrebakedSegment;
 import android.os.vibrator.PrimitiveSegment;
-import android.os.vibrator.PwleSegment;
+import android.os.vibrator.PwlePoint;
 import android.os.vibrator.RampSegment;
 import android.os.vibrator.StepSegment;
 import android.os.vibrator.VibrationEffectSegment;
@@ -50,6 +50,7 @@ public final class FakeVibratorControllerProvider {
     private final Map<Long, PrebakedSegment> mEnabledAlwaysOnEffects = new HashMap<>();
     private final Map<Long, List<VibrationEffectSegment>> mEffectSegments = new TreeMap<>();
     private final Map<Long, List<VibrationEffect.VendorEffect>> mVendorEffects = new TreeMap<>();
+    private final Map<Long, List<PwlePoint>> mEffectPwlePoints = new TreeMap<>();
     private final Map<Long, List<Integer>> mBraking = new HashMap<>();
     private final List<Float> mAmplitudes = new ArrayList<>();
     private final List<Boolean> mExternalControlStates = new ArrayList<>();
@@ -89,6 +90,10 @@ public final class FakeVibratorControllerProvider {
 
     void recordVendorEffect(long vibrationId, VibrationEffect.VendorEffect vendorEffect) {
         mVendorEffects.computeIfAbsent(vibrationId, k -> new ArrayList<>()).add(vendorEffect);
+    }
+
+    void recordEffectPwlePoint(long vibrationId, PwlePoint pwlePoint) {
+        mEffectPwlePoints.computeIfAbsent(vibrationId, k -> new ArrayList<>()).add(pwlePoint);
     }
 
     void recordBraking(long vibrationId, int braking) {
@@ -195,11 +200,11 @@ public final class FakeVibratorControllerProvider {
         }
 
         @Override
-        public long composePwleV2(PwleSegment[] primitives, long vibrationId) {
+        public long composePwleV2(PwlePoint[] pwlePoints, long vibrationId) {
             long duration = 0;
-            for (PwleSegment primitive: primitives) {
-                duration += primitive.getDuration();
-                recordEffectSegment(vibrationId, primitive);
+            for (PwlePoint pwlePoint: pwlePoints) {
+                duration += pwlePoint.getTimeMillis();
+                recordEffectPwlePoint(vibrationId, pwlePoint);
             }
             applyLatency(mOnLatency);
             scheduleListener(duration, vibrationId);
@@ -477,6 +482,28 @@ public final class FakeVibratorControllerProvider {
         // Returns segments in order of vibrationId, which increases over time. TreeMap gives order.
         ArrayList<VibrationEffect.VendorEffect> result = new ArrayList<>();
         for (List<VibrationEffect.VendorEffect> subList : mVendorEffects.values()) {
+            result.addAll(subList);
+        }
+        return result;
+    }
+
+    /** Return list of {@link PwlePoint} played by this controller, in order. */
+    public List<PwlePoint> getEffectPwlePoints(long vibrationId) {
+        if (mEffectPwlePoints.containsKey(vibrationId)) {
+            return new ArrayList<>(mEffectPwlePoints.get(vibrationId));
+        } else {
+            return new ArrayList<>();
+        }
+    }
+
+    /**
+     * Returns a list of all vibrations' {@link PwlePoint}s, for external-use where vibration
+     * IDs aren't exposed.
+     */
+    public List<PwlePoint> getAllEffectPwlePoints() {
+        // Returns segments in order of vibrationId, which increases over time. TreeMap gives order.
+        ArrayList<PwlePoint> result = new ArrayList<>();
+        for (List<PwlePoint> subList : mEffectPwlePoints.values()) {
             result.addAll(subList);
         }
         return result;

@@ -348,3 +348,14 @@ flag {
   bug: "372230928"
   is_fixed_read_only: true
 }
+
+flag {
+  name: "disallow_app_progress_embedded_window"
+  namespace: "windowing_frontend"
+  description: "Pilfer pointers when app transfer input gesture to embedded window."
+  bug: "365504126"
+  is_fixed_read_only: true
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}

@@ -22,8 +22,10 @@ import android.content.pm.PackageManager
 import android.content.res.Resources
 import android.hardware.input.IInputManager
 import android.hardware.input.AidlKeyGestureEvent
+import android.hardware.input.AppLaunchData
 import android.hardware.input.IKeyGestureEventListener
 import android.hardware.input.IKeyGestureHandler
+import android.hardware.input.InputGestureData
 import android.hardware.input.InputManager
 import android.hardware.input.InputManagerGlobal
 import android.hardware.input.KeyGestureEvent
@@ -232,7 +234,7 @@ class KeyGestureControllerTests {
         keyGestureController.handleKeyGesture(/* deviceId = */ 0, intArrayOf(KeyEvent.KEYCODE_HOME),
             /* modifierState = */ 0, KeyGestureEvent.KEY_GESTURE_TYPE_HOME,
             KeyGestureEvent.ACTION_GESTURE_COMPLETE, /* displayId */ 0,
-            /* focusedToken = */ null, /* flags = */ 0
+            /* focusedToken = */ null, /* flags = */ 0, /* appLaunchData = */null
         )
 
         assertEquals(
@@ -259,6 +261,7 @@ class KeyGestureControllerTests {
         val expectedKeys: IntArray,
         val expectedModifierState: Int,
         val expectedActions: IntArray,
+        val expectedAppLaunchData: AppLaunchData? = null,
     ) {
         override fun toString(): String = name
     }
@@ -884,6 +887,86 @@ class KeyGestureControllerTests {
     }
 
     @Test
+    @EnableFlags(com.android.window.flags.Flags.FLAG_ENABLE_TASK_RESIZING_KEYBOARD_SHORTCUTS)
+    fun testSnapLeftFreeformTask() {
+        val keyGestureController = KeyGestureController(context, testLooper.looper)
+        testKeyGestureInternal(
+            keyGestureController,
+            TestData(
+                "ALT + [ -> Resizes a task to fit the left half of the screen",
+                intArrayOf(
+                    KeyEvent.KEYCODE_ALT_LEFT,
+                    KeyEvent.KEYCODE_LEFT_BRACKET
+                ),
+                KeyGestureEvent.KEY_GESTURE_TYPE_SNAP_LEFT_FREEFORM_WINDOW,
+                intArrayOf(KeyEvent.KEYCODE_LEFT_BRACKET),
+                KeyEvent.META_ALT_ON,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
+            )
+        )
+    }
+
+    @Test
+    @EnableFlags(com.android.window.flags.Flags.FLAG_ENABLE_TASK_RESIZING_KEYBOARD_SHORTCUTS)
+    fun testSnapRightFreeformTask() {
+        val keyGestureController = KeyGestureController(context, testLooper.looper)
+        testKeyGestureInternal(
+            keyGestureController,
+            TestData(
+                "ALT + ] -> Resizes a task to fit the right half of the screen",
+                intArrayOf(
+                    KeyEvent.KEYCODE_ALT_LEFT,
+                    KeyEvent.KEYCODE_RIGHT_BRACKET
+                ),
+                KeyGestureEvent.KEY_GESTURE_TYPE_SNAP_RIGHT_FREEFORM_WINDOW,
+                intArrayOf(KeyEvent.KEYCODE_RIGHT_BRACKET),
+                KeyEvent.META_ALT_ON,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
+            )
+        )
+    }
+
+    @Test
+    @EnableFlags(com.android.window.flags.Flags.FLAG_ENABLE_TASK_RESIZING_KEYBOARD_SHORTCUTS)
+    fun testMaximizeFreeformTask() {
+        val keyGestureController = KeyGestureController(context, testLooper.looper)
+        testKeyGestureInternal(
+            keyGestureController,
+            TestData(
+                "ALT + '=' -> Maximizes a task to fit the screen",
+                intArrayOf(
+                    KeyEvent.KEYCODE_ALT_LEFT,
+                    KeyEvent.KEYCODE_EQUALS
+                ),
+                KeyGestureEvent.KEY_GESTURE_TYPE_MAXIMIZE_FREEFORM_WINDOW,
+                intArrayOf(KeyEvent.KEYCODE_EQUALS),
+                KeyEvent.META_ALT_ON,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
+            )
+        )
+    }
+
+    @Test
+    @EnableFlags(com.android.window.flags.Flags.FLAG_ENABLE_TASK_RESIZING_KEYBOARD_SHORTCUTS)
+    fun testRestoreFreeformTask() {
+        val keyGestureController = KeyGestureController(context, testLooper.looper)
+        testKeyGestureInternal(
+            keyGestureController,
+            TestData(
+                "ALT + '-' -> Restores a task size to its previous bounds",
+                intArrayOf(
+                    KeyEvent.KEYCODE_ALT_LEFT,
+                    KeyEvent.KEYCODE_MINUS
+                ),
+                KeyGestureEvent.KEY_GESTURE_TYPE_RESTORE_FREEFORM_WINDOW_SIZE,
+                intArrayOf(KeyEvent.KEYCODE_MINUS),
+                KeyEvent.META_ALT_ON,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
+            )
+        )
+    }
+
+    @Test
     fun testCapsLockPressNotified() {
         val keyGestureController = KeyGestureController(context, testLooper.looper)
         val listener = KeyGestureEventListener()
@@ -975,6 +1058,62 @@ class KeyGestureControllerTests {
         testKeyGestureInternal(keyGestureController, test)
     }
 
+    @Keep
+    private fun customInputGesturesTestArguments(): Array<TestData> {
+        return arrayOf(
+            TestData(
+                "META + ALT + Q -> Go Home",
+                intArrayOf(
+                    KeyEvent.KEYCODE_META_LEFT,
+                    KeyEvent.KEYCODE_ALT_LEFT,
+                    KeyEvent.KEYCODE_Q
+                ),
+                KeyGestureEvent.KEY_GESTURE_TYPE_HOME,
+                intArrayOf(KeyEvent.KEYCODE_Q),
+                KeyEvent.META_META_ON or KeyEvent.META_ALT_ON,
+                intArrayOf(
+                    KeyGestureEvent.ACTION_GESTURE_COMPLETE
+                )
+            ),
+            TestData(
+                "META + ALT + Q -> Launch app",
+                intArrayOf(
+                    KeyEvent.KEYCODE_CTRL_LEFT,
+                    KeyEvent.KEYCODE_SHIFT_LEFT,
+                    KeyEvent.KEYCODE_Q
+                ),
+                KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_APPLICATION,
+                intArrayOf(KeyEvent.KEYCODE_Q),
+                KeyEvent.META_CTRL_ON or KeyEvent.META_SHIFT_ON,
+                intArrayOf(
+                    KeyGestureEvent.ACTION_GESTURE_COMPLETE
+                ),
+                AppLaunchData.createLaunchDataForComponent("com.test", "com.test.BookmarkTest")
+            ),
+        )
+    }
+
+    @Test
+    @Parameters(method = "customInputGesturesTestArguments")
+    fun testCustomKeyGestures(test: TestData) {
+        val keyGestureController = KeyGestureController(context, testLooper.looper)
+        val builder = InputGestureData.Builder()
+            .setKeyGestureType(test.expectedKeyGestureType)
+            .setTrigger(
+                InputGestureData.createKeyTrigger(
+                    test.expectedKeys[0],
+                    test.expectedModifierState
+                )
+            );
+        if (test.expectedAppLaunchData != null) {
+            builder.setAppLaunchData(test.expectedAppLaunchData)
+        }
+        val inputGestureData = builder.build();
+
+        keyGestureController.addCustomInputGesture(0, inputGestureData.aidlData)
+        testKeyGestureInternal(keyGestureController, test)
+    }
+
     private fun testKeyGestureInternal(keyGestureController: KeyGestureController, test: TestData) {
         var handleEvents = mutableListOf<KeyGestureEvent>()
         val handler = KeyGestureHandler { event, _ ->
@@ -1012,6 +1151,11 @@ class KeyGestureControllerTests {
                 "Test: $test doesn't produce correct key gesture action",
                 test.expectedActions[i],
                 event.action
+            )
+            assertEquals(
+                "Test: $test doesn't produce correct app launch data",
+                test.expectedAppLaunchData,
+                event.appLaunchData
             )
         }
 

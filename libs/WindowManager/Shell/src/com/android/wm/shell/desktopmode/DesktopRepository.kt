@@ -23,14 +23,14 @@ import android.util.ArrayMap
 import android.util.ArraySet
 import android.util.SparseArray
 import android.view.Display.INVALID_DISPLAY
+import android.window.DesktopModeFlags
 import android.window.WindowContainerToken
 import androidx.core.util.forEach
 import androidx.core.util.keyIterator
 import androidx.core.util.valueIterator
 import com.android.internal.protolog.ProtoLog
-import com.android.window.flags.Flags
 import com.android.wm.shell.desktopmode.persistence.DesktopPersistentRepository
-import com.android.wm.shell.desktopmode.persistence.DesktopTaskState
+import com.android.wm.shell.desktopmode.persistence.DesktopRepositoryInitializer
 import com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE
 import com.android.wm.shell.shared.annotations.ShellMainThread
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
@@ -46,6 +46,7 @@ class DesktopRepository (
     private val context: Context,
     shellInit: ShellInit,
     private val persistentRepository: DesktopPersistentRepository,
+    private val repositoryInitializer: DesktopRepositoryInitializer,
     @ShellMainThread private val mainCoroutineScope: CoroutineScope,
 ){
 
@@ -120,32 +121,7 @@ class DesktopRepository (
     }
 
     private fun initRepoFromPersistentStorage() {
-        if (!Flags.enableDesktopWindowingPersistence()) return
-        //  TODO: b/365962554 - Handle the case that user moves to desktop before it's initialized
-        mainCoroutineScope.launch {
-            val desktop = persistentRepository.readDesktop() ?: return@launch
-
-            val maxTasks =
-                DesktopModeStatus.getMaxTaskLimit(context).takeIf { it > 0 }
-                    ?: desktop.zOrderedTasksCount
-
-            var visibleTasksCount = 0
-            desktop.zOrderedTasksList
-                // Reverse it so we initialize the repo from bottom to top.
-                .reversed()
-                .mapNotNull { taskId -> desktop.tasksByTaskIdMap[taskId] }
-                .forEach { task ->
-                    if (task.desktopTaskState == DesktopTaskState.VISIBLE
-                        && visibleTasksCount < maxTasks
-                    ) {
-                        visibleTasksCount++
-                        addTask(desktop.displayId, task.taskId, isVisible = false)
-                    } else {
-                        addTask(desktop.displayId, task.taskId, isVisible = false)
-                        minimizeTask(desktop.displayId, task.taskId)
-                    }
-                }
-        }
+        repositoryInitializer.initialize(this)
     }
 
     /** Adds [activeTasksListener] to be notified of updates to active tasks. */
@@ -318,6 +294,9 @@ class DesktopRepository (
                 taskId, isVisible, displayId)
             logD("VisibleTaskCount has changed from %d to %d", prevCount, newCount)
             notifyVisibleTaskListeners(displayId, newCount)
+            if (DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_PERSISTENCE.isTrue()) {
+                updatePersistentRepository(displayId)
+            }
         }
     }
 
@@ -365,7 +344,7 @@ class DesktopRepository (
         desktopTaskDataByDisplayId.getOrCreate(displayId).freeformTasksInZOrder.add(0, taskId)
         // Unminimize the task if it is minimized.
         unminimizeTask(displayId, taskId)
-        if (Flags.enableDesktopWindowingPersistence()) {
+        if (DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_PERSISTENCE.isTrue()) {
             updatePersistentRepository(displayId)
         }
     }
@@ -383,7 +362,7 @@ class DesktopRepository (
             desktopTaskDataByDisplayId.getOrCreate(displayId).minimizedTasks.add(taskId)
         }
         updateTask(displayId, taskId, isVisible = false)
-        if (Flags.enableDesktopWindowingPersistence()) {
+        if (DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_PERSISTENCE.isTrue()) {
             updatePersistentRepository(displayId)
         }
     }
@@ -431,7 +410,7 @@ class DesktopRepository (
         unminimizeTask(displayId, taskId)
         removeActiveTask(taskId)
         removeVisibleTask(taskId)
-        if (Flags.enableDesktopWindowingPersistence()) {
+        if (DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_PERSISTENCE.isTrue()) {
             updatePersistentRepository(displayId)
         }
     }

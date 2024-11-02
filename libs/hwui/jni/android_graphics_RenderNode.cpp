@@ -593,9 +593,9 @@ static void android_view_RenderNode_requestPositionUpdates(JNIEnv* env, jobject,
 
             Matrix4 transform;
             SkIRect clipBounds;
+            uirenderer::Rect initialClipBounds;
+            const auto clipFlags = props.getClippingFlags();
             if (enableClip) {
-                uirenderer::Rect initialClipBounds;
-                const auto clipFlags = props.getClippingFlags();
                 if (clipFlags) {
                     props.getClippingRectForFlags(clipFlags, &initialClipBounds);
                 } else {
@@ -659,8 +659,8 @@ static void android_view_RenderNode_requestPositionUpdates(JNIEnv* env, jobject,
                         static_cast<jint>(bounds.left), static_cast<jint>(bounds.top),
                         static_cast<jint>(bounds.right), static_cast<jint>(bounds.bottom),
                         static_cast<jint>(clipBounds.fLeft), static_cast<jint>(clipBounds.fTop),
-                        static_cast<jint>(clipBounds.fRight),
-                        static_cast<jint>(clipBounds.fBottom));
+                        static_cast<jint>(clipBounds.fRight), static_cast<jint>(clipBounds.fBottom),
+                        static_cast<jint>(props.getWidth()), static_cast<jint>(props.getHeight()));
             }
             if (!keepListening) {
                 env->DeleteGlobalRef(mListener);
@@ -891,7 +891,7 @@ int register_android_view_RenderNode(JNIEnv* env) {
     gPositionListener.callPositionChanged = GetStaticMethodIDOrDie(
             env, clazz, "callPositionChanged", "(Ljava/lang/ref/WeakReference;JIIII)Z");
     gPositionListener.callPositionChanged2 = GetStaticMethodIDOrDie(
-            env, clazz, "callPositionChanged2", "(Ljava/lang/ref/WeakReference;JIIIIIIII)Z");
+            env, clazz, "callPositionChanged2", "(Ljava/lang/ref/WeakReference;JIIIIIIIIII)Z");
     gPositionListener.callApplyStretch = GetStaticMethodIDOrDie(
             env, clazz, "callApplyStretch", "(Ljava/lang/ref/WeakReference;JFFFFFFFFFF)Z");
     gPositionListener.callPositionLost = GetStaticMethodIDOrDie(

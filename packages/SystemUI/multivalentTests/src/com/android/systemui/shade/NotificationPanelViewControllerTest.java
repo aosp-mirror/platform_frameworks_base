@@ -364,6 +364,64 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @EnableFlags(com.android.systemui.Flags.FLAG_SHADE_EXPANDS_ON_STATUS_BAR_LONG_PRESS)
+    public void onStatusBarLongPress_shadeExpands() {
+        long downTime = 42L;
+        // Start touch session with down event
+        onTouchEvent(MotionEvent.obtain(downTime, downTime, MotionEvent.ACTION_DOWN, 1f, 1f, 0));
+        // Status bar triggers long press expand
+        mNotificationPanelViewController.onStatusBarLongPress(
+                MotionEvent.obtain(downTime, downTime + 27L, MotionEvent.ACTION_MOVE, 1f, 1f, 0));
+        assertThat(mNotificationPanelViewController.isExpanded()).isTrue();
+        // Shade ignores the rest of the long press's touch session
+        assertThat(onTouchEvent(
+                MotionEvent.obtain(downTime, downTime + 42L, MotionEvent.ACTION_MOVE, 1f, 1f,
+                        0))).isFalse();
+
+        // Start new touch session
+        long downTime2 = downTime + 100L;
+        assertThat(onTouchEvent(
+                MotionEvent.obtain(downTime2, downTime2, MotionEvent.ACTION_DOWN, 1f, 1f,
+                        0))).isTrue();
+        // Shade no longer ignoring touches
+        assertThat(onTouchEvent(
+                MotionEvent.obtain(downTime2, downTime2 + 2L, MotionEvent.ACTION_MOVE, 1f, 1f,
+                        0))).isTrue();
+    }
+
+    @Test
+    @EnableFlags(com.android.systemui.Flags.FLAG_SHADE_EXPANDS_ON_STATUS_BAR_LONG_PRESS)
+    public void onStatusBarLongPress_qsExpands() {
+        long downTime = 42L;
+        // Start with shade already expanded
+        mNotificationPanelViewController.setExpandedFraction(1F);
+
+        // Start touch session with down event
+        onTouchEvent(MotionEvent.obtain(downTime, downTime, MotionEvent.ACTION_DOWN, 1f, 1f, 0));
+        // Status bar triggers long press expand
+        mNotificationPanelViewController.onStatusBarLongPress(
+                MotionEvent.obtain(downTime, downTime + 27L, MotionEvent.ACTION_MOVE, 1f, 1f, 0));
+        assertThat(mNotificationPanelViewController.isExpanded()).isTrue();
+        // Shade expands to QS
+        verify(mQsController, atLeastOnce()).flingQs(0F, ShadeViewController.FLING_EXPAND);
+        // Shade ignores the rest of the long press's touch session
+        assertThat(onTouchEvent(
+                MotionEvent.obtain(downTime, downTime + 42L, MotionEvent.ACTION_MOVE, 1f, 1f,
+                        0))).isFalse();
+
+        // Start new touch session
+        long downTime2 = downTime + 100L;
+        assertThat(onTouchEvent(
+                MotionEvent.obtain(downTime2, downTime2, MotionEvent.ACTION_DOWN, 1f, 1f,
+                        0))).isTrue();
+        // Shade no longer ignoring touches
+        assertThat(onTouchEvent(
+                MotionEvent.obtain(downTime2, downTime2 + 2L, MotionEvent.ACTION_MOVE, 1f, 1f,
+                        0))).isTrue();
+
+    }
+
+    @Test
     @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void test_pulsing_onTouchEvent_noTracking() {
         // GIVEN device is pulsing

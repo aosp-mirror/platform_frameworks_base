@@ -89,7 +89,7 @@ class DefaultClockProviderTest : SysuiTestCase() {
         // All providers need to provide clocks & thumbnails for exposed clocks
         for (metadata in provider.getClocks()) {
             assertNotNull(provider.createClock(metadata.clockId))
-            assertNotNull(provider.getClockPickerConfig(metadata.clockId))
+            assertNotNull(provider.getClockPickerConfig(ClockSettings(metadata.clockId)))
         }
     }
 

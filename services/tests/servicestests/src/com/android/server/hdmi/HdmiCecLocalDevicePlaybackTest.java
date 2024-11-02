@@ -37,6 +37,7 @@ import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.HdmiPortInfo;
 import android.hardware.hdmi.IHdmiControlCallback;
 import android.hardware.tv.cec.V1_0.SendMessageResult;
+import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.test.TestLooper;
@@ -2661,6 +2662,60 @@ public class HdmiCecLocalDevicePlaybackTest {
 
         assertThat(mHdmiCecLocalDevicePlayback.handleRoutingChange(routingChangeToPlayback))
                 .isEqualTo(Constants.HANDLED);
+        mTestLooper.dispatchAll();
+
+        assertThat(mIsOnActiveSourceLostPopupActive).isFalse();
+        assertThat(mNativeWrapper.getResultMessages().contains(activeSourceFromPlayback)).isTrue();
+        assertThat(mHdmiCecLocalDevicePlayback.getActiveSource().logicalAddress)
+                .isEqualTo(mPlaybackLogicalAddress);
+        assertThat(mHdmiCecLocalDevicePlayback.getActiveSource().physicalAddress)
+                .isEqualTo(mPlaybackPhysicalAddress);
+        mTestLooper.moveTimeForward(STANDBY_AFTER_ACTIVE_SOURCE_LOST_DELAY_MS);
+        mTestLooper.dispatchAll();
+
+        assertThat(mPowerManager.isInteractive()).isTrue();
+    }
+
+    @Test
+    public void onActiveSourceLost_oneTouchPlay_noStandbyAfterTimeout() {
+        mHdmiCecLocalDevicePlayback.mService.getHdmiCecConfig().setStringValue(
+                HdmiControlManager.CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST,
+                HdmiControlManager.POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST_STANDBY_NOW);
+        mHdmiCecLocalDevicePlayback.setActiveSource(mPlaybackLogicalAddress,
+                mPlaybackPhysicalAddress, "HdmiCecLocalDevicePlaybackTest");
+        mPowerManager.setInteractive(true);
+        mNativeWrapper.clearResultMessages();
+        mTestLooper.dispatchAll();
+
+        HdmiCecMessage activeSourceFromTv =
+                HdmiCecMessageBuilder.buildActiveSource(ADDR_TV, 0x0000);
+        HdmiCecMessage activeSourceFromPlayback =
+                HdmiCecMessageBuilder.buildActiveSource(mPlaybackLogicalAddress,
+                        mPlaybackPhysicalAddress);
+
+        assertThat(mHdmiCecLocalDevicePlayback.handleActiveSource(activeSourceFromTv))
+                .isEqualTo(Constants.HANDLED);
+        assertThat(mHdmiCecLocalDevicePlayback.getActiveSource().logicalAddress).isEqualTo(ADDR_TV);
+        mTestLooper.dispatchAll();
+
+        // Pop-up is triggered.
+        mTestLooper.moveTimeForward(POPUP_AFTER_ACTIVE_SOURCE_LOST_DELAY_MS);
+        mTestLooper.dispatchAll();
+        // RequestActiveSourceAction is triggered and TV confirms active source.
+        mNativeWrapper.onCecMessage(activeSourceFromTv);
+        mTestLooper.dispatchAll();
+
+        assertThat(mIsOnActiveSourceLostPopupActive).isTrue();
+        mHdmiControlService.oneTouchPlay(new IHdmiControlCallback() {
+            @Override
+            public void onComplete(int result) throws RemoteException {
+            }
+
+            @Override
+            public IBinder asBinder() {
+                return null;
+            }
+        });
         mTestLooper.dispatchAll();
 
         assertThat(mIsOnActiveSourceLostPopupActive).isFalse();

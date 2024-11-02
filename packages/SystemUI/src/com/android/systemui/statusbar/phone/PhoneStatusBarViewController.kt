@@ -33,7 +33,9 @@ import com.android.systemui.plugins.DarkIconDispatcher
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.ui.view.WindowRootView
+import com.android.systemui.shade.LongPressGestureDetector
 import com.android.systemui.shade.ShadeController
+import com.android.systemui.shade.ShadeExpandsOnStatusBarLongPress
 import com.android.systemui.shade.ShadeLogger
 import com.android.systemui.shade.ShadeViewController
 import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor
@@ -66,6 +68,7 @@ private constructor(
     private val shadeController: ShadeController,
     private val shadeViewController: ShadeViewController,
     private val panelExpansionInteractor: PanelExpansionInteractor,
+    private val longPressGestureDetector: Provider<LongPressGestureDetector>,
     private val windowRootView: Provider<WindowRootView>,
     private val shadeLogger: ShadeLogger,
     private val moveFromCenterAnimationController: StatusBarMoveFromCenterAnimationController?,
@@ -113,6 +116,10 @@ private constructor(
         battery = mView.requireViewById(R.id.battery)
         addDarkReceivers()
         addCursorSupportToIconContainers()
+
+        if (ShadeExpandsOnStatusBarLongPress.isEnabled) {
+            mView.setLongPressGestureDetector(longPressGestureDetector.get())
+        }
 
         progressProvider?.setReadyToHandleTransition(true)
         configurationController.addCallback(configurationListener)
@@ -328,6 +335,7 @@ private constructor(
         private val shadeController: ShadeController,
         private val shadeViewController: ShadeViewController,
         private val panelExpansionInteractor: PanelExpansionInteractor,
+        private val longPressGestureDetector: Provider<LongPressGestureDetector>,
         private val windowRootView: Provider<WindowRootView>,
         private val shadeLogger: ShadeLogger,
         private val viewUtil: ViewUtil,
@@ -352,6 +360,7 @@ private constructor(
                 shadeController,
                 shadeViewController,
                 panelExpansionInteractor,
+                longPressGestureDetector,
                 windowRootView,
                 shadeLogger,
                 statusBarMoveFromCenterAnimationController,

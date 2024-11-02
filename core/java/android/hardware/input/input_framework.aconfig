@@ -1,7 +1,10 @@
 package: "com.android.hardware.input"
 container: "system"
 
-# Project link: https://gantry.corp.google.com/projects/android_platform_input_native/changes
+# Project link: https://gantry.corp.google.com/projects/android_platform_input/changes
+
+# NOTE: the input_native namespace is deprecated. New flags should be added to the input namespace
+# instead.
 
 flag {
     namespace: "input_native"
@@ -140,6 +143,13 @@ flag {
   namespace: "input"
   description: "Adds shortcuts to toggle and control a11y features"
   bug: "373458181"
+}
+
+flag {
+    name: "enable_customizable_input_gestures"
+    namespace: "input"
+    description: "Enables keyboard shortcut customization support"
+    bug: "365064144"
 }
 
 flag {

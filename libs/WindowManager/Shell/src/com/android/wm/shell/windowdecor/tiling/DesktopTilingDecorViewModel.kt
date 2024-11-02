@@ -21,10 +21,13 @@ import android.app.ActivityManager.RunningTaskInfo
 import android.content.Context
 import android.graphics.Rect
 import android.util.SparseArray
+import android.window.DisplayAreaInfo
+import android.window.WindowContainerTransaction
 import androidx.core.util.valueIterator
 import com.android.internal.annotations.VisibleForTesting
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer
 import com.android.wm.shell.ShellTaskOrganizer
+import com.android.wm.shell.common.DisplayChangeController
 import com.android.wm.shell.common.DisplayController
 import com.android.wm.shell.common.SyncTransactionQueue
 import com.android.wm.shell.desktopmode.DesktopRepository
@@ -45,9 +48,15 @@ class DesktopTilingDecorViewModel(
     private val toggleResizeDesktopTaskTransitionHandler: ToggleResizeDesktopTaskTransitionHandler,
     private val returnToDragStartAnimator: ReturnToDragStartAnimator,
     private val taskRepository: DesktopRepository,
-) {
+) : DisplayChangeController.OnDisplayChangingListener {
     @VisibleForTesting
     var tilingTransitionHandlerByDisplayId = SparseArray<DesktopTilingWindowDecoration>()
+
+    init {
+        // TODO(b/374309287): Move this interface implementation to
+        // [DesktopModeWindowDecorViewModel] when the migration is done.
+        displayController.addDisplayChangingController(this)
+    }
 
     fun snapToHalfScreen(
         taskInfo: ActivityManager.RunningTaskInfo,
@@ -102,7 +111,20 @@ class DesktopTilingDecorViewModel(
 
     fun onUserChange() {
         for (tilingHandler in tilingTransitionHandlerByDisplayId.valueIterator()) {
-            tilingHandler.onUserChange()
+            tilingHandler.resetTilingSession()
         }
+    }
+
+    override fun onDisplayChange(
+        displayId: Int,
+        fromRotation: Int,
+        toRotation: Int,
+        newDisplayAreaInfo: DisplayAreaInfo?,
+        t: WindowContainerTransaction?,
+    ) {
+        // Exit if the rotation hasn't changed or is changed by 180 degrees. [fromRotation] and
+        // [toRotation] can be one of the [@Surface.Rotation] values.
+        if ((fromRotation % 2 == toRotation % 2)) return
+        tilingTransitionHandlerByDisplayId.get(displayId)?.resetTilingSession()
     }
 }

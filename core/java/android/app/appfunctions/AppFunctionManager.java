@@ -47,32 +47,42 @@ import java.util.function.Consumer;
  * <p>An app function is a piece of functionality that apps expose to the system for cross-app
  * orchestration.
  *
- * <p>**Developer Workflow:**
+ * <p>**Building App Functions:**
  *
- * <p>Most developers should interact with app functions through the AppFunctions SDK. This SDK
- * library offers a more convenient and type-safe way to represent the inputs and outputs of an app
- * function, using custom data classes called "AppFunction Schemas".
+ * <p>Most developers should build app functions through the AppFunctions SDK. This SDK library
+ * offers a more convenient and type-safe way to build app functions. The SDK provides predefined
+ * function schemas for common use cases and associated data classes for function parameters and
+ * return values. Apps only have to implement the provided interfaces. Internally, the SDK converts
+ * these data classes into {@link ExecuteAppFunctionRequest#getParameters()} and {@link
+ * ExecuteAppFunctionResponse#getResultDocument()}.
  *
- * <p>The suggested way to build an app function is to use the AppFunctions SDK. The SDK provides
- * custom data classes (AppFunctions Schemas) and handles the conversion to the underlying {@link
- * android.app.appsearch.GenericDocument}/{@link android.os.Bundle} format used in {@link
- * ExecuteAppFunctionRequest} and {@link ExecuteAppFunctionResponse}.
- *
- * <p>**Discovering (Listing) App Functions:**
+ * <p>**Discovering App Functions:**
  *
  * <p>When there is a package change or the device starts up, the metadata of available functions is
- * indexed on-device by {@link AppSearchManager}. AppSearch stores the indexed information as a
- * {@code AppFunctionStaticMetadata} document. This allows other apps and the app itself to discover
- * these functions using the AppSearch search APIs. Visibility to this metadata document is based on
- * the packages that have visibility to the app providing the app functions.
+ * indexed on-device by {@link AppSearchManager}. AppSearch stores the indexed information as an
+ * {@code AppFunctionStaticMetadata} document. This document contains the {@code functionIdentifier}
+ * and the schema information that the app function implements. This allows other apps and the app
+ * itself to discover these functions using the AppSearch search APIs. Visibility to this metadata
+ * document is based on the packages that have visibility to the app providing the app functions.
+ * AppFunction SDK provides a convenient way to achieve this and is the preferred method.
  *
  * <p>**Executing App Functions:**
  *
- * <p>Requests to execute a function are built using the {@link ExecuteAppFunctionRequest} class.
- * Callers need the {@code android.permission.EXECUTE_APP_FUNCTIONS} or {@code
+ * <p>To execute an app function, the caller app can retrieve the {@code functionIdentifier} from
+ * the {@code AppFunctionStaticMetadata} document and use it to build an {@link
+ * ExecuteAppFunctionRequest}. Then, invoke {@link #executeAppFunction} with the request to execute
+ * the app function. Callers need the {@code android.permission.EXECUTE_APP_FUNCTIONS} or {@code
  * android.permission.EXECUTE_APP_FUNCTIONS_TRUSTED} permission to execute app functions from other
- * apps. An app has automatic visibility to its own functions and doesn't need these permissions to
- * call its own functions via {@code AppFunctionManager}.
+ * apps. An app can always execute its own app functions and doesn't need these permissions.
+ * AppFunction SDK provides a convenient way to achieve this and is the preferred method.
+ *
+ * <p>**Example:**
+ *
+ * <p>An assistant app is trying to fulfill the user request "Save XYZ into my note". The assistant
+ * app should first list all available app functions as {@code AppFunctionStaticMetadata} documents
+ * from AppSearch. Then, it should identify an app function that implements the {@code CreateNote}
+ * schema. Finally, the assistant app can invoke {@link #executeAppFunction} with the {@code
+ * functionIdentifier} of the chosen function.
  */
 @FlaggedApi(FLAG_ENABLE_APP_FUNCTION_MANAGER)
 @SystemService(Context.APP_FUNCTION_SERVICE)
@@ -202,12 +212,13 @@ public final class AppFunctionManager {
     /**
      * Returns a boolean through a callback, indicating whether the app function is enabled.
      *
-     * <p>* This method can only check app functions owned by the caller, or those where the caller
+     * <p>This method can only check app functions owned by the caller, or those where the caller
      * has visibility to the owner package and holds either the {@link
      * Manifest.permission#EXECUTE_APP_FUNCTIONS} or {@link
      * Manifest.permission#EXECUTE_APP_FUNCTIONS_TRUSTED} permission.
      *
-     * <p>If operation fails, the callback's {@link OutcomeReceiver#onError} is called with errors:
+     * <p>If the operation fails, the callback's {@link OutcomeReceiver#onError} is called with
+     * errors:
      *
      * <ul>
      *   <li>{@link IllegalArgumentException}, if the function is not found or the caller does not
@@ -221,23 +232,47 @@ public final class AppFunctionManager {
      * @param executor the executor to run the request
      * @param callback the callback to receive the function enabled check result
      */
+    @RequiresPermission(
+            anyOf = {
+                Manifest.permission.EXECUTE_APP_FUNCTIONS_TRUSTED,
+                Manifest.permission.EXECUTE_APP_FUNCTIONS
+            },
+            conditional = true)
     public void isAppFunctionEnabled(
             @NonNull String functionIdentifier,
             @NonNull String targetPackage,
             @NonNull Executor executor,
             @NonNull OutcomeReceiver<Boolean, Exception> callback) {
-        Objects.requireNonNull(functionIdentifier);
-        Objects.requireNonNull(targetPackage);
-        Objects.requireNonNull(executor);
-        Objects.requireNonNull(callback);
-        AppSearchManager appSearchManager = mContext.getSystemService(AppSearchManager.class);
-        if (appSearchManager == null) {
-            callback.onError(new IllegalStateException("Failed to get AppSearchManager."));
-            return;
-        }
+        isAppFunctionEnabledInternal(functionIdentifier, targetPackage, executor, callback);
+    }
 
-        AppFunctionManagerHelper.isAppFunctionEnabled(
-                functionIdentifier, targetPackage, appSearchManager, executor, callback);
+    /**
+     * Returns a boolean through a callback, indicating whether the app function is enabled.
+     *
+     * <p>This method can only check app functions owned by the caller, unlike {@link
+     * #isAppFunctionEnabled(String, String, Executor, OutcomeReceiver)}, which allows specifying a
+     * different target package.
+     *
+     * <p>If the operation fails, the callback's {@link OutcomeReceiver#onError} is called with
+     * errors:
+     *
+     * <ul>
+     *   <li>{@link IllegalArgumentException}, if the function is not found or the caller does not
+     *       have access to it.
+     * </ul>
+     *
+     * @param functionIdentifier the identifier of the app function to check (unique within the
+     *     target package) and in most cases, these are automatically generated by the AppFunctions
+     *     SDK
+     * @param executor the executor to run the request
+     * @param callback the callback to receive the function enabled check result
+     */
+    public void isAppFunctionEnabled(
+            @NonNull String functionIdentifier,
+            @NonNull Executor executor,
+            @NonNull OutcomeReceiver<Boolean, Exception> callback) {
+        isAppFunctionEnabledInternal(
+                functionIdentifier, mContext.getPackageName(), executor, callback);
     }
 
     /**
@@ -278,6 +313,25 @@ public final class AppFunctionManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    private void isAppFunctionEnabledInternal(
+            @NonNull String functionIdentifier,
+            @NonNull String targetPackage,
+            @NonNull Executor executor,
+            @NonNull OutcomeReceiver<Boolean, Exception> callback) {
+        Objects.requireNonNull(functionIdentifier);
+        Objects.requireNonNull(targetPackage);
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(callback);
+        AppSearchManager appSearchManager = mContext.getSystemService(AppSearchManager.class);
+        if (appSearchManager == null) {
+            callback.onError(new IllegalStateException("Failed to get AppSearchManager."));
+            return;
+        }
+
+        AppFunctionManagerHelper.isAppFunctionEnabled(
+                functionIdentifier, targetPackage, appSearchManager, executor, callback);
     }
 
     private static class CallbackWrapper extends IAppFunctionEnabledCallback.Stub {

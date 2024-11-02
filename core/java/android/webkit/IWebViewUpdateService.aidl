@@ -72,16 +72,6 @@ interface IWebViewUpdateService {
     PackageInfo getCurrentWebViewPackage();
 
     /**
-     * Used by Settings to determine whether multiprocess is enabled.
-     */
-    boolean isMultiProcessEnabled();
-
-    /**
-     * Used by Settings to enable/disable multiprocess.
-     */
-    void enableMultiProcess(boolean enable);
-
-    /**
      * Used by Settings to get the default WebView package.
      */
     WebViewProviderInfo getDefaultWebViewPackage();

@@ -21,10 +21,12 @@ import static android.Manifest.permission.READ_WALLPAPER_INTERNAL;
 import static android.Manifest.permission.SET_WALLPAPER_DIM_AMOUNT;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.ParcelFileDescriptor.MODE_READ_ONLY;
+import static android.app.Flags.FLAG_LIVE_WALLPAPER_CONTENT_HANDLING;
 
 import static com.android.window.flags.Flags.FLAG_MULTI_CROP;
 import static com.android.window.flags.Flags.multiCrop;
 
+import android.Manifest;
 import android.annotation.FlaggedApi;
 import android.annotation.FloatRange;
 import android.annotation.IntDef;
@@ -39,6 +41,8 @@ import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.annotation.UiContext;
 import android.app.compat.CompatChanges;
+import android.app.wallpaper.WallpaperDescription;
+import android.app.wallpaper.WallpaperInstance;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -319,12 +323,12 @@ public class WallpaperManager {
      * This is only used internally by the framework and the WallpaperBackupAgent.
      * @hide
      */
-    @IntDef(value = {
+    @IntDef(prefix = { "ORIENTATION_" }, value = {
             ORIENTATION_UNKNOWN,
-            PORTRAIT,
-            LANDSCAPE,
-            SQUARE_PORTRAIT,
-            SQUARE_LANDSCAPE,
+            ORIENTATION_PORTRAIT,
+            ORIENTATION_LANDSCAPE,
+            ORIENTATION_SQUARE_PORTRAIT,
+            ORIENTATION_SQUARE_LANDSCAPE,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ScreenOrientation {}
@@ -338,25 +342,25 @@ public class WallpaperManager {
      * Portrait orientation of most screens
      * @hide
      */
-    public static final int PORTRAIT = 0;
+    public static final int ORIENTATION_PORTRAIT = 0;
 
     /**
      * Landscape orientation of most screens
      * @hide
      */
-    public static final int LANDSCAPE = 1;
+    public static final int ORIENTATION_LANDSCAPE = 1;
 
     /**
      * Portrait orientation with similar width and height (e.g. the inner screen of a foldable)
      * @hide
      */
-    public static final int SQUARE_PORTRAIT = 2;
+    public static final int ORIENTATION_SQUARE_PORTRAIT = 2;
 
     /**
      * Landscape orientation with similar width and height (e.g. the inner screen of a foldable)
      * @hide
      */
-    public static final int SQUARE_LANDSCAPE = 3;
+    public static final int ORIENTATION_SQUARE_LANDSCAPE = 3;
 
     /**
      * Converts a (width, height) screen size to a {@link ScreenOrientation}.
@@ -367,10 +371,10 @@ public class WallpaperManager {
     public static @ScreenOrientation int getOrientation(Point screenSize) {
         float ratio = ((float) screenSize.x) / screenSize.y;
         // ratios between 3/4 and 4/3 are considered square
-        return ratio >= 4 / 3f ? LANDSCAPE
-                : ratio > 1f ? SQUARE_LANDSCAPE
-                : ratio > 3 / 4f ? SQUARE_PORTRAIT
-                : PORTRAIT;
+        return ratio >= 4 / 3f ? ORIENTATION_LANDSCAPE
+                : ratio > 1f ? ORIENTATION_SQUARE_LANDSCAPE
+                : ratio > 3 / 4f ? ORIENTATION_SQUARE_PORTRAIT
+                : ORIENTATION_PORTRAIT;
     }
 
     /**
@@ -379,10 +383,10 @@ public class WallpaperManager {
      */
     public static @ScreenOrientation int getRotatedOrientation(@ScreenOrientation int orientation) {
         switch (orientation) {
-            case PORTRAIT: return LANDSCAPE;
-            case LANDSCAPE: return PORTRAIT;
-            case SQUARE_PORTRAIT: return SQUARE_LANDSCAPE;
-            case SQUARE_LANDSCAPE: return SQUARE_PORTRAIT;
+            case ORIENTATION_PORTRAIT: return ORIENTATION_LANDSCAPE;
+            case ORIENTATION_LANDSCAPE: return ORIENTATION_PORTRAIT;
+            case ORIENTATION_SQUARE_PORTRAIT: return ORIENTATION_SQUARE_LANDSCAPE;
+            case ORIENTATION_SQUARE_LANDSCAPE: return ORIENTATION_SQUARE_PORTRAIT;
             default: return ORIENTATION_UNKNOWN;
         }
     }
@@ -2023,6 +2027,34 @@ public class WallpaperManager {
     }
 
     /**
+     * Returns the description of the designated wallpaper. Returns null if the lock screen
+     * wallpaper is requested lock screen wallpaper is not set.
+
+     * @param which Specifies wallpaper to request (home or lock).
+     * @throws IllegalArgumentException if {@code which} is not exactly one of
+     * {{@link #FLAG_SYSTEM},{@link #FLAG_LOCK}}.
+     *
+     * @hide
+     */
+    @Nullable
+    @FlaggedApi(FLAG_LIVE_WALLPAPER_CONTENT_HANDLING)
+    @RequiresPermission(READ_WALLPAPER_INTERNAL)
+    @SystemApi
+    public WallpaperInstance getWallpaperInstance(@SetWallpaperFlags int which) {
+        checkExactlyOneWallpaperFlagSet(which);
+        try {
+            if (sGlobals.mService == null) {
+                Log.w(TAG, "WallpaperService not running");
+                throw new RuntimeException(new DeadSystemException());
+            } else {
+                return sGlobals.mService.getWallpaperInstance(which, mContext.getUserId());
+            }
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Get an open, readable file descriptor for the file that contains metadata about the
      * context user's wallpaper.
      *
@@ -2955,15 +2987,66 @@ public class WallpaperManager {
      *
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.SET_WALLPAPER_COMPONENT)
+    @RequiresPermission(allOf = {android.Manifest.permission.SET_WALLPAPER_COMPONENT,
+            Manifest.permission.INTERACT_ACROSS_USERS_FULL}, conditional = true)
     public boolean setWallpaperComponentWithFlags(@NonNull ComponentName name,
+            @SetWallpaperFlags int which, int userId) {
+        WallpaperDescription description = new WallpaperDescription.Builder().setComponent(
+                name).build();
+        return setWallpaperComponentWithDescription(description, which, userId);
+    }
+
+    /**
+     * Set the implementation of {@link android.service.wallpaper.WallpaperService} used to render
+     * wallpaper, along with associated metadata.
+     *
+     * <p>This can only be called by packages with android.permission.SET_WALLPAPER_COMPONENT
+     * permission. The caller must hold the INTERACT_ACROSS_USERS_FULL permission to change
+     * another user's wallpaper.
+     * </p>
+     *
+     * @param description wallpaper component and metadata to set
+     * @param which Specifies wallpaper destination (home and/or lock).
+     * @return true on success, otherwise false
+     *
+     * @hide
+     */
+    @FlaggedApi(FLAG_LIVE_WALLPAPER_CONTENT_HANDLING)
+    @SystemApi
+    @RequiresPermission(allOf = {android.Manifest.permission.SET_WALLPAPER_COMPONENT,
+            Manifest.permission.INTERACT_ACROSS_USERS_FULL}, conditional = true)
+    public boolean setWallpaperComponentWithDescription(@NonNull WallpaperDescription description,
+            @SetWallpaperFlags int which) {
+        return setWallpaperComponentWithDescription(description, which, mContext.getUserId());
+    }
+
+    /**
+     * Set the implementation of {@link android.service.wallpaper.WallpaperService} used to render
+     * wallpaper, along with associated metadata.
+     *
+     * <p>This can only be called by packages with android.permission.SET_WALLPAPER_COMPONENT
+     * permission. The caller must hold the INTERACT_ACROSS_USERS_FULL permission to change
+     * another user's wallpaper.
+     * </p>
+     *
+     * @param description wallpaper component and metadata to set
+     * @param which Specifies wallpaper destination (home and/or lock).
+     * @param userId User for whom the component should be set.
+     * @return true on success, otherwise false
+     *
+     * @hide
+     */
+    @FlaggedApi(FLAG_LIVE_WALLPAPER_CONTENT_HANDLING)
+    @RequiresPermission(allOf = {android.Manifest.permission.SET_WALLPAPER_COMPONENT,
+            Manifest.permission.INTERACT_ACROSS_USERS_FULL}, conditional = true)
+    public boolean setWallpaperComponentWithDescription(@NonNull WallpaperDescription description,
             @SetWallpaperFlags int which, int userId) {
         if (sGlobals.mService == null) {
             Log.w(TAG, "WallpaperManagerService not running");
             throw new RuntimeException(new DeadSystemException());
         }
         try {
-            sGlobals.mService.setWallpaperComponentChecked(name, mContext.getOpPackageName(),
+            sGlobals.mService.setWallpaperComponentChecked(description, mContext.getOpPackageName(),
                     which, userId);
             return true;
         } catch (RemoteException e) {

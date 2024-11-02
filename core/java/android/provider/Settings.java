@@ -6332,6 +6332,27 @@ public final class Settings {
         public static final String SCREEN_FLASH_NOTIFICATION_COLOR =
                 "screen_flash_notification_color_global";
 
+
+        /**
+         * A semi-colon separated list of Bluetooth hearing devices' local ambient volume.
+         * Each entry is encoded as a key=value list, separated by commas. Ex:
+         *
+         * "addr=XX:XX:XX:00:11,ambient=20,group_ambient=30;addr=XX:XX:XX:00:22,ambient=50"
+         *
+         * The following keys are supported:
+         * <pre>
+         * addr                 (String)
+         * ambient              (int)
+         * group_ambient        (int)
+         * control_expanded     (boolean)
+         * </pre>
+         *
+         * Each entry must contains "addr" attribute, otherwise it'll be ignored.
+         * @hide
+         */
+        public static final String HEARING_DEVICE_LOCAL_AMBIENT_VOLUME =
+                "hearing_device_local_ambient_volume";
+
         /**
          * IMPORTANT: If you add a new public settings you also have to add it to
          * PUBLIC_SETTINGS below. If the new setting is hidden you have to add
@@ -6476,6 +6497,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(DEFAULT_DEVICE_FONT_SCALE);
             PRIVATE_SETTINGS.add(MOUSE_REVERSE_VERTICAL_SCROLLING);
             PRIVATE_SETTINGS.add(MOUSE_SWAP_PRIMARY_BUTTON);
+            PRIVATE_SETTINGS.add(HEARING_DEVICE_LOCAL_AMBIENT_VOLUME);
         }
 
         /**

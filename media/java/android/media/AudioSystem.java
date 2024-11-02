@@ -93,7 +93,8 @@ public class AudioSystem
     /** @hide Used to identify the volume of audio streams for notifications */
     public static final int STREAM_NOTIFICATION = 5;
     /** @hide
-     *  Used to identify the volume of audio streams for phone calls when connected on bluetooth */
+     *  Used to identify the volume of audio streams for phone calls when connected on bluetooth
+     *  @deprecated use {@link #STREAM_VOICE_CALL} instead */
     public static final int STREAM_BLUETOOTH_SCO = 6;
     /** @hide Used to identify the volume of audio streams for enforced system sounds in certain
      * countries (e.g camera in Japan) */
@@ -110,7 +111,7 @@ public class AudioSystem
     public static final int STREAM_ASSISTANT = 11;
     /**
      * @hide
-     * @deprecated Use {@link #numStreamTypes() instead}
+     * @deprecated Use {@link #numStreamTypes()} instead
      */
     public static final int NUM_STREAMS = 5;
 
@@ -1066,6 +1067,8 @@ public class AudioSystem
     /** @hide */
     public static final int DEVICE_OUT_IP = 0x800000;
     /** @hide */
+    public static final int DEVICE_OUT_MULTICHANNEL_GROUP = 0x800001;
+    /** @hide */
     public static final int DEVICE_OUT_BUS = 0x1000000;
     /** @hide */
     public static final int DEVICE_OUT_PROXY = 0x2000000;
@@ -1134,6 +1137,7 @@ public class AudioSystem
         DEVICE_OUT_ALL_SET.add(DEVICE_OUT_AUX_LINE);
         DEVICE_OUT_ALL_SET.add(DEVICE_OUT_SPEAKER_SAFE);
         DEVICE_OUT_ALL_SET.add(DEVICE_OUT_IP);
+        DEVICE_OUT_ALL_SET.add(DEVICE_OUT_MULTICHANNEL_GROUP);
         DEVICE_OUT_ALL_SET.add(DEVICE_OUT_BUS);
         DEVICE_OUT_ALL_SET.add(DEVICE_OUT_PROXY);
         DEVICE_OUT_ALL_SET.add(DEVICE_OUT_USB_HEADSET);
@@ -1422,6 +1426,8 @@ public class AudioSystem
     /** @hide */ public static final String DEVICE_OUT_AUX_LINE_NAME = "aux_line";
     /** @hide */ public static final String DEVICE_OUT_SPEAKER_SAFE_NAME = "speaker_safe";
     /** @hide */ public static final String DEVICE_OUT_IP_NAME = "ip";
+    /** @hide */
+    public static final String DEVICE_OUT_MULTICHANNEL_GROUP_NAME = "multichannel_group";
     /** @hide */ public static final String DEVICE_OUT_BUS_NAME = "bus";
     /** @hide */ public static final String DEVICE_OUT_PROXY_NAME = "proxy";
     /** @hide */ public static final String DEVICE_OUT_USB_HEADSET_NAME = "usb_headset";
@@ -1515,6 +1521,8 @@ public class AudioSystem
             return DEVICE_OUT_SPEAKER_SAFE_NAME;
         case DEVICE_OUT_IP:
             return DEVICE_OUT_IP_NAME;
+        case DEVICE_OUT_MULTICHANNEL_GROUP:
+            return DEVICE_OUT_MULTICHANNEL_GROUP_NAME;
         case DEVICE_OUT_BUS:
             return DEVICE_OUT_BUS_NAME;
         case DEVICE_OUT_PROXY:

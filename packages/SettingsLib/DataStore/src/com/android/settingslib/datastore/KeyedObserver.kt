@@ -114,6 +114,10 @@ interface KeyedObservable<K> {
     fun notifyChange(key: K, reason: Int)
 }
 
+/** Delegation of [KeyedObservable]. */
+open class KeyedObservableDelegate<K>(delegate: KeyedObservable<K>) :
+    KeyedObservable<K> by delegate
+
 /** A thread safe implementation of [KeyedObservable]. */
 open class KeyedDataObservable<K> : KeyedObservable<K> {
     // Instead of @GuardedBy("this"), guarded by itself because KeyedDataObservable object could be

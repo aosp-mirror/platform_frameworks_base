@@ -3486,6 +3486,12 @@
              representation this attribute can be used for providing such. -->
         <attr name="contentDescription" format="string" localization="suggested" />
 
+        <!-- Provides brief supplemental information for the view, such as the purpose of
+             the view when that purpose is not conveyed within its textual representation.
+             This property is used primarily for accessibility. -->
+        <!-- @FlaggedApi("android.view.accessibility.supplemental_description") -->
+        <attr name="supplementalDescription" format="string" localization="suggested" />
+
         <!-- Sets the id of a view that screen readers are requested to visit after this view.
              Requests that a screen-reader visits the content of this view before the content of the
              one it precedes. This does nothing if either view is not important for accessibility.
@@ -9238,6 +9244,8 @@
             <flag name="home_screen" value="0x1" />
             <flag name="keyguard" value="0x2" />
             <flag name="searchbox" value="0x4" />
+            <!-- @FlaggedApi("android.appwidget.flags.not_keyguard_category") -->
+            <flag name="not_keyguard" value="0x8" />
         </attr>
         <!-- Flags indicating various features supported by the widget. These are hints to the
          widget host, and do not actually change the behavior of the widget. -->

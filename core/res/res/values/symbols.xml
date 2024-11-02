@@ -2652,6 +2652,7 @@
   <java-symbol type="string" name="zen_mode_default_weekends_name" />
   <java-symbol type="string" name="zen_mode_default_events_name" />
   <java-symbol type="string" name="zen_mode_default_every_night_name" />
+  <java-symbol type="string" name="zen_mode_implicit_name" />
   <java-symbol type="string" name="zen_mode_implicit_trigger_description" />
   <java-symbol type="string" name="zen_mode_implicit_activated" />
   <java-symbol type="string" name="zen_mode_implicit_deactivated" />
@@ -5263,7 +5264,7 @@
   <java-symbol type="string" name="system_locale_title" />
   <java-symbol type="layout" name="app_language_picker_system_default" />
   <java-symbol type="layout" name="app_language_picker_system_current" />
-  <java-symbol type="layout" name="app_language_picker_current_locale_item" />
+  <java-symbol type="layout" name="app_language_picker_locale_item" />
   <java-symbol type="id" name="system_locale_subtitle" />
   <java-symbol type="id" name="language_picker_item" />
   <java-symbol type="id" name="language_picker_header" />
@@ -5576,6 +5577,10 @@
   <!-- Whether a display enters desktop mode by default when the windowing mode of the display's
        root TaskDisplayArea is set to WINDOWING_MODE_FREEFORM. -->
   <java-symbol type="bool" name="config_enterDesktopByDefaultOnFreeformDisplay" />
+
+  <!-- Whether a desktop window should be maximized when it's dragged to the top edge of the
+       screen. -->
+  <java-symbol type="bool" name="config_dragToMaximizeInDesktopMode" />
 
   <!-- Frame rate compatibility value for Wallpaper -->
   <java-symbol type="integer" name="config_wallpaperFrameRateCompatibility" />

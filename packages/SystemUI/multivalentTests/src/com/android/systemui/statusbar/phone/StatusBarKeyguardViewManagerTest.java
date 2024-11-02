@@ -71,6 +71,7 @@ import com.android.systemui.Flags;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.biometrics.domain.interactor.UdfpsOverlayInteractor;
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor;
+import com.android.systemui.bouncer.domain.interactor.BouncerInteractor;
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerCallbackInteractor;
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerCallbackInteractor.PrimaryBouncerExpansionCallback;
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor;
@@ -82,8 +83,8 @@ import com.android.systemui.dreams.DreamOverlayStateController;
 import com.android.systemui.flags.DisableSceneContainer;
 import com.android.systemui.flags.EnableSceneContainer;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
-import com.android.systemui.keyguard.domain.interactor.KeyguardDismissTransitionInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardDismissActionInteractor;
+import com.android.systemui.keyguard.domain.interactor.KeyguardDismissTransitionInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
 import com.android.systemui.keyguard.shared.model.KeyguardState;
 import com.android.systemui.keyguard.shared.model.TransitionState;
@@ -170,6 +171,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     @Mock private DeviceEntryInteractor mDeviceEntryInteractor;
     @Mock private SceneInteractor mSceneInteractor;
     @Mock private DismissCallbackRegistry mDismissCallbackRegistry;
+    @Mock private BouncerInteractor mBouncerInteractor;
 
     private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     private PrimaryBouncerCallbackInteractor.PrimaryBouncerExpansionCallback
@@ -241,7 +243,8 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                         mock(StatusBarKeyguardViewManagerInteractor.class),
                         mExecutor,
                         () -> mDeviceEntryInteractor,
-                        mDismissCallbackRegistry) {
+                        mDismissCallbackRegistry,
+                        () -> mBouncerInteractor) {
                     @Override
                     public ViewRootImpl getViewRootImpl() {
                         return mViewRootImpl;
@@ -748,7 +751,8 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                         mock(StatusBarKeyguardViewManagerInteractor.class),
                         mExecutor,
                         () -> mDeviceEntryInteractor,
-                        mDismissCallbackRegistry) {
+                        mDismissCallbackRegistry,
+                        () -> mBouncerInteractor) {
                     @Override
                     public ViewRootImpl getViewRootImpl() {
                         return mViewRootImpl;
@@ -797,6 +801,13 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
         verify(mAlternateBouncerInteractor).hide();
         verify(mDismissCallbackRegistry).notifyDismissCancelled();
         verify(mPrimaryBouncerInteractor).setDismissAction(eq(null), eq(null));
+    }
+
+    @Test
+    public void onBackPressedResetsLeaveOnKeyguardHide() {
+        when(mPrimaryBouncerInteractor.isFullyShowing()).thenReturn(true);
+        mStatusBarKeyguardViewManager.onBackPressed();
+        verify(mStatusBarStateController).setLeaveOpenOnKeyguardHide(false);
     }
 
     @Test

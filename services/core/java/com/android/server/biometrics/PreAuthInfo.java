@@ -32,6 +32,7 @@ import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.Flags;
 import android.hardware.biometrics.PromptInfo;
 import android.os.RemoteException;
+import android.os.UserManager;
 import android.util.Pair;
 import android.util.Slog;
 
@@ -72,6 +73,7 @@ class PreAuthInfo {
     final boolean confirmationRequested;
     final boolean ignoreEnrollmentState;
     final int userId;
+    final int callingUserId;
     final Context context;
     private final boolean mBiometricRequested;
     private final int mBiometricStrengthRequested;
@@ -82,7 +84,7 @@ class PreAuthInfo {
     private PreAuthInfo(boolean biometricRequested, int biometricStrengthRequested,
             boolean credentialRequested, List<BiometricSensor> eligibleSensors,
             List<Pair<BiometricSensor, Integer>> ineligibleSensors, boolean credentialAvailable,
-            PromptInfo promptInfo, int userId, Context context,
+            PromptInfo promptInfo, int userId, int callingUserId, Context context,
             BiometricCameraManager biometricCameraManager,
             boolean isOnlyMandatoryBiometricsRequested,
             boolean isMandatoryBiometricsAuthentication) {
@@ -97,6 +99,7 @@ class PreAuthInfo {
         this.confirmationRequested = promptInfo.isConfirmationRequested();
         this.ignoreEnrollmentState = promptInfo.isIgnoreEnrollmentState();
         this.userId = userId;
+        this.callingUserId = callingUserId;
         this.context = context;
         this.mOnlyMandatoryBiometricsRequested = isOnlyMandatoryBiometricsRequested;
         this.mIsMandatoryBiometricsAuthentication = isMandatoryBiometricsAuthentication;
@@ -108,7 +111,8 @@ class PreAuthInfo {
             List<BiometricSensor> sensors,
             int userId, PromptInfo promptInfo, String opPackageName,
             boolean checkDevicePolicyManager, Context context,
-            BiometricCameraManager biometricCameraManager)
+            BiometricCameraManager biometricCameraManager,
+            UserManager userManager)
             throws RemoteException {
 
         final boolean isOnlyMandatoryBiometricsRequested = promptInfo.getAuthenticators()
@@ -141,14 +145,20 @@ class PreAuthInfo {
         final List<BiometricSensor> eligibleSensors = new ArrayList<>();
         final List<Pair<BiometricSensor, Integer>> ineligibleSensors = new ArrayList<>();
 
+        final int effectiveUserId;
+        if (Flags.effectiveUserBp()) {
+            effectiveUserId = userManager.getCredentialOwnerProfile(userId);
+        } else {
+            effectiveUserId = userId;
+        }
+
         if (biometricRequested) {
             for (BiometricSensor sensor : sensors) {
 
                 @AuthenticatorStatus int status = getStatusForBiometricAuthenticator(
-                        devicePolicyManager, settingObserver, sensor, userId, opPackageName,
-                        checkDevicePolicyManager, requestedStrength,
-                        promptInfo.getAllowedSensorIds(),
-                        promptInfo.isIgnoreEnrollmentState(),
+                        devicePolicyManager, settingObserver, sensor, effectiveUserId,
+                        opPackageName, checkDevicePolicyManager, requestedStrength,
+                        promptInfo.getAllowedSensorIds(), promptInfo.isIgnoreEnrollmentState(),
                         biometricCameraManager);
 
                 Slog.d(TAG, "Package: " + opPackageName
@@ -172,9 +182,9 @@ class PreAuthInfo {
         }
 
         return new PreAuthInfo(biometricRequested, requestedStrength, credentialRequested,
-                eligibleSensors, ineligibleSensors, credentialAvailable, promptInfo, userId,
-                context, biometricCameraManager, isOnlyMandatoryBiometricsRequested,
-                isMandatoryBiometricsAuthentication);
+                eligibleSensors, ineligibleSensors, credentialAvailable, promptInfo,
+                effectiveUserId, userId, context, biometricCameraManager,
+                isOnlyMandatoryBiometricsRequested, isMandatoryBiometricsAuthentication);
     }
 
     private static boolean dropCredentialFallback(int authenticators,

@@ -2169,6 +2169,22 @@ public abstract class CameraMetadata<TKey> {
      */
     public static final int COLOR_CORRECTION_MODE_HIGH_QUALITY = 2;
 
+    /**
+     * <p>Use
+     * {@link CaptureRequest#COLOR_CORRECTION_COLOR_TEMPERATURE android.colorCorrection.colorTemperature} and
+     * {@link CaptureRequest#COLOR_CORRECTION_COLOR_TINT android.colorCorrection.colorTint} to adjust the white balance based
+     * on correlated color temperature.</p>
+     * <p>If AWB is enabled with <code>{@link CaptureRequest#CONTROL_AWB_MODE android.control.awbMode} != OFF</code>, then
+     * CCT is ignored.</p>
+     *
+     * @see CaptureRequest#COLOR_CORRECTION_COLOR_TEMPERATURE
+     * @see CaptureRequest#COLOR_CORRECTION_COLOR_TINT
+     * @see CaptureRequest#CONTROL_AWB_MODE
+     * @see CaptureRequest#COLOR_CORRECTION_MODE
+     */
+    @FlaggedApi(Flags.FLAG_COLOR_TEMPERATURE)
+    public static final int COLOR_CORRECTION_MODE_CCT = 3;
+
     //
     // Enumeration values for CaptureRequest#COLOR_CORRECTION_ABERRATION_MODE
     //

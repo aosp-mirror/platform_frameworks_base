@@ -790,7 +790,8 @@ public final class PowerManagerService extends SystemService
                         WAKEFULNESS_AWAKE,
                         /* ready= */ false,
                         supportsSandman,
-                        mClock.uptimeMillis());
+                        mClock.uptimeMillis(),
+                        mFeatureFlags);
                 mPowerGroups.append(groupId, powerGroup);
                 onPowerGroupEventLocked(DISPLAY_GROUP_ADDED, powerGroup);
             }
@@ -1375,7 +1376,8 @@ public final class PowerManagerService extends SystemService
 
             mPowerGroups.append(Display.DEFAULT_DISPLAY_GROUP,
                     new PowerGroup(WAKEFULNESS_AWAKE, mPowerGroupWakefulnessChangeListener,
-                            mNotifier, mDisplayManagerInternal, mClock.uptimeMillis()));
+                            mNotifier, mDisplayManagerInternal, mClock.uptimeMillis(),
+                            mFeatureFlags));
             DisplayGroupPowerChangeListener displayGroupPowerChangeListener =
                     new DisplayGroupPowerChangeListener();
             mDisplayManagerInternal.registerDisplayGroupListener(displayGroupPowerChangeListener);
@@ -3738,14 +3740,6 @@ public final class PowerManagerService extends SystemService
     }
 
     @VisibleForTesting
-    @GuardedBy("mLock")
-    int getDesiredScreenPolicyLocked(int groupId) {
-        return mPowerGroups.get(groupId).getDesiredScreenPolicyLocked(sQuiescent,
-                mDozeAfterScreenOff, mBootCompleted,
-                mScreenBrightnessBoostInProgress, mBrightWhenDozingConfig);
-    }
-
-    @VisibleForTesting
     int getDreamsBatteryLevelDrain() {
         return mDreamsBatteryLevelDrain;
     }
@@ -4588,7 +4582,8 @@ public final class PowerManagerService extends SystemService
                     WAKEFULNESS_AWAKE,
                     /* ready= */ false,
                     /* supportsSandman= */ false,
-                    mClock.uptimeMillis());
+                    mClock.uptimeMillis(),
+                    mFeatureFlags);
             mPowerGroups.append(displayGroupId, powerGroup);
         }
         mDirty |= DIRTY_DISPLAY_GROUP_WAKEFULNESS;

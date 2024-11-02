@@ -23,3 +23,4 @@ HSPLandroid/graphics/Color;->luminance()F
 # For now, compile all methods in MessageQueue to avoid performance cliffs for
 # flagged/evolving hot code paths. See: b/338098106
 HSPLandroid/os/MessageQueue;->*
+HSPLandroid/os/MessageQueue$*;->*

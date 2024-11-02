@@ -30,6 +30,8 @@ import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.deviceentry.data.repository.FaceWakeUpTriggersConfigModule
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor
 import com.android.systemui.deviceentry.domain.interactor.SystemUIDeviceEntryFaceAuthInteractor
+import com.android.systemui.dump.DumpManager
+import com.android.systemui.keyguard.data.repository.PulseExpansionRepository
 import com.android.systemui.keyguard.ui.composable.blueprint.DefaultBlueprintModule
 import com.android.systemui.scene.SceneContainerFrameworkModule
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
@@ -70,11 +72,17 @@ import kotlinx.coroutines.test.runTest
 interface SysUITestModule {
 
     @Binds fun bindTestableContext(sysuiTestableContext: SysuiTestableContext): TestableContext
+
     @Binds fun bindContext(testableContext: TestableContext): Context
+
     @Binds @Application fun bindAppContext(context: Context): Context
+
     @Binds @Application fun bindAppResources(resources: Resources): Resources
+
     @Binds @Main fun bindMainResources(resources: Resources): Resources
+
     @Binds fun bindBroadcastDispatcher(fake: FakeBroadcastDispatcher): BroadcastDispatcher
+
     @Binds @SysUISingleton fun bindsShadeInteractor(sii: ShadeInteractorImpl): ShadeInteractor
 
     @Binds
@@ -108,7 +116,7 @@ interface SysUITestModule {
         @Provides
         fun provideBaseShadeInteractor(
             sceneContainerOn: Provider<ShadeInteractorSceneContainerImpl>,
-            sceneContainerOff: Provider<ShadeInteractorLegacyImpl>
+            sceneContainerOff: Provider<ShadeInteractorLegacyImpl>,
         ): BaseShadeInteractor {
             return if (SceneContainerFlag.isEnabled) {
                 sceneContainerOn.get()
@@ -124,6 +132,12 @@ interface SysUITestModule {
             config: SceneContainerConfig,
         ): SceneDataSourceDelegator {
             return SceneDataSourceDelegator(applicationScope, config)
+        }
+
+        @Provides
+        @SysUISingleton
+        fun providesPulseExpansionRepository(dumpManager: DumpManager): PulseExpansionRepository {
+            return PulseExpansionRepository(dumpManager)
         }
     }
 }

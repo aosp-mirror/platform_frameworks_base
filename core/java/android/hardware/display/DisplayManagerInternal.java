@@ -491,9 +491,15 @@ public abstract class DisplayManagerInternal {
         public static final int POLICY_DIM = 2;
         // Policy: Make the screen bright as usual.
         public static final int POLICY_BRIGHT = 3;
+        // The maximum policy constant. Useful for iterating through all constants in tests.
+        public static final int POLICY_MAX = POLICY_BRIGHT;
 
         // The basic overall policy to apply: off, doze, dim or bright.
         public int policy;
+
+        // The reason behind the current policy.
+        @Display.StateReason
+        public int policyReason;
 
         // If true, the proximity sensor overrides the screen state when an object is
         // nearby, turning it off temporarily until the object is moved away.
@@ -541,6 +547,7 @@ public abstract class DisplayManagerInternal {
 
         public DisplayPowerRequest() {
             policy = POLICY_BRIGHT;
+            policyReason = Display.STATE_REASON_DEFAULT_POLICY;
             useProximitySensor = false;
             screenBrightnessOverride = PowerManager.BRIGHTNESS_INVALID_FLOAT;
             screenAutoBrightnessAdjustmentOverride = Float.NaN;
@@ -561,6 +568,7 @@ public abstract class DisplayManagerInternal {
 
         public void copyFrom(DisplayPowerRequest other) {
             policy = other.policy;
+            policyReason = other.policyReason;
             useProximitySensor = other.useProximitySensor;
             screenBrightnessOverride = other.screenBrightnessOverride;
             screenBrightnessOverrideTag = other.screenBrightnessOverrideTag;

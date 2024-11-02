@@ -18,6 +18,7 @@ package com.android.systemui.deviceentry.domain.interactor
 
 import android.content.Intent
 import android.content.mockedContext
+import android.content.res.Resources
 import android.hardware.fingerprint.FingerprintManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -41,13 +42,16 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction
 import com.android.systemui.plugins.activityStarter
 import com.android.systemui.power.data.repository.fakePowerRepository
+import com.android.systemui.res.R
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.any
+import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
@@ -55,6 +59,7 @@ import org.mockito.ArgumentMatchers.eq
 import org.mockito.ArgumentMatchers.isNull
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
+import org.mockito.kotlin.mock
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
@@ -63,8 +68,8 @@ class OccludingAppDeviceEntryInteractorTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
-    private val underTest = kosmos.occludingAppDeviceEntryInteractor
-
+    private lateinit var underTest: OccludingAppDeviceEntryInteractor
+    private lateinit var mockedResources: Resources
     private val fingerprintAuthRepository = kosmos.deviceEntryFingerprintAuthRepository
     private val keyguardRepository = kosmos.fakeKeyguardRepository
     private val bouncerRepository = kosmos.keyguardBouncerRepository
@@ -74,9 +79,18 @@ class OccludingAppDeviceEntryInteractorTest : SysuiTestCase() {
     private val mockedContext = kosmos.mockedContext
     private val mockedActivityStarter = kosmos.activityStarter
 
+    @Before
+    fun setup() {
+        mockedResources = mock<Resources>()
+        whenever(mockedContext.resources).thenReturn(mockedResources)
+        whenever(mockedResources.getBoolean(R.bool.config_goToHomeFromOccludedApps))
+            .thenReturn(true)
+    }
+
     @Test
     fun fingerprintSuccess_goToHomeScreen() =
         testScope.runTest {
+            underTest = kosmos.occludingAppDeviceEntryInteractor
             givenOnOccludingApp(true)
             fingerprintAuthRepository.setAuthenticationStatus(
                 SuccessFingerprintAuthenticationStatus(0, true)
@@ -86,8 +100,23 @@ class OccludingAppDeviceEntryInteractorTest : SysuiTestCase() {
         }
 
     @Test
+    fun fingerprintSuccess_configOff_doesNotGoToHomeScreen() =
+        testScope.runTest {
+            whenever(mockedResources.getBoolean(R.bool.config_goToHomeFromOccludedApps))
+                .thenReturn(false)
+            underTest = kosmos.occludingAppDeviceEntryInteractor
+            givenOnOccludingApp(true)
+            fingerprintAuthRepository.setAuthenticationStatus(
+                SuccessFingerprintAuthenticationStatus(0, true)
+            )
+            runCurrent()
+            verifyNeverGoToHomeScreen()
+        }
+
+    @Test
     fun fingerprintSuccess_notInteractive_doesNotGoToHomeScreen() =
         testScope.runTest {
+            underTest = kosmos.occludingAppDeviceEntryInteractor
             givenOnOccludingApp(true)
             powerRepository.setInteractive(false)
             fingerprintAuthRepository.setAuthenticationStatus(
@@ -100,6 +129,7 @@ class OccludingAppDeviceEntryInteractorTest : SysuiTestCase() {
     @Test
     fun fingerprintSuccess_dreaming_doesNotGoToHomeScreen() =
         testScope.runTest {
+            underTest = kosmos.occludingAppDeviceEntryInteractor
             givenOnOccludingApp(true)
             keyguardRepository.setDreaming(true)
             fingerprintAuthRepository.setAuthenticationStatus(
@@ -112,6 +142,7 @@ class OccludingAppDeviceEntryInteractorTest : SysuiTestCase() {
     @Test
     fun fingerprintSuccess_notOnOccludingApp_doesNotGoToHomeScreen() =
         testScope.runTest {
+            underTest = kosmos.occludingAppDeviceEntryInteractor
             givenOnOccludingApp(false)
             fingerprintAuthRepository.setAuthenticationStatus(
                 SuccessFingerprintAuthenticationStatus(0, true)
@@ -123,11 +154,12 @@ class OccludingAppDeviceEntryInteractorTest : SysuiTestCase() {
     @Test
     fun lockout_goToHomeScreenOnDismissAction() =
         testScope.runTest {
+            underTest = kosmos.occludingAppDeviceEntryInteractor
             givenOnOccludingApp(true)
             fingerprintAuthRepository.setAuthenticationStatus(
                 ErrorFingerprintAuthenticationStatus(
                     FingerprintManager.FINGERPRINT_ERROR_LOCKOUT,
-                    "lockoutTest"
+                    "lockoutTest",
                 )
             )
             runCurrent()
@@ -137,11 +169,12 @@ class OccludingAppDeviceEntryInteractorTest : SysuiTestCase() {
     @Test
     fun lockout_notOnOccludingApp_neverGoToHomeScreen() =
         testScope.runTest {
+            underTest = kosmos.occludingAppDeviceEntryInteractor
             givenOnOccludingApp(false)
             fingerprintAuthRepository.setAuthenticationStatus(
                 ErrorFingerprintAuthenticationStatus(
                     FingerprintManager.FINGERPRINT_ERROR_LOCKOUT,
-                    "lockoutTest"
+                    "lockoutTest",
                 )
             )
             runCurrent()
@@ -151,11 +184,12 @@ class OccludingAppDeviceEntryInteractorTest : SysuiTestCase() {
     @Test
     fun lockout_onOccludingApp_onCommunal_neverGoToHomeScreen() =
         testScope.runTest {
+            underTest = kosmos.occludingAppDeviceEntryInteractor
             givenOnOccludingApp(isOnOccludingApp = true, isOnCommunal = true)
             fingerprintAuthRepository.setAuthenticationStatus(
                 ErrorFingerprintAuthenticationStatus(
                     FingerprintManager.FINGERPRINT_ERROR_LOCKOUT,
-                    "lockoutTest"
+                    "lockoutTest",
                 )
             )
             runCurrent()
@@ -165,6 +199,7 @@ class OccludingAppDeviceEntryInteractorTest : SysuiTestCase() {
     @Test
     fun message_fpFailOnOccludingApp_thenNotOnOccludingApp() =
         testScope.runTest {
+            underTest = kosmos.occludingAppDeviceEntryInteractor
             val message by collectLastValue(underTest.message)
 
             givenOnOccludingApp(true)
@@ -186,6 +221,7 @@ class OccludingAppDeviceEntryInteractorTest : SysuiTestCase() {
     @Test
     fun message_fpErrorHelpFailOnOccludingApp() =
         testScope.runTest {
+            underTest = kosmos.occludingAppDeviceEntryInteractor
             val message by collectLastValue(underTest.message)
 
             givenOnOccludingApp(true)
@@ -218,6 +254,7 @@ class OccludingAppDeviceEntryInteractorTest : SysuiTestCase() {
     @Test
     fun message_fpError_lockoutFilteredOut() =
         testScope.runTest {
+            underTest = kosmos.occludingAppDeviceEntryInteractor
             val message by collectLastValue(underTest.message)
 
             givenOnOccludingApp(true)
@@ -246,6 +283,7 @@ class OccludingAppDeviceEntryInteractorTest : SysuiTestCase() {
     @Test
     fun noMessage_fpErrorsWhileDozing() =
         testScope.runTest {
+            underTest = kosmos.occludingAppDeviceEntryInteractor
             val message by collectLastValue(underTest.message)
 
             givenOnOccludingApp(true)
@@ -254,7 +292,7 @@ class OccludingAppDeviceEntryInteractorTest : SysuiTestCase() {
             kosmos.fakeKeyguardTransitionRepository.sendTransitionSteps(
                 from = KeyguardState.OCCLUDED,
                 to = KeyguardState.DOZING,
-                testScope
+                testScope,
             )
             runCurrent()
 
@@ -283,7 +321,7 @@ class OccludingAppDeviceEntryInteractorTest : SysuiTestCase() {
 
     private suspend fun givenOnOccludingApp(
         isOnOccludingApp: Boolean,
-        isOnCommunal: Boolean = false
+        isOnCommunal: Boolean = false,
     ) {
         powerRepository.setInteractive(true)
         keyguardRepository.setIsDozing(false)
@@ -305,13 +343,13 @@ class OccludingAppDeviceEntryInteractorTest : SysuiTestCase() {
             kosmos.fakeKeyguardTransitionRepository.sendTransitionSteps(
                 from = KeyguardState.LOCKSCREEN,
                 to = KeyguardState.OCCLUDED,
-                testScope
+                testScope,
             )
         } else {
             kosmos.fakeKeyguardTransitionRepository.sendTransitionSteps(
                 from = KeyguardState.OCCLUDED,
                 to = KeyguardState.LOCKSCREEN,
-                testScope
+                testScope,
             )
         }
     }

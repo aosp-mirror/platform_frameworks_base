@@ -20,7 +20,7 @@ import static android.annotation.SystemApi.Client.MODULE_LIBRARIES;
 import static com.android.internal.util.FrameworkStatsLog.UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__EXPLICIT_INTENT_FILTER_UNMATCH;
 import static com.android.internal.util.FrameworkStatsLog.UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__INTERNAL_NON_EXPORTED_COMPONENT_MATCH;
 import static com.android.internal.util.FrameworkStatsLog.UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__NULL_ACTION_MATCH;
-import static com.android.window.flags.Flags.balStrictMode;
+import static com.android.window.flags.Flags.balStrictModeRo;
 
 import android.animation.ValueAnimator;
 import android.annotation.FlaggedApi;
@@ -33,6 +33,7 @@ import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.app.ActivityThread;
 import android.app.IActivityManager;
+import android.app.IActivityTaskManager;
 import android.app.IBackgroundActivityLaunchCallback;
 import android.app.IUnsafeIntentStrictModeCallback;
 import android.app.PendingIntent;
@@ -912,7 +913,7 @@ public final class StrictMode {
                 if (targetSdk >= Build.VERSION_CODES.S) {
                     detectUnsafeIntentLaunch();
                 }
-                if (balStrictMode() && targetSdk > Build.VERSION_CODES.VANILLA_ICE_CREAM) {
+                if (balStrictModeRo() && targetSdk > Build.VERSION_CODES.VANILLA_ICE_CREAM) {
                     detectBlockedBackgroundActivityLaunch();
                 }
 
@@ -1168,7 +1169,7 @@ public final class StrictMode {
              * the home button while the app tries to start a new activity.
              */
             @SuppressWarnings("BuilderSetStyle")
-            @FlaggedApi(Flags.FLAG_BAL_STRICT_MODE)
+            @FlaggedApi(Flags.FLAG_BAL_STRICT_MODE_RO)
             public @NonNull Builder detectBlockedBackgroundActivityLaunch() {
                 return enable(DETECT_VM_BACKGROUND_ACTIVITY_LAUNCH_ABORTED);
             }
@@ -1180,7 +1181,7 @@ public final class StrictMode {
              * This disables the effect of {@link #detectBlockedBackgroundActivityLaunch()}.
              */
             @SuppressWarnings("BuilderSetStyle")
-            @FlaggedApi(Flags.FLAG_BAL_STRICT_MODE)
+            @FlaggedApi(Flags.FLAG_BAL_STRICT_MODE_RO)
             public @NonNull Builder ignoreBlockedBackgroundActivityLaunch() {
                 return disable(DETECT_VM_BACKGROUND_ACTIVITY_LAUNCH_ABORTED);
             }
@@ -2189,8 +2190,11 @@ public final class StrictMode {
 
     private static void registerBackgroundActivityLaunchCallback() {
         try {
-            ActivityTaskManager.getService().registerBackgroundActivityStartCallback(
+            IActivityTaskManager service = ActivityTaskManager.getService();
+            if (service != null) {
+                service.registerBackgroundActivityStartCallback(
                     new BackgroundActivityLaunchCallback());
+            }
         } catch (DeadObjectException e) {
             // ignore
         } catch (RemoteException e) {

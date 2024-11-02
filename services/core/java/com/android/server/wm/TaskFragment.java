@@ -3157,12 +3157,16 @@ class TaskFragment extends WindowContainer<WindowContainer> {
 
     /** Bounds to be used for dimming, as well as touch related tests. */
     void getDimBounds(@NonNull Rect out) {
-        if (mIsEmbedded && isDimmingOnParentTask() && getDimmer().getDimBounds() != null) {
-            // Return the task bounds if the dimmer is showing and should cover on the Task (not
-            // just on this embedded TaskFragment).
-            out.set(getTask().getBounds());
+        if (Flags.useTasksDimOnly() && mDimmer.hasDimState()) {
+            out.set(mDimmer.getDimBounds());
         } else {
-            out.set(getBounds());
+            if (mIsEmbedded && isDimmingOnParentTask() && getDimmer().getDimBounds() != null) {
+                // Return the task bounds if the dimmer is showing and should cover on the Task (not
+                // just on this embedded TaskFragment).
+                out.set(getTask().getBounds());
+            } else {
+                out.set(getBounds());
+            }
         }
     }
 
@@ -3193,10 +3197,16 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         mDimmer.resetDimStates();
         super.prepareSurfaces();
 
-        final Rect dimBounds = mDimmer.getDimBounds();
-        if (dimBounds != null) {
-            // Bounds need to be relative, as the dim layer is a child.
-            dimBounds.offsetTo(0 /* newLeft */, 0 /* newTop */);
+        if (!Flags.useTasksDimOnly()) {
+            final Rect dimBounds = mDimmer.getDimBounds();
+            if (dimBounds != null) {
+                // Bounds need to be relative, as the dim layer is a child.
+                dimBounds.offsetTo(0 /* newLeft */, 0 /* newTop */);
+                if (mDimmer.updateDims(getSyncTransaction())) {
+                    scheduleAnimation();
+                }
+            }
+        } else {
             if (mDimmer.updateDims(getSyncTransaction())) {
                 scheduleAnimation();
             }

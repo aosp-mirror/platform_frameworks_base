@@ -19,7 +19,6 @@ package com.android.systemui.shared.clocks.view
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Point
-import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.RelativeLayout
@@ -28,7 +27,6 @@ import com.android.systemui.customization.R
 import com.android.systemui.log.core.MessageBuffer
 import com.android.systemui.shared.clocks.AssetLoader
 import com.android.systemui.shared.clocks.DigitTranslateAnimator
-import com.android.systemui.shared.clocks.FontTextStyle
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -39,8 +37,7 @@ class FlexClockView(context: Context, val assets: AssetLoader, messageBuffer: Me
     DigitalClockFaceView(context, messageBuffer) {
     override var digitalClockTextViewMap = mutableMapOf<Int, SimpleDigitalClockTextView>()
     val digitLeftTopMap = mutableMapOf<Int, Point>()
-    var maxSingleDigitHeight = -1
-    var maxSingleDigitWidth = -1
+    var maxSingleDigitSize = Point(-1, -1)
     val lockscreenTranslate = Point(0, 0)
     val aodTranslate = Point(0, 0)
 
@@ -53,65 +50,6 @@ class FlexClockView(context: Context, val assets: AssetLoader, messageBuffer: Me
             )
     }
 
-    private var prevX = 0f
-    private var prevY = 0f
-    private var isDown = false
-
-    private var wght = 603f
-    private var wdth = 100f
-
-    private val MAX_WGHT = 950f
-    private val MIN_WGHT = 50f
-    private val WGHT_SCALE = 0.5f
-
-    private val MAX_WDTH = 150f
-    private val MIN_WDTH = 0f
-    private val WDTH_SCALE = 0.2f
-
-    override fun onTouchEvent(evt: MotionEvent): Boolean {
-        if (!isReactiveTouchInteractionEnabled) {
-            return super.onTouchEvent(evt)
-        }
-
-        when (evt.action) {
-            MotionEvent.ACTION_DOWN -> {
-                isDown = true
-                prevX = evt.x
-                prevY = evt.y
-                return true
-            }
-
-            MotionEvent.ACTION_MOVE -> {
-                if (!isDown) {
-                    return super.onTouchEvent(evt)
-                }
-
-                wdth = clamp(wdth + (evt.x - prevX) * WDTH_SCALE, MIN_WDTH, MAX_WDTH)
-                wght = clamp(wght + (evt.y - prevY) * WGHT_SCALE, MIN_WGHT, MAX_WGHT)
-                prevX = evt.x
-                prevY = evt.y
-
-                val fvar = "'wght' $wght, 'wdth' $wdth, 'opsz' 144, 'ROND' 100"
-                digitalClockTextViewMap.forEach { (_, view) ->
-                    val textStyle = view.textStyle as FontTextStyle
-                    textStyle.fontVariation = fvar
-                    view.applyStyles(assets, textStyle, view.aodStyle)
-                }
-
-                requestLayout()
-                invalidate()
-                return true
-            }
-
-            MotionEvent.ACTION_UP -> {
-                isDown = false
-                return true
-            }
-        }
-
-        return super.onTouchEvent(evt)
-    }
-
     override fun addView(child: View?) {
         super.addView(child)
         (child as SimpleDigitalClockTextView).digitTranslateAnimator =
@@ -119,25 +57,26 @@ class FlexClockView(context: Context, val assets: AssetLoader, messageBuffer: Me
     }
 
     protected override fun calculateSize(widthMeasureSpec: Int, heightMeasureSpec: Int): Point {
+        maxSingleDigitSize = Point(-1, -1)
         digitalClockTextViewMap.forEach { (_, textView) ->
             textView.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED)
+            maxSingleDigitSize.x = max(maxSingleDigitSize.x, textView.measuredWidth)
+            maxSingleDigitSize.y = max(maxSingleDigitSize.y, textView.measuredHeight)
         }
         val textView = digitalClockTextViewMap[R.id.HOUR_FIRST_DIGIT]!!
-        maxSingleDigitHeight = textView.measuredHeight
-        maxSingleDigitWidth = textView.measuredWidth
-        aodTranslate.x = -(maxSingleDigitWidth * AOD_HORIZONTAL_TRANSLATE_RATIO).toInt()
-        aodTranslate.y = (maxSingleDigitHeight * AOD_VERTICAL_TRANSLATE_RATIO).toInt()
+        aodTranslate.x = -(maxSingleDigitSize.x * AOD_HORIZONTAL_TRANSLATE_RATIO).toInt()
+        aodTranslate.y = (maxSingleDigitSize.y * AOD_VERTICAL_TRANSLATE_RATIO).toInt()
         return Point(
-            ((maxSingleDigitWidth + abs(aodTranslate.x)) * 2),
-            ((maxSingleDigitHeight + abs(aodTranslate.y)) * 2),
+            ((maxSingleDigitSize.x + abs(aodTranslate.x)) * 2),
+            ((maxSingleDigitSize.y + abs(aodTranslate.y)) * 2),
         )
     }
 
     protected override fun calculateLeftTopPosition() {
         digitLeftTopMap[R.id.HOUR_FIRST_DIGIT] = Point(0, 0)
-        digitLeftTopMap[R.id.HOUR_SECOND_DIGIT] = Point(maxSingleDigitWidth, 0)
-        digitLeftTopMap[R.id.MINUTE_FIRST_DIGIT] = Point(0, maxSingleDigitHeight)
-        digitLeftTopMap[R.id.MINUTE_SECOND_DIGIT] = Point(maxSingleDigitWidth, maxSingleDigitHeight)
+        digitLeftTopMap[R.id.HOUR_SECOND_DIGIT] = Point(maxSingleDigitSize.x, 0)
+        digitLeftTopMap[R.id.MINUTE_FIRST_DIGIT] = Point(0, maxSingleDigitSize.y)
+        digitLeftTopMap[R.id.MINUTE_SECOND_DIGIT] = Point(maxSingleDigitSize)
         digitLeftTopMap.forEach { _, point ->
             point.x += abs(aodTranslate.x)
             point.y += abs(aodTranslate.y)
@@ -162,7 +101,7 @@ class FlexClockView(context: Context, val assets: AssetLoader, messageBuffer: Me
     override fun animateDoze(isDozing: Boolean, isAnimated: Boolean) {
         dozeControlState.animateDoze = {
             super.animateDoze(isDozing, isAnimated)
-            if (maxSingleDigitHeight == -1) {
+            if (maxSingleDigitSize.x < 0 || maxSingleDigitSize.y < 0) {
                 measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED)
             }
             digitalClockTextViewMap.forEach { (id, textView) ->

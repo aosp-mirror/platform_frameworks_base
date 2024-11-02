@@ -16,8 +16,9 @@
 
 package com.android.wm.shell.shared.animation
 
-import android.animation.RectEvaluator
+import android.animation.PointFEvaluator
 import android.animation.ValueAnimator
+import android.graphics.PointF
 import android.graphics.Rect
 import android.util.DisplayMetrics
 import android.util.TypedValue
@@ -52,46 +53,56 @@ object WindowAnimator {
         change: TransitionInfo.Change,
         transaction: SurfaceControl.Transaction,
     ): ValueAnimator {
-        val startBounds =
-            createBounds(
+        val startPos =
+            getPosition(
                 displayMetrics,
-                change.startAbsBounds,
+                change.endAbsBounds,
                 boundsAnimDef.startScale,
                 boundsAnimDef.startOffsetYDp,
             )
         val leash = change.leash
-        val endBounds =
-            createBounds(
+        val endPos =
+            getPosition(
                 displayMetrics,
-                change.startAbsBounds,
+                change.endAbsBounds,
                 boundsAnimDef.endScale,
                 boundsAnimDef.endOffsetYDp,
             )
-        return ValueAnimator.ofObject(RectEvaluator(), startBounds, endBounds).apply {
+        return ValueAnimator.ofObject(PointFEvaluator(), startPos, endPos).apply {
             duration = boundsAnimDef.durationMs
             interpolator = boundsAnimDef.interpolator
             addUpdateListener { animation ->
-                val animBounds = animation.animatedValue as Rect
-                val animScale = 1 - (1 - boundsAnimDef.endScale) * animation.animatedFraction
+                val animPos = animation.animatedValue as PointF
+                val animScale =
+                    interpolate(
+                        boundsAnimDef.startScale,
+                        boundsAnimDef.endScale,
+                        animation.animatedFraction
+                    )
                 transaction
-                    .setPosition(leash, animBounds.left.toFloat(), animBounds.top.toFloat())
+                    .setPosition(leash, animPos.x, animPos.y)
                     .setScale(leash, animScale, animScale)
                     .apply()
             }
         }
     }
 
-    private fun createBounds(
+    private fun interpolate(startVal: Float, endVal: Float, fraction: Float): Float {
+        require(fraction in 0.0f..1.0f)
+        return startVal + (endVal - startVal) * fraction
+    }
+
+    private fun getPosition(
         displayMetrics: DisplayMetrics,
-        origBounds: Rect,
+        bounds: Rect,
         scale: Float,
         offsetYDp: Float
-    ) = Rect(origBounds).apply {
-            check(scale in 0.0..1.0)
-            // Scale the  bounds down with an anchor in the center
-            inset(
-                (origBounds.width().toFloat() * (1 - scale) / 2).toInt(),
-                (origBounds.height().toFloat() * (1 - scale) / 2).toInt(),
+    ) = PointF(bounds.left.toFloat(), bounds.top.toFloat()).apply {
+            check(scale in 0.0f..1.0f)
+            // Scale the bounds down with an anchor in the center
+            offset(
+                (bounds.width().toFloat() * (1 - scale) / 2),
+                (bounds.height().toFloat() * (1 - scale) / 2),
             )
             val offsetYPx =
                 TypedValue.applyDimension(
@@ -100,6 +111,6 @@ object WindowAnimator {
                         displayMetrics,
                     )
                     .toInt()
-            offset(/* dx= */ 0, offsetYPx)
+            offset(/* dx= */ 0f, offsetYPx.toFloat())
         }
 }

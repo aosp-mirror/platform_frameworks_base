@@ -19,14 +19,13 @@ import android.view.LayoutInflater
 import com.android.systemui.customization.R
 import com.android.systemui.log.core.LogLevel
 import com.android.systemui.log.core.LogcatOnlyMessageBuffer
-import com.android.systemui.plugins.clocks.AxisType
 import com.android.systemui.plugins.clocks.ClockController
-import com.android.systemui.plugins.clocks.ClockId
+import com.android.systemui.plugins.clocks.ClockFontAxis
+import com.android.systemui.plugins.clocks.ClockFontAxisSetting
 import com.android.systemui.plugins.clocks.ClockMessageBuffers
 import com.android.systemui.plugins.clocks.ClockMetadata
 import com.android.systemui.plugins.clocks.ClockPickerConfig
 import com.android.systemui.plugins.clocks.ClockProvider
-import com.android.systemui.plugins.clocks.ClockReactiveAxis
 import com.android.systemui.plugins.clocks.ClockSettings
 import com.android.systemui.shared.clocks.view.HorizontalAlignment
 import com.android.systemui.shared.clocks.view.VerticalAlignment
@@ -61,7 +60,15 @@ class DefaultClockProvider(
                 messageBuffers?.infraMessageBuffer ?: LogcatOnlyMessageBuffer(LogLevel.INFO)
             val assets = AssetLoader(ctx, ctx, "clocks/", buffer)
             assets.setSeedColor(settings.seedColor, null)
-            FlexClockController(ctx, resources, assets, FLEX_DESIGN, messageBuffers)
+            val fontAxes = ClockFontAxis.merge(FlexClockController.FONT_AXES, settings.axes)
+            FlexClockController(
+                ctx,
+                resources,
+                settings.copy(axes = fontAxes.map { it.toSetting() }),
+                assets,
+                FLEX_DESIGN,
+                messageBuffers,
+            )
         } else {
             DefaultClockController(
                 ctx,
@@ -75,11 +82,14 @@ class DefaultClockProvider(
         }
     }
 
-    override fun getClockPickerConfig(id: ClockId): ClockPickerConfig {
-        if (id != DEFAULT_CLOCK_ID) {
-            throw IllegalArgumentException("$id is unsupported by $TAG")
+    override fun getClockPickerConfig(settings: ClockSettings): ClockPickerConfig {
+        if (settings.clockId != DEFAULT_CLOCK_ID) {
+            throw IllegalArgumentException("${settings.clockId} is unsupported by $TAG")
         }
 
+        val fontAxes =
+            if (!isClockReactiveVariantsEnabled) listOf()
+            else ClockFontAxis.merge(FlexClockController.FONT_AXES, settings.axes)
         return ClockPickerConfig(
             DEFAULT_CLOCK_ID,
             resources.getString(R.string.clock_default_name),
@@ -87,25 +97,28 @@ class DefaultClockProvider(
             // TODO(b/352049256): Update placeholder to actual resource
             resources.getDrawable(R.drawable.clock_default_thumbnail, null),
             isReactiveToTone = true,
-            // TODO(b/364673969): Populate the rest of this
-            axes =
-                if (isClockReactiveVariantsEnabled)
-                    listOf(
-                        ClockReactiveAxis(
-                            key = "wdth",
-                            type = AxisType.Slider,
-                            maxValue = 1000f,
-                            minValue = 100f,
-                            currentValue = 400f,
-                            name = "Width",
-                            description = "Glyph Width",
-                        )
-                    )
-                else listOf(),
+            axes = fontAxes,
         )
     }
 
     companion object {
+        // TODO(b/364681643): Variations for retargetted DIGITAL_CLOCK_FLEX
+        val LEGACY_FLEX_LS_VARIATION =
+            listOf(
+                ClockFontAxisSetting("wght", 600f),
+                ClockFontAxisSetting("wdth", 100f),
+                ClockFontAxisSetting("ROND", 100f),
+                ClockFontAxisSetting("slnt", 0f),
+            )
+
+        val LEGACY_FLEX_AOD_VARIATION =
+            listOf(
+                ClockFontAxisSetting("wght", 74f),
+                ClockFontAxisSetting("wdth", 43f),
+                ClockFontAxisSetting("ROND", 100f),
+                ClockFontAxisSetting("slnt", 0f),
+            )
+
         val FLEX_DESIGN = run {
             val largeLayer =
                 listOf(
@@ -117,16 +130,9 @@ class DefaultClockProvider(
                                 DigitalHandLayer(
                                     layerBounds = LayerBounds.FIT,
                                     timespec = DigitalTimespec.FIRST_DIGIT,
-                                    style =
-                                        FontTextStyle(
-                                            lineHeight = 147.25f,
-                                            fontVariation =
-                                                "'wght' 603, 'wdth' 100, 'opsz' 144, 'ROND' 100",
-                                        ),
+                                    style = FontTextStyle(lineHeight = 147.25f),
                                     aodStyle =
                                         FontTextStyle(
-                                            fontVariation =
-                                                "'wght' 74, 'wdth' 43, 'opsz' 144, 'ROND' 100",
                                             fillColorLight = "#FFFFFFFF",
                                             outlineColor = "#00000000",
                                             renderType = RenderType.CHANGE_WEIGHT,
@@ -143,16 +149,9 @@ class DefaultClockProvider(
                                 DigitalHandLayer(
                                     layerBounds = LayerBounds.FIT,
                                     timespec = DigitalTimespec.SECOND_DIGIT,
-                                    style =
-                                        FontTextStyle(
-                                            lineHeight = 147.25f,
-                                            fontVariation =
-                                                "'wght' 603, 'wdth' 100, 'opsz' 144, 'ROND' 100",
-                                        ),
+                                    style = FontTextStyle(lineHeight = 147.25f),
                                     aodStyle =
                                         FontTextStyle(
-                                            fontVariation =
-                                                "'wght' 74, 'wdth' 43, 'opsz' 144, 'ROND' 100",
                                             fillColorLight = "#FFFFFFFF",
                                             outlineColor = "#00000000",
                                             renderType = RenderType.CHANGE_WEIGHT,
@@ -169,16 +168,9 @@ class DefaultClockProvider(
                                 DigitalHandLayer(
                                     layerBounds = LayerBounds.FIT,
                                     timespec = DigitalTimespec.FIRST_DIGIT,
-                                    style =
-                                        FontTextStyle(
-                                            lineHeight = 147.25f,
-                                            fontVariation =
-                                                "'wght' 603, 'wdth' 100, 'opsz' 144, 'ROND' 100",
-                                        ),
+                                    style = FontTextStyle(lineHeight = 147.25f),
                                     aodStyle =
                                         FontTextStyle(
-                                            fontVariation =
-                                                "'wght' 74, 'wdth' 43, 'opsz' 144, 'ROND' 100",
                                             fillColorLight = "#FFFFFFFF",
                                             outlineColor = "#00000000",
                                             renderType = RenderType.CHANGE_WEIGHT,
@@ -195,16 +187,9 @@ class DefaultClockProvider(
                                 DigitalHandLayer(
                                     layerBounds = LayerBounds.FIT,
                                     timespec = DigitalTimespec.SECOND_DIGIT,
-                                    style =
-                                        FontTextStyle(
-                                            lineHeight = 147.25f,
-                                            fontVariation =
-                                                "'wght' 603, 'wdth' 100, 'opsz' 144, 'ROND' 100",
-                                        ),
+                                    style = FontTextStyle(lineHeight = 147.25f),
                                     aodStyle =
                                         FontTextStyle(
-                                            fontVariation =
-                                                "'wght' 74, 'wdth' 43, 'opsz' 144, 'ROND' 100",
                                             fillColorLight = "#FFFFFFFF",
                                             outlineColor = "#00000000",
                                             renderType = RenderType.CHANGE_WEIGHT,
@@ -227,14 +212,9 @@ class DefaultClockProvider(
                     DigitalHandLayer(
                         layerBounds = LayerBounds.FIT,
                         timespec = DigitalTimespec.TIME_FULL_FORMAT,
-                        style =
-                            FontTextStyle(
-                                fontVariation = "'wght' 600, 'wdth' 100, 'opsz' 144, 'ROND' 100",
-                                fontSizeScale = 0.98f,
-                            ),
+                        style = FontTextStyle(fontSizeScale = 0.98f),
                         aodStyle =
                             FontTextStyle(
-                                fontVariation = "'wght' 133, 'wdth' 43, 'opsz' 144, 'ROND' 100",
                                 fillColorLight = "#FFFFFFFF",
                                 outlineColor = "#00000000",
                                 renderType = RenderType.CHANGE_WEIGHT,

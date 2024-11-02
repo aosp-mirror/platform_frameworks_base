@@ -49,6 +49,7 @@ import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.eq
 import org.mockito.Captor
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.capture
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
@@ -112,6 +113,7 @@ class DesktopTilingWindowDecorationTest : ShellTestCase() {
                 returnToDragStartAnimator,
                 desktopRepository,
             )
+        whenever(context.createContextAsUser(any(), any())).thenReturn(context)
     }
 
     @Test
@@ -195,7 +197,7 @@ class DesktopTilingWindowDecorationTest : ShellTestCase() {
 
         verify(toggleResizeDesktopTaskTransitionHandler, times(1))
             .startTransition(capture(wctCaptor), any())
-        verify(returnToDragStartAnimator, times(1)).start(any(), any(), any(), any(), any())
+        verify(returnToDragStartAnimator, times(1)).start(any(), any(), any(), any(), anyOrNull())
         for (change in wctCaptor.value.changes) {
             val bounds = change.value.configuration.windowConfiguration.bounds
             val leftBounds = getLeftTaskBounds()
@@ -473,12 +475,13 @@ class DesktopTilingWindowDecorationTest : ShellTestCase() {
         tilingDecoration.rightTaskResizingHelper = tiledTaskHelper
         tilingDecoration.desktopTilingDividerWindowManager = desktopTilingDividerWindowManager
 
-        tilingDecoration.onUserChange()
+        tilingDecoration.resetTilingSession()
 
         assertThat(tilingDecoration.leftTaskResizingHelper).isNull()
         assertThat(tilingDecoration.rightTaskResizingHelper).isNull()
         verify(desktopWindowDecoration, times(2)).removeDragResizeListener(any())
         verify(tiledTaskHelper, times(2)).dispose()
+        verify(context, never()).getApplicationContext()
     }
 
     private fun initTiledTaskHelperMock(taskInfo: ActivityManager.RunningTaskInfo) {

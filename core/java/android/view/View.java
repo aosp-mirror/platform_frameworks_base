@@ -30,7 +30,9 @@ import static android.view.Surface.FRAME_RATE_COMPATIBILITY_FIXED_SOURCE;
 import static android.view.Surface.FRAME_RATE_COMPATIBILITY_GTE;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.accessibility.AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED;
+import static android.view.accessibility.Flags.FLAG_SUPPLEMENTAL_DESCRIPTION;
 import static android.view.accessibility.Flags.removeChildHoverCheckForTouchExploration;
+import static android.view.accessibility.Flags.supplementalDescription;
 import static android.view.displayhash.DisplayHashResultCallback.DISPLAY_HASH_ERROR_INVALID_BOUNDS;
 import static android.view.displayhash.DisplayHashResultCallback.DISPLAY_HASH_ERROR_MISSING_WINDOW;
 import static android.view.displayhash.DisplayHashResultCallback.DISPLAY_HASH_ERROR_NOT_VISIBLE_ON_SCREEN;
@@ -40,7 +42,6 @@ import static android.view.displayhash.DisplayHashResultCallback.EXTRA_DISPLAY_H
 import static android.view.flags.Flags.FLAG_SENSITIVE_CONTENT_APP_PROTECTION_API;
 import static android.view.flags.Flags.FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY;
 import static android.view.flags.Flags.FLAG_VIEW_VELOCITY_API;
-import static android.view.flags.Flags.calculateBoundsInParentFromBoundsInScreen;
 import static android.view.flags.Flags.enableUseMeasureCacheDuringForceLayout;
 import static android.view.flags.Flags.sensitiveContentAppProtection;
 import static android.view.flags.Flags.toolkitFrameRateAnimationBugfix25q1;
@@ -51,6 +52,7 @@ import static android.view.flags.Flags.toolkitFrameRateVelocityMappingReadOnly;
 import static android.view.flags.Flags.toolkitFrameRateViewEnablingReadOnly;
 import static android.view.flags.Flags.toolkitMetricsForFrameRateDecision;
 import static android.view.flags.Flags.toolkitSetFrameRateReadOnly;
+import static android.view.flags.Flags.toolkitViewgroupSetRequestedFrameRateApi;
 import static android.view.flags.Flags.viewVelocityApi;
 import static android.view.inputmethod.Flags.FLAG_HOME_SCREEN_HANDWRITING_DELEGATOR;
 import static android.view.inputmethod.Flags.initiationWithoutInputConnection;
@@ -966,13 +968,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Ignore an optimization that skips unnecessary EXACTLY layout passes.
      */
     private static boolean sAlwaysRemeasureExactly = false;
-
-    /**
-     * When true calculates the bounds in parent from bounds in screen relative to its parents.
-     * This addresses the deprecated API (setBoundsInParent) in Compose, which causes empty
-     * getBoundsInParent call for Compose apps.
-     */
-    private static boolean sCalculateBoundsInParentFromBoundsInScreenFlagValue = false;
 
     /**
      * When true makes it possible to use onMeasure caches also when the force layout flag is
@@ -2475,6 +2470,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             toolkitFrameRateVelocityMappingReadOnly();
     private static boolean sToolkitFrameRateAnimationBugfix25q1FlagValue =
             toolkitFrameRateAnimationBugfix25q1();
+    private static boolean sToolkitViewGroupFrameRateApiFlagValue =
+            toolkitViewgroupSetRequestedFrameRateApi();
 
     // Used to set frame rate compatibility.
     @Surface.FrameRateCompatibility int mFrameRateCompatibility =
@@ -2564,8 +2561,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         sToolkitSetFrameRateReadOnlyFlagValue = toolkitSetFrameRateReadOnly();
         sToolkitMetricsForFrameRateDecisionFlagValue = toolkitMetricsForFrameRateDecision();
-        sCalculateBoundsInParentFromBoundsInScreenFlagValue =
-                calculateBoundsInParentFromBoundsInScreen();
         sUseMeasureCacheDuringForceLayoutFlagValue = enableUseMeasureCacheDuringForceLayout();
     }
 
@@ -3815,6 +3810,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *     1                            PFLAG4_HAS_DRAWN
      *    1                             PFLAG4_HAS_MOVED
      *   1                              PFLAG4_HAS_VIEW_PROPERTY_INVALIDATION
+     *  1                               PFLAG4_FORCED_OVERRIDE_FRAME_RATE
+     * 1                                PFLAG4_SELF_REQUESTED_FRAME_RATE
      * |-------|-------|-------|-------|
      */
 
@@ -3964,6 +3961,17 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Whether the invalidateViewProperty is involked at current frame.
      */
     private static final int PFLAG4_HAS_VIEW_PROPERTY_INVALIDATION = 0x20000000;
+
+    /**
+     * When set, this indicates whether the frame rate of the children should be
+     * forcibly overridden, even if it has been explicitly configured by a user request.
+     */
+    private static final int PFLAG4_FORCED_OVERRIDE_FRAME_RATE = 0x40000000;
+
+    /**
+     * When set, this indicates that the frame rate is configured based on a user request.
+     */
+    private static final int PFLAG4_SELF_REQUESTED_FRAME_RATE = 0x80000000;
 
     /* End of masks for mPrivateFlags4 */
 
@@ -4872,6 +4880,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Briefly describes the view and is primarily used for accessibility support.
      */
     private CharSequence mContentDescription;
+
+    /**
+     * Brief supplemental information for view and is primarily used for accessibility support.
+     */
+    private CharSequence mSupplementalDescription;
 
     /**
      * If this view represents a distinct part of the window, it can have a title that labels the
@@ -6544,6 +6557,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 case R.styleable.View_contentSensitivity:
                     setContentSensitivity(a.getInt(attr, CONTENT_SENSITIVITY_AUTO));
                     break;
+                default: {
+                    if (supplementalDescription()) {
+                        if (attr == com.android.internal.R.styleable.View_supplementalDescription) {
+                            setSupplementalDescription(a.getString(attr));
+                        }
+                    }
+                }
             }
         }
 
@@ -9786,7 +9806,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             structure.setChildCount(1);
             final ViewStructure root = structure.newChild(0);
             if (info != null) {
-                populateVirtualStructure(root, provider, info, null, forAutofill);
+                populateVirtualStructure(root, provider, info, forAutofill);
                 info.recycle();
             } else {
                 Log.w(AUTOFILL_LOG_TAG, "AccessibilityNodeInfo is null.");
@@ -11085,19 +11105,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     private void populateVirtualStructure(ViewStructure structure,
             AccessibilityNodeProvider provider, AccessibilityNodeInfo info,
-            @Nullable AccessibilityNodeInfo parentInfo, boolean forAutofill) {
+            boolean forAutofill) {
         structure.setId(AccessibilityNodeInfo.getVirtualDescendantId(info.getSourceNodeId()),
                 null, null, info.getViewIdResourceName());
         Rect rect = structure.getTempRect();
-        // The bounds in parent for Jetpack Compose views aren't set as setBoundsInParent is
-        // deprecated, and only setBoundsInScreen is called.
-        // The bounds in parent can be calculated by diff'ing the child view's bounds in screen with
-        // the parent's.
-        if (sCalculateBoundsInParentFromBoundsInScreenFlagValue) {
-            getBoundsInParent(info, parentInfo, rect);
-        } else {
-            info.getBoundsInParent(rect);
-        }
+        info.getBoundsInParent(rect);
         structure.setDimens(rect.left, rect.top, 0, 0, rect.width(), rect.height());
         structure.setVisibility(VISIBLE);
         structure.setEnabled(info.isEnabled());
@@ -11181,28 +11193,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                         AccessibilityNodeInfo.getVirtualDescendantId(info.getChildId(i)));
                 if (cinfo != null) {
                     ViewStructure child = structure.newChild(i);
-                    populateVirtualStructure(child, provider, cinfo, info, forAutofill);
+                    populateVirtualStructure(child, provider, cinfo, forAutofill);
                     cinfo.recycle();
                 }
-            }
-        }
-    }
-
-    private void getBoundsInParent(@NonNull AccessibilityNodeInfo info,
-            @Nullable AccessibilityNodeInfo parentInfo, @NonNull Rect rect) {
-        info.getBoundsInParent(rect);
-        // Fallback to calculate bounds in parent by diffing the bounds in
-        // screen if it's all 0.
-        if ((rect.left | rect.top | rect.right | rect.bottom) == 0) {
-            if (parentInfo != null) {
-                Rect parentBoundsInScreen = parentInfo.getBoundsInScreen();
-                Rect boundsInScreen = info.getBoundsInScreen();
-                rect.set(boundsInScreen.left - parentBoundsInScreen.left,
-                        boundsInScreen.top - parentBoundsInScreen.top,
-                        boundsInScreen.right - parentBoundsInScreen.left,
-                        boundsInScreen.bottom - parentBoundsInScreen.top);
-            } else {
-                info.getBoundsInScreen(rect);
             }
         }
     }
@@ -11843,6 +11836,39 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * Returns the {@link View}'s supplemental description.
+     * <p>
+     * A supplemental description provides
+     * brief supplemental information for this node, such as the purpose of the node when
+     * that purpose is not conveyed within its textual representation. For example, if a
+     * dropdown select has a purpose of setting font family, the supplemental description
+     * could be "font family". If this node has children, its supplemental description serves
+     * as additional information and is not intended to replace any existing information
+     * in the subtree. This is different from the {@link #getContentDescription()} in that
+     * this description is purely supplemental while a content description may be used
+     * to replace a description for a node or its subtree that an assistive technology
+     * would otherwise compute based on other properties of the node and its descendants.
+     *
+     * <p>
+     * <strong>Note:</strong> Do not override this method, as it will have no
+     * effect on the supplemental description presented to accessibility services.
+     * You must call {@link #setSupplementalDescription(CharSequence)} to modify the
+     * supplemental description.
+     *
+     * @return the supplemental description
+     * @see #setSupplementalDescription(CharSequence)
+     * @see #getContentDescription()
+     * @attr ref android.R.styleable#View_supplementalDescription
+     */
+    @FlaggedApi(FLAG_SUPPLEMENTAL_DESCRIPTION)
+    @ViewDebug.ExportedProperty(category = "accessibility")
+    @InspectableProperty
+    @Nullable
+    public CharSequence getSupplementalDescription() {
+        return mSupplementalDescription;
+    }
+
+    /**
      * Sets the {@link View}'s state description.
      * <p>
      * A state description briefly describes the states of the view and is primarily used
@@ -11925,6 +11951,53 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         } else {
             notifyViewAccessibilityStateChangedIfNeeded(
                     AccessibilityEvent.CONTENT_CHANGE_TYPE_CONTENT_DESCRIPTION);
+        }
+    }
+
+    /**
+     * Sets the {@link View}'s supplemental description.
+     * <p>
+     * A supplemental description provides
+     * brief supplemental information for this node, such as the purpose of the node when
+     * that purpose is not conveyed within its textual representation. For example, if a
+     * dropdown select has a purpose of setting font family, the supplemental description
+     * could be "font family". If this node has children, its supplemental description serves
+     * as additional information and is not intended to replace any existing information
+     * in the subtree. This is different from the {@link #setContentDescription(CharSequence)}
+     * in that this description is purely supplemental while a content description may be used
+     * to replace a description for a node or its subtree that an assistive technology
+     * would otherwise compute based on other properties of the node and its descendants.
+     *
+     * <p>
+     * This should omit role or state. Role refers to the kind of user-interface element the View
+     * is, such as a Button or Checkbox. State refers to a frequently changing property of the View,
+     * such as an On/Off state of a button or the audio level of a volume slider.
+     *
+     * @param supplementalDescription The supplemental description.
+     * @see #getSupplementalDescription()
+     * @see #setContentDescription(CharSequence)
+     * @see #setStateDescription(CharSequence) for state changes.
+     * @attr ref android.R.styleable#View_supplementalDescription
+     */
+    @FlaggedApi(FLAG_SUPPLEMENTAL_DESCRIPTION)
+    @RemotableViewMethod
+    public void setSupplementalDescription(@Nullable CharSequence supplementalDescription) {
+        if (mSupplementalDescription == null) {
+            if (supplementalDescription == null) {
+                return;
+            }
+        } else if (mSupplementalDescription.equals(supplementalDescription)) {
+            return;
+        }
+        mSupplementalDescription = supplementalDescription;
+        final boolean nonEmptyDesc = supplementalDescription != null
+                && !supplementalDescription.isEmpty();
+        if (nonEmptyDesc && getImportantForAccessibility() == IMPORTANT_FOR_ACCESSIBILITY_AUTO) {
+            setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES);
+            notifySubtreeAccessibilityStateChangedIfNeeded();
+        } else {
+            notifyViewAccessibilityStateChangedIfNeeded(
+                    AccessibilityEvent.CONTENT_CHANGE_TYPE_SUPPLEMENTAL_DESCRIPTION);
         }
     }
 
@@ -34235,8 +34308,19 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     @FlaggedApi(FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
     public void setRequestedFrameRate(float frameRate) {
+        // Skip setting the frame rate if it's currently in forced override mode.
+        if (sToolkitViewGroupFrameRateApiFlagValue && getForcedOverrideFrameRateFlag()) {
+            return;
+        }
+
         if (sToolkitSetFrameRateReadOnlyFlagValue) {
             mPreferredFrameRate = frameRate;
+        }
+
+        if (sToolkitViewGroupFrameRateApiFlagValue) {
+            // If frameRate is Float.NaN, it means it's set to the default value.
+            // We only want to make the flag true, when the value is not Float.nan
+            setSelfRequestedFrameRateFlag(!Float.isNaN(mPreferredFrameRate));
         }
     }
 
@@ -34260,5 +34344,36 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             return mPreferredFrameRate;
         }
         return 0;
+    }
+
+    void overrideFrameRate(float frameRate, boolean forceOverride) {
+        setForcedOverrideFrameRateFlag(forceOverride);
+        if (forceOverride || !getSelfRequestedFrameRateFlag()) {
+            mPreferredFrameRate = frameRate;
+        }
+    }
+
+    void setForcedOverrideFrameRateFlag(boolean forcedOverride) {
+        if (forcedOverride) {
+            mPrivateFlags4 |= PFLAG4_FORCED_OVERRIDE_FRAME_RATE;
+        } else {
+            mPrivateFlags4 &= ~PFLAG4_FORCED_OVERRIDE_FRAME_RATE;
+        }
+    }
+
+    boolean getForcedOverrideFrameRateFlag() {
+        return (mPrivateFlags4 & PFLAG4_FORCED_OVERRIDE_FRAME_RATE) != 0;
+    }
+
+    void setSelfRequestedFrameRateFlag(boolean forcedOverride) {
+        if (forcedOverride) {
+            mPrivateFlags4 |= PFLAG4_SELF_REQUESTED_FRAME_RATE;
+        } else {
+            mPrivateFlags4 &= ~PFLAG4_SELF_REQUESTED_FRAME_RATE;
+        }
+    }
+
+    boolean getSelfRequestedFrameRateFlag() {
+        return (mPrivateFlags4 & PFLAG4_SELF_REQUESTED_FRAME_RATE) != 0;
     }
 }

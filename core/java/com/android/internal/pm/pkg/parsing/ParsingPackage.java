@@ -123,6 +123,9 @@ public interface ParsingPackage {
 
     ParsingPackage addQueriesProvider(String authority);
 
+    /** Adds a feature flag (`android:featureFlag` attribute) encountered in the manifest. */
+    ParsingPackage addFeatureFlag(@NonNull String flagPackageAndName, @Nullable Boolean flagValue);
+
     /** Sets a process name -> {@link ParsedProcess} map coming from the <processes> tag. */
     ParsingPackage setProcesses(@NonNull Map<String, ParsedProcess> processes);
 
@@ -550,4 +553,15 @@ public interface ParsingPackage {
     boolean isNormalScreensSupported();
 
     boolean isSmallScreensSupported();
+
+    /**
+     * Sets the intent matching flags. This value is intended to be set from the "application" tag.
+     * @see android.R.styleable#AndroidManifestApplication_intentMatchingFlags
+     */
+    ParsingPackage setIntentMatchingFlags(int intentMatchingFlags);
+
+    /**
+     * Returns the intent matching flags.
+     */
+    int getIntentMatchingFlags();
 }

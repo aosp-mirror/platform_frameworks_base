@@ -284,7 +284,7 @@ constructor(
         }
 
     /** Observable for the [StatusBarState] */
-    val statusBarState: Flow<StatusBarState> = repository.statusBarState
+    val statusBarState: StateFlow<StatusBarState> = repository.statusBarState
 
     /** Observable for [BiometricUnlockModel] when biometrics are used to unlock the device. */
     val biometricUnlockState: StateFlow<BiometricUnlockModel> = repository.biometricUnlockState
@@ -350,23 +350,21 @@ constructor(
     val dismissAlpha: Flow<Float> =
         shadeRepository.legacyShadeExpansion
             .sampleCombine(
-                statusBarState,
                 keyguardTransitionInteractor.currentKeyguardState,
                 keyguardTransitionInteractor.transitionState,
                 isKeyguardDismissible,
                 keyguardTransitionInteractor.isFinishedIn(Scenes.Communal, GLANCEABLE_HUB),
             )
-            .filter { (_, _, _, step, _, _) -> !step.transitionState.isTransitioning() }
+            .filter { (_, _, step, _, _) -> !step.transitionState.isTransitioning() }
             .transform {
                 (
                     legacyShadeExpansion,
-                    statusBarState,
                     currentKeyguardState,
                     step,
                     isKeyguardDismissible,
                     onGlanceableHub) ->
                 if (
-                    statusBarState == StatusBarState.KEYGUARD &&
+                    statusBarState.value == StatusBarState.KEYGUARD &&
                         isKeyguardDismissible &&
                         currentKeyguardState == LOCKSCREEN &&
                         legacyShadeExpansion != 1f
