@@ -62,6 +62,7 @@ import android.view.DisplayInfo;
 import android.view.Surface;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.display.feature.flags.Flags;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -127,6 +128,8 @@ public final class DisplayManagerGlobal {
             INTERNAL_EVENT_FLAG_DISPLAY_BRIGHTNESS_CHANGED,
             INTERNAL_EVENT_FLAG_DISPLAY_HDR_SDR_RATIO_CHANGED,
             INTERNAL_EVENT_FLAG_DISPLAY_CONNECTION_CHANGED,
+            INTERNAL_EVENT_FLAG_DISPLAY_REFRESH_RATE,
+            INTERNAL_EVENT_FLAG_DISPLAY_STATE
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface InternalEventFlag {}
@@ -137,6 +140,8 @@ public final class DisplayManagerGlobal {
     public static final long INTERNAL_EVENT_FLAG_DISPLAY_BRIGHTNESS_CHANGED = 1L << 3;
     public static final long INTERNAL_EVENT_FLAG_DISPLAY_HDR_SDR_RATIO_CHANGED = 1L << 4;
     public static final long INTERNAL_EVENT_FLAG_DISPLAY_CONNECTION_CHANGED = 1L << 5;
+    public static final long INTERNAL_EVENT_FLAG_DISPLAY_REFRESH_RATE = 1L << 6;
+    public static final long INTERNAL_EVENT_FLAG_DISPLAY_STATE = 1L << 7;
 
     @UnsupportedAppUsage
     private static DisplayManagerGlobal sInstance;
@@ -1629,6 +1634,17 @@ public final class DisplayManagerGlobal {
                 & DisplayManager.EVENT_FLAG_DISPLAY_REMOVED) != 0) {
             baseEventMask |= INTERNAL_EVENT_FLAG_DISPLAY_REMOVED;
         }
+
+        if (Flags.displayListenerPerformanceImprovements()) {
+            if ((eventFlags & DisplayManager.EVENT_FLAG_DISPLAY_REFRESH_RATE) != 0) {
+                baseEventMask |= INTERNAL_EVENT_FLAG_DISPLAY_REFRESH_RATE;
+            }
+
+            if ((eventFlags & DisplayManager.EVENT_FLAG_DISPLAY_STATE) != 0) {
+                baseEventMask |= INTERNAL_EVENT_FLAG_DISPLAY_STATE;
+            }
+        }
+
 
         return baseEventMask;
     }

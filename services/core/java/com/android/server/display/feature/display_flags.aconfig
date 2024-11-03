@@ -440,6 +440,14 @@ flag {
 }
 
 flag {
+    name: "display_listener_performance_improvements"
+    namespace: "display_manager"
+    description: "Feature flag for an API to let the apps subscribe to a specific property change of the Display."
+    bug: "372700957"
+    is_fixed_read_only: true
+}
+
+flag {
     name: "enable_get_supported_refresh_rates"
     namespace: "core_graphics"
     description: "Flag to use the surfaceflinger rates for getSupportedRefreshRates"
