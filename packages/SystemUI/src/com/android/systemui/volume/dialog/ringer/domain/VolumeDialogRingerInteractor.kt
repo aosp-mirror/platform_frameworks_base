@@ -21,6 +21,7 @@ import android.media.AudioManager.RINGER_MODE_NORMAL
 import android.media.AudioManager.RINGER_MODE_SILENT
 import android.media.AudioManager.RINGER_MODE_VIBRATE
 import android.provider.Settings
+import com.android.settingslib.volume.data.repository.AudioSystemRepository
 import com.android.settingslib.volume.shared.model.RingerMode
 import com.android.systemui.plugins.VolumeDialogController
 import com.android.systemui.volume.dialog.dagger.scope.VolumeDialog
@@ -43,6 +44,7 @@ constructor(
     @VolumeDialog private val coroutineScope: CoroutineScope,
     volumeDialogStateInteractor: VolumeDialogStateInteractor,
     private val controller: VolumeDialogController,
+    private val audioSystemRepository: AudioSystemRepository,
 ) {
 
     val ringerModel: Flow<VolumeDialogRingerModel> =
@@ -70,6 +72,7 @@ constructor(
                 isMuted = it.level == 0 || it.muted,
                 level = it.level,
                 levelMax = it.levelMax,
+                isSingleVolume = audioSystemRepository.isSingleVolume,
             )
         }
     }

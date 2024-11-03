@@ -16,9 +16,6 @@
 
 package com.android.systemui.volume.dialog.settings.ui.viewmodel
 
-import androidx.compose.runtime.getValue
-import com.android.systemui.lifecycle.ExclusiveActivatable
-import com.android.systemui.lifecycle.Hydrator
 import com.android.systemui.volume.dialog.dagger.scope.VolumeDialogScope
 import com.android.systemui.volume.dialog.settings.domain.VolumeDialogSettingsButtonInteractor
 import dagger.assisted.AssistedFactory
@@ -26,15 +23,9 @@ import dagger.assisted.AssistedInject
 
 class VolumeDialogSettingsButtonViewModel
 @AssistedInject
-constructor(private val interactor: VolumeDialogSettingsButtonInteractor) : ExclusiveActivatable() {
+constructor(private val interactor: VolumeDialogSettingsButtonInteractor) {
 
-    private val hydrator = Hydrator("VolumeDialog_settings_button")
-
-    val isVisible by hydrator.hydratedStateOf("isVisible", interactor.isVisible)
-
-    override suspend fun onActivated(): Nothing {
-        hydrator.activate()
-    }
+    val isVisible = interactor.isVisible
 
     fun onButtonClicked() {
         interactor.onButtonClicked()

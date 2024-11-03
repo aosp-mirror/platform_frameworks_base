@@ -38,12 +38,14 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.layout.Arrangement.spacedBy
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.windowInsetsPadding
@@ -59,6 +61,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.PointerInputChange
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.approachLayout
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.layout.onSizeChanged
@@ -70,8 +75,10 @@ import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.round
 import androidx.compose.ui.util.fastRoundToInt
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
@@ -94,10 +101,7 @@ import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.lifecycle.setSnapshotBinding
-import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager
 import com.android.systemui.media.controls.ui.view.MediaHost
-import com.android.systemui.media.dagger.MediaModule.QS_PANEL
-import com.android.systemui.media.dagger.MediaModule.QUICK_QS_PANEL
 import com.android.systemui.plugins.qs.QS
 import com.android.systemui.plugins.qs.QSContainerController
 import com.android.systemui.qs.composefragment.SceneKeys.QuickQuickSettings
@@ -123,7 +127,6 @@ import com.android.systemui.util.println
 import java.io.PrintWriter
 import java.util.function.Consumer
 import javax.inject.Inject
-import javax.inject.Named
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.coroutineScope
@@ -131,7 +134,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.map
-import com.android.app.tracing.coroutines.launchTraced as launch
+import kotlinx.coroutines.launch
 
 @SuppressLint("ValidFragment")
 class QSFragmentCompose
@@ -139,21 +142,21 @@ class QSFragmentCompose
 constructor(
     private val qsFragmentComposeViewModelFactory: QSFragmentComposeViewModel.Factory,
     private val dumpManager: DumpManager,
-    @Named(QUICK_QS_PANEL) private val qqsMediaHost: MediaHost,
-    @Named(QS_PANEL) private val qsMediaHost: MediaHost,
 ) : LifecycleFragment(), QS, Dumpable {
 
     private val scrollListener = MutableStateFlow<QS.ScrollListener?>(null)
+    private val collapsedMediaVisibilityChangedListener =
+        MutableStateFlow<(Consumer<Boolean>)?>(null)
     private val heightListener = MutableStateFlow<QS.HeightListener?>(null)
     private val qsContainerController = MutableStateFlow<QSContainerController?>(null)
 
     private lateinit var viewModel: QSFragmentComposeViewModel
 
-    private val qsHeight = MutableStateFlow(0)
     private val qqsVisible = MutableStateFlow(false)
     private val qqsPositionOnRoot = Rect()
     private val composeViewPositionOnScreen = Rect()
     private val scrollState = ScrollState(0)
+    private val locationTemp = IntArray(2)
 
     // Inside object for namespacing
     private val notificationScrimClippingParams =
@@ -180,8 +183,6 @@ constructor(
         QSComposeFragment.isUnexpectedlyInLegacyMode()
         viewModel = qsFragmentComposeViewModelFactory.create(lifecycleScope)
 
-        qqsMediaHost.init(MediaHierarchyManager.LOCATION_QQS)
-        qsMediaHost.init(MediaHierarchyManager.LOCATION_QS)
         setListenerCollections()
         lifecycleScope.launch { viewModel.activate() }
     }
@@ -247,7 +248,11 @@ constructor(
                             Modifier.notificationScrimClip {
                                 notificationScrimClippingParams.params
                             }
-                        },
+                        }
+                        // Disable touches in the whole composable while the mirror is showing.
+                        // While the mirror is showing, an ancestor of the ComposeView is made
+                        // alpha 0, but touches are still being captured by the composables.
+                        .gesturesDisabled(viewModel.showingMirror),
             ) {
                 val isEditing by
                     viewModel.containerViewModel.editModeViewModel.isEditing
@@ -324,8 +329,27 @@ constructor(
     }
 
     override fun getQsMinExpansionHeight(): Int {
-        // TODO (b/353253277) implement split screen
-        return viewModel.qqsHeight
+        return if (viewModel.isInSplitShade) {
+            getQsMinExpansionHeightForSplitShade()
+        } else {
+            viewModel.qqsHeight
+        }
+    }
+
+    /**
+     * Returns the min expansion height for split shade.
+     *
+     * On split shade, QS is always expanded and goes from the top of the screen to the bottom of
+     * the QS container.
+     */
+    private fun getQsMinExpansionHeightForSplitShade(): Int {
+        view?.getLocationOnScreen(locationTemp)
+        val top = locationTemp.get(1)
+        // We want to get the original top position, so we subtract any translation currently set.
+        val originalTop = (top - (view?.translationY ?: 0f)).toInt()
+        // On split shade the QS view doesn't start at the top of the screen, so we need to add the
+        // top margin.
+        return originalTop + (view?.height ?: 0)
     }
 
     override fun getDesiredHeight(): Int {
@@ -465,7 +489,7 @@ constructor(
     }
 
     override fun setCollapsedMediaVisibilityChangedListener(listener: Consumer<Boolean>?) {
-        // TODO (b/353253280)
+        collapsedMediaVisibilityChangedListener.value = listener
     }
 
     override fun setScrollListener(scrollListener: QS.ScrollListener?) {
@@ -508,6 +532,7 @@ constructor(
             lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 this@QSFragmentCompose.view?.setSnapshotBinding {
                     scrollListener.value?.onQsPanelScrollChanged(scrollState.value)
+                    collapsedMediaVisibilityChangedListener.value?.accept(viewModel.qqsMediaVisible)
                 }
                 launch {
                     setListenerJob(
@@ -543,7 +568,7 @@ constructor(
                 .squishiness
                 .collectAsStateWithLifecycle()
 
-        Column(modifier = Modifier.sysuiResTag("quick_qs_panel")) {
+        Column(modifier = Modifier.sysuiResTag(ResIdTags.quickQsPanel)) {
             Box(
                 modifier =
                     Modifier.fillMaxWidth()
@@ -555,6 +580,9 @@ constructor(
                                 leftFromRoot + coordinates.size.width,
                                 topFromRoot + coordinates.size.height,
                             )
+                            if (squishiness == 1f) {
+                                viewModel.qqsHeight = coordinates.size.height
+                            }
                         }
                         // Use an approach layout to determien the height without squishiness, as
                         // that's the value that NPVC and QuickSettingsController care about
@@ -569,8 +597,7 @@ constructor(
                         .padding(top = { qqsPadding }, bottom = { bottomPadding })
             ) {
                 if (viewModel.isQsEnabled) {
-                    QuickQuickSettings(
-                        viewModel = viewModel.containerViewModel.quickQuickSettingsViewModel,
+                    Column(
                         modifier =
                             Modifier.collapseExpandSemanticAction(
                                     stringResource(
@@ -582,7 +609,16 @@ constructor(
                                         QuickSettingsShade.Dimensions.Padding.roundToPx()
                                     }
                                 ),
-                    )
+                        verticalArrangement =
+                            spacedBy(dimensionResource(R.dimen.qs_tile_margin_vertical)),
+                    ) {
+                        QuickQuickSettings(
+                            viewModel = viewModel.containerViewModel.quickQuickSettingsViewModel
+                        )
+                        if (viewModel.qqsMediaVisible) {
+                            MediaObject(mediaHost = viewModel.qqsMediaHost)
+                        }
+                    }
                 }
             }
             Spacer(modifier = Modifier.weight(1f))
@@ -619,24 +655,38 @@ constructor(
                                 }
                                 .onSizeChanged { viewModel.qsScrollHeight = it.height }
                                 .verticalScroll(scrollState)
+                                .sysuiResTag(ResIdTags.qsScroll)
                     ) {
                         Spacer(
                             modifier = Modifier.height { qqsPadding + qsExtraPadding.roundToPx() }
                         )
                         QuickSettingsLayout(
                             viewModel = viewModel.containerViewModel,
-                            modifier = Modifier.sysuiResTag("quick_settings_panel"),
+                            modifier = Modifier.sysuiResTag(ResIdTags.quickSettingsPanel),
                         )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        if (viewModel.qsMediaVisible) {
+                            MediaObject(
+                                mediaHost = viewModel.qsMediaHost,
+                                modifier =
+                                    Modifier.padding(
+                                        horizontal = {
+                                            QuickSettingsShade.Dimensions.Padding.roundToPx()
+                                        }
+                                    ),
+                            )
+                        }
                     }
                 }
-            }
-            QuickSettingsTheme {
-                FooterActions(
-                    viewModel = viewModel.footerActionsViewModel,
-                    qsVisibilityLifecycleOwner = this@QSFragmentCompose,
-                    modifier =
-                        Modifier.sysuiResTag("qs_footer_actions").element(ElementKeys.FooterActions),
-                )
+                QuickSettingsTheme {
+                    FooterActions(
+                        viewModel = viewModel.footerActionsViewModel,
+                        qsVisibilityLifecycleOwner = this@QSFragmentCompose,
+                        modifier =
+                            Modifier.sysuiResTag(ResIdTags.qsFooterActions)
+                                .element(ElementKeys.FooterActions),
+                    )
+                }
             }
         }
     }
@@ -870,4 +920,46 @@ private class FrameLayoutTouchPassthrough(
         }
         return super.onInterceptTouchEvent(ev)
     }
+}
+
+private fun Modifier.gesturesDisabled(disabled: Boolean) =
+    if (disabled) {
+        pointerInput(Unit) {
+            awaitPointerEventScope {
+                // we should wait for all new pointer events
+                while (true) {
+                    awaitPointerEvent(pass = PointerEventPass.Initial)
+                        .changes
+                        .forEach(PointerInputChange::consume)
+                }
+            }
+        }
+    } else {
+        this
+    }
+
+@Composable
+private fun MediaObject(mediaHost: MediaHost, modifier: Modifier = Modifier) {
+    Box {
+        AndroidView(
+            modifier = modifier,
+            factory = {
+                mediaHost.hostView.apply {
+                    layoutParams =
+                        FrameLayout.LayoutParams(
+                            FrameLayout.LayoutParams.MATCH_PARENT,
+                            FrameLayout.LayoutParams.WRAP_CONTENT,
+                        )
+                }
+            },
+            onReset = {},
+        )
+    }
+}
+
+private object ResIdTags {
+    const val quickSettingsPanel = "quick_settings_panel"
+    const val quickQsPanel = "quick_qs_panel"
+    const val qsScroll = "expanded_qs_scroll_view"
+    const val qsFooterActions = "qs_footer_actions"
 }

@@ -18,6 +18,7 @@ package com.android.server.pm;
 
 import static com.android.server.pm.BackgroundInstallControlCallbackHelper.FLAGGED_PACKAGE_NAME_KEY;
 import static com.android.server.pm.BackgroundInstallControlCallbackHelper.FLAGGED_USER_ID_KEY;
+import static com.android.server.pm.BackgroundInstallControlCallbackHelper.INSTALL_EVENT_TYPE_KEY;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.after;
@@ -84,12 +85,18 @@ public class BackgroundInstallControlCallbackHelperTest {
         int testUserId = 1;
         mCallbackHelper.registerBackgroundInstallCallback(mCallback);
 
-        mCallbackHelper.notifyAllCallbacks(testUserId, testPackageName);
+        mCallbackHelper.notifyAllCallbacks(
+                testUserId,
+                testPackageName,
+                BackgroundInstallControlService.INSTALL_EVENT_TYPE_INSTALL);
 
         ArgumentCaptor<Bundle> bundleCaptor = ArgumentCaptor.forClass(Bundle.class);
         verify(mCallback, after(1000).times(1)).sendResult(bundleCaptor.capture());
         Bundle receivedBundle = bundleCaptor.getValue();
         assertEquals(testPackageName, receivedBundle.getString(FLAGGED_PACKAGE_NAME_KEY));
         assertEquals(testUserId, receivedBundle.getInt(FLAGGED_USER_ID_KEY));
+        assertEquals(
+                BackgroundInstallControlService.INSTALL_EVENT_TYPE_INSTALL,
+                receivedBundle.getInt(INSTALL_EVENT_TYPE_KEY));
     }
 }

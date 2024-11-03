@@ -21,6 +21,7 @@ import static org.junit.Assert.assertThrows;
 import android.os.Parcel;
 import android.platform.test.annotations.EnableFlags;
 
+import com.google.common.primitives.Ints;
 import com.google.common.truth.Expect;
 
 import org.junit.Rule;
@@ -34,6 +35,20 @@ public final class RadioAlertUnitTest {
 
     private static final int TEST_FLAGS = 0;
     private static final int CREATOR_ARRAY_SIZE = 3;
+    private static final int TEST_STATUS = RadioAlert.STATUS_ACTUAL;
+    private static final int TEST_TYPE = RadioAlert.MESSAGE_TYPE_ALERT;
+    private static final int[] TEST_CATEGORIES_1 = new int[]{RadioAlert.CATEGORY_CBRNE,
+            RadioAlert.CATEGORY_GEO};
+    private static final int[] TEST_CATEGORIES_2 = new int[]{RadioAlert.CATEGORY_CBRNE,
+            RadioAlert.CATEGORY_FIRE};
+    private static final int TEST_URGENCY_1 = RadioAlert.URGENCY_EXPECTED;
+    private static final int TEST_URGENCY_2 = RadioAlert.URGENCY_FUTURE;
+    private static final int TEST_SEVERITY_1 = RadioAlert.SEVERITY_SEVERE;
+    private static final int TEST_SEVERITY_2 = RadioAlert.SEVERITY_MODERATE;
+    private static final int TEST_CERTAINTY_1 = RadioAlert.CERTAINTY_POSSIBLE;
+    private static final int TEST_CERTAINTY_2 = RadioAlert.CERTAINTY_UNLIKELY;
+    private static final String TEST_DESCRIPTION_MESSAGE_1 = "Test Alert Description Message 1.";
+    private static final String TEST_DESCRIPTION_MESSAGE_2 = "Test Alert Description Message 2.";
     private static final String TEST_GEOCODE_VALUE_NAME = "SAME";
     private static final String TEST_GEOCODE_VALUE_1 = "006109";
     private static final String TEST_GEOCODE_VALUE_2 = "006009";
@@ -54,6 +69,18 @@ public final class RadioAlertUnitTest {
             List.of(TEST_POLYGON), List.of(TEST_GEOCODE_1));
     private static final RadioAlert.AlertArea TEST_AREA_2 = new RadioAlert.AlertArea(
             new ArrayList<>(), List.of(TEST_GEOCODE_1, TEST_GEOCODE_2));
+    private static final List<RadioAlert.AlertArea> TEST_AREA_LIST_1 = List.of(TEST_AREA_1);
+    private static final List<RadioAlert.AlertArea> TEST_AREA_LIST_2 = List.of(TEST_AREA_2);
+    private static final String TEST_LANGUAGE_1 = "en-US";
+
+    private static final RadioAlert.AlertInfo TEST_ALERT_INFO_1 = new RadioAlert.AlertInfo(
+            TEST_CATEGORIES_1, TEST_URGENCY_1, TEST_SEVERITY_1, TEST_CERTAINTY_1,
+            TEST_DESCRIPTION_MESSAGE_1, TEST_AREA_LIST_1, TEST_LANGUAGE_1);
+    private static final RadioAlert.AlertInfo TEST_ALERT_INFO_2 = new RadioAlert.AlertInfo(
+            TEST_CATEGORIES_2, TEST_URGENCY_2, TEST_SEVERITY_2, TEST_CERTAINTY_2,
+            TEST_DESCRIPTION_MESSAGE_2, TEST_AREA_LIST_2, /* language= */ null);
+    private static final RadioAlert TEST_ALERT = new RadioAlert(TEST_STATUS, TEST_TYPE,
+            List.of(TEST_ALERT_INFO_1, TEST_ALERT_INFO_2));
 
     @Rule
     public final Expect mExpect = Expect.create();
@@ -373,5 +400,210 @@ public final class RadioAlertUnitTest {
     public void equals_withDifferentTypeObject_forAlertArea() {
         mExpect.withMessage("Non-alert-area object").that(TEST_AREA_1)
                 .isNotEqualTo(TEST_GEOCODE_1);
+    }
+
+    @Test
+    public void constructor_withNullCategories_forAlertInfo_fails() {
+        NullPointerException thrown = assertThrows(NullPointerException.class, () ->
+                new RadioAlert.AlertInfo(/* categories= */ null, TEST_URGENCY_1, TEST_SEVERITY_1,
+                        TEST_CERTAINTY_1, TEST_DESCRIPTION_MESSAGE_1, TEST_AREA_LIST_1,
+                        TEST_LANGUAGE_1));
+
+        mExpect.withMessage("Exception for alert info constructor with null categories")
+                .that(thrown).hasMessageThat().contains("Categories can not be null");
+    }
+
+    @Test
+    public void constructor_withNullAreaList_forAlertInfo_fails() {
+        NullPointerException thrown = assertThrows(NullPointerException.class, () ->
+                new RadioAlert.AlertInfo(TEST_CATEGORIES_1, TEST_URGENCY_1, TEST_SEVERITY_1,
+                        TEST_CERTAINTY_1, TEST_DESCRIPTION_MESSAGE_1, /* areaList= */ null,
+                        TEST_LANGUAGE_1));
+
+        mExpect.withMessage("Exception for alert info constructor with null area list")
+                .that(thrown).hasMessageThat().contains("Area list can not be null");
+    }
+
+    @Test
+    public void getCategories_forAlertInfo() {
+        mExpect.withMessage("Radio alert info categories")
+                .that(Ints.asList(TEST_ALERT_INFO_1.getCategories()))
+                .containsExactlyElementsIn(Ints.asList(TEST_CATEGORIES_1));
+    }
+
+    @Test
+    public void getUrgency_forAlertInfo() {
+        mExpect.withMessage("Radio alert info urgency")
+                .that(TEST_ALERT_INFO_1.getUrgency()).isEqualTo(TEST_URGENCY_1);
+    }
+
+    @Test
+    public void getSeverity_forAlertInfo() {
+        mExpect.withMessage("Radio alert info severity")
+                .that(TEST_ALERT_INFO_1.getSeverity()).isEqualTo(TEST_SEVERITY_1);
+    }
+
+    @Test
+    public void getCertainty_forAlertInfo() {
+        mExpect.withMessage("Radio alert info certainty")
+                .that(TEST_ALERT_INFO_1.getCertainty()).isEqualTo(TEST_CERTAINTY_1);
+    }
+
+    @Test
+    public void getDescription_forAlertInfo() {
+        mExpect.withMessage("Radio alert info description")
+                .that(TEST_ALERT_INFO_1.getDescription()).isEqualTo(TEST_DESCRIPTION_MESSAGE_1);
+    }
+
+    @Test
+    public void getAreas_forAlertInfo() {
+        mExpect.withMessage("Radio alert info areas")
+                .that(TEST_ALERT_INFO_1.getAreas()).containsAtLeastElementsIn(TEST_AREA_LIST_1);
+    }
+
+    @Test
+    public void getLanguage_forAlertInfo() {
+        mExpect.withMessage("Radio alert language")
+                .that(TEST_ALERT_INFO_1.getLanguage()).isEqualTo(TEST_LANGUAGE_1);
+    }
+
+    @Test
+    public void describeContents_forAlertInfo() {
+        mExpect.withMessage("Contents of alert info")
+                .that(TEST_ALERT_INFO_1.describeContents()).isEqualTo(0);
+    }
+
+    @Test
+    public void writeToParcel_forAlertInfoWithNullLanguage() {
+        Parcel parcel = Parcel.obtain();
+
+        TEST_ALERT_INFO_2.writeToParcel(parcel, TEST_FLAGS);
+
+        parcel.setDataPosition(0);
+        RadioAlert.AlertInfo alertInfoFromParcel = RadioAlert.AlertInfo.CREATOR
+                .createFromParcel(parcel);
+        mExpect.withMessage("Alert info from parcel with null language")
+                .that(alertInfoFromParcel).isEqualTo(TEST_ALERT_INFO_2);
+    }
+
+    @Test
+    public void writeToParcel_forAlertInfoWithNonnullLanguage() {
+        Parcel parcel = Parcel.obtain();
+
+        TEST_ALERT_INFO_1.writeToParcel(parcel, TEST_FLAGS);
+
+        parcel.setDataPosition(0);
+        RadioAlert.AlertInfo alertInfoFromParcel = RadioAlert.AlertInfo.CREATOR
+                .createFromParcel(parcel);
+        mExpect.withMessage("Alert info with nonnull language from parcel")
+                .that(alertInfoFromParcel).isEqualTo(TEST_ALERT_INFO_1);
+    }
+
+    @Test
+    public void newArray_forAlertInfoCreator() {
+        RadioAlert.AlertInfo[] alertInfos = RadioAlert.AlertInfo.CREATOR
+                .newArray(CREATOR_ARRAY_SIZE);
+
+        mExpect.withMessage("Alert infos").that(alertInfos).hasLength(CREATOR_ARRAY_SIZE);
+    }
+
+    @Test
+    public void hashCode_withSameAlertInfos() {
+        RadioAlert.AlertInfo alertInfoCompared = new RadioAlert.AlertInfo(
+                TEST_CATEGORIES_1, TEST_URGENCY_1, TEST_SEVERITY_1, TEST_CERTAINTY_1,
+                TEST_DESCRIPTION_MESSAGE_1, TEST_AREA_LIST_1, TEST_LANGUAGE_1);
+
+        mExpect.withMessage("Hash code of the same alert info")
+                .that(alertInfoCompared.hashCode()).isEqualTo(TEST_ALERT_INFO_1.hashCode());
+    }
+
+    @Test
+    public void constructor_forRadioAlert() {
+        NullPointerException thrown = assertThrows(NullPointerException.class, () ->
+                new RadioAlert(TEST_STATUS, TEST_TYPE, /* infoList= */ null));
+
+        mExpect.withMessage("Exception for alert constructor with null alert info list")
+                .that(thrown).hasMessageThat().contains("Alert info list can not be null");
+    }
+
+    @Test
+    public void equals_withDifferentAlertInfo() {
+        mExpect.withMessage("Different alert info").that(TEST_ALERT_INFO_1)
+                .isNotEqualTo(TEST_ALERT_INFO_2);
+    }
+
+    @Test
+    @SuppressWarnings("TruthIncompatibleType")
+    public void equals_withDifferentTypeObject_forAlertInfo() {
+        mExpect.withMessage("Non-alert-info object").that(TEST_ALERT_INFO_1)
+                .isNotEqualTo(TEST_AREA_1);
+    }
+
+    @Test
+    public void getStatus() {
+        mExpect.withMessage("Radio alert status").that(TEST_ALERT.getStatus())
+                .isEqualTo(TEST_STATUS);
+    }
+
+    @Test
+    public void getMessageType() {
+        mExpect.withMessage("Radio alert message type")
+                .that(TEST_ALERT.getMessageType()).isEqualTo(TEST_TYPE);
+    }
+
+    @Test
+    public void getInfoList() {
+        mExpect.withMessage("Radio alert info list").that(TEST_ALERT.getInfoList())
+                .containsExactly(TEST_ALERT_INFO_1, TEST_ALERT_INFO_2);
+    }
+
+    @Test
+    public void describeContents() {
+        mExpect.withMessage("Contents of radio alert")
+                .that(TEST_ALERT.describeContents()).isEqualTo(0);
+    }
+
+    @Test
+    public void writeToParcel() {
+        Parcel parcel = Parcel.obtain();
+
+        TEST_ALERT.writeToParcel(parcel, TEST_FLAGS);
+
+        parcel.setDataPosition(0);
+        RadioAlert alertFromParcel = RadioAlert.CREATOR.createFromParcel(parcel);
+        mExpect.withMessage("Alert from parcel").that(alertFromParcel)
+                .isEqualTo(TEST_ALERT);
+    }
+
+    @Test
+    public void hashCode_withSameAlerts() {
+        RadioAlert alertCompared = new RadioAlert(TEST_STATUS, TEST_TYPE,
+                List.of(TEST_ALERT_INFO_1, TEST_ALERT_INFO_2));
+
+        mExpect.withMessage("Hash code of the same alert")
+                .that(alertCompared.hashCode()).isEqualTo(TEST_ALERT.hashCode());
+    }
+
+    @Test
+    public void newArray_forAlertCreator() {
+        RadioAlert[] alerts = RadioAlert.CREATOR.newArray(CREATOR_ARRAY_SIZE);
+
+        mExpect.withMessage("Alerts").that(alerts).hasLength(CREATOR_ARRAY_SIZE);
+    }
+
+    @Test
+    public void equals_withDifferentAlert() {
+        RadioAlert differentAlert = new RadioAlert(TEST_STATUS, TEST_TYPE,
+                List.of(TEST_ALERT_INFO_2));
+
+        mExpect.withMessage("Different alert").that(TEST_ALERT)
+                .isNotEqualTo(differentAlert);
+    }
+
+    @Test
+    @SuppressWarnings("TruthIncompatibleType")
+    public void equals_withDifferentTypeObject() {
+        mExpect.withMessage("Non-alert object").that(TEST_ALERT)
+                .isNotEqualTo(TEST_ALERT_INFO_2);
     }
 }

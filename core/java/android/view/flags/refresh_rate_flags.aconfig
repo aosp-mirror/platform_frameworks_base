@@ -122,6 +122,14 @@ flag {
 }
 
 flag {
+    name: "toolkit_viewgroup_set_requested_frame_rate_api"
+    namespace: "toolkit"
+    description: "Feature flag to introduce new frame rate setting APIs on ViewGroup"
+    bug: "335874198"
+    is_fixed_read_only: true
+}
+
+flag {
     name: "toolkit_frame_rate_touch_boost_25q1"
     namespace: "toolkit"
     description: "Feature flag to not suppress touch boost for specific windowTypes in VRR V QPR2"

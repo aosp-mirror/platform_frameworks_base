@@ -2400,10 +2400,14 @@ public final class InputMethodManager {
             if (Flags.refactorInsetsController()) {
                 final var viewRootImpl = view.getViewRootImpl();
                 // In case of a running show IME animation, it should not be requested visible,
-                // otherwise the animation would jump and not be controlled by the user anymore
-                if (viewRootImpl != null
-                        && (viewRootImpl.getInsetsController().computeUserAnimatingTypes()
-                                & WindowInsets.Type.ime()) == 0) {
+                // otherwise the animation would jump and not be controlled by the user anymore.
+                // If predictive back is in progress, and a editText is focussed, we should
+                // show the IME.
+                if (viewRootImpl != null && (
+                        (viewRootImpl.getInsetsController().computeUserAnimatingTypes()
+                                & WindowInsets.Type.ime()) == 0
+                        || viewRootImpl.getInsetsController()
+                                .isPredictiveBackImeHideAnimInProgress())) {
                     ImeTracker.forLogging().onProgress(statsToken,
                             ImeTracker.PHASE_CLIENT_NO_ONGOING_USER_ANIMATION);
                     if (resultReceiver != null) {

@@ -50,8 +50,8 @@ import android.provider.MediaStore;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Size;
+import android.view.Display;
 import android.view.Surface;
-import android.view.WindowManager;
 
 import com.android.internal.R;
 import com.android.systemui.mediaprojection.MediaProjectionCaptureTarget;
@@ -94,13 +94,18 @@ public class ScreenMediaRecorder extends MediaProjection.Callback {
     private final MediaProjectionCaptureTarget mCaptureRegion;
     private final ScreenRecordingStartTimeStore mScreenRecordingStartTimeStore;
     private final Handler mHandler;
+    private final int mDisplayId;
 
     private Context mContext;
     ScreenMediaRecorderListener mListener;
 
-    public ScreenMediaRecorder(Context context, Handler handler,
-            int uid, ScreenRecordingAudioSource audioSource,
+    public ScreenMediaRecorder(
+            Context context,
+            Handler handler,
+            int uid,
+            ScreenRecordingAudioSource audioSource,
             MediaProjectionCaptureTarget captureRegion,
+            int displayId,
             ScreenMediaRecorderListener listener,
             ScreenRecordingStartTimeStore screenRecordingStartTimeStore) {
         mContext = context;
@@ -109,6 +114,7 @@ public class ScreenMediaRecorder extends MediaProjection.Callback {
         mCaptureRegion = captureRegion;
         mListener = listener;
         mAudioSource = audioSource;
+        mDisplayId = displayId;
         mScreenRecordingStartTimeStore = screenRecordingStartTimeStore;
     }
 
@@ -117,9 +123,13 @@ public class ScreenMediaRecorder extends MediaProjection.Callback {
         IBinder b = ServiceManager.getService(MEDIA_PROJECTION_SERVICE);
         IMediaProjectionManager mediaService =
                 IMediaProjectionManager.Stub.asInterface(b);
-        IMediaProjection proj = null;
-        proj = mediaService.createProjection(mUid, mContext.getPackageName(),
-                    MediaProjectionManager.TYPE_SCREEN_CAPTURE, false);
+        IMediaProjection proj =
+                mediaService.createProjection(
+                        mUid,
+                        mContext.getPackageName(),
+                        MediaProjectionManager.TYPE_SCREEN_CAPTURE,
+                        false,
+                        mDisplayId);
         IMediaProjection projection = IMediaProjection.Stub.asInterface(proj.asBinder());
         if (mCaptureRegion != null) {
             projection.setLaunchCookie(mCaptureRegion.getLaunchCookie());
@@ -146,9 +156,10 @@ public class ScreenMediaRecorder extends MediaProjection.Callback {
 
         // Set up video
         DisplayMetrics metrics = new DisplayMetrics();
-        WindowManager wm = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
-        wm.getDefaultDisplay().getRealMetrics(metrics);
-        int refreshRate = (int) wm.getDefaultDisplay().getRefreshRate();
+        DisplayManager dm = mContext.getSystemService(DisplayManager.class);
+        Display display = dm.getDisplay(mDisplayId);
+        display.getRealMetrics(metrics);
+        int refreshRate = (int) display.getRefreshRate();
         int[] dimens = getSupportedSize(metrics.widthPixels, metrics.heightPixels, refreshRate);
         int width = dimens[0];
         int height = dimens[1];

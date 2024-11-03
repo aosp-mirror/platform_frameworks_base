@@ -116,7 +116,6 @@ import com.android.systemui.statusbar.notification.stack.NotificationChildrenCon
 import com.android.systemui.statusbar.notification.stack.NotificationChildrenContainerLogger;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.SwipeableView;
-import com.android.systemui.statusbar.phone.ExpandHeadsUpOnInlineReply;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.InflatedSmartReplyState;
@@ -1988,6 +1987,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         mColorUpdateLogger = colorUpdateLogger;
         mDismissibilityProvider = dismissibilityProvider;
         mFeatureFlags = featureFlags;
+        setHapticFeedbackEnabled(!com.android.systemui.Flags.msdlFeedback());
     }
 
     private void initDimens() {
@@ -2948,18 +2948,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     public boolean isExpanded(boolean allowOnKeyguard) {
-        final boolean isHeadsUpState = ExpandHeadsUpOnInlineReply.isEnabled()
-                && canShowHeadsUp() && isHeadsUpState();
-        // System expanded should be ignored in pinned heads up state
-        final boolean isPinned = isHeadsUpState && isPinned();
-        // Heads Up Notification can be expanded when it is pinned.
-        final boolean isPinnedAndExpanded =
-                isHeadsUpState && isPinnedAndExpanded();
-
         return (!shouldShowPublic()) && (!mOnKeyguard || allowOnKeyguard)
-                && (!hasUserChangedExpansion() && !isPinned
+                && (!hasUserChangedExpansion()
                 && (isSystemExpanded() || isSystemChildExpanded())
-                || isUserExpanded() || isPinnedAndExpanded);
+                || isUserExpanded());
     }
 
     private boolean isSystemChildExpanded() {

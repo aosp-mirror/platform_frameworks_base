@@ -31,6 +31,7 @@ import android.annotation.Nullable;
 import android.app.ActivityOptions;
 import android.content.ComponentName;
 import android.content.Intent;
+import android.os.Binder;
 import android.util.Slog;
 
 import com.android.internal.protolog.ProtoLog;
@@ -154,7 +155,8 @@ class RecentsAnimation {
                 .setCallingUid(mRecentsUid)
                 .setCallingPackage(mRecentsComponent.getPackageName())
                 .setCallingFeatureId(mRecentsFeatureId)
-                .setActivityOptions(new SafeActivityOptions(options))
+                .setActivityOptions(new SafeActivityOptions(options,
+                        Binder.getCallingPid(), Binder.getCallingUid()))
                 .setUserId(mUserId)
                 .execute();
     }

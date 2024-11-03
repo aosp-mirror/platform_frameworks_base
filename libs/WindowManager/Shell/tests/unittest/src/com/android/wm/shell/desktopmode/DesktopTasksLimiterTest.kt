@@ -41,6 +41,7 @@ import com.android.wm.shell.ShellTestCase
 import com.android.wm.shell.common.ShellExecutor
 import com.android.wm.shell.desktopmode.DesktopTestHelpers.Companion.createFreeformTask
 import com.android.wm.shell.desktopmode.persistence.DesktopPersistentRepository
+import com.android.wm.shell.desktopmode.persistence.DesktopRepositoryInitializer
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
 import com.android.wm.shell.sysui.ShellInit
 import com.android.wm.shell.transition.TransitionInfoBuilder
@@ -89,6 +90,7 @@ class DesktopTasksLimiterTest : ShellTestCase() {
     @Mock lateinit var handler: Handler
     @Mock lateinit var testExecutor: ShellExecutor
     @Mock lateinit var persistentRepository: DesktopPersistentRepository
+    @Mock lateinit var repositoryInitializer: DesktopRepositoryInitializer
 
     private lateinit var mockitoSession: StaticMockitoSession
     private lateinit var desktopTasksLimiter: DesktopTasksLimiter
@@ -106,7 +108,13 @@ class DesktopTasksLimiterTest : ShellTestCase() {
         testScope = CoroutineScope(Dispatchers.Unconfined + SupervisorJob())
 
         desktopTaskRepo =
-            DesktopRepository(context, shellInit, persistentRepository, testScope)
+            DesktopRepository(
+                context,
+                shellInit,
+                persistentRepository,
+                repositoryInitializer,
+                testScope
+            )
         desktopTasksLimiter =
             DesktopTasksLimiter(transitions, desktopTaskRepo, shellTaskOrganizer, MAX_TASK_LIMIT,
                 interactionJankMonitor, mContext, handler)
@@ -248,8 +256,8 @@ class DesktopTasksLimiterTest : ShellTestCase() {
     @Test
     @DisableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION)
     fun removeLeftoverMinimizedTasks_activeNonMinimizedTasksStillAround_doesNothing() {
-        desktopTaskRepo.addActiveTask(displayId = DEFAULT_DISPLAY, taskId = 1)
-        desktopTaskRepo.addActiveTask(displayId = DEFAULT_DISPLAY, taskId = 2)
+        desktopTaskRepo.addTask(displayId = DEFAULT_DISPLAY, taskId = 1, isVisible = true)
+        desktopTaskRepo.addTask(displayId = DEFAULT_DISPLAY, taskId = 2, isVisible = true)
         desktopTaskRepo.minimizeTask(displayId = DEFAULT_DISPLAY, taskId = 2)
 
         val wct = WindowContainerTransaction()
@@ -487,29 +495,26 @@ class DesktopTasksLimiterTest : ShellTestCase() {
         verify(interactionJankMonitor).end(eq(CUJ_DESKTOP_MODE_MINIMIZE_WINDOW))
     }
 
-    private fun setUpFreeformTask(
-            displayId: Int = DEFAULT_DISPLAY,
-    ): RunningTaskInfo {
+    private fun setUpFreeformTask(displayId: Int = DEFAULT_DISPLAY): RunningTaskInfo {
         val task = createFreeformTask(displayId)
         `when`(shellTaskOrganizer.getRunningTaskInfo(task.taskId)).thenReturn(task)
-        desktopTaskRepo.addActiveTask(displayId, task.taskId)
-        desktopTaskRepo.addOrMoveFreeformTaskToTop(displayId, task.taskId)
+        desktopTaskRepo.addTask(displayId, task.taskId, task.isVisible)
         return task
     }
 
     private fun markTaskVisible(task: RunningTaskInfo) {
-        desktopTaskRepo.updateTaskVisibility(
+        desktopTaskRepo.updateTask(
                 task.displayId,
                 task.taskId,
-                visible = true
+                isVisible = true
         )
     }
 
     private fun markTaskHidden(task: RunningTaskInfo) {
-        desktopTaskRepo.updateTaskVisibility(
+        desktopTaskRepo.updateTask(
                 task.displayId,
                 task.taskId,
-                visible = false
+                isVisible = false
         )
     }
 

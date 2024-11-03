@@ -1262,6 +1262,33 @@ public class Activity extends ContextThemeWrapper
         }
     }
 
+    /**
+     * To make users aware of system features such as the app header menu and its various
+     * functionalities, educational dialogs are shown to demonstrate how to find and utilize these
+     * features. Using this method, an activity can specify if it wants these educational dialogs to
+     * be shown. When set to {@code true}, these dialogs are not completely blocked; however, the
+     * system will be notified that they should not be shown unless necessary. If this API is not
+     * called, the system's educational dialogs are not limited by default.
+     *
+     * <p>This method can be utilized when activities have states where showing an
+     * educational dialog would be disruptive to the user. For example, if a game application is
+     * expecting prompt user input, this method can be used to limit educational dialogs such as the
+     * dialogs that showcase the app header's features which, in this instance, would disrupt the
+     * user's experience if shown.</p>
+     *
+     * <p>Note that educational dialogs may be shown soon after this activity is launched, so
+     * this method must be called early if the intent is to limit the dialogs from the start.</p>
+     */
+    @FlaggedApi(com.android.window.flags.Flags.FLAG_ENABLE_DESKTOP_WINDOWING_APP_TO_WEB_EDUCATION)
+    public final void setLimitSystemEducationDialogs(boolean limitSystemEducationDialogs) {
+        try {
+            ActivityTaskManager
+                  .getService().setLimitSystemEducationDialogs(mToken, limitSystemEducationDialogs);
+        } catch (RemoteException e) {
+            // Empty
+        }
+    }
+
     /** Return the application that owns this activity. */
     public final Application getApplication() {
         return mApplication;

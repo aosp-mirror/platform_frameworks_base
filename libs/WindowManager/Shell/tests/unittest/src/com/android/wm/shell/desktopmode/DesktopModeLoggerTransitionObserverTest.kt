@@ -59,6 +59,7 @@ import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
 import com.android.wm.shell.sysui.ShellInit
 import com.android.wm.shell.transition.TransitionInfoBuilder
 import com.android.wm.shell.transition.Transitions
+import com.android.wm.shell.transition.Transitions.TRANSIT_MINIMIZE
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import org.junit.Before
@@ -519,6 +520,23 @@ class DesktopModeLoggerTransitionObserverTest : ShellTestCase() {
     callOnTransitionReady(transitionInfo)
 
     verifyTaskRemovedAndExitLogging(ExitReason.TASK_FINISHED, DEFAULT_TASK_UPDATE)
+  }
+
+  @Test
+  fun transitMinimize_logExitReasongMinimized() {
+      // add a freeform task
+      transitionObserver.addTaskInfosToCachedMap(createTaskInfo(WINDOWING_MODE_FREEFORM))
+      transitionObserver.isSessionActive = true
+
+      // minimize the task
+      val change = createChange(TRANSIT_MINIMIZE, createTaskInfo(WINDOWING_MODE_FULLSCREEN))
+      val transitionInfo = TransitionInfoBuilder(TRANSIT_MINIMIZE).addChange(change).build()
+      callOnTransitionReady(transitionInfo)
+
+      assertFalse(transitionObserver.isSessionActive)
+      verify(desktopModeEventLogger, times(1)).logSessionExit(eq(ExitReason.TASK_MINIMIZED))
+      verify(desktopModeEventLogger, times(1)).logTaskRemoved(eq(DEFAULT_TASK_UPDATE))
+      verifyZeroInteractions(desktopModeEventLogger)
   }
 
   @Test

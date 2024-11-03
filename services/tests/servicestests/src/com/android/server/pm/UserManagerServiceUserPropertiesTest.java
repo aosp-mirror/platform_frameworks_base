@@ -160,6 +160,7 @@ public class UserManagerServiceUserPropertiesTest {
 
             // Make a possibly-not-full-permission (i.e. partial) copy and check that it is correct.
             final UserProperties copy = new UserProperties(orig, exposeAll, hasManage, hasQuery);
+            assertThat(copy.toString()).isNotNull();
             verifyTestCopyLacksPermissions(orig, copy, exposeAll, hasManage, hasQuery);
             if (permLevel < 1) {
                 // PropertiesPresent should definitely be different since not all items were copied.

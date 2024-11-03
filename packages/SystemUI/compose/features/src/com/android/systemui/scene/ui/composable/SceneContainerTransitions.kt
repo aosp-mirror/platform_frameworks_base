@@ -80,6 +80,7 @@ val SceneContainerTransitions = transitions {
     from(Scenes.Lockscreen, to = Scenes.Shade) { lockscreenToShadeTransition() }
     from(Scenes.Lockscreen, to = Scenes.Shade, key = ToSplitShade) {
         lockscreenToSplitShadeTransition()
+        sharedElement(Shade.Elements.BackgroundScrim, enabled = false)
     }
     from(Scenes.Lockscreen, to = Scenes.Shade, key = SlightlyFasterShadeCollapse) {
         lockscreenToShadeTransition(durationScale = 0.9)
@@ -95,6 +96,9 @@ val SceneContainerTransitions = transitions {
         reversed { lockscreenToShadeTransition() }
         sharedElement(Notifications.Elements.NotificationStackPlaceholder, enabled = false)
         sharedElement(Notifications.Elements.HeadsUpNotificationPlaceholder, enabled = false)
+    }
+    from(Scenes.Shade, to = Scenes.Lockscreen, key = ToSplitShade) {
+        reversed { lockscreenToSplitShadeTransition() }
     }
     from(Scenes.Communal, to = Scenes.Shade) { communalToShadeTransition() }
     from(Scenes.Communal, to = Scenes.Bouncer) { communalToBouncerTransition() }

@@ -6,7 +6,25 @@ filegroup {
     ],
     path: "java",
     visibility: [
-        "//frameworks/base:__subpackages__",
         "//packages/modules/CrashRecovery/framework",
     ],
+}
+
+java_sdk_library {
+    name: "framework-platformcrashrecovery",
+    srcs: [":framework-crashrecovery-sources"],
+    defaults: ["framework-non-updatable-unbundled-defaults"],
+    aidl: {
+        include_dirs: [
+            "frameworks/base/core/java",
+        ],
+    },
+    impl_library_visibility: [
+        "//frameworks/base:__subpackages__",
+    ],
+}
+
+platform_compat_config {
+    name: "framework-platformcrashrecovery-compat-config",
+    src: ":framework-platformcrashrecovery",
 }

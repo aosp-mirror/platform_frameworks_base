@@ -742,7 +742,10 @@ public class StagingManagerTest {
                 /* stagedSessionErrorMessage */ "no error",
                 /* preVerifiedDomains */ null,
                 /* verifierController */ null,
-                /* verificationPolicy */ PackageInstaller.VERIFICATION_POLICY_BLOCK_FAIL_CLOSED);
+                /* initialVerificationPolicy */ 
+                PackageInstaller.VERIFICATION_POLICY_BLOCK_FAIL_CLOSED,
+                /* currentVerificationPolicy */
+                PackageInstaller.VERIFICATION_POLICY_BLOCK_FAIL_CLOSED);
 
         StagingManager.StagedSession stagedSession = spy(session.mStagedSession);
         doReturn(packageName).when(stagedSession).getPackageName();

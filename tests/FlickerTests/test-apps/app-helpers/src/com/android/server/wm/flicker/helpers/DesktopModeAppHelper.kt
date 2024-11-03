@@ -109,11 +109,7 @@ open class DesktopModeAppHelper(private val innerHelper: IStandardAppHelper) :
         if (motionEventHelper.inputMethod == TOUCH
             && Flags.enableHoldToDragAppHandle()) {
             // Touch requires hold-to-drag.
-            val downTime = SystemClock.uptimeMillis()
-            motionEventHelper.actionDown(startX, startY, time = downTime)
-            SystemClock.sleep(100L) // hold for 100ns before starting the move.
-            motionEventHelper.actionMove(startX, startY, startX, endY, 100, downTime = downTime)
-            motionEventHelper.actionUp(startX, endY, downTime = downTime)
+            motionEventHelper.holdToDrag(startX, startY, startX, endY, steps = 100)
         } else {
             device.drag(startX, startY, startX, endY, 100)
         }

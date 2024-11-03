@@ -72,6 +72,20 @@ public class InputSettings {
     public static final int DEFAULT_POINTER_SPEED = 0;
 
     /**
+     * Bounce Keys Threshold: The default value of the threshold (500 ms).
+     *
+     * @hide
+     */
+    public static final int DEFAULT_BOUNCE_KEYS_THRESHOLD_MILLIS = 500;
+
+    /**
+     * Slow Keys Threshold: The default value of the threshold (500 ms).
+     *
+     * @hide
+     */
+    public static final int DEFAULT_SLOW_KEYS_THRESHOLD_MILLIS = 500;
+
+    /**
      * The maximum allowed obscuring opacity by UID to propagate touches (0 <= x <= 1).
      * @hide
      */

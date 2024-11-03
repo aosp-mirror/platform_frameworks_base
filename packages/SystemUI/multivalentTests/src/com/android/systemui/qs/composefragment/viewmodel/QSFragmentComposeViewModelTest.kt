@@ -25,6 +25,15 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.common.ui.data.repository.fakeConfigurationRepository
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.media.controls.domain.pipeline.legacyMediaDataManagerImpl
+import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager
+import com.android.systemui.media.controls.ui.controller.mediaCarouselController
+import com.android.systemui.media.controls.ui.view.MediaHostState
+import com.android.systemui.media.controls.ui.view.qqsMediaHost
+import com.android.systemui.media.controls.ui.view.qsMediaHost
+import com.android.systemui.qs.composefragment.viewmodel.MediaState.ACTIVE_MEDIA
+import com.android.systemui.qs.composefragment.viewmodel.MediaState.ANY_MEDIA
+import com.android.systemui.qs.composefragment.viewmodel.MediaState.NO_MEDIA
 import com.android.systemui.qs.fgsManagerController
 import com.android.systemui.qs.panels.domain.interactor.tileSquishinessInteractor
 import com.android.systemui.res.R
@@ -35,9 +44,11 @@ import com.android.systemui.statusbar.disableflags.data.repository.fakeDisableFl
 import com.android.systemui.statusbar.sysuiStatusBarStateController
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.whenever
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
@@ -185,6 +196,92 @@ class QSFragmentComposeViewModelTest : AbstractQSFragmentComposeViewModelTest() 
             }
         }
 
+    @Test
+    fun qqsMediaHost_initializedCorrectly() =
+        with(kosmos) {
+            testScope.testWithinLifecycle {
+                assertThat(underTest.qqsMediaHost.location)
+                    .isEqualTo(MediaHierarchyManager.LOCATION_QQS)
+                assertThat(underTest.qqsMediaHost.expansion).isEqualTo(MediaHostState.EXPANDED)
+                assertThat(underTest.qqsMediaHost.showsOnlyActiveMedia).isTrue()
+                assertThat(underTest.qqsMediaHost.hostView).isNotNull()
+            }
+        }
+
+    @Test
+    fun qsMediaHost_initializedCorrectly() =
+        with(kosmos) {
+            testScope.testWithinLifecycle {
+                assertThat(underTest.qsMediaHost.location)
+                    .isEqualTo(MediaHierarchyManager.LOCATION_QS)
+                assertThat(underTest.qsMediaHost.expansion).isEqualTo(MediaHostState.EXPANDED)
+                assertThat(underTest.qsMediaHost.showsOnlyActiveMedia).isFalse()
+                assertThat(underTest.qsMediaHost.hostView).isNotNull()
+            }
+        }
+
+    @Test
+    fun qqsMediaVisible_onlyWhenActiveMedia() =
+        with(kosmos) {
+            testScope.testWithinLifecycle {
+                whenever(mediaCarouselController.isLockedAndHidden()).thenReturn(false)
+
+                assertThat(underTest.qqsMediaVisible).isEqualTo(underTest.qqsMediaHost.visible)
+
+                setMediaState(NO_MEDIA)
+                assertThat(underTest.qqsMediaVisible).isFalse()
+
+                setMediaState(ANY_MEDIA)
+                assertThat(underTest.qqsMediaVisible).isFalse()
+
+                setMediaState(ACTIVE_MEDIA)
+                assertThat(underTest.qqsMediaVisible).isTrue()
+            }
+        }
+
+    @Test
+    fun qsMediaVisible_onAnyMedia() =
+        with(kosmos) {
+            testScope.testWithinLifecycle {
+                whenever(mediaCarouselController.isLockedAndHidden()).thenReturn(false)
+
+                assertThat(underTest.qsMediaVisible).isEqualTo(underTest.qsMediaHost.visible)
+
+                setMediaState(NO_MEDIA)
+                assertThat(underTest.qsMediaVisible).isFalse()
+
+                setMediaState(ANY_MEDIA)
+                assertThat(underTest.qsMediaVisible).isTrue()
+
+                setMediaState(ACTIVE_MEDIA)
+                assertThat(underTest.qsMediaVisible).isTrue()
+            }
+        }
+
+    @Test
+    fun notUsingMedia_mediaNotVisible() =
+        with(kosmos) {
+            testScope.testWithinLifecycle(usingMedia = false) {
+                setMediaState(ACTIVE_MEDIA)
+
+                assertThat(underTest.qqsMediaVisible).isFalse()
+                assertThat(underTest.qsMediaVisible).isFalse()
+            }
+        }
+
+    private fun TestScope.setMediaState(state: MediaState) {
+        with(kosmos) {
+            val activeMedia = state == ACTIVE_MEDIA
+            val anyMedia = state != NO_MEDIA
+            whenever(legacyMediaDataManagerImpl.hasActiveMediaOrRecommendation())
+                .thenReturn(activeMedia)
+            whenever(legacyMediaDataManagerImpl.hasAnyMediaOrRecommendation()).thenReturn(anyMedia)
+            qqsMediaHost.updateViewVisibility()
+            qsMediaHost.updateViewVisibility()
+        }
+        runCurrent()
+    }
+
     companion object {
         private const val QS_DISABLE_FLAG = StatusBarManager.DISABLE2_QUICK_SETTINGS
 
@@ -194,4 +291,10 @@ class QSFragmentComposeViewModelTest : AbstractQSFragmentComposeViewModelTest() 
 
         private const val epsilon = 0.001f
     }
+}
+
+private enum class MediaState {
+    ACTIVE_MEDIA,
+    ANY_MEDIA,
+    NO_MEDIA,
 }

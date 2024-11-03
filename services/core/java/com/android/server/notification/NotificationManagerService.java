@@ -105,6 +105,7 @@ import static android.os.UserHandle.USER_SYSTEM;
 import static android.service.notification.Adjustment.KEY_TYPE;
 import static android.service.notification.Adjustment.TYPE_CONTENT_RECOMMENDATION;
 import static android.service.notification.Adjustment.TYPE_PROMOTION;
+import static android.service.notification.Flags.FLAG_NOTIFICATION_CONVERSATION_CHANNEL_MANAGEMENT;
 import static android.service.notification.Flags.callstyleCallbackApi;
 import static android.service.notification.Flags.notificationClassification;
 import static android.service.notification.Flags.notificationForceGrouping;
@@ -161,6 +162,8 @@ import static com.android.internal.util.Preconditions.checkNotNull;
 import static com.android.server.am.PendingIntentRecord.FLAG_ACTIVITY_SENDER;
 import static com.android.server.am.PendingIntentRecord.FLAG_BROADCAST_SENDER;
 import static com.android.server.am.PendingIntentRecord.FLAG_SERVICE_SENDER;
+import static android.app.backup.NotificationLoggingConstants.DATA_TYPE_ZEN_CONFIG;
+import static android.app.backup.NotificationLoggingConstants.ERROR_XML_PARSING;
 import static com.android.server.notification.Flags.expireBitmaps;
 import static com.android.server.policy.PhoneWindowManager.TOAST_WINDOW_ANIM_BUFFER;
 import static com.android.server.policy.PhoneWindowManager.TOAST_WINDOW_TIMEOUT;
@@ -1098,7 +1101,7 @@ public class NotificationManagerService extends SystemService {
     }
 
     void readPolicyXml(InputStream stream, boolean forRestore, int userId,
-            BackupRestoreEventLogger logger)
+            @Nullable BackupRestoreEventLogger logger)
             throws XmlPullParserException, NumberFormatException, IOException {
         final TypedXmlPullParser parser;
         if (forRestore) {
@@ -1114,7 +1117,27 @@ public class NotificationManagerService extends SystemService {
         int outerDepth = parser.getDepth();
         while (XmlUtils.nextElementWithin(parser, outerDepth)) {
             if (ZenModeConfig.ZEN_TAG.equals(parser.getName())) {
-                mZenModeHelper.readXml(parser, forRestore, userId);
+                int successfulReads = 0;
+                int unsuccessfulReads = 0;
+                try {
+                    boolean loadedCorrectly =
+                            mZenModeHelper.readXml(parser, forRestore, userId, logger);
+                    if (loadedCorrectly)
+                        successfulReads++;
+                    else
+                        unsuccessfulReads++;
+                } catch (Exception e) {
+                    Slog.wtf(TAG, "failed to read config", e);
+                    unsuccessfulReads++;
+                }
+                if (logger != null) {
+                    logger.logItemsRestored(DATA_TYPE_ZEN_CONFIG, successfulReads);
+                    if (unsuccessfulReads > 0) {
+                        logger.logItemsRestoreFailed(
+                                DATA_TYPE_ZEN_CONFIG, unsuccessfulReads, ERROR_XML_PARSING);
+                    }
+                }
+
             } else if (PreferencesHelper.TAG_RANKING.equals(parser.getName())){
                 mPreferencesHelper.readXml(parser, forRestore, userId);
             }
@@ -1246,7 +1269,7 @@ public class NotificationManagerService extends SystemService {
         }
     }
 
-    private void writePolicyXml(OutputStream stream, boolean forBackup, int userId,
+    void writePolicyXml(OutputStream stream, boolean forBackup, int userId,
             BackupRestoreEventLogger logger)  throws IOException {
         final TypedXmlSerializer out;
         if (forBackup) {
@@ -1258,7 +1281,7 @@ public class NotificationManagerService extends SystemService {
         out.startDocument(null, true);
         out.startTag(null, TAG_NOTIFICATION_POLICY);
         out.attributeInt(null, ATTR_VERSION, DB_VERSION);
-        mZenModeHelper.writeXml(out, forBackup, null, userId);
+        mZenModeHelper.writeXml(out, forBackup, null, userId, logger);
         mPreferencesHelper.writeXml(out, forBackup, userId);
         mListeners.writeXml(out, forBackup, userId);
         mAssistants.writeXml(out, forBackup, userId);
@@ -5683,14 +5706,16 @@ public class NotificationManagerService extends SystemService {
 
                 final int zenMode = zenModeFromInterruptionFilter(interruptionFilter, -1);
                 if (zenMode == -1) return;
+
+                UserHandle zenUser = getCallingZenUser();
                 if (!canManageGlobalZenPolicy(info.component.getPackageName(), callingUid)) {
                     mZenModeHelper.applyGlobalZenModeAsImplicitZenRule(
-                            info.component.getPackageName(), callingUid, zenMode);
+                            zenUser, info.component.getPackageName(), callingUid, zenMode);
                 } else {
                     int origin = computeZenOrigin(/* fromUser= */ false);
                     Binder.withCleanCallingIdentity(() -> {
-                        mZenModeHelper.setManualZenMode(zenMode, /* conditionId= */ null, origin,
-                                "listener:" + info.component.flattenToShortString(),
+                        mZenModeHelper.setManualZenMode(zenUser, zenMode, /* conditionId= */ null,
+                                origin, "listener:" + info.component.flattenToShortString(),
                                 /* caller= */ info.component.getPackageName(),
                                 callingUid);
                     });
@@ -5745,12 +5770,13 @@ public class NotificationManagerService extends SystemService {
         public void setZenMode(int mode, Uri conditionId, String reason, boolean fromUser) {
             enforceSystemOrSystemUI("INotificationManager.setZenMode");
             enforceUserOriginOnlyFromSystem(fromUser, "setZenMode");
+            UserHandle zenUser = getCallingZenUser();
 
             final int callingUid = Binder.getCallingUid();
             final long identity = Binder.clearCallingIdentity();
             try {
-                mZenModeHelper.setManualZenMode(mode, conditionId, computeZenOrigin(fromUser),
-                        reason, /* caller= */ null, callingUid);
+                mZenModeHelper.setManualZenMode(zenUser, mode, conditionId,
+                        computeZenOrigin(fromUser), reason, /* caller= */ null, callingUid);
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
@@ -5760,7 +5786,7 @@ public class NotificationManagerService extends SystemService {
         @Override
         public List<ZenModeConfig.ZenRule> getZenRules() throws RemoteException {
             enforcePolicyAccess(Binder.getCallingUid(), "getZenRules");
-            return mZenModeHelper.getZenRules();
+            return mZenModeHelper.getZenRules(getCallingZenUser());
         }
 
         @Override
@@ -5769,14 +5795,14 @@ public class NotificationManagerService extends SystemService {
                 throw new IllegalStateException("getAutomaticZenRules called with flag off!");
             }
             enforcePolicyAccess(Binder.getCallingUid(), "getAutomaticZenRules");
-            return mZenModeHelper.getAutomaticZenRules();
+            return mZenModeHelper.getAutomaticZenRules(getCallingZenUser());
         }
 
         @Override
         public AutomaticZenRule getAutomaticZenRule(String id) throws RemoteException {
             Objects.requireNonNull(id, "Id is null");
             enforcePolicyAccess(Binder.getCallingUid(), "getAutomaticZenRule");
-            return mZenModeHelper.getAutomaticZenRule(id);
+            return mZenModeHelper.getAutomaticZenRule(getCallingZenUser(), id);
         }
 
         @Override
@@ -5791,6 +5817,7 @@ public class NotificationManagerService extends SystemService {
             }
             enforcePolicyAccess(Binder.getCallingUid(), "addAutomaticZenRule");
             enforceUserOriginOnlyFromSystem(fromUser, "addAutomaticZenRule");
+            UserHandle zenUser = getCallingZenUser();
 
             // If the calling app is the system (from any user), take the package name from the
             // rule's owner rather than from the caller's package.
@@ -5801,16 +5828,18 @@ public class NotificationManagerService extends SystemService {
                 }
             }
 
-            return mZenModeHelper.addAutomaticZenRule(rulePkg, automaticZenRule,
+            return mZenModeHelper.addAutomaticZenRule(zenUser, rulePkg, automaticZenRule,
                     computeZenOrigin(fromUser), "addAutomaticZenRule", Binder.getCallingUid());
         }
 
         @Override
         public void setManualZenRuleDeviceEffects(ZenDeviceEffects effects) throws RemoteException {
             checkCallerIsSystem();
+            UserHandle zenUser = getCallingZenUser();
 
-            mZenModeHelper.setManualZenRuleDeviceEffects(effects, computeZenOrigin(true),
-                    "Update manual mode non-policy settings", Binder.getCallingUid());
+            mZenModeHelper.setManualZenRuleDeviceEffects(zenUser, effects,
+                    computeZenOrigin(true), "Update manual mode non-policy settings",
+                    Binder.getCallingUid());
         }
 
         @Override
@@ -5819,8 +5848,9 @@ public class NotificationManagerService extends SystemService {
             validateAutomaticZenRule(id, automaticZenRule);
             enforcePolicyAccess(Binder.getCallingUid(), "updateAutomaticZenRule");
             enforceUserOriginOnlyFromSystem(fromUser, "updateAutomaticZenRule");
+            UserHandle zenUser = getCallingZenUser();
 
-            return mZenModeHelper.updateAutomaticZenRule(id, automaticZenRule,
+            return mZenModeHelper.updateAutomaticZenRule(zenUser, id, automaticZenRule,
                     computeZenOrigin(fromUser), "updateAutomaticZenRule", Binder.getCallingUid());
         }
 
@@ -5886,8 +5916,9 @@ public class NotificationManagerService extends SystemService {
             // Verify that they can modify zen rules.
             enforcePolicyAccess(Binder.getCallingUid(), "removeAutomaticZenRule");
             enforceUserOriginOnlyFromSystem(fromUser, "removeAutomaticZenRule");
+            UserHandle zenUser = getCallingZenUser();
 
-            return mZenModeHelper.removeAutomaticZenRule(id, computeZenOrigin(fromUser),
+            return mZenModeHelper.removeAutomaticZenRule(zenUser, id, computeZenOrigin(fromUser),
                     "removeAutomaticZenRule", Binder.getCallingUid());
         }
 
@@ -5897,9 +5928,11 @@ public class NotificationManagerService extends SystemService {
             Objects.requireNonNull(packageName, "Package name is null");
             enforceSystemOrSystemUI("removeAutomaticZenRules");
             enforceUserOriginOnlyFromSystem(fromUser, "removeAutomaticZenRules");
+            UserHandle zenUser = getCallingZenUser();
 
-            return mZenModeHelper.removeAutomaticZenRules(packageName, computeZenOrigin(fromUser),
-                    packageName + "|removeAutomaticZenRules", Binder.getCallingUid());
+            return mZenModeHelper.removeAutomaticZenRules(zenUser, packageName,
+                    computeZenOrigin(fromUser), packageName + "|removeAutomaticZenRules",
+                    Binder.getCallingUid());
         }
 
         @Override
@@ -5907,7 +5940,7 @@ public class NotificationManagerService extends SystemService {
             Objects.requireNonNull(owner, "Owner is null");
             enforceSystemOrSystemUI("getRuleInstanceCount");
 
-            return mZenModeHelper.getCurrentInstanceCount(owner);
+            return mZenModeHelper.getCurrentInstanceCount(getCallingZenUser(), owner);
         }
 
         @Override
@@ -5915,7 +5948,7 @@ public class NotificationManagerService extends SystemService {
         public int getAutomaticZenRuleState(@NonNull String id) {
             Objects.requireNonNull(id, "id is null");
             enforcePolicyAccess(Binder.getCallingUid(), "getAutomaticZenRuleState");
-            return mZenModeHelper.getAutomaticZenRuleState(id);
+            return mZenModeHelper.getAutomaticZenRuleState(getCallingZenUser(), id);
         }
 
         @Override
@@ -5926,9 +5959,30 @@ public class NotificationManagerService extends SystemService {
 
             enforcePolicyAccess(Binder.getCallingUid(), "setAutomaticZenRuleState");
             boolean fromUser = (condition.source == Condition.SOURCE_USER_ACTION);
+            UserHandle zenUser = getCallingZenUser();
 
-            mZenModeHelper.setAutomaticZenRuleState(id, condition, computeZenOrigin(fromUser),
-                    Binder.getCallingUid());
+            mZenModeHelper.setAutomaticZenRuleState(zenUser, id, condition,
+                    computeZenOrigin(fromUser), Binder.getCallingUid());
+        }
+
+        /**
+         * Returns the {@link UserHandle} corresponding to the caller that is performing a
+         * zen-related operation (such as {@link #setInterruptionFilter},
+         * {@link #addAutomaticZenRule}, {@link #setAutomaticZenRuleState}, etc). The user is
+         * {@link UserHandle#USER_CURRENT} if the caller is the system or SystemUI (assuming
+         * that all interactions in SystemUI are for the "current" user); otherwise it's the user
+         * associated to the binder call.
+         */
+        private UserHandle getCallingZenUser() {
+            if (android.app.Flags.modesMultiuser()) {
+                if (isCallerSystemOrSystemUiOrShell()) {
+                    return UserHandle.CURRENT;
+                } else {
+                    return Binder.getCallingUserHandle();
+                }
+            } else {
+                return UserHandle.CURRENT;
+            }
         }
 
         @ZenModeConfig.ConfigOrigin
@@ -5964,15 +6018,16 @@ public class NotificationManagerService extends SystemService {
             if (zen == -1) throw new IllegalArgumentException("Invalid filter: " + filter);
             final int callingUid = Binder.getCallingUid();
             enforceUserOriginOnlyFromSystem(fromUser, "setInterruptionFilter");
+            UserHandle zenUser = getCallingZenUser();
 
             if (android.app.Flags.modesApi() && !canManageGlobalZenPolicy(pkg, callingUid)) {
-                mZenModeHelper.applyGlobalZenModeAsImplicitZenRule(pkg, callingUid, zen);
+                mZenModeHelper.applyGlobalZenModeAsImplicitZenRule(zenUser, pkg, callingUid, zen);
                 return;
             }
 
             final long identity = Binder.clearCallingIdentity();
             try {
-                mZenModeHelper.setManualZenMode(zen, null, computeZenOrigin(fromUser),
+                mZenModeHelper.setManualZenMode(zenUser, zen, null, computeZenOrigin(fromUser),
                         /* reason= */ "setInterruptionFilter", /* caller= */ pkg,
                         callingUid);
             } finally {
@@ -6268,12 +6323,13 @@ public class NotificationManagerService extends SystemService {
         @Override
         public Policy getNotificationPolicy(String pkg) {
             final int callingUid = Binder.getCallingUid();
+            UserHandle zenUser = getCallingZenUser();
             if (android.app.Flags.modesApi() && !canManageGlobalZenPolicy(pkg, callingUid)) {
-                return mZenModeHelper.getNotificationPolicyFromImplicitZenRule(pkg);
+                return mZenModeHelper.getNotificationPolicyFromImplicitZenRule(zenUser, pkg);
             }
             final long identity = Binder.clearCallingIdentity();
             try {
-                return mZenModeHelper.getNotificationPolicy();
+                return mZenModeHelper.getNotificationPolicy(zenUser);
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
@@ -6302,6 +6358,7 @@ public class NotificationManagerService extends SystemService {
             enforceUserOriginOnlyFromSystem(fromUser, "setNotificationPolicy");
             int callingUid = Binder.getCallingUid();
             @ZenModeConfig.ConfigOrigin int origin = computeZenOrigin(fromUser);
+            UserHandle zenUser = getCallingZenUser();
 
             boolean isSystemCaller = isCallerSystemOrSystemUiOrShell();
             boolean shouldApplyAsImplicitRule = android.app.Flags.modesApi()
@@ -6311,7 +6368,7 @@ public class NotificationManagerService extends SystemService {
             try {
                 final ApplicationInfo applicationInfo = mPackageManager.getApplicationInfo(pkg,
                         0, UserHandle.getUserId(callingUid));
-                Policy currPolicy = mZenModeHelper.getNotificationPolicy();
+                Policy currPolicy = mZenModeHelper.getNotificationPolicy(zenUser);
 
                 if (applicationInfo.targetSdkVersion < Build.VERSION_CODES.P) {
                     int priorityCategories = policy.priorityCategories;
@@ -6369,11 +6426,12 @@ public class NotificationManagerService extends SystemService {
                 }
 
                 if (shouldApplyAsImplicitRule) {
-                    mZenModeHelper.applyGlobalPolicyAsImplicitZenRule(pkg, callingUid, policy);
+                    mZenModeHelper.applyGlobalPolicyAsImplicitZenRule(zenUser, pkg, callingUid,
+                            policy);
                 } else {
                     ZenLog.traceSetNotificationPolicy(pkg, applicationInfo.targetSdkVersion,
                             policy);
-                    mZenModeHelper.setNotificationPolicy(policy, origin, callingUid);
+                    mZenModeHelper.setNotificationPolicy(zenUser, policy, origin, callingUid);
                 }
             } catch (RemoteException e) {
                 Slog.e(TAG, "Failed to set notification policy", e);
@@ -6624,6 +6682,33 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
+        @FlaggedApi(FLAG_NOTIFICATION_CONVERSATION_CHANNEL_MANAGEMENT)
+        public NotificationChannel createConversationNotificationChannelForPackageFromPrivilegedListener(
+                INotificationListener token, String pkg, UserHandle user,
+                String parentId, String conversationId) throws RemoteException {
+            Objects.requireNonNull(pkg);
+            Objects.requireNonNull(user);
+            Objects.requireNonNull(parentId);
+            Objects.requireNonNull(conversationId);
+
+            verifyPrivilegedListener(token, user, true);
+
+            int uid = getUidForPackageAndUser(pkg, user);
+            NotificationChannel conversationChannel =
+                    mPreferencesHelper.getNotificationChannel(pkg, uid, parentId, false).copy();
+            String conversationChannelId = String.format(
+                    CONVERSATION_CHANNEL_ID_FORMAT, parentId, conversationId);
+            conversationChannel.setId(conversationChannelId);
+            conversationChannel.setConversationId(parentId, conversationId);
+            createNotificationChannelsImpl(
+                    pkg, uid, new ParceledListSlice(Arrays.asList(conversationChannel)));
+            handleSavePolicyFile();
+
+            return mPreferencesHelper.getConversationNotificationChannel(
+                    pkg, uid, parentId, conversationId, false, false).copy();
+        }
+
+        @Override
         public void updateNotificationChannelGroupFromPrivilegedListener(
                 INotificationListener token, String pkg, UserHandle user,
                 NotificationChannelGroup group) throws RemoteException {
@@ -6641,7 +6726,7 @@ public class NotificationManagerService extends SystemService {
             Objects.requireNonNull(pkg);
             Objects.requireNonNull(user);
 
-            verifyPrivilegedListener(token, user, false);
+            verifyPrivilegedListener(token, user, true);
 
             final NotificationChannel originalChannel = mPreferencesHelper.getNotificationChannel(
                     pkg, getUidForPackageAndUser(pkg, user), channel.getId(), true);
@@ -9278,10 +9363,15 @@ public class NotificationManagerService extends SystemService {
                                             // a group summary or children (complete a group)
                                             mHandler.postDelayed(() -> {
                                                 synchronized (mNotificationLock) {
-                                                    mGroupHelper.onNotificationPostedWithDelay(
-                                                        r, mNotificationList, mSummaryByGroupKey);
+                                                    NotificationRecord record =
+                                                            mNotificationsByKey.get(key);
+                                                    if (record != null) {
+                                                        mGroupHelper.onNotificationPostedWithDelay(
+                                                                record, mNotificationList,
+                                                                mSummaryByGroupKey);
+                                                    }
                                                 }
-                                            }, r.getKey(), DELAY_FORCE_REGROUP_TIME);
+                                            }, key, DELAY_FORCE_REGROUP_TIME);
                                         }
                                     }
 
@@ -9327,10 +9417,15 @@ public class NotificationManagerService extends SystemService {
                                     if (notificationForceGrouping()) {
                                         mHandler.postDelayed(() -> {
                                             synchronized (mNotificationLock) {
-                                                mGroupHelper.onNotificationPostedWithDelay(r,
-                                                        mNotificationList, mSummaryByGroupKey);
+                                                NotificationRecord record =
+                                                        mNotificationsByKey.get(key);
+                                                if (record != null) {
+                                                    mGroupHelper.onNotificationPostedWithDelay(
+                                                            record, mNotificationList,
+                                                            mSummaryByGroupKey);
+                                                }
                                             }
-                                        }, r.getKey(), DELAY_FORCE_REGROUP_TIME);
+                                        }, key, DELAY_FORCE_REGROUP_TIME);
                                     }
                                 }
                             }
@@ -10310,7 +10405,7 @@ public class NotificationManagerService extends SystemService {
                 }
                 mListeners.notifyRemovedLocked(r, reason, r.getStats());
                 if (notificationForceGrouping()) {
-                    mHandler.removeCallbacksAndMessages(r.getKey());
+                    mHandler.removeCallbacksAndEqualMessages(r.getKey());
                     mHandler.post(() -> {
                         synchronized (NotificationManagerService.this.mNotificationLock) {
                             mGroupHelper.onNotificationRemoved(r, mNotificationList);

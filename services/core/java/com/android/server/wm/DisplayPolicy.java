@@ -17,7 +17,6 @@
 package com.android.server.wm;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
-import static android.inputmethodservice.InputMethodService.ENABLE_HIDE_IME_CAPTION_BAR;
 import static android.view.Display.TYPE_INTERNAL;
 import static android.view.InsetsFrameProvider.SOURCE_ARBITRARY_RECTANGLE;
 import static android.view.InsetsFrameProvider.SOURCE_CONTAINER_BOUNDS;
@@ -1248,17 +1247,7 @@ public class DisplayPolicy {
                 throw new IllegalArgumentException("IME insets must be provided by a window.");
             }
 
-            if (!ENABLE_HIDE_IME_CAPTION_BAR && mNavigationBar != null && mHasBottomNavigationBar) {
-                // In gesture navigation, nav bar frame is larger than frame to calculate insets.
-                // IME should not provide frame which is smaller than the nav bar frame. Otherwise,
-                // nav bar might be overlapped with the content of the client when IME is shown.
-                sTmpRect.set(inOutFrame);
-                sTmpRect.intersectUnchecked(mNavigationBar.getFrame());
-                inOutFrame.inset(windowState.mGivenContentInsets);
-                inOutFrame.union(sTmpRect);
-            } else {
-                inOutFrame.inset(windowState.mGivenContentInsets);
-            }
+            inOutFrame.inset(windowState.mGivenContentInsets);
             return 0;
         };
     }

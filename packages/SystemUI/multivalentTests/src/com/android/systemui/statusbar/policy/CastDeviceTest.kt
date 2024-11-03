@@ -23,6 +23,7 @@ import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
 import android.media.MediaRouter
 import android.media.projection.MediaProjectionInfo
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.log.logcatLogBuffer
@@ -30,6 +31,7 @@ import com.android.systemui.res.R
 import com.android.systemui.statusbar.policy.CastDevice.Companion.toCastDevice
 import com.google.common.truth.Truth.assertThat
 import kotlin.test.Test
+import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.doAnswer
 import org.mockito.kotlin.any
@@ -38,6 +40,7 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class CastDeviceTest : SysuiTestCase() {
     private val mockAppInfo =
         mock<ApplicationInfo>().apply { whenever(this.loadLabel(any())).thenReturn("") }

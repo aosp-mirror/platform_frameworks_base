@@ -39,6 +39,7 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ShortcutInfo;
 import android.graphics.drawable.Icon;
@@ -1344,10 +1345,14 @@ public class NotificationManager {
      */
     @FlaggedApi(Flags.FLAG_MODES_API)
     public boolean areAutomaticZenRulesUserManaged() {
-        // modes ui is dependent on modes api
-        return Flags.modesApi() && Flags.modesUi();
+        if (Flags.modesApi() && Flags.modesUi()) {
+            PackageManager pm = mContext.getPackageManager();
+            return !pm.hasSystemFeature(PackageManager.FEATURE_WATCH)
+                    && !pm.hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE);
+        } else {
+            return false;
+        }
     }
-
 
     /**
      * Returns AutomaticZenRules owned by the caller.

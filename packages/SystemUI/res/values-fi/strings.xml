@@ -112,6 +112,8 @@
     <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"Tallennetaanko näytön toimintaa?"</string>
     <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"Tallenna yhdestä sovelluksesta"</string>
     <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"Tallenna koko näyttö"</string>
+    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen_for_display (3754611651558838691) -->
+    <skip />
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"Kun tallennat koko näyttöä, kaikki näytöllä näkyvä sisältö tallennetaan. Ole siis varovainen, kun lisäät salasanoja, maksutietoja, viestejä, kuvia, audiota tai videoita."</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"Kun tallennat sovellusta, kaikki sovelluksessa näkyvä tai toistettu sisältö tallennetaan. Ole siis varovainen, kun lisäät salasanoja, maksutietoja, viestejä, kuvia, audiota tai videoita."</string>
     <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"Tallenna näyttö"</string>
@@ -136,11 +138,17 @@
     <string name="screenrecord_stop_dialog_message_specific_app" msgid="5995770227684523244">"Laite, jonka sisältöä tallennat: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="screenrecord_stop_dialog_button" msgid="2883812564938194350">"Lopeta tallennus"</string>
     <string name="share_to_app_chip_accessibility_label" msgid="4210256229976947065">"Näyttöä jaetaan"</string>
+    <!-- no translation found for share_to_app_chip_accessibility_label_generic (5517431657924536133) -->
+    <skip />
     <string name="share_to_app_stop_dialog_title" msgid="9212915050910250438">"Lopetetaanko näytön jakaminen?"</string>
+    <!-- no translation found for share_to_app_stop_dialog_title_generic (9079161538135843648) -->
+    <skip />
     <string name="share_to_app_stop_dialog_message_entire_screen_with_host_app" msgid="522823522115375414">"Jaat tällä hetkellä koko näyttöä: <xliff:g id="HOST_APP_NAME">%1$s</xliff:g>"</string>
     <string name="share_to_app_stop_dialog_message_entire_screen" msgid="5090115386271179270">"Jaat tällä hetkellä koko näyttöä sovellukselle"</string>
     <string name="share_to_app_stop_dialog_message_single_app_specific" msgid="5923772039347985172">"Jaat tällä hetkellä tätä: <xliff:g id="APP_BEING_SHARED_NAME">%1$s</xliff:g>"</string>
     <string name="share_to_app_stop_dialog_message_single_app_generic" msgid="6681016774654578261">"Jaat tällä hetkellä sovellusta"</string>
+    <!-- no translation found for share_to_app_stop_dialog_message_generic (7622174291691249392) -->
+    <skip />
     <string name="share_to_app_stop_dialog_button" msgid="6334056916284230217">"Lopeta jakaminen"</string>
     <string name="cast_screen_to_other_device_chip_accessibility_label" msgid="4687917476203009885">"Näyttöä striimataan"</string>
     <string name="cast_to_other_device_stop_dialog_title" msgid="7836517190930357326">"Lopetetaanko striimaus?"</string>
@@ -515,6 +523,10 @@
     <string name="communal_widget_picker_title" msgid="1953369090475731663">"Lukitusnäytön widgetit"</string>
     <string name="communal_widget_picker_description" msgid="490515450110487871">"Kaikki voivat nähdä widgetit lukitusnäytöllä, vaikka tabletti olisi lukittuna."</string>
     <string name="accessibility_action_label_unselect_widget" msgid="1041811747619468698">"poista widgetin valinta"</string>
+    <!-- no translation found for accessibility_action_label_shrink_widget (8259511040536438771) -->
+    <skip />
+    <!-- no translation found for accessibility_action_label_expand_widget (9190524260912211759) -->
+    <skip />
     <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"Lukitusnäytön widgetit"</string>
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"Jos haluat avata sovelluksen käyttämällä widgetiä, sinun täytyy vahvistaa henkilöllisyytesi. Muista myös, että widgetit näkyvät kaikille, vaikka tabletti olisi lukittuna. Jotkin widgetit on ehkä tarkoitettu lukitusnäytölle, ja niiden lisääminen tänne ei välttämättä ole turvallista."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"Selvä"</string>
@@ -571,6 +583,10 @@
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Tyhjennä kaikki"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Muuta asetuksia"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Historia"</string>
+    <!-- no translation found for notification_settings_button_description (2441994740884163889) -->
+    <skip />
+    <!-- no translation found for notification_history_button_description (1578657591405033383) -->
+    <skip />
     <string name="notification_section_header_incoming" msgid="850925217908095197">"Uudet"</string>
     <string name="notification_section_header_gentle" msgid="6804099527336337197">"Äänetön"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Ilmoitukset"</string>
@@ -849,7 +865,7 @@
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"Avaa sovelluslista"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"Avaa asetukset"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Avaa Assistant"</string>
-    <string name="group_system_lock_screen" msgid="7391191300363416543">"Lukitusnäyttö"</string>
+    <string name="group_system_lock_screen" msgid="7391191300363416543">"Lukitse näyttö"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"Tee muistiinpano"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"Multitaskaus"</string>
     <string name="system_multitasking_rhs" msgid="8714224917276297810">"Käytä jaettua näyttöä niin, että nyt käytettävä sovellus on oikealla"</string>
@@ -1399,14 +1415,19 @@
     <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"Nykyinen sovellus"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Saavutettavuus"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Pikanäppäimet"</string>
+    <!-- no translation found for shortcut_helper_customize_mode_title (1467657117101096033) -->
+    <skip />
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Pikahaut"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"Ei hakutuloksia"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Tiivistyskuvake"</string>
+    <!-- no translation found for shortcut_helper_customize_button_text (3124983502748069338) -->
+    <skip />
+    <!-- no translation found for shortcut_helper_done_button_text (7249905942125386191) -->
+    <skip />
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Laajennuskuvake"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"tai"</string>
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"Vetokahva"</string>
-    <!-- no translation found for shortcut_helper_keyboard_settings_buttons_label (6720967595915985259) -->
-    <skip />
+    <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"Näppäimistön asetukset"</string>
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"Siirry käyttämällä näppäimistöä"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"Opettele pikanäppäimiä"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"Siirry käyttämällä kosketuslevyä"</string>
@@ -1464,8 +1485,6 @@
     <string name="qs_edit_mode_category_providedByApps" msgid="8346112074897919019">"Sovellusten tarjoama"</string>
     <string name="qs_edit_mode_category_display" msgid="4749511439121053942">"Näyttö"</string>
     <string name="qs_edit_mode_category_unknown" msgid="509314252124053550">"Tuntematon"</string>
-    <!-- no translation found for qs_edit_mode_reset_dialog_title (8841270491554460726) -->
-    <skip />
-    <!-- no translation found for qs_edit_mode_reset_dialog_content (8626426097929954027) -->
-    <skip />
+    <string name="qs_edit_mode_reset_dialog_title" msgid="8841270491554460726">"Palauta laatat"</string>
+    <string name="qs_edit_mode_reset_dialog_content" msgid="8626426097929954027">"Palautetaanko laatat alkuperäiseen järjestykseen ja kokoon?"</string>
 </resources>

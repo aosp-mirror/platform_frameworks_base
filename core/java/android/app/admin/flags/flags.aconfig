@@ -341,3 +341,11 @@ flag {
     purpose: PURPOSE_BUGFIX
   }
 }
+
+flag {
+    name: "set_mte_policy_coexistence"
+    is_exported: true
+    namespace: "enterprise"
+    description: "Enables coexistence support for Setting MTE policy."
+    bug: "376213673"
+}

@@ -26,6 +26,8 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.os.Bundle;
 import android.os.Parcel;
+import android.platform.test.annotations.EnableFlags;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.platform.test.flag.junit.SetFlagsRule;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -43,8 +45,9 @@ import org.junit.runner.RunWith;
 public class InputMethodInfoTest {
 
     @Rule
-    public SetFlagsRule mSetFlagsRule =
-            new SetFlagsRule(SetFlagsRule.DefaultInitValueType.DEVICE_DEFAULT);
+    public SetFlagsRule mSetFlagsRule = new SetFlagsRule();
+
+    private final DeviceFlagsValueProvider mFlagsValueProvider = new DeviceFlagsValueProvider();
 
     @Test
     public void testEqualsAndHashCode() throws Exception {
@@ -70,7 +73,7 @@ public class InputMethodInfoTest {
         assertThat(imi.supportsInlineSuggestionsWithTouchExploration(), is(false));
         assertThat(imi.supportsStylusHandwriting(), is(false));
         assertThat(imi.createStylusHandwritingSettingsActivityIntent(), equalTo(null));
-        if (Flags.imeSwitcherRevampApi()) {
+        if (mFlagsValueProvider.getBoolean(Flags.FLAG_IME_SWITCHER_REVAMP_API)) {
             assertThat(imi.createImeLanguageSettingsActivityIntent(), equalTo(null));
         }
     }
@@ -121,9 +124,8 @@ public class InputMethodInfoTest {
     }
 
     @Test
+    @EnableFlags(android.companion.virtual.flags.Flags.FLAG_VDM_CUSTOM_IME)
     public void testIsVirtualDeviceOnly() throws Exception {
-        mSetFlagsRule.enableFlags(android.companion.virtual.flags.Flags.FLAG_VDM_CUSTOM_IME);
-
         final InputMethodInfo imi = buildInputMethodForTest(R.xml.ime_meta_virtual_device_only);
 
         assertThat(imi.isVirtualDeviceOnly(), is(true));

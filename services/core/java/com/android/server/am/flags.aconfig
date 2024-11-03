@@ -233,3 +233,13 @@ flag {
     description: "Assign cached oom_score_adj in tiers."
     bug: "369893532"
 }
+
+flag {
+    name: "unfreeze_bind_policy_fix"
+    namespace: "backstage_power"
+    description: "Make sure shouldNotFreeze state change correctly triggers updates."
+    bug: "375691778"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}

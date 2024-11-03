@@ -16,34 +16,57 @@
 
 package com.android.systemui.deviceentry.domain.interactor
 
+import android.hardware.face.FaceManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.compose.animation.scene.ObservableTransitionState
+import com.android.keyguard.keyguardUpdateMonitor
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.authentication.data.repository.fakeAuthenticationRepository
+import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
+import com.android.systemui.biometrics.authController
 import com.android.systemui.biometrics.data.repository.fingerprintPropertyRepository
 import com.android.systemui.biometrics.shared.model.FingerprintSensorType
 import com.android.systemui.biometrics.shared.model.SensorStrength
+import com.android.systemui.bouncer.data.repository.keyguardBouncerRepository
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.deviceentry.shared.model.FailedFaceAuthenticationStatus
+import com.android.systemui.deviceentry.shared.model.SuccessFaceAuthenticationStatus
+import com.android.systemui.flags.DisableSceneContainer
+import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.keyevent.data.repository.fakeKeyEventRepository
 import com.android.systemui.keyguard.data.repository.biometricSettingsRepository
+import com.android.systemui.keyguard.data.repository.configureKeyguardBypass
 import com.android.systemui.keyguard.data.repository.deviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFaceAuthRepository
+import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.shared.model.BiometricUnlockMode
 import com.android.systemui.keyguard.shared.model.BiometricUnlockSource
 import com.android.systemui.keyguard.shared.model.FailFingerprintAuthenticationStatus
+import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticationStatus
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.power.data.repository.powerRepository
 import com.android.systemui.power.shared.model.WakeSleepReason
 import com.android.systemui.power.shared.model.WakefulnessState
+import com.android.systemui.scene.domain.interactor.sceneInteractor
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
+import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.statusbar.phone.dozeScrimController
+import com.android.systemui.statusbar.phone.screenOffAnimationController
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers.anyBoolean
+import org.mockito.kotlin.whenever
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
@@ -51,24 +74,52 @@ import org.junit.runner.RunWith
 class DeviceEntryHapticsInteractorTest : SysuiTestCase() {
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
-    private val underTest = kosmos.deviceEntryHapticsInteractor
 
+    private lateinit var underTest: DeviceEntryHapticsInteractor
+
+    @Before
+    fun setup() {
+        if (SceneContainerFlag.isEnabled) {
+            whenever(kosmos.authController.isUdfpsFingerDown).thenReturn(false)
+            whenever(kosmos.dozeScrimController.isPulsing).thenReturn(false)
+            whenever(kosmos.keyguardUpdateMonitor.isUnlockingWithBiometricAllowed(anyBoolean()))
+                .thenReturn(true)
+            whenever(kosmos.screenOffAnimationController.isKeyguardShowDelayed()).thenReturn(false)
+
+            // Dependencies for DeviceEntrySourceInteractor#biometricUnlockStateOnKeyguardDismissed
+            whenever(kosmos.keyguardUpdateMonitor.isDeviceInteractive).thenReturn(true)
+            whenever(kosmos.keyguardUpdateMonitor.isUnlockingWithBiometricAllowed(anyBoolean()))
+                .thenReturn(true)
+
+            // Mock authenticationMethodIsSecure true
+            kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
+                AuthenticationMethodModel.Pin
+            )
+
+            kosmos.keyguardBouncerRepository.setAlternateVisible(false)
+            kosmos.sceneInteractor.changeScene(Scenes.Lockscreen, "reason")
+        } else {
+            underTest = kosmos.deviceEntryHapticsInteractor
+        }
+    }
+
+    @DisableSceneContainer
     @Test
     fun nonPowerButtonFPS_vibrateSuccess() =
         testScope.runTest {
             val playSuccessHaptic by collectLastValue(underTest.playSuccessHaptic)
-            setFingerprintSensorType(FingerprintSensorType.UDFPS_ULTRASONIC)
+            enrollFingerprint(FingerprintSensorType.UDFPS_ULTRASONIC)
             runCurrent()
-            enterDeviceFromBiometricUnlock()
+            enterDeviceFromFingerprintUnlockLegacy()
             assertThat(playSuccessHaptic).isNotNull()
         }
 
+    @DisableSceneContainer
     @Test
     fun powerButtonFPS_vibrateSuccess() =
         testScope.runTest {
             val playSuccessHaptic by collectLastValue(underTest.playSuccessHaptic)
-            setPowerButtonFingerprintProperty()
-            setFingerprintEnrolled()
+            enrollFingerprint(FingerprintSensorType.POWER_BUTTON)
             kosmos.fakeKeyEventRepository.setPowerButtonDown(false)
 
             // It's been 10 seconds since the last power button wakeup
@@ -76,16 +127,16 @@ class DeviceEntryHapticsInteractorTest : SysuiTestCase() {
             advanceTimeBy(10000)
             runCurrent()
 
-            enterDeviceFromBiometricUnlock()
+            enterDeviceFromFingerprintUnlockLegacy()
             assertThat(playSuccessHaptic).isNotNull()
         }
 
+    @DisableSceneContainer
     @Test
     fun powerButtonFPS_powerDown_doNotVibrateSuccess() =
         testScope.runTest {
             val playSuccessHaptic by collectLastValue(underTest.playSuccessHaptic)
-            setPowerButtonFingerprintProperty()
-            setFingerprintEnrolled()
+            enrollFingerprint(FingerprintSensorType.POWER_BUTTON)
             kosmos.fakeKeyEventRepository.setPowerButtonDown(true) // power button is currently DOWN
 
             // It's been 10 seconds since the last power button wakeup
@@ -93,16 +144,16 @@ class DeviceEntryHapticsInteractorTest : SysuiTestCase() {
             advanceTimeBy(10000)
             runCurrent()
 
-            enterDeviceFromBiometricUnlock()
+            enterDeviceFromFingerprintUnlockLegacy()
             assertThat(playSuccessHaptic).isNull()
         }
 
+    @DisableSceneContainer
     @Test
     fun powerButtonFPS_powerButtonRecentlyPressed_doNotVibrateSuccess() =
         testScope.runTest {
             val playSuccessHaptic by collectLastValue(underTest.playSuccessHaptic)
-            setPowerButtonFingerprintProperty()
-            setFingerprintEnrolled()
+            enrollFingerprint(FingerprintSensorType.POWER_BUTTON)
             kosmos.fakeKeyEventRepository.setPowerButtonDown(false)
 
             // It's only been 50ms since the last power button wakeup
@@ -110,7 +161,7 @@ class DeviceEntryHapticsInteractorTest : SysuiTestCase() {
             advanceTimeBy(50)
             runCurrent()
 
-            enterDeviceFromBiometricUnlock()
+            enterDeviceFromFingerprintUnlockLegacy()
             assertThat(playSuccessHaptic).isNull()
         }
 
@@ -118,7 +169,7 @@ class DeviceEntryHapticsInteractorTest : SysuiTestCase() {
     fun nonPowerButtonFPS_vibrateError() =
         testScope.runTest {
             val playErrorHaptic by collectLastValue(underTest.playErrorHaptic)
-            setFingerprintSensorType(FingerprintSensorType.UDFPS_ULTRASONIC)
+            enrollFingerprint(FingerprintSensorType.UDFPS_ULTRASONIC)
             runCurrent()
             fingerprintFailure()
             assertThat(playErrorHaptic).isNotNull()
@@ -128,8 +179,8 @@ class DeviceEntryHapticsInteractorTest : SysuiTestCase() {
     fun nonPowerButtonFPS_coExFaceFailure_doNotVibrateError() =
         testScope.runTest {
             val playErrorHaptic by collectLastValue(underTest.playErrorHaptic)
-            setFingerprintSensorType(FingerprintSensorType.UDFPS_ULTRASONIC)
-            coExEnrolledAndEnabled()
+            enrollFingerprint(FingerprintSensorType.UDFPS_ULTRASONIC)
+            enrollFace()
             runCurrent()
             faceFailure()
             assertThat(playErrorHaptic).isNull()
@@ -139,8 +190,7 @@ class DeviceEntryHapticsInteractorTest : SysuiTestCase() {
     fun powerButtonFPS_vibrateError() =
         testScope.runTest {
             val playErrorHaptic by collectLastValue(underTest.playErrorHaptic)
-            setPowerButtonFingerprintProperty()
-            setFingerprintEnrolled()
+            enrollFingerprint(FingerprintSensorType.POWER_BUTTON)
             runCurrent()
             fingerprintFailure()
             assertThat(playErrorHaptic).isNotNull()
@@ -150,15 +200,143 @@ class DeviceEntryHapticsInteractorTest : SysuiTestCase() {
     fun powerButtonFPS_powerDown_doNotVibrateError() =
         testScope.runTest {
             val playErrorHaptic by collectLastValue(underTest.playErrorHaptic)
-            setPowerButtonFingerprintProperty()
-            setFingerprintEnrolled()
+            enrollFingerprint(FingerprintSensorType.POWER_BUTTON)
             kosmos.fakeKeyEventRepository.setPowerButtonDown(true)
             runCurrent()
             fingerprintFailure()
             assertThat(playErrorHaptic).isNull()
         }
 
-    private suspend fun enterDeviceFromBiometricUnlock() {
+    @EnableSceneContainer
+    @Test
+    fun playSuccessHaptic_onDeviceEntryFromUdfps_sceneContainer() =
+        testScope.runTest {
+            kosmos.configureKeyguardBypass(isBypassAvailable = false)
+            underTest = kosmos.deviceEntryHapticsInteractor
+            val playSuccessHaptic by collectLastValue(underTest.playSuccessHaptic)
+            enrollFingerprint(FingerprintSensorType.UDFPS_ULTRASONIC)
+            runCurrent()
+            configureDeviceEntryFromBiometricSource(isFpUnlock = true)
+            verifyDeviceEntryFromFingerprintAuth()
+            assertThat(playSuccessHaptic).isNotNull()
+        }
+
+    @EnableSceneContainer
+    @Test
+    fun playSuccessHaptic_onDeviceEntryFromSfps_sceneContainer() =
+        testScope.runTest {
+            kosmos.configureKeyguardBypass(isBypassAvailable = false)
+            underTest = kosmos.deviceEntryHapticsInteractor
+            val playSuccessHaptic by collectLastValue(underTest.playSuccessHaptic)
+            enrollFingerprint(FingerprintSensorType.POWER_BUTTON)
+            kosmos.fakeKeyEventRepository.setPowerButtonDown(false)
+
+            // It's been 10 seconds since the last power button wakeup
+            setAwakeFromPowerButton()
+            advanceTimeBy(10000)
+            runCurrent()
+
+            configureDeviceEntryFromBiometricSource(isFpUnlock = true)
+            verifyDeviceEntryFromFingerprintAuth()
+            assertThat(playSuccessHaptic).isNotNull()
+        }
+
+    @EnableSceneContainer
+    @Test
+    fun playSuccessHaptic_onDeviceEntryFromFaceAuth_sceneContainer() =
+        testScope.runTest {
+            enrollFace()
+            kosmos.configureKeyguardBypass(isBypassAvailable = true)
+            underTest = kosmos.deviceEntryHapticsInteractor
+            val playSuccessHaptic by collectLastValue(underTest.playSuccessHaptic)
+            configureDeviceEntryFromBiometricSource(isFaceUnlock = true)
+            verifyDeviceEntryFromFaceAuth()
+            assertThat(playSuccessHaptic).isNotNull()
+        }
+
+    @EnableSceneContainer
+    @Test
+    fun skipSuccessHaptic_onDeviceEntryFromSfps_whenPowerDown_sceneContainer() =
+        testScope.runTest {
+            kosmos.configureKeyguardBypass(isBypassAvailable = false)
+            underTest = kosmos.deviceEntryHapticsInteractor
+            val playSuccessHaptic by collectLastValue(underTest.playSuccessHaptic)
+            enrollFingerprint(FingerprintSensorType.POWER_BUTTON)
+            // power button is currently DOWN
+            kosmos.fakeKeyEventRepository.setPowerButtonDown(true)
+
+            // It's been 10 seconds since the last power button wakeup
+            setAwakeFromPowerButton()
+            advanceTimeBy(10000)
+            runCurrent()
+
+            configureDeviceEntryFromBiometricSource(isFpUnlock = true)
+            verifyDeviceEntryFromFingerprintAuth()
+            assertThat(playSuccessHaptic).isNull()
+        }
+
+    @EnableSceneContainer
+    @Test
+    fun skipSuccessHaptic_onDeviceEntryFromSfps_whenPowerButtonRecentlyPressed_sceneContainer() =
+        testScope.runTest {
+            kosmos.configureKeyguardBypass(isBypassAvailable = false)
+            underTest = kosmos.deviceEntryHapticsInteractor
+            val playSuccessHaptic by collectLastValue(underTest.playSuccessHaptic)
+            enrollFingerprint(FingerprintSensorType.POWER_BUTTON)
+            kosmos.fakeKeyEventRepository.setPowerButtonDown(false)
+
+            // It's only been 50ms since the last power button wakeup
+            setAwakeFromPowerButton()
+            advanceTimeBy(50)
+            runCurrent()
+
+            configureDeviceEntryFromBiometricSource(isFpUnlock = true)
+            verifyDeviceEntryFromFingerprintAuth()
+            assertThat(playSuccessHaptic).isNull()
+        }
+
+    // Mock dependencies for DeviceEntrySourceInteractor#deviceEntryFromBiometricSource
+    private fun configureDeviceEntryFromBiometricSource(
+        isFpUnlock: Boolean = false,
+        isFaceUnlock: Boolean = false,
+    ) {
+        // Mock DeviceEntrySourceInteractor#deviceEntryBiometricAuthSuccessState
+        if (isFpUnlock) {
+            kosmos.fakeDeviceEntryFingerprintAuthRepository.setAuthenticationStatus(
+                SuccessFingerprintAuthenticationStatus(0, true)
+            )
+        }
+        if (isFaceUnlock) {
+            kosmos.fakeDeviceEntryFaceAuthRepository.setAuthenticationStatus(
+                SuccessFaceAuthenticationStatus(
+                    FaceManager.AuthenticationResult(null, null, 0, true)
+                )
+            )
+
+            // Mock DeviceEntrySourceInteractor#faceWakeAndUnlockMode = MODE_UNLOCK_COLLAPSING
+            kosmos.sceneInteractor.setTransitionState(
+                MutableStateFlow<ObservableTransitionState>(
+                    ObservableTransitionState.Idle(Scenes.Lockscreen)
+                )
+            )
+        }
+        underTest = kosmos.deviceEntryHapticsInteractor
+    }
+
+    private fun TestScope.verifyDeviceEntryFromFingerprintAuth() {
+        val deviceEntryFromBiometricSource by
+            collectLastValue(kosmos.deviceEntrySourceInteractor.deviceEntryFromBiometricSource)
+        assertThat(deviceEntryFromBiometricSource)
+            .isEqualTo(BiometricUnlockSource.FINGERPRINT_SENSOR)
+    }
+
+    private fun TestScope.verifyDeviceEntryFromFaceAuth() {
+        val deviceEntryFromBiometricSource by
+            collectLastValue(kosmos.deviceEntrySourceInteractor.deviceEntryFromBiometricSource)
+        assertThat(deviceEntryFromBiometricSource).isEqualTo(BiometricUnlockSource.FACE_SENSOR)
+    }
+
+    private fun enterDeviceFromFingerprintUnlockLegacy() {
         kosmos.fakeKeyguardRepository.setBiometricUnlockSource(
             BiometricUnlockSource.FINGERPRINT_SENSOR
         )
@@ -177,21 +355,22 @@ class DeviceEntryHapticsInteractorTest : SysuiTestCase() {
         )
     }
 
-    private fun setFingerprintSensorType(fingerprintSensorType: FingerprintSensorType) {
-        kosmos.fingerprintPropertyRepository.setProperties(
-            sensorId = 0,
-            strength = SensorStrength.STRONG,
-            sensorType = fingerprintSensorType,
-            sensorLocations = mapOf(),
-        )
+    private fun enrollFingerprint(fingerprintSensorType: FingerprintSensorType?) {
+        if (fingerprintSensorType == null) {
+            kosmos.biometricSettingsRepository.setIsFingerprintAuthEnrolledAndEnabled(false)
+        } else {
+            kosmos.biometricSettingsRepository.setIsFingerprintAuthEnrolledAndEnabled(true)
+            kosmos.fingerprintPropertyRepository.setProperties(
+                sensorId = 0,
+                strength = SensorStrength.STRONG,
+                sensorType = fingerprintSensorType,
+                sensorLocations = mapOf(),
+            )
+        }
     }
 
-    private fun setPowerButtonFingerprintProperty() {
-        setFingerprintSensorType(FingerprintSensorType.POWER_BUTTON)
-    }
-
-    private fun setFingerprintEnrolled() {
-        kosmos.biometricSettingsRepository.setIsFingerprintAuthEnrolledAndEnabled(true)
+    private fun enrollFace() {
+        kosmos.biometricSettingsRepository.setIsFaceAuthEnrolledAndEnabled(true)
     }
 
     private fun setAwakeFromPowerButton() {
@@ -201,10 +380,5 @@ class DeviceEntryHapticsInteractorTest : SysuiTestCase() {
             WakeSleepReason.POWER_BUTTON,
             powerButtonLaunchGestureTriggered = false,
         )
-    }
-
-    private fun coExEnrolledAndEnabled() {
-        setFingerprintEnrolled()
-        kosmos.biometricSettingsRepository.setIsFaceAuthEnrolledAndEnabled(true)
     }
 }

@@ -42,6 +42,8 @@ import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState.DREAMING
 import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
 import com.android.systemui.res.R
+import com.android.systemui.settings.brightness.data.repository.BrightnessMirrorShowingRepository
+import com.android.systemui.settings.brightness.domain.interactor.BrightnessMirrorShowingInteractor
 import com.android.systemui.shade.NotificationShadeWindowView.InteractionEventHandler
 import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor
 import com.android.systemui.statusbar.DragDownHelper
@@ -106,7 +108,7 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
     @Mock private lateinit var quickSettingsController: QuickSettingsController
     @Mock
     private lateinit var notificationStackScrollLayoutController:
-            NotificationStackScrollLayoutController
+        NotificationStackScrollLayoutController
     @Mock private lateinit var statusBarWindowStateController: StatusBarWindowStateController
     @Mock
     private lateinit var lockscreenShadeTransitionController: LockscreenShadeTransitionController
@@ -122,7 +124,7 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
     private lateinit var keyguardSecurityContainerController: KeyguardSecurityContainerController
     @Mock
     private lateinit var unfoldTransitionProgressProvider:
-            Optional<UnfoldTransitionProgressProvider>
+        Optional<UnfoldTransitionProgressProvider>
     @Mock private lateinit var notificationInsetsController: NotificationInsetsController
     @Mock private lateinit var mGlanceableHubContainerController: GlanceableHubContainerController
     @Mock private lateinit var keyguardTransitionInteractor: KeyguardTransitionInteractor
@@ -131,6 +133,10 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
     @Mock lateinit var configurationForwarder: ConfigurationForwarder
     @Captor
     private lateinit var interactionEventHandlerCaptor: ArgumentCaptor<InteractionEventHandler>
+
+    private val brightnessMirrorShowingRepository = BrightnessMirrorShowingRepository()
+    private val brightnessMirrorShowingInteractor =
+        BrightnessMirrorShowingInteractor(brightnessMirrorShowingRepository)
 
     private lateinit var underTest: NotificationShadeWindowView
     private lateinit var controller: NotificationShadeWindowViewController
@@ -142,10 +148,10 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
         underTest = spy(NotificationShadeWindowView(context, null))
         whenever(
-            underTest.findViewById<NotificationStackScrollLayout>(
-                R.id.notification_stack_scroller
+                underTest.findViewById<NotificationStackScrollLayout>(
+                    R.id.notification_stack_scroller
+                )
             )
-        )
             .thenReturn(notificationStackScrollLayout)
         whenever(underTest.findViewById<FrameLayout>(R.id.keyguard_bouncer_container))
             .thenReturn(mock())
@@ -198,6 +204,7 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
                 alternateBouncerInteractor,
                 mock(),
                 configurationForwarder,
+                brightnessMirrorShowingInteractor,
             )
 
         controller.setupExpandedStatusBar()

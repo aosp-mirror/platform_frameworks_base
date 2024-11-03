@@ -26,6 +26,13 @@ flag {
 }
 
 flag {
+   name: "modes_ui_dialog_paging"
+   namespace: "systemui"
+   description: "Add pagination to the Modes dialog in quick settings."
+   bug: "376450983"
+}
+
+flag {
    name: "priority_people_section"
    namespace: "systemui"
    description: "Add a new section for priority people (aka important conversations)."
@@ -59,11 +66,19 @@ flag {
 flag {
    name: "notification_over_expansion_clipping_fix"
    namespace: "systemui"
-   description: "fix NSSL clipping when over-expanding; fixes split shade bug."
+   description: "Fix NSSL clipping when over-expanding; fixes split shade bug."
    bug: "288553572"
    metadata {
         purpose: PURPOSE_BUGFIX
    }
+}
+
+flag {
+    name: "notification_add_x_on_hover_to_dismiss"
+    namespace: "systemui"
+    description: "Adds an x to notifications which shows up on mouse hover, allowing the user to "
+        "dismiss a notification with mouse."
+    bug: "376297472"
 }
 
 flag {
@@ -378,6 +393,17 @@ flag {
 }
 
 flag {
+    name: "status_bar_show_audio_only_projection_chip"
+    namespace: "systemui"
+    description: "Show chip on the left side of the status bar when a user is only sharing *audio* "
+        "during a media projection"
+    bug: "373308507"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "status_bar_use_repos_for_call_chip"
     namespace: "systemui"
     description: "Use repositories as the source of truth for call notifications shown as a chip in"
@@ -435,9 +461,9 @@ flag {
 }
 
 flag {
-    name: "status_bar_ron_chips"
+    name: "status_bar_notification_chips"
     namespace: "systemui"
-    description: "Show rich ongoing notifications as chips in the status bar"
+    description: "Show promoted ongoing notifications as chips in the status bar"
     bug: "361346412"
 }
 
@@ -729,6 +755,16 @@ flag {
 }
 
 flag {
+    name: "smartspace_swipe_event_logging_fix"
+    namespace: "systemui"
+    description: "Log card swipe events in smartspace"
+    bug: "374150422"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+   }
+}
+
+flag {
    name: "pin_input_field_styled_focus_state"
    namespace: "systemui"
    description: "Enables styled focus states on pin input field if keyboard is connected"
@@ -890,16 +926,6 @@ flag {
 }
 
 flag {
-    name: "delayed_wakelock_release_on_background_thread"
-    namespace: "systemui"
-    description: "Released delayed wakelocks on background threads to avoid janking screen transitions."
-    bug: "316128516"
-    metadata {
-        purpose: PURPOSE_BUGFIX
-    }
-}
-
-flag {
     name: "notify_power_manager_user_activity_background"
     namespace: "systemui"
     description: "Decide whether to notify the user activity to power manager in the background thread."
@@ -988,6 +1014,16 @@ flag {
     namespace: "systemui"
     description: "Allow showing education for physical keyboard and touchpad"
     bug: "317496783"
+}
+
+flag {
+    name: "shortcut_helper_key_glyph"
+    namespace: "systemui"
+    description: "Allow showing key glyph in shortcut helper"
+    bug: "353902478"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
 }
 
 flag {
@@ -1122,6 +1158,13 @@ flag {
   namespace: "systemui"
   description: "Support communal features without a dock"
   bug: "352301247"
+}
+
+flag {
+  name: "communal_hub_on_mobile"
+  namespace: "systemui"
+  description: "Brings the glanceable hub experience to mobile phones"
+  bug: "375689917"
 }
 
 flag {
@@ -1597,6 +1640,16 @@ flag {
 }
 
 flag {
+  name: "home_controls_dream_hsum"
+  namespace: "systemui"
+  description: "Enables the home controls dream in HSUM"
+  bug: "370691405"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
    name: "only_show_media_stream_slider_in_single_volume_mode"
    namespace: "systemui"
    description: "When the device is in single volume mode, only show media stream slider and hide all other stream (e.g. call, notification, alarm, etc) sliders in volume panel"
@@ -1624,6 +1677,13 @@ flag {
 }
 
 flag {
+    name: "bouncer_ui_revamp"
+    namespace: "systemui"
+    description: "Updates to background (blur), button animations and font changes."
+    bug: "376491880"
+}
+
+flag {
   name: "ensure_enr_views_visibility"
   namespace: "systemui"
   description: "Ensures public and private visibilities"
@@ -1632,3 +1692,19 @@ flag {
     purpose: PURPOSE_BUGFIX
   }
 }
+
+flag {
+  name: "shade_expands_on_status_bar_long_press"
+  namespace: "systemui"
+  description: "Expands the shade on long press of any status bar"
+  bug: "371224114"
+}
+
+
+flag {
+    name: "keyboard_shortcut_helper_shortcut_customizer"
+    namespace: "systemui"
+    description: "An implementation of shortcut customizations through shortcut helper."
+    bug: "365064144"
+}
+

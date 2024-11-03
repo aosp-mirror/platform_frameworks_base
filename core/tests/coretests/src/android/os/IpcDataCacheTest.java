@@ -41,10 +41,7 @@ import org.junit.Test;
  *  atest FrameworksCoreTests:IpcDataCacheTest
  */
 @SmallTest
-@IgnoreUnderRavenwood(blockedBy = IpcDataCache.class)
 public class IpcDataCacheTest {
-    @Rule
-    public final RavenwoodRule mRavenwood = new RavenwoodRule();
 
     // Configuration for creating caches
     private static final String MODULE = IpcDataCache.MODULE_TEST;
@@ -452,9 +449,11 @@ public class IpcDataCacheTest {
         assertEquals(ec.isDisabled(), true);
     }
 
-    // Verify that test mode works properly.
+    // Verify that invalidating the cache from an app process would fail due to lack of permissions.
     @Test
-    public void testTestMode() {
+    @android.platform.test.annotations.DisabledOnRavenwood(
+            reason = "SystemProperties doesn't have permission check")
+    public void testPermissionFailure() {
         // Create a cache that will write a system nonce.
         TestCache sysCache = new TestCache(IpcDataCache.MODULE_SYSTEM, "mode1");
         try {
@@ -466,6 +465,13 @@ public class IpcDataCacheTest {
             // The expected exception is a bare RuntimeException.  The test does not attempt to
             // validate the text of the exception message.
         }
+    }
+
+    // Verify that test mode works properly.
+    @Test
+    public void testTestMode() {
+        // Create a cache that will write a system nonce.
+        TestCache sysCache = new TestCache(IpcDataCache.MODULE_SYSTEM, "mode1");
 
         sysCache.testPropertyName();
         // Invalidate the cache.  This must succeed because the property has been marked for
@@ -483,7 +489,9 @@ public class IpcDataCacheTest {
         IpcDataCache.setTestMode(false);
         try {
             IpcDataCache.setTestMode(false);
-            fail("expected an IllegalStateException");
+            if (android.app.Flags.enforcePicTestmodeProtocol()) {
+                fail("expected an IllegalStateException");
+            }
         } catch (IllegalStateException e) {
             // The expected exception.
         }

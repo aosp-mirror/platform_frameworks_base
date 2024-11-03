@@ -116,6 +116,8 @@ public class QSPanel extends LinearLayout implements Tunable {
     @Nullable
     private View mMediaViewPlaceHolderForScene;
 
+    private boolean mHadConfigurationChangeWhileDetached;
+
     public QSPanel(Context context, AttributeSet attrs) {
         super(context, attrs);
         mUsingMediaPlayer = useQsMediaPlayer(context);
@@ -425,8 +427,21 @@ public class QSPanel extends LinearLayout implements Tunable {
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
+        if (!isAttachedToWindow()) {
+            mHadConfigurationChangeWhileDetached = true;
+        }
         mOnConfigurationChangedListeners.forEach(
                 listener -> listener.onConfigurationChange(newConfig));
+    }
+
+    final boolean hadConfigurationChangeWhileDetached() {
+        return mHadConfigurationChangeWhileDetached;
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        mHadConfigurationChangeWhileDetached = false;
     }
 
     @Override

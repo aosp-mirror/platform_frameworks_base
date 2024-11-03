@@ -11415,6 +11415,7 @@ public class CarrierConfigManager {
         sDefaults.putIntArray(KEY_CELLULAR_SERVICE_CAPABILITIES_INT_ARRAY, new int[]{1, 2, 3});
         sDefaults.putInt(KEY_WEAR_CONNECTIVITY_BT_TO_CELL_DELAY_MS_INT, -1);
         sDefaults.putInt(KEY_WEAR_CONNECTIVITY_EXTEND_BT_TO_CELL_DELAY_ON_WIFI_MS_INT, -1);
+        sDefaults.putInt(KEY_SATELLITE_SOS_MAX_DATAGRAM_SIZE, 255);
     }
 
     /**

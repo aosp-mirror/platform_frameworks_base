@@ -29,6 +29,7 @@ import android.os.RemoteException;
 import android.security.Flags;
 import android.util.Log;
 
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 
@@ -41,8 +42,8 @@ import java.util.concurrent.Executor;
  */
 @FlaggedApi(Flags.FLAG_AAPM_API)
 @SystemService(Context.ADVANCED_PROTECTION_SERVICE)
-public class AdvancedProtectionManager {
-    private static final String TAG = "AdvancedProtectionM";
+public final class AdvancedProtectionManager {
+    private static final String TAG = "AdvancedProtectionMgr";
 
     private final ConcurrentHashMap<Callback, IAdvancedProtectionCallback>
             mCallbackMap = new ConcurrentHashMap<>();
@@ -73,7 +74,7 @@ public class AdvancedProtectionManager {
      * Registers a {@link Callback} to be notified of changes to the Advanced Protection state.
      *
      * <p>The provided callback will be called on the specified executor with the updated
-     * {@link AdvancedProtectionState}. Methods are called when the state changes, as well as once
+     * state. Methods are called when the state changes, as well as once
      * on initial registration.
      *
      * @param executor The executor of where the callback will execute.
@@ -141,6 +142,22 @@ public class AdvancedProtectionManager {
     public void setAdvancedProtectionEnabled(boolean enabled) {
         try {
             mService.setAdvancedProtectionEnabled(enabled);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the list of advanced protection features which are available on this device.
+     *
+     * @hide
+     */
+    @SystemApi
+    @NonNull
+    @RequiresPermission(Manifest.permission.SET_ADVANCED_PROTECTION_MODE)
+    public List<AdvancedProtectionFeature> getAdvancedProtectionFeatures() {
+        try {
+            return mService.getAdvancedProtectionFeatures();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

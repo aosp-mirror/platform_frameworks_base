@@ -71,6 +71,7 @@ public class ApkLiteParseUtilsTest {
     private static final String TEST_APP_USING_SDK1_AND_SDK1 = "HelloWorldUsingSdk1AndSdk1.apk";
     private static final String TEST_APP_USING_SDK_MALFORMED_VERSION =
             "HelloWorldUsingSdkMalformedNegativeVersion.apk";
+    private static final String TEST_APP_USING_STATIC_LIB = "CtsStaticSharedLibConsumerApp1.apk";
     private static final String TEST_SDK1 = "HelloWorldSdk1.apk";
     private static final String TEST_SDK1_PACKAGE = "com.test.sdk1_1";
     private static final String TEST_SDK1_NAME = "com.test.sdk1";
@@ -159,6 +160,30 @@ public class ApkLiteParseUtilsTest {
 
         String[][] liteCerts = baseApk.getUsesSdkLibrariesCertDigests();
         String[][] pkgCerts = pkg.getUsesSdkLibrariesCertDigests();
+        for (int i = 0; i < liteCerts.length; i++) {
+            assertThat(liteCerts[i]).isEqualTo(pkgCerts[i]);
+        }
+    }
+
+    @SuppressLint("CheckResult")
+    @Test
+    public void testParseApkLite_getUsesStaticLibrary_sameAsPackageParser() throws Exception {
+        File apkFile = copyApkToTmpDir(TEST_APP_USING_STATIC_LIB);
+        ParseResult<ApkLite> result = ApkLiteParseUtils
+                .parseApkLite(ParseTypeImpl.forDefaultParsing().reset(), apkFile, 0);
+        assertThat(result.isError()).isFalse();
+        ApkLite baseApk = result.getResult();
+
+        AndroidPackage pkg = mPackageParser2.parsePackage(apkFile, 0, true).hideAsFinal();
+        assertThat(baseApk.getUsesStaticLibraries())
+                .containsExactlyElementsIn(pkg.getUsesStaticLibraries());
+        List<Long> versionsBoxed = Arrays.stream(pkg.getUsesStaticLibrariesVersions()).boxed()
+                .toList();
+        assertThat(baseApk.getUsesStaticLibrariesVersions()).asList()
+                .containsExactlyElementsIn(versionsBoxed);
+
+        String[][] liteCerts = baseApk.getUsesStaticLibrariesCertDigests();
+        String[][] pkgCerts = pkg.getUsesStaticLibrariesCertDigests();
         for (int i = 0; i < liteCerts.length; i++) {
             assertThat(liteCerts[i]).isEqualTo(pkgCerts[i]);
         }

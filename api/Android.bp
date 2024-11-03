@@ -101,7 +101,9 @@ combined_apis {
         "true": [
             "framework-crashrecovery",
         ],
-        default: [],
+        default: [
+            "framework-platformcrashrecovery",
+        ],
     }) + select(release_flag("RELEASE_RANGING_STACK"), {
         true: [
             "framework-ranging",
@@ -436,6 +438,7 @@ java_defaults {
     impl_library_visibility: ["//frameworks/base"],
     defaults_visibility: [
         "//frameworks/base/location",
+        "//frameworks/base/packages/CrashRecovery/framework",
         "//frameworks/base/nfc",
     ],
     plugins: ["error_prone_android_framework"],

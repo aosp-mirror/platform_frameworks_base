@@ -150,6 +150,8 @@ import android.media.midi.MidiManager;
 import android.media.musicrecognition.IMusicRecognitionManager;
 import android.media.musicrecognition.MusicRecognitionManager;
 import android.media.projection.MediaProjectionManager;
+import android.media.quality.IMediaQualityManager;
+import android.media.quality.MediaQualityManager;
 import android.media.soundtrigger.SoundTriggerManager;
 import android.media.tv.ITvInputManager;
 import android.media.tv.TvInputManager;
@@ -1775,6 +1777,19 @@ public final class SystemServiceRegistry {
                         }
                     });
         }
+        registerService(Context.MEDIA_QUALITY_SERVICE, MediaQualityManager.class,
+                new CachedServiceFetcher<MediaQualityManager>() {
+                    @Override
+                    public MediaQualityManager createService(ContextImpl ctx)
+                            throws ServiceNotFoundException {
+                        IBinder iBinder = ServiceManager
+                                .getServiceOrThrow(Context.MEDIA_QUALITY_SERVICE);
+                        IMediaQualityManager service = IMediaQualityManager
+                                .Stub.asInterface(iBinder);
+                        return new MediaQualityManager(ctx, service);
+                    }
+                });
+
         sInitializing = true;
         try {
             // Note: the following functions need to be @SystemApis, once they become mainline

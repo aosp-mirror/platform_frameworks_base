@@ -36,13 +36,13 @@ import android.security.forensic.IForensicServiceCommandCallback;
 import android.security.forensic.IForensicServiceStateCallback;
 import android.util.ArrayMap;
 
+import androidx.test.core.app.ApplicationProvider;
+
 import com.android.server.ServiceThread;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -64,7 +64,6 @@ public class ForensicServiceTest {
     private static final int ERROR_DATA_SOURCE_UNAVAILABLE =
             IForensicServiceCommandCallback.ErrorCode.DATA_SOURCE_UNAVAILABLE;
 
-    @Mock
     private Context mContext;
     private BackupTransportConnection mBackupTransportConnection;
     private DataAggregator mDataAggregator;
@@ -77,7 +76,7 @@ public class ForensicServiceTest {
     @SuppressLint("VisibleForTests")
     @Before
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
+        mContext = spy(ApplicationProvider.getApplicationContext());
 
         mTestLooper = new TestLooper();
         mLooper = mTestLooper.getLooper();
@@ -491,7 +490,7 @@ public class ForensicServiceTest {
 
         @Override
         public DataAggregator getDataAggregator(ForensicService forensicService) {
-            mDataAggregator = spy(new DataAggregator(forensicService));
+            mDataAggregator = spy(new DataAggregator(mContext, forensicService));
             return mDataAggregator;
         }
     }

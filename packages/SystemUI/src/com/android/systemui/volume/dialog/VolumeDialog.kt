@@ -19,26 +19,24 @@ package com.android.systemui.volume.dialog
 import android.app.Dialog
 import android.content.Context
 import android.os.Bundle
-import android.view.ContextThemeWrapper
 import android.view.MotionEvent
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.res.R
 import com.android.systemui.volume.Events
 import com.android.systemui.volume.dialog.domain.interactor.VolumeDialogVisibilityInteractor
-import com.android.systemui.volume.dialog.ui.binder.VolumeDialogBinder
+import com.android.systemui.volume.dialog.ui.binder.VolumeDialogViewBinder
 import javax.inject.Inject
 
 class VolumeDialog
 @Inject
 constructor(
     @Application context: Context,
-    private val dialogBinder: VolumeDialogBinder,
+    private val viewBinder: VolumeDialogViewBinder,
     private val visibilityInteractor: VolumeDialogVisibilityInteractor,
-) : Dialog(ContextThemeWrapper(context, R.style.volume_dialog_theme)) {
+) : Dialog(context) {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        dialogBinder.bind(this)
+        viewBinder.bind(this)
     }
 
     /**

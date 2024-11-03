@@ -112,6 +112,8 @@
     <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"Ghi màn hình?"</string>
     <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"Ghi một ứng dụng"</string>
     <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"Ghi toàn màn hình"</string>
+    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen_for_display (3754611651558838691) -->
+    <skip />
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"Khi bạn ghi toàn màn hình, mọi nội dung trên màn hình của bạn đều được ghi. Vì vậy, hãy thận trọng để không làm lộ thông tin như mật khẩu, thông tin thanh toán, tin nhắn, ảnh, âm thanh và video."</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"Khi bạn ghi một ứng dụng, mọi nội dung xuất hiện hoặc phát trong ứng dụng đó sẽ đều được ghi. Vì vậy, hãy thận trọng để không làm lộ thông tin như mật khẩu, thông tin thanh toán, tin nhắn, ảnh, âm thanh và video."</string>
     <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"Ghi màn hình"</string>
@@ -136,11 +138,17 @@
     <string name="screenrecord_stop_dialog_message_specific_app" msgid="5995770227684523244">"Bạn đang ghi lại nội dung của <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="screenrecord_stop_dialog_button" msgid="2883812564938194350">"Dừng ghi"</string>
     <string name="share_to_app_chip_accessibility_label" msgid="4210256229976947065">"Đang chia sẻ màn hình"</string>
+    <!-- no translation found for share_to_app_chip_accessibility_label_generic (5517431657924536133) -->
+    <skip />
     <string name="share_to_app_stop_dialog_title" msgid="9212915050910250438">"Dừng chia sẻ màn hình?"</string>
+    <!-- no translation found for share_to_app_stop_dialog_title_generic (9079161538135843648) -->
+    <skip />
     <string name="share_to_app_stop_dialog_message_entire_screen_with_host_app" msgid="522823522115375414">"Bạn đang chia sẻ toàn bộ nội dung trên màn hình với <xliff:g id="HOST_APP_NAME">%1$s</xliff:g>"</string>
     <string name="share_to_app_stop_dialog_message_entire_screen" msgid="5090115386271179270">"Bạn đang chia sẻ toàn bộ nội dung trên màn hình với một ứng dụng"</string>
     <string name="share_to_app_stop_dialog_message_single_app_specific" msgid="5923772039347985172">"Bạn đang chia sẻ nội dung của <xliff:g id="APP_BEING_SHARED_NAME">%1$s</xliff:g>"</string>
     <string name="share_to_app_stop_dialog_message_single_app_generic" msgid="6681016774654578261">"Bạn đang chia sẻ một ứng dụng"</string>
+    <!-- no translation found for share_to_app_stop_dialog_message_generic (7622174291691249392) -->
+    <skip />
     <string name="share_to_app_stop_dialog_button" msgid="6334056916284230217">"Dừng chia sẻ"</string>
     <string name="cast_screen_to_other_device_chip_accessibility_label" msgid="4687917476203009885">"Đang truyền màn hình"</string>
     <string name="cast_to_other_device_stop_dialog_title" msgid="7836517190930357326">"Dừng truyền?"</string>
@@ -515,6 +523,10 @@
     <string name="communal_widget_picker_title" msgid="1953369090475731663">"Tiện ích trên màn hình khoá"</string>
     <string name="communal_widget_picker_description" msgid="490515450110487871">"Ai cũng thấy được tiện ích trên màn hình khoá, kể cả khi khoá máy tính bảng."</string>
     <string name="accessibility_action_label_unselect_widget" msgid="1041811747619468698">"bỏ chọn tiện ích"</string>
+    <!-- no translation found for accessibility_action_label_shrink_widget (8259511040536438771) -->
+    <skip />
+    <!-- no translation found for accessibility_action_label_expand_widget (9190524260912211759) -->
+    <skip />
     <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"Tiện ích trên màn hình khoá"</string>
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"Để dùng tiện ích mở một ứng dụng, bạn cần xác minh danh tính của mình. Ngoài ra, hãy lưu ý rằng bất kỳ ai cũng có thể xem các tiện ích này, ngay cả khi máy tính bảng của bạn được khoá. Một số tiện ích có thể không dành cho màn hình khoá và không an toàn khi thêm vào đây."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"Tôi hiểu"</string>
@@ -571,6 +583,8 @@
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Xóa tất cả"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Quản lý"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Lịch sử"</string>
+    <string name="notification_settings_button_description" msgid="2441994740884163889">"Cài đặt thông báo"</string>
+    <string name="notification_history_button_description" msgid="1578657591405033383">"Nhật ký thông báo"</string>
     <string name="notification_section_header_incoming" msgid="850925217908095197">"Mới"</string>
     <string name="notification_section_header_gentle" msgid="6804099527336337197">"Im lặng"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Thông báo"</string>
@@ -1399,14 +1413,19 @@
     <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"Ứng dụng hiện tại"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Hỗ trợ tiếp cận"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Phím tắt"</string>
+    <!-- no translation found for shortcut_helper_customize_mode_title (1467657117101096033) -->
+    <skip />
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Lối tắt tìm kiếm"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"Không có kết quả tìm kiếm nào"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Biểu tượng Thu gọn"</string>
+    <!-- no translation found for shortcut_helper_customize_button_text (3124983502748069338) -->
+    <skip />
+    <!-- no translation found for shortcut_helper_done_button_text (7249905942125386191) -->
+    <skip />
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Biểu tượng Mở rộng"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"hoặc"</string>
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"Nút kéo"</string>
-    <!-- no translation found for shortcut_helper_keyboard_settings_buttons_label (6720967595915985259) -->
-    <skip />
+    <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"Cài đặt bàn phím"</string>
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"Di chuyển bằng bàn phím"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"Tìm hiểu về phím tắt"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"Di chuyển bằng bàn di chuột"</string>
@@ -1464,8 +1483,6 @@
     <string name="qs_edit_mode_category_providedByApps" msgid="8346112074897919019">"Do các ứng dụng cung cấp"</string>
     <string name="qs_edit_mode_category_display" msgid="4749511439121053942">"Hiển thị"</string>
     <string name="qs_edit_mode_category_unknown" msgid="509314252124053550">"Không xác định"</string>
-    <!-- no translation found for qs_edit_mode_reset_dialog_title (8841270491554460726) -->
-    <skip />
-    <!-- no translation found for qs_edit_mode_reset_dialog_content (8626426097929954027) -->
-    <skip />
+    <string name="qs_edit_mode_reset_dialog_title" msgid="8841270491554460726">"Đặt lại các ô"</string>
+    <string name="qs_edit_mode_reset_dialog_content" msgid="8626426097929954027">"Đặt lại các ô về thứ tự và kích thước ban đầu?"</string>
 </resources>

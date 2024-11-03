@@ -1627,6 +1627,18 @@ public final class LoadedApk {
         }
     }
 
+    IIntentReceiver findRegisteredReceiverDispatcher(BroadcastReceiver r, Context context) {
+        synchronized (mReceivers) {
+            final ArrayMap<BroadcastReceiver, LoadedApk.ReceiverDispatcher> map =
+                    mReceivers.get(context);
+            if (map != null) {
+                final LoadedApk.ReceiverDispatcher rd = map.get(r);
+                return rd == null ? null : rd.getIIntentReceiver();
+            }
+            return null;
+        }
+    }
+
     public IIntentReceiver forgetReceiverDispatcher(Context context,
             BroadcastReceiver r) {
         synchronized (mReceivers) {

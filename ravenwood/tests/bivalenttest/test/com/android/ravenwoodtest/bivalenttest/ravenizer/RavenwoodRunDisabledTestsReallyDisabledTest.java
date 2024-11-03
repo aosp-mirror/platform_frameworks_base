@@ -18,7 +18,7 @@ package com.android.ravenwoodtest.bivalenttest.ravenizer;
 import static org.junit.Assert.fail;
 
 import android.platform.test.annotations.DisabledOnRavenwood;
-import android.platform.test.ravenwood.RavenwoodAwareTestRunner.RavenwoodTestRunnerInitializing;
+import android.platform.test.annotations.RavenwoodTestRunnerInitializing;
 import android.platform.test.ravenwood.RavenwoodRule;
 import android.util.Log;
 

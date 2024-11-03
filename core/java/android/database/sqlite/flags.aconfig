@@ -2,6 +2,13 @@ package: "android.database.sqlite"
 container: "system"
 
 flag {
+     name: "oneway_finalizer_close"
+     namespace: "system_performance"
+     description: "Make BuildCursorNative.close oneway if in the the finalizer"
+     bug: "368221351"
+}
+
+flag {
      name: "sqlite_apis_35"
      is_exported: true
      namespace: "system_performance"

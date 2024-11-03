@@ -144,9 +144,6 @@ filegroup {
         // For the generated R.java and Manifest.java
         ":framework-res{.aapt.srcjar}",
 
-        // Java/AIDL sources to be moved out to CrashRecovery module
-        ":framework-crashrecovery-sources",
-
         // etc.
         ":framework-javastream-protos",
         ":statslog-framework-java-gen", // FrameworkStatsLog.java
@@ -432,7 +429,12 @@ java_library {
     name: "framework-non-updatable-unbundled-impl-libs",
     static_libs: [
         "framework-location.impl",
-    ],
+    ] + select(soong_config_variable("ANDROID", "release_crashrecovery_module"), {
+        "true": [],
+        default: [
+            "framework-platformcrashrecovery.impl",
+        ],
+    }),
     sdk_version: "core_platform",
     installable: false,
 }
@@ -565,7 +567,12 @@ java_library {
         "documents-ui-compat-config",
         "calendar-provider-compat-config",
         "contacts-provider-platform-compat-config",
-    ],
+    ] + select(soong_config_variable("ANDROID", "release_crashrecovery_module"), {
+        "true": [],
+        default: [
+            "framework-platformcrashrecovery-compat-config",
+        ],
+    }),
 }
 
 platform_compat_config {

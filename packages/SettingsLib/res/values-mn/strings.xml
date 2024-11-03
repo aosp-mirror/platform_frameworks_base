@@ -357,10 +357,8 @@
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Сайжруулсан холболтын онцлогийг идэвхжүүлдэг."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Локал терминал"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Локал суурьт хандалт хийх боломж олгодог терминалын апп-г идэвхжүүлэх"</string>
-    <!-- no translation found for enable_linux_terminal_title (5076044866895670637) -->
-    <skip />
-    <!-- no translation found for enable_linux_terminal_summary (5893216510985145320) -->
-    <skip />
+    <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Linux-н хөгжүүлэлтийн орчин"</string>
+    <string name="enable_linux_terminal_summary" msgid="5893216510985145320">"Android дээр Linux терминалыг ажиллуулах"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP шалгах"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"HDCP шалгах авирыг тохируулах"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"Дебаг"</string>

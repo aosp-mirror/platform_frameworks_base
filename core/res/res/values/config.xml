@@ -4734,6 +4734,11 @@
    -->
     <string name="config_defaultWearableSensingService" translatable="false"></string>
 
+    <!-- The maximum number of concurrent connections allowed between the WearableSensingService and
+        wearable devices.
+        -->
+    <integer name="config_maxWearableSensingServiceConcurrentConnections">5</integer>
+
 
     <!-- The component name for the default system on-device intelligence service, -->
     <string name="config_defaultOnDeviceIntelligenceService" translatable="false"></string>
@@ -7137,6 +7142,10 @@
     <!-- Whether a display enters desktop mode by default when the windowing mode of the display's
          root TaskDisplayArea is set to WINDOWING_MODE_FREEFORM. -->
     <bool name="config_enterDesktopByDefaultOnFreeformDisplay">false</bool>
+
+    <!-- Whether a desktop window should be maximized when it's dragged to the top edge of the
+         screen. -->
+    <bool name="config_dragToMaximizeInDesktopMode">false</bool>
 
     <!-- Frame rate compatibility value for Wallpaper
          FRAME_RATE_COMPATIBILITY_MIN (102) is used by default for lower power consumption -->

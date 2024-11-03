@@ -21,10 +21,9 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.android.compose.animation.scene.ContentKey
-import com.android.compose.animation.scene.Element
+import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.ElementMatcher
 import com.android.compose.animation.scene.OverscrollScope
-import com.android.compose.animation.scene.SceneTransitionLayoutImpl
 import com.android.compose.animation.scene.content.state.TransitionState
 
 internal class Translate(
@@ -32,15 +31,13 @@ internal class Translate(
     private val x: Dp = 0.dp,
     private val y: Dp = 0.dp,
 ) : PropertyTransformation<Offset> {
-    override fun transform(
-        layoutImpl: SceneTransitionLayoutImpl,
+    override fun PropertyTransformationScope.transform(
         content: ContentKey,
-        element: Element,
-        stateInContent: Element.State,
+        element: ElementKey,
         transition: TransitionState.Transition,
         value: Offset,
     ): Offset {
-        return with(layoutImpl.density) { Offset(value.x + x.toPx(), value.y + y.toPx()) }
+        return Offset(value.x + x.toPx(), value.y + y.toPx())
     }
 }
 
@@ -51,11 +48,9 @@ internal class OverscrollTranslate(
 ) : PropertyTransformation<Offset> {
     private val cachedOverscrollScope = CachedOverscrollScope()
 
-    override fun transform(
-        layoutImpl: SceneTransitionLayoutImpl,
+    override fun PropertyTransformationScope.transform(
         content: ContentKey,
-        element: Element,
-        stateInContent: Element.State,
+        element: ElementKey,
         transition: TransitionState.Transition,
         value: Offset,
     ): Offset {
@@ -64,7 +59,7 @@ internal class OverscrollTranslate(
         // that this method was invoked after performing this check.
         val overscrollProperties = transition as TransitionState.HasOverscrollProperties
         val overscrollScope =
-            cachedOverscrollScope.getFromCacheOrCompute(layoutImpl.density, overscrollProperties)
+            cachedOverscrollScope.getFromCacheOrCompute(density = this, overscrollProperties)
 
         return Offset(x = value.x + overscrollScope.x(), y = value.y + overscrollScope.y())
     }
@@ -75,7 +70,7 @@ internal class OverscrollTranslate(
  * [TransitionState.HasOverscrollProperties]. This helps avoid recreating a scope every frame
  * whenever an overscroll transition is computed.
  */
-private class CachedOverscrollScope() {
+private class CachedOverscrollScope {
     private var previousScope: OverscrollScope? = null
     private var previousDensity: Density? = null
     private var previousOverscrollProperties: TransitionState.HasOverscrollProperties? = null

@@ -237,6 +237,10 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         @Override
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
+            if (action == null) {
+                return;
+            }
+
             final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL);
 
             if (DEBUG) {
@@ -1465,9 +1469,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         mSecurityPolicy.enforceCallFromPackage(callingPackage);
 
         // Check that if a cross-profile binding is attempted, it is allowed.
-        // Cross-profile binding is also allowed if the caller has interact across users permission.
-        if (!mSecurityPolicy.isEnabledGroupProfile(providerProfileId)
-                && !mSecurityPolicy.hasCallerInteractAcrossUsersPermission()) {
+        if (!mSecurityPolicy.isEnabledGroupProfile(providerProfileId)) {
             return false;
         }
 
@@ -2436,10 +2438,8 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             Slog.i(TAG, "getInstalledProvidersForProfiles() " + userId);
         }
 
-        // Ensure the profile is in the group and enabled, or that the caller has permission to
-        // interact across users.
-        if (!mSecurityPolicy.isEnabledGroupProfile(profileId)
-                && !mSecurityPolicy.hasCallerInteractAcrossUsersPermission()) {
+        // Ensure the profile is in the group and enabled.
+        if (!mSecurityPolicy.isEnabledGroupProfile(profileId)) {
             return null;
         }
 
@@ -5231,11 +5231,14 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 return true;
             }
             final int userId = UserHandle.getUserId(uid);
-            if ((widget.host.getUserId() == userId || (widget.provider != null
-                    && widget.provider.getUserId() == userId))
+            if ((widget.host.getUserId() == userId
+                    || (widget.provider != null && widget.provider.getUserId() == userId)
+                    || hasCallerInteractAcrossUsersPermission())
                     && callerHasPermission(android.Manifest.permission.BIND_APPWIDGET)) {
-                // Apps that run in the same user as either the host or the provider and
-                // have the bind widget permission have access to the widget.
+                // Access to the widget requires the app to:
+                // - Run in the same user as the host or provider, or have permission to interact
+                //   across users
+                // - Have bind widget permission
                 return true;
             }
             if (DEBUG) {
@@ -5256,14 +5259,10 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
          * The provider is accessible by the caller if any of the following is true:
          * - The provider belongs to the caller
          * - The provider belongs to a profile of the caller and is allowlisted
-         * - The caller has permission to interact across users
          */
         public boolean canAccessProvider(String packageName, int profileId) {
             final int callerId = UserHandle.getCallingUserId();
             if (profileId == callerId) {
-                return true;
-            }
-            if (hasCallerInteractAcrossUsersPermission()) {
                 return true;
             }
             final int parentId = getProfileParent(profileId);

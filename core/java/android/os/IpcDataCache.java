@@ -257,6 +257,7 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 @TestApi
 @SystemApi(client=SystemApi.Client.MODULE_LIBRARIES)
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class IpcDataCache<Query, Result> extends PropertyInvalidatedCache<Query, Result> {
     /**
      * {@inheritDoc}

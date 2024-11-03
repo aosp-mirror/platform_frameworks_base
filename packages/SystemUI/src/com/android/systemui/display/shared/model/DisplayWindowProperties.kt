@@ -17,6 +17,7 @@
 package com.android.systemui.display.shared.model
 
 import android.content.Context
+import android.view.LayoutInflater
 import android.view.WindowManager
 
 /** Represents a display specific group of window related properties. */
@@ -40,4 +41,7 @@ data class DisplayWindowProperties(
      * associated with this instance.
      */
     val windowManager: WindowManager,
+
+    /** The [LayoutInflater] to be used with the associated [Context]. */
+    val layoutInflater: LayoutInflater,
 )

@@ -131,12 +131,15 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
                 }
             };
 
-    RunningTaskInfo mTaskInfo;
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    public RunningTaskInfo mTaskInfo;
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    public Context mDecorWindowContext;
     int mLayoutResId;
-    final SurfaceControl mTaskSurface;
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    public final SurfaceControl mTaskSurface;
 
     Display mDisplay;
-    Context mDecorWindowContext;
     SurfaceControl mDecorationContainerSurface;
 
     SurfaceControl mCaptionContainerSurface;
@@ -200,6 +203,14 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
     }
 
     /**
+     * Gets the decoration's task leash.
+     * @return the decoration' task surface used to manipulate the task.
+     */
+    public SurfaceControl getLeash() {
+        return mTaskSurface;
+    }
+
+    /**
      * Used by {@link WindowDecoration} to trigger a new relayout because the requirements for a
      * relayout weren't satisfied are satisfied now.
      *
@@ -238,7 +249,9 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
 
         if (!mTaskInfo.isVisible) {
             releaseViews(wct);
-            finishT.hide(mTaskSurface);
+            if (params.mSetTaskVisibilityPositionAndCrop) {
+                finishT.hide(mTaskSurface);
+            }
             return;
         }
 
@@ -411,7 +424,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
 
     private void updateTaskSurface(RelayoutParams params, SurfaceControl.Transaction startT,
             SurfaceControl.Transaction finishT, RelayoutResult<T> outResult) {
-        if (params.mSetTaskPositionAndCrop) {
+        if (params.mSetTaskVisibilityPositionAndCrop) {
             final Point taskPosition = mTaskInfo.positionInParent;
             startT.setWindowCrop(mTaskSurface, outResult.mWidth, outResult.mHeight);
             finishT.setWindowCrop(mTaskSurface, outResult.mWidth, outResult.mHeight)
@@ -426,8 +439,12 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
             shadowRadius =
                     loadDimension(mDecorWindowContext.getResources(), params.mShadowRadiusId);
         }
-        startT.setShadowRadius(mTaskSurface, shadowRadius).show(mTaskSurface);
+        startT.setShadowRadius(mTaskSurface, shadowRadius);
         finishT.setShadowRadius(mTaskSurface, shadowRadius);
+
+        if (params.mSetTaskVisibilityPositionAndCrop) {
+            startT.show(mTaskSurface);
+        }
 
         if (mTaskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM) {
             if (!DesktopModeStatus.isVeiledResizeEnabled()) {
@@ -747,7 +764,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         Configuration mWindowDecorConfig;
 
         boolean mApplyStartTransactionOnDraw;
-        boolean mSetTaskPositionAndCrop;
+        boolean mSetTaskVisibilityPositionAndCrop;
         boolean mHasGlobalFocus;
 
         void reset() {
@@ -766,7 +783,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
             mIsCaptionVisible = false;
 
             mApplyStartTransactionOnDraw = false;
-            mSetTaskPositionAndCrop = false;
+            mSetTaskVisibilityPositionAndCrop = false;
             mWindowDecorConfig = null;
             mHasGlobalFocus = false;
         }

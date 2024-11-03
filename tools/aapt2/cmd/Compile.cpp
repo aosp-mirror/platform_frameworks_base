@@ -605,8 +605,9 @@ static bool CompilePng(IAaptContext* context, const CompileOptions& options,
     }
 
     // Write the crunched PNG.
-    if (!android::WritePng(image.get(), nine_patch.get(), &crunched_png_buffer_out, {},
-                           &source_diag, context->IsVerbose())) {
+    if (!android::WritePng(image.get(), nine_patch.get(), &crunched_png_buffer_out,
+                           {.compression_level = options.png_compression_level_int}, &source_diag,
+                           context->IsVerbose())) {
       return false;
     }
 
@@ -922,6 +923,19 @@ int CompileCommand::Action(const std::vector<std::string>& args) {
     if (!ParseFeatureFlagsParameter(arg, context.GetDiagnostics(), &options_.feature_flag_values)) {
       return 1;
     }
+  }
+
+  if (!options_.png_compression_level) {
+    options_.png_compression_level_int = 9;
+  } else {
+    if (options_.png_compression_level->size() != 1 ||
+        options_.png_compression_level->front() < '0' ||
+        options_.png_compression_level->front() > '9') {
+      context.GetDiagnostics()->Error(
+          android::DiagMessage() << "PNG compression level should be a number in [0..9] range");
+      return 1;
+    }
+    options_.png_compression_level_int = options_.png_compression_level->front() - '0';
   }
 
   return Compile(&context, file_collection.get(), archive_writer.get(), options_);

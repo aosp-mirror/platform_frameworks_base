@@ -40,8 +40,11 @@ import java.util.concurrent.Executor;
  * <p>Resources include:
  * <ul>
  * <li>TunerFrontend {@link android.media.tv.tuner.frontend}.
+ * <li>Demux {@link com.android.server.tv.tunerresourcemanager.DemuxResource}.
+ * <li>Descrambler {@link android.media.tv.tuner.Descrambler}.
  * <li>TunerLnb {@link android.media.tv.tuner.Lnb}.
  * <li>MediaCas {@link android.media.MediaCas}.
+ * <li>CiCam {@link com.android.server.tv.tunerresourcemanager.CiCamResource}.
  * <ul>
  *
  * <p>Expected workflow is:
@@ -78,7 +81,7 @@ public class TunerResourceManager {
         TUNER_RESOURCE_TYPE_LNB,
         TUNER_RESOURCE_TYPE_CAS_SESSION,
         TUNER_RESOURCE_TYPE_FRONTEND_CICAM,
-        TUNER_RESOURCE_TYPE_MAX,
+        TUNER_RESOURCE_TYPE_MAX, // upper bound of constants
      })
     @Retention(RetentionPolicy.SOURCE)
     public @interface TunerResourceType {}
@@ -217,6 +220,25 @@ public class TunerResourceManager {
             throw e.rethrowFromSystemServer();
         }
         return result;
+    }
+
+    /**
+     * Determines whether the resource holder retains ownership of the resource during a challenge
+     * scenario, when both resource holder and resource challenger have same processId and same
+     * priority.
+     *
+     * @param clientId The client id used to set ownership of resource to owner in case of resource
+     *     challenger situation.
+     * @param resourceHolderRetain Set to true to allow the resource holder to retain ownership, or
+     *     false to allow the resource challenger to acquire the resource. If not explicitly set,
+     *     resourceHolderRetain is set to false.
+     */
+    public void setResourceHolderRetain(int clientId, boolean resourceHolderRetain) {
+        try {
+            mService.setResourceHolderRetain(clientId, resourceHolderRetain);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**

@@ -23,6 +23,7 @@ import android.animation.Animator;
 import android.animation.RectEvaluator;
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.graphics.Matrix;
 import android.graphics.PointF;
 import android.graphics.Rect;
@@ -33,10 +34,13 @@ import android.window.TransitionInfo;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.android.launcher3.icons.IconProvider;
 import com.android.wm.shell.R;
 import com.android.wm.shell.common.pip.PipUtils;
 import com.android.wm.shell.pip2.PipSurfaceTransactionHelper;
+import com.android.wm.shell.pip2.phone.PipAppIconOverlay;
 import com.android.wm.shell.shared.animation.Interpolators;
+import com.android.wm.shell.shared.pip.PipContentOverlay;
 
 /**
  * Animator that handles bounds animations for entering PIP.
@@ -59,6 +63,10 @@ public class PipEnterAnimator extends ValueAnimator
 
     private final PipSurfaceTransactionHelper.SurfaceControlTransactionFactory
             mSurfaceControlTransactionFactory;
+    Matrix mTransformTensor = new Matrix();
+    final float[] mMatrixTmp = new float[9];
+    @Nullable private PipContentOverlay mContentOverlay;
+
 
     // Internal state representing initial transform - cached to avoid recalculation.
     private final PointF mInitScale = new PointF();
@@ -66,9 +74,6 @@ public class PipEnterAnimator extends ValueAnimator
     private final Rect mInitCrop = new Rect();
     private final PointF mInitActivityScale = new PointF();
     private final PointF mInitActivityPos = new PointF();
-
-    Matrix mTransformTensor = new Matrix();
-    final float[] mMatrixTmp = new float[9];
 
     public PipEnterAnimator(Context context,
             @NonNull SurfaceControl leash,
@@ -161,10 +166,15 @@ public class PipEnterAnimator extends ValueAnimator
         mRectEvaluator.evaluate(fraction, initCrop, endCrop);
         tx.setCrop(mLeash, mAnimatedRect);
 
+        mTransformTensor.reset();
         mTransformTensor.setScale(scaleX, scaleY);
         mTransformTensor.postTranslate(posX, posY);
         mTransformTensor.postRotate(degrees);
         tx.setMatrix(mLeash, mTransformTensor, mMatrixTmp);
+
+        if (mContentOverlay != null) {
+            mContentOverlay.onAnimationUpdate(tx, 1f / scaleX, fraction, mEndBounds);
+        }
     }
 
     // no-ops
@@ -182,22 +192,51 @@ public class PipEnterAnimator extends ValueAnimator
      * calculated differently from generic transitions.
      * @param pipChange PiP change received as a transition target.
      */
-    public void setEnterStartState(@NonNull TransitionInfo.Change pipChange,
-            @NonNull TransitionInfo.Change pipActivityChange) {
-        PipUtils.calcEndTransform(pipActivityChange, pipChange, mInitActivityScale,
-                mInitActivityPos);
-        if (mStartTransaction != null && pipActivityChange.getLeash() != null) {
-            mStartTransaction.setCrop(pipActivityChange.getLeash(), null);
-            mStartTransaction.setScale(pipActivityChange.getLeash(), mInitActivityScale.x,
-                    mInitActivityScale.y);
-            mStartTransaction.setPosition(pipActivityChange.getLeash(), mInitActivityPos.x,
-                    mInitActivityPos.y);
-            mFinishTransaction.setCrop(pipActivityChange.getLeash(), null);
-            mFinishTransaction.setScale(pipActivityChange.getLeash(), mInitActivityScale.x,
-                    mInitActivityScale.y);
-            mFinishTransaction.setPosition(pipActivityChange.getLeash(), mInitActivityPos.x,
-                    mInitActivityPos.y);
-        }
+    public void setEnterStartState(@NonNull TransitionInfo.Change pipChange) {
         PipUtils.calcStartTransform(pipChange, mInitScale, mInitPos, mInitCrop);
+    }
+
+    /**
+     * Initializes and attaches an app icon overlay on top of the PiP layer.
+     */
+    public void setAppIconContentOverlay(Context context, Rect appBounds, Rect destinationBounds,
+            ActivityInfo activityInfo, int appIconSizePx) {
+        reattachAppIconOverlay(
+                new PipAppIconOverlay(context, appBounds, destinationBounds,
+                        new IconProvider(context).getIcon(activityInfo), appIconSizePx));
+    }
+
+    private void reattachAppIconOverlay(PipAppIconOverlay overlay) {
+        final SurfaceControl.Transaction tx =
+                mSurfaceControlTransactionFactory.getTransaction();
+        if (mContentOverlay != null) {
+            mContentOverlay.detach(tx);
+        }
+        mContentOverlay = overlay;
+        mContentOverlay.attach(tx, mLeash);
+    }
+
+    /**
+     * Clears the {@link #mContentOverlay}, this should be done after the content overlay is
+     * faded out.
+     */
+    public void clearAppIconOverlay() {
+        if (mContentOverlay == null) {
+            return;
+        }
+        SurfaceControl.Transaction tx = mSurfaceControlTransactionFactory.getTransaction();
+        mContentOverlay.detach(tx);
+        mContentOverlay = null;
+    }
+
+    /**
+     * @return the app icon overlay leash; null if no overlay is attached.
+     */
+    @Nullable
+    public SurfaceControl getContentOverlayLeash() {
+        if (mContentOverlay == null) {
+            return null;
+        }
+        return mContentOverlay.getLeash();
     }
 }

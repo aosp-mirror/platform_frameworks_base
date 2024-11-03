@@ -16,6 +16,7 @@
 
 package com.android.systemui.volume.dialog
 
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.plugins.VolumeDialog
 import com.android.systemui.volume.dialog.dagger.VolumeDialogPluginComponent
@@ -23,7 +24,6 @@ import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.coroutineScope
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 class VolumeDialogPlugin
 @Inject
@@ -33,19 +33,22 @@ constructor(
 ) : VolumeDialog {
 
     private var job: Job? = null
+    private var pluginComponent: VolumeDialogPluginComponent? = null
 
     override fun init(windowType: Int, callback: VolumeDialog.Callback?) {
         job =
             applicationCoroutineScope.launch {
                 coroutineScope {
-                    val component = volumeDialogPluginComponentFactory.create(this)
-
-                    component.viewModel().activate()
+                    pluginComponent =
+                        volumeDialogPluginComponentFactory.create(this).also {
+                            it.viewModel().launchVolumeDialog()
+                        }
                 }
             }
     }
 
     override fun destroy() {
         job?.cancel()
+        pluginComponent = null
     }
 }

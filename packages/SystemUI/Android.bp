@@ -97,6 +97,7 @@ filegroup {
         "tests/src/**/systemui/media/dialog/MediaOutputBroadcastDialogTest.java",
         "tests/src/**/systemui/media/dialog/MediaOutputDialogTest.java",
         "tests/src/**/systemui/mediaprojection/permission/MediaProjectionPermissionDialogDelegateTest.kt",
+        "tests/src/**/systemui/settings/brightness/BrightnessDialogTest.kt",
     ],
 }
 
