@@ -48,6 +48,7 @@ import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
+import android.net.vcn.Flags;
 import android.net.vcn.IVcnManagementService;
 import android.net.vcn.IVcnStatusCallback;
 import android.net.vcn.IVcnUnderlyingNetworkPolicyListener;
@@ -878,6 +879,7 @@ public class VcnManagementService extends IVcnManagementService.Stub {
 
     private void garbageCollectAndWriteVcnConfigsLocked() {
         final SubscriptionManager subMgr = mContext.getSystemService(SubscriptionManager.class);
+        final Set<ParcelUuid> subGroups = mLastSnapshot.getAllSubscriptionGroups();
 
         boolean shouldWrite = false;
 
@@ -885,11 +887,20 @@ public class VcnManagementService extends IVcnManagementService.Stub {
         while (configsIterator.hasNext()) {
             final ParcelUuid subGrp = configsIterator.next();
 
-            final List<SubscriptionInfo> subscriptions = subMgr.getSubscriptionsInGroup(subGrp);
-            if (subscriptions == null || subscriptions.isEmpty()) {
-                // Trim subGrps with no more subscriptions; must have moved to another subGrp
-                configsIterator.remove();
-                shouldWrite = true;
+            if (Flags.fixConfigGarbageCollection()) {
+                if (!subGroups.contains(subGrp)) {
+                    // Trim subGrps with no more subscriptions; must have moved to another subGrp
+                    logDbg("Garbage collect VcnConfig for group=" + subGrp);
+                    configsIterator.remove();
+                    shouldWrite = true;
+                }
+            } else {
+                final List<SubscriptionInfo> subscriptions = subMgr.getSubscriptionsInGroup(subGrp);
+                if (subscriptions == null || subscriptions.isEmpty()) {
+                    // Trim subGrps with no more subscriptions; must have moved to another subGrp
+                    configsIterator.remove();
+                    shouldWrite = true;
+                }
             }
         }
 
@@ -1094,13 +1105,7 @@ public class VcnManagementService extends IVcnManagementService.Stub {
             synchronized (mLock) {
                 final Vcn vcn = mVcns.get(subGrp);
                 final VcnConfig vcnConfig = mConfigs.get(subGrp);
-                if (vcn != null) {
-                    if (vcnConfig == null) {
-                        // TODO: b/284381334 Investigate for the root cause of this issue
-                        // and handle it properly
-                        logWtf("Vcn instance exists but VcnConfig does not for " + subGrp);
-                    }
-
+                if (vcn != null && vcnConfig != null) {
                     if (vcn.getStatus() == VCN_STATUS_CODE_ACTIVE) {
                         isVcnManagedNetwork = true;
                     }
@@ -1120,6 +1125,8 @@ public class VcnManagementService extends IVcnManagementService.Stub {
                             }
                         }
                     }
+                } else if (vcn != null && vcnConfig == null) {
+                    logWtf("Vcn instance exists but VcnConfig does not for " + subGrp);
                 }
             }
 

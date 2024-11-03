@@ -2,6 +2,48 @@ package: "com.android.internal.os"
 container: "system"
 
 flag {
+     namespace: "ravenwood"
+     name: "ravenwood_flag_rw_1"
+     description: "Ravenwood test RW flag 1"
+     bug: "311370221"
+     metadata {
+         purpose: PURPOSE_BUGFIX
+     }
+}
+
+flag {
+     namespace: "ravenwood"
+     name: "ravenwood_flag_rw_2"
+     description: "Ravenwood test RW flag 2"
+     bug: "311370221"
+     metadata {
+         purpose: PURPOSE_BUGFIX
+     }
+}
+
+flag {
+     namespace: "ravenwood"
+     name: "ravenwood_flag_ro_1"
+     description: "Ravenwood test RO flag 1"
+     is_fixed_read_only: true
+     bug: "311370221"
+     metadata {
+         purpose: PURPOSE_BUGFIX
+     }
+}
+
+flag {
+     namespace: "ravenwood"
+     name: "ravenwood_flag_ro_2"
+     description: "Ravenwood test RO flag 2"
+     is_fixed_read_only: true
+     bug: "311370221"
+     metadata {
+         purpose: PURPOSE_BUGFIX
+     }
+}
+
+flag {
     name: "enable_apache_http_legacy_preload"
     namespace: "system_performance"
     description: "Enables zygote preload of non-BCP org.apache.http.legacy.jar library."

@@ -16,7 +16,7 @@
 package com.android.ravenwoodtest.bivalenttest.ravenizer;
 
 import android.platform.test.annotations.NoRavenizer;
-import android.platform.test.ravenwood.RavenwoodAwareTestRunner.RavenwoodTestRunnerInitializing;
+import android.platform.test.annotations.RavenwoodTestRunnerInitializing;
 
 import org.junit.Test;
 

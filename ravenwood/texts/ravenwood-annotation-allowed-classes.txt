@@ -359,3 +359,6 @@ com.android.server.SystemService
 com.android.server.SystemServiceManager
 
 com.android.server.utils.TimingsTraceAndSlog
+
+android.os.IpcDataCache
+android.app.PropertyInvalidatedCache

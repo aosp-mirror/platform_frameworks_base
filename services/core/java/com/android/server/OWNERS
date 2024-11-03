@@ -48,3 +48,6 @@ per-file SystemConfig.java = file:/PACKAGE_MANAGER_OWNERS
 
 # CertBlocklister
 per-file Cert*.java = tweek@google.com, brambonne@google.com, prb@google.com, miguelaranda@google.com
+
+# TradeInMode
+per-file TradeInModeService.java = dvander@google.com, paullawrence@google.com

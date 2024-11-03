@@ -65,6 +65,7 @@ android_ravenwood_test {
         "androidx.annotation_annotation",
         "androidx.test.rules",
         "androidx.test.uiautomator_uiautomator",
+        "androidx.test.ext.junit",
         "modules-utils-binary-xml",
         "flag-junit",
     ],
