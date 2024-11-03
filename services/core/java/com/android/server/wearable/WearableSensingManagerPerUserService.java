@@ -51,6 +51,7 @@ import android.system.OsConstants;
 import android.util.IndentingPrintWriter;
 import android.util.Slog;
 
+import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.infra.AndroidFuture;
@@ -59,21 +60,22 @@ import com.android.server.infra.AbstractPerUserSystemService;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
-/**
- * Per-user manager service for managing sensing {@link AmbientContextEvent}s on Wearables.
- */
-final class WearableSensingManagerPerUserService extends
-        AbstractPerUserSystemService<WearableSensingManagerPerUserService,
-                WearableSensingManagerService> {
+/** Per-user manager service for managing sensing {@link AmbientContextEvent}s on Wearables. */
+final class WearableSensingManagerPerUserService
+        extends AbstractPerUserSystemService<
+                WearableSensingManagerPerUserService, WearableSensingManagerService> {
     private static final String TAG = WearableSensingManagerPerUserService.class.getSimpleName();
 
     private final PackageManagerInternal mPackageManagerInternal;
 
-    @Nullable
-    @VisibleForTesting
-    RemoteWearableSensingService mRemoteService;
+    @Nullable @VisibleForTesting RemoteWearableSensingService mRemoteService;
 
     @Nullable private VoiceInteractionManagerInternal mVoiceInteractionManagerInternal;
 
@@ -85,16 +87,32 @@ final class WearableSensingManagerPerUserService extends
     @GuardedBy("mSecureChannelLock")
     private WearableSensingSecureChannel mSecureChannel;
 
+    // mSecureChannelMap is used by the WearableSensingManager#provideConnection(
+    // WearableConnection, Executor) API, which allows up to mMaxNumberOfConcurrentConnections
+    // concurrent connections, while the mSecureChannel above is used by the deprecated
+    // #provideConnection(ParcelFileDescriptor, Executor, Consumer) API, which does not allow
+    // concurrent connections.
+    @GuardedBy("mSecureChannelMap")
+    private final Map<Integer, WearableSensingSecureChannel> mSecureChannelMap = new HashMap<>();
+
+    private final AtomicInteger mNextConnectionId = new AtomicInteger(1);
+
+    private final int mMaxNumberOfConcurrentConnections;
+
     WearableSensingManagerPerUserService(
             @NonNull WearableSensingManagerService master, Object lock, @UserIdInt int userId) {
         super(master, lock, userId);
         mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
+        mMaxNumberOfConcurrentConnections =
+                getContext()
+                        .getResources()
+                        .getInteger(
+                                R.integer.config_maxWearableSensingServiceConcurrentConnections);
     }
 
     public static void notifyStatusCallback(RemoteCallback statusCallback, int statusCode) {
         Bundle bundle = new Bundle();
-        bundle.putInt(
-                WearableSensingManager.STATUS_RESPONSE_BUNDLE_KEY, statusCode);
+        bundle.putInt(WearableSensingManager.STATUS_RESPONSE_BUNDLE_KEY, statusCode);
         statusCallback.sendResult(bundle);
     }
 
@@ -116,8 +134,8 @@ final class WearableSensingManagerPerUserService extends
     @GuardedBy("mLock")
     private void ensureRemoteServiceInitiated() {
         if (mRemoteService == null) {
-            mRemoteService = new RemoteWearableSensingService(
-                    getContext(), mComponentName, getUserId());
+            mRemoteService =
+                    new RemoteWearableSensingService(getContext(), mComponentName, getUserId());
         }
     }
 
@@ -130,18 +148,15 @@ final class WearableSensingManagerPerUserService extends
         return mVoiceInteractionManagerInternal != null;
     }
 
-    /**
-     * get the currently bound component name.
-     */
+    /** get the currently bound component name. */
     @VisibleForTesting
     ComponentName getComponentName() {
         return mComponentName;
     }
 
-
     /**
-     * Resolves and sets up the service if it had not been done yet. Returns true if the service
-     * is available.
+     * Resolves and sets up the service if it had not been done yet. Returns true if the service is
+     * available.
      */
     @GuardedBy("mLock")
     @VisibleForTesting
@@ -155,8 +170,7 @@ final class WearableSensingManagerPerUserService extends
 
         ServiceInfo serviceInfo;
         try {
-            serviceInfo = AppGlobals.getPackageManager().getServiceInfo(
-                    mComponentName, 0, mUserId);
+            serviceInfo = AppGlobals.getPackageManager().getServiceInfo(mComponentName, 0, mUserId);
         } catch (RemoteException e) {
             Slog.w(TAG, "RemoteException while setting up service");
             return false;
@@ -169,17 +183,17 @@ final class WearableSensingManagerPerUserService extends
             throws PackageManager.NameNotFoundException {
         ServiceInfo serviceInfo;
         try {
-            serviceInfo = AppGlobals.getPackageManager().getServiceInfo(serviceComponent,
-                    0, mUserId);
+            serviceInfo =
+                    AppGlobals.getPackageManager().getServiceInfo(serviceComponent, 0, mUserId);
             if (serviceInfo != null) {
                 final String permission = serviceInfo.permission;
-                if (!Manifest.permission.BIND_WEARABLE_SENSING_SERVICE.equals(
-                        permission)) {
-                    throw new SecurityException(String.format(
-                            "Service %s requires %s permission. Found %s permission",
-                            serviceInfo.getComponentName(),
-                            Manifest.permission.BIND_WEARABLE_SENSING_SERVICE,
-                            serviceInfo.permission));
+                if (!Manifest.permission.BIND_WEARABLE_SENSING_SERVICE.equals(permission)) {
+                    throw new SecurityException(
+                            String.format(
+                                    "Service %s requires %s permission. Found %s permission",
+                                    serviceInfo.getComponentName(),
+                                    Manifest.permission.BIND_WEARABLE_SENSING_SERVICE,
+                                    serviceInfo.permission));
                 }
             }
         } catch (RemoteException e) {
@@ -196,6 +210,20 @@ final class WearableSensingManagerPerUserService extends
         }
         if (mRemoteService != null) {
             mRemoteService.dump("", new IndentingPrintWriter(pw, "  "));
+        }
+    }
+
+    /** Returns the number of available concurrent connection quota. */
+    public int getAvailableConnectionCount() {
+        synchronized (mSecureChannelMap) {
+            if (mSecureChannelMap.size() > mMaxNumberOfConcurrentConnections) {
+                Slog.e(
+                        TAG,
+                        "mMaxNumberOfConcurrentConnections exceeded. This should not be"
+                                + " possible!");
+                return 0;
+            }
+            return mMaxNumberOfConcurrentConnections - mSecureChannelMap.size();
         }
     }
 
@@ -245,32 +273,194 @@ final class WearableSensingManagerPerUserService extends
 
                                     @Override
                                     public void onError() {
-                                        if (Flags.enableRestartWssProcess()) {
-                                            synchronized (mSecureChannelLock) {
-                                                if (mSecureChannel != null
-                                                        && mSecureChannel
-                                                                == currentSecureChannelRef.get()) {
-                                                    mRemoteService
-                                                            .killWearableSensingServiceProcess();
-                                                    mSecureChannel = null;
-                                                }
+                                        synchronized (mSecureChannelLock) {
+                                            if (mSecureChannel != null
+                                                    && mSecureChannel
+                                                            == currentSecureChannelRef.get()) {
+                                                mRemoteService.killWearableSensingServiceProcess();
+                                                mSecureChannel = null;
                                             }
                                         }
-                                        if (Flags.enableProvideWearableConnectionApi()) {
-                                            notifyStatusCallback(
-                                                    statusCallback,
-                                                    WearableSensingManager.STATUS_CHANNEL_ERROR);
-                                        }
+                                        notifyStatusCallback(
+                                                statusCallback,
+                                                WearableSensingManager.STATUS_CHANNEL_ERROR);
                                     }
                                 });
                 currentSecureChannelRef.set(mSecureChannel);
             } catch (IOException ex) {
                 Slog.e(TAG, "Unable to create the secure channel.", ex);
-                if (Flags.enableProvideWearableConnectionApi()) {
-                    notifyStatusCallback(
-                            statusCallback, WearableSensingManager.STATUS_CHANNEL_ERROR);
-                }
+                notifyStatusCallback(statusCallback, WearableSensingManager.STATUS_CHANNEL_ERROR);
             }
+        }
+    }
+
+    /**
+     * Creates a CompanionDeviceManager secure channel and sends a proxy to the wearable sensing
+     * service.
+     */
+    public int onProvideConcurrentConnection(
+            ParcelFileDescriptor wearableConnection,
+            PersistableBundle metadata,
+            IWearableSensingCallback wearableSensingCallback,
+            RemoteCallback statusCallback) {
+        Slog.i(TAG, "onProvideConcurrentConnection in per user service.");
+        synchronized (mLock) {
+            if (!setUpServiceIfNeeded()) {
+                Slog.w(TAG, "Detection service is not available at this moment.");
+                notifyStatusCallback(
+                        statusCallback, WearableSensingManager.STATUS_SERVICE_UNAVAILABLE);
+                return WearableSensingManager.CONNECTION_ID_INVALID;
+            }
+        }
+        boolean isConcurrentConnectionLimitReached = false;
+        synchronized (mSecureChannelMap) {
+            // Do a pre-check on concurrent connection count. We need another check right before we
+            // add the connection into the map to prevent race conditions, but that can only happen
+            // after the WearableSensingSecureChannel is created. This check here allows us to
+            // reject before creating a new secure channel.
+            if (mSecureChannelMap.size() >= mMaxNumberOfConcurrentConnections) {
+                isConcurrentConnectionLimitReached = true;
+            }
+        }
+        if (isConcurrentConnectionLimitReached) {
+            Slog.i(
+                    TAG,
+                    "Rejecting connection because max concurrent connections limit has been"
+                            + " reached.");
+            if (Flags.enableConcurrentWearableConnections()) {
+                notifyStatusCallback(
+                        statusCallback,
+                        WearableSensingManager.STATUS_MAX_CONCURRENT_CONNECTIONS_EXCEEDED);
+            }
+            return WearableSensingManager.CONNECTION_ID_INVALID;
+        }
+        int connectionId = mNextConnectionId.getAndIncrement();
+        RemoteCallback wrappedStatusCallback =
+                wrapCallbackWithSecureChannelMapCleanUp(statusCallback, connectionId);
+        WearableSensingSecureChannel secureChannel;
+        try {
+            secureChannel =
+                    WearableSensingSecureChannel.create(
+                            getContext().getSystemService(CompanionDeviceManager.class),
+                            wearableConnection,
+                            new WearableSensingSecureChannel.SecureTransportListener() {
+                                @Override
+                                public void onSecureTransportAvailable(
+                                        ParcelFileDescriptor secureTransport) {
+                                    Slog.i(TAG, "calling over to remote service.");
+                                    synchronized (mLock) {
+                                        ensureRemoteServiceInitiated();
+                                        mRemoteService.provideConcurrentSecureConnection(
+                                                secureTransport,
+                                                metadata,
+                                                wearableSensingCallback,
+                                                wrappedStatusCallback);
+                                    }
+                                }
+
+                                @Override
+                                public void onError() {
+                                    synchronized (mSecureChannelMap) {
+                                        mSecureChannelMap.remove(connectionId);
+                                    }
+                                    notifyStatusCallback(
+                                            wrappedStatusCallback,
+                                            WearableSensingManager.STATUS_CHANNEL_ERROR);
+                                }
+                            });
+        } catch (IOException ex) {
+            Slog.e(TAG, "Unable to create the secure channel.", ex);
+            notifyStatusCallback(statusCallback, WearableSensingManager.STATUS_CHANNEL_ERROR);
+            return WearableSensingManager.CONNECTION_ID_INVALID;
+        }
+        synchronized (mSecureChannelMap) {
+            if (mSecureChannelMap.size() >= mMaxNumberOfConcurrentConnections) {
+                isConcurrentConnectionLimitReached = true;
+            } else {
+                mSecureChannelMap.put(connectionId, secureChannel);
+            }
+        }
+        if (isConcurrentConnectionLimitReached) {
+            Slog.i(
+                    TAG,
+                    "Rejecting connection because max concurrent connections limit has been"
+                            + " reached.");
+            if (Flags.enableConcurrentWearableConnections()) {
+                notifyStatusCallback(
+                        statusCallback,
+                        WearableSensingManager.STATUS_MAX_CONCURRENT_CONNECTIONS_EXCEEDED);
+            }
+            secureChannel.close();
+            return WearableSensingManager.CONNECTION_ID_INVALID;
+        }
+        return connectionId;
+    }
+
+    private RemoteCallback wrapCallbackWithSecureChannelMapCleanUp(
+            RemoteCallback statusCallback, int connectionId) {
+        return new RemoteCallback(
+                result -> {
+                    int status = result.getInt(WearableSensingManager.STATUS_RESPONSE_BUNDLE_KEY);
+                    if (status != WearableSensingManager.STATUS_SUCCESS) {
+                        removeConnection(connectionId);
+                    }
+                    statusCallback.sendResult(result);
+                });
+    }
+
+    /**
+     * Removes a connection by ID.
+     *
+     * @param connectionId The ID of the connection to remove.
+     * @return true if the {@code connectionId} corresponds to a stored connection. Returns false
+     *     otherwise.
+     */
+    public boolean removeConnection(int connectionId) {
+        WearableSensingSecureChannel removedChannel;
+        synchronized (mSecureChannelMap) {
+            removedChannel = mSecureChannelMap.remove(connectionId);
+        }
+        if (removedChannel != null) {
+            removedChannel.close();
+            return true;
+        }
+        return false;
+    }
+
+    /** Removes all stored connections. */
+    public void removeAllConnections() {
+        List<WearableSensingSecureChannel> allChannels;
+        synchronized (mSecureChannelMap) {
+            allChannels = new ArrayList<>(mSecureChannelMap.values());
+            mSecureChannelMap.clear();
+        }
+        for (WearableSensingSecureChannel channel : allChannels) {
+            channel.close();
+        }
+    }
+
+    /**
+     * Handles sending the provided read-only {@link ParcelFileDescriptor} to the wearable sensing
+     * service.
+     */
+    public void onProvideReadOnlyParcelFileDescriptor(
+            ParcelFileDescriptor parcelFileDescriptor,
+            PersistableBundle metadata,
+            RemoteCallback statusCallback) {
+        if (!isReadOnly(parcelFileDescriptor)) {
+            throw new IllegalArgumentException("Provided ParcelFileDescriptor is not read-only.");
+        }
+        synchronized (mLock) {
+            if (!setUpServiceIfNeeded()) {
+                Slog.w(TAG, "Detection service is not available at this moment.");
+                notifyStatusCallback(
+                        statusCallback, WearableSensingManager.STATUS_SERVICE_UNAVAILABLE);
+                return;
+            }
+            Slog.i(TAG, "calling over to remote servvice.");
+            ensureRemoteServiceInitiated();
+            mRemoteService.provideReadOnlyParcelFileDescriptor(
+                    parcelFileDescriptor, metadata, statusCallback);
         }
     }
 
@@ -301,12 +491,9 @@ final class WearableSensingManagerPerUserService extends
         }
     }
 
-    /**
-     * Handles sending the provided data to the wearable sensing service.
-     */
-    public void onProvidedData(PersistableBundle data,
-            SharedMemory sharedMemory,
-            RemoteCallback callback) {
+    /** Handles sending the provided data to the wearable sensing service. */
+    public void onProvidedData(
+            PersistableBundle data, SharedMemory sharedMemory, RemoteCallback callback) {
         synchronized (mLock) {
             if (!setUpServiceIfNeeded()) {
                 Slog.w(TAG, "Detection service is not available at this moment.");
@@ -557,7 +744,7 @@ final class WearableSensingManagerPerUserService extends
             Slog.w(
                     TAG,
                     "Error encountered when trying to determine if the parcelFileDescriptor is"
-                        + " read-only. Treating it as not read-only",
+                            + " read-only. Treating it as not read-only",
                     ex);
         }
         return false;

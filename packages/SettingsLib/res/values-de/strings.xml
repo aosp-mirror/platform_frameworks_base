@@ -357,10 +357,8 @@
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Aktiviert die Funktion \"Verbesserte Konnektivität\"."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Lokales Terminal"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Terminal-App mit Zugriff auf lokale Shell aktivieren"</string>
-    <!-- no translation found for enable_linux_terminal_title (5076044866895670637) -->
-    <skip />
-    <!-- no translation found for enable_linux_terminal_summary (5893216510985145320) -->
-    <skip />
+    <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Linux-Entwicklungsumgebung"</string>
+    <string name="enable_linux_terminal_summary" msgid="5893216510985145320">"Linux-Terminal unter Android ausführen"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP-Prüfung"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"HDCP-Prüfverhalten festlegen"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"Debugging"</string>

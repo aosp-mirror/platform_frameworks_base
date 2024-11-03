@@ -1560,6 +1560,7 @@ java_aconfig_library {
     name: "android.crashrecovery.flags-aconfig-java",
     aconfig_declarations: "android.crashrecovery.flags-aconfig",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
+    min_sdk_version: "35",
     apex_available: [
         "//apex_available:platform",
         "com.android.crashrecovery",

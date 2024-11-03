@@ -30,6 +30,7 @@ import android.os.VibrationEffect;
 import android.os.VibratorInfo;
 import android.os.vibrator.PrebakedSegment;
 import android.os.vibrator.PrimitiveSegment;
+import android.os.vibrator.PwlePoint;
 import android.os.vibrator.RampSegment;
 import android.util.IndentingPrintWriter;
 import android.util.Slog;
@@ -414,6 +415,33 @@ final class VibratorController {
     }
 
     /**
+     * Plays a composition of pwle v2 points, using {@code vibrationId} for completion callback
+     * to {@link OnVibrationCompleteListener}.
+     *
+     * <p>This will affect the state of {@link #isVibrating()}.
+     *
+     * @return The duration of the effect playing, or 0 if unsupported.
+     */
+    public long on(PwlePoint[] pwlePoints, long vibrationId) {
+        Trace.traceBegin(TRACE_TAG_VIBRATOR, "VibratorController#on (PWLE v2)");
+        try {
+            if (!mVibratorInfo.hasCapability(IVibrator.CAP_COMPOSE_PWLE_EFFECTS_V2)) {
+                return 0;
+            }
+            synchronized (mLock) {
+                long duration = mNativeWrapper.composePwleV2(pwlePoints, vibrationId);
+                if (duration > 0) {
+                    mCurrentAmplitude = -1;
+                    updateStateAndNotifyListenersLocked(VibratorState.VIBRATING);
+                }
+                return duration;
+            }
+        } finally {
+            Trace.traceEnd(TRACE_TAG_VIBRATOR);
+        }
+    }
+
+    /**
      * Turns off the vibrator and disables completion callback to any pending vibration.
      *
      * <p>This will affect the state of {@link #isVibrating()}.
@@ -534,6 +562,9 @@ final class VibratorController {
         private static native long performPwleEffect(long nativePtr, RampSegment[] effect,
                 int braking, long vibrationId);
 
+        private static native long performPwleV2Effect(long nativePtr, PwlePoint[] effect,
+                long vibrationId);
+
         private static native void setExternalControl(long nativePtr, boolean enabled);
 
         private static native void alwaysOnEnable(long nativePtr, long id, long effect,
@@ -598,6 +629,11 @@ final class VibratorController {
         /** Turns vibrator on to perform PWLE effect composed of given primitives. */
         public long composePwle(RampSegment[] primitives, int braking, long vibrationId) {
             return performPwleEffect(mNativePtr, primitives, braking, vibrationId);
+        }
+
+        /** Turns vibrator on to perform PWLE effect composed of given points. */
+        public long composePwleV2(PwlePoint[] pwlePoints, long vibrationId) {
+            return performPwleV2Effect(mNativePtr, pwlePoints, vibrationId);
         }
 
         /** Enabled the device vibrator to be controlled by another service. */

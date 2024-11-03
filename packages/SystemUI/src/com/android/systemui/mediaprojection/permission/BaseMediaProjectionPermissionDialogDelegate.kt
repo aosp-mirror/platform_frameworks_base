@@ -116,7 +116,7 @@ abstract class BaseMediaProjectionPermissionDialogDelegate<T : AlertDialog>(
             object : View.AccessibilityDelegate() {
                 override fun onInitializeAccessibilityNodeInfo(
                     host: View,
-                    info: AccessibilityNodeInfo
+                    info: AccessibilityNodeInfo,
                 ) {
                     info.removeAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_LONG_CLICK)
                     super.onInitializeAccessibilityNodeInfo(host, info)
@@ -169,14 +169,11 @@ abstract class BaseMediaProjectionPermissionDialogDelegate<T : AlertDialog>(
     }
 }
 
-private class OptionsAdapter(
-    context: Context,
-    private val options: List<ScreenShareOption>,
-) :
+private class OptionsAdapter(context: Context, private val options: List<ScreenShareOption>) :
     ArrayAdapter<String>(
         context,
         R.layout.screen_share_dialog_spinner_text,
-        options.map { context.getString(it.spinnerText) }
+        options.map { context.getString(it.spinnerText, it.displayName) },
     ) {
 
     override fun isEnabled(position: Int): Boolean {

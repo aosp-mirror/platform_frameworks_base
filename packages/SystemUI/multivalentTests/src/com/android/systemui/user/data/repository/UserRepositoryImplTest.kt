@@ -24,14 +24,15 @@ import android.provider.Settings
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.kosmos.unconfinedTestDispatcher
-import com.android.systemui.kosmos.unconfinedTestScope
+import com.android.systemui.kosmos.testDispatcher
+import com.android.systemui.kosmos.testScope
+import com.android.systemui.kosmos.useUnconfinedTestDispatcher
 import com.android.systemui.settings.FakeUserTracker
 import com.android.systemui.testKosmos
 import com.android.systemui.user.data.model.SelectedUserModel
 import com.android.systemui.user.data.model.SelectionStatus
 import com.android.systemui.user.data.model.UserSwitcherSettingsModel
-import com.android.systemui.util.settings.unconfinedDispatcherFakeGlobalSettings
+import com.android.systemui.util.settings.fakeGlobalSettings
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -52,10 +53,10 @@ import org.mockito.MockitoAnnotations
 @RunWith(AndroidJUnit4::class)
 class UserRepositoryImplTest : SysuiTestCase() {
 
-    private val kosmos = testKosmos()
-    private val testDispatcher = kosmos.unconfinedTestDispatcher
-    private val testScope = kosmos.unconfinedTestScope
-    private val globalSettings = kosmos.unconfinedDispatcherFakeGlobalSettings
+    private val kosmos = testKosmos().useUnconfinedTestDispatcher()
+    private val testDispatcher = kosmos.testDispatcher
+    private val testScope = kosmos.testScope
+    private val globalSettings = kosmos.fakeGlobalSettings
 
     @Mock private lateinit var manager: UserManager
 
@@ -131,11 +132,7 @@ class UserRepositoryImplTest : SysuiTestCase() {
             whenever(mainUser.identifier).thenReturn(mainUserId)
 
             underTest = create(testScope.backgroundScope)
-            val initialExpectedValue =
-                setUpUsers(
-                    count = 3,
-                    selectedIndex = 0,
-                )
+            val initialExpectedValue = setUpUsers(count = 3, selectedIndex = 0)
             var userInfos: List<UserInfo>? = null
             var selectedUserInfo: UserInfo? = null
             val job1 = underTest.userInfos.onEach { userInfos = it }.launchIn(this)
@@ -146,11 +143,7 @@ class UserRepositoryImplTest : SysuiTestCase() {
             assertThat(selectedUserInfo).isEqualTo(initialExpectedValue[0])
             assertThat(underTest.lastSelectedNonGuestUserId).isEqualTo(selectedUserInfo?.id)
 
-            val secondExpectedValue =
-                setUpUsers(
-                    count = 4,
-                    selectedIndex = 1,
-                )
+            val secondExpectedValue = setUpUsers(count = 4, selectedIndex = 1)
             underTest.refreshUsers()
             assertThat(userInfos).isEqualTo(secondExpectedValue)
             assertThat(selectedUserInfo).isEqualTo(secondExpectedValue[1])
@@ -158,11 +151,7 @@ class UserRepositoryImplTest : SysuiTestCase() {
 
             val selectedNonGuestUserId = selectedUserInfo?.id
             val thirdExpectedValue =
-                setUpUsers(
-                    count = 2,
-                    isLastGuestUser = true,
-                    selectedIndex = 1,
-                )
+                setUpUsers(count = 2, isLastGuestUser = true, selectedIndex = 1)
             underTest.refreshUsers()
             assertThat(userInfos).isEqualTo(thirdExpectedValue)
             assertThat(selectedUserInfo).isEqualTo(thirdExpectedValue[1])
@@ -177,12 +166,7 @@ class UserRepositoryImplTest : SysuiTestCase() {
     fun refreshUsers_sortsByCreationTime_guestUserLast() =
         testScope.runTest {
             underTest = create(testScope.backgroundScope)
-            val unsortedUsers =
-                setUpUsers(
-                    count = 3,
-                    selectedIndex = 0,
-                    isLastGuestUser = true,
-                )
+            val unsortedUsers = setUpUsers(count = 3, selectedIndex = 0, isLastGuestUser = true)
             unsortedUsers[0].creationTime = 999
             unsortedUsers[1].creationTime = 900
             unsortedUsers[2].creationTime = 950
@@ -207,10 +191,7 @@ class UserRepositoryImplTest : SysuiTestCase() {
     ): List<UserInfo> {
         val userInfos =
             (0 until count).map { index ->
-                createUserInfo(
-                    index,
-                    isGuest = isLastGuestUser && index == count - 1,
-                )
+                createUserInfo(index, isGuest = isLastGuestUser && index == count - 1)
             }
         whenever(manager.aliveUsers).thenReturn(userInfos)
         tracker.set(userInfos, selectedIndex)
@@ -224,16 +205,10 @@ class UserRepositoryImplTest : SysuiTestCase() {
             var selectedUserInfo: UserInfo? = null
             val job = underTest.selectedUserInfo.onEach { selectedUserInfo = it }.launchIn(this)
 
-            setUpUsers(
-                count = 2,
-                selectedIndex = 0,
-            )
+            setUpUsers(count = 2, selectedIndex = 0)
             tracker.onProfileChanged()
             assertThat(selectedUserInfo?.id).isEqualTo(0)
-            setUpUsers(
-                count = 2,
-                selectedIndex = 1,
-            )
+            setUpUsers(count = 2, selectedIndex = 1)
             tracker.onProfileChanged()
             assertThat(selectedUserInfo?.id).isEqualTo(1)
             job.cancel()
@@ -287,10 +262,7 @@ class UserRepositoryImplTest : SysuiTestCase() {
             job.cancel()
         }
 
-    private fun createUserInfo(
-        id: Int,
-        isGuest: Boolean,
-    ): UserInfo {
+    private fun createUserInfo(id: Int, isGuest: Boolean): UserInfo {
         val flags = 0
         return UserInfo(
             id,

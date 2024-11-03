@@ -59,6 +59,7 @@ import com.android.systemui.Flags;
 import com.android.systemui.animation.back.FlingOnBackAnimationCallback;
 import com.android.systemui.biometrics.domain.interactor.UdfpsOverlayInteractor;
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor;
+import com.android.systemui.bouncer.domain.interactor.BouncerInteractor;
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerCallbackInteractor;
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerCallbackInteractor.PrimaryBouncerExpansionCallback;
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor;
@@ -165,6 +166,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     private final PrimaryBouncerCallbackInteractor mPrimaryBouncerCallbackInteractor;
     private final PrimaryBouncerInteractor mPrimaryBouncerInteractor;
     private final AlternateBouncerInteractor mAlternateBouncerInteractor;
+    private final Lazy<BouncerInteractor> mBouncerInteractor;
     private final BouncerView mPrimaryBouncerView;
     private final Lazy<ShadeController> mShadeController;
     private final Lazy<SceneInteractor> mSceneInteractorLazy;
@@ -252,6 +254,9 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
 
         @Override
         public void onBackProgressedCompat(@NonNull BackEvent event) {
+            if (ComposeBouncerFlags.INSTANCE.isOnlyComposeBouncerEnabled()) {
+                mBouncerInteractor.get().onBackEventProgressed(event.getProgress());
+            }
             if (shouldPlayBackAnimation() && mPrimaryBouncerView.getDelegate() != null) {
                 mPrimaryBouncerView.getDelegate().getBackCallback().onBackProgressed(event);
             }
@@ -259,6 +264,9 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
 
         @Override
         public void onBackCancelledCompat() {
+            if (ComposeBouncerFlags.INSTANCE.isOnlyComposeBouncerEnabled()) {
+                mBouncerInteractor.get().onBackEventCancelled();
+            }
             if (shouldPlayBackAnimation() && mPrimaryBouncerView.getDelegate() != null) {
                 mPrimaryBouncerView.getDelegate().getBackCallback().onBackCancelled();
             }
@@ -400,7 +408,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             StatusBarKeyguardViewManagerInteractor statusBarKeyguardViewManagerInteractor,
             @Main DelayableExecutor executor,
             Lazy<DeviceEntryInteractor> deviceEntryInteractorLazy,
-            DismissCallbackRegistry dismissCallbackRegistry
+            DismissCallbackRegistry dismissCallbackRegistry,
+            Lazy<BouncerInteractor> bouncerInteractor
     ) {
         mContext = context;
         mExecutor = executor;
@@ -424,6 +433,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         mFoldAodAnimationController = sysUIUnfoldComponent
                 .map(SysUIUnfoldComponent::getFoldAodAnimationController).orElse(null);
         mAlternateBouncerInteractor = alternateBouncerInteractor;
+        mBouncerInteractor = bouncerInteractor;
         mIsBackAnimationEnabled = predictiveBackAnimateBouncer();
         mUdfpsOverlayInteractor = udfpsOverlayInteractor;
         mActivityStarter = activityStarter;
@@ -1338,6 +1348,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         if (!canHandleBackPressed()) {
             return;
         }
+        mStatusBarStateController.setLeaveOpenOnKeyguardHide(false);
 
         boolean hideBouncerOverDream = isBouncerShowing()
                 && mDreamOverlayStateController.isOverlayActive();

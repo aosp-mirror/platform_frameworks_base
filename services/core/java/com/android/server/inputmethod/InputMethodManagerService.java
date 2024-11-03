@@ -1082,6 +1082,19 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             AdditionalSubtypeMapRepository.remove(userId);
             InputMethodSettingsRepository.remove(userId);
             mService.mUserDataRepository.remove(userId);
+            synchronized (ImfLock.class) {
+                final int nextOrCurrentUser = mService.mUserSwitchHandlerTask != null
+                        ? mService.mUserSwitchHandlerTask.mToUserId : mService.mCurrentImeUserId;
+                if (!mService.mConcurrentMultiUserModeEnabled && userId == nextOrCurrentUser) {
+                    // The current user was removed without an ongoing switch, or the user targeted
+                    // by the ongoing switch was removed. Switch to the current non-profile user
+                    // to allow starting input on it or one of its profile users later.
+                    // Note: non-profile users cannot be removed while they are the current user.
+                    final int currentUserId = mService.mActivityManagerInternal.getCurrentUserId();
+                    mService.scheduleSwitchUserTaskLocked(currentUserId,
+                            null /* clientToBeReset */);
+                }
+            }
         }
 
         @Override
@@ -1332,7 +1345,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                     + " prevUserId=" + prevUserId);
         }
 
-        // Clean up stuff for mCurrentUserId, which soon becomes the previous user.
+        // Clean up stuff for mCurrentImeUserId, which soon becomes the previous user.
 
         // TODO(b/338461930): Check if this is still necessary or not.
         onUnbindCurrentMethodByReset(prevUserId);
@@ -6063,42 +6076,38 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
 
     @BinderThread
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @Nullable String[] args) {
         if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
 
         PriorityDump.dump(mPriorityDumper, fd, pw, args);
     }
 
     @BinderThread
-    private void dumpAsStringNoCheck(FileDescriptor fd, PrintWriter pw, String[] args,
-            boolean isCritical) {
+    private void dumpAsStringNoCheck(@NonNull FileDescriptor fd, @NonNull PrintWriter pw,
+            @NonNull String[] args, boolean isCritical) {
         final int argUserId = parseUserIdFromDumpArgs(args);
         final Printer p = new PrintWriterPrinter(pw);
-        p.println("Current Input Method Manager state:");
+        p.println("Input Method Manager Service state:");
         p.println("  mSystemReady=" + mSystemReady);
         p.println("  mInteractive=" + mIsInteractive);
         p.println("  mConcurrentMultiUserModeEnabled=" + mConcurrentMultiUserModeEnabled);
-        p.println("  ENABLE_HIDE_IME_CAPTION_BAR="
-                + InputMethodService.ENABLE_HIDE_IME_CAPTION_BAR);
+        final int currentImeUserId;
         synchronized (ImfLock.class) {
+            currentImeUserId = mCurrentImeUserId;
+            p.println("  mCurrentImeUserId=" + currentImeUserId);
             p.println("  mStylusIds=" + (mStylusIds != null
                     ? Arrays.toString(mStylusIds.toArray()) : ""));
         }
+        // TODO(b/305849394): Make mMenuController multi-user aware.
         if (Flags.imeSwitcherRevamp()) {
             p.println("  mMenuControllerNew:");
-            mMenuControllerNew.dump(p, "  ");
+            mMenuControllerNew.dump(p, "    ");
         } else {
             p.println("  mMenuController:");
-            mMenuController.dump(p, "  ");
+            mMenuController.dump(p, "    ");
         }
-        if (mConcurrentMultiUserModeEnabled && argUserId == UserHandle.USER_NULL) {
-            mUserDataRepository.forAllUserData(
-                    u -> dumpAsStringNoCheckForUser(u, fd, pw, args, isCritical));
-        } else {
-            final int userId = argUserId != UserHandle.USER_NULL ? argUserId : mCurrentImeUserId;
-            final var userData = getUserData(userId);
-            dumpAsStringNoCheckForUser(userData, fd, pw, args, isCritical);
-        }
+        dumpClientController(p);
+        dumpUserRepository(p);
 
         // TODO(b/365868861): Make StartInputHistory and ImeTracker multi-user aware.
         synchronized (ImfLock.class) {
@@ -6112,12 +6121,18 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         p.println("  mImeTrackerService#History:");
         mImeTrackerService.dump(pw, "    ");
 
-        dumpUserRepository(p);
-        dumpClientStates(p);
+        if (mConcurrentMultiUserModeEnabled && argUserId == UserHandle.USER_NULL) {
+            mUserDataRepository.forAllUserData(
+                    u -> dumpAsStringNoCheckForUser(u, fd, pw, args, isCritical));
+        } else {
+            final int userId = argUserId != UserHandle.USER_NULL ? argUserId : currentImeUserId;
+            final var userData = getUserData(userId);
+            dumpAsStringNoCheckForUser(userData, fd, pw, args, isCritical);
+        }
     }
 
     @UserIdInt
-    private static int parseUserIdFromDumpArgs(String[] args) {
+    private static int parseUserIdFromDumpArgs(@NonNull String[] args) {
         final int userIdx = Arrays.binarySearch(args, "--user");
         if (userIdx == -1 || userIdx == args.length - 1) {
             return UserHandle.USER_NULL;
@@ -6127,44 +6142,37 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
 
     // TODO(b/356239178): Update dump format output to better group per-user info.
     @BinderThread
-    private void dumpAsStringNoCheckForUser(UserData userData, FileDescriptor fd, PrintWriter pw,
-            String[] args, boolean isCritical) {
+    private void dumpAsStringNoCheckForUser(@NonNull UserData userData, @NonNull FileDescriptor fd,
+            @NonNull PrintWriter pw, @NonNull String[] args, boolean isCritical) {
         final Printer p = new PrintWriterPrinter(pw);
-        IInputMethodInvoker method;
         ClientState client;
+        IInputMethodInvoker method;
         p.println("  UserId=" + userData.mUserId);
         synchronized (ImfLock.class) {
-            final InputMethodSettings settings = InputMethodSettingsRepository.get(
-                    userData.mUserId);
+            final var bindingController = userData.mBindingController;
+            client = userData.mCurClient;
+            method = bindingController.getCurMethod();
+            p.println("    mBindingController:");
+            bindingController.dump(pw, "      ");
+            p.println("    mCurClient=" + client);
+            p.println("    mFocusedWindowPerceptible=" + mFocusedWindowPerceptible);
+            p.println("    mImeBindingState:");
+            userData.mImeBindingState.dump(p, "      ");
+            p.println("    mBoundToMethod=" + userData.mBoundToMethod);
+            p.println("    mEnabledSession=" + userData.mEnabledSession);
+            p.println("    mVisibilityStateComputer:");
+            userData.mVisibilityStateComputer.dump(pw, "      ");
+            p.println("    mInFullscreenMode=" + userData.mInFullscreenMode);
+
+            final var settings = InputMethodSettingsRepository.get(userData.mUserId);
             final List<InputMethodInfo> methodList = settings.getMethodList();
-            int numImes = methodList.size();
+            final int numImes = methodList.size();
             p.println("    Input Methods:");
             for (int i = 0; i < numImes; i++) {
-                InputMethodInfo info = methodList.get(i);
+                final InputMethodInfo info = methodList.get(i);
                 p.println("      InputMethod #" + i + ":");
                 info.dump(p, "        ");
             }
-            final var bindingController = userData.mBindingController;
-            p.println("        mCurMethodId=" + bindingController.getSelectedMethodId());
-            client = userData.mCurClient;
-            p.println("        mCurClient=" + client + " mCurSeq="
-                    + bindingController.getSequenceNumber());
-            p.println("        mFocusedWindowPerceptible=" + mFocusedWindowPerceptible);
-            userData.mImeBindingState.dump(/* prefix= */ "  ", p);
-            p.println("        mCurId=" + bindingController.getCurId());
-            p.println("        mHaveConnection=" + bindingController.hasMainConnection());
-            p.println("        mBoundToMethod=" + userData.mBoundToMethod);
-            p.println("        mVisibleBound=" + bindingController.isVisibleBound());
-            p.println("        mCurToken=" + bindingController.getCurToken());
-            p.println("        mCurTokenDisplayId=" + bindingController.getCurTokenDisplayId());
-            p.println("        mCurHostInputToken=" + bindingController.getCurHostInputToken());
-            p.println("        mCurIntent=" + bindingController.getCurIntent());
-            method = bindingController.getCurMethod();
-            p.println("        mCurMethod=" + method);
-            p.println("        mEnabledSession=" + userData.mEnabledSession);
-            final var visibilityStateComputer = userData.mVisibilityStateComputer;
-            visibilityStateComputer.dump(pw, "  ");
-            p.println("        mInFullscreenMode=" + userData.mInFullscreenMode);
         }
 
         // Exit here for critical dump, as remaining sections require IPCs to other processes.
@@ -6172,7 +6180,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             return;
         }
 
-        p.println(" ");
+        p.println("");
         if (client != null) {
             pw.flush();
             try {
@@ -6184,25 +6192,23 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             p.println("No input method client.");
         }
         synchronized (ImfLock.class) {
-            if (userData.mImeBindingState.mFocusedWindowClient != null
-                    && client != userData.mImeBindingState.mFocusedWindowClient) {
-                p.println(" ");
-                p.println("Warning: Current input method client doesn't match the last focused. "
-                        + "window.");
+            final var focusedWindowClient = userData.mImeBindingState.mFocusedWindowClient;
+            if (focusedWindowClient != null && client != focusedWindowClient) {
+                p.println("");
+                p.println("Warning: Current input method client doesn't match the last focused"
+                        + " window.");
                 p.println("Dumping input method client in the last focused window just in case.");
-                p.println(" ");
+                p.println("");
                 pw.flush();
                 try {
-                    TransferPipe.dumpAsync(
-                            userData.mImeBindingState.mFocusedWindowClient.mClient.asBinder(), fd,
-                            args);
+                    TransferPipe.dumpAsync(focusedWindowClient.mClient.asBinder(), fd, args);
                 } catch (IOException | RemoteException e) {
                     p.println("Failed to dump input method client in focused window: " + e);
                 }
             }
         }
 
-        p.println(" ");
+        p.println("");
         if (method != null) {
             pw.flush();
             try {
@@ -6215,56 +6221,51 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         }
     }
 
-    private void dumpClientStates(Printer p) {
-        p.println(" ClientStates:");
+    private void dumpClientController(@NonNull Printer p) {
+        p.println("  mClientController:");
         // TODO(b/324907325): Remove the suppress warnings once b/324907325 is fixed.
         @SuppressWarnings("GuardedBy") Consumer<ClientState> clientControllerDump = c -> {
-            p.println("   " + c + ":");
-            p.println("    client=" + c.mClient);
-            p.println("    fallbackInputConnection="
-                    + c.mFallbackInputConnection);
-            p.println("    sessionRequested="
-                    + c.mSessionRequested);
-            p.println("    sessionRequestedForAccessibility="
+            p.println("    " + c + ":");
+            p.println("      client=" + c.mClient);
+            p.println("      fallbackInputConnection=" + c.mFallbackInputConnection);
+            p.println("      sessionRequested=" + c.mSessionRequested);
+            p.println("      sessionRequestedForAccessibility="
                     + c.mSessionRequestedForAccessibility);
-            p.println("    curSession=" + c.mCurSession);
-            p.println("    selfReportedDisplayId=" + c.mSelfReportedDisplayId);
-            p.println("    uid=" + c.mUid);
-            p.println("    pid=" + c.mPid);
+            p.println("      curSession=" + c.mCurSession);
+            p.println("      selfReportedDisplayId=" + c.mSelfReportedDisplayId);
+            p.println("      uid=" + c.mUid);
+            p.println("      pid=" + c.mPid);
         };
         synchronized (ImfLock.class) {
             mClientController.forAllClients(clientControllerDump);
         }
     }
 
-    private void dumpUserRepository(Printer p) {
-        p.println("  mUserDataRepository=");
+    private void dumpUserRepository(@NonNull Printer p) {
+        p.println("  mUserDataRepository:");
         // TODO(b/324907325): Remove the suppress warnings once b/324907325 is fixed.
-        @SuppressWarnings("GuardedBy") Consumer<UserData> userDataDump =
-                u -> {
-                    p.println("    mUserId=" + u.mUserId);
-                    p.println("      unlocked=" + u.mIsUnlockingOrUnlocked.get());
-                    p.println("      hasMainConnection="
-                            + u.mBindingController.hasMainConnection());
-                    p.println("      isVisibleBound=" + u.mBindingController.isVisibleBound());
-                    p.println("      boundToMethod=" + u.mBoundToMethod);
-                    p.println("      curClient=" + u.mCurClient);
-                    if (u.mCurEditorInfo != null) {
-                        p.println("      curEditorInfo:");
-                        u.mCurEditorInfo.dump(p, "        ", false /* dumpExtras */);
-                    } else {
-                        p.println("      curEditorInfo: null");
-                    }
-                    p.println("      imeBindingState:");
-                    u.mImeBindingState.dump("        ", p);
-                    p.println("      enabledSession=" + u.mEnabledSession);
-                    p.println("      inFullscreenMode=" + u.mInFullscreenMode);
-                    p.println("      imeDrawsNavBar=" + u.mImeDrawsNavBar.get());
-                    p.println("      switchingController:");
-                    u.mSwitchingController.dump(p, "        ");
-                    p.println("      mLastEnabledInputMethodsStr="
-                            + u.mLastEnabledInputMethodsStr);
-                };
+        @SuppressWarnings("GuardedBy") Consumer<UserData> userDataDump = u -> {
+            p.println("    userId=" + u.mUserId);
+            p.println("      unlocked=" + u.mIsUnlockingOrUnlocked.get());
+            p.println("      hasMainConnection=" + u.mBindingController.hasMainConnection());
+            p.println("      isVisibleBound=" + u.mBindingController.isVisibleBound());
+            p.println("      boundToMethod=" + u.mBoundToMethod);
+            p.println("      curClient=" + u.mCurClient);
+            if (u.mCurEditorInfo != null) {
+                p.println("      curEditorInfo:");
+                u.mCurEditorInfo.dump(p, "        ", false /* dumpExtras */);
+            } else {
+                p.println("      curEditorInfo: null");
+            }
+            p.println("      imeBindingState:");
+            u.mImeBindingState.dump(p, "        ");
+            p.println("      enabledSession=" + u.mEnabledSession);
+            p.println("      inFullscreenMode=" + u.mInFullscreenMode);
+            p.println("      imeDrawsNavBar=" + u.mImeDrawsNavBar.get());
+            p.println("      switchingController:");
+            u.mSwitchingController.dump(p, "        ");
+            p.println("      mLastEnabledInputMethodsStr=" + u.mLastEnabledInputMethodsStr);
+        };
         synchronized (ImfLock.class) {
             mUserDataRepository.forAllUserData(userDataDump);
         }

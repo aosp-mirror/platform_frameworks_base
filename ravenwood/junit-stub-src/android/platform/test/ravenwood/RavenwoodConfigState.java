@@ -15,7 +15,7 @@
  */
 package android.platform.test.ravenwood;
 
-/** Stub class. The actual implementaetion is in junit-impl-src. */
+/** Stub class. The actual implementation is in junit-impl-src. */
 public class RavenwoodConfigState {
     public RavenwoodConfigState(RavenwoodConfig config) {
     }

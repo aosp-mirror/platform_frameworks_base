@@ -87,6 +87,14 @@ flag {
 }
 
 flag {
+    name: "prevent_intent_redirect_show_toast"
+    namespace: "responsible_apis"
+    description: "Prevent intent redirect attacks by showing a toast when activity start is blocked"
+    bug: "361143368"
+    is_fixed_read_only: true
+}
+
+flag {
     name: "enable_intent_matching_flags"
     is_exported: true
     namespace: "permissions"

@@ -41,10 +41,7 @@ import android.app.Activity;
 import android.app.ActivityThread;
 import android.app.AppGlobals;
 import android.app.StatusBarManager;
-import android.app.compat.CompatChanges;
 import android.bluetooth.BluetoothDevice;
-import android.compat.annotation.ChangeId;
-import android.compat.annotation.Overridable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
@@ -673,12 +670,6 @@ import java.util.TimeZone;
 @android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class Intent implements Parcelable, Cloneable {
     private static final String TAG = "Intent";
-
-    /** @hide */
-    @ChangeId
-    @Overridable
-    public static final long ENABLE_PREVENT_INTENT_REDIRECT = 29076063L;
-
     private static final String ATTR_ACTION = "action";
     private static final String TAG_CATEGORIES = "categories";
     private static final String ATTR_CATEGORY = "category";
@@ -908,7 +899,7 @@ public class Intent implements Parcelable, Cloneable {
         boolean isForeign = (intent.mLocalFlags & LOCAL_FLAG_FROM_PARCEL) != 0;
         boolean isWithoutTrustedCreatorToken =
                 (intent.mLocalFlags & Intent.LOCAL_FLAG_TRUSTED_CREATOR_TOKEN_PRESENT) == 0;
-        if (isForeign && isWithoutTrustedCreatorToken) {
+        if (isForeign && isWithoutTrustedCreatorToken && preventIntentRedirect()) {
             intent.addExtendedFlags(EXTENDED_FLAG_MISSING_CREATOR_OR_INVALID_TOKEN);
         }
     }
@@ -6184,7 +6175,6 @@ public class Intent implements Parcelable, Cloneable {
      * {@link #EXTRA_CHOOSER_RESULT_INTENT_SENDER}.
      * </p>
      */
-    @FlaggedApi(android.service.chooser.Flags.FLAG_CHOOSER_PAYLOAD_TOGGLING)
     public static final String EXTRA_CHOOSER_ADDITIONAL_CONTENT_URI =
             "android.intent.extra.CHOOSER_ADDITIONAL_CONTENT_URI";
 
@@ -6194,7 +6184,6 @@ public class Intent implements Parcelable, Cloneable {
      * An integer, zero-based index into {@link #EXTRA_STREAM} argument indicating the item that
      * should be focused by the Chooser in preview.
      */
-    @FlaggedApi(android.service.chooser.Flags.FLAG_CHOOSER_PAYLOAD_TOGGLING)
     public static final String EXTRA_CHOOSER_FOCUSED_ITEM_POSITION =
             "android.intent.extra.CHOOSER_FOCUSED_ITEM_POSITION";
 
@@ -12257,7 +12246,7 @@ public class Intent implements Parcelable, Cloneable {
      * @hide
      */
     public void collectExtraIntentKeys() {
-        if (!isPreventIntentRedirectEnabled()) return;
+        if (!preventIntentRedirect()) return;
 
         if (mExtras != null && !mExtras.isEmpty()) {
             for (String key : mExtras.keySet()) {
@@ -12272,14 +12261,6 @@ public class Intent implements Parcelable, Cloneable {
                 }
             }
         }
-    }
-
-    /**
-     * @hide
-     */
-    public static boolean isPreventIntentRedirectEnabled() {
-        return preventIntentRedirect() && CompatChanges.isChangeEnabled(
-                ENABLE_PREVENT_INTENT_REDIRECT);
     }
 
     /** @hide */
@@ -12370,7 +12351,7 @@ public class Intent implements Parcelable, Cloneable {
             out.writeInt(0);
         }
 
-        if (isPreventIntentRedirectEnabled()) {
+        if (preventIntentRedirect()) {
             if (mCreatorTokenInfo == null) {
                 out.writeInt(0);
             } else {
@@ -12437,7 +12418,7 @@ public class Intent implements Parcelable, Cloneable {
             mOriginalIntent = new Intent(in);
         }
 
-        if (isPreventIntentRedirectEnabled()) {
+        if (preventIntentRedirect()) {
             if (in.readInt() != 0) {
                 mCreatorTokenInfo = new CreatorTokenInfo();
                 mCreatorTokenInfo.mCreatorToken = in.readStrongBinder();

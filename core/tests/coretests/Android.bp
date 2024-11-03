@@ -150,6 +150,7 @@ android_test {
         ":HelloWorldUsingSdk1AndSdk1",
         ":HelloWorldUsingSdk1And2",
         ":HelloWorldUsingSdkMalformedNegativeVersion",
+        ":CtsStaticSharedLibConsumerApp1",
     ],
 }
 
@@ -266,6 +267,7 @@ android_ravenwood_test {
         "src/android/content/ContextTest.java",
         "src/android/content/pm/PackageManagerTest.java",
         "src/android/content/pm/UserInfoTest.java",
+        "src/android/app/PropertyInvalidatedCacheTests.java",
         "src/android/database/CursorWindowTest.java",
         "src/android/os/**/*.java",
         "src/android/content/res/*.java",

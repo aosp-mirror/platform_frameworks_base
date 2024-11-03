@@ -382,6 +382,7 @@ class DesktopModeLoggerTransitionObserver(
             transitionInfo.type == TRANSIT_EXIT_DESKTOP_MODE_KEYBOARD_SHORTCUT ->
                 ExitReason.KEYBOARD_SHORTCUT_EXIT
             transitionInfo.isExitToRecentsTransition() -> ExitReason.RETURN_HOME_OR_OVERVIEW
+            transitionInfo.type == Transitions.TRANSIT_MINIMIZE -> ExitReason.TASK_MINIMIZED
             else -> {
                 ProtoLog.w(
                     WM_SHELL_DESKTOP_MODE,

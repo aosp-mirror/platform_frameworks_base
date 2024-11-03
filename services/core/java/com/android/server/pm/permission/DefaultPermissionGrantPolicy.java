@@ -1271,6 +1271,7 @@ final class DefaultPermissionGrantPolicy {
      */
     private boolean isFixedOrUserSet(int flags) {
         return (flags & (PackageManager.FLAG_PERMISSION_USER_SET
+                | PackageManager.FLAG_PERMISSION_ONE_TIME
                 | PackageManager.FLAG_PERMISSION_USER_FIXED
                 | PackageManager.FLAG_PERMISSION_POLICY_FIXED
                 | PackageManager.FLAG_PERMISSION_SYSTEM_FIXED)) != 0;

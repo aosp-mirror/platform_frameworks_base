@@ -886,7 +886,10 @@ class ActivityClientController extends IActivityClientController.Stub {
 
     @Override
     public boolean convertToTranslucent(IBinder token, Bundle options) {
-        final SafeActivityOptions safeOptions = SafeActivityOptions.fromBundle(options);
+        final int callingPid = Binder.getCallingPid();
+        final int callingUid = Binder.getCallingUid();
+        final SafeActivityOptions safeOptions = SafeActivityOptions.fromBundle(
+                options, callingPid, callingUid);
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {

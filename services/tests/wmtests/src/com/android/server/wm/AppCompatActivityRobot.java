@@ -143,6 +143,10 @@ class AppCompatActivityRobot {
         doReturn(naturalOrientation).when(mDisplayContent).getNaturalOrientation();
     }
 
+    void setDisplayIgnoreActivitySizeRestrictions(boolean enabled) {
+        doReturn(enabled).when(mDisplayContent).isDisplayIgnoreActivitySizeRestrictions();
+    }
+
     void configureTaskBounds(@NonNull Rect taskBounds) {
         doReturn(taskBounds).when(mTaskStack.top()).getBounds();
     }
@@ -253,6 +257,10 @@ class AppCompatActivityRobot {
 
     void setTopActivityAsEmbedded(boolean embedded) {
         doReturn(embedded).when(mActivityStack.top()).isEmbedded();
+    }
+
+    void setTopActivityHasLetterboxedBounds(boolean letterboxed) {
+        doReturn(letterboxed).when(mActivityStack.top()).areBoundsLetterboxed();
     }
 
     void setTopActivityVisible(boolean isVisible) {

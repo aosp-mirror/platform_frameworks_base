@@ -3297,22 +3297,25 @@ class Task extends TaskFragment {
         mDimmer.resetDimStates();
         super.prepareSurfaces();
 
-        final Rect dimBounds = mDimmer.getDimBounds();
-        if (dimBounds != null) {
-            getDimBounds(dimBounds);
+        Rect dimBounds = null;
+        if (!Flags.useTasksDimOnly()) {
+            dimBounds = mDimmer.getDimBounds();
+            if (dimBounds != null) {
+                getDimBounds(dimBounds);
 
-            // Bounds need to be relative, as the dim layer is a child.
-            if (inFreeformWindowingMode()) {
-                getBounds(mTmpRect);
-                dimBounds.offsetTo(dimBounds.left - mTmpRect.left, dimBounds.top - mTmpRect.top);
-            } else {
-                dimBounds.offsetTo(0, 0);
+                // Bounds need to be relative, as the dim layer is a child.
+                if (inFreeformWindowingMode()) {
+                    getBounds(mTmpRect);
+                    dimBounds.offset(-mTmpRect.left, -mTmpRect.top);
+                } else {
+                    dimBounds.offsetTo(0, 0);
+                }
             }
         }
 
         final SurfaceControl.Transaction t = getSyncTransaction();
 
-        if (dimBounds != null && mDimmer.updateDims(t)) {
+        if (mDimmer.hasDimState() && mDimmer.updateDims(t)) {
             scheduleAnimation();
         }
 
@@ -3420,6 +3423,8 @@ class Task extends TaskFragment {
                 ? top.getLastParentBeforePip().mTaskId : INVALID_TASK_ID;
         info.shouldDockBigOverlays = top != null && top.shouldDockBigOverlays;
         info.mTopActivityLocusId = top != null ? top.getLocusId() : null;
+        info.isTopActivityLimitSystemEducationDialogs = top != null
+              ? top.mShouldLimitSystemEducationDialogs : false;
         final Task parentTask = getParent() != null ? getParent().asTask() : null;
         info.parentTaskId = parentTask != null && parentTask.mCreatedByOrganizer
                 ? parentTask.mTaskId
@@ -3461,7 +3466,8 @@ class Task extends TaskFragment {
             return null;
         }
         final Rect windowFrame = mainWindow.getFrame();
-        if (top.getBounds().equals(windowFrame)) {
+        final Rect parentFrame = mainWindow.getParentFrame();
+        if (parentFrame.equals(windowFrame)) {
             return null;
         }
         return windowFrame;
@@ -3913,8 +3919,10 @@ class Task extends TaskFragment {
             sb.append(affinityIntent.getComponent().flattenToShortString());
         }
         sb.append(" isResizeable=").append(isResizeable());
-        sb.append(" minWidth=").append(mMinWidth);
-        sb.append(" minHeight=").append(mMinHeight);
+        if (mMinWidth != INVALID_MIN_SIZE || mMinHeight != INVALID_MIN_SIZE) {
+            sb.append(" minWidth=").append(mMinWidth);
+            sb.append(" minHeight=").append(mMinHeight);
+        }
         sb.append('}');
         return stringName = sb.toString();
     }

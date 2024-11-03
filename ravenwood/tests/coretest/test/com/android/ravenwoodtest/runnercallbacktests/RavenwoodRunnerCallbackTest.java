@@ -337,9 +337,9 @@ public class RavenwoodRunnerCallbackTest extends RavenwoodRunnerTestBase {
     @Expected("""
     testRunStarted: classes
     testSuiteStarted: classes
-    testStarted: Constructor(com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerCallbackTest$ExceptionFromInnerRunnerConstructorTest)
-    testFailure: Exception detected in constructor
-    testFinished: Constructor(com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerCallbackTest$ExceptionFromInnerRunnerConstructorTest)
+    testStarted: initializationError(com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerCallbackTest$ExceptionFromInnerRunnerConstructorTest)
+    testFailure: Failed to instantiate class androidx.test.ext.junit.runners.AndroidJUnit4
+    testFinished: initializationError(com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerCallbackTest$ExceptionFromInnerRunnerConstructorTest)
     testSuiteFinished: classes
     testRunFinished: 1,1,0,0
     """)
@@ -439,9 +439,9 @@ public class RavenwoodRunnerCallbackTest extends RavenwoodRunnerTestBase {
     @Expected("""
     testRunStarted: classes
     testSuiteStarted: classes
-    testStarted: Constructor(com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerCallbackTest$BrokenRunnerTest)
-    testFailure: Exception detected in constructor
-    testFinished: Constructor(com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerCallbackTest$BrokenRunnerTest)
+    testStarted: initializationError(com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerCallbackTest$BrokenRunnerTest)
+    testFailure: Failed to instantiate class com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerCallbackTest$BrokenTestRunner
+    testFinished: initializationError(com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerCallbackTest$BrokenRunnerTest)
     testSuiteFinished: classes
     testRunFinished: 1,1,0,0
     """)

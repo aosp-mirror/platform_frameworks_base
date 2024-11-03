@@ -17,6 +17,7 @@
 package android.media;
 
 import static android.media.MediaRouter2Utils.toUniqueId;
+import static android.media.audio.Flags.FLAG_ENABLE_MULTICHANNEL_GROUP_DEVICE;
 
 import static com.android.media.flags.Flags.FLAG_ENABLE_AUDIO_POLICIES_DEVICE_AND_BLUETOOTH_CONTROLLER;
 import static com.android.media.flags.Flags.FLAG_ENABLE_BUILT_IN_SPEAKER_ROUTE_SUITABILITY_STATUSES;
@@ -270,6 +271,19 @@ public final class MediaRoute2Info implements Parcelable {
      * @see #getType
      */
     public static final int TYPE_BLE_HEADSET = AudioDeviceInfo.TYPE_BLE_HEADSET;
+
+    /**
+     * Indicates the route is a speaker group supporting multichannel contents.
+     *
+     * <p>The speakers in the group are connected together using local network based protocols. The
+     * speaker group requires additional input of the physical positions of each individual speaker
+     * to provide a better experience on multichannel contents.
+     *
+     * @see #getType
+     */
+    @FlaggedApi(FLAG_ENABLE_MULTICHANNEL_GROUP_DEVICE)
+    public static final int TYPE_MULTICHANNEL_SPEAKER_GROUP =
+            AudioDeviceInfo.TYPE_MULTICHANNEL_GROUP;
 
     /**
      * Indicates the route is a remote TV.

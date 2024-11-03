@@ -121,6 +121,9 @@ public final class QuotaController extends StateController {
     private static final String ALARM_TAG_CLEANUP = "*job.cleanup*";
     private static final String ALARM_TAG_QUOTA_CHECK = "*job.quota_check*";
 
+    private static final String TRACE_QUOTA_STATE_CHANGED_TAG = "QuotaStateChanged:";
+    private static final String TRACE_QUOTA_STATE_CHANGED_DELIMITER = "#";
+
     private static final int SYSTEM_APP_CHECK_FLAGS =
             PackageManager.MATCH_DIRECT_BOOT_AWARE | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
                     | PackageManager.GET_PERMISSIONS | PackageManager.MATCH_KNOWN_PACKAGES;
@@ -793,7 +796,9 @@ public final class QuotaController extends StateController {
                     || isTopStartedJobLocked(jobStatus)
                     || isUidInForeground(jobStatus.getSourceUid());
             final boolean isJobImportant = jobStatus.getEffectivePriority() >= JobInfo.PRIORITY_HIGH
-                    || (jobStatus.getFlags() & JobInfo.FLAG_IMPORTANT_WHILE_FOREGROUND) != 0;
+                    || (!android.app.job.Flags.ignoreImportantWhileForeground()
+                            && (jobStatus.getFlags()
+                                    & JobInfo.FLAG_IMPORTANT_WHILE_FOREGROUND) != 0);
             if (isInPrivilegedState && isJobImportant) {
                 return mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS;
             }
@@ -2655,11 +2660,12 @@ public final class QuotaController extends StateController {
                         if (timeRemainingMs <= 50) {
                             // Less than 50 milliseconds left. Start process of shutting down jobs.
                             if (DEBUG) Slog.d(TAG, pkg + " has reached its quota.");
-                            if (Trace.isTagEnabled(Trace.TRACE_TAG_SYSTEM_SERVER)) {
-                                Trace.instantForTrack(Trace.TRACE_TAG_SYSTEM_SERVER,
-                                        JobSchedulerService.TRACE_TRACK_NAME,
-                                        pkg + "#" + MSG_REACHED_TIME_QUOTA);
-                            }
+                            final StringBuilder traceMsg = new StringBuilder();
+                            traceMsg.append(TRACE_QUOTA_STATE_CHANGED_TAG)
+                                    .append(pkg)
+                                    .append(TRACE_QUOTA_STATE_CHANGED_DELIMITER)
+                                    .append(MSG_REACHED_TIME_QUOTA);
+                            Trace.instant(Trace.TRACE_TAG_POWER, traceMsg.toString());
                             mStateChangedListener.onControllerStateChanged(
                                     maybeUpdateConstraintForPkgLocked(
                                             sElapsedRealtimeClock.millis(),
@@ -2688,11 +2694,12 @@ public final class QuotaController extends StateController {
                                 pkg.userId, pkg.packageName);
                         if (timeRemainingMs <= 0) {
                             if (DEBUG) Slog.d(TAG, pkg + " has reached its EJ quota.");
-                            if (Trace.isTagEnabled(Trace.TRACE_TAG_SYSTEM_SERVER)) {
-                                Trace.instantForTrack(Trace.TRACE_TAG_SYSTEM_SERVER,
-                                        JobSchedulerService.TRACE_TRACK_NAME,
-                                        pkg + "#" + MSG_REACHED_EJ_TIME_QUOTA);
-                            }
+                            final StringBuilder traceMsg = new StringBuilder();
+                            traceMsg.append(TRACE_QUOTA_STATE_CHANGED_TAG)
+                                    .append(pkg)
+                                    .append(TRACE_QUOTA_STATE_CHANGED_DELIMITER)
+                                    .append(MSG_REACHED_EJ_TIME_QUOTA);
+                            Trace.instant(Trace.TRACE_TAG_POWER, traceMsg.toString());
                             mStateChangedListener.onControllerStateChanged(
                                     maybeUpdateConstraintForPkgLocked(
                                             sElapsedRealtimeClock.millis(),
@@ -2717,11 +2724,12 @@ public final class QuotaController extends StateController {
                             Slog.d(TAG, pkg + " has reached its count quota.");
                         }
 
-                        if (Trace.isTagEnabled(Trace.TRACE_TAG_SYSTEM_SERVER)) {
-                            Trace.instantForTrack(Trace.TRACE_TAG_SYSTEM_SERVER,
-                                    JobSchedulerService.TRACE_TRACK_NAME,
-                                    pkg + "#" + MSG_REACHED_COUNT_QUOTA);
-                        }
+                        final StringBuilder traceMsg = new StringBuilder();
+                        traceMsg.append(TRACE_QUOTA_STATE_CHANGED_TAG)
+                                .append(pkg)
+                                .append(TRACE_QUOTA_STATE_CHANGED_DELIMITER)
+                                .append(MSG_REACHED_COUNT_QUOTA);
+                        Trace.instant(Trace.TRACE_TAG_POWER, traceMsg.toString());
 
                         mStateChangedListener.onControllerStateChanged(
                                 maybeUpdateConstraintForPkgLocked(

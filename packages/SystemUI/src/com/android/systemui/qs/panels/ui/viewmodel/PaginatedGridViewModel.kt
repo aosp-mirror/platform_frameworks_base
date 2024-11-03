@@ -16,33 +16,50 @@
 
 package com.android.systemui.qs.panels.ui.viewmodel
 
-import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Application
+import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
+import com.android.systemui.lifecycle.ExclusiveActivatable
+import com.android.systemui.lifecycle.Hydrator
 import com.android.systemui.qs.panels.domain.interactor.PaginatedGridInteractor
-import javax.inject.Inject
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.stateIn
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 
-@SysUISingleton
 class PaginatedGridViewModel
-@Inject
+@AssistedInject
 constructor(
     iconTilesViewModel: IconTilesViewModel,
-    gridSizeViewModel: QSColumnsViewModel,
+    private val gridSizeViewModel: QSColumnsViewModel,
     paginatedGridInteractor: PaginatedGridInteractor,
-    @Application applicationScope: CoroutineScope,
-) : IconTilesViewModel by iconTilesViewModel, QSColumnsViewModel by gridSizeViewModel {
-    val rows =
-        paginatedGridInteractor.rows.stateIn(
-            applicationScope,
-            SharingStarted.WhileSubscribed(),
-            paginatedGridInteractor.defaultRows,
+    inFirstPageViewModel: InFirstPageViewModel,
+) : IconTilesViewModel by iconTilesViewModel, ExclusiveActivatable() {
+
+    private val hydrator = Hydrator("PaginatedGridViewModel")
+
+    val rows by
+        hydrator.hydratedStateOf(
+            traceName = "rows",
+            initialValue = paginatedGridInteractor.defaultRows,
+            source = paginatedGridInteractor.rows,
         )
 
-    /*
-     * Tracks whether the current HorizontalPager (using this viewmodel) is in the first page.
-     * This requires it to be a `@SysUISingleton` to be shared between viewmodels.
-     */
-    var inFirstPage = true
+    var inFirstPage by inFirstPageViewModel::inFirstPage
+
+    val columns: State<Int>
+        get() = gridSizeViewModel.columns
+
+    override suspend fun onActivated(): Nothing {
+        coroutineScope {
+            launch { hydrator.activate() }
+            launch { gridSizeViewModel.activate() }
+            awaitCancellation()
+        }
+    }
+
+    @AssistedFactory
+    interface Factory {
+        fun create(): PaginatedGridViewModel
+    }
 }

@@ -80,7 +80,6 @@ interface PreferenceBinding {
             preference.isVisible =
                 (this as? PreferenceAvailabilityProvider)?.isAvailable(context) != false
             preference.isPersistent = isPersistent(context)
-            metadata.order(context)?.let { preference.order = it }
             // PreferenceRegistry will notify dependency change, so we do not need to set
             // dependency here. This simplifies dependency management and avoid the
             // IllegalStateException when call Preference.setDependency

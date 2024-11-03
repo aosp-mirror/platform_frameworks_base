@@ -114,10 +114,8 @@ struct RegJNIRec {
 static const std::unordered_map<std::string, RegJNIRec> gRegJNIMap = {
         {"android.animation.PropertyValuesHolder",
          REG_JNI(register_android_animation_PropertyValuesHolder)},
-#ifdef __linux__
         {"android.content.res.ApkAssets", REG_JNI(register_android_content_res_ApkAssets)},
         {"android.content.res.AssetManager", REG_JNI(register_android_content_AssetManager)},
-#endif
         {"android.content.res.StringBlock", REG_JNI(register_android_content_StringBlock)},
         {"android.content.res.XmlBlock", REG_JNI(register_android_content_XmlBlock)},
 #ifdef __linux__

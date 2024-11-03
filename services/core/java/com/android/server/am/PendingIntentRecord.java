@@ -533,9 +533,9 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
             // Extract options before clearing calling identity
             mergedOptions = key.options;
             if (mergedOptions == null) {
-                mergedOptions = new SafeActivityOptions(opts);
+                mergedOptions = new SafeActivityOptions(opts, callingPid, callingUid);
             } else {
-                mergedOptions.setCallerOptions(opts);
+                mergedOptions.setCallerOptions(opts, callingPid, callingUid);
             }
 
             if (mAllowlistDuration != null) {

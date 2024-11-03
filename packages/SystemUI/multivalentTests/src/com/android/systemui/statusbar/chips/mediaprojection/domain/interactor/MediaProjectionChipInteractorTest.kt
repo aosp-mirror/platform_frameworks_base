@@ -21,7 +21,9 @@ import android.content.Intent
 import android.content.packageManager
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
+import android.platform.test.annotations.EnableFlags
 import androidx.test.filters.SmallTest
+import com.android.systemui.Flags.FLAG_STATUS_BAR_SHOW_AUDIO_ONLY_PROJECTION_CHIP
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.Kosmos
@@ -65,7 +67,23 @@ class MediaProjectionChipInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun projection_singleTaskState_otherDevicesPackage_isCastToOtherDeviceType() =
+    @EnableFlags(FLAG_STATUS_BAR_SHOW_AUDIO_ONLY_PROJECTION_CHIP)
+    fun projection_noScreenState_otherDevicesPackage_isCastToOtherAndAudio() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.projection)
+
+            mediaProjectionRepo.mediaProjectionState.value =
+                MediaProjectionState.Projecting.NoScreen(CAST_TO_OTHER_DEVICES_PACKAGE)
+
+            assertThat(latest).isInstanceOf(ProjectionChipModel.Projecting::class.java)
+            assertThat((latest as ProjectionChipModel.Projecting).receiver)
+                .isEqualTo(ProjectionChipModel.Receiver.CastToOtherDevice)
+            assertThat((latest as ProjectionChipModel.Projecting).contentType)
+                .isEqualTo(ProjectionChipModel.ContentType.Audio)
+        }
+
+    @Test
+    fun projection_singleTaskState_otherDevicesPackage_isCastToOtherAndScreen() =
         testScope.runTest {
             val latest by collectLastValue(underTest.projection)
 
@@ -73,31 +91,49 @@ class MediaProjectionChipInteractorTest : SysuiTestCase() {
                 MediaProjectionState.Projecting.SingleTask(
                     CAST_TO_OTHER_DEVICES_PACKAGE,
                     hostDeviceName = null,
-                    createTask(taskId = 1)
+                    createTask(taskId = 1),
                 )
 
             assertThat(latest).isInstanceOf(ProjectionChipModel.Projecting::class.java)
-            assertThat((latest as ProjectionChipModel.Projecting).type)
-                .isEqualTo(ProjectionChipModel.Type.CAST_TO_OTHER_DEVICE)
+            assertThat((latest as ProjectionChipModel.Projecting).receiver)
+                .isEqualTo(ProjectionChipModel.Receiver.CastToOtherDevice)
+            assertThat((latest as ProjectionChipModel.Projecting).contentType)
+                .isEqualTo(ProjectionChipModel.ContentType.Screen)
         }
 
     @Test
-    fun projection_entireScreenState_otherDevicesPackage_isCastToOtherDeviceChipType() =
+    fun projection_entireScreenState_otherDevicesPackage_isCastToOtherAndScreen() =
         testScope.runTest {
             val latest by collectLastValue(underTest.projection)
 
             mediaProjectionRepo.mediaProjectionState.value =
-                MediaProjectionState.Projecting.EntireScreen(
-                    CAST_TO_OTHER_DEVICES_PACKAGE,
-                )
+                MediaProjectionState.Projecting.EntireScreen(CAST_TO_OTHER_DEVICES_PACKAGE)
 
             assertThat(latest).isInstanceOf(ProjectionChipModel.Projecting::class.java)
-            assertThat((latest as ProjectionChipModel.Projecting).type)
-                .isEqualTo(ProjectionChipModel.Type.CAST_TO_OTHER_DEVICE)
+            assertThat((latest as ProjectionChipModel.Projecting).receiver)
+                .isEqualTo(ProjectionChipModel.Receiver.CastToOtherDevice)
+            assertThat((latest as ProjectionChipModel.Projecting).contentType)
+                .isEqualTo(ProjectionChipModel.ContentType.Screen)
         }
 
     @Test
-    fun projection_singleTaskState_normalPackage_isShareToAppChipType() =
+    @EnableFlags(FLAG_STATUS_BAR_SHOW_AUDIO_ONLY_PROJECTION_CHIP)
+    fun projection_noScreenState_normalPackage_isShareToAppAndAudio() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.projection)
+
+            mediaProjectionRepo.mediaProjectionState.value =
+                MediaProjectionState.Projecting.NoScreen(NORMAL_PACKAGE)
+
+            assertThat(latest).isInstanceOf(ProjectionChipModel.Projecting::class.java)
+            assertThat((latest as ProjectionChipModel.Projecting).receiver)
+                .isEqualTo(ProjectionChipModel.Receiver.ShareToApp)
+            assertThat((latest as ProjectionChipModel.Projecting).contentType)
+                .isEqualTo(ProjectionChipModel.ContentType.Audio)
+        }
+
+    @Test
+    fun projection_singleTaskState_normalPackage_isShareToAppAndScreen() =
         testScope.runTest {
             val latest by collectLastValue(underTest.projection)
 
@@ -109,12 +145,14 @@ class MediaProjectionChipInteractorTest : SysuiTestCase() {
                 )
 
             assertThat(latest).isInstanceOf(ProjectionChipModel.Projecting::class.java)
-            assertThat((latest as ProjectionChipModel.Projecting).type)
-                .isEqualTo(ProjectionChipModel.Type.SHARE_TO_APP)
+            assertThat((latest as ProjectionChipModel.Projecting).receiver)
+                .isEqualTo(ProjectionChipModel.Receiver.ShareToApp)
+            assertThat((latest as ProjectionChipModel.Projecting).contentType)
+                .isEqualTo(ProjectionChipModel.ContentType.Screen)
         }
 
     @Test
-    fun projection_entireScreenState_normalPackage_isShareToAppChipType() =
+    fun projection_entireScreenState_normalPackage_isShareToAppAndScreen() =
         testScope.runTest {
             val latest by collectLastValue(underTest.projection)
 
@@ -122,8 +160,10 @@ class MediaProjectionChipInteractorTest : SysuiTestCase() {
                 MediaProjectionState.Projecting.EntireScreen(NORMAL_PACKAGE)
 
             assertThat(latest).isInstanceOf(ProjectionChipModel.Projecting::class.java)
-            assertThat((latest as ProjectionChipModel.Projecting).type)
-                .isEqualTo(ProjectionChipModel.Type.SHARE_TO_APP)
+            assertThat((latest as ProjectionChipModel.Projecting).receiver)
+                .isEqualTo(ProjectionChipModel.Receiver.ShareToApp)
+            assertThat((latest as ProjectionChipModel.Projecting).contentType)
+                .isEqualTo(ProjectionChipModel.ContentType.Screen)
         }
 
     companion object {
@@ -140,14 +180,14 @@ class MediaProjectionChipInteractorTest : SysuiTestCase() {
                 whenever(
                         this.checkPermission(
                             Manifest.permission.REMOTE_DISPLAY_PROVIDER,
-                            CAST_TO_OTHER_DEVICES_PACKAGE
+                            CAST_TO_OTHER_DEVICES_PACKAGE,
                         )
                     )
                     .thenReturn(PackageManager.PERMISSION_GRANTED)
                 whenever(
                         this.checkPermission(
                             Manifest.permission.REMOTE_DISPLAY_PROVIDER,
-                            NORMAL_PACKAGE
+                            NORMAL_PACKAGE,
                         )
                     )
                     .thenReturn(PackageManager.PERMISSION_DENIED)

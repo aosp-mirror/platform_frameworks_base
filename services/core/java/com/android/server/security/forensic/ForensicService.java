@@ -332,7 +332,7 @@ public class ForensicService extends SystemService {
 
         @Override
         public DataAggregator getDataAggregator(ForensicService forensicService) {
-            return new DataAggregator(forensicService);
+            return new DataAggregator(mContext, forensicService);
         }
     }
 }

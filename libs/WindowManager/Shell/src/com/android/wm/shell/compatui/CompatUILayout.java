@@ -68,7 +68,7 @@ class CompatUILayout extends LinearLayout {
 
     private void setViewVisibility(@IdRes int resId, boolean show) {
         final View view = findViewById(resId);
-        int visibility = show ? View.VISIBLE : View.GONE;
+        int visibility = show ? View.VISIBLE : View.INVISIBLE;
         if (view.getVisibility() == visibility) {
             return;
         }

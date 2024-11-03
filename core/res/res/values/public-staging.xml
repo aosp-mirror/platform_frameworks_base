@@ -121,6 +121,10 @@
     <!-- @FlaggedApi("android.permission.flags.replace_body_sensor_permission_enabled")
          @hide @SystemApi -->
     <public name="backgroundPermission"/>
+    <!-- @FlaggedApi(android.view.accessibility.supplemental_description) -->
+    <public name="supplementalDescription"/>
+    <!-- @FlaggedApi("android.security.enable_intent_matching_flags") -->
+    <public name="intentMatchingFlags"/>
   </staging-public-group>
 
   <staging-public-group type="id" first-id="0x01b60000">

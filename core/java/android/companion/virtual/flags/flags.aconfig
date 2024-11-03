@@ -145,3 +145,11 @@ flag {
     bug: "370657575"
     is_exported: true
 }
+
+flag {
+    namespace: "virtual_devices"
+    name: "default_device_camera_access_policy"
+    description: "API for default device camera access policy"
+    bug: "371173368"
+    is_exported: true
+}

@@ -369,6 +369,7 @@ package android.app {
   }
 
   public final class NotificationChannel implements android.os.Parcelable {
+    method @FlaggedApi("android.service.notification.notification_conversation_channel_management") @NonNull public android.app.NotificationChannel copy();
     method public int getOriginalImportance();
     method public boolean isImportanceLockedByCriticalDeviceFunction();
     method public void lockFields(int);
@@ -376,7 +377,7 @@ package android.app {
     method public void setDeletedTimeMs(long);
     method public void setDemoted(boolean);
     method public void setImportanceLockedByCriticalDeviceFunction(boolean);
-    method public void setImportantConversation(boolean);
+    method @FlaggedApi("android.service.notification.notification_conversation_channel_management") public void setImportantConversation(boolean);
     method public void setOriginalImportance(int);
     method public void setUserVisibleTaskShown(boolean);
     field @FlaggedApi("android.service.notification.notification_classification") public static final String NEWS_ID = "android.app.news";
@@ -1029,6 +1030,7 @@ package android.content {
   public abstract class Context {
     method @NonNull public java.io.File getCrateDir(@NonNull String);
     method public abstract int getDisplayId();
+    method @NonNull public java.util.List<android.content.IntentFilter> getRegisteredIntentFilters(@NonNull android.content.BroadcastReceiver);
     method @NonNull public android.os.UserHandle getUser();
     method public int getUserId();
     method public void setAutofillOptions(@Nullable android.content.AutofillOptions);
@@ -2771,6 +2773,17 @@ package android.os.vibrator {
     field @NonNull public static final android.os.Parcelable.Creator<android.os.vibrator.PrimitiveSegment> CREATOR;
   }
 
+  @FlaggedApi("android.os.vibrator.normalized_pwle_effects") public final class PwleSegment extends android.os.vibrator.VibrationEffectSegment {
+    method public int describeContents();
+    method public long getDuration();
+    method public float getEndAmplitude();
+    method public float getEndFrequencyHz();
+    method public float getStartAmplitude();
+    method public float getStartFrequencyHz();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.os.vibrator.PwleSegment> CREATOR;
+  }
+
   public final class RampSegment extends android.os.vibrator.VibrationEffectSegment {
     method public int describeContents();
     method public long getDuration();
@@ -3286,14 +3299,6 @@ package android.service.voice {
   public static class VoiceInteractionSession.ActivityId {
     method @NonNull public android.os.IBinder getAssistToken();
     method public int getTaskId();
-  }
-
-}
-
-package android.service.watchdog {
-
-  public abstract class ExplicitHealthCheckService extends android.app.Service {
-    method public void setCallback(@Nullable android.os.RemoteCallback);
   }
 
 }

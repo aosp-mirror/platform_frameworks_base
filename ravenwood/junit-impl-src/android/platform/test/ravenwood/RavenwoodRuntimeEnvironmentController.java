@@ -137,7 +137,7 @@ public class RavenwoodRuntimeEnvironmentController {
         return res;
     }
 
-    private static RavenwoodConfig sConfig;
+    private static RavenwoodAwareTestRunner sRunner;
     private static RavenwoodSystemProperties sProps;
     private static boolean sInitialized = false;
 
@@ -165,20 +165,26 @@ public class RavenwoodRuntimeEnvironmentController {
         RavenwoodSystemProperties.initialize(RAVENWOOD_BUILD_PROP);
         setSystemProperties(null);
 
+        // Do this after loading RAVENWOOD_NATIVE_RUNTIME_NAME (which backs Os.setenv()),
+        // before loadFrameworkNativeCode() (which uses $ANDROID_LOG_TAGS).
+        if (RAVENWOOD_VERBOSE_LOGGING) {
+            RavenwoodCommonUtils.log(TAG, "Force enabling verbose logging");
+            try {
+                Os.setenv("ANDROID_LOG_TAGS", "*:v", true);
+            } catch (ErrnoException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
         // Make sure libandroid_runtime is loaded.
         RavenwoodNativeLoader.loadFrameworkNativeCode();
 
         // Redirect stdout/stdin to liblog.
         RuntimeInit.redirectLogStreams();
 
-        if (RAVENWOOD_VERBOSE_LOGGING) {
-            RavenwoodCommonUtils.log(TAG, "Force enabling verbose logging");
-            try {
-                Os.setenv("ANDROID_LOG_TAGS", "*:v", true);
-            } catch (ErrnoException e) {
-                // Shouldn't happen.
-            }
-        }
+        // Touch some references early to ensure they're <clinit>'ed
+        Objects.requireNonNull(Build.TYPE);
+        Objects.requireNonNull(Build.VERSION.SDK);
 
         System.setProperty(RAVENWOOD_VERSION_JAVA_SYSPROP, "1");
         // This will let AndroidJUnit4 use the original runner.
@@ -191,12 +197,19 @@ public class RavenwoodRuntimeEnvironmentController {
     /**
      * Initialize the environment.
      */
-    public static void init(RavenwoodConfig config) throws IOException {
+    public static void init(RavenwoodAwareTestRunner runner) {
         if (RAVENWOOD_VERBOSE_LOGGING) {
-            Log.i(TAG, "init() called here", new RuntimeException("STACKTRACE"));
+            Log.i(TAG, "init() called here: " + runner, new RuntimeException("STACKTRACE"));
         }
+        if (sRunner == runner) {
+            return;
+        }
+        if (sRunner != null) {
+            reset();
+        }
+        sRunner = runner;
         try {
-            initInner(config);
+            initInner(runner.mState.getConfig());
         } catch (Exception th) {
             Log.e(TAG, "init() failed", th);
             reset();
@@ -205,10 +218,6 @@ public class RavenwoodRuntimeEnvironmentController {
     }
 
     private static void initInner(RavenwoodConfig config) throws IOException {
-        if (sConfig != null) {
-            throw new RavenwoodRuntimeException("Internal error: init() called without reset()");
-        }
-        sConfig = config;
         if (ENABLE_UNCAUGHT_EXCEPTION_DETECTION) {
             maybeThrowPendingUncaughtException(false);
             Thread.setDefaultUncaughtExceptionHandler(sUncaughtExceptionHandler);
@@ -216,7 +225,7 @@ public class RavenwoodRuntimeEnvironmentController {
 
         android.os.Process.init$ravenwood(config.mUid, config.mPid);
         sOriginalIdentityToken = Binder.clearCallingIdentity();
-        Binder.restoreCallingIdentity(packBinderIdentityToken(false, config.mUid, config.mPid));
+        reinit();
         setSystemProperties(config.mSystemProperties);
 
         ServiceManager.init$ravenwood();
@@ -269,9 +278,7 @@ public class RavenwoodRuntimeEnvironmentController {
         config.mInstContext = instContext;
         config.mTargetContext = targetContext;
 
-        final Supplier<Resources> systemResourcesLoader = () -> {
-            return config.mState.loadResources(null);
-        };
+        final Supplier<Resources> systemResourcesLoader = () -> config.mState.loadResources(null);
 
         config.mState.mSystemServerContext =
                 new RavenwoodContext(ANDROID_PACKAGE_NAME, main, systemResourcesLoader);
@@ -288,10 +295,14 @@ public class RavenwoodRuntimeEnvironmentController {
                     RavenwoodRuntimeEnvironmentController::dumpStacks,
                     TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
         }
+    }
 
-        // Touch some references early to ensure they're <clinit>'ed
-        Objects.requireNonNull(Build.TYPE);
-        Objects.requireNonNull(Build.VERSION.SDK);
+    /**
+     * Partially re-initialize after each test method invocation
+     */
+    public static void reinit() {
+        var config = sRunner.mState.getConfig();
+        Binder.restoreCallingIdentity(packBinderIdentityToken(false, config.mUid, config.mPid));
     }
 
     /**
@@ -301,11 +312,11 @@ public class RavenwoodRuntimeEnvironmentController {
         if (RAVENWOOD_VERBOSE_LOGGING) {
             Log.i(TAG, "reset() called here", new RuntimeException("STACKTRACE"));
         }
-        if (sConfig == null) {
+        if (sRunner == null) {
             throw new RavenwoodRuntimeException("Internal error: reset() already called");
         }
-        var config = sConfig;
-        sConfig = null;
+        var config = sRunner.mState.getConfig();
+        sRunner = null;
 
         if (ENABLE_TIMEOUT_STACKS) {
             sPendingTimeout.cancel(false);

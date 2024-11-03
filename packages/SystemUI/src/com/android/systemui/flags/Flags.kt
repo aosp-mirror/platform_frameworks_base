@@ -255,11 +255,6 @@ object Flags {
     val WM_ENABLE_SHELL_TRANSITIONS =
         sysPropBooleanFlag("persist.wm.debug.shell_transit", default = true)
 
-    // TODO(b/256873975): Tracking Bug
-    @JvmField
-    @Keep
-    val WM_BUBBLE_BAR = sysPropBooleanFlag("persist.wm.debug.bubble_bar", default = false)
-
     // TODO(b/254513207): Tracking Bug to delete
     @Keep
     @JvmField

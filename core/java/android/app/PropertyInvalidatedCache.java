@@ -70,6 +70,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * @hide
  */
 @TestApi
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class PropertyInvalidatedCache<Query, Result> {
     /**
      * This is a configuration class that customizes a cache instance.
@@ -798,14 +799,32 @@ public class PropertyInvalidatedCache<Query, Result> {
             = new ConcurrentHashMap<>();
 
     // True if shared memory is flag-enabled, false otherwise.  Read the flags exactly once.
-    private static final boolean sSharedMemoryAvailable =
-            com.android.internal.os.Flags.applicationSharedMemoryEnabled()
-            && android.app.Flags.picUsesSharedMemory();
+    private static final boolean sSharedMemoryAvailable = isSharedMemoryAvailable();
+
+    @android.ravenwood.annotation.RavenwoodReplace
+    private static boolean isSharedMemoryAvailable() {
+        return com.android.internal.os.Flags.applicationSharedMemoryEnabled()
+                && android.app.Flags.picUsesSharedMemory();
+    }
+
+    private static boolean isSharedMemoryAvailable$ravenwood() {
+        return false; // Always disable shared memory on Ravenwood. (for now)
+    }
+
+    /**
+     * Keys that cannot be put in shared memory yet.
+     */
+    private static boolean inSharedMemoryDenyList(@NonNull String name) {
+        final String pkginfo = PREFIX_SYSTEM + "package_info";
+        return name.equals(pkginfo);
+    };
 
     // Return true if this cache can use shared memory for its nonce.  Shared memory may be used
     // if the module is the system.
     private static boolean sharedMemoryOkay(@NonNull String name) {
-        return sSharedMemoryAvailable && name.startsWith(PREFIX_SYSTEM);
+        return sSharedMemoryAvailable
+                && name.startsWith(PREFIX_SYSTEM)
+                && !inSharedMemoryDenyList(name);
     }
 
     /**
@@ -944,7 +963,12 @@ public class PropertyInvalidatedCache<Query, Result> {
     public static void setTestMode(boolean mode) {
         synchronized (sGlobalLock) {
             if (sTestMode == mode) {
-                throw new IllegalStateException("cannot set test mode redundantly: mode=" + mode);
+                final String msg = "cannot set test mode redundantly: mode=" + mode;
+                if (Flags.enforcePicTestmodeProtocol()) {
+                    throw new IllegalStateException(msg);
+                } else {
+                    Log.e(TAG, msg);
+                }
             }
             sTestMode = mode;
             if (mode) {
@@ -1787,14 +1811,6 @@ public class PropertyInvalidatedCache<Query, Result> {
         // block.
         private static final int MAX_STRING_LENGTH = 63;
 
-        // The raw byte block.  Strings are stored as run-length encoded byte arrays.  The first
-        // byte is the length of the following string.  It is an axiom of the system that the
-        // string block is initially all zeros and that it is write-once memory: new strings are
-        // appended to existing strings, so there is never a need to revisit strings that have
-        // already been pulled from the string block.
-        @GuardedBy("mLock")
-        private final byte[] mStringBlock;
-
         // The expected hash code of the string block.  If the hash over the string block equals
         // this value, then the string block is valid.  Otherwise, the block is not valid and
         // should be re-read.  An invalid block generally means that a client has read the shared
@@ -1806,12 +1822,15 @@ public class PropertyInvalidatedCache<Query, Result> {
         // logging.
         private final int mMaxNonce;
 
+        // The size of the native byte block.
+        private final int mMaxByte;
+
         /** @hide */
         @VisibleForTesting
         public NonceStore(long ptr, boolean mutable) {
             mPtr = ptr;
             mMutable = mutable;
-            mStringBlock = new byte[nativeGetMaxByte(ptr)];
+            mMaxByte = nativeGetMaxByte(ptr);
             mMaxNonce = nativeGetMaxNonce(ptr);
             refreshStringBlockLocked();
         }
@@ -1870,17 +1889,17 @@ public class PropertyInvalidatedCache<Query, Result> {
         // and the block hash is not checked.  The function skips past strings that have already
         // been read, and then processes any new strings.
         @GuardedBy("mLock")
-        private void updateStringMapLocked() {
+        private void updateStringMapLocked(byte[] block) {
             int index = 0;
             int offset = 0;
-            while (offset < mStringBlock.length && mStringBlock[offset] != 0) {
+            while (offset < block.length && block[offset] != 0) {
                 if (index > mHighestIndex) {
                     // Only record the string if it has not been seen yet.
-                    final String s = new String(mStringBlock, offset+1, mStringBlock[offset]);
+                    final String s = new String(block, offset+1, block[offset]);
                     mStringHandle.put(s, index);
                     mHighestIndex = index;
                 }
-                offset += mStringBlock[offset] + 1;
+                offset += block[offset] + 1;
                 index++;
             }
             mStringBytes = offset;
@@ -1889,24 +1908,21 @@ public class PropertyInvalidatedCache<Query, Result> {
         // Append a string to the string block and update the hash.  This does not write the block
         // to shared memory.
         @GuardedBy("mLock")
-        private void appendStringToMapLocked(@NonNull String str) {
+        private void appendStringToMapLocked(@NonNull String str, @NonNull byte[] block) {
             int offset = 0;
-            while (offset < mStringBlock.length && mStringBlock[offset] != 0) {
-                offset += mStringBlock[offset] + 1;
+            while (offset < block.length && block[offset] != 0) {
+                offset += block[offset] + 1;
             }
             final byte[] strBytes = str.getBytes();
 
-            if (offset + strBytes.length >= mStringBlock.length) {
+            if (offset + strBytes.length >= block.length) {
                 // Overflow.  Do not add the string to the block; the string will remain undefined.
                 return;
             }
 
-            mStringBlock[offset] = (byte) strBytes.length;
-            offset++;
-            for (int i = 0; i < strBytes.length; i++, offset++) {
-                mStringBlock[offset] = strBytes[i];
-            }
-            mBlockHash = Arrays.hashCode(mStringBlock);
+            block[offset] = (byte) strBytes.length;
+            System.arraycopy(strBytes, 0, block, offset+1, strBytes.length);
+            mBlockHash = Arrays.hashCode(block);
         }
 
         // Possibly update the string block.  If the native shared memory has a new block hash,
@@ -1917,8 +1933,9 @@ public class PropertyInvalidatedCache<Query, Result> {
                 // The fastest way to know that the shared memory string block has not changed.
                 return;
             }
-            final int hash = nativeGetByteBlock(mPtr, mBlockHash, mStringBlock);
-            if (hash != Arrays.hashCode(mStringBlock)) {
+            byte[] block = new byte[mMaxByte];
+            final int hash = nativeGetByteBlock(mPtr, mBlockHash, block);
+            if (hash != Arrays.hashCode(block)) {
                 // This is a partial read: ignore it.  The next time someone needs this string
                 // the memory will be read again and should succeed.  Set the local hash to
                 // zero to ensure that the next read attempt will actually read from shared
@@ -1930,7 +1947,7 @@ public class PropertyInvalidatedCache<Query, Result> {
             // The hash has changed.  Update the strings from the byte block.
             mStringUpdated++;
             mBlockHash = hash;
-            updateStringMapLocked();
+            updateStringMapLocked(block);
         }
 
         // Throw an exception if the string cannot be stored in the string block.
@@ -1963,6 +1980,9 @@ public class PropertyInvalidatedCache<Query, Result> {
             }
         }
 
+        static final AtomicLong sStoreCount = new AtomicLong();
+
+
         // Add a string to the local copy of the block and write the block to shared memory.
         // Return the index of the new string.  If the string has already been recorded, the
         // shared memory is not updated but the index of the existing string is returned.
@@ -1972,9 +1992,11 @@ public class PropertyInvalidatedCache<Query, Result> {
                 if (handle == null) {
                     throwIfImmutable();
                     throwIfBadString(str);
-                    appendStringToMapLocked(str);
-                    nativeSetByteBlock(mPtr, mBlockHash, mStringBlock);
-                    updateStringMapLocked();
+                    byte[] block = new byte[mMaxByte];
+                    nativeGetByteBlock(mPtr, 0, block);
+                    appendStringToMapLocked(str, block);
+                    nativeSetByteBlock(mPtr, mBlockHash, block);
+                    updateStringMapLocked(block);
                     handle = mStringHandle.get(str);
                 }
                 return handle;
@@ -2038,6 +2060,7 @@ public class PropertyInvalidatedCache<Query, Result> {
      * @param mPtr the pointer to the native shared memory.
      * @return the number of nonces supported by the shared memory.
      */
+    @FastNative
     private static native int nativeGetMaxNonce(long mPtr);
 
     /**
@@ -2046,6 +2069,7 @@ public class PropertyInvalidatedCache<Query, Result> {
      * @param mPtr the pointer to the native shared memory.
      * @return the number of string bytes supported by the shared memory.
      */
+    @FastNative
     private static native int nativeGetMaxByte(long mPtr);
 
     /**

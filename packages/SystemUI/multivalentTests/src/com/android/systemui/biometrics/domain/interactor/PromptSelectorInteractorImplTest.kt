@@ -77,6 +77,7 @@ class PromptSelectorInteractorImplTest : SysuiTestCase() {
     private val fingerprintRepository = FakeFingerprintPropertyRepository()
     private val promptRepository = FakePromptRepository()
     private val fakeExecutor = FakeExecutor(FakeSystemClock())
+    private val credentialInteractor = FakeCredentialInteractor()
 
     private lateinit var displayStateRepository: FakeDisplayStateRepository
     private lateinit var displayRepository: FakeDisplayRepository
@@ -99,8 +100,9 @@ class PromptSelectorInteractorImplTest : SysuiTestCase() {
             PromptSelectorInteractorImpl(
                 fingerprintRepository,
                 displayStateInteractor,
+                credentialInteractor,
                 promptRepository,
-                lockPatternUtils
+                lockPatternUtils,
             )
     }
 
@@ -134,13 +136,13 @@ class PromptSelectorInteractorImplTest : SysuiTestCase() {
         testScope.runTest {
             useBiometricsAndReset(
                 allowCredentialFallback = true,
-                setComponentNameForConfirmDeviceCredentialActivity = true
+                setComponentNameForConfirmDeviceCredentialActivity = true,
             )
         }
 
     private fun TestScope.useBiometricsAndReset(
         allowCredentialFallback: Boolean,
-        setComponentNameForConfirmDeviceCredentialActivity: Boolean = false
+        setComponentNameForConfirmDeviceCredentialActivity: Boolean = false,
     ) {
         setUserCredentialType(isPassword = true)
 
@@ -357,7 +359,7 @@ class PromptSelectorInteractorImplTest : SysuiTestCase() {
 
     private fun setPrompt(
         info: PromptInfo = basicPromptInfo(),
-        onSwitchToCredential: Boolean = false
+        onSwitchToCredential: Boolean = false,
     ) {
         interactor.setPrompt(
             info,

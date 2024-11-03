@@ -541,7 +541,8 @@ class DesktopModeEventLogger {
                 FrameworkStatsLog.DESKTOP_MODE_UICHANGED__EXIT_REASON__RETURN_HOME_OR_OVERVIEW
             ),
             TASK_FINISHED(FrameworkStatsLog.DESKTOP_MODE_UICHANGED__EXIT_REASON__TASK_FINISHED),
-            SCREEN_OFF(FrameworkStatsLog.DESKTOP_MODE_UICHANGED__EXIT_REASON__SCREEN_OFF)
+            SCREEN_OFF(FrameworkStatsLog.DESKTOP_MODE_UICHANGED__EXIT_REASON__SCREEN_OFF),
+            TASK_MINIMIZED(FrameworkStatsLog.DESKTOP_MODE_UICHANGED__EXIT_REASON__TASK_MINIMIZED),
         }
 
         /**

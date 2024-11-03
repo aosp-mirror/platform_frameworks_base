@@ -472,4 +472,10 @@
     <integer name="config_mt_sms_polling_throttle_millis">300000</integer>
     <java-symbol type="integer" name="config_mt_sms_polling_throttle_millis" />
 
+
+    <!-- The receiver class of the intent that hidden menu sends to start satellite non-emergency mode -->
+    <string name="config_satellite_carrier_roaming_non_emergency_session_class" translatable="false"></string>
+    <java-symbol type="string" name="config_satellite_carrier_roaming_non_emergency_session_class" />
+
+
 </resources>

@@ -102,6 +102,15 @@ public class DesktopModeStatus {
             "persist.wm.debug.enter_desktop_by_default_on_freeform_display";
 
     /**
+     * Sysprop declaring whether to enable drag-to-maximize for desktop windows.
+     *
+     * <p>If it is not defined, then {@code R.integer.config_dragToMaximizeInDesktopMode}
+     * is used.
+     */
+    public static final String ENABLE_DRAG_TO_MAXIMIZE_SYS_PROP =
+            "persist.wm.debug.enable_drag_to_maximize";
+
+    /**
      * Sysprop declaring the maximum number of Tasks to show in Desktop Mode at any one time.
      *
      * <p>If it is not defined, then {@code R.integer.config_maxDesktopWindowingActiveTasks} is
@@ -228,6 +237,18 @@ public class DesktopModeStatus {
         return SystemProperties.getBoolean(ENTER_DESKTOP_BY_DEFAULT_ON_FREEFORM_DISPLAY_SYS_PROP,
                 context.getResources().getBoolean(
                         R.bool.config_enterDesktopByDefaultOnFreeformDisplay));
+    }
+
+    /**
+     * Return {@code true} if a window should be maximized when it's dragged to the top edge of the
+     * screen.
+     */
+    public static boolean shouldMaximizeWhenDragToTopEdge(@NonNull Context context) {
+        if (!Flags.enableDragToMaximize()) {
+            return false;
+        }
+        return SystemProperties.getBoolean(ENABLE_DRAG_TO_MAXIMIZE_SYS_PROP,
+                context.getResources().getBoolean(R.bool.config_dragToMaximizeInDesktopMode));
     }
 
     /** Dumps DesktopModeStatus flags and configs. */

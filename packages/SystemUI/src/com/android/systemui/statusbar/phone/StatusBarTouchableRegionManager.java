@@ -37,6 +37,7 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.ScreenDecorations;
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor;
+import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.res.R;
 import com.android.systemui.scene.domain.interactor.SceneInteractor;
@@ -78,6 +79,7 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
     private View mNotificationShadeWindowView;
     private View mNotificationPanelView;
     private boolean mForceCollapsedUntilLayout = false;
+    private Boolean mCommunalVisible = false;
 
     private Region mTouchableRegion = new Region();
     private int mDisplayCutoutTouchableRegionSize;
@@ -98,7 +100,8 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
             JavaAdapter javaAdapter,
             UnlockedScreenOffAnimationController unlockedScreenOffAnimationController,
             PrimaryBouncerInteractor primaryBouncerInteractor,
-            AlternateBouncerInteractor alternateBouncerInteractor
+            AlternateBouncerInteractor alternateBouncerInteractor,
+            CommunalSceneInteractor communalSceneInteractor
     ) {
         mContext = context;
         initResources();
@@ -145,6 +148,9 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
             javaAdapter.alwaysCollectFlow(
                     shadeInteractor.isAnyExpanded(),
                     this::onShadeOrQsExpanded);
+            javaAdapter.alwaysCollectFlow(
+                    communalSceneInteractor.isCommunalVisible(),
+                    this::onCommunalVisible);
         }
 
         mPrimaryBouncerInteractor = primaryBouncerInteractor;
@@ -194,6 +200,10 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
             mIsRemoteUserInteractionOngoing = ongoing;
             updateTouchableRegion();
         }
+    }
+
+    private void onCommunalVisible(Boolean visible) {
+        mCommunalVisible = visible;
     }
 
     /**
@@ -304,6 +314,9 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
                 && (!mIsSceneContainerUiEmpty || mIsRemoteUserInteractionOngoing))
                 || mPrimaryBouncerInteractor.isShowing().getValue()
                 || mAlternateBouncerInteractor.isVisibleState()
+                // The glanceable hub is a full-screen UI within the notification shade window. When
+                // it's visible, the touchable region should be the full screen.
+                || mCommunalVisible
                 || mUnlockedScreenOffAnimationController.isAnimationPlaying();
     }
 

@@ -340,6 +340,12 @@ public class TaskInfo {
     public int requestedVisibleTypes;
 
     /**
+     * Whether the top activity has requested to limit educational dialogs shown by the system.
+     * @hide
+     */
+    public boolean isTopActivityLimitSystemEducationDialogs;
+
+    /**
      * Encapsulate specific App Compat information.
      * @hide
      */
@@ -486,6 +492,8 @@ public class TaskInfo {
                 && Objects.equals(capturedLink, that.capturedLink)
                 && capturedLinkTimestamp == that.capturedLinkTimestamp
                 && requestedVisibleTypes == that.requestedVisibleTypes
+                && isTopActivityLimitSystemEducationDialogs
+                    == that.isTopActivityLimitSystemEducationDialogs
                 && appCompatTaskInfo.equalsForTaskOrganizer(that.appCompatTaskInfo)
                 && Objects.equals(topActivityMainWindowFrame, that.topActivityMainWindowFrame);
     }
@@ -562,6 +570,7 @@ public class TaskInfo {
         capturedLink = source.readTypedObject(Uri.CREATOR);
         capturedLinkTimestamp = source.readLong();
         requestedVisibleTypes = source.readInt();
+        isTopActivityLimitSystemEducationDialogs = source.readBoolean();
         appCompatTaskInfo = source.readTypedObject(AppCompatTaskInfo.CREATOR);
         topActivityMainWindowFrame = source.readTypedObject(Rect.CREATOR);
     }
@@ -616,6 +625,7 @@ public class TaskInfo {
         dest.writeTypedObject(capturedLink, flags);
         dest.writeLong(capturedLinkTimestamp);
         dest.writeInt(requestedVisibleTypes);
+        dest.writeBoolean(isTopActivityLimitSystemEducationDialogs);
         dest.writeTypedObject(appCompatTaskInfo, flags);
         dest.writeTypedObject(topActivityMainWindowFrame, flags);
     }
@@ -660,6 +670,8 @@ public class TaskInfo {
                 + " capturedLink=" + capturedLink
                 + " capturedLinkTimestamp=" + capturedLinkTimestamp
                 + " requestedVisibleTypes=" + requestedVisibleTypes
+                + " isTopActivityLimitSystemEducationDialogs="
+                + isTopActivityLimitSystemEducationDialogs
                 + " appCompatTaskInfo=" + appCompatTaskInfo
                 + " topActivityMainWindowFrame=" + topActivityMainWindowFrame
                 + "}";

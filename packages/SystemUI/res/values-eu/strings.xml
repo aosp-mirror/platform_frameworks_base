@@ -112,6 +112,8 @@
     <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"Pantaila grabatu nahi duzu?"</string>
     <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"Grabatu aplikazio bat"</string>
     <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"Grabatu pantaila osoa"</string>
+    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen_for_display (3754611651558838691) -->
+    <skip />
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"Pantaila osoa grabatzen ari zarenean, pantailan agertzen den guztia grabatzen da. Beraz, kontuz ibili pasahitzekin, ordainketen xehetasunekin, mezuekin, argazkiekin, audioekin eta bideoekin, besteak beste."</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"Aplikazio bat grabatzen ari zarenean, aplikazio horretan agertzen den edo bertan erreproduzitzen ari den guztia grabatzen da. Beraz, kontuz ibili pasahitzekin, ordainketen xehetasunekin, mezuekin, argazkiekin, audioekin eta bideoekin, besteak beste."</string>
     <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"Grabatu pantaila"</string>
@@ -136,11 +138,17 @@
     <string name="screenrecord_stop_dialog_message_specific_app" msgid="5995770227684523244">"<xliff:g id="APP_NAME">%1$s</xliff:g> grabatzen ari zara"</string>
     <string name="screenrecord_stop_dialog_button" msgid="2883812564938194350">"Utzi grabatzeari"</string>
     <string name="share_to_app_chip_accessibility_label" msgid="4210256229976947065">"Pantaila partekatzen"</string>
+    <!-- no translation found for share_to_app_chip_accessibility_label_generic (5517431657924536133) -->
+    <skip />
     <string name="share_to_app_stop_dialog_title" msgid="9212915050910250438">"Pantaila partekatzeari utzi nahi diozu?"</string>
+    <!-- no translation found for share_to_app_stop_dialog_title_generic (9079161538135843648) -->
+    <skip />
     <string name="share_to_app_stop_dialog_message_entire_screen_with_host_app" msgid="522823522115375414">"Pantaila osoa <xliff:g id="HOST_APP_NAME">%1$s</xliff:g> aplikazioarekin partekatzen ari zara"</string>
     <string name="share_to_app_stop_dialog_message_entire_screen" msgid="5090115386271179270">"Pantaila osoa aplikazio batekin partekatzen ari zara"</string>
     <string name="share_to_app_stop_dialog_message_single_app_specific" msgid="5923772039347985172">"<xliff:g id="APP_BEING_SHARED_NAME">%1$s</xliff:g> partekatzen ari zara"</string>
     <string name="share_to_app_stop_dialog_message_single_app_generic" msgid="6681016774654578261">"Aplikazio bat partekatzen ari zara"</string>
+    <!-- no translation found for share_to_app_stop_dialog_message_generic (7622174291691249392) -->
+    <skip />
     <string name="share_to_app_stop_dialog_button" msgid="6334056916284230217">"Utzi partekatzeari"</string>
     <string name="cast_screen_to_other_device_chip_accessibility_label" msgid="4687917476203009885">"Pantaila igortzen"</string>
     <string name="cast_to_other_device_stop_dialog_title" msgid="7836517190930357326">"Igortzeari utzi nahi diozu?"</string>
@@ -515,6 +523,10 @@
     <string name="communal_widget_picker_title" msgid="1953369090475731663">"Pantaila blokeatuko widgetak"</string>
     <string name="communal_widget_picker_description" msgid="490515450110487871">"Edonork ikus ditzake pantaila blokeatuko widgetak, tableta blokeatuta badago ere."</string>
     <string name="accessibility_action_label_unselect_widget" msgid="1041811747619468698">"desautatu widgeta"</string>
+    <!-- no translation found for accessibility_action_label_shrink_widget (8259511040536438771) -->
+    <skip />
+    <!-- no translation found for accessibility_action_label_expand_widget (9190524260912211759) -->
+    <skip />
     <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"Pantaila blokeatuko widgetak"</string>
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"Aplikazio bat widget baten bidez irekitzeko, zeu zarela egiaztatu beharko duzu. Gainera, kontuan izan edonork ikusi ahalko dituela halako widgetak, tableta blokeatuta badago ere. Baliteke widget batzuk pantaila blokeaturako egokiak ez izatea, eta agian ez da segurua haiek bertan gehitzea."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"Ados"</string>
@@ -554,9 +566,9 @@
     <string name="media_projection_entry_cast_permission_dialog_option_text_single_app" msgid="6073353940838561981">"Igorri aplikazio bat"</string>
     <string name="media_projection_entry_cast_permission_dialog_option_text_entire_screen" msgid="8389508187954155307">"Igorri pantaila osoa"</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="4040447861037324017">"Pantaila osoa igortzen ari zarenean, pantailan duzun guztia dago ikusgai. Beraz, kontuz ibili pasahitzekin, ordainketen xehetasunekin, mezuekin, argazkiekin, audioekin eta bideoekin, besteak beste."</string>
-    <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="7487834861348460736">"Aplikazio bat igortzen ari zarenean, aplikazio horretan agertzen den edo bertan erreproduzitzen ari den guztia dago ikusgai. Beraz, kontuz ibili pasahitzekin, ordainketen xehetasunekin, mezuekin, argazkiekin, audioekin eta bideoekin, besteak beste."</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="7487834861348460736">"Aplikazio bat igortzen ari zarenean, aplikazio horretan agertzen edo erreproduzitzen den guztia dago ikusgai. Beraz, kontuz ibili pasahitzekin, ordainketen xehetasunekin, mezuekin, argazkiekin, audioekin eta bideoekin, besteak beste."</string>
     <string name="media_projection_entry_cast_permission_dialog_continue_entire_screen" msgid="3261124185304676483">"Igorri pantaila"</string>
-    <string name="media_projection_entry_cast_app_selector_title" msgid="6323062146661922387">"Aukeratu zer aplikazio igorri nahi duzun"</string>
+    <string name="media_projection_entry_cast_app_selector_title" msgid="6323062146661922387">"Aukeratu zein aplikazio igorri nahi duzun"</string>
     <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"Partekatzen hasi nahi duzu?"</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"Edukia partekatzen, grabatzen edo igortzen ari zarenean, pantailan ikusgai dagoen edo gailuan erreproduzitzen ari den guztia atzi dezake Android-ek. Beraz, kontuz ibili pasahitzekin, ordainketen xehetasunekin, mezuekin, argazkiekin, audioekin eta bideoekin, besteak beste."</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"Aplikazio bat partekatzen, grabatzen edo igortzen ari zarenean, aplikazio horretan ikusgai dagoen edo bertan erreproduzitzen ari den guztia atzi dezake Android-ek. Beraz, kontuz ibili pasahitzekin, ordainketen xehetasunekin, mezuekin, argazkiekin, audioekin eta bideoekin, besteak beste."</string>
@@ -571,6 +583,10 @@
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Garbitu guztiak"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Kudeatu"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Historia"</string>
+    <!-- no translation found for notification_settings_button_description (2441994740884163889) -->
+    <skip />
+    <!-- no translation found for notification_history_button_description (1578657591405033383) -->
+    <skip />
     <string name="notification_section_header_incoming" msgid="850925217908095197">"Berria"</string>
     <string name="notification_section_header_gentle" msgid="6804099527336337197">"Isila"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Jakinarazpenak"</string>
@@ -1399,14 +1415,19 @@
     <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"Oraingo aplikazioa"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Erabilerraztasuna"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Lasterbideak"</string>
+    <!-- no translation found for shortcut_helper_customize_mode_title (1467657117101096033) -->
+    <skip />
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Bilatu lasterbideak"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"Ez dago bilaketa-emaitzarik"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Tolesteko ikonoa"</string>
+    <!-- no translation found for shortcut_helper_customize_button_text (3124983502748069338) -->
+    <skip />
+    <!-- no translation found for shortcut_helper_done_button_text (7249905942125386191) -->
+    <skip />
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Zabaltzeko ikonoa"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"edo"</string>
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"Arrastatzeko kontrol-puntua"</string>
-    <!-- no translation found for shortcut_helper_keyboard_settings_buttons_label (6720967595915985259) -->
-    <skip />
+    <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"Teklatuaren ezarpenak"</string>
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"Nabigatu teklatua erabilita"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"Ikasi lasterbideak"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"Nabigatu ukipen-panela erabilita"</string>
@@ -1464,8 +1485,6 @@
     <string name="qs_edit_mode_category_providedByApps" msgid="8346112074897919019">"Aplikazioenak"</string>
     <string name="qs_edit_mode_category_display" msgid="4749511439121053942">"Pantaila"</string>
     <string name="qs_edit_mode_category_unknown" msgid="509314252124053550">"Ezezagunak"</string>
-    <!-- no translation found for qs_edit_mode_reset_dialog_title (8841270491554460726) -->
-    <skip />
-    <!-- no translation found for qs_edit_mode_reset_dialog_content (8626426097929954027) -->
-    <skip />
+    <string name="qs_edit_mode_reset_dialog_title" msgid="8841270491554460726">"Berrezarri lauzak"</string>
+    <string name="qs_edit_mode_reset_dialog_content" msgid="8626426097929954027">"Lauzen jatorrizko ordena eta tamainak berrezarri nahi dituzu?"</string>
 </resources>

@@ -590,7 +590,7 @@
     <string name="permdesc_changeWifiMulticastState" product="default" msgid="8296627590220222740">"तपाईँको फोन मात्र होइन, मल्टिकास्ट ठेगानाहरूको प्रयोग गरे Wi-Fi नेटवर्कका सबै उपकरणहरूमा पठाइएका प्याकेटहरू प्राप्त गर्न एपलाई अनुमति दिन्छ। यसले गैर-मल्टिकास्ट मोडभन्दा बढी उर्जा प्रयोग गर्छ।"</string>
     <string name="permlab_bluetoothAdmin" msgid="6490373569441946064">"ब्लुटुथ सेटिङहरूमा पहुँच गर्नुहोस्"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="5370837055438574863">"स्थानीय ब्लुटुथ ट्याब्लेटलाई कन्फिगर गर्नको लागि र टाढाका उपकरणहरूलाई पत्ता लगाउन र जोड्नको लागि एपलाई अनुमति दिन्छ।"</string>
-    <string name="permdesc_bluetoothAdmin" product="tv" msgid="1623992984547014588">"एपलाई तपाईंको Android टिभी डिभाइसको ब्लुटुथ कन्फिगर गर्ने तथा टाढा रहेका यन्त्रहरू पत्ता लगाई ती यन्त्रहरूसँग जोडा बनाउने अनुमति दिन्छ।"</string>
+    <string name="permdesc_bluetoothAdmin" product="tv" msgid="1623992984547014588">"एपलाई तपाईंको Android टिभी डिभाइसको ब्लुटुथ कन्फिगर गर्ने तथा टाढा रहेका यन्त्रहरू पत्ता लगाई ती यन्त्रहरूसँग कनेक्ट गर्ने अनुमति दिन्छ।"</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="7381341743021234863">"एपलाई स्थानीय ब्लुटुथ फोन कन्फिगर गर्न र टाढाका उपकरणहरूसँग खोज गर्न र जोडी गर्न अनुमति दिन्छ।"</string>
     <string name="permlab_accessWimaxState" msgid="7029563339012437434">"WiMAXसँग जोड्नुहोस् वा छुटाउनुहोस्"</string>
     <string name="permdesc_accessWimaxState" msgid="5372734776802067708">"एपलाई वाइम्याक्स सक्षम छ कि छैन र जडान भएको कुनै पनि वाइम्याक्स नेटवर्कहरूको बारेमा जानकारी निर्धारिण गर्न अनुमति दिन्छ।"</string>
@@ -1943,6 +1943,8 @@
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"अफ छ"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> - <xliff:g id="END">%2$s</xliff:g>"</string>
+    <!-- no translation found for zen_mode_trigger_summary_range_words (7228261413029290750) -->
+    <skip />
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"कुनै पनि पात्रो"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> ले केही ध्वनिहरू म्युट गर्दै छ"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"तपाईंको यन्त्रसँग आन्तरिक समस्या छ, र तपाईंले फ्याक्ट्री डाटा रिसेट नगर्दासम्म यो अस्थिर रहन्छ।"</string>
@@ -2424,6 +2426,14 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"मोबाइल वा Wi-Fi नेटवर्कविनै म्यासेजहरू पठाउनुहोस् र प्राप्त गर्नुहोस्"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages खोल्नुहोस्"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"यसले काम गर्ने तरिका"</string>
+    <!-- no translation found for satellite_manual_selection_state_popup_title (8545991934926661974) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_message (1928101658551382450) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_ok (2459664752624985095) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_cancel (973605633339469252) -->
+    <skip />
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"विचाराधीन..."</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"फिंगरप्रिन्ट अनलक फेरि सेटअप गर्नुहोस्"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> अब पहिचान गर्न सकिँदैन।"</string>

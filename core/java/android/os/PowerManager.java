@@ -517,9 +517,15 @@ public final class PowerManager {
     public static final int GO_TO_SLEEP_REASON_DEVICE_FOLD = 13;
 
     /**
+     * Go to sleep reason code: reason unknown.
      * @hide
      */
-    public static final int GO_TO_SLEEP_REASON_MAX =  GO_TO_SLEEP_REASON_DEVICE_FOLD;
+    public static final int GO_TO_SLEEP_REASON_UNKNOWN = 14;
+
+    /**
+     * @hide
+     */
+    public static final int GO_TO_SLEEP_REASON_MAX =  GO_TO_SLEEP_REASON_UNKNOWN;
 
     /**
      * @hide
@@ -540,6 +546,7 @@ public final class PowerManager {
             case GO_TO_SLEEP_REASON_QUIESCENT: return "quiescent";
             case GO_TO_SLEEP_REASON_SLEEP_BUTTON: return "sleep_button";
             case GO_TO_SLEEP_REASON_TIMEOUT: return "timeout";
+            case GO_TO_SLEEP_REASON_UNKNOWN: return "unknown";
             default: return Integer.toString(sleepReason);
         }
     }
@@ -635,6 +642,7 @@ public final class PowerManager {
             GO_TO_SLEEP_REASON_QUIESCENT,
             GO_TO_SLEEP_REASON_SLEEP_BUTTON,
             GO_TO_SLEEP_REASON_TIMEOUT,
+            GO_TO_SLEEP_REASON_UNKNOWN,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface GoToSleepReason{}

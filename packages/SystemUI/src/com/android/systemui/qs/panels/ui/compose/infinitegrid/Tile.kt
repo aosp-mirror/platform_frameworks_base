@@ -21,6 +21,7 @@ package com.android.systemui.qs.panels.ui.compose.infinitegrid
 import android.content.res.Resources
 import android.service.quicksettings.Tile.STATE_ACTIVE
 import android.service.quicksettings.Tile.STATE_INACTIVE
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
@@ -61,6 +62,7 @@ import androidx.compose.ui.semantics.toggleableState
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.compose.animation.Expandable
 import com.android.compose.animation.bounceable
 import com.android.compose.modifiers.thenIf
@@ -74,6 +76,7 @@ import com.android.systemui.lifecycle.rememberViewModel
 import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.qs.panels.ui.compose.BounceableInfo
 import com.android.systemui.qs.panels.ui.compose.infinitegrid.CommonTileDefaults.InactiveCornerRadius
+import com.android.systemui.qs.panels.ui.compose.infinitegrid.CommonTileDefaults.TileHeight
 import com.android.systemui.qs.panels.ui.compose.infinitegrid.CommonTileDefaults.longPressLabel
 import com.android.systemui.qs.panels.ui.viewmodel.TileUiState
 import com.android.systemui.qs.panels.ui.viewmodel.TileViewModel
@@ -82,7 +85,6 @@ import com.android.systemui.qs.tileimpl.QSTileImpl
 import com.android.systemui.res.R
 import java.util.function.Supplier
 import kotlinx.coroutines.CoroutineScope
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 private const val TEST_TAG_SMALL = "qs_tile_small"
 private const val TEST_TAG_LARGE = "qs_tile_large"
@@ -128,14 +130,18 @@ fun Tile(
 
     // TODO(b/361789146): Draw the shapes instead of clipping
     val tileShape = TileDefaults.animateTileShape(uiState.state)
-
-    TileExpandable(
-        color =
+    val animatedColor by
+        animateColorAsState(
             if (iconOnly || !uiState.handlesSecondaryClick) {
                 colors.iconBackground
             } else {
                 colors.background
             },
+            label = "QSTileBackgroundColor",
+        )
+
+    TileExpandable(
+        color = { animatedColor },
         shape = tileShape,
         squishiness = squishiness,
         hapticsViewModel = hapticsViewModel,
@@ -212,7 +218,7 @@ fun Tile(
 
 @Composable
 private fun TileExpandable(
-    color: Color,
+    color: () -> Color,
     shape: Shape,
     squishiness: () -> Float,
     hapticsViewModel: TileHapticsViewModel?,
@@ -220,7 +226,7 @@ private fun TileExpandable(
     content: @Composable (Expandable) -> Unit,
 ) {
     Expandable(
-        color = color,
+        color = color(),
         shape = shape,
         modifier = modifier.clip(shape).verticalSquish(squishiness),
     ) {
@@ -238,7 +244,7 @@ fun TileContainer(
 ) {
     Box(
         modifier =
-            Modifier.height(CommonTileDefaults.TileHeight)
+            Modifier.height(TileHeight)
                 .fillMaxWidth()
                 .tileCombinedClickable(
                     onClick = onClick,
@@ -336,6 +342,16 @@ private object TileDefaults {
         )
 
     @Composable
+    fun inactiveDualTargetTileColors(): TileColors =
+        TileColors(
+            background = MaterialTheme.colorScheme.surfaceVariant,
+            iconBackground = MaterialTheme.colorScheme.surfaceContainerHighest,
+            label = MaterialTheme.colorScheme.onSurfaceVariant,
+            secondaryLabel = MaterialTheme.colorScheme.onSurfaceVariant,
+            icon = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+
+    @Composable
     fun inactiveTileColors(): TileColors =
         TileColors(
             background = MaterialTheme.colorScheme.surfaceVariant,
@@ -365,7 +381,13 @@ private object TileDefaults {
                     activeTileColors()
                 }
             }
-            STATE_INACTIVE -> inactiveTileColors()
+            STATE_INACTIVE -> {
+                if (uiState.handlesSecondaryClick) {
+                    inactiveDualTargetTileColors()
+                } else {
+                    inactiveTileColors()
+                }
+            }
             else -> unavailableTileColors()
         }
     }

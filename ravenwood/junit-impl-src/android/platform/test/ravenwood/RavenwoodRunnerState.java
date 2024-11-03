@@ -20,8 +20,8 @@ import static com.android.ravenwood.common.RavenwoodCommonUtils.ensureIsPublicMe
 import static org.junit.Assert.fail;
 
 import android.annotation.Nullable;
+import android.util.Log;
 
-import com.android.internal.annotations.GuardedBy;
 import com.android.ravenwood.common.RavenwoodRuntimeException;
 
 import org.junit.ClassRule;
@@ -29,9 +29,7 @@ import org.junit.Rule;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 
-import java.io.IOException;
 import java.lang.reflect.Field;
-import java.util.WeakHashMap;
 
 /**
  * Used to store various states associated with the current test runner that's inly needed
@@ -45,10 +43,6 @@ import java.util.WeakHashMap;
 public final class RavenwoodRunnerState {
     private static final String TAG = "RavenwoodRunnerState";
 
-    @GuardedBy("sStates")
-    private static final WeakHashMap<RavenwoodAwareTestRunner, RavenwoodRunnerState> sStates =
-            new WeakHashMap<>();
-
     private final RavenwoodAwareTestRunner mRunner;
 
     /**
@@ -58,35 +52,65 @@ public final class RavenwoodRunnerState {
         mRunner = runner;
     }
 
-    private Description mClassDescription;
+    /**
+     * The RavenwoodConfig used to configure the current Ravenwood environment.
+     * This can either come from mConfig or mRule.
+     */
+    private RavenwoodConfig mCurrentConfig;
+    /**
+     * The RavenwoodConfig declared in the test class
+     */
+    private RavenwoodConfig mConfig;
+    /**
+     * The RavenwoodRule currently in effect, declared in the test class
+     */
+    private RavenwoodRule mRule;
+    private boolean mHasRavenwoodRule;
     private Description mMethodDescription;
 
-    private RavenwoodConfig mCurrentConfig;
-    private RavenwoodRule mCurrentRule;
-    private boolean mHasRavenwoodRule;
-
-    public Description getClassDescription() {
-        return mClassDescription;
+    public RavenwoodConfig getConfig() {
+        return mCurrentConfig;
     }
 
-    public void enterTestClass(Description classDescription) throws IOException {
-        mClassDescription = classDescription;
+    public void enterTestRunner() {
+        Log.i(TAG, "enterTestRunner: " + mRunner);
 
-        mHasRavenwoodRule = hasRavenwoodRule(mRunner.getTestClass().getJavaClass());
-        mCurrentConfig = extractConfiguration(mRunner.getTestClass().getJavaClass());
+        mHasRavenwoodRule = hasRavenwoodRule(mRunner.mTestJavaClass);
+        mConfig = extractConfiguration(mRunner.mTestJavaClass);
+
+        if (mConfig != null) {
+            if (mHasRavenwoodRule) {
+                fail("RavenwoodConfig and RavenwoodRule cannot be used in the same class."
+                        + " Suggest migrating to RavenwoodConfig.");
+            }
+            mCurrentConfig = mConfig;
+        } else if (!mHasRavenwoodRule) {
+            // If no RavenwoodConfig and no RavenwoodRule, use a default config
+            mCurrentConfig = new RavenwoodConfig.Builder().build();
+        }
 
         if (mCurrentConfig != null) {
-            RavenwoodRuntimeEnvironmentController.init(mCurrentConfig);
+            RavenwoodRuntimeEnvironmentController.init(mRunner);
+        }
+    }
+
+    public void enterTestClass() {
+        Log.i(TAG, "enterTestClass: " + mRunner.mTestJavaClass.getName());
+
+        if (mCurrentConfig != null) {
+            RavenwoodRuntimeEnvironmentController.init(mRunner);
         }
     }
 
     public void exitTestClass() {
-        if (mCurrentConfig != null) {
-            try {
+        Log.i(TAG, "exitTestClass: " + mRunner.mTestJavaClass.getName());
+        try {
+            if (mCurrentConfig != null) {
                 RavenwoodRuntimeEnvironmentController.reset();
-            } finally {
-                mClassDescription = null;
             }
+        } finally {
+            mConfig = null;
+            mRule = null;
         }
     }
 
@@ -96,55 +120,40 @@ public final class RavenwoodRunnerState {
 
     public void exitTestMethod() {
         mMethodDescription = null;
+        RavenwoodRuntimeEnvironmentController.reinit();
     }
 
-    public void enterRavenwoodRule(RavenwoodRule rule) throws IOException {
+    public void enterRavenwoodRule(RavenwoodRule rule) {
         if (!mHasRavenwoodRule) {
             fail("If you have a RavenwoodRule in your test, make sure the field type is"
                     + " RavenwoodRule so Ravenwood can detect it.");
         }
-        if (mCurrentConfig != null) {
-            fail("RavenwoodConfig and RavenwoodRule cannot be used in the same class."
-                    + " Suggest migrating to RavenwoodConfig.");
-        }
-        if (mCurrentRule != null) {
+        if (mRule != null) {
             fail("Multiple nesting RavenwoodRule's are detected in the same class,"
                     + " which is not supported.");
         }
-        mCurrentRule = rule;
-        RavenwoodRuntimeEnvironmentController.init(rule.getConfiguration());
+        mRule = rule;
+        if (mCurrentConfig == null) {
+            mCurrentConfig = rule.getConfiguration();
+        }
+        RavenwoodRuntimeEnvironmentController.init(mRunner);
     }
 
     public void exitRavenwoodRule(RavenwoodRule rule) {
-        if (mCurrentRule != rule) {
-            return; // This happens if the rule did _not_ take effect somehow.
+        if (mRule != rule) {
+            fail("RavenwoodRule did not take effect.");
         }
-
-        try {
-            RavenwoodRuntimeEnvironmentController.reset();
-        } finally {
-            mCurrentRule = null;
-        }
+        mRule = null;
     }
 
     /**
      * @return a configuration from a test class, if any.
      */
     @Nullable
-    private RavenwoodConfig extractConfiguration(Class<?> testClass) {
+    private static RavenwoodConfig extractConfiguration(Class<?> testClass) {
         var field = findConfigurationField(testClass);
         if (field == null) {
-            if (mHasRavenwoodRule) {
-                // Should be handled by RavenwoodRule
-                return null;
-            }
-
-            // If no RavenwoodConfig and no RavenwoodRule, return a default config
-            return new RavenwoodConfig.Builder().build();
-        }
-        if (mHasRavenwoodRule) {
-            fail("RavenwoodConfig and RavenwoodRule cannot be used in the same class."
-                    + " Suggest migrating to RavenwoodConfig.");
+            return null;
         }
 
         try {

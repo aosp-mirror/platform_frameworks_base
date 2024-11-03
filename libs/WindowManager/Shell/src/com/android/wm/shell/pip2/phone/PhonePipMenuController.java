@@ -243,7 +243,6 @@ public class PhonePipMenuController implements PipMenuController,
         mSystemWindows.updateViewLayout(mPipMenuView,
                 getPipMenuLayoutParams(mContext, MENU_WINDOW_TITLE, destinationBounds.width(),
                         destinationBounds.height()));
-        updateMenuLayout(destinationBounds);
     }
 
     /**
@@ -569,23 +568,6 @@ public class PhonePipMenuController implements PipMenuController,
         }
     }
 
-    /**
-     * Tell the PIP Menu to recalculate its layout given its current position on the display.
-     */
-    public void updateMenuLayout(Rect bounds) {
-        final boolean isMenuVisible = isMenuVisible();
-        if (DEBUG) {
-            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                    "%s: updateMenuLayout() state=%s"
-                            + " isMenuVisible=%s"
-                            + " callers=\n%s", TAG, mMenuState, isMenuVisible,
-                    Debug.getCallers(5, "    "));
-        }
-        if (isMenuVisible) {
-            mPipMenuView.updateMenuLayout(bounds);
-        }
-    }
-
     @Override
     public void onPipTransitionStateChanged(@PipTransitionState.TransitionState int oldState,
             @PipTransitionState.TransitionState int newState, Bundle extra) {
@@ -597,7 +579,6 @@ public class PhonePipMenuController implements PipMenuController,
                 detach();
                 break;
             case PipTransitionState.CHANGED_PIP_BOUNDS:
-                updateMenuLayout(mPipBoundsState.getBounds());
                 hideMenu();
                 break;
             case PipTransitionState.CHANGING_PIP_BOUNDS:

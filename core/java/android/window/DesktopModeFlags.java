@@ -49,6 +49,7 @@ public enum DesktopModeFlags {
     ENABLE_CAPTION_COMPAT_INSET_FORCE_CONSUMPTION_ALWAYS(
             Flags::enableCaptionCompatInsetForceConsumptionAlways, true),
     ENABLE_CASCADING_WINDOWS(Flags::enableCascadingWindows, true),
+    ENABLE_TILE_RESIZING(Flags::enableTileResizing, true),
     ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY(
             Flags::enableDesktopWindowingWallpaperActivity, true),
     ENABLE_DESKTOP_WINDOWING_MODALS_POLICY(Flags::enableDesktopWindowingModalsPolicy, true),
@@ -69,7 +70,12 @@ public enum DesktopModeFlags {
     ENABLE_DESKTOP_WINDOWING_ENTER_TRANSITIONS(Flags::enableDesktopWindowingTransitions, false),
     ENABLE_DESKTOP_WINDOWING_EXIT_TRANSITIONS(Flags::enableDesktopWindowingExitTransitions, false),
     ENABLE_WINDOWING_TRANSITION_HANDLERS_OBSERVERS(
-            Flags::enableWindowingTransitionHandlersObservers, false);
+            Flags::enableWindowingTransitionHandlersObservers, false),
+    ENABLE_DESKTOP_APP_LAUNCH_ALTTAB_TRANSITIONS(
+            Flags::enableDesktopAppLaunchAlttabTransitions, false),
+    ENABLE_DESKTOP_APP_LAUNCH_TRANSITIONS(
+            Flags::enableDesktopAppLaunchTransitions, false),
+    ENABLE_DESKTOP_WINDOWING_PERSISTENCE(Flags::enableDesktopWindowingPersistence, false);
 
     private static final String TAG = "DesktopModeFlagsUtil";
     // Function called to obtain aconfig flag value.

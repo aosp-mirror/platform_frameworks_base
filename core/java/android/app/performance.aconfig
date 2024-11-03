@@ -7,5 +7,14 @@ flag {
      is_exported: true
      is_fixed_read_only: true
      description: "PropertyInvalidatedCache uses shared memory for nonces."
-     bug: "366552454"
+     bug: "360897450"
+}
+
+flag {
+     namespace: "system_performance"
+     name: "enforce_pic_testmode_protocol"
+     is_exported: true
+     is_fixed_read_only: true
+     description: "Enforce PropertyInvalidatedCache.setTestMode() protocol"
+     bug: "360897450"
 }

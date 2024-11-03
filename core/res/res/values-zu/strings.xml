@@ -331,7 +331,7 @@
     <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"finyelela umculo nomsindo kudivayisi yakho"</string>
     <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Izithombe namavidiyo"</string>
     <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"finyelela izithombe namavidiyo kudivayisi yakho"</string>
-    <string name="permgrouplab_microphone" msgid="2480597427667420076">"I-Microphone"</string>
+    <string name="permgrouplab_microphone" msgid="2480597427667420076">"IMicrophone"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"rekhoda ividiyo"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Umsebenzi womzimba"</string>
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"finyelela kumsebenzi wakho womzimba"</string>
@@ -1943,6 +1943,8 @@
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Kuvaliwe"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g>, <xliff:g id="END">%2$s</xliff:g>"</string>
+    <!-- no translation found for zen_mode_trigger_summary_range_words (7228261413029290750) -->
+    <skip />
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"Noma iyiphi ikhalenda"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> ithulisa eminye imisindo"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"Kukhona inkinga yangaphakathi ngedivayisi yakho, futhi ingase ibe engazinzile kuze kube yilapho usetha kabusha yonke idatha."</string>
@@ -2424,6 +2426,14 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Thumela futhi wamukele imilayezo ngaphandle kwenethiwekhi yeselula noma yeWiFi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Vula Imilayezo"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Indlela esebenza ngayo"</string>
+    <!-- no translation found for satellite_manual_selection_state_popup_title (8545991934926661974) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_message (1928101658551382450) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_ok (2459664752624985095) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_cancel (973605633339469252) -->
+    <skip />
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Ilindile..."</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Setha Ukuvula ngesigxivizo somunwe futhi"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"I-<xliff:g id="FINGERPRINT">%s</xliff:g> angeke isaziwa."</string>

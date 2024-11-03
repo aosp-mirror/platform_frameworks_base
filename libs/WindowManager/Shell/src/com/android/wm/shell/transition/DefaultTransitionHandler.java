@@ -561,13 +561,12 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
 
                 final TransitionInfo.AnimationOptions options;
                 if (Flags.moveAnimationOptionsToChange()) {
-                    options = info.getAnimationOptions();
-                } else {
                     options = change.getAnimationOptions();
+                } else {
+                    options = info.getAnimationOptions();
                 }
                 if (options != null) {
-                    attachThumbnail(animations, onAnimFinish, change, info.getAnimationOptions(),
-                            cornerRadius);
+                    attachThumbnail(animations, onAnimFinish, change, options, cornerRadius);
                 }
             }
         }

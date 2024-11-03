@@ -17,6 +17,7 @@
 package com.android.systemui.screenrecord
 
 import android.content.Intent
+import android.hardware.display.DisplayManager
 import android.os.UserHandle
 import android.testing.TestableLooper
 import android.view.View
@@ -89,6 +90,7 @@ class ScreenRecordPermissionDialogDelegateTest : SysuiTestCase() {
                 mediaProjectionMetricsLogger,
                 systemUIDialogFactory,
                 context,
+                context.getSystemService(DisplayManager::class.java)!!,
             )
         dialog = delegate.createDialog()
     }
@@ -161,7 +163,7 @@ class ScreenRecordPermissionDialogDelegateTest : SysuiTestCase() {
 
         assertExtraPassedToAppSelector(
             extraKey = MediaProjectionAppSelectorActivity.EXTRA_HOST_APP_UID,
-            value = TEST_HOST_UID
+            value = TEST_HOST_UID,
         )
     }
 

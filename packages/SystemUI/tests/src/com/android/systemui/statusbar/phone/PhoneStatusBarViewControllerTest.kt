@@ -40,6 +40,7 @@ import com.android.systemui.flags.Flags
 import com.android.systemui.plugins.fakeDarkIconDispatcher
 import com.android.systemui.res.R
 import com.android.systemui.scene.ui.view.WindowRootView
+import com.android.systemui.shade.LongPressGestureDetector
 import com.android.systemui.shade.ShadeControllerImpl
 import com.android.systemui.shade.ShadeLogger
 import com.android.systemui.shade.ShadeViewController
@@ -97,6 +98,7 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
     @Mock private lateinit var windowRootView: Provider<WindowRootView>
     @Mock private lateinit var shadeLogger: ShadeLogger
     @Mock private lateinit var viewUtil: ViewUtil
+    @Mock private lateinit var longPressGestureDetector: LongPressGestureDetector
     private lateinit var statusBarWindowStateController: StatusBarWindowStateController
 
     private lateinit var view: PhoneStatusBarView
@@ -393,6 +395,7 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
                 shadeControllerImpl,
                 shadeViewController,
                 panelExpansionInteractor,
+                { longPressGestureDetector },
                 windowRootView,
                 shadeLogger,
                 viewUtil,

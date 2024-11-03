@@ -42,6 +42,7 @@ import android.os.BatteryStats;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.ConditionVariable;
 import android.os.DropBoxManager;
 import android.os.FileUtils;
 import android.os.Handler;
@@ -144,7 +145,7 @@ public final class BatteryService extends SystemService {
     private final Handler mHandler;
 
     private final Object mLock = new Object();
-
+    private final ConditionVariable mConditionVariable = new ConditionVariable();
     private HealthInfo mHealthInfo;
     private final HealthInfo mLastHealthInfo = new HealthInfo();
     private boolean mBatteryLevelCritical;
@@ -379,17 +380,10 @@ public final class BatteryService extends SystemService {
         // existing service in a near future. Wait for this.update() to instantiate
         // the initial mHealthInfo.
         long beforeWait = SystemClock.uptimeMillis();
-        synchronized (mLock) {
-            while (mHealthInfo == null) {
-                Slog.i(TAG, "health: Waited " + (SystemClock.uptimeMillis() - beforeWait) +
-                        "ms for callbacks. Waiting another " + HEALTH_HAL_WAIT_MS + " ms...");
-                try {
-                    mLock.wait(HEALTH_HAL_WAIT_MS);
-                } catch (InterruptedException ex) {
-                    Slog.i(TAG, "health: InterruptedException when waiting for update. "
-                        + " Continuing...");
-                }
-            }
+        if (mHealthInfo == null) {
+            Slog.i(TAG, "health: Waited " + (SystemClock.uptimeMillis() - beforeWait)
+                    + "ms for callbacks. Waiting another " + HEALTH_HAL_WAIT_MS + " ms...");
+            mConditionVariable.block(HEALTH_HAL_WAIT_MS);
         }
 
         Slog.i(TAG, "health: Waited " + (SystemClock.uptimeMillis() - beforeWait)
@@ -535,7 +529,7 @@ public final class BatteryService extends SystemService {
                 mHealthInfo = info;
                 // Process the new values.
                 processValuesLocked(false);
-                mLock.notifyAll(); // for any waiters on new info
+                mConditionVariable.open();
             } else {
                 copyV1Battery(mLastHealthInfo, info);
             }
@@ -1117,6 +1111,8 @@ public final class BatteryService extends SystemService {
             getSetOptions += "|current_now|current_average";
         }
         pw.println("  get [-f] [" + getSetOptions + "]");
+        pw.println("    Gets the value of a battery state.");
+        pw.println("    -f: force to get the latest property value.");
         pw.println("  set [-f] [" + getSetOptions + "] <value>");
         pw.println("    Force a battery property value, freezing battery state.");
         pw.println("    -f: force a battery change broadcast be sent, prints new sequence.");
@@ -1163,8 +1159,15 @@ public final class BatteryService extends SystemService {
                 if (key == null) {
                     pw.println("No property specified");
                     return -1;
-
                 }
+
+                // Update the health info.
+                if ((opts & OPTION_FORCE_UPDATE) != 0) {
+                    mConditionVariable.close();
+                    updateHealthInfo();
+                    mConditionVariable.block(HEALTH_HAL_WAIT_MS);
+                }
+
                 switch (key) {
                     case "present":
                         pw.println(mHealthInfo.batteryPresent);
@@ -1192,17 +1195,11 @@ public final class BatteryService extends SystemService {
                         break;
                     case "current_now":
                         if (batteryServiceSupportCurrentAdbCommand()) {
-                            if ((opts & OPTION_FORCE_UPDATE) != 0) {
-                                updateHealthInfo();
-                            }
                             pw.println(mHealthInfo.batteryCurrentMicroamps);
                         }
                         break;
                     case "current_average":
                         if (batteryServiceSupportCurrentAdbCommand()) {
-                            if ((opts & OPTION_FORCE_UPDATE) != 0) {
-                                updateHealthInfo();
-                            }
                             pw.println(mHealthInfo.batteryCurrentAverageMicroamps);
                         }
                         break;

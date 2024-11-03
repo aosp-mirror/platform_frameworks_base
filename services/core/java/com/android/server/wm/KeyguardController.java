@@ -329,7 +329,7 @@ class KeyguardController {
         // If the client has requested to dismiss the keyguard and the Activity has the flag to
         // turn the screen on, wakeup the screen if it's the top Activity.
         if (activityRecord.getTurnScreenOnFlag() && activityRecord.isTopRunningActivity()) {
-            mTaskSupervisor.wakeUp("dismissKeyguard");
+            mTaskSupervisor.wakeUp(activityRecord.getDisplayId(), "dismissKeyguard");
         }
 
         mWindowManager.dismissKeyguard(callback, message);
@@ -765,9 +765,9 @@ class KeyguardController {
             }
 
             if (mTopTurnScreenOnActivity != null
-                    && !mService.mWindowManager.mPowerManager.isInteractive()
+                    && !mService.mWindowManager.mPowerManager.isInteractive(display.getDisplayId())
                     && (mRequestDismissKeyguard || mOccluded)) {
-                controller.mTaskSupervisor.wakeUp("handleTurnScreenOn");
+                controller.mTaskSupervisor.wakeUp(display.getDisplayId(), "handleTurnScreenOn");
                 mTopTurnScreenOnActivity.setCurrentLaunchCanTurnScreenOn(false);
             }
 

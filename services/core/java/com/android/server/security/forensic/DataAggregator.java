@@ -16,6 +16,7 @@
 
 package com.android.server.security.forensic;
 
+import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -38,11 +39,14 @@ public class DataAggregator {
     private final ForensicService mForensicService;
     private final ArrayList<DataSource> mDataSources;
 
+    private Context mContext;
     private List<ForensicEvent> mStoredEvents = new ArrayList<>();
     private ServiceThread mHandlerThread;
     private Handler mHandler;
-    public DataAggregator(ForensicService forensicService) {
+
+    public DataAggregator(Context context, ForensicService forensicService) {
         mForensicService = forensicService;
+        mContext = context;
         mDataSources = new ArrayList<DataSource>();
     }
 
@@ -58,6 +62,8 @@ public class DataAggregator {
      */
     // TODO: Add the corresponding data sources
     public boolean initialize() {
+        SecurityLogSource securityLogSource = new SecurityLogSource(mContext, this);
+        mDataSources.add(securityLogSource);
         return true;
     }
 
@@ -93,6 +99,9 @@ public class DataAggregator {
      */
     public void disable() {
         mHandler.obtainMessage(MSG_DISABLE).sendToTarget();
+        for (DataSource ds : mDataSources) {
+            ds.disable();
+        }
     }
 
     private void onNewSingleData(ForensicEvent event) {

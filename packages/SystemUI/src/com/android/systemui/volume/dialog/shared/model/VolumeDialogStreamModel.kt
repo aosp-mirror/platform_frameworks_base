@@ -16,6 +16,7 @@
 
 package com.android.systemui.volume.dialog.shared.model
 
+import android.content.Context
 import androidx.annotation.StringRes
 import com.android.systemui.plugins.VolumeDialogController
 
@@ -29,7 +30,9 @@ data class VolumeDialogStreamModel(
     val levelMax: Int = 0,
     val muted: Boolean = false,
     val muteSupported: Boolean = false,
+    /** You likely need to use [streamLabel] instead. */
     @StringRes val name: Int = 0,
+    /** You likely need to use [streamLabel] instead. */
     val remoteLabel: String? = null,
     val routedToBluetooth: Boolean = false,
 ) {
@@ -50,4 +53,11 @@ data class VolumeDialogStreamModel(
         remoteLabel = legacyState.remoteLabel,
         routedToBluetooth = legacyState.routedToBluetooth,
     )
+}
+
+fun VolumeDialogStreamModel.streamLabel(context: Context): String {
+    if (remoteLabel != null) {
+        return remoteLabel
+    }
+    return context.resources.getString(name)
 }

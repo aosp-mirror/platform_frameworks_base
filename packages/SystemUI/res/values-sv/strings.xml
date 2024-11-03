@@ -112,6 +112,8 @@
     <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"Vill du spela in det som visas på skärmen?"</string>
     <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"Spela in en app"</string>
     <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"Spela in hela skärmen"</string>
+    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen_for_display (3754611651558838691) -->
+    <skip />
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"När du spelar in hela skärmen spelas allt som visas på skärmen in. Var försiktig med sådant som lösenord, betalningsuppgifter, meddelanden, foton, ljud och video."</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"När du spelar in en app spelas allt som visas eller spelas upp i appen in. Var försiktig med sådant som lösenord, betalningsuppgifter, meddelanden, foton, ljud och video."</string>
     <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"Spela in skärmen"</string>
@@ -136,11 +138,17 @@
     <string name="screenrecord_stop_dialog_message_specific_app" msgid="5995770227684523244">"Du spelar för närvarande in <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="screenrecord_stop_dialog_button" msgid="2883812564938194350">"Sluta spela in"</string>
     <string name="share_to_app_chip_accessibility_label" msgid="4210256229976947065">"Skärmen delas"</string>
+    <!-- no translation found for share_to_app_chip_accessibility_label_generic (5517431657924536133) -->
+    <skip />
     <string name="share_to_app_stop_dialog_title" msgid="9212915050910250438">"Vill du sluta dela skärmen?"</string>
+    <!-- no translation found for share_to_app_stop_dialog_title_generic (9079161538135843648) -->
+    <skip />
     <string name="share_to_app_stop_dialog_message_entire_screen_with_host_app" msgid="522823522115375414">"Du delar för närvarande hela din skärm med <xliff:g id="HOST_APP_NAME">%1$s</xliff:g>"</string>
     <string name="share_to_app_stop_dialog_message_entire_screen" msgid="5090115386271179270">"Du delar för närvarande hela din skärm med en app"</string>
     <string name="share_to_app_stop_dialog_message_single_app_specific" msgid="5923772039347985172">"Du delar för närvarande <xliff:g id="APP_BEING_SHARED_NAME">%1$s</xliff:g>"</string>
     <string name="share_to_app_stop_dialog_message_single_app_generic" msgid="6681016774654578261">"Du delar för närvarande en app"</string>
+    <!-- no translation found for share_to_app_stop_dialog_message_generic (7622174291691249392) -->
+    <skip />
     <string name="share_to_app_stop_dialog_button" msgid="6334056916284230217">"Sluta dela"</string>
     <string name="cast_screen_to_other_device_chip_accessibility_label" msgid="4687917476203009885">"Skärmen castas"</string>
     <string name="cast_to_other_device_stop_dialog_title" msgid="7836517190930357326">"Vill du sluta att casta?"</string>
@@ -515,6 +523,10 @@
     <string name="communal_widget_picker_title" msgid="1953369090475731663">"Widgetar för låsskärm"</string>
     <string name="communal_widget_picker_description" msgid="490515450110487871">"Vem som helst kan se widgetar på din låsskärm, även om surfplattan är låst."</string>
     <string name="accessibility_action_label_unselect_widget" msgid="1041811747619468698">"avmarkera widget"</string>
+    <!-- no translation found for accessibility_action_label_shrink_widget (8259511040536438771) -->
+    <skip />
+    <!-- no translation found for accessibility_action_label_expand_widget (9190524260912211759) -->
+    <skip />
     <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"Widgetar för låsskärm"</string>
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"Du måste verifiera din identitet innan du öppnar en app med en widget. Tänk också på att alla kan se dem, även när surfplattan är låst. Vissa widgetar kanske inte är avsedda för låsskärmen och det kan vara osäkert att lägga till dem här."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"OK"</string>
@@ -571,6 +583,10 @@
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Rensa alla"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Hantera"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Historik"</string>
+    <!-- no translation found for notification_settings_button_description (2441994740884163889) -->
+    <skip />
+    <!-- no translation found for notification_history_button_description (1578657591405033383) -->
+    <skip />
     <string name="notification_section_header_incoming" msgid="850925217908095197">"Ny"</string>
     <string name="notification_section_header_gentle" msgid="6804099527336337197">"Ljudlöst"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Aviseringar"</string>
@@ -855,7 +871,7 @@
     <string name="system_multitasking_rhs" msgid="8714224917276297810">"Anänd delad skärm med den aktuella appen till höger"</string>
     <string name="system_multitasking_lhs" msgid="8402954791206308783">"Använd delad skärm med den aktuella appen till vänster"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"Byt mellan delad skärm och helskärm"</string>
-    <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Byt till appen till vänster eller nedanför när du använder delad skärm"</string>
+    <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Byt till appen till höger eller nedanför när du använder delad skärm"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"Byt till appen till vänster eller ovanför när du använder delad skärm"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"Med delad skärm: ersätt en app med en annan"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Inmatning"</string>
@@ -1399,14 +1415,19 @@
     <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"Aktuell app"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Tillgänglighet"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Kortkommandon"</string>
+    <!-- no translation found for shortcut_helper_customize_mode_title (1467657117101096033) -->
+    <skip />
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Sökgenvägar"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"Inga sökresultat"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Ikonen Komprimera"</string>
+    <!-- no translation found for shortcut_helper_customize_button_text (3124983502748069338) -->
+    <skip />
+    <!-- no translation found for shortcut_helper_done_button_text (7249905942125386191) -->
+    <skip />
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Ikonen Utöka"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"eller"</string>
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"Handtag"</string>
-    <!-- no translation found for shortcut_helper_keyboard_settings_buttons_label (6720967595915985259) -->
-    <skip />
+    <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"Tangentbordsinställningar"</string>
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"Navigera med tangentbordet"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"Lär dig kortkommandon"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"Navigera med styrplattan"</string>
@@ -1464,8 +1485,6 @@
     <string name="qs_edit_mode_category_providedByApps" msgid="8346112074897919019">"Tillhandahålls av appar"</string>
     <string name="qs_edit_mode_category_display" msgid="4749511439121053942">"Skärm"</string>
     <string name="qs_edit_mode_category_unknown" msgid="509314252124053550">"Okänt"</string>
-    <!-- no translation found for qs_edit_mode_reset_dialog_title (8841270491554460726) -->
-    <skip />
-    <!-- no translation found for qs_edit_mode_reset_dialog_content (8626426097929954027) -->
-    <skip />
+    <string name="qs_edit_mode_reset_dialog_title" msgid="8841270491554460726">"Återställ rutor"</string>
+    <string name="qs_edit_mode_reset_dialog_content" msgid="8626426097929954027">"Vill du återställa rutorna till den ursprungliga ordningen och storleken?"</string>
 </resources>

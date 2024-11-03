@@ -60,7 +60,6 @@ import static android.app.ProcessMemoryState.HOSTING_COMPONENT_TYPE_BACKUP;
 import static android.app.ProcessMemoryState.HOSTING_COMPONENT_TYPE_INSTRUMENTATION;
 import static android.app.ProcessMemoryState.HOSTING_COMPONENT_TYPE_PERSISTENT;
 import static android.app.ProcessMemoryState.HOSTING_COMPONENT_TYPE_SYSTEM;
-import static android.content.Intent.isPreventIntentRedirectEnabled;
 import static android.content.pm.ApplicationInfo.HIDDEN_API_ENFORCEMENT_DEFAULT;
 import static android.content.pm.PackageManager.GET_SHARED_LIBRARY_FILES;
 import static android.content.pm.PackageManager.MATCH_ALL;
@@ -131,9 +130,11 @@ import static android.os.Process.setThreadScheduler;
 import static android.provider.Settings.Global.ALWAYS_FINISH_ACTIVITIES;
 import static android.provider.Settings.Global.DEBUG_APP;
 import static android.provider.Settings.Global.WAIT_FOR_DEBUGGER;
+import static android.security.Flags.preventIntentRedirect;
 import static android.util.FeatureFlagUtils.SETTINGS_ENABLE_MONITOR_PHANTOM_PROCS;
 import static android.view.Display.INVALID_DISPLAY;
 
+import static com.android.internal.util.FrameworkStatsLog.INTENT_CREATOR_TOKEN_ADDED;
 import static com.android.internal.util.FrameworkStatsLog.UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__NEW_MUTABLE_IMPLICIT_PENDING_INTENT_RETRIEVED;
 import static com.android.sdksandbox.flags.Flags.sdkSandboxInstrumentationInfo;
 import static com.android.server.am.ActiveServices.FGS_SAW_RESTRICTIONS;
@@ -2794,9 +2795,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 addServiceToMap(mAppBindArgs, Context.POWER_SERVICE);
                 addServiceToMap(mAppBindArgs, "mount");
                 addServiceToMap(mAppBindArgs, Context.PLATFORM_COMPAT_SERVICE);
-                addServiceToMap(mAppBindArgs, "permissionmgr");
-                addServiceToMap(mAppBindArgs, Context.APP_OPS_SERVICE);
-                addServiceToMap(mAppBindArgs, Context.USER_SERVICE);
             }
             // See b/79378449
             // Getting the window service and package service binder from servicemanager
@@ -2804,6 +2802,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             // TODO: remove exception
             addServiceToMap(mAppBindArgs, "package");
             addServiceToMap(mAppBindArgs, Context.WINDOW_SERVICE);
+            addServiceToMap(mAppBindArgs, Context.USER_SERVICE);
+            addServiceToMap(mAppBindArgs, "permissionmgr");
+            addServiceToMap(mAppBindArgs, Context.APP_OPS_SERVICE);
         }
         return mAppBindArgs;
     }
@@ -14300,6 +14301,10 @@ public class ActivityManagerService extends IActivityManager.Stub
         mBroadcastController.unregisterReceiver(receiver);
     }
 
+    public List<IntentFilter> getRegisteredIntentFilters(IIntentReceiver receiver) {
+        return mBroadcastController.getRegisteredIntentFilters(receiver);
+    }
+
     @GuardedBy("this")
     final int broadcastIntentLocked(ProcessRecord callerApp,
             String callerPackage, String callerFeatureId, Intent intent, String resolvedType,
@@ -19280,7 +19285,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      * @hide
      */
     public void addCreatorToken(@Nullable Intent intent, String creatorPackage) {
-        if (!isPreventIntentRedirectEnabled()) return;
+        if (!preventIntentRedirect()) return;
 
         if (intent == null || intent.getExtraIntentKeys() == null) return;
         for (String key : intent.getExtraIntentKeys()) {
@@ -19291,12 +19296,14 @@ public class ActivityManagerService extends IActivityManager.Stub
                             + "} does not correspond to an intent in the extra bundle.");
                     continue;
                 }
-                Slog.wtf(TAG,
-                        "A creator token is added to an intent. creatorPackage: " + creatorPackage
-                                + "; intent: " + intent);
-                IBinder creatorToken = createIntentCreatorToken(extraIntent, creatorPackage);
+                IntentCreatorToken creatorToken = createIntentCreatorToken(extraIntent,
+                        creatorPackage);
                 if (creatorToken != null) {
                     extraIntent.setCreatorToken(creatorToken);
+                    Slog.wtf(TAG, "A creator token is added to an intent. creatorPackage: "
+                            + creatorPackage + "; intent: " + intent);
+                    FrameworkStatsLog.write(INTENT_CREATOR_TOKEN_ADDED,
+                            creatorToken.getCreatorUid());
                 }
             } catch (Exception e) {
                 Slog.wtf(TAG,
@@ -19307,7 +19314,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
-    private IBinder createIntentCreatorToken(Intent intent, String creatorPackage) {
+    private IntentCreatorToken createIntentCreatorToken(Intent intent, String creatorPackage) {
         if (IntentCreatorToken.isValid(intent)) return null;
         int creatorUid = getCallingUid();
         IntentCreatorToken.Key key = new IntentCreatorToken.Key(creatorUid, creatorPackage, intent);

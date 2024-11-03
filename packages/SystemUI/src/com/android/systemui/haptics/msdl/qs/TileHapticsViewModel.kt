@@ -38,7 +38,7 @@ import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.transform
 
-/** A view-model to trigger haptics feedback on Quick Settings tiles */
+/** A view-model to trigger haptic feedback on Quick Settings tiles */
 @OptIn(ExperimentalCoroutinesApi::class)
 class TileHapticsViewModel
 @AssistedInject
@@ -149,7 +149,7 @@ constructor(
             onActivityLaunchTransitionEnd = ::onActivityLaunchTransitionEnd,
         )
 
-    /** Models the state of toggle haptics to play */
+    /** Models the state of haptics to play */
     enum class TileHapticsState {
         TOGGLE_ON,
         TOGGLE_OFF,

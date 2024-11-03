@@ -40,8 +40,18 @@ class FakeCommunalWidgetRepository(private val coroutineScope: CoroutineScope) :
     ) {
         coroutineScope.launch {
             val id = nextWidgetId++
-            val providerInfo = AppWidgetProviderInfo().apply { this.provider = provider }
-            val configured = configurator?.configureWidget(id) ?: true
+            val providerInfo = createAppWidgetProviderInfo(provider, user.identifier)
+
+            fakeDatabase[id] =
+                CommunalWidgetContentModel.Available(
+                    appWidgetId = id,
+                    rank = rank ?: 0,
+                    providerInfo = providerInfo,
+                    spanY = 3,
+                )
+            updateListFromDatabase()
+
+            val configured = configurator?.configureWidget(id) != false
             if (configured) {
                 onConfigured(id, providerInfo, rank ?: -1)
             }
@@ -61,20 +71,15 @@ class FakeCommunalWidgetRepository(private val coroutineScope: CoroutineScope) :
                 appWidgetId = appWidgetId,
                 rank = rank,
                 providerInfo =
-                    AppWidgetProviderInfo().apply {
-                        provider = ComponentName.unflattenFromString(componentName)!!
-                        widgetCategory = category
-                        providerInfo =
-                            ActivityInfo().apply {
-                                applicationInfo =
-                                    ApplicationInfo().apply {
-                                        uid = userId * UserHandle.PER_USER_RANGE
-                                    }
-                            }
-                    },
+                    createAppWidgetProviderInfo(
+                        ComponentName.unflattenFromString(componentName)!!,
+                        userId,
+                        category,
+                    ),
                 spanY = spanY,
             )
         updateListFromDatabase()
+        nextWidgetId = appWidgetId + 1
     }
 
     fun addPendingWidget(
@@ -150,5 +155,21 @@ class FakeCommunalWidgetRepository(private val coroutineScope: CoroutineScope) :
                 spanY = CommunalContentSize.HALF.span,
             )
         updateListFromDatabase()
+    }
+
+    private fun createAppWidgetProviderInfo(
+        componentName: ComponentName,
+        userId: Int,
+        category: Int = AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD,
+    ): AppWidgetProviderInfo {
+        return AppWidgetProviderInfo().apply {
+            provider = componentName
+            widgetCategory = category
+            providerInfo =
+                ActivityInfo().apply {
+                    applicationInfo =
+                        ApplicationInfo().apply { uid = userId * UserHandle.PER_USER_RANGE }
+                }
+        }
     }
 }

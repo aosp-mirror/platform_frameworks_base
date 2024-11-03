@@ -66,6 +66,16 @@ flag {
 }
 
 flag {
+  name: "modes_multiuser"
+  namespace: "systemui"
+  description: "Fixes for modes (and DND/Zen in general) when callers are not the current user"
+  bug: "323163267"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
   name: "api_tvextender"
   is_exported: true
   namespace: "systemui"

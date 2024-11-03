@@ -109,6 +109,14 @@ public final class KeyGestureEvent {
     public static final int KEY_GESTURE_TYPE_CLOSE_ALL_DIALOGS = 61;
     public static final int KEY_GESTURE_TYPE_MOVE_TO_NEXT_DISPLAY = 62;
     public static final int KEY_GESTURE_TYPE_TOGGLE_TALKBACK = 63;
+    public static final int KEY_GESTURE_TYPE_TOGGLE_STICKY_KEYS = 64;
+    public static final int KEY_GESTURE_TYPE_TOGGLE_BOUNCE_KEYS = 65;
+    public static final int KEY_GESTURE_TYPE_TOGGLE_SLOW_KEYS = 66;
+    public static final int KEY_GESTURE_TYPE_TOGGLE_MOUSE_KEYS = 67;
+    public static final int KEY_GESTURE_TYPE_SNAP_LEFT_FREEFORM_WINDOW = 68;
+    public static final int KEY_GESTURE_TYPE_SNAP_RIGHT_FREEFORM_WINDOW = 69;
+    public static final int KEY_GESTURE_TYPE_MAXIMIZE_FREEFORM_WINDOW = 70;
+    public static final int KEY_GESTURE_TYPE_RESTORE_FREEFORM_WINDOW_SIZE = 71;
 
     public static final int FLAG_CANCELLED = 1;
 
@@ -187,6 +195,14 @@ public final class KeyGestureEvent {
             KEY_GESTURE_TYPE_CLOSE_ALL_DIALOGS,
             KEY_GESTURE_TYPE_MOVE_TO_NEXT_DISPLAY,
             KEY_GESTURE_TYPE_TOGGLE_TALKBACK,
+            KEY_GESTURE_TYPE_TOGGLE_STICKY_KEYS,
+            KEY_GESTURE_TYPE_TOGGLE_BOUNCE_KEYS,
+            KEY_GESTURE_TYPE_TOGGLE_SLOW_KEYS,
+            KEY_GESTURE_TYPE_TOGGLE_MOUSE_KEYS,
+            KEY_GESTURE_TYPE_SNAP_LEFT_FREEFORM_WINDOW,
+            KEY_GESTURE_TYPE_SNAP_RIGHT_FREEFORM_WINDOW,
+            KEY_GESTURE_TYPE_MAXIMIZE_FREEFORM_WINDOW,
+            KEY_GESTURE_TYPE_RESTORE_FREEFORM_WINDOW_SIZE,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface KeyGestureType {
@@ -533,6 +549,14 @@ public final class KeyGestureEvent {
                 return FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__DESKTOP_MODE;
             case KEY_GESTURE_TYPE_MULTI_WINDOW_NAVIGATION:
                 return FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__MULTI_WINDOW_NAVIGATION;
+            case KEY_GESTURE_TYPE_SNAP_LEFT_FREEFORM_WINDOW:
+                return FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__SNAP_LEFT_FREEFORM_WINDOW;
+            case KEY_GESTURE_TYPE_SNAP_RIGHT_FREEFORM_WINDOW:
+                return FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__SNAP_RIGHT_FREEFORM_WINDOW;
+            case KEY_GESTURE_TYPE_MAXIMIZE_FREEFORM_WINDOW:
+                return FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__MAXIMIZE_FREEFORM_WINDOW;
+            case KEY_GESTURE_TYPE_RESTORE_FREEFORM_WINDOW_SIZE:
+                return FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__RESTORE_FREEFORM_WINDOW_SIZE;
             default:
                 return LOG_EVENT_UNSPECIFIED;
         }
@@ -733,6 +757,22 @@ public final class KeyGestureEvent {
                 return "KEY_GESTURE_TYPE_CLOSE_ALL_DIALOGS";
             case KEY_GESTURE_TYPE_TOGGLE_TALKBACK:
                 return "KEY_GESTURE_TYPE_TOGGLE_TALKBACK";
+            case KEY_GESTURE_TYPE_TOGGLE_STICKY_KEYS:
+                return "KEY_GESTURE_TYPE_TOGGLE_STICKY_KEYS";
+            case KEY_GESTURE_TYPE_TOGGLE_BOUNCE_KEYS:
+                return "KEY_GESTURE_TYPE_TOGGLE_BOUNCE_KEYS";
+            case KEY_GESTURE_TYPE_TOGGLE_SLOW_KEYS:
+                return "KEY_GESTURE_TYPE_TOGGLE_SLOW_KEYS";
+            case KEY_GESTURE_TYPE_TOGGLE_MOUSE_KEYS:
+                return "KEY_GESTURE_TYPE_TOGGLE_MOUSE_KEYS";
+            case KEY_GESTURE_TYPE_SNAP_LEFT_FREEFORM_WINDOW:
+                return "KEY_GESTURE_TYPE_SNAP_LEFT_FREEFORM_WINDOW";
+            case KEY_GESTURE_TYPE_SNAP_RIGHT_FREEFORM_WINDOW:
+                return "KEY_GESTURE_TYPE_SNAP_RIGHT_FREEFORM_WINDOW";
+            case KEY_GESTURE_TYPE_MAXIMIZE_FREEFORM_WINDOW:
+                return "KEY_GESTURE_TYPE_SNAP_RIGHT_FREEFORM_WINDOW";
+            case KEY_GESTURE_TYPE_RESTORE_FREEFORM_WINDOW_SIZE:
+                return "KEY_GESTURE_TYPE_RESTORE_FREEFORM_WINDOW_SIZE";
             default:
                 return Integer.toHexString(value);
         }

@@ -164,9 +164,11 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.power.domain.interactor.PowerInteractor;
 import com.android.systemui.power.shared.model.WakefulnessModel;
+import com.android.systemui.qs.flags.QSComposeFragment;
 import com.android.systemui.res.R;
 import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.scene.shared.model.Scenes;
+import com.android.systemui.settings.brightness.domain.interactor.BrightnessMirrorShowingInteractor;
 import com.android.systemui.shade.data.repository.FlingInfo;
 import com.android.systemui.shade.data.repository.ShadeRepository;
 import com.android.systemui.shade.domain.interactor.ShadeAnimationInteractor;
@@ -363,6 +365,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     private final TouchHandler mTouchHandler = new TouchHandler();
 
     private long mDownTime;
+    private long mStatusBarLongPressDowntime;
     private boolean mTouchSlopExceededBeforeDown;
     private float mOverExpansion;
     private CentralSurfaces mCentralSurfaces;
@@ -664,6 +667,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             };
 
     private final ActivityStarter mActivityStarter;
+    private final BrightnessMirrorShowingInteractor mBrightnessMirrorShowingInteractor;
 
     @Inject
     public NotificationPanelViewController(NotificationPanelView view,
@@ -757,7 +761,8 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             PowerInteractor powerInteractor,
             KeyguardClockPositionAlgorithm keyguardClockPositionAlgorithm,
             NaturalScrollingSettingObserver naturalScrollingSettingObserver,
-            MSDLPlayer msdlPlayer) {
+            MSDLPlayer msdlPlayer,
+            BrightnessMirrorShowingInteractor brightnessMirrorShowingInteractor) {
         SceneContainerFlag.assertInLegacyMode();
         keyguardStateController.addCallback(new KeyguardStateController.Callback() {
             @Override
@@ -944,6 +949,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                 },
                 mFalsingManager);
         mActivityStarter = activityStarter;
+        mBrightnessMirrorShowingInteractor = brightnessMirrorShowingInteractor;
         onFinishInflate();
         keyguardUnlockAnimationController.addKeyguardUnlockAnimationListener(
                 new KeyguardUnlockAnimationController.KeyguardUnlockAnimationListener() {
@@ -1185,6 +1191,12 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                     }
                 },
                 mMainDispatcher);
+        if (QSComposeFragment.isEnabled()) {
+            collectFlow(mView,
+                    mBrightnessMirrorShowingInteractor.isShowing(),
+                    isShowing -> setAlpha(isShowing ? 0 : 255, true)
+            );
+        }
     }
 
     @VisibleForTesting
@@ -3087,6 +3099,25 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         }
     }
 
+    /** @deprecated Temporary a11y solution until dual shade launch b/371224114 */
+    @Override
+    @Deprecated
+    public void onStatusBarLongPress(MotionEvent event) {
+        mShadeLog.d("Status Bar was long pressed.");
+        ShadeExpandsOnStatusBarLongPress.assertInNewMode();
+        mStatusBarLongPressDowntime = event.getDownTime();
+        if (isTracking()) {
+            onTrackingStopped(true);
+        }
+        if (isExpanded() && !mQsController.getExpanded()) {
+            mShadeLog.d("Status Bar was long pressed. Expanding to QS.");
+            expandToQs();
+        } else {
+            mShadeLog.d("Status Bar was long pressed. Expanding to Notifications.");
+            expandToNotifications();
+        }
+    }
+
     @Override
     public int getBarState() {
         return mBarState;
@@ -3750,6 +3781,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     private void endMotionEvent(MotionEvent event, float x, float y, boolean forceCancel) {
         mShadeLog.logEndMotionEvent("endMotionEvent called", forceCancel, false);
         mTrackingPointer = -1;
+        mStatusBarLongPressDowntime = 0L;
         mAmbientState.setSwipingUp(false);
         if ((isTracking() && mTouchSlopExceeded) || Math.abs(x - mInitialExpandX) > mTouchSlop
                 || Math.abs(y - mInitialExpandY) > mTouchSlop
@@ -5066,6 +5098,13 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                 }
                 return true;
             }
+            // This touch session has already resulted in shade expansion. Ignore everything else.
+            if (ShadeExpandsOnStatusBarLongPress.isEnabled()
+                    && event.getActionMasked() != MotionEvent.ACTION_DOWN
+                    && event.getDownTime() == mStatusBarLongPressDowntime) {
+                mShadeLog.d("Touch has same down time as Status Bar long press. Ignoring.");
+                return false;
+            }
             if (event.getActionMasked() == MotionEvent.ACTION_DOWN && isFullyCollapsed()) {
                 mMetricsLogger.count(COUNTER_PANEL_OPEN, 1);
                 handled = true;
@@ -5146,6 +5185,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                     mUpdateFlingOnLayout = false;
                     mMotionAborted = false;
                     mDownTime = mSystemClock.uptimeMillis();
+                    mStatusBarLongPressDowntime = 0L;
                     mTouchAboveFalsingThreshold = false;
                     mCollapsedAndHeadsUpOnDown =
                             isFullyCollapsed() && mHeadsUpManager.hasPinnedHeadsUp();
