@@ -50,6 +50,9 @@ public final class MediaQualityManager {
     private final List<PictureProfileCallbackRecord> mPpCallbackRecords = new ArrayList<>();
     // @GuardedBy("mLock")
     private final List<SoundProfileCallbackRecord> mSpCallbackRecords = new ArrayList<>();
+    // @GuardedBy("mLock")
+    private final List<AmbientBacklightCallbackRecord> mAbCallbackRecords = new ArrayList<>();
+
 
     /**
      * @hide
@@ -115,10 +118,22 @@ public final class MediaQualityManager {
                 }
             }
         };
+        IAmbientBacklightCallback abCallback = new IAmbientBacklightCallback.Stub() {
+            @Override
+            public void onAmbientBacklightEvent(AmbientBacklightEvent event) {
+                synchronized (mLock) {
+                    for (AmbientBacklightCallbackRecord record : mAbCallbackRecords) {
+                        record.postAmbientBacklightEvent(event);
+                    }
+                }
+            }
+        };
+
         try {
             if (mService != null) {
                 mService.registerPictureProfileCallback(ppCallback);
                 mService.registerSoundProfileCallback(spCallback);
+                mService.registerAmbientBacklightCallback(abCallback);
             }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -455,6 +470,68 @@ public final class MediaQualityManager {
         }
     }
 
+    /**
+     * Registers a {@link AmbientBacklightCallback}.
+     * @hide
+     */
+    public void registerAmbientBacklightCallback(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull AmbientBacklightCallback callback) {
+        Preconditions.checkNotNull(callback);
+        Preconditions.checkNotNull(executor);
+        synchronized (mLock) {
+            mAbCallbackRecords.add(new AmbientBacklightCallbackRecord(callback, executor));
+        }
+    }
+
+    /**
+     * Unregisters the existing {@link AmbientBacklightCallback}.
+     * @hide
+     */
+    public void unregisterAmbientBacklightCallback(
+            @NonNull final AmbientBacklightCallback callback) {
+        Preconditions.checkNotNull(callback);
+        synchronized (mLock) {
+            for (Iterator<AmbientBacklightCallbackRecord> it = mAbCallbackRecords.iterator();
+                    it.hasNext(); ) {
+                AmbientBacklightCallbackRecord record = it.next();
+                if (record.getCallback() == callback) {
+                    it.remove();
+                    break;
+                }
+            }
+        }
+    }
+
+    /**
+     * Set the ambient backlight settings.
+     *
+     * @param settings The settings to use for the backlight detector.
+     */
+    public void setAmbientBacklightSettings(
+            @NonNull AmbientBacklightSettings settings) {
+        Preconditions.checkNotNull(settings);
+        try {
+            mService.setAmbientBacklightSettings(settings);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Enables or disables the ambient backlight detection.
+     *
+     * @param enabled {@code true} to enable, {@code false} to disable.
+     */
+    public void setAmbientBacklightEnabled(boolean enabled) {
+        try {
+            mService.setAmbientBacklightEnabled(enabled);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+
     private static final class PictureProfileCallbackRecord {
         private final PictureProfileCallback mCallback;
         private final Executor mExecutor;
@@ -539,6 +616,29 @@ public final class MediaQualityManager {
         }
     }
 
+    private static final class AmbientBacklightCallbackRecord {
+        private final AmbientBacklightCallback mCallback;
+        private final Executor mExecutor;
+
+        AmbientBacklightCallbackRecord(AmbientBacklightCallback callback, Executor executor) {
+            mCallback = callback;
+            mExecutor = executor;
+        }
+
+        public AmbientBacklightCallback getCallback() {
+            return mCallback;
+        }
+
+        public void postAmbientBacklightEvent(AmbientBacklightEvent event) {
+            mExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    mCallback.onAmbientBacklightEvent(event);
+                }
+            });
+        }
+    }
+
     /**
      * Callback used to monitor status of picture profiles.
      * @hide
@@ -590,6 +690,18 @@ public final class MediaQualityManager {
          * @hide
          */
         public void onError(int errorCode) {
+        }
+    }
+
+    /**
+     * Callback used to monitor status of ambient backlight.
+     * @hide
+     */
+    public abstract static class AmbientBacklightCallback {
+        /**
+         * Called when new ambient backlight event is emitted.
+         */
+        public void onAmbientBacklightEvent(AmbientBacklightEvent event) {
         }
     }
 }

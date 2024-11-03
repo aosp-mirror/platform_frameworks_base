@@ -17,6 +17,8 @@
 package com.android.server.media.quality;
 
 import android.content.Context;
+import android.media.quality.AmbientBacklightSettings;
+import android.media.quality.IAmbientBacklightCallback;
 import android.media.quality.IMediaQualityManager;
 import android.media.quality.IPictureProfileCallback;
 import android.media.quality.ISoundProfileCallback;
@@ -119,6 +121,17 @@ public class MediaQualityService extends SystemService {
         public void registerSoundProfileCallback(final ISoundProfileCallback callback) {
         }
 
+        @Override
+        public void registerAmbientBacklightCallback(IAmbientBacklightCallback callback) {
+        }
+
+        @Override
+        public void setAmbientBacklightSettings(AmbientBacklightSettings settings) {
+        }
+
+        @Override
+        public void setAmbientBacklightEnabled(boolean enabled) {
+        }
 
         @Override
         public List<ParamCapability> getParamCapabilities(List<String> names) {
