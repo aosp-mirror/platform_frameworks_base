@@ -18,7 +18,10 @@ package com.android.server.media.quality;
 
 import android.content.Context;
 import android.media.quality.IMediaQualityManager;
+import android.media.quality.IPictureProfileCallback;
+import android.media.quality.ISoundProfileCallback;
 import android.media.quality.PictureProfile;
+import android.media.quality.SoundProfile;
 
 import com.android.server.SystemService;
 
@@ -53,6 +56,14 @@ public class MediaQualityService extends SystemService {
             return pp;
         }
         @Override
+        public void updatePictureProfile(long id, PictureProfile pp) {
+            // TODO: implement
+        }
+        @Override
+        public void removePictureProfile(long id) {
+            // TODO: implement
+        }
+        @Override
         public PictureProfile getPictureProfileById(long id) {
             return null;
         }
@@ -65,8 +76,46 @@ public class MediaQualityService extends SystemService {
             return new ArrayList<>();
         }
         @Override
-        public List<PictureProfile> getAvailableAllPictureProfiles() {
+        public List<PictureProfile> getAllPictureProfiles() {
             return new ArrayList<>();
+        }
+
+        @Override
+        public SoundProfile createSoundProfile(SoundProfile pp) {
+            // TODO: implement
+            return pp;
+        }
+        @Override
+        public void updateSoundProfile(long id, SoundProfile pp) {
+            // TODO: implement
+        }
+        @Override
+        public void removeSoundProfile(long id) {
+            // TODO: implement
+        }
+        @Override
+        public SoundProfile getSoundProfileById(long id) {
+            return null;
+        }
+        @Override
+        public List<SoundProfile> getSoundProfilesByPackage(String packageName) {
+            return new ArrayList<>();
+        }
+        @Override
+        public List<SoundProfile> getAvailableSoundProfiles() {
+            return new ArrayList<>();
+        }
+        @Override
+        public List<SoundProfile> getAllSoundProfiles() {
+            return new ArrayList<>();
+        }
+
+
+        @Override
+        public void registerPictureProfileCallback(final IPictureProfileCallback callback) {
+        }
+        @Override
+        public void registerSoundProfileCallback(final ISoundProfileCallback callback) {
         }
     }
 }
