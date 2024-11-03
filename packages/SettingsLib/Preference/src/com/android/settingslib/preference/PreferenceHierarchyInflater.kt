@@ -40,11 +40,11 @@ fun PreferenceGroup.inflatePreferenceHierarchy(
             addPreference(preferenceGroup)
             preferenceGroup.inflatePreferenceHierarchy(preferenceBindingFactory, it)
         } else {
-            preferenceBindingFactory.bind(widget, it, preferenceBinding)
             (metadata as? PersistentPreference<*>)?.storage(context)?.let { storage ->
                 widget.preferenceDataStore =
                     storages.getOrPut(storage) { PreferenceDataStoreAdapter(storage) }
             }
+            preferenceBindingFactory.bind(widget, it, preferenceBinding)
             // MUST add preference after binding for persistent preference to get initial value
             // (preference key is set within bind method)
             addPreference(widget)
