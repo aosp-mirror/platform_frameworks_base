@@ -236,12 +236,12 @@ class PreferenceScreenBindingHelper(
                     preference.bindRecursively(preferenceBindingFactory, preferences, storages)
                 } else {
                     preferences[preference.key]?.let {
-                        preferenceBindingFactory.bind(preference, it)
                         val metadata = it.metadata
                         (metadata as? PersistentPreference<*>)?.storage(context)?.let { storage ->
                             preference.preferenceDataStore =
                                 storages.getOrPut(storage) { PreferenceDataStoreAdapter(storage) }
                         }
+                        preferenceBindingFactory.bind(preference, it)
                     }
                 }
             }
