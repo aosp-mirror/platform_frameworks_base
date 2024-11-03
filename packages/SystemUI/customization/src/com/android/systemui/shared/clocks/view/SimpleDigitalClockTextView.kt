@@ -65,6 +65,9 @@ open class SimpleDigitalClockTextView(
     val lockScreenPaint = TextPaint()
     override lateinit var textStyle: FontTextStyle
     lateinit var aodStyle: FontTextStyle
+
+    private var lsFontVariation = ClockFontAxisSetting.toFVar(DEFAULT_LS_VARIATION)
+    private var aodFontVariation = ClockFontAxisSetting.toFVar(DEFAULT_AOD_VARIATION)
     private val parser = DimensionParser(ctx)
     var maxSingleDigitHeight = -1
     var maxSingleDigitWidth = -1
@@ -142,18 +145,10 @@ open class SimpleDigitalClockTextView(
     }
 
     override fun updateAxes(axes: List<ClockFontAxisSetting>) {
-        val sb = StringBuilder()
-        sb.append("'opsz' 144")
-
-        for (axis in axes) {
-            if (sb.length > 0) sb.append(", ")
-            sb.append("'${axis.key}' ${axis.value.toInt()}")
-        }
-
-        val fvar = sb.toString()
-        lockScreenPaint.typeface = typefaceCache.getTypefaceForVariant(fvar)
+        lsFontVariation = ClockFontAxisSetting.toFVar(axes + OPTICAL_SIZE_AXIS)
+        lockScreenPaint.typeface = typefaceCache.getTypefaceForVariant(lsFontVariation)
         typeface = lockScreenPaint.typeface
-        textAnimator.setTextStyle(fvar = fvar, animate = true)
+        textAnimator.setTextStyle(fvar = lsFontVariation, animate = true)
         measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED)
         recomputeMaxSingleDigitSizes()
         requestLayout()
@@ -287,15 +282,12 @@ open class SimpleDigitalClockTextView(
     }
 
     override fun animateDoze(isDozing: Boolean, isAnimated: Boolean) {
-        if (!this::textAnimator.isInitialized) {
-            return
-        }
-        val fvar = if (isDozing) aodStyle.fontVariation else textStyle.fontVariation
+        if (!this::textAnimator.isInitialized) return
         textAnimator.setTextStyle(
             animate = isAnimated && isAnimationEnabled,
             color = if (isDozing) AOD_COLOR else lockscreenColor,
             textSize = if (isDozing) aodFontSizePx else lockScreenPaint.textSize,
-            fvar = fvar,
+            fvar = if (isDozing) aodFontVariation else lsFontVariation,
             duration = aodStyle.transitionDuration,
             interpolator = aodDozingInterpolator,
         )
@@ -308,14 +300,15 @@ open class SimpleDigitalClockTextView(
             return
         }
         logger.d("animateCharge()")
-        val middleFvar = if (dozeFraction == 0F) aodStyle.fontVariation else textStyle.fontVariation
-        val endFvar = if (dozeFraction == 0F) textStyle.fontVariation else aodStyle.fontVariation
         val startAnimPhase2 = Runnable {
-            textAnimator.setTextStyle(fvar = endFvar, animate = isAnimationEnabled)
+            textAnimator.setTextStyle(
+                fvar = if (dozeFraction == 0F) lsFontVariation else aodFontVariation,
+                animate = isAnimationEnabled,
+            )
             updateTextBoundsForTextAnimator()
         }
         textAnimator.setTextStyle(
-            fvar = middleFvar,
+            fvar = if (dozeFraction == 0F) aodFontVariation else lsFontVariation,
             animate = isAnimationEnabled,
             onAnimationEnd = startAnimPhase2,
         )
@@ -444,7 +437,7 @@ open class SimpleDigitalClockTextView(
         val typefaceName = "fonts/" + textStyle.fontFamily
         setTypefaceCache(assets.typefaceCache.getVariantCache(typefaceName))
         lockScreenPaint.strokeJoin = Paint.Join.ROUND
-        lockScreenPaint.typeface = typefaceCache.getTypefaceForVariant(textStyle.fontVariation)
+        lockScreenPaint.typeface = typefaceCache.getTypefaceForVariant(lsFontVariation)
         textStyle.fontFeatureSettings?.let {
             lockScreenPaint.fontFeatureSettings = it
             fontFeatureSettings = it
@@ -515,7 +508,7 @@ open class SimpleDigitalClockTextView(
             textAnimator.textInterpolator.targetPaint.set(lockScreenPaint)
             textAnimator.textInterpolator.onTargetPaintModified()
             textAnimator.setTextStyle(
-                fvar = textStyle.fontVariation,
+                fvar = lsFontVariation,
                 textSize = lockScreenPaint.textSize,
                 color = lockscreenColor,
                 animate = false,
@@ -555,5 +548,22 @@ open class SimpleDigitalClockTextView(
     companion object {
         val AOD_STROKE_WIDTH = "2dp"
         val AOD_COLOR = Color.WHITE
+        val OPTICAL_SIZE_AXIS = ClockFontAxisSetting("opsz", 144f)
+        val DEFAULT_LS_VARIATION =
+            listOf(
+                OPTICAL_SIZE_AXIS,
+                ClockFontAxisSetting("wght", 400f),
+                ClockFontAxisSetting("wdth", 100f),
+                ClockFontAxisSetting("ROND", 0f),
+                ClockFontAxisSetting("slnt", 0f),
+            )
+        val DEFAULT_AOD_VARIATION =
+            listOf(
+                OPTICAL_SIZE_AXIS,
+                ClockFontAxisSetting("wght", 200f),
+                ClockFontAxisSetting("wdth", 100f),
+                ClockFontAxisSetting("ROND", 0f),
+                ClockFontAxisSetting("slnt", 0f),
+            )
     }
 }

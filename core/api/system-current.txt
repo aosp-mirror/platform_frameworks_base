@@ -15607,9 +15607,9 @@ package android.telephony {
   }
 
   @FlaggedApi("com.android.internal.telephony.flags.emergency_callback_mode_notification") public static interface TelephonyCallback.EmergencyCallbackModeListener {
-    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void onCallbackModeRestarted(int, @NonNull java.time.Duration, int);
-    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void onCallbackModeStarted(int, @NonNull java.time.Duration, int);
-    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void onCallbackModeStopped(int, int, int);
+    method public void onCallbackModeRestarted(int, @NonNull java.time.Duration, int);
+    method public void onCallbackModeStarted(int, @NonNull java.time.Duration, int);
+    method public void onCallbackModeStopped(int, int, int);
   }
 
   public static interface TelephonyCallback.LinkCapacityEstimateChangedListener {

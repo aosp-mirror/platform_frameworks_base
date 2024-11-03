@@ -509,7 +509,6 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             boolean applyStartTransactionOnDraw, boolean shouldSetTaskVisibilityPositionAndCrop,
             boolean hasGlobalFocus) {
         Trace.beginSection("DesktopModeWindowDecoration#updateRelayoutParamsAndSurfaces");
-
         if (Flags.enableDesktopWindowingAppToWeb()) {
             setCapturedLink(taskInfo.capturedLink, taskInfo.capturedLinkTimestamp);
         }
@@ -551,7 +550,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         if (mResult.mRootView == null) {
             // This means something blocks the window decor from showing, e.g. the task is hidden.
             // Nothing is set up in this case including the decoration surface.
-            if (canEnterDesktopMode(mContext) && Flags.enableDesktopWindowingAppHandleEducation()) {
+            if (canEnterDesktopMode(mContext) && isEducationEnabled()) {
                 notifyNoCaptionHandle();
             }
             mExclusionRegionListener.onExclusionRegionDismissed(mTaskInfo.taskId);
@@ -570,7 +569,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         if (isAppHandle(mWindowDecorViewHolder)) {
             position.set(determineHandlePosition());
         }
-        if (canEnterDesktopMode(mContext) && Flags.enableDesktopWindowingAppHandleEducation()) {
+        if (canEnterDesktopMode(mContext) && isEducationEnabled()) {
             notifyCaptionStateChanged();
         }
 
@@ -710,7 +709,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
 
     private void notifyCaptionStateChanged() {
         // TODO: b/366159408 - Ensure bounds sent with notification account for RTL mode.
-        if (!canEnterDesktopMode(mContext) || !Flags.enableDesktopWindowingAppHandleEducation()) {
+        if (!canEnterDesktopMode(mContext) || !isEducationEnabled()) {
             return;
         }
         if (!isCaptionVisible()) {
@@ -719,7 +718,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             // App handle is visible since `mWindowDecorViewHolder` is of type
             // [AppHandleViewHolder].
             final CaptionState captionState = new CaptionState.AppHandle(mTaskInfo,
-                    isHandleMenuActive(), getCurrentAppHandleBounds());
+                    isHandleMenuActive(), getCurrentAppHandleBounds(), isCapturedLinkAvailable());
             mWindowDecorCaptionHandleRepository.notifyCaptionChanged(captionState);
         } else {
             // App header is visible since `mWindowDecorViewHolder` is of type
@@ -732,8 +731,12 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         }
     }
 
+    private boolean isCapturedLinkAvailable() {
+        return mCapturedLink != null && !mCapturedLink.mExpired;
+    }
+
     private void notifyNoCaptionHandle() {
-        if (!canEnterDesktopMode(mContext) || !Flags.enableDesktopWindowingAppHandleEducation()) {
+        if (!canEnterDesktopMode(mContext) || !isEducationEnabled()) {
             return;
         }
         mWindowDecorCaptionHandleRepository.notifyCaptionChanged(
@@ -760,7 +763,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         final CaptionState captionState = new CaptionState.AppHeader(
                 mTaskInfo,
                 isHandleMenuActive(),
-                appChipGlobalPosition);
+                appChipGlobalPosition,
+                isCapturedLinkAvailable());
 
         mWindowDecorCaptionHandleRepository.notifyCaptionChanged(captionState);
     }
@@ -1389,6 +1393,9 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 /* openInBrowserClickListener= */ (intent) -> {
                     mOpenInBrowserClickListener.accept(intent);
                     onCapturedLinkExpired();
+                    if (Flags.enableDesktopWindowingAppToWebEducation()) {
+                        mWindowDecorCaptionHandleRepository.onAppToWebUsage();
+                    }
                     return Unit.INSTANCE;
                 },
                 /* onOpenByDefaultClickListener= */ () -> {
@@ -1407,7 +1414,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 },
                 /* forceShowSystemBars= */ inDesktopImmersive
         );
-        if (canEnterDesktopMode(mContext) && Flags.enableDesktopWindowingAppHandleEducation()) {
+        if (canEnterDesktopMode(mContext) && isEducationEnabled()) {
             notifyCaptionStateChanged();
         }
         mMinimumInstancesFound = false;
@@ -1478,7 +1485,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         mWindowDecorViewHolder.onHandleMenuClosed();
         mHandleMenu.close();
         mHandleMenu = null;
-        if (canEnterDesktopMode(mContext) && Flags.enableDesktopWindowingAppHandleEducation()) {
+        if (canEnterDesktopMode(mContext) && isEducationEnabled()) {
             notifyCaptionStateChanged();
         }
     }
@@ -1633,6 +1640,12 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 && v.getTop() <= y && v.getBottom() >= y;
     }
 
+    /** Returns true if at least one education flag is enabled. */
+    private boolean isEducationEnabled() {
+        return Flags.enableDesktopWindowingAppHandleEducation()
+                || Flags.enableDesktopWindowingAppToWebEducation();
+    }
+
     @Override
     public void close() {
         closeDragResizeListener();
@@ -1642,7 +1655,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         disposeResizeVeil();
         disposeStatusBarInputLayer();
         clearCurrentViewHostRunnable();
-        if (canEnterDesktopMode(mContext) && Flags.enableDesktopWindowingAppHandleEducation()) {
+        if (canEnterDesktopMode(mContext) && isEducationEnabled()) {
             notifyNoCaptionHandle();
         }
         super.close();

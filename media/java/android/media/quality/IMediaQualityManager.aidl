@@ -16,9 +16,16 @@
 
 package android.media.quality;
 
+import android.media.quality.PictureProfile;
+
 /**
  * Interface for Media Quality Manager
  * @hide
  */
 interface IMediaQualityManager {
+    PictureProfile createPictureProfile(in PictureProfile pp);
+    PictureProfile getPictureProfileById(in long id);
+    List<PictureProfile> getPictureProfilesByPackage(in String packageName);
+    List<PictureProfile> getAvailablePictureProfiles();
+    List<PictureProfile> getAvailableAllPictureProfiles();
 }

@@ -3913,6 +3913,17 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     @Override
+    public void setLimitSystemEducationDialogs(
+            IBinder appToken, boolean limitSystemEducationDialogs) {
+        synchronized (mGlobalLock) {
+            final ActivityRecord r = ActivityRecord.isInRootTaskLocked(appToken);
+            if (r != null) {
+                r.setLimitSystemEducationDialogs(limitSystemEducationDialogs);
+            }
+        }
+    }
+
+    @Override
     public boolean updateConfiguration(Configuration values) {
         mAmInternal.enforceCallingPermission(CHANGE_CONFIGURATION, "updateConfiguration()");
 

@@ -28,6 +28,8 @@ message WindowingEducationProto {
   oneof education_data {
     // Fields specific to app handle education
     AppHandleEducation app_handle_education = 3;
+    // Fields specific to App-to-Web education
+    AppToWebEducation app_to_web_education = 4;
   }
 
   message AppHandleEducation {
@@ -35,5 +37,10 @@ message WindowingEducationProto {
     map<string, int32> app_usage_stats = 1;
     // Timestamp of when app_usage_stats was last cached
     optional int64 app_usage_stats_last_update_timestamp_millis = 2;
+  }
+
+  message AppToWebEducation {
+    // Number of times education is shown
+    optional int64 education_shown_count = 1;
   }
 }
