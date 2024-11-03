@@ -170,7 +170,7 @@ java_library {
         "hoststubgen-helper-runtime.ravenwood",
         "mockito-ravenwood-prebuilt",
     ],
-    visibility: ["//frameworks/base"],
+    visibility: [":__subpackages__"],
     jarjar_rules: ":ravenwood-services-jarjar-rules",
 }
 

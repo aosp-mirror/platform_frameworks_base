@@ -670,6 +670,17 @@ public class SystemConfig {
     }
 
     private void readAllPermissions() {
+        readAllPermissionsFromXml();
+        readAllPermissionsFromEnvironment();
+
+        // Apply global feature removal last, after all features have been read.
+        // This only needs to happen once.
+        for (String featureName : mUnavailableFeatures) {
+            removeFeature(featureName);
+        }
+    }
+
+    private void readAllPermissionsFromXml() {
         final XmlPullParser parser = Xml.newPullParser();
 
         // Read configuration from system
@@ -1732,7 +1743,13 @@ public class SystemConfig {
         } finally {
             IoUtils.closeQuietly(permReader);
         }
+    }
 
+    // Add features or permission dependent on global system properties (as
+    // opposed to XML permission files).
+    // This only needs to be called once after all features have been parsed
+    // from various partition/apex sources.
+    private void readAllPermissionsFromEnvironment() {
         // Some devices can be field-converted to FBE, so offer to splice in
         // those features if not already defined by the static config
         if (StorageManager.isFileEncrypted()) {
@@ -1772,10 +1789,6 @@ public class SystemConfig {
             } else if (isKernelVersionAtLeast(4, 19)) {
                 addFeature(PackageManager.FEATURE_EROFS_LEGACY, 0);
             }
-        }
-
-        for (String featureName : mUnavailableFeatures) {
-            removeFeature(featureName);
         }
     }
 

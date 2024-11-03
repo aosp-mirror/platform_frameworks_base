@@ -37,10 +37,7 @@ import org.junit.Test;
  *  atest FrameworksCoreTests:IpcDataCacheTest
  */
 @SmallTest
-@IgnoreUnderRavenwood(blockedBy = IpcDataCache.class)
 public class IpcDataCacheTest {
-    @Rule
-    public final RavenwoodRule mRavenwood = new RavenwoodRule();
 
     // Configuration for creating caches
     private static final String MODULE = IpcDataCache.MODULE_TEST;

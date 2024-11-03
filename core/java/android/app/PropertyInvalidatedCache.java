@@ -250,6 +250,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * @hide
  */
 @TestApi
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class PropertyInvalidatedCache<Query, Result> {
     /**
      * This is a configuration class that customizes a cache instance.
