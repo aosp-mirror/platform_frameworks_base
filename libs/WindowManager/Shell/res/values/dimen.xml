@@ -239,11 +239,11 @@
     <!-- Max width for the bubble popup view. -->
     <dimen name="bubble_popup_content_max_width">300dp</dimen>
     <!-- Horizontal margin for the bubble popup view. -->
-    <dimen name="bubble_popup_margin_horizontal">32dp</dimen>
+    <dimen name="bubble_popup_margin_horizontal">24dp</dimen>
     <!-- Top margin for the bubble bar education views. -->
     <dimen name="bubble_popup_margin_top">24dp</dimen>
-    <!-- Bottom margin for the bubble bar education views. -->
-    <dimen name="bubble_popup_margin_bottom">32dp</dimen>
+    <!-- Bottom padding for the bubble bar education views. -->
+    <dimen name="bubble_popup_padding_bottom">8dp</dimen>
     <!-- Text margin for the bubble bar education views. -->
     <dimen name="bubble_popup_text_margin">16dp</dimen>
     <!-- Size of icons in the bubble bar education views. -->
@@ -650,4 +650,11 @@
     <dimen name="open_by_default_settings_dialog_radio_button_height">64dp</dimen>
     <!-- The width of radio buttons in the open by default settings dialog. -->
     <dimen name="open_by_default_settings_dialog_radio_button_width">316dp</dimen>
+
+    <!-- The width of the desktop windowing education promo. -->
+    <dimen name="desktop_windowing_education_promo_width">412dp</dimen>
+    <!-- The height of the desktop windowing education promo. -->
+    <dimen name="desktop_windowing_education_promo_height">352dp</dimen>
+    <!-- The corner radius of the desktop windowing education promo. -->
+    <dimen name="desktop_windowing_education_promo_corner_radius">28dp</dimen>
 </resources>

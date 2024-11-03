@@ -27,6 +27,7 @@ import androidx.compose.ui.util.fastCoerceIn
 import com.android.compose.animation.scene.content.Content
 import com.android.compose.animation.scene.content.state.TransitionState
 import com.android.compose.animation.scene.content.state.TransitionState.HasOverscrollProperties.Companion.DistanceUnspecified
+import com.android.compose.nestedscroll.OnStopScope
 import com.android.compose.nestedscroll.PriorityNestedScrollConnection
 import com.android.compose.nestedscroll.ScrollController
 import kotlin.math.absoluteValue
@@ -749,7 +750,7 @@ private fun scrollController(
             return dragController.onDrag(delta = deltaScroll)
         }
 
-        override suspend fun onStop(initialVelocity: Float): Float {
+        override suspend fun OnStopScope.onStop(initialVelocity: Float): Float {
             return dragController
                 .onStop(velocity = initialVelocity, canChangeContent = canChangeScene)
                 .invoke()

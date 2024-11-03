@@ -19,6 +19,7 @@ package com.android.wm.shell.desktopmode;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+import static android.view.WindowManager.LayoutParams.INPUT_FEATURE_NO_INPUT_CHANNEL;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 
 import static com.android.wm.shell.desktopmode.DesktopModeVisualIndicator.IndicatorType.NO_INDICATOR;
@@ -259,6 +260,7 @@ public class DesktopModeVisualIndicator {
                         FLAG_NOT_FOCUSABLE, PixelFormat.TRANSPARENT);
         lp.setTitle("Desktop Mode Visual Indicator");
         lp.setTrustedOverlay();
+        lp.inputFeatures |= INPUT_FEATURE_NO_INPUT_CHANNEL;
         final WindowlessWindowManager windowManager = new WindowlessWindowManager(
                 mTaskInfo.configuration, mLeash,
                 null /* hostInputToken */);

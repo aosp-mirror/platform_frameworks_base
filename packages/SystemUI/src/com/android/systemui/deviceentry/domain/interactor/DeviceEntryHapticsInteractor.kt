@@ -19,10 +19,12 @@ import com.android.keyguard.logging.BiometricUnlockLogger
 import com.android.systemui.biometrics.data.repository.FingerprintPropertyRepository
 import com.android.systemui.biometrics.shared.model.FingerprintSensorType
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dump.DumpManager
 import com.android.systemui.keyevent.domain.interactor.KeyEventInteractor
 import com.android.systemui.keyguard.data.repository.BiometricSettingsRepository
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.power.shared.model.WakeSleepReason
+import com.android.systemui.util.kotlin.FlowDumperImpl
 import com.android.systemui.util.kotlin.sample
 import com.android.systemui.util.time.SystemClock
 import javax.inject.Inject
@@ -46,16 +48,17 @@ import kotlinx.coroutines.flow.onStart
 class DeviceEntryHapticsInteractor
 @Inject
 constructor(
-    deviceEntrySourceInteractor: DeviceEntrySourceInteractor,
-    deviceEntryFingerprintAuthInteractor: DeviceEntryFingerprintAuthInteractor,
-    deviceEntryBiometricAuthInteractor: DeviceEntryBiometricAuthInteractor,
-    fingerprintPropertyRepository: FingerprintPropertyRepository,
     biometricSettingsRepository: BiometricSettingsRepository,
+    deviceEntryBiometricAuthInteractor: DeviceEntryBiometricAuthInteractor,
+    deviceEntryFingerprintAuthInteractor: DeviceEntryFingerprintAuthInteractor,
+    deviceEntrySourceInteractor: DeviceEntrySourceInteractor,
+    fingerprintPropertyRepository: FingerprintPropertyRepository,
     keyEventInteractor: KeyEventInteractor,
+    private val logger: BiometricUnlockLogger,
     powerInteractor: PowerInteractor,
     private val systemClock: SystemClock,
-    private val logger: BiometricUnlockLogger,
-) {
+    dumpManager: DumpManager,
+) : FlowDumperImpl(dumpManager) {
     private val powerButtonSideFpsEnrolled =
         combineTransform(
                 fingerprintPropertyRepository.sensorType,
@@ -86,7 +89,7 @@ constructor(
                     powerButtonSideFpsEnrolled,
                     powerButtonDown,
                     lastPowerButtonWakeup,
-                    ::Triple
+                    ::Triple,
                 )
             )
             .filter { (sideFpsEnrolled, powerButtonDown, lastPowerButtonWakeup) ->
@@ -100,14 +103,19 @@ constructor(
                 }
                 allowHaptic
             }
-            .map {} // map to Unit
+            // map to Unit
+            .map {}
+            .dumpWhileCollecting("playSuccessHaptic")
 
     private val playErrorHapticForBiometricFailure: Flow<Unit> =
         merge(
                 deviceEntryFingerprintAuthInteractor.fingerprintFailure,
                 deviceEntryBiometricAuthInteractor.faceOnlyFaceFailure,
             )
-            .map {} // map to Unit
+            // map to Unit
+            .map {}
+            .dumpWhileCollecting("playErrorHapticForBiometricFailure")
+
     val playErrorHaptic: Flow<Unit> =
         playErrorHapticForBiometricFailure
             .sample(combine(powerButtonSideFpsEnrolled, powerButtonDown, ::Pair))
@@ -118,7 +126,9 @@ constructor(
                 }
                 allowHaptic
             }
-            .map {} // map to Unit
+            // map to Unit
+            .map {}
+            .dumpWhileCollecting("playErrorHaptic")
 
     private val recentPowerButtonPressThresholdMs = 400L
 }

@@ -1244,11 +1244,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 mAmInternal.addCreatorToken(intent, callingPackage);
             }
         }
-        userId = handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(), userId, reason);
+        final int callingPid = Binder.getCallingPid();
+        final int callingUid = Binder.getCallingUid();
+        userId = handleIncomingUser(callingPid, callingUid, userId, reason);
         // TODO: Switch to user app stacks here.
         return getActivityStartController().startActivities(caller, -1, 0, -1, callingPackage,
                 callingFeatureId, intents, resolvedTypes, resultTo,
-                SafeActivityOptions.fromBundle(bOptions), userId, reason,
+                SafeActivityOptions.fromBundle(bOptions, callingPid, callingUid), userId, reason,
                 null /* originatingPendingIntent */, false);
     }
 
@@ -1274,7 +1276,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             IBinder resultTo, String resultWho, int requestCode, int startFlags,
             ProfilerInfo profilerInfo, Bundle bOptions, int userId, boolean validateIncomingUser) {
         mAmInternal.addCreatorToken(intent, callingPackage);
-        final SafeActivityOptions opts = SafeActivityOptions.fromBundle(bOptions);
+        final int callingPid = Binder.getCallingPid();
+        final int callingUid = Binder.getCallingUid();
+        final SafeActivityOptions opts = SafeActivityOptions.fromBundle(
+                bOptions, callingPid, callingUid);
 
         assertPackageMatchesCallingUid(callingPackage);
         enforceNotIsolatedCaller("startActivityAsUser");
@@ -1283,11 +1288,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             SdkSandboxManagerLocal sdkSandboxManagerLocal = LocalManagerRegistry.getManager(
                     SdkSandboxManagerLocal.class);
             sdkSandboxManagerLocal.enforceAllowedToHostSandboxedActivity(
-                    intent, Binder.getCallingUid(), callingPackage
+                    intent, callingUid, callingPackage
             );
         }
 
-        if (Process.isSdkSandboxUid(Binder.getCallingUid())) {
+        if (Process.isSdkSandboxUid(callingUid)) {
             SdkSandboxManagerLocal sdkSandboxManagerLocal = LocalManagerRegistry.getManager(
                     SdkSandboxManagerLocal.class);
             if (sdkSandboxManagerLocal == null) {
@@ -1298,7 +1303,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
 
         userId = getActivityStartController().checkTargetUser(userId, validateIncomingUser,
-                Binder.getCallingPid(), Binder.getCallingUid(), "startActivityAsUser");
+                callingPid, callingUid, "startActivityAsUser");
 
         // TODO: Switch to user app stacks here.
         return getActivityStartController().obtainStarter(intent, "startActivityAsUser")
@@ -1363,7 +1368,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             throw new IllegalArgumentException("File descriptors passed in Intent");
         }
 
-        SafeActivityOptions options = SafeActivityOptions.fromBundle(bOptions);
+        final int origCallingPid = Binder.getCallingPid();
+        final int origCallingUid = Binder.getCallingUid();
+        SafeActivityOptions options = SafeActivityOptions.fromBundle(bOptions, origCallingPid,
+                origCallingUid);
 
         synchronized (mGlobalLock) {
             final ActivityRecord r = ActivityRecord.isInRootTaskLocked(callingActivity);
@@ -1452,13 +1460,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 resultTo.removeResultsLocked(r, resultWho, requestCode);
             }
 
-            final int origCallingUid = Binder.getCallingUid();
-            final int origCallingPid = Binder.getCallingPid();
             final long origId = Binder.clearCallingIdentity();
             // TODO(b/64750076): Check if calling pid should really be -1.
             try {
                 if (options == null) {
-                    options = new SafeActivityOptions(ActivityOptions.makeBasic());
+                    options = new SafeActivityOptions(ActivityOptions.makeBasic(),
+                            Binder.getCallingPid(), Binder.getCallingUid());
                 }
 
                 // Fixes b/230492947 b/337726734
@@ -1576,8 +1583,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         assertPackageMatchesCallingUid(callingPackage);
         final WaitResult res = new WaitResult();
         enforceNotIsolatedCaller("startActivityAndWait");
-        userId = handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
-                userId, "startActivityAndWait");
+        final int callingPid = Binder.getCallingPid();
+        final int callingUid = Binder.getCallingUid();
+        userId = handleIncomingUser(callingPid, callingUid, userId, "startActivityAndWait");
         // TODO: Switch to user app stacks here.
         getActivityStartController().obtainStarter(intent, "startActivityAndWait")
                 .setCaller(caller)
@@ -1588,7 +1596,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 .setResultWho(resultWho)
                 .setRequestCode(requestCode)
                 .setStartFlags(startFlags)
-                .setActivityOptions(bOptions)
+                .setActivityOptions(bOptions, callingPid, callingUid)
                 .setUserId(userId)
                 .setProfilerInfo(profilerInfo)
                 .setWaitResult(res)
@@ -1603,8 +1611,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             Bundle bOptions, int userId) {
         assertPackageMatchesCallingUid(callingPackage);
         enforceNotIsolatedCaller("startActivityWithConfig");
-        userId = handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(), userId,
-                "startActivityWithConfig");
+        final int callingPid = Binder.getCallingPid();
+        final int callingUid = Binder.getCallingUid();
+        userId = handleIncomingUser(callingPid, callingUid, userId, "startActivityWithConfig");
         // TODO: Switch to user app stacks here.
         return getActivityStartController().obtainStarter(intent, "startActivityWithConfig")
                 .setCaller(caller)
@@ -1616,7 +1625,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 .setRequestCode(requestCode)
                 .setStartFlags(startFlags)
                 .setGlobalConfiguration(config)
-                .setActivityOptions(bOptions)
+                .setActivityOptions(bOptions, callingPid, callingUid)
                 .setUserId(userId)
                 .execute();
     }
@@ -1820,7 +1829,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
         final int callingPid = Binder.getCallingPid();
         final int callingUid = Binder.getCallingUid();
-        final SafeActivityOptions safeOptions = SafeActivityOptions.fromBundle(bOptions);
+        final SafeActivityOptions safeOptions = SafeActivityOptions.fromBundle(
+                bOptions, callingPid, callingUid);
         final long origId = Binder.clearCallingIdentity();
         try {
             return mTaskSupervisor.startActivityFromRecents(callingPid, callingUid, taskId,
@@ -1844,8 +1854,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
         assertPackageMatchesCallingUid(callingPackage);
 
+        mAmInternal.addCreatorToken(intent, callingPackage);
+
         final ActivityOptions activityOptions = ActivityOptions.makeBasic();
         activityOptions.setLaunchTaskId(taskId);
+        // Pass in the system UID to allow setting launch taskId with MANAGE_GAME_ACTIVITY.
+        final SafeActivityOptions safeOptions = new SafeActivityOptions(
+                activityOptions, Process.myPid(), Process.SYSTEM_UID);
 
         userId = handleIncomingUser(callingPid, callingUid, userId, "startActivityFromGameSession");
 
@@ -1859,7 +1874,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     .setCallingPackage(intent.getPackage())
                     .setCallingFeatureId(callingFeatureId)
                     .setUserId(userId)
-                    .setActivityOptions(activityOptions.toBundle())
+                    .setActivityOptions(safeOptions)
                     .setRealCallingUid(Binder.getCallingUid())
                     .execute();
         } finally {
@@ -2228,8 +2243,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
         ProtoLog.d(WM_DEBUG_TASKS, "moveTaskToFront: moving taskId=%d", taskId);
         synchronized (mGlobalLock) {
+            final int callingPid = Binder.getCallingPid();
+            final int callingUid = Binder.getCallingUid();
             moveTaskToFrontLocked(appThread, callingPackage, taskId, flags,
-                    SafeActivityOptions.fromBundle(bOptions));
+                    SafeActivityOptions.fromBundle(bOptions, callingPid, callingUid));
         }
     }
 
@@ -3895,6 +3912,17 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     public boolean supportsLocalVoiceInteraction() {
         return LocalServices.getService(VoiceInteractionManagerInternal.class)
                 .supportsLocalVoiceInteraction();
+    }
+
+    @Override
+    public void setLimitSystemEducationDialogs(
+            IBinder appToken, boolean limitSystemEducationDialogs) {
+        synchronized (mGlobalLock) {
+            final ActivityRecord r = ActivityRecord.isInRootTaskLocked(appToken);
+            if (r != null) {
+                r.setLimitSystemEducationDialogs(limitSystemEducationDialogs);
+            }
+        }
     }
 
     @Override
@@ -5881,6 +5909,29 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     /**
+     * Registers an app that uses the Strict Mode for detecting BAL.
+     *
+     * @param callback the callback to register
+     * @return {@code true} if the callback was registered successfully.
+     */
+    @Override
+    public boolean registerBackgroundActivityStartCallback(IBinder callback) {
+        return mTaskSupervisor.getBackgroundActivityLaunchController()
+                .addStrictModeCallback(Binder.getCallingUid(), callback);
+    }
+
+    /**
+     * Unregisters an app that uses the Strict Mode for detecting BAL.
+     *
+     * @param callback the callback to unregister
+     */
+    @Override
+    public void unregisterBackgroundActivityStartCallback(IBinder callback) {
+        mTaskSupervisor.getBackgroundActivityLaunchController()
+                .removeStrictModeCallback(Binder.getCallingUid(), callback);
+    }
+
+    /**
      * Wrap the {@link ActivityOptions} in {@link SafeActivityOptions} and attach caller options
      * that allow using the callers permissions to start background activities.
      */
@@ -5894,7 +5945,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             options.setPendingIntentBackgroundActivityStartMode(
                     ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED);
         }
-        return new SafeActivityOptions(options);
+        return new SafeActivityOptions(options, Binder.getCallingPid(), Binder.getCallingUid());
     }
 
     /**
@@ -6059,10 +6110,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 Binder.restoreCallingIdentity(ident);
             }
 
+            final int callingPid = Binder.getCallingPid();
+            final int callingUid = Binder.getCallingUid();
             return getActivityStartController().startActivitiesInPackage(
                     packageUid, packageName, featureId,
                     intents, resolvedTypes, null /* resultTo */,
-                    SafeActivityOptions.fromBundle(bOptions), userId,
+                    SafeActivityOptions.fromBundle(bOptions, callingPid, callingUid), userId,
                     false /* validateIncomingUser */, null /* originatingPendingIntent */,
                     false);
         }

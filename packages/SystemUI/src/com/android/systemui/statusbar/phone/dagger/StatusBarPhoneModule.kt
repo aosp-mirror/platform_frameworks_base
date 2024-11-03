@@ -31,6 +31,7 @@ import com.android.systemui.statusbar.core.StatusBarInitializerImpl
 import com.android.systemui.statusbar.core.StatusBarInitializerStore
 import com.android.systemui.statusbar.core.StatusBarOrchestrator
 import com.android.systemui.statusbar.core.StatusBarSimpleFragment
+import com.android.systemui.statusbar.data.repository.PrivacyDotViewControllerStoreModule
 import com.android.systemui.statusbar.data.repository.StatusBarModeRepositoryStore
 import com.android.systemui.statusbar.events.PrivacyDotViewControllerModule
 import com.android.systemui.statusbar.phone.CentralSurfacesCommandQueueCallbacks
@@ -46,7 +47,9 @@ import dagger.multibindings.IntoMap
 import kotlinx.coroutines.CoroutineScope
 
 /** Similar in purpose to [StatusBarModule], but scoped only to phones */
-@Module(includes = [PrivacyDotViewControllerModule::class])
+@Module(
+    includes = [PrivacyDotViewControllerModule::class, PrivacyDotViewControllerStoreModule::class]
+)
 interface StatusBarPhoneModule {
 
     @Binds
@@ -140,7 +143,7 @@ interface StatusBarPhoneModule {
         fun commandQueueInitializerCoreStartable(
             initializerLazy: Lazy<CommandQueueInitializer>
         ): CoreStartable {
-            return if (StatusBarSimpleFragment.isEnabled) {
+            return if (StatusBarConnectedDisplays.isEnabled) {
                 initializerLazy.get()
             } else {
                 CoreStartable.NOP

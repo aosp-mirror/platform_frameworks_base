@@ -190,7 +190,8 @@ public class ActivityStartController {
                 .setOutActivity(tmpOutRecord)
                 .setCallingUid(0)
                 .setActivityInfo(aInfo)
-                .setActivityOptions(options.toBundle())
+                .setActivityOptions(options.toBundle(),
+                        Binder.getCallingPid(), Binder.getCallingUid())
                 .execute();
         mLastHomeActivityStartRecord = tmpOutRecord[0];
         if (rootHomeTask.mInResumeTopActivity) {
@@ -477,7 +478,7 @@ public class ActivityStartController {
                                 intentGrants.merge(creatorIntentGrants);
                             }
                         } catch (SecurityException securityException) {
-                            ActivityStarter.logAndThrowExceptionForIntentRedirect(
+                            ActivityStarter.logAndThrowExceptionForIntentRedirect(mService.mContext,
                                     "Creator URI Grant Caused Exception.", intent, creatorUid,
                                     creatorPackage, filterCallingUid, callingPackage,
                                     securityException);

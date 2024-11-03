@@ -1943,6 +1943,8 @@
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Deaktiv"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> - <xliff:g id="END">%2$s</xliff:g>"</string>
+    <!-- no translation found for zen_mode_trigger_summary_range_words (7228261413029290750) -->
+    <skip />
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"İstənilən təqvim"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> bəzi səsləri səssiz rejimə salır"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"Cihazınızın daxili problemi var və istehsalçı sıfırlanması olmayana qədər qeyri-stabil ola bilər."</string>
@@ -2424,6 +2426,14 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Mobil və ya Wi-Fi şəbəkəsi olmadan mesajlar göndərin və qəbul edin"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Mesajı açın"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Haqqında"</string>
+    <!-- no translation found for satellite_manual_selection_state_popup_title (8545991934926661974) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_message (1928101658551382450) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_ok (2459664752624985095) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_cancel (973605633339469252) -->
+    <skip />
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Gözləmədə..."</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Barmaqla Kilidaçmanı yenidən ayarlayın"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> artıq tanınmır."</string>

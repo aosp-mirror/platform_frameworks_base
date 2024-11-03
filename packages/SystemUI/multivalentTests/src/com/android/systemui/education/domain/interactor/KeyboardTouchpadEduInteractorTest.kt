@@ -427,7 +427,7 @@ class KeyboardTouchpadEduInteractorTest(private val gestureType: GestureType) : 
 
     @After
     fun clear() {
-        testScope.launch { tutorialSchedulerRepository.clearDataStore() }
+        testScope.launch { tutorialSchedulerRepository.clear() }
     }
 
     private suspend fun triggerMaxEducationSignals(gestureType: GestureType) {

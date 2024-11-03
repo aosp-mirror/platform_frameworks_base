@@ -35,8 +35,10 @@ import com.android.systemui.dock.DockManager;
 import com.android.systemui.dock.DockManagerImpl;
 import com.android.systemui.doze.DozeHost;
 import com.android.systemui.education.dagger.ContextualEducationModule;
+import com.android.systemui.emergency.EmergencyGestureModule;
 import com.android.systemui.inputdevice.tutorial.KeyboardTouchpadTutorialModule;
 import com.android.systemui.keyboard.shortcut.ShortcutHelperModule;
+import com.android.systemui.keyguard.dagger.KeyguardModule;
 import com.android.systemui.keyguard.ui.composable.blueprint.DefaultBlueprintModule;
 import com.android.systemui.keyguard.ui.view.layout.blueprints.KeyguardBlueprintModule;
 import com.android.systemui.keyguard.ui.view.layout.sections.KeyguardSectionsModule;
@@ -52,6 +54,7 @@ import com.android.systemui.qs.tileimpl.QSFactoryImpl;
 import com.android.systemui.reardisplay.RearDisplayModule;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsImplementation;
+import com.android.systemui.recents.RecentsModule;
 import com.android.systemui.rotationlock.RotationLockModule;
 import com.android.systemui.rotationlock.RotationLockNewModule;
 import com.android.systemui.scene.SceneContainerFrameworkModule;
@@ -67,7 +70,9 @@ import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationLockscreenUserManagerImpl;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
+import com.android.systemui.statusbar.dagger.CentralSurfacesModule;
 import com.android.systemui.statusbar.dagger.StartCentralSurfacesModule;
+import com.android.systemui.statusbar.notification.dagger.ReferenceNotificationsModule;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.DozeServiceHost;
 import com.android.systemui.statusbar.phone.HeadsUpModule;
@@ -119,12 +124,15 @@ import javax.inject.Named;
         AccessibilityRepositoryModule.class,
         AospPolicyModule.class,
         BatterySaverModule.class,
+        CentralSurfacesModule.class,
         ClipboardOverlaySuppressionModule.class,
         CollapsedStatusBarFragmentStartableModule.class,
         ConnectingDisplayViewModel.StartableModule.class,
         DefaultBlueprintModule.class,
+        EmergencyGestureModule.class,
         GestureModule.class,
         HeadsUpModule.class,
+        KeyguardModule.class,
         KeyboardShortcutsModule.class,
         KeyguardBlueprintModule.class,
         KeyguardSectionsModule.class,
@@ -137,6 +145,8 @@ import javax.inject.Named;
         PowerModule.class,
         QSModule.class,
         RearDisplayModule.class,
+        RecentsModule.class,
+        ReferenceNotificationsModule.class,
         ReferenceScreenshotModule.class,
         RotationLockModule.class,
         RotationLockNewModule.class,

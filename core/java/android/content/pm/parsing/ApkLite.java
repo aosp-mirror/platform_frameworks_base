@@ -156,6 +156,12 @@ public class ApkLite {
      */
     private final @Nullable String[][] mUsesSdkLibrariesCertDigests;
 
+    private final @NonNull List<String> mUsesStaticLibraries;
+
+    private final @Nullable long[] mUsesStaticLibrariesVersions;
+
+    private final @Nullable String[][] mUsesStaticLibrariesCertDigests;
+
     /**
      * Indicates if this system app can be updated.
      */
@@ -185,7 +191,10 @@ public class ApkLite {
             Set<String> requiredSplitTypes, Set<String> splitTypes,
             boolean hasDeviceAdminReceiver, boolean isSdkLibrary,
             List<String> usesSdkLibraries, long[] usesSdkLibrariesVersionsMajor,
-            String[][] usesSdkLibrariesCertDigests, boolean updatableSystem,
+            String[][] usesSdkLibrariesCertDigests,
+            List<String> usesStaticLibraries, long[] usesStaticLibrariesVersionsMajor,
+            String[][] usesStaticLibrariesCertDigests,
+            boolean updatableSystem,
             String emergencyInstaller, List<SharedLibraryInfo> declaredLibraries) {
         mPath = path;
         mPackageName = packageName;
@@ -223,6 +232,9 @@ public class ApkLite {
         mUsesSdkLibraries = usesSdkLibraries;
         mUsesSdkLibrariesVersionsMajor = usesSdkLibrariesVersionsMajor;
         mUsesSdkLibrariesCertDigests = usesSdkLibrariesCertDigests;
+        mUsesStaticLibraries = usesStaticLibraries;
+        mUsesStaticLibrariesVersions = usesStaticLibrariesVersionsMajor;
+        mUsesStaticLibrariesCertDigests = usesStaticLibrariesCertDigests;
         mUpdatableSystem = updatableSystem;
         mEmergencyInstaller = emergencyInstaller;
         mArchivedPackage = null;
@@ -266,6 +278,9 @@ public class ApkLite {
         mUsesSdkLibraries = Collections.emptyList();
         mUsesSdkLibrariesVersionsMajor = null;
         mUsesSdkLibrariesCertDigests = null;
+        mUsesStaticLibraries = Collections.emptyList();
+        mUsesStaticLibrariesVersions = null;
+        mUsesStaticLibrariesCertDigests = null;
         mUpdatableSystem = true;
         mEmergencyInstaller = null;
         mArchivedPackage = archivedPackage;
@@ -602,6 +617,21 @@ public class ApkLite {
         return mUsesSdkLibrariesCertDigests;
     }
 
+    @DataClass.Generated.Member
+    public @NonNull List<String> getUsesStaticLibraries() {
+        return mUsesStaticLibraries;
+    }
+
+    @DataClass.Generated.Member
+    public @Nullable long[] getUsesStaticLibrariesVersions() {
+        return mUsesStaticLibrariesVersions;
+    }
+
+    @DataClass.Generated.Member
+    public @Nullable String[][] getUsesStaticLibrariesCertDigests() {
+        return mUsesStaticLibrariesCertDigests;
+    }
+
     /**
      * Indicates if this system app can be updated.
      */
@@ -632,10 +662,10 @@ public class ApkLite {
     }
 
     @DataClass.Generated(
-            time = 1729247366948L,
+            time = 1730202160705L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/content/pm/parsing/ApkLite.java",
-            inputSignatures = "private final @android.annotation.NonNull java.lang.String mPackageName\nprivate final @android.annotation.NonNull java.lang.String mPath\nprivate final @android.annotation.Nullable java.lang.String mSplitName\nprivate final @android.annotation.Nullable java.lang.String mUsesSplitName\nprivate final @android.annotation.Nullable java.lang.String mConfigForSplit\nprivate final @android.annotation.Nullable java.util.Set<java.lang.String> mRequiredSplitTypes\nprivate final @android.annotation.Nullable java.util.Set<java.lang.String> mSplitTypes\nprivate final  int mVersionCodeMajor\nprivate final  int mVersionCode\nprivate final  int mRevisionCode\nprivate final  int mInstallLocation\nprivate final  int mMinSdkVersion\nprivate final  int mTargetSdkVersion\nprivate final @android.annotation.NonNull android.content.pm.VerifierInfo[] mVerifiers\nprivate final @android.annotation.NonNull android.content.pm.SigningDetails mSigningDetails\nprivate final  boolean mFeatureSplit\nprivate final  boolean mIsolatedSplits\nprivate final  boolean mSplitRequired\nprivate final  boolean mCoreApp\nprivate final  boolean mDebuggable\nprivate final  boolean mProfileableByShell\nprivate final  boolean mMultiArch\nprivate final  boolean mUse32bitAbi\nprivate final  boolean mExtractNativeLibs\nprivate final  boolean mUseEmbeddedDex\nprivate final @android.annotation.Nullable java.lang.String mTargetPackageName\nprivate final  boolean mOverlayIsStatic\nprivate final  int mOverlayPriority\nprivate final @android.annotation.Nullable java.lang.String mRequiredSystemPropertyName\nprivate final @android.annotation.Nullable java.lang.String mRequiredSystemPropertyValue\nprivate final  int mRollbackDataPolicy\nprivate final  boolean mHasDeviceAdminReceiver\nprivate final  boolean mIsSdkLibrary\nprivate final @android.annotation.NonNull java.util.List<java.lang.String> mUsesSdkLibraries\nprivate final @android.annotation.Nullable long[] mUsesSdkLibrariesVersionsMajor\nprivate final @android.annotation.Nullable java.lang.String[][] mUsesSdkLibrariesCertDigests\nprivate final  boolean mUpdatableSystem\nprivate final @android.annotation.Nullable java.lang.String mEmergencyInstaller\nprivate final @android.annotation.NonNull java.util.List<android.content.pm.SharedLibraryInfo> mDeclaredLibraries\nprivate final @android.annotation.Nullable android.content.pm.ArchivedPackageParcel mArchivedPackage\npublic  long getLongVersionCode()\nprivate  boolean hasAnyRequiredSplitTypes()\nclass ApkLite extends java.lang.Object implements []\n@com.android.internal.util.DataClass(genConstructor=false, genConstDefs=false)")
+            inputSignatures = "private final @android.annotation.NonNull java.lang.String mPackageName\nprivate final @android.annotation.NonNull java.lang.String mPath\nprivate final @android.annotation.Nullable java.lang.String mSplitName\nprivate final @android.annotation.Nullable java.lang.String mUsesSplitName\nprivate final @android.annotation.Nullable java.lang.String mConfigForSplit\nprivate final @android.annotation.Nullable java.util.Set<java.lang.String> mRequiredSplitTypes\nprivate final @android.annotation.Nullable java.util.Set<java.lang.String> mSplitTypes\nprivate final  int mVersionCodeMajor\nprivate final  int mVersionCode\nprivate final  int mRevisionCode\nprivate final  int mInstallLocation\nprivate final  int mMinSdkVersion\nprivate final  int mTargetSdkVersion\nprivate final @android.annotation.NonNull android.content.pm.VerifierInfo[] mVerifiers\nprivate final @android.annotation.NonNull android.content.pm.SigningDetails mSigningDetails\nprivate final  boolean mFeatureSplit\nprivate final  boolean mIsolatedSplits\nprivate final  boolean mSplitRequired\nprivate final  boolean mCoreApp\nprivate final  boolean mDebuggable\nprivate final  boolean mProfileableByShell\nprivate final  boolean mMultiArch\nprivate final  boolean mUse32bitAbi\nprivate final  boolean mExtractNativeLibs\nprivate final  boolean mUseEmbeddedDex\nprivate final @android.annotation.Nullable java.lang.String mTargetPackageName\nprivate final  boolean mOverlayIsStatic\nprivate final  int mOverlayPriority\nprivate final @android.annotation.Nullable java.lang.String mRequiredSystemPropertyName\nprivate final @android.annotation.Nullable java.lang.String mRequiredSystemPropertyValue\nprivate final  int mRollbackDataPolicy\nprivate final  boolean mHasDeviceAdminReceiver\nprivate final  boolean mIsSdkLibrary\nprivate final @android.annotation.NonNull java.util.List<java.lang.String> mUsesSdkLibraries\nprivate final @android.annotation.Nullable long[] mUsesSdkLibrariesVersionsMajor\nprivate final @android.annotation.Nullable java.lang.String[][] mUsesSdkLibrariesCertDigests\nprivate final @android.annotation.NonNull java.util.List<java.lang.String> mUsesStaticLibraries\nprivate final @android.annotation.Nullable long[] mUsesStaticLibrariesVersions\nprivate final @android.annotation.Nullable java.lang.String[][] mUsesStaticLibrariesCertDigests\nprivate final  boolean mUpdatableSystem\nprivate final @android.annotation.Nullable java.lang.String mEmergencyInstaller\nprivate final @android.annotation.NonNull java.util.List<android.content.pm.SharedLibraryInfo> mDeclaredLibraries\nprivate final @android.annotation.Nullable android.content.pm.ArchivedPackageParcel mArchivedPackage\npublic  long getLongVersionCode()\nprivate  boolean hasAnyRequiredSplitTypes()\nclass ApkLite extends java.lang.Object implements []\n@com.android.internal.util.DataClass(genConstructor=false, genConstDefs=false)")
     @Deprecated
     private void __metadata() {}
 

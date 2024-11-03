@@ -47,4 +47,6 @@ data class SliderHapticFeedbackConfig(
     @FloatRange(from = 0.0, to = 1.0) val lowerBookendScale: Float = 0.05f,
     /** Exponent for power function compensation */
     @FloatRange(from = 0.0, fromInclusive = false) val exponent: Float = 1f / 0.89f,
+    /** The step-size that defines the slider quantization. Zero represents a continuous slider */
+    @FloatRange(from = 0.0) val sliderStepSize: Float = 0f,
 )

@@ -175,22 +175,12 @@ public class PipScheduler {
      * Note that we do not allow any actual WM Core changes at this point.
      *
      * @param toBounds destination bounds used only for internal state updates - not sent to Core.
-     * @param configAtEnd true if we are waiting for config updates at the end of the transition.
      */
-    public void scheduleFinishResizePip(Rect toBounds, boolean configAtEnd) {
-        // Make updates to the internal state to reflect new bounds
+    public void scheduleFinishResizePip(Rect toBounds) {
+        // Make updates to the internal state to reflect new bounds before updating any transitions
+        // related state; transition state updates can trigger callbacks that use the cached bounds.
         onFinishingPipResize(toBounds);
-
-        SurfaceControl.Transaction tx = null;
-        if (configAtEnd) {
-            tx = new SurfaceControl.Transaction();
-            tx.addTransactionCommittedListener(mMainExecutor, () -> {
-                mPipTransitionState.setState(PipTransitionState.CHANGED_PIP_BOUNDS);
-            });
-        } else {
-            mPipTransitionState.setState(PipTransitionState.CHANGED_PIP_BOUNDS);
-        }
-        mPipTransitionController.finishTransition(tx);
+        mPipTransitionController.finishTransition();
     }
 
     /**

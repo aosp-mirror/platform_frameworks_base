@@ -29,8 +29,10 @@ import android.os.Handler;
 import android.os.PersistableBundle;
 import android.os.VibrationEffect;
 import android.os.test.TestLooper;
+import android.os.vibrator.Flags;
 import android.os.vibrator.PrebakedSegment;
 import android.os.vibrator.PrimitiveSegment;
+import android.os.vibrator.PwleSegment;
 import android.os.vibrator.RampSegment;
 import android.os.vibrator.StepSegment;
 import android.os.vibrator.VibrationConfig;
@@ -57,11 +59,20 @@ public class DeviceAdapterTest {
     private static final int EMPTY_VIBRATOR_ID = 1;
     private static final int PWLE_VIBRATOR_ID = 2;
     private static final int PWLE_WITHOUT_FREQUENCIES_VIBRATOR_ID = 3;
+    private static final int PWLE_V2_VIBRATOR_ID = 4;
     private static final float TEST_MIN_FREQUENCY = 50;
     private static final float TEST_RESONANT_FREQUENCY = 150;
     private static final float TEST_FREQUENCY_RESOLUTION = 25;
     private static final float[] TEST_AMPLITUDE_MAP = new float[]{
             /* 50Hz= */ 0.08f, 0.16f, 0.32f, 0.64f, /* 150Hz= */ 0.8f, 0.72f, /* 200Hz= */ 0.64f};
+    private static final int TEST_MAX_ENVELOPE_EFFECT_SIZE = 10;
+    private static final int TEST_MIN_ENVELOPE_EFFECT_CONTROL_POINT_DURATION_MILLIS = 20;
+    private static final float[] TEST_FREQUENCIES_HZ = new float[]{30f, 50f, 100f, 120f, 150f};
+    private static final float[] TEST_OUTPUT_ACCELERATIONS_GS =
+            new float[]{0.3f, 0.5f, 1.0f, 0.8f, 0.6f};
+    private static final float PWLE_V2_MIN_FREQUENCY = TEST_FREQUENCIES_HZ[0];
+    private static final float PWLE_V2_MAX_FREQUENCY =
+            TEST_FREQUENCIES_HZ[TEST_FREQUENCIES_HZ.length - 1];
 
     @Rule
     public MockitoRule mMockitoRule = MockitoJUnit.rule();
@@ -296,6 +307,77 @@ public class DeviceAdapterTest {
         assertThat(vibration.adapt(mAdapter)).isEqualTo(expected);
     }
 
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
+    public void testPwleSegment_withoutPwleV2Capability_returnsNull() {
+        VibrationEffect.Composed effect = new VibrationEffect.Composed(Arrays.asList(
+                new PrimitiveSegment(VibrationEffect.Composition.PRIMITIVE_SPIN, 0.5f, 100),
+                new PwleSegment(1, 0.2f, 30, 60, 20),
+                new PwleSegment(0.8f, 0.2f, 60, 100, 100),
+                new PwleSegment(0.65f, 0.65f, 100, 50, 50)),
+                /* repeatIndex= */ 1);
+
+        VibrationEffect.Composed adaptedEffect =
+                (VibrationEffect.Composed) mAdapter.adaptToVibrator(EMPTY_VIBRATOR_ID, effect);
+        assertThat(adaptedEffect).isNull();
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
+    public void testPwleSegment_withPwleV2Capability_returnsAdaptedSegments() {
+        VibrationEffect.Composed effect = new VibrationEffect.Composed(Arrays.asList(
+                new PwleSegment(1, 0.2f, 30, 60, 20),
+                new PwleSegment(0.8f, 0.2f, 60, 100, 100),
+                new PwleSegment(0.65f, 0.65f, 100, 50, 50)),
+                /* repeatIndex= */ 1);
+
+        VibrationEffect.Composed expected = new VibrationEffect.Composed(Arrays.asList(
+                new PwleSegment(1, 0.2f, 30, 60, 20),
+                new PwleSegment(0.8f, 0.2f, 60, 100, 100),
+                new PwleSegment(0.65f, 0.65f, 100, 50, 50)),
+                /* repeatIndex= */ 1);
+
+        SparseArray<VibratorController> vibrators = new SparseArray<>();
+        vibrators.put(PWLE_V2_VIBRATOR_ID, createPwleV2VibratorController(PWLE_V2_VIBRATOR_ID));
+        DeviceAdapter adapter = new DeviceAdapter(mVibrationSettings, vibrators);
+
+        assertThat(adapter.adaptToVibrator(PWLE_V2_VIBRATOR_ID, effect)).isEqualTo(expected);
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
+    public void testPwleSegment_withFrequenciesBelowSupportedRange_returnsNull() {
+        float frequencyBelowSupportedRange = PWLE_V2_MIN_FREQUENCY - 1f;
+        VibrationEffect.Composed effect = new VibrationEffect.Composed(Arrays.asList(
+                new PwleSegment(0, 0.2f, 30, 60, 20),
+                new PwleSegment(0.8f, 0.2f, 60, frequencyBelowSupportedRange, 100),
+                new PwleSegment(0.65f, 0.65f, frequencyBelowSupportedRange, 50, 50)),
+                /* repeatIndex= */ 1);
+
+        SparseArray<VibratorController> vibrators = new SparseArray<>();
+        vibrators.put(PWLE_V2_VIBRATOR_ID, createPwleV2VibratorController(PWLE_V2_VIBRATOR_ID));
+        DeviceAdapter adapter = new DeviceAdapter(mVibrationSettings, vibrators);
+
+        assertThat(adapter.adaptToVibrator(PWLE_V2_VIBRATOR_ID, effect)).isNull();
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
+    public void testPwleSegment_withFrequenciesAboveSupportedRange_returnsNull() {
+        float frequencyAboveSupportedRange = PWLE_V2_MAX_FREQUENCY + 1f;
+        VibrationEffect.Composed effect = new VibrationEffect.Composed(Arrays.asList(
+                new PwleSegment(0, 0.2f, 30, frequencyAboveSupportedRange, 20),
+                new PwleSegment(0.8f, 0.2f, frequencyAboveSupportedRange, 100, 100),
+                new PwleSegment(0.65f, 0.65f, 100, 50, 50)),
+                /* repeatIndex= */ 1);
+
+        SparseArray<VibratorController> vibrators = new SparseArray<>();
+        vibrators.put(PWLE_V2_VIBRATOR_ID, createPwleV2VibratorController(PWLE_V2_VIBRATOR_ID));
+        DeviceAdapter adapter = new DeviceAdapter(mVibrationSettings, vibrators);
+
+        assertThat(adapter.adaptToVibrator(PWLE_V2_VIBRATOR_ID, effect)).isNull();
+    }
+
     private VibratorController createEmptyVibratorController(int vibratorId) {
         return new FakeVibratorControllerProvider(mTestLooper.getLooper())
                 .newVibratorController(vibratorId, (id, vibrationId)  -> {});
@@ -316,6 +398,20 @@ public class DeviceAdapterTest {
         provider.setMinFrequency(TEST_MIN_FREQUENCY);
         provider.setFrequencyResolution(TEST_FREQUENCY_RESOLUTION);
         provider.setMaxAmplitudes(TEST_AMPLITUDE_MAP);
+        return provider.newVibratorController(vibratorId, (id, vibrationId)  -> {});
+    }
+
+    private VibratorController createPwleV2VibratorController(int vibratorId) {
+        FakeVibratorControllerProvider provider = new FakeVibratorControllerProvider(
+                mTestLooper.getLooper());
+        provider.setCapabilities(IVibrator.CAP_COMPOSE_PWLE_EFFECTS_V2);
+        provider.setResonantFrequency(TEST_RESONANT_FREQUENCY);
+        provider.setFrequenciesHz(TEST_FREQUENCIES_HZ);
+        provider.setOutputAccelerationsGs(TEST_OUTPUT_ACCELERATIONS_GS);
+        provider.setMaxEnvelopeEffectSize(TEST_MAX_ENVELOPE_EFFECT_SIZE);
+        provider.setMinEnvelopeEffectControlPointDurationMillis(
+                TEST_MIN_ENVELOPE_EFFECT_CONTROL_POINT_DURATION_MILLIS);
+
         return provider.newVibratorController(vibratorId, (id, vibrationId)  -> {});
     }
 }

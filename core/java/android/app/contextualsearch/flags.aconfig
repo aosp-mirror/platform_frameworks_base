@@ -13,3 +13,17 @@ flag {
   description: "Flag to refresh the token to the callback"
   bug: "309689654"
 }
+
+flag {
+    name: "multi_window_screen_context"
+    namespace: "machine_learning"
+    description: "Report screen context and positions for all windows."
+    bug: "371065456"
+}
+
+flag {
+    name: "contextual_search_window_layer"
+    namespace: "machine_learning"
+    description: "Identify live contextual search UI to exclude from contextual search screenshot."
+    bug: "372510690"
+}

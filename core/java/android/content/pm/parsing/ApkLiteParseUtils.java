@@ -91,6 +91,7 @@ public class ApkLiteParseUtils {
     private static final String TAG_USES_SPLIT = "uses-split";
     private static final String TAG_MANIFEST = "manifest";
     private static final String TAG_USES_SDK_LIBRARY = "uses-sdk-library";
+    private static final String TAG_USES_STATIC_LIBRARY = "uses-static-library";
     private static final String TAG_SDK_LIBRARY = "sdk-library";
     private static final int SDK_VERSION = Build.VERSION.SDK_INT;
     private static final String[] SDK_CODENAMES = Build.VERSION.ACTIVE_CODENAMES;
@@ -466,6 +467,11 @@ public class ApkLiteParseUtils {
         List<String> usesSdkLibraries = new ArrayList<>();
         long[] usesSdkLibrariesVersionsMajor = new long[0];
         String[][] usesSdkLibrariesCertDigests = new String[0][0];
+
+        List<String> usesStaticLibraries = new ArrayList<>();
+        long[] usesStaticLibrariesVersions = new long[0];
+        String[][] usesStaticLibrariesCertDigests = new String[0][0];
+
         List<SharedLibraryInfo> declaredLibraries = new ArrayList<>();
 
         // Only search the tree when the tag is the direct child of <manifest> tag
@@ -578,6 +584,51 @@ public class ApkLiteParseUtils {
                             // TODO(372862145): Add support for multiple signer
                             usesSdkLibrariesCertDigests = ArrayUtils.appendElement(String[].class,
                                     usesSdkLibrariesCertDigests, new String[]{usesSdkCertDigest},
+                                    /*allowDuplicates=*/ true);
+                            break;
+                        case TAG_USES_STATIC_LIBRARY:
+                            String usesStaticLibName = parser.getAttributeValue(
+                                    ANDROID_RES_NAMESPACE, "name");
+                            long usesStaticLibVersion = parser.getAttributeIntValue(
+                                    ANDROID_RES_NAMESPACE, "version", -1);
+                            String usesStaticLibCertDigest = parser.getAttributeValue(
+                                    ANDROID_RES_NAMESPACE, "certDigest");
+
+                            if (usesStaticLibName == null || usesStaticLibName.isBlank()
+                                    || usesStaticLibVersion < 0
+                                    || usesStaticLibCertDigest == null) {
+                                return input.error(
+                                        PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED,
+                                        "Bad uses-static-library declaration name: "
+                                                + usesStaticLibName
+                                                + " version: " + usesStaticLibVersion
+                                                + " certDigest: " + usesStaticLibCertDigest);
+                            }
+
+                            if (usesStaticLibraries.contains(usesStaticLibName)) {
+                                return input.error(
+                                        PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED,
+                                        "Bad uses-sdk-library declaration. Depending on"
+                                                + " multiple versions of static library: "
+                                                + usesStaticLibName);
+                            }
+
+                            usesStaticLibraries.add(usesStaticLibName);
+                            usesStaticLibrariesVersions = ArrayUtils.appendLong(
+                                    usesStaticLibrariesVersions, usesStaticLibVersion,
+                                    /*allowDuplicates=*/ true);
+
+                            // We allow ":" delimiters in the SHA declaration as this is the format
+                            // emitted by the certtool making it easy for developers to copy/paste.
+                            // TODO(372862145): Add test for this replacement
+                            usesStaticLibCertDigest =
+                                    usesStaticLibCertDigest.replace(":", "").toLowerCase();
+
+                            // TODO(372862145): Add support for multiple signer for app targeting
+                            //  O-MR1
+                            usesStaticLibrariesCertDigests = ArrayUtils.appendElement(
+                                    String[].class, usesStaticLibrariesCertDigests,
+                                    new String[]{usesStaticLibCertDigest},
                                     /*allowDuplicates=*/ true);
                             break;
                         case TAG_SDK_LIBRARY:
@@ -753,7 +804,9 @@ public class ApkLiteParseUtils {
                         rollbackDataPolicy, requiredSplitTypes.first, requiredSplitTypes.second,
                         hasDeviceAdminReceiver, isSdkLibrary, usesSdkLibraries,
                         usesSdkLibrariesVersionsMajor, usesSdkLibrariesCertDigests,
-                        updatableSystem, emergencyInstaller, declaredLibraries));
+                        usesStaticLibraries, usesStaticLibrariesVersions,
+                        usesStaticLibrariesCertDigests, updatableSystem, emergencyInstaller,
+                        declaredLibraries));
     }
 
     private static boolean isDeviceAdminReceiver(

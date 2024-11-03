@@ -16,6 +16,7 @@
 
 package com.android.settingslib.service
 
+import com.android.settingslib.graph.PreferenceSetterApiHandler
 import com.android.settingslib.ipc.ApiHandler
 import com.android.settingslib.ipc.MessengerService
 import com.android.settingslib.ipc.PermissionChecker
@@ -31,7 +32,10 @@ open class PreferenceService(
     name: String = "PreferenceService",
 ) :
     MessengerService(
-        listOf<ApiHandler<*, *>>(PreferenceGraphApi(setOf())),
+        listOf<ApiHandler<*, *>>(
+            PreferenceGraphApi(),
+            PreferenceSetterApiHandler(API_PREFERENCE_SETTER),
+        ),
         permissionChecker,
         name,
     )

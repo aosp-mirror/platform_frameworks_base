@@ -209,15 +209,27 @@ public class SystemZenRulesTest extends UiServiceTestCase {
     }
 
     @Test
-    public void getShortDaysSummary_onlyDays() {
+    public void getDaysOfWeekShort_summarizesDays() {
         ScheduleInfo scheduleInfo = new ScheduleInfo();
         scheduleInfo.startHour = 10;
         scheduleInfo.endHour = 16;
         scheduleInfo.days = new int[] {Calendar.MONDAY, Calendar.TUESDAY,
                 Calendar.WEDNESDAY, Calendar.THURSDAY, Calendar.FRIDAY};
 
-        assertThat(SystemZenRules.getShortDaysSummary(mContext, scheduleInfo))
+        assertThat(SystemZenRules.getDaysOfWeekShort(mContext, scheduleInfo))
                 .isEqualTo("Mon-Fri");
+    }
+
+    @Test
+    public void getDaysOfWeekFull_summarizesDays() {
+        ScheduleInfo scheduleInfo = new ScheduleInfo();
+        scheduleInfo.startHour = 10;
+        scheduleInfo.endHour = 16;
+        scheduleInfo.days = new int[] {Calendar.MONDAY, Calendar.TUESDAY,
+                Calendar.WEDNESDAY, Calendar.THURSDAY, Calendar.FRIDAY};
+
+        assertThat(SystemZenRules.getDaysOfWeekFull(mContext, scheduleInfo))
+                .isEqualTo("Monday to Friday");
     }
 
     @Test

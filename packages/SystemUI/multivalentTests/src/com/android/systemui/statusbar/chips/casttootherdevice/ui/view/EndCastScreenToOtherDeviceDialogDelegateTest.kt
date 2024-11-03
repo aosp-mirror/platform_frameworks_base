@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.chips.casttootherdevice.ui.view
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import org.junit.runner.RunWith
 import android.content.ComponentName
 import android.content.DialogInterface
 import android.content.Intent
@@ -49,6 +51,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 @OptIn(ExperimentalCoroutinesApi::class)
 class EndCastScreenToOtherDeviceDialogDelegateTest : SysuiTestCase() {
     private val kosmos = Kosmos().also { it.testCase = this }
@@ -92,7 +95,7 @@ class EndCastScreenToOtherDeviceDialogDelegateTest : SysuiTestCase() {
         createAndSetDelegate(
             MediaProjectionState.Projecting.EntireScreen(
                 HOST_PACKAGE,
-                hostDeviceName = "My Favorite Device"
+                hostDeviceName = "My Favorite Device",
             )
         )
 
@@ -118,8 +121,8 @@ class EndCastScreenToOtherDeviceDialogDelegateTest : SysuiTestCase() {
             MediaProjectionState.Projecting.SingleTask(
                 HOST_PACKAGE,
                 hostDeviceName = null,
-                createTask(taskId = 1, baseIntent = baseIntent)
-            ),
+                createTask(taskId = 1, baseIntent = baseIntent),
+            )
         )
 
         underTest.beforeCreate(sysuiDialog, /* savedInstanceState= */ null)
@@ -141,8 +144,8 @@ class EndCastScreenToOtherDeviceDialogDelegateTest : SysuiTestCase() {
             MediaProjectionState.Projecting.SingleTask(
                 HOST_PACKAGE,
                 hostDeviceName = "My Favorite Device",
-                createTask(taskId = 1, baseIntent = baseIntent)
-            ),
+                createTask(taskId = 1, baseIntent = baseIntent),
+            )
         )
 
         underTest.beforeCreate(sysuiDialog, /* savedInstanceState= */ null)
@@ -169,8 +172,8 @@ class EndCastScreenToOtherDeviceDialogDelegateTest : SysuiTestCase() {
             MediaProjectionState.Projecting.SingleTask(
                 HOST_PACKAGE,
                 hostDeviceName = null,
-                createTask(taskId = 1, baseIntent = baseIntent)
-            ),
+                createTask(taskId = 1, baseIntent = baseIntent),
+            )
         )
 
         underTest.beforeCreate(sysuiDialog, /* savedInstanceState= */ null)
@@ -198,7 +201,7 @@ class EndCastScreenToOtherDeviceDialogDelegateTest : SysuiTestCase() {
                 HOST_PACKAGE,
                 hostDeviceName = "My Favorite Device",
                 createTask(taskId = 1, baseIntent = baseIntent),
-            ),
+            )
         )
 
         underTest.beforeCreate(sysuiDialog, /* savedInstanceState= */ null)
@@ -235,7 +238,7 @@ class EndCastScreenToOtherDeviceDialogDelegateTest : SysuiTestCase() {
             verify(sysuiDialog)
                 .setPositiveButton(
                     eq(R.string.cast_to_other_device_stop_dialog_button),
-                    clickListener.capture()
+                    clickListener.capture(),
                 )
 
             // Verify that clicking the button stops the recording
@@ -254,7 +257,8 @@ class EndCastScreenToOtherDeviceDialogDelegateTest : SysuiTestCase() {
                 kosmos.applicationContext,
                 stopAction = kosmos.mediaProjectionChipInteractor::stopProjecting,
                 ProjectionChipModel.Projecting(
-                    ProjectionChipModel.Type.CAST_TO_OTHER_DEVICE,
+                    ProjectionChipModel.Receiver.CastToOtherDevice,
+                    ProjectionChipModel.ContentType.Screen,
                     state,
                 ),
             )
@@ -268,7 +272,7 @@ class EndCastScreenToOtherDeviceDialogDelegateTest : SysuiTestCase() {
             MediaProjectionState.Projecting.SingleTask(
                 HOST_PACKAGE,
                 hostDeviceName = null,
-                createTask(taskId = 1)
+                createTask(taskId = 1),
             )
     }
 }

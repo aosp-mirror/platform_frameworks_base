@@ -1937,12 +1937,14 @@
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"వారపు రోజుల్లో రాత్రి"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"వారాంతం"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"ఈవెంట్"</string>
-    <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"నిద్ర"</string>
+    <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"స్లీప్ మోడ్"</string>
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"<xliff:g id="APP_NAME">%1$s</xliff:g> ద్వారా మేనేజ్ చేయబడుతోంది"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"ఆన్‌లో ఉంది"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"ఆఫ్‌లో ఉంది"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> - <xliff:g id="END">%2$s</xliff:g>"</string>
+    <!-- no translation found for zen_mode_trigger_summary_range_words (7228261413029290750) -->
+    <skip />
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"ఏదైనా క్యాలెండర్"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> కొన్ని ధ్వనులను మ్యూట్ చేస్తోంది"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"మీ పరికరంతో అంతర్గత సమస్య ఏర్పడింది మరియు మీరు ఫ్యాక్టరీ డేటా రీసెట్ చేసే వరకు అస్థిరంగా ఉంటుంది."</string>
@@ -2424,6 +2426,14 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"మొబైల్ లేదా Wi-Fi నెట్‌వర్క్ లేకుండా మెసేజ్‌లను పంపండి, స్వీకరించండి"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messagesను తెరవండి"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"ఇది ఎలా పని చేస్తుంది"</string>
+    <!-- no translation found for satellite_manual_selection_state_popup_title (8545991934926661974) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_message (1928101658551382450) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_ok (2459664752624985095) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_cancel (973605633339469252) -->
+    <skip />
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"పెండింగ్‌లో ఉంది..."</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"వేలిముద్ర అన్‌లాక్‌ను మళ్లీ సెటప్ చేయండి"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g>‌ను ఇకపై గుర్తించడం సాధ్యం కాదు."</string>

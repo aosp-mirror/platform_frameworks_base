@@ -17,12 +17,18 @@ package com.android.systemui.statusbar.notification.collection.coordinator
 
 import android.app.Notification.GROUP_ALERT_ALL
 import android.app.Notification.GROUP_ALERT_SUMMARY
+import android.platform.test.annotations.EnableFlags
 import android.testing.TestableLooper.RunWithLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.kosmos.applicationCoroutineScope
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.statusbar.NotificationRemoteInputManager
+import com.android.systemui.statusbar.chips.notification.domain.interactor.statusBarNotificationChipsInteractor
+import com.android.systemui.statusbar.chips.notification.shared.StatusBarNotifChips
+import com.android.systemui.statusbar.notification.HeadsUpManagerPhone
 import com.android.systemui.statusbar.notification.NotifPipelineFlags
 import com.android.systemui.statusbar.notification.collection.GroupEntryBuilder
 import com.android.systemui.statusbar.notification.collection.NotifPipeline
@@ -32,6 +38,8 @@ import com.android.systemui.statusbar.notification.collection.listbuilder.OnBefo
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeTransformGroupsListener
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifPromoter
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSectioner
+import com.android.systemui.statusbar.notification.collection.mockNotifCollection
+import com.android.systemui.statusbar.notification.collection.notifCollection
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifLifetimeExtender
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifLifetimeExtender.OnEndLifetimeExtensionCallback
@@ -43,9 +51,9 @@ import com.android.systemui.statusbar.notification.interruption.NotificationInte
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderWrapper.FullScreenIntentDecisionImpl
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionDecisionProvider
 import com.android.systemui.statusbar.notification.row.NotifBindPipeline.BindCallback
-import com.android.systemui.statusbar.notification.HeadsUpManagerPhone
 import com.android.systemui.statusbar.phone.NotificationGroupTestHelper
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener
+import com.android.systemui.testKosmos
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
@@ -54,6 +62,7 @@ import com.android.systemui.util.mockito.withArgCaptor
 import com.android.systemui.util.time.FakeSystemClock
 import java.util.ArrayList
 import java.util.function.Consumer
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -73,6 +82,11 @@ import org.mockito.MockitoAnnotations
 @RunWith(AndroidJUnit4::class)
 @RunWithLooper
 class HeadsUpCoordinatorTest : SysuiTestCase() {
+    private val kosmos = testKosmos()
+    private val testScope = kosmos.testScope
+    private val statusBarNotificationChipsInteractor = kosmos.statusBarNotificationChipsInteractor
+    private val notifCollection = kosmos.mockNotifCollection
+
     private lateinit var coordinator: HeadsUpCoordinator
 
     // captured listeners and pluggables:
@@ -115,16 +129,19 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
         helper = NotificationGroupTestHelper(mContext)
         coordinator =
             HeadsUpCoordinator(
+                kosmos.applicationCoroutineScope,
                 logger,
                 systemClock,
+                notifCollection,
                 headsUpManager,
                 headsUpViewBinder,
                 visualInterruptionDecisionProvider,
                 remoteInputManager,
                 launchFullScreenIntentProvider,
                 flags,
+                statusBarNotificationChipsInteractor,
                 headerController,
-                executor
+                executor,
             )
         coordinator.attach(notifPipeline)
 
@@ -351,7 +368,7 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
         assertFalse(
             notifLifetimeExtender.maybeExtendLifetime(
                 NotificationEntryBuilder().setPkg("test-package").build(),
-                /* reason= */ 0
+                /* reason= */ 0,
             )
         )
     }
@@ -440,6 +457,97 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
         onHeadsUpChangedListener.onHeadsUpStateChanged(entry, true)
         notifLifetimeExtender.cancelLifetimeExtension(entry)
     }
+
+    @Test
+    @EnableFlags(StatusBarNotifChips.FLAG_NAME)
+    fun showPromotedNotification_hasNotifEntry_shownAsHUN() =
+        testScope.runTest {
+            whenever(notifCollection.getEntry(entry.key)).thenReturn(entry)
+
+            statusBarNotificationChipsInteractor.onPromotedNotificationChipTapped(entry.key)
+            executor.advanceClockToLast()
+            executor.runAllReady()
+            beforeFinalizeFilterListener.onBeforeFinalizeFilter(listOf(entry))
+
+            finishBind(entry)
+            verify(headsUpManager).showNotification(entry)
+        }
+
+    @Test
+    @EnableFlags(StatusBarNotifChips.FLAG_NAME)
+    fun showPromotedNotification_noNotifEntry_noHUN() =
+        testScope.runTest {
+            whenever(notifCollection.getEntry(entry.key)).thenReturn(null)
+
+            statusBarNotificationChipsInteractor.onPromotedNotificationChipTapped(entry.key)
+            executor.advanceClockToLast()
+            executor.runAllReady()
+            beforeFinalizeFilterListener.onBeforeFinalizeFilter(listOf(entry))
+
+            verify(headsUpViewBinder, never()).bindHeadsUpView(eq(entry), any())
+            verify(headsUpManager, never()).showNotification(entry)
+        }
+
+    @Test
+    @EnableFlags(StatusBarNotifChips.FLAG_NAME)
+    fun showPromotedNotification_shownAsHUNEvenIfEntryShouldNot() =
+        testScope.runTest {
+            whenever(notifCollection.getEntry(entry.key)).thenReturn(entry)
+
+            // First, add the entry as shouldn't HUN
+            setShouldHeadsUp(entry, false)
+            collectionListener.onEntryAdded(entry)
+            beforeTransformGroupsListener.onBeforeTransformGroups(listOf(entry))
+            beforeFinalizeFilterListener.onBeforeFinalizeFilter(listOf(entry))
+
+            // WHEN that entry becomes a promoted notification and is tapped
+            statusBarNotificationChipsInteractor.onPromotedNotificationChipTapped(entry.key)
+            executor.advanceClockToLast()
+            executor.runAllReady()
+            beforeFinalizeFilterListener.onBeforeFinalizeFilter(listOf(entry))
+
+            // THEN it's still shown as heads up
+            finishBind(entry)
+            verify(headsUpManager).showNotification(entry)
+        }
+
+    @Test
+    @EnableFlags(StatusBarNotifChips.FLAG_NAME)
+    fun showPromotedNotification_atSameTimeAsOnAdded_promotedShownAsHUN() =
+        testScope.runTest {
+            // First, the promoted notification appears as not heads up
+            val promotedEntry = NotificationEntryBuilder().setPkg("promotedPackage").build()
+            whenever(notifCollection.getEntry(promotedEntry.key)).thenReturn(promotedEntry)
+            setShouldHeadsUp(promotedEntry, false)
+
+            collectionListener.onEntryAdded(promotedEntry)
+            beforeTransformGroupsListener.onBeforeTransformGroups(listOf(promotedEntry))
+            beforeFinalizeFilterListener.onBeforeFinalizeFilter(listOf(promotedEntry))
+
+            verify(headsUpViewBinder, never()).bindHeadsUpView(eq(promotedEntry), any())
+            verify(headsUpManager, never()).showNotification(promotedEntry)
+
+            // Then a new notification comes in that should be heads up
+            setShouldHeadsUp(entry, false)
+            whenever(notifCollection.getEntry(entry.key)).thenReturn(entry)
+            collectionListener.onEntryAdded(entry)
+
+            // At the same time, the promoted notification chip is tapped
+            statusBarNotificationChipsInteractor.onPromotedNotificationChipTapped(promotedEntry.key)
+            executor.advanceClockToLast()
+            executor.runAllReady()
+
+            // WHEN we finalize the pipeline
+            beforeTransformGroupsListener.onBeforeTransformGroups(listOf(promotedEntry, entry))
+            beforeFinalizeFilterListener.onBeforeFinalizeFilter(listOf(promotedEntry, entry))
+
+            // THEN the promoted entry is shown as a HUN, *not* the new entry
+            finishBind(promotedEntry)
+            verify(headsUpManager).showNotification(promotedEntry)
+
+            verify(headsUpViewBinder, never()).bindHeadsUpView(eq(entry), any())
+            verify(headsUpManager, never()).showNotification(entry)
+        }
 
     @Test
     fun testTransferIsolatedChildAlert_withGroupAlertSummary() {
@@ -862,7 +970,7 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
         verify(launchFullScreenIntentProvider).launchFullScreenIntent(entry)
         verifyLoggedFullScreenIntentDecision(
             entry,
-            FullScreenIntentDecision.FSI_DEVICE_NOT_INTERACTIVE
+            FullScreenIntentDecision.FSI_DEVICE_NOT_INTERACTIVE,
         )
     }
 
@@ -885,7 +993,7 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
         verify(launchFullScreenIntentProvider, never()).launchFullScreenIntent(any())
         verifyLoggedFullScreenIntentDecision(
             entry,
-            FullScreenIntentDecision.NO_FSI_SUPPRESSED_ONLY_BY_DND
+            FullScreenIntentDecision.NO_FSI_SUPPRESSED_ONLY_BY_DND,
         )
     }
 
@@ -899,7 +1007,7 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
         verify(launchFullScreenIntentProvider, never()).launchFullScreenIntent(any())
         verifyLoggedFullScreenIntentDecision(
             entry,
-            FullScreenIntentDecision.NO_FSI_SUPPRESSED_ONLY_BY_DND
+            FullScreenIntentDecision.NO_FSI_SUPPRESSED_ONLY_BY_DND,
         )
         clearInterruptionProviderInvocations()
 
@@ -917,7 +1025,7 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
         verify(headsUpManager, never()).showNotification(any())
         verifyLoggedFullScreenIntentDecision(
             entry,
-            FullScreenIntentDecision.FSI_DEVICE_NOT_INTERACTIVE
+            FullScreenIntentDecision.FSI_DEVICE_NOT_INTERACTIVE,
         )
         clearInterruptionProviderInvocations()
 
@@ -942,7 +1050,7 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
         verify(launchFullScreenIntentProvider, never()).launchFullScreenIntent(any())
         verifyLoggedFullScreenIntentDecision(
             entry,
-            FullScreenIntentDecision.NO_FSI_SUPPRESSED_ONLY_BY_DND
+            FullScreenIntentDecision.NO_FSI_SUPPRESSED_ONLY_BY_DND,
         )
         clearInterruptionProviderInvocations()
 
@@ -975,7 +1083,7 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
         verify(headsUpManager, never()).showNotification(any())
         verifyLoggedFullScreenIntentDecision(
             entry,
-            FullScreenIntentDecision.FSI_DEVICE_NOT_INTERACTIVE
+            FullScreenIntentDecision.FSI_DEVICE_NOT_INTERACTIVE,
         )
         clearInterruptionProviderInvocations()
     }
@@ -1070,7 +1178,7 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
 
     private fun setShouldFullScreen(
         entry: NotificationEntry,
-        originalDecision: FullScreenIntentDecision
+        originalDecision: FullScreenIntentDecision,
     ) {
         whenever(visualInterruptionDecisionProvider.makeUnloggedFullScreenIntentDecision(entry))
             .thenAnswer { FullScreenIntentDecisionImpl(entry, originalDecision) }
@@ -1078,7 +1186,7 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
 
     private fun verifyLoggedFullScreenIntentDecision(
         entry: NotificationEntry,
-        originalDecision: FullScreenIntentDecision
+        originalDecision: FullScreenIntentDecision,
     ) {
         val decision = withArgCaptor {
             verify(visualInterruptionDecisionProvider).logFullScreenIntentDecision(capture())

@@ -51,6 +51,7 @@ import android.hardware.SensorPrivacyManager.Sensors;
 import android.hardware.SensorPrivacyManagerInternal;
 import android.hardware.display.DisplayManagerInternal;
 import android.hardware.display.DisplayViewport;
+import android.hardware.input.AidlInputGestureData;
 import android.hardware.input.HostUsiVersion;
 import android.hardware.input.IInputDeviceBatteryListener;
 import android.hardware.input.IInputDeviceBatteryState;
@@ -63,6 +64,7 @@ import android.hardware.input.IKeyboardBacklightListener;
 import android.hardware.input.IStickyModifierStateListener;
 import android.hardware.input.ITabletModeChangedListener;
 import android.hardware.input.InputDeviceIdentifier;
+import android.hardware.input.InputGestureData;
 import android.hardware.input.InputManager;
 import android.hardware.input.InputSensorInfo;
 import android.hardware.input.InputSettings;
@@ -2985,8 +2987,42 @@ public class InputManagerService extends IInputManager.Stub
         mKeyGestureController.unregisterKeyGestureHandler(handler, Binder.getCallingPid());
     }
 
+    @Override
+    @PermissionManuallyEnforced
+    public int addCustomInputGesture(@NonNull AidlInputGestureData inputGestureData) {
+        enforceManageKeyGesturePermission();
+
+        Objects.requireNonNull(inputGestureData);
+        return mKeyGestureController.addCustomInputGesture(UserHandle.getCallingUserId(),
+                inputGestureData);
+    }
+
+    @Override
+    @PermissionManuallyEnforced
+    public int removeCustomInputGesture(@NonNull AidlInputGestureData inputGestureData) {
+        enforceManageKeyGesturePermission();
+
+        Objects.requireNonNull(inputGestureData);
+        return mKeyGestureController.removeCustomInputGesture(UserHandle.getCallingUserId(),
+                inputGestureData);
+    }
+
+    @Override
+    @PermissionManuallyEnforced
+    public void removeAllCustomInputGestures() {
+        enforceManageKeyGesturePermission();
+
+        mKeyGestureController.removeAllCustomInputGestures(UserHandle.getCallingUserId());
+    }
+
+    @Override
+    public AidlInputGestureData[] getCustomInputGestures() {
+        return mKeyGestureController.getCustomInputGestures(UserHandle.getCallingUserId());
+    }
+
     private void handleCurrentUserChanged(@UserIdInt int userId) {
         mCurrentUserId = userId;
+        mKeyGestureController.setCurrentUserId(userId);
     }
 
     /**

@@ -194,7 +194,6 @@ public abstract class CombinedVibration implements Parcelable {
         int[] getAvailableVibratorIds();
 
         /** Adapts a {@link VibrationEffect} to a given vibrator. */
-        @NonNull
         VibrationEffect adaptToVibrator(int vibratorId, @NonNull VibrationEffect effect);
     }
 
@@ -442,6 +441,10 @@ public abstract class CombinedVibration implements Parcelable {
             boolean hasSameEffects = true;
             for (int vibratorId : adapter.getAvailableVibratorIds()) {
                 VibrationEffect newEffect = adapter.adaptToVibrator(vibratorId, mEffect);
+                if (newEffect == null) {
+                    // The vibration effect contains unsupported segments and cannot be played.
+                    return null;
+                }
                 combination.addVibrator(vibratorId, newEffect);
                 hasSameEffects &= mEffect.equals(newEffect);
             }
@@ -649,6 +652,10 @@ public abstract class CombinedVibration implements Parcelable {
                 int vibratorId = mEffects.keyAt(i);
                 VibrationEffect effect = mEffects.valueAt(i);
                 VibrationEffect newEffect = adapter.adaptToVibrator(vibratorId, effect);
+                if (newEffect == null) {
+                    // The vibration effect contains unsupported segments and cannot be played.
+                    return null;
+                }
                 combination.addVibrator(vibratorId, newEffect);
                 hasSameEffects &= effect.equals(newEffect);
             }

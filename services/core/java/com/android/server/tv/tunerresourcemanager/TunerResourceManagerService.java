@@ -16,6 +16,8 @@
 
 package com.android.server.tv.tunerresourcemanager;
 
+import static android.media.tv.flags.Flags.setResourceHolderRetain;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
@@ -225,6 +227,14 @@ public class TunerResourceManagerService extends SystemService implements IBinde
             enforceTrmAccessPermission("hasUnusedFrontend");
             synchronized (mLock) {
                 return hasUnusedFrontendInternal(frontendType);
+            }
+        }
+
+        @Override
+        public void setResourceHolderRetain(int clientId, boolean resourceHolderRetain) {
+            enforceTrmAccessPermission("setResourceHolderRetain");
+            synchronized (mLock) {
+                getClientProfile(clientId).setResourceHolderRetain(resourceHolderRetain);
             }
         }
 
@@ -1066,8 +1076,10 @@ public class TunerResourceManagerService extends SystemService implements IBinde
             // request client has higher priority.
             if (inUseLowestPriorityFrontend != null
                     && ((requestClient.getPriority() > currentLowestPriority)
-                    || ((requestClient.getPriority() == currentLowestPriority)
-                    && isRequestFromSameProcess))) {
+                            || ((requestClient.getPriority() == currentLowestPriority)
+                                    && isRequestFromSameProcess
+                                    && !(setResourceHolderRetain()
+                                            && requestClient.shouldResourceHolderRetain())))) {
                 frontendHandle[0] = inUseLowestPriorityFrontend.getHandle();
                 reclaimOwnerId[0] = inUseLowestPriorityFrontend.getOwnerClientId();
                 return true;
@@ -1249,9 +1261,11 @@ public class TunerResourceManagerService extends SystemService implements IBinde
             // When all the resources are occupied, grant the lowest priority resource if the
             // request client has higher priority.
             if (inUseLowestPriorityLnb != null
-                    && ((requestClient.getPriority() > currentLowestPriority) || (
-                    (requestClient.getPriority() == currentLowestPriority)
-                        && isRequestFromSameProcess))) {
+                    && ((requestClient.getPriority() > currentLowestPriority)
+                            || ((requestClient.getPriority() == currentLowestPriority)
+                                    && isRequestFromSameProcess
+                                    && !(setResourceHolderRetain()
+                                            && requestClient.shouldResourceHolderRetain())))) {
                 lnbHandle[0] = inUseLowestPriorityLnb.getHandle();
                 reclaimOwnerId[0] = inUseLowestPriorityLnb.getOwnerClientId();
                 return true;
@@ -1335,8 +1349,10 @@ public class TunerResourceManagerService extends SystemService implements IBinde
             // request client has higher priority.
             if (lowestPriorityOwnerId != INVALID_CLIENT_ID
                     && ((requestClient.getPriority() > currentLowestPriority)
-                    || ((requestClient.getPriority() == currentLowestPriority)
-                    && isRequestFromSameProcess))) {
+                            || ((requestClient.getPriority() == currentLowestPriority)
+                                    && isRequestFromSameProcess
+                                    && !(setResourceHolderRetain()
+                                            && requestClient.shouldResourceHolderRetain())))) {
                 casSessionHandle[0] = cas.getHandle();
                 reclaimOwnerId[0] = lowestPriorityOwnerId;
                 return true;
@@ -1420,8 +1436,10 @@ public class TunerResourceManagerService extends SystemService implements IBinde
             // request client has higher priority.
             if (lowestPriorityOwnerId != INVALID_CLIENT_ID
                     && ((requestClient.getPriority() > currentLowestPriority)
-                    || ((requestClient.getPriority() == currentLowestPriority)
-                    && isRequestFromSameProcess))) {
+                            || ((requestClient.getPriority() == currentLowestPriority)
+                                    && isRequestFromSameProcess
+                                    && !(setResourceHolderRetain()
+                                            && requestClient.shouldResourceHolderRetain())))) {
                 ciCamHandle[0] = ciCam.getHandle();
                 reclaimOwnerId[0] = lowestPriorityOwnerId;
                 return true;
@@ -1655,9 +1673,11 @@ public class TunerResourceManagerService extends SystemService implements IBinde
             // When all the resources are occupied, grant the lowest priority resource if the
             // request client has higher priority.
             if (inUseLowestPriorityDemux != null
-                    && ((requestClient.getPriority() > currentLowestPriority) || (
-                    (requestClient.getPriority() == currentLowestPriority)
-                        && isRequestFromSameProcess))) {
+                    && ((requestClient.getPriority() > currentLowestPriority)
+                            || ((requestClient.getPriority() == currentLowestPriority)
+                                    && isRequestFromSameProcess
+                                    && !(setResourceHolderRetain()
+                                            && requestClient.shouldResourceHolderRetain())))) {
                 demuxHandle[0] = inUseLowestPriorityDemux.getHandle();
                 reclaimOwnerId[0] = inUseLowestPriorityDemux.getOwnerClientId();
                 return true;

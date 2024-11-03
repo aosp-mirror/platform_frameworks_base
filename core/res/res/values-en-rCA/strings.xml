@@ -1943,6 +1943,7 @@
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Off"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> - <xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_summary_range_words" msgid="7228261413029290750">"<xliff:g id="START">%1$s</xliff:g> to <xliff:g id="END">%2$s</xliff:g>"</string>
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"Any calendar"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> is muting some sounds"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"There\'s an internal problem with your device, and it may be unstable until you factory data reset."</string>
@@ -2424,6 +2425,10 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Send and receive messages without a mobile or Wi-Fi network"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Open Messages"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"How it works"</string>
+    <string name="satellite_manual_selection_state_popup_title" msgid="8545991934926661974">"Turn on \"Automatically select network\""</string>
+    <string name="satellite_manual_selection_state_popup_message" msgid="1928101658551382450">"Turn on \"Automatically select network\" in Settings so your phone can find a network that works with satellite"</string>
+    <string name="satellite_manual_selection_state_popup_ok" msgid="2459664752624985095">"Turn on"</string>
+    <string name="satellite_manual_selection_state_popup_cancel" msgid="973605633339469252">"Go back"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Pending..."</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Set up Fingerprint Unlock again"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> can no longer be recognized."</string>

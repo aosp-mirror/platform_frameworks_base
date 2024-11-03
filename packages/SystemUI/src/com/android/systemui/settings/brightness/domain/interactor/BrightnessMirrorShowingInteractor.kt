@@ -23,9 +23,12 @@ import javax.inject.Inject
 @SysUISingleton
 class BrightnessMirrorShowingInteractor
 @Inject
-constructor(
-    private val brightnessMirrorShowingRepository: BrightnessMirrorShowingRepository,
-) {
+constructor(private val brightnessMirrorShowingRepository: BrightnessMirrorShowingRepository) {
+    /**
+     * Whether a brightness mirror is showing (either as a compose overlay or as a separate mirror).
+     *
+     * This can be used to determine whether other views/composables have to be hidden.
+     */
     val isShowing = brightnessMirrorShowingRepository.isShowing
 
     fun setMirrorShowing(showing: Boolean) {

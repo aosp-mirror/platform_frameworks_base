@@ -18,12 +18,15 @@ package com.android.systemui.volume
 
 import android.app.activityManager
 import android.app.keyguardManager
+import android.content.Intent
 import android.content.applicationContext
 import android.content.packageManager
+import android.content.testableContext
 import android.media.AudioManager
 import android.media.IVolumeController
 import android.os.Handler
 import android.os.looper
+import android.os.testableLooper
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
@@ -34,6 +37,8 @@ import androidx.test.filters.SmallTest
 import com.android.settingslib.volume.data.model.VolumeControllerEvent
 import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.broadcast.broadcastDispatcher
+import com.android.systemui.broadcast.broadcastDispatcherContext
 import com.android.systemui.dump.dumpManager
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.keyguard.wakefulnessLifecycle
@@ -81,10 +86,11 @@ class VolumeDialogControllerImplTestKt : SysuiTestCase() {
             audioRepository.init()
             threadFactory =
                 FakeThreadFactory(FakeExecutor(fakeSystemClock)).apply { setLooper(looper) }
+            broadcastDispatcherContext = testableContext
             underTest =
                 VolumeDialogControllerImpl(
                         applicationContext,
-                        mock {},
+                        broadcastDispatcher,
                         mock {
                             on { ringerMode }.thenReturn(mock<RingerModeLiveData> {})
                             on { ringerModeInternal }.thenReturn(mock<RingerModeLiveData> {})
@@ -109,6 +115,23 @@ class VolumeDialogControllerImplTestKt : SysuiTestCase() {
                         setEnableDialogs(true, true)
                         addCallback(callbacks, Handler(looper))
                     }
+        }
+
+    @Test
+    fun broadcastEvent_sendsChangesOnce() =
+        with(kosmos) {
+            testScope.runTest {
+                whenever(audioManager.getLastAudibleStreamVolume(any())).thenReturn(1)
+                broadcastDispatcher.sendIntentToMatchingReceiversOnly(
+                    applicationContext,
+                    Intent(AudioManager.ACTION_VOLUME_CHANGED).apply {
+                        putExtra(AudioManager.EXTRA_VOLUME_STREAM_TYPE, AudioManager.STREAM_SYSTEM)
+                    },
+                )
+                testableLooper.processAllMessages()
+
+                verify(callbacks) { 1 * { onStateChanged(any()) } }
+            }
         }
 
     @Test

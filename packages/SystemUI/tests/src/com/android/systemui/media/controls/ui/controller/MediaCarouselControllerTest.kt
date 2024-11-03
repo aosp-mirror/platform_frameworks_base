@@ -48,7 +48,7 @@ import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticati
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.kosmos.unconfinedTestDispatcher
+import com.android.systemui.kosmos.useUnconfinedTestDispatcher
 import com.android.systemui.media.controls.MediaTestUtils
 import com.android.systemui.media.controls.domain.pipeline.EMPTY_SMARTSPACE_MEDIA_DATA
 import com.android.systemui.media.controls.domain.pipeline.MediaDataManager
@@ -73,7 +73,7 @@ import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.testKosmos
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.settings.GlobalSettings
-import com.android.systemui.util.settings.unconfinedDispatcherFakeSettings
+import com.android.systemui.util.settings.fakeSettings
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import java.util.Locale
@@ -119,9 +119,9 @@ private const val PLAYING_LOCAL = "playing local"
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 @RunWith(ParameterizedAndroidJunit4::class)
 class MediaCarouselControllerTest(flags: FlagsParameterization) : SysuiTestCase() {
-    private val kosmos = testKosmos()
-    private val testDispatcher = kosmos.unconfinedTestDispatcher
-    private val secureSettings = kosmos.unconfinedDispatcherFakeSettings
+    private val kosmos = testKosmos().useUnconfinedTestDispatcher()
+    private val testDispatcher = kosmos.testDispatcher
+    private val secureSettings = kosmos.fakeSettings
 
     @Mock lateinit var mediaControlPanelFactory: Provider<MediaControlPanel>
     @Mock lateinit var mediaViewControllerFactory: Provider<MediaViewController>

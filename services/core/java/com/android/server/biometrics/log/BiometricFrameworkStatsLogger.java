@@ -115,7 +115,7 @@ public class BiometricFrameworkStatsLogger {
     /** {@see FrameworkStatsLog.BIOMETRIC_ENROLLED}. */
     public void enroll(int statsModality, int statsAction, int statsClient,
             int targetUserId, long latency, boolean enrollSuccessful, float ambientLightLux,
-            int source) {
+            int source, int templateId) {
         FrameworkStatsLog.write(FrameworkStatsLog.BIOMETRIC_ENROLLED,
                 statsModality,
                 targetUserId,
@@ -124,7 +124,27 @@ public class BiometricFrameworkStatsLogger {
                 -1, /* sensorId */
                 ambientLightLux,
                 source,
-                -1 /* templateId*/);
+                templateId);
+    }
+
+    /** {@see FrameworkStatsLog.BIOMETRIC_UNENROLLED} */
+    public void unenrolled(int statsModality, int targetUserId, int reason, int templateId) {
+        FrameworkStatsLog.write(FrameworkStatsLog.BIOMETRIC_UNENROLLED,
+                statsModality,
+                targetUserId,
+                reason,
+                templateId);
+    }
+
+    /** {@see FrameworkStatsLog.BIOMETRIC_ENUMERATED} */
+    public void enumerated(int statsModality, int targetUserId, int result, int[] templateIdsHal,
+            int[] templateIdsFramework) {
+        FrameworkStatsLog.write(FrameworkStatsLog.BIOMETRIC_ENUMERATED,
+                statsModality,
+                targetUserId,
+                result,
+                templateIdsHal,
+                templateIdsFramework);
     }
 
     /** {@see FrameworkStatsLog.BIOMETRIC_ERROR_OCCURRED}. */

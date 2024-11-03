@@ -56,7 +56,7 @@ import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.OperatorNameView;
 import com.android.systemui.statusbar.OperatorNameViewController;
 import com.android.systemui.statusbar.StatusBarState;
-import com.android.systemui.statusbar.chips.ron.shared.StatusBarRonChips;
+import com.android.systemui.statusbar.chips.notification.shared.StatusBarNotifChips;
 import com.android.systemui.statusbar.core.StatusBarConnectedDisplays;
 import com.android.systemui.statusbar.core.StatusBarSimpleFragment;
 import com.android.systemui.statusbar.disableflags.DisableFlagsLogger;
@@ -657,7 +657,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         }
         boolean showSecondaryOngoingActivityChip =
                 Flags.statusBarScreenSharingChips()
-                        && StatusBarRonChips.isEnabled()
+                        && StatusBarNotifChips.isEnabled()
                         && mHasSecondaryOngoingActivity;
 
         return new StatusBarVisibilityModel(
@@ -699,7 +699,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
 
         boolean showSecondaryOngoingActivityChip =
                 // Secondary chips are only supported when RONs are enabled.
-                StatusBarRonChips.isEnabled()
+                StatusBarNotifChips.isEnabled()
                         && visibilityModel.getShowSecondaryOngoingActivityChip()
                         && !disableNotifications;
         if (showSecondaryOngoingActivityChip) {
@@ -832,7 +832,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     }
 
     private void showSecondaryOngoingActivityChip(boolean animate) {
-        StatusBarRonChips.assertInNewMode();
+        StatusBarNotifChips.assertInNewMode();
         StatusBarSimpleFragment.assertInLegacyMode();
         animateShow(mSecondaryOngoingActivityChip, animate);
     }

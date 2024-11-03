@@ -554,7 +554,7 @@ class BroadcastController {
             }
             BroadcastFilter bf = new BroadcastFilter(filter, rl, callerPackage, callerFeatureId,
                     receiverId, permission, callingUid, userId, instantApp, visibleToInstantApps,
-                    exported);
+                    exported, mService.mPlatformCompat);
             if (rl.containsFilter(filter)) {
                 Slog.w(TAG, "Receiver with filter " + filter
                         + " already registered for pid " + rl.pid
@@ -676,6 +676,21 @@ class BroadcastController {
         mRegisteredReceivers.remove(rl.receiver.asBinder());
         for (int i = rl.size() - 1; i >= 0; i--) {
             mReceiverResolver.removeFilter(rl.get(i));
+        }
+    }
+
+    List<IntentFilter> getRegisteredIntentFilters(IIntentReceiver receiver) {
+        synchronized (mService) {
+            final ReceiverList rl = mRegisteredReceivers.get(receiver.asBinder());
+            if (rl == null) {
+                return null;
+            }
+            final ArrayList<IntentFilter> filters = new ArrayList<>();
+            final int count = rl.size();
+            for (int i = 0; i < count; ++i) {
+                filters.add(rl.get(i));
+            }
+            return filters;
         }
     }
 

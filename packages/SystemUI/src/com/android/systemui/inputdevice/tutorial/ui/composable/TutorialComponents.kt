@@ -28,13 +28,17 @@ import androidx.compose.ui.res.stringResource
 import com.android.systemui.res.R
 
 @Composable
-fun DoneButton(onDoneButtonClicked: () -> Unit, modifier: Modifier = Modifier) {
+fun DoneButton(
+    onDoneButtonClicked: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+) {
     Row(
         horizontalArrangement = Arrangement.End,
         verticalAlignment = Alignment.CenterVertically,
-        modifier = modifier.fillMaxWidth()
+        modifier = modifier.fillMaxWidth(),
     ) {
-        Button(onClick = onDoneButtonClicked) {
+        Button(onClick = onDoneButtonClicked, enabled = enabled) {
             Text(stringResource(R.string.touchpad_tutorial_done_button))
         }
     }

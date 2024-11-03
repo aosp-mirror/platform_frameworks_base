@@ -660,8 +660,13 @@ public final class MediaProjectionManagerService extends SystemService
 
     // TODO(b/261563516): Remove internal method and test aidl directly, here and elsewhere.
     @VisibleForTesting
-    MediaProjection createProjectionInternal(int uid, String packageName, int type,
-            boolean isPermanentGrant, UserHandle callingUser) {
+    MediaProjection createProjectionInternal(
+            int uid,
+            String packageName,
+            int type,
+            boolean isPermanentGrant,
+            UserHandle callingUser,
+            int displayId) {
         MediaProjection projection;
         ApplicationInfo ai;
         try {
@@ -672,8 +677,14 @@ public final class MediaProjectionManagerService extends SystemService
         }
         final long callingToken = Binder.clearCallingIdentity();
         try {
-            projection = new MediaProjection(type, uid, packageName, ai.targetSdkVersion,
-                    ai.isPrivilegedApp());
+            projection =
+                    new MediaProjection(
+                            type,
+                            uid,
+                            packageName,
+                            ai.targetSdkVersion,
+                            ai.isPrivilegedApp(),
+                            displayId);
             if (isPermanentGrant) {
                 mAppOps.setMode(AppOpsManager.OP_PROJECT_MEDIA,
                         projection.uid, projection.packageName, AppOpsManager.MODE_ALLOWED);
@@ -773,11 +784,16 @@ public final class MediaProjectionManagerService extends SystemService
             return hasPermission;
         }
 
-        @Override // Binder call
-        public IMediaProjection createProjection(int processUid, String packageName, int type,
-                boolean isPermanentGrant) {
+        // Binder call
+        @Override
+        public IMediaProjection createProjection(
+                int processUid,
+                String packageName,
+                int type,
+                boolean isPermanentGrant,
+                int displayId) {
             if (mContext.checkCallingPermission(MANAGE_MEDIA_PROJECTION)
-                        != PackageManager.PERMISSION_GRANTED) {
+                    != PackageManager.PERMISSION_GRANTED) {
                 throw new SecurityException("Requires MANAGE_MEDIA_PROJECTION in order to grant "
                         + "projection permission");
             }
@@ -785,8 +801,8 @@ public final class MediaProjectionManagerService extends SystemService
                 throw new IllegalArgumentException("package name must not be empty");
             }
             final UserHandle callingUser = Binder.getCallingUserHandle();
-            return createProjectionInternal(processUid, packageName, type, isPermanentGrant,
-                    callingUser);
+            return createProjectionInternal(
+                    processUid, packageName, type, isPermanentGrant, callingUser, displayId);
         }
 
         @Override // Binder call
@@ -1074,6 +1090,10 @@ public final class MediaProjectionManagerService extends SystemService
         private final int mTargetSdkVersion;
         private final boolean mIsPrivileged;
         private final int mType;
+        // Values for tracking token validity.
+        // Timeout value to compare creation time against.
+        private final long mTimeoutMs = mDefaultTimeoutMs;
+        private final int mDisplayId;
 
         private IMediaProjectionCallback mCallback;
         private IBinder mToken;
@@ -1082,9 +1102,6 @@ public final class MediaProjectionManagerService extends SystemService
         private int mTaskId = -1;
         private LaunchCookie mLaunchCookie = null;
 
-        // Values for tracking token validity.
-        // Timeout value to compare creation time against.
-        private long mTimeoutMs = mDefaultTimeoutMs;
         // Count of number of times IMediaProjection#start is invoked.
         private int mCountStarts = 0;
         // Set if MediaProjection#createVirtualDisplay has been invoked previously (it
@@ -1093,8 +1110,13 @@ public final class MediaProjectionManagerService extends SystemService
         // The associated session details already sent to WindowManager.
         private ContentRecordingSession mSession;
 
-        MediaProjection(int type, int uid, String packageName, int targetSdkVersion,
-                boolean isPrivileged) {
+        MediaProjection(
+                int type,
+                int uid,
+                String packageName,
+                int targetSdkVersion,
+                boolean isPrivileged,
+                int displayId) {
             mType = type;
             this.uid = uid;
             this.packageName = packageName;
@@ -1104,6 +1126,7 @@ public final class MediaProjectionManagerService extends SystemService
             mCreateTimeMs = mClock.uptimeMillis();
             mActivityManagerInternal.notifyMediaProjectionEvent(uid, asBinder(),
                     MEDIA_PROJECTION_TOKEN_EVENT_CREATED);
+            mDisplayId = displayId;
         }
 
         int getVirtualDisplayId() {
@@ -1317,6 +1340,11 @@ public final class MediaProjectionManagerService extends SystemService
         public int getTaskId() {
             getTaskId_enforcePermission();
             return mTaskId;
+        }
+
+        @Override // Binder call
+        public int getDisplayId() {
+            return mDisplayId;
         }
 
         @android.annotation.EnforcePermission(android.Manifest.permission.MANAGE_MEDIA_PROJECTION)

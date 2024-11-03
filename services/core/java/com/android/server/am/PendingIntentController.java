@@ -157,7 +157,8 @@ public class PendingIntentController {
 
             PendingIntentRecord.Key key = new PendingIntentRecord.Key(type, packageName, featureId,
                     token, resultWho, requestCode, intents, resolvedTypes, flags,
-                    new SafeActivityOptions(opts), userId);
+                    new SafeActivityOptions(opts, Binder.getCallingPid(), Binder.getCallingUid()),
+                    userId);
             WeakReference<PendingIntentRecord> ref;
             ref = mIntentSenderRecords.get(key);
             PendingIntentRecord rec = ref != null ? ref.get() : null;

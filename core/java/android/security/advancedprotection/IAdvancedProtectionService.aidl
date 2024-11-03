@@ -16,6 +16,7 @@
 
 package android.security.advancedprotection;
 
+import android.security.advancedprotection.AdvancedProtectionFeature;
 import android.security.advancedprotection.IAdvancedProtectionCallback;
 
 /**
@@ -32,4 +33,6 @@ interface IAdvancedProtectionService {
     void unregisterAdvancedProtectionCallback(IAdvancedProtectionCallback callback);
     @EnforcePermission("SET_ADVANCED_PROTECTION_MODE")
     void setAdvancedProtectionEnabled(boolean enabled);
+    @EnforcePermission("SET_ADVANCED_PROTECTION_MODE")
+    List<AdvancedProtectionFeature> getAdvancedProtectionFeatures();
 }

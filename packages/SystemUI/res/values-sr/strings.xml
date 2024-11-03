@@ -72,7 +72,7 @@
     <string name="usb_disable_contaminant_detection" msgid="3827082183595978641">"Омогући USB"</string>
     <string name="learn_more" msgid="4690632085667273811">"Сазнајте више"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Снимак екрана"</string>
-    <string name="global_action_smart_lock_disabled" msgid="6286551337177954859">"Продужено откључавање је онемогућено"</string>
+    <string name="global_action_smart_lock_disabled" msgid="6286551337177954859">"Продужено откључано је онемогућено"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"је послао/ла слику"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Чување снимка екрана..."</string>
     <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"Снимак екрана се чува на пословном профилу…"</string>
@@ -112,6 +112,8 @@
     <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"Желите да снимите екран?"</string>
     <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"Сними једну апликацију"</string>
     <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"Сними цео екран"</string>
+    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen_for_display (3754611651558838691) -->
+    <skip />
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"Када снимате цео екран, снима се све што је на њему. Зато пазите на лозинке, информације о плаћању, поруке, слике, аудио и видео садржај."</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"Када снимате апликацију, снима се сав садржај који се приказује или пушта у њој. Зато пазите на лозинке, информације о плаћању, поруке, слике, аудио и видео садржај."</string>
     <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"Сними екран"</string>
@@ -136,11 +138,17 @@
     <string name="screenrecord_stop_dialog_message_specific_app" msgid="5995770227684523244">"Тренутно снимате: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="screenrecord_stop_dialog_button" msgid="2883812564938194350">"Заустави снимање"</string>
     <string name="share_to_app_chip_accessibility_label" msgid="4210256229976947065">"Екран се дели"</string>
+    <!-- no translation found for share_to_app_chip_accessibility_label_generic (5517431657924536133) -->
+    <skip />
     <string name="share_to_app_stop_dialog_title" msgid="9212915050910250438">"Желите да зауставите дељење екрана?"</string>
+    <!-- no translation found for share_to_app_stop_dialog_title_generic (9079161538135843648) -->
+    <skip />
     <string name="share_to_app_stop_dialog_message_entire_screen_with_host_app" msgid="522823522115375414">"Тренутно делите цео екран са: <xliff:g id="HOST_APP_NAME">%1$s</xliff:g>"</string>
     <string name="share_to_app_stop_dialog_message_entire_screen" msgid="5090115386271179270">"Тренутно делите цео екран са апликацијом"</string>
     <string name="share_to_app_stop_dialog_message_single_app_specific" msgid="5923772039347985172">"Тренутно делите: <xliff:g id="APP_BEING_SHARED_NAME">%1$s</xliff:g>"</string>
     <string name="share_to_app_stop_dialog_message_single_app_generic" msgid="6681016774654578261">"Тренутно делите апликацију"</string>
+    <!-- no translation found for share_to_app_stop_dialog_message_generic (7622174291691249392) -->
+    <skip />
     <string name="share_to_app_stop_dialog_button" msgid="6334056916284230217">"Заустави дељење"</string>
     <string name="cast_screen_to_other_device_chip_accessibility_label" msgid="4687917476203009885">"Пребацује се екран"</string>
     <string name="cast_to_other_device_stop_dialog_title" msgid="7836517190930357326">"Желите да зауставите пребацивање?"</string>
@@ -515,6 +523,10 @@
     <string name="communal_widget_picker_title" msgid="1953369090475731663">"Виџети за закључани екран"</string>
     <string name="communal_widget_picker_description" msgid="490515450110487871">"Сви могу да виде виџете на закључаном екрану, чак и када је таблет закључан."</string>
     <string name="accessibility_action_label_unselect_widget" msgid="1041811747619468698">"поништи избор виџета"</string>
+    <!-- no translation found for accessibility_action_label_shrink_widget (8259511040536438771) -->
+    <skip />
+    <!-- no translation found for accessibility_action_label_expand_widget (9190524260912211759) -->
+    <skip />
     <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"Виџети за закључани екран"</string>
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"Да бисте отворили апликацију која користи виџет, треба да потврдите да сте то ви. Имајте у виду да свако може да га види, чак и када је таблет закључан. Неки виџети можда нису намењени за закључани екран и можда није безбедно да их тамо додате."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"Важи"</string>
@@ -555,7 +567,7 @@
     <string name="media_projection_entry_cast_permission_dialog_option_text_entire_screen" msgid="8389508187954155307">"Пребаци цео екран"</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="4040447861037324017">"Када пребацујете цео екран, види се све што је на њему. Зато пазите на лозинке, информације о плаћању, поруке, слике, аудио и видео садржај."</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="7487834861348460736">"Када пребацујете апликацију, види се сав садржај који се приказује или пушта у њој. Зато пазите на лозинке, информације о плаћању, поруке, слике, аудио и видео садржај."</string>
-    <string name="media_projection_entry_cast_permission_dialog_continue_entire_screen" msgid="3261124185304676483">"Пребации екран"</string>
+    <string name="media_projection_entry_cast_permission_dialog_continue_entire_screen" msgid="3261124185304676483">"Пребаци екран"</string>
     <string name="media_projection_entry_cast_app_selector_title" msgid="6323062146661922387">"Одаберите апликацију коју желите да пребаците"</string>
     <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"Желите да почнете да делите?"</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"Када делите, снимате или пребацујете, Android има приступ комплетном садржају који је видљив на екрану или се пушта на уређају. Зато пазите на лозинке, информације о плаћању, поруке, слике, и аудио и видео садржај."</string>
@@ -571,6 +583,8 @@
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Обриши све"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Управљај"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Историја"</string>
+    <string name="notification_settings_button_description" msgid="2441994740884163889">"Подешавања обавештења"</string>
+    <string name="notification_history_button_description" msgid="1578657591405033383">"Историја обавештења"</string>
     <string name="notification_section_header_incoming" msgid="850925217908095197">"Ново"</string>
     <string name="notification_section_header_gentle" msgid="6804099527336337197">"Нечујно"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Обавештења"</string>
@@ -849,13 +863,13 @@
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"Отвори листу апликација"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"Отвори подешавања"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Отвори Помоћник"</string>
-    <string name="group_system_lock_screen" msgid="7391191300363416543">"Закључавање екрана"</string>
+    <string name="group_system_lock_screen" msgid="7391191300363416543">"Откључавање екрана"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"Направи белешку"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"Обављање више задатака истовремено"</string>
-    <string name="system_multitasking_rhs" msgid="8714224917276297810">"Користите подељени екран са актуелном апликацијом с десне стране"</string>
-    <string name="system_multitasking_lhs" msgid="8402954791206308783">"Користите подељени екран са актуелном апликацијом с леве стране"</string>
+    <string name="system_multitasking_rhs" msgid="8714224917276297810">"Користи подељени екран са том апликацијом с десне стране"</string>
+    <string name="system_multitasking_lhs" msgid="8402954791206308783">"Користи подељени екран са том апликацијом с леве стране"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"Пређи са подељеног екрана на цео екран"</string>
-    <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Пређите у апликацију здесна или испод док користите подељени екран"</string>
+    <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Пређи у апликацију здесна или испод док је подељен екран"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"Пређите у апликацију слева или изнад док користите подељени екран"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"У режиму подељеног екрана: замена једне апликације другом"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Унос"</string>
@@ -1399,14 +1413,19 @@
     <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"Актуелна апликација"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Приступачност"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Тастерске пречице"</string>
+    <!-- no translation found for shortcut_helper_customize_mode_title (1467657117101096033) -->
+    <skip />
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Пречице претраге"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"Нема резултата претраге"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Икона за скупљање"</string>
+    <!-- no translation found for shortcut_helper_customize_button_text (3124983502748069338) -->
+    <skip />
+    <!-- no translation found for shortcut_helper_done_button_text (7249905942125386191) -->
+    <skip />
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Икона за проширивање"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"или"</string>
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"Маркер за превлачење"</string>
-    <!-- no translation found for shortcut_helper_keyboard_settings_buttons_label (6720967595915985259) -->
-    <skip />
+    <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"Подешавања тастатуре"</string>
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"Крећите се помоћу тастатуре"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"Сазнајте више о тастерским пречицама"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"Крећите се помоћу тачпеда"</string>
@@ -1438,14 +1457,14 @@
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Контроле за дом"</string>
     <string name="home_controls_dream_description" msgid="4644150952104035789">"Брз приступ контролама за дом као чувару екрана"</string>
     <string name="volume_undo_action" msgid="5815519725211877114">"Опозови"</string>
-    <string name="back_edu_toast_content" msgid="4530314597378982956">"Да бисте се вратили, превуците улево или удесно са три прста на тачпеду"</string>
+    <string name="back_edu_toast_content" msgid="4530314597378982956">"За назад, превуците улево или удесно са три прста на тачпеду"</string>
     <string name="home_edu_toast_content" msgid="3381071147871955415">"Да бисте отишли на почетни екран, превуците нагоре са три прста на тачпеду"</string>
     <string name="overview_edu_toast_content" msgid="5797030644017804518">"Да бисте прегледали недавне апликације, превуците нагоре и задржите са три прста на тачпеду"</string>
     <string name="all_apps_edu_toast_content" msgid="8807496014667211562">"Да бисте погледали све апликације, притисните тастер радњи на тастатури"</string>
     <string name="redacted_notification_single_line_title" msgid="212019960919261670">"Редиговано"</string>
     <string name="redacted_notification_single_line_text" msgid="8684166405005242945">"Откључајте за приказ"</string>
     <string name="contextual_education_dialog_title" msgid="4630392552837487324">"Контекстуално образовање"</string>
-    <string name="back_edu_notification_title" msgid="5624780717751357278">"Користите тачпед да бисте се вратили"</string>
+    <string name="back_edu_notification_title" msgid="5624780717751357278">"Користите тачпед за враћање назад"</string>
     <string name="back_edu_notification_content" msgid="2497557451540954068">"Превуците улево или удесно са три прста. Додирните да бисте видели више покрета."</string>
     <string name="home_edu_notification_title" msgid="6097902076909654045">"Користите тачпед да бисте отишли на почетни екран"</string>
     <string name="home_edu_notification_content" msgid="6631697734535766588">"Превуците нагоре са три прста. Додирните да бисте видели више покрета."</string>
@@ -1464,8 +1483,6 @@
     <string name="qs_edit_mode_category_providedByApps" msgid="8346112074897919019">"Обезбеђују апликације"</string>
     <string name="qs_edit_mode_category_display" msgid="4749511439121053942">"Екран"</string>
     <string name="qs_edit_mode_category_unknown" msgid="509314252124053550">"Непознато"</string>
-    <!-- no translation found for qs_edit_mode_reset_dialog_title (8841270491554460726) -->
-    <skip />
-    <!-- no translation found for qs_edit_mode_reset_dialog_content (8626426097929954027) -->
-    <skip />
+    <string name="qs_edit_mode_reset_dialog_title" msgid="8841270491554460726">"Ресетујте плочице"</string>
+    <string name="qs_edit_mode_reset_dialog_content" msgid="8626426097929954027">"Желите да ресетујете плочице на првобитни редослед и величине?"</string>
 </resources>

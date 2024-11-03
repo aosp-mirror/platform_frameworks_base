@@ -38,6 +38,7 @@ import com.android.internal.telephony.ICarrierConfigChangeListener;
 import com.android.internal.telephony.ICarrierPrivilegesCallback;
 import com.android.internal.telephony.IPhoneStateListener;
 import com.android.internal.telephony.IOnSubscriptionsChangedListener;
+import com.android.internal.telephony.ISatelliteStateChangeListener;
 
 interface ITelephonyRegistry {
     void addOnSubscriptionsChangedListener(String pkg, String featureId,
@@ -124,4 +125,8 @@ interface ITelephonyRegistry {
     void notifyCarrierRoamingNtnModeChanged(int subId, in boolean active);
     void notifyCarrierRoamingNtnEligibleStateChanged(int subId, in boolean eligible);
     void notifyCarrierRoamingNtnAvailableServicesChanged(int subId, in int[] availableServices);
+
+    void addSatelliteStateChangeListener(ISatelliteStateChangeListener listener, String pkg, String featureId);
+    void removeSatelliteStateChangeListener(ISatelliteStateChangeListener listener, String pkg);
+    void notifySatelliteStateChanged(boolean isEnabled);
 }

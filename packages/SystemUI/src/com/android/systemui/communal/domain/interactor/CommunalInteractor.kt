@@ -40,7 +40,6 @@ import com.android.systemui.communal.shared.model.CommunalContentSize.THIRD
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.communal.shared.model.CommunalWidgetContentModel
 import com.android.systemui.communal.shared.model.EditModeState
-import com.android.systemui.communal.widgets.CommunalAppWidgetHost
 import com.android.systemui.communal.widgets.EditWidgetsActivityStarter
 import com.android.systemui.communal.widgets.WidgetConfigurator
 import com.android.systemui.dagger.SysUISingleton
@@ -108,7 +107,6 @@ constructor(
     keyguardInteractor: KeyguardInteractor,
     keyguardTransitionInteractor: KeyguardTransitionInteractor,
     communalSettingsInteractor: CommunalSettingsInteractor,
-    private val appWidgetHost: CommunalAppWidgetHost,
     private val editWidgetsActivityStarter: EditWidgetsActivityStarter,
     private val userTracker: UserTracker,
     private val activityStarter: ActivityStarter,
@@ -451,7 +449,6 @@ constructor(
                             appWidgetId = widget.appWidgetId,
                             rank = widget.rank,
                             providerInfo = widget.providerInfo,
-                            appWidgetHost = appWidgetHost,
                             inQuietMode = isQuietModeEnabled(widget.providerInfo.profile),
                             size = CommunalContentSize.toSize(widget.spanY),
                         )

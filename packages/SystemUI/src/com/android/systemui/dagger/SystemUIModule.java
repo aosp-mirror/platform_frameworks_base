@@ -70,6 +70,9 @@ import com.android.systemui.haptics.msdl.dagger.MSDLModule;
 import com.android.systemui.inputmethod.InputMethodModule;
 import com.android.systemui.keyboard.KeyboardModule;
 import com.android.systemui.keyevent.data.repository.KeyEventRepositoryModule;
+import com.android.systemui.keyguard.data.quickaffordance.KeyguardDataQuickAffordanceModule;
+import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancesMetricsLogger;
+import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancesMetricsLoggerImpl;
 import com.android.systemui.keyguard.ui.composable.LockscreenContent;
 import com.android.systemui.log.dagger.LogModule;
 import com.android.systemui.log.dagger.MonitorLog;
@@ -227,6 +230,7 @@ import javax.inject.Named;
         InputMethodModule.class,
         KeyEventRepositoryModule.class,
         KeyboardModule.class,
+        KeyguardDataQuickAffordanceModule.class,
         LetterboxModule.class,
         LogModule.class,
         MediaProjectionActivitiesModule.class,
@@ -426,6 +430,11 @@ public abstract class SystemUIModule {
                 notifPipelineFlags,
                 sysuiMainExecutor,
                 sysuiUiBgExecutor));
+    }
+
+    @Provides
+    static KeyguardQuickAffordancesMetricsLogger providesKeyguardQuickAffordancesMetricsLogger() {
+        return new KeyguardQuickAffordancesMetricsLoggerImpl();
     }
 
     @Binds

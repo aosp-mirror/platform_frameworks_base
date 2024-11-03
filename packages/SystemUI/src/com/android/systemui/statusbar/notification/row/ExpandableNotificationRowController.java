@@ -64,6 +64,9 @@ import com.android.systemui.statusbar.policy.dagger.RemoteInputViewSubcomponent;
 import com.android.systemui.util.time.SystemClock;
 import com.android.systemui.wmshell.BubblesManager;
 
+import com.google.android.msdl.data.model.MSDLToken;
+import com.google.android.msdl.domain.MSDLPlayer;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -114,6 +117,7 @@ public class ExpandableNotificationRowController implements NotifViewController 
     private final NotificationDismissibilityProvider mDismissibilityProvider;
     private final IStatusBarService mStatusBarService;
     private final UiEventLogger mUiEventLogger;
+    private final MSDLPlayer mMSDLPlayer;
 
     private final NotificationSettingsController mSettingsController;
 
@@ -273,7 +277,8 @@ public class ExpandableNotificationRowController implements NotifViewController 
             ExpandableNotificationRowDragController dragController,
             NotificationDismissibilityProvider dismissibilityProvider,
             IStatusBarService statusBarService,
-            UiEventLogger uiEventLogger) {
+            UiEventLogger uiEventLogger,
+            MSDLPlayer msdlPlayer) {
         mView = view;
         mListContainer = listContainer;
         mRemoteInputViewSubcomponentFactory = rivSubcomponentFactory;
@@ -309,6 +314,7 @@ public class ExpandableNotificationRowController implements NotifViewController 
         mDismissibilityProvider = dismissibilityProvider;
         mStatusBarService = statusBarService;
         mUiEventLogger = uiEventLogger;
+        mMSDLPlayer = msdlPlayer;
     }
 
     /**
@@ -352,6 +358,9 @@ public class ExpandableNotificationRowController implements NotifViewController 
             }
 
             mView.setLongPressListener((v, x, y, item) -> {
+                if (com.android.systemui.Flags.msdlFeedback()) {
+                    mMSDLPlayer.playToken(MSDLToken.LONG_PRESS, null);
+                }
                 if (mView.isSummaryWithChildren()) {
                     mView.expandNotification();
                     return true;

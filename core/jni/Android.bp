@@ -73,10 +73,12 @@ cc_library_shared_for_libandroid_runtime {
 
     srcs: [
         "android_animation_PropertyValuesHolder.cpp",
+        "android_content_res_ApkAssets.cpp",
         "android_os_SystemClock.cpp",
         "android_os_SystemProperties.cpp",
         "android_os_Trace.cpp",
         "android_text_AndroidCharacter.cpp",
+        "android_util_AssetManager.cpp",
         "android_util_EventLog.cpp",
         "android_util_Log.cpp",
         "android_util_StringBlock.cpp",
@@ -103,18 +105,7 @@ cc_library_shared_for_libandroid_runtime {
     ],
 
     shared_libs: [
-        "libbase",
-        "libcutils",
         "libtracing_perfetto",
-        "libharfbuzz_ng",
-        "liblog",
-        "libmediautils",
-        "libminikin",
-        "libz",
-        "server_configurable_flags",
-        "libaconfig_storage_read_api_cc",
-        "android.database.sqlite-aconfig-cc",
-        "android.media.audiopolicy-aconfig-cc",
     ],
 
     static_libs: [
@@ -203,7 +194,6 @@ cc_library_shared_for_libandroid_runtime {
                 "android_os_incremental_IncrementalManager.cpp",
                 "android_net_LocalSocketImpl.cpp",
                 "android_service_DataLoaderService.cpp",
-                "android_util_AssetManager.cpp",
                 "android_util_Binder.cpp",
                 "android_util_CharsetUtils.cpp",
                 "android_util_MemoryIntArray.cpp",
@@ -251,7 +241,6 @@ cc_library_shared_for_libandroid_runtime {
                 "android_backup_BackupHelperDispatcher.cpp",
                 "android_app_PropertyInvalidatedCache.cpp",
                 "android_app_backup_FullBackup.cpp",
-                "android_content_res_ApkAssets.cpp",
                 "android_content_res_ObbScanner.cpp",
                 "android_content_res_Configuration.cpp",
                 "android_content_res_ResourceTimer.cpp",
@@ -303,6 +292,14 @@ cc_library_shared_for_libandroid_runtime {
             ],
 
             shared_libs: [
+                "libbase",
+                "libharfbuzz_ng",
+                "liblog",
+                "libmediautils",
+                "libminikin",
+                "libz",
+                "android.database.sqlite-aconfig-cc",
+                "android.media.audiopolicy-aconfig-cc",
                 "audioclient-types-aidl-cpp",
                 "audioflinger-aidl-cpp",
                 "audiopolicy-types-aidl-cpp",
@@ -412,20 +409,24 @@ cc_library_shared_for_libandroid_runtime {
                 "frameworks/native/libs/nativebase/include",
                 "frameworks/native/libs/nativewindow/include",
             ],
-            shared_libs: [
-                "libicui18n",
-                "libicuuc",
-            ],
             static_libs: [
                 "libandroidfw",
+                "libbase",
                 "libbinary_parse",
+                "libcutils",
                 "libdng_sdk",
                 "libft2",
+                "libharfbuzz_ng",
                 "libhostgraphics",
                 "libhwui",
+                "libicui18n",
+                "libicuuc",
+                "libicuuc_stubdata",
                 "libimage_type_recognition",
                 "libinput",
                 "libjpeg",
+                "liblog",
+                "libminikin",
                 "libnativehelper_jvm",
                 "libpiex",
                 "libpng",
@@ -435,15 +436,21 @@ cc_library_shared_for_libandroid_runtime {
                 "libwebp-decode",
                 "libwebp-encode",
                 "libwuffs_mirror_release_c",
+                "libz",
                 "libimage_io",
                 "libjpegdecoder",
                 "libjpegencoder",
                 "libultrahdr",
+                "server_configurable_flags",
             ],
+            export_static_lib_headers: [
+                "libnativehelper_jvm",
+                "libui-types",
+            ],
+            stl: "libc++_static",
         },
         host_linux: {
             srcs: [
-                "android_content_res_ApkAssets.cpp",
                 "android_database_CursorWindow.cpp",
                 "android_database_SQLiteCommon.cpp",
                 "android_database_SQLiteConnection.cpp",
@@ -458,7 +465,6 @@ cc_library_shared_for_libandroid_runtime {
                 "android_view_InputEventReceiver.cpp",
                 "android_view_InputEventSender.cpp",
 
-                "android_util_AssetManager.cpp",
                 "android_util_Binder.cpp",
 
                 "android_util_FileObserver.cpp",
@@ -467,13 +473,17 @@ cc_library_shared_for_libandroid_runtime {
                 "libbinderthreadstateutils",
                 "libsqlite",
                 "libgui_window_info_static",
-            ],
-            shared_libs: [
-                // libbinder needs to be shared since it has global state
-                // (e.g. gDefaultServiceManager)
                 "libbinder",
                 "libhidlbase", // libhwbinder is in here
             ],
+        },
+        linux_glibc_x86_64: {
+            ldflags: ["-static-libgcc"],
+            dist: {
+                targets: ["layoutlib"],
+                dir: "layoutlib_native/linux",
+                tag: "stripped_all",
+            },
         },
     },
 }

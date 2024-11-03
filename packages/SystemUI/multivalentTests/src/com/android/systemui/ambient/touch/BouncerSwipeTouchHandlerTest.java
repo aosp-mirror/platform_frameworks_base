@@ -26,6 +26,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -37,12 +38,12 @@ import android.graphics.Rect;
 import android.graphics.Region;
 import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
+import android.platform.test.flag.junit.FlagsParameterization;
 import android.view.GestureDetector;
 import android.view.GestureDetector.OnGestureListener;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 
-import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.UiEventLogger;
@@ -52,9 +53,12 @@ import com.android.systemui.ambient.touch.scrim.ScrimController;
 import com.android.systemui.ambient.touch.scrim.ScrimManager;
 import com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants;
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel;
+import com.android.systemui.flags.SceneContainerFlagParameterizationKt;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.kosmos.KosmosJavaAdapter;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.scene.domain.interactor.SceneInteractor;
+import com.android.systemui.scene.ui.view.WindowRootView;
 import com.android.systemui.shade.ShadeExpansionChangeEvent;
 import com.android.systemui.shared.system.InputChannelCompat;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
@@ -70,10 +74,14 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import java.util.List;
 import java.util.Optional;
 
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4;
+import platform.test.runner.parameterized.Parameters;
+
 @SmallTest
-@RunWith(AndroidJUnit4.class)
+@RunWith(ParameterizedAndroidJunit4.class)
 @DisableFlags(Flags.FLAG_HUBMODE_FULLSCREEN_VERTICAL_SWIPE_FIX)
 public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
     private KosmosJavaAdapter mKosmos;
@@ -122,6 +130,9 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
     Region mRegion;
 
     @Mock
+    WindowRootView mWindowRootView;
+
+    @Mock
     CommunalViewModel mCommunalViewModel;
 
     @Mock
@@ -129,6 +140,8 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
 
     @Captor
     ArgumentCaptor<Rect> mRectCaptor;
+
+    private SceneInteractor mSceneInteractor;
 
     private static final float TOUCH_REGION = .3f;
     private static final int SCREEN_WIDTH_PX = 1024;
@@ -142,9 +155,21 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
             /* flags= */ 0
     );
 
+    @Parameters(name = "{0}")
+    public static List<FlagsParameterization> getParams() {
+        return SceneContainerFlagParameterizationKt.parameterizeSceneContainerFlag();
+    }
+
+    public BouncerSwipeTouchHandlerTest(FlagsParameterization flags) {
+        super();
+        mSetFlagsRule.setFlagsParameterization(flags);
+    }
+
     @Before
     public void setup() {
         mKosmos = new KosmosJavaAdapter(this);
+        mSceneInteractor = spy(mKosmos.getSceneInteractor());
+
         MockitoAnnotations.initMocks(this);
         mTouchHandler = new BouncerSwipeTouchHandler(
                 mKosmos.getTestScope(),
@@ -160,7 +185,10 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
                 MIN_BOUNCER_HEIGHT,
                 mUiEventLogger,
                 mActivityStarter,
-                mKeyguardInteractor);
+                mKeyguardInteractor,
+                mSceneInteractor,
+                Optional.of(() -> mWindowRootView)
+        );
 
         when(mScrimManager.getCurrentController()).thenReturn(mScrimController);
         when(mValueAnimatorCreator.create(anyFloat(), anyFloat())).thenReturn(mValueAnimator);
@@ -367,6 +395,7 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
      * Makes sure the expansion amount is proportional to (1 - scroll).
      */
     @Test
+    @DisableFlags(Flags.FLAG_SCENE_CONTAINER)
     public void testSwipeUp_setsCorrectExpansionAmount() {
         mTouchHandler.onSessionStart(mTouchSession);
         ArgumentCaptor<GestureDetector.OnGestureListener> gestureListenerCaptor =
@@ -377,6 +406,36 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
 
         verifyScroll(.3f, gestureListener);
         verifyScroll(.7f, gestureListener);
+    }
+
+    /**
+     * Makes sure that touches go to the scene container when the flag is on.
+     */
+    @Test
+    @EnableFlags(Flags.FLAG_SCENE_CONTAINER)
+    public void testSwipeUp_sendsTouchesToWindowRootView() {
+        mTouchHandler.onSessionStart(mTouchSession);
+        ArgumentCaptor<GestureDetector.OnGestureListener> gestureListenerCaptor =
+                ArgumentCaptor.forClass(GestureDetector.OnGestureListener.class);
+        verify(mTouchSession).registerGestureListener(gestureListenerCaptor.capture());
+
+        final OnGestureListener gestureListener = gestureListenerCaptor.getValue();
+
+        final float distanceY = SCREEN_HEIGHT_PX * 0.42f;
+
+        final MotionEvent event1 = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE,
+                0, SCREEN_HEIGHT_PX, 0);
+        final MotionEvent event2 = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE,
+                0, SCREEN_HEIGHT_PX - distanceY, 0);
+
+        assertThat(gestureListener.onScroll(event1, event2, 0,
+                distanceY))
+                .isTrue();
+
+        // Ensure only called once
+        verify(mSceneInteractor).onRemoteUserInputStarted(any());
+        verify(mWindowRootView).dispatchTouchEvent(event1);
+        verify(mWindowRootView).dispatchTouchEvent(event2);
     }
 
     /**
@@ -476,6 +535,7 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
      * Tests that ending an upward swipe before the set threshold leads to bouncer collapsing down.
      */
     @Test
+    @DisableFlags(Flags.FLAG_SCENE_CONTAINER)
     public void testSwipeUpPositionBelowThreshold_collapsesBouncer() {
         final float swipeUpPercentage = .3f;
         final float expansion = 1 - swipeUpPercentage;
@@ -499,6 +559,7 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
      * Tests that ending an upward swipe above the set threshold will continue the expansion.
      */
     @Test
+    @DisableFlags(Flags.FLAG_SCENE_CONTAINER)
     public void testSwipeUpPositionAboveThreshold_expandsBouncer() {
         final float swipeUpPercentage = .7f;
         final float expansion = 1 - swipeUpPercentage;
@@ -528,6 +589,7 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
      * Tests that swiping up with a speed above the set threshold will continue the expansion.
      */
     @Test
+    @DisableFlags(Flags.FLAG_SCENE_CONTAINER)
     public void testSwipeUpVelocityAboveMin_expandsBouncer() {
         when(mFlingAnimationUtils.getMinVelocityPxPerSecond()).thenReturn((float) 0);
 

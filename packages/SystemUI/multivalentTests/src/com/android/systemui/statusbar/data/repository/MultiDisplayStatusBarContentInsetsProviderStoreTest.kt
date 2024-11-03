@@ -21,9 +21,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.display.data.repository.displayRepository
-import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.kosmos.unconfinedTestDispatcher
+import com.android.systemui.kosmos.useUnconfinedTestDispatcher
 import com.android.systemui.testKosmos
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
@@ -37,7 +36,7 @@ import org.mockito.kotlin.verify
 @RunWith(AndroidJUnit4::class)
 class MultiDisplayStatusBarContentInsetsProviderStoreTest : SysuiTestCase() {
 
-    private val kosmos = testKosmos().also { it.testDispatcher = it.unconfinedTestDispatcher }
+    private val kosmos = testKosmos().useUnconfinedTestDispatcher()
     private val testScope = kosmos.testScope
     private val fakeDisplayRepository = kosmos.displayRepository
     private val underTest = kosmos.multiDisplayStatusBarContentInsetsProviderStore

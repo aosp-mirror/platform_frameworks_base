@@ -155,7 +155,7 @@ public class RankingHelperTest extends UiServiceTestCase {
 
         mTestNotificationPolicy = new NotificationManager.Policy(0, 0, 0, 0,
                 NotificationManager.Policy.STATE_CHANNELS_BYPASSING_DND, 0);
-        when(mMockZenModeHelper.getNotificationPolicy()).thenReturn(mTestNotificationPolicy);
+        when(mMockZenModeHelper.getNotificationPolicy(any())).thenReturn(mTestNotificationPolicy);
         mHelper = new RankingHelper(getContext(), mHandler, mConfig, mMockZenModeHelper,
                 mUsageStats, new String[] {ImportanceExtractor.class.getName()},
                 mock(IPlatformCompat.class), mGroupHelper);

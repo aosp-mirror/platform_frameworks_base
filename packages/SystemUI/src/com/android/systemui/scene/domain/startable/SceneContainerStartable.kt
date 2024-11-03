@@ -19,6 +19,7 @@
 package com.android.systemui.scene.domain.startable
 
 import android.app.StatusBarManager
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.compose.animation.scene.SceneKey
 import com.android.internal.logging.UiEventLogger
@@ -102,7 +103,6 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.stateIn
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 /**
  * Hooks up business logic that manipulates the state of the [SceneInteractor] for the system UI
@@ -300,7 +300,7 @@ constructor(
             bouncerInteractor.onImeHiddenByUser.collectLatest {
                 if (sceneInteractor.currentScene.value == Scenes.Bouncer) {
                     sceneInteractor.changeScene(
-                        toScene = Scenes.Lockscreen, // TODO(b/336581871): add sceneState?
+                        toScene = Scenes.Lockscreen,
                         loggingReason = "IME hidden",
                     )
                 }
@@ -318,7 +318,6 @@ constructor(
                     when {
                         isAnySimLocked -> {
                             switchToScene(
-                                // TODO(b/336581871): add sceneState?
                                 targetSceneKey = Scenes.Bouncer,
                                 loggingReason = "Need to authenticate locked SIM card.",
                             )
@@ -326,7 +325,6 @@ constructor(
                         unlockStatus.isUnlocked &&
                             deviceEntryInteractor.canSwipeToEnter.value == false -> {
                             switchToScene(
-                                // TODO(b/336581871): add sceneState?
                                 targetSceneKey = Scenes.Gone,
                                 loggingReason =
                                     "All SIM cards unlocked and device already unlocked and " +
@@ -335,7 +333,6 @@ constructor(
                         }
                         else -> {
                             switchToScene(
-                                // TODO(b/336581871): add sceneState?
                                 targetSceneKey = Scenes.Lockscreen,
                                 loggingReason =
                                     "All SIM cards unlocked and device still locked" +

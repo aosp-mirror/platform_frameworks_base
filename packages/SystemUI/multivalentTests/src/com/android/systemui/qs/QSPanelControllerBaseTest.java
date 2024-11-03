@@ -28,6 +28,8 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyFloat;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
@@ -602,6 +604,46 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
 
         mController.onViewAttached();
         assertThat(mPagedTileLayoutListening).isFalse();
+    }
+
+    @Test
+    public void reAttach_configurationChangePending_triggersConfigurationListener() {
+        mController.onViewDetached();
+
+        when(mQSPanel.hadConfigurationChangeWhileDetached()).thenReturn(true);
+        clearInvocations(mQSLogger);
+
+        mController.onViewAttached();
+
+        verify(mQSLogger).logOnConfigurationChanged(
+                anyInt(),
+                anyInt(),
+                anyBoolean(),
+                anyBoolean(),
+                anyInt(),
+                anyInt(),
+                anyString()
+        );
+    }
+
+    @Test
+    public void reAttach_noConfigurationChangePending_doesntTriggerConfigurationListener() {
+        mController.onViewDetached();
+
+        when(mQSPanel.hadConfigurationChangeWhileDetached()).thenReturn(false);
+        clearInvocations(mQSLogger);
+
+        mController.onViewAttached();
+
+        verify(mQSLogger, never()).logOnConfigurationChanged(
+                anyInt(),
+                anyInt(),
+                anyBoolean(),
+                anyBoolean(),
+                anyInt(),
+                anyInt(),
+                anyString()
+        );
     }
 
 

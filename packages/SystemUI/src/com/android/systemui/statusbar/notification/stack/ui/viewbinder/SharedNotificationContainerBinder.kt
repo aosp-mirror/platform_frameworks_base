@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.notification.stack.ui.viewbinder
 
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.Flags
 import com.android.systemui.common.ui.view.onLayoutChanged
 import com.android.systemui.communal.domain.interactor.CommunalSettingsInteractor
@@ -36,11 +37,8 @@ import com.android.systemui.util.kotlin.DisposableHandles
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.DisposableHandle
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 /** Binds the shared notification container to its view-model. */
-@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class SharedNotificationContainerBinder
 @Inject
@@ -74,7 +72,7 @@ constructor(
                     launch {
                         viewModel.configurationBasedDimensions.collect {
                             view.updateConstraints(
-                                useSplitShade = it.useSplitShade,
+                                horizontalPosition = it.horizontalPosition,
                                 marginStart = it.marginStart,
                                 marginTop = it.marginTop,
                                 marginEnd = it.marginEnd,

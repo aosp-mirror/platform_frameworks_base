@@ -124,12 +124,18 @@ final class HalVibration extends Vibration {
      * @param deviceAdapter A {@link CombinedVibration.VibratorAdapter} that transforms vibration
      *                      effects to device vibrators based on its capabilities.
      */
-    public void adaptToDevice(CombinedVibration.VibratorAdapter deviceAdapter) {
-        CombinedVibration newEffect = mEffectToPlay.adapt(deviceAdapter);
-        if (!Objects.equals(mEffectToPlay, newEffect)) {
-            mEffectToPlay = newEffect;
+    public boolean adaptToDevice(CombinedVibration.VibratorAdapter deviceAdapter) {
+        CombinedVibration adaptedEffect = mEffectToPlay.adapt(deviceAdapter);
+        if (adaptedEffect == null) {
+            return false;
+        }
+
+        if (!mEffectToPlay.equals(adaptedEffect)) {
+            mEffectToPlay = adaptedEffect;
         }
         // No need to update fallback effects, they are already configured per device.
+
+        return true;
     }
 
     /** Return the effect that should be played by this vibration. */

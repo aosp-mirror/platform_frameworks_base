@@ -60,6 +60,7 @@ public final class VirtualDisplayConfig implements Parcelable {
     private final float mRequestedRefreshRate;
     private final boolean mIsHomeSupported;
     private final DisplayCutout mDisplayCutout;
+    private final boolean mIgnoreActivitySizeRestrictions;
 
     private VirtualDisplayConfig(
             @NonNull String name,
@@ -74,7 +75,8 @@ public final class VirtualDisplayConfig implements Parcelable {
             @NonNull ArraySet<String> displayCategories,
             float requestedRefreshRate,
             boolean isHomeSupported,
-            @Nullable DisplayCutout displayCutout) {
+            @Nullable DisplayCutout displayCutout,
+            boolean ignoreActivitySizeRestrictions) {
         mName = name;
         mWidth = width;
         mHeight = height;
@@ -88,6 +90,7 @@ public final class VirtualDisplayConfig implements Parcelable {
         mRequestedRefreshRate = requestedRefreshRate;
         mIsHomeSupported = isHomeSupported;
         mDisplayCutout = displayCutout;
+        mIgnoreActivitySizeRestrictions = ignoreActivitySizeRestrictions;
     }
 
     /**
@@ -193,6 +196,20 @@ public final class VirtualDisplayConfig implements Parcelable {
     }
 
     /**
+     * Whether this virtual display ignores fixed orientation, aspect ratio and resizability
+     * of apps.
+     *
+     * @see Builder#setIgnoreActivitySizeRestrictions(boolean)
+     * @hide
+     */
+    @FlaggedApi(com.android.window.flags.Flags.FLAG_VDM_FORCE_APP_UNIVERSAL_RESIZABLE_API)
+    @SystemApi
+    public boolean isIgnoreActivitySizeRestrictions() {
+        return mIgnoreActivitySizeRestrictions
+                && com.android.window.flags.Flags.vdmForceAppUniversalResizableApi();
+    }
+
+    /**
      * Returns the display categories.
      *
      * @see Builder#setDisplayCategories
@@ -227,6 +244,7 @@ public final class VirtualDisplayConfig implements Parcelable {
         dest.writeFloat(mRequestedRefreshRate);
         dest.writeBoolean(mIsHomeSupported);
         DisplayCutout.ParcelableWrapper.writeCutoutToParcel(mDisplayCutout, dest, flags);
+        dest.writeBoolean(mIgnoreActivitySizeRestrictions);
     }
 
     @Override
@@ -253,6 +271,7 @@ public final class VirtualDisplayConfig implements Parcelable {
                 && Objects.equals(mDisplayCategories, that.mDisplayCategories)
                 && mRequestedRefreshRate == that.mRequestedRefreshRate
                 && mIsHomeSupported == that.mIsHomeSupported
+                && mIgnoreActivitySizeRestrictions == that.mIgnoreActivitySizeRestrictions
                 && Objects.equals(mDisplayCutout, that.mDisplayCutout);
     }
 
@@ -261,7 +280,8 @@ public final class VirtualDisplayConfig implements Parcelable {
         int hashCode = Objects.hash(
                 mName, mWidth, mHeight, mDensityDpi, mFlags, mSurface, mUniqueId,
                 mDisplayIdToMirror, mWindowManagerMirroringEnabled, mDisplayCategories,
-                mRequestedRefreshRate, mIsHomeSupported, mDisplayCutout);
+                mRequestedRefreshRate, mIsHomeSupported, mDisplayCutout,
+                mIgnoreActivitySizeRestrictions);
         return hashCode;
     }
 
@@ -282,6 +302,7 @@ public final class VirtualDisplayConfig implements Parcelable {
                 + " mRequestedRefreshRate=" + mRequestedRefreshRate
                 + " mIsHomeSupported=" + mIsHomeSupported
                 + " mDisplayCutout=" + mDisplayCutout
+                + " mIgnoreActivitySizeRestrictions=" + mIgnoreActivitySizeRestrictions
                 + ")";
     }
 
@@ -299,6 +320,7 @@ public final class VirtualDisplayConfig implements Parcelable {
         mRequestedRefreshRate = in.readFloat();
         mIsHomeSupported = in.readBoolean();
         mDisplayCutout = DisplayCutout.ParcelableWrapper.readCutoutFromParcel(in);
+        mIgnoreActivitySizeRestrictions = in.readBoolean();
     }
 
     @NonNull
@@ -332,6 +354,7 @@ public final class VirtualDisplayConfig implements Parcelable {
         private float mRequestedRefreshRate = 0.0f;
         private boolean mIsHomeSupported = false;
         private DisplayCutout mDisplayCutout = null;
+        private boolean mIgnoreActivitySizeRestrictions = false;
 
         /**
          * Creates a new Builder.
@@ -506,6 +529,24 @@ public final class VirtualDisplayConfig implements Parcelable {
         }
 
         /**
+         * Sets whether this display ignores fixed orientation, aspect ratio and resizability
+         * of apps.
+         *
+         * <p>Note: setting to {@code true} requires the display to have
+         * {@link DisplayManager#VIRTUAL_DISPLAY_FLAG_TRUSTED}. If this is false, this property
+         * is ignored.</p>
+         *
+         * @hide
+         */
+        @FlaggedApi(com.android.window.flags.Flags.FLAG_VDM_FORCE_APP_UNIVERSAL_RESIZABLE_API)
+        @SystemApi
+        @NonNull
+        public Builder setIgnoreActivitySizeRestrictions(boolean enabled) {
+            mIgnoreActivitySizeRestrictions = enabled;
+            return this;
+        }
+
+        /**
          * Builds the {@link VirtualDisplayConfig} instance.
          */
         @NonNull
@@ -523,7 +564,8 @@ public final class VirtualDisplayConfig implements Parcelable {
                     mDisplayCategories,
                     mRequestedRefreshRate,
                     mIsHomeSupported,
-                    mDisplayCutout);
+                    mDisplayCutout,
+                    mIgnoreActivitySizeRestrictions);
         }
     }
 }

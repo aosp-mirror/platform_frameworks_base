@@ -188,6 +188,28 @@ art_profile_java_defaults {
     },
 }
 
+// Conditionally add crashrecovery stubs library
+soong_config_module_type {
+    name: "crashrecovery_java_defaults",
+    module_type: "java_defaults",
+    config_namespace: "ANDROID",
+    bool_variables: [
+        "release_crashrecovery_module",
+    ],
+    properties: [
+        "libs",
+    ],
+}
+
+crashrecovery_java_defaults {
+    name: "services_crashrecovery_stubs_conditionally",
+    soong_config_variables: {
+        release_crashrecovery_module: {
+            libs: ["service-crashrecovery.stubs.system_server"],
+        },
+    },
+}
+
 // merge all required services into one jar
 // ============================================================
 soong_config_module_type {
@@ -213,6 +235,7 @@ system_java_library {
     defaults: [
         "services_java_defaults",
         "art_profile_java_defaults",
+        "services_crashrecovery_stubs_conditionally",
     ],
     installable: true,
 

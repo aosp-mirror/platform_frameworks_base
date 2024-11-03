@@ -296,6 +296,7 @@ class DeviceSettingServiceConnection(
                 val listener =
                     object : IDeviceSettingsListener.Stub() {
                         override fun onDeviceSettingsChanged(settings: List<DeviceSetting>) {
+                            Log.i(TAG, "Receive setting ids ${settings.map { it.settingId }}")
                             launch { send(settings) }
                         }
                     }

@@ -17,6 +17,7 @@
 package android.service.notification;
 
 import android.annotation.CurrentTimeMillisLong;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -882,6 +883,35 @@ public abstract class NotificationListenerService extends Service {
         }
     }
 
+    /**
+     * Creates a conversation notification channel for a given package for a given user.
+     *
+     * <p>This method will throw a security exception if you don't have access to notifications
+     * for the given user.</p>
+     * <p>The caller must have {@link CompanionDeviceManager#getAssociations() an associated
+     * device} or be the notification assistant in order to use this method.
+     *
+     * @param pkg The package the channel belongs to.
+     * @param user The user the channel belongs to.
+     * @param parentChannelId The parent channel id of the conversation channel belongs to.
+     * @param conversationId The conversation id of the conversation channel.
+     *
+     * @return The created conversation channel.
+     */
+    @FlaggedApi(Flags.FLAG_NOTIFICATION_CONVERSATION_CHANNEL_MANAGEMENT)
+    public final @Nullable NotificationChannel createConversationNotificationChannelForPackage(
+        @NonNull String pkg, @NonNull UserHandle user, @NonNull String parentChannelId,
+        @NonNull String conversationId) {
+        if (!isBound()) return null;
+        try {
+            return getNotificationInterface()
+                    .createConversationNotificationChannelForPackageFromPrivilegedListener(
+                            mWrapper, pkg, user, parentChannelId, conversationId);
+        } catch (RemoteException e) {
+            Log.v(TAG, "Unable to contact notification manager", e);
+            throw e.rethrowFromSystemServer();
+        }
+    }
 
     /**
      * Updates a notification channel for a given package for a given user. This should only be used
@@ -890,7 +920,7 @@ public abstract class NotificationListenerService extends Service {
      * <p>This method will throw a security exception if you don't have access to notifications
      * for the given user.</p>
      * <p>The caller must have {@link CompanionDeviceManager#getAssociations() an associated
-     * device} in order to use this method.
+     * device} or be the notification assistant in order to use this method.
      *
      * @param pkg The package the channel belongs to.
      * @param user The user the channel belongs to.

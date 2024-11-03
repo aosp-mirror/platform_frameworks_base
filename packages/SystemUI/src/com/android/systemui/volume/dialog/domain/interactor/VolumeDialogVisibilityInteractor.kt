@@ -17,6 +17,7 @@
 package com.android.systemui.volume.dialog.domain.interactor
 
 import android.annotation.SuppressLint
+import com.android.systemui.plugins.VolumeDialogController
 import com.android.systemui.volume.Events
 import com.android.systemui.volume.dialog.dagger.scope.VolumeDialogPlugin
 import com.android.systemui.volume.dialog.dagger.scope.VolumeDialogPluginScope
@@ -34,11 +35,14 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.stateIn
 
 private val MAX_DIALOG_SHOW_TIME: Duration = 3.seconds
 
@@ -57,11 +61,16 @@ constructor(
     callbacksInteractor: VolumeDialogCallbacksInteractor,
     private val tracer: VolumeTracer,
     private val repository: VolumeDialogVisibilityRepository,
+    private val controller: VolumeDialogController,
 ) {
 
     @SuppressLint("SharedFlowCreation")
     private val mutableDismissDialogEvents = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
-    val dialogVisibility: Flow<VolumeDialogVisibilityModel> = repository.dialogVisibility
+    val dialogVisibility: Flow<VolumeDialogVisibilityModel> =
+        repository.dialogVisibility
+            .onEach { controller.notifyVisible(it is Visible) }
+            .stateIn(coroutineScope, SharingStarted.Eagerly, null)
+            .filterNotNull()
 
     init {
         merge(

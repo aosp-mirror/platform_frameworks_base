@@ -4068,8 +4068,9 @@ public class OomAdjuster {
     }
 
     /**
-     * Evaluate the service connection, return {@code true} if the client will change the state
-     * of the service host process by the given connection.
+     * Evaluate the service connection, return {@code true} if the client will change any state
+     * (ie. ProcessState, oomAdj, capability, etc) of the service host process by the given
+     * connection.
      */
     @GuardedBy("mService")
     boolean evaluateServiceConnectionAdd(ProcessRecord client, ProcessRecord app,
@@ -4077,20 +4078,40 @@ public class OomAdjuster {
         if (evaluateConnectionPrelude(client, app)) {
             return true;
         }
-        if (app.getSetAdj() <= client.getSetAdj()
-                && app.getSetProcState() <= client.getSetProcState()
-                && ((app.getSetCapability() & client.getSetCapability())
-                        == client.getSetCapability()
-                        || cr.notHasFlag(Context.BIND_INCLUDE_CAPABILITIES
-                                | Context.BIND_BYPASS_USER_NETWORK_RESTRICTIONS))) {
-            // The service host process has better states than the client, so no change.
-            return false;
+
+        boolean needDryRun = false;
+        if (app.getSetAdj() > client.getSetAdj()) {
+            // The connection might elevate the importance of the service's oom adj score.
+            needDryRun = true;
+        } else if (app.getSetProcState() > client.getSetProcState()) {
+            // The connection might elevate the importance of the service's process state.
+            needDryRun = true;
+        } else if (cr.hasFlag(Context.BIND_INCLUDE_CAPABILITIES
+                            | Context.BIND_BYPASS_USER_NETWORK_RESTRICTIONS)
+                && (app.getSetCapability() & client.getSetCapability())
+                        != client.getSetCapability()) {
+            // The connection might elevate the importance of the service's capabilities.
+            needDryRun = true;
+        } else if (Flags.unfreezeBindPolicyFix()
+                && cr.hasFlag(Context.BIND_WAIVE_PRIORITY
+                            | Context.BIND_ALLOW_OOM_MANAGEMENT)) {
+            // These bind flags can grant the shouldNotFreeze state to the service.
+            needDryRun = true;
+        } else if (Flags.unfreezeBindPolicyFix()
+                && client.mOptRecord.shouldNotFreeze()
+                && !app.mOptRecord.shouldNotFreeze()) {
+            // The shouldNotFreeze state can be propagated and needs to be checked.
+            needDryRun = true;
         }
-        // Take a dry run of the computeServiceHostOomAdjLSP, this would't be expensive
-        // since it's only evaluating one service connection.
-        return computeServiceHostOomAdjLSP(cr, app, client, mInjector.getUptimeMillis(),
-                mService.getTopApp(), false, false, false, OOM_ADJ_REASON_NONE,
-                CACHED_APP_MIN_ADJ, false, true /* dryRun */);
+
+        if (needDryRun) {
+            // Take a dry run of the computeServiceHostOomAdjLSP, this would't be expensive
+            // since it's only evaluating one service connection.
+            return computeServiceHostOomAdjLSP(cr, app, client, mInjector.getUptimeMillis(),
+                    mService.getTopApp(), false, false, false, OOM_ADJ_REASON_NONE,
+                    CACHED_APP_MIN_ADJ, false, true /* dryRun */);
+        }
+        return false;
     }
 
     @GuardedBy("mService")
@@ -4100,17 +4121,26 @@ public class OomAdjuster {
             return true;
         }
 
-        if (app.getSetAdj() < client.getSetAdj()
-                && app.getSetProcState() < client.getSetProcState()) {
-            // The service host process has better states than the client.
-            if (((app.getSetCapability() & client.getSetCapability()) == PROCESS_CAPABILITY_NONE)
-                    || cr.notHasFlag(Context.BIND_INCLUDE_CAPABILITIES
-                            | Context.BIND_BYPASS_USER_NETWORK_RESTRICTIONS)) {
-                // The service host app doesn't get any capabilities from the client.
-                return false;
-            }
+        if (app.getSetAdj() >= client.getSetAdj()) {
+            return true;
+        } else if (app.getSetProcState() >= client.getSetProcState()) {
+            return true;
+        } else if (cr.hasFlag(Context.BIND_INCLUDE_CAPABILITIES
+                            | Context.BIND_BYPASS_USER_NETWORK_RESTRICTIONS)
+                && (app.getSetCapability() & client.getSetCapability())
+                            != PROCESS_CAPABILITY_NONE) {
+            return true;
+        } else if (Flags.unfreezeBindPolicyFix()
+                && cr.hasFlag(Context.BIND_WAIVE_PRIORITY
+                            | Context.BIND_ALLOW_OOM_MANAGEMENT)) {
+            return true;
+        } else if (Flags.unfreezeBindPolicyFix()
+                && app.mOptRecord.shouldNotFreeze()
+                && client.mOptRecord.shouldNotFreeze()) {
+            // Process has shouldNotFreeze and it could have gotten it from the client.
+            return true;
         }
-        return true;
+        return false;
     }
 
     @GuardedBy("mService")
@@ -4118,14 +4148,25 @@ public class OomAdjuster {
         if (evaluateConnectionPrelude(client, app)) {
             return true;
         }
-        if (app.getSetAdj() <= client.getSetAdj()
-                && app.getSetProcState() <= client.getSetProcState()) {
-            // The provider host process has better states than the client, so no change.
-            return false;
+
+        boolean needDryRun = false;
+        if (app.getSetAdj() > client.getSetAdj()) {
+            needDryRun = true;
+        } else if (app.getSetProcState() > client.getSetProcState()) {
+            needDryRun = true;
+        } else if (Flags.unfreezeBindPolicyFix()
+                && client.mOptRecord.shouldNotFreeze()
+                && !app.mOptRecord.shouldNotFreeze()) {
+            needDryRun = true;
         }
-        return computeProviderHostOomAdjLSP(null, app, client, mInjector.getUptimeMillis(),
-                mService.getTopApp(), false, false, false, OOM_ADJ_REASON_NONE, CACHED_APP_MIN_ADJ,
-                false, true /* dryRun */);
+
+        if (needDryRun) {
+            return computeProviderHostOomAdjLSP(null, app, client, mInjector.getUptimeMillis(),
+                    mService.getTopApp(), false, false, false, OOM_ADJ_REASON_NONE,
+                    CACHED_APP_MIN_ADJ,
+                    false, true /* dryRun */);
+        }
+        return false;
     }
 
     @GuardedBy("mService")
@@ -4133,12 +4174,19 @@ public class OomAdjuster {
         if (evaluateConnectionPrelude(client, app)) {
             return true;
         }
-        if (app.getSetAdj() < client.getSetAdj()
-                && app.getSetProcState() < client.getSetProcState()) {
-            // The provider host process has better states than the client, so no change.
-            return false;
+
+        if (app.getSetAdj() >= client.getSetAdj()) {
+            return true;
+        } else if (app.getSetProcState() >= client.getSetProcState()) {
+            return true;
+        } else if (Flags.unfreezeBindPolicyFix()
+                && app.mOptRecord.shouldNotFreeze()
+                && client.mOptRecord.shouldNotFreeze()) {
+            // Process has shouldNotFreeze and it could have gotten it from the client.
+            return true;
         }
-        return true;
+
+        return false;
     }
 
     private boolean evaluateConnectionPrelude(ProcessRecord client, ProcessRecord app) {

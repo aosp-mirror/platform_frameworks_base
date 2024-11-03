@@ -21,6 +21,7 @@ import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_AUDIO;
 import static android.content.Context.DEVICE_ID_DEFAULT;
 import static android.media.audio.Flags.autoPublicVolumeApiHardening;
 import static android.media.audio.Flags.automaticBtDeviceType;
+import static android.media.audio.Flags.FLAG_DEPRECATE_STREAM_BT_SCO;
 import static android.media.audio.Flags.FLAG_FOCUS_EXCLUSIVE_WITH_RECORDING;
 import static android.media.audio.Flags.FLAG_FOCUS_FREEZE_TEST_API;
 import static android.media.audio.Flags.FLAG_SUPPORTED_DEVICE_TYPES_API;
@@ -406,8 +407,10 @@ public class AudioManager {
     /** Used to identify the volume of audio streams for notifications */
     public static final int STREAM_NOTIFICATION = AudioSystem.STREAM_NOTIFICATION;
     /** @hide Used to identify the volume of audio streams for phone calls when connected
-     *        to bluetooth */
+     *        to bluetooth
+     *  @deprecated use {@link #STREAM_VOICE_CALL} instead */
     @SystemApi
+    @FlaggedApi(FLAG_DEPRECATE_STREAM_BT_SCO)
     public static final int STREAM_BLUETOOTH_SCO = AudioSystem.STREAM_BLUETOOTH_SCO;
     /** @hide Used to identify the volume of audio streams for enforced system sounds
      *        in certain countries (e.g camera in Japan) */
@@ -1161,7 +1164,7 @@ public class AudioManager {
         final IAudioService service = getService();
         try {
             service.setMasterMute(mute, flags, getContext().getOpPackageName(),
-                    UserHandle.getCallingUserId(), getContext().getAttributionTag());
+                    getContext().getUserId(), getContext().getAttributionTag());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -3278,7 +3281,7 @@ public class AudioManager {
         final IAudioService service = getService();
         try {
             service.setMicrophoneMute(on, getContext().getOpPackageName(),
-                    UserHandle.getCallingUserId(), getContext().getAttributionTag());
+                    getContext().getUserId(), getContext().getAttributionTag());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -6155,6 +6158,11 @@ public class AudioManager {
      * The audio output device code for a BLE audio brodcast group.
      */
     public static final int DEVICE_OUT_BLE_BROADCAST = AudioSystem.DEVICE_OUT_BLE_BROADCAST;
+    /** @hide
+     * The audio output device code for a wireless speaker group supporting multichannel content.
+     */
+    public static final int DEVICE_OUT_MULTICHANNEL_GROUP =
+            AudioSystem.DEVICE_OUT_MULTICHANNEL_GROUP;
     /** @hide
      * This is not used as a returned value from {@link #getDevicesForStream}, but could be
      *  used in the future in a set method to select whatever default device is chosen by the

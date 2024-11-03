@@ -65,7 +65,7 @@ public class DragResizeWindowGeometryTests extends ShellTestCase {
     private static final int LARGE_CORNER_SIZE = FINE_CORNER_SIZE + 10;
     private static final DragResizeWindowGeometry GEOMETRY = new DragResizeWindowGeometry(
             TASK_CORNER_RADIUS, TASK_SIZE, EDGE_RESIZE_THICKNESS, EDGE_RESIZE_HANDLE_INSET,
-            FINE_CORNER_SIZE, LARGE_CORNER_SIZE);
+            FINE_CORNER_SIZE, LARGE_CORNER_SIZE, DragResizeWindowGeometry.DisabledEdge.NONE);
     // Points in the edge resize handle. Note that coordinates start from the top left.
     private static final Point TOP_EDGE_POINT = new Point(TASK_SIZE.getWidth() / 2,
             -EDGE_RESIZE_THICKNESS / 2);
@@ -100,23 +100,25 @@ public class DragResizeWindowGeometryTests extends ShellTestCase {
                         GEOMETRY,
                         new DragResizeWindowGeometry(TASK_CORNER_RADIUS, TASK_SIZE,
                                 EDGE_RESIZE_THICKNESS, EDGE_RESIZE_HANDLE_INSET, FINE_CORNER_SIZE,
-                                LARGE_CORNER_SIZE))
+                                LARGE_CORNER_SIZE, DragResizeWindowGeometry.DisabledEdge.NONE))
                 .addEqualityGroup(
                         new DragResizeWindowGeometry(TASK_CORNER_RADIUS, TASK_SIZE,
                                 EDGE_RESIZE_THICKNESS + 10, EDGE_RESIZE_HANDLE_INSET,
-                                FINE_CORNER_SIZE, LARGE_CORNER_SIZE),
+                                FINE_CORNER_SIZE, LARGE_CORNER_SIZE,
+                                DragResizeWindowGeometry.DisabledEdge.NONE),
                         new DragResizeWindowGeometry(TASK_CORNER_RADIUS, TASK_SIZE,
                                 EDGE_RESIZE_THICKNESS + 10, EDGE_RESIZE_HANDLE_INSET,
-                                FINE_CORNER_SIZE, LARGE_CORNER_SIZE))
+                                FINE_CORNER_SIZE, LARGE_CORNER_SIZE,
+                                DragResizeWindowGeometry.DisabledEdge.NONE))
                 .addEqualityGroup(
                         new DragResizeWindowGeometry(TASK_CORNER_RADIUS, TASK_SIZE,
                                 EDGE_RESIZE_THICKNESS + 10, EDGE_RESIZE_HANDLE_INSET,
                                 FINE_CORNER_SIZE,
-                                LARGE_CORNER_SIZE + 5),
+                                LARGE_CORNER_SIZE + 5, DragResizeWindowGeometry.DisabledEdge.NONE),
                         new DragResizeWindowGeometry(TASK_CORNER_RADIUS, TASK_SIZE,
                                 EDGE_RESIZE_THICKNESS + 10, EDGE_RESIZE_HANDLE_INSET,
                                 FINE_CORNER_SIZE,
-                                LARGE_CORNER_SIZE + 5))
+                                LARGE_CORNER_SIZE + 5, DragResizeWindowGeometry.DisabledEdge.NONE))
                 .testEquals();
     }
 

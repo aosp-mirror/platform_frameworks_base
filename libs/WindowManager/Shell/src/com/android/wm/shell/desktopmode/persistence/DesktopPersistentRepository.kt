@@ -50,7 +50,9 @@ class DesktopPersistentRepository(
         DataStoreFactory.create(
             serializer = DesktopPersistentRepositoriesSerializer,
             produceFile = { context.dataStoreFile(DESKTOP_REPOSITORIES_DATASTORE_FILE) },
-            scope = bgCoroutineScope))
+            scope = bgCoroutineScope,
+        ),
+    )
 
     /** Provides `dataStore.data` flow and handles exceptions thrown during collection */
     private val dataStoreFlow: Flow<DesktopPersistentRepositories> =
@@ -116,7 +118,11 @@ class DesktopPersistentRepository(
                 val desktop =
                     getDesktop(currentRepository, desktopId)
                         .toBuilder()
-                        .updateTaskStates(visibleTasks, minimizedTasks)
+                        .updateTaskStates(
+                            visibleTasks,
+                            minimizedTasks,
+                            freeformTasksInZOrder,
+                        )
                         .updateZOrder(freeformTasksInZOrder)
 
                 desktopPersistentRepositories
@@ -169,9 +175,21 @@ class DesktopPersistentRepository(
 
         private fun Desktop.Builder.updateTaskStates(
             visibleTasks: ArraySet<Int>,
-            minimizedTasks: ArraySet<Int>
+            minimizedTasks: ArraySet<Int>,
+            freeformTasksInZOrder: ArrayList<Int>,
         ): Desktop.Builder {
             clearTasksByTaskId()
+
+            // Handle the case where tasks are not marked as visible but are meant to be visible
+            // after reboot. E.g. User moves out of desktop when there are multiple tasks are
+            // visible, they will be marked as not visible afterwards. This ensures that they are
+            // still persisted as visible.
+            // TODO - b/350476823: Remove this logic once repository holds expanded tasks
+            if (freeformTasksInZOrder.size > visibleTasks.size + minimizedTasks.size &&
+                visibleTasks.isEmpty()
+            ) {
+                visibleTasks.addAll(freeformTasksInZOrder.filterNot { it in minimizedTasks })
+            }
             putAllTasksByTaskId(
                 visibleTasks.associateWith {
                     createDesktopTask(it, state = DesktopTaskState.VISIBLE)

@@ -25,12 +25,10 @@ import static android.app.StatusBarManager.WindowType;
 import static android.app.StatusBarManager.WindowVisibleState;
 import static android.app.StatusBarManager.windowStateToString;
 import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
-import static android.inputmethodservice.InputMethodService.ENABLE_HIDE_IME_CAPTION_BAR;
 import static android.view.InsetsSource.FLAG_SUPPRESS_SCRIM;
 import static android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION;
-import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL;
 
@@ -1836,11 +1834,6 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
     private InsetsFrameProvider[] getInsetsFrameProvider(int insetsHeight, Context userContext) {
         final InsetsFrameProvider navBarProvider =
                 new InsetsFrameProvider(mInsetsSourceOwner, 0, WindowInsets.Type.navigationBars());
-        if (!ENABLE_HIDE_IME_CAPTION_BAR) {
-            navBarProvider.setInsetsSizeOverrides(new InsetsFrameProvider.InsetsSizeOverride[] {
-                    new InsetsFrameProvider.InsetsSizeOverride(TYPE_INPUT_METHOD, null)
-            });
-        }
         if (insetsHeight != -1 && !mEdgeBackGestureHandler.isButtonForcedVisible()) {
             navBarProvider.setInsetsSize(Insets.of(0, 0, 0, insetsHeight));
         }

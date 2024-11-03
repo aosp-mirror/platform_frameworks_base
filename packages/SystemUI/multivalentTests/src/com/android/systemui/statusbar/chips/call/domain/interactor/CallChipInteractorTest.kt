@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.chips.call.domain.interactor
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
@@ -27,8 +28,10 @@ import com.android.systemui.statusbar.phone.ongoingcall.shared.model.inCallModel
 import com.google.common.truth.Truth.assertThat
 import kotlin.test.Test
 import kotlinx.coroutines.test.runTest
+import org.junit.runner.RunWith
 
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class CallChipInteractorTest : SysuiTestCase() {
     val kosmos = Kosmos()
     val repo = kosmos.ongoingCallRepository
