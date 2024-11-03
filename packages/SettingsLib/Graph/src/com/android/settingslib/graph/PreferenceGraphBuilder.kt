@@ -270,7 +270,8 @@ private constructor(private val context: Context, private val request: GetPrefer
                 summary = textProto { string = it.toString() }
             }
         }
-        if (metadata.icon != 0) icon = metadata.icon
+        val metadataIcon = metadata.getPreferenceIcon(context)
+        if (metadataIcon != 0) icon = metadataIcon
         if (metadata.keywords != 0) keywords = metadata.keywords
         val preferenceExtras = metadata.extras(context)
         preferenceExtras?.let { extras = it.toProto() }
