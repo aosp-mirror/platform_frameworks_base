@@ -17,14 +17,14 @@
 
 package android.media.quality;
 
-import android.media.quality.PictureProfile;
+import android.media.quality.SoundProfile;
 
 /**
  * Interface to receive callbacks from IMediaQuality.
  * @hide
  */
-oneway interface IPictureProfileCallback {
-    void onPictureProfileAdded(in long id, in PictureProfile p);
-    void onPictureProfileUpdated(in long id, in PictureProfile p);
-    void onPictureProfileRemoved(in long id, in PictureProfile p);
+oneway interface ISoundProfileCallback {
+    void onSoundProfileAdded(in long id, in SoundProfile p);
+    void onSoundProfileUpdated(in long id, in SoundProfile p);
+    void onSoundProfileRemoved(in long id, in SoundProfile p);
 }
