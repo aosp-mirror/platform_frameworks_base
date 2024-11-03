@@ -18,6 +18,7 @@ package android.media.quality;
 
 import android.annotation.FlaggedApi;
 import android.media.tv.flags.Flags;
+import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -37,6 +38,8 @@ public class SoundProfile implements Parcelable {
     private final String mInputId;
     @Nullable
     private final String mPackageName;
+    @NonNull
+    private final Bundle mParams;
 
     protected SoundProfile(Parcel in) {
         if (in.readByte() == 0) {
@@ -47,6 +50,7 @@ public class SoundProfile implements Parcelable {
         mName = in.readString();
         mInputId = in.readString();
         mPackageName = in.readString();
+        mParams = in.readBundle();
     }
 
     @Override
@@ -60,6 +64,7 @@ public class SoundProfile implements Parcelable {
         dest.writeString(mName);
         dest.writeString(mInputId);
         dest.writeString(mPackageName);
+        dest.writeBundle(mParams);
     }
 
     @Override
@@ -89,12 +94,14 @@ public class SoundProfile implements Parcelable {
             @Nullable Long id,
             @NonNull String name,
             @Nullable String inputId,
-            @Nullable String packageName) {
+            @Nullable String packageName,
+            @NonNull Bundle params) {
         this.mId = id;
         this.mName = name;
         com.android.internal.util.AnnotationValidations.validate(NonNull.class, null, name);
         this.mInputId = inputId;
         this.mPackageName = packageName;
+        this.mParams = params;
     }
 
     @Nullable
@@ -116,6 +123,10 @@ public class SoundProfile implements Parcelable {
     public String getPackageName() {
         return mPackageName;
     }
+    @NonNull
+    public Bundle getParameters() {
+        return new Bundle(mParams);
+    }
 
     /**
      * A builder for {@link SoundProfile}
@@ -129,6 +140,8 @@ public class SoundProfile implements Parcelable {
         private String mInputId;
         @Nullable
         private String mPackageName;
+        @NonNull
+        private Bundle mParams;
 
         /**
          * Creates a new Builder.
@@ -181,6 +194,14 @@ public class SoundProfile implements Parcelable {
         }
 
         /**
+         * Sets profile parameters.
+         */
+        @NonNull
+        public Builder setParameters(@NonNull Bundle params) {
+            mParams = new Bundle(params);
+            return this;
+        }
+        /**
          * Builds the instance.
          */
         @NonNull
@@ -190,7 +211,8 @@ public class SoundProfile implements Parcelable {
                     mId,
                     mName,
                     mInputId,
-                    mPackageName);
+                    mPackageName,
+                    mParams);
             return o;
         }
     }

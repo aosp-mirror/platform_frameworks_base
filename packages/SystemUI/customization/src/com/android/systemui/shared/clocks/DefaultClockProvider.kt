@@ -94,7 +94,6 @@ class DefaultClockProvider(
             DEFAULT_CLOCK_ID,
             resources.getString(R.string.clock_default_name),
             resources.getString(R.string.clock_default_description),
-            // TODO(b/352049256): Update placeholder to actual resource
             resources.getDrawable(R.drawable.clock_default_thumbnail, null),
             isReactiveToTone = true,
             axes = fontAxes,
