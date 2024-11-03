@@ -39,7 +39,7 @@ import java.util.concurrent.Executor;
  */
 @FlaggedApi(Flags.FLAG_MEDIA_QUALITY_FW)
 @SystemService(Context.MEDIA_QUALITY_SERVICE)
-public class MediaQualityManager {
+public final class MediaQualityManager {
     // TODO: unhide the APIs for api review
     private static final String TAG = "MediaQualityManager";
 
@@ -287,7 +287,7 @@ public class MediaQualityManager {
 
 
     /** @SystemApi gets profiles that available to the given package */
-    @RequiresPermission(android.Manifest.permission.MANAGE_GLOBAL_PICTURE_QUALITY_SERVICE)
+    @RequiresPermission(android.Manifest.permission.MANAGE_GLOBAL_SOUND_QUALITY_SERVICE)
     public List<SoundProfile> getSoundProfilesByPackage(String packageName) {
         try {
             return mService.getSoundProfilesByPackage(packageName);
@@ -306,7 +306,7 @@ public class MediaQualityManager {
     }
 
     /** @SystemApi all stored sound profiles of all packages */
-    @RequiresPermission(android.Manifest.permission.MANAGE_GLOBAL_PICTURE_QUALITY_SERVICE)
+    @RequiresPermission(android.Manifest.permission.MANAGE_GLOBAL_SOUND_QUALITY_SERVICE)
     public List<SoundProfile> getAllSoundProfiles() {
         try {
             return mService.getAllSoundProfiles();
@@ -348,6 +348,108 @@ public class MediaQualityManager {
     public void removeSoundProfile(long profileId) {
         try {
             mService.removeSoundProfile(profileId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Gets capability information of the given parameters.
+     */
+    public List<ParamCapability> getParamCapabilities(List<String> names) {
+        try {
+            return mService.getParamCapabilities(names);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns {@code true} if media quality HAL is implemented; {@code false} otherwise.
+     */
+    public boolean isSupported() {
+        try {
+            return mService.isSupported();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Enables or disables auto picture quality.
+     * <p>If enabled, picture quality parameters can be adjusted dynamically by hardware based on
+     * different use cases.
+     *
+     * @param enabled {@code true} to enable, {@code false} to disable.
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_GLOBAL_PICTURE_QUALITY_SERVICE)
+    public void setAutoPictureQualityEnabled(boolean enabled) {
+        try {
+            mService.setAutoPictureQualityEnabled(enabled);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns {@code true} if auto picture quality is enabled; {@code false} otherwise.
+     */
+    public boolean isAutoPictureQualityEnabled() {
+        try {
+            return mService.isAutoPictureQualityEnabled();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Enables or disables super resolution.
+     * <p>Super resolution is a feature to improve resolution.
+     *
+     * @param enabled {@code true} to enable, {@code false} to disable.
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_GLOBAL_PICTURE_QUALITY_SERVICE)
+    public void setSuperResolutionEnabled(boolean enabled) {
+        try {
+            mService.setSuperResolutionEnabled(enabled);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns {@code true} if super resolution is enabled; {@code false} otherwise.
+     */
+    public boolean isSuperResolutionEnabled() {
+        try {
+            return mService.isSuperResolutionEnabled();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Enables or disables auto sound quality.
+     * <p>If enabled, sound quality parameters can be adjusted dynamically by hardware based on
+     * different use cases.
+     *
+     * @param enabled {@code true} to enable, {@code false} to disable.
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_GLOBAL_SOUND_QUALITY_SERVICE)
+    public void setAutoSoundQualityEnabled(boolean enabled) {
+        try {
+            mService.setAutoSoundQualityEnabled(enabled);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns {@code true} if auto sound quality is enabled; {@code false} otherwise.
+     */
+    public boolean isAutoSoundQualityEnabled() {
+        try {
+            return mService.isAutoSoundQualityEnabled();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

@@ -20,6 +20,7 @@ import android.content.Context;
 import android.media.quality.IMediaQualityManager;
 import android.media.quality.IPictureProfileCallback;
 import android.media.quality.ISoundProfileCallback;
+import android.media.quality.ParamCapability;
 import android.media.quality.PictureProfile;
 import android.media.quality.SoundProfile;
 
@@ -116,6 +117,45 @@ public class MediaQualityService extends SystemService {
         }
         @Override
         public void registerSoundProfileCallback(final ISoundProfileCallback callback) {
+        }
+
+
+        @Override
+        public List<ParamCapability> getParamCapabilities(List<String> names) {
+            return new ArrayList<>();
+        }
+
+
+        @Override
+        public boolean isSupported() {
+            return false;
+        }
+
+        @Override
+        public void setAutoPictureQualityEnabled(boolean enabled) {
+        }
+
+        @Override
+        public boolean isAutoPictureQualityEnabled() {
+            return false;
+        }
+
+        @Override
+        public void setSuperResolutionEnabled(boolean enabled) {
+        }
+
+        @Override
+        public boolean isSuperResolutionEnabled() {
+            return false;
+        }
+
+        @Override
+        public void setAutoSoundQualityEnabled(boolean enabled) {
+        }
+
+        @Override
+        public boolean isAutoSoundQualityEnabled() {
+            return false;
         }
     }
 }

@@ -18,6 +18,7 @@ package android.media.quality;
 
 import android.media.quality.IPictureProfileCallback;
 import android.media.quality.ISoundProfileCallback;
+import android.media.quality.ParamCapability;
 import android.media.quality.PictureProfile;
 import android.media.quality.SoundProfile;
 
@@ -44,4 +45,14 @@ interface IMediaQualityManager {
 
     void registerPictureProfileCallback(in IPictureProfileCallback cb);
     void registerSoundProfileCallback(in ISoundProfileCallback cb);
+
+    List<ParamCapability> getParamCapabilities(in List<String> names);
+
+    boolean isSupported();
+    void setAutoPictureQualityEnabled(in boolean enabled);
+    boolean isAutoPictureQualityEnabled();
+    void setSuperResolutionEnabled(in boolean enabled);
+    boolean isSuperResolutionEnabled();
+    void setAutoSoundQualityEnabled(in boolean enabled);
+    boolean isAutoSoundQualityEnabled();
 }
