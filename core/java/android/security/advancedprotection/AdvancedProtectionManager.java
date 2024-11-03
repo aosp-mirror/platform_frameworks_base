@@ -16,20 +16,30 @@
 
 package android.security.advancedprotection;
 
+import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
+
 import android.Manifest;
 import android.annotation.CallbackExecutor;
 import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.SdkConstant;
+import android.annotation.StringDef;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Binder;
 import android.os.RemoteException;
 import android.security.Flags;
 import android.util.Log;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 
@@ -44,6 +54,139 @@ import java.util.concurrent.Executor;
 @SystemService(Context.ADVANCED_PROTECTION_SERVICE)
 public final class AdvancedProtectionManager {
     private static final String TAG = "AdvancedProtectionMgr";
+
+    /**
+     * Advanced Protection's identifier for setting policies or restrictions in DevicePolicyManager.
+     *
+     * @hide */
+    public static final String ADVANCED_PROTECTION_SYSTEM_ENTITY =
+            "android.security.advancedprotection";
+
+    /**
+     * Feature identifier for disallowing 2G.
+     *
+     * @hide */
+    @SystemApi
+    public static final String FEATURE_ID_DISALLOW_CELLULAR_2G =
+            "android.security.advancedprotection.feature_disallow_2g";
+
+    /**
+     * Feature identifier for disallowing install of unknown sources.
+     *
+     * @hide */
+    @SystemApi
+    public static final String FEATURE_ID_DISALLOW_INSTALL_UNKNOWN_SOURCES =
+            "android.security.advancedprotection.feature_disallow_install_unknown_sources";
+
+    /**
+     * Feature identifier for disallowing USB.
+     *
+     * @hide */
+    @SystemApi
+    public static final String FEATURE_ID_DISALLOW_USB =
+            "android.security.advancedprotection.feature_disallow_usb";
+
+    /**
+     * Feature identifier for disallowing WEP.
+     *
+     * @hide */
+    @SystemApi
+    public static final String FEATURE_ID_DISALLOW_WEP =
+            "android.security.advancedprotection.feature_disallow_wep";
+
+    /**
+     * Feature identifier for enabling MTE.
+     *
+     * @hide */
+    @SystemApi
+    public static final String FEATURE_ID_ENABLE_MTE =
+            "android.security.advancedprotection.feature_enable_mte";
+
+    /** @hide */
+    @StringDef(prefix = { "FEATURE_ID_" }, value = {
+            FEATURE_ID_DISALLOW_CELLULAR_2G,
+            FEATURE_ID_DISALLOW_INSTALL_UNKNOWN_SOURCES,
+            FEATURE_ID_DISALLOW_USB,
+            FEATURE_ID_DISALLOW_WEP,
+            FEATURE_ID_ENABLE_MTE,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface FeatureId {}
+
+    private static final Set<String> ALL_FEATURE_IDS = Set.of(
+            FEATURE_ID_DISALLOW_CELLULAR_2G,
+            FEATURE_ID_DISALLOW_INSTALL_UNKNOWN_SOURCES,
+            FEATURE_ID_DISALLOW_USB,
+            FEATURE_ID_DISALLOW_WEP,
+            FEATURE_ID_ENABLE_MTE);
+
+    /**
+     * Activity Action: Show a dialog with disabled by advanced protection message.
+     * <p> If a user action or a setting toggle is disabled by advanced protection, this dialog can
+     * be triggered to let the user know about this.
+     * <p>
+     * Input:
+     * <p>{@link #EXTRA_SUPPORT_DIALOG_FEATURE}: The feature identifier.
+     * <p>{@link #EXTRA_SUPPORT_DIALOG_TYPE}: The type of the action.
+     * <p>
+     * Output: Nothing.
+     *
+     * @hide */
+    @SystemApi
+    @SdkConstant(SdkConstant.SdkConstantType.ACTIVITY_INTENT_ACTION)
+    @FlaggedApi(android.security.Flags.FLAG_AAPM_API)
+    public static final String ACTION_SHOW_ADVANCED_PROTECTION_SUPPORT_DIALOG =
+            "android.security.advancedprotection.action.SHOW_ADVANCED_PROTECTION_SUPPORT_DIALOG";
+
+    /**
+     * A string extra used with {@link #createSupportIntent} to identify the feature that needs to
+     * show a support dialog explaining it was disabled by advanced protection.
+     *
+     * @hide */
+    @FeatureId
+    @SystemApi
+    public static final String EXTRA_SUPPORT_DIALOG_FEATURE =
+            "android.security.advancedprotection.extra.SUPPORT_DIALOG_FEATURE";
+
+    /**
+     * A string extra used with {@link #createSupportIntent} to identify the type of the action that
+     * needs to be explained in the support dialog.
+     *
+     * @hide */
+    @SupportDialogType
+    @SystemApi
+    public static final String EXTRA_SUPPORT_DIALOG_TYPE =
+            "android.security.advancedprotection.extra.SUPPORT_DIALOG_TYPE";
+
+    /**
+     * Type for {@link #EXTRA_SUPPORT_DIALOG_TYPE} indicating a user performed an action that was
+     * blocked by advanced protection.
+     *
+     * @hide */
+    @SystemApi
+    public static final String SUPPORT_DIALOG_TYPE_BLOCKED_INTERACTION =
+            "android.security.advancedprotection.type_blocked_interaction";
+
+    /**
+     * Type for {@link #EXTRA_SUPPORT_DIALOG_TYPE} indicating a user pressed on a setting toggle
+     * that was disabled by advanced protection.
+     *
+     * @hide */
+    @SystemApi
+    public static final String SUPPORT_DIALOG_TYPE_DISABLED_SETTING =
+            "android.security.advancedprotection.type_disabled_setting";
+
+    /** @hide */
+    @StringDef(prefix = { "SUPPORT_DIALOG_TYPE_" }, value = {
+            SUPPORT_DIALOG_TYPE_BLOCKED_INTERACTION,
+            SUPPORT_DIALOG_TYPE_DISABLED_SETTING,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface SupportDialogType {}
+
+    private static final Set<String> ALL_SUPPORT_DIALOG_TYPES = Set.of(
+            SUPPORT_DIALOG_TYPE_BLOCKED_INTERACTION,
+            SUPPORT_DIALOG_TYPE_DISABLED_SETTING);
 
     private final ConcurrentHashMap<Callback, IAdvancedProtectionCallback>
             mCallbackMap = new ConcurrentHashMap<>();
@@ -161,6 +304,43 @@ public final class AdvancedProtectionManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Called by a feature to display a support dialog when a feature was disabled by advanced
+     * protection. This returns an intent that can be used with
+     * {@link Context#startActivity(Intent)} to display the dialog.
+     *
+     * <p>Note that this method doesn't check if the feature is actually disabled, i.e. this method
+     * will always return an intent.
+     *
+     * @param featureId The feature identifier.
+     * @param type The type of the feature describing the action that needs to be explained
+     *                 in the dialog or null for default explanation.
+     * @return Intent An intent to be used to start the dialog-activity that explains a feature was
+     *                disabled by advanced protection.
+     * @hide
+     */
+    @SystemApi
+    public @NonNull Intent createSupportIntent(@NonNull @FeatureId String featureId,
+            @Nullable @SupportDialogType String type) {
+        Objects.requireNonNull(featureId);
+        if (!ALL_FEATURE_IDS.contains(featureId)) {
+            throw new IllegalArgumentException(featureId + " is not a valid feature ID. See"
+                    + " FEATURE_ID_* APIs.");
+        }
+        if (type != null && !ALL_SUPPORT_DIALOG_TYPES.contains(type)) {
+            throw new IllegalArgumentException(type + " is not a valid type. See"
+                    + " SUPPORT_DIALOG_TYPE_* APIs.");
+        }
+
+        Intent intent = new Intent(ACTION_SHOW_ADVANCED_PROTECTION_SUPPORT_DIALOG);
+        intent.setFlags(FLAG_ACTIVITY_NEW_TASK);
+        intent.putExtra(EXTRA_SUPPORT_DIALOG_FEATURE, featureId);
+        if (type != null) {
+            intent.putExtra(EXTRA_SUPPORT_DIALOG_TYPE, type);
+        }
+        return intent;
     }
 
     /**
