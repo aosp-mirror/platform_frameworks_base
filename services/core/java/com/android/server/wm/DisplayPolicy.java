@@ -3053,7 +3053,7 @@ public class DisplayPolicy {
             @InsetsType int insetsType) {
         for (int i = insetsState.sourceSize() - 1; i >= 0; i--) {
             final InsetsSource source = insetsState.sourceAt(i);
-            if ((source.getType() & insetsType) == 0 || !source.isVisible()) {
+            if ((source.getType() & insetsType) == 0) {
                 continue;
             }
             if (Rect.intersects(bounds, source.getFrame())) {
