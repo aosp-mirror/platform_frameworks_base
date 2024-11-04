@@ -1707,10 +1707,3 @@ flag {
     description: "An implementation of shortcut customizations through shortcut helper."
     bug: "365064144"
 }
-
-flag {
-   name: "touchpad_three_finger_tap_customization"
-   namespace: "systemui"
-   description: "Customize touchpad three finger tap"
-   bug: "365063048"
-}
