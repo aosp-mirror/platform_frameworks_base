@@ -21,6 +21,7 @@ import android.animation.RectEvaluator
 import android.animation.ValueAnimator
 import android.graphics.Rect
 import android.os.IBinder
+import android.view.Choreographer
 import android.view.SurfaceControl
 import android.view.WindowManager.TRANSIT_CHANGE
 import android.window.TransitionInfo
@@ -126,6 +127,7 @@ class ToggleResizeDesktopTaskTransitionHandler(
                         tx.setPosition(leash, rect.left.toFloat(), rect.top.toFloat())
                             .setWindowCrop(leash, rect.width(), rect.height())
                             .show(leash)
+                            .setFrameTimeline(Choreographer.getInstance().getVsyncId())
                         onTaskResizeAnimationListener.onBoundsChange(taskId, tx, rect)
                     }
                     start()
