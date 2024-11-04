@@ -397,7 +397,7 @@ public class PipTransition extends PipTransitionController implements
         final Rect adjustedSourceRectHint = sourceRectHint != null ? new Rect(sourceRectHint)
                 : PipUtils.getEnterPipWithOverlaySrcRectHint(startBounds, aspectRatio);
 
-        final SurfaceControl pipLeash = mPipTransitionState.mPinnedTaskLeash;
+        final SurfaceControl pipLeash = mPipTransitionState.getPinnedTaskLeash();
 
         // For opening type transitions, if there is a change of mode TO_FRONT/OPEN,
         // make sure that change has alpha of 1f, since it's init state might be set to alpha=0f
@@ -521,7 +521,7 @@ public class PipTransition extends PipTransitionController implements
         }
 
         Rect destinationBounds = pipChange.getEndAbsBounds();
-        SurfaceControl pipLeash = mPipTransitionState.mPinnedTaskLeash;
+        SurfaceControl pipLeash = mPipTransitionState.getPinnedTaskLeash();
         Preconditions.checkNotNull(pipLeash, "Leash is null for alpha transition.");
 
         // Start transition with 0 alpha at the entry bounds.
@@ -797,17 +797,17 @@ public class PipTransition extends PipTransitionController implements
 
                 mPipTransitionState.mPipTaskToken = extra.getParcelable(
                         PIP_TASK_TOKEN, WindowContainerToken.class);
-                mPipTransitionState.mPinnedTaskLeash = extra.getParcelable(
-                        PIP_TASK_LEASH, SurfaceControl.class);
+                mPipTransitionState.setPinnedTaskLeash(extra.getParcelable(
+                        PIP_TASK_LEASH, SurfaceControl.class));
                 boolean hasValidTokenAndLeash = mPipTransitionState.mPipTaskToken != null
-                        && mPipTransitionState.mPinnedTaskLeash != null;
+                        && mPipTransitionState.getPinnedTaskLeash() != null;
 
                 Preconditions.checkState(hasValidTokenAndLeash,
                         "Unexpected bundle for " + mPipTransitionState);
                 break;
             case PipTransitionState.EXITED_PIP:
                 mPipTransitionState.mPipTaskToken = null;
-                mPipTransitionState.mPinnedTaskLeash = null;
+                mPipTransitionState.setPinnedTaskLeash(null);
                 break;
         }
     }

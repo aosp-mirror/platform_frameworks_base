@@ -142,7 +142,7 @@ public class PipTransitionState {
 
     // pinned PiP task's leash
     @Nullable
-    SurfaceControl mPinnedTaskLeash;
+    private SurfaceControl mPinnedTaskLeash;
 
     // Overlay leash potentially used during swipe PiP to home transition;
     // if null while mInSwipePipToHomeTransition is true, then srcRectHint was invalid.
@@ -302,6 +302,14 @@ public class PipTransitionState {
         mInSwipePipToHomeTransition = false;
         mSwipePipToHomeOverlay = null;
         mSwipePipToHomeAppBounds.setEmpty();
+    }
+
+    @Nullable SurfaceControl getPinnedTaskLeash() {
+        return mPinnedTaskLeash;
+    }
+
+    void setPinnedTaskLeash(@Nullable SurfaceControl leash) {
+        mPinnedTaskLeash = leash;
     }
 
     /**
