@@ -119,7 +119,6 @@ import com.android.internal.widget.ILockSettings;
 import com.android.internal.widget.LockSettingsInternal;
 import com.android.server.accessibility.AccessibilityManagerService;
 import com.android.server.accounts.AccountManagerService;
-import com.android.server.adaptiveauth.AdaptiveAuthService;
 import com.android.server.adb.AdbService;
 import com.android.server.alarm.AlarmManagerService;
 import com.android.server.am.ActivityManagerService;
@@ -249,6 +248,7 @@ import com.android.server.security.AttestationVerificationManagerService;
 import com.android.server.security.FileIntegrityService;
 import com.android.server.security.KeyAttestationApplicationIdProviderService;
 import com.android.server.security.KeyChainSystemService;
+import com.android.server.security.adaptiveauthentication.AdaptiveAuthenticationService;
 import com.android.server.security.advancedprotection.AdvancedProtectionService;
 import com.android.server.security.rkp.RemoteProvisioningService;
 import com.android.server.selinux.SelinuxAuditLogsService;
@@ -2650,8 +2650,8 @@ public final class SystemServer implements Dumpable {
             t.traceEnd();
 
             if (android.adaptiveauth.Flags.enableAdaptiveAuth()) {
-                t.traceBegin("StartAdaptiveAuthService");
-                mSystemServiceManager.startService(AdaptiveAuthService.class);
+                t.traceBegin("StartAdaptiveAuthenticationService");
+                mSystemServiceManager.startService(AdaptiveAuthenticationService.class);
                 t.traceEnd();
             }
 
