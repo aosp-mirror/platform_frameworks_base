@@ -1735,9 +1735,9 @@ public class DisplayPolicy {
         }
 
         // Show IME over the keyguard if the target allows it.
-        final boolean showImeOverKeyguard = imeTarget != null && imeTarget.isVisible()
-                && win.mIsImWindow && (imeTarget.canShowWhenLocked()
-                        || !imeTarget.canBeHiddenByKeyguard());
+        final boolean showImeOverKeyguard =
+                imeTarget != null && imeTarget.isOnScreen() && win.mIsImWindow && (
+                        imeTarget.canShowWhenLocked() || !imeTarget.canBeHiddenByKeyguard());
         if (showImeOverKeyguard) {
             return false;
         }
