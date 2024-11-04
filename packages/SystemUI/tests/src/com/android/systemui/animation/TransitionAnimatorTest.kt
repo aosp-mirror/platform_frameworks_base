@@ -77,7 +77,10 @@ class TransitionAnimatorTest(val useSpring: Boolean) : SysuiTestCase() {
     @get:Rule(order = 2) val animatorTestRule = android.animation.AnimatorTestRule(this)
     @get:Rule(order = 3)
     val motionRule =
-        MotionTestRule(AnimatorTestRuleToolkit(animatorTestRule, kosmos.testScope), pathManager)
+        MotionTestRule(
+            AnimatorTestRuleToolkit(animatorTestRule, kosmos.testScope) { activityRule.scenario },
+            pathManager,
+        )
 
     @Test
     fun backgroundAnimation_whenLaunching() {
