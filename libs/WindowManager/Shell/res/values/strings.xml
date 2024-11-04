@@ -339,4 +339,7 @@
     <string name="open_by_default_dialog_in_browser_text">In your browser</string>
     <!-- Text for open by default settings dialog dismiss button. -->
     <string name="open_by_default_dialog_dismiss_button_text">OK</string>
+
+    <!-- Text for the App-to-Web education promo. -->
+    <string name="desktop_windowing_app_to_web_education_text">Quickly open apps in your browser here</string>
 </resources>
