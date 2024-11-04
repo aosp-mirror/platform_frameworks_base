@@ -5155,6 +5155,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         mContext.registerReceiver(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
+                final String action = intent.getAction();
+                if (action == null) {
+                    return;
+                }
+
                 String[] pkgs = intent.getStringArrayExtra(Intent.EXTRA_PACKAGES);
                 if (pkgs != null) {
                     for (String pkg : pkgs) {
