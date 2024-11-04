@@ -16,25 +16,7 @@
 
 package com.android.systemui.media.controls.domain.pipeline
 
-import android.app.statusBarManager
-import android.content.testableContext
-import com.android.systemui.graphics.imageLoader
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.testDispatcher
-import com.android.systemui.kosmos.testScope
-import com.android.systemui.media.controls.util.fakeMediaControllerFactory
-import com.android.systemui.media.controls.util.mediaFlags
+import org.mockito.kotlin.mock
 
-val Kosmos.mediaDataLoader by
-    Kosmos.Fixture {
-        MediaDataLoader(
-            testableContext,
-            testDispatcher,
-            testScope,
-            fakeMediaControllerFactory,
-            mediaFlags,
-            imageLoader,
-            statusBarManager,
-            media3ActionFactory,
-        )
-    }
+var Kosmos.media3ActionFactory: Media3ActionFactory by Kosmos.Fixture { mock {} }
