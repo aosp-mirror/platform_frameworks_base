@@ -254,7 +254,7 @@ final class ImeInsetsSourceProvider extends InsetsSourceProvider {
             // Refer WindowState#getImeControlTarget().
             target = target.getWindow().getImeControlTarget();
         }
-        // TODO(b/329229469) make sure that the statsToken of all callers is non-null (currently
+        // TODO(b/353463205) make sure that the statsToken of all callers is non-null (currently
         //  not the case)
         super.updateControlForTarget(target, force, statsToken);
         if (Flags.refactorInsetsController()) {
@@ -290,12 +290,14 @@ final class ImeInsetsSourceProvider extends InsetsSourceProvider {
         changed |= mDisplayContent.onImeInsetsClientVisibilityUpdate();
         if (Flags.refactorInsetsController()) {
             if (changed) {
+                ImeTracker.forLogging().onProgress(statsToken,
+                        ImeTracker.PHASE_SERVER_UPDATE_CLIENT_VISIBILITY);
                 invokeOnImeRequestedChangedListener(mDisplayContent.getImeInputTarget(),
                         statsToken);
             } else {
-                // TODO(b/329229469) change phase and check cancelled / failed
+                // TODO(b/353463205) check cancelled / failed
                 ImeTracker.forLogging().onCancelled(statsToken,
-                        ImeTracker.PHASE_CLIENT_REPORT_REQUESTED_VISIBLE_TYPES);
+                        ImeTracker.PHASE_SERVER_UPDATE_CLIENT_VISIBILITY);
             }
         }
         return changed;
@@ -460,7 +462,7 @@ final class ImeInsetsSourceProvider extends InsetsSourceProvider {
             // This can later become ready, so we don't want to cancel the pending request here.
             return;
         }
-        // TODO(b/329229469) check if this is still triggered, as we don't go into STATE_SHOW_IME
+        // TODO(b/353463205) check if this is still triggered, as we don't go into STATE_SHOW_IME
         //  (DefaultImeVisibilityApplier)
         if (android.view.inputmethod.Flags.refactorInsetsController()) {
             // The IME is drawn, so call into {@link WindowState#notifyInsetsControlChanged}
