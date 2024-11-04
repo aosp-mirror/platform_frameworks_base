@@ -26,11 +26,14 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.fragments.FragmentHostManager
+import com.android.systemui.kosmos.useUnconfinedTestDispatcher
+import com.android.systemui.statusbar.data.repository.fakeStatusBarModePerDisplayRepository
 import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragment
 import com.android.systemui.statusbar.phone.fragment.dagger.HomeStatusBarComponent
 import com.android.systemui.statusbar.pipeline.shared.ui.composable.StatusBarRootFactory
 import com.android.systemui.statusbar.window.StatusBarWindowController
 import com.android.systemui.statusbar.window.StatusBarWindowControllerStore
+import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlin.test.Test
 import org.junit.Assert.assertThrows
@@ -45,12 +48,14 @@ import org.mockito.kotlin.whenever
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class StatusBarInitializerTest : SysuiTestCase() {
+    private val kosmos = testKosmos().useUnconfinedTestDispatcher()
     private val windowController = mock(StatusBarWindowController::class.java)
     private val windowControllerStore = mock(StatusBarWindowControllerStore::class.java)
     private val transaction = mock(FragmentTransaction::class.java)
     private val fragmentManager = mock(FragmentManager::class.java)
     private val fragmentHostManager = mock(FragmentHostManager::class.java)
     private val backgroundView = mock(ViewGroup::class.java)
+    private val statusBarModePerDisplayRepository = kosmos.fakeStatusBarModePerDisplayRepository
 
     @Before
     fun setup() {
@@ -72,6 +77,7 @@ class StatusBarInitializerTest : SysuiTestCase() {
             statusBarRootFactory = mock(StatusBarRootFactory::class.java),
             componentFactory = mock(HomeStatusBarComponent.Factory::class.java),
             creationListeners = setOf(),
+            statusBarModePerDisplayRepository = statusBarModePerDisplayRepository,
         )
 
     @Test
