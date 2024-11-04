@@ -37,7 +37,6 @@ import android.os.Process
 import android.os.SystemClock
 import android.os.SystemProperties
 import android.os.test.TestLooper
-import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.annotations.Presubmit
 import android.platform.test.flag.junit.SetFlagsRule
@@ -123,6 +122,7 @@ class KeyGestureControllerTests {
 
     private var currentPid = 0
     private lateinit var context: Context
+    private lateinit var keyGestureController: KeyGestureController
     private lateinit var inputManagerGlobalSession: InputManagerGlobal.TestSession
     private lateinit var testLooper: TestLooper
     private var events = mutableListOf<KeyGestureEvent>()
@@ -144,6 +144,7 @@ class KeyGestureControllerTests {
     }
 
     private fun setupBehaviors() {
+        Mockito.`when`(SystemProperties.get("ro.debuggable")).thenReturn("1")
         Mockito.`when`(resources.getBoolean(R.bool.config_enableScreenshotChord)).thenReturn(true)
         val testBookmarks: XmlResourceParser = context.resources.getXml(
             com.android.test.input.R.xml.bookmarks
@@ -172,7 +173,14 @@ class KeyGestureControllerTests {
         ExtendedMockito.`when`(KeyCharacterMap.load(Mockito.anyInt())).thenReturn(kcm)
     }
 
-    private fun notifyHomeGestureCompleted(keyGestureController: KeyGestureController) {
+    private fun setupKeyGestureController() {
+        keyGestureController = KeyGestureController(context, testLooper.looper)
+        Mockito.`when`(iInputManager.getAppLaunchBookmarks())
+            .thenReturn(keyGestureController.appLaunchBookmarks)
+        keyGestureController.systemRunning()
+    }
+
+    private fun notifyHomeGestureCompleted() {
         keyGestureController.notifyKeyGestureCompleted(
             DEVICE_ID, intArrayOf(KeyEvent.KEYCODE_H),
             KeyEvent.META_META_ON or KeyEvent.META_META_LEFT_ON,
@@ -182,12 +190,12 @@ class KeyGestureControllerTests {
 
     @Test
     fun testKeyGestureEvent_registerUnregisterListener() {
-        val keyGestureController = KeyGestureController(context, testLooper.looper)
+        setupKeyGestureController()
         val listener = KeyGestureEventListener()
 
         // Register key gesture event listener
         keyGestureController.registerKeyGestureEventListener(listener, 0)
-        notifyHomeGestureCompleted(keyGestureController)
+        notifyHomeGestureCompleted()
         testLooper.dispatchAll()
         assertEquals(
             "Listener should get callbacks on key gesture event completed",
@@ -203,7 +211,7 @@ class KeyGestureControllerTests {
         // Unregister listener
         events.clear()
         keyGestureController.unregisterKeyGestureEventListener(listener, 0)
-        notifyHomeGestureCompleted(keyGestureController)
+        notifyHomeGestureCompleted()
         testLooper.dispatchAll()
         assertEquals(
             "Listener should not get callback after being unregistered",
@@ -214,7 +222,7 @@ class KeyGestureControllerTests {
 
     @Test
     fun testKeyGestureEvent_multipleGestureHandlers() {
-        val keyGestureController = KeyGestureController(context, testLooper.looper)
+        setupKeyGestureController()
 
         // Set up two callbacks.
         var callbackCount1 = 0
@@ -278,7 +286,7 @@ class KeyGestureControllerTests {
     }
 
     @Keep
-    private fun keyGestureEventHandlerTestArguments(): Array<TestData> {
+    private fun systemGesturesTestArguments(): Array<TestData> {
         return arrayOf(
             TestData(
                 "META + A -> Launch Assistant",
@@ -287,25 +295,6 @@ class KeyGestureControllerTests {
                 intArrayOf(KeyEvent.KEYCODE_A),
                 KeyEvent.META_META_ON,
                 intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
-            ),
-            TestData(
-                "RECENT_APPS -> Show Overview",
-                intArrayOf(KeyEvent.KEYCODE_RECENT_APPS),
-                KeyGestureEvent.KEY_GESTURE_TYPE_RECENT_APPS,
-                intArrayOf(KeyEvent.KEYCODE_RECENT_APPS),
-                0,
-                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
-            ),
-            TestData(
-                "APP_SWITCH -> App Switch",
-                intArrayOf(KeyEvent.KEYCODE_APP_SWITCH),
-                KeyGestureEvent.KEY_GESTURE_TYPE_APP_SWITCH,
-                intArrayOf(KeyEvent.KEYCODE_APP_SWITCH),
-                0,
-                intArrayOf(
-                    KeyGestureEvent.ACTION_GESTURE_START,
-                    KeyGestureEvent.ACTION_GESTURE_COMPLETE
-                )
             ),
             TestData(
                 "META + H -> Go Home",
@@ -476,94 +465,6 @@ class KeyGestureControllerTests {
                 intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
             ),
             TestData(
-                "BRIGHTNESS_UP -> Brightness Up",
-                intArrayOf(KeyEvent.KEYCODE_BRIGHTNESS_UP),
-                KeyGestureEvent.KEY_GESTURE_TYPE_BRIGHTNESS_UP,
-                intArrayOf(KeyEvent.KEYCODE_BRIGHTNESS_UP),
-                0,
-                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
-            ),
-            TestData(
-                "BRIGHTNESS_DOWN -> Brightness Down",
-                intArrayOf(KeyEvent.KEYCODE_BRIGHTNESS_DOWN),
-                KeyGestureEvent.KEY_GESTURE_TYPE_BRIGHTNESS_DOWN,
-                intArrayOf(KeyEvent.KEYCODE_BRIGHTNESS_DOWN),
-                0,
-                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
-            ),
-            TestData(
-                "KEYBOARD_BACKLIGHT_UP -> Keyboard Backlight Up",
-                intArrayOf(KeyEvent.KEYCODE_KEYBOARD_BACKLIGHT_UP),
-                KeyGestureEvent.KEY_GESTURE_TYPE_KEYBOARD_BACKLIGHT_UP,
-                intArrayOf(KeyEvent.KEYCODE_KEYBOARD_BACKLIGHT_UP),
-                0,
-                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
-            ),
-            TestData(
-                "KEYBOARD_BACKLIGHT_DOWN -> Keyboard Backlight Down",
-                intArrayOf(KeyEvent.KEYCODE_KEYBOARD_BACKLIGHT_DOWN),
-                KeyGestureEvent.KEY_GESTURE_TYPE_KEYBOARD_BACKLIGHT_DOWN,
-                intArrayOf(KeyEvent.KEYCODE_KEYBOARD_BACKLIGHT_DOWN),
-                0,
-                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
-            ),
-            TestData(
-                "KEYBOARD_BACKLIGHT_TOGGLE -> Keyboard Backlight Toggle",
-                intArrayOf(KeyEvent.KEYCODE_KEYBOARD_BACKLIGHT_TOGGLE),
-                KeyGestureEvent.KEY_GESTURE_TYPE_KEYBOARD_BACKLIGHT_TOGGLE,
-                intArrayOf(KeyEvent.KEYCODE_KEYBOARD_BACKLIGHT_TOGGLE),
-                0,
-                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
-            ),
-            TestData(
-                "ALL_APPS -> Open App Drawer",
-                intArrayOf(KeyEvent.KEYCODE_ALL_APPS),
-                KeyGestureEvent.KEY_GESTURE_TYPE_ALL_APPS,
-                intArrayOf(KeyEvent.KEYCODE_ALL_APPS),
-                0,
-                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
-            ),
-            TestData(
-                "NOTIFICATION -> Toggle Notification Panel",
-                intArrayOf(KeyEvent.KEYCODE_NOTIFICATION),
-                KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_NOTIFICATION_PANEL,
-                intArrayOf(KeyEvent.KEYCODE_NOTIFICATION),
-                0,
-                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
-            ),
-            TestData(
-                "LANGUAGE_SWITCH -> Switch Language Forward",
-                intArrayOf(KeyEvent.KEYCODE_LANGUAGE_SWITCH),
-                KeyGestureEvent.KEY_GESTURE_TYPE_LANGUAGE_SWITCH,
-                intArrayOf(KeyEvent.KEYCODE_LANGUAGE_SWITCH),
-                0,
-                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
-            ),
-            TestData(
-                "SHIFT + LANGUAGE_SWITCH -> Switch Language Backward",
-                intArrayOf(KeyEvent.KEYCODE_SHIFT_LEFT, KeyEvent.KEYCODE_LANGUAGE_SWITCH),
-                KeyGestureEvent.KEY_GESTURE_TYPE_LANGUAGE_SWITCH,
-                intArrayOf(KeyEvent.KEYCODE_LANGUAGE_SWITCH),
-                KeyEvent.META_SHIFT_ON,
-                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
-            ),
-            TestData(
-                "SCREENSHOT -> Take Screenshot",
-                intArrayOf(KeyEvent.KEYCODE_SCREENSHOT),
-                KeyGestureEvent.KEY_GESTURE_TYPE_TAKE_SCREENSHOT,
-                intArrayOf(KeyEvent.KEYCODE_SCREENSHOT),
-                0,
-                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
-            ),
-            TestData(
-                "META -> Open Apps Drawer",
-                intArrayOf(KeyEvent.KEYCODE_META_LEFT),
-                KeyGestureEvent.KEY_GESTURE_TYPE_ACCESSIBILITY_ALL_APPS,
-                intArrayOf(KeyEvent.KEYCODE_META_LEFT),
-                0,
-                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
-            ),
-            TestData(
                 "META + ALT -> Toggle Caps Lock",
                 intArrayOf(KeyEvent.KEYCODE_META_LEFT, KeyEvent.KEYCODE_ALT_LEFT),
                 KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_CAPS_LOCK,
@@ -628,22 +529,6 @@ class KeyGestureControllerTests {
                 KeyGestureEvent.KEY_GESTURE_TYPE_ACCESSIBILITY_SHORTCUT,
                 intArrayOf(KeyEvent.KEYCODE_Z),
                 KeyEvent.META_CTRL_ON or KeyEvent.META_ALT_ON,
-                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
-            ),
-            TestData(
-                "SYSRQ -> Take screenshot",
-                intArrayOf(KeyEvent.KEYCODE_SYSRQ),
-                KeyGestureEvent.KEY_GESTURE_TYPE_TAKE_SCREENSHOT,
-                intArrayOf(KeyEvent.KEYCODE_SYSRQ),
-                0,
-                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
-            ),
-            TestData(
-                "ESC -> Close All Dialogs",
-                intArrayOf(KeyEvent.KEYCODE_ESCAPE),
-                KeyGestureEvent.KEY_GESTURE_TYPE_CLOSE_ALL_DIALOGS,
-                intArrayOf(KeyEvent.KEYCODE_ESCAPE),
-                0,
                 intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
             ),
             TestData(
@@ -758,6 +643,305 @@ class KeyGestureControllerTests {
                 AppLaunchData.createLaunchDataForComponent("com.test", "com.test.BookmarkTest")
             ),
             TestData(
+                "META + CTRL + DEL -> Trigger Bug Report",
+                intArrayOf(
+                    KeyEvent.KEYCODE_META_LEFT,
+                    KeyEvent.KEYCODE_CTRL_LEFT,
+                    KeyEvent.KEYCODE_DEL
+                ),
+                KeyGestureEvent.KEY_GESTURE_TYPE_TRIGGER_BUG_REPORT,
+                intArrayOf(KeyEvent.KEYCODE_DEL),
+                KeyEvent.META_META_ON or KeyEvent.META_CTRL_ON,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
+            ),
+            TestData(
+                "Meta + Alt + 3 -> Toggle Bounce Keys",
+                intArrayOf(
+                    KeyEvent.KEYCODE_META_LEFT,
+                    KeyEvent.KEYCODE_ALT_LEFT,
+                    KeyEvent.KEYCODE_3
+                ),
+                KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_BOUNCE_KEYS,
+                intArrayOf(KeyEvent.KEYCODE_3),
+                KeyEvent.META_META_ON or KeyEvent.META_ALT_ON,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
+            ),
+            TestData(
+                "Meta + Alt + 4 -> Toggle Mouse Keys",
+                intArrayOf(
+                    KeyEvent.KEYCODE_META_LEFT,
+                    KeyEvent.KEYCODE_ALT_LEFT,
+                    KeyEvent.KEYCODE_4
+                ),
+                KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_MOUSE_KEYS,
+                intArrayOf(KeyEvent.KEYCODE_4),
+                KeyEvent.META_META_ON or KeyEvent.META_ALT_ON,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
+            ),
+            TestData(
+                "Meta + Alt + 5 -> Toggle Sticky Keys",
+                intArrayOf(
+                    KeyEvent.KEYCODE_META_LEFT,
+                    KeyEvent.KEYCODE_ALT_LEFT,
+                    KeyEvent.KEYCODE_5
+                ),
+                KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_STICKY_KEYS,
+                intArrayOf(KeyEvent.KEYCODE_5),
+                KeyEvent.META_META_ON or KeyEvent.META_ALT_ON,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
+            ),
+            TestData(
+                "Meta + Alt + 6 -> Toggle Slow Keys",
+                intArrayOf(
+                    KeyEvent.KEYCODE_META_LEFT,
+                    KeyEvent.KEYCODE_ALT_LEFT,
+                    KeyEvent.KEYCODE_6
+                ),
+                KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_SLOW_KEYS,
+                intArrayOf(KeyEvent.KEYCODE_6),
+                KeyEvent.META_META_ON or KeyEvent.META_ALT_ON,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
+            ),
+            TestData(
+                "META + CTRL + D -> Move a task to next display",
+                intArrayOf(
+                    KeyEvent.KEYCODE_META_LEFT,
+                    KeyEvent.KEYCODE_CTRL_LEFT,
+                    KeyEvent.KEYCODE_D
+                ),
+                KeyGestureEvent.KEY_GESTURE_TYPE_MOVE_TO_NEXT_DISPLAY,
+                intArrayOf(KeyEvent.KEYCODE_D),
+                KeyEvent.META_META_ON or KeyEvent.META_CTRL_ON,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
+            ),
+            TestData(
+                "ALT + [ -> Resizes a task to fit the left half of the screen",
+                intArrayOf(
+                    KeyEvent.KEYCODE_ALT_LEFT,
+                    KeyEvent.KEYCODE_LEFT_BRACKET
+                ),
+                KeyGestureEvent.KEY_GESTURE_TYPE_SNAP_LEFT_FREEFORM_WINDOW,
+                intArrayOf(KeyEvent.KEYCODE_LEFT_BRACKET),
+                KeyEvent.META_ALT_ON,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
+            ),
+            TestData(
+                "ALT + ] -> Resizes a task to fit the right half of the screen",
+                intArrayOf(
+                    KeyEvent.KEYCODE_ALT_LEFT,
+                    KeyEvent.KEYCODE_RIGHT_BRACKET
+                ),
+                KeyGestureEvent.KEY_GESTURE_TYPE_SNAP_RIGHT_FREEFORM_WINDOW,
+                intArrayOf(KeyEvent.KEYCODE_RIGHT_BRACKET),
+                KeyEvent.META_ALT_ON,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
+            ),
+            TestData(
+                "ALT + '=' -> Maximizes a task to fit the screen",
+                intArrayOf(
+                    KeyEvent.KEYCODE_ALT_LEFT,
+                    KeyEvent.KEYCODE_EQUALS
+                ),
+                KeyGestureEvent.KEY_GESTURE_TYPE_MAXIMIZE_FREEFORM_WINDOW,
+                intArrayOf(KeyEvent.KEYCODE_EQUALS),
+                KeyEvent.META_ALT_ON,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
+            ),
+            TestData(
+                "ALT + '-' -> Restores a task size to its previous bounds",
+                intArrayOf(
+                    KeyEvent.KEYCODE_ALT_LEFT,
+                    KeyEvent.KEYCODE_MINUS
+                ),
+                KeyGestureEvent.KEY_GESTURE_TYPE_RESTORE_FREEFORM_WINDOW_SIZE,
+                intArrayOf(KeyEvent.KEYCODE_MINUS),
+                KeyEvent.META_ALT_ON,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
+            )
+        )
+    }
+
+    @Test
+    @Parameters(method = "systemGesturesTestArguments")
+    @EnableFlags(
+        com.android.server.flags.Flags.FLAG_NEW_BUGREPORT_KEYBOARD_SHORTCUT,
+        com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_SHORTCUT_CONTROL,
+        com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_BOUNCE_KEYS_FLAG,
+        com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_SLOW_KEYS_FLAG,
+        com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_STICKY_KEYS_FLAG,
+        com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_MOUSE_KEYS,
+        com.android.window.flags.Flags.FLAG_ENABLE_MOVE_TO_NEXT_DISPLAY_SHORTCUT,
+        com.android.window.flags.Flags.FLAG_ENABLE_TASK_RESIZING_KEYBOARD_SHORTCUTS
+    )
+    fun testKeyGestures(test: TestData) {
+        setupKeyGestureController()
+        testKeyGestureInternal(test)
+    }
+
+    @Test
+    @Parameters(method = "systemGesturesTestArguments")
+    @EnableFlags(
+        com.android.server.flags.Flags.FLAG_NEW_BUGREPORT_KEYBOARD_SHORTCUT,
+        com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_SHORTCUT_CONTROL,
+        com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_BOUNCE_KEYS_FLAG,
+        com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_SLOW_KEYS_FLAG,
+        com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_STICKY_KEYS_FLAG,
+        com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_MOUSE_KEYS,
+        com.android.window.flags.Flags.FLAG_ENABLE_MOVE_TO_NEXT_DISPLAY_SHORTCUT,
+        com.android.window.flags.Flags.FLAG_ENABLE_TASK_RESIZING_KEYBOARD_SHORTCUTS
+    )
+    fun testCustomKeyGesturesNotAllowedForSystemGestures(test: TestData) {
+        setupKeyGestureController()
+        // Need to re-init so that bookmarks are correctly blocklisted
+        Mockito.`when`(iInputManager.getAppLaunchBookmarks())
+            .thenReturn(keyGestureController.appLaunchBookmarks)
+        keyGestureController.systemRunning()
+
+        val builder = InputGestureData.Builder()
+            .setKeyGestureType(test.expectedKeyGestureType)
+            .setTrigger(
+                InputGestureData.createKeyTrigger(
+                    test.expectedKeys[0],
+                    test.expectedModifierState
+                )
+            )
+        if (test.expectedAppLaunchData != null) {
+            builder.setAppLaunchData(test.expectedAppLaunchData)
+        }
+        assertEquals(
+            test.toString(),
+            InputManager.CUSTOM_INPUT_GESTURE_RESULT_ERROR_RESERVED_GESTURE,
+            keyGestureController.addCustomInputGesture(0, builder.build().aidlData)
+        )
+    }
+
+    @Keep
+    private fun systemKeysTestArguments(): Array<TestData> {
+        return arrayOf(
+            TestData(
+                "RECENT_APPS -> Show Overview",
+                intArrayOf(KeyEvent.KEYCODE_RECENT_APPS),
+                KeyGestureEvent.KEY_GESTURE_TYPE_RECENT_APPS,
+                intArrayOf(KeyEvent.KEYCODE_RECENT_APPS),
+                0,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
+            ),
+            TestData(
+                "APP_SWITCH -> App Switch",
+                intArrayOf(KeyEvent.KEYCODE_APP_SWITCH),
+                KeyGestureEvent.KEY_GESTURE_TYPE_APP_SWITCH,
+                intArrayOf(KeyEvent.KEYCODE_APP_SWITCH),
+                0,
+                intArrayOf(
+                    KeyGestureEvent.ACTION_GESTURE_START,
+                    KeyGestureEvent.ACTION_GESTURE_COMPLETE
+                )
+            ),
+            TestData(
+                "BRIGHTNESS_UP -> Brightness Up",
+                intArrayOf(KeyEvent.KEYCODE_BRIGHTNESS_UP),
+                KeyGestureEvent.KEY_GESTURE_TYPE_BRIGHTNESS_UP,
+                intArrayOf(KeyEvent.KEYCODE_BRIGHTNESS_UP),
+                0,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
+            ),
+            TestData(
+                "BRIGHTNESS_DOWN -> Brightness Down",
+                intArrayOf(KeyEvent.KEYCODE_BRIGHTNESS_DOWN),
+                KeyGestureEvent.KEY_GESTURE_TYPE_BRIGHTNESS_DOWN,
+                intArrayOf(KeyEvent.KEYCODE_BRIGHTNESS_DOWN),
+                0,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
+            ),
+            TestData(
+                "KEYBOARD_BACKLIGHT_UP -> Keyboard Backlight Up",
+                intArrayOf(KeyEvent.KEYCODE_KEYBOARD_BACKLIGHT_UP),
+                KeyGestureEvent.KEY_GESTURE_TYPE_KEYBOARD_BACKLIGHT_UP,
+                intArrayOf(KeyEvent.KEYCODE_KEYBOARD_BACKLIGHT_UP),
+                0,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
+            ),
+            TestData(
+                "KEYBOARD_BACKLIGHT_DOWN -> Keyboard Backlight Down",
+                intArrayOf(KeyEvent.KEYCODE_KEYBOARD_BACKLIGHT_DOWN),
+                KeyGestureEvent.KEY_GESTURE_TYPE_KEYBOARD_BACKLIGHT_DOWN,
+                intArrayOf(KeyEvent.KEYCODE_KEYBOARD_BACKLIGHT_DOWN),
+                0,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
+            ),
+            TestData(
+                "KEYBOARD_BACKLIGHT_TOGGLE -> Keyboard Backlight Toggle",
+                intArrayOf(KeyEvent.KEYCODE_KEYBOARD_BACKLIGHT_TOGGLE),
+                KeyGestureEvent.KEY_GESTURE_TYPE_KEYBOARD_BACKLIGHT_TOGGLE,
+                intArrayOf(KeyEvent.KEYCODE_KEYBOARD_BACKLIGHT_TOGGLE),
+                0,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
+            ),
+            TestData(
+                "ALL_APPS -> Open App Drawer",
+                intArrayOf(KeyEvent.KEYCODE_ALL_APPS),
+                KeyGestureEvent.KEY_GESTURE_TYPE_ALL_APPS,
+                intArrayOf(KeyEvent.KEYCODE_ALL_APPS),
+                0,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
+            ),
+            TestData(
+                "NOTIFICATION -> Toggle Notification Panel",
+                intArrayOf(KeyEvent.KEYCODE_NOTIFICATION),
+                KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_NOTIFICATION_PANEL,
+                intArrayOf(KeyEvent.KEYCODE_NOTIFICATION),
+                0,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
+            ),
+            TestData(
+                "LANGUAGE_SWITCH -> Switch Language Forward",
+                intArrayOf(KeyEvent.KEYCODE_LANGUAGE_SWITCH),
+                KeyGestureEvent.KEY_GESTURE_TYPE_LANGUAGE_SWITCH,
+                intArrayOf(KeyEvent.KEYCODE_LANGUAGE_SWITCH),
+                0,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
+            ),
+            TestData(
+                "SHIFT + LANGUAGE_SWITCH -> Switch Language Backward",
+                intArrayOf(KeyEvent.KEYCODE_SHIFT_LEFT, KeyEvent.KEYCODE_LANGUAGE_SWITCH),
+                KeyGestureEvent.KEY_GESTURE_TYPE_LANGUAGE_SWITCH,
+                intArrayOf(KeyEvent.KEYCODE_LANGUAGE_SWITCH),
+                KeyEvent.META_SHIFT_ON,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
+            ),
+            TestData(
+                "SCREENSHOT -> Take Screenshot",
+                intArrayOf(KeyEvent.KEYCODE_SCREENSHOT),
+                KeyGestureEvent.KEY_GESTURE_TYPE_TAKE_SCREENSHOT,
+                intArrayOf(KeyEvent.KEYCODE_SCREENSHOT),
+                0,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
+            ),
+            TestData(
+                "META -> Open Apps Drawer",
+                intArrayOf(KeyEvent.KEYCODE_META_LEFT),
+                KeyGestureEvent.KEY_GESTURE_TYPE_ACCESSIBILITY_ALL_APPS,
+                intArrayOf(KeyEvent.KEYCODE_META_LEFT),
+                0,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
+            ),
+            TestData(
+                "SYSRQ -> Take screenshot",
+                intArrayOf(KeyEvent.KEYCODE_SYSRQ),
+                KeyGestureEvent.KEY_GESTURE_TYPE_TAKE_SCREENSHOT,
+                intArrayOf(KeyEvent.KEYCODE_SYSRQ),
+                0,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
+            ),
+            TestData(
+                "ESC -> Close All Dialogs",
+                intArrayOf(KeyEvent.KEYCODE_ESCAPE),
+                KeyGestureEvent.KEY_GESTURE_TYPE_CLOSE_ALL_DIALOGS,
+                intArrayOf(KeyEvent.KEYCODE_ESCAPE),
+                0,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
+            ),
+            TestData(
                 "EXPLORER -> Launch Default Browser",
                 intArrayOf(KeyEvent.KEYCODE_EXPLORER),
                 KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_APPLICATION,
@@ -815,17 +999,15 @@ class KeyGestureControllerTests {
     }
 
     @Test
-    @Parameters(method = "keyGestureEventHandlerTestArguments")
-    fun testKeyGestures(test: TestData) {
-        val keyGestureController = KeyGestureController(context, testLooper.looper)
-        keyGestureController.systemRunning()
-
-        testKeyGestureInternal(keyGestureController, test)
+    @Parameters(method = "systemKeysTestArguments")
+    fun testSystemKeys(test: TestData) {
+        setupKeyGestureController()
+        testKeyGestureInternal(test)
     }
 
     @Test
     fun testKeycodesFullyConsumed_irrespectiveOfHandlers() {
-        val keyGestureController = KeyGestureController(context, testLooper.looper)
+        setupKeyGestureController()
         val testKeys = intArrayOf(
             KeyEvent.KEYCODE_RECENT_APPS,
             KeyEvent.KEYCODE_APP_SWITCH,
@@ -853,7 +1035,7 @@ class KeyGestureControllerTests {
         keyGestureController.registerKeyGestureHandler(handler, 0)
 
         for (key in testKeys) {
-            sendKeys(keyGestureController, intArrayOf(key), assertNotSentToApps = true)
+            sendKeys(intArrayOf(key), assertNotSentToApps = true)
         }
     }
 
@@ -861,9 +1043,8 @@ class KeyGestureControllerTests {
     fun testSearchKeyGestures_defaultSearch() {
         Mockito.`when`(resources.getInteger(R.integer.config_searchKeyBehavior))
             .thenReturn(SEARCH_KEY_BEHAVIOR_DEFAULT_SEARCH)
-        val keyGestureController = KeyGestureController(context, testLooper.looper)
+        setupKeyGestureController()
         testKeyGestureNotProduced(
-            keyGestureController,
             "SEARCH -> Default Search",
             intArrayOf(KeyEvent.KEYCODE_SEARCH),
         )
@@ -873,9 +1054,8 @@ class KeyGestureControllerTests {
     fun testSearchKeyGestures_searchActivity() {
         Mockito.`when`(resources.getInteger(R.integer.config_searchKeyBehavior))
             .thenReturn(SEARCH_KEY_BEHAVIOR_TARGET_ACTIVITY)
-        val keyGestureController = KeyGestureController(context, testLooper.looper)
+        setupKeyGestureController()
         testKeyGestureInternal(
-            keyGestureController,
             TestData(
                 "SEARCH -> Launch Search Activity",
                 intArrayOf(KeyEvent.KEYCODE_SEARCH),
@@ -891,9 +1071,8 @@ class KeyGestureControllerTests {
     fun testSettingKeyGestures_doNothing() {
         Mockito.`when`(resources.getInteger(R.integer.config_settingsKeyBehavior))
             .thenReturn(SETTINGS_KEY_BEHAVIOR_NOTHING)
-        val keyGestureController = KeyGestureController(context, testLooper.looper)
+        setupKeyGestureController()
         testKeyGestureNotProduced(
-            keyGestureController,
             "SETTINGS -> Do Nothing",
             intArrayOf(KeyEvent.KEYCODE_SETTINGS),
         )
@@ -903,9 +1082,8 @@ class KeyGestureControllerTests {
     fun testSettingKeyGestures_settingsActivity() {
         Mockito.`when`(resources.getInteger(R.integer.config_settingsKeyBehavior))
             .thenReturn(SETTINGS_KEY_BEHAVIOR_SETTINGS_ACTIVITY)
-        val keyGestureController = KeyGestureController(context, testLooper.looper)
+        setupKeyGestureController()
         testKeyGestureInternal(
-            keyGestureController,
             TestData(
                 "SETTINGS -> Launch Settings Activity",
                 intArrayOf(KeyEvent.KEYCODE_SETTINGS),
@@ -921,9 +1099,8 @@ class KeyGestureControllerTests {
     fun testSettingKeyGestures_notificationPanel() {
         Mockito.`when`(resources.getInteger(R.integer.config_settingsKeyBehavior))
             .thenReturn(SETTINGS_KEY_BEHAVIOR_NOTIFICATION_PANEL)
-        val keyGestureController = KeyGestureController(context, testLooper.looper)
+        setupKeyGestureController()
         testKeyGestureInternal(
-            keyGestureController,
             TestData(
                 "SETTINGS -> Toggle Notification Panel",
                 intArrayOf(KeyEvent.KEYCODE_SETTINGS),
@@ -936,221 +1113,12 @@ class KeyGestureControllerTests {
     }
 
     @Test
-    @EnableFlags(com.android.server.flags.Flags.FLAG_NEW_BUGREPORT_KEYBOARD_SHORTCUT)
-    fun testTriggerBugReport() {
-        Mockito.`when`(SystemProperties.get("ro.debuggable")).thenReturn("1")
-        val keyGestureController = KeyGestureController(context, testLooper.looper)
-        testKeyGestureInternal(
-            keyGestureController,
-            TestData(
-                "META + CTRL + DEL -> Trigger Bug Report",
-                intArrayOf(
-                    KeyEvent.KEYCODE_META_LEFT,
-                    KeyEvent.KEYCODE_CTRL_LEFT,
-                    KeyEvent.KEYCODE_DEL
-                ),
-                KeyGestureEvent.KEY_GESTURE_TYPE_TRIGGER_BUG_REPORT,
-                intArrayOf(KeyEvent.KEYCODE_DEL),
-                KeyEvent.META_META_ON or KeyEvent.META_CTRL_ON,
-                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
-            )
-        )
-    }
-
-    @Test
-    @DisableFlags(com.android.server.flags.Flags.FLAG_NEW_BUGREPORT_KEYBOARD_SHORTCUT)
-    fun testTriggerBugReport_flagDisabled() {
-        Mockito.`when`(SystemProperties.get("ro.debuggable")).thenReturn("1")
-        val keyGestureController = KeyGestureController(context, testLooper.looper)
-        testKeyGestureInternal(
-            keyGestureController,
-            TestData(
-                "META + CTRL + DEL -> Not Trigger Bug Report (Fallback to BACK)",
-                intArrayOf(
-                    KeyEvent.KEYCODE_META_LEFT,
-                    KeyEvent.KEYCODE_CTRL_LEFT,
-                    KeyEvent.KEYCODE_DEL
-                ),
-                KeyGestureEvent.KEY_GESTURE_TYPE_BACK,
-                intArrayOf(KeyEvent.KEYCODE_DEL),
-                KeyEvent.META_META_ON,
-                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
-            )
-        )
-    }
-
-    @Test
-    @EnableFlags(
-        com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_SHORTCUT_CONTROL,
-        com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_BOUNCE_KEYS_FLAG,
-        com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_SLOW_KEYS_FLAG,
-        com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_STICKY_KEYS_FLAG,
-        com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_MOUSE_KEYS
-    )
-    fun testKeyboardAccessibilityToggleShortcutPress() {
-        val keyGestureController = KeyGestureController(context, testLooper.looper)
-        testKeyGestureInternal(
-            keyGestureController,
-            TestData(
-                "Meta + Alt + 3 -> Toggle Bounce Keys",
-                intArrayOf(
-                    KeyEvent.KEYCODE_META_LEFT,
-                    KeyEvent.KEYCODE_ALT_LEFT,
-                    KeyEvent.KEYCODE_3
-                ),
-                KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_BOUNCE_KEYS,
-                intArrayOf(KeyEvent.KEYCODE_3),
-                KeyEvent.META_META_ON or KeyEvent.META_ALT_ON,
-                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)))
-        testKeyGestureInternal(
-            keyGestureController,
-            TestData(
-                "Meta + Alt + 4 -> Toggle Mouse Keys",
-                intArrayOf(
-                    KeyEvent.KEYCODE_META_LEFT,
-                    KeyEvent.KEYCODE_ALT_LEFT,
-                    KeyEvent.KEYCODE_4
-                ),
-                KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_MOUSE_KEYS,
-                intArrayOf(KeyEvent.KEYCODE_4),
-                KeyEvent.META_META_ON or KeyEvent.META_ALT_ON,
-                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)))
-        testKeyGestureInternal(
-            keyGestureController,
-            TestData(
-                "Meta + Alt + 5 -> Toggle Sticky Keys",
-                intArrayOf(
-                    KeyEvent.KEYCODE_META_LEFT,
-                    KeyEvent.KEYCODE_ALT_LEFT,
-                    KeyEvent.KEYCODE_5
-                ),
-                KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_STICKY_KEYS,
-                intArrayOf(KeyEvent.KEYCODE_5),
-                KeyEvent.META_META_ON or KeyEvent.META_ALT_ON,
-                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)))
-        testKeyGestureInternal(
-            keyGestureController,
-            TestData(
-                "Meta + Alt + 6 -> Toggle Slow Keys",
-                intArrayOf(
-                    KeyEvent.KEYCODE_META_LEFT,
-                    KeyEvent.KEYCODE_ALT_LEFT,
-                    KeyEvent.KEYCODE_6
-                ),
-                KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_SLOW_KEYS,
-                intArrayOf(KeyEvent.KEYCODE_6),
-                KeyEvent.META_META_ON or KeyEvent.META_ALT_ON,
-                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)))
-    }
-
-    @Test
-    @EnableFlags(com.android.window.flags.Flags.FLAG_ENABLE_MOVE_TO_NEXT_DISPLAY_SHORTCUT)
-    fun testMoveToNextDisplay() {
-        val keyGestureController = KeyGestureController(context, testLooper.looper)
-        testKeyGestureInternal(
-            keyGestureController,
-            TestData(
-                "META + CTRL + D -> Move a task to next display",
-                intArrayOf(
-                    KeyEvent.KEYCODE_META_LEFT,
-                    KeyEvent.KEYCODE_CTRL_LEFT,
-                    KeyEvent.KEYCODE_D
-                ),
-                KeyGestureEvent.KEY_GESTURE_TYPE_MOVE_TO_NEXT_DISPLAY,
-                intArrayOf(KeyEvent.KEYCODE_D),
-                KeyEvent.META_META_ON or KeyEvent.META_CTRL_ON,
-                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
-            )
-        )
-    }
-
-    @Test
-    @EnableFlags(com.android.window.flags.Flags.FLAG_ENABLE_TASK_RESIZING_KEYBOARD_SHORTCUTS)
-    fun testSnapLeftFreeformTask() {
-        val keyGestureController = KeyGestureController(context, testLooper.looper)
-        testKeyGestureInternal(
-            keyGestureController,
-            TestData(
-                "ALT + [ -> Resizes a task to fit the left half of the screen",
-                intArrayOf(
-                    KeyEvent.KEYCODE_ALT_LEFT,
-                    KeyEvent.KEYCODE_LEFT_BRACKET
-                ),
-                KeyGestureEvent.KEY_GESTURE_TYPE_SNAP_LEFT_FREEFORM_WINDOW,
-                intArrayOf(KeyEvent.KEYCODE_LEFT_BRACKET),
-                KeyEvent.META_ALT_ON,
-                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
-            )
-        )
-    }
-
-    @Test
-    @EnableFlags(com.android.window.flags.Flags.FLAG_ENABLE_TASK_RESIZING_KEYBOARD_SHORTCUTS)
-    fun testSnapRightFreeformTask() {
-        val keyGestureController = KeyGestureController(context, testLooper.looper)
-        testKeyGestureInternal(
-            keyGestureController,
-            TestData(
-                "ALT + ] -> Resizes a task to fit the right half of the screen",
-                intArrayOf(
-                    KeyEvent.KEYCODE_ALT_LEFT,
-                    KeyEvent.KEYCODE_RIGHT_BRACKET
-                ),
-                KeyGestureEvent.KEY_GESTURE_TYPE_SNAP_RIGHT_FREEFORM_WINDOW,
-                intArrayOf(KeyEvent.KEYCODE_RIGHT_BRACKET),
-                KeyEvent.META_ALT_ON,
-                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
-            )
-        )
-    }
-
-    @Test
-    @EnableFlags(com.android.window.flags.Flags.FLAG_ENABLE_TASK_RESIZING_KEYBOARD_SHORTCUTS)
-    fun testMaximizeFreeformTask() {
-        val keyGestureController = KeyGestureController(context, testLooper.looper)
-        testKeyGestureInternal(
-            keyGestureController,
-            TestData(
-                "ALT + '=' -> Maximizes a task to fit the screen",
-                intArrayOf(
-                    KeyEvent.KEYCODE_ALT_LEFT,
-                    KeyEvent.KEYCODE_EQUALS
-                ),
-                KeyGestureEvent.KEY_GESTURE_TYPE_MAXIMIZE_FREEFORM_WINDOW,
-                intArrayOf(KeyEvent.KEYCODE_EQUALS),
-                KeyEvent.META_ALT_ON,
-                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
-            )
-        )
-    }
-
-    @Test
-    @EnableFlags(com.android.window.flags.Flags.FLAG_ENABLE_TASK_RESIZING_KEYBOARD_SHORTCUTS)
-    fun testRestoreFreeformTask() {
-        val keyGestureController = KeyGestureController(context, testLooper.looper)
-        testKeyGestureInternal(
-            keyGestureController,
-            TestData(
-                "ALT + '-' -> Restores a task size to its previous bounds",
-                intArrayOf(
-                    KeyEvent.KEYCODE_ALT_LEFT,
-                    KeyEvent.KEYCODE_MINUS
-                ),
-                KeyGestureEvent.KEY_GESTURE_TYPE_RESTORE_FREEFORM_WINDOW_SIZE,
-                intArrayOf(KeyEvent.KEYCODE_MINUS),
-                KeyEvent.META_ALT_ON,
-                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
-            )
-        )
-    }
-
-    @Test
     fun testCapsLockPressNotified() {
-        val keyGestureController = KeyGestureController(context, testLooper.looper)
+        setupKeyGestureController()
         val listener = KeyGestureEventListener()
 
         keyGestureController.registerKeyGestureEventListener(listener, 0)
-        sendKeys(keyGestureController, intArrayOf(KeyEvent.KEYCODE_CAPS_LOCK))
+        sendKeys(intArrayOf(KeyEvent.KEYCODE_CAPS_LOCK))
         testLooper.dispatchAll()
         assertEquals(
             "Listener should get callbacks on key gesture event completed",
@@ -1165,7 +1133,7 @@ class KeyGestureControllerTests {
     }
 
     @Keep
-    private fun keyGestureEventHandlerTestArguments_forKeyCombinations(): Array<TestData> {
+    private fun systemGesturesTestArguments_forKeyCombinations(): Array<TestData> {
         return arrayOf(
             TestData(
                 "VOLUME_DOWN + POWER -> Screenshot Chord",
@@ -1226,14 +1194,14 @@ class KeyGestureControllerTests {
     }
 
     @Test
-    @Parameters(method = "keyGestureEventHandlerTestArguments_forKeyCombinations")
+    @Parameters(method = "systemGesturesTestArguments_forKeyCombinations")
     @EnableFlags(
         com.android.hardware.input.Flags.FLAG_USE_KEY_GESTURE_EVENT_HANDLER,
         com.android.hardware.input.Flags.FLAG_USE_KEY_GESTURE_EVENT_HANDLER_MULTI_PRESS_GESTURES
     )
     fun testKeyCombinationGestures(test: TestData) {
-        val keyGestureController = KeyGestureController(context, testLooper.looper)
-        testKeyGestureInternal(keyGestureController, test)
+        setupKeyGestureController()
+        testKeyGestureInternal(test)
     }
 
     @Keep
@@ -1274,7 +1242,7 @@ class KeyGestureControllerTests {
     @Test
     @Parameters(method = "customInputGesturesTestArguments")
     fun testCustomKeyGestures(test: TestData) {
-        val keyGestureController = KeyGestureController(context, testLooper.looper)
+        setupKeyGestureController()
         val builder = InputGestureData.Builder()
             .setKeyGestureType(test.expectedKeyGestureType)
             .setTrigger(
@@ -1282,17 +1250,17 @@ class KeyGestureControllerTests {
                     test.expectedKeys[0],
                     test.expectedModifierState
                 )
-            );
+            )
         if (test.expectedAppLaunchData != null) {
             builder.setAppLaunchData(test.expectedAppLaunchData)
         }
-        val inputGestureData = builder.build();
+        val inputGestureData = builder.build()
 
         keyGestureController.addCustomInputGesture(0, inputGestureData.aidlData)
-        testKeyGestureInternal(keyGestureController, test)
+        testKeyGestureInternal(test)
     }
 
-    private fun testKeyGestureInternal(keyGestureController: KeyGestureController, test: TestData) {
+    private fun testKeyGestureInternal(test: TestData) {
         var handleEvents = mutableListOf<KeyGestureEvent>()
         val handler = KeyGestureHandler { event, _ ->
             handleEvents.add(KeyGestureEvent(event))
@@ -1301,7 +1269,7 @@ class KeyGestureControllerTests {
         keyGestureController.registerKeyGestureHandler(handler, 0)
         handleEvents.clear()
 
-        sendKeys(keyGestureController, test.keys)
+        sendKeys(test.keys)
 
         assertEquals(
             "Test: $test doesn't produce correct number of key gesture events",
@@ -1340,11 +1308,7 @@ class KeyGestureControllerTests {
         keyGestureController.unregisterKeyGestureHandler(handler, 0)
     }
 
-    private fun testKeyGestureNotProduced(
-        keyGestureController: KeyGestureController,
-        testName: String,
-        testKeys: IntArray
-    ) {
+    private fun testKeyGestureNotProduced(testName: String, testKeys: IntArray) {
         var handleEvents = mutableListOf<KeyGestureEvent>()
         val handler = KeyGestureHandler { event, _ ->
             handleEvents.add(KeyGestureEvent(event))
@@ -1353,15 +1317,11 @@ class KeyGestureControllerTests {
         keyGestureController.registerKeyGestureHandler(handler, 0)
         handleEvents.clear()
 
-        sendKeys(keyGestureController, testKeys)
+        sendKeys(testKeys)
         assertEquals("Test: $testName should not produce Key gesture", 0, handleEvents.size)
     }
 
-    private fun sendKeys(
-        keyGestureController: KeyGestureController,
-        testKeys: IntArray,
-        assertNotSentToApps: Boolean = false
-    ) {
+    private fun sendKeys(testKeys: IntArray, assertNotSentToApps: Boolean = false) {
         var metaState = 0
         val now = SystemClock.uptimeMillis()
         for (key in testKeys) {
@@ -1370,7 +1330,7 @@ class KeyGestureControllerTests {
                 DEVICE_ID, 0 /*scancode*/, 0 /*flags*/,
                 InputDevice.SOURCE_KEYBOARD
             )
-            interceptKey(keyGestureController, downEvent, assertNotSentToApps)
+            interceptKey(downEvent, assertNotSentToApps)
             metaState = metaState or MODIFIER.getOrDefault(key, 0)
 
             downEvent.recycle()
@@ -1383,7 +1343,7 @@ class KeyGestureControllerTests {
                 DEVICE_ID, 0 /*scancode*/, 0 /*flags*/,
                 InputDevice.SOURCE_KEYBOARD
             )
-            interceptKey(keyGestureController, upEvent, assertNotSentToApps)
+            interceptKey(upEvent, assertNotSentToApps)
             metaState = metaState and MODIFIER.getOrDefault(key, 0).inv()
 
             upEvent.recycle()
@@ -1391,11 +1351,7 @@ class KeyGestureControllerTests {
         }
     }
 
-    private fun interceptKey(
-        keyGestureController: KeyGestureController,
-        event: KeyEvent,
-        assertNotSentToApps: Boolean
-    ) {
+    private fun interceptKey(event: KeyEvent, assertNotSentToApps: Boolean) {
         keyGestureController.interceptKeyBeforeQueueing(event, FLAG_INTERACTIVE)
         testLooper.dispatchAll()
 
