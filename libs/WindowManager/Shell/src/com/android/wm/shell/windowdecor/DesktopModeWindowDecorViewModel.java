@@ -41,7 +41,6 @@ import static com.android.wm.shell.shared.desktopmode.ManageWindowsViewContainer
 import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
 import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
 import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSITION_UNDEFINED;
-import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_UNDEFINED;
 
 import android.annotation.NonNull;
 import android.app.ActivityManager;
@@ -122,8 +121,6 @@ import com.android.wm.shell.shared.annotations.ShellMainThread;
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.shared.desktopmode.DesktopModeTransitionSource;
 import com.android.wm.shell.shared.split.SplitScreenConstants.SplitPosition;
-import com.android.wm.shell.splitscreen.SplitScreen;
-import com.android.wm.shell.splitscreen.SplitScreen.StageType;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.sysui.KeyguardChangeListener;
 import com.android.wm.shell.sysui.ShellCommandHandler;
@@ -446,17 +443,6 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
     @Override
     public void setSplitScreenController(SplitScreenController splitScreenController) {
         mSplitScreenController = splitScreenController;
-        mSplitScreenController.registerSplitScreenListener(new SplitScreen.SplitScreenListener() {
-            @Override
-            public void onTaskStageChanged(int taskId, @StageType int stage, boolean visible) {
-                if (visible && stage != STAGE_TYPE_UNDEFINED) {
-                    DesktopModeWindowDecoration decor = mWindowDecorByTaskId.get(taskId);
-                    if (decor != null && DesktopModeStatus.canEnterDesktopMode(mContext)) {
-                        mDesktopTasksController.moveToSplit(decor.mTaskInfo);
-                    }
-                }
-            }
-        });
     }
 
     @Override
