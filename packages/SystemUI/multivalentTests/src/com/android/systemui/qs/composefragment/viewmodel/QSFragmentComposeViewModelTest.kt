@@ -36,6 +36,7 @@ import com.android.systemui.qs.composefragment.viewmodel.MediaState.ANY_MEDIA
 import com.android.systemui.qs.composefragment.viewmodel.MediaState.NO_MEDIA
 import com.android.systemui.qs.fgsManagerController
 import com.android.systemui.qs.panels.domain.interactor.tileSquishinessInteractor
+import com.android.systemui.qs.panels.ui.viewmodel.setConfigurationForMediaInRow
 import com.android.systemui.res.R
 import com.android.systemui.shade.largeScreenHeaderHelper
 import com.android.systemui.statusbar.StatusBarState
@@ -266,6 +267,54 @@ class QSFragmentComposeViewModelTest : AbstractQSFragmentComposeViewModelTest() 
 
                 assertThat(underTest.qqsMediaVisible).isFalse()
                 assertThat(underTest.qsMediaVisible).isFalse()
+            }
+        }
+
+    @Test
+    fun mediaNotInRow() =
+        with(kosmos) {
+            testScope.testWithinLifecycle {
+                setConfigurationForMediaInRow(mediaInRow = false)
+                setMediaState(ACTIVE_MEDIA)
+
+                assertThat(underTest.qqsMediaInRow).isFalse()
+                assertThat(underTest.qsMediaInRow).isFalse()
+            }
+        }
+
+    @Test
+    fun mediaInRow_mediaActive_bothInRow() =
+        with(kosmos) {
+            testScope.testWithinLifecycle {
+                setConfigurationForMediaInRow(mediaInRow = true)
+                setMediaState(ACTIVE_MEDIA)
+
+                assertThat(underTest.qqsMediaInRow).isTrue()
+                assertThat(underTest.qsMediaInRow).isTrue()
+            }
+        }
+
+    @Test
+    fun mediaInRow_mediaRecommendation_onlyQSInRow() =
+        with(kosmos) {
+            testScope.testWithinLifecycle {
+                setConfigurationForMediaInRow(mediaInRow = true)
+                setMediaState(ANY_MEDIA)
+
+                assertThat(underTest.qqsMediaInRow).isFalse()
+                assertThat(underTest.qsMediaInRow).isTrue()
+            }
+        }
+
+    @Test
+    fun mediaInRow_correctConfig_noMediaVisible_noMediaInRow() =
+        with(kosmos) {
+            testScope.testWithinLifecycle {
+                setConfigurationForMediaInRow(mediaInRow = true)
+                setMediaState(NO_MEDIA)
+
+                assertThat(underTest.qqsMediaInRow).isFalse()
+                assertThat(underTest.qsMediaInRow).isFalse()
             }
         }
 

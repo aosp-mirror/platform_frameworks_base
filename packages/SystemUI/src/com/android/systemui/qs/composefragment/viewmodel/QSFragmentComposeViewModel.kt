@@ -39,6 +39,8 @@ import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.lifecycle.Hydrator
 import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager
+import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager.Companion.LOCATION_QQS
+import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager.Companion.LOCATION_QS
 import com.android.systemui.media.controls.ui.view.MediaHost
 import com.android.systemui.media.controls.ui.view.MediaHostState
 import com.android.systemui.media.dagger.MediaModule.QS_PANEL
@@ -49,6 +51,7 @@ import com.android.systemui.qs.composefragment.dagger.QSFragmentComposeModule
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel
 import com.android.systemui.qs.panels.domain.interactor.TileSquishinessInteractor
 import com.android.systemui.qs.panels.ui.viewmodel.InFirstPageViewModel
+import com.android.systemui.qs.panels.ui.viewmodel.MediaInRowInLandscapeViewModel
 import com.android.systemui.qs.ui.viewmodel.QuickSettingsContainerViewModel
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.model.Scenes
@@ -94,6 +97,7 @@ constructor(
     private val largeScreenHeaderHelper: LargeScreenHeaderHelper,
     private val squishinessInteractor: TileSquishinessInteractor,
     private val inFirstPageViewModel: InFirstPageViewModel,
+    mediaInRowInLandscapeViewModelFactory: MediaInRowInLandscapeViewModel.Factory,
     @Named(QUICK_QS_PANEL) val qqsMediaHost: MediaHost,
     @Named(QS_PANEL) val qsMediaHost: MediaHost,
     @Named(QSFragmentComposeModule.QS_USING_MEDIA_PLAYER) private val usingMedia: Boolean,
@@ -101,6 +105,8 @@ constructor(
 ) : Dumpable, ExclusiveActivatable() {
 
     val containerViewModel = containerViewModelFactory.create(true)
+    private val qqsMediaInRowViewModel = mediaInRowInLandscapeViewModelFactory.create(LOCATION_QQS)
+    private val qsMediaInRowViewModel = mediaInRowInLandscapeViewModelFactory.create(LOCATION_QS)
 
     private val hydrator = Hydrator("QSFragmentComposeViewModel.hydrator")
 
@@ -195,16 +201,13 @@ constructor(
         }
     }
 
-    val isQsFullyExpanded by derivedStateOf { expansionState.progress >= 1f }
+    val isQsFullyExpanded by derivedStateOf { expansionState.progress >= 1f && isQsExpanded }
 
     /**
      * Accessibility action for collapsing/expanding QS. The provided runnable is responsible for
      * determining the correct action based on the expansion state.
      */
     var collapseExpandAccessibilityAction: Runnable? = null
-
-    val inFirstPage: Boolean
-        get() = inFirstPageViewModel.inFirstPage
 
     var overScrollAmount by mutableStateOf(0)
 
@@ -252,12 +255,27 @@ constructor(
                 },
         )
 
+    val qqsMediaInRow: Boolean
+        get() = qqsMediaInRowViewModel.shouldMediaShowInRow
+
     val qsMediaVisible by
         hydrator.hydratedStateOf(
             traceName = "qsMediaVisible",
             initialValue = usingMedia,
             source = if (usingMedia) mediaHostVisible(qsMediaHost) else flowOf(false),
         )
+
+    val qsMediaInRow: Boolean
+        get() = qsMediaInRowViewModel.shouldMediaShowInRow
+
+    val animateTilesExpansion: Boolean
+        get() = inFirstPage && !mediaSuddenlyAppearingInLandscape
+
+    private val inFirstPage: Boolean
+        get() = inFirstPageViewModel.inFirstPage
+
+    private val mediaSuddenlyAppearingInLandscape: Boolean
+        get() = !qqsMediaInRow && qsMediaInRow
 
     private var qsBounds by mutableStateOf(Rect())
 
@@ -362,6 +380,8 @@ constructor(
             launch { hydrateSquishinessInteractor() }
             launch { hydrator.activate() }
             launch { containerViewModel.activate() }
+            launch { qqsMediaInRowViewModel.activate() }
+            launch { qsMediaInRowViewModel.activate() }
             awaitCancellation()
         }
     }
@@ -391,6 +411,7 @@ constructor(
                 println("isQSVisible", isQsVisible)
                 println("isQSEnabled", isQsEnabled)
                 println("isCustomizing", containerViewModel.editModeViewModel.isEditing.value)
+                println("inFirstPage", inFirstPage)
             }
             printSection("Expansion state") {
                 println("qsExpansion", qsExpansion)
@@ -423,7 +444,9 @@ constructor(
             }
             printSection("Media") {
                 println("qqsMediaVisible", qqsMediaVisible)
+                println("qqsMediaInRow", qqsMediaInRow)
                 println("qsMediaVisible", qsMediaVisible)
+                println("qsMediaInRow", qsMediaInRow)
             }
         }
     }
