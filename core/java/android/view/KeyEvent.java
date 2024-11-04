@@ -19,7 +19,6 @@ package android.view;
 import static android.os.IInputConstants.INPUT_EVENT_FLAG_IS_ACCESSIBILITY_EVENT;
 import static android.view.Display.INVALID_DISPLAY;
 
-import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -33,8 +32,6 @@ import android.text.method.MetaKeyKeyListener;
 import android.util.Log;
 import android.util.SparseIntArray;
 import android.view.KeyCharacterMap.KeyData;
-
-import com.android.hardware.input.Flags;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -935,7 +932,6 @@ public class KeyEvent extends InputEvent implements Parcelable {
      */
     public static final int KEYCODE_MACRO_4 = 316;
     /** Key code constant: To open emoji picker */
-    @FlaggedApi(Flags.FLAG_EMOJI_AND_SCREENSHOT_KEYCODES_AVAILABLE)
     public static final int KEYCODE_EMOJI_PICKER = 317;
     /**
      * Key code constant: To take a screenshot
@@ -944,7 +940,6 @@ public class KeyEvent extends InputEvent implements Parcelable {
      * unlike {@code KEYCODE_SYSRQ} which is sent to the app first and only if the app
      * doesn't handle it, the framework handles it (to take a screenshot).
      */
-    @FlaggedApi(Flags.FLAG_EMOJI_AND_SCREENSHOT_KEYCODES_AVAILABLE)
     public static final int KEYCODE_SCREENSHOT = 318;
 
     /**

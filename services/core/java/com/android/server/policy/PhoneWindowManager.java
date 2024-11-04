@@ -83,7 +83,6 @@ import static android.view.WindowManagerGlobal.ADD_OKAY;
 import static android.view.WindowManagerGlobal.ADD_PERMISSION_DENIED;
 import static android.view.contentprotection.flags.Flags.createAccessibilityOverlayAppOpEnabled;
 
-import static com.android.hardware.input.Flags.emojiAndScreenshotKeycodesAvailable;
 import static com.android.hardware.input.Flags.enableTalkbackAndMagnifierKeyGestures;
 import static com.android.hardware.input.Flags.keyboardA11yShortcutControl;
 import static com.android.hardware.input.Flags.modifierShortcutDump;
@@ -3993,7 +3992,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     return true;
                 }
             case KeyEvent.KEYCODE_SCREENSHOT:
-                if (emojiAndScreenshotKeycodesAvailable() && down && repeatCount == 0) {
+                if (firstDown) {
                     interceptScreenshotChord(SCREENSHOT_KEY_OTHER, 0 /*pressDelay*/);
                 }
                 return true;
@@ -5665,12 +5664,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case KeyEvent.KEYCODE_MACRO_3:
             case KeyEvent.KEYCODE_MACRO_4:
                 result &= ~ACTION_PASS_TO_USER;
-                break;
-            case KeyEvent.KEYCODE_EMOJI_PICKER:
-                if (!emojiAndScreenshotKeycodesAvailable()) {
-                    // Don't allow EMOJI_PICKER key to be dispatched until flag is released.
-                    result &= ~ACTION_PASS_TO_USER;
-                }
                 break;
         }
 
