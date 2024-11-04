@@ -15,14 +15,13 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.layout.managers;
 
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.INT;
+import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT;
 
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.PaintContext;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
-import com.android.internal.widget.remotecompose.core.documentation.DocumentedCompanionOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.Component;
 import com.android.internal.widget.remotecompose.core.operations.layout.ComponentStartOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.measure.ComponentMeasure;
@@ -31,9 +30,7 @@ import com.android.internal.widget.remotecompose.core.operations.layout.measure.
 
 import java.util.List;
 
-/**
- * Simple Box layout implementation
- */
+/** Simple Box layout implementation */
 public class BoxLayout extends LayoutManager implements ComponentStartOperation {
 
     public static final int START = 1;
@@ -42,38 +39,68 @@ public class BoxLayout extends LayoutManager implements ComponentStartOperation 
     public static final int TOP = 4;
     public static final int BOTTOM = 5;
 
-    public static final BoxLayout.Companion COMPANION = new BoxLayout.Companion();
-
     int mHorizontalPositioning;
     int mVerticalPositioning;
 
-    public BoxLayout(Component parent, int componentId, int animationId,
-                     float x, float y, float width, float height,
-                     int horizontalPositioning, int verticalPositioning) {
+    public BoxLayout(
+            Component parent,
+            int componentId,
+            int animationId,
+            float x,
+            float y,
+            float width,
+            float height,
+            int horizontalPositioning,
+            int verticalPositioning) {
         super(parent, componentId, animationId, x, y, width, height);
         mHorizontalPositioning = horizontalPositioning;
         mVerticalPositioning = verticalPositioning;
     }
 
-    public BoxLayout(Component parent, int componentId, int animationId,
-                     int horizontalPositioning, int verticalPositioning) {
-        this(parent, componentId, animationId, 0, 0, 0, 0,
-                horizontalPositioning, verticalPositioning);
+    public BoxLayout(
+            Component parent,
+            int componentId,
+            int animationId,
+            int horizontalPositioning,
+            int verticalPositioning) {
+        this(
+                parent,
+                componentId,
+                animationId,
+                0,
+                0,
+                0,
+                0,
+                horizontalPositioning,
+                verticalPositioning);
     }
 
     @Override
     public String toString() {
-        return "BOX [" + mComponentId + ":" + mAnimationId + "] (" + mX + ", "
-                + mY + " - " + mWidth + " x " + mHeight + ") " + mVisibility;
+        return "BOX ["
+                + mComponentId
+                + ":"
+                + mAnimationId
+                + "] ("
+                + mX
+                + ", "
+                + mY
+                + " - "
+                + mWidth
+                + " x "
+                + mHeight
+                + ") "
+                + mVisibility;
     }
 
+    @Override
     protected String getSerializedName() {
         return "BOX";
     }
 
     @Override
-    public void computeWrapSize(PaintContext context, float maxWidth, float maxHeight,
-                                MeasurePass measure, Size size) {
+    public void computeWrapSize(
+            PaintContext context, float maxWidth, float maxHeight, MeasurePass measure, Size size) {
         for (Component c : mChildrenComponents) {
             c.measure(context, 0f, maxWidth, 0f, maxHeight, measure);
             ComponentMeasure m = measure.get(c);
@@ -86,16 +113,20 @@ public class BoxLayout extends LayoutManager implements ComponentStartOperation 
     }
 
     @Override
-    public void computeSize(PaintContext context, float minWidth, float maxWidth,
-                            float minHeight, float maxHeight, MeasurePass measure) {
+    public void computeSize(
+            PaintContext context,
+            float minWidth,
+            float maxWidth,
+            float minHeight,
+            float maxHeight,
+            MeasurePass measure) {
         for (Component child : mChildrenComponents) {
             child.measure(context, minWidth, maxWidth, minHeight, maxHeight, measure);
         }
     }
 
     @Override
-    public void internalLayoutMeasure(PaintContext context,
-                                      MeasurePass measure) {
+    public void internalLayoutMeasure(PaintContext context, MeasurePass measure) {
         ComponentMeasure selfMeasure = measure.get(this);
         float selfWidth = selfMeasure.getW() - mPaddingLeft - mPaddingRight;
         float selfHeight = selfMeasure.getH() - mPaddingTop - mPaddingBottom;
@@ -127,63 +158,73 @@ public class BoxLayout extends LayoutManager implements ComponentStartOperation 
             }
             m.setX(tx);
             m.setY(ty);
-            m.setVisibility(child.mVisibility);
         }
     }
 
-    public static class Companion implements DocumentedCompanionOperation {
-        @Override
-        public String name() {
-            return "BoxLayout";
-        }
+    public static String name() {
+        return "BoxLayout";
+    }
 
-        @Override
-        public int id() {
-            return Operations.LAYOUT_BOX;
-        }
+    public static int id() {
+        return Operations.LAYOUT_BOX;
+    }
 
-        public void apply(WireBuffer buffer, int componentId, int animationId,
-                          int horizontalPositioning, int verticalPositioning) {
-            buffer.start(Operations.LAYOUT_BOX);
-            buffer.writeInt(componentId);
-            buffer.writeInt(animationId);
-            buffer.writeInt(horizontalPositioning);
-            buffer.writeInt(verticalPositioning);
-        }
+    public static void apply(
+            WireBuffer buffer,
+            int componentId,
+            int animationId,
+            int horizontalPositioning,
+            int verticalPositioning) {
+        buffer.start(Operations.LAYOUT_BOX);
+        buffer.writeInt(componentId);
+        buffer.writeInt(animationId);
+        buffer.writeInt(horizontalPositioning);
+        buffer.writeInt(verticalPositioning);
+    }
 
-        @Override
-        public void read(WireBuffer buffer, List<Operation> operations) {
-            int componentId = buffer.readInt();
-            int animationId = buffer.readInt();
-            int horizontalPositioning = buffer.readInt();
-            int verticalPositioning = buffer.readInt();
-            operations.add(new BoxLayout(null, componentId, animationId,
-                    horizontalPositioning, verticalPositioning));
-        }
+    public static void read(WireBuffer buffer, List<Operation> operations) {
+        int componentId = buffer.readInt();
+        int animationId = buffer.readInt();
+        int horizontalPositioning = buffer.readInt();
+        int verticalPositioning = buffer.readInt();
+        operations.add(
+                new BoxLayout(
+                        null,
+                        componentId,
+                        animationId,
+                        horizontalPositioning,
+                        verticalPositioning));
+    }
 
-        @Override
-        public void documentation(DocumentationBuilder doc) {
-            doc.operation("Layout Operations", id(), name())
-                .description("Box layout implementation.\n\n"
-                      + "Child components are laid out independently from one another,\n"
-                      + " and painted in their hierarchy order (first children drawn"
-                      + "before the latter). Horizontal and Vertical positioning"
-                      + "are supported.")
+    public static void documentation(DocumentationBuilder doc) {
+        doc.operation("Layout Operations", id(), name())
+                .description(
+                        "Box layout implementation.\n\n"
+                                + "Child components are laid out independently from one another,\n"
+                                + " and painted in their hierarchy order (first children drawn"
+                                + "before the latter). Horizontal and Vertical positioning"
+                                + "are supported.")
                 .examplesDimension(150, 100)
                 .exampleImage("Top", "layout-BoxLayout-start-top.png")
                 .exampleImage("Center", "layout-BoxLayout-center-center.png")
                 .exampleImage("Bottom", "layout-BoxLayout-end-bottom.png")
                 .field(INT, "COMPONENT_ID", "unique id for this component")
-                .field(INT, "ANIMATION_ID", "id used to match components,"
-                      + " for animation purposes")
+                .field(
+                        INT,
+                        "ANIMATION_ID",
+                        "id used to match components," + " for animation purposes")
                 .field(INT, "HORIZONTAL_POSITIONING", "horizontal positioning value")
-                    .possibleValues("START", BoxLayout.START)
-                    .possibleValues("CENTER", BoxLayout.CENTER)
-                    .possibleValues("END", BoxLayout.END)
+                .possibleValues("START", BoxLayout.START)
+                .possibleValues("CENTER", BoxLayout.CENTER)
+                .possibleValues("END", BoxLayout.END)
                 .field(INT, "VERTICAL_POSITIONING", "vertical positioning value")
-                    .possibleValues("TOP", BoxLayout.TOP)
-                    .possibleValues("CENTER", BoxLayout.CENTER)
-                    .possibleValues("BOTTOM", BoxLayout.BOTTOM);
-        }
+                .possibleValues("TOP", BoxLayout.TOP)
+                .possibleValues("CENTER", BoxLayout.CENTER)
+                .possibleValues("BOTTOM", BoxLayout.BOTTOM);
+    }
+
+    @Override
+    public void write(WireBuffer buffer) {
+        apply(buffer, mComponentId, mAnimationId, mHorizontalPositioning, mVerticalPositioning);
     }
 }

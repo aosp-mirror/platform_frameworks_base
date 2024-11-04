@@ -35,6 +35,7 @@ import android.os.Build;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.view.DisplayCutout;
+import android.view.WindowInsets;
 import android.window.WindowContainerToken;
 
 import java.util.ArrayList;
@@ -274,7 +275,10 @@ public class TaskInfo {
     public int parentTaskId;
 
     /**
-     * Whether this task is focused.
+     * Whether this task is focused on the display. This means the task receives input events that
+     * target the display.
+     * CAUTION: This can be true for multiple tasks especially when multiple displays are connected
+     * in the system.
      * @hide
      */
     public boolean isFocused;
@@ -329,10 +333,32 @@ public class TaskInfo {
     public long capturedLinkTimestamp;
 
     /**
+     * The requested visible types of insets.
+     * @hide
+     */
+    @WindowInsets.Type.InsetsType
+    public int requestedVisibleTypes;
+
+    /**
+     * Whether the top activity has requested to limit educational dialogs shown by the system.
+     * @hide
+     */
+    public boolean isTopActivityLimitSystemEducationDialogs;
+
+    /**
      * Encapsulate specific App Compat information.
      * @hide
      */
     public AppCompatTaskInfo appCompatTaskInfo = AppCompatTaskInfo.create();
+
+    /**
+     * The top activity's main window frame if it doesn't match the top activity bounds.
+     * {@code null}, otherwise.
+     *
+     * @hide
+     */
+    @Nullable
+    public Rect topActivityMainWindowFrame;
 
     TaskInfo() {
         // Do nothing
@@ -465,7 +491,11 @@ public class TaskInfo {
                 && lastNonFullscreenBounds == this.lastNonFullscreenBounds
                 && Objects.equals(capturedLink, that.capturedLink)
                 && capturedLinkTimestamp == that.capturedLinkTimestamp
-                && appCompatTaskInfo.equalsForTaskOrganizer(that.appCompatTaskInfo);
+                && requestedVisibleTypes == that.requestedVisibleTypes
+                && isTopActivityLimitSystemEducationDialogs
+                    == that.isTopActivityLimitSystemEducationDialogs
+                && appCompatTaskInfo.equalsForTaskOrganizer(that.appCompatTaskInfo)
+                && Objects.equals(topActivityMainWindowFrame, that.topActivityMainWindowFrame);
     }
 
     /**
@@ -539,7 +569,10 @@ public class TaskInfo {
         lastNonFullscreenBounds = source.readTypedObject(Rect.CREATOR);
         capturedLink = source.readTypedObject(Uri.CREATOR);
         capturedLinkTimestamp = source.readLong();
+        requestedVisibleTypes = source.readInt();
+        isTopActivityLimitSystemEducationDialogs = source.readBoolean();
         appCompatTaskInfo = source.readTypedObject(AppCompatTaskInfo.CREATOR);
+        topActivityMainWindowFrame = source.readTypedObject(Rect.CREATOR);
     }
 
     /**
@@ -591,7 +624,10 @@ public class TaskInfo {
         dest.writeTypedObject(lastNonFullscreenBounds, flags);
         dest.writeTypedObject(capturedLink, flags);
         dest.writeLong(capturedLinkTimestamp);
+        dest.writeInt(requestedVisibleTypes);
+        dest.writeBoolean(isTopActivityLimitSystemEducationDialogs);
         dest.writeTypedObject(appCompatTaskInfo, flags);
+        dest.writeTypedObject(topActivityMainWindowFrame, flags);
     }
 
     @Override
@@ -633,7 +669,11 @@ public class TaskInfo {
                 + " lastNonFullscreenBounds=" + lastNonFullscreenBounds
                 + " capturedLink=" + capturedLink
                 + " capturedLinkTimestamp=" + capturedLinkTimestamp
+                + " requestedVisibleTypes=" + requestedVisibleTypes
+                + " isTopActivityLimitSystemEducationDialogs="
+                + isTopActivityLimitSystemEducationDialogs
                 + " appCompatTaskInfo=" + appCompatTaskInfo
+                + " topActivityMainWindowFrame=" + topActivityMainWindowFrame
                 + "}";
     }
 }

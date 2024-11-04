@@ -23,14 +23,15 @@ import android.content.res.Resources
 import android.graphics.Color
 import android.graphics.drawable.Icon
 import android.os.UserHandle
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
-import android.view.IWindowManager
 import android.view.WindowManager
-import android.view.WindowManagerGlobal
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import androidx.test.platform.app.InstrumentationRegistry
+import com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn
 import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.internal.protolog.ProtoLog
 import com.android.launcher3.icons.BubbleIconFactory
@@ -41,6 +42,7 @@ import com.android.wm.shell.bubbles.animation.AnimatableScaleMatrix
 import com.android.wm.shell.common.FloatingContentCoordinator
 import com.android.wm.shell.common.ShellExecutor
 import com.android.wm.shell.shared.animation.PhysicsAnimatorTestUtils
+import com.android.wm.shell.shared.bubbles.BubbleBarLocation
 import com.android.wm.shell.taskview.TaskView
 import com.android.wm.shell.taskview.TaskViewTaskController
 import com.google.common.truth.Truth.assertThat
@@ -51,9 +53,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
-import android.platform.test.annotations.DisableFlags
-import android.platform.test.annotations.EnableFlags
-import com.android.wm.shell.shared.bubbles.BubbleBarLocation
+import org.mockito.kotlin.verify
 import java.util.concurrent.Semaphore
 import java.util.concurrent.TimeUnit
 import java.util.function.Consumer
@@ -67,11 +67,12 @@ class BubbleStackViewTest {
 
     private val context = ApplicationProvider.getApplicationContext<Context>()
     private lateinit var positioner: BubblePositioner
+    private lateinit var bubbleLogger: BubbleLogger
     private lateinit var iconFactory: BubbleIconFactory
     private lateinit var expandedViewManager: FakeBubbleExpandedViewManager
     private lateinit var bubbleStackView: BubbleStackView
     private lateinit var shellExecutor: ShellExecutor
-    private lateinit var windowManager: IWindowManager
+    private lateinit var windowManager: WindowManager
     private lateinit var bubbleTaskViewFactory: BubbleTaskViewFactory
     private lateinit var bubbleData: BubbleData
     private lateinit var bubbleStackViewManager: FakeBubbleStackViewManager
@@ -82,9 +83,8 @@ class BubbleStackViewTest {
         PhysicsAnimatorTestUtils.prepareForTest()
         // Disable protolog tool when running the tests from studio
         ProtoLog.REQUIRE_PROTOLOGTOOL = false
-        windowManager = WindowManagerGlobal.getWindowManagerService()!!
         shellExecutor = TestShellExecutor()
-        val windowManager = context.getSystemService(WindowManager::class.java)
+        windowManager = context.getSystemService(WindowManager::class.java)
         iconFactory =
             BubbleIconFactory(
                 context,
@@ -96,10 +96,11 @@ class BubbleStackViewTest {
                 )
             )
         positioner = BubblePositioner(context, windowManager)
+        bubbleLogger = BubbleLogger(UiEventLoggerFake())
         bubbleData =
             BubbleData(
                 context,
-                BubbleLogger(UiEventLoggerFake()),
+                bubbleLogger,
                 positioner,
                 BubbleEducationController(context),
                 shellExecutor,
@@ -352,6 +353,16 @@ class BubbleStackViewTest {
         assertThat(bubbleStackView.getBubbleIndex(bubbleOverflow)).isGreaterThan(-1)
     }
 
+    @Test
+    fun removeFromWindow_stopMonitoringSwipeUpGesture() {
+        spyOn(bubbleStackView)
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            // No way to add to window in the test environment right now so just pretend
+            bubbleStackView.onDetachedFromWindow()
+        }
+        verify(bubbleStackView).stopMonitoringSwipeUpGesture()
+    }
+
     private fun createAndInflateChatBubble(key: String): Bubble {
         val icon = Icon.createWithResource(context.resources, R.drawable.bubble_ic_overflow_button)
         val shortcutInfo = ShortcutInfo.Builder(context, "fakeId").setIcon(icon).build()
@@ -394,6 +405,7 @@ class BubbleStackViewTest {
             expandedViewManager,
             bubbleTaskViewFactory,
             positioner,
+            bubbleLogger,
             bubbleStackView,
             null,
             iconFactory,

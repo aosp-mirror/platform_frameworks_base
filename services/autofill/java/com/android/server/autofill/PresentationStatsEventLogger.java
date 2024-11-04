@@ -732,6 +732,7 @@ public final class PresentationStatsEventLogger {
             // These autofill id's are being refilled, so they had failed previously.
             // Note that these autofillIds correspond to the new autofill ids after relayout.
             event.mFailedAutofillIds = new ArraySet<>(autofillIds);
+            setHasRelayoutLog();
         });
     }
 
@@ -753,6 +754,7 @@ public final class PresentationStatsEventLogger {
             int failureCount = ids.size();
             if (isRefill) {
                 event.mViewFailedOnRefillCount = failureCount;
+                setHasRelayoutLog();
             } else {
                 event.mViewFillFailureCount = failureCount;
                 event.mViewFailedPriorToRefillCount = failureCount;
@@ -834,6 +836,19 @@ public final class PresentationStatsEventLogger {
     }
 
     /**
+     * Set the log contains relayout metrics.
+     * This is being added as a temporary measure to add logging.
+     * In future, when we map Session's old view states to the new autofill id's as part of fixing
+     * save for relayout cases, we no longer would need this. But till then, this is needed to set
+     * autofill logs for relayout cases.
+     */
+    private void setHasRelayoutLog() {
+        mEventInternal.ifPresent(event -> {
+            event.mHasRelayoutLog = true;
+        });
+    }
+
+    /**
      * Finish and log the event.
      */
     public void logAndEndEvent(String caller) {
@@ -844,8 +859,10 @@ public final class PresentationStatsEventLogger {
         }
 
         PresentationStatsEventInternal event = mEventInternal.get();
-        boolean ignoreLogging = !event.mIsDatasetAvailable;
-
+        boolean ignoreLogging = !event.mIsDatasetAvailable
+                && !event.mHasRelayoutLog
+                && !(event.mFixExpireResponseDuringAuthCount > 0)
+                && !(event.mNotifyViewEnteredIgnoredDuringAuthCount > 0);
         if (sVerbose) {
             Slog.v(TAG, "(" + caller + ") "
                     + (ignoreLogging ? "IGNORING - following event won't be logged: " : "")
@@ -1032,8 +1049,9 @@ public final class PresentationStatsEventLogger {
         ArraySet<AutofillId> mFailedAutofillIds = new ArraySet<>();
         ArraySet<AutofillId> mAlreadyFilledAutofillIds = new ArraySet<>();
 
-        // Not logged - used for internal logic
+        // Following are not logged and used only for internal logic
         boolean shouldResetShownCount = false;
+        boolean mHasRelayoutLog = false;
         PresentationStatsEventInternal() {}
     }
 

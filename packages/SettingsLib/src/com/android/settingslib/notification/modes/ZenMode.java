@@ -140,7 +140,7 @@ public class ZenMode implements Parcelable {
 
     private static Status computeStatus(@NonNull ZenModeConfig.ZenRule zenRuleExtraData) {
         if (zenRuleExtraData.enabled) {
-            if (zenRuleExtraData.isAutomaticActive()) {
+            if (zenRuleExtraData.isActive()) {
                 return Status.ENABLED_AND_ACTIVE;
             } else {
                 return Status.ENABLED;
@@ -241,10 +241,6 @@ public class ZenMode implements Parcelable {
                         formattedTime);
             }
         }
-        // TODO: b/333527800 - For TYPE_SCHEDULE_TIME rules we could do the same; however
-        //   according to the snoozing discussions the mode may or may not end at the scheduled
-        //   time if manually activated. When we resolve that point, we could calculate end time
-        //   for these modes as well.
 
         return getTriggerDescription();
     }

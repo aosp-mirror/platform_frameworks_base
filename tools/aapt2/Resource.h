@@ -71,6 +71,17 @@ enum class ResourceType {
 
 enum class FlagStatus { NoFlag = 0, Disabled = 1, Enabled = 2 };
 
+struct FeatureFlagAttribute {
+  std::string name;
+  bool negated = false;
+
+  std::string ToString() {
+    return (negated ? "!" : "") + name;
+  }
+
+  bool operator==(const FeatureFlagAttribute& o) const = default;
+};
+
 android::StringPiece to_string(ResourceType type);
 
 /**
@@ -232,6 +243,12 @@ struct ResourceFile {
 
   // Exported symbols
   std::vector<SourcedResourceName> exported_symbols;
+
+  // Flag status
+  FlagStatus flag_status = FlagStatus::NoFlag;
+
+  // Flag
+  std::optional<FeatureFlagAttribute> flag;
 };
 
 /**

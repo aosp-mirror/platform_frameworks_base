@@ -146,7 +146,7 @@ class BackgroundLaunchProcessController {
                     "process bound by foreground uid");
         }
         // Allow if the caller has an activity in any foreground task.
-        if (checkConfiguration.checkVisibility && hasActivityInVisibleTask
+        if (checkConfiguration.checkOtherExemptions && hasActivityInVisibleTask
                 && appSwitchState != APP_SWITCH_DISALLOW) {
             return new BalVerdict(BAL_ALLOW_FOREGROUND, /*background*/ false,
                     "process has activity in foreground task");

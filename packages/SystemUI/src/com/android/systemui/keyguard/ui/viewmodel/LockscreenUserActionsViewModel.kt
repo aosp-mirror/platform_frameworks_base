@@ -18,20 +18,18 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
-import com.android.compose.animation.scene.Edge
 import com.android.compose.animation.scene.Swipe
-import com.android.compose.animation.scene.SwipeDirection
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
-import com.android.systemui.scene.shared.model.SceneFamilies
 import com.android.systemui.scene.shared.model.Scenes
-import com.android.systemui.scene.shared.model.TransitionKeys.ToSplitShade
 import com.android.systemui.scene.ui.viewmodel.UserActionsViewModel
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shade.shared.model.ShadeMode
-import com.android.systemui.util.kotlin.filterValuesNotNull
+import com.android.systemui.shade.ui.viewmodel.dualShadeActions
+import com.android.systemui.shade.ui.viewmodel.singleShadeActions
+import com.android.systemui.shade.ui.viewmodel.splitShadeActions
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -52,69 +50,33 @@ constructor(
         shadeInteractor.isShadeTouchable
             .flatMapLatest { isShadeTouchable ->
                 if (!isShadeTouchable) {
-                    flowOf(emptyMap())
-                } else {
-                    combine(
-                        deviceEntryInteractor.isUnlocked,
-                        communalInteractor.isCommunalAvailable,
-                        shadeInteractor.shadeMode,
-                    ) { isDeviceUnlocked, isCommunalAvailable, shadeMode ->
-                        val notifShadeSceneKey =
-                            UserActionResult(
-                                toScene = SceneFamilies.NotifShade,
-                                transitionKey =
-                                    ToSplitShade.takeIf { shadeMode is ShadeMode.Split },
+                    return@flatMapLatest flowOf(emptyMap())
+                }
+
+                combine(
+                    deviceEntryInteractor.isUnlocked,
+                    communalInteractor.isCommunalAvailable,
+                    shadeInteractor.shadeMode,
+                ) { isDeviceUnlocked, isCommunalAvailable, shadeMode ->
+                    buildList {
+                            if (isCommunalAvailable) {
+                                add(Swipe.Start to Scenes.Communal)
+                            }
+
+                            add(Swipe.Up to if (isDeviceUnlocked) Scenes.Gone else Scenes.Bouncer)
+
+                            addAll(
+                                when (shadeMode) {
+                                    ShadeMode.Single -> singleShadeActions()
+                                    ShadeMode.Split -> splitShadeActions()
+                                    ShadeMode.Dual -> dualShadeActions()
+                                }
                             )
-
-                        mapOf(
-                                Swipe.Left to
-                                    UserActionResult(Scenes.Communal).takeIf {
-                                        isCommunalAvailable
-                                    },
-                                Swipe.Up to if (isDeviceUnlocked) Scenes.Gone else Scenes.Bouncer,
-
-                                // Swiping down from the top edge goes to QS (or shade if in split
-                                // shade mode).
-                                swipeDownFromTop(pointerCount = 1) to
-                                    if (shadeMode is ShadeMode.Single) {
-                                        UserActionResult(Scenes.QuickSettings)
-                                    } else {
-                                        notifShadeSceneKey
-                                    },
-
-                                // TODO(b/338577208): Remove once we add Dual Shade invocation zones
-                                swipeDownFromTop(pointerCount = 2) to
-                                    UserActionResult(
-                                        toScene = SceneFamilies.QuickSettings,
-                                        transitionKey =
-                                            ToSplitShade.takeIf { shadeMode is ShadeMode.Split }
-                                    ),
-
-                                // Swiping down, not from the edge, always navigates to the notif
-                                // shade scene.
-                                swipeDown(pointerCount = 1) to notifShadeSceneKey,
-                                swipeDown(pointerCount = 2) to notifShadeSceneKey,
-                            )
-                            .filterValuesNotNull()
-                    }
+                        }
+                        .associate { it }
                 }
             }
             .collect { setActions(it) }
-    }
-
-    private fun swipeDownFromTop(pointerCount: Int): Swipe {
-        return Swipe(
-            SwipeDirection.Down,
-            fromSource = Edge.Top,
-            pointerCount = pointerCount,
-        )
-    }
-
-    private fun swipeDown(pointerCount: Int): Swipe {
-        return Swipe(
-            SwipeDirection.Down,
-            pointerCount = pointerCount,
-        )
     }
 
     @AssistedFactory

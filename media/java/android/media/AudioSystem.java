@@ -93,7 +93,8 @@ public class AudioSystem
     /** @hide Used to identify the volume of audio streams for notifications */
     public static final int STREAM_NOTIFICATION = 5;
     /** @hide
-     *  Used to identify the volume of audio streams for phone calls when connected on bluetooth */
+     *  Used to identify the volume of audio streams for phone calls when connected on bluetooth
+     *  @deprecated use {@link #STREAM_VOICE_CALL} instead */
     public static final int STREAM_BLUETOOTH_SCO = 6;
     /** @hide Used to identify the volume of audio streams for enforced system sounds in certain
      * countries (e.g camera in Japan) */
@@ -110,7 +111,7 @@ public class AudioSystem
     public static final int STREAM_ASSISTANT = 11;
     /**
      * @hide
-     * @deprecated Use {@link #numStreamTypes() instead}
+     * @deprecated Use {@link #numStreamTypes()} instead
      */
     public static final int NUM_STREAMS = 5;
 
@@ -542,6 +543,8 @@ public class AudioSystem
                 return "AUDIO_FORMAT_AAC_LATM_HE_V2"; // (AAC_LATM | AAC_SUB_HE_V2)
             case /* AUDIO_FORMAT_E_AC3_JOC         */ 0xA000001:
                 return "AUDIO_FORMAT_E_AC3_JOC";  // (E_AC3 | E_AC3_SUB_JOC)
+            case /* AUDIO_FORMAT_AC4_L4            */ 0x22000001:
+                return "AUDIO_FORMAT_AC4_L4";  // (AC4 | AC4_SUB_L4)
             case /* AUDIO_FORMAT_MAT_1_0           */ 0x24000001:
                 return "AUDIO_FORMAT_MAT_1_0"; // (MAT | MAT_SUB_1_0)
             case /* AUDIO_FORMAT_MAT_2_0           */ 0x24000002:
@@ -1064,6 +1067,8 @@ public class AudioSystem
     /** @hide */
     public static final int DEVICE_OUT_IP = 0x800000;
     /** @hide */
+    public static final int DEVICE_OUT_MULTICHANNEL_GROUP = 0x800001;
+    /** @hide */
     public static final int DEVICE_OUT_BUS = 0x1000000;
     /** @hide */
     public static final int DEVICE_OUT_PROXY = 0x2000000;
@@ -1132,6 +1137,7 @@ public class AudioSystem
         DEVICE_OUT_ALL_SET.add(DEVICE_OUT_AUX_LINE);
         DEVICE_OUT_ALL_SET.add(DEVICE_OUT_SPEAKER_SAFE);
         DEVICE_OUT_ALL_SET.add(DEVICE_OUT_IP);
+        DEVICE_OUT_ALL_SET.add(DEVICE_OUT_MULTICHANNEL_GROUP);
         DEVICE_OUT_ALL_SET.add(DEVICE_OUT_BUS);
         DEVICE_OUT_ALL_SET.add(DEVICE_OUT_PROXY);
         DEVICE_OUT_ALL_SET.add(DEVICE_OUT_USB_HEADSET);
@@ -1420,6 +1426,8 @@ public class AudioSystem
     /** @hide */ public static final String DEVICE_OUT_AUX_LINE_NAME = "aux_line";
     /** @hide */ public static final String DEVICE_OUT_SPEAKER_SAFE_NAME = "speaker_safe";
     /** @hide */ public static final String DEVICE_OUT_IP_NAME = "ip";
+    /** @hide */
+    public static final String DEVICE_OUT_MULTICHANNEL_GROUP_NAME = "multichannel_group";
     /** @hide */ public static final String DEVICE_OUT_BUS_NAME = "bus";
     /** @hide */ public static final String DEVICE_OUT_PROXY_NAME = "proxy";
     /** @hide */ public static final String DEVICE_OUT_USB_HEADSET_NAME = "usb_headset";
@@ -1513,6 +1521,8 @@ public class AudioSystem
             return DEVICE_OUT_SPEAKER_SAFE_NAME;
         case DEVICE_OUT_IP:
             return DEVICE_OUT_IP_NAME;
+        case DEVICE_OUT_MULTICHANNEL_GROUP:
+            return DEVICE_OUT_MULTICHANNEL_GROUP_NAME;
         case DEVICE_OUT_BUS:
             return DEVICE_OUT_BUS_NAME;
         case DEVICE_OUT_PROXY:
@@ -1696,12 +1706,12 @@ public class AudioSystem
     }
 
     /** @hide Wrapper for native methods called from AudioService */
-    public static int setStreamVolumeIndexAS(int stream, int index, int device) {
+    public static int setStreamVolumeIndexAS(int stream, int index, boolean muted, int device) {
         if (DEBUG_VOLUME) {
             Log.i(TAG, "setStreamVolumeIndex: " + STREAM_NAMES[stream]
-                    + " dev=" + Integer.toHexString(device) + " idx=" + index);
+                    + " dev=" + Integer.toHexString(device) + " idx=" + index + " muted=" + muted);
         }
-        return setStreamVolumeIndex(stream, index, device);
+        return setStreamVolumeIndex(stream, index, muted, device);
     }
 
     // usage for AudioRecord.startRecordingSync(), must match AudioSystem::sync_event_t
@@ -1772,7 +1782,8 @@ public class AudioSystem
     @UnsupportedAppUsage
     public static native int initStreamVolume(int stream, int indexMin, int indexMax);
     @UnsupportedAppUsage
-    private static native int setStreamVolumeIndex(int stream, int index, int device);
+    private static native int setStreamVolumeIndex(int stream, int index, boolean muted,
+            int device);
     /** @hide */
     public static native int getStreamVolumeIndex(int stream, int device);
     /**
@@ -1785,7 +1796,7 @@ public class AudioSystem
      * @return command completion status.
      */
     public static native int setVolumeIndexForAttributes(@NonNull AudioAttributes attributes,
-                                                         int index, int device);
+                                                         int index, boolean muted, int device);
    /**
     * @hide
     * get the volume index for the given {@link AudioAttributes}.

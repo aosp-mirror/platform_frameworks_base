@@ -745,7 +745,7 @@
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Saiakera gehiegi egin dira. Horren ordez, erabili pantailaren blokeoa."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Ezin da egiaztatu aurpegia. Saiatu berriro."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"Ez duzu konfiguratu aurpegi bidez desblokeatzeko eginbidea"</string>
-    <string name="face_error_hw_not_present" msgid="7940978724978763011">"Aurpegi bidez desblokeatzeko eginbidea ez da bateragarria gailu honekin"</string>
+    <string name="face_error_hw_not_present" msgid="7940978724978763011">"Aurpegi bidez desblokeatzeko eginbidea ez da onartzen gailu honetan"</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"Sentsorea aldi baterako desgaitu da."</string>
     <string name="face_name_template" msgid="3877037340223318119">"<xliff:g id="FACEID">%d</xliff:g> aurpegia"</string>
     <string name="face_app_setting_name" msgid="5854024256907828015">"Erabili aurpegi bidez desblokeatzeko eginbidea"</string>
@@ -1746,8 +1746,7 @@
     <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"Aplikazio bat baimen-eskaera oztopatzen ari da eta, ondorioz, ezin da egiaztatu erantzuna."</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Eginbide bat erabiltzen hasteko, saka ezazu:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Aukeratu zein eginbide erabili nahi duzun Erabilerraztasuna botoiarekin"</string>
-    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (2245540598834891500) -->
-    <skip />
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2245540598834891500">"Aukeratu zein eginbide erabili nahi duzun bolumen-botoien lasterbidearekin"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"Desaktibatu da <xliff:g id="SERVICE_NAME">%s</xliff:g>"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Editatu lasterbideak"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Eginda"</string>
@@ -1944,6 +1943,8 @@
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Desaktibatuta"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g>-<xliff:g id="END">%2$s</xliff:g>"</string>
+    <!-- no translation found for zen_mode_trigger_summary_range_words (7228261413029290750) -->
+    <skip />
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"Edozein egutegi"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> soinu batzuk isilarazten ari da"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"Barneko arazo bat dago zure gailuan eta agian ezegonkor egongo da jatorrizko datuak berrezartzen dituzun arte."</string>
@@ -2011,6 +2012,7 @@
     <string name="set_up_screen_lock_title" msgid="8346083801616474030">"Ezarri pantailaren blokeoa"</string>
     <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Ezarri pantailaren blokeoa"</string>
     <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"Eremu pribatua erabiltzeko, ezarri pantailaren blokeoa gailuan"</string>
+    <string name="private_space_set_up_screen_lock_for_reset" msgid="7817091386408432097">"Eremu pribatua ezabatzeko, ezarri pantaila blokeatzeko aukera bat gailuan"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Aplikazioa ez dago erabilgarri"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ez dago erabilgarri une honetan."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> ez dago erabilgarri"</string>
@@ -2129,11 +2131,6 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Dar-dar egingo du deiak eta jakinarazpenak jasotzean"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Ez da joko tonurik deiak eta jakinarazpenak jasotzean"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Sistema-aldaketak"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Ez molestatzeko modua"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Berria: Ez molestatzeko modua jakinarazpenak ezkutatzen ari da"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Sakatu informazio gehiago lortzeko eta portaera aldatzeko."</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Ez molestatzeko modua aldatu da"</string>
-    <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Sakatu zer dagoen blokeatuta ikusteko."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Berrikusi jakinarazpen-ezarpenak"</string>
     <string name="review_notification_settings_text" msgid="5916244866751849279">"Android 13 ezkero, jakinarazpenak bidaltzeko baimena eman behar diezu instalatzen dituzun aplikazioei. Sakatu hau lehendik dauden aplikazioen baimenak aldatzeko."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Gogorarazi geroago"</string>
@@ -2429,6 +2426,14 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Bidali eta jaso mezuak sare mugikorrik edo wifi-sarerik gabe"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Ireki Mezuak"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Nola funtzionatzen du?"</string>
+    <!-- no translation found for satellite_manual_selection_state_popup_title (8545991934926661974) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_message (1928101658551382450) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_ok (2459664752624985095) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_cancel (973605633339469252) -->
+    <skip />
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Zain…"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Konfiguratu berriro hatz-marka bidez desblokeatzeko eginbidea"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> ez da ezagutzen jada."</string>

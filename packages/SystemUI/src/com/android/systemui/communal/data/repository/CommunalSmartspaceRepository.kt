@@ -82,19 +82,26 @@ constructor(
             }
 
         _timers.value =
-            timerTargets.map { (stableId, target) ->
-                CommunalSmartspaceTimer(
-                    // The view layer should have the instance based smartspaceTargetId instead of
-                    // stable id, so that when a new instance of the timer is created, for example,
-                    // when it is paused, the view should re-render its remote views.
-                    smartspaceTargetId =
-                        if (communalTimerFlickerFix()) stableId else target.smartspaceTargetId,
-                    createdTimestampMillis = targetCreationTimes[stableId]!!,
-                    remoteViews = target.remoteViews!!,
-                )
-            }
-
-        logger.d({ "Smartspace timers updated: $str1" }) { str1 = _timers.value.toString() }
+            timerTargets
+                .map { (stableId, target) ->
+                    CommunalSmartspaceTimer(
+                        // The view layer should have the instance based smartspaceTargetId instead
+                        // of stable id, so that when a new instance of the timer is created, for
+                        // example, when it is paused, the view should re-render its remote views.
+                        smartspaceTargetId =
+                            if (communalTimerFlickerFix()) stableId else target.smartspaceTargetId,
+                        createdTimestampMillis = targetCreationTimes[stableId]!!,
+                        remoteViews = target.remoteViews!!,
+                    )
+                }
+                .also { newVal ->
+                    // Only log when value changes to avoid filling up the buffer.
+                    if (newVal != _timers.value) {
+                        logger.d({ "Smartspace timers updated: $str1" }) {
+                            str1 = newVal.toString()
+                        }
+                    }
+                }
     }
 
     override fun startListening() {

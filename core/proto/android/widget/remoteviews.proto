@@ -32,6 +32,8 @@ import "frameworks/base/core/proto/android/content/res/color_state_list.proto";
  *
  * Do not change the tag number or type of any fields in order to maintain compatibility with
  * previous versions. If a field is deleted, use `reserved` to mark its tag number.
+ *
+ * Next tag: 17
  */
 message RemoteViewsProto {
     option (android.msg_privacy).dest = DEST_AUTOMATIC;
@@ -54,6 +56,7 @@ message RemoteViewsProto {
     optional bool has_draw_instructions = 13;
     repeated bytes bitmap_cache = 14;
     optional RemoteCollectionCache remote_collection_cache = 15;
+    repeated Action actions = 16;
 
     message RemoteCollectionCache {
         message Entry {
@@ -287,6 +290,212 @@ message RemoteViewsProto {
                 optional string url = 1;
             }
         }
+    }
+
+    // Next tag: 23
+    message Action {
+        oneof action {
+            AttributeReflectionAction attribute_reflection_action = 1;
+            BitmapReflectionAction bitmap_reflection_action = 2;
+            ComplexUnitDimensionReflectionAction complex_unit_dimension_reflection_action = 3;
+            LayoutParamAction layout_param_action = 4;
+            NightModeReflectionAction night_mode_reflection_action = 5;
+            ReflectionAction reflection_action = 6;
+            RemoveFromParentAction remove_from_parent_action = 7;
+            ResourceReflectionAction resource_reflection_action = 8;
+            SetCompoundButtonCheckedAction set_compound_button_checked_action = 9;
+            SetDrawableTintAction set_drawable_tint_action = 10;
+            SetEmptyViewAction set_empty_view_action = 11;
+            SetIntTagAction set_int_tag_action = 12;
+            SetRadioGroupCheckedAction set_radio_group_checked_action = 13;
+            SetRemoteCollectionItemListAdapterAction set_remote_collection_item_list_adapter_action = 14;
+            SetRippleDrawableColorAction set_ripple_drawable_color_action = 15;
+            SetViewOutlinePreferredRadiusAction set_view_outline_preferred_radius_action = 16;
+            TextViewDrawableAction text_view_drawable_action = 17;
+            TextViewSizeAction text_view_size_action = 18;
+            ViewGroupAddAction view_group_add_action = 19;
+            ViewGroupRemoveAction view_group_remove_action = 20;
+            ViewPaddingAction view_padding_action = 21;
+            SetDrawInstructionAction set_draw_instruction_action = 22;
+        }
+    }
+
+    message AttributeReflectionAction {
+        optional string view_id = 1;
+        optional string method_name = 2;
+        optional int32 parameter_type = 3;
+        optional int32 resource_type = 4;
+        optional string attribute_id = 5;
+    }
+
+    message BitmapReflectionAction {
+        optional string view_id = 1;
+        optional string method_name = 2;
+        optional int32 bitmap_id = 3;
+    }
+
+    message ComplexUnitDimensionReflectionAction {
+        optional string view_id = 1;
+        optional string method_name = 2;
+        optional int32 parameter_type = 3;
+        optional float dimension_value = 4;
+        optional int32 unit = 5;
+    }
+
+    message LayoutParamAction {
+        optional string view_id = 1;
+        optional int32 property = 2;
+        optional int32 layout_value = 3;
+        optional int32 value_type = 4;
+    }
+
+    message NightModeReflectionAction {
+        optional string view_id = 1;
+        optional string method_name = 2;
+        optional int32 parameter_type = 3;
+        oneof light {
+            Icon light_icon = 4;
+            android.content.res.ColorStateListProto light_color_state_list = 5;
+            int32 light_int = 6;
+        }
+        oneof dark {
+            Icon dark_icon = 7;
+            android.content.res.ColorStateListProto dark_color_state_list = 8;
+            int32 dark_int = 9;
+        }
+    }
+
+    message ReflectionAction {
+        optional string view_id = 1;
+        optional string method_name = 2;
+        optional int32 parameter_type = 3;
+        oneof reflection_value {
+            bool boolean_value = 4;
+            bytes byte_value = 5;
+            int32 short_value = 6;
+            int32 int_value = 7;
+            int64 long_value = 8;
+            float float_value = 9;
+            double double_value = 10;
+            int32 char_value = 11;
+            string string_value = 12;
+            CharSequence char_sequence_value = 13;
+            string uri_value = 14;
+            bytes bitmap_value = 15;
+            android.content.res.ColorStateListProto color_state_list_value = 16;
+            Icon icon_value = 17;
+            int32 blend_mode_value = 18;
+            // Intent and Bundle values are excluded.
+        }
+    }
+
+    message RemoveFromParentAction {
+        optional string view_id = 1;
+    }
+
+    message ResourceReflectionAction {
+        optional string view_id = 1;
+        optional string method_name = 2;
+        optional int32 resource_type = 3;
+        optional string res_id = 4;
+        optional int32 parameter_type = 5;
+    }
+
+    message SetCompoundButtonCheckedAction {
+        optional string view_id = 1;
+        optional bool checked = 2;
+    }
+
+    message SetDrawableTintAction {
+        optional string view_id = 1;
+        optional bool target_background = 2;
+        optional int32 color_filter = 3;
+        optional int32 filter_mode = 4;
+    }
+
+    message SetEmptyViewAction {
+        optional string view_id = 1;
+        optional string empty_view_id = 2;
+    }
+
+    message SetIntTagAction {
+        optional string view_id = 1;
+        optional string key = 2;
+        optional int32 tag = 3;
+    }
+
+    message SetRadioGroupCheckedAction {
+        optional string view_id = 1;
+        optional string checked_id = 2;
+    }
+
+    message SetRemoteCollectionItemListAdapterAction {
+        optional string view_id = 1;
+        optional RemoteCollectionItems items = 2;
+    }
+
+    message SetRippleDrawableColorAction {
+        optional string view_id = 1;
+        optional android.content.res.ColorStateListProto color_state_list = 2;
+    }
+
+    message SetViewOutlinePreferredRadiusAction {
+        optional string view_id = 1;
+        optional int32 value_type = 2;
+        optional int32 value = 3;
+    }
+
+    message TextViewDrawableAction {
+        optional string view_id = 1;
+        optional bool is_relative = 2;
+        oneof drawables {
+            Resources resources = 3;
+            Icons icons = 4;
+        };
+
+        message Resources {
+            optional string one = 1;
+            optional string two = 2;
+            optional string three = 3;
+            optional string four = 4;
+        }
+
+        message Icons {
+            optional Icon one = 1;
+            optional Icon two = 2;
+            optional Icon three = 3;
+            optional Icon four = 4;
+        }
+    }
+
+    message TextViewSizeAction {
+        optional string view_id = 1;
+        optional int32 units = 2;
+        optional float size = 3;
+    }
+
+    message ViewGroupAddAction {
+        optional string view_id = 1;
+        optional RemoteViewsProto nested_views = 2;
+        optional int32 index = 3;
+        optional int32 stableId = 4;
+    }
+
+    message ViewGroupRemoveAction {
+        optional string view_id = 1;
+        optional string view_id_to_keep = 2;
+    }
+
+    message ViewPaddingAction {
+        optional string view_id = 1;
+        optional int32 left = 2;
+        optional int32 right = 3;
+        optional int32 top = 4;
+        optional int32 bottom = 5;
+    }
+
+    message SetDrawInstructionAction {
+        repeated bytes instructions = 1;
     }
 }
 

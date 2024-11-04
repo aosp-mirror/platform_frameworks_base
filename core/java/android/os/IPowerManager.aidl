@@ -42,10 +42,13 @@ interface IPowerManager
 
     void updateWakeLockWorkSource(IBinder lock, in WorkSource ws, String historyTag);
     void updateWakeLockCallback(IBinder lock, IWakeLockCallback callback);
+    @UnsupportedAppUsage
     boolean isWakeLockLevelSupported(int level);
+    boolean isWakeLockLevelSupportedWithDisplayId(int level, int displayId);
 
     void userActivity(int displayId, long time, int event, int flags);
     void wakeUp(long time, int reason, String details, String opPackageName);
+    void wakeUpWithDisplayId(long time, int reason, String details, String opPackageName, int displayId);
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void goToSleep(long time, int reason, int flags);
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)

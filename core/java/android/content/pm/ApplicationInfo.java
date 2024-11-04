@@ -2334,9 +2334,8 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * Whether an app allows its playback audio to be captured by other apps.
      *
      * @return {@code true} if the app indicates that its audio can be captured by other apps.
-     *
-     * @hide
      */
+    @FlaggedApi(Flags.FLAG_AUDIO_PLAYBACK_CAPTURE_ALLOWANCE)
     public boolean isAudioPlaybackCaptureAllowed() {
         return (privateFlags & PRIVATE_FLAG_ALLOW_AUDIO_PLAYBACK_CAPTURE) != 0;
     }

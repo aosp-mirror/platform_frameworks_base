@@ -60,7 +60,7 @@ import org.mockito.Mockito
 import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.verifyZeroInteractions
+import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.Mockito.`when` as whenever
 import org.mockito.junit.MockitoJUnit
 
@@ -557,7 +557,7 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
             transitionController.dragDownAmount = 10f
 
             verify(singleShadeOverScroller).expansionDragDownAmount = 10f
-            verifyZeroInteractions(splitShadeOverScroller)
+            verifyNoMoreInteractions(splitShadeOverScroller)
         }
 
     @Test
@@ -568,7 +568,7 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
             transitionController.dragDownAmount = 10f
 
             verify(splitShadeOverScroller).expansionDragDownAmount = 10f
-            verifyZeroInteractions(singleShadeOverScroller)
+            verifyNoMoreInteractions(singleShadeOverScroller)
         }
 
     @Test

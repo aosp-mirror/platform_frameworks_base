@@ -98,3 +98,38 @@ flag {
     bug: "331698645"
     is_fixed_read_only: true
 }
+
+flag {
+  name: "calculate_bounds_in_parent_from_bounds_in_screen"
+  namespace: "accessibility"
+  description: "Calculate bounds in parent of each node in ViewStructure from its bounds set relative to screen and its parent's"
+  bug: "366131857"
+  is_fixed_read_only: true
+  metadata {
+      purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+    name: "surface_view_set_composition_order"
+    namespace: "window_surfaces"
+    description: "Add a SurfaceView composition order control API."
+    bug: "341021569"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "surface_view_get_surface_package"
+    namespace: "window_surfaces"
+    description: "Add APIs to manage SurfacePackage of the parent SurfaceView."
+    bug: "341021569"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "use_refactored_round_scrollbar"
+    namespace: "wear_frameworks"
+    description: "Use refactored round scrollbar."
+    bug: "333417898"
+    is_fixed_read_only: true
+}

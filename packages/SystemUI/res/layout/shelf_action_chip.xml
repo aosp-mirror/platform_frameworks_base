@@ -28,6 +28,7 @@
     <ImageView
         android:id="@+id/overlay_action_chip_icon"
         android:tint="?androidprv:attr/materialColorOnSecondary"
+        android:tintMode="src_in"
         android:layout_width="@dimen/overlay_action_chip_icon_size"
         android:layout_height="@dimen/overlay_action_chip_icon_size"/>
     <TextView

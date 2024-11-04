@@ -100,7 +100,7 @@
     <string name="bluetooth_active_battery_level_untethered_right" msgid="7407517998880370179">"使用中。右側：<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> 電量。"</string>
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"電量：<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="tv_bluetooth_battery_level" msgid="8786353985605532846">"電量：<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_battery_level_untethered" msgid="1616774716076301755">"左側：<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>，右側：<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> 電量。"</string>
+    <string name="bluetooth_battery_level_untethered" msgid="1616774716076301755">"左：<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>，右：<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> 電量。"</string>
     <string name="bluetooth_battery_level_untethered_left" msgid="5725764679536058365">"左側：<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> 電量"</string>
     <string name="bluetooth_battery_level_untethered_right" msgid="8377995536997790142">"右側：<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> 電量。"</string>
     <string name="tv_bluetooth_battery_level_untethered_left" msgid="337629670583744410">"左耳機：<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
@@ -357,6 +357,8 @@
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"啟用強化連線功能。"</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"本機終端機"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"啟用可提供本機命令介面存取權的終端機應用程式"</string>
+    <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Linux 開發環境"</string>
+    <string name="enable_linux_terminal_summary" msgid="5893216510985145320">"在 Android 上執行 Linux 終端機"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP 檢查"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"設定 HDCP 檢查行為"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"除錯"</string>
@@ -564,8 +566,7 @@
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"鬧鐘和提醒"</string>
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"允許此應用程式設定鬧鐘及安排具時效性的操作。這讓應用程式在背景中執行，因此可能會較耗電。\n\n如果關閉此權限，此應用程式將不會在預定時間響起已設定的鬧鐘，亦不會就特定時間的活動傳送通知。"</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"日程表, 鬧鐘, 提醒, 時鐘"</string>
-    <!-- no translation found for zen_mode_do_not_disturb_name (6798711401734798283) -->
-    <skip />
+    <string name="zen_mode_do_not_disturb_name" msgid="6798711401734798283">"請勿騷擾"</string>
     <string name="zen_mode_settings_title" msgid="7374070457626419755">"請勿騷擾"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"開啟"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"開啟「請勿騷擾」模式"</string>
@@ -583,6 +584,7 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"剛剛"</string>
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"此手機"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"此平板電腦"</string>
+    <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"此電腦 (內置)"</string>
     <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
     <skip />
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"插座喇叭"</string>
@@ -685,7 +687,12 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"已停用"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"已啟用"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"你的裝置必須重新開機，才能套用此變更。請立即重新開機或取消。"</string>
-    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"有線耳機"</string>
+    <string name="media_transfer_wired_headphone_name" msgid="8698668536022665254">"有線耳機"</string>
+    <string name="media_transfer_headphone_name" msgid="1157798825650178478">"有線音響"</string>
+    <string name="media_transfer_usb_audio_name" msgid="1789292056757821355">"USB 音訊"</string>
+    <string name="media_transfer_wired_device_mic_name" msgid="7115192790725088698">"有線麥克風"</string>
+    <string name="media_transfer_usb_device_mic_name" msgid="7171789543226269822">"USB 麥克風"</string>
+    <string name="media_transfer_bt_device_mic_name" msgid="1870669402238687618">"藍牙麥克風"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"開啟"</string>
     <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"關閉"</string>
     <string name="carrier_network_change_mode" msgid="4257621815706644026">"流動網絡供應商網絡正在變更"</string>

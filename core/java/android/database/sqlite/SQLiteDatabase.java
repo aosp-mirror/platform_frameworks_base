@@ -488,6 +488,7 @@ public final class SQLiteDatabase extends SQLiteClosable {
             @Nullable CursorFactory cursorFactory, @Nullable DatabaseErrorHandler errorHandler,
             int lookasideSlotSize, int lookasideSlotCount, long idleConnectionTimeoutMs,
             @Nullable String journalMode, @Nullable String syncMode) {
+        mTrackClosure = true;
         mCursorFactory = cursorFactory;
         mErrorHandler = errorHandler != null ? errorHandler : new DefaultDatabaseErrorHandler();
         mConfigurationLocked = new SQLiteDatabaseConfiguration(path, openFlags);

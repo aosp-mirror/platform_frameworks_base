@@ -16,21 +16,60 @@
 
 package com.android.systemui.keyguard.ui.binder
 
+import android.animation.ValueAnimator
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
-import com.android.app.tracing.coroutines.launch
+import com.android.app.animation.Interpolators.ALPHA_IN
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.keyguard.ui.viewmodel.LightRevealScrimViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
+import com.android.systemui.shared.Flags.ambientAod
 import com.android.systemui.statusbar.LightRevealScrim
-import kotlinx.coroutines.launch
+import com.android.systemui.wallpapers.ui.viewmodel.WallpaperViewModel
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 object LightRevealScrimViewBinder {
     @JvmStatic
-    fun bind(revealScrim: LightRevealScrim, viewModel: LightRevealScrimViewModel) {
+    fun bind(
+        revealScrim: LightRevealScrim,
+        viewModel: LightRevealScrimViewModel,
+        wallpaperViewModel: WallpaperViewModel,
+    ) {
         revealScrim.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.CREATED) {
+                if (ambientAod()) {
+                    launch("$TAG#wallpaperViewModel.wallpaperSupportsAmbientMode") {
+                        wallpaperViewModel.wallpaperSupportsAmbientMode.collect {
+                            viewModel.setWallpaperSupportsAmbientMode(it)
+                        }
+                    }
+                    launch("$TAG#viewModel.maxAlpha") {
+                        var animator: ValueAnimator? = null
+                        viewModel.maxAlpha.collect { (alpha, animate) ->
+                            if (alpha != revealScrim.alpha) {
+                                animator?.cancel()
+                                if (!animate) {
+                                    revealScrim.alpha = alpha
+                                } else {
+                                    animator =
+                                        ValueAnimator.ofFloat(revealScrim.alpha, alpha).apply {
+                                            startDelay = 333
+                                            duration = 733
+                                            interpolator = ALPHA_IN
+                                            addUpdateListener { animation ->
+                                                revealScrim.alpha =
+                                                    animation.getAnimatedValue() as Float
+                                            }
+                                            start()
+                                        }
+                                }
+                            }
+                        }
+                    }
+                }
+
                 launch("$TAG#viewModel.revealAmount") {
-                    viewModel.revealAmount.collect { amount -> revealScrim.revealAmount = amount }
+                    viewModel.revealAmount.collect { revealScrim.revealAmount = it }
                 }
 
                 launch("$TAG#viewModel.lightRevealEffect") {

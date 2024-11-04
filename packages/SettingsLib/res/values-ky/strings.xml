@@ -258,7 +258,7 @@
     <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"QR кодунун сканерин колдонуп, жаңы түзмөктөрдү жупташтырыңыз"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Түзмөктү атайын код аркылуу жупташтыруу"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Жаңы түзмөктөрдү алты сандан турган код аркылуу жупташтырасыз"</string>
-    <string name="adb_paired_devices_title" msgid="5268997341526217362">"Жупташтырылган түзмөктөр"</string>
+    <string name="adb_paired_devices_title" msgid="5268997341526217362">"Байланышкан түзмөктөр"</string>
     <string name="adb_wireless_device_connected_summary" msgid="3039660790249148713">"Учурда туташып турган түзмөктөр"</string>
     <string name="adb_wireless_device_details_title" msgid="7129369670526565786">"Түзмөктүн чоо-жайы"</string>
     <string name="adb_device_forget" msgid="193072400783068417">"Унутулсун"</string>
@@ -357,6 +357,8 @@
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Жакшыртылган туташуу функциясын иштетет."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Жергиликтүү терминал"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Жергиликтүү буйрук кабыгын сунуштаган терминалга уруксат берүү"</string>
+    <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Linux иштеп чыгуу чөйрөсү"</string>
+    <string name="enable_linux_terminal_summary" msgid="5893216510985145320">"Android\'де Linux терминалын иштетүү"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP текшерүү"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"HDCP текшерүү тартиби"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"Мүчүлүштүктөрдү аныктоо"</string>
@@ -564,8 +566,7 @@
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Ойготкучтар жана эстеткичтер"</string>
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Бул колдонмого ойготкучтарды коюуга жана башка аракеттерди графикке киргизүүгө уруксат бересиз. Ушуну менен колдонмо фондо иштеп, батареяны көбүрөөк сарпташы мүмкүн.\n\nЭгер бул уруксат өчүрүлсө, колдонмодогу ойготкучтар жана графикке киргизилген башка аракеттер иштебейт."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"график, ойготкуч, эстеткич, саат"</string>
-    <!-- no translation found for zen_mode_do_not_disturb_name (6798711401734798283) -->
-    <skip />
+    <string name="zen_mode_do_not_disturb_name" msgid="6798711401734798283">"Тынчымды алба"</string>
     <string name="zen_mode_settings_title" msgid="7374070457626419755">"Тынчымды алба"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Күйгүзүү"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"\"Тынчымды алба\" режимин күйгүзүү"</string>
@@ -583,6 +584,7 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"Жаңы эле"</string>
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"Ушул телефон"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"Ушул планшет"</string>
+    <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"Бул компьютер (ички)"</string>
     <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
     <skip />
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Док бекеттин динамиги"</string>
@@ -685,7 +687,12 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Өчүк"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Күйүк"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Бул өзгөрүү күчүнө кириши үчүн, түзмөктү өчүрүп күйгүзүңүз. Азыр же кийинчерээк өчүрүп күйгүзсөңүз болот."</string>
-    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"Зымдуу гарнитура"</string>
+    <string name="media_transfer_wired_headphone_name" msgid="8698668536022665254">"Зымдуу гарнитура"</string>
+    <string name="media_transfer_headphone_name" msgid="1157798825650178478">"Зымдуу аудио түзмөк"</string>
+    <string name="media_transfer_usb_audio_name" msgid="1789292056757821355">"USB аудио"</string>
+    <string name="media_transfer_wired_device_mic_name" msgid="7115192790725088698">"Зымдуу микрофон"</string>
+    <string name="media_transfer_usb_device_mic_name" msgid="7171789543226269822">"USB микрофон"</string>
+    <string name="media_transfer_bt_device_mic_name" msgid="1870669402238687618">"Bluetooth микрофону"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"Күйгүзүү"</string>
     <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"Өчүрүү"</string>
     <string name="carrier_network_change_mode" msgid="4257621815706644026">"Байланыш оператору өзгөртүлүүдө"</string>

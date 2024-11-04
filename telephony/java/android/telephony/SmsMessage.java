@@ -19,6 +19,7 @@ package android.telephony;
 import static android.telephony.TelephonyManager.PHONE_TYPE_CDMA;
 
 import android.Manifest;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
@@ -32,6 +33,7 @@ import android.os.Binder;
 import android.os.Build;
 import android.text.TextUtils;
 
+import com.android.internal.telephony.flags.Flags;
 import com.android.internal.telephony.GsmAlphabet;
 import com.android.internal.telephony.GsmAlphabet.TextEncodingDetails;
 import com.android.internal.telephony.Sms7BitEncodingTranslator;
@@ -1208,9 +1210,9 @@ public class SmsMessage {
     /**
      * Returns the recipient address(receiver) of this SMS message in String form or null if
      * unavailable.
-     * {@hide}
      */
     @Nullable
+    @FlaggedApi(Flags.FLAG_SUPPORT_SMS_OVER_IMS_APIS)
     public String getRecipientAddress() {
         return mWrappedSmsMessage.getRecipientAddress();
     }

@@ -11,7 +11,7 @@ import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.window.StatusBarWindowStateController
 import com.android.systemui.util.concurrency.DelayableExecutor
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 import java.io.PrintWriter
 import javax.inject.Inject
 

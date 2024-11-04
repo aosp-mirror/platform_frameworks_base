@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.chips.mediaprojection.domain.interactor
 
 import android.content.pm.PackageManager
+import com.android.systemui.Flags
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.log.LogBuffer
@@ -32,7 +33,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /**
  * Interactor for media projection events, used to show chips in the status bar for share-to-app and
@@ -59,23 +60,43 @@ constructor(
                         ProjectionChipModel.NotProjecting
                     }
                     is MediaProjectionState.Projecting -> {
-                        val type =
+                        val receiver =
                             if (packageHasCastingCapabilities(packageManager, state.hostPackage)) {
-                                ProjectionChipModel.Type.CAST_TO_OTHER_DEVICE
+                                ProjectionChipModel.Receiver.CastToOtherDevice
                             } else {
-                                ProjectionChipModel.Type.SHARE_TO_APP
+                                ProjectionChipModel.Receiver.ShareToApp
                             }
+                        val contentType =
+                            if (Flags.statusBarShowAudioOnlyProjectionChip()) {
+                                when (state) {
+                                    is MediaProjectionState.Projecting.EntireScreen,
+                                    is MediaProjectionState.Projecting.SingleTask ->
+                                        ProjectionChipModel.ContentType.Screen
+                                    is MediaProjectionState.Projecting.NoScreen ->
+                                        ProjectionChipModel.ContentType.Audio
+                                }
+                            } else {
+                                ProjectionChipModel.ContentType.Screen
+                            }
+
                         logger.log(
                             TAG,
                             LogLevel.INFO,
                             {
-                                str1 = type.name
-                                str2 = state.hostPackage
-                                str3 = state.hostDeviceName
+                                bool1 = receiver == ProjectionChipModel.Receiver.CastToOtherDevice
+                                bool2 = contentType == ProjectionChipModel.ContentType.Screen
+                                str1 = state.hostPackage
+                                str2 = state.hostDeviceName
                             },
-                            { "State: Projecting(type=$str1 hostPackage=$str2 hostDevice=$str3)" }
+                            {
+                                "State: Projecting(" +
+                                    "receiver=${if (bool1) "CastToOtherDevice" else "ShareToApp"} " +
+                                    "contentType=${if (bool2) "Screen" else "Audio"} " +
+                                    "hostPackage=$str1 " +
+                                    "hostDevice=$str2)"
+                            },
                         )
-                        ProjectionChipModel.Projecting(type, state)
+                        ProjectionChipModel.Projecting(receiver, contentType, state)
                     }
                 }
             }

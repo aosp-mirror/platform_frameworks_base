@@ -719,6 +719,9 @@ public class Utils {
      * @return {@code true} if the Uri has vibration parameter
      */
     public static boolean hasVibration(Uri ringtoneUri) {
+        if (ringtoneUri == null) {
+            return false;
+        }
         final String vibrationUriString = ringtoneUri.getQueryParameter(VIBRATION_URI_PARAM);
         return vibrationUriString != null;
     }
@@ -730,7 +733,10 @@ public class Utils {
      * @return parsed {@link Uri} of vibration parameter, {@code null} if the vibration parameter
      * is not found.
      */
-    public static Uri getVibrationUri(Uri ringtoneUri) {
+    public static @Nullable Uri getVibrationUri(Uri ringtoneUri) {
+        if (ringtoneUri == null) {
+            return null;
+        }
         final String vibrationUriString = ringtoneUri.getQueryParameter(VIBRATION_URI_PARAM);
         if (vibrationUriString == null) {
             return null;

@@ -32,25 +32,20 @@ public class NativeAllocationRegistry {
 
     public static NativeAllocationRegistry createNonmalloced(
             ClassLoader classLoader, long freeFunction, long size) {
-        return new NativeAllocationRegistry(classLoader, freeFunction, size, false);
+        return new NativeAllocationRegistry(classLoader, freeFunction, size);
     }
 
     public static NativeAllocationRegistry createMalloced(
             ClassLoader classLoader, long freeFunction, long size) {
-        return new NativeAllocationRegistry(classLoader, freeFunction, size, true);
+        return new NativeAllocationRegistry(classLoader, freeFunction, size);
     }
 
     public static NativeAllocationRegistry createMalloced(
             ClassLoader classLoader, long freeFunction) {
-        return new NativeAllocationRegistry(classLoader, freeFunction, 0, true);
+        return new NativeAllocationRegistry(classLoader, freeFunction, 0);
     }
 
     public NativeAllocationRegistry(ClassLoader classLoader, long freeFunction, long size) {
-        this(classLoader, freeFunction, size, size == 0);
-    }
-
-    private NativeAllocationRegistry(ClassLoader classLoader, long freeFunction, long size,
-            boolean mallocAllocation) {
         if (size < 0) {
             throw new IllegalArgumentException("Invalid native allocation size: " + size);
         }

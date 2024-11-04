@@ -20,7 +20,6 @@ import android.view.Display
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.statusbar.data.model.StatusBarAppearance
 import com.android.systemui.statusbar.data.model.StatusBarMode
-import com.google.common.truth.Truth.assertThat
 import dagger.Binds
 import dagger.Module
 import javax.inject.Inject
@@ -37,7 +36,6 @@ class FakeStatusBarModeRepository @Inject constructor() : StatusBarModeRepositor
         FakeStatusBarModePerDisplayRepository()
 
     override fun forDisplay(displayId: Int): FakeStatusBarModePerDisplayRepository {
-        assertThat(displayId).isEqualTo(DISPLAY_ID)
         return defaultDisplay
     }
 }
@@ -51,6 +49,7 @@ class FakeStatusBarModePerDisplayRepository : StatusBarModePerDisplayRepository 
     override fun showTransient() {
         isTransientShown.value = true
     }
+
     override fun clearTransient() {
         isTransientShown.value = false
     }

@@ -99,6 +99,7 @@ public class InsetsAnimationControlImpl implements InternalInsetsAnimationContro
     private final @InsetsType int mTypes;
     private @InsetsType int mControllingTypes;
     private final InsetsAnimationControlCallbacks mController;
+    private final SurfaceParamsApplier mSurfaceParamsApplier;
     private final WindowInsetsAnimation mAnimation;
     private final long mDurationMs;
     private final Interpolator mInterpolator;
@@ -123,6 +124,7 @@ public class InsetsAnimationControlImpl implements InternalInsetsAnimationContro
     public InsetsAnimationControlImpl(SparseArray<InsetsSourceControl> controls,
             @Nullable Rect frame, InsetsState state, WindowInsetsAnimationControlListener listener,
             @InsetsType int types, InsetsAnimationControlCallbacks controller,
+            SurfaceParamsApplier surfaceParamsApplier,
             InsetsAnimationSpec insetsAnimationSpec, @AnimationType int animationType,
             @LayoutInsetsDuringAnimation int layoutInsetsDuringAnimation,
             CompatibilityInfo.Translator translator, @Nullable ImeTracker.Token statsToken) {
@@ -131,6 +133,7 @@ public class InsetsAnimationControlImpl implements InternalInsetsAnimationContro
         mTypes = types;
         mControllingTypes = types;
         mController = controller;
+        mSurfaceParamsApplier = surfaceParamsApplier;
         mInitialInsetsState = new InsetsState(state, true /* copySources */);
         if (frame != null) {
             final SparseIntArray idSideMap = new SparseIntArray();
@@ -258,6 +261,11 @@ public class InsetsAnimationControlImpl implements InternalInsetsAnimationContro
     }
 
     @Override
+    public SurfaceParamsApplier getSurfaceParamsApplier() {
+        return mSurfaceParamsApplier;
+    }
+
+    @Override
     @Nullable
     public ImeTracker.Token getStatsToken() {
         return mStatsToken;
@@ -305,7 +313,7 @@ public class InsetsAnimationControlImpl implements InternalInsetsAnimationContro
         updateLeashesForSide(SIDE_RIGHT, offset.right, params, outState, mPendingAlpha);
         updateLeashesForSide(SIDE_BOTTOM, offset.bottom, params, outState, mPendingAlpha);
 
-        mController.applySurfaceParams(params.toArray(new SurfaceParams[params.size()]));
+        mSurfaceParamsApplier.applySurfaceParams(params.toArray(new SurfaceParams[params.size()]));
         mCurrentInsets = mPendingInsets;
         mAnimation.setFraction(mPendingFraction);
         mCurrentAlpha = mPendingAlpha;
@@ -363,6 +371,7 @@ public class InsetsAnimationControlImpl implements InternalInsetsAnimationContro
         mPendingInsets = mLayoutInsetsDuringAnimation == LAYOUT_INSETS_DURING_ANIMATION_SHOWN
                 ? mShownInsets : mHiddenInsets;
         mPendingAlpha = 1f;
+        mPendingFraction = 1f;
         applyChangeInsets(null);
         mCancelled = true;
         mListener.onCancelled(mReadyDispatched ? this : null);
@@ -478,6 +487,17 @@ public class InsetsAnimationControlImpl implements InternalInsetsAnimationContro
         if (controls == null) {
             return;
         }
+
+        final boolean visible = mPendingFraction == 0
+                // The first frame of ANIMATION_TYPE_SHOW should be invisible since it is
+                // animated from the hidden state.
+                ? mAnimationType != ANIMATION_TYPE_SHOW
+                : mPendingFraction < 1f || (mFinished
+                        ? mShownOnFinish
+                        // If the animation is cancelled, mFinished and mShownOnFinish are not set.
+                        // Here uses mLayoutInsetsDuringAnimation to decide if it should be visible.
+                        : mLayoutInsetsDuringAnimation == LAYOUT_INSETS_DURING_ANIMATION_SHOWN);
+
         // TODO: Implement behavior when inset spans over multiple types
         for (int i = controls.size() - 1; i >= 0; i--) {
             final InsetsSourceControl control = controls.valueAt(i);
@@ -489,12 +509,6 @@ public class InsetsAnimationControlImpl implements InternalInsetsAnimationContro
                 mTmpFrame.set(source.getFrame());
             }
             addTranslationToMatrix(side, offset, mTmpMatrix, mTmpFrame);
-
-            // The first frame of ANIMATION_TYPE_SHOW should be invisible since it is animated from
-            // the hidden state.
-            final boolean visible = mPendingFraction == 0
-                    ? mAnimationType != ANIMATION_TYPE_SHOW
-                    : !mFinished || mShownOnFinish;
 
             if (outState != null && source != null) {
                 outState.addSource(new InsetsSource(source)

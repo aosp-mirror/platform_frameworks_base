@@ -33,7 +33,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.modifiers.padding
-import com.android.systemui.customization.R as customizationR
+import com.android.systemui.customization.R as customR
 import com.android.systemui.keyguard.ui.composable.blueprint.WeatherClockElementKeys
 import com.android.systemui.keyguard.ui.composable.modifier.burnInAware
 import com.android.systemui.keyguard.ui.viewmodel.AodBurnInViewModel
@@ -57,12 +57,12 @@ constructor(
         Row(
             modifier =
                 Modifier.padding(
-                        horizontal = dimensionResource(customizationR.dimen.clock_padding_start)
+                        horizontal = dimensionResource(customR.dimen.clock_padding_start)
                     )
                     .burnInAware(aodBurnInViewModel, burnInParams, isClock = true)
         ) {
             WeatherElement(
-                weatherClockElementViewId = customizationR.id.weather_clock_time,
+                weatherClockElementViewId = customR.id.weather_clock_time,
                 clock = clock,
                 elementKey = WeatherClockElementKeys.timeElementKey,
             )
@@ -75,7 +75,7 @@ constructor(
         modifier: Modifier = Modifier,
     ) {
         WeatherElement(
-            weatherClockElementViewId = customizationR.id.weather_clock_date,
+            weatherClockElementViewId = customR.id.weather_clock_date,
             clock = clock,
             elementKey = WeatherClockElementKeys.dateElementKey,
             modifier = modifier,
@@ -88,7 +88,7 @@ constructor(
         modifier: Modifier = Modifier,
     ) {
         WeatherElement(
-            weatherClockElementViewId = customizationR.id.weather_clock_weather_icon,
+            weatherClockElementViewId = customR.id.weather_clock_weather_icon,
             clock = clock,
             elementKey = WeatherClockElementKeys.weatherIconElementKey,
             modifier = modifier.wrapContentSize(),
@@ -101,7 +101,7 @@ constructor(
         modifier: Modifier = Modifier,
     ) {
         WeatherElement(
-            weatherClockElementViewId = customizationR.id.weather_clock_alarm_dnd,
+            weatherClockElementViewId = customR.id.weather_clock_alarm_dnd,
             clock = clock,
             elementKey = WeatherClockElementKeys.dndAlarmElementKey,
             modifier = modifier.wrapContentSize(),
@@ -114,7 +114,7 @@ constructor(
         modifier: Modifier = Modifier,
     ) {
         WeatherElement(
-            weatherClockElementViewId = customizationR.id.weather_clock_temperature,
+            weatherClockElementViewId = customR.id.weather_clock_temperature,
             clock = clock,
             elementKey = WeatherClockElementKeys.temperatureElementKey,
             modifier = modifier.wrapContentSize(),
@@ -159,7 +159,7 @@ constructor(
             modifier =
                 Modifier.height(IntrinsicSize.Max)
                     .padding(
-                        horizontal = dimensionResource(customizationR.dimen.clock_padding_start)
+                        horizontal = dimensionResource(customR.dimen.clock_padding_start)
                     )
                     .burnInAware(aodBurnInViewModel, burnInParams, isClock = true)
         ) {
@@ -168,7 +168,7 @@ constructor(
                 modifier =
                     Modifier.fillMaxSize()
                         .padding(
-                            start = dimensionResource(customizationR.dimen.clock_padding_start)
+                            start = dimensionResource(customR.dimen.clock_padding_start)
                         )
             ) {
                 Weather(clock = clock, modifier = Modifier.align(Alignment.TopStart))

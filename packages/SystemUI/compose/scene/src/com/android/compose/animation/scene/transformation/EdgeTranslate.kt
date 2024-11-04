@@ -19,9 +19,8 @@ package com.android.compose.animation.scene.transformation
 import androidx.compose.ui.geometry.Offset
 import com.android.compose.animation.scene.ContentKey
 import com.android.compose.animation.scene.Edge
-import com.android.compose.animation.scene.Element
+import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.ElementMatcher
-import com.android.compose.animation.scene.SceneTransitionLayoutImpl
 import com.android.compose.animation.scene.content.state.TransitionState
 
 /** Translate an element from an edge of the layout. */
@@ -30,21 +29,18 @@ internal class EdgeTranslate(
     private val edge: Edge,
     private val startsOutsideLayoutBounds: Boolean = true,
 ) : PropertyTransformation<Offset> {
-    override fun transform(
-        layoutImpl: SceneTransitionLayoutImpl,
+    override fun PropertyTransformationScope.transform(
         content: ContentKey,
-        element: Element,
-        stateInContent: Element.State,
+        element: ElementKey,
         transition: TransitionState.Transition,
-        value: Offset
+        value: Offset,
     ): Offset {
-        val sceneSize = layoutImpl.content(content).targetSize
-        val elementSize = stateInContent.targetSize
-        if (elementSize == Element.SizeUnspecified) {
-            return value
-        }
+        val sceneSize =
+            content.targetSize()
+                ?: error("Content ${content.debugName} does not have a target size")
+        val elementSize = element.targetSize(content) ?: return value
 
-        return when (edge.resolve(layoutImpl.layoutDirection)) {
+        return when (edge.resolve(layoutDirection)) {
             Edge.Resolved.Top ->
                 if (startsOutsideLayoutBounds) {
                     Offset(value.x, -elementSize.height.toFloat())

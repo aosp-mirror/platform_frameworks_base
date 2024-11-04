@@ -41,6 +41,7 @@ import com.android.internal.os.SomeArgs;
 import com.android.internal.util.Preconditions;
 import com.android.sdksandbox.flags.Flags;
 
+import dalvik.system.VMDebug;
 import dalvik.system.VMRuntime;
 
 import libcore.io.IoUtils;
@@ -588,6 +589,12 @@ public class Process {
      * @hide
      **/
     public static final int THREAD_GROUP_RESTRICTED = 7;
+
+    /**
+     * Thread group for foreground apps in multi-window mode
+     * @hide
+     **/
+    public static final int THREAD_GROUP_FOREGROUND_WINDOW = 8;
 
     /** @hide */
     public static final int SIGNAL_DEFAULT = 0;
@@ -1404,6 +1411,7 @@ public class Process {
     public static void setArgV0(@NonNull String text) {
         sArgV0 = text;
         setArgV0Native(text);
+        VMDebug.setCurrentProcessName(text);
     }
 
     private static native void setArgV0Native(String text);

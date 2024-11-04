@@ -1,0 +1,33 @@
+package {
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    default_team: "trendy_team_windowing_tools",
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
+android_test {
+    name: "TracingTests",
+    proto: {
+        type: "nano",
+    },
+    // Include some source files directly to be able to access package members
+    srcs: ["src/**/*.java"],
+    libs: ["android.test.runner.stubs.system"],
+    static_libs: [
+        "junit",
+        "androidx.test.rules",
+        "mockito-target-minus-junit4",
+        "truth",
+        "platform-test-annotations",
+        "flickerlib-parsers",
+        "perfetto_trace_java_protos",
+        "flickerlib-trace_processor_shell",
+    ],
+    java_resource_dirs: ["res"],
+    certificate: "platform",
+    platform_apis: true,
+    test_suites: ["device-tests"],
+}

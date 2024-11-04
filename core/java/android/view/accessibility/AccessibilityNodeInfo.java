@@ -756,6 +756,56 @@ public class AccessibilityNodeInfo implements Parcelable {
     public static final String ACTION_ARGUMENT_SCROLL_AMOUNT_FLOAT =
             "android.view.accessibility.action.ARGUMENT_SCROLL_AMOUNT_FLOAT";
 
+    // Expanded state types.
+
+    /**
+     * Expanded state for a non-expandable element
+     *
+     * @see #getExpandedState()
+     * @see #setExpandedState(int)
+     */
+    @FlaggedApi(Flags.FLAG_A11Y_EXPANSION_STATE_API)
+    public static final int EXPANDED_STATE_UNDEFINED = 0;
+
+    /**
+     * Expanded state for a collapsed expandable element.
+     *
+     * @see #getExpandedState()
+     * @see #setExpandedState(int)
+     */
+    @FlaggedApi(Flags.FLAG_A11Y_EXPANSION_STATE_API)
+    public static final int EXPANDED_STATE_COLLAPSED = 1;
+
+    /**
+     * Expanded state for an expanded expandable element that can still be expanded further.
+     *
+     * @see #getExpandedState()
+     * @see #setExpandedState(int)
+     */
+    @FlaggedApi(Flags.FLAG_A11Y_EXPANSION_STATE_API)
+    public static final int EXPANDED_STATE_PARTIAL = 2;
+
+    /**
+     * Expanded state for a expanded expandable element that cannot be expanded further.
+     *
+     * @see #getExpandedState()
+     * @see #setExpandedState(int)
+     */
+    @FlaggedApi(Flags.FLAG_A11Y_EXPANSION_STATE_API)
+    public static final int EXPANDED_STATE_FULL = 3;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(
+            prefix = "EXPANDED_STATE_",
+            value = {
+                EXPANDED_STATE_UNDEFINED,
+                EXPANDED_STATE_COLLAPSED,
+                EXPANDED_STATE_PARTIAL,
+                EXPANDED_STATE_FULL,
+            })
+    public @interface ExpandedState {}
+
     // Focus types.
 
     /**
@@ -806,7 +856,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * inside the CharSequence returned by {@link #getText()}, and the length must be positive.
      * <p>
      * The data can be retrieved from the {@code Bundle} returned by {@link #getExtras()} using this
-     * string as a key for {@link Bundle#getParcelableArray(String)}. The
+     * string as a key for {@link Bundle#getParcelableArray(String, Class)}. The
      * {@link android.graphics.RectF} will be null for characters that either do not exist or are
      * off the screen.
      *
@@ -859,6 +909,37 @@ public class AccessibilityNodeInfo implements Parcelable {
     /** @hide */
     public static final String EXTRA_DATA_REQUESTED_KEY =
             "android.view.accessibility.AccessibilityNodeInfo.extra_data_requested";
+
+    // Tri-state checked states.
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = { "CHECKED_STATE" }, value = {
+            CHECKED_STATE_FALSE,
+            CHECKED_STATE_TRUE,
+            CHECKED_STATE_PARTIAL
+    })
+    public @interface CheckedState {}
+
+    /**
+     * This node is not checked.
+     */
+    @FlaggedApi(Flags.FLAG_TRI_STATE_CHECKED)
+    public static final int CHECKED_STATE_FALSE = 0;
+
+    /**
+     * This node is checked.
+     */
+    @FlaggedApi(Flags.FLAG_TRI_STATE_CHECKED)
+    public static final int CHECKED_STATE_TRUE = 1;
+
+    /**
+     * This node is partially checked. For example,
+     * when a checkbox owns a number of sub-options and they have
+     * different states, then the main checkbox is in a partially-checked state.
+     */
+    @FlaggedApi(Flags.FLAG_TRI_STATE_CHECKED)
+    public static final int CHECKED_STATE_PARTIAL = 2;
 
     // Boolean attributes.
 
@@ -915,6 +996,8 @@ public class AccessibilityNodeInfo implements Parcelable {
     private static final int BOOLEAN_PROPERTY_ACCESSIBILITY_DATA_SENSITIVE = 1 << 25;
 
     private static final int BOOLEAN_PROPERTY_SUPPORTS_GRANULAR_SCROLLING = 1 << 26;
+
+    private static final int BOOLEAN_PROPERTY_FIELD_REQUIRED = 1 << 27;
 
     /**
      * Bits that provide the id of a virtual descendant of a view.
@@ -1004,6 +1087,7 @@ public class AccessibilityNodeInfo implements Parcelable {
     private CharSequence mPaneTitle;
     private CharSequence mStateDescription;
     private CharSequence mContentDescription;
+    private CharSequence mSupplementalDescription;
     private CharSequence mTooltipText;
     private String mViewIdResourceName;
     private String mUniqueId;
@@ -1016,6 +1100,10 @@ public class AccessibilityNodeInfo implements Parcelable {
 
     private int mMaxTextLength = -1;
     private int mMovementGranularities;
+
+    // TODO(b/362782158) Initialize mExpandedState explicitly with
+    // the EXPANDED_STATE_UNDEFINED state when flagging is removed.
+    private int mExpandedState;
 
     private int mTextSelectionStart = UNDEFINED_SELECTION_INDEX;
     private int mTextSelectionEnd = UNDEFINED_SELECTION_INDEX;
@@ -1037,6 +1125,10 @@ public class AccessibilityNodeInfo implements Parcelable {
     private IBinder mLeashedChild;
     private IBinder mLeashedParent;
     private long mLeashedParentNodeId = UNDEFINED_NODE_ID;
+
+    // TODO(b/369951517) Initialize mChecked explicitly with
+    // the CHECKED_FALSE state when flagging is removed.
+    private int mChecked;
 
     /**
      * Creates a new {@link AccessibilityNodeInfo}.
@@ -1896,6 +1988,47 @@ public class AccessibilityNodeInfo implements Parcelable {
     }
 
     /**
+     * Sets the expanded state of the node.
+     *
+     * <p><strong>Note:</strong> Cannot be called from an {@link
+     * android.accessibilityservice.AccessibilityService}. This class is made immutable before being
+     * delivered to an {@link android.accessibilityservice.AccessibilityService}.
+     *
+     * @param state new expanded state of this node.
+     * @throws IllegalArgumentException If state is not one of:
+     *     <ul>
+     *       <li>{@link #EXPANDED_STATE_UNDEFINED}
+     *       <li>{@link #EXPANDED_STATE_COLLAPSED}
+     *       <li>{@link #EXPANDED_STATE_PARTIAL}
+     *       <li>{@link #EXPANDED_STATE_FULL}
+     *     </ul>
+     *
+     * @throws IllegalStateException If called from an AccessibilityService
+     */
+    @FlaggedApi(Flags.FLAG_A11Y_EXPANSION_STATE_API)
+    public void setExpandedState(@ExpandedState int state) {
+        enforceValidExpandedState(state);
+        enforceNotSealed();
+        mExpandedState = state;
+    }
+
+    /**
+     * Gets the expanded state for this node.
+     *
+     * @return The expanded state, one of:
+     *     <ul>
+     *       <li>{@link #EXPANDED_STATE_UNDEFINED}
+     *       <li>{@link #EXPANDED_STATE_COLLAPSED}
+     *       <li>{@link #EXPANDED_STATE_FULL}
+     *       <li>{@link #EXPANDED_STATE_PARTIAL}
+     *     </ul>
+     */
+    @FlaggedApi(Flags.FLAG_A11Y_EXPANSION_STATE_API)
+    public @ExpandedState int getExpandedState() {
+        return mExpandedState;
+    }
+
+    /**
      * Sets the minimum time duration between two content change events, which is used in throttling
      * content change events in accessibility services.
      *
@@ -2253,10 +2386,7 @@ public class AccessibilityNodeInfo implements Parcelable {
     /**
      * Gets the node bounds in window coordinates.
      * <p>
-     * When magnification is enabled, the bounds in window are scaled up by magnification scale
-     * and the positions are also adjusted according to the offset of magnification viewport.
-     * For example, it returns Rect(-180, -180, 0, 0) for original bounds Rect(10, 10, 100, 100),
-     * when the magnification scale is 2 and offsets for X and Y are both 200.
+     *   The node bounds returned are not scaled by magnification.
      * <p/>
      *
      * @param outBounds The output node bounds.
@@ -2319,28 +2449,126 @@ public class AccessibilityNodeInfo implements Parcelable {
     }
 
     /**
-     * Gets whether this node is checked.
+     * Gets whether this node is checked. This is only meaningful
+     * when {@link #isCheckable()} returns {@code true}.
+     *
+     * @deprecated Use {@link #getChecked()} instead.
      *
      * @return True if the node is checked.
      */
+    @FlaggedApi(Flags.FLAG_TRI_STATE_CHECKED)
+    @Deprecated
     public boolean isChecked() {
         return getBooleanProperty(BOOLEAN_PROPERTY_CHECKED);
     }
 
     /**
-     * Sets whether this node is checked.
+     * Sets whether this node is checked. This is only meaningful
+     * when {@link #isCheckable()} returns {@code true}.
      * <p>
      *   <strong>Note:</strong> Cannot be called from an
      *   {@link android.accessibilityservice.AccessibilityService}.
      *   This class is made immutable before being delivered to an AccessibilityService.
      * </p>
      *
+     * @deprecated Use {@link #setChecked(int)} instead.
+     *
      * @param checked True if the node is checked.
      *
      * @throws IllegalStateException If called from an AccessibilityService.
      */
+    @FlaggedApi(Flags.FLAG_TRI_STATE_CHECKED)
+    @Deprecated
     public void setChecked(boolean checked) {
         setBooleanProperty(BOOLEAN_PROPERTY_CHECKED, checked);
+        if (Flags.triStateChecked()) {
+            mChecked = checked ? CHECKED_STATE_TRUE : CHECKED_STATE_FALSE;
+        }
+    }
+
+    /**
+     * Gets the checked state of this node. This is only meaningful
+     * when {@link #isCheckable()} returns {@code true}.
+     *
+     * @see #setCheckable(boolean)
+     * @see #isCheckable()
+     * @see #setChecked(int)
+     *
+     * @return The checked state, one of:
+     *          <ul>
+     *          <li>{@link #CHECKED_STATE_FALSE}
+     *          <li>{@link #CHECKED_STATE_TRUE}
+     *          <li>{@link #CHECKED_STATE_PARTIAL}
+     *          </ul>
+     */
+    @FlaggedApi(Flags.FLAG_TRI_STATE_CHECKED)
+    public @CheckedState int getChecked() {
+        return mChecked;
+    }
+
+    /**
+     * Sets the checked state of this node. This is only meaningful
+     * when {@link #isCheckable()} returns {@code true}.
+     * <p>
+     *   <strong>Note:</strong> Cannot be called from an
+     *   {@link android.accessibilityservice.AccessibilityService}.
+     *   This class is made immutable before being delivered to an AccessibilityService.
+     * </p>
+     *
+     * @see #setCheckable(boolean)
+     * @see #isCheckable()
+     * @see #getChecked()
+     *
+     * @param checked The checked state. One of
+     *          <ul>
+     *          <li>{@link #CHECKED_STATE_FALSE}
+     *          <li>{@link #CHECKED_STATE_TRUE}
+     *          <li>{@link #CHECKED_STATE_PARTIAL}
+     *          </ul>
+     *
+     * @throws IllegalStateException If called from an AccessibilityService.
+     * @throws IllegalArgumentException if checked is not one of {@link #CHECKED_STATE_FALSE},
+     *          {@link #CHECKED_STATE_TRUE}, or {@link #CHECKED_STATE_PARTIAL}.
+     */
+    @FlaggedApi(Flags.FLAG_TRI_STATE_CHECKED)
+    public void setChecked(@CheckedState int checked) {
+        enforceNotSealed();
+        switch (checked) {
+            case CHECKED_STATE_FALSE:
+            case CHECKED_STATE_TRUE:
+            case CHECKED_STATE_PARTIAL:
+                mChecked = checked;
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown checked argument: " + checked);
+        }
+        setBooleanProperty(BOOLEAN_PROPERTY_CHECKED, checked == CHECKED_STATE_TRUE);
+    }
+
+    /**
+     * Gets whether a node representing a form field requires input or selection.
+     *
+     * @return {@code true} if {@code this} node represents a form field that requires input or
+     *     selection, {@code false} otherwise.
+     */
+    @FlaggedApi(Flags.FLAG_A11Y_IS_REQUIRED_API)
+    public boolean isFieldRequired() {
+        return getBooleanProperty(BOOLEAN_PROPERTY_FIELD_REQUIRED);
+    }
+
+    /**
+     * Sets whether {@code this} node represents a form field that requires input or selection.
+     *
+     * <p><strong>Note:</strong> Cannot be called from an AccessibilityService. This class is made
+     * immutable before being delivered to an AccessibilityService.
+     *
+     * @param required {@code true} if input or selection of this node should be required, {@code
+     *     false} otherwise.
+     * @throws IllegalStateException If called from an AccessibilityService
+     */
+    @FlaggedApi(Flags.FLAG_A11Y_IS_REQUIRED_API)
+    public void setFieldRequired(boolean required) {
+        setBooleanProperty(BOOLEAN_PROPERTY_FIELD_REQUIRED, required);
     }
 
     /**
@@ -3487,6 +3715,27 @@ public class AccessibilityNodeInfo implements Parcelable {
         return mContentDescription;
     }
 
+    /**
+     * Gets the supplemental description of this node. A supplemental description provides
+     * brief supplemental information for this node, such as the purpose of the node when
+     * that purpose is not conveyed within its textual representation. For example, if a
+     * dropdown select has a purpose of setting font family, the supplemental description
+     * could be "font family". If this node has children, its supplemental description serves
+     * as additional information and is not intended to replace any existing information
+     * in the subtree. This is different from the {@link #getContentDescription()} in that
+     * this description is purely supplemental while a content description may be used
+     * to replace a description for a node or its subtree that an assistive technology
+     * would otherwise compute based on other properties of the node and its descendants.
+     *
+     * @return The supplemental description.
+     * @see #setSupplementalDescription(CharSequence)
+     * @see #getContentDescription()
+     */
+    @FlaggedApi(Flags.FLAG_SUPPLEMENTAL_DESCRIPTION)
+    @Nullable
+    public CharSequence getSupplementalDescription() {
+        return mSupplementalDescription;
+    }
 
     /**
      * Sets the state description of this node.
@@ -3522,6 +3771,35 @@ public class AccessibilityNodeInfo implements Parcelable {
         enforceNotSealed();
         mContentDescription = (contentDescription == null) ? null
                 : contentDescription.subSequence(0, contentDescription.length());
+    }
+
+    /**
+     * Sets the supplemental description of this node. A supplemental description provides
+     * brief supplemental information for this node, such as the purpose of the node when
+     * that purpose is not conveyed within its textual representation. For example, if a
+     * dropdown select has a purpose of setting font family, the supplemental description
+     * could be "font family". If this node has children, its supplemental description serves
+     * as additional information and is not intended to replace any existing information
+     * in the subtree. This is different from the {@link #setContentDescription(CharSequence)}
+     * in that this description is purely supplemental while a content description may be used
+     * to replace a description for a node or its subtree that an assistive technology
+     * would otherwise compute based on other properties of the node and its descendants.
+     * <p>
+     *   <strong>Note:</strong> Cannot be called from an
+     *   {@link android.accessibilityservice.AccessibilityService}.
+     *   This class is made immutable before being delivered to an AccessibilityService.
+     *
+     * @param supplementalDescription The supplemental description.
+     *
+     * @throws IllegalStateException If called from an AccessibilityService.
+     * @see #getSupplementalDescription()
+     * @see #setContentDescription(CharSequence)
+     */
+    @FlaggedApi(Flags.FLAG_SUPPLEMENTAL_DESCRIPTION)
+    public void setSupplementalDescription(@Nullable CharSequence supplementalDescription) {
+        enforceNotSealed();
+        mSupplementalDescription = (supplementalDescription == null) ? null
+                : supplementalDescription.subSequence(0, supplementalDescription.length());
     }
 
     /**
@@ -4265,6 +4543,20 @@ public class AccessibilityNodeInfo implements Parcelable {
         }
     }
 
+    private void enforceValidExpandedState(int state) {
+        if (Flags.a11yExpansionStateApi()) {
+            switch (state) {
+                case EXPANDED_STATE_UNDEFINED:
+                case EXPANDED_STATE_COLLAPSED:
+                case EXPANDED_STATE_PARTIAL:
+                case EXPANDED_STATE_FULL:
+                    return;
+                default:
+                    throw new IllegalArgumentException("Unknown expanded state: " + state);
+            }
+        }
+    }
+
     /**
      * Enforces that this instance is not sealed.
      *
@@ -4444,6 +4736,10 @@ public class AccessibilityNodeInfo implements Parcelable {
             nonDefaultFields |= bitAt(fieldIndex);
         }
         fieldIndex++;
+        if (!Objects.equals(mSupplementalDescription, DEFAULT.mSupplementalDescription)) {
+            nonDefaultFields |= bitAt(fieldIndex);
+        }
+        fieldIndex++;
         if (!Objects.equals(mPaneTitle, DEFAULT.mPaneTitle)) {
             nonDefaultFields |= bitAt(fieldIndex);
         }
@@ -4515,6 +4811,15 @@ public class AccessibilityNodeInfo implements Parcelable {
         if (mLeashedParentNodeId != DEFAULT.mLeashedParentNodeId) {
             nonDefaultFields |= bitAt(fieldIndex);
         }
+        fieldIndex++;
+        if (mChecked != DEFAULT.mChecked) {
+            nonDefaultFields |= bitAt(fieldIndex);
+        }
+        fieldIndex++;
+        if (mExpandedState != DEFAULT.mExpandedState) {
+            nonDefaultFields |= bitAt(fieldIndex);
+        }
+
         int totalFields = fieldIndex;
         parcel.writeLong(nonDefaultFields);
 
@@ -4621,6 +4926,9 @@ public class AccessibilityNodeInfo implements Parcelable {
         if (isBitSet(nonDefaultFields, fieldIndex++)) {
             parcel.writeCharSequence(mContentDescription);
         }
+        if (isBitSet(nonDefaultFields, fieldIndex++)) {
+            parcel.writeCharSequence(mSupplementalDescription);
+        }
         if (isBitSet(nonDefaultFields, fieldIndex++)) parcel.writeCharSequence(mPaneTitle);
         if (isBitSet(nonDefaultFields, fieldIndex++)) parcel.writeCharSequence(mTooltipText);
         if (isBitSet(nonDefaultFields, fieldIndex++)) parcel.writeCharSequence(mContainerTitle);
@@ -4683,6 +4991,12 @@ public class AccessibilityNodeInfo implements Parcelable {
         if (isBitSet(nonDefaultFields, fieldIndex++)) {
             parcel.writeLong(mLeashedParentNodeId);
         }
+        if (isBitSet(nonDefaultFields, fieldIndex++)) {
+            parcel.writeInt(mChecked);
+        }
+        if (isBitSet(nonDefaultFields, fieldIndex++)) {
+            parcel.writeInt(mExpandedState);
+        }
 
         if (DEBUG) {
             fieldIndex--;
@@ -4722,6 +5036,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         mError = other.mError;
         mStateDescription = other.mStateDescription;
         mContentDescription = other.mContentDescription;
+        mSupplementalDescription = other.mSupplementalDescription;
         mPaneTitle = other.mPaneTitle;
         mTooltipText = other.mTooltipText;
         mContainerTitle = other.mContainerTitle;
@@ -4771,6 +5086,8 @@ public class AccessibilityNodeInfo implements Parcelable {
         mLeashedChild = other.mLeashedChild;
         mLeashedParent = other.mLeashedParent;
         mLeashedParentNodeId = other.mLeashedParentNodeId;
+        mChecked = other.mChecked;
+        mExpandedState = other.mExpandedState;
     }
 
     private void initCopyInfos(AccessibilityNodeInfo other) {
@@ -4889,6 +5206,9 @@ public class AccessibilityNodeInfo implements Parcelable {
         if (isBitSet(nonDefaultFields, fieldIndex++)) {
             mContentDescription = parcel.readCharSequence();
         }
+        if (isBitSet(nonDefaultFields, fieldIndex++)) {
+            mSupplementalDescription = parcel.readCharSequence();
+        }
         if (isBitSet(nonDefaultFields, fieldIndex++)) mPaneTitle = parcel.readCharSequence();
         if (isBitSet(nonDefaultFields, fieldIndex++)) mTooltipText = parcel.readCharSequence();
         if (isBitSet(nonDefaultFields, fieldIndex++)) mContainerTitle = parcel.readCharSequence();
@@ -4959,6 +5279,12 @@ public class AccessibilityNodeInfo implements Parcelable {
         }
         if (isBitSet(nonDefaultFields, fieldIndex++)) {
             mLeashedParentNodeId = parcel.readLong();
+        }
+        if (isBitSet(nonDefaultFields, fieldIndex++)) {
+            mChecked = parcel.readInt();
+        }
+        if (isBitSet(nonDefaultFields, fieldIndex++)) {
+            mExpandedState = parcel.readInt();
         }
 
         mSealed = sealed;
@@ -5134,6 +5460,26 @@ public class AccessibilityNodeInfo implements Parcelable {
         }
     }
 
+    private static String getExpandedStateSymbolicName(int state) {
+        if (Flags.a11yExpansionStateApi()) {
+            switch (state) {
+                case EXPANDED_STATE_UNDEFINED:
+                    return "EXPANDED_STATE_UNDEFINED";
+                case EXPANDED_STATE_COLLAPSED:
+                    return "EXPANDED_STATE_COLLAPSED";
+                case EXPANDED_STATE_PARTIAL:
+                    return "EXPANDED_STATE_PARTIAL";
+                case EXPANDED_STATE_FULL:
+                    return "EXPANDED_STATE_FULL";
+                default:
+                    throw new IllegalArgumentException("Unknown expanded state: " + state);
+            }
+        } else {
+            // TODO(b/362782158) Remove when flag is removed.
+            return "";
+        }
+    }
+
     private static boolean canPerformRequestOverConnection(int connectionId,
             int windowId, long accessibilityNodeId) {
         final boolean hasWindowId = windowId != AccessibilityWindowInfo.UNDEFINED_WINDOW_ID;
@@ -5227,13 +5573,20 @@ public class AccessibilityNodeInfo implements Parcelable {
         builder.append("; maxTextLength: ").append(mMaxTextLength);
         builder.append("; stateDescription: ").append(mStateDescription);
         builder.append("; contentDescription: ").append(mContentDescription);
+        if (Flags.supplementalDescription()) {
+            builder.append("; supplementalDescription: ").append(mSupplementalDescription);
+        }
         builder.append("; tooltipText: ").append(mTooltipText);
         builder.append("; containerTitle: ").append(mContainerTitle);
         builder.append("; viewIdResName: ").append(mViewIdResourceName);
         builder.append("; uniqueId: ").append(mUniqueId);
+        builder.append("; expandedState: ").append(getExpandedStateSymbolicName(mExpandedState));
 
         builder.append("; checkable: ").append(isCheckable());
         builder.append("; checked: ").append(isChecked());
+        if (Flags.a11yIsRequiredApi()) {
+            builder.append("; required: ").append(isFieldRequired());
+        }
         builder.append("; focusable: ").append(isFocusable());
         builder.append("; focused: ").append(isFocused());
         builder.append("; selected: ").append(isSelected());
@@ -6159,6 +6512,19 @@ public class AccessibilityNodeInfo implements Parcelable {
         public static final int RANGE_TYPE_FLOAT = 1;
         /** Range type: percent with values from zero to one hundred. */
         public static final int RANGE_TYPE_PERCENT = 2;
+
+        /**
+         * Range type: indeterminate.
+         *
+         * A {@link RangeInfo} type used to represent a node which may typically expose range
+         * information but is presently in an indeterminate state, such as a {@link
+         * android.widget.ProgressBar} representing a loading operation of unknown duration.
+         * When using this type, the {@code min}, {@code max}, and {@code current} values used to
+         * construct an instance may be ignored. It is recommended to use {@code Float.NaN} for
+         * these values.
+         */
+        @FlaggedApi(Flags.FLAG_INDETERMINATE_RANGE_INFO)
+        public static final int RANGE_TYPE_INDETERMINATE = 3;
 
         private int mType;
         private float mMin;

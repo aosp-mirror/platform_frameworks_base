@@ -48,6 +48,9 @@ import static android.telephony.TelephonyManager.UNKNOWN_CARRIER_ID;
 import static android.util.MathUtils.constrain;
 import static android.view.Display.HdrCapabilities.HDR_TYPE_INVALID;
 
+import static com.android.internal.os.ProcfsMemoryUtil.getProcessCmdlines;
+import static com.android.internal.os.ProcfsMemoryUtil.readCmdlineFromProcfs;
+import static com.android.internal.os.ProcfsMemoryUtil.readMemorySnapshotFromProcfs;
 import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
 import static com.android.internal.util.FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_STATS__GESTURE_SHORTCUT_TYPE__TRIPLE_TAP;
 import static com.android.internal.util.FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_STATS__HARDWARE_SHORTCUT_TYPE__VOLUME_KEY;
@@ -63,13 +66,11 @@ import static com.android.internal.util.FrameworkStatsLog.TIME_ZONE_DETECTOR_STA
 import static com.android.internal.util.FrameworkStatsLog.TIME_ZONE_DETECTOR_STATE__DETECTION_MODE__TELEPHONY;
 import static com.android.internal.util.FrameworkStatsLog.TIME_ZONE_DETECTOR_STATE__DETECTION_MODE__UNKNOWN;
 import static com.android.server.am.MemoryStatUtil.readMemoryStatFromFilesystem;
+import static com.android.server.stats.Flags.accumulateNetworkStatsSinceBoot;
 import static com.android.server.stats.Flags.addMobileBytesTransferByProcStatePuller;
 import static com.android.server.stats.Flags.applyNetworkStatsPollRateLimit;
 import static com.android.server.stats.pull.IonMemoryUtil.readProcessSystemIonHeapSizesFromDebugfs;
 import static com.android.server.stats.pull.IonMemoryUtil.readSystemIonHeapSizeFromDebugfs;
-import static com.android.server.stats.pull.ProcfsMemoryUtil.getProcessCmdlines;
-import static com.android.server.stats.pull.ProcfsMemoryUtil.readCmdlineFromProcfs;
-import static com.android.server.stats.pull.ProcfsMemoryUtil.readMemorySnapshotFromProcfs;
 import static com.android.server.stats.pull.netstats.NetworkStatsUtils.fromPublicNetworkStats;
 import static com.android.server.stats.pull.netstats.NetworkStatsUtils.isAddEntriesSupported;
 
@@ -208,6 +209,8 @@ import com.android.internal.os.KernelSingleProcessCpuThreadReader.ProcessCpuUsag
 import com.android.internal.os.LooperStats;
 import com.android.internal.os.PowerProfile;
 import com.android.internal.os.ProcessCpuTracker;
+import com.android.internal.os.ProcfsMemoryUtil;
+import com.android.internal.os.ProcfsMemoryUtil.MemorySnapshot;
 import com.android.internal.os.SelectedProcessCpuThreadReader;
 import com.android.internal.os.StoragedUidIoStatsReader;
 import com.android.internal.util.CollectionUtils;
@@ -216,19 +219,19 @@ import com.android.role.RoleManagerLocal;
 import com.android.server.BinderCallsStatsService;
 import com.android.server.LocalManagerRegistry;
 import com.android.server.LocalServices;
-import com.android.server.PinnerService;
-import com.android.server.PinnerService.PinnedFileStats;
 import com.android.server.SystemService;
 import com.android.server.SystemServiceManager;
 import com.android.server.am.MemoryStatUtil.MemoryStat;
 import com.android.server.health.HealthServiceWrapper;
 import com.android.server.notification.NotificationManagerService;
+import com.android.server.pinner.PinnerService;
+import com.android.server.pinner.PinnerService.PinnedFileStats;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.power.stats.KernelWakelockReader;
 import com.android.server.power.stats.KernelWakelockStats;
 import com.android.server.power.stats.SystemServerCpuThreadReader.SystemServiceCpuThreadTimes;
 import com.android.server.stats.pull.IonMemoryUtil.IonAllocations;
-import com.android.server.stats.pull.ProcfsMemoryUtil.MemorySnapshot;
+import com.android.server.stats.pull.netstats.NetworkStatsAccumulator;
 import com.android.server.stats.pull.netstats.NetworkStatsExt;
 import com.android.server.stats.pull.netstats.SubInfo;
 import com.android.server.storage.DiskStatsFileLogger;
@@ -423,6 +426,14 @@ public class StatsPullAtomService extends SystemService {
     @NonNull
     @GuardedBy("mDataBytesTransferLock")
     private final ArrayList<NetworkStatsExt> mNetworkStatsBaselines = new ArrayList<>();
+
+    // Accumulates NetworkStats from initialization till the present moment.
+    // It is necessary to accumulate stats internally, because NetworkStats persists data for a
+    // limited amount of time, after which diff becomes incorrect without accumulation.
+    @NonNull
+    @GuardedBy("mDataBytesTransferLock")
+    private final ArrayList<NetworkStatsAccumulator> mNetworkStatsAccumulators =
+            new ArrayList<>();
 
     @GuardedBy("mDataBytesTransferLock")
     private long mLastNetworkStatsPollTime = -NETSTATS_POLL_RATE_LIMIT_MS;
@@ -1265,49 +1276,39 @@ public class StatsPullAtomService extends SystemService {
             case FrameworkStatsLog.WIFI_BYTES_TRANSFER: {
                 final NetworkStats stats = getUidNetworkStatsSnapshotForTransportLocked(
                         TRANSPORT_WIFI);
-                if (stats != null) {
-                    ret.add(new NetworkStatsExt(sliceNetworkStatsByUid(stats),
-                            new int[]{TRANSPORT_WIFI}, /*slicedByFgbg=*/false));
-                }
+                ret.add(new NetworkStatsExt(sliceNetworkStatsByUid(stats),
+                        new int[]{TRANSPORT_WIFI}, /*slicedByFgbg=*/false));
                 break;
             }
             case FrameworkStatsLog.WIFI_BYTES_TRANSFER_BY_FG_BG: {
                 final NetworkStats stats = getUidNetworkStatsSnapshotForTransportLocked(
                         TRANSPORT_WIFI);
-                if (stats != null) {
-                    ret.add(new NetworkStatsExt(sliceNetworkStatsByUidAndFgbg(stats),
-                            new int[]{TRANSPORT_WIFI}, /*slicedByFgbg=*/true));
-                }
+                ret.add(new NetworkStatsExt(sliceNetworkStatsByUidAndFgbg(stats),
+                        new int[]{TRANSPORT_WIFI}, /*slicedByFgbg=*/true));
                 break;
             }
             case FrameworkStatsLog.MOBILE_BYTES_TRANSFER: {
                 final NetworkStats stats =
                         getUidNetworkStatsSnapshotForTransportLocked(TRANSPORT_CELLULAR);
-                if (stats != null) {
-                    ret.add(new NetworkStatsExt(sliceNetworkStatsByUid(stats),
-                            new int[]{TRANSPORT_CELLULAR}, /*slicedByFgbg=*/false));
-                }
+                ret.add(new NetworkStatsExt(sliceNetworkStatsByUid(stats),
+                        new int[]{TRANSPORT_CELLULAR}, /*slicedByFgbg=*/false));
                 break;
             }
             case FrameworkStatsLog.MOBILE_BYTES_TRANSFER_BY_FG_BG: {
                 final NetworkStats stats =
                         getUidNetworkStatsSnapshotForTransportLocked(TRANSPORT_CELLULAR);
-                if (stats != null) {
-                    ret.add(new NetworkStatsExt(sliceNetworkStatsByUidAndFgbg(stats),
-                            new int[]{TRANSPORT_CELLULAR}, /*slicedByFgbg=*/true));
-                }
+                ret.add(new NetworkStatsExt(sliceNetworkStatsByUidAndFgbg(stats),
+                        new int[]{TRANSPORT_CELLULAR}, /*slicedByFgbg=*/true));
                 break;
             }
             case FrameworkStatsLog.PROXY_BYTES_TRANSFER_BY_FG_BG: {
                 final NetworkStats stats = getUidNetworkStatsSnapshotForTemplateLocked(
                         new NetworkTemplate.Builder(MATCH_PROXY).build(),  /*includeTags=*/false);
-                if (stats != null) {
-                    ret.add(new NetworkStatsExt(sliceNetworkStatsByUidAndFgbg(stats),
-                            new int[]{TRANSPORT_BLUETOOTH},
-                            /*slicedByFgbg=*/true, /*slicedByTag=*/false,
-                            /*slicedByMetered=*/false, TelephonyManager.NETWORK_TYPE_UNKNOWN,
-                            /*subInfo=*/null, OEM_MANAGED_ALL, /*isTypeProxy=*/true));
-                }
+                ret.add(new NetworkStatsExt(sliceNetworkStatsByUidAndFgbg(stats),
+                        new int[]{TRANSPORT_BLUETOOTH},
+                        /*slicedByFgbg=*/true, /*slicedByTag=*/false,
+                        /*slicedByMetered=*/false, TelephonyManager.NETWORK_TYPE_UNKNOWN,
+                        /*subInfo=*/null, OEM_MANAGED_ALL, /*isTypeProxy=*/true));
                 break;
             }
             case FrameworkStatsLog.BYTES_TRANSFER_BY_TAG_AND_METERED: {
@@ -1316,14 +1317,12 @@ public class StatsPullAtomService extends SystemService {
                 final NetworkStats cellularStats = getUidNetworkStatsSnapshotForTemplateLocked(
                         new NetworkTemplate.Builder(MATCH_MOBILE)
                                 .setMeteredness(METERED_YES).build(), /*includeTags=*/true);
-                if (wifiStats != null && cellularStats != null) {
-                    final NetworkStats stats = wifiStats.add(cellularStats);
-                    ret.add(new NetworkStatsExt(sliceNetworkStatsByUidTagAndMetered(stats),
-                            new int[]{TRANSPORT_WIFI, TRANSPORT_CELLULAR},
-                            /*slicedByFgbg=*/false, /*slicedByTag=*/true,
-                            /*slicedByMetered=*/true, TelephonyManager.NETWORK_TYPE_UNKNOWN,
-                            /*subInfo=*/null, OEM_MANAGED_ALL, /*isTypeProxy=*/false));
-                }
+                final NetworkStats stats = wifiStats.add(cellularStats);
+                ret.add(new NetworkStatsExt(sliceNetworkStatsByUidTagAndMetered(stats),
+                        new int[]{TRANSPORT_WIFI, TRANSPORT_CELLULAR},
+                        /*slicedByFgbg=*/false, /*slicedByTag=*/true,
+                        /*slicedByMetered=*/true, TelephonyManager.NETWORK_TYPE_UNKNOWN,
+                        /*subInfo=*/null, OEM_MANAGED_ALL, /*isTypeProxy=*/false));
                 break;
             }
             case FrameworkStatsLog.DATA_USAGE_BYTES_TRANSFER: {
@@ -1509,12 +1508,10 @@ public class StatsPullAtomService extends SystemService {
                 final NetworkStats stats = getUidNetworkStatsSnapshotForTemplateLocked(
                         template, false);
                 final Integer transport = ruleAndTransport.second;
-                if (stats != null) {
-                    ret.add(new NetworkStatsExt(sliceNetworkStatsByUidAndFgbg(stats),
-                            new int[]{transport}, /*slicedByFgbg=*/true, /*slicedByTag=*/false,
-                            /*slicedByMetered=*/false, TelephonyManager.NETWORK_TYPE_UNKNOWN,
-                            /*subInfo=*/null, oemManaged, /*isTypeProxy=*/false));
-                }
+                ret.add(new NetworkStatsExt(sliceNetworkStatsByUidAndFgbg(stats),
+                        new int[]{transport}, /*slicedByFgbg=*/true, /*slicedByTag=*/false,
+                        /*slicedByMetered=*/false, TelephonyManager.NETWORK_TYPE_UNKNOWN,
+                        /*subInfo=*/null, oemManaged, /*isTypeProxy=*/false));
             }
         }
 
@@ -1525,7 +1522,7 @@ public class StatsPullAtomService extends SystemService {
      * Create a snapshot of NetworkStats for a given transport.
      */
     @GuardedBy("mDataBytesTransferLock")
-    @Nullable
+    @NonNull
     private NetworkStats getUidNetworkStatsSnapshotForTransportLocked(int transport) {
         NetworkTemplate template = null;
         switch (transport) {
@@ -1564,20 +1561,49 @@ public class StatsPullAtomService extends SystemService {
      * some traffic before boot.
      */
     @GuardedBy("mDataBytesTransferLock")
-    @Nullable
+    @NonNull
     private NetworkStats getUidNetworkStatsSnapshotForTemplateLocked(
             @NonNull NetworkTemplate template, boolean includeTags) {
         final long elapsedMillisSinceBoot = SystemClock.elapsedRealtime();
-        final long currentTimeInMillis = MICROSECONDS.toMillis(SystemClock.currentTimeMicro());
-        final long bucketDuration = Settings.Global.getLong(mContext.getContentResolver(),
+        final long currentTimeMillis = MICROSECONDS.toMillis(SystemClock.currentTimeMicro());
+        final long bootTimeMillis = currentTimeMillis - elapsedMillisSinceBoot;
+        final long bucketDurationMillis = Settings.Global.getLong(mContext.getContentResolver(),
                 NETSTATS_UID_BUCKET_DURATION, NETSTATS_UID_DEFAULT_BUCKET_DURATION_MS);
 
-        // Set startTime before boot so that NetworkStats includes at least one full bucket.
-        // Set endTime in the future so that NetworkStats includes everything in the active bucket.
-        final long startTime = currentTimeInMillis - elapsedMillisSinceBoot - bucketDuration;
-        final long endTime = currentTimeInMillis + bucketDuration;
+        if (accumulateNetworkStatsSinceBoot()) {
+            NetworkStatsAccumulator accumulator = CollectionUtils.find(
+                    mNetworkStatsAccumulators, it -> it.hasEqualParameters(template, includeTags));
+            if (accumulator == null) {
+                accumulator = new NetworkStatsAccumulator(
+                        template,
+                        includeTags,
+                        bucketDurationMillis,
+                        bootTimeMillis - bucketDurationMillis);
+                mNetworkStatsAccumulators.add(accumulator);
+            }
 
-        // NetworkStatsManager#forceUpdate updates stats for all networks
+            return accumulator.queryStats(currentTimeMillis,
+                    (aTemplate, aIncludeTags, aStartTime, aEndTime) -> {
+                        synchronized (mDataBytesTransferLock) {
+                            return getUidNetworkStatsSnapshotForTemplateLocked(aTemplate,
+                                    aIncludeTags, aStartTime, aEndTime);
+                        }
+                    });
+
+        } else {
+            // Set end time in the future to include all stats in the active bucket.
+            return getUidNetworkStatsSnapshotForTemplateLocked(
+                    template, includeTags,
+                    bootTimeMillis - bucketDurationMillis,
+                    currentTimeMillis + bucketDurationMillis);
+        }
+    }
+
+    @GuardedBy("mDataBytesTransferLock")
+    @NonNull
+    private NetworkStats getUidNetworkStatsSnapshotForTemplateLocked(
+            @NonNull NetworkTemplate template, boolean includeTags, long startTime, long endTime) {
+        final long elapsedMillisSinceBoot = SystemClock.elapsedRealtime();
         if (applyNetworkStatsPollRateLimit()) {
             // The new way: rate-limit force-polling for all NetworkStats queries
             if (elapsedMillisSinceBoot - mLastNetworkStatsPollTime >= NETSTATS_POLL_RATE_LIMIT_MS) {
@@ -1621,12 +1647,10 @@ public class StatsPullAtomService extends SystemService {
                             .setMeteredness(METERED_YES).build();
             final NetworkStats stats =
                     getUidNetworkStatsSnapshotForTemplateLocked(template, /*includeTags=*/false);
-            if (stats != null) {
-                ret.add(new NetworkStatsExt(sliceNetworkStatsByFgbg(stats),
-                        new int[]{TRANSPORT_CELLULAR}, /*slicedByFgbg=*/true,
-                        /*slicedByTag=*/false, /*slicedByMetered=*/false, ratType, subInfo,
-                        OEM_MANAGED_ALL, /*isTypeProxy=*/false));
-            }
+            ret.add(new NetworkStatsExt(sliceNetworkStatsByFgbg(stats),
+                    new int[]{TRANSPORT_CELLULAR}, /*slicedByFgbg=*/true,
+                    /*slicedByTag=*/false, /*slicedByMetered=*/false, ratType, subInfo,
+                    OEM_MANAGED_ALL, /*isTypeProxy=*/false));
         }
         return ret;
     }

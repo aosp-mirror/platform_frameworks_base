@@ -30,7 +30,7 @@ import com.android.wm.shell.shared.GroupedRecentTaskInfo.TYPE_FREEFORM
 import com.android.wm.shell.shared.GroupedRecentTaskInfo.TYPE_SINGLE
 import com.android.wm.shell.shared.GroupedRecentTaskInfo.TYPE_SPLIT
 import com.android.wm.shell.shared.split.SplitBounds
-import com.android.wm.shell.shared.split.SplitScreenConstants.SNAP_TO_50_50
+import com.android.wm.shell.shared.split.SplitScreenConstants.SNAP_TO_2_50_50
 import com.google.common.truth.Correspondence
 import com.google.common.truth.Truth.assertThat
 import org.junit.Assert.assertThrows
@@ -136,7 +136,7 @@ class GroupedRecentTaskInfoTest : ShellTestCase() {
         assertThat(recentTaskInfoParcel.taskInfo2).isNotNull()
         assertThat(recentTaskInfoParcel.taskInfo2!!.taskId).isEqualTo(2)
         assertThat(recentTaskInfoParcel.splitBounds).isNotNull()
-        assertThat(recentTaskInfoParcel.splitBounds!!.snapPosition).isEqualTo(SNAP_TO_50_50)
+        assertThat(recentTaskInfoParcel.splitBounds!!.snapPosition).isEqualTo(SNAP_TO_2_50_50)
     }
 
     @Test
@@ -185,7 +185,7 @@ class GroupedRecentTaskInfoTest : ShellTestCase() {
     private fun splitTasksGroupInfo(): GroupedRecentTaskInfo {
         val task1 = createTaskInfo(id = 1)
         val task2 = createTaskInfo(id = 2)
-        val splitBounds = SplitBounds(Rect(), Rect(), 1, 2, SNAP_TO_50_50)
+        val splitBounds = SplitBounds(Rect(), Rect(), 1, 2, SNAP_TO_2_50_50)
         return GroupedRecentTaskInfo.forSplitTasks(task1, task2, splitBounds)
     }
 

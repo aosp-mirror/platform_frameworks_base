@@ -16,6 +16,8 @@
 
 package com.android.systemui.bouncer.domain.interactor
 
+import android.content.testableContext
+import android.provider.Settings.Global.ONE_HANDED_KEYGUARD_SIDE
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.uiEventLoggerFake
@@ -26,16 +28,22 @@ import com.android.systemui.authentication.domain.interactor.AuthenticationResul
 import com.android.systemui.authentication.domain.interactor.authenticationInteractor
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.authentication.shared.model.AuthenticationPatternCoordinate
+import com.android.systemui.authentication.shared.model.BouncerInputSide
+import com.android.systemui.bouncer.data.repository.bouncerRepository
 import com.android.systemui.bouncer.shared.logging.BouncerUiEvent
+import com.android.systemui.common.ui.data.repository.fakeConfigurationRepository
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryFaceAuthInteractor
 import com.android.systemui.flags.EnableSceneContainer
+import com.android.systemui.flags.Flags.FULL_SCREEN_USER_SWITCHER
+import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFaceAuthRepository
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.power.data.repository.fakePowerRepository
 import com.android.systemui.res.R
 import com.android.systemui.testKosmos
+import com.android.systemui.util.settings.fakeGlobalSettings
 import com.google.common.truth.Truth.assertThat
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -58,7 +66,8 @@ class BouncerInteractorTest : SysuiTestCase() {
     private val authenticationInteractor = kosmos.authenticationInteractor
     private val uiEventLoggerFake = kosmos.uiEventLoggerFake
 
-    private lateinit var underTest: BouncerInteractor
+    private val underTest: BouncerInteractor by lazy { kosmos.bouncerInteractor }
+    private val testableResources by lazy { kosmos.testableContext.orCreateTestableResources }
 
     @Before
     fun setUp() {
@@ -70,8 +79,6 @@ class BouncerInteractorTest : SysuiTestCase() {
         overrideResource(R.string.kg_wrong_pin, MESSAGE_WRONG_PIN)
         overrideResource(R.string.kg_wrong_password, MESSAGE_WRONG_PASSWORD)
         overrideResource(R.string.kg_wrong_pattern, MESSAGE_WRONG_PATTERN)
-
-        underTest = kosmos.bouncerInteractor
     }
 
     @Test
@@ -116,7 +123,7 @@ class BouncerInteractorTest : SysuiTestCase() {
             assertThat(
                     underTest.authenticate(
                         FakeAuthenticationRepository.DEFAULT_PIN,
-                        tryAutoConfirm = true
+                        tryAutoConfirm = true,
                     )
                 )
                 .isEqualTo(AuthenticationResult.SUCCEEDED)
@@ -141,7 +148,7 @@ class BouncerInteractorTest : SysuiTestCase() {
             assertThat(
                     underTest.authenticate(
                         FakeAuthenticationRepository.DEFAULT_PIN,
-                        tryAutoConfirm = true
+                        tryAutoConfirm = true,
                     )
                 )
                 .isEqualTo(AuthenticationResult.SKIPPED)
@@ -209,7 +216,7 @@ class BouncerInteractorTest : SysuiTestCase() {
             val tooShortPattern =
                 FakeAuthenticationRepository.PATTERN.subList(
                     0,
-                    kosmos.fakeAuthenticationRepository.minPatternLength - 1
+                    kosmos.fakeAuthenticationRepository.minPatternLength - 1,
                 )
             assertThat(underTest.authenticate(tooShortPattern))
                 .isEqualTo(AuthenticationResult.SKIPPED)
@@ -290,6 +297,77 @@ class BouncerInteractorTest : SysuiTestCase() {
             runCurrent()
 
             assertThat(isFaceAuthRunning).isFalse()
+        }
+
+    @Test
+    fun verifyOneHandedModeUsesTheConfigValue() =
+        testScope.runTest {
+            kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
+                AuthenticationMethodModel.Pin
+            )
+            testableResources.addOverride(R.bool.can_use_one_handed_bouncer, false)
+            val oneHandedModelSupported by collectLastValue(underTest.isOneHandedModeSupported)
+
+            assertThat(oneHandedModelSupported).isFalse()
+
+            testableResources.addOverride(R.bool.can_use_one_handed_bouncer, true)
+            kosmos.fakeConfigurationRepository.onAnyConfigurationChange()
+            runCurrent()
+
+            assertThat(oneHandedModelSupported).isTrue()
+
+            testableResources.removeOverride(R.bool.can_use_one_handed_bouncer)
+        }
+
+    @Test
+    fun verifyPreferredInputSideUsesTheSettingValue_Left() =
+        testScope.runTest {
+            val preferredInputSide by collectLastValue(underTest.preferredBouncerInputSide)
+            kosmos.bouncerRepository.setPreferredBouncerInputSide(BouncerInputSide.LEFT)
+            runCurrent()
+
+            assertThat(preferredInputSide).isEqualTo(BouncerInputSide.LEFT)
+        }
+
+    @Test
+    fun verifyPreferredInputSideUsesTheSettingValue_Right() =
+        testScope.runTest {
+            val preferredInputSide by collectLastValue(underTest.preferredBouncerInputSide)
+            underTest.setPreferredBouncerInputSide(BouncerInputSide.RIGHT)
+            runCurrent()
+
+            assertThat(preferredInputSide).isEqualTo(BouncerInputSide.RIGHT)
+
+            underTest.setPreferredBouncerInputSide(BouncerInputSide.LEFT)
+            runCurrent()
+
+            assertThat(preferredInputSide).isEqualTo(BouncerInputSide.LEFT)
+        }
+
+    @Test
+    fun preferredInputSide_defaultsToRight_whenUserSwitcherIsEnabled() =
+        testScope.runTest {
+            testableResources.addOverride(R.bool.config_enableBouncerUserSwitcher, true)
+            kosmos.fakeFeatureFlagsClassic.set(FULL_SCREEN_USER_SWITCHER, true)
+            kosmos.bouncerRepository.preferredBouncerInputSide.value = null
+            val preferredInputSide by collectLastValue(underTest.preferredBouncerInputSide)
+
+            assertThat(preferredInputSide).isEqualTo(BouncerInputSide.RIGHT)
+            testableResources.removeOverride(R.bool.config_enableBouncerUserSwitcher)
+        }
+
+    @Test
+    fun preferredInputSide_defaultsToLeft_whenUserSwitcherIsNotEnabledAndOneHandedModeIsEnabled() =
+        testScope.runTest {
+            testableResources.addOverride(R.bool.config_enableBouncerUserSwitcher, false)
+            kosmos.fakeFeatureFlagsClassic.set(FULL_SCREEN_USER_SWITCHER, true)
+            testableResources.addOverride(R.bool.can_use_one_handed_bouncer, true)
+            kosmos.fakeGlobalSettings.putInt(ONE_HANDED_KEYGUARD_SIDE, -1)
+            val preferredInputSide by collectLastValue(underTest.preferredBouncerInputSide)
+
+            assertThat(preferredInputSide).isEqualTo(BouncerInputSide.LEFT)
+            testableResources.removeOverride(R.bool.config_enableBouncerUserSwitcher)
+            testableResources.removeOverride(R.bool.can_use_one_handed_bouncer)
         }
 
     companion object {

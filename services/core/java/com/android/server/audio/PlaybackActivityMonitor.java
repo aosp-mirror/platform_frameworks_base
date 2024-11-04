@@ -72,6 +72,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * Class to receive and dispatch updates from AudioSystem about recording configurations.
@@ -160,18 +161,22 @@ public final class PlaybackActivityMonitor
 
     private final Context mContext;
     private int mSavedAlarmVolume = -1;
+    private boolean mSavedAlarmMuted = false;
+    private final Function<Integer, Boolean> mIsStreamMutedCb;
     private final int mMaxAlarmVolume;
     private int mPrivilegedAlarmActiveCount = 0;
     private final Consumer<AudioDeviceAttributes> mMuteAwaitConnectionTimeoutCb;
     private final FadeOutManager mFadeOutManager = new FadeOutManager();
 
     PlaybackActivityMonitor(Context context, int maxAlarmVolume,
-            Consumer<AudioDeviceAttributes> muteTimeoutCallback) {
+            Consumer<AudioDeviceAttributes> muteTimeoutCallback,
+            Function<Integer, Boolean> isStreamMutedCb) {
         mContext = context;
         mMaxAlarmVolume = maxAlarmVolume;
         PlayMonitorClient.sListenerDeathMonitor = this;
         AudioPlaybackConfiguration.sPlayerDeathMonitor = this;
         mMuteAwaitConnectionTimeoutCb = muteTimeoutCallback;
+        mIsStreamMutedCb = isStreamMutedCb;
         initEventHandler();
     }
 
@@ -253,7 +258,11 @@ public final class PlaybackActivityMonitor
                 updateAllowedCapturePolicy(apc, mAllowedCapturePolicies.get(uid));
             }
         }
-        sEventLogger.enqueue(new NewPlayerEvent(apc));
+        var packages = mContext.getPackageManager().getPackagesForUid(apc.getClientUid());
+        sEventLogger.enqueue(new NewPlayerEvent(
+                    apc,
+                    packages != null && packages.length > 0 ? packages[0] : null
+                ));
         synchronized(mPlayerLock) {
             mPlayers.put(newPiid, apc);
             maybeMutePlayerAwaitingConnection(apc);
@@ -328,8 +337,9 @@ public final class PlaybackActivityMonitor
                     if (mPrivilegedAlarmActiveCount++ == 0) {
                         mSavedAlarmVolume = AudioSystem.getStreamVolumeIndex(
                                 AudioSystem.STREAM_ALARM, AudioSystem.DEVICE_OUT_SPEAKER);
+                        mSavedAlarmMuted = mIsStreamMutedCb.apply(AudioSystem.STREAM_ALARM);
                         AudioSystem.setStreamVolumeIndexAS(AudioSystem.STREAM_ALARM,
-                                mMaxAlarmVolume, AudioSystem.DEVICE_OUT_SPEAKER);
+                                mMaxAlarmVolume, /*muted=*/false, AudioSystem.DEVICE_OUT_SPEAKER);
                     }
                 } else if (event != AudioPlaybackConfiguration.PLAYER_STATE_STARTED &&
                         apc.getPlayerState() == AudioPlaybackConfiguration.PLAYER_STATE_STARTED) {
@@ -338,7 +348,8 @@ public final class PlaybackActivityMonitor
                                 AudioSystem.STREAM_ALARM, AudioSystem.DEVICE_OUT_SPEAKER) ==
                                 mMaxAlarmVolume) {
                             AudioSystem.setStreamVolumeIndexAS(AudioSystem.STREAM_ALARM,
-                                    mSavedAlarmVolume, AudioSystem.DEVICE_OUT_SPEAKER);
+                                    mSavedAlarmVolume, mSavedAlarmMuted,
+                                    AudioSystem.DEVICE_OUT_SPEAKER);
                         }
                     }
                 }
@@ -1402,14 +1413,16 @@ public final class PlaybackActivityMonitor
         private final int mPlayerIId;
         private final int mPlayerType;
         private final int mClientUid;
+        private final String mClientPackageName;
         private final int mClientPid;
         private final AudioAttributes mPlayerAttr;
         private final int mSessionId;
 
-        NewPlayerEvent(AudioPlaybackConfiguration apc) {
+        NewPlayerEvent(AudioPlaybackConfiguration apc, String packageName) {
             mPlayerIId = apc.getPlayerInterfaceId();
             mPlayerType = apc.getPlayerType();
             mClientUid = apc.getClientUid();
+            mClientPackageName = packageName;
             mClientPid = apc.getClientPid();
             mPlayerAttr = apc.getAudioAttributes();
             mSessionId = apc.getSessionId();
@@ -1418,7 +1431,7 @@ public final class PlaybackActivityMonitor
         @Override
         public String eventToString() {
             return new String("new player piid:" + mPlayerIId + " uid/pid:" + mClientUid + "/"
-                    + mClientPid + " type:"
+                    + mClientPid  + " package:" + mClientPackageName + " type:"
                     + AudioPlaybackConfiguration.toLogFriendlyPlayerType(mPlayerType)
                     + " attr:" + mPlayerAttr
                     + " session:" + mSessionId);

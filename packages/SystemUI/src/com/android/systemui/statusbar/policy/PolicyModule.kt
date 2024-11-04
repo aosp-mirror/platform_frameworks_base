@@ -21,6 +21,7 @@ import android.os.UserManager.DISALLOW_CONFIG_LOCATION
 import android.os.UserManager.DISALLOW_MICROPHONE_TOGGLE
 import android.os.UserManager.DISALLOW_SHARE_LOCATION
 import com.android.systemui.Flags
+import com.android.systemui.modes.shared.ModesUi
 import com.android.systemui.qs.QsEventLogger
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.qs.shared.model.TileCategory
@@ -142,7 +143,7 @@ interface PolicyModule {
             dndTile: Provider<DndTile>,
             modesTile: Provider<ModesTile>,
         ): QSTileImpl<*> {
-            return if (android.app.Flags.modesUi()) modesTile.get() else dndTile.get()
+            return if (ModesUi.isEnabled) modesTile.get() else dndTile.get()
         }
 
         /** Inject flashlight config */
@@ -169,7 +170,7 @@ interface PolicyModule {
             factory: QSTileViewModelFactory.Static<FlashlightTileModel>,
             mapper: FlashlightMapper,
             stateInteractor: FlashlightTileDataInteractor,
-            userActionInteractor: FlashlightTileUserActionInteractor
+            userActionInteractor: FlashlightTileUserActionInteractor,
         ): QSTileViewModel =
             factory.create(
                 TileSpec.create(FLASHLIGHT_TILE_SPEC),
@@ -206,7 +207,7 @@ interface PolicyModule {
             factory: QSTileViewModelFactory.Static<LocationTileModel>,
             mapper: LocationTileMapper,
             stateInteractor: LocationTileDataInteractor,
-            userActionInteractor: LocationTileUserActionInteractor
+            userActionInteractor: LocationTileUserActionInteractor,
         ): QSTileViewModel =
             factory.create(
                 TileSpec.create(LOCATION_TILE_SPEC),
@@ -239,7 +240,7 @@ interface PolicyModule {
             factory: QSTileViewModelFactory.Static<AlarmTileModel>,
             mapper: AlarmTileMapper,
             stateInteractor: AlarmTileDataInteractor,
-            userActionInteractor: AlarmTileUserActionInteractor
+            userActionInteractor: AlarmTileUserActionInteractor,
         ): QSTileViewModel =
             factory.create(
                 TileSpec.create(ALARM_TILE_SPEC),
@@ -272,7 +273,7 @@ interface PolicyModule {
             factory: QSTileViewModelFactory.Static<UiModeNightTileModel>,
             mapper: UiModeNightTileMapper,
             stateInteractor: UiModeNightTileDataInteractor,
-            userActionInteractor: UiModeNightTileUserActionInteractor
+            userActionInteractor: UiModeNightTileUserActionInteractor,
         ): QSTileViewModel =
             factory.create(
                 TileSpec.create(UIMODENIGHT_TILE_SPEC),
@@ -306,7 +307,7 @@ interface PolicyModule {
             factory: QSTileViewModelFactory.Static<WorkModeTileModel>,
             mapper: WorkModeTileMapper,
             stateInteractor: WorkModeTileDataInteractor,
-            userActionInteractor: WorkModeTileUserActionInteractor
+            userActionInteractor: WorkModeTileUserActionInteractor,
         ): QSTileViewModel =
             factory.create(
                 TileSpec.create(WORK_MODE_TILE_SPEC),
@@ -406,7 +407,7 @@ interface PolicyModule {
         @IntoMap
         @StringKey(DND_TILE_SPEC)
         fun provideDndOrModesTileConfig(uiEventLogger: QsEventLogger): QSTileConfig =
-            if (android.app.Flags.modesUi()) {
+            if (ModesUi.isEnabled) {
                 QSTileConfig(
                     tileSpec = TileSpec.create(DND_TILE_SPEC),
                     uiConfig =
@@ -438,9 +439,9 @@ interface PolicyModule {
             factory: QSTileViewModelFactory.Static<ModesTileModel>,
             mapper: ModesTileMapper,
             stateInteractor: ModesTileDataInteractor,
-            userActionInteractor: ModesTileUserActionInteractor
+            userActionInteractor: ModesTileUserActionInteractor,
         ): QSTileViewModel =
-            if (android.app.Flags.modesUi() && Flags.qsNewTilesFuture())
+            if (ModesUi.isEnabled && Flags.qsNewTilesFuture())
                 factory.create(
                     TileSpec.create(DND_TILE_SPEC),
                     userActionInteractor,

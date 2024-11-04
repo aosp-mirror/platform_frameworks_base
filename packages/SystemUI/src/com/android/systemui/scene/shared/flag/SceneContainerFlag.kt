@@ -20,13 +20,11 @@ package com.android.systemui.scene.shared.flag
 
 import com.android.systemui.Flags.FLAG_SCENE_CONTAINER
 import com.android.systemui.Flags.sceneContainer
-import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor
 import com.android.systemui.flags.FlagToken
 import com.android.systemui.flags.RefactorFlagUtils
 import com.android.systemui.keyguard.KeyguardBottomAreaRefactor
 import com.android.systemui.keyguard.KeyguardWmStateRefactor
 import com.android.systemui.keyguard.MigrateClocksToBlueprint
-import com.android.systemui.keyguard.shared.ComposeLockscreen
 import com.android.systemui.statusbar.notification.shared.NotificationThrottleHun
 import com.android.systemui.statusbar.phone.PredictiveBackSysUiFlag
 
@@ -39,13 +37,11 @@ object SceneContainerFlag {
     inline val isEnabled
         get() =
             sceneContainer() && // mainAconfigFlag
-                ComposeLockscreen.isEnabled &&
                 KeyguardBottomAreaRefactor.isEnabled &&
                 KeyguardWmStateRefactor.isEnabled &&
                 MigrateClocksToBlueprint.isEnabled &&
                 NotificationThrottleHun.isEnabled &&
-                PredictiveBackSysUiFlag.isEnabled &&
-                DeviceEntryUdfpsRefactor.isEnabled
+                PredictiveBackSysUiFlag.isEnabled
 
     // NOTE: Changes should also be made in getSecondaryFlags and @EnableSceneContainer
 
@@ -55,13 +51,11 @@ object SceneContainerFlag {
     /** The set of secondary flags which must be enabled for scene container to work properly */
     inline fun getSecondaryFlags(): Sequence<FlagToken> =
         sequenceOf(
-            ComposeLockscreen.token,
             KeyguardBottomAreaRefactor.token,
             KeyguardWmStateRefactor.token,
             MigrateClocksToBlueprint.token,
             NotificationThrottleHun.token,
             PredictiveBackSysUiFlag.token,
-            DeviceEntryUdfpsRefactor.token,
             // NOTE: Changes should also be made in isEnabled and @EnableSceneContainer
         )
 

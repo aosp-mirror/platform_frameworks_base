@@ -16,12 +16,20 @@
 
 package com.android.systemui.recordissue
 
+import android.annotation.SuppressLint
+import android.content.ContentResolver
 import android.content.Context
+import android.database.ContentObserver
+import android.os.Handler
+import androidx.annotation.VisibleForTesting
+import androidx.annotation.WorkerThread
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.recordissue.RecordIssueModule.Companion.TILE_SPEC
 import com.android.systemui.res.R
 import com.android.systemui.settings.UserFileManager
 import com.android.systemui.settings.UserTracker
+import com.android.systemui.util.settings.GlobalSettings
 import com.android.traceur.PresetTraceConfigs
 import com.android.traceur.TraceConfig
 import java.util.concurrent.CopyOnWriteArrayList
@@ -31,12 +39,20 @@ import javax.inject.Inject
 class IssueRecordingState
 @Inject
 constructor(
-    userTracker: UserTracker,
-    userFileManager: UserFileManager,
+    private val userTracker: UserTracker,
+    private val userFileManager: UserFileManager,
+    @Background bgHandler: Handler,
+    private val resolver: ContentResolver,
+    private val globalSettings: GlobalSettings,
 ) {
 
-    private val prefs =
-        userFileManager.getSharedPreferences(TILE_SPEC, Context.MODE_PRIVATE, userTracker.userId)
+    private val prefs
+        get() =
+            userFileManager.getSharedPreferences(
+                TILE_SPEC,
+                Context.MODE_PRIVATE,
+                userTracker.userId,
+            )
 
     val customTraceState = CustomTraceState(prefs)
 
@@ -77,22 +93,52 @@ constructor(
 
     private val listeners = CopyOnWriteArrayList<Runnable>()
 
+    @VisibleForTesting
+    val onRecordingChangeListener =
+        object : ContentObserver(bgHandler) {
+            override fun onChange(selfChange: Boolean) {
+                isRecording = globalSettings.getInt(KEY_ONGOING_ISSUE_RECORDING, 0) == 1
+                listeners.forEach(Runnable::run)
+            }
+        }
+
+    /**
+     * isRecording is purposely always set to false at the initialization of the record issue qs
+     * tile. We want to avoid a situation where the System UI crashed / the device was restarted in
+     * the middle of a trace session and the QS tile is in an active state even though no tracing is
+     * ongoing.
+     */
     var isRecording = false
+        @WorkerThread
         set(value) {
+            globalSettings.putInt(KEY_ONGOING_ISSUE_RECORDING, if (value) 1 else 0)
             field = value
-            listeners.forEach(Runnable::run)
         }
 
     fun markUserApprovalForScreenRecording() {
         hasUserApprovedScreenRecording = true
     }
 
+    @WorkerThread
+    @SuppressLint("RegisterContentObserverViaContentResolver")
     fun addListener(listener: Runnable) {
+        if (listeners.isEmpty()) {
+            resolver.registerContentObserver(
+                globalSettings.getUriFor(KEY_ONGOING_ISSUE_RECORDING),
+                false,
+                onRecordingChangeListener,
+            )
+        }
         listeners.add(listener)
     }
 
+    @WorkerThread
+    @SuppressLint("RegisterContentObserverViaContentResolver")
     fun removeListener(listener: Runnable) {
         listeners.remove(listener)
+        if (listeners.isEmpty()) {
+            resolver.unregisterContentObserver(onRecordingChangeListener)
+        }
     }
 
     companion object {
@@ -100,6 +146,7 @@ constructor(
         private const val HAS_APPROVED_SCREEN_RECORDING = "HasApprovedScreenRecord"
         private const val KEY_RECORD_SCREEN = "key_recordScreen"
         private const val KEY_TAG_TITLES = "key_tagTitles"
+        private const val KEY_ONGOING_ISSUE_RECORDING = "issueRecordingOngoing"
         const val KEY_ISSUE_TYPE_INDEX = "key_issueTypeIndex"
         const val ISSUE_TYPE_NOT_SET = -1
         const val TAG_TITLE_DELIMITER = ": "

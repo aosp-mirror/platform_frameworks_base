@@ -168,6 +168,12 @@ public final class CardEmulation {
     public static final int PROTOCOL_AND_TECHNOLOGY_ROUTE_UICC = 2;
 
     /**
+     * Route to the default value in config file.
+     */
+    @FlaggedApi(Flags.FLAG_NFC_OVERRIDE_RECOVER_ROUTING_TABLE)
+    public static final int PROTOCOL_AND_TECHNOLOGY_ROUTE_DEFAULT = 3;
+
+    /**
      * Route unset.
      */
     @FlaggedApi(Flags.FLAG_NFC_OVERRIDE_RECOVER_ROUTING_TABLE)
@@ -548,13 +554,11 @@ public final class CardEmulation {
 
         List<String> validSE = adapter.getSupportedOffHostSecureElements();
         if ((offHostSecureElement.startsWith("eSE") && !validSE.contains("eSE"))
-                || (offHostSecureElement.startsWith("SIM") && !validSE.contains("SIM"))
-                || (offHostSecureElement.startsWith("eSIM") && !validSE.contains("eSIM"))) {
+                || (offHostSecureElement.startsWith("SIM") && !validSE.contains("SIM"))) {
             return false;
         }
 
-        if (!offHostSecureElement.startsWith("eSE") && !offHostSecureElement.startsWith("SIM")
-                && !(Flags.enableCardEmulationEuicc() && offHostSecureElement.startsWith("eSIM"))) {
+        if (!offHostSecureElement.startsWith("eSE") && !offHostSecureElement.startsWith("SIM")) {
             return false;
         }
 
@@ -562,8 +566,6 @@ public final class CardEmulation {
             offHostSecureElement = "eSE1";
         } else if (offHostSecureElement.equals("SIM")) {
             offHostSecureElement = "SIM1";
-        } else if (Flags.enableCardEmulationEuicc() && offHostSecureElement.equals("eSIM")) {
-            offHostSecureElement = "eSIM1";
         }
         final String offHostSecureElementV = new String(offHostSecureElement);
         return callServiceReturn(() ->
@@ -899,45 +901,47 @@ public final class CardEmulation {
                     PROTOCOL_AND_TECHNOLOGY_ROUTE_DH,
                     PROTOCOL_AND_TECHNOLOGY_ROUTE_ESE,
                     PROTOCOL_AND_TECHNOLOGY_ROUTE_UICC,
-                    PROTOCOL_AND_TECHNOLOGY_ROUTE_UNSET
+                    PROTOCOL_AND_TECHNOLOGY_ROUTE_UNSET,
+                    PROTOCOL_AND_TECHNOLOGY_ROUTE_DEFAULT
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ProtocolAndTechnologyRoute {}
 
-     /**
-      * Setting NFC controller routing table, which includes Protocol Route and Technology Route,
-      * while this Activity is in the foreground.
-      *
-      * The parameter set to {@link #PROTOCOL_AND_TECHNOLOGY_ROUTE_UNSET}
-      * can be used to keep current values for that entry. Either
-      * Protocol Route or Technology Route should be override when calling this API, otherwise
-      * throw {@link IllegalArgumentException}.
-      * <p>
-      * Example usage in an Activity that requires to set proto route to "ESE" and keep tech route:
-      * <pre>
-      * protected void onResume() {
-      *     mNfcAdapter.overrideRoutingTable(
-      *         this, {@link #PROTOCOL_AND_TECHNOLOGY_ROUTE_ESE}, null);
-      * }</pre>
-      * </p>
-      * Also activities must call {@link #recoverRoutingTable(Activity)}
-      * when it goes to the background. Only the package of the
-      * currently preferred service (the service set as preferred by the current foreground
-      * application via {@link CardEmulation#setPreferredService(Activity, ComponentName)} or the
-      * current Default Wallet Role Holder {@link RoleManager#ROLE_WALLET}),
-      * otherwise a call to this method will fail and throw {@link SecurityException}.
-      * @param activity The Activity that requests NFC controller routing table to be changed.
-      * @param protocol ISO-DEP route destination, where the possible inputs are defined
-      *                 in {@link ProtocolAndTechnologyRoute}.
-      * @param technology Tech-A, Tech-B and Tech-F route destination, where the possible inputs
-      *                   are defined in {@link ProtocolAndTechnologyRoute}
-      * @throws SecurityException if the caller is not the preferred NFC service
-      * @throws IllegalArgumentException if the activity is not resumed or the caller is not in the
-      * foreground.
-      * <p>
-      * This is a high risk API and only included to support mainline effort
-      * @hide
-      */
+    /**
+     * Setting NFC controller routing table, which includes Protocol Route and Technology Route,
+     * while this Activity is in the foreground.
+     *
+     * The parameter set to {@link #PROTOCOL_AND_TECHNOLOGY_ROUTE_UNSET}
+     * can be used to keep current values for that entry. Either
+     * Protocol Route or Technology Route should be override when calling this API, otherwise
+     * throw {@link IllegalArgumentException}.
+     * <p>
+     * Example usage in an Activity that requires to set proto route to "ESE" and keep tech route:
+     * <pre>
+     * protected void onResume() {
+     *     mNfcAdapter.overrideRoutingTable(
+     *         this, {@link #PROTOCOL_AND_TECHNOLOGY_ROUTE_ESE},
+     *         {@link #PROTOCOL_AND_TECHNOLOGY_ROUTE_UNSET});
+     * }</pre>
+     * </p>
+     * Also activities must call {@link #recoverRoutingTable(Activity)}
+     * when it goes to the background. Only the package of the
+     * currently preferred service (the service set as preferred by the current foreground
+     * application via {@link CardEmulation#setPreferredService(Activity, ComponentName)} or the
+     * current Default Wallet Role Holder {@link RoleManager#ROLE_WALLET}),
+     * otherwise a call to this method will fail and throw {@link SecurityException}.
+     * @param activity The Activity that requests NFC controller routing table to be changed.
+     * @param protocol ISO-DEP route destination, where the possible inputs are defined
+     *                 in {@link ProtocolAndTechnologyRoute}.
+     * @param technology Tech-A, Tech-B and Tech-F route destination, where the possible inputs
+     *                   are defined in {@link ProtocolAndTechnologyRoute}
+     * @throws SecurityException if the caller is not the preferred NFC service
+     * @throws IllegalArgumentException if the activity is not resumed or the caller is not in the
+     * foreground.
+     * <p>
+     * This is a high risk API and only included to support mainline effort
+     * @hide
+     */
     @SystemApi
     @FlaggedApi(Flags.FLAG_NFC_OVERRIDE_RECOVER_ROUTING_TABLE)
     public void overrideRoutingTable(
@@ -946,26 +950,14 @@ public final class CardEmulation {
         if (!activity.isResumed()) {
             throw new IllegalArgumentException("Activity must be resumed.");
         }
-        String protocolRoute = switch (protocol) {
-            case PROTOCOL_AND_TECHNOLOGY_ROUTE_DH -> "DH";
-            case PROTOCOL_AND_TECHNOLOGY_ROUTE_ESE -> "ESE";
-            case PROTOCOL_AND_TECHNOLOGY_ROUTE_UICC -> "UICC";
-            case PROTOCOL_AND_TECHNOLOGY_ROUTE_UNSET -> null;
-            default -> throw new IllegalStateException("Unexpected value: " + protocol);
-        };
-        String technologyRoute = switch (technology) {
-            case PROTOCOL_AND_TECHNOLOGY_ROUTE_DH -> "DH";
-            case PROTOCOL_AND_TECHNOLOGY_ROUTE_ESE -> "ESE";
-            case PROTOCOL_AND_TECHNOLOGY_ROUTE_UICC -> "UICC";
-            case PROTOCOL_AND_TECHNOLOGY_ROUTE_UNSET -> null;
-            default -> throw new IllegalStateException("Unexpected value: " + protocol);
-        };
+        String protocolRoute = routeIntToString(protocol);
+        String technologyRoute = routeIntToString(technology);
         callService(() ->
                 sService.overrideRoutingTable(
-                    mContext.getUser().getIdentifier(),
-                    protocolRoute,
-                    technologyRoute,
-                    mContext.getPackageName()));
+                        mContext.getUser().getIdentifier(),
+                        protocolRoute,
+                        technologyRoute,
+                        mContext.getPackageName()));
     }
 
     /**
@@ -992,9 +984,7 @@ public final class CardEmulation {
      * Is EUICC supported as a Secure Element EE which supports off host card emulation.
      *
      * @return true if the device supports EUICC for off host card emulation, false otherwise.
-     * @hide
      */
-    @SystemApi
     @FlaggedApi(android.nfc.Flags.FLAG_ENABLE_CARD_EMULATION_EUICC)
     public boolean isEuiccSupported() {
         return callServiceReturn(() -> sService.isEuiccSupported(), false);
@@ -1073,5 +1063,17 @@ public final class CardEmulation {
             }
         }
         return defaultReturn;
+    }
+
+    /** @hide */
+    public static String routeIntToString(@ProtocolAndTechnologyRoute int route) {
+        return switch (route) {
+            case PROTOCOL_AND_TECHNOLOGY_ROUTE_DH -> "DH";
+            case PROTOCOL_AND_TECHNOLOGY_ROUTE_ESE -> "eSE";
+            case PROTOCOL_AND_TECHNOLOGY_ROUTE_UICC -> "SIM";
+            case PROTOCOL_AND_TECHNOLOGY_ROUTE_UNSET -> null;
+            case PROTOCOL_AND_TECHNOLOGY_ROUTE_DEFAULT -> "default";
+            default -> throw new IllegalStateException("Unexpected value: " + route);
+        };
     }
 }

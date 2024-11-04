@@ -73,8 +73,7 @@
     <string name="bubble_accessibility_announce_collapse" msgid="3178806224494537097">"<xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>‌ను కుదించండి"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> సెట్టింగ్‌లు"</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"బబుల్‌ను విస్మరించు"</string>
-    <!-- no translation found for bubble_fullscreen_text (1006758103218086231) -->
-    <skip />
+    <string name="bubble_fullscreen_text" msgid="1006758103218086231">"ఫుల్ స్క్రీన్‌కు వెళ్లండి"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"సంభాషణను బబుల్ చేయవద్దు"</string>
     <string name="bubbles_user_education_title" msgid="2112319053732691899">"బబుల్స్‌ను ఉపయోగించి చాట్ చేయండి"</string>
     <string name="bubbles_user_education_description" msgid="4215862563054175407">"కొత్త సంభాషణలు తేలియాడే చిహ్నాలుగా లేదా బబుల్స్ లాగా కనిపిస్తాయి. బబుల్‌ని తెరవడానికి నొక్కండి. తరలించడానికి లాగండి."</string>
@@ -98,6 +97,9 @@
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"కెమెరా సమస్యలు ఉన్నాయా?\nరీఫిట్ చేయడానికి ట్యాప్ చేయండి"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"దాని సమస్యను పరిష్కరించలేదా?\nపూర్వస్థితికి మార్చడానికి ట్యాప్ చేయండి"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"కెమెరా సమస్యలు లేవా? తీసివేయడానికి ట్యాప్ చేయండి."</string>
+    <string name="windowing_app_handle_education_tooltip" msgid="2929643449849791854">"యాప్ మెనూను ఇక్కడ పొందవచ్చు"</string>
+    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="2523468503353474095">"పలు యాప్‌లను ఒకేసారి తెరవడానికి డెస్క్‌టాప్ వీక్షణకు ఎంటర్ అవ్వండి"</string>
+    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="5225660258192054132">"యాప్ మెనూ నుండి ఏ సమయంలోనైనా ఫుల్ స్క్రీన్‌కు తిరిగి రండి"</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"చూసి, మరిన్ని చేయండి"</string>
     <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"స్ప్లిట్ స్క్రీన్ కోసం మరొక యాప్‌లోకి లాగండి"</string>
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"యాప్ స్థానాన్ని మార్చడానికి దాని వెలుపల డబుల్-ట్యాప్ చేయండి"</string>
@@ -124,10 +126,22 @@
     <string name="screenshot_text" msgid="1477704010087786671">"స్క్రీన్‌షాట్"</string>
     <string name="open_in_browser_text" msgid="9181692926376072904">"బ్రౌజర్‌లో తెరవండి"</string>
     <string name="new_window_text" msgid="6318648868380652280">"కొత్త విండో"</string>
+    <string name="manage_windows_text" msgid="5567366688493093920">"విండోలను మేనేజ్ చేయండి"</string>
     <string name="close_text" msgid="4986518933445178928">"మూసివేయండి"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"మెనూను మూసివేయండి"</string>
-    <string name="expand_menu_text" msgid="3847736164494181168">"మెనూను తెరవండి"</string>
+    <string name="desktop_mode_app_header_chip_text" msgid="6366422614991687237">"మెనూను తెరవండి"</string>
     <string name="desktop_mode_maximize_menu_maximize_text" msgid="3275717276171114411">"స్క్రీన్ సైజ్‌ను పెంచండి"</string>
     <string name="desktop_mode_maximize_menu_snap_text" msgid="2065251022783880154">"స్క్రీన్‌ను స్నాప్ చేయండి"</string>
-    <string name="desktop_mode_non_resizable_snap_text" msgid="1049800446363800707">"ఈ యాప్ సైజ్‌ను మార్చడం సాధ్యపడదు"</string>
+    <string name="desktop_mode_non_resizable_snap_text" msgid="3771776422751387878">"యాప్‌ను ఇక్కడకి తరలించడం సాధ్యం కాదు"</string>
+    <string name="desktop_mode_maximize_menu_immersive_button_text" msgid="559492223133829481">"లీనమయ్యే"</string>
+    <string name="desktop_mode_maximize_menu_immersive_restore_button_text" msgid="4900114367354709257">"రీస్టోర్ చేయండి"</string>
+    <string name="desktop_mode_maximize_menu_maximize_button_text" msgid="3090199175564175845">"మ్యాగ్జిమైజ్ చేయండి"</string>
+    <string name="desktop_mode_maximize_menu_restore_button_text" msgid="4234449220944704387">"రీస్టోర్ చేయండి"</string>
+    <string name="desktop_mode_maximize_menu_snap_left_button_text" msgid="8077452201179893424">"ఎడమ వైపున స్నాప్ చేయండి"</string>
+    <string name="desktop_mode_maximize_menu_snap_right_button_text" msgid="7117751068945657304">"కుడి వైపున స్నాప్ చేయండి"</string>
+    <string name="open_by_default_settings_text" msgid="2526548548598185500">"ఆటోమేటిక్ సెట్టింగ్‌ల ద్వారా తెరవండి"</string>
+    <string name="open_by_default_dialog_subheader_text" msgid="1729599730664063881">"ఈ యాప్‌నకు సంబంధించిన వెబ్ లింక్‌లను ఎలా తెరవాలో ఎంచుకోండి"</string>
+    <string name="open_by_default_dialog_in_app_text" msgid="6978022419634199806">"యాప్‌లో"</string>
+    <string name="open_by_default_dialog_in_browser_text" msgid="8042769465958497081">"మీ బ్రౌజర్‌లో"</string>
+    <string name="open_by_default_dialog_dismiss_button_text" msgid="3487238795534582291">"సరే"</string>
 </resources>

@@ -46,6 +46,7 @@ import android.app.timedetector.TelephonyTimeSuggestion;
 import android.os.TimestampedValue;
 import android.util.IndentingPrintWriter;
 
+import com.android.internal.os.ApplicationSharedMemoryTestRule;
 import com.android.server.SystemClockTime.TimeConfidence;
 import com.android.server.timedetector.TimeDetectorStrategy.Origin;
 import com.android.server.timezonedetector.StateChangeListener;
@@ -55,6 +56,7 @@ import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -124,6 +126,10 @@ public class TimeDetectorStrategyImplTest {
                     .setOriginPriorities(ORIGIN_PRIORITIES)
                     .setAutoDetectionEnabledSetting(true)
                     .build();
+
+    @Rule
+    public final ApplicationSharedMemoryTestRule mApplicationSharedMemoryTestRule =
+            new ApplicationSharedMemoryTestRule();
 
     private FakeEnvironment mFakeEnvironment;
     private FakeServiceConfigAccessor mFakeServiceConfigAccessorSpy;

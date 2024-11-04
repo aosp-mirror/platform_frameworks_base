@@ -24,7 +24,6 @@ import android.os.Parcelable;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.annotations.VisibleForTesting.Visibility;
-import com.android.internal.util.ArrayUtils;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -114,8 +113,13 @@ public final class VcnUnderlyingNetworkSpecifier extends NetworkSpecifier implem
     @Override
     public boolean canBeSatisfiedBy(NetworkSpecifier other) {
         if (other instanceof TelephonyNetworkSpecifier) {
-            return ArrayUtils.contains(
-                    mSubIds, ((TelephonyNetworkSpecifier) other).getSubscriptionId());
+            final int targetSubId = ((TelephonyNetworkSpecifier) other).getSubscriptionId();
+            for (int subId : mSubIds) {
+                if (targetSubId == subId) {
+                    return true;
+                }
+            }
+            return false;
         }
         // TODO(b/180140053): Allow matching against WifiNetworkAgentSpecifier
 

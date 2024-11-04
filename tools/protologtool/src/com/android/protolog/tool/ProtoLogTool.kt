@@ -368,7 +368,7 @@ object ProtoLogTool {
     }
 
     interface ProtologViewerConfigBuilder {
-        fun build(statements: Map<LogCall, Long>): ByteArray
+        fun build(groups: Collection<LogGroup>, statements: Map<LogCall, Long>): ByteArray
     }
 
     private fun viewerConf(command: CommandOptions) {
@@ -416,7 +416,7 @@ object ProtoLogTool {
         }
 
         val outFile = injector.fileOutputStream(command.viewerConfigFileNameArg)
-        outFile.write(configBuilder.build(logCallRegistry.getStatements()))
+        outFile.write(configBuilder.build(groups.values, logCallRegistry.getStatements()))
         outFile.close()
     }
 

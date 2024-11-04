@@ -23,6 +23,7 @@ import android.os.fakeExecutorHandler
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.bouncer.data.repository.bouncerRepository
 import com.android.systemui.bouncer.data.repository.fakeKeyguardBouncerRepository
+import com.android.systemui.bouncer.domain.interactor.alternateBouncerInteractor
 import com.android.systemui.bouncer.domain.interactor.simBouncerInteractor
 import com.android.systemui.classifier.falsingCollector
 import com.android.systemui.common.ui.data.repository.fakeConfigurationRepository
@@ -36,6 +37,7 @@ import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryUdfpsInteractor
 import com.android.systemui.deviceentry.domain.interactor.deviceUnlockedInteractor
 import com.android.systemui.globalactions.domain.interactor.globalActionsInteractor
+import com.android.systemui.haptics.msdl.bouncerHapticPlayer
 import com.android.systemui.haptics.msdl.fakeMSDLPlayer
 import com.android.systemui.haptics.qs.qsLongPressEffect
 import com.android.systemui.jank.interactionJankMonitor
@@ -48,6 +50,7 @@ import com.android.systemui.keyguard.domain.interactor.fromPrimaryBouncerTransit
 import com.android.systemui.keyguard.domain.interactor.keyguardClockInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
+import com.android.systemui.keyguard.domain.interactor.pulseExpansionInteractor
 import com.android.systemui.model.sceneContainerPlugin
 import com.android.systemui.plugins.statusbar.statusBarStateController
 import com.android.systemui.power.data.repository.fakePowerRepository
@@ -122,6 +125,7 @@ class KosmosJavaAdapter() {
     val sceneBackInteractor by lazy { kosmos.sceneBackInteractor }
     val falsingCollector by lazy { kosmos.falsingCollector }
     val powerInteractor by lazy { kosmos.powerInteractor }
+    val pulseExpansionInteractor by lazy { kosmos.pulseExpansionInteractor }
     val deviceEntryInteractor by lazy { kosmos.deviceEntryInteractor }
     val deviceEntryUdfpsInteractor by lazy { kosmos.deviceEntryUdfpsInteractor }
     val deviceUnlockedInteractor by lazy { kosmos.deviceUnlockedInteractor }
@@ -151,6 +155,7 @@ class KosmosJavaAdapter() {
     val wifiInteractor by lazy { kosmos.wifiInteractor }
     val fakeWifiRepository by lazy { kosmos.fakeWifiRepository }
     val volumeDialogInteractor by lazy { kosmos.volumeDialogInteractor }
+    val alternateBouncerInteractor by lazy { kosmos.alternateBouncerInteractor }
 
     val ongoingActivityChipsViewModel by lazy { kosmos.ongoingActivityChipsViewModel }
     val scrimController by lazy { kosmos.scrimController }
@@ -158,4 +163,5 @@ class KosmosJavaAdapter() {
     val sceneContainerOcclusionInteractor by lazy { kosmos.sceneContainerOcclusionInteractor }
     val msdlPlayer by lazy { kosmos.fakeMSDLPlayer }
     val shadeModeInteractor by lazy { kosmos.shadeModeInteractor }
+    val bouncerHapticHelper by lazy { kosmos.bouncerHapticPlayer }
 }

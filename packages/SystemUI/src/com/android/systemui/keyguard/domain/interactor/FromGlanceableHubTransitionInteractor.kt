@@ -18,7 +18,7 @@ package com.android.systemui.keyguard.domain.interactor
 
 import android.animation.ValueAnimator
 import com.android.app.animation.Interpolators
-import com.android.app.tracing.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.Flags.communalSceneKtfRefactor
 import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
 import com.android.systemui.communal.domain.interactor.CommunalSettingsInteractor
@@ -48,7 +48,7 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 import kotlinx.coroutines.withContext
 
 @OptIn(FlowPreview::class)
@@ -162,10 +162,9 @@ constructor(
                 .filterRelevantKeyguardStateAnd { isAsleep -> isAsleep }
                 .collect {
                     if (communalSceneKtfRefactor()) {
-                        communalSceneInteractor.changeScene(
+                        communalSceneInteractor.snapToScene(
                             newScene = CommunalScenes.Blank,
                             loggingReason = "hub to dozing",
-                            transitionKey = CommunalTransitionKeys.Immediately,
                             keyguardState = KeyguardState.DOZING,
                         )
                     } else {
@@ -203,19 +202,19 @@ constructor(
             scope.launch {
                 combine(
                         keyguardInteractor.isKeyguardOccluded,
-                        keyguardInteractor.isAbleToDream
-                            // Debounce the dreaming signal since there is a race condition between
-                            // the occluded and dreaming signals. We therefore add a small delay
-                            // to give enough time for occluded to flip to false when the dream
-                            // ends, to avoid transitioning to OCCLUDED erroneously when exiting
-                            // the dream.
-                            .debounce(100.milliseconds),
-                        ::Pair
+                        keyguardInteractor.isDreaming,
+                        ::Pair,
                     )
+                    // Debounce signals since there is a race condition between the occluded and
+                    // dreaming signals when starting or stopping dreaming. We therefore add a small
+                    // delay to give enough time for occluded to flip to false when the dream
+                    // ends, to avoid transitioning to OCCLUDED erroneously when exiting the dream
+                    // or when the dream starts underneath the hub.
+                    .debounce(200.milliseconds)
                     .sampleFilter(
                         // When launching activities from widgets on the hub, we have a
                         // custom occlusion animation.
-                        communalSceneInteractor.isLaunchingWidget,
+                        communalSceneInteractor.isLaunchingWidget
                     ) { launchingWidget ->
                         !launchingWidget
                     }
@@ -253,7 +252,7 @@ constructor(
                         noneOf(
                             // When launching activities from widgets on the hub, we wait to change
                             // scenes until the activity launch is complete.
-                            communalSceneInteractor.isLaunchingWidget,
+                            communalSceneInteractor.isLaunchingWidget
                         ),
                     )
                     .filterRelevantKeyguardStateAnd { isKeyguardGoingAway -> isKeyguardGoingAway }
@@ -270,7 +269,7 @@ constructor(
                                 newScene = CommunalScenes.Blank,
                                 loggingReason = "hub to gone",
                                 transitionKey = CommunalTransitionKeys.SimpleFade,
-                                keyguardState = KeyguardState.GONE
+                                keyguardState = KeyguardState.GONE,
                             )
                         }
                     }

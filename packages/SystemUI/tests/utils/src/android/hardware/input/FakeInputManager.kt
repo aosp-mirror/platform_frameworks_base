@@ -84,7 +84,7 @@ class FakeInputManager {
         if (devices.containsKey(deviceId)) {
             return
         }
-        addPhysicalKeyboard(deviceId, enabled)
+        addPhysicalKeyboard(deviceId, enabled = enabled)
     }
 
     fun registerInputDeviceListener(listener: InputDeviceListener) {
@@ -92,9 +92,15 @@ class FakeInputManager {
         inputDeviceListener = listener
     }
 
-    fun addPhysicalKeyboard(id: Int, enabled: Boolean = true) {
+    fun addPhysicalKeyboard(
+        id: Int,
+        vendorId: Int = 0,
+        productId: Int = 0,
+        isFullKeyboard: Boolean = true,
+        enabled: Boolean = true
+    ) {
         check(id > 0) { "Physical keyboard ids have to be > 0" }
-        addKeyboard(id, enabled)
+        addKeyboard(id, vendorId, productId, isFullKeyboard, enabled)
     }
 
     fun removeKeysFromKeyboard(deviceId: Int, vararg keyCodes: Int) {
@@ -102,20 +108,38 @@ class FakeInputManager {
         supportedKeyCodesByDeviceId[deviceId]!!.removeAll(keyCodes.asList())
     }
 
-    private fun addKeyboard(id: Int, enabled: Boolean = true) {
-        devices[id] =
+    private fun addKeyboard(
+        id: Int,
+        vendorId: Int = 0,
+        productId: Int = 0,
+        isFullKeyboard: Boolean = true,
+        enabled: Boolean = true
+    ) {
+        val keyboardType =
+            if (isFullKeyboard) InputDevice.KEYBOARD_TYPE_ALPHABETIC
+            else InputDevice.KEYBOARD_TYPE_NON_ALPHABETIC
+        // VendorId and productId are set to 0 if not specified, which is the same as the default
+        // values used in InputDevice.Builder
+        val builder =
             InputDevice.Builder()
                 .setId(id)
-                .setKeyboardType(InputDevice.KEYBOARD_TYPE_ALPHABETIC)
+                .setVendorId(vendorId)
+                .setProductId(productId)
+                .setKeyboardType(keyboardType)
                 .setSources(InputDevice.SOURCE_KEYBOARD)
                 .setEnabled(enabled)
                 .setKeyCharacterMap(keyCharacterMap)
-                .build()
+        devices[id] = builder.build()
+        inputDeviceListener?.onInputDeviceAdded(id)
         supportedKeyCodesByDeviceId[id] = allKeyCodes.toMutableSet()
     }
 
-    fun addDevice(id: Int, sources: Int) {
-        devices[id] = InputDevice.Builder().setId(id).setSources(sources).build()
+    fun addDevice(id: Int, sources: Int, isNotFound: Boolean = false) {
+        // there's not way of differentiate device connection vs registry in current implementation.
+        // If the device isNotFound, it means that we connect an unregistered device.
+        if (!isNotFound) {
+            devices[id] = InputDevice.Builder().setId(id).setSources(sources).build()
+        }
         inputDeviceListener?.onInputDeviceAdded(id)
     }
 

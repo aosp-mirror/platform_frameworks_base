@@ -11,9 +11,9 @@ android_test {
     name: "TvRemoteTests",
     srcs: ["src/**/*.java"],
     libs: [
-        "android.test.runner",
-        "android.test.base",
-        "com.android.media.tv.remoteprovider",
+        "android.test.runner.stubs.system",
+        "android.test.base.stubs.system",
+        "com.android.media.tv.remoteprovider.impl",
     ],
     static_libs: [
         "mockito-target-minus-junit4",

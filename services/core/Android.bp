@@ -50,7 +50,7 @@ java_library_static {
     ],
 }
 
-genrule {
+java_genrule {
     name: "services.core.protologsrc",
     srcs: [
         ":protolog-impl",
@@ -60,7 +60,7 @@ genrule {
     tools: ["protologtool"],
     cmd: "$(location protologtool) transform-protolog-calls " +
         "--protolog-class com.android.internal.protolog.ProtoLog " +
-        "--loggroups-class com.android.internal.protolog.ProtoLogGroup " +
+        "--loggroups-class com.android.internal.protolog.WmProtoLogGroups " +
         "--loggroups-jar $(location :protolog-groups) " +
         "--viewer-config-file-path /etc/core.protolog.pb " +
         "--legacy-viewer-config-file-path /system/etc/protolog.conf.json.gz " +
@@ -70,7 +70,7 @@ genrule {
     out: ["services.core.protolog.srcjar"],
 }
 
-genrule {
+java_genrule {
     name: "generate-protolog.json",
     srcs: [
         ":protolog-groups",
@@ -79,7 +79,7 @@ genrule {
     tools: ["protologtool"],
     cmd: "$(location protologtool) generate-viewer-config " +
         "--protolog-class com.android.internal.protolog.ProtoLog " +
-        "--loggroups-class com.android.internal.protolog.ProtoLogGroup " +
+        "--loggroups-class com.android.internal.protolog.WmProtoLogGroups " +
         "--loggroups-jar $(location :protolog-groups) " +
         "--viewer-config-type json " +
         "--viewer-config $(out) " +
@@ -87,7 +87,7 @@ genrule {
     out: ["services.core.protolog.json"],
 }
 
-genrule {
+java_genrule {
     name: "gen-core.protolog.pb",
     srcs: [
         ":protolog-groups",
@@ -96,7 +96,7 @@ genrule {
     tools: ["protologtool"],
     cmd: "$(location protologtool) generate-viewer-config " +
         "--protolog-class com.android.internal.protolog.ProtoLog " +
-        "--loggroups-class com.android.internal.protolog.ProtoLogGroup " +
+        "--loggroups-class com.android.internal.protolog.WmProtoLogGroups " +
         "--loggroups-jar $(location :protolog-groups) " +
         "--viewer-config-type proto " +
         "--viewer-config $(out) " +
@@ -126,6 +126,7 @@ java_library_static {
         "platform_service_defaults",
         "android.hardware.power-java_shared",
         "latest_android_hardware_broadcastradio_java_static",
+        "services_crashrecovery_stubs_conditionally",
     ],
     srcs: [
         ":android.hardware.tv.hdmi.connection-V1-java-source",
@@ -225,6 +226,7 @@ java_library_static {
         "updates_flags_lib",
         "com_android_server_accessibility_flags_lib",
         "//frameworks/libs/systemui:com_android_systemui_shared_flags_lib",
+        "com_android_launcher3_flags_lib",
         "com_android_wm_shell_flags_lib",
         "com.android.server.utils_aconfig-java",
         "service-jobscheduler-deviceidle.flags-aconfig-java",
@@ -237,6 +239,7 @@ java_library_static {
         "dreams_flags_lib",
         "aconfig_new_storage_flags_lib",
         "powerstats_flags_lib",
+        "locksettings_flags_lib",
     ],
     javac_shard_size: 50,
     javacflags: [
@@ -282,7 +285,7 @@ prebuilt_etc {
     src: "java/com/android/server/location/gnss/gps_debug.conf",
 }
 
-genrule {
+java_genrule {
     name: "services.core.json.gz",
     srcs: [":generate-protolog.json"],
     out: ["services.core.protolog.json.gz"],

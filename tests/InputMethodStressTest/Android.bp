@@ -20,7 +20,7 @@ package {
 android_test {
     name: "InputMethodStressTest",
     srcs: ["src/**/*.java"],
-    libs: ["android.test.runner"],
+    libs: ["android.test.runner.stubs"],
     static_libs: [
         "androidx.test.ext.junit",
         "androidx.test.uiautomator_uiautomator",

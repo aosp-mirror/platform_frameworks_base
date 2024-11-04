@@ -16,16 +16,13 @@
 
 package com.android.server.wm;
 
-import static android.os.StrictMode.setThreadPolicy;
-
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
+import android.annotation.MainThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Environment;
-import android.os.StrictMode;
-import android.os.StrictMode.ThreadPolicy;
 import android.util.AtomicFile;
 import android.util.Slog;
 
@@ -122,7 +119,7 @@ class AppCompatConfigurationPersister {
         final File prefFiles = new File(configFolder, letterboxConfigurationFileName);
         mConfigurationFile = new AtomicFile(prefFiles);
         mPersisterQueue = persisterQueue;
-        runWithDiskReadsThreadPolicy(this::readCurrentConfiguration);
+        readCurrentConfiguration();
     }
 
     /**
@@ -212,6 +209,7 @@ class AppCompatConfigurationPersister {
                 mDefaultTabletopModeReachabilitySupplier.get();
     }
 
+    @MainThread
     private void readCurrentConfiguration() {
         if (!mConfigurationFile.exists()) {
             useDefaultValue();
@@ -270,20 +268,6 @@ class AppCompatConfigurationPersister {
         } finally {
             outputStream.close();
         }
-    }
-
-    // The LetterboxConfigurationDeviceConfig needs to access the
-    // file with the current reachability position once when the
-    // device boots. Because DisplayThread uses allowIo=false
-    // accessing a file triggers a DiskReadViolation.
-    // Here we use StrictMode to allow the current thread to read
-    // the AtomicFile once in the current thread restoring the
-    // original ThreadPolicy after that.
-    private void runWithDiskReadsThreadPolicy(Runnable runnable) {
-        final ThreadPolicy currentPolicy = StrictMode.getThreadPolicy();
-        setThreadPolicy(new ThreadPolicy.Builder().permitDiskReads().build());
-        runnable.run();
-        setThreadPolicy(currentPolicy);
     }
 
     private static class UpdateValuesCommand implements

@@ -38,8 +38,15 @@ android_test {
         "framework-connectivity-t.impl",
         "framework",
         "framework-res",
-        "android.test.runner",
-        "android.test.base",
-        "android.test.mock",
+        "android.test.runner.stubs",
+        "android.test.base.stubs",
+        "android.test.mock.stubs",
     ],
+}
+
+test_module_config {
+    name: "FrameworksVpnTests_android_server_connectivity",
+    base: "FrameworksVpnTests",
+    test_suites: ["device-tests"],
+    exclude_annotations: ["com.android.testutils.SkipPresubmit"],
 }

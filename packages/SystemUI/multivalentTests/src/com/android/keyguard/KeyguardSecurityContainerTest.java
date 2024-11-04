@@ -61,13 +61,18 @@ import com.android.systemui.classifier.FalsingA11yDelegate;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.res.R;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
+import com.android.systemui.statusbar.policy.UserSwitcherController.UserSwitchCallback;
 import com.android.systemui.user.data.source.UserRecord;
+import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.settings.GlobalSettings;
+import com.android.systemui.util.time.FakeSystemClock;
 
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
@@ -94,8 +99,12 @@ public class KeyguardSecurityContainerTest extends SysuiTestCase {
     private UserSwitcherController mUserSwitcherController;
     @Mock
     private FalsingA11yDelegate mFalsingA11yDelegate;
+    @Captor
+    private ArgumentCaptor<UserSwitchCallback> mUserSwitchCallbackCaptor =
+            ArgumentCaptor.forClass(UserSwitchCallback.class);
 
     private KeyguardSecurityContainer mKeyguardSecurityContainer;
+    private FakeExecutor mExecutor = new FakeExecutor(new FakeSystemClock());
 
     @Before
     public void setup() {
@@ -106,6 +115,7 @@ public class KeyguardSecurityContainerTest extends SysuiTestCase {
         mSecurityViewFlipper = new KeyguardSecurityViewFlipper(getContext());
         mSecurityViewFlipper.setId(View.generateViewId());
         mKeyguardSecurityContainer = new KeyguardSecurityContainer(getContext());
+        mKeyguardSecurityContainer.setBackgroundExecutor(mExecutor);
         mKeyguardSecurityContainer.setRight(VIEW_WIDTH);
         mKeyguardSecurityContainer.setLeft(0);
         mKeyguardSecurityContainer.setTop(0);
@@ -193,6 +203,28 @@ public class KeyguardSecurityContainerTest extends SysuiTestCase {
         assertThat(viewFlipperConstraint.layout.startToStart).isEqualTo(PARENT_ID);
         assertThat(viewFlipperConstraint.layout.endToEnd).isEqualTo(PARENT_ID);
         assertThat(viewFlipperConstraint.layout.bottomToBottom).isEqualTo(PARENT_ID);
+    }
+
+    @Test
+    public void testUserSwitcherToOneHandedRemovesViews() {
+        // Can happen when a SIM is inserted into a large screen device
+        initMode(MODE_USER_SWITCHER);
+        {
+            View view1 = mKeyguardSecurityContainer.findViewById(
+                    R.id.keyguard_bouncer_user_switcher);
+            View view2 = mKeyguardSecurityContainer.findViewById(R.id.user_switcher_header);
+            assertThat(view1).isNotNull();
+            assertThat(view2).isNotNull();
+        }
+
+        initMode(MODE_ONE_HANDED);
+        {
+            View view1 = mKeyguardSecurityContainer.findViewById(
+                    R.id.keyguard_bouncer_user_switcher);
+            View view2 = mKeyguardSecurityContainer.findViewById(R.id.user_switcher_header);
+            assertThat(view1).isNull();
+            assertThat(view2).isNull();
+        }
     }
 
     @Test
@@ -320,7 +352,7 @@ public class KeyguardSecurityContainerTest extends SysuiTestCase {
 
     @Test
     public void testTwoOrMoreUsersDoesAllowDropDown() {
-        // GIVEN one user has been setup
+        // GIVEN two users have been setup
         ArrayList<UserRecord> records = buildUserRecords(2);
         when(mUserSwitcherController.getCurrentUserRecord()).thenReturn(records.get(0));
         when(mUserSwitcherController.getUsers()).thenReturn(records);
@@ -328,9 +360,21 @@ public class KeyguardSecurityContainerTest extends SysuiTestCase {
         // WHEN UserSwitcherViewMode is initialized
         setupUserSwitcher();
 
-        // THEN the UserSwitcher anchor should not be clickable
+        // THEN the UserSwitcher anchor should be clickable
         ViewGroup anchor = mKeyguardSecurityContainer.findViewById(R.id.user_switcher_anchor);
         assertThat(anchor.isClickable()).isTrue();
+    }
+
+    @Test
+    public void goingOutOfUserSwitcherRemovesCallback() {
+        // WHEN UserSwitcherViewMode is initialized
+        setupUserSwitcher();
+        verify(mUserSwitcherController).addUserSwitchCallback(mUserSwitchCallbackCaptor.capture());
+
+        // Back to default mode, as SIM PIN would be
+        initMode(MODE_DEFAULT);
+        verify(mUserSwitcherController).removeUserSwitchCallback(
+                mUserSwitchCallbackCaptor.getValue());
     }
 
     @Test

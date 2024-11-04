@@ -26,6 +26,8 @@ import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STR
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_NON_STRONG_BIOMETRICS_TIMEOUT;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN;
 import static com.android.systemui.Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR;
+import static com.android.systemui.Flags.FLAG_RELOCK_WITH_POWER_BUTTON_IMMEDIATELY;
+import static com.android.systemui.Flags.FLAG_SIM_PIN_BOUNCER_RESET;
 import static com.android.systemui.keyguard.KeyguardViewMediator.DELAYED_KEYGUARD_ACTION;
 import static com.android.systemui.keyguard.KeyguardViewMediator.KEYGUARD_LOCK_AFTER_DELAY_DEFAULT;
 import static com.android.systemui.keyguard.KeyguardViewMediator.REBOOT_MAINLINE_UPDATE;
@@ -62,6 +64,8 @@ import android.content.Context;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.os.RemoteException;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
 import android.telephony.TelephonyManager;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -98,6 +102,7 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.flags.SystemPropertiesHelper;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionBootInteractor;
 import com.android.systemui.kosmos.KosmosJavaAdapter;
 import com.android.systemui.log.SessionTracker;
 import com.android.systemui.navigationbar.NavigationModeController;
@@ -197,6 +202,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     private @Mock ShadeWindowLogger mShadeWindowLogger;
     private @Mock SelectedUserInteractor mSelectedUserInteractor;
     private @Mock KeyguardInteractor mKeyguardInteractor;
+    private @Mock KeyguardTransitionBootInteractor mKeyguardTransitionBootInteractor;
     private @Captor ArgumentCaptor<KeyguardStateController.Callback>
             mKeyguardStateControllerCallback;
     private @Captor ArgumentCaptor<KeyguardUpdateMonitorCallback>
@@ -307,6 +313,28 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
             // Just so we don't have to add the exception signature to every test.
             fail();
         }
+    }
+
+    @Test
+    @TestableLooper.RunWithLooper(setAsMainLooper = true)
+    public void testHandleSystemReadyWhileUserIsSwitching() {
+        int userId = 1099;
+        when(mUserTracker.getUserId()).thenReturn(userId);
+
+        /* First test the default behavior: handleUserSwitching() is not invoked */
+        when(mUserTracker.isUserSwitching()).thenReturn(false);
+        mViewMediator.mUpdateCallback = mock(KeyguardUpdateMonitorCallback.class);
+        mViewMediator.onSystemReady();
+        TestableLooper.get(this).processAllMessages();
+
+        verify(mViewMediator.mUpdateCallback, never()).onUserSwitching(userId);
+
+        /* Next test user switching is already in progress when started */
+        when(mUserTracker.isUserSwitching()).thenReturn(true);
+        mViewMediator.onSystemReady();
+        TestableLooper.get(this).processAllMessages();
+
+        verify(mViewMediator.mUpdateCallback).onUserSwitching(userId);
     }
 
     @Test
@@ -588,6 +616,35 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
 
     @Test
     @TestableLooper.RunWithLooper(setAsMainLooper = true)
+    @EnableFlags(FLAG_SIM_PIN_BOUNCER_RESET)
+    public void resetStateLocked_whenSimNotReadyAndWasLockedPrior() {
+        // When showing and provisioned
+        mViewMediator.onSystemReady();
+        when(mUpdateMonitor.isDeviceProvisioned()).thenReturn(true);
+        mViewMediator.setShowingLocked(true, "");
+
+        // and a SIM becomes locked and requires a PIN
+        mViewMediator.mUpdateCallback.onSimStateChanged(
+                1 /* subId */,
+                0 /* slotId */,
+                TelephonyManager.SIM_STATE_PIN_REQUIRED);
+        TestableLooper.get(this).processAllMessages();
+
+        reset(mStatusBarKeyguardViewManager);
+
+        // but then disabled by a NOT_READY
+        mViewMediator.mUpdateCallback.onSimStateChanged(
+                1 /* subId */,
+                0 /* slotId */,
+                TelephonyManager.SIM_STATE_NOT_READY);
+        TestableLooper.get(this).processAllMessages();
+
+        // A call to reset the keyguard and bouncer was invoked
+        verify(mStatusBarKeyguardViewManager).reset(true);
+    }
+
+    @Test
+    @TestableLooper.RunWithLooper(setAsMainLooper = true)
     public void restoreBouncerWhenSimLockedAndKeyguardIsGoingAway_initiallyNotShowing() {
         // When showing and provisioned
         mViewMediator.onSystemReady();
@@ -786,6 +843,32 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
 
     @Test
     @TestableLooper.RunWithLooper(setAsMainLooper = true)
+    @EnableFlags(FLAG_RELOCK_WITH_POWER_BUTTON_IMMEDIATELY)
+    public void testCancelKeyguardExitAnimationDueToSleep_withPendingLockAndRelockFlag_keyguardWillBeShowing() {
+        startMockKeyguardExitAnimation();
+
+        mViewMediator.onStartedGoingToSleep(PowerManager.GO_TO_SLEEP_REASON_POWER_BUTTON);
+        mViewMediator.onFinishedGoingToSleep(PowerManager.GO_TO_SLEEP_REASON_POWER_BUTTON, false);
+
+        cancelMockKeyguardExitAnimation();
+
+        mViewMediator.maybeHandlePendingLock();
+        TestableLooper.get(this).processAllMessages();
+
+        assertTrue(mViewMediator.isShowingAndNotOccluded());
+
+        verify(mKeyguardUnlockAnimationController).notifyFinishedKeyguardExitAnimation(true);
+
+        // Unlock animators call `exitKeyguardAndFinishSurfaceBehindRemoteAnimation` when canceled
+        mViewMediator.exitKeyguardAndFinishSurfaceBehindRemoteAnimation(false);
+        TestableLooper.get(this).processAllMessages();
+
+        verify(mUpdateMonitor, never()).dispatchKeyguardDismissAnimationFinished();
+    }
+
+    @Test
+    @TestableLooper.RunWithLooper(setAsMainLooper = true)
+    @DisableFlags(FLAG_RELOCK_WITH_POWER_BUTTON_IMMEDIATELY)
     public void testCancelKeyguardExitAnimationDueToSleep_withPendingLock_keyguardWillBeShowing() {
         startMockKeyguardExitAnimation();
 
@@ -1241,6 +1324,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
                 () -> mock(WindowManagerLockscreenVisibilityManager.class),
                 mSelectedUserInteractor,
                 mKeyguardInteractor,
+                mKeyguardTransitionBootInteractor,
                 mock(WindowManagerOcclusionManager.class));
         mViewMediator.start();
 

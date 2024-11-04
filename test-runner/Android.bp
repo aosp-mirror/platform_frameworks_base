@@ -32,14 +32,28 @@ java_sdk_library {
         javacflags: ["-Xep:DepAnn:ERROR"],
     },
 
-    libs: [
-        "android.test.base",
-        "android.test.mock",
+    impl_only_libs: [
+        "android.test.base.impl",
+        "android.test.mock.impl",
     ],
-    stub_only_libs: [
-        "android.test.base",
-        "android.test.mock",
-    ],
+    public: {
+        libs: [
+            "android.test.base.stubs",
+            "android.test.mock.stubs",
+        ],
+    },
+    system: {
+        libs: [
+            "android.test.base.stubs.system",
+            "android.test.mock.stubs.system",
+        ],
+    },
+    test: {
+        libs: [
+            "android.test.base.stubs.test",
+            "android.test.mock.stubs.test",
+        ],
+    },
     api_packages: [
         "android.test",
         "android.test.suitebuilder",
@@ -64,7 +78,7 @@ java_library {
     sdk_version: "current",
     libs: [
         "android.test.base_static",
-        "android.test.mock",
+        "android.test.mock.stubs",
         "junit",
     ],
 }

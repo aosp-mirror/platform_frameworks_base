@@ -18,13 +18,15 @@ package com.android.compose.animation.scene.transformation
 
 import androidx.compose.animation.core.Easing
 import androidx.compose.animation.core.LinearEasing
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.util.fastCoerceAtLeast
 import androidx.compose.ui.util.fastCoerceAtMost
 import androidx.compose.ui.util.fastCoerceIn
 import com.android.compose.animation.scene.ContentKey
-import com.android.compose.animation.scene.Element
+import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.ElementMatcher
-import com.android.compose.animation.scene.SceneTransitionLayoutImpl
+import com.android.compose.animation.scene.ElementStateScope
 import com.android.compose.animation.scene.content.state.TransitionState
 
 /** A transformation applied to one or more elements during a transition. */
@@ -52,23 +54,32 @@ sealed interface Transformation {
 internal class SharedElementTransformation(
     override val matcher: ElementMatcher,
     internal val enabled: Boolean,
+    internal val elevateInContent: ContentKey?,
 ) : Transformation
 
 /** A transformation that changes the value of an element property, like its size or offset. */
-internal sealed interface PropertyTransformation<T> : Transformation {
+interface PropertyTransformation<T> : Transformation {
     /**
-     * Transform [value], i.e. the value of the transformed property without this transformation.
+     * Return the transformed value for the given property, i.e.:
+     * - the value at progress = 0% for elements that are entering the layout (i.e. elements in the
+     *   content we are transitioning to).
+     * - the value at progress = 100% for elements that are leaving the layout (i.e. elements in the
+     *   content we are transitioning from).
+     *
+     * The returned value will be interpolated using the [transition] progress and [value], the
+     * value of the property when we are idle.
      */
-    // TODO(b/290184746): Figure out a public API for custom transformations that don't have access
-    // to these internal classes.
-    fun transform(
-        layoutImpl: SceneTransitionLayoutImpl,
+    fun PropertyTransformationScope.transform(
         content: ContentKey,
-        element: Element,
-        stateInContent: Element.State,
+        element: ElementKey,
         transition: TransitionState.Transition,
         value: T,
     ): T
+}
+
+interface PropertyTransformationScope : Density, ElementStateScope {
+    /** The current [direction][LayoutDirection] of the layout. */
+    val layoutDirection: LayoutDirection
 }
 
 /**
@@ -83,17 +94,13 @@ internal class RangedPropertyTransformation<T>(
     override fun reversed(): Transformation {
         return RangedPropertyTransformation(
             delegate.reversed() as PropertyTransformation<T>,
-            range.reversed()
+            range.reversed(),
         )
     }
 }
 
 /** The progress-based range of a [PropertyTransformation]. */
-data class TransformationRange(
-    val start: Float,
-    val end: Float,
-    val easing: Easing,
-) {
+data class TransformationRange(val start: Float, val end: Float, val easing: Easing) {
     constructor(
         start: Float? = null,
         end: Float? = null,

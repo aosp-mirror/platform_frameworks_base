@@ -4,24 +4,7 @@
             "name": "FrameworksServicesTests_android_server_uri"
         },
         {
-            "name": "CtsStorageHostTestCases",
-            "options": [
-                {
-                    "include-filter": "android.appsecurity.cts.ExternalStorageHostTest#testGrantUriPermission"
-                },
-                {
-                    "include-filter": "android.appsecurity.cts.ExternalStorageHostTest#testGrantUriPermission29"
-                },
-                {
-                    "include-filter": "android.appsecurity.cts.ExternalStorageHostTest#testMediaNone"
-                },
-                {
-                    "include-filter": "android.appsecurity.cts.ExternalStorageHostTest#testMediaNone28"
-                },
-                {
-                    "include-filter": "android.appsecurity.cts.ExternalStorageHostTest#testMediaNone29"
-                }
-            ]
+            "name": "CtsStorageHostTestCases_android_server_uri"
         }
     ],
     "postsubmit": [
@@ -34,12 +17,7 @@
             ]
         },
         {
-            "name": "CtsWindowManagerDeviceWindow",
-            "options": [
-                {
-                    "include-filter": "android.server.wm.window.CrossAppDragAndDropTests"
-                }
-            ]
+            "name": "CtsWindowManagerDeviceWindow_window_crossappdraganddroptests"
         }
     ]
 }

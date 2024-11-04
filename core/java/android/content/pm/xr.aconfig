@@ -1,0 +1,9 @@
+package: "android.xr"
+container: "system"
+
+flag {
+    namespace: "xr"
+    name: "xr_manifest_entries"
+    description: "Adds manifest entries used by Android XR"
+    bug: "364416355"
+}

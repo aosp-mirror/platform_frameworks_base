@@ -22,6 +22,9 @@ import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 
 import static com.android.server.wm.AppCompatConfiguration.LETTERBOX_BACKGROUND_WALLPAPER;
 import static com.android.server.wm.AppCompatConfiguration.letterboxBackgroundTypeToString;
+import static com.android.server.wm.AppCompatLetterboxUtils.calculateLetterboxInnerBounds;
+import static com.android.server.wm.AppCompatLetterboxUtils.calculateLetterboxOuterBounds;
+import static com.android.server.wm.AppCompatLetterboxUtils.calculateLetterboxPosition;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -32,6 +35,7 @@ import android.view.SurfaceControl;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.LetterboxDetails;
 import com.android.server.wm.AppCompatConfiguration.LetterboxBackgroundType;
+import com.android.window.flags.Flags;
 
 import java.io.PrintWriter;
 
@@ -43,7 +47,7 @@ class AppCompatLetterboxPolicy {
     @NonNull
     private final ActivityRecord mActivityRecord;
     @NonNull
-    private final LetterboxPolicyState mLetterboxPolicyState;
+    private final AppCompatLetterboxPolicyState mLetterboxPolicyState;
     @NonNull
     private final AppCompatRoundedCorners mAppCompatRoundedCorners;
     @NonNull
@@ -54,7 +58,8 @@ class AppCompatLetterboxPolicy {
     AppCompatLetterboxPolicy(@NonNull ActivityRecord  activityRecord,
             @NonNull AppCompatConfiguration appCompatConfiguration) {
         mActivityRecord = activityRecord;
-        mLetterboxPolicyState = new LetterboxPolicyState();
+        mLetterboxPolicyState = Flags.appCompatRefactoring() ? new ShellLetterboxPolicyState()
+                : new LegacyLetterboxPolicyState();
         // TODO (b/358334569) Improve cutout logic dependency on app compat.
         mAppCompatRoundedCorners = new AppCompatRoundedCorners(mActivityRecord,
                 this::isLetterboxedNotForDisplayCutout);
@@ -88,7 +93,24 @@ class AppCompatLetterboxPolicy {
 
     @Nullable
     LetterboxDetails getLetterboxDetails() {
-        return mLetterboxPolicyState.getLetterboxDetails();
+        final WindowState w = mActivityRecord.findMainWindow();
+        if (!isRunning() || w == null || w.isLetterboxedForDisplayCutout()) {
+            return null;
+        }
+        final Rect letterboxInnerBounds = new Rect();
+        final Rect letterboxOuterBounds = new Rect();
+        mLetterboxPolicyState.getLetterboxInnerBounds(letterboxInnerBounds);
+        mLetterboxPolicyState.getLetterboxOuterBounds(letterboxOuterBounds);
+
+        if (letterboxInnerBounds.isEmpty() || letterboxOuterBounds.isEmpty()) {
+            return null;
+        }
+
+        return new LetterboxDetails(
+                letterboxInnerBounds,
+                letterboxOuterBounds,
+                w.mAttrs.insetsFlags.appearance
+        );
     }
 
     /**
@@ -99,6 +121,13 @@ class AppCompatLetterboxPolicy {
         return mLetterboxPolicyState.isFullyTransparentBarAllowed(rect);
     }
 
+    /**
+     * Updates the letterbox surfaces in case this is needed.
+     *
+     * @param winHint   The WindowState for the letterboxed Activity.
+     * @param t         The current Transaction.
+     * @param inputT    The pending transaction used for the input surface.
+     */
     void updateLetterboxSurfaceIfNeeded(@NonNull WindowState winHint,
             @NonNull SurfaceControl.Transaction t,
             @NonNull SurfaceControl.Transaction inputT) {
@@ -232,12 +261,17 @@ class AppCompatLetterboxPolicy {
                 || w.mAnimatingExit;
     }
 
-    private class LetterboxPolicyState {
+    /**
+     * Existing {@link AppCompatLetterboxPolicyState} implementation.
+     * TODO(b/375339716): Clean code for legacy implementation.
+     */
+    private class LegacyLetterboxPolicyState implements AppCompatLetterboxPolicyState {
 
         @Nullable
         private Letterbox mLetterbox;
 
-        void layoutLetterboxIfNeeded(@NonNull WindowState w) {
+        @Override
+        public void layoutLetterboxIfNeeded(@NonNull WindowState w) {
             if (!isRunning()) {
                 final AppCompatLetterboxOverrides letterboxOverrides = mActivityRecord
                         .mAppCompatController.getAppCompatLetterboxOverrides();
@@ -252,41 +286,11 @@ class AppCompatLetterboxPolicy {
                         .setLetterboxInnerBoundsSupplier(mLetterbox::getInnerFrame);
             }
             final Point letterboxPosition = new Point();
-            if (mActivityRecord.isInLetterboxAnimation()) {
-                // In this case we attach the letterbox to the task instead of the activity.
-                mActivityRecord.getTask().getPosition(letterboxPosition);
-            } else {
-                mActivityRecord.getPosition(letterboxPosition);
-            }
-
-            // Get the bounds of the "space-to-fill". The transformed bounds have the highest
-            // priority because the activity is launched in a rotated environment. In multi-window
-            // mode, the taskFragment-level represents this for both split-screen
-            // and activity-embedding. In fullscreen-mode, the task container does
-            // (since the orientation letterbox is also applied to the task).
-            final Rect transformedBounds = mActivityRecord.getFixedRotationTransformDisplayBounds();
-            final Rect spaceToFill = transformedBounds != null
-                    ? transformedBounds
-                    : mActivityRecord.inMultiWindowMode()
-                            ? mActivityRecord.getTaskFragment().getBounds()
-                            : mActivityRecord.getRootTask().getParent().getBounds();
-            // In case of translucent activities an option is to use the WindowState#getFrame() of
-            // the first opaque activity beneath. In some cases (e.g. an opaque activity is using
-            // non MATCH_PARENT layouts or a Dialog theme) this might not provide the correct
-            // information and in particular it might provide a value for a smaller area making
-            // the letterbox overlap with the translucent activity's frame.
-            // If we use WindowState#getFrame() for the translucent activity's letterbox inner
-            // frame, the letterbox will then be overlapped with the translucent activity's frame.
-            // Because the surface layer of letterbox is lower than an activity window, this
-            // won't crop the content, but it may affect other features that rely on values stored
-            // in mLetterbox, e.g. transitions, a status bar scrim and recents preview in Launcher
-            // For this reason we use ActivityRecord#getBounds() that the translucent activity
-            // inherits from the first opaque activity beneath and also takes care of the scaling
-            // in case of activities in size compat mode.
-            final TransparentPolicy transparentPolicy =
-                    mActivityRecord.mAppCompatController.getTransparentPolicy();
-            final Rect innerFrame =
-                    transparentPolicy.isRunning() ? mActivityRecord.getBounds() : w.getFrame();
+            calculateLetterboxPosition(mActivityRecord, letterboxPosition);
+            final Rect spaceToFill = new Rect();
+            calculateLetterboxOuterBounds(mActivityRecord, spaceToFill);
+            final Rect innerFrame = new Rect();
+            calculateLetterboxInnerBounds(mActivityRecord, w, innerFrame);
             mLetterbox.layout(spaceToFill, innerFrame, letterboxPosition);
             if (mActivityRecord.mAppCompatController.getAppCompatReachabilityOverrides()
                     .isDoubleTapEvent()) {
@@ -299,18 +303,21 @@ class AppCompatLetterboxPolicy {
          * @return  {@code true} if the policy is running and so if the current activity is
          *          letterboxed.
          */
-        boolean isRunning() {
+        @Override
+        public boolean isRunning() {
             return mLetterbox != null;
         }
 
-        void onMovedToDisplay(int displayId) {
+        @Override
+        public void onMovedToDisplay(int displayId) {
             if (isRunning()) {
                 mLetterbox.onMovedToDisplay(displayId);
             }
         }
 
         /** Cleans up {@link Letterbox} if it exists.*/
-        void stop() {
+        @Override
+        public void stop() {
             if (isRunning()) {
                 mLetterbox.destroy();
                 mLetterbox = null;
@@ -319,7 +326,8 @@ class AppCompatLetterboxPolicy {
                     .setLetterboxInnerBoundsSupplier(null);
         }
 
-        void updateLetterboxSurfaceIfNeeded(@NonNull WindowState winHint,
+        @Override
+        public void updateLetterboxSurfaceIfNeeded(@NonNull WindowState winHint,
                 @NonNull SurfaceControl.Transaction t,
                 @NonNull SurfaceControl.Transaction inputT) {
             if (shouldNotLayoutLetterbox(winHint)) {
@@ -331,15 +339,17 @@ class AppCompatLetterboxPolicy {
             }
         }
 
-        void hide() {
+        @Override
+        public void hide() {
             if (isRunning()) {
                 mLetterbox.hide();
             }
         }
 
         /** Gets the letterbox insets. The insets will be empty if there is no letterbox. */
+        @Override
         @NonNull
-        Rect getLetterboxInsets() {
+        public Rect getLetterboxInsets() {
             if (isRunning()) {
                 return mLetterbox.getInsets();
             } else {
@@ -348,7 +358,8 @@ class AppCompatLetterboxPolicy {
         }
 
         /** Gets the inner bounds of letterbox. The bounds will be empty with no letterbox. */
-        void getLetterboxInnerBounds(@NonNull Rect outBounds) {
+        @Override
+        public void getLetterboxInnerBounds(@NonNull Rect outBounds) {
             if (isRunning()) {
                 outBounds.set(mLetterbox.getInnerFrame());
                 final WindowState w = mActivityRecord.findMainWindow();
@@ -361,7 +372,8 @@ class AppCompatLetterboxPolicy {
         }
 
         /** Gets the outer bounds of letterbox. The bounds will be empty with no letterbox. */
-        private void getLetterboxOuterBounds(@NonNull Rect outBounds) {
+        @Override
+        public void getLetterboxOuterBounds(@NonNull Rect outBounds) {
             if (isRunning()) {
                 outBounds.set(mLetterbox.getOuterFrame());
             } else {
@@ -373,30 +385,9 @@ class AppCompatLetterboxPolicy {
          * @return {@code true} if bar shown within a given rectangle is allowed to be fully
          *          transparent when the current activity is displayed.
          */
-        boolean isFullyTransparentBarAllowed(@NonNull Rect rect) {
+        @Override
+        public boolean isFullyTransparentBarAllowed(@NonNull Rect rect) {
             return !isRunning() || mLetterbox.notIntersectsOrFullyContains(rect);
-        }
-
-        @Nullable
-        LetterboxDetails getLetterboxDetails() {
-            final WindowState w = mActivityRecord.findMainWindow();
-            if (!isRunning() || w == null || w.isLetterboxedForDisplayCutout()) {
-                return null;
-            }
-            final Rect letterboxInnerBounds = new Rect();
-            final Rect letterboxOuterBounds = new Rect();
-            getLetterboxInnerBounds(letterboxInnerBounds);
-            getLetterboxOuterBounds(letterboxOuterBounds);
-
-            if (letterboxInnerBounds.isEmpty() || letterboxOuterBounds.isEmpty()) {
-                return null;
-            }
-
-            return new LetterboxDetails(
-                    letterboxInnerBounds,
-                    letterboxOuterBounds,
-                    w.mAttrs.insetsFlags.appearance
-            );
         }
 
         @Nullable
@@ -407,5 +398,117 @@ class AppCompatLetterboxPolicy {
             return mActivityRecord.getSurfaceControl();
         }
 
+    }
+
+    /**
+     * {@link AppCompatLetterboxPolicyState} implementation for the letterbox presentation on shell.
+     */
+    private class ShellLetterboxPolicyState implements AppCompatLetterboxPolicyState {
+
+        private final Rect mInnerBounds = new Rect();
+        private final Rect mOuterBounds = new Rect();
+        private final Point mLetterboxPosition = new Point();
+        private boolean mRunning;
+
+        @Override
+        public void layoutLetterboxIfNeeded(@NonNull WindowState w) {
+            mRunning = true;
+            calculateLetterboxPosition(mActivityRecord, mLetterboxPosition);
+            calculateLetterboxOuterBounds(mActivityRecord, mOuterBounds);
+            calculateLetterboxInnerBounds(mActivityRecord, w, mInnerBounds);
+            mActivityRecord.mAppCompatController.getAppCompatReachabilityPolicy()
+                    .setLetterboxInnerBoundsSupplier(() -> mInnerBounds);
+        }
+
+        @Override
+        public boolean isRunning() {
+            return mRunning;
+        }
+
+        @Override
+        public void onMovedToDisplay(int displayId) {
+            // TODO(b/374918469): Handle Display Change for Letterbox in Shell
+        }
+
+        @Override
+        public void stop() {
+            if (!isRunning()) {
+                return;
+            }
+            mRunning = false;
+            mLetterboxPosition.set(0, 0);
+            mInnerBounds.setEmpty();
+            mOuterBounds.setEmpty();
+            mActivityRecord.mAppCompatController.getAppCompatReachabilityPolicy()
+                    .setLetterboxInnerBoundsSupplier(null);
+        }
+
+        @Override
+        public void hide() {
+            if (!isRunning()) {
+                return;
+            }
+            mLetterboxPosition.set(0, 0);
+            mInnerBounds.setEmpty();
+            mOuterBounds.setEmpty();
+        }
+
+        @NonNull
+        @Override
+        public Rect getLetterboxInsets() {
+            if (isRunning()) {
+                return new Rect(
+                        Math.max(0, mInnerBounds.left - mOuterBounds.left),
+                        Math.max(0, mOuterBounds.top - mInnerBounds.top),
+                        Math.max(0, mOuterBounds.right - mInnerBounds.right),
+                        Math.max(0, mInnerBounds.bottom - mOuterBounds.bottom)
+                );
+            }
+            return new Rect();
+        }
+
+        @Override
+        public void getLetterboxInnerBounds(@NonNull Rect outBounds) {
+            if (isRunning()) {
+                outBounds.set(mInnerBounds);
+                final WindowState w = mActivityRecord.findMainWindow();
+                if (w != null) {
+                    AppCompatUtils.adjustBoundsForTaskbar(w, outBounds);
+                }
+            } else {
+                outBounds.setEmpty();
+            }
+        }
+
+        @Override
+        public void getLetterboxOuterBounds(@NonNull Rect outBounds) {
+            if (isRunning()) {
+                outBounds.set(mOuterBounds);
+            } else {
+                outBounds.setEmpty();
+            }
+        }
+
+        @Override
+        public void updateLetterboxSurfaceIfNeeded(@NonNull WindowState winHint,
+                @NonNull SurfaceControl.Transaction t,
+                @NonNull SurfaceControl.Transaction inputT) {
+
+            if (shouldNotLayoutLetterbox(winHint)) {
+                return;
+            }
+            start(winHint);
+        }
+
+        @Override
+        public boolean isFullyTransparentBarAllowed(@NonNull Rect rect) {
+            // TODO(b/374921442) Handle Transparent Activities Letterboxing in Shell.
+            // At the moment Shell handles letterbox with a single surface. This would make
+            // notIntersectsOrFullyContains() to return false in the existing Letterbox
+            // implementation.
+            // Note: Previous implementation is
+            //       !isRunning() || mLetterbox.notIntersectsOrFullyContains(rect);
+            return !isRunning();
+        }
     }
 }

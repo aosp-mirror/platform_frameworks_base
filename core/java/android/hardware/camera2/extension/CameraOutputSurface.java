@@ -42,11 +42,9 @@ import com.android.internal.camera.flags.Flags;
  * @hide
  */
 @SystemApi
-@FlaggedApi(Flags.FLAG_CONCERT_MODE)
 public final class CameraOutputSurface {
     private final OutputSurface mOutputSurface;
 
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
     CameraOutputSurface(@NonNull OutputSurface surface) {
        mOutputSurface = surface;
     }
@@ -59,7 +57,6 @@ public final class CameraOutputSurface {
      * @param size         Requested size of the camera
      *                     output
      */
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
     public CameraOutputSurface(@NonNull Surface surface,
             @NonNull Size size) {
         mOutputSurface = new OutputSurface();
@@ -75,7 +72,6 @@ public final class CameraOutputSurface {
     /**
      * Return the current output {@link Surface}
      */
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
     @NonNull
     public Surface getSurface() {
         return mOutputSurface.surface;
@@ -84,7 +80,6 @@ public final class CameraOutputSurface {
     /**
      * Return the current requested output size
      */
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
     @NonNull
     public android.util.Size getSize() {
         if (mOutputSurface.size != null) {
@@ -96,7 +91,6 @@ public final class CameraOutputSurface {
     /**
      * Return the current surface output {@link android.graphics.ImageFormat}
      */
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
     public @ImageFormat.Format int getImageFormat() {
         return mOutputSurface.imageFormat;
     }
@@ -107,7 +101,6 @@ public final class CameraOutputSurface {
      * {@link android.hardware.camera2.params.DynamicRangeProfiles.STANDARD}
      * unless specified by CameraOutputSurface.setDynamicRangeProfile.
      */
-    @FlaggedApi(Flags.FLAG_EXTENSION_10_BIT)
     public @DynamicRangeProfiles.Profile long getDynamicRangeProfile() {
         return mOutputSurface.dynamicRangeProfile;
     }
@@ -118,7 +111,6 @@ public final class CameraOutputSurface {
      * unless specified by CameraOutputSurface.setColorSpace.
      */
     @SuppressLint("MethodNameUnits")
-    @FlaggedApi(Flags.FLAG_EXTENSION_10_BIT)
     public int getColorSpace() {
         return mOutputSurface.colorSpace;
     }
@@ -128,7 +120,6 @@ public final class CameraOutputSurface {
      * will be {@link android.hardware.camera2.params.DynamicRangeProfiles.STANDARD}
      * unless explicitly set using this method.
      */
-    @FlaggedApi(Flags.FLAG_EXTENSION_10_BIT)
     public void setDynamicRangeProfile(
             @DynamicRangeProfiles.Profile long dynamicRangeProfile) {
         mOutputSurface.dynamicRangeProfile = dynamicRangeProfile;

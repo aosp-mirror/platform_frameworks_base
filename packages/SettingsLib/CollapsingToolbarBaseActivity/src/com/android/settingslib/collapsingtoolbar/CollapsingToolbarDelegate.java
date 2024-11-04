@@ -20,6 +20,7 @@ import static android.text.Layout.HYPHENATION_FREQUENCY_NORMAL_FAST;
 
 import android.app.ActionBar;
 import android.app.Activity;
+import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
@@ -36,6 +37,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
+
+import com.android.settingslib.widget.SettingsThemeHelper;
 
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
@@ -84,6 +87,8 @@ public class CollapsingToolbarDelegate {
 
     private boolean mUseCollapsingToolbar;
 
+    private boolean mIsExpressiveTheme;
+
     public CollapsingToolbarDelegate(@NonNull HostCallback hostCallback,
             boolean useCollapsingToolbar) {
         mHostCallback = hostCallback;
@@ -103,11 +108,16 @@ public class CollapsingToolbarDelegate {
         int layoutId;
         boolean useCollapsingToolbar =
                 mUseCollapsingToolbar || Build.VERSION.SDK_INT < Build.VERSION_CODES.S;
+        Context context = (activity != null) ? activity : inflater.getContext();
+        mIsExpressiveTheme = SettingsThemeHelper.isExpressiveTheme(context);
         if (useCollapsingToolbar) {
-            layoutId = R.layout.collapsing_toolbar_base_layout;
+            layoutId = mIsExpressiveTheme
+                    ? R.layout.settingslib_expressive_collapsing_toolbar_base_layout
+                    : R.layout.collapsing_toolbar_base_layout;
         } else {
             layoutId = R.layout.non_collapsing_toolbar_base_layout;
         }
+
         final View view = inflater.inflate(layoutId, container, false);
         if (view instanceof CoordinatorLayout) {
             mCoordinatorLayout = (CoordinatorLayout) view;
@@ -155,6 +165,9 @@ public class CollapsingToolbarDelegate {
             if (actionBar != null) {
                 actionBar.setDisplayHomeAsUpEnabled(true);
                 actionBar.setHomeButtonEnabled(true);
+                if (mIsExpressiveTheme) {
+                    actionBar.setHomeAsUpIndicator(R.drawable.settingslib_expressive_icon_back);
+                }
                 actionBar.setDisplayShowTitleEnabled(true);
             }
         }
@@ -174,6 +187,9 @@ public class CollapsingToolbarDelegate {
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
             actionBar.setHomeButtonEnabled(true);
+            if (mIsExpressiveTheme) {
+                actionBar.setHomeAsUpIndicator(R.drawable.settingslib_expressive_icon_back);
+            }
             actionBar.setDisplayShowTitleEnabled(true);
         }
     }
@@ -188,6 +204,9 @@ public class CollapsingToolbarDelegate {
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
             actionBar.setHomeButtonEnabled(true);
+            if (mIsExpressiveTheme) {
+                actionBar.setHomeAsUpIndicator(R.drawable.settingslib_expressive_icon_back);
+            }
             actionBar.setDisplayShowTitleEnabled(true);
         }
     }

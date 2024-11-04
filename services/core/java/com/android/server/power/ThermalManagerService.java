@@ -31,6 +31,7 @@ import android.content.Context;
 import android.hardware.thermal.IThermal;
 import android.hardware.thermal.IThermalChangedCallback;
 import android.hardware.thermal.TemperatureThreshold;
+import android.hardware.thermal.TemperatureType;
 import android.hardware.thermal.ThrottlingSeverity;
 import android.hardware.thermal.V1_0.ThermalStatus;
 import android.hardware.thermal.V1_0.ThermalStatusCode;
@@ -134,6 +135,31 @@ public class ThermalManagerService extends SystemService {
     @VisibleForTesting
     final TemperatureWatcher mTemperatureWatcher = new TemperatureWatcher();
 
+    private final ThermalHalWrapper.WrapperThermalChangedCallback mWrapperCallback =
+            new ThermalHalWrapper.WrapperThermalChangedCallback() {
+                @Override
+                public void onTemperatureChanged(Temperature temperature) {
+                    final long token = Binder.clearCallingIdentity();
+                    try {
+                        ThermalManagerService.this.onTemperatureChanged(temperature, true);
+                    } finally {
+                        Binder.restoreCallingIdentity(token);
+                    }
+                }
+
+                @Override
+                public void onThresholdChanged(TemperatureThreshold threshold) {
+                    final long token = Binder.clearCallingIdentity();
+                    try {
+                        synchronized (mTemperatureWatcher.mSamples) {
+                            mTemperatureWatcher.updateTemperatureThresholdLocked(threshold, true);
+                        }
+                    } finally {
+                        Binder.restoreCallingIdentity(token);
+                    }
+                }
+            };
+
     private final Context mContext;
 
     public ThermalManagerService(Context context) {
@@ -146,7 +172,7 @@ public class ThermalManagerService extends SystemService {
         mContext = context;
         mHalWrapper = halWrapper;
         if (halWrapper != null) {
-            halWrapper.setCallback(this::onTemperatureChangedCallback);
+            halWrapper.setCallback(mWrapperCallback);
         }
         mStatus = Temperature.THROTTLING_NONE;
     }
@@ -171,19 +197,19 @@ public class ThermalManagerService extends SystemService {
             // Connect to HAL and post to listeners.
             boolean halConnected = (mHalWrapper != null);
             if (!halConnected) {
-                mHalWrapper = new ThermalHalAidlWrapper(this::onTemperatureChangedCallback);
+                mHalWrapper = new ThermalHalAidlWrapper(mWrapperCallback);
                 halConnected = mHalWrapper.connectToHal();
             }
             if (!halConnected) {
-                mHalWrapper = new ThermalHal20Wrapper(this::onTemperatureChangedCallback);
+                mHalWrapper = new ThermalHal20Wrapper(mWrapperCallback);
                 halConnected = mHalWrapper.connectToHal();
             }
             if (!halConnected) {
-                mHalWrapper = new ThermalHal11Wrapper(this::onTemperatureChangedCallback);
+                mHalWrapper = new ThermalHal11Wrapper(mWrapperCallback);
                 halConnected = mHalWrapper.connectToHal();
             }
             if (!halConnected) {
-                mHalWrapper = new ThermalHal10Wrapper(this::onTemperatureChangedCallback);
+                mHalWrapper = new ThermalHal10Wrapper(mWrapperCallback);
                 halConnected = mHalWrapper.connectToHal();
             }
             if (!halConnected) {
@@ -200,7 +226,7 @@ public class ThermalManagerService extends SystemService {
                 onTemperatureChanged(temperatures.get(i), false);
             }
             onTemperatureMapChangedLocked();
-            mTemperatureWatcher.updateThresholds();
+            mTemperatureWatcher.getAndUpdateThresholds();
             mHalReady.set(true);
         }
     }
@@ -332,16 +358,6 @@ public class ThermalManagerService extends SystemService {
             if (sendStatus) {
                 onTemperatureMapChangedLocked();
             }
-        }
-    }
-
-    /* HwBinder callback **/
-    private void onTemperatureChangedCallback(Temperature temperature) {
-        final long token = Binder.clearCallingIdentity();
-        try {
-            onTemperatureChanged(temperature, true);
-        } finally {
-            Binder.restoreCallingIdentity(token);
         }
     }
 
@@ -924,19 +940,19 @@ public class ThermalManagerService extends SystemService {
         /** Lock to protect HAL handle. */
         protected final Object mHalLock = new Object();
 
-        @FunctionalInterface
-        interface TemperatureChangedCallback {
-            void onValues(Temperature temperature);
+        interface WrapperThermalChangedCallback {
+            void onTemperatureChanged(Temperature temperature);
+            void onThresholdChanged(TemperatureThreshold threshold);
         }
 
         /** Temperature callback. */
-        protected TemperatureChangedCallback mCallback;
+        protected WrapperThermalChangedCallback mCallback;
 
         /** Cookie for matching the right end point. */
         protected static final int THERMAL_HAL_DEATH_COOKIE = 5612;
 
         @VisibleForTesting
-        protected void setCallback(TemperatureChangedCallback cb) {
+        protected void setCallback(WrapperThermalChangedCallback cb) {
             mCallback = cb;
         }
 
@@ -959,7 +975,7 @@ public class ThermalManagerService extends SystemService {
                 List<Temperature> temperatures = getCurrentTemperatures(false, 0);
                 final int count = temperatures.size();
                 for (int i = 0; i < count; i++) {
-                    mCallback.onValues(temperatures.get(i));
+                    mCallback.onTemperatureChanged(temperatures.get(i));
                 }
             }
         }
@@ -985,31 +1001,42 @@ public class ThermalManagerService extends SystemService {
         private IThermal mInstance = null;
 
         /** Callback for Thermal HAL AIDL. */
-        private final IThermalChangedCallback mThermalChangedCallback =
+        private final IThermalChangedCallback mThermalCallbackAidl =
                 new IThermalChangedCallback.Stub() {
-                    @Override public void notifyThrottling(
-                            android.hardware.thermal.Temperature temperature)
-                            throws RemoteException {
+                    @Override
+                    public void notifyThrottling(
+                            android.hardware.thermal.Temperature temperature) {
                         Temperature svcTemperature = new Temperature(temperature.value,
                                 temperature.type, temperature.name, temperature.throttlingStatus);
                         final long token = Binder.clearCallingIdentity();
                         try {
-                            mCallback.onValues(svcTemperature);
+                            mCallback.onTemperatureChanged(svcTemperature);
                         } finally {
                             Binder.restoreCallingIdentity(token);
                         }
                     }
 
-            @Override public int getInterfaceVersion() throws RemoteException {
-                return this.VERSION;
-            }
+                    @Override
+                    public void notifyThresholdChanged(TemperatureThreshold threshold) {
+                        if (Flags.allowThermalThresholdsCallback()) {
+                            if (threshold.type == TemperatureType.SKIN) {
+                                mCallback.onThresholdChanged(threshold);
+                            }
+                        }
+                    }
 
-            @Override public String getInterfaceHash() throws RemoteException {
-                return this.HASH;
-            }
-        };
+                    @Override
+                    public int getInterfaceVersion() throws RemoteException {
+                        return this.VERSION;
+                    }
 
-        ThermalHalAidlWrapper(TemperatureChangedCallback callback) {
+                    @Override
+                    public String getInterfaceHash() throws RemoteException {
+                        return this.HASH;
+                    }
+                };
+
+        ThermalHalAidlWrapper(WrapperThermalChangedCallback callback) {
             mCallback = callback;
         }
 
@@ -1153,7 +1180,7 @@ public class ThermalManagerService extends SystemService {
         @VisibleForTesting
         void registerThermalChangedCallback() {
             try {
-                mInstance.registerThermalChangedCallback(mThermalChangedCallback);
+                mInstance.registerThermalChangedCallback(mThermalCallbackAidl);
             } catch (IllegalArgumentException | IllegalStateException e) {
                 Slog.e(TAG, "Couldn't registerThermalChangedCallback due to invalid status",
                         e);
@@ -1185,7 +1212,7 @@ public class ThermalManagerService extends SystemService {
         @GuardedBy("mHalLock")
         private android.hardware.thermal.V1_0.IThermal mThermalHal10 = null;
 
-        ThermalHal10Wrapper(TemperatureChangedCallback callback) {
+        ThermalHal10Wrapper(WrapperThermalChangedCallback callback) {
             mCallback = callback;
         }
 
@@ -1317,14 +1344,14 @@ public class ThermalManagerService extends SystemService {
                                         : Temperature.THROTTLING_NONE);
                         final long token = Binder.clearCallingIdentity();
                         try {
-                            mCallback.onValues(thermalSvcTemp);
+                            mCallback.onTemperatureChanged(thermalSvcTemp);
                         } finally {
                             Binder.restoreCallingIdentity(token);
                         }
                     }
                 };
 
-        ThermalHal11Wrapper(TemperatureChangedCallback callback) {
+        ThermalHal11Wrapper(WrapperThermalChangedCallback callback) {
             mCallback = callback;
         }
 
@@ -1455,14 +1482,14 @@ public class ThermalManagerService extends SystemService {
                                 temperature.throttlingStatus);
                         final long token = Binder.clearCallingIdentity();
                         try {
-                            mCallback.onValues(thermalSvcTemp);
+                            mCallback.onTemperatureChanged(thermalSvcTemp);
                         } finally {
                             Binder.restoreCallingIdentity(token);
                         }
                     }
                 };
 
-        ThermalHal20Wrapper(TemperatureChangedCallback callback) {
+        ThermalHal20Wrapper(WrapperThermalChangedCallback callback) {
             mCallback = callback;
         }
 
@@ -1627,52 +1654,57 @@ public class ThermalManagerService extends SystemService {
         @VisibleForTesting
         long mInactivityThresholdMillis = INACTIVITY_THRESHOLD_MILLIS;
 
-        void updateThresholds() {
-            synchronized (mSamples) {
-                List<TemperatureThreshold> thresholds =
+        void getAndUpdateThresholds() {
+            List<TemperatureThreshold> thresholds =
                         mHalWrapper.getTemperatureThresholds(true, Temperature.TYPE_SKIN);
+            synchronized (mSamples) {
                 if (Flags.allowThermalHeadroomThresholds()) {
                     Arrays.fill(mHeadroomThresholds, Float.NaN);
                 }
-                for (int t = 0; t < thresholds.size(); ++t) {
-                    TemperatureThreshold threshold = thresholds.get(t);
-                    if (threshold.hotThrottlingThresholds.length <= ThrottlingSeverity.SEVERE) {
-                        continue;
-                    }
-                    float severeThreshold =
-                            threshold.hotThrottlingThresholds[ThrottlingSeverity.SEVERE];
-                    if (!Float.isNaN(severeThreshold)) {
-                        mSevereThresholds.put(threshold.name, severeThreshold);
-                        if (Flags.allowThermalHeadroomThresholds()) {
-                            for (int severity = ThrottlingSeverity.LIGHT;
-                                    severity <= ThrottlingSeverity.SHUTDOWN; severity++) {
-                                if (threshold.hotThrottlingThresholds.length > severity) {
-                                    updateHeadroomThreshold(severity,
-                                            threshold.hotThrottlingThresholds[severity],
-                                            severeThreshold);
-                                }
-                            }
-                        }
-                    }
+                for (final TemperatureThreshold threshold : thresholds) {
+                    updateTemperatureThresholdLocked(threshold, false);
                 }
             }
         }
 
         // For an older device with multiple SKIN sensors, we will set a severity's headroom
-        // threshold based on the minimum value of all as a workaround.
-        void updateHeadroomThreshold(int severity, float threshold, float severeThreshold) {
-            if (!Float.isNaN(threshold)) {
-                synchronized (mSamples) {
-                    if (severity == ThrottlingSeverity.SEVERE) {
-                        mHeadroomThresholds[severity] = 1.0f;
-                        return;
+        // threshold based on the minimum value of all as a workaround, unless override.
+        @GuardedBy("mSamples")
+        void updateTemperatureThresholdLocked(TemperatureThreshold threshold, boolean override) {
+            if (threshold.hotThrottlingThresholds.length <= ThrottlingSeverity.SEVERE) {
+                return;
+            }
+            float severeThreshold =
+                    threshold.hotThrottlingThresholds[ThrottlingSeverity.SEVERE];
+            if (Float.isNaN(severeThreshold)) {
+                return;
+            }
+            mSevereThresholds.put(threshold.name, severeThreshold);
+            if (!Flags.allowThermalHeadroomThresholds()) {
+                return;
+            }
+            if (override) {
+                Arrays.fill(mHeadroomThresholds, Float.NaN);
+            }
+            for (int severity = ThrottlingSeverity.LIGHT;
+                    severity <= ThrottlingSeverity.SHUTDOWN; severity++) {
+                if (threshold.hotThrottlingThresholds.length > severity) {
+                    float t = threshold.hotThrottlingThresholds[severity];
+                    if (Float.isNaN(t)) {
+                        continue;
                     }
-                    float headroom = normalizeTemperature(threshold, severeThreshold);
-                    if (Float.isNaN(mHeadroomThresholds[severity])) {
-                        mHeadroomThresholds[severity] = headroom;
-                    } else {
-                        float lastHeadroom = mHeadroomThresholds[severity];
-                        mHeadroomThresholds[severity] = Math.min(lastHeadroom, headroom);
+                    synchronized (mSamples) {
+                        if (severity == ThrottlingSeverity.SEVERE) {
+                            mHeadroomThresholds[severity] = 1.0f;
+                            continue;
+                        }
+                        float headroom = normalizeTemperature(t, severeThreshold);
+                        if (Float.isNaN(mHeadroomThresholds[severity])) {
+                            mHeadroomThresholds[severity] = headroom;
+                        } else {
+                            float lastHeadroom = mHeadroomThresholds[severity];
+                            mHeadroomThresholds[severity] = Math.min(lastHeadroom, headroom);
+                        }
                     }
                 }
             }

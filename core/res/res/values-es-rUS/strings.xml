@@ -1747,8 +1747,7 @@
     <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"Una app está cubriendo la solicitud de permiso, por lo que no se puede verificar tu respuesta."</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Presiona una función para comenzar a usarla:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Selecciona las funciones a utilizar con el botón de accesibilidad"</string>
-    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (2245540598834891500) -->
-    <skip />
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2245540598834891500">"Selecciona las funciones que usarás con la combinación de teclas de volumen"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"Se desactivó <xliff:g id="SERVICE_NAME">%s</xliff:g>"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Editar accesos directos"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Listo"</string>
@@ -1945,6 +1944,8 @@
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Desactivado"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> - <xliff:g id="END">%2$s</xliff:g>"</string>
+    <!-- no translation found for zen_mode_trigger_summary_range_words (7228261413029290750) -->
+    <skip />
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"Cualquier calendario"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> silencia algunos sonidos"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"Existe un problema interno con el dispositivo, de modo que el dispositivo puede estar inestable hasta que restablezcas la configuración de fábrica."</string>
@@ -2012,6 +2013,7 @@
     <string name="set_up_screen_lock_title" msgid="8346083801616474030">"Configurar bloqueo de pantalla"</string>
     <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Configurar bloqueo de pantalla"</string>
     <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"Para usar tu espacio privado, configura un bloqueo de pantalla"</string>
+    <string name="private_space_set_up_screen_lock_for_reset" msgid="7817091386408432097">"Para borrar el espacio privado, configura un bloqueo de pantalla."</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"La app no está disponible"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> no está disponible en este momento."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> no disponible"</string>
@@ -2130,11 +2132,6 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Vibrarán las llamadas y notificaciones"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Se silenciarán las llamadas y notificaciones"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Cambios del sistema"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"No interrumpir"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Nuevo: No interrumpir oculta las notificaciones"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Presiona para obtener más información y realizar cambios."</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Se modificó la opción No interrumpir"</string>
-    <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Presiona para consultar lo que está bloqueado."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Revisa la configuración de notificaciones"</string>
     <string name="review_notification_settings_text" msgid="5916244866751849279">"A partir de Android 13, las apps que instales necesitarán tu permiso a fin de enviar notificaciones. Presiona para cambiar este permiso para las apps existentes."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Recordarme más tarde"</string>
@@ -2430,6 +2427,14 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Envía y recibe mensajes sin una red móvil ni Wi-Fi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Abrir Mensajes"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Cómo funciona"</string>
+    <!-- no translation found for satellite_manual_selection_state_popup_title (8545991934926661974) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_message (1928101658551382450) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_ok (2459664752624985095) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_cancel (973605633339469252) -->
+    <skip />
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Pendiente…"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Vuelve a configurar el Desbloqueo con huellas dactilares"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"Ya no se puede reconocer <xliff:g id="FINGERPRINT">%s</xliff:g>."</string>

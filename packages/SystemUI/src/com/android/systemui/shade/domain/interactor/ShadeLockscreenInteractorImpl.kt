@@ -21,14 +21,14 @@ import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.scene.domain.interactor.SceneInteractor
-import com.android.systemui.scene.shared.model.SceneFamilies
 import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.scene.shared.model.TransitionKeys.Instant
 import com.android.systemui.shade.data.repository.ShadeRepository
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 import kotlinx.coroutines.withContext
 
 class ShadeLockscreenInteractorImpl
@@ -45,10 +45,14 @@ constructor(
     override val udfpsTransitionToFullShadeProgress =
         shadeRepository.udfpsTransitionToFullShadeProgress
 
+    @Deprecated("Use ShadeInteractor instead")
     override fun expandToNotifications() {
-        changeToShadeScene()
+        shadeInteractor.expandNotificationsShade(
+            loggingReason = "ShadeLockscreenInteractorImpl.expandToNotifications"
+        )
     }
 
+    @Deprecated("Use ShadeInteractor instead")
     override val isExpanded
         get() = shadeInteractor.isAnyExpanded.value
 
@@ -60,15 +64,20 @@ constructor(
         lockIconViewController.dozeTimeTick()
     }
 
+    @Deprecated("Not supported by scenes")
     override fun blockExpansionForCurrentTouch() {
         // TODO("b/324280998") Implement replacement or delete
     }
 
     override fun resetViews(animate: Boolean) {
         // The existing comment to the only call to this claims it only calls it to collapse QS
-        changeToShadeScene()
+        shadeInteractor.collapseQuickSettingsShade(
+            loggingReason = "ShadeLockscreenInteractorImpl.resetViews",
+            transitionKey = Instant.takeIf { !animate },
+        )
     }
 
+    @Deprecated("Not supported by scenes")
     override fun setPulsing(pulsing: Boolean) {
         // Now handled elsewhere. Do nothing.
     }
@@ -76,22 +85,30 @@ constructor(
     override fun transitionToExpandedShade(delay: Long) {
         backgroundScope.launch {
             delay(delay)
-            withContext(mainDispatcher) { changeToShadeScene() }
+            withContext(mainDispatcher) {
+                shadeInteractor.expandNotificationsShade(
+                    "ShadeLockscreenInteractorImpl.transitionToExpandedShade"
+                )
+            }
         }
     }
 
+    @Deprecated("Not supported by scenes")
     override fun resetViewGroupFade() {
         // Now handled elsewhere. Do nothing.
     }
 
+    @Deprecated("Not supported by scenes")
     override fun setKeyguardTransitionProgress(keyguardAlpha: Float, keyguardTranslationY: Int) {
         // Now handled elsewhere. Do nothing.
     }
 
+    @Deprecated("Not supported by scenes")
     override fun setOverStretchAmount(amount: Float) {
         // Now handled elsewhere. Do nothing.
     }
 
+    @Deprecated("TODO(b/325072511) delete this")
     override fun setKeyguardStatusBarAlpha(alpha: Float) {
         // TODO(b/325072511) delete this
     }
@@ -99,12 +116,5 @@ constructor(
     override fun showAodUi() {
         sceneInteractor.changeScene(Scenes.Lockscreen, "showAodUi", sceneState = KeyguardState.AOD)
         // TODO(b/330311871) implement transition to AOD
-    }
-
-    private fun changeToShadeScene() {
-        sceneInteractor.changeScene(
-            SceneFamilies.NotifShade,
-            "ShadeLockscreenInteractorImpl.expandToNotifications",
-        )
     }
 }

@@ -27,7 +27,7 @@ fun BubblePopupView.setup() {
     val attrs =
         context.obtainStyledAttributes(
             intArrayOf(
-                com.android.internal.R.attr.materialColorSurface,
+                com.android.internal.R.attr.materialColorSurfaceContainer,
                 android.R.attr.dialogCornerRadius
             )
         )

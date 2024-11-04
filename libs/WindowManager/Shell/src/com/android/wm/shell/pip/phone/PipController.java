@@ -44,6 +44,7 @@ import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.os.Handler;
 import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.util.Pair;
@@ -93,6 +94,7 @@ import com.android.wm.shell.pip.PipTaskOrganizer;
 import com.android.wm.shell.pip.PipTransitionController;
 import com.android.wm.shell.pip.PipTransitionState;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
+import com.android.wm.shell.shared.annotations.ShellMainThread;
 import com.android.wm.shell.sysui.ConfigurationChangeListener;
 import com.android.wm.shell.sysui.KeyguardChangeListener;
 import com.android.wm.shell.sysui.ShellCommandHandler;
@@ -146,6 +148,8 @@ public class PipController implements PipTransitionController.PipTransitionCallb
     private Optional<OneHandedController> mOneHandedController;
     private final ShellCommandHandler mShellCommandHandler;
     private final ShellController mShellController;
+    @ShellMainThread
+    private final Handler mHandler;
     protected final PipImpl mImpl;
 
     private final Rect mTmpInsetBounds = new Rect();
@@ -324,7 +328,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                         return;
                     }
                     onDisplayChanged(mDisplayController.getDisplayLayout(displayId),
-                            false /* saveRestoreSnapFraction */);
+                            true /* saveRestoreSnapFraction */);
                 }
 
                 @Override
@@ -405,7 +409,8 @@ public class PipController implements PipTransitionController.PipTransitionCallb
             DisplayInsetsController displayInsetsController,
             TabletopModeController pipTabletopController,
             Optional<OneHandedController> oneHandedController,
-            ShellExecutor mainExecutor) {
+            ShellExecutor mainExecutor,
+            Handler handler) {
         if (!context.getPackageManager().hasSystemFeature(FEATURE_PICTURE_IN_PICTURE)) {
             ProtoLog.w(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                     "%s: Device doesn't support Pip feature", TAG);
@@ -418,7 +423,8 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                 pipDisplayLayoutState, pipMotionHelper, pipMediaController, phonePipMenuController,
                 pipTaskOrganizer, pipTransitionState, pipTouchHandler, pipTransitionController,
                 windowManagerShellWrapper, taskStackListener, pipParamsChangedForwarder,
-                displayInsetsController, pipTabletopController, oneHandedController, mainExecutor)
+                displayInsetsController, pipTabletopController, oneHandedController, mainExecutor,
+                handler)
                 .mImpl;
     }
 
@@ -446,11 +452,13 @@ public class PipController implements PipTransitionController.PipTransitionCallb
             DisplayInsetsController displayInsetsController,
             TabletopModeController tabletopModeController,
             Optional<OneHandedController> oneHandedController,
-            ShellExecutor mainExecutor
+            ShellExecutor mainExecutor,
+            @ShellMainThread Handler handler
     ) {
         mContext = context;
         mShellCommandHandler = shellCommandHandler;
         mShellController = shellController;
+        mHandler = handler;
         mImpl = new PipImpl();
         mWindowManagerShellWrapper = windowManagerShellWrapper;
         mDisplayController = displayController;
@@ -584,8 +592,9 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                     public void onActivityRestartAttempt(ActivityManager.RunningTaskInfo task,
                             boolean homeTaskVisible, boolean clearedTask, boolean wasVisible) {
                         ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                                "onActivityRestartAttempt: %s", task.topActivity);
-                        if (task.getWindowingMode() != WINDOWING_MODE_PINNED) {
+                                "onActivityRestartAttempt: topActivity=%s, wasVisible=%b",
+                                task.topActivity, wasVisible);
+                        if (task.getWindowingMode() != WINDOWING_MODE_PINNED || !wasVisible) {
                             return;
                         }
                         if (mPipTaskOrganizer.isLaunchToSplit(task)) {
@@ -652,9 +661,11 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                             // there's a keyguard present
                             return;
                         }
-                        onDisplayChangedUncheck(mDisplayController
-                                        .getDisplayLayout(mPipDisplayLayoutState.getDisplayId()),
-                                false /* saveRestoreSnapFraction */);
+                        mMainExecutor.executeDelayed(() -> {
+                            onDisplayChangedUncheck(mDisplayController.getDisplayLayout(
+                                    mPipDisplayLayoutState.getDisplayId()),
+                                    false /* saveRestoreSnapFraction */);
+                        }, PIP_KEEP_CLEAR_AREAS_DELAY);
                     }
                 });
 
@@ -800,7 +811,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
             }
         };
 
-        if (mPipTaskOrganizer.isInPip() && saveRestoreSnapFraction) {
+        if (mPipTransitionState.hasEnteredPip() && saveRestoreSnapFraction) {
             mMenuController.attachPipMenuView();
             // Calculate the snap fraction of the current stack along the old movement bounds
             final PipSnapAlgorithm pipSnapAlgorithm = mPipBoundsAlgorithm.getSnapAlgorithm();
@@ -1045,7 +1056,8 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         // Begin InteractionJankMonitor with PIP transition CUJs
         final InteractionJankMonitor.Configuration.Builder builder =
                 InteractionJankMonitor.Configuration.Builder.withSurface(
-                        CUJ_PIP_TRANSITION, mContext, mPipTaskOrganizer.getSurfaceControl())
+                                CUJ_PIP_TRANSITION, mContext, mPipTaskOrganizer.getSurfaceControl(),
+                                mHandler)
                 .setTag(getTransitionTag(direction))
                 .setTimeout(2000);
         InteractionJankMonitor.getInstance().begin(builder);

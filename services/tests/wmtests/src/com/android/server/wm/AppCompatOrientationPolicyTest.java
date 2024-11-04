@@ -38,6 +38,7 @@ import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO
 import static android.view.WindowManager.PROPERTY_COMPAT_IGNORE_REQUESTED_ORIENTATION;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
+import static com.android.window.flags.Flags.FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.verify;
@@ -45,6 +46,7 @@ import static org.mockito.Mockito.verify;
 import android.compat.testing.PlatformCompatChangeRule;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.annotation.NonNull;
@@ -321,7 +323,22 @@ public class AppCompatOrientationPolicyTest extends WindowTestsBase {
             });
             robot.applyOnActivity((a) -> {
                 a.createActivityWithComponentInNewTaskAndDisplay();
-                a.setTopActivityCameraActive(false);
+                a.setIsCameraRunningAndWindowingModeEligibleFullscreen(false);
+            });
+
+            robot.checkOverrideOrientation(/* candidate */ SCREEN_ORIENTATION_PORTRAIT,
+                    /* expected */ SCREEN_ORIENTATION_PORTRAIT);
+        });
+    }
+
+    @Test
+    @EnableFlags(FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
+    public void testOverrideOrientationIfNeeded_fullscrOverrideFreeform_cameraActivity_unchanged() {
+        runTestScenario((robot) -> {
+            robot.applyOnActivity((a) -> {
+                robot.dw().allowEnterDesktopMode(true);
+                a.createActivityWithComponentInNewTaskAndDisplay();
+                a.setIsCameraRunningAndWindowingModeEligibleFreeform(false);
             });
 
             robot.checkOverrideOrientation(/* candidate */ SCREEN_ORIENTATION_PORTRAIT,
@@ -426,8 +443,8 @@ public class AppCompatOrientationPolicyTest extends WindowTestsBase {
                 c.enablePolicyForIgnoringRequestedOrientation(true);
             });
             robot.applyOnActivity((a) -> {
-                a.createActivityWithComponentInNewTask();
-                a.enableTreatmentForTopActivity(true);
+                a.createActivityWithComponentInNewTaskAndDisplay();
+                a.enableFullscreenCameraCompatTreatmentForTopActivity(true);
             });
             robot.prepareRelaunchingAfterRequestedOrientationChanged(false);
 

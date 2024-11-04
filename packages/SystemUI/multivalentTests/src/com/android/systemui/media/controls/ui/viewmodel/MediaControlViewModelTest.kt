@@ -24,26 +24,25 @@ import android.media.session.MediaSession
 import android.media.session.PlaybackState
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.internal.logging.InstanceId
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.media.controls.domain.pipeline.MediaDataFilterImpl
 import com.android.systemui.media.controls.domain.pipeline.mediaDataFilter
 import com.android.systemui.media.controls.shared.model.MediaData
 import com.android.systemui.media.controls.shared.model.MediaDeviceData
 import com.android.systemui.media.controls.util.mediaInstanceId
 import com.android.systemui.statusbar.notificationLockscreenUserManager
 import com.android.systemui.testKosmos
-import com.android.systemui.util.mockito.any
-import com.android.systemui.util.mockito.eq
-import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.whenever
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
@@ -52,30 +51,31 @@ class MediaControlViewModelTest : SysuiTestCase() {
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
 
-    private val mediaDataFilter: MediaDataFilterImpl = kosmos.mediaDataFilter
+    private val mediaDataFilter = kosmos.mediaDataFilter
     private val notificationLockscreenUserManager = kosmos.notificationLockscreenUserManager
     private val packageManager = kosmos.packageManager
     private val drawable = context.getDrawable(R.drawable.ic_media_play)
-    private val instanceId: InstanceId = kosmos.mediaInstanceId
-
+    private val instanceId = kosmos.mediaInstanceId
     private val underTest: MediaControlViewModel = kosmos.mediaControlViewModel
+
+    @Before
+    fun setUp() {
+        whenever(packageManager.getApplicationIcon(Mockito.anyString())).thenReturn(drawable)
+        whenever(packageManager.getApplicationIcon(any(ApplicationInfo::class.java)))
+            .thenReturn(drawable)
+        whenever(packageManager.getApplicationInfo(eq(PACKAGE_NAME), ArgumentMatchers.anyInt()))
+            .thenReturn(ApplicationInfo())
+        whenever(packageManager.getApplicationLabel(any())).thenReturn(PACKAGE_NAME)
+        whenever(notificationLockscreenUserManager.isCurrentProfile(USER_ID)).thenReturn(true)
+        whenever(notificationLockscreenUserManager.isProfileAvailable(USER_ID)).thenReturn(true)
+        context.setMockPackageManager(packageManager)
+    }
 
     @Test
     fun addMediaControl_mediaControlViewModelIsLoaded() =
         testScope.runTest {
-            whenever(packageManager.getApplicationIcon(Mockito.anyString())).thenReturn(drawable)
-            whenever(packageManager.getApplicationIcon(any(ApplicationInfo::class.java)))
-                .thenReturn(drawable)
-            whenever(packageManager.getApplicationInfo(eq(PACKAGE_NAME), ArgumentMatchers.anyInt()))
-                .thenReturn(ApplicationInfo())
-            whenever(packageManager.getApplicationLabel(any())).thenReturn(PACKAGE_NAME)
-            whenever(notificationLockscreenUserManager.isCurrentProfile(USER_ID)).thenReturn(true)
-            whenever(notificationLockscreenUserManager.isProfileAvailable(USER_ID)).thenReturn(true)
             val playerModel by collectLastValue(underTest.player)
-
-            context.setMockPackageManager(packageManager)
-
-            val mediaData = initMediaData()
+            val mediaData = initMediaData(ARTIST, TITLE)
 
             mediaDataFilter.onMediaDataLoaded(KEY, KEY, mediaData)
 
@@ -88,7 +88,51 @@ class MediaControlViewModelTest : SysuiTestCase() {
             assertThat(playerModel?.playTurbulenceNoise).isFalse()
         }
 
-    private fun initMediaData(): MediaData {
+    @Test
+    fun emitDuplicateMediaControls_mediaControlIsNotBound() =
+        testScope.runTest {
+            val playerModel by collectLastValue(underTest.player)
+            val mediaData = initMediaData(ARTIST, TITLE)
+
+            mediaDataFilter.onMediaDataLoaded(KEY, KEY, mediaData)
+
+            assertThat(playerModel).isNotNull()
+            assertThat(playerModel?.titleName).isEqualTo(TITLE)
+            assertThat(playerModel?.artistName).isEqualTo(ARTIST)
+            assertThat(underTest.isNewPlayer(playerModel!!)).isTrue()
+
+            mediaDataFilter.onMediaDataLoaded(KEY, KEY, mediaData)
+
+            assertThat(playerModel).isNotNull()
+            assertThat(playerModel?.titleName).isEqualTo(TITLE)
+            assertThat(playerModel?.artistName).isEqualTo(ARTIST)
+            assertThat(underTest.isNewPlayer(playerModel!!)).isFalse()
+        }
+
+    @Test
+    fun emitDifferentMediaControls_mediaControlIsBound() =
+        testScope.runTest {
+            val playerModel by collectLastValue(underTest.player)
+            var mediaData = initMediaData(ARTIST, TITLE)
+
+            mediaDataFilter.onMediaDataLoaded(KEY, KEY, mediaData)
+
+            assertThat(playerModel).isNotNull()
+            assertThat(playerModel?.titleName).isEqualTo(TITLE)
+            assertThat(playerModel?.artistName).isEqualTo(ARTIST)
+            assertThat(underTest.isNewPlayer(playerModel!!)).isTrue()
+
+            mediaData = initMediaData(ARTIST_2, TITLE_2)
+
+            mediaDataFilter.onMediaDataLoaded(KEY, KEY, mediaData)
+
+            assertThat(playerModel).isNotNull()
+            assertThat(playerModel?.titleName).isEqualTo(TITLE_2)
+            assertThat(playerModel?.artistName).isEqualTo(ARTIST_2)
+            assertThat(underTest.isNewPlayer(playerModel!!)).isTrue()
+        }
+
+    private fun initMediaData(artist: String, title: String): MediaData {
         val device = MediaDeviceData(true, null, DEVICE_NAME, null, showBroadcastButton = true)
 
         // Create media session
@@ -111,12 +155,12 @@ class MediaControlViewModelTest : SysuiTestCase() {
 
         return MediaData(
             userId = USER_ID,
-            artist = ARTIST,
-            song = TITLE,
+            artist = artist,
+            song = title,
             packageName = PACKAGE,
             token = session.sessionToken,
             device = device,
-            instanceId = instanceId
+            instanceId = instanceId,
         )
     }
 
@@ -127,6 +171,8 @@ class MediaControlViewModelTest : SysuiTestCase() {
         private const val PACKAGE = "PKG"
         private const val ARTIST = "ARTIST"
         private const val TITLE = "TITLE"
+        private const val ARTIST_2 = "ARTIST_2"
+        private const val TITLE_2 = "TITLE_2"
         private const val DEVICE_NAME = "DEVICE_NAME"
         private const val SESSION_KEY = "SESSION_KEY"
         private const val SESSION_ARTIST = "SESSION_ARTIST"

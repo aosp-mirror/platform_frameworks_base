@@ -94,7 +94,7 @@ constructor(
                 .stateIn(
                     scope = applicationScope,
                     started = SharingStarted.WhileSubscribed(),
-                    initialValue = ClockSize.LARGE
+                    initialValue = ClockSize.LARGE,
                 )
         } else {
             keyguardClockRepository.clockSize
@@ -105,21 +105,13 @@ constructor(
             combine(
                 shadeInteractor.isShadeLayoutWide,
                 activeNotificationsInteractor.areAnyNotificationsPresent,
-                keyguardInteractor.isActiveDreamLockscreenHosted,
                 isOnAod,
                 headsUpNotificationInteractor.isHeadsUpOrAnimatingAway,
                 keyguardInteractor.isDozing,
-            ) {
-                isShadeLayoutWide,
-                areAnyNotificationsPresent,
-                isActiveDreamLockscreenHosted,
-                isOnAod,
-                isHeadsUp,
-                isDozing ->
+            ) { isShadeLayoutWide, areAnyNotificationsPresent, isOnAod, isHeadsUp, isDozing ->
                 when {
                     !isShadeLayoutWide -> true
                     !areAnyNotificationsPresent -> true
-                    isActiveDreamLockscreenHosted -> true
                     // Pulsing notification appears on the right. Move clock left to avoid overlap.
                     isHeadsUp && isDozing -> false
                     else -> isOnAod
@@ -151,5 +143,9 @@ constructor(
             clock.smallClock.animations.fold(foldFraction)
             clock.largeClock.animations.fold(foldFraction)
         }
+    }
+
+    fun setNotificationStackDefaultTop(top: Float) {
+        keyguardClockRepository.setNotificationDefaultTop(top)
     }
 }

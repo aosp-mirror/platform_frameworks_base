@@ -84,27 +84,6 @@ flag {
 }
 
 flag {
-  name: "fix_font_update_failure"
-  namespace: "text"
-  description: "There was a bug of updating system font from Android 13 to 14. This flag for fixing the migration failure."
-  is_fixed_read_only: true
-  bug: "331717791"
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
-}
-
-flag {
-  name: "fix_misaligned_context_menu"
-  namespace: "text"
-  description: "Fix the context menu misalignment and incosistent icon size."
-  bug: "332542108"
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
-}
-
-flag {
   name: "missing_getter_apis"
   namespace: "text"
   description: "Fix the lint warning about missing getters."
@@ -154,26 +133,6 @@ flag {
 }
 
 flag {
-  name: "portuguese_hyphenator"
-  namespace: "text"
-  description: "Portuguese taiored hyphenator"
-  bug: "344656282"
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
-}
-
-flag {
-  name: "dont_break_email_in_nobreak_tag"
-  namespace: "text"
-  description: "Prevent line break inside email."
-  bug: "350691716"
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
-}
-
-flag {
   name: "handwriting_gesture_with_transformation"
   namespace: "text"
   description: "Fix handwriting gesture is not working when view has transformation."
@@ -208,4 +167,38 @@ flag {
   namespace: "text"
   description: "Decouple variation settings, weight and style information from Typeface class"
   bug: "361260253"
+}
+
+flag {
+  name: "handwriting_track_disabled"
+  namespace: "text"
+  description: "Handwriting initiator tracks focused view even if handwriting is disabled to fix initiation bug."
+  bug: "361256391"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "handwriting_unsupported_show_soft_input_fix"
+  namespace: "text"
+  description: "Don't show soft keyboard on stylus input if text field doesn't support handwriting and getShowSoftInputOnFocus() returns false."
+  bug: "363180475"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "tts_span_duration"
+  namespace: "text"
+  description: "Feature flag for adding a TYPE_DURATION to TtsSpan"
+  bug: "337103893"
+}
+
+flag {
+  name: "deprecate_elegant_text_height_api"
+  namespace: "text"
+  description: "Deprecate the Paint#elegantTextHeight API and stick it to true"
+  bug: "349519475"
 }

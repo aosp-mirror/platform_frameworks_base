@@ -54,14 +54,16 @@ import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_TASK;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_TOP;
 import static android.content.pm.ActivityInfo.launchModeToString;
 import static android.os.Process.INVALID_UID;
+import static android.security.Flags.preventIntentRedirectAbortOrThrowException;
+import static android.security.Flags.preventIntentRedirectShowToast;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.window.TaskFragmentOperation.OP_TYPE_START_ACTIVITY_IN_TASK_FRAGMENT;
 
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_CONFIGURATION;
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_TASKS;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_CONFIGURATION;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_TASKS;
 import static com.android.server.pm.PackageArchiver.isArchivingEnabled;
 import static com.android.server.wm.ActivityRecord.State.RESUMED;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_PERMISSIONS_REVIEW;
@@ -86,6 +88,7 @@ import static com.android.server.wm.TaskFragment.EMBEDDING_DISALLOWED_MIN_DIMENS
 import static com.android.server.wm.TaskFragment.EMBEDDING_DISALLOWED_NEW_TASK;
 import static com.android.server.wm.TaskFragment.EMBEDDING_DISALLOWED_UNTRUSTED_HOST;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
+import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.window.flags.Flags.balDontBringExistingBackgroundTaskStackToFg;
 
 import android.annotation.IntDef;
@@ -93,14 +96,17 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
-import android.app.BackgroundStartPrivileges;
 import android.app.IApplicationThread;
 import android.app.PendingIntent;
 import android.app.ProfilerInfo;
 import android.app.WaitResult;
 import android.app.WindowConfiguration;
+import android.app.compat.CompatChanges;
 import android.compat.annotation.ChangeId;
+import android.compat.annotation.Disabled;
 import android.compat.annotation.EnabledSince;
+import android.compat.annotation.Overridable;
+import android.content.Context;
 import android.content.IIntentSender;
 import android.content.Intent;
 import android.content.IntentSender;
@@ -124,12 +130,15 @@ import android.service.voice.IVoiceInteractionSession;
 import android.text.TextUtils;
 import android.util.Pools.SynchronizedPool;
 import android.util.Slog;
+import android.widget.Toast;
 import android.window.RemoteTransition;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.HeavyWeightSwitcherActivity;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.protolog.ProtoLog;
+import com.android.server.UiThread;
+import com.android.server.am.ActivityManagerService.IntentCreatorToken;
 import com.android.server.am.PendingIntentRecord;
 import com.android.server.pm.InstantAppResolver;
 import com.android.server.pm.PackageArchiver;
@@ -182,8 +191,12 @@ class ActivityStarter {
      * Feature flag for go/activity-security rules
      */
     @ChangeId
-    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.VANILLA_ICE_CREAM)
+    @Disabled
     static final long ASM_RESTRICTIONS = 230590090L;
+
+    @ChangeId
+    @Overridable
+    private static final long ENABLE_PREVENT_INTENT_REDIRECT_TAKE_ACTION = 29623414L;
 
     private final ActivityTaskManagerService mService;
     private final RootWindowContainer mRootWindowContainer;
@@ -382,6 +395,7 @@ class ActivityStarter {
         private static final int DEFAULT_CALLING_PID = 0;
         static final int DEFAULT_REAL_CALLING_UID = -1;
         static final int DEFAULT_REAL_CALLING_PID = 0;
+        static final int DEFAULT_INTENT_CREATOR_UID = -1;
 
         IApplicationThread caller;
         Intent intent;
@@ -402,6 +416,8 @@ class ActivityStarter {
         @Nullable String callingFeatureId;
         int realCallingPid = DEFAULT_REAL_CALLING_PID;
         int realCallingUid = DEFAULT_REAL_CALLING_UID;
+        int intentCreatorUid = DEFAULT_INTENT_CREATOR_UID;
+        String intentCreatorPackage;
         int startFlags;
         SafeActivityOptions activityOptions;
         boolean ignoreTargetSecurity;
@@ -417,7 +433,7 @@ class ActivityStarter {
         WaitResult waitResult;
         int filterCallingUid;
         PendingIntentRecord originatingPendingIntent;
-        BackgroundStartPrivileges forcedBalByPiSender;
+        boolean allowBalExemptionForSystemProcess;
         boolean freezeScreen;
 
         final StringBuilder logMessage = new StringBuilder();
@@ -462,6 +478,8 @@ class ActivityStarter {
             callingPid = DEFAULT_CALLING_PID;
             callingUid = DEFAULT_CALLING_UID;
             callingPackage = null;
+            intentCreatorUid = DEFAULT_INTENT_CREATOR_UID;
+            intentCreatorPackage = null;
             callingFeatureId = null;
             realCallingPid = DEFAULT_REAL_CALLING_PID;
             realCallingUid = DEFAULT_REAL_CALLING_UID;
@@ -481,7 +499,7 @@ class ActivityStarter {
             allowPendingRemoteAnimationRegistryLookup = true;
             filterCallingUid = UserHandle.USER_NULL;
             originatingPendingIntent = null;
-            forcedBalByPiSender = BackgroundStartPrivileges.NONE;
+            allowBalExemptionForSystemProcess = false;
             freezeScreen = false;
             errorCallbackToken = null;
         }
@@ -525,7 +543,7 @@ class ActivityStarter {
                     = request.allowPendingRemoteAnimationRegistryLookup;
             filterCallingUid = request.filterCallingUid;
             originatingPendingIntent = request.originatingPendingIntent;
-            forcedBalByPiSender = request.forcedBalByPiSender;
+            allowBalExemptionForSystemProcess = request.allowBalExemptionForSystemProcess;
             freezeScreen = request.freezeScreen;
             errorCallbackToken = request.errorCallbackToken;
         }
@@ -554,12 +572,14 @@ class ActivityStarter {
             // "resolved" calling UID, where we try our best to identify the
             // actual caller that is starting this activity
             int resolvedCallingUid = callingUid;
+            String resolvedCallingPackage = callingPackage;
             if (caller != null) {
                 synchronized (supervisor.mService.mGlobalLock) {
                     final WindowProcessController callerApp = supervisor.mService
                             .getProcessController(caller);
                     if (callerApp != null) {
                         resolvedCallingUid = callerApp.mInfo.uid;
+                        resolvedCallingPackage = callerApp.mInfo.packageName;
                     }
                 }
             }
@@ -595,7 +615,22 @@ class ActivityStarter {
             // Collect information about the target of the Intent.
             activityInfo = supervisor.resolveActivity(intent, resolveInfo, startFlags,
                     profilerInfo);
-
+            // Check if the Intent was redirected
+            if ((intent.getExtendedFlags() & Intent.EXTENDED_FLAG_MISSING_CREATOR_OR_INVALID_TOKEN)
+                    != 0) {
+                logAndThrowExceptionForIntentRedirect(supervisor.mService.mContext,
+                        "Unparceled intent does not have a creator token set.", intent,
+                        intentCreatorUid, intentCreatorPackage, resolvedCallingUid,
+                        resolvedCallingPackage, null);
+            }
+            if (IntentCreatorToken.isValid(intent)) {
+                IntentCreatorToken creatorToken = (IntentCreatorToken) intent.getCreatorToken();
+                if (creatorToken.getCreatorUid() != resolvedCallingUid) {
+                    intentCreatorUid = creatorToken.getCreatorUid();
+                    intentCreatorPackage = creatorToken.getCreatorPackage();
+                }
+                // leave intentCreatorUid as -1 if the intent creator is the same as the launcher
+            }
             // Carefully collect grants without holding lock
             if (activityInfo != null) {
                 if (android.security.Flags.contentUriPermissionApis()) {
@@ -603,12 +638,52 @@ class ActivityStarter {
                             .checkGrantUriPermissionFromIntent(intent, resolvedCallingUid,
                                     activityInfo.applicationInfo.packageName,
                                     UserHandle.getUserId(activityInfo.applicationInfo.uid),
-                                    activityInfo.requireContentUriPermissionFromCaller);
+                                    activityInfo.requireContentUriPermissionFromCaller,
+                                    /* requestHashCode */ this.hashCode());
+                    if (intentCreatorUid != DEFAULT_INTENT_CREATOR_UID) {
+                        try {
+                            NeededUriGrants creatorIntentGrants = supervisor.mService.mUgmInternal
+                                    .checkGrantUriPermissionFromIntent(intent, intentCreatorUid,
+                                            activityInfo.applicationInfo.packageName,
+                                            UserHandle.getUserId(activityInfo.applicationInfo.uid),
+                                            activityInfo.requireContentUriPermissionFromCaller,
+                                            /* requestHashCode */ this.hashCode());
+                            if (intentGrants == null) {
+                                intentGrants = creatorIntentGrants;
+                            } else {
+                                intentGrants.merge(creatorIntentGrants);
+                            }
+                        } catch (SecurityException securityException) {
+                            logAndThrowExceptionForIntentRedirect(supervisor.mService.mContext,
+                                    "Creator URI Grant Caused Exception.", intent, intentCreatorUid,
+                                    intentCreatorPackage, resolvedCallingUid,
+                                    resolvedCallingPackage, securityException);
+                        }
+                    }
                 } else {
                     intentGrants = supervisor.mService.mUgmInternal
                             .checkGrantUriPermissionFromIntent(intent, resolvedCallingUid,
                                     activityInfo.applicationInfo.packageName,
                                     UserHandle.getUserId(activityInfo.applicationInfo.uid));
+                    if (intentCreatorUid != DEFAULT_INTENT_CREATOR_UID && intentGrants != null) {
+                        try {
+                            NeededUriGrants creatorIntentGrants = supervisor.mService.mUgmInternal
+                                    .checkGrantUriPermissionFromIntent(intent, intentCreatorUid,
+                                            activityInfo.applicationInfo.packageName,
+                                            UserHandle.getUserId(
+                                                    activityInfo.applicationInfo.uid));
+                            if (intentGrants == null) {
+                                intentGrants = creatorIntentGrants;
+                            } else {
+                                intentGrants.merge(creatorIntentGrants);
+                            }
+                        } catch (SecurityException securityException) {
+                            logAndThrowExceptionForIntentRedirect(supervisor.mService.mContext,
+                                    "Creator URI Grant Caused Exception.", intent, intentCreatorUid,
+                                    intentCreatorPackage, resolvedCallingUid,
+                                    resolvedCallingPackage, securityException);
+                        }
+                    }
                 }
             }
         }
@@ -717,6 +792,9 @@ class ActivityStarter {
      * @return The starter result.
      */
     int execute() {
+        // Required for logging ContentOrFileUriEventReported in the finally block.
+        String callerActivityName = null;
+        ActivityRecord launchingRecord = null;
         try {
             onExecutionStarted();
 
@@ -737,6 +815,7 @@ class ActivityStarter {
                         ?  Binder.getCallingUid() : mRequest.realCallingUid;
                 launchingState = mSupervisor.getActivityMetricsLogger().notifyActivityLaunching(
                         mRequest.intent, caller, callingUid);
+                callerActivityName = caller != null ? caller.info.name : null;
             }
 
             if (mRequest.intent != null) {
@@ -812,7 +891,7 @@ class ActivityStarter {
                 final ActivityOptions originalOptions = mRequest.activityOptions != null
                         ? mRequest.activityOptions.getOriginalOptions() : null;
                 // Only track the launch time of activity that will be resumed.
-                final ActivityRecord launchingRecord = mDoResume ? mLastStartActivityRecord : null;
+                launchingRecord = mDoResume ? mLastStartActivityRecord : null;
                 // If the new record is the one that started, a new activity has created.
                 final boolean newActivityCreated = mStartActivity == launchingRecord;
                 // Notify ActivityMetricsLogger that the activity has launched.
@@ -828,6 +907,23 @@ class ActivityStarter {
                 return getExternalResult(res);
             }
         } finally {
+            // Notify UriGrantsManagerService that activity launch completed. Required for logging
+            // the ContentOrFileUriEventReported message.
+            mSupervisor.mService.mUgmInternal.notifyActivityLaunchRequestCompleted(
+                    mRequest.hashCode(),
+                    // isSuccessfulLaunch
+                    launchingRecord != null,
+                    // Intent action
+                    mRequest.intent != null ? mRequest.intent.getAction() : null,
+                    mRequest.realCallingUid,
+                    callerActivityName,
+                    // Callee UID
+                    mRequest.activityInfo != null
+                            ? mRequest.activityInfo.applicationInfo.uid : INVALID_UID,
+                    // Callee Activity name
+                    mRequest.activityInfo != null ? mRequest.activityInfo.name : null,
+                    // isStartActivityForResult
+                    launchingRecord != null && launchingRecord.resultTo != null);
             onExecutionComplete();
         }
     }
@@ -954,6 +1050,8 @@ class ActivityStarter {
         int requestCode = request.requestCode;
         int callingPid = request.callingPid;
         int callingUid = request.callingUid;
+        int intentCreatorUid = request.intentCreatorUid;
+        String intentCreatorPackage = request.intentCreatorPackage;
         String callingPackage = request.callingPackage;
         String callingFeatureId = request.callingFeatureId;
         final int realCallingPid = request.realCallingPid;
@@ -1006,6 +1104,7 @@ class ActivityStarter {
                 if (requestCode >= 0 && !sourceRecord.finishing) {
                     resultRecord = sourceRecord;
                 }
+                request.logMessage.append(" (sr=" + System.identityHashCode(sourceRecord) + ")");
             }
         }
 
@@ -1149,6 +1248,39 @@ class ActivityStarter {
         abort |= !mService.getPermissionPolicyInternal().checkStartActivity(intent, callingUid,
                 callingPackage);
 
+        if (intentCreatorUid != Request.DEFAULT_INTENT_CREATOR_UID) {
+            try {
+                if (!mSupervisor.checkStartAnyActivityPermission(intent, aInfo, resultWho,
+                        requestCode, 0, intentCreatorUid, intentCreatorPackage, "",
+                        request.ignoreTargetSecurity, inTask != null, null, resultRecord,
+                        resultRootTask)) {
+                    abort = logAndAbortForIntentRedirect(mService.mContext,
+                            "Creator checkStartAnyActivityPermission Caused abortion.",
+                            intent, intentCreatorUid, intentCreatorPackage, callingUid,
+                            callingPackage);
+                }
+            } catch (SecurityException e) {
+                logAndThrowExceptionForIntentRedirect(mService.mContext,
+                        "Creator checkStartAnyActivityPermission Caused Exception.",
+                        intent, intentCreatorUid, intentCreatorPackage, callingUid, callingPackage,
+                        e);
+            }
+            if (!mService.mIntentFirewall.checkStartActivity(intent, intentCreatorUid,
+                    0, resolvedType, aInfo.applicationInfo)) {
+                abort = logAndAbortForIntentRedirect(mService.mContext,
+                        "Creator IntentFirewall.checkStartActivity Caused abortion.",
+                        intent, intentCreatorUid, intentCreatorPackage, callingUid, callingPackage);
+            }
+
+            if (!mService.getPermissionPolicyInternal().checkStartActivity(intent,
+                    intentCreatorUid, intentCreatorPackage)) {
+                abort = logAndAbortForIntentRedirect(mService.mContext,
+                        "Creator PermissionPolicyService.checkStartActivity Caused abortion.",
+                        intent, intentCreatorUid, intentCreatorPackage, callingUid, callingPackage);
+            }
+        }
+        intent.removeCreatorToken();
+
         // Merge the two options bundles, while realCallerOptions takes precedence.
         ActivityOptions checkedOptions = options != null
                 ? options.getOptions(intent, aInfo, callerApp, mSupervisor) : null;
@@ -1169,7 +1301,7 @@ class ActivityStarter {
                             realCallingPid,
                             callerApp,
                             request.originatingPendingIntent,
-                            request.forcedBalByPiSender,
+                            request.allowBalExemptionForSystemProcess,
                             resultRecord,
                             intent,
                             checkedOptions);
@@ -1201,7 +1333,8 @@ class ActivityStarter {
 
         final TaskDisplayArea suggestedLaunchDisplayArea =
                 computeSuggestedLaunchDisplayArea(inTask, sourceRecord, checkedOptions);
-        mInterceptor.setStates(userId, realCallingPid, realCallingUid, startFlags, callingPackage,
+        mInterceptor.setStates(userId, realCallingPid, realCallingUid, startFlags,
+                callingPackage,
                 callingFeatureId);
         if (mInterceptor.intercept(intent, rInfo, aInfo, resolvedType, inTask, inTaskFragment,
                 callingPid, callingUid, checkedOptions, suggestedLaunchDisplayArea)) {
@@ -1239,7 +1372,8 @@ class ActivityStarter {
             if (mService.getPackageManagerInternalLocked().isPermissionsReviewRequired(
                     aInfo.packageName, userId)) {
                 final IIntentSender target = mService.getIntentSenderLocked(
-                        ActivityManager.INTENT_SENDER_ACTIVITY, callingPackage, callingFeatureId,
+                        ActivityManager.INTENT_SENDER_ACTIVITY, callingPackage,
+                        callingFeatureId,
                         callingUid, userId, null, null, 0, new Intent[]{intent},
                         new String[]{resolvedType}, PendingIntent.FLAG_CANCEL_CURRENT
                                 | PendingIntent.FLAG_ONE_SHOT, null);
@@ -1302,7 +1436,8 @@ class ActivityStarter {
         // app [on install success].
         if (rInfo != null && rInfo.auxiliaryInfo != null) {
             intent = createLaunchIntent(rInfo.auxiliaryInfo, request.ephemeralIntent,
-                    callingPackage, callingFeatureId, verificationBundle, resolvedType, userId);
+                    callingPackage, callingFeatureId, verificationBundle, resolvedType,
+                    userId);
             resolvedType = null;
             callingUid = realCallingUid;
             callingPid = realCallingPid;
@@ -1625,6 +1760,13 @@ class ActivityStarter {
             startedActivityRootTask.setAlwaysOnTop(true);
         }
 
+        if (isIndependentLaunch && !mDoResume && avoidMoveToFront() && !mTransientLaunch
+                && !started.shouldBeVisible(true /* ignoringKeyguard */)) {
+            Slog.i(TAG, "Abort " + transition + " of invisible launch " + started);
+            transition.abort();
+            return startedActivityRootTask;
+        }
+
         // If there is no state change (e.g. a resumed activity is reparented to top of
         // another display) to trigger a visibility/configuration checking, we have to
         // update the configuration for changing to different display.
@@ -1727,12 +1869,13 @@ class ActivityStarter {
         mIntent.setFlags(mLaunchFlags);
 
         boolean dreamStopping = false;
-
-        for (ActivityRecord stoppingActivity : mSupervisor.mStoppingActivities) {
-            if (stoppingActivity.getActivityType()
-                    == WindowConfiguration.ACTIVITY_TYPE_DREAM) {
-                dreamStopping = true;
-                break;
+        if (!com.android.window.flags.Flags.removeActivityStarterDreamCallback()) {
+            for (ActivityRecord stoppingActivity : mSupervisor.mStoppingActivities) {
+                if (stoppingActivity.getActivityType()
+                        == WindowConfiguration.ACTIVITY_TYPE_DREAM) {
+                    dreamStopping = true;
+                    break;
+                }
             }
         }
 
@@ -1856,8 +1999,21 @@ class ActivityStarter {
         if (mDoResume) {
             if (!avoidMoveToFront()) {
                 mTargetRootTask.getRootTask().moveToFront("reuseOrNewTask", targetTask);
-                if (!mTargetRootTask.isTopRootTaskInDisplayArea() && mService.isDreaming()
-                        && !dreamStopping) {
+
+                final boolean launchBehindDream;
+                if (com.android.window.flags.Flags.removeActivityStarterDreamCallback()) {
+                    final TaskDisplayArea tda = mTargetRootTask.getTaskDisplayArea();
+                    final Task top = (tda != null ? tda.getTopRootTask() : null);
+                    launchBehindDream = (top != null && top != mTargetRootTask)
+                            && top.getActivityType() == WindowConfiguration.ACTIVITY_TYPE_DREAM
+                            && top.getTopNonFinishingActivity() != null;
+                } else {
+                    launchBehindDream = !mTargetRootTask.isTopRootTaskInDisplayArea()
+                            && mService.isDreaming()
+                            && !dreamStopping;
+                }
+
+                if (launchBehindDream) {
                     // Launching underneath dream activity (fullscreen, always-on-top). Run the
                     // launch--behind transition so the Activity gets created and starts
                     // in visible state.
@@ -2221,6 +2377,9 @@ class ActivityStarter {
             return START_SUCCESS;
         }
 
+        if (mMovedToTopActivity != null) {
+            targetTaskTop = mMovedToTopActivity;
+        }
         // The reusedActivity could be finishing, for example of starting an activity with
         // FLAG_ACTIVITY_CLEAR_TOP flag. In that case, use the top running activity in the
         // task instead.
@@ -2242,7 +2401,8 @@ class ActivityStarter {
         // This is moving an existing task to front. But since dream activity has a higher z-order
         // to cover normal activities, it needs the awakening event to be dismissed.
         if (mService.isDreaming() && targetTaskTop.canTurnScreenOn()) {
-            targetTaskTop.mTaskSupervisor.wakeUp("recycleTask#turnScreenOnFlag");
+            targetTaskTop.mTaskSupervisor.wakeUp(
+                    targetTaskTop.getDisplayId(), "recycleTask#turnScreenOnFlag");
         }
 
         mLastStartActivityRecord = targetTaskTop;
@@ -2459,7 +2619,7 @@ class ActivityStarter {
         mInTaskFragment = null;
         mAddingToTaskFragment = null;
         mAddingToTask = false;
-
+        mMovedToTopActivity = null;
         mSourceRootTask = null;
 
         mTargetRootTask = null;
@@ -2721,10 +2881,7 @@ class ActivityStarter {
             mInTask = null;
             // Launch ResolverActivity in the source task, so that it stays in the task bounds
             // when in freeform workspace.
-            // Also put noDisplay activities in the source task. These by itself can be placed
-            // in any task/root-task, however it could launch other activities like
-            // ResolverActivity, and we want those to stay in the original task.
-            if ((mStartActivity.isResolverOrDelegateActivity() || mStartActivity.noDisplay)
+            if (mStartActivity.isResolverOrDelegateActivity()
                     && mSourceRecord != null && mSourceRecord.inFreeformWindowingMode()) {
                 mAddingToTask = true;
             }
@@ -2751,10 +2908,22 @@ class ActivityStarter {
             }
         }
 
-        if ((mLaunchFlags & FLAG_ACTIVITY_LAUNCH_ADJACENT) != 0
-                && ((mLaunchFlags & FLAG_ACTIVITY_NEW_TASK) == 0 || mSourceRecord == null)) {
-            // ignore the flag if there is no the sourceRecord or without new_task flag
-            mLaunchFlags &= ~FLAG_ACTIVITY_LAUNCH_ADJACENT;
+        if ((mLaunchFlags & FLAG_ACTIVITY_LAUNCH_ADJACENT) != 0) {
+            final boolean hasNewTaskFlag = (mLaunchFlags & FLAG_ACTIVITY_NEW_TASK) != 0;
+            if (!hasNewTaskFlag || mSourceRecord == null) {
+                // ignore the flag if there is no the sourceRecord or without new_task flag
+                Slog.w(TAG_WM, !hasNewTaskFlag
+                        ? "Launch adjacent ignored due to missing NEW_TASK"
+                        : "Launch adjacent ignored due to missing source activity");
+                mLaunchFlags &= ~FLAG_ACTIVITY_LAUNCH_ADJACENT;
+            }
+            // Ensure that the source task or its parents has not disabled launch-adjacent
+            if (mSourceRecord != null && mSourceRecord.getTask() != null &&
+                    mSourceRecord.getTask().isLaunchAdjacentDisabled()) {
+                Slog.w(TAG_WM, "Launch adjacent blocked by source task or ancestor");
+                mLaunchFlags &= ~FLAG_ACTIVITY_LAUNCH_ADJACENT;
+            }
+
         }
     }
 
@@ -3260,6 +3429,16 @@ class ActivityStarter {
         return this;
     }
 
+    ActivityStarter setIntentCreatorUid(int uid) {
+        mRequest.intentCreatorUid = uid;
+        return this;
+    }
+
+    ActivityStarter setIntentCreatorPackage(String intentCreatorPackage) {
+        mRequest.intentCreatorPackage = intentCreatorPackage;
+        return this;
+    }
+
     /**
      * Sets the pid of the caller who requested to launch the activity.
      *
@@ -3294,8 +3473,8 @@ class ActivityStarter {
         return this;
     }
 
-    ActivityStarter setActivityOptions(Bundle bOptions) {
-        return setActivityOptions(SafeActivityOptions.fromBundle(bOptions));
+    ActivityStarter setActivityOptions(Bundle bOptions, int callingPid, int callingUid) {
+        return setActivityOptions(SafeActivityOptions.fromBundle(bOptions, callingPid, callingUid));
     }
 
     ActivityStarter setIgnoreTargetSecurity(boolean ignoreTargetSecurity) {
@@ -3358,8 +3537,9 @@ class ActivityStarter {
         return this;
     }
 
-    ActivityStarter setBackgroundStartPrivileges(BackgroundStartPrivileges forcedBalByPiSender) {
-        mRequest.forcedBalByPiSender = forcedBalByPiSender;
+    ActivityStarter setAllowBalExemptionForSystemProcess(
+            boolean allowBalExemptionForSystemProcess) {
+        mRequest.allowBalExemptionForSystemProcess = allowBalExemptionForSystemProcess;
         return this;
     }
 
@@ -3418,5 +3598,49 @@ class ActivityStarter {
         pw.print(mAddingToTask);
         pw.print(" mInTaskFragment=");
         pw.println(mInTaskFragment);
+    }
+
+    static void logAndThrowExceptionForIntentRedirect(@NonNull Context context,
+            @NonNull String message, @NonNull Intent intent, int intentCreatorUid,
+            @Nullable String intentCreatorPackage, int callingUid, @Nullable String callingPackage,
+            @Nullable SecurityException originalException) {
+        String msg = getIntentRedirectPreventedLogMessage(message, intent, intentCreatorUid,
+                intentCreatorPackage, callingUid, callingPackage);
+        Slog.wtf(TAG, msg);
+        if (preventIntentRedirectShowToast()) {
+            UiThread.getHandler().post(
+                    () -> Toast.makeText(context,
+                            "Activity launch blocked. go/report-bug-intentRedir to report a bug",
+                            Toast.LENGTH_LONG).show());
+        }
+        if (preventIntentRedirectAbortOrThrowException() && CompatChanges.isChangeEnabled(
+                ENABLE_PREVENT_INTENT_REDIRECT_TAKE_ACTION, callingUid)) {
+            throw new SecurityException(msg, originalException);
+        }
+    }
+
+    private static boolean logAndAbortForIntentRedirect(@NonNull Context context,
+            @NonNull String message, @NonNull Intent intent, int intentCreatorUid,
+            @Nullable String intentCreatorPackage, int callingUid,
+            @Nullable String callingPackage) {
+        String msg = getIntentRedirectPreventedLogMessage(message, intent, intentCreatorUid,
+                intentCreatorPackage, callingUid, callingPackage);
+        Slog.wtf(TAG, msg);
+        if (preventIntentRedirectShowToast()) {
+            UiThread.getHandler().post(
+                    () -> Toast.makeText(context,
+                            "Activity launch blocked. go/report-bug-intentRedir to report a bug",
+                            Toast.LENGTH_LONG).show());
+        }
+        return preventIntentRedirectAbortOrThrowException() && CompatChanges.isChangeEnabled(
+                ENABLE_PREVENT_INTENT_REDIRECT_TAKE_ACTION, callingUid);
+    }
+
+    private static String getIntentRedirectPreventedLogMessage(@NonNull String message,
+            @NonNull Intent intent, int intentCreatorUid, @Nullable String intentCreatorPackage,
+            int callingUid, @Nullable String callingPackage) {
+        return "[IntentRedirect]" + message + " intentCreatorUid: " + intentCreatorUid
+                + "; intentCreatorPackage: " + intentCreatorPackage + "; callingUid: " + callingUid
+                + "; callingPackage: " + callingPackage + "; intent: " + intent;
     }
 }

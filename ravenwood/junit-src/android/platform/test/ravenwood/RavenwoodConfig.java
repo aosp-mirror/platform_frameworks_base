@@ -63,7 +63,11 @@ public final class RavenwoodConfig {
     int mUid = NOBODY_UID;
     int mPid = sNextPid.getAndIncrement();
 
-    String mPackageName;
+    String mTestPackageName;
+    String mTargetPackageName;
+
+    int mMinSdkLevel;
+    int mTargetSdkLevel;
 
     boolean mProvideMainThread = false;
 
@@ -71,9 +75,15 @@ public final class RavenwoodConfig {
 
     final List<Class<?>> mServicesRequired = new ArrayList<>();
 
-    volatile Context mContext;
+    volatile Context mInstContext;
+    volatile Context mTargetContext;
     volatile Instrumentation mInstrumentation;
 
+    /**
+     * Stores internal states / methods associated with this config that's only needed in
+     * junit-impl.
+     */
+    final RavenwoodConfigState mState = new RavenwoodConfigState(this);
     private RavenwoodConfig() {
     }
 
@@ -82,6 +92,12 @@ public final class RavenwoodConfig {
      */
     public static boolean isOnRavenwood() {
         return RavenwoodRule.isOnRavenwood();
+    }
+
+    private void setDefaults() {
+        if (mTargetPackageName == null) {
+            mTargetPackageName = mTestPackageName;
+        }
     }
 
     public static class Builder {
@@ -109,18 +125,46 @@ public final class RavenwoodConfig {
         }
 
         /**
-         * Configure the identity of this process to be the given package name for the duration
-         * of the test. Has no effect on non-Ravenwood environments.
+         * Configure the package name of the test, which corresponds to
+         * {@link Instrumentation#getContext()}.
          */
         public Builder setPackageName(@NonNull String packageName) {
-            mConfig.mPackageName = Objects.requireNonNull(packageName);
+            mConfig.mTestPackageName = Objects.requireNonNull(packageName);
+            return this;
+        }
+
+        /**
+         * Configure the package name of the target app, which corresponds to
+         * {@link Instrumentation#getTargetContext()}. Defaults to {@link #setPackageName}.
+         */
+        public Builder setTargetPackageName(@NonNull String packageName) {
+            mConfig.mTargetPackageName = Objects.requireNonNull(packageName);
+            return this;
+        }
+
+        /**
+         * Configure the min SDK level of the test.
+         */
+        public Builder setMinSdkLevel(int sdkLevel) {
+            mConfig.mMinSdkLevel = sdkLevel;
+            return this;
+        }
+
+        /**
+         * Configure the target SDK level of the test.
+         */
+        public Builder setTargetSdkLevel(int sdkLevel) {
+            mConfig.mTargetSdkLevel = sdkLevel;
             return this;
         }
 
         /**
          * Configure a "main" thread to be available for the duration of the test, as defined
          * by {@code Looper.getMainLooper()}. Has no effect on non-Ravenwood environments.
+         *
+         * @deprecated
          */
+        @Deprecated
         public Builder setProvideMainThread(boolean provideMainThread) {
             mConfig.mProvideMainThread = provideMainThread;
             return this;
@@ -178,6 +222,7 @@ public final class RavenwoodConfig {
         }
 
         public RavenwoodConfig build() {
+            mConfig.setDefaults();
             return mConfig;
         }
     }

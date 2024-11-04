@@ -98,7 +98,11 @@ public class DividerRoundedCorner extends View {
         return false;
     }
 
-    void setIsLeftRightSplit(boolean isLeftRightSplit) {
+    /**
+     * Set whether the rounded corner is for a left/right split.
+     * @param isLeftRightSplit whether it's a left/right split or top/bottom split.
+     */
+    public void setIsLeftRightSplit(boolean isLeftRightSplit) {
         mIsLeftRightSplit = isLeftRightSplit;
     }
 

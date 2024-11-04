@@ -212,9 +212,9 @@ easier.
 
         <!-- Color palette -->
         <item name="colorPrimary">@color/primary_device_default_dark</item>
-        <item name="colorPrimaryDark">@color/primary_device_default_dark</item>
+        <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>
         <item name="colorAccent">@color/accent_device_default_dark</item>
-        <item name="colorAccentPrimary">@color/system_primary_dark</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
         <item name="colorAccentSecondary">@color/system_secondary_dark</item>
         <item name="colorAccentTertiary">@color/system_tertiary_dark</item>
         <item name="colorAccentPrimaryVariant">@color/system_primary_container_dark</item>
@@ -314,9 +314,9 @@ easier.
     <style name="Theme.DeviceDefault.NoActionBar" parent="Theme.Material.NoActionBar">
         <!-- Color palette -->
         <item name="colorPrimary">@color/primary_device_default_dark</item>
-        <item name="colorPrimaryDark">@color/primary_device_default_dark</item>
+        <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>
         <item name="colorAccent">@color/accent_device_default_dark</item>
-        <item name="colorAccentPrimary">@color/system_primary_dark</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
         <item name="colorAccentSecondary">@color/system_secondary_dark</item>
         <item name="colorAccentTertiary">@color/system_tertiary_dark</item>
         <item name="colorAccentPrimaryVariant">@color/system_primary_container_dark</item>
@@ -431,9 +431,9 @@ easier.
     <style name="Theme.DeviceDefault.NoActionBar.Fullscreen" parent="Theme.Material.NoActionBar.Fullscreen">
         <!-- Color palette -->
         <item name="colorPrimary">@color/primary_device_default_dark</item>
-        <item name="colorPrimaryDark">@color/primary_device_default_dark</item>
+        <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>
         <item name="colorAccent">@color/accent_device_default_dark</item>
-        <item name="colorAccentPrimary">@color/system_primary_dark</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
         <item name="colorAccentSecondary">@color/system_secondary_dark</item>
         <item name="colorAccentTertiary">@color/system_tertiary_dark</item>
         <item name="colorAccentPrimaryVariant">@color/system_primary_container_dark</item>
@@ -550,9 +550,9 @@ easier.
     <style name="Theme.DeviceDefault.NoActionBar.Overscan" parent="Theme.Material.NoActionBar.Overscan">
         <!-- Color palette -->
         <item name="colorPrimary">@color/primary_device_default_dark</item>
-        <item name="colorPrimaryDark">@color/primary_device_default_dark</item>
+        <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>
         <item name="colorAccent">@color/accent_device_default_dark</item>
-        <item name="colorAccentPrimary">@color/system_primary_dark</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
         <item name="colorAccentSecondary">@color/system_secondary_dark</item>
         <item name="colorAccentTertiary">@color/system_tertiary_dark</item>
         <item name="colorAccentPrimaryVariant">@color/system_primary_container_dark</item>
@@ -668,9 +668,9 @@ easier.
     <style name="Theme.DeviceDefault.NoActionBar.TranslucentDecor" parent="Theme.Material.NoActionBar.TranslucentDecor">
         <!-- Color palette -->
         <item name="colorPrimary">@color/primary_device_default_dark</item>
-        <item name="colorPrimaryDark">@color/primary_device_default_dark</item>
+        <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>
         <item name="colorAccent">@color/accent_device_default_dark</item>
-        <item name="colorAccentPrimary">@color/system_primary_dark</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
         <item name="colorAccentSecondary">@color/system_secondary_dark</item>
         <item name="colorAccentTertiary">@color/system_tertiary_dark</item>
         <item name="colorAccentPrimaryVariant">@color/system_primary_container_dark</item>
@@ -801,9 +801,9 @@ easier.
 
         <!-- Color palette -->
         <item name="colorPrimary">@color/primary_device_default_dark</item>
-        <item name="colorPrimaryDark">@color/primary_device_default_dark</item>
+        <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>
         <item name="colorAccent">@color/accent_device_default_dark</item>
-        <item name="colorAccentPrimary">@color/system_primary_dark</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
         <item name="colorAccentSecondary">@color/system_secondary_dark</item>
         <item name="colorAccentTertiary">@color/system_tertiary_dark</item>
         <item name="colorAccentPrimaryVariant">@color/system_primary_container_dark</item>
@@ -911,9 +911,9 @@ easier.
     <style name="Theme.DeviceDefault.Dialog.MinWidth" parent="Theme.Material.Dialog.MinWidth">
         <!-- Color palette -->
         <item name="colorPrimary">@color/primary_device_default_dark</item>
-        <item name="colorPrimaryDark">@color/primary_device_default_dark</item>
+        <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>
         <item name="colorAccent">@color/accent_device_default_dark</item>
-        <item name="colorAccentPrimary">@color/system_primary_dark</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
         <item name="colorAccentSecondary">@color/system_secondary_dark</item>
         <item name="colorAccentTertiary">@color/system_tertiary_dark</item>
         <item name="colorAccentPrimaryVariant">@color/system_primary_container_dark</item>
@@ -1027,9 +1027,9 @@ easier.
     <style name="Theme.DeviceDefault.Dialog.NoActionBar" parent="Theme.Material.Dialog.NoActionBar">
         <!-- Color palette -->
         <item name="colorPrimary">@color/primary_device_default_dark</item>
-        <item name="colorPrimaryDark">@color/primary_device_default_dark</item>
+        <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>
         <item name="colorAccent">@color/accent_device_default_dark</item>
-        <item name="colorAccentPrimary">@color/system_primary_dark</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
         <item name="colorAccentSecondary">@color/system_secondary_dark</item>
         <item name="colorAccentTertiary">@color/system_tertiary_dark</item>
         <item name="colorAccentPrimaryVariant">@color/system_primary_container_dark</item>
@@ -1144,9 +1144,9 @@ easier.
     <style name="Theme.DeviceDefault.Dialog.NoActionBar.MinWidth" parent="Theme.Material.Dialog.NoActionBar.MinWidth">
         <!-- Color palette -->
         <item name="colorPrimary">@color/primary_device_default_dark</item>
-        <item name="colorPrimaryDark">@color/primary_device_default_dark</item>
+        <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>
         <item name="colorAccent">@color/accent_device_default_dark</item>
-        <item name="colorAccentPrimary">@color/system_primary_dark</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
         <item name="colorAccentSecondary">@color/system_secondary_dark</item>
         <item name="colorAccentTertiary">@color/system_tertiary_dark</item>
         <item name="colorAccentPrimaryVariant">@color/system_primary_container_dark</item>
@@ -1277,9 +1277,9 @@ easier.
     <style name="Theme.DeviceDefault.DialogWhenLarge" parent="Theme.Material.DialogWhenLarge">
         <!-- Color palette -->
         <item name="colorPrimary">@color/primary_device_default_dark</item>
-        <item name="colorPrimaryDark">@color/primary_device_default_dark</item>
+        <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>
         <item name="colorAccent">@color/accent_device_default_dark</item>
-        <item name="colorAccentPrimary">@color/system_primary_dark</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
         <item name="colorAccentSecondary">@color/system_secondary_dark</item>
         <item name="colorAccentTertiary">@color/system_tertiary_dark</item>
         <item name="colorAccentPrimaryVariant">@color/system_primary_container_dark</item>
@@ -1395,9 +1395,9 @@ easier.
     <style name="Theme.DeviceDefault.DialogWhenLarge.NoActionBar" parent="Theme.Material.DialogWhenLarge.NoActionBar">
         <!-- Color palette -->
         <item name="colorPrimary">@color/primary_device_default_dark</item>
-        <item name="colorPrimaryDark">@color/primary_device_default_dark</item>
+        <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>
         <item name="colorAccent">@color/accent_device_default_dark</item>
-        <item name="colorAccentPrimary">@color/system_primary_dark</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
         <item name="colorAccentSecondary">@color/system_secondary_dark</item>
         <item name="colorAccentTertiary">@color/system_tertiary_dark</item>
         <item name="colorAccentPrimaryVariant">@color/system_primary_container_dark</item>
@@ -1511,9 +1511,9 @@ easier.
     <style name="Theme.DeviceDefault.Dialog.Presentation" parent="Theme.Material.Dialog.Presentation">
         <!-- Color palette -->
         <item name="colorPrimary">@color/primary_device_default_dark</item>
-        <item name="colorPrimaryDark">@color/primary_device_default_dark</item>
+        <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>
         <item name="colorAccent">@color/accent_device_default_dark</item>
-        <item name="colorAccentPrimary">@color/system_primary_dark</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
         <item name="colorAccentSecondary">@color/system_secondary_dark</item>
         <item name="colorAccentTertiary">@color/system_tertiary_dark</item>
         <item name="colorAccentPrimaryVariant">@color/system_primary_container_dark</item>
@@ -1629,9 +1629,9 @@ easier.
     <style name="Theme.DeviceDefault.Panel" parent="Theme.Material.Panel">
         <!-- Color palette -->
         <item name="colorPrimary">@color/primary_device_default_dark</item>
-        <item name="colorPrimaryDark">@color/primary_device_default_dark</item>
+        <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>
         <item name="colorAccent">@color/accent_device_default_dark</item>
-        <item name="colorAccentPrimary">@color/system_primary_dark</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
         <item name="colorAccentSecondary">@color/system_secondary_dark</item>
         <item name="colorAccentTertiary">@color/system_tertiary_dark</item>
         <item name="colorAccentPrimaryVariant">@color/system_primary_container_dark</item>
@@ -1746,9 +1746,9 @@ easier.
     <style name="Theme.DeviceDefault.Wallpaper" parent="Theme.Material.Wallpaper">
         <!-- Color palette -->
         <item name="colorPrimary">@color/primary_device_default_dark</item>
-        <item name="colorPrimaryDark">@color/primary_device_default_dark</item>
+        <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>
         <item name="colorAccent">@color/accent_device_default_dark</item>
-        <item name="colorAccentPrimary">@color/system_primary_dark</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
         <item name="colorAccentSecondary">@color/system_secondary_dark</item>
         <item name="colorAccentTertiary">@color/system_tertiary_dark</item>
         <item name="colorAccentPrimaryVariant">@color/system_primary_container_dark</item>
@@ -1863,9 +1863,9 @@ easier.
     <style name="Theme.DeviceDefault.Wallpaper.NoTitleBar" parent="Theme.Material.Wallpaper.NoTitleBar">
         <!-- Color palette -->
         <item name="colorPrimary">@color/primary_device_default_dark</item>
-        <item name="colorPrimaryDark">@color/primary_device_default_dark</item>
+        <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>
         <item name="colorAccent">@color/accent_device_default_dark</item>
-        <item name="colorAccentPrimary">@color/system_primary_dark</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
         <item name="colorAccentSecondary">@color/system_secondary_dark</item>
         <item name="colorAccentTertiary">@color/system_tertiary_dark</item>
         <item name="colorAccentPrimaryVariant">@color/system_primary_container_dark</item>
@@ -1980,9 +1980,9 @@ easier.
     <style name="Theme.DeviceDefault.InputMethod" parent="Theme.Material.InputMethod">
         <!-- Color palette -->
         <item name="colorPrimary">@color/primary_device_default_light</item>
-        <item name="colorPrimaryDark">@color/primary_device_default_light</item>
+        <item name="colorPrimaryDark">@color/primary_dark_device_default_light</item>
         <item name="colorAccent">@color/accent_device_default_light</item>
-        <item name="colorAccentPrimary">@color/system_primary_dark</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
         <item name="colorAccentSecondary">@color/system_secondary_dark</item>
         <item name="colorAccentTertiary">@color/system_tertiary_dark</item>
         <item name="colorAccentPrimaryVariant">@color/system_primary_container_light</item>
@@ -2097,9 +2097,9 @@ easier.
     <style name="Theme.DeviceDefault.VoiceInteractionSession" parent="Theme.Material.VoiceInteractionSession">
         <!-- Color palette -->
         <item name="colorPrimary">@color/primary_device_default_light</item>
-        <item name="colorPrimaryDark">@color/primary_device_default_light</item>
+        <item name="colorPrimaryDark">@color/primary_dark_device_default_light</item>
         <item name="colorAccent">@color/accent_device_default_light</item>
-        <item name="colorAccentPrimary">@color/system_primary_dark</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
         <item name="colorAccentSecondary">@color/system_secondary_dark</item>
         <item name="colorAccentTertiary">@color/system_tertiary_dark</item>
         <item name="colorAccentPrimaryVariant">@color/system_primary_container_light</item>
@@ -2218,9 +2218,9 @@ easier.
 
         <!-- Color palette -->
         <item name="colorPrimary">@color/primary_device_default_dark</item>
-        <item name="colorPrimaryDark">@color/primary_device_default_dark</item>
+        <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>
         <item name="colorAccent">@color/accent_device_default_dark</item>
-        <item name="colorAccentPrimary">@color/system_primary_dark</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
         <item name="colorAccentSecondary">@color/system_secondary_dark</item>
         <item name="colorAccentTertiary">@color/system_tertiary_dark</item>
         <item name="colorAccentPrimaryVariant">@color/system_primary_container_dark</item>
@@ -2336,9 +2336,9 @@ easier.
     <style name="Theme.DeviceDefault.SearchBar" parent="Theme.Material.SearchBar">
         <!-- Color palette -->
         <item name="colorPrimary">@color/primary_device_default_dark</item>
-        <item name="colorPrimaryDark">@color/primary_device_default_dark</item>
+        <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>
         <item name="colorAccent">@color/accent_device_default_dark</item>
-        <item name="colorAccentPrimary">@color/system_primary_dark</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
         <item name="colorAccentSecondary">@color/system_secondary_dark</item>
         <item name="colorAccentTertiary">@color/system_tertiary_dark</item>
         <item name="colorAccentPrimaryVariant">@color/system_primary_container_dark</item>
@@ -2451,9 +2451,9 @@ easier.
     <style name="Theme.DeviceDefault.Dialog.NoFrame" parent="Theme.Material.Dialog.NoFrame">
         <!-- Color palette -->
         <item name="colorPrimary">@color/primary_device_default_dark</item>
-        <item name="colorPrimaryDark">@color/primary_device_default_dark</item>
+        <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>
         <item name="colorAccent">@color/accent_device_default_dark</item>
-        <item name="colorAccentPrimary">@color/system_primary_dark</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
         <item name="colorAccentSecondary">@color/system_secondary_dark</item>
         <item name="colorAccentTertiary">@color/system_tertiary_dark</item>
         <item name="colorAccentPrimaryVariant">@color/system_primary_container_dark</item>
@@ -2720,9 +2720,9 @@ easier.
 
         <!-- Color palette -->
         <item name="colorPrimary">@color/primary_device_default_light</item>
-        <item name="colorPrimaryDark">@color/primary_device_default_light</item>
+        <item name="colorPrimaryDark">@color/primary_dark_device_default_light</item>
         <item name="colorAccent">@color/accent_device_default_light</item>
-        <item name="colorAccentPrimary">@color/system_primary_dark</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
         <item name="colorAccentSecondary">@color/system_secondary_dark</item>
         <item name="colorAccentTertiary">@color/system_tertiary_dark</item>
         <item name="colorAccentPrimaryVariant">@color/system_primary_container_light</item>
@@ -2821,9 +2821,9 @@ easier.
     <style name="Theme.DeviceDefault.Light.DarkActionBar" parent="Theme.Material.Light.DarkActionBar">
         <!-- Color palette -->
         <item name="colorPrimary">@color/primary_device_default_dark</item>
-        <item name="colorPrimaryDark">@color/primary_device_default_dark</item>
+        <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>
         <item name="colorAccent">@color/accent_device_default_light</item>
-        <item name="colorAccentPrimary">@color/system_primary_dark</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
         <item name="colorAccentSecondary">@color/system_secondary_dark</item>
         <item name="colorAccentTertiary">@color/system_tertiary_dark</item>
         <item name="colorAccentPrimaryVariant">@color/system_primary_container_light</item>
@@ -2937,9 +2937,9 @@ easier.
     <style name="Theme.DeviceDefault.Light.NoActionBar" parent="Theme.Material.Light.NoActionBar">
         <!-- Color palette -->
         <item name="colorPrimary">@color/primary_device_default_light</item>
-        <item name="colorPrimaryDark">@color/primary_device_default_light</item>
+        <item name="colorPrimaryDark">@color/primary_dark_device_default_light</item>
         <item name="colorAccent">@color/accent_device_default_light</item>
-        <item name="colorAccentPrimary">@color/system_primary_dark</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
         <item name="colorAccentSecondary">@color/system_secondary_dark</item>
         <item name="colorAccentTertiary">@color/system_tertiary_dark</item>
         <item name="colorAccentPrimaryVariant">@color/system_primary_container_light</item>
@@ -3054,9 +3054,9 @@ easier.
     <style name="Theme.DeviceDefault.Light.NoActionBar.Fullscreen" parent="Theme.Material.Light.NoActionBar.Fullscreen">
         <!-- Color palette -->
         <item name="colorPrimary">@color/primary_device_default_light</item>
-        <item name="colorPrimaryDark">@color/primary_device_default_light</item>
+        <item name="colorPrimaryDark">@color/primary_dark_device_default_light</item>
         <item name="colorAccent">@color/accent_device_default_light</item>
-        <item name="colorAccentPrimary">@color/system_primary_dark</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
         <item name="colorAccentSecondary">@color/system_secondary_dark</item>
         <item name="colorAccentTertiary">@color/system_tertiary_dark</item>
         <item name="colorAccentPrimaryVariant">@color/system_primary_container_light</item>
@@ -3173,9 +3173,9 @@ easier.
     <style name="Theme.DeviceDefault.Light.NoActionBar.Overscan" parent="Theme.Material.Light.NoActionBar.Overscan">
         <!-- Color palette -->
         <item name="colorPrimary">@color/primary_device_default_light</item>
-        <item name="colorPrimaryDark">@color/primary_device_default_light</item>
+        <item name="colorPrimaryDark">@color/primary_dark_device_default_light</item>
         <item name="colorAccent">@color/accent_device_default_light</item>
-        <item name="colorAccentPrimary">@color/system_primary_dark</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
         <item name="colorAccentSecondary">@color/system_secondary_dark</item>
         <item name="colorAccentTertiary">@color/system_tertiary_dark</item>
         <item name="colorAccentPrimaryVariant">@color/system_primary_container_light</item>
@@ -3291,9 +3291,9 @@ easier.
     <style name="Theme.DeviceDefault.Light.NoActionBar.TranslucentDecor" parent="Theme.Material.Light.NoActionBar.TranslucentDecor">
         <!-- Color palette -->
         <item name="colorPrimary">@color/primary_device_default_light</item>
-        <item name="colorPrimaryDark">@color/primary_device_default_light</item>
+        <item name="colorPrimaryDark">@color/primary_dark_device_default_light</item>
         <item name="colorAccent">@color/accent_device_default_light</item>
-        <item name="colorAccentPrimary">@color/system_primary_dark</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
         <item name="colorAccentSecondary">@color/system_secondary_dark</item>
         <item name="colorAccentTertiary">@color/system_tertiary_dark</item>
         <item name="colorAccentPrimaryVariant">@color/system_primary_container_light</item>
@@ -3426,9 +3426,9 @@ easier.
 
         <!-- Color palette -->
         <item name="colorPrimary">@color/primary_device_default_light</item>
-        <item name="colorPrimaryDark">@color/primary_device_default_light</item>
+        <item name="colorPrimaryDark">@color/primary_dark_device_default_light</item>
         <item name="colorAccent">@color/accent_device_default_light</item>
-        <item name="colorAccentPrimary">@color/system_primary_dark</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
         <item name="colorAccentSecondary">@color/system_secondary_dark</item>
         <item name="colorAccentTertiary">@color/system_tertiary_dark</item>
         <item name="colorAccentPrimaryVariant">@color/system_primary_container_light</item>
@@ -3535,9 +3535,9 @@ easier.
 
         <!-- Color palette -->
         <item name="colorPrimary">@color/primary_device_default_light</item>
-        <item name="colorPrimaryDark">@color/primary_device_default_light</item>
+        <item name="colorPrimaryDark">@color/primary_dark_device_default_light</item>
         <item name="colorAccent">@color/accent_device_default_light</item>
-        <item name="colorAccentPrimary">@color/system_primary_dark</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
         <item name="colorAccentSecondary">@color/system_secondary_dark</item>
         <item name="colorAccentTertiary">@color/system_tertiary_dark</item>
         <item name="colorAccentPrimaryVariant">@color/system_primary_container_light</item>
@@ -3654,9 +3654,9 @@ easier.
 
         <!-- Color palette -->
         <item name="colorPrimary">@color/primary_device_default_light</item>
-        <item name="colorPrimaryDark">@color/primary_device_default_light</item>
+        <item name="colorPrimaryDark">@color/primary_dark_device_default_light</item>
         <item name="colorAccent">@color/accent_device_default_light</item>
-        <item name="colorAccentPrimary">@color/system_primary_dark</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
         <item name="colorAccentSecondary">@color/system_secondary_dark</item>
         <item name="colorAccentTertiary">@color/system_tertiary_dark</item>
         <item name="colorAccentPrimaryVariant">@color/system_primary_container_light</item>
@@ -3774,9 +3774,9 @@ easier.
 
         <!-- Color palette -->
         <item name="colorPrimary">@color/primary_device_default_light</item>
-        <item name="colorPrimaryDark">@color/primary_device_default_light</item>
+        <item name="colorPrimaryDark">@color/primary_dark_device_default_light</item>
         <item name="colorAccent">@color/accent_device_default_light</item>
-        <item name="colorAccentPrimary">@color/system_primary_dark</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
         <item name="colorAccentSecondary">@color/system_secondary_dark</item>
         <item name="colorAccentTertiary">@color/system_tertiary_dark</item>
         <item name="colorAccentPrimaryVariant">@color/system_primary_container_light</item>
@@ -3895,9 +3895,9 @@ easier.
 
         <!-- Color palette -->
         <item name="colorPrimary">@color/primary_device_default_light</item>
-        <item name="colorPrimaryDark">@color/primary_device_default_light</item>
+        <item name="colorPrimaryDark">@color/primary_dark_device_default_light</item>
         <item name="colorAccent">@color/accent_device_default_light</item>
-        <item name="colorAccentPrimary">@color/system_primary_dark</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
         <item name="colorAccentSecondary">@color/system_secondary_dark</item>
         <item name="colorAccentTertiary">@color/system_tertiary_dark</item>
         <item name="colorAccentPrimaryVariant">@color/system_primary_container_light</item>
@@ -3996,9 +3996,9 @@ easier.
 
         <!-- Color palette -->
         <item name="colorPrimary">@color/primary_device_default_light</item>
-        <item name="colorPrimaryDark">@color/primary_device_default_light</item>
+        <item name="colorPrimaryDark">@color/primary_dark_device_default_light</item>
         <item name="colorAccent">@color/accent_device_default_light</item>
-        <item name="colorAccentPrimary">@color/system_primary_dark</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
         <item name="colorAccentSecondary">@color/system_secondary_dark</item>
         <item name="colorAccentTertiary">@color/system_tertiary_dark</item>
         <item name="colorAccentPrimaryVariant">@color/system_primary_container_light</item>
@@ -4096,9 +4096,9 @@ easier.
 
         <!-- Color palette -->
         <item name="colorPrimary">@color/primary_device_default_light</item>
-        <item name="colorPrimaryDark">@color/primary_device_default_light</item>
+        <item name="colorPrimaryDark">@color/primary_dark_device_default_light</item>
         <item name="colorAccent">@color/accent_device_default_light</item>
-        <item name="colorAccentPrimary">@color/system_primary_dark</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
         <item name="colorAccentSecondary">@color/system_secondary_dark</item>
         <item name="colorAccentTertiary">@color/system_tertiary_dark</item>
         <item name="colorAccentPrimaryVariant">@color/system_primary_container_light</item>
@@ -4217,9 +4217,9 @@ easier.
 
         <!-- Color palette -->
         <item name="colorPrimary">@color/primary_device_default_light</item>
-        <item name="colorPrimaryDark">@color/primary_device_default_light</item>
+        <item name="colorPrimaryDark">@color/primary_dark_device_default_light</item>
         <item name="colorAccent">@color/accent_device_default_light</item>
-        <item name="colorAccentPrimary">@color/system_primary_dark</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
         <item name="colorAccentSecondary">@color/system_secondary_dark</item>
         <item name="colorAccentTertiary">@color/system_tertiary_dark</item>
         <item name="colorAccentPrimaryVariant">@color/system_primary_container_light</item>
@@ -4336,9 +4336,9 @@ easier.
 
         <!-- Color palette -->
         <item name="colorPrimary">@color/primary_device_default_light</item>
-        <item name="colorPrimaryDark">@color/primary_device_default_light</item>
+        <item name="colorPrimaryDark">@color/primary_dark_device_default_light</item>
         <item name="colorAccent">@color/accent_device_default_light</item>
-        <item name="colorAccentPrimary">@color/system_primary_dark</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
         <item name="colorAccentSecondary">@color/system_secondary_dark</item>
         <item name="colorAccentTertiary">@color/system_tertiary_dark</item>
         <item name="colorAccentPrimaryVariant">@color/system_primary_container_light</item>
@@ -4454,9 +4454,9 @@ easier.
     <style name="Theme.DeviceDefault.Light.Panel" parent="Theme.Material.Light.Panel">
         <!-- Color palette -->
         <item name="colorPrimary">@color/primary_device_default_light</item>
-        <item name="colorPrimaryDark">@color/primary_device_default_light</item>
+        <item name="colorPrimaryDark">@color/primary_dark_device_default_light</item>
         <item name="colorAccent">@color/accent_device_default_light</item>
-        <item name="colorAccentPrimary">@color/system_primary_dark</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
         <item name="colorAccentSecondary">@color/system_secondary_dark</item>
         <item name="colorAccentTertiary">@color/system_tertiary_dark</item>
         <item name="colorAccentPrimaryVariant">@color/system_primary_container_light</item>
@@ -4571,9 +4571,9 @@ easier.
 
         <!-- Color palette -->
         <item name="colorPrimary">@color/primary_device_default_light</item>
-        <item name="colorPrimaryDark">@color/primary_device_default_light</item>
+        <item name="colorPrimaryDark">@color/primary_dark_device_default_light</item>
         <item name="colorAccent">@color/accent_device_default_light</item>
-        <item name="colorAccentPrimary">@color/system_primary_dark</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
         <item name="colorAccentSecondary">@color/system_secondary_dark</item>
         <item name="colorAccentTertiary">@color/system_tertiary_dark</item>
         <item name="colorAccentPrimaryVariant">@color/system_primary_container_light</item>
@@ -4688,9 +4688,9 @@ easier.
     <style name="Theme.DeviceDefault.Light.SearchBar" parent="Theme.Material.Light.SearchBar">
         <!-- Color palette -->
         <item name="colorPrimary">@color/primary_device_default_light</item>
-        <item name="colorPrimaryDark">@color/primary_device_default_light</item>
+        <item name="colorPrimaryDark">@color/primary_dark_device_default_light</item>
         <item name="colorAccent">@color/accent_device_default_light</item>
-        <item name="colorAccentPrimary">@color/system_primary_dark</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
         <item name="colorAccentSecondary">@color/system_secondary_dark</item>
         <item name="colorAccentTertiary">@color/system_tertiary_dark</item>
         <item name="colorAccentPrimaryVariant">@color/system_primary_container_light</item>
@@ -4803,9 +4803,9 @@ easier.
     <style name="Theme.DeviceDefault.Light.Voice" parent="Theme.Material.Light.Voice">
         <!-- Color palette -->
         <item name="colorPrimary">@color/primary_device_default_light</item>
-        <item name="colorPrimaryDark">@color/primary_device_default_light</item>
+        <item name="colorPrimaryDark">@color/primary_dark_device_default_light</item>
         <item name="colorAccent">@color/accent_device_default_light</item>
-        <item name="colorAccentPrimary">@color/system_primary_dark</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
         <item name="colorAccentSecondary">@color/system_secondary_dark</item>
         <item name="colorAccentTertiary">@color/system_tertiary_dark</item>
         <item name="colorAccentPrimaryVariant">@color/system_primary_container_light</item>
@@ -4937,7 +4937,7 @@ easier.
         <item name="colorPrimaryDark">@color/primary_dark_device_default_settings_light</item>
         <item name="colorSecondary">@color/secondary_device_default_settings_light</item>
         <item name="colorAccent">@color/accent_device_default_light</item>
-        <item name="colorAccentPrimary">@color/system_primary_dark</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
         <item name="colorAccentSecondary">@color/system_secondary_dark</item>
         <item name="colorAccentTertiary">@color/system_tertiary_dark</item>
         <item name="colorAccentPrimaryVariant">@color/system_primary_container_light</item>
@@ -5044,7 +5044,7 @@ easier.
         <item name="colorPrimaryDark">@color/primary_dark_device_default_settings_light</item>
         <item name="colorSecondary">@color/secondary_device_default_settings_light</item>
         <item name="colorAccent">@color/accent_device_default_light</item>
-        <item name="colorAccentPrimary">@color/system_primary_dark</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
         <item name="colorAccentSecondary">@color/system_secondary_dark</item>
         <item name="colorAccentTertiary">@color/system_tertiary_dark</item>
         <item name="colorAccentPrimaryVariant">@color/system_primary_container_light</item>
@@ -5148,7 +5148,7 @@ easier.
         <item name="colorPrimaryDark">@color/primary_dark_device_default_settings_light</item>
         <item name="colorSecondary">@color/secondary_device_default_settings_light</item>
         <item name="colorAccent">@color/accent_device_default_light</item>
-        <item name="colorAccentPrimary">@color/system_primary_dark</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
         <item name="colorAccentSecondary">@color/system_secondary_dark</item>
         <item name="colorAccentTertiary">@color/system_tertiary_dark</item>
         <item name="colorAccentPrimaryVariant">@color/system_primary_container_light</item>
@@ -5245,7 +5245,7 @@ easier.
         <item name="colorPrimaryDark">@color/primary_dark_device_default_settings</item>
         <item name="colorSecondary">@color/secondary_device_default_settings</item>
         <item name="colorAccent">@color/accent_device_default_dark</item>
-        <item name="colorAccentPrimary">@color/system_primary_dark</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
         <item name="colorAccentSecondary">@color/system_secondary_dark</item>
         <item name="colorAccentTertiary">@color/system_tertiary_dark</item>
         <item name="colorAccentPrimaryVariant">@color/system_primary_container_dark</item>
@@ -5361,7 +5361,7 @@ easier.
         <item name="colorPrimaryDark">@color/primary_dark_device_default_settings</item>
         <item name="colorSecondary">@color/secondary_device_default_settings</item>
         <item name="colorAccent">@color/accent_device_default_light</item>
-        <item name="colorAccentPrimary">@color/system_primary_dark</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
         <item name="colorAccentSecondary">@color/system_secondary_dark</item>
         <item name="colorAccentTertiary">@color/system_tertiary_dark</item>
         <item name="colorAccentPrimaryVariant">@color/system_primary_container_light</item>
@@ -5487,7 +5487,7 @@ easier.
         <item name="colorPrimaryDark">@color/primary_dark_device_default_settings</item>
         <item name="colorSecondary">@color/secondary_device_default_settings</item>
         <item name="colorAccent">@color/accent_device_default_light</item>
-        <item name="colorAccentPrimary">@color/system_primary_dark</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
         <item name="colorAccentSecondary">@color/system_secondary_dark</item>
         <item name="colorAccentTertiary">@color/system_tertiary_dark</item>
         <item name="colorAccentPrimaryVariant">@color/system_primary_container_light</item>
@@ -5606,7 +5606,7 @@ easier.
         <item name="colorPrimaryDark">@color/primary_dark_device_default_settings</item>
         <item name="colorSecondary">@color/secondary_device_default_settings</item>
         <item name="colorAccent">@color/accent_device_default_light</item>
-        <item name="colorAccentPrimary">@color/system_primary_dark</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
         <item name="colorAccentSecondary">@color/system_secondary_dark</item>
         <item name="colorAccentTertiary">@color/system_tertiary_dark</item>
         <item name="colorAccentPrimaryVariant">@color/system_primary_container_light</item>
@@ -5788,7 +5788,7 @@ easier.
 
     <style name="ThemeOverlay.DeviceDefault.Accent">
         <item name="colorAccent">@color/accent_device_default_dark</item>
-        <item name="colorAccentPrimary">@color/system_primary_dark</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
         <item name="colorAccentSecondary">@color/system_secondary_dark</item>
         <item name="colorAccentTertiary">@color/system_tertiary_dark</item>
 
@@ -5863,7 +5863,7 @@ easier.
 
     <style name="ThemeOverlay.DeviceDefault.Accent.Light">
         <item name="colorAccent">@color/accent_device_default_light</item>
-        <item name="colorAccentPrimary">@color/system_primary_dark</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
         <item name="colorAccentSecondary">@color/system_secondary_dark</item>
         <item name="colorAccentTertiary">@color/system_tertiary_dark</item>
 
@@ -5942,7 +5942,7 @@ easier.
 
     <style name="ThemeOverlay.DeviceDefault.Dark.ActionBar.Accent" parent="ThemeOverlay.Material.Dark.ActionBar">
         <item name="colorAccent">@color/accent_device_default_dark</item>
-        <item name="colorAccentPrimary">@color/system_primary_dark</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
         <item name="colorAccentSecondary">@color/system_secondary_dark</item>
         <item name="colorAccentTertiary">@color/system_tertiary_dark</item>
 

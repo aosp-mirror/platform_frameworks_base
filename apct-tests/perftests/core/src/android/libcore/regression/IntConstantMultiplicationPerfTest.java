@@ -16,8 +16,8 @@
 
 package android.libcore.regression;
 
-import androidx.benchmark.BenchmarkState;
-import androidx.benchmark.junit4.BenchmarkRule;
+import android.perftests.utils.BenchmarkState;
+import android.perftests.utils.PerfStatusReporter;
 
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -29,12 +29,12 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 @LargeTest
 public class IntConstantMultiplicationPerfTest {
-    @Rule public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
+    @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
 
     @Test
     public void timeMultiplyIntByConstant6() {
         int result = 1;
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             result *= 6;
         }
@@ -43,7 +43,7 @@ public class IntConstantMultiplicationPerfTest {
     @Test
     public void timeMultiplyIntByConstant7() {
         int result = 1;
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             result *= 7;
         }
@@ -52,7 +52,7 @@ public class IntConstantMultiplicationPerfTest {
     @Test
     public void timeMultiplyIntByConstant8() {
         int result = 1;
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             result *= 8;
         }
@@ -61,7 +61,7 @@ public class IntConstantMultiplicationPerfTest {
     @Test
     public void timeMultiplyIntByConstant8_Shift() {
         int result = 1;
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             result <<= 3;
         }
@@ -70,7 +70,7 @@ public class IntConstantMultiplicationPerfTest {
     @Test
     public void timeMultiplyIntByConstant10() {
         int result = 1;
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             result *= 10;
         }
@@ -79,7 +79,7 @@ public class IntConstantMultiplicationPerfTest {
     @Test
     public void timeMultiplyIntByConstant10_Shift() {
         int result = 1;
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             result = (result + (result << 2)) << 1;
         }
@@ -88,7 +88,7 @@ public class IntConstantMultiplicationPerfTest {
     @Test
     public void timeMultiplyIntByConstant2047() {
         int result = 1;
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             result *= 2047;
         }
@@ -97,7 +97,7 @@ public class IntConstantMultiplicationPerfTest {
     @Test
     public void timeMultiplyIntByConstant2048() {
         int result = 1;
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             result *= 2048;
         }
@@ -106,7 +106,7 @@ public class IntConstantMultiplicationPerfTest {
     @Test
     public void timeMultiplyIntByConstant2049() {
         int result = 1;
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             result *= 2049;
         }
@@ -116,7 +116,7 @@ public class IntConstantMultiplicationPerfTest {
     public void timeMultiplyIntByVariable10() {
         int result = 1;
         int factor = 10;
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             result *= factor;
         }
@@ -126,7 +126,7 @@ public class IntConstantMultiplicationPerfTest {
     public void timeMultiplyIntByVariable8() {
         int result = 1;
         int factor = 8;
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             result *= factor;
         }

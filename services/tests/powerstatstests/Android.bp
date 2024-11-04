@@ -30,7 +30,7 @@ android_test {
     ],
 
     libs: [
-        "android.test.base",
+        "android.test.base.stubs.system",
     ],
 
     resource_dirs: ["res/"],

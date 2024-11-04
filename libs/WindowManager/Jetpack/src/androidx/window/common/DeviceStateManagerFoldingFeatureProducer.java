@@ -16,12 +16,11 @@
 
 package androidx.window.common;
 
-import static android.hardware.devicestate.DeviceStateManager.INVALID_DEVICE_STATE_IDENTIFIER;
+import static android.hardware.devicestate.DeviceStateManager.INVALID_DEVICE_STATE;
 
 import static androidx.window.common.layout.CommonFoldingFeature.COMMON_STATE_UNKNOWN;
 import static androidx.window.common.layout.CommonFoldingFeature.parseListFromString;
 
-import android.annotation.NonNull;
 import android.content.Context;
 import android.hardware.devicestate.DeviceState;
 import android.hardware.devicestate.DeviceStateManager;
@@ -31,16 +30,23 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseIntArray;
 
+import androidx.annotation.BinderThread;
+import androidx.annotation.GuardedBy;
+import androidx.annotation.MainThread;
+import androidx.annotation.NonNull;
+import androidx.annotation.VisibleForTesting;
 import androidx.window.common.layout.CommonFoldingFeature;
 import androidx.window.common.layout.DisplayFoldFeatureCommon;
 
 import com.android.internal.R;
+import com.android.window.flags.Flags;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 /**
@@ -55,13 +61,6 @@ public final class DeviceStateManagerFoldingFeatureProducer
     private static final boolean DEBUG = false;
 
     /**
-     * Emulated device state
-     * {@link DeviceStateManager.DeviceStateCallback#onDeviceStateChanged(DeviceState)} to
-     * {@link CommonFoldingFeature.State} map.
-     */
-    private final SparseIntArray mDeviceStateToPostureMap = new SparseIntArray();
-
-    /**
      * Device state received via
      * {@link DeviceStateManager.DeviceStateCallback#onDeviceStateChanged(DeviceState)}.
      * The identifier returned through {@link DeviceState#getIdentifier()} may not correspond 1:1
@@ -71,23 +70,40 @@ public final class DeviceStateManagerFoldingFeatureProducer
      * "rear display". Concurrent mode for example is activated via public API and can be active in
      * both the "open" and "half folded" device states.
      */
-    private DeviceState mCurrentDeviceState = new DeviceState(
-            new DeviceState.Configuration.Builder(INVALID_DEVICE_STATE_IDENTIFIER,
-                    "INVALID").build());
+    // TODO: b/337820752 - Add @GuardedBy("mCurrentDeviceStateLock") after flag cleanup.
+    private DeviceState mCurrentDeviceState = INVALID_DEVICE_STATE;
 
-    private List<DeviceState> mSupportedStates;
+    /**
+     * Lock to synchronize access to {@link #mCurrentDeviceState}.
+     *
+     * <p>This lock is used to ensure thread-safety when accessing and modifying the
+     * {@link #mCurrentDeviceState} field. It is acquired by both the binder thread (if
+     * {@link Flags#wlinfoOncreate()} is enabled) and the main thread (if
+     * {@link Flags#wlinfoOncreate()} is disabled) to prevent race conditions and
+     * ensure data consistency.
+     */
+    private final Object mCurrentDeviceStateLock = new Object();
 
     @NonNull
     private final RawFoldingFeatureProducer mRawFoldSupplier;
 
-    private final boolean mIsHalfOpenedSupported;
+    @NonNull
+    private final DeviceStateMapper mDeviceStateMapper;
 
-    private final DeviceStateCallback mDeviceStateCallback = new DeviceStateCallback() {
+    @VisibleForTesting
+    final DeviceStateCallback mDeviceStateCallback = new DeviceStateCallback() {
+        // The GuardedBy analysis is intra-procedural, meaning it doesn’t consider the getData()
+        // implementation. See https://errorprone.info/bugpattern/GuardedBy for limitations.
+        @SuppressWarnings("GuardedBy")
+        @BinderThread // When Flags.wlinfoOncreate() is enabled.
+        @MainThread // When Flags.wlinfoOncreate() is disabled.
         @Override
         public void onDeviceStateChanged(@NonNull DeviceState state) {
-            mCurrentDeviceState = state;
-            mRawFoldSupplier.getData(DeviceStateManagerFoldingFeatureProducer
-                    .this::notifyFoldingFeatureChange);
+            synchronized (mCurrentDeviceStateLock) {
+                mCurrentDeviceState = state;
+                mRawFoldSupplier.getData(DeviceStateManagerFoldingFeatureProducer.this
+                        ::notifyFoldingFeatureChangeLocked);
+            }
         }
     };
 
@@ -95,41 +111,14 @@ public final class DeviceStateManagerFoldingFeatureProducer
             @NonNull RawFoldingFeatureProducer rawFoldSupplier,
             @NonNull DeviceStateManager deviceStateManager) {
         mRawFoldSupplier = rawFoldSupplier;
-        String[] deviceStatePosturePairs = context.getResources()
-                .getStringArray(R.array.config_device_state_postures);
-        mSupportedStates = deviceStateManager.getSupportedDeviceStates();
-        boolean isHalfOpenedSupported = false;
-        for (String deviceStatePosturePair : deviceStatePosturePairs) {
-            String[] deviceStatePostureMapping = deviceStatePosturePair.split(":");
-            if (deviceStatePostureMapping.length != 2) {
-                if (DEBUG) {
-                    Log.e(TAG, "Malformed device state posture pair: "
-                            + deviceStatePosturePair);
-                }
-                continue;
-            }
+        mDeviceStateMapper =
+                new DeviceStateMapper(context, deviceStateManager.getSupportedDeviceStates());
 
-            int deviceState;
-            int posture;
-            try {
-                deviceState = Integer.parseInt(deviceStatePostureMapping[0]);
-                posture = Integer.parseInt(deviceStatePostureMapping[1]);
-            } catch (NumberFormatException e) {
-                if (DEBUG) {
-                    Log.e(TAG, "Failed to parse device state or posture: "
-                                    + deviceStatePosturePair,
-                            e);
-                }
-                continue;
-            }
-            isHalfOpenedSupported = isHalfOpenedSupported
-                    || posture == CommonFoldingFeature.COMMON_STATE_HALF_OPENED;
-            mDeviceStateToPostureMap.put(deviceState, posture);
-        }
-        mIsHalfOpenedSupported = isHalfOpenedSupported;
-        if (mDeviceStateToPostureMap.size() > 0) {
+        if (!mDeviceStateMapper.isDeviceStateToPostureMapEmpty()) {
+            final Executor executor =
+                    Flags.wlinfoOncreate() ? Runnable::run : context.getMainExecutor();
             Objects.requireNonNull(deviceStateManager)
-                    .registerCallback(context.getMainExecutor(), mDeviceStateCallback);
+                    .registerCallback(executor, mDeviceStateCallback);
         }
     }
 
@@ -137,50 +126,51 @@ public final class DeviceStateManagerFoldingFeatureProducer
      * Add a callback to mCallbacks if there is no device state. This callback will be run
      * once a device state is set. Otherwise,run the callback immediately.
      */
-    private void runCallbackWhenValidState(@NonNull Consumer<List<CommonFoldingFeature>> callback,
-            String displayFeaturesString) {
-        if (isCurrentStateValid()) {
-            callback.accept(calculateFoldingFeature(displayFeaturesString));
+    private void runCallbackWhenValidState(@NonNull DeviceState state,
+            @NonNull Consumer<List<CommonFoldingFeature>> callback,
+            @NonNull String displayFeaturesString) {
+        if (mDeviceStateMapper.isDeviceStateValid(state)) {
+            callback.accept(calculateFoldingFeature(state, displayFeaturesString));
         } else {
             // This callback will be added to mCallbacks and removed once it runs once.
-            AcceptOnceConsumer<List<CommonFoldingFeature>> singleRunCallback =
+            final AcceptOnceConsumer<List<CommonFoldingFeature>> singleRunCallback =
                     new AcceptOnceConsumer<>(this, callback);
             addDataChangedCallback(singleRunCallback);
         }
     }
 
-    /**
-     * Checks to find {@link DeviceStateManagerFoldingFeatureProducer#mCurrentDeviceState} in the
-     * {@link DeviceStateManagerFoldingFeatureProducer#mDeviceStateToPostureMap} which was
-     * initialized in the constructor of {@link DeviceStateManagerFoldingFeatureProducer}.
-     * Returns a boolean value of whether the device state is valid.
-     */
-    private boolean isCurrentStateValid() {
-        // If the device state is not found in the map, indexOfKey returns a negative number.
-        return mDeviceStateToPostureMap.indexOfKey(mCurrentDeviceState.getIdentifier()) >= 0;
-    }
-
+    // The GuardedBy analysis is intra-procedural, meaning it doesn’t consider the implementation of
+    // addDataChangedCallback(). See https://errorprone.info/bugpattern/GuardedBy for limitations.
+    @SuppressWarnings("GuardedBy")
     @Override
     protected void onListenersChanged() {
         super.onListenersChanged();
-        if (hasListeners()) {
-            mRawFoldSupplier.addDataChangedCallback(this::notifyFoldingFeatureChange);
-        } else {
-            mCurrentDeviceState = new DeviceState(
-                    new DeviceState.Configuration.Builder(INVALID_DEVICE_STATE_IDENTIFIER,
-                            "INVALID").build());
-            mRawFoldSupplier.removeDataChangedCallback(this::notifyFoldingFeatureChange);
+        synchronized (mCurrentDeviceStateLock) {
+            if (hasListeners()) {
+                mRawFoldSupplier.addDataChangedCallback(this::notifyFoldingFeatureChangeLocked);
+            } else {
+                mCurrentDeviceState = INVALID_DEVICE_STATE;
+                mRawFoldSupplier.removeDataChangedCallback(this::notifyFoldingFeatureChangeLocked);
+            }
+        }
+    }
+
+    @NonNull
+    private DeviceState getCurrentDeviceState() {
+        synchronized (mCurrentDeviceStateLock) {
+            return mCurrentDeviceState;
         }
     }
 
     @NonNull
     @Override
     public Optional<List<CommonFoldingFeature>> getCurrentData() {
-        Optional<String> displayFeaturesString = mRawFoldSupplier.getCurrentData();
-        if (!isCurrentStateValid()) {
+        final Optional<String> displayFeaturesString = mRawFoldSupplier.getCurrentData();
+        final DeviceState state = getCurrentDeviceState();
+        if (!mDeviceStateMapper.isDeviceStateValid(state) || displayFeaturesString.isEmpty()) {
             return Optional.empty();
         } else {
-            return displayFeaturesString.map(this::calculateFoldingFeature);
+            return Optional.of(calculateFoldingFeature(state, displayFeaturesString.get()));
         }
     }
 
@@ -191,7 +181,7 @@ public final class DeviceStateManagerFoldingFeatureProducer
      */
     @NonNull
     public List<CommonFoldingFeature> getFoldsWithUnknownState() {
-        Optional<String> optionalFoldingFeatureString = mRawFoldSupplier.getCurrentData();
+        final Optional<String> optionalFoldingFeatureString = mRawFoldSupplier.getCurrentData();
 
         if (optionalFoldingFeatureString.isPresent()) {
             return CommonFoldingFeature.parseListFromString(
@@ -200,7 +190,6 @@ public final class DeviceStateManagerFoldingFeatureProducer
         }
         return Collections.emptyList();
     }
-
 
     /**
      * Returns the list of supported {@link DisplayFoldFeatureCommon} calculated from the
@@ -218,16 +207,16 @@ public final class DeviceStateManagerFoldingFeatureProducer
         return foldFeatures;
     }
 
-
     /**
      * Returns {@code true} if the device supports half-opened mode, {@code false} otherwise.
      */
     public boolean isHalfOpenedSupported() {
-        return mIsHalfOpenedSupported;
+        return mDeviceStateMapper.mIsHalfOpenedSupported;
     }
 
     /**
      * Adds the data to the storeFeaturesConsumer when the data is ready.
+     *
      * @param storeFeaturesConsumer a consumer to collect the data when it is first available.
      */
     @Override
@@ -236,38 +225,123 @@ public final class DeviceStateManagerFoldingFeatureProducer
             if (TextUtils.isEmpty(displayFeaturesString)) {
                 storeFeaturesConsumer.accept(new ArrayList<>());
             } else {
-                runCallbackWhenValidState(storeFeaturesConsumer, displayFeaturesString);
+                final DeviceState state = getCurrentDeviceState();
+                runCallbackWhenValidState(state, storeFeaturesConsumer, displayFeaturesString);
             }
         });
     }
 
-    private void notifyFoldingFeatureChange(String displayFeaturesString) {
-        if (!isCurrentStateValid()) {
+    @GuardedBy("mCurrentDeviceStateLock")
+    private void notifyFoldingFeatureChangeLocked(String displayFeaturesString) {
+        final DeviceState state = mCurrentDeviceState;
+        if (!mDeviceStateMapper.isDeviceStateValid(state)) {
             return;
         }
         if (TextUtils.isEmpty(displayFeaturesString)) {
             notifyDataChanged(new ArrayList<>());
         } else {
-            notifyDataChanged(calculateFoldingFeature(displayFeaturesString));
+            notifyDataChanged(calculateFoldingFeature(state, displayFeaturesString));
         }
     }
 
-    private List<CommonFoldingFeature> calculateFoldingFeature(String displayFeaturesString) {
-        return parseListFromString(displayFeaturesString, currentHingeState());
-    }
-
-    @CommonFoldingFeature.State
-    private int currentHingeState() {
+    @NonNull
+    private List<CommonFoldingFeature> calculateFoldingFeature(@NonNull DeviceState deviceState,
+            @NonNull String displayFeaturesString) {
         @CommonFoldingFeature.State
-        int posture = mDeviceStateToPostureMap.get(mCurrentDeviceState.getIdentifier(),
-                COMMON_STATE_UNKNOWN);
+        final int hingeState = mDeviceStateMapper.getHingeState(deviceState);
+        return parseListFromString(displayFeaturesString, hingeState);
+    }
 
-        if (posture == CommonFoldingFeature.COMMON_STATE_USE_BASE_STATE) {
-            posture = mDeviceStateToPostureMap.get(
-                    DeviceStateUtil.calculateBaseStateIdentifier(mCurrentDeviceState,
-                            mSupportedStates), COMMON_STATE_UNKNOWN);
+    /**
+     * Internal class to map device states to corresponding postures.
+     *
+     * <p>This class encapsulates the logic for mapping device states to postures. The mapping is
+     * immutable after initialization to ensure thread safety.
+     */
+    private static class DeviceStateMapper {
+        /**
+         * Emulated device state
+         * {@link DeviceStateManager.DeviceStateCallback#onDeviceStateChanged(DeviceState)} to
+         * {@link CommonFoldingFeature.State} map.
+         *
+         * <p>This map must be immutable after initialization to ensure thread safety, as it may be
+         * accessed from multiple threads. Modifications should only occur during object
+         * construction.
+         */
+        private final SparseIntArray mDeviceStateToPostureMap = new SparseIntArray();
+
+        /**
+         * The list of device states that are supported.
+         *
+         * <p>This list must be immutable after initialization to ensure thread safety.
+         */
+        @NonNull
+        private final List<DeviceState> mSupportedStates;
+
+        final boolean mIsHalfOpenedSupported;
+
+        DeviceStateMapper(@NonNull Context context, @NonNull List<DeviceState> supportedStates) {
+            mSupportedStates = supportedStates;
+
+            final String[] deviceStatePosturePairs = context.getResources()
+                    .getStringArray(R.array.config_device_state_postures);
+            boolean isHalfOpenedSupported = false;
+            for (String deviceStatePosturePair : deviceStatePosturePairs) {
+                final String[] deviceStatePostureMapping = deviceStatePosturePair.split(":");
+                if (deviceStatePostureMapping.length != 2) {
+                    if (DEBUG) {
+                        Log.e(TAG, "Malformed device state posture pair: "
+                                + deviceStatePosturePair);
+                    }
+                    continue;
+                }
+
+                final int deviceState;
+                final int posture;
+                try {
+                    deviceState = Integer.parseInt(deviceStatePostureMapping[0]);
+                    posture = Integer.parseInt(deviceStatePostureMapping[1]);
+                } catch (NumberFormatException e) {
+                    if (DEBUG) {
+                        Log.e(TAG, "Failed to parse device state or posture: "
+                                        + deviceStatePosturePair,
+                                e);
+                    }
+                    continue;
+                }
+                isHalfOpenedSupported = isHalfOpenedSupported
+                        || posture == CommonFoldingFeature.COMMON_STATE_HALF_OPENED;
+                mDeviceStateToPostureMap.put(deviceState, posture);
+            }
+            mIsHalfOpenedSupported = isHalfOpenedSupported;
         }
 
-        return posture;
+        boolean isDeviceStateToPostureMapEmpty() {
+            return mDeviceStateToPostureMap.size() == 0;
+        }
+
+        /**
+         * Validates if the provided deviceState exists in the {@link #mDeviceStateToPostureMap}
+         * which was initialized in the constructor of {@link DeviceStateMapper}.
+         * Returns a boolean value of whether the device state is valid.
+         */
+        boolean isDeviceStateValid(@NonNull DeviceState deviceState) {
+            // If the device state is not found in the map, indexOfKey returns a negative number.
+            return mDeviceStateToPostureMap.indexOfKey(deviceState.getIdentifier()) >= 0;
+        }
+
+        @CommonFoldingFeature.State
+        int getHingeState(@NonNull DeviceState deviceState) {
+            @CommonFoldingFeature.State
+            final int posture =
+                    mDeviceStateToPostureMap.get(deviceState.getIdentifier(), COMMON_STATE_UNKNOWN);
+            if (posture != CommonFoldingFeature.COMMON_STATE_USE_BASE_STATE) {
+                return posture;
+            }
+
+            final int baseStateIdentifier =
+                    DeviceStateUtil.calculateBaseStateIdentifier(deviceState, mSupportedStates);
+            return mDeviceStateToPostureMap.get(baseStateIdentifier, COMMON_STATE_UNKNOWN);
+        }
     }
 }

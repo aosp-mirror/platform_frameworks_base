@@ -122,6 +122,16 @@ flag {
 }
 
 flag {
+    name: "enable_shell_top_task_tracking"
+    namespace: "multitasking"
+    description: "Enables tracking top tasks from the shell"
+    bug: "342627272"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "enable_bubble_bar_in_persistent_task_bar"
     namespace: "multitasking"
     description: "Enable bubble bar to be shown in the persistent task bar"
@@ -146,8 +156,25 @@ flag {
 }
 
 flag {
+    name: "enable_flexible_two_app_split"
+    namespace: "multitasking"
+    description: "Enables only 2 app 90:10 split"
+    bug: "349828130"
+}
+
+flag {
     name: "enable_flexible_split"
     namespace: "multitasking"
     description: "Enables flexibile split feature for split screen"
     bug: "349828130"
+}
+
+flag {
+    name: "enable_task_view_controller_cleanup"
+    namespace: "multitasking"
+    description: "Fix memory leak with task view controllers"
+    bug: "369995920"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }

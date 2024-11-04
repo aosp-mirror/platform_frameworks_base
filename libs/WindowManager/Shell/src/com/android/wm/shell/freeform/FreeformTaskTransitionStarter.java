@@ -48,6 +48,7 @@ public interface FreeformTaskTransitionStarter {
      *
      * @param wct the {@link WindowContainerTransaction} that closes the task
      *
+     * @return the started transition
      */
-    void startRemoveTransition(WindowContainerTransaction wct);
+    IBinder startRemoveTransition(WindowContainerTransaction wct);
 }

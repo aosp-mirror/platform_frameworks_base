@@ -1,0 +1,6 @@
+evitayan@google.com
+nharold@google.com
+benedictwong@google.com #{LAST_RESORT_SUGGESTION}
+yangji@google.com #{LAST_RESORT_SUGGESTION}
+
+include platform/packages/modules/common:/MODULES_OWNERS

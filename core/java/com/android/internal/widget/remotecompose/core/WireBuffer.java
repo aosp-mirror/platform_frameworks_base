@@ -17,9 +17,7 @@ package com.android.internal.widget.remotecompose.core;
 
 import java.util.Arrays;
 
-/**
- * The base communication buffer capable of encoding and decoding various types
- */
+/** The base communication buffer capable of encoding and decoding various types */
 public class WireBuffer {
     private static final int BUFFER_SIZE = 1024 * 1024 * 1;
     int mMaxSize;
@@ -130,6 +128,7 @@ public class WireBuffer {
         int v2 = (mBuffer[mIndex++] & 0xFF) << 0;
         return v1 + v2;
     }
+
     public int peekInt() {
         int tmp = mIndex;
         int v1 = (mBuffer[tmp++] & 0xFF) << 24;
@@ -177,8 +176,8 @@ public class WireBuffer {
     public byte[] readBuffer(int maxSize) {
         int count = readInt();
         if (count < 0 || count > maxSize) {
-            throw new RuntimeException("attempt read a buff of invalid size 0 <= "
-                    + count + " > " + maxSize);
+            throw new RuntimeException(
+                    "attempt read a buff of invalid size 0 <= " + count + " > " + maxSize);
         }
         byte[] b = Arrays.copyOfRange(mBuffer, mIndex, mIndex + count);
         mIndex += count;
@@ -201,7 +200,7 @@ public class WireBuffer {
 
     public void writeBoolean(boolean value) {
         resize(1);
-        mBuffer[mIndex++] = (byte) ((value) ? 1 : 0);
+        mBuffer[mIndex++] = (byte) (value ? 1 : 0);
         mSize++;
     }
 
@@ -256,7 +255,6 @@ public class WireBuffer {
         writeInt(b.length);
         for (int i = 0; i < b.length; i++) {
             mBuffer[mIndex++] = b[i];
-
         }
         mSize += b.length;
     }
@@ -265,6 +263,4 @@ public class WireBuffer {
         byte[] buffer = content.getBytes();
         writeBuffer(buffer);
     }
-
 }
-

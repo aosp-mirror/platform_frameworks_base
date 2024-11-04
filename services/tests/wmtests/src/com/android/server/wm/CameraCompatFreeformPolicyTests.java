@@ -16,11 +16,18 @@
 
 package com.android.server.wm;
 
+import static android.app.CameraCompatTaskInfo.CAMERA_COMPAT_FREEFORM_LANDSCAPE_DEVICE_IN_LANDSCAPE;
+import static android.app.CameraCompatTaskInfo.CAMERA_COMPAT_FREEFORM_LANDSCAPE_DEVICE_IN_PORTRAIT;
+import static android.app.CameraCompatTaskInfo.CAMERA_COMPAT_FREEFORM_NONE;
+import static android.app.CameraCompatTaskInfo.CAMERA_COMPAT_FREEFORM_PORTRAIT_DEVICE_IN_LANDSCAPE;
+import static android.app.CameraCompatTaskInfo.CAMERA_COMPAT_FREEFORM_PORTRAIT_DEVICE_IN_PORTRAIT;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.servertransaction.ActivityLifecycleItem.ON_PAUSE;
 import static android.app.servertransaction.ActivityLifecycleItem.ON_STOP;
-import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.content.pm.ActivityInfo.OVERRIDE_CAMERA_COMPAT_DISABLE_FREEFORM_WINDOWING_TREATMENT;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_FULL_USER;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
@@ -29,14 +36,15 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
-import static com.android.window.flags.Flags.FLAG_CAMERA_COMPAT_FOR_FREEFORM;
+import static com.android.server.wm.AppCompatConfiguration.MIN_FIXED_ORIENTATION_LETTERBOX_ASPECT_RATIO;
+import static com.android.window.flags.Flags.FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -54,7 +62,10 @@ import android.content.res.Configuration.Orientation;
 import android.graphics.Rect;
 import android.hardware.camera2.CameraManager;
 import android.os.Handler;
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.Presubmit;
+import android.view.DisplayInfo;
+import android.view.Surface;
 
 import androidx.test.filters.SmallTest;
 
@@ -127,17 +138,18 @@ public class CameraCompatFreeformPolicyTests extends WindowTestsBase {
                 });
 
         mActivityRefresher = new ActivityRefresher(mDisplayContent.mWmService, mMockHandler);
-        mSetFlagsRule.enableFlags(FLAG_CAMERA_COMPAT_FOR_FREEFORM);
         CameraStateMonitor cameraStateMonitor =
                 new CameraStateMonitor(mDisplayContent, mMockHandler);
         mCameraCompatFreeformPolicy =
                 new CameraCompatFreeformPolicy(mDisplayContent, cameraStateMonitor,
                         mActivityRefresher);
 
+        setDisplayRotation(Surface.ROTATION_90);
         mCameraCompatFreeformPolicy.start();
         cameraStateMonitor.startListeningToCameraState();
     }
 
+    @EnableFlags(FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
     @Test
     public void testFullscreen_doesNotActivateCameraCompatMode() {
         configureActivity(SCREEN_ORIENTATION_PORTRAIT, WINDOWING_MODE_FULLSCREEN);
@@ -148,6 +160,7 @@ public class CameraCompatFreeformPolicyTests extends WindowTestsBase {
         assertNotInCameraCompatMode();
     }
 
+    @EnableFlags(FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
     @Test
     public void testOrientationUnspecified_doesNotActivateCameraCompatMode() {
         configureActivity(SCREEN_ORIENTATION_UNSPECIFIED);
@@ -155,32 +168,70 @@ public class CameraCompatFreeformPolicyTests extends WindowTestsBase {
         assertNotInCameraCompatMode();
     }
 
+    @EnableFlags(FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
     @Test
     public void testNoCameraConnection_doesNotActivateCameraCompatMode() {
         configureActivity(SCREEN_ORIENTATION_PORTRAIT);
         assertNotInCameraCompatMode();
     }
 
+    @EnableFlags(FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
     @Test
-    public void testCameraConnected_activatesCameraCompatMode() throws Exception {
+    public void testCameraConnected_deviceInPortrait_portraitCameraCompatMode() throws Exception {
         configureActivity(SCREEN_ORIENTATION_PORTRAIT);
+        setDisplayRotation(Surface.ROTATION_0);
         mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
 
-        assertInCameraCompatMode();
+        assertInCameraCompatMode(CAMERA_COMPAT_FREEFORM_PORTRAIT_DEVICE_IN_PORTRAIT);
         assertActivityRefreshRequested(/* refreshRequested */ false);
     }
 
     @Test
+    public void testCameraConnected_deviceInLandscape_portraitCameraCompatMode() throws Exception {
+        configureActivity(SCREEN_ORIENTATION_PORTRAIT);
+        setDisplayRotation(Surface.ROTATION_270);
+        mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
+
+        assertInCameraCompatMode(CAMERA_COMPAT_FREEFORM_PORTRAIT_DEVICE_IN_LANDSCAPE);
+        assertActivityRefreshRequested(/* refreshRequested */ false);
+    }
+
+    @Test
+    public void testCameraConnected_deviceInPortrait_landscapeCameraCompatMode() throws Exception {
+        configureActivity(SCREEN_ORIENTATION_LANDSCAPE);
+        setDisplayRotation(Surface.ROTATION_0);
+        mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
+
+        assertInCameraCompatMode(CAMERA_COMPAT_FREEFORM_LANDSCAPE_DEVICE_IN_PORTRAIT);
+        assertActivityRefreshRequested(/* refreshRequested */ false);
+    }
+
+    @Test
+    public void testCameraConnected_deviceInLandscape_landscapeCameraCompatMode() throws Exception {
+        configureActivity(SCREEN_ORIENTATION_LANDSCAPE);
+        setDisplayRotation(Surface.ROTATION_270);
+        mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
+
+        assertInCameraCompatMode(CAMERA_COMPAT_FREEFORM_LANDSCAPE_DEVICE_IN_LANDSCAPE);
+        assertActivityRefreshRequested(/* refreshRequested */ false);
+    }
+
+    @EnableFlags(FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
+    @Test
     public void testCameraReconnected_cameraCompatModeAndRefresh() throws Exception {
         configureActivity(SCREEN_ORIENTATION_PORTRAIT);
+        setDisplayRotation(Surface.ROTATION_270);
 
         mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
-        callOnActivityConfigurationChanging(mActivity);
+        callOnActivityConfigurationChanging(mActivity, /* letterboxNew= */ true,
+                /* lastLetterbox= */ false);
         mCameraAvailabilityCallback.onCameraClosed(CAMERA_ID_1);
         mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
-        callOnActivityConfigurationChanging(mActivity);
+        // Activity is letterboxed from the previous configuration change.
+        callOnActivityConfigurationChanging(mActivity, /* letterboxNew= */ true,
+                /* lastLetterbox= */ true);
 
-        assertInCameraCompatMode();
+        assertInCameraCompatMode(CAMERA_COMPAT_FREEFORM_PORTRAIT_DEVICE_IN_LANDSCAPE);
         assertActivityRefreshRequested(/* refreshRequested */ true);
     }
 
@@ -194,25 +245,70 @@ public class CameraCompatFreeformPolicyTests extends WindowTestsBase {
     }
 
     @Test
+    @EnableFlags(FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
     @EnableCompatChanges({OVERRIDE_CAMERA_COMPAT_DISABLE_FREEFORM_WINDOWING_TREATMENT})
     public void testShouldApplyCameraCompatFreeformTreatment_overrideEnabled_returnsFalse() {
         configureActivity(SCREEN_ORIENTATION_PORTRAIT);
 
         assertTrue(mActivity.info
                 .isChangeEnabled(OVERRIDE_CAMERA_COMPAT_DISABLE_FREEFORM_WINDOWING_TREATMENT));
-        assertFalse(mCameraCompatFreeformPolicy
-                .shouldApplyFreeformTreatmentForCameraCompat(mActivity));
+        assertFalse(mCameraCompatFreeformPolicy.isCameraCompatForFreeformEnabledForActivity(
+                mActivity));
     }
 
     @Test
+    @EnableFlags(FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
     public void testShouldApplyCameraCompatFreeformTreatment_notDisabledByOverride_returnsTrue() {
         configureActivity(SCREEN_ORIENTATION_PORTRAIT);
 
-        assertTrue(mCameraCompatFreeformPolicy
-                .shouldApplyFreeformTreatmentForCameraCompat(mActivity));
+        assertTrue(mCameraCompatFreeformPolicy.isCameraCompatForFreeformEnabledForActivity(
+                mActivity));
     }
 
     @Test
+    @EnableFlags(FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
+    public void testShouldRefreshActivity_appBoundsChanged_returnsTrue() {
+        configureActivity(SCREEN_ORIENTATION_PORTRAIT);
+        Configuration oldConfiguration = createConfiguration(/* letterbox= */ false);
+        Configuration newConfiguration = createConfiguration(/* letterbox= */ true);
+        mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
+
+        assertTrue(mCameraCompatFreeformPolicy.shouldRefreshActivity(mActivity, newConfiguration,
+                oldConfiguration));
+    }
+
+    @Test
+    @EnableFlags(FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
+    public void testShouldRefreshActivity_displayRotationChanged_returnsTrue() {
+        configureActivity(SCREEN_ORIENTATION_PORTRAIT);
+        Configuration oldConfiguration = createConfiguration(/* letterbox= */ true);
+        Configuration newConfiguration = createConfiguration(/* letterbox= */ true);
+
+        oldConfiguration.windowConfiguration.setDisplayRotation(0);
+        newConfiguration.windowConfiguration.setDisplayRotation(90);
+        mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
+
+        assertTrue(mCameraCompatFreeformPolicy.shouldRefreshActivity(mActivity, newConfiguration,
+                oldConfiguration));
+    }
+
+    @Test
+    @EnableFlags(FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
+    public void testShouldRefreshActivity_appBoundsNorDisplayChanged_returnsFalse() {
+        configureActivity(SCREEN_ORIENTATION_PORTRAIT);
+        Configuration oldConfiguration = createConfiguration(/* letterbox= */ true);
+        Configuration newConfiguration = createConfiguration(/* letterbox= */ true);
+
+        oldConfiguration.windowConfiguration.setDisplayRotation(0);
+        newConfiguration.windowConfiguration.setDisplayRotation(0);
+        mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
+
+        assertFalse(mCameraCompatFreeformPolicy.shouldRefreshActivity(mActivity, newConfiguration,
+                oldConfiguration));
+    }
+
+    @Test
+    @EnableFlags(FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
     public void testOnActivityConfigurationChanging_refreshDisabledViaFlag_noRefresh()
             throws Exception {
         configureActivity(SCREEN_ORIENTATION_PORTRAIT);
@@ -227,6 +323,7 @@ public class CameraCompatFreeformPolicyTests extends WindowTestsBase {
     }
 
     @Test
+    @EnableFlags(FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
     public void testOnActivityConfigurationChanging_cycleThroughStopDisabled() throws Exception {
         when(mAppCompatConfiguration.isCameraCompatRefreshCycleThroughStopEnabled())
                 .thenReturn(false);
@@ -240,6 +337,7 @@ public class CameraCompatFreeformPolicyTests extends WindowTestsBase {
     }
 
     @Test
+    @EnableFlags(FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
     public void testOnActivityConfigurationChanging_cycleThroughStopDisabledForApp()
             throws Exception {
         configureActivity(SCREEN_ORIENTATION_PORTRAIT);
@@ -250,6 +348,51 @@ public class CameraCompatFreeformPolicyTests extends WindowTestsBase {
         callOnActivityConfigurationChanging(mActivity);
 
         assertActivityRefreshRequested(/* refreshRequested */ true, /* cycleThroughStop */ false);
+    }
+
+    @Test
+    @EnableFlags(FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
+    public void testGetCameraCompatAspectRatio_activityNotInCameraCompat_returnsDefaultAspRatio() {
+        configureActivity(SCREEN_ORIENTATION_FULL_USER);
+
+        mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
+        callOnActivityConfigurationChanging(mActivity);
+
+        assertEquals(MIN_FIXED_ORIENTATION_LETTERBOX_ASPECT_RATIO,
+                mCameraCompatFreeformPolicy.getCameraCompatAspectRatio(mActivity),
+                /* delta= */ 0.001);
+    }
+
+    @Test
+    @EnableFlags(FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
+    public void testGetCameraCompatAspectRatio_activityInCameraCompat_returnsConfigAspectRatio() {
+        configureActivity(SCREEN_ORIENTATION_PORTRAIT);
+        final float configAspectRatio = 1.5f;
+        mWm.mAppCompatConfiguration.setCameraCompatAspectRatio(configAspectRatio);
+
+        mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
+        callOnActivityConfigurationChanging(mActivity);
+
+        assertEquals(configAspectRatio,
+                mCameraCompatFreeformPolicy.getCameraCompatAspectRatio(mActivity),
+                /* delta= */ 0.001);
+    }
+
+    @Test
+    @EnableFlags(FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
+    public void testGetCameraCompatAspectRatio_inCameraCompatPerAppOverride_returnDefAspectRatio() {
+        configureActivity(SCREEN_ORIENTATION_PORTRAIT);
+        final float configAspectRatio = 1.5f;
+        mWm.mAppCompatConfiguration.setCameraCompatAspectRatio(configAspectRatio);
+        doReturn(true).when(mActivity.mAppCompatController.getAppCompatCameraOverrides())
+                .isOverrideMinAspectRatioForCameraEnabled();
+
+        mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
+        callOnActivityConfigurationChanging(mActivity);
+
+        assertEquals(MIN_FIXED_ORIENTATION_LETTERBOX_ASPECT_RATIO,
+                mCameraCompatFreeformPolicy.getCameraCompatAspectRatio(mActivity),
+                /* delta= */ 0.001);
     }
 
     private void configureActivity(@ScreenOrientation int activityOrientation) {
@@ -285,16 +428,14 @@ public class CameraCompatFreeformPolicyTests extends WindowTestsBase {
         doReturn(true).when(mActivity).inFreeformWindowingMode();
     }
 
-    private void assertInCameraCompatMode() {
-        assertNotEquals(CameraCompatTaskInfo.CAMERA_COMPAT_FREEFORM_NONE,
-                mActivity.mAppCompatController.getAppCompatCameraOverrides()
+    private void assertInCameraCompatMode(@CameraCompatTaskInfo.FreeformCameraCompatMode int mode) {
+        assertEquals(mode, mActivity.mAppCompatController.getAppCompatCameraOverrides()
                         .getFreeformCameraCompatMode());
     }
 
     private void assertNotInCameraCompatMode() {
-        assertEquals(CameraCompatTaskInfo.CAMERA_COMPAT_FREEFORM_NONE,
-                mActivity.mAppCompatController.getAppCompatCameraOverrides()
-                        .getFreeformCameraCompatMode());
+        assertEquals(CAMERA_COMPAT_FREEFORM_NONE, mActivity.mAppCompatController
+                .getAppCompatCameraOverrides().getFreeformCameraCompatMode());
     }
 
     private void assertActivityRefreshRequested(boolean refreshRequested) throws Exception {
@@ -312,14 +453,20 @@ public class CameraCompatFreeformPolicyTests extends WindowTestsBase {
                 /* isForward */ false, /* shouldSendCompatFakeFocus */ false);
 
         verify(mActivity.mAtmService.getLifecycleManager(), times(refreshRequested ? 1 : 0))
-                .scheduleTransactionAndLifecycleItems(mActivity.app.getThread(),
+                .scheduleTransactionItems(mActivity.app.getThread(),
                         refreshCallbackItem, resumeActivityItem);
     }
 
     private void callOnActivityConfigurationChanging(ActivityRecord activity) {
+        callOnActivityConfigurationChanging(activity, /* letterboxNew= */ true,
+                /* lastLetterbox= */false);
+    }
+
+    private void callOnActivityConfigurationChanging(ActivityRecord activity, boolean letterboxNew,
+            boolean lastLetterbox) {
         mActivityRefresher.onActivityConfigurationChanging(activity,
-                /* newConfig */ createConfiguration(/*letterbox=*/ true),
-                /* lastReportedConfig */ createConfiguration(/*letterbox=*/ false));
+                /* newConfig */ createConfiguration(letterboxNew),
+                /* lastReportedConfig */ createConfiguration(lastLetterbox));
     }
 
     private Configuration createConfiguration(boolean letterbox) {
@@ -327,5 +474,20 @@ public class CameraCompatFreeformPolicyTests extends WindowTestsBase {
         Rect bounds = letterbox ? new Rect(300, 0, 700, 600) : new Rect(0, 0, 1000, 600);
         configuration.windowConfiguration.setAppBounds(bounds);
         return configuration;
+    }
+
+    private void setDisplayRotation(@Surface.Rotation int displayRotation) {
+        doAnswer(invocation -> {
+            DisplayInfo displayInfo = new DisplayInfo();
+            mDisplayContent.getDisplay().getDisplayInfo(displayInfo);
+            displayInfo.rotation = displayRotation;
+            // Set height so that the natural orientation (rotation is 0) is portrait. This is the
+            // case for most standard phones and tablets.
+            // TODO(b/365725400): handle landscape natural orientation.
+            displayInfo.logicalHeight = displayRotation % 180 == 0 ? 800 : 600;
+            displayInfo.logicalWidth =  displayRotation % 180 == 0 ? 600 : 800;
+            return displayInfo;
+        }).when(mDisplayContent.mWmService.mDisplayManagerInternal)
+                .getDisplayInfo(anyInt());
     }
 }

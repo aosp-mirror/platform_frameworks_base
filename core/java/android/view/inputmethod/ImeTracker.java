@@ -220,6 +220,7 @@ public interface ImeTracker {
             PHASE_WM_POSTING_CHANGED_IME_VISIBILITY,
             PHASE_WM_INVOKING_IME_REQUESTED_LISTENER,
             PHASE_CLIENT_ALREADY_HIDDEN,
+            PHASE_CLIENT_VIEW_HANDLER_AVAILABLE,
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface Phase {}
@@ -424,6 +425,11 @@ public interface ImeTracker {
             ImeProtoEnums.PHASE_WM_INVOKING_IME_REQUESTED_LISTENER;
     /** IME is requested to be hidden, but already hidden. Don't hide to avoid another animation. */
     int PHASE_CLIENT_ALREADY_HIDDEN = ImeProtoEnums.PHASE_CLIENT_ALREADY_HIDDEN;
+    /**
+     * The view's handler is needed to check if we're running on a different thread. We can't
+     * continue without.
+     */
+    int PHASE_CLIENT_VIEW_HANDLER_AVAILABLE = ImeProtoEnums.PHASE_CLIENT_VIEW_HANDLER_AVAILABLE;
 
     /**
      * Called when an IME request is started.
@@ -920,7 +926,8 @@ public interface ImeTracker {
             final Configuration.Builder builder = Configuration.Builder.withSurface(
                             cujType,
                             jankContext.getDisplayContext(),
-                            jankContext.getTargetSurfaceControl())
+                            jankContext.getTargetSurfaceControl(),
+                            jankContext.getDisplayContext().getMainThreadHandler())
                     .setTag(String.format(Locale.US, "%d@%d@%s", animType,
                             useSeparatedThread ? 0 : 1, jankContext.getHostPackageName()));
             InteractionJankMonitor.getInstance().begin(builder);

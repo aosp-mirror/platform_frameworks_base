@@ -6183,7 +6183,8 @@ public interface WindowManager extends ViewManager {
         }
 
         /**
-         * Returns the size of the provided insets.
+         * Returns the size of the provided insets. May be {@code null} if the provided insets have
+         * the same size as the window frame.
          */
         public @Nullable Insets getInsetsSize() {
             return mInsets;

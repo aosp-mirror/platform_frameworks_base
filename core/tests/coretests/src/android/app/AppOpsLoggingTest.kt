@@ -33,6 +33,9 @@ import android.os.IBinder
 import android.os.Looper
 import android.os.Process
 import android.platform.test.annotations.AppModeFull
+import android.platform.test.annotations.RequiresFlagsEnabled
+import android.platform.test.flag.junit.CheckFlagsRule
+import android.platform.test.flag.junit.DeviceFlagsValueProvider
 import android.util.Log
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.frameworks.coretests.aidl.IAppOpsUserClient
@@ -41,9 +44,15 @@ import com.google.common.truth.Truth.assertThat
 import org.junit.After
 import org.junit.Assert.fail
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.TimeUnit.MILLISECONDS
+import java.util.concurrent.TimeUnit
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.TimeSource
 
 private const val LOG_TAG = "AppOpsLoggingTest"
 
@@ -71,8 +80,11 @@ class AppOpsLoggingTest {
 
     private var wasLocationEnabled = false
 
+    @get:Rule val checkFlagsRule: CheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule()
+
     private lateinit var testService: IAppOpsUserService
     private lateinit var serviceConnection: ServiceConnection
+    private lateinit var freezingTestCompletion: CompletableFuture<Unit>
 
     // Collected note-op calls inside of this process
     private val noted = mutableListOf<Pair<SyncNotedAppOp, Array<StackTraceElement>>>()
@@ -123,6 +135,7 @@ class AppOpsLoggingTest {
 
         context.bindService(serviceIntent, serviceConnection, BIND_AUTO_CREATE)
         testService = newService.get(TIMEOUT_MILLIS, MILLISECONDS)
+        freezingTestCompletion = CompletableFuture<Unit>()
     }
 
     private fun clearCollectedNotedOps() {
@@ -253,6 +266,26 @@ class AppOpsLoggingTest {
         }
     }
 
+    @Test
+    @RequiresFlagsEnabled(android.os.Flags.FLAG_BINDER_FROZEN_STATE_CHANGE_CALLBACK,
+            android.permission.flags.Flags.FLAG_USE_FROZEN_AWARE_REMOTE_CALLBACK_LIST)
+    fun dropAsyncOpNotedWhenFrozen() {
+        // Here's what the test does:
+        // 1. AppOpsLoggingTest calls AppOpsUserService
+        // 2. AppOpsUserService calls freezeAndNoteSyncOp in AppOpsLoggingTest
+        // 3. freezeAndNoteSyncOp freezes AppOpsUserService
+        // 4. freezeAndNoteSyncOp calls nativeNoteOp which leads to an async op noted callback
+        // 5. AppOpsService is expected to drop the callback (via RemoteCallbackList) since
+        //    AppOpsUserService is frozen
+        // 6. freezeAndNoteSyncOp unfreezes AppOpsUserService
+        // 7. AppOpsLoggingTest calls AppOpsUserService.assertEmptyAsyncNoted
+        rethrowThrowableFrom {
+            testService.callFreezeAndNoteSyncOp(AppOpsUserClient(context))
+            freezingTestCompletion.get()
+            testService.assertEmptyAsyncNoted()
+        }
+    }
+
     @After
     fun removeNotedAppOpsCollector() {
         appOpsManager.setOnOpNotedCallback(null, null)
@@ -261,6 +294,20 @@ class AppOpsLoggingTest {
     @After
     fun disconnectFromService() {
         context.unbindService(serviceConnection)
+    }
+
+    fun <T> waitForState(queue: LinkedBlockingQueue<T>, state: T, duration: Duration): T? {
+        val timeSource = TimeSource.Monotonic
+        val start = timeSource.markNow()
+        var remaining = duration
+        while (remaining.inWholeMilliseconds > 0) {
+            val v = queue.poll(remaining.inWholeMilliseconds, TimeUnit.MILLISECONDS)
+            if (v == state) {
+                return v
+            }
+            remaining -= timeSource.markNow() - start
+        }
+        return null
     }
 
     private inner class AppOpsUserClient(
@@ -283,6 +330,31 @@ class AppOpsLoggingTest {
 
         override fun noteSyncOpOnewayNative() {
             nativeNoteOp(strOpToOp(OPSTR_COARSE_LOCATION), Binder.getCallingUid(), TEST_SERVICE_PKG)
+        }
+
+        override fun freezeAndNoteSyncOp() {
+            handler.post {
+                var stateChanges = LinkedBlockingQueue<Int>()
+                // Leave some time for any pending binder transactions to complete.
+                //
+                // TODO(327047060) Remove this sleep and instead make am freeze wait for binder
+                // transactions to complete
+                Thread.sleep(1000)
+                testService.asBinder().addFrozenStateChangeCallback {
+                    _, state -> stateChanges.put(state)
+                }
+                InstrumentationRegistry.getInstrumentation().uiAutomation
+                    .executeShellCommand("am freeze $TEST_SERVICE_PKG")
+                waitForState(stateChanges, IBinder.FrozenStateChangeCallback.STATE_FROZEN,
+                    1000.milliseconds)
+                nativeNoteOp(strOpToOp(OPSTR_COARSE_LOCATION), Binder.getCallingUid(),
+                    TEST_SERVICE_PKG)
+                InstrumentationRegistry.getInstrumentation().uiAutomation
+                    .executeShellCommand("am unfreeze $TEST_SERVICE_PKG")
+                waitForState(stateChanges, IBinder.FrozenStateChangeCallback.STATE_UNFROZEN,
+                    1000.milliseconds)
+                freezingTestCompletion.complete(Unit)
+            }
         }
 
         override fun noteSyncOpOtherUidNative() {

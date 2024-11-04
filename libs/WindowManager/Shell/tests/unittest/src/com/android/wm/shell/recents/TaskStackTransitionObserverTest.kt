@@ -18,7 +18,6 @@ package com.android.wm.shell.recents
 
 import android.app.ActivityManager
 import android.app.WindowConfiguration
-import android.content.Context
 import android.os.IBinder
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
@@ -35,6 +34,7 @@ import com.android.wm.shell.common.ShellExecutor
 import com.android.wm.shell.sysui.ShellInit
 import com.android.wm.shell.transition.TransitionInfoBuilder
 import com.android.wm.shell.transition.Transitions
+import com.android.wm.shell.windowdecor.extension.isFullscreen
 import com.google.common.truth.Truth.assertThat
 import dagger.Lazy
 import org.junit.Before
@@ -60,7 +60,6 @@ class TaskStackTransitionObserverTest {
 
     @JvmField @Rule val setFlagsRule = SetFlagsRule()
 
-    @Mock private lateinit var context: Context
     @Mock private lateinit var shellInit: ShellInit
     @Mock lateinit var testExecutor: ShellExecutor
     @Mock private lateinit var transitionsLazy: Lazy<Transitions>
@@ -74,7 +73,7 @@ class TaskStackTransitionObserverTest {
         MockitoAnnotations.initMocks(this)
         shellInit = Mockito.spy(ShellInit(testExecutor))
         whenever(transitionsLazy.get()).thenReturn(transitions)
-        transitionObserver = TaskStackTransitionObserver(context, transitionsLazy, shellInit)
+        transitionObserver = TaskStackTransitionObserver(transitionsLazy, shellInit)
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
             val initRunnableCaptor = ArgumentCaptor.forClass(Runnable::class.java)
             verify(shellInit)
@@ -109,14 +108,14 @@ class TaskStackTransitionObserverTest {
         callOnTransitionFinished()
         executor.flushAll()
 
-        assertThat(listener.taskInfoToBeNotified.taskId).isEqualTo(change.taskInfo?.taskId)
-        assertThat(listener.taskInfoToBeNotified.windowingMode)
+        assertThat(listener.taskInfoOnTaskMovedToFront.taskId).isEqualTo(change.taskInfo?.taskId)
+        assertThat(listener.taskInfoOnTaskMovedToFront.windowingMode)
             .isEqualTo(change.taskInfo?.windowingMode)
     }
 
     @Test
     @EnableFlags(Flags.FLAG_ENABLE_TASK_STACK_OBSERVER_IN_SHELL)
-    fun taskCreated_fullscreenWindow_listenerNotNotified() {
+    fun taskCreated_fullscreenWindow_listenerNotified() {
         val listener = TestListener()
         val executor = TestShellExecutor()
         transitionObserver.addTaskStackTransitionObserverListener(listener, executor)
@@ -132,9 +131,9 @@ class TaskStackTransitionObserverTest {
         callOnTransitionFinished()
         executor.flushAll()
 
-        assertThat(listener.taskInfoToBeNotified.taskId).isEqualTo(0)
-        assertThat(listener.taskInfoToBeNotified.windowingMode)
-            .isEqualTo(WindowConfiguration.WINDOWING_MODE_UNDEFINED)
+        assertThat(listener.taskInfoOnTaskMovedToFront.taskId).isEqualTo(1)
+        assertThat(listener.taskInfoOnTaskMovedToFront.windowingMode)
+            .isEqualTo(WindowConfiguration.WINDOWING_MODE_FULLSCREEN)
     }
 
     @Test
@@ -163,9 +162,9 @@ class TaskStackTransitionObserverTest {
         callOnTransitionFinished()
         executor.flushAll()
 
-        assertThat(listener.taskInfoToBeNotified.taskId)
+        assertThat(listener.taskInfoOnTaskMovedToFront.taskId)
             .isEqualTo(freeformOpenChange.taskInfo?.taskId)
-        assertThat(listener.taskInfoToBeNotified.windowingMode)
+        assertThat(listener.taskInfoOnTaskMovedToFront.windowingMode)
             .isEqualTo(freeformOpenChange.taskInfo?.windowingMode)
     }
 
@@ -201,9 +200,15 @@ class TaskStackTransitionObserverTest {
         callOnTransitionFinished()
         executor.flushAll()
 
-        assertThat(listener.taskInfoToBeNotified.taskId).isEqualTo(change.taskInfo?.taskId)
-        assertThat(listener.taskInfoToBeNotified.windowingMode)
+        assertThat(listener.taskInfoOnTaskMovedToFront.taskId).isEqualTo(change.taskInfo?.taskId)
+        assertThat(listener.taskInfoOnTaskMovedToFront.windowingMode)
             .isEqualTo(change.taskInfo?.windowingMode)
+
+        assertThat(listener.taskInfoOnTaskChanged.size).isEqualTo(1)
+        with(listener.taskInfoOnTaskChanged.last()) {
+            assertThat(taskId).isEqualTo(mergedChange.taskInfo?.taskId)
+            assertThat(windowingMode).isEqualTo(mergedChange.taskInfo?.windowingMode)
+        }
     }
 
     @Test
@@ -238,18 +243,151 @@ class TaskStackTransitionObserverTest {
         callOnTransitionFinished()
         executor.flushAll()
 
-        assertThat(listener.taskInfoToBeNotified.taskId).isEqualTo(mergedChange.taskInfo?.taskId)
-        assertThat(listener.taskInfoToBeNotified.windowingMode)
-                .isEqualTo(mergedChange.taskInfo?.windowingMode)
+        assertThat(listener.taskInfoOnTaskMovedToFront.taskId)
+            .isEqualTo(mergedChange.taskInfo?.taskId)
+        assertThat(listener.taskInfoOnTaskMovedToFront.windowingMode)
+            .isEqualTo(mergedChange.taskInfo?.windowingMode)
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_TASK_STACK_OBSERVER_IN_SHELL)
+    fun taskChange_freeformWindowToFullscreenWindow_listenerNotified() {
+        val listener = TestListener()
+        val executor = TestShellExecutor()
+        transitionObserver.addTaskStackTransitionObserverListener(listener, executor)
+        val freeformState =
+            createChange(
+                WindowManager.TRANSIT_OPEN,
+                createTaskInfo(1, WindowConfiguration.WINDOWING_MODE_FREEFORM)
+            )
+        val transitionInfoOpen =
+            TransitionInfoBuilder(WindowManager.TRANSIT_OPEN, 0).addChange(freeformState).build()
+        callOnTransitionReady(transitionInfoOpen)
+        callOnTransitionFinished()
+        executor.flushAll()
+
+        assertThat(listener.taskInfoOnTaskMovedToFront.taskId)
+            .isEqualTo(freeformState.taskInfo?.taskId)
+        assertThat(listener.taskInfoOnTaskMovedToFront.windowingMode)
+            .isEqualTo(freeformState.taskInfo?.windowingMode)
+        assertThat(listener.taskInfoOnTaskMovedToFront.isFullscreen).isEqualTo(false)
+
+        // create change transition to update the windowing mode to full screen.
+        val fullscreenState =
+            createChange(
+                WindowManager.TRANSIT_CHANGE,
+                createTaskInfo(1, WindowConfiguration.WINDOWING_MODE_FULLSCREEN)
+            )
+        val transitionInfoChange =
+            TransitionInfoBuilder(WindowManager.TRANSIT_CHANGE, 0)
+                .addChange(fullscreenState)
+                .build()
+
+        callOnTransitionReady(transitionInfoChange)
+        callOnTransitionFinished()
+        executor.flushAll()
+
+        // Asserting whether freeformState remains the same as before the change
+        assertThat(listener.taskInfoOnTaskMovedToFront.taskId)
+            .isEqualTo(freeformState.taskInfo?.taskId)
+        assertThat(listener.taskInfoOnTaskMovedToFront.isFullscreen).isEqualTo(false)
+
+        // Asserting changes
+        assertThat(listener.taskInfoOnTaskChanged.size).isEqualTo(1)
+        with(listener.taskInfoOnTaskChanged.last()) {
+            assertThat(taskId).isEqualTo(fullscreenState.taskInfo?.taskId)
+            assertThat(isFullscreen).isEqualTo(true)
+        }
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_TASK_STACK_OBSERVER_IN_SHELL)
+    fun singleTransition_withOpenAndChange_onlyOpenIsNotified() {
+        val listener = TestListener()
+        val executor = TestShellExecutor()
+        transitionObserver.addTaskStackTransitionObserverListener(listener, executor)
+
+        // Creating multiple changes to be fired in a single transition
+        val freeformState =
+            createChange(
+                mode = WindowManager.TRANSIT_OPEN,
+                taskInfo = createTaskInfo(1, WindowConfiguration.WINDOWING_MODE_FREEFORM)
+            )
+        val fullscreenState =
+            createChange(
+                mode = WindowManager.TRANSIT_CHANGE,
+                taskInfo = createTaskInfo(1, WindowConfiguration.WINDOWING_MODE_FULLSCREEN)
+            )
+
+        val transitionInfoWithChanges =
+            TransitionInfoBuilder(WindowManager.TRANSIT_CHANGE, 0)
+                .addChange(freeformState)
+                .addChange(fullscreenState)
+                .build()
+
+        callOnTransitionReady(transitionInfoWithChanges)
+        callOnTransitionFinished()
+        executor.flushAll()
+
+        assertThat(listener.taskInfoOnTaskMovedToFront.taskId)
+            .isEqualTo(freeformState.taskInfo?.taskId)
+        assertThat(listener.taskInfoOnTaskMovedToFront.isFullscreen).isEqualTo(false)
+        assertThat(listener.taskInfoOnTaskChanged.size).isEqualTo(0)
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_TASK_STACK_OBSERVER_IN_SHELL)
+    fun singleTransition_withMultipleChanges_listenerNotified_forEachChange() {
+        val listener = TestListener()
+        val executor = TestShellExecutor()
+        transitionObserver.addTaskStackTransitionObserverListener(listener, executor)
+
+        val taskId = 1
+
+        // Creating multiple changes to be fired in a single transition
+        val changes =
+            listOf(
+                    WindowConfiguration.WINDOWING_MODE_FREEFORM,
+                    WindowConfiguration.WINDOW_CONFIG_DISPLAY_ROTATION,
+                    WindowConfiguration.WINDOWING_MODE_FULLSCREEN
+                )
+                .map { change ->
+                    createChange(
+                        mode = WindowManager.TRANSIT_CHANGE,
+                        taskInfo = createTaskInfo(taskId, change)
+                    )
+                }
+
+        val transitionInfoWithChanges =
+            TransitionInfoBuilder(WindowManager.TRANSIT_CHANGE, 0)
+                .apply { changes.forEach { c -> this@apply.addChange(c) } }
+                .build()
+
+        callOnTransitionReady(transitionInfoWithChanges)
+        callOnTransitionFinished()
+        executor.flushAll()
+
+        assertThat(listener.taskInfoOnTaskChanged.size).isEqualTo(changes.size)
+        changes.forEachIndexed { index, change ->
+            assertThat(listener.taskInfoOnTaskChanged[index].taskId)
+                .isEqualTo(change.taskInfo?.taskId)
+            assertThat(listener.taskInfoOnTaskChanged[index].windowingMode)
+                .isEqualTo(change.taskInfo?.windowingMode)
+        }
     }
 
     class TestListener : TaskStackTransitionObserver.TaskStackTransitionObserverListener {
-        var taskInfoToBeNotified = ActivityManager.RunningTaskInfo()
+        var taskInfoOnTaskMovedToFront = ActivityManager.RunningTaskInfo()
+        var taskInfoOnTaskChanged = mutableListOf<ActivityManager.RunningTaskInfo>()
 
         override fun onTaskMovedToFrontThroughTransition(
             taskInfo: ActivityManager.RunningTaskInfo
         ) {
-            taskInfoToBeNotified = taskInfo
+            taskInfoOnTaskMovedToFront = taskInfo
+        }
+
+        override fun onTaskChangedThroughTransition(taskInfo: ActivityManager.RunningTaskInfo) {
+            taskInfoOnTaskChanged += taskInfo
         }
     }
 

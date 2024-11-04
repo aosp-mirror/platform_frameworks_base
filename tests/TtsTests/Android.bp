@@ -28,8 +28,8 @@ android_test {
     srcs: ["**/*.java"],
     static_libs: ["mockito-target"],
     libs: [
-        "android.test.runner",
-        "android.test.base",
+        "android.test.runner.stubs.system",
+        "android.test.base.stubs.system",
     ],
     platform_apis: true,
 }

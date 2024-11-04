@@ -304,14 +304,14 @@ sealed class DragToDesktopTransitionHandler(
         val leafTaskFilter = TransitionUtil.LeafTaskFilter()
         info.changes.withIndex().forEach { (i, change) ->
             if (TransitionUtil.isWallpaper(change)) {
-                val layer = layers.wallpaperLayers - i
+                val layer = layers.topWallpaperLayer - i
                 startTransaction.apply {
                     setLayer(change.leash, layer)
                     show(change.leash)
                 }
             } else if (isHomeChange(change)) {
                 state.homeChange = change
-                val layer = layers.homeLayers - i
+                val layer = layers.topHomeLayer - i
                 startTransaction.apply {
                     setLayer(change.leash, layer)
                     show(change.leash)
@@ -325,7 +325,7 @@ sealed class DragToDesktopTransitionHandler(
                             if (state.cancelState == CancelState.NO_CANCEL) {
                                 // Normal case, split root goes to the bottom behind everything
                                 // else.
-                                layers.appLayers - i
+                                layers.topAppLayer - i
                             } else {
                                 // Cancel-early case, pretend nothing happened so split root stays
                                 // top.
@@ -357,7 +357,7 @@ sealed class DragToDesktopTransitionHandler(
                             state.otherRootChanges.add(change)
                             val bounds = change.endAbsBounds
                             startTransaction.apply {
-                                setLayer(change.leash, layers.appLayers - i)
+                                setLayer(change.leash, layers.topAppLayer - i)
                                 setWindowCrop(change.leash, bounds.width(), bounds.height())
                                 show(change.leash)
                             }
@@ -398,6 +398,7 @@ sealed class DragToDesktopTransitionHandler(
                 }
             }
         }
+        state.surfaceLayers = layers
         state.startTransitionFinishCb = finishCallback
         state.startTransitionFinishTransaction = finishTransaction
         startTransaction.apply()
@@ -522,6 +523,10 @@ sealed class DragToDesktopTransitionHandler(
                     startTransaction.show(change.leash)
                     finishTransaction.show(change.leash)
                     state.draggedTaskChange = change
+                    // Restoring the dragged leash layer as it gets reset in the merge transition
+                    state.surfaceLayers?.let {
+                        startTransaction.setLayer(change.leash, it.dragLayer)
+                    }
                 }
                 change.taskInfo?.windowingMode == WINDOWING_MODE_FREEFORM -> {
                     // Other freeform tasks that are being restored go behind the dragged task.
@@ -629,21 +634,39 @@ sealed class DragToDesktopTransitionHandler(
         finishTransaction: SurfaceControl.Transaction?
     ) {
         val state = transitionState ?: return
-        if (aborted && state.startTransitionToken == transition) {
+        if (!aborted) {
+            return
+        }
+        if (state.startTransitionToken == transition) {
             ProtoLog.v(
                 ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
                 "DragToDesktop: onTransitionConsumed() start transition aborted"
             )
             state.startAborted = true
-            // Cancel CUJ interaction if the transition is aborted.
+            // The start-transition (DRAG_HOLD) is aborted, cancel its jank interaction.
             interactionJankMonitor.cancel(CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_HOLD)
-        } else if (state.cancelTransitionToken != transition) {
+        } else if (state.cancelTransitionToken == transition) {
+            state.draggedTaskChange?.leash?.let {
+                state.startTransitionFinishTransaction?.show(it)
+            }
+            state.startTransitionFinishCb?.onTransitionFinished(null /* wct */)
+            clearState()
+        } else {
+            // This transition being aborted is neither the start, nor the cancel transition, so
+            // it must be the finish transition (DRAG_RELEASE); cancel its jank interaction.
             interactionJankMonitor.cancel(CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_RELEASE)
         }
     }
 
-    private fun isHomeChange(change: Change): Boolean {
-        return change.taskInfo?.activityType == ACTIVITY_TYPE_HOME
+    /** Checks if the change is a home task change */
+    @VisibleForTesting
+    fun isHomeChange(change: Change): Boolean {
+        return change.taskInfo?.let {
+            it.activityType == ACTIVITY_TYPE_HOME &&
+                // Skip translucent wizard task with type home
+                // TODO(b/368334295): Remove when the multiple home changes issue is resolved
+                !(it.isTopActivityTransparent && it.numActivities == 1)
+        } ?: false
     }
 
     private fun startCancelAnimation() {
@@ -760,12 +783,18 @@ sealed class DragToDesktopTransitionHandler(
 
     /**
      * Represents the layering (Z order) that will be given to any window based on its type during
-     * the "start" transition of the drag-to-desktop transition
+     * the "start" transition of the drag-to-desktop transition.
+     *
+     * @param topAppLayer Used to calculate the app layer z-order = `topAppLayer - changeIndex`.
+     * @param topHomeLayer Used to calculate the home layer z-order = `topHomeLayer - changeIndex`.
+     * @param topWallpaperLayer Used to calculate the wallpaper layer z-order = `topWallpaperLayer -
+     *   changeIndex`
+     * @param dragLayer Defines the drag layer z-order
      */
-    protected data class DragToDesktopLayers(
-        val appLayers: Int,
-        val homeLayers: Int,
-        val wallpaperLayers: Int,
+    data class DragToDesktopLayers(
+        val topAppLayer: Int,
+        val topHomeLayer: Int,
+        val topWallpaperLayer: Int,
         val dragLayer: Int,
     )
 
@@ -785,6 +814,7 @@ sealed class DragToDesktopTransitionHandler(
         abstract var homeChange: Change?
         abstract var draggedTaskChange: Change?
         abstract var freeformTaskChanges: List<Change>
+        abstract var surfaceLayers: DragToDesktopLayers?
         abstract var cancelState: CancelState
         abstract var startAborted: Boolean
 
@@ -798,6 +828,7 @@ sealed class DragToDesktopTransitionHandler(
             override var homeChange: Change? = null,
             override var draggedTaskChange: Change? = null,
             override var freeformTaskChanges: List<Change> = emptyList(),
+            override var surfaceLayers: DragToDesktopLayers? = null,
             override var cancelState: CancelState = CancelState.NO_CANCEL,
             override var startAborted: Boolean = false,
             var otherRootChanges: MutableList<Change> = mutableListOf()
@@ -813,6 +844,7 @@ sealed class DragToDesktopTransitionHandler(
             override var homeChange: Change? = null,
             override var draggedTaskChange: Change? = null,
             override var freeformTaskChanges: List<Change> = emptyList(),
+            override var surfaceLayers: DragToDesktopLayers? = null,
             override var cancelState: CancelState = CancelState.NO_CANCEL,
             override var startAborted: Boolean = false,
             var splitRootChange: Change? = null,
@@ -834,7 +866,8 @@ sealed class DragToDesktopTransitionHandler(
 
     companion object {
         /** The duration of the animation to commit or cancel the drag-to-desktop gesture. */
-        internal const val DRAG_TO_DESKTOP_FINISH_ANIM_DURATION_MS = 336L
+        @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+        const val DRAG_TO_DESKTOP_FINISH_ANIM_DURATION_MS = 336L
     }
 }
 
@@ -867,9 +900,9 @@ constructor(
      */
     override fun calculateStartDragToDesktopLayers(info: TransitionInfo): DragToDesktopLayers =
         DragToDesktopLayers(
-            appLayers = info.changes.size,
-            homeLayers = info.changes.size * 2,
-            wallpaperLayers = info.changes.size * 3,
+            topAppLayer = info.changes.size,
+            topHomeLayer = info.changes.size * 2,
+            topWallpaperLayer = info.changes.size * 3,
             dragLayer = info.changes.size * 3
         )
 }
@@ -909,9 +942,9 @@ constructor(
      */
     override fun calculateStartDragToDesktopLayers(info: TransitionInfo): DragToDesktopLayers =
         DragToDesktopLayers(
-            appLayers = -1,
-            homeLayers = info.changes.size - 1,
-            wallpaperLayers = info.changes.size * 2 - 1,
+            topAppLayer = -1,
+            topHomeLayer = info.changes.size - 1,
+            topWallpaperLayer = info.changes.size * 2 - 1,
             dragLayer = info.changes.size * 2
         )
 

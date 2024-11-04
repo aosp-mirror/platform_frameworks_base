@@ -92,6 +92,7 @@ public abstract class BaseLockSettingsServiceTests {
 
     MockLockSettingsContext mContext;
     LockSettingsStorageTestable mStorage;
+    LockSettingsStrongAuth mStrongAuth;
 
     Resources mResources;
     FakeGateKeeperService mGateKeeperService;
@@ -135,6 +136,7 @@ public abstract class BaseLockSettingsServiceTests {
         mFingerprintManager = mock(FingerprintManager.class);
         mFaceManager = mock(FaceManager.class);
         mPackageManager = mock(PackageManager.class);
+        mStrongAuth = mock(LockSettingsStrongAuth.class);
 
         LocalServices.removeServiceForTest(LockSettingsInternal.class);
         LocalServices.removeServiceForTest(DevicePolicyManagerInternal.class);
@@ -162,7 +164,7 @@ public abstract class BaseLockSettingsServiceTests {
         mInjector =
                 new LockSettingsServiceTestable.MockInjector(
                         mContext,
-                        mStorage,
+                        mStorage, mStrongAuth,
                         mActivityManager,
                         setUpStorageManagerMock(),
                         mSpManager,

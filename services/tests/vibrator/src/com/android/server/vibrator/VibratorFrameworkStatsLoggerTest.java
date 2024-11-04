@@ -115,6 +115,6 @@ public class VibratorFrameworkStatsLoggerTest {
     }
 
     private static VibrationStats.StatsInfo newEmptyStatsInfo() {
-        return new VibrationStats.StatsInfo(0, 0, 0, Status.FINISHED, new VibrationStats(), 0L);
+        return new VibrationStats.StatsInfo(0, 0, 0, Status.FINISHED, new VibrationStats());
     }
 }

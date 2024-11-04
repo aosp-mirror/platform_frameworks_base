@@ -62,12 +62,6 @@ public abstract class NetworkMetricMonitor implements AutoCloseable {
             @Nullable PersistableBundleWrapper carrierConfig,
             @NonNull NetworkMetricMonitorCallback callback)
             throws IllegalAccessException {
-        if (!vcnContext.isFlagNetworkMetricMonitorEnabled()) {
-            // Caller error
-            logWtf("networkMetricMonitor flag disabled");
-            throw new IllegalAccessException("networkMetricMonitor flag disabled");
-        }
-
         mVcnContext = Objects.requireNonNull(vcnContext, "Missing vcnContext");
         mNetwork = Objects.requireNonNull(network, "Missing network");
         mCallback = Objects.requireNonNull(callback, "Missing callback");

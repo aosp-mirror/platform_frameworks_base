@@ -77,6 +77,11 @@ public interface InsetsAnimationControlRunner {
     @AnimationType int getAnimationType();
 
     /**
+     * @return The {@link SurfaceParamsApplier} this runner is using.
+     */
+    SurfaceParamsApplier getSurfaceParamsApplier();
+
+    /**
      * @return The token tracking the current IME request or {@code null} otherwise.
      */
     @Nullable
@@ -99,4 +104,27 @@ public interface InsetsAnimationControlRunner {
      * @param fieldId FieldId of the implementation class
      */
     void dumpDebug(ProtoOutputStream proto, long fieldId);
+
+    /**
+     * Interface applying given surface operations.
+     */
+    interface SurfaceParamsApplier {
+
+        SurfaceParamsApplier DEFAULT = params -> {
+            final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
+            for (int i = params.length - 1; i >= 0; i--) {
+                SyncRtSurfaceTransactionApplier.applyParams(t, params[i], new float[9]);
+            }
+            t.apply();
+            t.close();
+        };
+
+        /**
+         * Apply the new params to the surface.
+         *
+         * @param params The {@link SyncRtSurfaceTransactionApplier.SurfaceParams} to apply.
+         */
+        void applySurfaceParams(SyncRtSurfaceTransactionApplier.SurfaceParams... params);
+
+    }
 }

@@ -65,11 +65,9 @@ import com.android.systemui.statusbar.phone.SystemUIDialog;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-/**
- * Base dialog for media output UI
- */
-public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
-        MediaOutputController.Callback, Window.Callback {
+/** Base dialog for media output UI */
+public abstract class MediaOutputBaseDialog extends SystemUIDialog
+        implements MediaSwitchingController.Callback, Window.Callback {
 
     private static final String TAG = "MediaOutputDialog";
     private static final String EMPTY_TITLE = " ";
@@ -82,7 +80,7 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
     private final RecyclerView.LayoutManager mLayoutManager;
 
     final Context mContext;
-    final MediaOutputController mMediaOutputController;
+    final MediaSwitchingController mMediaSwitchingController;
     final BroadcastSender mBroadcastSender;
 
     /**
@@ -212,22 +210,22 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
         @Override
         public void onLayoutCompleted(RecyclerView.State state) {
             super.onLayoutCompleted(state);
-            mMediaOutputController.setRefreshing(false);
-            mMediaOutputController.refreshDataSetIfNeeded();
+            mMediaSwitchingController.setRefreshing(false);
+            mMediaSwitchingController.refreshDataSetIfNeeded();
         }
     }
 
     public MediaOutputBaseDialog(
             Context context,
             BroadcastSender broadcastSender,
-            MediaOutputController mediaOutputController,
+            MediaSwitchingController mediaSwitchingController,
             boolean includePlaybackAndAppMetadata) {
         super(context, R.style.Theme_SystemUI_Dialog_Media);
 
         // Save the context that is wrapped with our theme.
         mContext = getContext();
         mBroadcastSender = broadcastSender;
-        mMediaOutputController = mediaOutputController;
+        mMediaSwitchingController = mediaSwitchingController;
         mLayoutManager = new LayoutManagerWrapper(mContext);
         mListMaxHeight = context.getResources().getDimensionPixelSize(
                 R.dimen.media_output_dialog_list_max_height);
@@ -279,9 +277,9 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
         // Init bottom buttons
         mDoneButton.setOnClickListener(v -> dismiss());
         mStopButton.setOnClickListener(v -> onStopButtonClick());
-        mAppButton.setOnClickListener(mMediaOutputController::tryToLaunchMediaApplication);
+        mAppButton.setOnClickListener(mMediaSwitchingController::tryToLaunchMediaApplication);
         mMediaMetadataSectionLayout.setOnClickListener(
-                mMediaOutputController::tryToLaunchMediaApplication);
+                mMediaSwitchingController::tryToLaunchMediaApplication);
 
         mDismissing = false;
     }
@@ -298,10 +296,10 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
 
     @Override
     public void start() {
-        mMediaOutputController.start(this);
+        mMediaSwitchingController.start(this);
         if (isBroadcastSupported() && !mIsLeBroadcastCallbackRegistered) {
-            mMediaOutputController.registerLeBroadcastServiceCallback(mExecutor,
-                    mBroadcastCallback);
+            mMediaSwitchingController.registerLeBroadcastServiceCallback(
+                    mExecutor, mBroadcastCallback);
             mIsLeBroadcastCallbackRegistered = true;
         }
     }
@@ -311,11 +309,11 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
         // unregister broadcast callback should only depend on profile and registered flag
         // rather than remote device or broadcast state
         // otherwise it might have risks of leaking registered callback handle
-        if (mMediaOutputController.isBroadcastSupported() && mIsLeBroadcastCallbackRegistered) {
-            mMediaOutputController.unregisterLeBroadcastServiceCallback(mBroadcastCallback);
+        if (mMediaSwitchingController.isBroadcastSupported() && mIsLeBroadcastCallbackRegistered) {
+            mMediaSwitchingController.unregisterLeBroadcastServiceCallback(mBroadcastCallback);
             mIsLeBroadcastCallbackRegistered = false;
         }
-        mMediaOutputController.stop();
+        mMediaSwitchingController.stop();
     }
 
     @VisibleForTesting
@@ -326,18 +324,17 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
     void refresh(boolean deviceSetChanged) {
         // TODO(287191450): remove binder calls in this method from the UI thread.
         // If the dialog is going away or is already refreshing, do nothing.
-        if (mDismissing || mMediaOutputController.isRefreshing()) {
+        if (mDismissing || mMediaSwitchingController.isRefreshing()) {
             return;
         }
-        mMediaOutputController.setRefreshing(true);
+        mMediaSwitchingController.setRefreshing(true);
         // Update header icon
         final int iconRes = getHeaderIconRes();
         final IconCompat headerIcon = getHeaderIcon();
         final IconCompat appSourceIcon = getAppSourceIcon();
         boolean colorSetUpdated = false;
         mCastAppLayout.setVisibility(
-                mMediaOutputController.shouldShowLaunchSection()
-                        ? View.VISIBLE : View.GONE);
+                mMediaSwitchingController.shouldShowLaunchSection() ? View.VISIBLE : View.GONE);
         if (iconRes != 0) {
             mHeaderIcon.setVisibility(View.VISIBLE);
             mHeaderIcon.setImageResource(iconRes);
@@ -371,10 +368,10 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
             mAppResourceIcon.setVisibility(View.GONE);
         } else if (appSourceIcon != null) {
             Icon appIcon = appSourceIcon.toIcon(mContext);
-            mAppResourceIcon.setColorFilter(mMediaOutputController.getColorItemContent());
+            mAppResourceIcon.setColorFilter(mMediaSwitchingController.getColorItemContent());
             mAppResourceIcon.setImageIcon(appIcon);
         } else {
-            Drawable appIconDrawable = mMediaOutputController.getAppSourceIconFromPackage();
+            Drawable appIconDrawable = mMediaSwitchingController.getAppSourceIconFromPackage();
             if (appIconDrawable != null) {
                 mAppResourceIcon.setImageDrawable(appIconDrawable);
             } else {
@@ -387,7 +384,7 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
                     R.dimen.media_output_dialog_header_icon_padding);
             mHeaderIcon.setLayoutParams(new LinearLayout.LayoutParams(size + padding, size));
         }
-        mAppButton.setText(mMediaOutputController.getAppSourceName());
+        mAppButton.setText(mMediaSwitchingController.getAppSourceName());
 
         if (!mIncludePlaybackAndAppMetadata) {
             mHeaderTitle.setVisibility(View.GONE);
@@ -424,23 +421,26 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
                 mAdapter.updateItems();
             }
         } else {
-            mMediaOutputController.setRefreshing(false);
-            mMediaOutputController.refreshDataSetIfNeeded();
+            mMediaSwitchingController.setRefreshing(false);
+            mMediaSwitchingController.refreshDataSetIfNeeded();
         }
     }
 
     private void updateButtonBackgroundColorFilter() {
-        ColorFilter buttonColorFilter = new PorterDuffColorFilter(
-                mMediaOutputController.getColorButtonBackground(),
-                PorterDuff.Mode.SRC_IN);
+        ColorFilter buttonColorFilter =
+                new PorterDuffColorFilter(
+                        mMediaSwitchingController.getColorButtonBackground(),
+                        PorterDuff.Mode.SRC_IN);
         mDoneButton.getBackground().setColorFilter(buttonColorFilter);
         mStopButton.getBackground().setColorFilter(buttonColorFilter);
-        mDoneButton.setTextColor(mMediaOutputController.getColorPositiveButtonText());
+        mDoneButton.setTextColor(mMediaSwitchingController.getColorPositiveButtonText());
     }
 
     private void updateDialogBackgroundColor() {
-        getDialogView().getBackground().setTint(mMediaOutputController.getColorDialogBackground());
-        mDeviceListLayout.setBackgroundColor(mMediaOutputController.getColorDialogBackground());
+        getDialogView()
+                .getBackground()
+                .setTint(mMediaSwitchingController.getColorDialogBackground());
+        mDeviceListLayout.setBackgroundColor(mMediaSwitchingController.getColorDialogBackground());
     }
 
     private Drawable resizeDrawable(Drawable drawable, int size) {
@@ -499,7 +499,7 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
     protected void startLeBroadcast() {
         mStopButton.setText(R.string.media_output_broadcast_starting);
         mStopButton.setEnabled(false);
-        if (!mMediaOutputController.startBluetoothLeBroadcast()) {
+        if (!mMediaSwitchingController.startBluetoothLeBroadcast()) {
             // If the system can't execute "broadcast start", then UI shows the error.
             handleLeBroadcastStartFailed();
         }
@@ -512,9 +512,10 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
                 && sharedPref.getBoolean(PREF_IS_LE_BROADCAST_FIRST_LAUNCH, true)) {
             Log.d(TAG, "PREF_IS_LE_BROADCAST_FIRST_LAUNCH: true");
 
-            mMediaOutputController.launchLeBroadcastNotifyDialog(mDialogView,
+            mMediaSwitchingController.launchLeBroadcastNotifyDialog(
+                    mDialogView,
                     mBroadcastSender,
-                    MediaOutputController.BroadcastNotifyDialog.ACTION_FIRST_LAUNCH,
+                    MediaSwitchingController.BroadcastNotifyDialog.ACTION_FIRST_LAUNCH,
                     (d, w) -> {
                         startLeBroadcast();
                     });
@@ -527,14 +528,13 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
     }
 
     protected void startLeBroadcastDialog() {
-        mMediaOutputController.launchMediaOutputBroadcastDialog(mDialogView,
-                mBroadcastSender);
+        mMediaSwitchingController.launchMediaOutputBroadcastDialog(mDialogView, mBroadcastSender);
         refresh();
     }
 
     protected void stopLeBroadcast() {
         mStopButton.setEnabled(false);
-        if (!mMediaOutputController.stopBluetoothLeBroadcast()) {
+        if (!mMediaSwitchingController.stopBluetoothLeBroadcast()) {
             // If the system can't execute "broadcast stop", then UI does refresh.
             mMainThreadHandler.post(() -> refresh());
         }
@@ -559,7 +559,7 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
     }
 
     public void onStopButtonClick() {
-        mMediaOutputController.releaseSession();
+        mMediaSwitchingController.releaseSession();
         dismiss();
     }
 

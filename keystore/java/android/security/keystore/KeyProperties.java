@@ -23,9 +23,6 @@ import android.annotation.StringDef;
 import android.annotation.SystemApi;
 import android.os.Process;
 import android.security.keymaster.KeymasterDefs;
-
-import libcore.util.EmptyArray;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.security.spec.AlgorithmParameterSpec;
@@ -33,6 +30,7 @@ import java.security.spec.ECParameterSpec;
 import java.security.spec.MGF1ParameterSpec;
 import java.util.Collection;
 import java.util.Locale;
+import libcore.util.EmptyArray;
 
 /**
  * Properties of <a href="{@docRoot}training/articles/keystore.html">Android Keystore</a> keys.
@@ -116,7 +114,7 @@ public abstract class KeyProperties {
     public static final int PURPOSE_AGREE_KEY = 1 << 6;
 
     /**
-     * Purpose of key: Signing attestaions. This purpose is incompatible with all others, meaning
+     * Purpose of key: Signing attestations. This purpose is incompatible with all others, meaning
      * that when generating a key with PURPOSE_ATTEST_KEY, no other purposes may be specified. In
      * addition, PURPOSE_ATTEST_KEY may not be specified for imported keys.
      */

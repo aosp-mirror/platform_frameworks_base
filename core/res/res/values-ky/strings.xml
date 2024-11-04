@@ -656,8 +656,8 @@
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Улантуу үчүн экрандын кулпусун киргизиңиз"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Сенсорду катуу басыңыз"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2410176550915730974">"Манжа изи таанылган жок. Кайра аракет кылыңыз."</string>
-    <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Манжа изинин сенсорун тазалап, кайра аракет кылыңыз"</string>
-    <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Сенсорду тазалап, кайра аракет кылыңыз"</string>
+    <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Манжа изинин сенсорун тазалап, кайталап көрүңүз"</string>
+    <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Сенсорду тазалап, кайталап көрүңүз"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Сенсорду катуу басыңыз"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Манжа өтө жай жылды. Кайталап көрүңүз."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Башка манжа изин байкап көрүңүз"</string>
@@ -1746,8 +1746,7 @@
     <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"Колдонмо уруксат суроону жашырып койгондуктан, жообуңузду ырастоо мүмкүн эмес."</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Функцияны колдонуп баштоо үчүн аны таптап коюңуз:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Атайын мүмкүнчүлүктөр баскычы менен колдонгуңуз келген функцияларды тандаңыз"</string>
-    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (2245540598834891500) -->
-    <skip />
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2245540598834891500">"Үн баскычтары менен кайсы функцияларды иштеткиңиз келет?"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> өчүрүлдү"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Кыска жолдорду түзөтүү"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Бүттү"</string>
@@ -1944,6 +1943,8 @@
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Өчүк"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g>, <xliff:g id="END">%2$s</xliff:g>"</string>
+    <!-- no translation found for zen_mode_trigger_summary_range_words (7228261413029290750) -->
+    <skip />
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"Бардык жылнаамалар"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> айрым үндөрдү өчүрүүдө"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"Түзмөгүңүздө ички көйгөй бар жана ал баштапкы абалга кайтарылмайынча туруктуу иштебей коюшу мүмкүн."</string>
@@ -2011,6 +2012,7 @@
     <string name="set_up_screen_lock_title" msgid="8346083801616474030">"Экран кулпусун коюп алыңыз"</string>
     <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Экран кулпусун коюу"</string>
     <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"Жеке мейкиндикти колдонуу үчүн бул түзмөктүн экранын кулпулаңыз"</string>
+    <string name="private_space_set_up_screen_lock_for_reset" msgid="7817091386408432097">"Жеке мейкиндикти өчүрүү үчүн бул түзмөктө экран кулпусун коюңуз"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Колдонмо учурда жеткиликсиз"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> учурда жеткиликсиз"</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> жеткиликсиз"</string>
@@ -2129,11 +2131,6 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Чалуулар менен билдирмелер дирилдөө режиминде иштейт"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Чалуулар менен эскертмелердин үнү өчүрүлөт"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Система өзгөрүүлөрү"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Тынчымды алба"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Жаңы: \"Тынчымды алба\" режими билдирмелерди жашырууда"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Көбүрөөк маалымат алып, өзгөртүү үчүн таптаңыз."</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"\"Тынчымды алба\" режими өзгөрдү"</string>
-    <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Бөгөттөлгөн нерселерди көрүү үчүн таптаңыз."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Билдирмелердин параметрлерин карап чыгуу"</string>
     <string name="review_notification_settings_text" msgid="5916244866751849279">"Android 13 версиясынан баштап билдирмелерди жөнөтүү үчүн орноткон колдонмолоруңузга уруксат берүү керек. Учурдагы колдонмолор үчүн бул уруксатты өзгөртүү үчүн таптап коюңуз."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Кийинчерээк эскертүү"</string>
@@ -2390,7 +2387,7 @@
     <string name="mic_access_on_toast" msgid="2666925317663845156">"Микрофон жеткиликтүү"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Микрофон бөгөттөлгөн"</string>
     <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"Башка экранга чыгаруу мүмкүн эмес"</string>
-    <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"Башка кабелди колдонуп, кайра аракет кылыңыз"</string>
+    <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"Башка кабелди колдонуп, кайталап көрүңүз"</string>
     <string name="connected_display_thermally_unavailable_notification_content" msgid="9205758199439955949">"Түзмөгүңүз өтө ысып кетти жана ал муздамайынча башка экранга чыгара албайт"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Кош экран"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dual Screen күйүк"</string>
@@ -2429,6 +2426,14 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Мобилдик же Wi-Fi тармагына туташпай эле билдирүүлөрдү жөнөтүп, алыңыз"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Жазышуулар колдонмосун ачуу"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Ал кантип иштейт"</string>
+    <!-- no translation found for satellite_manual_selection_state_popup_title (8545991934926661974) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_message (1928101658551382450) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_ok (2459664752624985095) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_cancel (973605633339469252) -->
+    <skip />
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Кезекте турат..."</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Манжа изи менен ачуу функциясын кайра тууралаңыз"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> мындан ары таанылбайт."</string>

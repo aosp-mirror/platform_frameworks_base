@@ -22,7 +22,7 @@ import static com.android.server.Watchdog.NATIVE_STACKS_OF_INTEREST;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ANR;
 import static com.android.server.am.ActivityManagerService.MY_PID;
 import static com.android.server.am.ProcessRecord.TAG;
-import static com.android.server.stats.pull.ProcfsMemoryUtil.readMemorySnapshotFromProcfs;
+import static com.android.internal.os.ProcfsMemoryUtil.readMemorySnapshotFromProcfs;
 
 import android.annotation.Nullable;
 import android.app.ActivityManager;
@@ -58,7 +58,7 @@ import com.android.internal.util.FrameworkStatsLog;
 import com.android.modules.expresslog.Counter;
 import com.android.server.ResourcePressureUtil;
 import com.android.server.criticalevents.CriticalEventLog;
-import com.android.server.stats.pull.ProcfsMemoryUtil.MemorySnapshot;
+import com.android.internal.os.ProcfsMemoryUtil.MemorySnapshot;
 import com.android.server.wm.WindowProcessController;
 
 import java.io.File;

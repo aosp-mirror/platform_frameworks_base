@@ -53,6 +53,15 @@
         app:layout_constraintEnd_toEndOf="parent">
 
         <com.android.systemui.statusbar.AlphaOptimizedImageView
+            android:id="@+id/dream_overlay_location_active"
+            android:layout_width="@dimen/dream_overlay_status_bar_icon_size"
+            android:layout_height="match_parent"
+            android:layout_marginStart="@dimen/dream_overlay_status_icon_margin"
+            android:src="@drawable/ic_location"
+            android:visibility="gone"
+            android:contentDescription="@string/location_active_dream_overlay_content_description" />
+
+        <com.android.systemui.statusbar.AlphaOptimizedImageView
             android:id="@+id/dream_overlay_alarm_set"
             android:layout_width="@dimen/dream_overlay_status_bar_icon_size"
             android:layout_height="match_parent"

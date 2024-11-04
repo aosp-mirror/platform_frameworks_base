@@ -20,8 +20,8 @@ import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.util.RotationUtils.deltaRotation;
 import static android.view.WindowManagerPolicyConstants.SCREEN_FREEZE_LAYER_BASE;
 
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ORIENTATION;
-import static com.android.internal.protolog.ProtoLogGroup.WM_SHOW_SURFACE_ALLOC;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_ORIENTATION;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_SHOW_SURFACE_ALLOC;
 import static com.android.server.wm.AnimationSpecProto.ROTATE;
 import static com.android.server.wm.RotationAnimationSpecProto.DURATION_MS;
 import static com.android.server.wm.RotationAnimationSpecProto.END_LUMA;
@@ -32,7 +32,6 @@ import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_SCREEN_ROTATI
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.utils.CoordinateTransforms.computeRotationMatrix;
-import static com.android.window.flags.Flags.deleteCaptureDisplay;
 
 import android.animation.ArgbEvaluator;
 import android.content.Context;
@@ -41,11 +40,9 @@ import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.HardwareBuffer;
-import android.os.IBinder;
 import android.os.Trace;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
-import android.view.DisplayAddress;
 import android.view.DisplayInfo;
 import android.view.Surface;
 import android.view.Surface.OutOfResourcesException;
@@ -58,7 +55,6 @@ import android.window.ScreenCapture;
 import com.android.internal.R;
 import com.android.internal.policy.TransitionAnimation;
 import com.android.internal.protolog.ProtoLog;
-import com.android.server.display.DisplayControl;
 import com.android.server.wm.SurfaceAnimator.AnimationType;
 import com.android.server.wm.SurfaceAnimator.OnAnimationFinishedCallback;
 
@@ -171,33 +167,7 @@ class ScreenRotationAnimation {
 
         try {
             final ScreenCapture.ScreenshotHardwareBuffer screenshotBuffer;
-            if (isSizeChanged && !deleteCaptureDisplay()) {
-                final DisplayAddress address = displayInfo.address;
-                if (!(address instanceof DisplayAddress.Physical)) {
-                    Slog.e(TAG, "Display does not have a physical address: " + displayId);
-                    return;
-                }
-                final DisplayAddress.Physical physicalAddress =
-                        (DisplayAddress.Physical) address;
-                final IBinder displayToken = DisplayControl.getPhysicalDisplayToken(
-                        physicalAddress.getPhysicalDisplayId());
-                if (displayToken == null) {
-                    Slog.e(TAG, "Display token is null.");
-                    return;
-                }
-                // Temporarily not skip screenshot for the rounded corner overlays and screenshot
-                // the whole display to include the rounded corner overlays.
-                setSkipScreenshotForRoundedCornerOverlays(false, t);
-                mRoundedCornerOverlay = displayContent.findRoundedCornerOverlays();
-                final ScreenCapture.DisplayCaptureArgs captureArgs =
-                        new ScreenCapture.DisplayCaptureArgs.Builder(displayToken)
-                                .setSourceCrop(new Rect(0, 0, width, height))
-                                .setAllowProtected(true)
-                                .setCaptureSecureLayers(true)
-                                .setHintForSeamlessTransition(true)
-                                .build();
-                screenshotBuffer = ScreenCapture.captureDisplay(captureArgs);
-            } else if (isSizeChanged) {
+            if (isSizeChanged) {
                 // Temporarily not skip screenshot for the rounded corner overlays and screenshot
                 // the whole display to include the rounded corner overlays.
                 setSkipScreenshotForRoundedCornerOverlays(false, t);
@@ -815,8 +785,7 @@ class ScreenRotationAnimation {
                 if (mDisplayContent.getRotationAnimation() == ScreenRotationAnimation.this) {
                     // It also invokes kill().
                     mDisplayContent.setRotationAnimation(null);
-                    mDisplayContent.mAppCompatCameraPolicy
-                            .onScreenRotationAnimationFinished();
+                    mDisplayContent.mAppCompatCameraPolicy.onScreenRotationAnimationFinished();
                 } else {
                     kill();
                 }

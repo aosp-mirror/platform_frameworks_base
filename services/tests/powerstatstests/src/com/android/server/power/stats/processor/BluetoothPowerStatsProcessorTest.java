@@ -479,6 +479,7 @@ public class BluetoothPowerStatsProcessorTest {
                 new AggregatedPowerStats(config).getPowerComponentStats(
                         BatteryConsumer.POWER_COMPONENT_BLUETOOTH);
 
+        aggregatedStats.start(0);
         aggregatedStats.setState(STATE_POWER, POWER_STATE_OTHER, 0);
         aggregatedStats.setState(STATE_SCREEN, SCREEN_STATE_ON, 0);
         aggregatedStats.setUidState(APP_UID1, STATE_PROCESS_STATE, PROCESS_STATE_FOREGROUND, 0);

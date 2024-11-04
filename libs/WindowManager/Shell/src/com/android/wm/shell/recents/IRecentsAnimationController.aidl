@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.recents;
 
-import android.app.ActivityManager;
 import android.graphics.GraphicBuffer;
 import android.view.IRemoteAnimationFinishedCallback;
 import android.view.RemoteAnimationTarget;

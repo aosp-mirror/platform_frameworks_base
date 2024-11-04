@@ -26,9 +26,11 @@ internal fun RootTaskInfo.childTasksTopDown(): Sequence<ChildTaskModel> {
             childTaskIds[index],
             childTaskNames[index],
             childTaskBounds[index],
-            childTaskUserIds[index]
+            childTaskUserIds[index],
         )
     }
 }
 
 internal fun RootTaskInfo.hasChildTasks() = childTaskUserIds.isNotEmpty()
+
+internal fun RootTaskInfo.childTaskCount() = childTaskIds.size

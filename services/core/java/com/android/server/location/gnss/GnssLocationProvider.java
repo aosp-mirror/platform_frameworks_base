@@ -389,7 +389,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
             // Reload gnss config for no SIM case
             mGnssConfiguration.reloadGpsProperties();
         }
-        if (Flags.enableNiSuplMessageInjectionByCarrierConfig()) {
+        if (Flags.enableNiSuplMessageInjectionByCarrierConfigBugfix()) {
             updateNiSuplMessageListenerRegistration(
                     mGnssConfiguration.isNiSuplMessageInjectionEnabled());
         }
@@ -538,7 +538,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         intentFilter.addAction(TelephonyManager.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED);
         mContext.registerReceiver(mIntentReceiver, intentFilter, null, mHandler);
 
-        if (!Flags.enableNiSuplMessageInjectionByCarrierConfig()) {
+        if (!Flags.enableNiSuplMessageInjectionByCarrierConfigBugfix()) {
             updateNiSuplMessageListenerRegistration(
                     mGnssConfiguration.isNiSuplMessageInjectionEnabled());
         }
@@ -1672,7 +1672,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         if (dumpAll) {
             mNetworkTimeHelper.dump(pw);
             pw.println("mSupportsPsds=" + mSupportsPsds);
-            if (Flags.enableNiSuplMessageInjectionByCarrierConfig()) {
+            if (Flags.enableNiSuplMessageInjectionByCarrierConfigBugfix()) {
                 pw.println("mNiSuplMessageListenerRegistered="
                         + mNiSuplMessageListenerRegistered);
             }

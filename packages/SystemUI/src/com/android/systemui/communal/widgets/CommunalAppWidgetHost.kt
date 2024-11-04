@@ -17,11 +17,9 @@
 package com.android.systemui.communal.widgets
 
 import android.appwidget.AppWidgetHost
-import android.appwidget.AppWidgetHostView
-import android.appwidget.AppWidgetProviderInfo
 import android.content.Context
-import android.os.Looper
-import android.widget.RemoteViews
+import com.android.app.tracing.coroutines.launchTraced as launch
+import com.android.systemui.communal.shared.model.GlanceableHubMultiUserHelper
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.Logger
 import javax.annotation.concurrent.GuardedBy
@@ -29,17 +27,20 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.launch
 
 /** Communal app widget host that creates a [CommunalAppWidgetHostView]. */
 class CommunalAppWidgetHost(
     context: Context,
     private val backgroundScope: CoroutineScope,
     hostId: Int,
-    private val interactionHandler: RemoteViews.InteractionHandler,
-    looper: Looper,
     logBuffer: LogBuffer,
-) : AppWidgetHost(context, hostId, interactionHandler, looper) {
+    glanceableHubMultiUserHelper: GlanceableHubMultiUserHelper,
+) : AppWidgetHost(context, hostId) {
+
+    init {
+        // The app widget host should never be accessed from a headless system user.
+        glanceableHubMultiUserHelper.assertNotInHeadlessSystemUser()
+    }
 
     private val logger = Logger(logBuffer, TAG)
 
@@ -49,29 +50,6 @@ class CommunalAppWidgetHost(
     val appWidgetIdToRemove: SharedFlow<Int> = _appWidgetIdToRemove.asSharedFlow()
 
     @GuardedBy("observers") private val observers = mutableSetOf<Observer>()
-
-    override fun onCreateView(
-        context: Context,
-        appWidgetId: Int,
-        appWidget: AppWidgetProviderInfo?
-    ): AppWidgetHostView {
-        return CommunalAppWidgetHostView(context, interactionHandler)
-    }
-
-    /**
-     * Creates and returns a [CommunalAppWidgetHostView]. This method does the same thing as
-     * `createView`. The only difference is that the returned value will be casted to
-     * [CommunalAppWidgetHostView].
-     */
-    fun createViewForCommunal(
-        context: Context?,
-        appWidgetId: Int,
-        appWidget: AppWidgetProviderInfo?
-    ): CommunalAppWidgetHostView {
-        // `createView` internally calls `onCreateView` to create the view. We cannot override
-        // `createView`, but we are sure that the hostView is `CommunalAppWidgetHostView`
-        return createView(context, appWidgetId, appWidget) as CommunalAppWidgetHostView
-    }
 
     override fun onAppWidgetRemoved(appWidgetId: Int) {
         backgroundScope.launch {

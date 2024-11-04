@@ -23,7 +23,6 @@ import com.android.settingslib.bluetooth.BluetoothUtils
 import com.android.settingslib.bluetooth.CachedBluetoothDevice
 import com.android.settingslib.bluetooth.LocalBluetoothManager
 import com.android.settingslib.flags.Flags
-import com.android.settingslib.flags.Flags.enableLeAudioSharing
 import com.android.systemui.res.R
 
 private val backgroundOn = R.drawable.settingslib_switch_bar_bg_on
@@ -43,7 +42,15 @@ abstract class DeviceItemFactory {
         context: Context,
         cachedDevice: CachedBluetoothDevice,
         audioManager: AudioManager,
+        audioSharingAvailable: Boolean,
     ): Boolean
+
+    // Overloaded that defaults audioSharingAvailable to false
+    fun isFilterMatched(
+        context: Context,
+        cachedDevice: CachedBluetoothDevice,
+        audioManager: AudioManager,
+    ): Boolean = isFilterMatched(context, cachedDevice, audioManager, false)
 
     abstract fun create(context: Context, cachedDevice: CachedBluetoothDevice): DeviceItem
 
@@ -56,7 +63,7 @@ abstract class DeviceItemFactory {
             connectionSummary: String,
             background: Int,
             actionAccessibilityLabel: String,
-            isActive: Boolean
+            isActive: Boolean,
         ): DeviceItem {
             return DeviceItem(
                 type = type,
@@ -70,7 +77,7 @@ abstract class DeviceItemFactory {
                 background = background,
                 isEnabled = !cachedDevice.isBusy,
                 actionAccessibilityLabel = actionAccessibilityLabel,
-                isActive = isActive
+                isActive = isActive,
             )
         }
     }
@@ -80,7 +87,8 @@ internal open class ActiveMediaDeviceItemFactory : DeviceItemFactory() {
     override fun isFilterMatched(
         context: Context,
         cachedDevice: CachedBluetoothDevice,
-        audioManager: AudioManager
+        audioManager: AudioManager,
+        audioSharingAvailable: Boolean,
     ): Boolean {
         return BluetoothUtils.isActiveMediaDevice(cachedDevice) &&
             BluetoothUtils.isAvailableMediaBluetoothDevice(cachedDevice, audioManager)
@@ -94,20 +102,21 @@ internal open class ActiveMediaDeviceItemFactory : DeviceItemFactory() {
             cachedDevice.connectionSummary ?: "",
             backgroundOn,
             context.getString(actionAccessibilityLabelDisconnect),
-            isActive = true
+            isActive = true,
         )
     }
 }
 
 internal class AudioSharingMediaDeviceItemFactory(
-    private val localBluetoothManager: LocalBluetoothManager?
+    private val localBluetoothManager: LocalBluetoothManager
 ) : DeviceItemFactory() {
     override fun isFilterMatched(
         context: Context,
         cachedDevice: CachedBluetoothDevice,
-        audioManager: AudioManager
+        audioManager: AudioManager,
+        audioSharingAvailable: Boolean,
     ): Boolean {
-        return enableLeAudioSharing() &&
+        return audioSharingAvailable &&
             BluetoothUtils.hasConnectedBroadcastSource(cachedDevice, localBluetoothManager)
     }
 
@@ -120,24 +129,25 @@ internal class AudioSharingMediaDeviceItemFactory(
                 ?: context.getString(audioSharing),
             if (cachedDevice.isBusy) backgroundOffBusy else backgroundOn,
             "",
-            isActive = !cachedDevice.isBusy
+            isActive = !cachedDevice.isBusy,
         )
     }
 }
 
 internal class AvailableAudioSharingMediaDeviceItemFactory(
-    private val localBluetoothManager: LocalBluetoothManager?
+    private val localBluetoothManager: LocalBluetoothManager
 ) : AvailableMediaDeviceItemFactory() {
     override fun isFilterMatched(
         context: Context,
         cachedDevice: CachedBluetoothDevice,
-        audioManager: AudioManager
+        audioManager: AudioManager,
+        audioSharingAvailable: Boolean,
     ): Boolean {
-        return BluetoothUtils.isAudioSharingEnabled() &&
-            super.isFilterMatched(context, cachedDevice, audioManager) &&
+        return audioSharingAvailable &&
+            super.isFilterMatched(context, cachedDevice, audioManager, true) &&
             BluetoothUtils.isAvailableAudioSharingMediaBluetoothDevice(
                 cachedDevice,
-                localBluetoothManager
+                localBluetoothManager,
             )
     }
 
@@ -151,7 +161,7 @@ internal class AvailableAudioSharingMediaDeviceItemFactory(
             ),
             if (cachedDevice.isBusy) backgroundOffBusy else backgroundOff,
             "",
-            isActive = false
+            isActive = false,
         )
     }
 }
@@ -160,7 +170,8 @@ internal class ActiveHearingDeviceItemFactory : ActiveMediaDeviceItemFactory() {
     override fun isFilterMatched(
         context: Context,
         cachedDevice: CachedBluetoothDevice,
-        audioManager: AudioManager
+        audioManager: AudioManager,
+        audioSharingAvailable: Boolean,
     ): Boolean {
         return BluetoothUtils.isActiveMediaDevice(cachedDevice) &&
             BluetoothUtils.isAvailableHearingDevice(cachedDevice)
@@ -171,7 +182,8 @@ open class AvailableMediaDeviceItemFactory : DeviceItemFactory() {
     override fun isFilterMatched(
         context: Context,
         cachedDevice: CachedBluetoothDevice,
-        audioManager: AudioManager
+        audioManager: AudioManager,
+        audioSharingAvailable: Boolean,
     ): Boolean {
         return !BluetoothUtils.isActiveMediaDevice(cachedDevice) &&
             BluetoothUtils.isAvailableMediaBluetoothDevice(cachedDevice, audioManager)
@@ -186,7 +198,7 @@ open class AvailableMediaDeviceItemFactory : DeviceItemFactory() {
                 ?: context.getString(connected),
             if (cachedDevice.isBusy) backgroundOffBusy else backgroundOff,
             context.getString(actionAccessibilityLabelActivate),
-            isActive = false
+            isActive = false,
         )
     }
 }
@@ -195,7 +207,8 @@ internal class AvailableHearingDeviceItemFactory : AvailableMediaDeviceItemFacto
     override fun isFilterMatched(
         context: Context,
         cachedDevice: CachedBluetoothDevice,
-        audioManager: AudioManager
+        audioManager: AudioManager,
+        audioSharingAvailable: Boolean,
     ): Boolean {
         return !BluetoothUtils.isActiveMediaDevice(cachedDevice) &&
             BluetoothUtils.isAvailableHearingDevice(cachedDevice)
@@ -206,7 +219,8 @@ internal class ConnectedDeviceItemFactory : DeviceItemFactory() {
     override fun isFilterMatched(
         context: Context,
         cachedDevice: CachedBluetoothDevice,
-        audioManager: AudioManager
+        audioManager: AudioManager,
+        audioSharingAvailable: Boolean,
     ): Boolean {
         return if (Flags.enableHideExclusivelyManagedBluetoothDevice()) {
             !BluetoothUtils.isExclusivelyManagedBluetoothDevice(context, cachedDevice.device) &&
@@ -225,7 +239,7 @@ internal class ConnectedDeviceItemFactory : DeviceItemFactory() {
                 ?: context.getString(connected),
             if (cachedDevice.isBusy) backgroundOffBusy else backgroundOff,
             context.getString(actionAccessibilityLabelDisconnect),
-            isActive = false
+            isActive = false,
         )
     }
 }
@@ -234,7 +248,8 @@ internal open class SavedDeviceItemFactory : DeviceItemFactory() {
     override fun isFilterMatched(
         context: Context,
         cachedDevice: CachedBluetoothDevice,
-        audioManager: AudioManager
+        audioManager: AudioManager,
+        audioSharingAvailable: Boolean,
     ): Boolean {
         return if (Flags.enableHideExclusivelyManagedBluetoothDevice()) {
             !BluetoothUtils.isExclusivelyManagedBluetoothDevice(context, cachedDevice.device) &&
@@ -254,7 +269,7 @@ internal open class SavedDeviceItemFactory : DeviceItemFactory() {
                 ?: context.getString(saved),
             if (cachedDevice.isBusy) backgroundOffBusy else backgroundOff,
             context.getString(actionAccessibilityLabelActivate),
-            isActive = false
+            isActive = false,
         )
     }
 }
@@ -263,12 +278,13 @@ internal class SavedHearingDeviceItemFactory : SavedDeviceItemFactory() {
     override fun isFilterMatched(
         context: Context,
         cachedDevice: CachedBluetoothDevice,
-        audioManager: AudioManager
+        audioManager: AudioManager,
+        audioSharingAvailable: Boolean,
     ): Boolean {
         return if (Flags.enableHideExclusivelyManagedBluetoothDevice()) {
             !BluetoothUtils.isExclusivelyManagedBluetoothDevice(
                 context,
-                cachedDevice.getDevice()
+                cachedDevice.getDevice(),
             ) &&
                 cachedDevice.isHearingAidDevice &&
                 cachedDevice.bondState == BluetoothDevice.BOND_BONDED &&

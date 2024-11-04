@@ -40,6 +40,7 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.res.R;
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
 
@@ -71,6 +72,7 @@ public class KeyguardStateControllerImpl implements KeyguardStateController {
             new UpdateMonitorCallback();
     private final Lazy<KeyguardUnlockAnimationController> mUnlockAnimationControllerLazy;
     private final KeyguardUpdateMonitorLogger mLogger;
+    private final Lazy<KeyguardInteractor> mKeyguardInteractorLazy;
 
     private boolean mCanDismissLockScreen;
     private boolean mShowing;
@@ -123,6 +125,7 @@ public class KeyguardStateControllerImpl implements KeyguardStateController {
             Lazy<KeyguardUnlockAnimationController> keyguardUnlockAnimationController,
             KeyguardUpdateMonitorLogger logger,
             DumpManager dumpManager,
+            Lazy<KeyguardInteractor> keyguardInteractor,
             FeatureFlags featureFlags,
             SelectedUserInteractor userInteractor) {
         mContext = context;
@@ -133,6 +136,7 @@ public class KeyguardStateControllerImpl implements KeyguardStateController {
         mKeyguardUpdateMonitor.registerCallback(mKeyguardUpdateMonitorCallback);
         mUnlockAnimationControllerLazy = keyguardUnlockAnimationController;
         mFeatureFlags = featureFlags;
+        mKeyguardInteractorLazy = keyguardInteractor;
 
         dumpManager.registerDumpable(getClass().getSimpleName(), this);
 
@@ -283,8 +287,9 @@ public class KeyguardStateControllerImpl implements KeyguardStateController {
 
     @Override
     public boolean isKeyguardScreenRotationAllowed() {
-        return SystemProperties.getBoolean("lockscreen.rot_override", false)
-                || mContext.getResources().getBoolean(R.bool.config_enableLockScreenRotation)
+        final boolean configEnabled =
+                mContext.getResources().getBoolean(R.bool.config_enableLockScreenRotation);
+        return SystemProperties.getBoolean("lockscreen.rot_override", configEnabled)
                 || mFeatureFlags.isEnabled(LOCKSCREEN_ENABLE_LANDSCAPE);
     }
 
@@ -354,6 +359,7 @@ public class KeyguardStateControllerImpl implements KeyguardStateController {
             Trace.traceCounter(Trace.TRACE_TAG_APP, "keyguardGoingAway",
                     keyguardGoingAway ? 1 : 0);
             mKeyguardGoingAway = keyguardGoingAway;
+            mKeyguardInteractorLazy.get().setIsKeyguardGoingAway(keyguardGoingAway);
             invokeForEachCallback(Callback::onKeyguardGoingAwayChanged);
         }
     }

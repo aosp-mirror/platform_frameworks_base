@@ -99,13 +99,23 @@ public final class DeviceConfigService extends Binder {
 
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        pw.print("SyncDisabledForTests: ");
-        MyShellCommand.getSyncDisabledForTests(pw, pw);
+        if (android.provider.flags.Flags.dumpImprovements()) {
+            pw.print("SyncDisabledForTests: ");
+            MyShellCommand.getSyncDisabledForTests(pw, pw);
 
-        pw.print("Is mainline: ");
-        pw.println(UpdatableDeviceConfigServiceReadiness.shouldStartUpdatableService());
+            pw.print("UpdatableDeviceConfigServiceReadiness.shouldStartUpdatableService(): ");
+            pw.println(UpdatableDeviceConfigServiceReadiness.shouldStartUpdatableService());
 
-        final IContentProvider iprovider = mProvider.getIContentProvider();
+            pw.println("DeviceConfig provider: ");
+            try (ParcelFileDescriptor pfd = ParcelFileDescriptor.dup(fd)) {
+                DeviceConfig.dump(pfd, pw, /* prefix= */ "  ", args);
+            } catch (IOException e) {
+                pw.print("IOException creating ParcelFileDescriptor: ");
+                pw.println(e);
+            }
+        }
+
+        IContentProvider iprovider = mProvider.getIContentProvider();
         pw.println("DeviceConfig flags:");
         for (String line : MyShellCommand.listAll(iprovider)) {
             pw.println(line);

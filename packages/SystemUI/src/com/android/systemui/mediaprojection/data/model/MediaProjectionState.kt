@@ -32,10 +32,8 @@ sealed interface MediaProjectionState {
      *   media projection. Null if the media projection is going to this same device (e.g. another
      *   app is recording the screen).
      */
-    sealed class Projecting(
-        open val hostPackage: String,
-        open val hostDeviceName: String?,
-    ) : MediaProjectionState {
+    sealed class Projecting(open val hostPackage: String, open val hostDeviceName: String?) :
+        MediaProjectionState {
         /** The entire screen is being projected. */
         data class EntireScreen(
             override val hostPackage: String,
@@ -47,6 +45,12 @@ sealed interface MediaProjectionState {
             override val hostPackage: String,
             override val hostDeviceName: String?,
             val task: RunningTaskInfo,
+        ) : Projecting(hostPackage, hostDeviceName)
+
+        /** The screen is not being projected, only audio is being projected. */
+        data class NoScreen(
+            override val hostPackage: String,
+            override val hostDeviceName: String? = null,
         ) : Projecting(hostPackage, hostDeviceName)
     }
 }

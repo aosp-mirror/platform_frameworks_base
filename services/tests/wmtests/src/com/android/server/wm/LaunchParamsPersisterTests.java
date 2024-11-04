@@ -494,6 +494,21 @@ public class LaunchParamsPersisterTests extends WindowTestsBase {
         assertTrue("Result should be empty.", mResult.isEmpty());
     }
 
+    @Test
+    public void testAbortsLoadingWhenUserCleansUpBeforeLoadingFinishes() {
+        mTarget.saveTask(mTestTask);
+        mPersisterQueue.flush();
+
+        final LaunchParamsPersister target = new LaunchParamsPersister(mPersisterQueue, mSupervisor,
+                mUserFolderGetter);
+        target.onSystemReady();
+        target.onUnlockUser(TEST_USER_ID);
+        target.onCleanupUser(TEST_USER_ID);
+
+        target.getLaunchParams(mTestTask, null, mResult);
+        assertTrue("Result should be empty.", mResult.isEmpty());
+    }
+
     private static boolean deleteRecursively(File file) {
         boolean result = true;
         if (file.isDirectory()) {

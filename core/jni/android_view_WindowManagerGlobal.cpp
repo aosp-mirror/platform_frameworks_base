@@ -69,8 +69,8 @@ void removeInputChannel(const sp<IBinder>& clientToken) {
     JNIEnv* env = AndroidRuntime::getJNIEnv();
 
     ScopedLocalRef<jobject> clientTokenObj(env, javaObjectForIBinder(env, clientToken));
-    env->CallStaticObjectMethod(gWindowManagerGlobal.clazz, gWindowManagerGlobal.removeInputChannel,
-                                clientTokenObj.get());
+    env->CallStaticVoidMethod(gWindowManagerGlobal.clazz, gWindowManagerGlobal.removeInputChannel,
+                              clientTokenObj.get());
 }
 
 int register_android_view_WindowManagerGlobal(JNIEnv* env) {

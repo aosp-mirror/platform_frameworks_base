@@ -16,8 +16,8 @@
 
 package android.libcore;
 
-import androidx.benchmark.BenchmarkState;
-import androidx.benchmark.junit4.BenchmarkRule;
+import android.perftests.utils.BenchmarkState;
+import android.perftests.utils.PerfStatusReporter;
 
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -35,8 +35,7 @@ import java.lang.reflect.Field;
 @RunWith(AndroidJUnit4.class)
 @LargeTest
 public class ReferenceGetPerfTest {
-    @Rule
-    public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
+    @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
 
     boolean mIntrinsicDisabled;
 
@@ -52,7 +51,7 @@ public class ReferenceGetPerfTest {
     @Test
     public void timeSoftReferenceGet() throws Exception {
         Reference soft = new SoftReference(mObj);
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             Object o = soft.get();
         }
@@ -61,7 +60,7 @@ public class ReferenceGetPerfTest {
     @Test
     public void timeWeakReferenceGet() throws Exception {
         Reference weak = new WeakReference(mObj);
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             Object o = weak.get();
         }
@@ -72,7 +71,7 @@ public class ReferenceGetPerfTest {
         Reference weak = new WeakReference(mObj);
         mObj = null;
         Runtime.getRuntime().gc();
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             Object o = weak.get();
         }

@@ -76,7 +76,6 @@ import java.util.concurrent.Executor;
  * @hide
  */
 @SystemApi
-@FlaggedApi(Flags.FLAG_CONCERT_MODE)
 public abstract class SessionProcessor {
     private static final String TAG = "SessionProcessor";
     private CameraUsageTracker mCameraUsageTracker;
@@ -84,7 +83,6 @@ public abstract class SessionProcessor {
     /**
      * Initialize a session process instance
      */
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
     public SessionProcessor() {}
 
     void setCameraUsageTracker(CameraUsageTracker tracker) {
@@ -97,7 +95,6 @@ public abstract class SessionProcessor {
      * @hide
      */
     @SystemApi
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
     public interface CaptureCallback {
         /**
          * This method is called when the camera device has started
@@ -116,7 +113,6 @@ public abstract class SessionProcessor {
          *                          first frame in a multi-frame capture,
          *                          in nanoseconds.
          */
-        @FlaggedApi(Flags.FLAG_CONCERT_MODE)
         void onCaptureStarted(int captureSequenceId, long timestamp);
 
         /**
@@ -126,7 +122,6 @@ public abstract class SessionProcessor {
          *
          * @param captureSequenceId id of the current capture sequence
          */
-        @FlaggedApi(Flags.FLAG_CONCERT_MODE)
         void onCaptureProcessStarted(int captureSequenceId);
 
         /**
@@ -139,7 +134,6 @@ public abstract class SessionProcessor {
          * @param captureSequenceId id of the current capture sequence
          * @param failure           The capture failure reason
          */
-        @FlaggedApi(Flags.FLAG_CONCERT_MODE)
         void onCaptureFailed(int captureSequenceId, @CaptureFailure.FailureReason int failure);
 
         /**
@@ -154,7 +148,6 @@ public abstract class SessionProcessor {
          *
          * @param captureSequenceId id of the current capture sequence
          */
-        @FlaggedApi(Flags.FLAG_CONCERT_MODE)
         void onCaptureSequenceCompleted(int captureSequenceId);
 
         /**
@@ -162,7 +155,6 @@ public abstract class SessionProcessor {
          *
          * @param captureSequenceId id of the current capture sequence
          */
-        @FlaggedApi(Flags.FLAG_CONCERT_MODE)
         void onCaptureSequenceAborted(int captureSequenceId);
 
         /**
@@ -192,7 +184,6 @@ public abstract class SessionProcessor {
          *                  settings and results are always supported and
          *                  applied by the corresponding framework.
          */
-        @FlaggedApi(Flags.FLAG_CONCERT_MODE)
         void onCaptureCompleted(long shutterTimestamp, int requestId,
                 @NonNull Map<CaptureResult.Key, Object> results);
     }
@@ -231,7 +222,6 @@ public abstract class SessionProcessor {
      * ensure this list will always  produce a valid camera capture
      * session.
      */
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
     @NonNull
     public abstract ExtensionConfiguration initSession(@NonNull IBinder token,
             @NonNull String cameraId, @NonNull CharacteristicsMap map,
@@ -247,7 +237,6 @@ public abstract class SessionProcessor {
      * @param token Binder token that can be used to unlink any previously
      *              linked death notifier callbacks
      */
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
     public abstract void deInitSession(@NonNull IBinder token);
 
     /**
@@ -268,7 +257,6 @@ public abstract class SessionProcessor {
      *
      *
      */
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
     public abstract void onCaptureSessionStart(@NonNull RequestProcessor requestProcessor,
             @NonNull String statsKey);
 
@@ -279,7 +267,6 @@ public abstract class SessionProcessor {
      * will no longer accept any requests after onCaptureSessionEnd()
      * returns.
      */
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
     public abstract void onCaptureSessionEnd();
 
     /**
@@ -293,7 +280,6 @@ public abstract class SessionProcessor {
      * @param callback a callback to report the status.
      * @return the id of the capture sequence.
      */
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
     public abstract int startRepeating(@NonNull Executor executor,
             @NonNull CaptureCallback callback);
 
@@ -305,7 +291,6 @@ public abstract class SessionProcessor {
      * forward calling {@link RequestProcessor#setRepeating} will simply
      * do nothing.
      */
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
     public abstract void stopRepeating();
 
     /**
@@ -326,7 +311,6 @@ public abstract class SessionProcessor {
      * @param callback a callback to report the status.
      * @return the id of the capture sequence.
      */
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
     public abstract int startMultiFrameCapture(@NonNull Executor executor,
             @NonNull CaptureCallback callback);
 
@@ -338,7 +322,6 @@ public abstract class SessionProcessor {
      * the value.
      *@param captureRequest Request that includes all client parameter
      */
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
     public abstract void setParameters(@NonNull CaptureRequest captureRequest);
 
     /**
@@ -357,7 +340,6 @@ public abstract class SessionProcessor {
      * @return the id of the capture sequence.
      *
      */
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
     public abstract int startTrigger(@NonNull CaptureRequest captureRequest,
             @NonNull Executor executor, @NonNull CaptureCallback callback);
 
@@ -372,11 +354,9 @@ public abstract class SessionProcessor {
                 Map<String, CameraMetadataNative> charsMap, OutputSurface previewSurface,
                 OutputSurface imageCaptureSurface, OutputSurface postviewSurface)
                 throws RemoteException {
-            if (Flags.surfaceLeakFix()) {
-                mPreviewSurface = previewSurface;
-                mPostviewSurface = postviewSurface;
-                mImageCaptureSurface = imageCaptureSurface;
-            }
+            mPreviewSurface = previewSurface;
+            mPostviewSurface = postviewSurface;
+            mImageCaptureSurface = imageCaptureSurface;
             ExtensionConfiguration config = SessionProcessor.this.initSession(token, cameraId,
                     new CharacteristicsMap(charsMap),
                     new CameraOutputSurface(previewSurface),
@@ -399,16 +379,14 @@ public abstract class SessionProcessor {
         @Override
         public void deInitSession(IBinder token) throws RemoteException {
             SessionProcessor.this.deInitSession(token);
-            if (Flags.surfaceLeakFix()) {
-                if ((mPreviewSurface != null) && (mPreviewSurface.surface != null)) {
-                    mPreviewSurface.surface.release();
-                }
-                if ((mImageCaptureSurface != null) && (mImageCaptureSurface.surface != null)) {
-                    mImageCaptureSurface.surface.release();
-                }
-                if ((mPostviewSurface != null) && (mPostviewSurface.surface != null)) {
-                    mPostviewSurface.surface.release();
-                }
+            if ((mPreviewSurface != null) && (mPreviewSurface.surface != null)) {
+                mPreviewSurface.surface.release();
+            }
+            if ((mImageCaptureSurface != null) && (mImageCaptureSurface.surface != null)) {
+                mImageCaptureSurface.surface.release();
+            }
+            if ((mPostviewSurface != null) && (mPostviewSurface.surface != null)) {
+                mPostviewSurface.surface.release();
             }
         }
 

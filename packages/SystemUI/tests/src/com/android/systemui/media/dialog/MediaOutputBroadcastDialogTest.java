@@ -119,7 +119,7 @@ public class MediaOutputBroadcastDialogTest extends SysuiTestCase {
     private UserTracker mUserTracker = mock(UserTracker.class);
 
     private MediaOutputBroadcastDialog mMediaOutputBroadcastDialog;
-    private MediaOutputController mMediaOutputController;
+    private MediaSwitchingController mMediaSwitchingController;
 
     @Before
     public void setUp() {
@@ -133,8 +133,8 @@ public class MediaOutputBroadcastDialogTest extends SysuiTestCase {
                 VolumePanelGlobalStateInteractorKosmosKt.getVolumePanelGlobalStateInteractor(
                         mKosmos);
 
-        mMediaOutputController =
-                new MediaOutputController(
+        mMediaSwitchingController =
+                new MediaSwitchingController(
                         mContext,
                         TEST_PACKAGE,
                         mContext.getUser(),
@@ -151,9 +151,10 @@ public class MediaOutputBroadcastDialogTest extends SysuiTestCase {
                         mFlags,
                         volumePanelGlobalStateInteractor,
                         mUserTracker);
-        mMediaOutputController.mLocalMediaManager = mLocalMediaManager;
-        mMediaOutputBroadcastDialog = new MediaOutputBroadcastDialog(mContext, false,
-                mBroadcastSender, mMediaOutputController);
+        mMediaSwitchingController.mLocalMediaManager = mLocalMediaManager;
+        mMediaOutputBroadcastDialog =
+                new MediaOutputBroadcastDialog(
+                        mContext, false, mBroadcastSender, mMediaSwitchingController);
         mMediaOutputBroadcastDialog.show();
     }
 

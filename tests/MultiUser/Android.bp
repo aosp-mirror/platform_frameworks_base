@@ -18,9 +18,9 @@ android_test {
         "services.core",
     ],
     libs: [
-        "android.test.runner",
-        "android.test.base",
-        "android.test.mock",
+        "android.test.runner.stubs.system",
+        "android.test.base.stubs.system",
+        "android.test.mock.stubs.system",
     ],
     certificate: "platform",
     test_suites: ["device-tests"],

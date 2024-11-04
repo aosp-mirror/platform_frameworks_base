@@ -117,6 +117,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import sun.misc.Cleaner;
@@ -4914,7 +4916,22 @@ public final class AutofillManager {
                     && (root.getWindowFlags() & WindowManager.LayoutParams.FLAG_SECURE) == 0) {
                 ViewNodeBuilder viewStructure = new ViewNodeBuilder();
                 viewStructure.setAutofillId(view.getAutofillId());
-                view.onProvideAutofillStructure(viewStructure, /* flags= */ 0);
+
+                // Post onProvideAutofillStructure to the UI thread
+                final CountDownLatch latch = new CountDownLatch(1);
+                afm.post(
+                    () -> {
+                        view.onProvideAutofillStructure(viewStructure, /* flags= */ 0);
+                        latch.countDown();
+                    }
+                );
+                try {
+                    latch.await(5000, TimeUnit.MILLISECONDS);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    return null;
+                }
+
                 // TODO(b/141703532): We don't call View#onProvideAutofillVirtualStructure for
                 //  efficiency reason. But this also means we will return null for virtual views
                 //  for now. We will add a new API to fetch the view node info of the virtual

@@ -26,6 +26,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -36,6 +37,7 @@ import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.VersionedPackage;
 import android.content.rollback.PackageRollbackInfo;
@@ -47,6 +49,7 @@ import android.os.MessageQueue;
 import android.os.SystemProperties;
 import android.platform.test.flag.junit.SetFlagsRule;
 
+import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.dx.mockito.inline.extended.ExtendedMockito;
@@ -144,6 +147,22 @@ public class RollbackPackageHealthObserverTest {
                     return storedValue == null ? defaultValue : Boolean.parseBoolean(storedValue);
                 }
         ).when(() -> SystemProperties.getBoolean(anyString(), anyBoolean()));
+
+        try {
+            when(mMockPackageManager.getPackageInfo(anyString(), anyInt())).then(inv -> {
+                final PackageInfo res = new PackageInfo();
+                res.packageName = inv.getArgument(0);
+                res.setApexPackageName(res.packageName);
+                return res;
+            });
+        } catch (PackageManager.NameNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+
+        Context testContext = InstrumentationRegistry.getInstrumentation()
+                .getTargetContext();
+        when(mMockContext.getUser()).thenReturn(testContext.getUser());
+        when(mMockContext.getPackageName()).thenReturn(testContext.getPackageName());
 
         SystemProperties.set(PROP_DISABLE_HIGH_IMPACT_ROLLBACK_FLAG, Boolean.toString(false));
     }

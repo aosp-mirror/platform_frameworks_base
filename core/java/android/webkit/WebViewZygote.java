@@ -16,12 +16,11 @@
 
 package android.webkit;
 
-import static android.webkit.Flags.updateServiceV2;
-
 import android.content.pm.PackageInfo;
 import android.os.Build;
 import android.os.ChildZygoteProcess;
 import android.os.Process;
+import android.os.UserHandle;
 import android.os.ZygoteProcess;
 import android.text.TextUtils;
 import android.util.Log;
@@ -51,13 +50,6 @@ public class WebViewZygote {
     @GuardedBy("sLock")
     private static PackageInfo sPackage;
 
-    /**
-     * Flag for whether multi-process WebView is enabled. If this is {@code false}, the zygote will
-     * not be started. Should be removed entirely after we remove the updateServiceV2 flag.
-     */
-    @GuardedBy("sLock")
-    private static boolean sMultiprocessEnabled = false;
-
     public static ZygoteProcess getProcess() {
         synchronized (sLock) {
             if (sZygote != null) return sZygote;
@@ -75,40 +67,13 @@ public class WebViewZygote {
 
     public static boolean isMultiprocessEnabled() {
         synchronized (sLock) {
-            if (updateServiceV2()) {
-                return sPackage != null;
-            } else {
-                return sMultiprocessEnabled && sPackage != null;
-            }
-        }
-    }
-
-    public static void setMultiprocessEnabled(boolean enabled) {
-        if (updateServiceV2()) {
-            throw new IllegalStateException(
-                    "setMultiprocessEnabled shouldn't be called if update_service_v2 flag is set.");
-        }
-        synchronized (sLock) {
-            sMultiprocessEnabled = enabled;
-
-            // When multi-process is disabled, kill the zygote. When it is enabled,
-            // the zygote will be started when it is first needed in getProcess().
-            if (!enabled) {
-                stopZygoteLocked();
-            }
+            return sPackage != null;
         }
     }
 
     static void onWebViewProviderChanged(PackageInfo packageInfo) {
         synchronized (sLock) {
             sPackage = packageInfo;
-
-            // If multi-process is not enabled, then do not start the zygote service.
-            // Only check sMultiprocessEnabled if updateServiceV2 is not enabled.
-            if (!updateServiceV2() && !sMultiprocessEnabled) {
-                return;
-            }
-
             stopZygoteLocked();
         }
     }
@@ -141,12 +106,14 @@ public class WebViewZygote {
             String abi = sPackage.applicationInfo.primaryCpuAbi;
             int runtimeFlags = Zygote.getMemorySafetyRuntimeFlagsForSecondaryZygote(
                     sPackage.applicationInfo, null);
+            final int[] sharedAppGid = {
+                    UserHandle.getSharedAppGid(UserHandle.getAppId(sPackage.applicationInfo.uid)) };
             sZygote = Process.ZYGOTE_PROCESS.startChildZygote(
                     "com.android.internal.os.WebViewZygoteInit",
                     "webview_zygote",
                     Process.WEBVIEW_ZYGOTE_UID,
                     Process.WEBVIEW_ZYGOTE_UID,
-                    null,  // gids
+                    sharedAppGid,  // Access to shared app GID for ART profiles
                     runtimeFlags,
                     "webview_zygote",  // seInfo
                     abi,  // abi

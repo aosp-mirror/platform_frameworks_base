@@ -16,8 +16,8 @@
 
 package android.libcore;
 
-import androidx.benchmark.BenchmarkState;
-import androidx.benchmark.junit4.BenchmarkRule;
+import android.perftests.utils.BenchmarkState;
+import android.perftests.utils.PerfStatusReporter;
 
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -41,9 +41,7 @@ import java.util.Random;
 @RunWith(AndroidJUnit4.class)
 @LargeTest
 public class SmallBigIntegerPerfTest {
-    @Rule
-    public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
-
+    @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
     // We allocate about 2 1/3 BigIntegers per iteration.
     // Assuming 100 bytes/BigInteger, this gives us around 500MB total.
     static final BigInteger BIG_THREE = BigInteger.valueOf(3);
@@ -53,7 +51,7 @@ public class SmallBigIntegerPerfTest {
     public void testSmallBigInteger() {
         final Random r = new Random();
         BigInteger x = new BigInteger(20, r);
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             // We know this converges, but the compiler doesn't.
             if (x.and(BigInteger.ONE).equals(BigInteger.ONE)) {

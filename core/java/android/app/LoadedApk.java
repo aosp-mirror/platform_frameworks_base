@@ -1478,7 +1478,7 @@ public final class LoadedApk {
                         + " package " + mPackageName + ": " + e.toString(), e);
                 }
             }
-            mActivityThread.mAllApplications.add(app);
+            mActivityThread.addApplication(app);
             mApplication = app;
             if (!allowDuplicateInstances) {
                 synchronized (sApplications) {
@@ -1624,6 +1624,18 @@ public final class LoadedApk {
             }
             rd.mForgotten = false;
             return rd.getIIntentReceiver();
+        }
+    }
+
+    IIntentReceiver findRegisteredReceiverDispatcher(BroadcastReceiver r, Context context) {
+        synchronized (mReceivers) {
+            final ArrayMap<BroadcastReceiver, LoadedApk.ReceiverDispatcher> map =
+                    mReceivers.get(context);
+            if (map != null) {
+                final LoadedApk.ReceiverDispatcher rd = map.get(r);
+                return rd == null ? null : rd.getIIntentReceiver();
+            }
+            return null;
         }
     }
 

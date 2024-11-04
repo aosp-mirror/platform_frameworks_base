@@ -20,3 +20,13 @@ import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.util.mockito.mock
 
 var Kosmos.shadeViewController by Kosmos.Fixture { mock<ShadeViewController>() }
+
+val Kosmos.mockNotificationShadeWindowViewController by
+    Kosmos.Fixture { mock<NotificationShadeWindowViewController>() }
+
+var Kosmos.notificationShadeWindowViewController by
+    Kosmos.Fixture { mockNotificationShadeWindowViewController }
+
+val Kosmos.mockShadeSurface by Kosmos.Fixture { mock<ShadeSurface>() }
+
+var Kosmos.shadeSurface by Kosmos.Fixture { mockShadeSurface }

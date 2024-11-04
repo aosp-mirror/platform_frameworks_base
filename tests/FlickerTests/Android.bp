@@ -31,7 +31,7 @@ java_defaults {
         enabled: false,
     },
     test_suites: ["device-tests"],
-    libs: ["android.test.runner"],
+    libs: ["android.test.runner.stubs.system"],
     static_libs: [
         "androidx.test.ext.junit",
         "flickertestapplib",
@@ -47,7 +47,6 @@ java_defaults {
 
 java_library {
     name: "wm-flicker-common-assertions",
-    platform_apis: true,
     optimize: {
         enabled: false,
     },

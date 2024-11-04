@@ -27,12 +27,15 @@ import com.android.app.tracing.coroutines.traceCoroutine
 import com.android.systemui.authentication.domain.interactor.AuthenticationInteractor
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.authentication.shared.model.AuthenticationWipeModel
+import com.android.systemui.authentication.shared.model.BouncerInputSide
 import com.android.systemui.bouncer.domain.interactor.BouncerActionButtonInteractor
 import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
 import com.android.systemui.bouncer.shared.model.BouncerActionButtonModel
+import com.android.systemui.bouncer.ui.helper.BouncerHapticPlayer
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.shared.model.Text
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.keyguard.domain.interactor.KeyguardMediaKeyInteractor
 import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.user.ui.viewmodel.UserSwitcherViewModel
 import dagger.assisted.AssistedFactory
@@ -45,7 +48,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /** Models UI state for the content of the bouncer scene. */
 class BouncerSceneContentViewModel
@@ -61,6 +64,9 @@ constructor(
     private val pinViewModelFactory: PinBouncerViewModel.Factory,
     private val patternViewModelFactory: PatternBouncerViewModel.Factory,
     private val passwordViewModelFactory: PasswordBouncerViewModel.Factory,
+    private val bouncerHapticPlayer: BouncerHapticPlayer,
+    private val keyguardMediaKeyInteractor: KeyguardMediaKeyInteractor,
+    private val bouncerActionButtonInteractor: BouncerActionButtonInteractor,
 ) : ExclusiveActivatable() {
     private val _selectedUserImage = MutableStateFlow<Bitmap?>(null)
     val selectedUserImage: StateFlow<Bitmap?> = _selectedUserImage.asStateFlow()
@@ -72,8 +78,8 @@ constructor(
     val userSwitcherDropdown: StateFlow<List<UserSwitcherDropdownItemViewModel>> =
         _userSwitcherDropdown.asStateFlow()
 
-    val isUserSwitcherVisible: Boolean
-        get() = bouncerInteractor.isUserSwitcherVisible
+    private val _isUserSwitcherVisible = MutableStateFlow(false)
+    val isUserSwitcherVisible: StateFlow<Boolean> = _isUserSwitcherVisible.asStateFlow()
 
     /** View-model for the current UI, based on the current authentication method. */
     private val _authMethodViewModel = MutableStateFlow<AuthMethodBouncerViewModel?>(null)
@@ -113,17 +119,19 @@ constructor(
      */
     val actionButton: StateFlow<BouncerActionButtonModel?> = _actionButton.asStateFlow()
 
-    private val _isSideBySideSupported =
-        MutableStateFlow(isSideBySideSupported(authMethodViewModel.value))
+    private val _isOneHandedModeSupported = MutableStateFlow(false)
     /**
-     * Whether the "side-by-side" layout is supported.
+     * Whether the one-handed mode is supported.
      *
      * When presented on its own, without a user switcher (e.g. not on communal devices like
      * tablets, for example), some authentication method UIs don't do well if they're shown in the
      * side-by-side layout; these need to be shown with the standard layout so they can take up as
      * much width as possible.
      */
-    val isSideBySideSupported: StateFlow<Boolean> = _isSideBySideSupported.asStateFlow()
+    val isOneHandedModeSupported: StateFlow<Boolean> = _isOneHandedModeSupported.asStateFlow()
+
+    private val _isInputPreferredOnLeftSide = MutableStateFlow(false)
+    val isInputPreferredOnLeftSide = _isInputPreferredOnLeftSide.asStateFlow()
 
     private val _isFoldSplitRequired =
         MutableStateFlow(isFoldSplitRequired(authMethodViewModel.value))
@@ -133,11 +141,15 @@ constructor(
      */
     val isFoldSplitRequired: StateFlow<Boolean> = _isFoldSplitRequired.asStateFlow()
 
+    /** How much the bouncer UI should be scaled. */
+    val scale: StateFlow<Float> = bouncerInteractor.scale
+
     private val _isInputEnabled =
         MutableStateFlow(authenticationInteractor.lockoutEndTimestamp == null)
     private val isInputEnabled: StateFlow<Boolean> = _isInputEnabled.asStateFlow()
 
     override suspend fun onActivated(): Nothing {
+        bouncerInteractor.resetScale()
         coroutineScope {
             launch { message.activate() }
             launch {
@@ -162,10 +174,7 @@ constructor(
             }
 
             launch {
-                combine(
-                        userSwitcher.users,
-                        userSwitcher.menu,
-                    ) { users, actions ->
+                combine(userSwitcher.users, userSwitcher.menu) { users, actions ->
                         users.map { user ->
                             UserSwitcherDropdownItemViewModel(
                                 icon = Icon.Loaded(user.image, contentDescription = null),
@@ -176,9 +185,11 @@ constructor(
                             actions.map { action ->
                                 UserSwitcherDropdownItemViewModel(
                                     icon =
-                                        Icon.Resource(
-                                            action.iconResourceId,
-                                            contentDescription = null
+                                        Icon.Loaded(
+                                            applicationContext.resources.getDrawable(
+                                                action.iconResourceId
+                                            ),
+                                            contentDescription = null,
                                         ),
                                     text = Text.Resource(action.textResourceId),
                                     onClick = action.onClicked,
@@ -196,9 +207,41 @@ constructor(
             launch { actionButtonInteractor.actionButton.collect { _actionButton.value = it } }
 
             launch {
-                authMethodViewModel
-                    .map { authMethod -> isSideBySideSupported(authMethod) }
-                    .collect { _isSideBySideSupported.value = it }
+                combine(
+                        bouncerInteractor.isOneHandedModeSupported,
+                        bouncerInteractor.lastRecordedLockscreenTouchPosition,
+                        ::Pair,
+                    )
+                    .collect { (isOneHandedModeSupported, lastRecordedNotificationTouchPosition) ->
+                        _isOneHandedModeSupported.value = isOneHandedModeSupported
+                        if (
+                            isOneHandedModeSupported &&
+                                lastRecordedNotificationTouchPosition != null
+                        ) {
+                            bouncerInteractor.setPreferredBouncerInputSide(
+                                if (
+                                    lastRecordedNotificationTouchPosition <
+                                        applicationContext.resources.displayMetrics.widthPixels / 2
+                                ) {
+                                    BouncerInputSide.LEFT
+                                } else {
+                                    BouncerInputSide.RIGHT
+                                }
+                            )
+                        }
+                    }
+            }
+
+            launch {
+                bouncerInteractor.isUserSwitcherVisible.collect {
+                    _isUserSwitcherVisible.value = it
+                }
+            }
+
+            launch {
+                bouncerInteractor.preferredBouncerInputSide.collect {
+                    _isInputPreferredOnLeftSide.value = it == BouncerInputSide.LEFT
+                }
             }
 
             launch {
@@ -217,16 +260,12 @@ constructor(
         }
     }
 
-    private fun isSideBySideSupported(authMethod: AuthMethodBouncerViewModel?): Boolean {
-        return isUserSwitcherVisible || authMethod !is PasswordBouncerViewModel
-    }
-
     private fun isFoldSplitRequired(authMethod: AuthMethodBouncerViewModel?): Boolean {
         return authMethod !is PasswordBouncerViewModel
     }
 
     private fun getChildViewModel(
-        authenticationMethod: AuthenticationMethodModel,
+        authenticationMethod: AuthenticationMethodModel
     ): AuthMethodBouncerViewModel? {
         // If the current child view-model matches the authentication method, reuse it instead of
         // creating a new instance.
@@ -241,12 +280,14 @@ constructor(
                     authenticationMethod = authenticationMethod,
                     onIntentionalUserInput = ::onIntentionalUserInput,
                     isInputEnabled = isInputEnabled,
+                    bouncerHapticPlayer = bouncerHapticPlayer,
                 )
             is AuthenticationMethodModel.Sim ->
                 pinViewModelFactory.create(
                     authenticationMethod = authenticationMethod,
                     onIntentionalUserInput = ::onIntentionalUserInput,
                     isInputEnabled = isInputEnabled,
+                    bouncerHapticPlayer = bouncerHapticPlayer,
                 )
             is AuthenticationMethodModel.Password ->
                 passwordViewModelFactory.create(
@@ -257,6 +298,7 @@ constructor(
                 patternViewModelFactory.create(
                     onIntentionalUserInput = ::onIntentionalUserInput,
                     isInputEnabled = isInputEnabled,
+                    bouncerHapticPlayer = bouncerHapticPlayer,
                 )
             else -> null
         }
@@ -317,10 +359,7 @@ constructor(
         return when {
             // The wipe dialog takes priority over the lockout dialog.
             wipeText != null ->
-                DialogViewModel(
-                    text = wipeText,
-                    onDismiss = { wipeDialogMessage.value = null },
-                )
+                DialogViewModel(text = wipeText, onDismiss = { wipeDialogMessage.value = null })
             lockoutText != null ->
                 DialogViewModel(
                     text = lockoutText,
@@ -331,15 +370,55 @@ constructor(
     }
 
     /**
+     * Notifies that double tap gesture was detected on the bouncer.
+     * [wasEventOnNonInputHalfOfScreen] is true when it happens on the side of the bouncer where the
+     * input UI is not present.
+     */
+    fun onDoubleTap(wasEventOnNonInputHalfOfScreen: Boolean) {
+        if (!wasEventOnNonInputHalfOfScreen) return
+        if (_isInputPreferredOnLeftSide.value) {
+            bouncerInteractor.setPreferredBouncerInputSide(BouncerInputSide.RIGHT)
+        } else {
+            bouncerInteractor.setPreferredBouncerInputSide(BouncerInputSide.LEFT)
+        }
+    }
+
+    /**
+     * Notifies that onDown was detected on the bouncer. [wasEventOnNonInputHalfOfScreen] is true
+     * when it happens on the side of the bouncer where the input UI is not present.
+     */
+    fun onDown(wasEventOnNonInputHalfOfScreen: Boolean) {
+        if (!wasEventOnNonInputHalfOfScreen) return
+        bouncerInteractor.onDown()
+    }
+
+    /**
      * Notifies that a key event has occurred.
      *
      * @return `true` when the [KeyEvent] was consumed as user input on bouncer; `false` otherwise.
      */
     fun onKeyEvent(keyEvent: KeyEvent): Boolean {
-        return (authMethodViewModel.value as? PinBouncerViewModel)?.onKeyEvent(
-            keyEvent.type,
-            keyEvent.nativeKeyEvent.keyCode
-        ) ?: false
+        if (keyguardMediaKeyInteractor.processMediaKeyEvent(keyEvent.nativeKeyEvent)) return true
+        return authMethodViewModel.value?.onKeyEvent(keyEvent.type, keyEvent.nativeKeyEvent.keyCode)
+            ?: false
+    }
+
+    fun onActionButtonClicked(actionButtonModel: BouncerActionButtonModel) {
+        when (actionButtonModel) {
+            is BouncerActionButtonModel.EmergencyButtonModel -> {
+                bouncerHapticPlayer.playEmergencyButtonClickFeedback()
+                bouncerActionButtonInteractor.onEmergencyButtonClicked()
+            }
+            is BouncerActionButtonModel.ReturnToCallButtonModel -> {
+                bouncerActionButtonInteractor.onReturnToCallButtonClicked()
+            }
+        }
+    }
+
+    fun onActionButtonLongClicked(actionButtonModel: BouncerActionButtonModel) {
+        if (actionButtonModel is BouncerActionButtonModel.EmergencyButtonModel) {
+            bouncerActionButtonInteractor.onEmergencyButtonLongClicked()
+        }
     }
 
     data class DialogViewModel(

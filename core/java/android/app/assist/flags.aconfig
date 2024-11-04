@@ -1,0 +1,13 @@
+package: "android.app.assist.flags"
+container: "system"
+
+flag {
+  name: "add_placeholder_view_for_null_child"
+  namespace: "machine_learning"
+  description: "Flag to add a placeholder view when a child view is null."
+  bug: "369503426"
+  is_fixed_read_only: true
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}

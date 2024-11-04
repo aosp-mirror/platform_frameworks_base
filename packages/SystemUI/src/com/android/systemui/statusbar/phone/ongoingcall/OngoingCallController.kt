@@ -52,13 +52,13 @@ import com.android.systemui.statusbar.notification.shared.CallType
 import com.android.systemui.statusbar.phone.ongoingcall.data.repository.OngoingCallRepository
 import com.android.systemui.statusbar.phone.ongoingcall.shared.model.OngoingCallModel
 import com.android.systemui.statusbar.policy.CallbackController
-import com.android.systemui.statusbar.window.StatusBarWindowController
+import com.android.systemui.statusbar.window.StatusBarWindowControllerStore
 import com.android.systemui.util.time.SystemClock
 import java.io.PrintWriter
 import java.util.concurrent.Executor
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /** A controller to handle the ongoing call chip in the collapsed status bar. */
 @SysUISingleton
@@ -75,7 +75,7 @@ constructor(
     @Main private val mainExecutor: Executor,
     private val iActivityManager: IActivityManager,
     private val dumpManager: DumpManager,
-    private val statusBarWindowController: StatusBarWindowController,
+    private val statusBarWindowControllerStore: StatusBarWindowControllerStore,
     private val swipeStatusBarAwayGestureHandler: SwipeStatusBarAwayGestureHandler,
     private val statusBarModeRepository: StatusBarModeRepositoryStore,
     @OngoingCallLog private val logger: LogBuffer,
@@ -205,7 +205,9 @@ constructor(
         this.chipView = chipView
         val backgroundView: ChipBackgroundContainer? =
             chipView.findViewById(R.id.ongoing_activity_chip_background)
-        backgroundView?.maxHeightFetcher = { statusBarWindowController.statusBarHeight }
+        backgroundView?.maxHeightFetcher = {
+            statusBarWindowControllerStore.defaultDisplay.statusBarHeight
+        }
         if (hasOngoingCall()) {
             updateChip()
         }
@@ -339,7 +341,8 @@ constructor(
             // But, this class still needs to do the non-display logic regardless of the flag.
             uidObserver.registerWithUid(currentCallNotificationInfo.uid)
             if (!currentCallNotificationInfo.statusBarSwipedAway) {
-                statusBarWindowController.setOngoingProcessRequiresStatusBarVisible(true)
+                statusBarWindowControllerStore.defaultDisplay
+                    .setOngoingProcessRequiresStatusBarVisible(true)
             }
             updateGestureListening()
             sendStateChangeEvent()
@@ -405,7 +408,9 @@ constructor(
         if (!Flags.statusBarScreenSharingChips()) {
             tearDownChipView()
         }
-        statusBarWindowController.setOngoingProcessRequiresStatusBarVisible(false)
+        statusBarWindowControllerStore.defaultDisplay.setOngoingProcessRequiresStatusBarVisible(
+            false
+        )
         swipeStatusBarAwayGestureHandler.removeOnGestureDetectedCallback(TAG)
         sendStateChangeEvent()
         uidObserver.unregister()
@@ -429,7 +434,9 @@ constructor(
     private fun onSwipeAwayGestureDetected() {
         logger.log(TAG, LogLevel.DEBUG, {}, { "Swipe away gesture detected" })
         callNotificationInfo = callNotificationInfo?.copy(statusBarSwipedAway = true)
-        statusBarWindowController.setOngoingProcessRequiresStatusBarVisible(false)
+        statusBarWindowControllerStore.defaultDisplay.setOngoingProcessRequiresStatusBarVisible(
+            false
+        )
         swipeStatusBarAwayGestureHandler.removeOnGestureDetectedCallback(TAG)
     }
 

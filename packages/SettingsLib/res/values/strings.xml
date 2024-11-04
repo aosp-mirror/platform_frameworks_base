@@ -819,6 +819,11 @@
     <!-- Summary of checkbox setting that enables the terminal app. [CHAR LIMIT=64] -->
     <string name="enable_terminal_summary">Enable terminal app that offers local shell access</string>
 
+    <!-- Title of checkbox setting that enables the Linux terminal app. [CHAR LIMIT=32] -->
+    <string name="enable_linux_terminal_title">Linux development environment</string>
+    <!-- Summary of checkbox setting that enables the Linux terminal app. [CHAR LIMIT=64] -->
+    <string name="enable_linux_terminal_summary">Run Linux terminal on Android</string>
+
     <!-- HDCP checking title, used for debug purposes only. [CHAR LIMIT=25] -->
     <string name="hdcp_checking_title">HDCP checking</string>
     <!-- HDCP checking dialog title, used for debug purposes only. [CHAR LIMIT=25] -->
@@ -1409,6 +1414,8 @@
     <string name="media_transfer_this_device_name">This phone</string>
     <!-- Name of the tablet device. [CHAR LIMIT=30] -->
     <string name="media_transfer_this_device_name_tablet">This tablet</string>
+    <!-- Name of the internal speaker and mic. [CHAR LIMIT=30] -->
+    <string name="media_transfer_this_device_name_desktop">This computer (internal)</string>
     <!-- Name of the default media output of the TV. [CHAR LIMIT=30] -->
     <string name="media_transfer_this_device_name_tv">@string/tv_media_transfer_default</string>
     <!-- Name of the dock device. [CHAR LIMIT=30] -->
@@ -1635,7 +1642,22 @@
     <string name="cached_apps_freezer_reboot_dialog_text">Your device must be rebooted for this change to apply. Reboot now or cancel.</string>
 
     <!-- Name of the 3.5mm and usb audio device. [CHAR LIMIT=50] -->
-    <string name="media_transfer_wired_usb_device_name">Wired headphone</string>
+    <string name="media_transfer_wired_headphone_name">Wired headphone</string>
+
+    <!-- Name of the 3.5mm headphone, used in desktop devices. [CHAR LIMIT=50] -->
+    <string name="media_transfer_headphone_name">Wired audio</string>
+
+    <!-- Name of the usb audio device speaker, used in desktop devices. [CHAR LIMIT=50] -->
+    <string name="media_transfer_usb_audio_name">USB audio</string>
+
+    <!-- Name of the 3.5mm audio device mic. [CHAR LIMIT=50] -->
+    <string name="media_transfer_wired_device_mic_name">Wired microphone</string>
+
+    <!-- Name of the usb audio device mic. [CHAR LIMIT=50] -->
+    <string name="media_transfer_usb_device_mic_name">USB microphone</string>
+
+    <!-- Name of the bluetooth audio device mic. [CHAR LIMIT=50] -->
+    <string name="media_transfer_bt_device_mic_name">BT microphone</string>
 
     <!-- Label for Wifi hotspot switch on. Toggles hotspot on [CHAR LIMIT=30] -->
     <string name="wifi_hotspot_switch_on_text">On</string>

@@ -16,6 +16,8 @@
 
 package android.os;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
@@ -24,6 +26,7 @@ import static org.junit.Assert.assertTrue;
 
 import android.hardware.vibrator.Braking;
 import android.hardware.vibrator.IVibrator;
+import android.util.Range;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -39,12 +42,19 @@ public class VibratorInfoTest {
     private static final float TEST_FREQUENCY_RESOLUTION = 25;
     private static final float[] TEST_AMPLITUDE_MAP = new float[]{
             /* 50Hz= */ 0.1f, 0.2f, 0.4f, 0.8f, /* 150Hz= */ 1f, 0.9f, /* 200Hz= */ 0.8f};
+    private static final float[] TEST_FREQUENCIES =
+            new float[]{90f, 120f, 150f, 60f, 30f, 210f, 270f, 300f, 240f, 180f};
+    private static final float[] TEST_OUTPUT_ACCELERATIONS =
+            new float[]{1.2f, 1.8f, 2.4f, 0.6f, 0.1f, 2.2f, 1.0f, 0.5f, 1.9f, 3.0f};
 
-    private static final VibratorInfo.FrequencyProfile EMPTY_FREQUENCY_PROFILE =
-            new VibratorInfo.FrequencyProfile(Float.NaN, Float.NaN, Float.NaN, null);
-    private static final VibratorInfo.FrequencyProfile TEST_FREQUENCY_PROFILE =
-            new VibratorInfo.FrequencyProfile(TEST_RESONANT_FREQUENCY, TEST_MIN_FREQUENCY,
+    private static final VibratorInfo.FrequencyProfileLegacy EMPTY_FREQUENCY_PROFILE =
+            new VibratorInfo.FrequencyProfileLegacy(Float.NaN, Float.NaN, Float.NaN, null);
+    private static final VibratorInfo.FrequencyProfileLegacy TEST_FREQUENCY_PROFILE_LEGACY =
+            new VibratorInfo.FrequencyProfileLegacy(TEST_RESONANT_FREQUENCY, TEST_MIN_FREQUENCY,
                     TEST_FREQUENCY_RESOLUTION, TEST_AMPLITUDE_MAP);
+    private static final VibratorInfo.FrequencyProfile TEST_FREQUENCY_PROFILE =
+            new VibratorInfo.FrequencyProfile(TEST_RESONANT_FREQUENCY, TEST_FREQUENCIES,
+                    TEST_OUTPUT_ACCELERATIONS);
 
     @Test
     public void testHasAmplitudeControl() {
@@ -61,8 +71,7 @@ public class VibratorInfoTest {
         VibratorInfo noCapabilities = new VibratorInfo.Builder(TEST_VIBRATOR_ID).build();
         assertFalse(noCapabilities.hasFrequencyControl());
         VibratorInfo composeAndFrequencyControl = new VibratorInfo.Builder(TEST_VIBRATOR_ID)
-                .setCapabilities(
-                        IVibrator.CAP_FREQUENCY_CONTROL | IVibrator.CAP_COMPOSE_PWLE_EFFECTS)
+                .setCapabilities(IVibrator.CAP_FREQUENCY_CONTROL)
                 .build();
         assertTrue(composeAndFrequencyControl.hasFrequencyControl());
     }
@@ -139,6 +148,36 @@ public class VibratorInfoTest {
     }
 
     @Test
+    public void testAreEnvelopeEffectsSupported() {
+        VibratorInfo noCapabilities = new VibratorInfo.Builder(TEST_VIBRATOR_ID).build();
+        assertFalse(noCapabilities.areEnvelopeEffectsSupported());
+        VibratorInfo envelopeEffectCapability = new VibratorInfo.Builder(TEST_VIBRATOR_ID)
+                .setCapabilities(
+                        IVibrator.CAP_FREQUENCY_CONTROL | IVibrator.CAP_COMPOSE_PWLE_EFFECTS_V2)
+                .build();
+        assertTrue(envelopeEffectCapability.areEnvelopeEffectsSupported());
+    }
+
+    @Test
+    public void testEnvelopeEffectLimits() {
+        VibratorInfo info = new VibratorInfo.Builder(TEST_VIBRATOR_ID)
+                .setMaxEnvelopeEffectSize(16)
+                .setMinEnvelopeEffectControlPointDurationMillis(20)
+                .setMaxEnvelopeEffectControlPointDurationMillis(1_000)
+                .build();
+        assertEquals(16, info.getMaxEnvelopeEffectSize());
+        assertEquals(20, info.getMinEnvelopeEffectControlPointDurationMillis());
+        assertEquals(1_000, info.getMaxEnvelopeEffectControlPointDurationMillis());
+        assertEquals(16_000, info.getMaxEnvelopeEffectDurationMillis());
+
+        VibratorInfo emptyInfo = new VibratorInfo.Builder(TEST_VIBRATOR_ID).build();
+        assertEquals(0, emptyInfo.getMaxEnvelopeEffectSize());
+        assertEquals(0, emptyInfo.getMinEnvelopeEffectControlPointDurationMillis());
+        assertEquals(0, emptyInfo.getMaxEnvelopeEffectControlPointDurationMillis());
+        assertEquals(0, emptyInfo.getMaxEnvelopeEffectDurationMillis());
+    }
+
+    @Test
     public void testGetDefaultBraking_returnsFirstSupportedBraking() {
         assertEquals(Braking.NONE, new VibratorInfo.Builder(
                 TEST_VIBRATOR_ID).build().getDefaultBraking());
@@ -151,52 +190,166 @@ public class VibratorInfoTest {
 
     @Test
     public void testGetFrequencyProfile_unsetProfileIsEmpty() {
-        assertTrue(
-                new VibratorInfo.Builder(TEST_VIBRATOR_ID).build().getFrequencyProfile().isEmpty());
+        assertTrue(new VibratorInfo.Builder(
+                TEST_VIBRATOR_ID).build().getFrequencyProfile().isEmpty());
     }
 
     @Test
     public void testFrequencyProfile_invalidValuesCreatesEmptyProfile() {
-        // Invalid, contains NaN values or empty array.
-        assertTrue(new VibratorInfo.FrequencyProfile(
-                Float.NaN, 50, 25, TEST_AMPLITUDE_MAP).isEmpty());
-        assertTrue(new VibratorInfo.FrequencyProfile(
-                150, Float.NaN, 25, TEST_AMPLITUDE_MAP).isEmpty());
-        assertTrue(new VibratorInfo.FrequencyProfile(
-                150, 50, Float.NaN, TEST_AMPLITUDE_MAP).isEmpty());
-        assertTrue(new VibratorInfo.FrequencyProfile(150, 50, 25, null).isEmpty());
-        // Invalid, contains zero or negative frequency values.
-        assertTrue(new VibratorInfo.FrequencyProfile(-1, 50, 25, TEST_AMPLITUDE_MAP).isEmpty());
-        assertTrue(new VibratorInfo.FrequencyProfile(150, 0, 25, TEST_AMPLITUDE_MAP).isEmpty());
-        assertTrue(new VibratorInfo.FrequencyProfile(150, 50, -2, TEST_AMPLITUDE_MAP).isEmpty());
-        // Invalid max amplitude entries.
-        assertTrue(new VibratorInfo.FrequencyProfile(
-                150, 50, 50, new float[] { -1, 0, 1, 1, 0 }).isEmpty());
-        assertTrue(new VibratorInfo.FrequencyProfile(
-                150, 50, 50, new float[] { 0, 1, 2, 1, 0 }).isEmpty());
-        // Invalid, minFrequency > resonantFrequency
-        assertTrue(new VibratorInfo.FrequencyProfile(
-                /* resonantFrequencyHz= */ 150, /* minFrequencyHz= */ 250, 25, TEST_AMPLITUDE_MAP)
-                .isEmpty());
-        // Invalid, maxFrequency < resonantFrequency by changing resolution.
-        assertTrue(new VibratorInfo.FrequencyProfile(
-                150, 50, /* frequencyResolutionHz= */ 10, TEST_AMPLITUDE_MAP).isEmpty());
+        // Invalid resonant frequency.
+        assertThat(new VibratorInfo.FrequencyProfile(Float.NaN,
+                TEST_FREQUENCIES, TEST_OUTPUT_ACCELERATIONS).isEmpty()).isTrue();
+        assertThat(new VibratorInfo.FrequencyProfile(/*resonantFrequencyHz=*/-1f,
+                TEST_FREQUENCIES, TEST_OUTPUT_ACCELERATIONS).isEmpty()).isTrue();
+        // No frequency-acceleration data
+        assertThat(new VibratorInfo.FrequencyProfile(/*resonantFrequencyHz=*/150f,
+                /*frequenciesHz=*/ null, /*outputAccelerationsGs=*/ null).isEmpty()).isTrue();
+        // Mismatching frequency and output acceleration lists
+        assertThat(new VibratorInfo.FrequencyProfile(/*resonantFrequencyHz=*/150f,
+                /*frequenciesHz=*/ new float[]{30f, 40f, 50f, 100f},
+                /*outputAccelerationsGs=*/ new float[]{0.8f, 1.0f, 2.0f}).isEmpty()).isTrue();
+    }
+
+    @Test
+    public void testGetFrequenciesAndOutputAccelerations_noFrequencyAccelerationData_returnNull() {
+        VibratorInfo.FrequencyProfile emptyFrequencyProfile =
+                new VibratorInfo.FrequencyProfile(/*resonantFrequencyHz=*/150f,
+                        /*frequenciesHz=*/ null, /*outputAccelerationsGs=*/ null);
+        assertThat(emptyFrequencyProfile.getFrequenciesHz()).isNull();
+        assertThat(emptyFrequencyProfile.getOutputAccelerationsGs()).isNull();
+    }
+
+    @Test
+    public void testGetFrequenciesAndOutputAccelerations_mismatchingDataLength_returnNull() {
+        VibratorInfo.FrequencyProfile emptyFrequencyProfile =
+                new VibratorInfo.FrequencyProfile(/*resonantFrequencyHz=*/150f,
+                        /*frequenciesHz=*/ new float[]{150f, 200f},
+                        /*outputAccelerationsGs=*/ new float[]{1.2f, 2.2f, 3.0f});
+        assertThat(emptyFrequencyProfile.getFrequenciesHz()).isNull();
+        assertThat(emptyFrequencyProfile.getOutputAccelerationsGs()).isNull();
+    }
+
+    @Test
+    public void testGetFrequenciesAndOutputAccelerations_dataIsDedupedAndSorted() {
+        VibratorInfo.FrequencyProfile frequencyProfile =
+                new VibratorInfo.FrequencyProfile(/*resonantFrequencyHz=*/150f,
+                        /*frequenciesHz=*/ new float[]{150f, 150f, 150f, 130f, 200f, 160f},
+                        /*outputAccelerationsGs=*/ new float[]{1.2f, 1.5f, 1.9f, 1.0f, 2.2f, 3.0f});
+        float[] frequencies = frequencyProfile.getFrequenciesHz();
+        assertThat(frequencies).isEqualTo(
+                new float[]{130f, 150f, 160f, 200f});
+        assertThat(frequencyProfile.getOutputAccelerationsGs()).isEqualTo(
+                new float[]{1.0f, 1.2f, 3.0f, 2.2f});
     }
 
     @Test
     public void testGetFrequencyRangeHz_emptyProfileReturnsNull() {
-        assertNull(new VibratorInfo.FrequencyProfile(
-                Float.NaN, 50, 25, TEST_AMPLITUDE_MAP).getFrequencyRangeHz());
-        assertNull(new VibratorInfo.FrequencyProfile(
-                150, Float.NaN, 25, TEST_AMPLITUDE_MAP).getFrequencyRangeHz());
-        assertNull(new VibratorInfo.FrequencyProfile(
-                150, 50, Float.NaN, TEST_AMPLITUDE_MAP).getFrequencyRangeHz());
-        assertNull(new VibratorInfo.FrequencyProfile(150, 50, 25, null).getFrequencyRangeHz());
+        VibratorInfo.FrequencyProfile emptyFrequencyProfile =
+                new VibratorInfo.FrequencyProfile(/*resonantFrequencyHz=*/150f,
+                        /*frequenciesHz=*/ null, /*outputAccelerationsGs=*/ null);
+        assertThat(
+                emptyFrequencyProfile.getFrequencyRangeHz(/*minOutputAcceleration=*/0.2f)).isNull();
     }
 
     @Test
     public void testGetFrequencyRangeHz_validProfileReturnsMappedValues() {
-        VibratorInfo.FrequencyProfile profile = new VibratorInfo.FrequencyProfile(
+        VibratorInfo.FrequencyProfile frequencyProfile =
+                new VibratorInfo.FrequencyProfile(/*resonantFrequencyHz=*/150f,
+                /*frequenciesHz=*/new float[]{90f, 120f, 150f, 60f, 30f, 210f, 180f},
+                /*outputAccelerationsGs=*/ new float[]{1.2f, 1.8f, 2.4f, 0.6f, 0.4f, 2.2f, 3.0f});
+
+        // lower and upper bounds are min and max frequencies
+        assertThat(frequencyProfile.getFrequencyRangeHz(/*minOutputAcceleration=*/0.33f)).isEqualTo(
+                new Range<>(frequencyProfile.getMinFrequencyHz(),
+                        frequencyProfile.getMaxFrequencyHz()));
+
+        // lower and upper bounds are within frequency range and use interpolation
+        assertThat(frequencyProfile.getFrequencyRangeHz(/*minOutputAcceleration=*/2.6f))
+                .isEqualTo(new Range<>(160f, 195f));
+
+        // upper bound is max frequency
+        assertThat(frequencyProfile.getFrequencyRangeHz(/*minOutputAcceleration=*/2.0f))
+                .isEqualTo(new Range<>(130f, frequencyProfile.getMaxFrequencyHz()));
+    }
+
+    @Test
+    public void testFrequencyProfile_emptyProfileReturnsNanValues() {
+        VibratorInfo.FrequencyProfile frequencyProfile = new VibratorInfo.FrequencyProfile(
+                /*resonantFrequencyHz=*/150f, /*frequenciesHz=*/ null,
+                /*outputAccelerationsGs=*/ null);
+
+        assertThat(frequencyProfile.getMaxOutputAccelerationGs()).isNaN();
+        assertThat(frequencyProfile.getMinFrequencyHz()).isNaN();
+        assertThat(frequencyProfile.getMaxFrequencyHz()).isNaN();
+        assertThat(frequencyProfile.getOutputAccelerationGs(/*frequencyHz=*/150f)).isNaN();
+    }
+
+    @Test
+    public void testFrequencyProfile_validProfileReturnsAppropriateValues() {
+        VibratorInfo.FrequencyProfile frequencyProfile = new VibratorInfo.FrequencyProfile(
+                /*resonantFrequencyHz=*/150f, TEST_FREQUENCIES, TEST_OUTPUT_ACCELERATIONS);
+
+        assertThat(frequencyProfile.getMaxOutputAccelerationGs()).isEqualTo(3f);
+        assertThat(frequencyProfile.getMinFrequencyHz()).isEqualTo(30f);
+        assertThat(frequencyProfile.getMaxFrequencyHz()).isEqualTo(300f);
+        assertThat(frequencyProfile.getOutputAccelerationGs(/*frequencyHz=*/150f)).isEqualTo(2.4f);
+        // Test getting output acceleration using linear interpolation
+        assertThat(frequencyProfile.getOutputAccelerationGs(/*frequencyHz=*/166f)).isEqualTo(
+                2.72f);
+    }
+
+    @Test
+    public void testGetFrequencyProfileLegacy_unsetProfileIsEmpty() {
+        assertTrue(new VibratorInfo.Builder(
+                TEST_VIBRATOR_ID).build().getFrequencyProfileLegacy().isEmpty());
+    }
+
+    @Test
+    public void testFrequencyProfileLegacy_invalidValuesCreatesEmptyProfile() {
+        // Invalid, contains NaN values or empty array.
+        assertTrue(new VibratorInfo.FrequencyProfileLegacy(
+                Float.NaN, 50, 25, TEST_AMPLITUDE_MAP).isEmpty());
+        assertTrue(new VibratorInfo.FrequencyProfileLegacy(
+                150, Float.NaN, 25, TEST_AMPLITUDE_MAP).isEmpty());
+        assertTrue(new VibratorInfo.FrequencyProfileLegacy(
+                150, 50, Float.NaN, TEST_AMPLITUDE_MAP).isEmpty());
+        assertTrue(new VibratorInfo.FrequencyProfileLegacy(150, 50, 25, null).isEmpty());
+        // Invalid, contains zero or negative frequency values.
+        assertTrue(
+                new VibratorInfo.FrequencyProfileLegacy(-1, 50, 25, TEST_AMPLITUDE_MAP).isEmpty());
+        assertTrue(
+                new VibratorInfo.FrequencyProfileLegacy(150, 0, 25, TEST_AMPLITUDE_MAP).isEmpty());
+        assertTrue(
+                new VibratorInfo.FrequencyProfileLegacy(150, 50, -2, TEST_AMPLITUDE_MAP).isEmpty());
+        // Invalid max amplitude entries.
+        assertTrue(new VibratorInfo.FrequencyProfileLegacy(
+                150, 50, 50, new float[] { -1, 0, 1, 1, 0 }).isEmpty());
+        assertTrue(new VibratorInfo.FrequencyProfileLegacy(
+                150, 50, 50, new float[] { 0, 1, 2, 1, 0 }).isEmpty());
+        // Invalid, minFrequency > resonantFrequency
+        assertTrue(new VibratorInfo.FrequencyProfileLegacy(
+                /* resonantFrequencyHz= */ 150, /* minFrequencyHz= */ 250, 25, TEST_AMPLITUDE_MAP)
+                .isEmpty());
+        // Invalid, maxFrequency < resonantFrequency by changing resolution.
+        assertTrue(new VibratorInfo.FrequencyProfileLegacy(
+                150, 50, /* frequencyResolutionHz= */ 10, TEST_AMPLITUDE_MAP).isEmpty());
+    }
+
+    @Test
+    public void testLegacyGetFrequencyRangeHz_emptyProfileReturnsNull() {
+        assertNull(new VibratorInfo.FrequencyProfileLegacy(
+                Float.NaN, 50, 25, TEST_AMPLITUDE_MAP).getFrequencyRangeHz());
+        assertNull(new VibratorInfo.FrequencyProfileLegacy(
+                150, Float.NaN, 25, TEST_AMPLITUDE_MAP).getFrequencyRangeHz());
+        assertNull(new VibratorInfo.FrequencyProfileLegacy(
+                150, 50, Float.NaN, TEST_AMPLITUDE_MAP).getFrequencyRangeHz());
+        assertNull(
+                new VibratorInfo.FrequencyProfileLegacy(150, 50, 25, null).getFrequencyRangeHz());
+    }
+
+    @Test
+    public void testLegacyGetFrequencyRangeHz_validProfileReturnsMappedValues() {
+        VibratorInfo.FrequencyProfileLegacy profile = new VibratorInfo.FrequencyProfileLegacy(
                 /* resonantFrequencyHz= */ 150,
                 /* minFrequencyHz= */ 50,
                 /* frequencyResolutionHz= */ 25,
@@ -210,12 +363,12 @@ public class VibratorInfoTest {
 
     @Test
     public void testGetMaxAmplitude_emptyProfileReturnsAlwaysZero() {
-        VibratorInfo.FrequencyProfile profile = EMPTY_FREQUENCY_PROFILE;
+        VibratorInfo.FrequencyProfileLegacy profile = EMPTY_FREQUENCY_PROFILE;
         assertEquals(0f, profile.getMaxAmplitude(Float.NaN), TEST_TOLERANCE);
         assertEquals(0f, profile.getMaxAmplitude(100f), TEST_TOLERANCE);
         assertEquals(0f, profile.getMaxAmplitude(200f), TEST_TOLERANCE);
 
-        profile = new VibratorInfo.FrequencyProfile(
+        profile = new VibratorInfo.FrequencyProfileLegacy(
                         /* resonantFrequencyHz= */ 150,
                         /* minFrequencyHz= */ Float.NaN,
                         /* frequencyResolutionHz= */ Float.NaN,
@@ -228,7 +381,7 @@ public class VibratorInfoTest {
 
     @Test
     public void testGetMaxAmplitude_validProfileReturnsMappedValues() {
-        VibratorInfo.FrequencyProfile profile = new VibratorInfo.FrequencyProfile(
+        VibratorInfo.FrequencyProfileLegacy profile = new VibratorInfo.FrequencyProfileLegacy(
                         /* resonantFrequencyHz= */ 150,
                         /* minFrequencyHz= */ 50,
                         /* frequencyResolutionHz= */ 25,
@@ -262,17 +415,21 @@ public class VibratorInfoTest {
         VibratorInfo.Builder completeBuilder2 = new VibratorInfo.Builder(TEST_VIBRATOR_ID + 2);
 
         for (VibratorInfo.Builder builder :
-                new VibratorInfo.Builder[] {completeBuilder, completeBuilder2}) {
+                new VibratorInfo.Builder[]{completeBuilder, completeBuilder2}) {
             builder.setCapabilities(IVibrator.CAP_AMPLITUDE_CONTROL)
-                .setSupportedEffects(VibrationEffect.EFFECT_CLICK)
-                .setSupportedPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 20)
-                .setPrimitiveDelayMax(100)
-                .setCompositionSizeMax(10)
-                .setSupportedBraking(Braking.CLAB)
-                .setPwlePrimitiveDurationMax(50)
-                .setPwleSizeMax(20)
-                .setQFactor(2f)
-                .setFrequencyProfile(TEST_FREQUENCY_PROFILE);
+                    .setSupportedEffects(VibrationEffect.EFFECT_CLICK)
+                    .setSupportedPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 20)
+                    .setPrimitiveDelayMax(100)
+                    .setCompositionSizeMax(10)
+                    .setSupportedBraking(Braking.CLAB)
+                    .setPwlePrimitiveDurationMax(50)
+                    .setPwleSizeMax(20)
+                    .setQFactor(2f)
+                    .setFrequencyProfileLegacy(TEST_FREQUENCY_PROFILE_LEGACY)
+                    .setFrequencyProfile(TEST_FREQUENCY_PROFILE)
+                    .setMaxEnvelopeEffectSize(16)
+                    .setMinEnvelopeEffectControlPointDurationMillis(20)
+                    .setMaxEnvelopeEffectControlPointDurationMillis(1_000);
         }
         VibratorInfo complete = completeBuilder.build();
 
@@ -311,18 +468,33 @@ public class VibratorInfoTest {
         assertNotEquals(complete, completeWithDifferentPrimitiveDuration);
         assertFalse(complete.equalContent(completeWithDifferentPrimitiveDuration));
 
-        VibratorInfo completeWithDifferentFrequencyProfile = completeBuilder
-                .setFrequencyProfile(new VibratorInfo.FrequencyProfile(
+        VibratorInfo completeWithDifferentFrequencyProfileLegacy = completeBuilder
+                .setFrequencyProfileLegacy(new VibratorInfo.FrequencyProfileLegacy(
                         TEST_RESONANT_FREQUENCY + 20,
                         TEST_MIN_FREQUENCY + 10,
                         TEST_FREQUENCY_RESOLUTION + 5,
                         TEST_AMPLITUDE_MAP))
                 .build();
+        assertNotEquals(complete, completeWithDifferentFrequencyProfileLegacy);
+        assertFalse(complete.equalContent(completeWithDifferentFrequencyProfileLegacy));
+
+        VibratorInfo completeWithEmptyFrequencyProfileLegacy = completeBuilder
+                .setFrequencyProfileLegacy(EMPTY_FREQUENCY_PROFILE)
+                .build();
+        assertNotEquals(complete, completeWithEmptyFrequencyProfileLegacy);
+        assertFalse(complete.equalContent(completeWithEmptyFrequencyProfileLegacy));
+
+        VibratorInfo completeWithDifferentFrequencyProfile = completeBuilder
+                .setFrequencyProfile(
+                        new VibratorInfo.FrequencyProfile(TEST_RESONANT_FREQUENCY + 20,
+                                new float[]{90f, 150f}, new float[]{1.2f, 2.2f}))
+                .build();
         assertNotEquals(complete, completeWithDifferentFrequencyProfile);
         assertFalse(complete.equalContent(completeWithDifferentFrequencyProfile));
 
         VibratorInfo completeWithEmptyFrequencyProfile = completeBuilder
-                .setFrequencyProfile(EMPTY_FREQUENCY_PROFILE)
+                .setFrequencyProfile(
+                        new VibratorInfo.FrequencyProfile(Float.NaN, null, null))
                 .build();
         assertNotEquals(complete, completeWithEmptyFrequencyProfile);
         assertFalse(complete.equalContent(completeWithEmptyFrequencyProfile));
@@ -359,6 +531,7 @@ public class VibratorInfoTest {
                 .setSupportedEffects(VibrationEffect.EFFECT_CLICK)
                 .setSupportedPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 20)
                 .setQFactor(Float.NaN)
+                .setFrequencyProfileLegacy(TEST_FREQUENCY_PROFILE_LEGACY)
                 .setFrequencyProfile(TEST_FREQUENCY_PROFILE)
                 .build();
 

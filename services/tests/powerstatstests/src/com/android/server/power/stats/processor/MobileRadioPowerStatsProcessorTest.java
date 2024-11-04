@@ -182,6 +182,7 @@ public class MobileRadioPowerStatsProcessorTest {
         PowerComponentAggregatedPowerStats aggregatedStats = new AggregatedPowerStats(config)
                 .getPowerComponentStats(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO);
 
+        aggregatedStats.start(0);
         aggregatedStats.setState(STATE_POWER, POWER_STATE_OTHER, 0);
         aggregatedStats.setState(STATE_SCREEN, SCREEN_STATE_ON, 0);
         aggregatedStats.setUidState(APP_UID, STATE_PROCESS_STATE, PROCESS_STATE_FOREGROUND, 0);
@@ -419,6 +420,7 @@ public class MobileRadioPowerStatsProcessorTest {
         PowerComponentAggregatedPowerStats aggregatedStats = new AggregatedPowerStats(config)
                 .getPowerComponentStats(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO);
 
+        aggregatedStats.start(0);
         aggregatedStats.setState(STATE_POWER, POWER_STATE_OTHER, 0);
         aggregatedStats.setState(STATE_SCREEN, SCREEN_STATE_ON, 0);
         aggregatedStats.setUidState(APP_UID, STATE_PROCESS_STATE, PROCESS_STATE_FOREGROUND, 0);

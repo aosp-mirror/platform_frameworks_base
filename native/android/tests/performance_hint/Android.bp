@@ -36,10 +36,13 @@ cc_test {
     srcs: ["PerformanceHintNativeTest.cpp"],
 
     shared_libs: [
+        "android.hardware.common.fmq-V1-ndk",
         "libandroid",
-        "liblog",
         "libbinder",
         "libbinder_ndk",
+        "libcutils",
+        "libfmq",
+        "liblog",
         "libpowermanager",
         "libutils",
     ],
@@ -56,8 +59,8 @@ cc_test {
     ],
 
     cflags: [
-        "-Werror",
         "-Wall",
+        "-Werror",
     ],
 
     header_libs: [

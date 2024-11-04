@@ -12,7 +12,7 @@ android_test {
     srcs: ["**/*.java"],
     libs: [
         "android.test.runner.stubs",
-        "org.apache.http.legacy",
+        "org.apache.http.legacy.stubs",
         "android.test.base.stubs",
     ],
     sdk_version: "current",

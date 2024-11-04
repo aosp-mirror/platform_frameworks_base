@@ -47,6 +47,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.android.settingslib.media.InputMediaDevice;
 import com.android.settingslib.media.MediaDevice;
 import com.android.settingslib.utils.ThreadUtils;
 import com.android.systemui.res.R;
@@ -63,7 +64,7 @@ public abstract class MediaOutputBaseAdapter extends
     static final int CUSTOMIZED_ITEM_GROUP = 2;
     static final int CUSTOMIZED_ITEM_DYNAMIC_GROUP = 3;
 
-    protected final MediaOutputController mController;
+    protected final MediaSwitchingController mController;
 
     private static final int UNMUTE_DEFAULT_VOLUME = 2;
 
@@ -73,7 +74,7 @@ public abstract class MediaOutputBaseAdapter extends
     int mCurrentActivePosition;
     private boolean mIsInitVolumeFirstTime;
 
-    public MediaOutputBaseAdapter(MediaOutputController controller) {
+    public MediaOutputBaseAdapter(MediaSwitchingController controller) {
         mController = controller;
         mIsDragging = false;
         mCurrentActivePosition = -1;
@@ -127,7 +128,7 @@ public abstract class MediaOutputBaseAdapter extends
         return mCurrentActivePosition;
     }
 
-    public MediaOutputController getController() {
+    public MediaSwitchingController getController() {
         return mController;
     }
 
@@ -321,18 +322,20 @@ public abstract class MediaOutputBaseAdapter extends
                     // Check if response volume match with the latest request, to ignore obsolete
                     // response
                     if (isCurrentSeekbarInvisible && !mIsInitVolumeFirstTime) {
-                        updateTitleIcon(currentVolume == 0 ? R.drawable.media_output_icon_volume_off
-                                        : R.drawable.media_output_icon_volume,
-                                mController.getColorItemContent());
+                        if (currentVolume == 0) {
+                            updateMutedVolumeIcon(device);
+                        } else {
+                            updateUnmutedVolumeIcon(device);
+                        }
                     } else {
                         if (!mVolumeAnimator.isStarted()) {
                             int percentage =
                                     (int) ((double) currentVolume * VOLUME_PERCENTAGE_SCALE_SIZE
                                             / (double) mSeekBar.getMax());
                             if (percentage == 0) {
-                                updateMutedVolumeIcon();
+                                updateMutedVolumeIcon(device);
                             } else {
-                                updateUnmutedVolumeIcon();
+                                updateUnmutedVolumeIcon(device);
                             }
                             mSeekBar.setVolume(currentVolume);
                             mLatestUpdateVolume = -1;
@@ -340,7 +343,7 @@ public abstract class MediaOutputBaseAdapter extends
                     }
                 } else if (currentVolume == 0) {
                     mSeekBar.resetVolume();
-                    updateMutedVolumeIcon();
+                    updateMutedVolumeIcon(device);
                 }
                 if (currentVolume == mLatestUpdateVolume) {
                     mLatestUpdateVolume = -1;
@@ -365,7 +368,7 @@ public abstract class MediaOutputBaseAdapter extends
                             R.string.media_output_dialog_volume_percentage, percentage));
                     mVolumeValueText.setVisibility(View.VISIBLE);
                     if (mStartFromMute) {
-                        updateUnmutedVolumeIcon();
+                        updateUnmutedVolumeIcon(device);
                         mStartFromMute = false;
                     }
                     if (progressToVolume != deviceVolume) {
@@ -390,9 +393,9 @@ public abstract class MediaOutputBaseAdapter extends
                             seekBar.getProgress());
                     if (currentVolume == 0) {
                         seekBar.setProgress(0);
-                        updateMutedVolumeIcon();
+                        updateMutedVolumeIcon(device);
                     } else {
-                        updateUnmutedVolumeIcon();
+                        updateUnmutedVolumeIcon(device);
                     }
                     mTitleIcon.setVisibility(View.VISIBLE);
                     mVolumeValueText.setVisibility(View.GONE);
@@ -402,36 +405,48 @@ public abstract class MediaOutputBaseAdapter extends
             });
         }
 
-        void updateMutedVolumeIcon() {
+        void updateMutedVolumeIcon(MediaDevice device) {
             mIconAreaLayout.setBackground(
                     mContext.getDrawable(R.drawable.media_output_item_background_active));
-            updateTitleIcon(R.drawable.media_output_icon_volume_off,
-                    mController.getColorItemContent());
+            updateTitleIcon(device, true /* isMutedVolumeIcon */);
         }
 
-        void updateUnmutedVolumeIcon() {
+        void updateUnmutedVolumeIcon(MediaDevice device) {
             mIconAreaLayout.setBackground(
                     mContext.getDrawable(R.drawable.media_output_title_icon_area)
             );
-            updateTitleIcon(R.drawable.media_output_icon_volume,
-                    mController.getColorItemContent());
+            updateTitleIcon(device, false /* isMutedVolumeIcon */);
         }
 
-        void updateTitleIcon(@DrawableRes int id, int color) {
+        void updateTitleIcon(MediaDevice device, boolean isMutedVolumeIcon) {
+            boolean isInputMediaDevice = device instanceof InputMediaDevice;
+            int id = getDrawableId(isInputMediaDevice, isMutedVolumeIcon);
             mTitleIcon.setImageDrawable(mContext.getDrawable(id));
-            mTitleIcon.setImageTintList(ColorStateList.valueOf(color));
+            mTitleIcon.setImageTintList(ColorStateList.valueOf(mController.getColorItemContent()));
             mIconAreaLayout.setBackgroundTintList(
                     ColorStateList.valueOf(mController.getColorSeekbarProgress()));
+        }
+
+        @VisibleForTesting
+        int getDrawableId(boolean isInputDevice, boolean isMutedVolumeIcon) {
+            // Returns the microphone icon when the flag is enabled and the device is an input
+            // device.
+            if (com.android.media.flags.Flags.enableAudioInputDeviceRoutingAndVolumeControl()
+                    && isInputDevice) {
+                return isMutedVolumeIcon ? R.drawable.ic_mic_off : R.drawable.ic_mic_26dp;
+            }
+            return isMutedVolumeIcon
+                    ? R.drawable.media_output_icon_volume_off
+                    : R.drawable.media_output_icon_volume;
         }
 
         void updateIconAreaClickListener(View.OnClickListener listener) {
             mIconAreaLayout.setOnClickListener(listener);
         }
 
-        void initFakeActiveDevice() {
+        void initFakeActiveDevice(MediaDevice device) {
             disableSeekBar();
-            updateTitleIcon(R.drawable.media_output_icon_volume,
-                    mController.getColorItemContent());
+            updateTitleIcon(device, false /* isMutedIcon */);
             final Drawable backgroundDrawable = mContext.getDrawable(
                                     R.drawable.media_output_item_background_active)
                             .mutate();
@@ -518,13 +533,13 @@ public abstract class MediaOutputBaseAdapter extends
                     mController.logInteractionUnmuteDevice(device);
                     mSeekBar.setVolume(UNMUTE_DEFAULT_VOLUME);
                     mController.adjustVolume(device, UNMUTE_DEFAULT_VOLUME);
-                    updateUnmutedVolumeIcon();
+                    updateUnmutedVolumeIcon(device);
                     mIconAreaLayout.setOnTouchListener(((iconV, event) -> false));
                 } else {
                     mController.logInteractionMuteDevice(device);
                     mSeekBar.resetVolume();
                     mController.adjustVolume(device, 0);
-                    updateMutedVolumeIcon();
+                    updateMutedVolumeIcon(device);
                     mIconAreaLayout.setOnTouchListener(((iconV, event) -> {
                         mSeekBar.dispatchTouchEvent(event);
                         return false;

@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright (C) 2024 The Android Open Source Project
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+  -->
+
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="@dimen/settingslib_expressive_space_extrasmall4"
+    android:paddingHorizontal="@dimen/settingslib_expressive_space_extrasmall4"
+    android:orientation="horizontal">
+
+    <LinearLayout
+        android:id="@+id/action1"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/button1"
+            style="@style/SettingsLibActionButton.Expressive"
+            android:layout_width="@dimen/settingslib_expressive_space_large3"
+            android:layout_height="@dimen/settingslib_expressive_space_medium5"
+            android:layout_gravity="center_horizontal"
+            android:importantForAccessibility="no"/>
+        <TextView
+            android:id="@+id/text1"
+            style="@style/SettingsLibActionButton.Expressive.Label"
+            android:layout_marginTop="@dimen/settingslib_expressive_space_extrasmall3"
+            android:importantForAccessibility="no"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/action2"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/button2"
+            style="@style/SettingsLibActionButton.Expressive"
+            android:layout_width="@dimen/settingslib_expressive_space_large3"
+            android:layout_height="@dimen/settingslib_expressive_space_medium5"
+            android:layout_gravity="center_horizontal"
+            android:importantForAccessibility="no"/>
+        <TextView
+            android:id="@+id/text2"
+            style="@style/SettingsLibActionButton.Expressive.Label"
+            android:layout_marginTop="@dimen/settingslib_expressive_space_extrasmall3"
+            android:importantForAccessibility="no"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/action3"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/button3"
+            style="@style/SettingsLibActionButton.Expressive"
+            android:layout_width="@dimen/settingslib_expressive_space_large3"
+            android:layout_height="@dimen/settingslib_expressive_space_medium5"
+            android:layout_gravity="center_horizontal"
+            android:importantForAccessibility="no"/>
+        <TextView
+            android:id="@+id/text3"
+            style="@style/SettingsLibActionButton.Expressive.Label"
+            android:layout_marginTop="@dimen/settingslib_expressive_space_extrasmall3"
+            android:importantForAccessibility="no"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/action4"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/button4"
+            style="@style/SettingsLibActionButton.Expressive"
+            android:layout_width="@dimen/settingslib_expressive_space_large3"
+            android:layout_height="@dimen/settingslib_expressive_space_medium5"
+            android:layout_gravity="center_horizontal"
+            android:importantForAccessibility="no"/>
+        <TextView
+            android:id="@+id/text4"
+            style="@style/SettingsLibActionButton.Expressive.Label"
+            android:layout_marginTop="@dimen/settingslib_expressive_space_extrasmall3"
+            android:importantForAccessibility="no"/>
+    </LinearLayout>
+</LinearLayout>

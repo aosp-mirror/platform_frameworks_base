@@ -73,8 +73,7 @@
     <string name="bubble_accessibility_announce_collapse" msgid="3178806224494537097">"<xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>-ის ჩაკეცვა"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>-ის პარამეტრები"</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"ბუშტის დახურვა"</string>
-    <!-- no translation found for bubble_fullscreen_text (1006758103218086231) -->
-    <skip />
+    <string name="bubble_fullscreen_text" msgid="1006758103218086231">"სრულეკრანიან რეჟიმზე გადატანა"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"აიკრძალოს საუბრის ბუშტები"</string>
     <string name="bubbles_user_education_title" msgid="2112319053732691899">"ჩეთი ბუშტების გამოყენებით"</string>
     <string name="bubbles_user_education_description" msgid="4215862563054175407">"ახალი საუბრები გამოჩნდება როგორც მოტივტივე ხატულები ან ბუშტები. შეეხეთ ბუშტის გასახსნელად. გადაიტანეთ ჩავლებით."</string>
@@ -98,6 +97,9 @@
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"კამერად პრობლემები აქვს?\nშეეხეთ გამოსასწორებლად"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"არ გამოსწორდა?\nშეეხეთ წინა ვერსიის დასაბრუნებლად"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"კამერას პრობლემები არ აქვს? შეეხეთ უარყოფისთვის."</string>
+    <string name="windowing_app_handle_education_tooltip" msgid="2929643449849791854">"აპის მენიუ შეგიძლიათ იხილოთ აქ"</string>
+    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="2523468503353474095">"რამდენიმე აპის ერთდროულად გასახსნელად შედით დესკტოპის ხედში"</string>
+    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="5225660258192054132">"სრულ ეკრანზე ნებისმიერ დროს შეგიძლიათ დაბრუნდეთ აპის მენიუდან"</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"მეტის ნახვა და გაკეთება"</string>
     <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"ეკრანის გასაყოფად ჩავლებით გადაიტანეთ სხვა აპში"</string>
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"ორმაგად შეეხეთ აპის გარშემო სივრცეს, რათა ის სხვაგან გადაიტანოთ"</string>
@@ -124,10 +126,22 @@
     <string name="screenshot_text" msgid="1477704010087786671">"ეკრანის ანაბეჭდი"</string>
     <string name="open_in_browser_text" msgid="9181692926376072904">"ბრაუზერში გახსნა"</string>
     <string name="new_window_text" msgid="6318648868380652280">"ახალი ფანჯარა"</string>
+    <string name="manage_windows_text" msgid="5567366688493093920">"ფანჯრების მართვა"</string>
     <string name="close_text" msgid="4986518933445178928">"დახურვა"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"მენიუს დახურვა"</string>
-    <string name="expand_menu_text" msgid="3847736164494181168">"მენიუს გახსნა"</string>
+    <string name="desktop_mode_app_header_chip_text" msgid="6366422614991687237">"მენიუს გახსნა"</string>
     <string name="desktop_mode_maximize_menu_maximize_text" msgid="3275717276171114411">"აპლიკაციის გაშლა სრულ ეკრანზე"</string>
     <string name="desktop_mode_maximize_menu_snap_text" msgid="2065251022783880154">"აპლიკაციის დაპატარავება ეკრანზე"</string>
-    <string name="desktop_mode_non_resizable_snap_text" msgid="1049800446363800707">"აპის ზომის შეცვლა შეუძლებელია"</string>
+    <string name="desktop_mode_non_resizable_snap_text" msgid="3771776422751387878">"აპის აქ გადატანა შეუძლებელია"</string>
+    <string name="desktop_mode_maximize_menu_immersive_button_text" msgid="559492223133829481">"იმერსიული"</string>
+    <string name="desktop_mode_maximize_menu_immersive_restore_button_text" msgid="4900114367354709257">"აღდგენა"</string>
+    <string name="desktop_mode_maximize_menu_maximize_button_text" msgid="3090199175564175845">"მაქსიმალურად გაშლა"</string>
+    <string name="desktop_mode_maximize_menu_restore_button_text" msgid="4234449220944704387">"აღდგენა"</string>
+    <string name="desktop_mode_maximize_menu_snap_left_button_text" msgid="8077452201179893424">"მარცხნივ გადატანა"</string>
+    <string name="desktop_mode_maximize_menu_snap_right_button_text" msgid="7117751068945657304">"მარჯვნივ გადატანა"</string>
+    <string name="open_by_default_settings_text" msgid="2526548548598185500">"პარამეტრების ნაგულისხმევად გახსნა"</string>
+    <string name="open_by_default_dialog_subheader_text" msgid="1729599730664063881">"ამ აპისთვის ვებ ბმულების გახსნის წესის არჩევა"</string>
+    <string name="open_by_default_dialog_in_app_text" msgid="6978022419634199806">"აპში"</string>
+    <string name="open_by_default_dialog_in_browser_text" msgid="8042769465958497081">"თქვენს ბრაუზერში"</string>
+    <string name="open_by_default_dialog_dismiss_button_text" msgid="3487238795534582291">"კარგი"</string>
 </resources>

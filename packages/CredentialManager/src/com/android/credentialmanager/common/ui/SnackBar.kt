@@ -19,7 +19,10 @@ package com.android.credentialmanager.common.ui
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
@@ -61,8 +64,15 @@ fun Snackbar(
             )
         }
         Box(
-            modifier = Modifier
-                .align(Alignment.BottomCenter).wrapContentSize().padding(bottom = 18.dp)
+            modifier =
+            Modifier.align(Alignment.BottomCenter)
+                .wrapContentSize()
+                .padding(
+                    bottom =
+                    WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 24.dp,
+                    start = 24.dp,
+                    end = 24.dp,
+                )
         ) {
             Card(
                 shape = Shapes.medium,

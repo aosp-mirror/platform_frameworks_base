@@ -18,10 +18,12 @@ package android.os;
 
 import android.Manifest;
 import android.annotation.FlaggedApi;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SuppressAutoDoc;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.app.ActivityThread;
@@ -42,6 +44,8 @@ import com.android.internal.ravenwood.RavenwoodEnvironment;
 
 import dalvik.system.VMRuntime;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -401,33 +405,42 @@ public class Build {
          * device. This value never changes while a device is booted, but it may
          * increase when the hardware manufacturer provides an OTA update.
          * <p>
-         * Together with {@link SDK_MINOR_INT}, this constant defines the
-         * <pre>major.minor</pre> version of Android. <pre>SDK_INT</pre> is
-         * increased and <pre>SDK_MINOR_INT</pre> is set to 0 on new Android
-         * dessert releases. Between these, Android may also release so called
-         * minor releases where <pre>SDK_INT</pre> remains unchanged and
-         * <pre>SDK_MINOR_INT</pre> is increased. Minor releases can add new
-         * APIs, and have stricter guarantees around backwards compatibility
-         * (e.g. no changes gated by <pre>targetSdkVersion</pre>) compared to
-         * major releases.
+         * This constant records the major version of Android. Use {@link
+         * SDK_INT_FULL} if you need to consider the minor version of Android
+         * as well.
          * <p>
          * Possible values are defined in {@link Build.VERSION_CODES}.
+         * @see #SDK_INT_FULL
          */
         public static final int SDK_INT = SystemProperties.getInt(
                 "ro.build.version.sdk", 0);
 
         /**
-         * The minor SDK version of the software currently running on this hardware
-         * device. This value never changes while a device is booted, but it may
-         * increase when the hardware manufacturer provides an OTA update.
+         * The major and minor SDK version of the software currently running on
+         * this hardware device. This value never changes while a device is
+         * booted, but it may increase when the hardware manufacturer provides
+         * an OTA update.
          * <p>
-         * Together with {@link SDK_INT}, this constant defines the
-         * <pre>major.minor</pre> version of Android. See {@link SDK_INT} for
-         * more information.
+         * <code>SDK_INT</code> is increased on new Android dessert releases,
+         * also called major releases. Between these, Android may also release
+         * minor releases where <code>SDK_INT</code> remains unchanged. Minor
+         * releases can add new APIs, and have stricter guarantees around
+         * backwards compatibility (e.g. no changes gated by
+         * <code>targetSdkVersion</code>) compared to major releases.
+         * <p>
+         * <code>SDK_INT_FULL</code> is increased on every release.
+         * <p>
+         * Possible values are defined in {@link
+         * android.os.Build.VERSION_CODES_FULL}.
          */
         @FlaggedApi(Flags.FLAG_MAJOR_MINOR_VERSIONING_SCHEME)
-        public static final int SDK_MINOR_INT = SystemProperties.getInt(
-                "ro.build.version.sdk_minor", 0);
+        public static final int SDK_INT_FULL;
+
+        static {
+            SDK_INT_FULL = VERSION_CODES_FULL.SDK_INT_MULTIPLIER
+                * SystemProperties.getInt("ro.build.version.sdk", 0)
+                + SystemProperties.getInt("ro.build.version.sdk_minor", 0);
+        }
 
         /**
          * The SDK version of the software that <em>initially</em> shipped on
@@ -1261,6 +1274,280 @@ public class Build {
          * Vanilla Ice Cream.
          */
         public static final int VANILLA_ICE_CREAM = 35;
+
+        /**
+         * Baklava.
+         */
+        @FlaggedApi(Flags.FLAG_MAJOR_MINOR_VERSIONING_SCHEME)
+        public static final int BAKLAVA = CUR_DEVELOPMENT;
+    }
+
+    /** @hide */
+    @IntDef(value = {
+        VERSION_CODES_FULL.BASE,
+        VERSION_CODES_FULL.BASE_1_1,
+        VERSION_CODES_FULL.CUPCAKE,
+        VERSION_CODES_FULL.DONUT,
+        VERSION_CODES_FULL.ECLAIR,
+        VERSION_CODES_FULL.ECLAIR_0_1,
+        VERSION_CODES_FULL.ECLAIR_MR1,
+        VERSION_CODES_FULL.FROYO,
+        VERSION_CODES_FULL.GINGERBREAD,
+        VERSION_CODES_FULL.GINGERBREAD_MR1,
+        VERSION_CODES_FULL.HONEYCOMB,
+        VERSION_CODES_FULL.HONEYCOMB_MR1,
+        VERSION_CODES_FULL.HONEYCOMB_MR2,
+        VERSION_CODES_FULL.ICE_CREAM_SANDWICH,
+        VERSION_CODES_FULL.ICE_CREAM_SANDWICH_MR1,
+        VERSION_CODES_FULL.JELLY_BEAN,
+        VERSION_CODES_FULL.JELLY_BEAN_MR1,
+        VERSION_CODES_FULL.JELLY_BEAN_MR2,
+        VERSION_CODES_FULL.KITKAT,
+        VERSION_CODES_FULL.KITKAT_WATCH,
+        VERSION_CODES_FULL.LOLLIPOP,
+        VERSION_CODES_FULL.LOLLIPOP_MR1,
+        VERSION_CODES_FULL.M,
+        VERSION_CODES_FULL.N,
+        VERSION_CODES_FULL.N_MR1,
+        VERSION_CODES_FULL.O,
+        VERSION_CODES_FULL.O_MR1,
+        VERSION_CODES_FULL.P,
+        VERSION_CODES_FULL.Q,
+        VERSION_CODES_FULL.R,
+        VERSION_CODES_FULL.S,
+        VERSION_CODES_FULL.S_V2,
+        VERSION_CODES_FULL.TIRAMISU,
+        VERSION_CODES_FULL.UPSIDE_DOWN_CAKE,
+        VERSION_CODES_FULL.VANILLA_ICE_CREAM,
+        VERSION_CODES_FULL.BAKLAVA,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface SdkIntFull {}
+
+    /**
+     * Enumeration of the currently known SDK major and minor version codes.
+     * The numbers increase for every release, and are guaranteed to be ordered
+     * by the release date of each release. The actual values should be
+     * considered an implementation detail, and the current encoding scheme may
+     * change in the future.
+     *
+     * @see android.os.Build.VERSION#SDK_INT_FULL
+     */
+    @FlaggedApi(Flags.FLAG_MAJOR_MINOR_VERSIONING_SCHEME)
+    @SuppressLint("AcronymName")
+    public static class VERSION_CODES_FULL {
+        private VERSION_CODES_FULL() {}
+
+        // Use the last 5 digits for the minor version. This allows the
+        // minor version to be set to CUR_DEVELOPMENT.
+        private static final int SDK_INT_MULTIPLIER = 100000;
+
+        /**
+         * Android 1.0.
+         */
+        public static final int BASE = VERSION_CODES.BASE * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 2.0.
+         */
+        public static final int BASE_1_1 = VERSION_CODES.BASE_1_1 * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 3.0.
+         */
+        public static final int CUPCAKE = VERSION_CODES.CUPCAKE * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 4.0.
+         */
+        public static final int DONUT = VERSION_CODES.DONUT * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 5.0.
+         */
+        public static final int ECLAIR = VERSION_CODES.ECLAIR * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 6.0.
+         */
+        public static final int ECLAIR_0_1 = VERSION_CODES.ECLAIR_0_1 * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 7.0.
+         */
+        public static final int ECLAIR_MR1 = VERSION_CODES.ECLAIR_MR1 * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 8.0.
+         */
+        public static final int FROYO = VERSION_CODES.FROYO * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 9.0.
+         */
+        public static final int GINGERBREAD = VERSION_CODES.GINGERBREAD * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 10.0.
+         */
+        public static final int GINGERBREAD_MR1 =
+                VERSION_CODES.GINGERBREAD_MR1 * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 11.0.
+         */
+        public static final int HONEYCOMB = VERSION_CODES.HONEYCOMB * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 12.0.
+         */
+        public static final int HONEYCOMB_MR1 = VERSION_CODES.HONEYCOMB_MR1 * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 13.0.
+         */
+        public static final int HONEYCOMB_MR2 = VERSION_CODES.HONEYCOMB_MR2 * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 14.0.
+         */
+        public static final int ICE_CREAM_SANDWICH =
+                VERSION_CODES.ICE_CREAM_SANDWICH * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 15.0.
+         */
+        public static final int ICE_CREAM_SANDWICH_MR1 =
+                VERSION_CODES.ICE_CREAM_SANDWICH_MR1 * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 16.0.
+         */
+        public static final int JELLY_BEAN = VERSION_CODES.JELLY_BEAN * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 17.0.
+         */
+        public static final int JELLY_BEAN_MR1 = VERSION_CODES.JELLY_BEAN_MR1 * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 18.0.
+         */
+        public static final int JELLY_BEAN_MR2 = VERSION_CODES.JELLY_BEAN_MR2 * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 19.0.
+         */
+        public static final int KITKAT = VERSION_CODES.KITKAT * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 20.0.
+         */
+        public static final int KITKAT_WATCH = VERSION_CODES.KITKAT_WATCH * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 21.0.
+         */
+        public static final int LOLLIPOP = VERSION_CODES.LOLLIPOP * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 22.0.
+         */
+        public static final int LOLLIPOP_MR1 = VERSION_CODES.LOLLIPOP_MR1 * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 23.0.
+         */
+        public static final int M = VERSION_CODES.M * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 24.0.
+         */
+        public static final int N = VERSION_CODES.N * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 25.0.
+         */
+        public static final int N_MR1 = VERSION_CODES.N_MR1 * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 26.0.
+         */
+        public static final int O = VERSION_CODES.O * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 27.0.
+         */
+        public static final int O_MR1 = VERSION_CODES.O_MR1 * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 28.0.
+         */
+        public static final int P = VERSION_CODES.P * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 29.0.
+         */
+        public static final int Q = VERSION_CODES.Q * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 30.0.
+         */
+        public static final int R = VERSION_CODES.R * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 31.0.
+         */
+        public static final int S = VERSION_CODES.S * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 32.0.
+         */
+        public static final int S_V2 = VERSION_CODES.S_V2 * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 33.0.
+         */
+        public static final int TIRAMISU = VERSION_CODES.TIRAMISU * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 34.0.
+         */
+        public static final int UPSIDE_DOWN_CAKE =
+                VERSION_CODES.UPSIDE_DOWN_CAKE * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 35.0.
+         */
+        public static final int VANILLA_ICE_CREAM =
+                VERSION_CODES.VANILLA_ICE_CREAM * SDK_INT_MULTIPLIER;
+
+        /**
+         * The upcoming, not yet finalized, version of Android.
+         */
+        public static final int BAKLAVA = VERSION_CODES.BAKLAVA * SDK_INT_MULTIPLIER;
+    }
+
+    /**
+     * Obtain the major version encoded in a VERSION_CODES_FULL value.
+     * This value is guaranteed to be non-negative.
+     *
+     * @return The major version encoded in a VERSION_CODES_FULL value
+     */
+    @FlaggedApi(Flags.FLAG_MAJOR_MINOR_VERSIONING_SCHEME)
+    public static int getMajorSdkVersion(@SdkIntFull int sdkIntFull) {
+        return sdkIntFull / VERSION_CODES_FULL.SDK_INT_MULTIPLIER;
+    }
+
+    /**
+     * Obtain the minor version encoded in a VERSION_CODES_FULL value.
+     * This value is guaranteed to be non-negative.
+     *
+     * @return The minor version encoded in a VERSION_CODES_FULL value
+     */
+    @FlaggedApi(Flags.FLAG_MAJOR_MINOR_VERSIONING_SCHEME)
+    public static int getMinorSdkVersion(@SdkIntFull int sdkIntFull) {
+        return sdkIntFull % VERSION_CODES_FULL.SDK_INT_MULTIPLIER;
     }
 
     /**

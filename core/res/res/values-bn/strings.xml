@@ -992,7 +992,7 @@
     <string name="keyguard_password_wrong_pin_code" msgid="8583732939138432793">"ভুল পিন কোড৷"</string>
     <string name="keyguard_label_text" msgid="3841953694564168384">"আনলক করতে, মেনু টিপুন তারপর ০ টিপুন৷"</string>
     <string name="emergency_call_dialog_number_for_display" msgid="2978165477085612673">"জরুরী নম্বর"</string>
-    <string name="lockscreen_carrier_default" msgid="6192313772955399160">"কোনো পরিষেবা নেই"</string>
+    <string name="lockscreen_carrier_default" msgid="6192313772955399160">"কোনও পরিষেবা নেই"</string>
     <string name="lockscreen_screen_locked" msgid="7364905540516041817">"স্ক্রীণ লক করা আছে৷"</string>
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"আনলক করতে বা জরুরি কল করতে মেনু টিপুন৷"</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"আনলক করতে মেনু টিপুন৷"</string>
@@ -1746,8 +1746,7 @@
     <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"কোনও অ্যাপ অনুমতির অনুরোধ আড়াল করছে তাই আপনার উত্তর যাচাই করা যাবে না।"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"কোনও ফিচার ব্যবহার করা শুরু করতে, সেটিতে ট্যাপ করুন:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"অ্যাক্সেসিবিলিটি বোতামের সাহায্যে আপনি যেসব ফিচার ব্যবহার করতে চান সেগুলি বেছে নিন"</string>
-    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (2245540598834891500) -->
-    <skip />
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2245540598834891500">"ভলিউম কী শর্টকাটের সাহায্যে আপনি যেসব ফিচার ব্যবহার করতে চান সেগুলি বেছে নিন"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> বন্ধ করে দেওয়া হয়েছে"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"শর্টকাট এডিট করুন"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"হয়ে গেছে"</string>
@@ -1944,6 +1943,8 @@
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"বন্ধ আছে"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> - <xliff:g id="END">%2$s</xliff:g>"</string>
+    <!-- no translation found for zen_mode_trigger_summary_range_words (7228261413029290750) -->
+    <skip />
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"যেকোনও ক্যালেন্ডার"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> কিছু সাউন্ডকে মিউট করে দিচ্ছে"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"আপনার ডিভাইসে একটি অভ্যন্তরীন সমস্যা হয়েছে, এবং আপনি যতক্ষণ না পর্যন্ত এটিকে ফ্যাক্টরি ডেটা রিসেট করছেন ততক্ষণ এটি ঠিকভাবে কাজ নাও করতে পারে৷"</string>
@@ -2011,6 +2012,7 @@
     <string name="set_up_screen_lock_title" msgid="8346083801616474030">"\'স্ক্রিন লক\' সেট-আপ করুন"</string>
     <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"\'স্ক্রিন লক\' ফিচার সেট করুন"</string>
     <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"নিজের প্রাইভেট স্পেস ব্যবহার করতে এই ডিভাইসে \'স্ক্রিন লক\' সেট করুন"</string>
+    <string name="private_space_set_up_screen_lock_for_reset" msgid="7817091386408432097">"প্রাইভেট স্পেস মুছে দিতে, এই ডিভাইসে \'স্ক্রিন লক\' সেট করুন।"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"অ্যাপ পাওয়া যাচ্ছে না"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"এই মুহূর্তে <xliff:g id="APP_NAME">%1$s</xliff:g> অ্যাপ পাওয়া যাচ্ছে না।"</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> উপলভ্য নেই"</string>
@@ -2129,11 +2131,6 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"কল এবং বিজ্ঞপ্তি আসলে ভাইব্রেট হবে"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"কল এবং বিজ্ঞপ্তিগুলি মিউট করা হবে"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"সিস্টেমে হয়ে থাকা পরিবর্তন"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"বিরক্ত করবে না"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"নতুন: \'বিরক্ত করবে না\' মোড চালু আছে, তাই বিজ্ঞপ্তি লুকিয়ে ফেলা হচ্ছে"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"আরও জানতে এবং পরিবর্তন করতে ট্যাপ করুন।"</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"\'বিরক্ত করবে না\' মোডের সেটিং বদলে গেছে"</string>
-    <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"কী কী ব্লক করা আছে তা দেখতে ট্যাপ করুন।"</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"বিজ্ঞপ্তির সেটিংস পর্যালোচনা করুন"</string>
     <string name="review_notification_settings_text" msgid="5916244866751849279">"Android 13 থেকে শুরু করে, বিজ্ঞপ্তি পাঠানোর জন্য আপনার ইনস্টল করা অ্যাপকে অনুমতি নিতে হবে। বর্তমান অ্যাপের জন্য এই অনুমতি পরিবর্তন করতে ট্যাপ করুন।"</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"পরে মনে করিয়ে দিও"</string>
@@ -2429,6 +2426,14 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"কোনও মেবাইল বা ওয়াই-ফাই নেটওয়ার্ক ছাড়াই মেসেজ পাঠান ও রিসিভ করুন"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages খুলুন"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"এটি কীভাবে কাজ করে"</string>
+    <!-- no translation found for satellite_manual_selection_state_popup_title (8545991934926661974) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_message (1928101658551382450) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_ok (2459664752624985095) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_cancel (973605633339469252) -->
+    <skip />
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"বাকি আছে…"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"\'ফিঙ্গারপ্রিন্ট আনলক\' আবার সেট-আপ করুন"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> আর শনাক্ত করা যাবে না।"</string>

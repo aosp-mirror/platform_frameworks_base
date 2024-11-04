@@ -25,6 +25,7 @@
 #include <cutils/compiler.h>
 #include <utils/StrongPointer.h>
 
+#include <mutex>
 #include <optional>
 
 #ifdef __ANDROID__ // Layoutlib does not support hardware acceleration
@@ -36,10 +37,10 @@ class SkWStream;
 namespace android {
 
 enum class PixelStorageType {
-    WrappedPixelRef,
-    Heap,
-    Ashmem,
-    Hardware,
+    WrappedPixelRef = 0,
+    Heap = 1,
+    Ashmem = 2,
+    Hardware = 3,
 };
 
 // TODO: Find a better home for this. It's here because hwui/Bitmap is exported and CanvasTransform
@@ -78,6 +79,9 @@ public:
     static sk_sp<Bitmap> allocateHeapBitmap(const SkImageInfo& info);
     static sk_sp<Bitmap> allocateHeapBitmap(size_t size, const SkImageInfo& i, size_t rowBytes);
 
+    static std::string getAshmemId(const char* tag, uint64_t bitmapId,
+                                   int width, int height, size_t size);
+
     /* The createFrom factories construct a new Bitmap object by wrapping the already allocated
      * memory that is provided as an input param.
      */
@@ -102,6 +106,10 @@ public:
     void reconfigure(const SkImageInfo& info);
     void setColorSpace(sk_sp<SkColorSpace> colorSpace);
     void setAlphaType(SkAlphaType alphaType);
+
+    uint64_t getId() const {
+        return mId;
+    }
 
     void getSkBitmap(SkBitmap* outBitmap);
 
@@ -176,11 +184,14 @@ public:
   static bool compress(const SkBitmap& bitmap, JavaCompressFormat format,
                        int32_t quality, SkWStream* stream);
 private:
+    static constexpr uint64_t INVALID_BITMAP_ID = 0u;
+
     static sk_sp<Bitmap> allocateAshmemBitmap(size_t size, const SkImageInfo& i, size_t rowBytes);
 
     Bitmap(void* address, size_t allocSize, const SkImageInfo& info, size_t rowBytes);
     Bitmap(SkPixelRef& pixelRef, const SkImageInfo& info);
-    Bitmap(void* address, int fd, size_t mappedSize, const SkImageInfo& info, size_t rowBytes);
+    Bitmap(void* address, int fd, size_t mappedSize, const SkImageInfo& info, size_t rowBytes,
+           uint64_t id = INVALID_BITMAP_ID);
 #ifdef __ANDROID__ // Layoutlib does not support hardware acceleration
     Bitmap(AHardwareBuffer* buffer, const SkImageInfo& info, size_t rowBytes,
            BitmapPalette palette);
@@ -227,6 +238,16 @@ private:
     } mPixelStorage;
 
     sk_sp<SkImage> mImage;  // Cache is used only for HW Bitmaps with Skia pipeline.
+
+    uint64_t mId;                // unique ID for this bitmap
+    static uint64_t getId(PixelStorageType type);
+
+    // for tracing total number and memory usage of bitmaps
+    static std::mutex mLock;
+    static size_t mTotalBitmapBytes;
+    static size_t mTotalBitmapCount;
+    void traceBitmapCreate();
+    void traceBitmapDelete();
 };
 
 }  // namespace android

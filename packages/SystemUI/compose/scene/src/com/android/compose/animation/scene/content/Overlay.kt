@@ -37,8 +37,10 @@ internal class Overlay(
     actions: Map<UserAction.Resolved, UserActionResult>,
     zIndex: Float,
     alignment: Alignment,
+    isModal: Boolean,
 ) : Content(key, layoutImpl, content, actions, zIndex) {
     var alignment by mutableStateOf(alignment)
+    var isModal by mutableStateOf(isModal)
 
     override fun toString(): String {
         return "Overlay(key=$key)"

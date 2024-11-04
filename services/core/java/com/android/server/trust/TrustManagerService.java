@@ -21,6 +21,7 @@ import static android.service.trust.GrantTrustResult.STATUS_UNLOCKED_BY_GRANT;
 import static android.service.trust.TrustAgentService.FLAG_GRANT_TRUST_TEMPORARY_AND_RENEWABLE;
 
 import android.Manifest;
+import android.annotation.EnforcePermission;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -89,6 +90,7 @@ import com.android.internal.widget.LockSettingsInternal;
 import com.android.internal.widget.LockSettingsStateListener;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.pm.UserManagerInternal;
 import com.android.server.servicewatcher.CurrentUserServiceSupplier;
 import com.android.server.servicewatcher.ServiceWatcher;
 import com.android.server.utils.Slogf;
@@ -170,6 +172,7 @@ public class TrustManagerService extends SystemService {
     private final ActivityManager mActivityManager;
     private FingerprintManager mFingerprintManager;
     private FaceManager mFaceManager;
+    private UserManagerInternal mUserManagerInternal;
 
     private enum TrustState {
         // UNTRUSTED means that TrustManagerService is currently *not* giving permission for the
@@ -1064,6 +1067,8 @@ public class TrustManagerService extends SystemService {
                     Log.w(TAG, "Unable to check keyguard lock state", e);
                 }
                 currentUserIsUnlocked = unlockedUser == id;
+            } else if (isVisibleBackgroundUser(id)) {
+                showingKeyguard = !mUserManager.isUserUnlocked(id);
             }
             final boolean deviceLocked = secure && showingKeyguard && !trusted
                     && !biometricAuthenticated;
@@ -1093,6 +1098,16 @@ public class TrustManagerService extends SystemService {
                 }
             }
         }
+    }
+
+    private boolean isVisibleBackgroundUser(int userId) {
+        if (!mUserManager.isVisibleBackgroundUsersSupported()) {
+            return false;
+        }
+        if (mUserManagerInternal == null) {
+            mUserManagerInternal = LocalServices.getService(UserManagerInternal.class);
+        }
+        return mUserManagerInternal.isVisibleBackgroundFullUser(userId);
     }
 
     private void notifyTrustAgentsOfDeviceLockState(int userId, boolean isLocked) {
@@ -1882,8 +1897,11 @@ public class TrustManagerService extends SystemService {
             }
         }
 
+        @EnforcePermission(Manifest.permission.ACCESS_FINE_LOCATION)
         @Override
         public boolean isInSignificantPlace() {
+            super.isInSignificantPlace_enforcePermission();
+
             if (android.security.Flags.significantPlaces()) {
                 mSignificantPlaceServiceWatcher.runOnBinder(
                         binder -> ISignificantPlaceProvider.Stub.asInterface(binder)

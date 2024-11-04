@@ -17,6 +17,7 @@ package android.os;
 
 import static android.os.BatteryConsumer.BatteryConsumerDataLayout.POWER_MODEL_NOT_INCLUDED;
 import static android.os.BatteryConsumer.POWER_COMPONENT_ANY;
+import static android.os.BatteryConsumer.POWER_COMPONENT_BASE;
 import static android.os.BatteryConsumer.POWER_STATE_ANY;
 import static android.os.BatteryConsumer.POWER_STATE_UNSPECIFIED;
 import static android.os.BatteryConsumer.PROCESS_STATE_ANY;
@@ -184,6 +185,10 @@ class PowerComponents {
             @BatteryConsumer.PowerState int powerState, boolean skipEmptyComponents) {
         StringBuilder sb = new StringBuilder();
         for (@BatteryConsumer.PowerComponentId int id : mData.layout.powerComponentIds) {
+            if (id == POWER_COMPONENT_BASE) {
+                continue;
+            }
+
             dump(sb, id, PROCESS_STATE_ANY, screenState, powerState, skipEmptyComponents);
             if (mData.layout.processStateDataIncluded) {
                 for (int processState = 0; processState < BatteryConsumer.PROCESS_STATE_COUNT;
@@ -488,6 +493,14 @@ class PowerComponents {
         public Builder setUsageDurationMillis(BatteryConsumer.Key key,
                 long componentUsageDurationMillis) {
             mData.putLong(key.mDurationColumnIndex, componentUsageDurationMillis);
+            return this;
+        }
+
+        @NonNull
+        public Builder addUsageDurationMillis(BatteryConsumer.Key key,
+                long componentUsageDurationMillis) {
+            mData.putLong(key.mDurationColumnIndex,
+                    mData.getLong(key.mDurationColumnIndex) + componentUsageDurationMillis);
             return this;
         }
 

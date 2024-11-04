@@ -31,6 +31,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.XmlResourceParser;
 import android.graphics.drawable.Icon;
+import android.hardware.input.AppLaunchData;
 import android.hardware.input.KeyGestureEvent;
 import android.os.Handler;
 import android.os.RemoteException;
@@ -48,6 +49,7 @@ import android.view.KeyboardShortcutGroup;
 import android.view.KeyboardShortcutInfo;
 
 import com.android.internal.R;
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.IShortcutService;
 import com.android.internal.util.XmlUtils;
@@ -63,6 +65,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -131,7 +134,10 @@ public class ModifierShortcutManager {
     private boolean mConsumeSearchKeyUp = true;
     private UserHandle mCurrentUser;
     private final Map<Pair<Character, Boolean>, Bookmark> mBookmarks = new HashMap<>();
+    @GuardedBy("mAppIntentCache")
+    private final Map<AppLaunchData, Intent> mAppIntentCache = new HashMap<>();
 
+    @SuppressLint("MissingPermission")
     ModifierShortcutManager(Context context, Handler handler, UserHandle currentUser) {
         mContext = context;
         mHandler = handler;
@@ -146,6 +152,17 @@ public class ModifierShortcutManager {
                     } else {
                         mRoleIntents.remove(roleName);
                     }
+                    synchronized (mAppIntentCache) {
+                        mAppIntentCache.entrySet().removeIf(
+                                entry -> {
+                                    if (entry.getKey() instanceof AppLaunchData.RoleData) {
+                                        return Objects.equals(
+                                                ((AppLaunchData.RoleData) entry.getKey()).getRole(),
+                                                roleName);
+                                    }
+                                    return false;
+                                });
+                    }
                 }, UserHandle.ALL);
         mCurrentUser = currentUser;
         mInputManagerInternal = LocalServices.getService(InputManagerInternal.class);
@@ -159,6 +176,10 @@ public class ModifierShortcutManager {
         // so clear the cache.
         clearRoleIntents();
         clearComponentIntents();
+
+        synchronized (mAppIntentCache) {
+            mAppIntentCache.clear();
+        }
     }
 
     void clearRoleIntents() {
@@ -667,9 +688,11 @@ public class ModifierShortcutManager {
     public KeyboardShortcutGroup getApplicationLaunchKeyboardShortcuts(int deviceId) {
         List<KeyboardShortcutInfo> shortcuts = new ArrayList();
         if (modifierShortcutManagerRefactor()) {
+            Context context = modifierShortcutManagerMultiuser()
+                    ? mContext.createContextAsUser(mCurrentUser, 0) : mContext;
             for (Bookmark b : mBookmarks.values()) {
                 KeyboardShortcutInfo info = shortcutInfoFromIntent(
-                        b.getShortcutChar(), b.getIntent(mContext), b.isShift());
+                        b.getShortcutChar(), b.getIntent(context), b.isShift());
                 if (info != null) {
                     shortcuts.add(info);
                 }
@@ -744,6 +767,46 @@ public class ModifierShortcutManager {
         return new KeyboardShortcutGroup(
                 mContext.getString(R.string.keyboard_shortcut_group_applications),
                 shortcuts);
+    }
+
+    private Intent getIntentFromAppLaunchData(@NonNull AppLaunchData data) {
+        Context context = mContext.createContextAsUser(mCurrentUser, 0);
+        synchronized (mAppIntentCache) {
+            Intent intent = mAppIntentCache.get(data);
+            if (intent != null) {
+                return intent;
+            }
+            if (data instanceof AppLaunchData.CategoryData) {
+                intent = Intent.makeMainSelectorActivity(Intent.ACTION_MAIN,
+                        ((AppLaunchData.CategoryData) data).getCategory());
+            } else if (data instanceof AppLaunchData.RoleData) {
+                intent = getRoleLaunchIntent(context, ((AppLaunchData.RoleData) data).getRole());
+            } else if (data instanceof AppLaunchData.ComponentData) {
+                AppLaunchData.ComponentData componentData = (AppLaunchData.ComponentData) data;
+                intent = resolveComponentNameIntent(context, componentData.getPackageName(),
+                        componentData.getClassName());
+            }
+            if (intent != null) {
+                mAppIntentCache.put(data, intent);
+            }
+            return intent;
+        }
+    }
+
+    boolean launchApplication(@NonNull AppLaunchData data) {
+        Intent intent  = getIntentFromAppLaunchData(data);
+        if (intent == null) {
+            return false;
+        }
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        try {
+            mContext.startActivityAsUser(intent, mCurrentUser);
+            return true;
+        } catch (ActivityNotFoundException ex) {
+            Slog.w(TAG, "Not launching app because "
+                    + "the activity to which it refers to was not found: " + data);
+        }
+        return false;
     }
 
     /**
@@ -867,7 +930,7 @@ public class ModifierShortcutManager {
 
         // TODO(b/280423320): Add new field package name associated in the
         //  KeyboardShortcutEvent atom and log it accordingly.
-        return KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_APPLICATION_BY_PACKAGE_NAME;
+        return KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_APPLICATION;
     }
 
     @KeyGestureEvent.KeyGestureType

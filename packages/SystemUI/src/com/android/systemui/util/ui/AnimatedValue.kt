@@ -26,7 +26,7 @@ import kotlinx.coroutines.flow.transformLatest
 
 /**
  * A state comprised of a [value] of type [T] paired with a boolean indicating whether or not the
- * [value] [isAnimating] in the UI.
+ * value [isAnimating][isAnimating] in the UI.
  */
 sealed interface AnimatedValue<out T> {
 

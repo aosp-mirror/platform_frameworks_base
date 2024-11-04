@@ -369,7 +369,7 @@ public class LogModule {
     @SysUISingleton
     @MediaCarouselControllerLog
     public static LogBuffer provideMediaCarouselControllerBuffer(LogBufferFactory factory) {
-        return factory.create("MediaCarouselCtlrLog", 20);
+        return factory.create("MediaCarouselCtlrLog", 100);
     }
 
     /**
@@ -477,6 +477,16 @@ public class LogModule {
     @KeyguardUpdateMonitorLog
     public static LogBuffer provideKeyguardUpdateMonitorLogBuffer(LogBufferFactory factory) {
         return factory.create("KeyguardUpdateMonitorLog", 400);
+    }
+
+    /**
+     * Provides a {@link LogBuffer} for use by SIM events.
+     */
+    @Provides
+    @SysUISingleton
+    @SimLog
+    public static LogBuffer provideSimLogBuffer(LogBufferFactory factory) {
+        return factory.create("SimLog", 500);
     }
 
     /**
@@ -653,6 +663,14 @@ public class LogModule {
     @DisplayMetricsRepoLog
     public static LogBuffer provideDisplayMetricsRepoLogBuffer(LogBufferFactory factory) {
         return factory.create("DisplayMetricsRepo", 50);
+    }
+
+    /** Provides a {@link LogBuffer} for focus related logs. */
+    @Provides
+    @SysUISingleton
+    @FocusedDisplayRepoLog
+    public static LogBuffer provideFocusedDisplayRepoLogBuffer(LogBufferFactory factory) {
+        return factory.create("FocusedDisplayRepo", 50);
     }
 
     /** Provides a {@link LogBuffer} for the scene framework. */

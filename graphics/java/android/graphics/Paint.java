@@ -18,6 +18,8 @@ package android.graphics;
 
 import static com.android.text.flags.Flags.FLAG_FIX_LINE_HEIGHT_FOR_LOCALE;
 import static com.android.text.flags.Flags.FLAG_LETTER_SPACING_JUSTIFICATION;
+import static com.android.text.flags.Flags.FLAG_DEPRECATE_ELEGANT_TEXT_HEIGHT_API;
+
 
 import android.annotation.ColorInt;
 import android.annotation.ColorLong;
@@ -39,8 +41,10 @@ import android.text.GraphicsOperations;
 import android.text.SpannableString;
 import android.text.SpannedString;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.text.flags.Flags;
 
 import dalvik.annotation.optimization.CriticalNative;
 import dalvik.annotation.optimization.FastNative;
@@ -60,6 +64,7 @@ import java.util.Objects;
  * geometries, text and bitmaps.
  */
 public class Paint {
+    private static final String TAG = "Paint";
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private long mNativePaint;
@@ -1802,8 +1807,18 @@ public class Paint {
     /**
      * Get the elegant metrics flag.
      *
+     * Note:
+     * For applications target API 35 or later, this function returns true by default.
+     * For applications target API 36 or later, the function call will be ignored and the elegant
+     * text height is always enabled.
+     *
      * @return true if elegant metrics are enabled for text drawing.
+     * @deprecated The underlying UI fonts are deprecated and will be removed from the system image.
+     * Applications supporting scripts with large vertical metrics should adapt their UI by using
+     * fonts designed with corresponding vertical metrics.
      */
+    @Deprecated
+    @FlaggedApi(FLAG_DEPRECATE_ELEGANT_TEXT_HEIGHT_API)
     public boolean isElegantTextHeight() {
         return nGetElegantTextHeight(mNativePaint) != ELEGANT_TEXT_HEIGHT_DISABLED;
     }
@@ -1818,9 +1833,28 @@ public class Paint {
      * variants that have not been compacted to fit Latin-based vertical
      * metrics, and also increases top and bottom bounds to provide more space.
      *
+     * <p>
+     * Note:
+     * For applications target API 35 or later, the default value will be true by default.
+     * For applications target API 36 or later, the function call will be ignored and the elegant
+     * text height is always enabled.
+     *
      * @param elegant set the paint's elegant metrics flag for drawing text.
+     * @deprecated This API will be no-op at some point in the future. The underlying UI fonts is
+     * deprecated and will be removed from the system image. Applications supporting scripts with
+     * large vertical metrics should adapt their UI by using fonts designed with corresponding
+     * vertical metrics.
      */
+    @Deprecated
+    @FlaggedApi(FLAG_DEPRECATE_ELEGANT_TEXT_HEIGHT_API)
     public void setElegantTextHeight(boolean elegant) {
+        if (Flags.deprecateElegantTextHeightApi() && !elegant
+                && CompatChanges.isChangeEnabled(DEPRECATE_UI_FONT_ENFORCE)) {
+            if (!elegant) {
+                Log.w(TAG, "The elegant text height cannot be turned off.");
+            }
+            return;
+        }
         nSetElegantTextHeight(mNativePaint,
                 elegant ? ELEGANT_TEXT_HEIGHT_ENABLED : ELEGANT_TEXT_HEIGHT_DISABLED);
     }
@@ -1837,6 +1871,19 @@ public class Paint {
     @ChangeId
     @EnabledSince(targetSdkVersion = Build.VERSION_CODES.VANILLA_ICE_CREAM)
     public static final long DEPRECATE_UI_FONT = 279646685L;
+
+    /**
+     * A change ID for deprecating UI fonts enforced.
+     *
+     * From API 36, the elegant text height will not be able to be overridden and always true if the
+     * app has a target SDK of API 36 or later.
+     *
+     * @hide
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = 36)
+    public static final long DEPRECATE_UI_FONT_ENFORCE = 349519475L;
+
 
     private void resetElegantTextHeight() {
         if (CompatChanges.isChangeEnabled(DEPRECATE_UI_FONT)) {
@@ -2000,6 +2047,14 @@ public class Paint {
     }
 
     /**
+     * A change ID for new font variation settings management.
+     * @hide
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = 36)
+    public static final long NEW_FONT_VARIATION_MANAGEMENT = 361260253L;
+
+    /**
      * Sets TrueType or OpenType font variation settings. The settings string is constructed from
      * multiple pairs of axis tag and style values. The axis tag must contain four ASCII characters
      * and must be wrapped with single quotes (U+0027) or double quotes (U+0022). Axis strings that
@@ -2028,12 +2083,16 @@ public class Paint {
      * </li>
      * </ul>
      *
+     * <p>Note: If the application that targets API 35 or before, this function mutates the
+     * underlying typeface instance.
+     *
      * @param fontVariationSettings font variation settings. You can pass null or empty string as
      *                              no variation settings.
      *
-     * @return true if the given settings is effective to at least one font file underlying this
-     *         typeface. This function also returns true for empty settings string. Otherwise
-     *         returns false
+     * @return If the application that targets API 36 or later and is running on devices API 36 or
+     *         later, this function always returns true. Otherwise, this function returns true if
+     *         the given settings is effective to at least one font file underlying this typeface.
+     *         This function also returns true for empty settings string. Otherwise returns false.
      *
      * @throws IllegalArgumentException If given string is not a valid font variation settings
      *                                  format
@@ -2042,6 +2101,26 @@ public class Paint {
      * @see FontVariationAxis
      */
     public boolean setFontVariationSettings(String fontVariationSettings) {
+        final boolean useFontVariationStore = Flags.typefaceRedesign()
+                && CompatChanges.isChangeEnabled(NEW_FONT_VARIATION_MANAGEMENT);
+        if (useFontVariationStore) {
+            FontVariationAxis[] axes =
+                    FontVariationAxis.fromFontVariationSettings(fontVariationSettings);
+            if (axes == null) {
+                nSetFontVariationOverride(mNativePaint, 0);
+                mFontVariationSettings = null;
+                return true;
+            }
+
+            long builderPtr = nCreateFontVariationBuilder(axes.length);
+            for (int i = 0; i < axes.length; ++i) {
+                nAddFontVariationToBuilder(builderPtr, axes[i].getOpenTypeTagValue(),
+                        axes[i].getStyleValue());
+            }
+            nSetFontVariationOverride(mNativePaint, builderPtr);
+            mFontVariationSettings = fontVariationSettings;
+            return true;
+        }
         final String settings = TextUtils.nullIfEmpty(fontVariationSettings);
         if (settings == mFontVariationSettings
                 || (settings != null && settings.equals(mFontVariationSettings))) {
@@ -3829,7 +3908,12 @@ public class Paint {
     private static native void nSetTextSize(long paintPtr, float textSize);
     @CriticalNative
     private static native boolean nEqualsForTextMeasurement(long leftPaintPtr, long rightPaintPtr);
-
+    @CriticalNative
+    private static native long nCreateFontVariationBuilder(int size);
+    @CriticalNative
+    private static native void nAddFontVariationToBuilder(long builderPtr, int tag, float value);
+    @CriticalNative
+    private static native void nSetFontVariationOverride(long paintPtr, long builderPtr);
 
     // Following Native methods are kept for old Robolectric JNI signature used by
     // SystemUIGoogleRoboRNGTests

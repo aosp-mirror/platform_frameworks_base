@@ -74,6 +74,7 @@ import android.util.Slog;
 import android.util.Xml;
 
 import com.android.internal.R;
+import com.android.internal.annotations.Keep;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.util.FrameworkStatsLog;
@@ -214,7 +215,7 @@ public class AdbDebuggingManager {
 
     class PairingThread extends Thread implements NsdManager.RegistrationListener {
         private NsdManager mNsdManager;
-        private String mPublicKey;
+        @Keep private String mPublicKey;
         private String mPairingCode;
         private String mGuid;
         private String mServiceName;

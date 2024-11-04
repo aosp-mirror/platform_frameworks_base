@@ -4,7 +4,7 @@ package {
 
 filegroup {
     name: "SettingsLibGraph-srcs",
-    srcs: ["src/**/*"],
+    srcs: ["src/**/*.kt"],
 }
 
 android_library {
@@ -14,8 +14,24 @@ android_library {
     ],
     srcs: [":SettingsLibGraph-srcs"],
     static_libs: [
+        "SettingsLibGraph-proto-lite",
+        "SettingsLibIpc",
+        "SettingsLibMetadata",
+        "SettingsLibPreference",
         "androidx.annotation_annotation",
+        "androidx.fragment_fragment",
         "androidx.preference_preference",
     ],
     kotlincflags: ["-Xjvm-default=all"],
+}
+
+java_library {
+    name: "SettingsLibGraph-proto-lite",
+    srcs: ["graph.proto"],
+    proto: {
+        type: "lite",
+        canonical_path_from_root: false,
+    },
+    sdk_version: "core_current",
+    static_libs: ["libprotobuf-java-lite"],
 }

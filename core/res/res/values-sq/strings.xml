@@ -1746,8 +1746,7 @@
     <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"Një aplikacion po fsheh kërkesën për leje, prandaj përgjigja jote nuk mund të verifikohet."</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Trokit te një veçori për të filluar ta përdorësh atë:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Zgjidh veçoritë që do të përdorësh me butonin e qasshmërisë"</string>
-    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (2245540598834891500) -->
-    <skip />
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2245540598834891500">"Zgjidh veçoritë që do të përdorësh me shkurtoren e tasteve të volumit"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> është çaktivizuar"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Redakto shkurtoret"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"U krye"</string>
@@ -1944,6 +1943,8 @@
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Çaktivizuar"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> - <xliff:g id="END">%2$s</xliff:g>"</string>
+    <!-- no translation found for zen_mode_trigger_summary_range_words (7228261413029290750) -->
+    <skip />
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"Çdo kalendar"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> po çaktivizon disa tinguj"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"Ka një problem të brendshëm me pajisjen tënde. Ajo mund të jetë e paqëndrueshme derisa të rivendosësh të dhënat në gjendje fabrike."</string>
@@ -2011,6 +2012,7 @@
     <string name="set_up_screen_lock_title" msgid="8346083801616474030">"Cakto një kyçje ekrani"</string>
     <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Cakto kyçjen e ekranit"</string>
     <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"Për të përdorur hapësirën private, cakto një kyçje ekrani në këtë pajisje"</string>
+    <string name="private_space_set_up_screen_lock_for_reset" msgid="7817091386408432097">"Për të përdorur hapësirën private, cakto një kyçje ekrani në këtë pajisje"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Aplikacioni nuk ofrohet"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> nuk ofrohet për momentin."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> nuk ofrohet"</string>
@@ -2129,11 +2131,6 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Do të lëshojë dridhje për telefonatat dhe njoftimet"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Do të hiqet zëri për telefonatat dhe njoftimet"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Ndryshimet e sistemit"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Mos shqetëso"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"E re: Modaliteti \"Mos shqetëso\" po fsheh njoftimet"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Trokit për të mësuar më shumë dhe për të ndryshuar."</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"\"Mos shqetëso\" ka ndryshuar"</string>
-    <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Trokit për të shënuar atë që është bllokuar"</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Rishiko cilësimet e njoftimeve"</string>
     <string name="review_notification_settings_text" msgid="5916244866751849279">"Nga Android 13, aplikacionet që instalon kanë nevojë për lejen tënde për të dërguar njoftime. Trokit për ta ndryshuar këtë leje për aplikacionet ekzistuese."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Më kujto më vonë"</string>
@@ -2429,6 +2426,14 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Dërgo dhe merr mesazhe pa një rrjet celular ose Wi-Fi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Hap \"Mesazhet\""</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Si funksionon"</string>
+    <!-- no translation found for satellite_manual_selection_state_popup_title (8545991934926661974) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_message (1928101658551382450) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_ok (2459664752624985095) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_cancel (973605633339469252) -->
+    <skip />
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Në pritje..."</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Konfiguro përsëri \"Shkyçjen me gjurmën e gishtit\""</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> nuk mund të njihet më."</string>

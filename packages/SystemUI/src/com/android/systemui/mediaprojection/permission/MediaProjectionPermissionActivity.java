@@ -34,6 +34,7 @@ import android.annotation.RequiresPermission;
 import android.app.Activity;
 import android.app.ActivityOptions.LaunchCookie;
 import android.app.AlertDialog;
+import android.app.KeyguardManager;
 import android.app.StatusBarManager;
 import android.app.compat.CompatChanges;
 import android.content.Context;
@@ -52,6 +53,7 @@ import android.text.BidiFormatter;
 import android.text.TextPaint;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Display;
 import android.view.Window;
 
 import com.android.systemui.flags.FeatureFlags;
@@ -67,11 +69,11 @@ import com.android.systemui.res.R;
 import com.android.systemui.statusbar.phone.AlertDialogWithDelegate;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 
+import dagger.Lazy;
+
 import java.util.function.Consumer;
 
 import javax.inject.Inject;
-
-import dagger.Lazy;
 
 public class MediaProjectionPermissionActivity extends Activity {
     private static final String TAG = "MediaProjectionPermissionActivity";
@@ -83,6 +85,7 @@ public class MediaProjectionPermissionActivity extends Activity {
     private final StatusBarManager mStatusBarManager;
     private final MediaProjectionMetricsLogger mMediaProjectionMetricsLogger;
     private final ScreenCaptureDisabledDialogDelegate mScreenCaptureDisabledDialogDelegate;
+    private final KeyguardManager mKeyguardManager;
 
     private String mPackageName;
     private int mUid;
@@ -101,11 +104,13 @@ public class MediaProjectionPermissionActivity extends Activity {
             FeatureFlags featureFlags,
             Lazy<ScreenCaptureDevicePolicyResolver> screenCaptureDevicePolicyResolver,
             StatusBarManager statusBarManager,
+            KeyguardManager keyguardManager,
             MediaProjectionMetricsLogger mediaProjectionMetricsLogger,
             ScreenCaptureDisabledDialogDelegate screenCaptureDisabledDialogDelegate) {
         mFeatureFlags = featureFlags;
         mScreenCaptureDevicePolicyResolver = screenCaptureDevicePolicyResolver;
         mStatusBarManager = statusBarManager;
+        mKeyguardManager = keyguardManager;
         mMediaProjectionMetricsLogger = mediaProjectionMetricsLogger;
         mScreenCaptureDisabledDialogDelegate = screenCaptureDisabledDialogDelegate;
     }
@@ -118,18 +123,22 @@ public class MediaProjectionPermissionActivity extends Activity {
         final Intent launchingIntent = getIntent();
         mReviewGrantedConsentRequired = launchingIntent.getBooleanExtra(
                 EXTRA_USER_REVIEW_GRANTED_CONSENT, false);
-
-        mPackageName = getCallingPackage();
+        if (com.android.systemui.Flags.mediaProjectionRequestAttributionFix()) {
+            mPackageName = getLaunchedFromPackage();
+        } else {
+            mPackageName = getCallingPackage();
+        }
 
         // This activity is launched directly by an app, or system server. System server provides
         // the package name through the intent if so.
-        if (mPackageName == null) {
+        if (mPackageName == null || (
+                com.android.systemui.Flags.mediaProjectionRequestAttributionFix()
+                        && getCallingPackage() == null)) {
             if (launchingIntent.hasExtra(EXTRA_PACKAGE_REUSING_GRANTED_CONSENT)) {
                 mPackageName = launchingIntent.getStringExtra(
                         EXTRA_PACKAGE_REUSING_GRANTED_CONSENT);
             } else {
-                setResult(RESULT_CANCELED);
-                finish(RECORD_CANCEL, /* projection= */ null);
+                finishAsCancelled();
                 return;
             }
         }
@@ -141,8 +150,7 @@ public class MediaProjectionPermissionActivity extends Activity {
             mUid = aInfo.uid;
         } catch (PackageManager.NameNotFoundException e) {
             Log.e(TAG, "Unable to look up package name", e);
-            setResult(RESULT_CANCELED);
-            finish(RECORD_CANCEL, /* projection= */ null);
+            finishAsCancelled();
             return;
         }
 
@@ -153,8 +161,11 @@ public class MediaProjectionPermissionActivity extends Activity {
                             mUid, SessionCreationSource.APP);
                 }
                 final IMediaProjection projection =
-                        MediaProjectionServiceHelper.createOrReuseProjection(mUid, mPackageName,
-                                mReviewGrantedConsentRequired);
+                        MediaProjectionServiceHelper.createOrReuseProjection(
+                                mUid,
+                                mPackageName,
+                                mReviewGrantedConsentRequired,
+                                Display.DEFAULT_DISPLAY);
 
                 LaunchCookie launchCookie = launchingIntent.getParcelableExtra(
                         MediaProjectionManager.EXTRA_LAUNCH_COOKIE, LaunchCookie.class);
@@ -172,15 +183,13 @@ public class MediaProjectionPermissionActivity extends Activity {
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Error checking projection permissions", e);
-            setResult(RESULT_CANCELED);
-            finish(RECORD_CANCEL, /* projection= */ null);
+            finishAsCancelled();
             return;
         }
 
         if (mFeatureFlags.isEnabled(Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING_ENTERPRISE_POLICIES)) {
             if (showScreenCaptureDisabledDialogIfNeeded()) {
-                setResult(RESULT_CANCELED);
-                finish(RECORD_CANCEL, /* projection= */ null);
+                finishAsCancelled();
                 return;
             }
         }
@@ -208,7 +217,14 @@ public class MediaProjectionPermissionActivity extends Activity {
         }
 
         setUpDialog(mDialog);
-        mDialog.show();
+
+        boolean shouldDismissKeyguard =
+                com.android.systemui.Flags.mediaProjectionDialogBehindLockscreen();
+        if (shouldDismissKeyguard && mKeyguardManager.isDeviceLocked()) {
+            requestDeviceUnlock();
+        } else {
+            mDialog.show();
+        }
 
         if (savedInstanceState == null) {
             mMediaProjectionMetricsLogger.notifyPermissionRequestDisplayed(mUid);
@@ -269,7 +285,9 @@ public class MediaProjectionPermissionActivity extends Activity {
                 dialog -> {
                     ScreenShareOption selectedOption = dialog.getSelectedScreenShareOption();
                     grantMediaProjectionPermission(
-                            selectedOption.getMode(), hasCastingCapabilities);
+                            selectedOption.getMode(),
+                            hasCastingCapabilities,
+                            selectedOption.getDisplayId());
                 };
         Runnable onCancelClicked = () -> finish(RECORD_CANCEL, /* projection= */ null);
         if (hasCastingCapabilities) {
@@ -332,11 +350,37 @@ public class MediaProjectionPermissionActivity extends Activity {
         return false;
     }
 
+    private void requestDeviceUnlock() {
+        mKeyguardManager.requestDismissKeyguard(this,
+                new KeyguardManager.KeyguardDismissCallback() {
+
+                    @Override
+                    public void onDismissError() {
+                        if (com.android.systemui.Flags.mediaProjectionDialogBehindLockscreen()) {
+                            finishAsCancelled();
+                        }
+                    }
+
+                    @Override
+                    public void onDismissCancelled() {
+                        if (com.android.systemui.Flags.mediaProjectionDialogBehindLockscreen()) {
+                            finishAsCancelled();
+                        }
+                    }
+
+                    @Override
+                    public void onDismissSucceeded() {
+                        mDialog.show();
+                    }
+                });
+    }
+
     private void grantMediaProjectionPermission(
-            int screenShareMode, boolean hasCastingCapabilities) {
+            int screenShareMode, boolean hasCastingCapabilities, int displayId) {
         try {
-            IMediaProjection projection = MediaProjectionServiceHelper.createOrReuseProjection(
-                    mUid, mPackageName, mReviewGrantedConsentRequired);
+            IMediaProjection projection =
+                    MediaProjectionServiceHelper.createOrReuseProjection(
+                            mUid, mPackageName, mReviewGrantedConsentRequired, displayId);
             if (screenShareMode == ENTIRE_SCREEN) {
                 final Intent intent = new Intent();
                 setCommonIntentExtras(intent, hasCastingCapabilities, projection);
@@ -365,8 +409,7 @@ public class MediaProjectionPermissionActivity extends Activity {
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Error granting projection permission", e);
-            setResult(RESULT_CANCELED);
-            finish(RECORD_CANCEL, /* projection= */ null);
+            finishAsCancelled();
         } finally {
             if (mDialog != null) {
                 mDialog.dismiss();
@@ -413,6 +456,14 @@ public class MediaProjectionPermissionActivity extends Activity {
         if (!isFinishing()) {
             finish();
         }
+    }
+
+    /**
+     * Finishes this activity and cancel the projection request.
+     */
+    private void finishAsCancelled() {
+        setResult(RESULT_CANCELED);
+        finish(RECORD_CANCEL, /* projection= */ null);
     }
 
     @Nullable

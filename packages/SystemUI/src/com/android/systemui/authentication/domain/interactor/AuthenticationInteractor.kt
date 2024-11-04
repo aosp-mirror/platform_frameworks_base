@@ -49,7 +49,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /**
  * Hosts application business logic related to user authentication.
@@ -320,7 +320,7 @@ constructor(
     }
 
     private suspend fun initiateGarbageCollection(delay: Duration) {
-        applicationScope.launch(backgroundDispatcher) {
+        applicationScope.launch(context = backgroundDispatcher) {
             delay(delay)
             System.gc()
             System.runFinalization()

@@ -82,4 +82,11 @@ oneway interface ISatelliteListener {
      *        For LTE (EMM), cause codes are TS 24.301 Sec 9.9.3.9
      */
     void onRegistrationFailure(in int causeCode);
+
+    /**
+     * Modem can send the callback with available for either in service or limited service.
+     *
+     * @param isAvailable True means there's terrestrial network and false means there's not.
+     */
+    void onTerrestrialNetworkAvailableChanged(in boolean isAvailable);
 }

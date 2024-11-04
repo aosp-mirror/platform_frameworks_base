@@ -1747,8 +1747,7 @@
     <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"Kāda lietotne padara atļaujas pieprasījumu nesaprotamu, tāpēc nevar verificēt jūsu atbildi."</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Pieskarieties funkcijai, lai sāktu to izmantot"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Izvēlieties funkcijas, ko izmantot ar pieejamības pogu"</string>
-    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (2245540598834891500) -->
-    <skip />
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2245540598834891500">"Izvēlieties funkcijas, kuras piešķirt skaļuma pogu saīsnei"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"Pakalpojums <xliff:g id="SERVICE_NAME">%s</xliff:g> ir izslēgts."</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Rediģēt īsinājumtaustiņus"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Gatavs"</string>
@@ -1945,6 +1944,8 @@
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Izslēgta"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g>–<xliff:g id="END">%2$s</xliff:g>"</string>
+    <!-- no translation found for zen_mode_trigger_summary_range_words (7228261413029290750) -->
+    <skip />
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"Jebkurš kalendārs"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> izslēdz noteiktas skaņas"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"Jūsu ierīcē ir radusies iekšēja problēma, un ierīce var darboties nestabili. Lai to labotu, veiciet rūpnīcas datu atiestatīšanu."</string>
@@ -2012,6 +2013,7 @@
     <string name="set_up_screen_lock_title" msgid="8346083801616474030">"Iestatiet ekrāna bloķēšanu"</string>
     <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Iestatīt ekrāna bloķēšanu"</string>
     <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"Lai izmantotu privāto telpu, iestatiet ekrāna bloķēšanu."</string>
+    <string name="private_space_set_up_screen_lock_for_reset" msgid="7817091386408432097">"Lai dzēstu privāto telpu, iestatiet ekrāna bloķēšanu šajā ierīcē."</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Lietotne nav pieejama"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"Lietotne <xliff:g id="APP_NAME">%1$s</xliff:g> pašlaik nav pieejama."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> nav pieejams"</string>
@@ -2130,11 +2132,6 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Zvaniem un paziņojumiem tiks aktivizēta vibrācija."</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Zvanu un paziņojumu signāla skaņa būs izslēgta."</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Sistēmas izmaiņas"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Netraucēt"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Jaunums: režīmā “Netraucēt” paziņojumi tiek paslēpti"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Pieskarieties, lai uzzinātu vairāk un veiktu izmaiņas."</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Režīms “Netraucēt” ir mainīts"</string>
-    <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Pieskarieties, lai uzzinātu, kas tiek bloķēts."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Pārskatīt paziņojumu iestatījumus"</string>
     <string name="review_notification_settings_text" msgid="5916244866751849279">"Operētājsistēmā Android 13 un jaunākās versijās jūsu instalētajām lietotnēm ir nepieciešama atļauja sūtīt paziņojumus. Pieskarieties, lai mainītu šo atļauju esošajām lietotnēm."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Atgādināt vēlāk"</string>
@@ -2430,6 +2427,14 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Sūtiet un saņemiet ziņojumus bez mobilā vai Wi‑Fi tīkla."</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Atvērt lietotni Ziņojumi"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Darbības principi"</string>
+    <!-- no translation found for satellite_manual_selection_state_popup_title (8545991934926661974) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_message (1928101658551382450) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_ok (2459664752624985095) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_cancel (973605633339469252) -->
+    <skip />
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Gaida…"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Vēlreiz iestatiet autorizāciju ar pirksta nospiedumu"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"Pirksta nospiedumu (<xliff:g id="FINGERPRINT">%s</xliff:g>) vairs nevar atpazīt."</string>

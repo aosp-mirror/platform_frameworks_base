@@ -17,6 +17,7 @@
 package com.android.systemui.media.controls.ui.controller
 
 import com.android.app.tracing.traceSection
+import com.android.systemui.Flags.mediaControlsUmoInflationInBackground
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.media.controls.ui.view.MediaHostState
 import com.android.systemui.util.animation.MeasurementOutput
@@ -71,23 +72,34 @@ class MediaHostStatesManager @Inject constructor() {
      */
     fun updateCarouselDimensions(
         @MediaLocation location: Int,
-        hostState: MediaHostState
+        hostState: MediaHostState,
     ): MeasurementOutput =
         traceSection("MediaHostStatesManager#updateCarouselDimensions") {
             val result = MeasurementOutput(0, 0)
+            var changed = false
             for (controller in controllers) {
                 val measurement = controller.getMeasurementsForState(hostState)
                 measurement?.let {
                     if (it.measuredHeight > result.measuredHeight) {
                         result.measuredHeight = it.measuredHeight
+                        changed = true
                     }
                     if (it.measuredWidth > result.measuredWidth) {
                         result.measuredWidth = it.measuredWidth
+                        changed = true
                     }
                 }
             }
-            carouselSizes[location] = result
-            return result
+            if (mediaControlsUmoInflationInBackground()) {
+                // Set carousel size if result measurements changed. This avoids setting carousel
+                // size when this method gets called before the addition of media view controllers
+                if (!carouselSizes.contains(location) || changed) {
+                    carouselSizes[location] = result
+                }
+            } else {
+                carouselSizes[location] = result
+            }
+            return carouselSizes[location] ?: result
         }
 
     /** Add a callback to be called when a MediaState has updated */

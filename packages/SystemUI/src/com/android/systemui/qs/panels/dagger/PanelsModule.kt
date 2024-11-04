@@ -23,23 +23,20 @@ import com.android.systemui.qs.panels.data.repository.DefaultLargeTilesRepositor
 import com.android.systemui.qs.panels.data.repository.DefaultLargeTilesRepositoryImpl
 import com.android.systemui.qs.panels.data.repository.GridLayoutTypeRepository
 import com.android.systemui.qs.panels.data.repository.GridLayoutTypeRepositoryImpl
-import com.android.systemui.qs.panels.domain.interactor.GridTypeConsistencyInteractor
-import com.android.systemui.qs.panels.domain.interactor.InfiniteGridConsistencyInteractor
-import com.android.systemui.qs.panels.domain.interactor.NoopGridConsistencyInteractor
+import com.android.systemui.qs.panels.domain.interactor.EditTilesResetInteractor
+import com.android.systemui.qs.panels.domain.interactor.SizedTilesResetInteractor
 import com.android.systemui.qs.panels.shared.model.GridLayoutType
 import com.android.systemui.qs.panels.shared.model.InfiniteGridLayoutType
 import com.android.systemui.qs.panels.shared.model.PaginatedGridLayoutType
 import com.android.systemui.qs.panels.shared.model.PanelsLog
 import com.android.systemui.qs.panels.ui.compose.GridLayout
-import com.android.systemui.qs.panels.ui.compose.InfiniteGridLayout
 import com.android.systemui.qs.panels.ui.compose.PaginatableGridLayout
 import com.android.systemui.qs.panels.ui.compose.PaginatedGridLayout
-import com.android.systemui.qs.panels.ui.viewmodel.FixedColumnsSizeViewModel
-import com.android.systemui.qs.panels.ui.viewmodel.FixedColumnsSizeViewModelImpl
-import com.android.systemui.qs.panels.ui.viewmodel.IconLabelVisibilityViewModel
-import com.android.systemui.qs.panels.ui.viewmodel.IconLabelVisibilityViewModelImpl
+import com.android.systemui.qs.panels.ui.compose.infinitegrid.InfiniteGridLayout
 import com.android.systemui.qs.panels.ui.viewmodel.IconTilesViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.IconTilesViewModelImpl
+import com.android.systemui.qs.panels.ui.viewmodel.QSColumnsSizeViewModelImpl
+import com.android.systemui.qs.panels.ui.viewmodel.QSColumnsViewModel
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -57,28 +54,15 @@ interface PanelsModule {
     fun bindGridLayoutTypeRepository(impl: GridLayoutTypeRepositoryImpl): GridLayoutTypeRepository
 
     @Binds
-    fun bindDefaultGridConsistencyInteractor(
-        impl: NoopGridConsistencyInteractor
-    ): GridTypeConsistencyInteractor
+    fun bindEditTilesResetInteractor(impl: SizedTilesResetInteractor): EditTilesResetInteractor
 
     @Binds fun bindIconTilesViewModel(impl: IconTilesViewModelImpl): IconTilesViewModel
 
-    @Binds fun bindGridSizeViewModel(impl: FixedColumnsSizeViewModelImpl): FixedColumnsSizeViewModel
-
-    @Binds
-    fun bindIconLabelVisibilityViewModel(
-        impl: IconLabelVisibilityViewModelImpl
-    ): IconLabelVisibilityViewModel
+    @Binds fun bindQSColumnsViewModel(impl: QSColumnsSizeViewModelImpl): QSColumnsViewModel
 
     @Binds
     @PaginatedBaseLayoutType
     fun bindPaginatedBaseGridLayout(impl: InfiniteGridLayout): PaginatableGridLayout
-
-    @Binds
-    @PaginatedBaseLayoutType
-    fun bindPaginatedBaseConsistencyInteractor(
-        impl: NoopGridConsistencyInteractor
-    ): GridTypeConsistencyInteractor
 
     @Binds @Named("Default") fun bindDefaultGridLayout(impl: PaginatedGridLayout): GridLayout
 
@@ -116,29 +100,6 @@ interface PanelsModule {
             entries: Set<@JvmSuppressWildcards Pair<GridLayoutType, GridLayout>>
         ): Set<GridLayoutType> {
             return entries.map { it.first }.toSet()
-        }
-
-        @Provides
-        @IntoSet
-        fun provideGridConsistencyInteractor(
-            consistencyInteractor: InfiniteGridConsistencyInteractor
-        ): Pair<GridLayoutType, GridTypeConsistencyInteractor> {
-            return Pair(InfiniteGridLayoutType, consistencyInteractor)
-        }
-
-        @Provides
-        @IntoSet
-        fun providePaginatedGridConsistencyInteractor(
-            @PaginatedBaseLayoutType consistencyInteractor: GridTypeConsistencyInteractor,
-        ): Pair<GridLayoutType, GridTypeConsistencyInteractor> {
-            return Pair(PaginatedGridLayoutType, consistencyInteractor)
-        }
-
-        @Provides
-        fun provideGridConsistencyInteractorMap(
-            entries: Set<@JvmSuppressWildcards Pair<GridLayoutType, GridTypeConsistencyInteractor>>
-        ): Map<GridLayoutType, GridTypeConsistencyInteractor> {
-            return entries.toMap()
         }
     }
 }

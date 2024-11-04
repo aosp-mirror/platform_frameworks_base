@@ -43,7 +43,7 @@ import com.android.systemui.dagger.SysUIComponent;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.process.ProcessWrapper;
 import com.android.systemui.res.R;
-import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.systemui.statusbar.phone.ConfigurationForwarder;
 import com.android.systemui.util.NotificationChannels;
 
 import java.lang.reflect.InvocationTargetException;
@@ -454,13 +454,13 @@ public class SystemUIApplication extends Application implements
     @Override
     public void onConfigurationChanged(@NonNull Configuration newConfig) {
         if (mServicesStarted) {
-            ConfigurationController configController = mSysUIComponent.getConfigurationController();
+            ConfigurationForwarder configForwarder = mSysUIComponent.getConfigurationForwarder();
             if (Trace.isEnabled()) {
                 Trace.traceBegin(
                         Trace.TRACE_TAG_APP,
-                        configController.getClass().getSimpleName() + ".onConfigurationChanged()");
+                        configForwarder.getClass().getSimpleName() + ".onConfigurationChanged()");
             }
-            configController.onConfigurationChanged(newConfig);
+            configForwarder.onConfigurationChanged(newConfig);
             Trace.endSection();
         }
     }

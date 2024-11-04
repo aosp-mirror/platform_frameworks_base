@@ -70,6 +70,20 @@
         <item name="android:fontWeight">700</item>
     </style>
 
+    <style name="StatusBar" />
+    <style name="StatusBar.Chip" />
+
+    <style name="StatusBar.Chip.Text">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:gravity">center|start</item>
+        <item name="android:paddingStart">@dimen/ongoing_activity_chip_icon_text_padding</item>
+        <item name="android:textAppearance">@android:style/TextAppearance.Material.Small</item>
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
+        <item name="android:textColor">?android:attr/colorPrimary</item>
+    </style>
+
     <style name="Chipbar" />
 
     <style name="Chipbar.Text" parent="@*android:style/TextAppearance.DeviceDefault.Notification.Title">
@@ -540,6 +554,21 @@
     <!-- Overridden by values-television/styles.xml with tv-specific settings -->
     <style name="volume_dialog_theme" parent="Theme.SystemUI">
         <item name="android:windowIsFloating">true</item>
+        <item name="android:showWhenLocked">true</item>
+    </style>
+
+    <style name="SystemUI.Material3.Slider.Volume">
+        <item name="trackHeight">40dp</item>
+        <item name="thumbHeight">52dp</item>
+    </style>
+
+    <style name="SystemUI.Material3.Slider" parent="@style/Widget.Material3.Slider">
+        <item name="labelStyle">@style/Widget.Material3.Slider.Label</item>
+        <item name="thumbColor">@color/slider_thumb_color</item>
+        <item name="tickColorActive">@color/slider_inactive_track_color</item>
+        <item name="tickColorInactive">@color/slider_active_track_color</item>
+        <item name="trackColorActive">@color/slider_active_track_color</item>
+        <item name="trackColorInactive">@color/slider_inactive_track_color</item>
     </style>
 
     <style name="Theme.SystemUI.DayNightDialog" parent="@android:style/Theme.DeviceDefault.Light.Dialog"/>
@@ -676,10 +705,12 @@
 
     <style name="TunerSettings" parent="@android:style/Theme.DeviceDefault.Settings">
         <item name="android:windowActionBar">false</item>
+        <item name="android:windowOptOutEdgeToEdgeEnforcement">true</item>
         <item name="preferenceTheme">@style/TunerPreferenceTheme</item>
     </style>
 
     <style name="TunerPreferenceTheme" parent="@style/PreferenceThemeOverlay.SettingsBase">
+        <item name="android:windowOptOutEdgeToEdgeEnforcement">true</item>
     </style>
 
     <style name="TextAppearance.NotificationInfo.Confirmation">
@@ -765,6 +796,16 @@
         <item name="android:textColor">?androidprv:attr/materialColorOnSurface</item>
         <item name="android:textAllCaps">false</item>
         <item name="android:textSize">14sp</item>
+        <item name="android:minWidth">0dp</item>
+    </style>
+
+    <style
+        name="TextAppearance.NotificationFooterButtonRedesign"
+        parent="@android:style/Widget.DeviceDefault.Button.Borderless">
+        <item name="android:textColor">?androidprv:attr/materialColorOnSurface</item>
+        <item name="android:drawableTint">?androidprv:attr/materialColorOnSurface</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textSize">16sp</item>
         <item name="android:minWidth">0dp</item>
     </style>
 
@@ -1337,7 +1378,7 @@
 
     <style name="InternetDialog.Network">
         <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">88dp</item>
+        <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_marginStart">@dimen/internet_dialog_network_layout_margin</item>
         <item name="android:layout_marginEnd">@dimen/internet_dialog_network_layout_margin</item>
         <item name="android:layout_gravity">center_vertical|start</item>
@@ -1691,33 +1732,5 @@
 
     <style name="Theme.SystemUI.Dialog.StickyKeys" parent="@style/Theme.SystemUI.Dialog">
         <item name="android:colorBackground">@color/transparent</item>
-    </style>
-
-    <style name="ShortcutHelperBottomSheet" parent="@style/Widget.Material3.BottomSheet">
-        <item name="backgroundTint">?colorSurfaceContainer</item>
-    </style>
-
-    <style name="ShortcutHelperAnimation" parent="@android:style/Animation.Activity">
-        <item name="android:activityOpenEnterAnimation">@anim/shortcut_helper_launch_anim</item>
-        <item name="android:taskOpenEnterAnimation">@anim/shortcut_helper_launch_anim</item>
-        <item name="android:activityOpenExitAnimation">@anim/shortcut_helper_close_anim</item>
-        <item name="android:taskOpenExitAnimation">@anim/shortcut_helper_close_anim</item>
-    </style>
-
-    <style name="ShortcutHelperThemeCommon" parent="@style/Theme.Material3.DynamicColors.DayNight">
-        <item name="android:windowAnimationStyle">@style/ShortcutHelperAnimation</item>
-        <item name="android:windowIsTranslucent">true</item>
-        <item name="android:windowNoTitle">true</item>
-        <item name="android:windowBackground">@android:color/transparent</item>
-        <item name="android:backgroundDimEnabled">true</item>
-        <item name="android:statusBarColor">@android:color/transparent</item>
-        <item name="android:windowContentOverlay">@null</item>
-        <item name="android:navigationBarColor">@android:color/transparent</item>
-        <item name="android:windowLayoutInDisplayCutoutMode">always</item>
-        <item name="enableEdgeToEdge">true</item>
-    </style>
-
-    <style name="ShortcutHelperTheme" parent="@style/ShortcutHelperThemeCommon">
-        <item name="android:windowLightNavigationBar">true</item>
     </style>
 </resources>

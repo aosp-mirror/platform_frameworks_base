@@ -1015,8 +1015,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                     permission, attributionSource, message, forDataDelivery, startDataDelivery,
                     fromDatasource, attributedOp);
             // Finish any started op if some step in the attribution chain failed.
-            if (startDataDelivery && result != PermissionChecker.PERMISSION_GRANTED
-                    && result != PermissionChecker.PERMISSION_SOFT_DENIED) {
+            if (startDataDelivery && result != PermissionChecker.PERMISSION_GRANTED) {
                 if (attributedOp == AppOpsManager.OP_NONE) {
                     finishDataDelivery(AppOpsManager.permissionToOpCode(permission),
                             attributionSource.asState(), fromDatasource);

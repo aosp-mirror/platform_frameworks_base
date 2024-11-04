@@ -15,19 +15,20 @@
  */
 package com.android.internal.widget.remotecompose.core.operations;
 
-import com.android.internal.widget.remotecompose.core.CompanionOperation;
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.RemoteComposeOperation;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
+import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
+import com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation;
 
 import java.util.List;
 
-/**
- * Add a click area to the document
- */
+/** Add a click area to the document */
 public class ClickArea implements RemoteComposeOperation {
+    private static final int OP_CODE = Operations.CLICK_AREA;
+    private static final String CLASS_NAME = "ClickArea";
     int mId;
     int mContentDescription;
     float mLeft;
@@ -36,24 +37,26 @@ public class ClickArea implements RemoteComposeOperation {
     float mBottom;
     int mMetadata;
 
-    public static final Companion COMPANION = new Companion();
-
     /**
      * Add a click area to the document
      *
-     * @param id       the id of the click area, which will be reported in the listener
-     *                 callback on the player
+     * @param id the id of the click area, which will be reported in the listener callback on the
+     *     player
      * @param contentDescription the content description (used for accessibility, as a textID)
-     * @param left     left coordinate of the area bounds
-     * @param top      top coordinate of the area bounds
-     * @param right    right coordinate of the area bounds
-     * @param bottom   bottom coordinate of the area bounds
+     * @param left left coordinate of the area bounds
+     * @param top top coordinate of the area bounds
+     * @param right right coordinate of the area bounds
+     * @param bottom bottom coordinate of the area bounds
      * @param metadata associated metadata, user-provided (as a textID, pointing to a string)
      */
-    public ClickArea(int id, int contentDescription,
-                     float left, float top,
-                     float right, float bottom,
-                     int metadata) {
+    public ClickArea(
+            int id,
+            int contentDescription,
+            float left,
+            float top,
+            float right,
+            float bottom,
+            int metadata) {
         this.mId = id;
         this.mContentDescription = contentDescription;
         this.mLeft = left;
@@ -65,15 +68,32 @@ public class ClickArea implements RemoteComposeOperation {
 
     @Override
     public void write(WireBuffer buffer) {
-        COMPANION.apply(buffer, mId, mContentDescription, mLeft, mTop, mRight, mBottom, mMetadata);
+        apply(buffer, mId, mContentDescription, mLeft, mTop, mRight, mBottom, mMetadata);
     }
 
     @Override
     public String toString() {
-        return "CLICK_AREA <" + mId + " <" + mContentDescription + "> "
-                + "<" + mMetadata + ">+" + mLeft + " "
-                + mTop + " " + mRight + " " + mBottom + "+"
-                + " (" + (mRight - mLeft) + " x " + (mBottom - mTop) + " }";
+        return "CLICK_AREA <"
+                + mId
+                + " <"
+                + mContentDescription
+                + "> "
+                + "<"
+                + mMetadata
+                + ">+"
+                + mLeft
+                + " "
+                + mTop
+                + " "
+                + mRight
+                + " "
+                + mBottom
+                + "+"
+                + " ("
+                + (mRight - mLeft)
+                + " x "
+                + (mBottom - mTop)
+                + " }";
     }
 
     @Override
@@ -89,44 +109,56 @@ public class ClickArea implements RemoteComposeOperation {
         return indent + toString();
     }
 
-    public static class Companion implements CompanionOperation {
-        private Companion() {}
+    public static String name() {
+        return CLASS_NAME;
+    }
 
-        @Override
-        public String name() {
-            return "ClickArea";
-        }
+    public static int id() {
+        return OP_CODE;
+    }
 
-        @Override
-        public int id() {
-            return Operations.CLICK_AREA;
-        }
+    public static void apply(
+            WireBuffer buffer,
+            int id,
+            int contentDescription,
+            float left,
+            float top,
+            float right,
+            float bottom,
+            int metadata) {
+        buffer.start(OP_CODE);
+        buffer.writeInt(id);
+        buffer.writeInt(contentDescription);
+        buffer.writeFloat(left);
+        buffer.writeFloat(top);
+        buffer.writeFloat(right);
+        buffer.writeFloat(bottom);
+        buffer.writeInt(metadata);
+    }
 
-        public void apply(WireBuffer buffer, int id, int contentDescription,
-                   float left, float top, float right, float bottom,
-                   int metadata) {
-            buffer.start(Operations.CLICK_AREA);
-            buffer.writeInt(id);
-            buffer.writeInt(contentDescription);
-            buffer.writeFloat(left);
-            buffer.writeFloat(top);
-            buffer.writeFloat(right);
-            buffer.writeFloat(bottom);
-            buffer.writeInt(metadata);
-        }
+    public static void read(WireBuffer buffer, List<Operation> operations) {
+        int id = buffer.readInt();
+        int contentDescription = buffer.readInt();
+        float left = buffer.readFloat();
+        float top = buffer.readFloat();
+        float right = buffer.readFloat();
+        float bottom = buffer.readFloat();
+        int metadata = buffer.readInt();
+        ClickArea clickArea =
+                new ClickArea(id, contentDescription, left, top, right, bottom, metadata);
+        operations.add(clickArea);
+    }
 
-        @Override
-        public void read(WireBuffer buffer, List<Operation> operations) {
-            int id = buffer.readInt();
-            int contentDescription = buffer.readInt();
-            float left = buffer.readFloat();
-            float top = buffer.readFloat();
-            float right = buffer.readFloat();
-            float bottom = buffer.readFloat();
-            int metadata = buffer.readInt();
-            ClickArea clickArea = new ClickArea(id, contentDescription,
-                    left, top, right, bottom, metadata);
-            operations.add(clickArea);
-        }
+    public static void documentation(DocumentationBuilder doc) {
+        doc.operation("Canvas Operations", OP_CODE, CLASS_NAME)
+                .description("Define a region you can click on")
+                .field(DocumentedOperation.FLOAT, "left", "The left side of the region")
+                .field(DocumentedOperation.FLOAT, "top", "The top of the region")
+                .field(DocumentedOperation.FLOAT, "right", "The right side of the region")
+                .field(DocumentedOperation.FLOAT, "bottom", "The bottom of the region")
+                .field(
+                        DocumentedOperation.FLOAT,
+                        "metadata",
+                        "user defined string accessible in callback");
     }
 }

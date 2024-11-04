@@ -416,6 +416,35 @@ void ASurfaceTransaction_setBuffer(ASurfaceTransaction* aSurfaceTransaction,
     transaction->setBuffer(surfaceControl, graphic_buffer, fence);
 }
 
+void ASurfaceTransaction_setBufferWithRelease(
+        ASurfaceTransaction* aSurfaceTransaction, ASurfaceControl* aSurfaceControl,
+        AHardwareBuffer* buffer, int acquire_fence_fd, void* _Null_unspecified context,
+        ASurfaceTransaction_OnBufferRelease aReleaseCallback) {
+    CHECK_NOT_NULL(aSurfaceTransaction);
+    CHECK_NOT_NULL(aSurfaceControl);
+    CHECK_NOT_NULL(aReleaseCallback);
+
+    sp<SurfaceControl> surfaceControl = ASurfaceControl_to_SurfaceControl(aSurfaceControl);
+    Transaction* transaction = ASurfaceTransaction_to_Transaction(aSurfaceTransaction);
+
+    sp<GraphicBuffer> graphic_buffer(GraphicBuffer::fromAHardwareBuffer(buffer));
+
+    std::optional<sp<Fence>> fence = std::nullopt;
+    if (acquire_fence_fd != -1) {
+        fence = new Fence(acquire_fence_fd);
+    }
+
+    ReleaseBufferCallback releaseBufferCallback =
+            [context,
+             aReleaseCallback](const ReleaseCallbackId&, const sp<Fence>& releaseFence,
+                               std::optional<uint32_t> /* currentMaxAcquiredBufferCount */) {
+                (*aReleaseCallback)(context, (releaseFence) ? releaseFence->dup() : -1);
+            };
+
+    transaction->setBuffer(surfaceControl, graphic_buffer, fence, /* frameNumber */ std::nullopt,
+                           /* producerId */ 0, releaseBufferCallback);
+}
+
 void ASurfaceTransaction_setGeometry(ASurfaceTransaction* aSurfaceTransaction,
                                      ASurfaceControl* aSurfaceControl, const ARect& source,
                                      const ARect& destination, int32_t transform) {
@@ -699,6 +728,28 @@ void ASurfaceTransaction_setFrameRateWithChangeStrategy(ASurfaceTransaction* aSu
     CHECK_NOT_NULL(aSurfaceControl);
     Transaction* transaction = ASurfaceTransaction_to_Transaction(aSurfaceTransaction);
     sp<SurfaceControl> surfaceControl = ASurfaceControl_to_SurfaceControl(aSurfaceControl);
+    transaction->setFrameRate(surfaceControl, frameRate, compatibility, changeFrameRateStrategy);
+}
+
+void ASurfaceTransaction_setFrameRateParams(
+        ASurfaceTransaction* aSurfaceTransaction, ASurfaceControl* aSurfaceControl,
+        float desiredMinRate, float desiredMaxRate, float fixedSourceRate,
+        ANativeWindow_ChangeFrameRateStrategy changeFrameRateStrategy) {
+    CHECK_NOT_NULL(aSurfaceTransaction);
+    CHECK_NOT_NULL(aSurfaceControl);
+    Transaction* transaction = ASurfaceTransaction_to_Transaction(aSurfaceTransaction);
+    sp<SurfaceControl> surfaceControl = ASurfaceControl_to_SurfaceControl(aSurfaceControl);
+
+    if (desiredMaxRate < desiredMinRate) {
+        ALOGW("desiredMaxRate must be greater than or equal to desiredMinRate");
+        return;
+    }
+    // TODO(b/362798998): Fix plumbing to send modern params
+    int compatibility = fixedSourceRate == 0 ? ANATIVEWINDOW_FRAME_RATE_COMPATIBILITY_DEFAULT
+                                             : ANATIVEWINDOW_FRAME_RATE_COMPATIBILITY_FIXED_SOURCE;
+    double frameRate = compatibility == ANATIVEWINDOW_FRAME_RATE_COMPATIBILITY_FIXED_SOURCE
+            ? fixedSourceRate
+            : desiredMinRate;
     transaction->setFrameRate(surfaceControl, frameRate, compatibility, changeFrameRateStrategy);
 }
 

@@ -27,7 +27,7 @@ import com.android.systemui.log.core.LogLevel
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /** Handles keyguard dismissal requests. */
 @SysUISingleton

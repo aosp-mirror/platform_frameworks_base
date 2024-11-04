@@ -23,7 +23,6 @@ import static android.app.NotificationManager.IMPORTANCE_MIN;
 import static android.text.TextUtils.formatSimple;
 
 import android.annotation.NonNull;
-import android.app.NotificationManager;
 import android.content.Context;
 import android.service.notification.RankingHelperProto;
 import android.util.ArrayMap;
@@ -61,7 +60,7 @@ public class RankingHelper {
             })
     public RankingHelper(Context context, RankingHandler rankingHandler, RankingConfig config,
             ZenModeHelper zenHelper, NotificationUsageStats usageStats, String[] extractorNames,
-            IPlatformCompat platformCompat) {
+            IPlatformCompat platformCompat, GroupHelper groupHelper) {
         mContext = context;
         mRankingHandler = rankingHandler;
         if (sortSectionByTime()) {
@@ -80,6 +79,7 @@ public class RankingHelper {
                 extractor.initialize(mContext, usageStats);
                 extractor.setConfig(config);
                 extractor.setZenHelper(zenHelper);
+                extractor.setGroupHelper(groupHelper);
                 if (restrictAudioAttributesAlarm() || restrictAudioAttributesMedia()
                         || restrictAudioAttributesCall()) {
                     extractor.setCompatChangeLogger(platformCompat);

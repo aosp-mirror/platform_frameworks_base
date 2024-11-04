@@ -38,7 +38,6 @@ import androidx.compose.ui.layout.Placeable
 import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.android.compose.theme.LocalAndroidColorScheme
 import kotlin.math.roundToInt
 
 /**
@@ -69,7 +68,7 @@ fun AlertDialogContent(
                 Modifier.defaultMinSize(minWidth = defaultSize, minHeight = defaultSize),
                 propagateMinConstraints = true,
             ) {
-                val iconColor = LocalAndroidColorScheme.current.primary
+                val iconColor = MaterialTheme.colorScheme.primary
                 CompositionLocalProvider(LocalContentColor provides iconColor) { icon() }
             }
 
@@ -77,7 +76,7 @@ fun AlertDialogContent(
         }
 
         // Title.
-        val titleColor = LocalAndroidColorScheme.current.onSurface
+        val titleColor = MaterialTheme.colorScheme.onSurface
         CompositionLocalProvider(LocalContentColor provides titleColor) {
             ProvideTextStyle(
                 MaterialTheme.typography.headlineSmall.copy(textAlign = TextAlign.Center)
@@ -88,7 +87,7 @@ fun AlertDialogContent(
         Spacer(Modifier.height(16.dp))
 
         // Content.
-        val contentColor = LocalAndroidColorScheme.current.onSurfaceVariant
+        val contentColor = MaterialTheme.colorScheme.onSurfaceVariant
         Box {
             CompositionLocalProvider(LocalContentColor provides contentColor) {
                 ProvideTextStyle(
@@ -169,7 +168,7 @@ private fun AlertDialogButtons(
                                 negative.width -
                                 positive.width -
                                 horizontalSpacing.roundToInt(),
-                            0
+                            0,
                         )
                     }
                 }

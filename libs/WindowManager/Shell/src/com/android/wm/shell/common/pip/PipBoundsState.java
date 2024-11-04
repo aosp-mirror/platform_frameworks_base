@@ -86,6 +86,7 @@ public class PipBoundsState {
     @NonNull private final Rect mExpandedBounds = new Rect();
     @NonNull private final Rect mNormalMovementBounds = new Rect();
     @NonNull private final Rect mExpandedMovementBounds = new Rect();
+    @NonNull private final Rect mRestoreBounds = new Rect();
     @NonNull private final PipDisplayLayoutState mPipDisplayLayoutState;
     private final Point mMaxSize = new Point();
     private final Point mMinSize = new Point();
@@ -404,11 +405,25 @@ public class PipBoundsState {
     public void setImeVisibility(boolean imeShowing, int imeHeight) {
         mIsImeShowing = imeShowing;
         mImeHeight = imeHeight;
+        // If IME is showing, save the current PiP bounds in case we need to restore it later.
+        if (mIsImeShowing) {
+            mRestoreBounds.set(getBounds());
+        }
     }
 
     /** Returns whether the IME is currently showing. */
     public boolean isImeShowing() {
         return mIsImeShowing;
+    }
+
+    /** Returns the bounds to restore PiP to (bounds before IME was expanded). */
+    public Rect getRestoreBounds() {
+        return mRestoreBounds;
+    }
+
+    /** Sets mRestoreBounds to (0,0,0,0). */
+    public void clearRestoreBounds() {
+        mRestoreBounds.setEmpty();
     }
 
     /** Returns the IME height. */
@@ -521,6 +536,10 @@ public class PipBoundsState {
     /** Set whether the user has resized the PIP. */
     public void setHasUserResizedPip(boolean hasUserResizedPip) {
         mHasUserResizedPip = hasUserResizedPip;
+        // If user resized PiP while IME is showing, clear the pre-IME restore bounds.
+        if (hasUserResizedPip && isImeShowing()) {
+            clearRestoreBounds();
+        }
     }
 
     /** Returns whether the user has moved the PIP. */
@@ -531,6 +550,10 @@ public class PipBoundsState {
     /** Set whether the user has moved the PIP. */
     public void setHasUserMovedPip(boolean hasUserMovedPip) {
         mHasUserMovedPip = hasUserMovedPip;
+        // If user moved PiP while IME is showing, clear the pre-IME restore bounds.
+        if (hasUserMovedPip && isImeShowing()) {
+            clearRestoreBounds();
+        }
     }
 
     /**

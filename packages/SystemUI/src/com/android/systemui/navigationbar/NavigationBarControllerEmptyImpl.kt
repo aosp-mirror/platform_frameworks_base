@@ -18,9 +18,9 @@ package com.android.systemui.navigationbar
 
 import com.android.internal.statusbar.RegisterStatusBarResult
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.shared.statusbar.phone.BarTransitions
 import com.android.systemui.navigationbar.views.NavigationBar
 import com.android.systemui.navigationbar.views.NavigationBarView
+import com.android.systemui.shared.statusbar.phone.BarTransitions
 import javax.inject.Inject
 
 /** A no-op version of [NavigationBarController] for variants like Arc and TV. */
@@ -30,18 +30,28 @@ class NavigationBarControllerEmptyImpl @Inject constructor() : NavigationBarCont
         includeDefaultDisplay: Boolean,
         result: RegisterStatusBarResult?,
     ) {}
+
     override fun removeNavigationBar(displayId: Int) {}
+
     override fun checkNavBarModes(displayId: Int) {}
+
     override fun finishBarAnimations(displayId: Int) {}
+
     override fun touchAutoDim(displayId: Int) {}
+
     override fun transitionTo(
         displayId: Int,
         @BarTransitions.TransitionMode barMode: Int,
         animate: Boolean,
     ) {}
+
     override fun disableAnimationsDuringHide(displayId: Int, delay: Long) {}
+
     override fun getDefaultNavigationBarView(): NavigationBarView? = null
+
     override fun getNavigationBarView(displayId: Int): NavigationBarView? = null
+
     override fun isOverviewEnabled(displayId: Int) = false
+
     override fun getDefaultNavigationBar(): NavigationBar? = null
 }

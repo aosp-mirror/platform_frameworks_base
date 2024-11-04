@@ -16,7 +16,6 @@
 
 package com.android.server.media;
 
-import static android.media.MediaRoute2Info.PLAYBACK_VOLUME_FIXED;
 import static android.media.VolumeProvider.VOLUME_CONTROL_ABSOLUTE;
 import static android.media.VolumeProvider.VOLUME_CONTROL_FIXED;
 import static android.media.VolumeProvider.VOLUME_CONTROL_RELATIVE;
@@ -48,9 +47,7 @@ import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.AudioSystem;
 import android.media.MediaMetadata;
-import android.media.MediaRouter2Manager;
 import android.media.Rating;
-import android.media.RoutingSessionInfo;
 import android.media.VolumeProvider;
 import android.media.session.ISession;
 import android.media.session.ISessionCallback;
@@ -186,7 +183,6 @@ public class MediaSessionRecord extends MediaSessionRecordImpl implements IBinde
     private final MediaSessionService mService;
     private final UriGrantsManagerInternal mUgmInternal;
     private final Context mContext;
-    private final boolean mVolumeAdjustmentForRemoteGroupSessions;
 
     private final ForegroundServiceDelegationOptions mForegroundServiceDelegationOptions;
 
@@ -311,8 +307,6 @@ public class MediaSessionRecord extends MediaSessionRecordImpl implements IBinde
         mAudioAttrs = DEFAULT_ATTRIBUTES;
         mPolicies = policies;
         mUgmInternal = LocalServices.getService(UriGrantsManagerInternal.class);
-        mVolumeAdjustmentForRemoteGroupSessions = mContext.getResources().getBoolean(
-                com.android.internal.R.bool.config_volumeAdjustmentForRemoteGroupSessions);
 
         mForegroundServiceDelegationOptions = createForegroundServiceDelegationOptions();
 
@@ -659,49 +653,7 @@ public class MediaSessionRecord extends MediaSessionRecordImpl implements IBinde
             }
             return false;
         }
-        if (mVolumeAdjustmentForRemoteGroupSessions) {
-            if (DEBUG) {
-                Slog.d(
-                        TAG,
-                        "Volume adjustment for remote group sessions allowed so MediaSessionRecord"
-                                + " can handle volume key");
-            }
-            return true;
-        }
-        // See b/228021646 for details.
-        MediaRouter2Manager mRouter2Manager = MediaRouter2Manager.getInstance(mContext);
-        List<RoutingSessionInfo> sessions = mRouter2Manager.getRoutingSessions(mPackageName);
-        boolean foundNonSystemSession = false;
-        boolean remoteSessionAllowVolumeAdjustment = true;
-        if (DEBUG) {
-            Slog.d(
-                    TAG,
-                    "Found "
-                            + sessions.size()
-                            + " routing sessions for package name "
-                            + mPackageName);
-        }
-        for (RoutingSessionInfo session : sessions) {
-            if (DEBUG) {
-                Slog.d(TAG, "Found routingSessionInfo: " + session);
-            }
-            if (!session.isSystemSession()) {
-                foundNonSystemSession = true;
-                if (session.getVolumeHandling() == PLAYBACK_VOLUME_FIXED) {
-                    remoteSessionAllowVolumeAdjustment = false;
-                }
-            }
-        }
-        if (!foundNonSystemSession) {
-            if (DEBUG) {
-                Slog.d(
-                        TAG,
-                        "Package " + mPackageName
-                                + " has a remote media session but no associated routing session");
-            }
-        }
-
-        return foundNonSystemSession && remoteSessionAllowVolumeAdjustment;
+        return true;
     }
 
     @Override

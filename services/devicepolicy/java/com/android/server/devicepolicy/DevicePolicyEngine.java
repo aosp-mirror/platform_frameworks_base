@@ -42,7 +42,6 @@ import android.app.admin.PolicyUpdateReceiver;
 import android.app.admin.PolicyValue;
 import android.app.admin.TargetUser;
 import android.app.admin.UserRestrictionPolicyKey;
-import android.app.admin.flags.Flags;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -2100,17 +2099,13 @@ final class DevicePolicyEngine {
                 String tag = parser.getName();
                 switch (tag) {
                     case TAG_POLICY_KEY_ENTRY:
-                        if (Flags.dontReadPolicyDefinition()) {
-                            policyDefinition = PolicyDefinition.readFromXml(parser);
-                            if (policyDefinition != null) {
-                                policyKey = policyDefinition.getPolicyKey();
-                            }
-                        } else {
-                            policyKey = PolicyDefinition.readPolicyKeyFromXml(parser);
+                        policyDefinition = PolicyDefinition.readFromXml(parser);
+                        if (policyDefinition != null) {
+                            policyKey = policyDefinition.getPolicyKey();
                         }
                         break;
                     case TAG_POLICY_STATE_ENTRY:
-                        if (Flags.dontReadPolicyDefinition() && policyDefinition == null) {
+                        if (policyDefinition == null) {
                             Slogf.w(TAG, "Skipping policy state - unknown policy definition");
                         } else {
                             policyState = PolicyState.readFromXml(policyDefinition, parser);

@@ -20,6 +20,10 @@ import static android.Manifest.permission.CONFIGURE_DISPLAY_COLOR_MODE;
 import static android.Manifest.permission.CONTROL_DISPLAY_BRIGHTNESS;
 import static android.hardware.flags.Flags.FLAG_OVERLAYPROPERTIES_CLASS_API;
 
+import static com.android.server.display.feature.flags.Flags.FLAG_HIGHEST_HDR_SDR_RATIO_API;
+import static com.android.server.display.feature.flags.Flags.FLAG_ENABLE_HAS_ARR_SUPPORT;
+import static com.android.server.display.feature.flags.Flags.FLAG_ENABLE_GET_SUGGESTED_FRAME_RATE;
+
 import android.Manifest;
 import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
@@ -445,6 +449,13 @@ public final class Display {
     @UnsupportedAppUsage
     @TestApi
     public static final int TYPE_VIRTUAL = 5;
+
+    /**
+     * The maximum display type value.
+     * Helpful to get all possible display values.
+     * @hide
+     */
+    public static final int TYPE_MAX = TYPE_VIRTUAL;
 
     /**
      * Display state: The display state is unknown.
@@ -1257,6 +1268,72 @@ public final class Display {
     }
 
     /**
+     * Returns whether display supports adaptive refresh rate or not.
+     */
+    // TODO(b/372526856) Add a link to the documentation for ARR.
+    @FlaggedApi(FLAG_ENABLE_HAS_ARR_SUPPORT)
+    public boolean hasArrSupport() {
+        synchronized (mLock) {
+            updateDisplayInfoLocked();
+            return mDisplayInfo.hasArrSupport;
+        }
+    }
+
+    @FlaggedApi(FLAG_ENABLE_GET_SUGGESTED_FRAME_RATE)
+    public static final int FRAME_RATE_CATEGORY_NORMAL = 0;
+    @FlaggedApi(FLAG_ENABLE_GET_SUGGESTED_FRAME_RATE)
+    public static final int FRAME_RATE_CATEGORY_HIGH = 1;
+
+    /**
+     * @hide
+     */
+    @IntDef(prefix = {"FRAME_RATE_CATEGORY_"},
+            value = {
+                FRAME_RATE_CATEGORY_NORMAL,
+                FRAME_RATE_CATEGORY_HIGH
+            })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface FrameRateCategory {}
+
+    /**
+     * <p> Gets the display-defined frame rate given a descriptive frame rate category. </p>
+     *
+     * <p> For example, an animation that does not require fast render rates can use
+     * the {@link #FRAME_RATE_CATEGORY_NORMAL} to get the suggested frame rate.
+     * The suggested frame rate then can be used in the
+     * {@link Surface.FrameRateParams.Builder#setDesiredRateRange} for desiredMinRate.
+     *
+     * <pre>{@code
+     *  float desiredMinRate = display.getSuggestedFrameRate(FRAME_RATE_CATEGORY_NORMAL);
+     *  Surface.FrameRateParams params = new Surface.FrameRateParams.Builder().
+     *                                      setDesiredRateRange(desiredMinRate, Float.MAX).build();
+     *  surface.setFrameRate(params);
+     * }</pre>
+     * </p>
+     *
+     * @param category either {@link #FRAME_RATE_CATEGORY_NORMAL}
+     *                 or {@link #FRAME_RATE_CATEGORY_HIGH}
+     *
+     * @see Surface#setFrameRate(Surface.FrameRateParams)
+     * @see SurfaceControl.Transaction#setFrameRate(SurfaceControl, Surface.FrameRateParams)
+     * @throws IllegalArgumentException when category is not {@link #FRAME_RATE_CATEGORY_NORMAL}
+     * or {@link #FRAME_RATE_CATEGORY_HIGH}
+     */
+    @FlaggedApi(FLAG_ENABLE_GET_SUGGESTED_FRAME_RATE)
+    public float getSuggestedFrameRate(@FrameRateCategory int category) {
+        synchronized (mLock) {
+            updateDisplayInfoLocked();
+            if (category == FRAME_RATE_CATEGORY_HIGH) {
+                return mDisplayInfo.frameRateCategoryRate.getHigh();
+            } else if (category == FRAME_RATE_CATEGORY_NORMAL) {
+                return mDisplayInfo.frameRateCategoryRate.getNormal();
+            } else {
+                throw new IllegalArgumentException("Invalid FrameRateCategory provided");
+            }
+        }
+    }
+
+    /**
      * <p> Returns true if the connected display can be switched into a mode with minimal
      * post processing. </p>
      *
@@ -1339,7 +1416,7 @@ public final class Display {
     public HdrCapabilities getHdrCapabilities() {
         synchronized (mLock) {
             updateDisplayInfoLocked();
-            if (mDisplayInfo.hdrCapabilities == null) {
+            if (mDisplayInfo.hdrCapabilities == null || mDisplayInfo.isForceSdr) {
                 return null;
             }
             int[] supportedHdrTypes;
@@ -1361,6 +1438,7 @@ public final class Display {
                     supportedHdrTypes[index++] = enabledType;
                 }
             }
+
             return new HdrCapabilities(supportedHdrTypes,
                     mDisplayInfo.hdrCapabilities.mMaxLuminance,
                     mDisplayInfo.hdrCapabilities.mMaxAverageLuminance,
@@ -1496,6 +1574,15 @@ public final class Display {
         if (toRemove != null) {
             mGlobal.unregisterDisplayListener(toRemove);
         }
+    }
+
+    /**
+     * @return The highest possible HDR/SDR ratio. If {@link #isHdrSdrRatioAvailable()} returns
+     * false, this method returns 1.
+     */
+    @FlaggedApi(FLAG_HIGHEST_HDR_SDR_RATIO_API)
+    public float getHighestHdrSdrRatio() {
+        return mGlobal.getHighestHdrSdrRatio(mDisplayId);
     }
 
     /**
@@ -2076,6 +2163,7 @@ public final class Display {
     /**
      * @hide
      */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static String stateToString(int state) {
         switch (state) {
             case STATE_UNKNOWN:
@@ -2098,6 +2186,7 @@ public final class Display {
     }
 
     /** @hide */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static String stateReasonToString(@StateReason int reason) {
         switch (reason) {
             case STATE_REASON_UNKNOWN:

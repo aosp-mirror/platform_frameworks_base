@@ -40,6 +40,19 @@ struct Idmap_target_entry_inline;
 struct Idmap_target_entry_inline_value;
 struct Idmap_overlay_entry;
 
+struct Idmap_target_entries {
+  const uint32_t* target_id = nullptr;
+  const uint32_t* overlay_id = nullptr;
+};
+struct Idmap_target_inline_entries {
+  const uint32_t* target_id = nullptr;
+  const Idmap_target_entry_inline* entry = nullptr;
+};
+struct Idmap_overlay_entries {
+  const uint32_t* overlay_id = nullptr;
+  const uint32_t* target_id = nullptr;
+};
+
 // A string pool for overlay apk assets. The string pool holds the strings of the overlay resources
 // table and additionally allows for loading strings from the idmap string pool. The idmap string
 // pool strings are offset after the end of the overlay resource table string pool entries so
@@ -67,7 +80,7 @@ class OverlayDynamicRefTable : public DynamicRefTable {
 
  private:
   explicit OverlayDynamicRefTable(const Idmap_data_header* data_header,
-                                  const Idmap_overlay_entry* entries,
+                                  Idmap_overlay_entries entries,
                                   uint8_t target_assigned_package_id);
 
   // Rewrites a compile-time overlay resource id to the runtime resource id of corresponding target
@@ -75,8 +88,8 @@ class OverlayDynamicRefTable : public DynamicRefTable {
   status_t lookupResourceIdNoRewrite(uint32_t* resId) const;
 
   const Idmap_data_header* data_header_;
-  const Idmap_overlay_entry* entries_;
-  const int8_t target_assigned_package_id_;
+  Idmap_overlay_entries entries_;
+  uint8_t target_assigned_package_id_;
 
   friend LoadedIdmap;
   friend IdmapResMap;
@@ -131,17 +144,15 @@ class IdmapResMap {
   }
 
  private:
-  explicit IdmapResMap(const Idmap_data_header* data_header,
-                       const Idmap_target_entry* entries,
-                       const Idmap_target_entry_inline* inline_entries,
+  explicit IdmapResMap(const Idmap_data_header* data_header, Idmap_target_entries entries,
+                       Idmap_target_inline_entries inline_entries,
                        const Idmap_target_entry_inline_value* inline_entry_values,
-                       const ConfigDescription* configs,
-                       uint8_t target_assigned_package_id,
+                       const ConfigDescription* configs, uint8_t target_assigned_package_id,
                        const OverlayDynamicRefTable* overlay_ref_table);
 
   const Idmap_data_header* data_header_;
-  const Idmap_target_entry* entries_;
-  const Idmap_target_entry_inline* inline_entries_;
+  Idmap_target_entries entries_;
+  Idmap_target_inline_entries inline_entries_;
   const Idmap_target_entry_inline_value* inline_entry_values_;
   const ConfigDescription* configurations_;
   const uint8_t target_assigned_package_id_;
@@ -192,11 +203,11 @@ class LoadedIdmap {
 
   const Idmap_header* header_;
   const Idmap_data_header* data_header_;
-  const Idmap_target_entry* target_entries_;
-  const Idmap_target_entry_inline* target_inline_entries_;
+  Idmap_target_entries target_entries_;
+  Idmap_target_inline_entries target_inline_entries_;
   const Idmap_target_entry_inline_value* inline_entry_values_;
   const ConfigDescription* configurations_;
-  const Idmap_overlay_entry* overlay_entries_;
+  const Idmap_overlay_entries overlay_entries_;
   const std::unique_ptr<ResStringPool> string_pool_;
 
   android::base::unique_fd idmap_fd_;
@@ -207,17 +218,13 @@ class LoadedIdmap {
  private:
   DISALLOW_COPY_AND_ASSIGN(LoadedIdmap);
 
-  explicit LoadedIdmap(const std::string& idmap_path,
-                       const Idmap_header* header,
-                       const Idmap_data_header* data_header,
-                       const Idmap_target_entry* target_entries,
-                       const Idmap_target_entry_inline* target_inline_entries,
+  explicit LoadedIdmap(const std::string& idmap_path, const Idmap_header* header,
+                       const Idmap_data_header* data_header, Idmap_target_entries target_entries,
+                       Idmap_target_inline_entries target_inline_entries,
                        const Idmap_target_entry_inline_value* inline_entry_values_,
-                       const ConfigDescription* configs,
-                       const Idmap_overlay_entry* overlay_entries,
+                       const ConfigDescription* configs, Idmap_overlay_entries overlay_entries,
                        std::unique_ptr<ResStringPool>&& string_pool,
-                       std::string_view overlay_apk_path,
-                       std::string_view target_apk_path);
+                       std::string_view overlay_apk_path, std::string_view target_apk_path);
 
   friend OverlayStringPool;
 };

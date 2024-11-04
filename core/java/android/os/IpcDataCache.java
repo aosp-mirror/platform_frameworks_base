@@ -16,12 +16,14 @@
 
 package android.os;
 
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StringDef;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.app.PropertyInvalidatedCache;
+import android.app.PropertyInvalidatedCache.Args;
 import android.text.TextUtils;
 import android.util.ArraySet;
 
@@ -46,6 +48,20 @@ import java.util.concurrent.atomic.AtomicLong;
 /**
  * LRU cache that's invalidated when an opaque value in a property changes. Self-synchronizing,
  * but doesn't hold a lock across data fetches on query misses.
+ *
+ * Clients should be aware of the following commonly-seen issues:
+ * <ul>
+ *
+ * <li>Client calls will not go through the cache before the first invalidation signal is
+ * received. Therefore, servers should signal an invalidation as soon as they have data to offer to
+ * clients.
+ *
+ * <li>Cache invalidation is restricted to well-known processes, which means that test code cannot
+ * invalidate a cache.  {@link #disableForTestMode()} and {@link #testPropertyName} must be used in
+ * test processes that attempt cache invalidation.  See
+ * {@link PropertyInvalidatedCacheTest#testBasicCache()} for an example.
+ *
+ * </ul>
  *
  * The intended use case is caching frequently-read, seldom-changed information normally retrieved
  * across interprocess communication. Imagine that you've written a user birthday information
@@ -135,20 +151,20 @@ import java.util.concurrent.atomic.AtomicLong;
  * string is permitted.  The third parameters is the name of the API being cached; this, too, can
  * any value.  The fourth is the name of the cache.  The cache is usually named after th API.
  * Some things you must know about the three strings:
- * <list>
- * <ul> The system property that controls the cache is named {@code cache_key.<module>.<api>}.
+ * <ul>
+ * <li> The system property that controls the cache is named {@code cache_key.<module>.<api>}.
  * Usually, the SELinux rules permit a process to write a system property (and therefore
  * invalidate a cache) based on the wildcard {@code cache_key.<module>.*}.  This means that
  * although the cache can be constructed with any module string, whatever string is chosen must be
  * consistent with the SELinux configuration.
- * <ul> The API name can be any string of alphanumeric characters.  All caches with the same API
+ * <li> The API name can be any string of alphanumeric characters.  All caches with the same API
  * are invalidated at the same time.  If a server supports several caches and all are invalidated
  * in common, then it is most efficient to assign the same API string to every cache.
- * <ul> The cache name can be any string.  In debug output, the name is used to distiguish between
+ * <li> The cache name can be any string.  In debug output, the name is used to distiguish between
  * caches with the same API name.  The cache name is also used when disabling caches in the
  * current process.  So, invalidation is based on the module+api but disabling (which is generally
  * a once-per-process operation) is based on the cache name.
- * </list>
+ * </ul>
  *
  * User birthdays do occasionally change, so we have to modify the server to invalidate this
  * cache when necessary. That invalidation code looks like this:
@@ -242,6 +258,7 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 @TestApi
 @SystemApi(client=SystemApi.Client.MODULE_LIBRARIES)
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class IpcDataCache<Query, Result> extends PropertyInvalidatedCache<Query, Result> {
     /**
      * {@inheritDoc}
@@ -325,7 +342,7 @@ public class IpcDataCache<Query, Result> extends PropertyInvalidatedCache<Query,
     public IpcDataCache(int maxEntries, @NonNull @IpcDataCacheModule String module,
             @NonNull String api, @NonNull String cacheName,
             @NonNull QueryHandler<Query, Result> computer) {
-        super(maxEntries, module, api, cacheName, computer);
+        super(new Args(module).maxEntries(maxEntries).api(api), cacheName, computer);
     }
 
     /**
@@ -547,15 +564,24 @@ public class IpcDataCache<Query, Result> extends PropertyInvalidatedCache<Query,
      * @hide
      */
     public IpcDataCache(@NonNull Config config, @NonNull QueryHandler<Query, Result> computer) {
-        super(config.maxEntries(), config.module(), config.api(), config.name(), computer);
+      super(new Args(config.module()).maxEntries(config.maxEntries()).api(config.api()),
+          config.name(), computer);
     }
 
     /**
-     * An interface suitable for a lambda expression instead of a QueryHandler.
+     * An interface suitable for a lambda expression instead of a QueryHandler applying remote call.
      * @hide
      */
     public interface RemoteCall<Query, Result> {
         Result apply(Query query) throws RemoteException;
+    }
+
+    /**
+     * An interface suitable for a lambda expression instead of a QueryHandler bypassing the cache.
+     * @hide
+     */
+    public interface BypassCall<Query> {
+        Boolean apply(Query query);
     }
 
     /**
@@ -580,11 +606,54 @@ public class IpcDataCache<Query, Result> extends PropertyInvalidatedCache<Query,
         }
     }
 
+
     /**
      * Create a cache using a config and a lambda expression.
+     * @param config The configuration for the cache.
+     * @param remoteCall The lambda expression that will be invoked to fetch the data.
      * @hide
      */
-    public IpcDataCache(@NonNull Config config, @NonNull RemoteCall<Query, Result> computer) {
-        this(config, new SystemServerCallHandler<>(computer));
+    public IpcDataCache(@NonNull Config config, @NonNull RemoteCall<Query, Result> remoteCall) {
+      this(config, android.multiuser.Flags.cachingDevelopmentImprovements() ?
+        new QueryHandler<Query, Result>() {
+            @Override
+            public Result apply(Query query) {
+                try {
+                    return remoteCall.apply(query);
+                } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
+                }
+            }
+        } : new SystemServerCallHandler<>(remoteCall));
+    }
+
+
+    /**
+     * Create a cache using a config and a lambda expression.
+     * @param config The configuration for the cache.
+     * @param remoteCall The lambda expression that will be invoked to fetch the data.
+     * @param bypass The lambda expression that will be invoked to determine if the cache should be
+     *     bypassed.
+     * @hide
+     */
+    @FlaggedApi(android.multiuser.Flags.FLAG_CACHING_DEVELOPMENT_IMPROVEMENTS)
+    public IpcDataCache(@NonNull Config config,
+            @NonNull RemoteCall<Query, Result> remoteCall,
+            @NonNull BypassCall<Query> bypass) {
+        this(config, new QueryHandler<Query, Result>() {
+            @Override
+            public Result apply(Query query) {
+                try {
+                    return remoteCall.apply(query);
+                } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
+                }
+            }
+
+            @Override
+            public boolean shouldBypassCache(Query query) {
+                return bypass.apply(query);
+            }
+        });
     }
 }

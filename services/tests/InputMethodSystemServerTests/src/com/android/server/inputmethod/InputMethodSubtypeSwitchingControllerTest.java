@@ -75,7 +75,7 @@ public final class InputMethodSubtypeSwitchingControllerTest {
                 .build();
     }
 
-    private static void addTestImeSubtypeListItems(@NonNull List<ImeSubtypeListItem> items,
+    static void addTestImeSubtypeListItems(@NonNull List<ImeSubtypeListItem> items,
             @NonNull String imeName, @NonNull String imeLabel,
             @Nullable List<String> subtypeLocales, boolean supportsSwitchingToNextInputMethod) {
         final ApplicationInfo ai = new ApplicationInfo();

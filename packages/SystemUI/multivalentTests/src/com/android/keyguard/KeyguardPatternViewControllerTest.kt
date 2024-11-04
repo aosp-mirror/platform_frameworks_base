@@ -30,7 +30,7 @@ import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.classifier.FalsingCollectorFake
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
-import com.android.systemui.haptics.msdl.msdlPlayer
+import com.android.systemui.haptics.msdl.bouncerHapticPlayer
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.policy.DevicePostureController
 import com.android.systemui.statusbar.policy.DevicePostureController.DEVICE_POSTURE_HALF_OPENED
@@ -92,7 +92,7 @@ class KeyguardPatternViewControllerTest : SysuiTestCase() {
     @Captor lateinit var postureCallbackCaptor: ArgumentCaptor<DevicePostureController.Callback>
 
     private val kosmos = testKosmos()
-    private val msdlPlayer = kosmos.msdlPlayer
+    private val bouncerHapticHelper = kosmos.bouncerHapticPlayer
 
     @Before
     fun setup() {
@@ -118,7 +118,7 @@ class KeyguardPatternViewControllerTest : SysuiTestCase() {
                 mPostureController,
                 fakeFeatureFlags,
                 mSelectedUserInteractor,
-                msdlPlayer,
+                bouncerHapticHelper,
             )
         mKeyguardPatternView.onAttachedToWindow()
     }

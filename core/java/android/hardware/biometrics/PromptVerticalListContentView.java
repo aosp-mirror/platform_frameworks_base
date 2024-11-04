@@ -16,9 +16,6 @@
 
 package android.hardware.biometrics;
 
-import static android.hardware.biometrics.Flags.FLAG_CUSTOM_BIOMETRIC_PROMPT;
-
-import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Parcel;
@@ -48,7 +45,6 @@ import java.util.List;
  *     .build();
  * </pre>
  */
-@FlaggedApi(FLAG_CUSTOM_BIOMETRIC_PROMPT)
 public final class PromptVerticalListContentView implements PromptContentViewParcelable {
     private static final String TAG = "PromptVerticalListContentView";
     @VisibleForTesting

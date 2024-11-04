@@ -45,6 +45,16 @@ flag {
 }
 
 flag {
+    name: "clear_shortcuts_when_activity_updates_to_service"
+    namespace: "accessibility"
+    description: "When an a11y activity is updated to an a11y service, clears the associated shortcuts so that we don't skip the AccessibilityServiceWarning."
+    bug: "358092445"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "compute_window_changes_on_a11y_v2"
     namespace: "accessibility"
     description: "Computes accessibility window changes in accessibility instead of wm package."
@@ -114,10 +124,13 @@ flag {
 }
 
 flag {
-    name: "enable_magnification_follows_mouse"
+    name: "enable_magnification_follows_mouse_bugfix"
     namespace: "accessibility"
     description: "Whether to enable mouse following for fullscreen magnification"
     bug: "354696546"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
 }
 
 flag {
@@ -162,10 +175,30 @@ flag {
 }
 
 flag {
+    name: "magnification_enlarge_pointer_bugfix"
+    namespace: "accessibility"
+    description: "When fullscreen magnification is enabled, pointer icon is enlarged"
+    bug: "355734856"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "manager_avoid_receiver_timeout"
     namespace: "accessibility"
     description: "Register receivers on background handler so they have more time to complete"
     bug: "333890389"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "package_monitor_dedicated_thread"
+    namespace: "accessibility"
+    description: "Runs the A11yManagerService PackageMonitor on a dedicated thread"
+    bug: "348138695"
     metadata {
         purpose: PURPOSE_BUGFIX
     }

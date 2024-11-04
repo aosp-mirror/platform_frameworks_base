@@ -29,6 +29,8 @@ import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
 
+import dalvik.annotation.optimization.NeverCompile;
+
 import java.io.FileDescriptor;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -380,6 +382,18 @@ public final class MessageQueue {
         }
     }
 
+    private static final class MatchDeliverableMessages extends MessageCompare {
+        @Override
+        public boolean compareMessage(Message m, Handler h, int what, Object object, Runnable r,
+                long when) {
+            if (m.when <= when) {
+                return true;
+            }
+            return false;
+        }
+    }
+    private final MatchDeliverableMessages mMatchDeliverableMessages =
+            new MatchDeliverableMessages();
     /**
      * Returns true if the looper has no pending messages which are due to be processed.
      *
@@ -388,6 +402,12 @@ public final class MessageQueue {
      * @return True if the looper is idle.
      */
     public boolean isIdle() {
+        final long now = SystemClock.uptimeMillis();
+
+        if (stackHasMessages(null, 0, null, null, now, mMatchDeliverableMessages, false)) {
+            return false;
+        }
+
         MessageNode msgNode = null;
         MessageNode asyncMsgNode = null;
 
@@ -403,7 +423,6 @@ public final class MessageQueue {
             } catch (NoSuchElementException e) { }
         }
 
-        final long now = SystemClock.uptimeMillis();
         if ((msgNode != null && msgNode.getWhen() <= now)
                 || (asyncMsgNode != null && asyncMsgNode.getWhen() <= now)) {
             return false;
@@ -754,7 +773,7 @@ public final class MessageQueue {
                 // Idle handles only run if the queue is empty or if the first message
                 // in the queue (possibly a barrier) is due to be handled in the future.
                 if (pendingIdleHandlerCount < 0
-                        && mNextPollTimeoutMillis != 0) {
+                        && isIdle()) {
                     pendingIdleHandlerCount = mIdleHandlers.size();
                 }
                 if (pendingIdleHandlerCount <= 0) {
@@ -965,7 +984,7 @@ public final class MessageQueue {
         return token;
     }
 
-    private class MatchBarrierToken extends MessageCompare {
+    private static final class MatchBarrierToken extends MessageCompare {
         int mBarrierToken;
 
         MatchBarrierToken(int token) {
@@ -1146,7 +1165,7 @@ public final class MessageQueue {
         return foundInStack || foundInQueue;
     }
 
-    private static class MatchHandlerWhatAndObject extends MessageCompare {
+    private static final class MatchHandlerWhatAndObject extends MessageCompare {
         @Override
         public boolean compareMessage(Message m, Handler h, int what, Object object, Runnable r,
                 long when) {
@@ -1166,7 +1185,7 @@ public final class MessageQueue {
         return findOrRemoveMessages(h, what, object, null, 0, mMatchHandlerWhatAndObject, false);
     }
 
-    private static class MatchHandlerWhatAndObjectEquals extends MessageCompare {
+    private static final class MatchHandlerWhatAndObjectEquals extends MessageCompare {
         @Override
         public boolean compareMessage(Message m, Handler h, int what, Object object, Runnable r,
                 long when) {
@@ -1187,7 +1206,7 @@ public final class MessageQueue {
                 false);
     }
 
-    private static class MatchHandlerRunnableAndObject extends MessageCompare {
+    private static final class MatchHandlerRunnableAndObject extends MessageCompare {
         @Override
         public boolean compareMessage(Message m, Handler h, int what, Object object, Runnable r,
                 long when) {
@@ -1208,7 +1227,7 @@ public final class MessageQueue {
         return findOrRemoveMessages(h, -1, object, r, 0, mMatchHandlerRunnableAndObject, false);
     }
 
-    private static class MatchHandler extends MessageCompare {
+    private static final class MatchHandler extends MessageCompare {
         @Override
         public boolean compareMessage(Message m, Handler h, int what, Object object, Runnable r,
                 long when) {
@@ -1247,7 +1266,7 @@ public final class MessageQueue {
         findOrRemoveMessages(h, -1, object, r, 0, mMatchHandlerRunnableAndObject, true);
     }
 
-    private static class MatchHandlerRunnableAndObjectEquals extends MessageCompare {
+    private static final class MatchHandlerRunnableAndObjectEquals extends MessageCompare {
         @Override
         public boolean compareMessage(Message m, Handler h, int what, Object object, Runnable r,
                 long when) {
@@ -1266,7 +1285,7 @@ public final class MessageQueue {
         findOrRemoveMessages(h, -1, object, r, 0, mMatchHandlerRunnableAndObjectEquals, true);
     }
 
-    private static class MatchHandlerAndObject extends MessageCompare {
+    private static final class MatchHandlerAndObject extends MessageCompare {
         @Override
         public boolean compareMessage(Message m, Handler h, int what, Object object, Runnable r,
                 long when) {
@@ -1284,7 +1303,7 @@ public final class MessageQueue {
         findOrRemoveMessages(h, -1, object, null, 0, mMatchHandlerAndObject, true);
     }
 
-    private static class MatchHandlerAndObjectEquals extends MessageCompare {
+    private static final class MatchHandlerAndObjectEquals extends MessageCompare {
         @Override
         public boolean compareMessage(Message m, Handler h, int what, Object object, Runnable r,
                 long when) {
@@ -1303,7 +1322,7 @@ public final class MessageQueue {
         findOrRemoveMessages(h, -1, object, null, 0, mMatchHandlerAndObjectEquals, true);
     }
 
-    private static class MatchAllMessages extends MessageCompare {
+    private static final class MatchAllMessages extends MessageCompare {
         @Override
         public boolean compareMessage(Message m, Handler h, int what, Object object, Runnable r,
                 long when) {
@@ -1315,7 +1334,7 @@ public final class MessageQueue {
         findOrRemoveMessages(null, -1, null, null, 0, mMatchAllMessages, true);
     }
 
-    private static class MatchAllFutureMessages extends MessageCompare {
+    private static final class MatchAllFutureMessages extends MessageCompare {
         @Override
         public boolean compareMessage(Message m, Handler h, int what, Object object, Runnable r,
                 long when) {
@@ -1331,6 +1350,7 @@ public final class MessageQueue {
                 mMatchAllFutureMessages, true);
     }
 
+    @NeverCompile
     private void printPriorityQueueNodes() {
         Iterator<MessageNode> iterator = mPriorityQueue.iterator();
 
@@ -1342,6 +1362,7 @@ public final class MessageQueue {
         }
     }
 
+    @NeverCompile
     private int dumpPriorityQueue(ConcurrentSkipListSet<MessageNode> queue, Printer pw,
             String prefix, Handler h, int n) {
         int count = 0;
@@ -1357,6 +1378,7 @@ public final class MessageQueue {
         return count;
     }
 
+    @NeverCompile
     void dump(Printer pw, String prefix, Handler h) {
         long now = SystemClock.uptimeMillis();
         int n = 0;
@@ -1387,6 +1409,7 @@ public final class MessageQueue {
                 + ", quitting=" + (boolean) sQuitting.getVolatile(this) + ")");
     }
 
+    @NeverCompile
     private int dumpPriorityQueue(ConcurrentSkipListSet<MessageNode> queue,
             ProtoOutputStream proto) {
         int count = 0;
@@ -1399,6 +1422,7 @@ public final class MessageQueue {
         return count;
     }
 
+    @NeverCompile
     void dumpDebug(ProtoOutputStream proto, long fieldId) {
         final long messageQueueToken = proto.start(fieldId);
 

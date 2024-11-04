@@ -42,8 +42,8 @@ import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_CONFIGURATION;
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_IMMERSIVE;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_CONFIGURATION;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_IMMERSIVE;
 import static com.android.server.wm.ActivityRecord.State.DESTROYED;
 import static com.android.server.wm.ActivityRecord.State.DESTROYING;
 import static com.android.server.wm.ActivityRecord.State.PAUSING;
@@ -500,6 +500,8 @@ class ActivityClientController extends IActivityClientController.Stub {
                 r.app.setLastActivityFinishTimeIfNeeded(SystemClock.uptimeMillis());
             }
 
+            mService.mAmInternal.addCreatorToken(resultData, r.packageName);
+
             final long origId = Binder.clearCallingIdentity();
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "finishActivity");
             try {
@@ -864,8 +866,9 @@ class ActivityClientController extends IActivityClientController.Stub {
                 if (transition != null) {
                     if (changed) {
                         // Always set as scene transition because it expects to be a jump-cut.
-                        transition.setOverrideAnimation(TransitionInfo.AnimationOptions
-                                .makeSceneTransitionAnimOptions(), null, null);
+                        transition.setOverrideAnimation(
+                                TransitionInfo.AnimationOptions.makeSceneTransitionAnimOptions(), r,
+                                null, null);
                         r.mTransitionController.requestStartTransition(transition,
                                 null /*startTask */, null /* remoteTransition */,
                                 null /* displayChange */);
@@ -883,7 +886,10 @@ class ActivityClientController extends IActivityClientController.Stub {
 
     @Override
     public boolean convertToTranslucent(IBinder token, Bundle options) {
-        final SafeActivityOptions safeOptions = SafeActivityOptions.fromBundle(options);
+        final int callingPid = Binder.getCallingPid();
+        final int callingUid = Binder.getCallingUid();
+        final SafeActivityOptions safeOptions = SafeActivityOptions.fromBundle(
+                options, callingPid, callingUid);
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
@@ -910,8 +916,9 @@ class ActivityClientController extends IActivityClientController.Stub {
                                 && under.returningOptions.getAnimationType()
                                         == ANIM_SCENE_TRANSITION) {
                             // Pass along the scene-transition animation-type
-                            transition.setOverrideAnimation(TransitionInfo.AnimationOptions
-                                    .makeSceneTransitionAnimOptions(), null, null);
+                            transition.setOverrideAnimation(TransitionInfo
+                                            .AnimationOptions.makeSceneTransitionAnimOptions(), r,
+                                    null, null);
                         }
                     } else {
                         transition.abort();
@@ -1508,7 +1515,7 @@ class ActivityClientController extends IActivityClientController.Stub {
                         r.mOverrideTaskTransition);
                 r.mTransitionController.setOverrideAnimation(
                         TransitionInfo.AnimationOptions.makeCustomAnimOptions(packageName,
-                                enterAnim, exitAnim, backgroundColor, r.mOverrideTaskTransition),
+                                enterAnim, exitAnim, backgroundColor, r.mOverrideTaskTransition), r,
                         null /* startCallback */, null /* finishCallback */);
             }
         }

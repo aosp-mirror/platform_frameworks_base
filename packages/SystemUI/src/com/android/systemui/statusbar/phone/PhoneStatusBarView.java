@@ -39,8 +39,10 @@ import com.android.systemui.Dependency;
 import com.android.systemui.Flags;
 import com.android.systemui.Gefingerpoken;
 import com.android.systemui.res.R;
+import com.android.systemui.shade.LongPressGestureDetector;
+import com.android.systemui.shade.ShadeExpandsOnStatusBarLongPress;
 import com.android.systemui.statusbar.phone.userswitcher.StatusBarUserSwitcherContainer;
-import com.android.systemui.statusbar.window.StatusBarWindowController;
+import com.android.systemui.statusbar.window.StatusBarWindowControllerStore;
 import com.android.systemui.user.ui.binder.StatusBarUserChipViewBinder;
 import com.android.systemui.user.ui.viewmodel.StatusBarUserChipViewModel;
 import com.android.systemui.util.leak.RotationUtils;
@@ -49,7 +51,7 @@ import java.util.Objects;
 
 public class PhoneStatusBarView extends FrameLayout {
     private static final String TAG = "PhoneStatusBarView";
-    private final StatusBarWindowController mStatusBarWindowController;
+    private final StatusBarWindowControllerStore mStatusBarWindowControllerStore;
 
     private int mRotationOrientation = -1;
     @Nullable
@@ -67,6 +69,7 @@ public class PhoneStatusBarView extends FrameLayout {
     private InsetsFetcher mInsetsFetcher;
     private int mDensity;
     private float mFontScale;
+    private LongPressGestureDetector mLongPressGestureDetector;
 
     /**
      * Draw this many pixels into the left/right side of the cutout to optimally use the space
@@ -75,7 +78,13 @@ public class PhoneStatusBarView extends FrameLayout {
 
     public PhoneStatusBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        mStatusBarWindowController = Dependency.get(StatusBarWindowController.class);
+        mStatusBarWindowControllerStore = Dependency.get(StatusBarWindowControllerStore.class);
+    }
+
+    void setLongPressGestureDetector(LongPressGestureDetector longPressGestureDetector) {
+        if (ShadeExpandsOnStatusBarLongPress.isEnabled()) {
+            mLongPressGestureDetector = longPressGestureDetector;
+        }
     }
 
     void setTouchEventHandler(Gefingerpoken handler) {
@@ -198,6 +207,9 @@ public class PhoneStatusBarView extends FrameLayout {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        if (ShadeExpandsOnStatusBarLongPress.isEnabled() && mLongPressGestureDetector != null) {
+            mLongPressGestureDetector.handleTouch(event);
+        }
         if (mTouchEventHandler == null) {
             Log.w(
                     TAG,
@@ -326,7 +338,7 @@ public class PhoneStatusBarView extends FrameLayout {
         if (Flags.statusBarStopUpdatingWindowHeight()) {
             return;
         }
-        mStatusBarWindowController.refreshStatusBarHeight();
+        mStatusBarWindowControllerStore.getDefaultDisplay().refreshStatusBarHeight();
     }
 
     interface HasCornerCutoutFetcher {

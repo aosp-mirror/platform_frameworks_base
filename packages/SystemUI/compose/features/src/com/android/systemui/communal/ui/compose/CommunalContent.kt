@@ -19,12 +19,12 @@ package com.android.systemui.communal.ui.compose
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.unit.IntRect
 import com.android.compose.animation.scene.SceneScope
-import com.android.compose.theme.LocalAndroidColorScheme
 import com.android.systemui.communal.smartspace.SmartspaceInteractionHandler
 import com.android.systemui.communal.ui.compose.section.AmbientStatusBarSection
 import com.android.systemui.communal.ui.compose.section.CommunalPopupSection
@@ -71,7 +71,7 @@ constructor(
                     }
                     with(lockSection) {
                         LockIcon(
-                            overrideColor = LocalAndroidColorScheme.current.onPrimaryContainer,
+                            overrideColor = MaterialTheme.colorScheme.onPrimaryContainer,
                             modifier = Modifier.element(Communal.Elements.LockIcon)
                         )
                     }

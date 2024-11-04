@@ -43,6 +43,7 @@ import com.android.systemui.communal.domain.interactor.communalSettingsInteracto
 import com.android.systemui.communal.domain.interactor.communalTutorialInteractor
 import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.communal.shared.log.CommunalMetricsLogger
+import com.android.systemui.communal.shared.model.CommunalContentSize
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel.Companion.POPUP_AUTO_HIDE_TIMEOUT_MS
@@ -150,10 +151,7 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
         kosmos.fakeFeatureFlagsClassic.set(COMMUNAL_SERVICE_ENABLED, true)
         mSetFlagsRule.enableFlags(FLAG_COMMUNAL_HUB)
 
-        kosmos.fakeUserTracker.set(
-            userInfos = listOf(MAIN_USER_INFO),
-            selectedUserIndex = 0,
-        )
+        kosmos.fakeUserTracker.set(userInfos = listOf(MAIN_USER_INFO), selectedUserIndex = 0)
         whenever(mediaHost.visible).thenReturn(true)
 
         kosmos.powerInteractor.setAwakeForTest()
@@ -246,6 +244,87 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
                 .isInstanceOf(CommunalContentModel.WidgetContent::class.java)
             assertThat(communalContent?.get(4))
                 .isInstanceOf(CommunalContentModel.CtaTileInViewMode::class.java)
+        }
+
+    @Test
+    fun ongoingContent_umoAndOneTimer_sizedAppropriately() =
+        testScope.runTest {
+            // Widgets available.
+            widgetRepository.addWidget(appWidgetId = 0, rank = 30)
+            widgetRepository.addWidget(appWidgetId = 1, rank = 20)
+
+            // Smartspace available.
+            smartspaceRepository.setTimers(
+                listOf(
+                    CommunalSmartspaceTimer(
+                        smartspaceTargetId = "target",
+                        createdTimestampMillis = 0L,
+                        remoteViews = Mockito.mock(RemoteViews::class.java),
+                    )
+                )
+            )
+
+            // Media playing.
+            mediaRepository.mediaActive()
+
+            val communalContent by collectLastValue(underTest.communalContent)
+
+            // One timer, UMO, two widgets, and cta.
+            assertThat(communalContent?.size).isEqualTo(5)
+
+            val timer = communalContent?.get(0)
+            val umo = communalContent?.get(1)
+
+            assertThat(timer).isInstanceOf(CommunalContentModel.Smartspace::class.java)
+            assertThat(umo).isInstanceOf(CommunalContentModel.Umo::class.java)
+
+            assertThat(timer?.size).isEqualTo(CommunalContentSize.HALF)
+            assertThat(umo?.size).isEqualTo(CommunalContentSize.HALF)
+        }
+
+    @Test
+    fun ongoingContent_umoAndTwoTimers_sizedAppropriately() =
+        testScope.runTest {
+            // Widgets available.
+            widgetRepository.addWidget(appWidgetId = 0, rank = 30)
+            widgetRepository.addWidget(appWidgetId = 1, rank = 20)
+
+            // Smartspace available.
+            smartspaceRepository.setTimers(
+                listOf(
+                    CommunalSmartspaceTimer(
+                        smartspaceTargetId = "target",
+                        createdTimestampMillis = 0L,
+                        remoteViews = Mockito.mock(RemoteViews::class.java),
+                    ),
+                    CommunalSmartspaceTimer(
+                        smartspaceTargetId = "target",
+                        createdTimestampMillis = 0L,
+                        remoteViews = Mockito.mock(RemoteViews::class.java),
+                    ),
+                )
+            )
+
+            // Media playing.
+            mediaRepository.mediaActive()
+
+            val communalContent by collectLastValue(underTest.communalContent)
+
+            // Two timers, UMO, two widgets, and cta.
+            assertThat(communalContent?.size).isEqualTo(6)
+
+            val timer1 = communalContent?.get(0)
+            val timer2 = communalContent?.get(1)
+            val umo = communalContent?.get(2)
+
+            assertThat(timer1).isInstanceOf(CommunalContentModel.Smartspace::class.java)
+            assertThat(timer2).isInstanceOf(CommunalContentModel.Smartspace::class.java)
+            assertThat(umo).isInstanceOf(CommunalContentModel.Umo::class.java)
+
+            // One full-sized timer and a half-sized timer and half-sized UMO.
+            assertThat(timer1?.size).isEqualTo(CommunalContentSize.HALF)
+            assertThat(timer2?.size).isEqualTo(CommunalContentSize.HALF)
+            assertThat(umo?.size).isEqualTo(CommunalContentSize.FULL)
         }
 
     @Test
@@ -497,7 +576,7 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
                     TransitionStep(
                         from = KeyguardState.LOCKSCREEN,
                         to = KeyguardState.GLANCEABLE_HUB,
-                    )
+                    ),
             )
             // Shade not expanded.
             if (!SceneContainerFlag.isEnabled) shadeTestUtil.setLockscreenShadeExpansion(0f)
@@ -550,8 +629,8 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
                 stateTransition =
                     TransitionStep(
                         from = KeyguardState.DREAMING,
-                        to = KeyguardState.GLANCEABLE_HUB,
-                    )
+                        to = KeyguardState.GLANCEABLE_HUB
+                    ),
             )
 
             // Then flow is not frozen
@@ -570,8 +649,8 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
                 stateTransition =
                     TransitionStep(
                         from = KeyguardState.GLANCEABLE_HUB,
-                        to = KeyguardState.OCCLUDED,
-                    )
+                        to = KeyguardState.OCCLUDED
+                    ),
             )
 
             // Then flow is not frozen
@@ -595,7 +674,7 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
                     TransitionStep(
                         from = KeyguardState.LOCKSCREEN,
                         to = KeyguardState.GLANCEABLE_HUB,
-                    )
+                    ),
             )
 
             // Then flow is not frozen
@@ -614,7 +693,7 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
                         to = KeyguardState.OCCLUDED,
                         transitionState = TransitionState.STARTED,
                         value = 0f,
-                    )
+                    ),
             )
 
             // Then flow is frozen
@@ -629,7 +708,7 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
                         to = KeyguardState.OCCLUDED,
                         transitionState = TransitionState.FINISHED,
                         value = 1f,
-                    )
+                    ),
             )
 
             // Then flow is not frozen
@@ -658,8 +737,8 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
                 stateTransition =
                     TransitionStep(
                         from = KeyguardState.DREAMING,
-                        to = KeyguardState.GLANCEABLE_HUB,
-                    )
+                        to = KeyguardState.GLANCEABLE_HUB
+                    ),
             )
 
             // Widgets available

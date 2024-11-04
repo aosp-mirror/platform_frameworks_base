@@ -17,13 +17,17 @@
 package android.os;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
+import android.multiuser.Flags;
 import android.platform.test.annotations.IgnoreUnderRavenwood;
+import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.ravenwood.RavenwoodRule;
 
 import androidx.test.filters.SmallTest;
 
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -37,10 +41,7 @@ import org.junit.Test;
  *  atest FrameworksCoreTests:IpcDataCacheTest
  */
 @SmallTest
-@IgnoreUnderRavenwood(blockedBy = IpcDataCache.class)
 public class IpcDataCacheTest {
-    @Rule
-    public final RavenwoodRule mRavenwood = new RavenwoodRule();
 
     // Configuration for creating caches
     private static final String MODULE = IpcDataCache.MODULE_TEST;
@@ -90,14 +91,20 @@ public class IpcDataCacheTest {
         public Boolean apply(Integer x) {
             return mServer.query(x);
         }
+
         @Override
         public boolean shouldBypassCache(Integer x) {
             return x % 13 == 0;
         }
     }
 
-    // Clear the test mode after every test, in case this process is used for other
-    // tests. This also resets the test property map.
+    // Prepare for testing.
+    @Before
+    public void setUp() throws Exception {
+        IpcDataCache.setTestMode(true);
+    }
+
+    // Ensure all test configurations are cleared.
     @After
     public void tearDown() throws Exception {
         IpcDataCache.setTestMode(false);
@@ -116,9 +123,6 @@ public class IpcDataCacheTest {
         IpcDataCache<Integer, Boolean> testCache =
                 new IpcDataCache<>(4, MODULE, API, "testCache1",
                         new ServerQuery(tester));
-
-        IpcDataCache.setTestMode(true);
-        testCache.testPropertyName();
 
         tester.verify(0);
         assertEquals(tester.value(3), testCache.query(3));
@@ -151,8 +155,6 @@ public class IpcDataCacheTest {
         tester.verify(9);
     }
 
-    // This test is disabled pending an sepolicy change that allows any app to set the
-    // test property.
     @Test
     public void testRemoteCall() {
 
@@ -164,9 +166,6 @@ public class IpcDataCacheTest {
         IpcDataCache.Config config = new IpcDataCache.Config(4, MODULE, API, "testCache2");
         IpcDataCache<Integer, Boolean> testCache =
                 new IpcDataCache<>(config, (x) -> tester.query(x, x % 10 == 9));
-
-        IpcDataCache.setTestMode(true);
-        testCache.testPropertyName();
 
         tester.verify(0);
         assertEquals(tester.value(3), testCache.query(3));
@@ -190,6 +189,41 @@ public class IpcDataCacheTest {
             assertEquals(e.getCause() instanceof RemoteException, true);
         }
         tester.verify(4);
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_CACHING_DEVELOPMENT_IMPROVEMENTS)
+    public void testRemoteCallBypass() {
+
+        // A stand-in for the binder.  The test verifies that calls are passed through to
+        // this class properly.
+        ServerProxy tester = new ServerProxy();
+
+        // Create a cache that uses simple arithmetic to computer its values.
+        IpcDataCache.Config config = new IpcDataCache.Config(4, MODULE, API, "testCache3");
+        IpcDataCache<Integer, Boolean> testCache =
+                new IpcDataCache<>(config, (x) -> tester.query(x), (x) -> x % 9 == 0);
+
+        tester.verify(0);
+        assertEquals(tester.value(3), testCache.query(3));
+        tester.verify(1);
+        assertEquals(tester.value(3), testCache.query(3));
+        tester.verify(2);
+        testCache.invalidateCache();
+        assertEquals(tester.value(3), testCache.query(3));
+        tester.verify(3);
+        assertEquals(tester.value(5), testCache.query(5));
+        tester.verify(4);
+        assertEquals(tester.value(5), testCache.query(5));
+        tester.verify(4);
+        assertEquals(tester.value(3), testCache.query(3));
+        tester.verify(4);
+        assertEquals(tester.value(9), testCache.query(9));
+        tester.verify(5);
+        assertEquals(tester.value(3), testCache.query(3));
+        tester.verify(5);
+        assertEquals(tester.value(5), testCache.query(5));
+        tester.verify(5);
     }
 
     @Test
@@ -275,8 +309,6 @@ public class IpcDataCacheTest {
         TestCache(String module, String api, TestQuery query) {
             super(4, module, api, "testCache7", query);
             mQuery = query;
-            setTestMode(true);
-            testPropertyName();
         }
 
         TestCache(IpcDataCache.Config c) {
@@ -286,8 +318,6 @@ public class IpcDataCacheTest {
         TestCache(IpcDataCache.Config c, TestQuery query) {
             super(c, query);
             mQuery = query;
-            setTestMode(true);
-            testPropertyName();
         }
 
         int getRecomputeCount() {
@@ -417,5 +447,64 @@ public class IpcDataCacheTest {
         IpcDataCache.Config e = a.child("nameE");
         TestCache ec = new TestCache(e);
         assertEquals(ec.isDisabled(), true);
+    }
+
+    // Verify that invalidating the cache from an app process would fail due to lack of permissions.
+    @Test
+    @android.platform.test.annotations.DisabledOnRavenwood(
+            reason = "SystemProperties doesn't have permission check")
+    public void testPermissionFailure() {
+        // Create a cache that will write a system nonce.
+        TestCache sysCache = new TestCache(IpcDataCache.MODULE_SYSTEM, "mode1");
+        try {
+            // Invalidate the cache, which writes the system property.  There must be a permission
+            // failure.
+            sysCache.invalidateCache();
+            fail("expected permission failure");
+        } catch (RuntimeException e) {
+            // The expected exception is a bare RuntimeException.  The test does not attempt to
+            // validate the text of the exception message.
+        }
+    }
+
+    // Verify that test mode works properly.
+    @Test
+    public void testTestMode() {
+        // Create a cache that will write a system nonce.
+        TestCache sysCache = new TestCache(IpcDataCache.MODULE_SYSTEM, "mode1");
+
+        sysCache.testPropertyName();
+        // Invalidate the cache.  This must succeed because the property has been marked for
+        // testing.
+        sysCache.invalidateCache();
+
+        // Create a cache that uses MODULE_TEST.  Invalidation succeeds whether or not the
+        // property is tagged as being tested.
+        TestCache testCache = new TestCache(IpcDataCache.MODULE_TEST, "mode2");
+        testCache.invalidateCache();
+        testCache.testPropertyName();
+        testCache.invalidateCache();
+
+        // Clear test mode.  This fails if test mode is not enabled.
+        IpcDataCache.setTestMode(false);
+        try {
+            IpcDataCache.setTestMode(false);
+            if (android.app.Flags.enforcePicTestmodeProtocol()) {
+                fail("expected an IllegalStateException");
+            }
+        } catch (IllegalStateException e) {
+            // The expected exception.
+        }
+        // Configuring a property for testing must fail if test mode is false.
+        TestCache cache2 = new TestCache(IpcDataCache.MODULE_SYSTEM, "mode3");
+        try {
+            cache2.testPropertyName();
+            fail("expected an IllegalStateException");
+        } catch (IllegalStateException e) {
+            // The expected exception.
+        }
+
+        // Re-enable test mode (so that the cleanup for the test does not throw).
+        IpcDataCache.setTestMode(true);
     }
 }

@@ -4,12 +4,7 @@
             "name": "SettingsProviderTest"
         },
         {
-            "name": "CtsProviderTestCases",
-            "options": [
-                {
-                    "include-filter": "android.provider.cts.settings."
-                }
-            ]
+            "name": "CtsProviderTestCases_cts_settings"
         }
     ],
     "postsubmit": [

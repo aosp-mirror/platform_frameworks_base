@@ -53,7 +53,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /**
  * Encapsulates business logic for interacting with the lock-screen primary (pin/pattern/password)
@@ -294,7 +294,9 @@ constructor(
 
     /** Tell the bouncer that bouncer is requested when device is already authenticated */
     fun notifyUserRequestedBouncerWhenAlreadyAuthenticated(userId: Int) {
-        applicationScope.launch { repository.setKeyguardAuthenticatedPrimaryAuth(userId) }
+        applicationScope.launch {
+            repository.setUserRequestedBouncerWhenAlreadyAuthenticated(userId)
+        }
     }
 
     /** Tell the bouncer that keyguard is authenticated with biometrics. */

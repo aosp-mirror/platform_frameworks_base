@@ -28,9 +28,9 @@ droidstubs {
         "testrunner-src/**/*.java",
     ],
     libs: [
-        "android.test.runner",
+        "android.test.runner.stubs.system",
         "junit",
-        "android.test.base",
+        "android.test.base.stubs.system",
         "unsupportedappusage",
     ],
     installable: false,
@@ -56,9 +56,9 @@ droiddoc {
         ":uiautomator-stubs",
     ],
     libs: [
-        "android.test.runner",
+        "android.test.runner.stubs",
         "junit",
-        "android.test.base",
+        "android.test.base.stubs",
     ],
     sdk_version: "current",
     installable: false,
@@ -71,7 +71,7 @@ java_library_static {
         ":uiautomator-stubs",
     ],
     libs: [
-        "android.test.runner",
+        "android.test.runner.stubs.system",
         "junit",
     ],
     java_version: "1.8",
@@ -84,8 +84,8 @@ java_library_static {
         "testrunner-src/**/*.java",
     ],
     libs: [
-        "android.test.runner",
-        "android.test.base",
+        "android.test.runner.stubs.system",
+        "android.test.base.stubs.system",
     ],
     static_libs: [
         "junit",

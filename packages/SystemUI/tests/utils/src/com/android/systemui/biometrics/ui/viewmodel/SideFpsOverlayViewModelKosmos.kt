@@ -27,9 +27,9 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 @OptIn(ExperimentalCoroutinesApi::class)
 val Kosmos.sideFpsOverlayViewModel by Fixture {
     SideFpsOverlayViewModel(
-        applicationContext,
-        deviceEntrySideFpsOverlayInteractor,
-        displayStateInteractor,
-        sideFpsSensorInteractor,
+        applicationContext = applicationContext,
+        deviceEntrySideFpsOverlayInteractor = deviceEntrySideFpsOverlayInteractor,
+        displayStateInteractor = displayStateInteractor,
+        sfpsSensorInteractor = sideFpsSensorInteractor,
     )
 }

@@ -34,9 +34,11 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
+import com.android.systemui.haptics.msdl.bouncerHapticPlayer
 import com.android.systemui.keyboard.data.repository.FakeKeyboardRepository
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.policy.DevicePostureController
+import com.android.systemui.testKosmos
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.systemui.util.mockito.mock
@@ -86,6 +88,7 @@ class KeyguardPasswordViewControllerTest : SysuiTestCase() {
     @Mock private lateinit var postureController: DevicePostureController
     @Mock private lateinit var mUserActivityNotifier: UserActivityNotifier
     @Captor private lateinit var keyListenerArgumentCaptor: ArgumentCaptor<View.OnKeyListener>
+    private val kosmos = testKosmos()
 
     private lateinit var keyguardPasswordViewController: KeyguardPasswordViewController
 
@@ -132,8 +135,8 @@ class KeyguardPasswordViewControllerTest : SysuiTestCase() {
                 fakeFeatureFlags,
                 mSelectedUserInteractor,
                 keyguardKeyboardInteractor,
-                null,
-                mUserActivityNotifier
+                kosmos.bouncerHapticPlayer,
+                mUserActivityNotifier,
             )
     }
 
@@ -194,7 +197,7 @@ class KeyguardPasswordViewControllerTest : SysuiTestCase() {
             keyListenerArgumentCaptor.value.onKey(
                 keyguardPasswordView,
                 KeyEvent.KEYCODE_SPACE,
-                KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_SPACE)
+                KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_SPACE),
             )
 
         assertFalse("Unlock attempted.", eventHandled)
@@ -213,7 +216,7 @@ class KeyguardPasswordViewControllerTest : SysuiTestCase() {
             keyListenerArgumentCaptor.value.onKey(
                 keyguardPasswordView,
                 KeyEvent.KEYCODE_ENTER,
-                KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_ENTER)
+                KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_ENTER),
             )
 
         assertTrue("Unlock not attempted.", eventHandled)

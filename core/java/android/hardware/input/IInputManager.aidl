@@ -17,6 +17,7 @@
 package android.hardware.input;
 
 import android.graphics.Rect;
+import android.hardware.input.AidlInputGestureData;
 import android.hardware.input.HostUsiVersion;
 import android.hardware.input.InputDeviceIdentifier;
 import android.hardware.input.KeyboardLayout;
@@ -26,6 +27,7 @@ import android.hardware.input.IInputDeviceBatteryState;
 import android.hardware.input.IKeyboardBacklightListener;
 import android.hardware.input.IKeyboardBacklightState;
 import android.hardware.input.IKeyGestureEventListener;
+import android.hardware.input.IKeyGestureHandler;
 import android.hardware.input.IStickyModifierStateListener;
 import android.hardware.input.ITabletModeChangedListener;
 import android.hardware.input.KeyboardLayoutSelectionResult;
@@ -250,4 +252,31 @@ interface IInputManager {
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
             + "android.Manifest.permission.MANAGE_KEY_GESTURES)")
     void unregisterKeyGestureEventListener(IKeyGestureEventListener listener);
+
+    @PermissionManuallyEnforced
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
+            + "android.Manifest.permission.MANAGE_KEY_GESTURES)")
+    void registerKeyGestureHandler(IKeyGestureHandler handler);
+
+    @PermissionManuallyEnforced
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
+            + "android.Manifest.permission.MANAGE_KEY_GESTURES)")
+    void unregisterKeyGestureHandler(IKeyGestureHandler handler);
+
+    @PermissionManuallyEnforced
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
+            + "android.Manifest.permission.MANAGE_KEY_GESTURES)")
+    int addCustomInputGesture(in AidlInputGestureData data);
+
+    @PermissionManuallyEnforced
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
+            + "android.Manifest.permission.MANAGE_KEY_GESTURES)")
+    int removeCustomInputGesture(in AidlInputGestureData data);
+
+    @PermissionManuallyEnforced
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
+            + "android.Manifest.permission.MANAGE_KEY_GESTURES)")
+    void removeAllCustomInputGestures();
+
+    AidlInputGestureData[] getCustomInputGestures();
 }

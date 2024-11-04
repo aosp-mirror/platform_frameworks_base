@@ -193,12 +193,16 @@ public class KeyguardClockSwitch extends RelativeLayout {
     protected void onFinishInflate() {
         super.onFinishInflate();
         if (!MigrateClocksToBlueprint.isEnabled()) {
-            mSmallClockFrame = findViewById(R.id.lockscreen_clock_view);
-            mLargeClockFrame = findViewById(R.id.lockscreen_clock_view_large);
+            mSmallClockFrame = findViewById(
+                    com.android.systemui.customization.R.id.lockscreen_clock_view);
+            mLargeClockFrame = findViewById(
+                    com.android.systemui.customization.R.id.lockscreen_clock_view_large);
             mStatusArea = findViewById(R.id.keyguard_status_area);
         } else {
-            removeView(findViewById(R.id.lockscreen_clock_view));
-            removeView(findViewById(R.id.lockscreen_clock_view_large));
+            removeView(findViewById(
+                    com.android.systemui.customization.R.id.lockscreen_clock_view));
+            removeView(findViewById(
+                    com.android.systemui.customization.R.id.lockscreen_clock_view_large));
         }
         onConfigChanged();
     }
@@ -461,7 +465,8 @@ public class KeyguardClockSwitch extends RelativeLayout {
         super.onLayout(changed, l, t, r, b);
         // TODO: b/305022530
         if (mClock != null && mClock.getConfig().getId().equals("DIGITAL_CLOCK_METRO")) {
-            mClock.getEvents().onColorPaletteChanged(mContext.getResources());
+            mClock.getSmallClock().getEvents().onThemeChanged(mClock.getSmallClock().getTheme());
+            mClock.getLargeClock().getEvents().onThemeChanged(mClock.getLargeClock().getTheme());
         }
 
         if (changed) {

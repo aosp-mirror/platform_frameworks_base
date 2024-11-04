@@ -23,7 +23,7 @@ android_test_helper_app {
     libs: [
         "SharedLibraryLoadingTests_StandardSharedLibrary",
         "SharedLibraryLoadingTests_SharedLibraryLoadedAfter",
-        "android.test.base",
+        "android.test.base.stubs.system",
     ],
     static_libs: [
         "androidx.test.ext.junit",

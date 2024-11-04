@@ -25,10 +25,10 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
-import com.android.systemui.keyguard.shared.ComposeLockscreen
 import com.android.systemui.keyguard.shared.model.ClockSize
 import com.android.systemui.keyguard.shared.model.ClockSizeSetting
 import com.android.systemui.res.R
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerAlwaysOnDisplayViewModel
 import com.android.systemui.statusbar.ui.SystemBarUtilsProxy
@@ -56,10 +56,9 @@ constructor(
     var burnInLayer: Layer? = null
 
     val clockSize: StateFlow<ClockSize> =
-        combine(
-                keyguardClockInteractor.selectedClockSize,
-                keyguardClockInteractor.clockSize,
-            ) { selectedSize, clockSize ->
+        combine(keyguardClockInteractor.selectedClockSize, keyguardClockInteractor.clockSize) {
+                selectedSize,
+                clockSize ->
                 if (selectedSize == ClockSizeSetting.SMALL) ClockSize.SMALL else clockSize
             }
             .stateIn(
@@ -80,10 +79,7 @@ constructor(
     val currentClock = keyguardClockInteractor.currentClock
 
     val hasCustomWeatherDataDisplay =
-        combine(
-                isLargeClockVisible,
-                currentClock,
-            ) { isLargeClock, currentClock ->
+        combine(isLargeClockVisible, currentClock) { isLargeClock, currentClock ->
                 currentClock?.let { clock ->
                     val face = if (isLargeClock) clock.largeClock else clock.smallClock
                     face.config.hasCustomWeatherDataDisplay
@@ -93,14 +89,14 @@ constructor(
                 scope = applicationScope,
                 started = SharingStarted.WhileSubscribed(),
                 initialValue =
-                    currentClock.value?.largeClock?.config?.hasCustomWeatherDataDisplay ?: false
+                    currentClock.value?.largeClock?.config?.hasCustomWeatherDataDisplay ?: false,
             )
 
     val clockShouldBeCentered: StateFlow<Boolean> =
         keyguardClockInteractor.clockShouldBeCentered.stateIn(
             scope = applicationScope,
             started = SharingStarted.WhileSubscribed(),
-            initialValue = false
+            initialValue = false,
         )
 
     // To translate elements below smartspace in weather clock to avoid overlapping between date
@@ -111,7 +107,7 @@ constructor(
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.WhileSubscribed(),
-                initialValue = false
+                initialValue = false,
             )
 
     val currentClockLayout: StateFlow<ClockLayout> =
@@ -145,7 +141,7 @@ constructor(
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.WhileSubscribed(),
-                initialValue = ClockLayout.SMALL_CLOCK
+                initialValue = ClockLayout.SMALL_CLOCK,
             )
 
     val hasCustomPositionUpdatedAnimation: StateFlow<Boolean> =
@@ -156,7 +152,7 @@ constructor(
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.WhileSubscribed(),
-                initialValue = false
+                initialValue = false,
             )
 
     /** Calculates the top margin for the small clock. */
@@ -164,10 +160,10 @@ constructor(
         val statusBarHeight = systemBarUtils.getStatusBarHeaderHeightKeyguard()
         return if (shadeInteractor.isShadeLayoutWide.value) {
             resources.getDimensionPixelSize(R.dimen.keyguard_split_shade_top_margin) -
-                if (ComposeLockscreen.isEnabled) statusBarHeight else 0
+                if (SceneContainerFlag.isEnabled) statusBarHeight else 0
         } else {
             resources.getDimensionPixelSize(R.dimen.keyguard_clock_top_margin) +
-                if (!ComposeLockscreen.isEnabled) statusBarHeight else 0
+                if (!SceneContainerFlag.isEnabled) statusBarHeight else 0
         }
     }
 

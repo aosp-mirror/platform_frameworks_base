@@ -55,11 +55,6 @@ interface ISplitScreen {
     oneway void unregisterSplitSelectListener(in ISplitSelectListener listener) = 21;
 
     /**
-     * Removes a task from the side stage.
-     */
-    oneway void removeFromSideStage(int taskId) = 4;
-
-    /**
      * Removes the split-screen stages and leaving indicated task to top. Passing INVALID_TASK_ID
      * to indicate leaving no top task after leaving split-screen.
      */

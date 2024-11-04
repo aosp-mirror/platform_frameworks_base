@@ -56,6 +56,7 @@ import static androidx.window.extensions.embedding.TaskFragmentContainer.Overlay
 import android.annotation.CallbackExecutor;
 import android.app.Activity;
 import android.app.ActivityClient;
+import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.ActivityThread;
 import android.app.AppGlobals;
@@ -238,6 +239,11 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         mActivityStartMonitor = new ActivityStartMonitor();
         instrumentation.addMonitor(mActivityStartMonitor);
         foldingFeatureProducer.addDataChangedCallback(new FoldingFeatureListener());
+
+        synchronized (mLock) {
+            // Abort the restoration if any and the application already has running activities.
+            abortRebuildingTaskContainersIfNeeded(null /* launchingActivity */);
+        }
     }
 
     private class FoldingFeatureListener
@@ -280,7 +286,11 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             mSplitRules.clear();
             mSplitRules.addAll(rules);
 
-            if (!Flags.aeBackStackRestore() || !mPresenter.isRebuildTaskContainersNeeded()) {
+            if (!Flags.aeBackStackRestore() || !mPresenter.isWaitingToRebuildTaskContainers()) {
+                return;
+            }
+
+            if (abortRebuildingTaskContainersIfNeeded(null /* launchingActivity */)) {
                 return;
             }
 
@@ -2304,15 +2314,12 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     @GuardedBy("mLock")
     @Nullable
     Bundle getPlaceholderOptions(@NonNull Activity primaryActivity, boolean isOnCreated) {
-        // Setting avoid move to front will also skip the animation. We only want to do that when
-        // the Task is currently in background.
         // Check if the primary is resumed or if this is called when the primary is onCreated
         // (not resumed yet).
         if (isOnCreated || primaryActivity.isResumed()) {
             // Only set trigger type if the launch happens in foreground.
             mTransactionManager.getCurrentTransactionRecord()
                     .setOriginType(TASK_FRAGMENT_TRANSIT_OPEN);
-            return null;
         }
         final ActivityOptions options = ActivityOptions.makeBasic();
         options.setAvoidMoveToFront();
@@ -2876,10 +2883,69 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         return getActiveSplitForContainer(container) != null;
     }
 
+
+    @Override
+    public void setAutoSaveEmbeddingState(boolean saveEmbeddingState) {
+        if (!Flags.aeBackStackRestore()) {
+            return;
+        }
+
+        synchronized (mLock) {
+            mPresenter.setAutoSaveEmbeddingState(saveEmbeddingState);
+        }
+    }
+
     void scheduleBackup() {
         synchronized (mLock) {
             mPresenter.scheduleBackup();
         }
+    }
+
+    @GuardedBy("mLock")
+    private boolean abortRebuildingTaskContainersIfNeeded(@Nullable Activity launchingActivity) {
+        if (mPresenter == null || !mPresenter.isWaitingToRebuildTaskContainers()) {
+            return false;
+        }
+
+        final ActivityThread activityThread = ActivityThread.currentActivityThread();
+        if (activityThread == null) {
+            return false;
+        }
+
+        final Activity lastCreatedActivity = activityThread.getLastCreatedActivity();
+        final Activity activity =
+                launchingActivity != null ? launchingActivity : lastCreatedActivity;
+        if (activity == null) {
+            return false;
+        }
+
+        Log.w(TAG, "Rebuilding aborted, clean up.");
+
+        // Retrieve the Task intent.
+        final int taskId = getTaskId(activity);
+
+        // Clean up and abort the restoration
+        // TODO(b/369488857): also to remove the non-organized activities in the Task?
+        final TransactionRecord transactionRecord =
+                mTransactionManager.startNewTransaction();
+        final WindowContainerTransaction wct = transactionRecord.getTransaction();
+        mPresenter.abortTaskContainerRebuilding(wct);
+        transactionRecord.apply(false /* shouldApplyIndependently */);
+
+        // Start the Task root activity if the task is now empty.
+        ActivityManager.RecentTaskInfo taskInfo = null;
+        final ActivityManager am = activity.getSystemService(ActivityManager.class);
+        final List<ActivityManager.AppTask> appTasks = am.getAppTasks();
+        for (ActivityManager.AppTask appTask : appTasks) {
+            if (appTask.getTaskInfo().taskId == taskId) {
+                taskInfo = appTask.getTaskInfo();
+                break;
+            }
+        }
+        if (taskInfo != null && !taskInfo.isRunning) {
+            activity.startActivity(taskInfo.baseIntent.cloneFilter());
+        }
+        return true;
     }
 
     private final class LifecycleCallbacks extends EmptyLifecycleCallbacksAdapter {
@@ -2893,6 +2959,10 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
                 return;
             }
             synchronized (mLock) {
+                if (abortRebuildingTaskContainersIfNeeded(activity)) {
+                    return;
+                }
+
                 final IBinder activityToken = activity.getActivityToken();
                 final IBinder initialTaskFragmentToken =
                         getTaskFragmentTokenFromActivityClientRecord(activity);

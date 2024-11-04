@@ -68,6 +68,7 @@ import static org.testng.Assert.assertThrows;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.Flags;
 import android.app.IOnProjectionStateChangedListener;
@@ -247,6 +248,8 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
         mInjector = spy(new TestInjector());
         mUiManagerService = new UiModeManagerService(mContext, /* setupWizardComplete= */ true,
                 mTwilightManager, mInjector);
+        // Initialize the current user.
+        mUiManagerService.setCurrentUser(ActivityManager.getCurrentUser());
         try {
             mUiManagerService.onBootPhase(SystemService.PHASE_SYSTEM_SERVICES_READY);
         } catch (SecurityException e) {/* ignore for permission denial */}

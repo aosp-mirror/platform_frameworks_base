@@ -20,6 +20,7 @@ import android.app.TaskInfo
 import android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN
 import android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW
 import android.app.WindowConfiguration.WINDOWING_MODE_PINNED
+import android.view.WindowInsets
 import android.view.WindowInsetsController.APPEARANCE_LIGHT_CAPTION_BARS
 import android.view.WindowInsetsController.APPEARANCE_TRANSPARENT_CAPTION_BAR_BACKGROUND
 
@@ -46,3 +47,10 @@ val TaskInfo.isPinned: Boolean
 /** Whether the task is in multi-window windowing mode. */
 val TaskInfo.isMultiWindow: Boolean
     get() = windowingMode == WINDOWING_MODE_MULTI_WINDOW
+
+/** Whether the task is requesting immersive mode. */
+val TaskInfo.requestingImmersive: Boolean
+    get() {
+        // Considered to be requesting immersive when requesting to hide the status bar.
+        return (requestedVisibleTypes and WindowInsets.Type.statusBars()) == 0
+    }

@@ -28,6 +28,8 @@ import android.widget.Toolbar;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.FragmentActivity;
 
+import com.android.settingslib.widget.SettingsThemeHelper;
+
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
 
@@ -59,6 +61,11 @@ public class CollapsingToolbarBaseActivity extends FragmentActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         EdgeToEdgeUtils.enable(this);
         super.onCreate(savedInstanceState);
+
+        if (SettingsThemeHelper.isExpressiveTheme(this)) {
+            setTheme(com.android.settingslib.widget.theme.R.style.Theme_SubSettingsBase_Expressive);
+        }
+
         // for backward compatibility on R devices or wearable devices due to small device size.
         if (mCustomizeLayoutResId > 0 && (Build.VERSION.SDK_INT < Build.VERSION_CODES.S
                 || isWatch())) {
@@ -66,7 +73,7 @@ public class CollapsingToolbarBaseActivity extends FragmentActivity {
             return;
         }
 
-        View view = getToolbarDelegate().onCreateView(getLayoutInflater(), null);
+        View view = getToolbarDelegate().onCreateView(getLayoutInflater(), null, this);
         super.setContentView(view);
     }
 

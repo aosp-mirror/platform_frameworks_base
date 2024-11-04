@@ -19,13 +19,16 @@ package com.android.compose.animation.scene
 import android.util.Log
 import androidx.annotation.VisibleForTesting
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.util.fastAll
+import androidx.compose.ui.util.fastAny
 import androidx.compose.ui.util.fastFilter
 import androidx.compose.ui.util.fastForEach
 import com.android.compose.animation.scene.content.state.TransitionState
+import com.android.compose.animation.scene.transformation.SharedElementTransformation
 import com.android.compose.animation.scene.transition.link.LinkedTransition
 import com.android.compose.animation.scene.transition.link.StateLink
 import kotlin.math.absoluteValue
@@ -176,6 +179,35 @@ sealed interface MutableSceneTransitionLayoutState : SceneTransitionLayoutState 
         animationScope: CoroutineScope,
         transitionKey: TransitionKey? = null,
     )
+
+    /**
+     * Instantly start a [transition], running it in [animationScope].
+     *
+     * This call returns immediately and [transition] will be the [currentTransition] of this
+     * [MutableSceneTransitionLayoutState].
+     *
+     * @see startTransition
+     */
+    fun startTransitionImmediately(
+        animationScope: CoroutineScope,
+        transition: TransitionState.Transition,
+        chain: Boolean = true,
+    ): Job
+
+    /**
+     * Start a new [transition].
+     *
+     * If [chain] is `true`, then the transitions will simply be added to [currentTransitions] and
+     * will run in parallel to the current transitions. If [chain] is `false`, then the list of
+     * [currentTransitions] will be cleared and [transition] will be the only running transition.
+     *
+     * If any transition is currently ongoing, it will be interrupted and forced to animate to its
+     * current state by calling [TransitionState.Transition.freezeAndAnimateToCurrentState].
+     *
+     * This method returns when [transition] is done running, i.e. when the call to
+     * [run][TransitionState.Transition.run] returns.
+     */
+    suspend fun startTransition(transition: TransitionState.Transition, chain: Boolean = true)
 }
 
 /**
@@ -205,7 +237,6 @@ fun MutableSceneTransitionLayoutState(
     canHideOverlay: (OverlayKey) -> Boolean = { true },
     canReplaceOverlay: (from: OverlayKey, to: OverlayKey) -> Boolean = { _, _ -> true },
     stateLinks: List<StateLink> = emptyList(),
-    enableInterruptions: Boolean = DEFAULT_INTERRUPTIONS_ENABLED,
 ): MutableSceneTransitionLayoutState {
     return MutableSceneTransitionLayoutStateImpl(
         initialScene,
@@ -216,7 +247,6 @@ fun MutableSceneTransitionLayoutState(
         canHideOverlay,
         canReplaceOverlay,
         stateLinks,
-        enableInterruptions,
     )
 }
 
@@ -232,9 +262,6 @@ internal class MutableSceneTransitionLayoutStateImpl(
         true
     },
     private val stateLinks: List<StateLink> = emptyList(),
-
-    // TODO(b/290930950): Remove this flag.
-    internal val enableInterruptions: Boolean = DEFAULT_INTERRUPTIONS_ENABLED,
 ) : MutableSceneTransitionLayoutState {
     private val creationThread: Thread = Thread.currentThread()
 
@@ -246,6 +273,14 @@ internal class MutableSceneTransitionLayoutStateImpl(
     internal var transitionStates: List<TransitionState> by
         mutableStateOf(listOf(TransitionState.Idle(initialScene, initialOverlays)))
         private set
+
+    /**
+     * The flattened list of [SharedElementTransformation] within all the transitions in
+     * [transitionStates].
+     */
+    private val transformationsWithElevation: List<SharedElementTransformation> by derivedStateOf {
+        transformationsWithElevation(transitionStates)
+    }
 
     override val currentScene: SceneKey
         get() = transitionState.currentScene
@@ -313,45 +348,19 @@ internal class MutableSceneTransitionLayoutStateImpl(
         )
     }
 
-    /**
-     * Instantly start a [transition], running it in [animationScope].
-     *
-     * This call returns immediately and [transition] will be the [currentTransition] of this
-     * [MutableSceneTransitionLayoutState].
-     *
-     * @see startTransition
-     */
-    internal fun startTransitionImmediately(
+    override fun startTransitionImmediately(
         animationScope: CoroutineScope,
         transition: TransitionState.Transition,
-        chain: Boolean = true,
+        chain: Boolean,
     ): Job {
         // Note that we start with UNDISPATCHED so that startTransition() is called directly and
         // transition becomes the current [transitionState] right after this call.
-        return animationScope.launch(
-            start = CoroutineStart.UNDISPATCHED,
-        ) {
+        return animationScope.launch(start = CoroutineStart.UNDISPATCHED) {
             startTransition(transition, chain)
         }
     }
 
-    /**
-     * Start a new [transition].
-     *
-     * If [chain] is `true`, then the transitions will simply be added to [currentTransitions] and
-     * will run in parallel to the current transitions. If [chain] is `false`, then the list of
-     * [currentTransitions] will be cleared and [transition] will be the only running transition.
-     *
-     * If any transition is currently ongoing, it will be interrupted and forced to animate to its
-     * current state.
-     *
-     * This method returns when [transition] is done running, i.e. when the call to
-     * [run][TransitionState.Transition.run] returns.
-     */
-    internal suspend fun startTransition(
-        transition: TransitionState.Transition,
-        chain: Boolean = true,
-    ) {
+    override suspend fun startTransition(transition: TransitionState.Transition, chain: Boolean) {
         checkThread()
 
         try {
@@ -389,11 +398,11 @@ internal class MutableSceneTransitionLayoutStateImpl(
         transition.transformationSpec =
             transitions
                 .transitionSpec(fromContent, toContent, key = transition.key)
-                .transformationSpec()
+                .transformationSpec(transition)
         transition.previewTransformationSpec =
             transitions
                 .transitionSpec(fromContent, toContent, key = transition.key)
-                .previewTransformationSpec()
+                .previewTransformationSpec(transition)
         if (orientation != null) {
             transition.updateOverscrollSpecs(
                 fromSpec = transitions.overscrollSpec(fromContent, orientation),
@@ -401,13 +410,6 @@ internal class MutableSceneTransitionLayoutStateImpl(
             )
         } else {
             transition.updateOverscrollSpecs(fromSpec = null, toSpec = null)
-        }
-
-        if (!enableInterruptions) {
-            // Set the current transition.
-            check(transitionStates.size == 1)
-            transitionStates = listOf(transition)
-            return
         }
 
         when (val currentState = transitionStates.last()) {
@@ -439,6 +441,10 @@ internal class MutableSceneTransitionLayoutStateImpl(
                     // Replace the transition.
                     transitionStates =
                         transitionStates.subList(0, transitionStates.lastIndex) + transition
+
+                    // Make sure it is removed from the finishedTransitions set if it was already
+                    // finished.
+                    finishedTransitions.remove(currentState)
                 } else {
                     // Append the new transition.
                     transitionStates = transitionStates + transition
@@ -461,7 +467,7 @@ internal class MutableSceneTransitionLayoutStateImpl(
                     val indicator = if (finishedTransitions.contains(transition)) "x" else " "
                     appendLine("  [$indicator] $from => $to ($transition)")
                 }
-            }
+            },
         )
     }
 
@@ -621,7 +627,7 @@ internal class MutableSceneTransitionLayoutStateImpl(
     override fun showOverlay(
         overlay: OverlayKey,
         animationScope: CoroutineScope,
-        transitionKey: TransitionKey?
+        transitionKey: TransitionKey?,
     ) {
         checkThread()
 
@@ -654,7 +660,7 @@ internal class MutableSceneTransitionLayoutStateImpl(
         ) {
             animate(
                 replacedTransition = currentState,
-                reversed = overlay == currentState.fromContent
+                reversed = overlay == currentState.fromContent,
             )
         } else {
             animate()
@@ -664,7 +670,7 @@ internal class MutableSceneTransitionLayoutStateImpl(
     override fun hideOverlay(
         overlay: OverlayKey,
         animationScope: CoroutineScope,
-        transitionKey: TransitionKey?
+        transitionKey: TransitionKey?,
     ) {
         checkThread()
 
@@ -705,7 +711,7 @@ internal class MutableSceneTransitionLayoutStateImpl(
         from: OverlayKey,
         to: OverlayKey,
         animationScope: CoroutineScope,
-        transitionKey: TransitionKey?
+        transitionKey: TransitionKey?,
     ) {
         checkThread()
 
@@ -748,12 +754,45 @@ internal class MutableSceneTransitionLayoutStateImpl(
 
         animate()
     }
+
+    private fun transformationsWithElevation(
+        transitionStates: List<TransitionState>
+    ): List<SharedElementTransformation> {
+        return buildList {
+            transitionStates.fastForEach { state ->
+                if (state !is TransitionState.Transition) {
+                    return@fastForEach
+                }
+
+                state.transformationSpec.transformations.fastForEach { transformation ->
+                    if (
+                        transformation is SharedElementTransformation &&
+                            transformation.elevateInContent != null
+                    ) {
+                        add(transformation)
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Return whether we might need to elevate [element] (or any element if [element] is `null`) in
+     * [content].
+     *
+     * This is used to compose `Modifier.container()` and `Modifier.drawInContainer()` only when
+     * necessary, for performance.
+     */
+    internal fun isElevationPossible(content: ContentKey, element: ElementKey?): Boolean {
+        if (transformationsWithElevation.isEmpty()) return false
+        return transformationsWithElevation.fastAny { transformation ->
+            transformation.elevateInContent == content &&
+                (element == null || transformation.matcher.matches(element, content))
+        }
+    }
 }
 
 private const val TAG = "SceneTransitionLayoutState"
-
-/** Whether support for interruptions in enabled by default. */
-internal const val DEFAULT_INTERRUPTIONS_ENABLED = true
 
 /**
  * The max number of concurrent transitions. If the number of transitions goes past this number,

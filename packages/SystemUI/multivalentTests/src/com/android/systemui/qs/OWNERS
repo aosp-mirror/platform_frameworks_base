@@ -1,3 +1,4 @@
 set noparent
 
 include /packages/SystemUI/src/com/android/systemui/qs/OWNERS
+include /packages/SystemUI/TEST_OWNERS

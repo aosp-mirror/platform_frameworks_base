@@ -64,3 +64,31 @@ flag {
   description: "Remote document support features in Q2 2025 release"
   bug: "339721781"
 }
+
+flag {
+    name: "security_policy_interact_across_users"
+    namespace: "app_widgets"
+    description: "Allow packages with interact_across_users permission to manage app widgets on behalf of other users."
+    bug: "357621815"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+  name: "use_smaller_app_widget_radius"
+  namespace: "app_widgets"
+  description: "Updates system corner radius for app widgets to 24.dp instead of 28.dp"
+  bug: "373351337"
+  is_exported: true
+  is_fixed_read_only: true
+}
+
+flag {
+  name: "not_keyguard_category"
+  namespace: "app_widgets"
+  description: "Adds the NOT_KEYGUARD category to AppWidgetInfo categories"
+  bug: "365169792"
+  is_exported: true
+  is_fixed_read_only: true
+}

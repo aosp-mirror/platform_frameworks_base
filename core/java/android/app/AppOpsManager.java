@@ -54,6 +54,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.database.DatabaseUtils;
 import android.health.connect.HealthConnectManager;
+import android.health.connect.HealthPermissions;
 import android.media.AudioAttributes.AttributeUsage;
 import android.media.MediaRouter2;
 import android.os.Binder;
@@ -261,6 +262,13 @@ public class AppOpsManager {
     /** Current {@link OnOpNotedCallback}. Change via {@link #setOnOpNotedCallback} */
     @GuardedBy("sLock")
     private static @Nullable OnOpNotedCallback sOnOpNotedCallback;
+
+    /**
+     * Whether OP_NOTED_CALLBACK_FLAG_IGNORE_ASYNC was set when sOnOpNotedCallback was registered
+     * last time.
+     */
+    @GuardedBy("sLock")
+    private static boolean sIgnoreAsyncNotedCallback;
 
     /**
      * Sync note-ops collected from {@link #readAndLogNotedAppops(Parcel)} that have not been
@@ -1607,9 +1615,15 @@ public class AppOpsManager {
     public static final int OP_RECEIVE_SENSITIVE_NOTIFICATIONS =
             AppProtoEnums.APP_OP_RECEIVE_SENSITIVE_NOTIFICATIONS;
 
+    /** @hide Access to read heart rate sensor. */
+    public static final int OP_READ_HEART_RATE = AppProtoEnums.APP_OP_READ_HEART_RATE;
+
+    /** @hide Access to read skin temperature. */
+    public static final int OP_READ_SKIN_TEMPERATURE = AppProtoEnums.APP_OP_READ_SKIN_TEMPERATURE;
+
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public static final int _NUM_OP = 149;
+    public static final int _NUM_OP = 151;
 
     /**
      * All app ops represented as strings.
@@ -1762,6 +1776,8 @@ public class AppOpsManager {
             OPSTR_UNARCHIVAL_CONFIRMATION,
             OPSTR_EMERGENCY_LOCATION,
             OPSTR_RECEIVE_SENSITIVE_NOTIFICATIONS,
+            OPSTR_READ_HEART_RATE,
+            OPSTR_READ_SKIN_TEMPERATURE,
     })
     public @interface AppOpString {}
 
@@ -2499,6 +2515,16 @@ public class AppOpsManager {
     public static final String OPSTR_RECEIVE_SENSITIVE_NOTIFICATIONS =
             "android:receive_sensitive_notifications";
 
+    /** @hide Access to read heart rate sensor. */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_REPLACE_BODY_SENSOR_PERMISSION_ENABLED)
+    public static final String OPSTR_READ_HEART_RATE = "android:read_heart_rate";
+
+    /** @hide Access to read skin temperature. */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_PLATFORM_SKIN_TEMPERATURE_ENABLED)
+    public static final String OPSTR_READ_SKIN_TEMPERATURE = "android:read_skin_temperature";
+
     /** {@link #sAppOpsToNote} not initialized yet for this op */
     private static final byte SHOULD_COLLECT_NOTE_OP_NOT_INITIALIZED = 0;
     /** Should not collect noting of this app-op in {@link #sAppOpsToNote} */
@@ -2572,6 +2598,9 @@ public class AppOpsManager {
             OP_NEARBY_WIFI_DEVICES,
             // Notifications
             OP_POST_NOTIFICATION,
+            // Health
+            Flags.replaceBodySensorPermissionEnabled() ? OP_READ_HEART_RATE : OP_NONE,
+            Flags.platformSkinTemperatureEnabled() ? OP_READ_SKIN_TEMPERATURE : OP_NONE,
     };
 
     /**
@@ -2612,6 +2641,7 @@ public class AppOpsManager {
             OP_READ_SYSTEM_GRAMMATICAL_GENDER,
     };
 
+    @SuppressWarnings("FlaggedApi")
     static final AppOpInfo[] sAppOpInfos = new AppOpInfo[]{
         new AppOpInfo.Builder(OP_COARSE_LOCATION, OPSTR_COARSE_LOCATION, "COARSE_LOCATION")
             .setPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION)
@@ -3079,6 +3109,15 @@ public class AppOpsManager {
         new AppOpInfo.Builder(OP_RECEIVE_SENSITIVE_NOTIFICATIONS,
                 OPSTR_RECEIVE_SENSITIVE_NOTIFICATIONS, "RECEIVE_SENSITIVE_NOTIFICATIONS")
                 .setDefaultMode(MODE_IGNORED).build(),
+        new AppOpInfo.Builder(OP_READ_HEART_RATE, OPSTR_READ_HEART_RATE, "READ_HEART_RATE")
+            .setPermission(Flags.replaceBodySensorPermissionEnabled() ?
+                HealthPermissions.READ_HEART_RATE : null)
+            .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_READ_SKIN_TEMPERATURE, OPSTR_READ_SKIN_TEMPERATURE,
+            "READ_SKIN_TEMPERATURE").setPermission(
+                Flags.platformSkinTemperatureEnabled()
+                    ? HealthPermissions.READ_SKIN_TEMPERATURE : null)
+            .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
     };
 
     // The number of longs needed to form a full bitmask of app ops
@@ -3132,6 +3171,10 @@ public class AppOpsManager {
             }
         }
         for (int op : RUNTIME_PERMISSION_OPS) {
+            if (op == OP_NONE) {
+                // Skip ops with a disabled feature flag.
+                continue;
+            }
             if (sAppOpInfos[op].permission != null) {
                 sPermToOp.put(sAppOpInfos[op].permission, op);
             }
@@ -8727,21 +8770,9 @@ public class AppOpsManager {
      * Do a quick check for whether an application might be able to perform an operation.
      * This is <em>not</em> a security check; you must use {@link #noteOp(String, int, String,
      * String, String)} or {@link #startOp(String, int, String, String, String)} for your actual
-     * security checks, which also ensure that the given uid and package name are consistent. This
-     * function can just be used for a quick check to see if an operation has been disabled for the
-     * application, as an early reject of some work.  This does not modify the time stamp or other
-     * data about the operation.
-     *
-     * <p>Important things this will not do (which you need to ultimate use
-     * {@link #noteOp(String, int, String, String, String)} or
-     * {@link #startOp(String, int, String, String, String)} to cover):</p>
-     * <ul>
-     *     <li>Verifying the uid and package are consistent, so callers can't spoof
-     *     their identity.</li>
-     *     <li>Taking into account the current foreground/background state of the
-     *     app; apps whose mode varies by this state will always be reported
-     *     as {@link #MODE_ALLOWED}.</li>
-     * </ul>
+     * security checks. This function can just be used for a quick check to see if an operation has
+     * been disabled for the application, as an early reject of some work.  This does not modify the
+     * time stamp or other data about the operation.
      *
      * @param op The operation to check.  One of the OPSTR_* constants.
      * @param uid The user id of the application attempting to perform the operation.
@@ -10090,6 +10121,22 @@ public class AppOpsManager {
     private static final int COLLECT_SYNC = 2;
     private static final int COLLECT_ASYNC = 3;
 
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(flag = true, prefix = { "OP_NOTED_CALLBACK_FLAG_" }, value = {
+            OP_NOTED_CALLBACK_FLAG_IGNORE_ASYNC,
+    })
+    private @interface OpNotedCallbackFlags {}
+
+    /**
+     * Ignores async op noted events.
+     *
+     * @see #setOnOpNotedCallback
+     */
+    @FlaggedApi(android.permission.flags.Flags.FLAG_SYNC_ON_OP_NOTED_API)
+    public static final int OP_NOTED_CALLBACK_FLAG_IGNORE_ASYNC = 1;
+    private static final int OP_NOTED_CALLBACK_FLAG_ALL = OP_NOTED_CALLBACK_FLAG_IGNORE_ASYNC;
+
     /**
      * Mark an app-op as noted.
      */
@@ -10153,6 +10200,9 @@ public class AppOpsManager {
         }
 
         p.writeInt(Parcel.EX_HAS_NOTED_APPOPS_REPLY_HEADER);
+        final int sizePosition = p.dataPosition();
+        // Write size placeholder. With this size we can easily skip it in native.
+        p.writeInt(0);
 
         int numAttributionWithNotesAppOps = notedAppOps.size();
         p.writeInt(numAttributionWithNotesAppOps);
@@ -10169,6 +10219,12 @@ public class AppOpsManager {
                 }
             }
         }
+
+        final int payloadPosition = p.dataPosition();
+        p.setDataPosition(sizePosition);
+        // Total header size including 4 bytes size itself.
+        p.writeInt(payloadPosition - sizePosition);
+        p.setDataPosition(payloadPosition);
     }
 
     /**
@@ -10182,6 +10238,8 @@ public class AppOpsManager {
      * @hide
      */
     public static void readAndLogNotedAppops(@NonNull Parcel p) {
+        // Skip size.
+        p.readInt();
         int numAttributionsWithNotedAppOps = p.readInt();
 
         for (int i = 0; i < numAttributionsWithNotedAppOps; i++) {
@@ -10224,6 +10282,12 @@ public class AppOpsManager {
      * <p>There can only ever be one collector per process. If there currently is another callback
      * set, this will fail.
      *
+     * <p>Note that if an app has multiple processes registering for this callback, the system would
+     * fan out async op noted callbacks to each of the processes, resulting in the same data being
+     * delivered multiple times to an app, which is usually undesired. To avoid this, consider
+     * listening to async ops only in one process. See
+     * {@link #setOnOpNotedCallback(Executor, OnOpNotedCallback, int)} for how to do this.
+     *
      * @param asyncExecutor executor to execute {@link OnOpNotedCallback#onAsyncNoted} on, {@code
      * null} to unset
      * @param callback listener to set, {@code null} to unset
@@ -10232,18 +10296,62 @@ public class AppOpsManager {
      */
     public void setOnOpNotedCallback(@Nullable @CallbackExecutor Executor asyncExecutor,
             @Nullable OnOpNotedCallback callback) {
+        setOnOpNotedCallback(asyncExecutor, callback, /* flag */ 0);
+    }
+
+    /**
+     * Set a new {@link OnOpNotedCallback}.
+     *
+     * <p>There can only ever be one collector per process. If there currently is another callback
+     * set, this will fail.
+     *
+     * <p>This API allows the caller to listen only to sync and self op noted events, and ignore
+     * async ops. This is useful in the scenario where an app has multiple processes. Consider an
+     * example where an app has two processes, A and B. The op noted events are as follows:
+     * <ul>
+     * <li>op 1: process A, sync
+     * <li>op 2: process A, async
+     * <li>op 3: process B, sync
+     * <li>op 4: process B, async
+     * Any process that listens to async op noted events gets events originating from across ALL
+     * processes (op 2 and op 4 in this example). So if both process A and B register as listeners,
+     * both of them get op 2 and 4 which is not ideal. To avoid duplicates, one of the two processes
+     * should set {@link #OP_NOTED_CALLBACK_FLAG_IGNORE_ASYNC}. For example
+     * process A sets {@link #OP_NOTED_CALLBACK_FLAG_IGNORE_ASYNC} and would then only get its own
+     * sync event (op 1). The other process would then listen to all types of events and get op 2, 3
+     * and 4.
+     *
+     * Note that even with {@link #OP_NOTED_CALLBACK_FLAG_IGNORE_ASYNC},
+     * {@link #OnOpNotedCallback.onAsyncNoted} may still be invoked. This happens for sync events
+     * that were collected before a callback is registered.
+     *
+     * @param asyncExecutor executor to execute {@link OnOpNotedCallback#onAsyncNoted} on, {@code
+     * null} to unset
+     * @param callback listener to set, {@code null} to unset
+     * @param flags additional flags to modify the callback behavior, such as
+     * {@link #OP_NOTED_CALLBACK_FLAG_IGNORE_ASYNC}
+     *
+     * @throws IllegalStateException If another callback is already registered
+     */
+    @FlaggedApi(android.permission.flags.Flags.FLAG_SYNC_ON_OP_NOTED_API)
+    public void setOnOpNotedCallback(@Nullable @CallbackExecutor Executor asyncExecutor,
+            @Nullable OnOpNotedCallback callback, @OpNotedCallbackFlags int flags) {
         Preconditions.checkState((callback == null) == (asyncExecutor == null));
+        Preconditions.checkFlagsArgument(flags, OP_NOTED_CALLBACK_FLAG_ALL);
 
         synchronized (sLock) {
             if (callback == null) {
+                Preconditions.checkFlagsArgument(flags, 0);
                 Preconditions.checkState(sOnOpNotedCallback != null,
                         "No callback is currently registered");
 
-                try {
-                    mService.stopWatchingAsyncNoted(mContext.getPackageName(),
-                            sOnOpNotedCallback.mAsyncCb);
-                } catch (RemoteException e) {
-                    e.rethrowFromSystemServer();
+                if (!sIgnoreAsyncNotedCallback) {
+                    try {
+                        mService.stopWatchingAsyncNoted(mContext.getPackageName(),
+                                sOnOpNotedCallback.mAsyncCb);
+                    } catch (RemoteException e) {
+                        e.rethrowFromSystemServer();
+                    }
                 }
 
                 sOnOpNotedCallback = null;
@@ -10253,14 +10361,17 @@ public class AppOpsManager {
 
                 callback.mAsyncExecutor = asyncExecutor;
                 sOnOpNotedCallback = callback;
+                sIgnoreAsyncNotedCallback = (flags & OP_NOTED_CALLBACK_FLAG_IGNORE_ASYNC) != 0;
 
                 List<AsyncNotedAppOp> missedAsyncOps = null;
-                try {
-                    mService.startWatchingAsyncNoted(mContext.getPackageName(),
-                            sOnOpNotedCallback.mAsyncCb);
-                    missedAsyncOps = mService.extractAsyncOps(mContext.getPackageName());
-                } catch (RemoteException e) {
-                    e.rethrowFromSystemServer();
+                if (!sIgnoreAsyncNotedCallback) {
+                    try {
+                        mService.startWatchingAsyncNoted(mContext.getPackageName(),
+                                sOnOpNotedCallback.mAsyncCb);
+                        missedAsyncOps = mService.extractAsyncOps(mContext.getPackageName());
+                    } catch (RemoteException e) {
+                        e.rethrowFromSystemServer();
+                    }
                 }
 
                 // Copy pointer so callback can be dispatched out of lock
@@ -10273,17 +10384,15 @@ public class AppOpsManager {
                                 () -> onOpNotedCallback.onAsyncNoted(asyncNotedAppOp));
                     }
                 }
-                synchronized (this) {
-                    int numMissedSyncOps = sUnforwardedOps.size();
-                    if (onOpNotedCallback != null) {
-                        for (int i = 0; i < numMissedSyncOps; i++) {
-                            final AsyncNotedAppOp syncNotedAppOp = sUnforwardedOps.get(i);
-                            onOpNotedCallback.getAsyncNotedExecutor().execute(
-                                    () -> onOpNotedCallback.onAsyncNoted(syncNotedAppOp));
-                        }
+                int numMissedSyncOps = sUnforwardedOps.size();
+                if (onOpNotedCallback != null) {
+                    for (int i = 0; i < numMissedSyncOps; i++) {
+                        final AsyncNotedAppOp syncNotedAppOp = sUnforwardedOps.get(i);
+                        onOpNotedCallback.getAsyncNotedExecutor().execute(
+                                () -> onOpNotedCallback.onAsyncNoted(syncNotedAppOp));
                     }
-                    sUnforwardedOps.clear();
                 }
+                sUnforwardedOps.clear();
             }
         }
     }

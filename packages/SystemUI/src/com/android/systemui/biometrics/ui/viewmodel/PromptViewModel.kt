@@ -27,7 +27,6 @@ import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.hardware.biometrics.BiometricFingerprintConstants
 import android.hardware.biometrics.BiometricPrompt
-import android.hardware.biometrics.Flags.customBiometricPrompt
 import android.hardware.biometrics.PromptContentView
 import android.os.UserHandle
 import android.text.TextPaint
@@ -72,17 +71,17 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /** ViewModel for BiometricPrompt. */
 class PromptViewModel
 @Inject
 constructor(
-    private val displayStateInteractor: DisplayStateInteractor,
+    displayStateInteractor: DisplayStateInteractor,
     private val promptSelectorInteractor: PromptSelectorInteractor,
     @Application private val context: Context,
-    udfpsOverlayInteractor: UdfpsOverlayInteractor,
-    biometricStatusInteractor: BiometricStatusInteractor,
+    private val udfpsOverlayInteractor: UdfpsOverlayInteractor,
+    private val biometricStatusInteractor: BiometricStatusInteractor,
     private val udfpsUtils: UdfpsUtils,
     private val iconProvider: IconProvider,
     private val activityTaskManager: ActivityTaskManager,
@@ -135,25 +134,23 @@ constructor(
             R.dimen.biometric_prompt_landscape_medium_horizontal_padding
         )
 
-    val currentRotation: StateFlow<DisplayRotation> = displayStateInteractor.currentRotation
-
     val udfpsOverlayParams: StateFlow<UdfpsOverlayParams> =
         udfpsOverlayInteractor.udfpsOverlayParams
 
     private val udfpsSensorBounds: Flow<Rect> =
-        combine(udfpsOverlayParams, currentRotation) { params, rotation ->
+        combine(udfpsOverlayParams, displayStateInteractor.currentRotation) { params, rotation ->
                 val rotatedBounds = Rect(params.sensorBounds)
                 RotationUtils.rotateBounds(
                     rotatedBounds,
                     params.naturalDisplayWidth,
                     params.naturalDisplayHeight,
-                    rotation.ordinal
+                    rotation.ordinal,
                 )
                 Rect(
                     rotatedBounds.left,
                     rotatedBounds.top,
                     params.logicalDisplayWidth - rotatedBounds.right,
-                    params.logicalDisplayHeight - rotatedBounds.bottom
+                    params.logicalDisplayHeight - rotatedBounds.bottom,
                 )
             }
             .distinctUntilChanged()
@@ -264,8 +261,8 @@ constructor(
                 _forceLargeSize,
                 promptKind,
                 displayStateInteractor.isLargeScreen,
-                currentRotation,
-                modalities
+                displayStateInteractor.currentRotation,
+                modalities,
             ) { forceLarge, promptKind, isLargeScreen, rotation, modalities ->
                 when {
                     forceLarge ||
@@ -353,7 +350,7 @@ constructor(
                                 0,
                                 0,
                                 landscapeMediumHorizontalPadding,
-                                landscapeMediumBottomPadding
+                                landscapeMediumBottomPadding,
                             )
                         }
                     PromptPosition.Left ->
@@ -367,7 +364,7 @@ constructor(
                                 landscapeMediumHorizontalPadding,
                                 0,
                                 0,
-                                landscapeMediumBottomPadding
+                                landscapeMediumBottomPadding,
                             )
                         }
                     PromptPosition.Top ->
@@ -456,7 +453,7 @@ constructor(
 
     /** Padding for prompt UI elements */
     val promptPadding: Flow<Rect> =
-        combine(size, currentRotation) { size, rotation ->
+        combine(size, displayStateInteractor.currentRotation) { size, rotation ->
             if (size != PromptSize.LARGE) {
                 val navBarInsets = Utils.getNavbarInsets(context)
                 if (rotation == DisplayRotation.ROTATION_90) {
@@ -476,7 +473,7 @@ constructor(
         promptSelectorInteractor.prompt
             .map {
                 when {
-                    !(customBiometricPrompt()) || it == null -> Pair(null, "")
+                    it == null -> Pair(null, "")
                     else -> context.getUserBadgedLogoInfo(it, iconProvider, activityTaskManager)
                 }
             }
@@ -492,9 +489,7 @@ constructor(
 
     /** Custom content view for the prompt. */
     val contentView: Flow<PromptContentView?> =
-        promptSelectorInteractor.prompt
-            .map { if (customBiometricPrompt()) it?.contentView else null }
-            .distinctUntilChanged()
+        promptSelectorInteractor.prompt.map { it?.contentView }.distinctUntilChanged()
 
     private val originalDescription =
         promptSelectorInteractor.prompt.map { it?.description ?: "" }.distinctUntilChanged()
@@ -523,7 +518,7 @@ constructor(
                 val attributes =
                     context.obtainStyledAttributes(
                         R.style.TextAppearance_AuthCredential_Title,
-                        intArrayOf(android.R.attr.textSize)
+                        intArrayOf(android.R.attr.textSize),
                     )
                 val paint = TextPaint()
                 paint.textSize = attributes.getDimensionPixelSize(0, 0).toFloat()
@@ -568,7 +563,7 @@ constructor(
     private fun getHorizontalPadding(
         size: PromptSize,
         modalities: BiometricModalities,
-        hasOnlyOneLineTitle: Boolean
+        hasOnlyOneLineTitle: Boolean,
     ) =
         if (size.isSmall) {
             -smallHorizontalGuidelinePadding
@@ -584,21 +579,13 @@ constructor(
 
     /** If the indicator (help, error) message should be shown. */
     val isIndicatorMessageVisible: Flow<Boolean> =
-        combine(
-            size,
-            position,
-            message,
-        ) { size, _, message ->
+        combine(size, position, message) { size, _, message ->
             size.isMedium && message.message.isNotBlank()
         }
 
     /** If the auth is pending confirmation and the confirm button should be shown. */
     val isConfirmButtonVisible: Flow<Boolean> =
-        combine(
-            size,
-            position,
-            isPendingConfirmation,
-        ) { size, _, isPendingConfirmation ->
+        combine(size, position, isPendingConfirmation) { size, _, isPendingConfirmation ->
             size.isNotSmall && isPendingConfirmation
         }
 
@@ -608,24 +595,22 @@ constructor(
 
     /** If the negative button should be shown. */
     val isNegativeButtonVisible: Flow<Boolean> =
-        combine(
+        combine(size, position, isAuthenticated, promptSelectorInteractor.isCredentialAllowed) {
             size,
-            position,
-            isAuthenticated,
-            promptSelectorInteractor.isCredentialAllowed,
-        ) { size, _, authState, credentialAllowed ->
+            _,
+            authState,
+            credentialAllowed ->
             size.isNotSmall && authState.isNotAuthenticated && !credentialAllowed
         }
 
     /** If the cancel button should be shown (. */
     val isCancelButtonVisible: Flow<Boolean> =
-        combine(
+        combine(size, position, isAuthenticated, isNegativeButtonVisible, isConfirmButtonVisible) {
             size,
-            position,
-            isAuthenticated,
-            isNegativeButtonVisible,
-            isConfirmButtonVisible,
-        ) { size, _, authState, showNegativeButton, showConfirmButton ->
+            _,
+            authState,
+            showNegativeButton,
+            showConfirmButton ->
             size.isNotSmall && authState.isAuthenticated && !showNegativeButton && showConfirmButton
         }
 
@@ -635,33 +620,28 @@ constructor(
      * fingerprint sensor.
      */
     val canTryAgainNow: Flow<Boolean> =
-        combine(
-            _canTryAgainNow,
+        combine(_canTryAgainNow, size, position, isAuthenticated, isRetrySupported) {
+            readyToTryAgain,
             size,
-            position,
-            isAuthenticated,
-            isRetrySupported,
-        ) { readyToTryAgain, size, _, authState, supportsRetry ->
+            _,
+            authState,
+            supportsRetry ->
             readyToTryAgain && size.isNotSmall && supportsRetry && authState.isNotAuthenticated
         }
 
     /** If the try again button show be shown (only the button, see [canTryAgainNow]). */
     val isTryAgainButtonVisible: Flow<Boolean> =
-        combine(
-            canTryAgainNow,
-            modalities,
-        ) { tryAgainIsPossible, modalities ->
+        combine(canTryAgainNow, modalities) { tryAgainIsPossible, modalities ->
             tryAgainIsPossible && modalities.hasFaceOnly
         }
 
     /** If the credential fallback button show be shown. */
     val isCredentialButtonVisible: Flow<Boolean> =
-        combine(
+        combine(size, position, isAuthenticated, promptSelectorInteractor.isCredentialAllowed) {
             size,
-            position,
-            isAuthenticated,
-            promptSelectorInteractor.isCredentialAllowed,
-        ) { size, _, authState, credentialAllowed ->
+            _,
+            authState,
+            credentialAllowed ->
             size.isMedium && authState.isNotAuthenticated && credentialAllowed
         }
 
@@ -761,10 +741,7 @@ constructor(
      *
      * Ignored if the user has already authenticated.
      */
-    suspend fun showTemporaryHelp(
-        message: String,
-        messageAfterHelp: String = "",
-    ) = coroutineScope {
+    suspend fun showTemporaryHelp(message: String, messageAfterHelp: String = "") = coroutineScope {
         if (_isAuthenticated.value.isAuthenticated) {
             return@coroutineScope
         }
@@ -912,13 +889,13 @@ constructor(
                 udfpsUtils.getTouchInNativeCoordinates(
                     event.getPointerId(0),
                     event,
-                    udfpsOverlayParams.value
+                    udfpsOverlayParams.value,
                 )
             if (
                 !udfpsUtils.isWithinSensorArea(
                     event.getPointerId(0),
                     event,
-                    udfpsOverlayParams.value
+                    udfpsOverlayParams.value,
                 )
             ) {
                 _accessibilityHint.emit(
@@ -927,7 +904,7 @@ constructor(
                         context,
                         scaledTouch.x,
                         scaledTouch.y,
-                        udfpsOverlayParams.value
+                        udfpsOverlayParams.value,
                     )
                 )
             }
@@ -950,10 +927,7 @@ constructor(
             if (msdlFeedback()) {
                 HapticsToPlay.MSDL(MSDLToken.UNLOCK, authInteractionProperties)
             } else {
-                HapticsToPlay.HapticConstant(
-                    HapticFeedbackConstants.BIOMETRIC_CONFIRM,
-                    flag = null,
-                )
+                HapticsToPlay.HapticConstant(HapticFeedbackConstants.BIOMETRIC_CONFIRM, flag = null)
             }
         _hapticsToPlay.value = haptics
     }
@@ -963,10 +937,7 @@ constructor(
             if (msdlFeedback()) {
                 HapticsToPlay.MSDL(MSDLToken.FAILURE, authInteractionProperties)
             } else {
-                HapticsToPlay.HapticConstant(
-                    HapticFeedbackConstants.BIOMETRIC_REJECT,
-                    flag = null,
-                )
+                HapticsToPlay.HapticConstant(HapticFeedbackConstants.BIOMETRIC_REJECT, flag = null)
             }
         _hapticsToPlay.value = haptics
     }
@@ -1008,7 +979,7 @@ constructor(
 private fun Context.getUserBadgedLogoInfo(
     prompt: BiometricPromptRequest.Biometric,
     iconProvider: IconProvider,
-    activityTaskManager: ActivityTaskManager
+    activityTaskManager: ActivityTaskManager,
 ): Pair<Drawable?, String> {
     var icon: Drawable? =
         if (prompt.logoBitmap != null) BitmapDrawable(resources, prompt.logoBitmap) else null
@@ -1047,7 +1018,7 @@ private fun Context.getUserBadgedLogoInfo(
                 packageManager
                     .getUserBadgedLabel(
                         packageManager.getApplicationLabel(appInfo),
-                        UserHandle.of(userId)
+                        UserHandle.of(userId),
                     )
                     .toString()
         }
@@ -1072,7 +1043,7 @@ private fun BiometricPromptRequest.Biometric.getComponentNameForLogo(
 
 private fun BiometricPromptRequest.Biometric.getApplicationInfo(
     context: Context,
-    componentNameForLogo: ComponentName?
+    componentNameForLogo: ComponentName?,
 ): ApplicationInfo? {
     val packageName =
         when {
@@ -1090,7 +1061,7 @@ private fun BiometricPromptRequest.Biometric.getApplicationInfo(
         try {
             context.packageManager.getApplicationInfo(
                 packageName,
-                PackageManager.MATCH_DISABLED_COMPONENTS or PackageManager.MATCH_ANY_USER
+                PackageManager.MATCH_DISABLED_COMPONENTS or PackageManager.MATCH_ANY_USER,
             )
         } catch (e: PackageManager.NameNotFoundException) {
             Log.w(PromptViewModel.TAG, "Cannot find application info for $opPackageName", e)

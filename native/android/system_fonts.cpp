@@ -327,7 +327,7 @@ AFont* _Nonnull AFontMatcher_match(
     result->mWeight = font->style().weight();
     result->mItalic = font->style().slant() == minikin::FontStyle::Slant::ITALIC;
     result->mCollectionIndex = minikinFontSkia->GetFontIndex();
-    const std::vector<minikin::FontVariation>& axes = minikinFontSkia->GetAxes();
+    const minikin::VariationSettings& axes = minikinFontSkia->GetAxes();
     result->mAxes.reserve(axes.size());
     for (auto axis : axes) {
         result->mAxes.push_back(std::make_pair(axis.axisTag, axis.value));

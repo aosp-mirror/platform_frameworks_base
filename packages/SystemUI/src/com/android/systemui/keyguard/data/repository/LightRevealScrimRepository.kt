@@ -39,6 +39,7 @@ import kotlin.math.max
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
@@ -65,6 +66,9 @@ interface LightRevealScrimRepository {
 
     val isAnimating: Boolean
 
+    /** Limit the max alpha for the scrim to allow for some transparency */
+    val maxAlpha: MutableStateFlow<Float>
+
     fun startRevealAmountAnimator(reveal: Boolean, duration: Long = DEFAULT_REVEAL_DURATION)
 }
 
@@ -79,6 +83,7 @@ constructor(
 ) : LightRevealScrimRepository {
     companion object {
         val TAG = LightRevealScrimRepository::class.simpleName!!
+        val DEFAULT_MAX_ALPHA = 1f
     }
 
     /** The reveal effect used if the device was locked/unlocked via the power button. */
@@ -126,6 +131,8 @@ constructor(
         }
 
     private val revealAmountAnimator = ValueAnimator.ofFloat(0f, 1f)
+
+    override val maxAlpha: MutableStateFlow<Float> = MutableStateFlow(DEFAULT_MAX_ALPHA)
 
     override val revealAmount: Flow<Float> = callbackFlow {
         val updateListener =

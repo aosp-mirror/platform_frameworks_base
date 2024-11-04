@@ -17,7 +17,6 @@
 package com.android.server.wm;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
-import static android.inputmethodservice.InputMethodService.ENABLE_HIDE_IME_CAPTION_BAR;
 import static android.view.Display.TYPE_INTERNAL;
 import static android.view.InsetsFrameProvider.SOURCE_ARBITRARY_RECTANGLE;
 import static android.view.InsetsFrameProvider.SOURCE_CONTAINER_BOUNDS;
@@ -65,20 +64,17 @@ import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static android.view.WindowManagerGlobal.ADD_OKAY;
 import static android.view.WindowManagerPolicyConstants.ACTION_HDMI_PLUGGED;
 import static android.view.WindowManagerPolicyConstants.EXTRA_HDMI_PLUGGED_STATE;
-import static android.view.WindowManagerPolicyConstants.NAV_BAR_BOTTOM;
-import static android.view.WindowManagerPolicyConstants.NAV_BAR_INVALID;
-import static android.view.WindowManagerPolicyConstants.NAV_BAR_LEFT;
-import static android.view.WindowManagerPolicyConstants.NAV_BAR_RIGHT;
 import static android.window.DisplayAreaOrganizer.FEATURE_UNDEFINED;
 
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ANIM;
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_SCREEN_ON;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_ANIM;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_SCREEN_ON;
 import static com.android.server.policy.PhoneWindowManager.TOAST_WINDOW_TIMEOUT;
 import static com.android.server.policy.WindowManagerPolicy.TRANSIT_PREVIEW_DONE;
 import static com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs.LID_ABSENT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYOUT;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
+import static com.android.window.flags.Flags.enableFullyImmersiveInDesktop;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -108,7 +104,6 @@ import android.util.ArraySet;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.DisplayInfo;
-import android.view.Gravity;
 import android.view.InsetsFlags;
 import android.view.InsetsFrameProvider;
 import android.view.InsetsSource;
@@ -141,7 +136,6 @@ import com.android.internal.view.AppearanceRegion;
 import com.android.internal.widget.PointerLocationView;
 import com.android.server.LocalServices;
 import com.android.server.UiThread;
-import com.android.server.policy.WindowManagerPolicy.NavigationBarPosition;
 import com.android.server.policy.WindowManagerPolicy.ScreenOnListener;
 import com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs;
 import com.android.server.statusbar.StatusBarManagerInternal;
@@ -262,8 +256,7 @@ public class DisplayPolicy {
     private WindowState mStatusBar = null;
     private volatile WindowState mNotificationShade;
     private WindowState mNavigationBar = null;
-    @NavigationBarPosition
-    private int mNavigationBarPosition = NAV_BAR_BOTTOM;
+    private boolean mHasBottomNavigationBar = true;
 
     private final ArraySet<WindowState> mInsetsSourceWindowsExceptIme = new ArraySet<>();
 
@@ -1073,7 +1066,8 @@ public class DisplayPolicy {
 
         final String systemUiPermission =
                 mService.isCallerVirtualDeviceOwner(mDisplayContent.getDisplayId(), callingUid)
-                        // Allow virtual device owners to add system windows on their displays.
+                        && mDisplayContent.isTrusted()
+                        // Virtual device owners can add system windows on their trusted displays.
                         ? android.Manifest.permission.CREATE_VIRTUAL_DEVICE
                         : android.Manifest.permission.STATUS_BAR_SERVICE;
 
@@ -1253,18 +1247,7 @@ public class DisplayPolicy {
                 throw new IllegalArgumentException("IME insets must be provided by a window.");
             }
 
-            if (!ENABLE_HIDE_IME_CAPTION_BAR && mNavigationBar != null
-                    && navigationBarPosition(displayFrames.mRotation) == NAV_BAR_BOTTOM) {
-                // In gesture navigation, nav bar frame is larger than frame to calculate insets.
-                // IME should not provide frame which is smaller than the nav bar frame. Otherwise,
-                // nav bar might be overlapped with the content of the client when IME is shown.
-                sTmpRect.set(inOutFrame);
-                sTmpRect.intersectUnchecked(mNavigationBar.getFrame());
-                inOutFrame.inset(windowState.mGivenContentInsets);
-                inOutFrame.union(sTmpRect);
-            } else {
-                inOutFrame.inset(windowState.mGivenContentInsets);
-            }
+            inOutFrame.inset(windowState.mGivenContentInsets);
             return 0;
         };
     }
@@ -1467,10 +1450,9 @@ public class DisplayPolicy {
     public void applyPostLayoutPolicyLw(WindowState win, WindowManager.LayoutParams attrs,
             WindowState attached, WindowState imeTarget) {
         if (attrs.type == TYPE_NAVIGATION_BAR) {
-            // Keep mNavigationBarPosition updated to make sure the transient detection and bar
-            // color control is working correctly.
-            final DisplayFrames displayFrames = mDisplayContent.mDisplayFrames;
-            mNavigationBarPosition = navigationBarPosition(displayFrames.mRotation);
+            // Keep mHasBottomNavigationBar updated to make sure the bar color control is working
+            // correctly.
+            mHasBottomNavigationBar = hasBottomNavigationBar();
         }
         final boolean affectsSystemUi = win.canAffectSystemUiFlags();
         if (DEBUG_LAYOUT) Slog.i(TAG, "Win " + win + ": affectsSystemUi=" + affectsSystemUi);
@@ -2131,7 +2113,8 @@ public class DisplayPolicy {
         final DecorInsets.Info newInfo = mDecorInsets.mTmpInfo;
         final InsetsState newInsetsState = newInfo.update(mDisplayContent, rotation, dw, dh);
         final DecorInsets.Info currentInfo = getDecorInsetsInfo(rotation, dw, dh);
-        if (newInfo.mConfigFrame.equals(currentInfo.mConfigFrame)
+        final boolean sameConfigFrame = newInfo.mConfigFrame.equals(currentInfo.mConfigFrame);
+        if (sameConfigFrame
                 && newInfo.mOverrideConfigFrame.equals(currentInfo.mOverrideConfigFrame)) {
             // Even if the config frame is not changed in current rotation, it may change the
             // insets in other rotations if the frame of insets source is changed.
@@ -2155,7 +2138,12 @@ public class DisplayPolicy {
         }
         mDecorInsets.invalidate();
         mDecorInsets.mInfoForRotation[rotation].set(newInfo);
-        return true;
+        if (!mService.mDisplayEnabled) {
+            // There could be other pending changes during booting. It might be better to let the
+            // clients receive the new states earlier.
+            return true;
+        }
+        return !sameConfigFrame;
     }
 
     DecorInsets.Info getDecorInsetsInfo(int rotation, int w, int h) {
@@ -2222,20 +2210,11 @@ public class DisplayPolicy {
         mDisplayContent.mDisplayUpdater.onDisplaySwitching(true);
     }
 
-    @NavigationBarPosition
-    int navigationBarPosition(int displayRotation) {
-        if (mNavigationBar != null) {
-            final int gravity = mNavigationBar.mAttrs.forRotation(displayRotation).gravity;
-            switch (gravity) {
-                case Gravity.LEFT:
-                    return NAV_BAR_LEFT;
-                case Gravity.RIGHT:
-                    return NAV_BAR_RIGHT;
-                default:
-                    return NAV_BAR_BOTTOM;
-            }
-        }
-        return NAV_BAR_INVALID;
+    boolean hasBottomNavigationBar() {
+        Insets navBarInsets = mDisplayContent.getInsetsStateController().getRawInsetsState()
+                .calculateInsets(mDisplayContent.mDisplayFrames.mUnrestricted,
+                        Type.navigationBars(), true /* ignoreVisibilities */);
+        return navBarInsets.bottom > 0;
     }
 
     /**
@@ -2397,7 +2376,7 @@ public class DisplayPolicy {
             return;
         }
         final WindowState navColorWin = chooseNavigationColorWindowLw(mNavBarColorWindowCandidate,
-                mDisplayContent.mInputMethodWindow, mNavigationBarPosition);
+                mDisplayContent.mInputMethodWindow, mHasBottomNavigationBar);
         final boolean isNavbarColorManagedByIme =
                 navColorWin != null && navColorWin == mDisplayContent.mInputMethodWindow;
         final int appearance = updateLightNavigationBarLw(win.mAttrs.insetsFlags.appearance,
@@ -2459,12 +2438,12 @@ public class DisplayPolicy {
     @VisibleForTesting
     @Nullable
     static WindowState chooseNavigationColorWindowLw(WindowState candidate, WindowState imeWindow,
-            @NavigationBarPosition int navBarPosition) {
+            boolean hasBottomNavigationBar) {
         // If the IME window is visible and FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS is set, then IME
         // window can be navigation color window.
         final boolean imeWindowCanNavColorWindow = imeWindow != null
                 && imeWindow.isVisible()
-                && navBarPosition == NAV_BAR_BOTTOM
+                && hasBottomNavigationBar
                 && (imeWindow.mAttrs.flags
                         & WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) != 0;
         if (!imeWindowCanNavColorWindow) {
@@ -2508,10 +2487,16 @@ public class DisplayPolicy {
                 defaultTaskDisplayArea.getRootTask(task -> task.isVisible()
                         && task.getTopLeafTask().getAdjacentTask() != null)
                         != null;
-        final boolean freeformRootTaskVisible =
-                defaultTaskDisplayArea.isRootTaskVisible(WINDOWING_MODE_FREEFORM);
+        final Task topFreeformTask = defaultTaskDisplayArea
+                .getTopRootTaskInWindowingMode(WINDOWING_MODE_FREEFORM);
+        final boolean freeformRootTaskVisible = topFreeformTask != null
+                && topFreeformTask.isVisible();
+        final boolean inNonFullscreenFreeformMode = freeformRootTaskVisible
+                && !topFreeformTask.getBounds().equals(mDisplayContent.getBounds());
 
-        getInsetsPolicy().updateSystemBars(win, adjacentTasksVisible, freeformRootTaskVisible);
+        getInsetsPolicy().updateSystemBars(win, adjacentTasksVisible,
+                enableFullyImmersiveInDesktop()
+                        ? inNonFullscreenFreeformMode : freeformRootTaskVisible);
 
         final boolean topAppHidesStatusBar = topAppHidesSystemBar(Type.statusBars());
         if (getStatusBar() != null) {
@@ -2675,7 +2660,7 @@ public class DisplayPolicy {
         final WindowState navBackgroundWin = chooseNavigationBackgroundWindow(
                 mNavBarBackgroundWindowCandidate,
                 mDisplayContent.mInputMethodWindow,
-                mNavigationBarPosition);
+                mHasBottomNavigationBar);
         final boolean drawBackground = navBackgroundWin != null
                 // There is no app window showing underneath nav bar. (e.g., The screen is locked.)
                 // Let system windows (ex: notification shade) draw nav bar background.
@@ -2713,8 +2698,8 @@ public class DisplayPolicy {
     @VisibleForTesting
     @Nullable
     static WindowState chooseNavigationBackgroundWindow(WindowState candidate,
-            WindowState imeWindow, @NavigationBarPosition int navBarPosition) {
-        if (imeWindow != null && imeWindow.isVisible() && navBarPosition == NAV_BAR_BOTTOM
+            WindowState imeWindow, boolean hasBottomNavigationBar) {
+        if (imeWindow != null && imeWindow.isVisible() && hasBottomNavigationBar
                 && drawsBarBackground(imeWindow)) {
             return imeWindow;
         }
@@ -2892,8 +2877,8 @@ public class DisplayPolicy {
             pw.print(prefix); pw.print("mNavigationBar="); pw.println(mNavigationBar);
             pw.print(prefix); pw.print("mNavBarOpacityMode="); pw.println(mNavBarOpacityMode);
             pw.print(prefix); pw.print("mNavigationBarCanMove="); pw.println(mNavigationBarCanMove);
-            pw.print(prefix); pw.print("mNavigationBarPosition=");
-            pw.println(mNavigationBarPosition);
+            pw.print(prefix); pw.print("mHasBottomNavigationBar=");
+            pw.println(mHasBottomNavigationBar);
         }
         if (mLeftGestureHost != null) {
             pw.print(prefix); pw.print("mLeftGestureHost="); pw.println(mLeftGestureHost);

@@ -53,9 +53,8 @@ public class BackProgressAnimatorTest {
         return new BackMotionEvent(
                 /* touchX = */ touchX,
                 /* touchY = */ 0,
+                /* frameTime = */ 0,
                 /* progress = */ progress,
-                /* velocityX = */ 0,
-                /* velocityY = */ 0,
                 /* triggerBack = */ false,
                 /* swipeEdge = */ BackEvent.EDGE_LEFT,
                 /* departingAnimationTarget = */ null);
@@ -169,6 +168,31 @@ public class BackProgressAnimatorTest {
         // remove onBackCancelled finishCallback (while progress is still animating to 0)
         InstrumentationRegistry.getInstrumentation().runOnMainSync(
                 () -> mProgressAnimator.removeOnBackCancelledFinishCallback());
+
+        // call reset (which triggers the finishCallback invocation, if one is present)
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> mProgressAnimator.reset());
+
+        // verify that finishCallback is not invoked
+        assertEquals(1, finishCallbackCalled.getCount());
+    }
+
+    @Test
+    public void testOnBackInvokedFinishCallbackNotInvokedWhenRemoved() throws InterruptedException {
+        // Give the animator some progress.
+        final BackMotionEvent backEvent = backMotionEventFrom(100, mTargetProgress);
+        mMainThreadHandler.post(
+                () -> mProgressAnimator.onBackProgressed(backEvent));
+        mTargetProgressCalled.await(1, TimeUnit.SECONDS);
+        assertNotNull(mReceivedBackEvent);
+
+        // Trigger back invoked animation
+        CountDownLatch finishCallbackCalled = new CountDownLatch(1);
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(
+                () -> mProgressAnimator.onBackInvoked(finishCallbackCalled::countDown));
+
+        // remove onBackCancelled finishCallback (while progress is still animating to 0)
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(
+                () -> mProgressAnimator.removeOnBackInvokedFinishCallback());
 
         // call reset (which triggers the finishCallback invocation, if one is present)
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> mProgressAnimator.reset());

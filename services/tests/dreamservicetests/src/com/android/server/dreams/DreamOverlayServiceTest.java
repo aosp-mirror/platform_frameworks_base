@@ -39,7 +39,6 @@ import android.service.dreams.IDreamOverlayClientCallback;
 import android.view.WindowManager;
 
 import androidx.annotation.NonNull;
-import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
@@ -106,6 +105,12 @@ public class DreamOverlayServiceTest {
             mMonitor.onEndDream();
             super.onEndDream();
         }
+
+        @Override
+        public void onWakeUp() {
+            mMonitor.onWakeUp();
+            super.onWakeUp();
+        }
     }
 
     /**
@@ -128,7 +133,6 @@ public class DreamOverlayServiceTest {
      * Verifies that callbacks for subclasses are run on the provided executor.
      */
     @Test
-    @FlakyTest(bugId = 293108088)
     public void testCallbacksRunOnExecutor() throws RemoteException {
         final TestDreamOverlayService.Monitor monitor = Mockito.mock(
                 TestDreamOverlayService.Monitor.class);
@@ -153,6 +157,8 @@ public class DreamOverlayServiceTest {
         // Callback is run.
         verify(monitor).onStartDream();
 
+        clearInvocations(mExecutor);
+
         // Verify onWakeUp is run on the executor.
         client.wakeUp();
         verify(monitor, never()).onWakeUp();
@@ -160,6 +166,8 @@ public class DreamOverlayServiceTest {
         verify(mExecutor).execute(mRunnableCaptor.capture());
         mRunnableCaptor.getValue().run();
         verify(monitor).onWakeUp();
+
+        clearInvocations(mExecutor);
 
         // Verify onEndDream is run on the executor.
         client.endDream();

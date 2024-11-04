@@ -21,26 +21,20 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import com.android.compose.animation.scene.Edge
 import com.android.compose.animation.scene.TransitionBuilder
-import com.android.compose.animation.scene.UserActionDistance
 import com.android.systemui.notifications.ui.composable.Notifications
 import com.android.systemui.shade.ui.composable.OverlayShade
 import com.android.systemui.shade.ui.composable.Shade
 import com.android.systemui.shade.ui.composable.ShadeHeader
 import kotlin.time.Duration.Companion.milliseconds
 
-fun TransitionBuilder.toNotificationsShadeTransition(
-    durationScale: Double = 1.0,
-) {
+fun TransitionBuilder.toNotificationsShadeTransition(durationScale: Double = 1.0) {
     spec = tween(durationMillis = (DefaultDuration * durationScale).inWholeMilliseconds.toInt())
     swipeSpec =
         spring(
             stiffness = Spring.StiffnessMediumLow,
             visibilityThreshold = Shade.Dimensions.ScrimVisibilityThreshold,
         )
-    distance = UserActionDistance { fromSceneSize, orientation ->
-        fromSceneSize.height.toFloat() * 2 / 3f
-    }
-
+    scaleSize(OverlayShade.Elements.Panel, height = 0f)
     translate(OverlayShade.Elements.Panel, Edge.Top)
 
     fractionRange(end = .5f) { fade(OverlayShade.Elements.Scrim) }

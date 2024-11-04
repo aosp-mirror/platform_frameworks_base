@@ -78,10 +78,10 @@ class PredictiveBackHandlerTest {
                                 spec =
                                     tween(
                                         durationMillis = transitionFrames * 16,
-                                        easing = LinearEasing
+                                        easing = LinearEasing,
                                     )
                             }
-                        }
+                        },
                 )
             }
         rule.setContent {
@@ -144,7 +144,7 @@ class PredictiveBackHandlerTest {
             rule.runOnUiThread {
                 MutableSceneTransitionLayoutState(
                     SceneA,
-                    transitions = transitions { from(SceneA, to = SceneB, preview = {}) }
+                    transitions = transitions { from(SceneA, to = SceneB, preview = {}) },
                 )
             }
         rule.setContent {
@@ -243,7 +243,7 @@ class PredictiveBackHandlerTest {
             rule.runOnUiThread {
                 MutableSceneTransitionLayoutState(
                     SceneA,
-                    initialOverlays = setOf(OverlayA, OverlayB)
+                    initialOverlays = setOf(OverlayA, OverlayB),
                 )
             }
 

@@ -19,6 +19,7 @@ package android.hardware.camera2;
 import static android.companion.virtual.VirtualDeviceParams.DEVICE_POLICY_DEFAULT;
 import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_CAMERA;
 import static android.content.Context.DEVICE_ID_DEFAULT;
+import static android.content.Context.DEVICE_ID_INVALID;
 
 import android.annotation.CallbackExecutor;
 import android.annotation.FlaggedApi;
@@ -29,12 +30,14 @@ import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.app.ActivityManager;
+import android.app.CameraCompatTaskInfo;
 import android.app.TaskInfo;
 import android.app.compat.CompatChanges;
 import android.companion.virtual.VirtualDeviceManager;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
 import android.compat.annotation.Overridable;
+import android.content.AttributionSource;
 import android.content.AttributionSourceState;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -68,6 +71,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ServiceSpecificException;
 import android.os.SystemProperties;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
@@ -79,6 +83,7 @@ import com.android.internal.camera.flags.Flags;
 import com.android.internal.util.ArrayUtils;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -180,7 +185,7 @@ public final class CameraManager {
      * @hide
      */
     @TestApi
-    @FlaggedApi(com.android.window.flags.Flags.FLAG_CAMERA_COMPAT_FOR_FREEFORM)
+    @FlaggedApi(com.android.window.flags.Flags.FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
     public static final int ROTATION_OVERRIDE_NONE = ICameraService.ROTATION_OVERRIDE_NONE;
 
     /**
@@ -190,7 +195,7 @@ public final class CameraManager {
      * @hide
      */
     @TestApi
-    @FlaggedApi(com.android.window.flags.Flags.FLAG_CAMERA_COMPAT_FOR_FREEFORM)
+    @FlaggedApi(com.android.window.flags.Flags.FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
     public static final int ROTATION_OVERRIDE_OVERRIDE_TO_PORTRAIT =
             ICameraService.ROTATION_OVERRIDE_OVERRIDE_TO_PORTRAIT;
 
@@ -200,7 +205,7 @@ public final class CameraManager {
      * @hide
      */
     @TestApi
-    @FlaggedApi(com.android.window.flags.Flags.FLAG_CAMERA_COMPAT_FOR_FREEFORM)
+    @FlaggedApi(com.android.window.flags.Flags.FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
     public static final int ROTATION_OVERRIDE_ROTATION_ONLY =
             ICameraService.ROTATION_OVERRIDE_ROTATION_ONLY;
 
@@ -673,8 +678,8 @@ public final class CameraManager {
         }
         try {
             for (String physicalCameraId : physicalCameraIds) {
-                AttributionSourceState clientAttribution = getClientAttribution();
-                clientAttribution.deviceId = DEVICE_ID_DEFAULT;
+                AttributionSourceState clientAttribution = getClientAttribution(DEVICE_ID_DEFAULT,
+                        /* useContextAttributionSource= */ false);
                 CameraMetadataNative physicalCameraInfo =
                         cameraService.getCameraCharacteristics(
                                 physicalCameraId,
@@ -817,7 +822,7 @@ public final class CameraManager {
             }
 
             boolean hasConcurrentStreams =
-                    CameraManagerGlobal.get().cameraIdHasConcurrentStreamsLocked(cameraId,
+                    CameraManagerGlobal.get().cameraIdHasConcurrentStreams(cameraId,
                             mContext.getDeviceId(), getDevicePolicyFromContext(mContext));
             metadata.setHasMandatoryConcurrentStreams(hasConcurrentStreams);
 
@@ -971,27 +976,58 @@ public final class CameraManager {
     }
 
     /**
-     * Constructs an AttributionSourceState with only the uid, pid, and deviceId fields set
+     * Retrieves the AttributionSourceState to pass to the CameraService.
      *
-     * <p>This method is a temporary stopgap in the transition to using AttributionSource. Currently
-     * AttributionSourceState is only used as a vehicle for passing deviceId, uid, and pid
-     * arguments.</p>
+     * @param deviceIdOverride An override of the AttributionSource's deviceId, if not equal to
+     *   DEVICE_ID_INVALID
+     * @param useContextAttributionSource Whether to return the full attribution source provided by
+     *   the Context.
+     *
+     * @hide
+     */
+    public AttributionSourceState getClientAttribution(int deviceIdOverride,
+            boolean useContextAttributionSource) {
+        AttributionSource contextAttributionSource = mContext.getAttributionSource();
+        if (deviceIdOverride != DEVICE_ID_INVALID) {
+            contextAttributionSource = contextAttributionSource.withDeviceId(deviceIdOverride);
+        }
+        AttributionSourceState contextAttributionSourceState =
+                contextAttributionSource.asState();
+
+        if (Flags.useContextAttributionSource() && useContextAttributionSource) {
+            return contextAttributionSourceState;
+        } else {
+            AttributionSourceState clientAttribution =
+                    new AttributionSourceState();
+            clientAttribution.uid = USE_CALLING_UID;
+            clientAttribution.pid = USE_CALLING_PID;
+            clientAttribution.deviceId = contextAttributionSourceState.deviceId;
+            clientAttribution.packageName = mContext.getOpPackageName();
+            clientAttribution.attributionTag = mContext.getAttributionTag();
+            clientAttribution.next = new AttributionSourceState[0];
+            return clientAttribution;
+        }
+    }
+
+    /**
+     * Retrieves the AttributionSourceState to pass to the CameraService.
+     *
+     * @param useContextAttributionSource Whether to return the full attribution source provided by
+     *   the Context.
+     *
+     * @hide
+     */
+    public AttributionSourceState getClientAttribution(boolean useContextAttributionSource) {
+        return getClientAttribution(DEVICE_ID_INVALID, useContextAttributionSource);
+    }
+
+    /**
+     * Retrieves the AttributionSourceState to pass to the CameraService.
      *
      * @hide
      */
     public AttributionSourceState getClientAttribution() {
-        // TODO: Send the full contextAttribution over aidl, remove USE_CALLING_*
-        AttributionSourceState contextAttribution =
-                mContext.getAttributionSource().asState();
-        AttributionSourceState clientAttribution =
-                new AttributionSourceState();
-        clientAttribution.uid = USE_CALLING_UID;
-        clientAttribution.pid = USE_CALLING_PID;
-        clientAttribution.deviceId = contextAttribution.deviceId;
-        clientAttribution.packageName = mContext.getOpPackageName();
-        clientAttribution.attributionTag = mContext.getAttributionTag();
-        clientAttribution.next = new AttributionSourceState[0];
-        return clientAttribution;
+        return getClientAttribution(DEVICE_ID_INVALID, /* useContextAttributionSource= */ false);
     }
 
     /**
@@ -1046,7 +1082,7 @@ public final class CameraManager {
                 }
 
                 AttributionSourceState clientAttribution =
-                        getClientAttribution();
+                        getClientAttribution(/* useContextAttributionSource= */ true);
                 cameraUser =
                         cameraService.connectDevice(
                                 callbacks,
@@ -1561,7 +1597,7 @@ public final class CameraManager {
      */
     public static int getRotationOverride(@Nullable Context context,
             @Nullable PackageManager packageManager, @Nullable String packageName) {
-        if (com.android.window.flags.Flags.cameraCompatForFreeform()) {
+        if (com.android.window.flags.Flags.enableCameraCompatForDesktopWindowing()) {
             return getRotationOverrideInternal(context, packageManager, packageName);
         } else {
             return shouldOverrideToPortrait(packageManager, packageName)
@@ -1573,7 +1609,7 @@ public final class CameraManager {
     /**
      * @hide
      */
-    @FlaggedApi(com.android.window.flags.Flags.FLAG_CAMERA_COMPAT_FOR_FREEFORM)
+    @FlaggedApi(com.android.window.flags.Flags.FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
     @TestApi
     public static int getRotationOverrideInternal(@Nullable Context context,
             @Nullable PackageManager packageManager, @Nullable String packageName) {
@@ -1586,12 +1622,13 @@ public final class CameraManager {
                     context.getSystemService(ActivityManager.class);
             for (ActivityManager.AppTask appTask : activityManager.getAppTasks()) {
                 final TaskInfo taskInfo = appTask.getTaskInfo();
-                if (taskInfo.appCompatTaskInfo.cameraCompatTaskInfo.freeformCameraCompatMode
-                        != 0
+                final int freeformCameraCompatMode =
+                        taskInfo.appCompatTaskInfo.cameraCompatTaskInfo.freeformCameraCompatMode;
+                if (freeformCameraCompatMode != 0
                         && taskInfo.topActivity != null
                         && taskInfo.topActivity.getPackageName().equals(packageName)) {
                     // WindowManager has requested rotation override.
-                    return ICameraService.ROTATION_OVERRIDE_ROTATION_ONLY;
+                    return getRotationOverrideForCompatFreeform(freeformCameraCompatMode);
                 }
             }
         }
@@ -1611,6 +1648,19 @@ public final class CameraManager {
         return CompatChanges.isChangeEnabled(OVERRIDE_CAMERA_LANDSCAPE_TO_PORTRAIT)
                 ? ICameraService.ROTATION_OVERRIDE_OVERRIDE_TO_PORTRAIT
                 : ICameraService.ROTATION_OVERRIDE_NONE;
+    }
+
+    private static int getRotationOverrideForCompatFreeform(
+            @CameraCompatTaskInfo.FreeformCameraCompatMode int freeformCameraCompatMode) {
+        // Only rotate-and-crop if the app and device orientations do not match.
+        if (freeformCameraCompatMode
+                == CameraCompatTaskInfo.CAMERA_COMPAT_FREEFORM_LANDSCAPE_DEVICE_IN_PORTRAIT
+                || freeformCameraCompatMode
+                    == CameraCompatTaskInfo.CAMERA_COMPAT_FREEFORM_PORTRAIT_DEVICE_IN_LANDSCAPE) {
+            return ICameraService.ROTATION_OVERRIDE_ROTATION_ONLY;
+        } else {
+            return ICameraService.ROTATION_OVERRIDE_NONE;
+        }
     }
 
     /**
@@ -2142,6 +2192,12 @@ public final class CameraManager {
 
         private final Set<Set<DeviceCameraInfo>> mConcurrentCameraIdCombinations = new ArraySet<>();
 
+        // Diagnostic messages for ArrayIndexOutOfBoundsException in extractCameraIdListLocked
+        // b/367649718
+        private static final int DEVICE_STATUS_ARRAY_SIZE = 10;
+        private final ArrayDeque<String> mDeviceStatusHistory =
+                new ArrayDeque<>(DEVICE_STATUS_ARRAY_SIZE);
+
         // Registered availability callbacks and their executors
         private final ArrayMap<AvailabilityCallback, Executor> mCallbackMap = new ArrayMap<>();
 
@@ -2259,6 +2315,10 @@ public final class CameraManager {
             }
 
             try {
+                addDeviceStatusHistoryLocked(TextUtils.formatSimple(
+                        "connectCameraServiceLocked(E): tid(%d): mDeviceStatus size %d",
+                        Thread.currentThread().getId(), mDeviceStatus.size()));
+
                 CameraStatus[] cameraStatuses = cameraService.addListener(this);
                 for (CameraStatus cameraStatus : cameraStatuses) {
                     DeviceCameraInfo info = new DeviceCameraInfo(cameraStatus.cameraId,
@@ -2281,6 +2341,10 @@ public final class CameraManager {
                     }
                 }
                 mCameraService = cameraService;
+
+                addDeviceStatusHistoryLocked(TextUtils.formatSimple(
+                        "connectCameraServiceLocked(X): tid(%d): mDeviceStatus size %d",
+                        Thread.currentThread().getId(), mDeviceStatus.size()));
             } catch (ServiceSpecificException e) {
                 // Unexpected failure
                 throw new IllegalStateException("Failed to register a camera service listener", e);
@@ -2334,18 +2398,28 @@ public final class CameraManager {
         }
 
         private String[] extractCameraIdListLocked(int deviceId, int devicePolicy) {
-            List<String> cameraIds = new ArrayList<>();
-            for (int i = 0; i < mDeviceStatus.size(); i++) {
-                int status = mDeviceStatus.valueAt(i);
-                DeviceCameraInfo info = mDeviceStatus.keyAt(i);
-                if (status == ICameraServiceListener.STATUS_NOT_PRESENT
-                        || status == ICameraServiceListener.STATUS_ENUMERATING
-                        || shouldHideCamera(deviceId, devicePolicy, info)) {
-                    continue;
+            addDeviceStatusHistoryLocked(TextUtils.formatSimple(
+                    "extractCameraIdListLocked(E): tid(%d): mDeviceStatus size %d",
+                    Thread.currentThread().getId(), mDeviceStatus.size()));
+            try {
+                List<String> cameraIds = new ArrayList<>();
+                for (int i = 0; i < mDeviceStatus.size(); i++) {
+                    int status = mDeviceStatus.valueAt(i);
+                    DeviceCameraInfo info = mDeviceStatus.keyAt(i);
+                    if (status == ICameraServiceListener.STATUS_NOT_PRESENT
+                            || status == ICameraServiceListener.STATUS_ENUMERATING
+                            || shouldHideCamera(deviceId, devicePolicy, info)) {
+                        continue;
+                    }
+                    cameraIds.add(info.mCameraId);
                 }
-                cameraIds.add(info.mCameraId);
+                return cameraIds.toArray(new String[0]);
+            }  catch (ArrayIndexOutOfBoundsException e) {
+                String message = e.getMessage();
+                String messageWithHistory = message + ": {"
+                        + String.join(" -> ", mDeviceStatusHistory) + "}";
+                throw new ArrayIndexOutOfBoundsException(messageWithHistory);
             }
-            return cameraIds.toArray(new String[0]);
         }
 
         private Set<Set<String>> extractConcurrentCameraIdListLocked(int deviceId,
@@ -2473,6 +2547,10 @@ public final class CameraManager {
             synchronized (mLock) {
                 connectCameraServiceLocked();
                 try {
+                    addDeviceStatusHistoryLocked(TextUtils.formatSimple(
+                            "getCameraIdListNoLazy(E): tid(%d): mDeviceStatus size %d",
+                            Thread.currentThread().getId(), mDeviceStatus.size()));
+
                     // The purpose of the addListener, removeListener pair here is to get a fresh
                     // list of camera ids from cameraserver. We do this since for in test processes,
                     // changes can happen w.r.t non-changeable permissions (eg: SYSTEM_CAMERA
@@ -2506,6 +2584,9 @@ public final class CameraManager {
                         onStatusChangedLocked(ICameraServiceListener.STATUS_NOT_PRESENT, info);
                         mTorchStatus.remove(info);
                     }
+                    addDeviceStatusHistoryLocked(TextUtils.formatSimple(
+                            "getCameraIdListNoLazy(X): tid(%d): mDeviceStatus size %d",
+                            Thread.currentThread().getId(), mDeviceStatus.size()));
                 } catch (ServiceSpecificException e) {
                     // Unexpected failure
                     throw new IllegalStateException("Failed to register a camera service listener",
@@ -2614,24 +2695,26 @@ public final class CameraManager {
          * @return Whether the camera device was found in the set of combinations returned by
          *         getConcurrentCameraIds
          */
-        public boolean cameraIdHasConcurrentStreamsLocked(String cameraId, int deviceId,
+        public boolean cameraIdHasConcurrentStreams(String cameraId, int deviceId,
                 int devicePolicy) {
-            DeviceCameraInfo info = new DeviceCameraInfo(cameraId,
-                    devicePolicy == DEVICE_POLICY_DEFAULT ? DEVICE_ID_DEFAULT : deviceId);
-            if (!mDeviceStatus.containsKey(info)) {
-                // physical camera ids aren't advertised in concurrent camera id combinations.
-                if (DEBUG) {
-                    Log.v(TAG, " physical camera id " + cameraId + " is hidden." +
-                            " Available logical camera ids : " + mDeviceStatus);
+            synchronized (mLock) {
+                DeviceCameraInfo info = new DeviceCameraInfo(cameraId,
+                        devicePolicy == DEVICE_POLICY_DEFAULT ? DEVICE_ID_DEFAULT : deviceId);
+                if (!mDeviceStatus.containsKey(info)) {
+                    // physical camera ids aren't advertised in concurrent camera id combinations.
+                    if (DEBUG) {
+                        Log.v(TAG, " physical camera id " + cameraId + " is hidden."
+                                + " Available logical camera ids : " + mDeviceStatus);
+                    }
+                    return false;
+                }
+                for (Set<DeviceCameraInfo> comb : mConcurrentCameraIdCombinations) {
+                    if (comb.contains(info)) {
+                        return true;
+                    }
                 }
                 return false;
             }
-            for (Set<DeviceCameraInfo> comb : mConcurrentCameraIdCombinations) {
-                if (comb.contains(info)) {
-                    return true;
-                }
-            }
-            return false;
         }
 
         public void setTorchMode(
@@ -3192,7 +3275,13 @@ public final class CameraManager {
         public void onStatusChanged(int status, String cameraId, int deviceId)
                 throws RemoteException {
             synchronized(mLock) {
+                addDeviceStatusHistoryLocked(
+                        TextUtils.formatSimple("onStatusChanged(E): tid(%d): mDeviceStatus size %d",
+                                Thread.currentThread().getId(), mDeviceStatus.size()));
                 onStatusChangedLocked(status, new DeviceCameraInfo(cameraId, deviceId));
+                addDeviceStatusHistoryLocked(
+                        TextUtils.formatSimple("onStatusChanged(X): tid(%d): mDeviceStatus size %d",
+                                Thread.currentThread().getId(), mDeviceStatus.size()));
             }
         }
 
@@ -3335,6 +3424,10 @@ public final class CameraManager {
          */
         public void binderDied() {
             synchronized(mLock) {
+                addDeviceStatusHistoryLocked(
+                        TextUtils.formatSimple("binderDied(E): tid(%d): mDeviceStatus size %d",
+                                Thread.currentThread().getId(), mDeviceStatus.size()));
+
                 // Only do this once per service death
                 if (mCameraService == null) return;
 
@@ -3363,6 +3456,10 @@ public final class CameraManager {
                 mConcurrentCameraIdCombinations.clear();
 
                 scheduleCameraServiceReconnectionLocked();
+
+                addDeviceStatusHistoryLocked(
+                        TextUtils.formatSimple("binderDied(X): tid(%d): mDeviceStatus size %d",
+                                Thread.currentThread().getId(), mDeviceStatus.size()));
             }
         }
 
@@ -3392,5 +3489,13 @@ public final class CameraManager {
                 return Objects.hash(mCameraId, mDeviceId);
             }
         }
+
+        private void addDeviceStatusHistoryLocked(String log) {
+            if (mDeviceStatusHistory.size() == DEVICE_STATUS_ARRAY_SIZE) {
+                mDeviceStatusHistory.removeFirst();
+            }
+            mDeviceStatusHistory.addLast(log);
+        }
+
     } // CameraManagerGlobal
 } // CameraManager

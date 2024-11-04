@@ -1,6 +1,7 @@
 package com.android.systemui.wallet.controller
 
 import android.content.Intent
+import android.os.DeadObjectException
 import android.os.IBinder
 import android.util.Log
 import androidx.annotation.VisibleForTesting
@@ -13,7 +14,7 @@ import com.android.systemui.flags.Flags
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /**
  * Serves as an intermediary between QuickAccessWalletService and ContextualCardManager (in PCC).
@@ -43,11 +44,15 @@ constructor(
     override fun onBind(intent: Intent): IBinder {
         super.onBind(intent)
         if (registerNewWalletCardInBackground()) {
-            scope.launch(backgroundDispatcher) {
+            scope.launch(context = backgroundDispatcher) {
                 controller.allWalletCards.collect { cards ->
                     val cardsSize = cards.size
                     Log.i(TAG, "Number of cards registered $cardsSize")
-                    listener?.registerNewWalletCards(cards)
+                    try {
+                        listener?.registerNewWalletCards(cards)
+                    } catch (e: DeadObjectException) {
+                        Log.e(TAG, "Failed to register wallet cards because IWalletCardsUpdatedListener is dead")
+                    }
                 }
             }
         } else {
@@ -55,7 +60,11 @@ constructor(
                 controller.allWalletCards.collect { cards ->
                     val cardsSize = cards.size
                     Log.i(TAG, "Number of cards registered $cardsSize")
-                    listener?.registerNewWalletCards(cards)
+                    try {
+                        listener?.registerNewWalletCards(cards)
+                    } catch (e: DeadObjectException) {
+                        Log.e(TAG, "Failed to register wallet cards because IWalletCardsUpdatedListener is dead")
+                    }
                 }
             }
         }

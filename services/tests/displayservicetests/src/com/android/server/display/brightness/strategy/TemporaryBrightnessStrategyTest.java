@@ -60,7 +60,8 @@ public class TemporaryBrightnessStrategyTest {
         DisplayBrightnessState updatedDisplayBrightnessState =
                 mTemporaryBrightnessStrategy.updateBrightness(
                         new StrategyExecutionRequest(displayPowerRequest, 0.2f,
-                                /* userSetBrightnessChanged= */ false));
+                                /* userSetBrightnessChanged= */ false,
+                                /* isStylusBeingUsed */ false));
         assertEquals(updatedDisplayBrightnessState, expectedDisplayBrightnessState);
     }
 

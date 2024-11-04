@@ -37,7 +37,7 @@ internal fun Element(
     modifier: Modifier,
     content: @Composable ElementScope<ElementContentScope>.() -> Unit,
 ) {
-    Box(modifier.element(layoutImpl, sceneOrOverlay, key)) {
+    Box(modifier.element(layoutImpl, sceneOrOverlay, key), propagateMinConstraints = true) {
         val contentScope = sceneOrOverlay.scope
         val boxScope = this
         val elementScope =
@@ -64,7 +64,7 @@ internal fun MovableElement(
             "MovableElementKey($elementName).contentPicker.contents does not contain $contentName"
     }
 
-    Box(modifier.element(layoutImpl, sceneOrOverlay, key)) {
+    Box(modifier.element(layoutImpl, sceneOrOverlay, key), propagateMinConstraints = true) {
         val contentScope = sceneOrOverlay.scope
         val boxScope = this
         val elementScope =
@@ -86,7 +86,7 @@ private abstract class BaseElementScope<ContentScope>(
         value: T,
         key: ValueKey,
         type: SharedValueType<T, *>,
-        canOverflow: Boolean
+        canOverflow: Boolean,
     ): AnimatedState<T> {
         return animateSharedValueAsState(
             layoutImpl,
@@ -200,7 +200,7 @@ private fun shouldComposeMovableElement(
                 content,
                 element,
                 elementState,
-                isInContent = { contents.contains(it) }
+                isInContent = { contents.contains(it) },
             )
         }
     }
@@ -220,11 +220,7 @@ private fun movableElementContentWhenIdle(
     elementState: TransitionState.Idle,
 ): ContentKey {
     val contents = element.contentPicker.contents
-    return elementContentWhenIdle(
-        layoutImpl,
-        elementState,
-        isInContent = { contents.contains(it) },
-    )
+    return elementContentWhenIdle(layoutImpl, elementState, isInContent = { contents.contains(it) })
 }
 
 /**
@@ -245,6 +241,10 @@ private fun placeholderContentSize(
         return targetValueInScene
     }
 
+    fun TransitionState.Transition.otherContent(): ContentKey {
+        return if (fromContent == content) toContent else fromContent
+    }
+
     // If the element content was already composed in the other overlay/scene, we use that
     // target size assuming it doesn't change between scenes.
     // TODO(b/317026105): Provide a way to give a hint size/content for cases where this is
@@ -253,8 +253,10 @@ private fun placeholderContentSize(
         when (val state = movableElementState(elementKey, transitionStates)) {
             null -> return IntSize.Zero
             is TransitionState.Idle -> movableElementContentWhenIdle(layoutImpl, elementKey, state)
-            is TransitionState.Transition ->
-                if (state.fromContent == content) state.toContent else state.fromContent
+            is TransitionState.Transition.ReplaceOverlay -> {
+                state.otherContent().takeIf { it in element.stateByContent } ?: state.currentScene
+            }
+            is TransitionState.Transition -> state.otherContent()
         }
 
     val targetValueInOtherContent = element.stateByContent[otherContent]?.targetSize

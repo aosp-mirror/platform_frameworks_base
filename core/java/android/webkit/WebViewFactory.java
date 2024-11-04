@@ -16,8 +16,6 @@
 
 package android.webkit;
 
-import static android.webkit.Flags.updateServiceV2;
-
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.annotation.UptimeMillisLong;
@@ -490,7 +488,7 @@ public final class WebViewFactory {
                 Trace.traceEnd(Trace.TRACE_TAG_WEBVIEW);
             }
 
-            if (updateServiceV2() && !isInstalledPackage(newPackageInfo)) {
+            if (!isInstalledPackage(newPackageInfo)) {
                 throw new MissingWebViewPackageException(
                         TextUtils.formatSimple(
                                 "Current WebView Package (%s) is not installed for the current "
@@ -498,7 +496,7 @@ public final class WebViewFactory {
                                 newPackageInfo.packageName));
             }
 
-            if (updateServiceV2() && !isEnabledPackage(newPackageInfo)) {
+            if (!isEnabledPackage(newPackageInfo)) {
                 throw new MissingWebViewPackageException(
                         TextUtils.formatSimple(
                                 "Current WebView Package (%s) is not enabled for the current user",

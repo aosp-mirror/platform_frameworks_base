@@ -30,6 +30,7 @@ import com.android.systemui.statusbar.notification.row.NotificationGutsManager
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.Compile
 import com.android.app.tracing.traceSection
+import com.android.systemui.shade.ShadeDisplayAware
 import javax.inject.Inject
 
 /**
@@ -39,7 +40,7 @@ import javax.inject.Inject
  */
 @CoordinatorScope
 class ViewConfigCoordinator @Inject internal constructor(
-    private val mConfigurationController: ConfigurationController,
+    @ShadeDisplayAware private val mConfigurationController: ConfigurationController,
     private val mLockscreenUserManager: NotificationLockscreenUserManager,
     private val mGutsManager: NotificationGutsManager,
     private val mKeyguardUpdateMonitor: KeyguardUpdateMonitor,

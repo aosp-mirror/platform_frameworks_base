@@ -265,19 +265,19 @@ public class ApexManagerTest {
     }
 
     @Test
-    public void testSubmitStagedSession_throwRunTimeException() throws RemoteException {
+    public void testSubmitStagedSession_throwPackageManagerExceptionOnRemoteException()
+             throws RemoteException {
         doThrow(RemoteException.class).when(mApexService).submitStagedSession(any(), any());
 
-        assertThrows(RuntimeException.class,
+        assertThrows(PackageManagerException.class,
                 () -> mApexManager.submitStagedSession(testParamsWithChildren()));
     }
 
     @Test
-    public void testGetStagedApexInfos_throwRunTimeException() throws RemoteException {
+    public void testGetStagedApexInfos_returnsEmptyOnRemoteException() throws RemoteException {
         doThrow(RemoteException.class).when(mApexService).getStagedApexInfos(any());
 
-        assertThrows(RuntimeException.class,
-                () -> mApexManager.getStagedApexInfos(testParamsWithChildren()));
+        assertThat(mApexManager.getStagedApexInfos(testParamsWithChildren())).hasLength(0);
     }
 
     @Test
@@ -298,10 +298,11 @@ public class ApexManagerTest {
     }
 
     @Test
-    public void testMarkStagedSessionReady_throwRunTimeException() throws RemoteException {
+    public void testMarkStagedSessionReady_throwPackageManagerExceptionOnRemoteException()
+            throws RemoteException {
         doThrow(RemoteException.class).when(mApexService).markStagedSessionReady(anyInt());
 
-        assertThrows(RuntimeException.class,
+        assertThrows(PackageManagerException.class,
                 () -> mApexManager.markStagedSessionReady(TEST_SESSION_ID));
     }
 

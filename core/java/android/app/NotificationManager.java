@@ -16,6 +16,8 @@
 
 package android.app;
 
+import static android.service.notification.Flags.notificationClassification;
+
 import android.annotation.CallbackExecutor;
 import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
@@ -37,6 +39,7 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ShortcutInfo;
 import android.graphics.drawable.Icon;
@@ -68,9 +71,11 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.Executor;
 
 /**
@@ -750,6 +755,11 @@ public class NotificationManager {
         INotificationManager service = getService();
         String pkg = mContext.getPackageName();
 
+        if (notificationClassification()
+                && NotificationChannel.SYSTEM_RESERVED_IDS.contains(notification.getChannelId())) {
+            return;
+        }
+
         try {
             if (localLOGV) Log.v(TAG, pkg + ": notify(" + id + ", " + notification + ")");
             service.enqueueNotificationWithTag(pkg, mContext.getOpPackageName(), tag, id,
@@ -953,6 +963,39 @@ public class NotificationManager {
     }
 
     /**
+     * Returns whether the calling app's properly formatted notifications can appear in a promoted
+     * format, which may result in higher ranking, appearances on additional surfaces, and richer
+     * presentation.
+     *
+     * Apps can request this permission by sending the user to the activity that matches the system
+     * intent action {@link android.provider.Settings#ACTION_APP_NOTIFICATION_PROMOTION_SETTINGS}.
+     */
+    @FlaggedApi(android.app.Flags.FLAG_API_RICH_ONGOING)
+    public boolean canPostPromotedNotifications() {
+        INotificationManager service = getService();
+        try {
+            return service.canBePromoted(mContext.getPackageName());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Setter for {@link #canPostPromotedNotifications()}. Only callable by the OS.
+     * @hide
+     */
+    @TestApi
+    @FlaggedApi(android.app.Flags.FLAG_API_RICH_ONGOING)
+    public void setCanPostPromotedNotifications(@NonNull String pkg, int uid, boolean allowed) {
+        INotificationManager service = getService();
+        try {
+            service.setCanBePromoted(pkg, uid, allowed, true);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Creates a group container for {@link NotificationChannel} objects.
      *
      * This can be used to rename an existing group.
@@ -1096,6 +1139,10 @@ public class NotificationManager {
      * had before it was deleted.
      */
     public void deleteNotificationChannel(String channelId) {
+        if (notificationClassification()
+                && NotificationChannel.SYSTEM_RESERVED_IDS.contains(channelId)) {
+            return;
+        }
         INotificationManager service = getService();
         try {
             service.deleteNotificationChannel(mContext.getPackageName(), channelId);
@@ -1298,10 +1345,14 @@ public class NotificationManager {
      */
     @FlaggedApi(Flags.FLAG_MODES_API)
     public boolean areAutomaticZenRulesUserManaged() {
-        // modes ui is dependent on modes api
-        return Flags.modesApi() && Flags.modesUi();
+        if (Flags.modesApi() && Flags.modesUi()) {
+            PackageManager pm = mContext.getPackageManager();
+            return !pm.hasSystemFeature(PackageManager.FEATURE_WATCH)
+                    && !pm.hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE);
+        } else {
+            return false;
+        }
     }
-
 
     /**
      * Returns AutomaticZenRules owned by the caller.
@@ -1750,6 +1801,34 @@ public class NotificationManager {
         INotificationManager service = getService();
         try {
             return service.getAllowedAssistantAdjustments(mContext.getOpPackageName());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     */
+    @TestApi
+    @FlaggedApi(android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION)
+    public void allowAssistantAdjustment(@NonNull String capability) {
+        INotificationManager service = getService();
+        try {
+            service.allowAssistantAdjustment(capability);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     */
+    @TestApi
+    @FlaggedApi(android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION)
+    public void disallowAssistantAdjustment(@NonNull String capability) {
+        INotificationManager service = getService();
+        try {
+            service.disallowAssistantAdjustment(capability);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -3064,4 +3143,19 @@ public class NotificationManager {
         }
     }
 
+    /**
+     * Returns the list of {@link Adjustment} keys that the current approved
+     * {@link android.service.notification.NotificationAssistantService} does not support.
+     * @hide
+     */
+    @TestApi
+    @FlaggedApi(android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION)
+    public @NonNull Set<String> getUnsupportedAdjustmentTypes() {
+        INotificationManager service = getService();
+        try {
+            return new HashSet<>(service.getUnsupportedAdjustmentTypes());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
 }

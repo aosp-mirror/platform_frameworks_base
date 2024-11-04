@@ -18,6 +18,7 @@ package com.android.systemui.settings
 
 import com.android.internal.logging.uiEventLogger
 import com.android.systemui.classifier.falsingManager
+import com.android.systemui.haptics.msdl.msdlPlayer
 import com.android.systemui.haptics.vibratorHelper
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.plugins.activityStarter
@@ -31,6 +32,7 @@ var Kosmos.brightnessSliderControllerFactory by
             falsingManager,
             uiEventLogger,
             vibratorHelper,
+            msdlPlayer,
             systemClock,
             activityStarter,
         )

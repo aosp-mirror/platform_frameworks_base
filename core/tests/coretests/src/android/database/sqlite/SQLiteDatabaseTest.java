@@ -25,6 +25,7 @@ import static org.junit.Assert.fail;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
+import android.database.DefaultDatabaseErrorHandler;
 import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
@@ -357,7 +358,6 @@ public class SQLiteDatabaseTest {
         assertTrue("ReadThread failed with errors: " + errors, errors.isEmpty());
     }
 
-    @RequiresFlagsEnabled(Flags.FLAG_SQLITE_ALLOW_TEMP_TABLES)
     @Test
     public void testTempTable() {
         boolean allowed;
@@ -591,5 +591,71 @@ public class SQLiteDatabaseTest {
             mDatabase.endTransaction();
         }
         closeAndDeleteDatabase();
+    }
+
+    @Test
+    public void testCloseCorruptionReport() throws Exception {
+        mDatabase.beginTransaction();
+        try {
+            mDatabase.execSQL("CREATE TABLE t2 (i int, j int);");
+            mDatabase.execSQL("INSERT INTO t2 (i, j) VALUES (2, 20)");
+            mDatabase.execSQL("INSERT INTO t2 (i, j) VALUES (3, 30)");
+            mDatabase.setTransactionSuccessful();
+        } finally {
+            mDatabase.endTransaction();
+        }
+
+        // Start a transaction and announce that the DB is corrupted.
+        DefaultDatabaseErrorHandler errorHandler = new DefaultDatabaseErrorHandler();
+
+        // Do not bother with endTransaction; the database will have been closed in the corruption
+        // handler.
+        mDatabase.beginTransaction();
+        try {
+            errorHandler.onCorruption(mDatabase);
+            mDatabase.execSQL("INSERT INTO t2 (i, j) VALUES (4, 40)");
+            fail("expected an exception");
+        } catch (IllegalStateException e) {
+            final Throwable cause = e.getCause();
+            assertNotNull(cause);
+            boolean found = false;
+            for (StackTraceElement s : cause.getStackTrace()) {
+                if (s.getMethodName().contains("onCorruption")) {
+                    found = true;
+                }
+            }
+            assertTrue(found);
+        }
+    }
+
+    @Test
+    public void testCloseReport() throws Exception {
+        mDatabase.beginTransaction();
+        try {
+            mDatabase.execSQL("CREATE TABLE t2 (i int, j int);");
+            mDatabase.execSQL("INSERT INTO t2 (i, j) VALUES (2, 20)");
+            mDatabase.execSQL("INSERT INTO t2 (i, j) VALUES (3, 30)");
+            mDatabase.setTransactionSuccessful();
+        } finally {
+            mDatabase.endTransaction();
+        }
+
+        mDatabase.close();
+        try {
+            // Do not bother with endTransaction; the database has already been close.
+            mDatabase.beginTransaction();
+            fail("expected an exception");
+        } catch (IllegalStateException e) {
+            assertTrue(e.toString().contains("attempt to re-open an already-closed object"));
+            final Throwable cause = e.getCause();
+            assertNotNull(cause);
+            boolean found = false;
+            for (StackTraceElement s : cause.getStackTrace()) {
+                if (s.getMethodName().contains("testCloseReport")) {
+                    found = true;
+                }
+            }
+            assertTrue(found);
+        }
     }
 }

@@ -109,14 +109,11 @@ public class ProxyAccessibilityServiceConnection extends AccessibilityServiceCon
         return mDeviceId;
     }
 
-    /**
-     * Called when the proxy is registered.
-     */
-    void initializeServiceInterface(IAccessibilityServiceClient serviceInterface)
-            throws RemoteException {
-        mServiceInterface = serviceInterface;
-        mService = serviceInterface.asBinder();
-        mServiceInterface.init(this, mId, this.mOverlayWindowTokens.get(mDisplayId));
+    /** Called when the proxy is registered. */
+    void initializeClient(IAccessibilityServiceClient client) throws RemoteException {
+        mClient = client;
+        mClientBinder = client.asBinder();
+        mClient.init(this, mId, this.mOverlayWindowTokens.get(mDisplayId));
     }
 
     /**

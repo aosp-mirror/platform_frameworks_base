@@ -16,7 +16,7 @@
 
 package com.android.systemui.statusbar.phone;
 
-import static com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentModule.OPERATOR_NAME_FRAME_VIEW;
+import static com.android.systemui.statusbar.phone.fragment.dagger.HomeStatusBarModule.OPERATOR_NAME_FRAME_VIEW;
 
 import android.graphics.Rect;
 import android.util.MathUtils;
@@ -44,7 +44,7 @@ import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.shared.AsyncGroupHeaderViewInflation;
 import com.android.systemui.statusbar.notification.stack.NotificationRoundnessManager;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
-import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentScope;
+import com.android.systemui.statusbar.phone.fragment.dagger.HomeStatusBarScope;
 import com.android.systemui.statusbar.policy.Clock;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -63,7 +63,7 @@ import javax.inject.Named;
  * Controls the appearance of heads up notifications in the icon area and the header itself.
  * It also controls the roundness of the heads up notifications and the pulsing notifications.
  */
-@StatusBarFragmentScope
+@HomeStatusBarScope
 public class HeadsUpAppearanceController extends ViewController<HeadsUpStatusBarView>
         implements OnHeadsUpChangedListener,
         DarkIconDispatcher.DarkReceiver,

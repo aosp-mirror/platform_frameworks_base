@@ -38,7 +38,7 @@ import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /** Binds the bouncer container to its view model. */
 object KeyguardBouncerViewBinder {

@@ -24,8 +24,8 @@ sealed interface CaptureType {
     data class FullScreen(val displayId: Int) : CaptureType
 
     /** Capture the contents of the task only. */
-    data class IsolatedTask(
-        val taskId: Int,
-        val taskBounds: Rect?,
-    ) : CaptureType
+    data class IsolatedTask(val taskId: Int, val taskBounds: Rect?) : CaptureType
+
+    data class RootTask(val parentTaskId: Int, val taskBounds: Rect?, val childTaskIds: List<Int>) :
+        CaptureType
 }

@@ -18,6 +18,9 @@ package com.android.systemui.statusbar.data.repository
 
 import com.android.systemui.kosmos.Kosmos
 
+val Kosmos.fakeStatusBarModePerDisplayRepository by
+    Kosmos.Fixture { FakeStatusBarModePerDisplayRepository() }
+
 val Kosmos.statusBarModeRepository: StatusBarModeRepositoryStore by
     Kosmos.Fixture { fakeStatusBarModeRepository }
 val Kosmos.fakeStatusBarModeRepository by Kosmos.Fixture { FakeStatusBarModeRepository() }

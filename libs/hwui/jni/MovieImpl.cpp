@@ -11,7 +11,7 @@
 
 // We should never see this in normal operation since our time values are
 // 0-based. So we use it as a sentinel.
-#define UNINITIALIZED_MSEC ((SkMSec)-1)
+#define UNINITIALIZED_MSEC ((Movie::MSec)-1)
 
 Movie::Movie()
 {
@@ -26,7 +26,7 @@ void Movie::ensureInfo()
         memset(&fInfo, 0, sizeof(fInfo));   // failure
 }
 
-SkMSec Movie::duration()
+Movie::MSec Movie::duration()
 {
     this->ensureInfo();
     return fInfo.fDuration;
@@ -50,9 +50,9 @@ int Movie::isOpaque()
     return fInfo.fIsOpaque;
 }
 
-bool Movie::setTime(SkMSec time)
+bool Movie::setTime(Movie::MSec time)
 {
-    SkMSec dur = this->duration();
+    Movie::MSec dur = this->duration();
     if (time > dur)
         time = dur;
 

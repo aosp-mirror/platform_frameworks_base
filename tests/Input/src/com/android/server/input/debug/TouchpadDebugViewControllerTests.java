@@ -38,6 +38,7 @@ import android.view.WindowMetrics;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.server.input.InputManagerService;
+import com.android.server.input.TouchpadHardwareProperties;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -87,6 +88,9 @@ public class TouchpadDebugViewControllerTests {
         mTestableLooper = TestableLooper.get(this);
 
         mTestableContext.addMockSystemService(InputManager.class, mInputManagerMock);
+        when(mInputManagerServiceMock.getTouchpadHardwareProperties(DEVICE_ID)).thenReturn(
+                new TouchpadHardwareProperties.Builder(-100f, 100f, -100f, 100f, 45f, 45f, -5f, 5f,
+                        (short) 10, true, false).build());
 
         mTouchpadDebugViewController = new TouchpadDebugViewController(mTestableContext,
                 mTestableLooper.getLooper(), mInputManagerServiceMock);

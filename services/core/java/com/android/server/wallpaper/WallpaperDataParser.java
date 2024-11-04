@@ -16,6 +16,8 @@
 
 package com.android.server.wallpaper;
 
+import static android.app.Flags.liveWallpaperContentHandling;
+import static android.app.Flags.removeNextWallpaperComponent;
 import static android.app.WallpaperManager.FLAG_LOCK;
 import static android.app.WallpaperManager.FLAG_SYSTEM;
 import static android.app.WallpaperManager.ORIENTATION_UNKNOWN;
@@ -29,11 +31,13 @@ import static com.android.server.wallpaper.WallpaperUtils.getWallpaperDir;
 import static com.android.server.wallpaper.WallpaperUtils.makeWallpaperIdLocked;
 import static com.android.window.flags.Flags.multiCrop;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.WallpaperColors;
 import android.app.WallpaperManager;
 import android.app.WallpaperManager.SetWallpaperFlags;
 import android.app.backup.WallpaperBackupHelper;
+import android.app.wallpaper.WallpaperDescription;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -170,60 +174,14 @@ public class WallpaperDataParser {
             stream = new FileInputStream(file);
             TypedXmlPullParser parser = Xml.resolvePullParser(stream);
 
-            int type;
-            do {
-                type = parser.next();
-                if (type == XmlPullParser.START_TAG) {
-                    String tag = parser.getName();
-                    if (("wp".equals(tag) && loadSystem) || ("kwp".equals(tag) && loadLock)) {
-                        if ("kwp".equals(tag)) {
-                            lockWallpaper = new WallpaperData(userId, FLAG_LOCK);
-                        }
-                        WallpaperData wallpaperToParse =
-                                "wp".equals(tag) ? wallpaper : lockWallpaper;
+            lockWallpaper = loadSettingsFromSerializer(parser, wallpaper, userId, loadSystem,
+                    loadLock, keepDimensionHints, wpdData);
 
-                        if (!multiCrop()) {
-                            parseWallpaperAttributes(parser, wallpaperToParse, keepDimensionHints);
-                        }
-
-                        String comp = parser.getAttributeValue(null, "component");
-                        wallpaperToParse.nextWallpaperComponent = comp != null
-                                ? ComponentName.unflattenFromString(comp)
-                                : null;
-                        if (wallpaperToParse.nextWallpaperComponent == null
-                                || "android".equals(wallpaperToParse.nextWallpaperComponent
-                                .getPackageName())) {
-                            wallpaperToParse.nextWallpaperComponent = mImageWallpaper;
-                        }
-
-                        if (multiCrop()) {
-                            parseWallpaperAttributes(parser, wallpaperToParse, keepDimensionHints);
-                        }
-
-                        if (DEBUG) {
-                            Slog.v(TAG, "mWidth:" + wpdData.mWidth);
-                            Slog.v(TAG, "mHeight:" + wpdData.mHeight);
-                            Slog.v(TAG, "cropRect:" + wallpaper.cropHint);
-                            Slog.v(TAG, "primaryColors:" + wallpaper.primaryColors);
-                            Slog.v(TAG, "mName:" + wallpaper.name);
-                            Slog.v(TAG, "mNextWallpaperComponent:"
-                                    + wallpaper.nextWallpaperComponent);
-                        }
-                    }
-                }
-            } while (type != XmlPullParser.END_DOCUMENT);
             success = true;
         } catch (FileNotFoundException e) {
             Slog.w(TAG, "no current wallpaper -- first boot?");
-        } catch (NullPointerException e) {
-            Slog.w(TAG, "failed parsing " + file + " " + e);
-        } catch (NumberFormatException e) {
-            Slog.w(TAG, "failed parsing " + file + " " + e);
-        } catch (XmlPullParserException e) {
-            Slog.w(TAG, "failed parsing " + file + " " + e);
-        } catch (IOException e) {
-            Slog.w(TAG, "failed parsing " + file + " " + e);
-        } catch (IndexOutOfBoundsException e) {
+        } catch (NullPointerException | NumberFormatException | XmlPullParserException
+                 | IOException | IndexOutOfBoundsException e) {
             Slog.w(TAG, "failed parsing " + file + " " + e);
         }
         IoUtils.closeQuietly(stream);
@@ -232,9 +190,16 @@ public class WallpaperDataParser {
 
         if (loadSystem) {
             if (!success) {
+                // Set safe values that won't cause crashes
                 wallpaper.cropHint.set(0, 0, 0, 0);
                 wpdData.mPadding.set(0, 0, 0, 0);
                 wallpaper.name = "";
+                if (liveWallpaperContentHandling()) {
+                    wallpaper.setDescription(new WallpaperDescription.Builder().setComponent(
+                            mImageWallpaper).build());
+                } else {
+                    wallpaper.setComponent(mImageWallpaper);
+                }
             } else {
                 if (wallpaper.wallpaperId <= 0) {
                     wallpaper.wallpaperId = makeWallpaperIdLocked();
@@ -257,6 +222,73 @@ public class WallpaperDataParser {
         }
 
         return new WallpaperLoadingResult(wallpaper, lockWallpaper, success);
+    }
+
+    // This method updates `wallpaper` in place, but returns `lockWallpaper`. This is because
+    // `wallpaper` already exists if it's being read per `loadSystem`, but `lockWallpaper` is
+    // created conditionally if there is lock screen wallpaper data to read.
+    @VisibleForTesting
+    WallpaperData loadSettingsFromSerializer(TypedXmlPullParser parser, WallpaperData wallpaper,
+            int userId, boolean loadSystem, boolean loadLock, boolean keepDimensionHints,
+            DisplayData wpdData) throws IOException, XmlPullParserException {
+        WallpaperData lockWallpaper = null;
+        int type;
+        do {
+            type = parser.next();
+            if (type == XmlPullParser.START_TAG) {
+                String tag = parser.getName();
+                if (("wp".equals(tag) && loadSystem) || ("kwp".equals(tag) && loadLock)) {
+                    if ("kwp".equals(tag)) {
+                        lockWallpaper = new WallpaperData(userId, FLAG_LOCK);
+                    }
+                    WallpaperData wallpaperToParse =
+                            "wp".equals(tag) ? wallpaper : lockWallpaper;
+
+                    if (!multiCrop()) {
+                        parseWallpaperAttributes(parser, wallpaperToParse, keepDimensionHints);
+                    }
+
+                    ComponentName comp = parseComponentName(parser);
+                    if (!liveWallpaperContentHandling()) {
+                        if (removeNextWallpaperComponent()) {
+                            wallpaperToParse.setComponent(comp);
+                        } else {
+                            wallpaperToParse.nextWallpaperComponent = comp;
+                        }
+                    }
+                    if (multiCrop()) {
+                        parseWallpaperAttributes(parser, wallpaperToParse, keepDimensionHints);
+                    }
+
+                    if (DEBUG) {
+                        Slog.v(TAG, "mWidth:" + wpdData.mWidth);
+                        Slog.v(TAG, "mHeight:" + wpdData.mHeight);
+                        Slog.v(TAG, "cropRect:" + wallpaper.cropHint);
+                        Slog.v(TAG, "primaryColors:" + wallpaper.primaryColors);
+                        Slog.v(TAG, "mName:" + wallpaper.name);
+                        if (removeNextWallpaperComponent()) {
+                            Slog.v(TAG, "mWallpaperComponent:" + wallpaper.getComponent());
+                        } else {
+                            Slog.v(TAG, "mNextWallpaperComponent:"
+                                    + wallpaper.nextWallpaperComponent);
+                        }
+                    }
+                }
+            }
+        } while (type != XmlPullParser.END_DOCUMENT);
+
+        return lockWallpaper;
+    }
+
+    @NonNull
+    private ComponentName parseComponentName(TypedXmlPullParser parser) {
+        String comp = parser.getAttributeValue(null, "component");
+        ComponentName c = (comp != null) ? ComponentName.unflattenFromString(comp) : null;
+        if (c == null || "android".equals(c.getPackageName())) {
+            c = mImageWallpaper;
+        }
+
+        return c;
     }
 
     private void ensureSaneWallpaperData(WallpaperData wallpaper) {
@@ -301,9 +333,29 @@ public class WallpaperDataParser {
         }
     }
 
+    void parseWallpaperDescription(TypedXmlPullParser parser, WallpaperData wallpaper)
+            throws XmlPullParserException, IOException {
+
+        int type = parser.next();
+        if (type == XmlPullParser.START_TAG && "description".equals(parser.getName())) {
+            // Always read the description if it's there - there may be one from a previous save
+            // with content handling enabled even if it's enabled now
+            WallpaperDescription description = WallpaperDescription.restoreFromXml(parser);
+            if (liveWallpaperContentHandling()) {
+                // null component means that wallpaper was last saved without content handling, so
+                // populate description from saved component
+                if (description.getComponent() == null) {
+                    description = description.toBuilder().setComponent(
+                            parseComponentName(parser)).build();
+                }
+                wallpaper.setDescription(description);
+            }
+        }
+    }
+
     @VisibleForTesting
     void parseWallpaperAttributes(TypedXmlPullParser parser, WallpaperData wallpaper,
-            boolean keepDimensionHints) throws XmlPullParserException {
+            boolean keepDimensionHints) throws XmlPullParserException, IOException {
         final int id = parser.getAttributeInt(null, "id", -1);
         if (id != -1) {
             wallpaper.wallpaperId = id;
@@ -324,7 +376,8 @@ public class WallpaperDataParser {
                 getAttributeInt(parser, "totalCropTop", 0),
                 getAttributeInt(parser, "totalCropRight", 0),
                 getAttributeInt(parser, "totalCropBottom", 0));
-        if (multiCrop() && mImageWallpaper.equals(wallpaper.nextWallpaperComponent)) {
+        ComponentName componentName = parseComponentName(parser);
+        if (multiCrop() && mImageWallpaper.equals(componentName)) {
             wallpaper.mCropHints = new SparseArray<>();
             for (Pair<Integer, String> pair: screenDimensionPairs()) {
                 Rect cropHint = new Rect(
@@ -410,6 +463,15 @@ public class WallpaperDataParser {
         }
         wallpaper.name = parser.getAttributeValue(null, "name");
         wallpaper.allowBackup = parser.getAttributeBoolean(null, "backup", false);
+
+        parseWallpaperDescription(parser, wallpaper);
+        if (liveWallpaperContentHandling() && wallpaper.getDescription().getComponent() == null) {
+            // The last save was done before the content handling flag was enabled and has no
+            // WallpaperDescription, so create a default one with the correct component.
+            // CSP: log boot after flag change to false -> true
+            wallpaper.setDescription(
+                    new WallpaperDescription.Builder().setComponent(componentName).build());
+        }
     }
 
     private static int getAttributeInt(TypedXmlPullParser parser, String name, int defValue) {
@@ -431,18 +493,7 @@ public class WallpaperDataParser {
         try {
             fstream = new FileOutputStream(journal.chooseForWrite(), false);
             TypedXmlSerializer out = Xml.resolveSerializer(fstream);
-            out.startDocument(null, true);
-
-            if (wallpaper != null) {
-                writeWallpaperAttributes(out, "wp", wallpaper);
-            }
-
-            if (lockWallpaper != null) {
-                writeWallpaperAttributes(out, "kwp", lockWallpaper);
-            }
-
-            out.endDocument();
-
+            saveSettingsToSerializer(out, wallpaper, lockWallpaper);
             fstream.flush();
             FileUtils.sync(fstream);
             fstream.close();
@@ -454,6 +505,22 @@ public class WallpaperDataParser {
     }
 
     @VisibleForTesting
+    void saveSettingsToSerializer(TypedXmlSerializer out, WallpaperData wallpaper,
+            WallpaperData lockWallpaper) throws IOException {
+        out.startDocument(null, true);
+
+        if (wallpaper != null) {
+            writeWallpaperAttributes(out, "wp", wallpaper);
+        }
+
+        if (lockWallpaper != null) {
+            writeWallpaperAttributes(out, "kwp", lockWallpaper);
+        }
+
+        out.endDocument();
+    }
+
+    @VisibleForTesting
     void writeWallpaperAttributes(TypedXmlSerializer out, String tag, WallpaperData wallpaper)
             throws IllegalArgumentException, IllegalStateException, IOException {
         if (DEBUG) {
@@ -462,7 +529,7 @@ public class WallpaperDataParser {
         out.startTag(null, tag);
         out.attributeInt(null, "id", wallpaper.wallpaperId);
 
-        if (multiCrop() && mImageWallpaper.equals(wallpaper.wallpaperComponent)) {
+        if (multiCrop() && mImageWallpaper.equals(wallpaper.getComponent())) {
             if (wallpaper.mCropHints == null) {
                 Slog.e(TAG, "cropHints should not be null when saved");
                 wallpaper.mCropHints = new SparseArray<>();
@@ -562,19 +629,37 @@ public class WallpaperDataParser {
         }
 
         out.attribute(null, "name", wallpaper.name);
-        if (wallpaper.wallpaperComponent != null
-                && !wallpaper.wallpaperComponent.equals(mImageWallpaper)) {
+        if (wallpaper.getComponent() != null
+                && !wallpaper.getComponent().equals(mImageWallpaper)) {
             out.attribute(null, "component",
-                    wallpaper.wallpaperComponent.flattenToShortString());
+                    wallpaper.getComponent().flattenToShortString());
         }
 
         if (wallpaper.allowBackup) {
             out.attributeBoolean(null, "backup", true);
         }
 
+        writeWallpaperDescription(out, wallpaper);
+
         out.endTag(null, tag);
     }
 
+    void writeWallpaperDescription(TypedXmlSerializer out, WallpaperData wallpaper)
+            throws IOException {
+        if (liveWallpaperContentHandling()) {
+            WallpaperDescription description = wallpaper.getDescription();
+            if (description != null) {
+                String descriptionTag = "description";
+                out.startTag(null, descriptionTag);
+                try {
+                    description.saveToXml(out);
+                } catch (XmlPullParserException e) {
+                    Slog.e(TAG, "Error writing wallpaper description", e);
+                }
+                out.endTag(null, descriptionTag);
+            }
+        }
+    }
     // Restore the named resource bitmap to both source + crop files
     boolean restoreNamedResourceLocked(WallpaperData wallpaper) {
         if (wallpaper.name.length() > 4 && "res:".equals(wallpaper.name.substring(0, 4))) {
@@ -654,9 +739,9 @@ public class WallpaperDataParser {
 
     private static List<Pair<Integer, String>> screenDimensionPairs() {
         return List.of(
-                new Pair<>(WallpaperManager.PORTRAIT, "Portrait"),
-                new Pair<>(WallpaperManager.LANDSCAPE, "Landscape"),
-                new Pair<>(WallpaperManager.SQUARE_PORTRAIT, "SquarePortrait"),
-                new Pair<>(WallpaperManager.SQUARE_LANDSCAPE, "SquareLandscape"));
+                new Pair<>(WallpaperManager.ORIENTATION_PORTRAIT, "Portrait"),
+                new Pair<>(WallpaperManager.ORIENTATION_LANDSCAPE, "Landscape"),
+                new Pair<>(WallpaperManager.ORIENTATION_SQUARE_PORTRAIT, "SquarePortrait"),
+                new Pair<>(WallpaperManager.ORIENTATION_SQUARE_LANDSCAPE, "SquareLandscape"));
     }
 }

@@ -201,6 +201,22 @@ public class PrimitiveSegmentTest {
     }
 
     @Test
+    public void testDuration_withVibratorSupportingPrimitives_returnsVibratorDurationWithDelay() {
+        VibratorInfo vibratorInfo = createVibratorInfoWithSupportedPrimitive(
+                VibrationEffect.Composition.PRIMITIVE_CLICK, /* durationMs= */ 10);
+        assertEquals(15, new PrimitiveSegment(
+                VibrationEffect.Composition.PRIMITIVE_CLICK, 1, 5).getDuration(vibratorInfo));
+    }
+
+    @Test
+    public void testDuration_withVibratorNotSupportingPrimitive_returnsUnknown() {
+        VibratorInfo vibratorInfo = createVibratorInfoWithSupportedPrimitive(
+                VibrationEffect.Composition.PRIMITIVE_CLICK);
+        assertEquals(-1, new PrimitiveSegment(
+                VibrationEffect.Composition.PRIMITIVE_NOOP, 1, 5).getDuration(vibratorInfo));
+    }
+
+    @Test
     public void testVibrationFeaturesSupport_primitiveSupportedByVibrator() {
         assertTrue(createSegment(VibrationEffect.Composition.PRIMITIVE_CLICK)
                 .areVibrationFeaturesSupported(
@@ -252,9 +268,14 @@ public class PrimitiveSegmentTest {
     }
 
     private static VibratorInfo createVibratorInfoWithSupportedPrimitive(int primitiveId) {
+        return createVibratorInfoWithSupportedPrimitive(primitiveId, /* durationMs= */ 10);
+    }
+
+    private static VibratorInfo createVibratorInfoWithSupportedPrimitive(int primitiveId,
+            int durationMs) {
         return new VibratorInfo.Builder(/* id= */ 1)
                 .setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS)
-                .setSupportedPrimitive(primitiveId, 10)
+                .setSupportedPrimitive(primitiveId, durationMs)
                 .build();
     }
 }

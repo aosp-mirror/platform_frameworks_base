@@ -20,8 +20,8 @@ android_test {
         "ravenwood-junit",
     ],
     libs: [
-        "android.test.runner",
-        "android.test.base",
+        "android.test.runner.stubs.system",
+        "android.test.base.stubs.system",
     ],
     platform_apis: true,
     certificate: "platform",
@@ -37,8 +37,8 @@ android_ravenwood_test {
         "ravenwood-junit",
     ],
     libs: [
-        "android.test.runner",
-        "android.test.base",
+        "android.test.runner.stubs.system",
+        "android.test.base.stubs.system",
     ],
     srcs: [
         "src/**/*.java",

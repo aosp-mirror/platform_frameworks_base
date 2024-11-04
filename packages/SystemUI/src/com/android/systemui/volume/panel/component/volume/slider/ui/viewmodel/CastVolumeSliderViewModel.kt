@@ -18,7 +18,10 @@ package com.android.systemui.volume.panel.component.volume.slider.ui.viewmodel
 
 import android.content.Context
 import android.media.session.MediaController.PlaybackInfo
+import com.android.app.tracing.coroutines.launchTraced as launch
+import com.android.systemui.Flags
 import com.android.systemui.common.shared.model.Icon
+import com.android.systemui.haptics.slider.compose.ui.SliderHapticsViewModel
 import com.android.systemui.res.R
 import com.android.systemui.volume.panel.component.mediaoutput.domain.interactor.MediaDeviceSessionInteractor
 import com.android.systemui.volume.panel.component.mediaoutput.shared.model.MediaDeviceSession
@@ -31,7 +34,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
 
 class CastVolumeSliderViewModel
 @AssistedInject
@@ -40,6 +42,7 @@ constructor(
     @Assisted private val coroutineScope: CoroutineScope,
     private val context: Context,
     private val mediaDeviceSessionInteractor: MediaDeviceSessionInteractor,
+    private val hapticsViewModelFactory: SliderHapticsViewModel.Factory,
 ) : SliderViewModel {
 
     override val slider: StateFlow<SliderState> =
@@ -59,6 +62,13 @@ constructor(
     override fun toggleMuted(state: SliderState) {
         // do nothing because this action isn't supported for Cast sliders.
     }
+
+    override fun getSliderHapticsViewModelFactory(): SliderHapticsViewModel.Factory? =
+        if (Flags.hapticsForComposeSliders() && slider.value != SliderState.Empty) {
+            hapticsViewModelFactory
+        } else {
+            null
+        }
 
     private fun PlaybackInfo.getCurrentState(): State {
         val volumeRange = 0..maxVolume

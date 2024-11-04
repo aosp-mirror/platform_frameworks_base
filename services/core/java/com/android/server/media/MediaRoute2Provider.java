@@ -42,15 +42,16 @@ abstract class MediaRoute2Provider {
     final Object mLock = new Object();
 
     Callback mCallback;
-    boolean mIsSystemRouteProvider;
+    public final boolean mIsSystemRouteProvider;
     private volatile MediaRoute2ProviderInfo mProviderInfo;
 
     @GuardedBy("mLock")
     final List<RoutingSessionInfo> mSessionInfos = new ArrayList<>();
 
-    MediaRoute2Provider(@NonNull ComponentName componentName) {
+    MediaRoute2Provider(@NonNull ComponentName componentName, boolean isSystemRouteProvider) {
         mComponentName = Objects.requireNonNull(componentName, "Component name must not be null.");
         mUniqueId = componentName.flattenToShortString();
+        mIsSystemRouteProvider = isSystemRouteProvider;
     }
 
     public void setCallback(Callback callback) {

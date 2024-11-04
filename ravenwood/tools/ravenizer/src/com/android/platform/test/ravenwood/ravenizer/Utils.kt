@@ -15,6 +15,7 @@
  */
 package com.android.platform.test.ravenwood.ravenizer
 
+import android.platform.test.annotations.internal.InnerRunner
 import android.platform.test.annotations.NoRavenizer
 import android.platform.test.ravenwood.RavenwoodAwareTestRunner
 import com.android.hoststubgen.asm.ClassNodes
@@ -39,7 +40,7 @@ val testAnotType = TypeHolder(org.junit.Test::class.java)
 val ruleAnotType = TypeHolder(org.junit.Rule::class.java)
 val classRuleAnotType = TypeHolder(org.junit.ClassRule::class.java)
 val runWithAnotType = TypeHolder(RunWith::class.java)
-val innerRunnerAnotType = TypeHolder(RavenwoodAwareTestRunner.InnerRunner::class.java)
+val innerRunnerAnotType = TypeHolder(InnerRunner::class.java)
 val noRavenizerAnotType = TypeHolder(NoRavenizer::class.java)
 
 val testRuleType = TypeHolder(TestRule::class.java)
@@ -99,4 +100,20 @@ fun String.shouldByBypassed(): Boolean {
         "android/support/",
         // TODO -- anything else?
     )
+}
+
+/**
+ * Files that should be removed when "--strip-mockito" is set.
+ */
+fun String.isMockitoFile(): Boolean {
+    return this.startsWithAny(
+        "org/mockito/", // Mockito
+        "com/android/dx/", // DexMaker
+        "mockito-extensions/", // DexMaker overrides
+    )
+}
+
+fun includeUnsupportedMockito(classes: ClassNodes): Boolean {
+    return classes.findClass("com/android/dx/DexMaker") != null
+            || classes.findClass("org/mockito/Matchers") != null
 }

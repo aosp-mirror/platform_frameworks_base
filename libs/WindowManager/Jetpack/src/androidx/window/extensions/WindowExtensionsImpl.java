@@ -57,9 +57,11 @@ class WindowExtensionsImpl implements WindowExtensions {
      */
     private static final int NO_LEVEL_OVERRIDE = -1;
 
-    private static final int EXTENSIONS_VERSION_V7 = 7;
+    private static final int EXTENSIONS_VERSION_V9 = 9;
 
-    private static final int EXTENSIONS_VERSION_V6 = 6;
+    private static final int EXTENSIONS_VERSION_V8 = 8;
+
+    private static final int EXTENSIONS_VERSION_V7 = 7;
 
     private final Object mLock = new Object();
     private volatile DeviceStateManagerFoldingFeatureProducer mFoldingFeatureProducer;
@@ -80,12 +82,13 @@ class WindowExtensionsImpl implements WindowExtensions {
      */
     @VisibleForTesting
     static int getExtensionsVersionCurrentPlatform() {
-        if (Flags.activityEmbeddingAnimationCustomizationFlag()) {
-            // Activity Embedding animation customization is the only major feature for v7.
-            return EXTENSIONS_VERSION_V7;
-        } else {
-            return EXTENSIONS_VERSION_V6;
+        if (Flags.wlinfoOncreate()) {
+            return EXTENSIONS_VERSION_V9;
         }
+        if (Flags.aeBackStackRestore()) {
+            return EXTENSIONS_VERSION_V8;
+        }
+        return EXTENSIONS_VERSION_V7;
     }
 
     private String generateLogMessage() {

@@ -16,8 +16,8 @@
 
 package android.libcore.regression;
 
-import androidx.benchmark.BenchmarkState;
-import androidx.benchmark.junit4.BenchmarkRule;
+import android.perftests.utils.BenchmarkState;
+import android.perftests.utils.PerfStatusReporter;
 
 import androidx.test.filters.LargeTest;
 
@@ -37,7 +37,7 @@ import java.util.List;
 @RunWith(JUnitParamsRunner.class)
 @LargeTest
 public final class EqualsHashCodePerfTest {
-    @Rule public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
+    @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
 
     private enum Type {
         URI() {
@@ -82,7 +82,7 @@ public final class EqualsHashCodePerfTest {
         mA2 = type.newInstance("https://mail.google.com/mail/u/0/?shva=1#inbox");
         mB1 = type.newInstance("http://developer.android.com/reference/java/net/URI.html");
         mB2 = type.newInstance("http://developer.android.com/reference/java/net/URI.html");
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             mA1.equals(mB1);
             mA1.equals(mA2);
@@ -95,7 +95,7 @@ public final class EqualsHashCodePerfTest {
     public void timeHashCode(Type type) throws Exception {
         mA1 = type.newInstance("https://mail.google.com/mail/u/0/?shva=1#inbox");
         mB1 = type.newInstance("http://developer.android.com/reference/java/net/URI.html");
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             mA1.hashCode();
             mB1.hashCode();
@@ -112,7 +112,7 @@ public final class EqualsHashCodePerfTest {
                         "http://developer.android.com/query?q="
                                 + QUERY.substring(0, QUERY.length() - 3)
                                 + "%AF");
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             mC1.equals(mC2);
         }

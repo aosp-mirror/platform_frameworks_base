@@ -16,8 +16,8 @@
 
 package android.libcore;
 
-import androidx.benchmark.BenchmarkState;
-import androidx.benchmark.junit4.BenchmarkRule;
+import android.perftests.utils.BenchmarkState;
+import android.perftests.utils.PerfStatusReporter;
 
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -30,8 +30,7 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 @LargeTest
 public class MethodInvocationPerfTest {
-    @Rule
-    public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
+    @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
 
     interface I {
         void emptyInterface();
@@ -66,12 +65,12 @@ public class MethodInvocationPerfTest {
     }
 
     public void timeInternalGetter() {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         new C().timeInternalGetter(state);
     }
 
     public void timeInternalFieldAccess() {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         new C().timeInternalFieldAccess(state);
     }
 
@@ -79,7 +78,7 @@ public class MethodInvocationPerfTest {
     @Test
     public void timeStringLength() {
         int result = 0;
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             result = "hello, world!".length();
         }
@@ -88,7 +87,7 @@ public class MethodInvocationPerfTest {
     @Test
     public void timeEmptyStatic() {
         C c = new C();
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             c.emptyStatic();
         }
@@ -97,7 +96,7 @@ public class MethodInvocationPerfTest {
     @Test
     public void timeEmptyVirtual() {
         C c = new C();
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             c.emptyVirtual();
         }
@@ -106,7 +105,7 @@ public class MethodInvocationPerfTest {
     @Test
     public void timeEmptyInterface() {
         I c = new C();
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             c.emptyInterface();
         }
@@ -139,7 +138,7 @@ public class MethodInvocationPerfTest {
     @Test
     public void timePrivateInnerPublicMethod() {
         Inner inner = new Inner();
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             inner.publicMethod();
         }
@@ -148,7 +147,7 @@ public class MethodInvocationPerfTest {
     @Test
     public void timePrivateInnerProtectedMethod() {
         Inner inner = new Inner();
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             inner.protectedMethod();
         }
@@ -157,7 +156,7 @@ public class MethodInvocationPerfTest {
     @Test
     public void timePrivateInnerPrivateMethod() {
         Inner inner = new Inner();
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             inner.privateMethod();
         }
@@ -166,7 +165,7 @@ public class MethodInvocationPerfTest {
     @Test
     public void timePrivateInnerPackageMethod() {
         Inner inner = new Inner();
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             inner.packageMethod();
         }
@@ -175,7 +174,7 @@ public class MethodInvocationPerfTest {
     @Test
     public void timePrivateInnerFinalPackageMethod() {
         Inner inner = new Inner();
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             inner.finalPackageMethod();
         }

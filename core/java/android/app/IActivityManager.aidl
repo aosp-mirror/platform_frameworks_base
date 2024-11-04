@@ -181,6 +181,7 @@ interface IActivityManager {
             in IntentFilter filter, in String requiredPermission, int userId, int flags);
     @UnsupportedAppUsage
     void unregisterReceiver(in IIntentReceiver receiver);
+    List<IntentFilter> getRegisteredIntentFilters(in IIntentReceiver receiver);
     /** @deprecated Use {@link #broadcastIntentWithFeature} instead */
     @UnsupportedAppUsage(maxTargetSdk=29, publicAlternatives="Use {@link android.content.Context#sendBroadcast(android.content.Intent)} instead")
     int broadcastIntent(in IApplicationThread caller, in Intent intent,
@@ -501,7 +502,7 @@ interface IActivityManager {
             in String shareDescription);
 
     void requestInteractiveBugReport();
-    void requestBugReportWithExtraAttachment(in Uri extraAttachment);
+    void requestBugReportWithExtraAttachments(in List<Uri> extraAttachment);
     void requestFullBugReport();
     void requestRemoteBugReport(long nonce);
     boolean launchBugReportHandlerApp();

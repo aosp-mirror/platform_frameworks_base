@@ -19,6 +19,7 @@ package com.android.systemui.shade.transition
 import android.content.Context
 import android.content.res.Configuration
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.SplitShadeStateController
 import javax.inject.Inject
@@ -28,11 +29,11 @@ import javax.inject.Inject
 internal class LargeScreenShadeInterpolatorImpl
 @Inject
 internal constructor(
-    configurationController: ConfigurationController,
-    private val context: Context,
+    @ShadeDisplayAware configurationController: ConfigurationController,
+    @ShadeDisplayAware private val context: Context,
     private val splitShadeInterpolator: SplitShadeInterpolator,
     private val portraitShadeInterpolator: LargeScreenPortraitShadeInterpolator,
-    private val splitShadeStateController: SplitShadeStateController
+    private val splitShadeStateController: SplitShadeStateController,
 ) : LargeScreenShadeInterpolator {
 
     private var inSplitShade = false

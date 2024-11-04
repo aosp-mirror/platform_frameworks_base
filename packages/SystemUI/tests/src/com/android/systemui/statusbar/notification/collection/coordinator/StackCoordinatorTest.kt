@@ -45,7 +45,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.verifyZeroInteractions
+import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.MockitoAnnotations.initMocks
 import org.mockito.Mockito.`when` as whenever
 
@@ -110,7 +110,7 @@ class StackCoordinatorTest : SysuiTestCase() {
         whenever(section.bucket).thenReturn(BUCKET_ALERTING)
         afterRenderListListener.onAfterRenderList(listOf(entry), stackController)
         verify(stackController).setNotifStats(NotifStats(1, false, true, false, false))
-        verifyZeroInteractions(activeNotificationsInteractor)
+        verifyNoMoreInteractions(activeNotificationsInteractor)
     }
 
     @Test
@@ -121,7 +121,7 @@ class StackCoordinatorTest : SysuiTestCase() {
         whenever(section.bucket).thenReturn(BUCKET_ALERTING)
         afterRenderListListener.onAfterRenderList(listOf(entry), stackController)
         verify(stackController).setNotifStats(NotifStats(1, true, false, false, false))
-        verifyZeroInteractions(activeNotificationsInteractor)
+        verifyNoMoreInteractions(activeNotificationsInteractor)
     }
 
     @Test
@@ -130,7 +130,7 @@ class StackCoordinatorTest : SysuiTestCase() {
         whenever(section.bucket).thenReturn(BUCKET_SILENT)
         afterRenderListListener.onAfterRenderList(listOf(entry), stackController)
         verify(stackController).setNotifStats(NotifStats(1, false, false, false, true))
-        verifyZeroInteractions(activeNotificationsInteractor)
+        verifyNoMoreInteractions(activeNotificationsInteractor)
     }
 
     @Test
@@ -141,7 +141,7 @@ class StackCoordinatorTest : SysuiTestCase() {
         whenever(section.bucket).thenReturn(BUCKET_SILENT)
         afterRenderListListener.onAfterRenderList(listOf(entry), stackController)
         verify(stackController).setNotifStats(NotifStats(1, false, false, true, false))
-        verifyZeroInteractions(activeNotificationsInteractor)
+        verifyNoMoreInteractions(activeNotificationsInteractor)
     }
 
     @Test
@@ -151,7 +151,7 @@ class StackCoordinatorTest : SysuiTestCase() {
         afterRenderListListener.onAfterRenderList(listOf(entry), stackController)
         verify(activeNotificationsInteractor)
             .setNotifStats(NotifStats(1, false, true, false, false))
-        verifyZeroInteractions(stackController)
+        verifyNoMoreInteractions(stackController)
     }
 
     @Test
@@ -166,7 +166,7 @@ class StackCoordinatorTest : SysuiTestCase() {
         afterRenderListListener.onAfterRenderList(listOf(entry), stackController)
         verify(activeNotificationsInteractor)
             .setNotifStats(NotifStats(1, true, false, false, false))
-        verifyZeroInteractions(stackController)
+        verifyNoMoreInteractions(stackController)
     }
 
     @Test
@@ -176,7 +176,7 @@ class StackCoordinatorTest : SysuiTestCase() {
         afterRenderListListener.onAfterRenderList(listOf(entry), stackController)
         verify(activeNotificationsInteractor)
             .setNotifStats(NotifStats(1, false, false, false, true))
-        verifyZeroInteractions(stackController)
+        verifyNoMoreInteractions(stackController)
     }
 
     @Test
@@ -191,7 +191,7 @@ class StackCoordinatorTest : SysuiTestCase() {
         afterRenderListListener.onAfterRenderList(listOf(entry), stackController)
         verify(activeNotificationsInteractor)
             .setNotifStats(NotifStats(1, false, false, true, false))
-        verifyZeroInteractions(stackController)
+        verifyNoMoreInteractions(stackController)
     }
 
     @Test
@@ -204,6 +204,6 @@ class StackCoordinatorTest : SysuiTestCase() {
         afterRenderListListener.onAfterRenderList(listOf(entry), stackController)
         verify(activeNotificationsInteractor)
             .setNotifStats(NotifStats(1, hasNonClearableAlertingNotifs = true, false, false, false))
-        verifyZeroInteractions(stackController)
+        verifyNoMoreInteractions(stackController)
     }
 }

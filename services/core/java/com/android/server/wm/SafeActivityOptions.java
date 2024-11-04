@@ -70,19 +70,6 @@ public class SafeActivityOptions {
     private @Nullable ActivityOptions mCallerOptions;
 
     /**
-     * Constructs a new instance from a bundle and records {@link Binder#getCallingPid}/
-     * {@link Binder#getCallingUid}. Thus, calling identity MUST NOT be cleared when constructing
-     * this object.
-     *
-     * @param bOptions The {@link ActivityOptions} as {@link Bundle}.
-     */
-    public static SafeActivityOptions fromBundle(Bundle bOptions) {
-        return bOptions != null
-                ? new SafeActivityOptions(ActivityOptions.fromBundle(bOptions))
-                : null;
-    }
-
-    /**
      * Constructs a new instance from a bundle and provided pid/uid.
      *
      * @param bOptions The {@link ActivityOptions} as {@link Bundle}.
@@ -95,24 +82,11 @@ public class SafeActivityOptions {
     }
 
     /**
-     * Constructs a new instance and records {@link Binder#getCallingPid}/
-     * {@link Binder#getCallingUid}. Thus, calling identity MUST NOT be cleared when constructing
-     * this object.
-     *
-     * @param options The options to wrap.
-     */
-    public SafeActivityOptions(@Nullable ActivityOptions options) {
-        mOriginalCallingPid = Binder.getCallingPid();
-        mOriginalCallingUid = Binder.getCallingUid();
-        mOriginalOptions = options;
-    }
-
-    /**
      * Constructs a new instance.
      *
      * @param options The options to wrap.
      */
-    private SafeActivityOptions(@Nullable ActivityOptions options, int callingPid, int callingUid) {
+    public SafeActivityOptions(@Nullable ActivityOptions options, int callingPid, int callingUid) {
         mOriginalCallingPid = callingPid;
         mOriginalCallingUid = callingUid;
         mOriginalOptions = options;
@@ -158,12 +132,12 @@ public class SafeActivityOptions {
 
     /**
      * Overrides options with options from a caller and records {@link Binder#getCallingPid}/
-     * {@link Binder#getCallingUid}. Thus, calling identity MUST NOT be cleared when calling this
-     * method.
+     * {@link Binder#getCallingUid}.
      */
-    public void setCallerOptions(@Nullable ActivityOptions options) {
-        mRealCallingPid = Binder.getCallingPid();
-        mRealCallingUid = Binder.getCallingUid();
+    public void setCallerOptions(@Nullable ActivityOptions options, int callingPid,
+            int callingUid) {
+        mRealCallingPid = callingPid;
+        mRealCallingUid = callingUid;
         mCallerOptions = options;
     }
 

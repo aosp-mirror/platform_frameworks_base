@@ -45,19 +45,16 @@ import java.util.concurrent.Executor;
  * @hide
  */
 @SystemApi
-@FlaggedApi(Flags.FLAG_CONCERT_MODE)
 public final class RequestProcessor {
     private final static String TAG = "RequestProcessor";
     private final IRequestProcessorImpl mRequestProcessor;
     private final long mVendorId;
 
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
     RequestProcessor (@NonNull IRequestProcessorImpl requestProcessor, long vendorId) {
         mRequestProcessor = requestProcessor;
         mVendorId = vendorId;
     }
 
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
     public interface RequestCallback {
         /**
          * This method is called when the camera device has started
@@ -76,7 +73,6 @@ public final class RequestProcessor {
          * @param frameNumber the frame number for this capture
          *
          */
-        @FlaggedApi(Flags.FLAG_CONCERT_MODE)
         void onCaptureStarted(@NonNull Request request, long frameNumber, long timestamp);
 
         /**
@@ -117,7 +113,6 @@ public final class RequestProcessor {
          *                      which includes a subset of the {@link
          *                      TotalCaptureResult} fields.
          */
-        @FlaggedApi(Flags.FLAG_CONCERT_MODE)
         void onCaptureProgressed(@NonNull Request request, @NonNull CaptureResult partialResult);
 
         /**
@@ -138,7 +133,6 @@ public final class RequestProcessor {
          *                           parameters and the state of the camera
          *                           system during capture.
          */
-        @FlaggedApi(Flags.FLAG_CONCERT_MODE)
         void onCaptureCompleted(@NonNull Request request,
                 @Nullable TotalCaptureResult totalCaptureResult);
 
@@ -163,7 +157,6 @@ public final class RequestProcessor {
          * @param failure The output failure from the capture, including the
          *                failure reason and the frame number.
          */
-        @FlaggedApi(Flags.FLAG_CONCERT_MODE)
         void onCaptureFailed(@NonNull Request request, @NonNull CaptureFailure failure);
 
         /**
@@ -182,7 +175,6 @@ public final class RequestProcessor {
          * @param outputStreamId The output stream id that the buffer will not
          *                       be produced for
          */
-        @FlaggedApi(Flags.FLAG_CONCERT_MODE)
         void onCaptureBufferLost(@NonNull Request request, long frameNumber, int outputStreamId);
 
         /**
@@ -203,7 +195,6 @@ public final class RequestProcessor {
          *                    or {@link CaptureFailure#getFrameNumber}) in
          *                    the capture sequence.
          */
-        @FlaggedApi(Flags.FLAG_CONCERT_MODE)
         void onCaptureSequenceCompleted(int sequenceId, long frameNumber);
 
         /**
@@ -221,17 +212,14 @@ public final class RequestProcessor {
          * @param sequenceId A sequence ID returned by the RequestProcessor
          *                   capture family of methods
          */
-        @FlaggedApi(Flags.FLAG_CONCERT_MODE)
         void onCaptureSequenceAborted(int sequenceId);
     }
 
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
     public final static class Request {
         private final List<Integer> mOutputIds;
         private final List<Pair<CaptureRequest.Key, Object>> mParameters;
         private final @CameraDevice.RequestTemplate int mTemplateId;
 
-        @FlaggedApi(Flags.FLAG_CONCERT_MODE)
         public Request(@NonNull List<Integer> outputConfigIds,
                 @NonNull List<Pair<CaptureRequest.Key, Object>> parameters,
                 @CameraDevice.RequestTemplate int templateId) {
@@ -244,7 +232,6 @@ public final class RequestProcessor {
          * Gets the target ids of {@link ExtensionOutputConfiguration} which identifies
          * corresponding Surface to be the targeted for the request.
          */
-        @FlaggedApi(Flags.FLAG_CONCERT_MODE)
         @NonNull
         List<Integer> getOutputConfigIds() {
             return mOutputIds;
@@ -253,7 +240,6 @@ public final class RequestProcessor {
         /**
          * Gets all the parameters.
          */
-        @FlaggedApi(Flags.FLAG_CONCERT_MODE)
         @NonNull
         public List<Pair<CaptureRequest.Key, Object>> getParameters() {
             return mParameters;
@@ -265,7 +251,6 @@ public final class RequestProcessor {
          *
          * @see CameraDevice.RequestTemplate
          */
-        @FlaggedApi(Flags.FLAG_CONCERT_MODE)
         Integer getTemplateId() {
             return mTemplateId;
         }
@@ -322,7 +307,6 @@ public final class RequestProcessor {
      * @param callback Request callback implementation
      * @return the id of the capture sequence
      */
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
     public int submit(@NonNull Request request, @NonNull Executor executor,
             @NonNull RequestCallback callback) throws CameraAccessException {
         ArrayList<Request> requests = new ArrayList<>(1);
@@ -355,7 +339,6 @@ public final class RequestProcessor {
      * @param callback Request callback implementation
      * @return the id of the capture sequence
      */
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
     public int submitBurst(@NonNull List<Request> requests, @NonNull Executor executor,
             @NonNull RequestCallback callback) throws CameraAccessException {
         List<android.hardware.camera2.extension.Request> parcelableRequests =
@@ -386,7 +369,6 @@ public final class RequestProcessor {
      * @param callback Request callback implementation
      * @return the id of the capture sequence
      */
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
     public int setRepeating(@NonNull Request request, @NonNull Executor executor,
             @NonNull RequestCallback callback) throws CameraAccessException {
         ArrayList<Request> requests = new ArrayList<>(1);
@@ -413,7 +395,6 @@ public final class RequestProcessor {
     /**
      * Abort all ongoing capture requests.
      */
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
     public void abortCaptures() {
         try {
             mRequestProcessor.abortCaptures();
@@ -425,7 +406,6 @@ public final class RequestProcessor {
     /**
      * Stop the current repeating request.
      */
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
     public void stopRepeating() {
         try {
             mRequestProcessor.stopRepeating();

@@ -4,20 +4,10 @@
       "name": "FrameworksCoreTests_textclassifier"
     },
     {
-      "name": "CtsTextClassifierTestCases",
-      "options": [
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        }
-      ]
+      "name": "CtsTextClassifierTestCases"
     },
     {
-      "name": "TextClassifierServiceTest",
-      "options": [
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        }
-      ]
+      "name": "TextClassifierServiceTest"
     }
   ]
 }

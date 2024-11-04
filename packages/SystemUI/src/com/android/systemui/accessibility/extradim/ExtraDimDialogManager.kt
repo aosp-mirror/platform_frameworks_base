@@ -15,7 +15,9 @@
  */
 package com.android.systemui.accessibility.extradim
 
-import androidx.annotation.VisibleForTesting
+import com.android.systemui.animation.DialogCuj
+import com.android.systemui.animation.DialogTransitionAnimator
+import com.android.systemui.animation.Expandable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.statusbar.phone.SystemUIDialog
@@ -28,25 +30,35 @@ class ExtraDimDialogManager
 @Inject
 constructor(
     private val extraDimDialogDelegateProvider: Provider<ExtraDimDialogDelegate>,
-    private val mActivityStarter: ActivityStarter
+    private val mActivityStarter: ActivityStarter,
+    private val dialogTransitionAnimator: DialogTransitionAnimator,
 ) {
     private var dialog: SystemUIDialog? = null
 
-    @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
-    fun dismissKeyguardIfNeededAndShowDialog() {
+    @JvmOverloads
+    fun dismissKeyguardIfNeededAndShowDialog(expandable: Expandable? = null) {
         mActivityStarter.executeRunnableDismissingKeyguard(
-            { showRemoveExtraDimShortcutsDialog() },
+            { showRemoveExtraDimShortcutsDialog(expandable) },
             /* cancelAction= */ null,
             /* dismissShade= */ false,
             /* afterKeyguardGone= */ true,
-            /* deferred= */ false
+            /* deferred= */ false,
         )
     }
 
     /** Show the dialog for removing all Extra Dim shortcuts. */
-    private fun showRemoveExtraDimShortcutsDialog() {
+    private fun showRemoveExtraDimShortcutsDialog(expandable: Expandable?) {
         dialog?.dismiss()
-        dialog = extraDimDialogDelegateProvider.get().createDialog()
-        dialog!!.show()
+        val dialog2 = extraDimDialogDelegateProvider.get().createDialog()
+        dialog = dialog2
+
+        val controller =
+            expandable?.dialogTransitionController(
+                DialogCuj(com.android.internal.jank.Cuj.CUJ_SHADE_DIALOG_OPEN)
+            )
+
+        controller?.let {
+            dialogTransitionAnimator.show(dialog2, it, animateBackgroundBoundsChange = true)
+        } ?: dialog2.show()
     }
 }

@@ -48,6 +48,7 @@ minikin::MinikinPaint MinikinUtils::prepareMinikinPaint(const Paint* paint,
     minikinPaint.localeListId = paint->getMinikinLocaleListId();
     minikinPaint.fontStyle = resolvedFace->fStyle;
     minikinPaint.fontFeatureSettings = paint->getFontFeatureSettings();
+    minikinPaint.fontVariationSettings = paint->getFontVariationOverride();
 
     const std::optional<minikin::FamilyVariant>& familyVariant = paint->getFamilyVariant();
     if (familyVariant.has_value()) {

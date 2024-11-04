@@ -71,12 +71,12 @@ import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.view.WindowManagerPolicyConstants.KEYGUARD_GOING_AWAY_FLAG_TO_LAUNCHER_CLEAR_SNAPSHOT;
 import static android.window.TransitionInfo.FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY;
 
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_CONFIGURATION;
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_DREAM;
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_FOCUS;
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_IMMERSIVE;
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_LOCKTASK;
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_TASKS;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_CONFIGURATION;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_DREAM;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_FOCUS;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_IMMERSIVE;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_LOCKTASK;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_TASKS;
 import static com.android.sdksandbox.flags.Flags.sandboxActivitySdkBasedContext;
 import static com.android.server.am.ActivityManagerService.STOCK_PM_FLAGS;
 import static com.android.server.am.ActivityManagerServiceDumpActivitiesProto.ROOT_WINDOW_CONTAINER;
@@ -145,7 +145,6 @@ import android.app.AlertDialog;
 import android.app.AnrController;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
-import android.app.BackgroundStartPrivileges;
 import android.app.Dialog;
 import android.app.IActivityClientController;
 import android.app.IActivityController;
@@ -1240,12 +1239,19 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         assertPackageMatchesCallingUid(callingPackage);
         final String reason = "startActivities";
         enforceNotIsolatedCaller(reason);
-        userId = handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(), userId, reason);
+        if (intents != null) {
+            for (Intent intent : intents) {
+                mAmInternal.addCreatorToken(intent, callingPackage);
+            }
+        }
+        final int callingPid = Binder.getCallingPid();
+        final int callingUid = Binder.getCallingUid();
+        userId = handleIncomingUser(callingPid, callingUid, userId, reason);
         // TODO: Switch to user app stacks here.
         return getActivityStartController().startActivities(caller, -1, 0, -1, callingPackage,
                 callingFeatureId, intents, resolvedTypes, resultTo,
-                SafeActivityOptions.fromBundle(bOptions), userId, reason,
-                null /* originatingPendingIntent */, BackgroundStartPrivileges.NONE);
+                SafeActivityOptions.fromBundle(bOptions, callingPid, callingUid), userId, reason,
+                null /* originatingPendingIntent */, false);
     }
 
     @Override
@@ -1269,7 +1275,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             @Nullable String callingFeatureId, Intent intent, String resolvedType,
             IBinder resultTo, String resultWho, int requestCode, int startFlags,
             ProfilerInfo profilerInfo, Bundle bOptions, int userId, boolean validateIncomingUser) {
-        final SafeActivityOptions opts = SafeActivityOptions.fromBundle(bOptions);
+        mAmInternal.addCreatorToken(intent, callingPackage);
+        final int callingPid = Binder.getCallingPid();
+        final int callingUid = Binder.getCallingUid();
+        final SafeActivityOptions opts = SafeActivityOptions.fromBundle(
+                bOptions, callingPid, callingUid);
 
         assertPackageMatchesCallingUid(callingPackage);
         enforceNotIsolatedCaller("startActivityAsUser");
@@ -1278,11 +1288,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             SdkSandboxManagerLocal sdkSandboxManagerLocal = LocalManagerRegistry.getManager(
                     SdkSandboxManagerLocal.class);
             sdkSandboxManagerLocal.enforceAllowedToHostSandboxedActivity(
-                    intent, Binder.getCallingUid(), callingPackage
+                    intent, callingUid, callingPackage
             );
         }
 
-        if (Process.isSdkSandboxUid(Binder.getCallingUid())) {
+        if (Process.isSdkSandboxUid(callingUid)) {
             SdkSandboxManagerLocal sdkSandboxManagerLocal = LocalManagerRegistry.getManager(
                     SdkSandboxManagerLocal.class);
             if (sdkSandboxManagerLocal == null) {
@@ -1293,7 +1303,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
 
         userId = getActivityStartController().checkTargetUser(userId, validateIncomingUser,
-                Binder.getCallingPid(), Binder.getCallingUid(), "startActivityAsUser");
+                callingPid, callingUid, "startActivityAsUser");
 
         // TODO: Switch to user app stacks here.
         return getActivityStartController().obtainStarter(intent, "startActivityAsUser")
@@ -1331,6 +1341,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
         PendingIntentRecord pir = (PendingIntentRecord) target;
 
+        if (fillInIntent != null) {
+            mAmInternal.addCreatorToken(fillInIntent, pir.getPackageName());
+        }
+
         synchronized (mGlobalLock) {
             // If this is coming from the currently resumed activity, it is
             // effectively saying that app switches are allowed at this point.
@@ -1341,6 +1355,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 mAppSwitchesState = APP_SWITCH_ALLOW;
             }
         }
+
         return pir.sendInner(caller, 0, fillInIntent, resolvedType, allowlistToken, null, null,
                 resultTo, resultWho, requestCode, flagsMask, flagsValues, bOptions);
     }
@@ -1352,7 +1367,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         if (intent != null && intent.hasFileDescriptors()) {
             throw new IllegalArgumentException("File descriptors passed in Intent");
         }
-        SafeActivityOptions options = SafeActivityOptions.fromBundle(bOptions);
+
+        final int origCallingPid = Binder.getCallingPid();
+        final int origCallingUid = Binder.getCallingUid();
+        SafeActivityOptions options = SafeActivityOptions.fromBundle(bOptions, origCallingPid,
+                origCallingUid);
 
         synchronized (mGlobalLock) {
             final ActivityRecord r = ActivityRecord.isInRootTaskLocked(callingActivity);
@@ -1365,6 +1384,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 SafeActivityOptions.abort(options);
                 return false;
             }
+
+            mAmInternal.addCreatorToken(intent, r.packageName);
+
             intent = new Intent(intent);
             // Remove existing mismatch flag so it can be properly updated later
             intent.removeExtendedFlags(Intent.EXTENDED_FLAG_FILTER_MISMATCH);
@@ -1438,13 +1460,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 resultTo.removeResultsLocked(r, resultWho, requestCode);
             }
 
-            final int origCallingUid = Binder.getCallingUid();
-            final int origCallingPid = Binder.getCallingPid();
             final long origId = Binder.clearCallingIdentity();
             // TODO(b/64750076): Check if calling pid should really be -1.
             try {
                 if (options == null) {
-                    options = new SafeActivityOptions(ActivityOptions.makeBasic());
+                    options = new SafeActivityOptions(ActivityOptions.makeBasic(),
+                            Binder.getCallingPid(), Binder.getCallingUid());
                 }
 
                 // Fixes b/230492947 b/337726734
@@ -1544,7 +1565,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     // To start the dream from background, we need to start it from a persistent
                     // system process. Here we set the real calling uid to the system server uid
                     .setRealCallingUid(Binder.getCallingUid())
-                    .setBackgroundStartPrivileges(BackgroundStartPrivileges.ALLOW_BAL)
+                    .setAllowBalExemptionForSystemProcess(true)
                     .execute();
 
             final ActivityRecord started = outActivity[0];
@@ -1562,8 +1583,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         assertPackageMatchesCallingUid(callingPackage);
         final WaitResult res = new WaitResult();
         enforceNotIsolatedCaller("startActivityAndWait");
-        userId = handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
-                userId, "startActivityAndWait");
+        final int callingPid = Binder.getCallingPid();
+        final int callingUid = Binder.getCallingUid();
+        userId = handleIncomingUser(callingPid, callingUid, userId, "startActivityAndWait");
         // TODO: Switch to user app stacks here.
         getActivityStartController().obtainStarter(intent, "startActivityAndWait")
                 .setCaller(caller)
@@ -1574,7 +1596,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 .setResultWho(resultWho)
                 .setRequestCode(requestCode)
                 .setStartFlags(startFlags)
-                .setActivityOptions(bOptions)
+                .setActivityOptions(bOptions, callingPid, callingUid)
                 .setUserId(userId)
                 .setProfilerInfo(profilerInfo)
                 .setWaitResult(res)
@@ -1589,8 +1611,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             Bundle bOptions, int userId) {
         assertPackageMatchesCallingUid(callingPackage);
         enforceNotIsolatedCaller("startActivityWithConfig");
-        userId = handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(), userId,
-                "startActivityWithConfig");
+        final int callingPid = Binder.getCallingPid();
+        final int callingUid = Binder.getCallingUid();
+        userId = handleIncomingUser(callingPid, callingUid, userId, "startActivityWithConfig");
         // TODO: Switch to user app stacks here.
         return getActivityStartController().obtainStarter(intent, "startActivityWithConfig")
                 .setCaller(caller)
@@ -1602,7 +1625,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 .setRequestCode(requestCode)
                 .setStartFlags(startFlags)
                 .setGlobalConfiguration(config)
-                .setActivityOptions(bOptions)
+                .setActivityOptions(bOptions, callingPid, callingUid)
                 .setUserId(userId)
                 .execute();
     }
@@ -1695,7 +1718,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     .setFilterCallingUid(isResolver ? 0 /* system */ : targetUid)
                     // The target may well be in the background, which would normally prevent it
                     // from starting an activity. Here we definitely want the start to succeed.
-                    .setBackgroundStartPrivileges(BackgroundStartPrivileges.ALLOW_BAL)
+                    .setAllowBalExemptionForSystemProcess(true)
                     .execute();
         } catch (SecurityException e) {
             // XXX need to figure out how to propagate to original app.
@@ -1741,7 +1764,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 .setProfilerInfo(profilerInfo)
                 .setActivityOptions(createSafeActivityOptionsWithBalAllowed(bOptions))
                 .setUserId(userId)
-                .setBackgroundStartPrivileges(BackgroundStartPrivileges.ALLOW_BAL)
+                .setAllowBalExemptionForSystemProcess(true)
                 .execute();
     }
 
@@ -1768,7 +1791,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     .setResolvedType(resolvedType)
                     .setActivityOptions(createSafeActivityOptionsWithBalAllowed(bOptions))
                     .setUserId(userId)
-                    .setBackgroundStartPrivileges(BackgroundStartPrivileges.ALLOW_BAL)
+                    .setAllowBalExemptionForSystemProcess(true)
                     .execute();
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -1806,7 +1829,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
         final int callingPid = Binder.getCallingPid();
         final int callingUid = Binder.getCallingUid();
-        final SafeActivityOptions safeOptions = SafeActivityOptions.fromBundle(bOptions);
+        final SafeActivityOptions safeOptions = SafeActivityOptions.fromBundle(
+                bOptions, callingPid, callingUid);
         final long origId = Binder.clearCallingIdentity();
         try {
             return mTaskSupervisor.startActivityFromRecents(callingPid, callingUid, taskId,
@@ -1830,8 +1854,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
         assertPackageMatchesCallingUid(callingPackage);
 
+        mAmInternal.addCreatorToken(intent, callingPackage);
+
         final ActivityOptions activityOptions = ActivityOptions.makeBasic();
         activityOptions.setLaunchTaskId(taskId);
+        // Pass in the system UID to allow setting launch taskId with MANAGE_GAME_ACTIVITY.
+        final SafeActivityOptions safeOptions = new SafeActivityOptions(
+                activityOptions, Process.myPid(), Process.SYSTEM_UID);
 
         userId = handleIncomingUser(callingPid, callingUid, userId, "startActivityFromGameSession");
 
@@ -1845,7 +1874,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     .setCallingPackage(intent.getPackage())
                     .setCallingFeatureId(callingFeatureId)
                     .setUserId(userId)
-                    .setActivityOptions(activityOptions.toBundle())
+                    .setActivityOptions(safeOptions)
                     .setRealCallingUid(Binder.getCallingUid())
                     .execute();
         } finally {
@@ -2214,8 +2243,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
         ProtoLog.d(WM_DEBUG_TASKS, "moveTaskToFront: moving taskId=%d", taskId);
         synchronized (mGlobalLock) {
+            final int callingPid = Binder.getCallingPid();
+            final int callingUid = Binder.getCallingUid();
             moveTaskToFrontLocked(appThread, callingPackage, taskId, flags,
-                    SafeActivityOptions.fromBundle(bOptions));
+                    SafeActivityOptions.fromBundle(bOptions, callingPid, callingUid));
         }
     }
 
@@ -2240,7 +2271,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 -1,
                 callerApp,
                 null,
-                BackgroundStartPrivileges.NONE,
+                false,
                 null,
                 null,
                 null);
@@ -3884,6 +3915,17 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     @Override
+    public void setLimitSystemEducationDialogs(
+            IBinder appToken, boolean limitSystemEducationDialogs) {
+        synchronized (mGlobalLock) {
+            final ActivityRecord r = ActivityRecord.isInRootTaskLocked(appToken);
+            if (r != null) {
+                r.setLimitSystemEducationDialogs(limitSystemEducationDialogs);
+            }
+        }
+    }
+
+    @Override
     public boolean updateConfiguration(Configuration values) {
         mAmInternal.enforceCallingPermission(CHANGE_CONFIGURATION, "updateConfiguration()");
 
@@ -3933,6 +3975,28 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
+    }
+
+    private TaskSnapshot getTaskSnapshotInner(int taskId, boolean isLowResolution,
+            @TaskSnapshot.ReferenceFlags int usage) {
+        final Task task;
+        synchronized (mGlobalLock) {
+            task = mRootWindowContainer.anyTaskForId(taskId, MATCH_ATTACHED_TASK_OR_RECENT_TASKS);
+            if (task == null) {
+                Slog.w(TAG, "getTaskSnapshot: taskId=" + taskId + " not found");
+                return null;
+            }
+            // Try to load snapshot from cache first, and add reference if the snapshot is in cache.
+            final TaskSnapshot snapshot = mWindowManager.mTaskSnapshotController.getSnapshot(taskId,
+                    task.mUserId, false /* restoreFromDisk */, isLowResolution);
+            if (snapshot != null) {
+                snapshot.addReference(usage);
+                return snapshot;
+            }
+        }
+        // Don't call this while holding the lock as this operation might hit the disk.
+        return mWindowManager.mTaskSnapshotController.getSnapshot(taskId,
+                task.mUserId, true /* restoreFromDisk */, isLowResolution);
     }
 
     @Override
@@ -5845,6 +5909,29 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     /**
+     * Registers an app that uses the Strict Mode for detecting BAL.
+     *
+     * @param callback the callback to register
+     * @return {@code true} if the callback was registered successfully.
+     */
+    @Override
+    public boolean registerBackgroundActivityStartCallback(IBinder callback) {
+        return mTaskSupervisor.getBackgroundActivityLaunchController()
+                .addStrictModeCallback(Binder.getCallingUid(), callback);
+    }
+
+    /**
+     * Unregisters an app that uses the Strict Mode for detecting BAL.
+     *
+     * @param callback the callback to unregister
+     */
+    @Override
+    public void unregisterBackgroundActivityStartCallback(IBinder callback) {
+        mTaskSupervisor.getBackgroundActivityLaunchController()
+                .removeStrictModeCallback(Binder.getCallingUid(), callback);
+    }
+
+    /**
      * Wrap the {@link ActivityOptions} in {@link SafeActivityOptions} and attach caller options
      * that allow using the callers permissions to start background activities.
      */
@@ -5858,7 +5945,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             options.setPendingIntentBackgroundActivityStartMode(
                     ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED);
         }
-        return new SafeActivityOptions(options);
+        return new SafeActivityOptions(options, Binder.getCallingPid(), Binder.getCallingUid());
     }
 
     /**
@@ -6023,12 +6110,14 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 Binder.restoreCallingIdentity(ident);
             }
 
+            final int callingPid = Binder.getCallingPid();
+            final int callingUid = Binder.getCallingUid();
             return getActivityStartController().startActivitiesInPackage(
                     packageUid, packageName, featureId,
                     intents, resolvedTypes, null /* resultTo */,
-                    SafeActivityOptions.fromBundle(bOptions), userId,
+                    SafeActivityOptions.fromBundle(bOptions, callingPid, callingUid), userId,
                     false /* validateIncomingUser */, null /* originatingPendingIntent */,
-                    BackgroundStartPrivileges.NONE);
+                    false);
         }
 
         @Override
@@ -6036,12 +6125,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 String callingPackage, @Nullable String callingFeatureId, Intent[] intents,
                 String[] resolvedTypes, IBinder resultTo, SafeActivityOptions options, int userId,
                 boolean validateIncomingUser, PendingIntentRecord originatingPendingIntent,
-                BackgroundStartPrivileges forcedBalByPiSender) {
+                boolean allowBalExemptionForSystemProcess) {
             assertPackageMatchesCallingUid(callingPackage);
             return getActivityStartController().startActivitiesInPackage(uid, realCallingPid,
                     realCallingUid, callingPackage, callingFeatureId, intents, resolvedTypes,
                     resultTo, options, userId, validateIncomingUser, originatingPendingIntent,
-                    forcedBalByPiSender);
+                    allowBalExemptionForSystemProcess);
         }
 
         @Override
@@ -6050,13 +6139,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 String resolvedType, IBinder resultTo, String resultWho, int requestCode,
                 int startFlags, SafeActivityOptions options, int userId, Task inTask, String reason,
                 boolean validateIncomingUser, PendingIntentRecord originatingPendingIntent,
-                BackgroundStartPrivileges forcedBalByPiSender) {
+                boolean allowBalExemptionForSystemProcess) {
             assertPackageMatchesCallingUid(callingPackage);
             return getActivityStartController().startActivityInPackage(uid, realCallingPid,
                     realCallingUid, callingPackage, callingFeatureId, intent, resolvedType,
                     resultTo, resultWho, requestCode, startFlags, options, userId, inTask,
                     reason, validateIncomingUser, originatingPendingIntent,
-                    forcedBalByPiSender);
+                    allowBalExemptionForSystemProcess);
         }
 
         @Override
@@ -6087,7 +6176,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     .setActivityOptions(createSafeActivityOptionsWithBalAllowed(options))
                     .setRealCallingUid(Binder.getCallingUid())
                     .setUserId(userId)
-                    .setBackgroundStartPrivileges(BackgroundStartPrivileges.ALLOW_BAL)
+                    .setAllowBalExemptionForSystemProcess(true)
                     .setFreezeScreen(true)
                     .execute();
         }
@@ -6207,6 +6296,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         @Override
         public void onProcessAdded(WindowProcessController proc) {
             synchronized (mGlobalLockWithoutBoost) {
+                mPackageConfigPersister.updateConfigIfNeeded(
+                        proc, proc.mUserId, proc.mInfo.packageName);
                 mProcessNames.put(proc.mName, proc.mUid, proc);
             }
         }
@@ -6216,7 +6307,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         public void onProcessRemoved(String name, int uid) {
             synchronized (mGlobalLockWithoutBoost) {
                 final WindowProcessController proc = mProcessNames.remove(name, uid);
-                if (proc != null && !mStartingProcessActivities.isEmpty()) {
+                if (proc != null && !proc.mHasEverAttached
+                        && !mStartingProcessActivities.isEmpty()) {
                     // Use a copy in case finishIfPossible changes the list indirectly.
                     final ArrayList<ActivityRecord> activities =
                             new ArrayList<>(mStartingProcessActivities);
@@ -6703,6 +6795,16 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             synchronized (mGlobalLockWithoutBoost) {
                 mTaskSupervisor.getActivityMetricsLogger().notifyBindApplication(wpc.mInfo);
                 wpc.onConfigurationChanged(getGlobalConfiguration());
+                // Let the application initialize with consistent configuration as its activity.
+                for (int i = mStartingProcessActivities.size() - 1; i >= 0; i--) {
+                    final ActivityRecord r = mStartingProcessActivities.get(i);
+                    if (wpc.mUid == r.info.applicationInfo.uid && wpc.mName.equals(r.processName)) {
+                        wpc.registerActivityConfigurationListener(r);
+                        break;
+                    }
+                }
+                ProtoLog.v(WM_DEBUG_CONFIGURATION, "Binding proc %s with config %s",
+                        wpc.mName, wpc.getConfiguration());
                 // The "info" can be the target of instrumentation.
                 return new PreBindInfo(compatibilityInfoForPackageLocked(info),
                         new Configuration(wpc.getConfiguration()));
@@ -7252,8 +7354,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
         @Override
         public TaskSnapshot getTaskSnapshotBlocking(
-                int taskId, boolean isLowResolution) {
-            return ActivityTaskManagerService.this.getTaskSnapshot(taskId, isLowResolution);
+                int taskId, boolean isLowResolution, @TaskSnapshot.ReferenceFlags int usage) {
+            return ActivityTaskManagerService.this.getTaskSnapshotInner(
+                    taskId, isLowResolution, usage);
         }
 
         @Override

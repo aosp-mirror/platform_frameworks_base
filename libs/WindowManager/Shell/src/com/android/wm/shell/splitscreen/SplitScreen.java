@@ -110,11 +110,11 @@ public interface SplitScreen {
     void registerSplitAnimationListener(@NonNull SplitInvocationListener listener,
             @NonNull Executor executor);
 
-    /** Called when device waking up finished. */
-    void onFinishedWakingUp();
-
     /** Called when device starts going to sleep (screen off). */
     void onStartedGoingToSleep();
+
+    /** Called when device wakes up. */
+    void onStartedWakingUp();
 
     /** Called when requested to go to fullscreen from the current active split app. */
     void goToFullscreenFromSplit();

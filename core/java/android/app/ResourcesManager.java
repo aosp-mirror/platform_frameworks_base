@@ -431,16 +431,19 @@ public class ResourcesManager {
     }
 
     /**
-     * Protected so that tests can override and returns something a fixed value.
+     * public so that tests can access and override
      */
     @VisibleForTesting
-    protected @NonNull DisplayMetrics getDisplayMetrics(int displayId, DisplayAdjustments da) {
+    public @NonNull DisplayMetrics getDisplayMetrics(int displayId, DisplayAdjustments da) {
         final DisplayManagerGlobal displayManagerGlobal = DisplayManagerGlobal.getInstance();
         final DisplayMetrics dm = new DisplayMetrics();
         final DisplayInfo displayInfo = displayManagerGlobal != null
                 ? displayManagerGlobal.getDisplayInfo(displayId) : null;
         if (displayInfo != null) {
-            displayInfo.getAppMetrics(dm, da);
+            final Configuration dajConfig = da.getConfiguration();
+            displayInfo.getAppMetrics(dm, da.getCompatibilityInfo(),
+                    (mResDisplayId == displayId && Configuration.EMPTY.equals(dajConfig))
+                            ? mResConfiguration : dajConfig);
         } else {
             dm.setToDefaults();
         }
@@ -1977,6 +1980,7 @@ public class ResourcesManager {
     public void registerAllResourcesReference(@NonNull Resources resources) {
         if (android.content.res.Flags.registerResourcePaths()) {
             synchronized (mLock) {
+                cleanupReferences(mAllResourceReferences, mAllResourceReferencesQueue);
                 mAllResourceReferences.add(
                         new WeakReference<>(resources, mAllResourceReferencesQueue));
             }

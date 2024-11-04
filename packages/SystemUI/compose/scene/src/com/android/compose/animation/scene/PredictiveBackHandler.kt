@@ -35,9 +35,7 @@ internal fun PredictiveBackHandler(
     layoutImpl: SceneTransitionLayoutImpl,
     result: UserActionResult?,
 ) {
-    PredictiveBackHandler(
-        enabled = result != null,
-    ) { events: Flow<BackEventCompat> ->
+    PredictiveBackHandler(enabled = result != null) { events: Flow<BackEventCompat> ->
         if (result == null) {
             // Note: We have to collect progress otherwise PredictiveBackHandler will throw.
             events.first()
@@ -72,6 +70,7 @@ internal fun PredictiveBackHandler(
             // The predictive back APIs will automatically animate the progress for us in this case
             // so there is no need to animate it.
             cancelSpec = snap(),
+            animationScope = layoutImpl.animationScope,
         )
     }
 }

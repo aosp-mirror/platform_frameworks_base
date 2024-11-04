@@ -27,7 +27,6 @@ import android.hardware.input.HostUsiVersion
 import android.hardware.input.IInputDeviceBatteryListener
 import android.hardware.input.IInputDeviceBatteryState
 import android.hardware.input.IInputDevicesChangedListener
-import android.hardware.input.IInputManager
 import android.hardware.input.InputManager
 import android.hardware.input.InputManagerGlobal
 import android.os.Binder
@@ -42,13 +41,13 @@ import com.android.server.input.BatteryController.BluetoothBatteryManager.Blueto
 import com.android.server.input.BatteryController.POLLING_PERIOD_MILLIS
 import com.android.server.input.BatteryController.UEventBatteryListener
 import com.android.server.input.BatteryController.USI_BATTERY_VALIDITY_DURATION_MILLIS
+import com.android.test.input.MockInputManagerRule
 import org.hamcrest.Description
 import org.hamcrest.Matcher
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers
 import org.hamcrest.TypeSafeMatcher
 import org.hamcrest.core.IsEqual.equalTo
-import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -184,11 +183,11 @@ class BatteryControllerTests {
 
     @get:Rule
     val rule = MockitoJUnit.rule()!!
+    @get:Rule
+    val inputManagerRule = MockInputManagerRule()
 
     @Mock
     private lateinit var native: NativeInputManagerService
-    @Mock
-    private lateinit var iInputManager: IInputManager
     @Mock
     private lateinit var uEventManager: UEventManager
     @Mock
@@ -205,10 +204,9 @@ class BatteryControllerTests {
     fun setup() {
         context = TestableContext(ApplicationProvider.getApplicationContext())
         testLooper = TestLooper()
-        inputManagerGlobalSession = InputManagerGlobal.createTestSession(iInputManager)
         val inputManager = InputManager(context)
         context.addMockSystemService(InputManager::class.java, inputManager)
-        `when`(iInputManager.inputDeviceIds).then {
+        `when`(inputManagerRule.mock.inputDeviceIds).then {
             deviceGenerationMap.keys.toIntArray()
         }
         addInputDevice(DEVICE_ID)
@@ -218,16 +216,9 @@ class BatteryControllerTests {
             bluetoothBatteryManager)
         batteryController.systemRunning()
         val listenerCaptor = ArgumentCaptor.forClass(IInputDevicesChangedListener::class.java)
-        verify(iInputManager).registerInputDevicesChangedListener(listenerCaptor.capture())
+        verify(inputManagerRule.mock).registerInputDevicesChangedListener(listenerCaptor.capture())
         devicesChangedListener = listenerCaptor.value
         testLooper.dispatchAll()
-    }
-
-    @After
-    fun tearDown() {
-        if (this::inputManagerGlobalSession.isInitialized) {
-            inputManagerGlobalSession.close()
-        }
     }
 
     private fun notifyDeviceChanged(
@@ -239,7 +230,7 @@ class BatteryControllerTests {
             ?: throw IllegalArgumentException("Device $deviceId was never added!")
         deviceGenerationMap[deviceId] = generation
 
-        `when`(iInputManager.getInputDevice(deviceId))
+        `when`(inputManagerRule.mock.getInputDevice(deviceId))
             .thenReturn(createInputDevice(deviceId, hasBattery, supportsUsi, generation))
         val list = deviceGenerationMap.flatMap { listOf(it.key, it.value) }
         if (::devicesChangedListener.isInitialized) {
@@ -657,9 +648,9 @@ class BatteryControllerTests {
 
     @Test
     fun testRegisterBluetoothListenerForMonitoredBluetoothDevices() {
-        `when`(iInputManager.getInputDeviceBluetoothAddress(BT_DEVICE_ID))
+        `when`(inputManagerRule.mock.getInputDeviceBluetoothAddress(BT_DEVICE_ID))
             .thenReturn("AA:BB:CC:DD:EE:FF")
-        `when`(iInputManager.getInputDeviceBluetoothAddress(SECOND_BT_DEVICE_ID))
+        `when`(inputManagerRule.mock.getInputDeviceBluetoothAddress(SECOND_BT_DEVICE_ID))
             .thenReturn("11:22:33:44:55:66")
         addInputDevice(BT_DEVICE_ID)
         testLooper.dispatchNext()
@@ -686,7 +677,7 @@ class BatteryControllerTests {
         batteryController.unregisterBatteryListener(BT_DEVICE_ID, listener, PID)
         verify(bluetoothBatteryManager, never()).removeBatteryListener(any())
 
-        `when`(iInputManager.getInputDeviceBluetoothAddress(SECOND_BT_DEVICE_ID))
+        `when`(inputManagerRule.mock.getInputDeviceBluetoothAddress(SECOND_BT_DEVICE_ID))
             .thenReturn(null)
         notifyDeviceChanged(SECOND_BT_DEVICE_ID)
         testLooper.dispatchNext()
@@ -695,7 +686,7 @@ class BatteryControllerTests {
 
     @Test
     fun testNotifiesBluetoothBatteryChanges() {
-        `when`(iInputManager.getInputDeviceBluetoothAddress(BT_DEVICE_ID))
+        `when`(inputManagerRule.mock.getInputDeviceBluetoothAddress(BT_DEVICE_ID))
             .thenReturn("AA:BB:CC:DD:EE:FF")
         `when`(bluetoothBatteryManager.getBatteryLevel(eq("AA:BB:CC:DD:EE:FF"))).thenReturn(21)
         addInputDevice(BT_DEVICE_ID)
@@ -716,7 +707,7 @@ class BatteryControllerTests {
     @Test
     fun testBluetoothBatteryIsPrioritized() {
         `when`(native.getBatteryDevicePath(BT_DEVICE_ID)).thenReturn("/sys/dev/bt_device")
-        `when`(iInputManager.getInputDeviceBluetoothAddress(BT_DEVICE_ID))
+        `when`(inputManagerRule.mock.getInputDeviceBluetoothAddress(BT_DEVICE_ID))
             .thenReturn("AA:BB:CC:DD:EE:FF")
         `when`(bluetoothBatteryManager.getBatteryLevel(eq("AA:BB:CC:DD:EE:FF"))).thenReturn(21)
         `when`(native.getBatteryCapacity(BT_DEVICE_ID)).thenReturn(98)
@@ -745,7 +736,7 @@ class BatteryControllerTests {
     @Test
     fun testFallBackToNativeBatteryStateWhenBluetoothStateInvalid() {
         `when`(native.getBatteryDevicePath(BT_DEVICE_ID)).thenReturn("/sys/dev/bt_device")
-        `when`(iInputManager.getInputDeviceBluetoothAddress(BT_DEVICE_ID))
+        `when`(inputManagerRule.mock.getInputDeviceBluetoothAddress(BT_DEVICE_ID))
             .thenReturn("AA:BB:CC:DD:EE:FF")
         `when`(bluetoothBatteryManager.getBatteryLevel(eq("AA:BB:CC:DD:EE:FF"))).thenReturn(21)
         `when`(native.getBatteryCapacity(BT_DEVICE_ID)).thenReturn(98)
@@ -776,9 +767,9 @@ class BatteryControllerTests {
 
     @Test
     fun testRegisterBluetoothMetadataListenerForMonitoredBluetoothDevices() {
-        `when`(iInputManager.getInputDeviceBluetoothAddress(BT_DEVICE_ID))
+        `when`(inputManagerRule.mock.getInputDeviceBluetoothAddress(BT_DEVICE_ID))
             .thenReturn("AA:BB:CC:DD:EE:FF")
-        `when`(iInputManager.getInputDeviceBluetoothAddress(SECOND_BT_DEVICE_ID))
+        `when`(inputManagerRule.mock.getInputDeviceBluetoothAddress(SECOND_BT_DEVICE_ID))
             .thenReturn("11:22:33:44:55:66")
         addInputDevice(BT_DEVICE_ID)
         testLooper.dispatchNext()
@@ -811,7 +802,7 @@ class BatteryControllerTests {
         verify(bluetoothBatteryManager)
             .removeMetadataListener("AA:BB:CC:DD:EE:FF", metadataListener1.value)
 
-        `when`(iInputManager.getInputDeviceBluetoothAddress(SECOND_BT_DEVICE_ID))
+        `when`(inputManagerRule.mock.getInputDeviceBluetoothAddress(SECOND_BT_DEVICE_ID))
             .thenReturn(null)
         notifyDeviceChanged(SECOND_BT_DEVICE_ID)
         testLooper.dispatchNext()
@@ -821,7 +812,7 @@ class BatteryControllerTests {
 
     @Test
     fun testNotifiesBluetoothMetadataBatteryChanges() {
-        `when`(iInputManager.getInputDeviceBluetoothAddress(BT_DEVICE_ID))
+        `when`(inputManagerRule.mock.getInputDeviceBluetoothAddress(BT_DEVICE_ID))
             .thenReturn("AA:BB:CC:DD:EE:FF")
         `when`(bluetoothBatteryManager.getMetadata("AA:BB:CC:DD:EE:FF",
                 BluetoothDevice.METADATA_MAIN_BATTERY))
@@ -861,7 +852,7 @@ class BatteryControllerTests {
 
     @Test
     fun testBluetoothMetadataBatteryIsPrioritized() {
-        `when`(iInputManager.getInputDeviceBluetoothAddress(BT_DEVICE_ID))
+        `when`(inputManagerRule.mock.getInputDeviceBluetoothAddress(BT_DEVICE_ID))
             .thenReturn("AA:BB:CC:DD:EE:FF")
         `when`(bluetoothBatteryManager.getBatteryLevel(eq("AA:BB:CC:DD:EE:FF"))).thenReturn(21)
         `when`(bluetoothBatteryManager.getMetadata("AA:BB:CC:DD:EE:FF",

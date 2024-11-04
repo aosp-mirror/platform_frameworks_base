@@ -22,7 +22,6 @@ import android.content.res.Configuration
 import android.hardware.biometrics.BiometricAuthenticator
 import android.hardware.biometrics.BiometricConstants
 import android.hardware.biometrics.BiometricManager
-import android.hardware.biometrics.Flags.FLAG_CUSTOM_BIOMETRIC_PROMPT
 import android.hardware.biometrics.PromptContentViewWithMoreOptionsButton
 import android.hardware.biometrics.PromptInfo
 import android.hardware.biometrics.PromptVerticalListContentView
@@ -65,7 +64,6 @@ import com.android.systemui.haptics.msdl.msdlPlayer
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.VibratorHelper
-import com.android.systemui.statusbar.events.ANIMATING_OUT
 import com.android.systemui.testKosmos
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.util.concurrency.FakeExecutor
@@ -139,6 +137,7 @@ open class AuthContainerViewTest : SysuiTestCase() {
         PromptSelectorInteractorImpl(
             fingerprintRepository,
             displayStateInteractor,
+            credentialInteractor,
             biometricPromptRepository,
             lockPatternUtils,
         )
@@ -176,7 +175,7 @@ open class AuthContainerViewTest : SysuiTestCase() {
             BiometricStatusInteractorImpl(
                 activityTaskManager,
                 biometricStatusRepository,
-                fingerprintRepository
+                fingerprintRepository,
             )
         iconProvider = IconProvider(context)
         // Set up default logo icon
@@ -245,7 +244,7 @@ open class AuthContainerViewTest : SysuiTestCase() {
     @Test
     fun testIgnoresAnimatedInWhenDialogAnimatingOut() {
         val container = initializeFingerprintContainer(addToView = false)
-        container.mContainerState = ANIMATING_OUT
+        container.mContainerState = 4 // STATE_ANIMATING_OUT
         container.addToView()
         waitForIdleSync()
 
@@ -278,7 +277,7 @@ open class AuthContainerViewTest : SysuiTestCase() {
             .onDismissed(
                 eq(AuthDialogCallback.DISMISSED_BIOMETRIC_AUTHENTICATED),
                 eq<ByteArray?>(null), /* credentialAttestation */
-                eq(authContainer?.requestId ?: 0L)
+                eq(authContainer?.requestId ?: 0L),
             )
         assertThat(container.parent).isNull()
     }
@@ -292,13 +291,13 @@ open class AuthContainerViewTest : SysuiTestCase() {
         verify(callback)
             .onSystemEvent(
                 eq(BiometricConstants.BIOMETRIC_SYSTEM_EVENT_EARLY_USER_CANCEL),
-                eq(authContainer?.requestId ?: 0L)
+                eq(authContainer?.requestId ?: 0L),
             )
         verify(callback)
             .onDismissed(
                 eq(AuthDialogCallback.DISMISSED_USER_CANCELED),
                 eq<ByteArray?>(null), /* credentialAttestation */
-                eq(authContainer?.requestId ?: 0L)
+                eq(authContainer?.requestId ?: 0L),
             )
         assertThat(container.parent).isNull()
     }
@@ -313,7 +312,7 @@ open class AuthContainerViewTest : SysuiTestCase() {
             .onDismissed(
                 eq(AuthDialogCallback.DISMISSED_BUTTON_NEGATIVE),
                 eq<ByteArray?>(null), /* credentialAttestation */
-                eq(authContainer?.requestId ?: 0L)
+                eq(authContainer?.requestId ?: 0L),
             )
         assertThat(container.parent).isNull()
     }
@@ -340,7 +339,7 @@ open class AuthContainerViewTest : SysuiTestCase() {
             .onDismissed(
                 eq(AuthDialogCallback.DISMISSED_ERROR),
                 eq<ByteArray?>(null), /* credentialAttestation */
-                eq(authContainer?.requestId ?: 0L)
+                eq(authContainer?.requestId ?: 0L),
             )
         assertThat(authContainer!!.parent).isNull()
     }
@@ -413,7 +412,6 @@ open class AuthContainerViewTest : SysuiTestCase() {
 
     @Test
     fun testShowBiometricUI_ContentViewWithMoreOptionsButton() {
-        mSetFlagsRule.enableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
         var isButtonClicked = false
         val contentView =
             PromptContentViewWithMoreOptionsButton.Builder()
@@ -450,11 +448,10 @@ open class AuthContainerViewTest : SysuiTestCase() {
 
     @Test
     fun testShowCredentialUI_withVerticalListContentView() {
-        mSetFlagsRule.enableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
         val container =
             initializeFingerprintContainer(
                 authenticators = BiometricManager.Authenticators.DEVICE_CREDENTIAL,
-                verticalListContentView = PromptVerticalListContentView.Builder().build()
+                verticalListContentView = PromptVerticalListContentView.Builder().build(),
             )
         // Two-step credential view should show -
         // 1. biometric prompt without sensor 2. credential view ui
@@ -471,7 +468,6 @@ open class AuthContainerViewTest : SysuiTestCase() {
 
     @Test
     fun testShowCredentialUI_withContentViewWithMoreOptionsButton() {
-        mSetFlagsRule.enableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
         val contentView =
             PromptContentViewWithMoreOptionsButton.Builder()
                 .setMoreOptionsButtonListener(fakeExecutor) { _, _ -> }
@@ -479,7 +475,7 @@ open class AuthContainerViewTest : SysuiTestCase() {
         val container =
             initializeFingerprintContainer(
                 authenticators = BiometricManager.Authenticators.DEVICE_CREDENTIAL,
-                contentViewWithMoreOptionsButton = contentView
+                contentViewWithMoreOptionsButton = contentView,
             )
         waitForIdleSync()
 
@@ -565,7 +561,7 @@ open class AuthContainerViewTest : SysuiTestCase() {
     }
 
     private fun initializeCredentialPasswordContainer(
-        addToView: Boolean = true,
+        addToView: Boolean = true
     ): TestAuthContainerView {
         whenever(userManager.getCredentialOwnerProfile(anyInt())).thenReturn(20)
         whenever(lockPatternUtils.getKeyguardStoredPasswordQuality(eq(20)))
@@ -597,25 +593,25 @@ open class AuthContainerViewTest : SysuiTestCase() {
                 fingerprintProps = fingerprintSensorPropertiesInternal(),
                 verticalListContentView = verticalListContentView,
             ),
-            addToView
+            addToView,
         )
 
     private fun initializeCoexContainer(
         authenticators: Int = BiometricManager.Authenticators.BIOMETRIC_WEAK,
-        addToView: Boolean = true
+        addToView: Boolean = true,
     ) =
         initializeContainer(
             TestAuthContainerView(
                 authenticators = authenticators,
                 fingerprintProps = fingerprintSensorPropertiesInternal(),
-                faceProps = faceSensorPropertiesInternal()
+                faceProps = faceSensorPropertiesInternal(),
             ),
-            addToView
+            addToView,
         )
 
     private fun initializeContainer(
         view: TestAuthContainerView,
-        addToView: Boolean
+        addToView: Boolean,
     ): TestAuthContainerView {
         authContainer = view
 
@@ -668,7 +664,7 @@ open class AuthContainerViewTest : SysuiTestCase() {
                 biometricStatusInteractor,
                 udfpsUtils,
                 iconProvider,
-                activityTaskManager
+                activityTaskManager,
             ),
             { credentialViewModel },
             fakeExecutor,

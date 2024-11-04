@@ -72,6 +72,13 @@ class AppCompatAspectRatioPolicy {
 
     float getDesiredAspectRatio(@NonNull Configuration newParentConfig,
             @NonNull Rect parentBounds) {
+        // If in camera compat mode, aspect ratio from the camera compat policy has priority over
+        // default letterbox aspect ratio.
+        if (AppCompatCameraPolicy.shouldCameraCompatControlAspectRatio(
+                mActivityRecord)) {
+            return AppCompatCameraPolicy.getCameraCompatAspectRatio(mActivityRecord);
+        }
+
         final float letterboxAspectRatioOverride =
                 mAppCompatOverrides.getAppCompatAspectRatioOverrides()
                         .getFixedOrientationLetterboxAspectRatio(newParentConfig);
@@ -114,17 +121,16 @@ class AppCompatAspectRatioPolicy {
             return mTransparentPolicy.getInheritedMinAspectRatio();
         }
         final ActivityInfo info = mActivityRecord.info;
-        if (info.applicationInfo == null) {
-            return info.getMinAspectRatio();
-        }
         final AppCompatAspectRatioOverrides aspectRatioOverrides =
                 mAppCompatOverrides.getAppCompatAspectRatioOverrides();
         if (aspectRatioOverrides.shouldApplyUserMinAspectRatioOverride()) {
             return aspectRatioOverrides.getUserMinAspectRatio();
         }
         if (!aspectRatioOverrides.shouldOverrideMinAspectRatio()
-                && !mAppCompatOverrides.getAppCompatCameraOverrides()
-                .shouldOverrideMinAspectRatioForCamera()) {
+                && !AppCompatCameraPolicy.shouldOverrideMinAspectRatioForCamera(mActivityRecord)) {
+            if (mActivityRecord.isUniversalResizeable()) {
+                return 0;
+            }
             return info.getMinAspectRatio();
         }
 
@@ -166,6 +172,9 @@ class AppCompatAspectRatioPolicy {
     float getMaxAspectRatio() {
         if (mTransparentPolicy.isRunning()) {
             return mTransparentPolicy.getInheritedMaxAspectRatio();
+        }
+        if (mActivityRecord.isUniversalResizeable()) {
+            return 0;
         }
         return mActivityRecord.info.getMaxAspectRatio();
     }

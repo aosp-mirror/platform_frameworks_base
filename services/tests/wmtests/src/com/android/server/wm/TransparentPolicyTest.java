@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
@@ -216,6 +217,19 @@ public class TransparentPolicyTest extends WindowTestsBase {
         });
     }
 
+    @Test
+    public void testNotApplyStrategyToTranslucentActivitiesOverNotLetterboxedActivities() {
+        runTestScenario((robot) -> {
+            robot.transparentActivity((ta) -> {
+                ta.activity().setTopActivityHasLetterboxedBounds(false);
+                ta.launchTransparentActivityInTask();
+
+                ta.checkTopActivityTransparentPolicyStartNotInvoked();
+                ta.checkTopActivityTransparentPolicyStateIsRunning(/* running */ false);
+            });
+        });
+    }
+
     @EnableFlags(com.android.window.flags.Flags.FLAG_RESPECT_NON_TOP_VISIBLE_FIXED_ORIENTATION)
     @Test
     public void testNotRunStrategyToTranslucentActivitiesIfRespectOrientation() {
@@ -233,6 +247,21 @@ public class TransparentPolicyTest extends WindowTestsBase {
             ta.setDisplayContentBounds(0, 0, 900, 1800);
             ta.checkTopActivityHasInheritedBoundsFrom(/* fromTop */ 1);
         })), /* displayWidth */ 500,  /* displayHeight */ 1000);
+    }
+
+    @Test
+    public void testNotRunStrategyToTranslucentActivitiesIfTaskIsFreeform() {
+        runTestScenario((robot) -> {
+            robot.transparentActivity((ta) -> {
+                ta.applyOnActivity((a) -> {
+                    a.setIgnoreOrientationRequest(true);
+                    ta.launchTransparentActivityInTask();
+                    a.setTaskWindowingMode(WINDOWING_MODE_FREEFORM);
+
+                    ta.checkTopActivityTransparentPolicyStateIsRunning(/* running */ false);
+                });
+            });
+        }, /* displayWidth */ 2800,  /* displayHeight */ 1400);
     }
 
     @Test
@@ -372,6 +401,7 @@ public class TransparentPolicyTest extends WindowTestsBase {
             mTransparentActivityRobot = new AppCompatTransparentActivityRobot(activity());
             // We always create at least an opaque activity in a Task
             activity().createNewTaskWithBaseActivity();
+            activity().setTopActivityHasLetterboxedBounds(true);
         }
 
         @Override

@@ -27,6 +27,6 @@ android_test {
     sdk_version: "system_current",
     srcs: ["src/**/*.java"],
     resource_dirs: ["res"],
-    libs: ["com.android.media.remotedisplay"],
+    libs: ["com.android.media.remotedisplay.stubs.system"],
     certificate: "platform",
 }

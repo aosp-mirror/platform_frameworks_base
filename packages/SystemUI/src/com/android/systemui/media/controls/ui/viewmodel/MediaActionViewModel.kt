@@ -32,4 +32,16 @@ data class MediaActionViewModel(
     val buttonId: Int? = null,
     val isEnabled: Boolean,
     val onClicked: (Int) -> Unit,
-)
+) {
+    fun contentEquals(other: MediaActionViewModel?): Boolean {
+        return other?.let {
+            contentDescription == other.contentDescription &&
+                isVisibleWhenScrubbing == other.isVisibleWhenScrubbing &&
+                notVisibleValue == other.notVisibleValue &&
+                showInCollapsed == other.showInCollapsed &&
+                rebindId == other.rebindId &&
+                buttonId == other.buttonId &&
+                isEnabled == other.isEnabled
+        } ?: false
+    }
+}

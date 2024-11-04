@@ -26,7 +26,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /** Encapsulates logic for pausing, unpausing, and scheduling a delayed job. */
 @SysUISingleton
@@ -41,7 +41,7 @@ constructor(
     private var isPaused = false
 
     fun pause() {
-        applicationScope.launch(mainDispatcher) {
+        applicationScope.launch(context = mainDispatcher) {
             isPaused = true
             scheduledUnpauseJob?.cancel()
             scheduledUnpauseJob =
@@ -53,14 +53,14 @@ constructor(
     }
 
     fun unpauseAndRefresh() {
-        applicationScope.launch(mainDispatcher) {
+        applicationScope.launch(context = mainDispatcher) {
             isPaused = false
             refreshIfNotPaused()
         }
     }
 
     fun refreshIfNotPaused() {
-        applicationScope.launch(mainDispatcher) {
+        applicationScope.launch(context = mainDispatcher) {
             if (isPaused) {
                 return@launch
             }

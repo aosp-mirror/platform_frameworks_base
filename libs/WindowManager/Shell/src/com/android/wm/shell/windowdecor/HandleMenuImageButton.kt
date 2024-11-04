@@ -39,7 +39,7 @@ class HandleMenuImageButton(
     lateinit var taskInfo: RunningTaskInfo
 
     override fun onHoverEvent(motionEvent: MotionEvent): Boolean {
-        if (Flags.enableAdditionalWindowsAboveStatusBar() || taskInfo.isFreeform) {
+        if (Flags.enableHandleInputFix() || taskInfo.isFreeform) {
             return super.onHoverEvent(motionEvent)
         } else {
             return false

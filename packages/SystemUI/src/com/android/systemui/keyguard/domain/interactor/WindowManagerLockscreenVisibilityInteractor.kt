@@ -19,6 +19,7 @@
 package com.android.systemui.keyguard.domain.interactor
 
 import com.android.compose.animation.scene.ObservableTransitionState
+import com.android.systemui.Flags.transitionRaceCondition
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
@@ -65,7 +66,7 @@ constructor(
         combine(
             transitionInteractor.isFinishedIn(
                 scene = Scenes.Gone,
-                stateWithoutSceneContainer = KeyguardState.GONE
+                stateWithoutSceneContainer = KeyguardState.GONE,
             ),
             wakeToGoneInteractor.canWakeDirectlyToGone,
         ) { isOnGone, canWakeDirectlyToGone ->
@@ -197,11 +198,11 @@ constructor(
             combine(
                     transitionInteractor.isInTransition(
                         edge = Edge.create(to = Scenes.Gone),
-                        edgeWithoutSceneContainer = Edge.create(to = KeyguardState.GONE)
+                        edgeWithoutSceneContainer = Edge.create(to = KeyguardState.GONE),
                     ),
                     transitionInteractor.isFinishedIn(
                         scene = Scenes.Gone,
-                        stateWithoutSceneContainer = KeyguardState.GONE
+                        stateWithoutSceneContainer = KeyguardState.GONE,
                     ),
                     surfaceBehindInteractor.isAnimatingSurface,
                     notificationLaunchAnimationInteractor.isLaunchAnimationRunning,
@@ -231,7 +232,7 @@ constructor(
             combine(
                     transitionInteractor.currentKeyguardState,
                     wakeToGoneInteractor.canWakeDirectlyToGone,
-                    ::Pair
+                    ::Pair,
                 )
                 .sample(transitionInteractor.startedStepWithPrecedingStep, ::toTriple)
                 .map { (currentState, canWakeDirectlyToGone, startedWithPrev) ->
@@ -242,7 +243,12 @@ constructor(
                             startedFromStep.transitionState == TransitionState.CANCELED &&
                             startedFromStep.from == KeyguardState.GONE
 
-                    val transitionInfo = transitionRepository.currentTransitionInfoInternal.value
+                    val transitionInfo =
+                        if (transitionRaceCondition()) {
+                            transitionRepository.currentTransitionInfo
+                        } else {
+                            transitionRepository.currentTransitionInfoInternal.value
+                        }
                     val wakingDirectlyToGone =
                         deviceIsAsleepInState(transitionInfo.from) &&
                             transitionInfo.to == KeyguardState.GONE

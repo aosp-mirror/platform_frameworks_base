@@ -24,6 +24,7 @@ import static android.service.notification.NotificationListenerService.NOTIFICAT
 import static android.service.notification.NotificationListenerService.NOTIFICATION_CHANNEL_OR_GROUP_UPDATED;
 import static android.service.notification.NotificationListenerService.REASON_APP_CANCEL;
 import static android.service.notification.NotificationListenerService.REASON_GROUP_SUMMARY_CANCELED;
+import static android.service.notification.NotificationListenerService.REASON_PACKAGE_BANNED;
 
 import static androidx.test.ext.truth.content.IntentSubject.assertThat;
 
@@ -45,6 +46,7 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doReturn;
@@ -52,7 +54,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
@@ -196,6 +198,8 @@ import com.android.wm.shell.taskview.TaskView;
 import com.android.wm.shell.taskview.TaskViewTransitions;
 import com.android.wm.shell.transition.Transitions;
 
+import kotlin.Lazy;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -214,7 +218,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Executor;
 
-import kotlin.Lazy;
 import platform.test.runner.parameterized.ParameterizedAndroidJunit4;
 import platform.test.runner.parameterized.Parameters;
 
@@ -1096,6 +1099,18 @@ public class BubblesTest extends SysuiTestCase {
 
         // Removes the notification
         mEntryListener.onEntryRemoved(mRow, REASON_APP_CANCEL);
+        assertFalse(mBubbleController.hasBubbles());
+    }
+
+    @Test
+    public void testNotifsBanned_entryListenerRemove() {
+        mEntryListener.onEntryAdded(mRow);
+        mBubbleController.updateBubble(mBubbleEntry);
+
+        assertTrue(mBubbleController.hasBubbles());
+
+        // Removes the notification
+        mEntryListener.onEntryRemoved(mRow, REASON_PACKAGE_BANNED);
         assertFalse(mBubbleController.hasBubbles());
     }
 
@@ -2349,7 +2364,7 @@ public class BubblesTest extends SysuiTestCase {
     @DisableFlags(FLAG_SCREENSHARE_NOTIFICATION_HIDING)
     @Test
     public void doesNotRegisterSensitiveStateListener() {
-        verifyZeroInteractions(mSensitiveNotificationProtectionController);
+        verifyNoMoreInteractions(mSensitiveNotificationProtectionController);
     }
 
     @EnableFlags(FLAG_SCREENSHARE_NOTIFICATION_HIDING)
@@ -2455,6 +2470,103 @@ public class BubblesTest extends SysuiTestCase {
 
         // Show overflow should never be called if the flag is off
         verify(stackView, never()).showOverflow(anyBoolean());
+    }
+
+    @EnableFlags(FLAG_ENABLE_BUBBLE_BAR)
+    @Test
+    public void testEventLogging_bubbleBar_addBubble() {
+        mBubbleProperties.mIsBubbleBarEnabled = true;
+        mPositioner.setIsLargeScreen(true);
+        FakeBubbleStateListener bubbleStateListener = new FakeBubbleStateListener();
+        mBubbleController.registerBubbleStateListener(bubbleStateListener);
+
+        mEntryListener.onEntryAdded(mRow);
+
+        verify(mBubbleLogger).log(eqBubbleWithKey(mRow.getKey()),
+                eq(BubbleLogger.Event.BUBBLE_BAR_BUBBLE_POSTED));
+    }
+
+    @EnableFlags(FLAG_ENABLE_BUBBLE_BAR)
+    @Test
+    public void testEventLogging_bubbleBar_updateBubble() {
+        mBubbleProperties.mIsBubbleBarEnabled = true;
+        mPositioner.setIsLargeScreen(true);
+        FakeBubbleStateListener bubbleStateListener = new FakeBubbleStateListener();
+        mBubbleController.registerBubbleStateListener(bubbleStateListener);
+
+        mEntryListener.onEntryAdded(mRow);
+        // Mark the notification as updated
+        NotificationEntryHelper.modifyRanking(mRow).setTextChanged(true).build();
+        mEntryListener.onEntryUpdated(mRow, /* fromSystem= */ true);
+
+        verify(mBubbleLogger).log(eqBubbleWithKey(mRow.getKey()),
+                eq(BubbleLogger.Event.BUBBLE_BAR_BUBBLE_UPDATED));
+    }
+
+    @EnableFlags(FLAG_ENABLE_BUBBLE_BAR)
+    @Test
+    public void testEventLogging_bubbleBar_dragBubbleToDismiss() {
+        mBubbleProperties.mIsBubbleBarEnabled = true;
+        mPositioner.setIsLargeScreen(true);
+        FakeBubbleStateListener bubbleStateListener = new FakeBubbleStateListener();
+        mBubbleController.registerBubbleStateListener(bubbleStateListener);
+
+        mEntryListener.onEntryAdded(mRow);
+        mBubbleController.dragBubbleToDismiss(mRow.getKey(), 1L);
+
+        verify(mBubbleLogger).log(eqBubbleWithKey(mRow.getKey()),
+                eq(BubbleLogger.Event.BUBBLE_BAR_BUBBLE_DISMISSED_DRAG_BUBBLE));
+    }
+
+    @EnableFlags(FLAG_ENABLE_BUBBLE_BAR)
+    @Test
+    public void testEventLogging_bubbleBar_dragBarToDismiss() {
+        mBubbleProperties.mIsBubbleBarEnabled = true;
+        mPositioner.setIsLargeScreen(true);
+
+        // Not a user gesture, should not log an event
+        mBubbleController.removeAllBubbles(Bubbles.DISMISS_NO_LONGER_BUBBLE);
+        verify(mBubbleLogger, never()).log(BubbleLogger.Event.BUBBLE_BAR_DISMISSED_DRAG_BAR);
+
+        // Dismiss via user gesture, log an event
+        mBubbleController.removeAllBubbles(Bubbles.DISMISS_USER_GESTURE);
+        verify(mBubbleLogger).log(BubbleLogger.Event.BUBBLE_BAR_DISMISSED_DRAG_BAR);
+    }
+
+    @EnableFlags(FLAG_ENABLE_BUBBLE_BAR)
+    @Test
+    public void testEventLogging_bubbleBar_expandAndCollapse() {
+        mBubbleProperties.mIsBubbleBarEnabled = true;
+        mPositioner.setIsLargeScreen(true);
+        FakeBubbleStateListener bubbleStateListener = new FakeBubbleStateListener();
+        mBubbleController.registerBubbleStateListener(bubbleStateListener);
+
+        mEntryListener.onEntryAdded(mRow);
+        mBubbleController.expandStackAndSelectBubbleFromLauncher(mRow.getKey(), 0);
+
+        verify(mBubbleLogger).log(eqBubbleWithKey(mRow.getKey()),
+                eq(BubbleLogger.Event.BUBBLE_BAR_EXPANDED));
+
+        mBubbleController.collapseStack();
+
+        verify(mBubbleLogger).log(eqBubbleWithKey(mRow.getKey()),
+                eq(BubbleLogger.Event.BUBBLE_BAR_COLLAPSED));
+    }
+
+    @EnableFlags(FLAG_ENABLE_BUBBLE_BAR)
+    @Test
+    public void testEventLogging_bubbleBar_autoExpandingBubble() {
+        mBubbleProperties.mIsBubbleBarEnabled = true;
+        mPositioner.setIsLargeScreen(true);
+        FakeBubbleStateListener bubbleStateListener = new FakeBubbleStateListener();
+        mBubbleController.registerBubbleStateListener(bubbleStateListener);
+
+        setMetadataFlags(mRow,
+                Notification.BubbleMetadata.FLAG_AUTO_EXPAND_BUBBLE, true /* enableFlag */);
+        mEntryListener.onEntryAdded(mRow);
+
+        verify(mBubbleLogger).log(eqBubbleWithKey(mRow.getKey()),
+                eq(BubbleLogger.Event.BUBBLE_BAR_EXPANDED));
     }
 
     /** Creates a bubble using the userId and package. */
@@ -2640,6 +2752,10 @@ public class BubblesTest extends SysuiTestCase {
     private void assertSysuiStates(boolean stackExpanded, boolean manageMenuExpanded) {
         assertThat(mSysUiStateBubblesExpanded).isEqualTo(stackExpanded);
         assertThat(mSysUiStateBubblesManageMenuExpanded).isEqualTo(manageMenuExpanded);
+    }
+
+    private Bubble eqBubbleWithKey(String key) {
+        return argThat(b -> b.getKey().equals(key));
     }
 
     private static class FakeBubbleStateListener implements Bubbles.BubbleStateListener {

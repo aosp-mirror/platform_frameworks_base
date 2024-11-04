@@ -49,6 +49,7 @@ import android.gui.DropInputMode;
 import android.gui.StalledTransactionInfo;
 import android.gui.TrustedOverlay;
 import android.hardware.DataSpace;
+import android.hardware.DisplayLuts;
 import android.hardware.HardwareBuffer;
 import android.hardware.OverlayProperties;
 import android.hardware.SyncFence;
@@ -86,6 +87,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
@@ -152,6 +154,8 @@ public final class SurfaceControl implements Parcelable {
             long nativeObject, int priority);
     private static native void nativeSetWindowCrop(long transactionObj, long nativeObject,
             int l, int t, int r, int b);
+    private static native void nativeSetCrop(long transactionObj, long nativeObject,
+            float l, float t, float r, float b);
     private static native void nativeSetCornerRadius(long transactionObj, long nativeObject,
             float cornerRadius);
     private static native void nativeSetBackgroundBlurRadius(long transactionObj, long nativeObject,
@@ -305,9 +309,9 @@ public final class SurfaceControl implements Parcelable {
     private static native StalledTransactionInfo nativeGetStalledTransactionInfo(int pid);
     private static native void nativeSetDesiredPresentTimeNanos(long transactionObj,
                                                                 long desiredPresentTimeNanos);
-    private static native void nativeSetFrameTimeline(long transactionObj,
-                                                           long vsyncId);
     private static native void nativeNotifyShutdown();
+    private static native void nativeSetLuts(long transactionObj, long nativeObject,
+            float[] buffers, int[] slots, int[] dimensions, int[] sizes, int[] samplingKeys);
 
     /**
      * Transforms that can be applied to buffers as they are displayed to a window.
@@ -409,41 +413,28 @@ public final class SurfaceControl implements Parcelable {
      */
     public static class JankData {
 
-        /** @hide */
-        @IntDef(flag = true, value = {JANK_NONE,
-                DISPLAY_HAL,
-                JANK_SURFACEFLINGER_DEADLINE_MISSED,
-                JANK_SURFACEFLINGER_GPU_DEADLINE_MISSED,
-                JANK_APP_DEADLINE_MISSED,
-                PREDICTION_ERROR,
-                SURFACE_FLINGER_SCHEDULING})
+        /**
+         * Needs to be kept in sync with android_view_SurfaceControl.cpp's
+         * JankDataListenerWrapper::onJankDataAvailable.
+         * @hide
+         */
+        @IntDef(flag = true, value = {
+            JANK_NONE,
+            JANK_COMPOSER,
+            JANK_APPLICATION,
+            JANK_OTHER,
+        })
         @Retention(RetentionPolicy.SOURCE)
         public @interface JankType {}
 
-        // Needs to be kept in sync with frameworks/native/libs/gui/include/gui/JankInfo.h
-
         // No Jank
-        public static final int JANK_NONE = 0x0;
-
-        // Jank not related to SurfaceFlinger or the App
-        public static final int DISPLAY_HAL = 0x1;
-        // SF took too long on the CPU
-        public static final int JANK_SURFACEFLINGER_DEADLINE_MISSED = 0x2;
-        // SF took too long on the GPU
-        public static final int JANK_SURFACEFLINGER_GPU_DEADLINE_MISSED = 0x4;
-        // Either App or GPU took too long on the frame
-        public static final int JANK_APP_DEADLINE_MISSED = 0x8;
-        // Vsync predictions have drifted beyond the threshold from the actual HWVsync
-        public static final int PREDICTION_ERROR = 0x10;
-        // Latching a buffer early might cause an early present of the frame
-        public static final int SURFACE_FLINGER_SCHEDULING = 0x20;
-        // A buffer is said to be stuffed if it was expected to be presented on a vsync but was
-        // presented later because the previous buffer was presented in its expected vsync. This
-        // usually happens if there is an unexpectedly long frame causing the rest of the buffers
-        // to enter a stuffed state.
-        public static final int BUFFER_STUFFING = 0x40;
-        // Jank due to unknown reasons.
-        public static final int UNKNOWN = 0x80;
+        public static final int JANK_NONE = 0;
+        // Jank caused by the composer missing a deadline
+        public static final int JANK_COMPOSER = 1 << 0;
+        // Jank caused by the application missing the composer's deadline
+        public static final int JANK_APPLICATION = 1 << 1;
+        // Jank due to other unknown reasons
+        public static final int JANK_OTHER = 1 << 2;
 
         public JankData(long frameVsyncId, @JankType int jankType, long frameIntervalNs,
                 long scheduledAppFrameTimeNs, long actualAppFrameTimeNs) {
@@ -473,7 +464,7 @@ public final class SurfaceControl implements Parcelable {
         /**
          * Called when new jank classifications are available.
          */
-        void onJankDataAvailable(JankData[] jankData);
+        void onJankDataAvailable(@NonNull List<JankData> jankData);
 
     }
 
@@ -1807,6 +1798,8 @@ public final class SurfaceControl implements Parcelable {
         public DisplayMode[] supportedDisplayModes;
         public int activeDisplayModeId;
         public float renderFrameRate;
+        public boolean hasArrSupport;
+        public FrameRateCategoryRate frameRateCategoryRate;
 
         public int[] supportedColorModes;
         public int activeColorMode;
@@ -1824,6 +1817,8 @@ public final class SurfaceControl implements Parcelable {
                     + "supportedDisplayModes=" + Arrays.toString(supportedDisplayModes)
                     + ", activeDisplayModeId=" + activeDisplayModeId
                     + ", renderFrameRate=" + renderFrameRate
+                    + ", hasArrSupport=" + hasArrSupport
+                    + ", frameRateCategoryRate=" + frameRateCategoryRate
                     + ", supportedColorModes=" + Arrays.toString(supportedColorModes)
                     + ", activeColorMode=" + activeColorMode
                     + ", hdrCapabilities=" + hdrCapabilities
@@ -1843,13 +1838,16 @@ public final class SurfaceControl implements Parcelable {
                 && Arrays.equals(supportedColorModes, that.supportedColorModes)
                 && activeColorMode == that.activeColorMode
                 && Objects.equals(hdrCapabilities, that.hdrCapabilities)
-                && preferredBootDisplayMode == that.preferredBootDisplayMode;
+                && preferredBootDisplayMode == that.preferredBootDisplayMode
+                && hasArrSupport == that.hasArrSupport
+                && Objects.equals(frameRateCategoryRate, that.frameRateCategoryRate);
         }
 
         @Override
         public int hashCode() {
             return Objects.hash(Arrays.hashCode(supportedDisplayModes), activeDisplayModeId,
-                    renderFrameRate, activeColorMode, hdrCapabilities);
+                    renderFrameRate, activeColorMode, hdrCapabilities, hasArrSupport,
+                    frameRateCategoryRate);
         }
     }
 
@@ -2689,7 +2687,9 @@ public final class SurfaceControl implements Parcelable {
      * Adds a callback to be informed about SF's jank classification for this surface.
      * @hide
      */
-    public OnJankDataListenerRegistration addJankDataListener(OnJankDataListener listener) {
+    @NonNull
+    public OnJankDataListenerRegistration addOnJankDataListener(
+            @NonNull OnJankDataListener listener) {
         return new OnJankDataListenerRegistration(this, listener);
     }
 
@@ -3452,6 +3452,29 @@ public final class SurfaceControl implements Parcelable {
         }
 
         /**
+         * Bounds the surface and its children to the bounds specified. Size of the surface will be
+         * ignored and only the crop and buffer size will be used to determine the bounds of the
+         * surface. If no crop is specified and the surface has no buffer, the surface bounds is
+         * only constrained by the size of its parent bounds.
+         *
+         * @param sc   SurfaceControl to set crop of.
+         * @param crop Bounds of the crop to apply.
+         * @return this This transaction for chaining
+         * @hide
+         */
+        public @NonNull Transaction setCrop(@NonNull SurfaceControl sc, float left, float top,
+                float right, float bottom) {
+            checkPreconditions(sc);
+            if (SurfaceControlRegistry.sCallStackDebuggingEnabled) {
+                SurfaceControlRegistry.getProcessInstance().checkCallStackDebugging(
+                        "setCrop", this, sc, "crop={" + top + ", " + left + ", " +
+                        bottom + ", " + right + "}");
+            }
+            nativeSetCrop(mNativeObject, sc.mNativeObject, left, top, right, bottom);
+            return this;
+        }
+
+        /**
          * Sets the corner radius of a {@link SurfaceControl}.
          * @param sc SurfaceControl
          * @param cornerRadius Corner radius in pixels.
@@ -3899,6 +3922,52 @@ public final class SurfaceControl implements Parcelable {
             checkPreconditions(sc);
             nativeSetFrameRate(mNativeObject, sc.mNativeObject, frameRate, compatibility,
                     changeFrameRateStrategy);
+            return this;
+        }
+
+        /**
+         * Sets the intended frame rate for the surface {@link SurfaceControl}.
+         *
+         * <p>On devices that are capable of running the display at different frame rates,
+         * the system may choose a display refresh rate to better match this surface's frame
+         * rate. Usage of this API won't introduce frame rate throttling, or affect other
+         * aspects of the application's frame production pipeline. However, because the system
+         * may change the display refresh rate, calls to this function may result in changes
+         * to {@link Choreographer} callback timings, and changes to the time interval at which the
+         * system releases buffers back to the application.</p>
+         *
+         * <p>Note that this only has an effect for surfaces presented on the display. If this
+         * surface is consumed by something other than the system compositor, e.g. a media
+         * codec, this call has no effect.</p>
+         *
+         * @param sc The SurfaceControl to specify the frame rate of.
+         * @param frameRateParams The parameters describing the intended frame rate of this surface.
+         *         Refer to {@link Surface.FrameRateParams} for details.
+         * @return This transaction object.
+         *
+         * @see #clearFrameRate(SurfaceControl)
+         */
+        @NonNull
+        @FlaggedApi(com.android.graphics.surfaceflinger.flags.Flags
+                        .FLAG_ARR_SURFACECONTROL_SETFRAMERATE_API)
+        public Transaction setFrameRate(@NonNull SurfaceControl sc,
+                @NonNull Surface.FrameRateParams frameRateParams) {
+            checkPreconditions(sc);
+
+            if (com.android.graphics.surfaceflinger.flags.Flags.arrSetframerateApi()) {
+                // TODO(b/362798998): Logic currently incomplete: it uses fixed source rate over the
+                // desired min/max rates. Fix when plumbing is upgraded.
+                int compatibility = frameRateParams.getFixedSourceRate() == 0
+                        ? Surface.FRAME_RATE_COMPATIBILITY_DEFAULT
+                        : Surface.FRAME_RATE_COMPATIBILITY_FIXED_SOURCE;
+                float frameRate = compatibility == Surface.FRAME_RATE_COMPATIBILITY_DEFAULT
+                        ? frameRateParams.getDesiredMinRate()
+                        : frameRateParams.getFixedSourceRate();
+                nativeSetFrameRate(mNativeObject, sc.mNativeObject, frameRate, compatibility,
+                        frameRateParams.getChangeFrameRateStrategy());
+            } else {
+                Log.w(TAG, "setFrameRate was called but flag arr_setframerate_api is disabled");
+            }
             return this;
         }
 
@@ -4374,6 +4443,17 @@ public final class SurfaceControl implements Parcelable {
             return this;
         }
 
+        /** @hide */
+        public @NonNull Transaction setLuts(@NonNull SurfaceControl sc,
+                @NonNull DisplayLuts displayLuts) {
+            checkPreconditions(sc);
+
+            nativeSetLuts(mNativeObject, sc.mNativeObject, displayLuts.getLutBuffers(),
+                    displayLuts.getOffsets(), displayLuts.getLutDimensions(),
+                    displayLuts.getLutSizes(), displayLuts.getLutSamplingKeys());
+            return this;
+        }
+
         /**
          * Sets the caching hint for the layer. By default, the caching hint is
          * {@link CACHING_ENABLED}.
@@ -4522,6 +4602,21 @@ public final class SurfaceControl implements Parcelable {
             other.mReparentedSurfaces.clear();
             nativeMergeTransaction(mNativeObject, other.mNativeObject);
             return this;
+        }
+
+        /**
+         * TODO(b/366484871): To be removed once we have some logging in native
+         * This is called when BlastBufferQueue.mergeWithNextTransaction() is called from java, and
+         * for the purposes of logging that path.
+         */
+        void onMergeWithNextTransaction(CharSequence windowName) {
+            if (SurfaceControlRegistry.sCallStackDebuggingEnabled) {
+                SurfaceControlRegistry.getProcessInstance().checkCallStackDebugging(
+                        "merge", this, null, "window=" + windowName);
+                if (mCalls != null) {
+                    mCalls.clear();
+                }
+            }
         }
 
         /**

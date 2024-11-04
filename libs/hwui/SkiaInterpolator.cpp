@@ -47,6 +47,8 @@ static inline Dot14 pin_and_convert(float x) {
     return static_cast<Dot14>(x * Dot14_ONE);
 }
 
+using MSec = uint32_t;  // millisecond duration
+
 static float SkUnitCubicInterp(float value, float bx, float by, float cx, float cy) {
     // pin to the unit-square, and convert to 2.14
     Dot14 x = pin_and_convert(value);
@@ -120,7 +122,7 @@ void SkiaInterpolatorBase::reset(int elemCount, int frameCount) {
     Totaling fElemCount+2 entries per keyframe
 */
 
-bool SkiaInterpolatorBase::getDuration(SkMSec* startTime, SkMSec* endTime) const {
+bool SkiaInterpolatorBase::getDuration(MSec* startTime, MSec* endTime) const {
     if (fFrameCount == 0) {
         return false;
     }
@@ -134,7 +136,7 @@ bool SkiaInterpolatorBase::getDuration(SkMSec* startTime, SkMSec* endTime) const
     return true;
 }
 
-float SkiaInterpolatorBase::ComputeRelativeT(SkMSec time, SkMSec prevTime, SkMSec nextTime,
+float SkiaInterpolatorBase::ComputeRelativeT(MSec time, MSec prevTime, MSec nextTime,
                                              const float blend[4]) {
     LOG_FATAL_IF(time < prevTime || time > nextTime);
 
@@ -144,7 +146,7 @@ float SkiaInterpolatorBase::ComputeRelativeT(SkMSec time, SkMSec prevTime, SkMSe
 
 // Returns the index of where the item is or the bit not of the index
 // where the item should go in order to keep arr sorted in ascending order.
-int SkiaInterpolatorBase::binarySearch(const SkTimeCode* arr, int count, SkMSec target) {
+int SkiaInterpolatorBase::binarySearch(const SkTimeCode* arr, int count, MSec target) {
     if (count <= 0) {
         return ~0;
     }
@@ -154,7 +156,7 @@ int SkiaInterpolatorBase::binarySearch(const SkTimeCode* arr, int count, SkMSec 
 
     while (lo < hi) {
         int mid = (hi + lo) / 2;
-        SkMSec elem = arr[mid].fTime;
+        MSec elem = arr[mid].fTime;
         if (elem == target) {
             return mid;
         } else if (elem < target) {
@@ -171,21 +173,21 @@ int SkiaInterpolatorBase::binarySearch(const SkTimeCode* arr, int count, SkMSec 
     return ~(lo + 1);
 }
 
-SkiaInterpolatorBase::Result SkiaInterpolatorBase::timeToT(SkMSec time, float* T, int* indexPtr,
+SkiaInterpolatorBase::Result SkiaInterpolatorBase::timeToT(MSec time, float* T, int* indexPtr,
                                                            bool* exactPtr) const {
     LOG_FATAL_IF(fFrameCount <= 0);
     Result result = kNormal_Result;
     if (fRepeat != 1.0f) {
-        SkMSec startTime = 0, endTime = 0;  // initialize to avoid warning
+        MSec startTime = 0, endTime = 0;  // initialize to avoid warning
         this->getDuration(&startTime, &endTime);
-        SkMSec totalTime = endTime - startTime;
-        SkMSec offsetTime = time - startTime;
+        MSec totalTime = endTime - startTime;
+        MSec offsetTime = time - startTime;
         endTime = SkScalarFloorToInt(fRepeat * totalTime);
         if (offsetTime >= endTime) {
             float fraction = SkScalarFraction(fRepeat);
             offsetTime = fraction == 0 && fRepeat > 0
                                  ? totalTime
-                                 : (SkMSec)SkScalarFloorToInt(fraction * totalTime);
+                                 : (MSec)SkScalarFloorToInt(fraction * totalTime);
             result = kFreezeEnd_Result;
         } else {
             int mirror = fFlags & kMirror;
@@ -217,11 +219,11 @@ SkiaInterpolatorBase::Result SkiaInterpolatorBase::timeToT(SkMSec time, float* T
     }
     LOG_FATAL_IF(index >= fFrameCount);
     const SkTimeCode* nextTime = &fTimes[index];
-    SkMSec nextT = nextTime[0].fTime;
+    MSec nextT = nextTime[0].fTime;
     if (exact) {
         *T = 0;
     } else {
-        SkMSec prevT = nextTime[-1].fTime;
+        MSec prevT = nextTime[-1].fTime;
         *T = ComputeRelativeT(time, prevT, nextT, nextTime[-1].fBlend);
     }
     *indexPtr = index;
@@ -251,7 +253,7 @@ void SkiaInterpolator::reset(int elemCount, int frameCount) {
 
 static const float gIdentityBlend[4] = {0.33333333f, 0.33333333f, 0.66666667f, 0.66666667f};
 
-bool SkiaInterpolator::setKeyFrame(int index, SkMSec time, const float values[],
+bool SkiaInterpolator::setKeyFrame(int index, MSec time, const float values[],
                                    const float blend[4]) {
     LOG_FATAL_IF(values == nullptr);
 
@@ -272,7 +274,7 @@ bool SkiaInterpolator::setKeyFrame(int index, SkMSec time, const float values[],
     return success;
 }
 
-SkiaInterpolator::Result SkiaInterpolator::timeToValues(SkMSec time, float values[]) const {
+SkiaInterpolator::Result SkiaInterpolator::timeToValues(MSec time, float values[]) const {
     float T;
     int index;
     bool exact;

@@ -753,9 +753,11 @@ public class AidlConversion {
                 break;
             case AudioSystem.DEVICE_IN_REMOTE_SUBMIX:
                 aidl.type = AudioDeviceType.IN_SUBMIX;
+                aidl.connection = AudioDeviceDescription.CONNECTION_VIRTUAL;
                 break;
             case AudioSystem.DEVICE_OUT_REMOTE_SUBMIX:
                 aidl.type = AudioDeviceType.OUT_SUBMIX;
+                aidl.connection = AudioDeviceDescription.CONNECTION_VIRTUAL;
                 break;
             case AudioSystem.DEVICE_IN_ANLG_DOCK_HEADSET:
                 aidl.type = AudioDeviceType.IN_DOCK;

@@ -19,6 +19,7 @@ package com.android.systemui.communal.domain.interactor
 import android.app.ActivityManager.RunningTaskInfo
 import android.app.usage.UsageEvents
 import android.content.pm.UserInfo
+import android.service.dream.dreamManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -28,6 +29,7 @@ import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.plugins.ActivityStarter.OnDismissAction
 import com.android.systemui.plugins.activityStarter
 import com.android.systemui.settings.fakeUserTracker
 import com.android.systemui.shared.system.taskStackChangeListeners
@@ -48,6 +50,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
+import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.times
@@ -87,6 +90,27 @@ class WidgetTrampolineInteractorTest : SysuiTestCase() {
             moveTaskToFront()
 
             verify(activityStarter).dismissKeyguardThenExecute(any(), anyOrNull(), any())
+        }
+
+    @Test
+    fun testNewTaskStartsWhileOnHub_stopsDream() =
+        testScope.runTest {
+            transition(from = KeyguardState.LOCKSCREEN, to = KeyguardState.GLANCEABLE_HUB)
+            backgroundScope.launch { underTest.waitForActivityStartAndDismissKeyguard() }
+            runCurrent()
+
+            verify(activityStarter, never()).dismissKeyguardThenExecute(any(), anyOrNull(), any())
+            moveTaskToFront()
+
+            argumentCaptor<OnDismissAction>().apply {
+                verify(activityStarter).dismissKeyguardThenExecute(capture(), anyOrNull(), any())
+
+                firstValue.onDismiss()
+                runCurrent()
+
+                // Dream is stopped once keyguard is dismissed.
+                verify(kosmos.dreamManager).stopDream()
+            }
         }
 
     @Test
@@ -209,7 +233,7 @@ class WidgetTrampolineInteractorTest : SysuiTestCase() {
                     ownerName = "test",
                 ),
             ),
-            testScope
+            testScope,
         )
         runCurrent()
     }

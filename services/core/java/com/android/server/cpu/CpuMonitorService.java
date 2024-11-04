@@ -22,6 +22,7 @@ import static com.android.server.cpu.CpuAvailabilityMonitoringConfig.CPUSET_ALL;
 import static com.android.server.cpu.CpuAvailabilityMonitoringConfig.CPUSET_BACKGROUND;
 import static com.android.server.cpu.CpuInfoReader.FLAG_CPUSET_CATEGORY_BACKGROUND;
 import static com.android.server.cpu.CpuInfoReader.FLAG_CPUSET_CATEGORY_TOP_APP;
+import static com.android.server.SystemService.PHASE_BOOT_COMPLETED;
 
 import android.annotation.Nullable;
 import android.content.Context;
@@ -82,6 +83,15 @@ public final class CpuMonitorService extends SystemService {
     //  frequently. Should this duration be increased as well when this happens?
     private static final long LATEST_AVAILABILITY_DURATION_MILLISECONDS =
             TimeUnit.SECONDS.toMillis(30);
+    /**
+     * Delay to stop the periodic cpuset reading after boot complete.
+     *
+     * Device specific implementations can update cpuset on boot complete. This may take
+     * a few seconds to propagate. So, wait for a few minutes before stopping the periodic cpuset
+     * reading.
+     */
+    private static final long STOP_PERIODIC_CPUSET_READING_DELAY_MILLISECONDS =
+            TimeUnit.MINUTES.toMillis(2);
 
     private final Context mContext;
     private final HandlerThread mHandlerThread;
@@ -90,6 +100,7 @@ public final class CpuMonitorService extends SystemService {
     private final long mNormalMonitoringIntervalMillis;
     private final long mDebugMonitoringIntervalMillis;
     private final long mLatestAvailabilityDurationMillis;
+    private final long mStopPeriodicCpusetReadingDelayMillis;
     private final Object mLock = new Object();
     @GuardedBy("mLock")
     private final SparseArrayMap<CpuMonitorInternal.CpuAvailabilityCallback,
@@ -153,13 +164,15 @@ public final class CpuMonitorService extends SystemService {
         this(context, new CpuInfoReader(), new ServiceThread(TAG,
                         Process.THREAD_PRIORITY_BACKGROUND, /* allowIo= */ true),
                 Build.IS_USERDEBUG || Build.IS_ENG, NORMAL_MONITORING_INTERVAL_MILLISECONDS,
-                DEBUG_MONITORING_INTERVAL_MILLISECONDS, LATEST_AVAILABILITY_DURATION_MILLISECONDS);
+                DEBUG_MONITORING_INTERVAL_MILLISECONDS, LATEST_AVAILABILITY_DURATION_MILLISECONDS,
+                STOP_PERIODIC_CPUSET_READING_DELAY_MILLISECONDS);
     }
 
     @VisibleForTesting
     CpuMonitorService(Context context, CpuInfoReader cpuInfoReader, HandlerThread handlerThread,
             boolean shouldDebugMonitor, long normalMonitoringIntervalMillis,
-            long debugMonitoringIntervalMillis, long latestAvailabilityDurationMillis) {
+            long debugMonitoringIntervalMillis, long latestAvailabilityDurationMillis,
+            long stopPeriodicCpusetReadingDelayMillis) {
         super(context);
         mContext = context;
         mHandlerThread = handlerThread;
@@ -167,6 +180,7 @@ public final class CpuMonitorService extends SystemService {
         mNormalMonitoringIntervalMillis = normalMonitoringIntervalMillis;
         mDebugMonitoringIntervalMillis = debugMonitoringIntervalMillis;
         mLatestAvailabilityDurationMillis = latestAvailabilityDurationMillis;
+        mStopPeriodicCpusetReadingDelayMillis = stopPeriodicCpusetReadingDelayMillis;
         mCpuInfoReader = cpuInfoReader;
         mCpusetInfosByCpuset = new SparseArray<>(2);
         mCpusetInfosByCpuset.append(CPUSET_ALL, new CpusetInfo(CPUSET_ALL));
@@ -198,6 +212,16 @@ public final class CpuMonitorService extends SystemService {
                 mHandler.post(mMonitorCpuStats);
             }
         }
+    }
+
+    @Override
+    public void onBootPhase(int phase) {
+        if (phase != PHASE_BOOT_COMPLETED || mHandler == null) {
+            return;
+        }
+        Slogf.i(TAG, "Stopping periodic cpuset reading on boot complete");
+        mHandler.postDelayed(() -> mCpuInfoReader.stopPeriodicCpusetReading(),
+                mStopPeriodicCpusetReadingDelayMillis);
     }
 
     @VisibleForTesting

@@ -17,6 +17,7 @@
 package android.app.supervision;
 
 import android.annotation.SystemService;
+import android.annotation.UserHandleAware;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.os.RemoteException;
@@ -45,13 +46,12 @@ public class SupervisionManager {
      *
      * @hide
      */
+    @UserHandleAware
     public boolean isSupervisionEnabled() {
         try {
-            return mService.isSupervisionEnabled();
+            return mService.isSupervisionEnabledForUser(mContext.getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
-
-
 }

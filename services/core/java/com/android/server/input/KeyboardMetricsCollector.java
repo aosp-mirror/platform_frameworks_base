@@ -24,7 +24,6 @@ import static android.hardware.input.KeyboardLayoutSelectionResult.layoutSelecti
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.hardware.input.KeyGestureEvent;
 import android.hardware.input.KeyboardLayout;
 import android.hardware.input.KeyboardLayoutSelectionResult.LayoutSelectionCriteria;
 import android.icu.util.ULocale;
@@ -41,6 +40,7 @@ import com.android.internal.os.KeyboardConfiguredProto.RepeatedKeyboardLayoutCon
 import com.android.internal.util.FrameworkStatsLog;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -60,23 +60,26 @@ public final class KeyboardMetricsCollector {
     @VisibleForTesting
     public static final String DEFAULT_LANGUAGE_TAG = "None";
 
+    private static final int INVALID_SYSTEMS_EVENT = FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__UNSPECIFIED;
+
     /**
      * Log keyboard system shortcuts for the proto
      * {@link com.android.os.input.KeyboardSystemsEventReported}
      * defined in "stats/atoms/input/input_extension_atoms.proto"
      */
     public static void logKeyboardSystemsEventReportedAtom(@NonNull InputDevice inputDevice,
-            @NonNull KeyGestureEvent keyGestureEvent) {
-        if (inputDevice.isVirtual() || !inputDevice.isFullKeyboard()) {
+            int[] keycodes, int modifierState, int systemsEvent) {
+        if (systemsEvent == INVALID_SYSTEMS_EVENT || inputDevice.isVirtual()
+                || !inputDevice.isFullKeyboard()) {
             return;
         }
         FrameworkStatsLog.write(FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED,
                 inputDevice.getVendorId(), inputDevice.getProductId(),
-                keyGestureEvent.getKeyGestureType(), keyGestureEvent.getKeycodes(),
-                keyGestureEvent.getModifierState(), inputDevice.getDeviceBus());
+                systemsEvent, keycodes, modifierState, inputDevice.getDeviceBus());
 
         if (DEBUG) {
-            Slog.d(TAG, "Logging Keyboard system event: " + keyGestureEvent);
+            Slog.d(TAG, "Logging Keyboard system event: " + modifierState + " + " + Arrays.toString(
+                    keycodes) + " -> " + systemsEvent);
         }
     }
 

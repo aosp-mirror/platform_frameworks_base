@@ -27,7 +27,7 @@ import kotlinx.coroutines.Dispatchers
  * and scoped to this rule.
  */
 fun ComposeContentTestRule.setContentAndCreateMainScope(
-    content: @Composable () -> Unit,
+    content: @Composable () -> Unit
 ): CoroutineScope {
     lateinit var coroutineScope: CoroutineScope
     setContent {

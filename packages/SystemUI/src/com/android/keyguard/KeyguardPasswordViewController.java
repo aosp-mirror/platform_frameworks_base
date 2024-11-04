@@ -19,7 +19,6 @@ package com.android.keyguard;
 import static com.android.systemui.flags.Flags.LOCKSCREEN_ENABLE_LANDSCAPE;
 import static com.android.systemui.util.kotlin.JavaAdapterKt.collectFlow;
 
-import android.annotation.Nullable;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
@@ -48,6 +47,7 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.keyguard.domain.interactor.KeyguardKeyboardInteractor;
 import com.android.systemui.Flags;
+import com.android.systemui.bouncer.ui.helper.BouncerHapticPlayer;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.flags.FeatureFlags;
@@ -55,8 +55,6 @@ import com.android.systemui.res.R;
 import com.android.systemui.statusbar.policy.DevicePostureController;
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
 import com.android.systemui.util.concurrency.DelayableExecutor;
-
-import com.google.android.msdl.domain.MSDLPlayer;
 
 import java.util.List;
 
@@ -138,12 +136,12 @@ public class KeyguardPasswordViewController
             FeatureFlags featureFlags,
             SelectedUserInteractor selectedUserInteractor,
             KeyguardKeyboardInteractor keyguardKeyboardInteractor,
-            @Nullable MSDLPlayer msdlPlayer,
+            BouncerHapticPlayer bouncerHapticPlayer,
             UserActivityNotifier userActivityNotifier) {
         super(view, keyguardUpdateMonitor, securityMode, lockPatternUtils, keyguardSecurityCallback,
                 messageAreaControllerFactory, latencyTracker, falsingCollector,
-                emergencyButtonController, featureFlags, selectedUserInteractor, msdlPlayer,
-                userActivityNotifier);
+                emergencyButtonController, featureFlags, selectedUserInteractor,
+                bouncerHapticPlayer, userActivityNotifier);
         mKeyguardSecurityCallback = keyguardSecurityCallback;
         mInputMethodManager = inputMethodManager;
         mPostureController = postureController;

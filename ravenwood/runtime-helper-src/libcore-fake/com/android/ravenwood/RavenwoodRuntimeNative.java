@@ -19,7 +19,6 @@ import android.system.ErrnoException;
 import android.system.StructStat;
 
 import com.android.ravenwood.common.JvmWorkaround;
-import com.android.ravenwood.common.RavenwoodCommonUtils;
 
 import java.io.FileDescriptor;
 
@@ -28,11 +27,6 @@ import java.io.FileDescriptor;
  */
 public class RavenwoodRuntimeNative {
     private RavenwoodRuntimeNative() {
-    }
-
-    static {
-        RavenwoodCommonUtils.ensureOnRavenwood();
-        RavenwoodCommonUtils.loadRavenwoodNativeRuntime();
     }
 
     public static native void applyFreeFunction(long freeFunction, long nativePtr);
@@ -55,6 +49,14 @@ public class RavenwoodRuntimeNative {
 
     public static native void setenv(String name, String value, boolean overwrite)
             throws ErrnoException;
+
+    public static native void reloadNativeLibrary(String libFile);
+
+    public static native String getSystemProperty(String key);
+
+    public static native boolean setSystemProperty(String key, String value);
+
+    public static native void clearSystemProperties();
 
     public static long lseek(FileDescriptor fd, long offset, int whence) throws ErrnoException {
         return nLseek(JvmWorkaround.getInstance().getFdInt(fd), offset, whence);

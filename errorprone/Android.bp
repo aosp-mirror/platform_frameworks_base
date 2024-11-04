@@ -22,6 +22,7 @@ java_library_host {
 
     static_libs: [
         "annotations",
+        "jsr305",
         "framework-annotations-lib",
         "//external/error_prone:error_prone_core",
     ],

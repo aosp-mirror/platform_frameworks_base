@@ -78,7 +78,6 @@ class RecordIssueDialogDelegateTest : SysuiTestCase() {
     @Mock private lateinit var sysuiState: SysUiState
     @Mock private lateinit var systemUIDialogManager: SystemUIDialogManager
     @Mock private lateinit var broadcastDispatcher: BroadcastDispatcher
-    @Mock private lateinit var traceurMessageSender: TraceurMessageSender
     private val systemClock = FakeSystemClock()
     private val bgExecutor = FakeExecutor(systemClock)
     private val mainExecutor = FakeExecutor(systemClock)
@@ -104,7 +103,7 @@ class RecordIssueDialogDelegateTest : SysuiTestCase() {
                     systemUIDialogManager,
                     sysuiState,
                     broadcastDispatcher,
-                    mDialogTransitionAnimator
+                    mDialogTransitionAnimator,
                 )
             )
 
@@ -120,7 +119,6 @@ class RecordIssueDialogDelegateTest : SysuiTestCase() {
                     mediaProjectionMetricsLogger,
                     screenCaptureDisabledDialogDelegate,
                     state,
-                    traceurMessageSender
                 ) {
                     latch.countDown()
                 }
@@ -166,7 +164,7 @@ class RecordIssueDialogDelegateTest : SysuiTestCase() {
         verify(mediaProjectionMetricsLogger, never())
             .notifyProjectionInitiated(
                 anyInt(),
-                eq(SessionCreationSource.SYSTEM_UI_SCREEN_RECORDER)
+                eq(SessionCreationSource.SYSTEM_UI_SCREEN_RECORDER),
             )
         assertThat(screenRecordSwitch.isChecked).isFalse()
     }
@@ -188,7 +186,7 @@ class RecordIssueDialogDelegateTest : SysuiTestCase() {
         verify(mediaProjectionMetricsLogger)
             .notifyProjectionInitiated(
                 anyInt(),
-                eq(SessionCreationSource.SYSTEM_UI_SCREEN_RECORDER)
+                eq(SessionCreationSource.SYSTEM_UI_SCREEN_RECORDER),
             )
         verify(factory, times(2)).create(any(SystemUIDialog.Delegate::class.java))
     }
@@ -208,7 +206,7 @@ class RecordIssueDialogDelegateTest : SysuiTestCase() {
         verify(mediaProjectionMetricsLogger)
             .notifyProjectionInitiated(
                 anyInt(),
-                eq(SessionCreationSource.SYSTEM_UI_SCREEN_RECORDER)
+                eq(SessionCreationSource.SYSTEM_UI_SCREEN_RECORDER),
             )
         verify(factory, never()).create()
     }

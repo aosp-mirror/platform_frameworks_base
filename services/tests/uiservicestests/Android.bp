@@ -54,9 +54,9 @@ android_test {
     ],
 
     libs: [
-        "android.test.runner",
-        "android.test.base",
-        "android.test.mock",
+        "android.test.runner.stubs.system",
+        "android.test.base.stubs.system",
+        "android.test.mock.stubs.system",
     ],
 
     dxflags: ["--multi-dex"],
@@ -91,4 +91,14 @@ android_test {
 
     // Required for TestParameterInjector
     javacflags: ["-parameters"],
+}
+
+test_module_config {
+    name: "FrameworksUiServicesTests_notification",
+    base: "FrameworksUiServicesTests",
+    test_suites: [
+        "automotive-tests",
+        "device-tests",
+    ],
+    exclude_annotations: ["androidx.test.filters.LargeTest"],
 }

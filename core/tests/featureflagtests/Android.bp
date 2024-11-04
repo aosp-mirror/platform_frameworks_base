@@ -19,8 +19,8 @@ android_test {
         "androidx.test.rules",
     ],
     libs: [
-        "android.test.runner",
-        "android.test.base",
+        "android.test.runner.stubs.system",
+        "android.test.base.stubs.system",
     ],
     platform_apis: true,
     certificate: "platform",

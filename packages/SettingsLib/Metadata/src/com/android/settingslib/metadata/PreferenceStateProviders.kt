@@ -17,6 +17,9 @@
 package com.android.settingslib.metadata
 
 import android.content.Context
+import android.content.ContextWrapper
+import android.content.Intent
+import android.os.Bundle
 
 /**
  * Interface to provide dynamic preference title.
@@ -38,6 +41,17 @@ interface PreferenceSummaryProvider {
 
     /** Provides preference summary. */
     fun getSummary(context: Context): CharSequence?
+}
+
+/**
+ * Interface to provide dynamic preference icon.
+ *
+ * Implement this interface implies that the preference icon should not be cached for indexing.
+ */
+interface PreferenceIconProvider {
+
+    /** Provides preference icon. */
+    fun getIcon(context: Context): Int
 }
 
 /**
@@ -71,25 +85,62 @@ interface PreferenceRestrictionProvider {
 interface PreferenceLifecycleProvider {
 
     /**
-     * Called when preference is attached to UI.
+     * Callbacks of preference fragment `onCreate`.
      *
-     * Subclass could override this API to register runtime condition listeners, and invoke
-     * `onPreferenceStateChanged(this)` on the given [preferenceStateObserver] to update UI when
-     * internal state (e.g. availability, enabled state, title, summary) is changed.
+     * Invoke [PreferenceLifecycleContext.notifyPreferenceChange] to update UI when any internal
+     * state (e.g. availability, enabled state, title, summary) is changed.
      */
-    fun onAttach(context: Context, preferenceStateObserver: PreferenceStateObserver)
+    fun onCreate(context: PreferenceLifecycleContext) {}
 
     /**
-     * Called when preference is detached from UI.
+     * Callbacks of preference fragment `onStart`.
      *
-     * Clean up and release resource.
+     * Invoke [PreferenceLifecycleContext.notifyPreferenceChange] to update UI when any internal
+     * state (e.g. availability, enabled state, title, summary) is changed.
      */
-    fun onDetach(context: Context)
+    fun onStart(context: PreferenceLifecycleContext) {}
 
-    /** Observer of preference state. */
-    interface PreferenceStateObserver {
+    /**
+     * Callbacks of preference fragment `onResume`.
+     *
+     * Invoke [PreferenceLifecycleContext.notifyPreferenceChange] to update UI when any internal
+     * state (e.g. availability, enabled state, title, summary) is changed.
+     */
+    fun onResume(context: PreferenceLifecycleContext) {}
 
-        /** Callbacks when preference state is changed. */
-        fun onPreferenceStateChanged(preference: PreferenceMetadata)
-    }
+    /** Callbacks of preference fragment `onPause`. */
+    fun onPause(context: PreferenceLifecycleContext) {}
+
+    /** Callbacks of preference fragment `onStop`. */
+    fun onStop(context: PreferenceLifecycleContext) {}
+
+    /** Callbacks of preference fragment `onDestroy`. */
+    fun onDestroy(context: PreferenceLifecycleContext) {}
+
+    /**
+     * Receives the result from a previous call of
+     * [PreferenceLifecycleContext.startActivityForResult].
+     *
+     * @return true if the result is handled
+     */
+    fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?): Boolean = false
+}
+
+/**
+ * [Context] for preference lifecycle.
+ *
+ * A preference fragment is associated with a [PreferenceLifecycleContext] only.
+ */
+abstract class PreferenceLifecycleContext(context: Context) : ContextWrapper(context) {
+
+    /** Notifies that preference state is changed and update preference widget UI. */
+    abstract fun notifyPreferenceChange(preference: PreferenceMetadata)
+
+    /**
+     * Starts activity for result, see [android.app.Activity.startActivityForResult].
+     *
+     * This API can be invoked by any preference, the caller must ensure the request code is unique
+     * on the preference screen.
+     */
+    abstract fun startActivityForResult(intent: Intent, requestCode: Int, options: Bundle?)
 }

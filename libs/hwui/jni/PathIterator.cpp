@@ -20,6 +20,7 @@
 #include "GraphicsJNI.h"
 #include "SkPath.h"
 #include "SkPoint.h"
+#include "graphics_jni_helpers.h"
 
 namespace android {
 
@@ -34,6 +35,18 @@ public:
     static jlong create(JNIEnv* env, jobject clazz, jlong pathHandle) {
         const SkPath* path = reinterpret_cast<SkPath*>(pathHandle);
         return reinterpret_cast<jlong>(new SkPath::RawIter(*path));
+    }
+
+    // A variant of 'next' (below) that is compatible with the host JVM.
+    static jint nextHost(JNIEnv* env, jclass clazz, jlong iteratorHandle, jfloatArray pointsArray) {
+        jfloat* points = env->GetFloatArrayElements(pointsArray, 0);
+#ifdef __ANDROID__
+        jint result = next(iteratorHandle, reinterpret_cast<jlong>(points));
+#else
+        jint result = next(env, clazz, iteratorHandle, reinterpret_cast<jlong>(points));
+#endif
+        env->ReleaseFloatArrayElements(pointsArray, points, 0);
+        return result;
     }
 
     // ---------------- @CriticalNative -------------------------
@@ -72,6 +85,7 @@ static const JNINativeMethod methods[] = {
 
         {"nPeek", "(J)I", (void*)SkPathIteratorGlue::peek},
         {"nNext", "(JJ)I", (void*)SkPathIteratorGlue::next},
+        {"nNextHost", "(J[F)I", (void*)SkPathIteratorGlue::nextHost},
 };
 
 int register_android_graphics_PathIterator(JNIEnv* env) {

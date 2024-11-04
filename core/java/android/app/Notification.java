@@ -115,13 +115,13 @@ import com.android.internal.graphics.ColorUtils;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.ContrastColorUtil;
 import com.android.internal.util.NotificationBigTextNormalizer;
+import com.android.internal.widget.NotificationProgressModel;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -772,10 +772,52 @@ public class Notification implements Parcelable
     @FlaggedApi(android.service.notification.Flags.FLAG_NOTIFICATION_SILENT_FLAG)
     public static final int FLAG_SILENT = 1 << 17;  //0x00020000
 
-    private static final List<Class<? extends Style>> PLATFORM_STYLE_CLASSES = Arrays.asList(
-            BigTextStyle.class, BigPictureStyle.class, InboxStyle.class, MediaStyle.class,
-            DecoratedCustomViewStyle.class, DecoratedMediaCustomViewStyle.class,
-            MessagingStyle.class, CallStyle.class);
+    /**
+     * Bit to be bitwise-ored into the {@link #flags} field that should be
+     * set by the system if this notification is a promoted ongoing notification, either via a
+     * user setting or allowlist.
+     *
+     * Applications cannot set this flag directly, but the posting app and
+     * {@link android.service.notification.NotificationListenerService} can read it.
+     */
+    @FlaggedApi(Flags.FLAG_API_RICH_ONGOING)
+    public static final int FLAG_PROMOTED_ONGOING = 0x00040000;
+
+    private static final Set<Class<? extends Style>> PLATFORM_STYLE_CLASSES = Set.of(
+            BigTextStyle.class,
+            BigPictureStyle.class,
+            InboxStyle.class,
+            MediaStyle.class,
+            DecoratedCustomViewStyle.class,
+            DecoratedMediaCustomViewStyle.class,
+            MessagingStyle.class,
+            CallStyle.class
+    );
+
+    private static boolean isPlatformStyle(Style style) {
+        if (style == null) {
+            return false;
+        }
+
+        if (PLATFORM_STYLE_CLASSES.contains(style.getClass())) {
+            return true;
+        }
+
+        if (Flags.apiRichOngoing()) {
+            return style.getClass() == ProgressStyle.class;
+        }
+
+        return false;
+    }
+
+    private static boolean isStandardLayout(int layoutId) {
+        if (Flags.apiRichOngoing()) {
+            if (layoutId == R.layout.notification_template_material_progress) {
+                return true;
+            }
+        }
+        return STANDARD_LAYOUTS.contains(layoutId);
+    }
 
     /** @hide */
     @IntDef(flag = true, prefix = {"FLAG_"}, value = {
@@ -1281,6 +1323,15 @@ public class Notification implements Parcelable
     public static final String EXTRA_BIG_TEXT = "android.bigText";
 
     /**
+     * {@link #extras} key: very short text summarizing the most critical information contained in
+     * the notification.
+     *
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_API_RICH_ONGOING)
+    public static final String EXTRA_SHORT_CRITICAL_TEXT = "android.shortCriticalText";
+
+    /**
      * {@link #extras} key: this is the resource ID of the notification's main small icon, as
      * supplied to {@link Builder#setSmallIcon(int)}.
      *
@@ -1578,37 +1629,70 @@ public class Notification implements Parcelable
     public static final String EXTRA_DECLINE_COLOR = "android.declineColor";
 
     /**
-     * {@link #extras} key: {@link Icon} of an image used as an overlay Icon on
-     * {@link Notification#mLargeIcon} for {@link EnRouteStyle} notifications.
-     * This extra is an {@code Icon}.
-     * @hide
-     */
-    @FlaggedApi(Flags.FLAG_API_RICH_ONGOING)
-    public static final String EXTRA_ENROUTE_OVERLAY_ICON = "android.enrouteOverlayIcon";
-
-    /**
-     * {@link #extras} key: text used as a sub-text for the largeIcon of
-     * {@link EnRouteStyle} notification. This extra is a {@code CharSequence}.
-     * @hide
-     */
-    @FlaggedApi(Flags.FLAG_API_RICH_ONGOING)
-    public static final String EXTRA_ENROUTE_LARGE_ICON_SUBTEXT = "android.enrouteLargeIconSubText";
-
-    /**
-     * {@link #extras} key: {@link Icon} of an image used as a thumb icon on
-     * {@link Notification} progress bar for {@link EnRouteStyle} notifications.
-     * This extra is an {@code Icon}.
-     * @hide
-     */
-    @FlaggedApi(Flags.FLAG_API_RICH_ONGOING)
-    public static final String EXTRA_ENROUTE_PROGRESS_THUMB_ICON =
-            "android.enrouteProgressThumbIcon";
-
-    /**
      * {@link #extras} key: whether the notification should be colorized as
      * supplied to {@link Builder#setColorized(boolean)}.
      */
     public static final String EXTRA_COLORIZED = "android.colorized";
+
+    /**
+     * {@link #extras} key: an arraylist of {@link android.app.Notification.ProgressStyle.Segment}
+     * bundles provided by a
+     * {@link android.app.Notification.ProgressStyle} notification as supplied to
+     * {@link ProgressStyle#setProgressSegments}
+     * or {@link ProgressStyle#addProgressSegment(ProgressStyle.Segment)}.
+     * This extra is a parcelable array list of bundles.
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_API_RICH_ONGOING)
+    public static final String EXTRA_PROGRESS_SEGMENTS = "android.progressSegments";
+
+    /**
+     * {@link #extras} key: an arraylist of {@link ProgressStyle.Point}
+     * bundles provided by a
+     * {@link android.app.Notification.ProgressStyle} notification as supplied to
+     * {@link ProgressStyle#setProgressPoints}
+     * or {@link ProgressStyle#addProgressPoint(ProgressStyle.Point)}.
+     * This extra is a parcelable array list of bundles.
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_API_RICH_ONGOING)
+    public static final String EXTRA_PROGRESS_POINTS = "android.progressPoints";
+
+    /**
+     * {@link #extras} key: whether the progress bar should be styled by its progress as
+     * supplied to {@link ProgressStyle#setStyledByProgress}.
+     * This extra is a boolean.
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_API_RICH_ONGOING)
+    public static final String EXTRA_STYLED_BY_PROGRESS = "android.styledByProgress";
+
+    /**
+     * {@link #extras} key: this is an {@link Icon} of an image to be
+     * shown as progress bar progress tracker icon in {@link ProgressStyle}, supplied to
+     *{@link ProgressStyle#setProgressTrackerIcon(Icon)}.
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_API_RICH_ONGOING)
+    public static final String EXTRA_PROGRESS_TRACKER_ICON = "android.progressTrackerIcon";
+
+    /**
+     * {@link #extras} key: this is an {@link Icon} of an image to be
+     * shown at the beginning of the progress bar in {@link ProgressStyle}, supplied to
+     *{@link ProgressStyle#setProgressStartIcon(Icon)}.
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_API_RICH_ONGOING)
+    public static final String EXTRA_PROGRESS_START_ICON = "android.progressStartIcon";
+
+    /**
+     * {@link #extras} key: this is an {@link Icon} of an image to be
+     * shown at the end of the progress bar in {@link ProgressStyle}, supplied to
+     *{@link ProgressStyle#setProgressEndIcon(Icon)}.
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_API_RICH_ONGOING)
+    public static final String EXTRA_PROGRESS_END_ICON = "android.progressEndIcon";
 
     /**
      * @hide
@@ -3062,9 +3146,9 @@ public class Notification implements Parcelable
         }
 
         if (Flags.apiRichOngoing()) {
-            visitIconUri(visitor, extras.getParcelable(EXTRA_ENROUTE_OVERLAY_ICON, Icon.class));
-            visitIconUri(visitor, extras.getParcelable(EXTRA_ENROUTE_PROGRESS_THUMB_ICON,
-                Icon.class));
+            visitIconUri(visitor, extras.getParcelable(EXTRA_PROGRESS_TRACKER_ICON, Icon.class));
+            visitIconUri(visitor, extras.getParcelable(EXTRA_PROGRESS_START_ICON, Icon.class));
+            visitIconUri(visitor, extras.getParcelable(EXTRA_PROGRESS_END_ICON, Icon.class));
         }
 
         if (mBubbleMetadata != null) {
@@ -3111,6 +3195,55 @@ public class Notification implements Parcelable
         } finally {
             Trace.endSection();
         }
+    }
+
+    /**
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_UI_RICH_ONGOING)
+    public boolean containsCustomViews() {
+        return contentView != null
+                || bigContentView != null
+                || headsUpContentView != null
+                || (publicVersion != null
+                && (publicVersion.contentView != null
+                || publicVersion.bigContentView != null
+                || publicVersion.headsUpContentView != null));
+    }
+
+    /**
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_UI_RICH_ONGOING)
+    public boolean hasTitle() {
+        return extras != null
+                && (!TextUtils.isEmpty(extras.getCharSequence(EXTRA_TITLE))
+                || !TextUtils.isEmpty(extras.getCharSequence(EXTRA_TITLE_BIG)));
+    }
+
+    /**
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_UI_RICH_ONGOING)
+    public boolean hasPromotableStyle() {
+        final Class<? extends Style> notificationStyle = getNotificationStyle();
+
+        return notificationStyle == null
+                || BigPictureStyle.class.equals(notificationStyle)
+                || BigTextStyle.class.equals(notificationStyle)
+                || CallStyle.class.equals(notificationStyle)
+                || ProgressStyle.class.equals(notificationStyle);
+    }
+
+    /**
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_UI_RICH_ONGOING)
+    public boolean hasPromotableCharacteristics() {
+        return isColorized()
+                && hasTitle()
+                && !containsCustomViews()
+                && hasPromotableStyle();
     }
 
     /**
@@ -4063,6 +4196,17 @@ public class Notification implements Parcelable
         return String.join("|", defaultStrings);
     }
 
+
+    /**
+     * Returns the very short text summarizing the most critical information contained in the
+     * notification, or null if this field was not set.
+     */
+    @Nullable
+    @FlaggedApi(Flags.FLAG_API_RICH_ONGOING)
+    public String getShortCriticalText() {
+        return extras.getString(EXTRA_SHORT_CRITICAL_TEXT);
+    }
+
     /**
      * @hide
      */
@@ -5004,6 +5148,18 @@ public class Notification implements Parcelable
         }
 
         /**
+         * Sets a very short string summarizing the most critical information contained in the
+         * notification. Suggested max length is 5 characters, and there is no guarantee how much or
+         * how little of this text will be shown.
+         */
+        @FlaggedApi(Flags.FLAG_API_RICH_ONGOING)
+        @NonNull
+        public Builder setShortCriticalText(@Nullable String shortCriticalText) {
+            mN.extras.putString(EXTRA_SHORT_CRITICAL_TEXT, shortCriticalText);
+            return this;
+        }
+
+        /**
          * Set the progress this notification represents.
          *
          * The platform template will represent this using a {@link ProgressBar}.
@@ -5837,9 +5993,9 @@ public class Notification implements Parcelable
                 }
             }
             boolean contentViewUsesHeader = mN.contentView == null
-                    || STANDARD_LAYOUTS.contains(mN.contentView.getLayoutId());
+                    || isStandardLayout(mN.contentView.getLayoutId());
             boolean bigContentViewUsesHeader = mN.bigContentView == null
-                    || STANDARD_LAYOUTS.contains(mN.bigContentView.getLayoutId());
+                    || isStandardLayout(mN.bigContentView.getLayoutId());
             return contentViewUsesHeader && bigContentViewUsesHeader;
         }
 
@@ -6553,7 +6709,7 @@ public class Notification implements Parcelable
             // Custom views which come from a platform style class are safe, and thus do not need to
             // be wrapped.  Any subclass of those styles has the opportunity to make arbitrary
             // changes to the RemoteViews, and thus can't be trusted as a fully vetted view.
-            if (fromStyle && PLATFORM_STYLE_CLASSES.contains(mStyle.getClass())) {
+            if (fromStyle && isPlatformStyle(mStyle)) {
                 return false;
             }
             return mContext.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.S;
@@ -6635,7 +6791,7 @@ public class Notification implements Parcelable
                 return false;
             }
             if (fullyCustomViewRequiresDecoration(false)
-                    && STANDARD_LAYOUTS.contains(customContent.getLayoutId())) {
+                    && isStandardLayout(customContent.getLayoutId())) {
                 // If the app's custom views are objects returned from Builder.create*ContentView()
                 // then the app is most likely attempting to spoof the user.  Even if they are not,
                 // the result would be broken (b/189189308) so we will ignore it.
@@ -7163,11 +7319,15 @@ public class Notification implements Parcelable
          */
         @VisibleForTesting
         public static int ensureButtonFillContrast(int color, int bg) {
-            return isColorDark(bg)
-                    ? ContrastColorUtil.findContrastColorAgainstDark(color, bg, true, 1.3)
-                    : ContrastColorUtil.findContrastColor(color, bg, true, 1.3);
+            return ensureColorContrast(color, bg, 1.3);
         }
 
+
+        private static int ensureColorContrast(int color, int bg, double contrastRatio) {
+            return isColorDark(bg)
+                    ? ContrastColorUtil.findContrastColorAgainstDark(color, bg, true, contrastRatio)
+                    : ContrastColorUtil.findContrastColor(color, bg, true, contrastRatio);
+        }
 
         /**
          * @return Whether we are currently building a notification from a legacy (an app that
@@ -7533,6 +7693,10 @@ public class Notification implements Parcelable
             return R.layout.notification_template_material_conversation;
         }
 
+        private int getProgressLayoutResource() {
+            return R.layout.notification_template_material_progress;
+        }
+
         private int getActionLayoutResource() {
             return R.layout.notification_material_action;
         }
@@ -7617,7 +7781,6 @@ public class Notification implements Parcelable
 
         if (mLargeIcon != null || largeIcon != null) {
             Resources resources = context.getResources();
-            Class<? extends Style> style = getNotificationStyle();
             int maxSize = resources.getDimensionPixelSize(isLowRam
                     ? R.dimen.notification_right_icon_size_low_ram
                     : R.dimen.notification_right_icon_size);
@@ -7893,6 +8056,12 @@ public class Notification implements Parcelable
         for (Class<? extends Style> innerClass : PLATFORM_STYLE_CLASSES) {
             if (templateClass.equals(innerClass.getName())) {
                 return innerClass;
+            }
+        }
+
+        if (Flags.apiRichOngoing()) {
+            if (templateClass.equals(ProgressStyle.class.getName())) {
+                return ProgressStyle.class;
             }
         }
         return null;
@@ -8760,6 +8929,16 @@ public class Notification implements Parcelable
                     >= Build.VERSION_CODES.P && (mUser == null || mUser.getName() == null)) {
                 throw new RuntimeException("User must be valid and have a name.");
             }
+        }
+
+        /**
+         * @hide
+         */
+        public boolean displayCustomViewInline() {
+            // This is a lie; True is returned for conversations to make sure that the custom
+            // view is not used instead of the template, but it will not actually be included.
+            return Flags.notificationNoCustomViewConversations()
+                    && mConversationType != CONVERSATION_TYPE_LEGACY;
         }
 
         /**
@@ -10997,103 +11176,73 @@ public class Notification implements Parcelable
     }
 
     /**
-     * TODO(b/360827871): Make EnRouteStyle public.
-     * A style used to represent the progress of a real-world journey with a known destination.
-     * For example:
-     * <ul>
-     *     <li>Delivery tracking</li>
-     *     <li>Ride progress</li>
-     *     <li>Flight tracking</li>
-     * </ul>
+     * A Notification Style used to define a notification whose expanded state includes
+     * a highly customizable progress bar with segments, points, a custom tracker icon,
+     * and custom icons at the start and end of the progress bar.
      *
-     * The exact fields from {@link Notification} that are shown with this style may vary by
-     * the surface where this update appears, but the following fields are recommended:
-     * <ul>
-     *     <li>{@link Notification.Builder#setContentTitle}</li>
-     *     <li>{@link Notification.Builder#setContentText}</li>
-     *     <li>{@link Notification.Builder#setSubText}</li>
-     *     <li>{@link Notification.Builder#setLargeIcon}</li>
-     *     <li>{@link Notification.Builder#setProgress}</li>
-     *     <li>{@link Notification.Builder#setWhen} - This should be the future time of the next,
-     *     final, or most important stop on this journey.</li>
-     * </ul>
-     * @hide
+     * This style is suggested for use cases where the app is showing a tracker to the
+     * user of a thing they are interested in: the location of a car on its way
+     * to pick them up, food being delivered, or their own progress in a navigation
+     * journey.
+     *
+     * To use this style with your Notification, feed it to
+     * {@link Notification.Builder#setStyle(android.app.Notification.Style)} like so:
+     * <pre class="prettyprint">
+     * new Notification.Builder(context)
+     *   .setSmallIcon(R.drawable.ic_notification)
+     *   .setColor(Color.GREEN)
+     *   .setColorized(true)
+     *   .setContentTitle("Arrive 10:08 AM").
+     *   .setContentText("Dominique Ansel Bakery Soho")
+     *   .addAction(new Notification.Action("Exit navigation",...))
+     *   .setStyle(new Notification.ProgressStyle()
+     *       .setStyledByProgress(false)
+     *       .setProgress(456)
+     *       .setProgressTrackerIcon(Icon.createWithResource(R.drawable.ic_driving_tracker))
+     *       .addProgressSegment(new Segment(41).setColor(Color.BLACK))
+     *       .addProgressSegment(new Segment(552).setColor(Color.YELLOW))
+     *       .addProgressSegment(new Segment(253).setColor(Color.YELLOW))
+     *       .addProgressSegment(new Segment(94).setColor(Color.BLUE))
+     *       .addProgressPoint(new Point(60).setColor(Color.RED))
+     *       .addProgressPoint(new Point(560).setColor(Color.YELLOW))
+     *   )
+     * </pre>
+     *
+     *
+     *
+     * NOTE: The progress bar layout will be mirrored for RTL layout.
+     * NOTE: The extras set by {@link Notification.Builder#setProgress} will be overridden by
+     * the values set on this style object when the notification is built.
+     *
      */
     @FlaggedApi(Flags.FLAG_API_RICH_ONGOING)
-    public static class EnRouteStyle extends Notification.Style {
+    public static class ProgressStyle extends Notification.Style {
+        private static final String KEY_ELEMENT_ID = "id";
+        private static final String KEY_ELEMENT_COLOR = "colorInt";
+        private static final String KEY_SEGMENT_LENGTH = "length";
+        private static final String KEY_POINT_POSITION = "position";
+
+        private static final int MAX_PROGRESS_SEGMENT_LIMIT = 15;
+        private static final int MAX_PROGRESS_STOP_LIMIT = 5;
+        private static final int DEFAULT_PROGRESS_MAX = 100;
+
+        private List<Segment> mProgressSegments = new ArrayList<>();
+        private List<Point> mProgressPoints = new ArrayList<>();
+
+        private int mProgress = 0;
+
+        private boolean mIndeterminate;
+
+        private boolean mIsStyledByProgress = true;
 
         @Nullable
-        private Icon mOverlayIcon = null;
-
+        private Icon mTrackerIcon;
         @Nullable
-        private CharSequence mLargeIconSubText = null;
-
+        private Icon mStartIcon;
         @Nullable
-        private Icon mProgressThumbIcon = null;
-
-        public EnRouteStyle() {
-        }
+        private Icon mEndIcon;
 
         /**
-         * Returns the overlay icon to be displayed on {@link Notification#mLargeIcon}.
-         * @see EnRouteStyle#setOverlayIcon
-         */
-        @Nullable
-        public Icon getOverlayIcon() {
-            return mOverlayIcon;
-        }
-
-        /**
-         * Optional icon to be displayed on {@link Notification#mLargeIcon}.
-         *
-         * This image will be cropped to a circle and will obscure
-         * a semicircle of the right side of the large icon.
-         */
-        @NonNull
-        public EnRouteStyle setOverlayIcon(@Nullable Icon overlayIcon) {
-            mOverlayIcon = overlayIcon;
-            return this;
-        }
-
-        /**
-         * Returns the sub-text for {@link Notification#mLargeIcon}.
-         * @see EnRouteStyle#setLargeIconSubText
-         */
-        @Nullable
-        public CharSequence getLargeIconSubText() {
-            return mLargeIconSubText;
-        }
-
-        /**
-         * Optional text which generally related to
-         * the {@link Notification.Builder#setLargeIcon} or {@link #setOverlayIcon} or both.
-         */
-        @NonNull
-        public EnRouteStyle setLargeIconSubText(@Nullable CharSequence largeIconSubText) {
-            mLargeIconSubText = stripStyling(largeIconSubText);
-            return this;
-        }
-
-        /**
-         * Returns the progress thumb icon.
-         * @see EnRouteStyle#setProgressThumbIcon
-         */
-        @Nullable
-        public Icon getProgressThumbIcon() {
-            return mProgressThumbIcon;
-        }
-
-        /**
-         * Optional icon to be used as a progress thumb.
-         */
-        @NonNull
-        public EnRouteStyle setProgressThumbIcon(@Nullable Icon progressThumbIcon) {
-            mProgressThumbIcon = progressThumbIcon;
-            return this;
-        }
-
-
-         /**
          * @hide
          */
         @Override
@@ -11102,33 +11251,281 @@ public class Notification implements Parcelable
                 return true;
             }
 
-            final EnRouteStyle enRouteStyle = (EnRouteStyle) other;
-            return !Objects.equals(mOverlayIcon, enRouteStyle.mOverlayIcon)
-                    || !Objects.equals(mLargeIconSubText, enRouteStyle.mLargeIconSubText)
-                    || !Objects.equals(mProgressThumbIcon, enRouteStyle.mProgressThumbIcon);
+            final ProgressStyle progressStyle = (ProgressStyle) other;
+
+            /**
+             * @see #setProgressIndeterminate
+             */
+            if (!Objects.equals(mIndeterminate, progressStyle.mIndeterminate)) {
+                return true;
+            }
+            boolean nonIndeterminateCheckResult = false;
+            if (!mIndeterminate) {
+                nonIndeterminateCheckResult = !Objects.equals(mProgress, progressStyle.mProgress)
+                        || !Objects.equals(mIsStyledByProgress, progressStyle.mIsStyledByProgress)
+                        || !Objects.equals(mProgressSegments, progressStyle.mProgressSegments)
+                        || !Objects.equals(mProgressPoints, progressStyle.mProgressPoints)
+                        || !Objects.equals(mTrackerIcon, progressStyle.mTrackerIcon);
+            }
+
+            return !Objects.equals(mStartIcon, progressStyle.mStartIcon)
+                    || !Objects.equals(mEndIcon, progressStyle.mEndIcon)
+                    || nonIndeterminateCheckResult;
         }
 
         /**
-         * @hide
+         * Gets the segments that define the background layer of the progress bar.
+         *
+         * If no segments are provided, the progress bar will be rendered with a single segment
+         * with length 100 and default color.
+         *
+         * @see #setProgressSegments
+         * @see #addProgressSegment
+         * @see Segment
          */
-        @Override
-        public void addExtras(Bundle extras) {
-            super.addExtras(extras);
-            extras.putParcelable(EXTRA_ENROUTE_OVERLAY_ICON, mOverlayIcon);
-            extras.putCharSequence(EXTRA_ENROUTE_LARGE_ICON_SUBTEXT, mLargeIconSubText);
-            extras.putParcelable(EXTRA_ENROUTE_PROGRESS_THUMB_ICON, mProgressThumbIcon);
+        public @NonNull List<Segment> getProgressSegments() {
+            return mProgressSegments;
         }
 
         /**
-         * @hide
+         * Sets or replaces the segments of the progress bar.
+         *
+         * Segments allow for creating progress bars with multiple colors or sections
+         * to represent different stages or categories of progress.
+         * For example, Traffic conditions along a navigation journey.
+         * @see Segment
          */
-        @Override
-        protected void restoreFromExtras(Bundle extras) {
-            super.restoreFromExtras(extras);
-            mOverlayIcon = extras.getParcelable(EXTRA_ENROUTE_OVERLAY_ICON, Icon.class);
-            mLargeIconSubText = extras.getCharSequence(EXTRA_ENROUTE_LARGE_ICON_SUBTEXT);
-            mProgressThumbIcon =
-                    extras.getParcelable(EXTRA_ENROUTE_PROGRESS_THUMB_ICON, Icon.class);
+        public @NonNull ProgressStyle setProgressSegments(@NonNull List<Segment> progressSegments) {
+            if (mProgressSegments == null) {
+                mProgressSegments = new ArrayList<>();
+            }
+            mProgressSegments.clear();
+            mProgressSegments.addAll(progressSegments);
+            return this;
+        }
+
+        /**
+         * Appends a segment to the end of the progress bar.
+         *
+         * Segments allow for creating progress bars with multiple colors or sections
+         * to represent different stages or categories of progress.
+         * For example, Traffic conditions along a navigation journey.
+         * @see Segment
+         */
+        public @NonNull ProgressStyle addProgressSegment(@NonNull Segment segment) {
+            if (mProgressSegments == null) {
+                mProgressSegments = new ArrayList<>();
+            }
+            mProgressSegments.add(segment);
+
+            return this;
+        }
+
+        /**
+         * Gets the points that are displayed on the progress bar.
+         *.
+         * @see #setProgressPoints
+         * @see #addProgressPoint
+         * @see Point
+         */
+        public @NonNull List<Point> getProgressPoints() {
+            return mProgressPoints;
+        }
+
+        /**
+         * Replaces all the progress points.
+         *
+         * Points within a progress bar are used to visualize distinct stages or milestones.
+         * For example, you might use points to mark stops in a multi-stop
+         * navigation journey, where each point represents a destination.
+         * @see Point
+         */
+        public @NonNull ProgressStyle setProgressPoints(@NonNull List<Point> points) {
+            mProgressPoints = new ArrayList<>(points);
+            return this;
+        }
+
+        /**
+         * Adds another point.
+         *
+         * Points within a progress bar are used to visualize distinct stages or milestones.
+         *
+         * For example, you might use points to mark stops in a multi-stop
+         * navigation journey, where each point represents a destination.
+         *
+         * Points can be added in any order, as their
+         * position within the progress bar is determined by their individual
+         * {@link Point#getPosition()}.
+         * @see Point
+         */
+        public @NonNull ProgressStyle addProgressPoint(@NonNull Point point) {
+            if (mProgressPoints == null) {
+                mProgressPoints = new ArrayList<>();
+            }
+            mProgressPoints.add(point);
+
+            return this;
+        }
+
+        /**
+         * Gets the progress value of the progress bar.
+         * @see #setProgress
+         */
+        public int getProgress() {
+            return mProgress;
+        }
+
+        /**
+        * Specifies the progress (in the same units as {@link Segment#getLength()})
+        * of the tracker along the length of the bar.
+        *
+        * The max progress value is the sum of all Segment lengths.
+        * The default value is 0.
+        */
+        public @NonNull ProgressStyle setProgress(int progress) {
+            mProgress = progress;
+            return this;
+        }
+
+        /**
+         * Gets the sum of the lengths of all Segments in the style, which
+         * defines the maximum progress. Defaults to 100 when segments are omitted.
+         */
+        public int getProgressMax() {
+            final List<Segment> progressSegment = mProgressSegments;
+            if (progressSegment == null || progressSegment.isEmpty()) {
+                return DEFAULT_PROGRESS_MAX;
+            } else {
+                int progressMax = 0;
+                int validSegmentCount = 0;
+                for (int i = 0; i < progressSegment.size()
+                        && validSegmentCount < MAX_PROGRESS_SEGMENT_LIMIT; i++) {
+                    int segmentLength = progressSegment.get(i).getLength();
+                    if (segmentLength > 0) {
+                        try {
+                            progressMax = Math.addExact(progressMax, segmentLength);
+                            validSegmentCount++;
+                        } catch (ArithmeticException e) {
+                            Log.e(TAG,
+                                    "Notification.ProgressStyle segment total overflowed.", e);
+                            return DEFAULT_PROGRESS_MAX;
+                        }
+                    }
+                }
+
+                if (validSegmentCount == 0) {
+                    return DEFAULT_PROGRESS_MAX;
+                }
+
+                return progressMax;
+            }
+
+        }
+
+        /**
+         * Get indeterminate value of the progress bar.
+         * @see #setProgressIndeterminate
+         */
+        public boolean isProgressIndeterminate() {
+            return mIndeterminate;
+        }
+
+        /**
+         * Used to indicate an initialization state without a known progress amount.
+         * When specified, the following fields are ignored:
+         * @see #setProgress
+         * @see #setProgressSegments
+         * @see #setProgressPoints
+         * @see #setProgressTrackerIcon
+         * @see #setStyledByProgress
+         *
+         * If the app provides exactly one Segment, that segment's color will be
+         * used to style the indeterminate bar.
+         */
+        public @NonNull ProgressStyle setProgressIndeterminate(boolean indeterminate) {
+            mIndeterminate = indeterminate;
+            return this;
+        }
+
+        /**
+         * Gets whether the progress bar's style is based on its progress.
+         * @see #setStyledByProgress
+         */
+        public boolean isStyledByProgress() {
+            return mIsStyledByProgress;
+        }
+
+        /**
+         * Indicates whether the segments and points will be styled differently
+         * based on whether they are behind or ahead of the current progress.
+         * When true, segments appearing ahead of the current progress will be given a
+         * slightly different appearance to indicate that it is part of the progress bar
+         * that is not "filled".
+         * When false, all segments will be given the filled appearance, and it will be
+         * the app's responsibility to use #setProgressTrackerIcon or segment colors
+         * to make the current progress clear to the user.
+         * the default value is true.
+         */
+        public @NonNull ProgressStyle setStyledByProgress(boolean enabled) {
+            mIsStyledByProgress = enabled;
+            return this;
+        }
+
+
+        /**
+         * Gets the progress tracker icon for the progress bar.
+         * @see #setProgressTrackerIcon
+         */
+        public @Nullable Icon getProgressTrackerIcon() {
+            return mTrackerIcon;
+        }
+
+        /**
+         * An optional icon that can appear as an overlay on the bar at the point of
+         * current progress.
+         * Aspect ratio may be anywhere from 2:1 to 1:2; content outside that
+         * aspect ratio range will be cropped.
+         * This icon will be mirrored in RTL.
+         */
+        public @NonNull ProgressStyle setProgressTrackerIcon(@Nullable Icon trackerIcon) {
+            mTrackerIcon = trackerIcon;
+            return this;
+        }
+
+        /**
+         * Gets the progress bar start icon.
+         * @see #setProgressStartIcon
+         */
+        public @Nullable Icon getProgressStartIcon() {
+            return mStartIcon;
+        }
+
+        /**
+         * An optional square icon that appears at the start of the progress bar.
+         * This icon will be cropped to its central square.
+         * This icon will NOT be mirrored in RTL layouts.
+         */
+        public @NonNull ProgressStyle setProgressStartIcon(@Nullable Icon startIcon) {
+            mStartIcon = startIcon;
+            return this;
+        }
+
+        /**
+         * Gets the progress bar end icon.
+         * @see #setProgressEndIcon(Icon)
+         */
+        public @Nullable Icon getProgressEndIcon() {
+            return mEndIcon;
+        }
+
+        /**
+         * An optional square icon that appears at the end of the progress bar.
+         * This icon will be cropped to its central square.
+         * This icon will NOT be mirrored in RTL layouts.
+         */
+        public @NonNull ProgressStyle setProgressEndIcon(@Nullable Icon endIcon) {
+            mEndIcon = endIcon;
+            return this;
         }
 
         /**
@@ -11137,12 +11534,14 @@ public class Notification implements Parcelable
         @Override
         public void purgeResources() {
             super.purgeResources();
-            if (mOverlayIcon != null) {
-                mOverlayIcon.convertToAshmem();
+            if (mTrackerIcon != null) {
+                mTrackerIcon.convertToAshmem();
             }
-
-            if (mProgressThumbIcon != null) {
-                mProgressThumbIcon.convertToAshmem();
+            if (mStartIcon != null) {
+                mStartIcon.convertToAshmem();
+            }
+            if (mEndIcon != null) {
+                mEndIcon.convertToAshmem();
             }
         }
 
@@ -11152,14 +11551,512 @@ public class Notification implements Parcelable
         @Override
         public void reduceImageSizes(Context context) {
             super.reduceImageSizes(context);
-            if (mOverlayIcon != null) {
-                final Resources resources = context.getResources();
-                final boolean isLowRam = ActivityManager.isLowRamDeviceStatic();
 
-                int rightIconSize = resources.getDimensionPixelSize(isLowRam
-                        ? R.dimen.notification_right_icon_size_low_ram
-                        : R.dimen.notification_right_icon_size);
-                mOverlayIcon.scaleDownIfNecessary(rightIconSize, rightIconSize);
+            final Resources resources = context.getResources();
+
+            int progressIconSize =
+                    resources.getDimensionPixelSize(R.dimen.notification_progress_icon_size);
+            if (mStartIcon != null) {
+                mStartIcon.scaleDownIfNecessary(progressIconSize, progressIconSize);
+            }
+            if (mEndIcon != null) {
+                mEndIcon.scaleDownIfNecessary(progressIconSize, progressIconSize);
+            }
+            if (mTrackerIcon != null) {
+                int progressTrackerWidth = resources.getDimensionPixelSize(
+                        R.dimen.notification_progress_tracker_width);
+                int progressTrackerHeight = resources.getDimensionPixelSize(
+                        R.dimen.notification_progress_tracker_height);
+                mTrackerIcon.scaleDownIfNecessary(progressTrackerWidth, progressTrackerHeight);
+            }
+        }
+
+        /**
+         * @hide
+         */
+        @Override
+        public void addExtras(Bundle extras) {
+            super.addExtras(extras);
+            extras.putParcelableArrayList(EXTRA_PROGRESS_SEGMENTS,
+                    getProgressSegmentsAsBundleList(mProgressSegments));
+            extras.putParcelableArrayList(EXTRA_PROGRESS_POINTS,
+                    getProgressPointsAsBundleList(mProgressPoints));
+
+            extras.putInt(EXTRA_PROGRESS, mProgress);
+            extras.putBoolean(EXTRA_PROGRESS_INDETERMINATE, mIndeterminate);
+            extras.putInt(EXTRA_PROGRESS_MAX, getProgressMax());
+            extras.putBoolean(EXTRA_STYLED_BY_PROGRESS, mIsStyledByProgress);
+
+            if (mTrackerIcon != null) {
+                extras.putParcelable(EXTRA_PROGRESS_TRACKER_ICON, mTrackerIcon);
+            } else {
+                extras.remove(EXTRA_PROGRESS_TRACKER_ICON);
+            }
+
+            if (mStartIcon != null) {
+                extras.putParcelable(EXTRA_PROGRESS_START_ICON, mStartIcon);
+            } else {
+                extras.remove(EXTRA_PROGRESS_START_ICON);
+            }
+
+            if (mEndIcon != null) {
+                extras.putParcelable(EXTRA_PROGRESS_END_ICON, mEndIcon);
+            } else {
+                extras.remove(EXTRA_PROGRESS_END_ICON);
+            }
+        }
+
+        /**
+         * @hide
+         */
+        @Override
+        protected void restoreFromExtras(Bundle extras) {
+            super.restoreFromExtras(extras);
+            mProgressSegments = getProgressSegmentsFromBundleList(
+                    extras.getParcelableArrayList(EXTRA_PROGRESS_SEGMENTS, Bundle.class));
+            mProgress = extras.getInt(EXTRA_PROGRESS, 0);
+            mIndeterminate = extras.getBoolean(EXTRA_PROGRESS_INDETERMINATE, false);
+            mIsStyledByProgress = extras.getBoolean(EXTRA_STYLED_BY_PROGRESS, true);
+            mTrackerIcon = extras.getParcelable(EXTRA_PROGRESS_TRACKER_ICON, Icon.class);
+            mStartIcon = extras.getParcelable(EXTRA_PROGRESS_START_ICON, Icon.class);
+            mEndIcon = extras.getParcelable(EXTRA_PROGRESS_END_ICON, Icon.class);
+            mProgressPoints = getProgressPointsFromBundleList(
+                    extras.getParcelableArrayList(EXTRA_PROGRESS_POINTS, Bundle.class));
+        }
+
+        /**
+         * @hide
+         */
+        @Override
+        public boolean displayCustomViewInline() {
+            // This is a lie; True is returned for progress notifications to make sure
+            // that the custom view is not used instead of the template, but it will not
+            // actually be included.
+            return true;
+        }
+        /**
+         * @hide
+         */
+        @Override
+        public RemoteViews makeContentView(boolean increasedHeight) {
+            final StandardTemplateParams p = mBuilder.mParams.reset()
+                    .viewType(StandardTemplateParams.VIEW_TYPE_NORMAL)
+                    .hideProgress(true)
+                    .fillTextsFrom(mBuilder);
+
+            return getStandardView(mBuilder.getBaseLayoutResource(), p, null /* result */);
+        }
+        /**
+         * @hide
+         */
+        @Override
+        public RemoteViews makeHeadsUpContentView(boolean increasedHeight) {
+            final StandardTemplateParams p = mBuilder.mParams.reset()
+                    .viewType(StandardTemplateParams.VIEW_TYPE_HEADS_UP)
+                    .hideProgress(true)
+                    .fillTextsFrom(mBuilder);
+
+            return getStandardView(mBuilder.getHeadsUpBaseLayoutResource(), p, null /* result */);
+        }
+        /**
+         * @hide
+         */
+        @Override
+        public RemoteViews makeBigContentView() {
+            StandardTemplateParams p = mBuilder.mParams.reset()
+                    .viewType(StandardTemplateParams.VIEW_TYPE_BIG)
+                    .allowTextWithProgress(true)
+                    .hideProgress(true)
+                    .fillTextsFrom(mBuilder);
+
+            // Replace the text with the big text, but only if the big text is not empty.
+            RemoteViews contentView = getStandardView(mBuilder.getProgressLayoutResource(), p,
+                    null /* result */);
+
+            // Bind progress start and end icons.
+            if (mStartIcon != null) {
+                contentView.setViewVisibility(R.id.notification_progress_start_icon, View.VISIBLE);
+                contentView.setImageViewIcon(R.id.notification_progress_start_icon, mStartIcon);
+            } else {
+                contentView.setViewVisibility(R.id.notification_progress_start_icon, View.GONE);
+            }
+
+            if (mEndIcon != null) {
+                contentView.setViewVisibility(R.id.notification_progress_end_icon, View.VISIBLE);
+                contentView.setImageViewIcon(R.id.notification_progress_end_icon, mEndIcon);
+            } else {
+                contentView.setViewVisibility(R.id.notification_progress_end_icon, View.GONE);
+            }
+
+            contentView.setViewVisibility(R.id.progress, View.VISIBLE);
+
+            final int backgroundColor = mBuilder.getColors(p).getBackgroundColor();
+            final int defaultProgressColor = mBuilder.getPrimaryAccentColor(p);
+            final NotificationProgressModel model = createProgressModel(
+                    defaultProgressColor, backgroundColor);
+            contentView.setBundle(R.id.progress,
+                    "setProgressModel", model.toBundle());
+
+            if (mTrackerIcon != null) {
+                contentView.setIcon(R.id.progress,
+                        "setProgressTrackerIcon",
+                        mTrackerIcon);
+            }
+
+            return contentView;
+        }
+
+        /**
+         * @hide
+         */
+        public static @NonNull ArrayList<Bundle> getProgressSegmentsAsBundleList(
+                @Nullable List<Segment> progressSegments) {
+            final ArrayList<Bundle> segments = new ArrayList<>();
+            if (progressSegments != null && !progressSegments.isEmpty()) {
+                for (int i = 0; i < progressSegments.size(); i++) {
+                    final Segment segment = progressSegments.get(i);
+                    if (segment.getLength() <= 0) {
+                        continue;
+                    }
+
+                    final Bundle bundle = new Bundle();
+                    bundle.putInt(KEY_SEGMENT_LENGTH, segment.getLength());
+                    bundle.putInt(KEY_ELEMENT_ID, segment.getId());
+                    bundle.putInt(KEY_ELEMENT_COLOR, segment.getColor());
+
+                    segments.add(bundle);
+                }
+            }
+
+            return segments;
+        }
+
+        /**
+         * @hide
+         */
+        public  static @NonNull List<Segment> getProgressSegmentsFromBundleList(
+                @Nullable List<Bundle> segmentBundleList) {
+            final ArrayList<Segment> segments = new ArrayList<>();
+            if (segmentBundleList != null && !segmentBundleList.isEmpty()) {
+                for (int i = 0; i < segmentBundleList.size(); i++) {
+                    final Bundle segmentBundle = segmentBundleList.get(i);
+                    final int length = segmentBundle.getInt(KEY_SEGMENT_LENGTH);
+                    if (length <= 0) {
+                        continue;
+                    }
+
+                    final int id = segmentBundle.getInt(KEY_ELEMENT_ID);
+                    final int color = segmentBundle.getInt(KEY_ELEMENT_COLOR,
+                            Notification.COLOR_DEFAULT);
+                    final Segment segment = new Segment(length)
+                            .setId(id).setColor(color);
+
+                    segments.add(segment);
+                }
+            }
+
+            return segments;
+        }
+        /**
+         * @hide
+         */
+        public static @NonNull ArrayList<Bundle> getProgressPointsAsBundleList(
+                @Nullable List<Point> progressPoints) {
+            final ArrayList<Bundle> points = new ArrayList<>();
+            if (progressPoints != null && !progressPoints.isEmpty()) {
+                for (int i = 0; i < progressPoints.size(); i++) {
+                    final Point point = progressPoints.get(i);
+                    if (point.getPosition() < 0) {
+                        continue;
+                    }
+
+                    final Bundle bundle = new Bundle();
+                    bundle.putInt(KEY_POINT_POSITION, point.getPosition());
+                    bundle.putInt(KEY_ELEMENT_ID, point.getId());
+                    bundle.putInt(KEY_ELEMENT_COLOR, point.getColor());
+
+                    points.add(bundle);
+                }
+            }
+
+            return points;
+        }
+
+        /**
+         * @hide
+         */
+        public static @NonNull List<Point> getProgressPointsFromBundleList(
+                @Nullable List<Bundle> pointBundleList) {
+            final ArrayList<Point> points = new ArrayList<>();
+
+            if (pointBundleList != null && !pointBundleList.isEmpty()) {
+                for (int i = 0; i < pointBundleList.size(); i++) {
+                    final Bundle pointBundle = pointBundleList.get(i);
+                    final int position = pointBundle.getInt(KEY_POINT_POSITION);
+                    if (position < 0) {
+                        continue;
+                    }
+                    final int id = pointBundle.getInt(KEY_ELEMENT_ID);
+                    final int color = pointBundle.getInt(KEY_ELEMENT_COLOR,
+                            Notification.COLOR_DEFAULT);
+                    final Point point = new Point(position).setId(id).setColor(color);
+                    points.add(point);
+                }
+            }
+
+            return points;
+        }
+
+        @NonNull
+        private NotificationProgressModel createProgressModel(int defaultProgressColor,
+                int backgroundColor) {
+            final NotificationProgressModel model;
+            if (mIndeterminate) {
+                final int indeterminateColor;
+                if (!mProgressSegments.isEmpty()) {
+                    indeterminateColor = mProgressSegments.get(0).mColor;
+                } else {
+                    indeterminateColor = defaultProgressColor;
+                }
+
+                model = new NotificationProgressModel(
+                        sanitizeProgressColor(indeterminateColor,
+                                backgroundColor, defaultProgressColor));
+            } else {
+                // Ensure segment color contrasts.
+                final List<Segment> segments = new ArrayList<>();
+                int totalLength = 0;
+                for (Segment segment : mProgressSegments) {
+                    final int length = segment.getLength();
+                    if (length <= 0) continue;
+
+                    try {
+                        totalLength = Math.addExact(totalLength, length);
+                        segments.add(sanitizeSegment(segment, backgroundColor,
+                                defaultProgressColor));
+                    } catch (ArithmeticException e) {
+                        totalLength = DEFAULT_PROGRESS_MAX;
+                        segments.clear();
+                        break;
+                    }
+                }
+
+                // Create default segment when no segments are provided.
+                if (segments.isEmpty()) {
+                    totalLength = DEFAULT_PROGRESS_MAX;
+                    segments.add(sanitizeSegment(new Segment(totalLength), backgroundColor,
+                            defaultProgressColor));
+                }
+
+                // Ensure point color contrasts.
+                final List<Point> points = new ArrayList<>();
+                for (Point point : mProgressPoints) {
+                    final int position = point.getPosition();
+                    if (position < 0 || position > totalLength) continue;
+                    points.add(sanitizePoint(point, backgroundColor, defaultProgressColor));
+                }
+
+                model = new NotificationProgressModel(segments, points,
+                        Math.clamp(mProgress, 0, totalLength), mIsStyledByProgress);
+            }
+            return model;
+        }
+
+        private Segment sanitizeSegment(@NonNull Segment segment,
+                @ColorInt int bg,
+                @ColorInt int defaultColor) {
+            return new Segment(segment.getLength())
+                    .setId(segment.getId())
+                    .setColor(sanitizeProgressColor(segment.getColor(), bg, defaultColor));
+        }
+
+        private Point sanitizePoint(@NonNull Point point,
+                @ColorInt int bg,
+                @ColorInt int defaultColor) {
+            return new Point(point.getPosition()).setId(point.getId())
+                    .setColor(sanitizeProgressColor(point.getColor(), bg, defaultColor));
+        }
+
+        /**
+         * Finds steps and points fill color with sufficient contrast over bg (1.3:1) that
+         * has the same hue as the original color, but is lightened or darkened depending on
+         * whether the background is dark or light.
+         *
+         */
+        private int sanitizeProgressColor(@ColorInt int color,
+                @ColorInt int bg,
+                @ColorInt int defaultColor) {
+            return Builder.ensureColorContrast(
+                    Color.alpha(color) == 0 ? defaultColor : color,
+                    bg,
+                    1.3);
+        }
+
+        /**
+         * A segment of the progress bar, which defines its length and color.
+         * Segments allow for creating progress bars with multiple colors or sections
+         * to represent different stages or categories of progress.
+         * For example, Traffic conditions along a navigation journey.
+         */
+        public static final class Segment {
+            private int mLength;
+            private int mId = 0;
+            @ColorInt
+            private int mColor = Notification.COLOR_DEFAULT;
+
+            /**
+             * Create a segment with a non-zero length.
+             * @param length
+             * See {@link #getLength}
+             */
+            public Segment(int length) {
+                mLength = length;
+            }
+
+            /**
+             * The length of this Segment within the progress bar.
+             * This value has no units, it is just relative to the length of other segments,
+             * and the value provided to {@link ProgressStyle#setProgress}.
+             */
+            public int getLength() {
+                return mLength;
+            }
+
+            /**
+             * Gets the id of this Segment.
+             *
+             * @see #setId
+             */
+            public int getId() {
+                return mId;
+            }
+
+            /**
+             * Optional ID used to uniquely identify the element across updates.
+             */
+            public @NonNull Segment setId(int id) {
+                mId = id;
+                return this;
+            }
+
+            /**
+             * Returns the color of this Segment.
+             *
+             * @see #setColor
+             */
+            @ColorInt
+            public int getColor() {
+                return mColor;
+            }
+
+            /**
+             * Optional color of this Segment
+             */
+            public @NonNull Segment setColor(@ColorInt int color) {
+                mColor = color;
+                return this;
+            }
+
+            /**
+             * Needed for {@link Notification.Style#areNotificationsVisiblyDifferent}
+             */
+            @Override
+            public boolean equals(Object o) {
+                if (this == o) return true;
+                if (o == null || getClass() != o.getClass()) return false;
+                final Segment segment = (Segment) o;
+                return mLength == segment.mLength && mId == segment.mId
+                        && mColor == segment.mColor;
+            }
+
+            @Override
+            public int hashCode() {
+                return Objects.hash(mLength, mId, mColor);
+            }
+        }
+
+        /**
+         * A point within the progress bar, defining its position and color.
+         * Points within a progress bar are used to visualize distinct stages or milestones.
+         * For example, you might use points to mark stops in a multi-stop
+         * navigation journey, where each point represents a destination.
+         */
+        public static final class Point {
+
+            private int mPosition;
+            private int mId;
+            @ColorInt
+            private int mColor = Notification.COLOR_DEFAULT;
+
+            /**
+             * Create a point element.
+             * The position of this point on the progress bar
+             * relative to {@link ProgressStyle#getProgressMax}
+             * @param position
+             * See {@link #getPosition}
+             */
+            public Point(int position) {
+                mPosition = position;
+            }
+
+            /**
+             * Gets the position of this Point.
+             * The position of this point on the progress bar
+             * relative to {@link ProgressStyle#getProgressMax}.
+             */
+            public int getPosition() {
+                return mPosition;
+            }
+
+
+            /**
+             * Optional ID used to uniquely identify the element across updates.
+             */
+            public int getId() {
+                return mId;
+            }
+
+            /**
+             * Optional ID used to uniquely identify the element across updates.
+             */
+            public @NonNull Point setId(int id) {
+                mId = id;
+                return this;
+            }
+
+            /**
+             * Returns the color of this Segment.
+             *
+             * @see #setColor
+             */
+            @ColorInt
+            public int getColor() {
+                return mColor;
+            }
+
+            /**
+             * Optional color of this Segment
+             */
+            public @NonNull Point setColor(@ColorInt int color) {
+                mColor = color;
+                return this;
+            }
+
+            /**
+             * Needed for {@link Notification.Style#areNotificationsVisiblyDifferent}
+             */
+            @Override
+            public boolean equals(Object o) {
+                if (this == o) return true;
+                if (o == null || getClass() != o.getClass()) return false;
+                final Point point = (Point) o;
+                return mPosition == point.mPosition && mId == point.mId
+                        && mColor == point.mColor;
+            }
+
+            @Override
+            public int hashCode() {
+                return Objects.hash(mPosition, mId, mColor);
             }
         }
     }

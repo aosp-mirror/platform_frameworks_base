@@ -32,7 +32,7 @@ import android.provider.Settings;
 import android.service.quicksettings.Tile;
 import android.text.TextUtils;
 import android.util.Log;
-import android.widget.Switch;
+import android.widget.Button;
 
 import androidx.annotation.VisibleForTesting;
 
@@ -59,12 +59,12 @@ import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.res.R;
 import com.android.systemui.statusbar.policy.BluetoothController;
 
-import kotlinx.coroutines.Job;
-
 import java.util.List;
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
+
+import kotlinx.coroutines.Job;
 
 /** Quick settings tile: Bluetooth **/
 public class BluetoothTile extends QSTileImpl<BooleanState> {
@@ -147,6 +147,8 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
         }
     }
 
+
+
     @Override
     public Intent getLongClickIntent() {
         return new Intent(Settings.ACTION_BLUETOOTH_SETTINGS);
@@ -221,7 +223,7 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
             state.state = Tile.STATE_INACTIVE;
         }
 
-        state.expandedAccessibilityClassName = Switch.class.getName();
+        state.expandedAccessibilityClassName = Button.class.getName();
         state.forceExpandIcon = mFeatureFlags.isEnabled(Flags.BLUETOOTH_QS_TILE_DIALOG);
     }
 

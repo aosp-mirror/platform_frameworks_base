@@ -74,6 +74,5 @@ abstract class BrightnessClamper<T> {
 
     protected enum Type {
         POWER,
-        WEAR_BEDTIME_MODE,
     }
 }

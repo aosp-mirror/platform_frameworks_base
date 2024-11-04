@@ -29,6 +29,7 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.pointer.AwaitPointerEventScope
 import androidx.compose.ui.input.pointer.PointerEvent
 import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.PointerId
 import androidx.compose.ui.input.pointer.PointerInputChange
 import androidx.compose.ui.input.pointer.PointerInputScope
@@ -42,15 +43,14 @@ import androidx.compose.ui.input.pointer.util.addPointerInputChange
 import androidx.compose.ui.node.CompositionLocalConsumerModifierNode
 import androidx.compose.ui.node.DelegatingNode
 import androidx.compose.ui.node.ModifierNodeElement
-import androidx.compose.ui.node.ObserverModifierNode
 import androidx.compose.ui.node.PointerInputModifierNode
 import androidx.compose.ui.node.currentValueOf
-import androidx.compose.ui.node.observeReads
 import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.util.fastAll
 import androidx.compose.ui.util.fastAny
+import androidx.compose.ui.util.fastFilter
 import androidx.compose.ui.util.fastFirstOrNull
 import androidx.compose.ui.util.fastSumBy
 import com.android.compose.ui.util.SpaceVectorConverter
@@ -78,7 +78,6 @@ import kotlinx.coroutines.launch
 @Stable
 internal fun Modifier.multiPointerDraggable(
     orientation: Orientation,
-    enabled: () -> Boolean,
     startDragImmediately: (startedPosition: Offset) -> Boolean,
     onDragStarted: (startedPosition: Offset, overSlop: Float, pointersDown: Int) -> DragController,
     onFirstPointerDown: () -> Unit = {},
@@ -88,7 +87,6 @@ internal fun Modifier.multiPointerDraggable(
     this.then(
         MultiPointerDraggableElement(
             orientation,
-            enabled,
             startDragImmediately,
             onDragStarted,
             onFirstPointerDown,
@@ -99,7 +97,6 @@ internal fun Modifier.multiPointerDraggable(
 
 private data class MultiPointerDraggableElement(
     private val orientation: Orientation,
-    private val enabled: () -> Boolean,
     private val startDragImmediately: (startedPosition: Offset) -> Boolean,
     private val onDragStarted:
         (startedPosition: Offset, overSlop: Float, pointersDown: Int) -> DragController,
@@ -110,7 +107,6 @@ private data class MultiPointerDraggableElement(
     override fun create(): MultiPointerDraggableNode =
         MultiPointerDraggableNode(
             orientation = orientation,
-            enabled = enabled,
             startDragImmediately = startDragImmediately,
             onDragStarted = onDragStarted,
             onFirstPointerDown = onFirstPointerDown,
@@ -120,7 +116,6 @@ private data class MultiPointerDraggableElement(
 
     override fun update(node: MultiPointerDraggableNode) {
         node.orientation = orientation
-        node.enabled = enabled
         node.startDragImmediately = startDragImmediately
         node.onDragStarted = onDragStarted
         node.onFirstPointerDown = onFirstPointerDown
@@ -130,27 +125,23 @@ private data class MultiPointerDraggableElement(
 
 internal class MultiPointerDraggableNode(
     orientation: Orientation,
-    enabled: () -> Boolean,
     var startDragImmediately: (startedPosition: Offset) -> Boolean,
     var onDragStarted:
         (startedPosition: Offset, overSlop: Float, pointersDown: Int) -> DragController,
     var onFirstPointerDown: () -> Unit,
-    var swipeDetector: SwipeDetector = DefaultSwipeDetector,
+    swipeDetector: SwipeDetector = DefaultSwipeDetector,
     private val dispatcher: NestedScrollDispatcher,
 ) :
     DelegatingNode(),
     PointerInputModifierNode,
     CompositionLocalConsumerModifierNode,
-    ObserverModifierNode,
     SpaceVectorConverter {
     private val pointerTracker = delegate(SuspendingPointerInputModifierNode { pointerTracker() })
     private val pointerInput = delegate(SuspendingPointerInputModifierNode { pointerInput() })
     private val velocityTracker = VelocityTracker()
-    private var previousEnabled: Boolean = false
 
-    var enabled: () -> Boolean = enabled
+    var swipeDetector: SwipeDetector = swipeDetector
         set(value) {
-            // Reset the pointer input whenever enabled changed.
             if (value != field) {
                 field = value
                 pointerInput.resetPointerInputHandler()
@@ -177,21 +168,6 @@ internal class MultiPointerDraggableNode(
             }
         }
 
-    override fun onAttach() {
-        previousEnabled = enabled()
-        onObservedReadsChanged()
-    }
-
-    override fun onObservedReadsChanged() {
-        observeReads {
-            val newEnabled = enabled()
-            if (newEnabled != previousEnabled) {
-                pointerInput.resetPointerInputHandler()
-            }
-            previousEnabled = newEnabled
-        }
-    }
-
     override fun onCancelPointerInput() {
         pointerTracker.onCancelPointerInput()
         pointerInput.onCancelPointerInput()
@@ -209,12 +185,15 @@ internal class MultiPointerDraggableNode(
 
     private var startedPosition: Offset? = null
     private var pointersDown: Int = 0
+    private var isMouseWheel: Boolean = false
 
     internal fun pointersInfo(): PointersInfo {
         return PointersInfo(
+            // This may be null, i.e. when the user uses TalkBack
             startedPosition = startedPosition,
-            // Note: We could have 0 pointers during fling or for other reasons.
+            // We could have 0 pointers during fling or for other reasons.
             pointersDown = pointersDown.coerceAtLeast(1),
+            isMouseWheel = isMouseWheel,
         )
     }
 
@@ -226,28 +205,41 @@ internal class MultiPointerDraggableNode(
             // [requireAncestorPointersInfoOwner], to our descendants.
             while (currentContext.isActive) {
                 // During the Initial pass, we receive the event after our ancestors.
-                val changes = awaitPointerEvent(PointerEventPass.Initial).changes
+                val pointerEvent = awaitPointerEvent(PointerEventPass.Initial)
+
+                // Ignore cursor has entered the input region.
+                // This will only be sent after the cursor is hovering when in the input region.
+                if (pointerEvent.type == PointerEventType.Enter) continue
+
+                val changes = pointerEvent.changes
                 pointersDown = changes.countDown()
+                isMouseWheel = pointerEvent.type == PointerEventType.Scroll
 
                 when {
                     // There are no more pointers down.
                     pointersDown == 0 -> {
                         startedPosition = null
 
-                        val lastPointerUp = changes.single { it.id == velocityPointerId }
-                        velocityTracker.addPointerInputChange(lastPointerUp)
+                        // In case of multiple events with 0 pointers down (not pressed) we may have
+                        // already removed the velocityPointer
+                        val lastPointerUp = changes.fastFilter { it.id == velocityPointerId }
+                        check(lastPointerUp.isEmpty() || lastPointerUp.size == 1) {
+                            "There are ${lastPointerUp.size} pointers up: $lastPointerUp"
+                        }
+                        if (lastPointerUp.size == 1) {
+                            velocityTracker.addPointerInputChange(lastPointerUp.first())
+                        }
                     }
 
                     // The first pointer down, startedPosition was not set.
                     startedPosition == null -> {
-                        val firstPointerDown = changes.single()
+                        // Mouse wheel could start with multiple pointer down
+                        val firstPointerDown = changes.first()
                         velocityPointerId = firstPointerDown.id
                         velocityTracker.resetTracking()
                         velocityTracker.addPointerInputChange(firstPointerDown)
                         startedPosition = firstPointerDown.position
-                        if (enabled()) {
-                            onFirstPointerDown()
-                        }
+                        onFirstPointerDown()
                     }
 
                     // Changes with at least one pointer
@@ -286,10 +278,6 @@ internal class MultiPointerDraggableNode(
     }
 
     private suspend fun PointerInputScope.pointerInput() {
-        if (!enabled()) {
-            return
-        }
-
         val currentContext = currentCoroutineContext()
         awaitPointerEventScope {
             while (currentContext.isActive) {
@@ -317,13 +305,17 @@ internal class MultiPointerDraggableNode(
                                             velocityTracker.calculateVelocity(maxVelocity)
                                         }
                                         .toFloat(),
-                                onFling = { controller.onStop(it, canChangeContent = true) },
+                                onFling = {
+                                    controller.onStop(it, canChangeContent = true).invoke()
+                                },
                             )
                         },
                         onDragCancel = { controller ->
                             startFlingGesture(
                                 initialVelocity = 0f,
-                                onFling = { controller.onStop(it, canChangeContent = true) },
+                                onFling = {
+                                    controller.onStop(it, canChangeContent = true).invoke()
+                                },
                             )
                         },
                         swipeDetector = swipeDetector,
@@ -345,7 +337,10 @@ internal class MultiPointerDraggableNode(
      *
      * Note: Inspired by [androidx.compose.foundation.gestures.ScrollableNode.onDragStopped]
      */
-    private fun startFlingGesture(initialVelocity: Float, onFling: (velocity: Float) -> Float) {
+    private fun startFlingGesture(
+        initialVelocity: Float,
+        onFling: suspend (velocity: Float) -> Float,
+    ) {
         // Note: [AwaitPointerEventScope] is annotated as @RestrictsSuspension, we need another
         // CoroutineScope to run the fling gestures.
         // We do not need to cancel this [Job], the source will take care of emitting an
@@ -407,7 +402,7 @@ internal class MultiPointerDraggableNode(
      */
     private suspend inline fun dispatchFlingEvents(
         availableOnPreFling: Float,
-        onFling: (velocity: Float) -> Float,
+        onFling: suspend (velocity: Float) -> Float,
     ): Float {
         // PreFling phase
         val consumedByPreFling =
@@ -663,4 +658,8 @@ internal fun interface PointersInfoOwner {
     fun pointersInfo(): PointersInfo
 }
 
-internal data class PointersInfo(val startedPosition: Offset?, val pointersDown: Int)
+internal data class PointersInfo(
+    val startedPosition: Offset?,
+    val pointersDown: Int,
+    val isMouseWheel: Boolean,
+)

@@ -2591,7 +2591,8 @@ public class ShortcutService extends IShortcutService.Stub {
             final List<ShortcutManager.ShareShortcutInfo> shortcutInfoList = new ArrayList<>();
             final ShortcutUser user = getUserShortcutsLocked(userId);
             user.forAllPackages(p -> shortcutInfoList.addAll(
-                    p.getMatchingShareTargets(filter, pkg)));
+                    p.getMatchingShareTargets(filter, pkg,
+                            mUserManagerInternal.getProfileParentId(userId))));
             return new ParceledListSlice<>(shortcutInfoList);
         }
     }
@@ -2623,7 +2624,8 @@ public class ShortcutService extends IShortcutService.Stub {
 
             final List<ShortcutManager.ShareShortcutInfo> matchedTargets =
                     getPackageShortcutsLocked(packageName, userId)
-                            .getMatchingShareTargets(filter);
+                            .getMatchingShareTargets(filter,
+                                    mUserManagerInternal.getProfileParentId(callingUserId));
             final int matchedSize = matchedTargets.size();
             for (int i = 0; i < matchedSize; i++) {
                 if (matchedTargets.get(i).getShortcutInfo().getId().equals(shortcutId)) {

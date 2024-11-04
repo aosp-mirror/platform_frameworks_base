@@ -70,8 +70,20 @@
     <!-- The number of rows in the QuickSettings -->
     <integer name="quick_settings_max_rows">4</integer>
 
+    <!-- The number of rows in the paginated grid QuickSettings -->
+    <integer name="quick_settings_paginated_grid_num_rows">4</integer>
+
+    <!-- The number of rows in the paginated grid QuickQuickSettings -->
+    <integer name="quick_qs_paginated_grid_num_rows">2</integer>
+
     <!-- The number of columns in the infinite grid QuickSettings -->
     <integer name="quick_settings_infinite_grid_num_columns">4</integer>
+
+    <!-- The number of columns in the Dual Shade QuickSettings -->
+    <integer name="quick_settings_dual_shade_num_columns">4</integer>
+
+    <!-- The number of columns in the Split Shade QuickSettings -->
+    <integer name="quick_settings_split_shade_num_columns">4</integer>
 
     <!-- Override column number for quick settings.
     For now, this value has effect only when flag lockscreen.enable_landscape is enabled.
@@ -125,17 +137,19 @@
     <!-- Use collapsed layout for media player in landscape QQS -->
     <bool name="config_quickSettingsMediaLandscapeCollapsed">true</bool>
 
-    <!-- For hearing devices related tool list. Need to be in ComponentName format (package/class).
-         Should be activity to be launched.
-         Already contains tool that holds intent: "com.android.settings.action.live_caption".
-         Maximum number is 3. -->
+    <!-- Hearing devices related tool list. Each entry must be in ComponentName format
+         (package/class), indicating the specific application component to launch.
+         Already contains tool that handles intent: "com.android.settings.action.live_caption" by
+         default. You can add up to 2 additional related tools. -->
     <string-array name="config_quickSettingsHearingDevicesRelatedToolName" translatable="false">
     </string-array>
 
-    <!-- The drawable resource names. If provided, it will replace the corresponding icons in
-         config_quickSettingsHearingDevicesRelatedToolName. Can be empty to use original icons.
-         Already contains tool that holds intent: "com.android.settings.action.live_caption".
-         Maximum number is 3. -->
+    <!-- Hearing devices related tool icon list. Provide drawable resource names in the same order
+         as the component names in config_quickSettingsHearingDevicesRelatedToolName. The icons
+         should be monochrome and will be tinted according to the system's material color. Ensure
+         the number of icon resources matches the number of components specified in
+         config_quickSettingsHearingDevicesRelatedToolName. If this array is empty or the sizes
+         don't match, the original application icons will be used. -->
     <string-array name="config_quickSettingsHearingDevicesRelatedToolIcon" translatable="false">
     </string-array>
 
@@ -323,6 +337,9 @@
 
     <!-- Whether to show the full screen user switcher. -->
     <bool name="config_enableFullscreenUserSwitcher">false</bool>
+
+    <!-- Whether to go to the launcher when unlocking via an occluding app -->
+    <bool name="config_goToHomeFromOccludedApps">false</bool>
 
     <!-- Determines whether the shell features all run on another thread. -->
     <bool name="config_enableShellMainThread">true</bool>

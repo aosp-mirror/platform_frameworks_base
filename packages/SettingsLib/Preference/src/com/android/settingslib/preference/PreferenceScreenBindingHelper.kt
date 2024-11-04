@@ -17,22 +17,26 @@
 package com.android.settingslib.preference
 
 import android.content.Context
-import android.os.Handler
-import android.os.Looper
+import android.content.Intent
+import android.os.Bundle
 import androidx.preference.Preference
+import androidx.preference.PreferenceDataStore
 import androidx.preference.PreferenceGroup
 import androidx.preference.PreferenceScreen
+import com.android.settingslib.datastore.HandlerExecutor
+import com.android.settingslib.datastore.KeyValueStore
 import com.android.settingslib.datastore.KeyedDataObservable
 import com.android.settingslib.datastore.KeyedObservable
 import com.android.settingslib.datastore.KeyedObserver
 import com.android.settingslib.metadata.PersistentPreference
 import com.android.settingslib.metadata.PreferenceHierarchy
+import com.android.settingslib.metadata.PreferenceHierarchyNode
+import com.android.settingslib.metadata.PreferenceLifecycleContext
 import com.android.settingslib.metadata.PreferenceLifecycleProvider
 import com.android.settingslib.metadata.PreferenceMetadata
 import com.android.settingslib.metadata.PreferenceScreenRegistry
 import com.google.common.collect.ImmutableMap
 import com.google.common.collect.ImmutableMultimap
-import java.util.concurrent.Executor
 
 /**
  * Helper to bind preferences on given [preferenceScreen].
@@ -43,21 +47,30 @@ import java.util.concurrent.Executor
  */
 class PreferenceScreenBindingHelper(
     context: Context,
+    fragment: PreferenceFragment,
     private val preferenceBindingFactory: PreferenceBindingFactory,
     private val preferenceScreen: PreferenceScreen,
-    preferenceHierarchy: PreferenceHierarchy,
-) : KeyedDataObservable<String>(), AutoCloseable {
+    private val preferenceHierarchy: PreferenceHierarchy,
+) : KeyedDataObservable<String>() {
 
-    private val handler = Handler(Looper.getMainLooper())
-    private val executor =
-        object : Executor {
-            override fun execute(command: Runnable) {
-                handler.post(command)
-            }
+    private val mainExecutor = HandlerExecutor.main
+
+    private val preferenceLifecycleContext =
+        object : PreferenceLifecycleContext(context) {
+            override fun notifyPreferenceChange(preference: PreferenceMetadata) =
+                notifyChange(preference.key, CHANGE_REASON_STATE)
+
+            @Suppress("DEPRECATION")
+            override fun startActivityForResult(
+                intent: Intent,
+                requestCode: Int,
+                options: Bundle?,
+            ) = fragment.startActivityForResult(intent, requestCode, options)
         }
 
-    private val preferences: ImmutableMap<String, PreferenceMetadata>
+    private val preferences: ImmutableMap<String, PreferenceHierarchyNode>
     private val dependencies: ImmutableMultimap<String, String>
+    private val lifecycleAwarePreferences: Array<PreferenceLifecycleProvider>
     private val storages = mutableSetOf<KeyedObservable<String>>()
 
     private val preferenceObserver: KeyedObserver<String?>
@@ -69,34 +82,30 @@ class PreferenceScreenBindingHelper(
             }
         }
 
-    private val stateObserver =
-        object : PreferenceLifecycleProvider.PreferenceStateObserver {
-            override fun onPreferenceStateChanged(preference: PreferenceMetadata) {
-                notifyChange(preference.key, CHANGE_REASON_STATE)
-            }
-        }
-
     init {
-        val preferencesBuilder = ImmutableMap.builder<String, PreferenceMetadata>()
+        val preferencesBuilder = ImmutableMap.builder<String, PreferenceHierarchyNode>()
         val dependenciesBuilder = ImmutableMultimap.builder<String, String>()
+        val lifecycleAwarePreferences = mutableListOf<PreferenceLifecycleProvider>()
         fun PreferenceMetadata.addDependency(dependency: PreferenceMetadata) {
             dependenciesBuilder.put(key, dependency.key)
         }
 
-        fun PreferenceMetadata.add() {
-            preferencesBuilder.put(key, this)
-            dependencyOfEnabledState(context)?.addDependency(this)
-            if (this is PreferenceLifecycleProvider) onAttach(context, stateObserver)
-            if (this is PersistentPreference<*>) storages.add(storage(context))
+        fun PreferenceHierarchyNode.addNode() {
+            metadata.let {
+                preferencesBuilder.put(it.key, this)
+                it.dependencyOfEnabledState(context)?.addDependency(it)
+                if (it is PreferenceLifecycleProvider) lifecycleAwarePreferences.add(it)
+                if (it is PersistentPreference<*>) storages.add(it.storage(context))
+            }
         }
 
         fun PreferenceHierarchy.addPreferences() {
-            metadata.add()
+            addNode()
             forEach {
                 if (it is PreferenceHierarchy) {
                     it.addPreferences()
                 } else {
-                    it.metadata.add()
+                    it.addNode()
                 }
             }
         }
@@ -104,10 +113,11 @@ class PreferenceScreenBindingHelper(
         preferenceHierarchy.addPreferences()
         this.preferences = preferencesBuilder.buildOrThrow()
         this.dependencies = dependenciesBuilder.build()
+        this.lifecycleAwarePreferences = lifecycleAwarePreferences.toTypedArray()
 
         preferenceObserver = KeyedObserver { key, reason -> onPreferenceChange(key, reason) }
-        addObserver(preferenceObserver, executor)
-        for (storage in storages) storage.addObserver(storageObserver, executor)
+        addObserver(preferenceObserver, mainExecutor)
+        for (storage in storages) storage.addObserver(storageObserver, mainExecutor)
     }
 
     private fun onPreferenceChange(key: String?, reason: Int) {
@@ -115,7 +125,7 @@ class PreferenceScreenBindingHelper(
 
         // bind preference to update UI
         preferenceScreen.findPreference<Preference>(key)?.let {
-            preferenceBindingFactory.bind(it, preferences[key])
+            preferences[key]?.let { node -> preferenceBindingFactory.bind(it, node) }
         }
 
         // check reason to avoid potential infinite loop
@@ -133,13 +143,50 @@ class PreferenceScreenBindingHelper(
         }
     }
 
-    override fun close() {
-        removeObserver(preferenceObserver)
-        val context = preferenceScreen.context
-        for (preference in preferences.values) {
-            if (preference is PreferenceLifecycleProvider) preference.onDetach(context)
+    fun getPreferences() = preferenceHierarchy.getAllPreferences()
+
+    fun onCreate() {
+        for (preference in lifecycleAwarePreferences) {
+            preference.onCreate(preferenceLifecycleContext)
         }
+    }
+
+    fun onStart() {
+        for (preference in lifecycleAwarePreferences) {
+            preference.onStart(preferenceLifecycleContext)
+        }
+    }
+
+    fun onResume() {
+        for (preference in lifecycleAwarePreferences) {
+            preference.onResume(preferenceLifecycleContext)
+        }
+    }
+
+    fun onPause() {
+        for (preference in lifecycleAwarePreferences) {
+            preference.onPause(preferenceLifecycleContext)
+        }
+    }
+
+    fun onStop() {
+        for (preference in lifecycleAwarePreferences) {
+            preference.onStop(preferenceLifecycleContext)
+        }
+    }
+
+    fun onDestroy() {
+        removeObserver(preferenceObserver)
         for (storage in storages) storage.removeObserver(storageObserver)
+        for (preference in lifecycleAwarePreferences) {
+            preference.onDestroy(preferenceLifecycleContext)
+        }
+    }
+
+    fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        for (preference in lifecycleAwarePreferences) {
+            if (preference.onActivityResult(requestCode, resultCode, data)) break
+        }
     }
 
     companion object {
@@ -173,28 +220,31 @@ class PreferenceScreenBindingHelper(
         ) =
             preferenceScreen.bindRecursively(
                 preferenceBindingFactory,
-                preferenceHierarchy.getAllPreferences().associateBy { it.key },
+                preferenceHierarchy.getAllPreferences().associateBy { it.metadata.key },
             )
 
         private fun PreferenceGroup.bindRecursively(
             preferenceBindingFactory: PreferenceBindingFactory,
-            preferences: Map<String, PreferenceMetadata>,
+            preferences: Map<String, PreferenceHierarchyNode>,
+            storages: MutableMap<KeyValueStore, PreferenceDataStore> = mutableMapOf(),
         ) {
-            preferenceBindingFactory.bind(this, preferences[key])
+            preferences[key]?.let { preferenceBindingFactory.bind(this, it) }
             val count = preferenceCount
             for (index in 0 until count) {
                 val preference = getPreference(index)
                 if (preference is PreferenceGroup) {
-                    preference.bindRecursively(preferenceBindingFactory, preferences)
+                    preference.bindRecursively(preferenceBindingFactory, preferences, storages)
                 } else {
-                    preferenceBindingFactory.bind(preference, preferences[preference.key])
+                    preferences[preference.key]?.let {
+                        val metadata = it.metadata
+                        (metadata as? PersistentPreference<*>)?.storage(context)?.let { storage ->
+                            preference.preferenceDataStore =
+                                storages.getOrPut(storage) { PreferenceDataStoreAdapter(storage) }
+                        }
+                        preferenceBindingFactory.bind(preference, it)
+                    }
                 }
             }
         }
-
-        private fun PreferenceBindingFactory.bind(
-            preference: Preference,
-            metadata: PreferenceMetadata?,
-        ) = metadata?.let { getPreferenceBinding(it)?.bind(preference, it) }
     }
 }

@@ -58,6 +58,7 @@ import com.android.systemui.shade.ShadeViewStateProvider;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
+import com.android.systemui.statusbar.data.repository.StatusBarContentInsetsProviderStore;
 import com.android.systemui.statusbar.disableflags.DisableStateTracker;
 import com.android.systemui.statusbar.events.SystemStatusAnimationCallback;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
@@ -300,7 +301,7 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
             KeyguardStatusBarViewModel keyguardStatusBarViewModel,
             BiometricUnlockController biometricUnlockController,
             SysuiStatusBarStateController statusBarStateController,
-            StatusBarContentInsetsProvider statusBarContentInsetsProvider,
+            StatusBarContentInsetsProviderStore statusBarContentInsetsProviderStore,
             UserManager userManager,
             StatusBarUserChipViewModel userChipViewModel,
             SecureSettings secureSettings,
@@ -327,7 +328,7 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
         mKeyguardStatusBarViewModel = keyguardStatusBarViewModel;
         mBiometricUnlockController = biometricUnlockController;
         mStatusBarStateController = statusBarStateController;
-        mInsetsProvider = statusBarContentInsetsProvider;
+        mInsetsProvider = statusBarContentInsetsProviderStore.getDefaultDisplay();
         mUserManager = userManager;
         mStatusBarUserChipViewModel = userChipViewModel;
         mSecureSettings = secureSettings;

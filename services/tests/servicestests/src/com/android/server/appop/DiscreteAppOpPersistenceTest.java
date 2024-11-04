@@ -86,7 +86,8 @@ public class DiscreteAppOpPersistenceTest {
         int attributionChainId = AppOpsManager.ATTRIBUTION_CHAIN_ID_NONE;
 
         mDiscreteRegistry.recordDiscreteAccess(uid, packageName, deviceId, op, null, opFlags,
-                uidState, accessTime, duration, attributionFlags, attributionChainId);
+                uidState, accessTime, duration, attributionFlags, attributionChainId,
+                DiscreteRegistry.ACCESS_TYPE_FINISH_OP);
 
         // Verify in-memory object is correct
         fetchDiscreteOpsAndValidate(uid, packageName, op, deviceId, null, accessTime,
@@ -117,7 +118,8 @@ public class DiscreteAppOpPersistenceTest {
         int attributionChainId = 10;
 
         mDiscreteRegistry.recordDiscreteAccess(uid, packageName, deviceId, op, null, opFlags,
-                uidState, accessTime, duration, attributionFlags, attributionChainId);
+                uidState, accessTime, duration, attributionFlags, attributionChainId,
+                DiscreteRegistry.ACCESS_TYPE_START_OP);
 
         fetchDiscreteOpsAndValidate(uid, packageName, op, deviceId, null, accessTime,
                 duration, uidState, opFlags, attributionFlags, attributionChainId);

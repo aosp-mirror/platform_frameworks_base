@@ -184,7 +184,10 @@ public interface QSTile {
             }
         }
 
-        /** Get the text for secondaryLabel. */
+        /**
+         *  If the current secondaryLabel value is not empty, ignore the given input and return
+         *  the current value. Otherwise return current value.
+         */
         public CharSequence getSecondaryLabel(CharSequence stateText) {
             // Use a local reference as the value might change from other threads
             CharSequence localSecondaryLabel = secondaryLabel;

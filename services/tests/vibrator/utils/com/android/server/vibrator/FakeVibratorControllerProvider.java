@@ -26,6 +26,7 @@ import android.os.VibrationEffect;
 import android.os.VibratorInfo;
 import android.os.vibrator.PrebakedSegment;
 import android.os.vibrator.PrimitiveSegment;
+import android.os.vibrator.PwlePoint;
 import android.os.vibrator.RampSegment;
 import android.os.vibrator.StepSegment;
 import android.os.vibrator.VibrationEffectSegment;
@@ -49,6 +50,7 @@ public final class FakeVibratorControllerProvider {
     private final Map<Long, PrebakedSegment> mEnabledAlwaysOnEffects = new HashMap<>();
     private final Map<Long, List<VibrationEffectSegment>> mEffectSegments = new TreeMap<>();
     private final Map<Long, List<VibrationEffect.VendorEffect>> mVendorEffects = new TreeMap<>();
+    private final Map<Long, List<PwlePoint>> mEffectPwlePoints = new TreeMap<>();
     private final Map<Long, List<Integer>> mBraking = new HashMap<>();
     private final List<Float> mAmplitudes = new ArrayList<>();
     private final List<Boolean> mExternalControlStates = new ArrayList<>();
@@ -68,12 +70,19 @@ public final class FakeVibratorControllerProvider {
     private int[] mSupportedPrimitives;
     private int mCompositionSizeMax;
     private int mPwleSizeMax;
+    private int mMaxEnvelopeEffectSize;
+    private int mMinEnvelopeEffectControlPointDurationMillis;
+    private int mMaxEnvelopeEffectControlPointDurationMillis;
     private float mMinFrequency = Float.NaN;
     private float mResonantFrequency = Float.NaN;
     private float mFrequencyResolution = Float.NaN;
     private float mQFactor = Float.NaN;
     private float[] mMaxAmplitudes;
+
+    private float[] mFrequenciesHz;
+    private float[] mOutputAccelerationsGs;
     private long mVendorEffectDuration = EFFECT_DURATION;
+    private long mPrimitiveDuration = EFFECT_DURATION;
 
     void recordEffectSegment(long vibrationId, VibrationEffectSegment segment) {
         mEffectSegments.computeIfAbsent(vibrationId, k -> new ArrayList<>()).add(segment);
@@ -81,6 +90,10 @@ public final class FakeVibratorControllerProvider {
 
     void recordVendorEffect(long vibrationId, VibrationEffect.VendorEffect vendorEffect) {
         mVendorEffects.computeIfAbsent(vibrationId, k -> new ArrayList<>()).add(vendorEffect);
+    }
+
+    void recordEffectPwlePoint(long vibrationId, PwlePoint pwlePoint) {
+        mEffectPwlePoints.computeIfAbsent(vibrationId, k -> new ArrayList<>()).add(pwlePoint);
     }
 
     void recordBraking(long vibrationId, int braking) {
@@ -165,7 +178,7 @@ public final class FakeVibratorControllerProvider {
             }
             long duration = 0;
             for (PrimitiveSegment primitive : primitives) {
-                duration += EFFECT_DURATION + primitive.getDelay();
+                duration += mPrimitiveDuration + primitive.getDelay();
                 recordEffectSegment(vibrationId, primitive);
             }
             applyLatency(mOnLatency);
@@ -183,6 +196,19 @@ public final class FakeVibratorControllerProvider {
             recordBraking(vibrationId, braking);
             applyLatency(mOnLatency);
             scheduleListener(duration, vibrationId);
+            return duration;
+        }
+
+        @Override
+        public long composePwleV2(PwlePoint[] pwlePoints, long vibrationId) {
+            long duration = 0;
+            for (PwlePoint pwlePoint: pwlePoints) {
+                duration += pwlePoint.getTimeMillis();
+                recordEffectPwlePoint(vibrationId, pwlePoint);
+            }
+            applyLatency(mOnLatency);
+            scheduleListener(duration, vibrationId);
+
             return duration;
         }
 
@@ -215,8 +241,16 @@ public final class FakeVibratorControllerProvider {
             }
             infoBuilder.setCompositionSizeMax(mCompositionSizeMax);
             infoBuilder.setQFactor(mQFactor);
-            infoBuilder.setFrequencyProfile(new VibratorInfo.FrequencyProfile(
+            infoBuilder.setFrequencyProfileLegacy(new VibratorInfo.FrequencyProfileLegacy(
                     mResonantFrequency, mMinFrequency, mFrequencyResolution, mMaxAmplitudes));
+            infoBuilder.setFrequencyProfile(
+                    new VibratorInfo.FrequencyProfile(mResonantFrequency, mFrequenciesHz,
+                            mOutputAccelerationsGs));
+            infoBuilder.setMaxEnvelopeEffectSize(mMaxEnvelopeEffectSize);
+            infoBuilder.setMinEnvelopeEffectControlPointDurationMillis(
+                    mMinEnvelopeEffectControlPointDurationMillis);
+            infoBuilder.setMaxEnvelopeEffectControlPointDurationMillis(
+                    mMaxEnvelopeEffectControlPointDurationMillis);
             return mIsInfoLoadSuccessful;
         }
 
@@ -352,9 +386,44 @@ public final class FakeVibratorControllerProvider {
         mMaxAmplitudes = maxAmplitudes;
     }
 
+    /** Set the list of available frequencies. */
+    public void setFrequenciesHz(float[] frequenciesHz) {
+        mFrequenciesHz = frequenciesHz;
+    }
+
+    /** Set the max output acceleration achievable by the supported frequencies. */
+    public void setOutputAccelerationsGs(float[] outputAccelerationsGs) {
+        mOutputAccelerationsGs = outputAccelerationsGs;
+    }
+
     /** Set the duration of vendor effects in fake vibrator hardware. */
     public void setVendorEffectDuration(long durationMs) {
         mVendorEffectDuration = durationMs;
+    }
+
+    /** Set the duration of primitives in fake vibrator hardware. */
+    public void setPrimitiveDuration(long primitiveDuration) {
+        mPrimitiveDuration = primitiveDuration;
+    }
+
+    /**
+     * Set the maximum number of envelope effects control points supported in fake vibrator
+     * hardware.
+     */
+    public void setMaxEnvelopeEffectSize(int envelopeEffectControlPointsMax) {
+        mMaxEnvelopeEffectSize = envelopeEffectControlPointsMax;
+    }
+
+    /** Set the envelope effect minimum segment duration in fake vibrator hardware. */
+    public void setMinEnvelopeEffectControlPointDurationMillis(
+            int minEnvelopeEffectControlPointDurationMillis) {
+        mMinEnvelopeEffectControlPointDurationMillis = minEnvelopeEffectControlPointDurationMillis;
+    }
+
+    /** Set the envelope effect maximum segment duration in fake vibrator hardware. */
+    public void setMaxEnvelopeEffectControlPointDurationMillis(
+            int maxEnvelopeEffectControlPointDurationMillis) {
+        mMaxEnvelopeEffectControlPointDurationMillis = maxEnvelopeEffectControlPointDurationMillis;
     }
 
     /**
@@ -413,6 +482,28 @@ public final class FakeVibratorControllerProvider {
         // Returns segments in order of vibrationId, which increases over time. TreeMap gives order.
         ArrayList<VibrationEffect.VendorEffect> result = new ArrayList<>();
         for (List<VibrationEffect.VendorEffect> subList : mVendorEffects.values()) {
+            result.addAll(subList);
+        }
+        return result;
+    }
+
+    /** Return list of {@link PwlePoint} played by this controller, in order. */
+    public List<PwlePoint> getEffectPwlePoints(long vibrationId) {
+        if (mEffectPwlePoints.containsKey(vibrationId)) {
+            return new ArrayList<>(mEffectPwlePoints.get(vibrationId));
+        } else {
+            return new ArrayList<>();
+        }
+    }
+
+    /**
+     * Returns a list of all vibrations' {@link PwlePoint}s, for external-use where vibration
+     * IDs aren't exposed.
+     */
+    public List<PwlePoint> getAllEffectPwlePoints() {
+        // Returns segments in order of vibrationId, which increases over time. TreeMap gives order.
+        ArrayList<PwlePoint> result = new ArrayList<>();
+        for (List<PwlePoint> subList : mEffectPwlePoints.values()) {
             result.addAll(subList);
         }
         return result;

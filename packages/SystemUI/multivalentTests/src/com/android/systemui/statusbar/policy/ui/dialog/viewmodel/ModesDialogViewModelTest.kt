@@ -19,6 +19,7 @@
 package com.android.systemui.statusbar.policy.ui.dialog.viewmodel
 
 import android.content.Intent
+import android.content.applicationContext
 import android.provider.Settings
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -38,9 +39,11 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.clearInvocations
+import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
@@ -55,14 +58,20 @@ class ModesDialogViewModelTest : SysuiTestCase() {
     private val mockDialogDelegate = kosmos.mockModesDialogDelegate
     private val mockDialogEventLogger = kosmos.mockModesDialogEventLogger
 
-    private val underTest =
-        ModesDialogViewModel(
-            context,
-            interactor,
-            kosmos.testDispatcher,
-            mockDialogDelegate,
-            mockDialogEventLogger
-        )
+    private lateinit var underTest: ModesDialogViewModel
+
+    @Before
+    fun setUp() {
+        MockitoAnnotations.initMocks(this)
+        underTest =
+            ModesDialogViewModel(
+                kosmos.applicationContext,
+                interactor,
+                kosmos.testDispatcher,
+                kosmos.mockModesDialogDelegate,
+                kosmos.mockModesDialogEventLogger,
+            )
+    }
 
     @Test
     fun tiles_filtersOutUserDisabledModes() =
@@ -97,7 +106,7 @@ class ModesDialogViewModelTest : SysuiTestCase() {
             assertThat(tiles?.size).isEqualTo(3)
             with(tiles?.elementAt(0)!!) {
                 assertThat(this.text).isEqualTo("Disabled by other")
-                assertThat(this.subtext).isEqualTo("Set up")
+                assertThat(this.subtext).isEqualTo("Not set")
                 assertThat(this.enabled).isEqualTo(false)
             }
             with(tiles?.elementAt(1)!!) {
@@ -323,10 +332,10 @@ class ModesDialogViewModelTest : SysuiTestCase() {
             assertThat(tiles!!).hasSize(6)
             assertThat(tiles!![0].subtext).isEqualTo("When the going gets tough")
             assertThat(tiles!![1].subtext).isEqualTo("On • When in Rome")
-            assertThat(tiles!![2].subtext).isEqualTo("Set up")
+            assertThat(tiles!![2].subtext).isEqualTo("Not set")
             assertThat(tiles!![3].subtext).isEqualTo("Off")
             assertThat(tiles!![4].subtext).isEqualTo("On")
-            assertThat(tiles!![5].subtext).isEqualTo("Set up")
+            assertThat(tiles!![5].subtext).isEqualTo("Not set")
         }
 
     @Test
@@ -387,7 +396,7 @@ class ModesDialogViewModelTest : SysuiTestCase() {
             }
             with(tiles?.elementAt(2)!!) {
                 assertThat(this.stateDescription).isEqualTo("Off")
-                assertThat(this.subtextDescription).isEqualTo("Set up")
+                assertThat(this.subtextDescription).isEqualTo("Not set")
             }
             with(tiles?.elementAt(3)!!) {
                 assertThat(this.stateDescription).isEqualTo("Off")
@@ -399,7 +408,7 @@ class ModesDialogViewModelTest : SysuiTestCase() {
             }
             with(tiles?.elementAt(5)!!) {
                 assertThat(this.stateDescription).isEqualTo("Off")
-                assertThat(this.subtextDescription).isEqualTo("Set up")
+                assertThat(this.subtextDescription).isEqualTo("Not set")
             }
 
             // All tiles have the same long click info
@@ -451,7 +460,7 @@ class ModesDialogViewModelTest : SysuiTestCase() {
                         .setName("Active without manual")
                         .setActive(true)
                         .setManualInvocationAllowed(false)
-                        .build(),
+                        .build()
                 )
             )
             runCurrent()
@@ -492,7 +501,7 @@ class ModesDialogViewModelTest : SysuiTestCase() {
                         .setId("ID")
                         .setName("Disabled by other")
                         .setEnabled(false, /* byUser= */ false)
-                        .build(),
+                        .build()
                 )
             )
             runCurrent()
@@ -500,7 +509,7 @@ class ModesDialogViewModelTest : SysuiTestCase() {
             assertThat(tiles?.size).isEqualTo(1)
             with(tiles?.elementAt(0)!!) {
                 assertThat(this.text).isEqualTo("Disabled by other")
-                assertThat(this.subtext).isEqualTo("Set up")
+                assertThat(this.subtext).isEqualTo("Not set")
                 assertThat(this.enabled).isEqualTo(false)
 
                 // Click the tile
@@ -519,7 +528,7 @@ class ModesDialogViewModelTest : SysuiTestCase() {
             // Check that nothing happened to the tile
             with(tiles?.elementAt(0)!!) {
                 assertThat(this.text).isEqualTo("Disabled by other")
-                assertThat(this.subtext).isEqualTo("Set up")
+                assertThat(this.subtext).isEqualTo("Not set")
                 assertThat(this.enabled).isEqualTo(false)
             }
         }

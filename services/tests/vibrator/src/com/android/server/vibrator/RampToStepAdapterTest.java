@@ -26,8 +26,11 @@ import android.os.vibrator.PrimitiveSegment;
 import android.os.vibrator.RampSegment;
 import android.os.vibrator.StepSegment;
 import android.os.vibrator.VibrationEffectSegment;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.flag.junit.SetFlagsRule;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -39,8 +42,8 @@ public class RampToStepAdapterTest {
     private static final int TEST_STEP_DURATION = 5;
     private static final float[] TEST_AMPLITUDE_MAP = new float[]{
             /* 50Hz= */ 0.1f, 0.2f, 0.4f, 0.8f, /* 150Hz= */ 1f, 0.9f, /* 200Hz= */ 0.8f};
-    private static final VibratorInfo.FrequencyProfile TEST_FREQUENCY_PROFILE =
-            new VibratorInfo.FrequencyProfile(
+    private static final VibratorInfo.FrequencyProfileLegacy TEST_FREQUENCY_PROFILE =
+            new VibratorInfo.FrequencyProfileLegacy(
                     /* resonantFrequencyHz= */ 150f, /* minFrequencyHz= */ 50f,
                     /* frequencyResolutionHz= */ 25f, TEST_AMPLITUDE_MAP);
     private static final VibratorInfo EMPTY_VIBRATOR_INFO = createVibratorInfo();
@@ -48,6 +51,9 @@ public class RampToStepAdapterTest {
             IVibrator.CAP_COMPOSE_PWLE_EFFECTS);
 
     private RampToStepAdapter mAdapter;
+
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     @Before
     public void setUp() throws Exception {
@@ -87,6 +93,7 @@ public class RampToStepAdapterTest {
     }
 
     @Test
+    @DisableFlags(android.os.vibrator.Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
     public void testRampSegments_withoutPwleCapability_convertsRampsToSteps() {
         List<VibrationEffectSegment> segments = new ArrayList<>(Arrays.asList(
                 new StepSegment(/* amplitude= */ 0, /* frequencyHz= */ 1, /* duration= */ 10),
@@ -121,7 +128,7 @@ public class RampToStepAdapterTest {
     private static VibratorInfo createVibratorInfo(int... capabilities) {
         return new VibratorInfo.Builder(0)
                 .setCapabilities(IntStream.of(capabilities).reduce((a, b) -> a | b).orElse(0))
-                .setFrequencyProfile(TEST_FREQUENCY_PROFILE)
+                .setFrequencyProfileLegacy(TEST_FREQUENCY_PROFILE)
                 .build();
     }
 }

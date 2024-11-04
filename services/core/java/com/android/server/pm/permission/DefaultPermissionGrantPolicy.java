@@ -884,10 +884,13 @@ final class DefaultPermissionGrantPolicy {
             }
 
             // Allow voice search on wear
-            grantPermissionsToSystemPackage(pm,
-                    getDefaultSystemHandlerActivityPackage(pm,
-                            SearchManager.INTENT_ACTION_GLOBAL_SEARCH, userId),
-                    userId, PHONE_PERMISSIONS, CALENDAR_PERMISSIONS, NEARBY_DEVICES_PERMISSIONS);
+            String voiceSearchPackage = getDefaultSystemHandlerActivityPackage(pm,
+                    SearchManager.INTENT_ACTION_GLOBAL_SEARCH, userId);
+            grantPermissionsToSystemPackage(pm, voiceSearchPackage,
+                    userId, PHONE_PERMISSIONS, CALENDAR_PERMISSIONS, NEARBY_DEVICES_PERMISSIONS,
+                    COARSE_BACKGROUND_LOCATION_PERMISSIONS);
+            revokeRuntimePermissions(pm, voiceSearchPackage,
+                FINE_LOCATION_PERMISSIONS, false, userId);
         }
 
         // Print Spooler
@@ -1268,6 +1271,7 @@ final class DefaultPermissionGrantPolicy {
      */
     private boolean isFixedOrUserSet(int flags) {
         return (flags & (PackageManager.FLAG_PERMISSION_USER_SET
+                | PackageManager.FLAG_PERMISSION_ONE_TIME
                 | PackageManager.FLAG_PERMISSION_USER_FIXED
                 | PackageManager.FLAG_PERMISSION_POLICY_FIXED
                 | PackageManager.FLAG_PERMISSION_SYSTEM_FIXED)) != 0;

@@ -45,7 +45,7 @@ android_test {
         "flag-junit",
         "mockito-target-extended",
     ],
-    libs: ["android.test.base"],
+    libs: ["android.test.base.stubs.system"],
     test_suites: [
         "general-tests",
         "automotive-general-tests",

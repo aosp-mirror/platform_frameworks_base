@@ -394,6 +394,7 @@ final class ZeroJankProxy implements IInputMethodManagerImpl.Callback {
                                     flags),
                     this::offload).get();
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             throw new RuntimeException(e);
         } catch (ExecutionException e) {
             throw new RuntimeException(e);

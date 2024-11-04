@@ -30,6 +30,7 @@
     <uses-permission android:name="android.permission.READ_WALLPAPER_INTERNAL" />
 
     <!-- Used to read storage for all users -->
+    <uses-permission android:name="android.permission.STORAGE_INTERNAL" />
     <uses-permission android:name="android.permission.WRITE_MEDIA_STORAGE" />
     <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
@@ -489,7 +490,6 @@
         <activity android:name=".touchpad.tutorial.ui.view.TouchpadTutorialActivity"
             android:exported="true"
             android:showForAllUsers="true"
-            android:screenOrientation="userLandscape"
             android:theme="@style/Theme.AppCompat.NoActionBar">
             <intent-filter>
                 <action android:name="com.android.systemui.action.TOUCHPAD_TUTORIAL"/>
@@ -500,7 +500,6 @@
         <activity android:name=".inputdevice.tutorial.ui.view.KeyboardTouchpadTutorialActivity"
             android:exported="true"
             android:showForAllUsers="true"
-            android:screenOrientation="userLandscape"
             android:theme="@style/Theme.AppCompat.NoActionBar">
             <intent-filter>
                 <action android:name="com.android.systemui.action.TOUCHPAD_KEYBOARD_TUTORIAL"/>
@@ -1013,8 +1012,13 @@
             android:excludeFromRecents="true"
             android:autoRemoveFromRecents="true"
             android:launchMode="singleTop"
+            android:showForAllUsers="true"
             android:exported="false">
         </activity>
+
+        <service
+            android:name="com.android.systemui.communal.widgets.GlanceableHubWidgetManagerService"
+            android:exported="false" />
 
         <!-- Doze with notifications, run in main sysui process for every user  -->
         <service
@@ -1139,10 +1143,10 @@
                 android:resource="@xml/home_controls_dream_metadata" />
         </service>
 
-        <activity android:name="com.android.systemui.keyboard.shortcut.ui.view.ShortcutHelperActivity"
+        <service android:name="com.android.systemui.dreams.homecontrols.system.HomeControlsRemoteService"
+            android:singleUser="true"
             android:exported="false"
-            android:showForAllUsers="true"
-            android:theme="@style/ShortcutHelperTheme"
-            android:excludeFromRecents="true" />
+            />
+
     </application>
 </manifest>

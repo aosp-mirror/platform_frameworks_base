@@ -32,6 +32,7 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.graphics.ImageLoader
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.statusbar.notification.row.BigPictureIconManager.DrawableState.Empty
 import com.android.systemui.statusbar.notification.row.BigPictureIconManager.DrawableState.FullImage
 import com.android.systemui.statusbar.notification.row.BigPictureIconManager.DrawableState.Initial
@@ -44,7 +45,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 import kotlinx.coroutines.withContext
 
 private const val TAG = "BigPicImageLoader"
@@ -61,7 +62,7 @@ private const val FREE_IMAGE_DELAY_MS = 3000L
 class BigPictureIconManager
 @Inject
 constructor(
-    private val context: Context,
+    @ShadeDisplayAware private val context: Context,
     private val imageLoader: ImageLoader,
     private val statsManager: BigPictureStatsManager,
     @Application private val scope: CoroutineScope,

@@ -31,37 +31,7 @@
 
     <include layout="@layout/settingslib_icon_frame"/>
 
-    <RelativeLayout
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:paddingTop="16dp"
-        android:paddingBottom="16dp">
-
-        <TextView
-            android:id="@android:id/title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="start"
-            android:textAlignment="viewStart"
-            android:maxLines="2"
-            android:textAppearance="?android:attr/textAppearanceListItem"
-            android:ellipsize="marquee"/>
-
-        <TextView
-            android:id="@android:id/summary"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@android:id/title"
-            android:layout_alignLeft="@android:id/title"
-            android:layout_alignStart="@android:id/title"
-            android:layout_gravity="start"
-            android:textAlignment="viewStart"
-            android:textColor="?android:attr/textColorSecondary"
-            android:maxLines="10"
-            style="@style/PreferenceSummaryTextStyle"/>
-
-    </RelativeLayout>
+    <include layout="@layout/settingslib_preference_frame"/>
 
     <!-- Preference should place its actual preference widget here. -->
     <LinearLayout

@@ -56,4 +56,6 @@
 
     <!--Deprecated. After sdk 35, don't use it-->
     <color name="settingslib_colorSurface">@color/settingslib_surface_dark</color>
+
+    <color name="settingslib_list_divider_color">@android:color/system_neutral1_700</color>
 </resources>

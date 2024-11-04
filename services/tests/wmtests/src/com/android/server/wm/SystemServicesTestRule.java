@@ -133,6 +133,7 @@ public class SystemServicesTestRule implements TestRule {
     private final ArrayList<DeviceConfig.OnPropertiesChangedListener> mDeviceConfigListeners =
             new ArrayList<>();
 
+    private AppCompatConfiguration mAppCompat;
     private Description mDescription;
     private Context mContext;
     private StaticMockitoSession mMockitoSession;
@@ -379,6 +380,11 @@ public class SystemServicesTestRule implements TestRule {
                 mock(ActivityManagerService.class, withSettings().stubOnly());
         mAtmService = new TestActivityTaskManagerService(mContext, amService);
         LocalServices.addService(ActivityTaskManagerInternal.class, mAtmService.getAtmInternal());
+
+        // AppCompatConfiguration
+        mAppCompat = new AppCompatConfiguration(
+                ActivityThread.currentActivityThread().getSystemUiContext());
+
         // Create a fake WindowProcessController for the system process.
         final WindowProcessController wpc =
                 addProcess("android", "system", 1485 /* pid */, 1000 /* uid */);
@@ -394,7 +400,7 @@ public class SystemServicesTestRule implements TestRule {
         mWmService = WindowManagerService.main(
                 mContext, mImService, false, wmPolicy, mAtmService,
                 testDisplayWindowSettingsProvider, StubTransaction::new,
-                MockSurfaceControlBuilder::new);
+                MockSurfaceControlBuilder::new, mAppCompat);
         spyOn(mWmService);
         spyOn(mWmService.mRoot);
         // Invoked during {@link ActivityStack} creation.

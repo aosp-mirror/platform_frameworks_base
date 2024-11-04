@@ -49,6 +49,7 @@ import android.content.ComponentName;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.HardwareBuffer;
+import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.view.Surface;
@@ -681,6 +682,7 @@ public final class TransitionInfo implements Parcelable {
         private float mSnapshotLuma;
         private ComponentName mActivityComponent = null;
         private AnimationOptions mAnimationOptions = null;
+        private IBinder mTaskFragmentToken = null;
 
         public Change(@Nullable WindowContainerToken container, @NonNull SurfaceControl leash) {
             mContainer = container;
@@ -712,6 +714,7 @@ public final class TransitionInfo implements Parcelable {
             mSnapshotLuma = in.readFloat();
             mActivityComponent = in.readTypedObject(ComponentName.CREATOR);
             mAnimationOptions = in.readTypedObject(AnimationOptions.CREATOR);
+            mTaskFragmentToken = in.readStrongBinder();
         }
 
         private Change localRemoteCopy() {
@@ -737,6 +740,7 @@ public final class TransitionInfo implements Parcelable {
             out.mSnapshotLuma = mSnapshotLuma;
             out.mActivityComponent = mActivityComponent;
             out.mAnimationOptions = mAnimationOptions;
+            out.mTaskFragmentToken = mTaskFragmentToken;
             return out;
         }
 
@@ -852,6 +856,14 @@ public final class TransitionInfo implements Parcelable {
                 return;
             }
             mAnimationOptions = options;
+        }
+
+        /**
+         * Sets the client-defined TaskFragment token. Only set this if the window is a
+         * client-organized TaskFragment.
+         */
+        public void setTaskFragmentToken(@Nullable IBinder token) {
+            mTaskFragmentToken = token;
         }
 
         /** @return the container that is changing. May be null if non-remotable (eg. activity) */
@@ -1009,6 +1021,15 @@ public final class TransitionInfo implements Parcelable {
             return mAnimationOptions;
         }
 
+        /**
+         * Returns the client-defined TaskFragment token. {@code null} if this window is not a
+         * client-organized TaskFragment.
+         */
+        @Nullable
+        public IBinder getTaskFragmentToken() {
+            return mTaskFragmentToken;
+        }
+
         /** @hide */
         @Override
         public void writeToParcel(@NonNull Parcel dest, int flags) {
@@ -1035,6 +1056,7 @@ public final class TransitionInfo implements Parcelable {
             dest.writeFloat(mSnapshotLuma);
             dest.writeTypedObject(mActivityComponent, flags);
             dest.writeTypedObject(mAnimationOptions, flags);
+            dest.writeStrongBinder(mTaskFragmentToken);
         }
 
         @NonNull
@@ -1110,6 +1132,9 @@ public final class TransitionInfo implements Parcelable {
             if (mAnimationOptions != null) {
                 sb.append(" opt=").append(mAnimationOptions);
             }
+            if (mTaskFragmentToken != null) {
+                sb.append(" taskFragmentToken=").append(mTaskFragmentToken);
+            }
             sb.append('}');
             return sb.toString();
         }
@@ -1141,6 +1166,7 @@ public final class TransitionInfo implements Parcelable {
         // Customize activity transition animation
         private CustomActivityTransition mCustomActivityOpenTransition;
         private CustomActivityTransition mCustomActivityCloseTransition;
+        private int mUserId;
 
         private AnimationOptions(int type) {
             mType = type;
@@ -1159,6 +1185,7 @@ public final class TransitionInfo implements Parcelable {
             mAnimations = in.readInt();
             mCustomActivityOpenTransition = in.readTypedObject(CustomActivityTransition.CREATOR);
             mCustomActivityCloseTransition = in.readTypedObject(CustomActivityTransition.CREATOR);
+            mUserId = in.readInt();
         }
 
         /** Make basic customized animation for a package */
@@ -1283,6 +1310,14 @@ public final class TransitionInfo implements Parcelable {
             return options;
         }
 
+        public void setUserId(int userId) {
+            mUserId = userId;
+        }
+
+        public int getUserId() {
+            return mUserId;
+        }
+
         public int getType() {
             return mType;
         }
@@ -1349,6 +1384,7 @@ public final class TransitionInfo implements Parcelable {
             dest.writeInt(mAnimations);
             dest.writeTypedObject(mCustomActivityOpenTransition, flags);
             dest.writeTypedObject(mCustomActivityCloseTransition, flags);
+            dest.writeInt(mUserId);
         }
 
         @NonNull
@@ -1406,6 +1442,7 @@ public final class TransitionInfo implements Parcelable {
             if (mExitResId != DEFAULT_ANIMATION_RESOURCES_ID) {
                 sb.append(" exitResId=").append(mExitResId);
             }
+            sb.append(" mUserId=").append(mUserId);
             sb.append('}');
             return sb.toString();
         }

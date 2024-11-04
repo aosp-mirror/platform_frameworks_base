@@ -16,7 +16,8 @@
 
 package com.android.systemui.bouncer.ui.composable
 
-import android.view.HapticFeedbackConstants
+import android.view.MotionEvent
+import android.view.View
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationSpec
@@ -49,6 +50,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -61,6 +63,7 @@ import com.android.systemui.bouncer.ui.viewmodel.PinBouncerViewModel
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.ui.compose.Icon
+import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.res.R
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.DurationUnit
@@ -69,11 +72,7 @@ import kotlinx.coroutines.launch
 
 /** Renders the PIN button pad. */
 @Composable
-fun PinPad(
-    viewModel: PinBouncerViewModel,
-    verticalSpacing: Dp,
-    modifier: Modifier = Modifier,
-) {
+fun PinPad(viewModel: PinBouncerViewModel, verticalSpacing: Dp, modifier: Modifier = Modifier) {
     DisposableEffect(Unit) { onDispose { viewModel.onHidden() } }
 
     val isInputEnabled: Boolean by viewModel.isInputEnabled.collectAsStateWithLifecycle()
@@ -101,7 +100,7 @@ fun PinPad(
         columns = columns,
         verticalSpacing = verticalSpacing,
         horizontalSpacing = calculateHorizontalSpacingBetweenColumns(gridWidth = 300.dp),
-        modifier = modifier.focusRequester(focusRequester)
+        modifier = modifier.focusRequester(focusRequester).sysuiResTag("pin_pad_grid"),
     ) {
         repeat(9) { index ->
             DigitButton(
@@ -110,6 +109,7 @@ fun PinPad(
                 onClicked = viewModel::onPinButtonClicked,
                 scaling = buttonScaleAnimatables[index]::value,
                 isAnimationEnabled = isDigitButtonAnimationEnabled,
+                onPointerDown = viewModel::onDigitButtonDown,
             )
         }
 
@@ -122,9 +122,11 @@ fun PinPad(
                 ),
             isInputEnabled = isInputEnabled,
             onClicked = viewModel::onBackspaceButtonClicked,
+            onPointerDown = viewModel::onBackspaceButtonPressed,
             onLongPressed = viewModel::onBackspaceButtonLongPressed,
             appearance = backspaceButtonAppearance,
             scaling = buttonScaleAnimatables[9]::value,
+            elementId = "delete_button",
         )
 
         DigitButton(
@@ -133,6 +135,7 @@ fun PinPad(
             onClicked = viewModel::onPinButtonClicked,
             scaling = buttonScaleAnimatables[10]::value,
             isAnimationEnabled = isDigitButtonAnimationEnabled,
+            onPointerDown = viewModel::onDigitButtonDown,
         )
 
         ActionButton(
@@ -146,6 +149,7 @@ fun PinPad(
             onClicked = viewModel::onAuthenticateButtonClicked,
             appearance = confirmButtonAppearance,
             scaling = buttonScaleAnimatables[11]::value,
+            elementId = "key_enter",
         )
     }
 }
@@ -155,6 +159,7 @@ private fun DigitButton(
     digit: Int,
     isInputEnabled: Boolean,
     onClicked: (Int) -> Unit,
+    onPointerDown: (View?) -> Unit,
     scaling: () -> Float,
     isAnimationEnabled: Boolean,
 ) {
@@ -164,12 +169,13 @@ private fun DigitButton(
         backgroundColor = MaterialTheme.colorScheme.surfaceVariant,
         foregroundColor = MaterialTheme.colorScheme.onSurfaceVariant,
         isAnimationEnabled = isAnimationEnabled,
+        onPointerDown = onPointerDown,
         modifier =
             Modifier.graphicsLayer {
                 val scale = if (isAnimationEnabled) scaling() else 1f
                 scaleX = scale
                 scaleY = scale
-            }
+            },
     ) { contentColor ->
         // TODO(b/281878426): once "color: () -> Color" (added to BasicText in aosp/2568972) makes
         // it into Text, use that here, to animate more efficiently.
@@ -186,7 +192,9 @@ private fun ActionButton(
     icon: Icon,
     isInputEnabled: Boolean,
     onClicked: () -> Unit,
+    elementId: String,
     onLongPressed: (() -> Unit)? = null,
+    onPointerDown: ((View?) -> Unit)? = null,
     appearance: ActionButtonAppearance,
     scaling: () -> Float,
 ) {
@@ -211,18 +219,17 @@ private fun ActionButton(
         backgroundColor = backgroundColor,
         foregroundColor = foregroundColor,
         isAnimationEnabled = true,
+        elementId = elementId,
+        onPointerDown = onPointerDown,
         modifier =
             Modifier.graphicsLayer {
                 alpha = hiddenAlpha
                 val scale = scaling()
                 scaleX = scale
                 scaleY = scale
-            }
+            },
     ) { contentColor ->
-        Icon(
-            icon = icon,
-            tint = contentColor(),
-        )
+        Icon(icon = icon, tint = contentColor())
     }
 }
 
@@ -234,22 +241,15 @@ private fun PinPadButton(
     foregroundColor: Color,
     isAnimationEnabled: Boolean,
     modifier: Modifier = Modifier,
+    elementId: String? = null,
     onLongPressed: (() -> Unit)? = null,
+    onPointerDown: ((View?) -> Unit)? = null,
     content: @Composable (contentColor: () -> Color) -> Unit,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
     val indication = LocalIndication.current.takeUnless { isPressed }
-
     val view = LocalView.current
-    LaunchedEffect(isPressed) {
-        if (isPressed) {
-            view.performHapticFeedback(
-                HapticFeedbackConstants.VIRTUAL_KEY,
-                HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING,
-            )
-        }
-    }
 
     // Pin button animation specification is asymmetric: fast animation to the pressed state, and a
     // slow animation upon release. Note that isPressed is guaranteed to be true for at least the
@@ -264,7 +264,7 @@ private fun PinPadButton(
         animateDpAsState(
             if (isAnimationEnabled && isPressed) 24.dp else pinButtonMaxSize / 2,
             label = "PinButton round corners",
-            animationSpec = tween(animDurationMillis, easing = animEasing)
+            animationSpec = tween(animDurationMillis, easing = animEasing),
         )
     val colorAnimationSpec: AnimationSpec<Color> = tween(animDurationMillis, easing = animEasing)
     val containerColor: Color by
@@ -274,7 +274,7 @@ private fun PinPadButton(
                 else -> backgroundColor
             },
             label = "Pin button container color",
-            animationSpec = colorAnimationSpec
+            animationSpec = colorAnimationSpec,
         )
     val contentColor =
         animateColorAsState(
@@ -283,7 +283,7 @@ private fun PinPadButton(
                 else -> foregroundColor
             },
             label = "Pin button container color",
-            animationSpec = colorAnimationSpec
+            animationSpec = colorAnimationSpec,
         )
 
     Box(
@@ -303,12 +303,19 @@ private fun PinPadButton(
                 .clip(CircleShape)
                 .thenIf(isEnabled) {
                     Modifier.combinedClickable(
-                        interactionSource = interactionSource,
-                        indication = indication,
-                        onClick = onClicked,
-                        onLongClick = onLongPressed
-                    )
-                },
+                            interactionSource = interactionSource,
+                            indication = indication,
+                            onClick = onClicked,
+                            onLongClick = onLongPressed,
+                        )
+                        .pointerInteropFilter { motionEvent ->
+                            if (motionEvent.action == MotionEvent.ACTION_DOWN) {
+                                onPointerDown?.let { it(view) }
+                            }
+                            false
+                        }
+                }
+                .thenIf(elementId != null) { Modifier.sysuiResTag(elementId!!) },
     ) {
         content(contentColor::value)
     }
@@ -333,10 +340,7 @@ private suspend fun showFailureAnimation(
                 animatable.animateTo(
                     targetValue = 1f,
                     animationSpec =
-                        tween(
-                            durationMillis = pinButtonErrorRevertMs,
-                            easing = Easings.Legacy,
-                        ),
+                        tween(durationMillis = pinButtonErrorRevertMs, easing = Easings.Legacy),
                 )
             }
         }
@@ -344,9 +348,7 @@ private suspend fun showFailureAnimation(
 }
 
 /** Returns the amount of horizontal spacing between columns, in dips. */
-private fun calculateHorizontalSpacingBetweenColumns(
-    gridWidth: Dp,
-): Dp {
+private fun calculateHorizontalSpacingBetweenColumns(gridWidth: Dp): Dp {
     return (gridWidth - (pinButtonMaxSize * columns)) / (columns - 1)
 }
 

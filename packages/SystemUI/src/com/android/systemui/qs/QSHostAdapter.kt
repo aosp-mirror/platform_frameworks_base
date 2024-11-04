@@ -31,7 +31,7 @@ import com.android.systemui.qs.pipeline.shared.TileSpec
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /**
  * Adapter to determine what real class to use for classes that depend on [QSHost].

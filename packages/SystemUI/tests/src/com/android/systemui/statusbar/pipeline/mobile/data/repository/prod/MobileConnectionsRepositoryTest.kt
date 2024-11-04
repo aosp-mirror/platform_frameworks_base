@@ -50,8 +50,8 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.FakeFeatureFlagsClassic
 import com.android.systemui.flags.Flags
 import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.log.table.TableLogBufferFactory
+import com.android.systemui.log.table.logcatTableLogBuffer
 import com.android.systemui.statusbar.connectivity.WifiPickerTrackerFactory
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.FakeAirplaneModeRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.MobileInputLogger
@@ -66,6 +66,7 @@ import com.android.systemui.statusbar.pipeline.shared.data.repository.Connectivi
 import com.android.systemui.statusbar.pipeline.shared.data.repository.ConnectivityRepositoryImpl
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepository
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.prod.WifiRepositoryImpl
+import com.android.systemui.testKosmos
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
@@ -104,6 +105,7 @@ import org.mockito.kotlin.whenever
 // to run the callback and this makes the looper place nicely with TestScope etc.
 @TestableLooper.RunWithLooper
 class MobileConnectionsRepositoryTest : SysuiTestCase() {
+    private val kosmos = testKosmos()
 
     private val flags =
         FakeFeatureFlagsClassic().also { it.set(Flags.ROAMING_INDICATOR_VIA_DISPLAY_INFO, true) }
@@ -120,13 +122,13 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
     @Mock private lateinit var subscriptionManager: SubscriptionManager
     @Mock private lateinit var telephonyManager: TelephonyManager
     @Mock private lateinit var logger: MobileInputLogger
-    @Mock private lateinit var summaryLogger: TableLogBuffer
+    private val summaryLogger = logcatTableLogBuffer(kosmos, "summaryLogger")
     @Mock private lateinit var logBufferFactory: TableLogBufferFactory
     @Mock private lateinit var updateMonitor: KeyguardUpdateMonitor
     @Mock private lateinit var wifiManager: WifiManager
     @Mock private lateinit var wifiPickerTrackerFactory: WifiPickerTrackerFactory
     @Mock private lateinit var wifiPickerTracker: WifiPickerTracker
-    @Mock private lateinit var wifiTableLogBuffer: TableLogBuffer
+    private val wifiTableLogBuffer = logcatTableLogBuffer(kosmos, "wifiTableLog")
 
     private val mobileMappings = FakeMobileMappingsProxy()
     private val subscriptionManagerProxy = FakeSubscriptionManagerProxy()
@@ -134,6 +136,7 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
     private val wifiLogBuffer = LogBuffer("wifi", maxSize = 100, logcatEchoTracker = mock())
     private val wifiPickerTrackerCallback =
         argumentCaptor<WifiPickerTracker.WifiPickerTrackerCallback>()
+    private val vcnTransportInfo = VcnTransportInfo.Builder().build()
 
     private val testDispatcher = StandardTestDispatcher()
     private val testScope = TestScope(testDispatcher)
@@ -153,7 +156,7 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
         }
 
         whenever(logBufferFactory.getOrCreate(anyString(), anyInt())).thenAnswer { _ ->
-            mock<TableLogBuffer>()
+            logcatTableLogBuffer(kosmos, "test")
         }
 
         whenever(wifiPickerTrackerFactory.create(any(), capture(wifiPickerTrackerCallback), any()))
@@ -606,10 +609,7 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
 
             // WHEN an appropriate intent gets sent out
             val intent = serviceStateIntent(subId = -1)
-            fakeBroadcastDispatcher.sendIntentToMatchingReceiversOnly(
-                context,
-                intent,
-            )
+            fakeBroadcastDispatcher.sendIntentToMatchingReceiversOnly(context, intent)
             runCurrent()
 
             // THEN the repo's state is updated despite no listeners
@@ -636,10 +636,7 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
 
             // GIVEN a broadcast goes out for the appropriate subID
             val intent = serviceStateIntent(subId = -1)
-            fakeBroadcastDispatcher.sendIntentToMatchingReceiversOnly(
-                context,
-                intent,
-            )
+            fakeBroadcastDispatcher.sendIntentToMatchingReceiversOnly(context, intent)
             runCurrent()
 
             // THEN the device is in ECM, because one of the service states is
@@ -666,10 +663,7 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
 
             // GIVEN a broadcast goes out for the appropriate subID
             val intent = serviceStateIntent(subId = -1)
-            fakeBroadcastDispatcher.sendIntentToMatchingReceiversOnly(
-                context,
-                intent,
-            )
+            fakeBroadcastDispatcher.sendIntentToMatchingReceiversOnly(context, intent)
             runCurrent()
 
             // THEN the device is in ECM, because one of the service states is
@@ -820,17 +814,9 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
 
             // Get repos to trigger creation
             underTest.getRepoForSubId(SUB_1_ID)
-            verify(logBufferFactory)
-                .getOrCreate(
-                    eq(tableBufferLogName(SUB_1_ID)),
-                    anyInt(),
-                )
+            verify(logBufferFactory).getOrCreate(eq(tableBufferLogName(SUB_1_ID)), anyInt())
             underTest.getRepoForSubId(SUB_2_ID)
-            verify(logBufferFactory)
-                .getOrCreate(
-                    eq(tableBufferLogName(SUB_2_ID)),
-                    anyInt(),
-                )
+            verify(logBufferFactory).getOrCreate(eq(tableBufferLogName(SUB_2_ID)), anyInt())
         }
 
     @Test
@@ -1018,6 +1004,18 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
             assertThat(latest).isTrue()
         }
 
+    private fun newWifiNetwork(wifiInfo: WifiInfo): Network {
+        val network = mock<Network>()
+        val capabilities =
+            mock<NetworkCapabilities>().also {
+                whenever(it.hasTransport(TRANSPORT_WIFI)).thenReturn(true)
+                whenever(it.transportInfo).thenReturn(wifiInfo)
+            }
+        whenever(connectivityManager.getNetworkCapabilities(network)).thenReturn(capabilities)
+
+        return network
+    }
+
     /** Regression test for b/272586234. */
     @Test
     fun hasCarrierMergedConnection_carrierMergedViaWifiWithVcnTransport_isTrue() =
@@ -1027,10 +1025,12 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
                     whenever(this.isCarrierMerged).thenReturn(true)
                     whenever(this.isPrimary).thenReturn(true)
                 }
+            val underlyingWifi = newWifiNetwork(carrierMergedInfo)
             val caps =
                 mock<NetworkCapabilities>().also {
                     whenever(it.hasTransport(TRANSPORT_WIFI)).thenReturn(true)
-                    whenever(it.transportInfo).thenReturn(VcnTransportInfo(carrierMergedInfo))
+                    whenever(it.transportInfo).thenReturn(vcnTransportInfo)
+                    whenever(it.underlyingNetworks).thenReturn(listOf(underlyingWifi))
                 }
 
             val latest by collectLastValue(underTest.hasCarrierMergedConnection)
@@ -1049,10 +1049,12 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
                     whenever(this.isCarrierMerged).thenReturn(true)
                     whenever(this.isPrimary).thenReturn(true)
                 }
+            val underlyingWifi = newWifiNetwork(carrierMergedInfo)
             val caps =
                 mock<NetworkCapabilities>().also {
                     whenever(it.hasTransport(TRANSPORT_CELLULAR)).thenReturn(true)
-                    whenever(it.transportInfo).thenReturn(VcnTransportInfo(carrierMergedInfo))
+                    whenever(it.transportInfo).thenReturn(vcnTransportInfo)
+                    whenever(it.underlyingNetworks).thenReturn(listOf(underlyingWifi))
                 }
 
             val latest by collectLastValue(underTest.hasCarrierMergedConnection)
@@ -1109,10 +1111,15 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
                     whenever(this.isCarrierMerged).thenReturn(true)
                     whenever(this.isPrimary).thenReturn(true)
                 }
+
+            // The Wifi network that is under the VCN network
+            val physicalWifiNetwork = newWifiNetwork(carrierMergedInfo)
+
             val underlyingCapabilities =
                 mock<NetworkCapabilities>().also {
                     whenever(it.hasTransport(TRANSPORT_CELLULAR)).thenReturn(true)
-                    whenever(it.transportInfo).thenReturn(VcnTransportInfo(carrierMergedInfo))
+                    whenever(it.transportInfo).thenReturn(vcnTransportInfo)
+                    whenever(it.underlyingNetworks).thenReturn(listOf(physicalWifiNetwork))
                 }
             whenever(connectivityManager.getNetworkCapabilities(underlyingCarrierMergedNetwork))
                 .thenReturn(underlyingCapabilities)
@@ -1578,9 +1585,7 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
          * To properly mimic telephony manager, create a service state, and then turn it into an
          * intent
          */
-        private fun serviceStateIntent(
-            subId: Int,
-        ): Intent {
+        private fun serviceStateIntent(subId: Int): Intent {
             return Intent(Intent.ACTION_SERVICE_STATE).apply {
                 putExtra(SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX, subId)
             }

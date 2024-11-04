@@ -16,7 +16,6 @@
 
 package android.service.chooser;
 
-import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -41,7 +40,6 @@ import java.util.Objects;
  *
  * @see Intent#EXTRA_CHOOSER_RESULT_INTENT_SENDER
  */
-@FlaggedApi(android.service.chooser.Flags.FLAG_ENABLE_CHOOSER_RESULT)
 public final class ChooserResult implements Parcelable {
 
     /**

@@ -20,6 +20,7 @@ import android.content.res.Configuration
 import android.graphics.Rect
 import android.os.LocaleList
 import android.view.View.LAYOUT_DIRECTION_RTL
+import com.android.systemui.statusbar.data.repository.StatusBarConfigurationController
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener
 import dagger.assisted.Assisted
@@ -28,9 +29,8 @@ import dagger.assisted.AssistedInject
 
 class ConfigurationControllerImpl
 @AssistedInject
-constructor(
-    @Assisted private val context: Context,
-) : ConfigurationController {
+constructor(@Assisted private val context: Context) :
+    ConfigurationController, StatusBarConfigurationController {
 
     private val listeners: MutableList<ConfigurationListener> = ArrayList()
     private val lastConfig = Configuration()

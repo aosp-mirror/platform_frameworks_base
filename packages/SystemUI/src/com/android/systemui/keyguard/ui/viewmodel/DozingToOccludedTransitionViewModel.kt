@@ -35,9 +35,7 @@ import kotlinx.coroutines.flow.Flow
 @SysUISingleton
 class DozingToOccludedTransitionViewModel
 @Inject
-constructor(
-    animationFlow: KeyguardTransitionAnimationFlow,
-) : DeviceEntryIconTransition {
+constructor(animationFlow: KeyguardTransitionAnimationFlow) : DeviceEntryIconTransition {
     private val transitionAnimation =
         animationFlow.setup(
             duration = FromAodTransitionInteractor.TO_OCCLUDED_DURATION,
@@ -56,11 +54,7 @@ constructor(
         var currentAlpha = 0f
         return transitionAnimation.sharedFlow(
             duration = 250.milliseconds,
-            startTime = if (lightRevealMigration()) {
-                100.milliseconds // Wait for the light reveal to "hit" the LS elements.
-            } else {
-                0.milliseconds
-            },
+            startTime = 0.milliseconds,
             onStart = {
                 if (lightRevealMigration()) {
                     currentAlpha = viewState.alpha()
@@ -69,7 +63,6 @@ constructor(
                 }
             },
             onStep = { MathUtils.lerp(currentAlpha, 0f, it) },
-            onCancel = { 0f },
         )
     }
 

@@ -66,3 +66,20 @@ flag {
     # This flag is read at boot time.
     is_fixed_read_only: true
 }
+
+flag {
+    name: "dimension_frro"
+    is_exported: true
+    namespace: "resource_manager"
+    description: "Feature flag for passing a dimension to create an frro"
+    bug: "369672322"
+}
+
+flag {
+    name: "rro_control_for_android_no_overlayable"
+    is_exported: true
+    namespace: "resource_manager"
+    description: "Allow enabling and disabling RROs targeting android package with no overlayable"
+    bug: "364035303"
+}
+
