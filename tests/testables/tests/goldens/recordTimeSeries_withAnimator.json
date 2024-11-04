@@ -29,7 +29,7 @@
   ],
   "features": [
     {
-      "name": "value",
+      "name": "alpha",
       "type": "float",
       "data_points": [
         1,

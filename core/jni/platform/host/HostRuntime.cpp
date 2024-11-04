@@ -87,7 +87,6 @@ extern int register_android_os_MessageQueue(JNIEnv* env);
 extern int register_android_os_Parcel(JNIEnv* env);
 extern int register_android_os_SystemClock(JNIEnv* env);
 extern int register_android_os_SystemProperties(JNIEnv* env);
-extern int register_android_os_Trace(JNIEnv* env);
 extern int register_android_text_AndroidCharacter(JNIEnv* env);
 extern int register_android_util_EventLog(JNIEnv* env);
 extern int register_android_util_Log(JNIEnv* env);
@@ -133,7 +132,6 @@ static const std::unordered_map<std::string, RegJNIRec> gRegJNIMap = {
 #endif
         {"android.os.SystemClock", REG_JNI(register_android_os_SystemClock)},
         {"android.os.SystemProperties", REG_JNI(register_android_os_SystemProperties)},
-        {"android.os.Trace", REG_JNI(register_android_os_Trace)},
         {"android.text.AndroidCharacter", REG_JNI(register_android_text_AndroidCharacter)},
         {"android.util.EventLog", REG_JNI(register_android_util_EventLog)},
         {"android.util.Log", REG_JNI(register_android_util_Log)},

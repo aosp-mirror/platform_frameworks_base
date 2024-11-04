@@ -305,6 +305,8 @@
     <string name="new_window_text">New Window</string>
     <!-- Accessibility text for the handle menu new window button [CHAR LIMIT=NONE] -->
     <string name="manage_windows_text">Manage Windows</string>
+    <!-- Accessibility text for the handle menu change aspect ratio button [CHAR LIMIT=NONE] -->
+    <string name="change_aspect_ratio_text">Change aspect ratio</string>
     <!-- Accessibility text for the handle menu close button [CHAR LIMIT=NONE] -->
     <string name="close_text">Close</string>
     <!-- Accessibility text for the handle menu close menu button [CHAR LIMIT=NONE] -->
@@ -339,4 +341,7 @@
     <string name="open_by_default_dialog_in_browser_text">In your browser</string>
     <!-- Text for open by default settings dialog dismiss button. -->
     <string name="open_by_default_dialog_dismiss_button_text">OK</string>
+
+    <!-- Text for the App-to-Web education promo. -->
+    <string name="desktop_windowing_app_to_web_education_text">Quickly open apps in your browser here</string>
 </resources>

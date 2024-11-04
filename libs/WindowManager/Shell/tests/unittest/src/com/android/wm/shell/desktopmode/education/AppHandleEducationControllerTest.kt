@@ -84,7 +84,7 @@ class AppHandleEducationControllerTest : ShellTestCase() {
   private val testDataStoreFlow = MutableStateFlow(createWindowingEducationProto())
   private val testCaptionStateFlow = MutableStateFlow<CaptionState>(CaptionState.NoCaption)
   private val educationConfigCaptor =
-      argumentCaptor<DesktopWindowingEducationTooltipController.EducationViewConfig>()
+      argumentCaptor<DesktopWindowingEducationTooltipController.TooltipEducationViewConfig>()
   @Mock private lateinit var mockEducationFilter: AppHandleEducationFilter
   @Mock private lateinit var mockDataStoreRepository: AppHandleEducationDatastoreRepository
   @Mock private lateinit var mockCaptionHandleRepository: WindowDecorCaptionHandleRepository

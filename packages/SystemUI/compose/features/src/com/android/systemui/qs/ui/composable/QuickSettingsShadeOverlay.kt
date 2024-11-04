@@ -43,6 +43,7 @@ import com.android.systemui.brightness.ui.compose.BrightnessSliderContainer
 import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.lifecycle.rememberViewModel
+import com.android.systemui.notifications.ui.composable.SnoozeableHeadsUpNotificationSpace
 import com.android.systemui.qs.composefragment.ui.GridAnchor
 import com.android.systemui.qs.panels.ui.compose.EditMode
 import com.android.systemui.qs.panels.ui.compose.TileGrid
@@ -53,8 +54,11 @@ import com.android.systemui.scene.shared.model.Overlays
 import com.android.systemui.scene.ui.composable.Overlay
 import com.android.systemui.shade.ui.composable.ExpandedShadeHeader
 import com.android.systemui.shade.ui.composable.OverlayShade
+import com.android.systemui.statusbar.notification.stack.ui.view.NotificationScrollView
+import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationsPlaceholderViewModel
 import com.android.systemui.statusbar.phone.ui.StatusBarIconController
 import com.android.systemui.statusbar.phone.ui.TintedIconManager
+import dagger.Lazy
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 
@@ -67,6 +71,8 @@ constructor(
     private val tintedIconManagerFactory: TintedIconManager.Factory,
     private val batteryMeterViewControllerFactory: BatteryMeterViewController.Factory,
     private val statusBarIconController: StatusBarIconController,
+    private val notificationStackScrollView: Lazy<NotificationScrollView>,
+    private val notificationsPlaceholderViewModelFactory: NotificationsPlaceholderViewModel.Factory,
 ) : Overlay {
 
     override val key = Overlays.QuickSettingsShade
@@ -98,6 +104,14 @@ constructor(
 
                 ShadeBody(viewModel = viewModel.quickSettingsContainerViewModel)
             }
+
+            SnoozeableHeadsUpNotificationSpace(
+                stackScrollView = notificationStackScrollView.get(),
+                viewModel =
+                    rememberViewModel("QuickSettingsShadeOverlay") {
+                        notificationsPlaceholderViewModelFactory.create()
+                    },
+            )
         }
     }
 }

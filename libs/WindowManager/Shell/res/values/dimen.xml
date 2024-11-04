@@ -523,8 +523,9 @@
     <dimen name="desktop_mode_handle_menu_width">216dp</dimen>
 
     <!-- The maximum height of the handle menu in desktop mode. Three pills at 52dp each,
-         additional actions pill 156dp, plus 2dp spacing between them plus 4dp top padding. -->
-    <dimen name="desktop_mode_handle_menu_height">322dp</dimen>
+         additional actions pill 208dp, plus 2dp spacing between them plus 4dp top padding.
+         52*3 + 52*4 + (4-1)*2 + 4 = 374 -->
+    <dimen name="desktop_mode_handle_menu_height">374dp</dimen>
 
     <!-- The elevation set on the handle menu pills. -->
     <dimen name="desktop_mode_handle_menu_pill_elevation">1dp</dimen>
@@ -546,6 +547,9 @@
 
     <!-- The height of the handle menu's "Open in browser" pill in desktop mode. -->
     <dimen name="desktop_mode_handle_menu_open_in_browser_pill_height">52dp</dimen>
+
+    <!-- The height of the handle menu's "Change aspect ratio" pill in desktop mode. -->
+    <dimen name="desktop_mode_handle_menu_change_aspect_ratio_height">52dp</dimen>
 
     <!-- The margin between pills of the handle menu in desktop mode. -->
     <dimen name="desktop_mode_handle_menu_pill_spacing_margin">2dp</dimen>
@@ -650,4 +654,11 @@
     <dimen name="open_by_default_settings_dialog_radio_button_height">64dp</dimen>
     <!-- The width of radio buttons in the open by default settings dialog. -->
     <dimen name="open_by_default_settings_dialog_radio_button_width">316dp</dimen>
+
+    <!-- The width of the desktop windowing education promo. -->
+    <dimen name="desktop_windowing_education_promo_width">412dp</dimen>
+    <!-- The height of the desktop windowing education promo. -->
+    <dimen name="desktop_windowing_education_promo_height">352dp</dimen>
+    <!-- The corner radius of the desktop windowing education promo. -->
+    <dimen name="desktop_windowing_education_promo_corner_radius">28dp</dimen>
 </resources>

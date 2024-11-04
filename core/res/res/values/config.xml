@@ -3087,6 +3087,12 @@
     <!-- Whether UI for multi user should be shown -->
     <bool name="config_enableMultiUserUI">false</bool>
 
+    <!-- Indicates the boot strategy in Headless System User Mode (HSUM)
+         This config has no effect if the device is not in HSUM.
+         0 (Default) : boot to the previous foreground user if there is one, otherwise the first switchable user.
+         1 : boot to the first switchable full user for initial boot (unprovisioned device), else to the headless system user, i.e. user 0. -->
+    <integer name="config_hsumBootStrategy">0</integer>
+
     <!-- Whether to boot system with the headless system user, i.e. user 0. If set to true,
          system will be booted with the headless system user, or user 0. It has no effect if device
          is not in Headless System User Mode (HSUM). -->

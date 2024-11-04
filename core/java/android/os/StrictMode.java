@@ -33,6 +33,7 @@ import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.app.ActivityThread;
 import android.app.IActivityManager;
+import android.app.IActivityTaskManager;
 import android.app.IBackgroundActivityLaunchCallback;
 import android.app.IUnsafeIntentStrictModeCallback;
 import android.app.PendingIntent;
@@ -2189,8 +2190,11 @@ public final class StrictMode {
 
     private static void registerBackgroundActivityLaunchCallback() {
         try {
-            ActivityTaskManager.getService().registerBackgroundActivityStartCallback(
+            IActivityTaskManager service = ActivityTaskManager.getService();
+            if (service != null) {
+                service.registerBackgroundActivityStartCallback(
                     new BackgroundActivityLaunchCallback());
+            }
         } catch (DeadObjectException e) {
             // ignore
         } catch (RemoteException e) {

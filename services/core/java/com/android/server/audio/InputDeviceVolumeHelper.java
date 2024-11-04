@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,6 @@ import java.util.Set;
 
     private final SettingsAdapter mSettings;
     private final ContentResolver mContentResolver;
-    private final Object mSettingsLock;
     private final String mInputGainIndexSettingsName;
 
     // A map between device internal type (e.g. AudioSystem.DEVICE_IN_BUILTIN_MIC) to its input gain
@@ -54,11 +53,9 @@ import java.util.Set;
     InputDeviceVolumeHelper(
             SettingsAdapter settings,
             ContentResolver contentResolver,
-            Object settingsLock,
             String settingsName) {
         mSettings = settings;
         mContentResolver = contentResolver;
-        mSettingsLock = settingsLock;
         mInputGainIndexSettingsName = settingsName;
 
         IntArray internalDeviceTypes = new IntArray();
@@ -82,34 +79,27 @@ import java.util.Set;
         readSettings();
     }
 
-    public void readSettings() {
+    private void readSettings() {
         synchronized (InputDeviceVolumeHelper.class) {
             for (int inputDeviceType : mSupportedDeviceTypes) {
                 // Retrieve current input gain for device. If no input gain stored for current
                 // device, use default input gain.
-                int index;
-                if (!hasValidSettingsName()) {
-                    index = INDEX_DEFAULT;
-                } else {
-                    String name = getSettingNameForDevice(inputDeviceType);
-                    index =
-                            mSettings.getSystemIntForUser(
-                                    mContentResolver, name, INDEX_DEFAULT, UserHandle.USER_CURRENT);
-                }
+                String name = getSettingNameForDevice(inputDeviceType);
+                int index = name == null
+                        ? INDEX_DEFAULT
+                        : mSettings.getSystemIntForUser(
+                                mContentResolver, name, INDEX_DEFAULT, UserHandle.USER_CURRENT);
 
                 mInputGainIndexMap.put(inputDeviceType, getValidIndex(index));
             }
         }
     }
 
-    public boolean hasValidSettingsName() {
-        return mInputGainIndexSettingsName != null && !mInputGainIndexSettingsName.isEmpty();
-    }
-
-    public @Nullable String getSettingNameForDevice(int inputDeviceType) {
-        if (!hasValidSettingsName()) {
+    private @Nullable String getSettingNameForDevice(int inputDeviceType) {
+        if (mInputGainIndexSettingsName == null || mInputGainIndexSettingsName.isEmpty()) {
             return null;
         }
+
         final String suffix = AudioSystem.getInputDeviceName(inputDeviceType);
         if (suffix.isEmpty()) {
             return mInputGainIndexSettingsName;
@@ -158,29 +148,27 @@ import java.util.Set;
         ensureValidInputDeviceType(inputDeviceType);
 
         int oldIndex;
-        synchronized (mSettingsLock) {
-            synchronized (InputDeviceVolumeHelper.class) {
-                oldIndex = getInputGainIndex(ada);
-                index = getValidIndex(index);
+        synchronized (InputDeviceVolumeHelper.class) {
+            oldIndex = getInputGainIndex(ada);
+            index = getValidIndex(index);
 
-                if (oldIndex == index) {
-                    return false;
-                }
-
-                mInputGainIndexMap.put(inputDeviceType, index);
-                return true;
+            if (oldIndex == index) {
+                return false;
             }
+
+            mInputGainIndexMap.put(inputDeviceType, index);
+            return true;
         }
     }
 
-    public void persistInputGainIndex(@NonNull AudioDeviceAttributes ada, int index) {
+    public void persistInputGainIndex(@NonNull AudioDeviceAttributes ada) {
         int inputDeviceType = AudioDeviceInfo.convertDeviceTypeToInternalInputDevice(ada.getType());
-        ensureValidInputDeviceType(inputDeviceType);
-
-        if (hasValidSettingsName()) {
+        String name = getSettingNameForDevice(inputDeviceType);
+        if (name != null) {
+            int index = getInputGainIndex(ada);
             mSettings.putSystemIntForUser(
                     mContentResolver,
-                    getSettingNameForDevice(inputDeviceType),
+                    name,
                     index,
                     UserHandle.USER_CURRENT);
         }

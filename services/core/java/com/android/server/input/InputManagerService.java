@@ -64,7 +64,6 @@ import android.hardware.input.IKeyboardBacklightListener;
 import android.hardware.input.IStickyModifierStateListener;
 import android.hardware.input.ITabletModeChangedListener;
 import android.hardware.input.InputDeviceIdentifier;
-import android.hardware.input.InputGestureData;
 import android.hardware.input.InputManager;
 import android.hardware.input.InputSensorInfo;
 import android.hardware.input.InputSettings;
@@ -2309,6 +2308,12 @@ public class InputManagerService extends IInputManager.Stub
         if (mTouchpadDebugViewController != null) {
             mTouchpadDebugViewController.updateTouchpadGestureInfo(type, deviceId);
         }
+    }
+
+    // Native callback.
+    @SuppressWarnings("unused")
+    private void notifyTouchpadThreeFingerTap() {
+        mKeyGestureController.handleTouchpadThreeFingerTap();
     }
 
     // Native callback.

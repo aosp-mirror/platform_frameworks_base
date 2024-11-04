@@ -997,6 +997,8 @@ public class AccessibilityNodeInfo implements Parcelable {
 
     private static final int BOOLEAN_PROPERTY_SUPPORTS_GRANULAR_SCROLLING = 1 << 26;
 
+    private static final int BOOLEAN_PROPERTY_FIELD_REQUIRED = 1 << 27;
+
     /**
      * Bits that provide the id of a virtual descendant of a view.
      */
@@ -2541,6 +2543,32 @@ public class AccessibilityNodeInfo implements Parcelable {
                 throw new IllegalArgumentException("Unknown checked argument: " + checked);
         }
         setBooleanProperty(BOOLEAN_PROPERTY_CHECKED, checked == CHECKED_STATE_TRUE);
+    }
+
+    /**
+     * Gets whether a node representing a form field requires input or selection.
+     *
+     * @return {@code true} if {@code this} node represents a form field that requires input or
+     *     selection, {@code false} otherwise.
+     */
+    @FlaggedApi(Flags.FLAG_A11Y_IS_REQUIRED_API)
+    public boolean isFieldRequired() {
+        return getBooleanProperty(BOOLEAN_PROPERTY_FIELD_REQUIRED);
+    }
+
+    /**
+     * Sets whether {@code this} node represents a form field that requires input or selection.
+     *
+     * <p><strong>Note:</strong> Cannot be called from an AccessibilityService. This class is made
+     * immutable before being delivered to an AccessibilityService.
+     *
+     * @param required {@code true} if input or selection of this node should be required, {@code
+     *     false} otherwise.
+     * @throws IllegalStateException If called from an AccessibilityService
+     */
+    @FlaggedApi(Flags.FLAG_A11Y_IS_REQUIRED_API)
+    public void setFieldRequired(boolean required) {
+        setBooleanProperty(BOOLEAN_PROPERTY_FIELD_REQUIRED, required);
     }
 
     /**
@@ -5556,6 +5584,9 @@ public class AccessibilityNodeInfo implements Parcelable {
 
         builder.append("; checkable: ").append(isCheckable());
         builder.append("; checked: ").append(isChecked());
+        if (Flags.a11yIsRequiredApi()) {
+            builder.append("; required: ").append(isFieldRequired());
+        }
         builder.append("; focusable: ").append(isFocusable());
         builder.append("; focused: ").append(isFocused());
         builder.append("; selected: ").append(isSelected());

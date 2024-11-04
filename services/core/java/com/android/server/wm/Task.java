@@ -3423,6 +3423,8 @@ class Task extends TaskFragment {
                 ? top.getLastParentBeforePip().mTaskId : INVALID_TASK_ID;
         info.shouldDockBigOverlays = top != null && top.shouldDockBigOverlays;
         info.mTopActivityLocusId = top != null ? top.getLocusId() : null;
+        info.isTopActivityLimitSystemEducationDialogs = top != null
+              ? top.mShouldLimitSystemEducationDialogs : false;
         final Task parentTask = getParent() != null ? getParent().asTask() : null;
         info.parentTaskId = parentTask != null && parentTask.mCreatedByOrganizer
                 ? parentTask.mTaskId
@@ -3916,7 +3918,9 @@ class Task extends TaskFragment {
             sb.append(" aI=");
             sb.append(affinityIntent.getComponent().flattenToShortString());
         }
-        sb.append(" isResizeable=").append(isResizeable());
+        if (!isResizeable()) {
+            sb.append(" nonResizable");
+        }
         if (mMinWidth != INVALID_MIN_SIZE || mMinHeight != INVALID_MIN_SIZE) {
             sb.append(" minWidth=").append(mMinWidth);
             sb.append(" minHeight=").append(mMinHeight);

@@ -29,6 +29,7 @@ import static android.window.TransitionInfo.FLAG_SHOW_WALLPAPER;
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_PREDICTIVE_BACK_HOME;
 import static com.android.window.flags.Flags.migratePredictiveBackTransition;
 import static com.android.window.flags.Flags.predictiveBackSystemAnims;
+import static com.android.window.flags.Flags.unifyBackNavigationTransition;
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_BACK_PREVIEW;
 import static com.android.wm.shell.shared.ShellSharedConstants.KEY_EXTRA_SHELL_BACK_ANIMATION;
 
@@ -1279,6 +1280,13 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
             if (transition == mClosePrepareTransition && aborted) {
                 mClosePrepareTransition = null;
                 applyFinishOpenTransition();
+            } else if (!aborted && unifyBackNavigationTransition()) {
+                // Since the closing target participates in the predictive back transition, the
+                // merged transition must be applied with the first transition to ensure a seamless
+                // animation.
+                if (mFinishOpenTransaction != null && finishTransaction != null) {
+                    mFinishOpenTransaction.merge(finishTransaction);
+                }
             }
         }
 

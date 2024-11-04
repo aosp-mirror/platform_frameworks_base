@@ -16,9 +16,49 @@
 
 package android.media.quality;
 
+import android.media.quality.AmbientBacklightSettings;
+import android.media.quality.IAmbientBacklightCallback;
+import android.media.quality.IPictureProfileCallback;
+import android.media.quality.ISoundProfileCallback;
+import android.media.quality.ParamCapability;
+import android.media.quality.PictureProfile;
+import android.media.quality.SoundProfile;
+
 /**
  * Interface for Media Quality Manager
  * @hide
  */
 interface IMediaQualityManager {
+    PictureProfile createPictureProfile(in PictureProfile pp);
+    void updatePictureProfile(in long id, in PictureProfile pp);
+    void removePictureProfile(in long id);
+    PictureProfile getPictureProfileById(in long id);
+    List<PictureProfile> getPictureProfilesByPackage(in String packageName);
+    List<PictureProfile> getAvailablePictureProfiles();
+    List<PictureProfile> getAllPictureProfiles();
+
+    SoundProfile createSoundProfile(in SoundProfile pp);
+    void updateSoundProfile(in long id, in SoundProfile pp);
+    void removeSoundProfile(in long id);
+    SoundProfile getSoundProfileById(in long id);
+    List<SoundProfile> getSoundProfilesByPackage(in String packageName);
+    List<SoundProfile> getAvailableSoundProfiles();
+    List<SoundProfile> getAllSoundProfiles();
+
+    void registerPictureProfileCallback(in IPictureProfileCallback cb);
+    void registerSoundProfileCallback(in ISoundProfileCallback cb);
+    void registerAmbientBacklightCallback(in IAmbientBacklightCallback cb);
+
+    List<ParamCapability> getParamCapabilities(in List<String> names);
+
+    boolean isSupported();
+    void setAutoPictureQualityEnabled(in boolean enabled);
+    boolean isAutoPictureQualityEnabled();
+    void setSuperResolutionEnabled(in boolean enabled);
+    boolean isSuperResolutionEnabled();
+    void setAutoSoundQualityEnabled(in boolean enabled);
+    boolean isAutoSoundQualityEnabled();
+
+    void setAmbientBacklightSettings(in AmbientBacklightSettings settings);
+    void setAmbientBacklightEnabled(in boolean enabled);
 }

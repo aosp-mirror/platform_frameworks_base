@@ -2187,6 +2187,8 @@ public class ParsingPackageUtils {
                     pkg.setKnownActivityEmbeddingCerts(knownActivityEmbeddingCerts);
                 }
             }
+            pkg.setIntentMatchingFlags(
+                    sa.getInt(R.styleable.AndroidManifestApplication_intentMatchingFlags, 0));
         } finally {
             sa.recycle();
         }

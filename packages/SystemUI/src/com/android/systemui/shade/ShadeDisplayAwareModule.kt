@@ -20,7 +20,11 @@ import android.content.Context
 import android.content.res.Resources
 import android.view.LayoutInflater
 import android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+import com.android.systemui.common.ui.ConfigurationState
+import com.android.systemui.common.ui.ConfigurationStateImpl
 import com.android.systemui.common.ui.GlobalConfig
+import com.android.systemui.common.ui.data.repository.ConfigurationRepository
+import com.android.systemui.common.ui.data.repository.ConfigurationRepositoryImpl
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.res.R
 import com.android.systemui.shade.shared.flag.ShadeWindowGoesAround
@@ -79,12 +83,12 @@ object ShadeDisplayAwareModule {
     fun provideShadeWindowConfigurationController(
         @ShadeDisplayAware shadeContext: Context,
         factory: ConfigurationControllerImpl.Factory,
-        @GlobalConfig globalConfigConfigController: ConfigurationController,
+        @GlobalConfig globalConfigController: ConfigurationController,
     ): ConfigurationController {
         return if (ShadeWindowGoesAround.isEnabled) {
             factory.create(shadeContext)
         } else {
-            globalConfigConfigController
+            globalConfigController
         }
     }
 
@@ -93,12 +97,40 @@ object ShadeDisplayAwareModule {
     @SysUISingleton
     fun provideShadeWindowConfigurationForwarder(
         @ShadeDisplayAware shadeConfigurationController: ConfigurationController,
-        @GlobalConfig globalConfigController: ConfigurationController,
     ): ConfigurationForwarder {
+        ShadeWindowGoesAround.isUnexpectedlyInLegacyMode()
+        return shadeConfigurationController
+    }
+
+    @SysUISingleton
+    @Provides
+    @ShadeDisplayAware
+    fun provideShadeDisplayAwareConfigurationState(
+        factory: ConfigurationStateImpl.Factory,
+        @ShadeDisplayAware configurationController: ConfigurationController,
+        @ShadeDisplayAware context: Context,
+        @GlobalConfig configurationState: ConfigurationState,
+    ): ConfigurationState {
         return if (ShadeWindowGoesAround.isEnabled) {
-            shadeConfigurationController
+            factory.create(context, configurationController)
         } else {
-            globalConfigController
+            configurationState
+        }
+    }
+
+    @SysUISingleton
+    @Provides
+    @ShadeDisplayAware
+    fun provideShadeDisplayAwareConfigurationRepository(
+        factory: ConfigurationRepositoryImpl.Factory,
+        @ShadeDisplayAware configurationController: ConfigurationController,
+        @ShadeDisplayAware context: Context,
+        @GlobalConfig globalConfigurationRepository: ConfigurationRepository
+    ): ConfigurationRepository {
+        return if (ShadeWindowGoesAround.isEnabled) {
+            factory.create(context, configurationController)
+        } else {
+            globalConfigurationRepository
         }
     }
 }

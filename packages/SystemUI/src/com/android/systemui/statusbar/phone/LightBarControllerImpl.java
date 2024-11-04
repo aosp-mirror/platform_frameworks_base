@@ -11,7 +11,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
 package com.android.systemui.statusbar.phone;
@@ -22,9 +22,9 @@ import static android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
 import static com.android.systemui.shared.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT_TRANSPARENT;
 import static com.android.systemui.shared.statusbar.phone.BarTransitions.MODE_TRANSPARENT;
 
-import android.content.Context;
 import android.graphics.Rect;
 import android.util.Log;
+import android.view.Display;
 import android.view.InsetsFlags;
 import android.view.ViewDebug;
 import android.view.WindowInsetsController.Appearance;
@@ -34,30 +34,32 @@ import androidx.annotation.Nullable;
 
 import com.android.internal.colorextraction.ColorExtractor.GradientColors;
 import com.android.internal.view.AppearanceRegion;
-import com.android.systemui.CoreStartable;
-import com.android.systemui.Dumpable;
-import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.plugins.DarkIconDispatcher;
-import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.statusbar.data.model.StatusBarAppearance;
-import com.android.systemui.statusbar.data.repository.StatusBarModeRepositoryStore;
+import com.android.systemui.statusbar.data.repository.StatusBarModePerDisplayRepository;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.util.Compile;
-import com.android.systemui.util.kotlin.JavaAdapter;
+import com.android.systemui.util.kotlin.JavaAdapterKt;
+
+import dagger.assisted.Assisted;
+import dagger.assisted.AssistedFactory;
+import dagger.assisted.AssistedInject;
+
+import kotlin.coroutines.CoroutineContext;
+
+import kotlinx.coroutines.CoroutineScope;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
-import javax.inject.Inject;
-
 /**
  * Controls how light status bar flag applies to the icons.
  */
-@SysUISingleton
-public class LightBarController implements
-        BatteryController.BatteryStateChangeCallback, Dumpable, CoreStartable {
+public class LightBarControllerImpl implements
+        BatteryController.BatteryStateChangeCallback, LightBarController {
 
     private static final String TAG = "LightBarController";
     private static final boolean DEBUG_NAVBAR = Compile.IS_DEBUG;
@@ -65,10 +67,13 @@ public class LightBarController implements
 
     private static final float NAV_BAR_INVERSION_SCRIM_ALPHA_THRESHOLD = 0.1f;
 
-    private final JavaAdapter mJavaAdapter;
+    private final CoroutineScope mCoroutineScope;
     private final SysuiDarkIconDispatcher mStatusBarIconController;
     private final BatteryController mBatteryController;
-    private final StatusBarModeRepositoryStore mStatusBarModeRepository;
+    private final NavigationModeController mNavModeController;
+    private final DumpManager mDumpManager;
+    private final StatusBarModePerDisplayRepository mStatusBarModeRepository;
+    private final CoroutineContext mMainContext;
     private BiometricUnlockController mBiometricUnlockController;
 
     private LightBarTransitionsController mNavigationBarController;
@@ -119,42 +124,59 @@ public class LightBarController implements
     private String mLastNavigationBarAppearanceChangedLog;
     private StringBuilder mLogStringBuilder = null;
 
-    @Inject
-    public LightBarController(
-            Context ctx,
-            JavaAdapter javaAdapter,
+    private final String mDumpableName;
+
+    private final NavigationModeController.ModeChangedListener mNavigationModeListener =
+            (mode) -> mNavigationMode = mode;
+
+    @AssistedInject
+    public LightBarControllerImpl(
+            @Assisted int displayId,
+            @Assisted CoroutineScope coroutineScope,
             DarkIconDispatcher darkIconDispatcher,
             BatteryController batteryController,
             NavigationModeController navModeController,
-            StatusBarModeRepositoryStore statusBarModeRepository,
+            @Assisted StatusBarModePerDisplayRepository statusBarModeRepository,
             DumpManager dumpManager,
-            DisplayTracker displayTracker) {
-        mJavaAdapter = javaAdapter;
+            @Main CoroutineContext mainContext) {
+        mCoroutineScope = coroutineScope;
         mStatusBarIconController = (SysuiDarkIconDispatcher) darkIconDispatcher;
         mBatteryController = batteryController;
-        mBatteryController.addCallback(this);
+        mNavModeController = navModeController;
+        mDumpManager = dumpManager;
         mStatusBarModeRepository = statusBarModeRepository;
-        mNavigationMode = navModeController.addListener((mode) -> {
-            mNavigationMode = mode;
-        });
-
-        if (ctx.getDisplayId() == displayTracker.getDefaultDisplayId()) {
-            dumpManager.registerDumpable(getClass().getSimpleName(), this);
-        }
+        mMainContext = mainContext;
+        String dumpableNameSuffix =
+                displayId == Display.DEFAULT_DISPLAY ? "" : String.valueOf(displayId);
+        mDumpableName = getClass().getSimpleName() + dumpableNameSuffix;
     }
 
     @Override
     public void start() {
-        mJavaAdapter.alwaysCollectFlow(
-                mStatusBarModeRepository.getDefaultDisplay().getStatusBarAppearance(),
+        mDumpManager.registerCriticalDumpable(mDumpableName, this);
+        mBatteryController.addCallback(this);
+        mNavigationMode = mNavModeController.addListener(mNavigationModeListener);
+        JavaAdapterKt.collectFlow(
+                mCoroutineScope,
+                mMainContext,
+                mStatusBarModeRepository.getStatusBarAppearance(),
                 this::onStatusBarAppearanceChanged);
     }
 
+    @Override
+    public void stop() {
+        mDumpManager.unregisterDumpable(mDumpableName);
+        mBatteryController.removeCallback(this);
+        mNavModeController.removeListener(mNavigationModeListener);
+    }
+
+    @Override
     public void setNavigationBar(LightBarTransitionsController navigationBar) {
         mNavigationBarController = navigationBar;
         updateNavigation();
     }
 
+    @Override
     public void setBiometricUnlockController(
             BiometricUnlockController biometricUnlockController) {
         mBiometricUnlockController = biometricUnlockController;
@@ -202,6 +224,7 @@ public class LightBarController implements
         mNavbarColorManagedByIme = navbarColorManagedByIme;
     }
 
+    @Override
     public void onNavigationBarAppearanceChanged(@Appearance int appearance, boolean nbModeChanged,
             int navigationBarMode, boolean navbarColorManagedByIme) {
         int diff = appearance ^ mAppearance;
@@ -244,6 +267,7 @@ public class LightBarController implements
         mNavbarColorManagedByIme = navbarColorManagedByIme;
     }
 
+    @Override
     public void onNavigationBarModeChanged(int newBarMode) {
         mHasLightNavigationBar = isLight(mAppearance, newBarMode, APPEARANCE_LIGHT_NAVIGATION_BARS);
     }
@@ -258,30 +282,28 @@ public class LightBarController implements
                 mNavigationBarMode, mNavbarColorManagedByIme);
     }
 
+    @Override
     public void setQsCustomizing(boolean customizing) {
         if (mQsCustomizing == customizing) return;
         mQsCustomizing = customizing;
         reevaluate();
     }
 
-    /** Set if Quick Settings is fully expanded, which affects notification scrim visibility */
+    @Override
     public void setQsExpanded(boolean expanded) {
         if (mQsExpanded == expanded) return;
         mQsExpanded = expanded;
         reevaluate();
     }
 
-    /** Set if Global Actions dialog is visible, which requires dark mode (light buttons) */
+    @Override
     public void setGlobalActionsVisible(boolean visible) {
         if (mGlobalActionsVisible == visible) return;
         mGlobalActionsVisible = visible;
         reevaluate();
     }
 
-    /**
-     * Controls the light status bar temporarily for back navigation.
-     * @param appearance the custmoized appearance.
-     */
+    @Override
     public void customizeStatusBarAppearance(AppearanceRegion appearance) {
         if (appearance != null) {
             final ArrayList<AppearanceRegion> appearancesList = new ArrayList<>();
@@ -303,16 +325,14 @@ public class LightBarController implements
         }
     }
 
-    /**
-     * Sets whether the direct-reply is in use or not.
-     * @param directReplying {@code true} when the direct-reply is in-use.
-     */
+    @Override
     public void setDirectReplying(boolean directReplying) {
         if (mDirectReplying == directReplying) return;
         mDirectReplying = directReplying;
         reevaluate();
     }
 
+    @Override
     public void setScrimState(ScrimState scrimState, float scrimBehindAlpha,
             GradientColors scrimInFrontColor) {
         boolean bouncerVisibleLast = mBouncerVisible;
@@ -387,20 +407,17 @@ public class LightBarController implements
             }
         }
 
-        // If no one is light, all icons become white.
         if (lightBarBounds.isEmpty()) {
-            mStatusBarIconController.getTransitionsController().setIconsDark(
-                    false, animateChange());
-        }
-
-        // If all stacks are light, all icons get dark.
-        else if (lightBarBounds.size() == numStacks) {
+            // If no one is light, all icons become white.
+            mStatusBarIconController
+                    .getTransitionsController()
+                    .setIconsDark(false, animateChange());
+        } else if (lightBarBounds.size() == numStacks) {
+            // If all stacks are light, all icons get dark.
             mStatusBarIconController.setIconsDarkArea(null);
             mStatusBarIconController.getTransitionsController().setIconsDark(true, animateChange());
-        }
-
-        // Not the same for every stack, magic!
-        else {
+        } else {
+            // Not the same for every stack, magic!
             mStatusBarIconController.setIconsDarkArea(lightBarBounds);
             mStatusBarIconController.getTransitionsController().setIconsDark(true, animateChange());
         }
@@ -468,47 +485,15 @@ public class LightBarController implements
         }
     }
 
-    /**
-     * Injectable factory for creating a {@link LightBarController}.
-     */
-    public static class Factory {
-        private final JavaAdapter mJavaAdapter;
-        private final DarkIconDispatcher mDarkIconDispatcher;
-        private final BatteryController mBatteryController;
-        private final NavigationModeController mNavModeController;
-        private final StatusBarModeRepositoryStore mStatusBarModeRepository;
-        private final DumpManager mDumpManager;
-        private final DisplayTracker mDisplayTracker;
+    /** Injectable factory for creating a {@link LightBarControllerImpl}. */
+    @AssistedFactory
+    @FunctionalInterface
+    public interface Factory {
 
-        @Inject
-        public Factory(
-                JavaAdapter javaAdapter,
-                DarkIconDispatcher darkIconDispatcher,
-                BatteryController batteryController,
-                NavigationModeController navModeController,
-                StatusBarModeRepositoryStore statusBarModeRepository,
-                DumpManager dumpManager,
-                DisplayTracker displayTracker) {
-            mJavaAdapter = javaAdapter;
-            mDarkIconDispatcher = darkIconDispatcher;
-            mBatteryController = batteryController;
-            mNavModeController = navModeController;
-            mStatusBarModeRepository = statusBarModeRepository;
-            mDumpManager = dumpManager;
-            mDisplayTracker = displayTracker;
-        }
-
-        /** Create an {@link LightBarController} */
-        public LightBarController create(Context context) {
-            return new LightBarController(
-                    context,
-                    mJavaAdapter,
-                    mDarkIconDispatcher,
-                    mBatteryController,
-                    mNavModeController,
-                    mStatusBarModeRepository,
-                    mDumpManager,
-                    mDisplayTracker);
-        }
+        /** Creates a {@link LightBarControllerImpl}. */
+        LightBarControllerImpl create(
+                int displayId,
+                CoroutineScope coroutineScope,
+                StatusBarModePerDisplayRepository statusBarModePerDisplayRepository);
     }
 }

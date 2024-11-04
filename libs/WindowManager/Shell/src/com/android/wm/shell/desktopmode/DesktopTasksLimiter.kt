@@ -133,7 +133,6 @@ class DesktopTasksLimiter (
         }
 
         override fun onTransitionFinished(transition: IBinder, aborted: Boolean) {
-            logV("transition %s finished", transition)
             if (activeTransitionTokensAndTasks.remove(transition) != null) {
                 if (aborted) {
                     interactionJankMonitor.cancel(CUJ_DESKTOP_MODE_MINIMIZE_WINDOW)
@@ -250,10 +249,6 @@ class DesktopTasksLimiter (
 
     private fun logV(msg: String, vararg arguments: Any?) {
         ProtoLog.v(WM_SHELL_DESKTOP_MODE, "%s: $msg", TAG, *arguments)
-    }
-
-    private fun logE(msg: String, vararg arguments: Any?) {
-        ProtoLog.e(WM_SHELL_DESKTOP_MODE, "%s: $msg", TAG, *arguments)
     }
 
     private companion object {

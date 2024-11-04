@@ -21,6 +21,7 @@ import android.annotation.NonNull;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Process;
+import android.os.UserHandle;
 import android.ravenwood.annotation.RavenwoodKeepWholeClass;
 import android.ravenwood.annotation.RavenwoodRedirect;
 import android.ravenwood.annotation.RavenwoodRedirectionClass;
@@ -92,7 +93,9 @@ public final class MessageQueue {
      * system processes and provides a higher level of concurrency and higher enqueue throughput
      * than the legacy implementation.
      */
-    private static boolean sForceConcurrent = false;
+    private static boolean sUseConcurrent;
+
+    private static boolean sUseConcurrentInitialized = false;
 
     @RavenwoodRedirect
     private native static long nativeInit();
@@ -109,8 +112,9 @@ public final class MessageQueue {
     private native static void nativeSetFileDescriptorEvents(long ptr, int fd, int events);
 
     MessageQueue(boolean quitAllowed) {
-        if (!sForceConcurrent) {
-            sForceConcurrent = Process.myUid() < Process.FIRST_APPLICATION_UID;
+        if (!sUseConcurrentInitialized) {
+            sUseConcurrent = UserHandle.isCore(Process.myUid());
+            sUseConcurrentInitialized = true;
         }
         mQuitAllowed = quitAllowed;
         mPtr = nativeInit();
@@ -154,7 +158,7 @@ public final class MessageQueue {
      * @return True if the looper is idle.
      */
     public boolean isIdle() {
-        if (sForceConcurrent) {
+        if (sUseConcurrent) {
             final long now = SystemClock.uptimeMillis();
 
             if (stackHasMessages(null, 0, null, null, now, mMatchDeliverableMessages, false)) {
@@ -204,7 +208,7 @@ public final class MessageQueue {
         if (handler == null) {
             throw new NullPointerException("Can't add a null IdleHandler");
         }
-        if (sForceConcurrent) {
+        if (sUseConcurrent) {
             synchronized (mIdleHandlersLock) {
                 mIdleHandlers.add(handler);
             }
@@ -225,7 +229,7 @@ public final class MessageQueue {
      * @param handler The IdleHandler to be removed.
      */
     public void removeIdleHandler(@NonNull IdleHandler handler) {
-        if (sForceConcurrent) {
+        if (sUseConcurrent) {
             synchronized (mIdleHandlersLock) {
                 mIdleHandlers.remove(handler);
             }
@@ -248,7 +252,7 @@ public final class MessageQueue {
      * @hide
      */
     public boolean isPolling() {
-        if (sForceConcurrent) {
+        if (sUseConcurrent) {
             // If the loop is quitting then it must not be idling.
             // We can assume mPtr != 0 when sQuitting is false.
             return !((boolean) sQuitting.getVolatile(this)) && nativeIsPolling(mPtr);
@@ -299,7 +303,7 @@ public final class MessageQueue {
             throw new IllegalArgumentException("listener must not be null");
         }
 
-        if (sForceConcurrent) {
+        if (sUseConcurrent) {
             synchronized (mFileDescriptorRecordsLock) {
                 updateOnFileDescriptorEventListenerLocked(fd, events, listener);
             }
@@ -327,7 +331,7 @@ public final class MessageQueue {
         if (fd == null) {
             throw new IllegalArgumentException("fd must not be null");
         }
-        if (sForceConcurrent) {
+        if (sUseConcurrent) {
             synchronized (mFileDescriptorRecordsLock) {
                 updateOnFileDescriptorEventListenerLocked(fd, 0, null);
             }
@@ -384,7 +388,7 @@ public final class MessageQueue {
         final int oldWatchedEvents;
         final OnFileDescriptorEventListener listener;
         final int seq;
-        if (sForceConcurrent) {
+        if (sUseConcurrent) {
             synchronized (mFileDescriptorRecordsLock) {
                 record = mFileDescriptorRecords.get(fd);
                 if (record == null) {
@@ -704,7 +708,7 @@ public final class MessageQueue {
 
     @UnsupportedAppUsage
     Message next() {
-        if (sForceConcurrent) {
+        if (sUseConcurrent) {
             return nextConcurrent();
         }
 
@@ -830,7 +834,7 @@ public final class MessageQueue {
             throw new IllegalStateException("Main thread not allowed to quit.");
         }
 
-        if (sForceConcurrent) {
+        if (sUseConcurrent) {
             synchronized (mIdleHandlersLock) {
                 if (sQuitting.compareAndSet(this, false, true)) {
                     if (safe) {
@@ -894,7 +898,7 @@ public final class MessageQueue {
     private int postSyncBarrier(long when) {
         // Enqueue a new sync barrier token.
         // We don't need to wake the queue because the purpose of a barrier is to stall it.
-        if (sForceConcurrent) {
+        if (sUseConcurrent) {
             final int token = mNextBarrierTokenAtomic.getAndIncrement();
 
             // b/376573804: apps and tests may expect to be able to use reflection
@@ -987,7 +991,7 @@ public final class MessageQueue {
     public void removeSyncBarrier(int token) {
         // Remove a sync barrier token from the queue.
         // If the queue is no longer stalled by a barrier then wake it.
-        if (sForceConcurrent) {
+        if (sUseConcurrent) {
             boolean removed;
             MessageNode first;
             final MatchBarrierToken matchBarrierToken = new MatchBarrierToken(token);
@@ -1054,7 +1058,7 @@ public final class MessageQueue {
             throw new IllegalArgumentException("Message must have a target.");
         }
 
-        if (sForceConcurrent) {
+        if (sUseConcurrent) {
             if (msg.isInUse()) {
                 throw new IllegalStateException(msg + " This message is already in use.");
             }
@@ -1183,7 +1187,7 @@ public final class MessageQueue {
         if (h == null) {
             return false;
         }
-        if (sForceConcurrent) {
+        if (sUseConcurrent) {
             return findOrRemoveMessages(h, what, object, null, 0, mMatchHandlerWhatAndObject,
                     false);
         }
@@ -1215,7 +1219,7 @@ public final class MessageQueue {
         if (h == null) {
             return false;
         }
-        if (sForceConcurrent) {
+        if (sUseConcurrent) {
             return findOrRemoveMessages(h, what, object, null, 0, mMatchHandlerWhatAndObjectEquals,
                     false);
 
@@ -1249,7 +1253,7 @@ public final class MessageQueue {
         if (h == null) {
             return false;
         }
-        if (sForceConcurrent) {
+        if (sUseConcurrent) {
             return findOrRemoveMessages(h, -1, object, r, 0, mMatchHandlerRunnableAndObject,
                     false);
         }
@@ -1281,7 +1285,7 @@ public final class MessageQueue {
         if (h == null) {
             return false;
         }
-        if (sForceConcurrent) {
+        if (sUseConcurrent) {
             return findOrRemoveMessages(h, -1, null, null, 0, mMatchHandler, false);
         }
         synchronized (this) {
@@ -1300,7 +1304,7 @@ public final class MessageQueue {
         if (h == null) {
             return;
         }
-        if (sForceConcurrent) {
+        if (sUseConcurrent) {
             findOrRemoveMessages(h, what, object, null, 0, mMatchHandlerWhatAndObject, true);
             return;
         }
@@ -1351,7 +1355,7 @@ public final class MessageQueue {
             return;
         }
 
-        if (sForceConcurrent) {
+        if (sUseConcurrent) {
             findOrRemoveMessages(h, what, object, null, 0, mMatchHandlerWhatAndObjectEquals, true);
             return;
         }
@@ -1403,7 +1407,7 @@ public final class MessageQueue {
             return;
         }
 
-        if (sForceConcurrent) {
+        if (sUseConcurrent) {
             findOrRemoveMessages(h, -1, object, r, 0, mMatchHandlerRunnableAndObject, true);
             return;
         }
@@ -1466,7 +1470,7 @@ public final class MessageQueue {
             return;
         }
 
-        if (sForceConcurrent) {
+        if (sUseConcurrent) {
             findOrRemoveMessages(h, -1, object, r, 0, mMatchHandlerRunnableAndObjectEquals, true);
             return;
         }
@@ -1528,7 +1532,7 @@ public final class MessageQueue {
             return;
         }
 
-        if (sForceConcurrent) {
+        if (sUseConcurrent) {
             findOrRemoveMessages(h, -1, object, null, 0, mMatchHandlerAndObject, true);
             return;
         }
@@ -1590,7 +1594,7 @@ public final class MessageQueue {
             return;
         }
 
-        if (sForceConcurrent) {
+        if (sUseConcurrent) {
             findOrRemoveMessages(h, -1, object, null, 0, mMatchHandlerAndObjectEquals, true);
             return;
         }
@@ -1738,7 +1742,7 @@ public final class MessageQueue {
 
     @NeverCompile
     void dump(Printer pw, String prefix, Handler h) {
-        if (sForceConcurrent) {
+        if (sUseConcurrent) {
             long now = SystemClock.uptimeMillis();
             int n = 0;
 
@@ -1799,7 +1803,7 @@ public final class MessageQueue {
 
     @NeverCompile
     void dumpDebug(ProtoOutputStream proto, long fieldId) {
-        if (sForceConcurrent) {
+        if (sUseConcurrent) {
             final long messageQueueToken = proto.start(fieldId);
 
             StackNode node = (StackNode) sState.getVolatile(this);
