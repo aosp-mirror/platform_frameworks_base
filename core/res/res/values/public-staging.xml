@@ -142,6 +142,9 @@
   </staging-public-group>
 
   <staging-public-group type="string" first-id="0x01b40000">
+    <!-- @FlaggedApi(android.content.pm.Flags.FLAG_SDK_DEPENDENCY_INSTALLER)
+         @hide @SystemApi -->
+    <public name="config_systemDependencyInstaller" />
   </staging-public-group>
 
   <staging-public-group type="dimen" first-id="0x01b30000">
