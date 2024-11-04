@@ -1515,6 +1515,16 @@ flag {
 }
 
 flag {
+  namespace: "systemui"
+  name: "user_aware_settings_repositories"
+  description: "Provide user-aware versions of SecureSettingsRepository and SystemSettingsRepository in SystemUI modules (see doc linked from b/356099784)."
+  bug: "356099784"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
     name: "notify_password_text_view_user_activity_in_background"
     namespace: "systemui"
     description: "Decide whether to notify the user activity in password text view, to power manager in the background thread."

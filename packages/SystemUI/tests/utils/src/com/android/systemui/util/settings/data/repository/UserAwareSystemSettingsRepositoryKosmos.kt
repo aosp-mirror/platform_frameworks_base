@@ -14,9 +14,21 @@
  * limitations under the License.
  */
 
-package com.android.systemui.util.settings
+package com.android.systemui.util.settings.data.repository
 
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.backgroundCoroutineContext
+import com.android.systemui.kosmos.testDispatcher
+import com.android.systemui.user.data.repository.userRepository
+import com.android.systemui.util.settings.fakeSettings
+import com.android.systemui.util.settings.repository.UserAwareSystemSettingsRepository
 
-val Kosmos.userAwareSecureSettingsRepository by
-    Kosmos.Fixture { FakeUserAwareSecureSettingsRepository() }
+val Kosmos.userAwareSystemSettingsRepository by
+    Kosmos.Fixture {
+        UserAwareSystemSettingsRepository(
+            fakeSettings,
+            userRepository,
+            testDispatcher,
+            backgroundCoroutineContext,
+        )
+    }
