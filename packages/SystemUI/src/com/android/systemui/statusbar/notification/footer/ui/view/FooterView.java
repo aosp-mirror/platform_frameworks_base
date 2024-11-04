@@ -459,8 +459,12 @@ public class FooterView extends StackScrollerDecorView {
         Resources.Theme theme = mContext.getTheme();
         final @ColorInt int onSurface = Utils.getColorAttrDefaultColor(mContext,
                 com.android.internal.R.attr.materialColorOnSurface);
+        // Same resource, separate drawables to prevent touch effects from showing on the wrong
+        // button.
         final Drawable clearAllBg = theme.getDrawable(R.drawable.notif_footer_btn_background);
-        final Drawable manageBg = theme.getDrawable(R.drawable.notif_footer_btn_background);
+        final Drawable settingsBg = theme.getDrawable(R.drawable.notif_footer_btn_background);
+        final Drawable historyBg = NotifRedesignFooter.isEnabled()
+                ? theme.getDrawable(R.drawable.notif_footer_btn_background) : null;
         final @ColorInt int scHigh;
         if (!notificationFooterBackgroundTintOptimization()) {
             scHigh = Utils.getColorAttrDefaultColor(mContext,
@@ -468,7 +472,10 @@ public class FooterView extends StackScrollerDecorView {
             if (scHigh != 0) {
                 final ColorFilter bgColorFilter = new PorterDuffColorFilter(scHigh, SRC_ATOP);
                 clearAllBg.setColorFilter(bgColorFilter);
-                manageBg.setColorFilter(bgColorFilter);
+                settingsBg.setColorFilter(bgColorFilter);
+                if (NotifRedesignFooter.isEnabled()) {
+                    historyBg.setColorFilter(bgColorFilter);
+                }
             }
         } else {
             scHigh = 0;
@@ -476,13 +483,13 @@ public class FooterView extends StackScrollerDecorView {
         mClearAllButton.setBackground(clearAllBg);
         mClearAllButton.setTextColor(onSurface);
         if (NotifRedesignFooter.isEnabled()) {
-            mSettingsButton.setBackground(manageBg);
+            mSettingsButton.setBackground(settingsBg);
             mSettingsButton.setCompoundDrawableTintList(ColorStateList.valueOf(onSurface));
 
-            mHistoryButton.setBackground(manageBg);
+            mHistoryButton.setBackground(historyBg);
             mHistoryButton.setCompoundDrawableTintList(ColorStateList.valueOf(onSurface));
         } else {
-            mManageOrHistoryButton.setBackground(manageBg);
+            mManageOrHistoryButton.setBackground(settingsBg);
             mManageOrHistoryButton.setTextColor(onSurface);
         }
         mSeenNotifsFooterTextView.setTextColor(onSurface);
@@ -492,7 +499,7 @@ public class FooterView extends StackScrollerDecorView {
             colorUpdateLogger.logEvent("Footer.updateColors()",
                     "textColor(onSurface)=" + hexColorString(onSurface)
                             + " backgroundTint(surfaceContainerHigh)=" + hexColorString(scHigh)
-                            + " background=" + DrawableDumpKt.dumpToString(manageBg));
+                            + " background=" + DrawableDumpKt.dumpToString(settingsBg));
         }
     }
 

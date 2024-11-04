@@ -65,6 +65,7 @@ constructor(
     val visitedScreens: Set<String> = setOf(),
     val locale: Locale? = null,
     val includeValue: Boolean = true,
+    val includeValueDescriptor: Boolean = true,
 )
 
 object GetPreferenceGraphRequestCodec : MessageCodec<GetPreferenceGraphRequest> {

@@ -17,6 +17,9 @@
 package android.app;
 
 import static android.app.PropertyInvalidatedCache.NONCE_UNSET;
+import static android.app.PropertyInvalidatedCache.MODULE_BLUETOOTH;
+import static android.app.PropertyInvalidatedCache.MODULE_SYSTEM;
+import static android.app.PropertyInvalidatedCache.MODULE_TEST;
 import static android.app.PropertyInvalidatedCache.NonceStore.INVALID_NONCE_INDEX;
 import static com.android.internal.os.Flags.FLAG_APPLICATION_SHARED_MEMORY_ENABLED;
 
@@ -27,6 +30,8 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import android.app.PropertyInvalidatedCache.Args;
+import android.annotation.SuppressLint;
 import com.android.internal.os.ApplicationSharedMemory;
 
 import android.platform.test.annotations.IgnoreUnderRavenwood;
@@ -57,7 +62,7 @@ public class PropertyInvalidatedCacheTests {
             DeviceFlagsValueProvider.createCheckFlagsRule();
 
     // Configuration for creating caches
-    private static final String MODULE = PropertyInvalidatedCache.MODULE_TEST;
+    private static final String MODULE = MODULE_TEST;
     private static final String API = "testApi";
 
     // This class is a proxy for binder calls.  It contains a counter that increments
@@ -245,6 +250,12 @@ public class PropertyInvalidatedCacheTests {
             mQuery = query;
         }
 
+        // Create a cache from the args.  The name of the cache is the api.
+        TestCache(Args args, TestQuery query) {
+            super(args, args.mApi(), query);
+            mQuery = query;
+        }
+
         public int getRecomputeCount() {
             return mQuery.getRecomputeCount();
         }
@@ -374,14 +385,11 @@ public class PropertyInvalidatedCacheTests {
     @Test
     public void testPropertyNames() {
         String n1;
-        n1 = PropertyInvalidatedCache.createPropertyName(
-            PropertyInvalidatedCache.MODULE_SYSTEM, "getPackageInfo");
+        n1 = PropertyInvalidatedCache.createPropertyName(MODULE_SYSTEM, "getPackageInfo");
         assertEquals(n1, "cache_key.system_server.get_package_info");
-        n1 = PropertyInvalidatedCache.createPropertyName(
-            PropertyInvalidatedCache.MODULE_SYSTEM, "get_package_info");
+        n1 = PropertyInvalidatedCache.createPropertyName(MODULE_SYSTEM, "get_package_info");
         assertEquals(n1, "cache_key.system_server.get_package_info");
-        n1 = PropertyInvalidatedCache.createPropertyName(
-            PropertyInvalidatedCache.MODULE_BLUETOOTH, "getState");
+        n1 = PropertyInvalidatedCache.createPropertyName(MODULE_BLUETOOTH, "getState");
         assertEquals(n1, "cache_key.bluetooth.get_state");
     }
 
@@ -391,7 +399,7 @@ public class PropertyInvalidatedCacheTests {
             reason = "SystemProperties doesn't have permission check")
     public void testPermissionFailure() {
         // Create a cache that will write a system nonce.
-        TestCache sysCache = new TestCache(PropertyInvalidatedCache.MODULE_SYSTEM, "mode1");
+        TestCache sysCache = new TestCache(MODULE_SYSTEM, "mode1");
         try {
             // Invalidate the cache, which writes the system property.  There must be a permission
             // failure.
@@ -407,7 +415,7 @@ public class PropertyInvalidatedCacheTests {
     @Test
     public void testTestMode() {
         // Create a cache that will write a system nonce.
-        TestCache sysCache = new TestCache(PropertyInvalidatedCache.MODULE_SYSTEM, "mode1");
+        TestCache sysCache = new TestCache(MODULE_SYSTEM, "mode1");
 
         sysCache.testPropertyName();
         // Invalidate the cache.  This must succeed because the property has been marked for
@@ -416,7 +424,7 @@ public class PropertyInvalidatedCacheTests {
 
         // Create a cache that uses MODULE_TEST.  Invalidation succeeds whether or not the
         // property is tagged as being tested.
-        TestCache testCache = new TestCache(PropertyInvalidatedCache.MODULE_TEST, "mode2");
+        TestCache testCache = new TestCache(MODULE_TEST, "mode2");
         testCache.invalidateCache();
         testCache.testPropertyName();
         testCache.invalidateCache();
@@ -432,7 +440,7 @@ public class PropertyInvalidatedCacheTests {
             // The expected exception.
         }
         // Configuring a property for testing must fail if test mode is false.
-        TestCache cache2 = new TestCache(PropertyInvalidatedCache.MODULE_SYSTEM, "mode3");
+        TestCache cache2 = new TestCache(MODULE_SYSTEM, "mode3");
         try {
             cache2.testPropertyName();
             fail("expected an IllegalStateException");
@@ -442,6 +450,34 @@ public class PropertyInvalidatedCacheTests {
 
         // Re-enable test mode (so that the cleanup for the test does not throw).
         PropertyInvalidatedCache.setTestMode(true);
+    }
+
+    // Test the Args-style constructor.
+    @Test
+    public void testArgsConstructor() {
+        // Create a cache with a maximum of four entries.
+        TestCache cache = new TestCache(new Args(MODULE_TEST).api("init1").maxEntries(4),
+                new TestQuery());
+
+        cache.invalidateCache();
+        for (int i = 1; i <= 4; i++) {
+            assertEquals("foo" + i, cache.query(i));
+            assertEquals(i, cache.getRecomputeCount());
+        }
+        // Everything is in the cache.  The recompute count must not increase.
+        for (int i = 1; i <= 4; i++) {
+            assertEquals("foo" + i, cache.query(i));
+            assertEquals(4, cache.getRecomputeCount());
+        }
+        // Overflow the max entries.  The recompute count increases by one.
+        assertEquals("foo5", cache.query(5));
+        assertEquals(5, cache.getRecomputeCount());
+        // The oldest entry (1) has been evicted.  Iterating through the first four entries will
+        // sequentially evict them all because the loop is proceeding oldest to newest.
+        for (int i = 1; i <= 4; i++) {
+            assertEquals("foo" + i, cache.query(i));
+            assertEquals(5+i, cache.getRecomputeCount());
+        }
     }
 
     // Verify the behavior of shared memory nonce storage.  This does not directly test the cache
@@ -494,5 +530,44 @@ public class PropertyInvalidatedCacheTests {
         assertNotEquals(index1, index2);
 
         shmem.close();
+    }
+
+    // Verify that an invalid module causes an exception.
+    private void testInvalidModule(String module) {
+        try {
+            @SuppressLint("UnusedVariable")
+            Args arg = new Args(module);
+            fail("expected an invalid module exception: module=" + module);
+        } catch (IllegalArgumentException e) {
+            // Expected exception.
+        }
+    }
+
+    // Test various instantiation errors.  The good path is tested in other methods.
+    @Test
+    public void testArgumentErrors() {
+        // Verify that an illegal module throws an exception.
+        testInvalidModule(MODULE_SYSTEM.substring(0, MODULE_SYSTEM.length() - 1));
+        testInvalidModule(MODULE_SYSTEM + "x");
+        testInvalidModule("mymodule");
+
+        // Verify that a negative max entries throws.
+        Args arg = new Args(MODULE_SYSTEM);
+        try {
+            arg.maxEntries(0);
+            fail("expected an invalid maxEntries exception");
+        } catch (IllegalArgumentException e) {
+            // Expected exception.
+        }
+
+        // Verify that creating a cache with an invalid property string throws.
+        try {
+            final String badKey = "cache_key.volume_list";
+            @SuppressLint("UnusedVariable")
+            var cache = new PropertyInvalidatedCache<Integer, Void>(4, badKey);
+            fail("expected bad property exception: prop=" + badKey);
+        } catch (IllegalArgumentException e) {
+            // Expected exception.
+        }
     }
 }

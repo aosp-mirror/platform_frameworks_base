@@ -110,6 +110,7 @@ static struct {
     jmethodID notifyInputDevicesChanged;
     jmethodID notifyTouchpadHardwareState;
     jmethodID notifyTouchpadGestureInfo;
+    jmethodID notifyTouchpadThreeFingerTap;
     jmethodID notifySwitch;
     jmethodID notifyInputChannelBroken;
     jmethodID notifyNoFocusedWindowAnr;
@@ -345,6 +346,7 @@ public:
     void setTouchpadTapDraggingEnabled(bool enabled);
     void setShouldNotifyTouchpadHardwareState(bool enabled);
     void setTouchpadRightClickZoneEnabled(bool enabled);
+    void setTouchpadThreeFingerTapShortcutEnabled(bool enabled);
     void setInputDeviceEnabled(uint32_t deviceId, bool enabled);
     void setShowTouches(bool enabled);
     void setNonInteractiveDisplays(const std::set<ui::LogicalDisplayId>& displayIds);
@@ -370,6 +372,7 @@ public:
     void notifyTouchpadHardwareState(const SelfContainedHardwareState& schs,
                                      int32_t deviceId) override;
     void notifyTouchpadGestureInfo(enum GestureType type, int32_t deviceId) override;
+    void notifyTouchpadThreeFingerTap() override;
     std::shared_ptr<KeyCharacterMap> getKeyboardLayoutOverlay(
             const InputDeviceIdentifier& identifier,
             const std::optional<KeyboardLayoutInfo> keyboardLayoutInfo) override;
@@ -509,6 +512,10 @@ private:
         // True to enable a zone on the right-hand side of touchpads where clicks will be turned
         // into context (a.k.a. "right") clicks.
         bool touchpadRightClickZoneEnabled{false};
+
+        // True to use three-finger tap as a customizable shortcut; false to use it as a
+        // middle-click.
+        bool touchpadThreeFingerTapShortcutEnabled{false};
 
         // True if a pointer icon should be shown for stylus pointers.
         bool stylusPointerIconEnabled{false};
@@ -780,6 +787,8 @@ void NativeInputManager::getReaderConfiguration(InputReaderConfiguration* outCon
         outConfig->touchpadTapDraggingEnabled = mLocked.touchpadTapDraggingEnabled;
         outConfig->shouldNotifyTouchpadHardwareState = mLocked.shouldNotifyTouchpadHardwareState;
         outConfig->touchpadRightClickZoneEnabled = mLocked.touchpadRightClickZoneEnabled;
+        outConfig->touchpadThreeFingerTapShortcutEnabled =
+                mLocked.touchpadThreeFingerTapShortcutEnabled;
 
         outConfig->disabledDevices = mLocked.disabledInputDevices;
 
@@ -1032,6 +1041,13 @@ void NativeInputManager::notifyTouchpadGestureInfo(enum GestureType type, int32_
     env->CallVoidMethod(mServiceObj, gServiceClassInfo.notifyTouchpadGestureInfo, type, deviceId);
 
     checkAndClearExceptionFromCallback(env, "notifyTouchpadGestureInfo");
+}
+
+void NativeInputManager::notifyTouchpadThreeFingerTap() {
+    ATRACE_CALL();
+    JNIEnv* env = jniEnv();
+    env->CallVoidMethod(mServiceObj, gServiceClassInfo.notifyTouchpadThreeFingerTap);
+    checkAndClearExceptionFromCallback(env, "notifyTouchpadThreeFingerTap");
 }
 
 std::shared_ptr<KeyCharacterMap> NativeInputManager::getKeyboardLayoutOverlay(
@@ -1489,6 +1505,22 @@ void NativeInputManager::setTouchpadRightClickZoneEnabled(bool enabled) {
 
         ALOGI("Setting touchpad right click zone to %s.", toString(enabled));
         mLocked.touchpadRightClickZoneEnabled = enabled;
+    } // release lock
+
+    mInputManager->getReader().requestRefreshConfiguration(
+            InputReaderConfiguration::Change::TOUCHPAD_SETTINGS);
+}
+
+void NativeInputManager::setTouchpadThreeFingerTapShortcutEnabled(bool enabled) {
+    { // acquire lock
+        std::scoped_lock _l(mLock);
+
+        if (mLocked.touchpadThreeFingerTapShortcutEnabled == enabled) {
+            return;
+        }
+
+        ALOGI("Setting touchpad three finger tap shortcut to %s.", toString(enabled));
+        mLocked.touchpadThreeFingerTapShortcutEnabled = enabled;
     } // release lock
 
     mInputManager->getReader().requestRefreshConfiguration(
@@ -2437,6 +2469,11 @@ static void nativeSetTouchpadRightClickZoneEnabled(JNIEnv* env, jobject nativeIm
     im->setTouchpadRightClickZoneEnabled(enabled);
 }
 
+static void nativeSetTouchpadThreeFingerTapShortcutEnabled(JNIEnv* env, jobject nativeImplObj,
+                                                           jboolean enabled) {
+    getNativeInputManager(env, nativeImplObj)->setTouchpadThreeFingerTapShortcutEnabled(enabled);
+}
+
 static void nativeSetShowTouches(JNIEnv* env, jobject nativeImplObj, jboolean enabled) {
     NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
 
@@ -3119,6 +3156,8 @@ static const JNINativeMethod gInputManagerMethods[] = {
         {"setShouldNotifyTouchpadHardwareState", "(Z)V",
          (void*)nativeSetShouldNotifyTouchpadHardwareState},
         {"setTouchpadRightClickZoneEnabled", "(Z)V", (void*)nativeSetTouchpadRightClickZoneEnabled},
+        {"setTouchpadThreeFingerTapShortcutEnabled", "(Z)V",
+         (void*)nativeSetTouchpadThreeFingerTapShortcutEnabled},
         {"setShowTouches", "(Z)V", (void*)nativeSetShowTouches},
         {"setNonInteractiveDisplays", "([I)V", (void*)nativeSetNonInteractiveDisplays},
         {"reloadCalibration", "()V", (void*)nativeReloadCalibration},
@@ -3229,6 +3268,8 @@ int register_android_server_InputManager(JNIEnv* env) {
     GET_METHOD_ID(gServiceClassInfo.notifyTouchpadGestureInfo, clazz, "notifyTouchpadGestureInfo",
                   "(II)V")
 
+    GET_METHOD_ID(gServiceClassInfo.notifyTouchpadThreeFingerTap, clazz,
+                  "notifyTouchpadThreeFingerTap", "()V")
     GET_METHOD_ID(gServiceClassInfo.notifySwitch, clazz,
             "notifySwitch", "(JII)V");
 

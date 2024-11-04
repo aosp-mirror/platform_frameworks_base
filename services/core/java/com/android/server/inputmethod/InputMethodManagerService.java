@@ -4969,7 +4969,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                     final var userData = getUserData(userId);
                     if (Flags.refactorInsetsController()) {
                         setImeVisibilityOnFocusedWindowClient(false, userData,
-                                null /* TODO(b329229469) check statsToken */);
+                                null /* TODO(b/353463205) check statsToken */);
                     } else {
 
                         hideCurrentInputLocked(userData.mImeBindingState.mFocusedWindow,

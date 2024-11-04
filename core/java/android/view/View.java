@@ -30,6 +30,7 @@ import static android.view.Surface.FRAME_RATE_COMPATIBILITY_FIXED_SOURCE;
 import static android.view.Surface.FRAME_RATE_COMPATIBILITY_GTE;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.accessibility.AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED;
+import static android.view.accessibility.Flags.FLAG_DEPRECATE_ACCESSIBILITY_ANNOUNCEMENT_APIS;
 import static android.view.accessibility.Flags.FLAG_SUPPLEMENTAL_DESCRIPTION;
 import static android.view.accessibility.Flags.removeChildHoverCheckForTouchExploration;
 import static android.view.accessibility.Flags.supplementalDescription;
@@ -42,6 +43,7 @@ import static android.view.displayhash.DisplayHashResultCallback.EXTRA_DISPLAY_H
 import static android.view.flags.Flags.FLAG_SENSITIVE_CONTENT_APP_PROTECTION_API;
 import static android.view.flags.Flags.FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY;
 import static android.view.flags.Flags.FLAG_VIEW_VELOCITY_API;
+import static android.view.flags.Flags.calculateBoundsInParentFromBoundsInScreen;
 import static android.view.flags.Flags.enableUseMeasureCacheDuringForceLayout;
 import static android.view.flags.Flags.sensitiveContentAppProtection;
 import static android.view.flags.Flags.toolkitFrameRateAnimationBugfix25q1;
@@ -968,6 +970,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Ignore an optimization that skips unnecessary EXACTLY layout passes.
      */
     private static boolean sAlwaysRemeasureExactly = false;
+
+    /**
+     * When true calculates the bounds in parent from bounds in screen relative to its parents.
+     * This addresses the deprecated API (setBoundsInParent) in Compose, which causes empty
+     * getBoundsInParent call for Compose apps.
+     */
+    private static boolean sCalculateBoundsInParentFromBoundsInScreenFlagValue = false;
 
     /**
      * When true makes it possible to use onMeasure caches also when the force layout flag is
@@ -2561,6 +2570,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         sToolkitSetFrameRateReadOnlyFlagValue = toolkitSetFrameRateReadOnly();
         sToolkitMetricsForFrameRateDecisionFlagValue = toolkitMetricsForFrameRateDecision();
+        sCalculateBoundsInParentFromBoundsInScreenFlagValue =
+                calculateBoundsInParentFromBoundsInScreen();
         sUseMeasureCacheDuringForceLayoutFlagValue = enableUseMeasureCacheDuringForceLayout();
     }
 
@@ -8941,44 +8952,45 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Convenience method for sending a {@link AccessibilityEvent#TYPE_ANNOUNCEMENT}
-     * {@link AccessibilityEvent} to suggest that an accessibility service announce the
-     * specified text to its users.
-     * <p>
-     * Note: The event generated with this API carries no semantic meaning, and is appropriate only
-     * in exceptional situations. Apps can generally achieve correct behavior for accessibility by
-     * accurately supplying the semantics of their UI.
-     * They should not need to specify what exactly is announced to users.
+     * Convenience method for sending a {@link AccessibilityEvent#TYPE_ANNOUNCEMENT} {@link
+     * AccessibilityEvent} to suggest that an accessibility service announce the specified text to
+     * its users.
      *
-     * <p>
-     * In general, only announce transitions and don't generate a confirmation message for simple
-     * actions like a button press. Label your controls concisely and precisely instead, and for
-     * significant UI changes like window changes, use
-     * {@link android.app.Activity#setTitle(CharSequence)} and
-     * {@link #setAccessibilityPaneTitle(CharSequence)}.
+     * <p>Note: The event generated with this API carries no semantic meaning, and accessibility
+     * services may choose to ignore it. Apps that accurately supply accessibility with the
+     * semantics of their UI should not need to specify what exactly is announced.
      *
-     * <p>
-     * Use {@link #setAccessibilityLiveRegion(int)} to inform the user of changes to critical
+     * <p>In general, do not attempt to generate announcements as confirmation message for simple
+     * actions like a button press. Label your controls concisely and precisely instead.
+     *
+     * <p>To convey significant UI changes like window changes, use {@link
+     * android.app.Activity#setTitle(CharSequence)} and {@link
+     * #setAccessibilityPaneTitle(CharSequence)}.
+     *
+     * <p>Use {@link #setAccessibilityLiveRegion(int)} to inform the user of changes to critical
      * views within the user interface. These should still be used sparingly as they may generate
      * announcements every time a View is updated.
      *
-     * <p>
-     * For notifying users about errors, such as in a login screen with text that displays an
-     * "incorrect password" notification, that view should send an AccessibilityEvent of type
-     * {@link AccessibilityEvent#CONTENT_CHANGE_TYPE_ERROR} and set
-     * {@link AccessibilityNodeInfo#setError(CharSequence)} instead. Custom widgets should expose
-     * error-setting methods that support accessibility automatically. For example, instead of
-     * explicitly sending this event when using a TextView, use
-     * {@link android.widget.TextView#setError(CharSequence)}.
-     *
-     * <p>
-     * Use {@link #setStateDescription(CharSequence)} to convey state changes to views within the
+     * <p>Use {@link #setStateDescription(CharSequence)} to convey state changes to views within the
      * user interface. While a live region may send different types of events generated by the view,
      * state description will send {@link AccessibilityEvent#TYPE_WINDOW_CONTENT_CHANGED} events of
      * type {@link AccessibilityEvent#CONTENT_CHANGE_TYPE_STATE_DESCRIPTION}.
      *
+     * <p>For notifying users about errors, such as in a login screen with text that displays an
+     * "incorrect password" notification, set {@link AccessibilityNodeInfo#setError(CharSequence)}
+     * and dispatch an {@link AccessibilityEvent#TYPE_WINDOW_CONTENT_CHANGED} event with a change
+     * type of {@link AccessibilityEvent#CONTENT_CHANGE_TYPE_ERROR}, instead. Some widgets may
+     * expose methods that convey error states to accessibility automatically, such as {@link
+     * android.widget.TextView#setError(CharSequence)}, which manages these accessibility semantics
+     * and event dispatch for callers.
+     *
+     * @deprecated Use one of the methods described in the documentation above to semantically
+     *     describe UI instead of using an announcement, as accessibility services may choose to
+     *     ignore events dispatched with this method.
      * @param text The announcement text.
      */
+    @FlaggedApi(FLAG_DEPRECATE_ACCESSIBILITY_ANNOUNCEMENT_APIS)
+    @Deprecated
     public void announceForAccessibility(CharSequence text) {
         if (AccessibilityManager.getInstance(mContext).isEnabled() && mParent != null) {
             AccessibilityEvent event = AccessibilityEvent.obtain(
@@ -9806,7 +9818,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             structure.setChildCount(1);
             final ViewStructure root = structure.newChild(0);
             if (info != null) {
-                populateVirtualStructure(root, provider, info, forAutofill);
+                populateVirtualStructure(root, provider, info, null, forAutofill);
                 info.recycle();
             } else {
                 Log.w(AUTOFILL_LOG_TAG, "AccessibilityNodeInfo is null.");
@@ -11105,11 +11117,19 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     private void populateVirtualStructure(ViewStructure structure,
             AccessibilityNodeProvider provider, AccessibilityNodeInfo info,
-            boolean forAutofill) {
+            @Nullable AccessibilityNodeInfo parentInfo, boolean forAutofill) {
         structure.setId(AccessibilityNodeInfo.getVirtualDescendantId(info.getSourceNodeId()),
                 null, null, info.getViewIdResourceName());
         Rect rect = structure.getTempRect();
-        info.getBoundsInParent(rect);
+        // The bounds in parent for Jetpack Compose views aren't set as setBoundsInParent is
+        // deprecated, and only setBoundsInScreen is called.
+        // The bounds in parent can be calculated by diff'ing the child view's bounds in screen with
+        // the parent's.
+        if (sCalculateBoundsInParentFromBoundsInScreenFlagValue) {
+            getBoundsInParent(info, parentInfo, rect);
+        } else {
+            info.getBoundsInParent(rect);
+        }
         structure.setDimens(rect.left, rect.top, 0, 0, rect.width(), rect.height());
         structure.setVisibility(VISIBLE);
         structure.setEnabled(info.isEnabled());
@@ -11193,9 +11213,28 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                         AccessibilityNodeInfo.getVirtualDescendantId(info.getChildId(i)));
                 if (cinfo != null) {
                     ViewStructure child = structure.newChild(i);
-                    populateVirtualStructure(child, provider, cinfo, forAutofill);
+                    populateVirtualStructure(child, provider, cinfo, info, forAutofill);
                     cinfo.recycle();
                 }
+            }
+        }
+    }
+
+    private void getBoundsInParent(@NonNull AccessibilityNodeInfo info,
+            @Nullable AccessibilityNodeInfo parentInfo, @NonNull Rect rect) {
+        info.getBoundsInParent(rect);
+        // Fallback to calculate bounds in parent by diffing the bounds in
+        // screen if it's all 0.
+        if ((rect.left | rect.top | rect.right | rect.bottom) == 0) {
+            if (parentInfo != null) {
+                Rect parentBoundsInScreen = parentInfo.getBoundsInScreen();
+                Rect boundsInScreen = info.getBoundsInScreen();
+                rect.set(boundsInScreen.left - parentBoundsInScreen.left,
+                        boundsInScreen.top - parentBoundsInScreen.top,
+                        boundsInScreen.right - parentBoundsInScreen.left,
+                        boundsInScreen.bottom - parentBoundsInScreen.top);
+            } else {
+                info.getBoundsInScreen(rect);
             }
         }
     }

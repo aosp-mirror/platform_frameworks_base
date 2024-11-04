@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     Copyright (C) 2022 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<configuration description="Runs Tests for Testables.">
+    <target_preparer class="com.android.tradefed.targetprep.TestAppInstallSetup">
+        <option name="test-file-name" value="TestablesTests.apk" />
+        <option name="install-arg" value="-t" />
+    </target_preparer>
+
+    <target_preparer class="com.android.tradefed.targetprep.RootTargetPreparer">
+        <option name="force-root" value="true" />
+    </target_preparer>
+
+    <target_preparer class="com.android.tradefed.targetprep.DeviceSetup">
+        <option name="screen-always-on" value="on" />
+    </target_preparer>
+
+    <target_preparer class="com.android.tradefed.targetprep.RunCommandTargetPreparer">
+        <option name="run-command" value="input keyevent KEYCODE_WAKEUP" />
+        <option name="run-command" value="wm dismiss-keyguard" />
+    </target_preparer>
+
+    <option name="test-suite-tag" value="apct" />
+    <option name="test-suite-tag" value="framework-base-presubmit" />
+    <option name="test-tag" value="TestableTests" />
+    <test class="com.android.tradefed.testtype.AndroidJUnitTest" >
+        <option name="package" value="com.android.testables" />
+        <option name="runner" value="androidx.test.runner.AndroidJUnitRunner" />
+        <option name="test-filter-dir" value="/data/data/com.android.testables" />
+        <option name="hidden-api-checks" value="false"/>
+    </test>
+
+    <metrics_collector class="com.android.tradefed.device.metric.FilePullerLogCollector">
+        <option name="directory-keys" value="/data/user/0/com.android.testables/files"/>
+        <option name="collect-on-run-ended-only" value="true"/>
+        <option name="clean-up" value="true"/>
+    </metrics_collector>
+</configuration>

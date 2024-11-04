@@ -273,13 +273,8 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
     private class DelayedStandbyOnActiveSourceLostRunnable implements Runnable {
         @Override
         public void run() {
-            if (mService.getPowerManagerInternal().wasDeviceIdleFor(
-                    STANDBY_AFTER_ACTIVE_SOURCE_LOST_DELAY_MS)) {
+            if (!isActiveSource()) {
                 mService.standby();
-            } else {
-                mService.setAndBroadcastActiveSource(mService.getPhysicalAddress(),
-                        getDeviceInfo().getDeviceType(), Constants.ADDR_TV,
-                        "DelayedActiveSourceLostStandbyRunnable");
             }
         }
     }

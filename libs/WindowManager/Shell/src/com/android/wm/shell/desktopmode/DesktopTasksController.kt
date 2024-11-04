@@ -554,19 +554,6 @@ class DesktopTasksController(
         }
     }
 
-    /** Move a desktop app to split screen. */
-    fun moveToSplit(task: RunningTaskInfo) {
-        logV( "moveToSplit taskId=%s", task.taskId)
-        desktopTilingDecorViewModel.removeTaskIfTiled(task.displayId, task.taskId)
-        val wct = WindowContainerTransaction()
-        wct.setBounds(task.token, Rect())
-        // Rather than set windowing mode to multi-window at task level, set it to
-        // undefined and inherit from split stage.
-        wct.setWindowingMode(task.token, WINDOWING_MODE_UNDEFINED)
-
-        transitions.startTransition(TRANSIT_CHANGE, wct, null /* handler */)
-    }
-
     private fun exitSplitIfApplicable(wct: WindowContainerTransaction, taskInfo: RunningTaskInfo) {
         if (splitScreenController.isTaskInSplitScreen(taskInfo.taskId)) {
             splitScreenController.prepareExitSplitScreen(

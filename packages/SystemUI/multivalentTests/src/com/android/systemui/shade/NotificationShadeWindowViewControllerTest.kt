@@ -238,7 +238,7 @@ class NotificationShadeWindowViewControllerTest(flags: FlagsParameterization) : 
                 primaryBouncerInteractor,
                 alternateBouncerInteractor,
                 mock(BouncerViewBinder::class.java),
-                mock(ConfigurationForwarder::class.java),
+                { mock(ConfigurationForwarder::class.java) },
                 brightnessMirrorShowingInteractor,
             )
         underTest.setupExpandedStatusBar()

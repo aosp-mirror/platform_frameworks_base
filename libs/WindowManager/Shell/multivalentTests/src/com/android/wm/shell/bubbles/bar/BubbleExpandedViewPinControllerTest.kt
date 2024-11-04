@@ -74,6 +74,7 @@ class BubbleExpandedViewPinControllerTest {
     @Before
     fun setUp() {
         ProtoLog.REQUIRE_PROTOLOGTOOL = false
+        ProtoLog.init()
         container = FrameLayout(context)
         val windowManager = context.getSystemService(WindowManager::class.java)
         positioner = BubblePositioner(context, windowManager)
@@ -85,7 +86,7 @@ class BubbleExpandedViewPinControllerTest {
                 isSmallTablet = false,
                 isLandscape = true,
                 isRtl = false,
-                insets = Insets.of(10, 20, 30, 40)
+                insets = Insets.of(10, 20, 30, 40),
             )
         positioner.update(deviceConfig)
         positioner.bubbleBarTopOnScreen =
@@ -407,12 +408,26 @@ class BubbleExpandedViewPinControllerTest {
         assertThat(testListener.locationReleases).containsExactly(RIGHT)
     }
 
+    /** Send drag start event when on left */
+    @Test
+    fun start_onLeft_sendStartEventOnLeft() {
+        getInstrumentation().runOnMainSync { controller.onDragStart(initialLocationOnLeft = true) }
+        assertThat(testListener.locationStart).containsExactly(LEFT)
+    }
+
+    /** Send drag start event when on right */
+    @Test
+    fun start_onRight_sendStartEventOnRight() {
+        getInstrumentation().runOnMainSync { controller.onDragStart(initialLocationOnLeft = false) }
+        assertThat(testListener.locationStart).containsExactly(RIGHT)
+    }
+
     private fun getExpectedDropTargetBoundsOnLeft(): Rect =
         Rect().also {
             positioner.getBubbleBarExpandedViewBounds(
                 true /* onLeft */,
                 false /* isOverflowExpanded */,
-                it
+                it,
             )
         }
 
@@ -421,7 +436,7 @@ class BubbleExpandedViewPinControllerTest {
             positioner.getBubbleBarExpandedViewBounds(
                 false /* onLeft */,
                 false /* isOverflowExpanded */,
-                it
+                it,
             )
         }
 
@@ -446,8 +461,14 @@ class BubbleExpandedViewPinControllerTest {
     }
 
     internal class TestLocationChangeListener : BaseBubblePinController.LocationChangeListener {
+        val locationStart = mutableListOf<BubbleBarLocation>()
         val locationChanges = mutableListOf<BubbleBarLocation>()
         val locationReleases = mutableListOf<BubbleBarLocation>()
+
+        override fun onStart(location: BubbleBarLocation) {
+            locationStart.add(location)
+        }
+
         override fun onChange(location: BubbleBarLocation) {
             locationChanges.add(location)
         }

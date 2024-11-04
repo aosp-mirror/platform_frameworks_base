@@ -1,0 +1,203 @@
+/*
+ * Copyright (C) 2024 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package android.media.quality;
+
+import android.annotation.IntDef;
+import android.os.Parcel;
+import android.os.Parcelable;
+
+import androidx.annotation.NonNull;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
+/**
+ * @hide
+ */
+public class AmbientBacklightSettings implements Parcelable {
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({SOURCE_NONE, SOURCE_AUDIO, SOURCE_VIDEO, SOURCE_AUDIO_VIDEO})
+    public @interface Source {}
+
+    /**
+     * The detection is disabled.
+     */
+    public static final int SOURCE_NONE = 0;
+
+    /**
+     * The detection is enabled for audio.
+     */
+    public static final int SOURCE_AUDIO = 1;
+
+    /**
+     * The detection is enabled for video.
+     */
+    public static final int SOURCE_VIDEO = 2;
+
+    /**
+     * The detection is enabled for audio and video.
+     */
+    public static final int SOURCE_AUDIO_VIDEO = 3;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({COLOR_FORMAT_RGB888})
+    public @interface ColorFormat {}
+
+    /**
+     * The color format is RGB888.
+     */
+    public static final int COLOR_FORMAT_RGB888 = 1;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({ALGORITHM_NONE, ALGORITHM_RLE})
+    public @interface CompressAlgorithm {}
+
+    /**
+     * The compress algorithm is disabled.
+     */
+    public static final int ALGORITHM_NONE = 0;
+
+    /**
+     * The compress algorithm is RLE.
+     */
+    public static final int ALGORITHM_RLE = 1;
+
+    /**
+     * The source of the ambient backlight.
+     */
+    private final int mSource;
+
+    /**
+     * The maximum framerate for the ambient backlight.
+     */
+    private final int mMaxFps;
+
+    /**
+     * The color format for the ambient backlight.
+     */
+    private final int mColorFormat;
+
+    /**
+     * The number of zones in horizontal direction.
+     */
+    private final int mHorizontalZonesNumber;
+
+    /**
+     * The number of zones in vertical direction.
+     */
+    private final int mVerticalZonesNumber;
+
+    /**
+     * The flag to indicate whether the letterbox is omitted.
+     */
+    private final boolean mIsLetterboxOmitted;
+
+    /**
+     * The color threshold for the ambient backlight.
+     */
+    private final int mThreshold;
+
+    public AmbientBacklightSettings(int source, int maxFps, int colorFormat,
+            int horizontalZonesNumber, int verticalZonesNumber, boolean isLetterboxOmitted,
+            int threshold) {
+        mSource = source;
+        mMaxFps = maxFps;
+        mColorFormat = colorFormat;
+        mHorizontalZonesNumber = horizontalZonesNumber;
+        mVerticalZonesNumber = verticalZonesNumber;
+        mIsLetterboxOmitted = isLetterboxOmitted;
+        mThreshold = threshold;
+    }
+
+    private AmbientBacklightSettings(Parcel in) {
+        mSource = in.readInt();
+        mMaxFps = in.readInt();
+        mColorFormat = in.readInt();
+        mHorizontalZonesNumber = in.readInt();
+        mVerticalZonesNumber = in.readInt();
+        mIsLetterboxOmitted = in.readBoolean();
+        mThreshold = in.readInt();
+    }
+
+    @Source
+    public int getSource() {
+        return mSource;
+    }
+
+    public int getMaxFps() {
+        return mMaxFps;
+    }
+
+    @ColorFormat
+    public int getColorFormat() {
+        return mColorFormat;
+    }
+
+    public int getHorizontalZonesNumber() {
+        return mHorizontalZonesNumber;
+    }
+
+    public int getVerticalZonesNumber() {
+        return mVerticalZonesNumber;
+    }
+
+    public boolean isLetterboxOmitted() {
+        return mIsLetterboxOmitted;
+    }
+
+    public int getThreshold() {
+        return mThreshold;
+    }
+
+    @Override
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
+        dest.writeInt(mSource);
+        dest.writeInt(mMaxFps);
+        dest.writeInt(mColorFormat);
+        dest.writeInt(mHorizontalZonesNumber);
+        dest.writeInt(mVerticalZonesNumber);
+        dest.writeBoolean(mIsLetterboxOmitted);
+        dest.writeInt(mThreshold);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    public static final @NonNull Parcelable.Creator<AmbientBacklightSettings> CREATOR =
+            new Parcelable.Creator<AmbientBacklightSettings>() {
+                public AmbientBacklightSettings createFromParcel(Parcel in) {
+                    return new AmbientBacklightSettings(in);
+                }
+
+                public AmbientBacklightSettings[] newArray(int size) {
+                    return new AmbientBacklightSettings[size];
+                }
+            };
+
+    @Override
+    public String toString() {
+        return "AmbientBacklightSettings{Source=" + mSource + ", MaxFps=" + mMaxFps
+                + ", ColorFormat=" + mColorFormat + ", HorizontalZonesNumber="
+                + mHorizontalZonesNumber + ", VerticalZonesNumber=" + mVerticalZonesNumber
+                + ", IsLetterboxOmitted=" + mIsLetterboxOmitted + ", Threshold=" + mThreshold + "}";
+    }
+}

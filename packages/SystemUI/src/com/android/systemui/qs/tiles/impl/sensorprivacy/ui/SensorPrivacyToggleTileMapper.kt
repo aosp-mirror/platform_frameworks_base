@@ -51,8 +51,7 @@ constructor(
             supportedActions =
                 setOf(QSTileState.UserAction.CLICK, QSTileState.UserAction.LONG_CLICK)
             iconRes = sensorPrivacyTileResources.getIconRes(data.isBlocked)
-            icon = { Icon.Loaded(resources.getDrawable(iconRes!!, theme), null) }
-
+            icon = Icon.Loaded(resources.getDrawable(iconRes!!, theme), null)
             sideViewIcon = QSTileState.SideViewIcon.None
 
             if (data.isBlocked) {
