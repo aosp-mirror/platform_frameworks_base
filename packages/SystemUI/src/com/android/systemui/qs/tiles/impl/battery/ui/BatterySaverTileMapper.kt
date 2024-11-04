@@ -29,10 +29,8 @@ import javax.inject.Inject
 /** Maps [BatterySaverTileModel] to [QSTileState]. */
 open class BatterySaverTileMapper
 @Inject
-constructor(
-    @Main protected val resources: Resources,
-    private val theme: Resources.Theme,
-) : QSTileDataToStateMapper<BatterySaverTileModel> {
+constructor(@Main protected val resources: Resources, private val theme: Resources.Theme) :
+    QSTileDataToStateMapper<BatterySaverTileModel> {
 
     override fun map(config: QSTileConfig, data: BatterySaverTileModel): QSTileState =
         QSTileState.build(resources, theme, config.uiConfig) {
@@ -41,8 +39,7 @@ constructor(
             iconRes =
                 if (data.isPowerSaving) R.drawable.qs_battery_saver_icon_on
                 else R.drawable.qs_battery_saver_icon_off
-            icon = { Icon.Loaded(resources.getDrawable(iconRes!!, theme), null) }
-
+            icon = Icon.Loaded(resources.getDrawable(iconRes!!, theme), null)
             sideViewIcon = QSTileState.SideViewIcon.None
 
             if (data.isPluggedIn) {
