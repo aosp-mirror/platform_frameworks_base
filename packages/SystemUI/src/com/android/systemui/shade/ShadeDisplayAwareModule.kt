@@ -79,12 +79,12 @@ object ShadeDisplayAwareModule {
     fun provideShadeWindowConfigurationController(
         @ShadeDisplayAware shadeContext: Context,
         factory: ConfigurationControllerImpl.Factory,
-        @GlobalConfig globalConfigConfigController: ConfigurationController,
+        @GlobalConfig globalConfigController: ConfigurationController,
     ): ConfigurationController {
         return if (ShadeWindowGoesAround.isEnabled) {
             factory.create(shadeContext)
         } else {
-            globalConfigConfigController
+            globalConfigController
         }
     }
 
@@ -93,12 +93,8 @@ object ShadeDisplayAwareModule {
     @SysUISingleton
     fun provideShadeWindowConfigurationForwarder(
         @ShadeDisplayAware shadeConfigurationController: ConfigurationController,
-        @GlobalConfig globalConfigController: ConfigurationController,
     ): ConfigurationForwarder {
-        return if (ShadeWindowGoesAround.isEnabled) {
-            shadeConfigurationController
-        } else {
-            globalConfigController
-        }
+        ShadeWindowGoesAround.isUnexpectedlyInLegacyMode()
+        return shadeConfigurationController
     }
 }
