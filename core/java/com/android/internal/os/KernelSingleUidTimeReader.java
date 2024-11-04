@@ -18,13 +18,12 @@ package com.android.internal.os;
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-
-import dalvik.annotation.optimization.CriticalNative;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -255,8 +254,8 @@ public class KernelSingleUidTimeReader {
      * the delta in the supplied array container.
      */
     public void addDelta(int uid, LongArrayMultiStateCounter counter, long timestampMs,
-            LongArrayMultiStateCounter.LongArrayContainer deltaContainer) {
-        mInjector.addDelta(uid, counter, timestampMs, deltaContainer);
+            long[] delta) {
+        mInjector.addDelta(uid, counter, timestampMs, delta);
     }
 
     @VisibleForTesting
@@ -274,15 +273,13 @@ public class KernelSingleUidTimeReader {
          * The delta is also returned via the optional deltaOut parameter.
          */
         public boolean addDelta(int uid, LongArrayMultiStateCounter counter, long timestampMs,
-                LongArrayMultiStateCounter.LongArrayContainer deltaOut) {
-            return addDeltaFromBpf(uid, counter.mNativeObject, timestampMs,
-                    deltaOut != null ? deltaOut.mNativeObject : 0);
+                long[] deltaOut) {
+            return addDeltaFromBpf(uid, counter.mNativeObject, timestampMs, deltaOut);
         }
 
-        @CriticalNative
         private static native boolean addDeltaFromBpf(int uid,
                 long longArrayMultiStateCounterNativePointer, long timestampMs,
-                long longArrayContainerNativePointer);
+                @Nullable long[] deltaOut);
 
         /**
          * Used for testing.
@@ -291,14 +288,14 @@ public class KernelSingleUidTimeReader {
          */
         public boolean addDeltaForTest(int uid, LongArrayMultiStateCounter counter,
                 long timestampMs, long[][] timeInFreqDataNanos,
-                LongArrayMultiStateCounter.LongArrayContainer deltaOut) {
+                long[] deltaOut) {
             return addDeltaForTest(uid, counter.mNativeObject, timestampMs, timeInFreqDataNanos,
-                    deltaOut != null ? deltaOut.mNativeObject : 0);
+                    deltaOut);
         }
 
         private static native boolean addDeltaForTest(int uid,
                 long longArrayMultiStateCounterNativePointer, long timestampMs,
-                long[][] timeInFreqDataNanos, long longArrayContainerNativePointer);
+                long[][] timeInFreqDataNanos, long[] deltaOut);
     }
 
     @VisibleForTesting
