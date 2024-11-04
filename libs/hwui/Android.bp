@@ -579,7 +579,6 @@ cc_defaults {
         "utils/Color.cpp",
         "utils/LinearAllocator.cpp",
         "utils/StringUtils.cpp",
-        "utils/StatsUtils.cpp",
         "utils/TypefaceUtils.cpp",
         "utils/VectorDrawableUtils.cpp",
         "AnimationContext.cpp",
