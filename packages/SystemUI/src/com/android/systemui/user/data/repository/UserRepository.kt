@@ -23,11 +23,13 @@ import android.app.admin.DevicePolicyManager
 import android.content.Context
 import android.content.IntentFilter
 import android.content.pm.UserInfo
+import android.content.res.Resources
 import android.os.UserHandle
 import android.os.UserManager
 import android.provider.Settings
 import androidx.annotation.VisibleForTesting
 import com.android.app.tracing.coroutines.launchTraced as launch
+import com.android.internal.statusbar.IStatusBarService
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
@@ -109,6 +111,9 @@ interface UserRepository {
     /** Whether logout for secondary users is enabled by admin device policy. */
     val isSecondaryUserLogoutEnabled: StateFlow<Boolean>
 
+    /** Whether logout into system user is enabled. */
+    val isLogoutToSystemUserEnabled: StateFlow<Boolean>
+
     /** Asynchronously refresh the list of users. This will cause [userInfos] to be updated. */
     fun refreshUsers()
 
@@ -120,6 +125,9 @@ interface UserRepository {
 
     /** Performs logout logout for secondary users. */
     suspend fun logOutSecondaryUser()
+
+    /** Performs logout into the system user. */
+    suspend fun logOutToSystemUser()
 
     /**
      * Returns the user ID of the "main user" of the device. This user may have access to certain
@@ -143,6 +151,7 @@ class UserRepositoryImpl
 @Inject
 constructor(
     @Application private val appContext: Context,
+    @Main private val resources: Resources,
     private val manager: UserManager,
     @Application private val applicationScope: CoroutineScope,
     @Main private val mainDispatcher: CoroutineDispatcher,
@@ -151,6 +160,7 @@ constructor(
     private val tracker: UserTracker,
     private val devicePolicyManager: DevicePolicyManager,
     private val broadcastDispatcher: BroadcastDispatcher,
+    private val statusBarService: IStatusBarService,
 ) : UserRepository {
 
     private val _userSwitcherSettings: StateFlow<UserSwitcherSettingsModel> =
@@ -275,9 +285,31 @@ constructor(
             .stateIn(applicationScope, SharingStarted.Eagerly, false)
 
     @SuppressLint("MissingPermission")
+    override val isLogoutToSystemUserEnabled: StateFlow<Boolean> =
+        selectedUser
+            .flatMapLatestConflated { selectedUser ->
+                if (selectedUser.isEligibleForLogout()) {
+                    flowOf(
+                        resources.getBoolean(R.bool.config_userSwitchingMustGoThroughLoginScreen)
+                    )
+                } else {
+                    flowOf(false)
+                }
+            }
+            .stateIn(applicationScope, SharingStarted.Eagerly, false)
+
+    @SuppressLint("MissingPermission")
     override suspend fun logOutSecondaryUser() {
         if (isSecondaryUserLogoutEnabled.value) {
             withContext(backgroundDispatcher) { devicePolicyManager.logoutUser() }
+        }
+    }
+
+    override suspend fun logOutToSystemUser() {
+        // TODO(b/377493351) : start using proper logout API once it is available.
+        // Using reboot is a temporary solution.
+        if (isLogoutToSystemUserEnabled.value) {
+            withContext(backgroundDispatcher) { statusBarService.reboot(false) }
         }
     }
 

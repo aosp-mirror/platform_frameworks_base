@@ -49,35 +49,78 @@ class UserLogoutInteractorTest : SysuiTestCase() {
     @Before
     fun setUp() {
         userRepository.setUserInfos(USER_INFOS)
-        runBlocking { userRepository.setSelectedUserInfo(USER_INFOS[1]) }
+        runBlocking { userRepository.setSelectedUserInfo(USER_INFOS[2]) }
+        userRepository.setLogoutToSystemUserEnabled(false)
+        userRepository.setSecondaryUserLogoutEnabled(false)
     }
 
     @Test
-    fun logOut_doesNothing_whenAdminDisabledSecondaryLogout() {
+    fun logOut_doesNothing_whenBothLogoutOptionsAreDisabled() {
         testScope.runTest {
             val isLogoutEnabled by collectLastValue(underTest.isLogoutEnabled)
-            val lastLogoutCount = userRepository.logOutSecondaryUserCallCount
-            userRepository.setSecondaryUserLogoutEnabled(false)
+            val secondaryUserLogoutCount = userRepository.logOutSecondaryUserCallCount
+            val logoutToSystemUserCount = userRepository.logOutToSystemUserCallCount
             assertThat(isLogoutEnabled).isFalse()
             underTest.logOut()
-            assertThat(userRepository.logOutSecondaryUserCallCount).isEqualTo(lastLogoutCount)
+            assertThat(userRepository.logOutSecondaryUserCallCount)
+                .isEqualTo(secondaryUserLogoutCount)
+            assertThat(userRepository.logOutToSystemUserCallCount)
+                .isEqualTo(logoutToSystemUserCount)
         }
     }
 
     @Test
-    fun logOut_logsOut_whenAdminEnabledSecondaryLogout() {
+    fun logOut_logsOutSecondaryUser_whenAdminEnabledSecondaryLogout() {
         testScope.runTest {
             val isLogoutEnabled by collectLastValue(underTest.isLogoutEnabled)
             val lastLogoutCount = userRepository.logOutSecondaryUserCallCount
+            val logoutToSystemUserCount = userRepository.logOutToSystemUserCallCount
             userRepository.setSecondaryUserLogoutEnabled(true)
             assertThat(isLogoutEnabled).isTrue()
             underTest.logOut()
             assertThat(userRepository.logOutSecondaryUserCallCount).isEqualTo(lastLogoutCount + 1)
+            assertThat(userRepository.logOutToSystemUserCallCount)
+                .isEqualTo(logoutToSystemUserCount)
+        }
+    }
+
+    @Test
+    fun logOut_logsOutToSystemUser_whenLogoutToSystemUserIsEnabled() {
+        testScope.runTest {
+            val isLogoutEnabled by collectLastValue(underTest.isLogoutEnabled)
+            val lastLogoutCount = userRepository.logOutSecondaryUserCallCount
+            val logoutToSystemUserCount = userRepository.logOutToSystemUserCallCount
+            userRepository.setLogoutToSystemUserEnabled(true)
+            assertThat(isLogoutEnabled).isTrue()
+            underTest.logOut()
+            assertThat(userRepository.logOutSecondaryUserCallCount).isEqualTo(lastLogoutCount)
+            assertThat(userRepository.logOutToSystemUserCallCount)
+                .isEqualTo(logoutToSystemUserCount + 1)
+        }
+    }
+
+    @Test
+    fun logOut_secondaryUserTakesPrecedence() {
+        testScope.runTest {
+            val isLogoutEnabled by collectLastValue(underTest.isLogoutEnabled)
+            val lastLogoutCount = userRepository.logOutSecondaryUserCallCount
+            val logoutToSystemUserCount = userRepository.logOutToSystemUserCallCount
+            userRepository.setLogoutToSystemUserEnabled(true)
+            userRepository.setSecondaryUserLogoutEnabled(true)
+            assertThat(isLogoutEnabled).isTrue()
+            underTest.logOut()
+            assertThat(userRepository.logOutSecondaryUserCallCount).isEqualTo(lastLogoutCount + 1)
+            assertThat(userRepository.logOutToSystemUserCallCount)
+                .isEqualTo(logoutToSystemUserCount)
         }
     }
 
     companion object {
         private val USER_INFOS =
-            listOf(UserInfo(0, "System user", 0), UserInfo(10, "Regular user", 0))
+            listOf(
+                UserInfo(0, "System user", 0),
+                UserInfo(10, "Regular user", 0),
+                UserInfo(11, "Secondary user", 0),
+            )
     }
 }
