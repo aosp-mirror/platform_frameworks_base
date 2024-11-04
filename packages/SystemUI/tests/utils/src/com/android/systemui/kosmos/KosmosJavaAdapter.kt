@@ -71,6 +71,7 @@ import com.android.systemui.shade.shadeController
 import com.android.systemui.shade.ui.viewmodel.notificationShadeWindowModel
 import com.android.systemui.statusbar.chips.ui.viewmodel.ongoingActivityChipsViewModel
 import com.android.systemui.statusbar.data.repository.fakeStatusBarModePerDisplayRepository
+import com.android.systemui.statusbar.notification.domain.interactor.activeNotificationsInteractor
 import com.android.systemui.statusbar.notification.domain.interactor.seenNotificationsInteractor
 import com.android.systemui.statusbar.notification.stack.domain.interactor.headsUpNotificationInteractor
 import com.android.systemui.statusbar.notification.stack.domain.interactor.sharedNotificationContainerInteractor
@@ -109,6 +110,7 @@ class KosmosJavaAdapter() {
     val bouncerRepository by lazy { kosmos.bouncerRepository }
     val communalRepository by lazy { kosmos.fakeCommunalSceneRepository }
     val communalTransitionViewModel by lazy { kosmos.communalTransitionViewModel }
+    val activeNotificationsInteractor by lazy { kosmos.activeNotificationsInteractor }
     val headsUpNotificationInteractor by lazy { kosmos.headsUpNotificationInteractor }
     val seenNotificationsInteractor by lazy { kosmos.seenNotificationsInteractor }
     val keyguardRepository by lazy { kosmos.fakeKeyguardRepository }
