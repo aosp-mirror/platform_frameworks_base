@@ -180,12 +180,13 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
         // all other cases, it is expected that the transition handler positions and crops the task
         // in order to allow the handler time to animate before the task before the final
         // position and crop are set.
-        final boolean shouldSetTaskPositionAndCrop = mTaskDragResizer.isResizingOrAnimating();
+        final boolean shouldSetTaskVisibilityPositionAndCrop =
+                mTaskDragResizer.isResizingOrAnimating();
         // Use |applyStartTransactionOnDraw| so that the transaction (that applies task crop) is
         // synced with the buffer transaction (that draws the View). Both will be shown on screen
         // at the same, whereas applying them independently causes flickering. See b/270202228.
         relayout(taskInfo, t, t, true /* applyStartTransactionOnDraw */,
-                shouldSetTaskPositionAndCrop, hasGlobalFocus);
+                shouldSetTaskVisibilityPositionAndCrop, hasGlobalFocus);
     }
 
     @VisibleForTesting
@@ -193,7 +194,7 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
             RelayoutParams relayoutParams,
             ActivityManager.RunningTaskInfo taskInfo,
             boolean applyStartTransactionOnDraw,
-            boolean setTaskCropAndPosition,
+            boolean shouldSetTaskVisibilityPositionAndCrop,
             boolean isStatusBarVisible,
             boolean isKeyguardVisibleAndOccluded,
             InsetsState displayInsetsState,
@@ -206,7 +207,7 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
                 ? R.dimen.freeform_decor_shadow_focused_thickness
                 : R.dimen.freeform_decor_shadow_unfocused_thickness;
         relayoutParams.mApplyStartTransactionOnDraw = applyStartTransactionOnDraw;
-        relayoutParams.mSetTaskPositionAndCrop = setTaskCropAndPosition;
+        relayoutParams.mSetTaskVisibilityPositionAndCrop = shouldSetTaskVisibilityPositionAndCrop;
         relayoutParams.mIsCaptionVisible = taskInfo.isFreeform()
                 || (isStatusBarVisible && !isKeyguardVisibleAndOccluded);
 
@@ -234,7 +235,7 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
     @SuppressLint("MissingPermission")
     void relayout(RunningTaskInfo taskInfo,
             SurfaceControl.Transaction startT, SurfaceControl.Transaction finishT,
-            boolean applyStartTransactionOnDraw, boolean setTaskCropAndPosition,
+            boolean applyStartTransactionOnDraw, boolean shouldSetTaskVisibilityPositionAndCrop,
             boolean hasGlobalFocus) {
         final boolean isFreeform =
                 taskInfo.getWindowingMode() == WindowConfiguration.WINDOWING_MODE_FREEFORM;
@@ -246,7 +247,8 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
         final WindowContainerTransaction wct = new WindowContainerTransaction();
 
         updateRelayoutParams(mRelayoutParams, taskInfo, applyStartTransactionOnDraw,
-                setTaskCropAndPosition, mIsStatusBarVisible, mIsKeyguardVisibleAndOccluded,
+                shouldSetTaskVisibilityPositionAndCrop, mIsStatusBarVisible,
+                mIsKeyguardVisibleAndOccluded,
                 mDisplayController.getInsetsState(taskInfo.displayId), hasGlobalFocus);
 
         relayout(mRelayoutParams, startT, finishT, wct, oldRootView, mResult);

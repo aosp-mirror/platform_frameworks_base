@@ -17,6 +17,7 @@
 package android.app;
 
 import static android.text.TextUtils.formatSimple;
+import static com.android.internal.util.Preconditions.checkArgumentPositive;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -40,6 +41,7 @@ import com.android.internal.os.BackgroundThread;
 
 import dalvik.annotation.optimization.CriticalNative;
 import dalvik.annotation.optimization.FastNative;
+import dalvik.annotation.optimization.NeverCompile;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
@@ -201,6 +203,23 @@ public class PropertyInvalidatedCache<Query, Result> {
     }
 
     /**
+     * The list of known and legal modules.  The list is not sorted.
+     */
+    private static final String[] sValidModule = {
+        MODULE_SYSTEM, MODULE_BLUETOOTH, MODULE_TELEPHONY, MODULE_TEST,
+    };
+
+    /**
+     * Verify that the module string is in the legal list.  Throw if it is not.
+     */
+    private static void throwIfInvalidModule(@NonNull String name) {
+        for (int i = 0; i < sValidModule.length; i++) {
+            if (sValidModule[i].equals(name)) return;
+        }
+        throw new IllegalArgumentException("invalid module: " + name);
+    }
+
+    /**
      * All legal keys start with one of the following strings.
      */
     private static final String[] sValidKeyPrefix = {
@@ -254,8 +273,11 @@ public class PropertyInvalidatedCache<Query, Result> {
     // written to global store.
     private static final int NONCE_BYPASS = 3;
 
+    // The largest reserved nonce value.  Update this whenever a reserved nonce is added.
+    private static final int MAX_RESERVED_NONCE = NONCE_BYPASS;
+
     private static boolean isReservedNonce(long n) {
-        return n >= NONCE_UNSET && n <= NONCE_BYPASS;
+        return n >= NONCE_UNSET && n <= MAX_RESERVED_NONCE;
     }
 
     /**
@@ -293,7 +315,7 @@ public class PropertyInvalidatedCache<Query, Result> {
     private long mMisses = 0;
 
     @GuardedBy("mLock")
-    private long[] mSkips = new long[]{ 0, 0, 0, 0 };
+    private long[] mSkips = new long[MAX_RESERVED_NONCE + 1];
 
     @GuardedBy("mLock")
     private long mMissOverflow = 0;
@@ -811,10 +833,20 @@ public class PropertyInvalidatedCache<Query, Result> {
         return false; // Always disable shared memory on Ravenwood. (for now)
     }
 
+    /**
+     * Keys that cannot be put in shared memory yet.
+     */
+    private static boolean inSharedMemoryDenyList(@NonNull String name) {
+        final String pkginfo = PREFIX_SYSTEM + "package_info";
+        return name.equals(pkginfo);
+    };
+
     // Return true if this cache can use shared memory for its nonce.  Shared memory may be used
     // if the module is the system.
     private static boolean sharedMemoryOkay(@NonNull String name) {
-        return sSharedMemoryAvailable && name.startsWith(PREFIX_SYSTEM);
+        return sSharedMemoryAvailable
+                && name.startsWith(PREFIX_SYSTEM)
+                && !inSharedMemoryDenyList(name);
     }
 
     /**
@@ -844,6 +876,73 @@ public class PropertyInvalidatedCache<Query, Result> {
     }
 
     /**
+     * A public argument builder to configure cache behavior.  The root instance requires a
+     * module; this is immutable.  New instances are created with member methods.  It is important
+     * to note that the member methods create new instances: they do not modify 'this'.  The api
+     * is allowed to be null in the record constructor to facility reuse of Args instances.
+     * @hide
+     */
+    public static record Args(@NonNull String mModule, @Nullable String mApi, int mMaxEntries) {
+
+        // Validation: the module must be one of the known module strings and the maxEntries must
+        // be positive.
+        public Args {
+            throwIfInvalidModule(mModule);
+            checkArgumentPositive(mMaxEntries, "max cache size must be positive");
+        }
+
+        // The base constructor must include the module.  Modules do not change in a source file,
+        // so even if the Args is reused, the module will not/should not change.  The api is null,
+        // which is not legal, but there is no reasonable default.  Clients must call the api
+        // method to set the field properly.
+        public Args(@NonNull String module) {
+            this(module, /* api */ null, /* maxEntries */ 32);
+        }
+
+        public Args api(@NonNull String api) {
+            return new Args(mModule, api, mMaxEntries);
+        }
+
+        public Args maxEntries(int val) {
+            return new Args(mModule, mApi, val);
+        }
+    }
+
+    /**
+     * Make a new property invalidated cache.  The key is computed from the module and api
+     * parameters.
+     *
+     * @param args The cache configuration.
+     * @param cacheName Name of this cache in debug and dumpsys
+     * @param computer The code to compute values that are not in the cache.
+     * @hide
+     */
+    public PropertyInvalidatedCache(@NonNull Args args, @NonNull String cacheName,
+            @Nullable QueryHandler<Query, Result> computer) {
+        mPropertyName = createPropertyName(args.mModule, args.mApi);
+        mCacheName = cacheName;
+        mNonce = getNonceHandler(mPropertyName);
+        mMaxEntries = args.mMaxEntries;
+        mCache = createMap();
+        mComputer = (computer != null) ? computer : new DefaultComputer<>(this);
+        registerCache();
+    }
+
+    /**
+     * Burst a property name into module and api.  Throw if the key is invalid.  This method is
+     * used in to transition legacy cache constructors to the args constructor.
+     */
+    private static Args parseProperty(@NonNull String name) {
+        throwIfInvalidCacheKey(name);
+        // Strip off the leading well-known prefix.
+        String base = name.substring(CACHE_KEY_PREFIX.length() + 1);
+        int dot = base.indexOf(".");
+        String module = base.substring(0, dot);
+        String api = base.substring(dot + 1);
+        return new Args(module).api(api);
+    }
+
+    /**
      * Make a new property invalidated cache.  This constructor names the cache after the
      * property name.  New clients should prefer the constructor that takes an explicit
      * cache name.
@@ -857,7 +956,7 @@ public class PropertyInvalidatedCache<Query, Result> {
      * @hide
      */
     public PropertyInvalidatedCache(int maxEntries, @NonNull String propertyName) {
-        this(maxEntries, propertyName, propertyName);
+        this(parseProperty(propertyName).maxEntries(maxEntries), propertyName, null);
     }
 
     /**
@@ -873,13 +972,7 @@ public class PropertyInvalidatedCache<Query, Result> {
      */
     public PropertyInvalidatedCache(int maxEntries, @NonNull String propertyName,
             @NonNull String cacheName) {
-        mPropertyName = propertyName;
-        mCacheName = cacheName;
-        mNonce = getNonceHandler(mPropertyName);
-        mMaxEntries = maxEntries;
-        mComputer = new DefaultComputer<>(this);
-        mCache = createMap();
-        registerCache();
+        this(parseProperty(propertyName).maxEntries(maxEntries), cacheName, null);
     }
 
     /**
@@ -897,13 +990,7 @@ public class PropertyInvalidatedCache<Query, Result> {
     @TestApi
     public PropertyInvalidatedCache(int maxEntries, @NonNull String module, @NonNull String api,
             @NonNull String cacheName, @NonNull QueryHandler<Query, Result> computer) {
-        mPropertyName = createPropertyName(module, api);
-        mCacheName = cacheName;
-        mNonce = getNonceHandler(mPropertyName);
-        mMaxEntries = maxEntries;
-        mComputer = computer;
-        mCache = createMap();
-        registerCache();
+        this(new Args(module).maxEntries(maxEntries).api(api), cacheName, computer);
     }
 
     // Create a map.  This should be called only from the constructor.
@@ -1171,7 +1258,8 @@ public class PropertyInvalidatedCache<Query, Result> {
     public @Nullable Result query(@NonNull Query query) {
         // Let access to mDisabled race: it's atomic anyway.
         long currentNonce = (!isDisabled()) ? getCurrentNonce() : NONCE_DISABLED;
-        if (bypass(query)) {
+        if (!isReservedNonce(currentNonce)
+            && bypass(query)) {
             currentNonce = NONCE_BYPASS;
         }
         for (;;) {
@@ -1639,53 +1727,61 @@ public class PropertyInvalidatedCache<Query, Result> {
         return false;
     }
 
-    /**
-     * helper method to check if dump should be skipped due to zero values
-     * @param args takes command arguments to check if -brief is present
-     * @return True if dump should be skipped
-     */
-    private boolean skipDump(String[] args) {
-        for (String a : args) {
-            if (a.equals(BRIEF)) {
-                return (mSkips[NONCE_CORKED] + mSkips[NONCE_UNSET] + mSkips[NONCE_DISABLED]
-                      + mSkips[NONCE_BYPASS] + mHits + mMisses) == 0;
-            }
+    @GuardedBy("mLock")
+    private long getSkipsLocked() {
+        int sum = 0;
+        for (int i = 0; i < mSkips.length; i++) {
+            sum += mSkips[i];
         }
-        return false;
+        return sum;
     }
 
+    // Return true if this cache has had any activity.  If the hits, misses, and skips are all
+    // zero then the client never tried to use the cache.
+    private boolean isActive() {
+        synchronized (mLock) {
+            return mHits + mMisses + getSkipsLocked() > 0;
+        }
+    }
+
+    @NeverCompile
     private void dumpContents(PrintWriter pw, boolean detailed, String[] args) {
         // If the user has requested specific caches and this is not one of them, return
         // immediately.
         if (detailed && !showDetailed(args)) {
             return;
         }
+        // Does the user want brief output?
+        boolean brief = false;
+        for (String a : args) brief |= a.equals(BRIEF);
 
         NonceHandler.Stats stats = mNonce.getStats();
 
         synchronized (mLock) {
-            if (!skipDump(args)) {
-                pw.println(formatSimple("  Cache Name: %s", cacheName()));
-                pw.println(formatSimple("    Property: %s", mPropertyName));
-                final long skips =
-                        mSkips[NONCE_CORKED] + mSkips[NONCE_UNSET] + mSkips[NONCE_DISABLED]
-                                + mSkips[NONCE_BYPASS];
-                pw.println(formatSimple(
-                        "    Hits: %d, Misses: %d, Skips: %d, Clears: %d",
-                        mHits, mMisses, skips, mClears));
-                pw.println(formatSimple(
-                        "    Skip-corked: %d, Skip-unset: %d, Skip-bypass: %d, Skip-other: %d",
-                        mSkips[NONCE_CORKED], mSkips[NONCE_UNSET],
-                        mSkips[NONCE_BYPASS], mSkips[NONCE_DISABLED]));
-                pw.println(formatSimple(
-                        "    Nonce: 0x%016x, Invalidates: %d, CorkedInvalidates: %d",
-                        mLastSeenNonce, stats.invalidated, stats.corkedInvalidates));
-                pw.println(formatSimple(
-                        "    Current Size: %d, Max Size: %d, HW Mark: %d, Overflows: %d",
-                        mCache.size(), mMaxEntries, mHighWaterMark, mMissOverflow));
-                pw.println(formatSimple("    Enabled: %s", mDisabled ? "false" : "true"));
-                pw.println("");
+            if (brief && !isActive()) {
+                return;
             }
+
+            pw.println(formatSimple("  Cache Name: %s", cacheName()));
+            pw.println(formatSimple("    Property: %s", mPropertyName));
+            pw.println(formatSimple(
+                "    Hits: %d, Misses: %d, Skips: %d, Clears: %d",
+                mHits, mMisses, getSkipsLocked(), mClears));
+
+            // Print all the skip reasons.
+            pw.format("    Skip-%s: %d", sNonceName[0], mSkips[0]);
+            for (int i = 1; i < mSkips.length; i++) {
+                pw.format(", Skip-%s: %d", sNonceName[i], mSkips[i]);
+            }
+            pw.println();
+
+            pw.println(formatSimple(
+                "    Nonce: 0x%016x, Invalidates: %d, CorkedInvalidates: %d",
+                mLastSeenNonce, stats.invalidated, stats.corkedInvalidates));
+            pw.println(formatSimple(
+                "    Current Size: %d, Max Size: %d, HW Mark: %d, Overflows: %d",
+                mCache.size(), mMaxEntries, mHighWaterMark, mMissOverflow));
+            pw.println(formatSimple("    Enabled: %s", mDisabled ? "false" : "true"));
 
             // No specific cache was requested.  This is the default, and no details
             // should be dumped.
@@ -1713,6 +1809,7 @@ public class PropertyInvalidatedCache<Query, Result> {
      * specific caches (selection is by cache name or property name); if these switches
      * are used then the output includes both cache statistics and cache entries.
      */
+    @NeverCompile
     private static void dumpCacheInfo(@NonNull PrintWriter pw, @NonNull String[] args) {
         if (!sEnabled) {
             pw.println("  Caching is disabled in this process.");
@@ -1745,6 +1842,7 @@ public class PropertyInvalidatedCache<Query, Result> {
      * are used then the output includes both cache statistics and cache entries.
      * @hide
      */
+    @NeverCompile
     public static void dumpCacheInfo(@NonNull ParcelFileDescriptor pfd, @NonNull String[] args) {
         // Create a PrintWriter that uses a byte array.  The code can safely write to
         // this array without fear of blocking.  The completed byte array will be sent

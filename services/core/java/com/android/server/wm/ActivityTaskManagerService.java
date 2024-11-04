@@ -1854,6 +1854,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
         assertPackageMatchesCallingUid(callingPackage);
 
+        mAmInternal.addCreatorToken(intent, callingPackage);
+
         final ActivityOptions activityOptions = ActivityOptions.makeBasic();
         activityOptions.setLaunchTaskId(taskId);
         // Pass in the system UID to allow setting launch taskId with MANAGE_GAME_ACTIVITY.
@@ -3910,6 +3912,17 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     public boolean supportsLocalVoiceInteraction() {
         return LocalServices.getService(VoiceInteractionManagerInternal.class)
                 .supportsLocalVoiceInteraction();
+    }
+
+    @Override
+    public void setLimitSystemEducationDialogs(
+            IBinder appToken, boolean limitSystemEducationDialogs) {
+        synchronized (mGlobalLock) {
+            final ActivityRecord r = ActivityRecord.isInRootTaskLocked(appToken);
+            if (r != null) {
+                r.setLimitSystemEducationDialogs(limitSystemEducationDialogs);
+            }
+        }
     }
 
     @Override

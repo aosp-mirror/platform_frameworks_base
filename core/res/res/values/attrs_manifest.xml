@@ -1876,6 +1876,34 @@
          @hide @SystemApi @FlaggedApi("android.content.res.manifest_flagging") -->
     <attr name="featureFlag" format="string" />
 
+    <!-- This attribute provides a way to fine-tune how incoming intents are matched to application
+    components. By default, no special matching rules are applied. This attribute can be specified
+    on the {@code <application>} tag as well as at the component tags such as {@code <activity>},
+    {@code <activity-alias>}, {@code <receiver>}, {@code <service>}, {@code <provider>} and the
+    attribute on the component can be used to override what's on the {@code <application>} tag. -->
+    <attr name="intentMatchingFlags">
+        <!-- Disables all special matching rules for incoming intents. When specifying multiple
+        flags, conflicting values are resolved by giving precedence to the "none" flag. -->
+        <flag name="none" value="0x0001" />
+
+        <!-- Enforces stricter matching for incoming intents:
+        <ul>
+             <li>Explicit intents should match the target component's intent filter
+             <li>Intents without an action should not match any intent filter
+        </ul>
+        -->
+        <flag name="enforceIntentFilter" value="0x0002" />
+
+        <!-- Relaxes the matching rules to allow intents without a action to match. This flag to be
+        used in conjunction with enforceIntentFilter to achieve a specific behavior:
+        <ul>
+            <li>Explicit intents should match the target component's intent filter
+            <li>Intents without an action are allowed to match any intent filter
+        </ul>
+        -->
+        <flag name="allowNullAction" value="0x0004" />
+    </attr>
+
     <!-- The <code>manifest</code> tag is the root of an
          <code>AndroidManifest.xml</code> file,
          describing the contents of an Android package (.apk) file.  One
@@ -2243,6 +2271,8 @@
              {@link android.window.OnBackInvokedCallback#onBackInvoked
              OnBackInvokedCallback.onBackInvoked()} on the focused window. -->
         <attr name="enableOnBackInvokedCallback" format="boolean"/>
+
+        <attr name="intentMatchingFlags"/>
     </declare-styleable>
 
     <!-- An attribution is a logical part of an app and is identified by a tag.
@@ -2930,6 +2960,7 @@
              contained here. -->
         <attr name="attributionTags" />
         <attr name="systemUserOnly" format="boolean" />
+        <attr name="intentMatchingFlags"/>
     </declare-styleable>
 
     <!-- Attributes that can be supplied in an AndroidManifest.xml
@@ -3089,6 +3120,7 @@
         -->
         <attr name="allowSharedIsolatedProcess" format="boolean" />
         <attr name="systemUserOnly" format="boolean" />
+        <attr name="intentMatchingFlags"/>
     </declare-styleable>
 
     <!-- @hide The <code>apex-system-service</code> tag declares an apex system service
@@ -3156,6 +3188,7 @@
              Context.createAttributionContext() using the first attribution tag
              contained here. -->
         <attr name="attributionTags" />
+        <attr name="intentMatchingFlags"/>
     </declare-styleable>
 
     <!-- The <code>activity</code> tag declares an
@@ -3350,6 +3383,7 @@
                  URIs. -->
             <enum name="readAndWrite" value="4" />
         </attr>
+        <attr name="intentMatchingFlags"/>
     </declare-styleable>
 
     <!-- The <code>activity-alias</code> tag declares a new
@@ -3392,6 +3426,7 @@
         <attr name="attributionTags" />
         <attr name="allowUntrustedActivityEmbedding" />
         <attr name="knownActivityEmbeddingCerts" />
+        <attr name="intentMatchingFlags"/>
     </declare-styleable>
 
     <!-- The <code>meta-data</code> tag is used to attach additional

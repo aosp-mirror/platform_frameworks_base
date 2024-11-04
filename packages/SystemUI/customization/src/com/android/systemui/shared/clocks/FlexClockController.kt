@@ -20,11 +20,14 @@ import android.content.Context
 import android.content.res.Resources
 import com.android.systemui.customization.R
 import com.android.systemui.plugins.clocks.AlarmData
+import com.android.systemui.plugins.clocks.AxisType
 import com.android.systemui.plugins.clocks.ClockConfig
 import com.android.systemui.plugins.clocks.ClockController
 import com.android.systemui.plugins.clocks.ClockEvents
+import com.android.systemui.plugins.clocks.ClockFontAxis
 import com.android.systemui.plugins.clocks.ClockFontAxisSetting
 import com.android.systemui.plugins.clocks.ClockMessageBuffers
+import com.android.systemui.plugins.clocks.ClockSettings
 import com.android.systemui.plugins.clocks.ThemeConfig
 import com.android.systemui.plugins.clocks.WeatherData
 import com.android.systemui.plugins.clocks.ZenData
@@ -37,6 +40,7 @@ import java.util.TimeZone
 class FlexClockController(
     private val ctx: Context,
     private val resources: Resources,
+    private val settings: ClockSettings,
     private val assets: AssetLoader, // TODO(b/364680879): Remove and replace w/ resources
     val design: ClockDesign, // TODO(b/364680879): Remove when done inlining
     val messageBuffers: ClockMessageBuffers?,
@@ -114,13 +118,16 @@ class FlexClockController(
             }
 
             override fun onFontAxesChanged(axes: List<ClockFontAxisSetting>) {
-                smallClock.events.onFontAxesChanged(axes)
-                largeClock.events.onFontAxesChanged(axes)
+                val fontAxes = ClockFontAxis.merge(FONT_AXES, axes).map { it.toSetting() }
+                smallClock.events.onFontAxesChanged(fontAxes)
+                largeClock.events.onFontAxesChanged(fontAxes)
             }
         }
 
     override fun initialize(isDarkTheme: Boolean, dozeFraction: Float, foldFraction: Float) {
         val theme = ThemeConfig(isDarkTheme, assets.seedColor)
+        events.onFontAxesChanged(settings.axes)
+
         smallClock.run {
             events.onThemeChanged(theme)
             animations.doze(dozeFraction)
@@ -137,4 +144,46 @@ class FlexClockController(
     }
 
     override fun dump(pw: PrintWriter) {}
+
+    companion object {
+        val FONT_AXES =
+            listOf(
+                ClockFontAxis(
+                    key = "wght",
+                    type = AxisType.Float,
+                    minValue = 1f,
+                    currentValue = 400f,
+                    maxValue = 1000f,
+                    name = "Weight",
+                    description = "Glyph Weight",
+                ),
+                ClockFontAxis(
+                    key = "wdth",
+                    type = AxisType.Float,
+                    minValue = 25f,
+                    currentValue = 100f,
+                    maxValue = 151f,
+                    name = "Width",
+                    description = "Glyph Width",
+                ),
+                ClockFontAxis(
+                    key = "ROND",
+                    type = AxisType.Boolean,
+                    minValue = 0f,
+                    currentValue = 0f,
+                    maxValue = 100f,
+                    name = "Round",
+                    description = "Glyph Roundness",
+                ),
+                ClockFontAxis(
+                    key = "slnt",
+                    type = AxisType.Boolean,
+                    minValue = 0f,
+                    currentValue = 0f,
+                    maxValue = -10f,
+                    name = "Slant",
+                    description = "Glyph Slant",
+                ),
+            )
+    }
 }

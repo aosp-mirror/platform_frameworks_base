@@ -4,8 +4,8 @@ import android.annotation.DimenRes
 import android.content.pm.PackageManager
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
+import android.platform.test.flag.junit.FlagsParameterization
 import android.widget.FrameLayout
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.keyguard.BouncerPanelExpansionCalculator.aboutToShowBouncerProgress
 import com.android.systemui.Flags
@@ -16,7 +16,9 @@ import com.android.systemui.flags.DisableSceneContainer
 import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.FeatureFlagsClassic
+import com.android.systemui.flags.andSceneContainer
 import com.android.systemui.res.R
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolator
 import com.android.systemui.statusbar.NotificationShelf
 import com.android.systemui.statusbar.StatusBarState
@@ -47,10 +49,12 @@ import org.mockito.Mockito.eq
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4
+import platform.test.runner.parameterized.Parameters
 
 @SmallTest
-@RunWith(AndroidJUnit4::class)
-class StackScrollAlgorithmTest : SysuiTestCase() {
+@RunWith(ParameterizedAndroidJunit4::class)
+class StackScrollAlgorithmTest(flags: FlagsParameterization) : SysuiTestCase() {
 
     @JvmField @Rule var expect: Expect = Expect.create()
 
@@ -98,6 +102,18 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
     private val headsUpZ = px(R.dimen.heads_up_pinned_elevation)
     private val bigGap = notifSectionDividerGap
     private val smallGap = px(R.dimen.notification_section_divider_height_lockscreen)
+
+    companion object {
+        @JvmStatic
+        @Parameters(name = "{0}")
+        fun getParams(): List<FlagsParameterization> {
+            return FlagsParameterization.allCombinationsOf().andSceneContainer()
+        }
+    }
+
+    init {
+        mSetFlagsRule.setFlagsParameterization(flags)
+    }
 
     @Before
     fun setUp() {
@@ -614,7 +630,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
 
     @Test
     fun resetViewStates_isOnKeyguard_viewBecomesTransparent() {
-        ambientState.setStatusBarState(StatusBarState.KEYGUARD)
+        ambientState.fakeShowingStackOnLockscreen()
         ambientState.hideAmount = 0.25f
         whenever(notificationRow.isHeadsUpState).thenReturn(true)
 
@@ -676,7 +692,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         whenever(row1.isHeadsUpState).thenReturn(true)
         whenever(row2.isHeadsUpState).thenReturn(false)
 
-        ambientState.setStatusBarState(StatusBarState.KEYGUARD)
+        ambientState.fakeShowingStackOnLockscreen()
         ambientState.hideAmount = 0.25f
         ambientState.dozeAmount = 0.33f
         notificationShelf.viewState.hidden = true
@@ -729,9 +745,24 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableSceneContainer
     fun resetViewStates_noSpaceForFooter_footerHidden() {
         ambientState.isShadeExpanded = true
         ambientState.stackEndHeight = 0f // no space for the footer in the stack
+        hostView.addView(footerView)
+
+        stackScrollAlgorithm.resetViewStates(ambientState, 0)
+
+        assertThat((footerView.viewState as FooterViewState).hideContent).isTrue()
+    }
+
+    @Test
+    @EnableSceneContainer
+    fun resetViewStates_noSpaceForFooter_footerHidden_withSceneContainer() {
+        ambientState.isShadeExpanded = true
+        ambientState.stackTop = 0f
+        ambientState.stackCutoff = 100f
+        val footerView = mockFooterView(height = 200) // no space for the footer in the stack
         hostView.addView(footerView)
 
         stackScrollAlgorithm.resetViewStates(ambientState, 0)
@@ -1550,5 +1581,21 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
 private fun mockExpandableNotificationRow(): ExpandableNotificationRow {
     return mock(ExpandableNotificationRow::class.java).apply {
         whenever(viewState).thenReturn(ExpandableViewState())
+    }
+}
+
+private fun mockFooterView(height: Int): FooterView {
+    return mock(FooterView::class.java).apply {
+        whenever(viewState).thenReturn(FooterViewState())
+        whenever(intrinsicHeight).thenReturn(height)
+    }
+}
+
+private fun AmbientState.fakeShowingStackOnLockscreen() {
+    if (SceneContainerFlag.isEnabled) {
+        isShowingStackOnLockscreen = true
+        lockscreenStackFadeInProgress = 1f // stack is fully opaque
+    } else {
+        setStatusBarState(StatusBarState.KEYGUARD)
     }
 }

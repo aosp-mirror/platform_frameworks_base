@@ -44,6 +44,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.json.JSONObject
 
 private val KEY_TIMESTAMP = "appliedTimestamp"
 private val KNOWN_PLUGINS =
@@ -299,7 +300,7 @@ open class ClockRegistry(
                         )
                     }
 
-                ClockSettings.deserialize(json)
+                ClockSettings.fromJson(JSONObject(json))
             } catch (ex: Exception) {
                 logger.e("Failed to parse clock settings", ex)
                 null
@@ -312,21 +313,24 @@ open class ClockRegistry(
         assert.isNotMainThread()
 
         try {
-            value?.metadata?.put(KEY_TIMESTAMP, System.currentTimeMillis())
+            val json =
+                value?.let {
+                    it.metadata.put(KEY_TIMESTAMP, System.currentTimeMillis())
+                    ClockSettings.toJson(it)
+                } ?: ""
 
-            val json = ClockSettings.serialize(value)
             if (handleAllUsers) {
                 Settings.Secure.putStringForUser(
                     context.contentResolver,
                     Settings.Secure.LOCK_SCREEN_CUSTOM_CLOCK_FACE,
-                    json,
+                    json.toString(),
                     ActivityManager.getCurrentUser(),
                 )
             } else {
                 Settings.Secure.putString(
                     context.contentResolver,
                     Settings.Secure.LOCK_SCREEN_CUSTOM_CLOCK_FACE,
-                    json,
+                    json.toString(),
                 )
             }
         } catch (ex: Exception) {
@@ -557,14 +561,15 @@ open class ClockRegistry(
     }
 
     fun getClocks(): List<ClockMetadata> {
-        if (!isEnabled) {
-            return listOf(availableClocks[DEFAULT_CLOCK_ID]!!.metadata)
-        }
+        if (!isEnabled) return listOf(availableClocks[DEFAULT_CLOCK_ID]!!.metadata)
         return availableClocks.map { (_, clock) -> clock.metadata }
     }
 
-    fun getClockPickerConfig(clockId: ClockId): ClockPickerConfig? =
-        availableClocks[clockId]?.provider?.getClockPickerConfig(clockId)
+    fun getClockPickerConfig(clockId: ClockId): ClockPickerConfig? {
+        val clockSettings =
+            settings?.let { if (clockId == it.clockId) it else null } ?: ClockSettings(clockId)
+        return availableClocks[clockId]?.provider?.getClockPickerConfig(clockSettings)
+    }
 
     fun createExampleClock(clockId: ClockId): ClockController? = createClock(clockId)
 

@@ -315,7 +315,7 @@ public class PreAuthInfoTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_PRIVATE_SPACE_BP)
+    @RequiresFlagsEnabled(Flags.FLAG_EFFECTIVE_USER_BP)
     public void testCredentialOwnerIdAsUserId() throws Exception {
         when(mUserManager.getCredentialOwnerProfile(USER_ID)).thenReturn(OWNER_ID);
 

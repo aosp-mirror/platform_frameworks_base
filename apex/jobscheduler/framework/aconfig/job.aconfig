@@ -37,3 +37,11 @@ flag {
     description: "Ignore the important_while_foreground flag and change the related APIs to be not effective"
     bug: "374175032"
 }
+
+flag {
+    name: "get_pending_job_reasons_api"
+    is_exported: true
+    namespace: "backstage_power"
+    description: "Introduce a new getPendingJobReasons() API which returns reasons why a job may not have executed. Also deprecate the existing getPendingJobReason() API."
+    bug: "372031023"
+}

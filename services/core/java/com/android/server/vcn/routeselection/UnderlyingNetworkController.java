@@ -204,10 +204,8 @@ public class UnderlyingNetworkController {
         List<NetworkCallback> oldCellCallbacks = new ArrayList<>(mCellBringupCallbacks);
         mCellBringupCallbacks.clear();
 
-        if (mVcnContext.isFlagIpSecTransformStateEnabled()) {
-            for (UnderlyingNetworkEvaluator evaluator : mUnderlyingNetworkRecords.values()) {
-                evaluator.close();
-            }
+        for (UnderlyingNetworkEvaluator evaluator : mUnderlyingNetworkRecords.values()) {
+            evaluator.close();
         }
 
         mUnderlyingNetworkRecords.clear();
@@ -429,10 +427,7 @@ public class UnderlyingNetworkController {
         if (oldSnapshot
                 .getAllSubIdsInGroup(mSubscriptionGroup)
                 .equals(newSnapshot.getAllSubIdsInGroup(mSubscriptionGroup))) {
-
-            if (mVcnContext.isFlagIpSecTransformStateEnabled()) {
-                reevaluateNetworks();
-            }
+            reevaluateNetworks();
             return;
         }
         registerOrUpdateNetworkRequests();
@@ -445,11 +440,6 @@ public class UnderlyingNetworkController {
      */
     public void updateInboundTransform(
             @NonNull UnderlyingNetworkRecord currentNetwork, @NonNull IpSecTransform transform) {
-        if (!mVcnContext.isFlagIpSecTransformStateEnabled()) {
-            logWtf("#updateInboundTransform: unexpected call; flags missing");
-            return;
-        }
-
         Objects.requireNonNull(currentNetwork, "currentNetwork is null");
         Objects.requireNonNull(transform, "transform is null");
 
@@ -572,10 +562,7 @@ public class UnderlyingNetworkController {
 
         @Override
         public void onLost(@NonNull Network network) {
-            if (mVcnContext.isFlagIpSecTransformStateEnabled()) {
-                mUnderlyingNetworkRecords.get(network).close();
-            }
-
+            mUnderlyingNetworkRecords.get(network).close();
             mUnderlyingNetworkRecords.remove(network);
 
             reevaluateNetworks();
@@ -648,11 +635,6 @@ public class UnderlyingNetworkController {
     class NetworkEvaluatorCallbackImpl implements NetworkEvaluatorCallback {
         @Override
         public void onEvaluationResultChanged() {
-            if (!mVcnContext.isFlagIpSecTransformStateEnabled()) {
-                logWtf("#onEvaluationResultChanged: unexpected call; flags missing");
-                return;
-            }
-
             mVcnContext.ensureRunningOnLooperThread();
             reevaluateNetworks();
         }

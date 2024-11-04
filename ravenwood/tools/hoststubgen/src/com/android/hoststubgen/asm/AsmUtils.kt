@@ -327,6 +327,10 @@ fun ClassNode.isSynthetic(): Boolean {
     return (this.access and Opcodes.ACC_SYNTHETIC) != 0
 }
 
+fun ClassNode.isAbstract(): Boolean {
+    return (this.access and Opcodes.ACC_ABSTRACT) != 0
+}
+
 fun MethodNode.isSynthetic(): Boolean {
     return (this.access and Opcodes.ACC_SYNTHETIC) != 0
 }

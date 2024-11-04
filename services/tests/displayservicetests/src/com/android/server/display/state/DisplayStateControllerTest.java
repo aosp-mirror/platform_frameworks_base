@@ -63,11 +63,12 @@ public final class DisplayStateControllerTest {
                 DisplayManagerInternal.DisplayPowerRequest.class);
 
         displayPowerRequest.policy = DisplayManagerInternal.DisplayPowerRequest.POLICY_OFF;
+        displayPowerRequest.policyReason = Display.STATE_REASON_KEY;
         Pair<Integer, Integer> stateAndReason =
                 mDisplayStateController.updateDisplayState(
                         displayPowerRequest, DISPLAY_ENABLED, !DISPLAY_IN_TRANSITION);
         assertTrue(Display.STATE_OFF == stateAndReason.first);
-        assertTrue(Display.STATE_REASON_DEFAULT_POLICY == stateAndReason.second);
+        assertTrue(Display.STATE_REASON_KEY == stateAndReason.second);
         verify(mDisplayPowerProximityStateController).updateProximityState(displayPowerRequest,
                 Display.STATE_OFF);
         assertEquals(true, mDisplayStateController.shouldPerformScreenOffTransition());
@@ -105,11 +106,12 @@ public final class DisplayStateControllerTest {
                 DisplayManagerInternal.DisplayPowerRequest.class);
 
         displayPowerRequest.policy = DisplayManagerInternal.DisplayPowerRequest.POLICY_BRIGHT;
+        displayPowerRequest.policyReason = Display.STATE_REASON_KEY;
         Pair<Integer, Integer> stateAndReason =
                 mDisplayStateController.updateDisplayState(
                         displayPowerRequest, !DISPLAY_ENABLED, !DISPLAY_IN_TRANSITION);
         assertTrue(Display.STATE_OFF == stateAndReason.first);
-        assertTrue(Display.STATE_REASON_DEFAULT_POLICY == stateAndReason.second);
+        assertTrue(Display.STATE_REASON_KEY == stateAndReason.second);
         verify(mDisplayPowerProximityStateController).updateProximityState(displayPowerRequest,
                 Display.STATE_ON);
         assertEquals(false, mDisplayStateController.shouldPerformScreenOffTransition());
@@ -123,11 +125,12 @@ public final class DisplayStateControllerTest {
                 DisplayManagerInternal.DisplayPowerRequest.class);
 
         displayPowerRequest.policy = DisplayManagerInternal.DisplayPowerRequest.POLICY_BRIGHT;
+        displayPowerRequest.policyReason = Display.STATE_REASON_MOTION;
         Pair<Integer, Integer> stateAndReason =
                 mDisplayStateController.updateDisplayState(
                         displayPowerRequest, DISPLAY_ENABLED, DISPLAY_IN_TRANSITION);
         assertTrue(Display.STATE_OFF == stateAndReason.first);
-        assertTrue(Display.STATE_REASON_DEFAULT_POLICY == stateAndReason.second);
+        assertTrue(Display.STATE_REASON_MOTION == stateAndReason.second);
         verify(mDisplayPowerProximityStateController).updateProximityState(displayPowerRequest,
                 Display.STATE_ON);
         assertEquals(false, mDisplayStateController.shouldPerformScreenOffTransition());
@@ -141,6 +144,7 @@ public final class DisplayStateControllerTest {
                 DisplayManagerInternal.DisplayPowerRequest.class);
 
         displayPowerRequest.policy = DisplayManagerInternal.DisplayPowerRequest.POLICY_BRIGHT;
+        displayPowerRequest.policyReason = Display.STATE_REASON_DEFAULT_POLICY;
         Pair<Integer, Integer> stateAndReason =
                 mDisplayStateController.updateDisplayState(
                         displayPowerRequest, DISPLAY_ENABLED, !DISPLAY_IN_TRANSITION);
@@ -156,6 +160,7 @@ public final class DisplayStateControllerTest {
         DisplayManagerInternal.DisplayPowerRequest displayPowerRequest =
                 new DisplayManagerInternal.DisplayPowerRequest();
         displayPowerRequest.policy = DisplayManagerInternal.DisplayPowerRequest.POLICY_DOZE;
+        displayPowerRequest.policyReason = Display.STATE_REASON_DRAW_WAKE_LOCK;
         mDisplayStateController.overrideDozeScreenState(
                 Display.STATE_DOZE_SUSPEND, Display.STATE_REASON_OFFLOAD);
 
@@ -172,8 +177,9 @@ public final class DisplayStateControllerTest {
         DisplayManagerInternal.DisplayPowerRequest displayPowerRequest =
                 new DisplayManagerInternal.DisplayPowerRequest();
         displayPowerRequest.policy = DisplayManagerInternal.DisplayPowerRequest.POLICY_OFF;
+        displayPowerRequest.policyReason = Display.STATE_REASON_DEFAULT_POLICY;
         mDisplayStateController.overrideDozeScreenState(
-                Display.STATE_DOZE_SUSPEND, Display.STATE_REASON_DEFAULT_POLICY);
+                Display.STATE_DOZE_SUSPEND, Display.STATE_REASON_DRAW_WAKE_LOCK);
 
         Pair<Integer, Integer> stateAndReason =
                 mDisplayStateController.updateDisplayState(
@@ -181,6 +187,53 @@ public final class DisplayStateControllerTest {
 
         assertTrue(Display.STATE_OFF == stateAndReason.first);
         assertTrue(Display.STATE_REASON_DEFAULT_POLICY == stateAndReason.second);
+    }
+
+    @Test
+    public void policyOff_usespolicyReasonFromRequest() {
+        DisplayManagerInternal.DisplayPowerRequest displayPowerRequest =
+                new DisplayManagerInternal.DisplayPowerRequest();
+        displayPowerRequest.policy = DisplayManagerInternal.DisplayPowerRequest.POLICY_OFF;
+        displayPowerRequest.policyReason = Display.STATE_REASON_KEY;
+
+        Pair<Integer, Integer> stateAndReason =
+                mDisplayStateController.updateDisplayState(
+                        displayPowerRequest, DISPLAY_ENABLED, !DISPLAY_IN_TRANSITION);
+
+        assertTrue(Display.STATE_OFF == stateAndReason.first);
+        assertTrue(Display.STATE_REASON_KEY == stateAndReason.second);
+    }
+
+    @Test
+    public void policyBright_usespolicyReasonFromRequest() {
+        DisplayManagerInternal.DisplayPowerRequest displayPowerRequest =
+                new DisplayManagerInternal.DisplayPowerRequest();
+        displayPowerRequest.policy = DisplayManagerInternal.DisplayPowerRequest.POLICY_BRIGHT;
+        displayPowerRequest.policyReason = Display.STATE_REASON_DREAM_MANAGER;
+
+        Pair<Integer, Integer> stateAndReason =
+                mDisplayStateController.updateDisplayState(
+                        displayPowerRequest, DISPLAY_ENABLED, !DISPLAY_IN_TRANSITION);
+
+        assertTrue(Display.STATE_ON == stateAndReason.first);
+        assertTrue(Display.STATE_REASON_DREAM_MANAGER == stateAndReason.second);
+    }
+
+    @Test
+    public void policyRequestHasDozeScreenState_usesPolicyDozeScreenStateReason() {
+        DisplayManagerInternal.DisplayPowerRequest displayPowerRequest =
+                new DisplayManagerInternal.DisplayPowerRequest();
+        displayPowerRequest.policy = DisplayManagerInternal.DisplayPowerRequest.POLICY_DOZE;
+        displayPowerRequest.policyReason = Display.STATE_REASON_MOTION;
+        displayPowerRequest.dozeScreenState = Display.STATE_ON;
+        displayPowerRequest.dozeScreenStateReason = Display.STATE_REASON_OFFLOAD;
+
+        Pair<Integer, Integer> stateAndReason =
+                mDisplayStateController.updateDisplayState(
+                        displayPowerRequest, DISPLAY_ENABLED, !DISPLAY_IN_TRANSITION);
+
+        assertTrue(Display.STATE_ON == stateAndReason.first);
+        assertTrue(Display.STATE_REASON_OFFLOAD == stateAndReason.second);
     }
 
     private void validDisplayState(int policy, int displayState, boolean isEnabled,

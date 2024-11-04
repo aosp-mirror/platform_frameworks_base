@@ -17,9 +17,19 @@
 package com.android.server.media.quality;
 
 import android.content.Context;
+import android.media.quality.AmbientBacklightSettings;
+import android.media.quality.IAmbientBacklightCallback;
 import android.media.quality.IMediaQualityManager;
+import android.media.quality.IPictureProfileCallback;
+import android.media.quality.ISoundProfileCallback;
+import android.media.quality.ParamCapability;
+import android.media.quality.PictureProfile;
+import android.media.quality.SoundProfile;
 
 import com.android.server.SystemService;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This service manage picture profile and sound profile for TV setting. Also communicates with the
@@ -43,5 +53,122 @@ public class MediaQualityService extends SystemService {
 
     // TODO: Add additional APIs. b/373951081
     private final class BinderService extends IMediaQualityManager.Stub {
+        @Override
+        public PictureProfile createPictureProfile(PictureProfile pp) {
+            // TODO: implement
+            return pp;
+        }
+        @Override
+        public void updatePictureProfile(long id, PictureProfile pp) {
+            // TODO: implement
+        }
+        @Override
+        public void removePictureProfile(long id) {
+            // TODO: implement
+        }
+        @Override
+        public PictureProfile getPictureProfileById(long id) {
+            return null;
+        }
+        @Override
+        public List<PictureProfile> getPictureProfilesByPackage(String packageName) {
+            return new ArrayList<>();
+        }
+        @Override
+        public List<PictureProfile> getAvailablePictureProfiles() {
+            return new ArrayList<>();
+        }
+        @Override
+        public List<PictureProfile> getAllPictureProfiles() {
+            return new ArrayList<>();
+        }
+
+        @Override
+        public SoundProfile createSoundProfile(SoundProfile pp) {
+            // TODO: implement
+            return pp;
+        }
+        @Override
+        public void updateSoundProfile(long id, SoundProfile pp) {
+            // TODO: implement
+        }
+        @Override
+        public void removeSoundProfile(long id) {
+            // TODO: implement
+        }
+        @Override
+        public SoundProfile getSoundProfileById(long id) {
+            return null;
+        }
+        @Override
+        public List<SoundProfile> getSoundProfilesByPackage(String packageName) {
+            return new ArrayList<>();
+        }
+        @Override
+        public List<SoundProfile> getAvailableSoundProfiles() {
+            return new ArrayList<>();
+        }
+        @Override
+        public List<SoundProfile> getAllSoundProfiles() {
+            return new ArrayList<>();
+        }
+
+
+        @Override
+        public void registerPictureProfileCallback(final IPictureProfileCallback callback) {
+        }
+        @Override
+        public void registerSoundProfileCallback(final ISoundProfileCallback callback) {
+        }
+
+        @Override
+        public void registerAmbientBacklightCallback(IAmbientBacklightCallback callback) {
+        }
+
+        @Override
+        public void setAmbientBacklightSettings(AmbientBacklightSettings settings) {
+        }
+
+        @Override
+        public void setAmbientBacklightEnabled(boolean enabled) {
+        }
+
+        @Override
+        public List<ParamCapability> getParamCapabilities(List<String> names) {
+            return new ArrayList<>();
+        }
+
+
+        @Override
+        public boolean isSupported() {
+            return false;
+        }
+
+        @Override
+        public void setAutoPictureQualityEnabled(boolean enabled) {
+        }
+
+        @Override
+        public boolean isAutoPictureQualityEnabled() {
+            return false;
+        }
+
+        @Override
+        public void setSuperResolutionEnabled(boolean enabled) {
+        }
+
+        @Override
+        public boolean isSuperResolutionEnabled() {
+            return false;
+        }
+
+        @Override
+        public void setAutoSoundQualityEnabled(boolean enabled) {
+        }
+
+        @Override
+        public boolean isAutoSoundQualityEnabled() {
+            return false;
+        }
     }
 }

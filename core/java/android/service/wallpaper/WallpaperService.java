@@ -16,6 +16,7 @@
 
 package android.service.wallpaper;
 
+import static android.app.Flags.FLAG_LIVE_WALLPAPER_CONTENT_HANDLING;
 import static android.app.WallpaperManager.COMMAND_FREEZE;
 import static android.app.WallpaperManager.COMMAND_UNFREEZE;
 import static android.app.WallpaperManager.SetWallpaperFlags;
@@ -50,6 +51,7 @@ import android.app.WallpaperColors;
 import android.app.WallpaperInfo;
 import android.app.WallpaperManager;
 import android.app.compat.CompatChanges;
+import android.app.wallpaper.WallpaperDescription;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledAfter;
 import android.compat.annotation.EnabledSince;
@@ -919,6 +921,24 @@ public abstract class WallpaperService extends Service {
          */
         @MainThread
         public void onZoomChanged(@FloatRange(from = 0f, to = 1f) float zoom) {
+        }
+
+        /**
+         * Called when the wallpaper preview rendered by this engine is about to be persisted as
+         * a selected wallpaper. The returned WallpaperDescription (if any) will be persisted by
+         * the system and passed into subsequent calls to
+         * {@link WallpaperService#onCreateEngine(WallpaperDescription)}. This allows the Engine
+         * to perform any necessary bookkeeping before a wallpaper being previewed is set on
+         * the device, and update the description if necessary.
+         *
+         * @param which Specifies wallpaper destination: home, lock, or both
+         * @return the description of the applied wallpaper, or {@code null} if description is
+         * unchanged
+         */
+        @Nullable
+        @FlaggedApi(FLAG_LIVE_WALLPAPER_CONTENT_HANDLING)
+        public WallpaperDescription onApplyWallpaper(@SetWallpaperFlags int which) {
+            return null;
         }
 
         /**
@@ -2449,6 +2469,7 @@ public abstract class WallpaperService extends Service {
         final Display mDisplay;
         final WallpaperManager mWallpaperManager;
         @Nullable final WallpaperInfo mInfo;
+        @NonNull final WallpaperDescription mDescription;
 
         Engine mEngine;
         @SetWallpaperFlags int mWhich;
@@ -2456,7 +2477,8 @@ public abstract class WallpaperService extends Service {
         IWallpaperEngineWrapper(WallpaperService service,
                 IWallpaperConnection conn, IBinder windowToken,
                 int windowType, boolean isPreview, int reqWidth, int reqHeight, Rect padding,
-                int displayId, @SetWallpaperFlags int which, @Nullable WallpaperInfo info) {
+                int displayId, @SetWallpaperFlags int which, @Nullable WallpaperInfo info,
+                @NonNull WallpaperDescription description) {
             mWallpaperManager = getSystemService(WallpaperManager.class);
             mCaller = new HandlerCaller(service, service.onProvideEngineLooper(), this, true);
             mConnection = conn;
@@ -2469,6 +2491,7 @@ public abstract class WallpaperService extends Service {
             mDisplayId = displayId;
             mWhich = which;
             mInfo = info;
+            mDescription = description;
 
             // Create a display context before onCreateEngine.
             mDisplayManager = getSystemService(DisplayManager.class);
@@ -2593,9 +2616,19 @@ public abstract class WallpaperService extends Service {
             return mEngine == null ? null : SurfaceControl.mirrorSurface(mEngine.mSurfaceControl);
         }
 
+        @Nullable
+        public WallpaperDescription onApplyWallpaper(@SetWallpaperFlags int which) {
+            return mEngine != null ? mEngine.onApplyWallpaper(which) : null;
+        }
+
         private void doAttachEngine() {
             Trace.beginSection("WPMS.onCreateEngine");
-            Engine engine = onCreateEngine();
+            Engine engine;
+            if (mDescription != null) {
+                engine = onCreateEngine(mDescription);
+            } else {
+                engine = onCreateEngine();
+            }
             Trace.endSection();
             mEngine = engine;
             Trace.beginSection("WPMS.mConnection.attachEngine-" + mDisplayId);
@@ -2804,11 +2837,13 @@ public abstract class WallpaperService extends Service {
         @Override
         public void attach(IWallpaperConnection conn, IBinder windowToken,
                 int windowType, boolean isPreview, int reqWidth, int reqHeight, Rect padding,
-                int displayId, @SetWallpaperFlags int which, @Nullable WallpaperInfo info) {
+                int displayId, @SetWallpaperFlags int which, WallpaperInfo info,
+                @NonNull WallpaperDescription description) {
             Trace.beginSection("WPMS.ServiceWrapper.attach");
             IWallpaperEngineWrapper engineWrapper =
                     new IWallpaperEngineWrapper(mTarget, conn, windowToken, windowType,
-                            isPreview, reqWidth, reqHeight, padding, displayId, which, info);
+                            isPreview, reqWidth, reqHeight, padding, displayId, which, info,
+                            description);
             synchronized (mActiveEngines) {
                 mActiveEngines.put(windowToken, engineWrapper);
             }
@@ -2882,6 +2917,19 @@ public abstract class WallpaperService extends Service {
      */
     @MainThread
     public abstract Engine onCreateEngine();
+
+    /**
+     * Creates a new engine instance to show the given content. See also {@link #onCreateEngine()}.
+     *
+     * @param description content to display
+     * @return the rendering engine
+     */
+    @FlaggedApi(FLAG_LIVE_WALLPAPER_CONTENT_HANDLING)
+    @MainThread
+    @Nullable
+    public Engine onCreateEngine(@NonNull WallpaperDescription description) {
+        return onCreateEngine();
+    }
 
     @Override
     protected void dump(FileDescriptor fd, PrintWriter out, String[] args) {

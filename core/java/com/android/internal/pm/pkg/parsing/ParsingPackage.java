@@ -553,4 +553,15 @@ public interface ParsingPackage {
     boolean isNormalScreensSupported();
 
     boolean isSmallScreensSupported();
+
+    /**
+     * Sets the intent matching flags. This value is intended to be set from the "application" tag.
+     * @see android.R.styleable#AndroidManifestApplication_intentMatchingFlags
+     */
+    ParsingPackage setIntentMatchingFlags(int intentMatchingFlags);
+
+    /**
+     * Returns the intent matching flags.
+     */
+    int getIntentMatchingFlags();
 }

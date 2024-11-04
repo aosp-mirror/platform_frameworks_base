@@ -73,7 +73,7 @@ import org.mockito.kotlin.whenever
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
+class CommunalWidgetRepositoryLocalImplTest : SysuiTestCase() {
     @Mock private lateinit var appWidgetHost: CommunalAppWidgetHost
     @Mock private lateinit var providerInfoA: AppWidgetProviderInfo
     @Mock private lateinit var providerInfoB: AppWidgetProviderInfo
@@ -105,14 +105,14 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
             "com.android.fake/WidgetProviderC",
         )
 
-    private lateinit var underTest: CommunalWidgetRepositoryImpl
+    private lateinit var underTest: CommunalWidgetRepositoryLocalImpl
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         fakeWidgets = MutableStateFlow(emptyMap())
         fakeProviders = MutableStateFlow(emptyMap())
-        logBuffer = logcatLogBuffer(name = "CommunalWidgetRepoImplTest")
+        logBuffer = logcatLogBuffer(name = "CommunalWidgetRepoLocalImplTest")
         backupUtils = CommunalBackupUtils(kosmos.applicationContext)
 
         setAppWidgetIds(emptyList())
@@ -126,7 +126,7 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
         restoreUser(mainUser)
 
         underTest =
-            CommunalWidgetRepositoryImpl(
+            CommunalWidgetRepositoryLocalImpl(
                 appWidgetHost,
                 testScope.backgroundScope,
                 kosmos.testDispatcher,
