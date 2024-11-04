@@ -20,7 +20,7 @@ import android.os.Looper
 import android.util.ArrayMap
 import androidx.dynamicanimation.animation.FloatPropertyCompat
 import com.android.wm.shell.shared.animation.PhysicsAnimatorTestUtils.prepareForTest
-import java.util.ArrayDeque
+import java.util.*
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import kotlin.collections.ArrayList
@@ -74,16 +74,13 @@ object PhysicsAnimatorTestUtils {
 
     @JvmStatic
     fun tearDown() {
-        if (Looper.myLooper() == animationThreadHandler.looper) {
+        val latch = CountDownLatch(1)
+        animationThreadHandler.post {
             animatorTestHelpers.keys.forEach { it.cancel() }
-        } else {
-            val latch = CountDownLatch(1)
-            animationThreadHandler.post {
-                animatorTestHelpers.keys.forEach { it.cancel() }
-                latch.countDown()
-            }
-            latch.await(5, TimeUnit.SECONDS)
+            latch.countDown()
         }
+
+        latch.await()
 
         animatorTestHelpers.clear()
         animators.clear()
@@ -351,9 +348,8 @@ object PhysicsAnimatorTestUtils {
      * Returns all of the values that have ever been reported to update listeners, per property.
      */
     @Suppress("UNCHECKED_CAST")
-    fun <T : Any> getAnimationUpdateFrames(
-        animator: PhysicsAnimator<T>
-    ): UpdateFramesPerProperty<T> {
+    fun <T : Any> getAnimationUpdateFrames(animator: PhysicsAnimator<T>):
+            UpdateFramesPerProperty<T> {
         return animatorTestHelpers[animator]?.getUpdates() as UpdateFramesPerProperty<T>
     }
 

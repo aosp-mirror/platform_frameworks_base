@@ -56,7 +56,6 @@ abstract class BaseBubblePinController(private val screenSizeProvider: () -> Poi
         onLeft = initialLocationOnLeft
         screenCenterX = screenSizeProvider.invoke().x / 2
         dismissZone = getExclusionRect()
-        listener?.onStart(if (initialLocationOnLeft) LEFT else RIGHT)
     }
 
     /** View has moved to [x] and [y] screen coordinates */
@@ -110,7 +109,6 @@ abstract class BaseBubblePinController(private val screenSizeProvider: () -> Poi
 
     /** Get width for exclusion rect where dismiss takes over drag */
     protected abstract fun getExclusionRectWidth(): Float
-
     /** Get height for exclusion rect where dismiss takes over drag */
     protected abstract fun getExclusionRectHeight(): Float
 
@@ -186,9 +184,6 @@ abstract class BaseBubblePinController(private val screenSizeProvider: () -> Poi
 
     /** Receive updates on location changes */
     interface LocationChangeListener {
-        /** Bubble bar dragging has started. Includes the initial location of the bar */
-        fun onStart(location: BubbleBarLocation) {}
-
         /**
          * Bubble bar has been dragged to a new [BubbleBarLocation]. And the drag is still in
          * progress.
