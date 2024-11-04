@@ -21,7 +21,6 @@ import android.graphics.Insets
 import android.graphics.Rect
 import android.os.UserHandle
 import android.platform.test.annotations.DisableFlags
-import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
 import android.view.Display.DEFAULT_DISPLAY
 import android.view.WindowManager.ScreenshotSource.SCREENSHOT_KEY_CHORD
@@ -76,9 +75,8 @@ class PolicyRequestProcessorTest {
 
     /** Tests applying CaptureParameters with 'IsolatedTask' CaptureType */
     @Test
-    @EnableFlags(Flags.FLAG_SCREENSHOT_POLICY_SPLIT_AND_DESKTOP_MODE)
     fun testProcess_newPolicy_isolatedTask() = runTest {
-        val taskImage = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
+        val taskImage = Bitmap.createBitmap(200, 100, Bitmap.Config.ARGB_8888)
 
         /* Create a policy request processor with no capture policies */
         val requestProcessor =
@@ -96,9 +94,15 @@ class PolicyRequestProcessorTest {
             requestProcessor.modify(
                 screenshotRequest,
                 CaptureParameters(
-                    IsolatedTask(taskId = TASK_ID, taskBounds = null),
-                    ComponentName.unflattenFromString(FILES),
-                    UserHandle.of(WORK),
+                    type = IsolatedTask(taskId = 100, taskBounds = Rect(0, 100, 200, 200)),
+                    contentTask =
+                        TaskReference(
+                            taskId = 1001,
+                            component = ComponentName.unflattenFromString(FILES)!!,
+                            owner = UserHandle.CURRENT,
+                            bounds = Rect(100, 100, 200, 200),
+                        ),
+                    owner = UserHandle.of(WORK),
                 ),
             )
 
@@ -112,14 +116,13 @@ class PolicyRequestProcessorTest {
             .that(result.topComponent)
             .isEqualTo(ComponentName.unflattenFromString(FILES))
 
-        assertWithMessage("Task ID").that(result.taskId).isEqualTo(TASK_ID)
+        assertWithMessage("Task ID").that(result.taskId).isEqualTo(1001)
     }
 
     /** Tests applying CaptureParameters with 'FullScreen' CaptureType */
     @Test
-    @EnableFlags(Flags.FLAG_SCREENSHOT_POLICY_SPLIT_AND_DESKTOP_MODE)
     fun testProcess_newPolicy_fullScreen() = runTest {
-        val screenImage = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
+        val screenImage = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888)
 
         /* Create a policy request processor with no capture policies */
         val requestProcessor =
@@ -136,7 +139,17 @@ class PolicyRequestProcessorTest {
         val result =
             requestProcessor.modify(
                 screenshotRequest,
-                CaptureParameters(FullScreen(displayId = 0), defaultComponent, defaultOwner),
+                CaptureParameters(
+                    type = FullScreen(displayId = 0),
+                    contentTask =
+                        TaskReference(
+                            taskId = 1234,
+                            component = defaultComponent,
+                            owner = UserHandle.CURRENT,
+                            bounds = Rect(1, 2, 3, 4),
+                        ),
+                    owner = defaultOwner,
+                ),
             )
 
         assertWithMessage("The result bitmap").that(result.bitmap).isSameInstanceAs(screenImage)
@@ -149,7 +162,11 @@ class PolicyRequestProcessorTest {
             .that(result.topComponent)
             .isEqualTo(defaultComponent)
 
-        assertWithMessage("Task ID").that(result.taskId).isEqualTo(-1)
+        assertWithMessage("The bounds of the screenshot")
+            .that(result.originalScreenBounds)
+            .isEqualTo(Rect(0, 0, 100, 100))
+
+        assertWithMessage("Task ID").that(result.taskId).isEqualTo(1234)
     }
 
     /** Tests behavior when no policies are applied */
@@ -230,7 +247,7 @@ class PolicyRequestProcessorTest {
                 policy = "",
                 reason = "",
                 parameters =
-                    CaptureParameters(
+                    LegacyCaptureParameters(
                         IsolatedTask(taskId = 0, taskBounds = null),
                         null,
                         UserHandle.CURRENT,

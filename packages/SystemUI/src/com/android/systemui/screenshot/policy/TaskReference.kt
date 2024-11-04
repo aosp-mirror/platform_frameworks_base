@@ -16,17 +16,17 @@
 
 package com.android.systemui.screenshot.policy
 
+import android.content.ComponentName
+import android.graphics.Rect
 import android.os.UserHandle
 
-data class CaptureParameters(
-    /** Describes how the image should be obtained. */
-    val type: CaptureType,
-    /** Which user to receive the image. */
+data class TaskReference(
+    /** The id of the task. */
+    val taskId: Int,
+    /** The component name of the task. */
+    val component: ComponentName?,
+    /** The owner of the task. */
     val owner: UserHandle,
-    /**
-     * The task which represents the main content or focal point of the screenshot. This is the task
-     * used for retrieval of [AssistContent][android.app.assist.AssistContent] as well as
-     * [Scroll Capture][android.view.IWindowManager.requestScrollCapture].
-     */
-    val contentTask: TaskReference,
+    /** The bounds of the task. */
+    val bounds: Rect,
 )
