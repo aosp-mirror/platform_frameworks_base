@@ -49,6 +49,17 @@ flag {
 }
 
 flag {
+  name: "respect_animation_clip"
+  namespace: "windowing_frontend"
+  description: "Fix missing clip transformation of animation"
+  bug: "376601866"
+  is_fixed_read_only: true
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
   name: "edge_to_edge_by_default"
   namespace: "windowing_frontend"
   description: "Make app go edge-to-edge by default when targeting SDK 35 or greater"
