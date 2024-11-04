@@ -148,7 +148,7 @@ open class SimpleDigitalClockTextView(
         lsFontVariation = ClockFontAxisSetting.toFVar(axes + OPTICAL_SIZE_AXIS)
         lockScreenPaint.typeface = typefaceCache.getTypefaceForVariant(lsFontVariation)
         typeface = lockScreenPaint.typeface
-        textAnimator.setTextStyle(fvar = lsFontVariation, animate = true)
+        textAnimator.setTextStyle(fvar = lsFontVariation, animate = false)
         measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED)
         recomputeMaxSingleDigitSizes()
         requestLayout()
