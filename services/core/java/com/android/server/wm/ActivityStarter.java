@@ -1037,7 +1037,6 @@ class ActivityStarter {
         mLastStartReason = request.reason;
         mLastStartActivityTimeMs = System.currentTimeMillis();
 
-        final ActivityRecord previousStart = mLastStartActivityRecord;
         final IApplicationThread caller = request.caller;
         Intent intent = request.intent;
         NeededUriGrants intentGrants = request.intentGrants;
