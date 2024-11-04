@@ -729,7 +729,9 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     }
 
     @Test
-    @DisableFlags({FooterViewRefactor.FLAG_NAME, ModesEmptyShadeFix.FLAG_NAME})
+    @DisableFlags({FooterViewRefactor.FLAG_NAME,
+        ModesEmptyShadeFix.FLAG_NAME,
+        NotifRedesignFooter.FLAG_NAME})
     public void testReInflatesFooterViews() {
         when(mEmptyShadeView.getTextResource()).thenReturn(R.string.empty_shade_text);
         clearInvocations(mStackScroller);
