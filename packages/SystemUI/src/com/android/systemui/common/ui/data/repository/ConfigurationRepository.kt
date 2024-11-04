@@ -134,7 +134,8 @@ constructor(
                     maxDisplayMode.physicalWidth,
                     maxDisplayMode.physicalHeight,
                     displayInfo.value.naturalWidth,
-                    displayInfo.value.naturalHeight)
+                    displayInfo.value.naturalHeight,
+                )
             return if (scaleFactor == Float.POSITIVE_INFINITY) 1f else scaleFactor
         }
         return 1f
@@ -148,7 +149,7 @@ constructor(
     interface Factory {
         fun create(
             context: Context,
-            configurationController: ConfigurationController
+            configurationController: ConfigurationController,
         ): ConfigurationRepositoryImpl
     }
 }
@@ -174,7 +175,7 @@ abstract class ConfigurationRepositoryModule {
         fun provideGlobalConfigRepository(
             context: Context,
             @GlobalConfig configurationController: ConfigurationController,
-            factory: ConfigurationRepositoryImpl.Factory
+            factory: ConfigurationRepositoryImpl.Factory,
         ): ConfigurationRepository {
             return factory.create(context, configurationController)
         }

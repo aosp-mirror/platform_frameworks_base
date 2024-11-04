@@ -96,7 +96,7 @@ object ShadeDisplayAwareModule {
     @ShadeDisplayAware
     @SysUISingleton
     fun provideShadeWindowConfigurationForwarder(
-        @ShadeDisplayAware shadeConfigurationController: ConfigurationController,
+        @ShadeDisplayAware shadeConfigurationController: ConfigurationController
     ): ConfigurationForwarder {
         ShadeWindowGoesAround.isUnexpectedlyInLegacyMode()
         return shadeConfigurationController
@@ -125,7 +125,7 @@ object ShadeDisplayAwareModule {
         factory: ConfigurationRepositoryImpl.Factory,
         @ShadeDisplayAware configurationController: ConfigurationController,
         @ShadeDisplayAware context: Context,
-        @GlobalConfig globalConfigurationRepository: ConfigurationRepository
+        @GlobalConfig globalConfigurationRepository: ConfigurationRepository,
     ): ConfigurationRepository {
         return if (ShadeWindowGoesAround.isEnabled) {
             factory.create(context, configurationController)

@@ -75,7 +75,7 @@ constructor(
     private val bubbles: Optional<Bubbles>,
     @ShadeDisplayAware private val context: Context,
     private val notificationManager: NotificationManager,
-    private val settingsInteractor: NotificationSettingsInteractor
+    private val settingsInteractor: NotificationSettingsInteractor,
 ) : VisualInterruptionDecisionProvider {
 
     init {
@@ -89,7 +89,7 @@ constructor(
 
     private class DecisionImpl(
         override val shouldInterrupt: Boolean,
-        override val logReason: String
+        override val logReason: String,
     ) : Decision
 
     private data class LoggableDecision
@@ -107,7 +107,7 @@ constructor(
                 LoggableDecision(
                     DecisionImpl(
                         shouldInterrupt = false,
-                        logReason = "${legacySuppressor.name}.$methodName"
+                        logReason = "${legacySuppressor.name}.$methodName",
                     )
                 )
 
@@ -123,7 +123,7 @@ constructor(
 
     private class FullScreenIntentDecisionImpl(
         val entry: NotificationEntry,
-        private val fsiDecision: FullScreenIntentDecisionProvider.Decision
+        private val fsiDecision: FullScreenIntentDecisionProvider.Decision,
     ) : FullScreenIntentDecision, Loggable {
         var hasBeenLogged = false
 
@@ -154,7 +154,7 @@ constructor(
             deviceProvisionedController,
             keyguardStateController,
             powerManager,
-            statusBarStateController
+            statusBarStateController,
         )
 
     private val legacySuppressors = mutableSetOf<NotificationInterruptSuppressor>()
@@ -197,7 +197,7 @@ constructor(
                     context,
                     notificationManager,
                     logger,
-                    systemSettings
+                    systemSettings,
                 )
             )
             avalancheProvider.register()
@@ -290,7 +290,7 @@ constructor(
     private fun logDecision(
         type: VisualInterruptionType,
         entry: NotificationEntry,
-        loggableDecision: LoggableDecision
+        loggableDecision: LoggableDecision,
     ) {
         if (!loggableDecision.isSpammy || logger.spew) {
             logger.logDecision(type.name, entry, loggableDecision.decision)
