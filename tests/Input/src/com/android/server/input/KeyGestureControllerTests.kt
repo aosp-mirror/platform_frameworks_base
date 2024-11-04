@@ -995,11 +995,28 @@ class KeyGestureControllerTests {
                 intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE),
                 AppLaunchData.createLaunchDataForCategory(Intent.CATEGORY_APP_CALCULATOR)
             ),
+            TestData(
+                "LOCK -> Lock Screen",
+                intArrayOf(KeyEvent.KEYCODE_LOCK),
+                KeyGestureEvent.KEY_GESTURE_TYPE_LOCK_SCREEN,
+                intArrayOf(KeyEvent.KEYCODE_LOCK),
+                0,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
+            ),
+            TestData(
+                "FULLSCREEN -> Maximizes a task to fit the screen",
+                intArrayOf(KeyEvent.KEYCODE_FULLSCREEN),
+                KeyGestureEvent.KEY_GESTURE_TYPE_MAXIMIZE_FREEFORM_WINDOW,
+                intArrayOf(KeyEvent.KEYCODE_FULLSCREEN),
+                0,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
+            ),
         )
     }
 
     @Test
     @Parameters(method = "systemKeysTestArguments")
+    @EnableFlags(com.android.hardware.input.Flags.FLAG_ENABLE_NEW_25Q2_KEYCODES)
     fun testSystemKeys(test: TestData) {
         setupKeyGestureController()
         testKeyGestureInternal(test)
@@ -1029,6 +1046,9 @@ class KeyGestureControllerTests {
             KeyEvent.KEYCODE_STYLUS_BUTTON_SECONDARY,
             KeyEvent.KEYCODE_STYLUS_BUTTON_TERTIARY,
             KeyEvent.KEYCODE_STYLUS_BUTTON_TAIL,
+            KeyEvent.KEYCODE_DO_NOT_DISTURB,
+            KeyEvent.KEYCODE_LOCK,
+            KeyEvent.KEYCODE_FULLSCREEN
         )
 
         val handler = KeyGestureHandler { _, _ -> false }

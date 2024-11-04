@@ -145,6 +145,13 @@ flag {
 }
 
 flag {
+    name: "enable_new_25q2_keycodes"
+    namespace: "input"
+    description: "Enables new 25Q2 keycodes"
+    bug: "365920375"
+}
+
+flag {
   name: "override_power_key_behavior_in_focused_window"
   namespace: "input_native"
   description: "Allows privileged focused windows to capture power key events."
