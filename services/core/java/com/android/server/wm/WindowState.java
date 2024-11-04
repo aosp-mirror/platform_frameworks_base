@@ -157,6 +157,7 @@ import static com.android.server.wm.WindowStateProto.ANIMATING_EXIT;
 import static com.android.server.wm.WindowStateProto.ANIMATOR;
 import static com.android.server.wm.WindowStateProto.ATTRIBUTES;
 import static com.android.server.wm.WindowStateProto.DESTROYING;
+import static com.android.server.wm.WindowStateProto.DIM_BOUNDS;
 import static com.android.server.wm.WindowStateProto.DISPLAY_ID;
 import static com.android.server.wm.WindowStateProto.FORCE_SEAMLESS_ROTATION;
 import static com.android.server.wm.WindowStateProto.GIVEN_CONTENT_INSETS;
@@ -4116,6 +4117,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (mMergedLocalInsetsSources != null) {
             for (int i = 0; i < mMergedLocalInsetsSources.size(); ++i) {
                 mMergedLocalInsetsSources.valueAt(i).dumpDebug(proto, MERGED_LOCAL_INSETS_SOURCES);
+            }
+        }
+        if (getDimController() != null) {
+            final Rect dimBounds = getDimController().getDimBounds();
+            if (dimBounds != null) {
+                dimBounds.dumpDebug(proto, DIM_BOUNDS);
             }
         }
         proto.end(token);
