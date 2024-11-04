@@ -15,3 +15,10 @@ flag {
   description: "Enable B frames for Stagefright recorder."
   bug: "341121900"
 }
+
+flag {
+  name: "muxer_mp4_enable_apv"
+  namespace: "media_solutions"
+  description: "Enable APV support in mp4 writer."
+  bug: "370061501"
+}
