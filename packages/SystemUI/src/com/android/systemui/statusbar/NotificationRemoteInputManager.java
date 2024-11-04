@@ -53,6 +53,7 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.power.domain.interactor.PowerInteractor;
 import com.android.systemui.res.R;
+import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.shade.domain.interactor.ShadeInteractor;
 import com.android.systemui.statusbar.dagger.CentralSurfacesDependenciesModule;
 import com.android.systemui.statusbar.notification.NotifPipelineFlags;
@@ -686,6 +687,7 @@ public class NotificationRemoteInputManager implements CoreStartable {
     }
 
     public void checkRemoteInputOutside(MotionEvent event) {
+        SceneContainerFlag.assertInLegacyMode();
         if (event.getAction() == MotionEvent.ACTION_OUTSIDE // touch outside the source bar
                 && event.getX() == 0 && event.getY() == 0  // a touch outside both bars
                 && isRemoteInputActive()) {

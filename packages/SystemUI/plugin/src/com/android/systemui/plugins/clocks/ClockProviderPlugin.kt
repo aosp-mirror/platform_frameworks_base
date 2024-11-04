@@ -28,6 +28,7 @@ import com.android.systemui.plugins.annotations.SimpleProperty
 import java.io.PrintWriter
 import java.util.Locale
 import java.util.TimeZone
+import org.json.JSONArray
 import org.json.JSONObject
 
 /** Identifies a clock design */
@@ -61,7 +62,7 @@ interface ClockProvider {
 
     @ProtectedReturn("return new ClockPickerConfig(\"\", \"\", \"\", null);")
     /** Settings configuration parameters for the clock */
-    fun getClockPickerConfig(id: ClockId): ClockPickerConfig
+    fun getClockPickerConfig(settings: ClockSettings): ClockPickerConfig
 }
 
 /** Interface for controlling an active clock */
@@ -213,7 +214,53 @@ data class ClockFontAxisSetting(
 
     /** Value to set this axis to */
     val value: Float,
-)
+) {
+    companion object {
+        private val KEY_AXIS_KEY = "key"
+        private val KEY_AXIS_VALUE = "value"
+
+        fun toJson(setting: ClockFontAxisSetting): JSONObject {
+            return JSONObject().apply {
+                put(KEY_AXIS_KEY, setting.key)
+                put(KEY_AXIS_VALUE, setting.value)
+            }
+        }
+
+        fun toJson(settings: List<ClockFontAxisSetting>): JSONArray {
+            return JSONArray().apply {
+                for (axis in settings) {
+                    put(toJson(axis))
+                }
+            }
+        }
+
+        fun fromJson(jsonObj: JSONObject): ClockFontAxisSetting {
+            return ClockFontAxisSetting(
+                key = jsonObj.getString(KEY_AXIS_KEY),
+                value = jsonObj.getDouble(KEY_AXIS_VALUE).toFloat(),
+            )
+        }
+
+        fun fromJson(jsonArray: JSONArray): List<ClockFontAxisSetting> {
+            val result = mutableListOf<ClockFontAxisSetting>()
+            for (i in 0..jsonArray.length() - 1) {
+                val obj = jsonArray.getJSONObject(i)
+                if (obj == null) continue
+                result.add(fromJson(obj))
+            }
+            return result
+        }
+
+        fun toFVar(settings: List<ClockFontAxisSetting>): String {
+            val sb = StringBuilder()
+            for (axis in settings) {
+                if (sb.length > 0) sb.append(", ")
+                sb.append("'${axis.key}' ${axis.value.toInt()}")
+            }
+            return sb.toString()
+        }
+    }
+}
 
 /** Methods which trigger various clock animations */
 @ProtectedInterface
@@ -350,6 +397,21 @@ data class ClockFontAxis(
     val description: String,
 ) {
     fun toSetting() = ClockFontAxisSetting(key, currentValue)
+
+    companion object {
+        fun merge(
+            fontAxes: List<ClockFontAxis>,
+            axisSettings: List<ClockFontAxisSetting>,
+        ): List<ClockFontAxis> {
+            val result = mutableListOf<ClockFontAxis>()
+            for (axis in fontAxes) {
+                val setting = axisSettings.firstOrNull { axis.key == it.key }
+                val output = setting?.let { axis.copy(currentValue = it.value) } ?: axis
+                result.add(output)
+            }
+            return result
+        }
+    }
 }
 
 /** Axis user interaction modes */
@@ -406,7 +468,7 @@ data class ClockFaceConfig(
 data class ClockSettings(
     val clockId: ClockId? = null,
     val seedColor: Int? = null,
-    val axes: List<ClockFontAxisSetting>? = null,
+    val axes: List<ClockFontAxisSetting> = listOf(),
 ) {
     // Exclude metadata from equality checks
     var metadata: JSONObject = JSONObject()
@@ -415,38 +477,24 @@ data class ClockSettings(
         private val KEY_CLOCK_ID = "clockId"
         private val KEY_SEED_COLOR = "seedColor"
         private val KEY_METADATA = "metadata"
+        private val KEY_AXIS_LIST = "axes"
 
-        fun serialize(setting: ClockSettings?): String {
-            if (setting == null) {
-                return ""
+        fun toJson(setting: ClockSettings): JSONObject {
+            return JSONObject().apply {
+                put(KEY_CLOCK_ID, setting.clockId)
+                put(KEY_SEED_COLOR, setting.seedColor)
+                put(KEY_METADATA, setting.metadata)
+                put(KEY_AXIS_LIST, ClockFontAxisSetting.toJson(setting.axes))
             }
-
-            // TODO(b/364673977): Serialize axes
-
-            return JSONObject()
-                .put(KEY_CLOCK_ID, setting.clockId)
-                .put(KEY_SEED_COLOR, setting.seedColor)
-                .put(KEY_METADATA, setting.metadata)
-                .toString()
         }
 
-        fun deserialize(jsonStr: String?): ClockSettings? {
-            if (jsonStr.isNullOrEmpty()) {
-                return null
+        fun fromJson(json: JSONObject): ClockSettings {
+            val clockId = if (!json.isNull(KEY_CLOCK_ID)) json.getString(KEY_CLOCK_ID) else null
+            val seedColor = if (!json.isNull(KEY_SEED_COLOR)) json.getInt(KEY_SEED_COLOR) else null
+            val axisList = json.optJSONArray(KEY_AXIS_LIST)?.let(ClockFontAxisSetting::fromJson)
+            return ClockSettings(clockId, seedColor, axisList ?: listOf()).apply {
+                metadata = json.optJSONObject(KEY_METADATA) ?: JSONObject()
             }
-
-            // TODO(b/364673977): Deserialize axes
-
-            val json = JSONObject(jsonStr)
-            val result =
-                ClockSettings(
-                    if (!json.isNull(KEY_CLOCK_ID)) json.getString(KEY_CLOCK_ID) else null,
-                    if (!json.isNull(KEY_SEED_COLOR)) json.getInt(KEY_SEED_COLOR) else null,
-                )
-            if (!json.isNull(KEY_METADATA)) {
-                result.metadata = json.getJSONObject(KEY_METADATA)
-            }
-            return result
         }
     }
 }

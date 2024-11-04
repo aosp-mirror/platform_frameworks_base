@@ -423,6 +423,8 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
 
     private Map<String, Boolean> mFeatureFlagState = new ArrayMap<>();
 
+    private int mIntentMatchingFlags;
+
     @NonNull
     public static PackageImpl forParsing(@NonNull String packageName, @NonNull String baseCodePath,
             @NonNull String codePath, @NonNull TypedArray manifestArray, boolean isCoreApp,
@@ -3270,6 +3272,7 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
         dest.writeLong(this.mBooleans);
         dest.writeLong(this.mBooleans2);
         dest.writeBoolean(this.mAllowCrossUidActivitySwitchFromBelow);
+        dest.writeInt(this.mIntentMatchingFlags);
     }
 
     private void writeFeatureFlagState(@NonNull Parcel dest) {
@@ -3461,6 +3464,7 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
         this.mBooleans = in.readLong();
         this.mBooleans2 = in.readLong();
         this.mAllowCrossUidActivitySwitchFromBelow = in.readBoolean();
+        this.mIntentMatchingFlags = in.readInt();
 
         assignDerivedFields();
         assignDerivedFields2();
@@ -3697,6 +3701,17 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     public PackageImpl setUid(int value) {
         uid = value;
         return this;
+    }
+
+    @Override
+    public ParsingPackage setIntentMatchingFlags(int intentMatchingFlags) {
+        mIntentMatchingFlags = intentMatchingFlags;
+        return this;
+    }
+
+    @Override
+    public int getIntentMatchingFlags() {
+        return mIntentMatchingFlags;
     }
 
     // The following methods are explicitly not inside any interface. These are hidden under

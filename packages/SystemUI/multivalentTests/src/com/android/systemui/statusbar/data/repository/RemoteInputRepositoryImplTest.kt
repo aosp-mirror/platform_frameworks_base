@@ -50,7 +50,7 @@ class RemoteInputRepositoryImplTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
 
         testScope = TestScope()
-        underTest = RemoteInputRepositoryImpl(remoteInputManager)
+        underTest = RemoteInputRepositoryImpl(testScope.backgroundScope, remoteInputManager)
     }
 
     @Test
