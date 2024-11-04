@@ -25,6 +25,8 @@ import com.android.systemui.common.ui.ConfigurationStateImpl
 import com.android.systemui.common.ui.GlobalConfig
 import com.android.systemui.common.ui.data.repository.ConfigurationRepository
 import com.android.systemui.common.ui.data.repository.ConfigurationRepositoryImpl
+import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
+import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractorImpl
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.res.R
 import com.android.systemui.shade.shared.flag.ShadeWindowGoesAround
@@ -131,6 +133,20 @@ object ShadeDisplayAwareModule {
             factory.create(context, configurationController)
         } else {
             globalConfigurationRepository
+        }
+    }
+
+    @SysUISingleton
+    @Provides
+    @ShadeDisplayAware
+    fun provideShadeAwareConfigurationInteractor(
+        @ShadeDisplayAware configurationRepository: ConfigurationRepository,
+        @GlobalConfig configurationInteractor: ConfigurationInteractor,
+    ): ConfigurationInteractor {
+        return if (ShadeWindowGoesAround.isEnabled) {
+            ConfigurationInteractorImpl(configurationRepository)
+        } else {
+            configurationInteractor
         }
     }
 }
