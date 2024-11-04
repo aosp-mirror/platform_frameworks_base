@@ -16,6 +16,11 @@
 
 package android.hardware.display;
 
+import static android.hardware.display.DisplayManagerGlobal.EVENT_DISPLAY_STATE_CHANGED;
+import static android.hardware.display.DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_REFRESH_RATE;
+import static android.hardware.display.DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_STATE;
+
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
@@ -28,13 +33,19 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.view.DisplayInfo;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
+import com.android.server.display.feature.flags.Flags;
+
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -54,6 +65,10 @@ import org.mockito.MockitoAnnotations;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class DisplayManagerGlobalTest {
+
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule =
+            DeviceFlagsValueProvider.createCheckFlagsRule();
 
     private static final long ALL_DISPLAY_EVENTS =
             DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_ADDED
@@ -113,6 +128,33 @@ public class DisplayManagerGlobalTest {
         callback.onDisplayEvent(displayId, DisplayManagerGlobal.EVENT_DISPLAY_REMOVED);
         waitForHandler();
         Mockito.verify(mListener).onDisplayRemoved(eq(displayId));
+        Mockito.verifyNoMoreInteractions(mListener);
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_DISPLAY_LISTENER_PERFORMANCE_IMPROVEMENTS)
+    public void testDisplayListenerIsCalled_WhenDisplayPropertyChangeEventOccurs()
+            throws RemoteException {
+        mDisplayManagerGlobal.registerDisplayListener(mListener, mHandler,
+                INTERNAL_EVENT_FLAG_DISPLAY_REFRESH_RATE
+                        | INTERNAL_EVENT_FLAG_DISPLAY_STATE,
+                null);
+        Mockito.verify(mDisplayManager)
+                .registerCallbackWithEventMask(mCallbackCaptor.capture(), anyLong());
+        IDisplayManagerCallback callback = mCallbackCaptor.getValue();
+
+        int displayId = 1;
+
+        Mockito.reset(mListener);
+        callback.onDisplayEvent(displayId, DisplayManagerGlobal.EVENT_DISPLAY_REFRESH_RATE_CHANGED);
+        waitForHandler();
+        Mockito.verify(mListener).onDisplayChanged(eq(displayId));
+        Mockito.verifyNoMoreInteractions(mListener);
+
+        Mockito.reset(mListener);
+        callback.onDisplayEvent(displayId, EVENT_DISPLAY_STATE_CHANGED);
+        waitForHandler();
+        Mockito.verify(mListener).onDisplayChanged(eq(displayId));
         Mockito.verifyNoMoreInteractions(mListener);
     }
 
@@ -229,6 +271,53 @@ public class DisplayManagerGlobalTest {
         waitForHandler();
 
         verify(mListener2, never()).onDisplayChanged(anyInt());
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_DISPLAY_LISTENER_PERFORMANCE_IMPROVEMENTS)
+    public void testMapFlagsToInternalEventFlag() {
+        // Test public flags mapping
+        assertEquals(DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_ADDED,
+                mDisplayManagerGlobal
+                        .mapFlagsToInternalEventFlag(DisplayManager.EVENT_FLAG_DISPLAY_ADDED, 0));
+        assertEquals(DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_CHANGED,
+                mDisplayManagerGlobal
+                        .mapFlagsToInternalEventFlag(DisplayManager.EVENT_FLAG_DISPLAY_CHANGED, 0));
+        assertEquals(DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_REMOVED,
+                mDisplayManagerGlobal
+                        .mapFlagsToInternalEventFlag(DisplayManager.EVENT_FLAG_DISPLAY_REMOVED, 0));
+        assertEquals(INTERNAL_EVENT_FLAG_DISPLAY_REFRESH_RATE,
+                mDisplayManagerGlobal
+                        .mapFlagsToInternalEventFlag(
+                                DisplayManager.EVENT_FLAG_DISPLAY_REFRESH_RATE,
+                                0));
+        assertEquals(DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_STATE,
+                mDisplayManagerGlobal
+                        .mapFlagsToInternalEventFlag(
+                                DisplayManager.EVENT_FLAG_DISPLAY_STATE,
+                                0));
+
+        // test private flags mapping
+        assertEquals(DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_CONNECTION_CHANGED,
+                mDisplayManagerGlobal
+                        .mapFlagsToInternalEventFlag(0,
+                                DisplayManager.PRIVATE_EVENT_FLAG_DISPLAY_CONNECTION_CHANGED));
+        assertEquals(DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_HDR_SDR_RATIO_CHANGED,
+                mDisplayManagerGlobal
+                        .mapFlagsToInternalEventFlag(0,
+                                DisplayManager.PRIVATE_EVENT_FLAG_HDR_SDR_RATIO_CHANGED));
+        assertEquals(DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_BRIGHTNESS_CHANGED,
+                mDisplayManagerGlobal
+                        .mapFlagsToInternalEventFlag(0,
+                                DisplayManager.PRIVATE_EVENT_FLAG_DISPLAY_BRIGHTNESS));
+
+        // Test both public and private flags mapping
+        assertEquals(DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_BRIGHTNESS_CHANGED
+                        | INTERNAL_EVENT_FLAG_DISPLAY_REFRESH_RATE,
+                mDisplayManagerGlobal
+                        .mapFlagsToInternalEventFlag(
+                                DisplayManager.EVENT_FLAG_DISPLAY_REFRESH_RATE,
+                                DisplayManager.PRIVATE_EVENT_FLAG_DISPLAY_BRIGHTNESS));
     }
 
     private void waitForHandler() {

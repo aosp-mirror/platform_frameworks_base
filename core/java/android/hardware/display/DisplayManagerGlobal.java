@@ -109,6 +109,8 @@ public final class DisplayManagerGlobal {
             EVENT_DISPLAY_HDR_SDR_RATIO_CHANGED,
             EVENT_DISPLAY_CONNECTED,
             EVENT_DISPLAY_DISCONNECTED,
+            EVENT_DISPLAY_REFRESH_RATE_CHANGED,
+            EVENT_DISPLAY_STATE_CHANGED
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface DisplayEvent {}
@@ -120,6 +122,8 @@ public final class DisplayManagerGlobal {
     public static final int EVENT_DISPLAY_HDR_SDR_RATIO_CHANGED = 5;
     public static final int EVENT_DISPLAY_CONNECTED = 6;
     public static final int EVENT_DISPLAY_DISCONNECTED = 7;
+    public static final int EVENT_DISPLAY_REFRESH_RATE_CHANGED = 8;
+    public static final int EVENT_DISPLAY_STATE_CHANGED = 9;
 
     @LongDef(prefix = {"INTERNAL_EVENT_DISPLAY"}, flag = true, value = {
             INTERNAL_EVENT_FLAG_DISPLAY_ADDED,
@@ -1432,6 +1436,18 @@ public final class DisplayManagerGlobal {
                         mListener.onDisplayDisconnected(displayId);
                     }
                     break;
+                case EVENT_DISPLAY_REFRESH_RATE_CHANGED:
+                    if ((mInternalEventFlagsMask
+                            & INTERNAL_EVENT_FLAG_DISPLAY_REFRESH_RATE) != 0) {
+                        mListener.onDisplayChanged(displayId);
+                    }
+                    break;
+                case EVENT_DISPLAY_STATE_CHANGED:
+                    if ((mInternalEventFlagsMask
+                            & INTERNAL_EVENT_FLAG_DISPLAY_STATE) != 0) {
+                        mListener.onDisplayChanged(displayId);
+                    }
+                    break;
             }
             if (DEBUG) {
                 Trace.endSection();
@@ -1571,6 +1587,10 @@ public final class DisplayManagerGlobal {
                 return "EVENT_DISPLAY_CONNECTED";
             case EVENT_DISPLAY_DISCONNECTED:
                 return "EVENT_DISPLAY_DISCONNECTED";
+            case EVENT_DISPLAY_REFRESH_RATE_CHANGED:
+                return "EVENT_DISPLAY_REFRESH_RATE_CHANGED";
+            case EVENT_DISPLAY_STATE_CHANGED:
+                return "EVENT_DISPLAY_STATE_CHANGED";
         }
         return "UNKNOWN";
     }
