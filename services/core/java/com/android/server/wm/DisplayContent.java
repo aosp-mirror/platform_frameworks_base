@@ -159,7 +159,6 @@ import static com.android.server.wm.utils.DisplayInfoOverrides.WM_OVERRIDE_FIELD
 import static com.android.server.wm.utils.DisplayInfoOverrides.copyDisplayInfoFields;
 import static com.android.server.wm.utils.RegionUtils.forEachRectReverse;
 import static com.android.server.wm.utils.RegionUtils.rectListToRegion;
-import static com.android.window.flags.Flags.explicitRefreshRateHints;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -3426,14 +3425,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         if (!mWmService.mSupportsHighPerfTransitions) {
             return;
         }
-        if (!explicitRefreshRateHints()) {
-            if (enable) {
-                getPendingTransaction().setEarlyWakeupStart();
-            } else {
-                getPendingTransaction().setEarlyWakeupEnd();
-            }
-            return;
-        }
         if (enable) {
             if (mTransitionPrefSession == null) {
                 mTransitionPrefSession = mWmService.mSystemPerformanceHinter.createSession(
@@ -3446,10 +3437,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     }
 
     void enableHighFrameRate(boolean enable) {
-        if (!explicitRefreshRateHints()) {
-            // Done by RefreshRatePolicy.
-            return;
-        }
         if (enable) {
             if (mHighFrameRateSession == null) {
                 mHighFrameRateSession = mWmService.mSystemPerformanceHinter.createSession(

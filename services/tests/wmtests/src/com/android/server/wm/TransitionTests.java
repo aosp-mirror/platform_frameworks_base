@@ -51,7 +51,6 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_NORMAL;
-import static com.android.window.flags.Flags.explicitRefreshRateHints;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -2883,17 +2882,14 @@ public class TransitionTests extends WindowTestsBase {
 
     @Test
     public void testTransitionsTriggerPerformanceHints() {
-        final boolean explicitRefreshRateHints = explicitRefreshRateHints();
         final var session = new SystemPerformanceHinter.HighPerfSession[1];
-        if (explicitRefreshRateHints) {
-            final SystemPerformanceHinter perfHinter = mWm.mSystemPerformanceHinter;
-            spyOn(perfHinter);
-            doAnswer(invocation -> {
-                session[0] = (SystemPerformanceHinter.HighPerfSession) invocation.callRealMethod();
-                spyOn(session[0]);
-                return session[0];
-            }).when(perfHinter).createSession(anyInt(), anyInt(), anyString());
-        }
+        final SystemPerformanceHinter perfHinter = mWm.mSystemPerformanceHinter;
+        spyOn(perfHinter);
+        doAnswer(invocation -> {
+            session[0] = (SystemPerformanceHinter.HighPerfSession) invocation.callRealMethod();
+            spyOn(session[0]);
+            return session[0];
+        }).when(perfHinter).createSession(anyInt(), anyInt(), anyString());
         final TransitionController controller = mDisplayContent.mTransitionController;
         final TestTransitionPlayer player = registerTestTransitionPlayer();
         final ActivityRecord app = new ActivityBuilder(mAtm).setCreateTask(true).build();
@@ -2905,15 +2901,11 @@ public class TransitionTests extends WindowTestsBase {
         player.start();
 
         verify(mDisplayContent).enableHighPerfTransition(true);
-        if (explicitRefreshRateHints) {
-            verify(session[0]).start();
-        }
+        verify(session[0]).start();
 
         player.finish();
         verify(mDisplayContent).enableHighPerfTransition(false);
-        if (explicitRefreshRateHints) {
-            verify(session[0]).close();
-        }
+        verify(session[0]).close();
     }
 
     @Test
