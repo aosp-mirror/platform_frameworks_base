@@ -43,8 +43,8 @@ import static android.app.Notification.FLAG_PROMOTED_ONGOING;
 import static android.app.Notification.FLAG_USER_INITIATED_JOB;
 import static android.app.Notification.GROUP_ALERT_CHILDREN;
 import static android.app.Notification.VISIBILITY_PRIVATE;
-import static android.app.NotificationChannel.NEWS_ID;
 import static android.app.NotificationChannel.DEFAULT_CHANNEL_ID;
+import static android.app.NotificationChannel.NEWS_ID;
 import static android.app.NotificationChannel.PROMOTIONS_ID;
 import static android.app.NotificationChannel.RECS_ID;
 import static android.app.NotificationChannel.SOCIAL_MEDIA_ID;
@@ -78,7 +78,6 @@ import static android.app.PendingIntent.FLAG_ONE_SHOT;
 import static android.app.StatusBarManager.ACTION_KEYGUARD_PRIVATE_NOTIFICATIONS_CHANGED;
 import static android.app.StatusBarManager.EXTRA_KM_PRIVATE_NOTIFS_ALLOWED;
 import static android.app.backup.NotificationLoggingConstants.DATA_TYPE_ZEN_CONFIG;
-import static android.app.backup.NotificationLoggingConstants.DATA_TYPE_ZEN_RULES;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
 import static android.content.pm.PackageManager.FEATURE_TELECOM;
 import static android.content.pm.PackageManager.FEATURE_WATCH;
@@ -334,11 +333,11 @@ import com.android.server.utils.quota.MultiRateLimiter;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
 
-import com.google.android.collect.Lists;
-import com.google.common.collect.ImmutableList;
-
 import libcore.junit.util.compat.CoreCompatChangeRule.DisableCompatChanges;
 import libcore.junit.util.compat.CoreCompatChangeRule.EnableCompatChanges;
+
+import com.google.android.collect.Lists;
+import com.google.common.collect.ImmutableList;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -364,7 +363,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.OutputStream;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14119,9 +14117,10 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 r.getSbn().getId(), r.getSbn().getTag(), r, false, false)).isTrue();
     }
 
-    private NotificationRecord createBigPictureRecord(boolean isBigPictureStyle, boolean hasImage,
-                                                      boolean isImageBitmap, boolean isExpired) {
-        Notification.Builder builder = new Notification.Builder(mContext);
+    private Notification createBigPictureNotification(boolean isBigPictureStyle, boolean hasImage,
+            boolean isImageBitmap) {
+        Notification.Builder builder = new Notification.Builder(mContext)
+                .setSmallIcon(android.R.drawable.sym_def_app_icon);
         Notification.BigPictureStyle style = new Notification.BigPictureStyle();
 
         if (isBigPictureStyle && hasImage) {
@@ -14137,12 +14136,18 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         Notification notification = builder.setChannelId(TEST_CHANNEL_ID).build();
 
+        return notification;
+    }
+
+    private NotificationRecord createBigPictureRecord(boolean isBigPictureStyle, boolean hasImage,
+            boolean isImageBitmap, boolean isExpired) {
         long timePostedMs = System.currentTimeMillis();
         if (isExpired) {
             timePostedMs -= BITMAP_DURATION.toMillis();
         }
         StatusBarNotification sbn = new StatusBarNotification(mPkg, mPkg, 8, "tag", mUid, 0,
-                notification, UserHandle.getUserHandleForUid(mUid), null, timePostedMs);
+                createBigPictureNotification(isBigPictureStyle, hasImage, isImageBitmap),
+                UserHandle.getUserHandleForUid(mUid), null, timePostedMs);
 
         return new NotificationRecord(mContext, sbn, mTestNotificationChannel);
     }
@@ -14151,6 +14156,33 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mService.addNotification(record);
         mInternalService.removeBitmaps();
         waitForIdle();
+    }
+
+    @Test
+    public void testRemoveBitmaps_canRemoveRevokedDelegate() throws Exception {
+        Notification n = createBigPictureNotification(true, true, true);
+        long timePostedMs = System.currentTimeMillis();
+        timePostedMs -= BITMAP_DURATION.toMillis();
+
+        when(mPermissionHelper.hasPermission(UID_O)).thenReturn(true);
+        when(mPackageManagerInternal.isSameApp(PKG_O, UID_O, UserHandle.getUserId(UID_O)))
+                .thenReturn(true);
+        mService.mPreferencesHelper.createNotificationChannel(PKG_O, UID_O,
+                mTestNotificationChannel, true /* fromTargetApp */, false, UID_O,
+                false);
+        mBinderService.createNotificationChannels(PKG_O, new ParceledListSlice(
+                Arrays.asList(mTestNotificationChannel, mSilentChannel, mMinChannel)));
+
+        StatusBarNotification sbn = new StatusBarNotification(PKG_O, "old.delegate", 8, "tag",
+                UID_O, 0, n, UserHandle.getUserHandleForUid(UID_O), null, timePostedMs);
+
+        mService.addNotification(new NotificationRecord(mContext, sbn, mTestNotificationChannel));
+        mInternalService.removeBitmaps();
+
+        waitForIdle();
+
+        verify(mWorkerHandler, times(1))
+                .post(any(NotificationManagerService.EnqueueNotificationRunnable.class));
     }
 
     @Test
