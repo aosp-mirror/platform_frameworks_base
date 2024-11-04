@@ -14,17 +14,6 @@
  * limitations under the License.
  */
 
-
 package android.media.quality;
 
-import android.media.quality.PictureProfile;
-
-/**
- * Interface to receive callbacks from IMediaQuality.
- * @hide
- */
-oneway interface IPictureProfileCallback {
-    void onPictureProfileAdded(in long id, in PictureProfile p);
-    void onPictureProfileUpdated(in long id, in PictureProfile p);
-    void onPictureProfileRemoved(in long id, in PictureProfile p);
-}
+parcelable ParamCapability;
