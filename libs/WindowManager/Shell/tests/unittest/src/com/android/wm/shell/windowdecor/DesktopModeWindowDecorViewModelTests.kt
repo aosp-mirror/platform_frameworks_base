@@ -478,25 +478,10 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
 
     @Test
     @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODALS_POLICY)
-    fun testDecorationIsCreatedForTopTranslucentActivitiesWithStyleFloating() {
+    fun testDecorationIsNotCreatedForTopTranslucentActivities() {
         val task = createTask(windowingMode = WINDOWING_MODE_FULLSCREEN).apply {
             isTopActivityTransparent = true
-            isTopActivityStyleFloating = true
-            numActivities = 1
-        }
-        doReturn(true).`when` { DesktopModeStatus.canEnterDesktopMode(any()) }
-        setUpMockDecorationsForTasks(task)
-
-        onTaskOpening(task)
-        assertTrue(windowDecorByTaskIdSpy.contains(task.taskId))
-    }
-
-    @Test
-    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODALS_POLICY)
-    fun testDecorationIsNotCreatedForTopTranslucentActivitiesWithoutStyleFloating() {
-        val task = createTask(windowingMode = WINDOWING_MODE_FULLSCREEN).apply {
-            isTopActivityTransparent = true
-            isTopActivityStyleFloating = false
+            isTopActivityNoDisplay = false
             numActivities = 1
         }
         onTaskOpening(task)
@@ -507,13 +492,14 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
     @Test
     @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODALS_POLICY)
     fun testDecorationIsNotCreatedForSystemUIActivities() {
-        val task = createTask(windowingMode = WINDOWING_MODE_FULLSCREEN)
-
         // Set task as systemUI package
         val systemUIPackageName = context.resources.getString(
             com.android.internal.R.string.config_systemUi)
         val baseComponent = ComponentName(systemUIPackageName, /* class */ "")
-        task.baseActivity = baseComponent
+        val task = createTask(windowingMode = WINDOWING_MODE_FULLSCREEN).apply {
+            baseActivity = baseComponent
+            isTopActivityNoDisplay = false
+        }
 
         onTaskOpening(task)
 

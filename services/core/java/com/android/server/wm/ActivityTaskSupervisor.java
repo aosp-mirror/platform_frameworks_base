@@ -2478,7 +2478,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
     /** Notifies that the top activity of the task is forced to be resizeable. */
     private void handleForcedResizableTaskIfNeeded(Task task, int reason) {
         final ActivityRecord topActivity = task.getTopNonFinishingActivity();
-        if (topActivity == null || topActivity.noDisplay
+        if (topActivity == null || topActivity.isNoDisplay()
                 || !topActivity.canForceResizeNonResizable(task.getWindowingMode())) {
             return;
         }
