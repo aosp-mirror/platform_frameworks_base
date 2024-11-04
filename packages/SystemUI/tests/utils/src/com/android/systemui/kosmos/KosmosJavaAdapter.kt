@@ -51,6 +51,8 @@ import com.android.systemui.keyguard.domain.interactor.keyguardClockInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.keyguard.domain.interactor.pulseExpansionInteractor
+import com.android.systemui.keyguard.ui.viewmodel.glanceableHubToLockscreenTransitionViewModel
+import com.android.systemui.keyguard.ui.viewmodel.lockscreenToGlanceableHubTransitionViewModel
 import com.android.systemui.model.sceneContainerPlugin
 import com.android.systemui.plugins.statusbar.statusBarStateController
 import com.android.systemui.power.data.repository.fakePowerRepository
@@ -166,4 +168,11 @@ class KosmosJavaAdapter() {
     val msdlPlayer by lazy { kosmos.fakeMSDLPlayer }
     val shadeModeInteractor by lazy { kosmos.shadeModeInteractor }
     val bouncerHapticHelper by lazy { kosmos.bouncerHapticPlayer }
+
+    val glanceableHubToLockscreenTransitionViewModel by lazy {
+        kosmos.glanceableHubToLockscreenTransitionViewModel
+    }
+    val lockscreenToGlanceableHubTransitionViewModel by lazy {
+        kosmos.lockscreenToGlanceableHubTransitionViewModel
+    }
 }
