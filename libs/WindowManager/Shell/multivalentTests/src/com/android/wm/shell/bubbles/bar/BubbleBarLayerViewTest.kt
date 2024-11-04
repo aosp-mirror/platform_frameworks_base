@@ -19,15 +19,12 @@ package com.android.wm.shell.bubbles.bar
 import android.app.ActivityManager
 import android.content.Context
 import android.content.pm.LauncherApps
-import android.graphics.PointF
 import android.os.Handler
 import android.os.UserManager
 import android.view.IWindowManager
 import android.view.LayoutInflater
-import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
-import androidx.core.animation.AnimatorTestRule
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -51,7 +48,6 @@ import com.android.wm.shell.bubbles.BubbleTaskViewFactory
 import com.android.wm.shell.bubbles.Bubbles.SysuiProxy
 import com.android.wm.shell.bubbles.FakeBubbleFactory
 import com.android.wm.shell.bubbles.UiEventSubject.Companion.assertThat
-import com.android.wm.shell.bubbles.animation.AnimatableScaleMatrix
 import com.android.wm.shell.bubbles.properties.BubbleProperties
 import com.android.wm.shell.bubbles.storage.BubblePersistentRepository
 import com.android.wm.shell.common.DisplayController
@@ -61,7 +57,6 @@ import com.android.wm.shell.common.ShellExecutor
 import com.android.wm.shell.common.SyncTransactionQueue
 import com.android.wm.shell.common.TaskStackListenerImpl
 import com.android.wm.shell.shared.TransactionPool
-import com.android.wm.shell.shared.animation.PhysicsAnimatorTestUtils
 import com.android.wm.shell.shared.bubbles.BubbleBarLocation
 import com.android.wm.shell.sysui.ShellCommandHandler
 import com.android.wm.shell.sysui.ShellController
@@ -71,10 +66,8 @@ import com.android.wm.shell.taskview.TaskViewTaskController
 import com.android.wm.shell.taskview.TaskViewTransitions
 import com.android.wm.shell.transition.Transitions
 import com.google.common.truth.Truth.assertThat
-import org.junit.After
 import java.util.Collections
 import org.junit.Before
-import org.junit.ClassRule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
@@ -86,20 +79,11 @@ import org.mockito.kotlin.whenever
 @RunWith(AndroidJUnit4::class)
 class BubbleBarLayerViewTest {
 
-    companion object {
-        @JvmField @ClassRule
-        val animatorTestRule: AnimatorTestRule = AnimatorTestRule()
-    }
-
     private val context = ApplicationProvider.getApplicationContext<Context>()
 
     private lateinit var bubbleBarLayerView: BubbleBarLayerView
 
     private lateinit var uiEventLoggerFake: UiEventLoggerFake
-
-    private lateinit var bubbleController: BubbleController
-
-    private lateinit var bubblePositioner: BubblePositioner
 
     private lateinit var bubble: Bubble
 
@@ -107,7 +91,6 @@ class BubbleBarLayerViewTest {
     fun setUp() {
         ProtoLog.REQUIRE_PROTOLOGTOOL = false
         ProtoLog.init()
-        PhysicsAnimatorTestUtils.prepareForTest()
 
         uiEventLoggerFake = UiEventLoggerFake()
         val bubbleLogger = BubbleLogger(uiEventLoggerFake)
@@ -117,7 +100,7 @@ class BubbleBarLayerViewTest {
 
         val windowManager = context.getSystemService(WindowManager::class.java)
 
-        bubblePositioner = BubblePositioner(context, windowManager)
+        val bubblePositioner = BubblePositioner(context, windowManager)
         bubblePositioner.setShowingInBubbleBar(true)
 
         val bubbleData =
@@ -130,7 +113,7 @@ class BubbleBarLayerViewTest {
                 bgExecutor,
             )
 
-        bubbleController =
+        val bubbleController =
             createBubbleController(
                 bubbleData,
                 windowManager,
@@ -166,11 +149,6 @@ class BubbleBarLayerViewTest {
 
         val viewInfo = FakeBubbleFactory.createViewInfo(bubbleBarExpandedView)
         bubble = FakeBubbleFactory.createChatBubbleWithViewInfo(context, viewInfo = viewInfo)
-    }
-
-    @After
-    fun tearDown() {
-        PhysicsAnimatorTestUtils.tearDown()
     }
 
     private fun createBubbleController(
@@ -246,70 +224,6 @@ class BubbleBarLayerViewTest {
         assertThat(uiEventLoggerFake.logs[0]).hasBubbleInfo(bubble)
     }
 
-    @Test
-    fun testEventLogging_dragExpandedViewLeft() {
-        bubblePositioner.bubbleBarLocation = BubbleBarLocation.RIGHT
-
-        getInstrumentation().runOnMainSync {
-            bubbleBarLayerView.showExpandedView(bubble)
-        }
-        waitForExpandedViewAnimation()
-
-        val handleView = bubbleBarLayerView.findViewById<View>(R.id.bubble_bar_handle_view)
-        assertThat(handleView).isNotNull()
-
-        // Drag from right to left
-        handleView.dispatchTouchEvent(0L, MotionEvent.ACTION_DOWN, rightEdge())
-        handleView.dispatchTouchEvent(10L, MotionEvent.ACTION_MOVE, leftEdge())
-        handleView.dispatchTouchEvent(20L, MotionEvent.ACTION_UP, leftEdge())
-
-        assertThat(uiEventLoggerFake.numLogs()).isEqualTo(1)
-        assertThat(uiEventLoggerFake.logs[0].eventId)
-            .isEqualTo(BubbleLogger.Event.BUBBLE_BAR_MOVED_LEFT_DRAG_EXP_VIEW.id)
-        assertThat(uiEventLoggerFake.logs[0]).hasBubbleInfo(bubble)
-    }
-
-    @Test
-    fun testEventLogging_dragExpandedViewRight() {
-        bubblePositioner.bubbleBarLocation = BubbleBarLocation.LEFT
-
-        getInstrumentation().runOnMainSync {
-            bubbleBarLayerView.showExpandedView(bubble)
-        }
-        waitForExpandedViewAnimation()
-
-        val handleView = bubbleBarLayerView.findViewById<View>(R.id.bubble_bar_handle_view)
-        assertThat(handleView).isNotNull()
-
-        // Drag from left to right
-        handleView.dispatchTouchEvent(0L, MotionEvent.ACTION_DOWN, leftEdge())
-        handleView.dispatchTouchEvent(10L, MotionEvent.ACTION_MOVE, rightEdge())
-        handleView.dispatchTouchEvent(20L, MotionEvent.ACTION_UP, rightEdge())
-
-        assertThat(uiEventLoggerFake.numLogs()).isEqualTo(1)
-        assertThat(uiEventLoggerFake.logs[0].eventId)
-            .isEqualTo(BubbleLogger.Event.BUBBLE_BAR_MOVED_RIGHT_DRAG_EXP_VIEW.id)
-        assertThat(uiEventLoggerFake.logs[0]).hasBubbleInfo(bubble)
-    }
-
-    private fun leftEdge(): PointF {
-        val screenSize = bubblePositioner.availableRect
-        return PointF(screenSize.left.toFloat(), screenSize.height() / 2f)
-    }
-
-    private fun rightEdge(): PointF {
-        val screenSize = bubblePositioner.availableRect
-        return PointF(screenSize.right.toFloat(), screenSize.height() / 2f)
-    }
-
-    private fun waitForExpandedViewAnimation() {
-        // wait for idle to allow the animation to start
-        getInstrumentation().waitForIdleSync()
-        getInstrumentation().runOnMainSync { animatorTestRule.advanceTimeBy(200) }
-        PhysicsAnimatorTestUtils.blockUntilAnimationsEnd(
-            AnimatableScaleMatrix.SCALE_X, AnimatableScaleMatrix.SCALE_Y)
-    }
-
     private inner class FakeBubbleTaskViewFactory(private val mainExecutor: ShellExecutor) :
         BubbleTaskViewFactory {
         override fun create(): BubbleTaskView {
@@ -375,10 +289,5 @@ class BubbleBarLayerViewTest {
                 runnables.removeAt(0).run()
             }
         }
-    }
-
-    private fun View.dispatchTouchEvent(eventTime: Long, action: Int, point: PointF) {
-        val event = MotionEvent.obtain(0L, eventTime, action, point.x, point.y, 0)
-        getInstrumentation().runOnMainSync { dispatchTouchEvent(event) }
     }
 }
