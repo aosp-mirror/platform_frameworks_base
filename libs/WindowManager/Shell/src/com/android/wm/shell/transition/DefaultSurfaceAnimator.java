@@ -136,6 +136,7 @@ public class DefaultSurfaceAnimator {
         @NonNull final Animation mAnim;
         @Nullable final Point mPosition;
         @Nullable final Rect mClipRect;
+        @Nullable private final Rect mAnimClipRect;
         final float mCornerRadius;
         final boolean mIsActivity;
 
@@ -147,6 +148,7 @@ public class DefaultSurfaceAnimator {
             mPosition = (position != null && (position.x != 0 || position.y != 0))
                     ? position : null;
             mClipRect = (clipRect != null && !clipRect.isEmpty()) ? clipRect : null;
+            mAnimClipRect = mClipRect != null ? new Rect() : null;
             mCornerRadius = cornerRadius;
             mIsActivity = isActivity;
         }
@@ -169,18 +171,26 @@ public class DefaultSurfaceAnimator {
             t.setAlpha(leash, transformation.getAlpha());
 
             if (mClipRect != null) {
-                Rect clipRect = mClipRect;
+                boolean needCrop = false;
+                mAnimClipRect.set(mClipRect);
+                if (transformation.hasClipRect()
+                        && com.android.window.flags.Flags.respectAnimationClip()) {
+                    mAnimClipRect.intersectUnchecked(transformation.getClipRect());
+                    needCrop = true;
+                }
                 final Insets extensionInsets = Insets.min(transformation.getInsets(), Insets.NONE);
                 if (!extensionInsets.equals(Insets.NONE)) {
                     // Clip out any overflowing edge extension.
-                    clipRect = new Rect(mClipRect);
-                    clipRect.inset(extensionInsets);
-                    t.setCrop(leash, clipRect);
+                    mAnimClipRect.inset(extensionInsets);
+                    needCrop = true;
                 }
                 if (mCornerRadius > 0 && mAnim.hasRoundedCorners()) {
                     // Rounded corner can only be applied if a crop is set.
-                    t.setCrop(leash, clipRect);
                     t.setCornerRadius(leash, mCornerRadius);
+                    needCrop = true;
+                }
+                if (needCrop) {
+                    t.setCrop(leash, mAnimClipRect);
                 }
             }
         }
