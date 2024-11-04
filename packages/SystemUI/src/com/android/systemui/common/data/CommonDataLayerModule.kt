@@ -26,11 +26,6 @@ import dagger.Module
 @Module
 abstract class CommonDataLayerModule {
     @Binds
-    abstract fun bindConfigurationRepository(
-        impl: ConfigurationRepositoryImpl
-    ): ConfigurationRepository
-
-    @Binds
     abstract fun bindPackageChangeRepository(
         impl: PackageChangeRepositoryImpl
     ): PackageChangeRepository

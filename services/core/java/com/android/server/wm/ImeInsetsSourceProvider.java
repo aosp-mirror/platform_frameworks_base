@@ -100,13 +100,13 @@ final class ImeInsetsSourceProvider extends InsetsSourceProvider {
             // isLeashReadyForDispatching (used to dispatch the leash of the control) is
             // depending on mGivenInsetsReady. Therefore, triggering notifyControlChanged here
             // again, so that the control with leash can be eventually dispatched
-            if (!mGivenInsetsReady && mServerVisible && !givenInsetsPending) {
+            if (!mGivenInsetsReady && isServerVisible() && !givenInsetsPending) {
                 mGivenInsetsReady = true;
                 ImeTracker.forLogging().onProgress(mStatsToken,
                         ImeTracker.PHASE_WM_POST_LAYOUT_NOTIFY_CONTROLS_CHANGED);
                 mStateController.notifyControlChanged(mControlTarget, this);
                 setImeShowing(true);
-            } else if (wasServerVisible && mServerVisible && mGivenInsetsReady
+            } else if (wasServerVisible && isServerVisible() && mGivenInsetsReady
                     && givenInsetsPending) {
                 // If the server visibility didn't change (still visible), and mGivenInsetsReady
                 // is set, we won't call into notifyControlChanged. Therefore, we can reset the
@@ -114,7 +114,7 @@ final class ImeInsetsSourceProvider extends InsetsSourceProvider {
                 ImeTracker.forLogging().onCancelled(mStatsToken,
                         ImeTracker.PHASE_WM_POST_LAYOUT_NOTIFY_CONTROLS_CHANGED);
                 mStatsToken = null;
-            } else if (wasServerVisible && !mServerVisible) {
+            } else if (wasServerVisible && !isServerVisible()) {
                 setImeShowing(false);
             }
         }
@@ -134,11 +134,15 @@ final class ImeInsetsSourceProvider extends InsetsSourceProvider {
     @Override
     protected boolean isLeashReadyForDispatching() {
         if (android.view.inputmethod.Flags.refactorInsetsController()) {
+            // We should only dispatch the leash, if the following conditions are fulfilled:
+            // 1. parent isLeashReadyForDispatching, 2. mGivenInsetsReady (means there are no
+            // givenInsetsPending), 3. the IME surface is drawn, 4. either the IME is
+            // serverVisible (the unfrozen state)
             final WindowState ws =
                     mWindowContainer != null ? mWindowContainer.asWindowState() : null;
             final boolean isDrawn = ws != null && ws.isDrawn();
             return super.isLeashReadyForDispatching()
-                    && mServerVisible && isDrawn && mGivenInsetsReady;
+                    && isServerVisible() && isDrawn && mGivenInsetsReady;
         } else {
             return super.isLeashReadyForDispatching();
         }
