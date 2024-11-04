@@ -61,6 +61,10 @@ import static com.android.internal.util.FrameworkStatsLog.ACCESSIBILITY_SHORTCUT
 import static com.android.internal.util.FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_STATS__SOFTWARE_SHORTCUT_TYPE__UNKNOWN_TYPE;
 import static com.android.internal.util.FrameworkStatsLog.DATA_USAGE_BYTES_TRANSFER__OPPORTUNISTIC_DATA_SUB__NOT_OPPORTUNISTIC;
 import static com.android.internal.util.FrameworkStatsLog.DATA_USAGE_BYTES_TRANSFER__OPPORTUNISTIC_DATA_SUB__OPPORTUNISTIC;
+import static com.android.internal.util.FrameworkStatsLog.PRESSURE_STALL_INFORMATION__PSI_RESOURCE__PSI_RESOURCE_CPU;
+import static com.android.internal.util.FrameworkStatsLog.PRESSURE_STALL_INFORMATION__PSI_RESOURCE__PSI_RESOURCE_IO;
+import static com.android.internal.util.FrameworkStatsLog.PRESSURE_STALL_INFORMATION__PSI_RESOURCE__PSI_RESOURCE_MEMORY;
+import static com.android.internal.util.FrameworkStatsLog.PRESSURE_STALL_INFORMATION__PSI_RESOURCE__PSI_RESOURCE_UNKNOWN;
 import static com.android.internal.util.FrameworkStatsLog.TIME_ZONE_DETECTOR_STATE__DETECTION_MODE__GEO;
 import static com.android.internal.util.FrameworkStatsLog.TIME_ZONE_DETECTOR_STATE__DETECTION_MODE__MANUAL;
 import static com.android.internal.util.FrameworkStatsLog.TIME_ZONE_DETECTOR_STATE__DETECTION_MODE__TELEPHONY;
@@ -68,6 +72,7 @@ import static com.android.internal.util.FrameworkStatsLog.TIME_ZONE_DETECTOR_STA
 import static com.android.server.am.MemoryStatUtil.readMemoryStatFromFilesystem;
 import static com.android.server.stats.Flags.accumulateNetworkStatsSinceBoot;
 import static com.android.server.stats.Flags.addMobileBytesTransferByProcStatePuller;
+import static com.android.server.stats.Flags.addPressureStallInformationPuller;
 import static com.android.server.stats.Flags.applyNetworkStatsPollRateLimit;
 import static com.android.server.stats.pull.IonMemoryUtil.readProcessSystemIonHeapSizesFromDebugfs;
 import static com.android.server.stats.pull.IonMemoryUtil.readSystemIonHeapSizeFromDebugfs;
@@ -234,6 +239,8 @@ import com.android.server.stats.pull.IonMemoryUtil.IonAllocations;
 import com.android.server.stats.pull.netstats.NetworkStatsAccumulator;
 import com.android.server.stats.pull.netstats.NetworkStatsExt;
 import com.android.server.stats.pull.netstats.SubInfo;
+import com.android.server.stats.pull.psi.PsiData;
+import com.android.server.stats.pull.psi.PsiExtractor;
 import com.android.server.storage.DiskStatsFileLogger;
 import com.android.server.storage.DiskStatsLoggingService;
 import com.android.server.timezonedetector.MetricsTimeZoneDetectorState;
@@ -458,6 +465,10 @@ public class StatsPullAtomService extends SystemService {
      */
     public static final boolean ENABLE_MOBILE_DATA_STATS_AGGREGATED_PULLER =
                 addMobileBytesTransferByProcStatePuller();
+
+    // Whether or not to enable the new puller with pressure stall information.
+    public static final boolean ENABLE_PRESSURE_STALL_INFORMATION_PULLER =
+                addPressureStallInformationPuller();
 
     // Puller locks
     private final Object mDataBytesTransferLock = new Object();
@@ -835,6 +846,8 @@ public class StatsPullAtomService extends SystemService {
                         return pullHdrCapabilities(atomTag, data);
                     case FrameworkStatsLog.CACHED_APPS_HIGH_WATERMARK:
                         return pullCachedAppsHighWatermark(atomTag, data);
+                    case FrameworkStatsLog.PRESSURE_STALL_INFORMATION:
+                        return pullPressureStallInformation(atomTag, data);
                     default:
                         throw new UnsupportedOperationException("Unknown tagId=" + atomTag);
                 }
@@ -1045,6 +1058,9 @@ public class StatsPullAtomService extends SystemService {
         registerPinnerServiceStats();
         registerHdrCapabilitiesPuller();
         registerCachedAppsHighWatermarkPuller();
+        if (ENABLE_PRESSURE_STALL_INFORMATION_PULLER) {
+            registerPressureStallInformation();
+        }
     }
 
     private void initMobileDataStatsPuller() {
@@ -5155,6 +5171,55 @@ public class StatsPullAtomService extends SystemService {
                 mStatsCallbackImpl
         );
     }
+
+    private void registerPressureStallInformation() {
+        int tagId = FrameworkStatsLog.PRESSURE_STALL_INFORMATION;
+        mStatsManager.setPullAtomCallback(
+                tagId,
+                null,
+                DIRECT_EXECUTOR,
+                mStatsCallbackImpl
+        );
+    }
+
+    int pullPressureStallInformation(int atomTag, List<StatsEvent> pulledData) {
+        PsiExtractor psiExtractor = new PsiExtractor();
+        for (PsiData.ResourceType resourceType: PsiData.ResourceType.values()) {
+            PsiData psiData = psiExtractor.getPsiData(resourceType);
+            if (psiData == null) {
+                Slog.e(
+                        TAG,
+                        "Failed to pull PressureStallInformation atom for resource: "
+                                + resourceType.toString());
+                continue;
+            }
+            pulledData.add(FrameworkStatsLog.buildStatsEvent(
+                    atomTag,
+                    toProtoPsiResourceType(psiData.getResourceType()),
+                    psiData.getSomeAvg10SecPercentage(),
+                    psiData.getSomeAvg60SecPercentage(),
+                    psiData.getSomeAvg300SecPercentage(),
+                    psiData.getSomeTotalUsec(),
+                    psiData.getFullAvg10SecPercentage(),
+                    psiData.getFullAvg60SecPercentage(),
+                    psiData.getFullAvg300SecPercentage(),
+                    psiData.getFullTotalUsec()));
+        }
+        return StatsManager.PULL_SUCCESS;
+    }
+
+    private int toProtoPsiResourceType(PsiData.ResourceType resourceType) {
+        if (resourceType == PsiData.ResourceType.CPU) {
+            return PRESSURE_STALL_INFORMATION__PSI_RESOURCE__PSI_RESOURCE_CPU;
+        } else if (resourceType == PsiData.ResourceType.MEMORY) {
+            return PRESSURE_STALL_INFORMATION__PSI_RESOURCE__PSI_RESOURCE_MEMORY;
+        } else if (resourceType == PsiData.ResourceType.IO) {
+            return PRESSURE_STALL_INFORMATION__PSI_RESOURCE__PSI_RESOURCE_IO;
+        } else {
+            return PRESSURE_STALL_INFORMATION__PSI_RESOURCE__PSI_RESOURCE_UNKNOWN;
+        }
+    }
+
 
     int pullSystemServerPinnerStats(int atomTag, List<StatsEvent> pulledData) {
         PinnerService pinnerService = LocalServices.getService(PinnerService.class);
