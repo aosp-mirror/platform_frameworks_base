@@ -567,6 +567,8 @@ interface IDevicePolicyManager {
 
     void finalizeWorkProfileProvisioning(in UserHandle managedProfileUser, in Account migratedAccount);
 
+    boolean removeManagedProfile(int userId);
+
     void setDeviceOwnerType(in ComponentName admin, in int deviceOwnerType);
     int getDeviceOwnerType(in ComponentName admin);
 
