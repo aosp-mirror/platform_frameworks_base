@@ -1570,6 +1570,9 @@ class BackNavigationController {
             }
 
             void createStartingSurface(@Nullable TaskSnapshot snapshot) {
+                if (Flags.deferPredictiveAnimationIfNoSnapshot() && snapshot == null) {
+                    return;
+                }
                 if (mAdaptors[0].mSwitchType == DIALOG_CLOSE) {
                     return;
                 }
