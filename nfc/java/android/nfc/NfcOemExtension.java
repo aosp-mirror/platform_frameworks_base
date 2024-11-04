@@ -195,9 +195,8 @@ public final class NfcOemExtension {
          * ex - if tag is connected  notify cover and Nfctest app if app is in testing mode
          *
          * @param connected status of the tag true if tag is connected otherwise false
-         * @param tag Tag details
          */
-        void onTagConnected(boolean connected, @NonNull Tag tag);
+        void onTagConnected(boolean connected);
 
         /**
          * Update the Nfc Adapter State
@@ -684,9 +683,9 @@ public final class NfcOemExtension {
     private final class NfcOemExtensionCallback extends INfcOemExtensionCallback.Stub {
 
         @Override
-        public void onTagConnected(boolean connected, Tag tag) throws RemoteException {
+        public void onTagConnected(boolean connected) throws RemoteException {
             mCallbackMap.forEach((cb, ex) ->
-                    handleVoid2ArgCallback(connected, tag, cb::onTagConnected, ex));
+                    handleVoidCallback(connected, cb::onTagConnected, ex));
         }
 
         @Override
