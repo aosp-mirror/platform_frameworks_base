@@ -14,23 +14,20 @@
  * limitations under the License.
  */
 
-package com.android.app.viewcapture
+package com.android.systemui.statusbar.data.repository
 
-import android.view.fakeWindowManager
-import com.android.systemui.kosmos.Kosmos
+import android.view.Display
+import com.android.systemui.statusbar.events.SystemEventChipAnimationController
 import org.mockito.kotlin.mock
 
-val Kosmos.mockViewCaptureAwareWindowManager by
-    Kosmos.Fixture { mock<ViewCaptureAwareWindowManager>() }
+class FakeSystemEventChipAnimationControllerStore : SystemEventChipAnimationControllerStore {
 
-val Kosmos.realCaptureAwareWindowManager by
-    Kosmos.Fixture {
-        ViewCaptureAwareWindowManager(
-            fakeWindowManager,
-            lazyViewCapture = lazy { mock<ViewCapture>() },
-            isViewCaptureEnabled = false,
-        )
+    private val perDisplayMocks = mutableMapOf<Int, SystemEventChipAnimationController>()
+
+    override val defaultDisplay: SystemEventChipAnimationController
+        get() = forDisplay(Display.DEFAULT_DISPLAY)
+
+    override fun forDisplay(displayId: Int): SystemEventChipAnimationController {
+        return perDisplayMocks.computeIfAbsent(displayId) { mock() }
     }
-
-var Kosmos.viewCaptureAwareWindowManager: ViewCaptureAwareWindowManager by
-    Kosmos.Fixture { mockViewCaptureAwareWindowManager }
+}

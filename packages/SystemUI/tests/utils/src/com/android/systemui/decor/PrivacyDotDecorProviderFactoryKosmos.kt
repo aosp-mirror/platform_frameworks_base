@@ -14,23 +14,12 @@
  * limitations under the License.
  */
 
-package com.android.app.viewcapture
+package com.android.systemui.decor
 
-import android.view.fakeWindowManager
+import android.content.testableContext
 import com.android.systemui.kosmos.Kosmos
-import org.mockito.kotlin.mock
 
-val Kosmos.mockViewCaptureAwareWindowManager by
-    Kosmos.Fixture { mock<ViewCaptureAwareWindowManager>() }
-
-val Kosmos.realCaptureAwareWindowManager by
+var Kosmos.privacyDotDecorProviderFactory by
     Kosmos.Fixture {
-        ViewCaptureAwareWindowManager(
-            fakeWindowManager,
-            lazyViewCapture = lazy { mock<ViewCapture>() },
-            isViewCaptureEnabled = false,
-        )
+        PrivacyDotDecorProviderFactory(testableContext.orCreateTestableResources.resources)
     }
-
-var Kosmos.viewCaptureAwareWindowManager: ViewCaptureAwareWindowManager by
-    Kosmos.Fixture { mockViewCaptureAwareWindowManager }

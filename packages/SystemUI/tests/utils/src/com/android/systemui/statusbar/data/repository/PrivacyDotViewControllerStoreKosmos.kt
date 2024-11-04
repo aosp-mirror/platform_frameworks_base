@@ -14,23 +14,12 @@
  * limitations under the License.
  */
 
-package com.android.app.viewcapture
+package com.android.systemui.statusbar.data.repository
 
-import android.view.fakeWindowManager
 import com.android.systemui.kosmos.Kosmos
-import org.mockito.kotlin.mock
 
-val Kosmos.mockViewCaptureAwareWindowManager by
-    Kosmos.Fixture { mock<ViewCaptureAwareWindowManager>() }
+val Kosmos.fakePrivacyDotViewControllerStore by
+    Kosmos.Fixture { FakePrivacyDotViewControllerStore() }
 
-val Kosmos.realCaptureAwareWindowManager by
-    Kosmos.Fixture {
-        ViewCaptureAwareWindowManager(
-            fakeWindowManager,
-            lazyViewCapture = lazy { mock<ViewCapture>() },
-            isViewCaptureEnabled = false,
-        )
-    }
-
-var Kosmos.viewCaptureAwareWindowManager: ViewCaptureAwareWindowManager by
-    Kosmos.Fixture { mockViewCaptureAwareWindowManager }
+var Kosmos.privacyDotViewControllerStore: PrivacyDotViewControllerStore by
+    Kosmos.Fixture { fakePrivacyDotViewControllerStore }
