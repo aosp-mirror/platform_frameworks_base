@@ -19,12 +19,16 @@ package com.android.systemui.user.data.repository
 
 import android.annotation.SuppressLint
 import android.annotation.UserIdInt
+import android.app.admin.DevicePolicyManager
 import android.content.Context
+import android.content.IntentFilter
 import android.content.pm.UserInfo
 import android.os.UserHandle
 import android.os.UserManager
 import android.provider.Settings
 import androidx.annotation.VisibleForTesting
+import com.android.app.tracing.coroutines.launchTraced as launch
+import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
@@ -38,6 +42,7 @@ import com.android.systemui.user.data.model.SelectionStatus
 import com.android.systemui.user.data.model.UserSwitcherSettingsModel
 import com.android.systemui.util.settings.GlobalSettings
 import com.android.systemui.util.settings.SettingsProxyExt.observerFlow
+import com.android.systemui.utils.coroutines.flow.flatMapLatestConflated
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
@@ -49,11 +54,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
-import com.android.app.tracing.coroutines.launchTraced as launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 
@@ -100,6 +106,9 @@ interface UserRepository {
     /** Whether refresh users should be paused. */
     var isRefreshUsersPaused: Boolean
 
+    /** Whether logout for secondary users is enabled by admin device policy. */
+    val isSecondaryUserLogoutEnabled: StateFlow<Boolean>
+
     /** Asynchronously refresh the list of users. This will cause [userInfos] to be updated. */
     fun refreshUsers()
 
@@ -108,6 +117,9 @@ interface UserRepository {
     fun isSimpleUserSwitcher(): Boolean
 
     fun isUserSwitcherEnabled(): Boolean
+
+    /** Performs logout logout for secondary users. */
+    suspend fun logOutSecondaryUser()
 
     /**
      * Returns the user ID of the "main user" of the device. This user may have access to certain
@@ -137,6 +149,8 @@ constructor(
     @Background private val backgroundDispatcher: CoroutineDispatcher,
     private val globalSettings: GlobalSettings,
     private val tracker: UserTracker,
+    private val devicePolicyManager: DevicePolicyManager,
+    private val broadcastDispatcher: BroadcastDispatcher,
 ) : UserRepository {
 
     private val _userSwitcherSettings: StateFlow<UserSwitcherSettingsModel> =
@@ -147,7 +161,7 @@ constructor(
                         SETTING_SIMPLE_USER_SWITCHER,
                         Settings.Global.ADD_USERS_WHEN_LOCKED,
                         Settings.Global.USER_SWITCHER_ENABLED,
-                    ),
+                    )
             )
             .onStart { emit(Unit) } // Forces an initial update.
             .map { getSettings() }
@@ -163,6 +177,7 @@ constructor(
 
     override var mainUserId: Int = UserHandle.USER_NULL
         private set
+
     override var lastSelectedNonGuestUserId: Int = UserHandle.USER_NULL
         private set
 
@@ -221,11 +236,50 @@ constructor(
             .stateIn(
                 applicationScope,
                 SharingStarted.Eagerly,
-                initialValue = SelectedUserModel(tracker.userInfo, currentSelectionStatus)
+                initialValue = SelectedUserModel(tracker.userInfo, currentSelectionStatus),
             )
     }
 
     override val selectedUserInfo: Flow<UserInfo> = selectedUser.map { it.userInfo }
+
+    /** Whether the secondary user logout is enabled by the admin device policy. */
+    private val isSecondaryUserLogoutSupported: Flow<Boolean> =
+        broadcastDispatcher
+            .broadcastFlow(
+                filter =
+                    IntentFilter(DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED)
+            ) { intent, _ ->
+                if (
+                    DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED == intent.action
+                ) {
+                    Unit
+                } else {
+                    null
+                }
+            }
+            .filterNotNull()
+            .onStart { emit(Unit) }
+            .map { _ -> devicePolicyManager.isLogoutEnabled() }
+            .flowOn(backgroundDispatcher)
+
+    @SuppressLint("MissingPermission")
+    override val isSecondaryUserLogoutEnabled: StateFlow<Boolean> =
+        selectedUser
+            .flatMapLatestConflated { selectedUser ->
+                if (selectedUser.isEligibleForLogout()) {
+                    isSecondaryUserLogoutSupported
+                } else {
+                    flowOf(false)
+                }
+            }
+            .stateIn(applicationScope, SharingStarted.Eagerly, false)
+
+    @SuppressLint("MissingPermission")
+    override suspend fun logOutSecondaryUser() {
+        if (isSecondaryUserLogoutEnabled.value) {
+            withContext(backgroundDispatcher) { devicePolicyManager.logoutUser() }
+        }
+    }
 
     @SuppressLint("MissingPermission")
     override fun refreshUsers() {
@@ -277,10 +331,7 @@ constructor(
                 ) != 0
 
             val isAddUsersFromLockscreen =
-                globalSettings.getInt(
-                    Settings.Global.ADD_USERS_WHEN_LOCKED,
-                    0,
-                ) != 0
+                globalSettings.getInt(Settings.Global.ADD_USERS_WHEN_LOCKED, 0) != 0
 
             val isUserSwitcherEnabled =
                 globalSettings.getInt(
@@ -308,4 +359,12 @@ constructor(
         private const val TAG = "UserRepository"
         @VisibleForTesting const val SETTING_SIMPLE_USER_SWITCHER = "lockscreenSimpleUserSwitcher"
     }
+}
+
+fun SelectedUserModel.isEligibleForLogout(): Boolean {
+    // TODO(b/206032495): should call mDevicePolicyManager.getLogoutUserId() instead of
+    // hardcode it to USER_SYSTEM so it properly supports headless system user mode
+    // (and then call mDevicePolicyManager.clearLogoutUser() after switched)
+    return selectionStatus == SelectionStatus.SELECTION_COMPLETE &&
+        userInfo.id != android.os.UserHandle.USER_SYSTEM
 }

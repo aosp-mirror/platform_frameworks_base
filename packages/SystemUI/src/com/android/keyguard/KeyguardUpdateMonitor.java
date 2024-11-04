@@ -219,7 +219,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private static final int MSG_USER_UNLOCKED = 334;
     private static final int MSG_ASSISTANT_STACK_CHANGED = 335;
     private static final int MSG_BIOMETRIC_AUTHENTICATION_CONTINUE = 336;
-    private static final int MSG_DEVICE_POLICY_MANAGER_STATE_CHANGED = 337;
     private static final int MSG_TELEPHONY_CAPABLE = 338;
     private static final int MSG_TIMEZONE_UPDATE = 339;
     private static final int MSG_USER_STOPPED = 340;
@@ -402,7 +401,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     protected int mFingerprintRunningState = BIOMETRIC_STATE_STOPPED;
     private boolean mFingerprintDetectRunning;
     private boolean mIsDreaming;
-    private boolean mLogoutEnabled;
     private int mActiveMobileDataSubscription = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
     private final FingerprintInteractiveToAuthProvider mFingerprintInteractiveToAuthProvider;
 
@@ -1739,9 +1737,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                         mHandler.obtainMessage(MSG_SERVICE_STATE_CHANGE, subId, 0, serviceState));
             } else if (TelephonyManager.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED.equals(action)) {
                 mHandler.sendEmptyMessage(MSG_SIM_SUBSCRIPTION_INFO_CHANGED);
-            } else if (DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED.equals(
-                    action)) {
-                mHandler.sendEmptyMessage(MSG_DEVICE_POLICY_MANAGER_STATE_CHANGED);
             }
         }
     };
@@ -2328,9 +2323,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                     case MSG_BIOMETRIC_AUTHENTICATION_CONTINUE:
                         updateFingerprintListeningState(BIOMETRIC_ACTION_UPDATE);
                         break;
-                    case MSG_DEVICE_POLICY_MANAGER_STATE_CHANGED:
-                        updateLogoutEnabled();
-                        break;
                     case MSG_TELEPHONY_CAPABLE:
                         updateTelephonyCapable((boolean) msg.obj);
                         break;
@@ -2496,7 +2488,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         boolean isUserUnlocked = mUserManager.isUserUnlocked(user);
         mLogger.logUserUnlockedInitialState(user, isUserUnlocked);
         mUserIsUnlocked.put(user, isUserUnlocked);
-        mLogoutEnabled = mDevicePolicyManager.isLogoutEnabled();
         updateSecondaryLockscreenRequirement(user);
         List<UserInfo> allUsers = mUserManager.getUsers();
         for (UserInfo userInfo : allUsers) {
@@ -4060,28 +4051,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             if (subId == info.getSubscriptionId()) return info;
         }
         return null; // not found
-    }
-
-    /**
-     * @return a cached version of DevicePolicyManager.isLogoutEnabled()
-     */
-    public boolean isLogoutEnabled() {
-        return mLogoutEnabled;
-    }
-
-    private void updateLogoutEnabled() {
-        Assert.isMainThread();
-        boolean logoutEnabled = mDevicePolicyManager.isLogoutEnabled();
-        if (mLogoutEnabled != logoutEnabled) {
-            mLogoutEnabled = logoutEnabled;
-
-            for (int i = 0; i < mCallbacks.size(); i++) {
-                KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
-                if (cb != null) {
-                    cb.onLogoutEnabledChanged();
-                }
-            }
-        }
     }
 
     protected int getBiometricLockoutDelay() {
