@@ -1918,7 +1918,7 @@ public class AudioService extends IAudioService.Stub
         // Restore call state
         synchronized (mDeviceBroker.mSetModeLock) {
             onUpdateAudioMode(AudioSystem.MODE_CURRENT, android.os.Process.myPid(),
-                    mContext.getPackageName(), true /*force*/, false /*signal*/);
+                    mContext.getPackageName(), true /*force*/);
         }
         final int forSys;
         synchronized (mSettingsLock) {
@@ -4746,47 +4746,14 @@ public class AudioService extends IAudioService.Stub
                 }
             }
             if (updateAudioMode) {
-                postUpdateAudioMode(existingMsgPolicy, AudioSystem.MODE_CURRENT,
-                        android.os.Process.myPid(), mContext.getPackageName(),
-                        false /*signal*/, delay);
+                sendMsg(mAudioHandler,
+                        MSG_UPDATE_AUDIO_MODE,
+                        existingMsgPolicy,
+                        AudioSystem.MODE_CURRENT,
+                        android.os.Process.myPid(),
+                        mContext.getPackageName(),
+                        delay);
             }
-        }
-    }
-
-    static class UpdateAudioModeInfo {
-        UpdateAudioModeInfo(int mode, int pid, String packageName, boolean signal) {
-            mMode = mode;
-            mPid = pid;
-            mPackageName = packageName;
-            mSignal = signal;
-        }
-        private final int mMode;
-        private final int mPid;
-        private final String mPackageName;
-        private final boolean mSignal;
-
-        int getMode() {
-            return mMode;
-        }
-        int getPid() {
-            return mPid;
-        }
-        String getPackageName() {
-            return mPackageName;
-        }
-        boolean getSignal() {
-            return mSignal;
-        }
-    }
-
-    void postUpdateAudioMode(int msgPolicy, int mode, int pid, String packageName,
-            boolean signal, int delay) {
-        synchronized (mAudioModeResetLock) {
-            if (signal) {
-                mAudioModeResetCount++;
-            }
-            sendMsg(mAudioHandler, MSG_UPDATE_AUDIO_MODE, msgPolicy, 0, 0,
-                new UpdateAudioModeInfo(mode, pid, packageName, signal), delay);
         }
     }
 
@@ -6188,9 +6155,13 @@ public class AudioService extends IAudioService.Stub
                 } else {
                     SetModeDeathHandler h = mSetModeDeathHandlers.get(index);
                     mSetModeDeathHandlers.remove(index);
-                    postUpdateAudioMode(SENDMSG_QUEUE, AudioSystem.MODE_CURRENT,
-                            android.os.Process.myPid(), mContext.getPackageName(),
-                            false /*signal*/, 0);
+                    sendMsg(mAudioHandler,
+                            MSG_UPDATE_AUDIO_MODE,
+                            SENDMSG_QUEUE,
+                            AudioSystem.MODE_CURRENT,
+                            android.os.Process.myPid(),
+                            mContext.getPackageName(),
+                            0);
                 }
             }
         }
@@ -6436,14 +6407,19 @@ public class AudioService extends IAudioService.Stub
                 }
             }
 
-            postUpdateAudioMode(SENDMSG_REPLACE, mode, pid, callingPackage,
-                    hasModifyPhoneStatePermission && mode == AudioSystem.MODE_NORMAL, 0);
+            sendMsg(mAudioHandler,
+                    MSG_UPDATE_AUDIO_MODE,
+                    SENDMSG_REPLACE,
+                    mode,
+                    pid,
+                    callingPackage,
+                    0);
         }
     }
 
     @GuardedBy("mDeviceBroker.mSetModeLock")
     void onUpdateAudioMode(int requestedMode, int requesterPid, String requesterPackage,
-                           boolean force, boolean signal) {
+                           boolean force) {
         if (requestedMode == AudioSystem.MODE_CURRENT) {
             requestedMode = getMode();
         }
@@ -6458,7 +6434,7 @@ public class AudioService extends IAudioService.Stub
         }
         if (DEBUG_MODE) {
             Log.v(TAG, "onUpdateAudioMode() new mode: " + mode + ", current mode: "
-                    + mMode.get() + " requested mode: " + requestedMode + " signal: " + signal);
+                    + mMode.get() + " requested mode: " + requestedMode);
         }
         if (mode != mMode.get() || force) {
             int status = AudioSystem.SUCCESS;
@@ -6504,7 +6480,7 @@ public class AudioService extends IAudioService.Stub
 
                 // when entering RINGTONE, IN_CALL or IN_COMMUNICATION mode, clear all SCO
                 // connections not started by the application changing the mode when pid changes
-                mDeviceBroker.postSetModeOwner(mode, pid, uid, signal);
+                mDeviceBroker.postSetModeOwner(mode, pid, uid);
             } else {
                 Log.w(TAG, "onUpdateAudioMode: failed to set audio mode to: " + mode);
             }
@@ -10186,7 +10162,7 @@ public class AudioService extends IAudioService.Stub
                         h.setRecordingActive(isRecordingActiveForUid(h.getUid()));
                         if (wasActive != h.isActive()) {
                             onUpdateAudioMode(AudioSystem.MODE_CURRENT, android.os.Process.myPid(),
-                                    mContext.getPackageName(), false /*force*/, false /*signal*/);
+                                    mContext.getPackageName(), false /*force*/);
                         }
                     }
                     break;
@@ -10216,9 +10192,7 @@ public class AudioService extends IAudioService.Stub
 
                 case MSG_UPDATE_AUDIO_MODE:
                     synchronized (mDeviceBroker.mSetModeLock) {
-                        UpdateAudioModeInfo info = (UpdateAudioModeInfo) msg.obj;
-                        onUpdateAudioMode(info.getMode(), info.getPid(), info.getPackageName(),
-                                false /*force*/, info.getSignal());
+                        onUpdateAudioMode(msg.arg1, msg.arg2, (String) msg.obj, false /*force*/);
                     }
                     break;
 
@@ -10921,57 +10895,7 @@ public class AudioService extends IAudioService.Stub
             return AudioManager.AUDIOFOCUS_REQUEST_FAILED;
         }
         mmi.record();
-        //delay abandon focus requests from Telecom if an audio mode reset from Telecom
-        // is still being processed
-        final boolean abandonFromTelecom = (mContext.checkCallingOrSelfPermission(
-                    MODIFY_PHONE_STATE) == PackageManager.PERMISSION_GRANTED)
-                && ((aa != null && aa.getUsage() == AudioAttributes.USAGE_VOICE_COMMUNICATION)
-                        || AudioSystem.IN_VOICE_COMM_FOCUS_ID.equals(clientId));
-        if (abandonFromTelecom) {
-            synchronized (mAudioModeResetLock) {
-                final long start = java.lang.System.currentTimeMillis();
-                long elapsed = 0;
-                while (mAudioModeResetCount > 0) {
-                    if (DEBUG_MODE) {
-                        Log.i(TAG, "Abandon focus from Telecom, waiting for mode change");
-                    }
-                    try {
-                        mAudioModeResetLock.wait(
-                                AUDIO_MODE_RESET_TIMEOUT_MS - elapsed);
-                    } catch (InterruptedException e) {
-                        Log.w(TAG, "Interrupted while waiting for audio mode reset");
-                    }
-                    elapsed = java.lang.System.currentTimeMillis() - start;
-                    if (elapsed >= AUDIO_MODE_RESET_TIMEOUT_MS) {
-                        Log.e(TAG, "Timeout waiting for audio mode reset");
-                        break;
-                    }
-                }
-                if (DEBUG_MODE && elapsed != 0) {
-                    Log.i(TAG, "Abandon focus from Telecom done waiting");
-                }
-            }
-        }
         return mMediaFocusControl.abandonAudioFocus(fd, clientId, aa, callingPackageName);
-    }
-
-    /** synchronization between setMode(NORMAL) and abandonAudioFocus() frmo Telecom */
-    private static final long AUDIO_MODE_RESET_TIMEOUT_MS = 3000;
-
-    private final Object mAudioModeResetLock = new Object();
-
-    @GuardedBy("mAudioModeResetLock")
-    private int mAudioModeResetCount = 0;
-
-    void decrementAudioModeResetCount() {
-        synchronized (mAudioModeResetLock) {
-            if (mAudioModeResetCount > 0) {
-                mAudioModeResetCount--;
-            } else {
-                Log.w(TAG, "mAudioModeResetCount already 0");
-            }
-            mAudioModeResetLock.notify();
-        }
     }
 
     /** see {@link AudioManager#abandonAudioFocusForTest(AudioFocusRequest, String)} */
