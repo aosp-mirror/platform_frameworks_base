@@ -281,5 +281,8 @@ public class DesktopModeStatus {
         SystemProperties.Handle maxTaskLimitHandle = SystemProperties.find(MAX_TASK_LIMIT_SYS_PROP);
         pw.print(innerPrefix); pw.print("maxTaskLimit sysprop=");
         pw.println(maxTaskLimitHandle == null ? "null" : maxTaskLimitHandle.getInt(/* def= */ -1));
+
+        pw.print(innerPrefix); pw.print("showAppHandle config override=");
+        pw.print(context.getResources().getBoolean(R.bool.config_enableAppHandle));
     }
 }

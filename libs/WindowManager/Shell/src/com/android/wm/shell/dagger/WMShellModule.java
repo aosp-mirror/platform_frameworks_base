@@ -307,7 +307,7 @@ public abstract class WMShellModule {
             Optional<DesktopActivityOrientationChangeHandler> desktopActivityOrientationHandler,
             FocusTransitionObserver focusTransitionObserver,
             DesktopModeEventLogger desktopModeEventLogger) {
-        if (DesktopModeStatus.canEnterDesktopMode(context)) {
+        if (DesktopModeStatus.canEnterDesktopModeOrShowAppHandle(context)) {
             return new DesktopModeWindowDecorViewModel(
                     context,
                     mainExecutor,
@@ -406,7 +406,7 @@ public abstract class WMShellModule {
             Optional<TaskChangeListener> taskChangeListener) {
         // TODO(b/238217847): Temporarily add this check here until we can remove the dynamic
         //                    override for this controller from the base module
-        ShellInit init = FreeformComponents.isFreeformEnabled(context) ? shellInit : null;
+        ShellInit init = FreeformComponents.requiresFreeformComponents(context) ? shellInit : null;
         return new FreeformTaskListener(
                 context,
                 init,
@@ -847,7 +847,7 @@ public abstract class WMShellModule {
             DisplayController displayController,
             ShellTaskOrganizer shellTaskOrganizer,
             ShellCommandHandler shellCommandHandler) {
-        if (DesktopModeStatus.canEnterDesktopMode(context)) {
+        if (DesktopModeStatus.canEnterDesktopModeOrShowAppHandle(context)) {
             return Optional.of(
                     new DesktopImmersiveController(
                             shellInit,
@@ -1074,7 +1074,8 @@ public abstract class WMShellModule {
             ShellInit shellInit,
             RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer
     ) {
-        if (!DesktopModeStatus.canEnterDesktopMode(context)) {
+        if (!DesktopModeStatus.canEnterDesktopMode(context)
+                && !DesktopModeStatus.overridesShowAppHandle(context)) {
             return Optional.empty();
         }
         return Optional.of(
