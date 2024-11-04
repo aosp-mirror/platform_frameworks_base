@@ -24,6 +24,7 @@ import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
+import static android.view.WindowManager.TRANSIT_PREPARE_BACK_NAVIGATION;
 import static android.window.BackNavigationInfo.typeToString;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
@@ -103,6 +104,13 @@ public class BackNavigationControllerTests extends WindowTestsBase {
 
     @Before
     public void setUp() throws Exception {
+        final TransitionController transitionController = mAtm.getTransitionController();
+        final Transition fakeTransition = new Transition(TRANSIT_PREPARE_BACK_NAVIGATION,
+                0 /* flag */, transitionController, transitionController.mSyncEngine);
+        spyOn(transitionController);
+        doReturn(fakeTransition).when(transitionController)
+                .createTransition(anyInt(), anyInt());
+
         final BackNavigationController original = new BackNavigationController();
         original.setWindowManager(mWm);
         mBackNavigationController = Mockito.spy(original);
@@ -111,6 +119,7 @@ public class BackNavigationControllerTests extends WindowTestsBase {
         LocalServices.addService(WindowManagerInternal.class, mWindowManagerInternal);
         mBackAnimationAdapter = mock(BackAnimationAdapter.class);
         doReturn(true).when(mBackAnimationAdapter).isAnimatable(anyInt());
+        Mockito.doNothing().when(mBackNavigationController).startAnimation();
         mNavigationMonitor = mock(BackNavigationController.NavigationMonitor.class);
         mRootHomeTask = initHomeActivity();
     }
