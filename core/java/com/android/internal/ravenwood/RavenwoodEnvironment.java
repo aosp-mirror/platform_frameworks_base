@@ -28,19 +28,9 @@ import android.ravenwood.annotation.RavenwoodReplace;
 public final class RavenwoodEnvironment {
     public static final String TAG = "RavenwoodEnvironment";
 
-    private static final RavenwoodEnvironment sInstance;
-    private static final Workaround sWorkaround;
+    private static RavenwoodEnvironment sInstance = new RavenwoodEnvironment();
 
-    private RavenwoodEnvironment() {
-    }
-
-    static {
-        sInstance = new RavenwoodEnvironment();
-        sWorkaround = new Workaround();
-        ensureRavenwoodInitialized();
-    }
-
-    public static RuntimeException notSupportedOnDevice() {
+    private static RuntimeException notSupportedOnDevice() {
         return new UnsupportedOperationException("This method can only be used on Ravenwood");
     }
 
@@ -49,15 +39,6 @@ public final class RavenwoodEnvironment {
      */
     public static RavenwoodEnvironment getInstance() {
         return sInstance;
-    }
-
-    /**
-     * Initialize the ravenwood environment if it hasn't happened already, if running on Ravenwood.
-     *
-     * No-op if called on the device side.
-     */
-    @RavenwoodRedirect
-    public static void ensureRavenwoodInitialized() {
     }
 
     /**
@@ -91,38 +72,10 @@ public final class RavenwoodEnvironment {
     }
 
     /**
-     * See {@link Workaround}. It's only usable on Ravenwood.
-     */
-    @RavenwoodReplace
-    public static Workaround workaround() {
-        throw notSupportedOnDevice();
-    }
-
-    private static Workaround workaround$ravenwood() {
-        return sWorkaround;
-    }
-
-    /**
      * @return the "ravenwood-runtime" directory.
      */
     @RavenwoodRedirect
     public String getRavenwoodRuntimePath() {
         throw notSupportedOnDevice();
-    }
-
-    /**
-     * A set of APIs used to work around missing features on Ravenwood. Ideally, this class should
-     * be empty, and all its APIs should be able to be implemented properly.
-     */
-    public static class Workaround {
-        Workaround() {
-        }
-
-        /**
-         * @return whether the app's target SDK level is at least Q.
-         */
-        public boolean isTargetSdkAtLeastQ() {
-            return true;
-        }
     }
 }
