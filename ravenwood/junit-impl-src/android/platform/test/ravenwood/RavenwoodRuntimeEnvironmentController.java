@@ -51,6 +51,7 @@ import android.util.Log;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.hoststubgen.hosthelper.HostTestUtils;
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.RuntimeInit;
 import com.android.ravenwood.RavenwoodRuntimeNative;
 import com.android.ravenwood.RavenwoodRuntimeState;
@@ -140,24 +141,59 @@ public class RavenwoodRuntimeEnvironmentController {
         return res;
     }
 
+    private static final Object sInitializationLock = new Object();
+
+    @GuardedBy("sInitializationLock")
+    private static boolean sInitialized = false;
+
+    @GuardedBy("sInitializationLock")
+    private static Throwable sExceptionFromGlobalInit;
+
     private static RavenwoodAwareTestRunner sRunner;
     private static RavenwoodSystemProperties sProps;
-    private static boolean sInitialized = false;
 
     /**
      * Initialize the global environment.
      */
     public static void globalInitOnce() {
-        if (sInitialized) {
-            return;
+        synchronized (sInitializationLock) {
+            if (!sInitialized) {
+                // globalInitOnce() is called from class initializer, which cause
+                // this method to be called recursively,
+                sInitialized = true;
+
+                // This is the first call.
+                try {
+                    globalInitInner();
+                } catch (Throwable th) {
+                    Log.e(TAG, "globalInit() failed", th);
+
+                    sExceptionFromGlobalInit = th;
+                    throw th;
+                }
+            } else {
+                // Subsequent calls. If the first call threw, just throw the same error, to prevent
+                // the test from running.
+                if (sExceptionFromGlobalInit != null) {
+                    Log.e(TAG, "globalInit() failed re-throwing the same exception",
+                            sExceptionFromGlobalInit);
+
+                    SneakyThrow.sneakyThrow(sExceptionFromGlobalInit);
+                }
+            }
         }
-        sInitialized = true;
+    }
+
+    private static void globalInitInner() {
+        if (RAVENWOOD_VERBOSE_LOGGING) {
+            Log.v(TAG, "globalInit() called here...", new RuntimeException("NOT A CRASH"));
+        }
 
         // Some process-wide initialization. (maybe redirect stdout/stderr)
         RavenwoodCommonUtils.loadJniLibrary(LIBRAVENWOOD_INITIALIZER_NAME);
 
         // We haven't initialized liblog yet, so directly write to System.out here.
-        RavenwoodCommonUtils.log(TAG, "globalInit()");
+        RavenwoodCommonUtils.log(TAG, "globalInitInner()");
 
         // Load libravenwood_sysprop before other libraries that may use SystemProperties.
         var libProp = RavenwoodCommonUtils.getJniLibraryPath(RAVENWOOD_NATIVE_SYSPROP_NAME);
