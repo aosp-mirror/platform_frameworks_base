@@ -4249,6 +4249,7 @@ public abstract class Context {
             //@hide: WIFI_RTT_SERVICE,
             //@hide: ETHERNET_SERVICE,
             WIFI_RTT_RANGING_SERVICE,
+            WIFI_USD_SERVICE,
             NSD_SERVICE,
             AUDIO_SERVICE,
             AUDIO_DEVICE_VOLUME_SERVICE,
@@ -5089,6 +5090,19 @@ public abstract class Context {
      * @see android.net.wifi.rtt.WifiRttManager
      */
     public static final String WIFI_RTT_RANGING_SERVICE = "wifirtt";
+
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a {@link
+     * android.net.wifi.usd.UsdManager} for Unsynchronized Service Discovery (USD) operation.
+     *
+     * @see #getSystemService(String)
+     * @see android.net.wifi.usd.UsdManager
+     * @hide
+     */
+    @FlaggedApi(android.net.wifi.flags.Flags.FLAG_USD)
+    @SystemApi
+    public static final String WIFI_USD_SERVICE = "wifi_usd";
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a {@link

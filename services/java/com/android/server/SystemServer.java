@@ -419,6 +419,8 @@ public final class SystemServer implements Dumpable {
             "com.android.server.wifi.aware.WifiAwareService";
     private static final String WIFI_P2P_SERVICE_CLASS =
             "com.android.server.wifi.p2p.WifiP2pService";
+    private static final String WIFI_USD_SERVICE_CLASS =
+            "com.android.server.wifi.usd.UsdService";
     private static final String CONNECTIVITY_SERVICE_APEX_PATH =
             "/apex/com.android.tethering/javalib/service-connectivity.jar";
     private static final String CONNECTIVITY_SERVICE_INITIALIZER_CLASS =
@@ -2128,6 +2130,13 @@ public final class SystemServer implements Dumpable {
                 mSystemServiceManager.startServiceFromJar(
                         WIFI_SCANNING_SERVICE_CLASS, WIFI_APEX_SERVICE_JAR_PATH);
                 t.traceEnd();
+                // Start USD service
+                if (android.net.wifi.flags.Flags.usd()) {
+                    t.traceBegin("StartUsd");
+                    mSystemServiceManager.startServiceFromJar(
+                            WIFI_USD_SERVICE_CLASS, WIFI_APEX_SERVICE_JAR_PATH);
+                    t.traceEnd();
+                }
             }
 
             if (context.getPackageManager().hasSystemFeature(

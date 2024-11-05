@@ -3905,6 +3905,7 @@ package android.content {
     field public static final String WIFI_NL80211_SERVICE = "wifinl80211";
     field @Deprecated public static final String WIFI_RTT_SERVICE = "rttmanager";
     field public static final String WIFI_SCANNING_SERVICE = "wifiscanner";
+    field @FlaggedApi("android.net.wifi.flags.usd") public static final String WIFI_USD_SERVICE = "wifi_usd";
   }
 
   public final class ContextParams {
