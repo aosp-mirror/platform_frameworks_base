@@ -31,6 +31,7 @@ import android.database.ContentObserver;
 import android.hardware.SensorPrivacyManager;
 import android.hardware.SensorPrivacyManagerInternal;
 import android.hardware.contexthub.ErrorCode;
+import android.hardware.contexthub.HubEndpointInfo;
 import android.hardware.contexthub.MessageDeliveryStatus;
 import android.hardware.location.ContextHubInfo;
 import android.hardware.location.ContextHubMessage;
@@ -737,6 +738,14 @@ public class ContextHubService extends IContextHubService.Stub {
             return Collections.emptyList();
         }
         return mHubInfoRegistry.getHubs();
+    }
+
+    @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
+    @Override
+    public List<HubEndpointInfo> findEndpoints(long endpointId) {
+        super.findEndpoints_enforcePermission();
+        // TODO(b/375487784): connect this with mHubInfoRegistry
+        return Collections.emptyList();
     }
 
     /**

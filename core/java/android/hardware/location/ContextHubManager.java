@@ -34,6 +34,8 @@ import android.chre.flags.Flags;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.hardware.contexthub.ErrorCode;
+import android.hardware.contexthub.HubDiscoveryInfo;
+import android.hardware.contexthub.HubEndpointInfo;
 import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.Looper;
@@ -42,6 +44,7 @@ import android.util.Log;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Executor;
@@ -676,6 +679,29 @@ public final class ContextHubManager {
         }
 
         return transaction;
+    }
+
+    /**
+     * Find a list of endpoints that matches a specific ID.
+     *
+     * @param endpointId Statically generated ID for an endpoint.
+     * @return A list of {@link HubDiscoveryInfo} objects that represents the result of discovery.
+     */
+    @FlaggedApi(Flags.FLAG_OFFLOAD_API)
+    @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
+    @NonNull
+    public List<HubDiscoveryInfo> findEndpoints(long endpointId) {
+        try {
+            List<HubEndpointInfo> endpointInfos = mService.findEndpoints(endpointId);
+            List<HubDiscoveryInfo> results = new ArrayList<>(endpointInfos.size());
+            // Wrap with result type
+            for (HubEndpointInfo endpointInfo : endpointInfos) {
+                results.add(new HubDiscoveryInfo(endpointInfo));
+            }
+            return results;
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
