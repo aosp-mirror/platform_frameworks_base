@@ -67,6 +67,7 @@ flag {
     name: "aapm_api"
     namespace: "responsible_apis"
     description: "Android Advanced Protection Mode Service and Manager"
+    is_exported: true
     bug: "352420507"
     is_fixed_read_only: true
 }
