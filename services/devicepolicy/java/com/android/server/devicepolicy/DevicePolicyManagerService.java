@@ -3486,7 +3486,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     @GuardedBy("getLockObject()")
     private boolean maybeMigrateSuspendedPackagesLocked(String backupId) {
         Slog.i(LOG_TAG, "Migrating suspended packages to policy engine");
-        if (!Flags.unmanagedModeMigration()) {
+        if (!Flags.suspendPackagesCoexistence()) {
             return false;
         }
         if (mOwners.isSuspendedPackagesMigrated()) {
@@ -13360,7 +13360,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     @Override
     public String[] setPackagesSuspended(ComponentName who, String callerPackage,
             String[] packageNames, boolean suspended) {
-        if (!Flags.unmanagedModeMigration()) {
+        if (!Flags.suspendPackagesCoexistence()) {
             return setPackagesSuspendedPreCoexistence(who, callerPackage, packageNames, suspended);
         }
 
@@ -13450,7 +13450,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     public boolean isPackageSuspended(ComponentName who, String callerPackage, String packageName) {
         final CallerIdentity caller = getCallerIdentity(who, callerPackage);
 
-        if (Flags.unmanagedModeMigration()) {
+        if (Flags.suspendPackagesCoexistence()) {
             enforcePermission(
                     MANAGE_DEVICE_POLICY_PACKAGE_STATE,
                     caller.getPackageName(),
@@ -24235,17 +24235,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         maybeMigrateSecurityLoggingPolicyLocked();
         // ID format: <sdk-int>.<auto_increment_id>.<descriptions>'
         String unmanagedBackupId = "35.1.unmanaged-mode";
-        boolean unmanagedMigrated = false;
-        unmanagedMigrated =
-                unmanagedMigrated | maybeMigrateRequiredPasswordComplexityLocked(unmanagedBackupId);
-        unmanagedMigrated =
-                unmanagedMigrated | maybeMigrateSuspendedPackagesLocked(unmanagedBackupId);
+        boolean unmanagedMigrated = maybeMigrateRequiredPasswordComplexityLocked(unmanagedBackupId);
         if (unmanagedMigrated) {
             Slogf.i(LOG_TAG, "Backup made: " + unmanagedBackupId);
         }
 
         String supervisionBackupId = "36.2.supervision-support";
         boolean supervisionMigrated = maybeMigrateResetPasswordTokenLocked(supervisionBackupId);
+        supervisionMigrated |= maybeMigrateSuspendedPackagesLocked(supervisionBackupId);
         if (supervisionMigrated) {
             Slogf.i(LOG_TAG, "Backup made: " + supervisionBackupId);
         }
