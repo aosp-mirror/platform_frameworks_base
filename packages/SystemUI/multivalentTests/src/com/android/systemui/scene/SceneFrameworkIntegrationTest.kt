@@ -44,6 +44,7 @@ import com.android.systemui.flags.Flags
 import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.keyguard.ui.viewmodel.lockscreenUserActionsViewModel
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.collectLastValue
 import com.android.systemui.kosmos.runCurrent
 import com.android.systemui.kosmos.runTest
 import com.android.systemui.kosmos.testScope
@@ -153,7 +154,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
     @Test
     fun swipeUpOnLockscreen_enterCorrectPin_unlocksDevice() =
         kosmos.runTest {
-            val actions by testScope.collectLastValue(kosmos.lockscreenUserActionsViewModel.actions)
+            val actions by collectLastValue(kosmos.lockscreenUserActionsViewModel.actions)
             val upDestinationSceneKey =
                 (actions?.get(Swipe.Up) as? UserActionResult.ChangeScene)?.toScene
             assertThat(upDestinationSceneKey).isEqualTo(Scenes.Bouncer)
@@ -170,7 +171,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
         kosmos.runTest {
             setAuthMethod(AuthenticationMethodModel.None, enableLockscreen = true)
 
-            val actions by testScope.collectLastValue(lockscreenUserActionsViewModel.actions)
+            val actions by collectLastValue(lockscreenUserActionsViewModel.actions)
             val upDestinationSceneKey =
                 (actions?.get(Swipe.Up) as? UserActionResult.ChangeScene)?.toScene
             assertThat(upDestinationSceneKey).isEqualTo(Scenes.Gone)
@@ -180,7 +181,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
     @Test
     fun swipeUpOnShadeScene_withAuthMethodSwipe_lockscreenNotDismissed_goesToLockscreen() =
         kosmos.runTest {
-            val actions by testScope.collectLastValue(shadeUserActionsViewModel.actions)
+            val actions by collectLastValue(shadeUserActionsViewModel.actions)
             setAuthMethod(AuthenticationMethodModel.None, enableLockscreen = true)
             assertCurrentScene(Scenes.Lockscreen)
 
@@ -197,8 +198,8 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
     @Test
     fun swipeUpOnShadeScene_withAuthMethodSwipe_lockscreenDismissed_goesToGone() =
         kosmos.runTest {
-            val actions by testScope.collectLastValue(shadeUserActionsViewModel.actions)
-            val canSwipeToEnter by testScope.collectLastValue(deviceEntryInteractor.canSwipeToEnter)
+            val actions by collectLastValue(shadeUserActionsViewModel.actions)
+            val canSwipeToEnter by collectLastValue(deviceEntryInteractor.canSwipeToEnter)
 
             setAuthMethod(AuthenticationMethodModel.None, enableLockscreen = true)
 
@@ -279,7 +280,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
     fun swipeUpOnLockscreenWhileUnlocked_dismissesLockscreen() =
         kosmos.runTest {
             unlockDevice()
-            val actions by testScope.collectLastValue(lockscreenUserActionsViewModel.actions)
+            val actions by collectLastValue(lockscreenUserActionsViewModel.actions)
             val upDestinationSceneKey =
                 (actions?.get(Swipe.Up) as? UserActionResult.ChangeScene)?.toScene
             assertThat(upDestinationSceneKey).isEqualTo(Scenes.Gone)
@@ -302,7 +303,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
     fun dismissingIme_whileOnPasswordBouncer_navigatesToLockscreen() =
         kosmos.runTest {
             setAuthMethod(AuthenticationMethodModel.Password)
-            val actions by testScope.collectLastValue(lockscreenUserActionsViewModel.actions)
+            val actions by collectLastValue(lockscreenUserActionsViewModel.actions)
             val upDestinationSceneKey =
                 (actions?.get(Swipe.Up) as? UserActionResult.ChangeScene)?.toScene
             assertThat(upDestinationSceneKey).isEqualTo(Scenes.Bouncer)
@@ -319,14 +320,13 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
     fun bouncerActionButtonClick_opensEmergencyServicesDialer() =
         kosmos.runTest {
             setAuthMethod(AuthenticationMethodModel.Password)
-            val actions by testScope.collectLastValue(lockscreenUserActionsViewModel.actions)
+            val actions by collectLastValue(lockscreenUserActionsViewModel.actions)
             val upDestinationSceneKey =
                 (actions?.get(Swipe.Up) as? UserActionResult.ChangeScene)?.toScene
             assertThat(upDestinationSceneKey).isEqualTo(Scenes.Bouncer)
             emulateUserDrivenTransition(to = upDestinationSceneKey)
 
-            val bouncerActionButton by
-                testScope.collectLastValue(bouncerSceneContentViewModel.actionButton)
+            val bouncerActionButton by collectLastValue(bouncerSceneContentViewModel.actionButton)
             assertWithMessage("Bouncer action button not visible")
                 .that(bouncerActionButton)
                 .isNotNull()
@@ -341,14 +341,13 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
         kosmos.runTest {
             setAuthMethod(AuthenticationMethodModel.Password)
             startPhoneCall()
-            val actions by testScope.collectLastValue(lockscreenUserActionsViewModel.actions)
+            val actions by collectLastValue(lockscreenUserActionsViewModel.actions)
             val upDestinationSceneKey =
                 (actions?.get(Swipe.Up) as? UserActionResult.ChangeScene)?.toScene
             assertThat(upDestinationSceneKey).isEqualTo(Scenes.Bouncer)
             emulateUserDrivenTransition(to = upDestinationSceneKey)
 
-            val bouncerActionButton by
-                testScope.collectLastValue(bouncerSceneContentViewModel.actionButton)
+            val bouncerActionButton by collectLastValue(bouncerSceneContentViewModel.actionButton)
             assertWithMessage("Bouncer action button not visible during call")
                 .that(bouncerActionButton)
                 .isNotNull()
@@ -574,7 +573,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
             .that(getCurrentSceneInUi())
             .isEqualTo(Scenes.Bouncer)
         val authMethodViewModel by
-            testScope.collectLastValue(bouncerSceneContentViewModel.authMethodViewModel)
+            collectLastValue(bouncerSceneContentViewModel.authMethodViewModel)
         assertWithMessage("Cannot enter PIN when not using a PIN authentication method!")
             .that(authMethodViewModel)
             .isInstanceOf(PinBouncerViewModel::class.java)
@@ -603,7 +602,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
             .that(getCurrentSceneInUi())
             .isEqualTo(Scenes.Bouncer)
         val authMethodViewModel by
-            testScope.collectLastValue(bouncerSceneContentViewModel.authMethodViewModel)
+            collectLastValue(bouncerSceneContentViewModel.authMethodViewModel)
         assertWithMessage("Cannot enter PIN when not using a PIN authentication method!")
             .that(authMethodViewModel)
             .isInstanceOf(PinBouncerViewModel::class.java)

@@ -91,6 +91,7 @@ package android.nfc {
     method public void onDisable(@NonNull java.util.function.Consumer<java.lang.Boolean>);
     method public void onDisableFinished(int);
     method public void onDisableStarted();
+    method public void onEeListenActivated(boolean);
     method public void onEnable(@NonNull java.util.function.Consumer<java.lang.Boolean>);
     method public void onEnableFinished(int);
     method public void onEnableStarted();
@@ -105,7 +106,7 @@ package android.nfc {
     method public void onRfFieldActivated(boolean);
     method public void onRoutingChanged();
     method public void onStateUpdated(int);
-    method public void onTagConnected(boolean, @NonNull android.nfc.Tag);
+    method public void onTagConnected(boolean);
     method public void onTagDispatch(@NonNull java.util.function.Consumer<java.lang.Boolean>);
   }
 

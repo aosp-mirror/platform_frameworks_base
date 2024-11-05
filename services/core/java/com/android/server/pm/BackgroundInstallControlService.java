@@ -404,9 +404,11 @@ public class BackgroundInstallControlService extends SystemService {
 
     void handlePackageRemove(String packageName, int userId) {
         initBackgroundInstalledPackages();
+        if (mBackgroundInstalledPackages.contains(userId, packageName)) {
+            mCallbackHelper.notifyAllCallbacks(userId, packageName, INSTALL_EVENT_TYPE_UNINSTALL);
+        }
         mBackgroundInstalledPackages.remove(userId, packageName);
         writeBackgroundInstalledPackagesToDisk();
-        mCallbackHelper.notifyAllCallbacks(userId, packageName, INSTALL_EVENT_TYPE_UNINSTALL);
     }
 
     void handleUsageEvent(UsageEvents.Event event, int userId) {

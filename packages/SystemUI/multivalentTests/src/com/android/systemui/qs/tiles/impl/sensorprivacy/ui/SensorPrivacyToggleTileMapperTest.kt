@@ -56,7 +56,7 @@ class SensorPrivacyToggleTileMapperTest : SysuiTestCase() {
                 context.getString(R.string.quick_settings_camera_mic_available),
                 R.drawable.qs_camera_access_icon_on,
                 null,
-                CAMERA
+                CAMERA,
             )
         QSTileStateSubject.assertThat(outputState).isEqualTo(expectedState)
     }
@@ -74,7 +74,7 @@ class SensorPrivacyToggleTileMapperTest : SysuiTestCase() {
                 context.getString(R.string.quick_settings_camera_mic_blocked),
                 R.drawable.qs_camera_access_icon_off,
                 null,
-                CAMERA
+                CAMERA,
             )
         QSTileStateSubject.assertThat(outputState).isEqualTo(expectedState)
     }
@@ -92,7 +92,7 @@ class SensorPrivacyToggleTileMapperTest : SysuiTestCase() {
                 context.getString(R.string.quick_settings_camera_mic_available),
                 R.drawable.qs_mic_access_on,
                 null,
-                MICROPHONE
+                MICROPHONE,
             )
         QSTileStateSubject.assertThat(outputState).isEqualTo(expectedState)
     }
@@ -110,7 +110,7 @@ class SensorPrivacyToggleTileMapperTest : SysuiTestCase() {
                 context.getString(R.string.quick_settings_camera_mic_blocked),
                 R.drawable.qs_mic_access_off,
                 null,
-                MICROPHONE
+                MICROPHONE,
             )
         QSTileStateSubject.assertThat(outputState).isEqualTo(expectedState)
     }
@@ -146,7 +146,7 @@ class SensorPrivacyToggleTileMapperTest : SysuiTestCase() {
             else context.getString(R.string.quick_settings_mic_label)
 
         return QSTileState(
-            { Icon.Loaded(context.getDrawable(iconRes)!!, null) },
+            Icon.Loaded(context.getDrawable(iconRes)!!, null),
             iconRes,
             label,
             activationState,
@@ -156,7 +156,7 @@ class SensorPrivacyToggleTileMapperTest : SysuiTestCase() {
             stateDescription,
             QSTileState.SideViewIcon.None,
             QSTileState.EnabledState.ENABLED,
-            Switch::class.qualifiedName
+            Switch::class.qualifiedName,
         )
     }
 }

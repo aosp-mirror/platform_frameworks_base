@@ -158,3 +158,10 @@ flag {
   description: "Allows privileged focused windows to capture power key events."
   bug: "357144512"
 }
+
+flag {
+  name: "touchpad_three_finger_tap_shortcut"
+  namespace: "input"
+  description: "Turns three-finger touchpad taps into a customizable shortcut."
+  bug: "365063048"
+}

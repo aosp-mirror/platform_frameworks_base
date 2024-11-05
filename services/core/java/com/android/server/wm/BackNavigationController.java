@@ -1038,6 +1038,12 @@ class BackNavigationController {
             return;
         }
 
+        if (mWindowManagerService.mRoot.mTransitionController.isCollecting()) {
+            Slog.v(TAG, "Skip predictive back transition, another transition is collecting");
+            cancelPendingAnimation();
+            return;
+        }
+
         // Ensure the final animation targets which hidden by transition could be visible.
         for (int i = 0; i < targets.size(); i++) {
             final WindowContainer wc = targets.get(i).mContainer;
@@ -1066,6 +1072,7 @@ class BackNavigationController {
             Slog.e(TAG, "Remote animation gone", e);
         }
         mPendingAnimationBuilder = null;
+        mNavigationMonitor.stopMonitorTransition();
     }
 
     /**
@@ -1563,6 +1570,9 @@ class BackNavigationController {
             }
 
             void createStartingSurface(@Nullable TaskSnapshot snapshot) {
+                if (Flags.deferPredictiveAnimationIfNoSnapshot() && snapshot == null) {
+                    return;
+                }
                 if (mAdaptors[0].mSwitchType == DIALOG_CLOSE) {
                     return;
                 }

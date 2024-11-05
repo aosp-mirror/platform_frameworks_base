@@ -383,6 +383,10 @@
     <!-- Whether to show activity indicators in the status bar -->
     <bool name="config_showActivity">false</bool>
 
+    <!-- Whether to show the opportunistic satellite icon. When true, an icon will show to indicate
+         satellite capabilities when all other connections are out of service. -->
+    <bool name="config_showOpportunisticSatelliteIcon">true</bool>
+
     <!-- Whether or not to show the notification shelf that houses the icons of notifications that
      have been scrolled off-screen. -->
     <bool name="config_showNotificationShelf">true</bool>

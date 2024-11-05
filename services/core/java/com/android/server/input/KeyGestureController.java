@@ -20,12 +20,8 @@ import static android.content.pm.PackageManager.FEATURE_LEANBACK;
 import static android.content.pm.PackageManager.FEATURE_WATCH;
 import static android.view.WindowManagerPolicyConstants.FLAG_INTERACTIVE;
 
-import static com.android.hardware.input.Flags.keyboardA11yShortcutControl;
 import static com.android.hardware.input.Flags.useKeyGestureEventHandler;
 import static com.android.hardware.input.Flags.useKeyGestureEventHandlerMultiPressGestures;
-import static com.android.server.flags.Flags.newBugreportKeyboardShortcut;
-import static com.android.window.flags.Flags.enableMoveToNextDisplayShortcut;
-import static com.android.window.flags.Flags.enableTaskResizingKeyboardShortcuts;
 
 import android.annotation.BinderThread;
 import android.annotation.MainThread;
@@ -69,6 +65,7 @@ import android.view.KeyEvent;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.policy.IShortcutService;
 import com.android.server.policy.KeyCombinationManager;
 
 import java.util.ArrayDeque;
@@ -119,7 +116,8 @@ final class KeyGestureController {
     private final int mSystemPid;
     private final KeyCombinationManager mKeyCombinationManager;
     private final SettingsObserver mSettingsObserver;
-    private final InputGestureManager mInputGestureManager = new InputGestureManager();
+    private final AppLaunchShortcutManager mAppLaunchShortcutManager;
+    private final InputGestureManager mInputGestureManager;
     private static final Object mUserLock = new Object();
     @UserIdInt
     @GuardedBy("mUserLock")
@@ -131,7 +129,6 @@ final class KeyGestureController {
     private boolean mPendingHideRecentSwitcher;
 
     // Platform behaviors
-    private boolean mEnableBugReportKeyboardShortcut;
     private boolean mHasFeatureWatch;
     private boolean mHasFeatureLeanback;
 
@@ -178,13 +175,13 @@ final class KeyGestureController {
         });
         mKeyCombinationManager = new KeyCombinationManager(mHandler);
         mSettingsObserver = new SettingsObserver(mHandler);
+        mAppLaunchShortcutManager = new AppLaunchShortcutManager(mContext);
+        mInputGestureManager = new InputGestureManager(mContext);
         initBehaviors();
         initKeyCombinationRules();
     }
 
     private void initBehaviors() {
-        mEnableBugReportKeyboardShortcut = "1".equals(SystemProperties.get("ro.debuggable"));
-
         PackageManager pm = mContext.getPackageManager();
         mHasFeatureWatch = pm.hasSystemFeature(FEATURE_WATCH);
         mHasFeatureLeanback = pm.hasSystemFeature(FEATURE_LEANBACK);
@@ -437,6 +434,8 @@ final class KeyGestureController {
 
     public void systemRunning() {
         mSettingsObserver.observe();
+        mAppLaunchShortcutManager.systemRunning();
+        mInputGestureManager.systemRunning();
     }
 
     public boolean interceptKeyBeforeQueueing(KeyEvent event, int policyFlags) {
@@ -513,15 +512,34 @@ final class KeyGestureController {
             mPendingCapsLockToggle = false;
         }
 
+        // Handle App launch shortcuts
+        AppLaunchShortcutManager.InterceptKeyResult result = mAppLaunchShortcutManager.interceptKey(
+                event);
+        if (result.consumed()) {
+            return true;
+        }
+        if (result.appLaunchData() != null) {
+            return handleKeyGesture(deviceId, new int[]{keyCode}, metaState,
+                    KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_APPLICATION,
+                    KeyGestureEvent.ACTION_GESTURE_COMPLETE, displayId,
+                    focusedToken, /* flags = */0, result.appLaunchData());
+        }
+
+        // Handle system shortcuts
+        if (firstDown) {
+            InputGestureData systemShortcut = mInputGestureManager.getSystemShortcutForKeyEvent(
+                    event);
+            if (systemShortcut != null) {
+                return handleKeyGesture(deviceId, new int[]{keyCode}, metaState,
+                        systemShortcut.getAction().keyGestureType(),
+                        KeyGestureEvent.ACTION_GESTURE_COMPLETE,
+                        displayId, focusedToken, /* flags = */0,
+                        systemShortcut.getAction().appLaunchData());
+            }
+        }
+
+        // Handle system keys
         switch (keyCode) {
-            case KeyEvent.KEYCODE_A:
-                if (firstDown && event.isMetaPressed()) {
-                    return handleKeyGesture(deviceId, new int[]{keyCode}, KeyEvent.META_META_ON,
-                            KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_ASSISTANT,
-                            KeyGestureEvent.ACTION_GESTURE_COMPLETE, displayId,
-                            focusedToken, /* flags = */0, /* appLaunchData = */null);
-                }
-                break;
             case KeyEvent.KEYCODE_RECENT_APPS:
                 if (firstDown) {
                     handleKeyGesture(deviceId, new int[]{keyCode}, /* modifierState = */0,
@@ -544,257 +562,6 @@ final class KeyGestureController {
                             /* appLaunchData = */null);
                 }
                 return true;
-            case KeyEvent.KEYCODE_H:
-            case KeyEvent.KEYCODE_ENTER:
-                if (firstDown && event.isMetaPressed()) {
-                    return handleKeyGesture(deviceId, new int[]{keyCode}, KeyEvent.META_META_ON,
-                            KeyGestureEvent.KEY_GESTURE_TYPE_HOME,
-                            KeyGestureEvent.ACTION_GESTURE_COMPLETE, displayId,
-                            focusedToken, /* flags = */0, /* appLaunchData = */null);
-                }
-                break;
-            case KeyEvent.KEYCODE_I:
-                if (firstDown && event.isMetaPressed()) {
-                    return handleKeyGesture(deviceId, new int[]{keyCode}, KeyEvent.META_META_ON,
-                            KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_SYSTEM_SETTINGS,
-                            KeyGestureEvent.ACTION_GESTURE_COMPLETE, displayId,
-                            focusedToken, /* flags = */0, /* appLaunchData = */null);
-                }
-                break;
-            case KeyEvent.KEYCODE_L:
-                if (firstDown && event.isMetaPressed()) {
-                    return handleKeyGesture(deviceId, new int[]{keyCode}, KeyEvent.META_META_ON,
-                            KeyGestureEvent.KEY_GESTURE_TYPE_LOCK_SCREEN,
-                            KeyGestureEvent.ACTION_GESTURE_COMPLETE, displayId,
-                            focusedToken, /* flags = */0, /* appLaunchData = */null);
-                }
-                break;
-            case KeyEvent.KEYCODE_N:
-                if (firstDown && event.isMetaPressed()) {
-                    if (event.isCtrlPressed()) {
-                        return handleKeyGesture(deviceId, new int[]{keyCode},
-                                KeyEvent.META_META_ON | KeyEvent.META_CTRL_ON,
-                                KeyGestureEvent.KEY_GESTURE_TYPE_OPEN_NOTES,
-                                KeyGestureEvent.ACTION_GESTURE_COMPLETE, displayId,
-                                focusedToken, /* flags = */0, /* appLaunchData = */null);
-                    } else {
-                        return handleKeyGesture(deviceId, new int[]{keyCode},
-                                KeyEvent.META_META_ON,
-                                KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_NOTIFICATION_PANEL,
-                                KeyGestureEvent.ACTION_GESTURE_COMPLETE, displayId,
-                                focusedToken, /* flags = */0, /* appLaunchData = */null);
-                    }
-                }
-                break;
-            case KeyEvent.KEYCODE_S:
-                if (firstDown && event.isMetaPressed() && event.isCtrlPressed()) {
-                    return handleKeyGesture(deviceId, new int[]{keyCode},
-                            KeyEvent.META_META_ON | KeyEvent.META_CTRL_ON,
-                            KeyGestureEvent.KEY_GESTURE_TYPE_TAKE_SCREENSHOT,
-                            KeyGestureEvent.ACTION_GESTURE_COMPLETE, displayId,
-                            focusedToken, /* flags = */0, /* appLaunchData = */null);
-                }
-                break;
-            case KeyEvent.KEYCODE_T:
-                if (keyboardA11yShortcutControl()) {
-                    if (firstDown && event.isMetaPressed() && event.isAltPressed()) {
-                        return handleKeyGesture(deviceId, new int[]{keyCode},
-                                KeyEvent.META_META_ON | KeyEvent.META_ALT_ON,
-                                KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_TALKBACK,
-                                KeyGestureEvent.ACTION_GESTURE_COMPLETE, displayId,
-                                focusedToken, /* flags = */0, /* appLaunchData = */null);
-                    }
-                }
-                break;
-            case KeyEvent.KEYCODE_3:
-                if (InputSettings.isAccessibilityBounceKeysFeatureEnabled()
-                        && keyboardA11yShortcutControl()) {
-                    if (firstDown && event.isMetaPressed() && event.isAltPressed()) {
-                        return handleKeyGesture(deviceId, new int[]{keyCode},
-                                KeyEvent.META_META_ON | KeyEvent.META_ALT_ON,
-                                KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_BOUNCE_KEYS,
-                                KeyGestureEvent.ACTION_GESTURE_COMPLETE, displayId,
-                                focusedToken, /* flags = */0, /* appLaunchData = */null);
-                    }
-                }
-                break;
-            case KeyEvent.KEYCODE_4:
-                if (InputSettings.isAccessibilityMouseKeysFeatureFlagEnabled()
-                        && keyboardA11yShortcutControl()) {
-                    if (firstDown && event.isMetaPressed() && event.isAltPressed()) {
-                        return handleKeyGesture(deviceId, new int[]{keyCode},
-                                KeyEvent.META_META_ON | KeyEvent.META_ALT_ON,
-                                KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_MOUSE_KEYS,
-                                KeyGestureEvent.ACTION_GESTURE_COMPLETE, displayId,
-                                focusedToken, /* flags = */0, /* appLaunchData = */null);
-                    }
-                }
-                break;
-            case KeyEvent.KEYCODE_5:
-                if (InputSettings.isAccessibilityStickyKeysFeatureEnabled()
-                        && keyboardA11yShortcutControl()) {
-                    if (firstDown && event.isMetaPressed() && event.isAltPressed()) {
-                        return handleKeyGesture(deviceId, new int[]{keyCode},
-                                KeyEvent.META_META_ON | KeyEvent.META_ALT_ON,
-                                KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_STICKY_KEYS,
-                                KeyGestureEvent.ACTION_GESTURE_COMPLETE, displayId,
-                                focusedToken, /* flags = */0, /* appLaunchData = */null);
-                    }
-                }
-                break;
-            case KeyEvent.KEYCODE_6:
-                if (InputSettings.isAccessibilitySlowKeysFeatureFlagEnabled()
-                        && keyboardA11yShortcutControl()) {
-                    if (firstDown && event.isMetaPressed() && event.isAltPressed()) {
-                        return handleKeyGesture(deviceId, new int[]{keyCode},
-                                KeyEvent.META_META_ON | KeyEvent.META_ALT_ON,
-                                KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_SLOW_KEYS,
-                                KeyGestureEvent.ACTION_GESTURE_COMPLETE, displayId,
-                                focusedToken, /* flags = */0, /* appLaunchData = */null);
-                    }
-                }
-                break;
-            case KeyEvent.KEYCODE_DEL:
-                if (newBugreportKeyboardShortcut()) {
-                    if (firstDown && mEnableBugReportKeyboardShortcut && event.isMetaPressed()
-                            && event.isCtrlPressed()) {
-                        return handleKeyGesture(deviceId, new int[]{keyCode},
-                                KeyEvent.META_META_ON | KeyEvent.META_CTRL_ON,
-                                KeyGestureEvent.KEY_GESTURE_TYPE_TRIGGER_BUG_REPORT,
-                                KeyGestureEvent.ACTION_GESTURE_COMPLETE, displayId,
-                                focusedToken, /* flags = */0, /* appLaunchData = */null);
-                    }
-                }
-                // fall through
-            case KeyEvent.KEYCODE_ESCAPE:
-                if (firstDown && event.isMetaPressed()) {
-                    return handleKeyGesture(deviceId, new int[]{keyCode}, KeyEvent.META_META_ON,
-                            KeyGestureEvent.KEY_GESTURE_TYPE_BACK,
-                            KeyGestureEvent.ACTION_GESTURE_COMPLETE, displayId,
-                            focusedToken, /* flags = */0, /* appLaunchData = */null);
-                }
-                break;
-            case KeyEvent.KEYCODE_DPAD_UP:
-                if (firstDown && event.isMetaPressed() && event.isCtrlPressed()) {
-                    return handleKeyGesture(deviceId, new int[]{keyCode},
-                            KeyEvent.META_META_ON | KeyEvent.META_CTRL_ON,
-                            KeyGestureEvent.KEY_GESTURE_TYPE_MULTI_WINDOW_NAVIGATION,
-                            KeyGestureEvent.ACTION_GESTURE_COMPLETE, displayId,
-                            focusedToken, /* flags = */0, /* appLaunchData = */null);
-                }
-                break;
-            case KeyEvent.KEYCODE_DPAD_DOWN:
-                if (firstDown && event.isMetaPressed() && event.isCtrlPressed()) {
-                    return handleKeyGesture(deviceId, new int[]{keyCode},
-                            KeyEvent.META_META_ON | KeyEvent.META_CTRL_ON,
-                            KeyGestureEvent.KEY_GESTURE_TYPE_DESKTOP_MODE,
-                            KeyGestureEvent.ACTION_GESTURE_COMPLETE, displayId,
-                            focusedToken, /* flags = */0, /* appLaunchData = */null);
-                }
-                break;
-            case KeyEvent.KEYCODE_DPAD_LEFT:
-                if (firstDown && event.isMetaPressed()) {
-                    if (event.isCtrlPressed()) {
-                        return handleKeyGesture(deviceId, new int[]{keyCode},
-                                KeyEvent.META_META_ON | KeyEvent.META_CTRL_ON,
-                                KeyGestureEvent.KEY_GESTURE_TYPE_SPLIT_SCREEN_NAVIGATION_LEFT,
-                                KeyGestureEvent.ACTION_GESTURE_COMPLETE, displayId,
-                                focusedToken, /* flags = */0, /* appLaunchData = */null);
-                    } else if (event.isAltPressed()) {
-                        return handleKeyGesture(deviceId, new int[]{keyCode},
-                                KeyEvent.META_META_ON | KeyEvent.META_ALT_ON,
-                                KeyGestureEvent.KEY_GESTURE_TYPE_CHANGE_SPLITSCREEN_FOCUS_LEFT,
-                                KeyGestureEvent.ACTION_GESTURE_COMPLETE, displayId,
-                                focusedToken, /* flags = */0, /* appLaunchData = */null);
-                    } else {
-                        return handleKeyGesture(deviceId, new int[]{keyCode},
-                                KeyEvent.META_META_ON,
-                                KeyGestureEvent.KEY_GESTURE_TYPE_BACK,
-                                KeyGestureEvent.ACTION_GESTURE_COMPLETE, displayId,
-                                focusedToken, /* flags = */0, /* appLaunchData = */null);
-                    }
-                }
-                break;
-            case KeyEvent.KEYCODE_DPAD_RIGHT:
-                if (firstDown && event.isMetaPressed()) {
-                    if (event.isCtrlPressed()) {
-                        return handleKeyGesture(deviceId, new int[]{keyCode},
-                                KeyEvent.META_META_ON | KeyEvent.META_CTRL_ON,
-                                KeyGestureEvent.KEY_GESTURE_TYPE_SPLIT_SCREEN_NAVIGATION_RIGHT,
-                                KeyGestureEvent.ACTION_GESTURE_COMPLETE, displayId,
-                                focusedToken, /* flags = */0, /* appLaunchData = */null);
-                    } else if (event.isAltPressed()) {
-                        return handleKeyGesture(deviceId, new int[]{keyCode},
-                                KeyEvent.META_META_ON | KeyEvent.META_ALT_ON,
-                                KeyGestureEvent.KEY_GESTURE_TYPE_CHANGE_SPLITSCREEN_FOCUS_RIGHT,
-                                KeyGestureEvent.ACTION_GESTURE_COMPLETE, displayId,
-                                focusedToken, /* flags = */0, /* appLaunchData = */null);
-                    }
-                }
-                break;
-            case KeyEvent.KEYCODE_D:
-                if (enableMoveToNextDisplayShortcut()) {
-                    if (firstDown && event.isMetaPressed() && event.isCtrlPressed()) {
-                        return handleKeyGesture(deviceId, new int[]{keyCode},
-                                KeyEvent.META_META_ON | KeyEvent.META_CTRL_ON,
-                                KeyGestureEvent.KEY_GESTURE_TYPE_MOVE_TO_NEXT_DISPLAY,
-                                KeyGestureEvent.ACTION_GESTURE_COMPLETE,
-                                displayId, focusedToken, /* flags = */0, /* appLaunchData = */null);
-                    }
-                }
-                break;
-            case KeyEvent.KEYCODE_LEFT_BRACKET:
-                if (enableTaskResizingKeyboardShortcuts()) {
-                    if (firstDown && event.isAltPressed()) {
-                        return handleKeyGesture(deviceId, new int[]{keyCode},
-                                KeyEvent.META_ALT_ON,
-                                KeyGestureEvent.KEY_GESTURE_TYPE_SNAP_LEFT_FREEFORM_WINDOW,
-                                KeyGestureEvent.ACTION_GESTURE_COMPLETE,
-                                displayId, focusedToken, /* flags = */0, /* appLaunchData = */null);
-                    }
-                }
-                break;
-            case KeyEvent.KEYCODE_RIGHT_BRACKET:
-                if (enableTaskResizingKeyboardShortcuts()) {
-                    if (firstDown && event.isAltPressed()) {
-                        return handleKeyGesture(deviceId, new int[]{keyCode},
-                                KeyEvent.META_ALT_ON,
-                                KeyGestureEvent.KEY_GESTURE_TYPE_SNAP_RIGHT_FREEFORM_WINDOW,
-                                KeyGestureEvent.ACTION_GESTURE_COMPLETE,
-                                displayId, focusedToken, /* flags = */0, /* appLaunchData = */null);
-                    }
-                }
-                break;
-            case KeyEvent.KEYCODE_EQUALS:
-                if (enableTaskResizingKeyboardShortcuts()) {
-                    if (firstDown && event.isAltPressed()) {
-                        return handleKeyGesture(deviceId, new int[]{keyCode},
-                                KeyEvent.META_ALT_ON,
-                                KeyGestureEvent.KEY_GESTURE_TYPE_MAXIMIZE_FREEFORM_WINDOW,
-                                KeyGestureEvent.ACTION_GESTURE_COMPLETE,
-                                displayId, focusedToken, /* flags = */0, /* appLaunchData = */null);
-                    }
-                }
-                break;
-            case KeyEvent.KEYCODE_MINUS:
-                if (enableTaskResizingKeyboardShortcuts()) {
-                    if (firstDown && event.isAltPressed()) {
-                        return handleKeyGesture(deviceId, new int[]{keyCode},
-                                KeyEvent.META_ALT_ON,
-                                KeyGestureEvent.KEY_GESTURE_TYPE_RESTORE_FREEFORM_WINDOW_SIZE,
-                                KeyGestureEvent.ACTION_GESTURE_COMPLETE,
-                                displayId, focusedToken, /* flags = */0, /* appLaunchData = */null);
-                    }
-                }
-                break;
-            case KeyEvent.KEYCODE_SLASH:
-                if (firstDown && event.isMetaPressed()) {
-                    return handleKeyGesture(deviceId, new int[]{keyCode}, KeyEvent.META_META_ON,
-                            KeyGestureEvent.KEY_GESTURE_TYPE_OPEN_SHORTCUT_HELPER,
-                            KeyGestureEvent.ACTION_GESTURE_COMPLETE, displayId,
-                            focusedToken, /* flags = */0, /* appLaunchData = */null);
-                }
-                break;
             case KeyEvent.KEYCODE_BRIGHTNESS_UP:
             case KeyEvent.KEYCODE_BRIGHTNESS_DOWN:
                 if (down) {
@@ -938,12 +705,7 @@ final class KeyGestureController {
                 return true;
             case KeyEvent.KEYCODE_TAB:
                 if (firstDown) {
-                    if (event.isMetaPressed()) {
-                        return handleKeyGesture(deviceId, new int[]{keyCode}, KeyEvent.META_META_ON,
-                                KeyGestureEvent.KEY_GESTURE_TYPE_RECENT_APPS,
-                                KeyGestureEvent.ACTION_GESTURE_COMPLETE, displayId,
-                                focusedToken, /* flags = */0, /* appLaunchData = */null);
-                    } else if (!mPendingHideRecentSwitcher) {
+                    if (!mPendingHideRecentSwitcher) {
                         final int shiftlessModifiers =
                                 event.getModifiers() & ~KeyEvent.META_SHIFT_MASK;
                         if (KeyEvent.metaStateHasModifiers(
@@ -1004,6 +766,7 @@ final class KeyGestureController {
                 return true;
         }
 
+        // Handle custom shortcuts
         if (firstDown) {
             InputGestureData customGesture;
             synchronized (mUserLock) {
@@ -1134,6 +897,13 @@ final class KeyGestureController {
         handleKeyGesture(event, null /*focusedToken*/);
     }
 
+    public void handleTouchpadThreeFingerTap() {
+        // TODO(b/365063048): trigger a custom shortcut based on the three-finger tap.
+        if (DEBUG) {
+            Slog.d(TAG, "Three-finger touchpad tap occurred");
+        }
+    }
+
     @MainThread
     public void setCurrentUserId(@UserIdInt int userId) {
         synchronized (mUserLock) {
@@ -1251,6 +1021,16 @@ final class KeyGestureController {
         return result;
     }
 
+    @BinderThread
+    public AidlInputGestureData[] getAppLaunchBookmarks() {
+        List<InputGestureData> bookmarks = mAppLaunchShortcutManager.getBookmarks();
+        AidlInputGestureData[] result = new AidlInputGestureData[bookmarks.size()];
+        for (int i = 0; i < bookmarks.size(); i++) {
+            result[i] = bookmarks.get(i).getAidlData();
+        }
+        return result;
+    }
+
     private void onKeyGestureEventListenerDied(int pid) {
         synchronized (mKeyGestureEventListenerRecords) {
             mKeyGestureEventListenerRecords.remove(pid);
@@ -1320,6 +1100,15 @@ final class KeyGestureController {
             record.mKeyGestureHandler.asBinder().unlinkToDeath(record, 0);
             mKeyGestureHandlerRecords.remove(pid);
         }
+    }
+
+    public void registerShortcutKey(long shortcutCode, IShortcutService shortcutKeyReceiver)
+            throws RemoteException {
+        mAppLaunchShortcutManager.registerShortcutKey(shortcutCode, shortcutKeyReceiver);
+    }
+
+    public List<InputGestureData> getBookmarks() {
+        return mAppLaunchShortcutManager.getBookmarks();
     }
 
     private void onKeyGestureHandlerDied(int pid) {
@@ -1464,6 +1253,7 @@ final class KeyGestureController {
         }
         ipw.decreaseIndent();
         mKeyCombinationManager.dump("", ipw);
+        mAppLaunchShortcutManager.dump(ipw);
         mInputGestureManager.dump(ipw);
     }
 }

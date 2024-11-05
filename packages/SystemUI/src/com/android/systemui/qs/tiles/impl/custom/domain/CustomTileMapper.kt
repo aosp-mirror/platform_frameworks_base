@@ -35,10 +35,8 @@ import javax.inject.Inject
 @SysUISingleton
 class CustomTileMapper
 @Inject
-constructor(
-    private val context: Context,
-    private val uriGrantsManager: IUriGrantsManager,
-) : QSTileDataToStateMapper<CustomTileDataModel> {
+constructor(private val context: Context, private val uriGrantsManager: IUriGrantsManager) :
+    QSTileDataToStateMapper<CustomTileDataModel> {
 
     override fun map(config: QSTileConfig, data: CustomTileDataModel): QSTileState {
         val userContext =
@@ -50,7 +48,7 @@ constructor(
 
         val iconResult =
             if (userContext != null) {
-                getIconProvider(
+                getIcon(
                     userContext = userContext,
                     icon = data.tile.icon,
                     callingAppUid = data.callingAppUid,
@@ -58,16 +56,16 @@ constructor(
                     defaultIcon = data.defaultTileIcon,
                 )
             } else {
-                IconResult({ null }, true)
+                IconResult(null, true)
             }
 
-        return QSTileState.build(iconResult.iconProvider, data.tile.label) {
+        return QSTileState.build(iconResult.icon, data.tile.label) {
             var tileState: Int = data.tile.state
             if (data.hasPendingBind) {
                 tileState = Tile.STATE_UNAVAILABLE
             }
 
-            icon = iconResult.iconProvider
+            icon = iconResult.icon
             activationState =
                 if (iconResult.failedToLoad) {
                     QSTileState.ActivationState.UNAVAILABLE
@@ -102,7 +100,7 @@ constructor(
     }
 
     @SuppressLint("MissingPermission") // android.permission.INTERACT_ACROSS_USERS_FULL
-    private fun getIconProvider(
+    private fun getIcon(
         userContext: Context,
         icon: android.graphics.drawable.Icon?,
         callingAppUid: Int,
@@ -123,17 +121,12 @@ constructor(
                 null
             } ?: defaultIcon?.loadDrawable(userContext)
         return IconResult(
-            {
-                drawable?.constantState?.newDrawable()?.let {
-                    Icon.Loaded(it, contentDescription = null)
-                }
+            drawable?.constantState?.newDrawable()?.let {
+                Icon.Loaded(it, contentDescription = null)
             },
             failedToLoad,
         )
     }
 
-    class IconResult(
-        val iconProvider: () -> Icon?,
-        val failedToLoad: Boolean,
-    )
+    class IconResult(val icon: Icon?, val failedToLoad: Boolean)
 }

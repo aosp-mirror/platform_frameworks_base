@@ -90,6 +90,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Class responsible for setting, resolving, and enforcing policies set by multiple management
@@ -1030,11 +1031,11 @@ final class DevicePolicyEngine {
         }
     }
 
-    private <V> void enforcePolicy(PolicyDefinition<V> policyDefinition,
+    private <V> CompletableFuture<Boolean> enforcePolicy(PolicyDefinition<V> policyDefinition,
             @Nullable PolicyValue<V> policyValue, int userId) {
         // null policyValue means remove any enforced policies, ensure callbacks handle this
         // properly
-        policyDefinition.enforcePolicy(
+        return policyDefinition.enforcePolicy(
                 policyValue == null ? null : policyValue.getValue(), mContext, userId);
     }
 

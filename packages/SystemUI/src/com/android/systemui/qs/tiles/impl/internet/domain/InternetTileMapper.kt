@@ -61,28 +61,26 @@ constructor(
             when (val dataIcon = data.icon) {
                 is InternetTileIconModel.ResourceId -> {
                     iconRes = dataIcon.resId
-                    icon = {
+                    icon =
                         Icon.Loaded(
                             resources.getDrawable(dataIcon.resId, theme),
                             contentDescription = null,
                         )
-                    }
                 }
 
                 is InternetTileIconModel.Cellular -> {
                     val signalDrawable = SignalDrawable(context, handler)
                     signalDrawable.setLevel(dataIcon.level)
-                    icon = { Icon.Loaded(signalDrawable, contentDescription = null) }
+                    icon = Icon.Loaded(signalDrawable, contentDescription = null)
                 }
 
                 is InternetTileIconModel.Satellite -> {
                     iconRes = dataIcon.resourceIcon.res // level is inferred from res
-                    icon = {
+                    icon =
                         Icon.Loaded(
                             resources.getDrawable(dataIcon.resourceIcon.res, theme),
                             contentDescription = null,
                         )
-                    }
                 }
             }
 

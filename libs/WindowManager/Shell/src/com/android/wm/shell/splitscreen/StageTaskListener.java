@@ -245,9 +245,9 @@ public class StageTaskListener implements ShellTaskOrganizer.TaskListener {
                 return;
             }
             mChildrenTaskInfo.put(taskInfo.taskId, taskInfo);
-            mVisible = taskInfo.isVisible && taskInfo.isVisibleRequested;
+            mVisible = isStageVisible();
             mCallbacks.onChildTaskStatusChanged(this, taskInfo.taskId, true /* present */,
-                    mVisible);
+                    taskInfo.isVisible && taskInfo.isVisibleRequested);
         } else {
             throw new IllegalArgumentException(this + "\n Unknown task: " + taskInfo
                     + "\n mRootTaskInfo: " + mRootTaskInfo);
@@ -291,6 +291,19 @@ public class StageTaskListener implements ShellTaskOrganizer.TaskListener {
     public void reparentChildSurfaceToTask(int taskId, SurfaceControl sc,
             SurfaceControl.Transaction t) {
         t.reparent(sc, findTaskSurface(taskId));
+    }
+
+    /**
+     * Checks against all children task info and return true if any are marked as visible.
+     */
+    private boolean isStageVisible() {
+        for (int i = mChildrenTaskInfo.size() - 1; i >= 0; --i) {
+            if (mChildrenTaskInfo.valueAt(i).isVisible
+                    && mChildrenTaskInfo.valueAt(i).isVisibleRequested) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private SurfaceControl findTaskSurface(int taskId) {

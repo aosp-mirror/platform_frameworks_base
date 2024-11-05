@@ -22,11 +22,10 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
-import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.testKosmos
 import com.android.systemui.user.data.repository.fakeUserRepository
+import com.android.systemui.util.settings.data.repository.userAwareSecureSettingsRepository
 import com.android.systemui.util.settings.fakeSettings
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -42,70 +41,127 @@ import org.junit.runner.RunWith
 class UserAwareSecureSettingsRepositoryTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
-    private val dispatcher = kosmos.testDispatcher
     private val testScope = kosmos.testScope
     private val secureSettings = kosmos.fakeSettings
-    private val userRepository = Kosmos().fakeUserRepository
-    private lateinit var repository: UserAwareSecureSettingsRepository
+    private val userRepository = kosmos.fakeUserRepository
+    private lateinit var underTest: UserAwareSecureSettingsRepository
 
     @Before
     fun setup() {
-        repository =
-            UserAwareSecureSettingsRepositoryImpl(
-                secureSettings,
-                userRepository,
-                dispatcher,
-            )
+        underTest = kosmos.userAwareSecureSettingsRepository
+
         userRepository.setUserInfos(USER_INFOS)
-        setSettingValueForUser(enabled = true, userInfo = SETTING_ENABLED_USER)
-        setSettingValueForUser(enabled = false, userInfo = SETTING_DISABLED_USER)
+
+        secureSettings.putBoolForUser(BOOL_SETTING_NAME, true, USER_1.id)
+        secureSettings.putBoolForUser(BOOL_SETTING_NAME, false, USER_2.id)
+        secureSettings.putIntForUser(INT_SETTING_NAME, 1337, USER_1.id)
+        secureSettings.putIntForUser(INT_SETTING_NAME, 818, USER_2.id)
     }
 
     @Test
-    fun settingEnabledEmitsValueForCurrentUser() {
+    fun boolSetting_emitsInitialValue() {
         testScope.runTest {
-            userRepository.setSelectedUserInfo(SETTING_ENABLED_USER)
+            userRepository.setSelectedUserInfo(USER_1)
 
-            val enabled by collectLastValue(repository.boolSettingForActiveUser(SETTING_NAME))
+            val enabled by collectLastValue(underTest.boolSetting(BOOL_SETTING_NAME, false))
 
             assertThat(enabled).isTrue()
         }
     }
 
     @Test
-    fun settingEnabledEmitsNewValueWhenSettingChanges() {
+    fun boolSetting_whenSettingChanges_emitsNewValue() {
         testScope.runTest {
-            userRepository.setSelectedUserInfo(SETTING_ENABLED_USER)
-            val enabled by collectValues(repository.boolSettingForActiveUser(SETTING_NAME))
+            userRepository.setSelectedUserInfo(USER_1)
+            val enabled by collectValues(underTest.boolSetting(BOOL_SETTING_NAME, false))
             runCurrent()
 
-            setSettingValueForUser(enabled = false, userInfo = SETTING_ENABLED_USER)
+            secureSettings.putBoolForUser(BOOL_SETTING_NAME, false, USER_1.id)
 
             assertThat(enabled).containsExactly(true, false).inOrder()
         }
     }
 
     @Test
-    fun settingEnabledEmitsValueForNewUserWhenUserChanges() {
+    fun boolSetting_whenWhenUserChanges_emitsNewValue() {
         testScope.runTest {
-            userRepository.setSelectedUserInfo(SETTING_ENABLED_USER)
-            val enabled by collectLastValue(repository.boolSettingForActiveUser(SETTING_NAME))
+            userRepository.setSelectedUserInfo(USER_1)
+            val enabled by collectLastValue(underTest.boolSetting(BOOL_SETTING_NAME, false))
             runCurrent()
 
-            userRepository.setSelectedUserInfo(SETTING_DISABLED_USER)
+            userRepository.setSelectedUserInfo(USER_2)
 
             assertThat(enabled).isFalse()
         }
     }
 
-    private fun setSettingValueForUser(enabled: Boolean, userInfo: UserInfo) {
-        secureSettings.putBoolForUser(SETTING_NAME, enabled, userInfo.id)
+    @Test
+    fun intSetting_emitsInitialValue() {
+        testScope.runTest {
+            userRepository.setSelectedUserInfo(USER_1)
+
+            val number by collectLastValue(underTest.intSetting(INT_SETTING_NAME, 0))
+
+            assertThat(number).isEqualTo(1337)
+        }
     }
 
+    @Test
+    fun intSetting_whenSettingChanges_emitsNewValue() {
+        testScope.runTest {
+            userRepository.setSelectedUserInfo(USER_1)
+            val number by collectValues(underTest.intSetting(INT_SETTING_NAME, 0))
+            runCurrent()
+
+            secureSettings.putIntForUser(INT_SETTING_NAME, 1338, USER_1.id)
+
+            assertThat(number).containsExactly(1337, 1338).inOrder()
+        }
+    }
+
+    @Test
+    fun intSetting_whenWhenUserChanges_emitsNewValue() {
+        testScope.runTest {
+            userRepository.setSelectedUserInfo(USER_1)
+            val number by collectLastValue(underTest.intSetting(INT_SETTING_NAME, 0))
+            runCurrent()
+
+            userRepository.setSelectedUserInfo(USER_2)
+
+            assertThat(number).isEqualTo(818)
+        }
+    }
+
+    @Test
+    fun getInt_returnsInitialValue() =
+        testScope.runTest {
+            userRepository.setSelectedUserInfo(USER_1)
+
+            assertThat(underTest.getInt(INT_SETTING_NAME, 0)).isEqualTo(1337)
+        }
+
+    @Test
+    fun getInt_whenSettingChanges_returnsNewValue() =
+        testScope.runTest {
+            userRepository.setSelectedUserInfo(USER_1)
+            secureSettings.putIntForUser(INT_SETTING_NAME, 999, USER_1.id)
+
+            assertThat(underTest.getInt(INT_SETTING_NAME, 0)).isEqualTo(999)
+        }
+
+    @Test
+    fun getInt_whenUserChanges_returnsThatUserValue() =
+        testScope.runTest {
+            userRepository.setSelectedUserInfo(USER_2)
+
+            assertThat(underTest.getInt(INT_SETTING_NAME, 0)).isEqualTo(818)
+        }
+
     private companion object {
-        const val SETTING_NAME = "SETTING_NAME"
-        val SETTING_ENABLED_USER = UserInfo(/* id= */ 0, "user1", /* flags= */ 0)
-        val SETTING_DISABLED_USER = UserInfo(/* id= */ 1, "user2", /* flags= */ 0)
-        val USER_INFOS = listOf(SETTING_ENABLED_USER, SETTING_DISABLED_USER)
+        const val BOOL_SETTING_NAME = "BOOL_SETTING_NAME"
+        const val INT_SETTING_NAME = "INT_SETTING_NAME"
+        val USER_1 = UserInfo(/* id= */ 0, "user1", /* flags= */ 0)
+        val USER_2 = UserInfo(/* id= */ 1, "user2", /* flags= */ 0)
+        val USER_INFOS = listOf(USER_1, USER_2)
     }
 }

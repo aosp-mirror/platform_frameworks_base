@@ -20,4 +20,4 @@ import com.android.systemui.common.ui.data.repository.configurationRepository
 import com.android.systemui.kosmos.Kosmos
 
 var Kosmos.configurationInteractor: ConfigurationInteractor by
-    Kosmos.Fixture { ConfigurationInteractor(configurationRepository) }
+    Kosmos.Fixture { ConfigurationInteractorImpl(configurationRepository) }

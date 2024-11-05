@@ -493,7 +493,7 @@ public class AudioService extends IAudioService.Stub
     private static final int MSG_INIT_ADI_DEVICE_STATES = 103;
 
     private static final int MSG_INIT_INPUT_GAINS = 104;
-    private static final int MSG_SET_INPUT_GAIN_INDEX = 105;
+    private static final int MSG_APPLY_INPUT_GAIN_INDEX = 105;
     private static final int MSG_PERSIST_INPUT_GAIN_INDEX = 106;
 
     // end of messages handled under wakelock
@@ -1626,7 +1626,6 @@ public class AudioService extends IAudioService.Stub
                 new InputDeviceVolumeHelper(
                         mSettings,
                         mContentResolver,
-                        mSettingsLock,
                         System.INPUT_GAIN_INDEX_SETTINGS);
     }
 
@@ -5804,7 +5803,7 @@ public class AudioService extends IAudioService.Stub
             // to persist).
             sendMsg(
                     mAudioHandler,
-                    MSG_SET_INPUT_GAIN_INDEX,
+                    MSG_APPLY_INPUT_GAIN_INDEX,
                     SENDMSG_QUEUE,
                     /*arg1*/ index,
                     /*arg2*/ 0,
@@ -5813,22 +5812,22 @@ public class AudioService extends IAudioService.Stub
         }
     }
 
-    private void setInputGainIndexInt(@NonNull AudioDeviceAttributes ada, int index) {
+    private void onApplyInputGainIndex(@NonNull AudioDeviceAttributes ada, int index) {
         // TODO(b/364923030): call AudioSystem to apply input gain in native layer.
 
         // Post a persist input gain msg.
         sendMsg(
                 mAudioHandler,
                 MSG_PERSIST_INPUT_GAIN_INDEX,
-                SENDMSG_QUEUE,
-                /*arg1*/ index,
+                SENDMSG_REPLACE,
+                /*arg1*/ 0,
                 /*arg2*/ 0,
                 /*obj*/ ada,
                 PERSIST_DELAY);
     }
 
-    private void persistInputGainIndex(@NonNull AudioDeviceAttributes ada, int index) {
-        mInputDeviceVolumeHelper.persistInputGainIndex(ada, index);
+    private void onPersistInputGainIndex(@NonNull AudioDeviceAttributes ada) {
+        mInputDeviceVolumeHelper.persistInputGainIndex(ada);
     }
 
     /**
@@ -10213,12 +10212,12 @@ public class AudioService extends IAudioService.Stub
                     vgs.persistVolumeGroup(msg.arg1);
                     break;
 
-                case MSG_SET_INPUT_GAIN_INDEX:
-                    setInputGainIndexInt((AudioDeviceAttributes) msg.obj, msg.arg1);
+                case MSG_APPLY_INPUT_GAIN_INDEX:
+                    onApplyInputGainIndex((AudioDeviceAttributes) msg.obj, msg.arg1);
                     break;
 
                 case MSG_PERSIST_INPUT_GAIN_INDEX:
-                    persistInputGainIndex((AudioDeviceAttributes) msg.obj, msg.arg1);
+                    onPersistInputGainIndex((AudioDeviceAttributes) msg.obj);
                     break;
 
                 case MSG_PERSIST_RINGER_MODE:

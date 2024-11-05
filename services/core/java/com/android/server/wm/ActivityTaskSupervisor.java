@@ -2478,7 +2478,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
     /** Notifies that the top activity of the task is forced to be resizeable. */
     private void handleForcedResizableTaskIfNeeded(Task task, int reason) {
         final ActivityRecord topActivity = task.getTopNonFinishingActivity();
-        if (topActivity == null || topActivity.noDisplay
+        if (topActivity == null || topActivity.isNoDisplay()
                 || !topActivity.canForceResizeNonResizable(task.getWindowingMode())) {
             return;
         }
@@ -2894,10 +2894,9 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
         private boolean mIncludeInvisibleAndFinishing;
         private boolean mIgnoringKeyguard;
 
-        ActivityRecord getOpaqueActivity(
-                @NonNull WindowContainer<?> container, boolean ignoringKeyguard) {
+        ActivityRecord getOpaqueActivity(@NonNull WindowContainer<?> container) {
             mIncludeInvisibleAndFinishing = true;
-            mIgnoringKeyguard = ignoringKeyguard;
+            mIgnoringKeyguard = true;
             return container.getActivity(this,
                     true /* traverseTopToBottom */, null /* boundary */);
         }

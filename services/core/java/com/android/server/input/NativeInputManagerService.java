@@ -143,6 +143,8 @@ interface NativeInputManagerService {
 
     void setTouchpadRightClickZoneEnabled(boolean enabled);
 
+    void setTouchpadThreeFingerTapShortcutEnabled(boolean enabled);
+
     void setShowTouches(boolean enabled);
 
     void setNonInteractiveDisplays(int[] displayIds);
@@ -425,6 +427,9 @@ interface NativeInputManagerService {
 
         @Override
         public native void setTouchpadRightClickZoneEnabled(boolean enabled);
+
+        @Override
+        public native void setTouchpadThreeFingerTapShortcutEnabled(boolean enabled);
 
         @Override
         public native void setShowTouches(boolean enabled);
