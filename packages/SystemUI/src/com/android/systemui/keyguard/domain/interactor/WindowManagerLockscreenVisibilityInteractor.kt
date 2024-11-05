@@ -126,14 +126,7 @@ constructor(
                 sceneInteractor.get().transitionState.flatMapLatestConflated { state ->
                     when {
                         state.isTransitioning(from = Scenes.Lockscreen, to = Scenes.Gone) ->
-                            (state as Transition).isUserInputOngoing.flatMapLatestConflated {
-                                isUserInputOngoing ->
-                                if (isUserInputOngoing) {
-                                    isDeviceEntered
-                                } else {
-                                    flowOf(true)
-                                }
-                            }
+                            isDeviceEntered
                         state.isTransitioning(from = Scenes.Bouncer, to = Scenes.Gone) ->
                             (state as Transition).progress.map { progress ->
                                 progress >
