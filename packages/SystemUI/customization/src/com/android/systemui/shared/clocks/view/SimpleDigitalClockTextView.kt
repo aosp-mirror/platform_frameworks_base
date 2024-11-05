@@ -148,6 +148,10 @@ open class SimpleDigitalClockTextView(
         lsFontVariation = ClockFontAxisSetting.toFVar(axes + OPTICAL_SIZE_AXIS)
         lockScreenPaint.typeface = typefaceCache.getTypefaceForVariant(lsFontVariation)
         typeface = lockScreenPaint.typeface
+
+        lockScreenPaint.getTextBounds(text, 0, text.length, textBounds)
+        targetTextBounds.set(textBounds)
+
         textAnimator.setTextStyle(fvar = lsFontVariation, animate = false)
         measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED)
         recomputeMaxSingleDigitSizes()
@@ -201,7 +205,7 @@ open class SimpleDigitalClockTextView(
                     } else {
                         textBounds.height() + 2 * lockScreenPaint.strokeWidth.toInt()
                     },
-                    MeasureSpec.getMode(measuredHeight),
+                    MeasureSpec.getMode(measuredHeightAndState),
                 )
         }
 
@@ -215,10 +219,10 @@ open class SimpleDigitalClockTextView(
                     } else {
                         max(
                             textBounds.width() + 2 * lockScreenPaint.strokeWidth.toInt(),
-                            MeasureSpec.getSize(measuredWidth),
+                            MeasureSpec.getSize(measuredWidthAndState),
                         )
                     },
-                    MeasureSpec.getMode(measuredWidth),
+                    MeasureSpec.getMode(measuredWidthAndState),
                 )
         }
 
