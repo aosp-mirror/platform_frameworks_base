@@ -78,12 +78,6 @@ object Flags {
         resourceBooleanFlag(R.bool.config_enableLockScreenCustomClocks, "lockscreen_custom_clocks")
 
     /**
-     * Whether the clock on a wide lock screen should use the new "stepping" animation for moving
-     * the digits when the clock moves.
-     */
-    @JvmField val STEP_CLOCK_ANIMATION = releasedFlag("step_clock_animation")
-
-    /**
      * Migration from the legacy isDozing/dozeAmount paths to the new KeyguardTransitionRepository
      * will occur in stages. This is one stage of many to come.
      */
