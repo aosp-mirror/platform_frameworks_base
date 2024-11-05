@@ -27,6 +27,7 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInterac
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.ui.view.DeviceEntryIconView
 import com.android.systemui.res.R
+import com.android.systemui.shade.ShadeDisplayAware
 import javax.inject.Inject
 import kotlin.math.roundToInt
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -45,7 +46,7 @@ class DeviceEntryForegroundViewModel
 @Inject
 constructor(
     val context: Context,
-    configurationInteractor: ConfigurationInteractor,
+    @ShadeDisplayAware configurationInteractor: ConfigurationInteractor,
     deviceEntryUdfpsInteractor: DeviceEntryUdfpsInteractor,
     transitionInteractor: KeyguardTransitionInteractor,
     deviceEntryIconViewModel: DeviceEntryIconViewModel,
@@ -106,12 +107,11 @@ constructor(
         }
 
     val viewModel: Flow<ForegroundIconViewModel> =
-        combine(
-            deviceEntryIconViewModel.iconType,
-            useAodIconVariant,
+        combine(deviceEntryIconViewModel.iconType, useAodIconVariant, color, padding) {
+            iconType,
+            useAodVariant,
             color,
-            padding,
-        ) { iconType, useAodVariant, color, padding ->
+            padding ->
             ForegroundIconViewModel(
                 type = iconType,
                 useAodVariant = useAodVariant,
