@@ -21,18 +21,25 @@ import android.util.Log
 import android.view.View.GONE
 import androidx.annotation.VisibleForTesting
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.media.controls.domain.pipeline.MediaDataManager
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.LockscreenShadeTransitionController
 import com.android.systemui.statusbar.StatusBarState.KEYGUARD
 import com.android.systemui.statusbar.SysuiStatusBarStateController
+import com.android.systemui.statusbar.notification.domain.interactor.SeenNotificationsInteractor
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.ExpandableView
 import com.android.systemui.statusbar.notification.shared.NotificationMinimalism
 import com.android.systemui.statusbar.policy.SplitShadeStateController
 import com.android.systemui.util.Compile
 import com.android.systemui.util.children
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.launch
 import java.io.PrintWriter
 import javax.inject.Inject
 import kotlin.math.max
@@ -56,7 +63,9 @@ constructor(
     private val lockscreenShadeTransitionController: LockscreenShadeTransitionController,
     private val mediaDataManager: MediaDataManager,
     @Main private val resources: Resources,
-    private val splitShadeStateController: SplitShadeStateController
+    private val splitShadeStateController: SplitShadeStateController,
+    private val seenNotificationsInteractor: SeenNotificationsInteractor,
+    @Application private val scope: CoroutineScope,
 ) {
 
     /**
@@ -74,7 +83,7 @@ constructor(
 
     /** Whether we allow keyguard to show less important notifications above the shelf. */
     private val limitLockScreenToOneImportant
-        get() = NotificationMinimalism.isEnabled
+        get() = NotificationMinimalism.isEnabled && minimalismSettingEnabled
 
     /** Minimum space between two notifications, see [calculateGapAndDividerHeight]. */
     private var dividerHeight by notNull<Float>()
@@ -85,8 +94,16 @@ constructor(
      */
     private var saveSpaceOnLockscreen = false
 
+    /**
+     * True when the lock screen notification minimalism feature setting is enabled
+     */
+    private var minimalismSettingEnabled = false
+
     init {
         updateResources()
+        if (NotificationMinimalism.isEnabled) {
+            scope.launch { trackLockScreenNotificationMinimalismSettingChanges() }
+        }
     }
 
     private fun allowedByPolicy(stackHeight: StackHeight): Boolean =
@@ -338,6 +355,16 @@ constructor(
         val shouldForceIntoShelf: Boolean
     )
 
+    private suspend fun trackLockScreenNotificationMinimalismSettingChanges() {
+        if (NotificationMinimalism.isUnexpectedlyInLegacyMode()) return
+        seenNotificationsInteractor.isLockScreenNotificationMinimalismEnabled().collectLatest {
+            if (it != minimalismSettingEnabled) {
+                minimalismSettingEnabled = it
+            }
+            Log.i(TAG, "minimalismSettingEnabled: $minimalismSettingEnabled")
+        }
+    }
+
     private fun computeHeightPerNotificationLimit(
         stack: NotificationStackScrollLayout,
         shelfHeight: Float,
@@ -390,7 +417,8 @@ constructor(
             log {
                 "\tcomputeHeightPerNotificationLimit i=$i notifs=$notifications " +
                     "notifsHeightSavingSpace=$notifsWithCollapsedHun" +
-                    " shelfWithSpaceBefore=$shelfWithSpaceBefore"
+                    " shelfWithSpaceBefore=$shelfWithSpaceBefore" +
+                    " limitLockScreenToOneImportant: $limitLockScreenToOneImportant"
             }
             yield(
                 StackHeight(
@@ -462,6 +490,8 @@ constructor(
 
     fun dump(pw: PrintWriter, args: Array<out String>) {
         pw.println("NotificationStackSizeCalculator saveSpaceOnLockscreen=$saveSpaceOnLockscreen")
+        pw.println("NotificationStackSizeCalculator " +
+                "limitLockScreenToOneImportant=$limitLockScreenToOneImportant")
     }
 
     private fun ExpandableView.isShowable(onLockscreen: Boolean): Boolean {

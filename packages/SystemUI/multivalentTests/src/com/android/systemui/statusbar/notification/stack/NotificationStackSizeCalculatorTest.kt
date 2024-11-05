@@ -23,14 +23,17 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.media.controls.domain.pipeline.MediaDataManager
 import com.android.systemui.statusbar.LockscreenShadeTransitionController
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
+import com.android.systemui.statusbar.notification.domain.interactor.SeenNotificationsInteractor
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.ExpandableView
 import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController
+import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.nullable
@@ -52,8 +55,11 @@ class NotificationStackSizeCalculatorTest : SysuiTestCase() {
     private lateinit var lockscreenShadeTransitionController: LockscreenShadeTransitionController
     @Mock private lateinit var mediaDataManager: MediaDataManager
     @Mock private lateinit var stackLayout: NotificationStackScrollLayout
+    @Mock private lateinit var seenNotificationsInteractor: SeenNotificationsInteractor
 
     private val testableResources = mContext.orCreateTestableResources
+    private val kosmos = testKosmos()
+    private val testScope = kosmos.testScope
 
     private lateinit var sizeCalculator: NotificationStackSizeCalculator
 
@@ -72,7 +78,9 @@ class NotificationStackSizeCalculatorTest : SysuiTestCase() {
                 lockscreenShadeTransitionController = lockscreenShadeTransitionController,
                 mediaDataManager = mediaDataManager,
                 testableResources.resources,
-                    ResourcesSplitShadeStateController()
+                ResourcesSplitShadeStateController(),
+                seenNotificationsInteractor = seenNotificationsInteractor,
+                scope = kosmos.testScope,
             )
     }
 
