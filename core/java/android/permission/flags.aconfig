@@ -53,6 +53,24 @@ flag {
 }
 
 flag {
+    name: "enhanced_confirmation_in_call_apis_enabled"
+    is_exported: true
+    is_fixed_read_only: true
+    namespace: "permissions"
+    description: "enable enhanced confirmation incall apis"
+    bug: "310220212"
+}
+
+flag {
+    name: "unknown_call_package_install_blocking_enabled"
+    is_exported: true
+    is_fixed_read_only: true
+    namespace: "permissions"
+    description: "enable the blocking of certain app installs during an unknown call"
+    bug: "310220212"
+}
+
+flag {
     name: "op_enable_mobile_data_by_user"
     is_exported: true
     namespace: "permissions"
