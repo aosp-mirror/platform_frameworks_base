@@ -18,7 +18,6 @@ package com.android.systemui.bouncer.ui.viewmodel
 
 import com.android.compose.animation.scene.Back
 import com.android.compose.animation.scene.Swipe
-import com.android.compose.animation.scene.SwipeDirection
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
@@ -33,16 +32,14 @@ import kotlinx.coroutines.flow.map
  */
 class BouncerUserActionsViewModel
 @AssistedInject
-constructor(
-    private val bouncerInteractor: BouncerInteractor,
-) : UserActionsViewModel() {
+constructor(private val bouncerInteractor: BouncerInteractor) : UserActionsViewModel() {
 
     override suspend fun hydrateActions(setActions: (Map<UserAction, UserActionResult>) -> Unit) {
         bouncerInteractor.dismissDestination
             .map { prevScene ->
                 mapOf(
                     Back to UserActionResult(prevScene),
-                    Swipe(SwipeDirection.Down) to UserActionResult(prevScene),
+                    Swipe.Down to UserActionResult(prevScene),
                 )
             }
             .collect { actions -> setActions(actions) }
