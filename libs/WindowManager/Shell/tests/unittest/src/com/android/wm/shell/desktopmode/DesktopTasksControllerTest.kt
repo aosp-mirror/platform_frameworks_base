@@ -36,6 +36,7 @@ import android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
 import android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
 import android.content.res.Configuration.ORIENTATION_LANDSCAPE
 import android.content.res.Configuration.ORIENTATION_PORTRAIT
+import android.content.res.Resources
 import android.graphics.Point
 import android.graphics.PointF
 import android.graphics.Rect
@@ -59,6 +60,7 @@ import android.view.WindowManager.TRANSIT_CLOSE
 import android.view.WindowManager.TRANSIT_OPEN
 import android.view.WindowManager.TRANSIT_TO_BACK
 import android.view.WindowManager.TRANSIT_TO_FRONT
+import android.widget.Toast
 import android.window.DisplayAreaInfo
 import android.window.IWindowContainerToken
 import android.window.RemoteTransition
@@ -214,12 +216,13 @@ class DesktopTasksControllerTest : ShellTestCase() {
   @Mock lateinit var persistentRepository: DesktopPersistentRepository
   @Mock lateinit var motionEvent: MotionEvent
   @Mock lateinit var repositoryInitializer: DesktopRepositoryInitializer
-
+  @Mock private lateinit var mockToast: Toast
   private lateinit var mockitoSession: StaticMockitoSession
   @Mock
   private lateinit var desktopTilingDecorViewModel: DesktopTilingDecorViewModel
   @Mock
   private lateinit var desktopWindowDecoration: DesktopModeWindowDecoration
+  @Mock private lateinit var resources: Resources
   private lateinit var controller: DesktopTasksController
   private lateinit var shellInit: ShellInit
   private lateinit var taskRepository: DesktopRepository
@@ -248,6 +251,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
         mockitoSession()
             .strictness(Strictness.LENIENT)
             .spyStatic(DesktopModeStatus::class.java)
+            .spyStatic(Toast::class.java)
             .startMocking()
     doReturn(true).`when` { DesktopModeStatus.isDesktopModeSupported(any()) }
 
@@ -275,6 +279,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     whenever(runBlocking { persistentRepository.readDesktop(any(), any()) }).thenReturn(
       Desktop.getDefaultInstance()
     )
+    doReturn(mockToast).`when` { Toast.makeText(any(), anyInt(), anyInt()) }
 
     val tda = DisplayAreaInfo(MockToken().token(), DEFAULT_DISPLAY, 0)
     tda.configuration.windowConfiguration.windowingMode = WINDOWING_MODE_FULLSCREEN
@@ -3403,7 +3408,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
   @Test
   @DisableFlags(Flags.FLAG_DISABLE_NON_RESIZABLE_APP_SNAP_RESIZING, Flags.FLAG_ENABLE_TILE_RESIZING)
-  fun handleSnapResizingTask_nonResizable_snapsToHalfScreen() {
+  fun handleSnapResizingTaskOnDrag_nonResizable_snapsToHalfScreen() {
     val task = setUpFreeformTask(DEFAULT_DISPLAY, Rect(0, 0, 200, 100)).apply {
       isResizeable = false
     }
@@ -3412,7 +3417,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     val expectedBounds =
       Rect(STABLE_BOUNDS.left, STABLE_BOUNDS.top, STABLE_BOUNDS.right / 2, STABLE_BOUNDS.bottom)
 
-    controller.handleSnapResizingTask(
+    controller.handleSnapResizingTaskOnDrag(
 
       task, SnapPosition.LEFT, mockSurface, currentDragBounds, preDragBounds, motionEvent,
       desktopWindowDecoration
@@ -3431,14 +3436,14 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
   @Test
   @EnableFlags(Flags.FLAG_DISABLE_NON_RESIZABLE_APP_SNAP_RESIZING)
-  fun handleSnapResizingTask_nonResizable_startsRepositionAnimation() {
+  fun handleSnapResizingTaskOnDrag_nonResizable_startsRepositionAnimation() {
     val task = setUpFreeformTask(DEFAULT_DISPLAY, Rect(0, 0, 200, 100)).apply {
       isResizeable = false
     }
     val preDragBounds = Rect(100, 100, 400, 500)
     val currentDragBounds = Rect(0, 100, 300, 500)
 
-    controller.handleSnapResizingTask(
+    controller.handleSnapResizingTaskOnDrag(
       task, SnapPosition.LEFT, mockSurface, currentDragBounds, preDragBounds, motionEvent,
       desktopWindowDecoration)
     verify(mReturnToDragStartAnimator).start(
@@ -3454,6 +3459,59 @@ class DesktopTasksControllerTest : ShellTestCase() {
       any(),
       any(),
       any()
+    )
+  }
+
+  @Test
+  @EnableFlags(
+    Flags.FLAG_DISABLE_NON_RESIZABLE_APP_SNAP_RESIZING
+  )
+  fun handleInstantSnapResizingTask_nonResizable_animatorNotStartedAndShowsToast() {
+    val taskBounds = Rect(0, 0, 200, 100)
+    val task = setUpFreeformTask(DEFAULT_DISPLAY, taskBounds).apply {
+      isResizeable = false
+    }
+
+    controller.handleInstantSnapResizingTask(
+      task, SnapPosition.LEFT, ResizeTrigger.SNAP_LEFT_MENU, motionEvent, desktopWindowDecoration)
+
+    // Assert that task is NOT updated via WCT
+    verify(toggleResizeDesktopTaskTransitionHandler, never()).startTransition(any(), any())
+    verify(mockToast).show()
+  }
+
+  @Test
+  @EnableFlags(Flags.FLAG_DISABLE_NON_RESIZABLE_APP_SNAP_RESIZING)
+  @DisableFlags(Flags.FLAG_ENABLE_TILE_RESIZING)
+  fun handleInstantSnapResizingTask_resizable_snapsToHalfScreenAndNotShowToast() {
+    val taskBounds = Rect(0, 0, 200, 100)
+    val task = setUpFreeformTask(DEFAULT_DISPLAY, taskBounds).apply {
+      isResizeable = true
+    }
+    val expectedBounds = Rect(
+      STABLE_BOUNDS.left, STABLE_BOUNDS.top, STABLE_BOUNDS.right / 2, STABLE_BOUNDS.bottom
+    )
+
+    controller.handleInstantSnapResizingTask(
+      task, SnapPosition.LEFT, ResizeTrigger.SNAP_LEFT_MENU, motionEvent, desktopWindowDecoration)
+
+    // Assert bounds set to half of the stable bounds
+    val wct = getLatestToggleResizeDesktopTaskWct(taskBounds)
+    assertThat(findBoundsChange(wct, task)).isEqualTo(expectedBounds)
+    verify(mockToast, never()).show()
+    verify(desktopModeEventLogger, times(1)).logTaskResizingStarted(
+      ResizeTrigger.SNAP_LEFT_MENU,
+      motionEvent,
+      task,
+      displayController
+    )
+    verify(desktopModeEventLogger, times(1)).logTaskResizingEnded(
+      ResizeTrigger.SNAP_LEFT_MENU,
+      motionEvent,
+      task,
+      expectedBounds.height(),
+      expectedBounds.width(),
+      displayController
     )
   }
 

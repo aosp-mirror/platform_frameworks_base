@@ -17,7 +17,6 @@
 package com.android.wm.shell.desktopmode
 
 import android.hardware.input.KeyGestureEvent
-import android.view.KeyEvent
 
 import android.hardware.input.InputManager
 import android.hardware.input.InputManager.KeyGestureEventHandler
@@ -29,6 +28,9 @@ import com.android.wm.shell.windowdecor.DesktopModeWindowDecorViewModel
 import com.android.internal.protolog.ProtoLog
 import android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM
 import android.content.Context
+import com.android.hardware.input.Flags.manageKeyGestures
+import com.android.window.flags.Flags.enableTaskResizingKeyboardShortcuts
+import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.ResizeTrigger
 import com.android.wm.shell.transition.FocusTransitionObserver
 import com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE
 import java.util.Optional
@@ -38,7 +40,7 @@ import java.util.Optional
  */
 class DesktopModeKeyGestureHandler(
     private val context: Context,
-    private val desktopModeWindowDecorViewModel: DesktopModeWindowDecorViewModel,
+    private val desktopModeWindowDecorViewModel: Optional<DesktopModeWindowDecorViewModel>,
     private val desktopTasksController: Optional<DesktopTasksController>,
     inputManager: InputManager,
     private val shellTaskOrganizer: ShellTaskOrganizer,
@@ -50,23 +52,63 @@ class DesktopModeKeyGestureHandler(
     }
 
     override fun handleKeyGestureEvent(event: KeyGestureEvent, focusedToken: IBinder?): Boolean {
-        if (!isKeyGestureSupported(event.keyGestureType) || !desktopTasksController.isPresent) {
+        if (!isKeyGestureSupported(event.keyGestureType) || !desktopTasksController.isPresent
+            || !desktopModeWindowDecorViewModel.isPresent) {
             return false
         }
         when (event.keyGestureType) {
             KeyGestureEvent.KEY_GESTURE_TYPE_MOVE_TO_NEXT_DISPLAY -> {
-                if (event.keycodes.contains(KeyEvent.KEYCODE_D) &&
-                    event.hasModifiers(KeyEvent.META_CTRL_ON or KeyEvent.META_META_ON)
-                ) {
-                    logV("Key gesture MOVE_TO_NEXT_DISPLAY is handled")
-                    getGloballyFocusedFreeformTask()?.let {
-                        desktopTasksController.get().moveToNextDisplay(
-                            it.taskId
-                        )
-                    }
-                    return true
+                logV("Key gesture MOVE_TO_NEXT_DISPLAY is handled")
+                getGloballyFocusedFreeformTask()?.let {
+                    desktopTasksController.get().moveToNextDisplay(
+                        it.taskId
+                    )
                 }
-                return false
+                return true
+            }
+            // TODO(b/375356876): Modify function to pass in keyboard shortcut as the input
+            // method for logging task resize
+            KeyGestureEvent.KEY_GESTURE_TYPE_SNAP_LEFT_FREEFORM_WINDOW -> {
+                logV("Key gesture SNAP_LEFT_FREEFORM_WINDOW is handled")
+                getGloballyFocusedFreeformTask()?.let {
+                    desktopModeWindowDecorViewModel.get().onSnapResize(
+                        it.taskId,
+                        true,
+                        null
+                    )
+                }
+                return true
+            }
+            KeyGestureEvent.KEY_GESTURE_TYPE_SNAP_RIGHT_FREEFORM_WINDOW -> {
+                logV("Key gesture SNAP_RIGHT_FREEFORM_WINDOW is handled")
+                getGloballyFocusedFreeformTask()?.let {
+                    desktopModeWindowDecorViewModel.get().onSnapResize(
+                        it.taskId,
+                        false,
+                        null
+                    )
+                }
+                return true
+            }
+            KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_MAXIMIZE_FREEFORM_WINDOW -> {
+                logV("Key gesture TOGGLE_MAXIMIZE_FREEFORM_WINDOW is handled")
+                getGloballyFocusedFreeformTask()?.let {
+                    desktopTasksController.get().toggleDesktopTaskSize(
+                        it,
+                        ResizeTrigger.MAXIMIZE_MENU,
+                        null,
+                    )
+                }
+                return true
+            }
+            KeyGestureEvent.KEY_GESTURE_TYPE_MINIMIZE_FREEFORM_WINDOW -> {
+                logV("Key gesture MINIMIZE_FREEFORM_WINDOW is handled")
+                getGloballyFocusedFreeformTask()?.let {
+                    desktopTasksController.get().minimizeTask(
+                        it,
+                    )
+                }
+                return true
             }
             else -> return false
         }
@@ -75,6 +117,11 @@ class DesktopModeKeyGestureHandler(
     override fun isKeyGestureSupported(gestureType: Int): Boolean = when (gestureType) {
         KeyGestureEvent.KEY_GESTURE_TYPE_MOVE_TO_NEXT_DISPLAY
             -> enableMoveToNextDisplayShortcut()
+        KeyGestureEvent.KEY_GESTURE_TYPE_SNAP_LEFT_FREEFORM_WINDOW,
+        KeyGestureEvent.KEY_GESTURE_TYPE_SNAP_RIGHT_FREEFORM_WINDOW,
+        KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_MAXIMIZE_FREEFORM_WINDOW,
+        KeyGestureEvent.KEY_GESTURE_TYPE_MINIMIZE_FREEFORM_WINDOW
+            -> enableTaskResizingKeyboardShortcuts() && manageKeyGestures()
         else -> false
     }
 

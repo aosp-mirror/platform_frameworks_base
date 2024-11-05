@@ -70,6 +70,7 @@ import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.policy.ScreenDecorationsUtils
 import com.android.internal.protolog.ProtoLog
 import com.android.window.flags.Flags
+import com.android.wm.shell.R
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer
 import com.android.wm.shell.ShellTaskOrganizer
 import com.android.wm.shell.common.DisplayController
@@ -777,6 +778,10 @@ class DesktopTasksController(
         resizeTrigger: ResizeTrigger,
         motionEvent: MotionEvent?,
     ) {
+        desktopModeEventLogger.logTaskResizingStarted(
+            resizeTrigger, motionEvent, taskInfo, displayController
+        )
+
         val displayLayout = displayController.getDisplayLayout(taskInfo.displayId) ?: return
 
         val stableBounds = Rect().apply { displayLayout.getStableBounds(this) }
@@ -855,9 +860,6 @@ class DesktopTasksController(
             return
         }
 
-        desktopModeEventLogger.logTaskResizingStarted(
-            ResizeTrigger.DRAG_TO_TOP_RESIZE_TRIGGER, motionEvent, taskInfo, displayController
-        )
         toggleDesktopTaskSize(taskInfo, ResizeTrigger.DRAG_TO_TOP_RESIZE_TRIGGER, motionEvent)
     }
 
@@ -945,13 +947,17 @@ class DesktopTasksController(
      */
     fun snapToHalfScreen(
         taskInfo: RunningTaskInfo,
-        taskSurface: SurfaceControl,
+        taskSurface: SurfaceControl?,
         currentDragBounds: Rect,
         position: SnapPosition,
         resizeTrigger: ResizeTrigger,
         motionEvent: MotionEvent?,
         desktopWindowDecoration: DesktopModeWindowDecoration,
     ) {
+        desktopModeEventLogger.logTaskResizingStarted(
+            resizeTrigger, motionEvent, taskInfo, displayController
+        )
+
         if (DesktopModeFlags.ENABLE_TILE_RESIZING.isTrue()) {
             val isTiled = desktopTilingDecorViewModel.snapToHalfScreen(
                 taskInfo,
@@ -977,7 +983,7 @@ class DesktopTasksController(
             // Handle the case where we attempt to snap resize when already snap resized: the task
             // position won't need to change but we want to animate the surface going back to the
             // snapped position from the "dragged-to-the-edge" position.
-            if (destinationBounds != currentDragBounds) {
+            if (destinationBounds != currentDragBounds && taskSurface != null) {
                 returnToDragStartAnimator.start(
                     taskInfo.taskId,
                     taskSurface,
@@ -994,8 +1000,40 @@ class DesktopTasksController(
         toggleResizeDesktopTaskTransitionHandler.startTransition(wct, currentDragBounds)
     }
 
+    /**
+     * Handles snap resizing a [taskInfo] to [position] instantaneously, for example when the
+     * [resizeTrigger] is the snap resize menu using any [motionEvent] or a keyboard shortcut.
+     */
+    fun handleInstantSnapResizingTask(
+        taskInfo: RunningTaskInfo,
+        position: SnapPosition,
+        resizeTrigger: ResizeTrigger,
+        motionEvent: MotionEvent? = null,
+        desktopModeWindowDecoration: DesktopModeWindowDecoration,
+    ) {
+        if (!isSnapResizingAllowed(taskInfo)) {
+            Toast.makeText(
+                getContext(),
+                R.string.desktop_mode_non_resizable_snap_text,
+                Toast.LENGTH_SHORT
+            ).show()
+            return
+        }
+
+        snapToHalfScreen(
+            taskInfo,
+            null,
+            taskInfo.configuration.windowConfiguration.bounds,
+            position,
+            resizeTrigger,
+            motionEvent,
+            desktopModeWindowDecoration
+        )
+    }
+
+
     @VisibleForTesting
-    fun handleSnapResizingTask(
+    fun handleSnapResizingTaskOnDrag(
         taskInfo: RunningTaskInfo,
         position: SnapPosition,
         taskSurface: SurfaceControl,
@@ -1005,7 +1043,7 @@ class DesktopTasksController(
         desktopModeWindowDecoration: DesktopModeWindowDecoration,
     ) {
         releaseVisualIndicator()
-        if (!taskInfo.isResizeable && DISABLE_NON_RESIZABLE_APP_SNAP_RESIZE.isTrue()) {
+        if (!isSnapResizingAllowed(taskInfo)) {
             interactionJankMonitor.begin(
                 taskSurface, context, handler, CUJ_DESKTOP_MODE_SNAP_RESIZE, "drag_non_resizable"
             )
@@ -1030,9 +1068,6 @@ class DesktopTasksController(
             } else {
                 ResizeTrigger.DRAG_RIGHT
             }
-            desktopModeEventLogger.logTaskResizingStarted(
-                resizeTrigger, motionEvent, taskInfo, displayController
-            )
             interactionJankMonitor.begin(
                 taskSurface, context, handler, CUJ_DESKTOP_MODE_SNAP_RESIZE, "drag_resizable"
             )
@@ -1047,6 +1082,9 @@ class DesktopTasksController(
             )
         }
     }
+
+    private fun isSnapResizingAllowed(taskInfo: RunningTaskInfo) =
+        taskInfo.isResizeable || !DISABLE_NON_RESIZABLE_APP_SNAP_RESIZE.isTrue()
 
     private fun getSnapBounds(taskInfo: RunningTaskInfo, position: SnapPosition): Rect {
         val displayLayout = displayController.getDisplayLayout(taskInfo.displayId) ?: return Rect()
@@ -1966,7 +2004,7 @@ class DesktopTasksController(
                 }
             }
             IndicatorType.TO_SPLIT_LEFT_INDICATOR -> {
-                handleSnapResizingTask(
+                handleSnapResizingTaskOnDrag(
                     taskInfo,
                     SnapPosition.LEFT,
                     taskSurface,
@@ -1977,7 +2015,7 @@ class DesktopTasksController(
                 )
             }
             IndicatorType.TO_SPLIT_RIGHT_INDICATOR -> {
-                handleSnapResizingTask(
+                handleSnapResizingTaskOnDrag(
                     taskInfo,
                     SnapPosition.RIGHT,
                     taskSurface,

@@ -20,6 +20,7 @@ import static android.window.DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_ENTER_TRA
 import static android.window.DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_TASK_LIMIT;
 import static android.window.DesktopModeFlags.ENABLE_WINDOWING_TRANSITION_HANDLERS_OBSERVERS;
 
+import static com.android.hardware.input.Flags.manageKeyGestures;
 import static com.android.hardware.input.Flags.useKeyGestureEventHandler;
 
 import android.annotation.NonNull;
@@ -884,13 +885,15 @@ public abstract class WMShellModule {
     @Provides
     static Optional<DesktopModeKeyGestureHandler> provideDesktopModeKeyGestureHandler(
             Context context,
-            DesktopModeWindowDecorViewModel desktopModeWindowDecorViewModel,
+            Optional<DesktopModeWindowDecorViewModel> desktopModeWindowDecorViewModel,
             Optional<DesktopTasksController> desktopTasksController,
             InputManager inputManager,
             ShellTaskOrganizer shellTaskOrganizer,
             FocusTransitionObserver focusTransitionObserver) {
         if (DesktopModeStatus.canEnterDesktopMode(context) && useKeyGestureEventHandler()
-                && Flags.enableMoveToNextDisplayShortcut()) {
+                && manageKeyGestures()
+                && (Flags.enableMoveToNextDisplayShortcut()
+                || Flags.enableTaskResizingKeyboardShortcuts())) {
             return Optional.of(new DesktopModeKeyGestureHandler(context,
                     desktopModeWindowDecorViewModel, desktopTasksController,
                     inputManager, shellTaskOrganizer, focusTransitionObserver));
@@ -900,7 +903,7 @@ public abstract class WMShellModule {
 
     @WMSingleton
     @Provides
-    static DesktopModeWindowDecorViewModel provideDesktopModeWindowDecorViewModel(
+    static Optional<DesktopModeWindowDecorViewModel> provideDesktopModeWindowDecorViewModel(
             Context context,
             @ShellMainThread ShellExecutor shellExecutor,
             @ShellMainThread Handler mainHandler,
@@ -930,7 +933,10 @@ public abstract class WMShellModule {
             FocusTransitionObserver focusTransitionObserver,
             DesktopModeEventLogger desktopModeEventLogger
     ) {
-        return new DesktopModeWindowDecorViewModel(context, shellExecutor, mainHandler,
+        if (!DesktopModeStatus.canEnterDesktopMode(context)) {
+            return Optional.empty();
+        }
+        return Optional.of(new DesktopModeWindowDecorViewModel(context, shellExecutor, mainHandler,
                 mainChoreographer, bgExecutor, shellInit, shellCommandHandler, windowManager,
                 taskOrganizer, desktopRepository, displayController, shellController,
                 displayInsetsController, syncQueue, transitions, desktopTasksController,
@@ -938,7 +944,7 @@ public abstract class WMShellModule {
                 assistContentRequester, multiInstanceHelper, desktopTasksLimiter,
                 appHandleEducationController, appToWebEducationController,
                 windowDecorCaptionHandleRepository, activityOrientationChangeHandler,
-                focusTransitionObserver, desktopModeEventLogger);
+                focusTransitionObserver, desktopModeEventLogger));
     }
 
     @WMSingleton
