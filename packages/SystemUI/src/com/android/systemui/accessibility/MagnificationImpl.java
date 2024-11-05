@@ -407,7 +407,8 @@ public class MagnificationImpl implements Magnification, CommandQueue.Callbacks 
         }
     }
 
-    boolean isMagnificationSettingsPanelShowing(int displayId) {
+    @MainThread
+    private boolean isMagnificationSettingsPanelShowing(int displayId) {
         final MagnificationSettingsController magnificationSettingsController =
                 mMagnificationSettingsSupplier.get(displayId);
         if (magnificationSettingsController != null) {
