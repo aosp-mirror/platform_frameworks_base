@@ -2971,8 +2971,8 @@ public final class PowerManagerService extends SystemService
         mHandler.removeMessages(MSG_USER_ACTIVITY_TIMEOUT);
 
         final long attentiveTimeout = getAttentiveTimeoutLocked();
-        final long sleepTimeout = getSleepTimeoutLocked(attentiveTimeout);
-        final long defaultScreenOffTimeout = getScreenOffTimeoutLocked(sleepTimeout,
+        final long defaultSleepTimeout = getSleepTimeoutLocked(attentiveTimeout);
+        final long defaultScreenOffTimeout = getScreenOffTimeoutLocked(defaultSleepTimeout,
                 attentiveTimeout);
         final long defaultScreenDimDuration = getScreenDimDurationLocked(defaultScreenOffTimeout);
 
@@ -2985,13 +2985,25 @@ public final class PowerManagerService extends SystemService
             final PowerGroup powerGroup = mPowerGroups.valueAt(idx);
             final int wakefulness = powerGroup.getWakefulnessLocked();
 
-            // The default display screen timeout could be overridden by policy.
+            // The timeouts could be overridden by the power group policy.
             long screenOffTimeout = defaultScreenOffTimeout;
             long screenDimDuration = defaultScreenDimDuration;
+            long sleepTimeout = defaultSleepTimeout;
+            // TODO(b/376211497): Consolidate the timeout logic for all power groups.
             if (powerGroup.getGroupId() == Display.DEFAULT_DISPLAY_GROUP) {
                 screenOffTimeout =
-                        getScreenOffTimeoutOverrideLocked(screenOffTimeout, screenDimDuration);
+                        getDefaultGroupScreenOffTimeoutOverrideLocked(screenOffTimeout,
+                                screenDimDuration);
                 screenDimDuration = getScreenDimDurationLocked(screenOffTimeout);
+            } else {
+                screenOffTimeout = powerGroup.getScreenOffTimeoutOverrideLocked(screenOffTimeout);
+                screenDimDuration =
+                        powerGroup.getScreenDimDurationOverrideLocked(screenDimDuration);
+                if (sleepTimeout > 0 && screenOffTimeout > 0) {
+                    // If both sleep and screen off timeouts are set, make sure that the sleep
+                    // timeout is not smaller than the screen off one.
+                    sleepTimeout = Math.max(sleepTimeout, screenOffTimeout);
+                }
             }
 
             if (wakefulness != WAKEFULNESS_ASLEEP) {
@@ -3273,7 +3285,8 @@ public final class PowerManagerService extends SystemService
 
     @VisibleForTesting
     @GuardedBy("mLock")
-    long getScreenOffTimeoutOverrideLocked(long screenOffTimeout, long screenDimDuration) {
+    long getDefaultGroupScreenOffTimeoutOverrideLocked(long screenOffTimeout,
+            long screenDimDuration) {
         long shortestScreenOffTimeout = screenOffTimeout;
         if (mScreenTimeoutOverridePolicy != null) {
             shortestScreenOffTimeout =

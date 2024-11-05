@@ -64,6 +64,7 @@ import android.companion.virtual.audio.IAudioRoutingCallback;
 import android.companion.virtual.sensor.VirtualSensor;
 import android.companion.virtual.sensor.VirtualSensorCallback;
 import android.companion.virtual.sensor.VirtualSensorConfig;
+import android.companion.virtualdevice.flags.Flags;
 import android.content.AttributionSource;
 import android.content.ComponentName;
 import android.content.Context;
@@ -103,6 +104,7 @@ import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.WorkSource;
+import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.Presubmit;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.testing.AndroidTestingRunner;
@@ -999,6 +1001,7 @@ public class VirtualDeviceManagerServiceTest {
                 nullable(String.class), anyInt(), eq(null));
     }
 
+    @DisableFlags(Flags.FLAG_DEVICE_AWARE_DISPLAY_POWER)
     @Test
     public void onVirtualDisplayCreatedLocked_wakeLockIsAcquired() throws RemoteException {
         verify(mIPowerManagerMock, never()).acquireWakeLock(any(Binder.class), anyInt(),
@@ -1010,6 +1013,7 @@ public class VirtualDeviceManagerServiceTest {
                 nullable(String.class), eq(DISPLAY_ID_1), eq(null));
     }
 
+    @DisableFlags(Flags.FLAG_DEVICE_AWARE_DISPLAY_POWER)
     @Test
     public void onVirtualDisplayCreatedLocked_duplicateCalls_onlyOneWakeLockIsAcquired()
             throws RemoteException {
@@ -1022,6 +1026,7 @@ public class VirtualDeviceManagerServiceTest {
                 nullable(String.class), eq(DISPLAY_ID_1), eq(null));
     }
 
+    @DisableFlags(Flags.FLAG_DEVICE_AWARE_DISPLAY_POWER)
     @Test
     public void onVirtualDisplayRemovedLocked_wakeLockIsReleased() throws RemoteException {
         addVirtualDisplay(mDeviceImpl, DISPLAY_ID_1, Display.FLAG_TRUSTED);
@@ -1037,6 +1042,7 @@ public class VirtualDeviceManagerServiceTest {
         verify(mIPowerManagerMock).releaseWakeLock(eq(wakeLock), anyInt());
     }
 
+    @DisableFlags(Flags.FLAG_DEVICE_AWARE_DISPLAY_POWER)
     @Test
     public void addVirtualDisplay_displayNotReleased_wakeLockIsReleased() throws RemoteException {
         addVirtualDisplay(mDeviceImpl, DISPLAY_ID_1, Display.FLAG_TRUSTED);
