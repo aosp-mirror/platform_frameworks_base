@@ -1436,6 +1436,24 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
             new Key<android.util.Range<Float>>("android.control.lowLightBoostInfoLuminanceRange", new TypeReference<android.util.Range<Float>>() {{ }});
 
     /**
+     * <p>List of auto-exposure priority modes for {@link CaptureRequest#CONTROL_AE_PRIORITY_MODE android.control.aePriorityMode}
+     * that are supported by this camera device.</p>
+     * <p>This entry lists the valid modes for
+     * {@link CaptureRequest#CONTROL_AE_PRIORITY_MODE android.control.aePriorityMode} for this camera device.
+     * If no AE priority modes are available for a device, this will only list OFF.</p>
+     * <p><b>Range of valid values:</b><br>
+     * Any value listed in {@link CaptureRequest#CONTROL_AE_PRIORITY_MODE android.control.aePriorityMode}</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     *
+     * @see CaptureRequest#CONTROL_AE_PRIORITY_MODE
+     */
+    @PublicKey
+    @NonNull
+    @FlaggedApi(Flags.FLAG_AE_PRIORITY)
+    public static final Key<int[]> CONTROL_AE_AVAILABLE_PRIORITY_MODES =
+            new Key<int[]>("android.control.aeAvailablePriorityModes", int[].class);
+
+    /**
      * <p>List of edge enhancement modes for {@link CaptureRequest#EDGE_MODE android.edge.mode} that are supported by this camera
      * device.</p>
      * <p>Full-capability camera devices must always support OFF; camera devices that support
