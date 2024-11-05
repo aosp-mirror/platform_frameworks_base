@@ -67,6 +67,7 @@ public class DarkIconDispatcherImpl implements SysuiDarkIconDispatcher,
 
     /** */
     @AssistedFactory
+    @FunctionalInterface
     public interface Factory {
         /** */
         DarkIconDispatcherImpl create(int displayId, Context context);
@@ -97,7 +98,7 @@ public class DarkIconDispatcherImpl implements SysuiDarkIconDispatcher,
         dumpManager.registerNormalDumpable(mDumpableName, this);
     }
 
-    /** Called when work should stop and resources should be cleaned up. */
+    @Override
     public void stop() {
         mDumpManager.unregisterDumpable(mDumpableName);
     }
