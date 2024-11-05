@@ -24,7 +24,7 @@ import androidx.test.filters.SmallTest
 import com.android.internal.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.ui.data.repository.ConfigurationRepositoryImpl
-import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
+import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractorImpl
 import com.android.systemui.defaultDeviceState
 import com.android.systemui.deviceStateManager
 import com.android.systemui.display.data.repository.DeviceStateRepository
@@ -107,9 +107,9 @@ class DisplaySwitchLatencyTrackerTest : SysuiTestCase() {
             configurationController,
             context,
             testScope.backgroundScope,
-            mock()
+            mock(),
         )
-    private val configurationInteractor = ConfigurationInteractor(configurationRepository)
+    private val configurationInteractor = ConfigurationInteractorImpl(configurationRepository)
     private val unfoldTransitionProgressProvider = FakeUnfoldTransitionProvider()
     private val unfoldTransitionRepository =
         UnfoldTransitionRepositoryImpl(Optional.of(unfoldTransitionProgressProvider))
@@ -145,7 +145,7 @@ class DisplaySwitchLatencyTrackerTest : SysuiTestCase() {
                 testScope.backgroundScope,
                 displaySwitchLatencyLogger,
                 systemClock,
-                deviceStateManager
+                deviceStateManager,
             )
     }
 
@@ -174,7 +174,7 @@ class DisplaySwitchLatencyTrackerTest : SysuiTestCase() {
                 DisplaySwitchLatencyEvent(
                     latencyMs = 250,
                     fromFoldableDeviceState = FOLDABLE_DEVICE_STATE_CLOSED,
-                    toFoldableDeviceState = FOLDABLE_DEVICE_STATE_HALF_OPEN
+                    toFoldableDeviceState = FOLDABLE_DEVICE_STATE_HALF_OPEN,
                 )
             assertThat(loggedEvent).isEqualTo(expectedLoggedEvent)
         }
@@ -200,7 +200,7 @@ class DisplaySwitchLatencyTrackerTest : SysuiTestCase() {
                     testScope.backgroundScope,
                     displaySwitchLatencyLogger,
                     systemClock,
-                    deviceStateManager
+                    deviceStateManager,
                 )
             areAnimationEnabled.emit(true)
 
@@ -226,7 +226,7 @@ class DisplaySwitchLatencyTrackerTest : SysuiTestCase() {
                 DisplaySwitchLatencyEvent(
                     latencyMs = 50,
                     fromFoldableDeviceState = FOLDABLE_DEVICE_STATE_CLOSED,
-                    toFoldableDeviceState = FOLDABLE_DEVICE_STATE_HALF_OPEN
+                    toFoldableDeviceState = FOLDABLE_DEVICE_STATE_HALF_OPEN,
                 )
             assertThat(loggedEvent).isEqualTo(expectedLoggedEvent)
         }
@@ -259,7 +259,7 @@ class DisplaySwitchLatencyTrackerTest : SysuiTestCase() {
                 DisplaySwitchLatencyEvent(
                     latencyMs = 50,
                     fromFoldableDeviceState = FOLDABLE_DEVICE_STATE_CLOSED,
-                    toFoldableDeviceState = FOLDABLE_DEVICE_STATE_HALF_OPEN
+                    toFoldableDeviceState = FOLDABLE_DEVICE_STATE_HALF_OPEN,
                 )
             assertThat(loggedEvent).isEqualTo(expectedLoggedEvent)
         }
@@ -289,7 +289,7 @@ class DisplaySwitchLatencyTrackerTest : SysuiTestCase() {
                 DisplaySwitchLatencyEvent(
                     latencyMs = 200,
                     fromFoldableDeviceState = FOLDABLE_DEVICE_STATE_HALF_OPEN,
-                    toFoldableDeviceState = FOLDABLE_DEVICE_STATE_CLOSED
+                    toFoldableDeviceState = FOLDABLE_DEVICE_STATE_CLOSED,
                 )
             assertThat(loggedEvent).isEqualTo(expectedLoggedEvent)
         }
@@ -310,7 +310,7 @@ class DisplaySwitchLatencyTrackerTest : SysuiTestCase() {
             lastWakefulnessEvent.emit(
                 WakefulnessModel(
                     internalWakefulnessState = WakefulnessState.ASLEEP,
-                    lastSleepReason = WakeSleepReason.FOLD
+                    lastSleepReason = WakeSleepReason.FOLD,
                 )
             )
             screenPowerState.emit(ScreenPowerState.SCREEN_OFF)
@@ -326,7 +326,7 @@ class DisplaySwitchLatencyTrackerTest : SysuiTestCase() {
                     latencyMs = 200,
                     fromFoldableDeviceState = FOLDABLE_DEVICE_STATE_HALF_OPEN,
                     toFoldableDeviceState = FOLDABLE_DEVICE_STATE_CLOSED,
-                    toState = SysUiStatsLog.DISPLAY_SWITCH_LATENCY_TRACKED__TO_STATE__AOD
+                    toState = SysUiStatsLog.DISPLAY_SWITCH_LATENCY_TRACKED__TO_STATE__AOD,
                 )
             assertThat(loggedEvent).isEqualTo(expectedLoggedEvent)
         }
@@ -372,7 +372,7 @@ class DisplaySwitchLatencyTrackerTest : SysuiTestCase() {
             lastWakefulnessEvent.emit(
                 WakefulnessModel(
                     internalWakefulnessState = WakefulnessState.ASLEEP,
-                    lastSleepReason = WakeSleepReason.FOLD
+                    lastSleepReason = WakeSleepReason.FOLD,
                 )
             )
             screenPowerState.emit(ScreenPowerState.SCREEN_OFF)
@@ -385,7 +385,7 @@ class DisplaySwitchLatencyTrackerTest : SysuiTestCase() {
                     latencyMs = 0,
                     fromFoldableDeviceState = FOLDABLE_DEVICE_STATE_HALF_OPEN,
                     toFoldableDeviceState = FOLDABLE_DEVICE_STATE_CLOSED,
-                    toState = SysUiStatsLog.DISPLAY_SWITCH_LATENCY_TRACKED__TO_STATE__SCREEN_OFF
+                    toState = SysUiStatsLog.DISPLAY_SWITCH_LATENCY_TRACKED__TO_STATE__SCREEN_OFF,
                 )
             assertThat(loggedEvent).isEqualTo(expectedLoggedEvent)
         }
