@@ -1578,6 +1578,13 @@ flag {
 }
 
 flag {
+   name: "show_clipboard_indication"
+   namespace: "systemui"
+   description: "Show indication text under the clipboard overlay when copied something"
+   bug: "361199935"
+}
+
+flag {
    name: "media_projection_dialog_behind_lockscreen"
    namespace: "systemui"
    description: "Ensure MediaProjection Dialog appears behind the lockscreen"
